@@ -1,0 +1,243 @@
+# the shoebox under saturn.
+#
+# a modern house at night on a slope, corten over concrete, lit from
+# inside, with saturn rising behind it, seen from the road: the look
+# asked for 2026-10-05.
+#
+# places are metres, as a map's run: x east, y north, z up. every size is
+# a placeholder judged by eye from a photograph, and every colour and
+# strength is one too: source says so on each, and will say where a
+# value came from once it is measured. where saturn and the cameras
+# stand is a choice, not a stand-in, so they have no source. light
+# strengths are the kit's own relative light, not candela, until the
+# lights have real units.
+scene:
+  name: shoebox
+  light: ambient
+  location:
+    lat: 37.78507614135742
+    lon: -122.40721893310547
+  timeofday: 1548
+  # the camera is only a pinhole, with no aperture or shutter, so its
+  # exposure is set at the print. the knee is where the shoulder
+  # starts, as a share of white; the top is the brightest light the
+  # print holds, in whites, and it lands on white. placeholders until
+  # the print is a stock's curve. rays are along each side of a pixel.
+  film:
+    width: 1280
+    height: 720
+    rays: 1
+    wide: 90
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # the front: from the road, looking a little up at the house with
+    # saturn rising behind it
+    front:
+      title: "the front"
+      location:
+        at: [11, -17, 6.4]
+      orientation:
+        look_at: [-1, 0, 8]
+    # the road: the front camera said off the box. 12 m east and 17 m
+    # south of the house's base, 6.4 m up, tipped up 4.4 degrees, which
+    # is the front's look at 8 m on the house.
+    road:
+      title: "from the road"
+      orientation:
+        point_to: the box
+        alpha: 4.4
+      location:
+        loc_relative:
+          object: the box
+          standoff_x: 12
+          standoff_y: -17
+          standoff_z: 6.4
+    # the garden: behind the house at eye height, looking up at it
+    garden:
+      title: "ninjas!"
+      orientation:
+        point_to: the box
+        alpha: 25
+      location:
+        loc_relative:
+          object: the box
+          standoff_x: 10
+          standoff_y: 10
+          standoff_z: 1.7
+  world:
+    # what things are made of, for now a colour each. a lit window is a
+    # pane glowing with the room's light: a 2700 K bulb's colour, at a
+    # luminance of 0.45.
+    materials:
+      night-grass:
+        colour: {srgb_linear: [0.05, 0.06, 0.04]}
+        source: eye
+      concrete:
+        colour: {srgb_linear: [0.33, 0.33, 0.32]}
+        source: eye
+      corten:
+        colour: {srgb_linear: [0.34, 0.11, 0.05]}
+        source: eye
+      garage-door:
+        colour: {srgb_linear: [0.09, 0.09, 0.1]}
+        source: eye
+      asphalt:
+        colour: {srgb_linear: [0.08, 0.08, 0.085]}
+        source: eye
+      lit-window:
+        glow: {temperature: 2700, luminance: 0.45}
+        source: eye
+    # each box its middle and its size, east, north and up. the ground
+    # is a slab 400 km across rather than an endless plane, so it hides
+    # a sun just under the horizon from the house and not from saturn.
+    # the concrete base sits on the slope, the corten storey above it at
+    # the road's level, the band of windows along the corten storey, and
+    # two tall slits in the concrete base.
+    boxes:
+      ground:
+        material: night-grass
+        middle: [0, 0, -1]
+        size: [400000, 400000, 2]
+        source: eye
+      base:
+        material: concrete
+        middle: [-5, 0, 2.5]
+        size: [5, 6, 5]
+        source: eye
+      upper:
+        material: corten
+        middle: [0, 0, 6.6]
+        size: [16, 6, 3.2]
+        source: eye
+      garage-door:
+        material: garage-door
+        middle: [-1, -3.03, 6.3]
+        size: [3, 0.06, 2.6]
+        source: eye
+      road:
+        material: asphalt
+        middle: [8, -9, 4.9]
+        size: [40, 10, 0.2]
+        source: eye
+      window-1:
+        material: lit-window
+        middle: [2.6, -3.03, 7.1]
+        size: [1.5, 0.06, 0.8]
+        source: eye
+      window-2:
+        material: lit-window
+        middle: [4.4, -3.03, 7.1]
+        size: [1.5, 0.06, 0.8]
+        source: eye
+      window-3:
+        material: lit-window
+        middle: [6.2, -3.03, 7.1]
+        size: [1.5, 0.06, 0.8]
+        source: eye
+      window-4:
+        material: lit-window
+        middle: [-6.6, -3.03, 7.1]
+        size: [1.5, 0.06, 0.8]
+        source: eye
+      window-5:
+        material: lit-window
+        middle: [-4.9, -3.03, 7.1]
+        size: [1.5, 0.06, 0.8]
+        source: eye
+      slit-low:
+        material: lit-window
+        middle: [-6, -3.03, 1.4]
+        size: [0.5, 0.06, 1.2]
+        source: eye
+      slit-high:
+        material: lit-window
+        middle: [-6, -3.03, 3.2]
+        size: [0.5, 0.06, 1.2]
+        source: eye
+    # lamps: tungsten bulbs, each its place, its temperature in kelvin,
+    # its luminance at a metre, and its bulb's radius, inside which it
+    # does not light
+    lamps:
+      sconce-1:
+        at: [-2.9, -3.25, 7.5]
+        temperature: 2700
+        strength: 0.35
+        radius: 0.05
+        source: eye
+      sconce-2:
+        at: [1, -3.25, 7.5]
+        temperature: 2700
+        strength: 0.35
+        radius: 0.05
+        source: eye
+      sconce-3:
+        at: [7.6, -3.25, 7.5]
+        temperature: 2700
+        strength: 0.35
+        radius: 0.05
+        source: eye
+      low:
+        at: [-5, -4, 1.2]
+        temperature: 2700
+        strength: 0.5
+        radius: 0.05
+        source: eye
+    # what the night sky gives everything, faintly and from everywhere
+    floods:
+      night:
+        colour: {srgb_linear: [0.01, 0.013, 0.025]}
+        strength: 1
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.05, 0.07, 0.12]}
+      zenith: {srgb_linear: [0.006, 0.01, 0.03]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye
+    # saturn, 164,000 km from the eye, its middle on the horizon, so it
+    # rises half above it, as wide as the house. its place is in the
+    # world, not measured from the camera: a shot may move. its facts are
+    # its template's and real, its colours not. its aurora is off, since
+    # the template's draws as a dark ring. detail is how finely its
+    # moons' ground is tiled.
+    bodies:
+      saturn:
+        template: saturn
+        middle: [-94576000, 133982700, 6.4]
+        tilt: 50
+        aurora: false
+        detail: 24
+    # saturn's sun, 2.3 degrees under the horizon behind the camera: it
+    # lights saturn and not the house. toward is the way to it.
+    suns:
+      sun:
+        toward: [0.5762, -0.8163, -0.04]
+        colour: {srgb_linear: [0.35, 0.34, 0.32]}
+        source: eye
+  set:
+    bounded_box:
+      size_x: 1000  # metres: a kilometre
+      size_y: 1000
+      size_z: 1000
+    assets:
+      house:
+        name: the box
+        autogen: true
+        autogen_parameters:
+          footprint: 1536  # square feet
+          aesthetic: nouveau modern
+          exterior_lighting:
+            front_door: gas_in_glass
+            back_garden: modern_led
+          swimming_pool:
+            lit: true
+            size: 10x5  # metres
+          front_garden:
+            aesthetic: beverly hills
+          back_garden:
+            aesthetic: modern
+            tree_lined: true
+            tree_type: spruce

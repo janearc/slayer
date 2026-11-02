@@ -1,0 +1,68 @@
+# kīlauea iki's north rim at night, its forest alight, seen from among
+# the trees. the ground is the usgs's 2019 lidar model; the trees are
+# spruces standing in for ʻōhiʻa, and the ferns a temperate fern standing
+# in for ʻamaʻu, until the manufactory grows them. the crater's floor is
+# 1,062 m at its lowest, its rim 1,175 to 1,225 m.
+scene:
+  name: kilauea iki alight
+  light: moon
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 2200
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263000
+    north: 2149000
+    across: 1600
+    down: 1000
+    step: 4
+  film:
+    width: 960
+    height: 600
+    rays: 2
+    exposure: 100000
+  cameras:
+    rim:
+      title: "on the rim, among the trees"
+      orientation:
+        point_to: the rim tree
+        alpha: -2
+      location:
+        loc_relative:
+          object: the rim tree
+          standoff_x: -70
+          standoff_y: -25
+          standoff_z: 4
+  set:
+    things:
+      the rim tree:
+        kind: spruce
+        seed: 3
+        east: 263800
+        north: 2148620
+        alight: true
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+    stands:
+      ferns on the wall:
+        kind: fern
+        count: 600
+        seed: 7
+        above: 1110
+        stands_in_for: "ʻamaʻu, with a temperate fern's numbers"
+      trees on the rim:
+        kind: spruce
+        count: 160
+        seed: 11
+        above: 1150
+        alight: 6
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      trees on the wall:
+        kind: spruce
+        count: 90
+        seed: 13
+        above: 1110
+        below: 1150
+        alight: 8
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"

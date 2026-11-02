@@ -1,0 +1,8 @@
+label,rate,shutter,glimpses
+no rate,0,3,1
+a rate below nought,-16,3,1
+a shut shutter,16,0,1
+a shutter below nought,16,-1,1
+more than a turn,16,7,1
+no glimpses,16,3,0
+fewer than none,16,3,-2

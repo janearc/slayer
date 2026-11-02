@@ -1,0 +1,72 @@
+# a porch, small enough to draw in a test: a box on a lawn under a lamp,
+# a sky and a sun, and two cameras, one at a place and one off the box.
+scene:
+  name: porch
+  film:
+    width: 16
+    height: 9
+    rays: 1
+    wide: 60
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    front:
+      title: "the front"
+      location:
+        at: [0, -10, 2]
+      orientation:
+        look_at: [0, 0, 1]
+    side:
+      title: "the side"
+      orientation:
+        point_to: the box
+        alpha: 5
+      location:
+        loc_relative:
+          object: the box
+          standoff_x: 10
+          standoff_y: 0
+          standoff_z: 2
+  world:
+    materials:
+      grass:
+        colour: {srgb_linear: [0.05, 0.06, 0.04]}
+        source: eye
+      brick:
+        colour: {srgb_linear: [0.3, 0.1, 0.05]}
+        source: eye
+    boxes:
+      lawn:
+        material: grass
+        middle: [0, 0, -0.5]
+        size: [100, 100, 1]
+        source: eye
+      porch:
+        material: brick
+        middle: [0, 0, 1]
+        size: [2, 2, 2]
+        source: eye
+    lamps:
+      bulb:
+        at: [0, -2, 2.5]
+        temperature: 2700
+        strength: 0.5
+        radius: 0.05
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.05, 0.07, 0.12]}
+      zenith: {srgb_linear: [0.006, 0.01, 0.03]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye
+    suns:
+      sun:
+        toward: [1, -1, 1]
+        colour: {srgb_linear: [0.35, 0.34, 0.32]}
+        source: eye
+  set:
+    assets:
+      house:
+        name: the box

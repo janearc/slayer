@@ -1,0 +1,23 @@
+name,height,wet,paint,says
+deep sea,-0.5,0,0,well under the sea
+deep sea however wet,-0.5,0.9,0,the wet does not move the sea
+just deep,-0.12000000000000001,0,0,the next float below the shallows' edge
+shallows at their edge,-0.12,0,1,the shallows begin at -0.12
+shallows at the shore,-0.00000000000000001,0,1,just under the sea
+beach at the sea,0,0,3,the beach begins at the sea
+beach at its edge,0.024999999999999998,0,3,the next float below 0.025
+land past the beach,0.025,0,5,at 0.025 the land is grass when the wet is nought
+land at the rock's edge,0.24,0,5,the rock begins past 0.24
+rock past its edge,0.24000000000000002,0,9,the next float above 0.24
+rock however wet,0.3,0.9,9,the wet does not move the rock
+rock at the snow's edge,0.34,0,9,the snow begins past 0.34
+snow past its edge,0.3400000000000001,0,10,the next float above 0.34
+snow however dry,0.6,-0.9,10,the wet does not move the snow
+desert,0.1,-0.5,4,dry land
+desert at its edge,0.1,-0.18000000000000002,4,the next float below -0.18
+grass at the desert's edge,0.1,-0.18,5,grass begins at -0.18
+grass at its edge,0.1,0.019999999999999997,5,the next float below 0.02
+forest at the grass's edge,0.1,0.02,6,forest begins at 0.02
+forest at its edge,0.1,0.21999999999999997,6,the next float below 0.22
+jungle at the forest's edge,0.1,0.22,7,jungle begins at 0.22
+jungle,0.1,0.9,7,wet land

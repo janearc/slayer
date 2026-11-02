@@ -1,0 +1,74 @@
+# a small world said piece by piece, for the set's tests: one of each
+# piece, and a camera that stands at a place. places are a map's: x
+# east, y north, z up.
+scene:
+  name: built
+  film:
+    width: 64
+    height: 36
+    rays: 2
+    wide: 60
+    exposure: 2
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    front:
+      title: "the front"
+      location:
+        at: [10, -20, 2]
+      orientation:
+        look_at: [0, 0, 3]
+  world:
+    materials:
+      grass:
+        colour: {srgb_linear: [0.05, 0.06, 0.04]}
+        source: eye
+      lit-window:
+        glow: {temperature: 2700, luminance: 0.45}
+        source: eye
+      ember:
+        colour: {srgb_linear: [0.3, 0.1, 0]}
+        glow: {temperature: 1200, luminance: 0.02}
+        source: "a thermocouple, 2026-10-05"
+    boxes:
+      lawn:
+        material: grass
+        middle: [1, 2, 3]
+        size: [4, 5, 6]
+        source: eye
+      pane:
+        material: lit-window
+        middle: [0, 0, 0]
+        size: [1, 0.06, 0.8]
+        source: eye
+    lamps:
+      porch:
+        at: [-2, 3, 7.5]
+        temperature: 2700
+        strength: 0.35
+        radius: 0.05
+        source: eye
+    floods:
+      night:
+        colour: {srgb_linear: [0.01, 0.013, 0.025]}
+        strength: 2
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.05, 0.07, 0.12]}
+      zenith: {srgb_linear: [0.006, 0.01, 0.03]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye
+    bodies:
+      saturn:
+        template: saturn
+        middle: [-94576000, 133982700, 6.4]
+        tilt: 50
+        aurora: false
+        detail: 24
+    suns:
+      sun:
+        toward: [0.5762, -0.8163, -0.04]
+        colour: {srgb_linear: [0.35, 0.34, 0.32]}
+        source: eye

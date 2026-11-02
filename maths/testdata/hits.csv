@@ -1,0 +1,19 @@
+name,at,dir,near,far,enter,left,ok
+through,high above,down,0,+Inf,4,6,true
+from inside,origin,down,0,+Inf,0,1,true
+beside,beside,down,0,+Inf,0,0,false
+along a face and inside,off to one side,down,0,+Inf,4,6,true
+along a face and outside,off the face,down,0,+Inf,0,0,false
+along the left face,on the left face,down,0,+Inf,4,6,true
+along the right face,on the right face,down,0,+Inf,4,6,true
+behind,high above,up from z,0,+Inf,0,0,false
+too far,high above,down,0,3,0,0,false
+a way that is no number,high above,nan way,0,+Inf,0,0,false
+a start that is no number,nan start,down,0,+Inf,0,0,false
+a near that is no number,high above,down,NaN,+Inf,0,0,false
+only past every distance,high above,tiny down,0,+Inf,0,0,false
+touching an edge,edge start,edge way,0,+Inf,1,1,true
+a still ray and a near that is no number,origin,origin,NaN,1,0,0,false
+a still ray and a far that is no number,origin,origin,0,NaN,0,0,false
+a still ray and a near past the far,origin,origin,5,1,0,0,false
+a still ray inside,origin,origin,0,3,0,3,true

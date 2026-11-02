@@ -1,0 +1,51 @@
+#!/bin/sh
+# gate -- what must hold before a commit in slayer: every line within
+# eighty columns with tabs as eight, her lint clean, vet clean, a linux
+# build, and the tests passing. run it from slayer's root; it says what
+# failed, shows why, and exits non-zero. it fails when a check cannot
+# run at all, rather than counting a check it did not make as passed.
+#
+# it holds the code written to her rules of 2026-10-03, emit, metal,
+# gpu, cmd/swarm, doc and tools, and trace, brought to
+# them on 2026-10-04. the rest is older than the rules and is listed
+# in DEBT.md until it is paid, then added here. lint reads its rules
+# from .game, here, and not from anyone's home.
+set -u
+held="emit metal gpu grav lantern lines materials measure raw sheet stars"
+held="$held trace cmd/house cmd/swarm cmd/lightbox doc tools forest"
+failed=0
+
+# say prints a check's name and what it found, and marks the gate failed
+say() {
+	echo "gate: $1"
+	[ -n "${2-}" ] && echo "$2"
+	failed=1
+}
+
+long=$(for f in $(git ls-files $held; \
+		git ls-files --others --exclude-standard $held); do
+	expand -t8 "$f" | awk -v f="$f" 'length($0) > 80 { print f ":" FNR }'
+done)
+[ -n "$long" ] && say "past eighty columns:" "$long"
+
+if ! command -v game >/dev/null 2>&1; then
+	say "lint did not run: no game on the path"
+else
+	linted=$(GOWORK=off game lint 2>&1)
+	if ! printf '%s\n' "$linted" | grep -q '^game: lint:'; then
+		say "lint did not run:" "$linted"
+	fi
+	mine=$(printf '%s\n' "$linted" |
+		grep -E "^lint: ($(echo $held | tr ' ' '|'))/")
+	[ -n "$mine" ] && say "lint:" "$mine"
+fi
+
+vetted=$(GOWORK=off go vet ./... 2>&1) || say "vet failed:" "$vetted"
+built=$(GOOS=linux CGO_ENABLED=0 GOWORK=off go build -o /dev/null \
+	./cmd/swarm 2>&1) || say "the linux build failed:" "$built"
+tested=$(GOWORK=off GOMAXPROCS=2 go test -count=1 -timeout 120s -p 2 \
+	./emit ./metal ./gpu ./grav ./materials ./measure ./raw ./stars \
+	./trace 2>&1) || say "tests failed:" "$tested"
+
+[ "$failed" = 0 ] && echo "gate: clean"
+exit "$failed"

@@ -1,0 +1,507 @@
+# melancholia: the blue ringed giant filling the sky over kīlauea iki,
+# seen from the crater floor at dusk, 2026-10-17: the blue ringed planet
+# filling the sky as the two are about to collide, the trees catching
+# fire, and beautiful right to the end. after von trier's film.
+#
+# made up, and said: the giant itself (sets/planetary-turbidity.yaml's,
+# at rest before the dwellers' prank), and its place: 142,000 km off,
+# closer than the moon, so it fills the sky, 50 degrees across. this is
+# fermat's turbo-laser carve-out: made up for the effect, for now. no
+# world this close would leave the earth whole; the set does not pretend
+# it would.
+#
+# measured: the ground (the usgs's 2019 lidar model); the sun's light;
+# the twilight sky it lights from below the horizon; the giant's gases'
+# indices and methane's absorption; the fires' heat, soot and smoke.
+# picked: where the camera and the giant stand, the lens, the giant's
+# rings and haze. the trees are spruces standing in for ʻōhiʻa.
+#
+# not here yet, and so wrong in the picture: our air between the ground
+# and the giant, so it is seen as from above the air, too blue and too
+# bright low down; the giant's light on the ground; light scattered more
+# than once, in the twilight and in the giant's haze; the storms in its
+# bands; the phosphors' glow, which waits for the x-rays.
+scene:
+  name: melancholia
+  light: sun
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 1900
+  # set as the moonrise's: the sun just under the western horizon, and
+  # the giant rising in the east, opposite it, fully lit
+  sun:
+    azimuth: 289.65
+    altitude: -4.95
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263300
+    north: 2149000
+    across: 2000
+    down: 1700
+    # every second metre of the 1 m lidar: its cells at 4 m stepped the
+    # edge of the firelight, the ground's own shadow following the faces
+    # and not their normals, a missed spot. 1.7 million
+    # faces, 1.65 GB at the most
+    step: 2
+    # the heights blurred by a gaussian 6 m wide, so the lidar's cells do
+    # not show as steps: the terrain is smoothed hard. blurred, not
+    # measured
+    smooth: 6
+  film:
+    # a test frame: 240 across, one ray, one glimpse, on 15/70's frame
+    width: 240
+    rays: 1
+    frame:
+      width: 70.41
+      height: 51.61
+    # picked, for the shot: 55 mm sees 65 by 50 degrees on this frame, so
+    # the giant, 50 degrees across, fits with its curve showing, its
+    # rings sweep out past both sides, and the ridge's trees are a third
+    # bigger than 40 mm made them. 80 was too long: a wall of weather, no
+    # limb, no rings. focused on the giant, so the bonfire is soft
+    lens:
+      focal: 55
+      stop: 8
+      focus: the giant
+    shutter: 0.5
+    glimpses: 1
+  cameras:
+    up:
+      title: "the giant over the east rim, from the crater floor"
+      orientation:
+        point_to: the giant
+        # tipped up 12 degrees, so the frame holds the bonfire at its
+        # foot, the ridge across it, and the giant looming over the ridge
+        # and out past the frame's top
+        alpha: 12
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 2
+  planet:
+    name: the giant
+    made_up: true
+    radius: 6.0e7     # metres, a little smaller than jupiter: picked
+    gravity: 24.8     # jupiter's at its cloud tops: picked
+    deck: 0.8         # the methane-ice deck's albedo: picked
+    from_star: 1.0    # astronomical units: beside the earth, as it is here
+    # in the sky: east-south-east, where the moon rose, 15 degrees up and
+    # 142,000 km off, so its 60,000 km radius is 25 degrees and its lower
+    # part is behind the ridge, looming over it: made up
+    sky: {azimuth: 109.65, altitude: 15, distance: 1.42e8}
+    # the bands torn and mixed: modelled, not a simulation of its air.
+    # the bands want substantial mixing and turbidity, and supersonic
+    # flows: a five-hour day, the jets against each other. turbulence 0.8 moves a latitude by up to about ten degrees,
+    # 24 eddies fit around it, the jets stretch them four times longer
+    # east to west, and a band's two columns blend across three degrees.
+    # one great spot and three small, longitude nought toward the camera.
+    # every number picked.
+    storms:
+      seed: 7
+      turbulence: 0.8
+      eddies: 24
+      stretch: 4
+      edge: 6
+      # the flow folded back through itself three times, for clouds that
+      # recur at every size, at least three folds deep; each fold carries
+      # it four eddies on, and the noise runs down to what a pixel tells
+      # apart. where the folds lift the air the churn rises into view,
+      # where they sink it the next band's air is pulled across, so the
+      # folding brings depth of colour too.
+      # modelled, not a fluid; picked.
+      folds: 3
+      # the jets: the planet spins fast and its bands run against each
+      # other, so a knot is smeared sideways across it. the air carried up to
+      # 30 degrees of longitude, east and west by turns, the way turning
+      # every 15 degrees of latitude, about a band's width, so the jets
+      # run against each other at the bands' edges. picked.
+      jets: {shear: 30, every: 30}
+      # after juno: vortices as a population, each a
+      # coherent oval that rides the jets whole; turbulence gathered in
+      # the lanes where the jets rub, laminar at their cores; white caps
+      # on the anticyclones and dark clearings in the cyclones. 150 more
+      # spots, 0.6 to 6 degrees, slope 2.5, each turning with the shear
+      # where it stands. picked.
+      swarm: {seed: 23, count: 400, smallest: 0.4, largest: 6, slope: 2.5}
+      marks: {cap: cap, clearing: clearing}
+      # where the bands mix, the churn column shows, strongest right on
+      # a band's edge, so the mixing between the bands is a colour of its
+      # own, and strong, with colours to show it: full strength, and the
+      # blend six degrees wide
+      churn: {column: churn, strength: 1}
+      # the spots wound deep, folded many times as jupiter's are, not
+      # once: the great spot three whole turns at its middle, the small
+      # ones two. picked.
+      spots:
+        - {latitude: -22, longitude: 30, radius: 10, turn: 6}
+        - {latitude: 30, longitude: -40, radius: 8, turn: -4}
+        - {latitude: -40, longitude: -15, radius: 6, turn: 4}
+        - {latitude: 12, longitude: 60, radius: 5, turn: -4}
+    # the pole tipped 70 degrees from the line back to the camera, so
+    # the rings open 20 degrees to it and we see its face, not its pole:
+    # the tilt, tipped back as asked
+    pole: {azimuth: 289.65, altitude: 55}
+    # its x-rays, from a band five degrees either side of its equator,
+    # out toward the rings. the planet as made up gives a million times
+    # jupiter's, and at a million the rings' glow is about a millionth
+    # of the sunlight on them: there, and not seen. this is a trillion,
+    # where the glow at the inner edges matches the sunlight: the
+    # turbo-laser carve-out again, made up for the effect, and said.
+    xrays: {times: 1.0e12, of: jupiter, band: 5}
+    # the weather as a fluid makes it, in place of the painted storms,
+    # since painted vortices look hand-drawn, and something has to feed
+    # them: one layer of air on the turning sphere, its vorticity stirred
+    # from below by storms, the radon's heat coming up, and its jets and
+    # vortices left to come out of the inverse cascade (vallis and
+    # maltrud 1993, cho and polvani 1996). a five-hour day, picked.
+    # storms 1600 km wide spinning at 1e-5 a second, friction over 1e7
+    # s, the bands drawn back over 1e6: turbo-laser, so the jets, not the
+    # eddies, hold the energy, as jupiter's do, and stand between the
+    # bands as walls; at 3e-5 and 3e6 s the eddies, 550 to 740 m/s, tore
+    # the bands to grain. the jets are asked to be supersonic: this air's
+    # speed of sound is about 190 m/s. a shot shows the weather 1e7 s on,
+    # about 560 of the planet's own days, kept every 1e6 s in the weather
+    # cache, so the next shot reads it.
+    weather:
+      cells: 1024
+      day: 18000
+      drag: 1.0e7
+      relax: 1.0e6
+      storms: {rate: 3.8e-17, wide: 1.6e6, strength: 1.0e-5}
+      seed: 7
+      moment: 1.0e7
+      every: 1.0e6
+    # the air cooks as it ages at the top, for more colour. fresh air,
+    # lifted by anticyclones and
+    # storms, is white; the longer it stays up under the light and the
+    # x-rays, the more tholin it bears, white to cream to yellow to
+    # orange to brown, as jupiter's chromophores are thought to be. it
+    # bears the tholin column's haze, thinned to what it has cooked over
+    # 1e6 s. picked.
+    cooking: {column: tholin, time: 1.0e6}
+    # sodium glows in its d lines, 588.995 and 589.592 nm (nist), in the
+    # air the x-rays lit about the equator, brightening toward the limb
+    # as a thin glowing layer does: blue and yellow. it glows at the
+    # fronts, where the flow draws the band's air steeply together, dark
+    # inside the band where it is still. 50 W/m²/sr straight down at a
+    # front twice as steep as the band's calm, the band's steepest share
+    # its fronts: turbo-laser, and much brighter, as asked; a fifth of the
+    # planet radon makes 3.6 MW a kilogram, so the energy is there. on
+    # every band to 70 degrees, the same lit turbulence at each; past 70
+    # the weather fades into its walls and has no fronts to read. its
+    # fronts the steepest twentieth, fewer and finer, cracks of light
+    # with dark between: picked.
+    airglow: {radiance: 50, band: 70, fronts: 0.05}
+    # its heat: the cyclones glow with it, since they sink all the way
+    # down to the radon. a cyclone clears toward the
+    # radon's heat, as jupiter's five-micron hot spots open to its warm
+    # depths, and glows as a black body, from the cloud tops' 150 K to
+    # 1800 K where it opens deepest: past the draper point's 800 K, dull
+    # red to orange. turbo-laser: picked for the effect, not worked from
+    # the radon's heat.
+    heat: {tops: 150, hottest: 1800}
+    # each ring's depth rises and falls about its mean in ringlets, the
+    # coarsest 300 km across and finer within: modelled, all picked
+    ringlets: {seed: 11, strength: 0.85, width: 3.0e5}
+    # seven rings from 1.3 to 2.9 radii, inside where the planet's tides
+    # would tear a moon apart. each is a fifth zns:ag and a fifth csi:tl
+    # by mass, the rest ice, a make-up picked; their glow waits for the
+    # x-rays. each is peach, its albedo half in the blue of what it is in
+    # the red, as ice dirtied by hydrocarbon is. the radii, depths and
+    # albedos are picked, the broad bright
+    # third ring after saturn's b; the lean of -0.3, large icy particles
+    # throwing light back toward the star, is picked until a measured
+    # phase is read.
+    #
+    # each ring's grains, varying a lot, as the caller says and by a
+    # pattern of noise: a pattern, the clumps' sizes in metres, the power law's
+    # slope (saturn's rings measure about 3), and how patchy: modelled,
+    # every number picked. clumps finer than a pixel, about 200 km out
+    # there, sparkle. the rings want more transparency and much coarser
+    # grain: clumping is how much of
+    # the ring is empty: at 0.9 a seventh of it holds matter, packed
+    # seven times as deep, and the rest is vacuum the light passes. the
+    # largest clumps are hundreds of km across, swaths, down to 100 m.
+    # the shear draws each out along its orbit, 30 to 60 times longer
+    # than across, as keplerian shear draws saturn's: picked. a clump of
+    # thousands of km drawn so far outruns its orbit and the ring combs
+    # into whole circles.
+    #
+    # moonlets in three of them clear space round themselves, as larger
+    # things in rings do: each clears six of its hill radii either side of its orbit,
+    # between pan's encke gap and daphnis's keeler gap: a whole gap if it
+    # is as large as its ring's opens, a propeller, cleared ahead and
+    # behind along its orbit, if smaller. moonlets of 10 to 400 km are
+    # turbo-laser, big enough that their clearings show at this
+    # distance; saturn's are a few km and under.
+    rings:
+      # faint and gritty, as saturn's c ring
+      - inner: 7.8e7
+        outer: 8.7e7
+        depth: 0.1
+        albedo: 0.6
+        lean: -0.3
+        blue: 0.5
+        made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}
+        grains: {pattern: speckle, seed: 1, smallest: 1.0e2,
+          largest: 5.0e5, slope: 3.5, shear: 40, clumping: 0.65}
+      # soft billows
+      - inner: 8.82e7
+        outer: 1.08e8
+        depth: 0.4
+        albedo: 0.7
+        lean: -0.3
+        blue: 0.5
+        made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}
+        grains: {pattern: smooth, seed: 2, smallest: 1.0e2,
+          largest: 1.2e6, slope: 3, shear: 50, clumping: 0.7}
+        moonlets: {seed: 21, count: 20, smallest: 1.0e4, largest: 1.5e5,
+          slope: 2.5, opens: 1.0e9}
+      # the broad bright one, clumped with gaps between, as moonlets clear
+      - inner: 1.098e8
+        outer: 1.35e8
+        depth: 1.5
+        albedo: 0.85
+        lean: -0.3
+        blue: 0.5
+        made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}
+        grains: {pattern: cells, seed: 3, smallest: 1.0e2,
+          largest: 2.0e6, slope: 3, shear: 30, clumping: 0.75}
+        moonlets: {seed: 31, count: 40, smallest: 2.0e4, largest: 4.0e5,
+          slope: 2.5, opens: 3.0e5}
+      # strands, as self-gravity's wakes in saturn's a ring
+      - inner: 1.392e8
+        outer: 1.5e8
+        depth: 0.6
+        albedo: 0.8
+        lean: -0.3
+        blue: 0.5
+        made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}
+        grains: {pattern: ridges, seed: 4, smallest: 1.0e2,
+          largest: 1.0e6, slope: 2.8, shear: 60, clumping: 0.7}
+        moonlets: {seed: 41, count: 15, smallest: 1.0e4, largest: 2.0e5,
+          slope: 2.5, opens: 1.5e5}
+      - inner: 1.53e8
+        outer: 1.608e8
+        depth: 0.3
+        albedo: 0.75
+        lean: -0.3
+        blue: 0.5
+        made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}
+        grains: {pattern: speckle, seed: 5, smallest: 1.0e2,
+          largest: 5.0e5, slope: 3.2, shear: 40, clumping: 0.6}
+      - inner: 1.632e8
+        outer: 1.68e8
+        depth: 0.15
+        albedo: 0.7
+        lean: -0.3
+        blue: 0.5
+        made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}
+        grains: {pattern: smooth, seed: 6, smallest: 1.0e2,
+          largest: 8.0e5, slope: 3, shear: 50, clumping: 0.6}
+      # narrow and clumpy, as saturn's f ring
+      - inner: 1.716e8
+        outer: 1.74e8
+        depth: 0.8
+        albedo: 0.8
+        lean: -0.3
+        blue: 0.5
+        made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}
+        grains: {pattern: cells, seed: 7, smallest: 1.0e2,
+          largest: 4.0e5, slope: 3, shear: 30, clumping: 0.75}
+    columns:
+      # the belts: clear down to the deck at 150 bar, at least what air
+      # this heavy would need. rayleigh's
+      # depth there is about 9 at 550 nm, so the deck is never seen, and
+      # the methane, about 140 km-amagats, takes the red and yellow
+      belt:
+        - top: 0
+          bottom: 0.3
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.3
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the zones: the same air with a bright haze high in it, from 0.05
+      # to 0.5 bar: depth 3, albedo 0.97, leaning forward 0.6, all
+      # picked until the haze's droplets are read
+      zone:
+        - top: 0
+          bottom: 0.05
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.05
+          bottom: 0.5
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 3, albedo: 0.97, lean: 0.6}
+        - top: 0.5
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the churn: the zones' air with its haze cooked brown-orange.
+      # methane broken by the x-rays and the sun makes hydrocarbon haze,
+      # tholin, which absorbs the blue (khare and others 1984); its
+      # albedo of 0.12 at 400 nm against 0.95 at 700, and its depth of
+      # 4, are picked strong for the effect until khare's constants are
+      # pinned and worked through
+      churn:
+        - top: 0
+          bottom: 0.05
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.05
+          bottom: 0.5
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 4, albedo: 0.95, lean: 0.6, blue: 0.12}
+        - top: 0.5
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the tholin cooked air bears at its top: only its haze is read, by
+      # cooking. depth 1.5 and a quarter as bright in the blue as the
+      # red, fully cooked: picked. the churn's own haze, depth 4 and an
+      # eighth, browned even the zones, cooked a fifth, to mud.
+      tholin:
+        - top: 0
+          bottom: 0.05
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 1.5, albedo: 0.95, lean: 0.6, blue: 0.25}
+      # the cap an anticyclone lifts in its middle: fresh haze thrown high
+      # by its upwelling, above the methane, so white, as jupiter's white
+      # ovals are. depth 8 from 0.01 to 0.3 bar, albedo 0.99, leaning
+      # little, as fresh small particles do: picked
+      cap:
+        - top: 0
+          bottom: 0.01
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.01
+          bottom: 0.3
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 8, albedo: 0.99, lean: 0.1}
+        - top: 0.3
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the clearing a cyclone opens: clear down to old tholin settled
+      # deep, from 2 to 6 bar, dark and brown, as jupiter's brown barges
+      # are. depth 3, albedo 0.5, half again as dark in the blue: picked
+      clearing:
+        - top: 0
+          bottom: 2
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 2
+          bottom: 6
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 3, albedo: 0.5, lean: 0.3, blue: 0.3}
+        - top: 6
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+    zones:
+      - {south: -90, north: -55, column: belt}
+      - {south: -55, north: -38, column: zone}
+      - {south: -38, north: -24, column: belt}
+      - {south: -24, north: -9, column: zone}
+      - {south: -9, north: 9, column: belt}
+      - {south: 9, north: 22, column: zone}
+      - {south: 22, north: 35, column: belt}
+      - {south: 35, north: 52, column: zone}
+      - {south: 52, north: 90, column: belt}
+  set:
+    things:
+      # the lookout, in a clearing in the ʻōhiʻa forest on the north rim,
+      # the giant rising across the crater over the far rim: a clearing,
+      # so the trees round it show the light coming off the fire. the floor is bare lava
+      # from 1959; the forest is on the rim. the rim's top here is flat at
+      # 1,165 to 1,171 m, and its lip about 30 to 50 m to the south-south-
+      # east, where the ground falls to the floor at 1,064 m (probed with
+      # hillside -places)
+      the lookout:
+        kind: cobble
+        seed: 5
+        east: 263875
+        north: 2148550
+      # a bonfire 12 m out from the lookout toward the giant, big enough
+      # to throw its light into the trees round the clearing, the deep
+      # orange and red the giant's blue is the backdrop for. its flames
+      # are the fire physics', from its size
+      the bonfire:
+        kind: bonfire
+        seed: 1
+        east: 263886.3
+        north: 2148546.0
+        alight: true
+      # the rim where the bearing meets it, 1,468 m from the lookout,
+      # and trees along it every 8 m, across the line of sight
+      the far tree:
+        kind: spruce
+        seed: 3
+        east: 264832
+        north: 2147806
+        alight: true
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      rim a:
+        kind: spruce
+        seed: 21
+        east: 264824
+        north: 2147783
+        alight: true
+      rim b:
+        kind: spruce
+        seed: 22
+        east: 264827
+        north: 2147791
+      rim c:
+        kind: spruce
+        seed: 23
+        east: 264829
+        north: 2147798
+      rim d:
+        kind: spruce
+        seed: 24
+        east: 264835
+        north: 2147814
+        alight: true
+      rim e:
+        kind: spruce
+        seed: 25
+        east: 264837
+        north: 2147821
+      rim f:
+        kind: spruce
+        seed: 26
+        east: 264840
+        north: 2147829
+        alight: true
+      rim g:
+        kind: spruce
+        seed: 27
+        east: 264843
+        north: 2147802
+    stands:
+      the east rim:
+        kind: spruce
+        count: 150
+        seed: 17
+        above: 1195
+        alight: 10
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      # thousands along the far ridge, a few thousand trees at the least.
+      # grown where the frame sees it across the crater: bearings
+      # 80 to 150 from the lookout, 0.7 to 2 km out, on the rim's top
+      the forest:
+        kind: spruce
+        count: 4000
+        seed: 11
+        above: 1160
+        below: 1240
+        within: {of: the lookout, from: 80, to: 150, near: 700, far: 2000}
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      # the clearing's edge: the forest round us, 20 to 90 m out, open
+      # only from 85 to 135 degrees, toward the giant, so the trees come
+      # in from both sides of the 55 mm frame (about 78 to 142), lit by
+      # the bonfire. no band: within 90 m all of it is the
+      # rim's flat top
+      the clearing:
+        kind: spruce
+        count: 500
+        seed: 29
+        within: {of: the lookout, from: 135, to: 85, near: 20, far: 90}
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"

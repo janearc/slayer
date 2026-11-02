@@ -1,0 +1,5 @@
+label,focal,stop,focus
+no focal length,0,8,10
+a stop below a half,50,0.4,10
+a focus nearer than the focal length,50,8,0.04
+a focus at the focal length,50,8,0.05

@@ -1,0 +1,44 @@
+scene:
+  name: shoebox
+  light: ambient
+  location:
+    lat: 37.78507614135742
+    lon: -122.40721893310547
+  timeofday: 1548
+  cameras:
+    shoot_1:
+      title: "ninjas!"
+      eye: human  # the default, implied
+      orientation:
+        point_to: the box
+        alpha: 25  # looking up, in degrees
+      location:
+        loc_relative:
+          object: the box
+          standoff_x: 10
+          standoff_y: 10
+          standoff_z: 0
+  set:
+    bounded_box:
+      size_x: 1000  # metres: a kilometre
+      size_y: 1000
+      size_z: 1000
+    assets:
+      house:
+        name: the box
+        autogen: true
+        autogen_parameters:
+          footprint: 1536  # square feet
+          aesthetic: nouveau modern
+          exterior_lighting:
+            front_door: gas_in_glass
+            back_garden: modern_led
+          swimming_pool:
+            lit: true
+            size: 10x5  # metres
+          front_garden:
+            aesthetic: beverly hills
+          back_garden:
+            aesthetic: modern
+            tree_lined: true
+            tree_type: spruce

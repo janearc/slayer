@@ -1,0 +1,33 @@
+label,kind,exposure,knee,top,bloom,aspect,pixel,size,amount,seed,band,gain,tint_r,tint_g,tint_b,digest
+plain,develop,1,0,0,0,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
+no exposure given,develop,0,0,0,0,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
+twice the exposure,develop,2,0,0,0,0,0,0,0,0,0,0,0,0,0,f10a104600b74121
+half the exposure,develop,0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,1be7cadb3bcb0ba9
+a knee,develop,1,0.6,0,0,0,0,0,0,0,0,0,0,0,0,1f69be95b3de6e77
+a knee and a top,develop,1,0.5,2.5,0,0,0,0,0,0,0,0,0,0,0,11d001b26b7c0dbb
+a low knee and a high top,develop,1.5,0.3,8,0,0,0,0,0,0,0,0,0,0,0,1093102eb42a0e8c
+a knee of one,develop,1,1,0,0,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
+a bloom,develop,1,0,0,1.2,0,0,0,0,0,0,0,0,0,0,ba4b6207917bb345
+a small bloom,develop,1,0,0,0.5,0,0,0,0,0,0,0,0,0,0,73a02ad6fffaa2bd
+a big bloom at twice the exposure,develop,2,0,0,2,0,0,0,0,0,0,0,0,0,0,8dd2de319c0fd2ba
+a bloom through a knee,develop,1,0.6,0,1,0,0,0,0,0,0,0,0,0,0,e82be4c94353fd7c
+no bloom,develop,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
+false with a gain,false,1,0,0,0,0,0,0,0,0,0.0008,0.5,0,0,0,34c9dcdd53c79751
+false with no gain,false,1,0,0,0,0,0,0,0,0,0.0008,0,0,0,0,28e66e5a575effb8
+false with a knee,false,1,0.5,0,0,0,0,0,0,0,2e-05,2,0,0,0,dda977360e7abf0d
+false with a tint,false,1,0,0,0,0,0,0,0,0,656,1,0,1,0,a418379dd63df058
+false with visible band,false,2,0,0,0,0,0,0,0,0,0,0.25,0,0,0,d78531eed6a374a3
+false with in no range,false,1,0,0,0,0,0,0,0,0,550,1,0,0,0,5c3b45baa2052d82
+false with radio,false,1,0,0,0,0,0,0,0,0,1e+06,1,0,0,0,720b441a98356c10
+false with bloom,false,1,0,0,1,0,0,0,0,0,10,1,0,0,0,bc16164f0e30c1f
+masked wider,masked,0,0,0,0,4,1,0,0,0,0,0,0,0,0,af54cd501fdc3c01
+masked narrower,masked,0,0,0,0,1,1,0,0,0,0,0,0,0,0,6ce4310ebff1b651
+masked the same shape,masked,0,0,0,0,1.3333333333333333,1,0,0,0,0,0,0,0,0,d6f40f9415c3605f
+masked sextant,masked,0,0,0,0,1.5,0.75,0,0,0,0,0,0,0,0,8839600672981abc
+masked no pixel,masked,0,0,0,0,1,0,0,0,0,0,0,0,0,0,6ce4310ebff1b651
+grained,grained,0,0,0,0,0,0,3,0.3,7,0,0,0,0,0,da6a6562c9ef403b
+grained fine,grained,0,0,0,0,0,0,0.5,0.4,7,0,0,0,0,0,8abf168a86b3a3fa
+grained one and a half,grained,0,0,0,0,0,0,1.5,0.3,11,0,0,0,0,0,787a3ad8f0f26271
+grained one,grained,0,0,0,0,0,0,1,0.5,0,0,0,0,0,0,7d820bdd53ae3788
+grained none,grained,0,0,0,0,0,0,0,0.5,7,0,0,0,0,0,d6f40f9415c3605f
+grained no amount,grained,0,0,0,0,0,0,3,0,7,0,0,0,0,0,d6f40f9415c3605f

@@ -1,0 +1,25 @@
+written,side
+"",either
+80,either
+x,columns
+80x24x3,rows
+80X24,either
+"80,24",either
+x24,columns
+80x,rows
+0x24,columns
+80x0,rows
+-1x5,columns
+5x-1,rows
+8.5x3,columns
+5x3.5,rows
+abcx3,columns
+3xabc,rows
++5x3,columns
+5x+3,rows
+1001x5,columns
+5x1001,rows
+ 80x24,columns
+80x24 ,rows
+80 x24,columns
+99999999999999999999x3,columns

@@ -1,0 +1,12 @@
+stock,sees_from,sees_to,image_from,image_to,crystal_um,slope,least,most,source
+soot,360,495,360,830,0.30,1.5,0.3,2.0,cine
+ash,360,600,360,830,0.88,1.5,0.3,2.0,cine
+smoke,360,830,360,830,1.09,1.5,0.3,2.0,cine
+dusk,601,830,601,830,1.09,1.5,0.2,3.2,pair
+dusk,501,600,360,600,1.09,1.5,0.2,3.2,pair
+pollen,601,830,360,830,0.30,1.5,0,2.0,mosaic
+pollen,501,600,360,830,0.30,1.5,0,2.0,mosaic
+pollen,360,500,360,830,0.30,1.5,0,2.0,mosaic
+lantern,360,500,360,500,0.20,1.5,0.2,3.2,still
+lantern,501,600,501,600,0.20,1.5,0.2,3.2,still
+lantern,601,830,601,830,0.20,1.5,0.2,3.2,still

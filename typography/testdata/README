@@ -1,0 +1,8 @@
+CFFTest.otf is golang.org/x/image's own test font for sfnt's cff
+reading, copied from golang.org/x/image v0.46.0, font/testdata. it is
+copyright 2016 the go authors, under go's bsd-style licence,
+https://golang.org/LICENSE.
+
+it is here because its glyphs are cff outlines, wound the other way
+from truetype's: its "0" is an outer ring and a hole, and the tests
+hold the nesting of that to the nesting of go's own truetype "o".

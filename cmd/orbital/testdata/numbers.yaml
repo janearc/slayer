@@ -1,0 +1,68 @@
+# every number the orbital's cells tests choose, with what it is and who
+# picked it.
+numbers:
+  - name: cells-cols
+    value: 6
+    says: how many cells across the orbital is drawn in the tests; small, since the scene takes seconds to build
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: cells-rows
+    value: 4
+    says: how many cells down the orbital is drawn in the tests
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: cells-frames
+    value: 2
+    says: how many frames the tests draw; two show the scene moving
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: cells-rays
+    value: 1
+    says: how many rays a side the tests cast through each pixel; one is the quickest
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: cells-rate
+    value: 24
+    says: the frames a second the in-package tests ask for, as render/cells' tests do
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: smoke-number
+    value: 1
+    says: which of slayer's smoke scenes the in-package run test draws; the first, a ball on a floor, is quick
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: read-chunk
+    value: 4096
+    says: how many bytes the end-to-end test reads from the pipe at a time while it waits for a whole frame
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: keys-first
+    value: 1
+    says: the frame the keys tests start at; not nought, so a start that is dropped shows
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: keys-frames
+    value: 3
+    says: how many frames the keys tests allow; three give a first, a middle and a last
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: settle-milliseconds
+    value: 500
+    says: how long a keys test lets the orbital sit after a frame to see that it draws no more until a key; a frame at the tests' size takes far less
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: run-limit-seconds
+    value: 120
+    says: how long a test lets the orbital run before it is stopped and the test fails; a scene builds in 6 to 13 seconds on the machine the tests were written on
+    kind: picked
+    by: the test author, 2026-10-24

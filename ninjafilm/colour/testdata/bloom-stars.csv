@@ -1,0 +1,5 @@
+label,star,exposure,spill
+four times white,4,1,1
+half past white,1.5,1,0.16666666666666666
+past white only at twice the exposure,0.75,2,0.08333333333333333
+under white only at half the exposure,6,0.5,1.3333333333333333

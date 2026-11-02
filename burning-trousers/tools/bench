@@ -1,0 +1,31 @@
+#!/bin/sh
+# bench -- times slayer's tracer and shows where the time goes inside
+# it. runs the benchmarks matching PATTERN (all of them by default) with
+# a cpu and a memory profile, writes both under out/, and prints the
+# tracer's hottest functions from each. cores is GOMAXPROCS, four unless
+# CORES says otherwise, so a run never takes the whole machine. the
+# profiled run counts nothing: plain go test -bench gives the counts.
+#
+#	tools/bench [PATTERN] [COUNT]
+set -eu
+pattern=${1:-.}
+count=${2:-3x}
+cores=${CORES:-4}
+here=$(cd "$(dirname "$0")/.." && pwd)
+out="$here/out/bench-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$out"
+cd "$here"
+BURNING_TROUSERS_COUNTS=off GOWORK=off GOMAXPROCS=$cores go test -run '^$' -bench "$pattern" \
+	-benchtime "$count" -cpuprofile "$out/cpu.pprof" \
+	-memprofile "$out/mem.pprof" -o "$out/bench.test" ./bench/ |
+	tee "$out/bench.txt"
+echo
+echo "== where the time goes, the tracer's own functions"
+go tool pprof -top -nodecount=15 -focus='slayer/trace' \
+	"$out/bench.test" "$out/cpu.pprof" 2>/dev/null | sed -n '/flat%/,$p'
+echo
+echo "== where the memory goes"
+go tool pprof -top -nodecount=8 -sample_index=alloc_space \
+	"$out/bench.test" "$out/mem.pprof" 2>/dev/null | sed -n '/flat%/,$p'
+echo
+echo "profiles in $out"

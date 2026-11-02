@@ -1,0 +1,132 @@
+# every number the biome tests choose, with what it is and who chose it.
+numbers:
+  - name: seed
+    value: 12
+    says: the seed of the flat world the tests make; of the first sixty, one whose map at the size and scale below holds volcanoes, cities, city hearts, every paint a map can hold, and more rivers than lakes, so a river runs to the sea
+    kind: picked
+    by: the test author, 2026-11-01, by trying the first sixty seeds
+  - name: other-seed
+    value: 13
+    says: a second seed, one along, for a world that should be another world
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: band-seed
+    value: 29
+    says: the seed of the ring the sprawl tests make; of the first thirty, the one whose ring below holds the most city hearts, six
+    kind: picked
+    by: the test author, 2026-11-01, by trying the first thirty seeds
+  - name: band-radius
+    value: 20
+    says: how far the ring's floor is from its axis, in tiles
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: band-width
+    value: 12
+    says: how wide the ring's floor is along its axis, in tiles
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: band-around
+    value: 96
+    says: how many tiles go once round the ring
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: small-sprawl
+    value: 0.5
+    says: a sprawl under one, so a sprawl that is there but small is told from none
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: across
+    value: 48
+    says: how many columns of tiles the test map has
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: down
+    value: 32
+    says: how many rows of tiles the test map has
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: step
+    value: 1
+    says: how far apart the middles of neighbouring tiles are
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: scale
+    value: 4
+    says: about how wide a continent is on the test map, in tiles
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: sprawl
+    value: 2
+    says: how far a city's lights spread on the test map, in tiles
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: sphere-split
+    value: 12
+    says: how many times each face of the icosahedron is split for a sphere of tiles, 1442 of them, enough for a tile near each pole and each axis
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: risen
+    value: 0.1
+    says: a sea a little above nought, so a test can tell a height above the sea from the height itself
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: drowned
+    value: 2
+    says: a sea higher than any land, about one at most, so every tile is under it
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: lowland
+    value: 0.5
+    says: a sea that leaves the land no higher than 0.15 above it, below the 0.26 a volcano needs
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: snowed
+    value: -2
+    says: a sea so low that every tile stands more than 0.34 above it, so every tile is snow
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: volcano-height
+    value: 0.26
+    says: the least height above the sea biome puts a volcano at
+    kind: picked
+    by: biome's author, in biome.go's Make; read here as it is written there
+  - name: brightest
+    value: 1.6
+    says: the most a sprawling city's light is, times its colour, before its grain dims it
+    kind: picked
+    by: biome's author, in biome.go's sprawled; read here as it is written there
+  - name: faintest
+    value: 0.04
+    says: the least a sprawling city's light may be and still be seen; any less is dark
+    kind: picked
+    by: biome's author, in biome.go's sprawled; read here as it is written there
+  - name: fewest-arms
+    value: 4
+    says: the fewest arms a city's lights reach out along
+    kind: picked
+    by: biome's author, in biome.go's armsOf, four and a hash's share of four more; read here as it is written there
+  - name: most-arms
+    value: 7
+    says: the most arms a city's lights reach out along, one fewer than the fewest and four, since a hash is under one
+    kind: picked
+    by: biome's author, in biome.go's armsOf; read here as it is written there
+  - name: within
+    value: 1e-9
+    says: how far two readings of a field may be apart when one was divided once more than the other on its way in
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: least-scale
+    value: 0.25
+    says: the smallest scale the property tests draw
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: most-scale
+    value: 16
+    says: the largest scale the property tests draw
+    kind: picked
+    by: the test author, 2026-11-01
+  - name: reach
+    value: 100
+    says: how far from the origin the property tests draw points, in tiles
+    kind: picked
+    by: the test author, 2026-11-01

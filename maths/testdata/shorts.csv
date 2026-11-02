@@ -1,0 +1,6 @@
+name,x,want
+about six millionths short,1e-160,9.99994433575849e-161
+six thousandths short,1e-161,9.940479322862118e-162
+eleven per cent long,2e-162,2.2227587494850775e-162
+thirty nine per cent long,1.6e-162,2.2227587494850775e-162
+nought,1.5e-162,0

@@ -1,0 +1,97 @@
+# every number the maths tests choose, with what it is and who chose it.
+numbers:
+  - name: within
+    value: 1e-9
+    says: how far a rounded answer may be from the worked one, in the same units as the answer
+    kind: picked
+    by: the test author, 2026-10-23; the audited tests used this tolerance
+  - name: tight
+    value: 1e-12
+    says: how far the length of a worked direction may be from one, and a right angle from nought
+    kind: picked
+    by: the test author, 2026-10-23; the audited tests used this tolerance
+  - name: doubling
+    value: 2
+    says: the factor a vector is scaled by where a test scales one
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: near-just-enough
+    value: 0.1
+    says: how far apart two points are that a test says are near, the distance between them exactly
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: near-not-enough
+    value: 0.09
+    says: a distance a little under the one that two points are apart, so they are not near
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: turn-radians
+    value: 0.3
+    says: an angle in radians that About and Rotation are held to give the same turn for
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: one-part-in
+    value: 1e-12
+    says: how far a length measured at any everyday size may be from the worked one, as a share of it
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: weight-red
+    value: 0.2126
+    says: what one unit of red adds to a luminance, as ITU-R BT.709 weighs it
+    kind: picked
+    by: the test author, 2026-10-23, from the standard's table of luma coefficients
+  - name: weight-green
+    value: 0.7152
+    says: what one unit of green adds to a luminance, as ITU-R BT.709 weighs it
+    kind: picked
+    by: the test author, 2026-10-23, from the standard's table of luma coefficients
+  - name: weight-blue
+    value: 0.0722
+    says: what one unit of blue adds to a luminance, as ITU-R BT.709 weighs it
+    kind: picked
+    by: the test author, 2026-10-23, from the standard's table of luma coefficients
+  - name: half
+    value: 0.5
+    says: the scale of a child space that is half the size of its parent, and the grey that is half of white
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: dot-of-a-and-b
+    value: 32
+    says: the dot product of the vectors a and b, worked by hand as 1 times 4, 2 times 5 and 3 times 6
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: length-of-three-four-nought
+    value: 5
+    says: the length of the vector 3, 4, 0, worked by hand as the root of 9 and 16
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: coordinate-most
+    value: 1000
+    says: the furthest from nought a coordinate a property test draws may be, either way; far enough to mix scales, near enough that rounding stays small
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: length-least
+    value: 0.01
+    says: the shortest a vector may be where a property test needs a direction from it, far above the sizes at which lengths lose digits
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: scale-most
+    value: 100
+    says: the largest scale a property test gives a subspace or a vector; the least is its reciprocal
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: angle-most
+    value: 7
+    says: the largest angle in radians a property test turns by, either way; a little over a whole turn
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: relative
+    value: 1e-9
+    says: how far a computed answer may be from the exact one, as a share of the sizes that went into it
+    kind: picked
+    by: the test author, 2026-10-23
+  - name: distance-most
+    value: 100
+    says: the furthest a property test walks along a ray
+    kind: picked
+    by: the test author, 2026-10-23

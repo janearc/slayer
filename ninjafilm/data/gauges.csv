@@ -1,0 +1,9 @@
+name,width_mm,height_mm,grain,source
+super 8,5.79,4.01,0.008,lamb film/lens.go
+16 mm,10.26,7.49,0.0045,lamb film/lens.go
+academy,22.0,16.0,0.0021,lamb film/lens.go
+super 35,24.89,18.66,0.0019,lamb film/lens.go
+full frame,36.0,24.0,0.0013,lamb film/lens.go
+65 mm,52.48,23.01,0.0009,lamb film/lens.go
+imax,70.41,52.63,0.0007,lamb film/lens.go
+hubble wfc3,61.4,61.5,0,lamb film/lens.go

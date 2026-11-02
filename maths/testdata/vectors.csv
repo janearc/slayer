@@ -1,0 +1,77 @@
+name,x,y,z
+origin,0,0,0
+one on x,1,0,0
+down,0,0,-1
+up from z,0,0,1
+a,1,2,3
+b,4,5,6
+a plus b,5,7,9
+a minus b,-3,-3,-3
+a doubled,2,4,6
+a negated,-1,-2,-3
+a cross b,-3,6,-3
+ray start,1,1,1
+ray end,1,1,-1
+three four nought,3,4,0
+three four nought as a direction,0.6,0.8,0
+a tenth along x,0.1,0,0
+long,3e200,4e200,0
+short,3e-200,4e-200,0
+sample one,-0.3,2,7.25
+sample two,1e-3,1e5,2
+a point,3,-2,7
+a far point,-4,0.5,9
+a tilted axis,1,1,0
+a point on the ship,0.5,0.25,-1
+a point further out,-3,2,7
+planet origin,10,0,0
+ship origin,1,0,0
+eye,0,2,6
+target,0,1,0
+high eye,0,5,0
+overhead,0,0,5
+upright up,0.3,-0.5,0.8
+side,5,0,0
+box min,-1,-1,-1
+box max,1,1,1
+high above,0,0,5
+beside,5,5,5
+off to one side,0.5,0,5
+off the face,2,0,5
+on the left face,-1,0,5
+on the right face,1,0,5
+edge start,2,0,0
+edge way,-1,1,0
+tiny down,0,0,-1e-320
+nan way,0,0,NaN
+nan start,NaN,0,5
+nan axis,NaN,0,1
+infinite axis,+Inf,0,0
+subspace out,1,2,0
+subspace in ray start,1,4,0
+subspace in ray way,0,-1,0
+subspace in start,2,0,0
+subspace in way,-1,0,0
+minus x,-1,0,0
+minus z,0,0,-1
+up,0,1,0
+one on y,0,1,0
+tint,2,0,0.5
+a through the tint,2,0,1.5
+half grey,0.5,0.5,0.5
+a plus half grey,1.5,2.5,3.5
+slanted way,0,1,-1
+beyond everything,1e300,1e300,1e300
+nan corner,NaN,0,0
+edge view,0.03998749804626443,0.02,0.999
+past edge view,0.03998749804626166,0.02,0.9990000000000001
+edge stand,0.9,0.02,0.4354308211415448
+past edge stand,0.9000000000000001,0.02,0.4354308211415445
+tiny up,0,0,1e-320
+a hair,1e-170,0,0
+measured in full,1e-150,0,0
+moved 1,-0.8,-0.2,-0.8
+moved 2,-0.8,-0.2,0.7
+moved 3,-0.8,-0.1,-0.5
+infinite on x,+Inf,0,0
+barely measured,1.6e-162,0,0

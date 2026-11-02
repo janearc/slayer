@@ -1,0 +1,10 @@
+label,light,code
+none,0,0
+half the light is 188 and not half the byte,0.5,188
+all the light,1,255
+more than all,3,255
+less than none,-1,0
+in the toe,0.001,3
+in the toe again,0.002,7
+where the toe meets the curve,0.0031308,10
+a quarter on the curve,0.25,137

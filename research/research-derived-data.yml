@@ -1,0 +1,68 @@
+# research-derived-data.yml: every number slayer takes from a published
+# source, read from that source and never typed from memory (ruled
+# 2026-10-18). each names its source by its key in sources.yaml,
+# where in it, the page as the file counts pages, and the text printed
+# there. sources verify holds every entry to its pinned source before a
+# build: the source on the shelf at its hash, the text on its page, and
+# the value the text says.
+
+numbers:
+  # mccaffrey, "purely buoyant diffusion flames: some experimental
+  # results", nbsir 79-1910, table 1, "summary of center line data":
+  # the weighted averages over his five fires, 14.4 to 57.5 kw. read
+  # 2026-10-18 from the page and from the arithmetic of its columns.
+
+  - name: continuous-speed
+    value: 6.84
+    unit: m^1/2 s^-1
+    says: the gas speed up the middle of the continuous flame, over the root of the height, v/z^1/2
+    kind: measured
+    source:
+      key: nbsir-79-1910
+      where: table 1 (printed page 27), flame, v/z^1/2, weighted average
+      page: 35
+      text: "6.84"
+
+  - name: tongue-speed
+    value: 1.93
+    unit: m s^-1 kW^-1/5
+    says: the gas speed up the middle of the intermittent flame, over the heat to the fifth, v/Q^1/5
+    kind: measured
+    source:
+      key: nbsir-79-1910
+      where: table 1 (printed page 27), intermittent, v/Q^1/5, weighted average
+      page: 35
+      text: "1.93"
+
+  - name: plume-speed
+    value: 1.12
+    unit: m^4/3 s^-1 kW^-1/3
+    says: the gas speed up the middle of the plume, times the height to the third over the heat to the third, vz^1/3/Q^1/3
+    kind: measured
+    source:
+      key: nbsir-79-1910
+      where: table 1 (printed page 27), plume, vz^1/3/Q^1/3, weighted average
+      page: 35
+      text: "1.12"
+
+  - name: tongues-from
+    value: 0.0793
+    unit: m kW^-2/5
+    says: where the intermittent flame begins, as a height over the heat to the two fifths, z/Q^2/5
+    kind: measured
+    source:
+      key: nbsir-79-1910
+      where: table 1 (printed page 27), intersections, flame-intermittent, weighted
+      page: 35
+      text: ".0793"
+
+  - name: plume-from
+    value: 0.198
+    unit: m kW^-2/5
+    says: where the plume begins, as a height over the heat to the two fifths, z/Q^2/5
+    kind: measured
+    source:
+      key: nbsir-79-1910
+      where: table 1 (printed page 27), intersections, intermittent-plume, weighted
+      page: 35
+      text: ".198"

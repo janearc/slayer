@@ -1,0 +1,3 @@
+# a failing rapid property writes the case that failed here; it is
+# kept to rerun it and is not part of the tree.
+testdata/rapid/

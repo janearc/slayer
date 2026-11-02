@@ -1,0 +1,12 @@
+label,aspect,pixel,x0,x1,y0,y1
+wider,4,1,0,100,12,37
+narrower,1,1,25,75,0,50
+the same shape,2,1,0,100,0,50
+the same shape in sextant pixels,1.5,0.75,0,100,0,50
+wider in sextant pixels,2.5,0.75,0,100,10,40
+narrower in sextant pixels,1,0.75,16,83,0,50
+narrower and not square,1.5,1,12,87,0,50
+narrower in sextant pixels and not square,1.2,0.75,10,90,0,50
+no pixel and narrower,1,0,25,75,0,50
+no pixel and wider,4,0,0,100,12,37
+a negative pixel and narrower,1,-3,25,75,0,50

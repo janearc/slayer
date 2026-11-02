@@ -1,0 +1,183 @@
+# a black widow inside a nebula, its companion made of smoke, and the
+# tail the pulsar's wind blows off her.
+#
+# a millisecond pulsar eating its companion on a two-hour orbit, inside
+# the glow of the gas round them. one unit is 10,000 km. the figures are
+# from memory, not read from a source.
+#
+# places are a map's: x east, y north, z up, so the orbit's plane is the
+# ground's, and up is out of it.
+scene:
+  name: widow-tail
+  # close on the pair, a little above the plane of the orbit, turned to
+  # take in the tail. the print is filmic: a shoulder from seven tenths
+  # of white to a top of eight.
+  film:
+    wide: 40
+    print: {knee: 0.7, top: 8, source: eye}
+  cameras:
+    eye:
+      location:
+        at: [0, -230, 45]
+      orientation:
+        look_at: [44, 24, 0]
+  world:
+    unit: 10000000
+    sky:
+      stars: {seed: 29, share: 0.08, size: 0.5, bright: 0.6}
+      source: eye
+    # the companion glows at 3200 K, libtheme's planckian, tungsten, so
+    # the red is derived, not typed.
+    materials:
+      cool-star:
+        glow: {swatch: tungsten}
+        source: eye
+    # the pulsar: 10 km across, so 0.001 units. smaller than a pixel
+    # from anywhere we can stand and still see the orbit.
+    bodies:
+      pulsar:
+        template: pulsar
+        middle: [0, 0, 0]
+        radius: 0.001
+        detail: 4
+    # the companion's core, the photosphere, 7 units, inside its
+    # envelope of gas.
+    spheres:
+      companion:
+        material: cool-star
+        middle: [0, 0, 0]
+        radius: 7
+        motion: orbit
+        source: eye
+    # two hours round, 64 units out: 640,000 km. the circle is a polygon
+    # of 24 sides.
+    motions:
+      orbit:
+        seconds: 7200
+        ease: linear
+        hold: true
+        frames:
+          - {percent: 0, at: [64.00, 0, 0]}
+          - {percent: 4.1667, at: [61.82, -16.56, 0]}
+          - {percent: 8.3333, at: [55.43, -32.00, 0]}
+          - {percent: 12.5, at: [45.25, -45.25, 0]}
+          - {percent: 16.6667, at: [32.00, -55.43, 0]}
+          - {percent: 20.8333, at: [16.56, -61.82, 0]}
+          - {percent: 25, at: [0.00, -64.00, 0]}
+          - {percent: 29.1667, at: [-16.56, -61.82, 0]}
+          - {percent: 33.3333, at: [-32.00, -55.43, 0]}
+          - {percent: 37.5, at: [-45.25, -45.25, 0]}
+          - {percent: 41.6667, at: [-55.43, -32.00, 0]}
+          - {percent: 45.8333, at: [-61.82, -16.56, 0]}
+          - {percent: 50, at: [-64.00, 0, 0]}
+          - {percent: 54.1667, at: [-61.82, 16.56, 0]}
+          - {percent: 58.3333, at: [-55.43, 32.00, 0]}
+          - {percent: 62.5, at: [-45.25, 45.25, 0]}
+          - {percent: 66.6667, at: [-32.00, 55.43, 0]}
+          - {percent: 70.8333, at: [-16.56, 61.82, 0]}
+          - {percent: 75, at: [0.00, 64.00, 0]}
+          - {percent: 79.1667, at: [16.56, 61.82, 0]}
+          - {percent: 83.3333, at: [32.00, 55.43, 0]}
+          - {percent: 87.5, at: [45.25, 45.25, 0]}
+          - {percent: 91.6667, at: [55.43, 32.00, 0]}
+          - {percent: 95.8333, at: [61.82, 16.56, 0]}
+          - {percent: 100, at: [64.00, 0, 0]}
+    # the companion as gas: a wispy envelope round the core that thins
+    # to nothing, its edge wibbly, the side facing the pulsar lit by the
+    # wind. a wisp cannot glow, so it only scatters what the wind gives
+    # it. for a still at nought: a wisp is placed, not carried.
+    #
+    # the tail: the pulsar's wind boils gas off her lit face and blows it
+    # back, away from the pulsar and behind her along the orbit, a
+    # comet's tail curling as she moves. it is what eclipses the pulsar's
+    # beam. at nought she moves south, so behind her is north and away is
+    # east. blobs, each thinner and wider than the last, since a set
+    # places wisps and cannot draw one bent volume.
+    #
+    # the nebula: the gas we are inside, thin and wide, its red painted.
+    # hydrogen-alpha glowing where the pulsar's light reaches it is the
+    # tracer's Excited, which a set cannot say yet.
+    wisps:
+      envelope:
+        colour: {swatch: rust}
+        middle: [64, 0, 0]
+        radius: 14
+        thick: 0.12
+        seed: 3
+        scale: 4
+        amount: 0.7
+        source: eye
+      tail-1:
+        colour: {swatch: rust}
+        middle: [80, 6, 0]
+        radius: 9
+        thick: 0.09
+        seed: 11
+        scale: 4
+        amount: 0.7
+        source: eye
+      tail-2:
+        colour: {swatch: rust}
+        middle: [94, 18, 1]
+        radius: 12
+        thick: 0.06
+        seed: 12
+        scale: 5
+        amount: 0.7
+        source: eye
+      tail-3:
+        colour: {swatch: rust}
+        middle: [105, 36, 2]
+        radius: 16
+        thick: 0.04
+        seed: 13
+        scale: 6
+        amount: 0.7
+        source: eye
+      tail-4:
+        colour: {swatch: rust}
+        middle: [112, 58, 3]
+        radius: 21
+        thick: 0.025
+        seed: 14
+        scale: 7
+        amount: 0.7
+        source: eye
+      tail-5:
+        colour: {swatch: rust}
+        middle: [115, 84, 4]
+        radius: 27
+        thick: 0.015
+        seed: 15
+        scale: 8
+        amount: 0.7
+        source: eye
+      nebula:
+        colour: {swatch: red}
+        middle: [0, 0, 0]
+        radius: 600
+        thick: 0.002
+        seed: 7
+        scale: 200
+        amount: 0.6
+        source: eye
+    # the pulsar's wind, as a lamp: the tracer has no lamp that shines
+    # every way from a point, so this is a spot at the pulsar aimed where
+    # the companion is at nought, its cone just wider than the companion.
+    # a stand-in for a still, not physics: it lights the near side, and
+    # the gas it crosses.
+    spots:
+      wind:
+        at: [0, 0, 0]
+        aim: [1, 0, 0]
+        cone: 12
+        soft: 3
+        temperature: 9000
+        strength: 9000
+        source: eye
+    # a faint fill for the nebula, so its gas has something to scatter.
+    floods:
+      nebula-light:
+        colour: {swatch: rust}
+        strength: 0.25
+        source: eye

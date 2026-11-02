@@ -1,0 +1,4 @@
+label,red,gain,scale
+half the gain on a tenth of red,0.1,0.5,0.05
+four times the gain on a twentieth,0.05,4,0.2
+no gain is one,0.1,0,0.1

@@ -1,0 +1,15 @@
+label,table,find,replace,says
+a gauge the table has not got,stocks,"super 35",plate,gauge
+a lay nobody has heard of,stocks,mosaic,woven,woven
+a number that is not one,stocks,6451600,many,many
+a stacked lay with elements,stocks,"stacked,0,0","stacked,5,0",stacked
+a mosaic with no elements,stocks,6451600,0,mosaic
+a stock twice,stocks,"two,full frame","one,full frame",twice
+a backward window,records,"one,360,830","one,831,830",forwards
+a window that is not whole,records,"one,360","one,360.5",whole
+a window on no lamp,records,"two,360,600","two,465,548",sees
+an image on no lamp,records,"two,601,830,360,830","two,601,830,465,548",blocks
+a crystal with no width,records,"0.5,1.5,0.3","0,1.5,0.3",crystal
+a curve with no room,records,"1.5,0.3,2","1.5,2,2",curve
+a record for no stock,records,"two,360","three,360",three
+a stock with no records,records,"one,360","two,360",records

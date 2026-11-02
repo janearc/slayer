@@ -1,0 +1,119 @@
+# planetary turbidity, t-0: the made-up giant at rest, before the
+# dwellers' prank, made up 2026-10-17: a noble-gas giant of neon,
+# krypton and xenon, 17% each, with methane and sodium, heavy and
+# radioactive.
+#
+# what is not here yet, and stands in: sodium (4%) and radon (5%) have
+# no light built, so methane carries their shares, 49% in all, until
+# they do. the haze is grey and picked; its yellow is sodium's glow,
+# which comes with sodium. no storms and no x-rays yet; the rings are
+# lit by the star alone, their phosphors' glow waits for the x-rays.
+# the light is single scattering only, so the hazed zones come out
+# darker than they would.
+#
+# space, in the set's own frame: x east, y up, north toward minus z.
+# the planet stands at the middle; its pole is tipped toward the camera.
+scene:
+  name: planetary turbidity
+  light: sun
+  # its star, from the planet's middle: low in the south-east of the
+  # set's frame, so the camera, due south, sees it three quarters lit
+  sun:
+    azimuth: 135
+    altitude: 20
+  film:
+    # a test frame: 240 across, one ray, one glimpse. the frame is
+    # 15/70's, as the moonrise's; at 850,000 km the lens fills the
+    # frame's height with the giant, and the rings run off every edge,
+    # as the close-tilt-50 of 10-05 does.
+    width: 240
+    rays: 1
+    frame:
+      width: 70.41
+      height: 51.61
+    lens:
+      focal: 330
+      stop: 8
+      focus: the giant
+    shutter: 0.004
+    glimpses: 1
+  cameras:
+    afar:
+      title: "the giant, at rest"
+      orientation:
+        point_to: the giant
+        alpha: 0
+      location:
+        loc_relative:
+          object: the giant
+          standoff_x: 0
+          standoff_y: -8.5e8   # 850,000 kilometres south
+          standoff_z: 0
+  planet:
+    name: the giant
+    made_up: true
+    radius: 6.0e7     # metres, a little smaller than jupiter: picked
+    gravity: 24.8     # jupiter's at its cloud tops: picked
+    deck: 0.8         # the methane-ice deck's albedo: picked
+    from_star: 1.2    # astronomical units: picked
+    # the pole tipped 40 degrees from straight up toward the camera, so
+    # the rings open 50 degrees to it, a tilt picked
+    pole: {azimuth: 180, altitude: 40}
+    # seven rings from 1.3 to 2.9 radii, inside where the planet's tides
+    # would tear a moon apart. each is a fifth zns:ag and a fifth csi:tl
+    # by mass, the rest ice, a make-up picked; their glow waits for the
+    # x-rays. the radii, depths and albedos are picked, the broad bright
+    # third ring after saturn's b; the lean of -0.3, large icy particles
+    # throwing light back toward the star, is picked until a measured
+    # phase is read.
+    rings:
+      - {inner: 7.8e7, outer: 8.7e7, depth: 0.1, albedo: 0.6, lean: -0.3,
+         made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}}
+      - {inner: 8.82e7, outer: 1.08e8, depth: 0.4, albedo: 0.7, lean: -0.3,
+         made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}}
+      - {inner: 1.098e8, outer: 1.35e8, depth: 1.5, albedo: 0.85,
+         lean: -0.3, made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}}
+      - {inner: 1.392e8, outer: 1.5e8, depth: 0.6, albedo: 0.8, lean: -0.3,
+         made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}}
+      - {inner: 1.53e8, outer: 1.608e8, depth: 0.3, albedo: 0.75,
+         lean: -0.3, made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}}
+      - {inner: 1.632e8, outer: 1.68e8, depth: 0.15, albedo: 0.7,
+         lean: -0.3, made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}}
+      - {inner: 1.716e8, outer: 1.74e8, depth: 0.8, albedo: 0.8, lean: -0.3,
+         made_of: {ice: 0.6, zns-ag: 0.2, csi-tl: 0.2}}
+    columns:
+      # the belts: clear down to the deck at 150 bar, at least what air
+      # this heavy would need. rayleigh's
+      # depth there is about 9 at 550 nm, so the deck is never seen, and
+      # the methane, about 140 km-amagats, takes the red and yellow
+      belt:
+        - top: 0
+          bottom: 0.3
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.3
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the zones: the same air with a bright haze high in it, from 0.05
+      # to 0.5 bar: depth 3, albedo 0.97, leaning forward 0.6, all
+      # picked until the haze's droplets are read
+      zone:
+        - top: 0
+          bottom: 0.05
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.05
+          bottom: 0.5
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 3, albedo: 0.97, lean: 0.6}
+        - top: 0.5
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+    zones:
+      - {south: -90, north: -55, column: belt}
+      - {south: -55, north: -38, column: zone}
+      - {south: -38, north: -24, column: belt}
+      - {south: -24, north: -9, column: zone}
+      - {south: -9, north: 9, column: belt}
+      - {south: 9, north: 22, column: zone}
+      - {south: 22, north: 35, column: belt}
+      - {south: 35, north: 52, column: zone}
+      - {south: 52, north: 90, column: belt}

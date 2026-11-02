@@ -1,0 +1,68 @@
+# a star in a nebula, for the set's tests: the pieces a world of moving
+# things and gas says, in a unit of ten thousand kilometres. places are a
+# map's: x east, y north, z up.
+scene:
+  name: nebula
+  film:
+    wide: 40
+    print: {knee: 0.7, top: 8, source: eye}
+  world:
+    unit: 10000000
+    sky:
+      stars: {seed: 29, share: 0.08, size: 0.5, bright: 0.6}
+      source: eye
+    materials:
+      cool-star:
+        glow: {swatch: tungsten}
+        source: eye
+    bodies:
+      pulsar:
+        template: pulsar
+        middle: [0, 0, 0]
+        radius: 0.001
+        detail: 4
+    spheres:
+      companion:
+        material: cool-star
+        middle: [0, 0, 0]
+        radius: 10.5
+        motion: orbit
+        source: eye
+      still:
+        material: cool-star
+        middle: [5, 0, 1]
+        radius: 1
+        source: eye
+    motions:
+      orbit:
+        seconds: 7200
+        ease: linear
+        hold: true
+        frames:
+          - {percent: 0, at: [64, 0, 0]}
+          - {percent: 4.1667, at: [61.82, -16.56, 0]}
+          - {percent: 100, at: [64, 0, 0]}
+    wisps:
+      nebula:
+        colour: {swatch: red}
+        middle: [0, 0, 0]
+        radius: 600
+        thick: 0.002
+        seed: 7
+        scale: 200
+        amount: 0.6
+        source: eye
+    spots:
+      wind:
+        at: [0, 0, 0]
+        aim: [1, 0, 0]
+        cone: 12
+        soft: 3
+        temperature: 9000
+        strength: 9000
+        source: eye
+    floods:
+      nebula-light:
+        colour: {swatch: rust}
+        strength: 0.25
+        source: eye

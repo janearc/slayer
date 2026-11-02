@@ -1,0 +1,158 @@
+# the full moon resting on kīlauea iki's east rim, seen from the crater
+# floor through a long lens, the trees on the rim before it and some of
+# them alight, their smoke rising out of the frame.
+#
+# the moon is full, at opposition, so it rises as the sun sets: this is
+# twilight, the sun below the western horizon. at opposition the moon
+# rises at the top of the earth's shadow, so the camera is low, on the
+# crater floor, where the far rim stands 4.67 degrees up and hides the
+# shadow's edge: everything in the frame is under it.
+#
+# measured: the ground (the usgs's 2019 lidar model); the moon's size,
+# distance and albedo (nasa's fact sheet); its light, the sun's through
+# that albedo; the sun's light; the air's dimming and reddening of
+# both, and the sky they light (rayleigh, bodhaine and the others); the
+# fires' heat, soot and smoke as alight.go says. picked: where the
+# camera and the moon stand, the lens. the trees are spruces standing in
+# for ʻōhiʻa, until the manufactory grows it.
+#
+# not here yet, and so wrong in the picture: light the air scatters
+# more than once, which fills the earth's shadow with a dusky blue, so
+# the sky in the frame is black; ozone; the air's bending of light near
+# the horizon; mauna loa, which in truth hides the sun to the west; and
+# the smoke's eddies, so the columns are smooth.
+scene:
+  name: moonrise over kilauea iki
+  light: moon
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 1900
+  # the bearing from the lookout to the far tree on the rim, and resting
+  # on the rim: the rim at 4.67 degrees from the lookout, by the lidar,
+  # and the moon's middle a radius and a little more above it
+  moon:
+    azimuth: 109.65
+    altitude: 4.95
+    face: svs-moon-kit-color
+  # opposite the moon, as a full moon's sun is, until an ephemeris gives
+  # the two for a date: the moon's way less half a turn
+  sun:
+    azimuth: 289.65
+    altitude: -4.95
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263300
+    north: 2149000
+    across: 2000
+    down: 1700
+    step: 4
+  # a test frame at preview size: 480 pixels across the frame, two rays
+  # a side, two glimpses. the raw is joules a square metre of film, in
+  # libtheme's three channels, not yet a spectrum.
+  film:
+    width: 480
+    rays: 2
+    # smpte st 417's 15/70 camera aperture, 70.41 by 51.61 mm: its table
+    # 1, "camera aperture height 2.032 nom 51.61 nom", read from the pdf,
+    # sha256 893c08a6...0edd. the 52.63 often given is a
+    # mailing list's, not the standard's
+    frame:
+      width: 70.41
+      height: 51.61
+    # picked, for the shot: 1344 mm sees 3 degrees across this frame,
+    # wide enough for the smoke to climb past the moon. f/16: focused
+    # on the rim 1.47 km off, the moon blurs about 0.08 mm, half a pixel
+    # at this size
+    lens:
+      focal: 1344
+      stop: 16
+      focus: the far tree
+    # picked: a second. the moon does not move yet, so it cannot trail
+    shutter: 1
+    glimpses: 2
+  cameras:
+    across:
+      title: "the moon on the east rim, from the crater floor"
+      orientation:
+        point_to: the far tree
+        # tipped up so the rim sits low and the frame, 2.2 degrees high,
+        # runs from about 4.4 to 6.6: the moon on the ridge, and some 50
+        # m of the smoke above the trees
+        alpha: 5.5
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 2
+  set:
+    things:
+      the lookout:
+        kind: cobble
+        seed: 5
+        east: 263450
+        north: 2148300
+      # the rim where the bearing meets it, 1,468 m from the lookout,
+      # and trees along it every 8 m, across the line of sight
+      the far tree:
+        kind: spruce
+        seed: 3
+        east: 264832
+        north: 2147806
+        alight: true
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      rim a:
+        kind: spruce
+        seed: 21
+        east: 264824
+        north: 2147783
+        alight: true
+      rim b:
+        kind: spruce
+        seed: 22
+        east: 264827
+        north: 2147791
+      rim c:
+        kind: spruce
+        seed: 23
+        east: 264829
+        north: 2147798
+      rim d:
+        kind: spruce
+        seed: 24
+        east: 264835
+        north: 2147814
+        alight: true
+      rim e:
+        kind: spruce
+        seed: 25
+        east: 264837
+        north: 2147821
+      rim f:
+        kind: spruce
+        seed: 26
+        east: 264840
+        north: 2147829
+        alight: true
+      rim g:
+        kind: spruce
+        seed: 27
+        east: 264843
+        north: 2147802
+    stands:
+      the east rim:
+        kind: spruce
+        count: 150
+        seed: 17
+        above: 1195
+        alight: 10
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      the forest:
+        kind: spruce
+        count: 600
+        seed: 11
+        above: 1150
+        below: 1195
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"

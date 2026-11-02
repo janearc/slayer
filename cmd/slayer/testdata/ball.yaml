@@ -1,0 +1,48 @@
+# a ball under a sky, quick to draw, for slayer's tests: one sphere, a
+# flood, a gradient sky, a camera at a place and one off an asset.
+scene:
+  name: ball
+  film:
+    wide: 60
+    print: {knee: 0.7, top: 8, source: eye}
+  cameras:
+    front:
+      location:
+        at: [0, -10, 1]
+      orientation:
+        look_at: [0, 0, 1]
+    off:
+      orientation:
+        point_to: the box
+        alpha: 5
+      location:
+        loc_relative:
+          object: the box
+          standoff_x: 5
+          standoff_y: 0
+          standoff_z: 1
+  world:
+    sky:
+      horizon: {swatch: horizon}
+      zenith: {swatch: zenith}
+      ground: {srgb_linear: [0.1, 0.1, 0.1]}
+      source: eye
+    materials:
+      clay:
+        colour: {swatch: clay}
+        source: eye
+    spheres:
+      ball:
+        material: clay
+        middle: [0, 0, 1]
+        radius: 1
+        source: eye
+    floods:
+      day:
+        colour: {swatch: daylight}
+        strength: 1
+        source: eye
+  set:
+    assets:
+      house:
+        name: the box

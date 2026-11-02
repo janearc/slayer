@@ -1,0 +1,8 @@
+name,from,to,up,orientation
+straight down keeps right and makes minus z the top,high eye,origin,,looking straight down
+straight along the only up gives x for the top,overhead,origin,up from z,along the only up
+an up of its own is kept,side,origin,up from z,standing east with z for up
+a view exactly at the edge of along z keeps that up,edge view,origin,up from z,at the edge of along z
+a view just past the edge of along z leaves that up,past edge view,origin,up from z,past the edge of along z
+a view exactly at the edge of along minus z keeps minus z,edge view,origin,edge view,at the edge of along the view
+a view just past the edge of along minus z takes x,past edge view,origin,past edge view,past the edge of along z

@@ -1,0 +1,4 @@
+stock,sees_from,sees_to,image_from,image_to,crystal_um,slope,least,most,source
+one,360,830,360,830,0.5,1.5,0.3,2,x
+two,601,830,360,830,0.3,1.5,0,2,x
+two,360,600,360,830,0.3,1.5,0,2,x

@@ -1,0 +1,94 @@
+# every number the take tests choose, with what it is and who picked it.
+# they were ninjafilm's, in its picked-numbers.yml, until the take moved
+# to slayer.
+numbers:
+  - name: take-rate-least
+    value: 1
+    says: the slowest rate a drawn camera is cranked at, in frames a second
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-rate-most
+    value: 120
+    says: the fastest rate a drawn camera is cranked at, in frames a second
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: take-length-least
+    value: 1
+    says: the shortest take drawn, in milliseconds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: take-length-most
+    value: 3000
+    says: the longest take drawn, in milliseconds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: take-shutter-least
+    value: 0.01
+    says: the narrowest opening of the shutter drawn, in radians
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-glimpses-most
+    value: 6
+    says: the most glimpses a drawn pace catches through each opening
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-frame-most
+    value: 100000
+    says: the latest frame number drawn, so that the time of a glimpse is far from the start of the take
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-rounding
+    value: 2
+    says: how many nanoseconds two glimpses' gap may stand from even, each time having been rounded to the nanosecond
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-odd-most
+    value: 8
+    says: the largest of the ordinary numbers drawn beside the odd ones when it is asked which paces are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-odd-least
+    value: -2
+    says: the least of the ordinary numbers drawn beside the odd ones when it is asked which paces are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-origin-most
+    value: 1000
+    says: how far from the origin in each direction a drawn camera stands, in the scene's units
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: take-still-rate
+    value: 16
+    says: the rate the still camera is cranked at, in frames a second
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: take-still-glimpses
+    value: 3
+    says: the glimpses the still camera catches through each opening
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: take-still-length
+    value: 1000
+    says: the length of the still camera's take, in milliseconds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: take-still-shutter
+    value: 170
+    says: the opening of the still camera's shutter, in degrees
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+

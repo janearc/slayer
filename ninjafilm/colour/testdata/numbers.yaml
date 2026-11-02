@@ -1,0 +1,9 @@
+# numbers.yaml: the numbers this package's tests are held to, by name.
+
+numbers:
+  - name: heap-ceiling
+    value: 96000000
+    unit: bytes
+    says: the bytes of heap that stop this package's tests as a runaway, 96 megabytes, at least four times the 21 MiB the package held at most with sixteen copies of its tests running at once, as a busy machine runs them, measured 2026-11-01 from the garbage collector's trace; four times its quiet peak, picked 2026-10-24, was too near
+    kind: picked
+    by: the test author, 2026-10-24, raised 2026-11-01

@@ -1,0 +1,7 @@
+label,off,share
+well inside,0.1,1
+at the start of the fade,0.3,1
+halfway through the fade,0.4,0.5
+a quarter of the way in,0.45,0.15625
+past the cone,0.6,0
+far past the cone,1.5,0

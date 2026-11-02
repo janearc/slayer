@@ -1,0 +1,54 @@
+# kīlauea iki's rim at night, a stand of trees on it alight
+scene:
+  name: kilauea iki alight
+  light: moon
+  location:
+    lat: 19.417
+    lon: -155.245
+  timeofday: 2200
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 264500
+    north: 2148100
+    across: 600
+    down: 600
+    step: 4
+  film:
+    width: 960
+    height: 600
+    rays: 2
+    exposure: 100000
+  cameras:
+    rim:
+      title: "across the crater"
+      orientation:
+        point_to: the first tree
+        alpha: 2
+      location:
+        loc_relative:
+          object: the first tree
+          standoff_x: -60
+          standoff_y: -90
+          standoff_z: 20
+  set:
+    things:
+      the first tree:
+        kind: spruce
+        seed: 3
+        east: 264800
+        north: 2147900
+        alight: true
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+    stands:
+      ferns on the rim:
+        kind: fern
+        count: 120
+        seed: 7
+        stands_in_for: "ʻamaʻu, with a temperate fern's numbers"
+      trees on the rim:
+        kind: spruce
+        count: 30
+        seed: 11
+        alight: 4
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"

@@ -1,0 +1,13 @@
+args,says
+-cells 80,not a size
+-cells 0x24,columns
+-cells 5x0,rows
+-cells 5x3 -out x.png,writes no file
+-cells 5x3 -raw,writes no file
+-cells 5x3 -fps 0,frame a second
+-cells 5x3 -fps -4,frame a second
+-cells 5x3 -n 0,ray a side
+-cells 5x3 -frames -1,negative
+-cells 5x3 -first -1,negative
+-keys,-keys is for -cells
+-cells 5x3 -keys,needs a terminal on both input and output

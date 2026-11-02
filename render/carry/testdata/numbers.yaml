@@ -1,0 +1,19 @@
+# every number the carry tests choose, with what it is and who picked it.
+numbers:
+  - name: side-most
+    value: 6
+    says: the widest or tallest a frame is drawn, in pixels; small, since a property test draws many
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: frames-most
+    value: 4
+    says: the most frames a list is drawn with
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: light
+    value: 3.5
+    says: an amount of light in one pixel, for the tests that change a frame and look at the other
+    kind: picked
+    by: the test author, 2026-10-24

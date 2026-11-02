@@ -1,0 +1,4 @@
+label,name,width,height,grain
+no width,x,0,1,0
+a height below nought,x,1,-1,0
+a grain below nought,x,1,1,-0.1

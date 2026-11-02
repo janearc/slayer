@@ -1,0 +1,7 @@
+name,origin,axis,degrees,scale
+empty,origin,,0,0
+tilted,a,a tilted axis,40,2.5
+turned and doubled,ship origin,up from z,90,2
+planet,planet origin,up,90,2
+ship,ship origin,one on x,30,0.5
+ship in place,ship origin,,0,0

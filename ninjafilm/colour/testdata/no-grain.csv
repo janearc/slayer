@@ -1,0 +1,6 @@
+label,size,amount
+no size,0,0.3
+no amount,3,0
+neither,0,0
+a negative size,-1,0.3
+a negative amount,3,-0.3

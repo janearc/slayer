@@ -1,0 +1,6 @@
+# vim: set filetype=game:
+# game: this repository
+
+# burning-trousers: a harness that tests slayer's tracer against
+# answers physics gives, until it can be trusted.
+name burning-trousers

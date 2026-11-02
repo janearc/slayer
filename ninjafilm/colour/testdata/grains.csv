@@ -1,0 +1,7 @@
+label,size,amount,size_is,amount_is
+a clump of 2,2,0.3,2,0.3
+a clump of 3,3,0.3,3,0.3
+a clump of a pixel,1,0.3,1,0.3
+a clump of one and a half,1.5,0.3,1.5,0.3
+a clump of half a pixel,0.5,0.4,1,0.2
+a clump of a quarter,0.25,0.8,1,0.2

@@ -1,0 +1,4 @@
+label,toward_x,toward_y,toward_z,unit_x,unit_y,unit_z
+three four five,0,3,4,0,0.6,0.8
+already a unit,0,1,0,0,1,0
+a long way up,0,300,0,0,1,0

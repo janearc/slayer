@@ -1,0 +1,91 @@
+# every number the stream tests choose, with what it is and who picked it.
+numbers:
+  - name: stream-cols
+    value: 5
+    says: how many cells across the stream tests draw
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: stream-rows
+    value: 3
+    says: how many cells down the stream tests draw
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: stream-frames
+    value: 3
+    says: how many frames the golden stream is
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: stream-first
+    value: 2
+    says: the frame the golden stream starts at, so its numbers are not the count
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: stream-cols-most
+    value: 6
+    says: the widest a stream is drawn in the property tests, in cells; small, since they draw many
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: stream-rows-most
+    value: 4
+    says: the tallest a stream is drawn in the property tests, in cells
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: stream-frames-most
+    value: 4
+    says: the most frames a property test runs a stream for
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: stream-first-most
+    value: 1000
+    says: the latest frame a property test starts a stream at
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: side-most
+    value: 1000
+    says: the most cells a stream may be across or down; the package holds the same limit, so changing either needs the other agreed
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: step-across
+    value: 37
+    says: how far the red of the test picture moves from one pixel to the next across; it is not a divisor of 256, so no two neighbours repeat
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: step-down
+    value: 61
+    says: how far the green of the test picture moves from one row to the next
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: step-frame
+    value: 50
+    says: how far the red of the test picture moves from one frame to the next
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: step-diagonal
+    value: 23
+    says: how far the blue of the test picture moves along a diagonal, and a frame
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: crop-left
+    value: 5
+    says: how many pixels in from the left a cropped test picture starts
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: crop-top
+    value: 7
+    says: how many pixels down from the top a cropped test picture starts
+    kind: picked
+    by: the test author, 2026-10-24

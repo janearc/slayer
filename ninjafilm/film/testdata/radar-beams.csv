@@ -1,0 +1,6 @@
+label,nanometres,beams
+below the range,0.0001,0
+at the low end,0.001,1
+inside,5,1
+at the high end,10,0
+past the range,20,0

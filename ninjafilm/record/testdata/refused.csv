@@ -1,0 +1,6 @@
+label,window_red,window_green,window_blue,image_red,image_green,image_blue,says
+a window of no light,0,0,0,0,1,1,sees
+a window of less than none,-1,-1,-1,0,1,1,sees
+a window that sums to nothing,1,-1,0,0,1,1,sees
+an image of no light,0,0,1,0,0,0,blocks
+an image of less than none,0,0,1,-1,-1,-1,blocks

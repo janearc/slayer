@@ -1,0 +1,10 @@
+name,paint,when,edge,says
+deep sea,0,height below,-0.12,the first band a tile's height above the sea puts it in is its paint
+shallow sea,1,height below,0,
+beach,3,height below,0.025,
+snow,10,height above,0.34,
+rock,9,height above,0.24,
+desert,4,wet below,-0.18,
+grass,5,wet below,0.02,
+forest,6,wet below,0.22,
+jungle,7,always,0,

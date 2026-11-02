@@ -1,0 +1,7 @@
+label,from,to
+a span backwards,501,500
+a span that starts before the observer sees,359,500
+a span that ends after it,500,831
+a span from the longest to the shortest,830,360
+a span at nought,0,0
+a span below nought,-5,5

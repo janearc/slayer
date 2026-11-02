@@ -1,0 +1,1889 @@
+# picked-numbers.yml: every number ninjafilm's code and tests use that
+# someone chose, with who and when. the code asks for them by name
+# through data.Picked and data.Whole. numbers true by definition stay in
+# the code, and the comment beside each says it is defined.
+
+numbers:
+  - name: simpson-slices
+    value: 16
+    says: how many pieces Exitance cuts a stretch of wavelengths into for Simpson's rule; even, as the rule needs, and enough that one band of libtheme's comes out within a millionth of the exact integral
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from maths/planck.go where it was written as a constant with this reason"
+
+  - name: hash-step-least
+    value: 1
+    says: the smallest step a property moves a part of a site by, so that the moved site is another site
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: hash-step-most
+    value: 1099511627776
+    says: the largest step a property moves a part of a site by, 2 to the 40, far from the edge of what a part holds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: hash-avalanche-least
+    value: 24.5
+    says: the fewest bits of 53 that one flipped input bit may change on average; half is 26.5, and the mean of 256 flips stays within two of it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: hash-avalanche-most
+    value: 28.5
+    says: the most bits of 53 that one flipped input bit may change on average, as far above half as the least is below
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: hash-bins
+    value: 8
+    says: how many equal bins the unit interval is cut into to see whether hashes fall evenly
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: hash-side
+    value: 64
+    says: how many sites a side of the square has that is hashed to see whether hashes fall evenly
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: hash-chi-limit
+    value: 40
+    says: the chi squared, for 7 degrees of freedom, that even hashes pass about once in ten million, so that only an uneven hash fails
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-stocks-least
+    value: 1
+    says: the fewest stocks a drawn shelf holds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-stocks-most
+    value: 3
+    says: the most stocks a drawn shelf holds, enough to tell one from another
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-records-least
+    value: 1
+    says: the fewest records a drawn stock holds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-records-most
+    value: 3
+    says: the most records a drawn stock holds, as many as the shipped mosaic and slide
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-width-least
+    value: 0.1
+    says: the narrowest crystal a drawn record has, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-width-most
+    value: 3
+    says: the widest crystal a drawn record has, in micrometres, a little over the widest the shipped stocks use
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-floor-most
+    value: 0.5
+    says: the most density a drawn curve is allowed at its least, so that its room above is not squeezed
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-room-least
+    value: 0.5
+    says: the least room between the ends of a drawn curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-room-most
+    value: 3
+    says: the most room between the ends of a drawn curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-slope-least
+    value: 0.1
+    says: the gentlest slope a drawn curve has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-slope-most
+    value: 3
+    says: the steepest slope a drawn curve has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-elements-least
+    value: 100000
+    says: the fewest elements to the square inch a drawn mosaic has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-elements-most
+    value: 10000000
+    says: the most elements to the square inch a drawn mosaic has, a little over the shipped plate's four million
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: shelf-passes-least
+    value: 0.01
+    says: the least share of light a drawn mosaic passes
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-chip-least
+    value: 0.05
+    says: the narrowest gauge a drawn roll is cut to, in millimetres, so small that a pixel holds few crystals
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-chip-most
+    value: 0.5
+    says: the widest gauge a drawn roll is cut to, in millimetres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-frame-least
+    value: 1
+    says: the fewest pixels a drawn frame has across or down
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-frame-most
+    value: 3
+    says: the most pixels a drawn frame has across or down, enough that a pixel has neighbours
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-across-least
+    value: 1
+    says: the fewest sites a drawn lay puts across a pixel
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-across-most
+    value: 3
+    says: the most sites a drawn lay puts across a pixel
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-bright-most
+    value: 4
+    says: the brightest a lamp of a drawn light is, in the light a white gives, a few times what the middle grey gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-records-most
+    value: 3
+    says: the most records a drawn stock has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-crystal-least
+    value: 0.1
+    says: the narrowest crystal a drawn record has, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-crystal-most
+    value: 2
+    says: the widest crystal a drawn record has, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-stops-most
+    value: 3
+    says: the most stops over or under its rating a drawn roll is exposed
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-doublings-most
+    value: 2
+    says: how many times a drawn count of glimpses may be doubled, so that a count is one, two or four and its reciprocal is exact
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-same-most
+    value: 8
+    says: how many pixels of 256 two prints of different frames or rolls may match by luck, six or more standard errors above what grain this strong gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-width
+    value: 0.5
+    says: the width in millimetres of the gauge of the roll printed to see its grain, so that a pixel of 256 across holds a few hundred crystals
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-across
+    value: 64
+    says: the pixels across of the frame printed to see its grain
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-down
+    value: 4
+    says: the pixels down of the frame printed to see its grain, so that it has 256 pixels
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-crystal
+    value: 0.3
+    says: the width in micrometres of the crystal of the roll printed to see its grain
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-least
+    value: 0
+    says: the least density of the curve of the roll printed to see its grain
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-most
+    value: 2
+    says: the most density of the curve of the roll printed to see its grain
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-slope
+    value: 1.5
+    says: the slope of the curve of the roll printed to see its grain
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-frame
+    value: 2
+    says: the number of the frame printed to see its grain, a whole number that means nothing else
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-grainy-seed
+    value: 4
+    says: the seed of the roll printed to see its grain, a whole number that means nothing else
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-large-width
+    value: 24.9
+    says: the width in millimetres of a gauge so large that a pixel holds too many crystals for grain to show, the width of super 35
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-spread-across
+    value: 2048
+    says: the pixels across of the frame whose grain is measured, so many that the spread of their densities is known to three percent
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-spread-down
+    value: 8
+    says: the pixels down of the frame whose grain is measured
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-spread-error
+    value: 0.03
+    says: how far the measured spread of the grain may stand from Siedentopf's, as a share of it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: tolerance-tight
+    value: 1e-12
+    says: how far apart two numbers worked out by the same steps in another order may stand, relative to their size
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: tolerance-loose
+    value: 1e-9
+    says: how far apart two numbers worked out by long chains of different steps may stand
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: tolerance-single
+    value: 1e-6
+    says: how far apart two numbers may stand when one has been through a float32, which holds about seven digits
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-lamp-steps
+    value: 4096
+    says: into how many equal steps the brightness of a drawn lamp is cut, so that every drawn lamp is a whole number of steps and doubling it or halving it loses no bit
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: roll-smooth-error
+    value: 0.0001
+    says: how far a still printed too large for grain to show may stand from its curve, in the light a white gives back
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: stocks-clear-least
+    value: 0.4
+    says: the least share of light a stock lets past where it saw nothing, so that it is nearly clear
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-dark-ratio
+    value: 5
+    says: how many times darker a stock prints a colour it sees than one it cannot, at the least
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-colour-ratio
+    value: 10
+    says: how many times more light a colour stock lets past in the lamp of a colour than in the other two, at the least
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-leaf-ratio
+    value: 5
+    says: how many times more green than red the two-colour print passes of green light, at the least
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-leaf-blue
+    value: 0.05
+    says: how far the blue of the two-colour print's green may stand from its green, as a share of it, since its dye is blue-green
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-white-error
+    value: 0.0001
+    says: how far apart the lamps of a colour stock's white and grey may stand, and how far its grey may stand from its curve, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-mosaic-passes
+    value: 0.075
+    says: the share of a white light the mosaic passes, as its plate did
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-mosaic-error
+    value: 0.008
+    says: how far the mean light the mosaic passes of a white may stand from its share, a little over three standard errors of 256 pixels
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-mosaic-pixels
+    value: 256
+    says: how many pixels across the frame is whose mean the mosaic's dimness is read from
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-mosaic-lamp
+    value: 1000
+    says: how bright a lamp is lit to expose the mosaic fully, in the light a white gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-mosaic-red
+    value: 0.05
+    says: the least light the mosaic passes of red light in its red lamp
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-guide-least
+    value: 0.8
+    says: the least a white card shows at, as a share of the screen's white, at the exposure doc/filming.md gives for the stock
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-guide-most
+    value: 1.25
+    says: the most a white card shows at, as a share of the screen's white, at the exposure doc/filming.md gives for the stock
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: stocks-grain-ratio-error
+    value: 0.2
+    says: how far the ratio of two stocks' grain may stand from the ratio of their crystals' widths, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: number-lamp-limit
+    value: 1000000
+    says: how bright a drawn lamp may be when sums of lamps are checked against plain addition, far from where a float loses its last digits
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: number-bounded
+    value: 1e300
+    says: how large a lamp may be drawn when finiteness is checked lamp by lamp, so that three together cannot pass the largest float
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-floor-most
+    value: 1
+    says: the most density a drawn curve has at its least
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-room-least
+    value: 0.5
+    says: the least room between the ends of a drawn curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-room-most
+    value: 4
+    says: the most room between the ends of a drawn curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-slope-least
+    value: 0.1
+    says: the gentlest slope a drawn curve has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-slope-most
+    value: 4
+    says: the steepest slope a drawn curve has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-decades
+    value: 6
+    says: how many tenfolds of exposure either side of the middle a drawn exposure may lie
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-stops-most
+    value: 10
+    says: how many stops either side of the middle the fall of the example curve is followed
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-odd-most
+    value: 5
+    says: the largest of the ordinary numbers drawn beside the odd ones when it is asked which curves are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-odd-least
+    value: -2
+    says: the least of the ordinary numbers drawn beside the odd ones when it is asked which curves are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-below-most
+    value: 1000000
+    says: how far below nought a drawn exposure may be, to see that none at all and less than none are alike
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-step
+    value: 0.00001
+    says: the step in log exposure either side of the middle that the slope of a curve is measured over
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-slope-error
+    value: 0.000001
+    says: how far the slope measured by that step may stand from the slope the curve was given
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: curve-example-least
+    value: 0.2
+    says: the density at its least of the example curve, a slide's
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: curve-example-most
+    value: 3.2
+    says: the density at its most of the example curve, a slide's
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: curve-example-slope
+    value: 1.5
+    says: the slope of the example curve, a slide's
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: crystal-width-least
+    value: 0.05
+    says: the narrowest crystal a drawn film has, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-width-most
+    value: 20
+    says: the widest crystal a drawn film has, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-density-least
+    value: 0.01
+    says: the least density a drawn film is counted at
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-density-most
+    value: 4
+    says: the most density a drawn film is counted at
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-area-least
+    value: 1
+    says: the least area of a drawn site, in square micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-area-most
+    value: 1000000
+    says: the most area of a drawn site, in square micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-count-least
+    value: 1
+    says: the fewest crystals a drawn count is of
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-count-most
+    value: 1000000
+    says: the most crystals a drawn count is of
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-chance-most
+    value: 8
+    says: how far from nought a drawn chance may be, either way, a little beyond what the hash can give
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-more-most
+    value: 8
+    says: how much more chance than another a drawn chance may be
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-step-least
+    value: 1
+    says: the smallest step a property moves a part of a site by
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-step-most
+    value: 1099511627776
+    says: the largest step a property moves a part of a site by, 2 to the 40
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-field-width
+    value: 200
+    says: how many sites wide the field is whose draws are checked against the bell curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-field-sites
+    value: 40000
+    says: how many sites the field holds, so many that the bounds below are six standard errors
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-mean-error
+    value: 0.03
+    says: how far the mean of the draws over a field may stand from nought, six standard errors of 40000 draws
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-spread-error
+    value: 0.03
+    says: how far the spread of the draws over a field may stand from one, eight standard errors of 40000 draws
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: crystal-share-error
+    value: 0.015
+    says: how far the share of draws within one of nought may stand from the bell curve's, six and a half standard errors of 40000 draws
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: span-shortest
+    value: 360
+    says: the shortest wavelength libtheme's observer sees, in nanometres, which the records table is written against; if the observer changes the table's spans have to follow
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: span-longest
+    value: 830
+    says: the longest wavelength libtheme's observer sees, in nanometres, which the records table is written against
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: span-red
+    value: 611
+    says: the dominant wavelength of the srgb red lamp in nanometres, as display references give it to the nanometre
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: span-green
+    value: 549
+    says: the dominant wavelength of the srgb green lamp in nanometres, as display references give it to the nanometre
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: span-blue
+    value: 464
+    says: the dominant wavelength of the srgb blue lamp in nanometres, as display references give it to the nanometre
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: span-margin
+    value: 20
+    says: how far outside what the observer sees a drawn end of a span may lie, in nanometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: span-margin-most
+    value: 40
+    says: how far past the longest wavelength a drawn second end of a span may lie, in nanometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: span-margin-wide
+    value: 30
+    says: how far outside what the observer sees either end of a drawn span may lie when it is asked which spans are made, in nanometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-across-least
+    value: 0.1
+    says: the narrowest crystal a drawn record has, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-across-most
+    value: 2
+    says: the widest crystal a drawn record has, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-floor-least
+    value: 0.1
+    says: the least density a drawn record's curve has at its least, so that the crystals counted at a site are not too few
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-floor-most
+    value: 0.5
+    says: the most density a drawn record's curve has at its least
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-room-least
+    value: 1
+    says: the least room between the ends of a drawn record's curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-room-most
+    value: 3
+    says: the most room between the ends of a drawn record's curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-slope-least
+    value: 0.5
+    says: the gentlest slope a drawn record's curve has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-slope-most
+    value: 3
+    says: the steepest slope a drawn record's curve has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-area-least
+    value: 50
+    says: the least area of a drawn site, in square micrometres, large enough to hold many crystals
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-area-most
+    value: 5000
+    says: the most area of a drawn site, in square micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-lamp-least
+    value: 0.05
+    says: the dimmest a lit lamp of a drawn window or image is
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-bright-most
+    value: 8
+    says: the brightest a lamp of a drawn light is, in the light a white gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-dim-most
+    value: 4
+    says: the brightest a lamp of a drawn light is when it is to be doubled, in the light a white gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-outside-most
+    value: 9
+    says: the brightest a lamp outside a drawn window is, in the light a white gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-white-most
+    value: 2
+    says: the brightest a drawn white light is, in the light a white gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-scale-least
+    value: 0.1
+    says: the least a drawn window is scaled by when it is asked whether its strength matters
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-scale-most
+    value: 10
+    says: the most a drawn window is scaled by when it is asked whether its strength matters
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-chance-most
+    value: 4
+    says: how far from nought a drawn chance may be, either way
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-odd-most
+    value: 2
+    says: how far from nought the ordinary lamps drawn beside the odd ones may be when it is asked which records are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-white-curve-least
+    value: 0.1
+    says: the density at its least of the curve of the records that a white light is shone on to see them expose alike
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-white-curve-most
+    value: 2.5
+    says: the density at its most of that curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-white-curve-slope
+    value: 1.2
+    says: the slope of that curve
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: record-white-crystal
+    value: 0.5
+    says: the width of the crystal of those records, in micrometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-pitch-least
+    value: 0.1
+    says: the narrowest pixel a drawn lay is asked about, in micrometres on the film
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-pitch-most
+    value: 5000
+    says: the widest pixel a drawn lay is asked about, in micrometres on the film
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-wider-most
+    value: 5000
+    says: how much wider than a drawn pixel the wider pixel is when it is asked whether wider pixels have more sites across
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-elements-least
+    value: 10000
+    says: the fewest elements to the square inch a drawn mosaic has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-elements-most
+    value: 100000000
+    says: the most elements to the square inch a drawn mosaic has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-elements-example
+    value: 6451600
+    says: elements to the square inch of the example mosaic, 2540 squared, so that its elements are ten micrometres wide
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lay-passes-example
+    value: 0.5
+    says: the share of light the example mosaic passes
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lay-passes-least
+    value: 0.01
+    says: the least share of light a drawn mosaic passes
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-allpass-elements
+    value: 4000000
+    says: elements to the square inch of the mosaic that passes all the light, the shipped plate's count
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lay-odd-least
+    value: -1
+    says: the least of the ordinary numbers drawn beside the odd ones when it is asked which mosaics are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-odd-most
+    value: 3
+    says: the most of the ordinary numbers drawn beside the odd ones when it is asked which mosaics are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-kinds-most
+    value: 6
+    says: the most kinds of record a drawn stock has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-field-width
+    value: 100
+    says: how many sites wide the field is whose picks are counted
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-field-sites
+    value: 10000
+    says: how many sites the field holds, so that the bounds on shares are six standard errors
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-fresh-sites
+    value: 400
+    says: how many sites in a row are compared between frames and rolls
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-other-most
+    value: 1099511627776
+    says: the most a frame or a seed is moved by to see that another frame or roll is laid afresh, 2 to the 40
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-example-pass
+    value: 0.25
+    says: the share of light passed by the mosaic whose picks are counted
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-cover-error
+    value: 0.000000000001
+    says: how far a count of elements times their width may fall short of covering a pixel, as a share of the pixel
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-six-sigma
+    value: 6
+    says: how many standard errors the bounds on shares and matches are
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lay-crystal
+    value: 0.3
+    says: the width in micrometres of the crystal of every record the lay tests draw; the lay does not look at it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lay-curve-most
+    value: 2
+    says: the density at its most of the curve of every record the lay tests draw; the lay does not look at it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lay-curve-slope
+    value: 1.5
+    says: the slope of the curve of every record the lay tests draw; the lay does not look at it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-frame-wide
+    value: 70.41
+    says: the width in millimetres of the shot's frame, SMPTE ST 417's 15/70 camera aperture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-frame-high
+    value: 51.61
+    says: the height in millimetres of the shot's frame, SMPTE ST 417's 15/70 camera aperture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-focal
+    value: 672
+    says: the focal length in millimetres of the shot's lens
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-stop
+    value: 8
+    says: the f-number of the shot's lens
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-focus
+    value: 1500
+    says: how far off in metres the shot's lens is focused
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-far-focus
+    value: 1000000000000
+    says: a focus so far off in metres that the image stands at the focal length
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-across
+    value: 1430
+    says: the pixels across of the picture of the shot
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-down
+    value: 1048
+    says: the pixels down of the picture of the shot
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-miss-error
+    value: 0.000000001
+    says: how far a ray may pass from the point it is aimed at, as a share of the focus distance
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-aperture-across
+    value: 200
+    says: the pixels across of the picture whose rays are checked to be spread over the aperture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-aperture-down
+    value: 100
+    says: the pixels down of the picture whose rays are checked to be spread over the aperture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-aperture-error
+    value: 0.01
+    says: how far the mean square distance of the rays' starts from the lens's middle may stand from half the aperture's radius squared, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-edge-error
+    value: 0.000000000001
+    says: how far a ray may start beyond the aperture's edge, and how far a gathering may stand from the law, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-radiance
+    value: 2.5
+    says: the radiance of the still scene the exposure is checked against, in watts a square metre a steradian
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-raw-error
+    value: 0.000001
+    says: how far an exposure may stand from the law, as a share, once through float32
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lens-picture-least
+    value: 1
+    says: the fewest pixels a drawn picture has across or down
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-picture-most
+    value: 9
+    says: the most pixels a drawn picture has across or down
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-glimpses-most
+    value: 4
+    says: the most glimpses a drawn exposure is made from
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-bright-most
+    value: 5
+    says: the brightest a lamp of a drawn glimpse is, in watts a square metre a steradian
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-doublings-most
+    value: 4
+    says: how many times a drawn shutter time of one second is doubled, so that doubling it again loses no bit
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-millimetres-most
+    value: 100
+    says: the most a drawn frame is wide or high, in millimetres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-millimetres-least
+    value: 1
+    says: the least a drawn frame is wide or high, in millimetres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-focal-most
+    value: 1000
+    says: the longest focal length drawn, in millimetres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-focal-least
+    value: 10
+    says: the shortest focal length drawn, in millimetres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-stop-most
+    value: 32
+    says: the largest f-number drawn
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-focus-factor
+    value: 1.5
+    says: how many focal lengths further off than the lens drawn focuses, at the least, so that the focus is further than the focal length
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-focus-most
+    value: 100000
+    says: the furthest focus drawn, in metres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-odd-least
+    value: -2
+    says: the least of the ordinary numbers drawn beside the odd ones when it is asked which lenses are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-odd-most
+    value: 100
+    says: the most of the ordinary numbers drawn beside the odd ones when it is asked which lenses are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-lamp-steps
+    value: 4096
+    says: into how many equal steps the brightness of a drawn lamp is cut, so that every drawn lamp is a whole number of steps and doubling the shutter loses no bit
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lens-ray-error
+    value: 0.000000001
+    says: how far a ray's start may stand from the start the published r2 sequence and concentric map give, as a share of the aperture's radius
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-odd-least
+    value: -2
+    says: the least of the ordinary amounts drawn beside the odd ones when it is asked which powers, temperatures and areas are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-odd-most
+    value: 1000000
+    says: the most of the ordinary amounts drawn beside the odd ones when it is asked which powers, temperatures and areas are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-suns-most
+    value: 1000
+    says: the most suns a drawn star shines with
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-sun
+    value: 3.828e26
+    says: the sun's luminosity in watts that IAU 2015 resolution B3 fixes as nominal
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces; the sources file for measured numbers does not exist here yet"
+
+  - name: maths-heat-least
+    value: 10
+    says: the coolest a drawn black body is, in kelvin
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-heat-most
+    value: 100000
+    says: the hottest a drawn black body is, in kelvin, when single bands are checked
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-wavelength-least
+    value: 100
+    says: the shortest wavelength a drawn band starts at, in nanometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-wavelength-most
+    value: 100000
+    says: the longest wavelength a drawn band starts at, in nanometres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-band-ratio
+    value: 1.03
+    says: how much longer a drawn band ends than it starts, about the width of one of libtheme's bands
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-narrow-ratio
+    value: 1.001
+    says: how much longer a drawn narrow band ends than it starts, narrow enough that one value of Planck's law stands for it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-additive-error
+    value: 0.000001
+    says: how far the exitance of a band may stand from the sum of its halves, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-narrow-error
+    value: 0.0001
+    says: how far the exitance of a narrow band may stand from Planck's law at its middle times its width, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-scale-least
+    value: 0.5
+    says: the least a drawn black body and its wavelengths are scaled by when the scaling law of Planck's curve is checked
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-scale-most
+    value: 4
+    says: the most a drawn black body and its wavelengths are scaled by when the scaling law of Planck's curve is checked
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-hotter-most
+    value: 100000
+    says: the most kelvin a drawn black body is made hotter by, to see that more heat gives more light
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-total-shortest
+    value: 0.001
+    says: the shortest wavelength, in nanometres, of the bands summed to see that a black body gives the Stefan and Boltzmann power
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-total-longest
+    value: 10000000000000
+    says: the longest wavelength, in nanometres, of the bands summed to see that a black body gives the Stefan and Boltzmann power
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-total-error
+    value: 0.000001
+    says: how far the power summed over every band may stand from the Stefan and Boltzmann power, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-total-heat-least
+    value: 300
+    says: the coolest black body summed over every band, in kelvin
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-total-heat-most
+    value: 10000000
+    says: the hottest black body summed over every band, in kelvin
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-x-least
+    value: 0.1
+    says: the least of hc over wavelength k T, Planck's exponent, at which a drawn band starts, far on the long side of the peak
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: maths-x-most
+    value: 30
+    says: the most of hc over wavelength k T, Planck's exponent, at which a drawn band starts, where a band three percent wide still changes by less than a factor of three; deeper in the short tail the 16 pieces of Simpson's rule do not resolve it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-bulb
+    value: 2700
+    says: the temperature in kelvin of a tungsten bulb, which the lamp tests warm
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lights-watts
+    value: 60
+    says: the power in watts of the bulb the tests light
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lights-eye-shortest
+    value: 380
+    says: the shortest wavelength in nanometres an eye is taken to see, for the share of a bulb's power that is light
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lights-eye-longest
+    value: 780
+    says: the longest wavelength in nanometres an eye is taken to see, for the share of a bulb's power that is light
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lights-eye-share
+    value: 0.15
+    says: the most of a bulb's power that is light an eye can see; tungsten gives about a tenth
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lights-watts-most
+    value: 1000000
+    says: the most watts a drawn lamp is given
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-heat-least
+    value: 300
+    says: the coolest a drawn lamp's black body is, in kelvin
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-heat-most
+    value: 10000000
+    says: the hottest a drawn lamp's black body is, in kelvin, as hot as a star's core
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-stefan-error
+    value: 0.000001
+    says: how far the power in a black body's whole spectrum may stand from the Stefan and Boltzmann power, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lights-watts-error
+    value: 0.000000000001
+    says: how far the power in a point's whole spectrum may stand from the watts it was given, as a share
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
+
+  - name: lights-lines-least
+    value: 1
+    says: the fewest lines of power a drawn spectrum has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-lines-most
+    value: 5
+    says: the most lines of power a drawn spectrum has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-line-least
+    value: 0.001
+    says: the shortest wavelength in nanometres a drawn line of power is at
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-line-most
+    value: 1000000
+    says: the longest wavelength in nanometres a drawn line of power is at
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-line-power-least
+    value: 0.001
+    says: the least power a drawn line has, in the units of the spectrum
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-line-power-most
+    value: 1000
+    says: the most power a drawn line has, in the units of the spectrum
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: lights-sun-heat
+    value: 5800
+    says: the temperature in kelvin of a body as hot as the sun's surface, whose light an eye sees more of than a bulb's
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-area-least
+    value: 0.01
+    says: the smallest area a drawn collector has, in square metres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-area-most
+    value: 100
+    says: the largest area a drawn collector has, in square metres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-lines-least
+    value: 1
+    says: the fewest lines of power a drawn arriving light has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-lines-most
+    value: 5
+    says: the most lines of power a drawn arriving light has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-wavelength-least
+    value: 1
+    says: the shortest wavelength in nanometres a drawn line of arriving power is at
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-wavelength-most
+    value: 1000000
+    says: the longest wavelength in nanometres a drawn line of arriving power is at
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-power-least
+    value: 0.001
+    says: the least power per square metre a drawn line of arriving light has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-power-most
+    value: 1000
+    says: the most power per square metre a drawn line of arriving light has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-fractions-most
+    value: 4
+    says: the most bands a drawn response lists
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-odd-least
+    value: -2
+    says: the least of the ordinary fractions drawn beside the odd ones when it is asked which responses are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-odd-most
+    value: 3
+    says: the most of the ordinary fractions drawn beside the odd ones when it is asked which responses are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-channels-most
+    value: 3
+    says: the most channels a drawn collector has, as many as an eye's cones
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: sensor-sum-error
+    value: 0.000000001
+    says: how far a channel's count may stand from the sum worked another way, as a share, the bands being added in another order
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: frame-side-most
+    value: 6
+    says: the most pixels a drawn frame has across or down
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: frame-past-most
+    value: 5
+    says: how far past the edge of a drawn frame a drawn place may lie, in pixels
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: frame-below-most
+    value: 5
+    says: how far below nought a drawn size may be, in pixels
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: frame-lamp-most
+    value: 100
+    says: the brightest a lamp of a drawn pixel is, in the light a white gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-size-least
+    value: 1
+    says: the smallest side of a drawn gauge, in millimetres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-size-most
+    value: 100
+    says: the largest side of a drawn gauge, in millimetres
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-grain-most
+    value: 0.01
+    says: the coarsest grain a drawn gauge has, as a share of its width
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-odd-least
+    value: -2
+    says: the least of the ordinary numbers drawn beside the odd ones when it is asked which gauges are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-odd-most
+    value: 100
+    says: the most of the ordinary numbers drawn beside the odd ones when it is asked which gauges are made
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-gauges-most
+    value: 4
+    says: the most gauges a drawn table holds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: pinhole-wide-degrees
+    value: 60
+    says: how many degrees a pinhole with no field given sees from its left edge to its right, a look and not a measurement
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from lamb's film/sensor.go where it was written as 60"
+
+  - name: lens-focal-millimetres
+    value: 50
+    says: the focal length in millimetres of a lens with none given, the normal lens of 35 mm still photography
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from lamb's film/lens.go where it was written as 50"
+
+  - name: hubble-focal-millimetres
+    value: 57600
+    says: the focal length in millimetres of the telescope as a lens, 24 times the 2.4 metre mirror, as lamb had it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from lamb's film/lens.go where it was written as 57600"
+
+  - name: film-wide-least
+    value: 0.1
+    says: the narrowest field in radians a drawn pinhole sees
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-wide-most
+    value: 2.5
+    says: the widest field in radians a drawn pinhole sees, short of a half turn
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-pixel-least
+    value: 0.25
+    says: the narrowest shape a drawn pixel has, its width over its height
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-pixel-most
+    value: 4
+    says: the widest shape a drawn pixel has, its width over its height
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-picture-most
+    value: 200
+    says: the most pixels a drawn picture is wide or high
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-focal-least
+    value: 10
+    says: the shortest focal length in millimetres a drawn lens has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-focal-most
+    value: 500
+    says: the longest focal length in millimetres a drawn lens has
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-wide-lens
+    value: 24
+    says: the focal length in millimetres of a wide lens on 35 mm film
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-long-lens
+    value: 200
+    says: the focal length in millimetres of a long lens on 35 mm film
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-ninety-degrees
+    value: 45
+    says: half of ninety degrees, the angle out from the middle that a field of ninety degrees would put the edge pixel at
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-edge-width
+    value: 4000
+    says: how many pixels wide the picture is when its edge pixel stands for the edge of the field
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-eye-most
+    value: 100
+    says: how far from the origin a drawn eye stands
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-hubble-degrees
+    value: 0.0611
+    says: how wide the space telescope as a lens sees, in degrees, 220 arcseconds as lamb had it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-hubble-within
+    value: 0.0006
+    says: how far from that, in degrees, a result may be, 2 arcseconds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-band-most
+    value: 1000
+    says: the longest wavelength in nanometres a drawn band is
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: laser-cutoff-widths
+    value: 3
+    says: how many widths from its axis a laser's light is cut off, where the gaussian has fallen to e to the minus eighteen
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from lamb's film/laser.go where it was written as 3"
+
+  - name: laser-reach
+    value: 1000
+    says: how far a laser reaches when none is given, in the units of the scene
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from lamb's film/laser.go where it was written as 1000"
+
+  - name: film-inside-most
+    value: 0.999
+    says: how far through a range a drawn point inside it lies, short of its high end
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-strength-most
+    value: 20
+    says: the strongest light a drawn emitter gives
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-cone-most
+    value: 1.5
+    says: the widest half-angle in radians a drawn spot has, short of a quarter turn
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: film-soft-edge
+    value: 0.2
+    says: how many radians the light of a drawn spot takes to fade at the edge of its cone, as lamb tested it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: grain-bound
+    value: 1.1
+    says: the most a gradient noise value may be past one either way, 1.033 being the most found
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: grain-slope-most
+    value: 8
+    says: the steepest the noise rises for a step of a point, in noise per unit, well past the 3 or so it reaches
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: grain-step
+    value: 0.0001
+    says: the step a point is moved to see how far the noise moves
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: grain-coordinate-most
+    value: 1000
+    says: the farthest from nought a drawn point is, in lattice cells
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: grain-sample
+    value: 8
+    says: how many points are drawn to see that two seeds make two fields
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: grain-shift
+    value: 0.25
+    says: how far a point is moved to see that the noise there is another, a quarter of a lattice cell
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: tone-top-default
+    value: 100
+    says: how many times white the brightest light a picture holds is read to be when none is given, for the shoulder to land on white
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from the audited render/colour where it was written as 100"
+
+  - name: bloom-reach-sigmas
+    value: 3
+    says: how many sigmas out a bloom's gaussian is cut off, where it has fallen to a hundredth
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from the audited render/colour where it was written as 3"
+
+  - name: bloom-spill-divisor
+    value: 3
+    says: the share of the light beyond white that spills, one over this, the rest clipping
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from the audited render/colour where it was written as 3"
+
+  - name: bloom-widest
+    value: 100000
+    says: the widest bloom in pixels of sigma, far past any picture and near enough that its table of weights is a few megabytes
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from the audited render/colour where it was written as 1e5"
+
+  - name: grain-height
+    value: 0.5
+    says: the height in the noise at which a print's grain is read, the middle of a cell
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23, carried over from the audited render/colour where it was written as 0.5"
+
+  - name: colour-within
+    value: 0.000000001
+    says: how far apart two lights worked out by the same law may stand, a part in a billion
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-light-most
+    value: 20
+    says: the brightest part of a drawn light, in times white
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-picture-most
+    value: 12
+    says: the most pixels a drawn picture or frame is wide or high
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-radius-least
+    value: 0.25
+    says: the narrowest bloom radius in pixels of sigma that is drawn
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-exposure-most
+    value: 4
+    says: the most a drawn exposure multiplies the light by
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-knee
+    value: 0.6
+    says: a knee for a drawn tone, 0.6 of the screen white, as the audited tests used
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-bright
+    value: 40
+    says: how many times white a bright light is in tests of the shoulder
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-base
+    value: 0.05
+    says: the dim grey the lights of a bloom test start from
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-rows
+    value: 9
+    says: how many pixels a bloom test row or column holds
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-bloom-radius-most
+    value: 2
+    says: the widest radius of a bloom whose reach fits inside a drawn picture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-bloom-picture
+    value: 13
+    says: how many pixels across and down the picture is that holds the reach of a drawn bloom
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-step
+    value: 0.005
+    says: the step between the dim lights of the picture a bloom spills across
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-dim
+    value: 0.1
+    says: the dim light beside a star in a developed picture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-star
+    value: 4
+    says: how many times white a star is in a developed picture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-stands-samples
+    value: 60
+    says: how many wavelengths are sampled across each range, spaced by the same ratio
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-long-band
+    value: 0.0008
+    says: a wavelength in nanometres at the long end of the gamma range, red once it stands for a colour
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-short-band
+    value: 0.00002
+    says: a wavelength in nanometres at the short end of the gamma range, violet once it stands for a colour
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-halpha
+    value: 656
+    says: the wavelength of hydrogen alpha in nanometres, rounded to a whole nanometre as the audited tests had it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-mask-across
+    value: 100
+    says: how many pixels across the picture is whose mask is worked by hand
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-mask-down
+    value: 50
+    says: how many pixels down the picture is whose mask is worked by hand
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grain-across
+    value: 12
+    says: how many pixels across the picture is that grain is worked on
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grain-down
+    value: 8
+    says: how many pixels down the picture is that grain is worked on
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grain-seed
+    value: 11
+    says: the seed of the grain worked on a cut picture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grain-size
+    value: 3
+    says: how many pixels across the clumps of the grain are whose softness is measured
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grain-amount
+    value: 0.3
+    says: how far the grain whose softness is measured lightens or darkens
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grain-soft
+    value: 0.6
+    says: how much of the difference of pixels three apart the difference of neighbours must be under for grain to be soft
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grain-levels
+    value: 10
+    says: how many levels of grey grain must make of a flat grey picture
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-grey
+    value: 128
+    says: the byte of the flat grey picture the grain is laid on
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-spill-across
+    value: 7
+    says: how many pixels across the picture is that a bloom spills across
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-spill-down
+    value: 9
+    says: how many pixels down the picture is that a bloom spills across
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-star-column
+    value: 1
+    says: the column of the star in the picture a bloom spills across, near enough the edge that its reach runs off it
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"
+
+  - name: colour-star-row
+    value: 4
+    says: the row of the star in the picture a bloom spills across
+    kind: picked
+    by: "the ninjafilm bar pass, 2026-10-23"

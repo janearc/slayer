@@ -1,0 +1,116 @@
+# a black widow inside a nebula.
+#
+# a millisecond pulsar eating its companion on a two-hour orbit, inside
+# the glow of the gas round them. one unit is 10,000 km. the figures are
+# from memory, not read from a source.
+#
+# places are a map's: x east, y north, z up, so the orbit's plane is the
+# ground's, and up is out of it.
+scene:
+  name: widow
+  # close on the pair, a little above the plane of the orbit. the print
+  # is filmic: a shoulder from seven tenths of white to a top of eight.
+  film:
+    wide: 40
+    print: {knee: 0.7, top: 8, source: eye}
+  cameras:
+    eye:
+      location:
+        at: [0, -230, 45]
+      orientation:
+        look_at: [0, 0, 0]
+  world:
+    unit: 10000000
+    sky:
+      stars: {seed: 29, share: 0.08, size: 0.5, bright: 0.6}
+      source: eye
+    # the companion glows at 3200 K, libtheme's planckian, tungsten, so
+    # the red is derived, not typed.
+    materials:
+      cool-star:
+        glow: {swatch: tungsten}
+        source: eye
+    # the pulsar: 10 km across, so 0.001 units. smaller than a pixel
+    # from anywhere we can stand and still see the orbit.
+    bodies:
+      pulsar:
+        template: pulsar
+        middle: [0, 0, 0]
+        radius: 0.001
+        detail: 4
+    # the companion: a few hundredths of a sun, swollen to about a tenth
+    # of the sun's radius, 10.5 units.
+    spheres:
+      companion:
+        material: cool-star
+        middle: [0, 0, 0]
+        radius: 10.5
+        motion: orbit
+        source: eye
+    # two hours round, 64 units out: 640,000 km. the circle is a polygon
+    # of 24 sides.
+    motions:
+      orbit:
+        seconds: 7200
+        ease: linear
+        hold: true
+        frames:
+          - {percent: 0, at: [64.00, 0, 0]}
+          - {percent: 4.1667, at: [61.82, -16.56, 0]}
+          - {percent: 8.3333, at: [55.43, -32.00, 0]}
+          - {percent: 12.5, at: [45.25, -45.25, 0]}
+          - {percent: 16.6667, at: [32.00, -55.43, 0]}
+          - {percent: 20.8333, at: [16.56, -61.82, 0]}
+          - {percent: 25, at: [0.00, -64.00, 0]}
+          - {percent: 29.1667, at: [-16.56, -61.82, 0]}
+          - {percent: 33.3333, at: [-32.00, -55.43, 0]}
+          - {percent: 37.5, at: [-45.25, -45.25, 0]}
+          - {percent: 41.6667, at: [-55.43, -32.00, 0]}
+          - {percent: 45.8333, at: [-61.82, -16.56, 0]}
+          - {percent: 50, at: [-64.00, 0, 0]}
+          - {percent: 54.1667, at: [-61.82, 16.56, 0]}
+          - {percent: 58.3333, at: [-55.43, 32.00, 0]}
+          - {percent: 62.5, at: [-45.25, 45.25, 0]}
+          - {percent: 66.6667, at: [-32.00, 55.43, 0]}
+          - {percent: 70.8333, at: [-16.56, 61.82, 0]}
+          - {percent: 75, at: [0.00, 64.00, 0]}
+          - {percent: 79.1667, at: [16.56, 61.82, 0]}
+          - {percent: 83.3333, at: [32.00, 55.43, 0]}
+          - {percent: 87.5, at: [45.25, 45.25, 0]}
+          - {percent: 91.6667, at: [55.43, 32.00, 0]}
+          - {percent: 95.8333, at: [61.82, 16.56, 0]}
+          - {percent: 100, at: [64.00, 0, 0]}
+    # the nebula: the gas we are inside, thin and wide. a wisp wears no
+    # glow, so its red is painted, and it only scatters what lamps give
+    # it. hydrogen-alpha glowing where the pulsar's light reaches it is
+    # the tracer's Excited, which a set cannot say yet.
+    wisps:
+      nebula:
+        colour: {swatch: red}
+        middle: [0, 0, 0]
+        radius: 600
+        thick: 0.002
+        seed: 7
+        scale: 200
+        amount: 0.6
+        source: eye
+    # the pulsar's wind, as a lamp: the tracer has no lamp that shines
+    # every way from a point, so this is a spot at the pulsar aimed where
+    # the companion is at nought, its cone just wider than the companion.
+    # a stand-in for a still, not physics: it lights the near side, and
+    # the gas it crosses.
+    spots:
+      wind:
+        at: [0, 0, 0]
+        aim: [1, 0, 0]
+        cone: 12
+        soft: 3
+        temperature: 9000
+        strength: 9000
+        source: eye
+    # a faint fill for the nebula, so its gas has something to scatter.
+    floods:
+      nebula-light:
+        colour: {swatch: rust}
+        strength: 0.25
+        source: eye

@@ -1,0 +1,5 @@
+label,normal_x,normal_y,normal_z,share
+facing up,0,1,0,1
+on its side,1,0,0,0.5
+facing down,0,-1,0,0
+facing up and long,0,40,0,1

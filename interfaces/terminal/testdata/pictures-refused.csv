@@ -1,0 +1,7 @@
+name,wide_off,high_off,drawn
+nothing,0,0,no
+too wide,1,0,yes
+too narrow,-1,0,yes
+too tall,0,1,yes
+too short,0,-1,yes
+both,3,-2,yes

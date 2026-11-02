@@ -1,0 +1,14 @@
+name,rows,tail,plain
+a plain frame,1,,yes
+a second plain frame,1,\x1b[?2026h\x1b[H\x1b[1;1H\x1b[0m\x1b[?2026l,yes
+kitty graphics,1,"\x1b_Ga=T,f=100;AAAA\x1b\\",no
+a cursor query,1,\x1b[6n,no
+a device query,1,\x1b[c,no
+a window title,1,\x1b]0;hello\x07,no
+a screen clear,1,\x1b[2J,no
+a newline,1,\n,no
+a letter,1,A,no
+a frame left open,1,\x1b[?2026h,no
+a frame closed twice,1,\x1b[?2026l,no
+a move past the frame,1,\x1b[?2026h\x1b[2;1H\x1b[?2026l,no
+a move to row nought,1,\x1b[?2026h\x1b[0;1H\x1b[?2026l,no

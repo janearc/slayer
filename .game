@@ -1,0 +1,54 @@
+# vim: set filetype=game et ai ts=4 wrap
+name slayer
+
+lint width 80
+lint rows 25
+lint comments
+lint print
+lint exclaim
+lint shout
+lint words cement hyperscaler enterprise-grade blazing-fast load-bearing
+lint paragraph 4
+
+omit burning-trousers/INSIDE.md
+exclude burning-trousers/INSIDE.md
+
+omit cmd/quorum
+exclude cmd/quorum
+
+omit cmd/show
+exclude cmd/show
+
+lint allow README.md words paragraph rows
+
+# don't need to share this witht he world
+omit DEBT.md
+
+# where the published sources slayer cites are kept, outside any
+# repository: each builder's own, given in their game config with set.
+needs SLAYER_SHELF the directory the sources are fetched to and read from
+
+# before slayer builds or is checked, every measured number in its
+# research data is held to its source: pinned, on the shelf, on its page.
+target pre-build . :: go run ./cmd/sources verify
+
+# the mock the take tests use, generated from the interface it stands in
+# for. mockgen is pinned in go.mod as a tool. burning-trousers/mocks has
+# its own, made by go generate there.
+run mocks . :: go tool mockgen -write_package_comment=false -destination take/mocks/motion.go -package mocks github.com/janearc/slayer/scene/thing Motion
+
+# the writer the terminal stream's tests make fail, generated from io.Writer.
+run mocks . :: go tool mockgen -write_package_comment=false -destination interfaces/terminal/mocks/writer.go -package mocks io Writer
+
+# the clock a drawn scene tells the time of each frame to.
+run mocks . :: go tool mockgen -write_package_comment=false -destination render/cells/mocks/clock.go -package mocks github.com/janearc/slayer/render/cells Clock
+
+# the source of frames the terminal stream's tests draw from.
+run mocks . :: go tool mockgen -write_package_comment=false -destination interfaces/terminal/mocks/source.go -package mocks github.com/janearc/slayer/interfaces/terminal Source
+
+# ninjafilm's mocks, from the interfaces they stand in for.
+run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/lay.go -package mocks github.com/janearc/slayer/ninjafilm/lay Lay
+run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/shelf.go -package mocks github.com/janearc/slayer/ninjafilm/roll Shelf
+run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/projection.go -package mocks github.com/janearc/slayer/ninjafilm/film Projection
+run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/emitter.go -package mocks github.com/janearc/slayer/ninjafilm/film Emitter
+run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/beamer.go -package mocks github.com/janearc/slayer/ninjafilm/film Beamer

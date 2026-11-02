@@ -1,0 +1,67 @@
+# every number the cells tests choose, with what it is and who picked it.
+numbers:
+  - name: smoke-number
+    value: 1
+    says: which of slayer's smoke scenes the tests draw; the first is a ball on a floor, quick to draw
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: frame-wide
+    value: 6
+    says: how many pixels across the tests draw a frame
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: frame-high
+    value: 4
+    says: how many pixels down the tests draw a frame
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: frame-number
+    value: 3
+    says: the frame the tests draw, so that its time is not the first
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: start-ms
+    value: 500
+    says: the time of frame nought in the tests, in milliseconds; the orbital starts half a second in
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: rate
+    value: 24
+    says: the frames a second the tests run at
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: wide-most
+    value: 8
+    says: the widest a property test draws a frame, in pixels; small, since a property test draws many
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: high-most
+    value: 6
+    says: the tallest a property test draws a frame, in pixels
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: number-most
+    value: 200
+    says: the latest frame a property test asks for
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: rate-most
+    value: 120
+    says: the fastest rate a property test runs at, in frames a second
+    kind: picked
+    by: the test author, 2026-10-24
+
+  - name: start-most-ms
+    value: 5000
+    says: the latest start a property test gives a pace, in milliseconds
+    kind: picked
+    by: the test author, 2026-10-24

@@ -1,0 +1,19 @@
+# every number the lines tests choose, with what it is and who picked it.
+numbers:
+  - name: luminance-tolerance
+    value: 1e-9
+    says: how near, as a share of the luminance asked for, a glow's luminance must come; Glow scales by one division, so a few roundings
+    kind: picked
+    by: the test author, 2026-11-01
+
+  - name: luminance-least
+    value: 1e-6
+    says: the dimmest luminance the property draws
+    kind: picked
+    by: the test author, 2026-11-01
+
+  - name: luminance-most
+    value: 1e6
+    says: the brightest luminance the property draws
+    kind: picked
+    by: the test author, 2026-11-01

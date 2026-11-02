@@ -1,0 +1,10 @@
+out/
+/swarm
+/ring
+/orbital
+/show
+/quorum
+.DS_Store
+smokes/pictures/
+smokes/results.jsonl
+smokes/index.html

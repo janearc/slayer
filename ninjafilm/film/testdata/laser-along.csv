@@ -1,0 +1,9 @@
+label,aim_x,aim_y,aim_z,length,along,lit
+no aim reaches a thousand: near,0,0,0,0,5,1
+no aim reaches a thousand: far,0,0,0,0,999,1
+no aim reaches a thousand: past,0,0,0,0,1000.5,0
+a short reach: inside,0,0,-1,0.5,0.4,1
+a short reach: past,0,0,-1,0.5,0.7,0
+at the source,1,0,0,10,0,0
+just past the source,1,0,0,10,0.5,1
+at the end of the reach,1,0,0,10,10,1

@@ -1,0 +1,5 @@
+label,width,height
+no width,0,5
+no height,5,0
+neither,0,0
+a width below nought,-3,4

@@ -1,0 +1,11 @@
+label,lay,per_square_inch,passes
+a stacked lay with elements,stacked,1,0
+a stacked lay with a dimness,stacked,0,1
+a stacked lay with both,stacked,4000000,0.075
+a lay nobody has heard of,woven,0,0
+a lay with no name,,0,0
+a mosaic with no elements,mosaic,0,0.5
+a mosaic with fewer than none,mosaic,-1,0.5
+a mosaic that passes none,mosaic,4000000,0
+a mosaic that passes more than all,mosaic,4000000,1.5
+a mosaic that passes less than none,mosaic,4000000,-0.1

@@ -1,0 +1,4 @@
+name,axis,degrees,direction,goes to
+a quarter about z takes x to y,up from z,90,one on x,one on y
+a quarter about z takes y to minus x,up from z,90,one on y,minus x
+a quarter about up takes x to minus z,up,90,one on x,minus z

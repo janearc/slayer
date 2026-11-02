@@ -1,0 +1,6 @@
+label,least,most,slope
+a floor below nought,-0.1,2,1.5
+no room,2,2,1.5
+a most below the least,2,1,1.5
+no slope,0.2,3,0
+a slope below nought,0.2,3,-1
