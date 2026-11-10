@@ -10,7 +10,7 @@ import (
 // Scenes at or below this total lamp count evaluate every lamp.
 const lampsAsked = 8
 
-// lit holds a selected lamp’s index, direction, distance, unoccluded light, and
+// lit holds a selected lamp's index, direction, distance, unoccluded light, and
 // sampling weight.
 type lit struct {
 	index  int
@@ -87,7 +87,7 @@ func byLight(_ maths.Vec, light maths.Light) float64 {
 	return light.Luminance()
 }
 
-// shadowed applies a selected lamp’s sampling weight and transmission. Ambient
+// shadowed applies a selected lamp's sampling weight and transmission. Ambient
 // contributions remain unshadowed, matching reaching.
 func (scene staged) shadowed(one lit, point maths.Vec) maths.Light {
 	light := one.light.Scale(one.counts)
@@ -97,7 +97,7 @@ func (scene staged) shadowed(one lit, point maths.Vec) maths.Light {
 	return light.Times(scene.transmit(point, one.toward, one.far))
 }
 
-// placeShare hashes a point’s coordinate bits to a reproducible fraction in [0,
+// placeShare hashes a point's coordinate bits to a reproducible fraction in [0,
 // 1), using the SplitMix64 finalizer (Steele, Lea, and Flood, 2014).
 func placeShare(point maths.Vec) float64 {
 	stirred := uint64(0x9e3779b97f4a7c15)

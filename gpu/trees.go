@@ -99,11 +99,10 @@ func above(number float64) bool {
 }
 
 // conifers appends every conifer of a grove, as the kernel reads them.
-func (encoded *scene) conifers(trees []grown) error {
+func (encoded *scene) conifers(trees []grown) {
 	for _, tree := range trees {
 		encoded.conifer(tree, encoded.surface(tree.material))
 	}
-	return nil
 }
 
 // conifer appends one conifer.

@@ -1,0 +1,7 @@
+# Independent quarter-turn placement contract, 2026-11-07.
+seed: 5
+kinds: [campfire, spotlight, maser]
+shift: {x: 3, y: 4, z: 5}
+scale: 2
+turn: 90
+tolerance: 1.0e-10

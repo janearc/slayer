@@ -1,4 +1,4 @@
-// Package lay arranges a stock’s records as stacked layers or side-by-side
+// Package lay arranges a stock's records as stacked layers or side-by-side
 // mosaic sites.
 package lay
 

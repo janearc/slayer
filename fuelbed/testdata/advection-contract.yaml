@@ -1,0 +1,57 @@
+# Authored one-step arithmetic, not measured combustion data.
+# Reaction is disabled by zero fuel; diffusion and cooling are also zero.
+cell-m: 1
+step-s: 0.1
+diffusion-m2-s: 0
+cooling-per-k: 0
+heating-k-s: 1
+activation-k: 1
+consumption-per-s: 1
+ambient-k: 300
+fuel: 0
+cases:
+  east:
+    width: 3
+    depth: 1
+    velocity-m-s: [2, 0]
+    initial-excess-k: [0, 100, 0]
+    after-one-step-k: [0, 80, 20]
+    after-two-steps-k: [0, 64, 32]
+  west:
+    width: 3
+    depth: 1
+    velocity-m-s: [-2, 0]
+    initial-excess-k: [0, 100, 0]
+    after-one-step-k: [20, 80, 0]
+  south:
+    width: 1
+    depth: 3
+    velocity-m-s: [0, 2]
+    initial-excess-k: [0, 100, 0]
+    after-one-step-k: [0, 80, 20]
+  diagonal:
+    width: 2
+    depth: 2
+    velocity-m-s: [2, 3]
+    initial-excess-k: [100, 0, 0, 0]
+    after-one-step-k: [50, 20, 30, 0]
+  ambient-inflow:
+    width: 1
+    depth: 1
+    velocity-m-s: [2, 3]
+    initial-excess-k: [100]
+    after-one-step-k: [50]
+  diffusion-edge:
+    width: 2
+    depth: 1
+    diffusion-m2-s: 1
+    velocity-m-s: [2, 0]
+    initial-excess-k: [100, 0]
+    after-one-step-k: [70, 30]
+# Acceptance picked before any new path was executed.
+cpu-tolerance-k: 1.0e-12
+metal-tolerance-k: 1.0e-5
+reacting-tolerance-k: 0.1
+reacting-tolerance-fuel: 1.0e-4
+reacting-velocity-m-s: [0.5, 0.25]
+reacting-times-s: [0, 1, 10, 2, 10]

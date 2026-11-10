@@ -24,8 +24,18 @@ func inPicture(eye maths.Subspace, point maths.Vec) bool {
 // place on it shows, and the eye looks at the hillside's middle on the
 // ground, whatever its width.
 func TestFromAboveEveryPlaceShows(t *testing.T) {
+	// Chosen framing is authored; keep the expected positions independent
+	// of the constants that construct the camera.
+	positions := map[float64]maths.Vec{
+		10:   maths.V(3.5, 18.2, 18),
+		40:   maths.V(14, 66.2, 60),
+		82.5: maths.V(28.875, 134.2, 119.5),
+	}
 	for _, across := range []float64{10, 40, 82.5} {
 		eye := aboveAt(across)
+		if !eye.Origin.Near(positions[across], 1e-12) {
+			t.Errorf("chosen view at width %g moved to %v, want %v", across, eye.Origin, positions[across])
+		}
 		half := across / 2
 		for _, corner := range []maths.Vec{maths.V(-half, 0, -half),
 			maths.V(half, 0, -half), maths.V(-half, 0, half),

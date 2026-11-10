@@ -1,9 +1,9 @@
 // Package lights computes physical spectral power for lamps, stars, lasers, and
 // other sources, in watts per libtheme band from gamma rays to radio.
 //
-// libtheme’s visible black-body swatches describe relative colour over the CIE
-// 1931 observer’s 360–830 nm range. This package supplies absolute power,
-// including infrared and other radiation outside that range, while libtheme’s
+// libtheme's visible black-body swatches describe relative colour over the CIE
+// 1931 observer's 360-830 nm range. This package supplies absolute power,
+// including infrared and other radiation outside that range, while libtheme's
 // bands.Light retains band boundaries, storage, and spectral operations.
 //
 // Only the physical band-power calculation belongs here. Colour conversion

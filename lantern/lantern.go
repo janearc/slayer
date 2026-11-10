@@ -1,6 +1,6 @@
 // Package lantern builds a star inside a Dyson swarm. Inward-facing panels on
 // tilted orbits let light escape in shafts, like a pierced tin lantern. A point
-// emitter supplies the star’s illumination.
+// emitter supplies the star's illumination.
 //
 // Dimensions are relative to the star and scaled by Radius when placed. The
 // baseline arrangement places panels near six stellar radii, in bands 0.4 radii

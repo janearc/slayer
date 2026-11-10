@@ -1,0 +1,50 @@
+# Independent pinhole geometry and rational arithmetic, not a captured result.
+# Identity pose, square pixels: field 90deg makes each focal scale 500px.
+width: 1000
+height: 500
+field-deg: 90
+pixel-aspect: 1
+near-m: 1
+cases:
+  centre:
+    point: [0, 0, -100]
+    displacement-m: 1
+    visible: true
+    limited: false
+    # (500/99)^2 + (500/99)^2
+    squared-bound-numerator: 500000
+    squared-bound-denominator: 9801
+  off-axis:
+    point: [90, 0, -100]
+    displacement-m: 1
+    visible: true
+    limited: false
+    # (950/99)^2 + (500/99)^2
+    squared-bound-numerator: 1152500
+    squared-bound-denominator: 9801
+  double-wide-pixel:
+    point: [0, 0, -100]
+    pixel-aspect: 2
+    displacement-m: 1
+    visible: true
+    limited: false
+    # Vertical focal scale is 1000px; horizontal remains 500px.
+    squared-bound-numerator: 1250000
+    squared-bound-denominator: 9801
+  near-crossing:
+    point: [0, 0, -1.5]
+    displacement-m: 1
+    visible: true
+    limited: true
+  behind:
+    point: [0, 0, 100]
+    displacement-m: 0
+    visible: false
+  outside-left:
+    point: [-200, 0, -100]
+    displacement-m: 0
+    visible: false
+  touching-right:
+    point: [100, 0, -100]
+    displacement-m: 0
+    visible: true

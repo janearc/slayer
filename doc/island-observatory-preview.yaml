@@ -1,0 +1,267 @@
+# Fictional summit site on NOAA terrain. The site, introduced redwoods,
+# palette, equipment, weather and light are authored; this is not a survey
+# of Maunakea vegetation or an engineering layout. See island-scene.md,
+# guide-stars.md and redwood-atmosphere.md for sources and model limits.
+---
+height-model: authored-radial-offsets
+radius-metres: 6371000
+anchor:
+  longitude-deg: -155.5
+  latitude-deg: 19.5
+  height-metres: 0
+sources:
+- file: "../../local/data/hawaii/noaa-hawaii-crm2023-big-island-float.tif"
+  sha256: 37c3cf3b48849d599950f255e64fed2bed7eb744ef18bf73d2375e9f0fc0f830
+  geographic-crs: 4326
+  height-datum: MSL (NOAA CRM2023; EPSG:5714 in product guide)
+  height-offset-metres: 0
+raster-budget:
+  cache-total-bytes: 67108864
+  cache-tiles-per-source: 128
+  tile-bytes: 33554432
+  metadata-bytes: 16777216
+  height-index:
+    block-side: 32
+    total-bytes: 2097152
+region:
+  west: -156.19
+  south: 18.81
+  east: -154.71
+  north: 20.39
+detail:
+  patches: 256
+  evaluations: 4096
+  depth: 14
+  side: 9
+  points: 65536
+  cell-pixels: 3
+  minimum-height-metres: -6000
+  maximum-height-metres: 4500
+  # One delivered NOAA sample interval on each source-coordinate axis.
+  normal-step:
+    longitude-deg: 0.0002777777699999998
+    latitude-deg: 0.00027777776999999984
+camera:
+  at:
+    longitude-deg: -155.5021
+    latitude-deg: 19.80315
+    height-metres: 3740
+  look-at:
+    longitude-deg: -155.5
+    latitude-deg: 19.8
+    height-metres: 3675
+  near-metres: 0.1
+film:
+  width: 320
+  height: 180
+  rays: 2
+  wide-deg: 55
+sun:
+  azimuth-deg: 285
+  altitude-deg: 15
+  strength-rgb:
+  - 2
+  - 1.75
+  - 1.4
+ground-rgb:
+- 0.12
+- 0.2
+- 0.07
+sky-rgb:
+- 0.008
+- 0.012
+- 0.025
+ocean:
+  height-metres: 0
+  colour-rgb:
+  - 0.01
+  - 0.06
+  - 0.1
+  gloss: 1
+  index: 1.34
+exposure: 1
+secondary-ray-reference-metres: 1
+landcover-transition-metres: 250
+landcover:
+- below-metres: 1700
+  colour-rgb:
+  - 0.08
+  - 0.18
+  - 0.06
+- below-metres: 2600
+  colour-rgb:
+  - 0.12
+  - 0.17
+  - 0.07
+- below-metres: 3600
+  colour-rgb:
+  - 0.17
+  - 0.16
+  - 0.15
+# Authored summit snow appearance, blended by height; not observed weather.
+- below-metres: 4500
+  colour-rgb:
+  - 0.78
+  - 0.82
+  - 0.87
+site:
+  at:
+    longitude-deg: -155.5
+    latitude-deg: 19.8
+  light-exposure: 1.0e-06
+  objects:
+  - name: summit observatory
+    kind: elt
+    seed: 0
+    detail: quick
+    east-metres: 0
+    south-metres: 0
+    above-metres: 0
+    heading-deg: 0
+  - name: mirror crane
+    kind: mobile-crane
+    seed: 1
+    detail: quick
+    east-metres: -75
+    south-metres: 55
+    above-metres: 0
+    heading-deg: 0
+  - name: service truck
+    kind: service-truck
+    seed: 2
+    detail: quick
+    east-metres: -90
+    south-metres: 75
+    above-metres: 0
+    heading-deg: 0
+  - name: maintenance scaffold
+    kind: scaffold-tower
+    seed: 3
+    detail: quick
+    east-metres: 60
+    south-metres: 35
+    above-metres: 0
+    heading-deg: 0
+  - name: visitor dobsonian
+    kind: dobsonian-36
+    seed: 4
+    detail: quick
+    east-metres: 70
+    south-metres: 85
+    above-metres: 0
+    heading-deg: 0
+  - name: visitor refractor
+    kind: apo-refractor-5
+    seed: 5
+    detail: quick
+    east-metres: 80
+    south-metres: 85
+    above-metres: 0
+    heading-deg: 0
+  budget:
+    cells: 262144
+    candidates: 2000000
+    instances: 150000
+    prototype-faces: 2000000
+  forest:
+    name: introduced mountain woodland
+    adaptive-regions: true
+    minimum-geometry-detail: crown
+    aggregate-area-samples-side: 32
+    edge-fade-metres: 3000
+    height-fade-metres: 200
+    seed: 11
+    bounds-metres:
+      min-east: -20000
+      min-south: -20000
+      max-east: 20000
+      max-south: 20000
+    cell-metres: 128
+    density-per-hectare: 20
+    variety: 1
+    mixture:
+    - kind: coast-redwood
+      weight: 3
+    - kind: giant-sequoia
+      weight: 1
+    minimum-height-metres: 0
+    maximum-height-metres: 3900
+    clearance-metres: 15
+    maximum-radius-metres: 40
+    maximum-tree-height-metres: 60
+    detail-thresholds-pixels:
+    - 8
+    - 24
+    - 80
+    - 160
+    aggregate-colour-rgb:
+    - 0.05
+    - 0.12
+    - 0.06
+  atmosphere:
+  - bounds-metres:
+      min-east: -1000
+      min-south: -1000
+      max-east: 1000
+      max-south: 1000
+    edge-fade-metres: 400
+    base-metres: -250
+    depth-metres: 300
+    extinction-per-metre: 0.004
+    coverage: 0.75
+    seed: 23
+    wind-metres-per-second:
+    - 0.8
+    - 0
+    - 0.3
+    colour-rgb:
+    - 0.95
+    - 0.95
+    - 0.95
+    floor-side: 65
+    floor-tolerance-metres: 0.001
+    floor-iterations: 8
+  - bounds-metres:
+      min-east: -1000
+      min-south: -1000
+      max-east: 1000
+      max-south: 1000
+    edge-fade-metres: 400
+    base-metres: -250
+    depth-metres: 900
+    extinction-per-metre: 8.0e-05
+    coverage: 1
+    seed: 24
+    wind-metres-per-second:
+    - 0.8
+    - 0
+    - 0.3
+    colour-rgb:
+    - 0.95
+    - 0.95
+    - 0.95
+    floor-side: 65
+    floor-tolerance-metres: 0.001
+    floor-iterations: 8
+  lasers:
+    origins-metres:
+    - - -16
+      - 59.18512902743416
+      - -35.255405695216766
+    - - 16
+      - 59.18512902743416
+      - -35.255405695216766
+    - - -6
+      - 55.17009397297683
+      - -40.98947000523971
+    - - 6
+      - 55.17009397297683
+      - -40.98947000523971
+    azimuth-deg: 0
+    altitude-deg: 55
+    radius-metres: 0.5
+    reach-metres: 100000
+    divergence-deg: 0.002
+    wavelength-nm: 589
+    display-strength: 60000000
+    visible-launchers: true

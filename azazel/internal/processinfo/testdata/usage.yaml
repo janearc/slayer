@@ -1,0 +1,4 @@
+# Picked bounds for the native test fixture, not installed job policy.
+child_deadline_ns: 2000000000
+minimum_reads: 1
+maximum_reads: 8

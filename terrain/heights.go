@@ -1,55 +1,16 @@
 package terrain
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"math"
-
-	"golang.org/x/image/tiff/lzw"
 )
-
-// mostTiles is how many decoded tiles a raster keeps at once: a window
-// a few kilometres across, at 128 samples a tile, is fewer.
-const mostTiles = 1024
-
-// tile is one tile's samples, decoded, row by row.
-func (raster *Raster) tile(i int) ([]float32, error) {
-	if kept, found := raster.cache[i]; found {
-		return kept, nil
-	}
-	raw := make([]byte, raster.counts[i])
-	if _, err := raster.file.ReadAt(raw, int64(raster.offsets[i])); err != nil {
-		return nil, err
-	}
-	if raster.compression == lzwed {
-		reader := lzw.NewReader(bytes.NewReader(raw), lzw.MSB, 8)
-		decoded, err := io.ReadAll(reader)
-		reader.Close()
-		if err != nil {
-			return nil, fmt.Errorf("terrain: tile %d: %w", i, err)
-		}
-		raw = decoded
-	}
-	want := raster.tileW * raster.tileH
-	if len(raw) < 4*want {
-		return nil, fmt.Errorf("terrain: tile %d is %d bytes, not %d", i,
-			len(raw), 4*want)
-	}
-	samples := make([]float32, want)
-	for k := range samples {
-		samples[k] = math.Float32frombits(raster.order.Uint32(raw[4*k:]))
-	}
-	if len(raster.cache) >= mostTiles {
-		clear(raster.cache)
-	}
-	raster.cache[i] = samples
-	return samples, nil
-}
 
 // sample is the height at a column and row of the raster, and whether
 // the raster has one there.
 func (raster *Raster) sample(column, row int) (float64, bool, error) {
+	if raster.closed {
+		return 0, false, fmt.Errorf("terrain: source is closed")
+	}
 	if column < 0 || row < 0 || column >= raster.width ||
 		row >= raster.height {
 		return 0, false, nil
@@ -63,6 +24,9 @@ func (raster *Raster) sample(column, row int) (float64, bool, error) {
 	if value == raster.noData || math.IsNaN(float64(value)) {
 		return 0, false, nil
 	}
+	// An infinite sample is a real reading the model published, however
+	// absurd; it rides the window to mesh construction, which refuses a
+	// non-finite point as a mesh refusal.
 	return float64(value), true, nil
 }
 
@@ -92,6 +56,22 @@ func (window Window) Size() (across, down int, step float64) {
 // that leaves the raster or meets a place with no height.
 func (raster *Raster) Window(west, north float64, across, down int,
 	step float64) (Window, error) {
+	limit, err := DefaultWindowBytes()
+	if err != nil {
+		return Window{}, err
+	}
+	return raster.WindowWithBudget(west, north, across, down, step, limit)
+}
+
+// WindowWithBudget retains strict coverage and bounds the returned float64
+// grid. The byte limit is separate from decoded tile retention and temporary
+// decoding.
+func (raster *Raster) WindowWithBudget(west, north float64, across, down int,
+	step float64, limitBytes int64,
+) (Window, error) {
+	if err := raster.projectedCoordinates(); err != nil {
+		return Window{}, err
+	}
 	if !raster.placed {
 		return Window{}, fmt.Errorf("terrain: the raster says nothing of " +
 			"where it is, so it has no window")
@@ -100,8 +80,13 @@ func (raster *Raster) Window(west, north float64, across, down int,
 		return Window{}, fmt.Errorf("terrain: a window of %d by %d, %g "+
 			"apart", across, down, step)
 	}
+	request := GridRequest{West: west, North: north, Across: across, Down: down, Step: step}
+	count, err := request.capacity(limitBytes, gridHeightBytes)
+	if err != nil {
+		return Window{}, err
+	}
 	window := Window{west: west, north: north, step: step, across: across,
-		down: down, heights: make([]float64, 0, across*down)}
+		down: down, heights: make([]float64, 0, count)}
 	for row := range down {
 		for column := range across {
 			east := west + float64(column)*step
@@ -118,9 +103,7 @@ func (raster *Raster) Window(west, north float64, across, down int,
 
 // elevation is the raster's height at an easting and a northing.
 func (raster *Raster) elevation(east, north float64) (float64, error) {
-	column := int(math.Floor((east - raster.west) / raster.spacing))
-	row := int(math.Floor((raster.north - north) / raster.spacing))
-	value, has, err := raster.sample(column, row)
+	value, has, err := raster.Elevation(east, north)
 	if err != nil {
 		return 0, err
 	}

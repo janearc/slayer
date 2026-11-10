@@ -7,7 +7,7 @@
 // model of the scene.
 //
 // GPU approximations are compared with CPU references using tolerances; they
-// are not subject to this exact replay check. The name recalls Fermat’s
+// are not subject to this exact replay check. The name recalls Fermat's
 // principle and asks which path the recorded light took.
 package fermat
 

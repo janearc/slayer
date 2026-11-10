@@ -14,6 +14,9 @@
 void *slayer_metal_open(const char *source, const char *kernel, int *nodevice,
                         char *err, int errlen);
 
+// slayer_metal_function selects an entry point while keeping context resources.
+int slayer_metal_function(void *ctx, const char *kernel, char *err, int errlen);
+
 // slayer_metal_name is the GPU's own name, for the record of what ran.
 const char *slayer_metal_name(void *ctx);
 
@@ -33,6 +36,21 @@ int slayer_metal_points(void *ctx, const float *points, int n,
 int slayer_metal_grid(void *ctx, int width, int height, int rows, int per,
                       const void **inputs, const long *lengths, int count,
                       float *out, char *err, int errlen);
+
+// A grid stream retains inputs and one output band. The caller retains ctx.
+// Bands use global row coordinates and are copied into the caller's buffer.
+void *slayer_metal_grid_open(void *ctx, int width, int rows, int per,
+                            const void **inputs, const long *lengths, int count,
+                            char *err, int errlen);
+// Begin/add copy each input synchronously; no caller input pointer is retained.
+// A failed add leaves a closable stream. Bands require all count inputs.
+void *slayer_metal_grid_begin(void *ctx, int width, int rows, int per,
+                             int count, char *err, int errlen);
+int slayer_metal_grid_add(void *stream, const void *input, long length,
+                          char *err, int errlen);
+int slayer_metal_grid_band(void *stream, int first, int down, float *out,
+                           char *err, int errlen);
+void slayer_metal_grid_close(void *stream);
 
 // slayer_metal_gpu is the seconds the gpu has spent on every command the
 // context has run, by the system's own timestamps on them: the time the
@@ -77,5 +95,12 @@ double slayer_session_gpu(void *s);
 
 // slayer_session_close lets the session and its buffers go.
 void slayer_session_close(void *s);
+
+// Build an acyclic plan. Nodes are kind/first/count triples; placements are
+// packed float4x3 matrices and child/mask pairs. The root is an instance node.
+int slayer_metal_accelerate(void *ctx, const void *vertices, long length,
+                            int stride, const int32_t *nodes, int count,
+                            const float *matrices, const uint32_t *references,
+                            int root, int *unavailable, char *err, int errlen);
 
 #endif

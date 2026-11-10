@@ -1,0 +1,7 @@
+# Authored small scene recipe, 2026-11-07.
+  recipes:
+    infrared telescope:
+      kind: space-observatory
+      spacecraft:
+        design: spitzer
+        aperture: {value: 1, unit: m}

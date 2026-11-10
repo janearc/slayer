@@ -4,10 +4,10 @@
 //
 // Layout uses terminal-style cells within a supplied rectangle. A drawer
 // changes only the cells its elements cover; all other pixels remain the
-// scene’s. Terminals display text as glyphs over sextants, while raster output
+// scene's. Terminals display text as glyphs over sextants, while raster output
 // draws the same cell layout.
 //
-// The rectangle-and-coverage contract follows Carrie’s drawer model so HUD
+// The rectangle-and-coverage contract follows Carrie's drawer model so HUD
 // coverage can be passed through without translation.
 package hud
 

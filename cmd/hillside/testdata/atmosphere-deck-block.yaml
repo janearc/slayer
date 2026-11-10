@@ -1,0 +1,26 @@
+# Authored integration optics, 2026-11-07.
+  weather:
+    regional mist:
+      kind: prescribed-mist
+      extinction: {value: 0.2, unit: m^-1}
+      depth: {value: 10, unit: m}
+      coverage: 1
+      seed: 34
+    thin air:
+      kind: prescribed-mist
+      extinction: {value: 0.001, unit: m^-1}
+      depth: {value: 30, unit: m}
+      coverage: 1
+      seed: 35
+  atmosphere:
+    layers:
+      cloud deck:
+        weather: regional mist
+        extent: terrain
+        albedo: 0.75
+        base: {value: 2, unit: m}
+      upper air:
+        weather: thin air
+        extent: terrain
+        albedo: 0.9
+        base: {value: 0, unit: m}

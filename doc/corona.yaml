@@ -1,0 +1,48 @@
+# corona: the Sun up close, its disc and the corona streaming off its
+# limb. 2026-11-09.
+#
+# Written against set/ecosystem-v2.schema.json, ahead of the reader.
+# Slayer's sun is today a light at an azimuth and altitude, never a body
+# in the frame; v2's star kind makes it one.
+#
+# measured, once read: the Sun's radius and its limb darkening, which come
+# through celestial by name, not from this file. picked: how far out the
+# camera stands, and the corona's look. The corona is authored emission
+# shaped like the photographs, not simulated, and cited as a choice when
+# it is made. The film's exposure is picked at the first render, for the
+# corona; the disc clips, as it does in photographs.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: the corona
+  renderer: gpu-native
+  seed: 31
+  setting: space
+  set:
+    things:
+      the sun:
+        kind: star
+        seed: 3
+        place: {at: origin}
+        star: sun
+        limb: darkened
+        # picked: four radii of reach, seven streamers
+        corona:
+          reach: 4
+          streamers: 7
+          seed: 3
+  film:
+    width: 3840
+    height: 2160
+    rays: 4
+    fps: 24
+  cameras:
+    limb:
+      title: "the corona off the Sun's limb"
+      moves:
+        # v2, gap 4: places in the Sun's radii; looking a little off its
+        # centre so the limb and the corona fill the frame
+        - from: {object: the sun, distance: {value: 12, unit: radii}}
+          to: {object: the sun, distance: {value: 6, unit: radii}}
+          look: {object: the sun, offset: {value: 0.8, unit: radii}}
+          duration: {value: 10, unit: s}
+          ease: in-out

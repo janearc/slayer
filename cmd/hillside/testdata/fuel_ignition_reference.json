@@ -1,0 +1,10 @@
+{
+  "purpose": "Authored Gaussian ignition fixture, not a published measurement.",
+  "geometry": "16x8 half-metre cells, continuous peak excess900K, radius1.6m. Squared-radius ratios at selected cell centres are exact25/512,125/512,3425/512.",
+  "arithmetic": "Independent Ruby BigDecimal/BigMath evaluation at requested80 decimal digits.",
+  "excessKelvin": {
+    "central": "857.110319905658755522146799069940663625833909910755764650613893036687740382136164",
+    "adjacent": "705.039717654736383146048934922760774462466447775293944404840057778245727250578667",
+    "corner": "1.1195665912595676932410288650669250453708789897123777387483130874049425456830217"
+  }
+}

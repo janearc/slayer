@@ -1,0 +1,15 @@
+# 2026/11/08 23:45:01.947859 [TestStopSequencesRequireEligibleExplicitResume] [rapid] draw events: 1
+# 2026/11/08 23:45:01.947861 [TestStopSequencesRequireEligibleExplicitResume] [rapid] draw decision: 0x3
+# 2026/11/08 23:45:01.947863 [TestStopSequencesRequireEligibleExplicitResume] [rapid] draw explicit resume: false
+# 2026/11/08 23:45:01.947863 [TestStopSequencesRequireEligibleExplicitResume] [rapid] draw expected generation: 0x0
+# 2026/11/08 23:45:01.947863 [TestStopSequencesRequireEligibleExplicitResume] disk loss did not latch: {state:{stopped:false generation:0} outcome:0}
+# 
+v0.4.8#11684743157269195871
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0

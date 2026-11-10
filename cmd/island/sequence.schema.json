@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "island-sequence-v1.json",
+  "title": "Timed geographic island camera track",
+  "description": "Longitude, latitude and radial height interpolate independently; easing applies per outgoing segment. Scene time is independent of playback fps. This is authored travel, not an orbit solver.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scene", "frames", "fps", "scene-duration-seconds", "keyframes"],
+  "properties": {
+    "scene": {"type": "string", "minLength": 1},
+    "frames": {"type": "integer", "minimum": 2, "maximum": 7200},
+    "fps": {"type": "integer", "minimum": 1, "maximum": 60},
+    "scene-duration-seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 86400},
+    "keyframes": {
+      "type": "array", "minItems": 2, "maxItems": 128,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["at-seconds", "at", "look-at", "wide-deg", "ease"],
+        "properties": {
+          "at-seconds": {"type": "number", "minimum": 0, "maximum": 86400},
+          "at": {"$ref": "#/$defs/location"},
+          "look-at": {"$ref": "#/$defs/location"},
+          "wide-deg": {"type": "number", "minimum": 1, "maximum": 170},
+          "ease": {"enum": ["linear", "smooth"]}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "location": {
+      "type": "object", "additionalProperties": false,
+      "required": ["longitude-deg", "latitude-deg", "height-metres"],
+      "properties": {
+        "longitude-deg": {"type": "number", "minimum": -180, "maximum": 180},
+        "latitude-deg": {"type": "number", "minimum": -90, "maximum": 90},
+        "height-metres": {"type": "number", "minimum": -20000, "maximum": 1000000}
+      }
+    }
+  }
+}

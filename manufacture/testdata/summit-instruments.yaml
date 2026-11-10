@@ -1,0 +1,465 @@
+# Source apertures transcribed independently; other extents hold authored scenery.
+# Plane coordinates use the declared 55-degree optical pose, not maker getters.
+# Mees aperture and radio shell thickness are picked proxy choices.
+# Optical sag uses the pre-existing authored ground ratio, 0.035.
+---
+seed: 5
+tolerance: 1.0e-08
+maximum-faces: 100000
+axis:
+  x: 0.0
+  y: 0.8191520442889918
+  z: -0.5735764363510462
+tangent:
+  x: 0.0
+  y: 0.5735764363510462
+  z: 0.8191520442889918
+profiles:
+- kind: cfht
+  aperture: 3.58
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 13.5
+    z: 0.0
+  near: -0.025060000000000006
+  far: 0.12530000000000002
+  minimum:
+    x: -13
+    y: 0
+    z: -13
+  maximum:
+    x: 21
+    y: 28
+    z: 13
+- kind: gemini-north
+  aperture: 8.1
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 20.0
+    z: 0.0
+  near: -0.05670000000000001
+  far: 0.28350000000000003
+  minimum:
+    x: -19.5
+    y: 0
+    z: -19.5
+  maximum:
+    x: 26
+    y: 46
+    z: 19.5
+- kind: irtf
+  aperture: 3.0
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 9.0
+    z: 0.0
+  near: -0.021000000000000005
+  far: 0.10500000000000001
+  minimum:
+    x: -9
+    y: 0
+    z: -9
+  maximum:
+    x: 14
+    y: 21
+    z: 9
+- kind: uh-88
+  aperture: 2.2
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 7.0
+    z: 0.0
+  near: -0.015400000000000004
+  far: 0.07700000000000001
+  minimum:
+    x: -6.5
+    y: 0
+    z: -6.5
+  maximum:
+    x: 6.5
+    y: 16
+    z: 6.5
+- kind: ukirt
+  aperture: 3.8
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 8.5
+    z: 0.0
+  near: -0.026600000000000002
+  far: 0.133
+  minimum:
+    x: -9.5
+    y: 0
+    z: -9.5
+  maximum:
+    x: 9.5
+    y: 21
+    z: 9.5
+- kind: jcmt
+  aperture: 15.0
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 12.0
+    z: 0.0
+  near: -0.045
+  far: 2.34375
+  minimum:
+    x: -16.5
+    y: 0
+    z: -16.5
+  maximum:
+    x: 16.5
+    y: 33
+    z: 16.5
+- kind: sma-antenna
+  aperture: 6.0
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 5.0
+    z: 0.0
+  near: -0.018000000000000002
+  far: 0.9375
+  minimum:
+    x: -4.7
+    y: 0
+    z: -4.7
+  maximum:
+    x: 4.7
+    y: 12
+    z: 4.7
+- kind: sma-array
+  aperture: 6.0
+  role: primary mirror
+  copies: 8
+  group: true
+  centres:
+  - x: -30
+    y: 5.0
+    z: -25.0
+  - x: -10
+    y: 5.0
+    z: -30.0
+  - x: 12
+    y: 5.0
+    z: -26.0
+  - x: 31
+    y: 5.0
+    z: -12.0
+  - x: 34
+    y: 5.0
+    z: 12.0
+  - x: 13
+    y: 5.0
+    z: 30.0
+  - x: -13
+    y: 5.0
+    z: 28.0
+  - x: -34
+    y: 5.0
+    z: 7.0
+  near: -0.018000000000000002
+  far: 0.9375
+  minimum:
+    x: -44
+    y: 0
+    z: -39
+  maximum:
+    x: 44
+    y: 12
+    z: 39
+- kind: vlba-maunakea
+  aperture: 25.0
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 17.0
+    z: 0.0
+  near: -0.075
+  far: 3.90625
+  minimum:
+    x: -16
+    y: 0
+    z: -16
+  maximum:
+    x: 32
+    y: 38
+    z: 16
+- kind: panstarrs-1
+  aperture: 1.8
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 4.5
+    z: 0.0
+  near: -0.012600000000000004
+  far: 0.06300000000000001
+  minimum:
+    x: -5.5
+    y: 0
+    z: -5.5
+  maximum:
+    x: 8
+    y: 12
+    z: 5.5
+- kind: panstarrs-2
+  aperture: 1.8
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 4.8
+    z: 0.0
+  near: -0.012600000000000004
+  far: 0.06300000000000001
+  minimum:
+    x: -5.5
+    y: 0
+    z: -5.5
+  maximum:
+    x: 10
+    y: 12.5
+    z: 5.5
+- kind: faulkes-north
+  aperture: 2.0
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 4.7
+    z: 0.0
+  near: -0.014000000000000002
+  far: 0.07
+  minimum:
+    x: -6.5
+    y: 0
+    z: -6.5
+  maximum:
+    x: 6.5
+    y: 10
+    z: 6.5
+- kind: dkist
+  aperture: 4.0
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 30.0
+    z: 0.0
+  near: -0.028000000000000004
+  far: 0.14
+  minimum:
+    x: -14.5
+    y: 0
+    z: -14.5
+  maximum:
+    x: 40
+    y: 44
+    z: 14.5
+- kind: atlas-haleakala
+  aperture: 0.5
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 1.8
+    z: 0.0
+  near: -0.0035000000000000005
+  far: 0.0175
+  minimum:
+    x: -2.8
+    y: 0
+    z: -2.8
+  maximum:
+    x: 2.8
+    y: 5
+    z: 2.8
+- kind: tlrs-4
+  aperture: 0.28
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 1.55
+    z: 0.0
+  near: -0.0019600000000000004
+  far: 0.009800000000000001
+  minimum:
+    x: -2.2
+    y: 0
+    z: -2.2
+  maximum:
+    x: 2.2
+    y: 4
+    z: 2.2
+- kind: solarc
+  aperture: 0.5
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 2.5
+    z: 0.0
+  near: -0.0035000000000000005
+  far: 0.0175
+  minimum:
+    x: -3.5
+    y: 0
+    z: -3.5
+  maximum:
+    x: 7.2
+    y: 5
+    z: 3.5
+- kind: mees-solar
+  aperture: 0.25
+  role: corrector or objective proxy
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 6.280703937377412
+    z: -2.29717362758594
+  near: 0.0
+  far: 0.003
+  minimum:
+    x: -9.5
+    y: 0
+    z: -9.5
+  maximum:
+    x: 21
+    y: 9
+    z: 9.5
+- kind: aeos
+  aperture: 3.67
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 6.5
+    z: 0.0
+  near: -0.025690000000000004
+  far: 0.12845
+  minimum:
+    x: -6.5
+    y: 0
+    z: -6.5
+  maximum:
+    x: 6.5
+    y: 15.5
+    z: 6.5
+- kind: mssc-1-6m
+  aperture: 1.6
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 5.0
+    z: 0.0
+  near: -0.011200000000000002
+  far: 0.05600000000000001
+  minimum:
+    x: -5.5
+    y: 0
+    z: -5.5
+  maximum:
+    x: 5.5
+    y: 11
+    z: 5.5
+- kind: mssc-twin-1-2m
+  aperture: 1.2
+  role: primary mirror
+  copies: 2
+  group: false
+  centres:
+  - x: -1.2
+    y: 5.4
+    z: 0.0
+  - x: 1.2
+    y: 5.4
+    z: 0.0
+  near: -0.008400000000000001
+  far: 0.042
+  minimum:
+    x: -7
+    y: 0
+    z: -7
+  maximum:
+    x: 7
+    y: 13
+    z: 7
+- kind: geodss
+  aperture: 1.0
+  role: primary mirror
+  copies: 1
+  group: false
+  centres:
+  - x: 0
+    y: 3.4
+    z: 0.0
+  near: -0.007000000000000001
+  far: 0.035
+  minimum:
+    x: -4
+    y: 0
+    z: -4
+  maximum:
+    x: 7
+    y: 8
+    z: 4
+- kind: geodss-site
+  aperture: 1.0
+  role: primary mirror
+  copies: 3
+  group: true
+  centres:
+  - x: -12
+    y: 3.4
+    z: -4.0
+  - x: 0
+    y: 3.4
+    z: 3.0
+  - x: 12
+    y: 3.4
+    z: -4.0
+  near: -0.007000000000000001
+  far: 0.035
+  minimum:
+    x: -18
+    y: 0
+    z: -10
+  maximum:
+    x: 18
+    y: 8
+    z: 10

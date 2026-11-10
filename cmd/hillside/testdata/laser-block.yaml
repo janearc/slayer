@@ -1,0 +1,14 @@
+# Authored launch fixture, 2026-11-07. Offsets use world axes.
+  lasers:
+    guide:
+      origin:
+        object: the stone
+        east: {value: 3, unit: m}
+        up: {value: 4, unit: m}
+        south: {value: 5, unit: m}
+      pointing: {azimuth: 30, altitude: 70}
+      radius: {value: 0.6, unit: m}
+      reach: {value: 200, unit: m}
+      divergence: {value: 0.2, unit: deg}
+      wavelength: {value: 589, unit: nm}
+      display-strength: 8

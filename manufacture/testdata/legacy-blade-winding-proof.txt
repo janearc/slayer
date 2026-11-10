@@ -1,0 +1,101 @@
+Legacy blade winding: compiled public domain
+
+Only the legacy spruce and Norway spruce rows reach individualFoliage.
+Redwood and sequoia use recursiveFoliage. The legacy path uses style 0.
+Lengths below are local metres; world placements come after this winding
+calculation. The accompanying producer checks the fixed row assumptions
+and every possible blade phase. It does not sample tree seeds.
+
+Envelope bounds
+
+Seed.draw is in [0,1), and swing is in [-1,1). Tree heights are 4..13 m.
+A primary branch has length between
+  4 * .30 * (1-.88) * (1-.15) = .1224
+and
+  13 * .30 * (1+.15) = 4.485.
+There are three primary segments. A Norway branchlet is at least
+  (.1224/3) * 1.1 * (1-.4) * (1-.2) = .0215424
+metres long, before its two segments are made. Joint radii use the WHOLE
+limb length, not the segment length (grow.go, sleeve.piece). Its smallest
+nonterminal leaf joint is .12 of that, above .0025 m. The primary sleeves
+and all upper bounds also satisfy the looser shared bounds:
+  foot > .002; tip >= 0; both radii < 1; segment length < 2.
+The producer checks these inequalities against both compiled rows.
+
+There are at most 12000 blades and 1500 supporting twigs. Midpoint placement
+keeps 1-up above 1/3000, apart from rounding much smaller than the margins
+used below. Interpolation therefore gives radius > 6e-7 m, blade length
+l > 8e-8 m, and width w=.12*l > 9e-9 m. Length is capped at .025 m.
+Every generated coordinate has magnitude below 2 m.
+
+Nonzero ideal triple
+
+Let c=cos(turn), s=sin(turn), C=cos(2.4*i), S=sin(2.4*i), using the same
+rounded trig results as the construction. Before coordinate rounding,
+the three edges are
+  U = (-2*w*c, 0, 2*w*s)
+  V = (-w*c, w, w*s)
+  W = (l*s*C-w*c, l*S, l*c*C+w*s).
+Their triple is -2*w*w*l*C*(c*c+s*s). Even blade indices negate way;
+that reverses this sign while preserving its absolute magnitude.
+
+Go 1.26.10 on Darwin/ARM64 uses math/sin.go for both trig functions;
+math/stubs.go disables archSin and archCos. For turn in [0,2*pi], their
+shared argument reduction leaves |z|<.786, z*z<.618. One function takes
+the cosine polynomial branch. Bounding its six Horner coefficients gives
+an absolute tail below .043, so that branch has magnitude greater than
+  1 - .5*.618 - .618*.618*.043 > .67.
+Consequently c*c+s*s > .4, without assuming a sampled accuracy figure.
+The retained Go producer exhausts i=0..11999 and finds |C|>5e-5. It also
+checks the phase sine and cosine stay below the coordinate bound 1.02.
+The ideal triple therefore has magnitude greater than 4e-5*w*w*l.
+
+Coordinate and evaluation rounding
+
+Use u=2^-53. Treat the already computed root as a common exact translation.
+Products and sums on coordinates below 2 m perturb each computed edge
+component by less than 2e-15 m. U.Y remains exactly zero. Expanding the
+four remaining determinant terms bounds the coordinate perturbation by
+less than 1e-13*w*l, including products of perturbations. Floating point
+evaluation of the triple adds less than 60*u*w*w*l.
+
+At w>9e-9, their sum is less than half the ideal magnitude:
+  1e-13/(4e-5*9e-9) + 60*u/(4e-5) < .28.
+Thus the computed triple cannot be zero. Changing <0 to <=0 chooses the
+same winding throughout this compiled public recipe domain.
+
+Limits and reproduction
+
+This is a numerical argument, not a botanical measurement. It does not
+cover arbitrary private sprays, new legacy species, altered row ranges,
+a different blade budget, or a changed grammar. Review those assumptions
+when the recorded sources change.
+
+Copy legacy_blade_phase_domain_sample_test.go into manufacture, run
+  go test -count=1 -v -run '^TestDiagnosticLegacyBladePhaseDomain$' ./manufacture
+and remove the temporary copy. The appended provenance records the actual
+run, toolchain and source hashes. Sampling seeds is not a replacement for
+the interval argument and exhaustive phase check.
+
+Production checkpoint: c51ba95eeb50b32c04e1136994e60c9cd98faf34
+Toolchain: Go 1.26.10, Darwin/ARM64
+
+Source SHA256:
+020d24d931c29e15c5f25b5d0cf631d9154e96ec0cb2c31f700084f568fa8803  manufacture/complexity.go
+ed177c1944f7d743ed28bf178c9e95b3716c39a2a81432146526af96b35fe386  manufacture/kinds.go
+1cc416d7f60f5e2389c7d8f54d81ad46d020a88af415f7469684109916304ccd  manufacture/grow.go
+a1ba3053845a78ab14d4151cdb21ca273ef7faf60b1c858febb626f7a62705b3  manufacture/arrangement.go
+80e0d6a52a219460161b82c52090f5db8af3dd09a52caa1d9e77b370120963e4  manufacture/architecture.go
+8696cf4c17b71f2ff23f4140fff9bf48967113856705e92631dddeb6810a3bc7  manufacture/seed.go
+715acf62b2345ee08710425db0424130dad2abcbd745be60d99b9dbd1f2299f1  manufacture/conifer_proper.go
+31219a93ce9a2099a2169fb7b0434a26d7ff932efeed55db9a288016b7cc39ec  manufacture/testdata/legacy_blade_phase_domain_sample_test.go
+
+=== RUN   TestDiagnosticLegacyBladePhaseDomain
+    diagnostic_legacy_phase_domain_test.go:56: indices=12000 minimum-abs-cos=5.9187205662700175e-05 at-index=4052
+--- PASS: TestDiagnosticLegacyBladePhaseDomain (0.00s)
+PASS
+ok  	github.com/janearc/slayer/manufacture	0.177s
+
+Go toolchain source SHA256:
+913640c10f5093e8cdaafa1ebebbf5175b5a156bdc0fa89d77350dd4dad3be9b  math/sin.go
+191ed067c7368ec75c25d1f7298720e14bbe7280230aa4d6ae5f791a77452015  math/stubs.go

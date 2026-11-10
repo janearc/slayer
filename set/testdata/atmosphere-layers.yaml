@@ -1,0 +1,32 @@
+# Authored reader contracts, 2026-11-07.
+block: |
+  atmosphere:
+    layers:
+      deck:
+        weather: grove mist
+        extent: terrain
+        albedo: 0.9
+        base: {value: 2, unit: m}
+      air:
+        weather: grove mist
+        extent: terrain
+        albedo: 0.7
+        base: {value: 0, unit: m}
+      ground mist:
+        weather: grove mist
+        extent: terrain
+        albedo: 0.8
+expected:
+  - {albedo: 0.9, base: 2, level: true}
+  - {albedo: 0.7, base: 0, level: true}
+  - {albedo: 0.8, base: 0, level: false}
+invalid:
+  - {before: "weather: grove mist", after: "weather: unknown"}
+  - {before: "unit: m", after: "unit: km"}
+  - {before: "value: 2", after: "value: .nan"}
+  - {before: "value: 2", after: "value: .inf"}
+  - {before: "value: 2", after: "value: -.inf"}
+  - {before: "albedo: 0.9", after: "albedo: 1.1"}
+  - {before: "extent: terrain", after: "extent: none"}
+  - {before: "layers:", after: "weather: grove mist\n    layers:"}
+  - {before: "base: {value: 2, unit: m}", after: "base: {value: 2}"}

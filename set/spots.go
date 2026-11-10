@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/janearc/slayer/maths"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // A Spotlight is a lamp kept to a cone: its place, the way it aims, the

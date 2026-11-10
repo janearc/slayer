@@ -7,7 +7,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies/template"
 	"github.com/janearc/slayer/scene/swatches"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // World is the set's world said piece by piece, as the tracer holds it:

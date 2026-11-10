@@ -1,0 +1,8 @@
+# Authored placement and retention expectations, 2026-11-07.
+replacement: "recipe: infrared telescope\n        height: {value: $LIFT, unit: m}"
+lift: 40
+epoch: 0
+later: 2
+tolerance: 1.0e-9
+aperture: 1
+delta: {x: 0, y: 40, z: 0}

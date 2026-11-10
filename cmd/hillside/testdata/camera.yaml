@@ -1,0 +1,8 @@
+# Authored 2026-11-07: four metres at two metres per second, aimed at the origin.
+camera:
+  unit: m
+  look-at: {x: 0, y: 0, z: 0}
+  moves:
+    - from: {x: 0, y: 0, z: 6}
+      to: {x: 0, y: 0, z: 2}
+      speed: {value: 2, unit: m/s}

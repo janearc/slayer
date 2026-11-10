@@ -1,9 +1,14 @@
 # Tree architectures, foliage, and quality
 
 This design began on 2026-10-14 and was extended through 2026-10-17.
-It separates a species’ branching rule, foliage, and parameters so a new
+It separates a species' branching rule, foliage, and parameters so a new
 species can reuse existing growth code. The first implemented stage covers
 the two spruces at `quick` quality; later stages below are a roadmap.
+
+The [observatory ecosystem](observatory-ecosystem.md) now provides named
+complexity levels, and [redwood and sequoia foliage](conifer-foliage.md)
+uses recursive shoots. The sequence below remains the original design;
+face-density selection and the additional branching architectures are planned.
 
 ## From species functions to shared rules
 
@@ -27,27 +32,40 @@ Each row names:
 
 Botanical family is recorded for provenance, not used as the growth rule.
 The planned six species span five families. The architectures simplify
-Hallé and Oldeman’s botanical models.
+Halle and Oldeman's botanical models.
 
-| Architecture | Branching pattern | Initial species |
-|---|---|---|
-| whorled | Trunk with branch tiers; branches carry paired rows of branchlets | Spruce, Norway spruce |
-| spire | Tapering trunk, flared base, irregular upswept branches, clumped crown | Sequoia |
-| leader | Single leader with spiral branches and further subdivisions | Poplar, alder |
-| forking | Low forks into heavy limbs; crown wider than tall | Oak |
-| burl | Crooked stems from a basal burl, turning and branching at joints | Manzanita |
+- **whorled:** Branching pattern: Trunk with branch tiers; branches carry
+  paired rows of branchlets; Initial species: Spruce, Norway spruce
+
+- **spire:** Branching pattern: Tapering trunk, flared base, irregular upswept
+  branches, clumped crown; Initial species: Sequoia
+
+- **leader:** Branching pattern: Single leader with spiral branches and
+  further subdivisions; Initial species: Poplar, alder
+
+- **forking:** Branching pattern: Low forks into heavy limbs; crown wider than
+  tall; Initial species: Oak
+
+- **burl:** Branching pattern: Crooked stems from a basal burl, turning and
+  branching at joints; Initial species: Manzanita
+
 
 These rules reuse `limb`, `sleeve`, `whorls`, `ring`, `habit`,
 `stemCarrying`, and `newLeaf`. Add a missing arrangement, such as singly
 spiralled attachments, once beside the existing primitives and test it
 independently.
 
-| Foliage | Geometry | Species |
-|---|---|---|
-| needles | Thin three-sided spikes spiralling toward the shoot tip | Spruces |
-| scales | Overlapping scales close to the shoot | Sequoia |
-| broad | Stalked blades with species-specific outlines | Poplar, alder, oak |
-| small | Small leathery ovals held edge-up | Manzanita |
+- **needles:** Geometry: Thin three-sided spikes spiralling toward the shoot
+  tip; Species: Spruces
+
+- **scales:** Geometry: Overlapping scales close to the shoot; Species:
+  Sequoia
+
+- **broad:** Geometry: Stalked blades with species-specific outlines; Species:
+  Poplar, alder, oak
+
+- **small:** Geometry: Small leathery ovals held edge-up; Species: Manzanita
+
 
 The provisional choices are giant sequoia and valley oak. Coast redwood
 would instead require flat needles in two rows; the species choice must
@@ -63,23 +81,31 @@ The requested density is faces per cubic metre of crown. Choose the
 nearest supported complexity without exceeding that budget, refining
 within a level where possible.
 
-| Level | Representation | Use |
-|---|---|---|
-| demo | Individual needles, scales, or leaves | Stills and close views |
-| quick | Sleeve around each shoot | Previews and crowds |
-| clumps | Sleeve around each branch and its shoots | Distant trees |
-| hull | Crown pyramid and trunk prism | Farthest views and coarse checks |
+- **demo:** Representation: Individual needles, scales, or leaves; Use: Stills
+  and close views
+
+- **quick:** Representation: Sleeve around each shoot; Use: Previews and
+  crowds
+
+- **clumps:** Representation: Sleeve around each branch and its shoots; Use:
+  Distant trees
+
+- **hull:** Representation: Crown pyramid and trunk prism; Use: Farthest views
+  and coarse checks
+
 
 Every level preserves crown placement, height, and width. Intermediate
 densities adjust sleeve or needle tessellation. `quick` must reproduce
 the original two spruce meshes face for face before later levels are added.
 
 The first-stage regression, `TestQuickIsTodaysTrees`, checks both spruces
-at twelve seeds against their skins from Fermat commit `e0859a6`.
+at twelve seeds. Its baseline was the skins from Fermat commit `e0859a6`;
+since commit `85c1c37` made physical needle shoots the named-factory
+foliage, the pinned skins are the woody parts of those needled trees.
 
 ## Foliage selection and ferns
 
-A caller may choose a species’ available foliage representation. A spruce
+A caller may choose a species' available foliage representation. A spruce
 can retain the original sleeves or use individual needles at levels with
 shoots. The hull has no foliage attachments.
 
@@ -88,11 +114,11 @@ per frond at quick, wedges at clumps, and one fan at hull quality.
 
 ## Hawaiian vegetation
 
-The Kīlauea and Mauna Kea scenes requested on 2026-10-16 need different
-plants: ʻōhiʻa lehua, ʻamaʻu, and hāpuʻu on Kīlauea; māmane, naio,
-and ʻāhinahina at higher elevations on Mauna Kea.
+The Kilauea and Mauna Kea scenes requested on 2026-10-16 need different
+plants: 'ohi'a lehua, 'ama'u, and hapu'u on Kilauea; mamane, naio,
+and 'ahinahina at higher elevations on Mauna Kea.
 
-ʻŌhiʻa needs sympodial branching, a stout twisted crown, and broad leathery
+'Ohi'a needs sympodial branching, a stout twisted crown, and broad leathery
 leaves. A tree fern combines a trunk with a fern crown. Initial source
 research starts with Forest Service silvics and park vegetation maps;
 those sources are not yet claimed as completed parameter verification.
@@ -111,7 +137,7 @@ accepting a level or face density, and `-foliage`; quick remains the default.
 `mostFaces` in `manufacture/good.go` holds quality caps. At the recorded
 cost of roughly 1 KB per face, a demo tree can require hundreds of
 megabytes. `hillside -variety` reuses a few specimens across a forest.
-Reducing the engine’s per-face storage is separate work.
+Reducing the engine's per-face storage is separate work.
 
 ## Implementation sequence
 
@@ -125,8 +151,8 @@ no new `game lint` failures.
 3. Add individual needles and selectable foliage; compare close views
    against the sleeve representation.
 4. Add hillside quality and foliage flags, and fern quality levels.
-5. Add sympodial ʻōhiʻa with broad leathery leaves.
-6. Add hāpuʻu, then māmane, naio, and ʻāhinahina.
+5. Add sympodial 'ohi'a with broad leathery leaves.
+6. Add hapu'u, then mamane, naio, and 'ahinahina.
 7. Add leader branching for poplar and alder.
 8. Add forking oak.
 9. Add spire sequoia.
@@ -150,4 +176,4 @@ document. Tracer, GPU, and crowd changes belong to the engine work in
 
 Completion requires review by someone other than the implementation author
 and hillside renders of every species and quality from a shared seed.
-The 2026-10-17 scope names trees and homes as the manufactory’s kinds.
+The 2026-10-17 scope names trees and homes as the manufactory's kinds.

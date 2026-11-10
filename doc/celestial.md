@@ -1,8 +1,8 @@
 # Celestial: positions, observers, and time
 
 The celestial design starts with one question: where does an object appear
-from an observer’s location, at a given instant, in a given frame?
-The Sun over a hillside, Kepler-16b through the Sun’s gravitational lens,
+from an observer's location, at a given instant, in a given frame?
+The Sun over a hillside, Kepler-16b through the Sun's gravitational lens,
 and a merger timed at two detectors all need that same foundation.
 
 This note records the 2026-10-14 package plan and its intended sequence.
@@ -18,13 +18,17 @@ inter-detector timing.
 
 **Time scale:** the clock convention attached to an instant.
 
-| Scale | Convention |
-|---|---|
-| UTC | Civil time with leap seconds |
-| TAI | Atomic time; the design records TAI−UTC as 37 s since 2017 |
-| TT | TAI plus exactly 32.184 s |
-| TDB | Barycentric dynamical time, differing periodically from TT by under about 2 ms |
-| UT1 | Earth rotation time, measured by IERS |
+- **UTC:** Civil time with leap seconds
+
+- **TAI:** Atomic time; the design records TAI-UTC as 37 s since 2017
+
+- **TT:** TAI plus exactly 32.184 s
+
+- **TDB:** Barycentric dynamical time, differing periodically from TT by under
+  about 2 ms
+
+- **UT1:** Earth rotation time, measured by IERS
+
 
 Leap-second offsets belong to dated tables, not an assumption that the
 recorded offset remains valid forever.
@@ -39,25 +43,25 @@ aberration, solar-deflection, and refraction corrections. Refraction
 applies to Earth-based observing sites.
 
 **Frame:** conversion to sky coordinates, ecliptic coordinates, galactic
-coordinates, or a site’s local azimuth and altitude. Azimuth starts north.
+coordinates, or a site's local azimuth and altitude. Azimuth starts north.
 
 **Accuracy:** angular and distance error estimates carried with state
-and sighting results. Initial implementations use Meeus’s published
+and sighting results. Initial implementations use Meeus's published
 accuracy estimates; more precise sources can improve them later.
 
 ## Derived locations
 
-Lagrange points derive from two orbiting objects. The Sun’s gravitational
+Lagrange points derive from two orbiting objects. The Sun's gravitational
 lens derives from its mass and radius: grazing light meets the axis beyond
-roughly 548 AU, at `R²c² / (4GM)`.
+roughly 548 AU, at `R^2c^2 / (4GM)`.
 
-For a target, the focal line extends away from the Sun opposite the target’s
+For a target, the focal line extends away from the Sun opposite the target's
 direction. These locations are calculated rather than stored as fixed
 positions.
 
 ## Gravitational waves
 
-A merger’s light and waves share a sky location and distance. The proposed
+A merger's light and waves share a sky location and distance. The proposed
 wave layer adds:
 
 - A merger object with two waveform polarizations and their orientation.

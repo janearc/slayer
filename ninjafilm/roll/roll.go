@@ -75,7 +75,7 @@ type Shelf interface {
 }
 
 // Roll is a seeded stock with an exposure gain. Different seeds retain the
-// stock’s response but produce different grain.
+// stock's response but produce different grain.
 type Roll struct {
 	stock Stock
 	seed  uint64
@@ -83,7 +83,7 @@ type Roll struct {
 }
 
 // Load obtains a named stock from the shelf and initializes a seeded roll at
-// its rated exposure. Unknown names return the shelf’s error.
+// its rated exposure. Unknown names return the shelf's error.
 func Load(shelf Shelf, name string, seed uint64) (Roll, error) {
 	loaded, err := shelf.Find(name)
 	if err != nil {
@@ -92,7 +92,7 @@ func Load(shelf Shelf, name string, seed uint64) (Roll, error) {
 	return Roll{stock: loaded, seed: seed, gain: ratedGain}, nil
 }
 
-// Rated adjusts exposure by stops relative to the stock’s rating.
+// Rated adjusts exposure by stops relative to the stock's rating.
 // Positive values increase exposure, negative values reduce it, and
 // each stop doubles the light.
 //
@@ -102,12 +102,12 @@ func (loaded Roll) Rated(stops float64) Roll {
 	return loaded
 }
 
-// Gauge returns the roll’s film dimensions for lens projection.
+// Gauge returns the roll's film dimensions for lens projection.
 //
 //ninja:vow practice slayer takes the gauge here; no caller in this tree
 func (loaded Roll) Gauge() film.Gauge { return loaded.stock.gauge }
 
-// Print integrates a frame’s glimpses of linear light and develops the
+// Print integrates a frame's glimpses of linear light and develops the
 // result. which identifies the frame for reproducible grain.
 //
 // The output is linear transmission under a white projector lamp, at most
@@ -152,7 +152,7 @@ func sound(glimpse *frame.Frame) bool {
 }
 
 // gathered averages RGB over equally weighted glimpses while retaining the
-// first frame’s coverage and depth. The mean represents integrated light
+// first frame's coverage and depth. The mean represents integrated light
 // normalized by the shutter-open duration.
 func gathered(glimpses []*frame.Frame) (*frame.Frame, error) {
 	if len(glimpses) == none {
@@ -173,7 +173,7 @@ func gathered(glimpses []*frame.Frame) (*frame.Frame, error) {
 	return averaged(base, lights, len(glimpses))
 }
 
-// added accumulates a glimpse’s RGB after checking its dimensions and channel
+// added accumulates a glimpse's RGB after checking its dimensions and channel
 // values.
 func added(lights []maths.Light, base, glimpse *frame.Frame) error {
 	if !sound(glimpse) {

@@ -1,0 +1,10 @@
+# Independent authored envelope and open-axis contract.
+seed: 5
+tolerance: 1.0e-8
+maximum-faces: 200000
+minimum: {x: -0.4, y: 0, z: -0.4}
+maximum: {x: 0.4, y: 3, z: 0.4}
+ray:
+  at: {x: 0, y: 4, z: 0}
+  dir: {x: 0, y: -1, z: 0}
+far: 5

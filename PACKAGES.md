@@ -1,4 +1,4 @@
-# Slayer’s packages
+# Slayer's packages
 
 A guide to responsibilities and boundaries. [OPERATION.md](OPERATION.md)
 follows the rendering pipeline; [EXAMPLES.md](EXAMPLES.md) describes the
@@ -16,10 +16,12 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
 - **geom:** simple types retained for older triangle-generation code,
   including the original conifers and GPU adapters.
 - **radiance:** spectral radiance per square metre, steradian, and nanometre,
-  including black-body emission from Planck’s law.
+  including black-body emission from Planck's law.
 
 ## Scene descriptions
 
+- **camera:** checked moves, speeds and holds, sampled from elapsed time
+  without a mutable playhead. The path keeps its look target separate.
 - **scene/thing:** worlds, surfaces, volumes, fields, lamps, sky, and haze.
   Motions place objects over time and compose through nested transforms.
 - **scene/shape:** local geometry: spheres, planes, meshes, and ring tubes.
@@ -46,13 +48,15 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
 
 - **film:** emitters and camera projections. Lamps include sun, flood,
   spotlight, laser, and radar; cameras include pinhole, physical focal
-  lengths and gauges, and Hubble’s camera.
+  lengths and gauges, and Hubble's camera.
 - **emit:** data descriptions of light independent of visible surfaces.
   Time-evaluated emitters supply CPU lamps and GPU-compatible state.
 - **lines:** approximate emission colours from NIST line wavelengths.
   Relative strengths are suitable for illustration, not spectroscopy.
 - **flame:** soot emission, radiative heat fraction, and flame puffing.
   Comments distinguish measured, modelled, and chosen parameters.
+- **fuelbed:** experimental surface heat and remaining fuel, with a CPU
+  reference and a retained Metal stencil; the grass proxy cites Mandel et al.
 - **plume:** fire-plume rise and spreading from measured correlations,
   with advecting eddies around a smooth mean column.
 - **moonlight:** full-moon illumination derived from solar radiation,
@@ -76,7 +80,7 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   clustered seas, coasts, forests, and deserts.
 - **globe:** stable sphere intersection at planetary scales, tested against
   high-precision arithmetic.
-- **terrain:** measured elevation models, including USGS Kīlauea lidar.
+- **terrain:** measured elevation models, including USGS Kilauea lidar.
   Tile-based reading avoids loading an entire multi-gigabyte raster.
 - **typography:** font outlines triangulated and extruded with bevels.
   Repeated letters share mesh geometry.
@@ -118,7 +122,7 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
 
 ## GPU support
 
-- **metal:** a cgo bridge to Apple’s Metal API. Kernels compile from source
+- **metal:** a cgo bridge to Apple's Metal API. Kernels compile from source
   when opened and are checked against Go reference implementations.
 - **gpu:** scene packing, haze baking, and GPU tracing through `gpu.Sampled`.
   Unsupported scene features return named errors. CPU results remain the
@@ -183,7 +187,7 @@ Stock data selects the response without a separate algorithm per name.
   cameras, and emitters.
 - **ninjafilm/frame:** grids of linear light, coverage, and depth.
 - **ninjafilm/lights:** physical spectral power, from gamma rays to radio.
-- **ninjafilm/maths:** typed power, temperature, and area, plus Planck’s law.
+- **ninjafilm/maths:** typed power, temperature, and area, plus Planck's law.
 - **ninjafilm/sensor:** light collectors; camera and telescope extensions
   remain planned.
 - **ninjafilm/colour:** development, sRGB, false colour, masks, and grain.
@@ -192,7 +196,7 @@ Stock data selects the response without a separate algorithm per name.
 - **ninjafilm/number:** numeric and RGB helpers.
 - **ninjafilm/mocks:** generated test doubles.
 
-See [ninjafilm’s guides](ninjafilm/README.md) for use, design, and sources.
+See [ninjafilm's guides](ninjafilm/README.md) for use, design, and sources.
 
 ## burning-trousers
 
@@ -208,7 +212,7 @@ Slayer APIs. Its changes must be committed separately from renderer changes.
 - **kernel:** CPU and GPU evaluated against the same physical fixtures.
 - **divergence:** perceptual image comparison using just-noticeable
   differences. The baseline allows at most 2% of pixels beyond one JND.
-- **mesh:** comparisons between Slayer’s mesh and the older shape mesh,
+- **mesh:** comparisons between Slayer's mesh and the older shape mesh,
   plus per-face rays to detect missed geometry.
 - **manufactory:** external checks of seeded output and closed,
   outward-facing skins.
@@ -216,27 +220,39 @@ Slayer APIs. Its changes must be committed separately from renderer changes.
 - **scenes:** seeded random scenes for invariant and regression checks.
 - **fake:** analytic lamps, geometry, sky, slabs, and sensors.
 - **mocks:** generated implementations of renderer dependencies.
-- **bench:** renderer timings using the harness’s own fakes.
+- **bench:** renderer timings using the harness's own fakes.
 - **cmd/apart:** pixelwise comparison of raw images.
 
 ## Commands and supporting files
 
 Commands live in `cmd/`; [EXAMPLES.md](EXAMPLES.md) shows their use.
 
-| Command | Purpose |
-|---|---|
-| `slayer` | Render a set file and check its terminal representation |
-| `smokecheck` | Render and compare numbered smoke scenes |
-| `swarm` | Render the lantern |
-| `orbital` | Render paired orbitals around the lantern |
-| `ring` | Render a mirror ring around a flaring magnetar |
-| `hillside` | Render procedural objects or a set file |
-| `moonrise` | Render the Moon behind a tree |
-| `house` | Render the shoebox from its set file |
-| `weather` | Simulate and visualise atmospheric flow |
-| `develop` | Develop or sum raw frames |
-| `sources` | Fetch and verify published sources |
-| `lightbox` | Serve the smoke gallery |
+- **`demo`:** List and preview numbered smokes and named scenes
+
+- **`slayer`:** Render a set file and check its terminal representation
+
+- **`smokecheck`:** Render and compare numbered smoke scenes
+
+- **`swarm`:** Render the lantern
+
+- **`orbital`:** Render paired orbitals around the lantern
+
+- **`ring`:** Render a mirror ring around a flaring magnetar
+
+- **`hillside`:** Render procedural objects or a set file
+
+- **`moonrise`:** Render the Moon behind a tree
+
+- **`house`:** Render the shoebox from its set file
+
+- **`weather`:** Simulate and visualise atmospheric flow
+
+- **`develop`:** Develop or sum raw frames
+
+- **`sources`:** Fetch and verify published sources
+
+- **`lightbox`:** Serve the smoke gallery
+
 
 `tools/gate` tracks completed style migrations; `tools/mutate` exercises
 mutations. `sets/` holds scene data. `smokes/` holds uncommitted

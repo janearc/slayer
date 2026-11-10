@@ -1,0 +1,30 @@
+# Independent source values from the selected 2005 overview, Tables2-2/2-3.
+# Structural envelopes and axial thickness below are authored scenery.
+# Review inputs only: these cases have not been run in the code-only phase.
+seed: 5
+tolerance: 1.0e-8
+maximum-faces: 300000
+axis: {x: 0, y: 0.819152044288992, z: -0.573576436351046}
+tangent: {x: 0, y: 0.573576436351046, z: 0.819152044288992}
+primary-seat: 45
+primary:
+  diameter: 100
+  panels: 3048
+  curvature: 250
+secondary:
+  diameter: 25.6
+  panels: 216
+  curvature: 0
+backing: 0.12
+corrector-roles:
+  - tertiary mirror
+  - fourth mirror
+  - fifth mirror
+  - sixth mirror
+bounds:
+  owl:
+    minimum: {x: -86, y: 0, z: -90}
+    maximum: {x: 86, y: 145, z: 90}
+  owl-shelter:
+    minimum: {x: -102, y: 0, z: -10}
+    maximum: {x: 102, y: 146, z: 46}

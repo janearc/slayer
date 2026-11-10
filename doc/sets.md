@@ -12,6 +12,10 @@ sets/shoebox.yaml is the house under saturn, its world piece by piece,
 and house draws it. sets/kilauea-iki.yaml and the others are hillsides
 and planets, and hillside draws them.
 
+the later [ecosystem subset](observatory-ecosystem.md) adds recipes,
+complexity and prescribed weather. its bundled schema covers only that
+subset; the legacy fields below remain available without `$schema`.
+
 ## what a set says
 
 everything is under scene:

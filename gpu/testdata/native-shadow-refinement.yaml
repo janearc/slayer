@@ -1,0 +1,5 @@
+# Picked, bounded native-shadow regression view; wide is in radians.
+width: 48
+height: 36
+samples: 1
+wide: 0.8726646259971648

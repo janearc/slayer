@@ -1,0 +1,18 @@
+# Independent angular fixtures; arcsecond conversion follows angle units.
+tolerance-deg: 0.00000001
+tolerance-arcsec: 0.00001
+cases:
+  - {name: exact-common-axis, azimuth: 145, altitude: 70, horizontal: 0, vertical: 0, expected-azimuth: 145, expected-altitude: 70}
+  - {name: east-on-horizon, azimuth: 0, altitude: 0, horizontal: 64, vertical: 0, expected-azimuth: 0.017777777777777778, expected-altitude: 0}
+  - {name: up-on-horizon, azimuth: 0, altitude: 0, horizontal: 0, vertical: 64, expected-azimuth: 0, expected-altitude: 0.017777777777777778}
+  - {name: across-north-wrap, azimuth: 0, altitude: 0, horizontal: -64, vertical: 0, expected-azimuth: 359.9822222222222, expected-altitude: 0}
+field-checks:
+  - {name: high-elevation-cross, azimuth: 127, altitude: 80, horizontal: 64, vertical: 0, separation-arcsec: 64}
+  - {name: zenith-roll, azimuth: 127, altitude: 90, horizontal: 64, vertical: 0, separation-arcsec: 64}
+  - {name: vertical-past-zenith, azimuth: 127, altitude: 89.99, horizontal: 0, vertical: 64, separation-arcsec: 64}
+invalid:
+  - {before: 'pointing: shared science', after: 'pointing: absent science'}
+  - {before: 'unit: arcsec', after: 'unit: deg'}
+  - {before: 'horizontal: {value: 64, unit: arcsec}', after: 'horizontal: {value: 3601, unit: arcsec}'}
+  - {before: 'vertical: {value: 0, unit: arcsec}', after: 'wrong: {value: 0, unit: arcsec}'}
+  - {before: 'shared science: {azimuth: 0, altitude: 0}', after: 'shared science: {azimuth: 0}'}

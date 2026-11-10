@@ -1,0 +1,8 @@
+# Authored finite framing fixture and property ranges, 2026-11-07.
+from: {x: -3, y: 0, z: -2}
+to: {x: 3, y: 8, z: 2}
+padding: 0
+shift: 1000
+yaw: 180
+tolerance: 1.0e-9
+elevation: 55

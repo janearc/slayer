@@ -1,0 +1,14 @@
+# Independent expected adapter direction and tube length.
+length: 3
+tolerance: 1.0e-8
+headings:
+  - {degrees: 0, axis: {x: 0, y: 0, z: -1}}
+  - {degrees: 90, axis: {x: 1, y: 0, z: 0}}
+  - {degrees: 270, axis: {x: -1, y: 0, z: 0}}
+
+seed: 5
+index: 0
+
+launchers: 4
+boresight: {x: 0, y: 0.819152044288992, z: -0.573576436351046}
+minimum-dot: 0.99999995

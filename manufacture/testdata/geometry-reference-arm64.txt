@@ -1,0 +1,144 @@
+bonfire 5 hull REFUSED manufacture: bonfire has no hull representation
+bonfire 5 clumps REFUSED manufacture: bonfire has no clumps representation
+bonfire 5 quick 745a450fd348db3df215274675c40ff21e4a95921b3ba5133633d0fac3c564a1
+bonfire 5 demo REFUSED manufacture: bonfire has no demo representation
+bonfire 11 hull REFUSED manufacture: bonfire has no hull representation
+bonfire 11 clumps REFUSED manufacture: bonfire has no clumps representation
+bonfire 11 quick 4162237024beb23668a5024f268a55641e7958739d7f80ca000bc528a217196d
+bonfire 11 demo REFUSED manufacture: bonfire has no demo representation
+boulder 5 hull REFUSED manufacture: boulder has no hull representation
+boulder 5 clumps REFUSED manufacture: boulder has no clumps representation
+boulder 5 quick b4a0dd189b4634b5c66c70a853c6a8b122ba4e8d44324f6e24547e8766790606
+boulder 5 demo REFUSED manufacture: boulder has no demo representation
+boulder 11 hull REFUSED manufacture: boulder has no hull representation
+boulder 11 clumps REFUSED manufacture: boulder has no clumps representation
+boulder 11 quick 28a027210a4a81eb0c6210d3e0d15632835ed443e4248fefcdceb0f0a2e8d782
+boulder 11 demo REFUSED manufacture: boulder has no demo representation
+campfire 5 hull REFUSED manufacture: campfire has no hull representation
+campfire 5 clumps REFUSED manufacture: campfire has no clumps representation
+campfire 5 quick 4def66896e43f5b7259cb60cfaecf587617422cdef5445a2e504ac45928dc7a5
+campfire 5 demo REFUSED manufacture: campfire has no demo representation
+campfire 11 hull REFUSED manufacture: campfire has no hull representation
+campfire 11 clumps REFUSED manufacture: campfire has no clumps representation
+campfire 11 quick 6d07e5a68ef40d8893fac62477da62a3dd2e9dc720305b70c5642d7617ae6b4b
+campfire 11 demo REFUSED manufacture: campfire has no demo representation
+can 5 hull REFUSED manufacture: can has no hull representation
+can 5 clumps REFUSED manufacture: can has no clumps representation
+can 5 quick b59e7cbbd718ea83f00a8bbea76bb19361350d2f7aca3425726706456b84942e
+can 5 demo REFUSED manufacture: can has no demo representation
+can 11 hull REFUSED manufacture: can has no hull representation
+can 11 clumps REFUSED manufacture: can has no clumps representation
+can 11 quick 1173b1736b6d2040d2c36c7f9a2ba96ce150e18c8565b7e4f6c278cc861f7f34
+can 11 demo REFUSED manufacture: can has no demo representation
+coast-redwood 5 hull 641938df3f93d67d60816b38f62be34e94804931a3e44639f22d30f536a2a1e5
+coast-redwood 5 clumps e91b0801a6e1a02efd6158bbf5c9efe670d8a5945897c5617bcbab518d90260c
+coast-redwood 5 quick 923a0070355f237d1979db366a2035248b1114b70c0f513a36a0cb94fdef862d
+coast-redwood 5 demo bd5cd3f4e78584afc4125916b88b77b74cac5c2f565ac11e52f3fea7e16af883
+coast-redwood 11 hull ca5460d578aaf1e6d637b8c6a4879c0d03eb2c7f7a6c243c23a533e65d76dd81
+coast-redwood 11 clumps f70b16e83d9a7b706f2e217f11344ea5799fa10863a323e9551bcac7d50952d3
+coast-redwood 11 quick 9208a5013a56bf446c7fe76aa05b134aa0de83f86508d4c6909ddd52e429d606
+coast-redwood 11 demo 39affb8b7d991b54fb82cfc819c5cfdb10484e39414741f1c53feff13824f087
+coast-redwood-shoot 5 hull 32bff80c685e94161fd70acd0c27bc3f9f466ce910192f55c5b1e5ad73e0fe11
+coast-redwood-shoot 5 clumps eb28131e19e50127b7d0ddf7cd5e432cf53808f3afcbc5ea95e3d25f55a27a82
+coast-redwood-shoot 5 quick f3244a96bd8a60ddda2da7774d74e5ff5cc43c700bbcb5cbcff7669a493fa116
+coast-redwood-shoot 5 demo 17a544f86ea2f67851c00a434d3cac3ba31c8b83c97a6bd1c0352968da298115
+coast-redwood-shoot 11 hull 32bff80c685e94161fd70acd0c27bc3f9f466ce910192f55c5b1e5ad73e0fe11
+coast-redwood-shoot 11 clumps eb28131e19e50127b7d0ddf7cd5e432cf53808f3afcbc5ea95e3d25f55a27a82
+coast-redwood-shoot 11 quick f3244a96bd8a60ddda2da7774d74e5ff5cc43c700bbcb5cbcff7669a493fa116
+coast-redwood-shoot 11 demo 17a544f86ea2f67851c00a434d3cac3ba31c8b83c97a6bd1c0352968da298115
+cobble 5 hull REFUSED manufacture: cobble has no hull representation
+cobble 5 clumps REFUSED manufacture: cobble has no clumps representation
+cobble 5 quick bb5cc776a08290227b1237527ead5f148bb7addf3a4e32ce291a4499e1a51b94
+cobble 5 demo REFUSED manufacture: cobble has no demo representation
+cobble 11 hull REFUSED manufacture: cobble has no hull representation
+cobble 11 clumps REFUSED manufacture: cobble has no clumps representation
+cobble 11 quick 41b8175bb76533c81c4c2ce0cf75431aab05e7c78fc806ce27e91bade08c9e7f
+cobble 11 demo REFUSED manufacture: cobble has no demo representation
+fern 5 hull REFUSED manufacture: fern has no hull representation
+fern 5 clumps REFUSED manufacture: fern has no clumps representation
+fern 5 quick 4129c76d31113ce231aa6bbd9b1a3055720308031ee1c714b254a8cb51384730
+fern 5 demo REFUSED manufacture: fern has no demo representation
+fern 11 hull REFUSED manufacture: fern has no hull representation
+fern 11 clumps REFUSED manufacture: fern has no clumps representation
+fern 11 quick 58ea4e1f4807685b8e3a67e7ea703835c9b2c7f9f0fbc653915ed06681250020
+fern 11 demo REFUSED manufacture: fern has no demo representation
+giant-sequoia 5 hull a4e7bf595bb9ecd611e32d6e41fb1eea3196d7794e8917fb66e32927ec0e197c
+giant-sequoia 5 clumps aa4f212e49252ca5573fe88ed5c61e5a467852a3a9e862383fb1d3a7931c20ae
+giant-sequoia 5 quick 107c5fd0248b3aeda5b62f2614fcc1c90d82f76cda48f1dbe0ec7df5c6106036
+giant-sequoia 5 demo 4499bdae36593f0b4ad07b6d343c375b1962e6eabbdb67a12a2acfb58c6f682f
+giant-sequoia 11 hull ef743f85c6001333068ca2aa0ce72d6c7da7844f90123001d44e7538c1d486fb
+giant-sequoia 11 clumps e05b09ba46a29e527549aa49c1056813dd4f02b894c5d4888697ec0cb123a343
+giant-sequoia 11 quick 6b61bc2b5faea52c05ad12a4b788aaf07e091d4286d4e36e8461381aaefcb10b
+giant-sequoia 11 demo 0e4b85db1dbb988ed9ca9fa5451d36e5d80fb771286ed1f59232b4b56d29e3c3
+giant-sequoia-shoot 5 hull 2b78629836c2c75f3b666be2ca03d8f634a7ea2e8b61dceddc7b50e66ecb2db7
+giant-sequoia-shoot 5 clumps e9d38562f168f416ea651fe683623dab9d395476a6fad28b18d2fc10d756c074
+giant-sequoia-shoot 5 quick 20564597e012e6b0797276267f9132a096fbff2ce2875713cfa6771a16124fd6
+giant-sequoia-shoot 5 demo a76b87fe708779fa2c1a2541b3847b5720cc076af6f02420ef88f838da5407c4
+giant-sequoia-shoot 11 hull 2b78629836c2c75f3b666be2ca03d8f634a7ea2e8b61dceddc7b50e66ecb2db7
+giant-sequoia-shoot 11 clumps e9d38562f168f416ea651fe683623dab9d395476a6fad28b18d2fc10d756c074
+giant-sequoia-shoot 11 quick 20564597e012e6b0797276267f9132a096fbff2ce2875713cfa6771a16124fd6
+giant-sequoia-shoot 11 demo a76b87fe708779fa2c1a2541b3847b5720cc076af6f02420ef88f838da5407c4
+home 5 hull REFUSED manufacture: home has no hull representation
+home 5 clumps REFUSED manufacture: home has no clumps representation
+home 5 quick 5afc74b9589470fa2fd1f6fb99baf56ab61264966b435a68a2a70f16b12958ad
+home 5 demo REFUSED manufacture: home has no demo representation
+home 11 hull REFUSED manufacture: home has no hull representation
+home 11 clumps REFUSED manufacture: home has no clumps representation
+home 11 quick 42dabf87487f5595e5fadb598517e30a7f9deb3950749039c97eaac7a62ddeb0
+home 11 demo REFUSED manufacture: home has no demo representation
+log 5 hull REFUSED manufacture: log has no hull representation
+log 5 clumps REFUSED manufacture: log has no clumps representation
+log 5 quick f41e1dd0da71a755953a3e9f46a55b02bd6ef43037c968a248464cccadf82089
+log 5 demo REFUSED manufacture: log has no demo representation
+log 11 hull REFUSED manufacture: log has no hull representation
+log 11 clumps REFUSED manufacture: log has no clumps representation
+log 11 quick 49a351bcca0a1f13f56c7c97be79c1e30d72960dfebccca03581dd78dff9ae61
+log 11 demo REFUSED manufacture: log has no demo representation
+maser 5 hull REFUSED manufacture: maser has no hull representation
+maser 5 clumps REFUSED manufacture: maser has no clumps representation
+maser 5 quick ce7f1539c514d29ea52b183fc1665d8ac0bb28c22bcb585bd893bb5a2b05e1af
+maser 5 demo REFUSED manufacture: maser has no demo representation
+maser 11 hull REFUSED manufacture: maser has no hull representation
+maser 11 clumps REFUSED manufacture: maser has no clumps representation
+maser 11 quick df4b65c6def12e2d889369aafaf0d358d5f46691c5af3cf6a8408ced99e3acf5
+maser 11 demo REFUSED manufacture: maser has no demo representation
+norway 5 hull 01a6d521e350764eb4008a0c0e87e90608e8dc8ce606000cbbaf9efcbd759b75
+norway 5 clumps 35a2d3eaa06ea6f7f84e5d36047e9e539a771577d42be45adec9382192ab722f
+norway 5 quick 36b9d863b42d07ceb319628f78e9665a1943b1c8a64ab32d1fde457d84f7ad77
+norway 5 demo 17a6fa6eca78ad36506f5e4e6311c11965d5d46fbcb93dcde0e2d9e4c3571aca
+norway 11 hull 1581e0e079829a547e5067b1b8486e8b2deb6bc11aee9c0617df296259a00c3b
+norway 11 clumps 262a757ab0ddf2d4546bb944ab9dbb9950598f87eb58d812b5cbe712c5cc38e8
+norway 11 quick 8b45bd118a38d90fe38d0b71369801864982f43e19d088e998b59d613cd438b5
+norway 11 demo a20619990a4aa6e5bd9cf2df1921cfa6a0ace27060a4c4c537a7b52e9bbeed7c
+optical-observatory 5 hull 5f7fbb56e88490334b5728e465566587e398c4a9f85d914b9af27f791bfa4fca
+optical-observatory 5 clumps 41b8c6fe92781cef313563d483b8f753170131c06710a560bf18074e5160f222
+optical-observatory 5 quick 6e59e189c55e46bed37e248431d301a0241c4b8a97ffeb1613e7b7fd778c79da
+optical-observatory 5 demo 8ee9569b29a96fb7878ecdc259f6bb7e3167dbd226022c5e52875a094a8a522a
+optical-observatory 11 hull 5f7fbb56e88490334b5728e465566587e398c4a9f85d914b9af27f791bfa4fca
+optical-observatory 11 clumps 41b8c6fe92781cef313563d483b8f753170131c06710a560bf18074e5160f222
+optical-observatory 11 quick 6e59e189c55e46bed37e248431d301a0241c4b8a97ffeb1613e7b7fd778c79da
+optical-observatory 11 demo 8ee9569b29a96fb7878ecdc259f6bb7e3167dbd226022c5e52875a094a8a522a
+pebble 5 hull REFUSED manufacture: pebble has no hull representation
+pebble 5 clumps REFUSED manufacture: pebble has no clumps representation
+pebble 5 quick 057a8d87e615e212f99fdb5cd918ea2a8f3bed79b546aace964ff798d6532819
+pebble 5 demo REFUSED manufacture: pebble has no demo representation
+pebble 11 hull REFUSED manufacture: pebble has no hull representation
+pebble 11 clumps REFUSED manufacture: pebble has no clumps representation
+pebble 11 quick c767b54e82c61a3be22b31b546fddead130105ed19e43cad13e5166ec291b55d
+pebble 11 demo REFUSED manufacture: pebble has no demo representation
+spotlight 5 hull REFUSED manufacture: spotlight has no hull representation
+spotlight 5 clumps REFUSED manufacture: spotlight has no clumps representation
+spotlight 5 quick 6b8eff7e955b82be01bca0bc7ccf7f835b23e4a241ed7e82ba91746e43321707
+spotlight 5 demo REFUSED manufacture: spotlight has no demo representation
+spotlight 11 hull REFUSED manufacture: spotlight has no hull representation
+spotlight 11 clumps REFUSED manufacture: spotlight has no clumps representation
+spotlight 11 quick 4b51bafcf65b9130880b7ce17724b28e3717b451c5fdb5959927ff5cec19937f
+spotlight 11 demo REFUSED manufacture: spotlight has no demo representation
+spruce 5 hull 6f9c7fcecc735c91a451deeb65dedd7c9cdad041e29e41310ab94bdeb28a445d
+spruce 5 clumps c4ab1141f6ea88c8320e3e383bd9ec2062dae4f8ac3e231c244f500b47ad3b3b
+spruce 5 quick a96077d346c39ba24740e8f7ab81d8bd706b59a12323c9e13e6eca6ed95c8c78
+spruce 5 demo cbe8797d8e85f4c08177783818f9bddedf409b59e57c3778bc9fc7bb159f5680
+spruce 11 hull 0c53926c3cd7729b2eb3863518b69d2ae530f0a87bcaf7d0f27d6d3472884c75
+spruce 11 clumps 40e229d74a5dcda9db52c39df1a2b71b79610e07ce209f514ce04a72da96b6d1
+spruce 11 quick d0851dbf344df6e60224071a21a3a6a22453e0be4fe57610e92f176e2a7b8b19
+spruce 11 demo ad3a758061aa9d340eee51a3d5bd6a047cf0eaaa82a96acbf59aebf345900fc0

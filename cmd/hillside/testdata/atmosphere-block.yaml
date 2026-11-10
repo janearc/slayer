@@ -1,0 +1,12 @@
+# Authored integration scene optics, 2026-11-07.
+  weather:
+    regional mist:
+      kind: prescribed-mist
+      extinction: {value: 0.2, unit: m^-1}
+      depth: {value: 10, unit: m}
+      coverage: 1
+      seed: 34
+  atmosphere:
+    weather: regional mist
+    extent: terrain
+    albedo: 0.75

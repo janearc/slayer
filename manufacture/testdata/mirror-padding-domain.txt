@@ -1,0 +1,57 @@
+Segmented mirror scan: exact retained lattice
+
+The tile radius is span=R/5. Integer q,r place centres at
+  x = 1.5*span*q
+  z = sqrt(3)*span*(r+q/2).
+A centre survives only when hypot(x,z)+span <= R. In exact arithmetic,
+this is 3*(q*q+q*r+r*r) <= 16. Equality is impossible: the left side is
+an integer multiple of three. The nearest squared values on either side
+are at most 15 and at least 18. Their radial margin exceeds .127 spans,
+or .025 of R.
+
+For R >= 2^-600, every nonzero radial-cull operand is normal binary64,
+including span. The height calculation does not enter this test. Go Hypot
+rescales by the larger operand before squaring. A conservative 512*u*R
+rounding envelope for this short, noncancelling pipeline is far smaller
+than the lattice margin. The > to >= mutation therefore retains the same
+tiles.
+
+A retained tile has |q|<=2. Already at |q|=3, |x|+span=5.5 spans > R.
+For those surviving columns, every |r|>=5 row is outside the disc. Adding
+q=-5 or q=5, removing q=4, adding r=-6 or r=6, or removing r=5 changes
+only discarded scan points.
+
+Replacing r+q/2 with r-q/2 reindexes r by r-q. The padded row range still
+contains every retained centre in each column. These are small exact
+half-integer sums; matching centres have bit-identical coordinates and
+remain in the same order. There are 19 retained centres.
+
+The public Optical API permits arbitrarily small positive apertures, so
+normal radial arithmetic alone is not the whole argument. For R<2^-600,
+Aperture A=2R<2^-599, including R=0 after division underflow. The first
+structure box has width=depth=.35A. Its top triangles have equal Y values
+and horizontal edge components bounded by A after azimuth rotation. Every
+cross component is bounded by 2*A*A<2^-1197 and underflows to zero.
+mesh.New refuses that leaf surface, if the enclosure has not failed first.
+
+Material slots are meshed in order: enclosure 0, structure 1, mirror 2.
+The changed mirror faces are not exposed before that identical error.
+Bounds is prescribed metadata, and Lights is empty. Even the fully padded
+scan has only 99*24 faces, below the unchanged 100000-face cap together
+with the fixed enclosure. No minimum aperture from YAML is assumed.
+
+This covers the exact eight recorded padding, reindexing and cull mutations.
+It does not cover arbitrary mirror edits or the quad area threshold. Review
+again if public construction, slot order, storage access or the numerical
+implementation changes. Source hashes are recorded below.
+
+Production checkpoint: c51ba95eeb50b32c04e1136994e60c9cd98faf34
+Toolchain: Go 1.26.10, Darwin/ARM64
+
+Source SHA256:
+62ac7543e5456cde1101ca2cb69c21e2483c887b4268bae08be8e38143e21597  manufacture/observatory.go
+5f6ad9b7882e880ae1bfbe31500323b5c945cf857ac3ff161382a831412436f1  manufacture/good.go
+9728ba56d8c5f46a142f93bc842afa3f94ce3e4bee925c7af65b35452a7e3314  manufacture/home.go
+7c9c27da0e17581defad28922a2f3809f38285dfbc44c4d699f847d55c8b1327  manufacture/surface.go
+e247f15393285bd25f2828c5797a70e4e5d71ec5cbed7cc607562839b87206eb  mesh/mesh.go
+

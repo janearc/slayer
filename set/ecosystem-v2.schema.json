@@ -1,0 +1,5464 @@
+{
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "const": "https://github.com/janearc/slayer/schemas/ecosystem-v2.json"
+    },
+    "scene": {
+      "$ref": "#/$defs/scene"
+    },
+    "edit": {
+      "$ref": "#/$defs/edit"
+    },
+    "timeline": {
+      "$ref": "#/$defs/timeline"
+    }
+  },
+  "required": [
+    "$schema"
+  ],
+  "oneOf": [
+    {
+      "required": [
+        "scene"
+      ]
+    },
+    {
+      "required": [
+        "edit"
+      ]
+    }
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/janearc/slayer/schemas/ecosystem-v2.json",
+  "title": "Slayer scene and edit, v2",
+  "description": "The scene format slayer is growing into: every key of v1, held to the reader by its parity test, and the keys the reader does not take yet. v2 adds a date, one anchor for a scene, the globe beyond a terrain patch, scenes set in space, things in orbit or placed relative to one another, an attitude, an instrument eye, a sky of catalogued stars, a star as a body with its corona, the lantern, culture orbitals and a nebula as kinds, camera moves relative to things, and an edit of shots cut to a song's timeline. No reader takes v2 yet: it is the specification the reader grows into, one key at a time, each moving into v1 when the reader takes it.",
+  "$defs": {
+    "scene": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "renderer": {
+          "enum": [
+            "gpu",
+            "cpu",
+            "gpu-native-shadows",
+            "gpu-native"
+          ]
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740992
+        },
+        "complexity": {
+          "enum": [
+            "hull",
+            "clumps",
+            "quick",
+            "demo"
+          ]
+        },
+        "light": {
+          "enum": [
+            "ambient",
+            "sun",
+            "moon",
+            "none"
+          ]
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "lon": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          "required": [
+            "lat",
+            "lon"
+          ],
+          "additionalProperties": false
+        },
+        "timeofday": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2359
+        },
+        "sun": {
+          "type": "object",
+          "properties": {
+            "azimuth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "altitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "tint": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "required": [
+            "azimuth",
+            "altitude"
+          ],
+          "additionalProperties": false
+        },
+        "terrain": {
+          "$ref": "#/$defs/terrain"
+        },
+        "recipes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/recipe"
+          }
+        },
+        "weather": {
+          "$ref": "#/$defs/weather"
+        },
+        "set": {
+          "type": "object",
+          "properties": {
+            "things": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/thing"
+              }
+            },
+            "stands": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/stand"
+              }
+            },
+            "bounded_box": {
+              "type": "object",
+              "properties": {
+                "size_x": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "size_y": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "size_z": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            },
+            "assets": {
+              "type": "object",
+              "propertyNames": {
+                "enum": [
+                  "house"
+                ]
+              },
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "autogen": {
+                    "type": "boolean"
+                  },
+                  "autogen_parameters": {
+                    "type": "object"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "texts": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          },
+          "required": [
+
+          ],
+          "additionalProperties": false
+        },
+        "film": {
+          "$ref": "#/$defs/film"
+        },
+        "hud": {
+          "$ref": "#/$defs/hud"
+        },
+        "world": {
+          "$ref": "#/$defs/world"
+        },
+        "planet": {
+          "$ref": "#/$defs/planet"
+        },
+        "cameras": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/camera"
+          }
+        },
+        "moon": {
+          "type": "object",
+          "properties": {
+            "azimuth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "altitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "face": {
+              "type": "string"
+            },
+            "disc": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "azimuth",
+            "altitude"
+          ],
+          "additionalProperties": false
+        },
+        "volume-lighting": {
+          "enum": [
+            "direct",
+            "cached"
+          ]
+        },
+        "fire-fronts": {
+          "type": "object",
+          "maxProperties": 8,
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "stand": {
+                "type": "string",
+                "minLength": 1
+              },
+              "recipe": {
+                "type": "string",
+                "minLength": 1
+              },
+              "from": {
+                "type": "string",
+                "minLength": 1
+              },
+              "bearing": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                  },
+                  "unit": {
+                    "const": "deg"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "speed": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 1.0e-06,
+                    "maximum": 1000
+                  },
+                  "unit": {
+                    "const": "m/s"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "starts": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 86400
+                  },
+                  "unit": {
+                    "const": "s"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "burn-duration": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0.001,
+                    "maximum": 86400
+                  },
+                  "unit": {
+                    "const": "s"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "group-width": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 10000.0
+                  },
+                  "unit": {
+                    "const": "m"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "ignition-height": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000.0
+                  },
+                  "unit": {
+                    "const": "m"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "smoke-radius": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0.001,
+                    "maximum": 10000.0
+                  },
+                  "unit": {
+                    "const": "m"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "fade-time": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 43200
+                  },
+                  "unit": {
+                    "const": "s"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "stand",
+              "recipe",
+              "from",
+              "bearing",
+              "speed",
+              "starts",
+              "burn-duration",
+              "group-width",
+              "ignition-height",
+              "fade-time"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "fuel-beds": {
+          "type": "object",
+          "maxProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "recipe": {
+                "type": "string",
+                "minLength": 1
+              },
+              "model": {
+                "const": "mandel-grass"
+              },
+              "east": {
+                "type": "number",
+                "minimum": -100000000.0,
+                "maximum": 100000000.0
+              },
+              "north": {
+                "type": "number",
+                "minimum": -100000000.0,
+                "maximum": 100000000.0
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 32,
+                "multipleOf": 8
+              },
+              "depth": {
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 32,
+                "multipleOf": 8
+              },
+              "cell": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0.25,
+                    "maximum": 2
+                  },
+                  "unit": {
+                    "const": "m"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "step": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0.001,
+                    "maximum": 0.1
+                  },
+                  "unit": {
+                    "const": "s"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "ignition-radius": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100
+                  },
+                  "unit": {
+                    "const": "m"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "ignition-temperature": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 300,
+                    "maximum": 3000
+                  },
+                  "unit": {
+                    "const": "K"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "ambient-temperature": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 200,
+                    "maximum": 400
+                  },
+                  "unit": {
+                    "const": "K"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "fuel": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "surface": {
+                "enum": [
+                  "fuel",
+                  "terrain"
+                ]
+              },
+              "heat-transport": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "east",
+                  "south"
+                ],
+                "properties": {
+                  "east": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "value",
+                      "unit"
+                    ],
+                    "properties": {
+                      "value": {
+                        "type": "number"
+                      },
+                      "unit": {
+                        "const": "m/s"
+                      }
+                    }
+                  },
+                  "south": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "value",
+                      "unit"
+                    ],
+                    "properties": {
+                      "value": {
+                        "type": "number"
+                      },
+                      "unit": {
+                        "const": "m/s"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "recipe",
+              "model",
+              "east",
+              "north",
+              "width",
+              "depth",
+              "cell",
+              "step",
+              "ignition-radius",
+              "ignition-temperature",
+              "ambient-temperature",
+              "fuel"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "lasers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/laser"
+          }
+        },
+        "atmosphere": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "weather": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "extent": {
+                  "const": "terrain"
+                },
+                "albedo": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "weather",
+                "extent",
+                "albedo"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "layers": {
+                  "type": "object",
+                  "minProperties": 1,
+                  "additionalProperties": {
+                    "$ref": "#/$defs/atmosphere-layer"
+                  }
+                }
+              },
+              "required": [
+                "layers"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "laser-pointings": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/laserDirection"
+          }
+        },
+        "ecosystems": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/ecosystem"
+          }
+        },
+        "setting": {
+          "description": "v2. ground: a scene on terrain, as every v1 scene is. space: no ground, location or weather; the sun is placed by the frame.",
+          "enum": [
+            "ground",
+            "space"
+          ]
+        },
+        "date": {
+          "description": "v2, keyhole gap 11. The day, so the sun and moon are placed by an ephemeris; authored sun and moon directions still win.",
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "globe": {
+          "$ref": "#/$defs/globe"
+        },
+        "frame": {
+          "$ref": "#/$defs/space-frame"
+        },
+        "sky": {
+          "$ref": "#/$defs/sky"
+        }
+      },
+      "required": [
+        "name",
+        "film",
+        "cameras"
+      ],
+      "additionalProperties": false
+    },
+    "terrain": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "west": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000.0
+        },
+        "north": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000.0
+        },
+        "across": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100000.0
+        },
+        "down": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100000.0
+        },
+        "step": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 10000.0
+        },
+        "smooth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000.0
+        }
+      },
+      "required": [
+        "from",
+        "file",
+        "west",
+        "north",
+        "across",
+        "down",
+        "step"
+      ],
+      "additionalProperties": false
+    },
+    "recipe": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "optical-observatory"
+            },
+            "enclosure": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "dome"
+                },
+                "diameter": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 200
+                    },
+                    "unit": {
+                      "const": "m"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "unit"
+                  ],
+                  "additionalProperties": false
+                },
+                "opening": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number",
+                      "minimum": 5,
+                      "maximum": 90
+                    },
+                    "unit": {
+                      "const": "deg"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "unit"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "diameter",
+                "opening"
+              ],
+              "additionalProperties": false
+            },
+            "telescope": {
+              "type": "object",
+              "properties": {
+                "aperture": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number",
+                      "minimum": 0.1,
+                      "maximum": 120
+                    },
+                    "unit": {
+                      "const": "m"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "unit"
+                  ],
+                  "additionalProperties": false
+                },
+                "mount": {
+                  "const": "alt-azimuth"
+                },
+                "primary": {
+                  "enum": [
+                    "segmented",
+                    "monolithic"
+                  ]
+                },
+                "pointing": {
+                  "type": "object",
+                  "properties": {
+                    "azimuth": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 360
+                    },
+                    "altitude": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 90
+                    }
+                  },
+                  "required": [
+                    "azimuth",
+                    "altitude"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "aperture",
+                "mount",
+                "primary",
+                "pointing"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "enclosure",
+            "telescope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "spruce",
+                "norway",
+                "coast-redwood",
+                "giant-sequoia",
+                "coast-redwood-shoot",
+                "giant-sequoia-shoot",
+                "fern",
+                "pebble",
+                "cobble",
+                "boulder",
+                "log",
+                "can",
+                "campfire",
+                "bonfire",
+                "spotlight",
+                "maser",
+                "home",
+                "spitzer",
+                "hubble",
+                "webb"
+              ]
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "valley-oak",
+                "alder",
+                "poplar",
+                "manzanita",
+                "chaparral-brush",
+                "joshua-tree"
+              ]
+            },
+            "season": {
+              "enum": [
+                "summer",
+                "autumn",
+                "winter"
+              ],
+              "default": "summer"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "fire"
+            },
+            "flame": {
+              "$ref": "#/$defs/fire-flame"
+            },
+            "smoke": {
+              "$ref": "#/$defs/fire-smoke"
+            },
+            "light-cells": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 8,
+              "default": 3
+            },
+            "layout": {
+              "$ref": "#/$defs/fire-layout"
+            },
+            "sparks": {
+              "$ref": "#/$defs/fireSparks"
+            }
+          },
+          "required": [
+            "kind",
+            "flame"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "space-observatory"
+            },
+            "spacecraft": {
+              "type": "object",
+              "properties": {
+                "design": {
+                  "enum": [
+                    "spitzer",
+                    "hubble",
+                    "webb"
+                  ]
+                },
+                "aperture": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "unit": {
+                      "const": "m"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "unit"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "design",
+                "aperture"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "spacecraft"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "thing": {
+      "type": "object",
+      "properties": {
+        "east": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000.0
+        },
+        "north": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000.0
+        },
+        "kind": {
+          "enum": [
+            "spruce",
+            "norway",
+            "coast-redwood",
+            "giant-sequoia",
+            "coast-redwood-shoot",
+            "giant-sequoia-shoot",
+            "fern",
+            "pebble",
+            "cobble",
+            "boulder",
+            "log",
+            "can",
+            "campfire",
+            "bonfire",
+            "spotlight",
+            "maser",
+            "home",
+            "optical-observatory",
+            "spitzer",
+            "hubble",
+            "webb",
+            "space-observatory",
+            "palomar",
+            "keck-i",
+            "keck-ii",
+            "subaru",
+            "rubin",
+            "elt",
+            "griffith",
+            "dobsonian-36",
+            "apo-refractor-5",
+            "sct-24",
+            "mobile-crane",
+            "mirror-gantry",
+            "scaffold-tower",
+            "service-truck",
+            "utility-pickup",
+            "equipment-trailer",
+            "shipping-crate",
+            "equipment-cabinet",
+            "generator",
+            "cooling-unit",
+            "access-stairs",
+            "work-platform",
+            "handrail",
+            "cable-tray",
+            "weather-mast",
+            "cfht",
+            "gemini-north",
+            "irtf",
+            "uh-88",
+            "ukirt",
+            "jcmt",
+            "sma-antenna",
+            "sma-array",
+            "vlba-maunakea",
+            "panstarrs-1",
+            "panstarrs-2",
+            "faulkes-north",
+            "dkist",
+            "atlas-haleakala",
+            "tlrs-4",
+            "solarc",
+            "mees-solar",
+            "aeos",
+            "mssc-1-6m",
+            "mssc-twin-1-2m",
+            "geodss",
+            "geodss-site",
+            "guide-star-launcher",
+            "point",
+            "star",
+            "lantern",
+            "culture-orbital",
+            "nebula"
+          ]
+        },
+        "recipe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740992
+        },
+        "complexity": {
+          "enum": [
+            "hull",
+            "clumps",
+            "quick",
+            "demo"
+          ]
+        },
+        "alight": {
+          "type": "boolean"
+        },
+        "stands_in_for": {
+          "type": "string",
+          "minLength": 1
+        },
+        "height": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "heading": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "unit": {
+              "const": "deg"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "place": {
+          "description": "v2. Placed at the scene's anchor, its space frame, or, for a scene in space about one body, the origin; not by east and north.",
+          "type": "object",
+          "properties": {
+            "at": {
+              "enum": [
+                "anchor",
+                "frame",
+                "origin"
+              ]
+            }
+          },
+          "required": [
+            "at"
+          ],
+          "additionalProperties": false
+        },
+        "orbit": {
+          "$ref": "#/$defs/orbit"
+        },
+        "attitude": {
+          "$ref": "#/$defs/attitude"
+        },
+        "eye": {
+          "$ref": "#/$defs/instrument-eye"
+        },
+        "around": {
+          "description": "v2. Placed round another thing of the set, by its name: an orbital round the lantern, a nebula round it all.",
+          "type": "string",
+          "minLength": 1
+        },
+        "star": {
+          "description": "v2. For kind star: which star, its radius and surface read from celestial by name.",
+          "enum": [
+            "sun"
+          ]
+        },
+        "limb": {
+          "description": "v2. For kind star: how the disc darkens toward its edge.",
+          "enum": [
+            "uniform",
+            "darkened"
+          ]
+        },
+        "corona": {
+          "$ref": "#/$defs/corona"
+        },
+        "panels": {
+          "description": "v2. For kind lantern: the swarm's arrangement; baseline is package lantern's, panels near six stellar radii in bands 0.4 radii wide.",
+          "enum": [
+            "baseline"
+          ]
+        },
+        "turning": {
+          "description": "v2. For kind lantern: whether the swarm's rings turn.",
+          "type": "boolean"
+        },
+        "radius": {
+          "$ref": "#/$defs/space-length"
+        },
+        "width": {
+          "$ref": "#/$defs/space-length"
+        },
+        "walls": {
+          "$ref": "#/$defs/space-length"
+        },
+        "lean": {
+          "description": "v2. For kind culture-orbital: its lean from the axis of what it goes round.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "unit": {
+              "const": "deg"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "sense": {
+          "description": "v2. For kind culture-orbital: which way it turns, one way or the other.",
+          "enum": [
+            1,
+            -1
+          ]
+        },
+        "lights": {
+          "description": "v2. For kind culture-orbital: the lights along its walls, black bodies across a range of temperatures.",
+          "type": "object",
+          "properties": {
+            "kelvin": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "to": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kelvin"
+          ],
+          "additionalProperties": false
+        },
+        "thickness": {
+          "description": "v2. For kind nebula: its density, in cmd/orbital's units.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "neon": {
+          "description": "v2. For kind nebula: the share of it that is neon.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "argon": {
+          "description": "v2. For kind nebula: the share of it that is argon.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "glow": {
+          "description": "v2. For kind nebula: how bright its glow is.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "seed"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "east",
+            "north"
+          ]
+        },
+        {
+          "required": [
+            "place"
+          ]
+        },
+        {
+          "required": [
+            "orbit"
+          ]
+        },
+        {
+          "required": [
+            "around"
+          ]
+        }
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "kind"
+          ],
+          "not": {
+            "required": [
+              "recipe"
+            ]
+          }
+        },
+        {
+          "required": [
+            "recipe"
+          ],
+          "not": {
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      ]
+    },
+    "stand": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "spruce",
+            "norway",
+            "coast-redwood",
+            "giant-sequoia",
+            "coast-redwood-shoot",
+            "giant-sequoia-shoot",
+            "fern",
+            "pebble",
+            "cobble",
+            "boulder",
+            "log",
+            "can",
+            "campfire",
+            "bonfire",
+            "spotlight",
+            "maser",
+            "home",
+            "optical-observatory",
+            "spitzer",
+            "hubble",
+            "webb",
+            "space-observatory",
+            "palomar",
+            "keck-i",
+            "keck-ii",
+            "subaru",
+            "rubin",
+            "elt",
+            "griffith",
+            "dobsonian-36",
+            "apo-refractor-5",
+            "sct-24",
+            "mobile-crane",
+            "mirror-gantry",
+            "scaffold-tower",
+            "service-truck",
+            "utility-pickup",
+            "equipment-trailer",
+            "shipping-crate",
+            "equipment-cabinet",
+            "generator",
+            "cooling-unit",
+            "access-stairs",
+            "work-platform",
+            "handrail",
+            "cable-tray",
+            "weather-mast",
+            "cfht",
+            "gemini-north",
+            "irtf",
+            "uh-88",
+            "ukirt",
+            "jcmt",
+            "sma-antenna",
+            "sma-array",
+            "vlba-maunakea",
+            "panstarrs-1",
+            "panstarrs-2",
+            "faulkes-north",
+            "dkist",
+            "atlas-haleakala",
+            "tlrs-4",
+            "solarc",
+            "mees-solar",
+            "aeos",
+            "mssc-1-6m",
+            "mssc-twin-1-2m",
+            "geodss",
+            "geodss-site",
+            "guide-star-launcher"
+          ]
+        },
+        "recipe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740992
+        },
+        "complexity": {
+          "enum": [
+            "hull",
+            "clumps",
+            "quick",
+            "demo"
+          ]
+        },
+        "above": {
+          "type": "number",
+          "minimum": -10000,
+          "maximum": 10000
+        },
+        "below": {
+          "type": "number",
+          "minimum": -10000,
+          "maximum": 10000
+        },
+        "alight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "stands_in_for": {
+          "type": "string",
+          "minLength": 1
+        },
+        "within": {
+          "type": "object",
+          "properties": {
+            "of": {
+              "type": "string",
+              "minLength": 1
+            },
+            "from": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "to": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "near": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "far": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "of",
+            "from",
+            "to",
+            "near",
+            "far"
+          ],
+          "additionalProperties": false
+        },
+        "exclude": {
+          "type": "object",
+          "properties": {
+            "around": {
+              "type": "string",
+              "minLength": 1
+            },
+            "clearance": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000.0
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "around",
+            "clearance"
+          ],
+          "additionalProperties": false
+        },
+        "atmosphere": {
+          "type": "object",
+          "properties": {
+            "weather": {
+              "type": "string",
+              "minLength": 1
+            },
+            "extent": {
+              "const": "canopy-and-ground"
+            },
+            "fade-at-boundary": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "weather",
+            "extent",
+            "fade-at-boundary"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "count",
+        "seed"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "kind"
+          ],
+          "not": {
+            "required": [
+              "recipe"
+            ]
+          }
+        },
+        {
+          "required": [
+            "recipe"
+          ],
+          "not": {
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      ]
+    },
+    "weather": {
+      "type": "object",
+      "properties": {
+        "wind": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 360
+                },
+                "unit": {
+                  "const": "deg"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            "speed": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "unit": {
+                  "const": "m/s"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "from",
+            "speed"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "prescribed-mist"
+          },
+          "extinction": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "unit": {
+                "const": "m^-1"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "depth": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 1000
+              },
+              "unit": {
+                "const": "m"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "coverage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "seed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740992
+          }
+        },
+        "required": [
+          "kind",
+          "extinction",
+          "depth",
+          "coverage",
+          "seed"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "triple": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -10000000000000.0,
+        "maximum": 10000000000000.0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "positive-triple": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 10000000000000.0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bright": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000000000000.0
+    },
+    "temperature": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "colour": {
+      "type": "object",
+      "properties": {
+        "srgb_linear": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000000000.0
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "swatch": {
+          "enum": [
+            "blue",
+            "chalk",
+            "clay",
+            "cream",
+            "daylight",
+            "green",
+            "horizon",
+            "ice",
+            "moss",
+            "ochre",
+            "paint",
+            "red",
+            "rust",
+            "sea",
+            "slate",
+            "storm",
+            "tungsten",
+            "zenith"
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "srgb_linear"
+          ]
+        },
+        {
+          "required": [
+            "swatch"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "world": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10000000000000.0
+        },
+        "materials": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "colour": {
+                "$ref": "#/$defs/colour"
+              },
+              "glow": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/colour"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "temperature": {
+                        "$ref": "#/$defs/temperature"
+                      },
+                      "luminance": {
+                        "$ref": "#/$defs/bright"
+                      }
+                    },
+                    "required": [
+                      "temperature",
+                      "luminance"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "source"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "colour"
+                ]
+              },
+              {
+                "required": [
+                  "glow"
+                ]
+              }
+            ],
+            "additionalProperties": false
+          }
+        },
+        "boxes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "material": {
+                "type": "string",
+                "minLength": 1
+              },
+              "middle": {
+                "$ref": "#/$defs/triple"
+              },
+              "size": {
+                "$ref": "#/$defs/positive-triple"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "material",
+              "middle",
+              "size",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "spheres": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "material": {
+                "type": "string",
+                "minLength": 1
+              },
+              "middle": {
+                "$ref": "#/$defs/triple"
+              },
+              "radius": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "motion": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "material",
+              "middle",
+              "radius",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "lamps": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "$ref": "#/$defs/triple"
+              },
+              "temperature": {
+                "$ref": "#/$defs/temperature"
+              },
+              "strength": {
+                "$ref": "#/$defs/bright"
+              },
+              "radius": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "at",
+              "temperature",
+              "strength",
+              "radius",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "spots": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "$ref": "#/$defs/triple"
+              },
+              "aim": {
+                "$ref": "#/$defs/triple"
+              },
+              "cone": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 180
+              },
+              "soft": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 180
+              },
+              "temperature": {
+                "$ref": "#/$defs/temperature"
+              },
+              "strength": {
+                "$ref": "#/$defs/bright"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "at",
+              "aim",
+              "cone",
+              "soft",
+              "temperature",
+              "strength",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "floods": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "colour": {
+                "$ref": "#/$defs/colour"
+              },
+              "strength": {
+                "$ref": "#/$defs/bright"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "colour",
+              "strength",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sky": {
+          "type": "object",
+          "properties": {
+            "horizon": {
+              "$ref": "#/$defs/colour"
+            },
+            "zenith": {
+              "$ref": "#/$defs/colour"
+            },
+            "ground": {
+              "$ref": "#/$defs/colour"
+            },
+            "stars": {
+              "type": "object",
+              "properties": {
+                "seed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740992
+                },
+                "share": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "size": {
+                  "$ref": "#/$defs/bright"
+                },
+                "bright": {
+                  "$ref": "#/$defs/bright"
+                }
+              },
+              "required": [
+                "seed",
+                "share",
+                "size",
+                "bright"
+              ],
+              "additionalProperties": false
+            },
+            "source": {
+              "$ref": "#/$defs/source"
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "horizon",
+                "zenith",
+                "ground",
+                "source"
+              ],
+              "not": {
+                "required": [
+                  "stars"
+                ]
+              }
+            },
+            {
+              "required": [
+                "stars",
+                "source"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "horizon"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "zenith"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "ground"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "additionalProperties": false
+        },
+        "bodies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "template": {
+                "enum": [
+                  "charon",
+                  "earth",
+                  "hale-bopp",
+                  "hot-jupiter",
+                  "hyakutake",
+                  "jupiter",
+                  "magnetar",
+                  "mars",
+                  "mercury",
+                  "neptune",
+                  "pluto",
+                  "pulsar",
+                  "quasar",
+                  "saturn",
+                  "sol",
+                  "uranus",
+                  "venus"
+                ]
+              },
+              "middle": {
+                "$ref": "#/$defs/triple"
+              },
+              "detail": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "radius": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "tilt": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "aurora": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "template",
+              "middle",
+              "detail"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "suns": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "toward": {
+                "$ref": "#/$defs/triple"
+              },
+              "colour": {
+                "$ref": "#/$defs/colour"
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "toward",
+              "colour",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "wisps": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "colour": {
+                "$ref": "#/$defs/colour"
+              },
+              "middle": {
+                "$ref": "#/$defs/triple"
+              },
+              "radius": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "thick": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1000000000000.0
+              },
+              "seed": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740992
+              },
+              "scale": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "amount": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "colour",
+              "middle",
+              "radius",
+              "thick",
+              "seed",
+              "scale",
+              "amount",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "motions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "seconds": {
+                "type": "number",
+                "minimum": 1.0e-9,
+                "maximum": 9214819200
+              },
+              "ease": {
+                "enum": [
+                  "linear",
+                  "ease",
+                  "ease-in",
+                  "ease-out",
+                  "ease-in-out"
+                ]
+              },
+              "hold": {
+                "type": "boolean"
+              },
+              "frames": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "percent": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    "at": {
+                      "$ref": "#/$defs/triple"
+                    }
+                  },
+                  "required": [
+                    "percent",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "seconds",
+              "ease",
+              "hold",
+              "frames"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "share": {
+      "type": "number",
+      "minimum": 1.0e-9,
+      "maximum": 1
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740992
+    },
+    "planet": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "made_up": {
+          "const": true
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000000000
+        },
+        "gravity": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 10000
+        },
+        "deck": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "from_star": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 100000
+        },
+        "pole": {
+          "type": "object",
+          "properties": {
+            "azimuth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "altitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          "additionalProperties": false
+        },
+        "columns": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/planet-layer"
+            }
+          }
+        },
+        "zones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "south": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "north": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "column": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "rings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/planet-ring"
+          }
+        },
+        "sky": {
+          "type": "object",
+          "properties": {
+            "azimuth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "altitude": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 90
+            },
+            "distance": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000000.0
+            }
+          },
+          "required": [
+            "azimuth",
+            "altitude",
+            "distance"
+          ],
+          "additionalProperties": false
+        },
+        "storms": {
+          "$ref": "#/$defs/planet-storms"
+        },
+        "ringlets": {
+          "type": "object",
+          "properties": {
+            "seed": {
+              "$ref": "#/$defs/seed"
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "width": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000.0
+            }
+          },
+          "required": [
+            "seed",
+            "strength",
+            "width"
+          ],
+          "additionalProperties": false
+        },
+        "xrays": {
+          "type": "object",
+          "properties": {
+            "times": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1.0e20
+            },
+            "of": {
+              "const": "jupiter"
+            },
+            "band": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 45
+            }
+          },
+          "required": [
+            "times",
+            "of",
+            "band"
+          ],
+          "additionalProperties": false
+        },
+        "weather": {
+          "type": "object",
+          "properties": {
+            "cells": {
+              "type": "integer",
+              "enum": [
+                16,
+                32,
+                64,
+                128,
+                256,
+                512,
+                1024,
+                2048
+              ]
+            },
+            "day": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 1000000000
+            },
+            "drag": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000.0
+            },
+            "relax": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000.0
+            },
+            "storms": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number",
+                  "minimum": 1.0e-30,
+                  "maximum": 1
+                },
+                "wide": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 1000000000
+                },
+                "strength": {
+                  "type": "number",
+                  "minimum": 1.0e-12,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "seed": {
+              "$ref": "#/$defs/seed"
+            },
+            "moment": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000000.0
+            },
+            "every": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000.0
+            }
+          },
+          "required": [
+            "cells",
+            "day",
+            "drag",
+            "relax",
+            "storms",
+            "seed",
+            "moment",
+            "every"
+          ],
+          "additionalProperties": false
+        },
+        "heat": {
+          "type": "object",
+          "properties": {
+            "tops": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "hottest": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "tops",
+            "hottest"
+          ],
+          "additionalProperties": false
+        },
+        "cooking": {
+          "type": "object",
+          "properties": {
+            "column": {
+              "type": "string",
+              "minLength": 1
+            },
+            "time": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000.0
+            }
+          },
+          "required": [
+            "column",
+            "time"
+          ],
+          "additionalProperties": false
+        },
+        "airglow": {
+          "type": "object",
+          "properties": {
+            "radiance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "band": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 90
+            },
+            "fronts": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 0.999
+            }
+          },
+          "required": [
+            "radiance",
+            "band"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "name",
+        "made_up",
+        "radius",
+        "gravity",
+        "from_star",
+        "zones"
+      ],
+      "additionalProperties": false
+    },
+    "planet-layer": {
+      "type": "object",
+      "properties": {
+        "top": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "bottom": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "gases": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "neon",
+              "krypton",
+              "xenon",
+              "methane"
+            ]
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/share"
+          }
+        },
+        "haze": {
+          "type": "object",
+          "properties": {
+            "depth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "albedo": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "lean": {
+              "type": "number",
+              "minimum": -0.99,
+              "maximum": 0.99
+            },
+            "blue": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "planet-ring": {
+      "type": "object",
+      "properties": {
+        "inner": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000000000000.0
+        },
+        "outer": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000000000000.0
+        },
+        "depth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "albedo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lean": {
+          "type": "number",
+          "minimum": -0.99,
+          "maximum": 0.99
+        },
+        "made_of": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "ice",
+              "zns-ag",
+              "csi-tl"
+            ]
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/share"
+          }
+        },
+        "blue": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "grains": {
+          "type": "object",
+          "properties": {
+            "pattern": {
+              "enum": [
+                "cells",
+                "ridges",
+                "smooth",
+                "speckle"
+              ]
+            },
+            "seed": {
+              "$ref": "#/$defs/seed"
+            },
+            "smallest": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1000000000
+            },
+            "largest": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1000000000
+            },
+            "slope": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 10
+            },
+            "shear": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "clumping": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "pattern",
+            "seed",
+            "smallest",
+            "largest",
+            "slope",
+            "shear",
+            "clumping"
+          ],
+          "additionalProperties": false
+        },
+        "moonlets": {
+          "type": "object",
+          "properties": {
+            "seed": {
+              "$ref": "#/$defs/seed"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "smallest": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000000
+            },
+            "largest": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000000
+            },
+            "slope": {
+              "type": "number",
+              "minimum": 1.01,
+              "maximum": 10
+            },
+            "opens": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "seed",
+            "count",
+            "smallest",
+            "largest",
+            "slope",
+            "opens"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "planet-storms": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "$ref": "#/$defs/seed"
+        },
+        "turbulence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "eddies": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10000
+        },
+        "stretch": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "edge": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 90
+        },
+        "folds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "jets": {
+          "type": "object",
+          "properties": {
+            "shear": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "every": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 180
+            }
+          },
+          "required": [
+            "shear",
+            "every"
+          ],
+          "additionalProperties": false
+        },
+        "swarm": {
+          "type": "object",
+          "properties": {
+            "seed": {
+              "$ref": "#/$defs/seed"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2000
+            },
+            "smallest": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 30
+            },
+            "largest": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 30
+            },
+            "slope": {
+              "type": "number",
+              "minimum": 1.01,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "seed",
+            "count",
+            "smallest",
+            "largest",
+            "slope"
+          ],
+          "additionalProperties": false
+        },
+        "marks": {
+          "type": "object",
+          "properties": {
+            "cap": {
+              "type": "string",
+              "minLength": 1
+            },
+            "clearing": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "spots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "longitude": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "radius": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 90
+              },
+              "turn": {
+                "type": "number",
+                "minimum": -10,
+                "maximum": 10
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "churn": {
+          "type": "object",
+          "properties": {
+            "column": {
+              "type": "string",
+              "minLength": 1
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "seed",
+        "turbulence",
+        "eddies",
+        "stretch",
+        "edge"
+      ],
+      "additionalProperties": false
+    },
+    "hud": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 500
+        },
+        "elements": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/hud-element"
+          }
+        }
+      },
+      "required": [
+        "theme"
+      ],
+      "additionalProperties": false
+    },
+    "hud-value": {
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": -1000000000000.0,
+          "maximum": 1000000000000.0
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "number",
+              "minimum": -1000000000000.0,
+              "maximum": 1000000000000.0
+            },
+            "to": {
+              "type": "number",
+              "minimum": -1000000000000.0,
+              "maximum": 1000000000000.0
+            },
+            "start": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "over": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "hud-share": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "hud-element": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "text",
+            "frame",
+            "bar",
+            "label"
+          ]
+        },
+        "words": {
+          "type": "string",
+          "minLength": 1
+        },
+        "count": {
+          "$ref": "#/$defs/hud-value"
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "$ref": "#/$defs/hud-value"
+        },
+        "left": {
+          "$ref": "#/$defs/hud-share"
+        },
+        "top": {
+          "$ref": "#/$defs/hud-share"
+        },
+        "right": {
+          "$ref": "#/$defs/hud-share"
+        },
+        "bottom": {
+          "$ref": "#/$defs/hud-share"
+        },
+        "across": {
+          "$ref": "#/$defs/hud-share"
+        },
+        "down": {
+          "$ref": "#/$defs/hud-share"
+        },
+        "align": {
+          "enum": [
+            "left",
+            "centre",
+            "right"
+          ]
+        },
+        "ink": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ground": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fill": {
+          "type": "string",
+          "minLength": 1
+        },
+        "empty": {
+          "type": "string",
+          "minLength": 1
+        },
+        "of": {
+          "type": "string",
+          "minLength": 1
+        },
+        "above": {
+          "type": "number",
+          "minimum": -10000,
+          "maximum": 10000
+        },
+        "occluded": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "dependentRequired": {
+        "count": [
+          "format"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "text"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "ink",
+              "across",
+              "down"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "words"
+                ]
+              },
+              {
+                "required": [
+                  "count"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "frame"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "ink",
+              "left",
+              "top",
+              "right",
+              "bottom"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "bar"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fill",
+              "empty",
+              "value",
+              "left",
+              "top",
+              "right",
+              "bottom"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "label"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "ink",
+              "of"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "words"
+                ]
+              },
+              {
+                "required": [
+                  "count"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "words": {
+          "type": "string",
+          "minLength": 1
+        },
+        "font": {
+          "type": "string",
+          "minLength": 1
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 10000
+        },
+        "depth": {
+          "type": "number",
+          "minimum": 0.0001,
+          "maximum": 10000
+        },
+        "bevel": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "smooth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180
+        },
+        "tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "colour": {
+          "type": "object",
+          "properties": {
+            "red": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "green": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "blue": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "red",
+            "green",
+            "blue"
+          ],
+          "additionalProperties": false
+        },
+        "gloss": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "east": {
+          "type": "number",
+          "minimum": 0
+        },
+        "north": {
+          "type": "number",
+          "minimum": 0
+        },
+        "up": {
+          "type": "number",
+          "minimum": -10000,
+          "maximum": 10000
+        },
+        "facing": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "spin": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "words",
+        "font",
+        "size",
+        "depth"
+      ],
+      "additionalProperties": false
+    },
+    "film": {
+      "type": "object",
+      "properties": {
+        "fps": {
+          "description": "v2. Frames a second, for a camera that moves.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 240
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "rays": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "exposure": {
+          "type": "number",
+          "minimum": 1.0e-12,
+          "maximum": 1000000000000.0
+        },
+        "wide": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 179
+        },
+        "print": {
+          "type": "object",
+          "properties": {
+            "knee": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000000.0
+            },
+            "top": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000000.0
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "knee",
+            "top",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "frame": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "height": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ],
+          "additionalProperties": false
+        },
+        "lens": {
+          "type": "object",
+          "properties": {
+            "focal": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "stop": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 1000
+            },
+            "focus": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "focal",
+            "stop",
+            "focus"
+          ],
+          "additionalProperties": false
+        },
+        "shutter": {
+          "type": "number",
+          "minimum": 1.0e-6,
+          "maximum": 100000
+        },
+        "glimpses": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "oneOf": [
+        {
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "frame"
+                ]
+              },
+              {
+                "required": [
+                  "lens"
+                ]
+              },
+              {
+                "required": [
+                  "shutter"
+                ]
+              },
+              {
+                "required": [
+                  "glimpses"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "frame",
+            "lens",
+            "shutter",
+            "glimpses"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "height"
+                ]
+              },
+              {
+                "required": [
+                  "exposure"
+                ]
+              },
+              {
+                "required": [
+                  "wide"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "camera": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eye": {
+          "description": "human, as in v1; or, v2 and keyhole gap 7, the instrument of a thing of the set, by its name, so the picture is what that instrument sees.",
+          "oneOf": [
+            {
+              "const": "human"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "instrument": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "instrument"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "moves": {
+          "description": "v2. A camera that moves: each move from one place to another over a duration, looking at something as it goes.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/move"
+          }
+        },
+        "duration": {
+          "description": "v2. How long a held camera holds; song means the span the edit gives it.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/seconds"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "const": "song"
+                },
+                "unit": {
+                  "const": "s"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "orientation": {
+          "type": "object",
+          "properties": {
+            "point_to": {
+              "type": "string",
+              "minLength": 1
+            },
+            "alpha": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "look_at": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "required": [
+
+          ],
+          "additionalProperties": false
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "loc_relative": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "standoff_x": {
+                  "type": "number"
+                },
+                "standoff_y": {
+                  "type": "number"
+                },
+                "standoff_z": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "object",
+                "standoff_x",
+                "standoff_y",
+                "standoff_z"
+              ],
+              "additionalProperties": false
+            },
+            "at": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "relative": {
+              "$ref": "#/$defs/relative-place"
+            }
+          },
+          "required": [
+
+          ],
+          "additionalProperties": false
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "orientation",
+            "location"
+          ]
+        },
+        {
+          "required": [
+            "moves"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "fire-flame": {
+      "type": "object",
+      "properties": {
+        "radius": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "height": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "absorption": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "m^-1"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "temperature": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "K"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "edge-temperature": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "K"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "intermittency-start": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "temperature-profile": {
+          "enum": [
+            "mean",
+            "hot-tongues"
+          ]
+        },
+        "composition": {
+          "$ref": "#/$defs/fireComposition"
+        }
+      },
+      "required": [
+        "radius",
+        "height",
+        "absorption",
+        "temperature",
+        "edge-temperature"
+      ],
+      "additionalProperties": false
+    },
+    "fire-smoke": {
+      "type": "object",
+      "properties": {
+        "heat-release": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1000000000000.0
+            },
+            "unit": {
+              "const": "kW"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "convective-fraction": {
+          "type": "number",
+          "minimum": 1.0e-06,
+          "maximum": 1
+        },
+        "soot-yield": {
+          "type": "number",
+          "minimum": 1.0e-12,
+          "maximum": 1
+        },
+        "combustion": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1000000.0
+            },
+            "unit": {
+              "const": "MJ/kg"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "mass-extinction": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000.0
+            },
+            "unit": {
+              "const": "m^2/g"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "air-temperature": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "K"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "air-density": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1.0e-09,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "kg/m^3"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "height": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1000000.0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "albedo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "heat-release",
+        "convective-fraction",
+        "soot-yield",
+        "combustion",
+        "mass-extinction",
+        "air-temperature",
+        "air-density",
+        "height",
+        "albedo"
+      ],
+      "additionalProperties": false
+    },
+    "fire-layout": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "pattern": {
+              "const": "cluster"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 32
+            },
+            "radius": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0.001,
+                  "maximum": 10000
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            "height-variation": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.5,
+              "default": 0
+            }
+          },
+          "required": [
+            "pattern",
+            "count",
+            "radius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "pattern": {
+              "const": "line"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 32
+            },
+            "length": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0.001,
+                  "maximum": 10000
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            "height-variation": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.5,
+              "default": 0
+            }
+          },
+          "required": [
+            "pattern",
+            "count",
+            "length"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "fireSparks": {
+      "type": "object",
+      "properties": {
+        "rate": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1000000.0
+            },
+            "unit": {
+              "const": "s^-1"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "lifetime": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 3600
+            },
+            "unit": {
+              "const": "s"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "radius": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.0001,
+              "maximum": 1
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "release-height": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "launch-speed": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "unit": {
+              "const": "m/s"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "spread": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "unit": {
+              "const": "m/s"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "updraft": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "unit": {
+              "const": "m/s"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "drag-time": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1000
+            },
+            "unit": {
+              "const": "s"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "gravity": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "unit": {
+              "const": "m/s^2"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "temperature": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "K"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "end-temperature": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 10000.0
+            },
+            "unit": {
+              "const": "K"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "rate",
+        "lifetime",
+        "radius",
+        "release-height",
+        "launch-speed",
+        "spread",
+        "updraft",
+        "drag-time",
+        "gravity",
+        "temperature",
+        "end-temperature"
+      ],
+      "additionalProperties": false
+    },
+    "fireComposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "continuum",
+        "lines"
+      ],
+      "properties": {
+        "continuum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lines": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "species",
+              "source",
+              "convention",
+              "wavelength",
+              "radiance"
+            ],
+            "properties": {
+              "species": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "convention": {
+                "enum": [
+                  "air",
+                  "vacuum"
+                ]
+              },
+              "wavelength": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 1000000.0
+                  },
+                  "unit": {
+                    "const": "nm"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "radiance": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000000000.0
+                  },
+                  "unit": {
+                    "const": "W/m^2/sr"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "laser": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "type": "object",
+          "properties": {
+            "object": {
+              "type": "string",
+              "minLength": 1
+            },
+            "east": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": -10000000000000.0,
+                  "maximum": 10000000000000.0
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            "up": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": -10000000000000.0,
+                  "maximum": 10000000000000.0
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            "south": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": -10000000000000.0,
+                  "maximum": 10000000000000.0
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "east",
+            "up",
+            "south"
+          ],
+          "additionalProperties": false
+        },
+        "pointing": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/laserDirection"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "radius": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.0001,
+              "maximum": 100
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "reach": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 10000000000000.0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "divergence": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 45
+            },
+            "unit": {
+              "const": "deg"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "wavelength": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000.0
+            },
+            "unit": {
+              "const": "nm"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "display-strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000000.0
+        },
+        "guide-star-offset": {
+          "type": "object",
+          "properties": {
+            "horizontal": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": -3600,
+                  "maximum": 3600
+                },
+                "unit": {
+                  "const": "arcsec"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            "vertical": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": -3600,
+                  "maximum": 3600
+                },
+                "unit": {
+                  "const": "arcsec"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "horizontal",
+            "vertical"
+          ],
+          "additionalProperties": false
+        },
+        "launcher": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "origin",
+        "pointing",
+        "radius",
+        "reach",
+        "divergence",
+        "wavelength",
+        "display-strength"
+      ],
+      "additionalProperties": false
+    },
+    "atmosphere-layer": {
+      "type": "object",
+      "properties": {
+        "weather": {
+          "type": "string",
+          "minLength": 1
+        },
+        "extent": {
+          "description": "terrain: the layer ends at the terrain patch's edge, as in v1. world, v2 and keyhole gap 10: it reaches the horizon, drawn coarser with distance.",
+          "enum": [
+            "terrain",
+            "world"
+          ]
+        },
+        "albedo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "base": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "weather",
+        "extent",
+        "albedo"
+      ],
+      "additionalProperties": false
+    },
+    "laserDirection": {
+      "type": "object",
+      "properties": {
+        "azimuth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "altitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        }
+      },
+      "required": [
+        "azimuth",
+        "altitude"
+      ],
+      "additionalProperties": false
+    },
+    "seconds": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "degrees": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360
+        },
+        "unit": {
+          "const": "deg"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "space-length": {
+      "description": "v2. A length in metres, kilometres, or the radii of the star the scene is about.",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "m",
+            "km",
+            "radii"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "sky-direction": {
+      "description": "v2. A direction on the sky, in degrees: right ascension and declination.",
+      "type": "object",
+      "properties": {
+        "ra": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "dec": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        }
+      },
+      "required": [
+        "ra",
+        "dec"
+      ],
+      "additionalProperties": false
+    },
+    "anchor": {
+      "description": "v2, keyhole gaps 5 and 6. One place, fixed for the whole scene, that the map, the maths and the terrain agree on; east, north and up are measured from it, from the ground to orbit.",
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "elevation": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "metres, or lidar to read it from the terrain at the anchor.",
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "const": "lidar"
+                }
+              ]
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "datum": {
+          "enum": [
+            "wgs84"
+          ]
+        }
+      },
+      "required": [
+        "lat",
+        "lon",
+        "elevation",
+        "datum"
+      ],
+      "additionalProperties": false
+    },
+    "globe": {
+      "description": "v2, keyhole gap 10. The world, not a patch: elevation near the anchor and a coarser model beyond it, the detail spent by each thing's size on the picture.",
+      "type": "object",
+      "properties": {
+        "planet": {
+          "enum": [
+            "earth"
+          ]
+        },
+        "terrain": {
+          "type": "object",
+          "properties": {
+            "near": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "from"
+              ],
+              "additionalProperties": false
+            },
+            "beyond": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "from"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "near",
+            "beyond"
+          ],
+          "additionalProperties": false
+        },
+        "detail": {
+          "enum": [
+            "by-size"
+          ]
+        }
+      },
+      "required": [
+        "planet",
+        "terrain",
+        "detail"
+      ],
+      "additionalProperties": false
+    },
+    "space-frame": {
+      "description": "v2. Where a scene set in space is, and when.",
+      "type": "object",
+      "properties": {
+        "at": {
+          "enum": [
+            "sun-earth-l2"
+          ]
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        }
+      },
+      "required": [
+        "at"
+      ],
+      "additionalProperties": false
+    },
+    "sky": {
+      "description": "v2. The sky behind everything, drawn from a catalogue, not painted.",
+      "type": "object",
+      "properties": {
+        "stars": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "enum": [
+                "gaia"
+              ]
+            },
+            "toward": {
+              "$ref": "#/$defs/sky-direction"
+            },
+            "radius": {
+              "$ref": "#/$defs/degrees"
+            },
+            "faintest": {
+              "description": "the faintest magnitude drawn.",
+              "type": "number"
+            }
+          },
+          "required": [
+            "from",
+            "toward",
+            "radius",
+            "faintest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "stars"
+      ],
+      "additionalProperties": false
+    },
+    "orbit": {
+      "description": "v2, keyhole gaps 8 and 9. A thing in orbit, placed so it passes over another thing at the scene's time.",
+      "type": "object",
+      "properties": {
+        "height": {
+          "$ref": "#/$defs/space-length"
+        },
+        "inclination": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180
+        },
+        "over": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "height",
+        "inclination",
+        "over"
+      ],
+      "additionalProperties": false
+    },
+    "attitude": {
+      "description": "v2, keyhole gap 9. Which way a thing points: straight down, at a place on the sky, or at another thing; and which side faces the sun.",
+      "type": "object",
+      "properties": {
+        "point": {
+          "oneOf": [
+            {
+              "const": "nadir"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "sky": {
+                  "$ref": "#/$defs/sky-direction"
+                }
+              },
+              "required": [
+                "sky"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "object"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "shield": {
+          "enum": [
+            "sun"
+          ]
+        }
+      },
+      "required": [
+        "point"
+      ],
+      "additionalProperties": false
+    },
+    "instrument-eye": {
+      "description": "v2, keyhole gap 7. What an instrument models: a pupil and a focal length, and so a diffraction limit. It does not trace the mirrors.",
+      "type": "object",
+      "properties": {
+        "pupil": {
+          "$ref": "#/$defs/space-length"
+        },
+        "focal": {
+          "$ref": "#/$defs/space-length"
+        },
+        "models": {
+          "const": "diffraction-limited pupil"
+        }
+      },
+      "required": [
+        "pupil",
+        "focal",
+        "models"
+      ],
+      "additionalProperties": false
+    },
+    "corona": {
+      "description": "v2. A star's corona as authored emission off its limb, shaped like the photographs; not simulated.",
+      "type": "object",
+      "properties": {
+        "reach": {
+          "description": "how far it reaches, in the star's radii.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "streamers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740992
+        }
+      },
+      "required": [
+        "reach",
+        "streamers",
+        "seed"
+      ],
+      "additionalProperties": false
+    },
+    "relative-place": {
+      "description": "v2, keyhole gap 4. A place set by a thing of the set: above it, behind it, at a distance, above its plane.",
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "up": {
+          "$ref": "#/$defs/space-length"
+        },
+        "above": {
+          "$ref": "#/$defs/space-length"
+        },
+        "behind": {
+          "$ref": "#/$defs/space-length"
+        },
+        "standoff": {
+          "$ref": "#/$defs/space-length"
+        },
+        "distance": {
+          "$ref": "#/$defs/space-length"
+        },
+        "above_plane": {
+          "$ref": "#/$defs/degrees"
+        }
+      },
+      "required": [
+        "object"
+      ],
+      "additionalProperties": false
+    },
+    "look": {
+      "description": "v2, keyhole gap 4. What a move looks at: a thing, or a place on the sky, with an offset to one side.",
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sky": {
+          "$ref": "#/$defs/sky-direction"
+        },
+        "offset": {
+          "$ref": "#/$defs/space-length"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "object"
+          ]
+        },
+        {
+          "required": [
+            "sky"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "move": {
+      "description": "v2. One move of a camera: from one place to another, or held where it is while its field narrows, over a duration.",
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/relative-place"
+        },
+        "to": {
+          "$ref": "#/$defs/relative-place"
+        },
+        "look": {
+          "$ref": "#/$defs/look"
+        },
+        "field": {
+          "description": "how wide the picture is across, at the thing looked at, from the move's start to its end.",
+          "type": "object",
+          "properties": {
+            "from": {
+              "$ref": "#/$defs/space-length"
+            },
+            "to": {
+              "$ref": "#/$defs/space-length"
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        "duration": {
+          "$ref": "#/$defs/seconds"
+        },
+        "ease": {
+          "enum": [
+            "none",
+            "in",
+            "out",
+            "in-out"
+          ]
+        }
+      },
+      "required": [
+        "look",
+        "duration"
+      ],
+      "additionalProperties": false
+    },
+    "edit": {
+      "description": "v2. Shots cut to a song. Shots are counted in the song's own bars and sections, never in seconds, so a tempo change moves every cut with it.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "music": {
+          "description": "the song's file; never in a repository.",
+          "type": "string",
+          "minLength": 1
+        },
+        "timeline": {
+          "description": "the song's timeline, as the beat tool writes it.",
+          "type": "string",
+          "minLength": 1
+        },
+        "film": {
+          "$ref": "#/$defs/film"
+        },
+        "shots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/shot"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "music",
+        "timeline",
+        "film",
+        "shots"
+      ],
+      "additionalProperties": false
+    },
+    "shot": {
+      "description": "v2. One shot of an edit: old footage, or a camera of a scene rendered for exactly its span.",
+      "type": "object",
+      "properties": {
+        "footage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scene": {
+          "type": "string",
+          "minLength": 1
+        },
+        "camera": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from": {
+          "$ref": "#/$defs/song-point"
+        },
+        "to": {
+          "$ref": "#/$defs/song-point"
+        },
+        "on-hit": {
+          "enum": [
+            "flash",
+            "cut"
+          ]
+        },
+        "fit": {
+          "description": "how a camera's moves meet the span: stretched to it, held at the end, or cut short.",
+          "enum": [
+            "stretch",
+            "hold",
+            "cut"
+          ]
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "footage"
+          ],
+          "not": {
+            "required": [
+              "scene"
+            ]
+          }
+        },
+        {
+          "required": [
+            "scene",
+            "camera"
+          ],
+          "not": {
+            "required": [
+              "footage"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "song-point": {
+      "description": "v2. A point in the song: a bar of a section, a section's end, or the song's end.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "section": {
+              "type": "string",
+              "minLength": 1
+            },
+            "bar": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "section",
+            "bar"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "section": {
+              "type": "string",
+              "minLength": 1
+            },
+            "end": {
+              "const": true
+            }
+          },
+          "required": [
+            "section",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "song": {
+              "const": "end"
+            }
+          },
+          "required": [
+            "song"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "timeline": {
+      "description": "v2. A song's timeline as the beat tool writes it, in seconds from the song's start: tempo, beats, bars, the big hits and the sections.",
+      "type": "object",
+      "properties": {
+        "tempo": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "number",
+                "minimum": 0
+              },
+              "bpm": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "at",
+              "bpm"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "beats": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "bars": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "hits": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "name",
+              "at"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "tempo",
+        "beats",
+        "bars",
+        "hits",
+        "sections"
+      ],
+      "additionalProperties": false
+    },
+    "ecosystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed",
+        "cell",
+        "density",
+        "variety",
+        "bounds",
+        "mixture"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740992
+        },
+        "cell": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "density": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0
+            },
+            "unit": {
+              "const": "ha^-1"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "variety": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "complexity": {
+          "enum": [
+            "hull",
+            "clumps",
+            "quick",
+            "demo"
+          ]
+        },
+        "above": {
+          "type": "number"
+        },
+        "below": {
+          "type": "number"
+        },
+        "bounds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "west",
+            "north",
+            "east",
+            "south"
+          ],
+          "properties": {
+            "west": {
+              "type": "number"
+            },
+            "north": {
+              "type": "number"
+            },
+            "east": {
+              "type": "number"
+            },
+            "south": {
+              "type": "number"
+            }
+          }
+        },
+        "mixture": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "exclude": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "around",
+            "clearance"
+          ],
+          "properties": {
+            "around": {
+              "type": "string",
+              "minLength": 1
+            },
+            "clearance": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "atmosphere": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "weather",
+            "extent",
+            "fade-at-boundary"
+          ],
+          "properties": {
+            "weather": {
+              "type": "string",
+              "minLength": 1
+            },
+            "extent": {
+              "const": "canopy-and-ground"
+            },
+            "fade-at-boundary": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

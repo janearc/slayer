@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/plume"
 	"github.com/janearc/slayer/scene/gas"
 	"github.com/janearc/slayer/scene/medium"
 	"github.com/janearc/slayer/scene/thing"
@@ -108,6 +109,7 @@ var volumeStruct = structure{"Volume", []field{
 	intField("baked", "first cell, cells a side; none at nought"),
 	floatField("low", "a boxed medium's box, in its own space"),
 	floatField("high", ""),
+	intField("lighting", "cached source RGB dimensions and first number; -1 for direct"),
 	intField("grid", "a boxed medium's cells across x, y, z; first cell"),
 	intField("shone", "its shine's first number, its paint's; or -1"),
 	floatField("tint", "how many times its density each channel meets"),
@@ -131,19 +133,23 @@ func (encoded *scene) volume(space maths.Subspace, found haze,
 	given["baked"] = wholes(first, side)
 	given["low"], given["high"] = nil, nil
 	given["grid"], given["shone"] = nil, wholes(-1, -1)
+	given["lighting"] = wholes(0, 0, 0, -1)
 	given["tint"] = []float64{1, 1, 1}
 	encoded.volumes.row(volumeStruct, given)
 	encoded.counts.volumes++
 }
 
-// boxedVolume appends one boxed medium, its grid asked on the cpu and
+// boxedVolume appends one boxed medium, with a reserved or CPU-sampled grid,
 // its cells after every other boxed medium's.
 func (encoded *scene) boxedVolume(space maths.Subspace, grid boxed,
 	material int) {
-	density, shine, paint := grid.asked()
-	first := encoded.boxes.floats(density)
-	shone, painted := encoded.boxes.floats(shine),
-		encoded.boxes.floats(paint)
+	first, shone, deferred := encoded.deferFlame(grid)
+	painted := -1
+	if !deferred {
+		density, shine, paint := grid.asked()
+		first = encoded.boxes.floats(density)
+		shone, painted = encoded.boxes.floats(shine), encoded.boxes.floats(paint)
+	}
 	tint := maths.Grey(1)
 	if thick, ok := grid.med.(tinted); ok {
 		tint = thick.Tint()
@@ -154,7 +160,12 @@ func (encoded *scene) boxedVolume(space maths.Subspace, grid boxed,
 	given["low"], given["high"] = point(grid.low), point(grid.high)
 	given["grid"] = append(wholes(grid.cells[:]...), float64(first))
 	given["shone"] = wholes(shone, painted)
+	given["lighting"] = wholes(0, 0, 0, -1)
 	given["tint"] = []float64{tint.R, tint.G, tint.B}
+	if _, ok := grid.med.(*plume.Column); ok && grid.paint == nil && grid.shine == nil {
+		encoded.smokes = append(encoded.smokes, smokeGrid{index: encoded.counts.volumes, grid: grid})
+	}
+
 	encoded.volumes.row(volumeStruct, given)
 	encoded.counts.volumes++
 }
@@ -211,3 +222,6 @@ func (encoded *scene) bakeIfWispy(found haze) (int, int) {
 	encoded.cells += bakeSide * bakeSide * bakeSide
 	return first, bakeSide
 }
+
+// VolumeLimit is the number of participating media a GPU ray can cross.
+func VolumeLimit() int { return mostVolumes }

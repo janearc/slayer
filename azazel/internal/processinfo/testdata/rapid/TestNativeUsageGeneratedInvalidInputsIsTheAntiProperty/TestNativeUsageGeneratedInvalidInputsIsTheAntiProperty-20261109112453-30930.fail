@@ -1,0 +1,13 @@
+# 2026/11/09 11:24:53.989324 [TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty] [rapid] draw nonpositive: -29117
+# 2026/11/09 11:24:53.989327 [TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty] [rapid] draw outside C int: true
+# 2026/11/09 11:24:53.989328 [TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty] [rapid] draw unrepresentable: 2147483649
+# 2026/11/09 11:24:53.989329 [TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty] invalid generated PID 2147483649: {pid:0 born:0 exited:0 state:1 err:0x1a1cb8c08558}
+# 
+v0.4.8#16029348346090874784
+0x17667806771fc4
+0x171c8e97705d31
+0x71bd
+0x1
+0xd5bd47c008cda
+0x10f6344cc1c7f
+0x1

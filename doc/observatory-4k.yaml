@@ -1,0 +1,101 @@
+# A fictional observatory and introduced redwoods on measured volcanic ground.
+#
+# Terrain fields follow the existing Kilauea set. The observatory,
+# coast redwoods, complexity controls, exclusions, and grove atmosphere
+# are authored scene elements. This is a fictional site on measured ground:
+# the redwoods are deliberately introduced, not Hawaiian vegetation.
+#
+# Counts, placement, dimensions, weather, and rendering choices here
+# are authored in 2026-11-02. They are not measured site data.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: an observatory above the forest
+  renderer: gpu
+  seed: 11
+  complexity: quick
+  light: sun
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 1700
+  sun:
+    azimuth: 260
+    altitude: 12
+
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263000
+    north: 2149000
+    across: 1800
+    down: 1300
+    step: 4
+
+  recipes:
+    ridge telescope:
+      kind: optical-observatory
+      enclosure:
+        kind: dome
+        diameter: {value: 24, unit: m}
+        opening: {value: 35, unit: deg}
+      telescope:
+        aperture: {value: 8, unit: m}
+        mount: alt-azimuth
+        primary: segmented
+        pointing:
+          azimuth: 180
+          altitude: 55
+    redwoods:
+      kind: coast-redwood
+
+  weather:
+    wind:
+      from: {value: 270, unit: deg}
+      speed: {value: 2, unit: m/s}
+    # Authored mist appearance, not a transpiration or condensation law.
+    grove mist:
+      kind: prescribed-mist
+      extinction: {value: 0.006, unit: m^-1}
+      depth: {value: 20, unit: m}
+      coverage: 0.4
+      seed: 23
+
+  set:
+    things:
+      the observatory:
+        recipe: ridge telescope
+        seed: 5
+        east: 263850
+        north: 2148720
+        complexity: demo
+    stands:
+      the forest:
+        recipe: redwoods
+        count: 5000
+        seed: 11
+        above: 1150
+        complexity: quick
+        exclude:
+          around: the observatory
+          clearance: {value: 40, unit: m}
+        atmosphere:
+          weather: grove mist
+          extent: canopy-and-ground
+          fade-at-boundary: true
+
+  film:
+    width: 3840
+    height: 2160
+    rays: 4
+    exposure: 1
+  cameras:
+    across the forest:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 120
+          standoff_y: -170
+          standoff_z: 70
+      orientation:
+        point_to: the observatory
+        alpha: -17

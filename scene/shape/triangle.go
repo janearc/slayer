@@ -108,15 +108,15 @@ func (q *query) meet(t *tri, near, far float64) (float64, bool, bool) {
 	bx, by, bz := q.shear(&t.p[1])
 	cx, cy, cz := q.shear(&t.p[2])
 	u, v, w := det(cx, cy, bx, by), det(ax, ay, cx, cy), det(bx, by, ax, ay)
+	whole := u + v + w
+	if whole == 0 {
+		return 0, false, false // seen edge on
+	}
 	su := side(u, bx, by, cx, cy)
 	sv := side(v, cx, cy, ax, ay)
 	sw := side(w, ax, ay, bx, by)
 	if su == 0 || su != sv || sv != sw {
 		return 0, false, false
-	}
-	whole := u + v + w
-	if whole == 0 {
-		return 0, false, false // seen edge on
 	}
 	d := (u*az + v*bz + w*cz) / whole
 	return d, whole > 0, d > near && d < far

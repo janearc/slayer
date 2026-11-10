@@ -189,7 +189,10 @@ func TestAThingPlacedTakesItsLightsWithIt(t *testing.T) {
 	quarter := maths.About(maths.YAxis, math.Pi/2)
 	there := maths.Subspace{Origin: maths.V(10, 0, -5),
 		Orientation: quarter, Scale: 2}
-	moved := made.placed(there)
+	moved, err := made.placed(there)
+	if err != nil {
+		t.Fatal(err)
+	}
 	was, is := made.lights[0], moved.lights[0]
 	if !is.at.Near(there.Out(was.at), 1e-9) {
 		t.Errorf("the light is at %v, not %v", is.at, there.Out(was.at))

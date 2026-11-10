@@ -422,6 +422,15 @@ type Subspace struct {
 	Scale float64 // zero means one
 }
 
+// Local is the unchanged frame, with the documented zero-value semantics.
+func Local() Subspace { return Subspace{} }
+
+// NewSubspace describes a frame in its parent. Placement users validate the
+// supplied values as they do for Subspace literals; zero scale means one.
+func NewSubspace(origin Vec, orientation Orientation, scale float64) Subspace {
+	return Subspace{Origin: origin, Orientation: orientation, Scale: scale}
+}
+
 // scale is the subspace's scale, with zero read as one.
 func (space Subspace) scale() float64 {
 	if space.Scale == nought {

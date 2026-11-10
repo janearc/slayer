@@ -83,7 +83,7 @@ func (seen view) fine() view {
 	return seen
 }
 
-// pixelAngle estimates a pixel’s angular width in radians using adjacent rays
+// pixelAngle estimates a pixel's angular width in radians using adjacent rays
 // at the image centre.
 func pixelAngle(eye maths.Subspace, lens film.Sensor, width,
 	height int) float64 {
@@ -144,7 +144,7 @@ func render(seen view) *frame.Frame {
 	})
 }
 
-// wide returns the world’s explicit angular pixel width when supplied,
+// wide returns the world's explicit angular pixel width when supplied,
 // otherwise estimating it from neighbouring camera rays.
 func (seen view) wide() float64 {
 	if seen.world.Pixel > 0 {
@@ -153,7 +153,7 @@ func (seen view) wide() float64 {
 	return pixelAngle(seen.eye, seen.lens, seen.width, seen.height)
 }
 
-// through traces the view’s ray for pixel x, y through the staged scene.
+// through traces the view's ray for pixel x, y through the staged scene.
 func (seen view) through(scene staged, wide float64, x, y int) frame.Pixel {
 	ray := film.Look(seen.eye, seen.lens, x, y, seen.width, seen.height,
 		maths.Band{})

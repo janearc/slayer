@@ -2,7 +2,6 @@ package terrain
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -40,37 +39,46 @@ func (raster *Raster) word(raw []byte, wide int) uint64 {
 }
 
 // directory reads the tags of the directory at an offset.
-func (raster *Raster) directory(at int64) (map[int]entry, error) {
+func (raster *Raster) directory(at uint64) (map[int]entry, error) {
 	counted, each, inline := raster.layout()
-	head := make([]byte, counted)
-	if _, err := raster.file.ReadAt(head, at); err != nil {
+	head, err := raster.readMetadata(at, counted)
+	if err != nil {
 		return nil, err
 	}
-	many := int(raster.word(head, counted))
-	table := make([]byte, each*many)
-	if _, err := raster.file.ReadAt(table, at+int64(counted)); err != nil {
+	many := raster.word(head, counted)
+	room := raster.budget.MetadataBytes - raster.metadataBytes
+	size, err := allocation(many, uint64(each), room)
+	if err != nil {
+		return nil, fmt.Errorf("terrain: TIFF directory byte budget: %w", err)
+	}
+	table, err := raster.readMetadata(at+uint64(counted), size)
+	if err != nil {
 		return nil, err
 	}
 	tags := map[int]entry{}
-	for i := range many {
-		row := table[each*i : each*(i+1)]
+	for index := range int(many) {
+		row := table[each*index : each*(index+1)]
 		tag := int(raster.order.Uint16(row))
 		kind := int(raster.order.Uint16(row[2:]))
-		count := int(raster.word(row[4:], inline))
-		size, known := sizes[kind]
+		count := raster.word(row[4:], inline)
+		width, known := sizes[kind]
 		if !known {
 			continue
 		}
 		raw := row[4+inline : 4+2*inline]
-		if whole := size * count; whole > inline {
-			raw = make([]byte, whole)
-			where := int64(raster.word(row[4+inline:], inline))
-			if _, err := raster.file.ReadAt(raw, where); err != nil &&
-				err != io.EOF {
+		size, err := allocation(count, uint64(width),
+			raster.budget.MetadataBytes)
+		if err != nil {
+			return nil, fmt.Errorf("terrain: TIFF tag %d byte budget: %w", tag, err)
+		}
+		if size > inline {
+			offset := raster.word(row[4+inline:], inline)
+			raw, err = raster.readMetadata(offset, size)
+			if err != nil {
 				return nil, err
 			}
 		}
-		tags[tag] = entry{kind: kind, count: count, raw: raw}
+		tags[tag] = entry{kind: kind, count: int(count), raw: raw}
 	}
 	return tags, nil
 }
@@ -119,14 +127,36 @@ func (raster *Raster) one(tags map[int]entry, tag int) int {
 }
 
 // take keeps what the tags say, refusing a raster that is not one band
-// of float32 heights in tiles, uncompressed or lzw, placed by a pixel
-// scale alike both ways and a tiepoint at its first sample.
+// of float32 heights in tiles or explicitly sized strips, uncompressed or
+// lzw, placed by positive pixel scales and a tiepoint at its first sample.
+// Projected legacy grids retain square scales; geographic grids retain both.
 func (raster *Raster) take(tags map[int]entry) error {
 	raster.width, raster.height = raster.one(tags, tagWidth),
 		raster.one(tags, tagHeight)
 	raster.tileW, raster.tileH = raster.one(tags, tagTileWidth),
 		raster.one(tags, tagTileHeight)
+	_, tiledWidth := tags[tagTileWidth]
+	_, tiledHeight := tags[tagTileHeight]
+	if !tiledWidth && !tiledHeight {
+		rows := raster.one(tags, tagRowsPerStrip)
+		if rows > 0 {
+			raster.stripped = true
+			raster.tileW, raster.tileH = raster.width, min(rows, raster.height)
+		}
+	}
 	raster.compression = raster.one(tags, tagCompression)
+	if _, present := tags[tagFillOrder]; present && raster.one(tags, tagFillOrder) != 1 {
+		order := raster.one(tags, tagFillOrder)
+		return fmt.Errorf("%w: fill order %d", errRaster, order)
+	}
+	raster.predictor = raster.one(tags, tagPredictor)
+	if _, present := tags[tagPredictor]; !present {
+		raster.predictor = 1
+	}
+	if raster.predictor != 1 && raster.predictor != 3 {
+		return fmt.Errorf("%w: predictor %d", errRaster, raster.predictor)
+	}
+
 	switch {
 	case raster.width < 1 || raster.height < 1:
 		return fmt.Errorf("%w: no size", errRaster)
@@ -141,12 +171,22 @@ func (raster *Raster) take(tags map[int]entry) error {
 		return fmt.Errorf("%w: compression %d", errRaster,
 			raster.compression)
 	}
+	expected, err := raster.tiles()
+	if err != nil {
+		return err
+	}
 	raster.offsets = raster.numbers(tags[tagTileOffsets])
 	raster.counts = raster.numbers(tags[tagTileCounts])
-	if len(raster.offsets) != raster.tiles() ||
-		len(raster.counts) != raster.tiles() {
-		return fmt.Errorf("%w: %d tile offsets for %d tiles", errRaster,
-			len(raster.offsets), raster.tiles())
+	if raster.stripped {
+		raster.offsets = raster.numbers(tags[tagStripOffsets])
+		raster.counts = raster.numbers(tags[tagStripCounts])
+	}
+	if len(raster.offsets) != expected || len(raster.counts) != expected {
+		return fmt.Errorf("%w: %d tile offsets and %d counts for %d tiles",
+			errRaster, len(raster.offsets), len(raster.counts), expected)
+	}
+	if err := raster.readReference(tags); err != nil {
+		return err
 	}
 	return raster.place(tags)
 }
@@ -160,13 +200,20 @@ func (raster *Raster) place(tags map[int]entry) error {
 	if scaled || tied {
 		scale := raster.reals(tags[tagScale])
 		tie := raster.reals(tags[tagTiepoint])
-		if len(scale) < 2 || len(tie) < 6 || !(scale[0] > 0) ||
-			scale[0] != scale[1] || tie[0] != 0 || tie[1] != 0 {
-			return fmt.Errorf("%w: not placed by a square scale and a "+
+		if len(scale) < 2 || len(tie) < 6 || !(scale[0] > 0) || !(scale[1] > 0) ||
+			(raster.reference.Model != 2 && scale[0] != scale[1]) || tie[0] != 0 || tie[1] != 0 ||
+			!finiteCoordinate(scale[0]) || !finiteCoordinate(scale[1]) || !finiteCoordinate(tie[3]) ||
+			!finiteCoordinate(tie[4]) {
+			return fmt.Errorf("%w: not placed by compatible positive scales and a "+
 				"tiepoint at its first sample", errRaster)
 		}
 		raster.spacing, raster.west, raster.north = scale[0], tie[3], tie[4]
+		raster.rowStep = scale[1]
 		raster.placed = true
+		coverage, _ := raster.Coverage()
+		if !finiteCoordinate(coverage.East) || !finiteCoordinate(coverage.South) {
+			return fmt.Errorf("%w: projected extent overflows", errRaster)
+		}
 	}
 	if value, found := tags[tagNoData]; found {
 		text := strings.Trim(string(value.raw), "\x00 ")
@@ -179,13 +226,22 @@ func (raster *Raster) place(tags map[int]entry) error {
 	return nil
 }
 
-// tiles is how many tiles the raster has.
-func (raster *Raster) tiles() int {
-	return raster.across() * ((raster.height + raster.tileH - 1) /
-		raster.tileH)
+// tiles checks a grid's product before using it as a directory length.
+// Every tile needs one offset and one byte count in uint64 storage.
+func (raster *Raster) tiles() (int, error) {
+	rows := (raster.height-1)/raster.tileH + 1
+	limit := raster.budget.MetadataBytes / tileReferenceBytes
+	count, err := allocation(uint64(raster.across()), uint64(rows), limit)
+	if err != nil {
+		return 0, fmt.Errorf("terrain: tile directory capacity: %w", err)
+	}
+	return count, nil
 }
 
-// across is how many tiles a row of the raster has.
+// tileReferenceBytes is defined by one uint64 offset and one uint64 count.
+const tileReferenceBytes = 2 * 64 / byteBits
+
+// across avoids overflow from adding two large source dimensions.
 func (raster *Raster) across() int {
-	return (raster.width + raster.tileW - 1) / raster.tileW
+	return (raster.width-1)/raster.tileW + 1
 }

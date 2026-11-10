@@ -1,0 +1,403 @@
+{
+  "originalFullSource": "3b78a383eb14ea5fea53f6b8cafbd28044f60a9e",
+  "observedSites": 25,
+  "printedNames": 22,
+  "sites": [
+    {
+      "key": "cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+      "originalRow": "survived   cmd/hillside/fire_front.go:68 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+      "originalLine": 68,
+      "currentExpectedLine": 68,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:68 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "survived   cmd/hillside/fire_front.go:91 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "survived   cmd/hillside/fire_front.go:111 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "killed     cmd/hillside/fire_front.go:120 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }\tTestFrontAndBedPreparationKeepTheInvalidPaletteCause,TestFrontAndBedPreparationKeepTheInvalidPaletteCause/front"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+      "originalRow": "survived   cmd/hillside/fire_front.go:91 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+      "originalLine": 91,
+      "currentExpectedLine": 91,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:68 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "survived   cmd/hillside/fire_front.go:91 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "survived   cmd/hillside/fire_front.go:111 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "killed     cmd/hillside/fire_front.go:120 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }\tTestFrontAndBedPreparationKeepTheInvalidPaletteCause,TestFrontAndBedPreparationKeepTheInvalidPaletteCause/front"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+      "originalRow": "survived   cmd/hillside/fire_front.go:111 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+      "originalLine": 111,
+      "currentExpectedLine": 111,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:68 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "survived   cmd/hillside/fire_front.go:91 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "survived   cmd/hillside/fire_front.go:111 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }",
+        "killed     cmd/hillside/fire_front.go:120 cmd/hillside/fire_front.go prepareFronts: if err != nil { return err } => if err != nil { }\tTestFrontAndBedPreparationKeepTheInvalidPaletteCause,TestFrontAndBedPreparationKeepTheInvalidPaletteCause/front"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go prepareFronts: start, end := events[0].Start, events[0].Start+events[0].Duration => start, end := events[0].Start, events[0].Start-events[0].Duration",
+      "originalRow": "survived   cmd/hillside/fire_front.go:97 cmd/hillside/fire_front.go prepareFronts: start, end := events[0].Start, events[0].Start+events[0].Duration => start, end := events[0].Start, events[0].Start-events[0].Duration",
+      "originalLine": 97,
+      "currentExpectedLine": 97,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:97 cmd/hillside/fire_front.go prepareFronts: start, end := events[0].Start, events[0].Start+events[0].Duration => start, end := events[0].Start, events[0].Start-events[0].Duration"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: if at < group.start || at >= group.end { continue } => if at < group.start || at >= group.end { }",
+      "originalRow": "survived   cmd/hillside/fire_front.go:138 cmd/hillside/fire_front.go addAt: if at < group.start || at >= group.end { continue } => if at < group.start || at >= group.end { }",
+      "originalLine": 138,
+      "currentExpectedLine": 138,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:138 cmd/hillside/fire_front.go addAt: if at < group.start || at >= group.end { continue } => if at < group.start || at >= group.end { }"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: at < group.start || at >= group.end => at < group.start && at >= group.end",
+      "originalRow": "survived   cmd/hillside/fire_front.go:138 cmd/hillside/fire_front.go addAt: at < group.start || at >= group.end => at < group.start && at >= group.end",
+      "originalLine": 138,
+      "currentExpectedLine": 138,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:138 cmd/hillside/fire_front.go addAt: at < group.start || at >= group.end => at < group.start && at >= group.end"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: at < group.start || at >= group.end => at < group.start || at > group.end",
+      "originalRow": "survived   cmd/hillside/fire_front.go:138 cmd/hillside/fire_front.go addAt: at < group.start || at >= group.end => at < group.start || at > group.end",
+      "originalLine": 138,
+      "currentExpectedLine": 138,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:138 cmd/hillside/fire_front.go addAt: at < group.start || at >= group.end => at < group.start || at > group.end"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: len(active) > 0 && front.smoke != nil => len(active) >= 0 && front.smoke != nil",
+      "originalRow": "survived   cmd/hillside/fire_front.go:152 cmd/hillside/fire_front.go addAt: len(active) > 0 && front.smoke != nil => len(active) >= 0 && front.smoke != nil",
+      "originalLine": 152,
+      "currentExpectedLine": 152,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:152 cmd/hillside/fire_front.go addAt: len(active) > 0 && front.smoke != nil => len(active) >= 0 && front.smoke != nil"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: spec.Yield *= math.Min(1, weight/float64(front.peakFuel)) => spec.Yield *= math.Min(2, weight/float64(front.peakFuel))",
+      "originalRow": "survived   cmd/hillside/fire_front.go:167 cmd/hillside/fire_front.go addAt: spec.Yield *= math.Min(1, weight/float64(front.peakFuel)) => spec.Yield *= math.Min(2, weight/float64(front.peakFuel))",
+      "originalLine": 167,
+      "currentExpectedLine": 167,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:167 cmd/hillside/fire_front.go addAt: spec.Yield *= math.Min(1, weight/float64(front.peakFuel)) => spec.Yield *= math.Min(2, weight/float64(front.peakFuel))"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: if at < event.start || age >= event.duration+event.sparks.life { continue } => if at < event.start || age >= event.duration+event.sparks.life { }",
+      "originalRow": "survived   cmd/hillside/fire_front.go:181 cmd/hillside/fire_front.go addAt: if at < event.start || age >= event.duration+event.sparks.life { continue } => if at < event.start || age >= event.duration+event.sparks.life { }",
+      "originalLine": 181,
+      "currentExpectedLine": 181,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:181 cmd/hillside/fire_front.go addAt: if at < event.start || age >= event.duration+event.sparks.life { continue } => if at < event.start || age >= event.duration+event.sparks.life { }"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: at < event.start || age >= event.duration+event.sparks.life => at < event.start && age >= event.duration+event.sparks.life",
+      "originalRow": "survived   cmd/hillside/fire_front.go:181 cmd/hillside/fire_front.go addAt: at < event.start || age >= event.duration+event.sparks.life => at < event.start && age >= event.duration+event.sparks.life",
+      "originalLine": 181,
+      "currentExpectedLine": 181,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:181 cmd/hillside/fire_front.go addAt: at < event.start || age >= event.duration+event.sparks.life => at < event.start && age >= event.duration+event.sparks.life"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_front.go addAt: at < event.start || age >= event.duration+event.sparks.life => at < event.start || age > event.duration+event.sparks.life",
+      "originalRow": "survived   cmd/hillside/fire_front.go:181 cmd/hillside/fire_front.go addAt: at < event.start || age >= event.duration+event.sparks.life => at < event.start || age > event.duration+event.sparks.life",
+      "originalLine": 181,
+      "currentExpectedLine": 181,
+      "path": "cmd/hillside/fire_front.go",
+      "currentSourceSHA256": "ed48726b86418c1e5e349a1cc3eac5ec1f9a050780c6c62f34fe89911ee8d746",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_front.go:181 cmd/hillside/fire_front.go addAt: at < event.start || age >= event.duration+event.sparks.life => at < event.start || age > event.duration+event.sparks.life"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+      "originalRow": "survived   cmd/hillside/fire_recipe.go:27 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+      "originalLine": 27,
+      "currentExpectedLine": 27,
+      "path": "cmd/hillside/fire_recipe.go",
+      "currentSourceSHA256": "a4da5d8c21e41b93d16b5a28b6f5bf5b0619dbf7ebe532b0a1dbac92975978c4",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_recipe.go:27 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+        "killed     cmd/hillside/fire_recipe.go:32 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }\tTestFirePlacementRefusesAnUncheckedNonfiniteOrigin,(panicked)",
+        "survived   cmd/hillside/fire_recipe.go:41 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+        "killed     cmd/hillside/fire_recipe.go:45 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }\tTestFireRecipeAndNamedPlacementKeepSourceOverflowRefusals"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+      "originalRow": "survived   cmd/hillside/fire_recipe.go:41 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+      "originalLine": 41,
+      "currentExpectedLine": 41,
+      "path": "cmd/hillside/fire_recipe.go",
+      "currentSourceSHA256": "a4da5d8c21e41b93d16b5a28b6f5bf5b0619dbf7ebe532b0a1dbac92975978c4",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_recipe.go:27 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+        "killed     cmd/hillside/fire_recipe.go:32 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }\tTestFirePlacementRefusesAnUncheckedNonfiniteOrigin,(panicked)",
+        "survived   cmd/hillside/fire_recipe.go:41 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }",
+        "killed     cmd/hillside/fire_recipe.go:45 cmd/hillside/fire_recipe.go putFireRecipe: if err != nil { return maths.Box{}, err } => if err != nil { }\tTestFireRecipeAndNamedPlacementKeepSourceOverflowRefusals"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_recipe.go putFireRecipe: volumes, _, err := made.Place(at, stage.given.exposure, 0) => volumes, _, err := made.Place(at, stage.given.exposure, 1)",
+      "originalRow": "survived   cmd/hillside/fire_recipe.go:31 cmd/hillside/fire_recipe.go putFireRecipe: volumes, _, err := made.Place(at, stage.given.exposure, 0) => volumes, _, err := made.Place(at, stage.given.exposure, 1)",
+      "originalLine": 31,
+      "currentExpectedLine": 31,
+      "path": "cmd/hillside/fire_recipe.go",
+      "currentSourceSHA256": "a4da5d8c21e41b93d16b5a28b6f5bf5b0619dbf7ebe532b0a1dbac92975978c4",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_recipe.go:31 cmd/hillside/fire_recipe.go putFireRecipe: volumes, _, err := made.Place(at, stage.given.exposure, 0) => volumes, _, err := made.Place(at, stage.given.exposure, 1)"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_recipe.go putFireRecipe: if !ok { return maths.Box{}, fmt.Errorf(\"fire has no sampled emission\") } => if !ok { }",
+      "originalRow": "survived   cmd/hillside/fire_recipe.go:37 cmd/hillside/fire_recipe.go putFireRecipe: if !ok { return maths.Box{}, fmt.Errorf(\"fire has no sampled emission\") } => if !ok { }",
+      "originalLine": 37,
+      "currentExpectedLine": 37,
+      "path": "cmd/hillside/fire_recipe.go",
+      "currentSourceSHA256": "a4da5d8c21e41b93d16b5a28b6f5bf5b0619dbf7ebe532b0a1dbac92975978c4",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_recipe.go:37 cmd/hillside/fire_recipe.go putFireRecipe: if !ok { return maths.Box{}, fmt.Errorf(\"fire has no sampled emission\") } => if !ok { }"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_sparks.go prepareSparks: if err != nil { return nil, err } => if err != nil { }",
+      "originalRow": "survived   cmd/hillside/fire_sparks.go:53 cmd/hillside/fire_sparks.go prepareSparks: if err != nil { return nil, err } => if err != nil { }",
+      "originalLine": 53,
+      "currentExpectedLine": 53,
+      "path": "cmd/hillside/fire_sparks.go",
+      "currentSourceSHA256": "9c7205185173464950beb1f49e5fbd3e38577aa06b53083132f85e4e1ae1087a",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "killed     cmd/hillside/fire_sparks.go:42 cmd/hillside/fire_sparks.go prepareSparks: if err != nil { return nil, err } => if err != nil { }\tTestSparkPreparationRefusesSourceAndPaletteFailures",
+        "killed     cmd/hillside/fire_sparks.go:47 cmd/hillside/fire_sparks.go prepareSparks: if err != nil { return nil, err } => if err != nil { }\tTestSparkPreparationRefusesSourceAndPaletteFailures",
+        "survived   cmd/hillside/fire_sparks.go:53 cmd/hillside/fire_sparks.go prepareSparks: if err != nil { return nil, err } => if err != nil { }"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fire_sparks.go thingsIn: duration > 0 && at-particle.Age() >= duration => duration > 1 && at-particle.Age() >= duration",
+      "originalRow": "survived   cmd/hillside/fire_sparks.go:76 cmd/hillside/fire_sparks.go thingsIn: duration > 0 && at-particle.Age() >= duration => duration > 1 && at-particle.Age() >= duration",
+      "originalLine": 76,
+      "currentExpectedLine": 76,
+      "path": "cmd/hillside/fire_sparks.go",
+      "currentSourceSHA256": "9c7205185173464950beb1f49e5fbd3e38577aa06b53083132f85e4e1ae1087a",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fire_sparks.go:76 cmd/hillside/fire_sparks.go thingsIn: duration > 0 && at-particle.Age() >= duration => duration > 1 && at-particle.Age() >= duration"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0-float64(gx)*cell, 0, z0+float64(gz)*cell)}",
+      "originalRow": "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0-float64(gx)*cell, 0, z0+float64(gz)*cell)}",
+      "originalLine": 76,
+      "currentExpectedLine": 76,
+      "path": "cmd/hillside/fuel_bed.go",
+      "currentSourceSHA256": "e1fd0199aa7bea878ecb368002bfe8e32f43db06bba35ca419513ca558cbb508",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0-float64(gx)*cell, 0, z0+float64(gz)*cell)}"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)/cell, 0, z0+float64(gz)*cell)}",
+      "originalRow": "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)/cell, 0, z0+float64(gz)*cell)}",
+      "originalLine": 76,
+      "currentExpectedLine": 76,
+      "path": "cmd/hillside/fuel_bed.go",
+      "currentSourceSHA256": "e1fd0199aa7bea878ecb368002bfe8e32f43db06bba35ca419513ca558cbb508",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)/cell, 0, z0+float64(gz)*cell)}"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 1, z0+float64(gz)*cell)}",
+      "originalRow": "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 1, z0+float64(gz)*cell)}",
+      "originalLine": 76,
+      "currentExpectedLine": 76,
+      "path": "cmd/hillside/fuel_bed.go",
+      "currentSourceSHA256": "e1fd0199aa7bea878ecb368002bfe8e32f43db06bba35ca419513ca558cbb508",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 1, z0+float64(gz)*cell)}"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0-float64(gz)*cell)}",
+      "originalRow": "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0-float64(gz)*cell)}",
+      "originalLine": 76,
+      "currentExpectedLine": 76,
+      "path": "cmd/hillside/fuel_bed.go",
+      "currentSourceSHA256": "e1fd0199aa7bea878ecb368002bfe8e32f43db06bba35ca419513ca558cbb508",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0-float64(gz)*cell)}"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)/cell)}",
+      "originalRow": "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)/cell)}",
+      "originalLine": 76,
+      "currentExpectedLine": 76,
+      "path": "cmd/hillside/fuel_bed.go",
+      "currentSourceSHA256": "e1fd0199aa7bea878ecb368002bfe8e32f43db06bba35ca419513ca558cbb508",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fuel_bed.go:76 cmd/hillside/fuel_bed.go prepareBeds: group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)*cell)} => group := fuelGroup{anchor: maths.V(x0+float64(gx)*cell, 0, z0+float64(gz)/cell)}"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/fuel_bed.go prepareBeds: at := maths.V(x0+(float64(x)+.5)*cell, 0, z0+(float64(z)+.5)*cell) => at := maths.V(x0+(float64(x)+.5)*cell, 1, z0+(float64(z)+.5)*cell)",
+      "originalRow": "survived   cmd/hillside/fuel_bed.go:81 cmd/hillside/fuel_bed.go prepareBeds: at := maths.V(x0+(float64(x)+.5)*cell, 0, z0+(float64(z)+.5)*cell) => at := maths.V(x0+(float64(x)+.5)*cell, 1, z0+(float64(z)+.5)*cell)",
+      "originalLine": 81,
+      "currentExpectedLine": 81,
+      "path": "cmd/hillside/fuel_bed.go",
+      "currentSourceSHA256": "e1fd0199aa7bea878ecb368002bfe8e32f43db06bba35ca419513ca558cbb508",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/fuel_bed.go:81 cmd/hillside/fuel_bed.go prepareBeds: at := maths.V(x0+(float64(x)+.5)*cell, 0, z0+(float64(z)+.5)*cell) => at := maths.V(x0+(float64(x)+.5)*cell, 1, z0+(float64(z)+.5)*cell)"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+
+      ]
+    },
+    {
+      "key": "cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }",
+      "originalRow": "survived   cmd/hillside/scene.go:320 cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }",
+      "originalLine": 320,
+      "currentExpectedLine": 322,
+      "path": "cmd/hillside/scene.go",
+      "currentSourceSHA256": "5f291d512fbd8cabe53e1ed7fe4edad3b4a89b25e22abc12107c46733acbc28b",
+      "sourceProof": "doc/hillside-mutation-equivalents.md",
+      "allOriginalSameNameOutcomes": [
+        "survived   cmd/hillside/scene.go:316 cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }",
+        "survived   cmd/hillside/scene.go:320 cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }",
+        "killed     cmd/hillside/scene.go:325 cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }\tTestMoonAndSkyBoundariesRejectInvalidAtmosphericHeightAndLight",
+        "killed     cmd/hillside/scene.go:334 cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }\tTestMoonAndSkyBoundariesRejectInvalidAtmosphericHeightAndLight",
+        "killed     cmd/hillside/scene.go:338 cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }\tTestMoonAndSkyBoundariesRejectInvalidAtmosphericHeightAndLight"
+      ],
+      "originalSameNameSurvivorsDetectedByNewTests": [
+        "survived   cmd/hillside/scene.go:316 cmd/hillside/scene.go moonlit: if err != nil { return way, err } => if err != nil { }"
+      ]
+    }
+  ]
+}

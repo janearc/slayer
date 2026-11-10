@@ -1,0 +1,89 @@
+# Authored byte ledgers, not host measurements or installed policy.
+empty:
+  - name: empty book
+    limit: 12
+    existing: []
+    request: {id: new, amount: 4}
+missing:
+  - name: no ceiling
+    limit: 0
+    request: {id: new, amount: 1}
+  - name: no identity
+    limit: 12
+    request: {id: "", amount: 1}
+  - name: no amount
+    limit: 12
+    request: {id: new, amount: 0}
+kept:
+  - name: preserve ordered reservations
+    limit: 12
+    existing: [{id: first, amount: 3}, {id: second, amount: 4}]
+    request: {id: new, amount: 5}
+capacity:
+  - name: one byte past remaining capacity
+    limit: 12
+    existing: [{id: first, amount: 3}, {id: second, amount: 4}]
+    request: {id: new, amount: 6}
+  - name: request exceeds an empty ceiling
+    limit: 2
+    request: {id: new, amount: 3}
+full_width:
+  - name: whole unsigned space
+    limit: 18446744073709551615
+    existing: []
+    request: {id: new, amount: 18446744073709551615}
+  - name: full width exact fit
+    limit: 18446744073709551615
+    existing: [{id: first, amount: 18446744073709551614}]
+    request: {id: new, amount: 1}
+wrapped:
+  - name: addition wraps to zero
+    limit: 18446744073709551615
+    existing: [{id: first, amount: 1}]
+    request: {id: new, amount: 18446744073709551615}
+duplicates:
+  - name: same identity and amount
+    limit: 12
+    existing: [{id: first, amount: 3}]
+    request: {id: first, amount: 3}
+  - name: same identity different amount
+    limit: 12
+    existing: [{id: first, amount: 3}]
+    request: {id: first, amount: 4}
+invalid:
+  - name: existing identity missing
+    limit: 12
+    existing: [{id: "", amount: 3}]
+    request: {id: new, amount: 1}
+  - name: existing amount missing
+    limit: 12
+    existing: [{id: first, amount: 0}]
+    request: {id: new, amount: 1}
+  - name: existing identity duplicated
+    limit: 12
+    existing: [{id: first, amount: 3}, {id: first, amount: 4}]
+    request: {id: new, amount: 1}
+  - name: existing total exceeds ceiling
+    limit: 12
+    existing: [{id: first, amount: 9}, {id: second, amount: 4}]
+    request: {id: new, amount: 1}
+  - name: existing total would wrap
+    limit: 18446744073709551615
+    existing: [{id: first, amount: 18446744073709551615}, {id: second, amount: 1}]
+    request: {id: new, amount: 1}
+  - name: corruption precedes a duplicate request
+    limit: 12
+    existing: [{id: first, amount: 3}, {id: broken, amount: 0}]
+    request: {id: first, amount: 3}
+ownership:
+  name: independent ledger storage
+  limit: 12
+  existing: [{id: first, amount: 3}, {id: second, amount: 4}]
+  request: {id: new, amount: 5}
+spare_capacity: 7
+sequence:
+  ceiling: 64
+  minimum_steps: 1
+  maximum_steps: 64
+  minimum_amount: 1
+  maximum_amount: 64

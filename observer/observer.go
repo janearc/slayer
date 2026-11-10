@@ -1,6 +1,6 @@
 // Package observer converts spectral light to colour using the CIE 1931
-// observer. It is the boundary between celestial’s spectral physics and
-// libtheme’s colour representation.
+// observer. It is the boundary between celestial's spectral physics and
+// libtheme's colour representation.
 package observer
 
 import (

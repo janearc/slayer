@@ -1,0 +1,8 @@
+# Actual frames at 24 fps; encode at 24 fps for real-time motion.
+$schema: https://github.com/janearc/slayer/schemas/sequence-v1.json
+scene: fire-woodland.yaml
+output: ../out/fire-woodland-motion
+fps: 24
+start: {value: 40, unit: s}
+duration: {value: 4, unit: s}
+print: {knee: 0.1, top: 100, bloom: 0.2}

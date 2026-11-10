@@ -126,3 +126,35 @@ func TestANumberWhoseSourceIsNotOnTheShelfFails(t *testing.T) {
 		t.Errorf("a source never fetched: %s", said)
 	}
 }
+
+func TestExcerptLocatesTheNumberWithinItsActualContext(t *testing.T) {
+	at, made := verifying("6.84", "6.84")
+	defer made.done()
+	var out bytes.Buffer
+	if code := tool(at).Run([]string{"fetch"}, &out, &out); code != 0 {
+		t.Fatal(out.String())
+	}
+	data, err := at.research()
+	if err != nil {
+		t.Fatal(err)
+	}
+	list, err := sources.Read(at.list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	one := data[0]
+	one.From.Excerpt = "6.84"
+	if err := at.verified(list, one); err != nil {
+		t.Fatal(err)
+	}
+	// The same numeric value occurs on the page, but this quoted context
+	// does not. Finding it elsewhere must not validate the claim.
+	one.From.Excerpt = "needles are 6.84 cm long"
+	if err := at.verified(list, one); err == nil {
+		t.Fatal("accepted a nonexistent source excerpt")
+	}
+	one.From.Excerpt = "candle"
+	if err := at.verified(list, one); err == nil {
+		t.Fatal("accepted a numeric value outside the quoted excerpt")
+	}
+}

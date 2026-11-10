@@ -1,0 +1,22 @@
+Authored catalogue compatibility record
+
+Platform: Darwin/ARM64, Go 1.26.10.
+Captured before assembly refactoring at:
+91c69753e2fae9e261dffdf47c1c379f742c7f9b
+
+144 cases: 18 kinds, seeds 5 and 11, four requested detail levels.
+78 actual geometry signatures; 66 expected unsupported-level refusals.
+All 144 case records matched after the assembly refactors.
+
+Reference data SHA256:
+d82b6ea2303e12f533806677409fedefee62a823abd342e451b077835b66bf0d
+Original producer SHA256:
+ae1b8ece6a1c9ac151d9f56d536ee8a473a0128642f50159fc6541560e8b3d8b
+
+The public API producer walks triangles, normals, prototype sharing, poses,
+physical bounds and material properties. It records authored asset stability.
+Scientific correctness is held separately by the physical and source tests.
+GPU pictures retain their existing numerical and image acceptance bounds.
+
+From the module root, the retained producer is run with:
+go run ./manufacture/testdata/geometry_sample.go

@@ -1,0 +1,48 @@
+# Authored independent sampling examples, 2026-11-07.
+# A launch radius of .25 has .75 padding and a .0625 target step.
+source:
+  at: {x: 0, y: 0, z: 0}
+  toward: {x: 0, y: 1, z: 0}
+  strength: {r: 1, g: 1, b: 1}
+radius: 0.25
+reach: 10
+divergence: 0
+queries:
+  - ray: {at: {x: -2, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+    far: 20
+    cells:
+      - {enter: 0, leave: 1, splits: 1}
+      - {enter: 0, leave: 1.25, splits: 1}
+      - {enter: 1.5, leave: 2, splits: 8}
+      - {enter: 1, leave: 1.5, splits: 8}
+      - {enter: 2.75, leave: 3, splits: 1}
+      - {enter: 0, leave: 20, splits: 64}
+  - ray: {at: {x: -2, y: 5, z: 2}, dir: {x: 1, y: 0, z: 0}}
+    far: 20
+    cells:
+      - {enter: 0, leave: 20, splits: 1}
+  - ray: {at: {x: -2, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+    far: 1
+    cells:
+      - {enter: 0, leave: 20, splits: 1}
+  - ray: {at: {x: -2, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+    far: 2
+    cells:
+      - {enter: 1.5, leave: 2, splits: 8}
+      - {enter: 2, leave: 3, splits: 1}
+  - ray: {at: {x: 0, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+    far: 20
+    cells:
+      - {enter: 0, leave: 0.5, splits: 8}
+      - {enter: 0.75, leave: 1, splits: 1}
+  - ray: {at: {x: 2, y: 5, z: 0}, dir: {x: -1, y: 0, z: 0}}
+    far: 20
+    cells:
+      - {enter: 1.5, leave: 2, splits: 8}
+second-source:
+  at: {x: 10, y: 0, z: 0}
+  toward: {x: 0, y: 1, z: 0}
+  strength: {r: 1, g: 1, b: 1}
+merged-ray: {at: {x: -2, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+merged-far: 20
+merged-gap: {enter: 6, leave: 7, splits: 16}

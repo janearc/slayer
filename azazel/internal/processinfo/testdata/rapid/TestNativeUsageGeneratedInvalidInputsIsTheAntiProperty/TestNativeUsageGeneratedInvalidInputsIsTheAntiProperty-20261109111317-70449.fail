@@ -1,0 +1,9 @@
+# 2026/11/09 11:13:17.729197 [TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty] [rapid] draw nonpositive: 0
+# 2026/11/09 11:13:17.729198 [TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty] [rapid] draw outside C int: false
+# 2026/11/09 11:13:17.729226 [TestNativeUsageGeneratedInvalidInputsIsTheAntiProperty] invalid generated PID 0: {pid:0 born:0 exited:0 state:0 err:<nil>}
+# 
+v0.4.8#14662681830410939761
+0x0
+0x0
+0x0
+0x0

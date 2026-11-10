@@ -9,18 +9,18 @@ cover only part of this plan; the package APIs define current support.
 
 A hand-picked gas colour or surface gloss cannot explain why dust reddens
 a nebula, ice brightens it, or ionized gas emits particular lines.
-Composition supplies those reasons, just as temperature supplies a star’s
+Composition supplies those reasons, just as temperature supplies a star's
 spectrum instead of an arbitrary RGB colour.
 
 ## Layers of the model
 
 - **Element:** an atomic symbol such as H, He, Fe, or U, with mass and
   emission lines represented using the `lines` package.
-- **Formula:** elemental proportions. Water is H₂O; a tholin is a mixture
+- **Formula:** elemental proportions. Water is H2O; a tholin is a mixture
   involving carbon, hydrogen, and nitrogen. One element is a valid formula.
 - **Material:** a formula plus bulk density and a complex refractive index
   across bands, with published tables cited. Example densities are about
-  0.92 g/cm³ for ice and 7.87 g/cm³ for iron.
+  0.92 g/cm^3 for ice and 7.87 g/cm^3 for iron.
 - **Fractions:** material shares summing to one. Construction rejects
   invalid totals rather than requiring downstream rechecks.
 - **Particle:** size and composition. Mie calculations derive band albedo

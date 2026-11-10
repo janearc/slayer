@@ -1,0 +1,11 @@
+# Authored reader contract, 2026-11-07.
+block: "  atmosphere:\n    weather: grove mist\n    extent: terrain\n    albedo: 0.95\n"
+weather: grove mist
+albedo: 0.95
+invalid:
+  - {before: 'weather: grove mist', after: 'weather: missing mist'}
+  - {before: 'extent: terrain', after: 'extent: canopy-and-ground'}
+  - {before: 'albedo: 0.95', after: 'albedo: -0.01'}
+  - {before: 'albedo: 0.95', after: 'albedo: 1.01'}
+  - before: "    albedo: 0.95\n"
+    after: ''

@@ -1,0 +1,5 @@
+# Existing witness bounds, not production lock or scheduler policy.
+attempt_timeout_ns: 2000000000
+minimum_attempts: 1
+maximum_attempts: 8
+repeated_releases: 4

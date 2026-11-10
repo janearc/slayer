@@ -1,0 +1,9 @@
+# Three actual GPU frames per simulation second. Encoding these at 24 fps
+# makes an eight-times-speed diagnostic; it is not real-time flame motion.
+$schema: https://github.com/janearc/slayer/schemas/sequence-v1.json
+scene: fire-fuel.yaml
+output: ../out/fire-fuel
+fps: 3
+start: {value: 0, unit: s}
+duration: {value: 60, unit: s}
+print: {knee: 0.1, top: 100, bloom: 0.35}

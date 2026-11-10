@@ -1,9 +1,13 @@
 package gpu
 
 import (
+	"fmt"
+	"math"
 	"sort"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/mesh"
+	"github.com/janearc/slayer/scene/shape"
 )
 
 // instanceStruct is one mesh standing in the world as the kernel reads
@@ -12,7 +16,7 @@ import (
 // world, which carry its normals back out.
 //
 // its info is its tree's root among the nodes, its material, and
-// whether it is clear.
+// whether it is clear, and a local group root plus one (zero for a mesh).
 var instanceStruct = structure{"Instance", []field{
 	floatField("into_x", "the world into the mesh, a row each, shift in w"),
 	floatField("into_y", ""),
@@ -20,7 +24,7 @@ var instanceStruct = structure{"Instance", []field{
 	floatField("out_x", "the mesh's own axes in the world"),
 	floatField("out_y", ""),
 	floatField("out_z", ""),
-	intField("info", "root, material, clear"),
+	intField("info", "mesh root, material, clear, group root plus one"),
 }}
 
 // pooled is a mesh's faces as they went into the pool, once: its tree's
@@ -39,6 +43,46 @@ type standing struct {
 	material int
 	clear    bool
 	bounds   box
+	group    int
+}
+
+// meshGroup keeps local placements once, shared by all world instances.
+type meshGroup struct{ members []standing }
+
+// group pools member meshes and records one shared local hierarchy.
+func (encoded *scene) group(made *shape.MeshGroup, space maths.Subspace,
+	material int, clear bool) error {
+	index, known := encoded.groupOf[made]
+	if !known {
+		local := meshGroup{}
+		for _, member := range made.Members() {
+			pooled, seen := encoded.meshes[member.Mesh]
+			if !seen {
+				var faces []triangle
+				switch solid := member.Mesh.(type) {
+				case *mesh.Mesh:
+					faces = slayersFaces(solid)
+				case *shape.Mesh:
+					if solid.Smooth && len(solid.Normals) > 0 {
+						return unsupported{"a smooth reference mesh in a group"}
+					}
+					faces = meshFaces(solid)
+				}
+				pooled = encoded.pool(faces)
+				encoded.meshes[member.Mesh] = pooled
+			}
+			local.members = append(local.members, standing{root: pooled.root,
+				space: member.Space, bounds: worldBox(pooled.bounds, member.Space)})
+		}
+		index = len(encoded.groups)
+		encoded.groups = append(encoded.groups, local)
+		encoded.groupOf[made] = index
+	}
+	bounds := made.Bounds()
+	encoded.standings = append(encoded.standings, standing{space: space,
+		material: material, clear: clear, group: index + 1,
+		bounds: worldBox(box{low: bounds.Min, high: bounds.Max}, space)})
+	return nil
 }
 
 // stand puts a mesh in the world at a space: its faces into the pool
@@ -100,10 +144,72 @@ func pick(bit int, low, high float64) float64 {
 // instancesOf writes every standing, in the order the leaves of their
 // own tree hold them, and that tree's boxes, which the kernel walks
 // before any mesh's own.
-func (encoded *scene) instancesOf() {
+func (encoded *scene) instancesOf() error {
+	return encoded.instancesWithin(math.MaxInt32)
+}
+
+// instanceBudget bounds every packed index and both hierarchy buffers before
+// materializing local members. The byte cap is Metal.Grid's input limit.
+//
+// Each nonempty hierarchy has at most 2*n-1 nodes; two nodes occupy less
+// than one instance. Empty scenes still need one root. Groups are nonempty
+// and are encoded only when a world standing references them.
+func instanceBudget(bytes int, counts ...int) error {
+	if bytes < nodeStruct.size() {
+		return fmt.Errorf("gpu: instance hierarchy exceeds %d bytes", bytes)
+	}
+	total := 0
+	limit := bytes / instanceStruct.size()
+	for _, count := range counts {
+		if count > limit-total {
+			return fmt.Errorf("gpu: instance buffer exceeds %d bytes", bytes)
+		}
+		total += count
+	}
+	return nil
+}
+
+// instancesWithin makes the same layout under an explicit byte cap. Small
+// caps exercise refusal before allocation; production uses Metal.Grid's cap.
+func (encoded *scene) instancesWithin(bytes int) error {
+	counts := []int{len(encoded.standings)}
+	for _, group := range encoded.groups {
+		counts = append(counts, len(group.members))
+	}
+	if err := instanceBudget(bytes, counts...); err != nil {
+		return err
+	}
+
 	order, nodes := topped(encoded.standings)
+	placed := make([]standing, 0, len(order))
 	for _, index := range order {
-		encoded.instance(encoded.standings[index])
+		placed = append(placed, encoded.standings[index])
+	}
+	// Global root stays at zero. Local roots and member ranges follow it.
+	roots := make([]int, len(encoded.groups))
+	for index, group := range encoded.groups {
+		localOrder, localNodes := topped(group.members)
+		firstNode, firstInstance := len(nodes), len(placed)
+		roots[index] = firstNode
+		for _, member := range localOrder {
+			placed = append(placed, group.members[member])
+		}
+		for _, node := range localNodes {
+			if node.count == 0 {
+				node.first += firstNode
+			} else {
+				node.first += firstInstance
+			}
+			nodes = append(nodes, node)
+		}
+	}
+	encoded.instances.reserveWords(len(placed) * instanceStruct.size())
+	encoded.tops.reserveWords(len(nodes) * nodeStruct.size())
+	for _, one := range placed {
+		if one.group > 0 {
+			one.group = roots[one.group-1] + 1
+		}
+		encoded.instance(one)
 	}
 	for _, each := range nodes {
 		encoded.tops.row(nodeStruct, values{
@@ -111,23 +217,16 @@ func (encoded *scene) instancesOf() {
 			"high": point(each.bounds.high),
 			"info": wholes(each.first, each.count)})
 	}
-	encoded.counts.instances = len(order)
+	encoded.counts.instances = len(placed)
 	encoded.counts.tops = len(nodes)
+	return nil
 }
 
 // instance writes one standing: the rows into its own space, a mesh's axes in
 // the world over its scale, each shifted so the space's origin goes to zero,
 // and its axes as they are, for normals.
 func (encoded *scene) instance(placed standing) {
-	space := placed.space
-	given := values{"info": wholes(placed.root, placed.material,
-		flag(placed.clear))}
-	into(space, given)
-	for index, axis := range axes() {
-		way := space.Orientation.Out(axis).Unit()
-		given["out_"+xyzName(index)] = point(way)
-	}
-	encoded.instances.row(instanceStruct, given)
+	encoded.packedInstance(placed)
 }
 
 // axes is the three axes, x, y and z.

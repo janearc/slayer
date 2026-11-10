@@ -1,0 +1,63 @@
+Grove endpoint checks: the compiled 64-bit domain
+
+The exact mutation changes the first pair of endpoint checks in NewGrove
+from !indexable(lo.X) || !indexable(hi.X) to their conjunction. This is
+redundant on the tested 64-bit target. It is NOT a portable logical
+equivalence of two arbitrary ranges.
+
+Construction establishes a positive finite cell width c at least as large
+as every canopy radius r. The centre coordinate a is binary64. Its vector
+length must be finite, so |a| is at most sqrt(MaxFloat64), below 2^513.
+The endpoint operations a-r and a+r cannot overflow: if r is in the largest
+binary64 binade, a is far below half its ULP and both sums round to +/-r;
+otherwise r+|a| stays below the overflow threshold. Neither division by the
+positive finite c can produce NaN.
+
+The only way an endpoint can fail indexable on a 64-bit host is for its
+floored normalized coordinate to reach the index boundary, about +/-2^63,
+or overflow to infinity. Conservatively, an offending endpoint has exact
+magnitude at least 2^62*c, allowing ample room for rounding. Since r<=c,
+the centre then has |a|>2^61*c, hence r<2^-61*|a|.
+
+The centre is normal: even the smallest positive c=2^-1074 gives
+|a|>2^-1013, above the minimum normal 2^-1022. For a normal binary64 centre,
+half the smaller adjacent spacing is at least 2^-55*|a|, including a binade
+boundary. Thus r is less than 1/64 of that half-spacing. Both a-r and a+r
+round to the SAME stored centre a. Their subsequent division and floor
+are identical, so both endpoints have the same indexability.
+
+If neither endpoint is outside, both checks are false anyway. Therefore
+their disjunction and conjunction make the same constructor decision in
+this isolated mutation on the compiled 64-bit public canopy domain.
+
+The distinction matters on 32-bit targets. With c=r=1 and a=MinInt32,
+lo=MinInt32-1 is outside while hi=MinInt32+1 fits. The retained 32-bit test
+checks this real canopy and a nearby valid control. It also avoids a
+runaway mutant: even if conversion is wrong, an accepted range ending at
+MinInt+1 can walk at most two X buckets. Game still runs mutations before
+classifying surviving equivalents, so this test kills the mutation on
+those targets rather than letting the 64-bit exception conceal it.
+
+Review this argument if the cell/radius relation, coordinate type, finite
+centre check, endpoint arithmetic, index bounds or target word size changes.
+The 32-bit test is not claimed as runtime-tested on this Darwin/ARM64 host;
+cross-compilation is a separate check, and its result must be recorded.
+Source hashes and actual target metadata belong with the installed proof.
+
+Production checkpoint: 61e6372e1fb564936e3f09d7bcf73bdd06ef639a
+Actual target:
+{
+	"GOARCH": "arm64",
+	"GOOS": "darwin",
+	"GOVERSION": "go1.26.10"
+}
+
+Source SHA256:
+828a98f2e7120d2fd30c75a8134130a731be04832c754b90eec49c1e265d2113  scene/medium/grove.go
+7ce062d17204dd85f4cb5fb94ffdcf4a22ccd6bdae4bbc09c858d116aa7ccac4  maths/space.go
+108aba84eec47c3a7f7cfa7e073494acfd78c77d9cf13351a61f44d3a6b1cdfa  scene/medium/grove_index_range_32bit_test.go
+
+Cross-compile: Go 1.26.10, GOOS=linux GOARCH=386 CGO_ENABLED=0
+go test -c -o /tmp/slayer-medium-linux-386.test ./scene/medium
+Exit: 0. Runtime on that target: NOT tested.
+Binary SHA256: 9d6c7aa65f484bb1ef5ba8eb63e0db67dafc931edc80642a4f5a9938bf5cf8cb

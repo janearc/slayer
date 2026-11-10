@@ -1,5 +1,5 @@
 // Package maths supplies typed power in watts, temperature in kelvin, and area
-// in square metres, together with Planck’s law.
+// in square metres, together with Planck's law.
 //
 // Constructors validate each quantity. Distinct types keep units explicit at
 // package boundaries and prevent a temperature from being passed where a power

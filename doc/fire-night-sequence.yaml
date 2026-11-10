@@ -1,0 +1,8 @@
+# frames are separate actual GPU renders at i/24 seconds, not interpolated.
+$schema: https://github.com/janearc/slayer/schemas/sequence-v1.json
+scene: fire-night.yaml
+output: ../out/fire-night
+fps: 24
+start: {value: 0, unit: s}
+duration: {value: 120, unit: s}
+print: {knee: 0.1, top: 100, bloom: 0.6}

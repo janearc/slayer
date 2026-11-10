@@ -1,0 +1,52 @@
+Lamp error guards: compiled public rows
+
+The mutation name omits receivers and locations. This argument therefore
+covers every matching guard in fire.made, stick.made, spot.made and
+maser.made, including guards already killed by private-constructor tests.
+No exported API accepts a caller-authored private row. Make checks sown
+seeds, every sprout is sown, and each draw lies in [0,1).
+
+The campfire has 7..10 cobbles at radius .35.. .5 m and 4..6 sticks at
+.55 of that radius. Ring jitter .3/.2, twist 1 and lean 55 degrees satisfy
+the arrangement domain. Cobbles have lengths .064.. .256 m, axis ratios
+.6.. .95 and .5.. .9, wear .3.. .9, and 12 cuts. Sticks have lengths
+.5.. .75 m, foot radii .025.. .04 m, taper .6, and 6 cuts. The light is
+1100..1500 K, 2000..6000 W, isotropic, with flicker .35. Ring placements
+have scale .7..1.3 or .8..1.2 and finite rotations. Both materials exist;
+gather and placement remain within their constructor domains.
+
+The bonfire also calls stick.made: its logs are 6..8 m long, with foot
+radii .30.. .45 m, taper .85 and 8 cuts. Its 11..15 logs at radius
+2.4..3 m, lean 21 degrees and jitter .2 satisfy the same arrangement
+bounds and have a dressed body. It creates no lamp.
+
+The spotlight stand is 1..1.6 m tall, radius .02 m. Its head length,
+back and front are .3, .07 and .12 m, with 12 cuts and tilt -10..-25
+degrees. The axis is finite and nonzero; spaceAlong and placed retain
+a right-handed orthonormal orientation. The lamp is 3200 K, 500..2000 W,
+with half-angle 12..25 degrees and soft edge 6 degrees, always below pi.
+
+The maser mount is 1.5..2.5 m tall, radius .06 m. Its dish is 2..4 m;
+head length is .25 of that, back .1 and front .5, with 16 cuts and tilt
+30..70 degrees. Wavelength 299792458/1420.4e6 m, aperture and .5..5 W
+power are finite and positive. The aperture receives a line spectrum,
+and its finite half-angle is capped at pi.
+
+All these shape, seed, cut, material, placement and light domains satisfy
+the callees. A deleted error guard therefore leaves the same public value.
+Invalid private rows are useful constructor tests, but outside this fixed
+row argument. Observable Lights/Things placement refusals are separate.
+Review again when a row, public construction door or callee changes.
+
+Production checkpoint: c51ba95eeb50b32c04e1136994e60c9cd98faf34
+Toolchain: Go 1.26.10, Darwin/ARM64
+
+Source SHA256:
+219bb6fd1262b710ace672b375c621a5e4dccd551d3909e4ca4425c323046fa1  manufacture/lamps.go
+705eecd1467f8caa5e9690bafa4e5c172a0ac6ca828ba642e354ca35d6e0399d  manufacture/bonfire.go
+ed177c1944f7d743ed28bf178c9e95b3716c39a2a81432146526af96b35fe386  manufacture/kinds.go
+6c4d96e01120e54b7a3a0ca78fa09c631dfe0f3ef685d24099a3333e3b1cd0ae  manufacture/light.go
+a1ba3053845a78ab14d4151cdb21ca273ef7faf60b1c858febb626f7a62705b3  manufacture/arrangement.go
+5f6ad9b7882e880ae1bfbe31500323b5c945cf857ac3ff161382a831412436f1  manufacture/good.go
+8696cf4c17b71f2ff23f4140fff9bf48967113856705e92631dddeb6810a3bc7  manufacture/seed.go
+

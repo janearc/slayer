@@ -1,0 +1,88 @@
+# Primary-source shortlist for forthcoming observatory recipes.
+# Browsed 2026-11-07. Fetch and pin bytes through the Game source tool
+# before promoting any value into research-derived-data.yml.
+sources:
+  - key: palomar-hale
+    by: Caltech, Palomar Observatory
+    from: https://sites.astro.caltech.edu/palomar/about/telescopes/hale.html
+    facts:
+      - {name: primary diameter, value: 200, unit: in}
+      - {name: dome diameter, value: 42, unit: m}
+      - {name: dome height, value: 41, unit: m}
+    context: Steel equatorial mount; the page's 5.1 m is rounded from 200 inches.
+  - key: keck-telescopes
+    by: W. M. Keck Observatory
+    from: https://keckobservatory.org/our-story/telescopes/
+    facts:
+      - {name: nominal primary diameter, value: 10, unit: m}
+      - {name: primary segments per telescope, value: 36, unit: count}
+    context: Both Keck I and Keck II use segmented primaries.
+  - key: subaru-parameters
+    by: National Astronomical Observatory of Japan
+    from: https://subarutelescope.org/Telescope/Parameters/
+    facts:
+      - {name: primary effective diameter, value: 8.2, unit: m}
+      - {name: enclosure height, value: 43, unit: m}
+      - {name: enclosure base diameter, value: 40, unit: m}
+    context: Alt-az mount and a cylindrical enclosure rotating with the telescope.
+  - key: rubin-key-numbers
+    by: Vera C. Rubin Observatory
+    from: https://rubinobservatory.org/for-scientists/rubin-101/key-numbers
+    facts:
+      - {name: primary mirror diameter, value: 8.4, unit: m}
+      - {name: mean effective aperture, value: 6.49, unit: m}
+    context: Physical mirror diameter and area-weighted effective aperture differ.
+  - key: rubin-mirrors
+    by: Vera C. Rubin Observatory
+    from: https://rubinobservatory.org/explore/how-rubin-works/technology/mirrors
+    facts:
+      - {name: secondary diameter, value: 3.4, unit: m}
+      - {name: tertiary diameter, value: 5.0, unit: m}
+    context: Primary and tertiary surfaces share one glass blank.
+  - key: elt-facts
+    by: European Southern Observatory
+    from: https://elt.eso.org/about/facts/
+    facts:
+      - {name: nominal primary diameter, value: 39, unit: m}
+      - {name: primary segments, value: 798, unit: count}
+    context: Hemispherical enclosure and a five-mirror optical design.
+  - key: owl-design-2004
+    by: European Southern Observatory
+    from: https://www.eso.org/sci/facilities/eelt/owl/OWL_design.html
+    facts:
+      - {name: conceptual pupil diameter, value: 100, unit: m}
+      - {name: conceptual primary segments, value: 3048, unit: count}
+      - {name: conceptual secondary segments, value: 216, unit: count}
+    context: Historical design, page marked last modified 2004-07-09.
+  - key: owl-overview
+    by: European Southern Observatory
+    from: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/2_Overview.pdf
+    context: Table 2-3, printed page 69, gives 3048 primary and 216 secondary segments.
+    pending: Browser text read; PDF screenshot failed. Verify table on fetched bytes.
+  - key: owl-faq
+    by: European Southern Observatory
+    from: https://www.eso.org/sci/facilities/eelt/owl/FAQs.html
+    context: Search-indexed FAQ says 3042 primary segments, unlike design page and overview.
+    pending: Full web open failed on content type. Preserve discrepancy until raw fetch.
+  - key: griffith-school-guide
+    by: Griffith Observatory
+    from: https://griffithobservatory.org/wp-content/uploads/2023/02/Module1_Student_Guide.pdf
+    facts:
+      - {name: Zeiss refractor aperture, value: 12, unit: in}
+    context: The east roof dome contains the refractor; a civic template is a site composition.
+  - key: alma-antennas
+    by: European Southern Observatory
+    from: https://www.hq.eso.org/public/teles-instr/alma/antennas/
+    facts:
+      - {name: larger dish diameter, value: 12, unit: m}
+      - {name: smaller dish diameter, value: 7, unit: m}
+      - {name: larger antenna count, value: 54, unit: count}
+      - {name: smaller antenna count, value: 12, unit: count}
+    context: A scenery array layout will be authored, not ALMA's surveyed pad coordinates.
+  - key: ska-mid
+    by: SKA Observatory
+    from: https://www.skao.int/en/explore/telescopes/ska-mid
+    facts:
+      - {name: SKA dish diameter, value: 15, unit: m}
+      - {name: MeerKAT dish diameter, value: 13.5, unit: m}
+    context: Offset sub-reflector and feed; keep this visibly distinct from an on-axis dish.

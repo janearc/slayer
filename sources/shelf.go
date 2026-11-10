@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"go.yaml.in/yaml/v3"
+	"gopkg.in/yaml.v3"
 )
 
 // A Shelf is where fetched sources are kept on this machine: a
@@ -164,13 +164,15 @@ func (shelf Shelf) download(ctx context.Context, source Source,
 // sidecar writes what is known of fetched bytes beside them.
 func (shelf Shelf) sidecar(source Source, at, sum string, size int64,
 	now time.Time) error {
-	text, err := yaml.Marshal(side{Key: source.Key(),
-		From: source.From(), Licence: source.Licence(), Sha256: sum,
-		Bytes: size, Fetched: now.UTC().Format(time.RFC3339)})
+	out, err := os.OpenFile(at+".source", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(at+".source", text, 0o644)
+	encoder := yaml.NewEncoder(out)
+	err = encoder.Encode(side{Key: source.Key(),
+		From: source.From(), Licence: source.Licence(), Sha256: sum,
+		Bytes: size, Fetched: now.UTC().Format(time.RFC3339)})
+	return errors.Join(err, encoder.Close(), out.Close())
 }
 
 // matches is whether a file is there and its sha256 is the one given.

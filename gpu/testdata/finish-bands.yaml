@@ -1,0 +1,45 @@
+# Authored host-finishing inputs, not a render or a timing observation.
+# A 3x3 sample block straddles row 64; the last band has five sample rows.
+width: 2
+height: 23
+side: 3
+batches: [[0, 64], [64, 5]]
+sample-lanes: 12
+texture-lanes: 11
+sky: [2, 4, 8]
+sky-weights: [0.5, 0.25, 0.125]
+hit-diagnostics: 546 # 0x0222: queries 2, candidates 2, refined 2
+fallback-diagnostics: 8226 # 0x2022: queries 2, candidates 2, fallbacks 2
+miss-diagnostics: 1 # one query, no triangle candidate
+miss-depth: 1.0e30
+textures:
+  - paint: [0.5, 0.25, 0.75]
+    shine: [0.125, 0.25, 0.5]
+    diffuse: [2, 4, 8]
+    emissive: [8, 4, 2]
+  - paint: [0.25, 0.5, 1]
+    shine: [0, 0, 0]
+    diffuse: [4, 2, 1]
+    emissive: [0, 0, 0]
+# There are 414 samples: 405 hits and 9 misses in the last output pixel.
+# One of three sample columns uses software fallback: 135*2=270.
+# The other 270 hit samples refine both candidates: 270*2=540.
+# Keep all four totals distinct so swapping two counters cannot pass.
+native: {queries: 819, candidates: 810, refined: 540, fallbacks: 270}
+# 414 samples * (12 + 2*11) lanes * 4 bytes; first band 6*64*34*4.
+sample-bytes: 56304
+peak-sample-bytes: 52224
+expected:
+  # Raw base at fine(col,row) is col+8*row. Its 3x3 mean is 3*x+24*y+9.
+  base: [3, 24, 9]
+  scales: [1, 2, 0.5]
+  # Both texture records add [3,3,8]; weighted sky adds [1,1,1].
+  offsets: [4, 4, 9]
+  cover: 0.5
+  depth: [3, 30, 1000] # nearest sample: 1000+10*(3*y)+3*x
+  # Last output pixel: no raw surface light or texture records, sky only.
+  sky: [1, 1, 1]
+  # Nine positive binary32 terms: quotient/multiply/add rounding allowed.
+  # This picked 2e-6 budget permits those roundings, not an indexing change.
+  relative: 0.000002
+  absolute: 0.000002

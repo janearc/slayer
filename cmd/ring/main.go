@@ -271,14 +271,14 @@ func band(around int, keep func(strip int) bool) (*mesh.Mesh, error) {
 		at := func(i, j int) int { return base + (i%around)*k + j }
 		for i := range around {
 			a := 2 * math.Pi * (float64(i) + 0.5) / float64(around)
-			mid := maths.V(radius*math.Cos(a), 0, radius*math.Sin(a))
+			outward := maths.V(s.facing.r*math.Cos(a), s.facing.y,
+				s.facing.r*math.Sin(a))
 			for j := 0; j+1 < k; j++ {
 				q := [4]int{at(i, j), at(i+1, j), at(i+1, j+1), at(i, j+1)}
 				for _, t := range [][3]int{{q[0], q[1], q[2]}, {q[0], q[2], q[3]}} {
 					p0, p1, p2 := verts[t[0]], verts[t[1]], verts[t[2]]
 					normal := p1.Sub(p0).Cross(p2.Sub(p0))
-					centre := p0.Add(p1).Add(p2).Scale(1.0 / 3)
-					if normal.Dot(centre.Sub(mid)) < 0 {
+					if normal.Dot(outward) < 0 {
 						t[1], t[2] = t[2], t[1]
 					}
 					faces = append(faces, t)

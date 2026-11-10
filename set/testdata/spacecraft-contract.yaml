@@ -1,0 +1,27 @@
+# Authored schema and legacy-reader cases, 2026-11-07.
+block: |
+  recipes:
+    compact spacecraft:
+      kind: space-observatory
+      spacecraft:
+        design: spitzer
+        aperture: {value: 1, unit: m}
+name: compact spacecraft
+seed: 5
+height: 40
+aperture: 1
+top: 4.8
+tolerance: 1.0e-9
+placement: "recipe: compact spacecraft\n        height: {value: 40, unit: m}"
+invalid:
+  - {before: "kind: space-observatory", after: ""}
+  - {before: "design: spitzer", after: "design: unknown"}
+  - {before: "value: 1, unit: m", after: "value: 0, unit: m"}
+  - {before: "value: 1, unit: m", after: "value: -1, unit: m"}
+  - {before: "value: 1, unit: m", after: "value: 1.0e300, unit: m"}
+  - {before: "value: 1, unit: m", after: "value: .nan, unit: m"}
+  - {before: "value: 1, unit: m", after: "value: 1, unit: cm"}
+  - {before: "value: 1, unit: m", after: "value: 1"}
+  - {before: "height: {value: 40, unit: m}", after: "height: {value: -1, unit: m}"}
+  - {before: "height: {value: 40, unit: m}", after: "height: {value: 1.0e300, unit: m}"}
+  - {before: "height: {value: 40, unit: m}", after: "height: {value: 40, unit: km}"}

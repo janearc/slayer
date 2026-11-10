@@ -8,21 +8,19 @@ import (
 )
 
 // A Norway spruce's needles are on branchlets its branches carry, many
-// to a branch: from every seed it has more than twice as many parts of
-// needles as parts of branch, where a spruce has one for one.
+// to a branch: from every seed it has more than twice as many needled
+// shoots as parts of branch, where a spruce has one for one. The shoots
+// are the leaf group's members; the parts are the woody scaffold.
 func TestANorwaySpruceIsBranchedTwice(t *testing.T) {
 	for number := range uint64(20) {
 		made := mustMake(t, "norway", number)
-		branches, needles := -1, 0 // the trunk is a body part
-		for _, one := range made.parts {
-			if one.of == leaf {
-				needles++
-			} else {
-				branches++
-			}
+		branches := len(made.parts) - 1 // the trunk is a body part
+		needles := 0
+		if group := made.groups[leaf]; group != nil {
+			needles = len(group.Members())
 		}
 		if branches < 1 || needles <= 2*branches {
-			t.Errorf("seed %d: %d parts of needles on %d of branch",
+			t.Errorf("seed %d: %d shoots of needles on %d of branch",
 				number, needles, branches)
 		}
 	}

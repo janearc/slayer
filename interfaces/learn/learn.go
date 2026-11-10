@@ -1,6 +1,6 @@
 // Package learn renders terminal cells as raster images for model inspection.
 // Each cell becomes six subpixels in two colours. The result approximates a
-// terminal: actual glyphs depend on the terminal’s font and sextant support.
+// terminal: actual glyphs depend on the terminal's font and sextant support.
 // Contact sheets are provided by interfaces/sheet.
 package learn
 

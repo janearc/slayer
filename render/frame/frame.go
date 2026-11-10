@@ -19,7 +19,7 @@ type Pixel struct {
 	Depth   float32 // distance to what the ray met; +Inf for nothing
 }
 
-// Light returns the pixel’s RGB as maths.Light.
+// Light returns the pixel's RGB as maths.Light.
 func (p Pixel) Light() maths.Light {
 	return maths.Light{R: float64(p.R), G: float64(p.G), B: float64(p.B)}
 }

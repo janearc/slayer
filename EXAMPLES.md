@@ -1,11 +1,19 @@
 # What Slayer draws
 
-The numbered smoke scenes follow Slayer’s rendering milestones. The larger
+The numbered smoke scenes follow Slayer's rendering milestones. The larger
 scenes show how those capabilities combine: a lantern in space, an orbital
 landscape, a hillside, and a moonrise.
 
-Run commands from the checkout root. Images go to `out/` unless an output
-flag specifies another location. For architecture, see [OPERATION.md](OPERATION.md).
+For a first look, [the demo menu](doc/demos.md) provides `game run demos`
+and `game run demo N`, with PNGs and optional terminal output. The camera demo
+also writes a short sequence from a checked YAML path.
+
+Run `game build` from the checkout root first. Images go to `out/` unless
+an output flag specifies another location. Application arguments after
+`--` require Game's forwarding fix; the [workflow](doc/developing.md)
+explains setup and the fixed runs available on older Game builds.
+
+For architecture, see [OPERATION.md](OPERATION.md).
 
 ## Smoke scenes
 
@@ -14,9 +22,9 @@ be traced to a capability. Add new scenes rather than renumbering passing
 ones; changes to existing scenes belong in separate, explained commits.
 
 ```sh
-go run ./cmd/smokecheck smoke          # All scenes.
-go run ./cmd/smokecheck smoke 9        # One scene.
-go run ./cmd/smokecheck smoke 9 -out /tmp/nine
+game run smokecheck -- smoke          # All scenes.
+game run smokecheck -- smoke 9        # One scene.
+game run smokecheck -- smoke 9 -out /tmp/nine
 ```
 
 `-out` copies the terminal image, raster image, and comparison result to
@@ -28,7 +36,7 @@ the chosen directory. Cached results are keyed by the rendering binary;
 1. **A ball on a floor.** A clay ball on chalk under one sun, with one
    shadow: the first render.
 2. **Two lamps.** Red from the left and green from the right combine to
-   yellow on a white ball. Each lamp lights the other’s shadow; the region
+   yellow on a white ball. Each lamp lights the other's shadow; the region
    reached by neither remains black.
 3. **A ball on a set.** Chalk and slate ground, a gradient sky, and haze
    that blends the distant floor into the horizon.
@@ -64,11 +72,11 @@ the chosen directory. Cached results are keyed by the rendering binary;
 14. **Cloud detail.** A frame-filling giant with fine turbulence, jets,
     mottling, a large storm, and white ovals.
 15. **The giant planets.** Jupiter, Saturn, Uranus, and Neptune at their
-    relative sizes, including rings and Uranus’s axial tilt.
+    relative sizes, including rings and Uranus's axial tilt.
 16. **The rocky worlds.** Mercury, Venus, Earth, Mars, and Pluto with
     Charon; the last pair orbits its common centre.
-17. **Orbiting moons.** Three satellites timed from the primary’s mass
-    using Kepler’s law, viewed above the orbital plane.
+17. **Orbiting moons.** Three satellites timed from the primary's mass
+    using Kepler's law, viewed above the orbital plane.
 18. **Hubble at Jupiter.** A narrow telescope view with four point-like
     moons, including a transit and its shadow. See the documented camera
     approximation in `film/lens.go`.
@@ -95,7 +103,7 @@ the chosen directory. Cached results are keyed by the rendering binary;
 28. **A magnetar flare.** A faint blue visible source becomes a bright,
     nearly transparent fireball in gamma rays.
 29. **The Pillars of Creation.** Emission-line light mapped through
-    Hubble’s palette.
+    Hubble's palette.
 
 ### Earth and beyond
 
@@ -109,7 +117,7 @@ the chosen directory. Cached results are keyed by the rendering binary;
     settings, rendered in X-rays.
 34. **An escaping atmosphere.** A hot Jupiter about 40 planetary diameters
     from its star trails gas away from the star and back along its orbit.
-35. **Hale–Bopp.** A slightly green coma, broad curved dust tail, and
+35. **Hale-Bopp.** A slightly green coma, broad curved dust tail, and
     straight blue ion tail near the Sun.
 
 ### Lensing and reflection
@@ -118,7 +126,7 @@ the chosen directory. Cached results are keyed by the rendering binary;
     disc above and below its shadow. Nine rays per pixel resolve the
     thin ring where rays orbit near the hole.
 37. **Falling in.** An infalling camera sees the sky crowd forward and
-    the disc’s light shift.
+    the disc's light shift.
 38. **The Blue Marble.** Earth from an image map, Africa facing the camera
     and sunlight from the upper right. This scene reads
     `$SLAYER_MARBLE/blue.jpg`.
@@ -128,8 +136,8 @@ the chosen directory. Cached results are keyed by the rendering binary;
 ## The lantern
 
 ```
-go run ./cmd/swarm
-go run ./cmd/swarm -gpu -wear 0.5 -out out/lantern.png
+game run swarm
+game run swarm -- -gpu -wear 0.5 -out out/lantern.png
 ```
 
 A star wrapped in a Dyson swarm: thousands of small mirrored panels,
@@ -158,9 +166,9 @@ be, day by day.
 ## The orbital scene
 
 ```
-go run ./cmd/orbital
-go run ./cmd/orbital -far
-go run ./cmd/orbital -cells 120x40 -frames 0
+game run orbital
+game run orbital -- -far
+game run orbital -- -cells 120x40 -frames 0
 ```
 
 Two Culture orbitals round a lantern, inside a nebula. The orbitals are
@@ -200,8 +208,8 @@ doc/the-orbital-scene.md tells the story of the scene.
 ## The ring
 
 ```
-go run ./cmd/ring
-go run ./cmd/ring -dress -night -bands
+game run ring
+game run ring -- -dress -night -bands
 ```
 
 A ring of triangles hung round a flaring magnetar, "the kind of thing
@@ -227,9 +235,9 @@ sun gives the hull its shape.
 ## The hillside
 
 ```
-go run ./cmd/hillside
-go run ./cmd/hillside -night -alight 1
-go run ./cmd/hillside -set sets/kilauea-iki.yaml
+game run hillside
+game run hillside -- -night -alight 1
+game run hillside -- -set sets/kilauea-iki.yaml
 ```
 
 A hillside of things from the manufactory: spruces, ferns, boulders,
@@ -264,7 +272,7 @@ file may say.
 ## Moonrise
 
 ```
-go run ./cmd/moonrise -out out/moonrise.pfm -preview out/moonrise.png
+game run moonrise -- -out out/moonrise.pfm -preview out/moonrise.png
 ```
 
 A full moon rising behind one tree, through a very long lens. The tree,
@@ -285,8 +293,8 @@ has no air here.
 ## The house
 
 ```
-go run ./cmd/house
-go run ./cmd/house -camera road,garden -at "the box=-1,0,0"
+game run house
+game run house -- -camera road,garden -at "the box=-1,0,0"
 ```
 
 The shoebox: a house under a sky with Saturn, drawn from its set file.
@@ -300,7 +308,7 @@ places the asset a camera stands off.
 ## Weather
 
 ```
-go run ./cmd/weather -gpu
+game run weather -- -gpu
 ```
 
 A planet's weather run from still air, drawn every so often as it
@@ -320,13 +328,13 @@ Each moment it writes three pictures, each a map of the whole planet:
 
 ## Other commands
 
-- **Slayer**: `go run ./cmd/slayer set sets/widow.yaml` draws a set
+- **Slayer**: `game run slayer -- set sets/widow.yaml` draws a set
   file as a stranger would, from outside, and checks its terminal
   picture against a real one.
-- **Develop**: `go run ./cmd/develop -out x.png a.pfm b.pfm` adds raws
+- **Develop**: `game run develop -- -out x.png a.pfm b.pfm` adds raws
   together and develops them at an exposure, with an optional white
   balance in kelvin.
 - **Sources**: fetches and checks the published sources. OPERATION.md
   has the details.
-- **Lightbox**: `go run ./cmd/lightbox` serves the smokes folder at
+- **Lightbox**: `game run lightbox` serves the smokes folder at
   http://localhost:8765.

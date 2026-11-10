@@ -1,6 +1,6 @@
 //go:build darwin
 
-// Package metal bridges Go and Apple’s Metal API through cgo. Kernels compile
+// Package metal bridges Go and Apple's Metal API through cgo. Kernels compile
 // from source when opened, so building Slayer needs no separate Metal compiler
 // toolchain.
 //

@@ -17,8 +17,9 @@ import (
 // stocked is which made thing a place stands: a kind, and which of its
 // variety, or the place itself where every thing is its own.
 type stocked struct {
-	name string
-	pick int
+	name   string
+	pick   int
+	detail string
 }
 
 // kept is a made thing, meshed once where it stands at the origin, the
@@ -26,7 +27,9 @@ type stocked struct {
 type kept struct {
 	things []thing.Thing
 	faces  int
+	stored int
 	lamps  func(at maths.Subspace) ([]emit.Lit, error)
+	bounds maths.Box
 }
 
 // stock is the things a hillside has made, by which they are.
@@ -61,33 +64,41 @@ func (have stock) made(given asked, name string,
 // it stands at the origin. the manufactory's light is a type nothing
 // outside it can name, so its lamps are kept as the way to read them.
 func manufactured(given asked, name string, pick int) (kept, error) {
+	return manufacturedRecipe(given, name, pick, "quick", nil)
+}
+
+// manufacturedRecipe shares geometry across placements of one recipe.
+func manufacturedRecipe(given asked, name string, pick int, detail string,
+	spec *manufacture.Optical) (kept, error) {
 	row, err := manufacture.KindNamed(name)
+	if spec != nil {
+		row, err = manufacture.Observatory(*spec)
+	}
 	if err != nil {
 		return kept{}, err
 	}
-	one, err := manufacture.Make(row,
-		manufacture.Sow(stir(given.seed, pick)))
+	return manufacturedKind(given, row, pick, detail)
+}
+
+// manufacturedKind meshes a checked recipe and retains only its local lights.
+func manufacturedKind(given asked, row manufacture.Kind, pick int,
+	detail string,
+) (kept, error) {
+	one, err := manufacture.MakeWithComplexity(row,
+		manufacture.Sow(stir(given.seed, pick)), detail)
 	if err != nil {
 		return kept{}, err
 	}
-	things, err := one.Things(maths.Subspace{})
+	things, err := one.Things(maths.Local())
 	if err != nil {
 		return kept{}, err
 	}
-	lamps := func(at maths.Subspace) ([]emit.Lit, error) {
-		var lit []emit.Lit
-		for _, lamp := range one.Lights(at) {
-			beyond := lamp.Beyond().InMetres()
-			shone, err := lampOf(lamp.Light(), lamp.At(),
-				lamp.Toward(), beyond, given)
-			if err != nil {
-				return nil, err
-			}
-			lit = append(lit, shone)
-		}
-		return lit, nil
-	}
-	return kept{things: things, faces: facesOf(things), lamps: lamps}, nil
+	lights := one.Descriptions()
+	lamps := localLamps{lights: lights,
+		exposure: given.exposure, moment: given.at}
+	return kept{things: things, faces: facesOf(things),
+		stored: storedFaces(things), lamps: lamps.at,
+		bounds: one.Bounds()}, nil
 }
 
 // lampOf is a carried light as a lamp of the picture, at its moment and with
@@ -132,6 +143,21 @@ func facesIn(solid shape.Shape) int {
 		return made.FaceCount()
 	case *shape.Mesh:
 		return len(made.Faces)
+	case *shape.MeshGroup:
+		return made.FaceCount()
 	}
 	return 0
+}
+
+// storedFaces accounts for prototypes rather than every repeated needle.
+func storedFaces(things []thing.Thing) int {
+	count := 0
+	for _, one := range things {
+		if group, ok := one.Shape.(*shape.MeshGroup); ok {
+			count += group.StoredFaces()
+		} else {
+			count += facesIn(one.Shape)
+		}
+	}
+	return count
 }

@@ -1,0 +1,242 @@
+# Authored small composition, 2026-11-07.
+# This is a sampling and layering study, not the planned mountain flyby.
+# Four outgoing guide beams: ESO 4LGSF visual reference.
+# https://www.eso.org/public/teles-instr/paranal-observatory/vlt/vlt-instr/4lgsf/
+# Width, pointing, reach, display strength and weather are authored.
+# Shared target; the 64 arcsec off-axis pattern follows ESO GALACSI WFM.
+# https://cdn3.eso.org/sci/facilities/develop/ao/sys/galacsi.html
+# No sodium return, water budget or adaptive-optics simulation.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: four guide beams above a level cloud deck
+  renderer: gpu-native
+  seed: 11
+  light: moon
+  location:
+    lat: 19.413
+    lon: -155.25
+  timeofday: 2300
+  moon:
+    azimuth: 250
+    altitude: 25
+    disc: true
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263818
+    north: 2148752
+    across: 64
+    down: 64
+    step: 2
+  recipes:
+    compact dome:
+      kind: optical-observatory
+      enclosure:
+        kind: dome
+        diameter:
+          value: 12
+          unit: m
+        opening:
+          value: 35
+          unit: deg
+      telescope:
+        aperture:
+          value: 4
+          unit: m
+        mount: alt-azimuth
+        primary: segmented
+        pointing:
+          azimuth: 180
+          altitude: 70
+  laser-pointings:
+    science target: {azimuth: 180, altitude: 70}
+  lasers:
+    north east:
+      origin:
+        object: the observatory
+        east:
+          value: 2
+          unit: m
+        up:
+          value: 8.8
+          unit: m
+        south:
+          value: -2
+          unit: m
+      pointing: science target
+      guide-star-offset:
+        horizontal: {value: 64, unit: arcsec}
+        vertical: {value: 0, unit: arcsec}
+      radius:
+        value: 0.35
+        unit: m
+      reach:
+        value: 150
+        unit: m
+      divergence:
+        value: 0.02
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 3000000
+    north west:
+      origin:
+        object: the observatory
+        east:
+          value: -2
+          unit: m
+        up:
+          value: 8.8
+          unit: m
+        south:
+          value: -2
+          unit: m
+      pointing: science target
+      guide-star-offset:
+        horizontal: {value: 0, unit: arcsec}
+        vertical: {value: 64, unit: arcsec}
+      radius:
+        value: 0.35
+        unit: m
+      reach:
+        value: 150
+        unit: m
+      divergence:
+        value: 0.02
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 3000000
+    south east:
+      origin:
+        object: the observatory
+        east:
+          value: 2
+          unit: m
+        up:
+          value: 8.8
+          unit: m
+        south:
+          value: 2
+          unit: m
+      pointing: science target
+      guide-star-offset:
+        horizontal: {value: -64, unit: arcsec}
+        vertical: {value: 0, unit: arcsec}
+      radius:
+        value: 0.35
+        unit: m
+      reach:
+        value: 150
+        unit: m
+      divergence:
+        value: 0.02
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 3000000
+    south west:
+      origin:
+        object: the observatory
+        east:
+          value: -2
+          unit: m
+        up:
+          value: 8.8
+          unit: m
+        south:
+          value: 2
+          unit: m
+      pointing: science target
+      guide-star-offset:
+        horizontal: {value: 0, unit: arcsec}
+        vertical: {value: -64, unit: arcsec}
+      radius:
+        value: 0.35
+        unit: m
+      reach:
+        value: 150
+        unit: m
+      divergence:
+        value: 0.02
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 3000000
+  weather:
+    low cloud:
+      kind: prescribed-mist
+      extinction:
+        value: 0.03
+        unit: m^-1
+      depth:
+        value: 12
+        unit: m
+      coverage: 0.85
+      seed: 23
+    thin air:
+      kind: prescribed-mist
+      extinction:
+        value: 0.001
+        unit: m^-1
+      depth:
+        value: 180
+        unit: m
+      coverage: 1
+      seed: 24
+  atmosphere:
+    layers:
+      cloud deck:
+        weather: low cloud
+        extent: terrain
+        albedo: 0.95
+        base:
+          value: 0
+          unit: m
+      upper air:
+        weather: thin air
+        extent: terrain
+        albedo: 0.95
+        base:
+          value: 0
+          unit: m
+  set:
+    things:
+      the observatory:
+        recipe: compact dome
+        seed: 5
+        east: 263850
+        north: 2148720
+        complexity: quick
+    stands:
+      young spruces:
+        kind: spruce
+        complexity: hull
+        count: 32
+        seed: 11
+        exclude:
+          around: the observatory
+          clearance:
+            value: 1
+            unit: m
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    exposure: 10000000
+    wide: 55
+  cameras:
+    across the clearing:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 24
+          standoff_y: -36
+          standoff_z: 20
+      orientation:
+        point_to: the observatory
+        alpha: -20

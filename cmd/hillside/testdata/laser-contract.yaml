@@ -1,0 +1,11 @@
+# Independent pose/envelope oracle, 2026-11-07.
+# Unit direction calculated from azimuth 30 degrees, altitude 70 degrees.
+offset: {x: 3, y: 4, z: 5}
+direction: {x: 0.1710100716628344, y: 0.9396926207859083, z: -0.29619813272602397}
+radius: 0.6
+reach: 200
+probe: 7
+wavelength: 589
+strength: 8
+tolerance: 1.0e-12
+later: 2

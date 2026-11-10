@@ -1,0 +1,7 @@
+# Authored CPU/Metal weather comparison, 2026-11-07.
+weather: {extinction: 0.05, depth: 10, coverage: 1, seed: 34}
+bounds: {min: {x: -5, y: -5, z: -5}, max: {x: 5, y: 5, z: 5}}
+base: -5
+ground: -10
+minimum: 1
+tolerance: 0.02

@@ -8,6 +8,9 @@ import (
 
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/mesh"
+	"github.com/janearc/slayer/scene/shape"
+	"github.com/janearc/slayer/scene/thing"
 )
 
 // Every kind is found by its name, and a name that is no kind is
@@ -42,12 +45,13 @@ func TestTheSameSeedMakesTheSameThing(t *testing.T) {
 
 // Different seeds make different spruces, stones and ferns: the seed
 // does the work hand-set numbers did. Each is told by the middle of its
-// corners.
+// corners where they stand: a shared prototype is the same mesh from
+// every seed, so its corners count where each member places them.
 func TestSeedsMakeDifferentThings(t *testing.T) {
 	for _, name := range []string{"spruce", "boulder", "fern"} {
 		seen := map[maths.Vec]uint64{}
 		for seed := range uint64(seeds) {
-			middle := middleOf(made(t, name, seed)[0].points)
+			middle := middleStanding(t, standing(t, name, seed))
 			if earlier, twice := seen[middle]; twice {
 				t.Errorf("%s from seeds %d and %d are the same", name,
 					earlier, seed)
@@ -57,13 +61,38 @@ func TestSeedsMakeDifferentThings(t *testing.T) {
 	}
 }
 
-// middleOf is the average of some corners.
-func middleOf(corners []maths.Vec) maths.Vec {
+// middleStanding is the average of every corner of some standing
+// things, a group's prototypes taken out through each member's space.
+func middleStanding(t *testing.T, things []thing.Thing) maths.Vec {
+	t.Helper()
 	var sum maths.Vec
-	for _, corner := range corners {
-		sum = sum.Add(corner)
+	corners := 0
+	for _, one := range things {
+		switch held := one.Shape.(type) {
+		case *mesh.Mesh:
+			for _, point := range held.Points() {
+				sum = sum.Add(point)
+				corners++
+			}
+		case *shape.MeshGroup:
+			for _, member := range held.Members() {
+				prototype, ok := member.Mesh.(*mesh.Mesh)
+				if !ok {
+					t.Fatalf("unexpected group prototype %T", member.Mesh)
+				}
+				for _, point := range prototype.Points() {
+					sum = sum.Add(member.Space.Out(point))
+					corners++
+				}
+			}
+		default:
+			t.Fatalf("unexpected standing shape %T", one.Shape)
+		}
 	}
-	return sum.Scale(1 / float64(len(corners)))
+	if corners == 0 {
+		t.Fatal("nothing stands")
+	}
+	return sum.Scale(1 / float64(corners))
 }
 
 // Every corner of every kind is a number, from every seed.

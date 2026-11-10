@@ -1,0 +1,529 @@
+# Authored scenery families, 2026-11-08. Lengths are metres.
+# Aperture and height references read the measured ledger; every other
+# dimension, parked pose, array layout and accessory is picked scenery.
+# Mees has an explicitly picked optical proxy, not a sourced instrument size.
+# UKIRT is a building family: science closure was announced for 2026-09-15.
+---
+designs:
+- kind: cfht
+  family: open
+  aperture: cfht-primary-metres
+  housing: dome
+  mount: yoke
+  diameter: 24
+  height: 28
+  seat: 13.5
+  length: 6.2
+  minimum:
+    x: -13
+    y: 0
+    z: -13
+  maximum:
+    x: 21
+    y: 28
+    z: 13
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 11.4
+        y: 0
+        z: -5
+      size:
+        x: 6
+        y: 4
+        z: 10
+- kind: gemini-north
+  family: open
+  aperture: gemini-primary-metres
+  housing: vented-dome
+  mount: fork
+  diameter: 36
+  height: 0
+  seat: 20
+  length: 11
+  minimum:
+    x: -19.5
+    y: 0
+    z: -19.5
+  maximum:
+    x: 26
+    y: 46
+    z: 19.5
+  height-reference: gemini-enclosure-height-metres
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 14.5
+        y: 0
+        z: -5
+      size:
+        x: 10
+        y: 5
+        z: 10
+- kind: irtf
+  family: open
+  aperture: irtf-aperture-metres
+  housing: dome
+  mount: yoke
+  diameter: 17
+  height: 21
+  seat: 9
+  length: 5
+  minimum:
+    x: -9
+    y: 0
+    z: -9
+  maximum:
+    x: 14
+    y: 21
+    z: 9
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 7
+        y: 0
+        z: -3.5
+      size:
+        x: 6
+        y: 3
+        z: 7
+- kind: uh-88
+  family: closed
+  aperture: uh88-nominal-metres
+  housing: dome
+  mount: yoke
+  diameter: 12
+  height: 16
+  seat: 7
+  length: 5.3
+  minimum:
+    x: -6.5
+    y: 0
+    z: -6.5
+  maximum:
+    x: 6.5
+    y: 16
+    z: 6.5
+- kind: ukirt
+  family: open
+  aperture: ukirt-primary-metres
+  housing: dome
+  mount: yoke
+  diameter: 18
+  height: 21
+  seat: 8.5
+  length: 5.7
+  minimum:
+    x: -9.5
+    y: 0
+    z: -9.5
+  maximum:
+    x: 9.5
+    y: 21
+    z: 9.5
+- kind: jcmt
+  family: radio
+  aperture: jcmt-primary-metres
+  housing: screened-house
+  mount: radio
+  diameter: 32
+  height: 33
+  seat: 12
+  length: 0
+  minimum:
+    x: -16.5
+    y: 0
+    z: -16.5
+  maximum:
+    x: 16.5
+    y: 33
+    z: 16.5
+- kind: sma-antenna
+  family: radio
+  aperture: sma-primary-metres
+  housing: none
+  mount: radio
+  diameter: 9
+  height: 12
+  seat: 5
+  length: 0
+  minimum:
+    x: -4.7
+    y: 0
+    z: -4.7
+  maximum:
+    x: 4.7
+    y: 12
+    z: 4.7
+  focal-ratio: sma-primary-focal-ratio
+- kind: sma-array
+  family: radio
+  aperture: sma-primary-metres
+  housing: none
+  mount: radio
+  diameter: 9
+  height: 12
+  seat: 5
+  length: 0
+  minimum:
+    x: -44
+    y: 0
+    z: -39
+  maximum:
+    x: 44
+    y: 12
+    z: 39
+  focal-ratio: sma-primary-focal-ratio
+  array-count: sma-antennas
+  array:
+  - x: -30
+    y: 0
+    z: -25
+  - x: -10
+    y: 0
+    z: -30
+  - x: 12
+    y: 0
+    z: -26
+  - x: 31
+    y: 0
+    z: -12
+  - x: 34
+    y: 0
+    z: 12
+  - x: 13
+    y: 0
+    z: 30
+  - x: -13
+    y: 0
+    z: 28
+  - x: -34
+    y: 0
+    z: 7
+- kind: vlba-maunakea
+  family: radio
+  aperture: vlba-primary-metres
+  housing: none
+  mount: radio
+  diameter: 30
+  height: 38
+  seat: 17
+  length: 0
+  minimum:
+    x: -16
+    y: 0
+    z: -16
+  maximum:
+    x: 32
+    y: 38
+    z: 16
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 22
+        y: 0
+        z: -4
+      size:
+        x: 8
+        y: 4.5
+        z: 8
+  - material: trim
+    box:
+      at:
+        x: 21.9
+        y: 4.55
+        z: -4.1
+      size:
+        x: 8.2
+        y: 0.12
+        z: 8.2
+- kind: panstarrs-1
+  family: closed
+  aperture: panstarrs-aperture-metres
+  housing: dome
+  mount: fork
+  diameter: 10
+  height: 12
+  seat: 4.5
+  length: 2.2
+  minimum:
+    x: -5.5
+    y: 0
+    z: -5.5
+  maximum:
+    x: 8
+    y: 12
+    z: 5.5
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 4.2
+        y: 0
+        z: -2
+      size:
+        x: 3
+        y: 2.7
+        z: 4
+- kind: panstarrs-2
+  family: closed
+  aperture: panstarrs-aperture-metres
+  housing: dome
+  mount: fork
+  diameter: 10
+  height: 12.5
+  seat: 4.8
+  length: 2.2
+  minimum:
+    x: -5.5
+    y: 0
+    z: -5.5
+  maximum:
+    x: 10
+    y: 12.5
+    z: 5.5
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 4.2
+        y: 0
+        z: -2.5
+      size:
+        x: 5
+        y: 3
+        z: 5
+- kind: faulkes-north
+  family: open
+  aperture: faulkes-primary-metres
+  housing: clamshell
+  mount: fork
+  diameter: 12
+  height: 10
+  seat: 4.7
+  length: 3.2
+  minimum:
+    x: -6.5
+    y: 0
+    z: -6.5
+  maximum:
+    x: 6.5
+    y: 10
+    z: 6.5
+- kind: dkist
+  family: off-axis
+  aperture: dkist-clear-metres
+  housing: calotte
+  mount: fork
+  diameter: 28
+  height: 44
+  seat: 30
+  length: 8
+  minimum:
+    x: -14.5
+    y: 0
+    z: -14.5
+  maximum:
+    x: 40
+    y: 44
+    z: 14.5
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 12
+        y: 0
+        z: -9
+      size:
+        x: 26
+        y: 12
+        z: 18
+  - material: trim
+    box:
+      at:
+        x: 12.1
+        y: 12.04
+        z: -8.9
+      size:
+        x: 25.8
+        y: 0.16
+        z: 17.8
+- kind: atlas-haleakala
+  family: camera
+  aperture: atlas-aperture-metres
+  housing: dome
+  mount: german
+  diameter: 5
+  height: 5
+  seat: 1.8
+  length: 0.9
+  minimum:
+    x: -2.8
+    y: 0
+    z: -2.8
+  maximum:
+    x: 2.8
+    y: 5
+    z: 2.8
+- kind: tlrs-4
+  family: ranging
+  aperture: tlrs4-aperture-metres
+  housing: dome
+  mount: fork
+  diameter: 4
+  height: 4
+  seat: 1.55
+  length: 0.7
+  minimum:
+    x: -2.2
+    y: 0
+    z: -2.2
+  maximum:
+    x: 2.2
+    y: 4
+    z: 2.2
+- kind: solarc
+  family: off-axis
+  aperture: solarc-aperture-metres
+  housing: sliding-roof
+  mount: fork
+  diameter: 6
+  height: 5
+  seat: 2.5
+  length: 1.4
+  minimum:
+    x: -3.5
+    y: 0
+    z: -3.5
+  maximum:
+    x: 7.2
+    y: 5
+    z: 3.5
+- kind: mees-solar
+  family: refractor
+  aperture: ''
+  housing: sliding-roof
+  mount: german
+  diameter: 18
+  height: 9
+  seat: 3
+  length: 4
+  minimum:
+    x: -9.5
+    y: 0
+    z: -9.5
+  maximum:
+    x: 21
+    y: 9
+    z: 9.5
+  picked-aperture: 0.25
+- kind: aeos
+  family: open
+  aperture: aeos-primary-metres
+  housing: retracted
+  mount: fork
+  diameter: 12
+  height: 15.5
+  seat: 6.5
+  length: 5.5
+  minimum:
+    x: -6.5
+    y: 0
+    z: -6.5
+  maximum:
+    x: 6.5
+    y: 15.5
+    z: 6.5
+- kind: mssc-1-6m
+  family: closed
+  aperture: mssc-reflector-nominal-metres
+  housing: dome
+  mount: gimbal
+  diameter: 10
+  height: 11
+  seat: 5
+  length: 3.6
+  minimum:
+    x: -5.5
+    y: 0
+    z: -5.5
+  maximum:
+    x: 5.5
+    y: 11
+    z: 5.5
+- kind: mssc-twin-1-2m
+  family: twin
+  aperture: mssc-twin-aperture-metres
+  housing: dome
+  mount: twin
+  diameter: 13
+  height: 13
+  seat: 5.4
+  length: 3.3
+  minimum:
+    x: -7
+    y: 0
+    z: -7
+  maximum:
+    x: 7
+    y: 13
+    z: 7
+- kind: geodss
+  family: closed
+  aperture: geodss-class-metres
+  housing: dome
+  mount: fork
+  diameter: 7
+  height: 8
+  seat: 3.4
+  length: 1.8
+  minimum:
+    x: -4
+    y: 0
+    z: -4
+  maximum:
+    x: 7
+    y: 8
+    z: 4
+  ancillary:
+  - material: shell
+    box:
+      at:
+        x: 3
+        y: 0
+        z: -1.7
+      size:
+        x: 3
+        y: 2.5
+        z: 3.4
+- kind: geodss-site
+  family: closed
+  aperture: geodss-class-metres
+  housing: dome
+  mount: fork
+  diameter: 7
+  height: 8
+  seat: 3.4
+  length: 1.8
+  minimum:
+    x: -18
+    y: 0
+    z: -10
+  maximum:
+    x: 18
+    y: 8
+    z: 10
+  array:
+  - x: -12
+    y: 0
+    z: -4
+  - x: 0
+    y: 0
+    z: 3
+  - x: 12
+    y: 0
+    z: -4

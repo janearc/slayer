@@ -1,0 +1,561 @@
+# A crowded summit quality study; all placements and weather are authored.
+# Demo detail retains physical needles; the queued preview decides its cost.
+# Fictional instruments and introduced forest on pinned USGS Kilauea ground.
+# Buildings, yard positions, light tint, cloud deck and beam appearance are picked.
+# Main instrument: ELT family, north55deg, zero placement heading.
+# Launch exits follow its picked front-rim pose: seat31.5m, axial42.9m;
+# peripheral offsets are outside the39m pupil. This is not an ESO layout.
+# ESO GALACSI wide-field example:64arcsec off-axis, not a universal pattern.
+# https://cdn3.eso.org/sci/facilities/develop/ao/sys/galacsi.html
+# Redwood mist context: https://research.fs.usda.gov/treesearch/69118
+# Prescribed mist is not transpiration, condensation or sodium return.
+# Sun tint is authored linear RGB, not calibrated atmospheric transfer.
+---
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: a crowded summit at maximum factory detail
+  renderer: gpu-native
+  seed: 11
+  light: sun
+  location:
+    lat: 19.413
+    lon: -155.25
+  timeofday: 1730
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263050
+    north: 2149520
+    across: 1600
+    down: 1600
+    step: 4
+    smooth: 2
+  recipes:
+    redwoods:
+      kind: coast-redwood
+    sequoias:
+      kind: giant-sequoia
+  lasers:
+    front rim 1:
+      origin:
+        object: the observatory
+        east:
+          value: -16
+          unit: m
+        up:
+          value: 59.18512902743416
+          unit: m
+        south:
+          value: -35.255405695216766
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: 64
+          unit: arcsec
+        vertical:
+          value: 0
+          unit: arcsec
+      radius:
+        value: 0.5
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 60000000
+    front rim 2:
+      origin:
+        object: the observatory
+        east:
+          value: 16
+          unit: m
+        up:
+          value: 59.18512902743416
+          unit: m
+        south:
+          value: -35.255405695216766
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: 0
+          unit: arcsec
+        vertical:
+          value: 64
+          unit: arcsec
+      radius:
+        value: 0.5
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 60000000
+    front rim 3:
+      origin:
+        object: the observatory
+        east:
+          value: -6
+          unit: m
+        up:
+          value: 55.17009397297683
+          unit: m
+        south:
+          value: -40.98947000523971
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: -64
+          unit: arcsec
+        vertical:
+          value: 0
+          unit: arcsec
+      radius:
+        value: 0.5
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 60000000
+    front rim 4:
+      origin:
+        object: the observatory
+        east:
+          value: 6
+          unit: m
+        up:
+          value: 55.17009397297683
+          unit: m
+        south:
+          value: -40.98947000523971
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: 0
+          unit: arcsec
+        vertical:
+          value: -64
+          unit: arcsec
+      radius:
+        value: 0.5
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 60000000
+  weather:
+    wind:
+      from: {value: 240, unit: deg}
+      speed: {value: 4, unit: m/s}
+    low cloud:
+      kind: prescribed-mist
+      extinction:
+        value: 0.02
+        unit: m^-1
+      depth:
+        value: 150
+        unit: m
+      coverage: 0.45
+      seed: 23
+    high wisps:
+      kind: prescribed-mist
+      extinction: {value: 0.006, unit: m^-1}
+      depth: {value: 75, unit: m}
+      coverage: 0.35
+      seed: 37
+    thin air:
+      kind: prescribed-mist
+      extinction:
+        value: 8.0e-05
+        unit: m^-1
+      depth:
+        value: 900
+        unit: m
+      coverage: 1
+      seed: 24
+  atmosphere:
+    layers:
+      cloud deck:
+        weather: low cloud
+        extent: terrain
+        albedo: 0.95
+        base:
+          value: 80
+          unit: m
+      higher bank:
+        weather: high wisps
+        extent: terrain
+        albedo: 0.95
+        base: {value: 155, unit: m}
+      upper air:
+        weather: thin air
+        extent: terrain
+        albedo: 0.95
+        base:
+          value: 0
+          unit: m
+  set:
+    things:
+      the observatory:
+        kind: elt
+        seed: 5
+        east: 263450
+        north: 2149088
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      survey facility:
+        kind: rubin
+        seed: 5
+        east: 263520
+        north: 2149033
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      small solar instrument:
+        kind: solarc
+        seed: 5
+        east: 263345
+        north: 2149070
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      subaru neighbour:
+        kind: subaru
+        seed: 7
+        east: 263260
+        north: 2149200
+        complexity: demo
+        heading: {value: 10, unit: deg}
+      first keck neighbour:
+        kind: keck-i
+        seed: 9
+        east: 263580
+        north: 2149300
+        complexity: demo
+        heading: {value: 340, unit: deg}
+      second keck neighbour:
+        kind: keck-ii
+        seed: 13
+        east: 263670
+        north: 2149190
+        complexity: demo
+        heading: {value: 20, unit: deg}
+      subaru maintenance scaffold:
+        kind: scaffold-tower
+        seed: 21
+        east: 263300
+        north: 2149172
+        complexity: demo
+        heading: {value: 90, unit: deg}
+      subaru work platform:
+        kind: work-platform
+        seed: 23
+        east: 263292
+        north: 2149160
+        complexity: demo
+        heading: {value: 0, unit: deg}
+      subaru supply crate:
+        kind: shipping-crate
+        seed: 25
+        east: 263300
+        north: 2149157
+        complexity: demo
+        heading: {value: 0, unit: deg}
+      spare visitor refractor:
+        kind: apo-refractor-5
+        seed: 27
+        east: 263402
+        north: 2149016
+        complexity: demo
+        heading: {value: 110, unit: deg}
+      north service truck:
+        kind: service-truck
+        seed: 29
+        east: 263400
+        north: 2149190
+        complexity: demo
+        heading: {value: 35, unit: deg}
+      north generator:
+        kind: generator
+        seed: 31
+        east: 263406
+        north: 2149180
+        complexity: demo
+        heading: {value: 35, unit: deg}
+      mobile crane:
+        kind: mobile-crane
+        seed: 5
+        east: 263492
+        north: 2149005
+        complexity: demo
+        heading:
+          value: 270
+          unit: deg
+      mirror gantry:
+        kind: mirror-gantry
+        seed: 5
+        east: 263578
+        north: 2149019
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      scaffold by the tower:
+        kind: scaffold-tower
+        seed: 5
+        east: 263511
+        north: 2149051
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      service truck:
+        kind: service-truck
+        seed: 5
+        east: 263551
+        north: 2149005
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      second service truck:
+        kind: service-truck
+        seed: 5
+        east: 263561
+        north: 2149005
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      utility pickup:
+        kind: utility-pickup
+        seed: 5
+        east: 263483
+        north: 2149014
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      equipment trailer:
+        kind: equipment-trailer
+        seed: 5
+        east: 263536
+        north: 2149007
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      delivery crate:
+        kind: shipping-crate
+        seed: 5
+        east: 263580
+        north: 2149024
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      second delivery crate:
+        kind: shipping-crate
+        seed: 5
+        east: 263577
+        north: 2149028
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      control cabinet:
+        kind: equipment-cabinet
+        seed: 5
+        east: 263568
+        north: 2149025
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      power generator:
+        kind: generator
+        seed: 5
+        east: 263560
+        north: 2149022
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      cooling plant:
+        kind: cooling-unit
+        seed: 5
+        east: 263547
+        north: 2149022
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      access stair:
+        kind: access-stairs
+        seed: 5
+        east: 263536
+        north: 2149021
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      maintenance platform:
+        kind: work-platform
+        seed: 5
+        east: 263516
+        north: 2149049
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      visitor rail:
+        kind: handrail
+        seed: 5
+        east: 263389
+        north: 2149022
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      cable run:
+        kind: cable-tray
+        seed: 5
+        east: 263555
+        north: 2149021
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      summit weather:
+        kind: weather-mast
+        seed: 5
+        east: 263385
+        north: 2149150
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      Janes Dobsonian:
+        kind: dobsonian-36
+        seed: 5
+        east: 263392
+        north: 2149027
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      Janes refractor:
+        kind: apo-refractor-5
+        seed: 5
+        east: 263398
+        north: 2149027
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      Janes SCT:
+        kind: sct-24
+        seed: 5
+        east: 263404
+        north: 2149027
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+      visitor supply crate:
+        kind: shipping-crate
+        seed: 5
+        east: 263386
+        north: 2149026
+        complexity: demo
+        heading:
+          value: 90
+          unit: deg
+      back utility cabinet:
+        kind: equipment-cabinet
+        seed: 5
+        east: 263350
+        north: 2149067
+        complexity: demo
+        heading:
+          value: 0
+          unit: deg
+    stands:
+      the redwood forest:
+        recipe: redwoods
+        complexity: demo
+        count: 6500
+        seed: 11
+        exclude:
+          around: the observatory
+          clearance:
+            value: 330
+            unit: m
+      the sequoia groves:
+        recipe: sequoias
+        complexity: demo
+        count: 1500
+        seed: 19
+        exclude:
+          around: the observatory
+          clearance:
+            value: 330
+            unit: m
+  film:
+    width: 640
+    height: 360
+    rays: 2
+    exposure: 30000000
+    wide: 60
+  cameras:
+    from the visitor edge:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -80
+          standoff_y: -110
+          standoff_z: 12
+      orientation:
+        point_to: the observatory
+        alpha: 7
+  sun:
+    azimuth: 250
+    altitude: 7
+    tint: [1, 0.55, 0.22]
+  laser-pointings:
+    science target:
+      azimuth: 0
+      altitude: 55

@@ -37,7 +37,7 @@ func TestAMistakeIsRefusedWhereItIsWritten(test *testing.T) {
 		{"  light: ambient", "  lihgt: ambient",
 			"shoebox.yaml:3:3: lihgt is not a key here"},
 		{"  light: ambient", "  light: spotlight",
-			"shoebox.yaml:3:10: light takes [ambient moon sun]"},
+			"shoebox.yaml:3:10: light takes [ambient moon sun none]"},
 		{"lat: 37.78507614135742", "lat: 91",
 			"shoebox.yaml:5:10: lat takes a number from -90 to 90"},
 		{"timeofday: 1548", "timeofday: 1575",

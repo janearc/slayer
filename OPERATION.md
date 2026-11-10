@@ -8,6 +8,7 @@ choice; artistic choices should be identified as such.
 This guide follows a render from scene construction to output.
 [PACKAGES.md](PACKAGES.md) describes the packages, and
 [EXAMPLES.md](EXAMPLES.md) lists scenes and commands.
+The [Game workflow](doc/developing.md) covers setup, builds and checks.
 
 ## The rendering pipeline
 
@@ -49,10 +50,10 @@ templates:
 
 `trace.Sampled` takes a world, camera transform, lens, time, image size,
 and sampling rate. It validates the request, places the scene at that
-instant, distributes rows across workers, and averages each pixel’s samples.
+instant, distributes rows across workers, and averages each pixel's samples.
 
 The sampling argument is the number of rays along each axis: `n` means
-`n × n` rays per pixel.
+`n x n` rays per pixel.
 
 Requests need a world, finite camera position and scale, positive dimensions,
 and at least one ray per axis. The total sample count is limited to
@@ -71,7 +72,7 @@ Volumes can shadow surfaces and one another; they do not illuminate other
 objects through indirect scattering.
 
 Rendering is deterministic for an unchanged world. Row scheduling does not
-change a pixel’s arithmetic. Do not mutate shared geometry, materials, or
+change a pixel's arithmetic. Do not mutate shared geometry, materials, or
 media during a render.
 
 There are currently two CPU tracers. `trace` contains newer fixes and is the
@@ -80,7 +81,7 @@ used by `cmd/slayer`, `smokecheck`, `ring`, and `swarm`.
 
 ## Rendering on the GPU
 
-On macOS, `gpu.Sampled` renders supported scenes through Apple’s Metal API
+On macOS, `gpu.Sampled` renders supported scenes through Apple's Metal API
 and returns the same frame type as the CPU tracer. Kernels compile from
 source when opened; building Slayer does not require a separate Metal
 compiler toolchain.
@@ -88,7 +89,11 @@ compiler toolchain.
 The GPU supports a subset of scene features. Unsupported features return an
 error identifying them. CPU renders provide the reference for GPU checks;
 approximations such as baked haze have explicit test tolerances.
-Commands with GPU support expose `-gpu`.
+
+Several commands expose `-gpu`. A hillside set chooses `gpu` or
+`gpu-native` with its `renderer` field; unsupported combinations are
+refused before drawing. The [ecosystem guide](doc/observatory-ecosystem.md)
+describes that path.
 
 ## The darkroom
 
@@ -124,25 +129,30 @@ is not yet connected to a command.
 SHA-256 hashes. The `sources` command downloads them to a shelf outside
 the repository and checks their bytes:
 
+Configure `SLAYER_SHELF` in Game's Slayer project block, then run:
+
 ```sh
-SLAYER_SHELF=/path/to/shelf go run ./cmd/sources fetch
-SLAYER_SHELF=/path/to/shelf go run ./cmd/sources check
+game run sources-fetch
+game run sources-check
+game run sources-verify
 ```
 
 Changed source bytes fail verification. `research` exposes named values
-from the project’s research data, rather than requiring callers to copy
+from the project's research data, rather than requiring callers to copy
 numbers from memory.
 
 ## Running Slayer
 
-Run commands from the checkout root so relative defaults resolve correctly.
-Images go to `out/` unless an output flag specifies another location.
+Run `game build` from the checkout root, then use its named runs so
+relative defaults resolve correctly. Images go to `out/` unless an output
+flag specifies another location. Extra application arguments after `--`
+need the Game forwarding fix linked in the development guide.
 
 ```sh
-go run ./cmd/swarm
-go run ./cmd/orbital -far
-go run ./cmd/hillside -night
-go run ./cmd/smokecheck smoke 1
+game run swarm
+game run orbital -- -far
+game run hillside -- -night
+game run smokecheck -- smoke 1
 ```
 
 See [EXAMPLES.md](EXAMPLES.md) for scene descriptions and command options.
@@ -157,7 +167,7 @@ establish correctness independently of the implementation.
 - **burning-trousers** compares exported renderer APIs with closed-form
   physics and independently computed expectations. A commit must not
   change both the harness and the renderer it checks.
-- **fermat** selects 64 pixels from a hash of a raw image’s bytes and
+- **fermat** selects 64 pixels from a hash of a raw image's bytes and
   replays their computation. Each must match bit for bit. Run it through
   `hillside -prove` with the original rendering parameters.
 - **Validation** reports unsupported or invalid inputs at construction
@@ -173,8 +183,8 @@ and as a finer raster image. It checks that the terminal view agrees with
 the raster image at the coarser resolution.
 
 ```sh
-go run ./cmd/smokecheck smoke
-go run ./cmd/smokecheck smoke 7 -out /tmp/smoke7
+game run smokecheck -- smoke
+game run smokecheck -- smoke 7 -out /tmp/smoke7
 ```
 
 A cache keyed by the rendering binary avoids repeating unchanged work.

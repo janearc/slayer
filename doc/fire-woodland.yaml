@@ -1,0 +1,89 @@
+# A fictional redwood grove on the measured Kilauea DEM. Trees do not grow
+# here in this arrangement. Their geometry, fire optics and camera are
+# authored. Surface heat/fuel use the Mandel grass proxy, not tree fuel.
+# Terrain places the flames; slope does not yet change the spread rate.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: surface fire beneath redwoods on a moonlit slope
+  renderer: gpu-native
+  seed: 7
+  light: moon
+  location: {lat: 19.413, lon: -155.25}
+  timeofday: 2300
+  moon:
+    azimuth: 250
+    altitude: 15
+    disc: true
+    face: svs-moon-kit-color
+  sun: {azimuth: 260, altitude: -4.5}
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263564
+    north: 2148488
+    across: 192
+    down: 192
+    step: 1
+    smooth: 3
+  recipes:
+    surface fire:
+      kind: fire
+      flame:
+        radius: {value: 0.85, unit: m}
+        height: {value: 7, unit: m}
+        absorption: {value: 0.6, unit: m^-1}
+        temperature: {value: 1900, unit: K}
+        edge-temperature: {value: 950, unit: K}
+        intermittency-start: 0.06
+        temperature-profile: hot-tongues
+      light-cells: 3
+  fuel-beds:
+    forest floor:
+      recipe: surface fire
+      model: mandel-grass
+      east: 263660
+      north: 2148392
+      width: 32
+      depth: 32
+      cell: {value: 0.5, unit: m}
+      step: {value: 0.01, unit: s}
+      ignition-radius: {value: 1.6, unit: m}
+      ignition-temperature: {value: 1200, unit: K}
+      ambient-temperature: {value: 300, unit: K}
+      fuel: 1
+      surface: terrain
+  set:
+    things:
+      viewpoint: {kind: cobble, seed: 4, east: 263748, north: 2148392}
+      lower west: {kind: coast-redwood, complexity: clumps, seed: 2, east: 263654, north: 2148389}
+      lower east: {kind: coast-redwood, complexity: clumps, seed: 5, east: 263667, north: 2148391}
+      upper west: {kind: coast-redwood, complexity: clumps, seed: 9, east: 263652, north: 2148401}
+      upper centre: {kind: coast-redwood, complexity: clumps, seed: 2, east: 263658, north: 2148396}
+      upper east: {kind: coast-redwood, complexity: clumps, seed: 5, east: 263664, north: 2148399}
+      east flank: {kind: coast-redwood, complexity: clumps, seed: 9, east: 263679, north: 2148387}
+      west flank: {kind: coast-redwood, complexity: clumps, seed: 5, east: 263642, north: 2148398}
+    stands:
+      the grove:
+        kind: coast-redwood
+        complexity: clumps
+        count: 100
+        seed: 15
+        exclude: {around: viewpoint, clearance: {value: 65, unit: m}}
+      understory:
+        kind: fern
+        count: 250
+        seed: 21
+        exclude: {around: viewpoint, clearance: {value: 55, unit: m}}
+  film:
+    width: 1280
+    height: 720
+    rays: 2
+    exposure: 800
+    wide: 50
+  # Camera coordinates are [east, north, up] from the terrain window corner.
+  cameras:
+    across the slope:
+      location:
+        at: [184, -96, 44]
+      orientation:
+        look_at: [96, -96, 49]

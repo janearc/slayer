@@ -1,0 +1,15 @@
+# Authored population: 70 kinds, seeds 5/11 and four requested details.
+# Original: 144 cases, 78 geometries, 66 refusals, kept byte-identical.
+# Spacecraft additions: 32 cases, all supported geometry.
+# Ground additions: 32 cases, all supported geometry.
+# Survey addition: 8 cases, all supported geometry.
+# Large-telescope addition: 8 cases, all supported geometry.
+# Civic-observatory addition: 8 cases, all supported geometry.
+# Personal telescope additions: 24 cases, all supported geometry.
+# Yard additions: 120 cases, all supported geometry.
+# Summit additions: 176 cases, all supported geometry.
+# Launcher addition: 8 cases, all supported geometry.
+# Vegetation, owl and saguaro additions: 72 cases, all supported geometry.
+cases: 632
+geometries: 566
+refusals: 66

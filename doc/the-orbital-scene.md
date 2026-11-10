@@ -26,7 +26,7 @@ snapshot. [EXAMPLES.md](../EXAMPLES.md) describes the commands, and
 - **Panels:** worn edges, holes, and dents, with blue-black glass on both sides.
 - **Beams:** two poles offset 15 degrees from opposition, inclined 50 degrees
   to an axis spinning every 1.5 seconds. The axis precesses around a
-  35-degree cone every five seconds. Axial light is 30 times the star’s.
+  35-degree cone every five seconds. Axial light is 30 times the star's.
 - **Nebula:** a custom wake medium, cleared along the orbital path with
   denser material outside and a ridge at the channel edge; density `4.5e-5`.
 - **Camera:** stars behind, a 90-degree pinhole, and the documented close
@@ -75,7 +75,7 @@ biomes from `slayer/biome`. Wake, marble, and city-light textures are
 custom Go types in the command.
 
 The recorded version renders on the CPU. Its tiled textures, wake medium,
-and polar beams were outside the GPU path’s support. The command sets
+and polar beams were outside the GPU path's support. The command sets
 the beam clock before each frame because `thing.Lamp` has no time argument.
 
 A film is a run such as `orbital -far -from 600 -frames N -fps R -first K`:

@@ -1,0 +1,5 @@
+# Independent support and appearance expectations, 2026-11-07.
+layers:
+  - {weather: regional mist, albedo: 0.75, bottom: 2, top: 12}
+  - {weather: thin air, albedo: 0.9, bottom: 0, top: 30}
+later: 2

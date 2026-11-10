@@ -1,0 +1,125 @@
+# keyhole to ground: one shot from inside the cloud sea over kīlauea iki,
+# up through the deck to a Keyhole-style spacecraft in orbit, then down
+# through its instrument to the summit it rose from. The keyhole scene,
+# 2026-11-08.
+#
+# Written against set/ecosystem-v2.schema.json, ahead of the reader. Every
+# key the reader does not take yet is v2's, and doc/keyhole.md names each
+# as a gap, by number. Nothing here renders until the renderer works
+# relative to the camera: a climb from metres to five hundred kilometres
+# in 32-bit floats shakes at the far end.
+#
+# measured: the ground (usgs 2019 lidar), the air and its light, as the
+# moonrise set has them. The cloud deck is the cloud-sea hero scene's of
+# 2026-11-08, taken whole. picked: the orbit, the time, the moves.
+# recalled, not read, and to be read before this renders: the Hubble
+# bus's mirror and focal length, marked where they stand.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: keyhole to ground
+  renderer: gpu-native
+  seed: 23
+  light: sun
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  # v2, gap 11: a date places the sun and moon. picked: the June
+  # solstice, so the sun stands high over Hawaiʻi in the morning
+  date: "2026-06-21"
+  timeofday: 1030
+  # v2, gaps 5 and 6: one anchor, fixed for the whole scene, that the
+  # map, the maths and the terrain all agree on, from the crater floor to
+  # the orbit. east, north, up from here
+  anchor:
+    lat: 19.4165
+    lon: -155.2485
+    elevation: {value: lidar, unit: m}
+    datum: wgs84
+  # v2, gap 10: the world, not a patch. near the anchor the lidar; away
+  # from it a global elevation model, coarser with distance
+  globe:
+    planet: earth
+    terrain:
+      near:
+        from: usgs-kilauea-2019-dem
+        file: unpacked/kil_2019dem/kil_2019dem.tif
+      beyond:
+        # to choose: a global model we have or can fetch through an
+        # adapter, recorded as every download is
+        from: global-dem-to-choose
+    detail: by-size
+  # the cloud-sea hero scene's deck (2026-11-08), whole; v2's extent
+  # world carries it to the horizon instead of the patch's edge
+  weather:
+    low cloud:
+      kind: prescribed-mist
+      extinction: {value: 0.018, unit: m^-1}
+      depth: {value: 130, unit: m}
+      coverage: 0.7
+      seed: 23
+  atmosphere:
+    layers:
+      cloud deck:
+        weather: low cloud
+        extent: world
+        albedo: 0.95
+        base: {value: 70, unit: m}
+  set:
+    things:
+      the summit:
+        kind: point
+        seed: 1
+        place: {at: anchor}
+      the keyhole:
+        # gap 9: Hubble's bus with its instrument looking down
+        kind: hubble
+        seed: 7
+        # v2, gaps 8 and 9: a place in orbit, not on the ground. picked:
+        # 500 km, sun-synchronous as imaging satellites fly, passing over
+        # the summit at the scene's time
+        orbit:
+          height: {value: 500, unit: km}
+          inclination: 97.4
+          over: the summit
+        attitude: {point: nadir}
+        # v2, gap 7: the eye says what it models. recalled, not read:
+        # Hubble's 2.4 m mirror and 57.6 m focal length
+        eye:
+          pupil: {value: 2.4, unit: m}
+          focal: {value: 57.6, unit: m}
+          models: diffraction-limited pupil
+  film:
+    width: 3840
+    height: 2160
+    rays: 4
+    fps: 24
+  cameras:
+    climb:
+      title: "from the cloud sea to the keyhole"
+      moves:
+        # inside the deck, looking up through it
+        - from: {object: the summit, up: {value: 100, unit: m}}
+          to: {object: the summit, up: {value: 400, unit: m}}
+          # v2, gap 4: a look at a thing, not a point in metres
+          look: {object: the keyhole}
+          duration: {value: 6, unit: s}
+          ease: in
+        # out of the deck and up, the world opening below; one frame
+        # across the whole climb (gap 6)
+        - from: {object: the summit, up: {value: 400, unit: m}}
+          to: {object: the keyhole, standoff: {value: 40, unit: m}}
+          look: {object: the keyhole}
+          duration: {value: 14, unit: s}
+          ease: in-out
+    down:
+      title: "down through the keyhole's eye"
+      # v2, gap 7: the picture is the instrument's
+      eye: {instrument: the keyhole}
+      moves:
+        # the field narrows from the whole island to the summit
+        - look: {object: the summit}
+          field:
+            from: {value: 100, unit: km}
+            to: {value: 200, unit: m}
+          duration: {value: 10, unit: s}
+          ease: out

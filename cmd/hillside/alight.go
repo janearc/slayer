@@ -101,7 +101,7 @@ const (
 	// crownEdge is its edge, in kelvin: picked, inside the 830 to 1440
 	// k riggan and others (2004) found most fire light comes from.
 	crownEdge = 900.0
-	// crownSoot is its soot's absorption, a metre: hägglund and
+	// crownSoot is its soot's absorption, a metre: hagglund and
 	// persson measured 0.75 to 1.3 a metre over wood cribs, as an
 	// effective grey number (cited by quintiere and mccaffrey, nbs,
 	// 1980). 1.0 is picked inside that and taken as at 550 nm.

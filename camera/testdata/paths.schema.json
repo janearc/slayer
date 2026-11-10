@@ -1,0 +1,18 @@
+{
+  "type": "object", "additionalProperties": false,
+  "required": ["numbers", "vectors", "samples"],
+  "properties": {
+    "numbers": {"type": "object", "minProperties": 1,
+      "additionalProperties": {"type": "number"}},
+    "vectors": {"type": "object", "minProperties": 1,
+      "additionalProperties": {"type": "object", "additionalProperties": false,
+        "required": ["x", "y", "z"], "properties": {
+          "x": {"type": "number"}, "y": {"type": "number"},
+          "z": {"type": "number"}}}},
+    "samples": {"type": "object", "required": ["speed", "holds"],
+      "additionalProperties": {"type": "array", "minItems": 1,
+        "items": {"type": "object", "additionalProperties": false,
+          "required": ["seconds", "point"], "properties": {
+            "seconds": {"type": "number"}, "point": {"type": "string"}}}}}
+  }
+}

@@ -1,6 +1,7 @@
 package manufacture
 
 import (
+	"cmp"
 	"errors"
 
 	"github.com/janearc/celestial/measure"
@@ -26,10 +27,11 @@ type form interface {
 // part is one piece of a made thing: a form, where it sits in the
 // thing's space, how finely it is cut, and which matter it is of.
 type part struct {
-	shape form
-	space maths.Subspace
-	fine  cut
-	of    slot
+	shape    form
+	space    maths.Subspace
+	fine     cut
+	of       slot
+	terminal bool // foliage carried by a terminal branchlet
 }
 
 // skin is the part's surface in the thing's space.
@@ -54,10 +56,11 @@ func (at joint) radius(of size) float64 {
 //
 // made only by newSleeve and newLeaf.
 type sleeve struct {
-	joints []joint
-	fine   cut
-	flat   bool
-	of     slot
+	joints   []joint
+	fine     cut
+	flat     bool
+	of       slot
+	terminal bool // terminal foliage, rather than a major branch sleeve
 }
 
 var errSleeve = errors.New("manufacture: a sleeve needs a cut, two " +
@@ -205,7 +208,7 @@ func (skin sleeve) piece(index int, of size, run place) (part, error) {
 		return part{}, err
 	}
 	return part{shape: shape, space: run.space, fine: skin.fine,
-		of: skin.of}, nil
+		of: skin.of, terminal: skin.terminal}, nil
 }
 
 // arrangement is where the parts a thing carries go, and how big each
@@ -335,16 +338,10 @@ func sleeved(joints []joint, around int, of slot) (sleeve, error) {
 func stemCarrying(stemPieces int, stemDroop float64, stemSkins []sleeve,
 	where arrangement, pieces int, droop float64,
 	skins []sleeve) (growth, error) {
-	stem, err := newLimb(stemPieces, 1, stemDroop, stemSkins...)
-	if err != nil {
-		return growth{}, err
-	}
-	bough, err := newLimb(pieces, 1, droop, skins...)
-	if err != nil {
-		return growth{}, err
-	}
-	borne, err := newGrowth(bough)
-	if err != nil {
+	stem, stemError := newLimb(stemPieces, 1, stemDroop, stemSkins...)
+	bough, boughError := newLimb(pieces, 1, droop, skins...)
+	borne, growthError := newGrowth(bough)
+	if err := cmp.Or(stemError, boughError, growthError); err != nil {
 		return growth{}, err
 	}
 	return newGrowth(stem, carried{where: where, what: borne})
@@ -412,36 +409,21 @@ func fernHabit() habit {
 func fernGrowth(fronds, leaflets int) (growth, error) {
 	const crownSides, stalkSides = 6, 4
 	const crownSpan, lean, stray, uneven = 0.03, -35, 0.3, 0.2
-	blade, err := newLeaf([]joint{{ofGirth: 1}, {ofGirth: 0.2}}, leaf)
-	if err != nil {
-		return growth{}, err
-	}
-	stalk, err := sleeved([]joint{{ofGirth: 1}, {ofGirth: 0.15}},
+	blade, bladeError := newLeaf([]joint{{ofGirth: 1}, {ofGirth: 0.2}}, leaf)
+	stalk, stalkError := sleeved([]joint{{ofGirth: 1}, {ofGirth: 0.15}},
 		stalkSides, body)
-	if err != nil {
-		return growth{}, err
-	}
-	pairs, err := newWhorls(leaflets, 1, fernHabit())
-	if err != nil {
-		return growth{}, err
-	}
-	frond, err := stemCarrying(1, 0, []sleeve{stalk}, pairs, 1, 0,
+	pairs, pairsError := newWhorls(leaflets, 1, fernHabit())
+	frond, frondError := stemCarrying(1, 0, []sleeve{stalk}, pairs, 1, 0,
 		[]sleeve{blade})
-	if err != nil {
-		return growth{}, err
-	}
-	stub, err := sleeved([]joint{{ofGirth: 3}, {ofGirth: 3}},
+	stub, stubError := sleeved([]joint{{ofGirth: 3}, {ofGirth: 3}},
 		crownSides, body)
-	if err != nil {
-		return growth{}, err
-	}
-	crown, err := newLimb(1, crownSpan, 0, stub)
-	if err != nil {
-		return growth{}, err
-	}
-	round, err := newRing(fronds, measure.Metres(0),
+	crown, crownError := newLimb(1, crownSpan, 0, stub)
+	round, roundError := newRing(fronds, measure.Metres(0),
 		measure.Degrees(lean), stray, uneven, 0)
-	if err != nil {
+	// These constructors are pure. Return the first refusal in the same
+	// order as the recipe, before any provisional growth is used.
+	if err := cmp.Or(bladeError, stalkError, pairsError, frondError,
+		stubError, crownError, roundError); err != nil {
 		return growth{}, err
 	}
 	return newGrowth(crown, carried{where: round, what: frond})

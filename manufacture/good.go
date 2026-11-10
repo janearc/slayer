@@ -7,6 +7,7 @@ import (
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -21,6 +22,8 @@ type good struct {
 	parts   []part
 	dressed looks
 	lights  []lit
+	extent  *maths.Box
+	groups  map[slot]*shape.MeshGroup
 }
 
 // lit is a light a thing carries: the light, where on the thing it is, which
@@ -39,7 +42,8 @@ type lit struct {
 
 // lit is the thing carrying one more light.
 func (made good) lit(by light, at, toward maths.Vec,
-	beyond measure.Length) good {
+	beyond measure.Length,
+) good {
 	made.lights = append(append([]lit{}, made.lights...),
 		lit{made: by, at: at, toward: toward.Unit(), beyond: beyond})
 	return made
@@ -53,6 +57,11 @@ func (made good) slots() []slot {
 		if !seen[one.of] {
 			seen[one.of] = true
 			slots = append(slots, one.of)
+		}
+	}
+	for of := range made.groups {
+		if !seen[of] {
+			slots = append(slots, of)
 		}
 	}
 	sort.Slice(slots, func(one, other int) bool {
@@ -86,7 +95,25 @@ func gather(things ...good) (good, error) {
 			piece.of = renumbered[piece.of]
 			all.parts = append(all.parts, piece)
 		}
+		for of, group := range one.groups {
+			if all.groups == nil {
+				all.groups = map[slot]*shape.MeshGroup{}
+			}
+			all.groups[renumbered[of]] = group
+		}
 		all.lights = append(all.lights, one.lights...)
+	}
+	// Only assemblies with a prescribed physical extent need metadata.
+	// Ordinary goods retain the extent of their actual surfaces.
+	for _, one := range things {
+		if one.extent != nil {
+			box := partBounds(all.parts)
+			for _, member := range things {
+				box = enclosing(box, member.Bounds())
+			}
+			all.extent = &box
+			break
+		}
 	}
 	return all, nil
 }
@@ -103,7 +130,10 @@ func (made good) in(dressed looks) good {
 
 // placed is the thing put in a space of something larger's: every part
 // of it and every light it carries, moved together.
-func (made good) placed(space maths.Subspace) good {
+func (made good) placed(space maths.Subspace) (good, error) {
+	if !shape.ValidPlacement(space) {
+		return good{}, errors.New("manufacture: invalid placement")
+	}
 	moved := make([]part, len(made.parts))
 	for index, one := range made.parts {
 		one.space = one.space.Within(space)
@@ -117,7 +147,26 @@ func (made good) placed(space maths.Subspace) good {
 		shone[index] = one
 	}
 	made.parts, made.lights = moved, shone
-	return made
+	if len(made.groups) > 0 {
+		groups := map[slot]*shape.MeshGroup{}
+		for of, group := range made.groups {
+			members := group.Members()
+			for i := range members {
+				members[i].Space = members[i].Space.Within(space)
+			}
+			moved, err := shape.NewMeshGroup(members)
+			if err != nil {
+				return good{}, err
+			}
+			groups[of] = moved
+		}
+		made.groups = groups
+	}
+	if made.extent != nil {
+		box := transformed(*made.extent, space)
+		made.extent = &box
+	}
+	return made, nil
 }
 
 // mostFaces is the most faces a thing may have and still be flattened
@@ -141,8 +190,10 @@ func newGood(shape form, fine cut) (good, error) {
 	if shape == nil || fine.around < leastAround {
 		return good{}, errGood
 	}
-	return good{parts: []part{{shape: shape, fine: fine, of: body,
-		space: maths.Subspace{Scale: 1}}}}, nil
+	return good{parts: []part{{
+		shape: shape, fine: fine, of: body,
+		space: maths.Subspace{Scale: 1},
+	}}}, nil
 }
 
 // grow is a thing grown from a seed to a size, or why it cannot be: a
@@ -158,7 +209,8 @@ func grow(grown growth, to size, from seed) (good, error) {
 	return good{parts: parts}, nil
 }
 
-// skins is the thing's surface, matter by matter.
+// skins is the explicit parts' surfaces, matter by matter. Repeated mesh
+// groups remain instances and are not expanded into this temporary surface.
 func (made good) skins() map[slot]surface {
 	skins := map[slot]surface{}
 	for _, one := range made.parts {
@@ -167,40 +219,62 @@ func (made good) skins() map[slot]surface {
 	return skins
 }
 
-// faces is how many faces the thing has.
+// faces is stored face cost: each prototype once within its material group.
 func (made good) faces() int {
 	faces := 0
-	for _, skin := range made.skins() {
-		faces += len(skin)
+	for of, skin := range made.skins() {
+		if made.groups[of] == nil {
+			faces += len(skin)
+		}
+	}
+	for _, group := range made.groups {
+		faces += group.StoredFaces()
 	}
 	return faces
 }
 
 // things is the thing as a scene holds it, standing at a place: one thing.Thing
-// a matter, each a mesh of every part of that matter, in the order of the
+// a matter, each a mesh or shared mesh group, in the order of the
 // matters. it refuses a thing of no parts, of too many faces, or with a matter
 // nobody gave a look, and whatever slayer's mesh refuses.
 func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
-	if len(made.parts) == 0 {
+	if !shape.ValidPlacement(at) {
+		return nil, errors.New("manufacture: invalid placement")
+	}
+	if len(made.parts) == 0 && len(made.groups) == 0 {
 		return nil, errGood
 	}
 	skins := made.skins()
-	if made.faces() > mostFaces {
+	// The flattening limit bounds temporary expanded surfaces. Groups
+	// retain their prototypes; the caller budgets their stored geometry.
+	flattened := 0
+	for of, skin := range skins {
+		if made.groups[of] == nil {
+			flattened += len(skin)
+		}
+	}
+	if flattened > mostFaces {
 		return nil, errTooMany
 	}
 	var things []thing.Thing
 	for _, of := range made.slots() {
-		skin := skins[of]
 		look, known := made.dressed[of]
 		if !known || look == nil {
 			return nil, errLook
 		}
+		if group := made.groups[of]; group != nil {
+			things = append(things, thing.Thing{Shape: group, Material: look, Motion: thing.Still(at)})
+			continue
+		}
+		skin := skins[of]
 		mesh, err := skin.meshed()
 		if err != nil {
 			return nil, err
 		}
-		things = append(things, thing.Thing{Shape: mesh, Material: look,
-			Motion: thing.Still(at)})
+		things = append(things, thing.Thing{
+			Shape: mesh, Material: look,
+			Motion: thing.Still(at),
+		})
 	}
 	return things, nil
 }

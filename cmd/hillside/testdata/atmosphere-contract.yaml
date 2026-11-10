@@ -1,0 +1,6 @@
+# Authored independent terrain-support and appearance oracle.
+# Authored 2026-11-07.
+weather: regional mist
+albedo: 0.75
+depth: 10
+later: 2

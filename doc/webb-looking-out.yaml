@@ -1,0 +1,62 @@
+# webb looking out: the James Webb Space Telescope at the Sun-Earth L2
+# point, seen from behind its sunshield as it looks away from the Sun into
+# a field of real stars. 2026-11-09.
+#
+# Written against set/ecosystem-v2.schema.json, ahead of the reader. The
+# telescope is the factory's existing webb design (doc/space-webb.yaml on
+# the observatory branches), which today stands only on terrain.
+#
+# measured, once read: the stars, from Gaia through celestial-data's
+# adapter. picked: where the camera stands, the field's size, the moves.
+# recalled, not read, and to be read before this renders: the first deep
+# field's coordinates, marked where they stand.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: webb looking out
+  renderer: gpu-native
+  seed: 29
+  light: sun
+  # v2: no ground, location or weather; the sun is placed by the frame
+  setting: space
+  frame:
+    at: sun-earth-l2
+    date: "2026-06-21"
+  # v2: the sky from a catalogue. recalled, not read: SMACS 0723, Webb's
+  # first deep field, near right ascension 07h 23m, declination -73 deg
+  # 27 min. Galaxies are beyond Gaia; until a source for them is chosen
+  # the field is stars only
+  sky:
+    stars:
+      from: gaia
+      toward: {ra: 110.8, dec: -73.45}
+      radius: {value: 10, unit: deg}
+      faintest: 12
+  set:
+    things:
+      the telescope:
+        kind: webb
+        seed: 5
+        complexity: demo
+        place: {at: frame}
+        # v2, gap 9: its mirror to the field, its sunshield to the Sun
+        attitude:
+          point: {sky: {ra: 110.8, dec: -73.45}}
+          shield: sun
+  film:
+    width: 3840
+    height: 2160
+    rays: 4
+    fps: 24
+  cameras:
+    behind:
+      title: "behind the sunshield, looking out with it"
+      moves:
+        # v2, gap 4: places relative to the telescope, looking past it
+        # at the field it looks at
+        - from: {object: the telescope, behind: {value: 60, unit: m},
+                 above: {value: 12, unit: m}}
+          to: {object: the telescope, behind: {value: 25, unit: m},
+               above: {value: 6, unit: m}}
+          look: {sky: {ra: 110.8, dec: -73.45}}
+          duration: {value: 12, unit: s}
+          ease: in-out

@@ -96,8 +96,7 @@ func (encoded *scene) things(world *thing.World, at time.Duration) error {
 	if err := encoded.tree(encoded.faces); err != nil {
 		return err
 	}
-	encoded.instancesOf()
-	return nil
+	return encoded.instancesOf()
 }
 
 // place puts one thing where it is at time t: a sphere among the
@@ -123,6 +122,8 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 		faces := func() []triangle { return slayersFaces(made) }
 		encoded.stand(made, faces, space, material, clear)
 		return nil
+	case *shape.MeshGroup:
+		return encoded.group(made, space, material, clear)
 	}
 	kind := fmt.Sprintf("a shape of kind %T", placed.Shape)
 	return unsupported{kind}
@@ -256,36 +257,67 @@ func point(at maths.Vec) []float64 { return []float64{at.X, at.Y, at.Z} }
 // shaded smooth, and the tree's boxes. It refuses more smooth faces
 // than a bend's place can name.
 func (encoded *scene) tree(grown tree) error {
+	return encoded.treeWithin(grown, mostBends)
+}
+
+// treeWithin uses the same packing path under an explicit smooth-face cap.
+// Small caps let boundary checks run without allocating millions of faces.
+func (encoded *scene) treeWithin(grown tree, bendLimit int) error {
 	bends := 0
+	for i := range grown.triangles {
+		if grown.triangles[i].smooth {
+			bends++
+		}
+	}
+	if bends > bendLimit {
+		return unsupported{fmt.Sprintf("more than %d faces shaded "+
+			"smooth", bendLimit)}
+	}
+	for _, face := range grown.triangles {
+		if !finiteFace(face) {
+			return unsupported{"a mesh face outside finite float32 coordinates"}
+		}
+	}
+	if err := encoded.geometryCapacity(grown, bends); err != nil {
+		return err
+	}
+	encoded.reserveGeometry(grown, bends)
+	// All index/coordinate/byte checks precede either output reservation.
+	bends = 0
 	for _, face := range grown.triangles {
 		bend := -1
 		if face.smooth {
 			bend = bends
 			bends++
-			encoded.bends.row(bendStruct, values{
-				"normal_a": point(face.normals[0]),
-				"normal_b": point(face.normals[1]),
-				"normal_c": point(face.normals[2])})
 		}
-		encoded.triangles.row(triangleStruct, values{
-			"corner_a": append(point(face.corners[0]),
-				float64(bend)),
-			"corner_b": point(face.corners[1]),
-			"corner_c": point(face.corners[2])})
-	}
-	if bends > mostBends {
-		return unsupported{fmt.Sprintf("more than %d faces shaded "+
-			"smooth", mostBends)}
+		encoded.packedFace(face, bend)
 	}
 	for _, box := range grown.nodes {
-		encoded.nodes.row(nodeStruct, values{
-			"low":  point(box.bounds.low),
-			"high": point(box.bounds.high),
-			"info": wholes(box.first, box.count)})
+		encoded.packedNode(box)
 	}
 	encoded.counts.triangles = len(grown.triangles)
 	encoded.counts.nodes = len(grown.nodes)
 	return nil
+}
+
+// finiteFace keeps fast-math kernels from receiving nonfinite mesh data.
+func finiteFace(face triangle) bool {
+	finite := func(point maths.Vec) bool {
+		return fits(point.X) && fits(point.Y) && fits(point.Z)
+	}
+	for _, corner := range face.corners {
+		if !finite(corner) {
+			return false
+		}
+	}
+	if face.smooth {
+		for _, normal := range face.normals {
+			if !finite(normal) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // lampStruct is a lamp as the kernel reads it. a width of zero is a lamp that
@@ -295,33 +327,65 @@ var lampStruct = structure{"Lamp", []field{
 	floatField("at", "beyond in w, or the way to a distant lamp"),
 	floatField("strength", "the soft edge of its cone in w"),
 	floatField("toward", "the way of its cone, its width in w"),
+	floatField("extent", "sphere radius in x; "+
+		"beam exponent/radius/slope/reach in xyzw"),
 }}
 
 // distantBeyond is the beyond that marks a lamp as distant
 const distantBeyond = -1
 
+// beamZero is defined as no arriving light, or no excluded launch interior.
+const beamZero = 0
+
 // lampsOf appends every lamp: a point emitter at its time, or a distant
 // lamp, the same way and light at every point.
 func (encoded *scene) lampsOf(world *thing.World) {
+	encoded.counts.beams = beamZero
 	for _, lamp := range world.Lamps {
+		if beam, ok := lamp.(*emit.Beam); ok {
+			encoded.beamOf(beam)
+			encoded.counts.beams++
+			continue
+		}
 		if sun, distant := lamp.(emit.Distant); distant {
 			toward, _, light := sun.Light(maths.Vec{}, maths.Vec{})
 			way := append(point(toward), distantBeyond)
 			encoded.lamps.row(lampStruct, values{
 				"at":       way,
 				"strength": {light.R, light.G, light.B},
-				"toward":   {}})
+				"toward":   {}, "extent": {}})
 			continue
 		}
-		lit := lamp.(emit.Lit)
+		var lit emit.Lit
+		radius := 0.0
+		if source, ok := lamp.(emit.Volume); ok {
+			lit, radius = source.Point(), source.Radius().InMetres()
+		} else {
+			lit = lamp.(emit.Lit)
+		}
 		strength := lit.Strength
 		encoded.lamps.row(lampStruct, values{
 			"at": append(point(lit.At), lit.Beyond),
 			"strength": {strength.R, strength.G, strength.B,
 				lit.Soft},
-			"toward": append(point(lit.Toward), lit.Width)})
+			"toward": append(point(lit.Toward), lit.Width),
+			"extent": {radius}})
 	}
 	encoded.counts.lamps = len(world.Lamps)
+}
+
+// beamOf keeps collimated sources distinct from inverse-square point lamps.
+// Extent's positive y selects a beam, whose x is its Gaussian exponent.
+func (encoded *scene) beamOf(beam *emit.Beam) {
+	lit := beam.Point()
+	strength := lit.Strength
+	encoded.lamps.row(lampStruct, values{
+		"at":       point(lit.At),
+		"strength": {strength.R, strength.G, strength.B},
+		"toward":   point(lit.Toward),
+		"extent": {emit.BeamExponent, beam.Radius().InMetres(),
+			beam.Slope(), beam.Reach().InMetres()},
+	})
 }
 
 // headerStruct is the header as the kernel reads it.
@@ -335,7 +399,8 @@ var headerStruct = structure{"Header", []field{
 	intField("more", "volumes, strides, shades, trees"),
 	floatField("tuning", "lift, faint, evenly, spread"),
 	intField("tops", "mesh standings, the boxes of their tree"),
-	intField("look", "whether the rays are given"),
+	intField("look", "whether rays are given in x; narrow beam count in y"),
+	intField("lighting", "source volume during smoke preparation"),
 }}
 
 // camera makes the header: the eye's place and axes, the lens, and how
@@ -362,9 +427,10 @@ func (encoded *scene) camera(eye maths.Subspace, lens film.Pinhole,
 			counts.lamps),
 		"more": wholes(counts.volumes, strides, shades,
 			counts.trees),
-		"tuning": {lift, faint, evenly, encoded.spread},
-		"tops":   wholes(counts.instances, counts.tops),
-		"look":   wholes(flag(encoded.looked))})
+		"tuning":   {lift, faint, evenly, encoded.spread},
+		"tops":     wholes(counts.instances, counts.tops),
+		"look":     wholes(flag(encoded.looked), encoded.counts.beams),
+		"lighting": wholes(beamZero)})
 }
 
 // slayer's tracer's own numbers (trace), so the two march alike

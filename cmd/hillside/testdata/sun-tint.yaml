@@ -1,0 +1,5 @@
+# Authored warm linear-light filter; not a calibrated atmosphere.
+written: '[1, 0.55, 0.22]'
+expected: {r: 1.5, g: 0.825, b: 0.33}
+tolerance: 1.0e-12
+invalid: ['[1, -0.1, 0.2]', '[1, 1.1, 0.2]', '[1, 0.2]', '[1, 0.2, .nan]']

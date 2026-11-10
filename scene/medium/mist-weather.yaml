@@ -1,0 +1,19 @@
+# Existing grove appearance controls, now shared with the regional layer.
+# These are authored sampling/noise choices, not measured weather.
+# Recorded in 2026-11-07, preserving the previous grove values.
+numbers:
+  - name: octaves
+    value: 3
+    says: authored number of noise octaves in prescribed mist
+    kind: picked
+    by: Slayer's prescribed-mist study, 2026-11-07
+  - name: threshold-shoulder
+    value: 0.1
+    says: authored smooth shoulder around the coverage threshold
+    kind: picked
+    by: Slayer's prescribed-mist study, 2026-11-07
+  - name: samples-per-depth
+    value: 4
+    says: authored density sampling hint across the mist depth
+    kind: picked
+    by: Slayer's prescribed-mist study, 2026-11-07

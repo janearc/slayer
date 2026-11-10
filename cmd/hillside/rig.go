@@ -90,6 +90,12 @@ func exposed(world *thing.World, given asked, eye maths.Subspace) (
 	sampled := trace.Sampled
 	if given.onGPU {
 		sampled = gpu.Sampled
+		if given.nativeShadows {
+			sampled = nativeSample
+		}
+		if given.nativeMeshes {
+			sampled = acceleratedSample
+		}
 	}
 	glimpses := make([]*frame.Frame, 0, len(moments))
 	for _, moment := range moments {

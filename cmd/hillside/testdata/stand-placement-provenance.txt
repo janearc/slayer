@@ -1,0 +1,27 @@
+Authored deterministic placement fixture, generated in Ruby. No Go scene
+or renderer was executed to obtain these expected values. The actual Go
+placement regression remains unrun.
+
+Inspected primary reference: Go 1.26.10, math/rand/v2/pcg.go (128-bit LCG,
+DXSM output) and rand.go (Float64 takes the LOW53 bits over2^53). Generator
+seeds7 and1 are authored legacy stand replay choices, not physical data.
+The Ruby implementation uses full-width integer arithmetic modulo2^128.
+
+Explicit fixture: raster sample(column,row)=(column+1000*row)/8 metres,
+2m spacing; scene west1001/north8999/across150/down100; one-cell margins;
+nearest-sample placement; strict height band2000..4000m; twelve specimens.
+Generator output is in stand-placement-reference.json.
+
+The standard-library source reference is:
+https://go.googlesource.com/go/+/refs/tags/go1.26.10/src/math/rand/v2/pcg.go
+pcg.go SHA256 6ebd291420193e3d127c3c5bc46e7b3ee99eb5db6c3729e3ac9786c912a0ffa5
+rand.go SHA256 a0b0f516652e66ee56de089ec01457f5f786e0463cd08b2453eb025cd6ad6f58
+
+The initial prepared reference used high53 bits; source inspection found
+that Go uses low53 bits. It was corrected BEFORE any Go regression run.
+
+Yaw fixtures apply the authored main.go XOR-lane SplitMix64 finalizer to
+explicit profile seeds28..31 and each specimen index. Ruby integer products
+are masked to64 bits. The recorded residue is in tenths of a degree; it is
+an authored replay policy, not a measured tree orientation. Geometry uses
+those same four explicit profiles and repeats them three times.

@@ -1,0 +1,5 @@
+# Finite input whose support-vector squared length underflows in float64.
+# A checked refusal is valid; a nil-object panic is not.
+design: hubble
+aperture: 1.0e-200
+seed: 5

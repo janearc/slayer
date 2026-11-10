@@ -1,0 +1,8 @@
+# A solid roof sector and an annular wall at the same authored opening.
+# The translation checks the roof's actual position in the enclosure.
+outer: 20
+inners: [0, 19.5]
+height: 0.5
+opening: 50
+sides: [12, 24, 48, 96]
+lift: 42.5

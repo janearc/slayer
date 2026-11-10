@@ -1,0 +1,10 @@
+# 2026/11/09 10:23:46.400633 [TestReservationSequencesPreserveEarlierClaims] [rapid] draw steps: 1
+# 2026/11/09 10:23:46.400633 [TestReservationSequencesPreserveEarlierClaims] [rapid] draw amount: 0x1
+# 2026/11/09 10:23:46.400635 [TestReservationSequencesPreserveEarlierClaims] sequence proposal: {next:<nil> disposition:0}, want [{id:step-0 amount:1}]
+# 
+v0.4.8#324872304281161431
+0x0
+0x0
+0x0
+0x0
+0x0

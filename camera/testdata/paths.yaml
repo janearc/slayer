@@ -1,0 +1,54 @@
+# These small, hand-worked paths were chosen on 2026-11-07.
+# Speed path: (3,4,0) is five metres at two metres per second.
+# Smooth path: at one quarter, 3t^2-2t^3 = 0.15625; four metres gives 0.625.
+# Expectations are written here independently of Path.At.
+numbers:
+  speed: 2
+  speed-duration: 2.5
+  tolerance: 1e-12
+  travel-duration: 4
+  hold-duration: 1
+  total-duration: 9
+  long-duration: 9000000000
+vectors:
+  origin: {x: 0, y: 0, z: 0}
+  target: {x: 0, y: 0, z: -5}
+  speed-end: {x: 3, y: 4, z: 0}
+  speed-one: {x: 1.2, y: 1.6, z: 0}
+  speed-two: {x: 2.4, y: 3.2, z: 0}
+  first: {x: 0, y: 0, z: 2}
+  corner: {x: 4, y: 0, z: 2}
+  end: {x: 4, y: 4, z: 2}
+  mutation: {x: 99, y: 0, z: 2}
+  smooth-quarter: {x: 4, y: 0.625, z: 2}
+  smooth-half: {x: 4, y: 2, z: 2}
+  valid-first: {x: 1, y: 0, z: 2}
+  valid-end: {x: 2, y: 0, z: 2}
+  crossing-from: {x: -1, y: 0, z: 0}
+  crossing-to: {x: 1, y: 0, z: 0}
+  far-from: {x: -1e154, y: 0, z: 0}
+  far-target: {x: 1e154, y: 0, z: 0}
+  nanosecond-end: {x: 1e-9, y: 0, z: 0}
+  shorter-end: {x: 1e-12, y: 0, z: 0}
+  early: {x: 2, y: 0, z: 2}
+  distant-start: {x: 1e16, y: 0, z: 2}
+  close-end: {x: 1, y: 0, z: 2}
+  overflow-from: {x: 1.4e154, y: 0, z: 0}
+  overflow-to: {x: 0.7e154, y: 0, z: 0}
+samples:
+  speed:
+    - {seconds: 1, point: speed-one}
+    - {seconds: 3, point: speed-end}
+    - {seconds: 0, point: origin}
+    - {seconds: 2, point: speed-two}
+    - {seconds: -1, point: origin}
+    - {seconds: 1, point: speed-one}
+  holds:
+    - {seconds: -1, point: first}
+    - {seconds: 2, point: early}
+    - {seconds: 4, point: corner}
+    - {seconds: 4.5, point: corner}
+    - {seconds: 5, point: corner}
+    - {seconds: 6, point: smooth-quarter}
+    - {seconds: 7, point: smooth-half}
+    - {seconds: 9, point: end}

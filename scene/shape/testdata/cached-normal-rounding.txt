@@ -1,0 +1,23 @@
+Cached ray-face normal regression, Darwin/ARM64, Go 1.26.10
+
+5fc3e660024485a4ca5d3946e1e040fae9c2fa90
+79f6006c54669b3410f6a8f36fbe9cdbafc9408c057a7014b82d5be9f3654db1  scene/shape/group.go
+dca521b09be588ea0bea1743e672ed2545fdfa8c867d0c03c218fd61901dbaa3  trace/surface.go
+
+    diagnostic_cached_normal_search_test.go:53: scale=0 magnitude=1000000000 angle=1.1000000000000001 delta=3.0000000000000004e-08 distance=3.0000000370061266 point=maths.Vec{X:5.312009811767551e-08, Y:0, Z:-2.703643568906649e-08} cached=maths.Vec{X:0.8912073600614354, Y:0, Z:0.4535961214255773} nearest=maths.Vec{X:0.4535961214255773, Y:0, Z:-0.8912073600614354}
+    diagnostic_cached_normal_search_test.go:53: scale=0.25 magnitude=10000000000 angle=0.40000000000000002 delta=-1.0100000000000001e-06 distance=0.75000049523991263 point=maths.Vec{X:7.427565427945147e-07, Y:0, Z:-1.756784427648325e-06} cached=maths.Vec{X:0.38941834230865063, Y:0, Z:0.9210609940028852} nearest=maths.Vec{X:0.9210609940028852, Y:0, Z:-0.38941834230865063}
+
+These are two valid pairs of open triangular faces, one in z=0 and a
+nearby face in x=delta. The ray meets the z plane first. After a large
+world translation, converting the rounded world hit back to local space
+can put the query closer to the x plane. The ray-hit face is still z=0.
+
+The fixed tests assert the rotated z-plane normal. They do not require
+nearest-point rounding to fail on every other architecture. No private
+mesh or landing state is corrupted; both meshes and groups use their
+normal constructors, and the trace test obtains its landing from reach.
+
+To reproduce the search, copy find_cached_normal_test.go into scene/shape,
+run go test -count=1 -v -run
+'^TestDiagnosticFindCachedNormalRoundingCases$' ./scene/shape,
+then remove that temporary copy.

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The manufactory</title>
+  <link rel="stylesheet" href="catalogue.css">
+  <link rel="icon" type="image/png" href="icon-light.png"
+    media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" href="icon-dark.png"
+    media="(prefers-color-scheme: dark)">
+</head>
+<body>
+<header>
+  <p class="eyebrow">Slayer / specimen book</p>
+  <h1>The manufactory</h1>
+  <p>A field guide to the things we can make.</p>
+  <p class="quiet">These are authored scenery. Source notes say which
+    dimensions have references and which are picked.</p>
+</header>
+<main>
+<form class="filters" role="search" onsubmit="return false">
+  <label>Find a specimen
+    <input id="search" type="search" placeholder="redwood, telescope, lamp...">
+  </label>
+  <label>Family
+    <select id="group">
+      <option value="">All families</option>
+      {{range .Groups}}<option>{{.}}</option>{{end}}
+    </select>
+  </label>
+  <label>Detail
+    <select id="detail">
+      <option value="">All details</option>
+      <option>hull</option><option>clumps</option>
+      <option>quick</option><option>demo</option>
+    </select>
+  </label>
+  <p id="count" role="status" aria-live="polite"></p>
+</form>
+<section class="cards" aria-label="Specimens">
+{{range .Cards}}
+<article data-group="{{.Entry.Group}}" data-detail="{{.Detail}}"
+  data-find="{{.Entry.Kind}} {{.Entry.About}} {{.Entry.Notes}}
+    {{range .Entry.References}}{{.Title}} {{end}}">
+  {{if eq .Status "native GPU render"}}
+  <a class="picture" href="{{.Folder}}/specimen.png">
+    <img src="{{.Folder}}/specimen.png" loading="lazy"
+      alt="{{.Entry.Kind}} at {{.Detail}} detail">
+  </a>
+  {{else}}
+  <div class="pending">{{.Status}}{{if .Failure}}: {{.Failure}}{{end}}</div>
+  {{end}}
+  <div class="description">
+    <p class="eyebrow">{{.Entry.Group}} / {{.Detail}}</p>
+    <h2>{{.Entry.Kind}}</h2>
+    {{if .Cutaway}}<p>Cutaway view: enclosure hidden.</p>{{end}}
+    <p>{{.Entry.About}}</p>
+    <details>
+      <summary>Recipe and source notes</summary>
+      <p>{{.Entry.Notes}}</p>
+      <p>Available details: {{range .Entry.Details}}<span>{{.}} </span>{{end}}</p>
+      {{range .Entry.References}}
+      <p><a href="{{.URL}}">{{.Title}}</a></p>
+      {{end}}
+    </details>
+    {{if eq .Status "native GPU render"}}
+    <p class="evidence">Rendered on the native GPU path.
+      <a href="{{.Folder}}/render.json">Render record</a> /
+      <a href="{{.Folder}}/settings.yaml">Settings</a></p>
+    {{end}}
+  </div>
+</article>
+{{end}}
+</section>
+<p id="empty" hidden>No specimens match those filters.</p>
+<footer>
+  <p>A rendered specimen proves that view reached the GPU. It does not
+    establish numerical agreement for every scene or physical accuracy.</p>
+  <p><a href="catalogue.json">Catalogue and producer record</a></p>
+</footer>
+</main>
+<script>
+const cards = [...document.querySelectorAll("article[data-find]")];
+const search = document.querySelector("#search");
+const group = document.querySelector("#group");
+const detail = document.querySelector("#detail");
+function filter() {
+  const words = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  let shown = 0;
+  for (const card of cards) {
+    const text = card.dataset.find.toLowerCase();
+    const match = words.every(word => text.includes(word)) &&
+      (!group.value || card.dataset.group === group.value) &&
+      (!detail.value || card.dataset.detail === detail.value);
+    card.hidden = !match;
+    if (match) shown++;
+  }
+  document.querySelector("#count").textContent =
+    `${shown} of ${cards.length} views`;
+  document.querySelector("#empty").hidden = shown !== 0;
+}
+for (const control of [search, group, detail]) {
+  control.addEventListener("input", filter);
+}
+filter();
+</script>
+</body>
+</html>

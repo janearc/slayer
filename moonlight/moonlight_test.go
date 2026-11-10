@@ -68,7 +68,7 @@ func TestTheMoonsFaceIsItsLight(t *testing.T) {
 	}
 }
 
-// the air takes its share: a moon overhead from kīlauea's 1222 m keeps
+// the air takes its share: a moon overhead from kilauea's 1222 m keeps
 // most of its green, and one four degrees up keeps less, and of its
 // blue less again, so it is redder.
 func TestALowMoonIsDimmerAndRedder(t *testing.T) {

@@ -1,0 +1,33 @@
+# Authored analytic reference, 2026-11-07.
+# A horizontal ray crosses uniform fog. Its vertical collimated beam has
+# launch-to-sample attenuation exp(-sigma). Eye attenuation is exp(-sigma*(x+2)).
+# The Gaussian integral is sigma/2 * exp(-sigma*(3+centre)) * radius*sqrt(pi/2)
+# times exp(sigma^2*radius^2/8). Gaussian tails beyond the box are negligible
+# at this radius. Expectations use that integral, not either marcher.
+width: 1
+height: 1
+samples: 1
+wide: 50
+eye: {x: -5, y: 0, z: 0}
+target: {x: 0, y: 0, z: 0}
+fog:
+  extent:
+    min: {x: -2, y: -1, z: -1}
+    max: {x: 2, y: 1, z: 1}
+  extinction: 0.2
+volume:
+  material:
+    name: uniform test fog
+    colour: {r: 1, g: 1, b: 1}
+source:
+  at: {x: 0, y: -1, z: 0}
+  toward: {x: 0, y: 1, z: 0}
+  strength: {r: 1, g: 1, b: 1}
+radius: 0.025
+reach: 2
+divergence: 0
+tolerance: 0.0001
+views:
+  - {centre: 0, expected: 0.0017195888293064278}
+  - {centre: 0.013, expected: 0.0017151237055264975}
+  - {centre: 0.027, expected: 0.0017103280761652736}

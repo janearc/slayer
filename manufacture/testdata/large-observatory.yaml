@@ -1,0 +1,22 @@
+# Primary aperture and inventory are source-backed. Enclosure, pose and
+# minimum central clearance are independent expectations for authored scenery.
+kind: elt
+seed: 5
+diameter: 96
+height: 90
+aperture: 39
+panels: 798
+minimum-clearance: 4
+tolerance: 1.0e-8
+maximum-faces: 200000
+centre: {x: 0, y: 31.5, z: 0}
+tangent: {x: 0, y: 0.573576436351046, z: 0.819152044288992}
+probe:
+  at: {x: 0.1, y: 45, z: -9.46}
+  dir: {x: 0, y: -0.819152044288992, z: 0.573576436351046}
+mirrors:
+  - primary mirror
+  - secondary mirror
+  - tertiary mirror
+  - fourth mirror
+  - fifth mirror

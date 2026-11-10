@@ -8,20 +8,21 @@ import (
 	"testing"
 )
 
-// todaysTrees is each spruce's skin as it was made at fermat e0859a6,
-// before the trees were rows of an architecture: a digest of every
-// corner of every face, matter by matter, at each seed from one to
+// todaysTrees is each spruce's woody skin as the named factory makes it
+// at 85c1c37, when both spruces took physical needle shoots and their
+// foliage moved to shared mesh groups: a digest of every corner of
+// every face of the parts, matter by matter, at each seed from one to
 // twelve. doc/families.md asks that quick stay today's trees, face for
 // face; these are today's trees.
 var todaysTrees = map[string][12]string{
-	"spruce": {"13716071c6c1fb24", "80932c95d786a200", "0da8ca98d389cbc0",
-		"03325430ae8896b3", "ffb407df3454b128", "525133f22e64ee6a",
-		"de46bad9ca76ccc5", "25bfa92a7b339fb6", "136da8e58045bb34",
-		"afd7ef4a5ee3ba5d", "f190e71411ba5ced", "0e62b2ae064d762d"},
-	"norway": {"c285fe9f085ec653", "75a6017000bacf14", "2eb31aab3af61c33",
-		"0f9bfb84d3e634eb", "c7e98b20c206475e", "5174ab6577552dd7",
-		"e013f56e90b99eb1", "3e4a661b136bc0d4", "18b32bb688b0a877",
-		"4c90ea5c1e47d044", "6ddda672dcfbca07", "95bb240304a203fd"},
+	"spruce": {"b0cce761bece8c6a", "b3a7af1111ee150a", "e6f01496bfdbc704",
+		"f339177fc6db00b0", "8b60dff2a02e8d26", "0d6de3ab703c1906",
+		"78c4179272328e73", "d39e780562d87f4e", "4baf61910bb9c555",
+		"d8e8d1504078f415", "0c0a12bd2870b293", "94f9afb2c74641c4"},
+	"norway": {"7cf07c6df25bb71d", "53f0f2581096fc2c", "1e0abaf314015034",
+		"d25029b944ac98b8", "229a404e8a1a2a61", "c81f7eece21e6a63",
+		"2c5bafa8c6a36fd9", "a5218615c190eb38", "8a96b513b4be219e",
+		"d199e65a0c348efc", "0f065d092220210e", "0f170c85c71db069"},
 }
 
 // spruceGrowth is a spruce grown by its row's architecture at quick, of

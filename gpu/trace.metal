@@ -1,3 +1,8 @@
+#ifdef SLAYER_NATIVE_SHADOWS
+#include <metal_raytracing>
+using namespace metal::raytracing;
+#endif
+
 // Metal tracing kernels corresponding to the CPU renderer. Functions retain
 // related names so the implementations can be compared, using float where
 // the CPU uses double. Go-side validation rejects unsupported scene features.
@@ -23,6 +28,13 @@ struct World {
 	device const Bend *bends;
 	device const float *rays;
 	device const float *boxes;
+#ifdef SLAYER_NATIVE_MESHES
+	device const int *firsts;
+#endif
+#ifdef SLAYER_NATIVE_SHADOWS
+	acceleration_structure<instancing> accelerated;
+#endif
+	thread uint4 *native_counts;
 };
 
 // nowhere is the finite miss-depth sentinel shared through structure.go.
@@ -40,6 +52,8 @@ struct Hit {
 	float3 lift;
 	float3 local;
 	float scale;
+	// Internal hit provenance, not part of a host/device buffer layout.
+	int sphere_index = -1;
 };
 
 // sphere_hit uses the stable quadratic form shared with globe.Hit and
@@ -79,38 +93,61 @@ static float sphere_hit(float3 at, float3 way, Sphere sphere, float near,
 	return -1;
 }
 
-// triangle_hit uses a float Möller–Trumbore intersection from either side.
-// Unlike mesh’s watertight fused-determinant test, it needs edge slack to
-// avoid cracks between adjacent faces; a head-on floor otherwise exposes
-// sky along shared edges.
-//
-// Nearly edge-on faces are rejected relative to their size. The direction
-// need not be normalized in object space, so the threshold also accounts
-// for its length. triangle_met additionally returns the second and third
-// barycentric weights; the first is one minus their sum.
+// edge_area uses the same compensated product difference as mesh/meet.go.
+// Explicit fused operations retain the residual of the rounded product.
+static float edge_area(float2 one, float2 two) {
+	float rounded = one.y * two.x;
+	float error = fma(-one.y, two.x, rounded);
+	float main = fma(one.x, two.y, -rounded);
+	return main + error;
+}
+
+// ray_corner translates and shears a vertex into the dominant ray axis.
+// Shared vertices take identical arithmetic in adjoining triangles.
+static float3 ray_corner(float3 corner, float3 at, int x, int y, int z,
+                         float3 shear) {
+	float3 local = corner - at;
+	return float3(fma(-shear.x, local[z], local[x]),
+	              fma(-shear.y, local[z], local[y]), local[z] * shear.z);
+}
+
+// triangle_met follows Woop, Benthin and Wald's ray-aligned triangle solve
+// (JCGT 2013, https://jcgt.org/published/0002/01/05/), as the CPU mesh path does.
+// It avoids the poorly conditioned distance quotient of long, thin faces.
+// This float-only variant retains the existing grazing rejection and edge
+// slack; it does not claim the paper's double-fallback watertight guarantee.
 static float triangle_met(float3 at, float3 way, Triangle face, float near,
                           float far, thread float2 &weights) {
-	float3 corner = face.corner_a.xyz;
-	float3 first = face.corner_b.xyz - corner;
-	float3 second = face.corner_c.xyz - corner;
-	float3 across = cross(way, second);
-	float det = dot(first, across);
+	float3 first = face.corner_b.xyz - face.corner_a.xyz;
+	float3 second = face.corner_c.xyz - face.corner_a.xyz;
+	float det = dot(first, cross(way, second));
 	if (abs(det) <= 1e-7f * length(first) * length(second) * length(way)) {
 		return -1;
 	}
-	float3 from = at - corner;
-	float toward_first = dot(from, across) / det;
-	float3 up = cross(from, first);
-	float toward_second = dot(way, up) / det;
-	// a hair of slack at the edges, so a ray straight down an edge two
-	// faces share meets one of them rather than slipping between; a face
-	// met twice at its edge costs nothing, since the nearer wins
+	int z = 0;
+	if (abs(way.y) > abs(way[z])) { z = 1; }
+	if (abs(way.z) > abs(way[z])) { z = 2; }
+	int x = (z + 1) % 3, y = (x + 1) % 3;
+	if (way[z] < 0) {
+		int swap = x; x = y; y = swap;
+	}
+	float3 shear = float3(way[x] / way[z], way[y] / way[z], 1 / way[z]);
+	float3 a = ray_corner(face.corner_a.xyz, at, x, y, z, shear);
+	float3 b = ray_corner(face.corner_b.xyz, at, x, y, z, shear);
+	float3 c = ray_corner(face.corner_c.xyz, at, x, y, z, shear);
+	float for_a = edge_area(c.xy, b.xy);
+	float for_b = edge_area(a.xy, c.xy);
+	float for_c = edge_area(b.xy, a.xy);
+	float whole = for_a + for_b + for_c;
+	if (whole == 0) { return -1; }
+	float toward_first = for_b / whole;
+	float toward_second = for_c / whole;
 	float slack = 1e-6f;
 	if (toward_first < -slack || toward_second < -slack ||
 	    toward_first + toward_second > 1 + slack) {
 		return -1;
 	}
-	float distance = dot(second, up) / det;
+	float distance = fma(for_a, a.z, fma(for_b, b.z, for_c * c.z)) / whole;
 	weights = float2(toward_first, toward_second);
 	return distance > near && distance < far ? distance : -1;
 }
@@ -372,7 +409,7 @@ static bool box_hit(float3 at, float3 way, Node box, float far) {
 // face, for a shadow. the hit's material is nought for a face met, and
 // its normal and lift are the face's in the mesh's space: blended and
 // lifted for a face shaded smooth, which a shadow does not ask.
-static Hit faces_hit(World world, int root, float3 at, float3 way,
+static Hit faces_near(World world, int root, float3 at, float3 way,
                      float near, float far, bool any) {
 	Hit found = {far, -1, float3(0), float3(0)};
 	Triangle met;
@@ -414,7 +451,7 @@ static Hit faces_hit(World world, int root, float3 at, float3 way,
 	if (found.material < 0) {
 		return found;
 	}
-	float3 point = at + way * found.distance;
+	float3 point = fma(way, found.distance, at);
 	found.local = point;
 	int bend = int(met.corner_a.w);
 	if (bend >= 0) {
@@ -423,18 +460,50 @@ static Hit faces_hit(World world, int root, float3 at, float3 way,
 	return found;
 }
 
+// before_mesh finds a point just before the mesh's enclosing sphere, with a
+// authored roundoff pad on its radius (about two parts per million over
+// the circumsphere). This is not a watertight error bound for arbitrary
+// coordinates. Distant origins otherwise lose fine-leaf barycentric detail.
+static float before_mesh(World world, int root, float3 at, float3 way) {
+	Node box = world.nodes[root];
+	float speed = length(way);
+	float3 centre = (box.low.xyz + box.high.xyz) * 0.5f;
+	float radius = length(box.high.xyz - box.low.xyz) * 0.500001f;
+	return max(0.0f, (dot(centre - at, way) / speed - radius) / speed);
+}
+
 // into transforms a world point to an instance’s local coordinates.
+static float into_row(float4 row, float3 point) {
+	return fma(row.x, point.x,
+	           fma(row.y, point.y, fma(row.z, point.z, row.w)));
+}
+
 static float3 into(Instance placed, float3 point) {
-	float4 at = float4(point, 1);
-	return float3(dot(placed.into_x, at), dot(placed.into_y, at),
-	              dot(placed.into_z, at));
+	return float3(into_row(placed.into_x, point), into_row(placed.into_y, point),
+	              into_row(placed.into_z, point));
 }
 
 // into_way transforms direction without normalizing, preserving the
 // ray’s distance parameter across coordinate spaces.
 static float3 into_way(Instance placed, float3 way) {
-	return float3(dot(placed.into_x.xyz, way), dot(placed.into_y.xyz, way),
-	              dot(placed.into_z.xyz, way));
+	return fma(float3(placed.into_x.x, placed.into_y.x, placed.into_z.x), way.x,
+	           fma(float3(placed.into_x.y, placed.into_y.y, placed.into_z.y), way.y,
+	               float3(placed.into_x.z, placed.into_y.z, placed.into_z.z) * way.z));
+}
+
+// instance_faces_hit rebases in the parent before rotating into a tiny mesh.
+// This also keeps rounded rotation coefficients from acting on a distant
+// origin. Recompute the local origin after the shift; keep ray distances in
+// the caller's parameter throughout.
+static Hit instance_faces_hit(World world, Instance placed, float3 at,
+                              float3 way, float near, float far, bool any) {
+	float3 local_at = into(placed, at), local_way = into_way(placed, way);
+	float shift = before_mesh(world, placed.info.x, local_at, local_way);
+	local_at = into(placed, fma(way, shift, at));
+	Hit met = faces_near(world, placed.info.x, local_at, local_way,
+	                     near - shift, far - shift, any);
+	if (met.material >= 0) { met.distance += shift; }
+	return met;
 }
 
 // out_of transforms an instance-local normal to world space.
@@ -453,10 +522,80 @@ static float3 moved_out(Instance placed, float3 move) {
 	        placed.out_z.xyz * move.z) * scale_of(placed.into_x);
 }
 
-// meshes_hit walks the tree of standing meshes for the nearest face
+// group_hit walks one shared tree of local mesh instances. Members are
+// meshes, so traversal has a fixed second instance level and no recursion.
+static Hit group_hit(World world, int root, float3 at, float3 way,
+                     float near, float far, bool any) {
+	Hit found = {far, -1, float3(0)};
+	int stack[tree_stack];
+	int depth = 0;
+	stack[depth++] = root;
+	while (depth > 0) {
+		Node box = world.tops[stack[--depth]];
+		if (!box_hit(at, way, box, found.distance)) { continue; }
+		if (box.info.y == 0) {
+			stack[depth++] = box.info.x;
+			stack[depth++] = box.info.x + 1;
+			continue;
+		}
+		for (int index = 0; index < box.info.y; index++) {
+			Instance child = world.instances[box.info.x + index];
+			Hit met = instance_faces_hit(world, child, at, way,
+			                            near, found.distance, any);
+			if (met.material < 0) { continue; }
+			found = {met.distance, 0, out_of(child, met.normal),
+			         moved_out(child, met.lift), fma(way, met.distance, at), 1};
+			if (any) { return found; }
+		}
+	}
+	return found;
+}
+
+// Forward declaration for a refused native shadow candidate.
+static Hit meshes_software(World world, float3 at, float3 way, float near,
+                          float far, bool any);
+
+#ifdef SLAYER_NATIVE_SHADOWS
+// Refine the candidate standing with the same predicate as ordinary meshes.
+// Hardware any-hit alone can report a near-surface self hit on thin supports.
+static Hit native_shadow_standing(World world, Instance placed,
+                                 float3 at, float3 way, float far) {
+	if (placed.info.w != 0) {
+		return group_hit(world, placed.info.w - 1, into(placed, at),
+		                 into_way(placed, way), 0, far, true);
+	}
+	return instance_faces_hit(world, placed, at, way, 0, far, true);
+}
+
+// Native any-hit proposes one opaque standing. Analytic shapes remain in blocked.
+static Hit native_shadow(World world, float3 at, float3 way, float far) {
+	Hit found = {far, -1, float3(0)};
+	if (world.header->tops.x == 0 || !(far > 0)) { return found; }
+	ray r;
+	r.origin = at;
+	r.direction = way;
+	r.min_distance = 0;
+	r.max_distance = far;
+	intersector<instancing, max_levels<3>> query;
+	query.assume_geometry_type(geometry_type::triangle);
+	query.accept_any_intersection(true);
+	auto met = query.intersect(r, world.accelerated, 2u);
+	if (met.type != intersection_type::triangle) { return found; }
+	Instance placed = world.instances[int(met.instance_id[0])];
+	Hit checked = native_shadow_standing(world, placed, at, way, far);
+	if (checked.material >= 0) {
+		found.material = 0;
+		return found;
+	}
+	// A refused candidate does not prove that the rest of the ray is clear.
+	return meshes_software(world, at, way, 0, far, true);
+}
+#endif
+
+// meshes_software walks the tree of standing meshes for the nearest face
 // before far, each mesh walked in its own space; with any, it stops at
 // the first face of a mesh that is not clear, for a shadow.
-static Hit meshes_hit(World world, float3 at, float3 way, float near,
+static Hit meshes_software(World world, float3 at, float3 way, float near,
                       float far, bool any) {
 	Hit found = {far, -1, float3(0)};
 	// no meshes: the tree is a root with no children, which must not be
@@ -484,9 +623,16 @@ static Hit meshes_hit(World world, float3 at, float3 way, float near,
 			if (any && placed.info.z != 0) {
 				continue;
 			}
-			Hit met = faces_hit(world, placed.info.x, into(placed, at),
-			                    into_way(placed, way), near,
-			                    found.distance, any);
+			float3 local_at = into(placed, at);
+			float3 local_way = into_way(placed, way);
+			Hit met;
+			if (placed.info.w != 0) {
+				met = group_hit(world, placed.info.w - 1, local_at,
+				                local_way, near, found.distance, any);
+			} else {
+				met = instance_faces_hit(world, placed, at, way,
+				                         near, found.distance, any);
+			}
 			if (met.material < 0) {
 				continue;
 			}
@@ -502,12 +648,100 @@ static Hit meshes_hit(World world, float3 at, float3 way, float near,
 	return found;
 }
 
+#ifdef SLAYER_NATIVE_MESHES
+// Refine one native candidate in the same nearby coordinates used by the
+// software path. Distant origins otherwise lose the width of thin needles.
+static Hit native_face(World world, Instance placed, int triangle,
+                       float3 at, float3 way, float near, float far) {
+	float3 local_at = into(placed, at), local_way = into_way(placed, way);
+	float shift = before_mesh(world, placed.info.x, local_at, local_way);
+	local_at = into(placed, fma(way, shift, at));
+	Triangle face = world.triangles[triangle];
+	float2 weights;
+	float distance = triangle_met(local_at, local_way, face,
+                               near - shift, far - shift, weights);
+	Hit found = {far, -1, float3(0)};
+	if (distance < 0) { return found; }
+	float3 normal = normalize(cross(face.corner_b.xyz - face.corner_a.xyz,
+                                face.corner_c.xyz - face.corner_a.xyz));
+	float3 point = fma(local_way, distance, local_at);
+	found = {distance, 0, normal, float3(0), point, 1};
+	int bend = int(face.corner_a.w);
+	if (bend >= 0) { found = bent(world.bends[bend], face, point, weights, found); }
+	found.distance += shift;
+	return found;
+}
+
+// Native IDs name the sorted world standing and, for a group, its sorted
+// local member. Apple WWDC2023/10128 documents the nested result ID array.
+static Hit native_first(World world, float3 at, float3 way,
+                        float near, float far) {
+	if (world.native_counts) { world.native_counts->x++; }
+	Hit miss = {far, -1, float3(0)};
+	if (world.header->tops.x == 0 || !(far > near)) { return miss; }
+	ray r;
+	r.origin = at;
+	r.direction = way;
+	r.min_distance = max(0.0f, near);
+	r.max_distance = far;
+	intersector<instancing, max_levels<3>> query;
+	query.assume_geometry_type(geometry_type::triangle);
+	query.accept_any_intersection(false);
+	auto candidate = query.intersect(r, world.accelerated, 1u);
+	if (candidate.type != intersection_type::triangle) { return miss; }
+	if (world.native_counts) { world.native_counts->y++; }
+	int root = int(candidate.instance_id[0]);
+	Instance placed = world.instances[root];
+	Hit met;
+	if (placed.info.w != 0) {
+		int leaf = world.firsts[root] + int(candidate.instance_id[1]);
+		Instance child = world.instances[leaf];
+		float3 local_at = into(placed, at), local_way = into_way(placed, way);
+		int triangle = world.firsts[leaf] + int(candidate.primitive_id);
+		met = native_face(world, child, triangle,
+                          local_at, local_way, near, far);
+		met.normal = out_of(child, met.normal);
+		met.lift = moved_out(child, met.lift);
+		met.local = fma(local_way, met.distance, local_at);
+	} else {
+		int triangle = world.firsts[root] + int(candidate.primitive_id);
+		met = native_face(world, placed, triangle,
+                          at, way, near, far);
+	}
+	if (met.material < 0) {
+		if (world.native_counts) { world.native_counts->w++; }
+		return meshes_software(world, at, way, near, far, false);
+	}
+	if (world.native_counts) { world.native_counts->z++; }
+	return {met.distance, placed.info.y, out_of(placed, met.normal),
+         moved_out(placed, met.lift), met.local, scale_of(placed.into_x)};
+}
+#endif
+
+// Keep software available for comparison and a refused candidate's refinement.
+static Hit meshes_hit(World world, float3 at, float3 way, float near,
+                      float far, bool any) {
+#ifdef SLAYER_NATIVE_SHADOWS
+	if (any) { return native_shadow(world, at, way, far); }
+#endif
+#ifdef SLAYER_NATIVE_MESHES
+	return native_first(world, at, way, near, far);
+#else
+	return meshes_software(world, at, way, near, far, any);
+#endif
+}
+
 // first is render/trace's: the nearest thing a ray meets past near, sphere or
 // face; a material of -1 is nothing.
-static Hit first(World world, float3 at, float3 way, float near) {
+static Hit first(World world, float3 at, float3 way, float near,
+                 int leaving_sphere) {
 	Hit found = meshes_hit(world, at, way, near, nowhere, false);
 	for (int index = 0; index < world.header->counts.x; index++) {
 		Sphere sphere = world.spheres[index];
+		if (index == leaving_sphere &&
+		    dot(at - sphere.centre.xyz, way) > 0) {
+			continue;
+		}
 		float distance = sphere_hit(at, way, sphere, near,
 		                            found.distance);
 		if (distance < 0) {
@@ -521,6 +755,7 @@ static Hit first(World world, float3 at, float3 way, float near) {
 		found = {distance, sphere.info.x,
 		         normalize(point - sphere.centre.xyz), float3(0), local,
 		         scale_of(sphere.into_x)};
+		found.sphere_index = index;
 	}
 	for (int index = 0; index < world.header->more.w; index++) {
 		Tree tree = world.trees[index];
@@ -538,11 +773,24 @@ static Hit first(World world, float3 at, float3 way, float near) {
 	return found;
 }
 
+static Hit first(World world, float3 at, float3 way, float near) {
+	return first(world, at, way, near, -1);
+}
+
 // blocked is render/trace's: whether anything not clear stands between a point
 // and a lamp far along the ray.
-static bool blocked(World world, float3 at, float3 way, float far) {
+// A ray leaving its own convex sphere outward cannot meet that sphere
+// again: |p+t*d-c|^2 = r^2 + 2*t*dot(p-c,d) + t^2*|d|^2 > r^2.
+// Excluding only that primitive avoids false self-hits from planetary float32
+// rounding. Inward rays and every other occluder retain the normal tests.
+static bool blocked(World world, float3 at, float3 way, float far,
+                    int leaving_sphere) {
 	for (int index = 0; index < world.header->counts.x; index++) {
 		Sphere sphere = world.spheres[index];
+		if (index == leaving_sphere &&
+		    dot(at - sphere.centre.xyz, way) > 0) {
+			continue;
+		}
 		if (sphere.info.y == 0 &&
 		    sphere_hit(at, way, sphere, 0, far) >= 0) {
 			return true;
@@ -560,6 +808,10 @@ static bool blocked(World world, float3 at, float3 way, float far) {
 		}
 	}
 	return meshes_hit(world, at, way, 0, far, true).material >= 0;
+}
+
+static bool blocked(World world, float3 at, float3 way, float far) {
+	return blocked(world, at, way, far, -1);
 }
 
 // lamp_along is how much of a lamp's light goes out a way, a unit
@@ -583,23 +835,59 @@ static float lamp_along(Lamp lamp, float3 out) {
 	return 1 - through * through * (3 - 2 * through);
 }
 
-// lamp_light is a point emitter's Light: the way toward it, how far the
-// light travels past its surface, and the light, by the inverse square
-// and by how much of it goes that way. a distant lamp's is emit's
-// Distant.Light: its way, nowhere far, and its light, at every point.
+// The volume average of inverse squared distance over a uniform ball.
+// These are the same stable near/far series used by emit.Volume.
+static float volume_falloff(float distance, float radius) {
+ float q = distance / radius;
+ if (q <= 0.25f) {
+  float u = q*q;
+  return 3/(radius*radius) *
+   (1-u*(1.0f/3+u*(1.0f/15+u*(1.0f/35+u/63))));
+ }
+ if (q >= 4) {
+  float u = (radius/distance)*(radius/distance);
+  return (1+u*(1.0f/5+u*(3.0f/35+u/21))) / (distance*distance);
+ }
+ if (q == 1) return 1.5f/(radius*radius);
+ return 1.5f/(radius*radius) *
+  (1 + (1-q*q)/(2*q)*log((1+q)/abs(1-q)));
+}
+
+// lamp_light agrees with emit.Lit, emit.Volume, emit.Beam and emit.Distant.
+// Finite sources keep the centre-ray approximation for shadows.
 struct Reached { float3 toward; float far; float3 light; };
 static Reached lamp_light(Lamp lamp, float3 point) {
-	if (lamp.at.w < 0) {
-		return {lamp.at.xyz, nowhere, lamp.strength.xyz};
-	}
-	float3 toward = lamp.at.xyz - point;
-	float distance = length(toward);
-	if (distance <= lamp.at.w) {
-		return {float3(0), 0, float3(0)};
-	}
-	float3 in = toward / distance;
-	float falling = lamp_along(lamp, -in) / (distance * distance);
-	return {in, distance - lamp.at.w, lamp.strength.xyz * falling};
+ if (lamp.extent.y > beam_zero) {
+  float3 delta = point - lamp.at.xyz;
+  float along = dot(delta, lamp.toward.xyz);
+  if (!isfinite(along) || along <= beam_zero || along >= lamp.extent.w) {
+   return {float3(beam_zero), beam_zero, float3(beam_zero)};
+  }
+  float width = lamp.extent.y + along * lamp.extent.z;
+  float off = length(delta - along * lamp.toward.xyz) / width;
+  float ratio = lamp.extent.y / width;
+  float weight = ratio * ratio * exp(lamp.extent.x * off * off);
+  if (!(weight > beam_zero)) {
+   return {float3(beam_zero), beam_zero, float3(beam_zero)};
+  }
+  return {-lamp.toward.xyz, along, lamp.strength.xyz * weight};
+ }
+ if (lamp.at.w < 0) {
+  return {lamp.at.xyz, nowhere, lamp.strength.xyz};
+ }
+ float3 toward = lamp.at.xyz - point;
+ float distance = length(toward);
+ if (lamp.extent.x > 0) {
+  float3 in = distance > 0 ? toward / distance : float3(0,1,0);
+  float falling = lamp_along(lamp, -in) * volume_falloff(distance, lamp.extent.x);
+  return {in, distance, lamp.strength.xyz * falling};
+ }
+ if (distance <= lamp.at.w) {
+  return {float3(0), 0, float3(0)};
+ }
+ float3 in = toward / distance;
+ float falling = lamp_along(lamp, -in) / (distance * distance);
+ return {in, distance - lamp.at.w, lamp.strength.xyz * falling};
 }
 
 // an Ask is one lamp a point asks, and how many times over it counts
@@ -868,7 +1156,7 @@ static float3 clear(World world, float3 point, float3 toward, float far) {
 // the eye, what it scatters of every lamp's light that reaches it, evenly,
 // and its glow; a boxed medium's paint and shine read from its grids at
 // the point of its own space, where it has them.
-static float3 scattered(World world, Volume volume, float3 point,
+static float3 scattered_direct(World world, Volume volume, float3 point,
                         float3 local) {
 	Material made = world.materials[volume.info.w];
 	float3 colour = made.colour.xyz, sum = made.glow.xyz;
@@ -883,6 +1171,9 @@ static float3 scattered(World world, Volume volume, float3 point,
 			colour = boxed_at(world, volume, volume.shone.y, 3, low, part);
 		}
 	}
+	// A medium with no scattering sends only its own emission.
+	// Skip light selection, geometry shadows and transmission in this case.
+	if (all(colour == float3(0))) { return sum; }
 	Ask asks[lamps_asked];
 	int count = asked(world, point, float3(0), asks);
 	for (int index = 0; index < count; index++) {
@@ -899,6 +1190,17 @@ static float3 scattered(World world, Volume volume, float3 point,
 		sum += colour * reached.light * reach * asks[index].counts;
 	}
 	return sum;
+}
+
+// The optional grid caches the isotropic source term, not density or opacity.
+static float3 scattered(World world, Volume volume, float3 point,
+                        float3 local) {
+ if (volume.lighting.w < 0) { return scattered_direct(world,volume,point,local); }
+ Volume grid=volume;
+ grid.grid=volume.lighting;
+ int3 low; float3 part;
+ if (!boxed_part(grid,local,low,part)) {return float3(0);}
+ return boxed_at(world,grid,grid.grid.w,3,low,part);
 }
 
 // a ray's crossing of one volume: where it enters and leaves, in the
@@ -941,16 +1243,59 @@ static bool shows(float3 keep, float faint) {
 // gathers from the volumes before far, step by step, front to back,
 // overlapping crossings' steps taken in turn by how far along each is.
 struct Through { float3 keep, added; };
+
+// BeamMarch is this ray's conservative refinement region. It changes only
+// sampling effort: light outside the region still gets ordinary integration.
+struct BeamMarch { float enter, leave, step; };
+static BeamMarch beam_march(World world, float3 at, float3 way, float far) {
+ BeamMarch result = {far, beam_zero, beam_zero};
+ if (world.header->look.y <= beam_zero) { return result; }
+ for (int index = beam_zero; index < world.header->counts.w; index++) {
+  Lamp lamp = world.lamps[index];
+  if (lamp.extent.y <= beam_zero) { continue; }
+  float3 end = lamp.at.xyz + lamp.toward.xyz * lamp.extent.w;
+  float margin = (lamp.extent.y + lamp.extent.z * lamp.extent.w) *
+                 beam_bound_radii;
+  float3 low = min(lamp.at.xyz, end) - margin;
+  float3 high = max(lamp.at.xyz, end) + margin;
+  float2 x = slab(at.x, way.x, low.x, high.x);
+  float2 y = slab(at.y, way.y, low.y, high.y);
+  float2 z = slab(at.z, way.z, low.z, high.z);
+  float enter = max(beam_zero, max(x.x, max(y.x, z.x)));
+  float leave = min(far, min(x.y, min(y.y, z.y)));
+  if (leave <= enter) { continue; }
+  float step = lamp.extent.y / beam_radial_samples;
+  if (result.step == beam_zero) {
+   result = {enter, leave, step};
+  } else {
+   result.enter = min(result.enter, enter);
+   result.leave = max(result.leave, leave);
+   result.step = min(result.step, step);
+  }
+ }
+ return result;
+}
+
+static int beam_splits(BeamMarch refine, float enter, float leave) {
+ if (refine.step <= beam_zero || leave <= refine.enter ||
+     enter >= refine.leave) { return int(beam_one); }
+ return int(clamp(ceil((leave-enter)/refine.step), beam_one,
+                  float(beam_max_splits)));
+}
+
 static Through through(World world, float3 at, float3 way, float far) {
 	Through gathered = {float3(1), float3(0)};
 	Crossing found[most_volumes];
 	int count = crossings(world, at, way, far, found);
 	int next[most_volumes] = {};
+	int parts[most_volumes] = {};
+	BeamMarch refine = beam_march(world, at, way, far);
 	int strides = world.header->more.y;
 	float faint = world.header->tuning.y;
 	while (shows(gathered.keep, faint)) {
 		int taken = -1;
 		float middle = 0, stride = 0;
+		int divided = beam_one;
 		for (int index = 0; index < count; index++) {
 			if (next[index] >= strides) {
 				continue;
@@ -958,16 +1303,24 @@ static Through through(World world, float3 at, float3 way, float far) {
 			Crossing crossing = found[index];
 			float crossed = crossing.leave - crossing.enter;
 			float size = crossed / strides;
-			float middle_of = next[index] + 0.5f;
+			float begin = crossing.enter + next[index] * size;
+			int split = beam_splits(refine, begin, begin+size);
+			float middle_of = next[index] +
+			                  (parts[index] + beam_half) / split;
 			float along = crossing.enter + middle_of * size;
 			if (taken < 0 || along < middle) {
-				taken = index, middle = along, stride = size;
+				taken = index, middle = along, stride = size / split;
+				divided = split;
 			}
 		}
 		if (taken < 0) {
 			break;
 		}
-		next[taken]++;
+		parts[taken]++;
+		if (parts[taken] >= divided) {
+			parts[taken] = beam_zero;
+			next[taken]++;
+		}
 		Volume volume = world.volumes[found[taken].volume];
 		float3 point = at + way * middle;
 		float3 local = inside(volume, point);
@@ -1031,7 +1384,8 @@ static float3 lifted(World world, float3 point, float3 normal) {
 // mean of the sky's light along sixteen looks round its normal, each
 // dimmed by what stands in the way. the looks and the frame they are
 // turned into are the tracer's, number for number (trace/skylight.go).
-static float3 skylit(World world, float3 point, float3 normal) {
+static float3 skylit(World world, float3 point, float3 normal,
+                     int leaving_sphere) {
 	const int looks = 16;
 	const float golden_turn = 2.39996322972865332f;
 	float sign = normal.z < 0 ? -1.0f : 1.0f;
@@ -1047,7 +1401,7 @@ static float3 skylit(World world, float3 point, float3 normal) {
 		float out = sqrt(share), turn = golden_turn * look;
 		float3 way = first * (out * cos(turn)) +
 		             second * (out * sin(turn)) + normal * sqrt(1 - share);
-		if (blocked(world, from, way, nowhere)) {
+		if (blocked(world, from, way, nowhere, leaving_sphere)) {
 			continue;
 		}
 		sum += sky_at(world, way) * clear(world, from, way, nowhere);
@@ -1059,8 +1413,9 @@ static float3 skylit(World world, float3 point, float3 normal) {
 // be taken by: every lamp's that reaches it past the things and the
 // volumes, over pi, and the sky's. render/trace's surfaceAt is the surface's
 // glow and its colour times this, without the mirror.
-static float3 falling(World world, float3 point, float3 normal) {
-	float3 sum = skylit(world, point, normal);
+static float3 falling(World world, float3 point, float3 normal,
+                      int leaving_sphere) {
+	float3 sum = skylit(world, point, normal, leaving_sphere);
 	float3 from = lifted(world, point, normal);
 	Ask asks[lamps_asked];
 	int count = asked(world, point, normal, asks);
@@ -1072,7 +1427,8 @@ static float3 falling(World world, float3 point, float3 normal) {
 		if (square <= 0) {
 			continue;
 		}
-		if (blocked(world, from, reached.toward, reached.far)) {
+		if (blocked(world, from, reached.toward, reached.far,
+		            leaving_sphere)) {
 			continue;
 		}
 		float3 reach = square * clear(world, from, reached.toward,
@@ -1141,8 +1497,13 @@ static Painted dimmed(Painted place, float3 by) {
 // paint and the light to paint it by.
 static Seen surfaced(World world, Hit hit, float3 point, float3 normal) {
 	Material made = world.materials[hit.material];
-	float3 fell = falling(world, point + hit.lift, normal);
 	bool painted = made.info.x != 0, shining = made.info.y != 0;
+	// Pure emission has no diffuse response. In particular, the Moon
+	// does not need terrestrial shadow queries at astronomical coordinates.
+	float3 fell = float3(0);
+	if (painted || any(made.colour.xyz != 0)) {
+		fell = falling(world, point + hit.lift, normal, hit.sphere_index);
+	}
 	float3 light = (painted ? float3(0) : made.colour.xyz * fell) +
 	               (shining ? float3(0) : made.glow.xyz);
 	Painted place = unpainted;
@@ -1178,12 +1539,13 @@ static float3 facing(Hit hit, float3 way) {
 
 // shade_plain is render/trace's shade at its last bounce: what a ray meets,
 // lit, and the volumes in front, with no mirror.
-static Seen shade_plain(World world, float3 at, float3 way) {
-	Hit hit = first(world, at, way, 0);
+static Seen shade_plain(World world, float3 at, float3 way,
+                        int leaving_sphere) {
+	Hit hit = first(world, at, way, 0, leaving_sphere);
 	if (hit.material < 0) {
 		return behind(world, at, way, to_sky(way));
 	}
-	float3 point = at + way * hit.distance;
+	float3 point = fma(way, hit.distance, at);
 	Seen seen = surfaced(world, hit, point, facing(hit, way));
 	return behind(world, at, way, seen);
 }
@@ -1196,7 +1558,7 @@ static Seen shade(World world, float3 at, float3 way) {
 	if (hit.material < 0) {
 		return behind(world, at, way, to_sky(way));
 	}
-	float3 point = at + way * hit.distance;
+	float3 point = fma(way, hit.distance, at);
 	float3 normal = facing(hit, way);
 	Material made = world.materials[hit.material];
 	Seen seen = surfaced(world, hit, point, normal);
@@ -1205,7 +1567,7 @@ static Seen shade(World world, float3 at, float3 way) {
 		float3 bounce = way - normal * 2 * dot(way, normal);
 		float3 mirrored = normalize(bounce);
 		float3 from = lifted(world, point, normal);
-		Seen bounced = shade_plain(world, from, mirrored);
+		Seen bounced = shade_plain(world, from, mirrored, hit.sphere_index);
 		seen.light = seen.light * (1 - share) + bounced.light * share;
 		seen.weight = bounced.weight * share;
 		seen.sky = bounced.sky;
@@ -1231,38 +1593,76 @@ static void record(device float *sample, int which, Painted place) {
 // middle, taken out of the eye's space into the world's.
 static float3 look(constant Header *header, uint2 pixel) {
 	float4 lens = header->lens;
-	float across = (2 * (pixel.x + 0.5f) / lens.z - 1) * lens.x;
-	float up = (1 - 2 * (pixel.y + 0.5f) / lens.w) * lens.x / lens.y;
-	float3 eyed = normalize(float3(across, up, -1));
-	return normalize(header->right.xyz * eyed.x + header->up.xyz * eyed.y +
-	                 header->back.xyz * eyed.z);
+	// Center in integer pixel units before scaling, and normalize once
+	// after the orthonormal camera rotation. Fine foliage exposes the
+	// cancellation and extra rounding of two normalizations.
+	float across = (2 * float(pixel.x) + 1 - lens.z) * (lens.x / lens.z);
+	float up = (lens.w - 2 * float(pixel.y) - 1) * (lens.x / (lens.w * lens.y));
+	return precise::normalize(fma(header->right.xyz, across,
+	                             fma(header->up.xyz, up, -header->back.xyz)));
 }
+
+// Trace and smoke preparation share this scene ABI and initializer. Keep
+// their optional native buffers beside the common bindings, in one place.
+#define SLAYER_SCENE_BUFFERS \
+ constant Header *header [[buffer(0)]], \
+ device const Sphere *spheres [[buffer(1)]], \
+ device const Triangle *triangles [[buffer(2)]], \
+ device const Node *nodes [[buffer(3)]], \
+ device const Material *materials [[buffer(4)]], \
+ device const Lamp *lamps [[buffer(5)]], \
+ device const Volume *volumes [[buffer(6)]], \
+ device const float *baked [[buffer(7)]], \
+ device const Tree *trees [[buffer(8)]], \
+ device const Instance *instances [[buffer(9)]], \
+ device const Node *tops [[buffer(10)]], \
+ device const float4 *sky [[buffer(11)]], \
+ device const Bend *bends [[buffer(12)]], \
+ device const float *rays [[buffer(13)]], \
+ device const float *boxes [[buffer(14)]],
+
+#ifdef SLAYER_NATIVE_MESHES
+#define SLAYER_SAMPLE_BUFFERS \
+ device const int *firsts [[buffer(15)]], \
+ device float *out [[buffer(16)]], \
+ constant uint2 &origin [[buffer(17)]],
+#define SLAYER_FIRSTS_VALUE , firsts
+#define SLAYER_ACCELERATION_INDEX 18
+#else
+#define SLAYER_SAMPLE_BUFFERS \
+ device float *out [[buffer(15)]], \
+ constant uint2 &origin [[buffer(16)]],
+#define SLAYER_FIRSTS_VALUE
+#define SLAYER_ACCELERATION_INDEX 17
+#endif
+
+#ifdef SLAYER_NATIVE_SHADOWS
+#define SLAYER_ACCELERATION_BUFFER \
+ , acceleration_structure<instancing> accelerated \
+   [[buffer(SLAYER_ACCELERATION_INDEX)]]
+#define SLAYER_ACCELERATION_VALUE , accelerated
+#else
+#define SLAYER_ACCELERATION_BUFFER
+#define SLAYER_ACCELERATION_VALUE
+#endif
+
+#define SLAYER_TRACE_ARGUMENTS \
+ SLAYER_SCENE_BUFFERS SLAYER_SAMPLE_BUFFERS \
+ uint2 at [[thread_position_in_grid]], \
+ uint2 grid [[threads_per_grid]] SLAYER_ACCELERATION_BUFFER
+
+#define SLAYER_WORLD_INITIALIZER \
+ {header, spheres, triangles, nodes, materials, lamps, volumes, baked, \
+  trees, instances, tops, sky, bends, rays, boxes SLAYER_FIRSTS_VALUE \
+  SLAYER_ACCELERATION_VALUE, nullptr}
 
 // trace draws one sample: twelve numbers, the light, the cover, the
 // sky's weight, the depth, and the way into the sky; and eleven more for
 // each record the scene hands back to be painted.
-kernel void trace(constant Header *header [[buffer(0)]],
-                  device const Sphere *spheres [[buffer(1)]],
-                  device const Triangle *triangles [[buffer(2)]],
-                  device const Node *nodes [[buffer(3)]],
-                  device const Material *materials [[buffer(4)]],
-                  device const Lamp *lamps [[buffer(5)]],
-                  device const Volume *volumes [[buffer(6)]],
-                  device const float *baked [[buffer(7)]],
-                  device const Tree *trees [[buffer(8)]],
-                  device const Instance *instances [[buffer(9)]],
-                  device const Node *tops [[buffer(10)]],
-                  device const float4 *sky [[buffer(11)]],
-                  device const Bend *bends [[buffer(12)]],
-                  device const float *rays [[buffer(13)]],
-                  device const float *boxes [[buffer(14)]],
-                  device float *out [[buffer(15)]],
-                  constant uint2 &origin [[buffer(16)]],
-                  uint2 at [[thread_position_in_grid]],
-                  uint2 grid [[threads_per_grid]]) {
-	World world = {header, spheres, triangles, nodes, materials, lamps,
-	               volumes, baked, trees, instances, tops, sky, bends, rays,
-	               boxes};
+kernel void trace(SLAYER_TRACE_ARGUMENTS) {
+	World world = SLAYER_WORLD_INITIALIZER;
+	uint4 native_counts(0);
+	world.native_counts = &native_counts;
 	uint2 pixel = uint2(at.x, at.y + origin.y);
 	float3 from = header->origin.xyz, way = look(header, pixel);
 	if (header->look.x != 0) {
@@ -1278,7 +1678,11 @@ kernel void trace(constant Header *header [[buffer(0)]],
 	sample[4] = seen.weight.x, sample[5] = seen.weight.y;
 	sample[6] = seen.weight.z, sample[7] = seen.depth;
 	sample[8] = seen.sky.x, sample[9] = seen.sky.y;
-	sample[10] = seen.sky.z, sample[11] = 0;
+	sample[10] = seen.sky.z;
+	// Four four-bit counters fit exactly in a float's integer range. The
+	// tracer has only a primary and one reflected closest query per sample.
+	sample[11] = float(native_counts.x + (native_counts.y << 4) +
+	                   (native_counts.z << 8) + (native_counts.w << 12));
 	if (records > 0) {
 		record(sample, 0, seen.met);
 	}
@@ -1302,4 +1706,19 @@ kernel void bake(device const Volume *volumes [[buffer(0)]],
 	float radius = volume.puff.x;
 	float3 local = (float3(place) + 0.5f) / side * (2 * radius) - radius;
 	out[at.y * grid.x + at.x] = live(volume, local);
+}
+
+// Prepare the same source term once per smoke lighting cell.
+kernel void smoke_light(SLAYER_TRACE_ARGUMENTS) {
+	World world = SLAYER_WORLD_INITIALIZER;
+ Volume volume=world.volumes[header->lighting.x];
+ int3 dims=volume.lighting.xyz;
+ int3 cell=int3(at.x%dims.x,at.x/dims.x,at.y+origin.y);
+ float3 local=volume.low.xyz+(float3(cell)+0.5f)/float3(dims)*
+              (volume.high.xyz-volume.low.xyz);
+ float3 point=volume.origin.xyz+volume.origin.w*
+              (volume.x.xyz*local.x+volume.y.xyz*local.y+volume.z.xyz*local.z);
+ float3 value=scattered_direct(world,volume,point,local);
+ int first=(at.y*grid.x+at.x)*3;
+ out[first]=value.x;out[first+1]=value.y;out[first+2]=value.z;
 }

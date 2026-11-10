@@ -1,0 +1,107 @@
+{
+  "source_root": "import-from-phone (outside the repository)",
+  "imported_at": "2026-11-09T22:51:56Z",
+  "files": [
+    {
+      "file": "oceantex/README.md",
+      "sha256": "22a626b845b9dc94a342717ca270fee2242f13248edf8ae0b6ceac5d07d5c0d8"
+    },
+    {
+      "file": "oceantex/camera.go",
+      "sha256": "3387bdf437124c124986da878c0f69a7885e2d1ba9de282e65e7cd443ba3ccb6"
+    },
+    {
+      "file": "oceantex/chlorophyll.go",
+      "sha256": "ead5826972cbc6b72b5603ffcde7e5bffa8c289b93fa0c5c1329126ce1912e8d"
+    },
+    {
+      "file": "oceantex/colour.go",
+      "sha256": "c8acd31c8a2c34ff916353536e9345141ce8b71266d95102e23758fb30bba95f"
+    },
+    {
+      "file": "oceantex/data/chlorophyll-points.csv",
+      "sha256": "70a167be0b0988fcc3dd63c37c2203c67f3806c07bd85145f1694ff6d04de1de"
+    },
+    {
+      "file": "oceantex/doc.go",
+      "sha256": "696fc3a3bd7d6ad0ce253340467b3456a47946d3c51f67232e5062b465da99d1"
+    },
+    {
+      "file": "oceantex/fft.go",
+      "sha256": "908a018a0a4288e658b9b793485ba6a50fec725e92c897d0ddf86b9cda2d0008"
+    },
+    {
+      "file": "oceantex/oceantex_test.go",
+      "sha256": "d14e58d92fef91e92abe083b6a7f554c0efeecc8ccd47cd38539e4670208eeea"
+    },
+    {
+      "file": "oceantex/optics.go",
+      "sha256": "68a51101b54250bdfecf73dd48d5f668691435adb503f9bbf098cc8b830425fc"
+    },
+    {
+      "file": "oceantex/patch.go",
+      "sha256": "f16f7a911aa52af74a0cb3355797625636a1f7801373ad75ee22de53495db84c"
+    },
+    {
+      "file": "oceantex/render.go",
+      "sha256": "18bc73739c7f8a0122b01597dcebfc31694fdc5c80c6441f063e2f6a1d0d9ef0"
+    },
+    {
+      "file": "oceantex/seastate.go",
+      "sha256": "95ccd6010b548784655b4466d4190052b37d015a4136df40b6363eea77c777aa"
+    },
+    {
+      "file": "oceantex/shade.go",
+      "sha256": "ca8d1f0a9e6415d6e5eb6c43c59022028eec0dcf54ff006d6ad4e94d1e8cb973"
+    },
+    {
+      "file": "oceantex/shore.go",
+      "sha256": "fedf43360f1c50166ecc1e0971da24b881b2cfb1ffaaaac1e500f8e8960c18c1"
+    },
+    {
+      "file": "oceantex/shore_test.go",
+      "sha256": "83dd7785b01b7bd09efee6c70ae502c2e24087435b87a701057e6f8cce854530"
+    },
+    {
+      "file": "oceantex/sources.go",
+      "sha256": "4dc37d8b971072941122582e63f075c56f6f062329e39bcefed8f4647539ddae"
+    },
+    {
+      "file": "oceantex/sources.yaml",
+      "sha256": "e1b6938710266fbcc6b3ed5c45db6fae6c5e16539a04fa7cd164823250d2008e"
+    },
+    {
+      "file": "oceantex/spectrum.go",
+      "sha256": "1e86e0f3014d423cff9d0dfa84744636c0e27ad67e9dfaea703b284aec799b38"
+    },
+    {
+      "file": "oceantex/sun.go",
+      "sha256": "f86d19ad9c0c2ddff11e9259e122bbfd063270a3de62b8b2f681ec92aa1de9b0"
+    },
+    {
+      "file": "oceantex/tide.go",
+      "sha256": "829cff9bb84fba43d8336ab732e6c00fed44b03779815a99a3adaea3889ed7e0"
+    },
+    {
+      "file": "oceantex/view.go",
+      "sha256": "9e0d6387ec8a1c14363a02a7819a7531694a88331c02ba01e7dff25c85f13c0a"
+    },
+    {
+      "file": "titan/corner.go",
+      "sha256": "2dd27cf8180969eafb9e6254497ec5e8a4d2158df1c84b326aa7582e96d8d927"
+    },
+    {
+      "file": "titan/noise.go",
+      "sha256": "1949356e4c8be1ba0103ba2620af39459693c502933a21a1d42d00da52d35eb0"
+    },
+    {
+      "file": "titan/titan.go",
+      "sha256": "d0d9257fd5434390e3b58839a36a80a76a5c4eb1886b3f021bfef6ae9e51d091"
+    },
+    {
+      "file": "titan/titan_test.go",
+      "sha256": "5661ae921bb96a87b968da42f5f5e6c152573d8e4b454cbc866a59cd070def19"
+    }
+  ],
+  "note": "Original phone sources; current package changes are recorded in Git. Demo commands with separate flag parsers are not imported."
+}

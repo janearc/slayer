@@ -54,11 +54,14 @@ func (d Disc) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
 		enter, leave = math.Max(enter, t0), math.Min(leave, t1)
 	}
 	// the cylinder: the ray's x and z against the outer radius
-	a := r.Dir.X*r.Dir.X + r.Dir.Z*r.Dir.Z
+	// Keep the recorded arm64 rounding order explicit, including when
+	// coverage counters change the compiler's product selection.
+	a := math.FMA(r.Dir.X, r.Dir.X, r.Dir.Z*r.Dir.Z)
 	if a > 0 {
-		b := (r.At.X*r.Dir.X + r.At.Z*r.Dir.Z) / a
-		c := (r.At.X*r.At.X + r.At.Z*r.At.Z - d.Outer*d.Outer) / a
-		disc := b*b - c
+		b := math.FMA(r.At.X, r.Dir.X, r.At.Z*r.Dir.Z) / a
+		squared := math.FMA(r.At.Z, r.At.Z, r.At.X*r.At.X)
+		c := math.FMA(-d.Outer, d.Outer, squared) / a
+		disc := math.FMA(b, b, -c)
 		if disc < 0 {
 			return 0, 0, false
 		}

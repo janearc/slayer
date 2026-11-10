@@ -1,5 +1,5 @@
-// Package curve models a projected positive’s density as a function of
-// exposure, using a logistic approximation to a Hurter–Driffield curve.
+// Package curve models a projected positive's density as a function of
+// exposure, using a logistic approximation to a Hurter-Driffield curve.
 package curve
 
 import (

@@ -16,7 +16,6 @@ import (
 	"github.com/janearc/slayer/planet"
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/set"
-	"github.com/janearc/slayer/sources"
 )
 
 // darkness is the sky in space: no light from anywhere but what is
@@ -398,19 +397,6 @@ func (stage *staging) gases() (map[string]planet.Gas, error) {
 // shelved is where a source is on the reader's shelf, once it is found
 // there as pinned.
 func (stage *staging) shelved(key string) (string, error) {
-	dir := filepath.Dir(stage.given.set)
-	shelf, err := pinned(key, dir)
-	if err != nil {
-		return "", err
-	}
-	listed, err := nearest(dir, "sources.yaml")
-	if err != nil {
-		return "", err
-	}
-	list, err := sources.Read(listed)
-	if err != nil {
-		return "", err
-	}
-	source, _ := list.Find(key)
-	return sources.NewShelf(shelf, nil).Path(source), nil
+	asset, err := pinnedAssetAt(key, filepath.Dir(stage.given.set))
+	return asset.path, err
 }

@@ -24,19 +24,43 @@ Callers provide placement and materials; the following sections show how.
 
 ## What is on the shelf for the wilderness
 
-| piece | call | wide by tall | triangles | material ids | same every call |
-|---|---|---|---|---|---|
-| fern | `Fern(base, DefaultFernParams())` | 0.78 by 0.46 | 64 | 6 | no |
-| grass, a tuft to the ankle | `Grass(base, AnkleGrassParams())` | 0.06 by 0.25 | 16 | 7 | yes |
-| grass, a tuft to the waist | `Grass(base, WaistGrassParams())` | 0.06 by 1.20 | 24 | 7 | yes |
-| shrub | `Shrub(base, DefaultShrubParams())` | 0.72 by 0.70 | 36 | 8 | no |
-| loose leaves | `Foliage(at, 40, 0.05, rng)` | 0.33 by 0.14 | 80 | 1 | with your `rng`'s seed |
-| conifer | `Conifer(base, DefaultConiferParams())` | 4.0 by 17.9 | 23,648 | 2 | yes |
-| whorled conifer | `ConiferProper(base, DefaultProperConiferParams())` | 5.5 by 10.0 | 4,876 | 2, 25 | yes, by its `Seed` |
-| spruce | `OrganicTree(base, DefaultSpruceParams())` | 9.9 by 12.4 | 1,296 | 2, 25 | no |
-| birch | `OrganicTree(base, DefaultBirchParams())` | 6.9 by 12.0 | 856 | 2, 25 | no |
-| oak | `OrganicTree(base, DefaultOakParams())` | 13.0 by 13.5 | 1,096 | 2, 25 | no |
-| larch | `OrganicTree(base, DefaultLarchParams())` | 5.5 by 13.2 | 1,060 | 2, 25 | no |
+- **fern:** call: `Fern(base, DefaultFernParams())`; wide by tall: 0.78 by
+  0.46; triangles: 64; material ids: 6; same every call: no
+
+- **grass, a tuft to the ankle:** call: `Grass(base, AnkleGrassParams())`;
+  wide by tall: 0.06 by 0.25; triangles: 16; material ids: 7; same every call:
+  yes
+
+- **grass, a tuft to the waist:** call: `Grass(base, WaistGrassParams())`;
+  wide by tall: 0.06 by 1.20; triangles: 24; material ids: 7; same every call:
+  yes
+
+- **shrub:** call: `Shrub(base, DefaultShrubParams())`; wide by tall: 0.72 by
+  0.70; triangles: 36; material ids: 8; same every call: no
+
+- **loose leaves:** call: `Foliage(at, 40, 0.05, rng)`; wide by tall: 0.33 by
+  0.14; triangles: 80; material ids: 1; same every call: with your `rng`'s
+  seed
+
+- **conifer:** call: `Conifer(base, DefaultConiferParams())`; wide by tall:
+  4.0 by 17.9; triangles: 23,648; material ids: 2; same every call: yes
+
+- **whorled conifer:** call: `ConiferProper(base,
+  DefaultProperConiferParams())`; wide by tall: 5.5 by 10.0; triangles: 4,876;
+  material ids: 2, 25; same every call: yes, by its `Seed`
+
+- **spruce:** call: `OrganicTree(base, DefaultSpruceParams())`; wide by tall:
+  9.9 by 12.4; triangles: 1,296; material ids: 2, 25; same every call: no
+
+- **birch:** call: `OrganicTree(base, DefaultBirchParams())`; wide by tall:
+  6.9 by 12.0; triangles: 856; material ids: 2, 25; same every call: no
+
+- **oak:** call: `OrganicTree(base, DefaultOakParams())`; wide by tall: 13.0
+  by 13.5; triangles: 1,096; material ids: 2, 25; same every call: no
+
+- **larch:** call: `OrganicTree(base, DefaultLarchParams())`; wide by tall:
+  5.5 by 13.2; triangles: 1,060; material ids: 2, 25; same every call: no
+
 
 Sizes are in the manufactory's units, which the defaults treat as
 metres. material id 2 is wood and 25 is needles.
@@ -51,7 +75,7 @@ sphere pushed half into the ground.
 turn every piece as you place it; the code below does.
 
 **2. A triangle carries a number, not a material.** `Material` on a
-triangle is one of the ids in the table. It means nothing to lamb. you
+triangle is one of the ids in the catalogue above. It means nothing to lamb. you
 give each id a `thing.Material`.
 
 **3. ferns, shrubs and the four organic trees are different every
@@ -91,7 +115,7 @@ on its base and is the same every time.
 ## From triangles to things
 
 This turns one piece into lamb things, one for each material it uses,
-standing at a place. It is the code that was run for the table above.
+standing at a place. It is the code used for the measurements above.
 
 ```go
 // upright turns the manufactory's up, z, to lamb's up, y.
@@ -130,7 +154,7 @@ func dressed(piece []geom.Triangle, made map[int]*thing.Material,
 ```
 
 Assign a material to each generated ID. This historical generator does
-not supply the fern’s colour.
+not supply the fern's colour.
 
 ```go
 made := map[int]*thing.Material{
@@ -190,14 +214,24 @@ set is centred.
 Build in layers: ground, ground cover, then taller plants. Give each
 layer a separate seed so its placements do not line up with the others.
 
-| layer | piece | spacing | why |
-|---|---|---|---|
-| ground cover | ankle grass | 0.15 | a tuft is 6 cm wide; closer than this is a lawn |
-| the rough | waist grass | 0.6, in patches | long grass grows in clumps, not evenly |
-| the shade | fern | 1.2 | under the trees, where the grass thins |
-| the edge | shrub | 3 | along the tree line and round rocks |
-| the litter | loose leaves | 0.8 | under every tree, in the hollows |
-| the wood | whorled conifer | 6 | a tree's crown is 5.5 wide; closer and they merge |
+- **ground cover:** piece: ankle grass; spacing: 0.15; why: a tuft is 6 cm
+  wide; closer than this is a lawn
+
+- **the rough:** piece: waist grass; spacing: 0.6, in patches; why: long grass
+  grows in clumps, not evenly
+
+- **the shade:** piece: fern; spacing: 1.2; why: under the trees, where the
+  grass thins
+
+- **the edge:** piece: shrub; spacing: 3; why: along the tree line and round
+  rocks
+
+- **the litter:** piece: loose leaves; spacing: 0.8; why: under every tree, in
+  the hollows
+
+- **the wood:** piece: whorled conifer; spacing: 6; why: a tree's crown is 5.5
+  wide; closer and they merge
+
 
 These spacings are visual starting points, not survey data. Adjust
 them after inspecting the render.

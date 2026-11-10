@@ -4,7 +4,7 @@ import (
 	"math"
 	"slices"
 
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // A Text is a line of solid letters on the set, by its name: its words,

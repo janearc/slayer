@@ -1,0 +1,14 @@
+# 2026/11/09 10:41:34.760680 [TestAdmissionReadyCapacityMatchesAnUnboundedSum] [rapid] draw limit: 0x0
+# 2026/11/09 10:41:34.760681 [TestAdmissionReadyCapacityMatchesAnUnboundedSum] [rapid] draw held: 0x0
+# 2026/11/09 10:41:34.760681 [TestAdmissionReadyCapacityMatchesAnUnboundedSum] [rapid] draw requested: 0x0
+# 2026/11/09 10:41:34.760682 [TestAdmissionReadyCapacityMatchesAnUnboundedSum] [rapid] draw cached stop: false
+# 2026/11/09 10:41:34.760682 [TestAdmissionReadyCapacityMatchesAnUnboundedSum] capacity proposal: {stop:{state:{stopped:false generation:0} outcome:0} host:0 reservation:0 next:<nil> disposition:0}, want 3/1
+# 
+v0.4.8#639786755540132644
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

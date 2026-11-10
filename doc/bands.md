@@ -9,7 +9,7 @@ not built yet: lamps lighting volumes in a band, and the GPU path.
 
 ## Current CPU path
 
-The first surface hit contributes its material’s `Radiant.Emits` value.
+The first surface hit contributes its material's `Radiant.Emits` value.
 It also transmits light from behind it according to `Through`, raised to
 the path length in local coordinates. Surfaces without `Radiant` are dark
 and opaque in this path.
@@ -20,7 +20,7 @@ surface echoes according to `Scatters`.
 
 A lamp that carries a spectrum, an `emit.Banded` such as `emit.Lit`, lights
 surfaces in the band. The surface sends back its `Scatters` fraction as a
-matte surface does in the visible: `Scatters / π` times the band's power
+matte surface does in the visible: `Scatters / pi` times the band's power
 landing there, times the cosine of incidence.
 
 The power landing is `Lands`: the inverse square and the lamp's cone. A
@@ -35,13 +35,13 @@ Gas media without that emission path only
 attenuate the band; their stored lines are not connected to emission.
 
 Gravitational fields are omitted and the sky is dark. Output repeats the
-band’s strength across RGB. The zero band selects ordinary visible-light
+band's strength across RGB. The zero band selects ordinary visible-light
 rendering. Validation follows `Render`, also rejecting negative or
 nonfinite wavelengths.
 
 ## Proposed: lamps lighting volumes
 
-A magnetar’s X-rays should illuminate a surrounding swarm, rather than
+A magnetar's X-rays should illuminate a surrounding swarm, rather than
 only appear where the source itself is visible. Surfaces in the swarm are
 lit now, as above. Volumes are not: the design has them scatter
 isotropically by their band-specific `Scatters` value.
@@ -53,11 +53,11 @@ consolidate the tracer paths.
 ## Proposed GPU representation
 
 The current `gpu.Sampled` path renders visible RGB, not arbitrary bands.
-For a future band path, evaluate each material’s `Emits`, `Through`, and
+For a future band path, evaluate each material's `Emits`, `Through`, and
 `Scatters`, along with emitter band power, once on the CPU and upload the
 numbers. A Metal kernel cannot call Go material interfaces.
 
-libtheme’s `bands.Light` owns spectra and band boundaries. The design’s
+Celestial's `bands.Light` owns spectra and band boundaries. The design's
 initial exclusions are line-excited gas (`thing.Lit`), textured roughness,
 and radar beams. Unsupported cases should return named errors before
 kernel execution rather than silently dropping those effects.

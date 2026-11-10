@@ -1,0 +1,89 @@
+# the orbital and the lantern: a pair of culture orbitals, two great
+# bands at right angles, round the lantern, a star inside a Dyson swarm
+# whose panels let its light out in shafts, all inside a glowing nebula.
+# A favourite scene, seen from far outside. 2026-11-09.
+#
+# Today this scene is Go: cmd/orbital builds it from flags and constants.
+# This file writes the same scene as data, against
+# set/ecosystem-v2.schema.json, so it is a set like the others and can be
+# rendered at 4K and cut to the music. The numbers are cmd/orbital's at
+# slayer main 26eab0b, cited by line; where the code computes a number,
+# the comment says how. One unit in cmd/orbital is a thousand kilometres.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: the orbital and the lantern
+  renderer: gpu-native
+  seed: 37
+  setting: space
+  set:
+    things:
+      the lantern:
+        # package lantern: a star inside a swarm of inward-facing panels
+        # on tilted orbits; light leaves in shafts. lantern_test.go
+        # measures about 87% of the light intercepted by the baseline
+        kind: lantern
+        seed: 1
+        place: {at: origin}
+        # the baseline: panels near six stellar radii, in bands 0.4
+        # radii wide, as lantern.go places them
+        panels: baseline
+        # cmd/orbital -still defaults to false: the swarm's rings turn
+        turning: true
+      the outer orbital:
+        kind: culture-orbital
+        seed: 2
+        around: the lantern
+        # main.go line 72: radius = 1840, thousands of km, the radius for
+        # one g at a 24 hour turn, T = 2 pi root(R/g)
+        radius: {value: 1840000, unit: km}
+        # main.go's opening comment: 32,000 km wide, walls a thousand high
+        width: {value: 32000, unit: km}
+        walls: {value: 1000, unit: km}
+        # main.go nested(): each leans 45 degrees from the lantern's axis,
+        # one each side, so the two stand at right angles; sense 1 and -1,
+        # so they turn opposite ways. the author's design, 2026-10-04
+        lean: {value: 45, unit: deg}
+        sense: 1
+        # main.go warmLights: sodium amber to warm white, black bodies
+        lights: {kelvin: {from: 1900, to: 3200}}
+      the inner orbital:
+        kind: culture-orbital
+        seed: 3
+        around: the lantern
+        # nested(): four fifths of the outer's radius
+        radius: {value: 1472000, unit: km}
+        width: {value: 32000, unit: km}
+        walls: {value: 1000, unit: km}
+        lean: {value: -45, unit: deg}
+        sense: -1
+        lights: {kelvin: {from: 1900, to: 3200}}
+      the nebula:
+        kind: nebula
+        seed: 4
+        around: the lantern
+        # main.go line 133: thick 4.5e-5 times -gas, which defaults to 1;
+        # -neon and -argon default to none, so the glow is hydrogen red;
+        # -glow defaults to 0.2
+        thickness: 4.5e-5
+        neon: 0
+        argon: 0
+        glow: 0.2
+  film:
+    width: 3840
+    height: 2160
+    rays: 4
+    fps: 24
+  cameras:
+    far:
+      # cmd/orbital -far: from far outside, 25 degrees above the plane,
+      # the hoops standing upright, lit by the lantern; -from defaults to
+      # 3600 thousand km
+      title: "the orbitals from far outside, lit by the lantern"
+      location:
+        relative:
+          object: the lantern
+          distance: {value: 3600000, unit: km}
+          above_plane: {value: 25, unit: deg}
+      orientation: {point_to: the lantern}
+      # held while the bands turn, for as long as the edit gives it
+      duration: {value: song, unit: s}

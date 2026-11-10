@@ -2,7 +2,6 @@ package main
 
 import (
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -12,12 +11,7 @@ import (
 // the verdict; one it cannot draw it says why after its name and the
 // verb's, and exits with one.
 func TestSlayerRunsAsAPersonRunsIt(t *testing.T) {
-	built := filepath.Join(t.TempDir(), "slayer")
-	made, err := exec.Command("go", "build", "-o", built, ".").
-		CombinedOutput()
-	if err != nil {
-		t.Fatalf("slayer would not build: %v\n%s", err, made)
-	}
+	built := coverageCommand
 	usage := exec.Command(built)
 	told, _ := usage.CombinedOutput()
 	if usage.ProcessState.ExitCode() != 2 ||

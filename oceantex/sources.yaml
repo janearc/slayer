@@ -1,0 +1,1159 @@
+# sources.yaml: every number oceantex uses, by name.
+#
+# The code holds no measured or chosen numbers of its own. It reads each
+# one from here by name (num("cox-munk.along.slope")), and a test fails if
+# the code asks for a name that is not here or leaves one here unused.
+# What stays in the code is arithmetic: pi, the 2 in a Gaussian, the
+# halves and squares of Fresnel's equations, unit conversions.
+#
+# Fields:
+#   value / values   the number, or a list of them
+#   unit             what it measures
+#   from             the publication the number belongs to
+#   url              the page I actually read it on
+#   fetched          the day I read it
+#   read             fetch  = I fetched that url and read the number there
+#                    search = I read it in a web-search excerpt of that url
+#                    clone  = I cloned the repository and read the file
+#   kind             sourced    = from the publication named
+#                    definition = exact by definition or convention
+#                    glue       = authored model choice, including imports
+#   note             anything a checker should know
+#
+# Fetches go through a tool that summarises the page, so a "fetch" is a
+# reading of the page, not a byte-for-byte copy. Where the tool said the
+# text was garbled or reconstructed, the note says so.
+
+# ---------------------------------------------------------------- gravity
+
+gravity.standard:
+  value: 9.80665
+  unit: "m/s^2"
+  from: "3rd CGPM (1901), standard acceleration of gravity"
+  url: "https://en.wikipedia.org/wiki/Standard_gravity"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "definition"
+
+# ------------------------------------------------------- the wave spectrum
+
+jonswap.alpha.scale:
+  value: 0.076
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973, Dtsch. Hydrogr. Z. Suppl. A8(12)"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "read in Horvath 2015 (DigiPro), not in the 1973 report. alpha = 0.076 (U^2 / (F g))^0.22"
+
+jonswap.alpha.power:
+  value: 0.22
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+jonswap.peak.scale:
+  value: 22
+  unit: "dimensionless"
+  from: "Rounded peak-frequency model retained from the phone prototype"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "glue"
+  note: "Import history: omega_p = 22 (g^2 / (U F))^(1/3) was read through a summary of Horvath 2015. Primary check on 2026-11-09: Hasselmann 1973 p. 37 Eq. 2.4.3 prints dimensionless f_m = 3.5 x^(-0.33). The coefficient 22 rounds 2*pi*3.5; the complete expression also changes the empirical exponent. See doc/phone-source-checks.md."
+
+jonswap.peak.power:
+  value: 0.3333333333333333
+  unit: "dimensionless"
+  from: "Rounded peak-frequency model retained from the phone prototype"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "glue"
+  note: "Import history: the fetch tool lost this exponent and reconstructed it dimensionally as 1/3. Primary check on 2026-11-09: the report's dimensionless fit uses -0.33, not exactly -1/3. Dimensional consistency of the imported rewrite does not recover that empirical fit. Numeric behaviour is retained as an explicit approximation; see doc/phone-source-checks.md."
+
+jonswap.gamma:
+  value: 3.3
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "peak enhancement"
+
+jonswap.width.below:
+  value: 0.07
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "peak width for omega <= omega_p"
+
+jonswap.width.above:
+  value: 0.09
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "peak width for omega > omega_p"
+
+jonswap.decay:
+  value: 1.25
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "the 5/4 in exp(-(5/4)(omega_p/omega)^4)"
+
+jonswap.tail:
+  value: 5
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "the spectrum falls as omega^-5"
+
+jonswap.rolloff:
+  value: 4
+  unit: "dimensionless"
+  from: "Hasselmann et al. 1973"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "the power of (omega_p/omega) inside the exponential"
+
+pierson-moskowitz.peak:
+  value: 0.877
+  unit: "dimensionless"
+  from: "Pierson & Moskowitz 1964, J. Geophys. Res. 69, 5181-5190"
+  url: "https://wikiwaves.org/Ocean-Wave_Spectra"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "a fully developed sea peaks at 0.877 g / U, U at 19.5 m. Same value derived in https://mail.shipstab.org/files/Proceedings/STAB/STAB2009/STAB_2009_s09-p2.pdf. GLUE - used as a floor under the JONSWAP peak, so that a long fetch stops raising the sea once it is fully developed, and with the 10 m wind. JONSWAP's own formulas grow without limit."
+
+spread.low.scale:
+  value: 2.61
+  unit: "dimensionless"
+  from: "Donelan, Hamilton & Hui 1985, Phil. Trans. R. Soc. A 315, 509-562"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "read in Horvath 2015. beta = 2.61 (omega/omega_p)^1.3 below 0.95"
+
+spread.low.power:
+  value: 1.3
+  unit: "dimensionless"
+  from: "Donelan, Hamilton & Hui 1985"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+spread.low.top:
+  value: 0.95
+  unit: "dimensionless"
+  from: "Donelan, Hamilton & Hui 1985"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "Donelan fitted from 0.56 up; Horvath's implementation uses the low branch below that too, and so does this."
+
+spread.mid.scale:
+  value: 2.28
+  unit: "dimensionless"
+  from: "Donelan, Hamilton & Hui 1985"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+spread.mid.power:
+  value: -1.3
+  unit: "dimensionless"
+  from: "Donelan, Hamilton & Hui 1985"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+spread.mid.top:
+  value: 1.6
+  unit: "dimensionless"
+  from: "Donelan, Hamilton & Hui 1985"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+spread.high.offset:
+  value: -0.4
+  unit: "dimensionless"
+  from: "Banner 1990, as given by Horvath 2015"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "beta = 10^(-0.4 + 0.8393 exp(-0.567 ln((omega/omega_p)^2))) above 1.6. The fetch tool reconstructed the 10^ form from the text."
+
+spread.high.scale:
+  value: 0.8393
+  unit: "dimensionless"
+  from: "Banner 1990, as given by Horvath 2015"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+spread.high.rate:
+  value: -0.567
+  unit: "dimensionless"
+  from: "Banner 1990, as given by Horvath 2015"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+depth.tma.knee:
+  value: 1
+  unit: "dimensionless"
+  from: "Thompson & Vincent 1983 approximation to Kitaigorodskii et al. 1975, as given by Horvath 2015"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "with W = omega sqrt(h/g), phi = W^2/2 for W <= 1, and 1 - (2-W)^2/2 above. The fetch tool reconstructed the square root; W must be dimensionless. The attribution to Thompson & Vincent is from memory."
+
+depth.tma.top:
+  value: 2
+  unit: "dimensionless"
+  from: "Thompson & Vincent 1983, as given by Horvath 2015"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "the 2 in (2 - W); above it the depth no longer matters"
+
+depth.tma.half:
+  value: 0.5
+  unit: "dimensionless"
+  from: "Thompson & Vincent 1983, as given by Horvath 2015"
+  url: "https://cdn.shopify.com/s/files/1/0134/1131/9867/files/EmpiricalDirectionalWaveSpectra_DigiPro2015_Jun20_2015_Optimized.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+waveheight.factor:
+  value: 4
+  unit: "dimensionless"
+  from: "NOAA National Data Buoy Center, \"How are significant wave height... calculated?\""
+  url: "https://www.ndbc.noaa.gov/faq/wavecalc.shtml"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "definition"
+  note: "significant wave height = 4 sqrt(m0)"
+
+choppy.scale:
+  value: 1
+  unit: "dimensionless"
+  from: "none"
+  url: "https://jtessen.people.clemson.edu/reports/papers_files/waterslides2001.pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "glue"
+  note: "the sideways displacement of choppy waves is Tessendorf's (SIGGRAPH 2001 course slides; not peer reviewed). He leaves its scale, lambda, to the artist; 1 is unscaled. The slides write D = -lambda sum(i k/|k| h); the sign depends on the transform's convention, so the code takes the sign that turns one wave into a Gerstner wave (crests sharpened), and a test holds it there."
+
+# -------------------------------------------------------- slopes and foam
+
+cox-munk.along.slope:
+  value: 0.00316
+  unit: "per (m/s)"
+  from: "Cox & Munk 1954, J. Opt. Soc. Am. 44, 838-850"
+  url: "https://apps.dtic.mil/sti/pdfs/ADA537951.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "upwind slope variance = 0.000 + 0.00316 U, clean surface, U at 12.5 m. Same numbers seen in https://sleet.larc.nasa.gov/papers/vrossSPIE_5572_13_2004cr.pdf and https://apps.dtic.mil/sti/tr/pdf/ADA056850.pdf"
+
+cox-munk.across.offset:
+  value: 0.003
+  unit: "dimensionless"
+  from: "Cox & Munk 1954"
+  url: "https://apps.dtic.mil/sti/pdfs/ADA537951.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+cox-munk.across.slope:
+  value: 0.00192
+  unit: "per (m/s)"
+  from: "Cox & Munk 1954"
+  url: "https://apps.dtic.mil/sti/pdfs/ADA537951.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+glint.geometry:
+  value: 4
+  unit: "dimensionless"
+  from: "Cox & Munk 1954"
+  url: "https://oceancolor.gsfc.nasa.gov/docs/ocssw/getglint_8f_source.html"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "glint = Fresnel * density / (4 cos(view) cos^4(tilt)), read in NASA's getglint.f"
+
+glint.tilt.power:
+  value: 4
+  unit: "dimensionless"
+  from: "Cox & Munk 1954"
+  url: "https://oceancolor.gsfc.nasa.gov/docs/ocssw/getglint_8f_source.html"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+slope.floor:
+  value: 0.0001
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "least slope variance a pixel is given, so the glint stays finite. Cox & Munk put 0.004 of uncertainty on their own fits."
+
+view.floor:
+  value: 0.01
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "least cosine of the view angle used in the glint's denominator, for waves seen edge on"
+
+monahan.scale:
+  value: 3.84e-6
+  unit: "dimensionless"
+  from: "Monahan & O'Muircheartaigh 1980, J. Phys. Oceanogr. 10, 2094-2099"
+  url: "https://scilit.com/publications/3cd49b23f8ae5ea87d197556e7be23ab"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "the paper's abstract. W = 3.84e-6 U^3.41, the robust biweight fit, U at 10 m"
+
+monahan.power:
+  value: 3.41
+  unit: "dimensionless"
+  from: "Monahan & O'Muircheartaigh 1980"
+  url: "https://scilit.com/publications/3cd49b23f8ae5ea87d197556e7be23ab"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+koepke.foam.reflectance:
+  value: 0.22
+  unit: "dimensionless"
+  from: "Koepke 1984, Appl. Opt. 23, 1816-1824"
+  url: "https://scilit.com/publications/d02e8fb48e351aa7a4b6391ef50b0338"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "the paper's abstract; effective reflectance of whitecaps in the visible"
+
+# ------------------------------------------------------------- the water
+
+quan-fry.coefficients:
+  values: [1.31405, 1.779e-4, -1.05e-6, 1.6e-8, -2.02e-6, 15.868, 0.01155, -0.00423, -4382, 1.1455e6]
+  unit: "mixed; n0 to n9"
+  from: "Quan & Fry 1995, Appl. Opt. 34, 3477-3480"
+  url: "https://oceancolor.gsfc.nasa.gov/docs/ocssw/seawater_8c_source.html"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "read in NASA's seawater.c. n = n0 + (n1 + n2 T + n3 T^2) S + n4 T^2 + (n5 + n6 S + n7 T)/L + n8/L^2 + n9/L^3. First five also seen in https://arxiv.org/pdf/2007.02226"
+
+index.wavelength:
+  value: 550
+  unit: "nm"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "the one wavelength the refractive index is worked out at"
+
+water.first:
+  value: 400
+  unit: "nm"
+  from: "Pope & Fry 1997"
+  url: "https://omlc.org/spectra/water/data/pope97.txt"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "first wavelength of the two tables below"
+
+water.step:
+  value: 10
+  unit: "nm"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "I took every fourth row of Pope & Fry's 2.5 nm table"
+
+pope-fry.absorption:
+  values: [0.00663, 0.00473, 0.00454, 0.00495, 0.00635, 0.00922, 0.00979, 0.0106, 0.0127, 0.0150, 0.0204, 0.0325, 0.0409, 0.0434, 0.0474, 0.0565, 0.0619, 0.0695, 0.0896, 0.1351, 0.2224, 0.2644, 0.2755, 0.2916, 0.3108, 0.340, 0.410, 0.439, 0.465, 0.516, 0.624]
+  unit: "1/m, at 400 to 700 nm every 10 nm"
+  from: "Pope & Fry 1997, Appl. Opt. 36, 8710-8723"
+  url: "https://omlc.org/spectra/water/data/pope97.txt"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "the file is in 1/cm; these are its values times 100. Checked row for row against NASA Ocean Optics Protocols rev. 4 vol. IV table 1.1 erratum 1, https://oceandata.sci.gsfc.nasa.gov/files/resources/docs/technical/volivch1err1.pdf, also fetched."
+
+morel.scattering.at-500:
+  value: 0.00288
+  unit: "1/m"
+  from: "Morel 1974, in Optical Aspects of Oceanography, 1-24"
+  url: "https://frouingroup.ucsd.edu/Aw_Chl/REFRENCES/Morel_and_Prieur_LO_77.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "read in Morel & Prieur 1977. scattering by pure seawater at 500 nm"
+
+morel.scattering.reference:
+  value: 500
+  unit: "nm"
+  from: "Morel 1974"
+  url: "https://frouingroup.ucsd.edu/Aw_Chl/REFRENCES/Morel_and_Prieur_LO_77.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+morel.scattering.power:
+  value: -4.32
+  unit: "dimensionless"
+  from: "Morel 1974"
+  url: "https://misclab.umeoce.maine.edu/ftp/classes/OO2011/Lectures/Mobley_Lec7_Scattering_Models.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "read in Mobley's lecture notes. Morel & Prieur 1977 round it to -4.3."
+
+water.backward.share:
+  value: 0.5
+  unit: "dimensionless"
+  from: "molecular scattering is symmetric front to back"
+  url: "https://ioccg.org/training/SLS-2012/Lee-IOPs_Lecture-1.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "\"bw = 2 bbw\" in Lee's IOCCG lecture"
+
+gordon.linear:
+  value: 0.0949
+  unit: "1/sr"
+  from: "Gordon et al. 1988, J. Geophys. Res. 93, 10909-10924"
+  url: "https://ioccg.org/wp-content/uploads/2024/12/zhongping-lee_lecture-2_iops-alg.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "read in Lee's IOCCG lecture. rrs = 0.0949 u + 0.0794 u^2, u = bb/(a+bb)"
+
+gordon.square:
+  value: 0.0794
+  unit: "1/sr"
+  from: "Gordon et al. 1988"
+  url: "https://ioccg.org/wp-content/uploads/2024/12/zhongping-lee_lecture-2_iops-alg.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+lee.surface.gain:
+  value: 0.52
+  unit: "dimensionless"
+  from: "Lee, Carder & Arnone 2002, Appl. Opt. 41, 5755-5772"
+  url: "https://oceancolor.gsfc.nasa.gov/docs/ocssw/get__rhown__nir_8c_source.html"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "read in NASA's get_rhown_nir.c. Rrs = 0.52 rrs / (1 - 1.7 rrs)"
+
+lee.surface.loss:
+  value: 1.7
+  unit: "dimensionless"
+  from: "Lee, Carder & Arnone 2002"
+  url: "https://oceancolor.gsfc.nasa.gov/docs/ocssw/get__rhown__nir_8c_source.html"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+# ------------------------------------------------------------ chlorophyll
+
+prieur.shape:
+  values: [0.687, 0.828, 0.913, 0.973, 1.000, 0.944, 0.917, 0.870, 0.798, 0.750, 0.668, 0.618, 0.528, 0.474, 0.416, 0.357, 0.294, 0.276, 0.291, 0.282, 0.236, 0.252, 0.276, 0.317, 0.334, 0.356, 0.441, 0.595, 0.502, 0.329, 0.215]
+  unit: "dimensionless, at 400 to 700 nm every 10 nm; 1 at 440"
+  from: "Prieur & Sathyendranath 1981, Limnol. Oceanogr. 26(4), 671-689"
+  url: "https://omlc.org/spectra/water/data/prieur81.txt"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "the shape of absorption by phytoplankton pigments, normalised to 440 nm"
+
+case1.particle.scale:
+  value: 0.06
+  unit: "1/m per (mg/m^3)^0.65"
+  from: "Morel & Maritorena 2001 after Prieur & Sathyendranath 1981, as given in Mobley, Ocean Optics Web Book, \"A Classic IOP Model for Case 1 Water\""
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "a_p = 0.06 A(lambda) Chl^0.65"
+
+case1.particle.power:
+  value: 0.65
+  unit: "dimensionless"
+  from: "as case1.particle.scale"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+case1.cdom.share:
+  value: 0.2
+  unit: "dimensionless"
+  from: "as case1.particle.scale"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "a_cdom = 0.2 a_p(440) exp(-0.014 (lambda - 440)); dissolved organic matter"
+
+case1.cdom.slope:
+  value: 0.014
+  unit: "1/nm"
+  from: "as case1.particle.scale"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+case1.cdom.reference:
+  value: 440
+  unit: "nm"
+  from: "as case1.particle.scale"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+case1.scatter.scale:
+  value: 0.3
+  unit: "1/m per (mg/m^3)^0.62"
+  from: "Gordon & Morel 1983, as given in Mobley, Ocean Optics Web Book"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "b_p = 0.30 Chl^0.62 (550/lambda)"
+
+case1.scatter.power:
+  value: 0.62
+  unit: "dimensionless"
+  from: "Gordon & Morel 1983, as given in Mobley"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+case1.scatter.reference:
+  value: 550
+  unit: "nm"
+  from: "Gordon & Morel 1983, as given in Mobley"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+case1.scatter.colour:
+  value: 1
+  unit: "dimensionless"
+  from: "Gordon & Morel 1983, as given in Mobley"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "the power m of (550/lambda)"
+
+ulloa.scale:
+  value: 0.01
+  unit: "dimensionless"
+  from: "Ulloa, Sathyendranath & Platt 1994, as given in Mobley, Ocean Optics Web Book"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "share of particle scattering that goes backward, at 550 nm = 0.01 (0.78 - 0.42 log10 Chl). GLUE - used at every wavelength."
+
+ulloa.offset:
+  value: 0.78
+  unit: "dimensionless"
+  from: "Ulloa, Sathyendranath & Platt 1994, as given in Mobley"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+ulloa.slope:
+  value: 0.42
+  unit: "dimensionless"
+  from: "Ulloa, Sathyendranath & Platt 1994, as given in Mobley"
+  url: "https://oceanopticsbook.info/view/optical-constituents-of-the-ocean/level-2/classic-iop-model-case-1-water/pdf"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+# ---------------------------------------------------------------- the sun
+
+sun.anomaly.epoch:
+  value: 357.529
+  unit: "degrees"
+  from: "U.S. Naval Observatory, \"Computing Approximate Solar Coordinates\""
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "g = 357.529 + 0.98560028 D, D days from 2000 January 1.5. Stated good to about an arcminute within two centuries of 2000."
+
+sun.anomaly.rate:
+  value: 0.98560028
+  unit: "degrees/day"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+sun.longitude.epoch:
+  value: 280.459
+  unit: "degrees"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "q = 280.459 + 0.98564736 D"
+
+sun.longitude.rate:
+  value: 0.98564736
+  unit: "degrees/day"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+sun.centre.first:
+  value: 1.915
+  unit: "degrees"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "L = q + 1.915 sin g + 0.020 sin 2g"
+
+sun.centre.second:
+  value: 0.020
+  unit: "degrees"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+sun.obliquity.epoch:
+  value: 23.439
+  unit: "degrees"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "e = 23.439 - 0.00000036 D"
+
+sun.obliquity.rate:
+  value: 0.00000036
+  unit: "degrees/day"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+sun.distance.mean:
+  value: 1.00014
+  unit: "au"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+  note: "R = 1.00014 - 0.01671 cos g - 0.00014 cos 2g"
+
+sun.distance.first:
+  value: 0.01671
+  unit: "au"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+sun.distance.second:
+  value: 0.00014
+  unit: "au"
+  from: "U.S. Naval Observatory"
+  url: "https://aa.usno.navy.mil/faq/sun_approx"
+  fetched: "2026-11-09"
+  read: "fetch"
+  kind: "sourced"
+
+sidereal.epoch:
+  value: 280.46061837
+  unit: "degrees"
+  from: "Meeus, Astronomical Algorithms"
+  url: "https://jgiesen.hier-im-netz.de/sunpos/meeus.html"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "Greenwich sidereal time = 280.46061837 + 360.98564736629 D degrees. The page gives two further terms in T^2 and T^3, under a thousandth of a degree this century, which are left out."
+
+sidereal.rate:
+  value: 360.98564736629
+  unit: "degrees/day"
+  from: "Meeus, Astronomical Algorithms"
+  url: "https://jgiesen.hier-im-netz.de/sunpos/meeus.html"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+sun.temperature:
+  value: 5772
+  unit: "K"
+  from: "IAU 2015 Resolution B3, nominal solar effective temperature"
+  url: "https://www.pas.rochester.edu/~emamajek/IAU/IAUres_B3.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "definition"
+  note: "GLUE - the sun above the air is taken to be a black body at this temperature, through libtheme's swatch.Blackbody. The real solar spectrum has lines and is not one."
+
+airmass.scale:
+  value: 0.50572
+  unit: "dimensionless"
+  from: "Kasten & Young 1989, Appl. Opt. 28, 4735-4738"
+  url: "https://misclab.umeoce.maine.edu/ftp/classes/OO2015/Lectures/Lecture27_Atmosphere_talk.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "m = 1 / (cos z + 0.50572 (96.07995 - z)^-1.6364), z in degrees. Also seen in https://arxiv.org/pdf/1707.06647"
+
+airmass.angle:
+  value: 96.07995
+  unit: "degrees"
+  from: "Kasten & Young 1989"
+  url: "https://misclab.umeoce.maine.edu/ftp/classes/OO2015/Lectures/Lecture27_Atmosphere_talk.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+airmass.power:
+  value: -1.6364
+  unit: "dimensionless"
+  from: "Kasten & Young 1989"
+  url: "https://misclab.umeoce.maine.edu/ftp/classes/OO2015/Lectures/Lecture27_Atmosphere_talk.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+rayleigh.scale:
+  value: 0.008569
+  unit: "micrometres^4"
+  from: "Hansen & Travis 1974, Space Sci. Rev. 16, 527-610"
+  url: "https://openlab.citytech.cuny.edu/remote_sensing/files/2011/07/Rayleigh-Optical-Depth-Comp-from-various-sources.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "read in Teillet 1990. optical depth of clear air = 0.008569 L^-4 (1 + 0.0113 L^-2 + 0.00013 L^-4), L in micrometres"
+
+rayleigh.power:
+  value: 4
+  unit: "dimensionless"
+  from: "Hansen & Travis 1974"
+  url: "https://openlab.citytech.cuny.edu/remote_sensing/files/2011/07/Rayleigh-Optical-Depth-Comp-from-various-sources.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "the leading wavelength^-4"
+
+rayleigh.second:
+  value: 0.0113
+  unit: "micrometres^2"
+  from: "Hansen & Travis 1974"
+  url: "https://openlab.citytech.cuny.edu/remote_sensing/files/2011/07/Rayleigh-Optical-Depth-Comp-from-various-sources.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+rayleigh.fourth:
+  value: 0.00013
+  unit: "micrometres^4"
+  from: "Hansen & Travis 1974"
+  url: "https://openlab.citytech.cuny.edu/remote_sensing/files/2011/07/Rayleigh-Optical-Depth-Comp-from-various-sources.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+# -------------------------------------------------- sea state, wind, tide
+
+seastate.bounds:
+  values: [0, 0.1, 0.5, 1.25, 2.5, 4, 6, 9, 14]
+  unit: "m; the lower bound of codes 1 to 9"
+  from: "WMO code table 3700, state of the sea"
+  url: "https://old.wmo.int/extranet/pages/prog/amp/mmop/documents/publications-history/cmm/CMM02Rec7-11.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "code 0 is 0 m; code 9 is over 14 m. The table's note gives a height exactly on a bound to the lower code (4 m is coded 5). Same table seen at https://corpora.tika.apache.org/base/docs/govdocs1/588/588875.html (NODC)"
+
+seastate.target:
+  value: 0.5
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "a sea state is rendered at this fraction of the way across its range of heights"
+
+beaufort.scale:
+  value: 0.836
+  unit: "m/s"
+  from: "the 1946 Beaufort scale relation"
+  url: "https://en.vedur.is/weather/articles/nr/1283"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "read at the Icelandic Meteorological Office. v = 0.836 B^(3/2) m/s at 10 m"
+
+beaufort.power:
+  value: 1.5
+  unit: "dimensionless"
+  from: "the 1946 Beaufort scale relation"
+  url: "https://en.vedur.is/weather/articles/nr/1283"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+
+tide.speeds:
+  values: [28.984104, 30.0, 28.43973, 15.041069, 57.96821, 13.943035]
+  unit: "degrees/hour, for M2, S2, N2, K1, M4, O1 in that order"
+  from: "NOAA CO-OPS harmonic constituents"
+  url: "https://tidesandcurrents.noaa.gov/harcon.html?id=9413643"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "the speed column of a station's constituent table; speeds are the same at every station"
+
+# ------------------------------------------------------------- the views
+
+view.cascade.extents:
+  values: [4096, 512, 64]
+  unit: "m"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "the sizes of the tiled wave patches a perspective view is built from"
+
+view.cascade.grid:
+  value: 256
+  unit: "samples a side"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+
+view.filter.keep:
+  value: 1
+  unit: "texels"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "a patch is drawn in full while a pixel covers no more than this many of its texels"
+
+view.filter.drop:
+  value: 2
+  unit: "texels"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "and not at all once a pixel covers this many; its waves become roughness instead"
+
+view.slope.bound:
+  value: 1.5
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "the steepest wave the ray marcher allows for when choosing a step"
+
+view.fold.floor:
+  value: 0.1
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "least determinant of the choppy displacement's Jacobian; below it the surface would fold through itself"
+
+view.march.steps:
+  value: 400
+  unit: "steps"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "most steps a ray takes looking for the surface"
+
+view.march.near:
+  value: 0.002
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "a ray has reached the surface when it is within this fraction of its own length of it"
+
+view.invert.rounds:
+  value: 3
+  unit: "rounds"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "fixed-point rounds used to undo the choppy displacement at a hit"
+
+integrate.steps:
+  value: 4000
+  unit: "steps"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "steps in the sum over the spectrum that gives significant wave height"
+
+integrate.low:
+  value: 0.2
+  unit: "peak frequencies"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+
+integrate.high:
+  value: 30
+  unit: "peak frequencies"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+
+seastate.wind.top:
+  value: 80
+  unit: "m/s"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "the strongest wind tried when finding the wind that raises a given sea state"
+
+# ------------------------------------------------------------ the camera
+# patterned on slayer's; these are its numbers, read from its repository
+# at commit 0986b418ae89414233e41663b679a9680bc5bc27 (tag v0.1.0).
+
+gauge.widths:
+  values: [5.79, 10.26, 22.0, 24.89, 36.0, 52.48, 70.41, 61.4]
+  unit: "mm; super 8, 16 mm, academy, super 35, full frame, 65 mm, imax, hubble wfc3"
+  from: "slayer, ninjafilm/data/gauges.csv"
+  url: "https://github.com/janearc/slayer/blob/0986b418ae89414233e41663b679a9680bc5bc27/ninjafilm/data/gauges.csv"
+  fetched: "2026-11-09"
+  read: "clone"
+  kind: "sourced"
+  note: "slayer's own ninjafilm/data/SOURCES.md says these frame sizes are carried forward unchanged from an earlier program (Lamb), that they represent published film gauges, and that this records their inheritance rather than a new measurement. I have not checked them against a publication either. The table's grain column is not carried over."
+
+gauge.heights:
+  values: [4.01, 7.49, 16.0, 18.66, 24.0, 23.01, 52.63, 61.5]
+  unit: "mm; in the same order as gauge.widths"
+  from: "slayer, ninjafilm/data/gauges.csv"
+  url: "https://github.com/janearc/slayer/blob/0986b418ae89414233e41663b679a9680bc5bc27/ninjafilm/data/gauges.csv"
+  fetched: "2026-11-09"
+  read: "clone"
+  kind: "sourced"
+  note: "as gauge.widths"
+
+lens.focal:
+  value: 50
+  unit: "mm"
+  from: "slayer, ninjafilm/data/picked-numbers.yml, lens-focal-millimetres"
+  url: "https://github.com/janearc/slayer/blob/0986b418ae89414233e41663b679a9680bc5bc27/ninjafilm/data/picked-numbers.yml"
+  fetched: "2026-11-09"
+  read: "clone"
+  kind: "glue"
+  note: "the focal length of a lens with none given. slayer marks it \"picked\"; it is a choice, and it is slayer's."
+
+pinhole.wide:
+  value: 60
+  unit: "degrees"
+  from: "slayer, ninjafilm/data/picked-numbers.yml, pinhole-wide-degrees"
+  url: "https://github.com/janearc/slayer/blob/0986b418ae89414233e41663b679a9680bc5bc27/ninjafilm/data/picked-numbers.yml"
+  fetched: "2026-11-09"
+  read: "clone"
+  kind: "glue"
+  note: "how wide a pinhole with no field given sees. slayer marks it \"picked\", a look and not a measurement."
+
+lookat.nearly-along:
+  value: 0.999
+  unit: "dimensionless"
+  from: "slayer, maths/space.go, nearlyAlong"
+  url: "https://github.com/janearc/slayer/blob/0986b418ae89414233e41663b679a9680bc5bc27/maths/space.go"
+  fetched: "2026-11-09"
+  read: "clone"
+  kind: "glue"
+  note: "how near to straight along up a view may look, as a dot product (about 2.56 degrees), before another axis is taken for the top of the picture. slayer's choice, kept so the two cameras roll at the same place."
+
+# -------------------------------------------------------------- the shore
+
+earth.radius:
+  value: 6371008.7714
+  unit: "m"
+  from: "Geodetic Reference System 1980, mean radius R1, as held in celestial's research data (earth-mean-radius-m)"
+  url: "https://github.com/janearc/celestial/blob/ad07b9401b0b365ceefc34f5f9f0806e72f54a5e/research/research-derived-data.yml"
+  fetched: "2026-11-09"
+  read: "clone"
+  kind: "sourced"
+  note: "celestial says it read this on 2026-10-31 from Moritz's account of GRS80. I read it in celestial, not in Moritz. It is typed here, and not read through celestial's research package, only because that package would not build where this was written."
+
+breaking.saturated:
+  value: 0.42
+  unit: "dimensionless"
+  from: "Thornton & Guza 1982, J. Geophys. Res. 87, 9499-9508"
+  url: "https://data-ww3.ifremer.fr/BIB/Thornton_Guza_JGR1982.pdf"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "in the inner surf zone the envelope of wave heights is Hrms = 0.42 h, h the depth. Measured on a gently sloping sand beach, and used here on a rock shelf, which is GLUE."
+
+waveheight.rms:
+  value: 1.4
+  unit: "dimensionless"
+  from: "significant wave height over root-mean-square wave height"
+  url: "https://wikiwand.com/en/articles/Significant_wave_height"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "\"the RMS wave height ... is approximately equal to Hs divided by 1.4\", citing Holthuijsen 2007. For Rayleigh-distributed heights it is the square root of two."
+
+foam.fresh:
+  value: 0.55
+  unit: "dimensionless"
+  from: "Whitlock, Bartlett & Gurganus 1982, Geophys. Res. Lett. 9, 719-722"
+  url: "https://oceancolor.gsfc.nasa.gov/data/reprocessing/r2009/whitecap"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "reflectance of fresh, dense foam in the visible, as NASA's ocean colour page quotes Whitlock. Used for surf, where foam is fresh; Koepke's 0.22 is for whitecaps of every age at sea."
+
+breaking.crest:
+  value: 0.78
+  unit: "dimensionless"
+  from: "McCowan 1894, Phil. Mag. 38, 351-357"
+  url: "https://arxiv.org/pdf/1703.04354"
+  fetched: "2026-11-09"
+  read: "search"
+  kind: "sourced"
+  note: "a wave breaks when its height reaches 0.78 of the depth; McCowan's limit for a solitary wave, read in Saket et al. and in Thornton & Guza 1982. Goda 2010 warns it is not one fixed value on a real slope."
+
+surf.full:
+  value: 1
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "a crest is all foam where it stands this much again too tall for the depth, and partly foam below that, in a straight line from none"
+
+rock.reflectance:
+  value: 0.2
+  unit: "dimensionless"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "how much light the ground sends back, at every wavelength alike. Picked. No rock was measured; it is a mid grey so that the ground can be seen at all."
+
+shore.march.steps:
+  value: 4000
+  unit: "steps"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "most steps a ray takes over a shore, where it may not step further than the ground's samples are apart"
+
+shore.march.widen:
+  value: 2
+  unit: "pixels"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-09"
+  read: "none"
+  kind: "glue"
+  note: "far from the eye a ray over a shore may step this many pixel footprints at a time"

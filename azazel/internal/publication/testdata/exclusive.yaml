@@ -1,0 +1,2 @@
+# Two tiny native operations should complete well inside this bounded wait.
+wait_ns: 2000000000

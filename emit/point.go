@@ -21,7 +21,7 @@ import (
 // Point is light from one place, falling off with the square of the distance:
 // alike every way, or kept to a cone.
 //
-// Light is its spectrum as libtheme carries it, the power in each band at one
+// Light is its spectrum as Celestial carries it, the power in each band at one
 // unit of distance. Beyond is how far from At the light starts: a star's
 // surface, so the star's own sphere does not shade what it lights.
 //
@@ -73,7 +73,7 @@ type Banded interface {
 }
 
 // In is the emitter's power in the band at one unit of distance: the
-// power of its spectrum in libtheme's band holding that wavelength.
+// power of its spectrum in Celestial's band holding that wavelength.
 func (lit Lit) In(band maths.Band) float64 {
 	return lit.Spectrum.Power(bands.Of(band.Nanometres))
 }

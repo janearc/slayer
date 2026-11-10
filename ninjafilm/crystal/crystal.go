@@ -1,5 +1,5 @@
 // Package crystal derives photographic grain from crystal size and density.
-// Nutting’s law supplies expected counts; seeded variation approximates the
+// Nutting's law supplies expected counts; seeded variation approximates the
 // count fluctuations that give a developed frame its grain.
 package crystal
 

@@ -1,0 +1,5 @@
+# Authored invalid component fixture: first bad radius, then zero run.
+from: {x: 0, y: 0, z: 0}
+to: {x: 0, y: 2, z: 0}
+bad-radius: 0
+valid-radius: 0.1

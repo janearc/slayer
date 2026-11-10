@@ -1,6 +1,6 @@
-// Package carry converts between Slayer’s render/frame and ninjafilm’s frame
+// Package carry converts between Slayer's render/frame and ninjafilm's frame
 // types. They have the same structure but separate type identities: the tracer
-// returns the former, while ninjafilm’s roll and lens accept the latter. The
+// returns the former, while ninjafilm's roll and lens accept the latter. The
 // adapter can be removed when those callers share a frame API.
 package carry
 

@@ -1,5 +1,5 @@
 // Package forest builds ground meshes and seeded plant placements. Ground uses
-// Slayer’s mesh representation and can follow the ordinary GPU geometry path.
+// Slayer's mesh representation and can follow the ordinary GPU geometry path.
 // The same seed reproduces the same placements.
 package forest
 

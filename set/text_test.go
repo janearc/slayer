@@ -7,7 +7,7 @@ import (
 	"github.com/janearc/slayer/set"
 )
 
-// titled is the kīlauea iki set file with a text on it, every key said.
+// titled is the kilauea iki set file with a text on it, every key said.
 func titled(t *testing.T) string {
 	t.Helper()
 	return strings.Replace(kilaueaIki(t), "    stands:\n", "    texts:\n"+

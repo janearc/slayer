@@ -1,0 +1,13 @@
+# Independent can inventory from manufactory-01/can-quick/render.json.
+# That native specimen recorded 64 stored faces at seed 5; this fixture
+# must not derive its budget from the counting function under test.
+kind: can
+detail: quick
+seed: 5
+faces: 64
+budgets:
+  - {limit: 63, allowed: false}
+  - {limit: 64, allowed: true}
+unknown-kind: absent-specimen
+unknown-detail: absent-detail
+bad-direction: {x: 0, y: 0, z: 0}

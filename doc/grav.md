@@ -2,7 +2,7 @@
 
 This is an unimplemented design recorded on 2026-10-05, not documentation
 of an existing `grav` package in this checkout. It follows the engineering
-guide’s `gravBody` example: planets, brown dwarfs, stars, white dwarfs,
+guide's `gravBody` example: planets, brown dwarfs, stars, white dwarfs,
 neutron stars, and black holes share a physical description.
 
 Mass, composition, size, and age determine the body. `grav` owns the
@@ -17,7 +17,7 @@ Any public struct needs an explicit reason.
 
 The design depends on:
 
-- `measure`, using MeV and natural units with c, ℏ, and kB equal to one,
+- `measure`, using MeV and natural units with c, hbar, and kB equal to one,
   and a measured Newtonian G. Locations use `measure.Coord`.
 - `materials`, describing composition and exposing mass.
 
@@ -44,10 +44,10 @@ func Momentum(axis measure.Direction,
 
 `Turning` describes a finite-sized body by its measured rotation period,
 which must be positive and finite. For a uniform-density sphere, angular
-momentum follows from moment of inertia `2MR²/5`; without a density profile,
+momentum follows from moment of inertia `2MR^2/5`; without a density profile,
 the body retains its period.
 
-`Momentum` describes a black hole by angular momentum. With ℏ equal to one,
+`Momentum` describes a black hole by angular momentum. With hbar equal to one,
 the quantity is a dimensionless count in those units, still represented
 by its own type.
 
@@ -69,16 +69,16 @@ Jupiter mass to above one solar mass, and MIST (Choi and colleagues, 2016),
 from about 0.1 to 300 solar masses, including giants and white dwarfs.
 
 The public constructor checks required values, positive finite mass, age
-within the universe’s age, and the derived radius. A zero-value `Spin`
+within the universe's age, and the derived radius. A zero-value `Spin`
 is invalid because it bypasses `Turning` and `Momentum`.
 
-A derived radius within the body’s own horizon returns an error directing
+A derived radius within the body's own horizon returns an error directing
 the caller to `NewHole`. The private constructor then caches GM, horizon,
 and density. Callers should not repeat those calculations or validations.
 
 `NewHole` rejects nonpositive or nonfinite mass, period-based spin, and
-angular momentum at or beyond the proposed `G × mass²` bound. This is the
-design’s stated nonextremal boundary; it is not an implemented API here.
+angular momentum at or beyond the proposed `G x mass^2` bound. This is the
+design's stated nonextremal boundary; it is not an implemented API here.
 
 ## Body properties
 
@@ -116,7 +116,7 @@ body. `Roche` gives the tidal disruption distance. `Tidal` applies the
 same question to a star approaching a black hole: disruption outside the
 horizon may be visible; inside it, the star is swallowed first.
 
-The fluid Roche coefficient comes from Roche’s numerical solution and
+The fluid Roche coefficient comes from Roche's numerical solution and
 needs a citation where used. The rigid-body approximation has a direct
 closed-form derivation.
 
@@ -138,15 +138,19 @@ func (orbit Orbit) At(when measure.Duration) Places
 The three orientation angles have distinct types to prevent swaps.
 Construction rules are:
 
-| Parameter | Proposed rule |
-|---|---|
-| apart | Positive finite semi-major axis |
-| eccentricity | Finite value in `[0, 1)`; open orbits are deferred |
-| tilt | Zero through half a turn, avoiding duplicate orbit spellings |
-| node, periapsis | Any finite angle, normalized to one turn |
-| since | Any finite time, including negative; normalized by the orbit period |
+- **apart:** Positive finite semi-major axis
 
-Kepler’s third law uses both masses. `At` solves Kepler’s equation with
+- **eccentricity:** Finite value in `[0, 1)`; open orbits are deferred
+
+- **tilt:** Zero through half a turn, avoiding duplicate orbit spellings
+
+- **node, periapsis:** Any finite angle, normalized to one turn
+
+- **since:** Any finite time, including negative; normalized by the orbit
+  period
+
+
+Kepler's third law uses both masses. `At` solves Kepler's equation with
 bounded Newton iteration to floating-point precision and reports failure
 to converge rather than returning a guess.
 
@@ -182,7 +186,7 @@ rockSpin, err := grav.Turning(measure.Up(), measure.Days(1))
 planet, err := grav.NewBody(rock, measure.Years(4.6e9), rockSpin)
 ```
 
-The rock example yields a radius near 7,600 km, versus Earth’s 6,371 km.
+The rock example yields a radius near 7,600 km, versus Earth's 6,371 km.
 That difference follows from the chosen simplification: Earth has a dense
 iron core and pressure-compressed rock; this example has neither.
 
@@ -198,31 +202,45 @@ uranus, err := grav.NewBody(materials.Planet("uranus"),
     measure.Years(4.6e9), uranusSpin)
 ```
 
-The design’s reference expectations are hydrogen and helium with a diffuse
+The design's reference expectations are hydrogen and helium with a diffuse
 rock-and-ice core for Saturn, following Mankovich and Fuller (2021), and
 ice-rich interiors for Uranus and Neptune, with Helled and colleagues
 (2011) as one of several competing models.
 
-The rough proposed fractions are a tenth to a fifth of Saturn’s mass in
+The rough proposed fractions are a tenth to a fifth of Saturn's mass in
 the diffuse core, versus about three quarters in ices and roughly a tenth
 in a hydrogen-helium envelope for the ice giants. These are model choices,
 not settled unique compositions.
 
 ## Physical and data bounds
 
-| Bound | Rejection | Basis |
-|---|---|---|
-| mass | Nonpositive or nonfinite | Numeric validity |
-| age | Negative or older than the universe | Planck age estimate |
-| spin | Period shorter than rotational breakup | Density |
-| horizon | Radius inside its own horizon | `2GM`; use `NewHole` |
-| gas retention | Envelope lost over the body’s age | Jeans escape |
-| tracks | Outside all supported tracks | Published data coverage |
-| shares | Composition does not sum to one | Materials validation |
-| layers | Layers not ordered by density | Interior-model constraints |
+- **mass:** Rejection: Nonpositive or nonfinite; Basis: Numeric validity
 
-For the simple self-gravitating model, breakup period is `√(3π / Gρ)`:
+- **age:** Rejection: Negative or older than the universe; Basis: Planck age
+  estimate
+
+- **spin:** Rejection: Period shorter than rotational breakup; Basis: Density
+
+- **horizon:** Rejection: Radius inside its own horizon; Basis: `2GM`; use
+  `NewHole`
+
+- **gas retention:** Rejection: Envelope lost over the body's age; Basis:
+  Jeans escape
+
+- **tracks:** Rejection: Outside all supported tracks; Basis: Published data
+  coverage
+
+- **shares:** Rejection: Composition does not sum to one; Basis: Materials
+  validation
+
+- **layers:** Rejection: Layers not ordered by density; Basis: Interior-model
+  constraints
+
+
+For the simple self-gravitating model, breakup period is
+`sqrt(3 * pi / (G * rho))`:
 it depends on density rather than size. Unsupported tracks fail explicitly.
+
 The proposed coverage spans about half a Jupiter mass through 300 solar
 masses; the actual tables must establish the supported domains.
 
@@ -231,13 +249,13 @@ masses; the actual tables must establish the supported domains.
 The design derives stellar behaviour from evolutionary tracks instead of
 hard-coding a separate star constructor. Near 0.075 solar masses, tracks
 settle into sustained hydrogen burning; below that, bodies continue cooling.
-Roughly 13–80 Jupiter masses can burn deuterium temporarily.
+Roughly 13-80 Jupiter masses can burn deuterium temporarily.
 
 Composition, mass, and age choose a track. External heating can inflate
 close-in giants and belongs to a later systems model. Rotation-dependent
 flattening requires an internal density profile.
 
-MIST lifetimes would replace the current stars model’s `burnedShare`
+MIST lifetimes would replace the current stars model's `burnedShare`
 approximation, including the noted factor-of-four short lifetimes for
 massive stars. Its giant and white-dwarf stages would extend the existing
 `ended` handling.
@@ -248,7 +266,7 @@ formation history is outside this structural model.
 ## The lower limit for gas retention
 
 Small bodies may lose their lightest atmospheric molecules. The proposed
-check compares Jeans escape over the body’s age using escape speed and
+check compares Jeans escape over the body's age using escape speed and
 the gas temperature and molecular mass, rather than a fixed size threshold
 or an escape-speed rule of thumb.
 
@@ -270,24 +288,27 @@ methods such as `Sun().Mass()`.
 
 Dimensionless values still need distinct types:
 
-| Type | Interpretation |
-|---|---|
-| Eccentricity | Focus offset divided by semi-major axis |
-| Compactness | GM divided by radius |
-| LightFraction | Speed divided by c |
-| AngularMomentum | Angular momentum in units of ℏ |
-| Direction | Vector divided by its magnitude |
+- **Eccentricity:** Focus offset divided by semi-major axis
+
+- **Compactness:** GM divided by radius
+
+- **LightFraction:** Speed divided by c
+
+- **AngularMomentum:** Angular momentum in units of hbar
+
+- **Direction:** Vector divided by its magnitude
+
 
 A coordinate contains three positions, not three lengths. Subtracting two
 coordinates produces a displacement; adding a displacement to a coordinate
 produces a coordinate. Adding two coordinates should not compile.
 
-Frame identity—solar, body-local, camera—belongs in a future location layer
-above these quantities.
+Frame identity -- solar, body-local, camera -- belongs in a future
+location layer above these quantities.
 
 ## Outside this package
 
 Emission belongs to `emit` and stellar models. Strong fields belong to
 `holes`, in front of libholemath. Gravitational-wave inspiral can layer
-Peters’ formula above `Orbit`. Three-body systems and shape-changing tides
+Peters' formula above `Orbit`. Three-body systems and shape-changing tides
 are deferred until their models and scene requirements are specified.

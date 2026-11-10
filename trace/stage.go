@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/render/beamstep"
 	"github.com/janearc/slayer/scene/gas"
 	"github.com/janearc/slayer/scene/medium"
 	"github.com/janearc/slayer/scene/shape"
@@ -51,7 +52,7 @@ func ticked(painted texture.Texture, moment time.Duration) texture.Texture {
 }
 
 // emits samples the time-evaluated shine at the local pixel footprint, falling
-// back to the material’s uniform Glow, or zero without a material.
+// back to the material's uniform Glow, or zero without a material.
 func emits(material *thing.Material, shine texture.Texture,
 	local maths.Vec, footprint float64) maths.Light {
 	if shine != nil {
@@ -101,7 +102,7 @@ func place(world *thing.World, moment time.Duration) []placedThing {
 	return things
 }
 
-// placedVolume caches a volume’s placement at the render time.
+// placedVolume caches a volume's placement at the render time.
 type placedVolume struct {
 	source *thing.Volume
 	placement
@@ -161,6 +162,7 @@ func placeVolumes(world *thing.World, moment time.Duration) []placedVolume {
 // remain shared and must not change until rendering finishes.
 type staged struct {
 	lamps []thing.Lamp
+	beams *beamstep.Beams
 	sky   thing.Sky
 	// lighting is the sky as a table of each cell's mean, which is what
 	// lights a surface, as the gpu's kernel reads it; nil with no sky
@@ -174,9 +176,9 @@ type staged struct {
 	// walked is a replay's steps, told as the pixel is made; nil in
 	// every render but a replay
 	walked *walk
-	// spread is the reach of the box round every thing with an edge, which
-	// a ray leaving a surface is lifted by a share of; zero when no thing
-	// has an edge
+	// spread encloses bounded surfaces that can reflect. Secondary rays use
+	// a share of it as their local offset; nonreflecting geometry still
+	// casts shadows without enlarging this scale
 	spread float64
 }
 
@@ -193,14 +195,33 @@ func (scene staged) lifting(point maths.Vec) float64 {
 	return lift * max(scene.spread, point.Len())
 }
 
-// Spread returns the extent of finite object bounds at the render time, or zero
-// if none exist. CPU and GPU use it to scale ray-origin offsets consistently
-// across scene sizes.
+// Spread returns a declared ray-origin reference, or the legacy reflecting
+// extent when none is supplied. Nonreflecting surfaces do not enlarge that
+// legacy extent. All geometry remains visible and available to shadow queries.
 func Spread(world *thing.World, moment time.Duration) float64 {
-	things := place(world, moment)
-	boxes := make([]maths.Box, len(things))
+	return rayOriginSpread(world, place(world, moment))
+}
+
+// rayOriginSpread shares the same declared numerical reference with GPU
+// encoding and CPU staging. The zero choice retains legacy scene bounds.
+func rayOriginSpread(world *thing.World, things []placedThing) float64 {
+	if reference := world.RayOriginReference.Metres(); reference > 0 {
+		return reference
+	}
+	return reflectingSpread(things)
+}
+
+// reflectingSpread includes diffuse, textured, glossy and spectral surfaces.
+// Black surfaces and pure emitters are omitted regardless of their distance;
+// they remain ordinary primary-ray surfaces and shadow occluders.
+func reflectingSpread(things []placedThing) float64 {
+	var boxes []maths.Box
 	for i := range things {
-		boxes[i] = worldBox(&things[i])
+		m := things[i].thing.Material
+		if m != nil && m.Colour == (maths.Light{}) && m.Texture == nil && m.Gloss <= 0 && m.Radiant == nil {
+			continue
+		}
+		boxes = append(boxes, worldBox(&things[i]))
 	}
 	return spreadOf(boxes)
 }
@@ -233,6 +254,7 @@ func stage(world *thing.World, moment time.Duration) staged {
 	things := gathered(place(world, moment))
 	return staged{
 		lamps:    lamps,
+		beams:    beamstep.Of(lamps),
 		sky:      world.Sky,
 		lighting: lighting,
 		haze:     world.Haze,
@@ -240,18 +262,18 @@ func stage(world *thing.World, moment time.Duration) staged {
 		volumes:  volumes,
 		fields:   placeFields(world, moment),
 		gassy:    hasGas(volumes),
-		spread:   spreadOf(things.boxes),
+		spread:   rayOriginSpread(world, things.things),
 	}
 }
 
-// reached holds a lamp’s attenuated light and direction at a point. A zero
+// reached holds a lamp's attenuated light and direction at a point. A zero
 // direction identifies ambient illumination.
 type reached struct {
 	toward maths.Vec
 	light  maths.Light
 }
 
-// ambient reports the lamps’ zero-direction convention for illumination from
+// ambient reports the lamps' zero-direction convention for illumination from
 // all directions, such as a flood.
 func (got reached) ambient() bool {
 	return got.toward == (maths.Vec{})
@@ -288,7 +310,7 @@ func (scene staged) transmit(from, toward maths.Vec,
 // extent stores entry and exit distances through a volume in local units.
 type extent struct{ enter, leave float64 }
 
-// span clips a local ray to a volume before limit, preferring the medium’s Span
+// span clips a local ray to a volume before limit, preferring the medium's Span
 // method and otherwise using its bounds. Misses and tangencies have no
 // integration interval.
 func (volume placedVolume) span(ray maths.Ray, limit float64) (extent, bool) {
@@ -307,7 +329,7 @@ func (volume placedVolume) span(ray maths.Ray, limit float64) (extent, bool) {
 }
 
 // crossing stores world-space entry and exit distances and the ray transformed
-// into the volume’s local coordinates.
+// into the volume's local coordinates.
 type crossing struct {
 	volume       *placedVolume
 	enter, leave float64

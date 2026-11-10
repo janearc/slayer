@@ -1,0 +1,17 @@
+Authored grove appearance record
+
+Captured from unchanged grove production code at 6b0a32e, Go 1.26.10.
+486 samples: three times, nine eastings, six northings and three heights.
+The retained public API producer is grove_sample.go. From the module root:
+go run ./scene/medium/testdata/grove_sample.go
+
+These samples preserve picked patch noise, advection and boundary fades.
+They are not measured fog, water budgets or condensation predictions.
+The analytic optical-depth, geometry and GPU checks remain independent.
+
+find_mist_endpoints.go reproduces the strong noise peaks used by the exact
+coverage endpoint check. It filters candidate hashes for speed, then checks
+every result with the production noise.Fractal API. At (5016.5,5016.5,5016.5)
+seed 6856140 gives 0.83929338789271224 and seed 36335586 gives
+-0.85694944754429803. The test expects clear or half-height filled density,
+not a copy of the patch-noise formula.

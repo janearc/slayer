@@ -1,0 +1,141 @@
+# Independent envelope contract for authored summit-yard scenery, metres.
+---
+seed: 5
+tolerance: 1.0e-08
+maximum-faces: 100000
+profiles:
+- kind: mobile-crane
+  minimum:
+    x: -3.7
+    y: 0
+    z: -5.5
+  maximum:
+    x: 3.7
+    y: 14.5
+    z: 4.6
+- kind: mirror-gantry
+  minimum:
+    x: -3.7
+    y: 0
+    z: -1.2
+  maximum:
+    x: 3.7
+    y: 7.3
+    z: 1.2
+- kind: scaffold-tower
+  minimum:
+    x: -1.1
+    y: 0
+    z: -0.8
+  maximum:
+    x: 1.1
+    y: 6.2
+    z: 0.8
+- kind: service-truck
+  minimum:
+    x: -1.4
+    y: 0
+    z: -3.5
+  maximum:
+    x: 1.4
+    y: 3.35
+    z: 3.4
+- kind: utility-pickup
+  minimum:
+    x: -1.2
+    y: 0
+    z: -2.9
+  maximum:
+    x: 1.2
+    y: 2.65
+    z: 2.8
+- kind: equipment-trailer
+  minimum:
+    x: -1.2
+    y: 0
+    z: -3.5
+  maximum:
+    x: 1.2
+    y: 2.85
+    z: 2.1
+- kind: shipping-crate
+  minimum:
+    x: -1.05
+    y: 0
+    z: -0.8
+  maximum:
+    x: 1.05
+    y: 2.0
+    z: 0.8
+- kind: equipment-cabinet
+  minimum:
+    x: -0.55
+    y: 0
+    z: -0.43
+  maximum:
+    x: 0.55
+    y: 1.85
+    z: 0.4
+- kind: generator
+  minimum:
+    x: -1.3
+    y: 0
+    z: -0.7
+  maximum:
+    x: 1.3
+    y: 2.15
+    z: 0.7
+- kind: cooling-unit
+  minimum:
+    x: -1.3
+    y: 0
+    z: -0.7
+  maximum:
+    x: 1.9
+    y: 1.85
+    z: 0.7
+- kind: access-stairs
+  minimum:
+    x: -0.75
+    y: 0
+    z: -2.25
+  maximum:
+    x: 0.75
+    y: 2.85
+    z: 0.4
+- kind: work-platform
+  minimum:
+    x: -1.55
+    y: 0
+    z: -1.05
+  maximum:
+    x: 1.55
+    y: 2.75
+    z: 1.05
+- kind: handrail
+  minimum:
+    x: -1.6
+    y: 0
+    z: -0.08
+  maximum:
+    x: 1.6
+    y: 1.2
+    z: 0.08
+- kind: cable-tray
+  minimum:
+    x: -0.35
+    y: 0
+    z: -2.05
+  maximum:
+    x: 0.35
+    y: 0.35
+    z: 2.05
+- kind: weather-mast
+  minimum:
+    x: -1.9
+    y: 0
+    z: -0.4
+  maximum:
+    x: 1.9
+    y: 8.4
+    z: 1.1

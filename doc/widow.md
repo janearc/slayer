@@ -15,15 +15,15 @@ The finals were rendered on 2026-10-05 and live in `~/reels/imax`:
 - `zappy-close-imax-0007.pfm` and `.png`: an ungraded close view over the
   lattice, with the camera at `0,338,725`.
 
-Both are single frames at moment 7, sized 4096 × 2864. `~/reels/imax/how`
+Both are single frames at moment 7, sized 4096 x 2864. `~/reels/imax/how`
 contains camera specifications, the preview grid, and the original binaries.
 
 ## Reproduction versions
 
-- `cmd/orbital` at `be73b24`, “an eye placed anywhere, and the pinhole’s
-  width”; archived binary `orbital-eye`.
-- `cmd/develop` at `81ea65a`, “print raws, at any exposure and white
-  balance”.
+- `cmd/orbital` at `be73b24`, "an eye placed anywhere, and the pinhole's
+  width"; archived binary `orbital-eye`.
+- `cmd/develop` at `81ea65a`, "print raws, at any exposure and white
+  balance".
 
 Both binaries were built just before their commits. Later tracer changes
 alter output, so use the archived binaries or check out those revisions
@@ -68,7 +68,7 @@ develop -exposure -2 -white 3200 \
 
 `-n 2` traces four rays per pixel and gave the useful quality/cost tradeoff
 in previews. These finals used `-n 1`, one ray per pixel. At the time,
-a four-sample frame at this size was estimated to take about 2¼ hours.
+a four-sample frame at this size was estimated to take about 2 1/4 hours.
 
 The stepped glow comes from hard panel shadows rather than sampling noise.
 Exposure and white balance belong in development: keep the raw light so

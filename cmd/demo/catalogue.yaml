@@ -1,0 +1,44 @@
+# Preview choices in 2026-11-07. These bound a first look; they
+# are not the commands' full-quality defaults or scientific parameters.
+preview:
+  width: 640
+  height: 360
+  rays: 1
+  cells: 80x24
+  pixel-aspect: 0.75
+  shutdown-grace: 2
+  limits: {width: 3840, height: 2160, rays: 4}
+  sample-budget: 8294400
+demos:
+  - name: orbital
+    command: orbital
+    about: Two counter-rotating orbitals and their magnetar.
+    arguments: [-gas, "0.25"]
+  - name: swarm
+    command: swarm
+    about: A star inside a perforated, mirrored Dyson swarm.
+    arguments: [-orbits, "12", -panels, "24", -wear, "0.15"]
+  - name: ring
+    command: ring
+    about: A ring under a magnetar.
+    arguments: [-around, "64"]
+  - name: hillside
+    command: hillside
+    about: Procedural trees, stones, ground and daylight.
+    arguments: [-spruce, "3", -fern, "12", -boulder, "5", -variety, "2"]
+  - name: moonrise
+    command: moonrise
+    about: A full Moon behind a spruce, with its linear raw.
+    raw-preview: true
+    arguments: []
+  - name: house
+    command: house
+    about: The shoebox house and Saturn, at the set's own film size.
+    scene-sized: true
+    arguments: [-set, sets/shoebox.yaml]
+  - name: camera
+    command: hillside
+    about: A four-second moving-camera sequence over smoke 1.
+    scene-sized: true
+    plan: doc/camera-smoke-sequence.yaml
+    arguments: []

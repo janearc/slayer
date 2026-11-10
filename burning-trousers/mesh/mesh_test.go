@@ -3,6 +3,8 @@
 // of the manufactory, made from a seed on slayer's mesh, is drawn again
 // with its faces copied into a shape.Mesh, from three sides, and the two
 // pictures are compared.
+// Shared groups are expanded into separate world objects, each using the
+// reference mesh. Their placement and traversal do not use MeshGroup.
 //
 // a pixel's light in just-noticeable differences, its cover and its
 // depth are all compared. the faces are the same, so a pixel that
@@ -19,6 +21,8 @@
 // a face slayer's mesh lost in the making is lost from both. slayer's
 // own tests hold the making, by a cube, a ball and rays from inside,
 // and the manufactory's skin reader here holds every kind's skin.
+// Group members also come from the manufactured object: a missing placement
+// in construction is missing on both sides. Construction needs its own tests.
 //
 // a shape.Mesh is no evidence that slayer's mesh is right; it is the other
 // side of a change of mesh under the same scenes.
@@ -69,16 +73,69 @@ func made(t *testing.T, name string) []thing.Thing {
 // for face into a shape.Mesh.
 func inRefMesh(t *testing.T, things []thing.Thing) []thing.Thing {
 	t.Helper()
-	copied := make([]thing.Thing, len(things))
-	for i, each := range things {
-		copied[i] = each
-		held, isMesh := each.Shape.(*mesh.Mesh)
-		if !isMesh {
+	var copied []thing.Thing
+	cache := map[shape.Shape]shape.Shape{}
+	converted := func(solid shape.Shape) shape.Shape {
+		if known, ok := cache[solid]; ok {
+			return known
+		}
+		var other shape.Shape = solid
+		switch held := solid.(type) {
+		case *mesh.Mesh:
+			other = refMesh(t, held.Points(), held.Faces())
+		}
+		cache[solid] = other
+		return other
+	}
+	for _, each := range things {
+		if group, ok := each.Shape.(*shape.MeshGroup); ok {
+			for _, member := range group.Members() {
+				if _, ok := member.Mesh.(*mesh.Mesh); !ok {
+					t.Fatalf("group member is not a production mesh: %T", member.Mesh)
+				}
+				copy := each
+				copy.Shape = converted(member.Mesh)
+				// These pictures are taken at time zero, for both renderers.
+				copy.Motion = thing.Still(member.Space.Within(each.At(0)))
+				copied = append(copied, copy)
+			}
 			continue
 		}
-		copied[i].Shape = refMesh(t, held.Points(), held.Faces())
+		each.Shape = converted(each.Shape)
+		copied = append(copied, each)
 	}
 	return copied
+}
+
+// Group comparisons must not route both pictures through MeshGroup.Hit.
+func TestReferenceGroupUsesSeparatePlacedMeshes(t *testing.T) {
+	prototype, err := mesh.New([]maths.Vec{
+		maths.V(0, 0, 0),
+		maths.V(1, 0, 0), maths.V(0, 1, 0),
+	}, [][3]int{{0, 1, 2}}, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	group, err := shape.NewMeshGroup([]shape.MeshMember{
+		{Mesh: prototype, Space: maths.Subspace{Origin: maths.V(2, 0, 0), Scale: 2}},
+		{Mesh: prototype, Space: maths.Subspace{Origin: maths.V(-3, 0, 0)}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	copies := inRefMesh(t, []thing.Thing{{Shape: group}})
+	if len(copies) != 2 {
+		t.Fatalf("group stayed one reference object: %d", len(copies))
+	}
+	for i, copy := range copies {
+		if _, ok := copy.Shape.(*shape.Mesh); !ok {
+			t.Fatalf("reference member %d shares group traversal: %T", i, copy.Shape)
+		}
+	}
+	if copies[0].At(0).Out(maths.XAxis) != maths.V(4, 0, 0) ||
+		copies[1].At(0).Out(maths.XAxis) != maths.V(-2, 0, 0) {
+		t.Fatal("reference members lost their independent placements")
+	}
 }
 
 // refMesh is a shape.Mesh of some faces, flat.
@@ -95,19 +152,35 @@ func refMesh(t *testing.T, corners []maths.Vec, faces [][3]int) *shape.Mesh {
 // a shape.Mesh: a face the three eyes never see, behind or under the rest, is
 // held as well as one they do.
 func TestEveryFaceIsMetOnBothMeshes(t *testing.T) {
+	seen := map[*mesh.Mesh]bool{}
 	for _, name := range manufacture.KindNames() {
 		for _, each := range made(t, name) {
-			held, isMesh := each.Shape.(*mesh.Mesh)
-			if !isMesh {
-				continue
+			var meshes []*mesh.Mesh
+			switch held := each.Shape.(type) {
+			case *mesh.Mesh:
+				meshes = append(meshes, held)
+			case *shape.MeshGroup:
+				for _, member := range held.Members() {
+					if mesh, ok := member.Mesh.(*mesh.Mesh); ok {
+						meshes = append(meshes, mesh)
+					} else {
+						t.Fatalf("%s group member is not a mesh: %T", name, member.Mesh)
+					}
+				}
 			}
-			corners, faces := held.Points(), held.Faces()
-			theirs := refMesh(t, corners, faces)
-			missed := unmet(held, theirs, corners, faces)
-			if len(missed) > 0 {
-				t.Errorf("%s: %d of %d faces not met "+
-					"where they are: %v",
-					name, len(missed), len(faces), missed)
+			for _, held := range meshes {
+				if seen[held] {
+					continue
+				}
+				seen[held] = true
+				corners, faces := held.Points(), held.Faces()
+				theirs := refMesh(t, corners, faces)
+				missed := unmet(held, theirs, corners, faces)
+				if len(missed) > 0 {
+					t.Errorf("%s: %d of %d faces not met "+
+						"where they are: %v",
+						name, len(missed), len(faces), missed)
+				}
 			}
 		}
 	}
@@ -154,8 +227,10 @@ func unmet(ours, theirs meeter, corners []maths.Vec, faces [][3]int) []int {
 		}
 		out := across.Unit()
 		middle := one.Add(two).Add(three).Scale(1.0 / 3)
-		ray := maths.Ray{At: middle.Add(out.Scale(hair)),
-			Dir: out.Scale(-1)}
+		ray := maths.Ray{
+			At:  middle.Add(out.Scale(hair)),
+			Dir: out.Scale(-1),
+		}
 		_, oursMet := ours.Hit(ray, 0, 1.001*hair)
 		_, theirsMet := theirs.Hit(ray, 0, 1.001*hair)
 		if !oursMet || !theirsMet {
@@ -180,7 +255,8 @@ func joined(one, other maths.Box) maths.Box {
 		Min: maths.V(math.Min(one.Min.X, other.Min.X),
 			math.Min(one.Min.Y, other.Min.Y), math.Min(one.Min.Z, other.Min.Z)),
 		Max: maths.V(math.Max(one.Max.X, other.Max.X),
-			math.Max(one.Max.Y, other.Max.Y), math.Max(one.Max.Z, other.Max.Z))}
+			math.Max(one.Max.Y, other.Max.Y), math.Max(one.Max.Z, other.Max.Z)),
+	}
 }
 
 // views is three eyes looking at a box's middle from as far away as
@@ -190,11 +266,17 @@ func views(box maths.Box) []maths.Subspace {
 	middle := box.Min.Add(box.Max).Scale(0.5)
 	away := box.Max.Sub(box.Min).Len()
 	var eyes []maths.Subspace
-	for _, way := range []maths.Vec{maths.V(0, 0.2, 1), maths.V(1, 0.1, 0),
-		maths.V(0.3, 1, 0.4)} {
+	// Oblique views give flat foliage area too; an exactly edge-on leaf
+	// cannot supply the surface pixels this comparison requires.
+	for _, way := range []maths.Vec{
+		maths.V(0, 0.2, 1), maths.V(1, 0.1, 0.2),
+		maths.V(0.3, 1, 0.4),
+	} {
 		from := middle.Add(way.Unit().Scale(away))
-		eyes = append(eyes, maths.Subspace{Origin: from,
-			Orientation: maths.LookAt(from, middle)})
+		eyes = append(eyes, maths.Subspace{
+			Origin:      from,
+			Orientation: maths.LookAt(from, middle),
+		})
 	}
 	return eyes
 }
@@ -202,7 +284,8 @@ func views(box maths.Box) []maths.Subspace {
 // drawn is some things under a sun, and a grey sky when asked, seen by
 // an eye.
 func drawn(t *testing.T, things []thing.Thing, eye maths.Subspace,
-	sky bool) *frame.Frame {
+	sky bool,
+) *frame.Frame {
 	t.Helper()
 	world := thing.NewWorld()
 	if sky {
@@ -258,8 +341,10 @@ type lighting struct {
 }
 
 // lightings are the sun alone, and the sun with the sky.
-var lightings = []lighting{{"by the sun", false, shadowEdges},
-	{"by the sun and sky", true, skyEdges}}
+var lightings = []lighting{
+	{"by the sun", false, shadowEdges},
+	{"by the sun and sky", true, skyEdges},
+}
 
 // alike holds two sets of the same things to drawing alike from each
 // side and in each lighting, with three hundred pixels of each picture
@@ -270,6 +355,19 @@ func alike(t *testing.T, name string, ours, theirs []thing.Thing) {
 	t.Helper()
 	for _, lit := range lightings {
 		for side, eye := range views(around(ours)) {
+			// Loose shoots are new horizontal specimens. Their second eye
+			// is oblique to the spray; existing kinds keep their old eyes.
+			if side == 1 && (name == "coast-redwood-shoot" ||
+				name == "giant-sequoia-shoot") {
+				box := around(ours)
+				middle := box.Min.Add(box.Max).Scale(0.5)
+				from := middle.Add(maths.V(1, 0.1, 0.2).Unit().Scale(
+					box.Max.Sub(box.Min).Len()))
+				eye = maths.Subspace{
+					Origin:      from,
+					Orientation: maths.LookAt(from, middle),
+				}
+			}
 			alikeFrom(t, name+" "+lit.name, side, lit,
 				drawn(t, ours, eye, lit.sky), drawn(t, theirs, eye, lit.sky))
 		}
@@ -279,7 +377,8 @@ func alike(t *testing.T, name string, ours, theirs []thing.Thing) {
 // alikeFrom holds two pictures of the same things, from one side and in
 // one lighting, to drawing alike.
 func alikeFrom(t *testing.T, name string, side int, lit lighting, picture,
-	other *frame.Frame) {
+	other *frame.Frame,
+) {
 	t.Helper()
 	if count := covered(picture); count < 300 {
 		t.Fatalf("%s, side %d: only %d pixels are it", name, side, count)
@@ -406,19 +505,38 @@ func pastOn(t *testing.T, one, other *frame.Frame, held mask) int {
 // new corners pushed out to the unit sphere, every face turning out.
 func ball(times int) ([]maths.Vec, [][3]int) {
 	gold := (1 + math.Sqrt(5)) / 2
-	corners := []maths.Vec{maths.V(-1, gold, 0), maths.V(1, gold, 0),
+	corners := []maths.Vec{
+		maths.V(-1, gold, 0), maths.V(1, gold, 0),
 		maths.V(-1, -gold, 0), maths.V(1, -gold, 0),
 		maths.V(0, -1, gold), maths.V(0, 1, gold), maths.V(0, -1, -gold),
 		maths.V(0, 1, -gold), maths.V(gold, 0, -1), maths.V(gold, 0, 1),
-		maths.V(-gold, 0, -1), maths.V(-gold, 0, 1)}
+		maths.V(-gold, 0, -1), maths.V(-gold, 0, 1),
+	}
 	for i, corner := range corners {
 		corners[i] = corner.Unit()
 	}
-	faces := [][3]int{{0, 11, 5}, {0, 5, 1}, {0, 1, 7}, {0, 7, 10},
-		{0, 10, 11}, {1, 5, 9}, {5, 11, 4}, {11, 10, 2}, {10, 7, 6},
-		{7, 1, 8}, {3, 9, 4}, {3, 4, 2}, {3, 2, 6}, {3, 6, 8},
-		{3, 8, 9}, {4, 9, 5}, {2, 4, 11}, {6, 2, 10}, {8, 6, 7},
-		{9, 8, 1}}
+	faces := [][3]int{
+		{0, 11, 5},
+		{0, 5, 1},
+		{0, 1, 7},
+		{0, 7, 10},
+		{0, 10, 11},
+		{1, 5, 9},
+		{5, 11, 4},
+		{11, 10, 2},
+		{10, 7, 6},
+		{7, 1, 8},
+		{3, 9, 4},
+		{3, 4, 2},
+		{3, 2, 6},
+		{3, 6, 8},
+		{3, 8, 9},
+		{4, 9, 5},
+		{2, 4, 11},
+		{6, 2, 10},
+		{8, 6, 7},
+		{9, 8, 1},
+	}
 	for range times {
 		corners, faces = quartered(corners, faces)
 	}
@@ -429,7 +547,8 @@ func ball(times int) ([]maths.Vec, [][3]int) {
 // middles pushed out to the unit sphere and shared by the faces either
 // side.
 func quartered(corners []maths.Vec, faces [][3]int) ([]maths.Vec,
-	[][3]int) {
+	[][3]int,
+) {
 	middles := map[[2]int]int{}
 	middle := func(one, other int) int {
 		key := [2]int{min(one, other), max(one, other)}

@@ -1,0 +1,161 @@
+# Authored inputs preserving the existing host-condition witnesses.
+# Byte counts are exact unsigned integers; these examples install no policy.
+policy:
+  load_limit: 8
+  swap_limit: 8589934592
+  disk_floor: 32212254720
+measured:
+  load: 0
+  swap: 0
+  free_disk: 32212254720
+  load_known: true
+  swap_known: true
+  disk_known: true
+# The load is the round-trip decimal for Nextafter(8, 0).
+near_ceilings:
+  load: 7.999999999999999
+  swap: 8589934591
+  free_disk: 32212254720
+  load_known: true
+  swap_known: true
+  disk_known: true
+unsafe:
+  load_at_ceiling:
+    load: 8
+    free_disk: 32212254720
+    load_known: true
+    swap_known: true
+    disk_known: true
+  swap_at_ceiling:
+    swap: 8589934592
+    free_disk: 32212254720
+    load_known: true
+    swap_known: true
+    disk_known: true
+  disk_below_floor:
+    free_disk: 32212254719
+    load_known: true
+    swap_known: true
+    disk_known: true
+  load_above_ceiling:
+    load: 9
+    free_disk: 32212254720
+    load_known: true
+    swap_known: true
+    disk_known: true
+  swap_above_ceiling:
+    swap: 18446744073709551615
+    free_disk: 32212254720
+    load_known: true
+    swap_known: true
+    disk_known: true
+  load_precedes_swap:
+    load: 8
+    swap: 8589934592
+    free_disk: 32212254720
+    load_known: true
+    swap_known: true
+    disk_known: true
+  disk_precedes_holds:
+    load: 8
+    swap: 8589934592
+    free_disk: 32212254719
+    load_known: true
+    swap_known: true
+    disk_known: true
+invalid_loads:
+  - -1
+  - .nan
+  - .inf
+  - -.inf
+configured:
+  policy:
+    load_limit: 2
+    swap_limit: 1
+    disk_floor: 1
+  ready:
+    load: 1
+    free_disk: 1
+    load_known: true
+    swap_known: true
+    disk_known: true
+  load_at_ceiling:
+    load: 2
+    free_disk: 1
+    load_known: true
+    swap_known: true
+    disk_known: true
+  swap_at_ceiling:
+    load: 1
+    swap: 1
+    free_disk: 1
+    load_known: true
+    swap_known: true
+    disk_known: true
+invalid_policies:
+  - {}
+  - load_limit: 8
+    disk_floor: 1
+  - load_limit: 8
+    swap_limit: 1
+  - load_limit: 0
+    swap_limit: 1
+    disk_floor: 1
+  - load_limit: -1
+    swap_limit: 1
+    disk_floor: 1
+  - load_limit: .nan
+    swap_limit: 1
+    disk_floor: 1
+  - load_limit: .inf
+    swap_limit: 1
+    disk_floor: 1
+  - load_limit: -.inf
+    swap_limit: 1
+    disk_floor: 1
+availability:
+  - label: "000"
+    load_known: false
+    swap_known: false
+    disk_known: false
+    ready: false
+  - label: "001"
+    load_known: true
+    swap_known: false
+    disk_known: false
+    ready: false
+  - label: "010"
+    load_known: false
+    swap_known: true
+    disk_known: false
+    ready: false
+  - label: "011"
+    load_known: true
+    swap_known: true
+    disk_known: false
+    ready: false
+  - label: "100"
+    load_known: false
+    swap_known: false
+    disk_known: true
+    ready: false
+  - label: "101"
+    load_known: true
+    swap_known: false
+    disk_known: true
+    ready: false
+  - label: "110"
+    load_known: false
+    swap_known: true
+    disk_known: true
+    ready: false
+  - label: "111"
+    load_known: true
+    swap_known: true
+    disk_known: true
+    ready: true
+known_disk_with_unknown:
+  load: .nan
+  free_disk: 1
+  disk_known: true
+minimum_disk_floor: 1
