@@ -1,0 +1,5 @@
+# Six directions define a hexagonal lattice; ring r adds 6*r cells.
+neighbors: 6
+# Authored property-test range, including future larger mirror layouts.
+minimum: 0
+maximum: 32

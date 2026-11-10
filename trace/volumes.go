@@ -5,6 +5,7 @@ import (
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/render/beamstep"
 	"github.com/janearc/slayer/scene/medium"
 )
 
@@ -70,6 +71,7 @@ func throughGain(scene staged, ray maths.Ray, far float64, gain gainer,
 		gains = append(gains, scale)
 	}
 	steps := stepping(across, cuts)
+	steps.refine = scene.beams.Ray(ray, far)
 	for shows(passed.keep) {
 		step, found := steps.next()
 		if !found {
@@ -160,12 +162,20 @@ type stepper struct {
 	across []crossing
 	cuts   int
 	taken  []int
+	parts  []int
+	refine beamstep.Refinement
 }
+
+// marchZero is defined as the first subdivision index.
+const marchZero = 0
+
+// marchHalf is defined as the midpoint of a unit cell.
+const marchHalf = 0.5
 
 // stepping is a stepper over the crossings, each cut into cuts steps.
 func stepping(across []crossing, cuts int) *stepper {
 	return &stepper{across: across, cuts: cuts, taken: make([]int,
-		len(across))}
+		len(across)), parts: make([]int, len(across))}
 }
 
 // nearest is the nearest step not yet taken, as a stride with its
@@ -179,14 +189,28 @@ func (steps *stepper) nearest() (stride, bool) {
 			continue
 		}
 		length := (crossed.leave - crossed.enter) / float64(steps.cuts)
-		along := crossed.enter + (float64(steps.taken[k])+0.5)*length
+		begin := crossed.enter + float64(steps.taken[k])*length
+		split := steps.refine.Splits(begin, begin+length)
+		middle := float64(steps.taken[k]) +
+			(float64(steps.parts[k])+marchHalf)/float64(split)
+		along := crossed.enter + middle*length
 		if !found || along < best.along {
 			found = true
-			best = stride{crossing: k, along: along, length: length}
+			best = stride{crossing: k, along: along,
+				length: length / float64(split)}
 		}
 	}
 	if found {
-		steps.taken[best.crossing]++
+		k := best.crossing
+		crossed := steps.across[k]
+		length := (crossed.leave - crossed.enter) / float64(steps.cuts)
+		begin := crossed.enter + float64(steps.taken[k])*length
+		split := steps.refine.Splits(begin, begin+length)
+		steps.parts[k]++
+		if steps.parts[k] >= split {
+			steps.parts[k] = marchZero
+			steps.taken[k]++
+		}
 	}
 	return best, found
 }

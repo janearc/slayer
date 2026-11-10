@@ -1,0 +1,6 @@
+# Deliberately differs from the named default's 24 m enclosure.
+# Authored test dimensions, not a measured observatory.
+before: "diameter: {value: 24, unit: m}"
+after: "diameter: {value: 32, unit: m}"
+diameter: 32
+seed: 5

@@ -504,7 +504,7 @@ func TestAWorldsNumbersAreTakenToTheirEdges(t *testing.T) {
 // block that takes keys and is given a word.
 func TestWhatIsNotKeysIsRefused(t *testing.T) {
 	for written, said := range map[string]string{
-		"scene: [":               "broken.yaml: yaml:",
+		"scene: [":               "broken.yaml:\n  line 1:",
 		"- one\n- two\n":         "broken.yaml: a set file is keys, and this is not",
 		"":                       "broken.yaml: a set file is keys, and this is not",
 		"scene: 3\n":             "broken.yaml:1:8: this takes keys under it",

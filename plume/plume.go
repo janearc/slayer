@@ -1,5 +1,5 @@
 // Package plume models smoke carried above a fire by buoyant hot air. Measured
-// fire-plume correlations set the mean column’s rise, spreading, and slowing;
+// fire-plume correlations set the mean column's rise, spreading, and slowing;
 // eddies rise around that mean in eddies.go.
 //
 // The model assumes still air and a vertical column. Its finite bounding box

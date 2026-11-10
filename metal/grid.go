@@ -19,6 +19,7 @@ import (
 var (
 	errNoNumbers = errors.New("metal: a pixel needs a number at least")
 	errTooBig    = errors.New("metal: an input over two gigabytes")
+	errGridSize  = errors.New("metal: grid dimensions overflow native or host sizes")
 )
 
 // Grid runs the kernel once for every pixel of a width by height picture and
@@ -43,11 +44,16 @@ func (k *Kernel) Grid(width, height, rows, per int,
 			return nil, errTooBig
 		}
 	}
-	out := make([]float32, width*height*per)
 	if width <= 0 || height <= 0 {
-		return out, nil
+		return []float32{}, nil
 	}
-	if rows <= 0 {
+	// Check the product by division before allocating or narrowing
+	// dimensions to C ints.
+	if !gridFits(width, height, per) {
+		return nil, errGridSize
+	}
+	out := make([]float32, width*height*per)
+	if rows <= 0 || rows > height {
 		rows = height
 	}
 	pointers, lengths, free := pinned(inputs)
@@ -94,4 +100,12 @@ func pinned(inputs [][]byte) (*unsafe.Pointer, *C.long, func()) {
 		C.free(unsafe.Pointer(&lengths[0]))
 	}
 	return &pointers[0], &lengths[0], free
+}
+
+// gridFits checks positive dimensions before allocation and C-int narrowing.
+// The caller has already handled empty dimensions and nonpositive channels.
+func gridFits(width, height, per int) bool {
+	const mostNumbers = math.MaxInt / 4
+	return width <= math.MaxInt32 && height <= math.MaxInt32 && per <= math.MaxInt32 &&
+		width <= mostNumbers/per && height <= mostNumbers/(width*per)
 }

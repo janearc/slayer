@@ -1,0 +1,13 @@
+# 2026/11/09 04:43:30.997378 [TestTemporaryCleanupGeneratedCauses] [rapid] draw close-attempted: false
+# 2026/11/09 04:43:30.997381 [TestTemporaryCleanupGeneratedCauses] [rapid] draw close-fails: false
+# 2026/11/09 04:43:30.997381 [TestTemporaryCleanupGeneratedCauses] [rapid] draw remove-fails: false
+# 2026/11/09 04:43:30.997382 [TestTemporaryCleanupGeneratedCauses] [rapid] draw rename-failed: false
+# 2026/11/09 04:43:30.997388 [TestTemporaryCleanupGeneratedCauses] missing call(s) to *publication.Mocktemporary.Close() cleanup_test.go:162
+# 2026/11/09 04:43:30.997389 [TestTemporaryCleanupGeneratedCauses] missing call(s) to *publication.Mockfilesystem.Remove(is equal to {/queue/.state-private} (publication.pathSpec)) cleanup_test.go:164
+# 2026/11/09 04:43:30.997390 [TestTemporaryCleanupGeneratedCauses] aborting test due to missing call(s)
+# 
+v0.4.8#17135334581081217090
+0x0
+0x0
+0x0
+0x0

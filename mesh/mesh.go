@@ -1,4 +1,4 @@
-// Package mesh implements Slayer’s triangle meshes. Construction validates the
+// Package mesh implements Slayer's triangle meshes. Construction validates the
 // geometry, a bounding hierarchy accelerates intersection, and the ray
 // intersection method avoids cracks along shared edges.
 //

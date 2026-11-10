@@ -7,6 +7,7 @@ package research
 import (
 	_ "embed"
 	"fmt"
+	"sync"
 
 	"github.com/janearc/puzzlemouth/numbers"
 )
@@ -24,11 +25,15 @@ func Read() (numbers.Numbers, error) {
 	return numbers.Read(fileName, raw)
 }
 
+// values retains only the private lookup view of immutable embedded data.
+// Read still parses a fresh caller-owned catalogue, including source records.
+var values = sync.OnceValues(Read)
+
 // Value is a measured number by its name. A name the data does not hold
 // is a mistake in slayer's own code, which its tests find, so asking for
 // one stops the program and says which.
 func Value(name string) float64 {
-	read, err := Read()
+	read, err := values()
 	if err != nil {
 		panic(err)
 	}

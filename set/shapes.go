@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/janearc/slayer/maths"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // A Sphere is a ball of a material, its middle at a place, so big; and,

@@ -6,7 +6,7 @@ manufactory supplies geometry, so a lantern also needs a separate emitter
 to light the scene around it.
 
 This guide targets `manufacture` at `3455095`, Lamb at `a623630`, and
-Slayer’s `emit` on `trees` at `367cb8a`. Dimensions and behaviour were
+Slayer's `emit` on `trees` at `367cb8a`. Dimensions and behaviour were
 measured on 2026-10-06. The examples and failure reports apply to those
 revisions, not the current seeded construction API.
 
@@ -15,12 +15,22 @@ revisions, not the current seeded construction API.
 Each of the four fittings accepts a base point and parameter struct
 and returns triangles.
 
-| fitting | call | size | triangles | material ids | where its light belongs |
-|---|---|---|---|---|---|
-| sconce | `SconceBracket(base, DefaultSconceBracketParams())` | an arm 0.30 out along x and 0.25 up | 28 | 9 bracket, 10 bulb | the bulb: 0.265 along x, 0.15 up |
-| pendant | `PendantLight(base, DefaultPendantParams())` | 0.16 wide, 1.20 long | 32 | 11 cord, 12 shade | just past the shade: 1.25 along z |
-| lantern | `Lantern(base, DefaultLanternParams())` | a box 0.15 by 0.15, 0.30 tall | 10 | 13 top, 14 the four panels | its middle: 0.15 up |
-| spotlight | `Spotlight(base, DefaultSpotlightParams())` | 0.16 wide, 0.40 long | 44 | 15 mount, 16 head | the head's far end: 0.40 along z |
+- **sconce:** call: `SconceBracket(base, DefaultSconceBracketParams())`; size:
+  an arm 0.30 out along x and 0.25 up; triangles: 28; material ids: 9 bracket,
+  10 bulb; where its light belongs: the bulb: 0.265 along x, 0.15 up
+
+- **pendant:** call: `PendantLight(base, DefaultPendantParams())`; size: 0.16
+  wide, 1.20 long; triangles: 32; material ids: 11 cord, 12 shade; where its
+  light belongs: just past the shade: 1.25 along z
+
+- **lantern:** call: `Lantern(base, DefaultLanternParams())`; size: a box 0.15
+  by 0.15, 0.30 tall; triangles: 10; material ids: 13 top, 14 the four panels;
+  where its light belongs: its middle: 0.15 up
+
+- **spotlight:** call: `Spotlight(base, DefaultSpotlightParams())`; size: 0.16
+  wide, 0.40 long; triangles: 44; material ids: 15 mount, 16 head; where its
+  light belongs: the head's far end: 0.40 along z
+
 
 Three things about them:
 
@@ -37,19 +47,21 @@ Three things about them:
 The light is one of ninjafilm's emitters, or slayer's point lamp, added to
 the world with `world.Lamp`.
 
-| lamp | whose | what it is | use it for |
-|---|---|---|---|
-| `emit.Lit{At, Strength, Beyond}` | slayer | a point that shines every way, falling off with the square of distance | a flame, a bulb |
-| `film.NewSpot(at, aim, strength, cone, soft)` | ninjafilm | a cone of light from a point | a spotlight, a pendant's pool on a desk |
-| `film.NewFlood(up, strength)` | ninjafilm | an even dome of light from above | an overcast sky, a lit ceiling |
-| `film.NewSun(toward, strength)` | ninjafilm | parallel light from one direction | the sun, the moon |
+- **`emit.Lit{At, Strength, Beyond}`:** Slayer's point lamp shines every
+  way, falling off with the square of distance. Use it for a flame or bulb.
+- **`film.NewSpot(at, aim, strength, cone, soft)`:** ninjafilm's cone of
+  light from a point, for a spotlight or a pendant's pool on a desk.
+- **`film.NewFlood(up, strength)`:** ninjafilm's even dome of light from
+  above, for an overcast sky or a lit ceiling.
+- **`film.NewSun(toward, strength)`:** ninjafilm's parallel light from one
+  direction, for the sun or moon.
 
 `Strength` is the light one unit away. `Beyond` on a point lamp is how
 far from the lamp its light starts, so that the fitting round it does
 not shade it: set it just past the fitting's own glass.
 
-**Renderer compatibility at these revisions:** Lamb’s `trace.Sampled`
-accepts all four lamp types. Slayer’s GPU then accepted only `emit.Lit`;
+**Renderer compatibility at these revisions:** Lamb's `trace.Sampled`
+accepts all four lamp types. Slayer's GPU then accepted only `emit.Lit`;
 a type assertion in `gpu/parts.go` panicked on other lamps. Current GPU
 validation has changed, so this is a historical limitation.
 
@@ -58,7 +70,7 @@ Check current GPU validation before adapting them to a later revision.
 
 ## The colour of the light
 
-Warm flame interacts strongly with a stock’s limited spectral sensitivity.
+Warm flame interacts strongly with a stock's limited spectral sensitivity.
 libtheme computes thermal colour from temperature:
 
 ```go
@@ -73,11 +85,13 @@ func glowing(kelvin float64) maths.Light {
 }
 ```
 
-| source | kelvin | red, green, blue |
-|---|---|---|
-| an oil flame or a candle | 1900 | 2.64, 0.61, 0.00 |
-| a filament bulb | 3000 | 1.77, 0.84, 0.27 |
-| daylight | 6500 | 1.04, 0.98, 1.04 |
+- **an oil flame or a candle:** kelvin: 1900; red, green, blue: 2.64, 0.61,
+  0.00
+
+- **a filament bulb:** kelvin: 3000; red, green, blue: 1.77, 0.84, 0.27
+
+- **daylight:** kelvin: 6500; red, green, blue: 1.04, 0.98, 1.04
+
 
 The lamp values are libtheme's, computed. The temperatures are the
 usual round figures for each source and were not measured here.
@@ -159,12 +173,18 @@ spending time on a render.
 An oil flame is 2.64 of red, 0.61 of green and no blue. Each stock
 sees only some of that:
 
-| stock | sees | of a flame of luminance one, it gets | against `smoke` |
-|---|---|---|---|
-| `smoke` | red, green, blue | 1.08 | the same |
-| `ash` | green, blue | 0.31 | 1.8 stops under |
-| `soot` | blue | 0 | nothing at all |
-| `lantern` | each lamp in its own record | all of it, as orange | |
+- **`smoke`:** sees: red, green, blue; of a flame of luminance one, it gets:
+  1.08; against `smoke`: the same
+
+- **`ash`:** sees: green, blue; of a flame of luminance one, it gets: 0.31;
+  against `smoke`: 1.8 stops under
+
+- **`soot`:** sees: blue; of a flame of luminance one, it gets: 0; against
+  `smoke`: nothing at all
+
+- **`lantern`:** sees: each lamp in its own record; of a flame of luminance
+  one, it gets: all of it, as orange; against `smoke`:
+
 
 So:
 
@@ -184,7 +204,7 @@ So:
 The arithmetic is the stock's own: a record's exposure is the mean of
 the lamps it sees. doc/design.md has it.
 
-## Bright interiors: the lawyer’s office
+## Bright interiors: the lawyer's office
 
 A seated subject in a bright office benefits from broad white light
 and gentle facial shadows. Visible fittings can then explain where

@@ -80,7 +80,7 @@ func (shot take) Frames() int {
 }
 
 // Glimpses returns ordered scene times and camera placements for a zero-based
-// frame number. Render each sample and pass the results to the roll’s Print
+// frame number. Render each sample and pass the results to the roll's Print
 // method.
 func (shot take) Glimpses(frame int) []glimpse {
 	var caught []glimpse
@@ -91,7 +91,7 @@ func (shot take) Glimpses(frame int) []glimpse {
 	return caught
 }
 
-// opening places a glimpse at the midpoint of its share of the shutter’s open
+// opening places a glimpse at the midpoint of its share of the shutter's open
 // interval, distributing samples evenly across exposure time.
 func (shot take) opening(frame, index int) time.Duration {
 	step := (float64(index) + midway) / float64(shot.pace.glimpses)
@@ -101,7 +101,7 @@ func (shot take) opening(frame, index int) time.Duration {
 	return time.Duration(nanoseconds)
 }
 
-// glimpse stores a shutter sample’s time and camera transform.
+// glimpse stores a shutter sample's time and camera transform.
 type glimpse struct {
 	at  time.Duration
 	eye maths.Subspace

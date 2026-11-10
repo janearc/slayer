@@ -3,7 +3,7 @@ package set
 import (
 	"math"
 
-	"go.yaml.in/yaml/v3"
+	"gopkg.in/yaml.v3"
 )
 
 // Weather is a planet's weather as a fluid makes it, where a set asks

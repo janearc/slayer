@@ -1,0 +1,29 @@
+# Independent resource and source-access expectations, not an execution record.
+# The existing100x70fixture has32x32float32tiles,4096bytes apiece.
+budget:
+  cache-bytes: 8192
+  cache-tiles: 3
+  tile-bytes: 4096
+  metadata-bytes: 65536
+sequence:
+  - {column: 0, row: 1}
+  - {column: 32, row: 1}
+  - {column: 0, row: 1}
+  - {column: 64, row: 1}
+retained-bytes: 8192
+retained-tiles: 2
+# After truncating the opened fixture's backing file, the most-recent tile
+# remains readable while the evicted middle tile must report a source error.
+cached-after-truncate: {column: 0, row: 1}
+evicted-after-truncate: {column: 32, row: 1}
+coverage:
+  west: 1000.5
+  north: 9000.25
+  east: 1200.5
+  south: 8860.25
+outside:
+  - {east: 1000.49, north: 9000.25}
+  - {east: 1200.5, north: 9000.25}
+  - {east: 1000.5, north: 9000.26}
+  - {east: 1000.5, north: 8860.25}
+oversize-tile-bytes: 4095

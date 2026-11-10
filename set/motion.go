@@ -7,7 +7,7 @@ import (
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/thing"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // A Motion is a run through keyframes that carries a thing: how many

@@ -1,0 +1,22 @@
+$schema: https://github.com/janearc/slayer/schemas/sequence-v1.json
+smoke: 1
+film: {width: 33, height: 33, rays: 1}
+output: frames
+fps: 6
+start: {value: 45, unit: s}
+duration: {value: 30, unit: s}
+scene-duration: {value: 3600, unit: s}
+print: {knee: 0.7, top: 8, bloom: 0}
+camera:
+  unit: m
+  look-at: {x: 0, y: 0, z: 0}
+  moves:
+    - from: {x: 0, y: 0, z: 5}
+      to: {x: 4, y: 0, z: 5}
+      duration: {value: 3600, unit: s}
+      ease: linear
+  zoom:
+    from: {value: 24, unit: deg}
+    to: {value: 64, unit: deg}
+    duration: {value: 3600, unit: s}
+    ease: linear

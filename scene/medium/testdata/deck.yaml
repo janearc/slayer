@@ -1,0 +1,24 @@
+# Independent level-deck examples, 2026-11-07.
+# At equal scene heights, density is equal until terrain clips the field.
+base: 2
+ground: {east: 1}
+samples:
+  - {at: {x: 0, y: 2, z: 0}, density: 0}
+  - {at: {x: 0, y: 4.5, z: 0}, density: 0.16875}
+  - {at: {x: 3, y: 4.5, z: 0}, density: 0.16875}
+  - {at: {x: 0, y: 7, z: 0}, density: 0.1}
+  - {at: {x: 3, y: 7, z: 0}, density: 0.1}
+  - {at: {x: 0, y: 9.5, z: 0}, density: 0.03125}
+  - {at: {x: 0, y: 12, z: 0}, density: 0}
+  - {at: {x: 0, y: 12.5, z: 0}, density: 0}
+  - {at: {x: 0, y: 1, z: 0}, density: 0}
+  - {at: {x: 4, y: 3, z: 0}, density: 0}
+  - {at: {x: 4, y: 4, z: 0}, density: 0}
+clipped:
+  min: {x: -2, y: 4.5, z: -3}
+  max: {x: 4, y: 9.5, z: 5}
+clip-samples:
+  - {at: {x: 0, y: 4.5, z: 0}, density: 0.16875}
+  - {at: {x: 0, y: 9.5, z: 0}, density: 0.03125}
+  - {at: {x: 0, y: 4.49, z: 0}, density: 0}
+  - {at: {x: 0, y: 9.51, z: 0}, density: 0}

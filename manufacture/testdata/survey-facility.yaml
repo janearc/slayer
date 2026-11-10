@@ -1,0 +1,15 @@
+# Independent physical reservations and service-roof probes, authored metres.
+kind: rubin
+seed: 5
+tolerance: 1.0e-8
+maximum-faces: 100000
+minimum: {x: -15, y: 0, z: -15}
+maximum: {x: 66, y: 30, z: 15}
+ray:
+  at: {x: 0, y: 45, z: 0}
+  dir: {x: 0, y: -1, z: 0}
+roofs:
+  - {east: 60, south: 0, height: 5.16}
+  - {east: 50, south: 0, height: 9.32}
+  - {east: 30, south: 0, height: 12.48}
+clearance: {east: 15.3, south: 0}

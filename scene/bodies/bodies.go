@@ -3,7 +3,7 @@
 // a black-hole scene combines a dark body with an accretion disc.
 //
 // Place adds those components to a world and times satellite orbits from the
-// primary’s mass. The caller supplies a scale to suit the shot.
+// primary's mass. The caller supplies a scale to suit the shot.
 //
 // Sizes, masses, and durations were originally entered from memory and are not
 // yet verified against published sources. Mark each verified value beside its

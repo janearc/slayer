@@ -1,0 +1,26 @@
+# Authored catalogue display controls, 2026-11-07.
+# Distances scale with each specimen's bounding radius. No measured lighting.
+width: 640
+height: 480
+rays: 2
+seed: 5
+details: [quick]
+wide: 45
+camera: {x: 1.4, y: 0.8, z: -2}
+distance: 3.8
+sample-limit: 2000000
+face-limit: 1500000
+pixel-aspect: 1
+light-exposure: 0.001
+minimum-coverage: 0.0001
+sky:
+  # A uniform backdrop keeps the camera's roll from revealing a sky seam.
+  horizon: {r: 0.04, g: 0.04, b: 0.045}
+  zenith: {r: 0.04, g: 0.04, b: 0.045}
+  ground: {r: 0.04, g: 0.04, b: 0.045}
+sources:
+  - toward: {x: -1, y: 2, z: -2}
+    strength: {r: 2.4, g: 2.3, b: 2.1}
+  - toward: {x: 2, y: 1, z: 1}
+    strength: {r: 0.5, g: 0.6, b: 0.8}
+tone: {exposure: 1, knee: 0.7, top: 8, bloom: 0}

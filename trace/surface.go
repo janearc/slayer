@@ -32,8 +32,10 @@ func (placed *placedThing) meet(ray maths.Ray, near,
 // landing is where on a mesh of slayer's a ray landed, when it met one:
 // which face, and where on it, so its normal needs no search.
 type landing struct {
-	met    mesh.Met
-	meshed bool
+	met     mesh.Met
+	meshed  bool
+	normal  maths.Vec
+	grouped bool
 }
 
 // reach is meet, and where the ray landed when the thing is slayer's
@@ -41,6 +43,11 @@ type landing struct {
 // finds what a search by meet finds.
 func (placed *placedThing) reach(ray maths.Ray, near,
 	far float64) (float64, landing, bool) {
+	if group, ok := placed.thing.Shape.(*shape.MeshGroup); ok {
+		local := placed.at.RayIn(ray)
+		distance, normal, hit := group.HitNormal(local, near/placed.scale, far/placed.scale)
+		return distance * placed.scale, landing{normal: normal, grouped: hit}, hit
+	}
 	skin, isMesh := placed.thing.Shape.(*mesh.Mesh)
 	if !isMesh {
 		along, ok := placed.meet(ray, near, far)
@@ -97,6 +104,9 @@ type hit struct {
 // against the ray: the face it landed on, for slayer's mesh, or the
 // shape asked at the point.
 func (met hit) normal(point, dir maths.Vec) maths.Vec {
+	if met.on.grouped {
+		return met.thing.toward(met.on.normal, dir)
+	}
 	skin, isMesh := met.thing.thing.Shape.(*mesh.Mesh)
 	if !isMesh || !met.on.meshed {
 		return met.thing.facing(point, dir)

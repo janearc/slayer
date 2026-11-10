@@ -117,8 +117,9 @@ func (at place) fetch(call pzm.Call) error {
 	}
 	if call.DryRun() {
 		for _, source := range chosen {
-			fmt.Fprintf(call.Out(), "%s: would fetch %s\n", source.Key(),
-				source.From())
+			if _, err := fmt.Fprintf(call.Out(), "%s: would fetch %s\n", source.Key(), source.From()); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -129,7 +130,9 @@ func (at place) fetch(call pzm.Call) error {
 			failed = append(failed, err)
 			continue
 		}
-		fmt.Fprintln(call.Out(), said)
+		if _, err := fmt.Fprintln(call.Out(), said); err != nil {
+			return errors.Join(append(failed, err)...)
+		}
 	}
 	return errors.Join(failed...)
 }
@@ -163,7 +166,9 @@ func (at place) check(call pzm.Call) error {
 			failed = append(failed, err)
 			continue
 		}
-		fmt.Fprintln(call.Out(), said)
+		if _, err := fmt.Fprintln(call.Out(), said); err != nil {
+			return errors.Join(append(failed, err)...)
+		}
 	}
 	return errors.Join(failed...)
 }

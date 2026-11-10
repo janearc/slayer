@@ -87,7 +87,7 @@ type Attrs struct {
 // Clear reports whether the object is excluded from shadow casting.
 func (t *Thing) Clear() bool { return t.Attrs.Clear }
 
-// Motion returns an object’s subspace at elapsed time t.
+// Motion returns an object's subspace at elapsed time t.
 type Motion interface {
 	At(t time.Duration) maths.Subspace
 }
@@ -115,7 +115,7 @@ func (t *Thing) Hidden() bool { return t.Attrs.Hidden }
 // Ghost reports whether the object passes through other objects.
 func (t *Thing) Ghost() bool { return t.Attrs.Ghost }
 
-// At returns the object’s transform at time at, or the identity placement when
+// At returns the object's transform at time at, or the identity placement when
 // no motion is supplied.
 func (t *Thing) At(at time.Duration) maths.Subspace {
 	if t.Motion == nil {
@@ -153,7 +153,7 @@ type Beam struct {
 }
 
 // Flow returns local flow direction and speed. The default axis is up. Axial
-// flow points away from the origin on the sample’s side.
+// flow points away from the origin on the sample's side.
 //
 // Rotational flow follows the tangent, scales as sqrt(At/radius) when At is
 // set, and is capped at 0.99c. Flow on the axis is zero.
@@ -220,10 +220,12 @@ func Sun(toward maths.Vec, strength maths.Light) Lamp {
 
 // World assembles surfaces, volumes, fields, lights, sky, and global haze.
 type World struct {
-	Things  []*Thing
-	Volumes []*Volume
-	Fields  []*Field
-	Lamps   []Lamp
+	// RayOriginReference's zero value keeps the geometry-derived heuristic.
+	RayOriginReference RayOriginReference
+	Things             []*Thing
+	Volumes            []*Volume
+	Fields             []*Field
+	Lamps              []Lamp
 	// Sky supplies distant light by direction. Nil returns black for rays
 	// that miss all geometry.
 	Sky Sky

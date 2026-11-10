@@ -1,0 +1,8 @@
+# Authored 2026-11-07: a camera above the procedural ground, moving four metres.
+camera:
+  unit: m
+  look-at: {x: 0, y: 1, z: 0}
+  moves:
+    - from: {x: 0, y: 2, z: 6}
+      to: {x: 0, y: 2, z: 2}
+      speed: {value: 2, unit: m/s}

@@ -1,0 +1,41 @@
+# Authored specimen view, 2026-11-07; not an orbit simulation.
+# Sources and visual choices: space-observatories.md.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: Hubble tube and solar wings
+  renderer: gpu-native
+  seed: 11
+  light: sun
+  sun: {azimuth: 70, altitude: 40}
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263818
+    north: 2148752
+    across: 64
+    down: 64
+    step: 2
+  set:
+    things:
+      the telescope:
+        kind: hubble
+        seed: 5
+        east: 263850
+        north: 2148720
+        height: {value: 100, unit: m}
+        complexity: demo
+  film:
+    width: 960
+    height: 720
+    rays: 3
+    exposure: 2000
+    wide: 50
+  cameras:
+    specimen:
+      location:
+        loc_relative:
+          object: the telescope
+          standoff_x: 18
+          standoff_y: 9
+          standoff_z: 15
+      orientation: {point_to: the telescope, alpha: -23}

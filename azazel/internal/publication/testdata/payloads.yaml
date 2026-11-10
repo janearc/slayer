@@ -1,0 +1,17 @@
+# Each authored byte family keeps its original order and empty-slice shape.
+local_write:
+  binary: [0, 255, 10, 128, 1]
+  empty: null
+native_publication:
+  binary: [0, 255, 128, 10, 1]
+  empty: null
+rename_source: [0, 255, 128, 1]
+replacement:
+  nil_payload: null
+  empty_payload: []
+  binary_payload: [0, 255, 10]
+  text_payload: [110, 101, 119, 32, 115, 116, 97, 116, 101]
+failed_write_count: 2
+short_write_gap: 1
+minimum_generated_bytes: 0
+maximum_generated_bytes: 256

@@ -12,6 +12,20 @@ type Source struct {
 	Strength maths.Light
 }
 
+// Placed carries a source cell into a uniformly scaled scene placement.
+// Its width scales as length and its integrated power as emitting volume.
+// A zero scale is the identity convention used by maths.Subspace.
+func (source Source) Placed(space maths.Subspace) Source {
+	scale := space.Scale
+	if scale == 0 {
+		scale = 1
+	}
+	source.At = space.Out(source.At)
+	source.Across *= scale
+	source.Strength = source.Strength.Scale(scale * scale * scale)
+	return source
+}
+
 // Sources is the flame's light as points, for lighting what is near it.
 //
 // the flame's box is cut into cells a side; each cell with soot in it

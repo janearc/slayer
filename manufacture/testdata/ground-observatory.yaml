@@ -1,0 +1,13 @@
+# Source dimensions and independent geometric expectations for the first
+# ground templates. Keck enclosure dimensions are authored scenery choices.
+seed: 5
+tolerance: 1.0e-8
+maximum-faces: 200000
+# A unit vector in the mirror plane for the authored 55 degree elevation.
+mirror-tangent: {x: 0, y: 0.573576436351046, z: 0.819152044288992}
+profiles:
+  - {design: palomar, diameter: 42, height: 41, aperture: 5.08, panels: 1}
+  - {design: keck-i, diameter: 30, height: 28, aperture: 10, panels: 36}
+  - {design: keck-ii, diameter: 30, height: 28, aperture: 10, panels: 36}
+  - {design: subaru, diameter: 40, height: 43, aperture: 8.2, panels: 1}
+  - {design: rubin, diameter: 81, height: 30, aperture: 8.4, panels: 1}

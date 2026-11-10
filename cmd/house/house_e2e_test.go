@@ -11,13 +11,7 @@ import (
 // built is house, built where the test keeps its files.
 func built(t *testing.T) string {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "house")
-	made, err := exec.Command("go", "build", "-o", path, ".").
-		CombinedOutput()
-	if err != nil {
-		t.Fatalf("house would not build: %v\n%s", err, made)
-	}
-	return path
+	return coverageCommand
 }
 
 // house run as a person runs it draws what its flags ask and says so on

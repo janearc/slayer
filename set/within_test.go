@@ -7,7 +7,7 @@ import (
 	"github.com/janearc/slayer/set"
 )
 
-// withinOf is the kīlauea iki set with its trees on the rim grown within
+// withinOf is the kilauea iki set with its trees on the rim grown within
 // a wedge, written as it is given.
 func withinOf(t *testing.T, wedge string) string {
 	t.Helper()

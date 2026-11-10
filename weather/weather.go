@@ -11,7 +11,8 @@ import (
 // the face reads to know which band's air it shows. it is the
 // barotropic vorticity equation,
 //
-//	dζ/dt = -J(ψ, ζ + f) - ζ/drag - ν∇⁸ζ + storms,  ∇²ψ = ζ,
+//	d(zeta)/dt = -J(psi, zeta + f) - zeta/drag - nu * grad^8(zeta) + storms
+//	grad^2(psi) = zeta
 //
 // with the bands' air carried by the same flow and drawn back slowly
 // toward the band it was made in.
@@ -134,9 +135,9 @@ func (made *Weather) rowsAtOnce(work func(j int)) {
 
 // changing is the tendency of a state: its stream function found, then
 // each cell's vorticity carried by it with the planet's, slowed by
-// friction and smoothed at the grid's scale by ∇⁸.
+// friction and smoothed at the grid's scale by grad^8.
 //
-// its bands' air is carried, smoothed by ∇⁴, and drawn back toward its
+// its bands' air is carried, smoothed by grad^4, and drawn back toward its
 // own band. its age is carried and smoothed alike, a second older each
 // second, and made new where the air rises.
 func (made *Weather) changing(vorticity, origin, age []float64) tendency {
@@ -190,8 +191,8 @@ func (made *Weather) laplacians(field []float64, times int) reading {
 // so what piles up at the grid's scale is taken off before it turns to
 // noise.
 //
-// ∇⁸ takes it off sharply there and leaves a storm a few cells wide all
-// but alone; ∇⁴ over twenty thousand seconds left the grid's noise, and
+// grad^8 takes it off sharply there and leaves a storm a few cells wide all
+// but alone; grad^4 over twenty thousand seconds left the grid's noise, and
 // over one hour killed the storms.
 const smoothing = 3600.0
 

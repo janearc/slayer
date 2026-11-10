@@ -1,7 +1,7 @@
 // Package flame models firelight from hot soot, the fraction of heat emitted as
 // radiation, and flame puffing as a function of size.
 //
-// Kirchhoff’s law gives emission as absorptivity times black-body radiance.
+// Kirchhoff's law gives emission as absorptivity times black-body radiance.
 // Soot absorptivity is one minus the exponential of negative optical depth. Its
 // wavelength dependence favours blue absorption, so the resulting flame is
 // bluer than a grey body at the same temperature.

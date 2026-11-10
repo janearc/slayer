@@ -3,7 +3,7 @@ package set
 import (
 	"math"
 
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // kinds is every kind of asset a set file may ask for.
@@ -14,15 +14,32 @@ var kinds = []string{"house"}
 func (reading reader) scene(_, value *yaml.Node) error {
 	made := reading.set
 	return reading.keys(value, map[string]step{
-		"name":    reading.text(&made.name),
-		"light":   reading.word(&made.light, "ambient", "moon", "sun"),
-		"terrain": reading.terrain,
-		"film":    reading.film,
-		"moon":    reading.moon,
-		"sun":     reading.sun,
-		"planet":  reading.planet,
-		"hud":     reading.hud,
-		"world":   reading.world,
+		"renderer": reading.word(&made.renderer,
+			"gpu", "cpu", "gpu-native-shadows", "gpu-native"),
+		"volume-lighting": reading.word(&made.volumeLighting, "direct", "cached"),
+		"complexity":      reading.complexity(&made.complexity),
+		"seed": func(key, value *yaml.Node) error {
+			err := reading.whole(&made.seed, 0, mostSeed)(key, value)
+			made.hasSeed = err == nil
+			return err
+		},
+		"recipes":         reading.recipes,
+		"ecosystems":      reading.ecosystems,
+		"fire-fronts":     reading.fireFronts,
+		"fuel-beds":       reading.fuelBeds,
+		"weather":         reading.weather,
+		"lasers":          reading.lasers,
+		"laser-pointings": reading.laserPointings,
+		"atmosphere":      reading.atmosphere,
+		"name":            reading.text(&made.name),
+		"light":           reading.word(&made.light, "ambient", "moon", "sun", "none"),
+		"terrain":         reading.terrain,
+		"film":            reading.film,
+		"moon":            reading.moon,
+		"sun":             reading.sun,
+		"planet":          reading.planet,
+		"hud":             reading.hud,
+		"world":           reading.world,
 		"location": reading.block(map[string]step{
 			"lat": reading.number(&made.latitude, -90, 90),
 			"lon": reading.number(&made.longitude, -180, 180)}),

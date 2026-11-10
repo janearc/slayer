@@ -5,7 +5,7 @@ import (
 	"slices"
 
 	"github.com/janearc/slayer/manufacture"
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // Terrain is the ground a set stands on, as it was measured: a window of
@@ -113,6 +113,7 @@ func (made Film) Wide() float64 { return made.wide }
 // toward east, and how high above the horizon, in degrees, and the
 // source its face's mosaic is, by its key in sources.yaml.
 type Moon struct {
+	disc              bool
 	azimuth, altitude float64
 	face              string
 }
@@ -122,6 +123,9 @@ func (made Moon) Where() (azimuth, altitude float64) {
 	return made.azimuth, made.altitude
 }
 
+// Disc says whether to draw the lunar surface as scene geometry.
+func (made Moon) Disc() bool { return made.disc }
+
 // Face is the key of its face's mosaic, or nothing for a plain face.
 func (made Moon) Face() string { return made.face }
 
@@ -130,6 +134,7 @@ func (made Moon) Face() string { return made.face }
 // it lights only the air: twilight.
 type Sun struct {
 	azimuth, altitude float64
+	tint              *[sunChannels]float64
 }
 
 // Where is the sun's azimuth and altitude, in degrees.
@@ -143,8 +148,11 @@ func (made Sun) Where() (azimuth, altitude float64) {
 // what the scene means and says so.
 type Thing struct {
 	name, kind, standsIn string
+	recipe, complexity   string
 	seed                 float64
 	east, north          float64
+	height               float64
+	heading              *float64
 	alight               bool
 }
 
@@ -160,6 +168,9 @@ func (made Thing) Seed() uint64 { return uint64(made.seed) }
 // At is where it stands, an easting and a northing.
 func (made Thing) At() (east, north float64) { return made.east, made.north }
 
+// Height is the optional lift above terrain, in metres. Zero stands on it.
+func (made Thing) Height() float64 { return made.height }
+
 // Alight is whether it burns.
 func (made Thing) Alight() bool { return made.alight }
 
@@ -170,6 +181,11 @@ func (made Thing) StandsIn() string { return made.standsIn }
 // how a hillside is covered.
 type Stand struct {
 	name, kind, standsIn string
+	recipe, complexity   string
+	excluded             string
+	clearance            float64
+	weather              string
+	fade                 bool
 	count, seed          float64
 	alight               float64
 	above, below         float64
@@ -314,7 +330,9 @@ func (reading reader) printed(into **[2]float64) step {
 // sun reads where the sun stands in the set's sky.
 func (reading reader) sun(_, value *yaml.Node) error {
 	made := &Sun{}
+	input := sunTintReader{reading: reading, sun: made}
 	err := reading.keys(value, map[string]step{
+		"tint":     input.read,
 		"azimuth":  reading.number(&made.azimuth, 0, 360),
 		"altitude": reading.number(&made.altitude, -90, 90),
 	}, nil)
@@ -324,11 +342,12 @@ func (reading reader) sun(_, value *yaml.Node) error {
 
 // moon reads where the full moon stands in the set's sky.
 func (reading reader) moon(_, value *yaml.Node) error {
-	made := &Moon{}
+	made := &Moon{disc: true}
 	err := reading.keys(value, map[string]step{
 		"azimuth":  reading.number(&made.azimuth, 0, 360),
 		"altitude": reading.number(&made.altitude, -90, 90),
 		"face":     reading.text(&made.face),
+		"disc":     reading.yes(&made.disc),
 	}, nil)
 	reading.set.moon = made
 	return err
@@ -336,13 +355,23 @@ func (reading reader) moon(_, value *yaml.Node) error {
 
 // things reads each made thing, by its name.
 func (reading reader) things(_, value *yaml.Node) error {
+	unbounded := math.Inf(scenePositiveInfinity)
+	maximum := math.Sqrt(math.MaxFloat64)
 	return reading.each(value, func(name, block *yaml.Node) error {
 		made := Thing{name: name.Value}
 		err := reading.keys(block, map[string]step{
-			"kind":          reading.only(manufacture.KindNames()...),
-			"seed":          reading.whole(&made.seed, 0, mostSeed),
-			"east":          reading.number(&made.east, 0, math.Inf(1)),
-			"north":         reading.number(&made.north, 0, math.Inf(1)),
+			"recipe":     reading.text(&made.recipe),
+			"complexity": reading.complexity(&made.complexity),
+			"kind":       reading.only(manufacture.KindNames()...),
+			"seed": reading.whole(&made.seed,
+				sceneScalarZero, mostSeed),
+			"east": reading.number(&made.east,
+				sceneScalarZero, unbounded),
+			"north": reading.number(&made.north,
+				sceneScalarZero, unbounded),
+			"heading": reading.heading(&made.heading),
+			"height": reading.quantity(&made.height, "m",
+				sceneScalarZero, maximum),
 			"alight":        reading.yes(&made.alight),
 			"stands_in_for": reading.text(&made.standsIn),
 		}, nil)
@@ -358,9 +387,18 @@ func (reading reader) stands(_, value *yaml.Node) error {
 		made := Stand{name: name.Value, above: math.Inf(-1),
 			below: math.Inf(1)}
 		err := reading.keys(block, map[string]step{
+			"recipe":     reading.text(&made.recipe),
+			"complexity": reading.complexity(&made.complexity),
+			"exclude": reading.block(map[string]step{
+				"around":    reading.text(&made.excluded),
+				"clearance": reading.quantity(&made.clearance, "m", 0, 1e5)}),
+			"atmosphere": reading.block(map[string]step{
+				"weather":          reading.text(&made.weather),
+				"extent":           reading.only("canopy-and-ground"),
+				"fade-at-boundary": reading.yes(&made.fade)}),
 			"kind":          reading.only(manufacture.KindNames()...),
 			"count":         reading.whole(&made.count, 1, mostStand),
-			"seed":          reading.whole(&made.seed, 0, mostSeed),
+			"seed":          reading.whole(&made.seed, sceneScalarZero, mostSeed),
 			"alight":        reading.whole(&made.alight, 0, mostStand),
 			"stands_in_for": reading.text(&made.standsIn),
 			"above":         reading.number(&made.above, -1e4, 1e4),

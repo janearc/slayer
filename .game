@@ -1,27 +1,89 @@
 # vim: set filetype=game et ai ts=4 wrap
+
+game v0.5.0
+
+# what does slayer do?
+#
+# slayer frickin slays.
 name slayer
 
-lint width 80
-lint rows 25
+# everyone loves lint
 lint comments
 lint print
 lint exclaim
 lint shout
 lint words cement hyperscaler enterprise-grade blazing-fast load-bearing
-lint paragraph 4
+lint paragraph 6
+lint allow README.md words paragraph rows
+
+lint abbreviations ATLAS CFLAGS DKIST FETCHED GALACSI GEODSS GLIMPSE GOCOVERDIR USACE
+lint abbreviations GOMAXPROCS GOWORK JONSWAP LDFLAGS LIGNUM NBSIR PPMAP README CORONA
+lint abbreviations SCHEMA SHORT SIGGRAPH SOLARC SPITZER STARRS UKIRT WEATHER WORLD
 
 omit burning-trousers/INSIDE.md
 exclude burning-trousers/INSIDE.md
 
+# not distributing this
 omit cmd/quorum
 exclude cmd/quorum
 
+# not distributing this
 omit cmd/show
 exclude cmd/show
 
-lint allow README.md words paragraph rows
+# not ready for this to distribute
+omit azazel/internal/locking/DESIGN.md
+omit azazel/internal/locking/RELEASE.md
+omit azazel/internal/publication/LOCAL-DESIGN.md
+omit cmd/hillside/main.go
+omit cmd/hillside/main_test.go
+omit doc/camera-hyperlapse-result.md
+omit doc/feature-backlog.md
+omit doc/golden-hour-site.yaml
+omit doc/mist-packet-contract.md
+omit doc/music-timeline.yaml
+omit doc/phone-ocean-integration.md
+omit doc/phone-source-checks.md
+omit doc/review-2026-11-04.md
+omit doc/terrain-streaming.md
+omit manufacture/ground-choices.yaml
+omit manufacture/home.go
+omit manufacture/needled-shoot.yml
+omit manufacture/offered_test.go
+omit manufacture/plant-choices.yaml
+omit manufacture/plant-profiles.yaml
+omit manufacture/rows_test.go
+omit ninjafilm/hash/hash.go
+omit render/emptyspace/policy.yaml
+omit scene/biome/selection-policy.yaml
+omit terrain/memory-policy.yaml
+exclude azazel/internal/locking/DESIGN.md
+exclude azazel/internal/locking/RELEASE.md
+exclude azazel/internal/publication/LOCAL-DESIGN.md
+exclude cmd/hillside/main.go
+exclude cmd/hillside/main_test.go
+exclude doc/camera-hyperlapse-result.md
+exclude doc/feature-backlog.md
+exclude doc/golden-hour-site.yaml
+exclude doc/mist-packet-contract.md
+exclude doc/music-timeline.yaml
+exclude doc/phone-ocean-integration.md
+exclude doc/phone-source-checks.md
+exclude doc/review-2026-11-04.md
+exclude doc/terrain-streaming.md
+exclude manufacture/ground-choices.yaml
+exclude manufacture/home.go
+exclude manufacture/needled-shoot.yml
+exclude manufacture/offered_test.go
+exclude manufacture/plant-choices.yaml
+exclude manufacture/plant-profiles.yaml
+exclude manufacture/rows_test.go
+exclude ninjafilm/hash/hash.go
+exclude render/emptyspace/policy.yaml
+exclude scene/biome/selection-policy.yaml
+exclude terrain/memory-policy.yaml
 
-# don't need to share this witht he world
+# don't need to share this with the world
 omit DEBT.md
 
 # where the published sources slayer cites are kept, outside any
@@ -31,6 +93,61 @@ needs SLAYER_SHELF the directory the sources are fetched to and read from
 # before slayer builds or is checked, every measured number in its
 # research data is held to its source: pinned, on the shelf, on its page.
 target pre-build . :: go run ./cmd/sources verify
+
+# The viewer and render commands use the binaries stamped by game build.
+# Application arguments follow --; see Game issue 2 for older builds.
+run hillside . :: ./bin/hillside
+run swarm . :: ./bin/swarm
+run orbital . :: ./bin/orbital
+run ring . :: ./bin/ring
+run moonrise . :: ./bin/moonrise
+run house . :: ./bin/house
+run weather . :: ./bin/weather
+run develop . :: ./bin/develop
+run smokecheck . :: ./bin/smokecheck
+run slayer . :: ./bin/slayer
+run lightbox . :: ./bin/lightbox
+run grissom . :: ./bin/grissom
+
+# These small, fixed runs also work before argument forwarding is installed.
+run smoke-one . :: ./bin/smokecheck smoke 1
+run hillside-help . :: ./bin/hillside -help
+run observatory . :: ./bin/hillside -set doc/observatory-ecosystem.yaml -out out/observatory.png
+run fire-cluster . :: ./bin/hillside -set doc/fire-cluster.yaml -out out/fire-cluster.png
+run fire-woodland . :: ./bin/hillside -set doc/fire-woodland.yaml -out out/fire-woodland.png
+run fire-sequence-check . :: ./bin/hillside sequence --plan doc/fire-fuel-sequence.yaml --dry-run
+run fire-camera-check . :: ./bin/hillside sequence --plan doc/fire-camera-sequence.yaml --dry-run
+
+# Fetching the shelf must work before the pre-build verification can pass.
+run sources . :: go run ./cmd/sources
+run sources-fetch . :: go run ./cmd/sources fetch
+run sources-check . :: go run ./cmd/sources check
+run sources-verify . :: go run ./cmd/sources verify
+run apart . :: go run ./burning-trousers/cmd/apart
+run check-light-grid . :: go test -count=1 -v ./gpu -run=TestSmokeLightingGridResolutionStudy|TestCachedSmokeTracksDirectFireLighting
+run check-film . :: go test -count=1 ./ninjafilm/...
+run check-coverage-focus . :: go test -count=1 -coverprofile=bin/.cover/coverage-focus.out ./internal/commandtest ./cmd/grissom ./cmd/develop ./cmd/lightbox ./cmd/orbital ./cmd/ring ./cmd/swarm ./cmd/weather ./cmd/quorum ./cmd/show ./cmd/moonrise ./cmd/slayer ./cmd/house
+run check-command-tests . :: go test -count=1 ./internal/commandtest ./cmd/grissom ./cmd/develop ./cmd/lightbox ./cmd/orbital ./cmd/ring ./cmd/swarm ./cmd/weather ./cmd/quorum ./cmd/show ./cmd/moonrise ./cmd/slayer ./cmd/house
+run check-coverage-core . :: go test -count=1 -coverprofile=bin/.cover/coverage-core.out ./internal/commandtest ./cmd/grissom ./cmd/develop ./cmd/lightbox ./cmd/ring ./cmd/moonrise
+run check-film-race . :: go test -race -count=1 -timeout=10m ./ninjafilm/...
+run check-mesh . :: go test -count=1 -v -timeout=30m ./burning-trousers/mesh
+run review-4k . :: go test -timeout=30m -run=^$$ -bench=^BenchmarkCommitted4K$$ -benchtime=1x -count=1 -v ./burning-trousers/animation
+target review-4k-binary . :: go build -o out/review-4k/hillside ./cmd/hillside
+
+# The optional viewer data uses the sibling layout in doc/grissom-setup.md.
+run grissom-data ../celestial-data :: ./bin/celestial-data fetch-set grissom --into ../local/data
+
+# Review these authored records with renders before replacing their fixtures.
+run sample-embers . :: go run ./embers/testdata/sample.go
+run sample-flame . :: go run ./flame/testdata/sample.go
+run sample-flame-rags . :: go run ./flame/testdata/ragged_sample.go
+run sample-fire-layout . :: go run ./manufacture/testdata/fire_layout_sample.go
+run sample-lights . :: go run ./manufacture/testdata/light_sample.go
+run sample-geometry . :: go run ./manufacture/testdata/geometry_sample.go
+run sample-monolithic . :: go run ./manufacture/testdata/monolithic_sample.go
+run sample-legacy-foliage . :: go test -count=1 -run=^TestDiagnosticPrintLegacyFoliageSamples$$ -v ./manufacture
+run sample-later-foliage . :: go test -count=1 -run=^TestDiagnosticPrintLaterFoliageSamples$$ -v ./manufacture
+run terrain-fixture . :: go test -count=1 ./terrain -run=WriteThePlainFixture
 
 # the mock the take tests use, generated from the interface it stands in
 # for. mockgen is pinned in go.mod as a tool. burning-trousers/mocks has
@@ -52,3 +169,131 @@ run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafi
 run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/projection.go -package mocks github.com/janearc/slayer/ninjafilm/film Projection
 run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/emitter.go -package mocks github.com/janearc/slayer/ninjafilm/film Emitter
 run mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/beamer.go -package mocks github.com/janearc/slayer/ninjafilm/film Beamer
+
+run check-coverage-scenes . :: go test -count=1 -coverprofile=bin/.cover/coverage-scenes.out ./cmd/weather ./cmd/swarm ./cmd/ring ./planet ./weather ./lantern
+run check-coverage-terminal . :: go test -count=1 -coverprofile=bin/.cover/coverage-terminal.out ./cmd/show ./cmd/quorum
+run check-coverage-moon-house . :: go test -count=1 -coverprofile=bin/.cover/coverage-moon-house.out ./cmd/moonrise ./cmd/house ./cmd/slayer
+run check-coverage-orbital . :: go test -count=1 -coverprofile=bin/.cover/coverage-orbital.out ./cmd/orbital
+run check-coverage-cache . :: go test -count=1 -coverprofile=bin/.cover/coverage-cache.out ./weather ./render/smokecache
+run check-cache-provenance . :: go test -count=1 ./render/smokecache
+run check-camera-motion . :: go test -count=1 ./camera ./cmd/hillside -run Camera|Path|Move|Speed|Sequence
+run check-coverage-set . :: go test -count=1 -coverprofile=bin/.cover/coverage-set.out ./set
+run check-coverage-smoke-command . :: go test -count=1 -coverprofile=bin/.cover/coverage-smoke-command.out ./cmd/smokecheck -run TestRealSmokecheck
+run check-coverage-mutator . :: go test -count=1 -coverprofile=bin/.cover/coverage-mutator.out ./tools/mutate
+run check-coverage-final-gaps . :: go test -count=1 -coverprofile=bin/.cover/coverage-final-gaps.out ./cmd/quorum ./tools/mutate ./planet
+run demos . :: go run ./cmd/demo list
+run demo . :: go run ./cmd/demo show
+run demo-one . :: go run ./cmd/demo show 1
+run check-demo . :: go test -count=1 ./cmd/demo
+run check-camera-inputs . :: go test -count=1 ./maths ./film ./scene/smoke -run View|PinholeOf|RequestedPhoto
+target demo-binary . :: go build -o bin/demo ./cmd/demo
+target camera-binary . :: go build -o bin/hillside ./cmd/hillside
+run check-shuriken . :: shuriken facts .
+run update-pzm . :: go get github.com/janearc/puzzlemouth@v0.1.4
+run format-instruments . :: go fmt ./manufacture ./set ./maths ./scene/thing ./cmd/hillside ./gpu
+run check-viewer-inputs . :: go test -count=1 ./cmd/grissom -run=TestViewerReportsRealInputAndOutputFailures
+run check-app-icon . :: game test -- -count=1 -v ./cmd/grissom ./cmd/catalogue ./internal/appicon -run=ApplicationIcon|Catalogue|BrightBackground|CoveredPixels|MovingBounds|LooseShoot|Example
+run format-app-icon . :: go fmt ./cmd/grissom ./cmd/catalogue ./internal/appicon
+run format-ground . :: go fmt ./manufacture ./set ./cmd/catalogue ./gpu
+run check-ground . :: game test -- -count=1 -v ./manufacture ./set -run=GroundObservatory
+run check-ground-gpu . :: game test -- -count=1 -v ./gpu -run=GroundObservatory|Spacecraft
+run check-camera-gpu . :: go test -count=1 -v ./cmd/hillside -run=TestSequenceCameraReachesTheGPUKernel
+run check-guide-beam . :: go test -count=1 ./emit -run=Beam
+run check-guide-beam-gpu . :: go test -count=1 -v ./gpu -run=TestGuideBeam
+run check-guide-beam-config . :: go test -count=1 ./set ./cmd/hillside -run=Laser|GuideBeam|EcosystemSubset
+run guide-star-mist . :: ./bin/hillside -set doc/guide-star-mist.yaml -out out/guide-star-mist.png
+run guide-star-deck . :: ./bin/hillside -set doc/guide-star-deck.yaml -out out/guide-star-deck.png
+run check-mist-layer . :: go test -count=1 ./scene/medium ./scene/thing ./set ./cmd/hillside -run=Layer|Atmosphere|Mist|Grove|EcosystemSubset
+run check-cloud-deck . :: go test -count=1 -v ./scene/medium ./set ./cmd/hillside ./gpu -run=Deck|Atmosphere|GroundAt
+run check-beam-sampling . :: go test -count=1 ./render/beamstep ./trace ./maths ./gpu -run=Beam|SegmentBox|Stride|March
+run check-beamstep . :: go test -count=1 ./render/beamstep
+run check-spacecraft . :: go test -count=1 -v ./manufacture -run=Spacecraft
+run check-spacecraft-gpu . :: go test -count=1 -v ./gpu -run=Spacecraft
+run check-spacecraft-scene . :: go test -count=1 -v ./cmd/hillside -run=Spacecraft
+run catalogue . :: go run ./cmd/catalogue
+run catalogue-list . :: go run ./cmd/catalogue list
+run catalogue-render . :: go run ./cmd/catalogue render
+run check-catalogue . :: go test -count=1 -v ./cmd/catalogue
+run check-instrument-regressions . :: go test -count=1 -v ./manufacture -run=TestInstrumentAssemblyKeepsTheFirstRefusalAndReturnsNoSpecimen|TestSpacecraftRejectsAnUnsownSeedFromThePublicAPI|TestTinySpacecraftFailsCleanlyBeforeRendering|TestHexRingInverseAgreesWithCountingSuccessiveRings
+run check-recipe-construction . :: go test -count=1 -v ./set -run=RecipeConstruction
+run format-catalogue . :: go fmt ./cmd/catalogue
+target catalogue-binary . :: go build -o bin/catalogue ./cmd/catalogue
+run check-instrument-adapters . :: go test -count=1 ./manufacture ./set ./cmd/hillside -run=Spacecraft|Recipe|Light|Lamp|Stock|Placement
+run check-instrument-core . :: go test -count=1 ./manufacture ./set ./maths ./scene/thing
+run space-spitzer . :: ./bin/hillside -set doc/space-spitzer.yaml -sky black -out out/space-spitzer.png
+run space-hubble . :: ./bin/hillside -set doc/space-hubble.yaml -sky black -out out/space-hubble.png
+run space-webb . :: ./bin/hillside -set doc/space-webb.yaml -sky black -out out/space-webb.png
+run check-volume-reference . :: go test -count=1 ./trace ./maths ./render/beamstep ./scene/medium
+run check-volume-gpu . :: go test -count=1 -v ./gpu -run=TestGuideBeam|TestTheGPUDrawsTheHallAsSlayerDoes|TestTheBakedHallIsCloseToSlayers|TestFiniteVolumeLampOnGPUAgreesWithCPU|TestTheGPUDrawsALampInAConeAsSlayerDoes
+
+# Source formatting for the streamed terrain implementation.
+run format-terrain . :: go fmt ./terrain
+run format-island . :: go fmt ./terrain ./scene/island ./scene/thing ./trace ./cmd/island
+target island-core . :: go build -p=1 ./terrain ./scene/island
+target island-binary . :: go build -p=1 -o bin/island ./cmd/island
+run island . :: ./bin/island
+
+# Pure frame geometry, without invoking render or integration checks.
+run format-frame . :: go fmt ./scene/frame
+
+# Host-only streamed GPU readback and finishing.
+run format-readback . :: go fmt ./metal ./gpu ./cmd/hillside
+
+# Fixed spatial populations and their YAML/scene adapters.
+run format-ecosystems . :: go fmt ./scene/biome ./set ./cmd/hillside
+
+# Conservative occupancy and ray-packet preparation, not transport activation.
+run format-emptyspace . :: go fmt ./render/emptyspace
+
+# Optional surface-fuel heat transport and its checked scene input.
+run format-fuel-transport . :: go fmt ./fuelbed ./set ./cmd/hillside
+
+# Ordinary source formatting; execution checks wait for the review break.
+run format-footprint . :: go fmt ./scene/footprint
+
+# Azazel's pure admission decisions; no renderer or host process is started.
+run azazel-format . :: gofmt -w azazel/internal/budget
+run azazel-compile . :: go test -run=^$$ ./azazel/internal/budget
+run azazel-tests . :: go test -count=1 ./azazel/internal/budget
+run azazel-storage-format . :: gofmt -w azazel/internal/storageprobe
+run azazel-storage-probe . :: go test -tags=storageprobe -count=1 -v ./azazel/internal/storageprobe
+
+# The private publisher uses generated test-only filesystem boundaries.
+run azazel-publication-mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/publication/filesystem.go -destination=azazel/internal/publication/filesystem_mock_test.go -package=publication
+run azazel-publication-format . :: gofmt -w azazel/internal/publication
+run azazel-publication-compile . :: go test -run=^$$ ./azazel/internal/publication
+run azazel-publication-tests . :: go test -count=1 -v ./azazel/internal/publication
+run azazel-publication-parent . :: go test -count=1 -v -run=TestReplacementAcceptsTheCleanRootParent|TestReplacementRefusesUncleanParents ./azazel/internal/publication
+run azazel-package-inventory . :: go list ./azazel/...
+run azazel-probe-inventory . :: go list -tags=storageprobe ./azazel/...
+run azazel-probe-compile . :: go test -tags=storageprobe -run=^$$ ./azazel/internal/storageprobe
+run azazel-lock-compile . :: go test -run=^$$ ./azazel/internal/locking
+run azazel-lock-tests . :: go test -count=1 -v -timeout=30s ./azazel/internal/locking
+run azazel-release-tests . :: go test -count=1 -v -timeout=30s -run=^TestNativeRelease ./azazel/internal/locking
+run azazel-cleanup-tests . :: go test -count=1 -v -timeout=30s -run=^TestTemporaryCleanup ./azazel/internal/publication
+run azazel-local-close . :: go test -count=1 -v -run=^TestLocalClose ./azazel/internal/publication
+run azazel-local-write . :: go test -count=1 -v -run=^TestLocalWrite ./azazel/internal/publication
+run azazel-local-create . :: go test -count=1 -v -run=^TestLocalCreate ./azazel/internal/publication
+run azazel-local-rename . :: go test -count=1 -v -run=^TestLocalRename ./azazel/internal/publication
+run azazel-local-remove . :: go test -count=1 -v -run=^TestLocalRemove ./azazel/internal/publication
+run azazel-exclusive-compile . :: go test -run=^$$ ./azazel/internal/publication
+run azazel-exclusive-tests . :: go test -count=1 -v -timeout=15s -run=^TestExclusiveInstall ./azazel/internal/publication
+run azazel-immutable-mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/publication/immutable_filesystem.go -destination=azazel/internal/publication/immutable_filesystem_mock_test.go -package=publication
+run azazel-immutable-compile . :: go test -run=^$$ ./azazel/internal/publication
+run azazel-immutable-tests . :: go test -count=1 -v -timeout=15s -run=^TestImmutable ./azazel/internal/publication
+
+# Completing opaque prepared records, without a live admission root.
+run azazel-prepared-compile . :: go test -run=^$$ ./azazel/internal/publication
+run azazel-prepared-tests . :: go test -count=1 -v -timeout=15s -run=^TestPrepared ./azazel/internal/publication
+
+# Identified reservation proposals perform no I/O or host admission.
+run azazel-reservations-compile . :: go test -run=^$$ ./azazel/internal/budget
+run azazel-reservations-tests . :: go test -count=1 -v -timeout=15s -run=^TestReservation ./azazel/internal/budget
+
+# Ordinary value composition does not grant work or perform host I/O.
+run azazel-admission-compile . :: go test -run=^$$ ./azazel/internal/budget
+run azazel-admission-tests . :: go test -count=1 -v -timeout=15s -run=^TestAdmission ./azazel/internal/budget
+
+# Native process observations use current and controlled-child test fixtures.
+run azazel-usage-compile . :: go test -run=^$$ ./azazel/internal/processinfo
+run azazel-usage-tests . :: go test -count=1 -v -timeout=15s ./azazel/internal/processinfo

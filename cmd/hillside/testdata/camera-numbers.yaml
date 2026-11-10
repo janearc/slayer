@@ -1,0 +1,10 @@
+numbers:
+  - {name: width, value: 24, says: tiny camera render width in pixels, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07"}
+  - {name: start, value: 3, says: absolute scene time at the start of sequenceFixture in seconds, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07; independent of camera elapsed time"}
+  - {name: middle, value: 4, says: absolute scene time one second into the two-second camera move, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07"}
+  - {name: end, value: 5, says: absolute scene time at the camera endpoint, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07"}
+  - {name: start-z, value: 6, says: starting z coordinate in the authored camera fixture, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07"}
+  - {name: middle-z, value: 4, says: hand-worked z after one second at two metres per second, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07; six minus two"}
+  - {name: end-z, value: 2, says: endpoint z in the authored camera fixture, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07"}
+  - {name: smooth-quarter-seconds, value: 0.5, says: one quarter of the two-second camera duration, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07"}
+  - {name: smooth-quarter-z, value: 5.375, says: hand-worked z at one quarter of the smooth camera move, kind: picked, by: "Slayer's scene-adapter fixtures, 2026-11-07; six minus four times 0.15625"}

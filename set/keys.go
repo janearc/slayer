@@ -5,31 +5,46 @@ import (
 	"maps"
 	"slices"
 
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // Set is a set file read: what the scene wants, every value checked,
 // and the keys it holds that nothing renders yet.
 type Set struct {
-	name       string
-	latitude   float64 // degrees north
-	longitude  float64 // degrees east
-	clock      int     // minutes after local midnight
-	cameras    []camera
-	bounds     [3]float64 // metres a side; none means the bodies' scale
-	assets     []asset
-	unrendered []string
-	light      string
-	terrain    *Terrain
-	film       Film
-	things     []Thing
-	stands     []Stand
-	texts      []Text
-	moon       *Moon
-	sun        *Sun
-	planet     *Planet
-	hud        *Hud
-	world      *World
+	fronts               []FireFront
+	beds                 []FuelBed
+	name                 string
+	latitude             float64 // degrees north
+	longitude            float64 // degrees east
+	clock                int     // minutes after local midnight
+	cameras              []camera
+	bounds               [3]float64 // metres a side; none means the bodies' scale
+	assets               []asset
+	unrendered           []string
+	light                string
+	terrain              *Terrain
+	film                 Film
+	things               []Thing
+	stands               []Stand
+	ecosystems           []Ecosystem
+	texts                []Text
+	moon                 *Moon
+	sun                  *Sun
+	planet               *Planet
+	hud                  *Hud
+	world                *World
+	recipes              map[string]Recipe
+	weather              map[string]Mist
+	laserPointings       map[string]laserDirection
+	lasers               []Laser
+	atmosphere           string
+	atmosphereAlbedo     float64
+	atmosphereLayers     []AtmosphereLayer
+	renderer, complexity string
+	volumeLighting       string
+	seed                 float64
+	hasSeed              bool
+	windSpeed, windFrom  float64
 }
 
 // Light is how the set is lit: ambient, the moon, or the sun.
@@ -104,11 +119,36 @@ func Read(file string, source []byte) (Set, error) {
 	if err != nil {
 		return Set{}, err
 	}
-	made := Set{}
+	if err = checkedEcosystem(file, source, top); err != nil {
+		return Set{}, err
+	}
+	made := Set{complexity: "quick", recipes: map[string]Recipe{}, weather: map[string]Mist{}}
 	reading := reader{file: file, set: &made}
-	err = reading.keys(top, map[string]step{"scene": reading.scene}, nil)
+	err = reading.keys(top, map[string]step{"scene": reading.scene,
+		"$schema": reading.only(EcosystemSchema)}, nil)
+	if err == nil && made.volumeLighting == "cached" && made.renderer != "gpu-native" {
+		return Set{}, fmt.Errorf("%s: cached volume lighting requires gpu-native", file)
+	}
+	if err == nil {
+		err = reading.resolvedRecipes()
+	}
 	if err == nil {
 		err = reading.found()
+	}
+	if err == nil {
+		err = reading.foundEcosystems()
+	}
+	if err == nil {
+		err = reading.foundFronts()
+	}
+	if err == nil {
+		err = reading.foundBeds()
+	}
+	if err == nil {
+		err = reading.foundLasers()
+	}
+	if err == nil {
+		err = reading.foundAtmosphere()
 	}
 	if err == nil {
 		err = reading.pinned()

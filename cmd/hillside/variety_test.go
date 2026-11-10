@@ -10,6 +10,7 @@ import (
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
+	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -36,17 +37,25 @@ func TestAKeptThingStandsAsOneMadeThere(t *testing.T) {
 	}
 }
 
-// meshesOf is the distinct meshes of a world's spruce and the faces
-// drawn of them, counting each time one stands.
-func meshesOf(world *thing.World) (map[*mesh.Mesh]bool, int) {
-	meshes, drawn := map[*mesh.Mesh]bool{}, 0
+// meshesOf is the distinct meshes of a world's spruce, each with the
+// faces it keeps, and the faces drawn of them, counting each time one
+// stands. A shared mesh group keeps its prototypes and draws every
+// standing, as the stock accounts them.
+func meshesOf(world *thing.World) (map[shape.Shape]int, int) {
+	meshes, drawn := map[shape.Shape]int{}, 0
 	for _, each := range world.Things {
-		skin, isMesh := each.Shape.(*mesh.Mesh)
-		if !isMesh || each.Material == nil {
+		if each.Material == nil {
 			continue
 		}
-		if name := each.Material.Name; name == "bark" || name == "needles" {
-			meshes[skin] = true
+		if name := each.Material.Name; name != "bark" && name != "needles" {
+			continue
+		}
+		switch skin := each.Shape.(type) {
+		case *mesh.Mesh:
+			meshes[skin] = skin.FaceCount()
+			drawn += skin.FaceCount()
+		case *shape.MeshGroup:
+			meshes[skin] = skin.StoredFaces()
 			drawn += skin.FaceCount()
 		}
 	}
@@ -72,8 +81,8 @@ func TestAVarietyIsMadeOnceAndStoodOften(t *testing.T) {
 	}
 	meshes, drawn := meshesOf(world)
 	kept := 0
-	for skin := range meshes {
-		kept += skin.FaceCount()
+	for _, stored := range meshes {
+		kept += stored
 	}
 	if len(meshes) > 2*3 || made.things != 30 {
 		t.Errorf("thirty spruce of three are %d things of %d meshes",
@@ -86,16 +95,25 @@ func TestAVarietyIsMadeOnceAndStoodOften(t *testing.T) {
 }
 
 // With no variety every thing is its own: no two spruce share a mesh,
-// and every face drawn is kept.
+// and every spruce's stored faces are kept, once each. A spruce's own
+// needle prototypes still repeat within it, so the faces drawn exceed
+// those kept even unshared. Thirty needled spruces of their own keep
+// more faces than the default budget; the budget is not what is tested
+// here, so the test raises it out of the way.
 func TestNoVarietyIsEveryThingItsOwn(t *testing.T) {
-	world, made, err := thirty(t, "0")
+	world, made, err := thirty(t, "0", "-faces", "4000000")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if meshes, _ := meshesOf(world); len(meshes) != 2*30 ||
-		made.kept != made.faces {
-		t.Errorf("thirty spruce of their own are %d meshes, %d faces "+
-			"kept of %d", len(meshes), made.kept, made.faces)
+	meshes, drawn := meshesOf(world)
+	kept := 0
+	for _, stored := range meshes {
+		kept += stored
+	}
+	if len(meshes) != 2*30 || made.kept != kept || made.faces != drawn {
+		t.Errorf("thirty spruce of their own are %d meshes keeping %d "+
+			"faces of %d drawn; the tally says %d kept of %d",
+			len(meshes), kept, drawn, made.kept, made.faces)
 	}
 }
 

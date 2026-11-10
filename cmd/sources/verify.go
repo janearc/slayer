@@ -21,7 +21,11 @@ data quotes on the page it names, and the value the data holds the one
 that text says. a number that fails any of them fails the verb, and the
 build that runs it first. a paged source, a pdf, is read a page at a
 time by poppler's pdftotext; it reaches nothing outside and writes
-nothing.`
+nothing.
+
+this is a text-and-value check. it does not infer units, range endpoints,
+coefficient roles or powers from prose. those claims need source review
+and the model's independent checks.`
 
 // pdfSuffix is how a paged source's file is named.
 const pdfSuffix = ".pdf"
@@ -46,8 +50,9 @@ func (at place) verify(call pzm.Call) error {
 			continue
 		}
 		from := *number.From
-		fmt.Fprintf(call.Out(), "%s: %s, %s\n", number.Name, from.Text,
-			whereIn(from))
+		if _, err := fmt.Fprintf(call.Out(), "%s: %s, %s\n", number.Name, from.Text, whereIn(from)); err != nil {
+			return errors.Join(append(failed, err)...)
+		}
 	}
 	return errors.Join(failed...)
 }
@@ -82,6 +87,12 @@ func (at place) verified(list sources.List, number numbers.Number) error {
 	page, err := pageOf(at.shelf.Path(source), from.Page)
 	if err != nil {
 		return fmt.Errorf("%s: %w", number.Name, err)
+	}
+	if from.Excerpt != "" {
+		if !strings.Contains(page, from.Excerpt) {
+			return fmt.Errorf("%s: source excerpt %q is not %s", number.Name, from.Excerpt, whereIn(from))
+		}
+		page = from.Excerpt
 	}
 	if !strings.Contains(page, from.Text) {
 		return fmt.Errorf("%s: %q is not %s", number.Name, from.Text,

@@ -1,8 +1,8 @@
 // Package sensor defines light collectors: areas with one or more channels,
 // each recording a fraction of incoming spectral power.
 //
-// Camera and telescope models are planned above this primitive. A camera’s
-// image follows lens projection; a telescope’s resolution also depends on
+// Camera and telescope models are planned above this primitive. A camera's
+// image follows lens projection; a telescope's resolution also depends on
 // diffraction, wavelength, and aperture. Nonvisible telescope bands require a
 // separate mapping to display colours. Neither extension is implemented.
 package sensor

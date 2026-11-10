@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -28,7 +29,8 @@ const folded = "03d5d4421a855727670c6d48dcfa09bf6cff6ade"
 // mechanical are the commits that changed the harness and what it judges
 // together and judged nothing differently, each read whole: tree-wide
 // moves of import paths, and comments, prose and helpers renamed. the
-// rule holds every other commit, and every one to come.
+// rule holds every commit in neither this list nor readWhole, and every
+// one to come.
 var mechanical = map[string]string{
 	"8a86563b71dc959d81ee71f7d19f589fb513d0b2": "lamb's imports became " +
 		"slayer's audited copies: import paths alone in the harness",
@@ -42,6 +44,25 @@ var mechanical = map[string]string{
 	"d8936f670fa99f8b33aa5a45745c5fe8abc99dac": "maths and ninjafilm " +
 		"become slayer's own: import paths alone in the harness, the " +
 		"pins they moved",
+}
+
+// readWhole are the commits that changed the harness and what it judges
+// together and are not mechanical: each changes what the harness checks,
+// and each was read whole and found to leave it at least as strict. each
+// says what it changed in the harness, the loosening first, and when it
+// was read. they are not mechanical and are not listed as if they were.
+var readWhole = map[string]string{
+	"03d6b0aa10a1f3a3a48a0d7e290962390bb1cc4a": "recursive foliage: one " +
+		"view of three moves off edge-on, (1, 0.1, 0) to (1, 0.1, 0.2), " +
+		"since a flat spray edge-on has no pixels to compare; the harness " +
+		"learns mesh groups, each placement's winding and finite corners " +
+		"and each prototype's faces checked, where groups went unchecked " +
+		"before. read 2026-11-06",
+	"96fb7c74700c0c8c3f9ed96608133535df6a9e8d": "a merge resolved by " +
+		"hand: mesh_test takes 6ce998d's comparison, which expands each " +
+		"group into plain reference meshes so no group is judged against " +
+		"itself, as 03d6b0a's was; the rest is gofumpt's reflow. read " +
+		"2026-11-06",
 }
 
 // shared is what a commit to the harness may also touch: the module's
@@ -209,19 +230,61 @@ func TestNoCommitChangesTheHarnessAndWhatItJudges(t *testing.T) {
 		if len(others) == 0 {
 			continue
 		}
-		if _, read := mechanical[commit]; read {
+		_, isMechanical := mechanical[commit]
+		_, isRead := readWhole[commit]
+		if isMechanical || isRead {
 			broke[commit] = true
 			continue
 		}
-		t.Errorf("%s changes the harness and %s together: split it",
-			commit[:7], strings.Join(others, ", "))
+		judges := slices.Compact(slices.Sorted(slices.Values(others)))
+		t.Errorf("%s changes the harness, burning-trousers, and what it "+
+			"judges, %s, in one commit.\n%s", commit[:7],
+			strings.Join(judges, ", "), apart)
 	}
-	// a commit named mechanical that the rule would not hold, or that is
-	// not in the history, is a name with nothing behind it
-	for commit, why := range mechanical {
-		if !broke[commit] {
-			t.Errorf("%s is named mechanical (%s) and the rule has "+
-				"nothing against it", commit[:7], why)
+	// a commit named in either list that the rule would not hold, or that
+	// is not in the history, is a name with nothing behind it; one named
+	// in both is mechanical and not at once
+	for _, named := range namedLists() {
+		for commit, why := range named.commits {
+			if !broke[commit] {
+				t.Errorf("%s is named %s (%s), and the rule has "+
+					"nothing against it.\n%s", commit[:7], named.list,
+					why, unbacked)
+			}
+			if _, both := mechanical[commit]; both && named.list != "mechanical" {
+				t.Errorf("%s is named both mechanical and %s.\n%s",
+					commit[:7], named.list, oneList)
+			}
 		}
 	}
+}
+
+// What the rule's refusals say, for a reader who has not read the rule.
+const (
+	apart = "The harness is slayer's judge. A commit that changes the " +
+		"judge and the judged together can change what passes without " +
+		"anyone seeing it, so the rule asks for them apart.\n" +
+		"Not yet pushed: split it into a commit to the harness and a " +
+		"commit to the rest.\n" +
+		"Already in the history: read the harness's part whole. If it " +
+		"leaves the harness at least as strict, name the commit in " +
+		"readWhole in burning-trousers/rules/rules_test.go, saying what " +
+		"it changed there, any loosening first, and when it was read. " +
+		"mechanical is for import paths, comments and renames alone."
+	unbacked = "It is not in this history, or it does not change the " +
+		"harness and what it judges together. A name the rule does not " +
+		"need would excuse a commit no one read: take it out."
+	oneList = "A commit is mechanical or it changes what the harness " +
+		"checks; it cannot be both. Take it out of one list."
+)
+
+// namedList is one of the lists of commits the rule lets stand.
+type namedList struct {
+	list    string
+	commits map[string]string
+}
+
+// namedLists are both lists, by the names their errors give them.
+func namedLists() []namedList {
+	return []namedList{{"mechanical", mechanical}, {"read whole", readWhole}}
 }

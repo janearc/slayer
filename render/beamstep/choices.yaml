@@ -1,0 +1,19 @@
+# Authored integration budgets, 2026-11-07.
+# Outside this refinement envelope, ordinary volume sampling still applies.
+# This is not a cutoff in the Gaussian beam's physical light function.
+numbers:
+  - name: refinement-radii
+    value: 3
+    says: conservative refinement envelope in maximum beam-radius units
+    kind: picked
+    by: Slayer's beam-sampling study, 2026-11-07
+  - name: samples-per-radius
+    value: 4
+    says: target radial integration samples per launch radius
+    kind: picked
+    by: Slayer's beam-sampling study, 2026-11-07
+  - name: maximum-splits
+    value: 64
+    says: bounded subdivisions of one existing volume-march cell
+    kind: picked
+    by: Slayer's beam-sampling study, 2026-11-07

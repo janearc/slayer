@@ -79,3 +79,40 @@ func TestTheGPUStepsAsTheCPUDoes(t *testing.T) {
 		}
 	}
 }
+
+// The public GPU runner must advance and return actual fields, not only
+// dispatch kernels. A second request for its current clock takes no steps.
+func TestPublicGPURunnerReturnsTheWeatherItAdvanced(t *testing.T) {
+	cpu, gpu := small(t, 11), small(t, 11)
+	cpu.Run(3600)
+	steps, err := gpu.RunOnGPU(3600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if steps != 1 || gpu.Clock() != cpu.Clock() {
+		t.Fatalf("%d steps to %g, cpu %g", steps, gpu.Clock(), cpu.Clock())
+	}
+	for i, pair := range [][2][]float64{{cpu.vorticity, gpu.vorticity}, {cpu.origin, gpu.origin}, {cpu.age, gpu.age}} {
+		most := 0.0
+		for k, want := range pair[0] {
+			most = math.Max(most, math.Abs(pair[1][k]-want))
+		}
+		if most > 1e-5*math.Max(1, spread(pair[0])) {
+			t.Fatalf("field%d error %g", i, most)
+		}
+	}
+	if steps, err := gpu.RunOnGPU(gpu.Clock()); err != nil || steps != 0 {
+		t.Fatalf("already reached: %d %v", steps, err)
+	}
+	grid, err := NewGrid(4096, 4, 1, 6e7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wide, err := New(grid, 18000, 3e6, 2e6, cpu.stirring, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := wide.RunOnGPU(1); err == nil {
+		t.Fatal("GPU accepted a row wider than its kernels hold")
+	}
+}

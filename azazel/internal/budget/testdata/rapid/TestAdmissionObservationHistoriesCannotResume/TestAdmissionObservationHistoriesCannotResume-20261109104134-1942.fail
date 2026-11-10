@@ -1,0 +1,8 @@
+# 2026/11/09 10:41:34.759841 [TestAdmissionObservationHistoriesCannotResume] [rapid] draw history: []budget.hostSample{budget.hostSample{load:7.999999999999999, swap:0x1ffffffff, freeDisk:0x780000000, loadKnown:true, swapKnown:true, diskKnown:true, stopped:false}}
+# 2026/11/09 10:41:34.759845 [TestAdmissionObservationHistoriesCannotResume] observation lost stop history: {stop:{state:{stopped:false generation:0} outcome:0} host:0 reservation:0 next:<nil> disposition:0}
+# 
+v0.4.8#8766964756423949212
+0x0
+0x0
+0x0
+0x0

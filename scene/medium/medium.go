@@ -56,9 +56,13 @@ type Spanner interface {
 // origin, between near and far: the two roots, each kept inside the range.
 func sphere(rad float64, r maths.Ray, near, far float64) (float64, float64,
 	bool) {
-	b := r.At.Dot(r.Dir)
-	c := r.At.Dot(r.At) - rad*rad
-	disc := b*b - c
+	// Name the fused operations used by the recorded arm64 renderer.
+	// Otherwise coverage instrumentation can change which product the
+	// compiler rounds first, moving the same ray's roots by a last bit.
+	b := math.FMA(r.At.Z, r.Dir.Z, math.FMA(r.At.X, r.Dir.X, r.At.Y*r.Dir.Y))
+	squared := math.FMA(r.At.Z, r.At.Z, math.FMA(r.At.Y, r.At.Y, r.At.X*r.At.X))
+	c := math.FMA(-rad, rad, squared)
+	disc := math.FMA(b, b, -c)
 	if disc < 0 {
 		return 0, 0, false
 	}

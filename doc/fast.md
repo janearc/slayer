@@ -1,5 +1,12 @@
 # Rendering faster
 
+This is the original optimization roadmap. Density baking and native mesh
+traversal now exist, and the night study adds an optional smoke-light grid.
+
+[Animation performance](animation-performance.md) and the linked measurements
+record their implementation. Retained frame resources and wavefront queues
+remain unfinished.
+
 Ray tracing is easy to start and expensive to run. This roadmap separates
 four optimisations by the work they remove. The sequence matters: later
 stages build on earlier ones. It is a design sequence, not a claim that
@@ -8,11 +15,11 @@ all four stages are implemented.
 ## 1. Bake the haze
 
 A view ray takes 48 steps through haze. Each step takes another 10 toward
-each lamp, sampling noise along the way—roughly 500 noise evaluations per
-ray for one lamp. This dominates the swarm scene’s rendering time.
+each lamp, sampling noise along the way -- roughly 500 noise evaluations per
+ray for one lamp. This dominates the swarm scene's rendering time.
 
 Before tracing a frame, sample density into a 3D texture and store each
-lamp’s transmission in a shadow volume. Integration can then use hardware
+lamp's transmission in a shadow volume. Integration can then use hardware
 texture interpolation instead of repeated noise evaluation.
 
 This is an approximation absent from the CPU reference. Tests declare a
@@ -29,10 +36,10 @@ resources and update only what changes: camera, emitters, or pulse state.
 
 Metal exposes acceleration structures for hardware traversal and triangle
 intersection. A scene-wide hierarchy built using surface-area cost can
-improve on Slayer’s current split at the median face.
+improve on Slayer's current split at the median face.
 
 Analytic spheres use bounding boxes with custom intersection functions.
-Keep Slayer’s software hierarchy as a fallback on hardware without ray
+Keep Slayer's software hierarchy as a fallback on hardware without ray
 tracing support and as a reference for the new path.
 
 ## 4. Group rays by work

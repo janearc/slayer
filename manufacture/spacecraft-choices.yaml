@@ -1,0 +1,228 @@
+# Authored visual proportions and appearance; no engineering replica.
+# Physical reference values live separately in research-derived-data.yml.
+numbers:
+- name: sides-hull
+  value: 12
+  says: enclosure tessellation at hull detail
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: sides-clumps
+  value: 24
+  says: enclosure tessellation at clumps detail
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: sides-quick
+  value: 48
+  says: enclosure tessellation at quick detail
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: sides-demo
+  value: 96
+  says: enclosure tessellation at demo detail
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: spitzer-length
+  value: 3.6
+  says: cryostat and telescope length per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: spitzer-radius
+  value: 1.0
+  says: housing radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: spitzer-span
+  value: 4.8
+  says: solar shield height per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: hubble-length
+  value: 4.7
+  says: tube length per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: hubble-radius
+  value: 0.72
+  says: housing radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: hubble-span
+  value: 5.0
+  says: full bilateral solar wing span per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: bus-height
+  value: 0.55
+  says: bus height per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: wall-thickness
+  value: 0.035
+  says: housing wall thickness per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: mirror-depth
+  value: 0.025
+  says: authored shallow reflector sag per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: mirror-lift
+  value: 0.12
+  says: primary height above the bus per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: panel-thickness
+  value: 0.012
+  says: closed solar panel thickness per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: spitzer-panel-width
+  value: 2.0
+  says: solar shield width per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: spitzer-panel-offset
+  value: 1.18
+  says: solar shield distance behind the optical axis per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: hubble-panel-height
+  value: 0.95
+  says: solar wing length along the body per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: hubble-panel-lift
+  value: 1.8
+  says: wing attachment height per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: strut-radius
+  value: 0.018
+  says: support tube radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: secondary-radius
+  value: 0.075
+  says: secondary radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: secondary-reach
+  value: 0.9
+  says: secondary distance from the primary per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: tile-fill
+  value: 0.97
+  says: hexagonal tile radius share, leaving visible gaps
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: shield-thickness
+  value: 0.004
+  says: closed membrane thickness per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: shield-gap
+  value: 0.055
+  says: visible layer gap per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: shield-contraction
+  value: 0.025
+  says: successive shield outline contraction
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: shield-shoulder
+  value: 0.22
+  says: shoulder offset along the shield length
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: white
+  value: 0.78
+  says: authored enclosure diffuse reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: solar-red
+  value: 0.035
+  says: authored solar panel red reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: solar-green
+  value: 0.075
+  says: authored solar panel green reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: solar-blue
+  value: 0.18
+  says: authored solar panel blue reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: gold-red
+  value: 0.8
+  says: authored mirror red diffuse reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: gold-green
+  value: 0.58
+  says: authored mirror green diffuse reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: gold-blue
+  value: 0.2
+  says: authored mirror blue diffuse reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: structure
+  value: 0.11
+  says: authored dark structure reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: foil
+  value: 0.65
+  says: authored membrane reflectance
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: gloss
+  value: 0.7
+  says: authored polished reflection share
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: index
+  value: 8
+  says: authored Fresnel index proxy, not measured metal optical data
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: webb-bus-radius
+  value: 0.25
+  says: service bus radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: webb-bus-height
+  value: 0.15
+  says: service bus height per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: webb-bus-lift
+  value: 0.1
+  says: bus lift above the top shield per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: solar-columns
+  value: 8
+  says: readable solar panel grid columns
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: solar-rows
+  value: 4
+  says: readable solar panel grid rows
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: solar-grid-width
+  value: 0.008
+  says: grid bar width per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07
+- name: mirror-thickness
+  value: 0.005
+  says: closed primary tile backing thickness per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-07

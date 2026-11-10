@@ -1,0 +1,41 @@
+# Authored specimen view, 2026-11-07; not an orbit simulation.
+# Sources and visual choices: space-observatories.md.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: Webb mirror and five sunshield layers
+  renderer: gpu-native
+  seed: 11
+  light: sun
+  sun: {azimuth: 70, altitude: 45}
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263818
+    north: 2148752
+    across: 64
+    down: 64
+    step: 2
+  set:
+    things:
+      the telescope:
+        kind: webb
+        seed: 5
+        east: 263850
+        north: 2148720
+        height: {value: 100, unit: m}
+        complexity: demo
+  film:
+    width: 960
+    height: 720
+    rays: 3
+    exposure: 2000
+    wide: 45
+  cameras:
+    specimen:
+      location:
+        loc_relative:
+          object: the telescope
+          standoff_x: 30
+          standoff_y: 15
+          standoff_z: 17
+      orientation: {point_to: the telescope, alpha: -20}

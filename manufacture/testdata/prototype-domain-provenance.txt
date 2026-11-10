@@ -1,0 +1,44 @@
+Compiled prototype length domain, Darwin/ARM64, Go 1.26.10
+
+Production source: bf44a32b239079c96235e11d218a58809f255bec
+needled_shoot.go SHA256: fc25a9705565794b1531d3069fbd25b61b5dd479548ae5d0638e39a98067fd18
+needled-shoot.yml SHA256: 9cd329c58f44cbed1761659055ee64c9604c0ba297b2f8a8882126a5b6c92d2b
+
+The only production caller of planShoot is prototype: styles 1 and 2,
+bins 0 through 4, variants 0 and 1. Root lengths are 0.025 * 2^bin metres.
+Child lengths depend on parent length, order and node, not the seeded angle.
+All twenty public prototype configurations were enumerated below.
+
+No retained child lies exactly on the two-spacing cutoff. Changing < to <=
+therefore changes no plan for this compiled parameter set. The needle count
+is always at least two: roots are at least 0.025 m, spacing is at most 0.004 m,
+and every retained child passes the two-spacing cutoff. max(1, count) and
+max(2, count) consequently agree throughout this domain.
+
+To reproduce, copy prototype_domain_sample_test.go into manufacture, run
+go test -count=1 -v -run '^TestDiagnosticCheckTheCompletePrototypeLengthDomain$' ./manufacture
+and remove that temporary copy. Review this finite-domain argument if the
+prototype caller, allowed key domain or embedded parameters change. It is
+a proof of these isolated equivalences, not a botanical validation.
+
+style=1 bin=0 variant=0 length=0.025000000000000001 axes=7 shortest-child=0.0084209157985925941
+style=1 bin=0 variant=1 length=0.025000000000000001 axes=7 shortest-child=0.0084209157985925941
+style=1 bin=1 variant=0 length=0.050000000000000003 axes=29 shortest-child=0.0080109012263161247
+style=1 bin=1 variant=1 length=0.050000000000000003 axes=29 shortest-child=0.0080109012263161247
+style=1 bin=2 variant=0 length=0.10000000000000001 axes=58 shortest-child=0.0084525762733116145
+style=1 bin=2 variant=1 length=0.10000000000000001 axes=58 shortest-child=0.0084525762733116145
+style=1 bin=3 variant=0 length=0.20000000000000001 axes=86 shortest-child=0.0080598267656366469
+style=1 bin=3 variant=1 length=0.20000000000000001 axes=86 shortest-child=0.0080598267656366469
+style=1 bin=4 variant=0 length=0.40000000000000002 axes=105 shortest-child=0.0084182615304938084
+style=1 bin=4 variant=1 length=0.40000000000000002 axes=105 shortest-child=0.0084182615304938084
+style=2 bin=0 variant=0 length=0.025000000000000001 axes=14 shortest-child=0.0061021891669864933
+style=2 bin=0 variant=1 length=0.025000000000000001 axes=14 shortest-child=0.0061021891669864933
+style=2 bin=1 variant=0 length=0.050000000000000003 axes=42 shortest-child=0.0060442087090311347
+style=2 bin=1 variant=1 length=0.050000000000000003 axes=42 shortest-child=0.0060442087090311347
+style=2 bin=2 variant=0 length=0.10000000000000001 axes=70 shortest-child=0.0060123986878163555
+style=2 bin=2 variant=1 length=0.10000000000000001 axes=70 shortest-child=0.0060123986878163555
+style=2 bin=3 variant=0 length=0.20000000000000001 axes=96 shortest-child=0.0060636718914477304
+style=2 bin=3 variant=1 length=0.20000000000000001 axes=96 shortest-child=0.0060636718914477304
+style=2 bin=4 variant=0 length=0.40000000000000002 axes=113 shortest-child=0.0060317594375944722
+style=2 bin=4 variant=1 length=0.40000000000000002 axes=113 shortest-child=0.0060317594375944722
+plans=20 axes=1240 exact-cutoff-equalities=0 minimum-needle-count=2

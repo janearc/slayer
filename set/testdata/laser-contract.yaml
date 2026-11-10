@@ -1,0 +1,30 @@
+# Authored independent reader oracle and fault cases, 2026-11-07.
+name: guide
+object: ''
+east: 3
+up: 4
+south: 5
+azimuth: 30
+altitude: 70
+radius: 0.6
+reach: 200
+divergence: 0.2
+wavelength: 589
+strength: 8
+invalid:
+  - before: 'radius: {value: 0.6, unit: m}'
+    after: 'radius: {value: 0, unit: m}'
+  - before: 'unit: nm'
+    after: 'unit: m'
+  - before: 'altitude: 70'
+    after: 'altitude: 91'
+  - before: 'divergence: {value: 0.2, unit: deg}'
+    after: 'divergence: {value: 90, unit: deg}'
+  - before: "        south: {value: 5, unit: m}\n"
+    after: ''
+  - before: "origin:\n"
+    after: "origin:\n        object: missing\n"
+  - before: 'pointing: {azimuth: 30, altitude: 70}'
+    after: 'pointing: {azimuth: 30}'
+  - before: 'pointing: {azimuth: 30, altitude: 70}'
+    after: 'pointing: {altitude: 70}'

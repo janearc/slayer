@@ -12,6 +12,10 @@ typedef struct {
 	void *device;
 	void *queue;
 	void *pipeline;
+	void *library;
+	void *pipelines;
+	void *accelerations;
+	int acceleration_root;
 	double gpu;
 	char name[128];
 } context;
@@ -40,7 +44,8 @@ static void failed(char *err, int errlen, NSString *what, NSError *why) {
 static id<MTLComputePipelineState> pipeline(id<MTLDevice> device,
                                             const char *source,
                                             const char *kernel,
-                                            char *err, int errlen) {
+                                            char *err, int errlen,
+                                            id<MTLLibrary> __autoreleasing *kept) {
 	NSError *why = nil;
 	NSString *text = [NSString stringWithUTF8String:source];
 	MTLCompileOptions *options = [MTLCompileOptions new];
@@ -65,6 +70,7 @@ static id<MTLComputePipelineState> pipeline(id<MTLDevice> device,
 	if (made == nil) {
 		failed(err, errlen, @"pipeline", why);
 	}
+	if (made != nil) { *kept = library; }
 	return made;
 }
 
@@ -78,8 +84,9 @@ void *slayer_metal_open(const char *source, const char *kernel, int *nodevice,
 			say(err, errlen, @"no metal device");
 			return NULL;
 		}
+		id<MTLLibrary> compiled = nil;
 		id<MTLComputePipelineState> made =
-			pipeline(device, source, kernel, err, errlen);
+			pipeline(device, source, kernel, err, errlen, &compiled);
 		if (made == nil) {
 			return NULL;
 		}
@@ -95,10 +102,40 @@ void *slayer_metal_open(const char *source, const char *kernel, int *nodevice,
 		}
 		c->device = (__bridge_retained void *)device;
 		c->queue = (__bridge_retained void *)queue;
-		c->pipeline = (__bridge_retained void *)made;
+  c->pipeline = (__bridge_retained void *)made;
+  c->library = (__bridge_retained void *)compiled;
+  NSMutableDictionary *pipelines = [NSMutableDictionary dictionary];
+  pipelines[[NSString stringWithUTF8String:kernel]] = made;
+  c->pipelines = (__bridge_retained void *)pipelines;
 		strncpy(c->name, [device.name UTF8String], sizeof(c->name) - 1);
 		return c;
 	}
+}
+
+// Entry points share the device, queue, compiled library and acceleration tree.
+int slayer_metal_function(void *ctx, const char *kernel, char *err, int errlen) {
+ @autoreleasepool {
+  context *c = ctx;
+  NSString *name = [NSString stringWithUTF8String:kernel];
+  NSMutableDictionary *pipelines = (__bridge NSMutableDictionary *)c->pipelines;
+  id<MTLComputePipelineState> made = pipelines[name];
+  if (made == nil) {
+   id<MTLLibrary> library = (__bridge id<MTLLibrary>)c->library;
+   id<MTLFunction> function = [library newFunctionWithName:name];
+   if (function == nil) {
+    say(err, errlen, [NSString stringWithFormat:@"no kernel named %@", name]);
+    return 1;
+   }
+   id<MTLDevice> device = (__bridge id<MTLDevice>)c->device;
+   NSError *why = nil;
+   made = [device newComputePipelineStateWithFunction:function error:&why];
+   if (made == nil) { failed(err, errlen, @"pipeline", why); return 1; }
+   pipelines[name] = made;
+  }
+  (void)(__bridge_transfer id)c->pipeline;
+  c->pipeline = (__bridge_retained void *)made;
+  return 0;
+ }
 }
 
 const char *slayer_metal_name(void *ctx) {
@@ -110,6 +147,10 @@ const char *slayer_metal_name(void *ctx) {
 // it, saying why it failed if it did
 static int run(context *c, NSArray<id<MTLBuffer>> *buffers, MTLSize grid,
                const void *origin, int originlen, char *err, int errlen) {
+	if (c->accelerations != NULL && origin == NULL) {
+		say(err, errlen, @"an accelerated kernel requires Grid");
+		return 1;
+	}
 	id<MTLCommandQueue> queue = (__bridge id<MTLCommandQueue>)c->queue;
 	id<MTLComputePipelineState> made =
 		(__bridge id<MTLComputePipelineState>)c->pipeline;
@@ -126,6 +167,17 @@ static int run(context *c, NSArray<id<MTLBuffer>> *buffers, MTLSize grid,
 	if (origin != NULL) {
 		[encoder setBytes:origin length:(NSUInteger)originlen
 		          atIndex:buffers.count];
+	}
+	if (c->accelerations != NULL) {
+		if (@available(macOS 14.0, *)) {
+			NSArray<id<MTLAccelerationStructure>> *all =
+				(__bridge NSArray *)c->accelerations;
+			[encoder setAccelerationStructure:all[c->acceleration_root]
+			          atBufferIndex:buffers.count + 1];
+			for (id<MTLAccelerationStructure> structure in all) {
+				[encoder useResource:structure usage:MTLResourceUsageRead];
+			}
+		}
 	}
 	NSUInteger across = made.threadExecutionWidth;
 	NSUInteger down = made.maxTotalThreadsPerThreadgroup / across;
@@ -263,6 +315,115 @@ int slayer_metal_grid(void *ctx, int width, int height, int rows, int per,
 	}
 }
 
+// grid_stream owns only the retained buffers; the Go call keeps its kernel.
+typedef struct {
+	context *kernel;
+	void *buffers;
+	int width, rows;
+	int expected_inputs, inputs;
+	size_t row_bytes;
+} grid_stream;
+
+void *slayer_metal_grid_open(void *ctx, int width, int rows, int per,
+                            const void **inputs, const long *lengths, int count,
+                            char *err, int errlen) {
+	void *stream = slayer_metal_grid_begin(ctx, width, rows, per, count, err, errlen);
+	if (stream == NULL) { return NULL; }
+	for (int index = 0; index < count; index++) {
+		if (slayer_metal_grid_add(stream, inputs[index], lengths[index], err, errlen) != 0) {
+			slayer_metal_grid_close(stream);
+			return NULL;
+		}
+	}
+	return stream;
+}
+
+void *slayer_metal_grid_begin(void *ctx, int width, int rows, int per,
+                             int count, char *err, int errlen) {
+	@autoreleasepool {
+		if (ctx == NULL || width <= 0 || rows <= 0 || per <= 0 || count < 0) {
+			say(err, errlen, @"invalid streamed grid preparation");
+			return NULL;
+		}
+		context *c = ctx;
+		if ((size_t)width > SIZE_MAX / sizeof(float) / (size_t)per ||
+		    (size_t)rows > SIZE_MAX / ((size_t)width * (size_t)per * sizeof(float))) {
+			say(err, errlen, @"streamed grid size overflow");
+			return NULL;
+		}
+		id<MTLDevice> device = (__bridge id<MTLDevice>)c->device;
+		NSMutableArray<id<MTLBuffer>> *buffers =
+			[NSMutableArray array];
+		size_t row_bytes = (size_t)width * (size_t)per * sizeof(float);
+		id<MTLBuffer> band = [device newBufferWithLength:row_bytes * (size_t)rows
+		                                        options:shared];
+		if (band == nil) {
+			say(err, errlen, @"could not make a streamed output buffer");
+			return NULL;
+		}
+		[buffers addObject:band];
+		grid_stream *stream = calloc(1, sizeof(grid_stream));
+		if (stream == NULL) {
+			say(err, errlen, @"could not allocate a grid stream");
+			return NULL;
+		}
+		stream->kernel = c;
+		stream->buffers = (__bridge_retained void *)buffers;
+		stream->width = width;
+		stream->rows = rows;
+		stream->expected_inputs = count;
+		stream->row_bytes = row_bytes;
+		return stream;
+	}
+}
+
+int slayer_metal_grid_add(void *handle, const void *input, long length,
+                          char *err, int errlen) {
+	@autoreleasepool {
+		grid_stream *stream = handle;
+		if (stream == NULL || stream->inputs >= stream->expected_inputs || length < 0 ||
+		    (length > 0 && input == NULL)) {
+			say(err, errlen, @"invalid streamed grid input");
+			return 1;
+		}
+		id<MTLDevice> device = (__bridge id<MTLDevice>)stream->kernel->device;
+		id<MTLBuffer> one = buffer(device, input, (NSUInteger)length);
+		if (one == nil) {
+			say(err, errlen, @"could not make a streamed input buffer");
+			return 1;
+		}
+		NSMutableArray<id<MTLBuffer>> *buffers =
+			(__bridge NSMutableArray<id<MTLBuffer>> *)stream->buffers;
+		// Keep the output last, after exactly the caller's ordered inputs.
+		[buffers insertObject:one atIndex:(NSUInteger)stream->inputs];
+		stream->inputs++;
+		return 0;
+	}
+}
+
+int slayer_metal_grid_band(void *handle, int first, int down, float *out,
+                           char *err, int errlen) {
+	@autoreleasepool {
+		grid_stream *stream = handle;
+		if (stream == NULL || stream->inputs != stream->expected_inputs ||
+		    first < 0 || down <= 0 || down > stream->rows) {
+			say(err, errlen, @"invalid streamed grid band");
+			return 1;
+		}
+		NSArray<id<MTLBuffer>> *buffers =
+			(__bridge NSArray<id<MTLBuffer>> *)stream->buffers;
+		return draw_band(stream->kernel, buffers, stream->width, first,
+		                 down, (char *)out, stream->row_bytes, err, errlen);
+	}
+}
+
+void slayer_metal_grid_close(void *handle) {
+	if (handle == NULL) { return; }
+	grid_stream *stream = handle;
+	(void)(__bridge_transfer id)stream->buffers;
+	free(stream);
+}
+
 double slayer_metal_gpu(void *ctx) {
 	return ((context *)ctx)->gpu;
 }
@@ -272,8 +433,118 @@ void slayer_metal_close(void *ctx) {
 		return;
 	}
 	context *c = ctx;
+	(void)(__bridge_transfer id)c->accelerations;
 	(void)(__bridge_transfer id)c->pipeline;
+	(void)(__bridge_transfer id)c->pipelines;
+	(void)(__bridge_transfer id)c->library;
 	(void)(__bridge_transfer id)c->queue;
 	(void)(__bridge_transfer id)c->device;
 	free(c);
+}
+
+// Each node is a triangle range or placements of earlier nodes. Building in
+// that order keeps dependencies explicit. Resources stay owned by the kernel.
+int slayer_metal_accelerate(void *ctx, const void *vertices, long length,
+                            int stride, const int32_t *nodes, int count,
+                            const float *matrices, const uint32_t *references,
+                            int root, int *unavailable, char *err, int errlen) {
+	@autoreleasepool {
+		*unavailable = 0;
+		context *c = ctx;
+		if (c->accelerations != NULL) {
+			say(err, errlen, @"the kernel already has an acceleration structure");
+			return 1;
+		}
+		if (@available(macOS 14.0, *)) {
+			id<MTLDevice> device = (__bridge id<MTLDevice>)c->device;
+			if (!device.supportsRaytracing) {
+				*unavailable = 1;
+				return 1;
+			}
+			id<MTLCommandQueue> queue = (__bridge id<MTLCommandQueue>)c->queue;
+			id<MTLBuffer> points = buffer(device, vertices, (NSUInteger)length);
+			if (points == nil) {
+				say(err, errlen, @"could not allocate acceleration vertices");
+				return 1;
+			}
+			NSMutableArray<id<MTLAccelerationStructure>> *built = [NSMutableArray array];
+			for (int n = 0; n < count; n++) {
+				int kind = nodes[n * 3], first = nodes[n * 3 + 1];
+				int amount = nodes[n * 3 + 2];
+				MTLAccelerationStructureDescriptor *descriptor;
+				if (kind == 0) {
+					MTLAccelerationStructureTriangleGeometryDescriptor *geometry =
+						[MTLAccelerationStructureTriangleGeometryDescriptor descriptor];
+					geometry.vertexBuffer = points;
+					geometry.vertexBufferOffset = (NSUInteger)first * 3 * stride;
+					geometry.vertexStride = (NSUInteger)stride;
+					geometry.vertexFormat = MTLAttributeFormatFloat3;
+					geometry.triangleCount = (NSUInteger)amount;
+					geometry.opaque = YES;
+					MTLPrimitiveAccelerationStructureDescriptor *primitive =
+						[MTLPrimitiveAccelerationStructureDescriptor descriptor];
+					primitive.geometryDescriptors = @[geometry];
+					descriptor = primitive;
+				} else {
+					NSUInteger size = sizeof(MTLAccelerationStructureUserIDInstanceDescriptor);
+					id<MTLBuffer> instances = [device newBufferWithLength:MAX(1, size * amount)
+						options:shared];
+					if (instances == nil) {
+						say(err, errlen, @"could not allocate acceleration instances");
+						return 1;
+					}
+					memset(instances.contents, 0, instances.length);
+					MTLAccelerationStructureUserIDInstanceDescriptor *placed = instances.contents;
+					for (int i = 0; i < amount; i++) {
+						int p = first + i;
+						memcpy(&placed[i].transformationMatrix, matrices + p * 12,
+						       sizeof(placed[i].transformationMatrix));
+						placed[i].accelerationStructureIndex = references[p * 2];
+						placed[i].mask = references[p * 2 + 1];
+						placed[i].userID = (uint32_t)i;
+					}
+					MTLInstanceAccelerationStructureDescriptor *group =
+						[MTLInstanceAccelerationStructureDescriptor descriptor];
+					group.instanceDescriptorType = MTLAccelerationStructureInstanceDescriptorTypeUserID;
+					group.instanceDescriptorBuffer = instances;
+					group.instanceCount = (NSUInteger)amount;
+					group.instancedAccelerationStructures = [built copy];
+					descriptor = group;
+				}
+				MTLAccelerationStructureSizes sizes =
+					[device accelerationStructureSizesWithDescriptor:descriptor];
+				id<MTLAccelerationStructure> structure =
+					[device newAccelerationStructureWithSize:sizes.accelerationStructureSize];
+				id<MTLBuffer> scratch = [device newBufferWithLength:MAX(1, sizes.buildScratchBufferSize)
+					options:MTLResourceStorageModePrivate];
+				if (structure == nil || scratch == nil) {
+					say(err, errlen, @"could not allocate an acceleration structure or scratch");
+					return 1;
+				}
+				id<MTLCommandBuffer> commands = [queue commandBuffer];
+				id<MTLAccelerationStructureCommandEncoder> encoder =
+					[commands accelerationStructureCommandEncoder];
+				if (encoder == nil) {
+					say(err, errlen, @"could not encode an acceleration build");
+					return 1;
+				}
+				[encoder buildAccelerationStructure:structure descriptor:descriptor
+				          scratchBuffer:scratch scratchBufferOffset:0];
+				[encoder endEncoding];
+				[commands commit];
+				[commands waitUntilCompleted];
+				if (commands.error != nil) {
+					failed(err, errlen, @"acceleration build", commands.error);
+					return 1;
+				}
+				c->gpu += commands.GPUEndTime - commands.GPUStartTime;
+				[built addObject:structure];
+			}
+			c->accelerations = (__bridge_retained void *)built;
+			c->acceleration_root = root;
+			return 0;
+		}
+		*unavailable = 1;
+		return 1;
+	}
 }

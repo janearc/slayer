@@ -1,0 +1,24 @@
+# One hour of scene time in thirty seconds of playback: 120x compression.
+# The camera and lens durations are in scene time, not playback time.
+$schema: https://github.com/janearc/slayer/schemas/sequence-v1.json
+smoke: 1
+film: {width: 640, height: 360, rays: 2}
+output: ../out/camera-hyperlapse
+fps: 6
+start: {value: 0, unit: s}
+duration: {value: 30, unit: s}
+scene-duration: {value: 3600, unit: s}
+print: {knee: 0.7, top: 8, bloom: 0}
+camera:
+  unit: m
+  look-at: {x: 0, y: 0.8, z: 0}
+  moves:
+    - from: {x: -6, y: 3, z: 8}
+      to: {x: 6, y: 3, z: 8}
+      duration: {value: 3600, unit: s}
+      ease: linear
+  zoom:
+    from: {value: 24, unit: deg}
+    to: {value: 70, unit: deg}
+    duration: {value: 3600, unit: s}
+    ease: smooth

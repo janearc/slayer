@@ -1,0 +1,58 @@
+# A surface-fuel study. Mandel grass coefficients are a proxy, not redwood
+# calibration. Gas temperatures/optics and the remaining-fuel colour are
+# authored display choices. No crown fire, wind or transported smoke yet.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: one hot spot in a surface fuel bed
+  renderer: gpu-native
+  seed: 7
+  light: moon
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 2300
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263780
+    north: 2148780
+    across: 64
+    down: 64
+    step: 1
+  recipes:
+    surface fire:
+      kind: fire
+      flame:
+        radius: {value: 0.85, unit: m}
+        height: {value: 3.5, unit: m}
+        absorption: {value: 0.8, unit: m^-1}
+        temperature: {value: 1900, unit: K}
+        edge-temperature: {value: 950, unit: K}
+        intermittency-start: 0.06
+        temperature-profile: hot-tongues
+      light-cells: 3
+  fuel-beds:
+    litter:
+      recipe: surface fire
+      model: mandel-grass
+      east: 263812
+      north: 2148748
+      width: 32
+      depth: 32
+      cell: {value: 0.5, unit: m}
+      step: {value: 0.01, unit: s}
+      ignition-radius: {value: 1.6, unit: m}
+      ignition-temperature: {value: 1200, unit: K}
+      ambient-temperature: {value: 300, unit: K}
+      fuel: 1
+  set: {}
+  film:
+    width: 1280
+    height: 720
+    rays: 1
+    exposure: 400
+  # Camera coordinates are [east, north, up] in scene metres.
+  cameras:
+    above the fuel:
+      location:
+        at: [32, -46, 26]
+      orientation:
+        look_at: [32, -32, 5]

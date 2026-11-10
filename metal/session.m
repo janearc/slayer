@@ -108,6 +108,10 @@ int slayer_session_buffer(void *ctx, long length, char *err, int errlen) {
 		session *s = ctx;
 		id<MTLDevice> device = (__bridge id<MTLDevice>)s->device;
 		NSMutableArray *buffers = (__bridge NSMutableArray *)s->buffers;
+		if (length < 0 || (NSUInteger)length > device.maxBufferLength) {
+			tell(err, errlen, @"buffer exceeds device limit");
+			return -1;
+		}
 		id<MTLBuffer> made = [device
 			newBufferWithLength:(NSUInteger)(length > 0 ? length : 1)
 			            options:MTLResourceStorageModeShared];

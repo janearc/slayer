@@ -6,9 +6,9 @@
 // At opposition, lunar geometric albedo gives reflected brightness relative to
 // a white disc of the same apparent size. Irradiance above the atmosphere is
 // solar irradiance times albedo times the squared lunar radius-to-distance
-// ratio: about 3.3 mW/m² using 1361 W/m², 0.12, and 1737.4/384400.
+// ratio: about 3.3 mW/m^2 using 1361 W/m^2, 0.12, and 1737.4/384400.
 //
-// Wavelength samples follow the CIE 1931 observer’s 1 nm table, so the result
+// Wavelength samples follow the CIE 1931 observer's 1 nm table, so the result
 // covers the wavelengths available to that observer and film models using it.
 package moonlight
 

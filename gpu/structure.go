@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 	"strings"
+
+	"github.com/janearc/slayer/render/beamstep"
 )
 
 // field is one member of a struct the kernel reads: four floats, or
@@ -159,10 +161,21 @@ constexpr constant int conifer_stack = %d;
 constexpr constant int most_conifer_depth = %d;
 constexpr constant int lamps_asked = %d;
 constexpr constant int boxed_kind = %d;
+constexpr constant float beam_zero = %g;
+constexpr constant float beam_one = %g;
+constexpr constant float beam_half = %g;
+constexpr constant float beam_bound_radii = %g;
+constexpr constant float beam_radial_samples = %g;
+constexpr constant int beam_max_splits = %d;
 `, mostVolumes, treeStack, per+perRecord*records, per, perRecord,
 		records, nowhere, coniferStack, mostConiferDepth, lampsAsked,
-		boxedKind)
+		boxedKind, float64(beamZero), float64(beamWhole), beamHalf,
+		beamstep.Radii(), beamstep.RadialSamples(),
+		beamstep.MaximumSplits())
 }
+
+// beamWhole and beamHalf are defined as a unit cell and its midpoint.
+const beamWhole, beamHalf = 1, 0.5
 
 // prelude is the kernel's declaration of every number and structure
 // the two share, for a scene that hands back so many records a sample.

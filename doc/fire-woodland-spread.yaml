@@ -1,0 +1,8 @@
+# Actual frames; encoding the spread plan at 24 fps gives 12x playback.
+$schema: https://github.com/janearc/slayer/schemas/sequence-v1.json
+scene: fire-woodland.yaml
+output: ../out/fire-woodland-spread
+fps: 2
+start: {value: 0, unit: s}
+duration: {value: 60, unit: s}
+print: {knee: 0.1, top: 100, bloom: 0.2}

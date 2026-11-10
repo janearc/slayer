@@ -53,7 +53,7 @@ func TestAlightSetsSprucesOnFire(t *testing.T) {
 			made.burning, made)
 	}
 	for _, arguments := range [][]string{{"-spruce", "1", "-alight", "2"},
-		{"-alight", "-1"}, {"-alight", "1", "-gpu"}} {
+		{"-alight", "-1"}} {
 		_, err := parse(arguments, io.Discard)
 		if err == nil || !strings.Contains(err.Error(), "alight") {
 			t.Errorf("%v: %v, not refused by -alight", arguments, err)

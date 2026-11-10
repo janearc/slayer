@@ -5,7 +5,7 @@
 // A hash mismatch rejects the download. A source without a pinned hash can be
 // fetched and its hash reported for manual review and pinning. Entries that
 // must not be fetched again remain as tombstones with a reason. The original
-// plan is vanguard’s 2026-10-15-citations-fetch.md.
+// plan is vanguard's 2026-10-15-citations-fetch.md.
 package sources
 
 import (
@@ -15,7 +15,7 @@ import (
 	"os"
 	"regexp"
 
-	"go.yaml.in/yaml/v3"
+	"gopkg.in/yaml.v3"
 )
 
 // row is one source as the list writes it.

@@ -25,10 +25,16 @@ type Fire struct {
 	Absorption     float64
 	Hottest, Edge  measure.Temperature
 	Seed           uint64
+	// Intermittency is an authored occupancy border; zero keeps 0.4.
+	Intermittency float64
+	// HotTongues keeps occupied tips hot; it is not a measured mean law.
+	HotTongues bool
+	// Composition replaces the thermal source function when supplied.
+	Composition *composition
 }
 
 // A Body is a flame in space: soot that a ray marches through, taking light by
-// its density and giving it by kirchhoff's law at its own temperature, and
+// its density and giving it by the thermal source function by default, and
 // puffing as a buoyant flame does.
 //
 // it is a medium, its own glow as a texture, and thicker to blue than red, as
@@ -36,7 +42,7 @@ type Fire struct {
 // zero and one unit is a metre. it is the same at a time however often it is
 // asked, so a replay meets the same flame.
 //
-// made only by NewBody.
+// Constructed by NewBody or as part of NewField.
 type Body struct {
 	fire   Fire
 	period time.Duration
@@ -48,18 +54,45 @@ type Body struct {
 // exposure: what a watt a square metre a steradian is there, as a
 // lamp's exposure is what a watt a steradian is.
 func NewBody(fire Fire, exposure float64) (*Body, error) {
+	return bodyWithPalette(fire, exposure, nil)
+}
+
+type paletteKey struct {
+	cold, hot, exposure float64
+	composition         *composition
+}
+
+// bodyWithPalette shares immutable colour tables within one field.
+func bodyWithPalette(fire Fire, exposure float64, palettes map[paletteKey]glowing) (*Body, error) {
 	hot, edge := fire.Hottest.InKelvin(), fire.Edge.InKelvin()
 	if !sane(fire.Radius) || !sane(fire.Height) ||
 		!(fire.Absorption >= 0) || math.IsInf(fire.Absorption, 0) ||
-		!sane(hot) || !sane(edge) || edge > hot || !sane(exposure) {
+		!sane(hot) || !sane(edge) || edge > hot || !sane(exposure) ||
+		!(fire.Intermittency >= 0 && fire.Intermittency < 1) {
+		return nil, errFlame
+	}
+	if fire.Composition != nil && fire.Composition.Reference() != fire.Hottest {
 		return nil, errFlame
 	}
 	period, err := Period(measure.Metres(2 * fire.Radius))
 	if err != nil {
 		return nil, err
 	}
-	return &Body{fire: fire, period: period,
-		glows: newGlowing(edge, hot, exposure)}, nil
+	key := paletteKey{edge, hot, exposure, fire.Composition}
+	table, found := palettes[key]
+	if !found {
+		if fire.Composition != nil {
+			table = compositionGlowing(fire.Composition, edge, hot, exposure)
+		} else {
+			table = newGlowing(edge, hot, exposure)
+		}
+		if palettes != nil {
+			palettes[key] = table
+		}
+	}
+
+	return &Body{fire: fire, period: period, glows: table}, nil
+
 }
 
 // the flame's shape and motion, all picked by looking, none measured:
@@ -150,8 +183,7 @@ type shine struct{ body *Body }
 // Shine is the flame's glow, for its volume's material.
 func (body *Body) Shine() texture.Timed { return shine{body} }
 
-// At is the glow at a point: a black body at the flame's temperature
-// there, by kirchhoff's law.
+// At reads the thermal or prescribed spectral source at the point's heat.
 func (glow shine) At(p maths.Vec) maths.Light {
 	return glow.body.glows.at(glow.body.Heat(p))
 }
@@ -245,14 +277,15 @@ func (body *Body) Density(p maths.Vec) float64 {
 // from the noise's foot to its top across the tongues, so they lick up in
 // sheets and thin to nothing at the tip.
 func (body *Body) tongued(p maths.Vec, up float64) float64 {
-	if up <= continuous {
+	border := body.tonguesStart()
+	if up <= border {
 		return 1
 	}
 	fire := body.fire
 	size := eddies * fire.Radius
 	risen := noise.Fractal(fire.Seed+3, p.X/size,
 		body.lifted(p.Y)/(tall*size), p.Z/size, octaves)
-	bar := -0.65 + 1.3*(up-continuous)/(1-continuous)
+	bar := -0.65 + 1.3*(up-border)/(1-border)
 	return math.Max(0, math.Min(1, (risen-bar)/soft))
 }
 
@@ -273,8 +306,11 @@ func (body *Body) Heat(p maths.Vec) measure.Temperature {
 	deep, up := body.inside(p)
 	hot, edge := body.fire.Hottest.InKelvin(), body.fire.Edge.InKelvin()
 	heat := edge + (hot-edge)*math.Sqrt(deep)
-	if up > continuous {
-		axis := edge + (hot-edge)*continuous/up
+	if up > continuous || (body.fire.HotTongues && up > body.tonguesStart()) {
+		axis := hot
+		if !body.fire.HotTongues {
+			axis = edge + (hot-edge)*continuous/up
+		}
 		heat = edge + (axis-edge)*math.Sqrt(deep)
 		heat -= (heat - edge) * ragCools * body.ragged(p)
 	}
@@ -316,7 +352,7 @@ func Tilt() maths.Light {
 	return maths.RGB(tilt(eye[0]), tilt(eye[1]), tilt(eye[2]))
 }
 
-// glowing is a black body's glow in a picture's light, worked out once
+// glowing stores source radiance in picture units, worked out once
 // a few kelvin apart across the temperatures a flame has, since a march
 // asks it at every step.
 type glowing struct {
@@ -356,4 +392,26 @@ func (table glowing) at(heat measure.Temperature) maths.Light {
 	share := place - low
 	below, above := table.glows[int(low)], table.glows[int(low)+1]
 	return below.Scale(1 - share).Add(above.Scale(share))
+}
+
+// tonguesStart is an authored occupancy border when supplied. Zero keeps the
+// original mean-region ratio; it does not claim a new measured correlation.
+func (body *Body) tonguesStart() float64 {
+	if body.fire.Intermittency > 0 {
+		return body.fire.Intermittency
+	}
+	return continuous
+}
+
+// compositionGlowing uses the same observer and RGB clipping as the thermal
+// table. The GPU receives this table, so it has no separate chemistry model.
+func compositionGlowing(profile *composition, cold, hot, exposure float64) glowing {
+	apart := (hot - cold) / (glowSteps - 1)
+	table := glowing{coolest: cold, apart: apart}
+	for i := range glowSteps {
+		spectrum := profile.Spectrum(measure.Kelvin(cold + float64(i)*apart)).Scale(exposure)
+		red, green, blue := srgb.Light(observer.Swatch(spectrum))
+		table.glows = append(table.glows, maths.RGB(math.Max(0, red), math.Max(0, green), math.Max(0, blue)))
+	}
+	return table
 }

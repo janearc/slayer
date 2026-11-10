@@ -1,8 +1,8 @@
 // Package lines builds emission colours from elemental spectral lines, using
-// libtheme’s light representation.
+// libtheme's light representation.
 //
-// Wavelengths follow NIST’s values in nanometres in air. Relative strengths are
-// approximate and normalized to each element’s strongest line: useful for
+// Wavelengths follow NIST's values in nanometres in air. Relative strengths are
+// approximate and normalized to each element's strongest line: useful for
 // illustration, not quantitative spectroscopy.
 package lines
 

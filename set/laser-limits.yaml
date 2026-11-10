@@ -1,0 +1,51 @@
+# Input limits, not measurements. The schema repeats these wire bounds;
+# contract tests must keep the schema and legacy reader in agreement.
+# All choices: 2026-11-07.
+numbers:
+  - name: minimum-radius
+    value: 0.0001
+    unit: m
+    says: authored smallest supported launch radius
+    kind: picked
+    by: Slayer's scene-schema fixtures, 2026-11-07
+  - name: maximum-radius
+    value: 100
+    unit: m
+    says: authored largest supported launch radius
+    kind: picked
+    by: Slayer's scene-schema fixtures, 2026-11-07
+  - name: minimum-reach
+    value: 0.001
+    unit: m
+    says: authored shortest supported beam
+    kind: picked
+    by: Slayer's scene-schema fixtures, 2026-11-07
+  - name: maximum-divergence
+    value: 45
+    unit: deg
+    says: authored input bound; the parallel-ray shadow approximation is intended for narrow beams
+    kind: picked
+    by: Slayer's scene-schema fixtures, 2026-11-07
+  - name: minimum-wavelength
+    value: 1
+    unit: nm
+    says: authored lower input bound for a spectral line
+    kind: picked
+    by: Slayer's scene-schema fixtures, 2026-11-07
+  - name: maximum-wavelength
+    value: 1000000000
+    unit: nm
+    says: authored upper input bound; an invisible line need not appear in an RGB render
+    kind: picked
+    by: Slayer's scene-schema fixtures, 2026-11-07
+  - name: maximum-strength
+    value: 1000000000000
+    says: authored peak display-strength input budget, not measured laser power
+    kind: picked
+    by: Slayer's scene-schema fixtures, 2026-11-07
+  - name: maximum-offset-arcsec
+    value: 3600
+    unit: arcsec
+    says: authored tangent-plane input budget, not an instrument field of view
+    kind: picked
+    by: Slayer common-pointing reader, 2026-11-08

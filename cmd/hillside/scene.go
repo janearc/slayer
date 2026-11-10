@@ -13,7 +13,9 @@ import (
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/globe"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/moonlight"
+	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/set"
 	"github.com/janearc/slayer/sources"
@@ -43,7 +45,7 @@ func clashes(flags *flag.FlagSet, given asked) string {
 }
 
 // the scene's own numbers, picked by looking, none measured: the colour
-// of kīlauea's ground, dark weathered basalt, and how many of a stand's
+// of kilauea's ground, dark weathered basalt, and how many of a stand's
 // kind are made before the rest repeat them
 var basalt = maths.RGB(0.07, 0.065, 0.06)
 
@@ -53,16 +55,28 @@ const standVariety = 4
 // stock, where each named thing stands, where every thing stood, and
 // the tally.
 type staging struct {
-	given  asked
-	world  *thing.World
-	have   stock
-	made   tally
-	places map[string]maths.Vec
-	stood  []standing
-	ground terrain.Window
-	west   float64
-	north  float64
-	lowest float64
+	firebrandShape *mesh.Mesh
+	unretained     string
+	fronts         []retainedFront
+	beds           []retainedBed
+	fuels          map[string][]groveTree
+	fires          []retainedFire
+	dynamicThings  map[*thing.Thing]bool
+	dynamicVolumes map[*thing.Volume]bool
+	dynamicLamps   map[int]bool
+	given          asked
+	world          *thing.World
+	have           stock
+	made           tally
+	places         map[string]maths.Vec
+	radii          map[string]float64
+	recipes        set.Set
+	stood          []standing
+	ground         terrain.Window
+	groundExtent   maths.Box
+	west           float64
+	north          float64
+	lowest         float64
 }
 
 // standing is one thing as the stage stood it: the thing's name or its
@@ -108,9 +122,20 @@ func staged(given asked) (*thing.World, tally, asked, error) {
 		return nil, tally{}, given, err
 	}
 	stage := &staging{given: given, world: thing.NewWorld(),
-		have: stock{}, places: map[string]maths.Vec{}}
+		have: stock{}, places: map[string]maths.Vec{},
+		radii: map[string]float64{}, recipes: read}
+	retained := false
+	defer func() {
+		if !retained {
+			(&liveScene{beds: stage.beds}).closeBeds()
+		}
+	}()
 	world, inSpace := read.Planet()
-	if err := stage.place(read, world, inSpace); err != nil {
+	err = stage.place(read, world, inSpace)
+	if err == nil {
+		err = stage.lasers(read)
+	}
+	if err != nil {
 		return nil, tally{}, given, err
 	}
 	if given.placed != "" {
@@ -139,6 +164,14 @@ func staged(given asked) (*thing.World, tally, asked, error) {
 			return nil, tally{}, given, err
 		}
 	}
+	stage.given.live = stage.retain()
+	if len(stage.fronts) > 0 || len(stage.beds) > 0 {
+		stage.world, stage.made, err = stage.given.live.frameAt(stage.given.at)
+		if err != nil {
+			return nil, tally{}, given, err
+		}
+	}
+	retained = true
 	return stage.world, stage.made, stage.given, nil
 }
 
@@ -170,7 +203,16 @@ func (stage *staging) place(read set.Set, world set.Planet,
 	} else if err := stage.light(read); err != nil {
 		return err
 	}
-	return stage.stand(read)
+	if err := stage.stand(read); err != nil {
+		return err
+	}
+	if err := stage.atmosphere(read); err != nil {
+		return err
+	}
+	if err := stage.prepareFronts(read); err != nil {
+		return err
+	}
+	return stage.prepareBeds(read)
 }
 
 // filmed is what was asked with the set's film and light in it.
@@ -182,10 +224,23 @@ func filmed(read set.Set, given asked) (asked, error) {
 	given.width, given.height, given.samples = film.Size()
 	given.exposure = film.Exposure()
 	given.night = read.Light() == "moon"
+	given.cachedLighting = read.VolumeLighting() == "cached"
+	if read.Renderer() != "" {
+		given.nativeMeshes = read.Renderer() == "gpu-native"
+		given.nativeShadows = read.Renderer() == "gpu-native-shadows"
+		given.onGPU = read.Renderer() == "gpu" || given.nativeShadows || given.nativeMeshes
+	}
+	if read.HasSeed() {
+		given.seed = read.Seed()
+	}
 	if film.Wide() > 0 {
 		given.wide = film.Wide()
 	}
 	if rig, has := film.Rig(); has {
+		if given.cachedLighting {
+			return given, fmt.Errorf(
+				"volume-lighting: cached requires a pinhole film")
+		}
 		return rigged(rig, given)
 	}
 	return given, nil
@@ -201,6 +256,10 @@ func (stage *staging) where(name string) (maths.Vec, bool) {
 // where it stands, or else the sun or the moon as hillside's own are,
 // picked.
 func (stage *staging) light(read set.Set) error {
+	if read.Light() == "none" {
+		stage.world.Sky = sky.Gradient{}
+		return nil
+	}
 	if moon, has := read.Moonlit(); has && read.Light() == "moon" {
 		way, err := stage.moonlit(moon)
 		if err != nil {
@@ -208,12 +267,39 @@ func (stage *staging) light(read set.Set) error {
 		}
 		return stage.skies(read, way)
 	}
+	if sun, has := read.Sunlit(); has && read.Light() == "sun" {
+		azimuth, altitude := sun.Where()
+		if altitude <= 0 {
+			return fmt.Errorf("%s: daylight sun must be above the horizon", stage.given.set)
+		}
+		stage.world.Sky = skyFor(stage.given)
+		for index, source := range []struct {
+			toward maths.Vec
+			power  float64
+		}{
+			{skyward(azimuth, altitude), day}, {fillWay, day * fill},
+		} {
+			colour := maths.Grey(source.power)
+			if index == placementZero {
+				colour = tintedSun(sun, source.power)
+			}
+			lamp, err := emit.NewDistant(source.toward, colour)
+			if err != nil {
+				return err
+			}
+			stage.world.Lamp(lamp)
+			stage.made.lamps++
+		}
+		return nil
+	}
 	level := day
 	stage.world.Sky = skyFor(stage.given)
 	if stage.given.night {
 		level = moonlit
 	}
-	return lamps(stage.world, stage.given, level)
+	err := lamps(stage.world, stage.given, level)
+	stage.made.lamps = len(stage.world.Lamps)
+	return err
 }
 
 // skyward is the way to a body at an azimuth and an altitude, in
@@ -238,21 +324,25 @@ func (stage *staging) moonlit(moon set.Moon) (maths.Vec, error) {
 	height := measure.Metres(stage.lowest)
 	rise, exposure := measure.Radians(altitude*maths.Degree),
 		stage.given.exposure
-	face, err := moonlight.Disc().Through(height, rise)
-	if err != nil {
-		return way, err
+	if moon.Disc() {
+		face, err := moonlight.Disc().Through(height, rise)
+		if err != nil {
+			return way, err
+		}
+		ball, err := globe.New(moonlight.Moon().Radius().InMetres())
+		if err != nil {
+			return way, err
+		}
+		far := moonlight.Moon().Distance().InMetres()
+		material, err := stage.faced(moon, way, face.Picture(exposure))
+		if err != nil {
+			return way, err
+		}
+		// The visual disc must not block its paired distant light.
+		stage.world.Add(thing.Thing{Shape: ball, Material: material,
+			Attrs:  thing.Attrs{Clear: true},
+			Motion: thing.Still(maths.Subspace{Origin: way.Scale(far)})})
 	}
-	ball, err := globe.New(moonlight.Moon().Radius().InMetres())
-	if err != nil {
-		return way, err
-	}
-	far := moonlight.Moon().Distance().InMetres()
-	material, err := stage.faced(moon, way, face.Picture(exposure))
-	if err != nil {
-		return way, err
-	}
-	stage.world.Add(thing.Thing{Shape: ball, Material: material,
-		Motion: thing.Still(maths.Subspace{Origin: way.Scale(far)})})
 	arriving, err := moonlight.Full().Through(height, rise)
 	if err != nil {
 		return way, err
@@ -339,6 +429,7 @@ func (stage *staging) terrain(read set.Set) error {
 		return err
 	}
 	stage.lowest = lowest
+	stage.groundExtent = surface.Bounds()
 	stage.given.floor = lowest
 	stage.world.Add(thing.Thing{Shape: surface,
 		Material: &thing.Material{Name: "basalt", Colour: basalt}})
@@ -348,26 +439,43 @@ func (stage *staging) terrain(read set.Set) error {
 // pinned is the shelf, once the source is found pinned on it, in the
 // sources.yaml nearest the set file: in its directory or one above.
 func pinned(key, near string) (string, error) {
+	shelf, _, err := pinnedSource(key, near)
+	return shelf, err
+}
+
+// pinnedSource returns the exact catalogue used for the pin check as well
+// as the shelf, so sequence fingerprints do not repeat the path search.
+func pinnedSource(key, near string) (string, string, error) {
+	asset, err := pinnedAssetAt(key, near)
+	return asset.shelf, asset.catalogue, err
+}
+
+// pinnedAsset keeps the checked path and catalogue from one lookup.
+type pinnedAsset struct{ shelf, catalogue, path string }
+
+// pinnedAssetAt checks exactly the catalogue entry that supplies the path.
+func pinnedAssetAt(key, near string) (pinnedAsset, error) {
 	shelf, err := sources.Here()
 	if err != nil {
-		return "", err
+		return pinnedAsset{}, err
 	}
 	listed, err := nearest(near, "sources.yaml")
 	if err != nil {
-		return "", err
+		return pinnedAsset{}, err
 	}
 	list, err := sources.Read(listed)
 	if err != nil {
-		return "", err
+		return pinnedAsset{}, err
 	}
 	source, found := list.Find(key)
 	if !found {
-		return "", fmt.Errorf("%s is not in sources.yaml", key)
+		return pinnedAsset{}, fmt.Errorf("%s is not in sources.yaml", key)
 	}
-	if _, err := sources.NewShelf(shelf, nil).Check(source); err != nil {
-		return "", err
+	kept := sources.NewShelf(shelf, nil)
+	if _, err := kept.Check(source); err != nil {
+		return pinnedAsset{}, err
 	}
-	return shelf, nil
+	return pinnedAsset{shelf: shelf, catalogue: listed, path: kept.Path(source)}, nil
 }
 
 // faced is the moon's material: its glow, and its face where the set
@@ -378,21 +486,11 @@ func (stage *staging) faced(moon set.Moon, way maths.Vec,
 	if moon.Face() == "" {
 		return material, nil
 	}
-	shelf, err := pinned(moon.Face(), filepath.Dir(stage.given.set))
+	asset, err := pinnedAssetAt(moon.Face(), filepath.Dir(stage.given.set))
 	if err != nil {
 		return nil, err
 	}
-	listed, err := nearest(filepath.Dir(stage.given.set), "sources.yaml")
-	if err != nil {
-		return nil, err
-	}
-	list, err := sources.Read(listed)
-	if err != nil {
-		return nil, err
-	}
-	source, _ := list.Find(moon.Face())
-	face, err := moonlight.NewFace(sources.NewShelf(shelf, nil).Path(source),
-		way, glow)
+	face, err := moonlight.NewFace(asset.path, way, glow)
 	if err != nil {
 		return nil, err
 	}
@@ -440,10 +538,11 @@ func (stage *staging) stand(read set.Set) error {
 		if err != nil {
 			return fmt.Errorf("%s: %w", each.Name(), err)
 		}
+		place.Y += each.Height()
 		stage.places[each.Name()] = place
 		stage.note(each.Name(), each.Kind(), place)
-		err = stage.put(each.Kind(), each.Seed(), uint64(i), place,
-			each.Alight())
+		_, err = stage.putRecipe(each.Kind(), each.Recipe(), each.Complexity(),
+			each.Seed(), uint64(i), place, each.Alight(), each.Name())
 		if err != nil {
 			return fmt.Errorf("%s: %w", each.Name(), err)
 		}
@@ -458,7 +557,7 @@ func (stage *staging) stand(read set.Set) error {
 			return fmt.Errorf("%s: %w", each.Name(), err)
 		}
 	}
-	return nil
+	return stage.ecosystems(read)
 }
 
 // tries is how many places a seed offers a stand's thing before the
@@ -472,6 +571,7 @@ const tries = 4096
 func (stage *staging) scatter(each set.Stand) error {
 	count, seed := each.Count()
 	places := rand.New(rand.NewPCG(seed, 1))
+	var grove []groveTree
 	for i := range count {
 		place, err := stage.inBand(each, places)
 		if err != nil {
@@ -479,13 +579,19 @@ func (stage *staging) scatter(each set.Stand) error {
 		}
 		stage.note(each.Name(), each.Kind(), place)
 		pick := seed*standVariety + uint64(i%standVariety)
-		err = stage.put(each.Kind(), pick, uint64(i), place,
-			i < each.Alight())
+		var bounds maths.Box
+		bounds, err = stage.putRecipe(each.Kind(), each.Recipe(), each.Complexity(),
+			pick, uint64(i), place, i < each.Alight(), "")
 		if err != nil {
 			return err
 		}
+		grove = append(grove, groveTree{at: place, bounds: bounds})
 	}
-	return nil
+	if stage.fuels == nil {
+		stage.fuels = map[string][]groveTree{}
+	}
+	stage.fuels[each.Name()] = grove
+	return stage.grove(each, grove)
 }
 
 // inBand is a place the generator offers on the ground, short of its
@@ -504,7 +610,7 @@ func (stage *staging) inBand(each set.Stand,
 			continue
 		}
 		height := place.Y + stage.lowest
-		if height > above && height < below {
+		if height > above && height < below && stage.allowed(each, place) {
 			return place, nil
 		}
 	}
@@ -544,26 +650,53 @@ func (stage *staging) offering(each set.Stand,
 	}, nil
 }
 
-// put makes one of a kind from a seed, or the stock's, and stands it at
-// a place turned by its index, alight if asked. the seed is stirred as
-// hillside stirs a place's, so a set's seeds and hillside's agree.
-func (stage *staging) put(kind string, seed, index uint64,
-	place maths.Vec, burning bool) error {
-	key := stocked{name: kind, pick: int(seed)}
+// putRecipe keeps named recipes and complexity levels in separate stock.
+// An optical recipe's pointing is already baked into its assembly.
+func (stage *staging) putRecipe(kind, recipe, detail string, seed, index uint64,
+	place maths.Vec, burning bool, name string) (maths.Box, error) {
+	if kind == "fire" {
+		return stage.putFireRecipe(recipe, seed, index, place, name)
+	}
+	identity := kind
+	if recipe != "" {
+		identity = "recipe:" + recipe
+	}
+	key := stocked{name: identity, pick: int(seed), detail: detail}
 	one, known := stage.have[key]
 	if !known {
-		var err error
-		one, err = manufactured(stage.given, kind, int(seed))
+		fresh, err := stage.constructed(kind, recipe, detail, seed)
 		if err != nil {
-			return err
+			return maths.Box{}, err
 		}
+		one = *fresh
 		stage.have[key] = one
-		stage.made.kept += one.faces
+		stage.made.kept += one.stored
 	}
-	turn := float64(stir(seed, int(index))%3600) / 3600 * 2 * math.Pi
+	turn := stage.placementTurn(kind, name, seed, index)
 	at := maths.Subspace{Origin: place,
 		Orientation: maths.About(maths.YAxis, turn), Scale: 1}
-	return stage.add(one, kind, at, seed, burning)
+	if name != "" {
+		stage.radii[name] = horizontalRadius(one.bounds)
+	}
+	return one.bounds, stage.add(one, kind, at, seed, burning)
+}
+
+// allowed leaves clearance beyond the excluded object's enclosing circle.
+func (stage *staging) allowed(each set.Stand, place maths.Vec) bool {
+	name, clearance := each.Exclude()
+	if name == "" {
+		return true
+	}
+	centre := stage.places[name]
+	return math.Hypot(place.X-centre.X, place.Z-centre.Z) >=
+		clearance+stage.radii[name]
+}
+
+// horizontalRadius encloses every yaw of the physical extent.
+func horizontalRadius(box maths.Box) float64 {
+	x := math.Max(math.Abs(box.Min.X), math.Abs(box.Max.X))
+	z := math.Max(math.Abs(box.Min.Z), math.Abs(box.Max.Z))
+	return math.Hypot(x, z)
 }
 
 // add stands a kept thing at a place with its lamps and its fire.
@@ -575,6 +708,9 @@ func (stage *staging) add(one kept, kind string, at maths.Subspace,
 	}
 	for _, each := range stood(one.things, at) {
 		stage.world.Add(each)
+	}
+	if kind == "campfire" || kind == "bonfire" {
+		stage.unretained = "legacy fire lamps are sampled at construction; use fire recipes"
 	}
 	stage.made.things++
 	stage.made.faces += one.faces

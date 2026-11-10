@@ -168,9 +168,9 @@ func (made *Weather) draw() float64 {
 type stamp func(k int, spin, core float64)
 
 // storm adds one storm's vortex at a latitude and longitude in radians, cell by
-// cell by add: a mexican hat of spin, (1 - r²/s²) e^(-r²/s²) of its strength at
-// r from its middle for a storm s wide, whose spin sums to zero, and its core,
-// e^(-r²/s²).
+// cell by add: a mexican hat of spin, (1 - r^2/s^2) * e^(-r^2/s^2), of its
+// strength at r from its middle for a storm s wide. Its spin sums to zero;
+// its core is e^(-r^2/s^2).
 func (made *Weather) storm(latitude, longitude, spin float64, add stamp) {
 	grid := made.grid
 	wide := made.stirring.radius / grid.radius

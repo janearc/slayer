@@ -6,7 +6,8 @@ package set
 import (
 	"fmt"
 
-	yaml "go.yaml.in/yaml/v3"
+	"github.com/janearc/puzzlemouth/yamlfile"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // parse is a set file's top: the keys it is made of, every node keeping
@@ -17,8 +18,8 @@ import (
 // through when it keeps the file as written.
 func parse(file string, source []byte) (*yaml.Node, error) {
 	var document yaml.Node
-	if err := yaml.Unmarshal(source, &document); err != nil {
-		return nil, fmt.Errorf("%s: %w", file, err)
+	if err := yamlfile.Read(file, source, &document); err != nil {
+		return nil, err
 	}
 	if len(document.Content) != 1 ||
 		document.Content[0].Kind != yaml.MappingNode {

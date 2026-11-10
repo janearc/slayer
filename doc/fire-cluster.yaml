@@ -1,0 +1,70 @@
+# a visual study, not a calibrated fuel experiment. dimensions, temperatures,
+# camera, exposure, optical depth and smoke cutoff are authored choices.
+# 0.71 assumes 1 - the mean radiative share; 0.0024 is the mean soot yield:
+# NIST TN 2314, abstract. extinction is converted from 632 to 550 nm.
+# 21 MJ/kg is nominal net combustion energy, not measured effective energy.
+# see fire-recipes.md for sources, derivation and model limits.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: a wood fire on volcanic ground
+  renderer: gpu-native
+  seed: 7
+  light: none
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 1900
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263780
+    north: 2148780
+    across: 64
+    down: 64
+    step: 1
+  recipes:
+    wood fire:
+      kind: fire
+      layout:
+        pattern: cluster
+        count: 9
+        radius: {value: 0.45, unit: m}
+        height-variation: 0.45
+      flame:
+        radius: {value: 0.28, unit: m}
+        height: {value: 1.3, unit: m}
+        absorption: {value: 1, unit: m^-1}
+        temperature: {value: 1900, unit: K}
+        edge-temperature: {value: 1100, unit: K}
+      light-cells: 3
+      smoke:
+        heat-release: {value: 40, unit: kW}
+        convective-fraction: 0.71
+        soot-yield: 0.0024
+        combustion: {value: 21, unit: MJ/kg}
+        mass-extinction: {value: 10.6, unit: m^2/g}
+        air-temperature: {value: 288, unit: K}
+        air-density: {value: 1.2, unit: kg/m^3}
+        height: {value: 10, unit: m}
+        albedo: 0.3
+  set:
+    things:
+      the fire:
+        recipe: wood fire
+        seed: 5
+        east: 263812
+        north: 2148748
+  film:
+    width: 1920
+    height: 1200
+    rays: 2
+    exposure: 50
+  cameras:
+    by the fire:
+      location:
+        loc_relative:
+          object: the fire
+          standoff_x: 3
+          standoff_y: -6
+          standoff_z: 2.2
+      orientation:
+        point_to: the fire
+        alpha: -12

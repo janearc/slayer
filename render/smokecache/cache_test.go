@@ -179,17 +179,19 @@ func TestAPlainPathIsKeyedAsDeclared(t *testing.T) {
 	}
 }
 
-// git runs git in dir, failing the test if it fails.
-func git(t *testing.T, dir string, args ...string) {
+// git runs git in dir, returning its output or failing the test.
+func git(t *testing.T, dir string, args ...string) string {
 	t.Helper()
 	cmd := exec.Command("git", args...)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), "GIT_AUTHOR_NAME=smokecheck",
 		"GIT_AUTHOR_EMAIL=smokecheck@here", "GIT_COMMITTER_NAME=smokecheck",
 		"GIT_COMMITTER_EMAIL=smokecheck@here")
-	if out, err := cmd.CombinedOutput(); err != nil {
+	out, err := cmd.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git %v: %v\n%s", args, err, out)
 	}
+	return strings.TrimSpace(string(out))
 }
 
 // The record says a tree's commit, and what is uncommitted in it, an
@@ -201,9 +203,9 @@ func TestTheRecordSaysWhatIsUncommitted(t *testing.T) {
 	write(t, dir, ".gitignore", "bin/\n")
 	git(t, dir, "add", ".")
 	git(t, dir, "commit", "-q", "--no-verify", "-m", "one")
-	clean := commit(dir)
-	if len(clean) != 40 {
-		t.Fatalf("a clean tree: %q", clean)
+	clean := git(t, dir, "rev-parse", "HEAD")
+	if got := commit(dir); got != clean {
+		t.Fatalf("a clean tree: %q, want %s", got, clean)
 	}
 	write(t, dir, "bin/smokecheck", "built")
 	if got := commit(dir); got != clean {

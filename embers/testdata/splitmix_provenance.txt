@@ -1,0 +1,24 @@
+SplitMix64 finalizer oracle
+
+Primary source read on 2026-11-04 (local date):
+https://prng.di.unimi.it/splitmix64.c
+Redirected primary source:
+https://prng.di.unimi.it/splitmix.c
+
+The 2015 implementation is by Sebastiano Vigna and is dedicated to the
+public domain. The small C producer retains the fixed-increment state and
+finalizer and prints the high 53 bits of eight outputs from state zero.
+It does not call Slayer, use Go, or sample the emitter.
+
+Reproduce the vectors:
+  cc -std=c11 -O2 splitmix_reference.c -o /tmp/splitmix_reference
+  /tmp/splitmix_reference
+
+The table pins the attributed algorithm. It does not claim a physically
+preferred random generator or a measured law for firebrand placement.
+Slayer's attribute salt is authored and separate from this reference.
+
+SHA-256 of the producer:
+d9cc9d6311b5cc2a65863d1b002b2e89acc6912a920e7dc744fb0f7b604ecdcd
+SHA-256 of the eight-line output:
+398bdcb56fd73b90b1f2341d3188725e830a6abdda0d24722c5c4ffd09402825

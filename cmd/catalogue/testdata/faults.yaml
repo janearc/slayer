@@ -1,0 +1,13 @@
+# These inputs must fail before a render directory is created.
+- before: "rays: 2"
+  after: "rays: 8"
+- before: "camera: {x: 1.4, y: 0.8, z: -2}"
+  after: "camera: {x: 0, y: 1, z: 0}"
+- before: "toward: {x: -1, y: 2, z: -2}"
+  after: "toward: {x: 0, y: 0, z: 0}"
+- before: "details: [quick]"
+  after: "details: [wishful]"
+- before: "distance: 3.8"
+  after: "distance: .nan"
+- before: "width: 640"
+  after: "width: 640\nwidht: 640"

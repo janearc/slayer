@@ -1,0 +1,16 @@
+numbers:
+  - name: command-seconds
+    value: 120
+    says: deadline for each real demo subprocess in the command tests
+    kind: picked
+    by: Slayer's demo previews, 2026-11-07; bounded build and tiny render, not a performance target
+  - name: width
+    value: 16
+    says: horizontal pixels in the actual demo PNG fixture
+    kind: picked
+    by: Slayer's demo previews, 2026-11-07; deliberately small, with visible variation required
+  - name: height
+    value: 12
+    says: vertical pixels in the actual demo PNG fixture
+    kind: picked
+    by: Slayer's demo previews, 2026-11-07; deliberately small, with visible variation required

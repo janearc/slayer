@@ -1,0 +1,56 @@
+# Authored contract fixtures: 2026-11-07.
+# Gaussian ratio is exp(-2); expected quadrature is 8*pi*2^2/2.
+# The integration disc extends beyond five local radii at every plane.
+# Sodium context, not a calibrated power: doc/guide-stars.md.
+source:
+  at: {x: 3, y: 4, z: 5}
+  toward: {x: 0, y: 2, z: 0}
+  strength: {r: 8, g: 4, b: 2}
+radius: 2
+reach: 20
+slope: 0.1
+heights: [1, 7, 19]
+outside: [-1, 0, 20, 21]
+gaussian-ratio: 0.1353352832366127
+tolerance: 1.0e-12
+quadrature:
+  count: 20000
+  step: 0.001
+  midpoint: 0.5
+  turn: 6.283185307179586
+  expected: 50.26548245743669
+  tolerance: 1.0e-5
+invalid-sources:
+  - toward: {x: 0, y: 0, z: 0}
+  - toward: {x: 0, y: 1, z: 0}
+    at: {x: .nan, y: 0, z: 0}
+  - toward: {x: 0, y: .inf, z: 0}
+  - toward: {x: 0, y: 1, z: 0}
+    strength: {r: .inf, g: 0, b: 0}
+  - toward: {x: 0, y: 1, z: 0}
+    strength: {r: 0, g: .nan, b: 0}
+  - toward: {x: 0, y: 1, z: 0}
+    strength: {r: 0, g: 0, b: -.inf}
+  - toward: {x: 0, y: 1, z: 0}
+    strength: {r: 0, g: -1, b: 0}
+  - toward: {x: 0, y: 1, z: 0}
+    beyond: 1
+  - toward: {x: 0, y: 1, z: 0}
+    width: 1
+  - toward: {x: 0, y: 1, z: 0}
+    soft: 1
+invalid-lengths: [0, -1, .nan, .inf, -.inf]
+invalid-angles: [-1, 1.5707963267948966, .nan, .inf, -.inf]
+line: {wavelength: 589, strength: 8, probe: 7}
+tilt:
+  axis: {x: 0.6, y: 0.8, z: 0}
+  across: {x: -0.8, y: 0.6, z: 0}
+  length: 2
+# Physical lengths remain finite after natural-unit conversion. Radius plus
+# reach*tan(angle) overflows, while radius minus reach*tan(angle) is finite.
+overflow:
+  radius: 1.0e295
+  reach: 5.09245019079845e292
+  angle: 1.5707963267948963
+valid-angles: [0, 1.2, 1.5707963267948963]
+remote: {x: 1.0e300, y: 7, z: 5}

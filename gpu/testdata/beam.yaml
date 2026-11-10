@@ -1,0 +1,22 @@
+# Authored GPU/CPU comparison scenery and acceptance, 2026-11-07.
+# The beam is broad enough to resolve with a small regular ray grid.
+width: 97
+height: 65
+samples: 1
+wide: 50
+eye: {x: 8, y: 3, z: 12}
+target: {x: 0, y: 0, z: 0}
+source:
+  at: {x: 0, y: -6, z: 0}
+  toward: {x: 0, y: 1, z: 0}
+  strength: {r: 8, g: 4, b: 0.5}
+radius: 0.6
+reach: 12
+divergence: 0.2
+mist: {radius: 5, thick: 0.05}
+volume:
+  material:
+    name: authored mist
+    colour: {r: 0.9, g: 0.9, b: 0.9}
+minimum: 1
+tolerance: 0.001

@@ -11,7 +11,7 @@ import (
 	"github.com/janearc/slayer/set"
 )
 
-// wedged is the set package's kīlauea iki, its trees on the rim grown
+// wedged is the set package's kilauea iki, its trees on the rim grown
 // within a wedge seen from its first tree, written as it is given.
 func wedged(t *testing.T, wedge string) set.Stand {
 	t.Helper()

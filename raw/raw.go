@@ -27,7 +27,7 @@ const (
 	channels = 3
 )
 
-// Write saves a frame’s RGB light to a PFM at path. NaN and infinite channel
+// Write saves a frame's RGB light to a PFM at path. NaN and infinite channel
 // values are rejected.
 func Write(path string, kept *frame.Frame) error {
 	floats := make([]float32, 0, len(kept.Pix)*channels)

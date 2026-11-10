@@ -238,6 +238,11 @@ func (round ring) across(int) int { return round.count }
 // middle the same way: a fern's fronds all lie face up. it sizes nothing; the
 // part comes at its carrier's size and the space scales it.
 func (round ring) at(_ size, row, index int, from seed) (place, error) {
+	return round.place(row, index, from), nil
+}
+
+// place is the infallible ring placement behind the arrangement interface.
+func (round ring) place(row, index int, from seed) place {
 	gap := fullTurn / float64(round.count)
 	angle := gap * (float64(index) + round.stray*from.swing(row, index, 0))
 	out := maths.V(math.Cos(angle), 0, -math.Sin(angle))
@@ -250,5 +255,5 @@ func (round ring) at(_ size, row, index int, from seed) (place, error) {
 		Origin:      out.Scale(inScene(round.radius)),
 		Orientation: facing.Then(maths.About(maths.YAxis, twist)),
 		Scale:       1 + round.uneven*from.swing(row, index, 2),
-	}}, nil
+	}}
 }

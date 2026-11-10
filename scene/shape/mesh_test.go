@@ -309,7 +309,7 @@ func inradius(vs []maths.Vec, fs [][3]int) float64 {
 // the middle than in meets both shapes, and one passing further than one
 // meets neither; between in and one is the silhouette, where either may
 // meet and the other not. Along a ray that meets both, the two surfaces
-// are between the two balls, which are sqrt(1-b²) - sqrt(in²-b²) apart
+// are between the two balls, which are sqrt(1-b^2) - sqrt(in^2-b^2) apart
 // there, b the line's distance from the middle, so the two distances agree
 // that well. The band, one less in, quarters each time the faces split in
 // four, and the gap with it.
@@ -494,7 +494,7 @@ func throughCube(t *testing.T, m *Mesh, from, aim maths.Vec,
 // are near the sphere's own normal where the same ray meets the sphere.
 //
 // The two points are on the ray, as far apart as the distances are,
-// which is at most (1-in²)/sqrt(1-b²); seen from the middle, at least in
+// which is at most (1-in^2)/sqrt(1-b^2); seen from the middle, at least in
 // away, they are at most twice the arcsine of that over 2in apart. For
 // 5,120 faces and rays that pass within 0.9 of the middle that is under
 // three tenths of a degree, where flat faces are off by degrees.

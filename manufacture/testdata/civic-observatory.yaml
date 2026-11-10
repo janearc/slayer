@@ -1,0 +1,15 @@
+# Independent scene contract. Building values are authored, not surveyed.
+kind: griffith
+seed: 5
+minimum: {x: -36, y: 0, z: -22}
+maximum: {x: 36, y: 20, z: 22}
+tolerance: 0.00000001
+maximum-faces: 100000
+objective-centre: {x: 23, y: 15.94894735944037, z: -2.064875170863766}
+objective-axis: {x: 0, y: 0.8191520442889918, z: -0.5735764363510462}
+objective-diameter: 0.3048
+objective-thickness: 0.015
+roofs:
+  - {ray: {at: {x: 0, y: 25, z: -3}, dir: {x: 0, y: -1, z: 0}}, distance: 5}
+  - {ray: {at: {x: -23, y: 25, z: 0}, dir: {x: 0, y: -1, z: 0}}, distance: 7}
+  - {ray: {at: {x: 0, y: 25, z: 7}, dir: {x: 0, y: -1, z: 0}}, distance: 16}

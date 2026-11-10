@@ -1,0 +1,21 @@
+# Authored generation examples preserving the existing stop-state witnesses.
+# Full-width values stay exact decimal unsigned integers.
+before_disk_loss: 4
+after_disk_loss: 5
+resume_generations:
+  - 5
+  - 18446744073709551613
+stopped_generation: 5
+stale_generations:
+  - 0
+  - 4
+  - 6
+  - 18446744073709551615
+last_generation: 18446744073709551615
+before_last_generation: 18446744073709551614
+clear_before_redundant_resume: 6
+redundant_resume_generation: 5
+minimum_events: 1
+maximum_events: 30
+old_resume_generation: 1
+second_stop_generation: 3

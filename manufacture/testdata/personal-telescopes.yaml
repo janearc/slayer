@@ -1,0 +1,75 @@
+# Independent geometry expectations for the requested instruments.
+# Requested apertures use the exact international inch; scenery dimensions authored.
+---
+seed: 5
+tolerance: 1.0e-08
+maximum-faces: 100000
+axis:
+  x: 0
+  y: 0.8191520442889918
+  z: -0.5735764363510462
+tangent:
+  x: 0
+  y: 0.5735764363510462
+  z: 0.8191520442889918
+profiles:
+- kind: dobsonian-36
+  aperture: 0.9144
+  minimum:
+    x: -0.9601200000000001
+    y: 0
+    z: -2.9260800000000002
+  maximum:
+    x: 0.9601200000000001
+    y: 4.572
+    z: 1.09728
+  centre:
+    x: 0
+    y: 0.9144
+    z: -0.0
+  role: primary mirror
+  roles:
+  - primary mirror
+  - secondary mirror
+  near: -0.0064008
+  far: 0.032004000000000005
+- kind: apo-refractor-5
+  aperture: 0.127
+  minimum:
+    x: -0.635
+    y: 0
+    z: -0.889
+  maximum:
+    x: 0.635
+    y: 2.3114
+    z: 0.635
+  centre:
+    x: 0
+    y: 2.125226167372914
+    z: -0.5099094519160801
+  role: objective proxy
+  roles:
+  - objective proxy
+  near: 0
+  far: 0.001524
+- kind: sct-24
+  aperture: 0.6096
+  minimum:
+    x: -0.7315200000000001
+    y: 0
+    z: -1.9507200000000002
+  maximum:
+    x: 0.7315200000000001
+    y: 3.6576000000000004
+    z: 0.7315200000000001
+  centre:
+    x: 0
+    y: 3.105074241355994
+    z: -0.9790261476788736
+  role: objective proxy
+  roles:
+  - primary mirror
+  - secondary mirror
+  - objective proxy
+  near: 0
+  far: 0.007315200000000001

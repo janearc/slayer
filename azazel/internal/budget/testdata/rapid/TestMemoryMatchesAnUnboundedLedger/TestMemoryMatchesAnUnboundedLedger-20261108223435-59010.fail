@@ -1,0 +1,12 @@
+# 2026/11/08 22:34:35.546966 [TestMemoryMatchesAnUnboundedLedger] [rapid] draw limit: 0x1
+# 2026/11/08 22:34:35.546973 [TestMemoryMatchesAnUnboundedLedger] [rapid] draw reserved: 0x0
+# 2026/11/08 22:34:35.546973 [TestMemoryMatchesAnUnboundedLedger] [rapid] draw requested: 0x1
+# 2026/11/08 22:34:35.546974 [TestMemoryMatchesAnUnboundedLedger] limit 1, reserved 0, request 1: admitted false, want true
+# 
+v0.4.8#11460777099522991628
+0x0
+0x1
+0x0
+0x0
+0x0
+0x1

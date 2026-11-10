@@ -1,6 +1,7 @@
 package manufacture
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"math"
@@ -93,12 +94,45 @@ var errKind = errors.New("manufacture: no such kind")
 
 // table is every kind there is, by name.
 func table() map[string]maker {
-	rows := map[string]maker{"spruce": spruceRow(), "fern": fernRow(),
-		"norway": norwayRow(),
+	rows := map[string]maker{"spruce": physicalSpruce{legacy: spruceRow()}, "fern": fernRow(),
+		"norway": physicalSpruce{legacy: norwayRow()},
 		"log":    logRow(), "can": canRow(), "campfire": fireRow(),
 		"bonfire": pyreRow(), "spotlight": spotRow(), "maser": maserRow(),
 		"home": homeRow()}
+	rows["guide-star-launcher"] = guideLauncher{}
+	rows["saguaro"] = saguaro{}
+	rows["optical-observatory"] = optical{Optical{
+		Diameter: measure.Metres(24), Aperture: measure.Metres(8),
+		Opening: measure.Degrees(35), Azimuth: measure.Degrees(180),
+		Altitude: measure.Degrees(55), Segmented: true,
+	}}
+	rows["coast-redwood"], rows["giant-sequoia"] = redwoodRow(), sequoiaRow()
+	rows["coast-redwood-shoot"] = shootKind{style: 1}
+	rows["giant-sequoia-shoot"] = shootKind{style: 2}
 	for name, row := range stoneRows() {
+		rows[name] = row
+	}
+	for name, row := range spacecraftRows() {
+		rows[name] = row
+	}
+	for name, row := range personalRows() {
+		rows[name] = row
+	}
+	for name, row := range yardRows() {
+		rows[name] = row
+	}
+	for name, row := range vegetationRows() {
+		rows[name] = row
+	}
+	for name, row := range owlRows() {
+		rows[name] = row
+	}
+	for name, row := range summitRows() {
+		rows[name] = row
+	}
+	rows["griffith"] = civicObservatory{}
+	rows["space-observatory"] = rows["spitzer"]
+	for name, row := range groundRows() {
 		rows[name] = row
 	}
 	return rows
@@ -209,6 +243,8 @@ type conifer struct {
 	hangs                          habit
 	grows                          whorled
 	dressed                        looks
+	foliageStyle                   int
+	flare                          float64
 }
 
 // spruceRow is the spruce, a pinaceae. how its branches hang is ninja's
@@ -271,6 +307,16 @@ func norwayWhorled() whorled {
 // made is a whorled tree from a seed: as many whorls as fit up its
 // height, at quick.
 func (row conifer) made(from seed) (good, error) {
+	made, err := row.scaffold(from)
+	if err != nil || row.foliageStyle == 0 {
+		return made, err
+	}
+	return recursiveFoliage(made, from, row.foliageStyle, "quick")
+}
+
+// scaffold retains the seeded major limbs while foliage is constructed
+// separately. Legacy spruce recipes still use its original sleeves.
+func (row conifer) scaffold(from seed) (good, error) {
 	tall := row.tall.metres(from.draw(picking, 0, 0))
 	girth := tall.Times(row.slender.pick(from.draw(picking, 1, 0)))
 	between := row.between.metres(from.draw(picking, 2, 0))
@@ -285,8 +331,13 @@ func (row conifer) made(from seed) (good, error) {
 	if err != nil {
 		return good{}, err
 	}
-	return grownIn(grown, tall, girth, maths.Subspace{}, from,
-		row.dressed)
+	made, err := grownIn(grown, tall, girth, maths.Subspace{}, from, row.dressed)
+	if err == nil && row.flare > 0 {
+		h, r := tall.InMetres(), girth.InMetres()
+		made.parts[0].shape = turnedProfile{[][2]float64{
+			{0, 0}, {r * row.flare, 0}, {r, h * 0.08}, {r * 0.65, h * 0.4}, {0, h}}}
+	}
+	return made, err
 }
 
 // grownIn is a growth grown to a size, standing or lying in a space,
@@ -298,7 +349,8 @@ func grownIn(grown growth, length, girth measure.Length,
 	if err != nil {
 		return good{}, err
 	}
-	return made.placed(in).in(dressed), nil
+	placed, err := made.placed(in)
+	return placed.in(dressed), err
 }
 
 // fern is the row of a fern: how long a frond is and how thick its
@@ -374,7 +426,7 @@ func (row can) made(from seed) (good, error) {
 		return made, err
 	}
 	return made.placed(lying(row.tall, radius,
-		from.draw(picking, 1, 0))), nil
+		from.draw(picking, 1, 0)))
 }
 
 // log is the row of a fallen log: how long, in metres, its radius as
@@ -426,17 +478,11 @@ func (row log) made(from seed) (good, error) {
 	if err != nil {
 		return good{}, err
 	}
-	along, err := newWhorls(row.stubs.count(from.draw(picking, 2, 0)), 1,
+	along, whorlsError := newWhorls(row.stubs.count(from.draw(picking, 2, 0)), 1,
 		stubHabit())
-	if err != nil {
-		return good{}, err
-	}
-	// a trunk of one piece and stubs of one piece, each with its two
-	// joints, is a limb newLimb takes: the error is newLimb's, for
-	// rows that could ask for a limb it would not
-	grown, err := stemCarrying(1, 0, []sleeve{trunk}, along, 1, 0,
+	grown, growthError := stemCarrying(1, 0, []sleeve{trunk}, along, 1, 0,
 		[]sleeve{stub})
-	if err != nil {
+	if err := cmp.Or(whorlsError, growthError); err != nil {
 		return good{}, err
 	}
 	return grownIn(grown, long, girth,

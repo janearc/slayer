@@ -32,6 +32,9 @@ func TestFilmImportsOnlyMathsCelestialAndLibtheme(t *testing.T) {
 			path, _ := strconv.Unquote(imp.Path.Value)
 			switch {
 			case !strings.Contains(path, "."): // standard library
+			case strings.HasSuffix(f, "_test.go") &&
+				path == "github.com/janearc/slayer/film":
+				// External tests exercise this package's public API.
 			case path == "github.com/janearc/slayer/maths":
 			case strings.HasPrefix(path, "github.com/janearc/celestial/"):
 			case strings.HasPrefix(path,

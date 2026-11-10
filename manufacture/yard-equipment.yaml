@@ -1,0 +1,2275 @@
+# Authored summit-yard scenery, 2026-11-08. All lengths are metres.
+# Picked proportions and parked poses; no engineering or load rating.
+---
+designs:
+- kind: mobile-crane
+  about: A parked lattice-boom crane with deployed outriggers and a hanging hook.
+  minimum:
+    x: -3.7
+    y: 0
+    z: -5.5
+  maximum:
+    x: 3.7
+    y: 14.5
+    z: 4.6
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -1.4
+        y: 0.65
+        z: -4.5
+      size:
+        x: 2.8
+        y: 0.38
+        z: 9.0
+  - material: tyre
+    rod:
+      from:
+        x: -1.17
+        y: 0.55
+        z: -3.0
+      to:
+        x: -1.45
+        y: 0.55
+        z: -3.0
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: -1.4549999999999998
+        y: 0.55
+        z: -3.0
+      to:
+        x: -1.47
+        y: 0.55
+        z: -3.0
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: 1.17
+        y: 0.55
+        z: -3.0
+      to:
+        x: 1.45
+        y: 0.55
+        z: -3.0
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: 1.4549999999999998
+        y: 0.55
+        z: -3.0
+      to:
+        x: 1.47
+        y: 0.55
+        z: -3.0
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: -1.17
+        y: 0.55
+        z: 2.0
+      to:
+        x: -1.45
+        y: 0.55
+        z: 2.0
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: -1.4549999999999998
+        y: 0.55
+        z: 2.0
+      to:
+        x: -1.47
+        y: 0.55
+        z: 2.0
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: 1.17
+        y: 0.55
+        z: 2.0
+      to:
+        x: 1.45
+        y: 0.55
+        z: 2.0
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: 1.4549999999999998
+        y: 0.55
+        z: 2.0
+      to:
+        x: 1.47
+        y: 0.55
+        z: 2.0
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: -1.17
+        y: 0.55
+        z: 3.3
+      to:
+        x: -1.45
+        y: 0.55
+        z: 3.3
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: -1.4549999999999998
+        y: 0.55
+        z: 3.3
+      to:
+        x: -1.47
+        y: 0.55
+        z: 3.3
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: 1.17
+        y: 0.55
+        z: 3.3
+      to:
+        x: 1.45
+        y: 0.55
+        z: 3.3
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: 1.4549999999999998
+        y: 0.55
+        z: 3.3
+      to:
+        x: 1.47
+        y: 0.55
+        z: 3.3
+      radius: 0.22
+  - material: ochre
+    box:
+      at:
+        x: -1.3699999999999999
+        y: 1.04
+        z: -4.45
+      size:
+        x: 2.7399999999999998
+        y: 0.75
+        z: 1.7
+  - material: ochre
+    box:
+      at:
+        x: -1.3199999999999998
+        y: 1.8
+        z: -3.9
+      size:
+        x: 2.6399999999999997
+        y: 0.8
+        z: 1.05
+  - material: window
+    box:
+      at:
+        x: -1.23
+        y: 1.93
+        z: -3.92
+      size:
+        x: 2.46
+        y: 0.52
+        z: 0.035
+  - material: steel
+    box:
+      at:
+        x: -1.3399999999999999
+        y: 0.89
+        z: -4.62
+      size:
+        x: 2.6799999999999997
+        y: 0.18
+        z: 0.15
+  - material: ochre
+    box:
+      at:
+        x: -1.15
+        y: 1.1
+        z: -0.7
+      size:
+        x: 2.3
+        y: 0.65
+        z: 2.6
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 1.76
+        z: 0.5
+      to:
+        x: 0
+        y: 3.0
+        z: 0.5
+      radius: 0.72
+  - material: ochre
+    box:
+      at:
+        x: -0.95
+        y: 2.8
+        z: -0.8
+      size:
+        x: 1.9
+        y: 0.8
+        z: 2.8
+  - material: ochre
+    box:
+      at:
+        x: -0.8
+        y: 3.61
+        z: 0.8
+      size:
+        x: 1.6
+        y: 1.0
+        z: 0.85
+  - material: ochre
+    rod:
+      from:
+        x: -0.32
+        y: 3.5
+        z: -0.12
+      to:
+        x: -0.32
+        y: 14.0
+        z: -5.32
+      radius: 0.08
+  - material: ochre
+    rod:
+      from:
+        x: -0.32
+        y: 3.5
+        z: 0.52
+      to:
+        x: -0.32
+        y: 14.0
+        z: -4.68
+      radius: 0.08
+  - material: ochre
+    rod:
+      from:
+        x: 0.32
+        y: 3.5
+        z: -0.12
+      to:
+        x: 0.32
+        y: 14.0
+        z: -5.32
+      radius: 0.08
+  - material: ochre
+    rod:
+      from:
+        x: 0.32
+        y: 3.5
+        z: 0.52
+      to:
+        x: 0.32
+        y: 14.0
+        z: -4.68
+      radius: 0.08
+  - material: steel
+    rod:
+      from:
+        x: -0.32
+        y: 3.5
+        z: -0.12
+      to:
+        x: 0.32
+        y: 5.25
+        z: -0.34666666666666673
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.32
+        y: 5.25
+        z: -0.9866666666666668
+      to:
+        x: 0.32
+        y: 7.0
+        z: -1.2133333333333334
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.32
+        y: 7.0
+        z: -1.8533333333333335
+      to:
+        x: 0.32
+        y: 8.75
+        z: -2.0800000000000005
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.32
+        y: 8.75
+        z: -2.7199999999999998
+      to:
+        x: 0.32
+        y: 10.5
+        z: -2.9466666666666668
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.32
+        y: 10.5
+        z: -3.5866666666666664
+      to:
+        x: 0.32
+        y: 12.25
+        z: -3.813333333333333
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.32
+        y: 12.25
+        z: -4.453333333333333
+      to:
+        x: 0.32
+        y: 14.0
+        z: -4.68
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 14.0
+        z: -5.0
+      to:
+        x: 0
+        y: 7.0
+        z: -5.0
+      radius: 0.035
+  - material: ochre
+    rod:
+      from:
+        x: 0
+        y: 7.0
+        z: -5.0
+      to:
+        x: 0
+        y: 6.7
+        z: -5.0
+      radius: 0.13
+  - material: steel
+    rod:
+      from:
+        x: -1.1
+        y: 0.95
+        z: -1.5
+      to:
+        x: -3.3
+        y: 0.95
+        z: -1.5
+      radius: 0.12
+  - material: steel
+    rod:
+      from:
+        x: -3.3
+        y: 0.15
+        z: -1.5
+      to:
+        x: -3.3
+        y: 1.05
+        z: -1.5
+      radius: 0.1
+  - material: steel
+    box:
+      at:
+        x: -3.58
+        y: 0
+        z: -1.78
+      size:
+        x: 0.56
+        y: 0.1
+        z: 0.56
+  - material: steel
+    rod:
+      from:
+        x: -1.1
+        y: 0.95
+        z: 2.8
+      to:
+        x: -3.3
+        y: 0.95
+        z: 2.8
+      radius: 0.12
+  - material: steel
+    rod:
+      from:
+        x: -3.3
+        y: 0.15
+        z: 2.8
+      to:
+        x: -3.3
+        y: 1.05
+        z: 2.8
+      radius: 0.1
+  - material: steel
+    box:
+      at:
+        x: -3.58
+        y: 0
+        z: 2.5199999999999996
+      size:
+        x: 0.56
+        y: 0.1
+        z: 0.56
+  - material: steel
+    rod:
+      from:
+        x: 1.1
+        y: 0.95
+        z: -1.5
+      to:
+        x: 3.3
+        y: 0.95
+        z: -1.5
+      radius: 0.12
+  - material: steel
+    rod:
+      from:
+        x: 3.3
+        y: 0.15
+        z: -1.5
+      to:
+        x: 3.3
+        y: 1.05
+        z: -1.5
+      radius: 0.1
+  - material: steel
+    box:
+      at:
+        x: 3.0199999999999996
+        y: 0
+        z: -1.78
+      size:
+        x: 0.56
+        y: 0.1
+        z: 0.56
+  - material: steel
+    rod:
+      from:
+        x: 1.1
+        y: 0.95
+        z: 2.8
+      to:
+        x: 3.3
+        y: 0.95
+        z: 2.8
+      radius: 0.12
+  - material: steel
+    rod:
+      from:
+        x: 3.3
+        y: 0.15
+        z: 2.8
+      to:
+        x: 3.3
+        y: 1.05
+        z: 2.8
+      radius: 0.1
+  - material: steel
+    box:
+      at:
+        x: 3.0199999999999996
+        y: 0
+        z: 2.5199999999999996
+      size:
+        x: 0.56
+        y: 0.1
+        z: 0.56
+- kind: mirror-gantry
+  about: A wide travelling beam, hoist trolley and suspended hook.
+  minimum:
+    x: -3.7
+    y: 0
+    z: -1.2
+  maximum:
+    x: 3.7
+    y: 7.3
+    z: 1.2
+  parts:
+  - material: ochre
+    box:
+      at:
+        x: -3.3800000000000003
+        y: 0.18
+        z: -0.65
+      size:
+        x: 0.36
+        y: 6.6
+        z: 1.3
+  - material: steel
+    box:
+      at:
+        x: -3.58
+        y: 0
+        z: -1.15
+      size:
+        x: 0.76
+        y: 0.16
+        z: 2.3
+  - material: ochre
+    box:
+      at:
+        x: 3.02
+        y: 0.18
+        z: -0.65
+      size:
+        x: 0.36
+        y: 6.6
+        z: 1.3
+  - material: steel
+    box:
+      at:
+        x: 2.8200000000000003
+        y: 0
+        z: -1.15
+      size:
+        x: 0.76
+        y: 0.16
+        z: 2.3
+  - material: ochre
+    box:
+      at:
+        x: -3.6
+        y: 6.8
+        z: -0.35
+      size:
+        x: 7.2
+        y: 0.5
+        z: 0.7
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 6.35
+        z: -0.45
+      size:
+        x: 1.3
+        y: 0.4
+        z: 0.9
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 6.3
+        z: 0
+      to:
+        x: 0
+        y: 3.0
+        z: 0
+      radius: 0.035
+  - material: ochre
+    rod:
+      from:
+        x: 0
+        y: 3
+        z: 0
+      to:
+        x: 0
+        y: 2.7
+        z: 0
+      radius: 0.12
+- kind: scaffold-tower
+  about: Braced scaffold bays, timber decks and top rails.
+  minimum:
+    x: -1.1
+    y: 0
+    z: -0.8
+  maximum:
+    x: 1.1
+    y: 6.2
+    z: 0.8
+  parts:
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 0.1
+        z: -0.7
+      to:
+        x: -1.0
+        y: 6.1
+        z: -0.7
+      radius: 0.055
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 0.1
+        z: 0.7
+      to:
+        x: -1.0
+        y: 6.1
+        z: 0.7
+      radius: 0.055
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 0.1
+        z: -0.7
+      to:
+        x: 1.0
+        y: 6.1
+        z: -0.7
+      radius: 0.055
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 0.1
+        z: 0.7
+      to:
+        x: 1.0
+        y: 6.1
+        z: 0.7
+      radius: 0.055
+  - material: timber
+    box:
+      at:
+        x: -1.06
+        y: 0.18
+        z: -0.76
+      size:
+        x: 2.12
+        y: 0.09
+        z: 1.52
+  - material: timber
+    box:
+      at:
+        x: -1.06
+        y: 2.1
+        z: -0.76
+      size:
+        x: 2.12
+        y: 0.09
+        z: 1.52
+  - material: timber
+    box:
+      at:
+        x: -1.06
+        y: 4.1
+        z: -0.76
+      size:
+        x: 2.12
+        y: 0.09
+        z: 1.52
+  - material: timber
+    box:
+      at:
+        x: -1.06
+        y: 6.05
+        z: -0.76
+      size:
+        x: 2.12
+        y: 0.09
+        z: 1.52
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 0.35
+        z: -0.7
+      to:
+        x: 1.0
+        y: 1.9500000000000002
+        z: -0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 0.35
+        z: -0.7
+      to:
+        x: -1.0
+        y: 1.9500000000000002
+        z: -0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 0.35
+        z: 0.7
+      to:
+        x: 1.0
+        y: 1.9500000000000002
+        z: 0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 0.35
+        z: 0.7
+      to:
+        x: -1.0
+        y: 1.9500000000000002
+        z: 0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 2.3
+        z: -0.7
+      to:
+        x: 1.0
+        y: 3.9
+        z: -0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 2.3
+        z: -0.7
+      to:
+        x: -1.0
+        y: 3.9
+        z: -0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 2.3
+        z: 0.7
+      to:
+        x: 1.0
+        y: 3.9
+        z: 0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 2.3
+        z: 0.7
+      to:
+        x: -1.0
+        y: 3.9
+        z: 0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 4.3
+        z: -0.7
+      to:
+        x: 1.0
+        y: 5.9
+        z: -0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 4.3
+        z: -0.7
+      to:
+        x: -1.0
+        y: 5.9
+        z: -0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 4.3
+        z: 0.7
+      to:
+        x: 1.0
+        y: 5.9
+        z: 0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.0
+        y: 4.3
+        z: 0.7
+      to:
+        x: -1.0
+        y: 5.9
+        z: 0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1
+        y: 6.0
+        z: -0.7
+      to:
+        x: 1
+        y: 6.0
+        z: -0.7
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1
+        y: 6.0
+        z: 0.7
+      to:
+        x: 1
+        y: 6.0
+        z: 0.7
+      radius: 0.035
+- kind: service-truck
+  about: A closed service body, cab, bumper, wheels and roof rack.
+  minimum:
+    x: -1.4
+    y: 0
+    z: -3.5
+  maximum:
+    x: 1.4
+    y: 3.35
+    z: 3.4
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -1.225
+        y: 0.65
+        z: -3.3
+      size:
+        x: 2.45
+        y: 0.38
+        z: 6.6
+  - material: tyre
+    rod:
+      from:
+        x: -0.9950000000000001
+        y: 0.55
+        z: -2.2
+      to:
+        x: -1.2750000000000001
+        y: 0.55
+        z: -2.2
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: -1.28
+        y: 0.55
+        z: -2.2
+      to:
+        x: -1.2950000000000002
+        y: 0.55
+        z: -2.2
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: 0.9950000000000001
+        y: 0.55
+        z: -2.2
+      to:
+        x: 1.2750000000000001
+        y: 0.55
+        z: -2.2
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: 1.28
+        y: 0.55
+        z: -2.2
+      to:
+        x: 1.2950000000000002
+        y: 0.55
+        z: -2.2
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: -0.9950000000000001
+        y: 0.55
+        z: 2.15
+      to:
+        x: -1.2750000000000001
+        y: 0.55
+        z: 2.15
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: -1.28
+        y: 0.55
+        z: 2.15
+      to:
+        x: -1.2950000000000002
+        y: 0.55
+        z: 2.15
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: 0.9950000000000001
+        y: 0.55
+        z: 2.15
+      to:
+        x: 1.2750000000000001
+        y: 0.55
+        z: 2.15
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: 1.28
+        y: 0.55
+        z: 2.15
+      to:
+        x: 1.2950000000000002
+        y: 0.55
+        z: 2.15
+      radius: 0.22
+  - material: white
+    box:
+      at:
+        x: -1.195
+        y: 1.04
+        z: -3.25
+      size:
+        x: 2.39
+        y: 0.75
+        z: 1.7
+  - material: white
+    box:
+      at:
+        x: -1.145
+        y: 1.8
+        z: -2.6999999999999997
+      size:
+        x: 2.29
+        y: 0.8
+        z: 1.05
+  - material: window
+    box:
+      at:
+        x: -1.0550000000000002
+        y: 1.93
+        z: -2.7199999999999998
+      size:
+        x: 2.1100000000000003
+        y: 0.52
+        z: 0.035
+  - material: steel
+    box:
+      at:
+        x: -1.165
+        y: 0.89
+        z: -3.42
+      size:
+        x: 2.33
+        y: 0.18
+        z: 0.15
+  - material: white
+    box:
+      at:
+        x: -1.2
+        y: 1.04
+        z: -0.95
+      size:
+        x: 2.4
+        y: 2.15
+        z: 4.15
+  - material: steel
+    box:
+      at:
+        x: -1.17
+        y: 1.2
+        z: 3.205
+      size:
+        x: 2.34
+        y: 1.8
+        z: 0.025
+  - material: steel
+    box:
+      at:
+        x: -0.92
+        y: 3.21
+        z: -0.7
+      size:
+        x: 1.84
+        y: 0.08
+        z: 3.45
+- kind: utility-pickup
+  about: A summit pickup with an open cargo bed.
+  minimum:
+    x: -1.2
+    y: 0
+    z: -2.9
+  maximum:
+    x: 1.2
+    y: 2.65
+    z: 2.8
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -1.0
+        y: 0.65
+        z: -2.75
+      size:
+        x: 2.0
+        y: 0.38
+        z: 5.5
+  - material: tyre
+    rod:
+      from:
+        x: -0.77
+        y: 0.55
+        z: -1.8
+      to:
+        x: -1.05
+        y: 0.55
+        z: -1.8
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: -1.055
+        y: 0.55
+        z: -1.8
+      to:
+        x: -1.07
+        y: 0.55
+        z: -1.8
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: 0.77
+        y: 0.55
+        z: -1.8
+      to:
+        x: 1.05
+        y: 0.55
+        z: -1.8
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: 1.055
+        y: 0.55
+        z: -1.8
+      to:
+        x: 1.07
+        y: 0.55
+        z: -1.8
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: -0.77
+        y: 0.55
+        z: 1.7
+      to:
+        x: -1.05
+        y: 0.55
+        z: 1.7
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: -1.055
+        y: 0.55
+        z: 1.7
+      to:
+        x: -1.07
+        y: 0.55
+        z: 1.7
+      radius: 0.22
+  - material: tyre
+    rod:
+      from:
+        x: 0.77
+        y: 0.55
+        z: 1.7
+      to:
+        x: 1.05
+        y: 0.55
+        z: 1.7
+      radius: 0.5
+  - material: steel
+    rod:
+      from:
+        x: 1.055
+        y: 0.55
+        z: 1.7
+      to:
+        x: 1.07
+        y: 0.55
+        z: 1.7
+      radius: 0.22
+  - material: white
+    box:
+      at:
+        x: -0.97
+        y: 1.04
+        z: -2.7
+      size:
+        x: 1.94
+        y: 0.75
+        z: 1.7
+  - material: white
+    box:
+      at:
+        x: -0.92
+        y: 1.8
+        z: -2.15
+      size:
+        x: 1.84
+        y: 0.8
+        z: 1.05
+  - material: window
+    box:
+      at:
+        x: -0.83
+        y: 1.93
+        z: -2.17
+      size:
+        x: 1.66
+        y: 0.52
+        z: 0.035
+  - material: steel
+    box:
+      at:
+        x: -0.94
+        y: 0.89
+        z: -2.87
+      size:
+        x: 1.88
+        y: 0.18
+        z: 0.15
+  - material: steel
+    box:
+      at:
+        x: -0.94
+        y: 1.04
+        z: -0.35
+      size:
+        x: 1.88
+        y: 0.12
+        z: 2.95
+  - material: white
+    box:
+      at:
+        x: -0.99
+        y: 1.17
+        z: -0.35
+      size:
+        x: 0.1
+        y: 0.57
+        z: 2.95
+  - material: white
+    box:
+      at:
+        x: 0.8899999999999999
+        y: 1.17
+        z: -0.35
+      size:
+        x: 0.1
+        y: 0.57
+        z: 2.95
+  - material: white
+    box:
+      at:
+        x: -0.93
+        y: 1.17
+        z: 2.59
+      size:
+        x: 1.86
+        y: 0.57
+        z: 0.1
+- kind: equipment-trailer
+  about: A box trailer with a tow frame and a parking jack.
+  minimum:
+    x: -1.2
+    y: 0
+    z: -3.5
+  maximum:
+    x: 1.2
+    y: 2.85
+    z: 2.1
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -1.0
+        y: 0.7
+        z: -2
+      size:
+        x: 2
+        y: 0.2
+        z: 4
+  - material: white
+    box:
+      at:
+        x: -0.95
+        y: 0.91
+        z: -1.95
+      size:
+        x: 1.9
+        y: 1.9
+        z: 3.9
+  - material: tyre
+    rod:
+      from:
+        x: -0.9
+        y: 0.5
+        z: 0.4
+      to:
+        x: -1.15
+        y: 0.5
+        z: 0.4
+      radius: 0.45
+  - material: tyre
+    rod:
+      from:
+        x: 0.9
+        y: 0.5
+        z: 0.4
+      to:
+        x: 1.15
+        y: 0.5
+        z: 0.4
+      radius: 0.45
+  - material: steel
+    rod:
+      from:
+        x: -0.8
+        y: 0.78
+        z: -1.9
+      to:
+        x: -0.06
+        y: 0.78
+        z: -3.32
+      radius: 0.055
+  - material: steel
+    rod:
+      from:
+        x: 0.8
+        y: 0.78
+        z: -1.9
+      to:
+        x: 0.06
+        y: 0.78
+        z: -3.32
+      radius: 0.055
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 0.1
+        z: -2.9
+      to:
+        x: 0
+        y: 0.8
+        z: -2.9
+      radius: 0.055
+  - material: steel
+    box:
+      at:
+        x: -0.13
+        y: 0.67
+        z: -3.45
+      size:
+        x: 0.26
+        y: 0.22
+        z: 0.25
+- kind: shipping-crate
+  about: A timber shipping crate with metal straps and pallet runners.
+  minimum:
+    x: -1.05
+    y: 0
+    z: -0.8
+  maximum:
+    x: 1.05
+    y: 2.0
+    z: 0.8
+  parts:
+  - material: timber
+    box:
+      at:
+        x: -1
+        y: 0.12
+        z: -0.75
+      size:
+        x: 2
+        y: 1.8
+        z: 1.5
+  - material: steel
+    box:
+      at:
+        x: -0.7050000000000001
+        y: 0.1
+        z: -0.78
+      size:
+        x: 0.05
+        y: 1.85
+        z: 0.025
+  - material: steel
+    box:
+      at:
+        x: -0.025
+        y: 0.1
+        z: -0.78
+      size:
+        x: 0.05
+        y: 1.85
+        z: 0.025
+  - material: steel
+    box:
+      at:
+        x: 0.655
+        y: 0.1
+        z: -0.78
+      size:
+        x: 0.05
+        y: 1.85
+        z: 0.025
+  - material: timber
+    box:
+      at:
+        x: -0.98
+        y: 0
+        z: -0.6100000000000001
+      size:
+        x: 1.96
+        y: 0.1
+        z: 0.12
+  - material: timber
+    box:
+      at:
+        x: -0.98
+        y: 0
+        z: 0.49000000000000005
+      size:
+        x: 1.96
+        y: 0.1
+        z: 0.12
+- kind: equipment-cabinet
+  about: A weatherproof cabinet on a low plinth.
+  minimum:
+    x: -0.55
+    y: 0
+    z: -0.43
+  maximum:
+    x: 0.55
+    y: 1.85
+    z: 0.4
+  parts:
+  - material: white
+    box:
+      at:
+        x: -0.5
+        y: 0.1
+        z: -0.35
+      size:
+        x: 1
+        y: 1.7
+        z: 0.7
+  - material: steel
+    box:
+      at:
+        x: -0.49
+        y: 0.2
+        z: -0.375
+      size:
+        x: 0.98
+        y: 1.5
+        z: 0.02
+  - material: steel
+    box:
+      at:
+        x: -0.42
+        y: 0
+        z: -0.29
+      size:
+        x: 0.84
+        y: 0.08
+        z: 0.58
+  - material: steel
+    rod:
+      from:
+        x: 0.3
+        y: 0.85
+        z: -0.39
+      to:
+        x: 0.3
+        y: 1.05
+        z: -0.39
+      radius: 0.025
+- kind: generator
+  about: A stationary diesel-generator proxy with louvers and an exhaust.
+  minimum:
+    x: -1.3
+    y: 0
+    z: -0.7
+  maximum:
+    x: 1.3
+    y: 2.15
+    z: 0.7
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -1.25
+        y: 0.06
+        z: -0.62
+      size:
+        x: 2.5
+        y: 0.18
+        z: 1.24
+  - material: ochre
+    box:
+      at:
+        x: -1.17
+        y: 0.25
+        z: -0.57
+      size:
+        x: 2.34
+        y: 1.2
+        z: 1.14
+  - material: steel
+    box:
+      at:
+        x: -0.9
+        y: 0.55
+        z: -0.595
+      size:
+        x: 0.12
+        y: 0.55
+        z: 0.02
+  - material: steel
+    box:
+      at:
+        x: -0.55
+        y: 0.55
+        z: -0.595
+      size:
+        x: 0.12
+        y: 0.55
+        z: 0.02
+  - material: steel
+    box:
+      at:
+        x: -0.2
+        y: 0.55
+        z: -0.595
+      size:
+        x: 0.12
+        y: 0.55
+        z: 0.02
+  - material: steel
+    box:
+      at:
+        x: 0.15
+        y: 0.55
+        z: -0.595
+      size:
+        x: 0.12
+        y: 0.55
+        z: 0.02
+  - material: steel
+    box:
+      at:
+        x: 0.5
+        y: 0.55
+        z: -0.595
+      size:
+        x: 0.12
+        y: 0.55
+        z: 0.02
+  - material: steel
+    rod:
+      from:
+        x: 0.8
+        y: 1.46
+        z: 0.2
+      to:
+        x: 0.8
+        y: 2.05
+        z: 0.2
+      radius: 0.07
+- kind: cooling-unit
+  about: A paired-fan cooling cabinet with external pipe stubs.
+  minimum:
+    x: -1.3
+    y: 0
+    z: -0.7
+  maximum:
+    x: 1.9
+    y: 1.85
+    z: 0.7
+  parts:
+  - material: white
+    box:
+      at:
+        x: -1.2
+        y: 0.1
+        z: -0.6
+      size:
+        x: 2.4
+        y: 1.6
+        z: 1.2
+  - material: steel
+    box:
+      at:
+        x: -1.18
+        y: 0
+        z: -0.58
+      size:
+        x: 2.36
+        y: 0.08
+        z: 1.16
+  - material: steel
+    rod:
+      from:
+        x: -0.57
+        y: 1.72
+        z: 0
+      to:
+        x: -0.57
+        y: 1.77
+        z: 0
+      radius: 0.44
+  - material: steel
+    rod:
+      from:
+        x: 0.57
+        y: 1.72
+        z: 0
+      to:
+        x: 0.57
+        y: 1.77
+        z: 0
+      radius: 0.44
+  - material: steel
+    rod:
+      from:
+        x: 1.22
+        y: 0.4
+        z: -0.45
+      to:
+        x: 1.8
+        y: 0.4
+        z: -0.45
+      radius: 0.055
+  - material: steel
+    rod:
+      from:
+        x: 1.22
+        y: 0.4
+        z: 0.45
+      to:
+        x: 1.8
+        y: 0.4
+        z: 0.45
+      radius: 0.055
+- kind: access-stairs
+  about: Eight open treads, stringers and sloping handrails.
+  minimum:
+    x: -0.75
+    y: 0
+    z: -2.25
+  maximum:
+    x: 0.75
+    y: 2.85
+    z: 0.4
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 0.02
+        z: 0.0
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 0.24
+        z: -0.3
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 0.46
+        z: -0.6
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 0.68
+        z: -0.8999999999999999
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 0.9
+        z: -1.2
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 1.12
+        z: -1.5
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 1.34
+        z: -1.7999999999999998
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    box:
+      at:
+        x: -0.65
+        y: 1.56
+        z: -2.1
+      size:
+        x: 1.3
+        y: 0.1
+        z: 0.28
+  - material: steel
+    rod:
+      from:
+        x: -0.6
+        y: 0.08
+        z: 0.14
+      to:
+        x: -0.6
+        y: 1.59
+        z: -2.1
+      radius: 0.065
+  - material: steel
+    rod:
+      from:
+        x: -0.67
+        y: 1.15
+        z: 0.12
+      to:
+        x: -0.67
+        y: 2.69
+        z: -2.1
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.67
+        y: 0.2
+        z: 0.1
+      to:
+        x: -0.67
+        y: 1.18
+        z: 0.1
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.67
+        y: 0.97
+        z: -1.0
+      to:
+        x: -0.67
+        y: 1.95
+        z: -1.0
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -0.67
+        y: 1.74
+        z: -2.1
+      to:
+        x: -0.67
+        y: 2.7199999999999998
+        z: -2.1
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0.6
+        y: 0.08
+        z: 0.14
+      to:
+        x: 0.6
+        y: 1.59
+        z: -2.1
+      radius: 0.065
+  - material: steel
+    rod:
+      from:
+        x: 0.67
+        y: 1.15
+        z: 0.12
+      to:
+        x: 0.67
+        y: 2.69
+        z: -2.1
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0.67
+        y: 0.2
+        z: 0.1
+      to:
+        x: 0.67
+        y: 1.18
+        z: 0.1
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0.67
+        y: 0.97
+        z: -1.0
+      to:
+        x: 0.67
+        y: 1.95
+        z: -1.0
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0.67
+        y: 1.74
+        z: -2.1
+      to:
+        x: 0.67
+        y: 2.7199999999999998
+        z: -2.1
+      radius: 0.035
+- kind: work-platform
+  about: A raised work deck with legs and side rails.
+  minimum:
+    x: -1.55
+    y: 0
+    z: -1.05
+  maximum:
+    x: 1.55
+    y: 2.75
+    z: 1.05
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -1.5
+        y: 1.5
+        z: -1
+      size:
+        x: 3
+        y: 0.14
+        z: 2
+  - material: steel
+    rod:
+      from:
+        x: -1.3
+        y: 0.08
+        z: -0.8
+      to:
+        x: -1.3
+        y: 1.48
+        z: -0.8
+      radius: 0.075
+  - material: steel
+    rod:
+      from:
+        x: -1.3
+        y: 0.08
+        z: 0.8
+      to:
+        x: -1.3
+        y: 1.48
+        z: 0.8
+      radius: 0.075
+  - material: steel
+    rod:
+      from:
+        x: 1.3
+        y: 0.08
+        z: -0.8
+      to:
+        x: 1.3
+        y: 1.48
+        z: -0.8
+      radius: 0.075
+  - material: steel
+    rod:
+      from:
+        x: 1.3
+        y: 0.08
+        z: 0.8
+      to:
+        x: 1.3
+        y: 1.48
+        z: 0.8
+      radius: 0.075
+  - material: steel
+    rod:
+      from:
+        x: -1.4
+        y: 2.65
+        z: -0.91
+      to:
+        x: 1.4
+        y: 2.65
+        z: -0.91
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.4
+        y: 1.66
+        z: -0.91
+      to:
+        x: -1.4
+        y: 2.63
+        z: -0.91
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 1.66
+        z: -0.91
+      to:
+        x: 0
+        y: 2.63
+        z: -0.91
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.4
+        y: 1.66
+        z: -0.91
+      to:
+        x: 1.4
+        y: 2.63
+        z: -0.91
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.4
+        y: 2.65
+        z: 0.91
+      to:
+        x: 1.4
+        y: 2.65
+        z: 0.91
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.4
+        y: 1.66
+        z: 0.91
+      to:
+        x: -1.4
+        y: 2.63
+        z: 0.91
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 1.66
+        z: 0.91
+      to:
+        x: 0
+        y: 2.63
+        z: 0.91
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 1.4
+        y: 1.66
+        z: 0.91
+      to:
+        x: 1.4
+        y: 2.63
+        z: 0.91
+      radius: 0.035
+- kind: handrail
+  about: A freestanding three-post safety railing.
+  minimum:
+    x: -1.6
+    y: 0
+    z: -0.08
+  maximum:
+    x: 1.6
+    y: 1.2
+    z: 0.08
+  parts:
+  - material: steel
+    rod:
+      from:
+        x: -1.5
+        y: 1.1
+        z: 0
+      to:
+        x: 1.5
+        y: 1.1
+        z: 0
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: -1.5
+        y: 0.55
+        z: 0
+      to:
+        x: 1.5
+        y: 0.55
+        z: 0
+      radius: 0.025
+  - material: steel
+    rod:
+      from:
+        x: -1.5
+        y: 0.04
+        z: 0
+      to:
+        x: -1.5
+        y: 1.1
+        z: 0
+      radius: 0.04
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 0.04
+        z: 0
+      to:
+        x: 0
+        y: 1.1
+        z: 0
+      radius: 0.04
+  - material: steel
+    rod:
+      from:
+        x: 1.5
+        y: 0.04
+        z: 0
+      to:
+        x: 1.5
+        y: 1.1
+        z: 0
+      radius: 0.04
+- kind: cable-tray
+  about: An open ladder tray with three dark cable runs.
+  minimum:
+    x: -0.35
+    y: 0
+    z: -2.05
+  maximum:
+    x: 0.35
+    y: 0.35
+    z: 2.05
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -0.32
+        y: 0.12
+        z: -2
+      size:
+        x: 0.04
+        y: 0.18
+        z: 4
+  - material: steel
+    box:
+      at:
+        x: 0.28
+        y: 0.12
+        z: -2
+      size:
+        x: 0.04
+        y: 0.18
+        z: 4
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: -1.9
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: -1.5
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: -1.0999999999999999
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: -0.6999999999999997
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: -0.2999999999999998
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: 0.10000000000000009
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: 0.5000000000000004
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: 0.9000000000000004
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: 1.3000000000000003
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: steel
+    box:
+      at:
+        x: -0.27
+        y: 0.1
+        z: 1.7000000000000002
+      size:
+        x: 0.54
+        y: 0.035
+        z: 0.05
+  - material: tyre
+    rod:
+      from:
+        x: -0.15
+        y: 0.18
+        z: -1.95
+      to:
+        x: -0.15
+        y: 0.18
+        z: 1.95
+      radius: 0.028
+  - material: tyre
+    rod:
+      from:
+        x: 0
+        y: 0.18
+        z: -1.95
+      to:
+        x: 0
+        y: 0.18
+        z: 1.95
+      radius: 0.028
+  - material: tyre
+    rod:
+      from:
+        x: 0.15
+        y: 0.18
+        z: -1.95
+      to:
+        x: 0.15
+        y: 0.18
+        z: 1.95
+      radius: 0.028
+- kind: weather-mast
+  about: An instrument crossarm, sensor proxies, antenna and guy wires.
+  minimum:
+    x: -1.9
+    y: 0
+    z: -0.4
+  maximum:
+    x: 1.9
+    y: 8.4
+    z: 1.1
+  parts:
+  - material: steel
+    box:
+      at:
+        x: -0.3
+        y: 0
+        z: -0.3
+      size:
+        x: 0.6
+        y: 0.1
+        z: 0.6
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 0.12
+        z: 0
+      to:
+        x: 0
+        y: 7.5
+        z: 0
+      radius: 0.075
+  - material: steel
+    rod:
+      from:
+        x: -1.0
+        y: 7.1
+        z: 0
+      to:
+        x: 1.0
+        y: 7.1
+        z: 0
+      radius: 0.03
+  - material: white
+    box:
+      at:
+        x: 0.55
+        y: 7.15
+        z: -0.15
+      size:
+        x: 0.3
+        y: 0.25
+        z: 0.3
+  - material: white
+    rod:
+      from:
+        x: -0.75
+        y: 7.15
+        z: 0
+      to:
+        x: -0.75
+        y: 7.9
+        z: 0
+      radius: 0.035
+  - material: steel
+    rod:
+      from:
+        x: 0
+        y: 7.52
+        z: 0
+      to:
+        x: 0
+        y: 8.3
+        z: 0
+      radius: 0.018
+  - material: steel
+    rod:
+      from:
+        x: -1.8
+        y: 0.08
+        z: 1.0
+      to:
+        x: -0.025
+        y: 5.18
+        z: 0
+      radius: 0.015
+  - material: steel
+    rod:
+      from:
+        x: 1.8
+        y: 0.08
+        z: 1.0
+      to:
+        x: 0.025
+        y: 5.22
+        z: 0
+      radius: 0.015

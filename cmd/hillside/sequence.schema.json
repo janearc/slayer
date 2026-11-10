@@ -1,0 +1,362 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "const": "https://github.com/janearc/slayer/schemas/sequence-v1.json"
+    },
+    "scene": {
+      "type": "string",
+      "minLength": 1
+    },
+    "output": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 120
+    },
+    "start": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "unit": {
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "duration": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 3600
+        },
+        "unit": {
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "print": {
+      "type": "object",
+      "properties": {
+        "knee": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "top": {
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 1000000000000.0
+        },
+        "bloom": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        }
+      },
+      "required": [
+        "knee",
+        "top",
+        "bloom"
+      ],
+      "additionalProperties": false
+    },
+    "camera": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "const": "m"
+        },
+        "look-at": {
+          "$ref": "#/$defs/camera-point"
+        },
+        "up": {
+          "$ref": "#/$defs/camera-point"
+        },
+        "moves": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "$ref": "#/$defs/camera-point"
+              },
+              "to": {
+                "$ref": "#/$defs/camera-point"
+              },
+              "speed": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1000000000.0
+                  },
+                  "unit": {
+                    "const": "m/s"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "duration": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 3600
+                  },
+                  "unit": {
+                    "const": "s"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "ease": {
+                "enum": [
+                  "linear",
+                  "smooth"
+                ]
+              },
+              "look": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "$ref": "#/$defs/camera-point"
+                  },
+                  "to": {
+                    "$ref": "#/$defs/camera-point"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "speed"
+                ]
+              },
+              {
+                "required": [
+                  "duration"
+                ]
+              }
+            ],
+            "additionalProperties": false
+          }
+        },
+        "zoom": {
+          "$ref": "#/$defs/zoom"
+        }
+      },
+      "required": [
+        "unit",
+        "look-at",
+        "moves"
+      ],
+      "additionalProperties": false
+    },
+    "smoke": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "film": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3840
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2160
+        },
+        "rays": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "rays"
+      ],
+      "additionalProperties": false
+    },
+    "scene-duration": {
+      "$ref": "#/$defs/scene-duration"
+    }
+  },
+  "required": [
+    "$schema",
+    "output",
+    "fps",
+    "start",
+    "duration",
+    "print"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "camera-point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": -1000000000.0,
+          "maximum": 1000000000.0
+        },
+        "y": {
+          "type": "number",
+          "minimum": -1000000000.0,
+          "maximum": 1000000000.0
+        },
+        "z": {
+          "type": "number",
+          "minimum": -1000000000.0,
+          "maximum": 1000000000.0
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "additionalProperties": false
+    },
+    "scene-duration": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 86400
+        },
+        "unit": {
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "zoom-angle": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 180
+        },
+        "unit": {
+          "const": "deg"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "zoom": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/zoom-angle"
+        },
+        "to": {
+          "$ref": "#/$defs/zoom-angle"
+        },
+        "duration": {
+          "$ref": "#/$defs/scene-duration"
+        },
+        "ease": {
+          "enum": [
+            "linear",
+            "smooth"
+          ]
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "duration"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "scene"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "smoke"
+            ]
+          },
+          {
+            "required": [
+              "film"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "required": [
+        "smoke",
+        "film"
+      ],
+      "not": {
+        "required": [
+          "scene"
+        ]
+      }
+    }
+  ]
+}

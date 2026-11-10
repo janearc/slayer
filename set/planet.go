@@ -4,7 +4,7 @@ import (
 	"math"
 	"slices"
 
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // gases is every gas a planet's air may hold, by the name a set gives

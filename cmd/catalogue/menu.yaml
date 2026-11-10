@@ -1,0 +1,736 @@
+# Authored descriptions of the current factory, 2026-11-07.
+# Listed detail support is held to actual construction by command tests.
+entries:
+  - kind: dobsonian-36
+    group: Personal telescopes
+    about: A 36-inch Newtonian on a timber rocker and large altitude bearings.
+    notes: >-
+      Requested 36-inch aperture. Mirror box, paired V trusses, upper cage,
+      side focuser and a flat folding secondary. All proportions and materials
+      are authored scenery; this is not a working optical prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+    references:
+      - title: Obsession, mirror box, rocker and bearings
+        url: https://www.obsessiontelescopes.com/why_buy/
+  - kind: apo-refractor-5
+    group: Personal telescopes
+    about: A 5-inch apochromatic-refractor scenery on a counterweighted tripod.
+    notes: >-
+      Requested 5-inch aperture. Long tube, dew shield, rings, focuser,
+      diagonal and finder. The objective is an opaque polished proxy;
+      no glass prescription or colour-correction calculation is implemented.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+    references:
+      - title: Explore Scientific, 127 mm triplet construction reference
+        url: https://explorescientific.com/products/127mm-fcd100-apochromatic-refractor
+  - kind: sct-24
+    group: Personal telescopes
+    about: A 24-inch Schmidt-Cassegrain scenery on a fork and pier.
+    notes: >-
+      Requested 24-inch aperture. Short tube, primary, secondary, corrector
+      proxy, finder and rear focuser. Tube and mount proportions are authored;
+      the corrector is opaque scenery and does not refract light.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+    references:
+      - title: Celestron, Schmidt-Cassegrain construction and corrector
+        url: https://www.celestron.com/blogs/knowledgebase/the-ultimate-guide-to-celestron-optical-tubes
+  - kind: griffith
+    group: Ground observatories
+    about: A public observatory with a domed rotunda and two rooftop instruments.
+    notes: >-
+      The east refractor has the guide's nominal 12-inch objective. Wings,
+      rotunda and rear planetarium follow the visitor map's layout in broad
+      strokes. All building sizes, tube length and materials are authored.
+      The west solar roof is closed; no working coelostat or lens prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 25
+    view-elevation-deg: 25
+    references:
+      - title: Griffith Observatory, student guide, page 17
+        url: https://griffithobservatory.org/wp-content/uploads/2023/02/Module1_Student_Guide.pdf
+      - title: Griffith Observatory, visitor map, main level
+        url: https://griffithobservatory.org/wp-content/uploads/2021/03/GOMap_03112021.pdf
+  - kind: elt
+    group: Ground observatories
+    about: A dense segmented primary and open truss with five mirror roles.
+    notes: >-
+      Nominal 39 m primary and 798 installed panels from ESO. The central
+      opening, panel positions, secondary and relay dimensions, supports and
+      96 m by 90 m enclosure are authored approximations. The mirror figures
+      do not implement a calibrated optical prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+    references:
+      - title: ESO, ELT facts
+        url: https://elt.eso.org/about/facts/
+      - title: ESO, ELT primary mirror technical concept
+        url: https://elt.eso.org/mirror/M1/
+  - kind: rubin
+    group: Ground observatories
+    about: A survey telescope, faceted enclosure and long tiered service wing.
+    notes: >-
+      Physical 8.4 m primary blank, 3.4 m secondary and 5 m tertiary surface
+      from Rubin's mirror descriptions. The enclosure, supports, figures,
+      camera housing, tiered service wing and secondary opening are authored
+      scenery choices.
+      Effective aperture is a different quantity from the physical blank.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 55
+    references:
+      - title: Rubin Observatory, telescope key numbers
+        url: https://rubinobservatory.org/for-scientists/rubin-101/key-numbers
+      - title: Rubin Observatory, mirrors
+        url: https://rubinobservatory.org/explore/how-rubin-works/technology/mirrors
+      - title: Rubin Observatory, summit facility and service building
+        url: https://rubinobservatory.org/explore/how-rubin-works/technology/summit-facility
+  - kind: palomar
+    group: Ground observatories
+    about: A long optical tube carried by a tilted horseshoe mount.
+    notes: >-
+      Nominal 200-inch primary; Caltech's rounded 42 m dome diameter and
+      41 m height. The support proportions, slit and pointing are authored.
+      This suggests the Hale telescope without an engineering replica.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+    references:
+      - title: Caltech, the Hale telescope
+        url: https://sites.astro.caltech.edu/palomar/about/telescopes/hale.html
+  - kind: keck-i
+    group: Ground observatories
+    about: An open truss above a 36-panel primary, inside a domed enclosure.
+    notes: >-
+      Nominal 10 m primary and 36 segments from Keck's telescope page.
+      The enclosure dimensions and support geometry are authored scenery.
+      Keck I and II share this template; place them as distinct site objects.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+    references:
+      - title: W. M. Keck Observatory, the telescopes
+        url: https://keckobservatory.org/our-story/telescopes/
+  - kind: keck-ii
+    group: Ground observatories
+    about: The second instance of the segmented-primary Keck-like family.
+    notes: >-
+      Uses the same nominal 10 m, 36-segment template as keck-i.
+      Site names, pointing and laser launchers belong to the scene.
+      Enclosure and support proportions remain authored.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+    references:
+      - title: W. M. Keck Observatory, the telescopes
+        url: https://keckobservatory.org/our-story/telescopes/
+  - kind: subaru
+    group: Ground observatories
+    about: An open telescope inside a tall cylindrical rotating enclosure.
+    notes: >-
+      Effective 8.2 m primary, 40 m enclosure base and 43 m height from
+      NAOJ's parameters. The mirror figure, slit, roof and mount proportions
+      are authored. Effective aperture is not a claim about the glass blank.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+    references:
+      - title: NAOJ, Subaru telescope parameters
+        url: https://subarutelescope.org/Telescope/Parameters/
+  - kind: spruce
+    group: Conifers
+    about: A whorled spruce with a clear trunk and radial branches.
+    notes: >-
+      Draft replacement of legacy sleeves with shared recursive shoots and
+      physical needles around each twig. Four picked radial ranks alternate
+      their phase; all dimensions remain authored. New views and appearance
+      records are deferred to the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: norway
+    group: Conifers
+    about: A taller spruce with hanging branchlets.
+    notes: >-
+      The hanging branchlet scaffold now carries draft recursive needle
+      shoots. Needle dimensions and arrangement are authored scenery;
+      this is not a growth or phyllotaxis model. Geometry, appearance and
+      CPU/Metal checks await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, Norway spruce foliage and branch habit
+        url: https://landscapeplants.oregonstate.edu/plants/picea-abies
+  - kind: coast-redwood
+    group: Conifers
+    about: Flared bark, a tall crown and recursively branched flat sprays.
+    notes: Authored crown; leaf lengths have botanical references. Not a growth model.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, coast redwood foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoia-sempervirens
+  - kind: giant-sequoia
+    group: Conifers
+    about: A broad flared trunk and dense sprays with scale-like foliage.
+    notes: Authored crown; source-backed scale lengths do not calibrate the whole tree.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, giant sequoia foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoiadendron-giganteum
+  - kind: coast-redwood-shoot
+    view-up: x
+    group: Foliage
+    about: A loose redwood spray for looking at the actual reusable foliage.
+    notes: These are the shared shoot meshes used by the redwood crown.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, coast redwood foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoia-sempervirens
+  - kind: giant-sequoia-shoot
+    view-up: x
+    group: Foliage
+    about: A loose sequoia shoot, down to its individual foliage at demo detail.
+    notes: Authored recursive branching with source-backed scale lengths.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, giant sequoia foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoiadendron-giganteum
+  - kind: fern
+    group: Understory
+    about: Arched fronds carrying paired leaflets.
+    notes: Seeded dimensions and arrangement, with a shared green appearance.
+    details: [quick]
+  - kind: log
+    group: Wood and stone
+    about: A fallen log with broken branch stubs.
+    notes: Bark on the whole surface; exposed end grain is not implemented.
+    details: [quick]
+  - kind: pebble
+    group: Wood and stone
+    about: A small worn granite lump.
+    notes: Size classes were recalled, not verified; wornness is an authored control.
+    details: [quick]
+  - kind: cobble
+    group: Wood and stone
+    about: A seeded granite cobble, between a pebble and a boulder.
+    notes: Authored proportions and cleaving; not a measured erosion model.
+    details: [quick]
+  - kind: boulder
+    group: Wood and stone
+    about: An angular granite boulder with seeded lumps and cleaves.
+    notes: The seed chooses form within the construction row's ranges.
+    details: [quick]
+  - kind: can
+    group: Props
+    about: Somebody's aluminium can, upright or lying where it was left.
+    notes: Fixed dimensions recalled from memory; no pull tab or label.
+    details: [quick]
+  - kind: home
+    group: Buildings
+    about: Cantilevered storeys, flat slabs and glowing reflective panes.
+    notes: Glazing suggests occupied rooms; there are no furnished interiors.
+    details: [quick]
+  - kind: campfire
+    group: Fire and lamps
+    about: A stone ring, leaning sticks and an attached flickering light.
+    notes: The named kind supplies geometry and light. A fire recipe supplies flames.
+    details: [quick]
+  - kind: bonfire
+    group: Fire and lamps
+    about: A tall pyre of leaning logs.
+    notes: Geometry only; scene fire is supplied separately. No attached lamp.
+    details: [quick]
+  - kind: spotlight
+    group: Fire and lamps
+    about: A mounted lamp with a soft-edged thermal cone beam.
+    notes: Temperature, power and angles are authored display choices.
+    details: [quick]
+  - kind: maser
+    group: Fire and lamps
+    about: A mounted dish carrying a radio emitter.
+    notes: The housing is visible; its radio beam is not shown by an RGB picture.
+    details: [quick]
+  - kind: optical-observatory
+    group: Observatories
+    about: A slitted dome, mount, open truss and primary mirror.
+    notes: Visual assembly; not a calibrated optical bench or a real-site replica.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: -145
+  - kind: spitzer
+    group: Observatories
+    about: Spitzer gets to come too. Cryostat, baffle and a solar shield.
+    notes: Source-backed default aperture; authored body proportions and materials.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 180
+    references:
+      - title: Caltech/IPAC, Spitzer telescope
+        url: https://www.spitzer.caltech.edu/mission/the-telescope
+      - title: Caltech/IPAC, Spitzer spacecraft
+        url: https://www.spitzer.caltech.edu/mission/the-spacecraft
+  - kind: hubble
+    group: Observatories
+    about: A long optical tube and two gridded solar wings.
+    notes: Source-backed default aperture; authored tube, bus and wing proportions.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Hubble optics
+        url: https://science.nasa.gov/mission/hubble/observatory/design/optics/
+  - kind: webb
+    group: Observatories
+    about: A gold-looking segmented primary above five sunshield layers.
+    notes: Referenced aperture, counts and shield lengths; authored figure and gaps.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Webb telescope overview
+        url: https://science.nasa.gov/mission/webb/science-overview/science-explainers/telescope-overview/
+      - title: NASA, Webb sunshield
+        url: https://science.nasa.gov/mission/webb/webbs-sunshield/
+  - kind: space-observatory
+    group: Observatories
+    about: The default Spitzer template behind the custom spacecraft recipe.
+    notes: This named convenience is an alias, not a fourth spacecraft design.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 180
+    references:
+      - title: Caltech/IPAC, Spitzer telescope
+        url: https://www.spitzer.caltech.edu/mission/the-telescope
+  - kind: mobile-crane
+    group: Summit yard
+    about: A parked lattice-boom crane with deployed outriggers and a hanging hook.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: mirror-gantry
+    group: Summit yard
+    about: A wide travelling beam, hoist trolley and suspended hook.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: scaffold-tower
+    group: Summit yard
+    about: Braced scaffold bays, timber decks and top rails.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: service-truck
+    group: Summit yard
+    about: A closed service body, cab, bumper, wheels and roof rack.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: utility-pickup
+    group: Summit yard
+    about: A summit pickup with an open cargo bed.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: equipment-trailer
+    group: Summit yard
+    about: A box trailer with a tow frame and a parking jack.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: shipping-crate
+    group: Summit yard
+    about: A timber shipping crate with metal straps and pallet runners.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: equipment-cabinet
+    group: Summit yard
+    about: A weatherproof cabinet on a low plinth.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: generator
+    group: Summit yard
+    about: A stationary diesel-generator proxy with louvers and an exhaust.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: cooling-unit
+    group: Summit yard
+    about: A paired-fan cooling cabinet with external pipe stubs.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: access-stairs
+    group: Summit yard
+    about: Eight open treads, stringers and sloping handrails.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: work-platform
+    group: Summit yard
+    about: A raised work deck with legs and side rails.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: handrail
+    group: Summit yard
+    about: A freestanding three-post safety railing.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: cable-tray
+    group: Summit yard
+    about: An open ladder tray with three dark cable runs.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: weather-mast
+    group: Summit yard
+    about: An instrument crossarm, sensor proxies, antenna and guy wires.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: cfht
+    group: Maunakea families
+    about: A yoke-mounted reflector inside a slitted dome and service wing.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.cfht.hawaii.edu/Instruments/ObservatoryManual/CFHT_ObservatoryManual_%28Sec_4%29.html
+  - kind: gemini-north
+    group: Maunakea families
+    about: An open reflector beneath a tall vented enclosure.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.gemini.edu/images/pio/handouts/gn_telescope_handout.pdf
+  - kind: irtf
+    group: Maunakea families
+    about: A compact infrared reflector, yoke and service annex.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/maunakea-telescopes/
+  - kind: uh-88
+    group: Maunakea families
+    about: A closed optical tube and yoke inside a small summit dome.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/maunakea-telescopes/
+  - kind: ukirt
+    group: Maunakea families
+    about: A small infrared reflector and dome; science closure was announced for 2026.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking. The announced science closure is September15,2026; this template does not imply continuing operations.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/ukirt/about-us/
+      - title: University of Hawaii, announced science closure
+        url: https://www.hawaii.edu/news/2026/07/02/uh-continues-ukirt-decommissioning/
+  - kind: jcmt
+    group: Maunakea families
+    about: A deep dish and quadrupod inside a broadly opened faceted house.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.eaobservatory.org/jcmt/public/jcmt/
+  - kind: sma-antenna
+    group: Maunakea families
+    about: A single six-metre radio dish on a compact altitude cradle.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.cfa.harvard.edu/facilities-technology/telescopes-instruments/submillimeter-array-maunakea-hi
+  - kind: sma-array
+    group: Maunakea families
+    about: Eight shared antenna prototypes in an authored compact layout.
+    notes: Published eight six-metre antennas and f/0.4 primary ratio. Layout, mounts and feeds are authored, not surveyed SMA pad coordinates.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://lweb.cfa.harvard.edu/sma/general/Ho.pdf
+  - kind: vlba-maunakea
+    group: Maunakea families
+    about: A large radio dish, altitude cradle and station control building.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.vlba.nrao.edu/whatis/
+  - kind: panstarrs-1
+    group: Haleakala families
+    about: A compact survey reflector in its own small dome.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://panstarrs.ifa.hawaii.edu/
+  - kind: panstarrs-2
+    group: Haleakala families
+    about: The second survey-telescope family with a different authored annex.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://panstarrs.ifa.hawaii.edu/
+  - kind: faulkes-north
+    group: Haleakala families
+    about: An open reflector beneath a broadly opened clamshell proxy.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://lco.global/observatory/telescopes/2m0/
+  - kind: dkist
+    group: Haleakala families
+    about: An off-axis solar instrument inside a round-pupil calotte proxy.
+    notes: Published four-metre clear pupil and offset secondary; authored figure and housing, not a calibrated Gregorian prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 55
+    references:
+      - title: Primary family reference
+        url: https://nso.edu/dkist-at-a-glance/
+  - kind: atlas-haleakala
+    group: Haleakala families
+    about: A short wide-field camera on a counterweighted mount.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://fallingstar.com/specifications.php
+  - kind: tlrs-4
+    group: Haleakala families
+    about: A small ranging telescope and opaque corrector inside a dome.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://ilrs.gsfc.nasa.gov/network/stations/active/HA4T_station_info.html
+  - kind: solarc
+    group: Haleakala families
+    about: An unobstructed off-axis coronagraph proxy and sliding-roof house.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/haleakala-observatories/
+  - kind: mees-solar
+    group: Haleakala families
+    about: The Mees facility family with an explicitly picked small solar tube.
+    notes: The quarter-metre tube is explicitly picked; the references establish the Mees facility, not this proxy aperture.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/history-of-ifa-maui/
+  - kind: aeos
+    group: Haleakala families
+    about: An open tracking reflector with its housing panels parked low.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://boeing.mediaroom.com/2012-06-20-Boeing-Completes-Upgrade-of-AEOS-Telescope-at-Maui-Space-Surveillance-Complex
+  - kind: mssc-1-6m
+    group: Haleakala families
+    about: A closed reflector with an outer gimbal ring.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/history-of-ifa-maui/
+  - kind: mssc-twin-1-2m
+    group: Haleakala families
+    about: Two parallel infrared tubes on a common central support.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/history-of-ifa-maui/
+  - kind: geodss
+    group: Haleakala families
+    about: A nominal metre-class tracker, dome and control cabin.
+    notes: Nominal metre-class family from a historical inventory, not the separate102cm physical specification or a current full site survey.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://files.hawaii.gov/dbedt/erp/EA_EIS_Library/2009-05-08-MA-SDEIS-Advanced-Tech-Solar-Telescope-V1.pdf
+  - kind: geodss-site
+    group: Haleakala families
+    about: Three shared dome prototypes in an authored site layout.
+    notes: Nominal metre-class family from a historical inventory, not the separate102cm physical specification or a current full site survey.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://files.hawaii.gov/dbedt/erp/EA_EIS_Library/2009-05-08-MA-SDEIS-Advanced-Tech-Solar-Telescope-V1.pdf
+
+  - kind: guide-star-launcher
+    group: Observatory equipment
+    about: An open launch tube with two collars and an attachment shoe.
+    notes: Authored scenery; positive y is the outgoing axis, and the exit is at the upper bound.
+    details: [hull, clumps, quick, demo]
+
+  - kind: owl
+    group: Historical and unbuilt concepts
+    about: The unbuilt 100-m OWL concept, observing in the open.
+    notes: >-
+      Selected 2005 Blue Book baseline: 3048 spherical primary panels and
+      216 flat secondary panels. Tapered modular space frame, deep mirror
+      cell, azimuth rail, altitude cradle and four corrector roles are
+      authored scenery. Panel positions are not an ESO segment survey.
+      The roll-away shelter is independently placeable as owl-shelter.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 25
+    references:
+      - title: ESO OWL Blue Book overview, 2005
+        url: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/2_Overview.pdf
+      - title: ESO OWL enclosure and infrastructure concept
+        url: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/11_Enclosure_and_infrastructures.pdf
+
+  - kind: owl-shelter
+    group: Historical and unbuilt concepts
+    about: A parked roll-away shelter for the OWL scenery family.
+    notes: >-
+      The Blue Book describes a hangar that moves away for observations.
+      Four open arch modules, bogies and short parking rails form this
+      authored interpretation. Span, wall section and parked positions are
+      picked; hinge motion, travel and a surveyed enclosure are not modelled.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    references:
+      - title: ESO OWL enclosure and infrastructure concept
+        url: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/11_Enclosure_and_infrastructures.pdf
+  - kind: valley-oak
+    group: Broadleaf trees
+    about: A spreading forked oak with lobed physical leaves.
+    notes: >-
+      Deciduous family scenery with a branching scaffold and fixed-size
+      twig cells. All dimensions and colours are picked. Seasonal recipes
+      can change the palette or remove leaves while retaining the wood.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: UC ANR, California oak identification and ecology
+        url: https://www.ucanr.edu/site/uc-oaks/california-oak-tree-species-id-and-ecology
+  - kind: alder
+    group: Broadleaf trees
+    about: A continuing leader with lateral branches and oval blades.
+    notes: >-
+      An authored alder-family treatment, without species identification.
+      Physical leaf cells are shared without scaling their blades to the
+      tree. Summer, autumn and winter are discrete scenery states.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: poplar
+    group: Broadleaf trees
+    about: A tall leader-based crown with deltoid leaf outlines.
+    notes: >-
+      An authored poplar-family treatment with picked branching and colours.
+      Leaf size stays fixed across specimen scale and detail. Winter drops
+      the deciduous blades and keeps the woody twigs.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: manzanita
+    group: Desert and chaparral
+    about: A red-barked multi-stem shrub with small oval blades.
+    notes: >-
+      Authored evergreen family scenery, without a particular species or
+      measured growth model. Separate basal stems carry branching twigs
+      and shared physical-size leaf cells.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: chaparral-brush
+    group: Desert and chaparral
+    about: Low multi-stem brush with narrow evergreen blades.
+    notes: >-
+      A generic authored brush recipe rather than a botanical species.
+      Short forks and small leaf cells supply a different architecture
+      from the conifers. Dimensions, counts and colours are picked.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: joshua-tree
+    group: Desert and chaparral
+    about: Forked stems ending in green blade rosettes and brown leaf skirts.
+    notes: >-
+      Terminal stiff blades and persistent old foliage follow the qualitative
+      Joshua-tree habit. Dimensions, counts, branching and angles are picked.
+      The old-leaf skirt is a separate material and downward arrangement.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, Joshua-tree foliage habit
+        url: https://landscapeplants.oregonstate.edu/plants/yucca-brevifolia
+  - kind: saguaro
+    group: Desert and chaparral
+    about: A pleated upright cactus with rounded tips and curved rising arms.
+    notes: >-
+      An authored column-and-arm recipe, including unbranched specimens.
+      Quick and demo add fixed-size shared spine cones on the upright runs;
+      bends and caps have no spines. Dimensions and pleat counts are picked.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: National Park Service, saguaro arms and pleats
+        url: https://www.nps.gov/tont/learn/nature/saguaro.htm

@@ -1,0 +1,12 @@
+# 2026/11/09 10:23:46.400023 [TestReservationMatchesAnUnboundedSum] [rapid] draw limit: 0x0
+# 2026/11/09 10:23:46.400025 [TestReservationMatchesAnUnboundedSum] [rapid] draw held: 0x0
+# 2026/11/09 10:23:46.400026 [TestReservationMatchesAnUnboundedSum] [rapid] draw requested: 0x0
+# 2026/11/09 10:23:46.400026 [TestReservationMatchesAnUnboundedSum] limit=0 held=0 request=0: {next:<nil> disposition:0}, want 1
+# 
+v0.4.8#9597367396975395060
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

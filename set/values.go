@@ -4,7 +4,7 @@ import (
 	"math"
 	"slices"
 
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // block is a step that reads a block of keys, none of them for later.

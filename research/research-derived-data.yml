@@ -6,7 +6,334 @@
 # build: the source on the shelf at its hash, the text on its page, and
 # the value the text says.
 
+# Puzzlemouth's measured kind means read from a published source. It includes
+# fitted model coefficients and botanical descriptions, not only experiments.
+# Verification holds bytes and quoted numeric text. Roles, powers and units
+# also need review and the independent model/metadata checks in the tests.
 numbers:
+  - name: owl-primary-curvature-metres
+    value: 250
+    unit: m
+    says: spherical primary radius in the selected 2005 overview
+    kind: measured
+    source:
+      key: owl-blue-book-overview
+      where: Table 2-3, radius of curvature, primary mirror
+      page: 17
+      text: "250"
+      excerpt: "250-m"
+  - name: owl-secondary-panels
+    value: 216
+    says: OWL flat secondary panel inventory in the selected 2005 baseline
+    kind: measured
+    source:
+      key: owl-blue-book-overview
+      where: Table 2-3, quantity, secondary mirror
+      page: 17
+      text: "216"
+      excerpt: "216"
+  - name: owl-primary-panels
+    value: 3048
+    says: OWL primary panel inventory in the selected 2005 baseline
+    kind: measured
+    source:
+      key: owl-blue-book-overview
+      where: Table 2-3, quantity, primary mirror
+      page: 17
+      text: "3048"
+      excerpt: "3048"
+  - name: owl-secondary-metres
+    value: 25.6
+    unit: m
+    says: nominal flat secondary diameter in the selected 2005 baseline
+    kind: measured
+    source:
+      key: owl-blue-book-overview
+      where: Table 2-2, secondary mirror diameter
+      page: 13
+      text: "25.6"
+      excerpt: "25.6m"
+  - name: owl-primary-metres
+    value: 100
+    unit: m
+    says: nominal OWL diameter in the selected 2005 baseline
+    kind: measured
+    source:
+      key: owl-blue-book-overview
+      where: Table 2-2, telescope diameter
+      page: 13
+      text: "100"
+      excerpt: "100m"
+  - name: galacsi-wide-radius-arcsec
+    value: 64
+    unit: arcsec
+    says: GALACSI wide-field laser guide-star off-axis radius
+    kind: measured
+    source:
+      key: eso-galacsi-layout
+      where: wide field mode optical layout
+      text: "64"
+      excerpt: "4 LGS 64&quot; off axis"
+  - name: griffith-objective-inches
+    value: 12
+    unit: in
+    says: nominal Zeiss refractor objective diameter in the student guide
+    kind: measured
+    source:
+      key: griffith-school-guide
+      where: east rooftop dome, Zeiss refracting telescope
+      page: 17
+      text: "12"
+      excerpt: "The 12-inch Zeiss Refracting Telescope"
+  - name: elt-primary-metres
+    value: 39
+    unit: m
+    says: nominal ELT primary diameter on ESO's facts page
+    kind: measured
+    source:
+      key: elt-facts
+      where: main mirror diameter
+      text: "39"
+      excerpt: "<p>39 metres</p>"
+  - name: elt-primary-segments
+    value: 798
+    says: installed ELT primary segments, excluding the maintenance set
+    kind: measured
+    source:
+      key: elt-facts
+      where: number of main mirror segments
+      text: "798"
+      excerpt: "<p>798</p>"
+  - name: rubin-primary-metres
+    value: 8.4
+    unit: m
+    says: physical diameter of the combined primary and tertiary glass blank
+    kind: measured
+    source:
+      key: rubin-key-numbers
+      where: telescope key numbers, primary mirror diameter
+      text: "8.4"
+      excerpt: "Primary mirror diameter: 8.4 m"
+  - name: rubin-secondary-metres
+    value: 3.4
+    unit: m
+    says: secondary mirror diameter in the observatory's mirror description
+    kind: measured
+    source:
+      key: rubin-mirrors
+      where: path from the primary to the secondary
+      text: "3.4"
+      excerpt: "3.4-meter secondary mirror"
+  - name: rubin-tertiary-metres
+    value: 5.0
+    unit: m
+    says: diameter of the inner tertiary surface in the shared glass blank
+    kind: measured
+    source:
+      key: rubin-mirrors
+      where: path from the secondary back to the inner tertiary surface
+      text: "5.0"
+      excerpt: "inner 5.0-meter surface"
+  - name: palomar-primary-inches
+    value: 200
+    unit: in
+    says: nominal Hale primary diameter, retained in its original unit
+    kind: measured
+    source:
+      key: palomar-hale
+      where: Hale telescope description, nominal 200-inch primary
+      text: "200"
+      excerpt: "200-inch mirror"
+  - name: palomar-enclosure-height-metres
+    value: 41
+    unit: m
+    says: dome height, the rounded metric dimension printed by Caltech
+    kind: measured
+    source:
+      key: palomar-hale
+      where: telescope mount and dome, 135 feet tall
+      text: "41"
+      excerpt: "(41 meters) tall"
+  - name: palomar-enclosure-diameter-metres
+    value: 42
+    unit: m
+    says: dome diameter, the rounded metric dimension printed by Caltech
+    kind: measured
+    source:
+      key: palomar-hale
+      where: telescope mount and dome, 137 feet in diameter
+      text: "42"
+      excerpt: "137 feet (42 meters) in diameter"
+  - name: keck-primary-metres
+    value: 10
+    unit: m
+    says: nominal primary diameter shared by the two Keck telescopes
+    kind: measured
+    source:
+      key: keck-telescopes
+      where: primary mirror description
+      text: "10"
+      excerpt: "10-meters in diameter"
+  - name: keck-primary-segments
+    value: 36
+    says: hexagonal primary segment count per Keck telescope
+    kind: measured
+    source:
+      key: keck-telescopes
+      where: primary mirror description
+      text: "36"
+      excerpt: "36 hexagonal segments"
+  - name: subaru-primary-effective-metres
+    value: 8.2
+    unit: m
+    says: effective primary diameter, rather than the unilluminated blank
+    kind: measured
+    source:
+      key: subaru-parameters
+      where: primary mirror, effective diameter
+      text: "8.2"
+      excerpt: "Effective diameter: 8.2 m"
+  - name: subaru-enclosure-height-metres
+    value: 43
+    unit: m
+    says: height of the cylindrical rotating enclosure
+    kind: measured
+    source:
+      key: subaru-parameters
+      where: enclosure parameters, height
+      text: "43"
+      excerpt: "Height: 43 m"
+  - name: subaru-enclosure-base-metres
+    value: 40
+    unit: m
+    says: base diameter of the cylindrical rotating enclosure
+    kind: measured
+    source:
+      key: subaru-parameters
+      where: enclosure parameters, base diameter
+      text: "40"
+      excerpt: "Diameter at base: 40 m"
+  - name: sodium-d2-air-angstrom
+    value: 5889.950
+    unit: angstrom
+    says: Na I D2 air wavelength in the handbook table; divide by ten for nm
+    kind: measured
+    source:
+      key: nist-handbook-sodium-lines
+      where: Air Wavelength (angstrom), Na I row 5889.950, reference R56
+      text: "5889.950"
+      excerpt: "<td>&nbsp;5889.950</td><td>Na I</td>"
+  - name: sodium-d1-air-angstrom
+    value: 5895.924
+    unit: angstrom
+    says: Na I D1 air wavelength in the handbook table; divide by ten for nm
+    kind: measured
+    source:
+      key: nist-handbook-sodium-lines
+      where: Air Wavelength (angstrom), Na I row 5895.924, reference R56
+      text: "5895.924"
+      excerpt: "<td>&nbsp;5895.924</td><td>Na I</td>"
+  # Section 2 defines diffusivity in m^2/s. The extra K^-3 in section
+  # 7.1 conflicts with equation (1) and is not applied here.
+  - name: fuel-diffusion-mantissa
+    value: 2.136
+    unit: mantissa
+    says: printed mantissa of the section 7.1 diffusion coefficient, with its power applied by the model
+    kind: measured
+    source:
+      key: mandel-2008-surface-fire
+      where: section 7.1, final calibrated coefficients; proxy for grass, not redwood fuel
+      page: 24
+      text: "2.1360"
+  - name: fuel-heating-mantissa
+    value: 1.8793
+    unit: mantissa
+    says: printed mantissa of the section 7.1 heating coefficient, with its power applied by the model
+    kind: measured
+    source:
+      key: mandel-2008-surface-fire
+      where: section 7.1, final calibrated coefficients; proxy for grass, not redwood fuel
+      page: 24
+      text: "1.8793"
+  # The final section 7.1 list gives B with 10^2. Its opening paragraph
+  # prints 10^4; the model uses the final calibrated list. The mantissa
+  # alone cannot distinguish these two occurrences.
+  - name: fuel-activation-mantissa
+    value: 5.5849
+    unit: mantissa
+    says: printed mantissa of the section 7.1 activation coefficient, with its power applied by the model
+    kind: measured
+    source:
+      key: mandel-2008-surface-fire
+      where: section 7.1, final calibrated coefficients; proxy for grass, not redwood fuel
+      page: 24
+      text: "5.5849"
+  - name: fuel-cooling-mantissa
+    value: 4.8372
+    unit: mantissa
+    says: printed mantissa of the section 7.1 cooling coefficient, with its power applied by the model
+    kind: measured
+    source:
+      key: mandel-2008-surface-fire
+      where: section 7.1, final calibrated coefficients; proxy for grass, not redwood fuel
+      page: 24
+      text: "4.8372"
+  - name: fuel-consumption-mantissa
+    value: 1.625
+    unit: mantissa
+    says: printed mantissa of the section 7.1 consumption coefficient, with its power applied by the model
+    kind: measured
+    source:
+      key: mandel-2008-surface-fire
+      where: section 7.1, final calibrated coefficients; proxy for grass, not redwood fuel
+      page: 24
+      text: "1.6250"
+  # OSU's descriptive leaf-length ranges, read 2026-11-03. These are
+  # botanical descriptions, not sampled distributions or tree calibration.
+  - name: redwood-needle-minimum
+    value: 1
+    unit: cm
+    says: lower end of OSU's 1-2 cm flat needle length range
+    kind: measured
+    source:
+      key: osu-coast-redwood-foliage
+      where: first description paragraph, leaves, "1-2 cm long"
+      text: "1"
+      excerpt: "1-2 cm long"
+
+  - name: redwood-needle-maximum
+    value: 2
+    unit: cm
+    says: upper end of OSU's 1-2 cm flat needle length range
+    kind: measured
+    source:
+      key: osu-coast-redwood-foliage
+      where: first description paragraph, leaves, "1-2 cm long"
+      text: "2"
+      excerpt: "1-2 cm long"
+
+  - name: sequoia-scale-minimum
+    value: 3
+    unit: mm
+    says: lower end of OSU's 3-6 mm length range on leaders
+    kind: measured
+    source:
+      key: osu-giant-sequoia-foliage
+      where: first description paragraph, leaves, "3-6 mm long on leaders"
+      text: "3"
+      excerpt: "3-6 mm long on leaders"
+
+  - name: sequoia-scale-maximum
+    value: 6
+    unit: mm
+    says: upper end of OSU's 3-6 mm length range on leaders
+    kind: measured
+    source:
+      key: osu-giant-sequoia-foliage
+      where: first description paragraph, leaves, "3-6 mm long on leaders"
+      text: "6"
+      excerpt: "3-6 mm long on leaders"
+
   # mccaffrey, "purely buoyant diffusion flames: some experimental
   # results", nbsir 79-1910, table 1, "summary of center line data":
   # the weighted averages over his five fires, 14.4 to 57.5 kw. read
@@ -66,3 +393,288 @@ numbers:
       where: table 1 (printed page 27), intersections, intermittent-plume, weighted
       page: 35
       text: ".198"
+
+  - name: spitzer-primary-diameter-centimetres
+    value: 85
+    unit: cm
+    says: primary mirror diameter in the Spitzer telescope description
+    kind: measured
+    source:
+      key: spitzer-telescope
+      where: opening telescope description, primary mirror diameter
+      text: "85"
+      excerpt: "85 centimeters"
+  - name: hubble-primary-diameter-metres
+    value: 2.4
+    unit: m
+    says: primary mirror diameter in NASA's Hubble optics description
+    kind: measured
+    source:
+      key: hubble-optics
+      where: opening optics description, primary mirror diameter
+      text: "2.4"
+      excerpt: "2.4-meter"
+  - name: webb-primary-diameter-metres
+    value: 6.6
+    unit: m
+    says: nominal diameter as listed in NASA's Mirror Quick Facts
+    kind: measured
+    source:
+      key: webb-telescope-overview
+      where: Mirror Quick Facts, diameter of primary mirror
+      text: "6.6"
+      excerpt: "6.6 meters"
+  - name: webb-primary-segments
+    value: 18
+    says: primary segment count, with an empty centre
+    kind: measured
+    source:
+      key: webb-telescope-overview
+      where: primary mirror comparison table, shape and structure
+      text: "18"
+      excerpt: "18 segments"
+  - name: webb-shield-layers
+    value: 5
+    says: deployed sunshield membrane count
+    kind: measured
+    source:
+      key: webb-sunshield
+      where: deployment image caption, deployed sunshield
+      text: "5"
+      excerpt: "5-layer sunshield"
+  - name: webb-shield-length-metres
+    value: 21.197
+    unit: m
+    says: longer deployed sunshield dimension in NASA's actual dimensions
+    kind: measured
+    source:
+      key: webb-sunshield
+      where: actual dimensions, longer side
+      text: "21.197"
+      excerpt: "21.197 m x 14.162 m"
+  - name: webb-shield-width-metres
+    value: 14.162
+    unit: m
+    says: shorter deployed sunshield dimension in NASA's actual dimensions
+    kind: measured
+    source:
+      key: webb-sunshield
+      where: actual dimensions, shorter side
+      text: "14.162"
+      excerpt: "21.197 m x 14.162 m"
+
+  # Summit instrument roles, checked against pinned institutional references.
+  - name: cfht-primary-metres
+    value: 3.58
+    says: usable CFHT primary diameter
+    kind: measured
+    source:
+      key: cfht-observatory-manual
+      where: General features
+      text: '3.58'
+      excerpt: usable diameter of 3.58 m
+    unit: m
+  - name: gemini-primary-metres
+    value: 8.1
+    says: Gemini primary diameter
+    kind: measured
+    source:
+      key: gemini-north-handout
+      where: Primary mirrors
+      text: '8.1'
+      excerpt: 'Diameter: 8.1 meters'
+      page: 2
+    unit: m
+  - name: gemini-enclosure-height-metres
+    value: 46
+    says: Gemini enclosure height from ground
+    kind: measured
+    source:
+      key: gemini-north-handout
+      where: Domes
+      text: '46'
+      excerpt: 'Height: 46 meters'
+      page: 2
+    unit: m
+  - name: irtf-aperture-metres
+    value: 3.0
+    says: nominal IRTF observing aperture, not mirror blank diameter
+    kind: measured
+    source:
+      key: uh-maunakea-telescopes
+      where: NASA Infrared Telescope Facility
+      text: '3.0'
+      excerpt: IRTF is a 3.0 meter telescope
+    unit: m
+  - name: uh88-nominal-metres
+    value: 2.2
+    says: nominal UH 2.2-metre telescope class
+    kind: measured
+    source:
+      key: uh-maunakea-telescopes
+      where: UH 88
+      text: '2.2'
+      excerpt: University of Hawaii 2.2-meter telescope
+    unit: m
+  - name: ukirt-primary-metres
+    value: 3.8
+    says: UKIRT primary mirror diameter
+    kind: measured
+    source:
+      key: ukirt-telescope
+      where: About UKIRT
+      text: '3.8'
+      excerpt: 3.8 meter primary mirror
+    unit: m
+  - name: jcmt-primary-metres
+    value: 15
+    says: JCMT submillimetre dish diameter
+    kind: measured
+    source:
+      key: jcmt-telescope
+      where: The JCMT
+      text: '15'
+      excerpt: 15-metre (50-foot) dish
+    unit: m
+  - name: sma-primary-metres
+    value: 6
+    says: individual SMA antenna diameter
+    kind: measured
+    source:
+      key: sma-telescope
+      where: Interferometer description
+      text: '6'
+      excerpt: each 6 meters in diameter
+    unit: m
+  - name: sma-antennas
+    value: 8
+    says: SMA interferometer element count in the technical table
+    kind: measured
+    source:
+      key: sma-technical
+      where: Table 1, interferometer elements
+      text: '8'
+      excerpt: Interferometer elements     8 6-meter
+      page: 6
+  - name: sma-primary-focal-ratio
+    value: 0.4
+    says: dimensionless primary focal length divided by diameter
+    kind: measured
+    source:
+      key: sma-technical
+      where: Table 1, interferometer elements
+      text: '0.4'
+      excerpt: f/0.4 paraboloids
+      page: 6
+  - name: vlba-primary-metres
+    value: 25
+    says: nominal VLBA station dish diameter
+    kind: measured
+    source:
+      key: vlba-telescope
+      where: Station description
+      text: '25'
+      excerpt: 25- meter) diameter dish antenna
+    unit: m
+  - name: panstarrs-aperture-metres
+    value: 1.8
+    says: nominal aperture per Pan-STARRS telescope
+    kind: measured
+    source:
+      key: panstarrs-telescopes
+      where: Project introduction
+      text: '1.8'
+      excerpt: two 1.8m telescopes
+    unit: m
+  - name: faulkes-primary-metres
+    value: 2
+    says: nominal Faulkes telescope aperture class
+    kind: measured
+    source:
+      key: faulkes-telescopes
+      where: Two-metre telescope family
+      text: '2'
+      excerpt: 2-meter
+    unit: m
+  - name: dkist-clear-metres
+    value: 4
+    says: DKIST clear aperture, not the larger physical mirror blank
+    kind: measured
+    source:
+      key: dkist-telescope
+      where: The telescope
+      text: '4'
+      excerpt: 'Clear aperture: 4 m'
+    unit: m
+  - name: atlas-aperture-metres
+    value: 0.5
+    says: ATLAS Wright-Schmidt aperture
+    kind: measured
+    source:
+      key: atlas-specifications
+      where: Telescope aperture row
+      text: '0.5'
+      excerpt: 0.5m
+    unit: m
+  - name: tlrs4-aperture-metres
+    value: 0.28
+    says: TLRS-4 receiving and transmitting telescope aperture
+    kind: measured
+    source:
+      key: tlrs4-station-log
+      where: Section 4.01, receiving telescope
+      text: '0.28'
+      excerpt: 'Aperture              [m]: 0.28'
+    unit: m
+  - name: solarc-aperture-metres
+    value: 0.5
+    says: SOLARC off-axis coronagraphic telescope aperture
+    kind: measured
+    source:
+      key: ifa-haleakala-facilities
+      where: Zodiacal Light Observatory
+      text: '0.5'
+      excerpt: 0.5 meter, off-axis
+    unit: m
+  - name: aeos-primary-metres
+    value: 3.67
+    says: published AEOS telescope diameter in the upgrade account
+    kind: measured
+    source:
+      key: aeos-upgrade
+      where: AEOS upgrade description
+      text: '3.67'
+      excerpt: 3.67 meters
+    unit: m
+  - name: mssc-reflector-nominal-metres
+    value: 1.6
+    says: nominal MSSC reflector aperture class in the historical inventory
+    kind: measured
+    source:
+      key: ifa-maui-history
+      where: 1965 observatory construction
+      text: '1.6'
+      excerpt: 60-inch (1.6 meter) reflector
+    unit: m
+  - name: mssc-twin-aperture-metres
+    value: 1.2
+    says: nominal aperture of each twin MSSC infrared telescope
+    kind: measured
+    source:
+      key: ifa-maui-history
+      where: 1965 observatory construction
+      text: '1.2'
+      excerpt: 48-inch (1.2 meter) infrared telescopes
+    unit: m
+  - name: geodss-class-metres
+    value: 1
+    says: nominal GEODSS metre-class telescope, not the 102-cm physical specification
+      elsewhere in the study
+    kind: measured
+    source:
+      key: haleakala-environmental-study-2009
+      where: Table 1-2, historical 1982 facility entry
+      text: '1'
+      excerpt: GEODSS, with three 1-meter telescopes
+      page: 115
+    unit: m

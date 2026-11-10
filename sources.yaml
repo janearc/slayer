@@ -5,13 +5,220 @@
 # a shelf in your own scratch, outside any repository, and holds them to
 # that hash:
 #
-#     SLAYER_SHELF=$HOME/slayer/sources go run ./cmd/sources fetch
+#     SLAYER_SHELF=$HOME/slayer/sources game run sources-fetch
 #
 # a source with no sha256 yet is fetched and its hash said; pin it here
 # by hand. a source that must never be fetched again keeps its key and
 # says why, in never. used, never released: the bytes are not shipped.
 
 sources:
+  - key: eso-galacsi-layout
+    sha256: e042529d784d28159a5b2b4d9f87990534787bee567ae07f5d3fb59454e85296
+    bytes: 48632
+    fetched: 2026-11-08
+    title: GALACSI optical layout and laser guide-star asterism
+    by: European Southern Observatory
+    from: https://cdn3.eso.org/sci/facilities/develop/ao/sys/galacsi.html
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: ifa-haleakala-facilities
+    sha256: 2078be913c832f2eafd67c49726cad7b659b6e86bc687d2b5b330f157d0f69c0
+    bytes: 226214
+    fetched: 2026-11-08
+    title: Haleakala observatory facilities
+    by: University of Hawaii Institute for Astronomy
+    from: https://about.ifa.hawaii.edu/facility/haleakala-observatories/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: ifa-observatory-index
+    sha256: f76571a10a16e7b84aa4e3bc7325197e1a8c8514f9ff8099c3bfbb63b3012ca4
+    bytes: 241366
+    fetched: 2026-11-08
+    title: Institute for Astronomy facility index
+    by: University of Hawaii Institute for Astronomy
+    from: https://www.ifa.hawaii.edu/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: rubin-summit-facility
+    sha256: 20e437ed0cd3f431ad4717a8103afea48a7b9304474b6728596c8ae94ebb5ab2
+    bytes: 299439
+    fetched: 2026-11-08
+    title: Observatory summit facility and service building
+    by: Vera C. Rubin Observatory
+    from: https://rubinobservatory.org/explore/how-rubin-works/technology/summit-facility
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: palomar-hale
+    sha256: b3d9c2b332d285c87c158dac7bc112b170b26289a35f2655adbb01e13c3b8d7e
+    bytes: 92468
+    fetched: 2026-11-07
+    title: Hale Telescope
+    by: Caltech, Palomar Observatory
+    from: https://sites.astro.caltech.edu/palomar/about/telescopes/hale.html
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: keck-telescopes
+    sha256: 9b8add3ddf2fae75c1fcded25f40a5dc3ac22cbf9779b8fb7236566bb8d96a30
+    bytes: 145876
+    fetched: 2026-11-07
+    title: The Telescopes
+    by: W. M. Keck Observatory
+    from: https://keckobservatory.org/our-story/telescopes/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: subaru-parameters
+    sha256: 4b3bca6471eee5cadb245e9750c1ed71b62383656209fb43bf8f28bebb875d84
+    bytes: 24268
+    fetched: 2026-11-07
+    title: Telescope Parameters
+    by: National Astronomical Observatory of Japan
+    from: https://subarutelescope.org/Telescope/Parameters/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: rubin-key-numbers
+    sha256: 8376a2090066bb3baf0f8c37db0fbe08ecf812420d2246d2b9a765c61b91796a
+    bytes: 256267
+    fetched: 2026-11-07
+    title: Rubin Key Numbers
+    by: Vera C. Rubin Observatory
+    from: https://rubinobservatory.org/for-scientists/rubin-101/key-numbers
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: rubin-mirrors
+    sha256: 02c4c8e41dbef6f4c25336e282824c6c6641d6643ac5cb9533978156a74c7e5d
+    bytes: 300824
+    fetched: 2026-11-07
+    title: Rubin Mirrors
+    by: Vera C. Rubin Observatory
+    from: https://rubinobservatory.org/explore/how-rubin-works/technology/mirrors
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: elt-m1-technical
+    sha256: eac93e074967bf171a80c6db7d181afeb5a788222b173e1d5961713041b4e226
+    bytes: 78991
+    fetched: 2026-11-08
+    title: ELT M1 mirror technical concept
+    by: European Southern Observatory
+    from: https://elt.eso.org/mirror/M1/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: elt-facts
+    sha256: 6713533de304da1f79f55bff62aa9ec0f66567278843c168e35c515939919332
+    bytes: 69982
+    fetched: 2026-11-07
+    title: ELT Facts
+    by: European Southern Observatory
+    from: https://elt.eso.org/about/facts/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: owl-blue-book-overview
+    title: "OWL Blue Book, chapter 2: Overview"
+    by: European Southern Observatory
+    from: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/2_Overview.pdf
+    sha256: f65c0a3e6eb238f4006282bd213cbf838fb6486ca3e87420be08477c7c622552
+    bytes: 1384878
+    fetched: 2026-11-08
+    licence: "historical institutional reference; local use only, no source redistribution"
+  - key: owl-blue-book-enclosure
+    title: "OWL Blue Book, chapter 11: Enclosure and infrastructures"
+    by: European Southern Observatory
+    from: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/11_Enclosure_and_infrastructures.pdf
+    sha256: 86d683c6b21b6a54ebeb75b04d747add5e696cda51f25d1f028414117b1f094b
+    bytes: 2435785
+    fetched: 2026-11-08
+    licence: "historical institutional reference; local use only, no source redistribution"
+  - key: owl-design-2004
+    title: OWL Design
+    by: European Southern Observatory
+    from: https://www.eso.org/sci/facilities/eelt/owl/OWL_design.html
+    licence: "historical institutional reference; local use only, no redistribution"
+  - key: griffith-visitor-map
+    sha256: 718601b7763f4ae81ce128d7183ff254634d0688f1cf981cd3f6c5324758b0a4
+    bytes: 374430
+    fetched: 2026-11-08
+    title: Griffith Observatory visitor map, main and lower levels
+    by: Griffith Observatory
+    from: https://griffithobservatory.org/wp-content/uploads/2021/03/GOMap_03112021.pdf
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: griffith-school-guide
+    sha256: 2d41290adbef066cbd1dbff9800d1f2cd2d5373bc5576861f32fce9d761692dc
+    bytes: 3973737
+    fetched: 2026-11-07
+    title: Griffith Observatory Student Guide, Module 1
+    by: Griffith Observatory
+    from: https://griffithobservatory.org/wp-content/uploads/2023/02/Module1_Student_Guide.pdf
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: mandel-2008-surface-fire
+    title: "A wildland fire model with data assimilation"
+    by: "Mandel, Bennethum, Beezley, Coen, Douglas, Kim, Vodacek"
+    year: 2008
+    doi: 10.1016/j.matcom.2008.03.015
+    from: https://arxiv.org/pdf/0709.0086.pdf
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: 9411a2a77b96ade7183c5418a6f23832971f03301f1476972727348b395f3615
+    bytes: 787589
+    fetched: 2026-11-04
+  # Recursive structure and species foliage; local references only.
+
+  - key: abop-tree-models-ch2
+    title: "The Algorithmic Beauty of Plants, chapter 2: Modeling of trees"
+    by: "Prusinkiewicz and Lindenmayer"
+    year: 1990
+    from: https://algorithmicbotany.org/papers/abop/abop-ch2.pdf
+    licence: "copyright authors and publisher; author-hosted reference, no redistribution"
+    sha256: ea3055f7ac7bf50cd637024d01a85251bcc267e030d00213d988c194f60c63bf
+    bytes: 4178846
+    fetched: 2026-11-03
+
+  - key: weber-penn-1995
+    title: "Creation and Rendering of Realistic Trees"
+    by: "Jason Weber and Joseph Penn"
+    year: 1995
+    doi: 10.1145/218380.218427
+    from: https://courses.cs.duke.edu/cps124/fall01/resources/p119-weber.pdf
+    licence: "copyright ACM; university-hosted reference, no redistribution"
+    sha256: db92b467d29c13c04015cf9640a9b46337c25730667571b9f58059b4ee95fb5a
+    bytes: 2214573
+    fetched: 2026-11-03
+
+  - key: osu-coast-redwood-foliage
+    title: "Sequoia sempervirens: Landscape Plants"
+    by: "Oregon State University, Department of Horticulture"
+    from: https://landscapeplants.oregonstate.edu/plants/sequoia-sempervirens
+    licence: "copyright Oregon State University; local reference, no redistribution"
+    sha256: 0a014724b44fe3ce60bf04f1639fb78e4a59f2ef269665ce20fd33601c364f53
+    bytes: 40817
+    fetched: 2026-11-03
+
+  - key: osu-giant-sequoia-foliage
+    title: "Sequoiadendron giganteum: Landscape Plants"
+    by: "Oregon State University, Department of Horticulture"
+    from: https://landscapeplants.oregonstate.edu/plants/sequoiadendron-giganteum
+    licence: "copyright Oregon State University; local reference, no redistribution"
+    sha256: 7d257522b12fd72748c4aa534215233ae0b6cd11c69343c43e7af036499ad1de
+    bytes: 40353
+    fetched: 2026-11-03
+
+  # coast redwood atmosphere: qualitative references, no runtime values
+
+  - key: ca-parks-redwood-transpiration
+    title: "Survivors Through Time"
+    by: "California State Parks"
+    from: "https://www.parks.ca.gov/?page_id=24728"
+    licence: "reference only; reuse terms not reviewed; source bytes stay on the local shelf"
+    sha256: 2f56c0c1b8905fcf144970d08c06a3617284c2bc73171126a0d9478366d08988
+    bytes: 53334
+    fetched: 2026-11-02
+
+  - key: nps-redwood-fog
+    title: "About the Trees"
+    by: "National Park Service, Redwood National and State Parks"
+    from: https://www.nps.gov/redw/learn/nature/about-the-trees.htm
+    licence: "reference only; reuse terms not reviewed; source bytes stay on the local shelf"
+    sha256: af58db1a6830284e9e6026287a3d62879b62a8920f333dbc98116e30757e5f95
+    bytes: 41187
+    fetched: 2026-11-02
+
+  - key: petreshen-2025-redwood-fog
+    title: "Fog presence and ecosystem responses in a managed coast redwood forest"
+    by: "Petreshen, Dymond, Keppeler, Allen, Wagenbrenner"
+    year: 2025
+    from: https://research.fs.usda.gov/download/treesearch/69118.pdf
+    doi: 10.1016/j.agrformet.2025.110525
+    licence: "Elsevier B.V., 2025; all rights reserved, including text and data mining and AI training; local reference only, no redistribution"
+    sha256: 0610fd4ab226107f45e7f2f6edd737217d76f1206d6526f293c066b1506bcf03
+    bytes: 12262560
+    fetched: 2026-11-02
+
   # fire: burning trees, the flame, the plume
 
   - key: nist-tn-2362
@@ -437,3 +644,214 @@ sources:
     sha256: ff64db44dd739dd156217671d53d406b351d7d83b43e86eda6a2115766a6fce7
     bytes: 125050
     fetched: 2026-10-17
+
+  - key: nist-handbook-sodium-lines
+    title: NIST Handbook of Basic Atomic Spectroscopic Data, strong lines of sodium
+    by: NIST Physical Measurement Laboratory
+    from: https://physics.nist.gov/PhysRefData/Handbook/Tables/sodiumtable2.htm
+    licence: "us government work: public domain"
+    sha256: b60c4e4159b5a3624801801377a47b1fa6cb15520d2b1700fb66e3844735e414
+    bytes: 35361
+    fetched: 2026-11-04
+
+  # Space observatory references. Local HTML snapshots are not shipped.
+  - key: spitzer-telescope
+    title: "The Telescope"
+    by: "Caltech/IPAC, Spitzer Space Telescope"
+    from: https://www.spitzer.caltech.edu/mission/the-telescope
+    licence: "local reference only; webpage bytes are not redistributed"
+    sha256: d5849d04ea9c63e35443ccf5e87f33cb25917fe3194eefd5449b16d852939c7c
+    bytes: 18682
+    fetched: 2026-11-07
+  - key: spitzer-spacecraft
+    title: "The Spacecraft"
+    by: "Caltech/IPAC, Spitzer Space Telescope"
+    from: https://www.spitzer.caltech.edu/mission/the-spacecraft
+    licence: "local reference only; webpage bytes are not redistributed"
+    sha256: 569fc69e0b3792a3a17940f9f1f2b222f171e6f1c2935cae94167ff2f52fccdc
+    bytes: 18819
+    fetched: 2026-11-07
+  - key: hubble-optics
+    title: "Hubble: Optics"
+    by: "NASA Science"
+    from: https://science.nasa.gov/mission/hubble/observatory/design/optics/
+    licence: "local reference only; webpage bytes are not redistributed"
+    sha256: 53a1bef9b97b149017ba5bf044696dadeb8185f77c8c1d48907cf39500520700
+    bytes: 323863
+    fetched: 2026-11-07
+  - key: webb-telescope-overview
+    title: "Webb: Telescope Overview"
+    by: "NASA Science"
+    from: https://science.nasa.gov/mission/webb/science-overview/science-explainers/telescope-overview/
+    licence: "local reference only; webpage bytes are not redistributed"
+    sha256: d2756e77b04f31d251f2f67188b5e537e15994e82ada26177ae8578d1094e75a
+    bytes: 322623
+    fetched: 2026-11-07
+  - key: webb-sunshield
+    title: "Webb's Sunshield"
+    by: "NASA Science"
+    from: https://science.nasa.gov/mission/webb/webbs-sunshield/
+    licence: "local reference only; webpage bytes are not redistributed"
+    sha256: 3cfbf40695fd23a92eb0db2c05926384782019b794926ab102fafd8fd19093ab
+    bytes: 394717
+    fetched: 2026-11-07
+  - key: cfht-observatory-manual
+    sha256: 8be0bd2606554d1f5ca36b3321384356b22134f3356a2fc7d3082f76e3e9d593
+    bytes: 45041
+    fetched: 2026-11-08
+    title: CFHT observatory manual, telescope
+    by: Canada-France-Hawaii Telescope
+    from: https://www.cfht.hawaii.edu/Instruments/ObservatoryManual/CFHT_ObservatoryManual_%28Sec_4%29.html
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: gemini-north-handout
+    sha256: 724eafef38fe219d8830940143682722239d471d59e0b4ed9b6c15cc4f557308
+    bytes: 2293692
+    fetched: 2026-11-08
+    title: Gemini North telescope facts
+    by: International Gemini Observatory
+    from: https://www.gemini.edu/images/pio/handouts/gn_telescope_handout.pdf
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: ukirt-telescope
+    sha256: a65defb7ef27baa18b54c2058ff16000b062aec5dfd5553cd4889a3c5f48750c
+    bytes: 69627
+    fetched: 2026-11-08
+    title: About the United Kingdom Infrared Telescope
+    by: University of Hawaii Institute for Astronomy
+    from: https://about.ifa.hawaii.edu/ukirt/about-us/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: uh-maunakea-telescopes
+    sha256: b92ad6be9cc24f432209e9bef507c2472cf2a3b507ca905ab11fe492a687ec81
+    bytes: 197518
+    fetched: 2026-11-08
+    title: University of Hawaii Maunakea telescope families
+    by: University of Hawaii Institute for Astronomy
+    from: https://about.ifa.hawaii.edu/facility/maunakea-telescopes/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: jcmt-telescope
+    sha256: 1e50975342c3266703ea857b503bb92dcb81567e3bc2adfbd89eeb70ec678801
+    bytes: 72056
+    fetched: 2026-11-08
+    title: The James Clerk Maxwell Telescope
+    by: East Asian Observatory
+    from: https://www.eaobservatory.org/jcmt/public/jcmt/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: sma-telescope
+    sha256: 7ef9332c5d7e15813d5c376316e0d5ee03bca73ffcaeaaa1d347f54a131c5044
+    bytes: 80650
+    fetched: 2026-11-08
+    title: The Submillimeter Array on Maunakea
+    by: Center for Astrophysics Harvard and Smithsonian
+    from: https://www.cfa.harvard.edu/facilities-technology/telescopes-instruments/submillimeter-array-maunakea-hi
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: vlba-telescope
+    sha256: d96814a7a2b02e73bca29ca1310d89f1e584188cb7e78411444294e9ce9adaff
+    bytes: 1781
+    fetched: 2026-11-08
+    title: What is the Very Long Baseline Array
+    by: National Radio Astronomy Observatory
+    from: https://www.vlba.nrao.edu/whatis/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: panstarrs-telescopes
+    sha256: a09abbbcaeef2f06bb588055d13af28b071161c732653e79ff998f3c44097646
+    bytes: 3770
+    fetched: 2026-11-08
+    title: Pan-STARRS telescope pair
+    by: University of Hawaii Institute for Astronomy
+    from: https://panstarrs.ifa.hawaii.edu/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: faulkes-telescopes
+    sha256: 423e0c89abe8485e23b5eab512f8106330535557a22e137e091dac0a73ff4b38
+    bytes: 19392
+    fetched: 2026-11-08
+    title: Las Cumbres two-metre telescopes
+    by: Las Cumbres Observatory
+    from: https://lco.global/observatory/telescopes/2m0/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: dkist-telescope
+    sha256: 448e40fde8ea1177335ab41a6d26cb6315c62bb76cf2a0343bc0c476b49b3288
+    bytes: 329154
+    fetched: 2026-11-08
+    title: DKIST at a glance
+    by: National Solar Observatory
+    from: https://nso.edu/dkist-at-a-glance/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: dkist-enclosure
+    sha256: 9f1a651138694514bd975c1e0b1ce249403c4fd2d0b88ddebcf93eec29ac5abd
+    bytes: 322632
+    fetched: 2026-11-08
+    title: DKIST enclosure
+    by: National Solar Observatory
+    from: https://nso.edu/telescopes/dkist/enclosure/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: dkist-support-buildings
+    sha256: 84ba2ab8f2180ea380c3ab2447131c90f36539048c2197f25ad397ebb8b3853c
+    bytes: 319189
+    fetched: 2026-11-08
+    title: DKIST support facilities and buildings
+    by: National Solar Observatory
+    from: https://nso.edu/telescopes/dkist/dkist-telescope/support-facilities-and-buildings/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: atlas-specifications
+    sha256: f49880290b42809050216a40946e645f01de6cd235ebaca06f49f31c8f561b31
+    bytes: 9070
+    fetched: 2026-11-08
+    title: ATLAS technical specifications
+    by: ATLAS project
+    from: https://fallingstar.com/specifications.php
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: tlrs4-station-log
+    sha256: 5075950402aede511b17d6ccc41dc244d9c75fca75994c8d1889a9d3d7641e16
+    bytes: 96796
+    fetched: 2026-11-08
+    title: Haleakala TLRS-4 station information
+    by: NASA International Laser Ranging Service
+    from: https://ilrs.gsfc.nasa.gov/network/stations/active/HA4T_station_info.html
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: aeos-upgrade
+    sha256: 307560db3ebde83d23558d1b6bdd799fd794218edcff24eac12892412b04fe81
+    bytes: 133918
+    fetched: 2026-11-08
+    title: AEOS modernization and aperture
+    by: Boeing
+    from: https://boeing.mediaroom.com/2012-06-20-Boeing-Completes-Upgrade-of-AEOS-Telescope-at-Maui-Space-Surveillance-Complex
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: ifa-maui-history
+    sha256: af1a285293d30c221a4e7a9af1e3876dfc95ac5d07c3ac35b4299baf8bd90bff
+    bytes: 241771
+    fetched: 2026-11-08
+    title: History of the Institute for Astronomy on Maui
+    by: University of Hawaii Institute for Astronomy
+    from: https://about.ifa.hawaii.edu/facility/history-of-ifa-maui/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: ukirt-science-closure
+    sha256: cd0d594f9a5f725713416970fe48c2e257e24d2f412b36f6cf8e67c2b71c3609
+    bytes: 82919
+    fetched: 2026-11-08
+    title: UKIRT science operations to end September 15 2026
+    by: University of Hawaii
+    from: https://www.hawaii.edu/news/2026/07/02/uh-continues-ukirt-decommissioning/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: maunakea-removed-observatories
+    sha256: 70826d66f009c6c3b7b1acff77413e813781bb0f53e2dcc6918f416ee04b839f
+    bytes: 80440
+    fetched: 2026-11-08
+    title: Second observatory removed from Maunakea
+    by: University of Hawaii
+    from: https://www.hawaii.edu/news/2024/07/02/second-observatory-removed-maunakea/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: haleakala-environmental-study-2009
+    sha256: a1804e1c0d8d49ffb9eec50583b8623d931cb7955ffec1a1308cedcd82fb343e
+    bytes: 17800499
+    fetched: 2026-11-08
+    title: ATST supplemental environmental impact statement, volume one
+    by: National Science Foundation and State of Hawaii environmental review
+    from: https://files.hawaii.gov/dbedt/erp/EA_EIS_Library/2009-05-08-MA-SDEIS-Advanced-Tech-Solar-Telescope-V1.pdf
+    licence: "government reference; local use only, no source redistribution"
+  - key: sma-technical
+    sha256: 15873784431981df87d1164c83b68431e1429c20cf5f12d11c2218cebad97cdd
+    bytes: 522483
+    fetched: 2026-11-08
+    title: The Submillimeter Array
+    by: Paul Ho, James Moran and Fred Lo
+    from: https://lweb.cfa.harvard.edu/sma/general/Ho.pdf
+    licence: "research reference; local use only, no source redistribution"

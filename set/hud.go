@@ -5,7 +5,7 @@ import (
 	"math"
 	"slices"
 
-	yaml "go.yaml.in/yaml/v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // Hud is what a set draws on its pictures' own plane: the colourway its

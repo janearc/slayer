@@ -1,0 +1,43 @@
+# Independent public geometry probes, 2026-11-07.
+# Apertures follow the cited reference rows; probe locations are authored.
+seed: 5
+tolerance: 1.0e-9
+maximum-faces: 12000
+profiles:
+  - design: spitzer
+    aperture: 0.85
+    primary-axis: x
+    probes:
+      - material: primary mirror
+        ray: {at: {x: 0, y: 6, z: 0}, dir: {x: 0, y: -1, z: 0}}
+        hit: true
+      - material: solar array
+        ray: {at: {x: 0.05, y: 4, z: -3}, dir: {x: 0, y: 0, z: 1}}
+        hit: true
+  - design: hubble
+    aperture: 2.4
+    primary-axis: x
+    probes:
+      - material: primary mirror
+        ray: {at: {x: 0, y: 15, z: 0}, dir: {x: 0, y: -1, z: 0}}
+        hit: true
+      - material: solar array
+        ray: {at: {x: 4, y: 5, z: -3}, dir: {x: 0, y: 0, z: 1}}
+        hit: true
+  - design: webb
+    aperture: 6.6
+    primary-axis: y
+    probes:
+      - material: primary mirror
+        ray: {at: {x: 0, y: 6.43, z: -12}, dir: {x: 0, y: 0, z: 1}}
+        hit: false
+      - material: primary mirror
+        ray: {at: {x: 1.15, y: 7.1, z: -12}, dir: {x: 0, y: 0, z: 1}}
+        hit: true
+      - material: thermal shield
+        ray: {at: {x: 5, y: 3, z: 0}, dir: {x: 0, y: -1, z: 0}}
+        hit: true
+invalid-apertures:
+  - {value: 0, message: "invalid spacecraft"}
+  - {value: -1, message: "invalid spacecraft"}
+  - {value: 1.0e160, message: "non-finite spacecraft envelope"}

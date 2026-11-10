@@ -1,6 +1,7 @@
 package manufacture
 
 import (
+	"cmp"
 	"math"
 
 	"github.com/janearc/celestial/measure"
@@ -109,17 +110,16 @@ func (row fire) made(from seed) (good, error) {
 func around(where ring, of maker, from seed) (good, error) {
 	var all good
 	for index := range where.across(0) {
-		// a ring's place cannot fail: the error is the arrangement
-		// interface's, which whorls need and a ring never fills
-		there, err := where.at(size{}, 0, index, from)
-		if err != nil {
-			return good{}, err
-		}
+		there := where.place(0, index, from)
 		one, err := of.made(from.sprout(index, 0))
 		if err != nil {
 			return good{}, err
 		}
-		all.parts = append(all.parts, one.placed(there.space).parts...)
+		placed, err := one.placed(there.space)
+		if err != nil {
+			return good{}, err
+		}
+		all.parts = append(all.parts, placed.parts...)
 		all.dressed = one.dressed
 	}
 	return all, nil
@@ -173,24 +173,26 @@ func headed(stand stalk, head horn, tilt measure.Angle, around int,
 	if err != nil {
 		return mounted{}, err
 	}
-	stood, err := shaped(post, around, dressed)
-	if err != nil {
-		return mounted{}, err
+	var pieces [2]good
+	for index, shape := range []tube{post, bell} {
+		made, err := shaped(shape, around, dressed)
+		if err != nil {
+			return mounted{}, err
+		}
+		pieces[index] = made
 	}
-	turned, err := shaped(bell, around, dressed)
-	if err != nil {
-		return mounted{}, err
-	}
+	stood, turned := pieces[0], pieces[1]
 	top := maths.V(0, inScene(stand.tall), 0)
 	up := tilt.InRadians()
 	way := maths.V(math.Cos(up), math.Sin(up), 0)
 	// the way is a unit long whatever the tilt, so it is a way to go:
 	// the error is spaceAlong's, for a run that has none
-	space, err := spaceAlong(top, way)
-	if err != nil {
+	space, spaceError := spaceAlong(top, way)
+	placed, placementError := turned.placed(space)
+	if err := cmp.Or(spaceError, placementError); err != nil {
 		return mounted{}, err
 	}
-	stood.parts = append(stood.parts, turned.placed(space).parts...)
+	stood.parts = append(stood.parts, placed.parts...)
 	return mounted{whole: stood,
 		mouth: top.Add(way.Scale(inScene(head.long))), way: way}, nil
 }
@@ -290,20 +292,12 @@ func (row maser) made(from seed) (good, error) {
 		thick: row.thick}
 	dish := horn{long: across.Times(row.deep),
 		back: across.Times(row.back), front: across.Times(midway)}
-	lamp, err := headed(stand, dish,
+	lamp, headError := headed(stand, dish,
 		row.lift.degrees(from.draw(picking, 2, 0)), row.around,
 		row.dressed)
-	if err != nil {
-		return good{}, err
-	}
-	line, err := newLine(row.wave)
-	if err != nil {
-		return good{}, err
-	}
-	// a dish too small to be an opening was too small to be a head,
-	// and headed has refused it by now
-	through, err := newAperture(across)
-	if err != nil {
+	line, lineError := newLine(row.wave)
+	through, apertureError := newAperture(across)
+	if err := cmp.Or(headError, lineError, apertureError); err != nil {
 		return good{}, err
 	}
 	shining, err := newLight(line,

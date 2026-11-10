@@ -1,0 +1,24 @@
+# Independently enumerated unit-lattice rotations and invalid inputs.
+# These are test cases, not a map or dimensions of ESO's physical primary.
+start: {column: 1, row: 0}
+rotation:
+  - {column: 1, row: 0}
+  - {column: 0, row: 1}
+  - {column: -1, row: 1}
+  - {column: -1, row: 0}
+  - {column: 0, row: -1}
+  - {column: 1, row: -1}
+inventories:
+  - {count: -1, hole: 0, want: 0}
+  - {count: 0, hole: 0, want: 0}
+  - {count: 1, hole: 0, want: 0}
+  - {count: 5, hole: 0, want: 0}
+  - {count: 7, hole: 0, want: 0}
+  - {count: 6, hole: -1, want: 0}
+sectors:
+  - {count: -1, hole: 0, centres: []}
+  - {count: 0, hole: 0, centres: []}
+  - {count: 1, hole: -1, centres: []}
+  - count: 1
+    hole: 0
+    centres: [{column: 1, row: 0}]

@@ -10,12 +10,11 @@ opening and develops them into a frame.
 
 ## What you need before you start
 
-| thing | whose | what it is |
-|---|---|---|
-| a world | slayer, `scene/thing` | the set: things, lamps |
-| a camera | slayer | where the eye is at each instant the shutter is open |
-| a renderer | slayer's tracer, or slayer `gpu` | gives a `*frame.Frame` of linear light for an eye and a time |
-| a roll | ninjafilm | a stock, loaded |
+- **a world:** Slayer's `scene/thing` holds the set's things and lamps.
+- **a camera:** Slayer places the eye at each instant the shutter is open.
+- **a renderer:** Slayer's tracer or `gpu` returns a `*frame.Frame` of
+  linear light for that eye and time.
+- **a roll:** ninjafilm loads the chosen stock.
 
 ## The rendering loop
 
@@ -32,7 +31,7 @@ if err != nil {
 printed, err := roll.Print(number, glimpses)
 ```
 
-Use a stable frame number to reproduce that frame’s grain. The exposure
+Use a stable frame number to reproduce that frame's grain. The exposure
 section below explains how to rate and display each stock.
 
 ## The shelf
@@ -40,14 +39,21 @@ section below explains how to rate and display each stock.
 `ninjafilm.Stocks()` lists the names. These are the six, in the order
 the hills got them.
 
-| name | what it is | what it sees | how it prints | grain | cut to |
-|---|---|---|---|---|---|
-| `soot` | one silver record | blue only | red and green things print black. A blue sky prints white | fine | super 35 |
-| `ash` | one silver record | blue and green | red prints black: a red sash, blood, a setting sun. The stock of the 1910s | medium | super 35 |
-| `smoke` | one silver record | everything | greys as the eye would rank them. The 1920s | coarse | super 35 |
-| `dusk` | two dye records, a red one and a green one | red and green | in red-orange and blue-green only. It never saw blue: a blue thing prints as a black one does | coarse | super 35 |
-| `pollen` | three kinds of dyed element scattered over one silver record | everything, a third of it at each element | full colour, dim, with a coloured speckle you can see | fine | full frame |
-| `lantern` | three dye records, one under another | everything | full colour, the deepest blacks, the least grain. The slide | finest | full frame |
+- **`soot`:** one silver record sees blue only. Red and green things print
+  black; a blue sky prints white. Fine grain, cut to super 35.
+- **`ash`:** one silver record sees blue and green. Red prints black: a red
+  sash, blood, a setting sun. The stock of the 1910s; medium grain, super 35.
+- **`smoke`:** one silver record sees everything and prints greys as the eye
+  would rank them. The 1920s; coarse grain, super 35.
+- **`dusk`:** two dye records see red and green, printing in red-orange and
+  blue-green only. It never saw blue: a blue thing prints as a black one
+  does. Coarse grain, super 35.
+- **`pollen`:** three kinds of dyed element lie scattered over one silver
+  record. It sees everything, a third at each element, and prints full
+  colour, dim, with a coloured speckle you can see. Fine grain, full frame.
+- **`lantern`:** three dye records, one under another, see everything. Full
+  colour, the deepest blacks, the least grain. The slide; finest grain,
+  full frame.
 
 A stock is rows in two tables, `data/stocks.csv` and `data/records.csv`.
 a new stock is new rows; no code changes. `data/SOURCES.md` says where
@@ -101,14 +107,26 @@ frame number give the same grain for ever; the next frame's is new.
 Check loading and printing errors before using their results. The
 following messages identify the failed condition and expected input.
 
-| the error says | it means | do |
-|---|---|---|
-| `no stock is called "x"; the shelf holds [...]` | a name not on the shelf | use a name from the list it gives |
-| `a roll comes from Roll, and is rated within what a number holds` | the roll is a zero value, or `Rated` was given something absurd | check the error from `Roll`; rate in stops, single digits |
-| `a frame is printed from one glimpse or more` | `Print` was handed no frames | render the glimpses first |
-| `a glimpse is a frame of one pixel or more, with a light for every pixel` | a nil or empty frame | the renderer failed; check its error |
-| `the glimpses of a frame are all one size` | two renders of different sizes | one width and height for the whole reel |
-| `a glimpse holds light that is not a number` | the renderer returned a NaN or an infinity | fix the scene; ninjafilm will not hide it |
+- **`no stock is called "x"; the shelf holds [...]`:** it means: a name not on
+  the shelf; do: use a name from the list it gives
+
+- **`a roll comes from Roll, and is rated within what a number holds`:** it
+  means: the roll is a zero value, or `Rated` was given something absurd; do:
+  check the error from `Roll`; rate in stops, single digits
+
+- **`a frame is printed from one glimpse or more`:** it means: `Print` was
+  handed no frames; do: render the glimpses first
+
+- **`a glimpse is a frame of one pixel or more, with a light for every
+  pixel`:** it means: a nil or empty frame; do: the renderer failed; check its
+  error
+
+- **`the glimpses of a frame are all one size`:** it means: two renders of
+  different sizes; do: one width and height for the whole reel
+
+- **`a glimpse holds light that is not a number`:** it means: the renderer
+  returned a NaN or an infinity; do: fix the scene; ninjafilm will not hide it
+
 
 ## Model limits
 

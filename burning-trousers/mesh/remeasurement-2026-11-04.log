@@ -1,0 +1,121 @@
+=== RUN   TestEveryFaceIsMetOnBothMeshes
+--- PASS: TestEveryFaceIsMetOnBothMeshes (2.69s)
+=== RUN   TestADroppedFaceIsFound
+--- PASS: TestADroppedFaceIsFound (0.00s)
+=== RUN   TestSlayersMeshDrawsWhatAShapeMeshDoes
+    mesh_test.go:275: bonfire by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: bonfire by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: bonfire by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: bonfire by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: bonfire by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: bonfire by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: boulder by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: boulder by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: boulder by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: boulder by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: boulder by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: boulder by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: campfire by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: campfire by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: campfire by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: campfire by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: campfire by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: campfire by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: can by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: can by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: can by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: can by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: can by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: can by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood-shoot by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood-shoot by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood-shoot by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood-shoot by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood-shoot by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: coast-redwood-shoot by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: cobble by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: cobble by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: cobble by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: cobble by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: cobble by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: cobble by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: fern by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: fern by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: fern by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: fern by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: fern by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: fern by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia-shoot by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia-shoot by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia-shoot by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia-shoot by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia-shoot by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: giant-sequoia-shoot by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: home by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: home by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: home by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: home by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: home by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: home by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: log by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: log by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: log by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: log by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: log by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: log by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: maser by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: maser by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: maser by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: maser by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: maser by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: maser by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: norway by the sun, side 0: 2 pixels past one jnd, worst 2.33; 0 placed apart
+    mesh_test.go:275: norway by the sun, side 1: 1 pixels past one jnd, worst 1.73; 0 placed apart
+    mesh_test.go:275: norway by the sun, side 2: 1 pixels past one jnd, worst 2.85; 0 placed apart
+    mesh_test.go:275: norway by the sun and sky, side 0: 4 pixels past one jnd, worst 3.68; 0 placed apart
+    mesh_test.go:275: norway by the sun and sky, side 1: 7 pixels past one jnd, worst 3.36; 0 placed apart
+    mesh_test.go:275: norway by the sun and sky, side 2: 1 pixels past one jnd, worst 3.82; 0 placed apart
+    mesh_test.go:275: optical-observatory by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: optical-observatory by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: optical-observatory by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: optical-observatory by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: optical-observatory by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: optical-observatory by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: pebble by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: pebble by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: pebble by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: pebble by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: pebble by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: pebble by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spotlight by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spotlight by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spotlight by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spotlight by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spotlight by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spotlight by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spruce by the sun, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spruce by the sun, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spruce by the sun, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spruce by the sun and sky, side 0: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spruce by the sun and sky, side 1: 0 pixels past one jnd, worst 0.00; 0 placed apart
+    mesh_test.go:275: spruce by the sun and sky, side 2: 0 pixels past one jnd, worst 0.00; 0 placed apart
+--- PASS: TestSlayersMeshDrawsWhatAShapeMeshDoes (28.01s)
+=== RUN   TestASmoothBallDrawsAsASphere
+    mesh_test.go:400: side 0: of 21476 pixels wholly ball, slayer's mesh has 52 past one jnd from the sphere, a shape.Mesh 56
+    mesh_test.go:400: side 1: of 21532 pixels wholly ball, slayer's mesh has 54 past one jnd from the sphere, a shape.Mesh 75
+    mesh_test.go:400: side 2: of 21468 pixels wholly ball, slayer's mesh has 39 past one jnd from the sphere, a shape.Mesh 55
+--- PASS: TestASmoothBallDrawsAsASphere (0.71s)
+PASS
+ok  	github.com/janearc/slayer/burning-trousers/mesh	31.562s

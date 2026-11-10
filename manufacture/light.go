@@ -61,7 +61,7 @@ func (of spectrum) lined() bool { return inScene(of.wave) > 0 }
 // nanometres is how many of libtheme's unit of wavelength a metre is.
 const nanometres = 1e9
 
-// bands is the spectrum as libtheme carries light: a black body's by
+// bands is the spectrum as Celestial carries light: a black body's by
 // planck's law, or all of it in the line's own band.
 func (of spectrum) bands() bands.Light {
 	if of.lined() {
@@ -175,7 +175,7 @@ func (made light) flickering(from seed, depth float64) (light, error) {
 	return made, nil
 }
 
-// bands is the light's spectrum, as libtheme carries light.
+// bands is the light's spectrum, as Celestial carries light.
 func (made light) bands() bands.Light { return made.colour.bands() }
 
 // angles is the half angle of the light's beam at full strength and how much

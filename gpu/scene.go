@@ -8,6 +8,7 @@ import (
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/trace"
 )
@@ -23,7 +24,7 @@ type scene struct {
 	header, spheres, triangles, nodes packer
 	materials, lamps, volumes, trees  packer
 	instances, tops, sky, bends       packer
-	// boxes is every boxed medium's cells, asked on the cpu: density,
+	// boxes is every boxed medium's cells, prepared on CPU or GPU: density,
 	// then its shine and paint three numbers a cell
 	boxes packer
 	// rays is every sample's ray, its start and its way, six floats
@@ -32,7 +33,7 @@ type scene struct {
 	rays   packer
 	counts struct {
 		spheres, triangles, nodes, lamps, volumes, trees int
-		instances, tops                                  int
+		instances, tops, beams                           int
 	}
 	materialOf map[*thing.Material]int
 	// faces is every mesh's faces in its own space and their trees,
@@ -41,10 +42,14 @@ type scene struct {
 	faces     tree
 	meshes    map[any]pooled
 	standings []standing
+	groups    []meshGroup
+	groupOf   map[*shape.MeshGroup]int
 	// bakes are the volumes to bake, and cells how many cells all
 	// their grids hold together
-	bakes []bake
-	cells int
+	smokes []smokeGrid
+	flames []flameBake
+	bakes  []bake
+	cells  int
 	// baked is every baked cell, filled in after encoding by the bake
 	// kernel, before the trace
 	baked packer
@@ -85,7 +90,22 @@ func (encoded *scene) perSample() int {
 // newScene is a scene with nothing in it yet.
 func newScene() *scene {
 	return &scene{materialOf: map[*thing.Material]int{},
-		meshes: map[any]pooled{}}
+		meshes: map[any]pooled{}, groupOf: map[*shape.MeshGroup]int{}}
+}
+
+// discardFaceValues releases float64 construction faces after serialization.
+// Native planning uses node ranges and packed triangles, not these values.
+func (encoded *scene) discardFaceValues() { encoded.faces.triangles = nil }
+
+// discardBuildHierarchy releases descriptors after native IDs/plans are made.
+// Rendering and lighting use the packed buffers retained by this scene.
+func (encoded *scene) discardBuildHierarchy() {
+	encoded.faces.nodes = nil
+	encoded.standings = nil
+	encoded.groups = nil
+	encoded.meshes = nil
+	encoded.groupOf = nil
+	encoded.materialOf = nil
 }
 
 // unsupported is a world the kernel cannot draw, and what in it.
@@ -117,8 +137,12 @@ func refuse(world *thing.World) error {
 		return unsupported{"the world's haze"}
 	}
 	for _, lamp := range world.Lamps {
-		switch lamp.(type) {
-		case emit.Lit, emit.Distant:
+		switch source := lamp.(type) {
+		case emit.Lit, emit.Distant, emit.Volume:
+		case *emit.Beam:
+			if source == nil {
+				return unsupported{"a nil beam"}
+			}
 		default:
 			kind := fmt.Sprintf("a lamp of kind %T", lamp)
 			return unsupported{kind}
@@ -150,9 +174,7 @@ func encodeGrown(world *thing.World, trees []grown, eye maths.Subspace,
 	if err := encoded.volumesOf(world, at); err != nil {
 		return nil, err
 	}
-	if err := encoded.conifers(trees); err != nil {
-		return nil, err
-	}
+	encoded.conifers(trees)
 	encoded.lampsOf(world)
 	encoded.skyOf(world)
 	pinhole, isPinhole := pinholeOf(lens)
@@ -168,6 +190,12 @@ func encodeGrown(world *thing.World, trees []grown, eye maths.Subspace,
 func pinholeOf(lens film.Sensor) (film.Pinhole, bool) {
 	if lens == nil {
 		return film.Pinhole{}, true
+	}
+	// PinholeOf returns a checked pointer. It has the same ray geometry as
+	// its value; retaining the generic-lens path here uploads a full CPU ray
+	// array even though the kernel can generate those pinhole rays itself.
+	if pointer, ok := lens.(*film.Pinhole); ok && pointer != nil {
+		return *pointer, true
 	}
 	pinhole, ok := lens.(film.Pinhole)
 	return pinhole, ok

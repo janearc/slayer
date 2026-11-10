@@ -1,0 +1,30 @@
+# Authored sampling examples, 2026-11-07.
+# Widths, coordinates and expected cell splits are independent examples.
+cases:
+  - name: widening reaches an otherwise missed ray
+    beams:
+      - {x: 0, radius: 0.25, divergence: 5}
+    ray: {at: {x: -2, y: 5, z: 2}, dir: {x: 1, y: 0, z: 0}}
+    far: 20
+    cell: {enter: 1.5, leave: 2, splits: 8}
+  - name: a narrower second launch chooses the smaller step
+    beams:
+      - {x: 0, radius: 0.25, divergence: 0}
+      - {x: 10, radius: 0.125, divergence: 0}
+    ray: {at: {x: -2, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+    far: 20
+    cell: {enter: 6, leave: 7, splits: 32}
+  - name: touching the far plane does not extend another interval
+    beams:
+      - {x: 0, radius: 0.25, divergence: 0}
+      - {x: 18.75, radius: 0.25, divergence: 0}
+    ray: {at: {x: -2, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+    far: 20
+    cell: {enter: 6, leave: 7, splits: 1}
+  - name: a missed small launch does not tighten the real beam step
+    beams:
+      - {x: 0, radius: 0.25, divergence: 0}
+      - {x: 100, radius: 0.125, divergence: 0}
+    ray: {at: {x: -2, y: 5, z: 0}, dir: {x: 1, y: 0, z: 0}}
+    far: 20
+    cell: {enter: 1.5, leave: 2, splits: 8}

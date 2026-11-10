@@ -1,0 +1,50 @@
+# Authored independent layer contracts, 2026-11-07.
+# Filled-layer values are extinction times the cubic height complement.
+weather: {extinction: 0.2, depth: 10, coverage: 1, seed: 34}
+bounds:
+  min: {x: -2, y: 0, z: -3}
+  max: {x: 4, y: 13, z: 5}
+ground: {east: 0.1, south: 0.2, level: 1}
+finest: 2.5
+tolerance: 1.0e-12
+samples:
+  - {at: {x: 0, y: 1, z: 0}, density: 0}
+  - {at: {x: 0, y: 3.5, z: 0}, density: 0.16875}
+  - {at: {x: 0, y: 6, z: 0}, density: 0.1}
+  - {at: {x: 0, y: 8.5, z: 0}, density: 0.03125}
+  - {at: {x: 0, y: 11, z: 0}, density: 0}
+  - {at: {x: 2, y: 6.8, z: 3}, density: 0.1}
+  - {at: {x: -2, y: 5.8, z: 0}, density: 0.1}
+  - {at: {x: 4, y: 6.4, z: 0}, density: 0.1}
+  - {at: {x: 0, y: 7, z: 5}, density: 0.1}
+  - {at: {x: 0, y: 5.4, z: -3}, density: 0.1}
+  - {at: {x: -2.001, y: 6, z: 0}, density: 0}
+  - {at: {x: 4.001, y: 6, z: 0}, density: 0}
+  - {at: {x: 0, y: 6, z: -3.001}, density: 0}
+  - {at: {x: 0, y: 6, z: 5.001}, density: 0}
+advection:
+  seconds: 2
+  coverage: 0.7
+  wind: {x: 1, y: 0, z: 0}
+  probes:
+    - {x: 0, y: 5, z: 0}
+    - {x: 1, y: 5, z: 1}
+    - {x: -1, y: 5, z: -1}
+invalid-weather:
+  - {extinction: -1, depth: 10, coverage: 1}
+  - {extinction: 0.2, depth: 0, coverage: 1}
+  - {extinction: 0.2, depth: 10, coverage: -1}
+  - {extinction: 0.2, depth: 10, coverage: 2}
+  - {extinction: .nan, depth: 10, coverage: 1}
+  - {extinction: 0.2, depth: 10, coverage: 1, wind: {x: .inf, y: 0, z: 0}}
+invalid-bounds:
+  - min: {x: 4, y: 0, z: -3}
+    max: {x: 4, y: 13, z: 5}
+  - min: {x: -2, y: 13, z: -3}
+    max: {x: 4, y: 13, z: 5}
+  - min: {x: -2, y: 0, z: 5}
+    max: {x: 4, y: 13, z: 5}
+  - min: {x: .nan, y: 0, z: -3}
+    max: {x: 4, y: 13, z: 5}
+  - min: {x: -2, y: 0, z: -3}
+    max: {x: 4, y: 13, z: .inf}

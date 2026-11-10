@@ -13,19 +13,24 @@ import (
 
 // the tiff tags a raster is read from
 const (
-	tagWidth       = 256
-	tagHeight      = 257
-	tagBits        = 258
-	tagCompression = 259
-	tagSamples     = 277
-	tagTileWidth   = 322
-	tagTileHeight  = 323
-	tagTileOffsets = 324
-	tagTileCounts  = 325
-	tagFormat      = 339
-	tagScale       = 33550
-	tagTiepoint    = 33922
-	tagNoData      = 42113
+	tagWidth        = 256
+	tagHeight       = 257
+	tagBits         = 258
+	tagCompression  = 259
+	tagSamples      = 277
+	tagTileWidth    = 322
+	tagTileHeight   = 323
+	tagTileOffsets  = 324
+	tagTileCounts   = 325
+	tagFillOrder    = 266
+	tagPredictor    = 317
+	tagFormat       = 339
+	tagScale        = 33550
+	tagTiepoint     = 33922
+	tagNoData       = 42113
+	tagStripOffsets = 273
+	tagRowsPerStrip = 278
+	tagStripCounts  = 279
 )
 
 // the values those tags must have for a raster this reads
@@ -45,24 +50,51 @@ type Raster struct {
 	file            *os.File
 	order           binary.ByteOrder
 	big, placed     bool
+	closed          bool
+	stripped        bool
 	width, height   int
 	tileW, tileH    int
 	offsets, counts []uint64
 	compression     int
+	predictor       int
 	west, north     float64
 	spacing         float64
+	rowStep         float64
 	noData          float32
-	cache           map[int][]float32
+	cache           tileCache
+	budget          RasterBudget
+	fileBytes       int64
+	metadataBytes   int64
+	reference       SourceReference
 }
 
 // Open is the raster in a file, its tags read and checked, its samples
 // not read until asked for.
 func Open(path string) (*Raster, error) {
+	budget, err := DefaultRasterBudget()
+	if err != nil {
+		return nil, err
+	}
+	return OpenWithBudget(path, budget)
+}
+
+// OpenWithBudget opens the same raster with explicit per-source payload limits.
+// Zero cache bytes or entries disables retention. Oversized tiles are refused.
+func OpenWithBudget(path string, budget RasterBudget) (*Raster, error) {
+	if err := budget.valid(); err != nil {
+		return nil, err
+	}
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	raster := &Raster{file: file, cache: map[int][]float32{},
+	info, err := file.Stat()
+	if err != nil {
+		file.Close()
+		return nil, err
+	}
+	raster := &Raster{file: file, budget: budget,
+		fileBytes: info.Size(), cache: newTileCache(budget.CacheBytes, budget.CacheTiles),
 		noData: float32(math.Inf(-1))}
 	if err := raster.readTags(); err != nil {
 		file.Close()
@@ -72,16 +104,38 @@ func Open(path string) (*Raster, error) {
 }
 
 // Close lets go of the file.
-func (raster *Raster) Close() error { return raster.file.Close() }
+func (raster *Raster) Close() error {
+	raster.closed = true
+	raster.cache.clear()
+	return raster.file.Close()
+}
+
+// DiscardCache releases decoded samples while leaving the file available.
+// A world manager can use it when dividing a budget between active sources.
+func (raster *Raster) DiscardCache() { raster.cache.clear() }
+
+// CacheUsage reports retained sample bytes and entries, excluding metadata.
+func (raster *Raster) CacheUsage() (bytes int64, tiles int) {
+	return raster.cache.used, len(raster.cache.items)
+}
 
 // Size is the raster's width and height in samples.
 func (raster *Raster) Size() (int, int) { return raster.width, raster.height }
 
-// Corner is where the raster's first sample's corner is, as an easting
-// and a northing in its projection's metres, and how far apart its
-// samples are.
+// Corner retains the legacy origin and eastward sample spacing in declared
+// source units. For geographic grids, SampleLocation also accounts for the
+// independent row scale and point/area registration.
 func (raster *Raster) Corner() (west, north, spacing float64) {
 	return raster.west, raster.north, raster.spacing
+}
+
+// rowSpacing keeps legacy square-grid fixtures valid while retaining both
+// declared angular scales for geographic sources.
+func (raster *Raster) rowSpacing() float64 {
+	if raster.rowStep != 0 {
+		return raster.rowStep
+	}
+	return raster.spacing
 }
 
 // readTags reads the header and the first directory's tags.
@@ -98,7 +152,7 @@ func (raster *Raster) readTags() error {
 	default:
 		return fmt.Errorf("%w: no byte order", errRaster)
 	}
-	first := int64(raster.order.Uint32(head[4:]))
+	first := uint64(raster.order.Uint32(head[4:]))
 	switch raster.order.Uint16(head[2:]) {
 	case classic:
 	case bigTiff:
@@ -107,7 +161,7 @@ func (raster *Raster) readTags() error {
 		if _, err := raster.file.ReadAt(wide, 0); err != nil {
 			return err
 		}
-		first = int64(raster.order.Uint64(wide[8:]))
+		first = raster.order.Uint64(wide[8:])
 	default:
 		return fmt.Errorf("%w: not a tiff or a bigtiff", errRaster)
 	}

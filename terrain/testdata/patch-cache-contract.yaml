@@ -1,0 +1,34 @@
+# Authored payload arithmetic and reuse order, not a captured test pass.
+source: fixture-plain.tif
+index-bytes: 8
+height-bytes: 8
+availability-bytes: 1
+patches:
+  a: {min-column: 0, max-column: 1, min-row: 0, max-row: 1, level: 0}
+  b: {min-column: 2, max-column: 3, min-row: 0, max-row: 1, level: 0}
+  c: {min-column: 4, max-column: 5, min-row: 0, max-row: 1, level: 0}
+side: 2
+# Four native indices plus four heights and four availability bits-as-bools.
+# 4*8 + 4*(8+1) = 68 bytes on the stated 64-bit host.
+per-grid-bytes: 68
+cache-bytes: 136
+cache-entries: 2
+access: [a, b, a, c]
+after-access:
+  bytes: 136
+  entries: 2
+  hits: 1
+  misses: 3
+  evicted: b
+stricter-hit:
+  patch: a
+  refused-read-bytes: 67
+  accepted-read-bytes: 68
+# Terminal native rectangles remain 2x2 under either side request.
+alias:
+  patch: a
+  sides: [99, 100]
+after-close:
+  reads: refused
+  retained-payload-after-refused-read: 0
+# A previously returned read-only grid must remain readable after cache Clear.

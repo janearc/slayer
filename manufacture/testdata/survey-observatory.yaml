@@ -1,0 +1,15 @@
+# Independent source-sized mirror spans and picked backing/camera inventory.
+# The ray is an authored axial probe with a small offset from mesh vertices.
+kind: rubin
+seed: 5
+tolerance: 1.0e-8
+tangent: {x: 0, y: 0.573576436351046, z: 0.819152044288992}
+ray:
+  at: {x: 0.1, y: 20, z: -6.65}
+  dir: {x: 0, y: -0.819152044288992, z: 0.573576436351046}
+surfaces:
+  - {material: primary mirror, span: 8.4, hit: false}
+  - {material: secondary mirror, span: 3.4, hit: false}
+  - {material: tertiary mirror, span: 5, hit: true}
+  - {material: mirror backing, span: 8.358, hit: true}
+  - {material: camera housing, span: 2.016, hit: true}

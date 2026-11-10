@@ -6,23 +6,26 @@ package manufacture
 // architecture and foliage is a row and no code.
 //
 // the branching is an architecture and not a form: a form is already the shape
-// of one part. whorled is the only architecture so far, so there is no
+// of one part . whorled is the only architecture so far, so there is no
 // architecture interface yet; it comes with the second, 'ohi'a's, at families
 // step 5.
 
 // quality is how much of a tree is made, never which tree: one species
 // and one seed are one tree at every quality, its limbs the same, cut
-// more or less finely. doc/families.md names four rungs; quick, today's
-// trees, is the one built so far.
+// more or less finely.
+//
+// This internal quality describes the legacy sleeve
+// scaffold. Complexities names the public representations, including the
+// recursive foliage described in doc/conifer-foliage.md.
 type quality struct{ rung rung }
 
 // rung is one of the qualities doc/families.md names.
 type rung int
 
-// quick is a sleeve round each shoot: today's trees, face for face.
+// quick is the legacy sleeve scaffold, face for face.
 const quick rung = iota
 
-// atQuick is the quality every door makes today.
+// atQuick makes the legacy scaffold before a foliage representation is chosen.
 var atQuick = quality{rung: quick}
 
 // round is the shape of a sleeve before it is cut: its joints, foot to
@@ -67,8 +70,8 @@ type foliage interface {
 }
 
 // sleeveFoliage is the foliage every tree here has worn since ninja's
-// conifer: a sleeve of leaf round each shoot. it is the same at every
-// quality built so far.
+// conifer: a sleeve of leaf round each shoot. Redwood and sequoia retain
+// these as construction descriptors, then replace them with needled shoots.
 type sleeveFoliage round
 
 // bears is the sleeve of leaf a shoot wears.
@@ -94,7 +97,7 @@ type branchlets struct {
 	wear  foliage
 }
 
-// whorled is a trunk with tiers of branches at its nodes: hallé and
+// whorled is a trunk with tiers of branches at its nodes: halle and
 // oldeman's model of the spruces, simplified. its trunk is one piece;
 // each branch is in bark and clad in a foliage, and every piece of it
 // carries branchlets when the tree has them.
@@ -151,6 +154,7 @@ func (tree whorled) branching(bark, clad sleeve, sprays int,
 	if err != nil {
 		return growth{}, err
 	}
+	worn.terminal = true
 	return stemCarrying(tree.branch.pieces, tree.branch.droop,
 		[]sleeve{bark, clad}, shoots, tree.shoots.shoot.pieces,
 		tree.shoots.shoot.droop, []sleeve{worn})

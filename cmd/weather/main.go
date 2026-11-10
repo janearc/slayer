@@ -62,6 +62,11 @@ func main() {
 
 // run runs the weather as asked, drawing it every so often.
 func run(given asked) error {
+	if !(given.every > 0) || math.IsInf(given.every, 0) ||
+		!(given.seconds >= 0) || math.IsInf(given.seconds, 0) {
+		return fmt.Errorf("invalid time: duration %g s, interval %g s",
+			given.seconds, given.every)
+	}
 	degree := math.Pi / 180
 	grid, err := weather.NewGrid(given.across, given.rows,
 		given.limit*degree, given.radius)
@@ -90,7 +95,7 @@ func run(given asked) error {
 			"of the energy (jupiter 0.93)\n", made.Clock(), steps,
 			made.Fastest(), made.Zonality())
 		zonal := made.Zonal()
-		for j := 0; j < len(zonal); j += len(zonal) / 32 {
+		for j := 0; j < len(zonal); j += max(1, len(zonal)/32) {
 			fmt.Printf(" %+.0f", zonal[j])
 		}
 		fmt.Println(" (mean east wind, m/s, south to north)")

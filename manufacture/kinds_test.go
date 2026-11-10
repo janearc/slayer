@@ -3,6 +3,7 @@ package manufacture
 import (
 	"errors"
 	"math"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -25,7 +26,10 @@ func mustMake(t *testing.T, name string, number uint64) good {
 
 // the solid kinds: everything asked for that is not a light.
 var solids = []string{"spruce", "norway", "fern", "pebble", "cobble",
-	"boulder", "log", "can", "bonfire", "home"}
+	"boulder", "log", "can", "bonfire", "home", "coast-redwood",
+	"giant-sequoia", "optical-observatory", "coast-redwood-shoot",
+	"giant-sequoia-shoot", "spitzer", "hubble", "webb",
+	"space-observatory", "palomar", "keck-i", "keck-ii", "subaru", "rubin", "elt", "griffith", "dobsonian-36", "apo-refractor-5", "sct-24", "mobile-crane", "mirror-gantry", "scaffold-tower", "service-truck", "utility-pickup", "equipment-trailer", "shipping-crate", "equipment-cabinet", "generator", "cooling-unit", "access-stairs", "work-platform", "handrail", "cable-tray", "weather-mast", "cfht", "gemini-north", "irtf", "uh-88", "ukirt", "jcmt", "sma-antenna", "sma-array", "vlba-maunakea", "panstarrs-1", "panstarrs-2", "faulkes-north", "dkist", "atlas-haleakala", "tlrs-4", "solarc", "mees-solar", "aeos", "mssc-1-6m", "mssc-twin-1-2m", "geodss", "geodss-site", "guide-star-launcher"}
 
 // one number in, a whole thing out: every kind, from forty seeds,
 // makes a thing slayer's mesh takes, already in its own looks.
@@ -67,23 +71,26 @@ func TestEveryLookIsAShareOfTheLight(t *testing.T) {
 
 func TestTheSameSeedIsTheSameThingAndAnotherIsNot(t *testing.T) {
 	for _, name := range solids {
-		if name == "can" {
-			continue // every can is the same can; see its own test
-		}
 		one, same := mustMake(t, name, 3), mustMake(t, name, 3)
 		other := mustMake(t, name, 4)
-		if len(one.parts) != len(same.parts) {
-			t.Fatalf("%s: the same seed made %d parts and then %d",
-				name, len(one.parts), len(same.parts))
+		if !reflect.DeepEqual(one.skins(), same.skins()) || !reflect.DeepEqual(one.groups, same.groups) {
+			t.Fatalf("%s: the same seed changed its surface", name)
 		}
-		for index := range one.parts {
-			if one.parts[index] != same.parts[index] {
-				t.Fatalf("%s: part %d changed for one seed",
-					name, index)
+		// Cans keep their dimensions but may change their constructed pose.
+		if name == "can" {
+			continue
+		}
+		// Telescope templates have fixed components at a declared aperture.
+		switch name {
+		case "optical-observatory", "spitzer", "hubble", "webb",
+			"space-observatory", "palomar", "keck-i", "keck-ii", "subaru", "rubin", "elt", "griffith", "dobsonian-36", "apo-refractor-5", "sct-24", "mobile-crane", "mirror-gantry", "scaffold-tower", "service-truck", "utility-pickup", "equipment-trailer", "shipping-crate", "equipment-cabinet", "generator", "cooling-unit", "access-stairs", "work-platform", "handrail", "cable-tray", "weather-mast", "cfht", "gemini-north", "irtf", "uh-88", "ukirt", "jcmt", "sma-antenna", "sma-array", "vlba-maunakea", "panstarrs-1", "panstarrs-2", "faulkes-north", "dkist", "atlas-haleakala", "tlrs-4", "solarc", "mees-solar", "aeos", "mssc-1-6m", "mssc-twin-1-2m", "geodss", "geodss-site",
+			"guide-star-launcher":
+			if !reflect.DeepEqual(other.skins(), one.skins()) {
+				t.Errorf("%s: a seed changed fixed geometry", name)
 			}
+			continue
 		}
-		if len(other.parts) == len(one.parts) &&
-			other.parts[0] == one.parts[0] {
+		if reflect.DeepEqual(other.skins(), one.skins()) && reflect.DeepEqual(other.groups, one.groups) {
 			t.Errorf("%s: another seed made the same thing", name)
 		}
 	}

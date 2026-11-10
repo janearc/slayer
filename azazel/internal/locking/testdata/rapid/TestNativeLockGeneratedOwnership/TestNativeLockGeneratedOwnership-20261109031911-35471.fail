@@ -1,0 +1,9 @@
+# 2026/11/09 03:19:11.150200 [TestNativeLockGeneratedOwnership] [rapid] draw competing holder: false
+# 2026/11/09 03:19:11.150202 [TestNativeLockGeneratedOwnership] [rapid] draw repeated attempts: 1
+# 2026/11/09 03:19:11.150205 [TestNativeLockGeneratedOwnership] free acquisition = {state:0 err:<nil>}
+# 
+v0.4.8#7359450357473866084
+0x0
+0x0
+0x0
+0x0

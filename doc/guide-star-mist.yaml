@@ -1,0 +1,90 @@
+# A small visual check, not a reconstruction of any real observatory.
+# All geometry, weather, launch width and display strength: 2026-11-07.
+# Terrain is the pinned USGS Kilauea DEM. Sodium-line context:
+# https://www2.keck.hawaii.edu/optics/lgsao/lgsbasics.html
+# The beam ends at an authored axial reach; no sodium fluorescence is modeled.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: a guide beam above a small observatory
+  renderer: gpu-native
+  seed: 11
+  light: moon
+  location: {lat: 19.413, lon: -155.25}
+  timeofday: 2300
+  moon: {azimuth: 250, altitude: 25, disc: true}
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263818
+    north: 2148752
+    across: 64
+    down: 64
+    step: 2
+  recipes:
+    compact dome:
+      kind: optical-observatory
+      enclosure:
+        kind: dome
+        diameter: {value: 12, unit: m}
+        opening: {value: 35, unit: deg}
+      telescope:
+        aperture: {value: 4, unit: m}
+        mount: alt-azimuth
+        primary: segmented
+        pointing: {azimuth: 180, altitude: 70}
+  lasers:
+    sodium launch:
+      origin:
+        object: the observatory
+        east: {value: 0, unit: m}
+        up: {value: 8.8, unit: m}
+        south: {value: 0, unit: m}
+      pointing: {azimuth: 180, altitude: 70}
+      radius: {value: 0.6, unit: m}
+      reach: {value: 150, unit: m}
+      divergence: {value: 0.02, unit: deg}
+      wavelength: {value: 589, unit: nm}
+      display-strength: 100000
+  weather:
+    grove mist:
+      kind: prescribed-mist
+      extinction: {value: 0.03, unit: m^-1}
+      depth: {value: 24, unit: m}
+      coverage: 1
+      seed: 23
+  atmosphere:
+    weather: grove mist
+    extent: terrain
+    albedo: 0.95
+  set:
+    things:
+      the observatory:
+        recipe: compact dome
+        seed: 5
+        east: 263850
+        north: 2148720
+        complexity: quick
+    stands:
+      young spruces:
+        kind: spruce
+        complexity: hull
+        count: 32
+        seed: 11
+        exclude:
+          around: the observatory
+          clearance: {value: 1, unit: m}
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    exposure: 10000000
+    wide: 55
+  cameras:
+    across the clearing:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 24
+          standoff_y: -36
+          standoff_z: 20
+      orientation: {point_to: the observatory, alpha: -20}

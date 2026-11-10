@@ -23,6 +23,11 @@ const rungs = 16
 // fresh, through cream and yellow to orange and brown as it ages; the
 // x-rays cook it here. modelled: one haze thickening, not its chemistry.
 func (body Body) Cooked(column []Layer, cooking float64) (Body, error) {
+	for _, zone := range body.zones {
+		if len(zone.column) == 0 {
+			return body, fmt.Errorf("cooking needs a top layer in every zone")
+		}
+	}
 	for _, layer := range column {
 		if layer.haze.depth > 0 && cooking > 0 {
 			body.cooked, body.cooking = layer.haze, cooking

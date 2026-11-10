@@ -1,0 +1,19 @@
+# Authored lateral camera move, 2026-11-07. The surface fire starts
+# at scene time 40 s; the camera starts at the beginning of its own move.
+$schema: https://github.com/janearc/slayer/schemas/sequence-v1.json
+scene: fire-woodland.yaml
+output: ../out/fire-camera
+fps: 24
+start: {value: 40, unit: s}
+duration: {value: 10, unit: s}
+print: {knee: 0.1, top: 100, bloom: 0.2}
+camera:
+  unit: m
+  look-at: {x: 96, y: 49, z: 96}
+  moves:
+    - from: {x: 184, y: 44, z: 110}
+      to: {x: 184, y: 44, z: 82}
+      speed: {value: 3.5, unit: m/s}
+    - from: {x: 184, y: 44, z: 82}
+      to: {x: 184, y: 44, z: 82}
+      duration: {value: 2, unit: s}

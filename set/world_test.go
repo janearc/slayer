@@ -8,7 +8,7 @@ import (
 	"github.com/janearc/slayer/set"
 )
 
-// kilaueaIki is the kīlauea iki set file, as written.
+// kilaueaIki is the kilauea iki set file, as written.
 func kilaueaIki(t *testing.T) string {
 	t.Helper()
 	source, err := os.ReadFile("testdata/kilauea-iki.yaml")
@@ -98,7 +98,7 @@ func TestASetsSunIsWhereItSays(t *testing.T) {
 	}
 }
 
-// kilaueaIkiRead is the kīlauea iki set file, read.
+// kilaueaIkiRead is the kilauea iki set file, read.
 func kilaueaIkiRead(t *testing.T) set.Set {
 	t.Helper()
 	made, err := set.Read("kilauea-iki.yaml", []byte(kilaueaIki(t)))
@@ -108,7 +108,7 @@ func kilaueaIkiRead(t *testing.T) set.Set {
 	return made
 }
 
-// rigged is the kīlauea iki set file with a rig in its film in place of
+// rigged is the kilauea iki set file with a rig in its film in place of
 // the height and the exposure.
 func rigged(t *testing.T) string {
 	t.Helper()

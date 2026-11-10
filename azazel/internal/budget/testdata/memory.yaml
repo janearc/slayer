@@ -1,0 +1,108 @@
+# Authored test examples, chosen for the memory design.
+# These are byte-ledger fixtures, not measured host memory or runtime policy.
+# Full-width values are decimal uint64 values, never floating-point numbers.
+unreserved_capacity:
+  - name: empty ledger
+    limit: 12
+    reserved: 0
+    requested: 4
+  - name: some already reserved
+    limit: 12
+    reserved: 3
+    requested: 4
+  - name: one byte remains
+    limit: 12
+    reserved: 10
+    requested: 1
+  - name: smallest reservation
+    limit: 2
+    reserved: 0
+    requested: 1
+kept_reservations:
+  - name: existing reservation consumes the gap
+    limit: 12
+    reserved: 9
+    requested: 4
+  - name: existing reservation leaves no room
+    limit: 12
+    reserved: 12
+    requested: 1
+  - name: largest possible reservation
+    limit: 18446744073709551615
+    reserved: 18446744073709551615
+    requested: 1
+  - name: request alone exceeds the limit
+    limit: 2
+    reserved: 0
+    requested: 3
+exact_fits:
+  - name: ordinary fit
+    limit: 9
+    reserved: 4
+    requested: 5
+  - name: smallest fit
+    limit: 1
+    reserved: 0
+    requested: 1
+  - name: full-width fit
+    limit: 18446744073709551615
+    reserved: 18446744073709551614
+    requested: 1
+one_byte_over:
+  - name: ordinary overcommit
+    limit: 9
+    reserved: 4
+    requested: 6
+  - name: smallest overcommit
+    limit: 1
+    reserved: 0
+    requested: 2
+  - name: full-width overcommit
+    limit: 18446744073709551615
+    reserved: 18446744073709551614
+    requested: 2
+full_width_requests:
+  - name: whole unsigned capacity
+    limit: 18446744073709551615
+    reserved: 0
+    requested: 18446744073709551615
+  - name: above signed range
+    limit: 18446744073709551615
+    reserved: 1
+    requested: 18446744073709551614
+wrapped_overcommits:
+  - name: wrap to zero
+    limit: 18446744073709551615
+    reserved: 1
+    requested: 18446744073709551615
+  - name: wrap into a small budget
+    limit: 8
+    reserved: 18446744073709551615
+    requested: 2
+  - name: wrap below a large budget
+    limit: 18446744073709551614
+    reserved: 18446744073709551613
+    requested: 5
+missing_or_broken:
+  - name: missing request
+    limit: 12
+    reserved: 3
+    requested: 0
+  - name: zero budget
+    limit: 0
+    reserved: 0
+    requested: 1
+  - name: all zero is not a grant
+    limit: 0
+    reserved: 0
+    requested: 0
+  - name: already overcommitted
+    limit: 8
+    reserved: 9
+    requested: 1
+broken_ledger_range:
+  minimum_limit: 0
+  maximum_limit: 18446744073709551614
+  overcommit: 1
+  minimum_request: 1
+  maximum_request: 18446744073709551615

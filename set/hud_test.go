@@ -7,7 +7,7 @@ import (
 	"github.com/janearc/slayer/set"
 )
 
-// hudded is the kīlauea iki set file with a hud of every kind on it.
+// hudded is the kilauea iki set file with a hud of every kind on it.
 func hudded(t *testing.T) string {
 	t.Helper()
 	const at = "  light: moon\n"

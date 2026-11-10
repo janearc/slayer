@@ -1,7 +1,7 @@
 // Package globe implements a planet-sized sphere centred at the local origin.
 // It supports views from ground level through orbital distances.
 //
-// Intersection uses the stable quadratic formula. At Earth’s radius, float64
+// Intersection uses the stable quadratic formula. At Earth's radius, float64
 // resolves the hit to roughly a nanometre; the stable form also handles larger
 // scales. Tests compare with 200-bit arithmetic.
 package globe

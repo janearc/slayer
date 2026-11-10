@@ -1,0 +1,284 @@
+# a fictional grove on the measured Kilauea DEM.
+# these are introduced redwoods, not a claim about local vegetation.
+# front speed, fade, geometry, temperatures, line strengths and shared smoke
+# power/footprint are authored. Na I air wavelengths are from NIST's linked
+# strong-line table (R56); powers are not the handbook's relative intensities.
+# the Douglas-fir smoke coefficients are a proxy; see fire-recipes.md.
+# aggregate smoke follows faded active fuel, without transported burn history.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: a prescribed fire front in a fictional moonlit grove
+  renderer: gpu-native
+  volume-lighting: cached
+  seed: 7
+  light: moon
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 2300
+  moon:
+    azimuth: 115
+    altitude: 28
+    disc: false
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263716
+    north: 2148844
+    across: 192
+    down: 192
+    step: 2
+  recipes:
+    wood fire:
+      kind: fire
+      layout:
+        pattern: cluster
+        count: 24
+        radius:
+          value: 2.4
+          unit: m
+        height-variation: 0.5
+      flame:
+        radius:
+          value: 0.85
+          unit: m
+        height:
+          value: 6
+          unit: m
+        absorption:
+          value: 0.6
+          unit: m^-1
+        temperature:
+          value: 1900
+          unit: K
+        edge-temperature:
+          value: 1100
+          unit: K
+        intermittency-start: 0.06
+        temperature-profile: hot-tongues
+        composition:
+          continuum: 0.85
+          lines:
+          - species: Na I
+            wavelength:
+              value: 588.995
+              unit: nm
+            radiance:
+              value: 0.0005
+              unit: W/m^2/sr
+            convention: air
+            source: https://physics.nist.gov/PhysRefData/Handbook/Tables/sodiumtable2.htm
+          - species: Na I
+            wavelength:
+              value: 589.5924
+              unit: nm
+            radiance:
+              value: 0.00025
+              unit: W/m^2/sr
+            convention: air
+            source: https://physics.nist.gov/PhysRefData/Handbook/Tables/sodiumtable2.htm
+      sparks:
+        rate:
+          value: 160
+          unit: s^-1
+        lifetime:
+          value: 4
+          unit: s
+        radius:
+          value: 0.025
+          unit: m
+        release-height:
+          value: 4
+          unit: m
+        launch-speed:
+          value: 10
+          unit: m/s
+        spread:
+          value: 3
+          unit: m/s
+        updraft:
+          value: 8
+          unit: m/s
+        drag-time:
+          value: 0.8
+          unit: s
+        gravity:
+          value: 9.80665
+          unit: m/s^2
+        temperature:
+          value: 1650
+          unit: K
+        end-temperature:
+          value: 900
+          unit: K
+      light-cells: 4
+      smoke:
+        heat-release:
+          value: 4000
+          unit: kW
+        convective-fraction: 0.71
+        soot-yield: 0.0024
+        combustion:
+          value: 21
+          unit: MJ/kg
+        mass-extinction:
+          value: 10.6
+          unit: m^2/g
+        air-temperature:
+          value: 288
+          unit: K
+        air-density:
+          value: 1.2
+          unit: kg/m^3
+        height:
+          value: 35
+          unit: m
+        albedo: 0.3
+    tree fire:
+      kind: fire
+      flame:
+        radius:
+          value: 0.8
+          unit: m
+        height:
+          value: 20
+          unit: m
+        absorption:
+          value: 0.25
+          unit: m^-1
+        temperature:
+          value: 1800
+          unit: K
+        edge-temperature:
+          value: 950
+          unit: K
+        intermittency-start: 0.06
+        temperature-profile: hot-tongues
+      sparks:
+        rate:
+          value: 3
+          unit: s^-1
+        lifetime:
+          value: 3
+          unit: s
+        radius:
+          value: 0.025
+          unit: m
+        release-height:
+          value: 10
+          unit: m
+        launch-speed:
+          value: 8
+          unit: m/s
+        spread:
+          value: 3
+          unit: m/s
+        updraft:
+          value: 6
+          unit: m/s
+        drag-time:
+          value: 0.8
+          unit: s
+        gravity:
+          value: 9.80665
+          unit: m/s^2
+        temperature:
+          value: 1650
+          unit: K
+        end-temperature:
+          value: 900
+          unit: K
+      light-cells: 3
+      smoke:
+        heat-release:
+          value: 20000
+          unit: kW
+        convective-fraction: 0.71
+        soot-yield: 0.0024
+        combustion:
+          value: 21
+          unit: MJ/kg
+        mass-extinction:
+          value: 10.6
+          unit: m^2/g
+        air-temperature:
+          value: 288
+          unit: K
+        air-density:
+          value: 1.2
+          unit: kg/m^3
+        height:
+          value: 65
+          unit: m
+        albedo: 0.3
+  weather:
+    wind:
+      from:
+        value: 270
+        unit: deg
+      speed:
+        value: 2
+        unit: m/s
+  set:
+    things:
+      the fire:
+        recipe: wood fire
+        seed: 5
+        east: 263812
+        north: 2148748
+    stands:
+      the grove:
+        kind: coast-redwood
+        complexity: clumps
+        count: 500
+        seed: 11
+        exclude:
+          around: the fire
+          clearance:
+            value: 25
+            unit: m
+  film:
+    width: 3840
+    height: 2160
+    rays: 1
+    exposure: 400
+  cameras:
+    by the fire:
+      location:
+        loc_relative:
+          object: the fire
+          standoff_x: -8
+          standoff_y: -15
+          standoff_z: 2
+      orientation:
+        point_to: the fire
+        alpha: 8
+  fire-fronts:
+    the passing front:
+      stand: the grove
+      recipe: tree fire
+      from: the fire
+      bearing:
+        value: 90
+        unit: deg
+      speed:
+        value: 1.5
+        unit: m/s
+      starts:
+        value: 20
+        unit: s
+      burn-duration:
+        value: 12
+        unit: s
+      fade-time:
+        value: 2
+        unit: s
+      group-width:
+        value: 24
+        unit: m
+      ignition-height:
+        value: 0
+        unit: m
+      smoke-radius:
+        value: 12
+        unit: m

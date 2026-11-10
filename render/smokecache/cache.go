@@ -1,6 +1,6 @@
 // Package smokecache caches smoke renders and their comparison results.
 //
-// The key includes the executable’s hash, the contents of declared input files,
+// The key includes the executable's hash, the contents of declared input files,
 // smoke number, dimensions, sampling, and sensor. The executable captures the
 // compiled dependencies, Go version, and platform. Checkout commits are
 // recorded for inspection but do not affect the key.

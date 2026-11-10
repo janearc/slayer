@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// kilauea is the usgs's 2019 model of kīlauea on this machine's shelf,
+// kilauea is the usgs's 2019 model of kilauea on this machine's shelf,
 // unpacked, or the test is skipped: it is 1.9 gb and never in the
 // repository.
 func kilauea(t *testing.T) *Raster {
@@ -44,7 +44,7 @@ func TestKilaueaIsWhereItsFilesSay(t *testing.T) {
 	}
 }
 
-// kīlauea iki's crater, a window 600 m across about 264.8 km e and
+// kilauea iki's crater, a window 600 m across about 264.8 km e and
 // 2,147.8 km n: every height inside the model's own range (its
 // metadata: -1.02 m to 1,305.66 m), and the crater a hundred metres
 // and more below its rim.

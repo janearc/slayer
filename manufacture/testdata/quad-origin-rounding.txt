@@ -1,0 +1,22 @@
+Dome quad area regression, Darwin/ARM64, Go 1.26.10
+
+5fc3e660024485a4ca5d3946e1e040fae9c2fa90
+62ac7543e5456cde1101ca2cb69c21e2483c887b4268bae08be8e38143e21597  manufacture/observatory.go
+
+    diagnostic_quad_cross_origin_search_test.go:78: sides=20 side=12 radius=6.033938143083053e-07 first=1.0000000000000002e-14 second=1e-14 points=[4]maths.Vec{maths.Vec{X:-1.0155281874295332e-07, Y:5.738616189901016e-07, Z:1.5637762755888684e-07}, maths.Vec{X:-1.4178449253735503e-07, Y:5.738616189901016e-07, Z:1.2109539657439408e-07}, maths.Vec{X:0, Y:6.033938143083053e-07, Z:0}, maths.Vec{X:0, Y:6.033938143083053e-07, Z:0}}
+
+The input comes from the optical recipe's clumps-level dome: 20 sides,
+side 12, opening 30 degrees, radius 6.033938143083053e-7 metres. The
+second triangle collapses at the axial pole. Exact rational arithmetic
+on the actual binary64 coordinates places the first triangle strictly
+above the authored cross-product magnitude floor of binary64(1e-14).
+
+Changing the cross-product subtraction origin rounds its computed
+magnitude down to the floor and discards that triangle. The fixed test
+uses exact squared cross magnitude, avoiding a rounded square root.
+
+To reproduce, copy find_quad_origin_test.go into manufacture,
+run go test -count=1 -v -run
+'^TestDiagnosticFindQuadCrossOriginBoundary$' ./manufacture,
+then remove that temporary copy. The search is retained as a producer;
+the fixed regression has no search or random seed.

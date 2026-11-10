@@ -1,0 +1,78 @@
+# Authored GPU views and acceptance, 2026-11-07.
+width: 63
+height: 63
+samples: 1
+wide: 45
+seed: 5
+tolerance: 0.005
+minimum: 0.1
+views:
+- design: spitzer
+  aperture: 0.85
+  eye:
+    x: 7
+    y: 5
+    z: -10
+  target:
+    x: 0
+    y: 2
+    z: 0
+  source:
+    at:
+      x: -4
+      y: 8
+      z: -8
+    toward:
+      x: 0
+      y: 1
+      z: 0
+    strength:
+      r: 32
+      g: 32
+      b: 32
+- design: hubble
+  aperture: 2.4
+  eye:
+    x: 20
+    y: 14
+    z: -25
+  target:
+    x: 0
+    y: 6
+    z: 0
+  source:
+    at:
+      x: -10
+      y: 25
+      z: -15
+    toward:
+      x: 0
+      y: 1
+      z: 0
+    strength:
+      r: 128
+      g: 128
+      b: 128
+- design: webb
+  aperture: 6.6
+  eye:
+    x: 20
+    y: 18
+    z: -27
+  target:
+    x: 0
+    y: 4
+    z: 0
+  source:
+    at:
+      x: -6
+      y: 25
+      z: -15
+    toward:
+      x: 0
+      y: 1
+      z: 0
+    strength:
+      r: 256
+      g: 256
+      b: 256

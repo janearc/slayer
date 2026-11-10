@@ -10,6 +10,7 @@ import "C"
 
 import (
 	"errors"
+	"math"
 	"runtime"
 	"time"
 	"unsafe"
@@ -73,6 +74,9 @@ func OpenSession(source string, kernels ...string) (*Session, error) {
 func (s *Session) Buffer(count int) (Buffer, error) {
 	if s.ctx == nil {
 		return Buffer{}, errors.New("metal: the session is closed")
+	}
+	if count < 0 || count > math.MaxInt/4 {
+		return Buffer{}, errors.New("metal: invalid session buffer size")
 	}
 	var why [1024]C.char
 	index := C.slayer_session_buffer(s.ctx, C.long(count*4), &why[0],

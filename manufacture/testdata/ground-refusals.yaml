@@ -1,0 +1,7 @@
+# Invalid authored row: enclosure is finite, aperture has the wrong sign.
+# The first bearing tube must report its radius refusal to the caller.
+diameter: 40
+height: 43
+aperture: -1
+seed: 5
+detail: quick

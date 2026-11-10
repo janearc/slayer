@@ -1,0 +1,39 @@
+MeshGroup hierarchy equivalence: layout and geometric answers
+
+The public group promises a collection of bounded member surfaces and
+nearest ray/surface answers. Members returns placements without exposing
+its mutable slice; it does not promise the caller's input order, and the
+constructor already permutes members while splitting. Exact ties between
+equidistant surfaces do not prescribe which component wins.
+
+Each surviving split variant still permutes all input indices, keeps
+members and boxes aligned, partitions a nonempty range into two nonempty
+ranges, and unions the same child/member boxes. Leaf cutoffs 3/4/5 and the
+one-third median retain a finite hierarchy. Axis and sort-direction choices
+change partition shape, not membership or any bound's enclosed geometry.
+The sort with <= may order equal centres differently, but every sorting
+operation still permutes indices and the recursion remains range-bounded.
+
+The pruning removals do more member tests, but preserve the same finite
+candidate set and use each exact member hitter's original near/far window.
+Nearest >= at equal box distance can skip only candidates no closer than
+the current best; changing strict improvement to <= chooses another tied
+nearest component. All valid tied components satisfy the geometric promise.
+
+These operations change performance/layout and unspecified tie choice,
+not promised geometry. Go group nodes are not the GPU hierarchy: GPU
+encoding rebuilds its own sorted hierarchy from Members. Keep this limit
+explicit; this is not an assertion that all variants have equal speed.
+
+The NewMeshGroup count>0 to >=0 change only adds CornerNormals(0) for an
+empty nonnil mesh. A public zero Mesh is flat, so CornerNormals returns
+false before indexing. A nonempty smooth Mesh comes only from New, which
+already requires faces. The later zero-count guard still refuses emptiness.
+
+Production checkpoint: c51ba95eeb50b32c04e1136994e60c9cd98faf34
+Toolchain: Go 1.26.10, Darwin/ARM64
+
+Source SHA256:
+79f6006c54669b3410f6a8f36fbe9cdbafc9408c057a7014b82d5be9f3654db1  scene/shape/group.go
+e247f15393285bd25f2828c5797a70e4e5d71ec5cbed7cc607562839b87206eb  mesh/mesh.go
+

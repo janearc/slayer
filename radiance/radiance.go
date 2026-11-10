@@ -1,5 +1,5 @@
 // Package radiance models spectral radiance in watts per square metre,
-// steradian, and nanometre, including thermal emission through Planck’s law.
+// steradian, and nanometre, including thermal emission through Planck's law.
 package radiance
 
 import (

@@ -243,6 +243,7 @@ func throughIn(scene staged, ray maths.Ray, far float64,
 	keep, added := 1.0, 0.0
 	across := crossings(scene.volumes, ray, far)
 	steps := stepping(across, strides)
+	steps.refine = scene.beams.Ray(ray, far)
 	// the march stops on the test the eye's march stops on
 	for shows(maths.Grey(keep)) {
 		step, found := steps.next()

@@ -1,0 +1,32 @@
+Compiled needle orientation domain, Darwin/ARM64, Go 1.26.10
+
+3b6c57330882b44229bae051129138548acdd045
+fc25a9705565794b1531d3069fbd25b61b5dd479548ae5d0638e39a98067fd18  manufacture/needled_shoot.go
+9cd329c58f44cbed1761659055ee64c9604c0ba297b2f8a8882126a5b6c92d2b  manufacture/needled-shoot.yml
+
+=== RUN   TestDiagnosticNeedleVolumeSignsAcrossThePrototypeDomain
+    diagnostic_needle_volume_domain_test.go:44: needles=29322 closed-surfaces=58644 minimum-six-volume=4.5009001857683491e-10
+--- PASS: TestDiagnosticNeedleVolumeSignsAcrossThePrototypeDomain (0.02s)
+PASS
+ok  	github.com/janearc/slayer/manufacture	0.219s
+
+Only prototype constructs these private needle surfaces in production.
+Its public key domain is styles 1/2, bins 0..4, variants 0/1.
+The producer exhausts all twenty plans: 29322 needles, 58644 closed
+surfaces. Every tested signed six-volume is strictly positive; minimum
+4.5009001857683491e-10. Both open clump surfaces return before this code.
+
+The producer checks the root of the first two faces and all vertices of
+the first face as volume origins. The returned surface may already have
+its winding reversed. Reversing the last two vertices of every triangle
+negates its triple product; checking both first-face side vertices covers
+the origin selection on either side of that reversal. The alternative
+origins therefore have the same nonzero sign before the reversal too.
+Only the sign controls output; no computed volume is stored.
+
+To reproduce, copy needle_volume_domain_sample_test.go into manufacture,
+run go test -count=1 -v -run
+'^TestDiagnosticNeedleVolumeSignsAcrossThePrototypeDomain$' ./manufacture,
+then remove the temporary copy. Review the finite domain again if its
+caller, key domain or embedded parameters change. This establishes three
+isolated operation equivalences, not botanical or experimental validity.

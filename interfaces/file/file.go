@@ -3,6 +3,7 @@ package file
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"errors"
 	"image"
 	"image/png"
@@ -64,16 +65,35 @@ func PNG(path string, img image.Image, pixel float64) error {
 		return errNoPicture
 	}
 	bw, bh := Block(pixel)
-	var made bytes.Buffer
-	if err := png.Encode(&made, Grow(img, bw, bh)); err != nil {
+	return writePNG(path, Grow(img, bw, bh), png.Encoder{})
+}
+
+// writePNG makes the image whole before atomically replacing the target.
+func writePNG(path string, img image.Image, encoder png.Encoder) error {
+	raw, err := pngBytes(img, encoder)
+	if err != nil {
 		return err
 	}
+	return writePNGBytes(path, raw)
+}
+
+// pngBytes completes encoding before an output file is touched.
+func pngBytes(img image.Image, encoder png.Encoder) ([]byte, error) {
+	var made bytes.Buffer
+	if err := encoder.Encode(&made, img); err != nil {
+		return nil, err
+	}
+	return made.Bytes(), nil
+}
+
+// writePNGBytes commits already encoded bytes beside the target.
+func writePNGBytes(path string, raw []byte) error {
 	beside, err := os.CreateTemp(filepath.Dir(path),
 		"."+filepath.Base(path)+".")
 	if err != nil {
 		return err
 	}
-	_, err = beside.Write(made.Bytes())
+	_, err = beside.Write(raw)
 	err = errors.Join(err, beside.Chmod(0o644), beside.Close())
 	if err == nil {
 		err = os.Rename(beside.Name(), path)
@@ -82,4 +102,32 @@ func PNG(path string, img image.Image, pixel float64) error {
 		os.Remove(beside.Name())
 	}
 	return err
+}
+
+// SequencePNG writes an RGBA frame with fast lossless compression.
+// It keeps every decoded pixel while trading file size for encoding time,
+// and avoids the redundant one-by-one Grow copy used by the general writer.
+func SequencePNG(path string, img *image.RGBA) error {
+	if img == nil {
+		return errNoPicture
+	}
+	return writePNG(path, img, png.Encoder{CompressionLevel: png.BestSpeed})
+}
+
+// SequencePNGHash atomically writes a fast lossless frame and returns the
+// SHA-256 of the encoded bytes it committed. A failed write returns no digest.
+// Resume manifests can record the expected bytes without rereading a path
+// that another process might change after the commit.
+func SequencePNGHash(path string, img *image.RGBA) ([sha256.Size]byte, error) {
+	if img == nil {
+		return [sha256.Size]byte{}, errNoPicture
+	}
+	raw, err := pngBytes(img, png.Encoder{CompressionLevel: png.BestSpeed})
+	if err != nil {
+		return [sha256.Size]byte{}, err
+	}
+	if err := writePNGBytes(path, raw); err != nil {
+		return [sha256.Size]byte{}, err
+	}
+	return sha256.Sum256(raw), nil
 }

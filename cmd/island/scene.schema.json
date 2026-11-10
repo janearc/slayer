@@ -1,0 +1,881 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "island-scene-v1.json",
+  "title": "Sourced spherical island study",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "height-model",
+    "radius-metres",
+    "anchor",
+    "sources",
+    "raster-budget",
+    "region",
+    "detail",
+    "camera",
+    "film",
+    "sun",
+    "ground-rgb",
+    "sky-rgb",
+    "ocean",
+    "exposure"
+  ],
+  "properties": {
+    "landcover-transition-metres": {
+      "type": "number", "minimum": 0, "maximum": 1000
+    },
+    "height-model": {
+      "const": "authored-radial-offsets"
+    },
+    "radius-metres": {
+      "type": "number",
+      "minimum": 1000000,
+      "maximum": 10000000
+    },
+    "anchor": {
+      "$ref": "#/$defs/location"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "file",
+          "sha256",
+          "geographic-crs",
+          "height-datum",
+          "height-offset-metres"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "geographic-crs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "height-datum": {
+            "type": "string",
+            "minLength": 1
+          },
+          "height-offset-metres": {
+            "type": "number",
+            "minimum": -10000,
+            "maximum": 10000
+          }
+        }
+      }
+    },
+    "raster-budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cache-total-bytes",
+        "cache-tiles-per-source",
+        "tile-bytes",
+        "metadata-bytes"
+      ],
+      "properties": {
+        "cache-total-bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 268435456
+        },
+        "cache-tiles-per-source": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2048
+        },
+        "tile-bytes": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 33554432
+        },
+        "metadata-bytes": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 16777216
+        },
+        "height-index": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "block-side",
+            "total-bytes"
+          ],
+          "properties": {
+            "block-side": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            },
+            "total-bytes": {
+              "type": "integer",
+              "minimum": 9,
+              "maximum": 16777216
+            }
+          }
+        }
+      }
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "west",
+        "south",
+        "east",
+        "north"
+      ],
+      "properties": {
+        "west": {
+          "$ref": "#/$defs/longitude"
+        },
+        "east": {
+          "$ref": "#/$defs/longitude"
+        },
+        "south": {
+          "$ref": "#/$defs/latitude"
+        },
+        "north": {
+          "$ref": "#/$defs/latitude"
+        }
+      }
+    },
+    "detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "patches",
+        "evaluations",
+        "depth",
+        "side",
+        "points",
+        "cell-pixels",
+        "minimum-height-metres",
+        "maximum-height-metres"
+      ],
+      "properties": {
+        "normal-step": {
+          "type": "object", "additionalProperties": false,
+          "required": ["longitude-deg", "latitude-deg"],
+          "properties": {
+            "longitude-deg": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+            "latitude-deg": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+          }
+        },
+        "patches": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "evaluations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16384
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "side": {
+          "enum": [
+            3,
+            5,
+            9,
+            17,
+            33,
+            65
+          ]
+        },
+        "points": {
+          "type": "integer",
+          "minimum": 9,
+          "maximum": 524288
+        },
+        "cell-pixels": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10000
+        },
+        "minimum-height-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 10000
+        },
+        "maximum-height-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 10000
+        }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "at",
+        "look-at",
+        "near-metres"
+      ],
+      "properties": {
+        "at": {
+          "$ref": "#/$defs/location"
+        },
+        "look-at": {
+          "$ref": "#/$defs/location"
+        },
+        "near-metres": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000
+        }
+      }
+    },
+    "film": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height",
+        "rays",
+        "wide-deg"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3840
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2160
+        },
+        "rays": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "wide-deg": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 160
+        }
+      }
+    },
+    "sun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "azimuth-deg",
+        "altitude-deg",
+        "strength-rgb"
+      ],
+      "properties": {
+        "azimuth-deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "altitude-deg": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "strength-rgb": {
+          "$ref": "#/$defs/light"
+        }
+      }
+    },
+    "ground-rgb": {
+      "$ref": "#/$defs/reflectance"
+    },
+    "sky-rgb": {
+      "$ref": "#/$defs/light"
+    },
+    "ocean": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "height-metres",
+        "colour-rgb",
+        "gloss",
+        "index"
+      ],
+      "properties": {
+        "height-metres": {
+          "type": "number",
+          "minimum": -1000,
+          "maximum": 1000
+        },
+        "colour-rgb": {
+          "$ref": "#/$defs/reflectance"
+        },
+        "gloss": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "index": {
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 2
+        }
+      }
+    },
+    "exposure": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1000
+    },
+    "landcover": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/height-band"
+      }
+    },
+    "site": {
+      "$ref": "#/$defs/site"
+    },
+    "time-seconds": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 86400
+    },
+    "secondary-ray-reference-metres": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1000000
+    }
+  },
+  "$defs": {
+    "longitude": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "latitude": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "longitude-deg",
+        "latitude-deg",
+        "height-metres"
+      ],
+      "properties": {
+        "longitude-deg": {
+          "$ref": "#/$defs/longitude"
+        },
+        "latitude-deg": {
+          "$ref": "#/$defs/latitude"
+        },
+        "height-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 1000000
+        }
+      }
+    },
+    "reflectance": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "light": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1000
+      }
+    },
+    "local-bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min-east",
+        "min-south",
+        "max-east",
+        "max-south"
+      ],
+      "properties": {
+        "min-east": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 20000
+        },
+        "min-south": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 20000
+        },
+        "max-east": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 20000
+        },
+        "max-south": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 20000
+        }
+      }
+    },
+    "geographic-point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "longitude-deg",
+        "latitude-deg"
+      ],
+      "properties": {
+        "longitude-deg": {
+          "$ref": "#/$defs/longitude"
+        },
+        "latitude-deg": {
+          "$ref": "#/$defs/latitude"
+        }
+      }
+    },
+    "height-band": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "below-metres",
+        "colour-rgb"
+      ],
+      "properties": {
+        "below-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 10000
+        },
+        "colour-rgb": {
+          "$ref": "#/$defs/reflectance"
+        }
+      }
+    },
+    "site-object": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "kind",
+        "seed",
+        "detail",
+        "east-metres",
+        "south-metres",
+        "above-metres",
+        "heading-deg"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "detail": {
+          "enum": [
+            "hull",
+            "clumps",
+            "quick",
+            "demo"
+          ]
+        },
+        "east-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 20000
+        },
+        "south-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 20000
+        },
+        "above-metres": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "heading-deg": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360
+        }
+      }
+    },
+    "forest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "seed",
+        "bounds-metres",
+        "cell-metres",
+        "density-per-hectare",
+        "variety",
+        "mixture",
+        "minimum-height-metres",
+        "maximum-height-metres",
+        "clearance-metres",
+        "maximum-radius-metres",
+        "maximum-tree-height-metres",
+        "detail-thresholds-pixels",
+        "aggregate-colour-rgb"
+      ],
+      "properties": {
+        "adaptive-regions": {"type": "boolean"},
+        "aggregate-area-samples-side": {"type": "integer", "minimum": 8, "maximum": 128},
+        "minimum-geometry-detail": {"enum": ["hull", "clumps", "crown"]},
+        "height-fade-metres": {"type": "number", "minimum": 0, "maximum": 20000},
+        "edge-fade-metres": {"type": "number", "minimum": 0, "maximum": 20000},
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bounds-metres": {
+          "$ref": "#/$defs/local-bounds"
+        },
+        "cell-metres": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "density-per-hectare": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "variety": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "mixture": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "weight"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "minLength": 1
+              },
+              "weight": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1000000
+              }
+            }
+          }
+        },
+        "minimum-height-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 10000
+        },
+        "maximum-height-metres": {
+          "type": "number",
+          "minimum": -20000,
+          "maximum": 10000
+        },
+        "clearance-metres": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "maximum-radius-metres": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "maximum-tree-height-metres": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "detail-thresholds-pixels": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1000000
+          }
+        },
+        "aggregate-colour-rgb": {
+          "$ref": "#/$defs/reflectance"
+        }
+      }
+    },
+    "mist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bounds-metres",
+        "base-metres",
+        "depth-metres",
+        "extinction-per-metre",
+        "coverage",
+        "seed",
+        "wind-metres-per-second",
+        "colour-rgb",
+        "floor-side",
+        "floor-tolerance-metres",
+        "floor-iterations"
+      ],
+      "properties": {
+        "edge-fade-metres": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20000
+        },
+        "bounds-metres": {
+          "$ref": "#/$defs/local-bounds"
+        },
+        "base-metres": {
+          "type": "number",
+          "minimum": -10000,
+          "maximum": 10000
+        },
+        "depth-metres": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4000
+        },
+        "extinction-per-metre": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wind-metres-per-second": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number",
+            "minimum": -100,
+            "maximum": 100
+          }
+        },
+        "colour-rgb": {
+          "$ref": "#/$defs/reflectance"
+        },
+        "floor-side": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 129
+        },
+        "floor-tolerance-metres": {
+          "type": "number",
+          "minimum": 1.0e-06,
+          "maximum": 1
+        },
+        "floor-iterations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        }
+      }
+    },
+    "lasers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origins-metres",
+        "azimuth-deg",
+        "altitude-deg",
+        "radius-metres",
+        "reach-metres",
+        "divergence-deg",
+        "wavelength-nm",
+        "display-strength",
+        "visible-launchers"
+      ],
+      "properties": {
+        "origins-metres": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "number",
+              "minimum": -10000,
+              "maximum": 10000
+            }
+          }
+        },
+        "azimuth-deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "altitude-deg": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "radius-metres": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 10
+        },
+        "reach-metres": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 200000
+        },
+        "divergence-deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "wavelength-nm": {
+          "type": "number",
+          "minimum": 380,
+          "maximum": 780
+        },
+        "display-strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "visible-launchers": {
+          "type": "boolean"
+        }
+      }
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "at",
+        "light-exposure",
+        "objects",
+        "budget"
+      ],
+      "properties": {
+        "at": {
+          "$ref": "#/$defs/geographic-point"
+        },
+        "light-exposure": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000
+        },
+        "objects": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/site-object"
+          }
+        },
+        "forest": {
+          "$ref": "#/$defs/forest"
+        },
+        "lasers": {
+          "$ref": "#/$defs/lasers"
+        },
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cells",
+            "candidates",
+            "instances",
+            "prototype-faces"
+          ],
+          "properties": {
+            "cells": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "candidates": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2000000
+            },
+            "instances": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200000
+            },
+            "prototype-faces": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2000000
+            }
+          }
+        },
+        "atmosphere": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/mist"
+          }
+        }
+      }
+    }
+  }
+}

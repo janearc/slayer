@@ -1,0 +1,4 @@
+# Authored host resource ceilings, not measured ocean properties.
+wave-cells: 1048576
+image-pixels: 8294400
+shore-cells: 1048576
