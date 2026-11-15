@@ -32,6 +32,10 @@ type Polar struct {
 	Axis    maths.Vec
 	Cone    float64
 	Precess time.Duration
+	// SpinPhase and PrecessPhase are turns added to where the clock has
+	// the spin and the precession, so music can place them; nought is
+	// where the clock alone has them.
+	SpinPhase, PrecessPhase float64
 }
 
 // Poles are where the two beams point at a time. The spin axis wanders
@@ -40,9 +44,11 @@ type Polar struct {
 // second pole is the first's opposite turned by Offset.
 func (polar Polar) Poles(at time.Duration) (maths.Vec, maths.Vec) {
 	axis := polar.Axis.Unit()
-	spin := tilted(axis, polar.Cone, share(at, polar.Precess))
-	north := tilted(spin, polar.Tilt, share(at, polar.Spin))
-	south := tilted(north.Neg(), polar.Offset, share(at, polar.Spin)+0.25)
+	spin := tilted(axis, polar.Cone,
+		share(at, polar.Precess)+polar.PrecessPhase)
+	turned := share(at, polar.Spin) + polar.SpinPhase
+	north := tilted(spin, polar.Tilt, turned)
+	south := tilted(north.Neg(), polar.Offset, turned+0.25)
 	return north, south
 }
 
@@ -83,6 +89,10 @@ type Beams struct {
 	Clock    *time.Duration
 	strength maths.Light
 }
+
+// Strength is the beams' light along a pole at one unit of distance, as the
+// three channels maths.Light carries.
+func (beams Beams) Strength() maths.Light { return beams.strength }
 
 // Light is what reaches a point from the beams at the clock's time: the
 // way toward the star, how far past its surface, and the light, by the

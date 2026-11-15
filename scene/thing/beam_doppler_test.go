@@ -32,7 +32,7 @@ func TestBeamBoostIsDeltaCubed(t *testing.T) {
 		{"the lower jet at the eye", maths.Up.Neg(), maths.V(0, -1, 0), 8},
 		{"the lower jet away from it", maths.Up, maths.V(0, -1, 0), 0.125},
 	} {
-		if got := b.Boost(c.toward, c.at); math.Abs(got-c.want) > 1e-12*c.want {
+		if got := b.Boost(c.toward, c.at); !(math.Abs(got-c.want) <= 1e-12*c.want) {
 			t.Errorf("%s: %v, want %v", c.name, got, c.want)
 		}
 	}
@@ -92,7 +92,7 @@ func TestARoundBeamBoostsByItsFlowThere(t *testing.T) {
 	}{
 		{maths.V(0, 0, -1), 8}, {maths.V(0, 0, 1), 0.125}, {maths.Up, 0.512},
 	} {
-		if got := b.Boost(c.toward, at); math.Abs(got-c.want) > 1e-12*c.want {
+		if got := b.Boost(c.toward, at); !(math.Abs(got-c.want) <= 1e-12*c.want) {
 			t.Errorf("seen along %v the boost is %v, want %v", c.toward, got, c.want)
 		}
 	}
@@ -170,7 +170,7 @@ func TestARoundFlowSlowsByTheSquareRootAndIsHeld(t *testing.T) {
 		{Beam{Speed: 0.4, Round: true}, maths.V(4, 0, 0), 0.4},
 		{Beam{Speed: 0.4, Round: true}, maths.V(0.01, 0, 0), 0.4},
 	} {
-		if _, got := c.b.Flow(c.at); math.Abs(got-c.want) > 1e-12 {
+		if _, got := c.b.Flow(c.at); !(math.Abs(got-c.want) <= 1e-12) {
 			t.Errorf("%+v at %v flows at %v, want %v", c.b, c.at, got, c.want)
 		}
 	}

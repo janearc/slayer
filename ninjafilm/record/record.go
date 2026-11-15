@@ -4,6 +4,7 @@ package record
 
 import (
 	"errors"
+	"math"
 
 	"github.com/janearc/libtheme-css/spaces/ok"
 	"github.com/janearc/slayer/maths"
@@ -65,6 +66,25 @@ func (layer Record) Window() maths.Light { return layer.window }
 
 // Image is the lamps the developed record blocks.
 func (layer Record) Image() maths.Light { return layer.image }
+
+// Clearest is the density the developed record holds in each lamp where
+// endless light fell. It is the least of its curve, in the lamps its
+// image blocks.
+func (layer Record) Clearest() maths.Light {
+	return layer.image.Scale(layer.tone.Least())
+}
+
+// Passed is the share of each lamp that a density lets through. It is
+// ten to the minus density.
+func Passed(density maths.Light) maths.Light {
+	return maths.RGB(passed(density.R), passed(density.G),
+		passed(density.B))
+}
+
+// passed is the share of one lamp that a density lets through.
+func passed(density float64) float64 {
+	return math.Exp(-density * math.Ln10)
+}
 
 // exposure is how strongly a light exposes the record against the
 // middle grey. One is the middle of its curve. White light exposes

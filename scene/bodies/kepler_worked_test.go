@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/thing"
@@ -42,6 +43,18 @@ func massFor(years, metres float64) float64 {
 		(6.6743e-11 * seconds * seconds)
 }
 
+// mooned is a star of a mass wearing one moon on an orbit, for the
+// orbit tests: the moon itself is nominal.
+func mooned(t *testing.T, mass, orbitKm, phase float64) bodies.Body {
+	t.Helper()
+	moon, err := bodies.NewMoon(made(t, "m", bodies.Star, 1, 1),
+		bodies.Kilometres(orbitKm), measure.Radians(phase))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return made(t, "sun", bodies.Star, 1, mass, moon)
+}
+
 // Omega is 2 pi over kepler's period: the sun's mass at one astronomical
 // unit comes round in a sidereal year, and the earth's at the
 // geostationary radius in a sidereal day.
@@ -51,40 +64,25 @@ func massFor(years, metres float64) float64 {
 // thousandth more on the radius is three parts in two thousand off in
 // the rate, and shows.
 func TestOmegaIsKeplersAtTheEarthsOrbitAndTheGeostationaryOne(t *testing.T) {
-	sun := bodies.Body{Name: "sun", Mass: bodies.Sun}
-	near(t, "the sun's omega at one au", sun.Omega(auKm), 2*math.Pi/siderealYear, 5e-4)
-	earth := bodies.Body{Name: "earth", Mass: earthMass}
-	near(t, "the earth's omega at 42,164 km", earth.Omega(geoKm), 2*math.Pi/siderealDay, 1e-4)
+	sun := made(t, "sun", bodies.Star, 1, bodies.Sun)
+	near(t, "the sun's omega at one au", sun.Omega(bodies.Kilometres(auKm)), 2*math.Pi/siderealYear, 5e-4)
+	earth := made(t, "earth", bodies.Star, 1, earthMass)
+	near(t, "the earth's omega at 42,164 km", earth.Omega(bodies.Kilometres(geoKm)), 2*math.Pi/siderealDay, 1e-4)
 }
 
 // Omega at other radii and masses is 2 pi / T, T from r^3 / GM, to the last few
 // digits. a body of under a kilogram has one, and so has a radius of under a
 // kilometre: they are rates, not zero.
 func TestOmegaOfSmallMassesAndRadiiIsKeplersToo(t *testing.T) {
-	near(t, "half a kilogram at a kilometre", (&bodies.Body{Mass: 0.5}).Omega(1),
+	half := made(t, "b", bodies.Star, 1, 0.5)
+	near(t, "half a kilogram at a kilometre", half.Omega(bodies.Kilometres(1)),
 		omega(0.5, 1), 1e-12)
-	near(t, "a sun at half a kilometre", (&bodies.Body{Mass: bodies.Sun}).Omega(0.5),
+	sun := made(t, "b", bodies.Star, 1, bodies.Sun)
+	near(t, "a sun at half a kilometre", sun.Omega(bodies.Kilometres(0.5)),
 		omega(bodies.Sun, 0.5), 1e-12)
+	earth := made(t, "b", bodies.Star, 1, earthMass)
 	near(t, "the earth at ten thousand kilometres",
-		(&bodies.Body{Mass: earthMass}).Omega(1e4), omega(earthMass, 1e4), 1e-12)
-}
-
-// Omega is zero where there is no orbit to go round: a body with no mass or
-// less, or a radius of zero or less. a body of no mass at a radius so small its
-// cube is under what a float holds is zero too, and not zero over zero.
-func TestOmegaOfNothingIsNothing(t *testing.T) {
-	for name, c := range map[string]struct{ mass, km float64 }{
-		"no mass":          {0, 1000},
-		"no mass, a speck": {0, 1e-120},
-		"negative mass":    {-1, 1000},
-		"no radius":        {bodies.Sun, 0},
-		"negative radius":  {bodies.Sun, -1000},
-		"neither":          {0, 0},
-	} {
-		if got := (&bodies.Body{Mass: c.mass}).Omega(c.km); got != 0 {
-			t.Errorf("%s: omega is %v", name, got)
-		}
-	}
+		earth.Omega(bodies.Kilometres(1e4)), omega(earthMass, 1e4), 1e-12)
 }
 
 // the sun's schwarzschild radius, r_s = 2GM/c^2, is 2.95325 km by the
@@ -106,10 +104,13 @@ func TestSchwarzschildOfTheSunAndTheEarth(t *testing.T) {
 // world's units, the body's north (the tilt takes up to +z), kepler's
 // period, the moon's phase, and locks it.
 func TestAMoonsOrbitIsKeplersAboutTheBodysNorth(t *testing.T) {
-	sun := bodies.Body{Name: "sun", Mass: bodies.Sun, Tilt: math.Pi / 2,
-		Moons: []bodies.Moon{{Body: bodies.Body{Name: "earth"}, Orbit: auKm, Phase: 0.25 * math.Pi}}}
+	sun := mooned(t, bodies.Sun, auKm, 0.25*math.Pi).
+		Turning(0, measure.Radians(math.Pi/2))
 	at := maths.V(1, 2, 3)
-	o := sun.Orbit(0, at, 0.5)
+	o, err := sun.Orbit(0, at, 0.5)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if o.Centre != at {
 		t.Errorf("the orbit is round %v, not %v", o.Centre, at)
 	}
@@ -128,10 +129,13 @@ func TestAMoonsOrbitIsKeplersAboutTheBodysNorth(t *testing.T) {
 // the body in the moon's own space is the same a quarter and a half
 // of the way round as at the start. an unlocked one would not.
 func TestALockedMoonKeepsOneFaceToItsBody(t *testing.T) {
-	sun := bodies.Body{Name: "sun", Mass: bodies.Sun, Tilt: 0.3,
-		Moons: []bodies.Moon{{Body: bodies.Body{Name: "earth"}, Orbit: auKm, Phase: 1.25}}}
+	sun := mooned(t, bodies.Sun, auKm, 1.25).
+		Turning(0, measure.Radians(0.3))
 	at := maths.V(1, 2, 3)
-	o := sun.Orbit(0, at, 1e-8)
+	o, err := sun.Orbit(0, at, 1e-8)
+	if err != nil {
+		t.Fatal(err)
+	}
 	face := func(t time.Duration) maths.Vec {
 		s := o.At(t)
 		return s.Orientation.In(at.Sub(s.Origin))
@@ -146,10 +150,12 @@ func TestALockedMoonKeepsOneFaceToItsBody(t *testing.T) {
 // the body's north. a moon at phase zero is on +x, and a quarter of a period on
 // it is on -z, the radius out; half a period on, -x.
 func TestAMoonGoesRoundProgradeFromXTowardMinusZ(t *testing.T) {
-	sun := bodies.Body{Name: "sun", Mass: bodies.Sun,
-		Moons: []bodies.Moon{{Body: bodies.Body{Name: "earth"}, Orbit: auKm}}}
+	sun := mooned(t, bodies.Sun, auKm, 0)
 	at := maths.V(1, 2, 3)
-	o := sun.Orbit(0, at, 1e-8)
+	o, err := sun.Orbit(0, at, 1e-8)
+	if err != nil {
+		t.Fatal(err)
+	}
 	r := auKm * 1e-8
 	nearVec(t, "the moon at the start", o.At(0).Origin, at.Add(maths.V(r, 0, 0)), 1e-9)
 	nearVec(t, "a quarter on", o.At(o.Period/4).Origin, at.Add(maths.V(0, 0, -r)), 1e-9)
@@ -159,14 +165,23 @@ func TestAMoonGoesRoundProgradeFromXTowardMinusZ(t *testing.T) {
 // a moon is placed on the orbit Orbit gives it, so the moon is as
 // timed and as locked as that one is.
 func TestPlaceMovesAMoonOnItsOrbit(t *testing.T) {
-	sun := bodies.Body{Name: "sun", Mass: bodies.Sun, Tilt: 0.3,
-		Moons: []bodies.Moon{{Body: bodies.Body{Name: "earth", Kind: bodies.Star}, Orbit: auKm, Phase: 1.25}}}
+	moon, err := bodies.NewMoon(made(t, "earth", bodies.Star, 1, 1),
+		bodies.Kilometres(auKm), measure.Radians(1.25))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sun := made(t, "sun", bodies.Star, 1, bodies.Sun, moon).
+		Turning(0, measure.Radians(0.3))
 	at := maths.V(1, 2, 3)
 	w := thing.NewWorld()
 	if err := sun.Place(w, at, 1e-8, 2); err != nil {
 		t.Fatal(err)
 	}
-	if got := solidNamed(t, w, "earth").Motion; got != thing.Motion(sun.Orbit(0, at, 1e-8)) {
+	want, err := sun.Orbit(0, at, 1e-8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := solidNamed(t, w, "earth").Motion; got != thing.Motion(want) {
 		t.Errorf("the moon is on %v", got)
 	}
 }
@@ -185,13 +200,17 @@ func TestAnOrbitJustUnderTwoHundredNinetyTwoYearsIsMade(t *testing.T) {
 		made  bool
 	}{{291.999, true}, {292.001, false}} {
 		total := massFor(c.years, km*1000)
-		parent := bodies.Body{Name: "p", Kind: bodies.Star, Radius: 1, Mass: total,
-			Moons: []bodies.Moon{{Body: bodies.Body{Name: "m", Kind: bodies.Star, Radius: 1}, Orbit: km}}}
+		moon, err := bodies.NewMoon(made(t, "m", bodies.Star, 1, 1),
+			bodies.Kilometres(km), measure.Radians(0))
+		if err != nil {
+			t.Fatal(err)
+		}
+		parent := made(t, "p", bodies.Star, 1, total, moon)
 		w := thing.NewWorld()
-		err := parent.Place(w, maths.Vec{}, 1e-6, 2)
-		half := bodies.Body{Name: "h", Kind: bodies.Star, Radius: 1, Mass: total / 2}
+		err = parent.Place(w, maths.Vec{}, 1e-6, 2)
+		half := made(t, "h", bodies.Star, 1, total/2)
 		pw := thing.NewWorld()
-		perr := bodies.Binary(pw, half, half, maths.Vec{}, km, 1e-6, 2)
+		perr := bodies.Binary(pw, half, half, maths.Vec{}, bodies.Kilometres(km), 1e-6, 2)
 		if c.made {
 			if err != nil || perr != nil {
 				t.Fatalf("%v years: a moon is %v, a pair %v", c.years, err, perr)
@@ -209,32 +228,21 @@ func TestAnOrbitJustUnderTwoHundredNinetyTwoYearsIsMade(t *testing.T) {
 	}
 }
 
-// a parent of no mass has no period to refuse, and its moons are not
-// timed.
-//
 // a parent of a kilogram or less, or a moon of a metre or less, is timed
 // by its own numbers all the same: half a kilogram with a moon at 1e10 km,
 // and a trillionth of a kilogram with a moon half a metre out
 // (T = 2 pi sqrt(0.125 / (G 1e-12)), about 8,600 years), are refused.
-func TestOrbitsOfNoMassAndOfSmallNumbers(t *testing.T) {
-	moon := func(km float64) []bodies.Moon {
-		return []bodies.Moon{{Body: bodies.Body{Name: "m", Kind: bodies.Star, Radius: 1}, Orbit: km}}
-	}
-	w := thing.NewWorld()
-	none := bodies.Body{Name: "none", Kind: bodies.Star, Radius: 1, Moons: moon(1e10)}
-	if err := none.Place(w, maths.Vec{}, 1e-6, 2); err != nil {
-		t.Fatalf("a parent of no mass: %v", err)
-	}
-	if p := solidNamed(t, w, "m").Motion.(thing.Orbit).Period; p != 0 {
-		t.Errorf("a moon of a parent of no mass goes round in %v", p)
-	}
+//
+// a parent of no mass cannot pass the door; its untimed moons are the
+// package's own guard to hold.
+func TestOrbitsOfSmallNumbersAreTimedAllTheSame(t *testing.T) {
 	for name, c := range map[string]struct {
 		mass, km float64
 	}{
 		"half a kilogram": {0.5, 1e10},
 		"half a metre":    {1e-12, 5e-4},
 	} {
-		b := bodies.Body{Name: "b", Kind: bodies.Star, Radius: 1, Mass: c.mass, Moons: moon(c.km)}
+		b := mooned(t, c.mass, c.km, 0)
 		if err := b.Place(thing.NewWorld(), maths.Vec{}, 1e-6, 2); err == nil ||
 			!strings.Contains(err.Error(), "292") {
 			t.Errorf("%s: %v", name, err)
@@ -246,11 +254,9 @@ func TestOrbitsOfNoMassAndOfSmallNumbers(t *testing.T) {
 // mass a float holds: G times it is under what a float holds, so timing it
 // would be zero over zero, no number, and refused.
 func TestAnOrbitOfNoRadiusRoundASpeckIsNotRefused(t *testing.T) {
-	speck := bodies.Body{Name: "speck", Kind: bodies.Star, Radius: 1,
-		Mass:  math.SmallestNonzeroFloat64,
-		Moons: []bodies.Moon{{Body: bodies.Body{Name: "m", Kind: bodies.Star, Radius: 1}}}}
+	speck := mooned(t, math.SmallestNonzeroFloat64, 0, 0)
 	w := thing.NewWorld()
 	if err := speck.Place(w, maths.Vec{}, 1e-6, 2); err != nil {
-		t.Errorf("a moon at nought round a speck: %v", err)
+		t.Errorf("a moon at zero round a speck: %v", err)
 	}
 }

@@ -13,7 +13,7 @@ import (
 // World is the set's world said piece by piece, as the tracer holds it:
 // what things are made of, the boxes and spheres made of them, the
 // lamps, spots, floods and suns that light them, the sky, the bodies,
-// the wisps of gas, and the motions that carry things.
+// the wisps of gas, the fizzes, and the motions that carry things.
 //
 // its places are in the world's unit, a metre unless it says, as a
 // map's run (x east, y north, z up), and come back in the world's space.
@@ -34,6 +34,7 @@ type World struct {
 	bodies    []Body
 	suns      []Sunlight
 	wisps     []Wisp
+	fizzes    []Fizz
 	motions   []Motion
 }
 
@@ -52,6 +53,9 @@ func (made World) Spots() []Spotlight { return slices.Clone(made.spots) }
 
 // Wisps is every wisp, in the order written.
 func (made World) Wisps() []Wisp { return slices.Clone(made.wisps) }
+
+// Fizzes is every fizz, in the order written.
+func (made World) Fizzes() []Fizz { return slices.Clone(made.fizzes) }
 
 // Motions is every motion, in the order written.
 func (made World) Motions() []Motion { return slices.Clone(made.motions) }
@@ -338,6 +342,7 @@ func (reading reader) world(_, value *yaml.Node) error {
 		"bodies":    reading.bodies,
 		"suns":      reading.suns,
 		"wisps":     reading.wisps,
+		"fizzes":    reading.fizzes,
 		"motions":   reading.motions,
 	}
 	for key, read := range steps {

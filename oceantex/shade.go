@@ -133,6 +133,25 @@ func (scene Scene) lighting() (*lighting, error) {
 	return l, nil
 }
 
+type LightingConstants struct {
+	Sun                                                              Vec
+	Sunlight, Water                                                  [3]float64
+	Index, Along, Across, WindSin, WindCos, Foam, Down               float64
+	SlopeFloor, ViewFloor, GlintGeometry, GlintTilt, FoamReflectance float64
+}
+
+// LightingConstants is the scene worked out before any pixel: the sun, the
+// colours of sunlight and water, and the sea's roughness, with the fixed
+// floors and glint and foam values the shading uses. It refuses a scene
+// whose sun is not above the horizon.
+func (scene Scene) LightingConstants() (LightingConstants, error) {
+	light, err := scene.lighting()
+	if err != nil {
+		return LightingConstants{}, err
+	}
+	return LightingConstants{Sun: light.sun, Sunlight: [3]float64(light.sunlight), Water: [3]float64(light.water), Index: light.index, Along: light.along, Across: light.across, WindSin: light.windSin, WindCos: light.windCos, Foam: light.foam, Down: light.down, SlopeFloor: slopeFloor, ViewFloor: viewFloor, GlintGeometry: glintGeometry, GlintTilt: glintTilt, FoamReflectance: FoamReflectance}, nil
+}
+
 // spread is the slope variance along a compass direction, from the
 // variances along and across the wind.
 func (l *lighting) spread(x, y float64) float64 {
@@ -170,10 +189,10 @@ func (l *lighting) seen(
 		dy := -half.Y/half.Z - slopeY
 		along := dx*l.windCos + dy*l.windSin
 		across := -dx*l.windSin + dy*l.windCos
-		chance := density(along, across, varAlong, varAcross)
+		chance := SlopeChance(along, across, varAlong, varAcross)
 		// GLUE: the two hidings are multiplied as if independent.
-		inView := 1 / ((1 + hidden(eye.Z, l.spread(eye.X, eye.Y))) *
-			(1 + hidden(l.sun.Z, l.spread(l.sun.X, l.sun.Y))))
+		inView := 1 / ((1 + Hidden(eye.Z, l.spread(eye.X, eye.Y))) *
+			(1 + Hidden(l.sun.Z, l.spread(l.sun.X, l.sun.Y))))
 		glint := Fresnel(l.sun.dot(half), l.index) * chance * inView /
 			(glintGeometry * math.Max(eye.Z, viewFloor) *
 				math.Pow(half.Z, glintTilt))

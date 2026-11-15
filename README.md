@@ -1,5 +1,14 @@
 # Slayer
 
+[Contributing](CONTRIBUTING.md) · [Testing](doc/testing.md) ·
+[Making models](doc/making-models.md) · [Azazel](doc/azazel.md)
+
+New here? Start with [Getting started](doc/getting-started.md) and
+[Building Slayer](doc/building.md), including what Game is and why we use it.
+The current [renderer](doc/renderer.md), [light](doc/light.md),
+[modes](doc/modes.md), [optimizations](doc/optimizations.md) and
+[music](doc/music.md) guides explain the larger system.
+
 ## pre-released
 
 this is my third attempt at a ray tracing/rendering kit. it is my first with
@@ -9,6 +18,11 @@ plan to change a lot about it.
 
 if you'd like help with using it or you have questions or patches, let me
 know. please expect that this will change substantially for a little while.
+
+12 november 2026: slayer is getting a little more robust and less difficult to
+use but it is still very complicated and not friendly. if you cna't figure it
+out today, that's okay, it will get better. but if you're not pretty skilled
+at golang, this is probably not the place to start your tracing journey.
 
 ## reign of bl--i mean, "what is this?"
 
@@ -24,7 +38,11 @@ should be identified as choices.
 
 ## Start here
 
-- [How Slayer works](OPERATION.md): scenes, tracing, development, and output.
+- [How Slayer works](OPERATION.md): scenes, tracing, development, and output,
+  and the `slayer` front door with its verbs.
+- [Flags](doc/flags.md), [music](doc/music.md) and [caches](doc/caches.md):
+  what departs from the exact picture, how tunes are written and chosen,
+  and what is kept between runs.
 - [Game workflow](doc/developing.md): setup, builds, runs and checks.
 - [Scenes and commands](EXAMPLES.md): smoke scenes and larger examples.
 - [Feature backlog](doc/feature-backlog.md): current plans, partial work,

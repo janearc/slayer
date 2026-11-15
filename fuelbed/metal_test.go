@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package fuelbed_test
 
@@ -27,7 +27,7 @@ func TestMetalEvolvesHeatAndFuelLikeTheReference(t *testing.T) {
 			t.Fatal(e)
 		}
 		for i, c := range got {
-			if math.Abs(c.Excess-want[i].Excess) > .1 || math.Abs(c.Fuel-want[i].Fuel) > .0001 {
+			if !(math.Abs(c.Excess-want[i].Excess) <= .1) || !(math.Abs(c.Fuel-want[i].Fuel) <= .0001) {
 				t.Fatal(at, i, c, want[i])
 			}
 		}
@@ -91,7 +91,7 @@ func TestMetalKeepsNeighbourStateAcrossMultipleThreadgroups(t *testing.T) {
 		t.Fatal(e)
 	}
 	for i, c := range got {
-		if math.Abs(c.Excess-want[i].Excess) > .1 || math.Abs(c.Fuel-want[i].Fuel) > .0001 {
+		if !(math.Abs(c.Excess-want[i].Excess) <= .1) || !(math.Abs(c.Fuel-want[i].Fuel) <= .0001) {
 			t.Fatal("threadgroup boundary", i, c, want[i])
 		}
 	}

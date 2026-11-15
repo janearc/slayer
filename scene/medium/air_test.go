@@ -15,7 +15,7 @@ func TestAir(t *testing.T) {
 	if d := a.Density(maths.V(10, 0, 0)); d != 2 {
 		t.Errorf("at the surface, %v", d)
 	}
-	if d := a.Density(maths.V(10.5, 0, 0)); math.Abs(d-2/math.E) > 1e-12 {
+	if d := a.Density(maths.V(10.5, 0, 0)); !(math.Abs(d-2/math.E) <= 1e-12) {
 		t.Errorf("a scale height up, %v", d)
 	}
 	if d := a.Density(maths.V(9, 0, 0)); d != 0 {
@@ -26,7 +26,7 @@ func TestAir(t *testing.T) {
 	}
 	down := maths.Ray{At: maths.V(0, 20, 0), Dir: maths.V(0, -1, 0)}
 	enter, _, ok := a.Span(down, 0, math.Inf(1))
-	if !ok || math.Abs(enter-(20-13)) > 1e-12 {
+	if !ok || !(math.Abs(enter-(20-13)) <= 1e-12) {
 		t.Errorf("the air's top is met at %v, %v", enter, ok)
 	}
 }

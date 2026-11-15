@@ -11,17 +11,32 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
+// tail is a door-made tail for the aiming tests.
+func tail(t *testing.T, lengthKm, baseKm, spread, curve, dense float64,
+	colour maths.Light) bodies.Tail {
+	t.Helper()
+	made, err := bodies.NewTail(km(lengthKm), km(baseKm), spread, curve,
+		bodies.PerKilometre(dense), colour, maths.Light{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return made
+}
+
 // Aim sets the sun and the trail on every tail the body has, and no
 // other part of it.
 func TestAimSetsEveryTail(t *testing.T) {
-	b := bodies.Body{Name: "c", Tails: []bodies.Tail{{Length: 1}, {Length: 2}, {Length: 3}}}
-	b.Aim(maths.V(1, 2, 3), maths.V(4, 5, 6))
-	for i, tail := range b.Tails {
-		if tail.Sun != maths.V(1, 2, 3) || tail.Trail != maths.V(4, 5, 6) {
-			t.Errorf("tail %d is aimed at %v along %v", i, tail.Sun, tail.Trail)
+	b := made(t, "c", bodies.Star, 1, 1,
+		tail(t, 1, 1, 0, 0, 0, maths.Light{}),
+		tail(t, 2, 1, 0, 0, 0, maths.Light{}),
+		tail(t, 3, 1, 0, 0, 0, maths.Light{}))
+	b = b.Aimed(maths.V(1, 2, 3), maths.V(4, 5, 6))
+	for i, streamed := range b.Tails() {
+		if streamed.Sun() != maths.V(1, 2, 3) || streamed.Trail() != maths.V(4, 5, 6) {
+			t.Errorf("tail %d is aimed at %v along %v", i, streamed.Sun(), streamed.Trail())
 		}
-		if tail.Length != float64(i+1) {
-			t.Errorf("tail %d is %v long", i, tail.Length)
+		if streamed.Length() != float64(i+1) {
+			t.Errorf("tail %d is %v long", i, streamed.Length())
 		}
 	}
 }
@@ -31,12 +46,14 @@ func TestAimSetsEveryTail(t *testing.T) {
 // the second is ragged, in wisps of three base widths, 3 x 8 x 0.5 = 12
 // units, with its own seed. the smooth one is a plain tail.
 func TestTailsAreCutToTheScale(t *testing.T) {
-	smooth := bodies.Tail{Length: 64, Base: 8, Spread: 0.125, Curve: 0.25, Dense: 0.125,
-		Colour: maths.Light{R: 0.5, G: 0.25, B: 0.125}}
-	ragged := smooth
-	ragged.Wisp, ragged.Seed = 0.25, 21
-	b := bodies.Body{Name: "c", Kind: bodies.Star, Radius: 8, Tails: []bodies.Tail{smooth, ragged}}
-	b.Aim(maths.V(-3, 0, 0), maths.V(1, 0, 1))
+	smooth := tail(t, 64, 8, 0.125, 0.25, 0.125,
+		maths.Light{R: 0.5, G: 0.25, B: 0.125})
+	ragged, err := smooth.Wisped(maths.Share(0.25), 21)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "c", bodies.Star, 8, 1, smooth, ragged)
+	b = b.Aimed(maths.V(-3, 0, 0), maths.V(1, 0, 1))
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.V(0, 4, 0), 0.5, 2); err != nil {
 		t.Fatal(err)
@@ -58,9 +75,9 @@ func TestTailsAreCutToTheScale(t *testing.T) {
 //
 // its z is x cross y, (0.8, -0.6, -0.8) over the same root.
 func TestATailIsAwayFromTheSunAndBackAlongTheTrail(t *testing.T) {
-	b := bodies.Body{Name: "c", Kind: bodies.Star, Radius: 8,
-		Tails: []bodies.Tail{{Length: 64, Base: 8, Spread: 0.125, Dense: 0.125}}}
-	b.Aim(maths.V(-3, 0, 0), maths.V(1, 0, 1))
+	b := made(t, "c", bodies.Star, 8, 1,
+		tail(t, 64, 8, 0.125, 0, 0.125, maths.Light{}))
+	b = b.Aimed(maths.V(-3, 0, 0), maths.V(1, 0, 1))
 	w := thing.NewWorld()
 	at := maths.V(0, 4, 0)
 	if err := b.Place(w, at, 0.5, 2); err != nil {
@@ -82,9 +99,9 @@ func TestATailIsAwayFromTheSunAndBackAlongTheTrail(t *testing.T) {
 // and that frame's x is +x.
 func TestATrailAlongTheTailTakesTheFramesFirstAxis(t *testing.T) {
 	for _, trail := range []maths.Vec{maths.V(0, 2, 0), maths.V(0, -2, 0)} {
-		b := bodies.Body{Name: "c", Kind: bodies.Star, Radius: 8,
-			Tails: []bodies.Tail{{Length: 64, Base: 8, Dense: 0.125}}}
-		b.Aim(maths.V(0, -5, 0), trail)
+		b := made(t, "c", bodies.Star, 8, 1,
+			tail(t, 64, 8, 0, 0, 0.125, maths.Light{}))
+		b = b.Aimed(maths.V(0, -5, 0), trail)
 		w := thing.NewWorld()
 		if err := b.Place(w, maths.V(0, 5, 0), 0.5, 2); err != nil {
 			t.Fatal(err)
@@ -103,16 +120,16 @@ func TestATrailAlongTheTailTakesTheFramesFirstAxis(t *testing.T) {
 // four nanoseconds, prograde), with a sun at (-100, 0, 0), streams along +x at
 // both times.
 func TestATailIsAimedWhereTheBodyIsAtNought(t *testing.T) {
-	b := bodies.Body{Name: "c", Kind: bodies.Star, Radius: 8,
-		Tails: []bodies.Tail{{Length: 64, Base: 8, Dense: 0.125}}}
-	b.Aim(maths.V(-100, 0, 0), maths.V(0, 0, 1))
+	b := made(t, "c", bodies.Star, 8, 1,
+		tail(t, 64, 8, 0, 0, 0.125, maths.Light{}))
+	b = b.Aimed(maths.V(-100, 0, 0), maths.V(0, 0, 1))
 	w := thing.NewWorld()
 	track := thing.Orbit{Radius: 10, Period: 4 * time.Nanosecond}
 	if err := b.PlaceOn(w, track, 0.5, 2); err != nil {
 		t.Fatal(err)
 	}
 	v := w.Volumes[0]
-	nearVec(t, "the tail's y at nought", v.At(0).Orientation.Y, maths.V(1, 0, 0), 1e-12)
+	nearVec(t, "the tail's y at zero", v.At(0).Orientation.Y, maths.V(1, 0, 0), 1e-12)
 	later := v.At(time.Nanosecond)
 	nearVec(t, "the tail's y a nanosecond on", later.Orientation.Y, maths.V(1, 0, 0), 1e-12)
 	nearVec(t, "the tail's place a nanosecond on", later.Origin, maths.V(0, 0, -10), 1e-9)

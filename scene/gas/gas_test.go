@@ -21,14 +21,14 @@ import (
 func TestAirFromItsOwnNumbers(t *testing.T) {
 	air := Air()
 	blue, red := air.Scatter(maths.Band{Nanometres: 450}), air.Scatter(maths.Band{Nanometres: 650})
-	if ratio := blue / red; math.Abs(ratio-math.Pow(650.0/450, 4)) > 1e-9 {
+	if ratio := blue / red; !(math.Abs(ratio-math.Pow(650.0/450, 4)) <= 1e-9) {
 		t.Errorf("blue scatters %v times red; the fourth power says %v", ratio, math.Pow(650.0/450, 4))
 	}
 	column := 8000.0 // the air's scale height, the column's worth at sea level density
 	// 5e-4 nm is gamma; 1e-3, the range's top, is x-ray, its top being
 	// open. by hand, 3.3e-3 a metre over 8000 metres is 26.4 radiation
 	// lengths (air's X0, 36.6 g/cm2 over 1.225e-3 g/cm3, is 299 m)
-	if g := air.Transmit(maths.Band{Nanometres: 5e-4}, column); math.Abs(math.Log(g)+26.4) > 1e-9 {
+	if g := air.Transmit(maths.Band{Nanometres: 5e-4}, column); !(math.Abs(math.Log(g)+26.4) <= 1e-9) {
 		t.Errorf("gamma through the column is %g; twenty-six radiation lengths say e to the minus 26.4", g)
 	}
 	if v := air.Transmit(maths.Band{Nanometres: 550}, column); !(v > 0.85 && v < 0.95) {
@@ -50,7 +50,7 @@ func TestAirFromItsOwnNumbers(t *testing.T) {
 			cos := -1 + (float64(i)+0.5)*2/float64(n)
 			sum += g.PhaseAt(cos) * 2 * math.Pi * 2 / float64(n)
 		}
-		if math.Abs(sum-1) > 1e-3 {
+		if !(math.Abs(sum-1) <= 1e-3) {
 			t.Errorf("the phase at asymmetry %v integrates to %v over the sphere", g.Phase, sum)
 		}
 	}
@@ -58,7 +58,7 @@ func TestAirFromItsOwnNumbers(t *testing.T) {
 		t.Errorf("haze throws %v forward and %v back", fwd, back)
 	}
 	s := air.Spectrum(1000)
-	if math.Abs(s.Passes[thing.Visible]-air.Transmit(maths.Band{Nanometres: 550}, 1000)) > 1e-12 {
+	if !(math.Abs(s.Passes[thing.Visible]-air.Transmit(maths.Band{Nanometres: 550}, 1000)) <= 1e-12) {
 		t.Errorf("the spectrum passes %v of the visible a kilometre; beer says %v", s.Passes[thing.Visible], air.Transmit(maths.Band{Nanometres: 550}, 1000))
 	}
 	if s.Passes[radiation.Gamma()] > 0.05 {
@@ -92,7 +92,7 @@ func TestALaserThroughHazeFallsByBeersLaw(t *testing.T) {
 		t.Fatalf("the beam at two is %g and at four %g", a, b)
 	}
 	k := haze.Extinction(band)
-	if got, want := math.Log(a/b), k*2; math.Abs(got-want) > 1e-9 {
+	if got, want := math.Log(a/b), k*2; !(math.Abs(got-want) <= 1e-9) {
 		t.Errorf("over two units the beam fell by %g in the log; beer's law says %g", got, want)
 	}
 	if off := Single(haze, 1, band, lamps, maths.V(2, 1, 0), maths.V(0, 0, 1), through).G; off != 0 {

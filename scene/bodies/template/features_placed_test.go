@@ -20,8 +20,8 @@ const featureSplits = 12
 // placed: only the terrain is worked out.
 func plain(t *testing.T, b bodies.Body, n int) *world.World {
 	t.Helper()
-	terrain := b.Ground.Terrain
-	terrain.Tiling = hexes.Sphere{N: n}
+	terrain := groundOf(t, b).Terrain()
+	terrain.Tiling = hexes.Sphere{Splits: n}
 	return world.New(terrain)
 }
 
@@ -29,7 +29,7 @@ func plain(t *testing.T, b bodies.Body, n int) *world.World {
 // laid under deep water by a patch as wide as the sphere.
 func drowned(t *testing.T, n int) *world.World {
 	t.Helper()
-	w := world.New(world.Terrain{Tiling: hexes.Sphere{N: n}, Seed: 1, Plates: 4,
+	w := world.New(world.Terrain{Tiling: hexes.Sphere{Splits: n}, Seed: 1, Plates: 4,
 		Features: []world.Feature{world.Patch{At: maths.XAxis, Reach: 10, Of: world.Deep}}})
 	if _, found := w.Find(maths.XAxis, world.Land); found {
 		t.Fatal("the drowned world has land")
@@ -58,10 +58,10 @@ func landNear(t *testing.T, w *world.World, toward maths.Vec) maths.Vec {
 // the oracle is the world's Find, asked here with the directions typed
 // again, on venus's own terrain at 12 splits.
 func TestVenusPutsMaxwellAndMaatWhereItIsTold(t *testing.T) {
-	b := Venus()
+	b := its(t, Venus)
 	w := plain(t, b, featureSplits)
 	step := w.Tiling.Spacing()
-	got, err := b.Ground.Features(w)
+	got, err := groundOf(t, b).Features()(w)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,10 +81,10 @@ func TestVenusPutsMaxwellAndMaatWhereItIsTold(t *testing.T) {
 // -0.5) to the unit vector of that point plus (0.5, 0, 0.2), 1.2
 // spacings wide and 0.5 deep.
 func TestMarsPutsTharsisAndTheCanyonWhereItIsTold(t *testing.T) {
-	b := Mars()
+	b := its(t, Mars)
 	w := plain(t, b, featureSplits)
 	step := w.Tiling.Spacing()
-	got, err := b.Ground.Features(w)
+	got, err := groundOf(t, b).Features()(w)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,9 +102,9 @@ func TestMarsPutsTharsisAndTheCanyonWhereItIsTold(t *testing.T) {
 // on pluto, the heart is a patch of ice on the land toward (0.2, 0.1,
 // 1), 5 spacings wide.
 func TestPlutoLaysItsHeartOfIceWhereItIsTold(t *testing.T) {
-	b := Pluto()
+	b := its(t, Pluto)
 	w := plain(t, b, featureSplits)
-	got, err := b.Ground.Features(w)
+	got, err := groundOf(t, b).Features()(w)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,10 +123,10 @@ func TestPlutoLaysItsHeartOfIceWhereItIsTold(t *testing.T) {
 // worked by hand: for k = 1 that direction is (-0.737, 0.793, 0.675),
 // which the last check holds the typed formula to.
 func TestIoPutsADozenLiveVolcanoes(t *testing.T) {
-	b := Jupiter().Moons[0].Body
+	b := its(t, Jupiter).Moons()[0].Body()
 	w := plain(t, b, featureSplits)
 	step := w.Tiling.Spacing()
-	got, err := b.Ground.Features(w)
+	got, err := groundOf(t, b).Features()(w)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +152,7 @@ func TestIoPutsADozenLiveVolcanoes(t *testing.T) {
 // this is why venus's second refusal, for maat, can not be reached when
 // the first, for maxwell, did not refuse (see .mutants).
 func TestFindOnASphereFailsOnlyWhereThereIsNoLand(t *testing.T) {
-	land, sea := plain(t, Venus(), 4), drowned(t, 4)
+	land, sea := plain(t, its(t, Venus), 4), drowned(t, 4)
 	for k := 0; k < 300; k++ {
 		x := float64(k)
 		toward := maths.V(math.Cos(x*2.4), math.Sin(x*1.3), math.Sin(x*2.4)+0.1)
@@ -174,20 +174,20 @@ func TestWithNoLandVenusMarsAndPlutoRefuseAndIoPlacesNone(t *testing.T) {
 		body bodies.Body
 		want string
 	}{
-		{Venus(), "no land for maxwell"},
-		{Mars(), "no land for the volcano"},
-		{Pluto(), "no land for the heart"},
+		{its(t, Venus), "no land for maxwell"},
+		{its(t, Mars), "no land for the volcano"},
+		{its(t, Pluto), "no land for the heart"},
 	} {
-		got, err := c.body.Ground.Features(w)
+		got, err := groundOf(t, c.body).Features()(w)
 		if err == nil || err.Error() != c.want {
-			t.Errorf("%s: error is %v, want %q", c.body.Name, err, c.want)
+			t.Errorf("%s: error is %v, want %q", c.body.Name(), err, c.want)
 		}
 		if got != nil {
-			t.Errorf("%s: placed %v along with the refusal", c.body.Name, got)
+			t.Errorf("%s: placed %v along with the refusal", c.body.Name(), got)
 		}
 	}
-	io := Jupiter().Moons[0].Body
-	got, err := io.Ground.Features(w)
+	io := its(t, Jupiter).Moons()[0].Body()
+	got, err := groundOf(t, io).Features()(w)
 	if err != nil || len(got) != 0 {
 		t.Errorf("io on a drowned world gave %v and %v, want none and no error", got, err)
 	}

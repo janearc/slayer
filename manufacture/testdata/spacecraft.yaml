@@ -37,6 +37,39 @@ profiles:
       - material: thermal shield
         ray: {at: {x: 5, y: 3, z: 0}, dir: {x: 0, y: -1, z: 0}}
         hit: true
+      # the bus hangs under the shield, on the sun's side: looking up from
+      # below the middle, the first thing met is structure
+      - material: spacecraft structure
+        ray: {at: {x: 1.2, y: -5, z: -1.2}, dir: {x: 0, y: 1, z: 0}}
+        hit: true
+      # and it is not on the cold side: a look across, between the shield
+      # and the telescope and clear of the tower, meets no structure.
+      # Before 2026-11-12 the bus sat here.
+      - material: spacecraft structure
+        ray: {at: {x: 5, y: 2.6, z: 0.8}, dir: {x: -1, y: 0, z: 0}}
+        hit: false
+      # the solar panels run aft from the bus in a row, off to one side of
+      # the aft pallet; and none is on the pallet's other side
+      - material: solar array
+        ray: {at: {x: 1.5, y: -5, z: 5}, dir: {x: 0, y: 1, z: 0}}
+        hit: true
+      - material: solar array
+        ray: {at: {x: -1.5, y: -5, z: 5}, dir: {x: 0, y: 1, z: 0}}
+        hit: false
+      # the instrument module is on the primary's back
+      - material: spacecraft structure
+        ray: {at: {x: 0.8, y: 5, z: 12}, dir: {x: 0, y: 0, z: -1}}
+        hit: true
+      # the secondary stands 7.169 m in front of the primary's vertex, at
+      # z = -8.82 for this aperture: a look across the axis there meets
+      # it, and one across the axis where it used to stand, 5.94 m out,
+      # at z = -7.59, does not
+      - material: secondary mirror
+        ray: {at: {x: -3, y: 6.5, z: -8.85}, dir: {x: 1, y: 0, z: 0}}
+        hit: true
+      - material: secondary mirror
+        ray: {at: {x: -3, y: 6.5, z: -7.59}, dir: {x: 1, y: 0, z: 0}}
+        hit: false
 invalid-apertures:
   - {value: 0, message: "invalid spacecraft"}
   - {value: -1, message: "invalid spacecraft"}

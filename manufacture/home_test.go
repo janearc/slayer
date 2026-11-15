@@ -33,7 +33,7 @@ func TestABoxIsClosedOutwardAndHoldsItsVolume(t *testing.T) {
 	if index := inward(skin, maths.V(0, 1, 0)); index >= 0 {
 		t.Errorf("face %d of a box looks inward", index)
 	}
-	if got := skin.volume(); math.Abs(got-30) > 1e-12 {
+	if got := skin.volume(); !(math.Abs(got-30) <= 1e-12) {
 		t.Errorf("a box of 3 by 2 by 5 holds %v, want 30", got)
 	}
 	wide, tall, deep, lowest := extent(skin)

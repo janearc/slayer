@@ -35,8 +35,7 @@ func TestABlurKeepsASlope(t *testing.T) {
 		t.Fatal(err)
 	}
 	for column := 8; column < 22; column++ {
-		if got := blurred.At(column, 4); math.Abs(got-3*float64(column)) >
-			1e-9 {
+		if got := blurred.At(column, 4); !(math.Abs(got-3*float64(column)) <= 1e-9) {
 			t.Errorf("column %d at %g, want %g", column, got,
 				3*float64(column))
 		}
@@ -66,7 +65,7 @@ func TestABlurRoundsAStep(t *testing.T) {
 		t.Fatal(err)
 	}
 	mid := (blurred.At(9, 1) + blurred.At(10, 1)) / 2
-	if math.Abs(mid-5) > 1e-9 {
+	if !(math.Abs(mid-5) <= 1e-9) {
 		t.Errorf("at the step %g, want 5", mid)
 	}
 	if !(blurred.At(9, 1) > 0.5 && blurred.At(9, 1) < 5) ||

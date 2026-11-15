@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
@@ -26,7 +26,7 @@ func TestFlamePaintMarkerDistinguishesDeferredAndSpatialColour(t *testing.T) {
 			Colour: maths.Grey(.2), Texture: paint, Shine: grid.shine,
 		})
 		encoded.boxedVolume(maths.Subspace{}, grid, material)
-		if len(encoded.volumes.bytes) != 13*16 {
+		if len(encoded.volumes.bytes) != 15*16 {
 			t.Fatal("flame fixture did not produce one volume record")
 		}
 		// Volume's shone int4 is lane eleven: emission first, paint second.

@@ -1,0 +1,34 @@
+# One hour of flight in thirty seconds, with no waypoint velocity resets.
+# The target stays at the observatory; the ascent and turn are authored.
+# Continuous coordinate rates do not imply constant world or angular speed.
+scene: island-observatory-preview.yaml
+interpolation: continuous
+frames: 720
+fps: 24
+scene-duration-seconds: 3600
+keyframes:
+- at-seconds: 0
+  at: {longitude-deg: -155.5021, latitude-deg: 19.80315, height-metres: 3740}
+  look-at: {longitude-deg: -155.5, latitude-deg: 19.8, height-metres: 3636}
+  wide-deg: 35
+  ease: linear
+- at-seconds: 900
+  at: {longitude-deg: -155.515, latitude-deg: 19.82, height-metres: 5200}
+  look-at: {longitude-deg: -155.5, latitude-deg: 19.8, height-metres: 3636}
+  wide-deg: 55
+  ease: linear
+- at-seconds: 1800
+  at: {longitude-deg: -155.57, latitude-deg: 19.87, height-metres: 15000}
+  look-at: {longitude-deg: -155.5, latitude-deg: 19.8, height-metres: 3636}
+  wide-deg: 65
+  ease: linear
+- at-seconds: 2700
+  at: {longitude-deg: -155.75, latitude-deg: 20.1, height-metres: 70000}
+  look-at: {longitude-deg: -155.5, latitude-deg: 19.8, height-metres: 3636}
+  wide-deg: 70
+  ease: linear
+- at-seconds: 3600
+  at: {longitude-deg: -155.85, latitude-deg: 20.3, height-metres: 300000}
+  look-at: {longitude-deg: -155.5, latitude-deg: 19.8, height-metres: 3636}
+  wide-deg: 75
+  ease: linear

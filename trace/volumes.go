@@ -6,7 +6,9 @@ import (
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/beamstep"
+	"github.com/janearc/slayer/scene/gas"
 	"github.com/janearc/slayer/scene/medium"
+	"github.com/janearc/slayer/scene/thing"
 )
 
 // passage is what a ray gathers on its way through volumes: keep, how
@@ -38,7 +40,7 @@ func untouched() passage {
 // Volumes are added up front to back, step by step: where two overlap,
 // as an aurora round a giant or clouds in air, their steps are taken in
 // turn by how far along the ray each is.
-func through(scene staged, ray maths.Ray, far float64) passage {
+func through(scene *staged, ray maths.Ray, far float64) passage {
 	return throughGain(scene, ray, far, nil, strides)
 }
 
@@ -57,11 +59,17 @@ func most(keep maths.Light) float64 {
 // throughGain is through with the volumes' light scaled by a field's
 // shift, nil for none, and a crossing cut into cuts steps, since the bent
 // march's segments are short and want few.
-func throughGain(scene staged, ray maths.Ray, far float64, gain gainer,
+func throughGain(scene *staged, ray maths.Ray, far float64, gain gainer,
 	cuts int) passage {
 	passed := untouched()
-	across := crossings(scene.volumes, ray, far)
-	gains := make([]float64, 0, len(across))
+	// the ray's own scratch, on this call's stack, so that a march
+	// through a few volumes allocates nothing and no two goroutines
+	// share it
+	var acrossRoom [roomy]crossing
+	var gainRoom [roomy]float64
+	var takenRoom, partsRoom [roomy]int
+	across := crossingsIn(acrossRoom[:0], scene.volumes, ray, far)
+	gains := gainRoom[:0]
 	for _, crossed := range across {
 		scale := 1.0
 		if gain != nil {
@@ -70,7 +78,7 @@ func throughGain(scene staged, ray maths.Ray, far float64, gain gainer,
 		}
 		gains = append(gains, scale)
 	}
-	steps := stepping(across, cuts)
+	steps := steppingIn(across, cuts, takenRoom[:], partsRoom[:])
 	steps.refine = scene.beams.Ray(ray, far)
 	for shows(passed.keep) {
 		step, found := steps.next()
@@ -172,10 +180,24 @@ const marchZero = 0
 // marchHalf is defined as the midpoint of a unit cell.
 const marchHalf = 0.5
 
+// roomy is how many crossings a march keeps in scratch on the stack
+// before it asks the heap for more.
+const roomy = 8
+
 // stepping is a stepper over the crossings, each cut into cuts steps.
 func stepping(across []crossing, cuts int) *stepper {
-	return &stepper{across: across, cuts: cuts, taken: make([]int,
-		len(across)), parts: make([]int, len(across))}
+	return steppingIn(across, cuts, nil, nil)
+}
+
+// steppingIn is stepping with the counts kept in taken and parts, which
+// MUST hold zeros, when they are as long as across; otherwise it makes
+// its own.
+func steppingIn(across []crossing, cuts int, taken, parts []int) *stepper {
+	if len(taken) < len(across) || len(parts) < len(across) {
+		taken, parts = make([]int, len(across)), make([]int, len(across))
+	}
+	return &stepper{across: across, cuts: cuts, taken: taken[:len(across)],
+		parts: parts[:len(across)]}
 }
 
 // nearest is the nearest step not yet taken, as a stride with its
@@ -238,7 +260,7 @@ func (steps *stepper) next() (stride, bool) {
 // scattered is the light a bit of volume sends toward the eye: what it
 // scatters of every lamp's light that reaches it, past the surfaces and
 // through the volumes in the way, evenly in all directions, and its glow.
-func scattered(scene staged, crossed *crossing, step stride, ray maths.Ray,
+func scattered(scene *staged, crossed *crossing, step stride, ray maths.Ray,
 	beam bool) maths.Light {
 	local, point, dir := step.local, ray.Point(step.along), ray.Dir
 	material := crossed.volume.source.Material
@@ -253,13 +275,55 @@ func scattered(scene staged, crossed *crossing, step stride, ray maths.Ray,
 	if beam {
 		sum = sum.Scale(boosted(crossed.volume, local, dir))
 	}
+	if colour == (maths.Light{}) {
+		return sum
+	}
+	// Colour is the painted medium's single-scattering albedo in the new
+	// opt-in model. Emission remains separate and is not phase-normalized.
+	phase := evenly
+	if len(scene.volumeSky) > 0 {
+		phase = thing.IsotropicPhase()
+		sum = sum.Add(colour.Times(scene.volumeSkyAt(point)))
+	}
 	facing := dir.Neg()
-	for _, one := range scene.asked(point, facing, byLight) {
+	lobe := asymmetryOf(crossed.volume.source.Medium)
+	var room [lampsAsked]lit
+	for _, one := range scene.asked(room[:], point, facing, byLight) {
 		got := scene.shadowed(one, point)
-		sum = sum.Add(colour.Times(got).Scale(evenly))
+		if lobe != 0 && !one.ambient() {
+			got = got.Scale(lobed(lobe, one.toward, dir))
+		}
+		sum = sum.Add(colour.Times(got).Scale(phase))
 	}
 	return sum
 }
+
+// lopsided is a medium that scatters more one way than another, by a
+// Henyey-Greenstein asymmetry: a mist that says one.
+type lopsided interface{ Asymmetry() float64 }
+
+// asymmetryOf is a medium's asymmetry, nought for one that scatters
+// evenly or does not say.
+func asymmetryOf(made medium.Medium) float64 {
+	if said, ok := made.(lopsided); ok {
+		return said.Asymmetry()
+	}
+	return 0
+}
+
+// lobed is how many times the even share a lopsided medium sends toward
+// the eye of a lamp's light: its lobe at the angle from the lamp's way
+// of travel, minus toward, to the eye's, minus dir, over the even
+// lobe's one in four pi. It is gas's PhaseAt, as the kernel's
+// gas_phase is, so the two tracers take the same lobe.
+func lobed(asymmetry float64, toward, dir maths.Vec) float64 {
+	cosine := toward.Unit().Neg().Dot(dir.Neg())
+	return gas.Gas{Phase: asymmetry}.PhaseAt(cosine) * fullSphere
+}
+
+// fullSphere is the solid angle of the whole sphere, four pi steradians,
+// what an even lobe's one in four pi is taken over. Defined.
+const fullSphere = 4 * math.Pi
 
 // boosted is how much brighter a bit of a volume looks for its beam,
 // toward the eye that the ray runs away from: one for a volume at rest.

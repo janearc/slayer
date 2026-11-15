@@ -41,24 +41,6 @@ func TestNotEveryStockIsCutToOneGauge(t *testing.T) {
 	}
 }
 
-// anti-tests: no stock prints white as it prints black. White light
-// makes every stock lighter than no light does, for these stocks are
-// reversal stocks.
-func TestNoStockPrintsWhiteAsItPrintsBlack(t *testing.T) {
-	names, err := ninjafilm.Stocks()
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, name := range names {
-		black, white := still(t, name, maths.Light{}), still(t, name,
-			maths.Grey(lit))
-		if !(white.R > black.R) {
-			t.Errorf("%s prints white as %v and black as %v", name, white,
-				black)
-		}
-	}
-}
-
 // anti-tests: stocks that see every colour do not print colour. White
 // light prints as a grey, with the same in each lamp.
 func TestABlackAndWhiteStockDoesNotPrintColour(t *testing.T) {

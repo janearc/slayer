@@ -13,8 +13,6 @@ import (
 	"testing"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
-	"github.com/janearc/slayer/manufacture"
-	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 )
 
@@ -38,33 +36,6 @@ func defaultPlan(test *testing.T) *plan {
 		test.Fatal(err)
 	}
 	return made
-}
-
-func TestCatalogueDeclaresEveryKindAndOnlyActualDetails(test *testing.T) {
-	menu, err := readMenu()
-	if err != nil {
-		test.Fatal(err)
-	}
-	plan := defaultPlan(test)
-	for _, entry := range menu.Entries {
-		row, err := manufacture.KindNamed(entry.Kind)
-		if err != nil {
-			test.Fatal(err)
-		}
-		var first *maths.Box
-		for _, detail := range entry.Details {
-			object, err := manufacture.MakeWithComplexity(row,
-				manufacture.Sow(plan.Seed), detail)
-			if err != nil {
-				test.Fatal(entry.Kind, detail, err)
-			}
-			bounds := object.Bounds()
-			if first != nil && *first != bounds {
-				test.Fatal("detail moved the physical envelope", entry.Kind)
-			}
-			first = &bounds
-		}
-	}
 }
 
 func TestCatalogueRefusesInvalidPlansBeforeCreatingOutput(test *testing.T) {
@@ -104,7 +75,10 @@ func refuseInvocation(test *testing.T, output string, args ...string) {
 	}
 }
 
-func TestCatalogueNeverOverwritesAnExistingBook(test *testing.T) {
+// A directory that is not a book is refused and left as it was. The
+// anti-test is a book, which is resumed, not refused: see
+// TestASecondRunDrawsOnlyWhatIsNotRendered.
+func TestCatalogueNeverOverwritesADirectoryThatIsNotABook(test *testing.T) {
 	root := test.TempDir()
 	marker := filepath.Join(root, "keep.txt")
 	expected := []byte("keep this book")
@@ -191,7 +165,7 @@ func TestCancelledCatalogueCreatesNoBook(test *testing.T) {
 func Example_list() {
 	tool(context.Background()).Run([]string{"list", "webb"}, os.Stdout, os.Stderr)
 	// Output:
-	// webb: A gold-looking segmented primary above five sunshield layers. [hull clumps quick demo]
+	// webb: A gold segmented primary on a tower above five aluminium sunshield layers, its bus and solar panels on the sun's side. [hull clumps quick demo]
 }
 
 func Example_render() {

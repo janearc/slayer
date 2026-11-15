@@ -1,0 +1,27 @@
+{
+	// the same score with no chords at all: the second pulse is a quiet
+	// copy of the lead two thirds of a beat late, flat and panned away.
+	// the harmony is left to the bass and the echo's overlap.
+	"name": "tape-echo",
+	"machine": "gameboy",
+	"channels": [
+		{"kind": "pulse", "role": "lead", "duty": 0.25, "volume": 0.75,
+		 "pan": "left",
+		 "envelope": {"attack": 0.02, "decay": 0.5, "sustain": 0.5,
+		              "release": 0.35},
+		 "vibrato": {"rate": 4.5, "depth": 12, "delay": 0.35}},
+		{"kind": "pulse", "echo": "lead", "delay": "2/3", "gain": 0.4,
+		 "detune": -9, "duty": 0.5, "pan": "right",
+		 "envelope": {"attack": 0.04, "decay": 0.5, "sustain": 0.5,
+		              "release": 0.5}},
+		{"kind": "wave", "role": "bass", "table": "triangle",
+		 "envelope": {"attack": 0, "decay": 0.6, "sustain": 0.5,
+		              "release": 0.1}},
+		{"kind": "noise", "role": "perc", "hits": {
+			"k": {"shift": 7, "divisor": 4, "decay": 0.12, "volume": 0.8},
+			"s": {"shift": 4, "divisor": 2, "decay": 0.25, "volume": 0.45},
+			"h": {"shift": 1, "divisor": 0, "decay": 0.03, "volume": 0.2}
+		}}
+	],
+	"drop": ["pad"]
+}

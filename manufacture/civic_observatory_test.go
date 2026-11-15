@@ -108,8 +108,8 @@ func (data civicContract) checkObjective(test *testing.T, parts []thing.Thing) {
 		}
 		diameterError := math.Abs(radius + radius - data.ObjectiveDiameter)
 		if diameterError > data.Tolerance ||
-			math.Abs(near) > data.Tolerance ||
-			math.Abs(far-data.ObjectiveThickness) > data.Tolerance {
+			!(math.Abs(near) <= data.Tolerance) ||
+			!(math.Abs(far-data.ObjectiveThickness) <= data.Tolerance) {
 			test.Fatal("wrong objective aperture or pose",
 				radius, near, far)
 		}

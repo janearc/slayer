@@ -26,18 +26,18 @@ type Set struct {
 	Baked      bool
 	Resolution int
 	// Skip steps a ray over the empty space inside a medium's bounds.
-	// Declared; no effect until render/trace takes it.
+	// Declared; no effect until trace takes it.
 	Skip bool
 	// Distance takes fewer noise octaves where a sample is far from
-	// the eye. Declared; no effect until render/trace takes it.
+	// the eye. Declared; no effect until trace takes it.
 	Distance bool
 	// Once evaluates density once a sample and shares it across bands.
-	// Declared; no effect until render/trace takes it.
+	// Declared; no effect until trace takes it.
 	Once bool
 	// Cutoff stops a ray the moment what is left of its light cannot
 	// change a pixel after the tone curve, Threshold saying where; the
 	// error is bounded by the remainder. Declared; no effect until
-	// render/trace takes it in place of its own fixed faintness.
+	// trace takes it in place of its own fixed faintness.
 	Cutoff bool
 }
 

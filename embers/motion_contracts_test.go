@@ -96,13 +96,13 @@ func TestLaunchJitterIsCentredBoundedAndIndependentByAxisAndBirth(t *testing.T) 
 	}
 	for axis := range 3 {
 		mean, variance := sums[axis]/count, squares[axis]/count-math.Pow(sums[axis]/count, 2)
-		if math.Abs(mean) > .06 || math.Abs(variance-1.0/3) > .04 || low[axis] > -.95 || high[axis] < .95 {
+		if !(math.Abs(mean) <= .06) || !(math.Abs(variance-1.0/3) <= .04) || low[axis] > -.95 || high[axis] < .95 {
 			t.Fatalf("axis %d mean %g variance %g range [%g,%g]", axis, mean, variance, low[axis], high[axis])
 		}
 	}
 	for index, pair := range [][2]int{{0, 1}, {1, 2}, {2, 0}} {
 		covariance := products[index]/count - sums[pair[0]]*sums[pair[1]]/(count*count)
-		if math.Abs(covariance) > .03 {
+		if !(math.Abs(covariance) <= .03) {
 			t.Fatalf("launch axes %v share correlated jitter: %g", pair, covariance)
 		}
 	}

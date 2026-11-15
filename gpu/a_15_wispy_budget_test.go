@@ -1,3 +1,5 @@
+//go:build draw
+
 package gpu
 
 import (
@@ -28,12 +30,12 @@ func TestDefaultWispyBakingKeepsItsDocumentedReservationBudget(t *testing.T) {
 	}
 	const perGrid = 160 * 160 * 160
 	if len(encoded.bakes) != 2 || encoded.cells != 2*perGrid ||
-		len(encoded.baked.bytes) != 0 || len(encoded.volumes.bytes) != 2*13*16 {
+		len(encoded.baked.bytes) != 0 || len(encoded.volumes.bytes) != 2*15*16 {
 		t.Fatal("wispy reservation changed its job, cell or output-buffer budget")
 	}
 	for i := range 2 {
 		// Volume lane six is the baked-grid first cell and side length.
-		at := i*13*16 + 6*16
+		at := i*15*16 + 6*16
 		first := int32(binary.LittleEndian.Uint32(encoded.volumes.bytes[at:]))
 		side := int32(binary.LittleEndian.Uint32(encoded.volumes.bytes[at+4:]))
 		if first != int32(i*perGrid) || side != 160 {

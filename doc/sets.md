@@ -6,7 +6,7 @@ diffed and handed to anyone without reading go.
 it says what a scene wants, at whatever level the scene knows it: a
 hillside by its terrain and its stands of trees, a planet by its air,
 or a house box by box. the set package reads it and checks every
-value; the owner of each part builds it.
+value; the package each part belongs to builds it.
 
 sets/shoebox.yaml is the house under saturn, its world piece by piece,
 and house draws it. sets/kilauea-iki.yaml and the others are hillsides
@@ -16,6 +16,39 @@ the later [ecosystem subset](observatory-ecosystem.md) adds recipes,
 complexity and prescribed weather. its bundled schema covers only that
 subset; the legacy fields below remain available without `$schema`.
 
+a set may name one of two schemas in `$schema`: version 1, the schema
+above, or version 2 (`set/ecosystem-v2.schema.json`), which has all of
+version 1 and adds scenes set in space, bodies in orbit, and cameras that
+move. one reader takes both and checks a file against the schema it names.
+
+a feature of version 2 that the reader keeps and no stage draws yet is
+refused by hillside by name, with the file, the key and where it stands,
+before anything is staged.
+
+two are drawn. `setting: space` is drawn by hillside's stage for a scene
+in space (hillside/afloat.go), and a film's `fps` is read and has no use
+in a still. sets/webb-at-l2.yaml is the example: smoke 50 as a set.
+
+a scene in space:
+
+- has no ground and no air. its sky is black unless its world half says
+  one.
+- stands each thing, a kind the manufactory makes, at its east, north
+  and height in metres from the scene's origin, and turns it by its
+  heading or not at all.
+- is lit by `light: sun`, one distant lamp from `sun:` at any altitude,
+  as bright as sunlight at the earth at the film's exposure; or by
+  `light: none`, no lamp.
+- is seen by a fixed camera, `location.at` and `orientation.look_at`,
+  or one placed off a thing.
+- refuses by name stands, texts, ecosystems, fire fronts, fuel beds,
+  layers of air, a planet, a burning thing and a recipe.
+
+every other version 2 key is still refused by name: the date, the
+frame, an anchor, a globe, a sky of stars, an orbit, an attitude, an
+eye, a camera's moves and duration, and the kinds point, star, lantern,
+culture-orbital and nebula.
+
 ## what a set says
 
 everything is under scene:
@@ -23,13 +56,45 @@ everything is under scene:
 - name: the scene's name.
 - light: ambient, moon or sun.
 - location: lat and lon, in degrees. timeofday: hhmm, on a local clock.
-- terrain: the ground, a window of a published elevation model.
+- terrain: the ground, a window of a published elevation model. the
+  set names it: `from` is the dataset's key in sources.yaml, `file` the
+  file of it that is read from the shelf.
+
+  slayer downloads nothing unless asked; a set whose terrain or moon
+  face is not on the shelf fails and names the flag. `--fetch-terrain`
+  fetches what is missing, checks it against sources.yaml and draws.
+  `--refresh-terrain` fetches again and replaces a file only with a
+  good one. `--check-terrain` downloads nothing, says whether the shelf
+  is the source's and draws nothing.
 - film: the picture's width, height and rays, its exposure, how wide it
   sees; or a rig, a frame, a lens and a shutter. and a print.
+  sections, under film, says how its frames are drawn in pieces:
+  - over: the width in pixels a frame must be wider than (320).
+  - size: a section's side in pixels (64).
+  - keep: whether a section that cannot have changed since the last
+    frame is kept from it (true). false draws every section of every
+    frame, to check the kept ones against.
+  - drift: how far a kept section may be from the frame drawn whole (0):
+    the share of a volume's light from the lamps that did not change
+    that the lamps that did may come to. with a drift, a ring a far fire
+    barely lights is kept; with none it is drawn again.
 - cameras: each by its name. see cameras, below.
 - moon, sun: where each stands in the sky, by azimuth and altitude.
 - planet, hud: a planet seen from its air, and what is drawn over the
   picture. go doc ./set Planet and Hud say what they take.
+- fantasy: what the scene states that the physics does not say. each
+  key departs from the measured or derived value, and the render prints
+  a line for each one. a flag of the same name given on the command line
+  stands over its key. the keys:
+  - lake: still water up to this elevation, in metres from zero; zero
+    is no lake.
+  - lakeglow: true shows the lake as a glowing mask of the water.
+  - moon: the moon's disc this many times its size, above zero.
+  - moonglow: the moon's disc gives this many times its light, zero or
+    more.
+  - giants: the rim's named trees this many times taller, above zero.
+  - close: the close spruces this many times taller, above zero.
+  - closeglow: true shows the close spruces as a glowing mask.
 - world: the world piece by piece. see the world, below.
 - set: the bounded box, the assets, the manufactory's things and
   stands, and the texts.
@@ -136,6 +201,15 @@ said here to be its own to leave out.
   ball of gas thinning from its middle to its radius, ragged by noise:
   seed makes it its own, scale sizes the wisps, amount is how much of
   the density they take, colour what it gives back of the light.
+- fizzes: colour, foot, radius, height, thick, rise, churn, seed;
+  source. the mist of bubbles too small to see: a column on its foot,
+  radius wide there and twice that at its top, height tall, thick at
+  the foot's middle and thinning to nothing at its side and its top.
+
+  churn is how much of the density the water's churn takes, nought to
+  one, and rise how fast the churn climbs, in units a second: a fizz
+  drawn at two moments is two pictures. with a churn of nought or a
+  rise of nought it stands still. sets/fizz.yaml is one.
 
 a colour is linear light in srgb's primaries, each part not below
 nought, or one of slayer's swatches by its name:
@@ -180,7 +254,7 @@ measurement once the comment above it has scrolled away.
    refuses with the place it was written.
 3. found: a name one piece uses must be another's: a camera's asset, a
    box's or a sphere's material, a sphere's motion.
-4. built: the owner of each part builds it from the set. stage builds
+4. built: the package each part belongs to builds it from the set. stage builds
    the world for the tracer, and refuses what the tracer cannot hold: a
    black body too cold to see, a box too thin to have faces, a comet at
    its own sun.

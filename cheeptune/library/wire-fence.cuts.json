@@ -1,0 +1,28 @@
+{
+	"group": "tense and sparse",
+	"mood": "tense and watchful",
+	"feeling": "Someone is watching from the dark and has not moved yet.",
+	"intent": "A stealth sequence, a slow approach to a locked building, a thriller title.",
+	"listen_for": "The silence at 0:19 before everything comes back harder at 0:24.",
+	"voicing": "@overdrive-dmg",
+	"tempo": 100,
+	"meter": 4,
+	"seconds": 36.0,
+	"parts": [
+		{"name": "watch", "bar": 1, "second": 0.0,
+		 "change": "a bass pulse, a few drum hits and a hinting lead",
+		 "feels": "Waiting, hair on end"},
+		{"name": "stalk", "bar": 5, "second": 9.6,
+		 "change": "a tom pattern and stabs join",
+		 "feels": "Closing the distance"},
+		{"name": "hush", "bar": 9, "second": 19.2,
+		 "change": "everything stops for two bars",
+		 "feels": "Dead silent: a held breath"},
+		{"name": "again", "bar": 11, "second": 24.0,
+		 "change": "the bass runs in eighths and the lead is full",
+		 "feels": "Spotted: run"},
+		{"name": "cut", "bar": 15, "second": 33.6,
+		 "change": "one chord and a kick",
+		 "feels": "Frozen"}
+	]
+}

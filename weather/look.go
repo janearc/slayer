@@ -181,3 +181,30 @@ func (made *Weather) Clock() float64 { return made.clock }
 
 // Fastest is the fastest wind on the grid, metres a second.
 func (made *Weather) Fastest() float64 { return made.fastest() }
+
+// Cells is the grid's size: how many cells around, and how many rows from
+// wall to wall.
+func (made *Weather) Cells() (across, rows int) {
+	return made.grid.across, made.grid.rows
+}
+
+// Wall is the latitude, in radians, the grid's rows stand inside of.
+func (made *Weather) Wall() float64 { return made.grid.limit }
+
+// planetaryVorticity is how many times a planet's spin its own vorticity
+// is, defined: a body turning rigidly has a vorticity of twice its spin.
+const planetaryVorticity = 2
+
+// Fields are the weather's three numbers a cell, row by row from the south:
+// the latitude its air came from in radians, its vorticity over twice the
+// planet's spin, and its age in seconds, each as At reads them between
+// cells. The lists are copies.
+func (made *Weather) Fields() (origin, spin, age []float64) {
+	origin = append([]float64(nil), made.origin...)
+	age = append([]float64(nil), made.age...)
+	spin = make([]float64, len(made.vorticity))
+	for at, each := range made.vorticity {
+		spin[at] = each / (planetaryVorticity * made.spin)
+	}
+	return origin, spin, age
+}

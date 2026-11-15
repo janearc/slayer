@@ -84,8 +84,7 @@ func TestALiftOnlyRaises(t *testing.T) {
 		maths.V(0.2, 3, -1)}
 	made := mustMesh(t, corners, [][3]int{{0, 1, 2}}, bowl, true)
 	met, point := landed(t, made, 1.2, 1.3)
-	if got := made.Lifted(met, point); math.Abs(got.Sub(point).Len()) >
-		1e-12 {
+	if got := made.Lifted(met, point); !(math.Abs(got.Sub(point).Len()) <= 1e-12) {
 		t.Errorf("in a bowl, moved to %v from %v", got, point)
 	}
 }

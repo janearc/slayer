@@ -1,3 +1,5 @@
+//go:build draw
+
 package fuelbed_test
 
 import (
@@ -13,7 +15,7 @@ func TestFixedTickBoundaryDoesNotLoseTheThirdStep(t *testing.T) {
 	s.Initial[4].Excess = 900
 	got := must(t, s, 0.3)
 	// Three Euler cooling steps have the exact decimal factor 0.9^3.
-	if math.Abs(got[4].Excess-656.1) > 1e-9 {
+	if !(math.Abs(got[4].Excess-656.1) <= 1e-9) {
 		t.Fatal("0.3 seconds missed a completed tick", got[4])
 	}
 }

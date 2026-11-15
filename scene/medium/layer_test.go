@@ -89,7 +89,7 @@ func TestLayerAdvectsWithoutChangingTheOriginalFrame(test *testing.T) {
 	for _, probe := range data.Advection.Probes {
 		before := layer.Density(probe)
 		at := probe.Add(shift)
-		if math.Abs(moved.Density(at)-before) > data.Tolerance {
+		if !(math.Abs(moved.Density(at)-before) <= data.Tolerance) {
 			test.Fatal("wind did not carry the noise field", probe)
 		}
 		energy += before

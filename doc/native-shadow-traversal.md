@@ -76,8 +76,8 @@ The capability check currently follows shader compilation; unsupported hardware
 may first report a compilation error. The measurements below are from the
 Apple M3 Max.
 
-The current acceptance is perceptual. The owner clarified on 2026-11-03 that
-matching bits is not the priority for fast rendering.
+The current acceptance is perceptual. Since 2026-11-03, matching bits is not
+the priority for fast rendering.
 
 Use the existing still budget of two percent of pixels beyond one JND; report
 worst error as well. Motion stability remains a separate check before accepting

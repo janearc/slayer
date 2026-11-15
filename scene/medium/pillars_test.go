@@ -45,7 +45,7 @@ func TestPillarsHaveTipsAndFilaments(t *testing.T) {
 		t.Fatalf("%d tips", len(tips))
 	}
 	for _, tip := range tips {
-		if tip.Y < 5 || tip.Y > 10 || math.Abs(tip.X) > 5 || math.Abs(tip.Z) > 5 {
+		if tip.Y < 5 || tip.Y > 10 || !(math.Abs(tip.X) <= 5) || !(math.Abs(tip.Z) <= 5) {
 			t.Errorf("a tip at %v", tip)
 		}
 		if d := p.Density(tip.Add(maths.V(0, -1.5, 0))); d < 0.3 {

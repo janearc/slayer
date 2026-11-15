@@ -90,12 +90,26 @@ Later versions separated the rings radially, made outer rings narrower
 and faster, settled on twelve rings, added tumbling, and introduced
 moving polar beams.
 
+## Zappy
+
+The lantern with beams at the middle of the orbital's far view has a
+name: zappy. The brief: "we started with lantern and we moved our way
+to zappy with lots of collaborative design." It is a star of 9,000 km in
+twelve shells of blue-black glass panels that tumble, with two beams
+from its poles that spin every 1.5 seconds and precess every 5.
+
+Zappy is defined once, in package `lantern`, beside the lantern it grew
+from: `lantern.Zappy()` gives its values, read from `lantern/zappy.yaml`
+with who picked each, and `Place` puts it in a world with a clock for its
+beams. The orbital's far view builds its middle from it, and the named
+scene `zappy` draws it alone, in a thin haze so the beams show.
+
 ## Scene configuration
 
 The snapshot builds a `Lantern` value in Go. `swarm` exposes settings such
 as `-orbits`, `-panels`, `-wide`, `-wear`, `-glass`, `-spread`, `-fastest`,
-`-narrowest`, `-from`, and `-at`. The orbital scene configures its lantern
-inside `farView`.
+`-narrowest`, `-from`, and `-at`. The orbital scene's far view places zappy,
+below.
 
 A proposed set-file representation, a list in the world, is:
 

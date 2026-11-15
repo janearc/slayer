@@ -20,20 +20,9 @@ import (
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/gpu"
 	"github.com/janearc/slayer/interfaces/file"
-	"github.com/janearc/slayer/lantern"
-	"github.com/janearc/slayer/maths"
-	"github.com/janearc/slayer/render/colour"
 	"github.com/janearc/slayer/render/frame"
-	"github.com/janearc/slayer/render/trace"
-	"github.com/janearc/slayer/scene/medium"
-	"github.com/janearc/slayer/scene/sky"
-	"github.com/janearc/slayer/scene/thing"
-)
-
-// the swarm in units of the star's radius: a haze to fourteen
-const (
-	star = 1.0
-	haze = 14.0
+	"github.com/janearc/slayer/scene/named"
+	"github.com/janearc/slayer/trace"
 )
 
 // asked is what the command was asked to draw, and how
@@ -86,22 +75,37 @@ func parse() asked {
 // main parses, builds the swarm, draws it and saves it
 func main() {
 	given := parse()
-	world, count, err := swarm(given)
+	scene, err := named.Get("swarm")
 	if err != nil {
 		fail(err)
 	}
-	fmt.Printf("%d panels on %d orbits\n", count, given.orbits)
+	built, err := scene.Build(given.with(), os.Stdout)
+	if err != nil {
+		fail(err)
+	}
+	fmt.Printf("%d panels on %d orbits\n", given.orbits*given.panels,
+		given.orbits)
 	start := time.Now()
-	drawn, err := draw(world, given)
+	drawn, err := draw(built, scene.Defaults(), given)
 	if err != nil {
 		fail(err)
 	}
-	if err := save(drawn, given.out); err != nil {
+	if err := save(drawn, scene.Defaults(), given.out); err != nil {
 		fail(err)
 	}
 	fmt.Printf("%s: %dx%d, %d rays a pixel, %v\n", given.out, given.width,
 		given.height, given.samples*given.samples,
 		time.Since(start).Round(time.Second))
+}
+
+// with is the scene's parameters as the flags give them; -wide is the
+// scene's band-width and -from its distance.
+func (given asked) with() map[string]any {
+	return map[string]any{"orbits": given.orbits,
+		"panels": given.panels, "band-width": given.wide,
+		"wear": given.wear, "glass": given.glass,
+		"distance": given.away, "spread": given.spread,
+		"narrowest": given.narrowest, "fastest": given.fastest}
 }
 
 // fail says what went wrong and stops
@@ -110,57 +114,24 @@ func fail(err error) {
 	os.Exit(1)
 }
 
-// swarm is the world: the lantern, a star of radius one in its swarm,
-// and the haze its light shows in
-func swarm(given asked) (*thing.World, int, error) {
-	world := thing.NewWorld()
-	world.Sky = sky.Stars{Dark: maths.RGB(0.002, 0.002, 0.004), Seed: 7}
-	count, err := lantern.Lantern{Radius: star, Orbits: given.orbits,
-		Panels: given.panels, Kelvin: 4800, Green: 38, Wide: given.wide,
-		Wear: given.wear, Turn: time.Minute,
-		Skin:   lantern.BlackGlass(given.glass),
-		Lining: lantern.Matte(given.glass),
-		Shells: lantern.Shells{Spread: given.spread,
-			Fastest: given.fastest, Narrowest: given.narrowest},
-	}.Place(world)
-	if err != nil {
-		return nil, 0, err
-	}
-	world.AddVolume(hazeAround())
-	return world, count, nil
-}
-
-// hazeAround is the haze the shafts show in: thin, ragged, scattering
-// the lantern's light where no panel shades it
-func hazeAround() thing.Volume {
-	wisps := medium.Wispy{Of: medium.Puff{Radius: haze, Thick: 0.05},
-		Seed: 3, Scale: 2.5, Amount: 0.45}
-	dust := &thing.Material{Name: "haze",
-		Colour: maths.RGB(0.9, 0.82, 0.72)}
-	return thing.Volume{Medium: wisps, Material: dust}
-}
-
-// draw is the picture from a little above the swarm's plane, on the cpu
+// draw is the picture from the scene's eye through its lens, on the cpu
 // or the gpu as asked
-func draw(world *thing.World, given asked) (*frame.Frame, error) {
-	from := maths.V(0, 4, 26).Unit().Scale(given.away)
-	eye := maths.Subspace{Origin: from,
-		Orientation: maths.LookAt(from, maths.Vec{})}
-	lens := film.Pinhole{Wide: 45 * maths.Degree}
+func draw(built *named.Built, defaults named.Defaults,
+	given asked) (*frame.Frame, error) {
+	lens := film.Pinhole{Wide: defaults.Wide()}
 	width, height := given.width, given.height
 	if given.onGPU {
-		return gpu.Sampled(world, eye, lens, given.at, width, height,
-			given.samples)
+		return gpu.Sampled(built.World(), built.Eye(), lens, given.at,
+			width, height, given.samples)
 	}
-	return trace.Sampled(world, eye, lens, given.at, width, height,
-		given.samples), nil
+	return trace.Sampled(built.World(), built.Eye(), lens, given.at,
+		width, height, given.samples)
 }
 
-// save develops the picture and writes it as a png
-func save(drawn *frame.Frame, out string) error {
+// save develops the picture with the scene's tone and writes it as a png
+func save(drawn *frame.Frame, defaults named.Defaults, out string) error {
 	if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
 		return err
 	}
-	developed := colour.Tone{Knee: 0.7, Top: 8}.Develop(drawn)
-	return file.PNG(out, developed, 1)
+	return file.PNG(out, defaults.Tone().Develop(drawn), 1)
 }

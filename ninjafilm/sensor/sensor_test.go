@@ -203,8 +203,8 @@ func gatherCountsEachShare(t *rapid.T) {
 		}
 		want := sum * squareMetres
 		got, ok := reading.Channel(name)
-		if !ok || math.Abs(got.Watts()-want) > sumError*math.Max(want,
-			got.Watts()) {
+		if !ok || !(math.Abs(got.Watts()-want) <= sumError*math.Max(want,
+			got.Watts())) {
 			t.Fatalf("%s counted %v watts, not %v", name, got.Watts(), want)
 		}
 	}

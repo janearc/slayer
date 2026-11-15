@@ -2,6 +2,7 @@ package set_test
 
 import (
 	"encoding/json/v2"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -117,6 +118,63 @@ func propertyPaths(node any, path string, into map[string]bool) {
 	}
 }
 
+// enumPaths is every list of words a schema allows at a place, by the path
+// to the place through its properties, definitions and numbered branches,
+// so two schemas can be compared word for word as well as key for key.
+func enumPaths(node any, path string, into map[string][]string) {
+	switch value := node.(type) {
+	case map[string]any:
+		for key, child := range value {
+			switch key {
+			case "properties":
+				names, _ := child.(map[string]any)
+				for name, property := range names {
+					enumPaths(property, path+"/"+name, into)
+				}
+			case "$defs":
+				definitions, _ := child.(map[string]any)
+				for name, definition := range definitions {
+					enumPaths(definition, "#"+name, into)
+				}
+			case "enum":
+				words, _ := child.([]any)
+				for _, word := range words {
+					into[path] = append(into[path], fmt.Sprint(word))
+				}
+			case "oneOf", "anyOf", "allOf":
+				branches, _ := child.([]any)
+				for number, branch := range branches {
+					enumPaths(branch, fmt.Sprintf("%s|%s%d", path, key,
+						number), into)
+				}
+			default:
+				enumPaths(child, path, into)
+			}
+		}
+	case []any:
+		for _, child := range value {
+			enumPaths(child, path, into)
+		}
+	}
+}
+
+// schemaEnums is a schema file's lists of words by place, or the test
+// stops.
+func schemaEnums(t *testing.T, file string) map[string][]string {
+	t.Helper()
+	raw, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var schema any
+	if err := json.Unmarshal(raw, &schema); err != nil {
+		t.Fatal(err)
+	}
+	words := map[string][]string{}
+	enumPaths(schema, "", words)
+	return words
+}
+
 // schemaPaths is a schema file's property paths, or the test stops.
 func schemaPaths(t *testing.T, file string) map[string]bool {
 	t.Helper()
@@ -147,6 +205,15 @@ func TestV2KeepsEveryV1Key(t *testing.T) {
 	slices.Sort(lost)
 	if len(lost) > 0 {
 		t.Errorf("v2 lost %d of v1's keys: %v", len(lost), lost)
+	}
+	v1Words := schemaEnums(t, "ecosystem.schema.json")
+	v2Words := schemaEnums(t, "ecosystem-v2.schema.json")
+	for path, words := range v1Words {
+		for _, word := range words {
+			if !slices.Contains(v2Words[path], word) {
+				t.Errorf("v2 refuses %q at %s, which v1 takes", word, path)
+			}
+		}
 	}
 	if len(v2) <= len(v1) {
 		t.Errorf("v2 names %d keys and v1 %d: nothing was added", len(v2),

@@ -1,0 +1,73 @@
+# fire support, 2026-11-10: moonlake's lake fire, the study's night wood
+# fire five times over, as improv/moonlake/passes wrote it before the
+# towers (66ecac7): 24 sources over 24 m, 30 m flames, sparks thrown
+# from 20 m. On her wood-fire study's ground at night, for the
+# catalogue's still.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: moonlake's lake fire
+  renderer: gpu-native
+  seed: 7
+  light: none
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 1900
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263700
+    north: 2148860
+    across: 224
+    down: 224
+    step: 2
+  recipes:
+    the moonlake fire:
+      kind: fire
+      layout:
+        pattern: cluster
+        count: 24
+        radius: {value: 12, unit: m}
+        height-variation: 0.5
+      flame:
+        radius: {value: 4.25, unit: m}
+        height: {value: 30, unit: m}
+        absorption: {value: 0.12, unit: m^-1}
+        temperature: {value: 1900, unit: K}
+        edge-temperature: {value: 1100, unit: K}
+        intermittency-start: 0.06
+        temperature-profile: hot-tongues
+      sparks:
+        rate: {value: 400, unit: s^-1}
+        lifetime: {value: 4, unit: s}
+        radius: {value: 0.12, unit: m}
+        release-height: {value: 20, unit: m}
+        launch-speed: {value: 25, unit: m/s}
+        spread: {value: 8, unit: m/s}
+        updraft: {value: 20, unit: m/s}
+        drag-time: {value: 0.8, unit: s}
+        gravity: {value: 9.80665, unit: m/s^2}
+        temperature: {value: 1650, unit: K}
+        end-temperature: {value: 900, unit: K}
+      light-cells: 4
+  set:
+    things:
+      the fire:
+        recipe: the moonlake fire
+        seed: 81
+        east: 263812
+        north: 2148748
+  film:
+    width: 1920
+    height: 1200
+    rays: 2
+    exposure: 100
+  cameras:
+    back from the fire:
+      location:
+        loc_relative:
+          object: the fire
+          standoff_x: 30
+          standoff_y: -80
+          standoff_z: 3
+      orientation:
+        point_to: the fire
+        alpha: 11

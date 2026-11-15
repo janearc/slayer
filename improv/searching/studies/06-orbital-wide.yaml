@@ -1,0 +1,17 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  named: orbital
+  with:
+    far: true
+    distance: 5200
+film:
+  width: 320
+  height: 180
+  rays: 2
+at:
+  value: 0
+  unit: s
+renderer: gpu
+outputs:
+  picture: 06-orbital-wide.png

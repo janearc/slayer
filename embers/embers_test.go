@@ -75,7 +75,7 @@ func TestFirebrandDragHasAnalyticSpecialCases(t *testing.T) {
 		t.Fatal("comoving particle moved relative to air")
 	}
 	got := position(maths.Vec{}, maths.Vec{}, maths.Vec{}, maths.V(0, -2, 0), time.Second, time.Second)
-	if math.Abs(got.Y+2/math.E) > 1e-12 {
+	if !(math.Abs(got.Y+2/math.E) <= 1e-12) {
 		t.Fatal("constant-gravity drag integral changed")
 	}
 	if position(at, air, maths.Vec{}, maths.YAxis, 0, time.Second) != at {
@@ -131,7 +131,7 @@ func TestFirebrandSeedsChangePathsButNotCountOrThermalLaw(t *testing.T) {
 		different := false
 		for i, p := range a {
 			q := (p.Heat().InKelvin() - spec.Cool.InKelvin()) / (spec.Hot.InKelvin() - spec.Cool.InKelvin())
-			if math.Abs(q-(1-p.Age().Seconds()/spec.Life.Seconds())) > 1e-12 {
+			if !(math.Abs(q-(1-p.Age().Seconds()/spec.Life.Seconds())) <= 1e-12) {
 				return false
 			}
 			different = different || (i < len(b) && p.Position() != b[i].Position())

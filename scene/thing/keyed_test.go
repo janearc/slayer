@@ -50,7 +50,7 @@ func TestTheNamedEasesAreCssBeziers(t *testing.T) {
 		{"ease-in-out", 0, 0, "ends"},
 		{"ease-in-out", 1, 1, "ends"},
 	} {
-		if got := Eased(c.name, c.x); math.Abs(got-c.want) > 1e-9 {
+		if got := Eased(c.name, c.x); !(math.Abs(got-c.want) <= 1e-9) {
 			t.Errorf("%q at %v is %v, want %v (%s)", c.name, c.x, got,
 				c.want, c.working)
 		}
@@ -132,7 +132,7 @@ func TestTheHalvingsSettleBelowAnExactMeet(t *testing.T) {
 		{"ease-in-out", 0.5, 0.5 - 1.5*step},
 	} {
 		got := Eased(c.name, c.x)
-		if math.Abs(got-c.want) > 1e-15 {
+		if !(math.Abs(got-c.want) <= 1e-15) {
 			t.Errorf("%s at %v is %.17g, want %.17g (a half of 2 to the "+
 				"-40 below the meet)", c.name, c.x, got, c.want)
 		}

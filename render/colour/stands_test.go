@@ -25,7 +25,7 @@ func TestAStandingColourIsNeverBelowNoughtAndAsBrightAsWhite(t *testing.T) {
 			if l.R < 0 || l.G < 0 || l.B < 0 {
 				t.Errorf("%v at %g nm stands for %v, less than dark", span, nm, l)
 			}
-			if y := l.Luminance(); math.Abs(y-1) > 1e-9 {
+			if y := l.Luminance(); !(math.Abs(y-1) <= 1e-9) {
 				t.Errorf("%v at %g nm stands at luminance %v", span, nm, y)
 			}
 		}

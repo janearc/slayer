@@ -1,0 +1,25 @@
+{
+	// the chords as a slow swung broken arpeggio, in thirds of a beat,
+	// soft and a few cents sharp against a lead left dry.
+	"name": "tape-chords",
+	"machine": "gameboy",
+	"channels": [
+		{"kind": "pulse", "role": "lead", "duty": 0.25, "volume": 0.75,
+		 "pan": "left",
+		 "envelope": {"attack": 0.02, "decay": 0.5, "sustain": 0.5,
+		              "release": 0.35},
+		 "vibrato": {"rate": 4.5, "depth": 12, "delay": 0.35}},
+		{"kind": "pulse", "role": "pad", "duty": 0.125, "volume": 0.4,
+		 "pan": "right", "arp": "1/3", "detune": 8,
+		 "envelope": {"attack": 0.15, "decay": 1, "sustain": 0.6,
+		              "release": 0.4}},
+		{"kind": "wave", "role": "bass", "table": "triangle",
+		 "envelope": {"attack": 0, "decay": 0.6, "sustain": 0.5,
+		              "release": 0.1}},
+		{"kind": "noise", "role": "perc", "hits": {
+			"k": {"shift": 7, "divisor": 4, "decay": 0.12, "volume": 0.8},
+			"s": {"shift": 4, "divisor": 2, "decay": 0.25, "volume": 0.45},
+			"h": {"shift": 1, "divisor": 0, "decay": 0.03, "volume": 0.2}
+		}}
+	]
+}

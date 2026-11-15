@@ -1,0 +1,19 @@
+{
+	"group": "zappy",
+	"mood": "eager, then very large",
+	"feeling": "A small friendly voice says hello and something enormous is standing behind it.",
+	"intent": "Zappy's ident, the rising form: the first four seconds of every short, under its opening line.",
+	"listen_for": "Five plucked notes that climb and settle on a sweet note, and at 0:02 the low floor that arrives under the last one and makes it sound unsure.",
+	"voicing": "@zappy-voice",
+	"tempo": 126,
+	"meter": 4,
+	"seconds": 3.81,
+	"parts": [
+		{"name": "hello", "bar": 1, "second": 0.0,
+		 "change": "a ticking clock and four plucked notes climbing, alone",
+		 "feels": "small, eager: hello"},
+		{"name": "behind", "bar": 2, "second": 1.9,
+		 "change": "the last note lands and a deep floor opens under it",
+		 "feels": "something very large is behind it"}
+	]
+}

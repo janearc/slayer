@@ -218,7 +218,7 @@ func (s Spot) swirl(lat, lon float64, tint maths.Light,
 	u, v = u*c-v*sn, u*sn+v*c
 	lat = s.Lat + v
 	lon = s.Lon + u*stretch/cosLat
-	tint = tint.Scale(tintBy).Add(s.Paint.Scale(in))
+	tint = tint.Scale(tintBy * (1 - in)).Add(s.Paint.Scale(in))
 	tintBy = tintBy + in*(1-tintBy)
 	if tintBy > 0 {
 		tint = tint.Scale(1 / tintBy)

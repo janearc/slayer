@@ -54,18 +54,18 @@ func TestWeatherInterpolationWrapsAndPolesForgetLongitude(t *testing.T) {
 	}
 	latitude := g.latitude(5)
 	origin, spin, age := made.At(latitude, 1.5*g.run())
-	if math.Abs(origin-1.5) > 1e-12 || math.Abs(spin-.75) > 1e-12 || age != 0 {
+	if !(math.Abs(origin-1.5) <= 1e-12) || !(math.Abs(spin-.75) <= 1e-12) || age != 0 {
 		t.Fatalf("midpoint %g %g %g", origin, spin, age)
 	}
 	a, b, c := made.At(latitude, -.5*g.run())
 	d, e, f := made.At(latitude, (float64(g.across)-.5)*g.run())
-	if math.Abs(a-d) > 1e-12 || math.Abs(b-e) > 1e-12 || c != f {
+	if !(math.Abs(a-d) <= 1e-12) || !(math.Abs(b-e) <= 1e-12) || c != f {
 		t.Fatal("longitude seam")
 	}
 	for _, pole := range []float64{-math.Pi / 2, math.Pi / 2} {
 		origin, spin, age := made.At(pole, 0)
 		other, _, _ := made.At(pole, math.Pi)
-		if math.Abs(origin-15.5) > 1e-12 || origin != other || spin != 0 || age != 0 {
+		if !(math.Abs(origin-15.5) <= 1e-12) || origin != other || spin != 0 || age != 0 {
 			t.Fatalf("pole %g %g %g %g", origin, other, spin, age)
 		}
 	}
@@ -86,7 +86,7 @@ func TestStillWeatherHasNoZonalEnergyAndJetsHoldTheirEnergy(t *testing.T) {
 			made.vorticity[made.grid.at(i, j)] = 1e-5 * math.Sin(float64(j))
 		}
 	}
-	if got := made.Zonality(); math.Abs(got-1) > 1e-12 {
+	if got := made.Zonality(); !(math.Abs(got-1) <= 1e-12) {
 		t.Fatalf("pure zonal flow holds %g", got)
 	}
 }

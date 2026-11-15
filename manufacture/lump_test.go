@@ -73,7 +73,7 @@ func TestALumpHasItsThreeAxes(t *testing.T) {
 			}
 			for _, pair := range [3][2]float64{{wide, long},
 				{tall, short}, {deep, middle}} {
-				if math.Abs(pair[0]-pair[1]) > 1e-9 {
+				if !(math.Abs(pair[0]-pair[1]) <= 1e-9) {
 					flaw = "an axis is not what was asked"
 				}
 			}
@@ -98,7 +98,7 @@ func TestALumpWornSmoothIsItsEllipsoid(t *testing.T) {
 			up := (point.Y - short/2) / (short / 2)
 			along := point.Z / (middle / 2)
 			on := across*across + up*up + along*along
-			if math.Abs(on-1) > 1e-9 {
+			if !(math.Abs(on-1) <= 1e-9) {
 				t.Fatalf("face %d has a corner %v off the "+
 					"ellipsoid: %v", index, point, on)
 			}
@@ -239,7 +239,7 @@ func TestAStoneIsCleavedByFewerPlanesTheMoreItIsWorn(t *testing.T) {
 		}
 		ways := map[maths.Vec]bool{}
 		for index, cleft := range planes {
-			if math.Abs(cleft.facing.Len()-1) > close {
+			if !(math.Abs(cleft.facing.Len()-1) <= close) {
 				t.Errorf("worn %v: plane %d faces %v, no unit",
 					worn, index, cleft.facing)
 			}
@@ -285,8 +285,8 @@ func TestACleavingBringsWhatIsPastItBackToThePlane(t *testing.T) {
 				continue
 			}
 			moved++
-			if off := cut.Dot(cleft.facing) - cleft.out; math.Abs(
-				off) > 1e-12 {
+			if off := cut.Dot(cleft.facing) - cleft.out; !(math.Abs(
+				off) <= 1e-12) {
 				t.Fatalf("%v was past the plane and is now %v "+
 					"off it", on, off)
 			}
@@ -319,7 +319,7 @@ func TestAStonesRoughnessIsItsSeeds(t *testing.T) {
 // middle; a stone worn smooth reaches the whole way down.
 func TestAStonesFlatRisesAsItIsLessWorn(t *testing.T) {
 	fresh, smooth := mustLump(t, 1, 1, 1, 0, 1), mustLump(t, 1, 1, 1, 1, 1)
-	if got := fresh.flat(); math.Abs(got+sits) > close {
+	if got := fresh.flat(); !(math.Abs(got+sits) <= close) {
 		t.Errorf("a fresh stone's flat is at %v, not %v below", got,
 			sits)
 	}
@@ -342,11 +342,11 @@ func TestTheBallStartsAsARegularIcosahedron(t *testing.T) {
 		for corner, at := range face {
 			out := at.Len()
 			long := face[(corner+1)%3].Sub(at).Len()
-			if math.Abs(out-1) > close {
+			if !(math.Abs(out-1) <= close) {
 				t.Errorf("face %d: a corner is %v out", index,
 					out)
 			}
-			if math.Abs(long-edge) > close {
+			if !(math.Abs(long-edge) <= close) {
 				t.Errorf("face %d: an edge is %v long, not %v",
 					index, long, edge)
 			}

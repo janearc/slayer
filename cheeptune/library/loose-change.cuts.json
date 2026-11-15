@@ -1,0 +1,25 @@
+{
+	"group": "playful",
+	"mood": "cheeky and bluesy",
+	"feeling": "A shrug and a smile: the plan did not work, and that is fine.",
+	"intent": "A comic failure, a prank, a pocket full of odds and ends.",
+	"listen_for": "How the lead talks in short phrases, and answers itself an octave higher from 0:09.",
+	"voicing": "@tape-echo",
+	"tempo": 108,
+	"meter": 4,
+	"seconds": 35.56,
+	"parts": [
+		{"name": "talk", "bar": 1, "second": 0.0,
+		 "change": "short lead phrases over a walking bass",
+		 "feels": "Saying one thing, then another"},
+		{"name": "answer", "bar": 5, "second": 8.89,
+		 "change": "the same phrases an octave higher",
+		 "feels": "A cheeky reply"},
+		{"name": "both", "bar": 9, "second": 17.78,
+		 "change": "the lead runs in eighths; the bass arpeggiates",
+		 "feels": "Talking over each other"},
+		{"name": "shrug", "bar": 13, "second": 26.67,
+		 "change": "back to a sparse drum and slow phrases",
+		 "feels": "Oh well"}
+	]
+}

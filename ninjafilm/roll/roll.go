@@ -107,6 +107,14 @@ func (loaded Roll) Rated(stops float64) Roll {
 //ninja:vow practice slayer takes the gauge here; no caller in this tree
 func (loaded Roll) Gauge() film.Gauge { return loaded.stock.gauge }
 
+// Clearest is the most a print of the roll passes of each lamp: where
+// endless light fell and every record is at the least density of its
+// curve. It comes from the stock alone. Its rating does not move it.
+// A screen that turns the projector up holds this as its brightest.
+func (loaded Roll) Clearest() maths.Light {
+	return loaded.stock.lay.Clearest(loaded.stock.records)
+}
+
 // Print integrates a frame's glimpses of linear light and develops the
 // result. which identifies the frame for reproducible grain.
 //
@@ -240,22 +248,11 @@ func (through pass) site(light maths.Light, x, y int64) maths.Light {
 		dense := one.Developed(exposing, area, draw)
 		blocked = blocked.Add(one.Image().Scale(dense))
 	}
-	return filter.Times(cleared(blocked))
+	return filter.Times(record.Passed(blocked))
 }
 
 // draw selects reproducible grain variation for one record at a site.
 func (through pass) draw(index int, x, y int64) float64 {
 	seed := through.roll.seed + uint64(index) + firstDraw
 	return crystal.Chance(seed, x, y, through.number)
-}
-
-// cleared converts channel densities to transmission using 10^-density.
-func cleared(density maths.Light) maths.Light {
-	return maths.RGB(passed(density.R), passed(density.G),
-		passed(density.B))
-}
-
-// passed returns transmission for one channel density.
-func passed(density float64) float64 {
-	return math.Exp(-density * math.Ln10)
 }

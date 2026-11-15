@@ -1,0 +1,439 @@
+# Craft that are bodies of revolution: capsules, service modules, stages
+# and the launchers made of them. Each is its sections from the bottom
+# up, standing on its own zero, in metres: how wide a section is at its
+# bottom and at its top, how long it is, what it is made of and how that
+# was finished, and where its numbers were read.
+#
+# read says where a section's numbers come from, in words, for a person.
+# It is not a pinned source: a number here has been read off a page and
+# has not been held to that page's bytes by cmd/sources, as the numbers
+# in research/research-derived-data.yml are. Where read says "picked",
+# nobody read the number anywhere. Looks are picked throughout: no
+# section's surface here is from a measurement of that craft. A section
+# whose finish is painted names its paint, one of the swatches: chalk
+# for a launcher's white, slate for its dark, rust for the orange of
+# foam. Those are the nearest named colours and not the craft's own.
+stacks:
+- name: apollo-csm
+  says: >-
+    The Apollo command and service module, standing on its engine bell:
+    the service propulsion engine's bell, the service module, and the
+    command module on top. 10.11 m from the bell's lip to the command
+    module's apex.
+  sections:
+  - part: engine bell
+    bottom: 2.501
+    top: 0.6
+    length: 2.36
+    material: titanium
+    finish: weathered
+    read: >-
+      2.501 m wide at its lip (Wikipedia, Apollo command and service
+      module, "98.48 inches (2.501 m) wide at the base", read
+      2026-11-10). Its length here is how far it stands out of the
+      service module: NASA's 22 ft 7 in for the module with its engine
+      (Apollo 204 Review Board, spacecraft page, "22ft, 7in. excluding
+      fairing", 6.88 m) less the module's shell, 4.52 m. The whole bell
+      is 3.882 m long and the rest of it is inside. Its top, 0.6 m, is
+      picked.
+  - part: service module
+    bottom: 3.91
+    top: 3.91
+    length: 4.52
+    material: aluminium
+    finish: frosted
+    read: >-
+      3.91 m across (NASA, Apollo 204 Review Board, spacecraft page,
+      "12ft, 10in."; NSSDCA, 1968-089A, "390 cm in diameter"). 4.52 m
+      long (Wikipedia, "14 feet 10 inches (4.52 m) long"; the shell
+      alone, a secondary figure, taken because the primary lengths
+      include the engine). Read 2026-11-10.
+  - part: command module
+    bottom: 3.91
+    top: 0.9
+    length: 3.23
+    material: aluminium
+    finish: brushed
+    read: >-
+      3.91 m across its base and 3.23 m high (NASA, Apollo 204 Review
+      Board, spacecraft page, "12ft, 10in." and "10ft, 7in."), read
+      2026-11-10. Its top, 0.9 m, where the docking tunnel is, is picked.
+- name: soyuz-ms
+  says: >-
+    Soyuz MS, standing on its service module: the service module, the
+    bell of the descent module, and the orbital module on top, 7.48 m
+    in all. Without its solar arrays. Every size of it is from one
+    secondary page, and the Russian page disagrees with it: unverified.
+  sections:
+  - part: service module
+    bottom: 2.72
+    top: 2.17
+    length: 2.26
+    material: aluminium
+    finish: frosted
+    read: >-
+      2.26 m long and 2.72 m across at its widest (Wikipedia, Soyuz
+      (spacecraft), the Soyuz MS column, read 2026-11-10). Its top is
+      taken as the descent module's width.
+  - part: descent module
+    bottom: 2.17
+    top: 1.0
+    length: 2.24
+    material: titanium
+    finish: weathered
+    read: >-
+      2.24 m long and 2.17 m across (Wikipedia, the same column). Its
+      top, 1.0 m, where it joins the orbital module, is picked.
+  - part: orbital module, lower
+    bottom: 1.0
+    top: 2.26
+    length: 0.75
+    material: aluminium
+    finish: frosted
+    read: >-
+      The orbital module is 2.98 m long and 2.26 m across (Wikipedia,
+      the same column). It is rounded; here it is three lengths, and
+      how its 2.98 m is shared among them, 0.75, 1.48 and 0.75, is
+      picked, as are its 1.0 m ends.
+  - part: orbital module, middle
+    bottom: 2.26
+    top: 2.26
+    length: 1.48
+    material: aluminium
+    finish: frosted
+    read: as the orbital module's lower length
+  - part: orbital module, upper
+    bottom: 2.26
+    top: 1.0
+    length: 0.75
+    material: aluminium
+    finish: frosted
+    read: as the orbital module's lower length
+- name: mercury-capsule
+  says: >-
+    The Mercury capsule, standing on its heat shield, 3.3 m tall and
+    1.8 m across, without its escape tower. Its two sizes are from a
+    secondary page; a second gives 3.5 m and 1.9 m.
+  sections:
+  - part: cabin
+    bottom: 1.8
+    top: 0.82
+    length: 2.1
+    material: titanium
+    finish: weathered
+    read: >-
+      1.8 m across and, with the two lengths above it, 3.3 m long
+      (Wikipedia, Mercury capsule, "10.8 ft (3.3 m) long, 6.0 ft (1.8
+      m) wide", read 2026-11-10). How the 3.3 m is shared among the
+      three lengths, and their 0.82 m and 0.5 m widths, are picked.
+  - part: recovery section
+    bottom: 0.82
+    top: 0.82
+    length: 0.75
+    material: titanium
+    finish: weathered
+    read: as the cabin
+  - part: antenna canister
+    bottom: 0.82
+    top: 0.5
+    length: 0.45
+    material: titanium
+    finish: weathered
+    read: as the cabin
+- name: gemini
+  says: >-
+    The Gemini spacecraft, standing on its adapter: the adapter and the
+    reentry module, 5.736 m tall and 3.048 m across its base. NASA's own
+    manual says 19 feet, 5.79 m; the figures here are a secondary page's.
+  sections:
+  - part: adapter
+    bottom: 3.048
+    top: 2.286
+    length: 2.286
+    material: aluminium
+    finish: frosted
+    read: >-
+      3.048 m across its base and 2.286 m high (Gunter's Space Page,
+      Gemini, "304.8 cm diameter at adapter base; adapter 228.6 cm
+      high", read 2026-11-10). Its top is the heat shield's width, 90
+      inches (NASA Gemini Familiarization Manual, "heat shield 90 in
+      dia").
+  - part: reentry module
+    bottom: 2.286
+    top: 0.99
+    length: 2.2
+    material: titanium
+    finish: weathered
+    read: >-
+      The reentry module is 3.45 m high (Gunter's Space Page, "reentry
+      module 345.0 cm high"). How that is shared between this cone and
+      the nose above it, 2.2 and 1.25, and the nose's 0.99 m width, are
+      picked.
+  - part: nose
+    bottom: 0.99
+    top: 0.99
+    length: 1.25
+    material: titanium
+    finish: weathered
+    read: as the reentry module
+- name: saturn-v
+  says: >-
+    The Saturn V launch vehicle, standing on its first stage: the S-IC,
+    the S-II, the S-IVB on its flared skirt, and the instrument unit,
+    85.6 m in all. The Apollo spacecraft and its escape tower are not on
+    it; with them it stood 363 feet, 110.6 m. No fins, no engines, and
+    not its white and black paint.
+  sections:
+  - part: first stage, S-IC
+    bottom: 10.0584
+    top: 10.0584
+    length: 42.0624
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      138 feet tall and 33 feet across, "not including the fins and
+      engine shrouds" (NASA, Apollo 4 press kit, NTRS 19670031260, as a
+      search of nasa.gov relayed it, 2026-11-12; the kit itself was too
+      large to open).
+  - part: second stage, S-II
+    bottom: 10.0584
+    top: 10.0584
+    length: 24.8412
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      "33 feet in diameter and 81 1/2 feet long" (a NASA source in the
+      same search, 2026-11-12).
+  - part: third stage skirt
+    bottom: 10.0584
+    top: 6.604
+    length: 5.8
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      The third stage is 58.4 feet tall and 21 feet 8 inches across
+      (NASA press kit, as relayed, 2026-11-12). It stands on a skirt
+      that flares to the second stage's 33 feet. How its 17.80 m is
+      shared between the skirt, 5.8 m, and the stage above it is picked.
+  - part: third stage, S-IVB
+    bottom: 6.604
+    top: 6.604
+    length: 12.00032
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: as the third stage skirt
+  - part: instrument unit
+    bottom: 6.61416
+    top: 6.61416
+    length: 0.9144
+    material: aluminium
+    finish: painted
+    paint: slate
+    read: >-
+      "21.7 feet diameter, 3 feet long" (a NASA technical paper, NTRS
+      20200002830, as relayed, 2026-11-12; the Smithsonian gives about
+      3 feet and 22 feet).
+- name: saturn-ib
+  says: >-
+    The Saturn IB launch vehicle, standing on its first stage: the S-IB,
+    the S-IVB and the instrument unit, 43.2 m in all, with no spacecraft
+    on it. The S-IVB is eight centimetres wider than the S-IB, so it
+    stands straight on it with no flared skirt, as it does not on a
+    Saturn V. No fins, no engines, and not the black and white of its
+    first stage's tanks.
+  sections:
+  - part: first stage, S-IB
+    bottom: 6.53
+    top: 6.53
+    length: 24.44
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      "24.44 metres (80.17 ft)" long and "6.53 metres (21.42 ft)" across
+      (Wikipedia, Saturn IB, the S-IB's general characteristics, read
+      2026-11-12).
+  - part: second stage, S-IVB
+    bottom: 6.61
+    top: 6.61
+    length: 17.81
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      "17.81 metres (58.42 ft)" long and "6.61 metres (21.67 ft)" across
+      (the same page, the S-IVB's general characteristics, read
+      2026-11-12; its infobox gives the stage 6.53 m across, which is
+      the first stage's width).
+  - part: instrument unit
+    bottom: 6.61
+    top: 6.61
+    length: 0.91
+    material: aluminium
+    finish: painted
+    paint: slate
+    read: >-
+      "0.91 m (3 ft)" tall and "6.61 m (21.67 ft)" across (the same
+      page, its table of the launch vehicle, read 2026-11-12). The three
+      lengths come to 43.16 m; the page gives the vehicle "141.6 ft
+      (43.2 m)" without payload.
+- name: saturn-v-apollo
+  says: >-
+    The Apollo-Saturn V as it stood on the pad: the Saturn V's three
+    stages and instrument unit, the adapter that held the lunar module,
+    the service module, the command module, and the escape tower. 110.64
+    m, NASA's 363 feet. The adapter's length is unverified and the
+    tower's is what is left of the 363 feet, so the total is NASA's and
+    the share of it above the instrument unit is not. No fins, no
+    engines, and not its black markings.
+  sections:
+  - part: first stage, S-IC
+    bottom: 10.0584
+    top: 10.0584
+    length: 42.0624
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: as saturn-v's first stage
+  - part: second stage, S-II
+    bottom: 10.0584
+    top: 10.0584
+    length: 24.8412
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: as saturn-v's second stage
+  - part: third stage skirt
+    bottom: 10.0584
+    top: 6.604
+    length: 5.8
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: as saturn-v's third stage skirt
+  - part: third stage, S-IVB
+    bottom: 6.604
+    top: 6.604
+    length: 12.00032
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: as saturn-v's third stage skirt
+  - part: instrument unit
+    bottom: 6.61416
+    top: 6.61416
+    length: 0.9144
+    material: aluminium
+    finish: painted
+    paint: slate
+    read: as saturn-v's instrument unit
+  - part: lunar module adapter
+    bottom: 6.61416
+    top: 3.91
+    length: 8.5344
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      It narrows from the instrument unit's width to the service
+      module's. Its length, 28 feet, is unverified: it was the figure
+      asked of a search of nasa.gov on 2026-11-12, and the search found
+      nothing for or against it.
+  - part: service module
+    bottom: 3.91
+    top: 3.91
+    length: 4.52
+    material: aluminium
+    finish: frosted
+    read: as apollo-csm's service module; its engine bell is inside the adapter
+  - part: command module
+    bottom: 3.91
+    top: 0.9
+    length: 3.23
+    material: aluminium
+    finish: brushed
+    read: as apollo-csm's command module
+  - part: escape tower
+    bottom: 0.66
+    top: 0.66
+    length: 8.73968
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      Its length is what is left of the vehicle's 363 feet, 110.6424 m,
+      "with the Apollo spacecraft and launch escape system in place"
+      (NASA, Apollo 4 press kit, as relayed, 2026-11-12), once every
+      section below it is counted: derived, not read. It is a rocket on
+      an open tower; here it is one slim length, 0.66 m across, picked.
+- name: sls-block-1
+  says: >-
+    The Space Launch System, Block 1, standing on its core stage with a
+    solid rocket booster on each side: the core stage, the adapter above
+    it, and the upper stage, 86.7 m to the upper stage's top. Orion, its
+    adapter and its escape system are not on it; with them it stands
+    322 feet, 98.3 m. No engines, and not the core's orange foam.
+  sections:
+  - part: core stage
+    bottom: 8.4
+    top: 8.4
+    length: 64.6
+    material: aluminium
+    finish: painted
+    paint: rust
+    read: >-
+      "Approximately 212 ft. (64.6 m)" tall, "from forward skirt to
+      engine exhaust exit plane", and "27.6 ft. (8.4 m)" across (NASA,
+      SLS core stage fact sheet, as a search of nasa.gov relayed it,
+      2026-11-12).
+  - part: launch vehicle stage adapter
+    bottom: 8.4
+    top: 5.1
+    length: 8.4
+    material: aluminium
+    finish: painted
+    paint: rust
+    read: >-
+      It narrows from the core stage's width to the upper stage's. Its
+      height was not found; 8.4 m is picked.
+  - part: interim cryogenic propulsion stage
+    bottom: 5.1
+    top: 5.1
+    length: 13.7
+    material: aluminium
+    finish: painted
+    paint: chalk
+    read: >-
+      "45 ft (13.7 m) tall and 16.7 ft (5.1 m) in diameter" (NASA, SLS
+      reference guide 2022, a table row the search relayed without the
+      stage's name; that it is this stage is inferred, 2026-11-12).
+  beside:
+  - part: solid rocket booster
+    count: 2
+    raised: 0
+    sections:
+    - part: booster case
+      bottom: 3.6576
+      top: 3.6576
+      length: 48.0
+      material: aluminium
+      finish: painted
+      paint: chalk
+      read: >-
+        "Each modified booster is 177 ft. tall, 12 ft. in diameter"
+        (NASA, nasa.gov/reference/space-launch-system, read
+        2026-11-12). How its 53.95 m is shared between the case, 48.0
+        m, and the nose is picked, as is where its foot stands against
+        the core's.
+    - part: booster nose
+      bottom: 3.6576
+      top: 0.6
+      length: 5.9496
+      material: aluminium
+      finish: painted
+      paint: chalk
+      read: as the booster case; its 0.6 m tip is picked

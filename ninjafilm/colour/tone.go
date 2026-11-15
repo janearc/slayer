@@ -134,7 +134,10 @@ func beyondWhite(lights []maths.Light, exposure float64) (over []maths.Light,
 	for index, light := range lights {
 		light = light.Scale(exposure)
 		if luminance := light.Luminance(); luminance > whole {
-			spill := (luminance - whole) / luminance / spillDivisor
+			spill := whole / spillDivisor
+			if !math.IsInf(luminance, whole) {
+				spill = (luminance - whole) / luminance / spillDivisor
+			}
 			over[index] = light.Scale(spill)
 			found = true
 		}
@@ -185,7 +188,9 @@ func spread(lights []maths.Light, weights []float64, reach, across,
 		var sum maths.Light
 		for step, weight := range weights {
 			along := at + step - reach
-			if along >= none && along < limit {
+			// a weight of zero carries nothing, and infinity times it
+			// is no number
+			if weight != none && along >= none && along < limit {
 				near := lights[index+(along-at)*stride]
 				sum = sum.Add(near.Scale(weight))
 			}
@@ -201,6 +206,18 @@ func spread(lights []maths.Light, weights []float64, reach, across,
 // clipping.
 //
 // The spill is a third of the light beyond white. The rest clips.
+//
+// An infinite light spills an infinite third of itself, which is what
+// that third comes to as the light grows. So the pixels within its reach
+// come out infinite in the parts it holds light in. The shoulder bleaches
+// them to white as it does any infinite light. A light that is no number
+// spills nothing.
+//
+// No NaN comes out of lights whose parts are finite or positive
+// infinity, at a finite exposure. Two cases are not covered. One
+// is an infinite light within reach of a light with a part of negative
+// infinity, which sums to NaN. The other is an infinite exposure with an
+// infinite light.
 //
 // Radii past the widest are refused by name. So are endless ones. The
 // refusal is a panic. The lights are across by down.
@@ -219,9 +236,22 @@ func Bloom(lights []maths.Light, across, down int, exposure,
 	weights, reach := kernel(radius)
 	sideways := spread(over, weights, reach, across, down, false)
 	glow := spread(sideways, weights, reach, across, down, true)
+	// the glow goes back to the scale of the light by the reciprocal of
+	// the exposure, unless that is infinite, for an exposure too small to
+	// invert
+	inverse := whole / exposure
+	flat := math.IsInf(inverse, whole) || math.IsInf(inverse, -whole)
 	out := make([]maths.Light, len(lights))
 	for index, light := range lights {
-		out[index] = light.Add(glow[index].Scale(whole / exposure))
+		if flat {
+			// times a part of zero the reciprocal would be no number,
+			// so the glow is divided
+			back := maths.Light{R: glow[index].R / exposure,
+				G: glow[index].G / exposure, B: glow[index].B / exposure}
+			out[index] = light.Add(back)
+			continue
+		}
+		out[index] = light.Add(glow[index].Scale(inverse))
 	}
 	return out
 }

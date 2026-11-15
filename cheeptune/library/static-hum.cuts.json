@@ -1,0 +1,25 @@
+{
+	"group": "tense and sparse",
+	"mood": "tense and sparse",
+	"feeling": "Something is wrong in the next room and you are holding still.",
+	"intent": "A held shot before a reveal, a cut to a closed door, a countdown with no number on screen.",
+	"listen_for": "How little there is for the first ten seconds, and the full drum that finally lands at 0:18.",
+	"voicing": "@crypt-dmg",
+	"tempo": 90,
+	"meter": 3,
+	"seconds": 32.0,
+	"parts": [
+		{"name": "wire", "bar": 1, "second": 0.0,
+		 "change": "a bass pulse and a thin lead, rests between",
+		 "feels": "Held breath, waiting"},
+		{"name": "closing-in", "bar": 6, "second": 10.0,
+		 "change": "off-beat stabs and a sparse kick join",
+		 "feels": "The floor tilts: unease grows"},
+		{"name": "knock", "bar": 10, "second": 18.0,
+		 "change": "a full drum bar and a walking bass",
+		 "feels": "Someone is at the door"},
+		{"name": "cut", "bar": 16, "second": 30.0,
+		 "change": "a held low chord and one kick",
+		 "feels": "A hard stop"}
+	]
+}

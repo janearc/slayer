@@ -1,0 +1,28 @@
+{
+	"group": "bright and driving",
+	"mood": "bright and punchy",
+	"feeling": "Sunlight and a good song on the radio.",
+	"intent": "Fast cuts of a city, a sports reel, a travel montage with a stripped moment in the middle for a title.",
+	"listen_for": "The stripped bass-and-kick moment at 0:13 where the lead disappears.",
+	"voicing": "@crypt-dmg",
+	"tempo": 146,
+	"meter": 4,
+	"seconds": 36.16,
+	"parts": [
+		{"name": "hook", "bar": 1, "second": 0.0,
+		 "change": "a punchy off-beat lead over a four-on-the-floor kick",
+		 "feels": "Head up, moving"},
+		{"name": "verse", "bar": 5, "second": 6.58,
+		 "change": "the lead keeps moving, the drum fills out",
+		 "feels": "Confident and busy"},
+		{"name": "strip", "bar": 9, "second": 13.15,
+		 "change": "only bass and kick; the lead and chords drop out",
+		 "feels": "Space to breathe: a title can land"},
+		{"name": "shine", "bar": 13, "second": 19.73,
+		 "change": "the lead returns an octave higher and busier",
+		 "feels": "All in: full brightness"},
+		{"name": "end", "bar": 21, "second": 32.88,
+		 "change": "a held chord and a kick",
+		 "feels": "Done, smiling"}
+	]
+}

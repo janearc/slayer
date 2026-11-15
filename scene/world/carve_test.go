@@ -130,10 +130,10 @@ func TestFindGoesOutwardFromTheHeart(t *testing.T) {
 		tile   hexes.Tile
 		ok     bool
 	}{
-		{"dry from the sea end", maths.V(0, 0, 0), Land, hexes.Tile{I: 2}, true},
-		{"sea from the far end", maths.V(4, 0, 0), Water, hexes.Tile{I: 1}, true},
+		{"dry from the sea end", maths.V(0, 0, 0), Land, hexes.Tile{Column: 2}, true},
+		{"sea from the far end", maths.V(4, 0, 0), Water, hexes.Tile{Column: 1}, true},
 		{"rock from the sea end", maths.V(0, 0, 0),
-			func(b Biome) bool { return b == Rock }, hexes.Tile{I: 4}, true},
+			func(b Biome) bool { return b == Rock }, hexes.Tile{Column: 4}, true},
 		{"nothing", maths.V(2, 0, 0), func(Biome) bool { return false },
 			hexes.Tile{}, false},
 	} {

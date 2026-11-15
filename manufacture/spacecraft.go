@@ -118,6 +118,10 @@ func (row spacecraft) madeAt(from seed, detail string) (good, error) {
 		object: good{dressed: spacecraftLooks(row.design)}}
 	size := row.dimensions()
 	if row.design == "webb" {
+		err := webbSurfaces(webbSurfacesRaw, assembly.object.dressed)
+		if err != nil {
+			return good{}, err
+		}
 		row.exposed(assembly, size)
 	} else {
 		row.enclosed(assembly, size)
@@ -134,12 +138,17 @@ func (row spacecraft) madeAt(from seed, detail string) (good, error) {
 func (row spacecraft) extent(size spacecraftSize) maths.Box {
 	aperture := size.aperture
 	if row.design == "webb" {
-		lift := spacecraftValue("webb-bus-lift")
-		height := spacecraftValue("webb-bus-height")
-		top := row.shieldTop(size) + aperture*(lift+height) +
-			size.length
+		// above the shield: the tower's rise and the telescope on it.
+		// below it, on the sun's side: the gap, the bus, and the antenna
+		// hung under the bus, taken as deep as it is wide
+		top := row.shieldTop(size) +
+			aperture*spacecraftValue("webb-tower-rise") + size.length
+		under := -aperture * (spacecraftValue("webb-bus-drop") +
+			spacecraftValue("webb-bus-height") +
+			spacecraftValue("webb-antenna-drop") +
+			spacecraftValue("webb-antenna-radius"))
 		return maths.SegmentBox(
-			maths.V(-size.span*spaceHalf, spaceZero,
+			maths.V(-size.span*spaceHalf, under,
 				-size.shieldLength*spaceHalf),
 			maths.V(size.span*spaceHalf, top,
 				size.shieldLength*spaceHalf), spaceZero)

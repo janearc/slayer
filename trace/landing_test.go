@@ -43,7 +43,7 @@ func TestALandingOnAMeshKnowsItsFace(t *testing.T) {
 		from := side.Scale(5).Add(turn.Out(off))
 		ray := maths.Ray{At: from, Dir: side.Neg()}
 		met, found := seen.first(ray, 0)
-		if !found || !met.on.meshed || math.Abs(met.dist-4) > 1e-12 {
+		if !found || !met.on.meshed || !(math.Abs(met.dist-4) <= 1e-12) {
 			t.Fatalf("from %v: found %v, landed %v, at %v", from, found,
 				met.on.meshed, met.dist)
 		}

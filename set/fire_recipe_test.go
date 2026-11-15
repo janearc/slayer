@@ -103,7 +103,7 @@ func TestFireLayoutRecipeCarriesItsExtentAndSampling(t *testing.T) {
 		spec.Layout.Radius != measure.Metres(0.55) || spec.Layout.Variation != 0.3 {
 		t.Fatal("layout data lost")
 	}
-	if spec.Smoke == nil || math.Abs(spec.Smoke.Base-2) > 1e-12 {
+	if spec.Smoke == nil || !(math.Abs(spec.Smoke.Base-2) <= 1e-12) {
 		t.Fatal("smoke base ignored its fuel footprint")
 	}
 }
@@ -136,7 +136,7 @@ func TestFireLineRecipeCarriesLengthWithoutInventingARadius(t *testing.T) {
 	recipe, _ := made.Recipe("wood fire")
 	spec, _ := recipe.Fire()
 	if spec.Layout.Pattern != "line" || spec.Layout.Length != measure.Metres(4) ||
-		spec.Layout.Radius != measure.Metres(0) || math.Abs(spec.Smoke.Base-4.9) > 1e-12 {
+		spec.Layout.Radius != measure.Metres(0) || !(math.Abs(spec.Smoke.Base-4.9) <= 1e-12) {
 		t.Fatal("line recipe lost its source extent")
 	}
 }

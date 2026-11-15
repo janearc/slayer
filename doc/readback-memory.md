@@ -1,41 +1,62 @@
 # Keep the readback bounded
 
-The GPU already dispatches bands. The host still keeps every raw sample
-until the whole picture has returned. This is separate from scene caching
-and from the cost of marching through mist.
+This is a historical design and accounting record. For the shipped
+streaming contract and later focused evidence, read
+[streamed readback](streamed-readback.md); for current feature status,
+read [optimizations](optimizations.md). Proposal wording below retains
+the state at the time of this record.
 
-## What the current code does
+The GPU already dispatches bands. The sampled picture no longer keeps every
+raw sample: `metal.Kernel.GridBands` returns one reusable band at a time, and
+`gpu/sampled.go` averages each band into the frame as it arrives. The
+full-grid `metal.Kernel.Grid` remains; its only non-test caller is
+`gpu/flame_bake.go`. This is separate from scene caching and from the cost of
+marching through mist.
+
+## What `Grid` does
 
 [`metal.Kernel.Grid`](../metal/grid.go) allocates `width * height * per` float32
 values. These dimensions are the supersampled grid. The Objective-C bridge
 uses one GPU output band, then copies each band into that full Go slice.
-[`gpu.sampledLightingGrid`](../gpu/sampled.go) averages it afterward.
 
-With no CPU texture records, each sample has 12 floats. A 3840 by 2160
-picture at 16 samples per pixel therefore asks for 6,370,099,200 raw bytes
-before its final frame and other scene storage. This is a size calculation,
-not a measured allocation from a new 4K run.
+Its only non-test caller, `bakeFlame` in
+[`gpu/flame_bake.go`](../gpu/flame_bake.go), copies the samples into density
+and shine arrays. The sampled picture's own path,
+[`gpu.sampledLightingGrid`](../gpu/sampled.go), no longer calls it.
+
+This paragraph is the former sampled path, which `Grid` served before
+`GridBands`. With no CPU texture records, each sample has 12 floats. A 3840 by
+2160 picture at 16 samples per pixel therefore asked for 6,370,099,200 raw
+bytes before its final frame and other scene storage. This is a size
+calculation, not a measured allocation from a new 4K run.
 
 The committed spacecraft studies provide a smaller check: their 960 by
 720 pictures at nine samples report 298,598,400 sample-output bytes, matching
 the same calculation. Those studies are not a dense-forest performance test.
 
-## Proposed change
+## The change, as shipped for the sampled picture
 
-Let a prepared Metal grid return one bounded band to a consumer. Keep inputs
-and its GPU output buffer alive for the dispatch sequence, then release them
-with that grid. Average each band into the final frame before reusing its
+The first paragraph below is shipped. The second is shipped in part and the
+third is still a proposal; each says so in its first words. The evidence
+section further down is still the list of what remains to be measured.
+
+Shipped: let a prepared Metal grid return one bounded band to a consumer. Keep
+inputs and its GPU output buffer alive for the dispatch sequence, then release
+them with that grid. Average each band into the final frame before reusing its
 sample storage. Keep the existing full-grid API for current callers.
 
-Align renderer bands to complete supersampling rows where possible. Preserve
-the per-pixel addition order, nearest depth, coverage and native counters.
-Account for CPU finishing separately from dispatch wall time; the existing
-profile promises disjoint stages.
+Shipped in part: the sampled path times dispatch and CPU finishing apart
+(`gpu/sampled.go`, `spent.dispatch` and `spent.average`). Still a proposal:
+align renderer bands to complete supersampling rows where possible, which
+the fixed 64-row `rows` does not claim; and preserve the per-pixel addition
+order, nearest depth, coverage and native counters, which the evidence
+section lists as unmeasured.
 
-The actual byte limit needs an explicit authored budget. If one complete
+Proposal, not shipped: the actual byte limit needs an explicit authored budget.
+The band is a fixed 64 rows and no budget or refusal exists. If one complete
 output row exceeds it, refuse before allocation or implement partial-row
-accumulation with its own compatibility tests. Do not call an unbounded
-minimum allocation a bounded implementation.
+accumulation with its own compatibility tests. Do not call an unbounded minimum
+allocation a bounded implementation.
 
 ## Evidence needed
 

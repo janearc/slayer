@@ -94,10 +94,13 @@ func (ring Ring) cleared(x, z float64) float64 {
 	return left
 }
 
+// edgeWidth is how wide a gap's soft edge is, in the widths of the gap: picked.
+const edgeWidth = 0.5
+
 // edged is zero inside one, one past one and a half, smoothly between: a gap's
 // soft edge.
 func edged(apart float64) float64 {
-	share := math.Max(0, math.Min(1, (apart-1)/0.5))
+	share := math.Max(0, math.Min(1, (apart-1)/edgeWidth))
 	return share * share * (3 - 2*share)
 }
 

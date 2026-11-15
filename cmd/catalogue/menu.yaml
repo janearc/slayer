@@ -233,6 +233,46 @@ entries:
     about: Cantilevered storeys, flat slabs and glowing reflective panes.
     notes: Glazing suggests occupied rooms; there are no furnished interiors.
     details: [quick]
+  - kind: stage-scaffold
+    group: Buildings
+    about: One tower of a festival stage's scaffolding, about 15 by 8 by 40 m, decked every fifth lift, for lasers and pyro to stand on.
+    notes: A ringlock system's bay, lift and tube, from memory; which outer bays are braced is the seed's.
+    details: [quick]
+  - kind: stage-tower
+    group: Buildings
+    about: A show's tower, about 10 by 5 by 20 m, with laser heads, flame units, moving heads, hung speaker columns and road cases on its decks.
+    notes: The gear is black housings only, nothing lit; it faces the tower's front, the side its heading turns to the audience.
+    details: [quick]
+  - kind: hemtt
+    group: Vehicles
+    about: Oshkosh's HEMTT, the M977 A4 eight-wheel-drive cargo truck, 10.39 by 2.44 by 3.0 m, its spare tyre lying behind the cab.
+    notes: Length, width, height, track, wheelbase and tyres from Oshkosh's brochure; each pair's axle spacing, the cab and the bed are picked to look right.
+    details: [quick]
+  - kind: kamaz
+    group: Vehicles
+    about: The KAMAZ-43118, a six-wheel-drive cargo truck, 9.27 by 2.55 by 3.11 m, its cab over its engine.
+    notes: Size and tyres from listings, the wheelbase from a body-builder's catalogue; the cab and bed are picked.
+    details: [quick]
+  - kind: unimog
+    group: Vehicles
+    about: The Unimog U 5023, 5.95 by 2.4 by 2.87 m, its axles 3.85 m apart and 460 mm clear underneath, its cab behind a short bonnet, with a short bed.
+    notes: Size, wheelbase, clearance and tyres as Mercedes-Benz publishes them; the track, bonnet and bed are picked.
+    details: [quick]
+  - kind: tatra
+    group: Vehicles
+    about: The Tatra T 815-7 eight-wheel-drive cargo truck, 10.72 by 2.5 by 3.42 m, on its backbone tube with swinging half-axles, 410 mm clear underneath.
+    notes: Width, track, clearance, tyres and cab from Tatra's sheet; length, height and axle spacing from valka.cz; the bed is picked.
+    details: [quick]
+  - kind: scania-r
+    group: Vehicles
+    about: A Scania R tractor unit, two axles, its normal cab 3.53 m high, twin tyres on its drive axle and a fifth wheel for a trailer.
+    notes: The cab's height as Scania publishes it; the wheelbase, length and tyres are picked.
+    details: [quick]
+  - kind: daf-xf
+    group: Vehicles
+    about: A DAF XF tractor unit, two axles, its wheelbase 3.8 m, its Super Space Cab tall and flat-fronted, a fifth wheel for a trailer.
+    notes: The wheelbase as published; the cab's height, the length and the tyres are picked.
+    details: [quick]
   - kind: campfire
     group: Fire and lamps
     about: A stone ring, leaning sticks and an attached flickering light.
@@ -252,6 +292,46 @@ entries:
     group: Fire and lamps
     about: A mounted dish carrying a radio emitter.
     notes: The housing is visible; its radio beam is not shown by an RGB picture.
+    details: [quick]
+  - kind: laser-green
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 532 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; the line is the usual show module's.
+    details: [quick]
+  - kind: laser-red
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 638 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; the line is the usual show module's.
+    details: [quick]
+  - kind: laser-blue
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 445 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; the line is the usual show module's.
+    details: [quick]
+  - kind: laser-cyan
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 488 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; 488 nm is the argon line.
+    details: [quick]
+  - kind: laser-amber
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 589 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; 589 nm is sodium's line.
+    details: [quick]
+  - kind: laser-magenta
+    group: Fire and lamps
+    about: A show laser head mixing the red and blue lines from one mouth.
+    notes: Power and beam numbers are authored to sound right; the lines share its power evenly.
+    details: [quick]
+  - kind: laser-white
+    group: Fire and lamps
+    about: A show laser head mixing the red, green and blue lines from one mouth.
+    notes: Power and beam numbers are authored to sound right; the lines share its power evenly.
+    details: [quick]
+  - kind: strobe
+    group: Fire and lamps
+    about: A stage strobe on a stand, a spotlight's cousin, wide, white and cold.
+    notes: Temperature, power and angles are authored display choices.
     details: [quick]
   - kind: optical-observatory
     group: Observatories
@@ -280,14 +360,137 @@ entries:
         url: https://science.nasa.gov/mission/hubble/observatory/design/optics/
   - kind: webb
     group: Observatories
-    about: A gold-looking segmented primary above five sunshield layers.
-    notes: Referenced aperture, counts and shield lengths; authored figure and gaps.
+    about: A gold segmented primary on a tower above five aluminium sunshield layers, its bus and solar panels on the sun's side.
+    notes: Referenced aperture, counts, shield lengths and secondary; gold and aluminium by their optical constants; authored figure, gaps and sizes of the bus, tower and instrument module.
     details: [hull, clumps, quick, demo]
+    # In space: nothing behind it, and one sun. Webb may point only 85 to
+    # 135 degrees from the sun (STScI, JWST user documentation, "JWST
+    # Field of Regard"), and its sky is darkest at 135, so the sun lies
+    # 135 degrees from the mirror's line of sight (-z here) on the
+    # shield's side (-y): toward (0, -sin 135, -cos 135). The direction
+    # is measured; the strength is the studio's key light, authored.
+    staging:
+      sky:
+        horizon: {r: 0, g: 0, b: 0}
+        zenith: {r: 0, g: 0, b: 0}
+        ground: {r: 0, g: 0, b: 0}
+      sources:
+        - toward: {x: 0, y: -0.7071067811865476, z: 0.7071067811865476}
+          strength: {r: 2.4, g: 2.3, b: 2.1}
     references:
       - title: NASA, Webb telescope overview
         url: https://science.nasa.gov/mission/webb/science-overview/science-explainers/telescope-overview/
       - title: NASA, Webb sunshield
         url: https://science.nasa.gov/mission/webb/webbs-sunshield/
+  - kind: mcrn-larson
+    group: Visitors
+    about: A flying saucer, the MCRN Larson, weathered titanium under a glass dome.
+    notes: Patterned on the plain saucers Gary Larson drew in The Far Side, named as The Expanse names Mars's navy; our own geometry, picked by eye.
+    details: [hull, clumps, quick, demo]
+    # In space, by one sun from the studio key light's way.
+    staging:
+      sky:
+        horizon: {r: 0, g: 0, b: 0}
+        zenith: {r: 0, g: 0, b: 0}
+        ground: {r: 0, g: 0, b: 0}
+      sources:
+        - toward: {x: -1, y: 2, z: -2}
+          strength: {r: 2.4, g: 2.3, b: 2.1}
+    references:
+      - title: Gary Larson, The Far Side
+        url: https://www.thefarside.com/
+      - title: James S. A. Corey, The Expanse
+        url: https://en.wikipedia.org/wiki/The_Expanse_(novel_series)
+  - kind: apollo-csm
+    group: Crewed spacecraft
+    about: The Apollo command and service module, standing on its engine bell, 10.11 m tall and 3.91 m across.
+    notes: Diameters and lengths read from NASA's Apollo 204 spacecraft page, NSSDCA and Wikipedia, and not yet pinned; the bell's top, the command module's apex and every look are picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Apollo 204 Review Board, the spacecraft
+        url: https://www.nasa.gov/wp-content/uploads/static/history/Apollo204/spacecraft.html
+      - title: NSSDCA, Apollo 7 command and service module
+        url: https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1968-089A
+  - kind: apollo-lunar-module
+    group: Crewed spacecraft
+    about: The Apollo lunar module on its four footpads, 7.04 m tall and 9.4 m across them, its descent stage in a gold blanket.
+    notes: Heights, widths and the pads' span read from NASA's Apollo 204 spacecraft page, NSSDCA and Wikipedia, and not yet pinned. The ascent stage is one eight-sided prism and each leg one strut; the blanket is Kapton over aluminium by their optical constants.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NSSDCA, Apollo 11 lunar module
+        url: https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1969-059C
+      - title: NASA, Apollo 204 Review Board, the spacecraft
+        url: https://www.nasa.gov/wp-content/uploads/static/history/Apollo204/spacecraft.html
+  - kind: soyuz-ms
+    group: Crewed spacecraft
+    about: Soyuz MS, standing on its service module, 7.48 m tall, without its solar arrays.
+    notes: Every size is from one secondary page, which the Russian page disagrees with; unverified. The orbital module's roundness is three straight lengths, and every look is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Wikipedia, Soyuz (spacecraft)
+        url: https://en.wikipedia.org/wiki/Soyuz_(spacecraft)
+  - kind: mercury-capsule
+    group: Crewed spacecraft
+    about: The Mercury capsule, standing on its heat shield, 3.3 m tall and 1.8 m across, without its escape tower.
+    notes: Its two sizes are from a secondary page; how its height is shared among its three lengths, and every look, are picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Wikipedia, Mercury capsule
+        url: https://en.wikipedia.org/wiki/Mercury_capsule
+  - kind: gemini
+    group: Crewed spacecraft
+    about: The Gemini spacecraft, standing on its adapter, 5.736 m tall and 3.048 m across its base.
+    notes: Sizes from a secondary page and the heat shield's width from NASA's familiarization manual, which gives a different overall length; every look is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Gunter's Space Page, Gemini
+        url: https://space.skyrocket.de/doc_sdat/gemini.htm
+  - kind: saturn-v
+    group: Launchers
+    about: The Saturn V launch vehicle, its three stages and instrument unit, 85.6 m tall and 10.06 m across, without the Apollo spacecraft on top.
+    notes: Stage lengths and diameters are NASA's, as a search of nasa.gov relayed them; how the third stage is shared with its skirt is picked. No fins, no engines, and not its white and black paint.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Apollo 4 press kit
+        url: https://ntrs.nasa.gov/api/citations/19670031260/downloads/19670031260.pdf
+      - title: NASA, The Enduring Legacy of Saturn V Launch Vehicle Flight
+        url: https://ntrs.nasa.gov/api/citations/20200002830/downloads/20200002830.pdf
+  - kind: saturn-ib
+    group: Launchers
+    about: The Saturn IB launch vehicle, its two stages and instrument unit, 43.16 m tall and 6.61 m across, with no spacecraft on top.
+    notes: Stage lengths and diameters are as Wikipedia's Saturn IB page gives them, read 2026-11-12, and are not pinned; its infobox and its text disagree by eight centimetres on the second stage's width, and the text's is used. No fins, no engines, and plain white where the first stage's tanks were black and white.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Wikipedia, Saturn IB
+        url: https://en.wikipedia.org/wiki/Saturn_IB
+  - kind: saturn-v-apollo
+    group: Launchers
+    about: The Apollo-Saturn V as it stood on the pad, with the Apollo spacecraft and its escape tower, 110.64 m tall, NASA's 363 feet.
+    notes: The stages and the total height are NASA's; the lunar module adapter's length is unverified, and the escape tower's is what is left of the 363 feet. No fins, no engines, and not its black markings.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Apollo 4 press kit
+        url: https://ntrs.nasa.gov/api/citations/19670031260/downloads/19670031260.pdf
+  - kind: sls-block-1
+    group: Launchers
+    about: The Space Launch System, Block 1, its core stage, two solid rocket boosters and upper stage, 86.7 m tall, without Orion on top.
+    notes: The core stage's and boosters' sizes are NASA's; the upper stage's is a table row inferred to be it; the adapter's height is picked. No engines, and not the core's orange foam.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Space Launch System reference
+        url: https://www.nasa.gov/reference/space-launch-system/
+      - title: NASA, SLS core stage fact sheet
+        url: https://www.nasa.gov/wp-content/uploads/2020/02/sls_core_stage_fact_sheet_04262021_508.pdf
+  - kind: mcrn-larson-landed
+    group: Visitors
+    about: The MCRN Larson landed, on three legs, its stairs down from the belly.
+    notes: The same saucer with its gear down. The legs and the stairs are picked by eye; the stairs are built by the stairs constructor, and each part's look is made from the material and the finish it names.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Gary Larson, The Far Side
+        url: https://www.thefarside.com/
+      - title: James S. A. Corey, The Expanse
+        url: https://en.wikipedia.org/wiki/The_Expanse_(novel_series)
   - kind: space-observatory
     group: Observatories
     about: The default Spitzer template behind the custom spacecraft recipe.

@@ -33,23 +33,24 @@ import (
 )
 
 type record struct {
-	Started             time.Time        `json:"started"`
-	Elapsed             time.Duration    `json:"elapsed-nanoseconds"`
-	SettingsSHA256      string           `json:"settings-sha256"`
-	BinarySHA256        string           `json:"binary-sha256"`
-	ImageSHA256         string           `json:"image-sha256"`
-	Build               *debug.BuildInfo `json:"go-build-info,omitempty"`
-	Sources             []sourcePlan     `json:"sources"`
-	HeightModel         string           `json:"height-model"`
-	RenderOrigin        maths.Vec        `json:"render-origin-metres"`
-	Patches             []terrain.Patch  `json:"patches"`
-	Samples             int              `json:"source-samples"`
-	NormalStencils      int              `json:"normal-stencils"`
-	NormalHeightQueries int              `json:"normal-height-queries"`
-	Limited             bool             `json:"cell-target-limited"`
-	Profile             gpu.Profile      `json:"gpu-profile"`
-	RayReference        float64          `json:"secondary-ray-reference-metres"`
-	Site                *siteRecord      `json:"site,omitempty"`
+	TerrainTransition   *island.TransitionRecord `json:"terrain-transition,omitempty"`
+	Started             time.Time                `json:"started"`
+	Elapsed             time.Duration            `json:"elapsed-nanoseconds"`
+	SettingsSHA256      string                   `json:"settings-sha256"`
+	BinarySHA256        string                   `json:"binary-sha256"`
+	ImageSHA256         string                   `json:"image-sha256"`
+	Build               *debug.BuildInfo         `json:"go-build-info,omitempty"`
+	Sources             []sourcePlan             `json:"sources"`
+	HeightModel         string                   `json:"height-model"`
+	RenderOrigin        maths.Vec                `json:"render-origin-metres"`
+	Patches             []terrain.Patch          `json:"patches"`
+	Samples             int                      `json:"source-samples"`
+	NormalStencils      int                      `json:"normal-stencils"`
+	NormalHeightQueries int                      `json:"normal-height-queries"`
+	Limited             bool                     `json:"cell-target-limited"`
+	Profile             gpu.Profile              `json:"gpu-profile"`
+	RayReference        float64                  `json:"secondary-ray-reference-metres"`
+	Site                *siteRecord              `json:"site,omitempty"`
 }
 
 // render opens one checked scene, draws it and closes its retained sources.
@@ -118,7 +119,7 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 	if err != nil {
 		return record{}, err
 	}
-	prepared, err := session.ground.Prepare(ctx, view, origin)
+	prepared, err := session.prepareGround(ctx, plan, view, origin)
 	if err != nil {
 		return record{}, err
 	}
@@ -126,7 +127,7 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 	if err != nil {
 		return record{}, err
 	}
-	site, err := plan.compose(ctx, world, sphere, session.layers, view, origin, &session.prototypes)
+	site, err := plan.compose(ctx, world, sphere, session.layers, view, origin, &session.prototypes, &session.floors)
 	if err != nil {
 		return record{}, err
 	}
@@ -167,7 +168,7 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 	if err != nil {
 		return record{}, err
 	}
-	receipt := record{Started: started.UTC(), Elapsed: time.Since(started), SettingsSHA256: plan.hash,
+	receipt := record{TerrainTransition: prepared.Transition, Started: started.UTC(), Elapsed: time.Since(started), SettingsSHA256: plan.hash,
 		BinarySHA256: session.binaryHash, ImageSHA256: hex.EncodeToString(imageHash[:]), Build: session.build,
 		Sources: plan.Sources, HeightModel: plan.Model, RenderOrigin: origin.Origin(),
 		Patches: prepared.Patches, Samples: prepared.Samples, Limited: prepared.Limited, Profile: profile, Site: site}
@@ -225,6 +226,11 @@ func (plan plan) openSources(ctx context.Context) (*island.Layers, []*terrain.Ra
 // under the same render origin.
 func (plan plan) world(sphere frame.Sphere, origin frame.Relative, ground island.Prepared) (*thing.World, error) {
 	world := thing.NewWorld()
+	illumination, err := plan.relativeIllumination(origin)
+	if err != nil {
+		return nil, err
+	}
+	world.VolumeIllumination = illumination
 	if plan.RayReference != nil {
 		reference, err := thing.NewRayOriginReference(measure.Metres(*plan.RayReference))
 		if err != nil {
@@ -238,10 +244,14 @@ func (plan plan) world(sphere frame.Sphere, origin frame.Relative, ground island
 	world.Sky = sky.Gradient{Horizon: background, Zenith: background, Ground: background}
 	material := &thing.Material{Name: "authored island ground", Colour: rgb(plan.Ground)}
 	if len(plan.Landcover) > 0 || (plan.Site != nil && plan.Site.Forest != nil) {
-		material.Texture = &altitudePaint{frame: sphere, origin: origin.Origin(), bands: append([]heightBand(nil), plan.Landcover...), base: rgb(plan.Ground), transition: plan.LandcoverTransition}
+		material.Texture = &altitudePaint{frame: sphere, origin: ground.Origin, bands: append([]heightBand(nil), plan.Landcover...), base: rgb(plan.Ground), transition: plan.LandcoverTransition}
 	}
 	for _, surface := range ground.Surfaces {
-		world.Add(thing.Thing{Shape: surface, Material: material})
+		placed := thing.Thing{Shape: surface, Material: material}
+		if ground.Origin != origin.Origin() {
+			placed.Motion = thing.Still(maths.NewSubspace(ground.Origin.Sub(origin.Origin()), maths.Orientation{}, 1))
+		}
+		world.Add(placed)
 	}
 	ocean, err := globe.New(plan.Radius + plan.Ocean.Height)
 	if err != nil {
@@ -254,6 +264,9 @@ func (plan plan) world(sphere frame.Sphere, origin frame.Relative, ground island
 	world.Add(thing.Thing{Shape: ocean, Material: &thing.Material{Name: "authored smooth ocean proxy",
 		Colour: rgb(plan.Ocean.Colour), Gloss: plan.Ocean.Gloss, Index: plan.Ocean.Index},
 		Motion: thing.Still(maths.NewSubspace(centre, maths.Orientation{}, 1))})
+	if err := plan.cloudLayers(world, sphere, origin); err != nil {
+		return nil, err
+	}
 	azimuth, altitude := plan.Sun.Azimuth*maths.Degree, plan.Sun.Altitude*maths.Degree
 	toward := maths.V(math.Sin(azimuth)*math.Cos(altitude), math.Sin(altitude), -math.Cos(azimuth)*math.Cos(altitude))
 	lamp, err := emit.NewDistant(toward, rgb(plan.Sun.Strength))

@@ -2,8 +2,11 @@
 // rocky planet combines ground, atmosphere, and moons; a gas giant adds rings;
 // a black-hole scene combines a dark body with an accretion disc.
 //
-// Place adds those components to a world and times satellite orbits from the
-// primary's mass. The caller supplies a scale to suit the shot.
+// NewBody is the door: it checks the core - name, kind, size and mass -
+// and hangs the parts, each made by its own constructor from typed
+// quantities, each checking its own arguments. Place adds the parts to
+// a world and times satellite orbits from the primary's mass; the
+// caller supplies a scale to suit the shot.
 //
 // Sizes, masses, and durations were originally entered from memory and are not
 // yet verified against published sources. Mark each verified value beside its
@@ -12,10 +15,9 @@
 package bodies
 
 import (
+	"errors"
 	"fmt"
-	"image"
 	"math"
-	"time"
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/hexes"
@@ -47,314 +49,16 @@ const lightSpeed = 299792458.0
 // its disc: the jets' seed is the body's plus this.
 const jetsOffset = 4
 
-// Body is a body as a whole.
-type Body struct {
-	Name string
-	Kind Kind
-	// Radius in kilometres, Mass in kilograms, Day the time it turns once,
-	// Tilt its axis off its orbit's north in radians. Spin is a hole's, its
-	// angular momentum per unit mass as a share of its mass, zero for
-	// schwarzschild and under one for kerr.
-	Radius float64
-	Mass   float64
-	Day    time.Duration
-	Tilt   float64
-	Spin   float64
-	// Seed grows the noise of the parts that have no seed of their
-	// own, the disc, the jets and the coma, so two bodies do not share
-	// one noise. Clouds, Cities, Aurora and a Tail carry their own.
-	Seed uint64
-	// Glow is what a star's surface gives off, and Radiant what it
-	// gives off and passes outside the visible.
-	Glow    maths.Light
-	Radiant thing.Radiant
-	// The parts, each there or not.
-	Ground *Ground
-	Gas    *Gas
-	Air    *Air
-	Clouds *Clouds
-	Cities *Cities
-	Aurora *Aurora
-	Rings  *Rings
-	Disc   *Disc
-	Jets   *Jets
-	Flare  *Flare
-	Edge   Horizon
-	Coma   *Coma
-	Tails  []Tail
-	Plumes []Plume
-	Moons  []Moon
-}
-
-// Coma is a comet's head: a cloud of gas and dust round the nucleus,
-// Radius in kilometres, Dense at its heart, scattering the sun in
-// Colour and giving off Glow of its own, the green of carbon.
-//
-// Dense, here and on every part that has one, is an extinction per
-// kilometre: how much of the light is lost in a kilometre of path
-// where the part is densest, falling off by the medium's own profile,
-// one number for every band.
-//
-// Thick is always a length in kilometres, and Opacity an optical depth
-// with no unit.
-type Coma struct {
-	Radius float64
-	Dense  float64
-	Colour maths.Light
-	Glow   maths.Light
-}
-
-// Tail is a stream from the body away from its sun: Length, Base, Spread and
-// Curve as a medium.Tail takes them, in kilometres, Dense per kilometre at its
-// heart, scattering the sun in Colour and glowing Glow; Wisp is how ragged it
-// is, zero smooth.
-//
-// Sun is where the sun is in the world and Trail which way the body is moving,
-// both set by the shot with Aim: the tail streams away from the sun and bends
-// back along the trail, set once, where the body is at time zero.
-//
-// the tail is laid in the body's own turning, tilted space, so on a body that
-// turns or leans it streams away from the sun only at zero and turns with the
-// body after: kept as it was, as ruled.
-type Tail struct {
-	Length, Base, Spread float64
-	Curve                float64
-	Dense                float64
-	Colour, Glow         maths.Light
-	Radiant              thing.Radiant
-	Wisp                 float64
-	Seed                 uint64
-	Sun, Trail           maths.Vec
-}
-
-// Aim points every tail of the body away from a sun at a point in the
-// world, bending back along the way the body moves.
-func (b *Body) Aim(sun, trail maths.Vec) {
-	for i := range b.Tails {
-		b.Tails[i].Sun, b.Tails[i].Trail = sun, trail
-	}
-}
-
-// Clouds is a world's cloud layer: Low and High above the surface in
-// kilometres, Cover the share of the sky clouded, Dense the extinction
-// per kilometre at a patch's heart, Seed its weather.
-type Clouds struct {
-	Low, High float64
-	Cover     float64
-	Dense     float64
-	Seed      uint64
-}
-
-// Aurora is a body's aurora: a glow in a shell from Low to High above the
-// surface in kilometres, in an oval round each magnetic pole at Lat from the
-// pole's equator and Width wide, both in radians, the magnetic axis Tilt off
-// the spin, about x.
-//
-// Strength is the glow at the oval's heart as a share of the sun's light, which
-// a night shot exposes for; Curtains the dressing, zero for a smooth band.
-//
-// Fringe, Bottom and Top are its colours with height; the earth's are purple,
-// green and red, a giant's blues standing in for the ultraviolet it really
-// shines in.
-type Aurora struct {
-	Low, High           float64
-	Lat, Width          float64
-	Tilt                float64
-	Strength            float64
-	Curtains            float64
-	Seed                uint64
-	Fringe, Bottom, Top maths.Light
-	// Radiant, when there is one, is what the aurora gives off and
-	// passes outside the visible: an aurora driven by a magnetar is
-	// x-ray bright.
-	Radiant thing.Radiant
-}
-
-// Cities is a world's lights at night, laid as the black marble lays
-// the earth's: Rungs below the ground's tiles, Share of the land tiles
-// lit as towns and Metro of the tiles two rungs up as metros, more on
-// coasts and in the middle latitudes, each Glow, Seed their places.
-type Cities struct {
-	Rungs int
-	Share float64
-	Metro float64
-	Glow  maths.Light
-	Seed  uint64
-}
-
-// Jets is a pair of jets along the body's axis, Tilt off it: Length,
-// Base, From and the spread of a medium.Jet in kilometres, Dense per
-// kilometre at the base, and what they glow and give off in bands.
-//
-// Speed is the share of the speed of light they move at, which beams
-// their light.
-type Jets struct {
-	Length, Base, Spread float64
-	From                 float64
-	Dense                float64
-	Tilt                 float64
-	Speed                float64
-	// Knots is a dressing, as medium.Jet takes it: lumps along the jet,
-	// zero for a smooth one.
-	Knots   float64
-	Glow    maths.Light
-	Radiant thing.Radiant
-}
-
-// Flare is a fireball from a star's surface: born At, growing at Speed
-// kilometres a second, Opacity the optical depth across its own radius
-// however big it has grown, glowing and giving off in bands. Before At
-// there is nothing.
-type Flare struct {
-	At      time.Duration
-	Speed   float64
-	Opacity float64
-	Glow    maths.Light
-	Radiant thing.Radiant
-}
-
-// Plume is a volcanic plume: a column of gas and dust rising from a
-// point on the ground and falling back in an umbrella, as io's do.
-//
-// Toward is the point on the ground as a direction from the centre;
-// Height and Width are in kilometres; Dense is the extinction per
-// kilometre at the column's heart.
-type Plume struct {
-	Toward        maths.Vec
-	Height, Width float64
-	Dense         float64
-	Colour        maths.Light
-}
-
-// Fineness is detail painted finer than the ground's own hex tiles, for an eye
-// near it. Each fine tile takes the land class of the coarse tile it sits in,
-// its brightness varied by Vary and a neighbouring class let in by Mix, both
-// shares.
-//
-// Rungs is how many levels finer the hex tiling goes, zero for the picture to
-// choose from the angle a pixel covers (world.Fine says how).
-type Fineness struct {
-	Rungs     int
-	Vary, Mix float64
-}
-
-// Ground is a rock world's surface: how its terrain is made, how it is
-// painted, and what features it has, placed by what the terrain has
-// where.
-type Ground struct {
-	Terrain world.Terrain
-	Look    world.Look
-	// Features places the features on a plain world, by asking it
-	// where its land and water are; it refuses, with the reason, when
-	// a feature has nowhere to go.
-	Features func(w *world.World) ([]world.Feature, error)
-	// Radiant is what the ground does outside the visible, and Rough how
-	// rough each class is for a radar, as a look whose paints are greys
-	// from zero to one. Nil is opaque, dark, and rough alike.
-	Radiant thing.Radiant
-	Rough   *world.Look
-	// Fine, when there is one, paints the ground below its own rung,
-	// for an eye near it. Nil paints the tiles as they are.
-	Fine *Fineness
-	// Map and Lights, when given, are pictures wrapped on the sphere in
-	// place of the painted world and the cities: an equirectangular map of
-	// the ground by day, and of its lights at night, as nasa publishes the
-	// blue and the black marble.
-	//
-	// Turn moves their left edge round the sphere, in radians.
-	//
-	// The lights are scaled by Glow, a city's light against the sun's,
-	// which a night shot exposes for; zero is read as four thousandths.
-	Map, Lights image.Image
-	Turn        float64
-	Glow        float64
-}
-
-// Gas is a giant's body: Depth, how far below the cloud tops it goes
-// opaque, as a share of the radius; Opacity, the optical depth from the
-// cloud tops to there, no unit; and Bands, what it looks like.
-type Gas struct {
-	Depth   float64
-	Opacity float64
-	Bands   texture.Banded
-}
-
-// Air is an atmosphere: Height its scale height in kilometres, Dense
-// the extinction per kilometre at the surface, and the colour of what
-// it scatters.
-type Air struct {
-	Height float64
-	Dense  float64
-	Colour maths.Light
-	// Radiant is what the air does outside the visible: venus's clouds
-	// pass radio, which is how its ground was mapped.
-	Radiant thing.Radiant
-}
-
-// Rings are a disc round a giant: from Inner to Outer as shares of the
-// radius, Thick its thickness in kilometres, and the rest as a
-// medium.Disc has it.
-type Rings struct {
-	Inner, Outer float64
-	Thick        float64
-	Dense        float64
-	Profile      []float64
-	Grain        float64
-	Ringlets     float64
-	Colour       maths.Light
-}
-
-// Horizon is a hole's edge, a body's Edge; what is on it is a dressing, since
-// nothing on a horizon can be seen. Hexes is the brightness of hex lines drawn
-// on a black ball just outside it, zero for none, and Light their colour, white
-// when unset.
-//
-// A spinning hole's horizon is flattened at the poles, so the ball is as wide
-// as its equator and a fiftieth more: outside the horizon at the equator, and a
-// hair further outside at the poles.
-//
-// The ball blocks a camera's way out from inside, where no horizon would; a
-// fall through the horizon wants the hexes off.
-type Horizon struct {
-	Hexes float64
-	Light maths.Light
-}
-
-// Disc is the glowing disc round a hole: from Inner to Outer in
-// kilometres, Thick its thickness in kilometres, Dense the extinction
-// per kilometre; its colour falls from Hot at the inner edge by
-// texture.Thin's profile.
-type Disc struct {
-	Inner, Outer float64
-	Thick, Dense float64
-	// Hot is the hottest ring's temperature in kelvin and Bright its
-	// light: the disc's colour is a black body's by radius, none typed.
-	Hot, Bright float64
-	// Speed is the gas's orbital speed at the inner edge as a share of the
-	// speed of light, which beams the side coming toward the eye; zero is
-	// none.
-	Speed float64
-	// Streaks and Shear are a dressing, as texture.Thin takes them: a
-	// toggle for a film, zero honest.
-	Streaks, Shear float64
-}
-
-// Moon is a body on an orbit round another: its own body, the orbit's
-// radius in kilometres, and where on it the moon starts.
-type Moon struct {
-	Body  Body
-	Orbit float64
-	Phase float64
-}
-
 // Omega is how fast a circular orbit goes round the body at a radius,
-// in radians a second, by kepler: the radius in kilometres.
-func (b *Body) Omega(radius float64) float64 {
-	if b.Mass <= 0 || radius <= 0 {
+// in radians a second, by kepler. It is zero for a body with no mass or
+// less, and for a radius of zero or less.
+func (body *Body) Omega(radius Span) float64 {
+	around := radius.InKilometres()
+	if body.mass <= 0 || around <= 0 {
 		return 0
 	}
-	r := radius * 1000
-	return math.Sqrt(thing.G * b.Mass / (r * r * r))
+	metres := around * 1000
+	return math.Sqrt(thing.G * body.mass / (metres * metres * metres))
 }
 
 // Schwarzschild is the radius of a hole of a mass, in kilometres: worked
@@ -371,23 +75,33 @@ func Schwarzschild(mass float64) float64 {
 // The parts: the ground, the gas, the hole and its disc, the air, the
 // rings, the plumes, and the moons on their orbits with their own
 // parts, each a thing or a volume that moves as the body does.
-func (b Body) Place(w *thing.World, at maths.Vec, scale float64,
+func (body Body) Place(into *thing.World, at maths.Vec, scale float64,
 	detail int) error {
-	lean := maths.Rotation(maths.XAxis, b.Tilt)
+	if err := vecComplaint(body.name+" placed at a point that", at); err != nil {
+		return fmt.Errorf("bodies: %w", err)
+	}
+	lean := maths.Rotation(maths.XAxis, body.tilt)
 	space := maths.Subspace{Origin: at, Orientation: lean}
 	var motion thing.Motion = thing.Still(space)
-	if b.Day != 0 {
+	if body.day != 0 {
 		// the body turns on its own axis once a day
-		motion = thing.Spin{In: space, Axis: lean.Out(maths.Up), Period: b.Day}
+		motion = thing.Spin{In: space, Axis: lean.Out(maths.Up),
+			Period: body.day}
 	}
-	if err := b.build(w, motion, scale, detail); err != nil {
+	if err := body.build(into, motion, scale, detail); err != nil {
 		return err
 	}
-	for i, m := range b.Moons {
-		if err := orbitable(b.Name+"'s "+m.Body.Name, b.Mass, m.Orbit*1000); err != nil {
+	for place, moon := range body.moons {
+		err := orbitable(body.name+"'s "+moon.body.name, body.mass,
+			moon.orbit*1000)
+		if err != nil {
 			return err
 		}
-		err := m.Body.build(w, b.Orbit(i, at, scale), scale, max(2, detail/2))
+		orbit, err := body.Orbit(place, at, scale)
+		if err != nil {
+			return err
+		}
+		err = moon.body.build(into, orbit, scale, max(2, detail/2))
 		if err != nil {
 			return err
 		}
@@ -399,20 +113,30 @@ func (b Body) Place(w *thing.World, at maths.Vec, scale float64,
 // motion of the caller's, at a scale: the body's own turning is not
 // added, so a planet on a track keeps one face along it, as a moon
 // does. Its moons are not placed. It refuses as Place does.
-func (b Body) PlaceOn(w *thing.World, motion thing.Motion, scale float64,
-	detail int) error {
-	return b.build(w, motion, scale, detail)
+func (body Body) PlaceOn(into *thing.World, motion thing.Motion,
+	scale float64, detail int) error {
+	return body.build(into, motion, scale, detail)
 }
 
-// Orbit is the orbit of the body's i-th moon when the body is placed at
-// a point at a scale: round the body's own north, kepler's period from
-// the body's mass, locked so the moon keeps one face to the body.
-func (b Body) Orbit(i int, at maths.Vec, scale float64) thing.Orbit {
-	m := b.Moons[i]
-	lean := maths.Rotation(maths.XAxis, b.Tilt)
-	return thing.Orbit{Centre: at, Radius: m.Orbit * scale,
-		Axis: lean.Out(maths.Up), Period: thing.Period(b.Mass, m.Orbit*1000),
-		Phase: m.Phase, Locked: true}
+// Orbit is the orbit of the body's moon at a place when the body is
+// placed at a point at a scale: round the body's own north, kepler's
+// period from the body's mass, locked so the moon keeps one face to
+// the body.
+//
+// It is an error when the body has no moon at the place.
+func (body Body) Orbit(place int, at maths.Vec,
+	scale float64) (thing.Orbit, error) {
+	if place < 0 || place >= len(body.moons) {
+		return thing.Orbit{}, fmt.Errorf("bodies: %s has %d moons: "+
+			"there is none at place %d", body.name, len(body.moons),
+			place)
+	}
+	moon := body.moons[place]
+	lean := maths.Rotation(maths.XAxis, body.tilt)
+	return thing.Orbit{Centre: at, Radius: moon.orbit * scale,
+		Axis:   lean.Out(maths.Up),
+		Period: thing.Period(body.mass, moon.orbit*1000),
+		Phase:  moon.phase, Locked: true}, nil
 }
 
 // Stand is where someone stands on a body's ground: the body's space
@@ -432,312 +156,299 @@ func Stand(space maths.Subspace, radius float64, toward maths.Vec,
 // optional part, as things and volumes in the world, all carried by
 // one motion. Place and PlaceOn decide where and how it moves; build
 // decides what it is made of, and refuses when a part cannot be made.
-func (b Body) build(w *thing.World, motion thing.Motion, scale float64,
+func (body Body) build(into *thing.World, motion thing.Motion, scale float64,
 	detail int) error {
-	if err := b.sound(scale); err != nil {
+	if into == nil {
+		return fmt.Errorf("bodies: %s cannot be placed in a nil world",
+			body.name)
+	}
+	if err := body.sound(scale); err != nil {
 		return err
 	}
-	r := b.Radius * scale
-	switch b.Kind {
+	radius := body.radius * scale
+	switch body.kind {
 	case Rock:
-		ground, err := b.groundMaterial(detail)
+		ground, err := body.groundMaterial(detail)
 		if err != nil {
 			return err
 		}
-		w.Add(thing.Thing{
-			Shape:    shape.Sphere{Radius: r},
+		into.Add(thing.Thing{
+			Shape:    shape.Sphere{Radius: radius},
 			Material: ground,
 			Motion:   motion,
 		})
 	case Giant:
-		if b.Gas != nil {
-			bands := b.Gas.Bands
+		if body.gas != nil {
+			bands := body.gas.bands
 			bands.Axis = maths.Up
-			w.AddVolume(thing.Volume{
-				Medium: medium.Giant{Radius: r, Depth: b.Gas.Depth * r,
-					Thick: b.Gas.Opacity / (b.Gas.Depth * r)},
-				Material: &thing.Material{Name: b.Name, Texture: bands},
-				Motion:   motion,
+			into.AddVolume(thing.Volume{
+				Medium: medium.Giant{Radius: radius,
+					Depth: body.gas.depth * radius,
+					Thick: body.gas.opacity /
+						(body.gas.depth * radius)},
+				Material: &thing.Material{Name: body.name,
+					Texture: bands},
+				Motion: motion,
 			})
 		}
 	case Star:
-		w.Add(thing.Thing{
-			Shape: shape.Sphere{Radius: r},
-			Material: &thing.Material{Name: b.Name, Glow: b.Glow,
-				Radiant: b.Radiant},
+		into.Add(thing.Thing{
+			Shape: shape.Sphere{Radius: radius},
+			Material: &thing.Material{Name: body.name,
+				Glow: body.glow, Radiant: body.radiant},
 			Motion: motion,
 			// a star is the light: it casts no shadow of its own
 			Attrs: thing.Attrs{Clear: true},
 		})
 	case Hole:
-		rs := Schwarzschild(b.Mass) * scale
-		// the hole's field: its mass as a length is half the
-		// schwarzschild radius; it bends rays within twenty radii, and
-		// the black is the field's own, rays that came from the horizon
-		//
-		// the hexes, a dressing, want a ball to be drawn on, just
-		// outside the horizon, since nothing on it can be seen
-		m := rs / 2
-		spin := b.Spin * m
-		w.AddField(thing.Field{Mass: m, Spin: spin, Reach: 20 * rs,
-			Motion: motion})
-		if b.Edge.Hexes > 0 {
-			light := b.Edge.Light
-			if light == (maths.Light{}) {
-				light = maths.Grey(1)
-			}
-			// the horizon's kerr-schild radius, as
-			// holemath.Hole.Horizon has it, which bodies does not
-			// import on purpose: its reach at the poles; at the
-			// equator it reaches root(rplus^2 + spin^2)
-			rplus := m + math.Sqrt(math.Max(0, m*m-spin*spin))
-			w.Add(thing.Thing{
-				Shape: shape.Sphere{
-					Radius: 1.02 * math.Sqrt(rplus*rplus+spin*spin)},
-				Material: &thing.Material{Name: b.Name + " horizon",
-					Shine: texture.Wire{Tiling: hexes.Sphere{N: 6},
-						Light: light.Scale(b.Edge.Hexes)}},
-				Motion: motion,
-			})
-		}
-		if b.Disc != nil {
-			disc := b.Disc
-			v := thing.Volume{
-				Medium: medium.Disc{Inner: disc.Inner * scale, Outer: disc.Outer * scale,
-					Thick: disc.Thick * scale, Dense: disc.Dense / scale},
-				// the streaks go round at the orbital rate the
-				// hole's mass sets, in the disc's own units
-				Material: &thing.Material{Name: b.Name + " disc",
-					Shine: texture.Thin{Inner: disc.Inner * scale,
-						Outer: disc.Outer * scale, Hot: disc.Hot,
-						Bright: disc.Bright, Streaks: disc.Streaks,
-						Shear: disc.Shear, Seed: b.Seed,
-						Omega: b.Omega(1 / scale)}},
-				Motion: motion,
-			}
-			if disc.Speed > 0 {
-				v.Beam = &thing.Beam{Axis: maths.Up, Speed: disc.Speed,
-					Round: true, At: disc.Inner * scale}
-			}
-			w.AddVolume(v)
-		}
+		body.buildHole(into, motion, scale)
 	}
-	if air := b.Air; air != nil {
-		w.AddVolume(thing.Volume{
-			Medium: medium.Air{Radius: r, Height: air.Height * scale,
-				Thick: air.Dense / scale},
-			Material: &thing.Material{Name: b.Name + " air", Colour: air.Colour,
-				Radiant: air.Radiant},
+	if air := body.air; air != nil {
+		into.AddVolume(thing.Volume{
+			Medium: medium.Air{Radius: radius,
+				Height: air.height * scale,
+				Thick:  air.dense / scale},
+			Material: &thing.Material{Name: body.name + " air",
+				Colour: air.colour, Radiant: air.radiant},
 			Motion: motion,
 		})
 	}
-	if aurora := b.Aurora; aurora != nil {
-		axis := maths.Rotation(maths.XAxis, aurora.Tilt).Out(maths.Up)
-		w.AddVolume(thing.Volume{
-			Medium: medium.Aurora{Radius: r, Low: aurora.Low * scale,
-				High: aurora.High * scale, Lat: aurora.Lat, Width: aurora.Width,
-				Axis: axis, Thick: 1 / (aurora.High - aurora.Low) / scale,
-				Curtains: aurora.Curtains, Seed: aurora.Seed},
-			Material: &thing.Material{Name: b.Name + " aurora",
-				Shine: texture.Aurora{Radius: r, Low: aurora.Low * scale,
-					High:   aurora.High * scale,
-					Fringe: aurora.Fringe.Scale(aurora.Strength),
-					Bottom: aurora.Bottom.Scale(aurora.Strength),
-					Top:    aurora.Top.Scale(aurora.Strength)},
-				Radiant: aurora.Radiant},
+	if aurora := body.aurora; aurora != nil {
+		axis := maths.Rotation(maths.XAxis, aurora.tilt).Out(maths.Up)
+		into.AddVolume(thing.Volume{
+			Medium: medium.Aurora{Radius: radius,
+				Low:  aurora.low * scale,
+				High: aurora.high * scale, Lat: aurora.lat,
+				Width: aurora.width, Axis: axis,
+				Thick:    1 / (aurora.high - aurora.low) / scale,
+				Curtains: aurora.curtains, Seed: aurora.seed},
+			Material: &thing.Material{Name: body.name + " aurora",
+				Shine: texture.Aurora{Radius: radius,
+					Low:  aurora.low * scale,
+					High: aurora.high * scale,
+					Fringe: aurora.colours.fringe.Scale(
+						aurora.strength),
+					Bottom: aurora.colours.bottom.Scale(
+						aurora.strength),
+					Top: aurora.colours.top.Scale(
+						aurora.strength)},
+				Radiant: aurora.radiant},
 			Motion: motion,
 		})
 	}
-	if clouds := b.Clouds; clouds != nil {
-		w.AddVolume(thing.Volume{
-			Medium: medium.Clouds{Radius: r, Low: clouds.Low * scale,
-				High: clouds.High * scale, Cover: clouds.Cover,
-				Thick: clouds.Dense / scale, Seed: clouds.Seed},
-			Material: &thing.Material{Name: b.Name + " clouds",
+	if clouds := body.clouds; clouds != nil {
+		into.AddVolume(thing.Volume{
+			Medium: medium.Clouds{Radius: radius,
+				Low:   clouds.low * scale,
+				High:  clouds.high * scale,
+				Cover: clouds.cover,
+				Thick: clouds.dense / scale, Seed: clouds.seed},
+			Material: &thing.Material{Name: body.name + " clouds",
 				Colour: maths.Grey(1)},
 			Motion: motion,
 		})
 	}
-	if rings := b.Rings; rings != nil {
-		w.AddVolume(thing.Volume{
-			Medium: medium.Disc{Inner: rings.Inner * r, Outer: rings.Outer * r,
-				Thick: rings.Thick * scale, Dense: rings.Dense / scale,
-				Profile: rings.Profile, Grain: rings.Grain,
-				Ringlets: rings.Ringlets},
-			Material: &thing.Material{Name: b.Name + " rings",
-				Colour: rings.Colour},
+	if rings := body.rings; rings != nil {
+		into.AddVolume(thing.Volume{
+			Medium: medium.Disc{Inner: rings.inner * radius,
+				Outer:   rings.outer * radius,
+				Thick:   rings.thick * scale,
+				Dense:   rings.dense / scale,
+				Profile: rings.profile, Grain: rings.grain,
+				Ringlets: rings.ringlets},
+			Material: &thing.Material{Name: body.name + " rings",
+				Colour: rings.colour},
 			Motion: motion,
 		})
 	}
-	if jets := b.Jets; jets != nil {
-		b.buildJets(w, motion, jets, scale)
+	if jets := body.jets; jets != nil {
+		body.buildJets(into, motion, jets, scale)
 	}
-	if flare := b.Flare; flare != nil {
-		w.AddVolume(thing.Volume{
-			Medium: medium.Puff{Radius: 1, Thick: flare.Opacity},
-			Material: &thing.Material{Name: b.Name + " flare", Glow: flare.Glow,
-				Radiant: flare.Radiant},
-			Motion: thing.Growing{Of: motion, From: flare.At,
-				Rate: flare.Speed * scale},
+	if flare := body.flare; flare != nil {
+		into.AddVolume(thing.Volume{
+			Medium: medium.Puff{Radius: 1, Thick: flare.opacity},
+			Material: &thing.Material{Name: body.name + " flare",
+				Glow: flare.glow, Radiant: flare.radiant},
+			Motion: thing.Growing{Of: motion, From: flare.at,
+				Rate: flare.speed * scale},
 		})
 	}
-	if coma := b.Coma; coma != nil {
-		w.AddVolume(thing.Volume{
-			Medium: medium.Wispy{Of: medium.Puff{Radius: coma.Radius * scale,
-				Thick: coma.Dense / scale}, Seed: b.Seed,
-				Scale: coma.Radius * scale / 3, Amount: 0.5},
-			Material: &thing.Material{Name: b.Name + " coma", Colour: coma.Colour,
-				Glow: coma.Glow},
+	if coma := body.coma; coma != nil {
+		into.AddVolume(thing.Volume{
+			Medium: medium.Wispy{Of: medium.Puff{
+				Radius: coma.radius * scale,
+				Thick:  coma.dense / scale}, Seed: body.seed,
+				Scale:  coma.radius * scale / 3,
+				Amount: 0.5},
+			Material: &thing.Material{Name: body.name + " coma",
+				Colour: coma.colour, Glow: coma.glow},
 			Motion: motion,
 		})
 	}
-	for _, tail := range b.Tails {
-		// away from the sun, bending back along the trail
-		at := motion.At(0).Origin
-		if at == tail.Sun {
-			return fmt.Errorf("bodies: %s is at its sun, so its tail has "+
-				"no way to stream: Aim it at a sun somewhere else", b.Name)
-		}
-		away := at.Add(tail.Sun.Scale(-1)).Unit()
-		back := tail.Trail.Scale(-1)
-		back = back.Add(away.Scale(-away.Dot(back))).Unit()
-		if back == (maths.Vec{}) || math.IsNaN(back.X) {
-			back = maths.Upright(away).X
-		}
-		o := maths.Orientation{X: back, Y: away, Z: back.Cross(away)}
-		var m medium.Medium = medium.Tail{Length: tail.Length * scale,
-			Base: tail.Base * scale, Spread: tail.Spread, Curve: tail.Curve,
-			Thick: tail.Dense / scale}
-		if tail.Wisp > 0 {
-			// wisps a few base widths long, so they are several
-			// pixels from any distance the tail is seen at
-			m = medium.Wispy{Of: m, Seed: tail.Seed, Scale: 3 * tail.Base * scale,
-				Amount: tail.Wisp}
-		}
-		w.AddVolume(thing.Volume{
-			Medium: m,
-			Material: &thing.Material{Name: b.Name + " tail", Colour: tail.Colour,
-				Glow: tail.Glow, Radiant: tail.Radiant},
-			Motion: thing.Nested{Of: motion, In: maths.Subspace{Orientation: o}},
-		})
+	if err := body.buildTails(into, motion, scale); err != nil {
+		return err
 	}
-	for _, plume := range b.Plumes {
-		up := plume.Toward.Unit()
-		w.AddVolume(thing.Volume{
-			Medium: medium.Plume{Height: plume.Height * scale,
-				Width: plume.Width * scale, Thick: plume.Dense / scale},
-			Material: &thing.Material{Name: b.Name + " plume",
-				Colour: plume.Colour},
+	for _, plume := range body.plumes {
+		up := plume.toward.Unit()
+		into.AddVolume(thing.Volume{
+			Medium: medium.Plume{Height: plume.height * scale,
+				Width: plume.width * scale,
+				Thick: plume.dense / scale},
+			Material: &thing.Material{Name: body.name + " plume",
+				Colour: plume.colour},
 			Motion: thing.Nested{Of: motion, In: maths.Subspace{
-				Origin: up.Scale(r), Orientation: maths.Upright(up)}},
+				Origin:      up.Scale(radius),
+				Orientation: maths.Upright(up)}},
 		})
 	}
 	return nil
 }
 
+// buildHole puts a hole into the world: its field, the dressed ball
+// just outside its horizon, and its disc, beamed when the gas moves.
+func (body Body) buildHole(into *thing.World, motion thing.Motion,
+	scale float64) {
+	schwarzschild := Schwarzschild(body.mass) * scale
+	// the hole's field: its mass as a length is half the
+	// schwarzschild radius; it bends rays within twenty radii, and
+	// the black is the field's own, rays that came from the horizon
+	//
+	// the hexes, a dressing, want a ball to be drawn on, just
+	// outside the horizon, since nothing on it can be seen
+	massLength := schwarzschild / 2
+	spinLength := math.Abs(body.spin) * massLength
+	into.AddField(thing.Field{Mass: massLength, Spin: spinLength,
+		Reach: 20 * schwarzschild, Motion: turnedFor(body.spin, motion)})
+	if body.edge.hexes > 0 {
+		light := body.edge.light
+		if light == (maths.Light{}) {
+			light = maths.Grey(1)
+		}
+		// the horizon's kerr-schild radius, as
+		// holemath.Hole.Horizon has it, which bodies does not
+		// import on purpose: its reach at the poles; at the
+		// equator it reaches root(rplus^2 + spin^2)
+		rplus := massLength + math.Sqrt(math.Max(0,
+			massLength*massLength-spinLength*spinLength))
+		into.Add(thing.Thing{
+			Shape: shape.Sphere{
+				Radius: 1.02 * math.Sqrt(rplus*rplus+
+					spinLength*spinLength)},
+			Material: &thing.Material{Name: body.name + " horizon",
+				Shine: texture.Wire{
+					Tiling: hexes.Sphere{Splits: 6},
+					Light:  light.Scale(body.edge.hexes)}},
+			Motion: motion,
+		})
+	}
+	if disc := body.disc; disc != nil {
+		volume := thing.Volume{
+			Medium: medium.Disc{Inner: disc.inner * scale,
+				Outer: disc.outer * scale,
+				Thick: disc.thick * scale,
+				Dense: disc.dense / scale},
+			// the streaks go round at the orbital rate the
+			// hole's mass sets, in the disc's own units
+			Material: &thing.Material{Name: body.name + " disc",
+				Shine: texture.Thin{Inner: disc.inner * scale,
+					Outer:   disc.outer * scale,
+					Hot:     disc.hot,
+					Bright:  disc.bright,
+					Streaks: disc.streaks,
+					Shear:   disc.shear, Seed: body.seed,
+					Omega: body.Omega(Kilometres(1 / scale))}},
+			Motion: motion,
+		}
+		if disc.speed > 0 {
+			volume.Beam = &thing.Beam{Axis: maths.Up,
+				Speed: disc.speed, Round: true,
+				At: disc.inner * scale}
+		}
+		into.AddVolume(volume)
+	}
+}
+
+// buildTails streams every tail from the body: away from the sun,
+// bending back along the trail, each a volume carried by the body's
+// motion in its own leaning frame.
+func (body Body) buildTails(into *thing.World, motion thing.Motion,
+	scale float64) error {
+	for _, tail := range body.tails {
+		// away from the sun, bending back along the trail
+		at := motion.At(0).Origin
+		if at == tail.sun {
+			return fmt.Errorf("bodies: %s is at its sun, so its "+
+				"tail has no way to stream: call Aimed with a sun "+
+				"somewhere else", body.name)
+		}
+		away := at.Add(tail.sun.Scale(-1)).Unit()
+		back := tail.trail.Scale(-1)
+		back = back.Add(away.Scale(-away.Dot(back))).Unit()
+		if back == (maths.Vec{}) || math.IsNaN(back.X) {
+			back = maths.Upright(away).X
+		}
+		frame := maths.Orientation{X: back, Y: away,
+			Z: back.Cross(away)}
+		var made medium.Medium = medium.Tail{
+			Length: tail.length * scale,
+			Base:   tail.base * scale, Spread: tail.spread,
+			Curve: tail.curve, Thick: tail.dense / scale}
+		if tail.wisp > 0 {
+			// wisps a few base widths long, so they are several
+			// pixels from any distance the tail is seen at
+			made = medium.Wispy{Of: made, Seed: tail.seed,
+				Scale:  3 * tail.base * scale,
+				Amount: tail.wisp}
+		}
+		into.AddVolume(thing.Volume{
+			Medium: made,
+			Material: &thing.Material{Name: body.name + " tail",
+				Colour: tail.colour, Glow: tail.glow,
+				Radiant: tail.radiant},
+			Motion: thing.Nested{Of: motion,
+				In: maths.Subspace{Orientation: frame}},
+		})
+	}
+	return nil
+}
+
+// jetFlow is the speed at which the knots ride out, in base widths a
+// second, of jets moving at a share of the speed of light from a base a
+// width in kilometres wide.
+func jetFlow(speed, base float64) float64 {
+	return speed * lightSpeed / 1000 / base
+}
+
 // buildJets puts the body's jets into the world: a cone of glowing gas
-// each way along an axis Tilt off the body's, carried by the body's
+// each way along an axis leaning off the body's, carried by the body's
 // motion, with the knots riding out at the jets' own speed and the bulk
 // flow beaming their light toward the eye.
-func (b Body) buildJets(w *thing.World, motion thing.Motion, jets *Jets,
+func (body Body) buildJets(into *thing.World, motion thing.Motion, jets *Jets,
 	scale float64) {
 	// the knots ride out at the jet's own speed, in base widths a
 	// second, so a jet seen over time is alive
-	flow := 0.0
-	if jets.Base > 0 {
-		flow = jets.Speed * lightSpeed / 1000 / jets.Base
-	}
+	flow := jetFlow(jets.speed, jets.base)
 	// the gas: lengths to the world's units, the density per unit
-	cone := medium.Jet{Length: jets.Length * scale, Base: jets.Base * scale,
-		Spread: jets.Spread, Thick: jets.Dense / scale, From: jets.From * scale,
-		Flow: flow, Knots: jets.Knots, Seed: b.Seed + jetsOffset}
+	cone := medium.Jet{Length: jets.length * scale,
+		Base: jets.base * scale, Spread: jets.spread,
+		Thick: jets.dense / scale, From: jets.from * scale,
+		Flow: flow, Knots: jets.knots, Seed: body.seed + jetsOffset}
 	// what it glows and gives off in bands
-	gas := &thing.Material{Name: b.Name + " jets", Glow: jets.Glow,
-		Radiant: jets.Radiant}
-	// leaning Tilt off the body's axis, carried by its motion
+	gas := &thing.Material{Name: body.name + " jets", Glow: jets.glow,
+		Radiant: jets.radiant}
+	// leaning off the body's axis, carried by its motion
 	leaning := thing.Nested{Of: motion,
-		In: maths.Subspace{Orientation: maths.Rotation(maths.XAxis, jets.Tilt)}}
+		In: maths.Subspace{
+			Orientation: maths.Rotation(maths.XAxis, jets.tilt)}}
 	// the bulk flow, which beams the light toward the eye
-	beam := &thing.Beam{Axis: maths.Up, Speed: jets.Speed}
-	w.AddVolume(thing.Volume{Medium: cone, Material: gas, Motion: leaning,
+	beam := &thing.Beam{Axis: maths.Up, Speed: jets.speed}
+	into.AddVolume(thing.Volume{Medium: cone, Material: gas, Motion: leaning,
 		Beam: beam})
 }
 
 // groundTiling is the sphere a ground is made on, split detail times.
 func (Body) groundTiling(detail int) hexes.Tiling {
-	return hexes.Sphere{N: max(1, detail)}
-}
-
-// groundMaterial is the body's surface as a material: its world, made
-// on a sphere split detail times, painted in its look. A body with no
-// Ground is a mid-grey ball. It refuses when the world cannot be made.
-func (b Body) groundMaterial(detail int) (*thing.Material, error) {
-	if b.Ground == nil {
-		return &thing.Material{Name: b.Name, Colour: maths.Grey(0.5)}, nil
-	}
-	g := b.Ground
-	made, err := b.World(detail)
-	if err != nil {
-		return nil, err
-	}
-	m := &thing.Material{Name: b.Name, Radiant: g.Radiant}
-	switch {
-	case g.Map != nil:
-		m.Texture = texture.Picture{Image: g.Map, Turn: g.Turn}
-	case g.Fine != nil:
-		f := g.Fine
-		m.Texture = made.Fine(g.Look, f.Rungs, f.Vary, f.Mix)
-	default:
-		m.Texture = made.Painted(g.Look)
-	}
-	if g.Lights != nil {
-		glow := g.Glow
-		if glow == 0 {
-			glow = 0.004
-		}
-		m.Shine = texture.Picture{Image: g.Lights, Turn: g.Turn, Gain: glow}
-	}
-	if cities := b.Cities; cities != nil && g.Lights == nil {
-		shine := texture.Cities{Tiling: made.Tiling, Rungs: cities.Rungs,
-			Share: cities.Share, Metro: cities.Metro, Glow: cities.Glow,
-			Seed: cities.Seed,
-			Land: func(p maths.Vec) bool {
-				return world.Land(made.Biome(made.Tiling.Nearest(p)))
-			},
-			// a coast is a land tile with water beside it
-			Coast: func(p maths.Vec) bool {
-				tile := made.Tiling.Nearest(p)
-				for _, n := range made.Tiling.Neighbours(tile) {
-					if world.Water(made.Biome(n)) {
-						return true
-					}
-				}
-				return false
-			}}
-		if g.Map != nil {
-			// the map says where the land and the water are: a
-			// coast is land with water within a few degrees
-			pic := texture.Picture{Image: g.Map, Turn: g.Turn}
-			shine.Land = func(p maths.Vec) bool { return !pic.Water(p) }
-			shine.Coast = func(p maths.Vec) bool {
-				o := maths.Upright(p)
-				for _, d := range []maths.Vec{o.X, o.X.Neg(), o.Z, o.Z.Neg()} {
-					if pic.Water(p.Unit().Add(d.Scale(0.04))) {
-						return true
-					}
-				}
-				return false
-			}
-		}
-		m.Shine = shine
-	}
-	if g.Rough != nil {
-		// a radar map is finer than the paint: three rungs below the
-		// world's own, varied and mixed, as magellan's is in look; the
-		// 3, 0.3 and 0.35 are chosen, not from its data
-		m.Rough = made.Fine(*g.Rough, 3, 0.3, 0.35)
-	}
-	return m, nil
+	return hexes.Sphere{Splits: max(1, detail)}
 }
 
 // World is the world a rock body's ground is made from: its terrain on
@@ -747,83 +458,141 @@ func (b Body) groundMaterial(detail int) (*thing.Material, error) {
 //
 // With features the terrain is made twice, plain and then with them,
 // since world has no way to carve a made world. That cost is a thread.
-func (b Body) World(detail int) (*world.World, error) {
-	g := b.Ground
-	if g == nil {
-		return nil, fmt.Errorf("bodies: %s has no ground to make a world from",
-			b.Name)
+func (body Body) World(detail int) (*world.World, error) {
+	ground := body.ground
+	if ground == nil {
+		return nil, fmt.Errorf("bodies: %s has no ground to make a "+
+			"world from", body.name)
 	}
-	t := g.Terrain
-	t.Tiling = b.groundTiling(detail)
-	if g.Features != nil {
-		features, err := g.Features(world.New(t))
+	terrain := ground.terrain
+	terrain.Tiling = body.groundTiling(detail)
+	if ground.features != nil {
+		features, err := ground.features(world.New(terrain))
 		if err != nil {
-			return nil, fmt.Errorf("bodies: %s: %w", b.Name, err)
+			return nil, fmt.Errorf("bodies: %s: %w", body.name, err)
 		}
-		t.Features = features
+		terrain.Features = features
 	}
-	return world.New(t), nil
+	return world.New(terrain), nil
 }
 
 // Binary places two bodies going round their common centre, `at`, apart
-// kilometres from each other, each on its own orbit timed by the two
-// masses together, as pluto and charon are. It refuses as Place does.
+// from each other, each on its own orbit timed by the two masses
+// together, as pluto and charon are. It runs the checks Place runs on
+// each body at the scale, and refuses a distance that is negative or
+// not a finite number.
 //
-// each is drawn as a rock's grey ground, whatever its Kind: a pair of
-// stars comes out two grey balls with no glow. Day, Tilt, Air and Moons
-// are not read, and the two do not keep a face to each other: kept as it
-// is, as ruled.
-func Binary(w *thing.World, a, b Body, at maths.Vec, apart, scale float64,
-	detail int) error {
-	total := a.Mass + b.Mass
-	if !(total > 0) {
-		return fmt.Errorf("bodies: %s and %s have no mass to go round "+
-			"each other by", a.Name, b.Name)
+// each is drawn as a rock's grey ground, whatever its kind: a pair of
+// stars comes out two grey balls with no glow. Day, tilt, air and moons
+// are not read, and the two do not keep a face to each other.
+func Binary(into *thing.World, one, other Body, at maths.Vec,
+	apart Span, scale float64, detail int) error {
+	if into == nil {
+		return fmt.Errorf("bodies: %s and %s cannot be placed in a "+
+			"nil world", one.name, other.name)
 	}
-	if err := orbitable(a.Name+" and "+b.Name, total, apart*1000); err != nil {
+	if err := vecComplaint(one.name+" and "+other.name+
+		" placed at a point that", at); err != nil {
+		return fmt.Errorf("bodies: %w", err)
+	}
+	for _, body := range []Body{one, other} {
+		if err := body.sound(scale); err != nil {
+			return err
+		}
+	}
+	distance := apart.InKilometres()
+	if !nonNegativeFinite(distance) {
+		return fmt.Errorf("bodies: %s and %s are %v km apart: "+
+			"kilometres, zero or above, finite", one.name,
+			other.name, distance)
+	}
+	total := one.mass + other.mass
+	if !(total > 0) {
+		return fmt.Errorf("bodies: %s and %s have no mass to go "+
+			"round each other by", one.name, other.name)
+	}
+	if err := orbitable(one.name+" and "+other.name, total,
+		distance*1000); err != nil {
 		return err
 	}
-	ra, rb := apart*b.Mass/total, apart*a.Mass/total
-	period := thing.Period(total, apart*1000)
-	for _, p := range []struct {
+	oneRadius := distance * other.mass / total
+	otherRadius := distance * one.mass / total
+	period := thing.Period(total, distance*1000)
+	for _, pairing := range []struct {
 		body   Body
 		radius float64
 		phase  float64
-	}{{a, ra, 0}, {b, rb, math.Pi}} {
-		ground, err := p.body.groundMaterial(detail)
+	}{{one, oneRadius, 0}, {other, otherRadius, math.Pi}} {
+		ground, err := pairing.body.groundMaterial(detail)
 		if err != nil {
 			return err
 		}
-		w.Add(thing.Thing{
-			Shape:    shape.Sphere{Radius: p.body.Radius * scale},
+		into.Add(thing.Thing{
+			Shape: shape.Sphere{
+				Radius: pairing.body.radius * scale},
 			Material: ground,
-			Motion: thing.Orbit{Centre: at, Radius: p.radius * scale,
-				Period: period, Phase: p.phase},
+			Motion: thing.Orbit{Centre: at,
+				Radius: pairing.radius * scale,
+				Period: period, Phase: pairing.phase},
 		})
 	}
 	return nil
 }
 
+// halfTurn is the turn that takes a space's up to its down: half a
+// circle, defined as the angle that reverses a direction.
+const halfTurn = math.Pi
+
+// turnedFor is motion with its space turned about x by a half turn when
+// spin is below zero, and motion itself otherwise. celestial takes a
+// spin of zero or more only: a hole turning the other way is the same
+// hole seen from below, so its axis is turned and its spin kept
+// positive (hole.NewHole in celestial).
+func turnedFor(spin float64, motion thing.Motion) thing.Motion {
+	if !retrograde(spin) {
+		return motion
+	}
+	over := maths.Local()
+	over.Orientation = maths.Rotation(maths.XAxis, halfTurn)
+	return thing.Nested{Of: motion, In: over}
+}
+
+// noSpin is the spin of a body that does not turn, defined as zero.
+const noSpin = 0
+
+// retrograde is whether a spin turns the other way from the body's
+// north: it is below noSpin.
+func retrograde(spin float64) bool { return spin < noSpin }
+
 // sound is what is wrong with the body at a scale, if anything, by
-// name: a scale that is not a size, a giant's gas of no depth, an aurora
-// whose top is not above its bottom, or a hole spinning at its mass or
-// past, which has no horizon to draw.
-func (b Body) sound(scale float64) error {
+// name: a body not made by NewBody, a complaint a verb recorded, a scale that is not a size, a
+// radius that is not a size (Resized can set one), or a hole spinning
+// at its mass or past, which has no horizon to draw. The checks that
+// need no scale are made by the part constructors.
+func (body Body) sound(scale float64) error {
+	if !body.made {
+		return errors.New("bodies: a Body{} was not made by NewBody")
+	}
+	if body.complaint != nil {
+		return fmt.Errorf("bodies: %s: %w", body.name, body.complaint)
+	}
 	if !(scale > 0) || math.IsInf(scale, 1) {
 		return fmt.Errorf("bodies: %s at a scale of %v: a scale is "+
-			"kilometres to the world's units, above nought", b.Name, scale)
+			"kilometres to the world's units, above zero",
+			body.name, scale)
 	}
-	if b.Kind == Giant && b.Gas != nil && !(b.Gas.Depth > 0) {
-		return fmt.Errorf("bodies: %s's gas has a depth of %v: it is a "+
-			"share of the radius, above nought", b.Name, b.Gas.Depth)
+	if !(body.radius > 0) || math.IsInf(body.radius, 1) {
+		return fmt.Errorf("bodies: %s resized to %v km: kilometres, "+
+			"above zero", body.name, body.radius)
 	}
-	if a := b.Aurora; a != nil && !(a.High > a.Low) {
-		return fmt.Errorf("bodies: %s's aurora runs from %v to %v: its "+
-			"High is above its Low", b.Name, a.Low, a.High)
+	if body.kind != Hole && (math.IsNaN(body.spin) || math.IsInf(body.spin, 0)) {
+		return fmt.Errorf("bodies: %s spins at %v: the spin must be a "+
+			"finite number", body.name, body.spin)
 	}
-	if b.Kind == Hole && !(b.Spin < 1) {
-		return fmt.Errorf("bodies: %s spins at %v of its mass: at one or "+
-			"past, a hole has no horizon", b.Name, b.Spin)
+	if body.kind == Hole && !(math.Abs(body.spin) < 1) {
+		return fmt.Errorf("bodies: %s spins at %v of its mass: at "+
+			"one or past, in either direction, a hole has no "+
+			"horizon", body.name, body.spin)
 	}
 	return nil
 }
@@ -836,11 +605,12 @@ func orbitable(names string, mass, metres float64) error {
 	if mass <= 0 || metres <= 0 {
 		return nil
 	}
-	years := 2 * math.Pi * math.Sqrt(metres*metres*metres/(thing.G*mass)) /
+	years := 2 * math.Pi *
+		math.Sqrt(metres*metres*metres/(thing.G*mass)) /
 		(365.25 * 86400)
 	if !(years < 292) {
-		return fmt.Errorf("bodies: %s go round in %v years: 292 or more "+
-			"is past what a time.Duration holds", names, years)
+		return fmt.Errorf("bodies: %s go round in %v years: 292 or "+
+			"more is past what a time.Duration holds", names, years)
 	}
 	return nil
 }

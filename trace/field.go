@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -19,16 +20,40 @@ type placedField struct {
 	hole   kerr.Hole
 }
 
+// isField is whether a field has a mass and a reach to be one. It is
+// written the positive way, so a mass or a reach that is not a number
+// is no field either.
+func isField(each *thing.Field) bool {
+	return each.Reach > 0 && each.Mass > 0
+}
+
+// fieldFault is why a field of the world cannot be drawn, or nil: the
+// first field that has a mass and a reach, whose mass and spin celestial
+// says make no hole. The error names the field by its place in the
+// world, gives its mass, spin and reach, and says what celestial said.
+func fieldFault(world *thing.World) error {
+	for place, each := range world.Fields {
+		if !isField(each) {
+			continue
+		}
+		if _, err := kerr.NewHole(each.Mass, each.Spin); err != nil {
+			return fmt.Errorf("trace: field %d, with a mass of %v, a "+
+				"spin of %v and a reach of %v, is no hole: %w",
+				place, each.Mass, each.Spin, each.Reach, err)
+		}
+	}
+	return nil
+}
+
 // placeFields is every field, where it is at a moment.
 func placeFields(world *thing.World, moment time.Duration) []placedField {
 	fields := make([]placedField, 0, len(world.Fields))
 	for _, each := range world.Fields {
-		// written the positive way, so a mass or a reach that is not
-		// a number is no field either
-		if !(each.Reach > 0 && each.Mass > 0) {
+		if !isField(each) {
 			continue
 		}
-		// nor is a mass and spin that make no hole, as celestial says
+		// a mass and spin that make no hole are left out here, and
+		// refused by name in fieldFault before a picture starts
 		hole, err := kerr.NewHole(each.Mass, each.Spin)
 		if err != nil {
 			continue
@@ -56,6 +81,15 @@ const bends = 40000
 // is 40. Passing 8 out or nearer the two agree to a hundredth.
 const loose = 12
 
+// letGo is the radius, in masses, past which the field lets an outgoing
+// ray go straight: its own LetGo when it has one, loose otherwise.
+func (field placedField) letGo() float64 {
+	if field.source.LetGo > 0 {
+		return field.source.LetGo
+	}
+	return loose
+}
+
 // enterEpsilon is the least way along a ray a field's reach has to
 // lie for the ray to count as going into it: a ray that starts on the
 // reach, by rounding, has not just entered.
@@ -70,6 +104,18 @@ const reachMargin = 1.002
 // a march through a field, where the eye's own march cuts a whole
 // crossing into strides: a step of the march is short.
 const fieldStrides = 4
+
+// FieldPolicy is the finite-reach transport policy shared with GPU renderers.
+// Geodesic integration and observer equations remain Celestial's.
+type FieldPolicy struct {
+	Steps, Strides             int
+	Outward, Core, ReachMargin float64
+}
+
+// FieldSettings exposes the CPU reference's stopping and segment policies.
+func FieldSettings() FieldPolicy {
+	return FieldPolicy{bends, fieldStrides, loose, core, reachMargin}
+}
 
 // atRest is the four-velocity of an eye at rest far from the hole,
 // whose energy is the conserved one.
@@ -215,7 +261,7 @@ func capped(gain float64) float64 {
 //
 // If the ray escapes, the straight picture from where it leaves comes
 // after; if it came from the horizon, nothing more.
-func bent(scene staged, seen look, into entry) frame.Pixel {
+func bent(scene *staged, seen look, into entry) frame.Pixel {
 	walker := newMarcher(scene, seen, into)
 	for i := 0; i < bends && shows(walker.keep); i++ {
 		if drawn, done := walker.march(i); done {
@@ -231,7 +277,7 @@ func bent(scene staged, seen look, into entry) frame.Pixel {
 // and how much of what lies behind still gets through, how far it has
 // come, and the world point its next segment starts at.
 type marcher struct {
-	scene  staged
+	scene  *staged
 	field  placedField
 	asked  look
 	front  maths.Light
@@ -247,7 +293,7 @@ type marcher struct {
 // ready for its first step: what the ray gathered in front of the
 // field, and the ray set off in the hole's own space. It is the only
 // way to a marcher, so a march never starts half made.
-func newMarcher(scene staged, seen look, into entry) *marcher {
+func newMarcher(scene *staged, seen look, into entry) *marcher {
 	ray, enter := seen.ray, into.dist
 	walker := &marcher{scene: scene, field: into.field, asked: seen,
 		keep: maths.Grey(1), depth: float32(enter)}
@@ -314,7 +360,7 @@ func (walker *marcher) march(i int) (frame.Pixel, bool) {
 	// the first step starts on the reach, where rounding may put it a
 	// hair outside, so only a later step leaves by the reach
 	past := i > 0 && radius > walker.field.source.Reach
-	if past || (outward && radius > loose*hole.Mass()) {
+	if past || (outward && radius > walker.field.letGo()*hole.Mass()) {
 		return walker.leave(here, radius, velocity), true
 	}
 	// a ray that came from the hole's edge hovers there, and one deep

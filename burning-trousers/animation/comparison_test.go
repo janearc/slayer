@@ -24,7 +24,7 @@ func TestComparisonCountsTheLastPixelAndIndependentAlpha(t *testing.T) {
 		t.Fatalf("lost pixels, alpha or worst location: %+v", result)
 	}
 	// Ideal black and white have lightness zero and one in OKLab.
-	if math.Abs(result.WorstJND-1/ok.Eye) > 1e-4 {
+	if !(math.Abs(result.WorstJND-1/ok.Eye) <= 1e-4) {
 		t.Fatalf("black-white difference: %g JND", result.WorstJND)
 	}
 }

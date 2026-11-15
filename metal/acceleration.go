@@ -13,6 +13,7 @@ import (
 	"errors"
 	"math"
 	"runtime"
+	"slices"
 	"unsafe"
 )
 
@@ -119,10 +120,82 @@ func (plan *Acceleration) Instances(places ...Placement) (int, error) {
 	return index, nil
 }
 
+// Layout is a plan without its vertices: its stride, its triangle
+// ranges and its placements, which a kernel's built hierarchy keeps.
+// A caller that holds a built hierarchy compares the next plan's layout
+// with it, and the vertices themselves where they are held.
+type Layout struct {
+	stride    int
+	nodes     []accelerationNode
+	instances []Placement
+}
+
+// Layout is the plan's layout, copied, so it borrows no vertices.
+func (plan *Acceleration) Layout() Layout {
+	if plan == nil {
+		return Layout{}
+	}
+	return Layout{stride: plan.stride, nodes: slices.Clone(plan.nodes),
+		instances: slices.Clone(plan.instances)}
+}
+
+// Same is whether two layouts build the same hierarchy over the same
+// vertices: the same stride and ranges, and every placement's child,
+// mask and matrix the same to the bit.
+func (layout Layout) Same(other Layout) bool {
+	if layout.stride != other.stride ||
+		!slices.Equal(layout.nodes, other.nodes) ||
+		len(layout.instances) != len(other.instances) {
+		return false
+	}
+	for index, place := range layout.instances {
+		if !place.same(other.instances[index]) {
+			return false
+		}
+	}
+	return true
+}
+
+// same is whether two placements are one: a matrix is compared by its
+// bits, so a negative zero is not a zero.
+func (place Placement) same(other Placement) bool {
+	if place.child != other.child || place.mask != other.mask {
+		return false
+	}
+	for index, value := range place.matrix {
+		if math.Float32bits(value) !=
+			math.Float32bits(other.matrix[index]) {
+			return false
+		}
+	}
+	return true
+}
+
 // Accelerate builds and retains an instance root. Grid binds it after the
 // origin, at buffer index len(inputs)+2. Close releases every structure.
 // A second build is refused without changing the first; calls are serial.
 func (kernel *Kernel) Accelerate(plan *Acceleration, root int) error {
+	return kernel.accelerate(plan, root, keepFirst)
+}
+
+// Rebuild builds an instance root as Accelerate does and puts it in the
+// place of the kernel's hierarchy, or gives the kernel its first. The
+// old one serves until the new one is built; a build that fails leaves
+// it. A frame whose meshes moved rebuilds its hierarchy on its kernel.
+func (kernel *Kernel) Rebuild(plan *Acceleration, root int) error {
+	return kernel.accelerate(plan, root, replaceFirst)
+}
+
+// keepFirst and replaceFirst are whether a build may take the place of a
+// hierarchy the kernel has.
+const (
+	keepFirst    = false
+	replaceFirst = true
+)
+
+// accelerate checks a plan, stages it for the bridge and builds it.
+func (kernel *Kernel) accelerate(plan *Acceleration, root int,
+	replace bool) error {
 	if kernel.ctx == nil {
 		return errors.New("metal: the kernel is closed")
 	}
@@ -152,12 +225,22 @@ func (kernel *Kernel) Accelerate(plan *Acceleration, root int) error {
 	vertices := unsafe.Pointer(unsafe.SliceData(plan.vertices))
 	var why [1024]C.char
 	var unavailable C.int
-	failed := C.slayer_metal_accelerate(kernel.ctx, vertices,
-		C.long(len(plan.vertices)), C.int(plan.stride),
-		(*C.int32_t)(unsafe.Pointer(unsafe.SliceData(nodes))), C.int(len(plan.nodes)),
-		(*C.float)(unsafe.Pointer(unsafe.SliceData(matrices))),
-		(*C.uint32_t)(unsafe.Pointer(unsafe.SliceData(references))), C.int(root),
-		&unavailable, &why[0], C.int(len(why)))
+	nodeWords := (*C.int32_t)(unsafe.Pointer(unsafe.SliceData(nodes)))
+	matrixWords := (*C.float)(unsafe.Pointer(unsafe.SliceData(matrices)))
+	referenceWords := (*C.uint32_t)(unsafe.Pointer(
+		unsafe.SliceData(references)))
+	var failed C.int
+	if replace {
+		failed = C.slayer_metal_reaccelerate(kernel.ctx, vertices,
+			C.long(len(plan.vertices)), C.int(plan.stride), nodeWords,
+			C.int(len(plan.nodes)), matrixWords, referenceWords, C.int(root),
+			&unavailable, &why[0], C.int(len(why)))
+	} else {
+		failed = C.slayer_metal_accelerate(kernel.ctx, vertices,
+			C.long(len(plan.vertices)), C.int(plan.stride), nodeWords,
+			C.int(len(plan.nodes)), matrixWords, referenceWords, C.int(root),
+			&unavailable, &why[0], C.int(len(why)))
+	}
 	runtime.KeepAlive(plan)
 	runtime.KeepAlive(kernel)
 	if unavailable != 0 {

@@ -3,8 +3,10 @@ package planet
 import (
 	"fmt"
 	"math"
+	"sync"
 
 	"github.com/janearc/celestial/bands"
+	"github.com/janearc/libtheme-css/primitives/swatch"
 	"github.com/janearc/libtheme-css/spaces/srgb"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/observer"
@@ -123,14 +125,18 @@ type Face struct {
 	churned         int
 	churning        float64
 	capped, cleared int
-	stacks          [][][]optics
-	ladders         [][][][]optics
+	stacks          [][][]leaf
+	ladders         [][][][]leaf
 	cooking         float64
 	airglow         float64
 	airband         float64
 	fronts, calm    float64
 	deck            float64
 	exposure        float64
+	shades          []shade
+	lobes           []lobe
+	unit            float64
+	quick           bool
 }
 
 // NewFace is the body seen from an eye at a place in the body's own
@@ -152,21 +158,11 @@ func NewFace(body Body, pole, star, eye maths.Vec, light bands.Light,
 		capped, cleared = len(columns), len(columns)+1
 		columns = append(columns, body.cap, body.clearing)
 	}
-	stacks := make([][][]optics, len(columns))
+	stacks := make([][][]leaf, len(columns))
 	for i, column := range columns {
 		stacks[i] = stacksOf(column, light, body.gravity)
 	}
-	var ladders [][][][]optics
-	if body.cooking > 0 {
-		for _, zone := range body.zones {
-			var rungsOf [][][]optics
-			for _, column := range body.ladder(zone.column) {
-				rungsOf = append(rungsOf, stacksOf(column, light,
-					body.gravity))
-			}
-			ladders = append(ladders, rungsOf)
-		}
-	}
+	ladders := laddersOf(body, light)
 	ways := frameOf(pole.Unit(), eye)
 	face := &Face{pole: pole.Unit(), star: star.Unit(), eye: eye,
 		storms: body.storms, ways: ways,
@@ -181,20 +177,41 @@ func NewFace(body Body, pole, star, eye maths.Vec, light bands.Light,
 		deck:     body.deck,
 		exposure: exposure}
 	face.calm = face.calmness()
+	face.shades = shadesOf(light)
+	face.lobes = face.seat()
+	face.unit = whiteUnit()
+	face.quick = agreeing(light, face.shades, face.unit)
 	return face
 }
 
-// stacksOf is a column's optics in each of the light's bands, its
+// laddersOf is each zone's ladder of columns as leaves in each of the light's
+// bands, for a body that cooks, and none for one that does not.
+func laddersOf(body Body, light bands.Light) [][][][]leaf {
+	var ladders [][][][]leaf
+	if body.cooking > 0 {
+		for _, zone := range body.zones {
+			var rungsOf [][][]leaf
+			for _, column := range body.ladder(zone.column) {
+				rungsOf = append(rungsOf, stacksOf(column, light,
+					body.gravity))
+			}
+			ladders = append(ladders, rungsOf)
+		}
+	}
+	return ladders
+}
+
+// stacksOf is a column's leaves in each of the light's bands, its
 // layers top down.
 func stacksOf(column []Layer, light bands.Light,
-	gravity float64) [][]optics {
+	gravity float64) [][]leaf {
 	first, last := light.Span()
-	var made [][]optics
+	var made [][]leaf
 	for band := first; band <= last; band++ {
 		nm := centre(band)
-		stack := make([]optics, len(column))
+		stack := make([]leaf, len(column))
 		for k, layer := range column {
-			stack[k] = layer.optics(nm, gravity)
+			stack[k] = layer.optics(nm, gravity).leaf()
 		}
 		made = append(made, stack)
 	}
@@ -271,7 +288,8 @@ func (face *Face) neighbour(latitude float64) int {
 // then each blend in turn, so much of another column's light taken in.
 type mix struct {
 	here   int
-	blends []blend
+	held   [mostBlends]blend
+	taken  int
 	rung   int
 	toward float64
 }
@@ -310,10 +328,20 @@ func (face *Face) mixAt(latitude, lift float64, marked marks) mix {
 	return made
 }
 
-// add takes so much of a column into the mix, if any.
+// mostBlends is the most columns a mix takes in beside its own: its
+// neighbour, the churn, a clearing and a cap. defined as the number of
+// calls of add that mixAt makes.
+const mostBlends = 4
+
+// blends are the columns the mix took in, in the order it took them.
+func (made *mix) blends() []blend { return made.held[:made.taken] }
+
+// add takes so much of a column into the mix, if any. the mix holds its
+// blends itself, so a point of the face makes no list.
 func (made *mix) add(column int, share float64) {
 	if share > 0 {
-		made.blends = append(made.blends, blend{column, share})
+		made.held[made.taken] = blend{column, share}
+		made.taken++
 	}
 }
 
@@ -340,23 +368,86 @@ func (face *Face) Within(p maths.Vec, footprint float64) maths.Light {
 	if star > 0 {
 		reached = shadowed(face.rings, p, face.star, face.pole)
 	}
-	turn := -face.star.Dot(toward)
-	first, _ := face.light.Span()
-	lines := make(map[float64]float64, len(face.stacks[mixed.here]))
-	for i := range face.stacks[mixed.here] {
-		band := first + bands.Band(i)
-		sent := 0.0
-		if reached > 0 {
-			sent = face.sent(mixed, i, star, eye, turn)
-		}
-		lo, hi := band.Edges()
-		lines[centre(band)] = (face.light.Power(band)*reached*sent +
-			face.glowed(marked.cleared, lo, hi) +
-			face.glowedAt(came, eye, lo, hi)*front) * face.exposure
-	}
-	red, green, blue := srgb.Light(observer.Swatch(bands.Lines(lines)))
+	at := sight{mixed: mixed, marked: marked, star: star, eye: eye,
+		turn: -face.star.Dot(toward), reached: reached, came: came,
+		front: front}
+	red, green, blue := srgb.Light(face.colour(&at))
 	return maths.RGB(math.Max(0, red), math.Max(0, green),
 		math.Max(0, blue))
+}
+
+// a sight is what Within works out of a point before it draws its bands: the
+// air's mix and marks, the cosines of the star's and eye's heights and of
+// the turn, how much starlight reaches it, the latitude its air came from,
+// how strongly its airglow shows, and each of the face's lobes' phase at its
+// turn.
+type sight struct {
+	mixed                mix
+	marked               marks
+	star, eye, turn      float64
+	reached, came, front float64
+	tilts                []float64
+}
+
+// colour is the swatch of a sight: its light in every band, through the
+// observer. a face the observer's sums are worked out for does them itself;
+// any other asks the observer.
+func (face *Face) colour(at *sight) swatch.Swatch {
+	held := linePool.Get().(*lineBox)
+	defer linePool.Put(held)
+	powers := held.v[:0]
+	if at.reached > 0 {
+		held.t = face.tilted(held.t, at.turn)
+		at.tilts = held.t
+	}
+	for i := range face.shades {
+		powers = append(powers, face.bandLight(at, i))
+	}
+	held.v = powers
+	if face.quick {
+		return colourOf(face.shades, face.unit, powers)
+	}
+	lines := held.m
+	clear(lines)
+	for i, each := range face.shades {
+		lines[each.centre] = powers[i]
+	}
+	return observer.Swatch(bands.Lines(lines))
+}
+
+// bandLight is the light a sight sends the eye in one band: the star's,
+// what the mix sends back of it, and the glows.
+func (face *Face) bandLight(at *sight, i int) float64 {
+	shade := &face.shades[i]
+	sent := 0.0
+	if at.reached > 0 {
+		sent = face.sent(at, i)
+	}
+	return (shade.power*at.reached*sent +
+		face.glowedBy(at.marked.cleared, shade.warm) +
+		face.glowedAt(at.came, at.eye, shade.held)*at.front) * face.exposure
+}
+
+// linePool holds the scratch Within draws a pixel's bands in, so each pixel
+// does not make it: a slice of the bands' light, and a map of it for the
+// observer. bands.Lines reads a map and keeps none of it.
+var linePool = sync.Pool{New: newLineBox}
+
+// newLineBox is a box for the pool.
+func newLineBox() any {
+	return &lineBox{m: make(map[float64]float64, lineRoom)}
+}
+
+// lineRoom is how many bands the pool's maps start with room for: picked,
+// from the eye's own band count.
+const lineRoom = 16
+
+// lineBox is scratch in the pool, boxed so that putting it back does not
+// allocate.
+type lineBox struct {
+	m map[float64]float64
+	v []float64
+	t []float64
 }
 
 // airAt is the mix of columns a way of the face shows, the marks its
@@ -380,10 +471,10 @@ func (face *Face) airAt(up maths.Vec, finest float64) (mix, marks,
 
 // sent is the light the mix sends back in one band, over the star's:
 // its own column's, with each blend taken in turn.
-func (face *Face) sent(mixed mix, i int, star, eye, turn float64) float64 {
-	sent := face.from(mixed, mixed.here, i, star, eye, turn)
-	for _, each := range mixed.blends {
-		other := face.from(mixed, each.column, i, star, eye, turn)
+func (face *Face) sent(at *sight, i int) float64 {
+	sent := face.from(at, at.mixed.here, i)
+	for _, each := range at.mixed.blends() {
+		other := face.from(at, each.column, i)
 		sent += each.share * (other - sent)
 	}
 	return sent
@@ -392,16 +483,61 @@ func (face *Face) sent(mixed mix, i int, star, eye, turn float64) float64 {
 // from is the light one column sends back in one band, over the star's:
 // a zone's as cooked as the mix's air, between the rungs either side,
 // and any other column's as it is.
-func (face *Face) from(mixed mix, column, i int, star, eye,
-	turn float64) float64 {
+func (face *Face) from(at *sight, column, i int) float64 {
 	if face.ladders == nil || column >= len(face.ladders) {
-		return reflected(face.stacks[column][i], face.deck, star, eye, turn)
+		return shone(face.stacks[column][i], at.tilts, face.deck, at.star,
+			at.eye, at.turn)
 	}
 	rungs := face.ladders[column]
-	below := reflected(rungs[mixed.rung][i], face.deck, star, eye, turn)
-	if mixed.toward == 0 {
+	below := shone(rungs[at.mixed.rung][i], at.tilts, face.deck, at.star,
+		at.eye, at.turn)
+	if at.mixed.toward == 0 {
 		return below
 	}
-	above := reflected(rungs[mixed.rung+1][i], face.deck, star, eye, turn)
-	return below + mixed.toward*(above-below)
+	above := shone(rungs[at.mixed.rung+1][i], at.tilts, face.deck, at.star,
+		at.eye, at.turn)
+	return below + at.mixed.toward*(above-below)
+}
+
+// seat gives each leaf the place of its lobe among the face's lobes, one
+// for each lean its layers have, and returns the lobes.
+func (face *Face) seat() []lobe {
+	var made []lobe
+	places := map[lobe]int{}
+	for _, column := range face.stacks {
+		made = seatStacks(column, made, places)
+	}
+	for _, zone := range face.ladders {
+		for _, rung := range zone {
+			made = seatStacks(rung, made, places)
+		}
+	}
+	return made
+}
+
+// seatStacks seats the leaves of a column's stacks in the places of the lobes
+// so far, adding the lobes it has not seen.
+func seatStacks(stacks [][]leaf, made []lobe, places map[lobe]int) []lobe {
+	for _, stack := range stacks {
+		for k := range stack {
+			place, seen := places[stack[k].lobe]
+			if !seen {
+				place = len(made)
+				places[stack[k].lobe] = place
+				made = append(made, stack[k].lobe)
+			}
+			stack[k].slot = place
+		}
+	}
+	return made
+}
+
+// tilted is the henyey phase of each of the face's lobes at a turn, in
+// place of the slice given, which it makes room in as it needs.
+func (face *Face) tilted(into []float64, turn float64) []float64 {
+	into = into[:0]
+	for _, shape := range face.lobes {
+		into = append(into, shape.at(turn))
+	}
+	return into
 }

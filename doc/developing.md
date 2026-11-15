@@ -1,5 +1,9 @@
 # Working on Slayer with Game
 
+New contributors: start with [Building Slayer](building.md), which explains
+Game, why the project uses it, prerequisites and the first build. This
+guide covers the development gates and their evidence in more detail.
+
 Run Game from the Slayer checkout. The repository's `.game` names the
 project, its source check and the commands you can run. Your Game config
 keeps machine paths and remotes outside the repository.
@@ -55,7 +59,7 @@ For application flags, use a Game build with argument forwarding:
 ```sh
 game run hillside -- -night -alight 1 -out out/night.png
 game run hillside -- -set doc/fire-woodland.yaml -out out/woodland.png
-game run smokecheck -- smoke 9 -out out/smoke-nine
+game run slayer -- assess --smokes 9 --out out/smoke-nine
 game run grissom -- -help
 ```
 
@@ -77,11 +81,11 @@ happen inside them.
 ## Checks and resource limits
 
 Start with one test package at a time on a machine sharing its GPU with
-other work. This setting permits three Go workers while keeping packages
+other work. This setting permits two Go workers while keeping packages
 and parallel tests serial:
 
 ```sh
-export GOMAXPROCS=3
+export GOMAXPROCS=2
 export GOFLAGS='-p=1 -parallel=1 -timeout=60m'
 export TMPDIR=/tmp
 game check
@@ -92,8 +96,8 @@ game sweep
 
 The long timeout accommodates the actual smoke renders on a cold cache.
 It does not skip a test. `GOMEMLIMIT`, when set, is a soft Go heap target;
-it does not bound native Metal allocations. Follow the machine owner's
-queue and render policy before starting large tests or renders.
+it does not bound native Metal allocations. Follow the machine's queue
+and render policy before starting large tests or renders.
 
 Game check runs formatting, vet and tests. Game cover runs the tests again
 with coverage instrumentation and writes `bin/.cover/go.out`. Its report
@@ -140,9 +144,10 @@ Do not weaken the history rule to make a candidate pass. The harness's
 [rules](../burning-trousers/INSIDE.md) describe the module-pin exception.
 
 Celestial and celestial-data still use private review candidates. A release
-needs their published revisions and corresponding pins; see
-[review dependencies](review-dependencies.md). Only the owner releases
-the dist. Preparing a local branch does not publish it.
+needs their published revisions and corresponding pins; see [review
+dependencies](review-dependencies.md). The `go.mod` replace directive for
+celestial MUST be gone before a release is cut. A release is cut by hand;
+preparing a local branch does not publish it.
 
 See [Coverage](coverage.md) for the per-file gate, command instrumentation,
 focused runs, and how to read the remaining gaps.

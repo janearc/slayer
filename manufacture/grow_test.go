@@ -153,7 +153,7 @@ func TestAFernIsACrownOfFrondsOfLeaflets(t *testing.T) {
 				foot)
 		}
 		level := stalk.space.Orientation.X.Y
-		if math.Abs(level) > close {
+		if !(math.Abs(level) <= close) {
 			t.Errorf("frond %d is twisted: its side rises %v",
 				frond, level)
 		}
@@ -188,7 +188,7 @@ func frondUnlike(stalk part, blades []part) string {
 		if !lying.X.Cross(way).Near(face, close) {
 			return fmt.Sprintf("leaflet %d is left handed", index)
 		}
-		if math.Abs(face.Dot(axes.Y)) > 1e-9 {
+		if !(math.Abs(face.Dot(axes.Y)) <= 1e-9) {
 			return fmt.Sprintf("leaflet %d is edge on to the frond",
 				index)
 		}
@@ -282,7 +282,7 @@ func TestWhatIsCarriedTakesItsCarriersScale(t *testing.T) {
 	big, _ := grown.parts(doubled, sow(3))
 	for index := range small {
 		want := 2 * small[index].space.Scale
-		if got := big[index].space.Scale; math.Abs(got-want) > close {
+		if got := big[index].space.Scale; !(math.Abs(got-want) <= close) {
 			t.Fatalf("part %d is scaled %v, not %v", index, got,
 				want)
 		}
@@ -417,7 +417,7 @@ func TestALimbDroopsAndItsPiecesJoin(t *testing.T) {
 		}
 		fall = way.Y
 		reach := inScene(one.shape.(tube).length) * one.space.Scale
-		if math.Abs(reach-1.5) > 1e-9 {
+		if !(math.Abs(reach-1.5) <= 1e-9) {
 			t.Errorf("piece %d reaches %v, not a third of the "+
 				"limb at its scale", index, reach)
 		}

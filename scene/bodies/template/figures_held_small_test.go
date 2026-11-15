@@ -4,7 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/celestial/radiation"
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -15,14 +17,12 @@ import (
 // hale-bopp: 30 km, 1e16 kg, a coma of radius 1e6 km and 6e-6 per km,
 // and two tails: dust 4e7 km long and ion 6e7 km long.
 func TestHaleBoppFiguresAreHeld(t *testing.T) {
-	holds(t, "hale-bopp", HaleBopp(), bodies.Body{Name: "hale-bopp", Kind: bodies.Rock,
-		Radius: 30, Mass: 1e16, Seed: 3,
-		Coma: &bodies.Coma{Radius: 1e6, Dense: 6e-6},
-		Tails: []bodies.Tail{
-			{Length: 4e7, Base: 6e5, Spread: 0.08, Curve: 0.35, Dense: 2e-7,
-				Wisp: 0.5, Seed: 97},
-			{Length: 6e7, Base: 3e5, Spread: 0.03, Curve: 0.02, Dense: 2e-7,
-				Wisp: 0.7, Seed: 98}}})
+	holds(t, "hale-bopp", its(t, HaleBopp),
+		want(t, "hale-bopp", bodies.Rock, 30, 1e16,
+			wantComa(t, 1e6, 6e-6),
+			wantTail(t, 4e7, 6e5, 0.08, 0.35, 2e-7, 0.5, 97),
+			wantTail(t, 6e7, 3e5, 0.03, 0.02, 2e-7, 0.7, 98)).
+			Seeded(3))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -31,14 +31,12 @@ func TestHaleBoppFiguresAreHeld(t *testing.T) {
 // hyakutake: 2 km, 1e13 kg, a coma of 5e5 km and 1e-5 per km, and two
 // tails: dust 8e6 km long and ion 5e8 km.
 func TestHyakutakeFiguresAreHeld(t *testing.T) {
-	holds(t, "hyakutake", Hyakutake(), bodies.Body{Name: "hyakutake", Kind: bodies.Rock,
-		Radius: 2, Mass: 1e13, Seed: 5,
-		Coma: &bodies.Coma{Radius: 5e5, Dense: 1e-5},
-		Tails: []bodies.Tail{
-			{Length: 8e6, Base: 4e5, Spread: 0.06, Curve: 0.3, Dense: 1.5e-7,
-				Wisp: 0.5, Seed: 96},
-			{Length: 5e8, Base: 6e5, Spread: 0.01, Curve: 0.01, Dense: 3e-7,
-				Wisp: 0.7, Seed: 95}}})
+	holds(t, "hyakutake", its(t, Hyakutake),
+		want(t, "hyakutake", bodies.Rock, 2, 1e13,
+			wantComa(t, 5e5, 1e-5),
+			wantTail(t, 8e6, 4e5, 0.06, 0.3, 1.5e-7, 0.5, 96),
+			wantTail(t, 5e8, 6e5, 0.01, 0.01, 3e-7, 0.7, 95)).
+			Seeded(5))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -48,14 +46,21 @@ func TestHyakutakeFiguresAreHeld(t *testing.T) {
 // gamma at 0.2; a flare at one second, 30,000 km/s, opacity 0.8,
 // giving gamma 2 and x-ray 1 and passing gamma at 0.9.
 func TestMagnetarFiguresAreHeld(t *testing.T) {
-	holds(t, "magnetar", Magnetar(), bodies.Body{Name: "magnetar", Kind: bodies.Star,
-		Radius: 12, Mass: 1.4 * bodies.Sun, Day: 7540 * time.Millisecond,
-		Radiant: thing.Spectrum{Gives: map[radiation.Range]float64{
-			radiation.XRay(): 1, radiation.Gamma(): 0.2}},
-		Flare: &bodies.Flare{At: time.Second, Speed: 30000, Opacity: 0.8,
-			Radiant: thing.Spectrum{
-				Gives:  map[radiation.Range]float64{radiation.Gamma(): 2, radiation.XRay(): 1},
-				Passes: map[radiation.Range]float64{radiation.Gamma(): 0.9}}}})
+	flare, err := bodies.NewFlare(time.Second, 30000, 0.8, maths.Light{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	flare = flare.Radiating(thing.Spectrum{
+		Gives: map[radiation.Range]float64{radiation.Gamma(): 2,
+			radiation.XRay(): 1},
+		Passes: map[radiation.Range]float64{radiation.Gamma(): 0.9}})
+	holds(t, "magnetar", its(t, Magnetar),
+		want(t, "magnetar", bodies.Star, 12, 1.4*bodies.Sun, flare).
+			Turning(7540*time.Millisecond, measure.Radians(0)).
+			Glowing(maths.Light{}, thing.Spectrum{
+				Gives: map[radiation.Range]float64{
+					radiation.XRay():  1,
+					radiation.Gamma(): 0.2}}))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -65,14 +70,19 @@ func TestMagnetarFiguresAreHeld(t *testing.T) {
 // 1500 km long, 30 km at the base, 45 degrees off the spin, giving
 // x-ray 0.8 and radio 1 and passing both at 0.97.
 func TestPulsarFiguresAreHeld(t *testing.T) {
-	holds(t, "pulsar", Pulsar(), bodies.Body{Name: "pulsar", Kind: bodies.Star,
-		Radius: 10, Mass: 1.4 * bodies.Sun, Seed: 8, Day: 33 * time.Millisecond,
-		Radiant: thing.Spectrum{Gives: map[radiation.Range]float64{radiation.XRay(): 1}},
-		Jets: &bodies.Jets{Length: 1500, Base: 30, Spread: 0.12, Dense: 0.004,
-			Tilt: 45 * radPerDeg,
-			Radiant: thing.Spectrum{
-				Gives:  map[radiation.Range]float64{radiation.XRay(): 0.8, radiation.Radio(): 1},
-				Passes: map[radiation.Range]float64{radiation.XRay(): 0.97, radiation.Radio(): 0.97}}}})
+	beams := wantJets(t, 1500, 30, 0.12, 0, 0.004, 45*radPerDeg, 0).
+		Radiating(thing.Spectrum{
+			Gives: map[radiation.Range]float64{
+				radiation.XRay(): 0.8, radiation.Radio(): 1},
+			Passes: map[radiation.Range]float64{
+				radiation.XRay(): 0.97, radiation.Radio(): 0.97}})
+	holds(t, "pulsar", its(t, Pulsar),
+		want(t, "pulsar", bodies.Star, 10, 1.4*bodies.Sun, beams).
+			Seeded(8).
+			Turning(33*time.Millisecond, measure.Radians(0)).
+			Glowing(maths.Light{}, thing.Spectrum{
+				Gives: map[radiation.Range]float64{
+					radiation.XRay(): 1}}))
 }
 
 // physics, worked by hand: a hole's radius is 2GM/c^2. with G =
@@ -83,12 +93,12 @@ func TestPulsarFiguresAreHeld(t *testing.T) {
 // held to a tenth of a per cent, since 2.954 is rounded.
 func TestQuasarsRadiusIsTwoGMOverCSquaredOfSixPointSixTenBillionSuns(t *testing.T) {
 	const perSun = 2.954
-	q := Quasar()
-	if want := 6.6e10 * bodies.Sun; q.Mass != want {
-		t.Errorf("mass is %v, want %v", q.Mass, want)
+	q := its(t, Quasar)
+	if want := 6.6e10 * bodies.Sun; q.Mass() != want {
+		t.Errorf("mass is %v, want %v", q.Mass(), want)
 	}
-	if want := 6.6e10 * perSun; !(q.Radius > want*0.999 && q.Radius < want*1.001) {
-		t.Errorf("radius is %v km, want %v within a tenth of a per cent", q.Radius, want)
+	if want := 6.6e10 * perSun; !(q.Radius() > want*0.999 && q.Radius() < want*1.001) {
+		t.Errorf("radius is %v km, want %v within a tenth of a per cent", q.Radius(), want)
 	}
 }
 
@@ -107,13 +117,15 @@ func TestQuasarFiguresAreHeld(t *testing.T) {
 	const g, c = 6.6743e-11, 299792458.0
 	mass := 6.6e10 * bodies.Sun
 	rs := 2 * g * mass / (c * c) / 1000
-	holds(t, "quasar", Quasar(), bodies.Body{Name: "quasar", Kind: bodies.Hole,
-		Radius: rs, Mass: mass, Seed: 7,
-		Disc: &bodies.Disc{Inner: 3 * rs, Outer: 30 * rs, Thick: 0.3 * rs,
-			Dense: 10 / rs, Hot: 12000, Bright: 60, Speed: 0.41, Shear: 1.5},
-		Jets: &bodies.Jets{Length: 300 * rs, Base: rs, Spread: 0.03, From: 2 * rs,
-			Dense: 2 / rs, Speed: 0.6,
-			Radiant: thing.Spectrum{
-				Gives:  map[radiation.Range]float64{radiation.XRay(): 1, radiation.Gamma(): 0.5},
-				Passes: map[radiation.Range]float64{radiation.XRay(): 0.97, radiation.Gamma(): 0.98}}}})
+	jets := wantJets(t, 300*rs, rs, 0.03, 2*rs, 2/rs, 0, 0.6).
+		Radiating(thing.Spectrum{
+			Gives: map[radiation.Range]float64{
+				radiation.XRay(): 1, radiation.Gamma(): 0.5},
+			Passes: map[radiation.Range]float64{
+				radiation.XRay(): 0.97, radiation.Gamma(): 0.98}})
+	holds(t, "quasar", its(t, Quasar),
+		want(t, "quasar", bodies.Hole, rs, mass,
+			wantDisc(t, 3*rs, 30*rs, 0.3*rs, 10/rs, 12000, 60,
+				0.41, 0, 1.5),
+			jets).Seeded(7))
 }

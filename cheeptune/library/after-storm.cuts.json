@@ -1,0 +1,25 @@
+{
+	"group": "sad, turning hopeful",
+	"mood": "heavy, then clearing",
+	"feeling": "The last rain, and a thin line of blue at the edge of the clouds.",
+	"intent": "After a disaster or a hard stretch, a recovery montage, a place coming back.",
+	"listen_for": "The chords brightening at 0:33 as the minor lilt becomes major.",
+	"voicing": "@dmg-pad",
+	"tempo": 88,
+	"meter": 6,
+	"seconds": 65.45,
+	"parts": [
+		{"name": "rain", "bar": 1, "second": 0.0,
+		 "change": "a heavy lilt of long notes",
+		 "feels": "Weight and wet"},
+		{"name": "drip", "bar": 5, "second": 16.36,
+		 "change": "a sparse drum and a busier bass",
+		 "feels": "Easing off"},
+		{"name": "clear", "bar": 9, "second": 32.73,
+		 "change": "major chords and a singing lead",
+		 "feels": "Blue at the edge"},
+		{"name": "end", "bar": 15, "second": 57.27,
+		 "change": "a held chord and a kick",
+		 "feels": "Clear"}
+	]
+}

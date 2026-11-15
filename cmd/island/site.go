@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"sort"
 	"time"
 
 	"github.com/janearc/celestial/measure"
@@ -27,38 +28,48 @@ type placedObject struct {
 }
 
 type siteRecord struct {
-	ForestPreparation   time.Duration  `json:"forest-preparation-nanoseconds"`
-	ForestSelection     time.Duration  `json:"forest-region-selection-nanoseconds"`
-	ForestPlacement     time.Duration  `json:"forest-placement-nanoseconds"`
-	BoundedRoots        int            `json:"candidates-culled-before-height-read"`
-	GroundQueries       int            `json:"source-ground-placement-queries"`
-	CanopyArea          float64        `json:"mean-vertical-specimen-area-square-metres"`
-	CanopyCover         float64        `json:"approximate-overhead-canopy-cover"`
-	CanopyAreaSamples   int            `json:"canopy-area-rays"`
-	Objects             []placedObject `json:"objects"`
-	Trees               int            `json:"drawn-trees"`
-	Aggregated          int            `json:"aggregated-candidates"`
-	RegionAggregated    bool           `json:"whole-region-aggregated"`
-	RegionSkipped       string         `json:"whole-region-skipped-reason,omitempty"`
-	ExaminedCells       int            `json:"examined-cells"`
-	ExaminedRegions     int            `json:"examined-regions"`
-	AggregateRegions    int            `json:"aggregate-regions"`
-	GeneratedCandidates int            `json:"generated-candidates"`
-	Prototypes          int            `json:"prototypes"`
-	StoredFaces         int            `json:"prototype-stored-faces"`
-	Instances           int            `json:"placed-material-groups"`
-	Roots               []rootRecord   `json:"selected-root-records,omitempty"`
+	MistFloorBuilds     int                `json:"mist-floor-grid-builds"`
+	MistFloorHits       int                `json:"mist-floor-cache-hits"`
+	MistFloorEvictions  int                `json:"mist-floor-cache-evictions"`
+	MistFloorBytes      int64              `json:"retained-mist-floor-payload-bytes"`
+	MistHeightQueries   int                `json:"mist-floor-source-height-queries"`
+	MistFloorTime       time.Duration      `json:"mist-floor-preparation-nanoseconds"`
+	CrownFits           []retainedCrownFit `json:"retained-crown-material-fits,omitempty"`
+	CrownAreaRays       int                `json:"crown-material-area-rays"`
+	ForestPreparation   time.Duration      `json:"forest-preparation-nanoseconds"`
+	ForestSelection     time.Duration      `json:"forest-region-selection-nanoseconds"`
+	ForestPlacement     time.Duration      `json:"forest-placement-nanoseconds"`
+	BoundedRoots        int                `json:"candidates-culled-before-height-read"`
+	GroundQueries       int                `json:"source-ground-placement-queries"`
+	CanopyArea          float64            `json:"mean-vertical-specimen-area-square-metres"`
+	CanopyCover         float64            `json:"approximate-overhead-canopy-cover"`
+	CanopyAreaSamples   int                `json:"canopy-area-rays"`
+	Objects             []placedObject     `json:"objects"`
+	Trees               int                `json:"drawn-trees"`
+	Aggregated          int                `json:"aggregated-candidates"`
+	RegionAggregated    bool               `json:"whole-region-aggregated"`
+	RegionSkipped       string             `json:"whole-region-skipped-reason,omitempty"`
+	ExaminedCells       int                `json:"examined-cells"`
+	ExaminedRegions     int                `json:"examined-regions"`
+	AggregateRegions    int                `json:"aggregate-regions"`
+	GeneratedCandidates int                `json:"generated-candidates"`
+	Prototypes          int                `json:"prototypes"`
+	StoredFaces         int                `json:"prototype-stored-faces"`
+	Instances           int                `json:"placed-material-groups"`
+	Roots               []rootRecord       `json:"selected-root-records,omitempty"`
 }
 
 type prototypeKey struct {
 	kind, detail string
 	seed         uint64
+	areaSide     int
 }
 type prototype struct {
 	parts  []thing.Thing
 	lights []manufacture.AttachedLight
 	bounds maths.Box
 	areas  map[int]float64
+	fit    *crownAreaFit
 }
 
 // prototypeStore owns bounded, camera-independent geometry across frames.
@@ -81,6 +92,7 @@ type siteBuilder struct {
 	world     *thing.World
 	seconds   float64
 	store     *prototypeStore
+	floors    *floorStore
 	clearings []clearing
 	record    siteRecord
 }
@@ -88,10 +100,13 @@ type siteBuilder struct {
 // compose fixes the site's chart once in the world. Changing the camera only
 // changes visibility, surface representation and the final render translation.
 func (plan plan) compose(ctx context.Context, world *thing.World, sphere frame.Sphere,
-	heights island.Heights, view footprint.Perspective, origin frame.Relative, store *prototypeStore,
+	heights island.Heights, view footprint.Perspective, origin frame.Relative, store *prototypeStore, floors *floorStore,
 ) (*siteRecord, error) {
 	if plan.Site == nil {
 		return nil, nil
+	}
+	if floors == nil || floors.limit != plan.Site.Budget.MistFloors {
+		return nil, fmt.Errorf("island: mist floor cache budget changed within the scene session")
 	}
 	point := plan.Site.At
 	height, has, err := heights.Height(point.Longitude, point.Latitude)
@@ -112,7 +127,7 @@ func (plan plan) compose(ctx context.Context, world *thing.World, sphere frame.S
 	}
 	site := &siteBuilder{ctx: ctx, plan: plan.Site, frame: sphere, heights: heights, view: view,
 		relative: origin, space: maths.NewSubspace(position, basis, 1),
-		world: world, seconds: plan.Time, store: store}
+		world: world, seconds: plan.Time, store: store, floors: floors}
 	for _, object := range site.plan.Objects {
 		if err := site.object(object); err != nil {
 			return nil, err
@@ -140,6 +155,22 @@ func (plan plan) compose(ctx context.Context, world *thing.World, sphere frame.S
 	}
 	site.record.Prototypes = len(site.store.values)
 	site.record.StoredFaces = site.store.faces
+	site.record.MistFloorBytes = site.floors.bytes
+	for key, value := range site.store.values {
+		if value.fit != nil {
+			site.record.CrownFits = append(site.record.CrownFits, retainedCrownFit{key.kind, key.seed, value.fit})
+		}
+	}
+	sort.Slice(site.record.CrownFits, func(a, b int) bool {
+		one, two := site.record.CrownFits[a], site.record.CrownFits[b]
+		if one.Kind != two.Kind {
+			return one.Kind < two.Kind
+		}
+		if one.Seed != two.Seed {
+			return one.Seed < two.Seed
+		}
+		return one.Fit.Side < two.Fit.Side
+	})
 	return &site.record, nil
 }
 
@@ -184,17 +215,27 @@ func (site *siteBuilder) chartUp(east, south float64) maths.Vec {
 // load retains only renderable geometry, bounds and copied light descriptions;
 // procedural construction arrays are released after this call.
 func (site *siteBuilder) load(key prototypeKey) (prototype, error) {
+	if key.detail == "crown" && site.plan.Forest != nil && site.plan.Forest.CrownAreaMatch {
+		key.areaSide = site.plan.Forest.CrownAreaSide
+	}
 	if value, found := site.store.values[key]; found {
 		return value, nil
 	}
 	if key.detail == "crown" {
-		source, err := site.load(prototypeKey{key.kind, "clumps", key.seed})
+		source, err := site.load(prototypeKey{kind: key.kind, detail: "clumps", seed: key.seed})
 		if err != nil {
 			return prototype{}, err
 		}
 		value, faces, err := crown(source)
 		if err != nil {
 			return prototype{}, err
+		}
+		if key.areaSide > 0 {
+			value, err = fitCrownArea(site.ctx, source, value, key.areaSide)
+			if err != nil {
+				return prototype{}, err
+			}
+			site.record.CrownAreaRays += 3 * key.areaSide * key.areaSide
 		}
 		if faces > site.plan.Budget.Faces-site.store.faces {
 			return prototype{}, fmt.Errorf("island: crown exceeds retained prototype face budget")
@@ -238,7 +279,7 @@ func (site *siteBuilder) load(key prototypeKey) (prototype, error) {
 // add places shared geometry and its transformed lights within the frame budget.
 func (site *siteBuilder) add(value prototype, pose maths.Subspace) error {
 	if len(value.parts) > site.plan.Budget.Instances-site.record.Instances {
-		return fmt.Errorf("island: site instance budget exhausted")
+		return fmt.Errorf("island: site instance budget exhausted: %d material groups placed; next object needs %d; allowance %d", site.record.Instances, len(value.parts), site.plan.Budget.Instances)
 	}
 	local, err := site.relative.Placement(pose)
 	if err != nil {
@@ -266,7 +307,7 @@ func (site *siteBuilder) add(value prototype, pose maths.Subspace) error {
 
 // object grounds an authored recipe and reserves its horizontal clearing.
 func (site *siteBuilder) object(object objectPlan) error {
-	value, err := site.load(prototypeKey{object.Kind, object.Detail, object.Seed})
+	value, err := site.load(prototypeKey{kind: object.Kind, detail: object.Detail, seed: object.Seed})
 	if err != nil {
 		return err
 	}

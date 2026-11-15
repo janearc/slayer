@@ -1,8 +1,9 @@
 # A population belongs to its region
 
-This implementation is a code draft, with builds, geometry checks and
-renders deferred to the review pause. It adds authored mixed populations
-and a local terrain adapter; it does not yet stream a whole world.
+This implementation is committed with tests, in `scene/biome`; this note was
+written before them and records no results. Renders are not recorded here.
+It adds authored mixed populations and a local terrain adapter; it does not
+yet stream a whole world.
 
 ## Fixed roots
 

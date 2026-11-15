@@ -115,13 +115,13 @@ func TestARayMeetsTheCubeWhereItIs(t *testing.T) {
 		if !got {
 			continue
 		}
-		if math.Abs(met.Along()-want) > 1e-14*want {
+		if !(math.Abs(met.Along()-want) <= 1e-14*want) {
 			t.Fatalf("met at %v, the box at %v", met.Along(), want)
 		}
 		point := ray.Point(met.Along())
 		normal := made.NormalAt(met)
-		if math.Abs(normal.Dot(point)*2-maxPart(point)*2) > 1e-9 ||
-			math.Abs(normal.Len()-1) > 1e-12 {
+		if !(math.Abs(normal.Dot(point)*2-maxPart(point)*2) <= 1e-9) ||
+			!(math.Abs(normal.Len()-1) <= 1e-12) {
 			t.Fatalf("at %v the cube faces %v", point, normal)
 		}
 	}

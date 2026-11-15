@@ -2,11 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "island-sequence-v1.json",
   "title": "Timed geographic island camera track",
-  "description": "Longitude, latitude and radial height interpolate independently; easing applies per outgoing segment. Scene time is independent of playback fps. This is authored travel, not an orbit solver.",
+  "description": "Longitude, latitude and radial height interpolate independently. Optional continuous interpolation shares coordinate velocities at waypoints and requires linear key easing. Otherwise easing applies per outgoing segment. Scene time is independent of playback fps. This is authored travel, not an orbit solver.",
   "type": "object",
   "additionalProperties": false,
   "required": ["scene", "frames", "fps", "scene-duration-seconds", "keyframes"],
   "properties": {
+    "interpolation": {"enum": ["segments", "continuous"]},
     "scene": {"type": "string", "minLength": 1},
     "frames": {"type": "integer", "minimum": 2, "maximum": 7200},
     "fps": {"type": "integer", "minimum": 1, "maximum": 60},

@@ -401,8 +401,8 @@ func TestABuiltWorldsMistakesAreRefused(t *testing.T) {
 			"a sun says [toward colour source], all of them"},
 		{"    floods:", "    flood:",
 			"flood is not a key here; this block takes [bodies boxes " +
-				"floods lamps materials motions sky spheres spots suns unit " +
-				"wisps]"},
+				"fizzes floods lamps materials motions sky spheres spots " +
+				"suns unit wisps]"},
 		{"      top: 8", "      top: 0.5",
 			"a top of 0.5 at or under a knee of 0.7"},
 		{"      knee: 0.7", "      knee: -0.7", "knee takes a number from 0"},

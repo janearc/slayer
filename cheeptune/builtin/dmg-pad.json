@@ -1,0 +1,24 @@
+{
+	// the same score with the second pulse on the chords instead of the
+	// echo: the harmony broken into eighths, quiet, under the lead.
+	"name": "dmg-pad",
+	"machine": "gameboy",
+	"channels": [
+		{"kind": "pulse", "role": "lead", "duty": 0.5, "volume": 0.9,
+		 "envelope": {"attack": 0.01, "decay": 0.4, "sustain": 0.55,
+		              "release": 0.3},
+		 "vibrato": {"rate": 5, "depth": 10, "delay": 0.3}},
+		{"kind": "pulse", "role": "pad", "duty": 0.125, "volume": 0.4,
+		 "detune": 6, "pan": "right", "arp": "1/2",
+		 "envelope": {"attack": 0.3, "decay": 1, "sustain": 0.7,
+		              "release": 0.5}},
+		{"kind": "wave", "role": "bass", "table": "triangle",
+		 "envelope": {"attack": 0, "decay": 0.5, "sustain": 0.5,
+		              "release": 0.1}},
+		{"kind": "noise", "role": "perc", "hits": {
+			"k": {"shift": 7, "divisor": 3, "decay": 0.12},
+			"s": {"shift": 3, "divisor": 2, "decay": 0.15, "volume": 0.7},
+			"h": {"shift": 1, "divisor": 0, "decay": 0.04, "volume": 0.4}
+		}}
+	]
+}

@@ -30,7 +30,7 @@ func TestGroveHasPrescribedOpticalDepthAndNoTreeCountMultiplier(t *testing.T) {
 		}
 		tau += got * 0.01
 	}
-	if math.Abs(tau-0.06) > 1e-9 {
+	if !(math.Abs(tau-0.06) <= 1e-9) {
 		t.Fatalf("optical depth %g, want 0.06", tau)
 	}
 	for _, at := range []maths.Vec{maths.V(0, -1, 0), maths.V(0, 20, 0), maths.V(41, 1, 0)} {
@@ -52,7 +52,7 @@ func TestGroveCoverageWindAndGroundAffectTheField(t *testing.T) {
 	for x := -20.0; x < 20; x++ {
 		at := maths.V(x, 15, 0)
 		moved := grove.Tick(2 * time.Second).Density(at.Add(maths.V(4, 0, 0)))
-		if math.Abs(moved-grove.Density(at)) > 1e-14 {
+		if !(math.Abs(moved-grove.Density(at)) <= 1e-14) {
 			t.Fatal("wind did not advect the patches")
 		}
 		changed = changed || moved != grove.Density(at.Add(maths.V(4, 0, 0)))

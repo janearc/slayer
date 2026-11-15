@@ -1,0 +1,110 @@
+{
+	// zappy's bed for explaining, the awe mood. 66 a minute (glass-hour's
+	// tempo), 14 bars, 50.91 s. d major, with the two chords from below
+	// it, b flat and c, at the turn.
+	//
+	// the plan. the same things as the other two beds. the motif at half
+	// speed, each note twice as long: a4 d5 | e5 a5 | f#5. the floor,
+	// the ident's low b flat. no bounce and no heartbeat: long chords,
+	// widely spaced, and almost no drum.
+	//
+	// harmony, a bar each:
+	//   1-3   d (no third, with e)   wide and bare. the slow motif starts
+	//                                in bar 2 and the third (f#) arrives
+	//                                in the chord in bar 3.
+	//   4-5   g                      the motif's last note, f#5, lands as
+	//                                the sweet top of a g chord; then two
+	//                                notes walk down, e d.
+	//   6-7   a                      the slow motif a step up: b4 e5 |
+	//                                f#5 b5
+	//   8     a, thinning            its last note g#5, held, quiet. it
+	//                                leans up toward a.
+	//   9     b flat                 the turn, where the fact lands: g#
+	//                                rises to a5 while the bass moves the
+	//                                other way, a to b flat. the ident's
+	//                                floor, the loudest bass note, one
+	//                                drum. the chord has e in it, the
+	//                                bright fourth: large, not grim.
+	//   10    c                      the floor steps up; the slow motif
+	//                                begins again, a4 d5
+	//   11    d                      and arrives home, e5 a5, with the
+	//                                full d major chord and a drum. the
+	//                                loudest bar of the tune.
+	//   12    d                      f#5 held over it.
+	//   13-14 d (no third)           small again: a d e, then d, and the
+	//                                chord is let go half way through the
+	//                                last bar.
+	//
+	// loud and quiet: p and mp to bar 8, which is the quietest; bar 9 mf
+	// with the bass at f; bar 11 mf and f; then mp, p, p.
+	"name": "zappy-bed-awe",
+	"tempo": 66,
+	"meter": 4,
+	"loop": false,
+	"parts": [
+		{"role": "lead", "bars": [
+			"-:4",
+			"-:2 a4@mp d5@mp",
+			"e5:2@mp a5:2@mp",
+			"f#5:4@mp",
+			"-:2 e5@p d5@p",
+			"-:2 b4@mp e5@mp",
+			"f#5:2@mp b5:2@mp",
+			"g#5:4@p",
+			"a5:4",
+			"-:2 a4 d5",
+			"e5:2 a5:2@f",
+			"f#5:4",
+			"- a4@p d5@p e5@p",
+			"d5:2@p -:2"
+		]},
+		{"role": "pad", "bars": [
+			"(d3 a3 e4):4@p",
+			"(d3 a3 e4):4@p",
+			"(d3 a3 e4 f#4):4@p",
+			"(g2 d3 b3 f#4):4@p",
+			"(g2 d3 a3 e4):4@p",
+			"(a2 e3 c#4 e4):4@p",
+			"(a2 e3 b3 c#4):4@p",
+			"(a2 e3 b3):4@pp",
+			"(bb2 f3 d4 e4):4",
+			"(c3 g3 e4 g4):4",
+			"(d3 a3 d4 f#4 a4):4",
+			"(d3 a3 d4 f#4):4@mp",
+			"(d3 a3 e4):4@p",
+			"(d3 a3 d4):2@p -:2"
+		]},
+		{"role": "bass", "bars": [
+			"d2:4@p",
+			"d2:4@p",
+			"d2:4@p",
+			"g2:4@p",
+			"g2:4@p",
+			"a2:4@p",
+			"a2:4@p",
+			"a2:4@pp",
+			"bb1:4@f",
+			"c2:4",
+			"(d1 d2):4@f",
+			"d2:4@mp",
+			"d2:4@p",
+			"d2:2@p -:2"
+		]},
+		{"role": "perc", "bars": [
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"k -:3",
+			"-:3 t@p",
+			"k@f -:3",
+			"-:4",
+			"-:4",
+			"-:4"
+		]}
+	]
+}

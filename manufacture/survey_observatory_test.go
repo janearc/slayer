@@ -71,7 +71,7 @@ func (surface surveySurface) check(test *testing.T, data surveyContract,
 			along := point.Dot(data.Tangent)
 			low, high = min(low, along), max(high, along)
 		}
-		if math.Abs(high-low-surface.Span) > data.Tolerance ||
+		if !(math.Abs(high-low-surface.Span) <= data.Tolerance) ||
 			connectedPanels(polygon) != spacecraftPositiveSign {
 			test.Fatal("wrong mirror or housing extent", surface, high-low)
 		}

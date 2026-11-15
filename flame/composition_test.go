@@ -35,11 +35,11 @@ func TestCompositionPreservesIntegratedLinesAndItsAuthoredThermalLaw(t *testing.
 	got := profile.Spectrum(spec.Reference)
 	lo, hi := atHot.Span()
 	for b := lo; b <= hi; b++ {
-		if math.Abs(got.Power(b)-atHot.Power(b)) > 1e-12 {
+		if !(math.Abs(got.Power(b)-atHot.Power(b)) <= 1e-12) {
 			t.Fatal("line energy moved or changed")
 		}
 	}
-	if math.Abs(spectralPower(got)-3) > 1e-12 {
+	if !(math.Abs(spectralPower(got)-3) <= 1e-12) {
 		t.Fatal("line radiance was treated as spectral density")
 	}
 	cold := measure.Kelvin(1200)
@@ -47,13 +47,13 @@ func TestCompositionPreservesIntegratedLinesAndItsAuthoredThermalLaw(t *testing.
 	for _, line := range spec.Lines {
 		want += line.Radiance * radiance.Planck(cold, line.Wavelength).InWattsPerNanometre() / radiance.Planck(spec.Reference, line.Wavelength).InWattsPerNanometre()
 	}
-	if math.Abs(spectralPower(profile.Spectrum(cold))-want) > 1e-12 {
+	if !(math.Abs(spectralPower(profile.Spectrum(cold))-want) <= 1e-12) {
 		t.Fatal("wrong temperature response")
 	}
 	spec.Lines[0].Radiance = 900
 	copy := profile.Lines()
 	copy[0].Radiance = 800
-	if math.Abs(spectralPower(profile.Spectrum(profile.Reference()))-3) > 1e-12 {
+	if !(math.Abs(spectralPower(profile.Spectrum(profile.Reference()))-3) <= 1e-12) {
 		t.Fatal("caller changed immutable composition")
 	}
 }
@@ -69,7 +69,7 @@ func TestCompositionAddsContinuumAndRejectsInvalidInputs(t *testing.T) {
 	expected := spectralPower(Glowing(heat)) * .25
 	lineOnly, _ := NewComposition(lineSpec())
 	expected += spectralPower(lineOnly.Spectrum(heat))
-	if math.Abs(spectralPower(profile.Spectrum(heat))-expected) > 1e-10 {
+	if !(math.Abs(spectralPower(profile.Spectrum(heat))-expected) <= 1e-10) {
 		t.Fatal("continuum not added")
 	}
 	for _, alter := range []func(*CompositionSpec){

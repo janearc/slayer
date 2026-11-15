@@ -39,6 +39,10 @@ func (column *Column) Tick(at time.Duration) medium.Medium {
 	return &ticked
 }
 
+// eddyFields is how many noise fields an eddy asks at a point: the push
+// across, the push along, and the clumping, by definition.
+const eddyFields = 3
+
 // rolled is where a point's soot comes from once the eddies have moved it, and
 // how much thicker the eddies make it there.
 //
@@ -54,9 +58,13 @@ func (column *Column) rolled(p maths.Vec) (maths.Vec, float64) {
 	x, y, z := p.X/size, column.phase(p.Y)/size, p.Z/size
 	seed := column.fire.Seed ^ smokeSeeds
 	push := sway * radius
-	moved := maths.V(p.X+push*noise.Fractal(seed, x, y, z, octaves), p.Y,
-		p.Z+push*noise.Fractal(seed+1, x, y, z, octaves))
-	thicker := 1 + clump*noise.Fractal(seed+2, x, y, z, octaves)
+	// the three fields at one point, asked together: across, along and
+	// how thick, each the fractal of its own seed
+	var found [eddyFields]float64
+	noise.Fractals([]uint64{seed, seed + 1, seed + 2}, x, y, z, octaves,
+		found[:])
+	moved := maths.V(p.X+push*found[0], p.Y, p.Z+push*found[1])
+	thicker := 1 + clump*found[2]
 	return moved, max(0, thicker)
 }
 

@@ -54,7 +54,7 @@ func TestALasersBeamFallsOffAcrossItsWidth(t *testing.T) {
 		across := maths.V(laserReach/pair, number(t, row, "across"), none)
 		_, _, light := glass.Light(across, maths.Up)
 		want := number(t, row, "share")
-		if math.Abs(light.R-want) > loose*want {
+		if !(math.Abs(light.R-want) <= loose*want) {
 			t.Errorf("%s: %v, want %v", label(row), light.R, want)
 		}
 	}
@@ -94,8 +94,8 @@ func laserLightIsAGaussian(t *rapid.T) {
 	point := at.Add(aim.Scale(along)).Add(across)
 	toward, far, light := glass.Light(point, maths.Up)
 	want := math.Exp(-pair * share * share)
-	if math.Abs(light.R-want) > loose || !toward.Near(aim.Neg(), loose) ||
-		math.Abs(far-along) > loose*length {
+	if !(math.Abs(light.R-want) <= loose) || !toward.Near(aim.Neg(), loose) ||
+		!(math.Abs(far-along) <= loose*length) {
 		t.Fatalf("%v along and %v widths across: %v, %v, %v, want %v", along,
 			share, toward, far, light, want)
 	}

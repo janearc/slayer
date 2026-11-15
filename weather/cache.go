@@ -71,6 +71,13 @@ func (made *Weather) Reach(dir string, moment, every float64,
 			return taken, err
 		}
 	}
+	// a moment reached with no step, still air at nothing among them,
+	// is kept too, or the note would name a checkpoint never written
+	if taken == 0 {
+		if err := made.save(shelf); err != nil {
+			return taken, err
+		}
+	}
 	return taken, os.WriteFile(note(shelf, moment), []byte(name(made.clock)),
 		0o644)
 }

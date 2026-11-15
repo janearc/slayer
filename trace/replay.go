@@ -29,6 +29,9 @@ func Replay(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	}
 	fine := seen.fine()
 	scene := stage(fine.world, fine.at)
+	if err := scene.refusal(); err != nil {
+		return frame.Pixel{}, nil, err
+	}
 	walked := &walk{}
 	scene.walked = walked
 	wide := fine.wide()

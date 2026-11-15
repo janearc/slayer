@@ -1,6 +1,7 @@
 package template
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/janearc/celestial/radiation"
@@ -13,16 +14,24 @@ import (
 // turning once in seven and a half seconds, dim blue and hot in x-ray,
 // and a giant flare a second in: a fireball from the surface at a tenth
 // of the speed of light, gamma bright and nearly clear to gamma.
-func Magnetar() bodies.Body {
-	return bodies.Body{Name: "magnetar", Kind: bodies.Star, Radius: 12, Mass: 1.4 * bodies.Sun,
-		Day:  7540 * time.Millisecond,
-		Glow: swatches.Light(swatches.MagnetarBlue),
-		Radiant: thing.Spectrum{Gives: map[radiation.Range]float64{
-			radiation.XRay(): 1, radiation.Gamma(): 0.2}},
-		Flare: &bodies.Flare{At: time.Second, Speed: 30000, Opacity: 0.8,
-			Glow: swatches.Light(swatches.FlareWhite),
-			Radiant: thing.Spectrum{
-				Gives:  map[radiation.Range]float64{radiation.Gamma(): 2, radiation.XRay(): 1},
-				Passes: map[radiation.Range]float64{radiation.Gamma(): 0.9}}},
+func Magnetar() (bodies.Body, error) {
+	flare, err := bodies.NewFlare(time.Second, 30000, 0.8,
+		swatches.Light(swatches.FlareWhite))
+	if err != nil {
+		return bodies.Body{}, fmt.Errorf("magnetar: %w", err)
 	}
+	flare = flare.Radiating(thing.Spectrum{
+		Gives: map[radiation.Range]float64{radiation.Gamma(): 2,
+			radiation.XRay(): 1},
+		Passes: map[radiation.Range]float64{radiation.Gamma(): 0.9}})
+	magnetar, err := bodies.NewBody("magnetar", bodies.Star, km(12),
+		kg(1.4*bodies.Sun), flare)
+	if err != nil {
+		return bodies.Body{}, err
+	}
+	magnetar = magnetar.Turning(7540*time.Millisecond, deg(0)).
+		Glowing(swatches.Light(swatches.MagnetarBlue),
+			thing.Spectrum{Gives: map[radiation.Range]float64{
+				radiation.XRay(): 1, radiation.Gamma(): 0.2}})
+	return magnetar, nil
 }

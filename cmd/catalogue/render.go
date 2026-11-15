@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/janearc/puzzlemouth/pzm"
@@ -24,6 +25,14 @@ const directoryMode = 0o755
 // artifactMode is defined as owner rw, group r and other r.
 const artifactMode = 0o644
 
+// settingsName is the file a specimen's plan is saved to, beside its
+// picture, and settingsShown the same plan under a name that ends in
+// txt: a browser downloads a yaml and will not show it.
+const (
+	settingsName  = "settings.yaml"
+	settingsShown = "settings-yaml.txt"
+)
+
 type card struct {
 	Entry   entry  `json:"entry"`
 	Detail  string `json:"detail"`
@@ -31,6 +40,11 @@ type card struct {
 	Status  string `json:"status"`
 	Failure string `json:"failure,omitempty"`
 	Cutaway bool   `json:"cutaway,omitempty"`
+	// Settings is the hash of the plan the card was drawn under, and
+	// Producer the binary that drew it: both belong to the card, so a
+	// book resumed by another binary keeps each card's own record.
+	Settings string    `json:"settings-sha256,omitempty"`
+	Producer *producer `json:"producer,omitempty"`
 }
 
 type book struct {
@@ -59,7 +73,7 @@ func prepare(call pzm.Call) (*book, *plan, error) {
 			if slices.Contains(entry.Details, detail) {
 				view := card{Entry: entry, Detail: detail,
 					Folder: entry.Kind + "-" + detail,
-					Status: "pending"}
+					Status: pendingStatus}
 				cards = append(cards, view)
 			}
 		}
@@ -71,7 +85,10 @@ func prepare(call pzm.Call) (*book, *plan, error) {
 	return &book{Cards: cards}, plan, nil
 }
 
-// render writes one completed specimen at a time, keeping a truthful index.
+// render writes one completed specimen at a time, keeping a truthful
+// index. A specimen that fails is marked failed and the run goes on; the
+// run says every failure at its end and exits with them. A destination
+// that holds a book is resumed.
 func (app application) render(call pzm.Call) error {
 	if err := app.context.Err(); err != nil {
 		return err
@@ -89,50 +106,82 @@ func (app application) render(call pzm.Call) error {
 			len(book.Cards), destination)
 		return err
 	}
-	if err := book.start(destination); err != nil {
-		return err
-	}
-	for index := range book.Cards {
-		if err := app.context.Err(); err != nil {
-			return err
-		}
-		err := plan.draw(destination, &book.Cards[index], book.Producer)
-		if err != nil {
-			book.Cards[index].Status = "failed"
-			book.Cards[index].Failure = err.Error()
-		}
-		writeError := book.write(destination)
-		if err != nil || writeError != nil {
-			return errors.Join(err, writeError)
-		}
-		_, err = fmt.Fprintln(call.Out(), book.Cards[index].Folder)
-		if err != nil {
-			return err
-		}
-	}
-	index := filepath.Join(destination, "index.html")
-	_, err = fmt.Fprintln(call.Out(), index)
-	return err
-}
-
-// start creates a new book with the identity of its actual producer.
-func (book *book) start(destination string) error {
-	var err error
-	book.Producer, err = compiledProducer()
+	selected, err := book.open(call.Out(), destination, plan)
 	if err != nil {
 		return err
 	}
-	parent := filepath.Dir(destination)
-	if err := os.MkdirAll(parent, directoryMode); err != nil {
+	failures, err := app.drawAll(call, destination, book, plan, selected)
+	if err != nil {
 		return err
 	}
-	if err := os.Mkdir(destination, directoryMode); err != nil {
+	index := filepath.Join(destination, "index.html")
+	if _, err = fmt.Fprintln(call.Out(), index); err != nil {
 		return err
 	}
-	if err := writeIcons(destination); err != nil {
+	return failed(failures, len(selected))
+}
+
+// drawAll draws each selected card the book does not already hold, and
+// returns a line for each that failed. A card that cannot be recorded
+// or said stops the run, as does cancellation; a card that cannot be
+// drawn does not.
+func (app application) drawAll(call pzm.Call, destination string,
+	book *book, plan *plan, selected map[string]bool,
+) ([]string, error) {
+	var failures []string
+	settings := plan.hash()
+	for index := range book.Cards {
+		view := &book.Cards[index]
+		if !selected[view.Folder] || view.drawnUnder(settings) {
+			continue
+		}
+		if err := app.context.Err(); err != nil {
+			return failures, err
+		}
+		if err := app.drawOne(destination, view, plan, book.Producer); err != nil {
+			failures = append(failures, view.Folder+": "+err.Error())
+		}
+		if err := book.write(destination); err != nil {
+			return failures, err
+		}
+		if view.Status != renderedStatus {
+			continue
+		}
+		if _, err := fmt.Fprintln(call.Out(), view.Folder); err != nil {
+			return failures, err
+		}
+	}
+	return failures, nil
+}
+
+// drawOne draws one card afresh: whatever an earlier try left in its
+// folder is removed first, and the card says on its face what it holds.
+func (app application) drawOne(destination string, view *card, plan *plan,
+	maker *producer,
+) error {
+	view.Status, view.Failure = pendingStatus, ""
+	view.Settings, view.Producer = plan.hash(), maker
+	err := os.RemoveAll(filepath.Join(destination, view.Folder))
+	if err == nil {
+		err = app.drawer.draw(*plan, destination, view, maker)
+	}
+	if err != nil {
+		view.Status, view.Failure = failedStatus, err.Error()
+		view.Settings, view.Producer = "", nil
 		return err
 	}
-	return book.write(destination)
+	view.Status = renderedStatus
+	return nil
+}
+
+// failed says every specimen that failed, one line each, as the error
+// the run ends with; a run with none ends well.
+func failed(failures []string, selected int) error {
+	if len(failures) == noEntries {
+		return nil
+	}
+	return fmt.Errorf("%d of %d specimens failed:\n%s", len(failures),
+		selected, strings.Join(failures, "\n"))
 }
 
 // draw reaches native Metal and refuses empty or unrefined mesh pictures.
@@ -168,9 +217,14 @@ func (plan plan) draw(destination string, card *card,
 		plan.Tone.Develop(picture), plan.PixelAspect); err != nil {
 		return err
 	}
-	if err := os.WriteFile(filepath.Join(folder, "settings.yaml"),
-		plan.raw, artifactMode); err != nil {
-		return err
+	// the settings twice: as the yaml a plan is read back from, and as
+	// the same bytes under a name a browser will show, which is the one
+	// the book's page links to
+	for _, name := range []string{settingsName, settingsShown} {
+		if err := os.WriteFile(filepath.Join(folder, name), plan.raw,
+			artifactMode); err != nil {
+			return err
+		}
 	}
 	card.Status = "native GPU render"
 	imageHash, err := hashFile(imagePath)

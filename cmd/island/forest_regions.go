@@ -28,7 +28,7 @@ func (site *siteBuilder) completeEnvelope() (maths.Box, error) {
 	for _, member := range forest.Mixture {
 		for variant := 0; variant < forest.Variety; variant++ {
 			for _, detail := range details {
-				value, err := site.load(prototypeKey{member.Kind, detail, forest.Seed + uint64(variant)})
+				value, err := site.load(prototypeKey{kind: member.Kind, detail: detail, seed: forest.Seed + uint64(variant)})
 				if err != nil {
 					return maths.Box{}, err
 				}

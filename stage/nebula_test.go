@@ -63,8 +63,11 @@ func pulsar(t *testing.T, scale float64) *thing.World {
 // parts, then the two spheres; the pulsar's gas, then the nebula; the
 // pulsar's lamps, then the spot, then the flood.
 func TestAWorldIsBuiltInTheOrderItIsWritten(t *testing.T) {
-	body, _ := template.Named("pulsar")
-	world, alone := nebula(t), pulsar(t, 0.001/body.Radius)
+	body, err := template.Named("pulsar")
+	if err != nil {
+		t.Fatal(err)
+	}
+	world, alone := nebula(t), pulsar(t, 0.001/body.Radius())
 	if len(world.Things) != len(alone.Things)+2 ||
 		len(world.Volumes) != len(alone.Volumes)+1 ||
 		len(world.Lamps) != len(alone.Lamps)+2 {

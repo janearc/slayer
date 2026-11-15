@@ -14,6 +14,11 @@ type triangle struct {
 	corners [3]maths.Vec
 	normals [3]maths.Vec
 	smooth  bool
+	// unlifted is a smooth face whose normal is blended and whose point
+	// is left where the ray met it: a shape.Mesh's, as slayer's tracer
+	// shades one. slayer's own mesh also raises the point toward the
+	// curved surface its normals draw, and is not unlifted.
+	unlifted bool
 }
 
 // box is the smallest box round some corners.

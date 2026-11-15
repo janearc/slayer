@@ -52,6 +52,16 @@ type Spanner interface {
 	Span(r maths.Ray, near, far float64) (enter, leave float64, ok bool)
 }
 
+// Interval is one contiguous occupied ray segment in a medium's local units.
+// An empty interval has Leave <= Enter.
+type Interval struct{ Enter, Leave float64 }
+
+// SplitSpanner preserves both sides of a hollow shell without marching its
+// empty interior. At most two disjoint intervals are returned, nearest first.
+type SplitSpanner interface {
+	Spans(r maths.Ray, near, far float64) [2]Interval
+}
+
 // sphere is where a ray enters and leaves a ball of radius rad about the
 // origin, between near and far: the two roots, each kept inside the range.
 func sphere(rad float64, r maths.Ray, near, far float64) (float64, float64,

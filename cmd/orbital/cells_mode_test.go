@@ -9,8 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/mock/gomock"
+
 	"github.com/janearc/puzzlemouth/numbers"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/render/cells/mocks"
 	"github.com/janearc/slayer/scene/smoke"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -161,18 +164,40 @@ func TestTheDeveloperExposesByStops(t *testing.T) {
 	}
 }
 
-// The beams' clock is set to the time they are told.
-func TestTheBeamsAreToldTheTime(t *testing.T) {
-	defer setBeams(beamClock)
-	at := time.Duration(pick("cells-frames")) * time.Second
-	beams{}.Set(at)
-	if beamClock != at {
-		t.Errorf("the beams' clock is %v, not %v", beamClock, at)
+// A cells mode passes the time of each frame on to the clock it follows.
+func TestTheRelayPassesTheTimeOn(t *testing.T) {
+	mode, err := askCells(goodAsk())
+	if err != nil {
+		t.Fatal(err)
 	}
+	clock := mocks.NewMockClock(gomock.NewController(t))
+	at := time.Duration(pick("cells-frames")) * time.Second
+	clock.EXPECT().Set(at).Times(aFrame)
+	mode.follow(clock)
+	mode.relay.Set(at)
 }
 
-// setBeams puts the beams' clock back to at.
-func setBeams(at time.Duration) { beamClock = at }
+// anti-tests: before it follows a clock, a relay told the time tells no
+// one and does not stop.
+func TestARelayWithNoClockTellsNoOne(t *testing.T) {
+	mode, err := askCells(goodAsk())
+	if err != nil {
+		t.Fatal(err)
+	}
+	mode.relay.Set(time.Duration(pick("cells-frames")) * time.Second)
+}
+
+// anti-tests: -cells draws on the cpu, so -gpu with it is refused before
+// a scene is built.
+func TestCellsRefuseTheGPU(t *testing.T) {
+	ask := goodAsk()
+	ask.gpu = true
+	if mode, err := askCells(ask); !errors.Is(err, errGPUCells) ||
+		mode.on {
+		t.Errorf("-gpu with -cells: on %v, %v; want errGPUCells",
+			mode.on, err)
+	}
+}
 
 // Noting a flag gives it. givenFlags gives no flag the tests didn't set.
 func TestANotedFlagIsGiven(t *testing.T) {
@@ -184,46 +209,6 @@ func TestANotedFlagIsGiven(t *testing.T) {
 	if givenFlags()[outFlag] {
 		t.Errorf("-%s is given, and the tests never set it", outFlag)
 	}
-}
-
-// Run draws the frames of a placed scene to the writer it is given.
-func TestRunWritesTheFrames(t *testing.T) {
-	mode, world, eye := smokeMode(t)
-	out, err := os.CreateTemp(t.TempDir(), "frames")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := mode.run(out, world, eye); err != nil {
-		t.Fatalf("run: %v", err)
-	}
-	if info, _ := out.Stat(); info.Size() == noCount {
-		t.Error("run wrote nothing")
-	}
-}
-
-// anti-tests: a writer that will take nothing stops the run with an error.
-func TestRunStopsWhenTheWriterRefuses(t *testing.T) {
-	mode, world, eye := smokeMode(t)
-	readOnly, err := os.Open(os.DevNull)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer readOnly.Close()
-	if err := mode.run(readOnly, world, eye); err == nil {
-		t.Error("run went on with a writer that takes nothing")
-	}
-}
-
-// smokeMode is a good ask's cells mode, with the picked smoke scene's
-// world and eye to place in it.
-func smokeMode(t *testing.T) (cellsMode, *thing.World, maths.Subspace) {
-	t.Helper()
-	mode, err := askCells(goodAsk())
-	if err != nil {
-		t.Fatal(err)
-	}
-	world, eye := smokeScene(t)
-	return mode, world, eye
 }
 
 // smokeScene is the picked smoke scene's world and eye.

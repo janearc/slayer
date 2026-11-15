@@ -17,6 +17,7 @@ import (
 // modelled: a pattern in layers about the ring, a layer for each doubling of
 // size, each weighed by the slope; not particles.
 type grains struct {
+	name                        string
 	seed                        uint64
 	pattern                     pattern
 	smallest, largest, shear    float64
@@ -135,7 +136,7 @@ func (ring Ring) Grained(name string, seed uint64, smallest, largest,
 			"shear %g, clumping %g", smallest, largest, slope, shear,
 			clumping)
 	}
-	ring.grains = grains{seed: seed, pattern: drawn, smallest: smallest,
+	ring.grains = grains{name: name, seed: seed, pattern: drawn, smallest: smallest,
 		largest: largest, shear: shear, slope: slope, clumping: clumping}
 	ring.grains.settle()
 	return ring, nil
@@ -190,7 +191,7 @@ func (made grains) layered(x, z, finest float64) (sum, hidden float64) {
 	along := reach / made.shear
 	size, unseen := made.largest, 0.0
 	for i := 0; i < mostLayers && size >= made.smallest; i++ {
-		strength := math.Pow(size/made.largest, (made.slope-2)/2)
+		strength := made.weight(size)
 		seen := 1.0
 		if finest > 0 {
 			seen = math.Max(0, math.Min(1, size/finest-1))
@@ -204,6 +205,17 @@ func (made grains) layered(x, z, finest float64) (sum, hidden float64) {
 		size /= 2
 	}
 	return sum, math.Sqrt(unseen) * made.spread
+}
+
+// hiddenWidths is how many standard deviations of the hidden layers wide
+// smoothstep's edge is taken over, so its slope at the middle is a normal
+// spread's: 3.75, worked from the two slopes.
+const hiddenWidths = 3.75
+
+// weight is how strongly a layer of clumps of a size shows against the
+// largest, by the power law of their sizes.
+func (made grains) weight(size float64) float64 {
+	return math.Pow(size/made.largest, (made.slope-2)/2)
 }
 
 // share is how much of the ring's mean depth stands at a point of its
@@ -225,7 +237,7 @@ func (made grains) share(x, z, finest float64) float64 {
 		return 1
 	}
 	sum, hidden := made.layered(x, z, finest)
-	width := made.softness + 3.75*hidden
+	width := made.softness + hiddenWidths*hidden
 	edge := math.Max(0, math.Min(1, (sum-made.threshold)/width+0.5))
 	return eased(edge) / filled(made.clumping)
 }

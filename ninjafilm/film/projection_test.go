@@ -67,7 +67,7 @@ func rayIsOneUnitLong(t *rapid.T) {
 	x := rapid.IntRange(none, across-whole).Draw(t, "x")
 	y := rapid.IntRange(none, down-whole).Draw(t, "y")
 	got := glass.Ray(x, y, across, down, maths.Band{})
-	if length := got.Dir.Len(); math.Abs(length-whole) > tight {
+	if length := got.Dir.Len(); !(math.Abs(length-whole) <= tight) {
 		t.Fatalf("the ray at %d, %d of %d by %d is %v long", x, y,
 			across, down, length)
 	}
@@ -89,9 +89,8 @@ func pictureMirrors(t *rapid.T) {
 	here := glass.Ray(x, y, across, down, band).Dir
 	over := glass.Ray(across-whole-x, y, across, down, band).Dir
 	under := glass.Ray(x, down-whole-y, across, down, band).Dir
-	if math.Abs(here.X+over.X) > tight || math.Abs(here.Y-over.Y) >
-		tight || math.Abs(here.Y+under.Y) > tight ||
-		math.Abs(here.X-under.X) > tight {
+	if !(math.Abs(here.X+over.X) <= tight) || !(math.Abs(here.Y-over.Y) <= tight) || !(math.Abs(here.Y+under.Y) <= tight) ||
+		!(math.Abs(here.X-under.X) <= tight) {
 		t.Fatalf("%v at %d, %d is mirrored by %v and %v", here, x, y, over,
 			under)
 	}
@@ -141,7 +140,7 @@ func shapeKeepsCirclesRound(t *rapid.T) {
 	x1, _ := slopes(glass, across, down, x+whole, y)
 	_, y1 := slopes(glass, across, down, x, y+whole)
 	want := shape
-	if got := (x1 - x0) / (y0 - y1); math.Abs(got-want) > loose {
+	if got := (x1 - x0) / (y0 - y1); !(math.Abs(got-want) <= loose) {
 		t.Fatalf("across over down is %v, want %v", got, want)
 	}
 }

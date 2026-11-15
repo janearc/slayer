@@ -1,0 +1,58 @@
+{
+	// the studio machine. the acid lead and bass of @acid, kept in step
+	// with it, over a clockwork kit: every hit is struck metal that
+	// ticks and does not ring, and the chords are short strikes on a
+	// bar, like a musical movement. k is a thud on a plate, s a ratchet,
+	// h a fine tick, o a longer tick, t an anvil, b a chime.
+	"name": "acid-clockwork",
+	"machine": "studio",
+	"master": 0.4,
+	"reverb": {"size": 0.4, "decay": 1.4, "damping": 0.3, "level": 0.3},
+	"channels": [
+		{"kind": "analog", "role": "lead", "volume": 0.7, "place": -0.1,
+		 "glide": 0.05, "send": {"reverb": 0.25},
+		 "envelope": {"attack": 0.003, "decay": 0.5, "sustain": 0.6,
+		              "release": 0.18},
+		 "analog": {"oscillators": [{"shape": "saw"}],
+		            "overdrive": 0.3,
+		            "filter": {"poles": 4, "cutoff": 2000,
+		                       "resonance": 0.7, "follow": 0.7,
+		                       "amount": 2.8, "accent": 1.2, "snap": 0.5,
+		                       "envelope": {"attack": 0.002,
+		                                    "decay": 0.3,
+		                                    "sustain": 0.25,
+		                                    "release": 0.2}}}},
+		{"kind": "modal", "role": "pad", "volume": 0.8, "place": 0.4,
+		 "send": {"reverb": 0.35},
+		 "modal": {"set": "bar", "hardness": 0.95, "decay": 0.5,
+		           "release": 0.12}},
+		{"kind": "analog", "role": "bass", "volume": 0.45, "glide": 0.06,
+		 "envelope": {"attack": 0.002, "decay": 0.3, "sustain": 0.7,
+		              "release": 0.1},
+		 "analog": {"oscillators": [{"shape": "saw"}],
+		            "overdrive": 0.4,
+		            "filter": {"poles": 4, "cutoff": 800,
+		                       "resonance": 0.72, "follow": 0.5,
+		                       "amount": 3, "accent": 1.5, "snap": 0.5,
+		                       "envelope": {"attack": 0, "decay": 0.25,
+		                                    "sustain": 0.25,
+		                                    "release": 0.1}}}},
+		{"kind": "drum", "role": "perc", "volume": 1,
+		 "send": {"reverb": 0.25},
+		 "drums": {
+			"k": {"tone": 62, "struck": "plate", "hardness": 0.55,
+			      "decay": 0.35, "click": 0.5},
+			"s": {"tone": 700, "struck": "bar", "hardness": 1,
+			      "decay": 0.06, "click": 0.6, "noise": 0.3,
+			      "noise_decay": 0.04, "colour": 5000},
+			"h": {"tone": 1900, "struck": "bar", "hardness": 1,
+			      "decay": 0.025, "click": 0.3, "volume": 0.7},
+			"t": {"tone": 410, "struck": "plate", "hardness": 0.9,
+			      "decay": 0.45, "click": 0.4},
+			"o": {"tone": 1500, "struck": "plate", "hardness": 1,
+			      "decay": 0.18, "click": 0.2},
+			"b": {"tone": 880, "struck": "tube", "hardness": 0.9,
+			      "decay": 0.5}
+		 }}
+	]
+}

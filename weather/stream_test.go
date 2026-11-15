@@ -35,7 +35,7 @@ func TestTheStreamFunctionUndoesTheLaplacian(t *testing.T) {
 	}
 	back := grid.streamOf(vorticity)
 	for k := range psi {
-		if math.Abs(back[k]-psi[k]) > 1e-6*1e12 {
+		if !(math.Abs(back[k]-psi[k]) <= 1e-6*1e12) {
 			t.Fatalf("cell %d: %g, want %g", k, back[k], psi[k])
 		}
 	}

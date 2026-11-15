@@ -1,0 +1,25 @@
+{
+	"group": "bright and driving",
+	"mood": "bright and driving",
+	"feeling": "A clear morning and a road that goes where you want.",
+	"intent": "A fast montage: a run, a drive, sunrise on the water, a set of quick cuts that ends on a still.",
+	"listen_for": "The one silent bar at 0:12, then everything coming back an octave higher at 0:14.",
+	"voicing": "@leap-dmg",
+	"tempo": 138,
+	"meter": 4,
+	"seconds": 31.3,
+	"parts": [
+		{"name": "start", "bar": 1, "second": 0.0,
+		 "change": "lead, stabbing chords and a driving drum from the first beat",
+		 "feels": "Off and running"},
+		{"name": "lap", "bar": 5, "second": 6.96,
+		 "change": "the lead leaps in wider steps",
+		 "feels": "Easy and confident"},
+		{"name": "sun", "bar": 9, "second": 13.91,
+		 "change": "sixteenths in the lead and a galloping bass; the lead sits an octave higher",
+		 "feels": "Everything lifts: the sun is up"},
+		{"name": "arrive", "bar": 17, "second": 27.83,
+		 "change": "a held chord and a kick; the run stops",
+		 "feels": "Arrived, and still"}
+	]
+}

@@ -16,7 +16,7 @@ func TestEveryRayIsOneUnitLong(t *testing.T) {
 			for y := range size[1] {
 				for x := range size[0] {
 					r := s.Ray(x, y, size[0], size[1], maths.Band{})
-					if l := r.Dir.Len(); math.Abs(l-1) > 1e-12 {
+					if l := r.Dir.Len(); !(math.Abs(l-1) <= 1e-12) {
 						t.Fatalf("%+v at %d, %d of %v: %v long", s, x, y,
 							size, l)
 					}
@@ -59,8 +59,8 @@ func TestADegeneratePictureLooksAhead(t *testing.T) {
 func TestThePinholeSeesSixtyDegrees(t *testing.T) {
 	const w = 2000
 	r := Pinhole{}.Ray(w-1, 0, w, 1, maths.Band{})
-	if got := math.Atan2(r.Dir.X, -r.Dir.Z) / maths.Degree; math.Abs(got-
-		30) > 0.05 {
+	if got := math.Atan2(r.Dir.X, -r.Dir.Z) / maths.Degree; !(math.Abs(got-
+		30) <= 0.05) {
 		t.Errorf("the rightmost pixel looks %v degrees out", got)
 	}
 }
@@ -76,8 +76,8 @@ func TestASwathOfNothingIsAPlainLens(t *testing.T) {
 		}
 	}
 	// forty kilometres from four hundred is a lens of 5.725 degrees
-	if got := Swath(40, 400).Wide() / maths.Degree; math.Abs(got-
-		5.7248) > 0.001 {
+	if got := Swath(40, 400).Wide() / maths.Degree; !(math.Abs(got-
+		5.7248) <= 0.001) {
 		t.Errorf("forty from four hundred sees %v degrees", got)
 	}
 }

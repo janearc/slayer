@@ -69,6 +69,45 @@ func (made Wisp) Ragged() (seed uint64, scale, amount float64) {
 	return uint64(made.seed), made.scale, made.amount
 }
 
+// A Fizz is the mist of bubbles too small to see, over something that
+// fizzes: a column standing on its foot, thick where it is born and
+// thinning as it climbs and widens, and the colour it gives back of the
+// light that crosses it.
+//
+// the water's churn makes it ragged, and the churn climbs with the
+// bubbles: a fizz drawn at two moments is two pictures. One with no
+// churn, or that does not rise, is the same picture at every moment.
+type Fizz struct {
+	name                        string
+	colour                      Colour
+	foot                        [3]float64
+	radius, height, thick, rise float64
+	churn, seed                 float64
+}
+
+// Name is the fizz's name.
+func (made Fizz) Name() string { return made.name }
+
+// Colour is what it gives back of the light.
+func (made Fizz) Colour() Colour { return made.colour }
+
+// Foot is where the middle of its foot stands, in the world's space.
+func (made Fizz) Foot() maths.Vec { return fromMap(made.foot) }
+
+// Column is its radius at the foot and how high it rises, in the
+// world's units, and its density at the middle of the foot.
+func (made Fizz) Column() (radius, height, thick float64) {
+	return made.radius, made.height, made.thick
+}
+
+// Rise is how fast it climbs, in the world's units a second.
+func (made Fizz) Rise() float64 { return made.rise }
+
+// Churned is its seed, and how much of the density the churn may take.
+func (made Fizz) Churned() (seed uint64, churn float64) {
+	return uint64(made.seed), made.churn
+}
+
 // spheres reads each sphere, by its name.
 func (reading reader) spheres(_, value *yaml.Node) error {
 	return reading.each(value, func(name, block *yaml.Node) error {
@@ -112,6 +151,32 @@ func (reading reader) wisps(_, value *yaml.Node) error {
 				"thick", "seed", "scale", "amount", "source")
 		}
 		reading.set.world.wisps = append(reading.set.world.wisps, made)
+		return err
+	})
+}
+
+// fizzes reads each fizz, by its name.
+func (reading reader) fizzes(_, value *yaml.Node) error {
+	return reading.each(value, func(name, block *yaml.Node) error {
+		made := Fizz{name: name.Value}
+		var source string
+		over := math.SmallestNonzeroFloat64
+		err := reading.keys(block, map[string]step{
+			"colour": reading.colour(&made.colour),
+			"foot":   reading.three(&made.foot, -farthest, farthest),
+			"radius": reading.number(&made.radius, over, farthest),
+			"height": reading.number(&made.height, over, farthest),
+			"thick":  reading.number(&made.thick, over, brightest),
+			"rise":   reading.number(&made.rise, 0, farthest),
+			"churn":  reading.number(&made.churn, 0, 1),
+			"seed":   reading.whole(&made.seed, 0, mostSeed),
+			"source": reading.source(&source),
+		}, nil)
+		if err == nil {
+			err = reading.all(block, "a fizz", "colour", "foot", "radius",
+				"height", "thick", "rise", "churn", "seed", "source")
+		}
+		reading.set.world.fizzes = append(reading.set.world.fizzes, made)
 		return err
 	})
 }

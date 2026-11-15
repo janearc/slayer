@@ -41,8 +41,8 @@ func TestDecodeIsTheCurveUndone(t *testing.T) {
 	for _, row := range rows(t, decodeFile) {
 		code := uint8(amount(t, row, "code"))
 		want := amount(t, row, "light")
-		if got := colour.Decode(code); math.Abs(got-want) > amount(t, row,
-			"within") {
+		if got := colour.Decode(code); !(math.Abs(got-want) <= amount(t, row,
+			"within")) {
 			t.Errorf("%s: byte %d is %v, want %v", text(t, row, "label"),
 				code, got, want)
 		}

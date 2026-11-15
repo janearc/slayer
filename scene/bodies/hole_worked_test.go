@@ -4,6 +4,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/hexes"
 	"github.com/janearc/slayer/scene/bodies"
@@ -21,6 +22,13 @@ const (
 	sunRs   = 2.95325
 )
 
+// hole is a door-made hole of the sun's mass, wearing the parts: its
+// radius is nominal, since a hole is sized by its mass.
+func hole(t *testing.T, parts ...bodies.Part) bodies.Body {
+	t.Helper()
+	return made(t, "h", bodies.Hole, 1, sunMass, parts...)
+}
+
 // a hole is a field of its mass as a length, half its schwarzschild
 // radius, reaching twenty radii, and spinning at its spin share of that
 // length.
@@ -29,7 +37,7 @@ const (
 // units, its mass as a length 0.7383125 (m), and its reach 29.5325. a
 // spin of 0.6 is a = 0.6 m.
 func TestAHoleIsAFieldOfItsMassAsALength(t *testing.T) {
-	b := bodies.Body{Name: "h", Kind: bodies.Hole, Mass: sunMass, Spin: 0.6}
+	b := hole(t).Spinning(0.6)
 	w := thing.NewWorld()
 	at := maths.V(10, 0, 0)
 	if err := b.Place(w, at, 0.5, 2); err != nil {
@@ -53,9 +61,8 @@ func TestAHoleIsAFieldOfItsMassAsALength(t *testing.T) {
 // a hole that does not spin is a schwarzschild one, with no spin in its
 // field.
 func TestAHoleThatDoesNotSpinHasNoSpin(t *testing.T) {
-	b := bodies.Body{Name: "h", Kind: bodies.Hole, Mass: sunMass}
 	w := thing.NewWorld()
-	if err := b.Place(w, maths.Vec{}, 0.5, 2); err != nil {
+	if err := hole(t).Place(w, maths.Vec{}, 0.5, 2); err != nil {
 		t.Fatal(err)
 	}
 	if s := w.Fields[0].Spin; s != 0 {
@@ -77,8 +84,11 @@ func TestTheHexesAreDrawnOnABallJustOutsideTheHorizon(t *testing.T) {
 		"kerr, a = 0.6": {0.6, 1.02 * math.Sqrt(3.6) * m},
 		"kerr, a = 0.8": {0.8, 1.02 * math.Sqrt(2.56+0.64) * m},
 	} {
-		b := bodies.Body{Name: "h", Kind: bodies.Hole, Mass: sunMass, Spin: c.spin,
-			Edge: bodies.Horizon{Hexes: 0.5}}
+		edge, err := bodies.NewHorizon(0.5, maths.Light{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		b := hole(t, edge).Spinning(c.spin)
 		w := thing.NewWorld()
 		at := maths.V(10, 0, 0)
 		if err := b.Place(w, at, 0.5, 2); err != nil {
@@ -105,19 +115,20 @@ func TestTheHexesAreAWireInTheColourAtTheBrightness(t *testing.T) {
 		"unset":  {maths.Light{}, maths.Grey(0.5)},
 		"bright": {maths.Grey(1), maths.Grey(0.5)},
 	} {
-		b := bodies.Body{Name: "h", Kind: bodies.Hole, Mass: sunMass,
-			Edge: bodies.Horizon{Hexes: 0.5, Light: c.light}}
+		edge, err := bodies.NewHorizon(0.5, c.light)
+		if err != nil {
+			t.Fatal(err)
+		}
 		w := thing.NewWorld()
-		if err := b.Place(w, maths.Vec{}, 0.5, 2); err != nil {
+		if err := hole(t, edge).Place(w, maths.Vec{}, 0.5, 2); err != nil {
 			t.Fatal(err)
 		}
 		ball := solidNamed(t, w, "h horizon")
 		same(t, name+": the hexes", ball.Material.Shine,
-			texture.Wire{Tiling: hexes.Sphere{N: 6}, Light: c.want})
+			texture.Wire{Tiling: hexes.Sphere{Splits: 6}, Light: c.want})
 	}
-	b := bodies.Body{Name: "h", Kind: bodies.Hole, Mass: sunMass}
 	w := thing.NewWorld()
-	if err := b.Place(w, maths.Vec{}, 0.5, 2); err != nil {
+	if err := hole(t).Place(w, maths.Vec{}, 0.5, 2); err != nil {
 		t.Fatal(err)
 	}
 	if len(w.Things) != 0 {
@@ -132,34 +143,46 @@ func TestTheHexesAreAWireInTheColourAtTheBrightness(t *testing.T) {
 // given, the seed the body's, and the streaks wound at the orbital rate
 // at one unit out, which is 2 km: omega = 2 pi / T, T = 2 pi sqrt(r^3/GM).
 func TestAHolesDiscIsCutToTheScale(t *testing.T) {
-	b := bodies.Body{Name: "h", Kind: bodies.Hole, Mass: sunMass, Seed: 3,
-		Disc: &bodies.Disc{Inner: 8, Outer: 24, Thick: 2, Dense: 0.25, Hot: 6000,
-			Bright: 4, Streaks: 0.5, Shear: 2}}
+	disc, err := bodies.NewDisc(bodies.Kilometres(8), bodies.Kilometres(24),
+		bodies.Kilometres(2), bodies.PerKilometre(0.25),
+		measure.Kelvin(6000), 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := hole(t, disc.Dressed(0.5, 2)).Seeded(3)
 	w := thing.NewWorld()
 	at := maths.V(10, 0, 0)
 	if err := b.Place(w, at, 0.5, 2); err != nil {
 		t.Fatal(err)
 	}
-	disc := volumeNamed(t, w, "h disc")
-	same(t, "the disc", disc.Medium, medium.Disc{Inner: 4, Outer: 12, Thick: 1, Dense: 0.5})
-	thin := disc.Material.Shine.(texture.Thin)
+	placed := volumeNamed(t, w, "h disc")
+	same(t, "the disc", placed.Medium, medium.Disc{Inner: 4, Outer: 12, Thick: 1, Dense: 0.5})
+	thin := placed.Material.Shine.(texture.Thin)
 	near(t, "the disc's omega", thin.Omega, omega(sunMass, 2), 1e-12)
 	thin.Omega = 0
 	same(t, "the disc's colour", thin, texture.Thin{Inner: 4, Outer: 12, Hot: 6000,
 		Bright: 4, Streaks: 0.5, Shear: 2, Seed: 3})
-	nearVec(t, "where the disc is", disc.At(0).Origin, at, 1e-12)
-	if disc.Beam != nil {
-		t.Errorf("a disc of no speed is beamed: %+v", disc.Beam)
+	nearVec(t, "where the disc is", placed.At(0).Origin, at, 1e-12)
+	if placed.Beam != nil {
+		t.Errorf("a disc of no speed is beamed: %+v", placed.Beam)
 	}
 }
 
 // a disc with a speed is a flow round its axis at that share of light's
 // speed at its inner edge, 4 units, prograde.
 func TestADiscWithASpeedIsABeamRoundTheAxis(t *testing.T) {
-	b := bodies.Body{Name: "h", Kind: bodies.Hole, Mass: sunMass,
-		Disc: &bodies.Disc{Inner: 8, Outer: 24, Thick: 2, Dense: 0.25, Speed: 0.25}}
+	disc, err := bodies.NewDisc(bodies.Kilometres(8), bodies.Kilometres(24),
+		bodies.Kilometres(2), bodies.PerKilometre(0.25),
+		measure.Kelvin(6000), 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	disc, err = disc.Beamed(maths.Share(0.25))
+	if err != nil {
+		t.Fatal(err)
+	}
 	w := thing.NewWorld()
-	if err := b.Place(w, maths.Vec{}, 0.5, 2); err != nil {
+	if err := hole(t, disc).Place(w, maths.Vec{}, 0.5, 2); err != nil {
 		t.Fatal(err)
 	}
 	beam := volumeNamed(t, w, "h disc").Beam

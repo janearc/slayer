@@ -59,21 +59,70 @@ func bits3(seed uint64, i, j, k int64) uint64 {
 // rather than a shuffled table. A table is 256 entries of one fixed shuffle;
 // the hash gives every seed its own field, which is how two planets differ.
 func Gradient(seed uint64, x, y, z float64) float64 {
+	at := cellAt(x, y, z)
+	return at.gradient(seed)
+}
+
+// cell is a point in its lattice cell, worked out once for every seed
+// asked there: its place in the cell, the fades of it, and each
+// corner's hash before the seed is mixed in, by its step along x, y, z.
+type cell struct {
+	x, y, z, u, v, w float64
+	placed           [cellEnds][cellEnds][cellEnds]uint64
+}
+
+// cellAt is the cell a point is in, and where in it.
+func cellAt(x, y, z float64) cell {
 	fx, fy, fz := math.Floor(x), math.Floor(y), math.Floor(z)
 	ix, iy, iz := int64(fx), int64(fy), int64(fz)
-	x, y, z = x-fx, y-fy, z-fz
-	u, v, w := fade(x), fade(y), fade(z)
-
-	g := func(dx, dy, dz int64) float64 {
-		h := bits3(seed, ix+dx, iy+dy, iz+dz)
-		return grad(h, x-float64(dx), y-float64(dy), z-float64(dz))
+	at := cell{x: x - fx, y: y - fy, z: z - fz}
+	at.u, at.v, at.w = fade(at.x), fade(at.y), fade(at.z)
+	inner := corners(iy, iz)
+	for dx := range int64(cellEnds) {
+		for dy := range cellEnds {
+			for dz := range cellEnds {
+				at.placed[dx][dy][dz] = mix(uint64(ix+dx) + inner[dy][dz])
+			}
+		}
 	}
+	return at
+}
+
+// gradient is Gradient's noise for a seed at the cell's point: each
+// corner's hash finished with the seed, as bits3 finishes it, graded,
+// and blended across the cell.
+func (at cell) gradient(seed uint64) float64 {
+	g := func(dx, dy, dz int64) float64 {
+		h := mix(seed ^ at.placed[dx][dy][dz])
+		return grad(h, at.x-float64(dx), at.y-float64(dy),
+			at.z-float64(dz))
+	}
+	u, v, w := at.u, at.v, at.w
 	return lerp(w,
 		lerp(v, lerp(u, g(0, 0, 0), g(1, 0, 0)),
 			lerp(u, g(0, 1, 0), g(1, 1, 0))),
 		lerp(v, lerp(u, g(0, 0, 1), g(1, 0, 1)),
 			lerp(u, g(0, 1, 1), g(1, 1, 1))))
 }
+
+// corners is the part of bits3 that the four columns of a lattice cell
+// share, by the corner's step along y and along z: the hash of j and k,
+// which every corner's i is then added to. Worked once a cell, it is the
+// same number bits3 works for each of the eight corners.
+func corners(j, k int64) [cellEnds][cellEnds]uint64 {
+	var inner [cellEnds][cellEnds]uint64
+	for dz := range int64(cellEnds) {
+		under := mix(uint64(k+dz) + golden)
+		for dy := range int64(cellEnds) {
+			inner[dy][dz] = mix(uint64(j+dy) + under)
+		}
+	}
+	return inner
+}
+
+// cellEnds is the two ends of a lattice cell along an axis, its low
+// corner and its high, true by definition.
+const cellEnds = 2
 
 // finite is whether a number is one: not NaN, and not infinite either way.
 func finite(v float64) bool { return !math.IsNaN(v) && !math.IsInf(v, 0) }
@@ -87,32 +136,43 @@ func lerp(t, a, b float64) float64 { return a + t*(b-a) }
 
 // grad is the dot product of an offset with one of the twelve edge
 // directions of a cube, chosen by the low bits of a hash.
+//
+// The edge is looked up, not switched on: the hash makes the choice
+// unpredictable, and a mispredicted branch was most of the noise's time.
+// Each term is the offset's number times one or minus one, which is
+// exact, so the sum is the one the switch made, to the bit.
 func grad(h uint64, x, y, z float64) float64 {
-	switch h % 12 {
-	case 0:
-		return x + y
-	case 1:
-		return -x + y
-	case 2:
-		return x - y
-	case 3:
-		return -x - y
-	case 4:
-		return x + z
-	case 5:
-		return -x + z
-	case 6:
-		return x - z
-	case 7:
-		return -x - z
-	case 8:
-		return y + z
-	case 9:
-		return -y + z
-	case 10:
-		return y - z
-	}
-	return -y - z
+	along := edges[h%cubeEdges]
+	offset := [3]float64{x, y, z}
+	return along.firstSign*offset[along.first] +
+		along.secondSign*offset[along.second]
+}
+
+// cubeEdges is how many edges a cube has, true by definition.
+const cubeEdges = 12
+
+// edge is one edge direction of a cube as grad reads it: which two of an
+// offset's numbers it adds, x, y or z by place, and the sign of each.
+type edge struct {
+	first, second         int
+	firstSign, secondSign float64
+}
+
+// the places of an offset's numbers, and the signs an edge gives them
+const (
+	alongX, alongY, alongZ = 0, 1, 2
+	plus, minus            = 1.0, -1.0
+)
+
+// edges are the twelve, in the order of Perlin's improved noise: x+y,
+// -x+y, x-y, -x-y, then x and z, then y and z, the same way round.
+var edges = [cubeEdges]edge{
+	{alongX, alongY, plus, plus}, {alongX, alongY, minus, plus},
+	{alongX, alongY, plus, minus}, {alongX, alongY, minus, minus},
+	{alongX, alongZ, plus, plus}, {alongX, alongZ, minus, plus},
+	{alongX, alongZ, plus, minus}, {alongX, alongZ, minus, minus},
+	{alongY, alongZ, plus, plus}, {alongY, alongZ, minus, plus},
+	{alongY, alongZ, plus, minus}, {alongY, alongZ, minus, minus},
 }
 
 // Fractal is gradient noise summed over octaves, each about twice the
@@ -136,15 +196,55 @@ func Fractal(seed uint64, x, y, z float64, octaves int) float64 {
 		if !finite(x) || !finite(y) || !finite(z) {
 			break
 		}
-		s := seed + uint64(o)*0x632be59bd9b4e019
+		s := seed + uint64(o)*octaveStep
 		sum += amp * Gradient(s, x, y, z)
 		norm += amp
-		amp *= 0.5
-		// 2.03 and not 2, so the octaves do not line up
-		x, y, z = x*2.03, y*2.03, z*2.03
+		amp *= octaveFall
+		x, y, z = x*octaveRise, y*octaveRise, z*octaveRise
 	}
 	if norm == 0 {
 		return 0
 	}
 	return sum / norm
+}
+
+// the octaves of a fractal: each octave's field is the seed plus this
+// step times the octave; each is this share of the one before it; and
+// each is this many times finer, 2.03 and not 2, so the octaves do not
+// line up. All three are picked, and are what slayer has always drawn.
+const (
+	octaveStep = 0x632be59bd9b4e019
+	octaveFall = 0.5
+	octaveRise = 2.03
+)
+
+// Fractals is Fractal at one point for several seeds: into[i] is
+// Fractal(seeds[i], x, y, z, octaves), to the bit. Each octave's cell,
+// its fades and the seed-free part of its corners' hashes are worked
+// once for all the seeds, which is most of a fractal's work beside the
+// grading. into must be as long as seeds.
+func Fractals(seeds []uint64, x, y, z float64, octaves int,
+	into []float64) {
+	into = into[:len(seeds)]
+	clear(into)
+	amp, norm := 1.0, 0.0
+	for o := range octaves {
+		if !finite(x) || !finite(y) || !finite(z) {
+			break
+		}
+		at := cellAt(x, y, z)
+		for index, seed := range seeds {
+			into[index] += amp * at.gradient(seed+uint64(o)*octaveStep)
+		}
+		norm += amp
+		amp *= octaveFall
+		x, y, z = x*octaveRise, y*octaveRise, z*octaveRise
+	}
+	for index := range into {
+		if norm == 0 {
+			into[index] = 0
+			continue
+		}
+		into[index] /= norm
+	}
 }

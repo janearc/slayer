@@ -37,7 +37,7 @@ To repeat the focused checks:
 
 ```sh
 game test -- -p=1 -parallel=1 -count=1 \
-  -run='IndependentLighting|MoonOnly' ./gpu ./cmd/hillside
+  -run='IndependentLighting|MoonOnly' ./gpu ./hillside
 ```
 
 The linked logs are companion local receipts beside this checkout.

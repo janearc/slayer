@@ -1,0 +1,48 @@
+# The MCRN Larson, landed, at night, lit by nothing but its own lights:
+# the red cabin lamp, the belly floodlight, and the twelve portholes, which
+# are its running lights. No sun, no moon, no sky light: what shows is
+# what the saucer lights. 2026-11-12.
+#
+#   slayer render improv/larson/landed-night.yaml -out PICTURE.png
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: the MCRN Larson, landed at night, by its own lights
+  renderer: gpu-native
+  seed: 7
+  light: none
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 2300
+  # the campfire set's ground: Kilauea's 2019 survey, a patch 64 m square.
+  # a set must stand on a terrain. it is not level here, and the Larson's
+  # gear is built for level ground, so a foot may float or sink a little.
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263780
+    north: 2148780
+    across: 64
+    down: 64
+    step: 1
+  set:
+    things:
+      the larson:
+        kind: mcrn-larson-landed
+        seed: 5
+        east: 263812
+        north: 2148748
+  film:
+    width: 1280
+    height: 800
+    rays: 2
+    exposure: 30000
+  cameras:
+    low, from the stairs' side:
+      location:
+        loc_relative:
+          object: the larson
+          standoff_x: 3
+          standoff_y: -13
+          standoff_z: 1.0
+      orientation:
+        point_to: the larson
+        alpha: 5

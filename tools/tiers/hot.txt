@@ -1,0 +1,20 @@
+# The hot path tier: the non draw tests of the packages on Slayer's hot
+# paths, run on every edit and for every mutant by `game run test-hot`.
+# One import path per line, then a comment saying why it is here.
+# The list is from the hot path review of 12 November (hot.tsv, path.tsv):
+# the highest fan-in, and on the main drawing path. Keep the whole tier
+# under a minute.
+github.com/janearc/slayer/maths               # 39 hot functions, 2206 callers (maths.V is called from 430 places)
+github.com/janearc/slayer/maths/noise         # the noise every terrain and cloud reads
+github.com/janearc/slayer/maths/hexes         # 26 hot functions, 283 callers
+github.com/janearc/slayer/set                 # reads every scene file; 702 callers into its reader
+github.com/janearc/slayer/scene/thing         # the world every scene is built in; 13 functions on the main path
+github.com/janearc/slayer/scene/swatches      # the light and colour swatches; 72 callers of one function
+github.com/janearc/slayer/scene/medium        # 21 functions on the main path
+github.com/janearc/slayer/scene/shape         # 6 functions on the main path
+github.com/janearc/slayer/render/colour       # colour on the way to the frame
+github.com/janearc/slayer/render/frame        # the frame every renderer fills
+github.com/janearc/slayer/trace               # the ray tracer
+github.com/janearc/slayer/flame               # 17 functions on the main path
+github.com/janearc/slayer/job                 # 35 hot functions, all on the main path
+github.com/janearc/slayer/diskcache           # every cached picture and cache key

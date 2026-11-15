@@ -1,0 +1,193 @@
+{
+	// intent: an industrial kit. a distorted kick with a noise burst, a hard snare of
+	// hiss, hats with a metal tone, and a short struck plate on b. a folded and
+	// overdriven bed. every wave is a saw or square, so the overtones are whole.
+	"name": "iron-kit",
+	"machine": "studio",
+	"master": 0.3,
+	"reverb": {
+		"size": 0.3,
+		"decay": 0.8,
+		"damping": 0.4,
+		"level": 0.2
+	},
+	"channels": [
+		{
+			"kind": "analog",
+			"role": "lead",
+			"volume": 1.0,
+			"place": -0.1,
+			"send": {
+				"reverb": 0.15
+			},
+			"envelope": {
+				"attack": 0.003,
+				"decay": 0.3,
+				"sustain": 0.25,
+				"release": 0.1
+			},
+			"analog": {
+				"oscillators": [
+					{
+						"shape": "square",
+						"width": 0.4
+					},
+					{
+						"shape": "saw",
+						"detune": 8
+					}
+				],
+				"fold": 0.08,
+				"overdrive": 0.1,
+				"filter": {
+					"poles": 4,
+					"cutoff": 1800,
+					"resonance": 0.4,
+					"follow": 0.8,
+					"amount": 2,
+					"envelope": {
+						"attack": 0.001,
+						"decay": 0.22,
+						"sustain": 0.3,
+						"release": 0.1
+					}
+				}
+			}
+		},
+		{
+			"kind": "analog",
+			"role": "pad",
+			"volume": 0.3,
+			"place": 0.3,
+			"voices": 12,
+			"send": {
+				"reverb": 0.3
+			},
+			"envelope": {
+				"attack": 0.03,
+				"decay": 0.6,
+				"sustain": 0.6,
+				"release": 0.5
+			},
+			"analog": {
+				"oscillators": [
+					{
+						"shape": "saw",
+						"octave": 1,
+						"detune": -7
+					},
+					{
+						"shape": "saw",
+						"octave": 1,
+						"detune": 7
+					}
+				],
+				"fold": 0.25,
+				"overdrive": 0.3,
+				"filter": {
+					"cutoff": 1400,
+					"resonance": 0.3,
+					"follow": 0.8,
+					"amount": 1.5,
+					"envelope": {
+						"attack": 0.03,
+						"decay": 0.5,
+						"sustain": 0.4,
+						"release": 0.4
+					}
+				}
+			}
+		},
+		{
+			"kind": "analog",
+			"role": "bass",
+			"volume": 0.36,
+			"envelope": {
+				"attack": 0.003,
+				"decay": 0.35,
+				"sustain": 0.6,
+				"release": 0.1
+			},
+			"analog": {
+				"oscillators": [
+					{
+						"shape": "saw"
+					},
+					{
+						"shape": "saw",
+						"octave": -1,
+						"level": 0.6
+					}
+				],
+				"overdrive": 0.5,
+				"filter": {
+					"poles": 4,
+					"cutoff": 450,
+					"resonance": 0.3,
+					"follow": 0.4,
+					"amount": 1.5,
+					"envelope": {
+						"attack": 0,
+						"decay": 0.18,
+						"sustain": 0.3,
+						"release": 0.1
+					}
+				}
+			}
+		},
+		{
+			"kind": "drum",
+			"role": "perc",
+			"volume": 0.85,
+			"send": {
+				"reverb": 0.1
+			},
+			"drums": {
+				"k": {
+					"tone": 40,
+					"sweep": 50,
+					"fall": 0.07,
+					"decay": 0.45,
+					"click": 0.9,
+					"noise": 0.2,
+					"noise_decay": 0.03,
+					"colour": 2000
+				},
+				"s": {
+					"tone": 170,
+					"sweep": 14,
+					"fall": 0.03,
+					"decay": 0.08,
+					"click": 0.6,
+					"noise": 0.95,
+					"noise_decay": 0.2,
+					"colour": 800
+				},
+				"h": {
+					"noise": 1,
+					"noise_decay": 0.05,
+					"colour": 2500
+				},
+				"o": {
+					"noise": 0.9,
+					"noise_decay": 0.3,
+					"colour": 2200
+				},
+				"t": {
+					"tone": 75,
+					"sweep": 24,
+					"fall": 0.1,
+					"decay": 0.35,
+					"click": 0.5
+				},
+				"b": {
+					"tone": 370,
+					"struck": "plate",
+					"hardness": 1,
+					"decay": 0.09,
+					"click": 0.6
+				}
+			}
+		}
+	]
+}

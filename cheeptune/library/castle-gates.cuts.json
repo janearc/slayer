@@ -1,0 +1,31 @@
+{
+	"group": "slow start, fast finish",
+	"mood": "castle, then final boss",
+	"feeling": "Dread in a stone hall, and then the doors blow open.",
+	"intent": "A trailer for an adventure: a long quiet approach that explodes into the fight.",
+	"listen_for": "The drum roll at 0:27 and the boss fight crashing in at 0:33.",
+	"voicing": "@crypt-dmg",
+	"tempo": 88,
+	"meter": 4,
+	"seconds": 81.82,
+	"parts": [
+		{"name": "hall", "bar": 1, "second": 0.0,
+		 "change": "a slow lead over long chords",
+		 "feels": "Cold stone, echoing steps"},
+		{"name": "keep", "bar": 6, "second": 13.64,
+		 "change": "a slow backbeat and a walking bass",
+		 "feels": "Closer to the throne"},
+		{"name": "roll", "bar": 11, "second": 27.27,
+		 "change": "the lead sits high and the drum thins",
+		 "feels": "The air tightens"},
+		{"name": "boss", "bar": 13, "second": 32.73,
+		 "change": "a fast boss fight: sixteenths in lead and bass",
+		 "feels": "The fight is on"},
+		{"name": "last", "bar": 23, "second": 60.0,
+		 "change": "higher and faster for the last stretch",
+		 "feels": "The last of your strength"},
+		{"name": "end", "bar": 29, "second": 76.36,
+		 "change": "a held chord and a kick",
+		 "feels": "The dust settles"}
+	]
+}

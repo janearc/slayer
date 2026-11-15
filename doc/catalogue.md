@@ -3,10 +3,10 @@
 The [browsable specimen book](browsable-catalogue.md) adds local search,
 detail views, source notes and actual GPU render records to this written list.
 
-The previously reviewed catalogue held 70 kinds. This code draft registers
-nine more and changes the two spruce entries: OWL, its shelter, seven
-vegetation families and the replacement spruce foliage await review. Each name
-makes a specimen from a seed.
+The catalogue menu holds 106 kinds. The specimen book draws one picture
+of each, and `game run catalogue-list` lists them. Each name makes a
+specimen from a seed. Some entries await review; the notes on each say
+which.
 
 The dimensions below describe the current rows, not caller-set options. Except
 where noted, these are authored choices, not measured botanical or engineering
@@ -92,6 +92,9 @@ or label. [Construction rows](../manufacture/kinds.go).
 - [bonfire](#bonfire): a large pile of logs; the scene supplies fire.
 - [spotlight](#spotlight): a mounted head with a thermal cone beam.
 - [maser](#maser): a mounted dish with a radio line and aperture spread.
+- [stage lasers](#stage-lasers): seven snouts on stands, each shining
+  one visible line or a mix of lines through a narrow opening.
+- [strobe](#strobe): the spotlight's cold wide cousin.
 
 ### volumetric fire recipes
 
@@ -139,6 +142,31 @@ its spread by diffraction.
 
 Its emission is outside visible light. A visible picture of the housing
 does not demonstrate the radio beam. [Construction row](../manufacture/lamps.go).
+
+### stage lasers
+
+`laser-green`, `laser-red`, `laser-blue`, `laser-cyan`, `laser-amber`,
+`laser-magenta` and `laser-white`: a slim snout on a stand 0.8 to
+1.2 m tall, tipped level to 12 degrees skyward, with a picked power
+of 2 to 8 W through a 3 mm opening, whose diffraction sets the spread.
+
+The wavelengths are the usual show modules' lines, recalled from
+memory: 532, 638, 445, 488 and 589 nm. A magenta or white head mixes
+two or three lines from one mouth, sharing the one power, as real
+projectors do.
+
+A beam this narrow lights what it hits; the shaft itself appears only
+where a scattering medium stands in it, as [guide-star
+beams](guide-stars.md) explains for the scene-level kind.
+[Construction row](../manufacture/stagelights.go).
+
+### strobe
+
+A stand 1.2 to 1.8 m tall carries a short wide head tipped down 0 to
+10 degrees. Its attached 6500 K light has a picked power of 400 to
+1600 W, a beam half-angle of 35 to 55 degrees, and a 15-degree soft
+edge. Its flashing is not here: a light's timing belongs to the scene,
+not the manufactory. [Construction row](../manufacture/stagelights.go).
 
 ## Buildings
 
@@ -192,7 +220,8 @@ records the sources and work still required for the remaining instruments.
 
 - `spitzer`: an octagonal bus, cryostat, optical baffle and solar shield.
 - `hubble`: a long telescope tube and two gridded solar wings.
-- `webb`: 18 gold-looking mirror tiles, a secondary and five shield layers.
+- `webb`: 18 gold mirror tiles and a secondary on a tower, five aluminium
+  shield layers, and the bus, five solar panels and antenna under them.
 - `space-observatory`: the default Spitzer template; a checked YAML recipe
   selects a design and an aperture explicitly.
 
@@ -200,6 +229,70 @@ These are visual templates, with fixed structural dimensions for each
 aperture. Seeds retain the scene's placement-yaw rule. Circular tessellation
 changes with complexity; the physical envelope stays fixed.
 [Recipes, sources and limits](space-observatories.md).
+
+## Visitors
+
+- `mcrn-larson`: a flying saucer of weathered titanium under a glass dome.
+  It carries fourteen lamps by name: `cabin`, a red light under the dome;
+  `belly`, a floodlight under the hull; and `port-0` to `port-11`, the
+  running lights at its portholes, whose glass glows.
+- `mcrn-larson-landed`: the same saucer on three legs, its stairs down from
+  the belly. Its own zero is the ground it stands on.
+
+Patterned on the plain saucers Gary Larson drew in The Far Side. Every
+number of it is picked by eye, in metres; none is engineering.
+
+## Crewed spacecraft
+
+- `apollo-csm`: the Apollo command and service module, standing on its
+  engine bell, 10.11 m tall and 3.91 m across.
+- `apollo-lunar-module`: the Apollo lunar module on its four footpads,
+  7.04 m tall and 9.4 m across them. It is no stack: an eight-sided
+  descent stage in a blanket of Kapton over aluminium, an eight-sided
+  ascent stage on it, and four legs of one strut each.
+- `gemini`: the Gemini spacecraft on its adapter, 5.736 m tall and 3.048 m
+  across its base.
+- `mercury-capsule`: the Mercury capsule on its heat shield, 3.3 m tall and
+  1.8 m across, without its escape tower.
+- `soyuz-ms`: Soyuz MS on its service module, 7.48 m tall, without its
+  solar arrays. Every size of it is unverified.
+
+## Launchers
+
+- `saturn-v`: the Saturn V's three stages and instrument unit, 85.6 m tall
+  and 10.06 m across, without the Apollo spacecraft on top.
+- `saturn-v-apollo`: the Apollo-Saturn V as it stood on the pad, with the
+  Apollo spacecraft and its escape tower, 110.64 m, NASA's 363 feet.
+- `saturn-ib`: the Saturn IB's two stages and instrument unit, 43.16 m
+  tall and 6.61 m across, with no spacecraft on top. Its sizes are read
+  from a secondary page and not pinned.
+- `sls-block-1`: the Space Launch System's core stage with a solid rocket
+  booster on each side, its adapter and its upper stage, 86.7 m tall,
+  without Orion on top.
+
+Neither has engines, fins or its own paint yet.
+
+The crewed spacecraft and the launchers are stacks: bodies of revolution
+listed in
+`manufacture/stacks.yaml` as sections from the bottom up, each with what
+it is made of, how it is finished and where its numbers were read. A new
+capsule, stage or launcher is rows in that file. Its numbers are read off
+pages and are not yet pinned sources; its looks are picked.
+
+## Vehicles
+
+- `hemtt`: Oshkosh's HEMTT, the M977 A4 eight-wheel-drive cargo truck.
+- `kamaz`: the KAMAZ-43118 six-wheel-drive cargo truck, cab over engine.
+- `tatra`: the Tatra T 815-7 eight-wheel-drive cargo truck, on its backbone
+  tube with swinging half-axles.
+- `unimog`: the Unimog U 5023, cab behind a short bonnet, with a short bed.
+- `scania-r` and `daf-xf`: two-axle tractor units, each with a fifth wheel
+  for a trailer.
+
+The menu gives each one's overall dimensions and says which were read from
+the maker and which were picked to look right. They are built at `quick`
+detail only. `service-truck` and `utility-pickup`, the summit's own, are in
+the menu's Summit yard group.
 
 ## Making and placing a specimen
 
@@ -216,7 +309,7 @@ and kernel tree representations use z up; their transforms matter.
 The same kind and seed reproduce the same specimen. Scattering that
 specimen over terrain is the scene's job.
 
-`cmd/hillside` retains its original kind count flags. The newer trees,
+`hillside` retains its original kind count flags. The newer trees,
 loose shoots and observatory recipes use the [YAML scene](observatory-ecosystem.md).
 Its `-variety` option reuses a limited number of specimens at many places.
 That saves repeated geometry; it does not create additional kinds.

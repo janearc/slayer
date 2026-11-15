@@ -24,7 +24,7 @@ func TestALineStandsCentredAndSharesItsLetters(t *testing.T) {
 	scale := text.Size / face.Units()
 	for i, each := range letters {
 		want := (line.Letters[i].Pen - line.Width/2) * scale
-		if math.Abs(each.At.X-want) > 1e-12 || each.At.Y != 0 ||
+		if !(math.Abs(each.At.X-want) <= 1e-12) || each.At.Y != 0 ||
 			each.At.Z != 0 {
 			t.Errorf("%q at %v, want x %v", each.Letter, each.At,
 				want)

@@ -1,53 +1,25 @@
 # Rendering faster
 
-This is the original optimization roadmap. Density baking and native mesh
-traversal now exist, and the night study adds an optional smoke-light grid.
+The current [optimization catalogue](optimizations.md) explains every layer:
+shared geometry, packing, retained films, native mesh traversal, field bakes,
+lighting grids, streamed readback, compositing, gravity and completed-work
+caches. It distinguishes reuse from numerical changes and approximations.
 
-[Animation performance](animation-performance.md) and the linked measurements
-record their implementation. Retained frame resources and wavefront queues
-remain unfinished.
+Use [modes](modes.md) to choose a practical science or fast-film workflow,
+and [fast light](fast-light.md) for the lamp-store and shared-sky study.
+The [renderer guide](renderer.md) gives the API and lifetime map.
 
-Ray tracing is easy to start and expensive to run. This roadmap separates
-four optimisations by the work they remove. The sequence matters: later
-stages build on earlier ones. It is a design sequence, not a claim that
-all four stages are implemented.
+## Status of the original roadmap
 
-## 1. Bake the haze
+| Stage | Current state |
+|---|---|
+| bake expensive density fields | implemented for supported boxed, flame and wispy fields |
+| retain resources between frames | implemented by `gpu.Frames`; time-changing host encoding can remain |
+| hardware ray traversal | explicit native mesh shadow and closest-hit modes |
+| wavefront queues | not implemented as the production tracer |
 
-A view ray takes 48 steps through haze. Each step takes another 10 toward
-each lamp, sampling noise along the way -- roughly 500 noise evaluations per
-ray for one lamp. This dominates the swarm scene's rendering time.
-
-Before tracing a frame, sample density into a 3D texture and store each
-lamp's transmission in a shadow volume. Integration can then use hardware
-texture interpolation instead of repeated noise evaluation.
-
-This is an approximation absent from the CPU reference. Tests declare a
-looser image tolerance, and cells must be small enough to resolve the
-finest wisp with several samples.
-
-## 2. Reuse resources between frames
-
-Recompiling kernels, uploading unchanged buffers, and regrowing geometry
-for every frame wastes work. A persistent engine should retain those
-resources and update only what changes: camera, emitters, or pulse state.
-
-## 3. Use hardware ray tracing
-
-Metal exposes acceleration structures for hardware traversal and triangle
-intersection. A scene-wide hierarchy built using surface-area cost can
-improve on Slayer's current split at the median face.
-
-Analytic spheres use bounding boxes with custom intersection functions.
-Keep Slayer's software hierarchy as a fallback on hardware without ray
-tracing support and as a reference for the new path.
-
-## 4. Group rays by work
-
-GPU threads execute in groups. A combined kernel can leave most of a group
-waiting while one ray marches through haze and another immediately hits
-the sky.
-
-A wavefront tracer separates tracing into kernels and queues rays between
-stages. Each group then performs similar work. Plan this stage alongside
-hardware traversal so the queues feed the accelerator efficiently.
+The [animation performance record](animation-performance.md) and
+[native traversal studies](native-primary-traversal.md) retain dated
+measurements and rejected experiments. They are historical evidence,
+not the current feature checklist. Native acceleration handles meshes;
+analytic shapes retain their own intersection paths.

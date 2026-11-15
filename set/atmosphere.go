@@ -21,6 +21,7 @@ type AtmosphereLayer struct {
 	albedo  float64
 	base    float64
 	level   bool
+	world   bool // reaches the world, in schema version 2
 }
 
 // Weather names the checked weather recipe for this layer.
@@ -77,7 +78,7 @@ func (reading reader) atmosphereLayer(_, node *yaml.Node) error {
 	layer := AtmosphereLayer{}
 	err := reading.keys(node, map[string]step{
 		"weather": reading.text(&layer.weather),
-		"extent":  reading.only("terrain"),
+		"extent":  reading.extentStep(&layer.world),
 		"albedo": reading.number(&layer.albedo,
 			clearAlbedo, fullAlbedo),
 		"base": reading.quantity(&layer.base, "m",
@@ -110,7 +111,11 @@ func (reading reader) foundAtmosphere() error {
 				"weather %q",
 				reading.file, layer.weather)
 		}
-		if reading.set.terrain == nil {
+		if layer.world && reading.set.globe == nil {
+			return fmt.Errorf("%s: a world atmosphere needs a globe",
+				reading.file)
+		}
+		if !layer.world && reading.set.terrain == nil {
 			return fmt.Errorf("%s: a terrain atmosphere needs "+
 				"terrain",
 				reading.file)

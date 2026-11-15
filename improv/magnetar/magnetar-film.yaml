@@ -1,0 +1,48 @@
+# magnetar-film.yaml: the real magnetar's short in the house form: zappy's
+# intro over glass-acid's first part, then the scene's own frames with
+# zappy small at the foot, cut on the tune's parts. The sentences are
+# lines of scene/named/magnetar-script.yaml, where each figure is held to
+# its value; their times are seconds from the end of the intro, for a
+# voice to be laid over later. The sentences are drafts, to be rewritten.
+tune:
+  # glass-acid's score, cut sheet and sound are not kept in the repository.
+  # They are read from the folder the command is run in.
+  score: glass-acid.json
+  cuts: glass-acid.cuts.json
+  sound: glass-acid.mp4
+  kicking: [spreads, breaks]
+lifts: [breaks]
+# the host's clips go here when they are drawn; none is the placeholder
+clips: ""
+intro:
+  clip: angry
+  words: "hi! i am zappy. i'm a pretend magnetar drawn by slayer, a rendering kit for apple silicon."
+  frames: 87
+segments:
+  - {frames: b-beside, count: 175}
+  - {frames: c-field, count: 84}
+  - {frames: d-shells, count: 85}
+  - {frames: d2-world, count: 163}
+  - {frames: e-flare, count: 311}
+  - {frames: f-after, count: 175}
+lines:
+  - {from: 0.0000, until: 3.6458,
+     say: "The real one is that dot. It is about 20 km across."}
+  - {from: 3.6458, until: 7.2917,
+     say: "To see it as large as me, we have to come 900 times closer."}
+  - {from: 7.2917, until: 10.7917,
+     say: "You cannot see a magnetic field. This is a drawing of one."}
+  - {from: 10.7917, until: 14.3333,
+     say: "Inside 950 km, the field outpulls an atom's grip on its electrons."}
+  - {from: 14.3333, until: 17.7292,
+     say: "Here is a world 100,000 km from it, with its aurora."}
+  - {from: 17.7292, until: 21.1250,
+     say: "Here the star's field is 4,000 times the Earth's own."}
+  - {from: 21.1250, until: 25.5308,
+     say: "In 0.2 seconds it gave out what the Sun does in 56,000 years."}
+  - {from: 25.5308, until: 29.8071,
+     say: "The tail here runs 20 times faster than it did."}
+  - {from: 29.8071, until: 34.0833,
+     say: "A flare would bring that world 130,000,000,000 years of sunlight."}
+  - {from: 34.0833, until: 41.3750,
+     say: "I'm only a pretend one. I find that a relief."}

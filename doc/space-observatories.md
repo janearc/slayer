@@ -2,12 +2,15 @@
 
 Spitzer gets to come too. These templates give it a cryostat and shield
 panel, give Hubble a long optical baffle and solar wings, and give Webb an
-open segmented primary above a layered sunshield.
+open segmented primary on a tower above a layered sunshield, with its bus,
+solar panels and antenna under the shield on the sun's side.
 
 The geometry is scenery based on their published layouts. The default
-apertures and the Webb shield dimensions and counts come from pinned
-references. Body proportions, gaps, layer spacing and display materials are
-authored choices in `manufacture/spacecraft-choices.yaml`.
+apertures, the Webb shield dimensions and counts, and the place and size of
+Webb's secondary come from pinned references. Body proportions, gaps and
+layer spacing are authored choices in `manufacture/spacecraft-choices.yaml`.
+Display materials are authored too, except Webb's mirrors and sunshield,
+which `manufacture/webb-surfaces.yaml` makes of gold and aluminium.
 
 Use `spitzer`, `hubble` or `webb` as a named kind for the default blueprint.
 A custom aperture scales the chosen design:
@@ -65,21 +68,41 @@ segments around an empty centre. This recipe fits that declared height;
 it does not reconstruct the optical figure, poses or collecting area.
 
 [The Webb sunshield reference][shield] gives five layers and deployed
-lengths of 21.197 m and 14.162 m. Its outline, exaggerated gaps, finite
+lengths of 21.197 m and 14.162 m. Its outline is a kite with its edges
+drawn inward, by eye from NASA's picture of it. That outline, the
+exaggerated gaps, the finite
 membrane thickness and support structure here are visual approximations.
 There is no membrane tension or thermal model.
 
-Colours and the Fresnel index are picked display parameters. A gold-looking
-mirror is not a measured gold optical-constant model.
+Webb is laid out as [McElwain et al. 2023][ote] lays it out, section 3: the
+spacecraft bus and solar array on the sun's side of the shield, the
+telescope above it on a tower, and the instrument module on the primary's
+back. Its secondary stands 7169.0 mm in front of the primary's vertex and
+is 738 mm across, the paper's table 2 (source
+`mcelwain-2023-webb-telescope`).
+
+No paper in hand gives the size of the
+bus, the tower or the instrument module, so those are authored, and the
+module is one closed box: the four instruments are not made. The sun side,
+with its two pallets, its booms, its row of five solar panels, its
+radiators and its flap, is laid out by eye from NASA's picture of it.
+
+For Spitzer and Hubble, colours and the Fresnel index are picked display
+parameters. Webb's mirrors are gold and its sunshield aluminium, each a
+conductor by its published optical constants: Johnson and Christy's
+measurements for gold, Rakić's fitted model for aluminium. The mirror's
+overcoat and the doped silicon on the sun's side of the two hottest shield
+layers are not drawn, and Webb's structure keeps a picked dark grey.
 
 [spitzer]: https://www.spitzer.caltech.edu/mission/the-telescope
 [bus]: https://www.spitzer.caltech.edu/mission/the-spacecraft
 [hubble]: https://science.nasa.gov/mission/hubble/observatory/design/optics/
 [shield]: https://science.nasa.gov/mission/webb/webbs-sunshield/
+[ote]: https://arxiv.org/abs/2301.01779
 
-The source tool fetches and pins the official pages.
-`game run sources-verify` holds all seven numerical claims to their archived
-text before a Game build.
+The source tool fetches and pins the official pages and the paper.
+`game run sources-verify` holds all nine numerical claims to their archived
+text before a Game build; the paper's two are held to its page 6.
 The page bytes stay on the local source shelf and are not redistributed.
 
 ## Geometry and GPU checks

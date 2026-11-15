@@ -1,0 +1,74 @@
+# the motor pool, 2026-11-10: the manufactory's six trucks side by side
+# in the afternoon sun, on the study ground at Kilauea:
+# "i *love* me some trucks". From the left: the HEMTT, the KAMAZ, the
+# Unimog, the Tatra, the Scania and the DAF, each 5 m from the next,
+# their fronts turned toward the camera as the stage tower's is.
+# No $schema line: the v1 and v2 schemas' kind lists have no trucks yet.
+scene:
+  name: the motor pool
+  renderer: gpu-native
+  seed: 7
+  light: sun
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 1500
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263700
+    north: 2148860
+    across: 224
+    down: 224
+    step: 2
+  set:
+    things:
+      the hemtt:
+        kind: hemtt
+        seed: 1
+        east: 263800
+        north: 2148748
+        heading: {value: 340, unit: deg}
+      the kamaz:
+        kind: kamaz
+        seed: 2
+        east: 263805
+        north: 2148748
+        heading: {value: 340, unit: deg}
+      the unimog:
+        kind: unimog
+        seed: 3
+        east: 263810
+        north: 2148748
+        heading: {value: 340, unit: deg}
+      the tatra:
+        kind: tatra
+        seed: 4
+        east: 263815
+        north: 2148748
+        heading: {value: 340, unit: deg}
+      the scania:
+        kind: scania-r
+        seed: 5
+        east: 263820
+        north: 2148748
+        heading: {value: 340, unit: deg}
+      the daf:
+        kind: daf-xf
+        seed: 6
+        east: 263825
+        north: 2148748
+        heading: {value: 340, unit: deg}
+  film:
+    width: 1920
+    height: 1080
+    rays: 2
+  cameras:
+    before the line:
+      location:
+        loc_relative:
+          object: the unimog
+          standoff_x: 6
+          standoff_y: -30
+          standoff_z: 2
+      orientation:
+        point_to: the unimog
+        alpha: 55

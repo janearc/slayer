@@ -31,13 +31,13 @@ func TestFlatHoldsItsExtent(t *testing.T) {
 		}
 		ids[f.ID(tile)] = true
 		ns := f.Neighbours(tile)
-		inside := tile.I > 0 && tile.J > 0 && tile.I < 6 && tile.J < 4
+		inside := tile.Column > 0 && tile.Row > 0 && tile.Column < 6 && tile.Row < 4
 		if inside && len(ns) != 6 || !inside && len(ns) >= 6 {
 			t.Fatalf("tile %v has %d neighbours", tile, len(ns))
 		}
 		for _, n := range ns {
 			d := f.Centre(tile).Sub(f.Centre(n)).Len()
-			if math.Abs(d-2) > 1e-12 {
+			if !(math.Abs(d-2) <= 1e-12) {
 				t.Fatalf("tile %v and %v are %v apart", tile, n, d)
 			}
 		}
@@ -60,7 +60,7 @@ func TestFlatNearestIsTheTrueNearest(t *testing.T) {
 		}
 		// outside the extent the true nearest may be a tile Tiles
 		// does not list, so only points inside are held to it
-		if f.holds(got.I, got.J) && got != want &&
+		if f.holds(got.Column, got.Row) && got != want &&
 			math.Abs(p.Sub(f.Centre(got)).Len()-best) > 1e-12 {
 			t.Fatalf("point %d at %v: tile %v, want %v", k, p, got, want)
 		}
@@ -80,14 +80,14 @@ func TestFlatEdge(t *testing.T) {
 	tile := Tile{0, 3, 3}
 	for _, n := range f.Neighbours(tile) {
 		mid := f.Centre(tile).Add(f.Centre(n)).Scale(0.5)
-		if e := f.Edge(mid, tile); math.Abs(e) > 1e-12 {
+		if e := f.Edge(mid, tile); !(math.Abs(e) <= 1e-12) {
 			t.Fatalf("midpoint with %v is %v from the edge", n, e)
 		}
 		if e := f.Edge(f.Centre(tile), n); e >= 0 {
 			t.Fatalf("the middle of %v is inside %v", tile, n)
 		}
 	}
-	if e := f.Edge(f.Centre(tile), tile); math.Abs(e-0.5) > 1e-12 {
+	if e := f.Edge(f.Centre(tile), tile); !(math.Abs(e-0.5) <= 1e-12) {
 		t.Fatalf("the middle is %v from the edge", e)
 	}
 }
@@ -100,7 +100,7 @@ func TestBandWraps(t *testing.T) {
 	last := Tile{0, 39, 2}
 	wrapped := false
 	for _, n := range b.Neighbours(last) {
-		wrapped = wrapped || n.I == 0
+		wrapped = wrapped || n.Column == 0
 		d := b.Centre(last).Sub(b.Centre(n)).Len()
 		if d > 1.01*b.Spacing() {
 			t.Fatalf("%v and %v are %v apart, spacing %v", last, n, d,
@@ -111,11 +111,11 @@ func TestBandWraps(t *testing.T) {
 		t.Fatal("the last column does not reach the first")
 	}
 	just := maths.V(1e-6, 0, 10)
-	if got := b.Nearest(just); got.I != 0 {
-		t.Fatalf("just past the seam is column %d", got.I)
+	if got := b.Nearest(just); got.Column != 0 {
+		t.Fatalf("just past the seam is column %d", got.Column)
 	}
 	seam := b.Centre(last).Add(b.Centre(Tile{0, 0, 2})).Scale(0.5)
-	if e := b.Edge(seam, last); math.Abs(e) > 1e-9 {
+	if e := b.Edge(seam, last); !(math.Abs(e) <= 1e-9) {
 		t.Fatalf("the seam midpoint is %v from the edge", e)
 	}
 }
@@ -131,7 +131,7 @@ func TestBandTilesLieOnTheCylinder(t *testing.T) {
 	}
 	for _, tile := range tiles {
 		c := b.Centre(tile)
-		if r := math.Hypot(c.X, c.Z); math.Abs(r-3) > 1e-12 {
+		if r := math.Hypot(c.X, c.Z); !(math.Abs(r-3) <= 1e-12) {
 			t.Fatalf("tile %v's middle is %v from the axis", tile, r)
 		}
 		far := maths.V(c.X*5, c.Y, c.Z*5) // further from the axis
@@ -184,7 +184,7 @@ func TestAManholeOnAnOrbital(t *testing.T) {
 // its extent along north, none at all for a north straight up.
 func TestEverySurfaceHasDistanceLatitudeAndSomewhere(t *testing.T) {
 	near := func(a, b float64) bool { return math.Abs(a-b) < 1e-9 }
-	s := Sphere{N: 4}
+	s := Sphere{Splits: 4}
 	if d := s.Distance(maths.V(1, 0, 0), maths.V(0, 1, 0)); !near(d, math.Pi/2) {
 		t.Errorf("a quarter turn on the sphere is %v", d)
 	}

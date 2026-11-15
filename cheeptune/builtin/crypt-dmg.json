@@ -1,0 +1,24 @@
+{
+	// short, dry and loud: a note that is over before the next beat, so
+	// the beat stays readable. the stabs shimmer on two ticks a note.
+	"name": "crypt-dmg",
+	"machine": "gameboy",
+	"channels": [
+		{"kind": "pulse", "role": "lead", "duty": 0.25, "volume": 0.85,
+		 "pan": "left",
+		 "envelope": {"attack": 0, "decay": 0.15, "sustain": 0.6,
+		              "release": 0.05},
+		 "vibrato": {"rate": 6, "depth": 8, "delay": 0.2}},
+		{"kind": "pulse", "role": "pad", "duty": 0.125, "volume": 0.5,
+		 "pan": "right", "arp": 2,
+		 "envelope": {"attack": 0, "decay": 0.08, "sustain": 0.4,
+		              "release": 0.03}},
+		{"kind": "wave", "role": "bass", "table": "saw"},
+		{"kind": "noise", "role": "perc", "hits": {
+			"k": {"shift": 6, "divisor": 4, "decay": 0.09},
+			"s": {"shift": 2, "divisor": 1, "decay": 0.12, "volume": 0.8},
+			"h": {"shift": 0, "divisor": 0, "short": true, "decay": 0.03,
+			      "volume": 0.35}
+		}}
+	]
+}

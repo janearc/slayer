@@ -120,8 +120,8 @@ func (probe personalProbe) checkAperture(test *testing.T, polygon *mesh.Mesh) {
 	}
 	error := math.Abs(radius + radius - probe.profile.Aperture)
 	if error > probe.contract.Tolerance ||
-		math.Abs(near-probe.profile.Near) > probe.contract.Tolerance ||
-		math.Abs(far-probe.profile.Far) > probe.contract.Tolerance {
+		!(math.Abs(near-probe.profile.Near) <= probe.contract.Tolerance) ||
+		!(math.Abs(far-probe.profile.Far) <= probe.contract.Tolerance) {
 		test.Fatal("wrong requested aperture or optical plane",
 			probe.profile.Kind, radius, near, far)
 	}

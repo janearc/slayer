@@ -19,6 +19,7 @@ import (
 	"time"
 
 	kerr "github.com/janearc/celestial/hole"
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/celestial/radiation"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
@@ -38,8 +39,11 @@ import (
 
 // Smoke is one milestone.
 type Smoke struct {
-	Number int
-	Name   string
+	Number  int
+	Name    string
+	group   string // the one group the smoke is checked with, one of Groups
+	heavy   bool   // true for a smoke that takes minutes to draw both ways
+	noSmall string // why the smoke cannot be judged small, or empty when it can
 	// Scene builds the world and where the eye is, fresh on every call.
 	Scene func() (*thing.World, maths.Subspace)
 	// Wide is how much the camera sees from its left edge to its right,
@@ -72,12 +76,57 @@ type Smoke struct {
 	Inputs []string
 }
 
+// Group is the one group the smoke is checked with, one of Groups.
+func (made Smoke) Group() string { return made.group }
+
+// Heavy is true for a smoke that takes minutes to draw both ways, so a
+// check can leave it for a run of its own.
+func (made Smoke) Heavy() bool { return made.heavy }
+
+// NoSmall is why the smoke cannot be judged at small size, or empty when
+// it can. A check at small size skips a smoke that has one, and says it
+// did, with this reason.
+func (made Smoke) NoSmall() string { return made.noSmall }
+
+// matteLamp is how many times stronger a lamp is made than the strength a
+// smoke names, for a matte surface to show its colour times that strength.
+// trace reads a lamp's strength as irradiance, so a matte surface shows its
+// colour over pi times it; the smokes' strengths are written for colour
+// times strength.
+//
+// A smoke whose lamps light only volumes, bodies or other light that
+// trace does not divide by pi names its lamps as they are.
+const matteLamp = math.Pi
+
+// matte is the strength a lamp needs for a matte surface to show its
+// colour times named, under trace.
+func matte(named maths.Light) maths.Light { return named.Scale(matteLamp) }
+
+// matteSun is a thing.Sun whose light is matte of the strength named, so a
+// matte surface it lights shows its colour times that strength.
+func matteSun(toward maths.Vec, named maths.Light) thing.Lamp {
+	return thing.Sun(toward, matte(named))
+}
+
 // placed is a template's refusal to be placed, which in a smoke is a
 // bug in the smoke: the picture stops with the reason.
 func placed(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// sure is a door's refusal surfaced the smoke way: the picture stops
+// with the reason, and the made thing passes through.
+func sure[T any](made T, err error) T {
+	placed(err)
+	return made
+}
+
+// with is the body wearing parts, or the picture stops with the
+// reason it cannot.
+func with(body bodies.Body, parts ...bodies.Part) bodies.Body {
+	return sure(body.With(parts...))
 }
 
 // found is the tile Find reaches from a direction for a want, or the
@@ -132,101 +181,167 @@ func (s Smoke) Reads() ([]string, error) {
 
 // all is every smoke, in order.
 var all = []Smoke{
-	{Number: 1, Name: "a ball on a floor", Scene: one,
+	{Number: 1, group: "light", Name: "a ball on a floor", Scene: one,
 		Wide: 50 * maths.Degree},
-	{Number: 2, Name: "two lamps", Scene: two, Wide: 50 * maths.Degree},
+	{Number: 2, group: "light", Name: "two lamps", Scene: two, Wide: 50 * maths.Degree},
 	// three rays a side: the checker near the horizon is finer than a
 	// pixel, and one ray a pixel turns it into dashes
-	{Number: 3, Name: "a ball on a set", Scene: three,
+	{Number: 3, group: "light", Name: "a ball on a set", Scene: three,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 4, Name: "red, green and blue on the set", Scene: four,
+	{Number: 4, group: "light", Name: "red, green and blue on the set", Scene: four,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 5, Name: "a spotlight on the set", Scene: five,
+	{Number: 5, group: "light", Name: "a spotlight on the set", Scene: five,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 6, Name: "a world of hexes", Scene: six,
+	{Number: 6, group: "worlds", noSmall: "the hex edges are thinner than a " +
+		"small terminal pixel: at small size and one real pixel a sextant " +
+		"third the terminal differs from the real picture beyond what an " +
+		"eye can see (worst 0.0271), where at full size they agree " +
+		"(worst 0.0120)", Name: "a world of hexes", Scene: six,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 7, Name: "a planet", Scene: seven,
+	{Number: 7, group: "worlds", Name: "a planet", Scene: seven,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 8, Name: "a floor and a ring in hexes", Scene: eight,
+	{Number: 8, group: "worlds", Name: "a floor and a ring in hexes", Scene: eight,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 9, Name: "smoke on the set", Scene: nine,
+	{Number: 9, group: "gas", Name: "smoke on the set", Scene: nine,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 10, Name: "a gas giant", Scene: ten,
+	{Number: 10, group: "worlds", Name: "a gas giant", Scene: ten,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 11, Name: "a ringed giant", Scene: eleven,
+	{Number: 11, group: "worlds", Name: "a ringed giant", Scene: eleven,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 12, Name: "a planet with features", Scene: twelve,
+	{Number: 12, group: "worlds", Name: "a planet with features", Scene: twelve,
 		Wide: 50 * maths.Degree, Samples: 3},
 	// the first smoke whose width is a lens's and not a number: a long
 	// lens from far off, the shot that flattens a planet against its sky
-	{Number: 13, Name: "a ringed giant through a long lens",
+	{Number: 13, group: "worlds", Name: "a ringed giant through a long lens",
 		Scene: thirteen, Wide: thirteenLens.Wide(), Samples: 3},
-	{Number: 14, Name: "a gas giant in detail", Scene: fourteen,
+	{Number: 14, group: "worlds", Name: "a gas giant in detail", Scene: fourteen,
 		Wide: fourteenLens.Wide(), Samples: 3},
-	{Number: 15, Name: "the giants", Scene: fifteen,
+	{Number: 15, group: "worlds", Name: "the giants", Scene: fifteen,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 16, Name: "the rocks", Scene: sixteen,
+	{Number: 16, group: "worlds", Name: "the rocks", Scene: sixteen,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 17, Name: "moons on orbits", Scene: seventeen,
+	{Number: 17, group: "worlds", Name: "moons on orbits", Scene: seventeen,
 		Wide: 50 * maths.Degree, Samples: 3},
-	{Number: 18, Name: "hubble looks at jupiter", Scene: eighteen,
+	{Number: 18, group: "lens", Name: "hubble looks at jupiter", Scene: eighteen,
 		Wide: film.Hubble().Wide(), Samples: 3},
-	{Number: 19, Name: "a satellite looks down", Scene: nineteen,
+	{Number: 19, group: "lens", Name: "a satellite looks down", Scene: nineteen,
 		Wide: nineteenLens.Wide(), Samples: 3},
-	{Number: 20, Name: "a magnetar behind a giant, in gamma and x-ray",
+	{Number: 20, group: "energy", Name: "a magnetar behind a giant, in gamma and x-ray",
 		Scene: twenty, Wide: 40 * maths.Degree, Samples: 3,
 		Bands: []maths.Band{twentyGamma, twentyXRay}},
-	{Number: 21, Name: "magellan maps venus", Scene: twentyOne,
+	{Number: 21, group: "worlds", Name: "magellan maps venus", Scene: twentyOne,
 		Wide: 30 * maths.Degree, Samples: 3,
 		Bands: []maths.Band{twentyOneBand}},
-	{Number: 22, Name: "the ringed giant on super 8", Scene: twentyTwo,
+	{Number: 22, group: "lens", Name: "the ringed giant on super 8", Scene: twentyTwo,
 		Wide: film.Lens{Focal: 50, Gauge: film.Super8}.Wide(), Samples: 3,
 		Gauge: film.Super8},
-	{Number: 23, Name: "the ringed giant on imax", Scene: twentyTwo,
+	{Number: 23, group: "lens", Name: "the ringed giant on imax", Scene: twentyTwo,
 		Wide: film.Lens{Focal: 50, Gauge: film.IMAX}.Wide(), Samples: 3,
 		Gauge: film.IMAX},
-	{Number: 24, Name: "io looks up at jupiter", Scene: twentyFour,
+	{Number: 24, group: "worlds", Name: "io looks up at jupiter", Scene: twentyFour,
 		Wide: twentyFourWide, Samples: 3},
-	{Number: 25, Name: "a quasar and its jets", Scene: twentyFive,
+	{Number: 25, group: "energy", Name: "a quasar and its jets", Scene: twentyFive,
 		Wide: 40 * maths.Degree, Samples: 3, Bands: []maths.Band{twentyXRay},
 		Tone: quasarTone},
-	{Number: 26, Name: "a blazar, down the jet", Scene: twentySix,
+	{Number: 26, group: "energy", Name: "a blazar, down the jet", Scene: twentySix,
 		Wide: 40 * maths.Degree, Samples: 3,
 		Bands: []maths.Band{twentyXRay, twentyGamma},
 		Tone:  colour.Tone{Knee: 0.5, Top: 300}},
-	{Number: 27, Name: "a pulsar turns", Scene: twentySeven,
+	{Number: 27, group: "energy", Name: "a pulsar turns", Scene: twentySeven,
 		Wide: 40 * maths.Degree, Samples: 3},
-	{Number: 28, Name: "a magnetar flares", Scene: twentyEight,
+	{Number: 28, group: "energy", Name: "a magnetar flares", Scene: twentyEight,
 		Wide: 40 * maths.Degree, Samples: 3, Bands: []maths.Band{twentyGamma}},
-	{Number: 29, Name: "the pillars of creation", Scene: twentyNine,
+	{Number: 29, group: "gas", heavy: true, Name: "the pillars of creation", Scene: twentyNine,
 		Wide: 40 * maths.Degree, Samples: 3, Bands: twentyNineLines,
 		Palette: twentyNinePalette, Tone: twentyNineTone},
-	{Number: 30, Name: "the earth by night", Scene: thirty,
+	{Number: 30, group: "earth", Name: "the earth by night", Scene: thirty,
 		Wide: 40 * maths.Degree, Samples: 3, Tone: thirtyTone},
-	{Number: 31, Name: "the bullet cluster, in its palette", Scene: thirtyOne,
+	{Number: 31, group: "gas", Name: "the bullet cluster, in its palette", Scene: thirtyOne,
 		Wide: 40 * maths.Degree, Samples: 3, Bands: thirtyOneBands,
 		Palette: thirtyOnePalette, Tone: thirtyOneTone},
-	{Number: 32, Name: "the aurora from orbit", Scene: thirtyTwo,
+	{Number: 32, group: "earth", Name: "the aurora from orbit", Scene: thirtyTwo,
 		Wide: 60 * maths.Degree, Samples: 3, Tone: thirtyTone},
-	{Number: 33, Name: "a world beside a magnetar", Scene: thirtyThree,
+	{Number: 33, group: "energy", Name: "a world beside a magnetar", Scene: thirtyThree,
 		Wide: 40 * maths.Degree, Samples: 3, Bands: []maths.Band{twentyXRay},
 		Palette: []maths.Light{maths.RGB(0.3, 0.9, 1)}, Tone: thirtyThreeTone},
-	{Number: 34, Name: "a hot jupiter, its air blown off", Scene: thirtyFour,
+	{Number: 34, group: "gas", Name: "a hot jupiter, its air blown off", Scene: thirtyFour,
 		Wide: 80 * maths.Degree, Samples: 3, Tone: cometTone},
-	{Number: 35, Name: "hale-bopp", Scene: thirtyFive,
+	{Number: 35, group: "gas", heavy: true, Name: "hale-bopp", Scene: thirtyFive,
 		Wide: 60 * maths.Degree, Samples: 3, Tone: cometTone},
 	// the photon ring is thinner than a pixel, and a picture of it wants
 	// many rays per pixel or it speckles
-	{Number: 36, Name: "the photon ring", Scene: thirtySix,
+	{Number: 36, group: "holes", heavy: true, Name: "the photon ring", Scene: thirtySix,
 		Wide: 40 * maths.Degree, Samples: 9, Tone: quasarTone},
-	{Number: 37, Name: "falling in", Scene: thirtySeven,
+	{Number: 37, group: "holes", heavy: true, Name: "falling in", Scene: thirtySeven,
 		Wide: 90 * maths.Degree, Samples: 9, Tone: quasarTone},
 	// the one smoke that reads from disk, and says so
-	{Number: 38, Name: "the blue marble", Scene: thirtyEight,
+	{Number: 38, group: "earth", Name: "the blue marble", Scene: thirtyEight,
 		Wide: 40 * maths.Degree, Samples: 2,
 		Inputs: []string{"$SLAYER_MARBLE/blue.jpg"}},
-	{Number: 39, Name: "a windscreen catches the sky", Scene: thirtyNine,
+	{Number: 39, group: "earth", Name: "a windscreen catches the sky", Scene: thirtyNine,
 		Wide: 60 * maths.Degree, Samples: 3},
+	{Number: 40, group: "gas", Name: "four atmospheres", Scene: forty,
+		Wide: 50 * maths.Degree, Samples: 3},
+	{Number: 41, group: "gas", Name: "a laser in haze", Scene: fortyOne,
+		Wide: 50 * maths.Degree, Samples: 3},
+	{Number: 42, group: "light", Name: "a hill and a closed solid", Scene: fortyTwo,
+		Wide: 50 * maths.Degree, Samples: 3},
+	{Number: 43, group: "gas", Name: "a glass fizzing", Scene: fortyThree,
+		Wide: 50 * maths.Degree, Samples: 3},
+	{Number: 44, group: "earth", Name: "the earth by night from a picture of its lights",
+		Scene: fortyFour, Wide: 40 * maths.Degree, Samples: 3, Tone: thirtyTone},
+	{Number: 45, group: "worlds", Name: "three planets on a track of the caller's",
+		Scene: fortyFive, Wide: 60 * maths.Degree, Samples: 3},
+	{Number: 46, group: "gas", Name: "a baked puff beside the exact one",
+		Scene: fortySix, Wide: 50 * maths.Degree, Samples: 3},
+	{Number: 47, group: "light", Name: "a stage lit by ninjafilm's lamps",
+		Scene: fortySeven, Wide: 50 * maths.Degree, Samples: 3},
+	// white where the beam arrives whole, as a film held to the light is
+	{Number: 48, group: "energy", Name: "lead, aluminium and water on an x-ray film",
+		Scene: fortyEight, Wide: 50 * maths.Degree, Samples: 3,
+		Bands:   []maths.Band{fortyEightBand},
+		Palette: []maths.Light{swatches.Light(swatches.Chalk)}},
+	{Number: fortyNineNo, group: "light",
+		Name:  "a glass of water on a wooden table in an infinity cove",
+		Scene: fortyNine, Wide: studioWide * maths.Degree, Samples: 3},
+	{Number: fiftyNo, group: "light",
+		Name:  "Webb at the edge of where it may point, lit by the Larson",
+		Scene: fifty, Wide: webbWide * maths.Degree, Samples: 3,
+		Tone:   colour.Tone{Exposure: unity, Knee: webbKnee, Top: webbTop},
+		Inputs: []string{"$" + starsFolder + "/" + starsFile}},
+	{Number: fiftyOneNo, group: "light",
+		Name:  "a ball of water with bubbles in it",
+		Scene: fiftyOne, Wide: bubblesWide * maths.Degree, Samples: 3},
+	{Number: fiftyTwoNo, group: "light",
+		Name:  "a glass of cola",
+		Scene: fiftyTwo, Wide: colaWide * maths.Degree, Samples: 3},
+}
+
+// groups are the names a smoke's Group may take, in the order a check
+// lists them: lamps and a ball on a floor, planets and moons and their
+// surfaces, the lenses and films that look at them, objects that emit
+// beyond the visible, gas and dust, the black hole, and the earth seen
+// from orbit.
+var groups = []string{"light", "worlds", "lens", "energy", "gas", "holes",
+	"earth"}
+
+// Groups is the name of every group of smokes, a copy.
+func Groups() []string { return slices.Clone(groups) }
+
+// InGroup is every smoke in the named group, oldest first, each a copy.
+// A name that is no group's is refused, with the names there are.
+func InGroup(name string) ([]Smoke, error) {
+	if !slices.Contains(groups, name) {
+		return nil, fmt.Errorf("smoke: no group %q; the groups are %s",
+			name, strings.Join(groups, ", "))
+	}
+	var in []Smoke
+	for _, s := range all {
+		if s.group == name {
+			in = append(in, own(s))
+		}
+	}
+	return in, nil
 }
 
 // All is every smoke, oldest first, each a copy a caller may change.
@@ -275,7 +390,7 @@ func one() (*thing.World, maths.Subspace) {
 			Colour: swatches.Light(swatches.Clay)},
 		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0)}),
 	})
-	w.Lamp(thing.Sun(maths.V(1, 2, 1),
+	w.Lamp(matteSun(maths.V(1, 2, 1),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	from := maths.V(0, 2.2, 6)
 	return w, maths.Subspace{Origin: from,
@@ -285,9 +400,9 @@ func one() (*thing.World, maths.Subspace) {
 // the two lamps of smoke two, a hard red from the left and a hard green
 // from the right, at the strength smoke one's sun had
 var (
-	redLamp = thing.Sun(maths.V(-1.5, 2, 1),
+	redLamp = matteSun(maths.V(-1.5, 2, 1),
 		swatches.Light(swatches.Red).Scale(1.1))
-	greenLamp = thing.Sun(maths.V(1.5, 2, 1),
+	greenLamp = matteSun(maths.V(1.5, 2, 1),
 		swatches.Light(swatches.Green).Scale(1.1))
 )
 
@@ -344,7 +459,7 @@ func three() (*thing.World, maths.Subspace) {
 			Colour: swatches.Light(swatches.Clay)},
 		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0)}),
 	})
-	w.Lamp(thing.Sun(maths.V(1, 2, 1),
+	w.Lamp(matteSun(maths.V(1, 2, 1),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	return w, setEye()
 }
@@ -384,11 +499,11 @@ func setEye() maths.Subspace {
 // the right and a hard blue from behind, each at the strength of smoke one's
 // sun
 var (
-	fourRed = thing.Sun(maths.V(-1.5, 2, 1),
+	fourRed = matteSun(maths.V(-1.5, 2, 1),
 		swatches.Light(swatches.Red).Scale(1.1))
-	fourGreen = thing.Sun(maths.V(1.5, 2, 1),
+	fourGreen = matteSun(maths.V(1.5, 2, 1),
 		swatches.Light(swatches.Green).Scale(1.1))
-	fourBlue = thing.Sun(maths.V(0, 2, -1.5),
+	fourBlue = matteSun(maths.V(0, 2, -1.5),
 		swatches.Light(swatches.Blue).Scale(1.1))
 )
 
@@ -423,7 +538,7 @@ var (
 	fiveSpot = film.Spot{
 		At:       maths.V(-2, 5, 2),
 		Aim:      maths.V(2, -4, -2),
-		Strength: swatches.Light(swatches.Tungsten).Scale(26),
+		Strength: matte(swatches.Light(swatches.Tungsten).Scale(26)),
 		Cone:     25 * maths.Degree,
 		Soft:     8 * maths.Degree,
 	}
@@ -443,8 +558,8 @@ func five() (*thing.World, maths.Subspace) {
 // the tiles of smoke six: the ball's, coarse enough that a tile is many
 // cells across, and the sky's, finer, so the dome reads as a dome
 var (
-	sixBall = hexes.Sphere{N: 5}
-	sixSky  = hexes.Sphere{N: 6}
+	sixBall = hexes.Sphere{Splits: 5}
+	sixSky  = hexes.Sphere{Splits: 6}
 )
 
 // sixWorld is the ball's surface: sea and moss, a tile each by hash, with
@@ -478,7 +593,7 @@ func sixUnder(air bool) (*thing.World, maths.Subspace) {
 			Texture: sixWorld},
 		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0)}),
 	})
-	w.Lamp(thing.Sun(maths.V(1, 2, 1),
+	w.Lamp(matteSun(maths.V(1, 2, 1),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	return w, sixEye()
 }
@@ -494,7 +609,7 @@ func sixEye() maths.Subspace {
 // sevenTerrain is smoke seven's world: plates, a sea over six tenths of
 // it, a tilted axis, on a rung coarse enough that a tile is many cells
 // across at the planet's size in the picture.
-var sevenTerrain = world.Terrain{Tiling: hexes.Sphere{N: 8}, Seed: 5,
+var sevenTerrain = world.Terrain{Tiling: hexes.Sphere{Splits: 8}, Seed: 5,
 	Ocean: 0.6, Plates: 7, Axis: maths.V(0.2, 1, 0)}
 
 // sevenLook paints the world's eleven biomes from the paint box's terran
@@ -532,7 +647,7 @@ func sevenUnder(set_, air bool) (*thing.World, maths.Subspace) {
 			Texture: planet.Painted(sevenLook())},
 		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 2.2, 0)}),
 	})
-	w.Lamp(thing.Sun(maths.V(1, 2, 1),
+	w.Lamp(matteSun(maths.V(1, 2, 1),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	from := maths.V(0, 2.6, 6.8)
 	return w, maths.Subspace{Origin: from,
@@ -587,7 +702,7 @@ func eightUnder(air bool) (*thing.World, maths.Subspace) {
 			Origin:      maths.V(0, eightTube.Radius+eightTube.Thick/2, 0),
 			Orientation: maths.Rotation(maths.XAxis, 90*maths.Degree)}),
 	})
-	w.Lamp(thing.Sun(maths.V(1, 2, 1),
+	w.Lamp(matteSun(maths.V(1, 2, 1),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	if air {
 		w.Sky = sky.Hexed{Of: sky.Gradient{
@@ -637,7 +752,7 @@ func nineUnder(air bool) (*thing.World, maths.Subspace) {
 			Colour: swatches.Light(swatches.Paint)},
 		Motion: thing.Still(maths.Subspace{Origin: maths.V(1.4, 1.5, 0.3)}),
 	})
-	w.Lamp(thing.Sun(maths.V(1, 2, 1),
+	w.Lamp(matteSun(maths.V(1, 2, 1),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	if air {
 		w.Lamp(film.Flood{Strength: swatches.Light(swatches.Zenith).Scale(0.35)})
@@ -762,7 +877,7 @@ func elevenUnder(air bool) (*thing.World, maths.Subspace) {
 
 // twelveTerrain is smoke seven's world on a finer rung, so a feature is
 // a group of tiles and not one.
-var twelveTerrain = world.Terrain{Tiling: hexes.Sphere{N: 12}, Seed: 5,
+var twelveTerrain = world.Terrain{Tiling: hexes.Sphere{Splits: 12}, Seed: 5,
 	Ocean: 0.6, Plates: 7, Axis: maths.V(0.2, 1, 0)}
 
 // twelveWorld is the terrain with its features placed by what the plain
@@ -823,7 +938,7 @@ func twelveUnder(air bool) (*thing.World, maths.Subspace) {
 			Texture: planet.Painted(sevenLook())},
 		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 2.2, 0)}),
 	})
-	w.Lamp(thing.Sun(maths.V(1, 2, 1),
+	w.Lamp(matteSun(maths.V(1, 2, 1),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	from := maths.V(0, 2.6, 6.8)
 	return w, maths.Subspace{Origin: from,
@@ -913,8 +1028,8 @@ func fourteenUnder(air bool) (*thing.World, maths.Subspace) {
 
 // space is a world with no set: a sky of stars and the sun from the
 // right, for bodies to sit in. the stars are about a pixel across at
-// the smokes' picture size; smaller, the terminal's nine rays and smokecheck's
-// twelve land on one differently and smokecheck calls the picture a liar.
+// the smokes' picture size; smaller, the terminal's nine rays and smokejudge's
+// twelve land on one differently and smokejudge calls the picture a liar.
 func space() *thing.World {
 	w := thing.NewWorld()
 	w.Sky = sky.Stars{Seed: 15, Size: 0.35, Dark: maths.Grey(0.002)}
@@ -930,9 +1045,9 @@ func row(w *thing.World, scale float64, gap float64, detail int,
 	bodies ...bodies.Body) float64 {
 	x := 0.0
 	for i, b := range bodies {
-		r := b.Radius * scale
-		if b.Rings != nil {
-			r *= b.Rings.Outer
+		r := b.Radius() * scale
+		if rings, worn := b.Rings(); worn {
+			r *= rings.Outer()
 		}
 		if i > 0 {
 			x += r + gap
@@ -961,8 +1076,9 @@ func framing(left, right, wide float64) maths.Subspace {
 // under a sun from the right with the stars behind.
 func fifteen() (*thing.World, maths.Subspace) {
 	w := space()
-	right := row(w, 1/template.Jupiter().Radius, 0.8, 6,
-		template.Jupiter(), template.Saturn(), template.Uranus(), template.Neptune())
+	jupiter := sure(template.Jupiter())
+	right := row(w, 1/jupiter.Radius(), 0.8, 6,
+		jupiter, sure(template.Saturn()), sure(template.Uranus()), sure(template.Neptune()))
 	return w, framing(-1, right, 50*maths.Degree)
 }
 
@@ -972,9 +1088,10 @@ func fifteen() (*thing.World, maths.Subspace) {
 // pluto and charon go round their common centre, placed by Binary.
 func sixteen() (*thing.World, maths.Subspace) {
 	w := space()
-	scale := 1 / template.Earth().Radius
+	earth, mercury := sure(template.Earth()), sure(template.Mercury())
+	scale := 1 / earth.Radius()
 	right := row(w, scale, 0.6, 8,
-		template.Mercury(), template.Venus(), template.Earth(), template.Mars())
+		mercury, sure(template.Venus()), earth, sure(template.Mars()))
 	// pluto and charon at the end of the row at their true distance,
 	// 19,591 km: their common centre is then about 2,130 km from
 	// pluto's, outside it, which is what makes them a binary and the
@@ -983,14 +1100,14 @@ func sixteen() (*thing.World, maths.Subspace) {
 	// Binary puts pluto past the centre and charon short of it, each
 	// by the other's share of the mass, so the centre stands where
 	// charon clears mars, and the frame reaches pluto
-	pluto, charon := template.Pluto(), template.Charon()
+	pluto, charon := sure(template.Pluto()), sure(template.Charon())
 	apart := 19591.0
-	total := pluto.Mass + charon.Mass
-	ra, rb := apart*charon.Mass/total*scale, apart*pluto.Mass/total*scale
-	at := maths.V(right+0.6+rb+charon.Radius*scale, 0, 0)
-	placed(bodies.Binary(w, pluto, charon, at, apart, scale, 4))
-	left := -template.Mercury().Radius * scale
-	return w, framing(left, at.X+ra+pluto.Radius*scale, 50*maths.Degree)
+	total := pluto.Mass() + charon.Mass()
+	ra, rb := apart*charon.Mass()/total*scale, apart*pluto.Mass()/total*scale
+	at := maths.V(right+0.6+rb+charon.Radius()*scale, 0, 0)
+	placed(bodies.Binary(w, pluto, charon, at, bodies.Kilometres(apart), scale, 4))
+	left := -mercury.Radius() * scale
+	return w, framing(left, at.X+ra+pluto.Radius()*scale, 50*maths.Degree)
 }
 
 // seventeenGiant is the jupiter template changed, as a template is for:
@@ -1000,14 +1117,29 @@ func sixteen() (*thing.World, maths.Subspace) {
 //
 // kepler still times them from the mass, and they go round in hours.
 func seventeenGiant() bodies.Body {
-	j := template.Jupiter()
-	j.Moons = j.Moons[:3]
-	for i := range j.Moons {
-		j.Moons[i].Body.Radius *= 6
-		j.Moons[i].Orbit /= 2.4
-		j.Moons[i].Body.Ground.Terrain.Seed += 17
+	j := sure(template.Jupiter())
+	grown := j.WithoutMoons()
+	for _, moon := range j.Moons()[:3] {
+		body := moon.Body()
+		var parts []bodies.Part
+		if ground, worn := body.Ground(); worn {
+			terrain := ground.Terrain()
+			terrain.Seed += 17
+			fresh := sure(bodies.NewGround(terrain, ground.Look())).
+				Featured(ground.Features())
+			parts = append(parts, fresh)
+		}
+		for _, plume := range body.Plumes() {
+			parts = append(parts, plume)
+		}
+		bigger := sure(bodies.NewBody(body.Name(), body.Kind(),
+			bodies.Kilometres(body.Radius()*6),
+			measure.Kilograms(body.Mass()), parts...))
+		grown = with(grown, sure(bodies.NewMoon(bigger,
+			bodies.Kilometres(moon.Orbit()/2.4),
+			measure.Radians(moon.Phase()))))
 	}
-	return j
+	return grown
 }
 
 // seventeen is the seventeenth milestone: moons on orbits. the giant with three
@@ -1018,10 +1150,10 @@ func seventeenGiant() bodies.Body {
 func seventeen() (*thing.World, maths.Subspace) {
 	w := space()
 	j := seventeenGiant()
-	scale := 1 / j.Radius
+	scale := 1 / j.Radius()
 	placed(j.Place(w, maths.Vec{}, scale, 6))
 	// the widest orbit, with room round it
-	far := j.Moons[2].Orbit * scale
+	far := j.Moons()[2].Orbit() * scale
 	from := maths.V(0, 0.55*far, 1.0*far).Scale(1.35)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1052,17 +1184,21 @@ func eighteen() (*thing.World, maths.Subspace) {
 	w := thing.NewWorld()
 	// a field this narrow needs stars eleven thousand splits fine, a
 	// billion tiles, which cost nothing to have
-	w.Sky = sky.Stars{Tiling: hexes.Sphere{N: 11000}, Share: 0.15, Size: 0.05,
+	w.Sky = sky.Stars{Tiling: hexes.Sphere{Splits: 11000}, Share: 0.15, Size: 0.05,
 		Bright: 0.8, Seed: 18, Dark: maths.Grey(0.002)}
-	j := template.Jupiter()
+	j := sure(template.Jupiter())
 	// the moons where they are seen from the earth: io in front of the
 	// disc, which on an orbit whose plane runs toward minus z is three
 	// quarters round, the others behind and off to its sides
+	moons := j.Moons()
+	j = j.WithoutMoons()
 	for i, phase := range []float64{270 * maths.Degree, 80 * maths.Degree,
 		85 * maths.Degree, 92 * maths.Degree} {
-		j.Moons[i].Phase = phase
+		j = with(j, sure(bodies.NewMoon(moons[i].Body(),
+			bodies.Kilometres(moons[i].Orbit()),
+			measure.Radians(phase))))
 	}
-	scale := 1 / j.Radius
+	scale := 1 / j.Radius()
 	away := eighteenAway * eighteenAU * scale
 	placed(j.Place(w, maths.V(0, 0, -away), scale, 10))
 	// at opposition the sun is behind the earth: a little off the line
@@ -1070,7 +1206,7 @@ func eighteen() (*thing.World, maths.Subspace) {
 	// moon on the disc; further off and it is thrown past the limb
 	w.Lamp(thing.Sun(maths.V(0.05, 0.03, 1),
 		swatches.Light(swatches.Daylight).Scale(1.2)))
-	return w, maths.Subspace{}
+	return w, maths.Local()
 }
 
 // nineteenLens sees forty kilometres of ground from four hundred up, and
@@ -1080,7 +1216,7 @@ func eighteen() (*thing.World, maths.Subspace) {
 //
 // a texture can pick its rung by the pixel asking (world.Fine with no
 // rungs), and that is the ladder in use; a smoke cannot show it to
-// smokecheck, since its finer picture would pick a finer rung and every
+// smokejudge, since its finer picture would pick a finer rung and every
 // cell would hold an edge. the unit test holds it; the smoke is fixed.
 var (
 	nineteenLens = film.Swath(40, 400)
@@ -1101,19 +1237,21 @@ var (
 // it, and nothing between is stored. the earth's air is in the way, a little.
 func nineteen() (*thing.World, maths.Subspace) {
 	w := thing.NewWorld()
-	e := template.Earth()
-	e.Moons = nil
 	// a clear day over the coast: the clouds are a part of the earth
 	// now, and this shot is about the ground
-	e.Clouds = nil
-	scale := 1 / e.Radius
+	e := sure(template.Earth()).WithoutMoons().WithoutClouds()
+	ground, worn := e.Ground()
+	if !worn {
+		panic("the earth template wears no ground")
+	}
+	scale := 1 / e.Radius()
 	// the ground, made as the template makes it and then painted fine
-	t := e.Ground.Terrain
-	t.Tiling = hexes.Sphere{N: 12}
+	t := ground.Terrain()
+	t.Tiling = hexes.Sphere{Splits: 12}
 	plain := world.New(t)
 	placed(e.Place(w, maths.Vec{}, scale, 12))
 	w.Things[0].Material = &thing.Material{Name: "earth, fine",
-		Texture: plain.Fine(e.Ground.Look, nineteenRungs, 0.2, 0.35)}
+		Texture: plain.Fine(ground.Look(), nineteenRungs, 0.2, 0.35)}
 	// over a coast: the nearest shore to a direction, and the line
 	// between it and the sea beside it, turned with the planet, which
 	// leans on its axis as the template says
@@ -1128,9 +1266,9 @@ func nineteen() (*thing.World, maths.Subspace) {
 			break
 		}
 	}
-	lean := maths.Rotation(maths.XAxis, e.Tilt)
+	lean := maths.Rotation(maths.XAxis, e.Tilt())
 	over := lean.Out(coast)
-	w.Lamp(thing.Sun(over.Add(maths.V(0.2, 0.3, 0.1)),
+	w.Lamp(matteSun(over.Add(maths.V(0.2, 0.3, 0.1)),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	from := over.Scale(1 + nineteenUp*scale)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, over)}
@@ -1173,7 +1311,7 @@ func twenty() (*thing.World, maths.Subspace) {
 		Radiant: thing.Spectrum{Passes: map[radiation.Range]float64{
 			radiation.Gamma(): 0.985, radiation.XRay(): 0.982}}}
 	w.AddVolume(thing.Volume{Medium: tenGiant, Material: gas,
-		Motion: thing.Still(maths.Subspace{})})
+		Motion: thing.Still(maths.Local())})
 	w.Add(thing.Thing{
 		Shape: shape.Sphere{Radius: 0.35},
 		Material: &thing.Material{Name: "moon",
@@ -1218,8 +1356,8 @@ var twentyOneBand = maths.Band{Nanometres: 1.26e8}
 // aperture's trick is not modelled.
 func twentyOne() (*thing.World, maths.Subspace) {
 	w := space()
-	v := template.Venus()
-	scale := 1 / v.Radius
+	v := sure(template.Venus())
+	scale := 1 / v.Radius()
 	placed(v.Place(w, maths.Vec{}, scale, 10))
 	from := maths.V(0.4, 0.3, 1).Unit().Scale(6.5)
 	w.Lamp(film.Radar{At: from, Range: radiation.Radio(), Strength: 1})
@@ -1294,33 +1432,43 @@ func twentyFourAt(t time.Duration) (*thing.World, maths.Subspace) {
 	w := thing.NewWorld()
 	// a sunlit ground: only the brighter stars show beside it
 	w.Sky = sky.Stars{Seed: 15, Share: 0.06, Size: 0.35, Dark: maths.Grey(0.002)}
-	w.Lamp(thing.Sun(maths.V(0.3, 0.05, 1),
+	w.Lamp(matteSun(maths.V(0.3, 0.05, 1),
 		swatches.Light(swatches.Daylight).Scale(1.2)))
-	j := template.Jupiter()
-	j.Moons = j.Moons[:1]
-	io := &j.Moons[0].Body
-	io.Ground.Fine = &bodies.Fineness{Vary: 0.25, Mix: 0.35}
-	// a small plume where the shot wants one, on a live volcano; pele's
-	// is on the far side
-	io.Plumes = append(io.Plumes, bodies.Plume{Toward: twentyFourPlume,
-		Height: 60, Width: 200, Dense: 0.03, Colour: maths.RGB(0.82, 0.78, 0.7)})
-	volcanoes := io.Ground.Features
+	j := sure(template.Jupiter())
+	first := j.Moons()[0]
+	io := first.Body()
+	ground, worn := io.Ground()
+	if !worn {
+		placed(fmt.Errorf("smoke: the jupiter template's io wears no ground"))
+	}
+	volcanoes := ground.Features()
 	if volcanoes == nil {
-		placed(fmt.Errorf("smoke: the jupiter template's io has no Ground.Features, " +
+		placed(fmt.Errorf("smoke: the jupiter template's io has no features, " +
 			"which the plume's volcano is added to"))
 	}
-	io.Ground.Features = func(pw *world.World) ([]world.Feature, error) {
-		fs, err := volcanoes(pw)
-		return append(fs, world.Volcano{At: twentyFourPlume,
-			Reach: 2.5 * pw.Tiling.Spacing(), Rise: 0.3}), err
-	}
-	scale := 1 / io.Radius
+	ground = ground.
+		Fined(sure(bodies.NewFineness(0, maths.Share(0.25),
+			maths.Share(0.35)))).
+		Featured(func(pw *world.World) ([]world.Feature, error) {
+			fs, err := volcanoes(pw)
+			return append(fs, world.Volcano{At: twentyFourPlume,
+				Reach: 2.5 * pw.Tiling.Spacing(), Rise: 0.3}), err
+		})
+	// a small plume where the shot wants one, on a live volcano; pele's
+	// is on the far side
+	io = with(io, ground, sure(bodies.NewPlume(twentyFourPlume,
+		bodies.Kilometres(60), bodies.Kilometres(200),
+		bodies.PerKilometre(0.03), maths.RGB(0.82, 0.78, 0.7))))
+	j = with(j.WithoutMoons(), sure(bodies.NewMoon(io,
+		bodies.Kilometres(first.Orbit()),
+		measure.Radians(first.Phase()))))
+	scale := 1 / io.Radius()
 	placed(j.Place(w, maths.Vec{}, scale, 10))
 	// the detail is the shot's: a tile is six pixels of a picture three
 	// hundred and sixty across, whatever the screen
 	w.Pixel = twentyFourWide / 360
-	orbit := j.Orbit(0, maths.Vec{}, scale)
-	from, up := bodies.Stand(orbit.At(t), io.Radius*scale, twentyFourEye,
+	orbit := sure(j.Orbit(0, maths.Vec{}, scale))
+	from, up := bodies.Stand(orbit.At(t), io.Radius()*scale, twentyFourEye,
 		twentyFourUp)
 	// at jupiter's centre, then nine degrees down to bring the horizon in
 	look := maths.LookAtUp(from, maths.Vec{}, up).
@@ -1356,10 +1504,13 @@ var quasarTone = colour.Tone{Knee: 0.5, Top: 80}
 // the field, so nothing bends there.
 func twentyFive() (*thing.World, maths.Subspace) {
 	w := dark()
-	q := template.Quasar()
-	q.Tilt = 30 * maths.Degree
-	q.Jets.Length = 25 * q.Radius
-	placed(q.Place(w, maths.Vec{}, 2/q.Radius, 4))
+	q := sure(template.Quasar()).Tilting(measure.Degrees(30))
+	jets, worn := q.Jets()
+	if !worn {
+		panic("the quasar template wears no jets")
+	}
+	q = with(q, rejets(jets, 25*q.Radius(), jets.Speed()))
+	placed(q.Place(w, maths.Vec{}, 2/q.Radius(), 4))
 	from := maths.V(0, 0, 300)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1376,10 +1527,13 @@ func twentySix() (*thing.World, maths.Subspace) {
 	// quasar's and the shot aims it; the jets are run at nineteen
 	// twentieths of the speed of light here so the beaming shows, a
 	// look the shot chooses and the body does not know about
-	b := template.Quasar()
-	b.Jets.Speed = 0.95
-	b.Tilt = 85 * maths.Degree
-	placed(b.Place(w, maths.Vec{}, 1/b.Radius, 4))
+	b := sure(template.Quasar()).Tilting(measure.Degrees(85))
+	beams, worn := b.Jets()
+	if !worn {
+		panic("the quasar template wears no jets")
+	}
+	b = with(b, rejets(beams, beams.Length(), 0.95))
+	placed(b.Place(w, maths.Vec{}, 1/b.Radius(), 4))
 	from := maths.V(0, 0, 420)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1390,7 +1544,7 @@ func twentySix() (*thing.World, maths.Subspace) {
 // times a second; the test lays a turn out on a sheet.
 func twentySeven() (*thing.World, maths.Subspace) {
 	w := dark()
-	p := template.Pulsar()
+	p := sure(template.Pulsar())
 	placed(p.Place(w, maths.Vec{}, 1/200.0, 4))
 	from := maths.V(0, 0, 10)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
@@ -1407,9 +1561,15 @@ func twentySeven() (*thing.World, maths.Subspace) {
 // the test lays it out over milliseconds.
 func twentyEight() (*thing.World, maths.Subspace) {
 	w := dark()
-	m := template.Magnetar()
-	m.Flare.At = -2 * time.Millisecond
-	placed(m.Place(w, maths.Vec{}, 1/m.Radius, 4))
+	m := sure(template.Magnetar())
+	fireball, worn := m.Flare()
+	if !worn {
+		panic("the magnetar template wears no flare")
+	}
+	m = with(m, sure(bodies.NewFlare(-2*time.Millisecond, fireball.Speed(),
+		fireball.Opacity(), fireball.Glow())).
+		Radiating(fireball.Radiant()))
+	placed(m.Place(w, maths.Vec{}, 1/m.Radius(), 4))
 	from := maths.V(0, 0, 40)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1449,7 +1609,7 @@ func twentyNine() (*thing.World, maths.Subspace) {
 	w.Lamp(thing.Sun(maths.V(0.35, 1, -0.3), maths.RGB(1.3, 1.4, 1.6)))
 	// dressed: filaments up the columns, a toggle on the part
 	pillars := medium.Pillars{Count: 3, Height: 7, Width: 10, Thick: 1.6,
-		Seed: 29, Filaments: 0.6}
+		Seed: 29, Filaments: 0.6}.Prepared()
 	at := maths.Subspace{Origin: maths.V(0, -3.5, 0)}
 	w.AddVolume(thing.Volume{
 		Medium: pillars,
@@ -1458,7 +1618,7 @@ func twentyNine() (*thing.World, maths.Subspace) {
 			Radiant: thing.Excited{Lines: map[float64]float64{
 				672: 0.5, 656: 0.6, 501: 0.4},
 				Excitations: map[float64]float64{672: 0.4, 656: 1, 501: 2},
-				Width:       3, Passes: 0.5}},
+				Width:       3, Passes: 0.5}.Prepared()},
 		Motion: thing.Still(at),
 	})
 	// the young stars, a few at each tip where the gas is being eaten
@@ -1509,9 +1669,8 @@ func thirtyLit(sun maths.Vec, night bool) (*thing.World, maths.Subspace) {
 		w.Sky = sky.Stars{Seed: 15, Share: 0.06, Size: 0.35, Bright: 0.004}
 	}
 	w.Lamp(thing.Sun(sun, swatches.Light(swatches.Daylight).Scale(1.2)))
-	e := template.Earth()
-	e.Moons = nil
-	placed(e.Place(w, maths.Vec{}, 1/e.Radius, 10))
+	e := sure(template.Earth()).WithoutMoons()
+	placed(e.Place(w, maths.Vec{}, 1/e.Radius(), 10))
 	from := maths.V(0, 0, 4)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1608,9 +1767,8 @@ func thirtyOne() (*thing.World, maths.Subspace) {
 func thirtyTwo() (*thing.World, maths.Subspace) {
 	w := dark()
 	w.Sky = sky.Stars{Seed: 15, Share: 0.06, Size: 0.35, Bright: 0.004}
-	e := template.Earth()
-	e.Moons = nil
-	placed(e.Place(w, maths.Vec{}, 1/e.Radius, 10))
+	e := sure(template.Earth()).WithoutMoons()
+	placed(e.Place(w, maths.Vec{}, 1/e.Radius(), 10))
 	// standing four hundred kilometres over the direction 62 degrees
 	// from the world's z axis toward its y axis, which is 28 from y.
 	// the 62 is that angle and not a latitude.
@@ -1630,7 +1788,7 @@ func thirtyTwo() (*thing.World, maths.Subspace) {
 	under := maths.V(0, math.Sin(lat), math.Cos(lat))
 	w.Lamp(thing.Sun(under.Scale(-1).Add(maths.V(0.3, 0, 0)),
 		swatches.Light(swatches.Daylight).Scale(1.2)))
-	from := under.Scale(1 + 400/e.Radius)
+	from := under.Scale(1 + 400/e.Radius())
 	north := maths.Up.Add(under.Scale(-under.Dot(maths.Up))).Unit()
 	look := maths.LookAtUp(from, from.Add(north).Add(under.Scale(-0.3)), under)
 	return w, maths.Subspace{Origin: from, Orientation: look}
@@ -1644,9 +1802,8 @@ func thirtyTwo() (*thing.World, maths.Subspace) {
 func thirtyTwoJupiter() (*thing.World, maths.Subspace) {
 	w := dark()
 	w.Lamp(thing.Sun(maths.V(0.2, -0.3, -1), swatches.Light(swatches.Daylight).Scale(1.2)))
-	j := template.Jupiter()
-	j.Moons = nil
-	placed(j.Place(w, maths.Vec{}, 1/j.Radius, 6))
+	j := sure(template.Jupiter()).WithoutMoons()
+	placed(j.Place(w, maths.Vec{}, 1/j.Radius(), 6))
 	from := maths.V(0, 3.2, 2.2)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1671,27 +1828,28 @@ var thirtyThreeTone = colour.Tone{Knee: 0.5, Top: 12, Bloom: 1.5}
 func thirtyThree() (*thing.World, maths.Subspace) {
 	w := dark()
 	w.Lamp(thing.Sun(maths.V(1, 0.3, 0.6), swatches.Light(swatches.Daylight)))
-	e := template.Earth()
-	e.Moons, e.Cities = nil, nil
-	e.Aurora = &bodies.Aurora{Low: 300, High: 25000, Lat: 20 * maths.Degree,
-		Width: 30 * maths.Degree, Tilt: 30 * maths.Degree, Strength: 0.8,
-		Curtains: 1, Seed: 33,
-		Fringe: maths.RGB(1, 0.3, 0.9), Bottom: maths.RGB(0.3, 1, 0.4),
-		Top: maths.RGB(1, 0.35, 0.15),
-		Radiant: thing.Spectrum{Gives: map[radiation.Range]float64{radiation.XRay(): 1},
-			Passes: map[radiation.Range]float64{radiation.XRay(): 0.9}}}
-	placed(e.Place(w, maths.Vec{}, 1/e.Radius, 8))
-	m := template.Magnetar()
-	m.Flare = nil
+	e := sure(template.Earth()).WithoutMoons().WithoutCities()
+	storm := sure(bodies.NewAurora(
+		bodies.NewShell(bodies.Kilometres(300), bodies.Kilometres(25000)),
+		measure.Degrees(20), measure.Degrees(30), measure.Degrees(30),
+		maths.Share(0.8), maths.Share(1), 33,
+		bodies.NewAuroraColours(maths.RGB(1, 0.3, 0.9),
+			maths.RGB(0.3, 1, 0.4), maths.RGB(1, 0.35, 0.15)))).
+		Radiating(thing.Spectrum{
+			Gives:  map[radiation.Range]float64{radiation.XRay(): 1},
+			Passes: map[radiation.Range]float64{radiation.XRay(): 0.9}})
+	e = with(e, storm)
+	placed(e.Place(w, maths.Vec{}, 1/e.Radius(), 8))
+	m := sure(template.Magnetar()).WithoutFlare()
 	// a thousand times the template's glow, a number chosen for the
 	// shot (no distance or inverse square is worked out for it).
 	//
 	// a radius of two hundred kilometres where the template's is
 	// twelve: 278 times the area, since 200 over 12 squared is 278,
 	// so a ray lands on it at all. the bloom makes the point
-	m.Glow = m.Glow.Scale(1000)
-	m.Radius = 200
-	placed(m.Place(w, maths.V(5, 1.5, -4), 1/e.Radius, 2))
+	m = m.Resized(bodies.Kilometres(200)).
+		Glowing(m.Glow().Scale(1000), m.Radiant())
+	placed(m.Place(w, maths.V(5, 1.5, -4), 1/e.Radius(), 2))
 	from := maths.V(0, 0, 14)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1709,17 +1867,17 @@ var cometTone = colour.Tone{Knee: 0.5, Top: 10, Bloom: 1.5}
 // at the left of the frame, in planet radii.
 func thirtyFour() (*thing.World, maths.Subspace) {
 	w := dark()
-	star := template.Sol()
-	star.Radius = 10 * 69911 // a sun ten jupiter radii across, for the shot
-	p := template.HotJupiter()
-	scale := 1 / p.Radius
+	// a sun ten jupiter radii across, for the shot
+	star := sure(template.Sol()).Resized(bodies.Kilometres(10 * 69911))
+	p := sure(template.HotJupiter())
+	scale := 1 / p.Radius()
 	sun := maths.V(-40, 0, 0)
 	w.Lamp(thing.Sun(sun, swatches.Light(swatches.Daylight).Scale(1.3)))
 	placed(star.Place(w, sun, scale, 2))
 	// the planet goes round the star clockwise seen from above, from
 	// plus y: at plus x of it, it moves toward plus z, and r cross v,
 	// from the star to the planet and the way it moves, is along minus y
-	p.Aim(sun, maths.V(0, 0, 1))
+	p = p.Aimed(sun, maths.V(0, 0, 1))
 	placed(p.Place(w, maths.Vec{}, scale, 6))
 	from := maths.V(8, 4, 25)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.V(-3, 0, 0))}
@@ -1736,14 +1894,14 @@ func thirtyFive() (*thing.World, maths.Subspace) {
 	w := dark()
 	// a long exposure's stars: soft, several pixels across and dim,
 	// as a wide comet photograph has them; a star a pixel across has
-	// an edge the terminal's rays and smokecheck's sample apart by more
+	// an edge the terminal's rays and smokejudge's sample apart by more
 	// than an eye in the dark
 	w.Sky = sky.Stars{Seed: 15, Share: 0.1, Size: 1.2, Bright: 0.3,
 		Dark: maths.Grey(0.002)}
-	c := template.HaleBopp()
+	c := sure(template.HaleBopp())
 	sun := maths.V(-130, -40, 0)
 	w.Lamp(thing.Sun(sun, swatches.Light(swatches.Daylight).Scale(1.2)))
-	c.Aim(sun, maths.V(0, 0, 1))
+	c = c.Aimed(sun, maths.V(0, 0, 1))
 	placed(c.Place(w, maths.Vec{}, 1e-6, 2))
 	from := maths.V(10, 12, 50)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.V(14, 5, 0))}
@@ -1755,10 +1913,10 @@ func thirtyFive() (*thing.World, maths.Subspace) {
 // kilometres to the unit.
 func thirtyFiveHyakutake() (*thing.World, maths.Subspace) {
 	w := dark()
-	c := template.Hyakutake()
+	c := sure(template.Hyakutake())
 	sun := maths.V(-65, -20, 0)
 	w.Lamp(thing.Sun(sun, swatches.Light(swatches.Daylight).Scale(1.2)))
-	c.Aim(sun, maths.V(0, 0, 1))
+	c = c.Aimed(sun, maths.V(0, 0, 1))
 	placed(c.Place(w, maths.Vec{}, 5e-7, 2))
 	from := maths.V(20, 8, 50)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.V(18, 5, 0))}
@@ -1788,16 +1946,14 @@ func thirtySixBent(bend bool) (*thing.World, maths.Subspace) {
 // toward the eye, and the horizon wears its hexes, a dressing.
 func thirtySixSpun(bend bool, spin float64) (*thing.World, maths.Subspace) {
 	w := dark()
-	q := template.Quasar()
-	q.Jets = nil
-	q.Tilt = 10 * maths.Degree
-	q.Spin = spin
+	q := sure(template.Quasar()).WithoutJets().
+		Tilting(measure.Degrees(10)).Spinning(spin)
 	if spin > 0 {
-		q.Edge.Hexes = 0.3
+		q = with(q, sure(bodies.NewHorizon(0.3, maths.Light{})))
 	}
 	// a tenth of the quasar's light, so the disc's structure shows
-	q.Disc.Bright = 6
-	placed(q.Place(w, maths.Vec{}, 2/q.Radius, 4))
+	q = with(q, brightened(q, 6))
+	placed(q.Place(w, maths.Vec{}, 2/q.Radius(), 4))
 	if !bend {
 		w.Fields = nil
 	}
@@ -1845,14 +2001,12 @@ func thirtySevenAt(radius float64) (*thing.World, maths.Subspace) {
 func thirtySevenFrame(radius float64, back, still bool) (*thing.World, maths.Subspace) {
 	if !(radius > 0) || math.IsInf(radius, 1) {
 		placed(fmt.Errorf("smoke: thirtySevenFrame wants a radius above "+
-			"nought and finite, in masses, and was given %v", radius))
+			"zero and finite, in masses, and was given %v", radius))
 	}
 	w := dark()
-	q := template.Quasar()
-	q.Jets = nil
-	q.Tilt = 0
-	q.Disc.Bright = 6
-	placed(q.Place(w, maths.Vec{}, 2/q.Radius, 4))
+	q := sure(template.Quasar()).WithoutJets().Turning(0, measure.Radians(0))
+	q = with(q, brightened(q, 6))
+	placed(q.Place(w, maths.Vec{}, 2/q.Radius(), 4))
 	f := w.Fields[0]
 	hole, err := kerr.NewHole(f.Mass, f.Spin)
 	if err != nil {
@@ -1896,19 +2050,23 @@ func thirtySevenFrame(radius float64, back, still bool) (*thing.World, maths.Sub
 // is refused, by name, and not drawn as the painted world.
 //
 // africa faces the eye, the sun from the upper right. it is the one
-// smoke that reads from disk, and its Inputs say so, for smokecheck's cache:
+// smoke that reads from disk, and its Inputs say so, for the smoke cache:
 // smokes declare their input files.
 func thirtyEight() (*thing.World, maths.Subspace) {
 	w := dark()
 	w.Lamp(thing.Sun(maths.V(0.6, 0.3, 1), maths.RGB(1.2, 1.2, 1.2)))
-	e := template.Earth()
-	e.Moons, e.Clouds = nil, nil
+	e := sure(template.Earth())
+	e = e.WithoutMoons().WithoutClouds()
 	if blue := marble("blue.jpg"); blue != nil {
 		// the picture's left edge is the antimeridian; turned so
 		// africa faces the eye on plus z
-		e.Ground.Map, e.Ground.Turn = blue, -1.6
+		ground, worn := e.Ground()
+		if !worn {
+			placed(fmt.Errorf("smoke: the earth template wears no ground"))
+		}
+		e = with(e, ground.Mapped(blue, measure.Radians(-1.6)))
 	}
-	placed(e.Place(w, maths.Vec{}, 1/e.Radius, 10))
+	placed(e.Place(w, maths.Vec{}, 1/e.Radius(), 10))
 	from := maths.V(0, 0, 3.2)
 	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
@@ -1976,9 +2134,37 @@ func thirtyNineGloss(gloss float64) (*thing.World, maths.Subspace) {
 	})
 	w.Sky = sky.Gradient{Horizon: maths.RGB(0.75, 0.8, 0.9),
 		Zenith: maths.RGB(0.25, 0.4, 0.8), Ground: maths.Grey(0.2)}
-	w.Lamp(thing.Sun(maths.V(0.5, 2, 2),
+	w.Lamp(matteSun(maths.V(0.5, 2, 2),
 		swatches.Light(swatches.Daylight).Scale(1.1)))
 	from := maths.V(0, 1, 1.5)
 	return w, maths.Subspace{Origin: from,
 		Orientation: maths.LookAt(from, maths.V(0, 1.6, -1.9))}
+}
+
+// rejets is a template's jets rebuilt with the shot's own length and
+// speed, the rest as the template made them: a look the shot chooses
+// and the body does not know about.
+func rejets(jets bodies.Jets, lengthKm, speed float64) bodies.Jets {
+	return sure(bodies.NewJets(bodies.Kilometres(lengthKm),
+		bodies.Kilometres(jets.Base()), jets.Spread(),
+		bodies.Kilometres(jets.From()),
+		bodies.PerKilometre(jets.Dense()),
+		measure.Radians(jets.Tilt()), maths.Share(speed),
+		jets.Glow())).Knotted(jets.Knots()).Radiating(jets.Radiant())
+}
+
+// brightened is the body's disc rebuilt at another brightness, the
+// rest as the template made it: a look the shot chooses.
+func brightened(body bodies.Body, bright float64) bodies.Disc {
+	disc, worn := body.Disc()
+	if !worn {
+		placed(fmt.Errorf("smoke: %s wears no disc to brighten",
+			body.Name()))
+	}
+	fresh := sure(bodies.NewDisc(bodies.Kilometres(disc.Inner()),
+		bodies.Kilometres(disc.Outer()), bodies.Kilometres(disc.Thick()),
+		bodies.PerKilometre(disc.Dense()), measure.Kelvin(disc.Hot()),
+		bright))
+	fresh = sure(fresh.Beamed(maths.Share(disc.Speed())))
+	return fresh.Dressed(disc.Streaks(), disc.Shear())
 }

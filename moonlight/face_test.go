@@ -53,7 +53,7 @@ func TestTheFaceIsTheMosaicsPatternAtTheMoonsGlow(t *testing.T) {
 		sum += float64(b)
 		count++
 	}
-	if mean := sum / count; math.Abs(mean-1) > 1e-6 {
+	if mean := sum / count; !(math.Abs(mean-1) <= 1e-6) {
 		t.Errorf("the mosaic's mean is %v, not one", mean)
 	}
 	right := face.At(maths.V(1, 0, 0.2))

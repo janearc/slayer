@@ -1,0 +1,31 @@
+{
+	"group": "glass hour, acid",
+	"mood": "acid, frantic, speeding up",
+	"feeling": "A machine that has found glass-hour's tune and will not stop running it faster.",
+	"intent": "Glass-hour as an acid line, the short one, for a short: the tune is the loud notes of a fast low line that speeds up until it breaks. Nobody has heard it: it was checked by measurement only. It plays through a stand-in acid sound of the composer's until the machine's own is ready, so there are no slides between notes yet.",
+	"listen_for": "Glass-hour's tune as the loud notes in the low line from 0:04; the kick at 0:11; and at 0:25 the fast run from the middle of glass-hour, with everything hitting.",
+	"voicing": "@acid-draft",
+	"tempo": 132,
+	"meter": 4,
+	"seconds": 44.98,
+	"parts": [
+		{"name": "thin", "bar": 1, "second": 0.0,
+		 "change": "a low line of fast notes alone, over a tick and a tock",
+		 "feels": "thin, wound up: a clock and a wire"},
+		{"name": "ice", "bar": 3, "second": 3.64,
+		 "change": "glass-hour's tune appears as the loud notes of the line",
+		 "feels": "brittle: you know this tune"},
+		{"name": "hairline", "bar": 7, "second": 10.91,
+		 "change": "a kick on every beat, a low bass, the line with no gaps; then a climb",
+		 "feels": "a line spreads: faster"},
+		{"name": "spreads", "bar": 11, "second": 17.97,
+		 "change": "the tune jumps up to its own height, chords stab, the bass rolls",
+		 "feels": "it will not hold: frantic"},
+		{"name": "breaks", "bar": 15, "second": 24.73,
+		 "change": "the fastest tempo; glass-hour's run of notes, everything loud",
+		 "feels": "it breaks, and keeps breaking"},
+		{"name": "after", "bar": 23, "second": 37.7,
+		 "change": "the clock alone, three low notes at a time",
+		 "feels": "cold after: the machine still ticking"}
+	]
+}

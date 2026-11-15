@@ -33,8 +33,8 @@ type Stars struct {
 
 // tiling is the rung, with zero read as a hundred and twenty.
 func (s Stars) tiling() hexes.Sphere {
-	if s.Tiling.N == 0 {
-		return hexes.Sphere{N: 120}
+	if s.Tiling.Splits == 0 {
+		return hexes.Sphere{Splits: 120}
 	}
 	return s.Tiling
 }

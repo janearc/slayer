@@ -35,7 +35,7 @@ func viewerFixture(t *testing.T) {
 // closeFloat compares geometry against independently computed coordinates.
 func closeFloat(t *testing.T, got, want float64) {
 	t.Helper()
-	if math.IsNaN(got) || math.Abs(got-want) > 1e-12*math.Max(1, math.Abs(want)) {
+	if math.IsNaN(got) || !(math.Abs(got-want) <= 1e-12*math.Max(1, math.Abs(want))) {
 		t.Fatalf("got %.16g, want %.16g", got, want)
 	}
 }
@@ -72,7 +72,7 @@ func TestSphereSubdivisionsPreserveUnitCornersAndFaceCount(t *testing.T) {
 			}
 			for i := 1; i < len(corners); i += 3 {
 				length := float64(corners[i]*corners[i] + corners[i+1]*corners[i+1] + corners[i+2]*corners[i+2])
-				if math.Abs(length-1) > 2e-7 {
+				if !(math.Abs(length-1) <= 2e-7) {
 					t.Fatalf("corner left sphere: %g", length)
 				}
 			}
@@ -133,7 +133,7 @@ func TestHorizonIsAnOrthonormalLocalFrameAndFacesCentre(t *testing.T) {
 		closeFloat(t, east[i], v)
 	}
 	faceCentre()
-	if view.altitude < horizonView || view.altitude < view.centreAlt || math.Abs(view.azimuth) > 180 {
+	if view.altitude < horizonView || view.altitude < view.centreAlt || !(math.Abs(view.azimuth) <= 180) {
 		t.Fatalf("centre pointing %.3f %.3f %.3f", view.azimuth, view.altitude, view.centreAlt)
 	}
 	first := sidereal()

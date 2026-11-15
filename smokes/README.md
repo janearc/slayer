@@ -10,5 +10,4 @@ before the smoke workflow was established.
 
 `index.html` shows the latest CPU and GPU render of each scene side by side,
 along with its rendering-time history. Results, gallery, and images are
-uncommitted data. From the Slayer root, `game build` then `game run lightbox`
-serves them at <http://localhost:8765>.
+uncommitted data.

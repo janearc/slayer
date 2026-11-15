@@ -1,0 +1,55 @@
+# What a film says of its sections, and what the reader gives back. The
+# unsaid values are the reader's defaults: a frame over 320 pixels wide
+# in sections 64 pixels square, kept. The others are what the lines say.
+sections:
+  - {name: unsaid, lines: "", over: 320, size: 64, keep: true}
+  - {name: said, lines: "    sections: {over: 640, size: 128, keep: false}\n", over: 640, size: 128, keep: false}
+  - {name: only keep, lines: "    sections: {keep: false}\n", over: 320, size: 64, keep: false}
+# a film's drift is zero unless it says, and then what it says.
+drifts:
+  - {name: unsaid, lines: "", drift: 0}
+  - {name: said, lines: "    sections: {drift: 0.02}\n", drift: 0.02}
+# the edges the reader takes: a side or width of one pixel is the least and
+# one hundred thousand the most (1e5), and a drift runs from none to the
+# whole of the steady lamps' light. Worked by hand from those bounds.
+edges:
+  - {name: over at least, lines: "    sections: {over: 1}\n", over: 1, size: 64, keep: true, drift: 0}
+  - {name: over at most, lines: "    sections: {over: 100000}\n", over: 100000, size: 64, keep: true, drift: 0}
+  - {name: over in exponent form, lines: "    sections: {over: 1e5}\n", over: 100000, size: 64, keep: true, drift: 0}
+  - {name: size at least, lines: "    sections: {size: 1}\n", over: 320, size: 1, keep: true, drift: 0}
+  - {name: size at most, lines: "    sections: {size: 100000}\n", over: 320, size: 100000, keep: true, drift: 0}
+  - {name: drift none, lines: "    sections: {drift: 0}\n", over: 320, size: 64, keep: true, drift: 0}
+  - {name: drift whole, lines: "    sections: {drift: 1}\n", over: 320, size: 64, keep: true, drift: 1}
+  - {name: drift just under whole, lines: "    sections: {drift: 0.999999}\n", over: 320, size: 64, keep: true, drift: 0.999999}
+  - {name: keep said true, lines: "    sections: {keep: true}\n", over: 320, size: 64, keep: true, drift: 0}
+  - {name: all said, lines: "    sections: {over: 7, size: 3, keep: false, drift: 0.5}\n", over: 7, size: 3, keep: false, drift: 0.5}
+# what the reader refuses: a whole number of pixels from one to 1e5, a
+# drift from zero to one, and nothing that is not a number or a mapping.
+refused:
+  - {name: over none, lines: "    sections: {over: 0}\n"}
+  - {name: over past most, lines: "    sections: {over: 100001}\n"}
+  - {name: over not whole, lines: "    sections: {over: 1.5}\n"}
+  - {name: over just past whole, lines: "    sections: {over: 64.0000001}\n"}
+  - {name: over a fraction, lines: "    sections: {over: 0.5}\n"}
+  - {name: over not a number, lines: "    sections: {over: .nan}\n"}
+  - {name: over infinite, lines: "    sections: {over: .inf}\n"}
+  - {name: over a word, lines: "    sections: {over: wide}\n"}
+  - {name: over empty, lines: "    sections: {over: }\n"}
+  - {name: size past most, lines: "    sections: {size: 100001}\n"}
+  - {name: size not whole, lines: "    sections: {size: 2.5}\n"}
+  - {name: size a fraction, lines: "    sections: {size: 0.5}\n"}
+  - {name: size negative, lines: "    sections: {size: -64}\n"}
+  - {name: size not a number, lines: "    sections: {size: .nan}\n"}
+  - {name: size infinite, lines: "    sections: {size: -.inf}\n"}
+  - {name: drift past whole, lines: "    sections: {drift: 1.0000001}\n"}
+  - {name: drift well past whole, lines: "    sections: {drift: 2}\n"}
+  - {name: drift negative, lines: "    sections: {drift: -0.0001}\n"}
+  - {name: drift not a number, lines: "    sections: {drift: .nan}\n"}
+  - {name: drift infinite, lines: "    sections: {drift: .inf}\n"}
+  - {name: drift a word, lines: "    sections: {drift: some}\n"}
+  - {name: keep a number, lines: "    sections: {keep: 1}\n"}
+  - {name: keep yes, lines: "    sections: {keep: yes}\n"}
+  - {name: sections a number, lines: "    sections: 3\n"}
+  - {name: sections a list, lines: "    sections: [1, 2]\n"}
+  - {name: sections a word, lines: "    sections: keep\n"}
+  - {name: sections a key twice, lines: "    sections: {over: 5, over: 6}\n"}

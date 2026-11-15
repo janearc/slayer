@@ -77,6 +77,17 @@ func (t Tone) picture(lights []maths.Light, w, h int) *image.RGBA {
 // added back, so a point too bright to hold glows instead of clipping.
 // The spill is a third of the light beyond white; the rest clips.
 //
+// An infinite pixel spills an infinite third of itself, the limit of
+// that third as the light grows, so the pixels within its reach come out
+// infinite in the parts it holds light in, and the shoulder bleaches
+// them to white as it does any infinite light. A pixel that is no number
+// spills nothing.
+//
+// No NaN comes out of lights whose parts are finite or +Inf, at a
+// finite exposure. Two cases are not covered: a +Inf pixel
+// within reach of a pixel with a -Inf part, which sums to NaN, and an
+// infinite exposure with an infinite pixel.
+//
 // A radius past widest, or endless, is refused by name.
 func bloomed(lights []maths.Light, w, h int,
 	exposure, radius float64) []maths.Light {
@@ -85,7 +96,11 @@ func bloomed(lights []maths.Light, w, h int,
 	for i, l := range lights {
 		l = l.Scale(exposure)
 		if y := l.Luminance(); y > 1 {
-			over[i] = l.Scale((y - 1) / y / 3)
+			spill := 1.0 / 3
+			if !math.IsInf(y, 1) {
+				spill = (y - 1) / y / 3
+			}
+			over[i] = l.Scale(spill)
 			any = true
 		}
 	}
@@ -119,24 +134,39 @@ func bloomed(lights []maths.Light, w, h int,
 			var acc maths.Light
 			for k, wt := range weights {
 				sx := x + k - reach
-				if sx >= 0 && sx < w {
+				// a zero weight carries nothing, and infinity
+				// times it would be no number
+				if wt != 0 && sx >= 0 && sx < w {
 					acc = acc.Add(over[y*w+sx].Scale(wt))
 				}
 			}
 			across[y*w+x] = acc
 		}
 	}
+	// the glow goes back to the scale of the light by the reciprocal of
+	// the exposure, unless that is infinite, for an exposure too small to
+	// invert
+	inverse := 1 / exposure
+	flat := math.IsInf(inverse, 0)
 	out := make([]maths.Light, len(lights))
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			var acc maths.Light
 			for k, wt := range weights {
 				sy := y + k - reach
-				if sy >= 0 && sy < h {
+				if wt != 0 && sy >= 0 && sy < h {
 					acc = acc.Add(across[sy*w+x].Scale(wt))
 				}
 			}
-			out[y*w+x] = lights[y*w+x].Add(acc.Scale(1 / exposure))
+			if flat {
+				// the reciprocal is infinite, and times a part of zero
+				// would be no number, so the glow is divided
+				acc = maths.Light{R: acc.R / exposure, G: acc.G / exposure,
+					B: acc.B / exposure}
+				out[y*w+x] = lights[y*w+x].Add(acc)
+				continue
+			}
+			out[y*w+x] = lights[y*w+x].Add(acc.Scale(inverse))
 		}
 	}
 	return out
@@ -201,8 +231,59 @@ func Encode(v float64) uint8 {
 		return 0
 	}
 	v = math.Max(0, math.Min(1, v))
+	// the byte is the number of steps at or below v. the table says how
+	// many are at or below the start of v's slot, and the few steps
+	// inside the slot are counted from there; v times a power of two is
+	// exact, so the slot is too.
+	n := int(slotted[int(v*slots)])
+	for n < len(steps) && steps[n] <= v {
+		n++
+	}
+	return uint8(n)
+}
+
+// slots is how many slots from 0 to 1 Encode sorts a part into, a power of
+// two so that a part's slot is found exactly.
+const slots = 4096
+
+// slotted is, for each slot's start, how many steps are at or below it.
+var slotted = func() (t [slots + 1]uint8) {
+	n := 0
+	for j := range t {
+		for n < len(steps) && steps[n] <= float64(j)/slots {
+			n++
+		}
+		t[j] = uint8(n)
+	}
+	return t
+}()
+
+// byCurve is the byte for a part already clamped to 0 through 1, by the
+// curve itself.
+func byCurve(v float64) uint8 {
 	return uint8(math.Round(srgb.FromLinear(v) * 255))
 }
+
+// steps are the smallest parts that encode to each byte from 1 through
+// 255, found by bisection on the curve over the floats themselves, so a
+// part is at or above steps[i] exactly when byCurve of it is at least
+// i+1.
+var steps = func() (t [255]float64) {
+	for i := range t {
+		want := uint8(i + 1)
+		lo, hi := uint64(0), math.Float64bits(1)
+		for hi-lo > 1 {
+			mid := lo + (hi-lo)/2
+			if byCurve(math.Float64frombits(mid)) >= want {
+				hi = mid
+			} else {
+				lo = mid
+			}
+		}
+		t[i] = math.Float64frombits(hi)
+	}
+	return t
+}()
 
 // Decode is an srgb byte as linear light: Encode, undone.
 func Decode(b uint8) float64 { return decoded[b] }

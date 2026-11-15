@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
@@ -61,8 +61,10 @@ kernel void layout(constant Header *header [[buffer(0)]],
                    device const Bend *bends [[buffer(12)]],
                    device const float *rays [[buffer(13)]],
                    device const float *boxes [[buffer(14)]],
-                   device float *out [[buffer(15)]],
-                   constant uint2 &origin [[buffer(16)]],
+                   device const Field *fieldbuf [[buffer(15)]],
+                   device const float *heights [[buffer(16)]],
+                   device float *out [[buffer(17)]],
+                   constant uint2 &origin [[buffer(18)]],
                    uint2 at [[thread_position_in_grid]]) {
 	Sphere sphere = spheres[1];
 	Triangle face = triangles[1];
@@ -205,6 +207,8 @@ func writeVolumes(encoded *scene) []reading {
 			wispy: true, seed: 0xB0000000A + uint64(index)<<32,
 			scale: 9 + k, amount: 0.5}, index)
 	}
+	encoded.airLast(airing{extinction: maths.RGB(0.5, 1.5, 2.5),
+		scatter: maths.RGB(0.25, 0.75, 1.25), asymmetry: 0.5})
 	cells := float64(bakeSide * bakeSide * bakeSide)
 	table := fields("volume.origin", xyzw, 2, 3, 4, 3)
 	along := []maths.Vec{maths.XAxis, maths.YAxis, maths.ZAxis}
@@ -215,6 +219,10 @@ func writeVolumes(encoded *scene) []reading {
 	}
 	table = append(table, fields("volume.puff", xyzw, 8, 9, 10, 0.5)...)
 	table = append(table, fields("volume.info", xyzw, 10, 12, 1, 1)...)
+	table = append(table, fields("volume.tint", xyz, 0.5, 1.5, 2.5)...)
+	table = append(table, fields("volume.scatter", xyzw, 0.25, 0.75, 1.25,
+		0.5)...)
+	table = append(table, fields("volume.air", xyz, gasOn)...)
 	return append(table, fields("volume.baked", xyz, cells,
 		float64(bakeSide))...)
 }
@@ -283,13 +291,32 @@ func writeStandings(encoded *scene) []reading {
 	return append(table, fields("top.info", xyzw, 61, 71)...)
 }
 
+// writeExposure writes the header's rows of the shutter and the lens,
+// each number its own, over the closed ones the camera wrote, and says
+// what they hold
+func writeExposure(encoded *scene) []reading {
+	headerStruct.patch(encoded.header.bytes, values{
+		"close_origin": {4, 5, 6}, "close_right": {0, 0.5, 0.25},
+		"close_back": {0.75, 0, 0.125}, "optics": {0.0625, 13, 9, 6},
+		"exposure": {1, 1, 3, 77}})
+	table := fields("header->close_origin", xyz, 4, 5, 6)
+	table = append(table, fields("header->close_right", xyz, 0, 0.5,
+		0.25)...)
+	table = append(table, fields("header->close_back", xyz, 0.75, 0,
+		0.125)...)
+	table = append(table, fields("header->optics", xyzw, 0.0625, 13, 9,
+		6)...)
+	return append(table, fields("header->exposure", xyzw, 1, 1, 3, 77)...)
+}
+
 // writeHeader sets the camera, and says what the header holds: the eye,
-// the lens, and how many of everything there are
+// the lens, how many of everything there are, and the exposure
 func writeHeader(encoded *scene) []reading {
 	eye := maths.Subspace{Origin: maths.V(1, 2, 3),
 		Orientation: maths.Identity}
 	encoded.camera(eye, film.Pinhole{Wide: 1, Pixel: 1}, 640, 480)
-	table := fields("header->origin", xyz, 1, 2, 3)
+	table := writeExposure(encoded)
+	table = append(table, fields("header->origin", xyz, 1, 2, 3)...)
 	table = append(table, fields("header->right", xyz, 1, 0, 0)...)
 	table = append(table, fields("header->up", xyz, 0, 1, 0)...)
 	table = append(table, fields("header->back", xyz, 0, 0, 1)...)
@@ -318,6 +345,7 @@ func TestTheKernelReadsWhatTheGoSideWrote(t *testing.T) {
 	table = append(table, writeConifers(encoded)...)
 	table = append(table, writeStandings(encoded)...)
 	table = append(table, writeHeader(encoded)...)
+	table = append(table, writeLampStore(encoded)...)
 	text := source() + layoutKernel(table)
 	kernel, err := metal.Open(text, "layout")
 	if errors.Is(err, metal.ErrNoDevice) {

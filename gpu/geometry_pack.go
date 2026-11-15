@@ -51,7 +51,10 @@ func (buffer *packer) reserveWords(additional int) {
 // packedFace retains the existing triangle and optional smooth-normal layout.
 func (encoded *scene) packedFace(face triangle, bend int) {
 	if face.smooth {
-		normalRows.write(&encoded.bends, vectorRow(face.normals[0], 0),
+		// the first normal's spare number says whether the kernel is to
+		// leave the point unlifted: nought, as it always was, lifts
+		normalRows.write(&encoded.bends,
+			vectorRow(face.normals[0], float64(flag(face.unlifted))),
 			vectorRow(face.normals[1], 0), vectorRow(face.normals[2], 0))
 	}
 	triangleRows.write(&encoded.triangles, vectorRow(face.corners[0], float64(bend)),

@@ -3,6 +3,7 @@ package manufacture
 import (
 	"cmp"
 	"errors"
+	"math"
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
@@ -105,11 +106,16 @@ func jointed(joints []joint) bool {
 // or more: ninja's branch, which is three pieces in bark and needles.
 // a trunk is a limb of one piece that does not droop.
 //
+// a limb that wanders turns at each joint a little to one side and up
+// or down as well as drooping, by two slow sines of the joint's count
+// at a phase its place picks, so it flows and twists, and no two
+// limbs alike; wander is the most a joint turns, in radians.
+//
 // made only by newLimb.
 type limb struct {
-	pieces      int
-	span, droop float64
-	skins       []sleeve
+	pieces              int
+	span, droop, wander float64
+	skins               []sleeve
 }
 
 var errLimb = errors.New("manufacture: a limb needs a piece or more, " +
@@ -152,6 +158,16 @@ func scaleOf(space maths.Subspace) float64 {
 	return space.Scale
 }
 
+// phaseAt is an angle a place picks, the same for the same place: where
+// a wandering limb's sines begin.
+func phaseAt(at maths.Vec) float64 {
+	mixed := math.Float64bits(at.X)*0x9e3779b97f4a7c15 ^
+		math.Float64bits(at.Y)*0xbf58476d1ce4e5b9 ^
+		math.Float64bits(at.Z)*0x94d049bb133111eb
+	mixed ^= mixed >> 31
+	return float64(mixed%1_000_003) / 1_000_003 * fullTurn
+}
+
 // runs is where each piece of the limb goes when the limb is put at a
 // place: the first piece in the place's own space, each later one
 // where the last ended, its way the last's with the droop added toward
@@ -164,9 +180,16 @@ func (made limb) runs(on place) ([]place, error) {
 	first := on.space
 	first.Scale = scale
 	runs := []place{{space: first, size: each}}
+	phase := phaseAt(on.space.Origin)
 	for len(runs) < made.pieces {
 		at = at.Add(way.Scale(step * scale))
 		way = way.Sub(maths.Up.Scale(made.droop)).Unit()
+		if side := way.Cross(maths.Up); made.wander > 0 && positive(side.Len()) {
+			joint := float64(len(runs))
+			way = way.Add(side.Unit().Scale(made.wander * math.Sin(1.3*joint+phase))).
+				Add(maths.Up.Scale(0.5 * made.wander * math.Sin(0.9*joint+2*phase))).
+				Unit()
+		}
 		space, err := spaceAlong(at, way)
 		if err != nil {
 			return nil, err

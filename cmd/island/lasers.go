@@ -32,7 +32,7 @@ func (site *siteBuilder) lasers() error {
 		}
 		site.world.Lamp(beam)
 		if lasers.Launchers {
-			value, err := site.load(prototypeKey{"guide-star-launcher", "quick", 0})
+			value, err := site.load(prototypeKey{kind: "guide-star-launcher", detail: "quick", seed: 0})
 			if err != nil {
 				return err
 			}

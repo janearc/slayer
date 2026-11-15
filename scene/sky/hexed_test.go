@@ -8,7 +8,7 @@ import (
 	"github.com/janearc/slayer/maths/hexes"
 )
 
-var hexed = Hexed{Of: g, Tiling: hexes.Sphere{N: 6}}
+var hexed = Hexed{Of: g, Tiling: hexes.Sphere{Splits: 6}}
 
 // near is whether two lights are within e in every part.
 func near(a, b maths.Light, e float64) bool {

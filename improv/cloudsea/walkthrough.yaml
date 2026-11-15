@@ -1,0 +1,386 @@
+# The cloud sea's walkthrough: seven shorts that walk a stranger through
+# the scene, saying which parts of the picture are measurements and
+# which were made up, from the scene's own records. Read by package walk
+# (improv/walk/README.md); written by improv/moonlake/walkthrough, which
+# is general enough for a short with no song.
+#
+# The sentences are zappy's voice and are drafts, to be rewritten. Every
+# number on screen says where it comes from in its `from`. Sources are by
+# their key in sources.yaml or research/observatory-family-references.yaml;
+# "the study's record" is render.json in the renders folder of the 8
+# November hero study; "the scene" is cloudsea.yaml here.
+#
+# Sound: glass hour through @night-pad, the cloud sea reel's piece, 66 a
+# minute in fours (a bar is 3.64 s), from a different bar for each short.
+#
+# The stills are the corrected scene drawn at full detail, 1920 by 1080,
+# 4 rays a pixel, in the renders recipe folder
+# fable-team/sources/render-recipes/2026-11-12-cloudsea-walk/stills. A
+# window of width 0.5625 is the square middle of a 16 by 9 still.
+set: cloudsea.yaml
+places: places.csv
+shorts:
+  - name: where the camera is
+    title: Where the camera is
+    sound: {bar: 1}
+    shots:
+      - camera: southwest
+        picture: southwest.png
+        seconds: 9
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.3, 0.284, 0.4]}
+        name: The cloud sea
+        figures:
+          - value: "744"
+            unit: m
+            says: to the dome
+            from: >-
+              the scene, cameras.southwest standoff -500, -500, 230:
+              the square root of the sum of their squares, 743.6
+          - value: "64"
+            unit: deg
+            says: across
+            from: the scene, film.wide
+        sentence: >-
+          I'm just a pretend magnetar. This is not my picture. This scene
+          was built by someone else, and I want to show you how.
+      # the plan: 2,000 m over the enclosure's foot, north up
+      - camera: above
+        picture: above.png
+        seconds: 12
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.21875, 0, 0.5625]}
+        name: From above
+        figures:
+          - value: "1.6"
+            unit: km
+            says: a side, real
+            from: the scene, terrain.across and terrain.down, 1600
+          - value: "1,194"
+            unit: m
+            says: above the sea
+            from: places.csv, the observatory's height, 1193.5
+        labels:
+          - {thing: the observatory, words: the dome, side: down}
+          - {at: [262950, 2148588, 1423.5], words: the camera stood here,
+             side: right}
+        # the bar 450 m east and 212 m north of the dome, clear of it, at
+        # the dome's height: true there on level ground
+        scale: {at: [263900, 2149300, 1193.5]}
+        sentence: >-
+          From above, north up. The ground is a square of real land 1.6 km
+          a side. The camera stood 744 m from the dome and 230 m up.
+      - camera: southwest
+        picture: southwest.png
+        seconds: 8
+        lit: show
+        name: Back where we started
+        figures:
+          - value: "230"
+            unit: m
+            says: up
+            from: the scene, cameras.southwest standoff_z
+        sentence: >-
+          So that is where you are: in the air, south west of the dome,
+          looking down on a sea of cloud.
+
+  - name: the ground is real
+    title: The ground is real
+    sound: {bar: 15}
+    shots:
+      - camera: above
+        picture: above.png
+        seconds: 12
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.3, 0.15, 0.4]}
+        name: Kilauea, measured
+        figures:
+          - value: "2019"
+            unit: ""
+            says: lidar, July
+            from: usgs-kilauea-2019-dem-readme, the title
+          - value: "1"
+            unit: m
+            says: apart, measured
+            from: usgs-kilauea-2019-dem-readme, "a 1-meter resolution raster"
+        sentence: >-
+          The ground is the one true thing here. It is the USGS's model of
+          Kilauea, from lidar flown over it in July 2019.
+      - camera: southwest
+        picture: southwest.png
+        seconds: 12
+        lit: show
+        name: What was done to it
+        figures:
+          - value: "12"
+            unit: m
+            says: apart, as used
+            from: the scene, terrain.step
+          - value: "2"
+            unit: m
+            says: of smoothing
+            from: the scene, terrain.smooth (set/world.go Smooth)
+        sentence: >-
+          The model measures the bare ground under the forest every metre.
+          The scene uses every twelfth, softened by two metres.
+      - camera: southwest
+        picture: southwest.png
+        seconds: 9
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.3, 0.284, 0.4]}
+        name: What stands on it
+        sentence: >-
+          The ground is real. The dome, the forest and the cloud standing
+          on it are not. That is the rest of this series.
+
+  - name: the dome
+    title: The dome
+    sound: {bar: 25}
+    shots:
+      - camera: dome-close
+        picture: dome-close.png
+        seconds: 12
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.28, 0.05, 0.45]}
+        name: The enclosure
+        figures:
+          - value: "96"
+            unit: m
+            says: across, picked
+            from: manufacture/ground-choices.yaml elt-enclosure-diameter
+          - value: "90"
+            unit: m
+            says: tall, picked
+            from: manufacture/ground-choices.yaml elt-enclosure-height
+        sentence: >-
+          The dome is drawn from a recipe for a giant telescope. Its size
+          was picked. It is not a real building's.
+      - camera: close
+        picture: close.png
+        seconds: 12
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.3, 0.2, 0.4]}
+        name: The mirror inside
+        figures:
+          - value: "39"
+            unit: m
+            says: mirror, ESO
+            from: elt-facts, nominal primary diameter
+          - value: "798"
+            unit: ""
+            says: pieces, ESO
+            from: elt-facts, primary segments
+        sentence: >-
+          Inside the slit is a mirror 39 m across, in 798 pieces. Those two
+          numbers are ESO's for its Extremely Large Telescope.
+      - camera: close
+        picture: close.png
+        seconds: 9
+        lit: show
+        name: Inspired, not copied
+        sentence: >-
+          The rest of the telescope is scenery: the right size of mirror in
+          a dome somebody imagined around it.
+
+  - name: the four beams
+    title: The four beams
+    sound: {bar: 35}
+    shots:
+      - camera: along-a-beam
+        picture: along-a-beam.png
+        seconds: 12
+        lit: show
+        name: Laser guide stars
+        figures:
+          - value: "4"
+            unit: ""
+            says: beams, as ESO
+            from: eso-4lgsf, four lasers
+          - value: "90"
+            unit: km
+            says: up, real ones
+            from: eso-4lgsf, sodium at an altitude of 90 kilometres
+        sentence: >-
+          A real telescope shines four lasers to make fake stars 90 km up,
+          to measure and undo the air's blurring.
+      - camera: close
+        picture: close.png
+        seconds: 12
+        lit: show
+        name: What is measured
+        figures:
+          - value: "30"
+            unit: cm
+            says: across each beam
+            from: eso-4lgsf, a beam with a diameter of 30 centimetres
+          - value: "589"
+            unit: nm
+            says: sodium's line
+            from: the scene, lasers wavelength; nist-handbook-sodium-lines
+        sentence: >-
+          The first study's beams splayed apart. In these pictures they share
+          one aim, 30 cm wide, sodium's colour. Those parts are sourced.
+      - camera: southwest
+        picture: southwest.png
+        seconds: 12
+        lit: show
+        name: What is made up
+        figures:
+          - value: "1"
+            unit: km
+            says: long, not 90
+            from: the scene, lasers reach 1000 m
+        sentence: >-
+          Their brightness is picked so you can see them. They stop after a
+          kilometre, and the light here scatters only once.
+
+  - name: five thousand trees
+    title: Five thousand trees
+    sound: {bar: 5}
+    shots:
+      - camera: under-the-trees
+        picture: under-the-trees.png
+        seconds: 12
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.3, 0.1, 0.45]}
+        name: The forest
+        figures:
+          - value: "4,000"
+            unit: ""
+            says: coast redwoods
+            from: the scene, stands.the redwood forest.count
+          - value: "1,000"
+            unit: ""
+            says: giant sequoias
+            from: the scene, stands.the sequoia groves.count
+        sentence: >-
+          Five thousand trees. The scene calls them fiction: redwoods and
+          sequoias, brought here by the scene.
+      - camera: under-the-trees
+        picture: under-the-trees.png
+        seconds: 12
+        lit: show
+        name: Eight trees, many times
+        figures:
+          - value: "8"
+            unit: ""
+            says: trees grown
+            from: >-
+              hillside/scene.go standVariety, four of a stand's kind
+              before the rest repeat them; two stands
+        sentence: >-
+          Only eight trees are grown, four of each kind. The other 4,992
+          are copies, turned and placed at random.
+      - camera: southwest
+        picture: southwest.png
+        seconds: 12
+        lit: show
+        name: How tall
+        figures:
+          - value: "18-42"
+            unit: m
+            says: redwoods, picked
+            from: manufacture/redwoods.go redwoodRow tall
+          - value: "20-45"
+            unit: m
+            says: sequoias, picked
+            from: manufacture/redwoods.go sequoiaRow tall
+        sentence: >-
+          Their heights were picked, not measured. Each is grown from the
+          code's spruce recipe, reshaped.
+
+  - name: the cloud sea
+    title: The cloud sea
+    sound: {bar: 45}
+    shots:
+      - camera: deck-near
+        picture: deck-near.png
+        seconds: 12
+        lit: show
+        name: The deck
+        figures:
+          - value: "130"
+            unit: m
+            says: deep
+            from: the scene, weather.low cloud.depth
+          - value: "56"
+            unit: m
+            says: light goes in
+            from: the scene, extinction 0.018 per m; 1 / 0.018 = 55.6
+        sentence: >-
+          The cloud is a layer 130 m deep. Where it is thickest, light
+          goes about 56 m, on average, before it is turned aside.
+      - camera: southwest
+        picture: southwest.png
+        seconds: 12
+        lit: show
+        name: Prescribed
+        figures:
+          - value: "0.7"
+            unit: ""
+            says: of noise kept
+            from: the scene, coverage; set/grove_weather.go Coverage
+        sentence: >-
+          It is not weather. Nothing evaporates or condenses. A noise
+          pattern says where cloud is, and how thick.
+      - camera: southwest
+        picture: southwest.png
+        seconds: 10
+        lit: show
+        name: The scene says so
+        sentence: >-
+          It says so at the top of the file: this mist is not
+          transpiration, condensation or adaptive optics.
+
+  - name: what this picture does not claim
+    title: What this picture does not claim
+    sound: {bar: 29}
+    shots:
+      - camera: southwest
+        picture: southwest.png
+        seconds: 10
+        lit: show
+        name: Its own list
+        sentence: >-
+          My favourite part. The record of this picture ends with a list
+          of what the picture does not claim.
+      - camera: under-the-trees
+        picture: under-the-trees.png
+        seconds: 10
+        lit: show
+        name: The forest
+        sentence: >-
+          The redwoods and sequoias are made up. So is the dome's size, and
+          where everything stands.
+      - camera: deck-near
+        picture: deck-near.png
+        seconds: 10
+        lit: show
+        name: The light
+        sentence: >-
+          The weather, the lighting and how bright the beams are were all
+          chosen by eye.
+      - camera: along-a-beam
+        picture: along-a-beam.png
+        seconds: 10
+        lit: show
+        name: The physics
+        sentence: >-
+          No claim about moisture, light coming back from the sodium,
+          calibrated optics, or two ways of drawing it agreeing.
+      - camera: above
+        picture: above.png
+        seconds: 10
+        lit: show
+        window: {from: [0.21875, 0, 0.5625], to: [0.21875, 0, 0.5625]}
+        name: What is real
+        sentence: >-
+          What is measured is the ground: Kilauea, as lidar saw it in July
+          2019. Everything else is a guess.
+      - camera: close
+        picture: close.png
+        seconds: 9
+        lit: show
+        name: A good guess
+        sentence: >-
+          A very good guess, that tells you it is one. I find that tidy.

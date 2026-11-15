@@ -1,0 +1,25 @@
+{
+	"group": "slow start, fast finish",
+	"mood": "quiet then full speed",
+	"feeling": "Standing at a big gate that is about to open.",
+	"intent": "A reveal of scale: a landscape, a city, a long shot that rises from small to huge.",
+	"listen_for": "The bass dropping an octave lower at 0:24, under a lead twice as busy.",
+	"voicing": "@dmg-pad",
+	"tempo": 80,
+	"meter": 4,
+	"seconds": 54.0,
+	"parts": [
+		{"name": "wait", "bar": 1, "second": 0.0,
+		 "change": "open fifths and a slow walking bass",
+		 "feels": "Stillness, wide space"},
+		{"name": "gather", "bar": 5, "second": 12.0,
+		 "change": "a drum and fuller chords join",
+		 "feels": "Something rising"},
+		{"name": "open", "bar": 9, "second": 24.0,
+		 "change": "the bass drops an octave and the lead doubles its speed",
+		 "feels": "The gate swings wide"},
+		{"name": "over", "bar": 17, "second": 48.0,
+		 "change": "a held chord and one kick",
+		 "feels": "The whole view, held"}
+	]
+}

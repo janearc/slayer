@@ -1,0 +1,11 @@
+# a score for cueshow's tests: sixteen beats half a second apart from
+# 2 s, bars one to four, and a lead of three notes
+score:
+  duration: 10
+  tracks:
+    lead:
+      - {at_sec: 2.0, vel: 90}
+      - {at_sec: 2.75, vel: 80}
+      - {at_sec: 3.5, vel: 40}
+  beats:
+    times: [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5]

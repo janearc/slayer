@@ -17,6 +17,33 @@
           "view-yaw-deg": {"type": "number", "minimum": -180, "maximum": 180},
           "view-up": {"enum": ["x", "y"]},
           "view-elevation-deg": {"type": "number", "minimum": -85, "maximum": 85},
+          "staging": {
+            "$comment": "An entry's own sky and lamps, in place of the plan's studio.",
+            "type": "object", "additionalProperties": false,
+            "required": ["sky", "sources"],
+            "properties": {
+              "sky": {
+                "type": "object", "additionalProperties": false,
+                "required": ["horizon", "zenith", "ground"],
+                "properties": {
+                  "horizon": {"$ref": "#/$defs/light"},
+                  "zenith": {"$ref": "#/$defs/light"},
+                  "ground": {"$ref": "#/$defs/light"}
+                }
+              },
+              "sources": {
+                "type": "array", "minItems": 1, "maxItems": 4,
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["toward", "strength"],
+                  "properties": {
+                    "toward": {"$ref": "#/$defs/vector"},
+                    "strength": {"$ref": "#/$defs/light"}
+                  }
+                }
+              }
+            }
+          },
           "details": {
             "type": "array", "minItems": 1, "uniqueItems": true,
             "items": {"enum": ["hull", "clumps", "quick", "demo"]}
@@ -33,6 +60,26 @@
             }
           }
         }
+      }
+    }
+  },
+  "$defs": {
+    "vector": {
+      "type": "object", "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": {"type": "number", "minimum": -100, "maximum": 100},
+        "y": {"type": "number", "minimum": -100, "maximum": 100},
+        "z": {"type": "number", "minimum": -100, "maximum": 100}
+      }
+    },
+    "light": {
+      "type": "object", "additionalProperties": false,
+      "required": ["r", "g", "b"],
+      "properties": {
+        "r": {"type": "number", "minimum": 0, "maximum": 16},
+        "g": {"type": "number", "minimum": 0, "maximum": 16},
+        "b": {"type": "number", "minimum": 0, "maximum": 16}
       }
     }
   }

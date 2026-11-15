@@ -32,13 +32,19 @@ func (one lit) ambient() bool { return (reached{toward: one.toward}).ambient() }
 // selection is weighted by total worth divided by its own worth and the number
 // of samples, accounting for repeated selections.
 //
+// room is the caller's scratch: the result is built in it from the start,
+// so a scene of lampsAsked lamps or fewer allocates nothing when room has
+// that capacity. The result shares room's memory and is good until the
+// caller next uses room. A room must belong to one goroutine.
+//
 // Without occlusion, sampled worth sums to the full worth. With occlusion, only
 // selected lamps trace shadows; the weighted estimate is correct on average
 // over sampling offsets.
-func (scene staged) asked(point, facing maths.Vec,
+func (scene *staged) asked(room []lit, point, facing maths.Vec,
 	worth func(toward maths.Vec, light maths.Light) float64) []lit {
 	every := len(scene.lamps) <= lampsAsked
-	var kept, rest []lit
+	kept := room[:0]
+	var rest []lit
 	var worths []float64
 	total := 0.0
 	for i, lamp := range scene.lamps {
@@ -89,7 +95,7 @@ func byLight(_ maths.Vec, light maths.Light) float64 {
 
 // shadowed applies a selected lamp's sampling weight and transmission. Ambient
 // contributions remain unshadowed, matching reaching.
-func (scene staged) shadowed(one lit, point maths.Vec) maths.Light {
+func (scene *staged) shadowed(one lit, point maths.Vec) maths.Light {
 	light := one.light.Scale(one.counts)
 	if light == (maths.Light{}) || one.ambient() {
 		return light

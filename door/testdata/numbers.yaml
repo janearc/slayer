@@ -1,0 +1,44 @@
+# every number the door's tests choose, with what it is and who chose it.
+numbers:
+  - name: width
+    value: 48
+    says: a test picture's width, small so a cpu frame is quick
+    kind: picked
+    by: the door slice's author, 2026-11-12; hillside's session tests' own
+  - name: height
+    value: 27
+    says: a test picture's height, not a multiple of 16, so a film pads
+    kind: picked
+    by: the door slice's author, 2026-11-12; hillside's session tests' own
+  - name: rays
+    value: 1
+    says: rays along each side of a test pixel
+    kind: picked
+    by: the door slice's author, 2026-11-12; the fewest
+  - name: fps
+    value: 3
+    says: a test film's rate, so one second is three frames
+    kind: picked
+    by: the door slice's author, 2026-11-12; three frames show a middle
+  - name: title-from
+    value: 0.5
+    unit: s
+    says: when a test title comes, after frame 1 and before frame 2 at 3 a second
+    kind: picked
+    by: the door slice's author, 2026-11-12; between 0.33 and 0.67 s
+  - name: title-until
+    value: 1.2
+    unit: s
+    says: when a test title goes, after frame 3 and before frame 4 at 3 a second
+    kind: picked
+    by: the door slice's author, 2026-11-12; between 1 and 1.33 s
+  - name: weather-across
+    value: 32
+    says: a test weather's cells round a circle, a power of two
+    kind: picked
+    by: the weather slice's author, 2026-11-12; weather's own cache tests
+  - name: weather-rows
+    value: 16
+    says: a test weather's rows of latitude
+    kind: picked
+    by: the weather slice's author, 2026-11-12; weather's own cache tests

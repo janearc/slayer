@@ -120,22 +120,32 @@ func (body Body) Airglowing(radiance, band, fronts float64) (Body,
 	return body, nil
 }
 
+// heldIn is how much of sodium's d lines a band from lo to hi nanometres
+// holds: half for each line.
+func heldIn(lo, hi float64) float64 {
+	held := 0.0
+	for _, line := range []float64{sodiumD2, sodiumD1} {
+		if line >= lo && line < hi {
+			held += lineShare
+		}
+	}
+	return held
+}
+
+// lineShare is how much of the glow each d line holds, as the two are
+// alike: half.
+const lineShare = 0.5
+
 // glowedAt is the airglow a point sends the eye whose air came from a
-// latitude in degrees, in a band from lo to hi nanometres, watts a
+// latitude in degrees, in a band that holds so much of the d lines, watts a
 // square metre a steradian, with the cosine of the eye's height there.
 //
 // it holds both d lines if the band does, as full at the band's edge as
 // at the equator, so the edge, where the band's air meets the next, is a
 // front like any other.
-func (face *Face) glowedAt(latitude, eye, lo, hi float64) float64 {
+func (face *Face) glowedAt(latitude, eye, held float64) float64 {
 	if face.airglow == 0 || math.Abs(latitude) >= face.airband {
 		return 0
-	}
-	held := 0.0
-	for _, line := range []float64{sodiumD2, sodiumD1} {
-		if line >= lo && line < hi {
-			held += 0.5
-		}
 	}
 	return held * face.airglow / math.Max(eye, grazing)
 }

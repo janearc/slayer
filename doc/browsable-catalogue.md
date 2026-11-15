@@ -11,8 +11,8 @@ game run catalogue-render
 ```
 
 Open `out/catalogue/index.html` in a browser. The default is a small,
-quick-detail view of every named kind. These are native Metal renders;
-the command refuses an unavailable GPU rather than substituting a CPU image.
+quick-detail view of every one of the 106 kinds the menu holds. These are
+native Metal renders; the command refuses an unavailable GPU rather than substituting a CPU image.
 No survey or terrain download is needed for the specimen book.
 
 The default takes four samples per pixel against a uniform backdrop.
@@ -24,10 +24,60 @@ game run catalogue-list
 game run catalogue -- render spitzer hubble webb --out out/space-book
 ```
 
-The destination must be new. A second invocation never replaces a previous
-book. Completed images remain available if a later specimen fails. The index
-keeps pending and failed entries visible; a partial book is not a successful
-full run.
+A specimen that fails does not stop the run. Its card is marked failed
+with the reason, the run goes on, and at the end it names every specimen
+that failed, one line each, and exits non-zero. A run with no failure exits
+zero.
+
+A second run resumes a book. Give it the same `--out`, which holds a
+`catalogue.json` the command wrote: cards already rendered under the same
+plan are kept and not redrawn, cards that failed or are pending are drawn,
+kinds added to the menu since are added and drawn, and kinds the menu no
+longer has are dropped from the index and named.
+
+A card drawn under a
+different plan is drawn again. Each card keeps the record of the binary
+that drew it. A destination that exists and is not a book is refused and
+left as it was. To draw everything again, give a new `--out`.
+
+## One file to send
+
+A finished book composes into a single PDF that holds what the HTML
+holds. It has a cover (the title, the date the book's record was last
+written, the counts of specimens and groups, and the binary that drew
+it), a contents page with each specimen's page number, and then one page
+for each specimen, in the menu's order.
+
+A specimen's page has its picture, as large as the page allows with its
+words, then the group and kind, the description, the recipe and source
+notes, the references as links, and a provenance block: the settings
+hash, the binary's hash, the compiled revision and the device.
+
+A specimen whose words do not fit under its picture at a reasonable size
+runs on to a second page. Every page after the cover has the book's
+title and its number in the foot, and a reader's sidebar lists the
+groups and kinds.
+
+```sh
+game run catalogue-pdf
+game run catalogue -- pdf --book out/catalogue --out out/catalogue.pdf
+```
+
+The defaults are the ones shown. Prose is set in Helvetica, hashes and
+addresses in Courier, nothing below 11 points. The PDF's standard fonts
+cover Latin-1 and the common typographic marks; a menu entry with any
+other character is refused, naming the character and the card, rather
+than printed as a question mark.
+
+A book holding pending or failed cards is refused, and the refusal names
+them; run `render` again on the book to finish it. To compose such a book
+anyway, give `--with-failures`: each card that did not render gets a page
+saying so and why, and the cover counts them.
+
+The PDF's destination must
+be new. The full render receipts and settings stay in the book; the
+document is the part you hand someone. Pictures are kept lossless, and
+the 106-specimen book comes to about 2.4 MB.
 
 ## Detail comparisons
 
@@ -62,6 +112,11 @@ For an inspection view, add `cutaway: true` to a copy of the plan. The book
 hides an observatory's enclosure and labels that view explicitly. The source
 object's bounds and the camera framing stay fixed across detail levels.
 Other specimens keep their usual appearance and receive no cutaway label.
+
+An entry may carry a staging of its own: Webb's is space, with one sun and
+nothing behind it. To see what such a specimen is made of, add `studio: true`
+to a copy of the plan. The plan's sky and lamps then light it, as they light
+an entry with no staging. A mirror staged in space mirrors the dark.
 
 A narrower field of view and smaller `distance` can show the instrument more
 closely. These are display choices for the book; scene recipes still make

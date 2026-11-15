@@ -26,6 +26,11 @@ var (
 	// Moss is a world's land, a green that reads against the sea in two
 	// colours a cell.
 	Moss = srgb.FromLight(0.34, 0.52, 0.20)
+	// Oak is the pale wood an oak grows in spring, the body of a board.
+	Oak = srgb.FromLight(0.62, 0.45, 0.27)
+	// OakLate is the dark wood it grows at summer's end: the line of each
+	// ring, dark enough to read as grain beside Oak.
+	OakLate = srgb.FromLight(0.36, 0.23, 0.12)
 )
 
 // The lamps.

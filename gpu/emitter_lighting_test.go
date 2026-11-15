@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
@@ -15,7 +15,7 @@ import (
 // no scene traversal can hide a query that should never have happened.
 func emitterProbe(t *testing.T) string {
 	t.Helper()
-	source := sourceWith(1)
+	source := sourceWith(1, probeVolumes)
 	begin := strings.Index(source, "static float3 falling(")
 	if begin < 0 {
 		t.Fatal("lighting function not found")

@@ -81,10 +81,24 @@ frame, with a white lamp behind it. It is linear, and it is never more
 than one. It is not bright: film at its clearest still holds some
 density, and `pollen` passes less than a tenth of the light at its best.
 
-Turn the projector up with `colour.Develop(printed, exposure)`, or a
-`colour.NewTone`. The exposure that puts a white card on the screen's
-white is about 2 for `soot`, `ash` and `smoke`, 4 for `dusk` and
-`lantern`, and 16 for `pollen`.
+Turn the projector up with a `colour.NewTone`. The exposure that puts a
+white card on the screen's white is about 2 for `soot`, `ash` and
+`smoke`, 4 for `dusk` and `lantern`, and 16 for `pollen`.
+
+A print holds light brighter than that white card: up to `Clearest`,
+where the film has cleared as far as its curves go. Through `dusk` and
+`lantern` at an exposure of 4 that is two and a half times the
+screen's white. Give the tone a shoulder that lands the clearest on
+white, or the screen clips it:
+
+```go
+top := exposure * roll.Clearest().Luminance()
+screen := colour.NewTone(exposure, knee, top, 0)
+```
+
+`colour.Develop(printed, exposure)` has no knee. It clips each part of
+the light at white by itself, so a flame whose red and green are past
+white and whose blue is not comes out one flat yellow.
 
 Do not also give the picture the grain of `colour.Grained`. The gauge
 of a roll comes with its grain turned off for that reason.

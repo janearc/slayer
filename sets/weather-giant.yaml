@@ -1,0 +1,227 @@
+# weather-giant: melancholia's giant alone in space, its weather run
+# from still air through a film: a planet's air stirred by storms, the
+# bands torn and the jets coming out of it, the planet turning under a
+# sun from one side. 2026-11-12.
+#
+# the giant is sets/melancholia.yaml's, less its rings, its x-rays and
+# its place in the sky, with its pole tipped ten degrees toward the
+# camera, so the camera stands a little above its equator. the weather
+# is melancholia's (drag 1e7 s, storms 1600 km wide at 1e-5 a second, the
+# bands drawn back over 1e6 s) on a grid of 512, half melancholia's, run
+# from still air to 1e7 s over twelve seconds of scene time: 833,334
+# seconds of weather a second of scene time, the planet turning a full
+# turn eastward in the twelve seconds. picked, for the film.
+scene:
+  name: weather-giant
+  light: sun
+  sun:
+    azimuth: 120
+    altitude: 0
+  # a square frame 60 mm across behind a 64 mm lens sees 50 degrees, so
+  # the giant, 44 degrees across from 160,000 km, fills it with a margin;
+  # the shutter and stop are melancholia's giant alone's. picked.
+  film:
+    width: 1080
+    rays: 4
+    frame:
+      width: 60
+      height: 60
+    lens:
+      focal: 64
+      stop: 8
+      focus: the giant
+    shutter: 0.004
+    glimpses: 1
+  cameras:
+    afar:
+      title: "the giant, whole, from a little above its equator"
+      orientation:
+        point_to: the giant
+        alpha: 0
+      location:
+        loc_relative:
+          object: the giant
+          standoff_x: 0
+          standoff_y: -1.6e8
+          standoff_z: 0
+  planet:
+    name: the giant
+    made_up: true
+    radius: 6.0e7     # metres, a little smaller than jupiter: picked
+    gravity: 24.8     # jupiter's at its cloud tops: picked
+    deck: 0.8         # the methane-ice deck's albedo: picked
+    from_star: 1.0    # astronomical units: beside the earth, as it is here
+    storms:
+      seed: 7
+      turbulence: 0.8
+      eddies: 24
+      stretch: 4
+      edge: 6
+      # the flow folded back through itself three times, for clouds that
+      # recur at every size, at least three folds deep; each fold carries
+      # it four eddies on, and the noise runs down to what a pixel tells
+      # apart. where the folds lift the air the churn rises into view,
+      # where they sink it the next band's air is pulled across, so the
+      # folding brings depth of colour too.
+      # modelled, not a fluid; picked.
+      folds: 3
+      # the jets: the planet spins fast and its bands run against each
+      # other, so a knot is smeared sideways across it. the air carried up to
+      # 30 degrees of longitude, east and west by turns, the way turning
+      # every 15 degrees of latitude, about a band's width, so the jets
+      # run against each other at the bands' edges. picked.
+      jets: {shear: 30, every: 30}
+      # after juno: vortices as a population, each a
+      # coherent oval that rides the jets whole; turbulence gathered in
+      # the lanes where the jets rub, laminar at their cores; white caps
+      # on the anticyclones and dark clearings in the cyclones. 150 more
+      # spots, 0.6 to 6 degrees, slope 2.5, each turning with the shear
+      # where it stands. picked.
+      swarm: {seed: 23, count: 400, smallest: 0.4, largest: 6, slope: 2.5}
+      marks: {cap: cap, clearing: clearing}
+      # where the bands mix, the churn column shows, strongest right on
+      # a band's edge, so the mixing between the bands is a colour of its
+      # own, and strong, with colours to show it: full strength, and the
+      # blend six degrees wide
+      churn: {column: churn, strength: 1}
+      # the spots wound deep, folded many times as jupiter's are, not
+      # once: the great spot three whole turns at its middle, the small
+      # ones two. picked.
+      spots:
+        - {latitude: -22, longitude: 30, radius: 10, turn: 6}
+        - {latitude: 30, longitude: -40, radius: 8, turn: -4}
+        - {latitude: -40, longitude: -15, radius: 6, turn: 4}
+        - {latitude: 12, longitude: 60, radius: 5, turn: -4}
+    pole: {azimuth: 180, altitude: 80}
+    cooking: {column: tholin, time: 1.0e6}
+    airglow: {radiance: 50, band: 70, fronts: 0.05}
+    heat: {tops: 150, hottest: 1800}
+    columns:
+      # the belts: clear down to the deck at 150 bar, at least what air
+      # this heavy would need. rayleigh's
+      # depth there is about 9 at 550 nm, so the deck is never seen, and
+      # the methane, about 140 km-amagats, takes the red and yellow
+      belt:
+        - top: 0
+          bottom: 0.3
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.3
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the zones: the same air with a bright haze high in it, from 0.05
+      # to 0.5 bar: depth 3, albedo 0.97, leaning forward 0.6, all
+      # picked until the haze's droplets are read
+      zone:
+        - top: 0
+          bottom: 0.05
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.05
+          bottom: 0.5
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 3, albedo: 0.97, lean: 0.6}
+        - top: 0.5
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the churn: the zones' air with its haze cooked brown-orange.
+      # methane broken by the x-rays and the sun makes hydrocarbon haze,
+      # tholin, which absorbs the blue (khare and others 1984); its
+      # albedo of 0.12 at 400 nm against 0.95 at 700, and its depth of
+      # 4, are picked strong for the effect until khare's constants are
+      # pinned and worked through
+      churn:
+        - top: 0
+          bottom: 0.05
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.05
+          bottom: 0.5
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 4, albedo: 0.95, lean: 0.6, blue: 0.12}
+        - top: 0.5
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the tholin cooked air bears at its top: only its haze is read, by
+      # cooking. depth 1.5 and a quarter as bright in the blue as the
+      # red, fully cooked: picked. the churn's own haze, depth 4 and an
+      # eighth, browned even the zones, cooked a fifth, to mud.
+      tholin:
+        - top: 0
+          bottom: 0.05
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 1.5, albedo: 0.95, lean: 0.6, blue: 0.25}
+      # the cap an anticyclone lifts in its middle: fresh haze thrown high
+      # by its upwelling, above the methane, so white, as jupiter's white
+      # ovals are. depth 8 from 0.01 to 0.3 bar, albedo 0.99, leaning
+      # little, as fresh small particles do: picked
+      cap:
+        - top: 0
+          bottom: 0.01
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 0.01
+          bottom: 0.3
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 8, albedo: 0.99, lean: 0.1}
+        - top: 0.3
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+      # the clearing a cyclone opens: clear down to old tholin settled
+      # deep, from 2 to 6 bar, dark and brown, as jupiter's brown barges
+      # are. depth 3, albedo 0.5, half again as dark in the blue: picked
+      clearing:
+        - top: 0
+          bottom: 2
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+        - top: 2
+          bottom: 6
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+          haze: {depth: 3, albedo: 0.5, lean: 0.3, blue: 0.3}
+        - top: 6
+          bottom: 150
+          gases: {neon: 0.17, krypton: 0.17, xenon: 0.17, methane: 0.49}
+    zones:
+      - {south: -90, north: -55, column: belt}
+      - {south: -55, north: -38, column: zone}
+      - {south: -38, north: -24, column: belt}
+      - {south: -24, north: -9, column: zone}
+      - {south: -9, north: 9, column: belt}
+      - {south: 9, north: 22, column: zone}
+      - {south: 22, north: 35, column: belt}
+      - {south: 35, north: 52, column: zone}
+      - {south: 52, north: 90, column: belt}
+  # the fires are recipes from the fire support cookbook.
+  #
+  # the bonfire is the night wood fire of doc/fire-night.yaml, sized to the
+  # pyre: 24 flames clustered inside the logs, each with its hottest parts
+  # broken into tongues, sodium's two yellow lines in its colour, sparks,
+  # and smoke. it is 1900 K at its hottest and 1100 K at the edge, as the
+  # night wood fire is.
+  #
+  # the night wood fire's flames are 0.85 m in radius and 6 m tall; here
+  # they are 1.2 m and 12 m, so they stand above the pyre's top at 7.8 m.
+  # the cluster is the night wood fire's 2.4 m, inside the pyre's 2.87 m.
+  # its sparks leave from 8 m, the pyre's top, and its smoke carries
+  # 10,000 kW 60 m up.
+  #
+  # at 1900 K the fire is about ten times as bright as the giant behind
+  # it, and the frame's exposure is the giant's, so the fire's heart
+  # shows white and its edges orange. that is the picture wanted.
+  #
+  # a burning tree is the cookbook's tree fire: one tall flame at 1800 K
+  # with tongues, three sparks a second from half its height, and smoke of
+  # 20,000 kW rising 65 m. each flame is 1.5 times as tall as its tree, as
+  # the manufactory builds the tree, and its radius is the tree fire's
+  # 0.8 m in 20 m of height, and no less than 0.6 m.
+  #
+  # the smoke's soot is 8.7 m2/g of extinction measured at 632 nm and
+  # carried to 550 nm as 8.7 * (632/550)^1.39 = 10.554, in air of 280.5 K
+  # and 1.09 kg/m3, the standard atmosphere at about 1,170 to 1,230 m.
+    weather:
+      cells: 1024
+      day: 18000
+      drag: 1.0e7
+      relax: 1.0e6
+      storms: {rate: 3.8e-17, wide: 1.6e6, strength: 1.0e-5}
+      seed: 7
+      moment: 0
+      every: 1.0e6
+      pace: 833334
+      turning: 30

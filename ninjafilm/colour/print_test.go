@@ -274,7 +274,7 @@ func TestGrainIsSoftAndBounded(t *testing.T) {
 			near += distance(code, beside)
 			far += distance(code, apart)
 			ratio := colour.Decode(code) / colour.Decode(greyByte)
-			if math.Abs(ratio-whole) > noiseBound*softAmount {
+			if !(math.Abs(ratio-whole) <= noiseBound*softAmount) {
 				t.Fatalf("grain moved a pixel to %v of what it was", ratio)
 			}
 		}

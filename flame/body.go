@@ -2,6 +2,7 @@ package flame
 
 import (
 	"math"
+	"sync"
 	"time"
 
 	"github.com/janearc/celestial/measure"
@@ -363,12 +364,39 @@ type glowing struct {
 // glowSteps is how many temperatures the glow is worked out at.
 const glowSteps = 256
 
-// newGlowing is the glow from the coolest temperature to the hottest, at an
-// exposure.
+// glowKey is what a plain glow table is a function of.
+type glowKey struct{ coolest, hottest, exposure float64 }
+
+// glowTables is every plain glow table made in this process, by what it
+// was made from: each costs about 24 ms (271 spectra through the
+// observer, measured 2026-11-12), and a night fire asked for the same
+// one for each of its fires' sparks and again for each field. A table
+// is never written once made, so one is shared by everyone who asks.
+var glowTables = struct {
+	sync.Mutex
+	made map[glowKey]glowing
+}{made: map[glowKey]glowing{}}
+
+// newGlowing is the glow from the coolest temperature to the hottest, at
+// an exposure: made once a process for each three numbers, and shared.
+func newGlowing(coolest, hottest, exposure float64) glowing {
+	key := glowKey{coolest, hottest, exposure}
+	glowTables.Lock()
+	defer glowTables.Unlock()
+	if table, made := glowTables.made[key]; made {
+		return table
+	}
+	table := workedGlowing(coolest, hottest, exposure)
+	glowTables.made[key] = table
+	return table
+}
+
+// workedGlowing is the glow from the coolest temperature to the hottest,
+// at an exposure, worked out.
 //
 // a red-hot body is redder than srgb's red, so a channel can come out less than
 // zero: it is left at zero, the nearest srgb can show.
-func newGlowing(coolest, hottest, exposure float64) glowing {
+func workedGlowing(coolest, hottest, exposure float64) glowing {
 	apart := (hottest - coolest) / (glowSteps - 1)
 	table := glowing{coolest: coolest, apart: apart}
 	for i := range glowSteps {

@@ -67,6 +67,7 @@ Game lint has zero hard findings and 1,292 existing review notes. Game sweep
 still reports seven older files. The whole Game check, broader catalogue
 mutation/coverage work and release integration remain open.
 
-Rubin, ELT, Griffith and historical OWL still need distinct assemblies.
+Rubin, ELT, Griffith and historical OWL have distinct assemblies in
+`manufacture` (`rubin`, `elt`, `griffith` and `owl`).
 Radio dishes and arrays, radomes, wooded sites and the mountain flyby remain
 in the [feature backlog](feature-backlog.md).

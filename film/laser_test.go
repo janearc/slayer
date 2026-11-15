@@ -17,7 +17,7 @@ func TestALaserIsANarrowBeam(t *testing.T) {
 		t.Errorf("on the axis: %v %v %v", toward, far, light)
 	}
 	_, _, half := l.Light(maths.V(0.05, 1, -5), maths.Up)
-	if want := 10 * math.Exp(-0.5); math.Abs(half.G-want) > 1e-9 {
+	if want := 10 * math.Exp(-0.5); !(math.Abs(half.G-want) <= 1e-9) {
 		t.Errorf("half a width off the axis the light is %v, want %v", half.G, want)
 	}
 	if _, _, far := l.Light(maths.V(0.5, 1, -5), maths.Up); far != (maths.Light{}) {

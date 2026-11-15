@@ -24,14 +24,16 @@ export GOWORK=off
 Use Go 1.27.3, as required by Puzzlemouth v0.1.4. Configure `SLAYER_SHELF` as
 described in the [Game workflow](developing.md), then run `game build` and `game check`
 from the Slayer root. Source verification precedes the build. Rendering and
-GPU checks follow the machine owner's render policy.
+GPU checks follow the machine's render policy.
 
 The checksum exception applies only to the two private modules. Their
 canonical module hashes are retained in `go.sum`; the supplied manifest and
-archive hashes provide the review provenance. No replace directives or
-workspace are required for this setup.
+archive hashes provide the review provenance. No workspace is required, but
+`go.mod` carries one replace directive, for celestial, with an absolute path
+into one machine's tree. The build needs a machine that has the directory
+named in `go.mod` until the pin is replaced through the proxy.
 
 Before a Slayer release, publish the dependency revisions through their
-owners' release process and update the pins to released versions. Preparing
+own release process and update the pins to released versions. Preparing
 these archives does not publish a module, create a release tag or push a
 branch. The supplied bundles preserve the local source for review.

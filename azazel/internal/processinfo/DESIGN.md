@@ -83,6 +83,90 @@ or reparented-descendant proof is implemented. Those need a separately
 reviewed ownership and lifetime strategy; a sampled PID check alone cannot
 close a race between reading identity and signaling a reused PID.
 
+## Composed owner identity and bounded quiescence observation
+
+`CaptureOwner` composes the native reader with `kern.bootsessionuuid`. Two
+positive, matching start observations with no exit stamp are fenced by two
+matching boot reads. A missing, malformed, all-zero or changing boot UUID,
+zero birth, PID mismatch, reuse during capture, native failure or cancellation
+returns no identity. UUIDs are normalized to lowercase at the native boundary.
+
+The public identity's fields are private; `ParseOwnerIdentity` accepts only
+its exact canonical serialization, including positive native-width PID and
+nonzero unsigned start. Parsing a durable identity is not authenticating it.
+
+`Incarnation` returns `process-v1.<boot-uuid>.<pid>.<mach-start>` using only
+transaction-owner token characters. It is suitable for the existing owner
+incarnation field, but no transaction, reservation, release proof or rendering
+wiring is changed here.
+
+The supervisor must bind the captured identity to its
+actual launch and durable owner record, not capture a possibly reused PID
+later and silently replace the stored identity. Start is an opaque native
+Mach timestamp, not a wall-clock time or executable UUID.
+
+`ObserveOwner` checks the exact boot first and fences the usage observation
+with another boot read. Present means that exact PID/start was observed with
+no exit stamp during the call, not a continuing liveness guarantee. Dead
+means the stored incarnation is gone: the kernel returned ESRCH, a valid
+observation has a different start, or that incarnation has an exit stamp.
+
+A replacement process is never reported as the original owner. Boot mismatch
+is unknown rather than evidence about the current boot's PID. Permission,
+I/O, malformed and omitted observations remain unknown and retain causes.
+Owner death says nothing about children or reserved capacity.
+
+`ObserveQuiescence` requires a caller deadline and performs at most four
+usage reads, one BSD-info read and two fixed-capacity list reads. It observes
+the owner's direct children and current process group using the public SDK
+`proc_listchildpids`, `proc_listpgrppids` and `PROC_PIDTBSDINFO` declarations.
+
+C determines native layouts and sizes. Each list has a 4096-PID ceiling;
+a full buffer is ambiguous truncation and is refused, not retried indefinitely.
+Returned PID lists are diagnostic samples only, not owner identities or a
+complete descendant set. Identity is rechecked after sampling; a changed or
+unknown owner invalidates the lists. No cached PID result supplies authority.
+
+The public wrapper source divides list results by sizeof(int), so these two
+list calls return PID counts, not bytes. Its lower `proc_listpids` wrapper
+maps syscall failure to zero, making zero ambiguous with an empty list.
+A zero result is therefore unknown even if errno is zero; a positive result
+ignores stale errno. BSD-info success must return exactly the SDK structure
+size. Native failure causes remain inspectable with errors.Is.
+
+There is deliberately no successful whole-tree quiescence state. Every
+quiescence observation returns `QuiescenceUnknown` and an error including
+`ErrDescendantsUnknown`.
+
+An empty process group, a dead/reused leader, a
+zombie or repeated stable snapshots cannot prove historical descendants are
+finished: children can fork, change group/session and be reparented between
+observations. Recursing over sampled parent PIDs would add races, not proof,
+so this implementation does not pretend that it establishes transitive
+closure.
+
+A future success primitive needs an independently enforced lifetime
+containment strategy and complete launch-time tracking. Do not construct a
+transaction release attestation from these diagnostic samples.
+
+All loops and allocations are bounded. Context cancellation is checked before
+and after native calls. These synchronous read-only syscalls cannot be forcibly
+interrupted by context; deadlines bound further observation work, not kernel
+scheduling latency. No goroutine or retry loop hides a blocked syscall.
+
+Tests were written first: the requested Game command failed compilation with
+missing types, then compiled against refusal stubs and failed actual assertions
+before implementation. Rapid generates identity round trips and replacement
+start stamps against mock readers. Deterministic mocks exercise boot changes,
+exit/capture races, permission/I/O failures, omitted data, malformed identities,
+list errors and truncation, and cancellation.
+
+Bounded native children establish
+stable own identity, distinct child identity, post-reap death, real child/group
+sampling and refusal to infer descendant closure. The existing usage witnesses
+are also exposed under `TestUsageNativeWitnesses` so the requested selection
+actually runs them. Existing fixture deadlines and cleanup remain unchanged.
+
 ## Sources read
 
 - Installed MacOSX.sdk: libproc.h declarations and return contract;
@@ -92,4 +176,9 @@ close a race between reading identity and signaling a reused PID.
 - [Apple fork path](https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/kern/kern_fork.c),
   the start-statistics assignment and exec preservation.
 - [Apple public wrapper](https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/libsyscall/wrappers/libproc/libproc.c),
-  proc_pid_rusage's direct native delegation.
+  proc_pid_rusage's direct native delegation and list count/error conversion.
+- Installed MacOSX.sdk libproc.h and sys/proc_info.h: child/group list
+  declarations, PROC_PIDTBSDINFO, proc_bsdinfo and native structure size.
+- [Apple process information syscall](https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/kern/proc_info.c),
+  proc_listpids, proc_pidbsdinfo, proc_pidinfo and proc_pid_rusage: list
+  truncation, current parent/group fields, permissions and ESRCH lookup.

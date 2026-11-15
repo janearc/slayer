@@ -1,7 +1,8 @@
 // Command weather runs a planet's weather from still air and draws what
 // it makes: its vorticity, and its bands' air as the flow has torn
 // them, each a png, latitude and longitude straight across, every so
-// many seconds of its time.
+// many seconds of its time. It is the named scene weather (package
+// scene/named), which a job draws through slayer draw.
 package main
 
 import (
@@ -12,8 +13,9 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"time"
 
-	"github.com/janearc/slayer/weather"
+	"github.com/janearc/slayer/scene/named"
 )
 
 // asked is what the command was asked to run.
@@ -60,26 +62,15 @@ func main() {
 	}
 }
 
-// run runs the weather as asked, drawing it every so often.
+// run runs the weather as asked, drawing it every so often: the named
+// scene weather, its scene seconds the weather's own.
 func run(given asked) error {
 	if !(given.every > 0) || math.IsInf(given.every, 0) ||
 		!(given.seconds >= 0) || math.IsInf(given.seconds, 0) {
 		return fmt.Errorf("invalid time: duration %g s, interval %g s",
 			given.seconds, given.every)
 	}
-	degree := math.Pi / 180
-	grid, err := weather.NewGrid(given.across, given.rows,
-		given.limit*degree, given.radius)
-	if err != nil {
-		return err
-	}
-	stirring, err := weather.NewStirring(given.rate, given.wide,
-		given.strength)
-	if err != nil {
-		return err
-	}
-	made, err := weather.New(grid, given.day, given.drag, given.relax,
-		stirring, given.seed)
+	made, err := mapper(given)
 	if err != nil {
 		return err
 	}
@@ -87,54 +78,48 @@ func run(given asked) error {
 		return err
 	}
 	for at := given.every; at <= given.seconds; at += given.every {
-		steps, err := reach(made, given, at)
+		maps, err := made.At(seconds(at))
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%.0f s: %d steps, fastest %.1f m/s, jets hold %.2f "+
-			"of the energy (jupiter 0.93)\n", made.Clock(), steps,
-			made.Fastest(), made.Zonality())
-		zonal := made.Zonal()
-		for j := 0; j < len(zonal); j += max(1, len(zonal)/32) {
-			fmt.Printf(" %+.0f", zonal[j])
-		}
-		fmt.Println(" (mean east wind, m/s, south to north)")
-		if err := draw(made, given, degree); err != nil {
-			return err
+		for _, one := range maps {
+			if err := save(one.Picture(), given.out, one.Name()); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-// reach carries the weather to a moment as asked: through the cache, or
-// run straight, on the gpu or the cpu.
-func reach(made *weather.Weather, given asked, at float64) (int, error) {
-	switch {
-	case given.cache != "":
-		return made.Reach(given.cache, at, given.every, given.onGPU)
-	case given.onGPU:
-		return made.RunOnGPU(at)
+// mapper is the named scene weather as the flags ask, on the renderer
+// they say, through the cache where one is named, saying where it is on
+// the standard output.
+func mapper(given asked) (named.Mapper, error) {
+	scene, err := named.GetMaps("weather")
+	if err != nil {
+		return nil, err
 	}
-	return made.Run(at), nil
+	renderer := named.CPU
+	if given.onGPU {
+		renderer = named.GPU
+	}
+	ask, err := named.AskMaps(renderer, true, given.cache,
+		seconds(given.every), os.Stdout)
+	if err != nil {
+		return nil, err
+	}
+	return scene.Build(map[string]any{"across": given.across,
+		"rows": given.rows, "limit": given.limit, "radius": given.radius,
+		"day": given.day, "drag": given.drag, "relax": given.relax,
+		"rate": given.rate, "storm-width": given.wide,
+		"strength": given.strength, "bands": given.bands,
+		"seed": given.seed, "pace": time.Second}, ask)
 }
 
-// cooking is how long air takes to cook, for the age picture, in
-// seconds: melancholia's.
-const cooking = 1e6
-
-// draw saves the weather's three pictures, named by its clock.
-func draw(made *weather.Weather, given asked, degree float64) error {
-	name := fmt.Sprintf("%08.0f", made.Clock())
-	for prefix, picture := range map[string]image.Image{
-		"spun-":  made.Spun(),
-		"bands-": made.Bands(given.bands * degree),
-		"aged-":  made.Aged(cooking),
-	} {
-		if err := save(picture, given.out, prefix+name); err != nil {
-			return err
-		}
-	}
-	return nil
+// seconds is so many of the weather's seconds as scene time, at the
+// pace of a second a second.
+func seconds(weather float64) time.Duration {
+	return time.Duration(weather * float64(time.Second))
 }
 
 // save writes a picture as a png in a directory, by a name.

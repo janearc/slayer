@@ -25,7 +25,7 @@ func TestFieldStrengthChangesActualDensityAndRetainsPalette(t *testing.T) {
 	}
 	got, _, _, glow := pieces[0].Body.Samples()
 	_, _, _, original := field.Pieces()[0].Body.Samples()
-	if got.Absorption != .125 || math.Abs(got.Height-1) > 1e-12 || glow[200] != original[200] {
+	if got.Absorption != .125 || !(math.Abs(got.Height-1) <= 1e-12) || glow[200] != original[200] {
 		t.Fatal("strength not carried to GPU description")
 	}
 	if len(field.Pieces()) != 2 {

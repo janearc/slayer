@@ -30,7 +30,7 @@ func TestHashSpreadsNeighbours(t *testing.T) {
 		bins[int(h*10)]++
 	}
 	for b, c := range bins {
-		if math.Abs(float64(c)-n/10) > n/10*0.04 {
+		if !(math.Abs(float64(c)-n/10) <= n/10*0.04) {
 			t.Errorf("bin %d holds %d of %d", b, c, n)
 		}
 	}
@@ -45,7 +45,7 @@ func TestGradientIsSmoothAndBounded(t *testing.T) {
 		y := Hash(2, i)*40 - 20
 		z := Hash(3, i)*40 - 20
 		v := Gradient(5, x, y, z)
-		if math.Abs(v) > 1.05 {
+		if !(math.Abs(v) <= 1.05) {
 			t.Fatalf("noise %v at %v,%v,%v", v, x, y, z)
 		}
 		if d := math.Abs(Gradient(5, x+1e-3, y, z) - v); d > 0.01 {
@@ -63,7 +63,7 @@ func TestGradientIsSmoothAndBounded(t *testing.T) {
 func TestFractalIsBounded(t *testing.T) {
 	for i := range int64(500) {
 		x, y, z := Hash(1, i)*9, Hash(2, i)*9, Hash(3, i)*9
-		if v := Fractal(7, x, y, z, 5); math.Abs(v) > 1.05 {
+		if v := Fractal(7, x, y, z, 5); !(math.Abs(v) <= 1.05) {
 			t.Fatalf("fractal %v at %v,%v,%v", v, x, y, z)
 		}
 	}
@@ -143,7 +143,7 @@ func TestGradientIsContinuousAcrossALatticePlane(t *testing.T) {
 		x := math.Floor(Hash(1, i)*40-20) + 0
 		y, z := Hash(2, i)*40-20, Hash(3, i)*40-20
 		a, b := Gradient(5, x-1e-9, y, z), Gradient(5, x+1e-9, y, z)
-		if math.Abs(a-b) > 1e-8 {
+		if !(math.Abs(a-b) <= 1e-8) {
 			t.Fatalf("across x=%v it jumps from %v to %v", x, a, b)
 		}
 	}
@@ -172,7 +172,7 @@ func TestFractalOfAnyOctavesIsANumber(t *testing.T) {
 		for _, at := range [][3]float64{{0.3, 1.7, -2.2}, {0, 0, -1.7},
 			{0, 1.3, 0}, {-0.9, 0, 0}} {
 			v := Fractal(7, at[0], at[1], at[2], octaves)
-			if math.IsNaN(v) || math.Abs(v) > 1 {
+			if math.IsNaN(v) || !(math.Abs(v) <= 1) {
 				t.Errorf("%d octaves at %v gave %v", octaves, at, v)
 			}
 		}

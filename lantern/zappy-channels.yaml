@@ -1,0 +1,45 @@
+# zappy's channels: each thing in zappy that music can move or pulse. A
+# channel's rest is the value that draws zappy as it is defined; every
+# channel at rest, with the clock running, is zappy byte for byte. A rest
+# written as a name is zappy's own value of that name, from zappy.yaml.
+#
+# A shell channel is offered for all the shells together (shells-) and for
+# each on its own (shell-1- to shell-12-, innermost first). A shell's own
+# channel, when it is off its rest, wins over the all-shells one.
+#
+# Phases are turns added to where the clock has the motion: the clock
+# keeps its rate and the phase moves it on from there, so a phase at rest
+# is the clock alone. To place a motion outright, hold its rate at
+# nought (the scene's still) and the phase is all of it.
+#
+# The ranges were picked by the author of this file, 2026-11-12, as what
+# still draws zappy as zappy: the star inside its innermost shell, a beam
+# narrower than a hemisphere.
+channels:
+  - {name: star-brightness, unit: times, least: 0, most: 8, rest: 1,
+     says: "the star's light and glow, as a share of its own: a pulse"}
+  - {name: star-kelvin, unit: K, least: 2000, most: 40000, rest: kelvin,
+     says: "the star's temperature: the colour of its light"}
+  - {name: star-breath, unit: times, least: 0.25, most: 1.5, rest: 1,
+     says: "the star's radius, as a share of its own: a breath"}
+  - {name: beam-brightness, unit: times, least: 0, most: 8, rest: 1,
+     says: "both beams' light, as a share of their own; nought is off"}
+  - {name: beam-width, unit: degree, least: 0, most: 60, rest: beam-width,
+     says: "how far off its pole a beam is at full strength"}
+  - {name: beam-cone, unit: degree, least: 0, most: 90, rest: beam-cone,
+     says: "how far the beams' spin axis leans off their mean axis"}
+  - {name: beam-spin, unit: turns, least: -1000, most: 1000, rest: 0,
+     says: "turns added to the beams' spin, a phase music can place"}
+  - {name: beam-precess, unit: turns, least: -1000, most: 1000, rest: 0,
+     says: "turns added to the spin axis's precession"}
+  - {name: glare, unit: times, least: 0, most: 200, rest: glare,
+     says: "how much brighter along a beam than the star's own light"}
+  - {name: tumble, unit: turns, least: -1000, most: 1000, rest: 0,
+     shell: true,
+     says: "turns added to a shell's tumble end over end"}
+  - {name: breath, unit: times, least: 0.25, most: 4, rest: 1, shell: true,
+     says: "a shell's size, as a share of its own: its distance out and its panels together"}
+  - {name: band, unit: times, least: 0.05, most: 4, rest: 1, shell: true,
+     says: "a shell's width toward its poles, as a share of its own; its panels are made again"}
+  - {name: open, unit: share, least: 0, most: 1, rest: 0.1, shell: true,
+     says: "how much of each panel's length along a shell is open, so the star shows; its panels are made again"}

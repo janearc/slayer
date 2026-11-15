@@ -39,11 +39,13 @@ type sourcePlan struct {
 }
 
 type plan struct {
-	Model        string       `yaml:"height-model" json:"height-model"`
-	Radius       float64      `yaml:"radius-metres" json:"radius-metres"`
-	Anchor       location     `yaml:"anchor" json:"anchor"`
-	Sources      []sourcePlan `yaml:"sources" json:"sources"`
-	RasterBudget struct {
+	VolumeLighting *volumeLightingPlan `yaml:"volume-lighting" json:"volume-lighting,omitempty"`
+	Clouds         []cloudPlan         `yaml:"cloud-layers" json:"cloud-layers,omitempty"`
+	Model          string              `yaml:"height-model" json:"height-model"`
+	Radius         float64             `yaml:"radius-metres" json:"radius-metres"`
+	Anchor         location            `yaml:"anchor" json:"anchor"`
+	Sources        []sourcePlan        `yaml:"sources" json:"sources"`
+	RasterBudget   struct {
 		CacheBytes    int64 `yaml:"cache-total-bytes" json:"cache-total-bytes"`
 		CacheTiles    int   `yaml:"cache-tiles-per-source" json:"cache-tiles-per-source"`
 		TileBytes     int64 `yaml:"tile-bytes" json:"tile-bytes"`
@@ -60,14 +62,15 @@ type plan struct {
 		North float64 `yaml:"north" json:"north"`
 	} `yaml:"region" json:"region"`
 	Detail struct {
-		Patches       int     `yaml:"patches" json:"patches"`
-		Evaluations   int     `yaml:"evaluations" json:"evaluations"`
-		Depth         int     `yaml:"depth" json:"depth"`
-		Side          int     `yaml:"side" json:"side"`
-		Points        int     `yaml:"points" json:"points"`
-		CellPixels    float64 `yaml:"cell-pixels" json:"cell-pixels"`
-		MinimumHeight float64 `yaml:"minimum-height-metres" json:"minimum-height-metres"`
-		MaximumHeight float64 `yaml:"maximum-height-metres" json:"maximum-height-metres"`
+		Transition    *terrainTransitionPlan `yaml:"transition" json:"transition,omitempty"`
+		Patches       int                    `yaml:"patches" json:"patches"`
+		Evaluations   int                    `yaml:"evaluations" json:"evaluations"`
+		Depth         int                    `yaml:"depth" json:"depth"`
+		Side          int                    `yaml:"side" json:"side"`
+		Points        int                    `yaml:"points" json:"points"`
+		CellPixels    float64                `yaml:"cell-pixels" json:"cell-pixels"`
+		MinimumHeight float64                `yaml:"minimum-height-metres" json:"minimum-height-metres"`
+		MaximumHeight float64                `yaml:"maximum-height-metres" json:"maximum-height-metres"`
 		Normals       *struct {
 			Longitude float64 `yaml:"longitude-deg" json:"longitude-deg"`
 			Latitude  float64 `yaml:"latitude-deg" json:"latitude-deg"`

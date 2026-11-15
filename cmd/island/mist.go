@@ -29,22 +29,15 @@ func (site *siteBuilder) mist() error {
 	return nil
 }
 
-// mistLayer samples a source-grounded floor before constructing its weather deck.
+// mistLayer gives prescribed weather a source-grounded floor in the site frame.
 func (site *siteBuilder) mistLayer(mist mistPlan) error {
-	floor := floorGrid{bounds: mist.Bounds, side: mist.FloorSide, heights: make([]float64, mist.FloorSide*mist.FloorSide)}
-	for row := 0; row < floor.side; row++ {
-		for column := 0; column < floor.side; column++ {
-			x := floor.bounds.MinEast + float64(column)/float64(floor.side-1)*(floor.bounds.MaxEast-floor.bounds.MinEast)
-			z := floor.bounds.MinSouth + float64(row)/float64(floor.side-1)*(floor.bounds.MaxSouth-floor.bounds.MinSouth)
-			height, err := site.floorHeight(x, z, mist.FloorTolerance, mist.FloorIterations)
-			if err != nil {
-				return err
-			}
-			floor.heights[row*floor.side+column] = height
-		}
+	floor, err := site.mistFloor(mist)
+	if err != nil {
+		return err
 	}
 	wind := maths.V(mist.Wind[0], mist.Wind[1], mist.Wind[2])
 	weather := medium.NewWeather(mist.Extinction, mist.Depth, mist.Coverage, mist.Seed, wind)
+	weather.PatchScale = mist.PatchScale
 	box := maths.Box{Min: maths.V(mist.Bounds.MinEast, mist.Base, mist.Bounds.MinSouth),
 		Max: maths.V(mist.Bounds.MaxEast, mist.Base+mist.Depth, mist.Bounds.MaxSouth)}
 	field, err := medium.NewDeck(weather, box, floor.height, mist.Base)
@@ -114,6 +107,7 @@ func (site *siteBuilder) floorHeight(x, z, tolerance float64, iterations int) (f
 		if err != nil {
 			return 0, err
 		}
+		site.record.MistHeightQueries++
 		height, has, err := site.heights.Height(location.Longitude.InDegrees(), location.Latitude.InDegrees())
 		if err != nil {
 			return 0, err

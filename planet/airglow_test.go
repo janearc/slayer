@@ -42,22 +42,22 @@ func (fronted) At(latitude, longitude float64) (origin, spin, age float64) {
 // none at or past its edge.
 func TestTheAirglowIsSodiumsTwoLines(t *testing.T) {
 	face := glowing(nil)
-	if got := face.glowedAt(0, 1, 580, 600); math.Abs(got-2) > 1e-12 {
+	if got := face.glowedAt(0, 1, heldIn(580, 600)); !(math.Abs(got-2) <= 1e-12) {
 		t.Errorf("both lines: %g, want 2", got)
 	}
-	if got := face.glowedAt(-9.9, 1, 580, 600); math.Abs(got-2) > 1e-12 {
+	if got := face.glowedAt(-9.9, 1, heldIn(580, 600)); !(math.Abs(got-2) <= 1e-12) {
 		t.Errorf("just inside the edge: %g, want 2", got)
 	}
-	if got := face.glowedAt(0, 1, 588, 589.2); math.Abs(got-1) > 1e-12 {
+	if got := face.glowedAt(0, 1, heldIn(588, 589.2)); !(math.Abs(got-1) <= 1e-12) {
 		t.Errorf("d2 alone: %g, want 1", got)
 	}
-	if got := face.glowedAt(0, 1, 600, 620); got != 0 {
+	if got := face.glowedAt(0, 1, heldIn(600, 620)); got != 0 {
 		t.Errorf("no line: %g", got)
 	}
-	if got := face.glowedAt(10, 1, 580, 600); got != 0 {
+	if got := face.glowedAt(10, 1, heldIn(580, 600)); got != 0 {
 		t.Errorf("at the band's edge: %g", got)
 	}
-	if got := face.glowedAt(-12, 1, 580, 600); got != 0 {
+	if got := face.glowedAt(-12, 1, heldIn(580, 600)); got != 0 {
 		t.Errorf("past it: %g", got)
 	}
 }
@@ -66,13 +66,13 @@ func TestTheAirglowIsSodiumsTwoLines(t *testing.T) {
 // lengthens, and stays finite where the eye grazes it.
 func TestTheAirglowBrightensToTheLimb(t *testing.T) {
 	face := glowing(nil)
-	down := face.glowedAt(0, 1, 580, 600)
-	slant := face.glowedAt(0, 0.5, 580, 600)
-	if math.Abs(slant-2*down) > 1e-12 {
+	down := face.glowedAt(0, 1, heldIn(580, 600))
+	slant := face.glowedAt(0, 0.5, heldIn(580, 600))
+	if !(math.Abs(slant-2*down) <= 1e-12) {
 		t.Errorf("at half height %g, want twice %g", slant, down)
 	}
-	edge := face.glowedAt(0, 0, 580, 600)
-	if math.IsInf(edge, 0) || math.Abs(edge-down/grazing) > 1e-9 {
+	edge := face.glowedAt(0, 0, heldIn(580, 600))
+	if math.IsInf(edge, 0) || !(math.Abs(edge-down/grazing) <= 1e-9) {
 		t.Errorf("grazing: %g, want %g", edge, down/grazing)
 	}
 }
@@ -88,7 +88,7 @@ func TestAFrontGlowsByItsSteepnessOverTheCalm(t *testing.T) {
 	} {
 		face := glowing(sloped(x.slope))
 		face.calm = 1
-		if got := face.front(up, 0); math.Abs(got-x.want) > 1e-6 {
+		if got := face.front(up, 0); !(math.Abs(got-x.want) <= 1e-6) {
 			t.Errorf("slope %g: %g, want %g", x.slope, got, x.want)
 		}
 	}
@@ -101,11 +101,11 @@ func TestAFrontGlowsByItsSteepnessOverTheCalm(t *testing.T) {
 // and nowhere in it glows.
 func TestAnEvenBandHasNoFronts(t *testing.T) {
 	face := glowing(sloped(2))
-	if math.Abs(face.calm-2) > 1e-6 {
+	if !(math.Abs(face.calm-2) <= 1e-6) {
 		t.Errorf("calm %g, want 2", face.calm)
 	}
 	up := face.ways.toward(-6, 200)
-	if got := face.front(up, 0); math.Abs(got) > 1e-6 {
+	if got := face.front(up, 0); !(math.Abs(got) <= 1e-6) {
 		t.Errorf("glows %g", got)
 	}
 }
@@ -116,15 +116,13 @@ func TestAnEvenBandHasNoFronts(t *testing.T) {
 // not at all.
 func TestTheBandsInsideIsDarkAndItsFrontsGlow(t *testing.T) {
 	face := glowing(fronted{})
-	if math.Abs(face.calm-1) > 1e-6 {
+	if !(math.Abs(face.calm-1) <= 1e-6) {
 		t.Errorf("calm %g, want 1", face.calm)
 	}
-	if got := face.front(face.ways.toward(0, 40), 0); math.Abs(got-2) >
-		1e-6 {
+	if got := face.front(face.ways.toward(0, 40), 0); !(math.Abs(got-2) <= 1e-6) {
 		t.Errorf("on the front, %g, want 2", got)
 	}
-	if got := face.front(face.ways.toward(5, 40), 0); math.Abs(got) >
-		1e-6 {
+	if got := face.front(face.ways.toward(5, 40), 0); !(math.Abs(got) <= 1e-6) {
 		t.Errorf("inside the band, %g, want nought", got)
 	}
 }
@@ -149,7 +147,7 @@ func TestAWidePixelReadsTheFrontAcrossIt(t *testing.T) {
 	up := frameOf(maths.V(0, 1, 0), maths.V(0, 0, 1)).toward(-3, 100)
 	face := glowing(sloped(2.7))
 	face.calm = 1
-	if got := face.front(up, 3*maths.Degree); math.Abs(got-1.7) > 1e-6 {
+	if got := face.front(up, 3*maths.Degree); !(math.Abs(got-1.7) <= 1e-6) {
 		t.Errorf("%g, want 1.7", got)
 	}
 }

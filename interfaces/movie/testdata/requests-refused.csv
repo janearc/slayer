@@ -1,0 +1,15 @@
+case,width,height,rate,frames,pad,says
+height not a multiple of 16,320,180,24,24,false,not a multiple of 16
+height one short of 16s,320,191,24,24,false,not a multiple of 16
+odd width,321,192,24,24,false,is odd
+odd width padded,321,180,24,24,true,is odd
+no width,0,192,24,24,false,above nought
+negative height,320,-192,24,24,true,above nought
+no rate,320,192,0,24,false,a rate of 0
+negative rate,320,192,-24,24,false,a rate of -24
+no frames,320,192,24,0,false,a movie of 0 frames
+negative frames,320,192,24,-1,false,a movie of -1 frames
+4K at 120 needs 6.0,3840,2160,120,24,true,level 6.0
+8K needs 6.0,7680,4320,24,24,false,level 6.0
+beyond every level,16384,16384,24,24,false,beyond every H.264 level
+rate past the most,320,192,241,24,false,a rate of 241

@@ -1,0 +1,42 @@
+# A staging unlike the plan's studio: a black sky, and one lamp where the
+# studio has two. A menu whose one entry is staged with a lamp that lies
+# no way at all, which must be refused when the menu is read. And Webb:
+# its mirror looks along -z ("its face toward -z",
+# manufacture/spacecraft_webb.go), its shield's sun side is -y, and its
+# field of regard ends 135 degrees from the sun (STScI, JWST user
+# documentation, "JWST Field of Regard"), which is 45 from the shield's
+# side when the sun lies square to the mirror's roll.
+kind: can
+detail: quick
+seed: 5
+staging:
+  sky:
+    horizon: {r: 0, g: 0, b: 0}
+    zenith: {r: 0, g: 0, b: 0}
+    ground: {r: 0, g: 0, b: 0}
+  sources:
+    - toward: {x: 0, y: -1, z: 1}
+      strength: {r: 1, g: 1, b: 1}
+refused: |
+  entries:
+    - kind: webb
+      group: Observatories
+      about: A staging that cannot light.
+      notes: Its one lamp lies no way at all.
+      details: [quick]
+      staging:
+        sky:
+          horizon: {r: 0, g: 0, b: 0}
+          zenith: {r: 0, g: 0, b: 0}
+          ground: {r: 0, g: 0, b: 0}
+        sources:
+          - toward: {x: 0, y: 0, z: 0}
+            strength: {r: 1, g: 1, b: 1}
+webb:
+  kind: webb
+  suns: 1
+  line-of-sight: {x: 0, y: 0, z: -1}
+  shield-side: {x: 0, y: -1, z: 0}
+  degrees-from-sight: 135
+  degrees-from-shield-side: 45
+  within-degrees: 0.000000001

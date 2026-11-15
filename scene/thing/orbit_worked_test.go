@@ -22,11 +22,11 @@ func near(t *testing.T, what string, got, want maths.Vec) {
 // moves.
 func TestAngleIsPhaseAndTurns(t *testing.T) {
 	fast := Orbit{Period: 1, Phase: 0.5}
-	if got, want := fast.Angle(time.Nanosecond), 0.5+2*math.Pi; math.Abs(got-want) > 1e-12 {
+	if got, want := fast.Angle(time.Nanosecond), 0.5+2*math.Pi; !(math.Abs(got-want) <= 1e-12) {
 		t.Errorf("a nanosecond into a nanosecond orbit: %v, want %v", got, want)
 	}
 	slow := Orbit{Period: 4 * time.Second, Phase: 0.5}
-	if got, want := slow.Angle(time.Second), 0.5+math.Pi/2; math.Abs(got-want) > 1e-12 {
+	if got, want := slow.Angle(time.Second), 0.5+math.Pi/2; !(math.Abs(got-want) <= 1e-12) {
 		t.Errorf("a quarter of the way round: %v, want %v", got, want)
 	}
 	for _, p := range []time.Duration{0, -1, -time.Hour} {
@@ -64,7 +64,7 @@ func TestATiltedOrbitGoesRoundItsOwnPlane(t *testing.T) {
 	// the plane is square to the axis all the way round
 	for k := range 8 {
 		at := o.At(time.Duration(k) * time.Second).Origin
-		if d := at.Dot(maths.V(1, 1, 0)); math.Abs(d) > 1e-9 {
+		if d := at.Dot(maths.V(1, 1, 0)); !(math.Abs(d) <= 1e-9) {
 			t.Errorf("at %d s the orbit left its plane: %v along its axis", k, d)
 		}
 	}

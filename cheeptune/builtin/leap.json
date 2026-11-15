@@ -1,0 +1,40 @@
+{
+	// a platformer's first world. 150 a minute, c major, a tune that
+	// jumps: the lead leaps in thirds and octaves and the bass bounces
+	// root to fifth.
+	"name": "leap",
+	"tempo": 150,
+	"meter": 4,
+	"loop": true,
+	"parts": [
+		{"role": "lead", "bars": [
+			"g5:1/2 e5:1/2 c5:1/2 e5:1/2 g5 c6",
+			"a5:1/2 g5:1/2 e5:1/2 c5:1/2 e5:2",
+			"f5:1/2 a5:1/2 c6 a5:1/2 f5:1/2 c5",
+			"d5:1/2 e5:1/2 f5:1/2 g5:1/2 b5 g5",
+			"g5:1/2 e5:1/2 c5:1/2 e5:1/2 g5 c6",
+			"a5:1/2 c6:1/2 e6:1/2 c6:1/2 a5:2",
+			"f5:1/2 a5:1/2 c6 d6:1/2 b5:1/2 g5",
+			"c6:1/2 g5:1/2 e5:1/2 g5:1/2 c6:2"
+		]},
+		{"role": "pad", "bars": [
+			"(c4 e4 g4):4", "(a3 c4 e4):4", "(f3 a3 c4):4", "(g3 b3 d4):4",
+			"(c4 e4 g4):4", "(a3 c4 e4):4", "(f3 a3 c4):2 (g3 b3 d4):2",
+			"(c4 e4 g4):4"
+		]},
+		{"role": "bass", "bars": [
+			"c3 g2 c3 g2", "a2 e2 a2 e2", "f2 c3 f2 c3", "g2 d3 g2 d3",
+			"c3 g2 c3 g2", "a2 e2 a2 e2", "f2 c3 g2 d3", "c3 g2 c2:2"
+		]},
+		{"role": "perc", "bars": [
+			"k:1/2 h:1/2 s:1/2 h:1/2 k:1/2 k:1/2 s:1/2 h:1/2",
+			"k:1/2 h:1/2 s:1/2 h:1/2 k:1/2 k:1/2 s:1/2 h:1/2",
+			"k:1/2 h:1/2 s:1/2 h:1/2 k:1/2 k:1/2 s:1/2 h:1/2",
+			"k:1/2 h:1/2 s:1/2 h:1/2 k:1/2 k:1/2 s:1/2 s:1/2",
+			"k:1/2 h:1/2 s:1/2 h:1/2 k:1/2 k:1/2 s:1/2 h:1/2",
+			"k:1/2 h:1/2 s:1/2 h:1/2 k:1/2 k:1/2 s:1/2 h:1/2",
+			"k:1/2 h:1/2 s:1/2 h:1/2 k:1/2 k:1/2 s:1/2 h:1/2",
+			"k s k:1/2 s:1/4 s:1/4 s:1/2 s:1/2"
+		]}
+	]
+}

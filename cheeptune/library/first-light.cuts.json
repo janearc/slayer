@@ -1,0 +1,25 @@
+{
+	"group": "sad, turning hopeful",
+	"mood": "dawn after a bad night",
+	"feeling": "You thought it was over and then the window turns pale gold.",
+	"intent": "A recovery, a morning after, a hard thing survived.",
+	"listen_for": "The same tune turning from minor to major at 0:33.",
+	"voicing": "@tape-chords",
+	"tempo": 72,
+	"meter": 4,
+	"seconds": 66.67,
+	"parts": [
+		{"name": "night", "bar": 1, "second": 0.0,
+		 "change": "a slow minor lead over long chords",
+		 "feels": "Grey, spent"},
+		{"name": "grey", "bar": 7, "second": 20.0,
+		 "change": "a heartbeat drum joins",
+		 "feels": "Something stirs"},
+		{"name": "gold", "bar": 11, "second": 33.33,
+		 "change": "the same tune in major, a backbeat and a rising lead",
+		 "feels": "Light across the floor"},
+		{"name": "end", "bar": 19, "second": 60.0,
+		 "change": "a held major chord and a kick",
+		 "feels": "Day"}
+	]
+}

@@ -10,7 +10,7 @@ import (
 )
 
 // drawSmoke uses the actual milestone scene, camera and development. This is a
-// preview, not smokecheck's terminal/reference comparison or a passing verdict.
+// preview, not smokejudge's terminal/reference comparison or a passing verdict.
 func drawSmoke(scene smoke.Smoke, given preview) (*image.RGBA, error) {
 	world, eye := scene.Scene()
 	lens, err := film.PinholeOf(scene.Wide)

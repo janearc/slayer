@@ -33,7 +33,7 @@ func TestTheSecondPoleIsOppositeUntilOffset(t *testing.T) {
 	turned.Offset = 20 * maths.Degree
 	north, south = turned.Poles(0)
 	apart := math.Acos(north.Dot(south)) / maths.Degree
-	if math.Abs(apart-160) > 1e-6 {
+	if !(math.Abs(apart-160) <= 1e-6) {
 		t.Errorf("offset poles are %.3f degrees apart, want 160", apart)
 	}
 }

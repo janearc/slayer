@@ -30,7 +30,7 @@ func TestGrainPatternsFilterFineStructureAndKeepTheirSeam(t *testing.T) {
 				t.Fatalf("unresolved structure %g %g", low, hidden)
 			}
 			left, right := made.share(-150, -1e-8), made.share(-150, 1e-8)
-			if math.Abs(left-right) > 1e-5 || left < 0 || math.IsNaN(left) {
+			if !(math.Abs(left-right) <= 1e-5) || left < 0 || math.IsNaN(left) {
 				t.Fatalf("grain seam %g %g", left, right)
 			}
 			a, b := made.grains.layered(150, 2, 0)
@@ -216,7 +216,7 @@ func TestStormRecipesKeepBoundsAndSeeds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if math.Abs(jet.jet(10)-30) > 1e-12 || math.Abs(jet.jet(-10)+30) > 1e-12 || jet.rough(10) >= jet.rough(0) {
+	if !(math.Abs(jet.jet(10)-30) <= 1e-12) || !(math.Abs(jet.jet(-10)+30) <= 1e-12) || jet.rough(10) >= jet.rough(0) {
 		t.Fatal("jet direction or core turbulence")
 	}
 	for _, bad := range [][2]float64{{-1, 40}, {361, 40}, {30, 0}, {30, 181}} {
@@ -240,7 +240,7 @@ func TestStormRecipesKeepBoundsAndSeeds(t *testing.T) {
 			t.Fatal("seed or value semantics")
 		}
 		for _, spot := range made.spots {
-			if math.Abs(spot.latitude) > 75 || math.Abs(spot.longitude) > 180 || spot.radius < 1 || spot.radius > 5 || math.Abs(spot.turn) != 2.5 {
+			if !(math.Abs(spot.latitude) <= 75) || !(math.Abs(spot.longitude) <= 180) || spot.radius < 1 || spot.radius > 5 || math.Abs(spot.turn) != 2.5 {
 				t.Fatal("spot bounds")
 			}
 		}
@@ -267,14 +267,14 @@ func TestStormRecipesKeepBoundsAndSeeds(t *testing.T) {
 	ways := frameOf(maths.V(0, 1, 0), maths.V(0, 0, 10))
 	p := ways.toward(10, 0)
 	moved := jet.sheared(p, ways, marks{})
-	if math.Abs(moved.Len()-1) > 1e-12 || moved.Sub(p).Len() < .1 {
+	if !(math.Abs(moved.Len()-1) <= 1e-12) || moved.Sub(p).Len() < .1 {
 		t.Fatal("shear did not carry unit direction")
 	}
 	if storms.layers(1, maths.V(1, 2, 3), 1e6, 16) != 0 {
 		t.Fatal("unresolved turbulence not filtered")
 	}
 	flow := storms.flow(5, maths.V(1, 2, 3), 0)
-	if math.Abs(flow.Dot(maths.V(1, 2, 3))) > 1e-10 {
+	if !(math.Abs(flow.Dot(maths.V(1, 2, 3))) <= 1e-10) {
 		t.Fatal("flow left sphere tangent")
 	}
 	folded, stretch := storms.folded(maths.V(0, 1, 0), 0, 1)
@@ -283,7 +283,7 @@ func TestStormRecipesKeepBoundsAndSeeds(t *testing.T) {
 	}
 	for _, eye := range []maths.Vec{{}, maths.V(0, 10, 0)} {
 		frame := frameOf(maths.V(0, 1, 0), eye)
-		if math.Abs(frame.front.Len()-1) > 1e-12 || math.Abs(frame.east.Dot(frame.pole)) > 1e-12 {
+		if !(math.Abs(frame.front.Len()-1) <= 1e-12) || !(math.Abs(frame.east.Dot(frame.pole)) <= 1e-12) {
 			t.Fatal("polar frame")
 		}
 	}
@@ -303,11 +303,11 @@ func TestFlowUsesRadiansAndFadesAtPolarWalls(t *testing.T) {
 	for _, latitude := range []float64{30, -30, 80} {
 		up := face.ways.toward(latitude, -90)
 		origin, lift, marked := face.flowed(up)
-		if math.Abs(flow.latitude-latitude*maths.Degree) > 1e-12 || math.Abs(flow.longitude-1.5*math.Pi) > 1e-12 {
+		if !(math.Abs(flow.latitude-latitude*maths.Degree) <= 1e-12) || !(math.Abs(flow.longitude-1.5*math.Pi) <= 1e-12) {
 			t.Fatal("flow coordinate units")
 		}
 		if latitude == 80 {
-			if math.Abs(origin-80) > 1e-10 || lift != 0 {
+			if !(math.Abs(origin-80) <= 1e-10) || lift != 0 {
 				t.Fatal("wall fade")
 			}
 		} else if origin != 0 || marked.age != 5 || lift != map[bool]float64{true: 1, false: -1}[latitude < 0] {
@@ -328,7 +328,7 @@ func TestHazeAndRingTintsHoldTheirEndpoints(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if haze.albedo.at(300) != .2 || haze.albedo.at(800) != .8 || math.Abs(haze.albedo.at(550)-.5) > 1e-12 {
+	if haze.albedo.at(300) != .2 || haze.albedo.at(800) != .8 || !(math.Abs(haze.albedo.at(550)-.5) <= 1e-12) {
 		t.Fatal("haze tint")
 	}
 	ring := mustRing(t, 1, 2, .3, .8, 0)
@@ -426,7 +426,7 @@ func TestStormColumnsBlendWithoutSeamsAndCookingChangesTheirLight(t *testing.T) 
 	}
 	for _, lat := range []float64{-1, 1} {
 		_, _, share := face.blend(lat)
-		if math.Abs(share-.25) > 1e-12 {
+		if !(math.Abs(share-.25) <= 1e-12) {
 			t.Fatal("band edge is not symmetric")
 		}
 	}
@@ -434,10 +434,12 @@ func TestStormColumnsBlendWithoutSeamsAndCookingChangesTheirLight(t *testing.T) 
 	flowed := NewFace(body.Flowing(flow), maths.V(0, 1, 0), maths.V(0, 0, 1), maths.V(0, 0, 1e9), even(), 1)
 	// The same material darkens as its air cooks; caps and churn stay separate.
 	mixed := mix{here: 0, rung: 0}
-	fresh := flowed.from(mixed, 0, 0, 1, 1, -1)
+	at := sight{mixed: mixed, star: 1, eye: 1, turn: -1, tilts: flowed.tilted(nil, -1)}
+	fresh := flowed.from(&at, 0, 0)
 	mixed.rung = 14
 	mixed.toward = .5
-	cooked := flowed.from(mixed, 0, 0, 1, 1, -1)
+	at.mixed = mixed
+	cooked := flowed.from(&at, 0, 0)
 	if !(cooked < fresh) {
 		t.Fatalf("cooked haze %g, fresh %g", cooked, fresh)
 	}

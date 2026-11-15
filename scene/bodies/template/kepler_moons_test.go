@@ -45,20 +45,21 @@ var published = map[string]float64{
 // period.
 func TestEachMoonsKeplerPeriodIsThePublishedOne(t *testing.T) {
 	seen := map[string]bool{}
-	for _, parent := range []bodies.Body{Earth(), Mars(), Jupiter(), Saturn(),
-		Uranus(), Neptune()} {
-		for _, m := range parent.Moons {
-			name := m.Body.Name
+	for _, make := range []func() (bodies.Body, error){Earth, Mars, Jupiter, Saturn,
+		Uranus, Neptune} {
+		parent := its(t, make)
+		for _, m := range parent.Moons() {
+			name := m.Body().Name()
 			want, ok := published[name]
 			if !ok {
 				t.Errorf("%s has no published period here to hold it to", name)
 				continue
 			}
 			seen[name] = true
-			got := keplerDays(parent.Mass, m.Orbit)
+			got := keplerDays(parent.Mass(), m.Orbit())
 			if !(math.Abs(got-want) <= 0.01*want) {
 				t.Errorf("%s round %s: kepler gives %.5f days, published %v, "+
-					"more than 1 per cent apart", name, parent.Name, got, want)
+					"more than 1 per cent apart", name, parent.Name(), got, want)
 			}
 		}
 	}
@@ -74,8 +75,8 @@ func TestEachMoonsKeplerPeriodIsThePublishedOne(t *testing.T) {
 // earth's mass or the moon's orbit shows as a day and not as a
 // fraction of a per cent.
 func TestTheMoonsWorkedPeriodIsTwentySevenPointFourFiveDays(t *testing.T) {
-	e := Earth()
-	if got := keplerDays(e.Mass, e.Moons[0].Orbit); math.Abs(got-27.45) > 0.01 {
+	e := its(t, Earth)
+	if got := keplerDays(e.Mass(), e.Moons()[0].Orbit()); !(math.Abs(got-27.45) <= 0.01) {
 		t.Errorf("the moon's period is %v days, want 27.45", got)
 	}
 }

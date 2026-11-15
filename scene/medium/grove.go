@@ -24,10 +24,16 @@ type Canopy struct {
 // See doc/redwood-atmosphere.md for the evidence and its limits.
 type GroveWeather struct {
 	Extinction, Depth, Coverage float64
-	GroundFloor                 float64
-	Seed                        uint64
-	Wind                        maths.Vec
-	Fade                        bool
+	// PatchScale separates weather patch size from layer depth.
+	// Zero preserves the original noise scale of Depth.
+	PatchScale  float64
+	GroundFloor float64
+	Seed        uint64
+	Wind        maths.Vec
+	Fade        bool
+	// Asymmetry is the Henyey-Greenstein asymmetry the field scatters
+	// with; nought is even every way, as before it could be said.
+	Asymmetry float64
 }
 
 // Grove holds one bounded field for a group. Its small horizontal index keeps

@@ -1,0 +1,142 @@
+# zappy: the lantern grown up. A star of 9,000 km in nested shells of
+# black-glass panels that tumble, with two beams from its poles that spin
+# and precess. It was designed for the orbital's far view on
+# 2026-10-03 (commits 52f393f2, 00e508f5 and 7aad1668), where it sat as
+# constants until it was named on 2026-11-12. Lengths are in the orbital's
+# unit, a thousand kilometres; angles in degrees; times in seconds.
+numbers:
+  - name: radius
+    value: 9
+    unit: thousand km
+    says: the star's radius
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: kelvin
+    value: 9000
+    unit: K
+    says: the star's surface, a hotter star than the lantern's
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: green
+    value: 6000
+    says: how bright the star's light is at its own radius, in the green; dimmer for its heat
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: orbits
+    value: 12
+    says: how many rings of panels
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: panels
+    value: 4
+    says: how many panels to a ring
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: turn
+    value: 60
+    unit: s
+    says: how long the innermost ring takes to go once round its pole
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: band-width
+    value: 9
+    unit: star radii
+    says: how wide each ring of panels is
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: wear
+    value: 1
+    says: how battered the panels are, nought to one; fully
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: glass
+    value: 2.2
+    says: the index of the blue-black glass the panels are made of, both sides
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: spread
+    value: 1.2
+    unit: star radii
+    says: how far each ring is out from the one inside it
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: narrowest
+    value: 2
+    unit: star radii
+    says: the outermost ring's width, narrowing from band-width
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: fastest
+    value: 15
+    unit: s
+    says: the outermost ring's turn, quickening from turn
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: tumble
+    value: 40
+    unit: s
+    says: how long the innermost ring takes to tumble end over end
+    kind: picked
+    by: picked for the lantern's rings, 2026-10-03
+  - name: glare
+    value: 30
+    says: how much brighter along a beam than the star's own light
+    kind: picked
+    by: picked for the beams, 2026-10-03
+  - name: axis-x
+    value: 0.3
+    says: the beams' mean spin axis, across; the orbital's hoops are set from it
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: axis-y
+    value: 1
+    says: the beams' mean spin axis, up
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: axis-z
+    value: 0.2
+    says: the beams' mean spin axis, toward the eye
+    kind: picked
+    by: picked for the orbital's far view, 2026-10-03
+  - name: beam-width
+    value: 6
+    unit: degree
+    says: how far off its pole a beam is at full strength
+    kind: picked
+    by: picked for the beams, 2026-10-03
+  - name: beam-soft
+    value: 4
+    unit: degree
+    says: how much further past its width a beam fades to nothing
+    kind: picked
+    by: picked for the beams, 2026-10-03
+  - name: beam-offset
+    value: 15
+    unit: degree
+    says: how far the second pole is turned off the first's opposite
+    kind: picked
+    by: picked for the beams, 2026-10-03
+  - name: beam-tilt
+    value: 50
+    unit: degree
+    says: how far the poles sit off the spin axis
+    kind: picked
+    by: picked for the beams, 2026-10-03
+  - name: beam-spin
+    value: 1.5
+    unit: s
+    says: how long the poles take to go once round the spin axis, a lighthouse
+    kind: picked
+    by: picked for the beams, 2026-10-03
+  - name: beam-cone
+    value: 35
+    unit: degree
+    says: how far the spin axis leans off the mean axis as it goes round
+    kind: picked
+    by: picked for the beams, 2026-10-03
+  - name: beam-precess
+    value: 5
+    unit: s
+    says: how long the spin axis takes to go once round the mean axis
+    kind: picked
+    by: picked for the beams, 2026-10-03

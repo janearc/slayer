@@ -67,7 +67,7 @@ func TestTheShoulderFitsBrightLightAndKeepsHue(t *testing.T) {
 	if bright.G == 255 || !(r > g && g > b) {
 		t.Errorf("the bright light clipped or turned: %v %v %v", r, g, b)
 	}
-	if math.Abs((r-g)/(g-b)-2) > 0.2 {
+	if !(math.Abs((r-g)/(g-b)-2) <= 0.2) {
 		t.Errorf("the hue moved: %v %v %v", r, g, b)
 	}
 }

@@ -83,7 +83,7 @@ func TestATumbleTurnsTheBandAndASpinDoesNot(t *testing.T) {
 	turning.across = ring.tumbleAxis(3)
 	turning.tumble = 12 * time.Second
 	later = turning.At(3 * time.Second).Orientation.Out(ring.pole)
-	if math.Abs(later.Dot(ring.pole)) > 1e-9 {
+	if !(math.Abs(later.Dot(ring.pole)) <= 1e-9) {
 		t.Errorf("a quarter tumble left the pole at %v, want it "+
 			"turned square to where it was", later)
 	}

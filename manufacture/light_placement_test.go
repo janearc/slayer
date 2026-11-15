@@ -77,7 +77,7 @@ func (data lightPlacementContract) assertPlaced(test *testing.T,
 		actual := placed[index]
 		if actual.At().Sub(expected).Len() > data.Tolerance ||
 			actual.Toward().Sub(direction).Len() > data.Tolerance ||
-			math.Abs(actual.Beyond().InMetres()-source.Beyond().InMetres()*data.Scale) > data.Tolerance ||
+			!(math.Abs(actual.Beyond().InMetres()-source.Beyond().InMetres()*data.Scale) <= data.Tolerance) ||
 			actual.Light().Strength() != source.Light().Strength() {
 			test.Fatal("retained light lost the declared quarter-turn, scale or source", actual, source)
 		}

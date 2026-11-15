@@ -1,0 +1,25 @@
+{
+	"group": "tense and sparse",
+	"mood": "ticking, tightening, urgent",
+	"feeling": "A fuse burning down toward something you cannot stop.",
+	"intent": "A countdown to an explosion, a launch, a sudden change of scene.",
+	"listen_for": "How each four bars is twice as busy as the last, and the single hit at 0:29.",
+	"voicing": "@crypt-dmg",
+	"tempo": 132,
+	"meter": 4,
+	"seconds": 30.91,
+	"parts": [
+		{"name": "light", "bar": 1, "second": 0.0,
+		 "change": "a hat and one bass note",
+		 "feels": "A spark"},
+		{"name": "burn", "bar": 6, "second": 9.09,
+		 "change": "eighths in the lead, hats in the drum",
+		 "feels": "It spits and crackles"},
+		{"name": "race", "bar": 11, "second": 18.18,
+		 "change": "sixteenths in the lead and bass",
+		 "feels": "It races toward the end"},
+		{"name": "boom", "bar": 17, "second": 29.09,
+		 "change": "a single low chord and a hit",
+		 "feels": "Impact"}
+	]
+}

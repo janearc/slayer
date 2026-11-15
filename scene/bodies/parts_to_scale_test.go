@@ -2,15 +2,23 @@ package bodies_test
 
 import (
 	"math"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/medium"
 	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
 )
+
+// km is a length in the unit bodies speak, for the tests' own hands.
+func km(amount float64) bodies.Span { return bodies.Kilometres(amount) }
+
+// rad is an angle in radians, for the tests' own hands.
+func rad(amount float64) measure.Angle { return measure.Radians(amount) }
 
 // a body of 8 km put in the world at half a unit a kilometre is 4 units
 // across its radius, and each part it carries is that, by hand:
@@ -21,18 +29,37 @@ import (
 // and quarters, so a float holds each exactly.
 func TestEachPartIsMadeToTheBodysScale(t *testing.T) {
 	light := func(r, g, b float64) maths.Light { return maths.Light{R: r, G: g, B: b} }
-	b := bodies.Body{Name: "p", Kind: bodies.Star, Radius: 8, Seed: 5,
-		Air: &bodies.Air{Height: 6, Dense: 0.25, Colour: light(0.25, 0.5, 1)},
-		Aurora: &bodies.Aurora{Low: 128, High: 384, Lat: 1.25, Width: 0.5,
-			Tilt: math.Pi / 2, Strength: 0.25, Curtains: 0.75, Seed: 7,
-			Fringe: light(0.5, 1, 2), Bottom: light(1, 2, 4), Top: light(2, 4, 8)},
-		Clouds: &bodies.Clouds{Low: 64, High: 128, Cover: 0.75, Dense: 0.25, Seed: 9},
-		Rings: &bodies.Rings{Inner: 1.5, Outer: 2.25, Thick: 6, Dense: 0.375,
-			Profile: []float64{1, 0.5}, Grain: 0.25, Ringlets: 12,
-			Colour: light(0.5, 0.25, 0.125)},
-		Coma: &bodies.Coma{Radius: 12, Dense: 0.25, Colour: light(0.25, 0.25, 0.5),
-			Glow: light(0, 0.5, 0)},
+	air, err := bodies.NewAir(km(6), bodies.PerKilometre(0.25),
+		light(0.25, 0.5, 1))
+	if err != nil {
+		t.Fatal(err)
 	}
+	aurora, err := bodies.NewAurora(bodies.NewShell(km(128), km(384)),
+		rad(1.25), rad(0.5), rad(math.Pi/2), maths.Share(0.25),
+		maths.Share(0.75), 7,
+		bodies.NewAuroraColours(light(0.5, 1, 2), light(1, 2, 4),
+			light(2, 4, 8)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	clouds, err := bodies.NewClouds(bodies.NewShell(km(64), km(128)),
+		maths.Share(0.75), bodies.PerKilometre(0.25), 9)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rings, err := bodies.NewRings(1.5, 2.25, km(6),
+		bodies.PerKilometre(0.375), light(0.5, 0.25, 0.125))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rings = rings.Profiled([]float64{1, 0.5}).Grained(0.25, 12)
+	coma, err := bodies.NewComa(km(12), bodies.PerKilometre(0.25),
+		light(0.25, 0.25, 0.5), light(0, 0.5, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "p", bodies.Star, 8, 1, air, aurora, clouds, rings,
+		coma).Seeded(5)
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.V(10, 0, 0), 0.5, 2); err != nil {
 		t.Fatal(err)
@@ -40,47 +67,47 @@ func TestEachPartIsMadeToTheBodysScale(t *testing.T) {
 
 	// 8 km x 0.5 = 4 units; the scale height 6 km is 3 units, and the
 	// 0.25 a kilometre at the ground is 0.5 a unit.
-	air := volumeNamed(t, w, "p air")
-	same(t, "the air", air.Medium, medium.Air{Radius: 4, Height: 3, Thick: 0.5})
-	same(t, "the air's colour", air.Material.Colour, light(0.25, 0.5, 1))
+	placedAir := volumeNamed(t, w, "p air")
+	same(t, "the air", placedAir.Medium, medium.Air{Radius: 4, Height: 3, Thick: 0.5})
+	same(t, "the air's colour", placedAir.Material.Colour, light(0.25, 0.5, 1))
 
 	// the shell is 128 to 384 km, 64 to 192 units; it is 256 km deep, so a
 	// kilometre of it is 1/256 and a unit of it twice that, 1/128. the
 	// tilt of a quarter turn about x takes the spin's north, +y, to +z.
 	// the colours are the strength, a quarter, of the ones given.
-	aurora := volumeNamed(t, w, "p aurora")
-	got := aurora.Medium.(medium.Aurora)
+	placedAurora := volumeNamed(t, w, "p aurora")
+	got := placedAurora.Medium.(medium.Aurora)
 	nearVec(t, "the aurora's axis", got.Axis, maths.V(0, 0, 1), 1e-12)
 	got.Axis = maths.V(0, 0, 1)
 	same(t, "the aurora", got, medium.Aurora{Radius: 4, Low: 64, High: 192,
 		Lat: 1.25, Width: 0.5, Axis: maths.V(0, 0, 1), Thick: 1.0 / 128,
 		Curtains: 0.75, Seed: 7})
-	same(t, "the aurora's colours", aurora.Material.Shine, texture.Aurora{Radius: 4,
+	same(t, "the aurora's colours", placedAurora.Material.Shine, texture.Aurora{Radius: 4,
 		Low: 64, High: 192, Fringe: light(0.125, 0.25, 0.5),
 		Bottom: light(0.25, 0.5, 1), Top: light(0.5, 1, 2)})
 
 	// 64 to 128 km is 32 to 64 units, and 0.25 a kilometre is 0.5 a unit.
-	clouds := volumeNamed(t, w, "p clouds")
-	same(t, "the clouds", clouds.Medium, medium.Clouds{Radius: 4, Low: 32, High: 64,
+	placedClouds := volumeNamed(t, w, "p clouds")
+	same(t, "the clouds", placedClouds.Medium, medium.Clouds{Radius: 4, Low: 32, High: 64,
 		Cover: 0.75, Thick: 0.5, Seed: 9})
-	same(t, "the clouds' colour", clouds.Material.Colour, maths.Grey(1))
+	same(t, "the clouds' colour", placedClouds.Material.Colour, maths.Grey(1))
 
 	// the rings run from 1.5 to 2.25 radii, which are 6 to 9 units at a
 	// radius of 4; 6 km thick is 3 units; 0.375 a kilometre is 0.75.
-	rings := volumeNamed(t, w, "p rings")
-	same(t, "the rings", rings.Medium, medium.Disc{Inner: 6, Outer: 9, Thick: 3,
+	placedRings := volumeNamed(t, w, "p rings")
+	same(t, "the rings", placedRings.Medium, medium.Disc{Inner: 6, Outer: 9, Thick: 3,
 		Dense: 0.75, Profile: []float64{1, 0.5}, Grain: 0.25, Ringlets: 12})
-	same(t, "the rings' colour", rings.Material.Colour, light(0.5, 0.25, 0.125))
+	same(t, "the rings' colour", placedRings.Material.Colour, light(0.5, 0.25, 0.125))
 
 	// the coma is 12 km across its radius, 6 units, with a ragged scale of
 	// a third of that, 2; 0.25 a kilometre is 0.5; its seed is the
 	// body's, 5; the noise takes up to half.
-	coma := volumeNamed(t, w, "p coma")
-	same(t, "the coma", coma.Medium, medium.Wispy{
+	placedComa := volumeNamed(t, w, "p coma")
+	same(t, "the coma", placedComa.Medium, medium.Wispy{
 		Of:   medium.Puff{Radius: 6, Thick: 0.5},
 		Seed: 5, Scale: 2, Amount: 0.5})
-	same(t, "the coma's colour", coma.Material.Colour, light(0.25, 0.25, 0.5))
-	same(t, "the coma's glow", coma.Material.Glow, light(0, 0.5, 0))
+	same(t, "the coma's colour", placedComa.Material.Colour, light(0.25, 0.25, 0.5))
+	same(t, "the coma's glow", placedComa.Material.Glow, light(0, 0.5, 0))
 }
 
 // a giant's gas is a medium cut to the scale: a radius of 8 km at half a
@@ -92,32 +119,42 @@ func TestEachPartIsMadeToTheBodysScale(t *testing.T) {
 func TestAGiantsGasIsCutToTheScale(t *testing.T) {
 	bands := texture.Banded{Paints: []maths.Light{maths.Grey(0.25), maths.Grey(0.5)},
 		Axis: maths.V(1, 0, 0), Roil: 0.5}
-	g := bodies.Body{Name: "g", Kind: bodies.Giant, Radius: 8,
-		Gas: &bodies.Gas{Depth: 0.125, Opacity: 3, Bands: bands}}
+	gas, err := bodies.NewGas(maths.Share(0.125), 3, bands)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := made(t, "g", bodies.Giant, 8, 1, gas)
 	w := thing.NewWorld()
 	if err := g.Place(w, maths.Vec{}, 0.5, 2); err != nil {
 		t.Fatal(err)
 	}
-	gas := volumeNamed(t, w, "g")
-	same(t, "the gas", gas.Medium, medium.Giant{Radius: 4, Depth: 0.5, Thick: 6})
+	placed := volumeNamed(t, w, "g")
+	same(t, "the gas", placed.Medium, medium.Giant{Radius: 4, Depth: 0.5, Thick: 6})
 	want := bands
 	want.Axis = maths.Up
-	same(t, "the bands", gas.Material.Texture, want)
+	same(t, "the bands", placed.Material.Texture, want)
 }
 
-// a giant with no gas, and a body that is not a giant with a gas of no
-// depth, are placed without a fault: only a giant's gas is read.
+// a giant with no gas is placed without a fault, and a star wearing a
+// gas is placed without reading it: only a giant's gas is read.
 func TestOnlyAGiantsGasIsRead(t *testing.T) {
 	w := thing.NewWorld()
-	if err := (bodies.Body{Name: "g", Kind: bodies.Giant, Radius: 8}).Place(w, maths.Vec{}, 0.5, 2); err != nil {
+	if err := made(t, "g", bodies.Giant, 8, 1).Place(w, maths.Vec{}, 0.5, 2); err != nil {
 		t.Errorf("a giant with no gas: %v", err)
 	}
 	if len(w.Volumes) != 0 {
 		t.Errorf("a giant with no gas has %d volumes", len(w.Volumes))
 	}
-	star := bodies.Body{Name: "s", Kind: bodies.Star, Radius: 8, Gas: &bodies.Gas{}}
-	if err := star.Place(thing.NewWorld(), maths.Vec{}, 0.5, 2); err != nil {
-		t.Errorf("a star with a gas of no depth: %v", err)
+	gas, err := bodies.NewGas(maths.Share(0.5), 1, texture.Banded{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w = thing.NewWorld()
+	if err := made(t, "s", bodies.Star, 8, 1, gas).Place(w, maths.Vec{}, 0.5, 2); err != nil {
+		t.Errorf("a star with a gas: %v", err)
+	}
+	if len(w.Volumes) != 0 {
+		t.Errorf("a star's gas was read: %d volumes", len(w.Volumes))
 	}
 }
 
@@ -128,9 +165,12 @@ func TestOnlyAGiantsGasIsRead(t *testing.T) {
 // before it is born it is nothing. the optical depth across its radius
 // is the one given.
 func TestAFlareGrowsAtItsSpeedFromItsBirth(t *testing.T) {
-	b := bodies.Body{Name: "f", Kind: bodies.Star, Radius: 8,
-		Flare: &bodies.Flare{At: 3 * time.Second, Speed: 24, Opacity: 3,
-			Glow: maths.Light{R: 1, G: 0.5, B: 0.25}}}
+	fireball, err := bodies.NewFlare(3*time.Second, 24, 3,
+		maths.Light{R: 1, G: 0.5, B: 0.25})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "f", bodies.Star, 8, 1, fireball)
 	at := maths.V(10, 0, 0)
 	w := thing.NewWorld()
 	if err := b.Place(w, at, 0.5, 2); err != nil {
@@ -141,7 +181,7 @@ func TestAFlareGrowsAtItsSpeedFromItsBirth(t *testing.T) {
 	same(t, "the flare's glow", flare.Material.Glow, maths.Light{R: 1, G: 0.5, B: 0.25})
 	near(t, "its scale a second after", flare.At(4*time.Second).Scale, 12, 1e-12)
 	near(t, "its scale three seconds after", flare.At(6*time.Second).Scale, 36, 1e-12)
-	if s := flare.At(2 * time.Second).Scale; s > 1e-9 {
+	if s := flare.At(2 * time.Second).Scale; !(s <= 1e-9) {
 		t.Errorf("a second before it is born its scale is %v", s)
 	}
 	nearVec(t, "where it grows", flare.At(4*time.Second).Origin, at, 1e-12)
@@ -154,9 +194,12 @@ func TestAFlareGrowsAtItsSpeedFromItsBirth(t *testing.T) {
 // the height 40 km is 20 units, the width 24 km is 12, and 0.125 a
 // kilometre is 0.25 a unit.
 func TestAPlumeStandsOnTheGroundWhereItPoints(t *testing.T) {
-	b := bodies.Body{Name: "p", Kind: bodies.Star, Radius: 8,
-		Plumes: []bodies.Plume{{Toward: maths.V(0, 0, 2), Height: 40, Width: 24,
-			Dense: 0.125, Colour: maths.Light{R: 0.5, G: 0.25, B: 0.125}}}}
+	column, err := bodies.NewPlume(maths.V(0, 0, 2), km(40), km(24),
+		bodies.PerKilometre(0.125), maths.Light{R: 0.5, G: 0.25, B: 0.125})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "p", bodies.Star, 8, 1, column)
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.V(10, 0, 0), 0.5, 2); err != nil {
 		t.Fatal(err)
@@ -180,10 +223,13 @@ func TestAPlumeStandsOnTheGroundWhereItPoints(t *testing.T) {
 // the knots ride out at the jet's speed, 0.5 c = 149,896.229 km/s, in
 // base widths a second: over the base, 0.5 km, 299,792.458.
 func TestJetsAreAConeCutToTheScale(t *testing.T) {
-	jets := &bodies.Jets{Length: 64, Base: 0.5, Spread: 0.125, From: 16,
-		Dense: 0.0625, Tilt: math.Pi / 3, Speed: 0.5, Knots: 0.75,
-		Glow: maths.Light{R: 0.25, G: 0.5, B: 1}}
-	b := bodies.Body{Name: "j", Kind: bodies.Star, Radius: 8, Seed: 5, Jets: jets}
+	jets, err := bodies.NewJets(km(64), km(0.5), 0.125, km(16),
+		bodies.PerKilometre(0.0625), rad(math.Pi/3), maths.Share(0.5),
+		maths.Light{R: 0.25, G: 0.5, B: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "j", bodies.Star, 8, 1, jets.Knotted(0.75)).Seeded(5)
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.V(10, 0, 0), 0.5, 2); err != nil {
 		t.Fatal(err)
@@ -204,17 +250,14 @@ func TestJetsAreAConeCutToTheScale(t *testing.T) {
 	nearVec(t, "where the jets are", v.At(0).Origin, maths.V(10, 0, 0), 1e-12)
 }
 
-// jets with no base have no widths to ride out in, and their knots stand still,
-// with a flow of zero and not of infinity. a base of under a kilometre has one:
-// the 0.5 above.
-func TestJetsWithNoBaseHaveNoFlow(t *testing.T) {
-	b := bodies.Body{Name: "j", Kind: bodies.Star, Radius: 8,
-		Jets: &bodies.Jets{Length: 64, Spread: 0.125, Dense: 0.0625, Speed: 0.5}}
-	w := thing.NewWorld()
-	if err := b.Place(w, maths.Vec{}, 0.5, 2); err != nil {
-		t.Fatal(err)
-	}
-	if flow := volumeNamed(t, w, "j jets").Medium.(medium.Jet).Flow; flow != 0 {
-		t.Errorf("a jet with no base flows at %v", flow)
+// jets with no base cannot be made: the knots would have no widths to
+// ride out in, and their flow would be infinity. the door refuses them
+// by name, so no jet ever flows endlessly.
+func TestJetsWithNoBaseAreRefusedAtTheDoor(t *testing.T) {
+	_, err := bodies.NewJets(km(64), km(0), 0.125, km(0),
+		bodies.PerKilometre(0.0625), rad(0), maths.Share(0.5),
+		maths.Light{})
+	if err == nil || !strings.Contains(err.Error(), "base") {
+		t.Errorf("jets with no base: %v", err)
 	}
 }

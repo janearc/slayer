@@ -1,0 +1,43 @@
+{
+	// zappy's ident, the rising form. 126 a minute, two bars, 3.81 s.
+	//
+	// the plan. the motif is five notes in d major: a4 d5 e5 a5, then
+	// f#5. up a fourth, up a step, up a fourth (the eager leap), down a
+	// third to settle. short short long long | held: "da da daa DAA,
+	// daa". it grows louder into the leap and eases on the last note.
+	//
+	// bar 1: a clock's tick on each beat, and over it the motif's first
+	//        four notes on beats two to four, plucked. nothing else.
+	// bar 2: the fifth note, f#5, on the downbeat, and with it the large
+	//        thing: a low b flat in the bass (bb1), b flat and d in the
+	//        floor (bb2 d4) and one deep drum. b flat is not in the
+	//        tune's key; the tune's notes a, d, e, f# all sit above it as
+	//        the bright notes of a b flat scale with a raised fourth and
+	//        fifth, so the small tune turns out to be the top of
+	//        something wide. with f# on top the chord is b flat, d, f#:
+	//        an even stack of major thirds, which does not settle.
+	//
+	// the falling form (zappy-ident-falling) differs only in the tune.
+	"name": "zappy-ident",
+	"tempo": 126,
+	"meter": 4,
+	"loop": false,
+	"parts": [
+		{"role": "lead", "bars": [
+			"- a4:1/2@mp d5:1/2@mp e5 a5@f",
+			"f#5:4"
+		]},
+		{"role": "pad", "bars": [
+			"-:4",
+			"(bb2 d4):4"
+		]},
+		{"role": "bass", "bars": [
+			"-:4",
+			"bb1:4@f"
+		]},
+		{"role": "perc", "bars": [
+			"h@mp h@p h@p h@p",
+			"k -:3"
+		]}
+	]
+}

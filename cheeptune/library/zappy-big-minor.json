@@ -1,0 +1,192 @@
+{
+	// zappy at full scale, in d minor. 30 bars, 65.15 s, five tempos.
+	//
+	// the plan. the ident's motif (a d e a | f#), stated, darkened, built,
+	// broken and brought back larger. the key is d minor with its two
+	// chords from below, b flat and c, which climb back to d: the chords
+	// of a film's last reel. (zappy-big-phrygian is the same piece in the
+	// other key, to choose between.)
+	//
+	//   1-4   plain, 92 a minute, a clock ticking the beats. the motif
+	//         alone on the driven saw with low brass under it, and the ident's b flat
+	//         floor under its last note (bar 2). then the motif again,
+	//         and this time it lands on f, not f#: minor (bar 4), over a
+	//         bare d. the tune has been told what key it is really in.
+	//   5-8   build, 104. the bass starts to run in eighths, a kick on
+	//         one and three. the minor motif with a tail (f e d); then
+	//         the motif a fourth higher over b flat and c (d g a d | bb
+	//         a g). chords: dm dm bb c.
+	//   9-12  build, 116. the motif at double speed, one to a bar, each
+	//         bar starting higher: from a, from c, from d, from e. the
+	//         brass in a three-three-two push. chords: dm f bb a. the a
+	//         chord is major (c#) and pulls hard; its last beat is a
+	//         rest in everything but a snare roll.
+	//   13-20 destruction, 132, everything ff. the motif's first three
+	//         notes (a d e) hammered twice a bar in octaves, then its
+	//         last two (a, f) as two long blows, the bass in sixteenths.
+	//         the same hammering holds while the chords fall under it by
+	//         thirds, dm dm bb bb gm gm (the tune moves down for gm: g c
+	//         d | g e flat), then a, an a major arpeggio hammered, and
+	//         bar 20 is one blow on the first beat and nothing after.
+	//   21-22 break, 72. near silence: the clock, slower, and the ident
+	//         alone, pp, in the major, a d e a | f#. nothing under it.
+	//   23-30 return, 120. the motif at half speed in octaves, an octave
+	//         lower than it has been, over b flat, c and then d major
+	//         with every voice: bb c d d. then once more at speed over bb
+	//         c, landing on d for two bars and one last blow. the lowest
+	//         bass of the piece is here (b flat 0, c1, d1).
+	//
+	// drums: from bar 13 a kick on every beat with a clap on two and
+	// four and a hat between; a crash on the first beat of bars 13, 17
+	// and each second bar of the return; kick, tom and crash together
+	// for the two last blows (bars 20 and 30).
+	//
+	// time: the clock of bars 1 to 4 is the beat of everything after it,
+	// and the piece is that clock driven faster in steps, 92, 104, 116,
+	// 132, until it breaks; the break is the clock alone again, slowed.
+	//
+	// loud and quiet: 1-4 mp and mf; 5-10 mf; 11-12 f; 13-20 ff; 21-22
+	// pp; 23-30 ff. the return has more voices than the first statement
+	// (octaves, five-note chords, two bass notes, drums) at the top mark.
+	"name": "zappy-big-minor",
+	"tempo": 92,
+	"meter": 4,
+	"loop": false,
+	"tempos": [
+		{"bar": 5, "tempo": 104},
+		{"bar": 9, "tempo": 116},
+		{"bar": 13, "tempo": 132},
+		{"bar": 21, "tempo": 72},
+		{"bar": 23, "tempo": 120}
+	],
+	"parts": [
+		{"role": "lead", "bars": [
+			"- a4:1/2@mp d5:1/2@mp e5@mp a5",
+			"f#5:4@mp",
+			"- a4:1/2@mp d5:1/2@mp e5@mp a5",
+			"f5:4",
+			"- a4:1/2 d5:1/2 e5 a5",
+			"f5:2 e5 d5",
+			"- d5:1/2 g5:1/2 a5 d6",
+			"bb5:2 a5 g5",
+			"a4:1/2 d5:1/2 e5:1/2 a5:1/2 f5 d5",
+			"c5:1/2 f5:1/2 g5:1/2 c6:1/2 a5 f5",
+			"d5:1/2@f g5:1/2@f a5:1/2@f d6:1/2@f bb5@f g5@f",
+			"e5:1/2@f a5:1/2@f b5:1/2@f e6:1/2@f c#6@ff -",
+			"(a4 a5):1/2@ff (d5 d6):1/2@ff (e5 e6)@ff (a4 a5):1/2@ff (d5 d6):1/2@ff (e5 e6)@ff",
+			"(a4 a5):2@ff (f4 f5):2@ff",
+			"(a4 a5):1/2@ff (d5 d6):1/2@ff (e5 e6)@ff (a4 a5):1/2@ff (d5 d6):1/2@ff (e5 e6)@ff",
+			"(a4 a5):2@ff (f4 f5):2@ff",
+			"(g4 g5):1/2@ff (c5 c6):1/2@ff (d5 d6)@ff (g4 g5):1/2@ff (c5 c6):1/2@ff (d5 d6)@ff",
+			"(g4 g5):2@ff (eb4 eb5):2@ff",
+			"(a4 a5):1/2@ff (c#5 c#6):1/2@ff (e5 e6)@ff (a4 a5):1/2@ff (c#5 c#6):1/2@ff (e5 e6)@ff",
+			"(a4 e5 a5)@ff -:3",
+			"- a4:1/2@pp d5:1/2@pp e5@pp a5@pp",
+			"f#5:4@pp",
+			"-:2 (a3 a4)@ff (d4 d5)@ff",
+			"(e4 e5):2@ff (a4 a5):2@ff",
+			"(f#4 f#5):4@ff",
+			"(f#4 f#5):2@f (e4 e5)@f (d4 d5)@f",
+			"- (a3 a4):1/2@ff (d4 d5):1/2@ff (e4 e5)@ff (a4 a5)@ff",
+			"(f#4 f#5):2@ff (e4 e5)@ff (a4 a5)@ff",
+			"(d4 d5):4@ff",
+			"(d4 a4 d5)@ff -:3"
+		]},
+		{"role": "pad", "bars": [
+			"-:4",
+			"(bb2 d4):4@mp",
+			"-:4",
+			"(d3 a3 d4):4@mp",
+			"(d3 a3 d4 f4):4@mp",
+			"(d3 a3 d4 f4):4@mp",
+			"(bb2 f3 bb3 d4):4",
+			"(c3 g3 c4 e4):4",
+			"(d3 a3 d4 f4):3/2 (d3 a3 d4 f4):3/2 (d3 a3 d4 f4)",
+			"(f3 a3 c4 f4):3/2 (f3 a3 c4 f4):3/2 (f3 a3 c4 f4)",
+			"(bb2 f3 bb3 d4):3/2@f (bb2 f3 bb3 d4):3/2@f (bb2 f3 bb3 d4)@f",
+			"(a2 e3 a3 c#4):3/2@f (a2 e3 a3 c#4):3/2@f -",
+			"(d3 a3 d4 f4):3/2@ff (d3 a3 d4 f4):3/2@ff (d3 a3 d4 f4)@ff",
+			"(d3 a3 d4 f4):3/2@ff (d3 a3 d4 f4):3/2@ff (d3 a3 d4 f4)@ff",
+			"(bb2 f3 bb3 d4):3/2@ff (bb2 f3 bb3 d4):3/2@ff (bb2 f3 bb3 d4)@ff",
+			"(bb2 f3 bb3 d4):3/2@ff (bb2 f3 bb3 d4):3/2@ff (bb2 f3 bb3 d4)@ff",
+			"(g2 d3 g3 bb3):3/2@ff (g2 d3 g3 bb3):3/2@ff (g2 d3 g3 bb3)@ff",
+			"(g2 d3 g3 bb3):3/2@ff (g2 d3 g3 bb3):3/2@ff (g2 d3 g3 bb3)@ff",
+			"(a2 e3 a3 c#4):3/2@ff (a2 e3 a3 c#4):3/2@ff (a2 e3 a3 c#4)@ff",
+			"(a2 e3 a3 c#4 e4)@ff -:3",
+			"-:4",
+			"-:4",
+			"(bb2 f3 bb3 d4):4@ff",
+			"(c3 g3 c4 e4):4@ff",
+			"(d3 a3 d4 f#4):4@ff",
+			"(d3 a3 d4 f#4):4@f",
+			"(bb2 f3 bb3 d4):4@ff",
+			"(c3 g3 c4 e4):4@ff",
+			"(d3 a3 d4 f#4 a4):4@ff",
+			"(d3 a3 d4 f#4 a4)@ff -:3"
+		]},
+		{"role": "bass", "bars": [
+			"-:4",
+			"bb1:4",
+			"-:4",
+			"d2:4",
+			"d2:1/2 d2:1/2 d3:1/2 d2:1/2 d2:1/2 d2:1/2 d3:1/2 d2:1/2",
+			"d2:1/2 d2:1/2 d3:1/2 d2:1/2 d2:1/2 d2:1/2 d3:1/2 d2:1/2",
+			"bb1:1/2 bb1:1/2 bb2:1/2 bb1:1/2 bb1:1/2 bb1:1/2 bb2:1/2 bb1:1/2",
+			"c2:1/2 c2:1/2 c3:1/2 c2:1/2 c2:1/2 c2:1/2 c3:1/2 c2:1/2",
+			"d2:1/2 d2:1/2 d3:1/2 d2:1/2 d2:1/2 d2:1/2 d3:1/2 d2:1/2",
+			"f2:1/2 f2:1/2 f3:1/2 f2:1/2 f2:1/2 f2:1/2 f3:1/2 f2:1/2",
+			"bb1:1/2@f bb1:1/2@f bb2:1/2@f bb1:1/2@f bb1:1/2@f bb1:1/2@f bb2:1/2@f bb1:1/2@f",
+			"a1:1/2@f a1:1/2@f a2:1/2@f a1:1/2@f a1:1/2@f a1:1/2@f -",
+			"d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff",
+			"d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff d2:1/4@ff d2:1/4@ff d3:1/4@ff d2:1/4@ff",
+			"bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff",
+			"bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff bb1:1/4@ff bb1:1/4@ff bb2:1/4@ff bb1:1/4@ff",
+			"g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff",
+			"g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff g1:1/4@ff g1:1/4@ff g2:1/4@ff g1:1/4@ff",
+			"a1:1/4@ff a1:1/4@ff a2:1/4@ff a1:1/4@ff a1:1/4@ff a1:1/4@ff a2:1/4@ff a1:1/4@ff a1:1/4@ff a1:1/4@ff a2:1/4@ff a1:1/4@ff a1:1/4@ff a1:1/4@ff a2:1/4@ff a1:1/4@ff",
+			"(a1 a2)@ff -:3",
+			"-:4",
+			"-:4",
+			"(bb0 bb1):2@ff bb1@ff bb1@ff",
+			"(c1 c2):2@ff c2@ff c2@ff",
+			"(d1 d2):2@ff d2@ff d2@ff",
+			"(d1 d2):2@f d2@f a1@f",
+			"(bb0 bb1):2@ff bb1@ff bb1@ff",
+			"(c1 c2):2@ff c2@ff c2@ff",
+			"(d1 d2):4@ff",
+			"(d1 d2)@ff -:3"
+		]},
+		{"role": "perc", "bars": [
+			"h@mp h@p h@p h@p",
+			"(k t)@mp h@p h@p h@p",
+			"h@mp h@p h@p h@p",
+			"(k t) h@p h@p h@p",
+			"(k h) h:1/2@p h:1/2@p (k h) h:1/2@p h:1/2@p",
+			"(k h) h:1/2@p h:1/2@p (k h) h:1/2@p h:1/2@p",
+			"(k h) h:1/2@p h:1/2@p (k h) h:1/2@p h:1/2@p",
+			"(k h) h:1/2@p h:1/2@p (k h) t:1/2 t:1/2",
+			"(k h):1/2 h:1/2@p (s h):1/2 h:1/2@p (k h):1/2 k:1/2 (s h):1/2 h:1/2@p",
+			"(k h):1/2 h:1/2@p (s h):1/2 h:1/2@p (k h):1/2 k:1/2 (s h):1/2 h:1/2@p",
+			"(k h):1/2@f h:1/2@p (s h):1/2@f h:1/2@p (k h):1/2@f k:1/2 (s h):1/2@f h:1/2@p",
+			"(k h)@f (s h)@f s:1/4@mp s:1/4@mp s:1/4 s:1/4 s:1/4@f s:1/4@f s:1/4@ff s:1/4@ff",
+			"(k o):1/2 h:1/2 (k s):1/2 h:1/2 (k h):1/2 h:1/2 (k s):1/2 h:1/2",
+			"(k h):1/2 h:1/2 (k s):1/2 h:1/2 (k h):1/2 k:1/2 (k s):1/2 h:1/2",
+			"(k h):1/2 h:1/2 (k s):1/2 h:1/2 (k h):1/2 h:1/2 (k s):1/2 h:1/2",
+			"(k h):1/2 h:1/2 (k s):1/2 h:1/2 (k h):1/2 k:1/2 (k s):1/2 t:1/2",
+			"(k o):1/2 h:1/2 (k s):1/2 h:1/2 (k h):1/2 h:1/2 (k s):1/2 h:1/2",
+			"(k h):1/2 h:1/2 (k s):1/2 h:1/2 (k h):1/2 k:1/2 (k s):1/2 h:1/2",
+			"(k h):1/2 h:1/2 (k s):1/2 h:1/2 t:1/2@f t:1/2@f t:1/4@f t:1/4@f t:1/4@ff t:1/4@ff",
+			"(k t o)@f -:3",
+			"h@p h@p h@p h@p",
+			"h@p h@p h@p h@p",
+			"(k o)@f k:1/2 k:1/2 (k s) k",
+			"(k h) k:1/2 k:1/2 (k s) t:1/2 t:1/2",
+			"(k o)@f k:1/2 k:1/2 (k s) k",
+			"(k h) k:1/2 k:1/2 (k s) t:1/2 t:1/2",
+			"(k o)@f k:1/2 k:1/2 (k s) k",
+			"(k h) k:1/2 k:1/2 (k s):1/2 s:1/2 s:1/4@f s:1/4@f s:1/4@ff s:1/4@ff",
+			"(k o)@f -:3",
+			"(k t o)@f -:3"
+		]}
+	]
+}

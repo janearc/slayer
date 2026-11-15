@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 
 	"gopkg.in/yaml.v3"
@@ -20,17 +21,49 @@ import (
 
 // row is one source as the list writes it.
 type row struct {
-	Key     string `yaml:"key"`
-	Title   string `yaml:"title"`
-	By      string `yaml:"by"`
-	Year    int    `yaml:"year"`
-	From    string `yaml:"from"`
-	DOI     string `yaml:"doi"`
-	Licence string `yaml:"licence"`
-	Sha256  string `yaml:"sha256"`
-	Bytes   int64  `yaml:"bytes"`
-	Fetched string `yaml:"fetched"`
-	Never   string `yaml:"never"`
+	Key     string  `yaml:"key"`
+	Title   string  `yaml:"title"`
+	By      string  `yaml:"by"`
+	Year    int     `yaml:"year"`
+	From    string  `yaml:"from"`
+	DOI     string  `yaml:"doi"`
+	Licence string  `yaml:"licence"`
+	Sha256  string  `yaml:"sha256"`
+	Bytes   int64   `yaml:"bytes"`
+	Fetched string  `yaml:"fetched"`
+	Never   string  `yaml:"never"`
+	Unpack  *unpack `yaml:"unpack"`
+}
+
+// unpack is the one member of an archive a set reads, and what it is: its
+// path inside the archive, and its sha256 and size once unpacked.
+type unpack struct {
+	member, sum string
+	size        int64
+}
+
+// UnmarshalYAML reads an unpack's member, sha256 and bytes, and refuses
+// a key it does not know.
+func (held *unpack) UnmarshalYAML(node *yaml.Node) error {
+	var fields map[string]any
+	if err := node.Decode(&fields); err != nil {
+		return err
+	}
+	for key, value := range fields {
+		switch key {
+		case "member":
+			held.member, _ = value.(string)
+		case "sha256":
+			held.sum, _ = value.(string)
+		case "bytes":
+			size, _ := value.(int)
+			held.size = int64(size)
+		default:
+			return fmt.Errorf("unpack: the key %q is not member, sha256 "+
+				"or bytes", key)
+		}
+	}
+	return nil
 }
 
 // A Source is one published work in the list.
@@ -118,6 +151,28 @@ func sound(each row, seen map[string]bool) error {
 	case each.Sha256 != "" && !hashShape.MatchString(each.Sha256):
 		return fmt.Errorf("%w: %s's sha256 %q", errList, each.Key,
 			each.Sha256)
+	}
+	return soundUnpack(each)
+}
+
+// soundUnpack is what is wrong with a row's unpacked member, or nothing:
+// a member is a path inside the archive that stays inside the folder it
+// is unpacked to, with a sha256 and a size.
+func soundUnpack(each row) error {
+	if each.Unpack == nil {
+		return nil
+	}
+	member := each.Unpack
+	switch {
+	case !filepath.IsLocal(member.member):
+		return fmt.Errorf("%w: %s's member %q is not a path inside its "+
+			"folder", errList, each.Key, member.member)
+	case !hashShape.MatchString(member.sum):
+		return fmt.Errorf("%w: %s's member sha256 %q", errList, each.Key,
+			member.sum)
+	case member.size <= nothing:
+		return fmt.Errorf("%w: %s's member has %d bytes", errList, each.Key,
+			member.size)
 	}
 	return nil
 }

@@ -71,7 +71,7 @@ func (data facilityContract) checkRoofs(test *testing.T,
 	test.Helper()
 	for _, roof := range data.Roofs {
 		distance := data.distance(parts, roof)
-		if math.Abs(data.Ray.At.Y-distance-roof.Height) > data.Tolerance {
+		if !(math.Abs(data.Ray.At.Y-distance-roof.Height) <= data.Tolerance) {
 			test.Fatal("missing service roof tier", detail, roof, distance)
 		}
 	}

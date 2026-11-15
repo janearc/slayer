@@ -13,11 +13,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/interfaces/sheet"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/colour"
-	"github.com/janearc/slayer/render/trace"
 	"github.com/janearc/slayer/scene/bodies/template"
 	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
@@ -60,19 +60,33 @@ func TestTheMarblesOnTheEarth(t *testing.T) {
 			w.Sky = sky.Stars{Seed: 15, Share: 0.06, Size: 0.35, Bright: 0.004}
 		}
 		w.Lamp(thing.Sun(sun, maths.RGB(1.2, 1.2, 1.2)))
-		e := template.Earth()
-		e.Moons, e.Clouds = nil, nil
+		e, err := template.Earth()
+		if err != nil {
+			t.Fatal(err)
+		}
+		e = e.WithoutMoons().WithoutClouds()
+		ground, worn := e.Ground()
+		if !worn {
+			t.Fatal("the earth template wears no ground")
+		}
 		// the pictures' left edge is the antimeridian; turned so
 		// africa faces the eye on plus z
-		e.Ground.Map, e.Ground.Turn = blue, -1.6
-		if own {
-			// the template's own cities, laid as the marble lays
-			// them, on the real map
-			e.Ground.Lights = nil
-		} else {
-			e.Ground.Lights, e.Cities = black, nil
+		ground = ground.Mapped(blue, measure.Radians(-1.6))
+		if !own {
+			// the template's own cities, replaced by the black
+			// marble's lights on the real map
+			lit, err := ground.NightLit(black, maths.Share(0))
+			if err != nil {
+				t.Fatal(err)
+			}
+			ground = lit
+			e = e.WithoutCities()
 		}
-		if err := e.Place(w, maths.Vec{}, 1/e.Radius, 10); err != nil {
+		e, err = e.With(ground)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := e.Place(w, maths.Vec{}, 1/e.Radius(), 10); err != nil {
 			t.Fatal(err)
 		}
 		from := maths.V(0, 0, 3.2)
@@ -80,11 +94,11 @@ func TestTheMarblesOnTheEarth(t *testing.T) {
 	}
 	lens := film.Pinhole{Wide: 40 * maths.Degree, Pixel: 0.75}
 	dayW, eye := build(maths.V(0.6, 0.3, 1), false, false)
-	day := trace.Sampled(dayW, eye, lens, 0, 480, 200, 2)
+	day := mustSampled(dayW, eye, lens, 0, 480, 200, 2)
 	nightW, _ := build(maths.V(0, 0, -1), true, false)
-	night := trace.Sampled(nightW, eye, lens, 0, 480, 200, 2)
+	night := mustSampled(nightW, eye, lens, 0, 480, 200, 2)
 	ownW, _ := build(maths.V(0, 0, -1), true, true)
-	own := trace.Sampled(ownW, eye, lens, 0, 480, 200, 2)
+	own := mustSampled(ownW, eye, lens, 0, 480, 200, 2)
 	nightTone := colour.Tone{Exposure: 200, Knee: 0.6, Top: 20, Bloom: 1}
 	s := sheet.New(3)
 	s.Add("the blue marble, by day", colour.Tone{Exposure: 1}.Develop(day), 0.75)

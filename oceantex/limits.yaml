@@ -1,4 +1,6 @@
 # Authored host resource ceilings, not measured ocean properties.
 wave-cells: 1048576
-image-pixels: 8294400
+# 4096 by 4096: moonlake's whole 15/70 aperture at 4096 across is 4096 by
+# 3002, past the 3840 by 2160 this was (2026-11-10)
+image-pixels: 16777216
 shore-cells: 1048576

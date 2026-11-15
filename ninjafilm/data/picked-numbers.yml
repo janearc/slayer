@@ -928,6 +928,18 @@ numbers:
     kind: picked
     by: "the ninjafilm bar pass, 2026-10-23, from the test this replaces"
 
+  - name: lay-clear-floor-most
+    value: 0.5
+    says: the densest floor a record the lay's clearest tests draw clears to; the shelf's floors run 0 to 0.3, and half a density more than covers them
+    kind: picked
+    by: "the fable-team stock slice, 2026-11-12"
+
+  - name: lay-clear-floor-least
+    value: 0.01
+    says: the thinnest floor the lay's clearest anti-tests hold to passing less; a hundredth of a density passes about two percent less, far past a float's rounding, where a floor of a few times ten to the minus seventeen passes the same
+    kind: picked
+    by: "the fable-team stock slice, 2026-11-12"
+
   - name: lens-frame-wide
     value: 70.41
     says: the width in millimetres of the shot's frame, SMPTE ST 417's 15/70 camera aperture

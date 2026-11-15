@@ -88,7 +88,7 @@ func TestSpanIsTheBall(t *testing.T) {
 	for _, m := range []Spanner{Puff{Radius: 2}, Giant{Radius: 2, Depth: 1},
 		Wispy{Of: Puff{Radius: 2}}} {
 		enter, leave, ok := m.Span(down, 0, math.Inf(1))
-		if !ok || math.Abs(enter-3) > 1e-12 || math.Abs(leave-7) > 1e-12 {
+		if !ok || !(math.Abs(enter-3) <= 1e-12) || !(math.Abs(leave-7) <= 1e-12) {
 			t.Errorf("%T spans %v to %v, %v", m, enter, leave, ok)
 		}
 		corner := maths.Ray{At: maths.V(1.9, 5, 1.9), Dir: maths.V(0, -1, 0)}
@@ -112,7 +112,7 @@ func TestAJetsKnotsFlow(t *testing.T) {
 	// along the jet; the pattern three base widths back before is the
 	// pattern here now
 	here, there := later.Density(at), j.Density(maths.V(0, 20-3*j.Base, 0))
-	if math.Abs(here/(1-20/j.Length)-there/(1-14/j.Length)) > 1e-9 {
+	if !(math.Abs(here/(1-20/j.Length)-there/(1-14/j.Length)) <= 1e-9) {
 		t.Errorf("after three seconds the knot at 20 is %v; at 14 before it was %v", here, there)
 	}
 	still := Jet{Length: 100, Base: 2, Spread: 0.05, Thick: 1, Knots: 1, Seed: 5}

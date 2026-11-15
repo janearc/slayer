@@ -57,17 +57,17 @@ func along(n int) [][2]int {
 func (c *chart) Tiles() []hexes.Tile {
 	out := make([]hexes.Tile, len(c.at))
 	for i := range out {
-		out[i] = hexes.Tile{I: i}
+		out[i] = hexes.Tile{Column: i}
 	}
 	return out
 }
 
-func (c *chart) Centre(t hexes.Tile) maths.Vec { return c.at[t.I] }
+func (c *chart) Centre(t hexes.Tile) maths.Vec { return c.at[t.Column] }
 
 func (c *chart) Neighbours(t hexes.Tile) []hexes.Tile {
 	var out []hexes.Tile
-	for _, j := range c.near[t.I] {
-		out = append(out, hexes.Tile{I: j})
+	for _, j := range c.near[t.Column] {
+		out = append(out, hexes.Tile{Column: j})
 	}
 	return out
 }
@@ -79,11 +79,11 @@ func (c *chart) Nearest(p maths.Vec) hexes.Tile {
 			best, at = d, i
 		}
 	}
-	return hexes.Tile{I: at}
+	return hexes.Tile{Column: at}
 }
 
 func (c *chart) Edge(maths.Vec, hexes.Tile) float64 { return 1 }
-func (c *chart) ID(t hexes.Tile) int64              { return int64(t.I) }
+func (c *chart) ID(t hexes.Tile) int64              { return int64(t.Column) }
 func (c *chart) Spacing() float64                   { return 1 }
 func (c *chart) Finer() hexes.Tiling {
 	c.fined++

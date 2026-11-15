@@ -242,7 +242,7 @@ func TestATubesVolumeIsTheFrustums(t *testing.T) {
 		sides := float64(around)
 		share := sides / 2 * math.Sin(2*math.Pi/sides) / math.Pi
 		got := made.skin(mustCut(t, around)).volume()
-		if math.Abs(got-round*share) > 1e-12 {
+		if !(math.Abs(got-round*share) <= 1e-12) {
 			t.Errorf("%d around: volume %v, a frustum of %d sides "+
 				"holds %v", around, got, around, round*share)
 		}
@@ -288,7 +288,7 @@ func TestABladeIsOneStrip(t *testing.T) {
 			t.Errorf("%s: holds %v", blade.name, skin.volume())
 		}
 		strip := (blade.foot + blade.tip) * blade.length
-		if math.Abs(areaOf(skin)-strip) > 1e-15 {
+		if !(math.Abs(areaOf(skin)-strip) <= 1e-15) {
 			t.Errorf("%s: area %v, the strip is %v", blade.name,
 				areaOf(skin), strip)
 		}
@@ -372,8 +372,8 @@ func TestSpaceAlongIsSquareAndRightHanded(t *testing.T) {
 		if !axes.Y.Near(run.Unit(), close) {
 			t.Errorf("along %v: y is %v", run, axes.Y)
 		}
-		if math.Abs(axes.X.Len()-1) > close ||
-			math.Abs(axes.X.Dot(axes.Y)) > close {
+		if !(math.Abs(axes.X.Len()-1) <= close) ||
+			!(math.Abs(axes.X.Dot(axes.Y)) <= close) {
 			t.Errorf("along %v: x is %v, not a unit square to y",
 				run, axes.X)
 		}

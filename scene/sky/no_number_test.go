@@ -43,8 +43,8 @@ func someSkies() map[string]Sky {
 		"gradient":        g,
 		"stars":           bright,
 		"default stars":   Stars{Seed: 2},
-		"hexed gradient":  Hexed{Of: g, Tiling: hexes.Sphere{N: 6}},
-		"hexed stars":     Hexed{Of: bright, Tiling: hexes.Sphere{N: 6}, Soft: 0.2},
+		"hexed gradient":  Hexed{Of: g, Tiling: hexes.Sphere{Splits: 6}},
+		"hexed stars":     Hexed{Of: bright, Tiling: hexes.Sphere{Splits: 6}, Soft: 0.2},
 		"hexed no tiling": Hexed{Of: bright},
 	}
 }

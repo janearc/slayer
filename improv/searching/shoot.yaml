@@ -1,0 +1,32 @@
+# First-proof plan, retained for the original search/lock/blazar driver.
+# SHOOT.md now describes the expanded cast and Laniakea reveal; those
+# revised scenes and cues are not yet compiled into this executable plan.
+name: heard. (first-proof edit)
+# The song and its score are not kept in the repository. Put them, or
+# links to them, beside this file.
+music: b-m-a-s.opus
+score: score-b4f2f95a.yaml
+width: 320
+height: 180
+fps: 6
+rays: 1
+# The swell is at bar 48 beat 4, about 2:03. Its sound may
+# be a human voice; a possible local timing change remains to check.
+lock: "48.4"
+radio-one: "61.1"
+radio-two: "73.1"
+reveal: "85.1"
+coda-bars: 4
+search-cut-bars: 4
+beat-motion: [1, 0.45, 0.18, 0.03]
+# Optional authored beat-two accents. None are falsely labelled detected.
+beat-two-accents: []
+search-days: 6
+shared-azimuth-deg: 25
+shared-altitude-deg: 55
+optical-diameter-metres: 38
+optical-aperture-metres: 8
+array-count: 19
+# Tone/colour choices for a dark music-video proof, not photometry.
+exposure: 1.5
+bloom: 0.65

@@ -26,7 +26,7 @@ func TestGroupedLandingKeepsItsRayNormalAfterWorldRounding(t *testing.T) {
 		t.Fatal(err)
 	}
 	item := thing.Thing{Shape: group}
-	placed := placedThing{thing: &item, placement: newPlacement(maths.Subspace{}, nil, 0)}
+	placed := placedThing{thing: &item, placement: newPlacement(maths.Local(), nil, 0)}
 	ray := maths.Ray{At: space.Out(maths.V(0, 0, 3)),
 		Dir: space.Orientation.Out(maths.ZAxis.Neg()).Unit()}
 	distance, on, found := placed.reach(ray, 2, 4)

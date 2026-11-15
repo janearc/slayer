@@ -25,7 +25,7 @@ func TestEachDayIsThePublishedRotationInHours(t *testing.T) {
 		"neptune": 16.11, "pluto": 153.29, "charon": 153.29,
 	} {
 		b := byName(t, name)
-		if got := b.Day.Hours(); !(math.Abs(got-want) <= 0.01*want) {
+		if got := b.Day().Hours(); !(math.Abs(got-want) <= 0.01*want) {
 			t.Errorf("%s: day is %v hours, published about %v", name, got, want)
 		}
 	}
@@ -48,7 +48,7 @@ func TestEachTiltIsThePublishedAxialTiltInRadians(t *testing.T) {
 		"pluto": 122.53,
 	} {
 		b := byName(t, name)
-		if got := b.Tilt * 180 / math.Pi; !(math.Abs(got-want) <= 0.1) {
+		if got := b.Tilt() * 180 / math.Pi; !(math.Abs(got-want) <= 0.1) {
 			t.Errorf("%s: tilt is %v degrees, published about %v", name, got, want)
 		}
 	}
@@ -61,14 +61,14 @@ func TestEachTiltIsThePublishedAxialTiltInRadians(t *testing.T) {
 //
 // each is held to a tenth of a radius or so.
 func TestLengthsAreInKilometresByTheirRatios(t *testing.T) {
-	earth := Earth()
-	if got := earth.Moons[0].Orbit / earth.Radius; math.Abs(got-60.3) > 0.1 {
+	earth := its(t, Earth)
+	if got := earth.Moons()[0].Orbit() / earth.Radius(); !(math.Abs(got-60.3) <= 0.1) {
 		t.Errorf("the moon is %v earth radii away, want 60.3", got)
 	}
-	if got := Sol().Radius / earth.Radius; math.Abs(got-109.2) > 0.1 {
+	if got := its(t, Sol).Radius() / earth.Radius(); !(math.Abs(got-109.2) <= 0.1) {
 		t.Errorf("the sun is %v earth radii across, want 109.2", got)
 	}
-	if got := Jupiter().Radius / earth.Radius; math.Abs(got-11.0) > 0.1 {
+	if got := its(t, Jupiter).Radius() / earth.Radius(); !(math.Abs(got-11.0) <= 0.1) {
 		t.Errorf("jupiter is %v earth radii across, want 11.0", got)
 	}
 }
@@ -80,11 +80,11 @@ func TestLengthsAreInKilometresByTheirRatios(t *testing.T) {
 // the earth's mass is in kilograms: 5.972e24 is 81.3 moons, 5.972e24
 // over 7.342e22.
 func TestTheEarthIsInKilometresAndKilograms(t *testing.T) {
-	e := Earth()
-	if got := 2 * math.Pi * e.Radius; math.Abs(got-40030) > 10 {
+	e := its(t, Earth)
+	if got := 2 * math.Pi * e.Radius(); !(math.Abs(got-40030) <= 10) {
 		t.Errorf("the earth is %v km round, want about 40,030", got)
 	}
-	if got := e.Mass / e.Moons[0].Body.Mass; math.Abs(got-81.3) > 0.1 {
+	if got := e.Mass() / e.Moons()[0].Body().Mass(); !(math.Abs(got-81.3) <= 0.1) {
 		t.Errorf("the earth is %v moons of mass, want 81.3", got)
 	}
 }
@@ -92,8 +92,8 @@ func TestTheEarthIsInKilometresAndKilograms(t *testing.T) {
 // byName is the template of that name, or the test fails.
 func byName(t *testing.T, name string) bodies.Body {
 	t.Helper()
-	for _, b := range everyBody() {
-		if b.Name == name {
+	for _, b := range everyBody(t) {
+		if b.Name() == name {
 			return b
 		}
 	}

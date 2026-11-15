@@ -1,0 +1,80 @@
+laser-amber 5 hull REFUSED manufacture: laser-amber has no hull representation
+laser-amber 5 clumps REFUSED manufacture: laser-amber has no clumps representation
+laser-amber 5 quick 1827363f709eddd7154dc12405b2f476d3cac2e7e504b43248a40ef3f0c4160d
+laser-amber 5 demo REFUSED manufacture: laser-amber has no demo representation
+laser-amber 11 hull REFUSED manufacture: laser-amber has no hull representation
+laser-amber 11 clumps REFUSED manufacture: laser-amber has no clumps representation
+laser-amber 11 quick f87f653f22a4e0bf0327684ff46c35c65614299261a09cf1c7168e3f00cbc8e4
+laser-amber 11 demo REFUSED manufacture: laser-amber has no demo representation
+laser-blue 5 hull REFUSED manufacture: laser-blue has no hull representation
+laser-blue 5 clumps REFUSED manufacture: laser-blue has no clumps representation
+laser-blue 5 quick 1827363f709eddd7154dc12405b2f476d3cac2e7e504b43248a40ef3f0c4160d
+laser-blue 5 demo REFUSED manufacture: laser-blue has no demo representation
+laser-blue 11 hull REFUSED manufacture: laser-blue has no hull representation
+laser-blue 11 clumps REFUSED manufacture: laser-blue has no clumps representation
+laser-blue 11 quick f87f653f22a4e0bf0327684ff46c35c65614299261a09cf1c7168e3f00cbc8e4
+laser-blue 11 demo REFUSED manufacture: laser-blue has no demo representation
+laser-cyan 5 hull REFUSED manufacture: laser-cyan has no hull representation
+laser-cyan 5 clumps REFUSED manufacture: laser-cyan has no clumps representation
+laser-cyan 5 quick 1827363f709eddd7154dc12405b2f476d3cac2e7e504b43248a40ef3f0c4160d
+laser-cyan 5 demo REFUSED manufacture: laser-cyan has no demo representation
+laser-cyan 11 hull REFUSED manufacture: laser-cyan has no hull representation
+laser-cyan 11 clumps REFUSED manufacture: laser-cyan has no clumps representation
+laser-cyan 11 quick f87f653f22a4e0bf0327684ff46c35c65614299261a09cf1c7168e3f00cbc8e4
+laser-cyan 11 demo REFUSED manufacture: laser-cyan has no demo representation
+laser-green 5 hull REFUSED manufacture: laser-green has no hull representation
+laser-green 5 clumps REFUSED manufacture: laser-green has no clumps representation
+laser-green 5 quick 1827363f709eddd7154dc12405b2f476d3cac2e7e504b43248a40ef3f0c4160d
+laser-green 5 demo REFUSED manufacture: laser-green has no demo representation
+laser-green 11 hull REFUSED manufacture: laser-green has no hull representation
+laser-green 11 clumps REFUSED manufacture: laser-green has no clumps representation
+laser-green 11 quick f87f653f22a4e0bf0327684ff46c35c65614299261a09cf1c7168e3f00cbc8e4
+laser-green 11 demo REFUSED manufacture: laser-green has no demo representation
+laser-magenta 5 hull REFUSED manufacture: laser-magenta has no hull representation
+laser-magenta 5 clumps REFUSED manufacture: laser-magenta has no clumps representation
+laser-magenta 5 quick 1827363f709eddd7154dc12405b2f476d3cac2e7e504b43248a40ef3f0c4160d
+laser-magenta 5 demo REFUSED manufacture: laser-magenta has no demo representation
+laser-magenta 11 hull REFUSED manufacture: laser-magenta has no hull representation
+laser-magenta 11 clumps REFUSED manufacture: laser-magenta has no clumps representation
+laser-magenta 11 quick f87f653f22a4e0bf0327684ff46c35c65614299261a09cf1c7168e3f00cbc8e4
+laser-magenta 11 demo REFUSED manufacture: laser-magenta has no demo representation
+laser-red 5 hull REFUSED manufacture: laser-red has no hull representation
+laser-red 5 clumps REFUSED manufacture: laser-red has no clumps representation
+laser-red 5 quick 1827363f709eddd7154dc12405b2f476d3cac2e7e504b43248a40ef3f0c4160d
+laser-red 5 demo REFUSED manufacture: laser-red has no demo representation
+laser-red 11 hull REFUSED manufacture: laser-red has no hull representation
+laser-red 11 clumps REFUSED manufacture: laser-red has no clumps representation
+laser-red 11 quick f87f653f22a4e0bf0327684ff46c35c65614299261a09cf1c7168e3f00cbc8e4
+laser-red 11 demo REFUSED manufacture: laser-red has no demo representation
+laser-white 5 hull REFUSED manufacture: laser-white has no hull representation
+laser-white 5 clumps REFUSED manufacture: laser-white has no clumps representation
+laser-white 5 quick 1827363f709eddd7154dc12405b2f476d3cac2e7e504b43248a40ef3f0c4160d
+laser-white 5 demo REFUSED manufacture: laser-white has no demo representation
+laser-white 11 hull REFUSED manufacture: laser-white has no hull representation
+laser-white 11 clumps REFUSED manufacture: laser-white has no clumps representation
+laser-white 11 quick f87f653f22a4e0bf0327684ff46c35c65614299261a09cf1c7168e3f00cbc8e4
+laser-white 11 demo REFUSED manufacture: laser-white has no demo representation
+stage-scaffold 5 hull REFUSED manufacture: stage-scaffold has no hull representation
+stage-scaffold 5 clumps REFUSED manufacture: stage-scaffold has no clumps representation
+stage-scaffold 5 quick 69475a5e4e1fdf8dda507bdec9991eaac673e8d68ceb5e4283c1df48ed7db2c9
+stage-scaffold 5 demo REFUSED manufacture: stage-scaffold has no demo representation
+stage-scaffold 11 hull REFUSED manufacture: stage-scaffold has no hull representation
+stage-scaffold 11 clumps REFUSED manufacture: stage-scaffold has no clumps representation
+stage-scaffold 11 quick e6cdb49d4bc8af1821049583be49aab2c6ca268c6f74a80dd841bdaab6b45f50
+stage-scaffold 11 demo REFUSED manufacture: stage-scaffold has no demo representation
+stage-tower 5 hull REFUSED manufacture: stage-tower has no hull representation
+stage-tower 5 clumps REFUSED manufacture: stage-tower has no clumps representation
+stage-tower 5 quick 8c756d05e2c595504b7411f7498b9d10fe5ec6aed0c0733bfc657256bfcc8080
+stage-tower 5 demo REFUSED manufacture: stage-tower has no demo representation
+stage-tower 11 hull REFUSED manufacture: stage-tower has no hull representation
+stage-tower 11 clumps REFUSED manufacture: stage-tower has no clumps representation
+stage-tower 11 quick 37e0743ec7fee23677737c08f167808411758d433b3a918e74f4b1dd4b38df99
+stage-tower 11 demo REFUSED manufacture: stage-tower has no demo representation
+strobe 5 hull REFUSED manufacture: strobe has no hull representation
+strobe 5 clumps REFUSED manufacture: strobe has no clumps representation
+strobe 5 quick 1e006d3bb082adb9d3e9ebb1c8a938559d115f791de53be0ff5a6b713e944770
+strobe 5 demo REFUSED manufacture: strobe has no demo representation
+strobe 11 hull REFUSED manufacture: strobe has no hull representation
+strobe 11 clumps REFUSED manufacture: strobe has no clumps representation
+strobe 11 quick 9d2d93f6b0469879539a1612c06aac241217824b310c20d5855850a497d561e5
+strobe 11 demo REFUSED manufacture: strobe has no demo representation

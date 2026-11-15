@@ -113,7 +113,7 @@ func TestARadarIsWhereItIs(t *testing.T) {
 		toward, dist, light := glass.Light(vector(t, row, "from"),
 			maths.Up)
 		if !toward.Near(vector(t, row, "toward"), tight) ||
-			math.Abs(dist-number(t, row, "dist")) > tight ||
+			!(math.Abs(dist-number(t, row, "dist")) <= tight) ||
 			light != (maths.Light{}) {
 			t.Errorf("%s: %v, %v, %v", label(row), toward, dist, light)
 		}
@@ -128,7 +128,7 @@ func radarLooksBackAtItself(t *rapid.T) {
 	toward, dist, light := glass.Light(from, maths.Up)
 	back := from.Add(toward.Scale(dist))
 	if !back.Near(at, loose*dist) || light != (maths.Light{}) ||
-		math.Abs(toward.Len()-whole) > tight {
+		!(math.Abs(toward.Len()-whole) <= tight) {
 		t.Fatalf("from %v the radar at %v is %v away along %v", from, at,
 			dist, toward)
 	}
@@ -187,9 +187,9 @@ func floodTradesFacesForShares(t *rapid.T) {
 	_, _, facing := glass.Light(maths.Vec{}, normal)
 	_, _, away := glass.Light(maths.Vec{}, normal.Neg())
 	total := facing.Add(away)
-	if math.Abs(total.R-strength.R) > loose*strength.R ||
-		math.Abs(total.G-strength.G) > loose*strength.G ||
-		math.Abs(total.B-strength.B) > loose*strength.B {
+	if !(math.Abs(total.R-strength.R) <= loose*strength.R) ||
+		!(math.Abs(total.G-strength.G) <= loose*strength.G) ||
+		!(math.Abs(total.B-strength.B) <= loose*strength.B) {
 		t.Fatalf("a face and its back get %v and %v of %v", facing, away,
 			strength)
 	}
@@ -216,15 +216,15 @@ func spotFallsOffWithTheSquare(t *rapid.T) {
 	for _, name := range []string{"near", "far"} {
 		dist := rapid.Float64Range(wideLeast, eyeMost).Draw(t, name)
 		toward, got, light := glass.Light(aim.Scale(dist), maths.Up)
-		if math.Abs(got-dist) > loose*dist ||
+		if !(math.Abs(got-dist) <= loose*dist) ||
 			!toward.Near(aim.Neg(), tight) {
 			t.Fatalf("a spot is %v away along %v, not %v along %v", got,
 				toward, dist, aim.Neg())
 		}
 		scaled := light.Scale(dist * dist)
-		if math.Abs(scaled.R-strength.R) > loose*strengthMost ||
-			math.Abs(scaled.G-strength.G) > loose*strengthMost ||
-			math.Abs(scaled.B-strength.B) > loose*strengthMost {
+		if !(math.Abs(scaled.R-strength.R) <= loose*strengthMost) ||
+			!(math.Abs(scaled.G-strength.G) <= loose*strengthMost) ||
+			!(math.Abs(scaled.B-strength.B) <= loose*strengthMost) {
 			t.Fatalf("%v away the light %v scales to %v, not %v", dist,
 				light, scaled, strength)
 		}
@@ -261,14 +261,14 @@ func TestASpotsEdgeIsASmoothStep(t *testing.T) {
 	for _, row := range table(t, spotEdgeFile) {
 		off := offAim(number(t, row, "off"))
 		_, _, light := soft.Light(off, maths.Up)
-		if math.Abs(light.R-number(t, row, "share")) > tight {
+		if !(math.Abs(light.R-number(t, row, "share")) <= tight) {
 			t.Errorf("%s: %v", label(row), light)
 		}
 	}
 	for _, row := range table(t, spotHardFile) {
 		off := offAim(number(t, row, "off"))
 		_, _, light := hard.Light(off, maths.Up)
-		if math.Abs(light.R-number(t, row, "share")) > tight {
+		if !(math.Abs(light.R-number(t, row, "share")) <= tight) {
 			t.Errorf("%s: %v", label(row), light)
 		}
 	}
@@ -304,7 +304,7 @@ func TestASpotAimedWhereTheDotRoundsPastOne(t *testing.T) {
 			half, none)
 		_, _, light := glass.Light(vector(t, row, "from"), maths.Up)
 		if math.IsNaN(light.R) ||
-			math.Abs(light.R-number(t, row, "share")) > tight {
+			!(math.Abs(light.R-number(t, row, "share")) <= tight) {
 			t.Errorf("%s: %v", label(row), light)
 		}
 	}

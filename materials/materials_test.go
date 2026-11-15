@@ -56,7 +56,7 @@ func TestAFormulaRefusesWhatIsNotAnElement(t *testing.T) {
 
 func TestAFormulaKnowsItsMass(t *testing.T) {
 	// water is two hydrogens and an oxygen: 18.015 to three places
-	if mass := water(t).Mass(); math.Abs(mass-18.015) > 0.001 {
+	if mass := water(t).Mass(); !(math.Abs(mass-18.015) <= 0.001) {
 		t.Errorf("water weighs %v, not 18.015", mass)
 	}
 }

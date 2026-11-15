@@ -229,7 +229,7 @@ func TestDistWeighsRedGreenAndBlue(t *testing.T) {
 		{color.RGBA{0, 0, 10, 255}, color.RGBA{0, 0, 0, 255}, 11},
 		{color.RGBA{0, 0, 10, 255}, color.RGBA{0, 0, 10, 255}, 0},
 	} {
-		if got := dist(w.a, w.b); math.Abs(got-w.want) > 1e-9 {
+		if got := dist(w.a, w.b); !(math.Abs(got-w.want) <= 1e-9) {
 			t.Errorf("dist(%v, %v) = %v, want %v", w.a, w.b, got, w.want)
 		}
 	}

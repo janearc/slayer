@@ -1,0 +1,51 @@
+{
+	// slow and dark. a minor, 66 a minute, am f dm e with the major e
+	// pulling back to am. the lead is long notes and falls; the drum is
+	// two beats apart. eight bars, about 29 seconds.
+	"name": "ember",
+	"tempo": 66,
+	"meter": 4,
+	"loop": true,
+	"parts": [
+		{"role": "lead", "bars": [
+			"e5:2 c5 a4",
+			"c5:2 b4:2",
+			"a4:2 c5 f5",
+			"e5:3 d5",
+			"d5:2 f5 a5",
+			"g5:2 f5:2",
+			"b4:2 g#4 e5",
+			"e5:3 -"
+		]},
+		{"role": "pad", "bars": [
+			"(a3 c4 e4):4",
+			"(a3 c4 e4):4",
+			"(f3 a3 c4):4",
+			"(f3 a3 c4):4",
+			"(d4 f4 a4):4",
+			"(d4 f4 a4):4",
+			"(e4 g#4 b4):4",
+			"(e4 g#4 b4):4"
+		]},
+		{"role": "bass", "bars": [
+			"a2:3 e3",
+			"a2:3 e3",
+			"f2:3 c3",
+			"f2:3 c3",
+			"d2:3 a2",
+			"d2:3 a2",
+			"e2:3 b2",
+			"e2:3 b2"
+		]},
+		{"role": "perc", "bars": [
+			"k -:1 s -",
+			"k -:1 s -",
+			"k -:1 s -",
+			"k -:1 s -",
+			"k -:1 s -",
+			"k -:1 s -",
+			"k -:1 s -",
+			"k -:1 s s:1/2 s:1/2"
+		]}
+	]
+}

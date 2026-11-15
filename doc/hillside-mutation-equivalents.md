@@ -10,6 +10,11 @@ also killed necessary guards with those same names. The
 [site audit](hillside-mutation-sites.json) keeps every location and outcome.
 The final pass must preserve that distinction.
 
+The site audit's recorded source hashes for `hillside/scene.go` and
+`hillside/fuel_bed.go` no longer match those files, so its line numbers
+and outcomes for them are as recorded at 3b78a38 and not rechecked. The
+other three audited files still match.
+
 New report-formatting tests exercise single-nanosecond inputs as formatter
 data. The old reporting mutations were replaced by the extraction, rather
 than credited as killed.
@@ -40,10 +45,15 @@ Place checks exposure before spark preparation; the remaining repeated spark
 check is therefore redundant at this site. Other placement and lamp-error
 returns remain necessary and were killed.
 
-The first-medium assertion follows this concrete factory, not an arbitrary
-interface supplied by a test. The fixed ember octahedron and the lunar
-disc's fixed positive mean radius also cannot fail their constructors in the
-command's initialized state.
+The first-medium assertion follows this particular factory, not an arbitrary
+interface supplied by a test. The fixed ember octahedron also cannot fail its
+constructor in the command's initialized state.
+
+The lunar disc is no longer in that class: its radius is the Moon's mean
+radius times the `-moon` flag (`hillside/scene.go`, `moonlit`), and
+nothing validates the flag, so a zero, negative or NaN value reaches
+`globe.New` and can fail it. This note's equivalence for the disc's
+constructor was written before `-moon` existed.
 
 Source, palette, atmosphere and face-file failures are different locations
 and remain tested.

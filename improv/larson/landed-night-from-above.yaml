@@ -1,0 +1,51 @@
+# The MCRN Larson, landed, at night, for the film of its lights: the
+# scene landed-night.yaml beside this file, with the camera brought up
+# above the rim so the running lights can be seen going round.
+# 2026-11-12. Nothing else is changed.
+#
+# One frame, at a moment of the lights' programme:
+#   slayer render improv/larson/landed-night-from-above.yaml -at 2s -out FRAME.png
+# The programme is six seconds: every light lit for a second and a half,
+# then the running lights chasing round the rim three at a time, three
+# laps, with the belly lamp low. A film is the frames of one cycle.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: the MCRN Larson, landed at night, its lights going round
+  renderer: gpu-native
+  seed: 7
+  light: none
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 2300
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263780
+    north: 2148780
+    across: 64
+    down: 64
+    step: 1
+  set:
+    things:
+      the larson:
+        kind: mcrn-larson-landed
+        seed: 5
+        east: 263812
+        north: 2148748
+  film:
+    width: 1280
+    height: 800
+    rays: 2
+    exposure: 30000
+  cameras:
+    above the rim, from the stairs' side:
+      location:
+        loc_relative:
+          object: the larson
+          standoff_x: 3
+          standoff_y: -13
+          standoff_z: 5
+      orientation:
+        point_to: the larson
+        # tipped down a little, where the low camera is tipped up: from
+        # above, the hull is below the line to where the Larson stands
+        alpha: -9

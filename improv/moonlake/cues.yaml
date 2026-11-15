@@ -1,0 +1,154 @@
+# moonlake's cue sheet: what the lights do, written in bars against
+# score.yaml's measured grid. every number here is a choice to tune,
+# not a measurement. `at` is bar.beat on the grid (the first drum beat
+# is 1.1, at 59.09 s, its phase verified by eye); `at_sec` is wall time
+# for the beatless intro and past the last measured beat. The arc is
+# in arc.md.
+#
+# a cue changes only the fields it names; cueshow folds all cues up to
+# the moment and prints the state for lightshow. fields:
+#   rig        laser fan brightness, 0 off to 1 full
+#   beams      beams in each fan
+#   palette    beam colour per beat in the bar, cycling
+#   sweep_bars bars per mirror sweep
+#   pulse      the fans' sixteen steps a bar, x a hit; decay, split
+#   strobes    off | lattice | grid16 | grid8 | lead (the rim strobes)
+#   duty       how much of each subdivision a grid strobe burns
+#   hot        a lead note this loud strikes the white strobe (78)
+#   hotter     and this loud, the magenta (88)
+#   floods     off | lead | grid16 | grid8 | ones (the backlights)
+#   spots      the flank spots' level; spot_bars their sweep
+#   search     the searchlights' level; search_bars their sweep
+#   mist       the lake mist level handed to mistlake
+#   master     the moonlit scene's dimmer, 0 to 1
+#   overhead   the ship's beam, 0 to 1
+#   exposure   the camera's, in stops from the moon's
+#   fire       the shore fires, 0 to 1: they burst on this cue's beat
+#              and every four beats after, so where the cue sits is
+#              the bursts' phase
+#   moon       the moon's disc, 0 to 1, when it is laid in (MOON_DISC)
+#   moon_alt   where it stands, in degrees: the rim is at 1.65 and the
+#              disc 1.55 in radius, so at 0 it is hidden
+#   moon_pulse how deep it pulses on the beat, 0 steady to 1
+#   fade       seconds for rig, mist, master, overhead, exposure, fire,
+#              moon and moon_alt to glide to what this cue says; none
+#              is a cut
+cues:
+  # "start dark": the intro, the chant; the moon dim and coming up very
+  # slowly as the music goes from pensive toward full energy
+  - {at_sec: 0, rig: 0, strobes: off, mist: 0.12, master: 0}
+  - {at_sec: 1, master: 0.35, fade: 50}
+  # "the moon is a character": it rises from behind the rim, dim, all
+  # through the intro, and stands where it will be lit at 1:38.9
+  - {at_sec: 0, moon: 0.35, moon_alt: 0}
+  - {at_sec: 1, moon: 0.6, moon_alt: 2.3, fade: 97.9}
+  - {at_sec: 30, mist: 0.2, fade: 20}
+
+  # first drums (0:59): two beams, low, a rumour of a rig. green owns
+  # the downbeat all night.
+  - {at: "1.1", rig: 0.15, beams: 2,
+     palette: [green, magenta, cyan, amber], sweep_bars: 8}
+
+  # first break (1:12.4): hard kill, verified by ear. stillness.
+  - {at: "9.1", rig: 0}
+
+  # the drop (1:38.9, 25.1): "the moon becomes fully illuminated and
+  # present". The rig arrives with the drums and the bass: lasers on the
+  # 3-3-2, strobes on the acid line's loud notes, backlights on the
+  # eighths, the searchlights
+  - {at: "25.1", master: 1, moon: 1, fade: 0.15}
+  - {at: "25.1", rig: 0.8, beams: 10, strobes: lead, hot: 62, hotter: 74,
+     pulse: "x..x..x.x..x..x.", decay: 1.2, split: true,
+     floods: grid8, spots: 0, search: 0.9, search_bars: 4, mist: 0.4}
+  # the lasers play: a look every two bars, the banks together
+  - {at: "25.1", figures: [fan, scan, beam, fan, pair, fan64], figure_bars: 2,
+     banks: [unison]}
+  # the searchlights play too: struck on each beat, a move every four bars
+  - {at: "25.1", search_moves: [sweep, fan, chase, sweep], search_move_bars: 4,
+     search_beat: 0.6}
+  - {at: "40.1", sweep_bars: 4}
+  # wider, and the banks part for four bars and meet for four
+  - {at: "40.1", figures: [fan64, scan, cone, fan], figure_bars: 2,
+     banks: [unison, offset], banks_bars: 4}
+
+  # 2:20.0 (49.4): "a sharp fade to black, much quicker": gone in a fifth
+  # of a second, a beat of dark before the hit; the mist rises in the dark
+  - {at: "49.4", rig: 0, strobes: off, floods: off, search: 0,
+     master: 0, fade: 0.2}
+  - {at: "49.4", mist: 1.2, fade: 0.4}
+
+  # 2:20.4 (50.1): "BOOM": the ship's beam, a cone of coherent light on
+  # the lake, up in 40 ms; the camera blown white, coming down 7 stops in
+  # a second until the cone stands in its mist
+  - {at: "50.1", overhead: 1, fade: 0.04}
+  - {at: "50.1", exposure: -7, fade: 1}
+
+  # the beam glides out and the moon comes back over six seconds,
+  # landing as the acid returns
+  - {at: "61.1", overhead: 0, exposure: 0, master: 1, mist: 0.3, fade: 6}
+
+  # 2:45.3 (65.1): "the acid comes back": hotter palette, full power,
+  # gridded strobes and backlights
+  - {at: "65.1", rig: 1, beams: 10, palette: [green, red, blue, white],
+     strobes: grid16, duty: 0.3, sweep_bars: 4, floods: grid16,
+     search: 1}
+  # "another light in the frame... the moon pulsing"
+  - {at: "65.1", moon_pulse: 0.7}
+  # "especially in the acid there's a rhythm that sounds back and forth":
+  # the right heads a sixteenth behind the left for two bars, then
+  # together for two, and the looks turning every two
+  - {at: "65.1", figures: [scan, fan64, cone, pair, wave, fan],
+     figure_bars: 2, banks: [offset, unison], banks_bars: 2}
+  # "they need to point towards the viewer sometimes": every third move
+  - {at: "65.1", search_moves: [chase, fan, viewer, sweep], search_move_bars: 2,
+     search_beat: 0.8}
+
+  # ~3:00 (74.1): "it calms down... all the lights are on, but the
+  # overhead isn't so hard... grounding": the beam faint and steady,
+  # the backlights on the eighths, the lasers sweeping slower
+  - {at: "74.1", overhead: 0.2, exposure: -1, fade: 3}
+  - {at: "74.1", floods: grid8, strobes: lead, sweep_bars: 8}
+  # the lasers quiet too: single beams and pairs, the banks together
+  - {at: "74.1", figures: [beam, pair], figure_bars: 4, banks: [unison]}
+  - {at: "74.1", search_moves: [sweep], search_beat: 0.3}
+  # the moon static again
+  - {at: "74.1", moon_pulse: 0}
+
+  # ~3:13 (81.3): "the moon starts to set back the way it came and dims,
+  # and the lights dim again slowly, lasers and strobes off or gentle"
+  - {at: "81.3", master: 0.3, overhead: 0, exposure: 0, rig: 0.3,
+     mist: 0.25, fade: 12}
+  - {at: "81.3", strobes: off, floods: off, search: 0.3, beams: 4}
+  - {at: "81.3", figures: [beam]}
+  # "the moon starts to set back the way it came and dims": down behind
+  # the rim by 3:52
+  - {at: "81.3", moon: 0.35, moon_alt: 0, fade: 39}
+
+  # the fast hits before 3:39 (from 95.1): "the lasers should be going
+  # crazy": every sixteenth, alternating halves, a sweep every half bar
+  - {at: "95.1", rig: 1, beams: 10, pulse: "xxxxxxxxxxxxxxxx", decay: 0.6,
+     split: true, sweep_bars: 0.5, fade: 0.3}
+  # a look every half bar, the banks apart
+  - {at: "95.1", figures: [fan64, scan, cone, wave], figure_bars: 0.5,
+     banks: [offset]}
+  - {at: "95.1", search_moves: [chase, viewer], search_move_bars: 0.5,
+     search_beat: 1}
+
+  # 3:39 (97.2): "a huge fire explode on the scene and send up sparks,
+  # every single downbeat". The bursts count from this cue's beat.
+  # 2026-11-10, by the metronome: "bar 97.1 is when the fires should
+  # BURST from the towers", so the bursts fall on the ones; the lights
+  # below still change on beat two
+  - {at: "97.1", fire: 1}
+  - {at: "97.2", floods: ones, rig: 0.6, pulse: "x...x...x...x...",
+     sweep_bars: 4}
+  - {at: "97.2", figures: [cone, fan64], figure_bars: 1,
+     banks: [unison, offset], banks_bars: 1}
+  - {at: "97.2", search_moves: [fan, viewer], search_move_bars: 1}
+
+  # ~3:52 (105.2): "the overhead comes on bright and harsh for just a
+  # moment, and then everything fades to black"
+  - {at_sec: 232.0, overhead: 1, exposure: -5, fade: 0.04}
+  - {at_sec: 232.6, overhead: 0, master: 0, rig: 0, mist: 0, exposure: 0,
+     fire: 0, moon: 0, fade: 2}
+  - {at_sec: 232.6, floods: off, search: 0, strobes: off}

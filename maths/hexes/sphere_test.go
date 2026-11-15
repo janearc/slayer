@@ -19,7 +19,7 @@ func random(k int64) maths.Vec {
 // Goldberg polyhedron's, and a tiling off by one tile has a seam somewhere.
 func TestTwelvePentagonsAndTheRestHexagons(t *testing.T) {
 	for _, n := range []int{1, 2, 5, 16} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		tiles := tl.Tiles()
 		if len(tiles) != tl.Count() || tl.Count() != 10*n*n+2 {
 			t.Fatalf("n=%d: %d tiles, want %d", n, len(tiles),
@@ -53,7 +53,7 @@ func TestTwelvePentagonsAndTheRestHexagons(t *testing.T) {
 // over the sphere, pentagons and face edges included.
 func TestNearestIsTheTrueNearest(t *testing.T) {
 	for _, n := range []int{1, 3, 12} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		tiles := tl.Tiles()
 		for k := range int64(20000) {
 			p := random(k)
@@ -75,7 +75,7 @@ func TestNearestIsTheTrueNearest(t *testing.T) {
 
 // Neighbours are each other's neighbours, and a tile is never its own.
 func TestNeighboursAreMutual(t *testing.T) {
-	tl := Sphere{N: 4}
+	tl := Sphere{Splits: 4}
 	for _, tile := range tl.Tiles() {
 		for _, nb := range tl.Neighbours(tile) {
 			if nb == tile {
@@ -96,14 +96,14 @@ func TestNeighboursAreMutual(t *testing.T) {
 // A direction is further from its tile's edge the nearer it is to the
 // middle, and at the midpoint between two neighbours it is on the edge.
 func TestEdgeIsNoughtBetweenNeighbours(t *testing.T) {
-	tl := Sphere{N: 8}
+	tl := Sphere{Splits: 8}
 	tiles := tl.Tiles()
 	for i := 0; i < len(tiles); i += 37 {
 		tile := tiles[i]
 		c := tl.Centre(tile)
 		n := tl.Centre(tl.Neighbours(tile)[0])
 		mid := c.Add(n).Unit()
-		if e := tl.Edge(mid, tile); math.Abs(e) > 1e-9 {
+		if e := tl.Edge(mid, tile); !(math.Abs(e) <= 1e-9) {
 			t.Fatalf("tile %v: midpoint is %v from the edge", tile,
 				e)
 		}
@@ -118,7 +118,7 @@ func TestEdgeIsNoughtBetweenNeighbours(t *testing.T) {
 // Every middle of a tiling is a middle of the one a rung finer, so a
 // thing placed on a tile stays put when the rung changes.
 func TestEveryMiddleIsAMiddleOneRungFiner(t *testing.T) {
-	tl := Sphere{N: 5}
+	tl := Sphere{Splits: 5}
 	fine := tl.Finer().(Sphere)
 	for _, tile := range tl.Tiles() {
 		c := tl.Centre(tile)
@@ -135,10 +135,10 @@ func TestSpacing(t *testing.T) {
 	if (Sphere{}).Count() != 12 {
 		t.Fatalf("the zero tiling has %d tiles", (Sphere{}).Count())
 	}
-	if got := (Sphere{N: 10}).Spacing(); math.Abs(got-math.Atan(2)/10) > 1e-12 {
+	if got := (Sphere{Splits: 10}).Spacing(); !(math.Abs(got-math.Atan(2)/10) <= 1e-12) {
 		t.Fatalf("spacing at 10 is %v", got)
 	}
-	if got := SphereFor((Sphere{N: 300}).Spacing()); got.N != 300 {
+	if got := SphereFor((Sphere{Splits: 300}).Spacing()); got.Splits != 300 {
 		t.Fatalf("for its own spacing, %v", got)
 	}
 }
@@ -151,8 +151,8 @@ func TestSpacing(t *testing.T) {
 func TestAManholeOnAState(t *testing.T) {
 	const earth, manhole = 6.371e6, 0.6
 	tl := SphereFor(manhole / earth)
-	if tl.N < 1e7 || tl.N > 2e7 {
-		t.Fatalf("the manhole rung is %d splits", tl.N)
+	if tl.Splits < 1e7 || tl.Splits > 2e7 {
+		t.Fatalf("the manhole rung is %d splits", tl.Splits)
 	}
 	for k := range int64(200) {
 		p := random(k)
@@ -178,21 +178,21 @@ func TestAManholeOnAState(t *testing.T) {
 }
 
 func BenchmarkNearestCoarse(b *testing.B) {
-	tl := Sphere{N: 12}
+	tl := Sphere{Splits: 12}
 	for i := range b.N {
 		tl.Nearest(random(int64(i % 1000)))
 	}
 }
 
 func BenchmarkNearestFine(b *testing.B) {
-	tl := Sphere{N: 1 << 23}
+	tl := Sphere{Splits: 1 << 23}
 	for i := range b.N {
 		tl.Nearest(random(int64(i % 1000)))
 	}
 }
 
 func BenchmarkEdgeCoarse(b *testing.B) {
-	tl := Sphere{N: 12}
+	tl := Sphere{Splits: 12}
 	p := random(7)
 	tile := tl.Nearest(p)
 	for range b.N {

@@ -64,7 +64,7 @@ func TestLensesSeeTheAnglesKnownOfThem(t *testing.T) {
 		name, _ := row.Text("gauge")
 		made := film.NewLens(number(t, row, "focal"), gauged(t, name), none)
 		got, want := degrees(made.Wide()), number(t, row, "degrees")
-		if within := number(t, row, "within"); math.Abs(got-want) > within {
+		if within := number(t, row, "within"); !(math.Abs(got-want) <= within) {
 			label, _ := row.Text("label")
 			t.Errorf("%s sees %.3f degrees, want %v", label, got, want)
 		}
@@ -82,7 +82,7 @@ func TestLensesSeeTheAnglesKnownOfThem(t *testing.T) {
 // telescope. That is wider than the real 162 of WFC3.
 func TestTheTelescopeSeesWhatItDid(t *testing.T) {
 	seen := degrees(film.Hubble().Wide())
-	if math.Abs(seen-hubbleSeen) > hubbleWithin {
+	if !(math.Abs(seen-hubbleSeen) <= hubbleWithin) {
 		t.Errorf("hubble sees %v degrees, want %v", seen, hubbleSeen)
 	}
 	want := film.NewLens(data.Picked("hubble-focal-millimetres"),
@@ -103,7 +103,7 @@ func focalUndoesWide(t *rapid.T) {
 	name := rapid.SampledFrom(gaugeNames()).Draw(t, "gauge")
 	frame := gauged(t, name)
 	seen := film.NewLens(length, frame, none).Wide()
-	if got := film.Focal(seen, frame); math.Abs(got-length) > loose*length {
+	if got := film.Focal(seen, frame); !(math.Abs(got-length) <= loose*length) {
 		t.Fatalf("a %v on %s came back as %v", length, name, got)
 	}
 }
@@ -120,7 +120,7 @@ func lensRaysArePinholeRays(t *rapid.T) {
 	y := rapid.IntRange(none, down-whole).Draw(t, "y")
 	band := maths.Band{}
 	got := glass.Ray(x, y, across, down, band)
-	if length := got.Dir.Len(); math.Abs(length-whole) > tight {
+	if length := got.Dir.Len(); !(math.Abs(length-whole) <= tight) {
 		t.Fatalf("the lens's ray is %v long", length)
 	}
 	flat := film.NewPinhole(glass.Wide(), none)
@@ -186,7 +186,7 @@ func swathSeesWhatItCovers(t *rapid.T) {
 	across := rapid.Float64Range(wideLeast, eyeMost).Draw(t, "across")
 	got := film.Swath(across, above).Wide()
 	want := pair * math.Atan(across/(pair*above))
-	if math.Abs(got-want) > loose*want {
+	if !(math.Abs(got-want) <= loose*want) {
 		t.Fatalf("a swath %v across from %v sees %v, want %v", across,
 			above, got, want)
 	}
@@ -197,7 +197,7 @@ func TestASwathSeesTheAngleKnownOfIt(t *testing.T) {
 	for _, row := range table(t, knownSwaths) {
 		got := degrees(film.Swath(number(t, row, "across"),
 			number(t, row, "above")).Wide())
-		if math.Abs(got-number(t, row, "degrees")) > number(t, row, "within") {
+		if !(math.Abs(got-number(t, row, "degrees")) <= number(t, row, "within")) {
 			label, _ := row.Text("label")
 			t.Errorf("%s sees %v degrees", label, got)
 		}

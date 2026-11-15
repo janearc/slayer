@@ -80,10 +80,11 @@ func (shape sleeveFoliage) bears(quality) (sleeve, error) {
 }
 
 // limbing is how a limb of an architecture is made: how many pieces it
-// is in, and how far each piece droops.
+// is in, how far each piece droops, and how far it wanders from side to
+// side as it goes (see limb).
 type limbing struct {
-	pieces int
-	droop  float64
+	pieces        int
+	droop, wander float64
 }
 
 // branchlets is what a whorled tree's branches carry, when they carry
@@ -144,6 +145,7 @@ func (tree whorled) branching(bark, clad sleeve, sprays int,
 		if err != nil {
 			return growth{}, err
 		}
+		bough.wander = tree.branch.wander
 		return newGrowth(bough)
 	}
 	shoots, err := newWhorls(sprays, 1, tree.shoots.set)
@@ -155,7 +157,9 @@ func (tree whorled) branching(bark, clad sleeve, sprays int,
 		return growth{}, err
 	}
 	worn.terminal = true
-	return stemCarrying(tree.branch.pieces, tree.branch.droop,
+	carrying, err := stemCarrying(tree.branch.pieces, tree.branch.droop,
 		[]sleeve{bark, clad}, shoots, tree.shoots.shoot.pieces,
 		tree.shoots.shoot.droop, []sleeve{worn})
+	carrying.stem.wander = tree.branch.wander
+	return carrying, err
 }

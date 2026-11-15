@@ -35,10 +35,18 @@ func (assembly *instrumentAssembly) box(width, height, depth float64,
 func (assembly *instrumentAssembly) rod(from, to maths.Vec,
 	radius float64, material slot,
 ) {
+	assembly.rodAlong(from, to.Sub(from), radius, material)
+}
+
+// rodAlong lays a checked tube from a point along a run. tubes laid
+// along the same run are the same to the last bit, and so share one
+// mesh; endpoints subtracted need not be.
+func (assembly *instrumentAssembly) rodAlong(from, run maths.Vec,
+	radius float64, material slot,
+) {
 	if assembly.trouble != nil {
 		return
 	}
-	run := to.Sub(from)
 	length := measure.Metres(run.Len())
 	girth := measure.Metres(radius)
 	tube, err := newTube(length, girth, girth)

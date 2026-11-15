@@ -3,7 +3,10 @@ package set
 import yaml "gopkg.in/yaml.v3"
 
 // Mist is a prescribed appearance field, not a transpiration model.
-type Mist struct{ extinction, depth, coverage, seed float64 }
+type Mist struct {
+	extinction, depth, coverage, seed float64
+	asymmetry                         float64
+}
 
 // Extinction is the prescribed peak extinction per metre.
 func (mist Mist) Extinction() float64 { return mist.extinction }
@@ -13,6 +16,17 @@ func (mist Mist) Depth() float64 { return mist.depth }
 
 // Coverage controls noise thresholds, not measured cloud cover.
 func (mist Mist) Coverage() float64 { return mist.coverage }
+
+// Asymmetry is the Henyey-Greenstein asymmetry of the mist's scattering:
+// nought, or unsaid, scatters evenly every way, as before it could be
+// said; toward one sends the light on forward, as droplets do.
+func (mist Mist) Asymmetry() float64 { return mist.asymmetry }
+
+// mistLobe is how near one either way a mist's asymmetry may come. A
+// Henyey-Greenstein lobe stays strictly inside one by its definition;
+// picked short of it, fable-team 2026-11-12, where the lobe is a spike
+// no march resolves.
+const mistLobe = 0.99
 
 // Seed keeps weather independent of mesh construction draws.
 func (mist Mist) Seed() uint64 { return uint64(mist.seed) }
@@ -37,7 +51,9 @@ func (reading reader) weather(_, node *yaml.Node) error {
 			"extinction": reading.quantity(&m.extinction, "m^-1", 0, 100),
 			"depth":      reading.quantity(&m.depth, "m", 0.1, 1000),
 			"coverage":   reading.number(&m.coverage, 0, 1),
-			"seed":       reading.whole(&m.seed, 0, mostSeed)}, nil)
+			"seed":       reading.whole(&m.seed, 0, mostSeed),
+			"asymmetry": reading.number(&m.asymmetry, -mistLobe,
+				mistLobe)}, nil)
 		if err != nil {
 			return err
 		}

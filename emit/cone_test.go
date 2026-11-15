@@ -38,7 +38,7 @@ func TestAConeLightsInsideItsWidthAndFadesAcrossItsEdge(t *testing.T) {
 	fades := map[float64]float64{0: 1, 19: 1, 25: 0.5, 30: 0, 60: 0}
 	for off, want := range fades {
 		got := lightAt(lit, off*maths.Degree) / whole
-		if math.Abs(got-want) > 1e-9 {
+		if !(math.Abs(got-want) <= 1e-9) {
 			t.Errorf("%v degrees off the beam is %v of it, want %v",
 				off, got, want)
 		}

@@ -1,0 +1,25 @@
+{
+	"group": "bright and driving",
+	"mood": "open and rolling",
+	"feeling": "A boat leaving harbour into a bright wide morning.",
+	"intent": "Travel footage, water, a cheerful start to a documentary, an upbeat explainer.",
+	"listen_for": "The lead dropping out for one bar at 0:13 and coming back an octave up.",
+	"voicing": "@tape-chords",
+	"tempo": 128,
+	"meter": 4,
+	"seconds": 33.75,
+	"parts": [
+		{"name": "cast-off", "bar": 1, "second": 0.0,
+		 "change": "a rolling arpeggio lead over a steady hat",
+		 "feels": "Easing out of the harbour"},
+		{"name": "swell", "bar": 5, "second": 7.5,
+		 "change": "a fuller drum and a higher lead",
+		 "feels": "Wind in the sails"},
+		{"name": "open", "bar": 9, "second": 15.0,
+		 "change": "the lead returns doubled in speed an octave up",
+		 "feels": "Open sea in every direction"},
+		{"name": "end", "bar": 17, "second": 30.0,
+		 "change": "a held chord and a kick",
+		 "feels": "Horizon"}
+	]
+}

@@ -43,6 +43,11 @@ type Lay interface {
 	// again on the way out.
 	Site(records []record.Record, seed uint64, x, y, frame int64) (
 		[]record.Record, maths.Light)
+	// Clearest is the share of each lamp a pixel passes where endless
+	// light fell, every record at the least density of its curve. It
+	// is what the sites pass on the mean. Nothing a print passes is
+	// brighter.
+	Clearest(records []record.Record) maths.Light
 }
 
 // stacked is records one under another, each as wide as the film. Every
@@ -64,6 +69,16 @@ func (stacked) Across(float64) int { return whole }
 func (stacked) Site(records []record.Record, _ uint64, _, _, _ int64) (
 	[]record.Record, maths.Light) {
 	return records, maths.Grey(whole)
+}
+
+// Clearest is what the records pass one over another, each at its
+// clearest: their densities add.
+func (stacked) Clearest(records []record.Record) maths.Light {
+	var dense maths.Light
+	for _, one := range records {
+		dense = dense.Add(one.Clearest())
+	}
+	return record.Passed(dense)
 }
 
 // mosaic is records side by side. The film is a scatter of elements of
@@ -100,6 +115,18 @@ func (scatter mosaic) Site(records []record.Record, seed uint64, x, y,
 	picked := records[int(share*kinds)]
 	dimmed := picked.Window().Scale(scatter.passes * kinds)
 	return []record.Record{picked}, dimmed
+}
+
+// Clearest is the mean of what an element of each record passes at its
+// clearest, under its dimmed window. The records are held in equal
+// shares, so the mean is the sum over the count.
+func (scatter mosaic) Clearest(records []record.Record) maths.Light {
+	var total maths.Light
+	for _, one := range records {
+		window := one.Window().Scale(scatter.passes)
+		total = total.Add(window.Times(record.Passed(one.Clearest())))
+	}
+	return total
 }
 
 // lays is every lay by its name in the table. The table chooses and no

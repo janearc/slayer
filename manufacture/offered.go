@@ -2,6 +2,7 @@ package manufacture
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"time"
 
@@ -27,7 +28,7 @@ import (
 // their methods, as emit.Described does. Use go doc -u to inspect the methods
 // on generated specimens.
 //
-// cmd/hillside uses object construction; emit reads light descriptions. Keep
+// hillside uses object construction; emit reads light descriptions. Keep
 // additional implementation details private until a client needs them.
 
 // Sow constructs a deterministic random seed, not an object age or state.
@@ -51,6 +52,50 @@ func KindNamed(name string) (kind, error) { return kindNamed(name) }
 // Make generates a kind from a seed, selecting values within the kind's
 // declared ranges. It returns an error when construction is invalid.
 func Make(row kind, from seed) (good, error) { return makeOf(row, from) }
+
+var errTaller = errors.New("manufacture: only a whorled tree grows " +
+	"taller, and by a number of times above nought")
+
+var errBranched = errors.New("manufacture: only a whorled tree's " +
+	"branches carry branches")
+
+// Branched is a whorled tree whose limbs carry side branches of their
+// own, spaced along them in two rows, each in its own foliage: a bough
+// is a fan of sprays, not a line of them (2026-11-10: "the
+// branches themselves should also have branches"). For a tree seen
+// close; the trees Make and MakeWithComplexity grow are unchanged.
+func Branched(row kind) (kind, error) {
+	switch how := row.how.(type) {
+	case physicalSpruce:
+		how.legacy = how.legacy.branched()
+		return kind{name: row.name, how: how}, nil
+	case conifer:
+		return kind{name: row.name, how: how.branched()}, nil
+	}
+	return kind{}, fmt.Errorf("%w: %s is not one", errBranched, row.name)
+}
+
+// Taller is a whorled tree grown so many times taller from the same
+// seed: its trunk as much taller and thicker, as many more whorls as fit
+// up it, branches longer by less and as thick as their own length asks,
+// and needles at their own size, as many more as its crown has room
+// for. The trees Make and MakeWithComplexity grow are unchanged.
+//
+// A tree magnified instead thickens every limb with its trunk,
+// lengthens every needle, and keeps as few needles over far more crown.
+func Taller(row kind, times float64) (kind, error) {
+	if !positive(times) {
+		return kind{}, fmt.Errorf("%w: %v times", errTaller, times)
+	}
+	switch how := row.how.(type) {
+	case physicalSpruce:
+		how.legacy = how.legacy.taller(times)
+		return kind{name: row.name, how: how}, nil
+	case conifer:
+		return kind{name: row.name, how: how.taller(times)}, nil
+	}
+	return kind{}, fmt.Errorf("%w: %s is not one", errTaller, row.name)
+}
 
 // Things places the generated object in a scene, returning one thing.Thing per
 // material.
@@ -96,6 +141,10 @@ func (one lit) Toward() maths.Vec { return one.toward }
 // Beyond returns the source exclusion distance from At, preventing the light's
 // own housing from shadowing its illumination.
 func (one lit) Beyond() measure.Length { return one.beyond }
+
+// Name returns the name a scene addresses the light by to program it,
+// or nothing for a light that has none.
+func (one lit) Name() string { return one.name }
 
 // Light returns the attached light's emission description.
 func (one lit) Light() light { return one.made }

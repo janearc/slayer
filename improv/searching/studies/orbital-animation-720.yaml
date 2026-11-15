@@ -1,0 +1,48 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  named: orbital
+  with:
+    far: true
+    distance: 5200
+    day: 60s
+film:
+  width: 1280
+  height: 720
+  rays: 2
+renderer: gpu
+outputs:
+  frames: orbital-animation-720-frames
+  movie: orbital-animation-720.mp4
+fps: 6
+duration:
+  value: 8
+  unit: s
+camera:
+  unit: a thousand kilometres
+  look-at:
+    x: 0
+    y: 0
+    z: 0
+  up:
+    x: 1
+    y: 0
+    z: 0
+  moves:
+  - from:
+      x: 0
+      y: 2197.615
+      z: 4712.8
+    to:
+      x: 400
+      y: 2297.615
+      z: 4712.8
+    duration:
+      value: 8
+      unit: s
+    ease: smooth
+sound:
+  file: ../b-m-a-s.opus
+  from:
+    value: 215.67
+    unit: s

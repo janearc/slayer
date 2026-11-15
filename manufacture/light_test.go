@@ -86,7 +86,7 @@ func TestALightsStrengthAddsUpToItsPower(t *testing.T) {
 	}
 	for name, made := range lights {
 		power := made.power.InWatts()
-		if got := gathered(made); math.Abs(got-power) > 2e-4*power {
+		if got := gathered(made); !(math.Abs(got-power) <= 2e-4*power) {
 			t.Errorf("%s: its strength adds up to %v watts of %v",
 				name, got, power)
 		}
@@ -102,8 +102,8 @@ func TestASpotIsBrighterThanABareLampOfItsPower(t *testing.T) {
 	spot := mustLight(t, warm, 100, mustCone(t, 15, 0))
 	cap := 2 * math.Pi * (1 - math.Cos(15*math.Pi/180))
 	want := 4 * math.Pi / cap
-	if got := spot.strength() / bare.strength(); math.Abs(got-
-		want) > 1e-6*want {
+	if got := spot.strength() / bare.strength(); !(math.Abs(got-
+		want) <= 1e-6*want) {
 		t.Errorf("a 15 degree spot is %v times a bare lamp, not %v",
 			got, want)
 	}
@@ -119,7 +119,7 @@ func TestASpotIsBrighterThanABareLampOfItsPower(t *testing.T) {
 	degree := math.Pi / 180
 	fades := map[float64]float64{20: 1, 25: 0.5, 30: 0, 40: 0}
 	for off, want := range fades {
-		if got := soft.along(off * degree); math.Abs(got-want) > close {
+		if got := soft.along(off * degree); !(math.Abs(got-want) <= close) {
 			t.Errorf("%v degrees off a soft spot is %v of it, "+
 				"not %v", off, got, want)
 		}
@@ -140,7 +140,7 @@ func TestABeamThroughAnOpeningIsAsNarrowAsItAllows(t *testing.T) {
 	half, soft := beam.angles()
 	wide, edge, want := half.InRadians(), soft.InRadians(),
 		1.22*wave/dish
-	if math.Abs(wide-want) > close || edge != 0 {
+	if !(math.Abs(wide-want) <= close) || edge != 0 {
 		t.Errorf("a %v m wave through a %v m dish spreads %v with "+
 			"an edge of %v, not %v", wave, dish, wide, edge, want)
 	}
@@ -169,7 +169,7 @@ func TestAVeryNarrowBeamKeepsItsStrength(t *testing.T) {
 		}
 		got := mustLight(t, warm, 1, over).strength()
 		want := 1 / (math.Pi * half * half)
-		if math.IsInf(got, 0) || math.Abs(got-want) > 1e-6*want {
+		if math.IsInf(got, 0) || !(math.Abs(got-want) <= 1e-6*want) {
 			t.Errorf("a beam %v wide is %v strong, not %v", half,
 				got, want)
 		}
@@ -305,7 +305,7 @@ func TestALightThatCannotBeIsRefused(t *testing.T) {
 	refusedLight(t, err, "a flicker", "no seed")
 }
 
-// the manufactory never calls emit, as ruled 2026-10-06. a light made
+// the manufactory never calls emit, as decided 2026-10-06. a light made
 // here is a description, and emit is who reads it. this reads the
 // package's own imports.
 func TestTheManufactoryImportsNoEmit(t *testing.T) {

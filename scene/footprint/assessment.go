@@ -8,9 +8,9 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// Assessment reports possible visibility and a projected displacement bound.
-// Pixels is not a measured terrain error: the supplied displacement must be
-// justified independently. Limited means the view meets the near-plane bound.
+// Assessment reports possible visibility and a projected bound. Assess reports
+// displacement error; Span reports a containing screen extent. Neither is a
+// measured terrain error. Limited means the view meets the near-plane bound.
 type Assessment struct {
 	Visible, Limited bool
 	Pixels           float64

@@ -28,7 +28,7 @@ func TestABandCastsTwoTrianglesATile(t *testing.T) {
 // a sphere's tiling closes too, pentagons and all, and every triangle is
 // turned outward, or NewMesh would have refused it
 func TestASphereCastsClosed(t *testing.T) {
-	s := hexes.Sphere{N: 8}
+	s := hexes.Sphere{Splits: 8}
 	outward := func(p maths.Vec) maths.Vec { return p }
 	if _, n, err := Mesh(s, outward, nil, true); err != nil || n == 0 {
 		t.Fatalf("cast %d triangles: %v", n, err)

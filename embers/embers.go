@@ -11,6 +11,10 @@ import (
 )
 
 // Spec gives the authored source, motion and thermal endpoints in SI units.
+//
+// Sphere throws the jitter as a direction on a sphere, at between half and
+// all of Jitter.X, instead of each axis on its own, which fills a box: an
+// outward burst, which a box shows as a square.
 type Spec struct {
 	Rate                  float64
 	Life, Drag            time.Duration
@@ -19,6 +23,7 @@ type Spec struct {
 	Gravity               float64
 	Hot, Cool             measure.Temperature
 	Seed                  uint64
+	Sphere                bool
 }
 
 // Source supplies repeatable firebrand snapshots to a scene or animation.
@@ -91,7 +96,15 @@ func (source emitter) particle(id int64, age time.Duration) Particle {
 	angle := 2 * math.Pi * share(spec.Seed, id, 2)
 	at := maths.V(radius*math.Cos(angle), spec.Height.InMetres(), radius*math.Sin(angle))
 	jitter := maths.V(2*share(spec.Seed, id, 3)-1, 2*share(spec.Seed, id, 4)-1, 2*share(spec.Seed, id, 5)-1)
-	velocity := spec.Velocity.Add(maths.V(jitter.X*spec.Jitter.X, jitter.Y*spec.Jitter.Y, jitter.Z*spec.Jitter.Z))
+	thrown := maths.V(jitter.X*spec.Jitter.X, jitter.Y*spec.Jitter.Y, jitter.Z*spec.Jitter.Z)
+	if spec.Sphere {
+		// the same three draws: a height on the sphere, a bearing, a speed
+		up, turn := jitter.Y, math.Pi*jitter.Z
+		across := math.Sqrt(1 - up*up)
+		speed := spec.Jitter.X * (0.75 + 0.25*jitter.X)
+		thrown = maths.V(across*math.Cos(turn), up, across*math.Sin(turn)).Scale(speed)
+	}
+	velocity := spec.Velocity.Add(thrown)
 	at = position(at, velocity, spec.Air, maths.V(0, -spec.Gravity, 0), age, spec.Drag)
 	hot, cool := spec.Hot.InKelvin(), spec.Cool.InKelvin()
 	heat := cool + (hot-cool)*(1-age.Seconds()/spec.Life.Seconds())

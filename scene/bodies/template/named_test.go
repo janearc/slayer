@@ -11,12 +11,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 )
 
 // every template the package makes has a name: each exported function
-// of no arguments that hands back a bodies.Body is in named, so a file
-// can call any of them. this is the rule, checked against the source.
+// of no arguments that hands back a bodies.Body and an error is in
+// named, so a file can call any of them. this is the rule, checked
+// against the source.
 func TestEveryTemplateHasAName(t *testing.T) {
 	files, _ := filepath.Glob("*.go")
 	var made []string
@@ -32,7 +34,7 @@ func TestEveryTemplateHasAName(t *testing.T) {
 			fn, ok := each.(*ast.FuncDecl)
 			if ok && fn.Recv == nil && fn.Name.IsExported() &&
 				fn.Type.Params.NumFields() == 0 &&
-				fn.Type.Results.NumFields() == 1 &&
+				fn.Type.Results.NumFields() == 2 &&
 				types(fn.Type.Results.List[0].Type) == "bodies.Body" {
 				made = append(made, fn.Name.Name)
 			}
@@ -63,41 +65,49 @@ func types(written ast.Expr) string {
 // a name finds its template: the body is the one its function makes,
 // for a word and for two words joined by a dash.
 func TestANameFindsItsTemplate(t *testing.T) {
-	for name, want := range map[string]func() bodies.Body{
+	for name, make := range map[string]func() (bodies.Body, error){
 		"saturn": Saturn, "hot-jupiter": HotJupiter, "hale-bopp": HaleBopp,
 	} {
-		got, found := Named(name)
-		if !found {
-			t.Errorf("%s: not found", name)
+		got, err := Named(name)
+		if err != nil {
+			t.Errorf("%s: %v", name, err)
 		}
-		for _, a := range apartWithColours(got, want()) {
+		for _, a := range apartWithColours(got, its(t, make)) {
 			t.Errorf("%s: differs from its template: %s", name, a)
 		}
 	}
 }
 
-// what Named hands back is its own copy: changing it leaves the next
-// one as the template makes it.
+// what Named hands back is its own copy: aiming one leaves the next
+// as the template makes it.
 func TestNamedHandsBackItsOwnCopy(t *testing.T) {
-	mine, _ := Named("saturn")
-	scribble(reflect.ValueOf(&mine).Elem())
-	if len(apartWithColours(mine, Saturn())) == 0 {
-		t.Fatal("scribbling changed nothing, so the check below proves " +
+	mine, err := Named("hale-bopp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mine = mine.Aimed(maths.V(9, 9, 9), maths.V(1, 0, 0))
+	if len(apartWithColours(mine, its(t, HaleBopp))) == 0 {
+		t.Fatal("aiming changed nothing, so the check below proves " +
 			"nothing")
 	}
-	again, _ := Named("saturn")
-	for _, a := range apartWithColours(again, Saturn()) {
+	again, err := Named("hale-bopp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, a := range apartWithColours(again, its(t, HaleBopp)) {
 		t.Errorf("after changing one, the next differs: %s", a)
 	}
 }
 
-// a name that is not a template's finds nothing, and hands back the
-// empty body: a capital, a space for the dash, nothing at all.
+// a name that is not a template's finds nothing, saying which names
+// there are, and hands back the empty body: a capital, a space for the
+// dash, nothing at all.
 func TestANameThatIsNotATemplateFindsNothing(t *testing.T) {
 	for _, name := range []string{"Saturn", "hot jupiter", "", "vulcan"} {
-		got, found := Named(name)
-		if found || !reflect.ValueOf(got).IsZero() {
-			t.Errorf("%q: found %v, %+v", name, found, got)
+		got, err := Named(name)
+		if err == nil || !strings.Contains(err.Error(), "charon") ||
+			!reflect.ValueOf(got).IsZero() {
+			t.Errorf("%q: %v, %+v", name, err, got)
 		}
 	}
 }

@@ -32,6 +32,15 @@ snapshot. [EXAMPLES.md](../EXAMPLES.md) describes the commands, and
 - **Camera:** stars behind, a 90-degree pinhole, and the documented close
   far-view setup 600,000 km away at 25 degrees above the orbital plane.
 
+## Zappy
+
+The beamed star in its swarm at the middle of the far view is zappy, the
+lantern grown up. It is no longer built inside the orbital: it is defined
+once in package `lantern` (`lantern.Zappy()`, its values in
+`lantern/zappy.yaml`), and the far view places it from there. The named
+scene `zappy` draws it alone. The orbital's hoops are set from zappy's
+beam axis.
+
 ## Development history
 
 On 2026-10-02, the paired orbitals surrounded a small magnetar in a neon-lit

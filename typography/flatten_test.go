@@ -169,7 +169,7 @@ func TestBendIsNeverLessThanHowFarACurveStrays(t *testing.T) {
 	if got := bend(p); got != 80 {
 		t.Errorf("bend %v, want the pull of 80", got)
 	}
-	if got := strays(p, ring{p[2]}, 1000); math.Abs(got-40) > 1e-9 {
+	if got := strays(p, ring{p[2]}, 1000); !(math.Abs(got-40) <= 1e-9) {
 		t.Errorf("the quadratic strays %v, want 40", got)
 	}
 }

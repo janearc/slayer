@@ -159,6 +159,7 @@ site:
     above-metres: 0
     heading-deg: 0
   budget:
+    mist-floor-cache-bytes: 65536
     cells: 262144
     candidates: 2000000
     instances: 150000
@@ -167,6 +168,8 @@ site:
     name: introduced mountain woodland
     adaptive-regions: true
     minimum-geometry-detail: crown
+    match-crown-material-area: true
+    crown-area-samples-side: 32
     aggregate-area-samples-side: 32
     edge-fade-metres: 3000
     height-fade-metres: 200

@@ -1,0 +1,31 @@
+{
+	"group": "zappy",
+	"mood": "epic, driven, then enormous",
+	"feeling": "A small machine's tune is wound faster and faster until it wrecks the room, stops, and comes back the size of a star.",
+	"intent": "Zappy at full scale, for zappy's own video, in d minor: the five notes stated, built with brass chords and drums over four steps up in tempo, a break of near silence, and a return larger than the first statement. Nobody has heard it: it was checked by measurement only.",
+	"listen_for": "The tune turning from bright to dark at 0:08; the hammering from 0:28; the near silence at 0:42 with only a clock and the little tune; and the same tune at half speed with everything under it at 0:49.",
+	"voicing": "@zappy-full",
+	"tempo": 92,
+	"meter": 4,
+	"seconds": 65.15,
+	"parts": [
+		{"name": "plain", "bar": 1, "second": 0.0,
+		 "change": "the five notes alone over a ticking clock; a deep floor under the last",
+		 "feels": "small and sure of itself, then told otherwise"},
+		{"name": "build", "bar": 5, "second": 10.43,
+		 "change": "the bass starts to run, a kick, brass chords; the tempo steps up",
+		 "feels": "wound up: gathering"},
+		{"name": "faster", "bar": 9, "second": 19.67,
+		 "change": "the tune at double speed, each bar starting higher; a snare roll",
+		 "feels": "it cannot be stopped now"},
+		{"name": "destruction", "bar": 13, "second": 27.94,
+		 "change": "the fastest tempo; three notes of the tune hammered in octaves, chords falling",
+		 "feels": "everything breaking at once"},
+		{"name": "silence", "bar": 21, "second": 42.49,
+		 "change": "a slow clock and the five notes, very quiet, alone",
+		 "feels": "the dust settling: only pretend"},
+		{"name": "return", "bar": 23, "second": 49.15,
+		 "change": "the tune at half speed in octaves over the lowest bass and full chords",
+		 "feels": "the real size of it: vast, and bright"}
+	]
+}

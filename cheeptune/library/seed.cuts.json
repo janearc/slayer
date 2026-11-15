@@ -1,0 +1,28 @@
+{
+	"group": "sad, turning hopeful",
+	"mood": "one note, then a tune",
+	"feeling": "Something very small deciding to grow.",
+	"intent": "A beginning: a startup, a seedling, a first step, a quiet opening that builds.",
+	"listen_for": "How each section adds one thing: a bass at 0:08, a drum at 0:16, then the major lift at 0:26.",
+	"voicing": "@dmg-pad",
+	"tempo": 92,
+	"meter": 4,
+	"seconds": 52.17,
+	"parts": [
+		{"name": "seed", "bar": 1, "second": 0.0,
+		 "change": "a lone lead line, nothing else",
+		 "feels": "Small and bare"},
+		{"name": "root", "bar": 4, "second": 7.83,
+		 "change": "a low bass arrives",
+		 "feels": "Taking root"},
+		{"name": "sprout", "bar": 7, "second": 15.65,
+		 "change": "a drum and chords",
+		 "feels": "Pushing upward"},
+		{"name": "bloom", "bar": 11, "second": 26.09,
+		 "change": "major chords, a fast lead and a full drum",
+		 "feels": "Open, bright"},
+		{"name": "end", "bar": 19, "second": 46.96,
+		 "change": "a held chord and a kick",
+		 "feels": "Full grown"}
+	]
+}

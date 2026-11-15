@@ -1,0 +1,10 @@
+case,width,height,rate,frames,pad,coded,level
+small,320,192,24,24,false,192,3.0
+small padded,320,180,24,24,true,192,3.0
+padding asked and not needed,320,192,24,24,true,192,3.0
+odd height padded,320,191,24,24,true,192,3.0
+shorts,1080,1920,24,72,false,1920,4.0
+shorts at 30,1080,1920,30,72,false,1920,4.0
+shorts at 60,1080,1920,60,72,false,1920,4.2
+4K at 30,3840,2160,30,24,true,2160,5.1
+4K at 60,3840,2160,60,24,true,2160,5.2

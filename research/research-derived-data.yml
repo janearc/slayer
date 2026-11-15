@@ -1,5 +1,5 @@
 # research-derived-data.yml: every number slayer takes from a published
-# source, read from that source and never typed from memory (ruled
+# source, read from that source and never typed from memory (since
 # 2026-10-18). each names its source by its key in sources.yaml,
 # where in it, the page as the file counts pages, and the text printed
 # there. sources verify holds every entry to its pinned source before a
@@ -462,6 +462,28 @@ numbers:
       where: actual dimensions, shorter side
       text: "14.162"
       excerpt: "21.197 m x 14.162 m"
+  - name: webb-secondary-vertex-millimetres
+    value: 7169.0
+    unit: mm
+    says: how far the secondary stands in front of the primary's vertex, along V1
+    kind: measured
+    source:
+      key: mcelwain-2023-webb-telescope
+      where: table 2, the Secondary's row, V1
+      page: 6
+      text: "7169.0"
+      excerpt: "-1.6598    7169.0"
+  - name: webb-secondary-diameter-millimetres
+    value: 738
+    unit: mm
+    says: the secondary's size
+    kind: measured
+    source:
+      key: mcelwain-2023-webb-telescope
+      where: table 2, the Secondary's row, size, the last number of the row that begins Secondary 1778.9 convex
+      page: 6
+      text: "738"
+      excerpt: "0         738"
 
   # Summit instrument roles, checked against pinned institutional references.
   - name: cfht-primary-metres
@@ -678,3 +700,484 @@ numbers:
       excerpt: GEODSS, with three 1-meter telescopes
       page: 115
     unit: m
+  # magnetars, read 2026-11-12 for the real one beside zappy. a field or
+  # an energy printed with its power of ten is held as its printed
+  # mantissa, the unit naming the power, which the scene applies. what
+  # is computed from these (shells, distances, ratios) is in scene/named.
+  - name: magnetar-radius-low-km
+    value: 10
+    unit: km
+    says: lower end of the neutron-star radius the review takes; the spin-inferred fields assume this end
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: section 5.2, surface temperature, "a neutron star of radius R = 10 - 13 km"
+      page: 23
+      text: "10"
+      excerpt: "R ≈ 10 − 13 km"
+  - name: magnetar-radius-high-km
+    value: 13
+    unit: km
+    says: upper end of the neutron-star radius the review takes
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: section 5.2, surface temperature, "a neutron star of radius R = 10 - 13 km"
+      page: 23
+      text: "13"
+      excerpt: "R ≈ 10 − 13 km"
+  - name: magnetar-crust-km
+    value: 1
+    unit: km
+    says: thickness of the solid crust over the liquid core, a model's figure, not an observation
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: section 5.1, internal dynamics
+      page: 21
+      text: "1"
+      excerpt: "1 km-thick solid crust"
+  - name: sgr1806-period-seconds
+    value: 7.55
+    unit: s
+    says: spin period of SGR 1806-20, from the McGill catalogue
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: Table 1, SGR 1806-20 row, P
+      page: 6
+      text: "7.55"
+      excerpt: "SGR 1806−20           7.55    20     0.24      45       8.7"
+  - name: sgr1806-field-1e14-gauss
+    value: 20
+    unit: 1e14 G
+    says: spin-inferred surface dipole field of SGR 1806-20, from the McGill catalogue; inferred, not seen
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: Table 1, SGR 1806-20 row, B
+      page: 6
+      text: "20"
+      excerpt: "SGR 1806−20           7.55    20     0.24      45       8.7"
+  - name: sgr1806-distance-kpc
+    value: 8.7
+    unit: kpc
+    says: distance to SGR 1806-20 as the catalogue takes it; the 2005 flare papers used 15 kpc
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: Table 1, SGR 1806-20 row, D
+      page: 6
+      text: "8.7"
+      excerpt: "SGR 1806−20           7.55    20     0.24      45       8.7"
+  - name: magnetar-period-shortest-seconds
+    value: 2.07
+    unit: s
+    says: shortest spin period among the review's magnetars, 1E 1547.0-5408, leaving out the two rotation-powered pulsars it lists in brackets
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: Table 1, 1E 1547.0-5408 row, P
+      page: 6
+      text: "2.07"
+      excerpt: "1E 1547.0-5408        2.07"
+  - name: magnetar-period-longest-seconds
+    value: 11.79
+    unit: s
+    says: longest spin period among the review's magnetars, 1E 1841-045
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: Table 1, 1E 1841-045 row, P
+      page: 6
+      text: "11.79"
+      excerpt: "1E 1841–045           11.79"
+  - name: quantum-critical-field-1e13-gauss
+    value: 4.4
+    unit: 1e13 G
+    says: the field above which the vacuum's own polarisation changes how light travels
+    kind: measured
+    source:
+      key: kaspi-beloborodov-2017-magnetars
+      where: section 5.2.4, B_Q
+      page: 25
+      text: "4.4"
+      excerpt: "≈ 4.4 × 1013 G"
+  - name: spin-down-field-coefficient-1e19
+    value: 3.2
+    unit: 1e19 G per root (s)
+    says: the catalogue's surface dipole field from period and its slowing, B = 3.2e19 (P Pdot)^0.5 G, vacuum dipole, I = 1e45 g cm^2
+    kind: measured
+    source:
+      key: olausen-kaspi-2014-catalog
+      where: section 2, definition of B
+      page: 2
+      text: "3.2"
+      excerpt: "B = 3.2 × 1019"
+  - name: sgr1806-spike-seconds
+    value: 0.2
+    unit: s
+    says: how long the initial spike of the 2004 giant flare lasted
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: abstract
+      page: 1
+      text: "0.2"
+      excerpt: "first 0.2 s"
+  - name: sgr1806-spike-rise-ms
+    value: 1
+    unit: ms
+    says: the spike's rise time, an upper bound
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: the initial spike, rise and fall times
+      page: 3
+      text: "1"
+      excerpt: "τrise≤1 ms"
+  - name: sgr1806-spike-decay-ms
+    value: 65
+    unit: ms
+    says: the spike's decay time
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: the initial spike, rise and fall times
+      page: 3
+      text: "65"
+      excerpt: "τdecay≈65 ms"
+  - name: sgr1806-tail-period-seconds
+    value: 7.56
+    unit: s
+    says: the period the flare's tail pulsed at, the star's spin
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: the pulsating tail
+      page: 3
+      text: "7.56"
+      excerpt: "period of 7.56 s"
+  - name: sgr1806-tail-seconds
+    value: 380
+    unit: s
+    says: how long RHESSI saw the pulsating tail
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: the pulsating tail
+      page: 3
+      text: "380"
+      excerpt: "for 380 s."
+  - name: sgr1806-spike-fluence-erg-cm2
+    value: 1.36
+    unit: erg cm^-2
+    says: the spike's energy per square centimetre at the Earth, photons above 30 keV, Wind
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: the initial spike, fluence
+      page: 3
+      text: "1.36"
+      excerpt: "(1.36±0.35) erg cm−2"
+  - name: sgr1806-spike-energy-1e46-erg-at-15kpc
+    value: 3.7
+    unit: 1e46 erg
+    says: the spike's energy if it shone the same every way, at the 15 kpc the paper took
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: the initial spike, energy
+      page: 3
+      text: "3.7"
+      excerpt: "Espike=(3.7±0.9)×1046d152 erg"
+  - name: hurley-flare-distance-kpc
+    value: 15
+    unit: kpc
+    says: the distance the 2005 flare energies are scaled to
+    kind: measured
+    source:
+      key: hurley-2005-sgr1806-flare
+      where: the precursor, definition of d15
+      page: 3
+      text: "15"
+      excerpt: "d15 = (d / 15 kpc)"
+  - name: sgr1806-spike-energy-palmer-1e46-erg-at-15kpc
+    value: 2
+    unit: 1e46 erg
+    says: the spike's energy as Swift's team measured it, at 15 kpc; the second of two measurements
+    kind: measured
+    source:
+      key: palmer-2005-sgr1806-flare
+      where: main text, energy release in the spike
+      page: 4
+      text: "2"
+      excerpt: "2 × 1046 d215 erg"
+  - name: sgr1806-spike-fluence-palmer-erg-cm2
+    value: 0.80
+    unit: erg cm^-2
+    says: the spike's fluence as Swift's team measured it, 45 keV to 10 MeV
+    kind: measured
+    source:
+      key: palmer-2005-sgr1806-flare
+      where: main text, spike spectrum
+      page: 3
+      text: "0.80"
+      excerpt: "0.80(5) erg cm−2"
+  - name: sgr1806-ionosphere-lowest-km
+    value: 20
+    unit: km
+    says: how low in the Earth's daytime air the flare's ionisation reached, from radio signals and a model
+    kind: measured
+    source:
+      key: inan-2007-sgr1806-ionosphere
+      where: paragraph 4
+      page: 1
+      text: "20"
+      excerpt: "20 km altitude for >1 hour"
+  - name: atomic-field-1e9-gauss
+    value: 2.351
+    unit: 1e9 G
+    says: the field at which an electron's magnetic energy matches an atom's own binding; far above it atoms become thin cylinders
+    kind: measured
+    source:
+      key: lai-2001-strong-fields
+      where: equation 1.3, B_0
+      page: 2
+      text: "2.351"
+      excerpt: "= 2.351 × 109 G"
+  - name: fridge-magnet-gauss
+    value: 10
+    unit: G
+    says: a fridge magnet's field
+    kind: measured
+    source:
+      key: maglab-mini-to-mighty
+      where: opening section, units
+      text: "10"
+      excerpt: "Your fridge magnet is a modest 10 gauss"
+  - name: earth-field-gauss
+    value: 0.5
+    unit: G
+    says: the Earth's magnetic field, about
+    kind: measured
+    source:
+      key: maglab-mini-to-mighty
+      where: opening section, units
+      text: ".5"
+      excerpt: "The Earth's magnetic field is about .5 gauss"
+  - name: strongest-steady-field-tesla
+    value: 45
+    unit: T
+    says: the strongest steady field made in a laboratory, the MagLab's hybrid magnet
+    kind: measured
+    source:
+      key: maglab-mini-to-mighty
+      where: the hybrid magnet's picture
+      text: "45"
+      excerpt: "The MagLab's world-record 45 tesla hybrid magnet."
+  - name: earth-mean-radius-km
+    value: 6371
+    unit: km
+    says: the Earth's volumetric mean radius
+    kind: measured
+    source:
+      key: nasa-earth-factsheet
+      where: bulk parameters
+      text: "6371.000"
+      excerpt: "Volumetric mean radius (km)     6371.000"
+  - name: solar-irradiance-w-m2
+    value: 1361
+    unit: W m^-2
+    says: the Sun's light arriving at the Earth's distance
+    kind: measured
+    source:
+      key: nasa-earth-factsheet
+      where: bulk parameters
+      text: "1361.0"
+      excerpt: "Solar irradiance (W/m<sup>2</sup>)         1361.0"
+  - name: moon-semimajor-1e6-km
+    value: 0.3844
+    unit: 1e6 km
+    says: the Moon's mean distance from the Earth, its orbit's semimajor axis
+    kind: measured
+    source:
+      key: nasa-moon-fact-sheet
+      where: orbital parameters, semimajor axis
+      text: "0.3844"
+      excerpt: "<td align=\"center\">0.3844</td>"
+  - name: sun-luminosity-1e24-watts
+    value: 382.8
+    unit: 1e24 W
+    says: the Sun's luminosity
+    kind: measured
+    source:
+      key: nasa-sun-factsheet
+      where: bulk parameters, luminosity
+      text: "382.8"
+      excerpt: "<td align=\"center\">382.8</td>"
+
+  # quasars, blazars and the photon ring: the quasar slice, 2026-11-12.
+  # masses of the largest holes differ between papers; each is kept with
+  # its paper, and the shorts say the range.
+  - name: photon-subring-dimming-schwarzschild-percent
+    value: 4
+    unit: percent
+    says: each photon subring of a still hole carries e to the minus pi, about
+      four percent, of the one outside it, and is that much thinner
+    kind: measured
+    source:
+      key: johnson-2020-photon-ring
+      where: section 2, the subring flux ratio, for Schwarzschild
+      page: 4
+      text: '4'
+      excerpt: e−π ≈ 4%
+  - name: m87-ring-diameter-microarcsec
+    value: 42
+    unit: microarcsecond
+    says: the diameter of the bright ring the EHT imaged round M87's hole
+    kind: measured
+    source:
+      key: eht-2019-m87-paper-one
+      where: abstract
+      page: 1
+      text: '42'
+      excerpt: diameter of 42
+  - name: m87-hole-mass-billion-suns
+    value: 6.5
+    unit: billion solar masses
+    says: M87's hole's mass from the EHT image, plus or minus 0.7
+    kind: measured
+    source:
+      key: eht-2019-m87-paper-one
+      where: abstract
+      page: 1
+      text: '6.5'
+      excerpt: (6.5
+  - name: sgra-ring-diameter-microarcsec
+    value: 51.8
+    unit: microarcsecond
+    says: the diameter of the bright ring the EHT imaged round our galaxy's
+      central hole, plus or minus 2.3
+    kind: measured
+    source:
+      key: eht-2022-sgra-paper-one
+      where: abstract
+      page: 1
+      text: '51.8'
+      excerpt: 51.8 ± 2.3 µas
+  - name: ton618-hole-mass-log-suns-shemmer
+    value: 10.82
+    unit: log10 solar masses
+    says: TON 618's hole's mass from the width of its H-beta line, about 66
+      billion suns; its measurement uncertainty is within a factor of two,
+      the paper says
+    kind: measured
+    source:
+      key: shemmer-2004-nir-quasars
+      where: Table 2, TON 618, log MBH
+      page: 6
+      text: '10.82'
+      excerpt: 14905           10.82
+  - name: ton618-hole-mass-log-suns-ge
+    value: 10.61
+    unit: log10 solar masses
+    says: TON 618's hole's mass as Ge and others list it from an H-beta fit,
+      about 41 billion suns
+    kind: measured
+    source:
+      key: ge-2019-civ-blueshift
+      where: Table 2, TON618, MBH
+      page: 13
+      text: '10.610'
+      excerpt: 47.310       10.610
+  - name: ton618-redshift
+    value: 2.219
+    says: TON 618's redshift as Shemmer and others' observing log gives it
+    kind: measured
+    source:
+      key: shemmer-2004-nir-quasars
+      where: Table 1, TON 618, z
+      page: 2
+      text: '2.219'
+      excerpt: +31 28 38     2.219
+  - name: porphyrion-jets-projected-megaparsecs
+    value: 6.43
+    unit: Mpc
+    says: the length on the sky of the longest pair of black hole jets yet
+      found, Porphyrion's, plus or minus 0.05; about seven in full
+    kind: measured
+    source:
+      key: oei-2024-porphyrion
+      where: main text, the outflow's projected length
+      page: 2
+      text: '6.43'
+      excerpt: lp = 6.43 ± 0.05 Mpc
+  - name: neptune-semimajor-axis-au
+    value: 30.06896348
+    unit: au
+    says: the semimajor axis of Neptune's orbit
+    kind: measured
+    source:
+      key: nasa-neptune-fact-sheet
+      where: orbital parameters, semimajor axis (AU)
+      text: '30.06896348'
+      excerpt: Semimajor axis (AU)                 30.06896348
+  - name: eye-foveola-degrees
+    value: 1
+    unit: degree
+    says: the diameter of the foveola, the sharpest middle of the eye's view,
+      which is what foveal vision usually means
+    kind: measured
+    source:
+      key: strasburger-2011-peripheral-vision
+      where: section 2, the fovea and the periphery
+      text: '1'
+      excerpt: having a diameter of 1 deg of arc
+  - name: eye-whole-field-horizontal-degrees
+    value: 214
+    unit: degree
+    says: the whole horizontal width of what two eyes take in, round about;
+      only its middle is sharp
+    kind: measured
+    source:
+      key: strasburger-2011-peripheral-vision
+      where: section 2, the extent of the visual field
+      text: '214'
+      excerpt: up to around 214° horizontal diameter
+  - name: sun-gm-nominal-mantissa
+    value: 1.3271244
+    unit: 1e20 m3 s-2
+    says: the sun's mass times the gravitational constant, the nominal value
+      IAU 2015 Resolution B3 sets; times ten to the twenty
+    kind: measured
+    source:
+      key: iau-2015-b3-nominal
+      where: the worked example of the nominal solar mass parameter
+      page: 12
+      text: '1.3271244'
+      excerpt: 1.3271244 × 1020 m3 s−2
+  - name: sun-radius-nominal-mantissa
+    value: 6.957
+    unit: 1e8 m
+    says: the sun's nominal radius, IAU 2015 Resolution B3; times ten to the
+      eight metres
+    kind: measured
+    source:
+      key: iau-2015-b3-nominal
+      where: Table 1, solar conversion constants
+      page: 5
+      text: '6.957'
+      excerpt: = 6.957 × 108 m
+  - name: earth-equatorial-radius-nominal-mantissa
+    value: 6.3781
+    unit: 1e6 m
+    says: the earth's nominal equatorial radius, IAU 2015 Resolution B3; times
+      ten to the six metres
+    kind: measured
+    source:
+      key: iau-2015-b3-nominal
+      where: Table 1, planetary conversion constants
+      page: 5
+      text: '6.3781'
+      excerpt: = 6.3781 × 106 m

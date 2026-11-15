@@ -1,0 +1,337 @@
+# the full moon resting on kīlauea iki's east rim, seen from the crater
+# floor through a long lens, the trees on the rim before it. none of
+# them is alight in this set.
+#
+# the moon is full, at opposition, so it rises as the sun sets: this is
+# twilight, the sun below the western horizon. at opposition the moon
+# rises at the top of the earth's shadow, so the camera is low, on the
+# crater floor, where the far rim stands 4.67 degrees up and hides the
+# shadow's edge: everything in the frame is under it.
+#
+# measured: the ground (the usgs's 2019 lidar model); the moon's size,
+# distance and albedo (nasa's fact sheet); its light, the sun's through
+# that albedo; the sun's light; the air's dimming and reddening of
+# both, and the sky they light (rayleigh, bodhaine and the others).
+# picked: where the camera and the moon stand, the lens. the trees are
+# spruces standing in for ʻōhiʻa, until the manufactory grows it.
+#
+# not here yet, and so wrong in the picture: light the air scatters
+# more than once, which fills the earth's shadow with a dusky blue, so
+# the sky in the frame is black; ozone; the air's bending of light near
+# the horizon; and mauna loa, which in truth hides the sun to the west.
+scene:
+  # improv/moonlake, 2026-11-09: the moonrise set, the crater flooded
+  # with still water to 1076 m (hillside -lake 1076), seen from the rise
+  # at the west end, 1127 m, between two spruces. never merged
+  name: moonlake
+  # drawn by the gpu's own ray queries for its meshes and shadows: at 2048
+  # wide with 4 rays a side it takes 11.5 s where the kernel's own
+  # traversal takes 12.6 s, and the picture is 0.0001 percent of mean
+  # light from it, with 90 pixels in 2.4 million differing by over 1 percent
+  renderer: gpu-native
+  light: moon
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 1900
+  # the bearing from the lookout to the far tree on the rim, and resting
+  # on the rim: the rim at 4.67 degrees from the lookout, by the lidar,
+  # and the moon's middle a radius and a little more above it
+  moon:
+    azimuth: 109.65
+    # improv: low behind the rim, whose far tree's ground stands at +1.5
+    # degrees from the raised camera (1195.5 m over 1147.6 m, 1,834.5 m
+    # off), so the rim and its giant spruces cut the disc's foot and it
+    # reads as far behind the land, and so as huge
+    altitude: 2.3
+    face: svs-moon-kit-color
+  # opposite the moon, as a full moon's sun is, until an ephemeris gives
+  # the two for a date: the moon's way less half a turn
+  # improv: off opposition, a night or so before full. at opposition the
+  # lake, an earth-sized sphere, eclipses the moon it reflects
+  sun:
+    azimuth: 304
+    altitude: -12
+  # improv: the file form of the flags the lake picture is made with
+  # (-lake 1076 -moon 6 -moonglow 0.042 -giants 5). each key departs from
+  # what is measured, and the render prints a line for it. a flag given
+  # on the command line stands over its key
+  # fantasy:
+  #   lake: 1076
+  #   moon: 6
+  #   moonglow: 0.042
+  #   giants: 5
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    # improv: 400 m further west, to hold the rise the camera stands on
+    west: 262900
+    north: 2149000
+    across: 2400
+    down: 1700
+    step: 4
+  # a test frame at preview size: 480 pixels across the frame, two rays
+  # a side, two glimpses. the raw is joules a square metre of film, in
+  # libtheme's three channels, not yet a spectrum.
+  # improv: 16 by 9; 320 across for minute-long drafts, 2048 for the
+  # whole film, with four rays a side, sixteen a pixel, for its plates
+  film:
+    width: 2048
+    rays: 4
+    # smpte st 417's 15/70 camera aperture, 70.41 by 51.61 mm: its table
+    # 1, "camera aperture height 2.032 nom 51.61 nom", read from the pdf,
+    # sha256 893c08a6...0edd. the 52.63 often given is a
+    # mailing list's, not the standard's
+    # improv: the 15/70 aperture cropped to 16 by 9
+    frame:
+      width: 70.41
+      height: 39.61
+    # picked, for the shot: 1344 mm sees 3 degrees across this frame,
+    # wide enough to hold the moon on the ridge. f/16: focused
+    # on the rim 1.47 km off, the moon blurs about 0.08 mm, half a pixel
+    # at this size
+    # improv: 85 mm sees about 26 degrees up and down this frame and 45
+    # across: the rim and the sky above, the lake below, looked down on
+    lens:
+      focal: 85
+      stop: 16
+      focus: the far tree
+    # picked: a second. the moon does not move yet, so it cannot trail
+    shutter: 1
+    glimpses: 2
+  cameras:
+    down:
+      # improv, the first ask: "looking down at the water through
+      # trees": 20 m up among the spruces on the west rise, 6 degrees down
+      title: "looking down at the water through the trees"
+      orientation:
+        point_to: the far tree
+        alpha: -6
+      location:
+        loc_relative:
+          object: the west rise
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 20
+    across:
+      title: "the moon on the east rim, from the crater floor"
+      orientation:
+        point_to: the far tree
+        # tipped up so the rim sits low and the frame, 2.2 degrees high,
+        # runs from about 4.4 to 6.6: the moon on the ridge, and some 50
+        # m of sky above the rim
+        alpha: 5.5
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 2
+    ridge:
+      # the walkthrough's reverse of down (improv/moonlake/walkthrough.yaml,
+      # fable-team 2026-11-12): 70 m over the far tree on the east rim,
+      # the moon at its back, looking down the lake at the west rise,
+      # 1,834.5 m off. Drawn at 135 mm on a square frame in its shot
+      title: "from the ridge, the moon behind, looking back at the viewer"
+      orientation:
+        point_to: the west rise
+        alpha: -3.4
+      location:
+        loc_relative:
+          object: the far tree
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 70
+    plan:
+      # the walkthrough's plan (fable-team 2026-11-12): straight down on
+      # the whole set from 4,400 m over the lookout's ground, over the
+      # middle of the line from the west rise to the far tree, the show's
+      # way (toward the far tree) up the picture
+      title: "straight down on the whole set"
+      orientation:
+        point_to: the far tree
+        alpha: -90
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 518
+          standoff_y: -185
+          standoff_z: 4400
+  set:
+    things:
+      # improv: the rise on the moon's bearing, back from the lookout,
+      # 1127.6 m by the lidar, and two spruces 30 m on down its slope,
+      # 3.5 m either side of the line
+      the west rise:
+        kind: cobble
+        seed: 6
+        east: 263104.5
+        north: 2148423.5
+      # improv: three close spruces, 7 to 12 m ahead of the raised
+      # camera and a few metres to either side, rising past its eye, so
+      # it looks down at the water through their branches. demo: their
+      # foliage grown needle by needle, since they fill the frame
+      close left:
+        kind: spruce
+        complexity: demo
+        seed: 51
+        east: 263115.3
+        north: 2148423.9
+      close right:
+        kind: spruce
+        complexity: demo
+        seed: 52
+        east: 263114.1
+        north: 2148414.8
+      close edge:
+        kind: spruce
+        complexity: demo
+        seed: 53
+        east: 263113.8
+        north: 2148428.7
+      near left:
+        kind: spruce
+        seed: 41
+        east: 263134.0
+        north: 2148416.7
+      near right:
+        kind: spruce
+        seed: 42
+        east: 263131.6
+        north: 2148410.1
+      # improv: the towers the lasers stand on, from "device", 2026-11-10:
+      # "build it like a stage scaffolding", and then "put more stuff on
+      # them, and make them smaller": a stage tower, 20 m with its gear, at
+      # each of lightshow's four heads, two on the rim 120 m either side of
+      # the far tree, two on the shores, each turned square to the camera
+      # on the west rise (its heading the bearing to it), the heads and the
+      # fires on their top decks; rig-heights.yaml measures the ground
+      rig rim left:
+        kind: stage-tower
+        seed: 91
+        east: 264872.4
+        north: 2147919.0
+        heading: {value: 106, unit: deg}
+      rig rim right:
+        kind: stage-tower
+        seed: 92
+        east: 264791.6
+        north: 2147693.0
+        heading: {value: 113, unit: deg}
+      rig shore left:
+        kind: stage-tower
+        seed: 93
+        east: 263652.4
+        north: 2148337.2
+        heading: {value: 99, unit: deg}
+      rig shore right:
+        kind: stage-tower
+        seed: 94
+        east: 263578.1
+        north: 2148129.0
+        heading: {value: 122, unit: deg}
+      the lookout:
+        kind: cobble
+        seed: 5
+        east: 263450
+        north: 2148300
+      # the rim where the bearing meets it, 1,468 m from the lookout,
+      # and trees along it every 8 m, across the line of sight
+      the far tree:
+        kind: spruce
+        seed: 3
+        east: 264832
+        north: 2147806
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      rim a:
+        kind: spruce
+        seed: 21
+        east: 264824
+        north: 2147783
+      rim b:
+        kind: spruce
+        seed: 22
+        east: 264827
+        north: 2147791
+      rim c:
+        kind: spruce
+        seed: 23
+        east: 264829
+        north: 2147798
+      rim d:
+        kind: spruce
+        seed: 24
+        east: 264835
+        north: 2147814
+      rim e:
+        kind: spruce
+        seed: 25
+        east: 264837
+        north: 2147821
+      rim f:
+        kind: spruce
+        seed: 26
+        east: 264840
+        north: 2147829
+      rim g:
+        kind: spruce
+        seed: 27
+        east: 264843
+        north: 2147802
+      # improv: more along the rim across the moon's bearing, 24 to 48 m
+      # either side of the far tree, to stand against the disc
+      rim h:
+        kind: spruce
+        seed: 28
+        east: 264816.2
+        north: 2147760.8
+      rim i:
+        kind: spruce
+        seed: 29
+        east: 264818.8
+        north: 2147768.4
+      rim j:
+        kind: spruce
+        seed: 30
+        east: 264821.4
+        north: 2147775.9
+      rim k:
+        kind: spruce
+        seed: 31
+        east: 264824.1
+        north: 2147783.4
+      rim l:
+        kind: spruce
+        seed: 32
+        east: 264839.9
+        north: 2147828.6
+      rim m:
+        kind: spruce
+        seed: 33
+        east: 264842.6
+        north: 2147836.1
+      rim n:
+        kind: spruce
+        seed: 34
+        east: 264845.2
+        north: 2147843.6
+      rim o:
+        kind: spruce
+        seed: 35
+        east: 264847.8
+        north: 2147851.2
+    stands:
+      # improv: 400, not 150, and none alight
+      the east rim:
+        kind: spruce
+        count: 400
+        seed: 17
+        above: 1195
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      the forest:
+        kind: spruce
+        count: 600
+        seed: 11
+        above: 1150
+        below: 1195
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"

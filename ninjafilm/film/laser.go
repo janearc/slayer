@@ -36,8 +36,6 @@ var (
 //
 // Its length is how far the beam reaches, for its bounds. Nought is a
 // thousand units. Zero aims are down minus z.
-//
-//ninja:vow practice slayer's scenes make their laser here
 type Laser struct {
 	at, aim  maths.Vec
 	width    float64
@@ -47,8 +45,6 @@ type Laser struct {
 
 // NewLaser is a laser at a place and aimed. It has a width, a strength
 // and a reach.
-//
-//ninja:vow practice slayer's scenes make their laser here
 func NewLaser(at, aim maths.Vec, width float64, strength maths.Light,
 	length float64) Laser {
 	return Laser{at, aim, width, strength, length}

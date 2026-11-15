@@ -35,7 +35,7 @@ func TestDecodeOfTheEndsAndTheMiddle(t *testing.T) {
 		in   uint8
 		want float64
 	}{{0, 0}, {1, 1.0 / 255 / 12.92}, {128, 0.21586050}, {255, 1}} {
-		if got := Decode(c.in); math.Abs(got-c.want) > 1e-8 {
+		if got := Decode(c.in); !(math.Abs(got-c.want) <= 1e-8) {
 			t.Errorf("Decode(%d) = %v, want %v", c.in, got, c.want)
 		}
 	}

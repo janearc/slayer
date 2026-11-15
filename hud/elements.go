@@ -27,10 +27,15 @@ type Text struct {
 	At          Point
 	Align       Align
 	Ink, Ground string
+	Within      Span
 }
 
-// lay sets the words' cells, one character a cell along the row.
+// lay sets the words' cells, one character a cell along the row, if the
+// text's span holds the frame's time.
 func (made Text) lay(on *grid) error {
+	if !made.Within.Holds(on.at) {
+		return nil
+	}
 	return on.words(made.Words.At(on.at), on.cell(made.At), made.Align,
 		made.Ink, made.Ground)
 }
@@ -66,13 +71,17 @@ func (on *grid) inked(ink, ground string) (Cell, error) {
 // Frame is a box's edge drawn in lines, in the ink role, the picture
 // showing inside it and behind its lines.
 type Frame struct {
-	Box Box
-	Ink string
+	Box    Box
+	Ink    string
+	Within Span
 }
 
 // lay sets the cells of the box's edge: a line along its top and bottom
 // rows and down its first and last columns, a corner at each corner.
 func (made Frame) lay(on *grid) error {
+	if !made.Within.Holds(on.at) {
+		return nil
+	}
 	box := on.cells(made.Box)
 	if box.Dx() < 2 || box.Dy() < 2 {
 		return fmt.Errorf("%w: a frame takes two cells each way, "+
@@ -111,6 +120,7 @@ type Bar struct {
 	Box         Box
 	Value       Gauge
 	Fill, Empty string
+	Within      Span
 }
 
 // eighths are the characters that fill a cell from its left, by how many
@@ -119,6 +129,9 @@ var eighths = [9]rune{' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█
 
 // lay sets every cell of the box, each row filled alike.
 func (made Bar) lay(on *grid) error {
+	if !made.Within.Holds(on.at) {
+		return nil
+	}
 	value := made.Value.At(on.at)
 	if !(value >= 0 && value <= 1) {
 		return fmt.Errorf("%w: a bar shows nought to one, not %v",

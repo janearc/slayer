@@ -96,7 +96,7 @@ func lowest(n, f, i, j int) Tile {
 // several splits and for a sample at the finest.
 func TestEveryCornerHasOneNameTheLowestFace(t *testing.T) {
 	for _, n := range []int{1, 2, 3, 4, 6, 9} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		for f := range faces {
 			for i := 0; i <= n; i++ {
 				for j := 0; i+j <= n; j++ {
@@ -108,7 +108,7 @@ func TestEveryCornerHasOneNameTheLowestFace(t *testing.T) {
 			}
 		}
 	}
-	tl := Sphere{N: finest}
+	tl := Sphere{Splits: finest}
 	n := finest
 	for f := range faces {
 		for _, c := range [][2]int{{1, 1}, {1, 2}, {2, 1}, {1, n - 2}, {n - 2, 1},
@@ -131,7 +131,7 @@ func TestEveryCornerHasOneNameTheLowestFace(t *testing.T) {
 // 25.
 func TestIDsCountTheCornersInOrder(t *testing.T) {
 	for _, n := range []int{1, 2, 3, 5} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		k := int64(0)
 		for f := range faces {
 			for i := 0; i <= n; i++ {
@@ -145,10 +145,10 @@ func TestIDsCountTheCornersInOrder(t *testing.T) {
 			}
 		}
 	}
-	if got := (Sphere{N: 3}).ID(Tile{2, 1, 1}); got != 25 {
+	if got := (Sphere{Splits: 3}).ID(Tile{2, 1, 1}); got != 25 {
 		t.Errorf("the id is %d, want 25", got)
 	}
-	tl := Sphere{N: 5}
+	tl := Sphere{Splits: 5}
 	last := int64(-1)
 	for _, tile := range tl.Tiles() {
 		if id := tl.ID(tile); id <= last {
@@ -166,17 +166,17 @@ func TestIDsCountTheCornersInOrder(t *testing.T) {
 // a spacing is undone by rounding: the icosahedron's own edge is one
 // split and a third of it is three.
 func TestTheFinestAndTheRungsToIt(t *testing.T) {
-	if SphereFor(0).N != 500_000_000 {
-		t.Errorf("the finest is %d splits", SphereFor(0).N)
+	if SphereFor(0).Splits != 500_000_000 {
+		t.Errorf("the finest is %d splits", SphereFor(0).Splits)
 	}
-	if got := (Sphere{N: 500_000_000}).Count(); got != 2_500_000_000_000_000_002 {
+	if got := (Sphere{Splits: 500_000_000}).Count(); got != 2_500_000_000_000_000_002 {
 		t.Errorf("the finest counts %d tiles", got)
 	}
 	for _, c := range []struct{ from, to int }{{7, 14}, {0, 2}, {1, 2},
 		{249_999_999, 499_999_998}, {250_000_000, 500_000_000},
 		{250_000_001, 500_000_000}, {300_000_000, 500_000_000},
 		{500_000_000, 500_000_000}} {
-		if got := (Sphere{N: c.from}).Finer(); got != (Sphere{N: c.to}) {
+		if got := (Sphere{Splits: c.from}).Finer(); got != (Sphere{Splits: c.to}) {
 			t.Errorf("below %d is %v, want %d", c.from, got, c.to)
 		}
 	}
@@ -185,17 +185,17 @@ func TestTheFinestAndTheRungsToIt(t *testing.T) {
 		want    int
 	}{{edge, 1}, {10, 1}, {edge / 2, 2}, {edge / 3.4, 3}, {edge / 3.6, 4},
 		{edge / 500_000_000 * 1.0000001, 499_999_950}} {
-		if got := SphereFor(c.radians).N; got != c.want {
+		if got := SphereFor(c.radians).Splits; got != c.want {
 			t.Errorf("for %v radians, %d splits, want %d", c.radians, got, c.want)
 		}
 	}
 	for _, n := range []int{-5, 0, 1} {
-		if (Sphere{N: n}).Count() != 12 {
-			t.Errorf("%d splits count %d tiles", n, (Sphere{N: n}).Count())
+		if (Sphere{Splits: n}).Count() != 12 {
+			t.Errorf("%d splits count %d tiles", n, (Sphere{Splits: n}).Count())
 		}
 	}
-	if (Sphere{N: 2}).Count() != 42 {
-		t.Errorf("two splits count %d tiles", (Sphere{N: 2}).Count())
+	if (Sphere{Splits: 2}).Count() != 42 {
+		t.Errorf("two splits count %d tiles", (Sphere{Splits: 2}).Count())
 	}
 }
 
@@ -227,7 +227,7 @@ func TestClampKeepsACornerOnItsFace(t *testing.T) {
 // eight away and nine away along any of the six directions is still on
 // the face.
 func TestWalkTakesEightStepsAndNoMore(t *testing.T) {
-	tl := Sphere{N: 40}
+	tl := Sphere{Splits: 40}
 	for _, d := range [][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, -1}, {-1, 1}} {
 		for _, away := range []int{8, 9} {
 			p := tl.corner(0, 20+away*d[0], 10+away*d[1])
@@ -246,9 +246,9 @@ func TestWalkTakesEightStepsAndNoMore(t *testing.T) {
 // edge itself, on each of the three edges.
 func TestWalkStaysOnItsFace(t *testing.T) {
 	const n = 40
-	tl := Sphere{N: n}
+	tl := Sphere{Splits: n}
 	onFace := func(tile Tile) bool {
-		return tile.I >= 0 && tile.J >= 0 && tile.I+tile.J <= n
+		return tile.Column >= 0 && tile.Row >= 0 && tile.Column+tile.Row <= n
 	}
 	for _, f := range []int{0, 13} {
 		for _, c := range []struct {
@@ -293,7 +293,7 @@ func TestWalkStaysOnItsFace(t *testing.T) {
 // six directions.
 func TestWalkFindsTheNearestFromAFewStepsAway(t *testing.T) {
 	for _, n := range []int{3, 12, 40} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		for k := range int64(300) {
 			p := random(k + 77)
 			if k%3 == 0 {
@@ -342,7 +342,7 @@ func abs(x int) int {
 // that neighbour, which is zero away.
 func TestSettleMovesAnEdgeTileToANearerNeighbour(t *testing.T) {
 	for _, n := range []int{1, 2, 4} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		for _, tile := range tl.Tiles() {
 			if tl.inside(tile) {
 				continue
@@ -364,7 +364,7 @@ func TestSettleMovesAnEdgeTileToANearerNeighbour(t *testing.T) {
 // or just off a corner by more than a millionth of a split.
 func TestOnIsTheCornersOfTheFaceAndNothingElse(t *testing.T) {
 	for _, n := range []int{1, 2, 3, 5} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		for g := range faces {
 			for i := -2; i <= n+2; i++ {
 				for j := -2; j <= n+2; j++ {
@@ -379,7 +379,7 @@ func TestOnIsTheCornersOfTheFaceAndNothingElse(t *testing.T) {
 			}
 		}
 	}
-	tl := Sphere{N: 4}
+	tl := Sphere{Splits: 4}
 	a, b, c := verts[faces[3][0]], verts[faces[3][1]], verts[faces[3][2]]
 	between := func(fi, fj float64) maths.Vec {
 		return a.Scale(4 - fi - fj).Add(b.Scale(fi)).Add(c.Scale(fj)).Unit()
@@ -405,13 +405,13 @@ func TestOnIsTheCornersOfTheFaceAndNothingElse(t *testing.T) {
 // its edge and a neighbour's middle is as far beyond it.
 func TestSphereEdgeIsHalfTheChord(t *testing.T) {
 	const half = 1.0514622242382672 / 2
-	tl := Sphere{N: 1}
+	tl := Sphere{Splits: 1}
 	for _, tile := range tl.Tiles() {
-		if e := tl.Edge(tl.Centre(tile), tile); math.Abs(e-half) > 1e-12 {
+		if e := tl.Edge(tl.Centre(tile), tile); !(math.Abs(e-half) <= 1e-12) {
 			t.Fatalf("tile %v: its middle is %v from its edge", tile, e)
 		}
 		for _, nb := range tl.Neighbours(tile) {
-			if e := tl.Edge(tl.Centre(nb), tile); math.Abs(e+half) > 1e-12 {
+			if e := tl.Edge(tl.Centre(nb), tile); !(math.Abs(e+half) <= 1e-12) {
 				t.Fatalf("tile %v: the middle of %v is %v from its edge", tile, nb, e)
 			}
 		}
@@ -426,7 +426,7 @@ func TestSphereEdgeIsHalfTheChord(t *testing.T) {
 // 2, and against minus 1 along x is minus 2. the checks are written so
 // that a result which is no number fails them.
 func TestSphereDistanceHoldsADotToOne(t *testing.T) {
-	tl := Sphere{N: 4}
+	tl := Sphere{Splits: 4}
 	x := maths.V(1, 0, 0)
 	if d := tl.Distance(x.Scale(2), x); !(d == 0) {
 		t.Errorf("a direction past one is %v from itself", d)
@@ -444,7 +444,7 @@ func TestSphereDistanceHoldsADotToOne(t *testing.T) {
 // the cube is a corner's direction, and the middle of the cube, which has
 // no direction, is up.
 func TestSphereSomewhereIsTheCubesDirection(t *testing.T) {
-	tl := Sphere{N: 4}
+	tl := Sphere{Splits: 4}
 	l := math.Sqrt(1.14)
 	if p := tl.Somewhere(0.9, 0.25, 0.75); !p.Near(maths.V(0.8/l, -0.5/l, 0.5/l), 1e-12) {
 		t.Errorf("somewhere (0.9, 0.25, 0.75) is %v", p)
@@ -463,7 +463,7 @@ func TestSphereSomewhereIsTheCubesDirection(t *testing.T) {
 // of the icosahedron, where the faces meet.
 func TestNearestIsTheTrueNearestAtTheFacesEdges(t *testing.T) {
 	for _, n := range []int{2, 4, 7, 25} {
-		tl := Sphere{N: n}
+		tl := Sphere{Splits: n}
 		tiles := tl.Tiles()
 		for k := range int64(4000) {
 			p := random(k + 5000)
@@ -496,7 +496,7 @@ func TestNearestIsTheTrueNearestAtTheFacesEdges(t *testing.T) {
 // neighbours come in order of id, lowest first, five at the corners of
 // the icosahedron and six elsewhere.
 func TestSphereNeighboursAreInOrderOfID(t *testing.T) {
-	tl := Sphere{N: 4}
+	tl := Sphere{Splits: 4}
 	for _, tile := range tl.Tiles() {
 		ns := tl.Neighbours(tile)
 		for k := 1; k < len(ns); k++ {

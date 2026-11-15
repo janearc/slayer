@@ -1,0 +1,128 @@
+# moonlake's explainer script: what the panel under the film says, and
+# when. Every sentence here is a draft, to be rewritten; the timing is the
+# only fixed part.
+#
+# Each sentence was checked against the cue it stands on in cues.yaml
+# (the comment above it names the cue). Do not claim what the cue sheet
+# does not say: if a cue changes, the sentence over it changes too.
+#
+# says: {at: "bar.beat" or at_sec: seconds, says: "..."}, in order, over
+# the whole song. A sentence stands until the next. Inside each short it
+# must be short enough to read in the time it stands there, at 15
+# characters a second (picked), which the tests check.
+#
+# chant: the sung lines, from_sec and until_sec as the song's own lyric
+# track (lyrics.srt in the score's scratch) times them. The transcribed
+# chant notes are too sparse to time a line, so the lyric track does.
+#
+# shorts: each short's start and end. Each is its own film.
+shorts:
+  # the first: the last quiet bars, the drop, the full rig, the fade to
+  # black and the ship's beam
+  drop: {from: {at: "21.1"}, until: {at: "54.1"}}
+  # the opening: the chant, before any drums
+  chant: {from: {at_sec: 0}, until: {at_sec: 40}}
+  # the first drums, to the first break and into it
+  first-drums: {from: {at_sec: 49}, until: {at: "13.1"}}
+  # the beam glides out, the acid comes back, the drums drop out, the
+  # fast hits and the fires, and the end of the show
+  acid: {from: {at: "61.1"}, until: {at_sec: 235.2}}
+  # all of it
+  whole-song: {from: {at_sec: 0}, until: {at_sec: 235.2}}
+says:
+  # 0 s: rig 0, strobes off, master 0
+  - {at_sec: 0, says: "Before the drums, the rig is dark."}
+  # the lyric track: "distant quiet chanting, no drums"
+  - {at_sec: 4, says: "The words are the song's chant, sung before any drums."}
+  # 1 s: moon_alt 0 to 2.3, fade 97.9: "it rises from behind the rim, dim,
+  # all through the intro"
+  - {at_sec: 11, says: "The moon rises from behind the far rim, slowly, all through the intro."}
+  # 1 s: master 0 to 0.35, fade 50
+  - {at_sec: 18, says: "The night's light comes up over fifty seconds, from nothing."}
+  # score: the grid starts at 59.09 s
+  - {at_sec: 26, says: "The beat has not begun, so the squares wait."}
+  # 30 s: mist 0.12 to 0.2, fade 20
+  - {at_sec: 30, says: "From here the mist on the lake slowly thickens."}
+  # nothing cued until 1.1; the moon's fade runs to 98.9 s
+  - {at_sec: 40, says: "Still no drums. The moon climbs on."}
+  # score: the first drum beat is bar 1, at 59.09 s
+  - {at_sec: 49, says: "The squares are the beat. They wait for the first drum."}
+  # 1.1: "two beams, low, a rumour of a rig": rig 0.15, beams 2
+  - {at: "1.1", says: "First drums: two beams, low. A rumour of a rig."}
+  # 1.1: palette [green, magenta, cyan, amber]: "green owns the downbeat"
+  - {at: "3.1", says: "Green owns the downbeat. Each beat after takes its own colour."}
+  # 1.1: sweep_bars 8
+  - {at: "6.1", says: "The mirrors sweep the beams once every eight bars."}
+  # 9.1: rig 0, "hard kill"; score.sections: drums out at 73.0 s
+  - {at: "9.1", says: "The drums stop. The rig is killed with them."}
+  # score.beats.measured is 0 from bar 9 beat 4
+  - {at: "11.1", says: "Stillness. Hollow squares are beats counted on."}
+  # nothing re-cues the rig until 25.1; the moon's fade runs to 98.9 s
+  - {at: "13.1", says: "The rig stays dark through the break. The moon keeps rising."}
+  # 9.1 to 25.1 is sixteen bars, every beat carried
+  - {at: "17.1", says: "Sixteen bars of break, counted on beat by beat."}
+  # the break; the rig was killed at 9.1 and nothing has re-cued it
+  - {at: "21.1", says: "Every light here is played by the song itself."}
+  # score.beats.measured is 0 here: beats carried through the break
+  - {at: "23.1", says: "No drums. Hollow squares are beats counted on."}
+  # 25.1: "the drop: the moon becomes fully illuminated and present. The
+  # rig arrives with the drums and the bass"
+  - {at: "25.1", says: "The drop. The moon is lit, and the whole rig arrives with the drums and bass."}
+  # 25.1: pulse x..x..x.x..x..x. (3-3-2); strobes: lead, hot 62
+  - {at: "29.1", says: "Lasers hit in a 3-3-2 pattern. Strobes fire on the acid line's loud notes."}
+  # 25.1: floods grid8 ("backlights on the eighths"); search_beat 0.6
+  - {at: "33.1", says: "Backlights flash on the eighths. Searchlights strike on every beat."}
+  # the grid: beats measured from the drum stem (measured 1 from 24.4)
+  - {at: "37.1", says: "Each flash of the square is a beat the drums played."}
+  # 40.1: sweep_bars 8 to 4; banks unison and offset, four bars each
+  - {at: "40.1", says: "Bar 40: the lasers sweep twice as fast. Left and right part, then meet."}
+  # cues.yaml: "what the lights do, written in bars"
+  - {at: "44.1", says: "Every change you see is a line in a cue sheet, written in bars."}
+  # 49.4: "a sharp fade to black": rig, strobes, floods, search and master
+  # to nought, fade 0.2; the drums stop at 49 (score.sections). The moon
+  # is not cued off, and stays up in the film, so "the rig", not "every
+  # light"
+  - {at: "47.1", says: "Soon the drums stop, and the rig goes dark in a fifth of a second."}
+  # 50.1: "BOOM: the ship's beam, a cone of coherent light on the lake ...
+  # the camera blown white"
+  - {at: "50.1", says: "A ship's beam hits the lake, blinding the camera."}
+  # 50.1: exposure -7, fade 1: "coming down 7 stops in a second until the
+  # cone stands in its mist"
+  - {at: "52.1", says: "The camera recovers. The beam stands in the mist."}
+  # 50.1 to 61.1 is eleven bars with overhead 1
+  - {at: "54.1", says: "The beam holds on the lake for eleven bars."}
+  # 61.1: overhead 0, master 1, fade 6: "the beam glides out and the moon
+  # comes back over six seconds"
+  - {at: "61.1", says: "The beam glides out and the moon comes back over six seconds."}
+  # 65.1: "the acid comes back": palette [green, red, blue, white], rig 1
+  - {at: "65.1", says: "The acid comes back: a hotter palette, the rig at full power."}
+  # 65.1: strobes grid16, floods grid16
+  - {at: "68.1", says: "Strobes and backlights fire on every sixteenth."}
+  # 65.1: moon_pulse 0.7; banks [offset, unison], the right heads a
+  # sixteenth behind the left
+  - {at: "71.1", says: "The moon pulses on the beat. Left and right lasers trade sixteenths."}
+  # 74.1: "it calms down": overhead 0.2, fade 3
+  - {at: "74.1", says: "It calms. The ship's beam returns, faint and steady."}
+  # 74.1: strobes lead, floods grid8
+  - {at: "77.1", says: "Strobes ride the loud notes again; backlights, the eighths."}
+  # 81.3: master 0.3 fade 12; moon_alt to 0 fade 39; score.sections: drums
+  # out at 192.9 s
+  - {at: "81.3", says: "The drums drop out. The moon begins to set; the lights dim."}
+  # 81.3: rig 0.3, figures [beam]
+  - {at: "85.1", says: "The lasers play single beams now, at a third of their power."}
+  # 81.3: "down behind the rim by 3:52"
+  - {at: "89.1", says: "The moon sinks back behind the rim the way it came."}
+  # 95.1: pulse every sixteenth, split: "the lasers should be going crazy"
+  - {at: "95.1", says: "Fast hits: the lasers strike on every sixteenth."}
+  # 97.1: fire 1: "BURST from the towers", every downbeat
+  - {at: "97.1", says: "Fires burst from the towers on every downbeat."}
+  # 97.2: search_moves [fan, viewer], a bar each
+  - {at: "99.1", says: "Searchlights swing between fan and viewer."}
+  # 81.3: moon_alt reaches 0 at 231.7 s
+  - {at_sec: 226.5, says: "Last bars. The moon is nearly down."}
+  # 232.0: overhead 1, exposure -5; 232.6: everything to 0, fade 2
+  - {at_sec: 231, says: "A last flash of the ship's beam, then everything fades."}
+chant:
+  - {from_sec: 0.789, until_sec: 10.789, words: "na-ei sora velu, am-ta keshi noor"}
+  - {from_sec: 21.809, until_sec: 31.809, words: "veya som, veya som, iri-tal ahu"}
+  - {from_sec: 125.427, until_sec: 135.427, words: "na-ei sora velu, am-ta keshi noor"}

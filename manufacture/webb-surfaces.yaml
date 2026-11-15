@@ -1,0 +1,39 @@
+# What the outside of the James Webb Space Telescope is made of, surface
+# by surface. Each surface names the material it is and the finish it was
+# given; its look is made from the two, from the material's published
+# optical constants, and not from a colour picked to look right. Gold's
+# are measurements; aluminium's are a model fitted to measurements.
+#
+# What is not here is not yet known to slayer as a material, and keeps
+# the picked look in spacecraft_looks.go: the structure, which on Webb is
+# graphite composite under black Kapton, has no optical constants here.
+surfaces:
+- part: primary mirror
+  material: gold
+  finish: polished
+  says: >-
+    eighteen beryllium segments, gold coated by vacuum vapour deposition,
+    under a protective SiOx overcoat. The gold is what light meets. The
+    overcoat is not drawn: its thickness is not published, and a layer a
+    fraction of a wavelength thin wants interference, which the tracer's
+    clear film does not draw.
+  by: >-
+    McElwain et al. 2023, PASP 135, 058001, section 4.2.1; Keski-Kuha et
+    al. 2012, Proc. SPIE 8442, 84422J
+- part: secondary mirror
+  material: gold
+  finish: polished
+  says: the same coating, on one convex beryllium mirror
+  by: McElwain et al. 2023, PASP 135, 058001, section 4.2.1
+- part: sunshield
+  material: aluminium
+  finish: satin
+  says: >-
+    five membranes of Kapton E, each coated with about 100 nm of
+    aluminium, which is opaque: the aluminium is what light meets, and
+    the Kapton under it does not show. The finish is picked: a tensioned
+    film is a mirror that is not flat. The sun's side of the two hottest
+    layers is doped silicon over the aluminium, and is not here yet.
+  by: >-
+    NASA, "Webb's Sunshield" and "Sunshield Membrane Coatings",
+    science.nasa.gov, read 2026-11-10

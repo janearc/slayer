@@ -14,9 +14,6 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
-// seeds is how many seeds each kind is made from.
-const seeds = 8
-
 // made is one of a kind from a seed, as the skins of the meshes a
 // scene would hold, standing nowhere in particular. Shared groups contribute
 // each prototype once; their placements are checked without expanding them.

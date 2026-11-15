@@ -34,13 +34,13 @@ type rungs struct {
 
 func (r rungs) spec() rungSpec { return r.specs[r.at] }
 
-func (r rungs) Nearest(maths.Vec) hexes.Tile { return hexes.Tile{I: r.spec().nearest} }
+func (r rungs) Nearest(maths.Vec) hexes.Tile { return hexes.Tile{Column: r.spec().nearest} }
 
-func (r rungs) Centre(tile hexes.Tile) maths.Vec { return r.spec().centres[tile.I] }
+func (r rungs) Centre(tile hexes.Tile) maths.Vec { return r.spec().centres[tile.Column] }
 
 func (r rungs) Edge(maths.Vec, hexes.Tile) float64 { return r.spec().edge }
 
-func (r rungs) ID(tile hexes.Tile) int64 { return int64(tile.I) }
+func (r rungs) ID(tile hexes.Tile) int64 { return int64(tile.Column) }
 
 func (r rungs) Spacing() float64 { return r.spec().spacing }
 
@@ -48,8 +48,8 @@ func (r rungs) Finer() hexes.Tiling { return rungs{at: r.at + 1, specs: r.specs}
 
 func (r rungs) Neighbours(tile hexes.Tile) []hexes.Tile {
 	var out []hexes.Tile
-	for _, i := range r.spec().around[tile.I] {
-		out = append(out, hexes.Tile{I: i})
+	for _, i := range r.spec().around[tile.Column] {
+		out = append(out, hexes.Tile{Column: i})
 	}
 	return out
 }

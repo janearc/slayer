@@ -31,7 +31,7 @@ func TestRecursiveShootHasAttachedContractingAxes(t *testing.T) {
 			// repeating the implementation's fractional power.
 			ratio := axis.length / parent.length
 			area := axis.radius * axis.radius / (parent.radius * parent.radius)
-			if math.Abs(area-ratio*ratio*ratio) > 1e-14 {
+			if !(math.Abs(area-ratio*ratio*ratio) <= 1e-14) {
 				t.Fatal("twig cross-section does not follow the authored contraction")
 			}
 		}
@@ -61,7 +61,7 @@ func TestNeedleDimensionsAndRanksFollowTheSpeciesDescriptions(t *testing.T) {
 				axial := delta.Dot(axis.direction)
 				radial := delta.Sub(axis.direction.Scale(axial)).Len()
 				wantRadius := axis.radius * (1 - 0.85*axial/axis.length)
-				if math.Abs(radial-wantRadius) > 1e-12 {
+				if !(math.Abs(radial-wantRadius) <= 1e-12) {
 					t.Fatal("needle root is not on the twig surface")
 				}
 				if style == 1 && math.Abs(needle.normal.Dot(maths.ZAxis)) < 1-1e-12 {

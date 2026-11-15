@@ -1,0 +1,28 @@
+{
+	"group": "playful",
+	"mood": "bouncy and goofy",
+	"feeling": "Bouncing up and down, laughing, a little out of control.",
+	"intent": "A funny montage, an animal acting silly, a quick-cut gag reel.",
+	"listen_for": "The bass alone at 0:13 and the lead coming back in thirds.",
+	"voicing": "@crypt-dmg",
+	"tempo": 144,
+	"meter": 4,
+	"seconds": 30.0,
+	"parts": [
+		{"name": "bounce", "bar": 1, "second": 0.0,
+		 "change": "a jumping lead over a bouncing octave bass",
+		 "feels": "Up, up, down"},
+		{"name": "hop", "bar": 5, "second": 6.67,
+		 "change": "the lead runs up and slides down",
+		 "feels": "Wobbling"},
+		{"name": "bass", "bar": 9, "second": 13.33,
+		 "change": "only the bass and a hat",
+		 "feels": "Stopped mid-air"},
+		{"name": "thirds", "bar": 11, "second": 16.67,
+		 "change": "the lead in thirds, higher",
+		 "feels": "Round two, bigger bounces"},
+		{"name": "end", "bar": 17, "second": 26.67,
+		 "change": "a held chord and a kick",
+		 "feels": "Landed"}
+	]
+}

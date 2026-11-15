@@ -1,6 +1,7 @@
 package gpu
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math"
 	"time"
@@ -9,20 +10,28 @@ import (
 	"github.com/janearc/slayer/plume"
 	"github.com/janearc/slayer/scene/gas"
 	"github.com/janearc/slayer/scene/medium"
+	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
 )
 
-// mostVolumes is how many volumes a ray may cross in the kernel, which
-// keeps its crossings in a fixed array: a fire's smoke and flame for
-// each of a clearing's fires, picked
-const mostVolumes = 32
+// mostVolumes bounds how many volumes a scene may carry. The kernel's
+// crossing arrays are sized to the scene when its source is built, so
+// a scene pays thread memory only for the volumes it has: about 40
+// bytes a volume a thread, which at this ceiling is ten kilobytes,
+// where a dispatch still runs but occupancy is paying for it. The
+// ceiling refuses a pathological pack with a plain error instead.
+const mostVolumes = 256
 
-// the kinds of volume the kernel reads: a puff, a wispy puff, which it
-// asks itself, and a boxed medium, which the cpu asks into a grid
+// the kinds of volume the kernel reads: a puff, a wispy puff, a shell, a
+// ring and a wake, which it asks itself, and a boxed medium, which the cpu
+// asks into a grid
 const (
 	puffKind = iota
 	wispyKind
 	boxedKind
+	shellKind
+	ringKind
+	wakeKind
 )
 
 // tinted is a medium thicker to some light than to other, as soot is to
@@ -63,7 +72,8 @@ func hazeOf(made medium.Medium) (haze, error) {
 //
 // a puff, plain or wispy, with no paint or shine, the kernel asks
 // itself; any other medium, and any volume painted or shining, the cpu
-// asks into a grid over its box. a gas is refused.
+// asks into a grid over its box. a gas takes the same paths by its shape, the
+// medium a gas.Of wraps, and carries its optics beside.
 func (encoded *scene) volumesOf(world *thing.World,
 	at time.Duration) error {
 	if len(world.Volumes) > mostVolumes {
@@ -74,27 +84,98 @@ func (encoded *scene) volumesOf(world *thing.World,
 		if volume.Hidden() || volume.Medium == nil {
 			continue
 		}
-		if volume.Beam != nil {
-			return unsupported{"a volume with a beam"}
+		if err := encoded.volumeAt(volume, at); err != nil {
+			return err
 		}
-		med := volume.Medium
-		if moving, ok := med.(medium.Timed); ok {
-			med = moving.Tick(at)
-		}
-		if _, gassy := med.(gas.Optical); gassy {
-			return unsupported{fmt.Sprintf("a gas volume, %T", med)}
-		}
-		material := encoded.material(volume.Material)
-		textures := encoded.paints[material]
-		found, err := hazeOf(med)
-		if err == nil && textures == (painting{}) {
-			encoded.volume(volume.At(at), found, material)
-			continue
-		}
-		grid := boxOf(med, textures.paint, textures.shine)
-		encoded.boxedVolume(volume.At(at), grid, material)
 	}
 	return nil
+}
+
+// volumeAt appends one seen volume, placed at time t, as volumesOf does: a
+// ring or a wake the kernel asks itself, or the shapes of plainVolume.
+func (encoded *scene) volumeAt(volume *thing.Volume, at time.Duration) error {
+	if volume.Beam != nil && !encoded.gravity {
+		return unsupported{"a volume with a beam"}
+	}
+	if volume.Beam != nil && !volume.Beam.Round && volume.Beam.Speed > 0 && volume.Beam.Speed < 1 {
+		return unsupported{"an axial beam in a field"}
+	}
+	first := len(encoded.volumes.bytes)
+	defer func() {
+		if len(encoded.volumes.bytes) > first {
+			encoded.volumeBeam(first, volume.Beam)
+		}
+	}()
+	med := volume.Medium
+	if shell, ok := med.(*medium.ShellWeather); ok && shell == nil {
+		return unsupported{"a nil spherical weather shell"}
+	}
+	if moving, ok := med.(medium.Timed); ok {
+		med = moving.Tick(at)
+	}
+	material := encoded.material(volume.Material)
+	textures := encoded.paints[material]
+	air, gassy := med.(gas.Optical)
+	var optics airing
+	if gassy {
+		if encoded.gravity {
+			return unsupported{"a gas volume in a gravity field"}
+		}
+		found, err := airingOf(air)
+		if err != nil {
+			return err
+		}
+		optics, med, textures = *found, shapeOf(air), painting{}
+	}
+	if asked, err := encoded.ringIf(volume.At(at), med, textures, material,
+		gassy, optics); err != nil || asked {
+		return err
+	}
+	if asked, err := encoded.wakeIf(volume.At(at), med, textures, material,
+		gassy, optics); err != nil || asked {
+		return err
+	}
+	return encoded.plainVolume(volume.At(at), med, textures, material, gassy,
+		optics)
+}
+
+// plainVolume appends a volume that is neither a ring nor a wake: a spherical
+// weather shell, a puff or wispy medium the kernel asks itself, or any other
+// medium as a grid over its box.
+func (encoded *scene) plainVolume(space maths.Subspace, med medium.Medium,
+	textures painting, material int, gassy bool, optics airing) error {
+	if shell, ok := med.(*medium.ShellWeather); ok {
+		if textures != (painting{}) || shell.Parameters().Radius <= 0 {
+			return unsupported{"an invalid or textured spherical weather shell"}
+		}
+		encoded.shellVolume(space, shell.Parameters(), material)
+		encoded.airIf(gassy, optics)
+		return nil
+	}
+	found, err := hazeOf(med)
+	if err == nil && textures == (painting{}) {
+		encoded.volume(space, found, material)
+		encoded.airIf(gassy, optics)
+		return nil
+	}
+	grid := boxOf(med, textures.paint, textures.shine, encoded.volumeCells)
+	smoking, reached := len(encoded.smokes), len(encoded.reached)
+	encoded.boxedVolume(space, grid, material)
+	if gassy {
+		// a gas is lit by its lamps at every step, never from a
+		// cached source grid or a lamp store
+		encoded.smokes = encoded.smokes[:smoking]
+		encoded.reached = encoded.reached[:reached]
+	}
+	encoded.airIf(gassy, optics)
+	return nil
+}
+
+// airIf makes the volume appended last a gas, when it is one.
+func (encoded *scene) airIf(gassy bool, optics airing) {
+	if gassy {
+		encoded.airLast(optics)
+	}
 }
 
 // volumeStruct is a volume as the kernel reads it: where it is, its
@@ -112,7 +193,16 @@ var volumeStruct = structure{"Volume", []field{
 	intField("lighting", "cached source RGB dimensions and first number; -1 for direct"),
 	intField("grid", "a boxed medium's cells across x, y, z; first cell"),
 	intField("shone", "its shine's first number, its paint's; or -1"),
-	floatField("tint", "how many times its density each channel meets"),
+	floatField("tint", "how many times its density each channel meets; "+
+		"a gas's extinction at the eye's three bands"),
+	floatField("scatter", "a gas's scatter at the eye's three bands, "+
+		"its phase asymmetry in w; a lopsided mist's asymmetry in w"),
+	intField("air", "one in x for a gas, nought for the rest"),
+	floatField("beam", "axis and speed"),
+	floatField("flow", "round and reference radius"),
+	intField("thermal", "radial light table, count, seed low, seed high"),
+	floatField("thin", "inner, outer, streaks, shear"),
+	floatField("phase", "orbital coefficient times seconds"),
 }}
 
 // volume appends one puff. The axes are the rows that take a world
@@ -135,6 +225,7 @@ func (encoded *scene) volume(space maths.Subspace, found haze,
 	given["grid"], given["shone"] = nil, wholes(-1, -1)
 	given["lighting"] = wholes(0, 0, 0, -1)
 	given["tint"] = []float64{1, 1, 1}
+	noAir(given)
 	encoded.volumes.row(volumeStruct, given)
 	encoded.counts.volumes++
 }
@@ -143,10 +234,18 @@ func (encoded *scene) volume(space maths.Subspace, found haze,
 // its cells after every other boxed medium's.
 func (encoded *scene) boxedVolume(space maths.Subspace, grid boxed,
 	material int) {
+	thin, radial := grid.shine.(texture.Thin)
+	if radial {
+		grid.shine = nil
+	}
 	first, shone, deferred := encoded.deferFlame(grid)
 	painted := -1
 	if !deferred {
+		started := time.Now()
 		density, shine, paint := grid.asked()
+		encoded.boxedCPU.Wall += time.Since(started)
+		encoded.boxedCPU.Cells += int64(grid.count())
+		encoded.boxedCPU.Volumes++
 		first = encoded.boxes.floats(density)
 		shone, painted = encoded.boxes.floats(shine), encoded.boxes.floats(paint)
 	}
@@ -157,17 +256,91 @@ func (encoded *scene) boxedVolume(space maths.Subspace, grid boxed,
 	given := placedAt(space)
 	given["puff"], given["baked"] = nil, nil
 	given["info"] = wholes(0, 0, boxedKind, material)
+	// A giant's thin cloud boundary stays analytic at every grid size.
+	// Its painted bands still use the shared texture grid.
+	if giant, ok := grid.med.(medium.Giant); ok {
+		given["puff"] = []float64{giant.Radius, giant.Depth, giant.Thick, 0}
+		given["info"] = wholes(1, 0, boxedKind, material)
+	}
+	if disc, ok := grid.med.(medium.Disc); ok && len(disc.Profile) == 0 && disc.Grain == 0 {
+		given["puff"] = []float64{disc.Inner, disc.Outer, disc.Thick, disc.Dense}
+		given["info"] = wholes(2, 0, boxedKind, material)
+	}
 	given["low"], given["high"] = point(grid.low), point(grid.high)
 	given["grid"] = append(wholes(grid.cells[:]...), float64(first))
 	given["shone"] = wholes(shone, painted)
 	given["lighting"] = wholes(0, 0, 0, -1)
 	given["tint"] = []float64{tint.R, tint.G, tint.B}
+	noAir(given)
+	if radial {
+		const samples = 1024
+		base := thin
+		base.Streaks = 0
+		table := make([]float32, 0, samples*3)
+		for i := range samples {
+			r := thin.Inner + (thin.Outer-thin.Inner)*float64(i)/float64(samples-1)
+			light := base.At(maths.V(r, 0, 0))
+			table = append(table, float32(light.R), float32(light.G), float32(light.B))
+		}
+		first := encoded.boxes.floats(table)
+		given["thermal"] = wholes(first, samples, int(uint32(thin.Seed)), int(uint32(thin.Seed>>32)))
+		given["thin"] = []float64{thin.Inner, thin.Outer, thin.Streaks, thin.Shear}
+		given["phase"] = []float64{thin.Omega * thin.Time}
+	}
 	if _, ok := grid.med.(*plume.Column); ok && grid.paint == nil && grid.shine == nil {
 		encoded.smokes = append(encoded.smokes, smokeGrid{index: encoded.counts.volumes, grid: grid})
+	}
+	if !deferred {
+		// a flame's deferred box sends its own light and scatters none
+		encoded.reached = append(encoded.reached,
+			reachGrid{index: encoded.counts.volumes, grid: grid})
 	}
 
 	encoded.volumes.row(volumeStruct, given)
 	encoded.counts.volumes++
+	encoded.lobeLast(grid.med)
+}
+
+// lobedMedium is a medium that scatters more one way than another, by a
+// Henyey-Greenstein asymmetry: a mist that says one.
+type lobedMedium interface{ Asymmetry() float64 }
+
+// lobeLast writes a lopsided medium's asymmetry into the scatter's w of
+// the volume appended last, where a gas keeps its own; the kernel's
+// scattered_direct weighs each lamp by gas_phase at it. A medium that
+// scatters evenly, or does not say, leaves the row as it was.
+func (encoded *scene) lobeLast(made medium.Medium) {
+	said, ok := made.(lobedMedium)
+	if !ok || said.Asymmetry() == 0 {
+		return
+	}
+	encoded.putLast("scatter", floatWords(0, 0, 0, said.Asymmetry()))
+}
+
+// volumeBeam writes flow metadata into the volume just appended.
+func (encoded *scene) volumeBeam(first int, beam *thing.Beam) {
+	if beam == nil {
+		return
+	}
+	axis := beam.Axis
+	if axis == (maths.Vec{}) {
+		axis = maths.Up
+	}
+	axis = axis.Unit()
+	for i, member := range volumeStruct.fields {
+		var parts []float64
+		switch member.name {
+		case "beam":
+			parts = []float64{axis.X, axis.Y, axis.Z, beam.Speed}
+		case "flow":
+			parts = []float64{float64(flag(beam.Round)), beam.At}
+		default:
+			continue
+		}
+		for j, value := range parts {
+			binary.LittleEndian.PutUint32(encoded.volumes.bytes[first+i*16+j*4:], math.Float32bits(float32(value)))
+		}
+	}
 }
 
 // placedAt is where a volume is: its space's origin and scale, and the

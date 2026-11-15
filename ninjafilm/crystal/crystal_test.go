@@ -322,7 +322,7 @@ func chanceIsBounded(t *rapid.T) {
 	x, y := rapid.Int64().Draw(t, "x"), rapid.Int64().Draw(t, "y")
 	frame := rapid.Int64().Draw(t, "frame")
 	got := crystal.Chance(seed, x, y, frame)
-	if math.IsNaN(got) || math.Abs(got) > bound {
+	if math.IsNaN(got) || !(math.Abs(got) <= bound) {
 		t.Fatalf("chance drew %v, which is outside %v", got, bound)
 	}
 }
@@ -378,12 +378,12 @@ func chanceIsABell(t *rapid.T) {
 	many := float64(fieldSites)
 	mean := total / many
 	spread := math.Sqrt(squares/many - mean*mean)
-	if math.Abs(mean) > meanError || math.Abs(spread-unity) > spreadError {
+	if !(math.Abs(mean) <= meanError) || !(math.Abs(spread-unity) <= spreadError) {
 		t.Fatalf("chance has mean %v and spread %v, want 0 and 1", mean,
 			spread)
 	}
 	within := math.Erf(unity / math.Sqrt2)
-	if share := inside / many; math.Abs(share-within) > shareError {
+	if share := inside / many; !(math.Abs(share-within) <= shareError) {
 		t.Fatalf("%v of draws fall within one, want %v", share, within)
 	}
 }

@@ -1,0 +1,20 @@
+/*
+ * default -- the hud's own colourway, for a picture whose maker names none.
+ * Light ink on a dark ground, 11.7 to 1: inside the house band for text,
+ * 10 to 1 up to 12.5 to 1.
+ *
+ * The ink is the cream of twilight, the colourway of carrie-road
+ * (contrib/colorways/twilight.css), and the ground is twilight's navy
+ * lifted so the pair falls in the band: twilight's own pair is 8.9 to 1.
+ * The warn is twilight's amber. The other accents are picked here, light
+ * enough to read on the ground, since twilight's are dark for its amber.
+ */
+:root {
+  --ink: #fff1dc;
+  --ground: #122a75;
+  --dim: #b9b4c4;
+  --border: #8f9ccb;
+  --ok: #9ad98a;
+  --warn: #ffac4e;
+  --err: #ff8f7a;
+}

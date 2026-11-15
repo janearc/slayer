@@ -3,6 +3,7 @@ package texture
 import (
 	"image"
 	"math"
+	"sync"
 
 	"github.com/janearc/libtheme-css/spaces/srgb"
 	"github.com/janearc/slayer/maths"
@@ -43,13 +44,12 @@ func (pic Picture) At(p maths.Vec) maths.Light {
 	x, y := u*float64(w)-0.5, v*float64(h)-0.5
 	x0, y0 := int(math.Floor(x)), int(math.Floor(y))
 	fx, fy := x-float64(x0), y-float64(y0)
+	read := reader(pic.Image)
 	sample := func(px, py int) maths.Light {
 		px = ((px % w) + w) % w
 		py = max(0, min(h-1, py))
-		r, g, bl, _ := pic.Image.At(b.Min.X+px, b.Min.Y+py).RGBA()
-		return maths.RGB(srgb.ToLinear(float64(r)/65535),
-			srgb.ToLinear(float64(g)/65535),
-			srgb.ToLinear(float64(bl)/65535))
+		r, g, bl := read(b.Min.X+px, b.Min.Y+py)
+		return maths.RGB(r, g, bl)
 	}
 	top := sample(x0, y0).Scale(1 - fx).Add(sample(x0+1, y0).Scale(fx))
 	bottom := sample(x0, y0+1).Scale(1 - fx).
@@ -66,4 +66,55 @@ func (pic Picture) At(p maths.Vec) maths.Light {
 func (pic Picture) Water(p maths.Vec) bool {
 	c := pic.At(p)
 	return c.B > c.R*1.15 && c.B > c.G*1.05
+}
+
+// linear8 is linear light for each srgb byte, as the 16-bit part the
+// byte makes, so the table agrees with linear16 where the two overlap.
+var linear8 = func() (t [256]float64) {
+	for i := range t {
+		t[i] = srgb.ToLinear(float64(i*0x101) / 65535)
+	}
+	return t
+}()
+
+// linear16 is linear light for each 16-bit srgb part, filled on first use.
+// A color.Color that returns a channel above 65535 breaks the color.Color
+// contract and is not supported: the table has no entry for it.
+var linear16 = sync.OnceValue(func() *[65536]float64 {
+	var t [65536]float64
+	for i := range t {
+		t[i] = srgb.ToLinear(float64(i) / 65535)
+	}
+	return &t
+})
+
+// reader is a way to read an image's pixels as linear light, each channel
+// what srgb.ToLinear makes of the image's own 16-bit part over 65535. the
+// common image types are read without boxing a colour; any other is read
+// through its At, and every path converts by a table.
+func reader(img image.Image) func(x, y int) (r, g, b float64) {
+	switch m := img.(type) {
+	case *image.RGBA:
+		return func(x, y int) (float64, float64, float64) {
+			c := m.RGBAAt(x, y)
+			return linear8[c.R], linear8[c.G], linear8[c.B]
+		}
+	case *image.NRGBA:
+		return func(x, y int) (float64, float64, float64) {
+			c := m.NRGBAAt(x, y)
+			r, g, b, _ := c.RGBA()
+			t := linear16()
+			return t[r], t[g], t[b]
+		}
+	case *image.Gray:
+		return func(x, y int) (float64, float64, float64) {
+			v := linear8[m.GrayAt(x, y).Y]
+			return v, v, v
+		}
+	}
+	return func(x, y int) (float64, float64, float64) {
+		r, g, b, _ := img.At(x, y).RGBA()
+		t := linear16()
+		return t[r], t[g], t[b]
+	}
 }

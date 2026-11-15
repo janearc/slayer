@@ -1,0 +1,86 @@
+# improv/moonlake, 2026-11-10: the ground under the four laser towers,
+# for lightshow's heads, which stand on their top decks. hillside -set
+# improv/moonlake/rig-heights.yaml -places heights.tsv writes the table;
+# the film is too small to look at, and nothing else stands here
+scene:
+  name: rig-heights
+  light: moon
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 1900
+  moon:
+    azimuth: 109.65
+    altitude: 2.3
+    face: svs-moon-kit-color
+  sun:
+    azimuth: 304
+    altitude: -12
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 262900
+    north: 2149000
+    across: 2400
+    down: 1700
+    step: 4
+  film:
+    width: 64
+    rays: 1
+    frame:
+      width: 70.41
+      height: 39.61
+    lens:
+      focal: 85
+      stop: 16
+      focus: the far tree
+    shutter: 1
+    glimpses: 1
+  cameras:
+    down:
+      title: "the towers"
+      orientation:
+        point_to: the far tree
+        alpha: -6
+      location:
+        loc_relative:
+          object: the west rise
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 20
+  set:
+    things:
+      the west rise:
+        kind: cobble
+        seed: 6
+        east: 263104.5
+        north: 2148423.5
+      the far tree:
+        kind: spruce
+        seed: 3
+        east: 264832
+        north: 2147806
+      rig rim left:
+        kind: stage-scaffold
+        seed: 91
+        east: 264872.4
+        north: 2147919.0
+        heading: {value: 106, unit: deg}
+      rig rim right:
+        kind: stage-scaffold
+        seed: 92
+        east: 264791.6
+        north: 2147693.0
+        heading: {value: 113, unit: deg}
+      rig shore left:
+        kind: stage-scaffold
+        seed: 93
+        east: 263652.4
+        north: 2148337.2
+        heading: {value: 99, unit: deg}
+      rig shore right:
+        kind: stage-scaffold
+        seed: 94
+        east: 263578.1
+        north: 2148129.0
+        heading: {value: 122, unit: deg}

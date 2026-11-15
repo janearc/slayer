@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"sync"
 	"time"
 
 	"golang.org/x/image/font"
@@ -47,11 +48,22 @@ func (made Hud) Picture(img *image.RGBA, rows int, at time.Duration,
 	return nil
 }
 
-// mono is go's mono font at a size that fills a cell so high.
-func mono(high int) (font.Face, error) {
+// parsedMono is go's mono font, parsed once. A parsed font is safe to use
+// from many goroutines; each face made from it is not, and mono makes one
+// per call.
+var parsedMono = sync.OnceValues(func() (*opentype.Font, error) {
 	parsed, err := opentype.Parse(gomono.TTF)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrHud, err)
+	}
+	return parsed, nil
+})
+
+// mono is go's mono font at a size that fills a cell so high.
+func mono(high int) (font.Face, error) {
+	parsed, err := parsedMono()
+	if err != nil {
+		return nil, err
 	}
 	return opentype.NewFace(parsed, &opentype.FaceOptions{
 		Size: float64(high) * 0.8, DPI: 72, Hinting: font.HintingFull})

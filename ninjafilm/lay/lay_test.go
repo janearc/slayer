@@ -307,8 +307,7 @@ func mosaicSharesKindsEqually(t *rapid.T) {
 	share := whole / float64(kinds)
 	bound := sigmas * math.Sqrt(share*(whole-share)/float64(fieldSites))
 	for kind, count := range picked {
-		if got := count / float64(fieldSites); math.Abs(got-share) >
-			bound {
+		if got := count / float64(fieldSites); !(math.Abs(got-share) <= bound) {
 			t.Fatalf("kind %d holds %v of the sites, want %v", kind, got,
 				share)
 		}
@@ -336,12 +335,11 @@ func mosaicIsLaidAfresh(t *rapid.T) {
 		t.Fatalf("a frame matched itself at %v sites of %d", got,
 			freshSites)
 	}
-	if got := matches(scatter, held, seed, frame, seed, frame+other); math.Abs(got-want) > bound {
+	if got := matches(scatter, held, seed, frame, seed, frame+other); !(math.Abs(got-want) <= bound) {
 		t.Fatalf("another frame matched at %v sites of %d, want about %v",
 			got, freshSites, want)
 	}
-	if got := matches(scatter, held, seed, frame, seed+uint64(other), frame); math.Abs(got-want) >
-		bound {
+	if got := matches(scatter, held, seed, frame, seed+uint64(other), frame); !(math.Abs(got-want) <= bound) {
 		t.Fatalf("another roll matched at %v sites of %d, want about %v",
 			got, freshSites, want)
 	}

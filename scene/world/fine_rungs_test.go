@@ -53,7 +53,7 @@ func paints() Look {
 // are over it, S / 4 is under, two. S / 20, 0.3 S: the same, two. S / 100, 0.06
 // S: S / 16 is over it, S / 32 under, five, where thirds would say three.
 func TestAFineTextureChoosesItsRungByTheFootprint(t *testing.T) {
-	w := New(Terrain{Tiling: hexes.Sphere{N: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
+	w := New(Terrain{Tiling: hexes.Sphere{Splits: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
 	look := paints()
 	s := w.Tiling.Spacing()
 	if 6*(s/6) != s {
@@ -84,7 +84,7 @@ func TestAFineTextureChoosesItsRungByTheFootprint(t *testing.T) {
 // it for any footprint at all: with a rung of 1 or 2, a footprint small enough
 // to want rung 5 or none at all.
 func TestAFineTextureWithARungKeepsItAndAFootprintOfNoneIsCoarse(t *testing.T) {
-	w := New(Terrain{Tiling: hexes.Sphere{N: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
+	w := New(Terrain{Tiling: hexes.Sphere{Splits: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
 	look := paints()
 	s := w.Tiling.Spacing()
 	p := apart(t, w, look, []int{0, 1, 2, 3, 5})

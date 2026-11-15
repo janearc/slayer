@@ -158,26 +158,32 @@ static const char *overlayShaders =
 "  return t.sample(s, in.uv);\n"
 "}\n";
 
+// Every function Go calls here works under a pool of its own. Go calls
+// these from whatever thread it is on, and a thread of Go's has no
+// autorelease pool: what an object hands back autoreleased outside one
+// is never dropped. The descriptor below is such an object.
 void viewer_hud(const uint8_t *rgba, int width, int height) {
-  if (rgba == NULL || width <= 0 || height <= 0) {
-    hudPicture = nil;
-    return;
+  @autoreleasepool {
+    if (rgba == NULL || width <= 0 || height <= 0) {
+      hudPicture = nil;
+      return;
+    }
+    if (hudPicture == nil || (int)hudPicture.width != width ||
+        (int)hudPicture.height != height) {
+      MTLTextureDescriptor *shape = [MTLTextureDescriptor
+          texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                       width:width
+                                      height:height
+                                   mipmapped:NO];
+      shape.usage = MTLTextureUsageShaderRead;
+      shape.storageMode = MTLStorageModeShared;
+      hudPicture = [theDevice newTextureWithDescriptor:shape];
+    }
+    [hudPicture replaceRegion:MTLRegionMake2D(0, 0, width, height)
+                  mipmapLevel:0
+                    withBytes:rgba
+                  bytesPerRow:(NSUInteger)width * 4];
   }
-  if (hudPicture == nil || (int)hudPicture.width != width ||
-      (int)hudPicture.height != height) {
-    MTLTextureDescriptor *shape = [MTLTextureDescriptor
-        texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
-                                     width:width
-                                    height:height
-                                 mipmapped:NO];
-    shape.usage = MTLTextureUsageShaderRead;
-    shape.storageMode = MTLStorageModeShared;
-    hudPicture = [theDevice newTextureWithDescriptor:shape];
-  }
-  [hudPicture replaceRegion:MTLRegionMake2D(0, 0, width, height)
-                mipmapLevel:0
-                  withBytes:rgba
-                bytesPerRow:(NSUInteger)width * 4];
 }
 
 // encode draws one frame: the earth from outside, or the sky with its
@@ -305,12 +311,16 @@ static MTLClearColor background = {0.02, 0.02, 0.03, 1};
 @end
 
 void viewer_colours(int which, const uint8_t *colours, int count) {
-  memcpy(meshes[which].colours.contents, colours, (size_t)count * 12);
+  @autoreleasepool {
+    memcpy(meshes[which].colours.contents, colours, (size_t)count * 12);
+  }
 }
 
 void viewer_background(double r, double g, double b) {
-  background = MTLClearColorMake(r, g, b, 1);
-  if (shown != nil) shown.clearColor = background;
+  @autoreleasepool {
+    background = MTLClearColorMake(r, g, b, 1);
+    if (shown != nil) shown.clearColor = background;
+  }
 }
 
 int viewer_run(viewer_mesh sky, viewer_mesh back, viewer_mesh earth,

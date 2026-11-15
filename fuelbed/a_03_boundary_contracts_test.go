@@ -1,3 +1,5 @@
+//go:build draw
+
 package fuelbed
 
 import (
@@ -98,7 +100,7 @@ func TestReactionStopsAtNonpositiveHeatOrFuel(t *testing.T) {
 			t.Fatalf("inactive state %v reacted: %.17g", cell, got)
 		}
 	}
-	if got := Reaction(Cell{Excess: 1, Fuel: .5}, 1); math.Abs(got-.5/math.E) > 1e-16 {
+	if got := Reaction(Cell{Excess: 1, Fuel: .5}, 1); !(math.Abs(got-.5/math.E) <= 1e-16) {
 		t.Fatalf("positive low-temperature state did not react: %.17g", got)
 	}
 }

@@ -1,0 +1,28 @@
+{
+	"group": "zappy",
+	"mood": "awe, wide and slow",
+	"feeling": "Looking up at something far too big to be frightened of.",
+	"intent": "Zappy's bed for explaining, the awe one: under a voice or words on screen, with the large fact at 0:29 and an arrival at 0:36.",
+	"listen_for": "Zappy's five notes at half speed from 0:05; the low floor at 0:29 where the tune and the bass move apart; and the full bright chord at 0:36.",
+	"voicing": "@zappy-voice",
+	"tempo": 66,
+	"meter": 4,
+	"seconds": 50.91,
+	"parts": [
+		{"name": "looking-up", "bar": 1, "second": 0.0,
+		 "change": "wide bare chords and zappy's tune very slowly",
+		 "feels": "still, open: a clear night"},
+		{"name": "wider", "bar": 6, "second": 18.18,
+		 "change": "the tune again a step higher, and it thins to one held note",
+		 "feels": "leaning toward something"},
+		{"name": "the-fact", "bar": 9, "second": 29.09,
+		 "change": "the tune steps up as the bass steps down to a deep floor; one drum",
+		 "feels": "the scale of it lands"},
+		{"name": "arrival", "bar": 11, "second": 36.36,
+		 "change": "the full bright home chord under the tune's leap",
+		 "feels": "wonder, all the way open"},
+		{"name": "small-again", "bar": 12, "second": 40.0,
+		 "change": "it thins back to the bare chords and four quiet notes",
+		 "feels": "small, and glad to have seen it"}
+	]
+}

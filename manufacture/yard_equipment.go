@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
+	"github.com/janearc/slayer/materials"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/thing"
 )
 
 //go:embed yard-equipment.yaml
@@ -25,6 +27,8 @@ type yardEquipment struct {
 	Maximum maths.Vec `yaml:"maximum"`
 	//ninja:vow gate Puzzlemouth decodes this private YAML field
 	Parts []yardPart `yaml:"parts"`
+	//ninja:vow gate Puzzlemouth decodes this private YAML field
+	Stairs *stairFlight `yaml:"stairs"`
 }
 
 // yardPart uses either a closed box or a closed rod, never an open card.
@@ -84,7 +88,16 @@ func (row yardEquipment) madeAt(from seed, detail string) (good, error) {
 	assembly := &instrumentAssembly{fine: cut{
 		around: int(groundValue("sides-" + detail))},
 		object: good{dressed: yardLooks()}}
-	for _, piece := range row.Parts {
+	pieces := row.Parts
+	if row.Stairs != nil {
+		built, err := row.stairPieces(row.Stairs, assembly.object.dressed)
+		if err != nil {
+			//ninja:vow feint value API; Things rejects it
+			return good{}, err
+		}
+		pieces = built
+	}
+	for _, piece := range pieces {
 		if err := piece.addTo(assembly); err != nil {
 			//ninja:vow feint value API; Things rejects it
 			return good{}, err
@@ -102,6 +115,39 @@ func (row yardEquipment) madeAt(from seed, detail string) (good, error) {
 // addTo refuses an ambiguous component instead of silently dropping it.
 func (piece yardPart) addTo(assembly *instrumentAssembly) error {
 	return piece.addWith(assembly, yardSlots)
+}
+
+// stairPieces lays a booked flight out as yard parts, after checking
+// what its families wear: a flight names a material and a finish for
+// every family, the material must be a name the yard's palette
+// carries, and the finish must be the paint the yard's look for that
+// material actually wears, so a flight cannot quietly name a finish
+// nobody mixed.
+//
+// The flight's own parts are refused by name instead of
+// built when its parameters are nonsense.
+func (row yardEquipment) stairPieces(flight *stairFlight,
+	dressed looks,
+) ([]yardPart, error) {
+	for _, worn := range flight.wears() {
+		material, known := yardSlots[worn.material]
+		if !known {
+			return nil, fmt.Errorf(
+				"manufacture: stairs %s made of %q, which the yard does not carry",
+				worn.family, worn.material)
+		}
+		if worn.finish != paintFinish {
+			return nil, fmt.Errorf(
+				"manufacture: stairs %s finished %q; the yard paints",
+				worn.family, worn.finish)
+		}
+		if look, mixed := dressed[material]; !mixed || look == nil ||
+			look.Metal != nil {
+			return nil, fmt.Errorf(
+				"manufacture: stairs %s look is not painted", worn.family)
+		}
+	}
+	return flight.parts()
 }
 
 // addWith lets a facility use structural roles instead of the yard's palette.
@@ -128,13 +174,27 @@ var yardSlots = map[string]slot{
 	"window": personalGlass, "white": spaceMirror, "timber": spaceSecondary,
 }
 
-// yardLooks reads picked display colours from the same scenery book.
+// yardLooks reads picked display colours from the same scenery book and
+// makes each look of its material painted in that colour: the yard is
+// what it is made of, with a coat of pigment over it. The made look's
+// Name is set to "yard <name>" afterwards, so the geometry records,
+// which hash the look's name and its eight numbers, do not move: paint
+// is flat, and a plain look was flat too.
 func yardLooks() looks {
 	paint := looks{}
 	for name, material := range yardSlots {
-		paint[material] = plain("yard "+name,
+		kind, err := materials.ByName(name)
+		if err != nil {
+			panic(fmt.Sprintf("yard looks: %v", err))
+		}
+		coat, err := thing.Made(kind, thing.Painted(maths.RGB(
 			yardColour(name, "red"), yardColour(name, "green"),
-			yardColour(name, "blue"))
+			yardColour(name, "blue"))))
+		if err != nil {
+			panic(fmt.Sprintf("yard looks: %v", err))
+		}
+		coat.Name = "yard " + name
+		paint[material] = coat
 	}
 	return paint
 }

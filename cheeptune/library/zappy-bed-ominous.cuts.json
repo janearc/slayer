@@ -1,0 +1,28 @@
+{
+	"group": "zappy",
+	"mood": "ominous, a slow heartbeat",
+	"feeling": "Something is being explained calmly and you would rather it were not true.",
+	"intent": "Zappy's bed for explaining, the ominous one: under a voice or words on screen, with the frightening fact at 0:24.",
+	"listen_for": "The heartbeat left alone at 0:21, the hard low note at 0:24, and the little five-note tune very high and very quiet over it at 0:27.",
+	"voicing": "@zappy-voice",
+	"tempo": 80,
+	"meter": 4,
+	"seconds": 51.0,
+	"parts": [
+		{"name": "low", "bar": 1, "second": 0.0,
+		 "change": "a two-beat heartbeat, a bass note held and let go, zappy's tune in minor",
+		 "feels": "quiet, watchful: something is near"},
+		{"name": "closer", "bar": 5, "second": 12.0,
+		 "change": "everything shifts up a half step and slips back; the tune's question is bent",
+		 "feels": "it moved: unease"},
+		{"name": "held-breath", "bar": 8, "second": 21.0,
+		 "change": "the heartbeat alone",
+		 "feels": "nothing else in the room"},
+		{"name": "the-fact", "bar": 9, "second": 24.0,
+		 "change": "the loudest low note and a hard drum; then the tune tiny and high above it",
+		 "feels": "it is enormous, and you are small"},
+		{"name": "it-stays", "bar": 13, "second": 36.0,
+		 "change": "the heartbeat and the minor tune again, a little louder, ending on one bare chord",
+		 "feels": "it does not go away: cold calm"}
+	]
+}

@@ -54,6 +54,11 @@ type habit struct {
 	// girth is a part's radius as a share of the stem's where it
 	// joins, and least the smallest it can be.
 	girth, least float64
+	// own, when above nought, is a part's radius as a share of its own
+	// length, in place of girth and least, and never thicker than girth
+	// allows where it joins. no habit of today's trees sets it: their
+	// branches keep ninja's girth, face for face.
+	own float64
 }
 
 // spruceHabit is how a spruce sets its branches.
@@ -106,6 +111,7 @@ func (set habit) sound() error {
 		{"uneven", set.uneven >= 0 && set.uneven < 1},
 		{"girth", positive(set.girth)},
 		{"least", set.least >= 0 && finite(set.least)},
+		{"own", set.own >= 0 && finite(set.own)},
 	}
 	for _, check := range checks {
 		if !check.good {
@@ -186,6 +192,9 @@ func (up whorls) at(stem size, row, index int,
 		return place{}, err
 	}
 	thick := math.Max(set.girth*stemHere, set.least*length)
+	if set.own > 0 {
+		thick = math.Min(set.own*reach, set.girth*stemHere)
+	}
 	return place{space: space, size: size{
 		length: measure.Metres(reach),
 		girth:  measure.Metres(thick)}}, nil

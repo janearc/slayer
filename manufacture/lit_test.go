@@ -163,12 +163,12 @@ func TestAMaserIsALineThroughItsDish(t *testing.T) {
 		half, _ := beam.made.angles()
 		wave := inScene(beam.made.colour.wave)
 		wide, want := half.InRadians(), 1.22*wave/across
-		if math.Abs(wide-want) > 1e-9 {
+		if !(math.Abs(wide-want) <= 1e-9) {
 			t.Errorf("seed %d: a beam of %v through a dish %v "+
 				"across, not %v", number, wide, across, want)
 		}
 		// 21 cm: hydrogen's line, from memory
-		if math.Abs(wave-0.211) > 0.001 {
+		if !(math.Abs(wave-0.211) <= 0.001) {
 			t.Errorf("seed %d: a line of %v m", number, wave)
 		}
 		if beam.made.bands().Power(bands.Of(550)) != 0 {
@@ -206,7 +206,7 @@ func TestAThingPlacedTakesItsLightsWithIt(t *testing.T) {
 	}
 	// a thing twice the size has a housing twice the size to clear
 	far, near := inScene(is.beyond), inScene(was.beyond)
-	if math.Abs(far-2*near) > close || near <= 0 {
+	if !(math.Abs(far-2*near) <= close) || near <= 0 {
 		t.Errorf("the light starts %v out, and started %v", far, near)
 	}
 	if len(made.lights) != 1 || made.lights[0] != was {

@@ -241,7 +241,7 @@ func declared(t *testing.T, name string) string {
 // ground sets, so the schema is held to what scenes really say.
 func TestEcosystemSchemaTakesTheSetsAsWritten(t *testing.T) {
 	for _, name := range []string{"shoebox", "widow", "widow-smoke",
-		"widow-tail", "kilauea-iki", "melancholia",
+		"widow-tail", "fizz", "kilauea-iki", "melancholia",
 		"planetary-turbidity"} {
 		raw := []byte(declared(t, name))
 		if _, err := set.Read(name+".yaml", raw); err != nil {

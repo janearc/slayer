@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/gas"
 )
 
 // eyeBands is the three wavelengths a gas is asked at for the eye's
@@ -21,6 +22,14 @@ func byEye(ask func(band maths.Band) float64) maths.Light {
 	return maths.RGB(ask(eyeBands[0]), ask(eyeBands[1]), ask(eyeBands[2]))
 }
 
+// EyeOptics is a gas's extinction and scatter at the eye's three bands, per
+// unit of its medium's space at unit density: the numbers every step of a
+// picture's rays through the gas is made from, and that a picture drawn
+// another way MUST use too, so that the two cannot drift.
+func EyeOptics(air gas.Gas) (extinction, scatter maths.Light) {
+	return byEye(air.Extinction), byEye(air.Scatter)
+}
+
 // gasStep is one step of a ray through a gas: each of the eye's
 // channels keeps what beer's law leaves of it over the step, and
 // gathers what the gas scatters toward the eye of every lamp's light
@@ -29,7 +38,7 @@ func byEye(ask func(band maths.Band) float64) maths.Light {
 // That is the gas's scattering at the band, its phase at the lamp's
 // angle to the eye, and the density there. thick is the step's density
 // times its length in the medium's own units.
-func gasStep(scene staged, crossed *crossing, step stride, ray maths.Ray,
+func gasStep(scene *staged, crossed *crossing, step stride, ray maths.Ray,
 	gain float64, passed passage) passage {
 	point, dir, thick := ray.Point(step.along), ray.Dir, step.thick
 	air := crossed.volume.gas
@@ -40,8 +49,14 @@ func gasStep(scene staged, crossed *crossing, step stride, ray maths.Ray,
 	})
 	scatter := crossed.volume.scatter
 	var in maths.Light
-	for _, one := range scene.asked(point, dir.Neg(), byLight) {
+	var room [lampsAsked]lit
+	for _, one := range scene.asked(room[:], point, dir.Neg(), byLight) {
 		got := scene.shadowed(one, point)
+		if got == (maths.Light{}) {
+			// a lamp that sends nothing here has no direction worth
+			// taking the phase at, as it has none for a surface
+			continue
+		}
 		if one.ambient() {
 			// from everywhere at once: as a painted volume takes it
 			in = in.Add(got.Scale(evenly))

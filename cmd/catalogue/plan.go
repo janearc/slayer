@@ -44,7 +44,11 @@ type plan struct {
 	LightExposure float64      `json:"light-exposure" yaml:"light-exposure"`
 	MinCoverage   float64      `json:"minimum-coverage" yaml:"minimum-coverage"`
 	Cutaway       bool         `json:"cutaway" yaml:"cutaway"`
-	raw           []byte
+	// Studio lights every entry by the plan's own sky and lamps, an
+	// entry with a staging of its own among them: a mirror staged in
+	// space mirrors the dark, and what it is made of is judged in a room.
+	Studio bool `json:"studio" yaml:"studio"`
+	raw    []byte
 }
 
 // zeroLength is defined as a direction with no length.
@@ -94,15 +98,24 @@ func (plan plan) check() error {
 		!(horizontal > zeroLength) {
 		return fmt.Errorf("catalogue camera needs a finite heading")
 	}
-	for _, source := range plan.Sources {
-		_, err := emit.NewDistant(source.Toward, source.Strength)
-		if err != nil {
-			return err
-		}
+	if err := checkSources(plan.Sources); err != nil {
+		return err
 	}
 	for _, detail := range plan.Details {
 		if !slices.Contains(manufacture.Complexities(), detail) {
 			return fmt.Errorf("unknown catalogue detail %q", detail)
+		}
+	}
+	return nil
+}
+
+// checkSources refuses a lamp with no way to come from or no finite light,
+// before anything is drawn, for the plan's studio and an entry's staging.
+func checkSources(sources []source) error {
+	for _, source := range sources {
+		_, err := emit.NewDistant(source.Toward, source.Strength)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

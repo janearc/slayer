@@ -1,0 +1,172 @@
+{
+	// glass-hour as an acid line, the short one. 26 bars, 44.98 s, five
+	// tempos stepping up and one step back down. f sharp phrygian, as
+	// glass-hour is.
+	//
+	// the plan. one voice carries it: a line of sixteenth notes on the
+	// lead. most of its notes are the low f sharp (f#2) and its octave,
+	// quiet, with gaps; glass-hour's own melody, an octave lower than it
+	// was written, is the loud notes of the line, at the places in the
+	// bar where glass-hour has them (one bar of glass-hour is one bar of
+	// this, at twice its tempo and rising, so the tune goes by at a
+	// little over twice its speed). under it a clock: a tick on each
+	// beat and a metal tock between.
+	//
+	//   1-2   thin, 132 a minute. the line alone on f#2 with its octave,
+	//         no melody yet, and the clock. bar 2 ends on g, the note a
+	//         half step up that glass-hour leans on.
+	//   3-6   ice. glass-hour bars 1 to 4, a loud note for each of its
+	//         notes: c# f# c# | d g d | c# f# c# | b e b, over f#, g, f#
+	//         and c in the line's low notes, as glass-hour's bass has.
+	//   7-10  hairline, 136. a kick on every beat and a low bass off the
+	//         beat. glass-hour bars 5 to 7 (c# e g c# e | d f# a | b d f#
+	//         b d), the line with no gaps now. bar 10 is glass-hour's
+	//         silent bar with its snare roll: the kick stops and the line
+	//         climbs the scale two octaves in sixteenths, quiet to loud.
+	//   11-14 it spreads, 140 then 144 at bar 13. bars 5 to 7 again with
+	//         the melody back up at its own octave, where the filter is
+	//         open; the bass rolls in sixteenths; chord stabs off the
+	//         beat (the 64-bar piece's triads). bar 14: the kick doubles
+	//         and the line leaps octaves up the scale.
+	//   15-22 it breaks, 148, everything ff. glass-hour's crack, bars 9
+	//         and 10, note for note an octave down: the eighth-note line
+	//         with the low f# struck between each, then the sixteenth
+	//         run as written. then the 64-bar piece's two answers to it
+	//         (its bars 35, 36), the crack again, its rising run (bar
+	//         37), and bar 22 falls down the scale and ends on one low
+	//         blow half way through the bar.
+	//   23-26 after, back to 132. the clock alone with glass-hour's last
+	//         four bars: f# f# f#, the same on g, f# again, low and quiet,
+	//         and it stops.
+	//
+	// accents: every melody note is f or ff; the filling notes are p in
+	// bars 1 to 6, mp in 7 to 9, mf from 11. slides, to be written when
+	// the machine takes them: from the low note into each melody note
+	// that begins a group (bar 3 step 9, bar 4 step 5, bar 6 step 5), and
+	// along the run in bar 10 and the leaps in bar 14.
+	"name": "glass-acid",
+	"tempo": 132,
+	"meter": 4,
+	"loop": false,
+	"tempos": [
+		{"bar": 7, "tempo": 136},
+		{"bar": 11, "tempo": 140},
+		{"bar": 13, "tempo": 144},
+		{"bar": 15, "tempo": 148},
+		{"bar": 23, "tempo": 132}
+	],
+	"parts": [
+		{"role": "lead", "bars": [
+			"f#2:1/4@p f#2:1/4@p -:1/4 f#2:1/4@p f#3:1/4@mp -:1/4 f#2:1/4@p f#2:1/4@p -:1/4 f#2:1/4@p f#2:1/4@p f#3:1/4@mp -:1/4 f#2:1/4@p f#3:1/4@mp f#2:1/4@p",
+			"f#2:1/4@p f#2:1/4@p -:1/4 f#2:1/4@p f#3:1/4@mp -:1/4 f#2:1/4@p f#2:1/4@p -:1/4 f#2:1/4@p f#2:1/4@p f#3:1/4@mp g2:1/4@mp g2:1/4@p g3:1/4@mp g2:1/4@p",
+			"f#2:1/4@p f#2:1/4@p -:1/4 f#2:1/4@p f#3:1/4@mp -:1/4 f#2:1/4@p f#2:1/4@p c#4:1/4@f f#2:1/4@p f#4:1/4@f f#2:1/4@p c#4:1/4@f -:1/4 f#2:1/4@p f#3:1/4@mp",
+			"g2:1/4@p g2:1/4@p -:1/4 g2:1/4@p d4:1/4@f g2:1/4@p g4:1/4@f g2:1/4@p d4:1/4@f -:1/4 g2:1/4@p g3:1/4@mp -:1/4 g2:1/4@p g3:1/4@mp g2:1/4@p",
+			"f#2:1/4@p f#3:1/4@mp -:1/4 f#2:1/4@p f#2:1/4@p -:1/4 f#3:1/4@mp f#2:1/4@p c#4:1/4@f f#2:1/4@p f#4:1/4@f f#2:1/4@p c#4:1/4@f -:1/4 f#2:1/4@p f#2:1/4@p",
+			"c3:1/4@p c3:1/4@p -:1/4 c3:1/4@p b3:1/4@f c3:1/4@p e4:1/4@f c3:1/4@p b3:1/4@f -:1/4 c3:1/4@p c2:1/4@mp -:1/4 c3:1/4@p c2:1/4@mp c3:1/4@p",
+			"c#4:1/4@f f#2:1/4@mp e4:1/4@f f#2:1/4@mp f#2:1/4@mp f#3:1/4@mp g4:1/4@f f#2:1/4@mp f#2:1/4@mp f#3:1/4@mp c#4:1/4@f f#2:1/4@mp e4:1/4@f f#2:1/4@mp f#3:1/4@mp f#2:1/4@mp",
+			"g2:1/4@mp g2:1/4@mp g3:1/4@mp g2:1/4@mp d4:1/4@f g2:1/4@mp f#4:1/4@f g2:1/4@mp a4:1/4@f g2:1/4@mp g2:1/4@mp g3:1/4@mp a4:1/4 g2:1/4@mp g3:1/4@mp g2:1/4@mp",
+			"b3:1/4@f c3:1/4@mp d4:1/4@f c3:1/4@mp c3:1/4@mp c2:1/4@mp f#4:1/4@f c3:1/4@mp c3:1/4@mp c2:1/4@mp b3:1/4@f c3:1/4@mp d4:1/4@f c3:1/4@mp c2:1/4@mp c3:1/4@mp",
+			"f#2:1/4@p g2:1/4@p a2:1/4@p b2:1/4@p c#3:1/4@mp d3:1/4@mp e3:1/4@mp f#3:1/4@mp g3:1/4 a3:1/4 b3:1/4 c#4:1/4 d4:1/4@f e4:1/4@f f#4:1/4@ff g4:1/4@ff",
+			"c#5:1/4@ff f#2:1/4 e5:1/4@ff f#2:1/4 f#2:1/4 f#3:1/4 g5:1/4@ff f#2:1/4 f#2:1/4 f#3:1/4 c#5:1/4@ff f#2:1/4 e5:1/4@ff f#2:1/4 f#3:1/4 f#2:1/4",
+			"g2:1/4 g2:1/4 g3:1/4 g2:1/4 d5:1/4@ff g2:1/4 f#5:1/4@ff g2:1/4 a5:1/4@ff g2:1/4 g2:1/4 g3:1/4 a5:1/4@f g2:1/4 g3:1/4 g2:1/4",
+			"b4:1/4@ff c3:1/4 d5:1/4@ff c3:1/4 c3:1/4 c2:1/4 f#5:1/4@ff c3:1/4 c3:1/4 c2:1/4 b4:1/4@ff c3:1/4 d5:1/4@ff c3:1/4 c2:1/4 c3:1/4",
+			"f#2:1/4 f#3:1/4 g2:1/4 g3:1/4 a2:1/4 a3:1/4 b2:1/4 b3:1/4 c#3:1/4@f c#4:1/4@f d3:1/4@f d4:1/4@f e3:1/4@ff e4:1/4@ff f#3:1/4@ff f#4:1/4@ff",
+			"a4:1/4@ff f#2:1/4 c#5:1/4@ff f#2:1/4 b4:1/4@ff f#2:1/4 a4:1/4@ff f#2:1/4 f#4:1/4@ff f#2:1/4 e4:1/4@ff f#2:1/4 f#4:1/4@ff f#2:1/4 g4:1/4@ff f#2:1/4",
+			"g4:1/4@ff a4:1/4@ff f#4:1/4@ff a4:1/4@ff f#4:1/4@ff d4:1/4@ff b3:1/4@ff c#4:1/4@ff c#4:1/4@ff d4:1/4@ff c#4:1/4@ff e4:1/4@ff d4:1/4@ff e4:1/4@ff f#4:1/4@ff a4:1/4@ff",
+			"c#5:1/4@ff f#2:1/4 b4:1/4@ff f#2:1/4 a4:1/4@ff f#2:1/4 g4:1/4@ff f#2:1/4 f#4:1/4@ff f#2:1/4 g4:1/4@ff f#2:1/4 a4:1/4@ff f#2:1/4 c#5:1/4@ff f#2:1/4",
+			"d5:1/4@ff g2:1/4 c#5:1/4@ff g2:1/4 b4:1/4@ff g2:1/4 a4:1/4@ff g2:1/4 g4:1/4@ff g2:1/4 a4:1/4@ff g2:1/4 b4:1/4@ff g2:1/4 d5:1/4@ff g2:1/4",
+			"a4:1/4@ff f#3:1/4 c#5:1/4@ff f#3:1/4 b4:1/4@ff f#3:1/4 a4:1/4@ff f#3:1/4 f#4:1/4@ff f#3:1/4 e4:1/4@ff f#3:1/4 f#4:1/4@ff f#3:1/4 g4:1/4@ff f#3:1/4",
+			"g4:1/4@ff a4:1/4@ff f#4:1/4@ff a4:1/4@ff f#4:1/4@ff d4:1/4@ff b3:1/4@ff c#4:1/4@ff c#4:1/4@ff d4:1/4@ff c#4:1/4@ff e4:1/4@ff d4:1/4@ff e4:1/4@ff f#4:1/4@ff a4:1/4@ff",
+			"a4:1/4@ff g4:1/4@ff f#4:1/4@ff e4:1/4@ff d4:1/4@ff c#4:1/4@ff b3:1/4@ff c#4:1/4@ff d4:1/4@ff e4:1/4@ff f#4:1/4@ff g4:1/4@ff a4:1/4@ff b4:1/4@ff c#5:1/4@ff d5:1/4@ff",
+			"e5:1/4@ff d5:1/4@ff c#5:1/4@ff b4:1/4@ff a4:1/4@ff g4:1/4@ff f#4:1/4@ff e4:1/4@ff f#2:1/2@ff -:3/2",
+			"- f#2:1/2@p f#2:1/2@p f#2:2@p",
+			"- f#2:1/2@p f#2:1/2@p f#2:2@p",
+			"- g2:1/2@p g2:1/2@p g2:2@p",
+			"- f#2:1/2@p f#2:1/2@p f#2@pp -"
+		]},
+		{"role": "pad", "bars": [
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:3/2 (f#3 a3 c#4):1/2 -:3/2 (f#3 a3 c#4):1/2",
+			"-:3/2 (g3 b3 d4):1/2 -:3/2 (g3 b3 d4):1/2",
+			"-:3/2 (c4 e4 g4):1/2 -:3/2 (c4 e4 g4):1/2",
+			"-:4",
+			"-:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f",
+			"-:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f",
+			"-:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f",
+			"-:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f",
+			"-:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f",
+			"-:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f -:1/2 (g3 b3 d4):1/2@f",
+			"-:1/2 (c4 e4 g4):1/2@f -:1/2 (c4 e4 g4):1/2@f -:1/2 (c4 e4 g4):1/2@f -:1/2 (c4 e4 g4):1/2@f",
+			"-:1/2 (f#3 a3 c#4):1/2@f -:1/2 (f#3 a3 c#4):1/2@f (f#3 a3 c#4):1/2@ff -:3/2",
+			"(f#3 c#4):4@pp",
+			"(f#3 c#4):4@pp",
+			"(g3 d4):4@pp",
+			"(f#3 c#4):3@pp -"
+		]},
+		{"role": "bass", "bars": [
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:4",
+			"-:1/2 f#1:1/2 -:1/2 f#1:1/2 -:1/2 f#1:1/2 -:1/2 f#1:1/2",
+			"-:1/2 g1:1/2 -:1/2 g1:1/2 -:1/2 g1:1/2 -:1/2 g1:1/2",
+			"-:1/2 c2:1/2 -:1/2 c2:1/2 -:1/2 c2:1/2 -:1/2 c2:1/2",
+			"-:4",
+			"-:1/4 f#1:1/4 f#1:1/4 f#1:1/4 -:1/4 f#1:1/4 f#1:1/4 f#1:1/4 -:1/4 f#1:1/4 f#1:1/4 f#1:1/4 -:1/4 f#1:1/4 f#1:1/4 f#1:1/4",
+			"-:1/4 g1:1/4 g1:1/4 g1:1/4 -:1/4 g1:1/4 g1:1/4 g1:1/4 -:1/4 g1:1/4 g1:1/4 g1:1/4 -:1/4 g1:1/4 g1:1/4 g1:1/4",
+			"-:1/4 c2:1/4 c2:1/4 c2:1/4 -:1/4 c2:1/4 c2:1/4 c2:1/4 -:1/4 c2:1/4 c2:1/4 c2:1/4 -:1/4 c2:1/4 c2:1/4 c2:1/4",
+			"-:4",
+			"-:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f",
+			"-:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f",
+			"-:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f",
+			"-:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f",
+			"-:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f",
+			"-:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f -:1/4 g1:1/4@f g1:1/4@f g1:1/4@f",
+			"-:1/4 c2:1/4@f c2:1/4@f c2:1/4@f -:1/4 c2:1/4@f c2:1/4@f c2:1/4@f -:1/4 c2:1/4@f c2:1/4@f c2:1/4@f -:1/4 c2:1/4@f c2:1/4@f c2:1/4@f",
+			"-:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f -:1/4 f#1:1/4@f f#1:1/4@f f#1:1/4@f f#1:1/2@ff -:3/2",
+			"f#1:4@p",
+			"f#1:4@p",
+			"g1:4@p",
+			"f#1:3@p -"
+		]},
+		{"role": "perc", "bars": [
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@p h:1/4@p t:1/4@p t:1/4@mp t:1/4@mp",
+			"k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p",
+			"k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p",
+			"k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p k:1/4 h:1/4@p t:1/4@p h:1/4@p",
+			"s:1/4@pp s:1/4@pp s:1/4@pp s:1/4@pp s:1/4@p s:1/4@p s:1/4@p s:1/4@p s:1/4@mp s:1/4@mp s:1/4 s:1/4 s:1/4@f s:1/4@f s:1/4@ff s:1/4@ff",
+			"k:1/4@f h:1/4@p t:1/4 h:1/4@p k:1/4@f h:1/4@p t:1/4 s:1/4@mp k:1/4@f h:1/4@p t:1/4 h:1/4@p k:1/4@f h:1/4@p t:1/4 s:1/4@mp",
+			"k:1/4@f h:1/4@p t:1/4 h:1/4@p k:1/4@f h:1/4@p t:1/4 s:1/4@mp k:1/4@f h:1/4@p t:1/4 h:1/4@p k:1/4@f h:1/4@p t:1/4 s:1/4@mp",
+			"k:1/4@f h:1/4@p t:1/4 h:1/4@p k:1/4@f h:1/4@p t:1/4 s:1/4@mp k:1/4@f h:1/4@p t:1/4 h:1/4@p k:1/4@f h:1/4@p t:1/4 s:1/4@mp",
+			"k:1/2 k:1/2 k:1/2 k:1/2 k:1/4@f k:1/4@f k:1/4@f k:1/4@f k:1/4@ff k:1/4@ff s:1/4@ff s:1/4@ff",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff s:1/4@f s:1/4@f s:1/4@ff",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff h:1/4 t:1/4@f s:1/4@f k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff s:1/4@f s:1/4@f s:1/4@ff",
+			"k:1/4@ff h:1/4 t:1/4@f h:1/4 k:1/4@ff s:1/4@f s:1/4@ff s:1/4@ff k:1/2@ff -:3/2",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp",
+			"h:1/2@p t:1/2@pp h:1/2@p t:1/2@pp h:1/2@pp t:1/2@pp -"
+		]}
+	]
+}

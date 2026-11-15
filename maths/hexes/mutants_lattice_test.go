@@ -37,10 +37,10 @@ func apothem(s, du, dv float64) float64 {
 // byRowThenColumn puts tiles in the order of their ids: row first.
 func byRowThenColumn(tiles []Tile) {
 	sort.Slice(tiles, func(a, b int) bool {
-		if tiles[a].J != tiles[b].J {
-			return tiles[a].J < tiles[b].J
+		if tiles[a].Row != tiles[b].Row {
+			return tiles[a].Row < tiles[b].Row
 		}
-		return tiles[a].I < tiles[b].I
+		return tiles[a].Column < tiles[b].Column
 	})
 }
 
@@ -85,9 +85,9 @@ func TestFlatNeighboursAreTheTilesOneStepAway(t *testing.T) {
 		tiles := g.Tiles()
 		for _, tile := range tiles {
 			var want []Tile
-			cu, cv := middle(g.Step, tile.I, tile.J)
+			cu, cv := middle(g.Step, tile.Column, tile.Row)
 			for _, other := range tiles {
-				ou, ov := middle(g.Step, other.I, other.J)
+				ou, ov := middle(g.Step, other.Column, other.Row)
 				d := math.Hypot(ou-cu, ov-cv)
 				if other != tile && math.Abs(d-g.Step) < 1e-9*g.Step {
 					want = append(want, other)
@@ -138,8 +138,8 @@ func TestFlatEdgeIsTheHexagons(t *testing.T) {
 	for _, s := range []float64{1, 2, 3.7} {
 		f := Flat{Step: s, Across: 6, Down: 6}
 		for _, tile := range []Tile{{0, 3, 2}, {0, 3, 3}, {0, 0, 0}, {0, 5, 5}} {
-			cu, cv := middle(s, tile.I, tile.J)
-			if e := f.Edge(f.Centre(tile), tile); math.Abs(e-s/2) > 1e-12 {
+			cu, cv := middle(s, tile.Column, tile.Row)
+			if e := f.Edge(f.Centre(tile), tile); !(math.Abs(e-s/2) <= 1e-12) {
 				t.Fatalf("step %v tile %v: the middle is %v from the edge",
 					s, tile, e)
 			}
@@ -148,7 +148,7 @@ func TestFlatEdgeIsTheHexagons(t *testing.T) {
 				dv := s * (random(int64(k) + 99).Y) * 0.9
 				p := maths.V(cu+du, 5, cv+dv)
 				want := apothem(s, du, dv)
-				if e := f.Edge(p, tile); math.Abs(e-want) > 1e-12*s {
+				if e := f.Edge(p, tile); !(math.Abs(e-want) <= 1e-12*s) {
 					t.Fatalf("step %v tile %v offset (%v, %v): %v, want %v",
 						s, tile, du, dv, e, want)
 				}
@@ -181,7 +181,7 @@ func TestFlatDistanceIsTheStraightLine(t *testing.T) {
 		{maths.V(-1, 0, -2), maths.V(2, 0, 2), 5},
 		{maths.V(5, 0, -3), maths.V(5, 0, 1), 4},
 	} {
-		if d := f.Distance(c.a, c.b); math.Abs(d-c.want) > 1e-12 {
+		if d := f.Distance(c.a, c.b); !(math.Abs(d-c.want) <= 1e-12) {
 			t.Errorf("%v to %v is %v, want %v", c.a, c.b, d, c.want)
 		}
 	}
@@ -228,7 +228,7 @@ func TestFlatBoxSomewhereAndLatitude(t *testing.T) {
 								want = math.Min(1, math.Abs(p.Sub(mid).Dot(flat))/reach)
 							}
 						}
-						if got := f.Latitude(p, n); math.Abs(got-want) > 1e-12 {
+						if got := f.Latitude(p, n); !(math.Abs(got-want) <= 1e-12) {
 							t.Fatalf("%+v at %v under north %v: %v, want %v",
 								f, p, n, got, want)
 						}
@@ -248,7 +248,7 @@ func TestFlatLatitudeStopsAtATinyNorth(t *testing.T) {
 	if in := maths.V(exact.X, 0, exact.Z); in.Len() != 1e-12 {
 		t.Fatalf("1e-12 is %v long in the plane here", in.Len())
 	}
-	if l := f.Latitude(edge, exact); math.Abs(l-1) > 1e-12 {
+	if l := f.Latitude(edge, exact); !(math.Abs(l-1) <= 1e-12) {
 		t.Errorf("a north 1e-12 long gives latitude %v", l)
 	}
 	if l := f.Latitude(edge, maths.V(1e-13, 3, 0)); l != 0 {
@@ -278,7 +278,7 @@ func TestBandRowsAndColumnsFit(t *testing.T) {
 		{7, 7, 12.0 / 7, 5, 35},
 	} {
 		b := Band{Radius: r, Width: c.width, Around: c.around}
-		if math.Abs(b.Spacing()-c.spacing) > 1e-12 {
+		if !(math.Abs(b.Spacing()-c.spacing) <= 1e-12) {
 			t.Errorf("%+v: spacing %v, want %v", b, b.Spacing(), c.spacing)
 		}
 		if b.rows() != c.rows || len(b.Tiles()) != c.want {
@@ -344,9 +344,9 @@ func TestBandNeighboursAreTheTilesOneStepAway(t *testing.T) {
 		tiles := g.Tiles()
 		for _, tile := range tiles {
 			var want []Tile
-			au, av := middle(s, tile.I, tile.J)
+			au, av := middle(s, tile.Column, tile.Row)
 			for _, other := range tiles {
-				bu, bv := middle(s, other.I, other.J)
+				bu, bv := middle(s, other.Column, other.Row)
 				turn := math.Abs(math.Remainder((bu-au)/g.Radius, 2*math.Pi))
 				d := math.Hypot(turn*g.Radius, bv-av)
 				if other != tile && math.Abs(d-s) < 1e-9*s {
@@ -371,7 +371,7 @@ func TestBandEdgeIsTheHexagonsTheShortWayRound(t *testing.T) {
 	s := b.Spacing()
 	for _, tile := range []Tile{{0, 0, 1}, {0, 39, 1}, {0, 1, 0}, {0, 38, 2},
 		{0, 20, 1}, {0, 19, 1}, {0, 21, 0}, {0, 10, 2}, {0, 30, 1}} {
-		cu, cv := middle(s, tile.I, tile.J)
+		cu, cv := middle(s, tile.Column, tile.Row)
 		for k := range 96 {
 			ang := (float64(k) + 0.37) * 2 * math.Pi / 96
 			if k%4 == 0 {
@@ -381,7 +381,7 @@ func TestBandEdgeIsTheHexagonsTheShortWayRound(t *testing.T) {
 			p := maths.V(10*math.Sin(ang), y, 10*math.Cos(ang))
 			turn := math.Remainder(ang-cu/10, 2*math.Pi)
 			want := apothem(s, 10*turn, y-(cv-2))
-			if e := b.Edge(p, tile); math.Abs(e-want) > 1e-9 {
+			if e := b.Edge(p, tile); !(math.Abs(e-want) <= 1e-9) {
 				t.Fatalf("tile %v at angle %v: %v from the edge, want %v",
 					tile, ang, e, want)
 			}
@@ -427,13 +427,13 @@ func TestBandDistanceIsAlongTheCylinder(t *testing.T) {
 	at := func(az, y float64) maths.Vec {
 		return maths.V(10*math.Sin(az), y, 10*math.Cos(az))
 	}
-	if d := b.Distance(at(-0.9*math.Pi, 0), at(0.9*math.Pi, 0)); math.Abs(d-0.2*math.Pi*10) > 1e-9 {
+	if d := b.Distance(at(-0.9*math.Pi, 0), at(0.9*math.Pi, 0)); !(math.Abs(d-0.2*math.Pi*10) <= 1e-9) {
 		t.Errorf("across the seam: %v", d)
 	}
-	if d := b.Distance(at(1, 3), at(1, 1)); math.Abs(d-2) > 1e-12 {
+	if d := b.Distance(at(1, 3), at(1, 1)); !(math.Abs(d-2) <= 1e-12) {
 		t.Errorf("two apart in height: %v", d)
 	}
-	if d := b.Distance(at(0.5, 1), at(0.9, -1)); math.Abs(d-math.Hypot(0.4*10, 2)) > 1e-12 {
+	if d := b.Distance(at(0.5, 1), at(0.9, -1)); !(math.Abs(d-math.Hypot(0.4*10, 2)) <= 1e-12) {
 		t.Errorf("slantwise: %v", d)
 	}
 }
@@ -445,7 +445,7 @@ func TestBandLatitudeAndSomewhere(t *testing.T) {
 	b := Band{Radius: 10, Width: 4, Around: 40}
 	for _, c := range []struct{ y, want float64 }{{1, 0.5}, {-1.5, 0.75},
 		{2, 1}, {3, 1}, {0, 0}} {
-		if l := b.Latitude(maths.V(10, c.y, 0), maths.Up); math.Abs(l-c.want) > 1e-12 {
+		if l := b.Latitude(maths.V(10, c.y, 0), maths.Up); !(math.Abs(l-c.want) <= 1e-12) {
 			t.Errorf("height %v: latitude %v, want %v", c.y, l, c.want)
 		}
 	}
@@ -454,7 +454,7 @@ func TestBandLatitudeAndSomewhere(t *testing.T) {
 			t.Errorf("width %v: latitude %v", w, l)
 		}
 	}
-	if l := (Band{Radius: 10, Width: 0.5, Around: 40}).Latitude(maths.V(10, 0.125, 0), maths.Up); math.Abs(l-0.5) > 1e-12 {
+	if l := (Band{Radius: 10, Width: 0.5, Around: 40}).Latitude(maths.V(10, 0.125, 0), maths.Up); !(math.Abs(l-0.5) <= 1e-12) {
 		t.Errorf("a narrow band: latitude %v", l)
 	}
 	if p := b.Somewhere(0.25, 0.75, 0); !p.Near(maths.V(10, 1, 0), 1e-9) {
@@ -477,7 +477,7 @@ func TestBandUnwrapGoesRoundFromNought(t *testing.T) {
 		{0.75}, {1.0 - 1e-9}, {1.0 / 3}, {0.04}} {
 		a := c.turns * 2 * math.Pi
 		u, v := b.unwrap(maths.V(10*math.Sin(a), 1.5, 10*math.Cos(a)))
-		if want := 10 * a; math.Abs(u-want) > 1e-9 || v != 3.5 {
+		if want := 10 * a; !(math.Abs(u-want) <= 1e-9) || v != 3.5 {
 			t.Errorf("%v of a turn round: u %v v %v, want %v and 3.5", c.turns, u, v, want)
 		}
 	}

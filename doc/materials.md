@@ -39,6 +39,34 @@ absorption, scattering directionality, and emission. Plain and compound
 gases should supply that same interface so composition does not introduce
 a special tracer path.
 
+## What a material carries, as built by 2026-11-12
+
+This part is not design. It says what the `materials` package holds today
+for solid things, so a reader need not infer it from the plan above.
+
+- A material has a name and a formula. It may also have a bulk density,
+  with the table cell it was read from (`AtDensity`, `DensityFrom`).
+- It may have optics: a complex refractive index, n and k, for each of the
+  tracer's red, green and blue, each reading with the row it was read from
+  in the refractiveindex.info database. Gold, silver, aluminium, beryllium,
+  titanium, steel and ochre have them.
+- It may have x-ray attenuation: a mass attenuation coefficient at an
+  energy, each with its row in NIST's tables (SRD 126). Lead, aluminium and
+  liquid water have a row at 60 keV. `Passes` is the share of a beam that
+  comes through a thickness, by the exponential law, and refuses a material
+  with no row at that energy or no density.
+- `ByName` gives a material by its name. A row is quoted in the code and its
+  page is not: NIST's pages are copyright and stay with celestial-data's
+  adapter, which holds each to its checksum.
+- A look is made of a material and a finish by `thing.Made`: a metal mirrors
+  by its own n and k, and the finish says how polished it is.
+  `thing.Stopping` is what a material takes from a band beyond the visible,
+  from its attenuation; a band with no row is stopped whole.
+
+Nothing reads a material's formula back yet, so a wrong one could not be
+seen; that is a known gap. No material's optics are interpolated between
+rows: the readings are the grid points nearest the tracer's three colours.
+
 ## Spatially varying mixtures
 
 A cloud may contain more ice far from a star and more iron nearby. A

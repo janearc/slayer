@@ -43,7 +43,7 @@ func TestPlacementAndGatherRetainGroupedGeometry(t *testing.T) {
 		normal := placement.Orientation.Out(maths.ZAxis)
 		ray := maths.Ray{At: point.Add(normal.Scale(2)), Dir: normal.Neg()}
 		distance, hit := solid.Hit(ray, 0, 10)
-		if !hit || math.Abs(distance-2) > 1e-10 {
+		if !hit || !(math.Abs(distance-2) <= 1e-10) {
 			t.Fatalf("placement %d: hit %v, distance %g", i, hit, distance)
 		}
 	}

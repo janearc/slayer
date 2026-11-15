@@ -1,0 +1,87 @@
+# the photon ring short, in the walk package's script form, hosted by
+# zappy. the sentences are drafts, to be rewritten; every number in them
+# is a figure, and every figure's from is a facts number (registered in
+# research, or computed by rings): photonring's test holds each sentence
+# to facts.NewSentence and each label's pixel to the rings measurement.
+#
+# labels near the hole are pixels from the rings package's march, not a
+# straight projection: light bends there. they mark where an image
+# appears in the picture, not where a thing is. the walk package takes
+# pixel labels and a script with no set once its door lands; until then
+# this is the script it will read.
+#
+# the traced shots are drawn at smoke 36's own 9 by 9 rays a pixel with
+# the hole's reach at sixty masses, so the light is bent all the way from
+# the eye (ringshots -reach 60), which is where the labels' march starts.
+#
+# under it: glass-acid, its own sound, cut on its parts. zappy's intro
+# is over "thin" (0 to 3.64 s, laid by the host package, not here); the
+# shots follow from "ice": straight at ice, bent at hairline, the
+# diagram at spreads, the two close-ins across breaks (the turn, where
+# everything hits), and the telescopes in "after", the clock alone.
+shorts:
+  - name: the photon ring
+    title: light that went round before it left
+    shots:
+      - picture: straight.png
+        seconds: 7.27
+        lit: drawing
+        name: a black hole's disc, light drawn straight
+        sentence: >-
+          I'm just a pretend magnetar. This disc is drawn as if light
+          went straight. Even the black is gone.
+      - picture: bent.png
+        seconds: 7.06
+        lit: drawing
+        name: the same disc, light bent
+        labels:
+          - {pixel: [540, 224], words: the far side of the disc}
+          - {pixel: [540, 380], words: where the ring appears, side: down}
+        sentence: >-
+          Bend the light: the disc's far side shows over the top. The
+          thin line at the black is the photon ring.
+      - picture: diagram.png
+        seconds: 6.76
+        lit: drawing
+        name: rays followed back from the eye
+        sentence: >-
+          Light that went round before it left. Followed back from the
+          eye: once, half round, round again.
+      - picture: closein.png
+        seconds: 6.97
+        lit: drawing
+        name: a close-in on the ring's top
+        figures:
+          - {value: "4", unit: "%", says: each ring of the last,
+             from: research photon-subring-dimming-schwarzschild-percent}
+        labels:
+          - {pixel: [540, 208], words: the second image}
+          - {pixel: [540, 540], words: the third image, side: down}
+        sentence: >-
+          Close in: a thinner ring inside. Round a hole that does not
+          spin, each is about 4% as wide as the last.
+      - picture: closein.png
+        seconds: 6.0
+        lit: drawing
+        name: what the full picture can show
+        figures:
+          - {value: "3", unit: pixels, says: the second, full picture,
+             from: rings second image width}
+          - {value: "0.1", unit: pixel, says: the third, full picture,
+             from: rings third image width}
+        sentence: >-
+          In the full picture that one is 0.1 of a pixel. The tracer
+          has it; the pixels hide it.
+      - picture: bent.png
+        seconds: 7.28
+        lit: drawing
+        name: what telescopes have seen
+        figures:
+          - {value: "42", unit: µas, says: "M87's ring, EHT 2019",
+             from: research m87-ring-diameter-microarcsec}
+          - {value: "51.8", unit: µas,
+             says: "our galaxy's, EHT 2022",
+             from: research sgra-ring-diameter-microarcsec}
+        sentence: >-
+          Telescopes have seen M87's ring, 42 microarcseconds across, but
+          not how thin. A space telescope is proposed.

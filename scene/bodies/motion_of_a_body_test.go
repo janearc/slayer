@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/thing"
@@ -18,7 +19,8 @@ import (
 // a day of zero is no turn, and a nanosecond is a day all the same.
 func TestABodyTurnsProgradeOnceADayAndBackwardOnANegativeOne(t *testing.T) {
 	place := func(day time.Duration, tilt float64) *thing.Thing {
-		b := bodies.Body{Name: "s", Kind: bodies.Star, Radius: 8, Day: day, Tilt: tilt}
+		b := made(t, "s", bodies.Star, 8, 1).
+			Turning(day, measure.Radians(tilt))
 		w := thing.NewWorld()
 		if err := b.Place(w, maths.Vec{}, 0.5, 2); err != nil {
 			t.Fatal(err)
@@ -59,10 +61,18 @@ func TestABodyTurnsProgradeOnceADayAndBackwardOnANegativeOne(t *testing.T) {
 // the day is not added and the moons are not placed, and every part of
 // it, the thing and the volumes, is carried by that motion.
 func TestPlaceOnCarriesTheBodyOnTheMotionItIsGiven(t *testing.T) {
-	b := bodies.Body{Name: "s", Kind: bodies.Star, Radius: 8, Day: 4 * time.Hour,
-		Tilt: 0.5, Mass: bodies.Sun,
-		Air:   &bodies.Air{Height: 6, Dense: 0.25},
-		Moons: []bodies.Moon{{Body: bodies.Body{Name: "m", Kind: bodies.Star, Radius: 1}, Orbit: 1e6}}}
+	air, err := bodies.NewAir(bodies.Kilometres(6),
+		bodies.PerKilometre(0.25), maths.Light{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	moon, err := bodies.NewMoon(made(t, "m", bodies.Star, 1, 1),
+		bodies.Kilometres(1e6), measure.Radians(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "s", bodies.Star, 8, bodies.Sun, air, moon).
+		Turning(4*time.Hour, measure.Radians(0.5))
 	track := thing.Orbit{Centre: maths.V(1, 2, 3), Radius: 10, Period: 8 * time.Hour}
 	w := thing.NewWorld()
 	if err := b.PlaceOn(w, track, 0.5, 2); err != nil {
@@ -88,11 +98,29 @@ func TestPlaceOnCarriesTheBodyOnTheMotionItIsGiven(t *testing.T) {
 // PlaceOn refuses as Place does, by name: a scale that is no size.
 func TestPlaceOnRefusesWithTheReason(t *testing.T) {
 	track := thing.Orbit{Radius: 10, Period: time.Hour}
-	b := bodies.Body{Name: "s", Kind: bodies.Star, Radius: 8}
+	b := made(t, "s", bodies.Star, 8, 1)
 	if err := b.PlaceOn(thing.NewWorld(), track, 0, 2); err == nil || !strings.Contains(err.Error(), "scale") {
-		t.Errorf("a scale of nought: %v", err)
+		t.Errorf("a scale of zero: %v", err)
 	}
 	if err := b.PlaceOn(thing.NewWorld(), track, math.Inf(1), 2); err == nil || !strings.Contains(err.Error(), "scale") {
 		t.Errorf("an endless scale: %v", err)
+	}
+}
+
+// Tilting changes the lean and leaves the day alone, and a tilt that is no
+// number is held for Place to refuse.
+func TestTiltingLeansTheAxisAndKeepsTheDay(t *testing.T) {
+	b := made(t, "s", bodies.Star, 8, 1).
+		Turning(4*time.Hour, measure.Radians(0.1)).
+		Tilting(measure.Radians(0.5))
+	if b.Day() != 4*time.Hour {
+		t.Errorf("Tilting leaves the day at 4h, and it is %v", b.Day())
+	}
+	if !(math.Abs(b.Tilt()-0.5) <= 1e-12) {
+		t.Errorf("Tilting(0.5 rad) leaves the tilt at %v radians", b.Tilt())
+	}
+	bad := b.Tilting(measure.Radians(math.NaN()))
+	if err := bad.Place(thing.NewWorld(), maths.Vec{}, 0.5, 2); err == nil {
+		t.Errorf("Place accepted a body Tilting held a NaN tilt for")
 	}
 }

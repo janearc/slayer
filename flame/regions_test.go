@@ -31,15 +31,14 @@ func TestTheContinuousFlameHoldsItsHeat(t *testing.T) {
 	fire.Seed = 11
 	hot, edge := fire.Hottest.InKelvin(), fire.Edge.InKelvin()
 	for _, up := range []float64{0.05, 0.2, 0.35} {
-		if got := axisHeat(t, fire, up); math.Abs(got-hot) > 3 {
+		if got := axisHeat(t, fire, up); !(math.Abs(got-hot) <= 3) {
 			t.Errorf("%g of the way up, %g K, want the hottest %g", up, got,
 				hot)
 		}
 	}
 	middle := 2 * continuous
 	want := edge + (hot-edge)/2
-	if got := axisHeat(t, fire, middle); math.Abs(got-want) >
-		(hot-edge)/10 {
+	if got := axisHeat(t, fire, middle); !(math.Abs(got-want) <= (hot-edge)/10) {
 		t.Errorf("at %g of the way up, %g K, want about %g", middle, got,
 			want)
 	}

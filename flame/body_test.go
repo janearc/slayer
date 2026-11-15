@@ -109,13 +109,13 @@ func TestAFlameBreathesAtItsFrequency(t *testing.T) {
 		at := time.Duration(i) * 37 * time.Millisecond
 		one := narrow.Tick(at).(*Body).breath()
 		other := broad.Tick(2 * at).(*Body).breath()
-		if math.Abs(one-other) > 1e-6 {
+		if !(math.Abs(one-other) <= 1e-6) {
 			t.Fatalf("at %v the narrow breathes %v, the wide at twice "+
 				"%v", at, one, other)
 		}
 		sum += one
 	}
-	if mean := sum / 4000; math.Abs(mean) > 0.01 {
+	if mean := sum / 4000; !(math.Abs(mean) <= 0.01) {
 		t.Errorf("over many puffs the flame is %v of itself taller", mean)
 	}
 }

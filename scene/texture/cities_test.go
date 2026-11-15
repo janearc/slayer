@@ -21,7 +21,7 @@ func scatter(i int) maths.Vec {
 func TestCitiesLightTheLandAsTheMarbleDoes(t *testing.T) {
 	land := func(p maths.Vec) bool { return p.X > 0 }
 	coast := func(p maths.Vec) bool { return p.Z > 0 }
-	c := Cities{Tiling: hexes.Sphere{N: 6}, Land: land, Coast: coast, Rungs: 3,
+	c := Cities{Tiling: hexes.Sphere{Splits: 6}, Land: land, Coast: coast, Rungs: 3,
 		Share: 0.2, Metro: 0.08, Glow: maths.RGB(1, 0.8, 0.5), Seed: 9}
 	var lit, dark, mid, midN, eq, eqN, shore, shoreN, inland, inlandN int
 	for i := range 6000 {

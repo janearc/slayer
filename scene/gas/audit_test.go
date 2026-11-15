@@ -37,7 +37,7 @@ func TestNoDistanceAndNoExtinctionPassAll(t *testing.T) {
 // is refused by name; one inside is henyey and greenstein's, worked at
 // g a half face on: (1 - 1/4) / (4 pi (1/4)^1.5), 3/(2 pi).
 func TestALobeIsInsideOne(t *testing.T) {
-	if got, want := (Gas{Phase: 0.5}).PhaseAt(1), 3/(2*math.Pi); math.Abs(got-want) > 1e-12 {
+	if got, want := (Gas{Phase: 0.5}).PhaseAt(1), 3/(2*math.Pi); !(math.Abs(got-want) <= 1e-12) {
 		t.Errorf("a lobe of a half, forward, is %v, want %v", got, want)
 	}
 	for _, g := range []float64{1, -1, 1.5, math.NaN()} {

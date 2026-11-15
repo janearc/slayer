@@ -39,7 +39,7 @@ func TestAStepShorterThanTheBevelVanishes(t *testing.T) {
 	if at.sub(point{8, 2}).length() > 1e-9 {
 		t.Errorf("the cut corner moved to %v, want 8, 2", at)
 	}
-	if math.Abs(abs(in.area())-36) > 1e-9 {
+	if !(math.Abs(abs(in.area())-36) <= 1e-9) {
 		t.Errorf("the inset's area is %v, want 36", in.area())
 	}
 }

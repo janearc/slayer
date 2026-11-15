@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/hexes"
 	"github.com/janearc/slayer/maths/noise"
@@ -26,25 +27,25 @@ func TestTemplatesPlaceTheirParts(t *testing.T) {
 		body            bodies.Body
 		things, volumes int
 	}{
-		{template.Mercury(), 1, 0},
-		{template.Venus(), 1, 1},
-		{template.Earth(), 2, 3}, // the air, the aurora and the clouds
-		{template.Mars(), 3, 1},
-		{template.Jupiter(), 4, 3}, // the gas, its aurora and io's plume
-		{template.Saturn(), 3, 4},  // the gas, its aurora, the rings and titan's air
-		{template.Uranus(), 3, 2},
-		{template.Neptune(), 1, 1},
-		{template.Pluto(), 1, 0},
-		{template.Charon(), 1, 0},
-		{template.Quasar(), 0, 2}, // the disc and the jets; the hole is a field
+		{temp(t, template.Mercury), 1, 0},
+		{temp(t, template.Venus), 1, 1},
+		{temp(t, template.Earth), 2, 3}, // the air, the aurora and the clouds
+		{temp(t, template.Mars), 3, 1},
+		{temp(t, template.Jupiter), 4, 3}, // the gas, its aurora and io's plume
+		{temp(t, template.Saturn), 3, 4},  // the gas, its aurora, the rings and titan's air
+		{temp(t, template.Uranus), 3, 2},
+		{temp(t, template.Neptune), 1, 1},
+		{temp(t, template.Pluto), 1, 0},
+		{temp(t, template.Charon), 1, 0},
+		{temp(t, template.Quasar), 0, 2}, // the disc and the jets; the hole is a field
 	} {
 		w := thing.NewWorld()
-		if err := c.body.Place(w, maths.Vec{}, 1/c.body.Radius, 4); err != nil {
+		if err := c.body.Place(w, maths.Vec{}, 1/c.body.Radius(), 4); err != nil {
 			t.Fatal(err)
 		}
 		if len(w.Things) != c.things || len(w.Volumes) != c.volumes {
 			t.Errorf("%s places %d things and %d volumes, want %d and %d",
-				c.body.Name, len(w.Things), len(w.Volumes), c.things, c.volumes)
+				c.body.Name(), len(w.Things), len(w.Volumes), c.things, c.volumes)
 		}
 	}
 }
@@ -57,9 +58,10 @@ func TestMoonsOrbitByGravity(t *testing.T) {
 		body bodies.Body
 		name string
 		days float64
-	}{{template.Jupiter(), "io", 1.77}, {template.Earth(), "moon", 27.3}} {
+	}{{temp(t, template.Jupiter), "io", 1.77},
+		{temp(t, template.Earth), "moon", 27.3}} {
 		w := thing.NewWorld()
-		scale := 1 / c.body.Radius
+		scale := 1 / c.body.Radius()
 		if err := c.body.Place(w, maths.V(5, 0, 0), scale, 2); err != nil {
 			t.Fatal(err)
 		}
@@ -70,16 +72,17 @@ func TestMoonsOrbitByGravity(t *testing.T) {
 			}
 		}
 		if moon == nil {
-			t.Fatalf("%s has no %s", c.body.Name, c.name)
+			t.Fatalf("%s has no %s", c.body.Name(), c.name)
 		}
 		o, ok := moon.Motion.(thing.Orbit)
 		if !ok {
 			t.Fatalf("%s is not on an orbit", c.name)
 		}
-		if d := o.Period.Hours() / 24; math.Abs(d-c.days) > 0.02*c.days {
+		if d := o.Period.Hours() / 24; !(math.Abs(d-c.days) <= 0.02*c.days) {
 			t.Errorf("%s goes round in %.2f days, want %.2f", c.name, d, c.days)
 		}
-		if got := o.At(0).Origin.Sub(maths.V(5, 0, 0)).Len(); math.Abs(got-c.body.Moons[0].Orbit*scale) > 1e-9 {
+		first := c.body.Moons()[0]
+		if got := o.At(0).Origin.Sub(maths.V(5, 0, 0)).Len(); !(math.Abs(got-first.Orbit()*scale) <= 1e-9) {
 			t.Errorf("%s orbits at %v", c.name, got)
 		}
 	}
@@ -90,21 +93,22 @@ func TestMoonsOrbitByGravity(t *testing.T) {
 func TestBinaryGoesRoundTheCommonCentre(t *testing.T) {
 	w := thing.NewWorld()
 	// 19,591 km apart, their true distance
-	if err := bodies.Binary(w, template.Pluto(), template.Charon(), maths.Vec{}, 19591, 1e-3, 3); err != nil {
+	if err := bodies.Binary(w, temp(t, template.Pluto),
+		temp(t, template.Charon), maths.Vec{}, bodies.Kilometres(19591), 1e-3, 3); err != nil {
 		t.Fatal(err)
 	}
 	if len(w.Things) != 2 {
 		t.Fatalf("%d things", len(w.Things))
 	}
 	p, c := w.Things[0].Motion.(thing.Orbit), w.Things[1].Motion.(thing.Orbit)
-	if math.Abs(p.Radius-2.126) > 0.05 || math.Abs(c.Radius-17.46) > 0.1 {
+	if !(math.Abs(p.Radius-2.126) <= 0.05) || !(math.Abs(c.Radius-17.46) <= 0.1) {
 		t.Errorf("pluto orbits at %v and charon at %v", p.Radius, c.Radius)
 	}
-	if d := p.Period.Hours() / 24; math.Abs(d-6.39) > 0.05 {
+	if d := p.Period.Hours() / 24; !(math.Abs(d-6.39) <= 0.05) {
 		t.Errorf("they go round in %.2f days", d)
 	}
 	a, b := p.At(100000e9).Origin, c.At(100000e9).Origin
-	if apart := a.Sub(b).Len(); math.Abs(apart-19.591) > 1e-6 {
+	if apart := a.Sub(b).Len(); !(math.Abs(apart-19.591) <= 1e-6) {
 		t.Errorf("at some time they are %v apart", apart)
 	}
 	if a.Dot(b) >= 0 {
@@ -118,8 +122,8 @@ func TestBinaryGoesRoundTheCommonCentre(t *testing.T) {
 func TestVenusIsMappedByRadio(t *testing.T) {
 	radio := maths.Band{Nanometres: 1.26e8}
 	w := thing.NewWorld()
-	v := template.Venus()
-	if err := v.Place(w, maths.Vec{}, 1/v.Radius, 8); err != nil {
+	v := temp(t, template.Venus)
+	if err := v.Place(w, maths.Vec{}, 1/v.Radius(), 8); err != nil {
 		t.Fatal(err)
 	}
 	air := w.Volumes[0].Material
@@ -145,13 +149,14 @@ func TestVenusIsMappedByRadio(t *testing.T) {
 // The sun's schwarzschild radius is about three kilometres, and the
 // quasar's disc is sized by it.
 func TestSchwarzschild(t *testing.T) {
-	if rs := bodies.Schwarzschild(1.989e30); math.Abs(rs-2.95) > 0.02 {
+	if rs := bodies.Schwarzschild(1.989e30); !(math.Abs(rs-2.95) <= 0.02) {
 		t.Errorf("the sun's horizon would be %v km", rs)
 	}
-	q := template.Quasar()
-	if q.Disc.Inner != 3*q.Radius || q.Disc.Outer != 30*q.Radius {
-		t.Errorf("the disc runs %v to %v for a radius of %v", q.Disc.Inner,
-			q.Disc.Outer, q.Radius)
+	q := temp(t, template.Quasar)
+	disc, worn := q.Disc()
+	if !worn || disc.Inner() != 3*q.Radius() || disc.Outer() != 30*q.Radius() {
+		t.Errorf("the disc runs %v to %v for a radius of %v",
+			disc.Inner(), disc.Outer(), q.Radius())
 	}
 }
 
@@ -159,11 +164,14 @@ func TestSchwarzschild(t *testing.T) {
 // a canyon, and io has live ones.
 func TestGroundsHaveTheirFeatures(t *testing.T) {
 	count := func(b bodies.Body, detail int, want world.Biome) int {
-		g := b.Ground
-		tr := g.Terrain
-		tr.Tiling = hexes.Sphere{N: max(1, detail)}
+		g, worn := b.Ground()
+		if !worn {
+			t.Fatalf("%s has no ground", b.Name())
+		}
+		tr := g.Terrain()
+		tr.Tiling = hexes.Sphere{Splits: max(1, detail)}
 		plain := world.New(tr)
-		fs, err := g.Features(plain)
+		fs, err := g.Features()(plain)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -177,13 +185,13 @@ func TestGroundsHaveTheirFeatures(t *testing.T) {
 		}
 		return n
 	}
-	if n := count(template.Mars(), 10, world.Rock); n < 5 {
+	if n := count(temp(t, template.Mars), 10, world.Rock); n < 5 {
 		t.Errorf("mars has %d rock tiles", n)
 	}
-	if n := count(template.Mars(), 10, world.Lava); n != 0 {
+	if n := count(temp(t, template.Mars), 10, world.Lava); n != 0 {
 		t.Errorf("mars has %d lava tiles", n)
 	}
-	io := template.Jupiter().Moons[0].Body
+	io := temp(t, template.Jupiter).Moons()[0].Body()
 	if n := count(io, 10, world.Lava); n < 5 {
 		t.Errorf("io has %d lava tiles", n)
 	}
@@ -193,8 +201,8 @@ func TestGroundsHaveTheirFeatures(t *testing.T) {
 // unit out from its centre, and titan's air is in the world.
 func TestMoonsCarryTheirParts(t *testing.T) {
 	w := thing.NewWorld()
-	j := template.Jupiter()
-	scale := 1 / j.Radius
+	j := temp(t, template.Jupiter)
+	scale := 1 / j.Radius()
 	if err := j.Place(w, maths.Vec{}, scale, 8); err != nil {
 		t.Fatal(err)
 	}
@@ -207,16 +215,19 @@ func TestMoonsCarryTheirParts(t *testing.T) {
 	if plume == nil {
 		t.Fatal("io's plume was not placed")
 	}
-	o := j.Orbit(0, maths.Vec{}, scale)
+	o, err := j.Orbit(0, maths.Vec{}, scale)
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, at := range []time.Duration{0, o.Period / 4, o.Period / 2} {
 		from := plume.Motion.At(at).Origin.Sub(o.At(at).Origin).Len()
-		if math.Abs(from-1821.6*scale) > 1e-9 {
+		if !(math.Abs(from-1821.6*scale) <= 1e-9) {
 			t.Fatalf("at %v the plume stands %v from io's centre", at, from)
 		}
 	}
-	s := template.Saturn()
+	s := temp(t, template.Saturn)
 	w = thing.NewWorld()
-	if err := s.Place(w, maths.Vec{}, 1/s.Radius, 8); err != nil {
+	if err := s.Place(w, maths.Vec{}, 1/s.Radius(), 8); err != nil {
 		t.Fatal(err)
 	}
 	for _, v := range w.Volumes {
@@ -232,7 +243,7 @@ func TestStandIsOnTheGroundAndUpright(t *testing.T) {
 	space := maths.Subspace{Origin: maths.V(10, 0, 0),
 		Orientation: maths.About(maths.Up, math.Pi/2)}
 	at, up := bodies.Stand(space, 2, maths.XAxis, 0.5)
-	if at.Sub(maths.V(10, 0, -2.5)).Len() > 1e-9 || up.Sub(maths.V(0, 0, -1)).Len() > 1e-9 {
+	if !(at.Sub(maths.V(10, 0, -2.5)).Len() <= 1e-9) || !(up.Sub(maths.V(0, 0, -1)).Len() <= 1e-9) {
 		t.Fatalf("standing at %v with up %v", at, up)
 	}
 }
@@ -243,8 +254,8 @@ func TestStandIsOnTheGroundAndUpright(t *testing.T) {
 // grows at its speed after.
 func TestStarsJetsAndFlares(t *testing.T) {
 	w := thing.NewWorld()
-	q := template.Quasar()
-	if err := q.Place(w, maths.Vec{}, 1/q.Radius, 4); err != nil {
+	q := temp(t, template.Quasar)
+	if err := q.Place(w, maths.Vec{}, 1/q.Radius(), 4); err != nil {
 		t.Fatal(err)
 	}
 	var jets *thing.Volume
@@ -258,8 +269,8 @@ func TestStarsJetsAndFlares(t *testing.T) {
 	}
 
 	w = thing.NewWorld()
-	p := template.Pulsar()
-	if err := p.Place(w, maths.Vec{}, 1/p.Radius, 4); err != nil {
+	p := temp(t, template.Pulsar)
+	if err := p.Place(w, maths.Vec{}, 1/p.Radius(), 4); err != nil {
 		t.Fatal(err)
 	}
 	star := w.Things[0]
@@ -270,27 +281,31 @@ func TestStarsJetsAndFlares(t *testing.T) {
 	axis := func(at time.Duration) maths.Vec {
 		return w.Volumes[0].At(at).Orientation.Out(maths.Up)
 	}
-	a0, a1 := axis(0), axis(p.Day/4)
-	if math.Abs(a0.Y-a1.Y) > 1e-9 || math.Abs(a0.Dot(a1)-0.5) > 1e-6 {
+	a0, a1 := axis(0), axis(p.Day()/4)
+	if !(math.Abs(a0.Y-a1.Y) <= 1e-9) || !(math.Abs(a0.Dot(a1)-0.5) <= 1e-6) {
 		t.Errorf("the beams' axis went from %v to %v in a quarter turn", a0, a1)
 	}
-	if math.Abs(a0.Y-math.Cos((45)*maths.Degree)) > 1e-9 {
+	if !(math.Abs(a0.Y-math.Cos((45)*maths.Degree)) <= 1e-9) {
 		t.Errorf("the beams lean %v from the spin", a0.Y)
 	}
 
 	w = thing.NewWorld()
-	m := template.Magnetar()
-	if err := m.Place(w, maths.Vec{}, 1/m.Radius, 4); err != nil {
+	m := temp(t, template.Magnetar)
+	if err := m.Place(w, maths.Vec{}, 1/m.Radius(), 4); err != nil {
 		t.Fatal(err)
 	}
 	flare := w.Volumes[0]
 	if flare.Material.Name != "magnetar flare" {
 		t.Fatalf("the first volume is %q", flare.Material.Name)
 	}
-	if s := flare.At(0).Scale; s > 1e-6 {
+	if s := flare.At(0).Scale; !(s <= 1e-6) {
 		t.Errorf("before the flare its scale is %v", s)
 	}
-	if s := flare.At(m.Flare.At + time.Millisecond).Scale; math.Abs(s-30000/12*1e-3) > 1e-9 {
+	fireball, worn := m.Flare()
+	if !worn {
+		t.Fatal("the magnetar wears no flare")
+	}
+	if s := flare.At(fireball.At() + time.Millisecond).Scale; !(math.Abs(s-30000/12*1e-3) <= 1e-9) {
 		t.Errorf("a millisecond in the fireball's scale is %v", s)
 	}
 }
@@ -299,9 +314,8 @@ func TestStarsJetsAndFlares(t *testing.T) {
 // shine on the ground: lit somewhere on land, dark at sea.
 func TestEarthHasCloudsAndCities(t *testing.T) {
 	w := thing.NewWorld()
-	e := template.Earth()
-	e.Moons = nil
-	if err := e.Place(w, maths.Vec{}, 1/e.Radius, 8); err != nil {
+	e := temp(t, template.Earth).WithoutMoons()
+	if err := e.Place(w, maths.Vec{}, 1/e.Radius(), 8); err != nil {
 		t.Fatal(err)
 	}
 	clouds := false
@@ -339,11 +353,22 @@ func TestAGroundWearsItsMapAndLights(t *testing.T) {
 			img.Set(x, y, color.RGBA{200, 100, 50, 255})
 		}
 	}
-	e := template.Earth()
-	e.Moons = nil
-	e.Ground.Map, e.Ground.Lights = img, img
+	e := temp(t, template.Earth).WithoutMoons()
+	ground, worn := e.Ground()
+	if !worn {
+		t.Fatal("the earth wears no ground")
+	}
+	ground = ground.Mapped(img, measure.Radians(0))
+	ground, err := ground.NightLit(img, maths.Share(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	e, err = e.With(ground)
+	if err != nil {
+		t.Fatal(err)
+	}
 	w := thing.NewWorld()
-	if err := e.Place(w, maths.Vec{}, 1/e.Radius, 4); err != nil {
+	if err := e.Place(w, maths.Vec{}, 1/e.Radius(), 4); err != nil {
 		t.Fatal(err)
 	}
 	m := w.Things[0].Material
@@ -351,7 +376,7 @@ func TestAGroundWearsItsMapAndLights(t *testing.T) {
 	if !(paint.R > paint.G && paint.G > paint.B) {
 		t.Errorf("the map paints %v", paint)
 	}
-	if m.Shine == nil || m.Shine.At(maths.V(0, 0, 1)).Luminance() > 0.01 {
+	if m.Shine == nil || !(m.Shine.At(maths.V(0, 0, 1)).Luminance() <= 0.01) {
 		t.Error("the lights are not the picture, scaled down")
 	}
 }
@@ -360,9 +385,8 @@ func TestAGroundWearsItsMapAndLights(t *testing.T) {
 // surface, glowing on the oval and dark at the equator.
 func TestAuroraIsPlaced(t *testing.T) {
 	w := thing.NewWorld()
-	e := template.Earth()
-	e.Moons = nil
-	if err := e.Place(w, maths.Vec{}, 1/e.Radius, 6); err != nil {
+	e := temp(t, template.Earth).WithoutMoons()
+	if err := e.Place(w, maths.Vec{}, 1/e.Radius(), 6); err != nil {
 		t.Fatal(err)
 	}
 	var aurora *thing.Volume
@@ -374,10 +398,14 @@ func TestAuroraIsPlaced(t *testing.T) {
 	if aurora == nil {
 		t.Fatal("no aurora")
 	}
-	up := 200 / e.Radius
-	axis := maths.About(maths.XAxis, e.Aurora.Tilt).Out(maths.Up)
+	oval, worn := e.Aurora()
+	if !worn {
+		t.Fatal("the earth wears no aurora")
+	}
+	up := 200 / e.Radius()
+	axis := maths.About(maths.XAxis, oval.Tilt()).Out(maths.Up)
 	o := maths.Upright(axis)
-	on := axis.Scale(math.Sin(e.Aurora.Lat)).Add(o.X.Scale(math.Cos(e.Aurora.Lat))).Scale(1 + up)
+	on := axis.Scale(math.Sin(oval.Lat())).Add(o.X.Scale(math.Cos(oval.Lat()))).Scale(1 + up)
 	if d := aurora.Medium.Density(on); d <= 0 {
 		t.Errorf("the oval is dark: %v", d)
 	}
@@ -394,9 +422,9 @@ func TestAuroraIsPlaced(t *testing.T) {
 // the trail; a hot jupiter has one tail.
 func TestTailsStreamAwayFromTheSun(t *testing.T) {
 	w := thing.NewWorld()
-	c := template.HaleBopp()
+	c := temp(t, template.HaleBopp)
 	sun := maths.V(-100, 0, 0)
-	c.Aim(sun, maths.V(0, 0, 1))
+	c = c.Aimed(sun, maths.V(0, 0, 1))
 	scale := 1e-6
 	at := maths.V(0, 0, 0)
 	if err := c.Place(w, at, scale, 2); err != nil {
@@ -416,19 +444,19 @@ func TestTailsStreamAwayFromTheSun(t *testing.T) {
 		t.Fatal("a tail is missing")
 	}
 	// the tail's y is away from the sun: plus x
-	if away := dust.At(0).Orientation.Out(maths.Up); away.Sub(maths.XAxis).Len() > 1e-9 {
+	if away := dust.At(0).Orientation.Out(maths.Up); !(away.Sub(maths.XAxis).Len() <= 1e-9) {
 		t.Errorf("the dust tail streams %v", away)
 	}
 	// the dust tail's x is back along the trail: minus z
-	if back := dust.At(0).Orientation.Out(maths.XAxis); back.Sub(maths.V(0, 0, -1)).Len() > 1e-9 {
+	if back := dust.At(0).Orientation.Out(maths.XAxis); !(back.Sub(maths.V(0, 0, -1)).Len() <= 1e-9) {
 		t.Errorf("the dust tail bends toward %v", back)
 	}
 	// ten units down the tail there is gas, and none before the head
 	if d := dust.Medium.Density(maths.V(0.35*100/40, 10, 0)); d <= 0 {
 		t.Errorf("ten units out on its bend the dust tail is %v", d)
 	}
-	h := template.HotJupiter()
-	if len(h.Tails) != 1 || h.Day != time.Duration((18)*float64(time.Hour)) {
+	h := temp(t, template.HotJupiter)
+	if len(h.Tails()) != 1 || h.Day() != time.Duration((18)*float64(time.Hour)) {
 		t.Error("a hot jupiter has one tail and an eighteen hour day")
 	}
 }
@@ -438,28 +466,38 @@ func TestTailsStreamAwayFromTheSun(t *testing.T) {
 // the feature, and puts nothing in the world; and the templates' own
 // features all find their land.
 func TestWorldAndPlaceRefuseWithTheReason(t *testing.T) {
-	if _, err := template.Jupiter().World(4); err == nil ||
+	if _, err := temp(t, template.Jupiter).World(4); err == nil ||
 		!strings.Contains(err.Error(), "jupiter has no ground") {
 		t.Errorf("jupiter's world: %v", err)
 	}
-	v := template.Venus()
-	v.Ground.Features = func(w *world.World) ([]world.Feature, error) {
+	v := temp(t, template.Venus)
+	ground, worn := v.Ground()
+	if !worn {
+		t.Fatal("venus wears no ground")
+	}
+	ground = ground.Featured(func(w *world.World) ([]world.Feature, error) {
 		if _, ok := w.Find(maths.V(0, 1, 0), func(world.Biome) bool { return false }); !ok {
 			return nil, fmt.Errorf("no land for maxwell")
 		}
 		return nil, nil
+	})
+	v, err := v.With(ground)
+	if err != nil {
+		t.Fatal(err)
 	}
 	w := thing.NewWorld()
-	err := v.Place(w, maths.Vec{}, 1/v.Radius, 4)
+	err = v.Place(w, maths.Vec{}, 1/v.Radius(), 4)
 	if err == nil || !strings.Contains(err.Error(), "venus: no land for maxwell") {
 		t.Errorf("venus placed with %v", err)
 	}
 	if len(w.Things)+len(w.Volumes) != 0 {
 		t.Errorf("a refused venus still put %d things in the world", len(w.Things))
 	}
-	for _, b := range []bodies.Body{template.Venus(), template.Mars(), template.Pluto(), template.Jupiter().Moons[0].Body} {
+	for _, b := range []bodies.Body{temp(t, template.Venus),
+		temp(t, template.Mars), temp(t, template.Pluto),
+		temp(t, template.Jupiter).Moons()[0].Body()} {
 		if _, err := b.World(6); err != nil {
-			t.Errorf("%s: %v", b.Name, err)
+			t.Errorf("%s: %v", b.Name(), err)
 		}
 	}
 }

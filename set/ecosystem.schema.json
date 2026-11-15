@@ -208,6 +208,19 @@
             "$ref": "#/$defs/camera"
           }
         },
+        "fantasy": {
+          "type": "object",
+          "properties": {
+            "lake": {"type": "number", "minimum": 0},
+            "lakeglow": {"type": "boolean"},
+            "moon": {"type": "number", "exclusiveMinimum": 0},
+            "moonglow": {"type": "number", "minimum": 0},
+            "giants": {"type": "number", "exclusiveMinimum": 0},
+            "close": {"type": "number", "exclusiveMinimum": 0},
+            "closeglow": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
         "moon": {
           "type": "object",
           "properties": {
@@ -233,6 +246,37 @@
             "altitude"
           ],
           "additionalProperties": false
+        },
+        "volume-illumination": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model",
+            "sky-samples"
+          ],
+          "properties": {
+            "model": {
+              "const": "isotropic-single"
+            },
+            "sky-samples": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 64,
+              "multipleOf": 2
+            }
+          }
+        },
+        "vibes": {
+          "enum": [
+            "on",
+            "off"
+          ]
+        },
+        "fastlight": {
+          "enum": [
+            "on",
+            "off"
+          ]
         },
         "volume-lighting": {
           "enum": [
@@ -1097,7 +1141,18 @@
             "manzanita",
             "chaparral-brush",
             "joshua-tree",
-            "saguaro"
+            "saguaro",
+            "mcrn-larson",
+            "mcrn-larson-landed",
+            "apollo-csm",
+            "soyuz-ms",
+            "mercury-capsule",
+            "gemini",
+            "saturn-v",
+            "sls-block-1",
+            "saturn-v-apollo",
+            "apollo-lunar-module",
+            "saturn-ib"
           ]
         },
         "recipe": {
@@ -1272,7 +1327,18 @@
             "manzanita",
             "chaparral-brush",
             "joshua-tree",
-            "saguaro"
+            "saguaro",
+            "mcrn-larson",
+            "mcrn-larson-landed",
+            "apollo-csm",
+            "soyuz-ms",
+            "mercury-capsule",
+            "gemini",
+            "saturn-v",
+            "sls-block-1",
+            "saturn-v-apollo",
+            "apollo-lunar-module",
+            "saturn-ib"
           ]
         },
         "recipe": {
@@ -1536,6 +1602,11 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740992
+          },
+          "asymmetry": {
+            "type": "number",
+            "minimum": -0.99,
+            "maximum": 0.99
           }
         },
         "required": [
@@ -2072,6 +2143,65 @@
             "additionalProperties": false
           }
         },
+        "fizzes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "colour": {
+                "$ref": "#/$defs/colour"
+              },
+              "foot": {
+                "$ref": "#/$defs/triple"
+              },
+              "radius": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "thick": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1000000000000.0
+              },
+              "rise": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "churn": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "seed": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740992
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "colour",
+              "foot",
+              "radius",
+              "height",
+              "thick",
+              "rise",
+              "churn",
+              "seed",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
         "motions": {
           "type": "object",
           "additionalProperties": {
@@ -2163,6 +2293,11 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "chart": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16
         },
         "from_star": {
           "type": "number",
@@ -2365,6 +2500,18 @@
               "type": "number",
               "minimum": 1,
               "maximum": 1000000000000.0
+            },
+            "pace": {
+              "description": "A film: seconds of weather that pass in a second of scene time, from the moment on. Unsaid, every frame shows the moment.",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000.0
+            },
+            "turning": {
+              "description": "A film: degrees the planet turns eastward in a second of scene time. Unsaid, it does not turn.",
+              "type": "number",
+              "minimum": -3600,
+              "maximum": 3600
             }
           },
           "required": [
@@ -3185,6 +3332,30 @@
           "type": "number",
           "minimum": 0.01,
           "maximum": 179
+        },
+        "sections": {
+          "type": "object",
+          "properties": {
+            "over": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "keep": {
+              "type": "boolean"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
         },
         "print": {
           "type": "object",

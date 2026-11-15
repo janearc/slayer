@@ -88,7 +88,7 @@ doc/observatory-4k.yaml -out baseline.png` through the authorized render queue.
 Application arguments need the forwarding fix described in the
 [Game workflow](developing.md).
 
-This measurement used an explicit owner exception to run one direct job,
+This measurement used an explicit exception to run one direct job,
 with four CPU workers.
 
 - Scene construction and parsing: 3.235 seconds.

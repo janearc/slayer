@@ -53,6 +53,10 @@ func NewDeck(weather GroveWeather, bounds maths.Box,
 	return layer, nil
 }
 
+// Asymmetry is the Henyey-Greenstein asymmetry the field scatters with:
+// nought scatters evenly every way.
+func (layer *Layer) Asymmetry() float64 { return layer.weather.Asymmetry }
+
 // Bounds is the region supplied by the terrain owner.
 func (layer *Layer) Bounds() maths.Box { return layer.box }
 

@@ -3,9 +3,20 @@ package gpu
 import "time"
 
 // Profile records a render call's measured costs, without changing its image.
-// Wall stages are disjoint. GPU times sit inside their corresponding wall
-// stages and must not be added to them. Total excludes caller construction.
+// Top-level wall stages are disjoint. GPU times sit inside their corresponding
+// wall stages, and BoxedCPU.Wall sits inside Encode; neither is added again.
+// Total excludes caller construction.
 type Profile struct {
+	// Environment records current-frame incident-sky lattice preparation.
+	// Nodes is zero for direct integration; times are disjoint from TraceGPU.
+	EnvironmentWall, EnvironmentGPU time.Duration
+	EnvironmentNodes                int
+	VolumeSkySamples                int
+	// ShellVolumes counts radial weather fields evaluated directly on the GPU.
+	ShellVolumes int
+	// BoxedCPU measures generic density/texture grid sampling during encoding.
+	// It excludes GPU-deferred fields and packing the sampled values into inputs.
+	BoxedCPU BoxedPreparation
 	// Native counts actual closest-query outcomes, including
 	// software retries.
 	Native NativeCounts
@@ -30,6 +41,39 @@ type Profile struct {
 	// keeps a separate output band; neither value is a whole-process memory
 	// measure.
 	PeakSampleBytes int64
+	// Retained is what a Frames drawer sent to the inputs it keeps on
+	// the device. It is zero for the per-call functions, which copy every
+	// input for every grid they run.
+	Retained FrameInputs
+	// LampStoreBytes is the size of fast light's lamp store, baked
+	// inside LightingWall. It is nought for a picture lit exactly, so a
+	// profile says which a picture was.
+	LampStoreBytes int64
+	// SkyShared is whether fast light shared the sky's looks among a
+	// pixel's samples.
+	SkyShared bool
+}
+
+// FrameInputs counts a retained frame's traffic to the device. Held is
+// how many inputs the drawer keeps; Sent how many times one was found
+// changed and sent, only its changed parts, and SentBytes the bytes
+// copied.
+//
+// The cached mode's light bakes change the header and the boxes between
+// grids, so one frame can send an input more than once. Patched is
+// whether the frame was a camera move drawn without encoding the world.
+type FrameInputs struct {
+	Held, Sent int
+	SentBytes  int64
+	Patched    bool
+}
+
+// BoxedPreparation records CPU grid work without counting it as a new stage.
+// Cells counts density sample locations; textures can add queries per cell.
+type BoxedPreparation struct {
+	Wall    time.Duration
+	Cells   int64
+	Volumes int
 }
 
 // NativeCounts distinguishes native replies from refinement fallbacks.

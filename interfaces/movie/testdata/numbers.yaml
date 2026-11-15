@@ -1,0 +1,115 @@
+# every number the movie tests choose, with what it is and who picked it.
+numbers:
+  - name: small-width
+    value: 320
+    says: pixels across the small movies the tests write; even, and quick to encode
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: small-height
+    value: 192
+    says: pixels down the small movies; twelve macroblocks
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: short-height
+    value: 180
+    says: a height that is not a multiple of 16, written padded to 192
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: small-rate
+    value: 24
+    says: frames a second of the small movies, as the shorts are
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: small-frames
+    value: 24
+    says: frames in a small movie; one second at the small rate
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: long-frames
+    value: 120
+    says: frames in the movie the keyframe test writes; more than two runs of 48
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: early-frames
+    value: 12
+    says: frames written before a test stops, aborts or closes early
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: tone-hertz
+    value: 440
+    says: the pitch of the test tone, concert A
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: tone-loudness
+    value: 0.5
+    says: the left channel's peak, half of full scale
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: right-share
+    value: -0.5
+    says: the right channel as a share of the left, inverted and halved, so the channels can be told apart
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: mono-rate
+    value: 48000
+    says: the sample rate of the mono wav file ReadSound reads and resamples
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: aac-error
+    value: 0.02
+    says: the most a decoded sample may differ from the one written, once aligned; AAC is lossy, and on the test tone at 192 kbit/s the worst measured here was 0.0065, so this is three times that
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: silence-loudness
+    value: 0.001
+    says: the root mean square below which decoded sound counts as silence; AAC codes silence as near-silence
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: aac-packet
+    value: 1024
+    says: samples in one AAC-LC packet (ISO/IEC 14496-3); a track's length is a whole number of them, so lengths are compared to within one
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: aac-delay
+    value: 3136
+    says: the furthest the comparison looks for the decoded sound shifted from the written; AAC's 2112 samples of priming and one packet, so a sound left primed is found and refused
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: shorts-width
+    value: 1080
+    says: pixels across a YouTube short, portrait
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: shorts-height
+    value: 1920
+    says: pixels down a YouTube short, portrait
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: shorts-frames
+    value: 72
+    says: three seconds at 24; a movie this size with sound stalled at frame 57 when sound and pictures were handed over from one thread
+    kind: picked
+    by: the test author, 2026-11-12
+
+  - name: film-error
+    value: 4
+    says: the most a written film's pictures may differ from what was written, read back, as the mean of every channel's difference in 0-255 steps; H.264 4:2:0 at 0.2 bits a pixel loses some of the colour, most at the gradient's wrap
+    kind: picked
+    by: the film reader's author, 2026-11-12, over the 1.37 measured on the small movie that day

@@ -103,7 +103,7 @@ func TestPinholeBoundsMatchIndependentRationalFixtures(t *testing.T) {
 			if aspect == 0 {
 				aspect = book.PixelAspect
 			}
-			view := checkedView(t, book, aspect, maths.Subspace{})
+			view := checkedView(t, book, aspect, maths.Local())
 			point := maths.V(row.Point[0], row.Point[1], row.Point[2])
 			got, err := view.Assess(pointBox(point),
 				measure.Metres(row.Displacement))
@@ -139,7 +139,7 @@ var planes = []planeCase{
 }
 
 func TestAllFiveFrustumPlanesRetainTheirBoundary(t *testing.T) {
-	view := checkedView(t, readPinhole(t), 1, maths.Subspace{})
+	view := checkedView(t, readPinhole(t), 1, maths.Local())
 	for _, row := range planes {
 		t.Run(row.name, func(t *testing.T) {
 			got, err := view.Assess(pointBox(row.point),
@@ -171,7 +171,7 @@ func TestAChangedPoseKeepsTheIndependentCentreBound(t *testing.T) {
 
 func TestInvalidFieldsAndPosesAreRefused(t *testing.T) {
 	for _, field := range []float64{0, math.Pi, math.NaN()} {
-		if _, err := footprint.New(maths.Subspace{}, measure.Radians(field),
+		if _, err := footprint.New(maths.Local(), measure.Radians(field),
 			1000, 500, 1, measure.Metres(1)); err == nil {
 			t.Fatal("accepted invalid field", field)
 		}
@@ -194,7 +194,7 @@ func TestRasterAspectAndNearDistanceMustBeUsable(t *testing.T) {
 	}{{0, 500, 1, 1}, {1000, 0, 1, 1}, {1000, 500, 0, 1},
 		{1000, 500, 1, 0}, {1000, 500, 1, math.NaN()},
 		{1000, 500, math.MaxFloat64, 1}} {
-		if _, err := footprint.New(maths.Subspace{},
+		if _, err := footprint.New(maths.Local(),
 			measure.Radians(math.Pi/2), row.width, row.height,
 			row.aspect, measure.Metres(row.near)); err == nil {
 			t.Fatal("accepted invalid raster or near distance", row)
@@ -208,7 +208,7 @@ func TestUncheckedViewsAndInvalidBoundsCannotCull(t *testing.T) {
 	if _, err := unchecked.Assess(box, measure.Metres(0)); err == nil {
 		t.Fatal("an unchecked view assessed geometry")
 	}
-	view := checkedView(t, readPinhole(t), 1, maths.Subspace{})
+	view := checkedView(t, readPinhole(t), 1, maths.Local())
 	for _, bad := range []maths.Box{{Min: maths.V(1, 0, 0)},
 		{Max: maths.V(0, math.NaN(), 0)}} {
 		if _, err := view.Assess(bad, measure.Metres(0)); err == nil {

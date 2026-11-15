@@ -9,14 +9,16 @@ import (
 
 // everyBody is each template and each moon of one, with the moons
 // after their parent. the hot jupiter is left out, being jupiter.
-func everyBody() []bodies.Body {
+func everyBody(t *testing.T) []bodies.Body {
+	t.Helper()
 	var out []bodies.Body
-	for _, b := range []bodies.Body{Sol(), Mercury(), Venus(), Earth(), Mars(),
-		Jupiter(), Saturn(), Uranus(), Neptune(), Pluto(), Charon(),
-		HaleBopp(), Hyakutake(), Magnetar(), Pulsar(), Quasar()} {
+	for _, make := range []func() (bodies.Body, error){Sol, Mercury,
+		Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto,
+		Charon, HaleBopp, Hyakutake, Magnetar, Pulsar, Quasar} {
+		b := its(t, make)
 		out = append(out, b)
-		for _, m := range b.Moons {
-			out = append(out, m.Body)
+		for _, m := range b.Moons() {
+			out = append(out, m.Body())
 		}
 	}
 	return out
@@ -26,8 +28,8 @@ func everyBody() []bodies.Body {
 // by hand: its mass over a sphere of its radius, 4/3 pi r^3, with the
 // radius in metres from kilometres.
 func density(b bodies.Body) float64 {
-	r := b.Radius * 1000
-	return b.Mass / (4.0 / 3.0 * math.Pi * r * r * r)
+	r := b.Radius() * 1000
+	return b.Mass() / (4.0 / 3.0 * math.Pi * r * r * r)
 }
 
 // densities is the mean density of each body that has one published, in
@@ -49,13 +51,13 @@ var densities = map[string]float64{
 // 1.083e21 m^3 is 5514 kg/m^3. each planet, moon and the sun is held
 // to within 10 per cent of the density published for it.
 func TestMeanDensityOfEachWorldIsTheOnePublished(t *testing.T) {
-	for _, b := range everyBody() {
-		want, ok := densities[b.Name]
+	for _, b := range everyBody(t) {
+		want, ok := densities[b.Name()]
 		if !ok {
 			continue
 		}
 		if got := density(b); !(math.Abs(got-want) <= 0.1*want) {
-			t.Errorf("%s: mean density is %.0f kg/m^3, published about %v", b.Name, got, want)
+			t.Errorf("%s: mean density is %.0f kg/m^3, published about %v", b.Name(), got, want)
 		}
 	}
 }
@@ -79,18 +81,19 @@ func TestMeanDensityOfEachWorldIsTheOnePublished(t *testing.T) {
 // be higher is left open.
 func TestMeanDensityOfTheOddBodiesIsInARangeThatCanBe(t *testing.T) {
 	for _, c := range []struct {
-		body   bodies.Body
+		make   func() (bodies.Body, error)
 		lo, hi float64
 	}{
-		{Magnetar(), 1e17, 1e18},
-		{Pulsar(), 1e17, 1e18},
-		{Quasar(), 3e-3, 6e-3},
-		{HaleBopp(), 50, 1500},
-		{Hyakutake(), 100, 1500},
+		{Magnetar, 1e17, 1e18},
+		{Pulsar, 1e17, 1e18},
+		{Quasar, 3e-3, 6e-3},
+		{HaleBopp, 50, 1500},
+		{Hyakutake, 100, 1500},
 	} {
-		if got := density(c.body); !(got >= c.lo && got <= c.hi) {
+		body := its(t, c.make)
+		if got := density(body); !(got >= c.lo && got <= c.hi) {
 			t.Errorf("%s: mean density is %v kg/m^3, want between %v and %v",
-				c.body.Name, got, c.lo, c.hi)
+				body.Name(), got, c.lo, c.hi)
 		}
 	}
 }
@@ -113,14 +116,14 @@ var gravities = map[string]float64{
 // it is held to 3 per cent of the published one, which leaves room for
 // the published figures being remembered.
 func TestSurfaceGravityOfEachSolidWorldIsThePublishedOne(t *testing.T) {
-	for _, b := range everyBody() {
-		want, ok := gravities[b.Name]
+	for _, b := range everyBody(t) {
+		want, ok := gravities[b.Name()]
 		if !ok {
 			continue
 		}
-		r := b.Radius * 1000
-		if got := 6.6743e-11 * b.Mass / (r * r); !(math.Abs(got-want) <= 0.03*want) {
-			t.Errorf("%s: surface gravity is %.3f m/s^2, published about %v", b.Name, got, want)
+		r := b.Radius() * 1000
+		if got := 6.6743e-11 * b.Mass() / (r * r); !(math.Abs(got-want) <= 0.03*want) {
+			t.Errorf("%s: surface gravity is %.3f m/s^2, published about %v", b.Name(), got, want)
 		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
@@ -65,10 +66,13 @@ func near(a, b float64) bool { return math.Abs(a-b) <= 1e-12*math.Abs(b) }
 // degrees, its aurora as said, at the yard's place for it.
 func saturn(t *testing.T, aurora bool) *thing.World {
 	t.Helper()
-	body, _ := template.Named("saturn")
-	body.Tilt = 12 * maths.Degree
+	body, err := template.Named("saturn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body = body.Turning(body.Day(), measure.Degrees(12))
 	if !aurora {
-		body.Aurora = nil
+		body = body.WithoutAurora()
 	}
 	alone := thing.NewWorld()
 	if err := body.Place(alone, maths.V(0, 0, -600000000), 1e3,

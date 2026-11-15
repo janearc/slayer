@@ -29,7 +29,7 @@ func TestGreysAreApartByTheCubeRoots(t *testing.T) {
 		want := math.Abs(math.Cbrt(pair[0])-math.Cbrt(pair[1])) / 0.02
 		got := float64(divergence.Apart(maths.Grey(pair[0]),
 			maths.Grey(pair[1])))
-		if math.Abs(got/want-1) > 1e-4 {
+		if !(math.Abs(got/want-1) <= 1e-4) {
 			t.Errorf("greys %g and %g are %.5f JND; cube roots say %.5f",
 				pair[0], pair[1], got, want)
 		}

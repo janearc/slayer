@@ -121,11 +121,11 @@ func areas(t *testing.T, face *Font, letter rune) {
 	for _, contour := range outline {
 		curved += truly(contour)
 	}
-	if !turned || math.Abs(got-rings) > 1e-9*abs(rings) {
+	if !turned || !(math.Abs(got-rings) <= 1e-9*abs(rings)) {
 		t.Errorf("%q: faces %v, rings %v, all turned %v", letter, got,
 			rings, turned)
 	}
-	if math.Abs(abs(curved)-got) > 2*perimeter(solids) {
+	if !(math.Abs(abs(curved)-got) <= 2*perimeter(solids)) {
 		t.Errorf("%q: faces %v, the curves %v", letter, got, curved)
 	}
 }
@@ -137,7 +137,7 @@ func TestFacesShortOfATriangleAreShortOfTheArea(t *testing.T) {
 	whole, _ := covered(tris)
 	less, _ := covered(tris[1:])
 	rings := solids[0].outer.area() + solids[0].holes[0].area()
-	if math.Abs(whole-rings) > 1e-9*rings || !(rings-less > 1e-6) {
+	if !(math.Abs(whole-rings) <= 1e-9*rings) || !(rings-less > 1e-6) {
 		t.Errorf("rings %v, whole %v, less one %v", rings, whole, less)
 	}
 }
@@ -225,7 +225,7 @@ func TestHolesAtAwkwardPlacesAreBridged(t *testing.T) {
 			want += r.area()
 		}
 		if got, turned := covered(tris); !turned ||
-			math.Abs(got-want) > 1e-9 {
+			!(math.Abs(got-want) <= 1e-9) {
 			t.Errorf("%s: faces %v of %v, all turned %v", name, got,
 				want, turned)
 		}

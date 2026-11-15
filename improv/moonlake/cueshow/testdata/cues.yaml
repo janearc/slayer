@@ -1,0 +1,12 @@
+# a cue sheet for cueshow's tests: a fade in seconds before the grid, a
+# cut and a fade on it, the fires lit on a beat two, the moon rising and
+# then pulsing, and the lasers' looks taken in turn with the banks apart
+cues:
+  - {at_sec: 0, master: 0, moon: 0.2, moon_alt: 0}
+  - {at_sec: 1, master: 1, moon_alt: 2, fade: 2}
+  - {at: "1.1", rig: 0.5, beams: 4, palette: [green, red]}
+  - {at: "2.1", rig: 1, fade: 1}
+  - {at: "2.2", fire: 1}
+  - {at: "3.1", moon: 1, moon_pulse: 1}
+  - {at: "4.1", pulse: "x...x...x...x...", figures: [scan, beam],
+     figure_bars: 1, banks: [offset]}

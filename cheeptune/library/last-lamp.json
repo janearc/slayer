@@ -1,0 +1,57 @@
+{
+	// sombre and slow in six. f minor, 72 a minute, six beats a bar, @tape-chords. a rocking compound lilt, a lead that rises and falls like a lullaby, a drum that is only the first beat; a lone bass ends it.
+	"name": "last-lamp",
+	"tempo": 72,
+	"meter": 6,
+	"loop": false,
+	"parts": [
+		{"role": "lead", "bars": [
+			"c5:3 bb4 g4 f4",
+			"db5:3 c5:3",
+			"c5:3 bb4 g4 f4",
+			"bb4:3 ab4:3",
+			"ab4 f4:1/2 g4:1/2 f4 g4:1/2 f4:1/2 ab4 g4",
+			"db5:3 eb5:3",
+			"bb4 g4:1/2 g4:1/2 f4 g4:1/2 f4:1/2 ab4 g4",
+			"eb5:3 f5:3",
+			"-:6",
+			"-:6"
+		]},
+		{"role": "pad", "bars": [
+			"(f3 ab3 c4):6",
+			"(db3 f3 ab3):6",
+			"(ab2 c3 eb3):6",
+			"(eb3 g3 bb3):6",
+			"(f3 ab3 c4):3 (f3 ab3 c4):3",
+			"(db3 f3 ab3):3 (db3 f3 ab3):3",
+			"(bb2 db3 f3):3 (bb2 db3 f3):3",
+			"(c3 e3 g3):3 (c3 e3 g3):3",
+			"-:6",
+			"-:6"
+		]},
+		{"role": "bass", "bars": [
+			"f2:3 c3:3",
+			"db2:3 ab2:3",
+			"ab2:3 eb3:3",
+			"eb2:3 bb2:3",
+			"f2 ab2 c3 ab2 f2 ab2",
+			"db2 f2 ab2 f2 db2 f2",
+			"bb2 db3 f3 db3 bb2 db3",
+			"c2 e2 g2 e2 c2 e2",
+			"f1:6",
+			"f1:6"
+		]},
+		{"role": "perc", "bars": [
+			"k:1/2 k:1/2 -:5",
+			"k:1/2 k:1/2 -:5",
+			"k:1/2 k:1/2 -:5",
+			"k:1/2 k:1/2 -:5",
+			"k -:2 s -:2",
+			"k -:2 s -:2",
+			"k -:2 s -:2",
+			"k -:2 s -:2",
+			"-:6",
+			"-:6"
+		]}
+	]
+}

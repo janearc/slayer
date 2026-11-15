@@ -112,7 +112,7 @@ func TestCoarseGroundIsMeasured(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if math.Abs(got.Height()-want) > 1e-6 {
+	if !(math.Abs(got.Height()-want) <= 1e-6) {
 		t.Errorf("at a corner the ground is %v, the map %v",
 			got.Height(), want)
 	}
@@ -220,9 +220,11 @@ func TestLookingCloserMovesNothing(t *testing.T) {
 	toward := vectorOf(*at)
 	cell, _ := mesh.Locate(at, 0)
 	first, second, third := cell.Corners()
+	nameA, nameB, nameC := cell.CornerNames()
 	var shape [corners]corner
 	for i, each := range []mesh.Point{first, second, third} {
-		shape[i], _ = world.read(vectorOf(each))
+		shape[i], _ = world.read(vectorOf(each),
+			[]uint64{nameA, nameB, nameC}[i])
 	}
 	for depth := 1; depth <= 24; depth++ {
 		var err error
@@ -252,7 +254,7 @@ func TestLookingCloserMovesNothing(t *testing.T) {
 			}
 			// a corner's place goes through degrees and back on its
 			// way in, so it lands a hair off the corner
-			if math.Abs(got.Height()-each.height) > noise+1e-4 {
+			if !(math.Abs(got.Height()-each.height) <= noise+1e-4) {
 				t.Fatalf("a depth %d corner at %v m is %v m at an "+
 					"inchworm", depth, each.height, got.Height())
 			}
@@ -343,7 +345,7 @@ func TestDepths(t *testing.T) {
 	world := ground(t, &chart{finest: 100}, 1)
 	for depth := range 30 {
 		ratio := world.Edge(depth) / world.Edge(depth+1)
-		if math.Abs(ratio-2) > 1e-12 {
+		if !(math.Abs(ratio-2) <= 1e-12) {
 			t.Fatalf("depth %d to the next is a ratio of %v", depth, ratio)
 		}
 	}

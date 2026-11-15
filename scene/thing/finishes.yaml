@@ -1,0 +1,57 @@
+# What was done to the surfaces of things, as numbers. A finish says
+# what became of a surface; a material says what is under it; Made, in
+# scene/thing, joins the two into one look. Every number here is picked
+# for how it looks, not measured off any surface.
+finishes:
+- name: polished
+  gloss: 1
+  satin: 0
+  says: a burnished mirror, all the reflection the metal beneath can give and a highlight too small to draw
+  kind: picked
+  by: Slayer finish study, 2026-11-11
+- name: satin
+  gloss: 1
+  satin: 0.25
+  says: a hand-rubbed sheen, the mirror kept and its highlight spread a little
+  kind: picked
+  by: Slayer finish study, 2026-11-11
+- name: brushed
+  gloss: 0.85
+  satin: 0.5
+  says: the grain of a wire brush, less mirror and a highlight dragged wide
+  kind: picked
+  by: Slayer finish study, 2026-11-11
+- name: weathered
+  gloss: 0.65
+  satin: 0.45
+  colour: [0.45, 0.42, 0.38]
+  says: air and handling have dulled the metal and left it a dusty warm grey, as much a choice as any paint
+  kind: picked
+  by: Slayer finish study, 2026-11-11
+- name: frosted
+  gloss: 0.3
+  satin: 0.9
+  says: a sandblasted blur, hardly a mirror left and the sheen spread nearly as wide as it goes
+  kind: picked
+  by: Slayer finish study, 2026-11-11
+- name: flat
+  gloss: 0
+  satin: 0
+  says: no finish at all; the material's own colour and nothing added, no sheen and no coat
+  kind: picked
+  by: Slayer finish study, 2026-11-11
+- name: painted
+  paint: true
+  gloss: 0
+  satin: 0
+  says: paint is pigment, not polish; it colours and covers whatever is beneath, and leaves the surface as unpolished as it found it; the colour comes with the paint, not from this book
+  kind: picked
+  by: Slayer finish study, 2026-11-11
+- name: oxidised
+  gloss: 0.85
+  satin: 0.15
+  film-index: 2.65
+  film-thickness: 5e-9
+  says: the metal's own oxide grown over it, a clear film at rutile's index and a thickness picked at five nanometres, thin enough that the interference a Film does not draw is little to lose
+  kind: picked
+  by: Slayer finish study, 2026-11-11

@@ -7,6 +7,7 @@
     "light-exposure", "minimum-coverage", "sky", "sources", "tone"],
   "properties": {
     "cutaway": {"type": "boolean"},
+    "studio": {"type": "boolean"},
     "width": {"type": "integer", "minimum": 1, "maximum": 3840},
     "height": {"type": "integer", "minimum": 1, "maximum": 2160},
     "rays": {"type": "integer", "minimum": 1, "maximum": 8},

@@ -77,7 +77,7 @@ func TestWhatCannotBeAProfileIsRefused(t *testing.T) {
 // across a stretch of one depth, the depth seen is that depth.
 func TestAnEvenStretchIsSeenAsItsDepth(t *testing.T) {
 	profile := table(t, row(1, 0.7), row(2, 0.7), row(3, 0.7), row(4, 0.7))
-	if got := profile.Seen(2.5e3, 2e3); math.Abs(got-0.7) > 1e-12 {
+	if got := profile.Seen(2.5e3, 2e3); !(math.Abs(got-0.7) <= 1e-12) {
 		t.Errorf("seen %g, want 0.7", got)
 	}
 }
@@ -88,10 +88,10 @@ func TestAnEvenStretchIsSeenAsItsDepth(t *testing.T) {
 func TestAGapLetsItsLightThrough(t *testing.T) {
 	profile := table(t, row(1, 0), row(2, 99))
 	want := -math.Log((1 + math.Exp(-opaque)) / 2)
-	if got := profile.Seen(1.5e3, 2e3); math.Abs(got-want) > 1e-12 {
+	if got := profile.Seen(1.5e3, 2e3); !(math.Abs(got-want) <= 1e-12) {
 		t.Errorf("seen %g, want %g", got, want)
 	}
-	if got := profile.Mean(0.5e3, 2.5e3); math.Abs(got-opaque/2.0) > 1e-12 {
+	if got := profile.Mean(0.5e3, 2.5e3); !(math.Abs(got-opaque/2.0) <= 1e-12) {
 		t.Errorf("mean %g, want %g", got, opaque/2.0)
 	}
 }
@@ -100,7 +100,7 @@ func TestAGapLetsItsLightThrough(t *testing.T) {
 // quarters of a zero deep one mean half a depth.
 func TestPartOfABinCountsByThePart(t *testing.T) {
 	profile := table(t, row(1, 0), row(2, 2))
-	if got := profile.Mean(0.75e3, 1.75e3); math.Abs(got-0.5) > 1e-12 {
+	if got := profile.Mean(0.75e3, 1.75e3); !(math.Abs(got-0.5) <= 1e-12) {
 		t.Errorf("mean %g, want 0.5", got)
 	}
 }
@@ -112,7 +112,7 @@ func TestOutsideTheProfileIsEmpty(t *testing.T) {
 	if got := profile.Seen(3e3, 0); got != 0 {
 		t.Errorf("outside, %g", got)
 	}
-	if got := profile.Seen(2.4e3, 2e3); math.Abs(got-1) > 1e-12 {
+	if got := profile.Seen(2.4e3, 2e3); !(math.Abs(got-1) <= 1e-12) {
 		t.Errorf("reaching past the edge, %g, want 1", got)
 	}
 }

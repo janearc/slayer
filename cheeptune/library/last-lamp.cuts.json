@@ -1,0 +1,22 @@
+{
+	"group": "sombre and slow",
+	"mood": "lullaby, dim and tired",
+	"feeling": "The last light in a house at night, and someone finally sleeping.",
+	"intent": "A bedtime scene, the end of a long day, a calm closing shot.",
+	"listen_for": "The slow rocking six-beat sway, and the bass left alone at 0:40.",
+	"voicing": "@tape-chords",
+	"tempo": 72,
+	"meter": 6,
+	"seconds": 50.0,
+	"parts": [
+		{"name": "lull", "bar": 1, "second": 0.0,
+		 "change": "a lullaby lead over rocking chords",
+		 "feels": "Sleepy, safe"},
+		{"name": "rock", "bar": 5, "second": 20.0,
+		 "change": "a sparse drum and a walking bass",
+		 "feels": "The room breathes slowly"},
+		{"name": "alone", "bar": 9, "second": 40.0,
+		 "change": "only a low bass is left",
+		 "feels": "The light goes out"}
+	]
+}

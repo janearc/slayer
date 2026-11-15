@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"math"
 	"os"
 
@@ -12,17 +13,22 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/raw"
 	"github.com/janearc/slayer/render/frame"
+	"github.com/janearc/slayer/scene/named"
 	"github.com/janearc/slayer/trace"
 )
 
 // made draws the scene as asked and keeps it: the raw, and the plain
 // preview when one is asked for.
 func made(given asked) error {
-	composed, err := compose(given)
+	scene, err := named.Get("moonrise")
 	if err != nil {
 		return err
 	}
-	picture, err := draw(composed, given)
+	built, err := scene.Build(given.with(), io.Discard)
+	if err != nil {
+		return err
+	}
+	picture, err := draw(built, given)
 	if err != nil {
 		return err
 	}
@@ -36,9 +42,9 @@ func made(given asked) error {
 }
 
 // draw is the scene through the lens.
-func draw(composed scene, given asked) (*frame.Frame, error) {
+func draw(built *named.Built, given asked) (*frame.Frame, error) {
 	lens := film.Pinhole{Wide: given.wide * maths.Degree}
-	return trace.Sampled(composed.world, composed.eye, lens, 0,
+	return trace.Sampled(built.World(), built.Eye(), lens, 0,
 		given.width, given.height, given.samples)
 }
 

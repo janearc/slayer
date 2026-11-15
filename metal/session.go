@@ -63,6 +63,7 @@ func OpenSession(source string, kernels ...string) (*Session, error) {
 		return nil, errors.New("metal: " + C.GoString(&why[0]))
 	}
 	made := &Session{ctx: ctx, kernels: map[string]int{}}
+	made.SetLimit(defaultLimit)
 	for k, name := range kernels {
 		made.kernels[name] = k
 	}
@@ -164,4 +165,15 @@ func (s *Session) Close() {
 		C.slayer_session_close(s.ctx)
 		s.ctx = nil
 	}
+}
+
+// SetLimit sets how long the wait for one batch lasts before it gives up
+// with an error. The batch is not cancelled and may keep the device busy,
+// so the session refuses every later dispatch.
+func (s *Session) SetLimit(limit time.Duration) {
+	if s.ctx == nil {
+		return
+	}
+	C.slayer_session_limit(s.ctx, C.double(limit.Seconds()))
+	runtime.KeepAlive(s)
 }

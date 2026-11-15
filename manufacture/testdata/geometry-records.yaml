@@ -10,6 +10,22 @@
 # Summit additions: 176 cases, all supported geometry.
 # Launcher addition: 8 cases, all supported geometry.
 # Vegetation, owl and saguaro additions: 72 cases, all supported geometry.
-cases: 632
-geometries: 566
-refusals: 66
+# Stage light additions: 64 cases, quick only, 16 geometries and 48 refusals.
+# Stage scaffold and tower additions: 16 cases, quick only, 4 geometries
+# and 12 refusals.
+# Truck additions (vehicle-reference-arm64.txt): 48 cases, quick only, 12
+# geometries and 36 refusals.
+# Saucer additions (saucer-reference-arm64.txt): 16 cases, all supported
+# geometry: the Larson in flight, and from 2026-11-12 the Larson landed.
+# Re-captured 2026-11-12 with Webb's eight rows; see
+# reference-recapture-2026-11-12.txt beside this file.
+# Stack additions (stack-reference-arm64.txt): 8 cases a craft, all
+# supported geometry. From 2026-11-12: apollo-csm, gemini,
+# mercury-capsule, soyuz-ms, saturn-v, sls-block-1, saturn-v-apollo,
+# saturn-ib.
+# Captured by the producer when each was added; a new craft adds its
+# eight here. The file also holds the lunar module's eight,
+# apollo-lunar-module, which is a crewed craft and no stack.
+cases: 848
+geometries: 686
+refusals: 162

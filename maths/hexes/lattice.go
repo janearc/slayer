@@ -11,45 +11,49 @@ import (
 // columns along the other, with odd rows pushed half a tile along. Flat
 // lays it on the x z plane and Band wraps it round a cylinder.
 //
-// Both do their arithmetic here, in the lattice's own two coordinates, u
-// along a row and v across the rows.
+// Both do their arithmetic here, in the lattice's own two coordinates,
+// along a row and across the rows.
 
-// lattice is a hex lattice with a spacing between neighbouring middles.
-type lattice struct{ s float64 }
+// lattice is a hex lattice with a step between neighbouring middles.
+type lattice struct{ step float64 }
 
 // root3 is the square root of three, which is the shape of a hexagon.
 var root3 = math.Sqrt(3)
 
-// centre is the middle of column c, row r.
-func (l lattice) centre(c, r int) (u, v float64) {
-	u = l.s * (float64(c) + 0.5*float64(r&1))
-	v = l.s * root3 / 2 * float64(r)
-	return u, v
+// centre is the middle of a column and row.
+func (grid lattice) centre(column, row int) (along, across float64) {
+	along = grid.step * (float64(column) + 0.5*float64(row&1))
+	across = grid.step * root3 / 2 * float64(row)
+	return along, across
 }
 
 // nearest is the column and row a point is in: the lattice's axial
 // coordinates, rounded as cube coordinates, then made offset.
-func (l lattice) nearest(u, v float64) (c, r int) {
-	size := l.s / root3
-	fr := v * 2 / (3 * size)
-	fq := u/(size*root3) - fr/2
-	q, r := roundHex(fq, fr)
-	return q + (r-(r&1))/2, r
+func (grid lattice) nearest(along, across float64) (column, row int) {
+	size := grid.step / root3
+	looseRow := across * 2 / (3 * size)
+	looseColumn := along/(size*root3) - looseRow/2
+	axialColumn, axialRow := roundHex(looseColumn, looseRow)
+	return axialColumn + (axialRow-(axialRow&1))/2, axialRow
 }
 
 // roundHex rounds axial coordinates to the nearest hex, through the three
 // cube coordinates, fixing whichever one rounding moved the most.
-func roundHex(fq, fr float64) (q, r int) {
-	fs := -fq - fr
-	rq, rr, rs := math.Round(fq), math.Round(fr), math.Round(fs)
-	dq, dr, ds := math.Abs(rq-fq), math.Abs(rr-fr), math.Abs(rs-fs)
+func roundHex(looseColumn, looseRow float64) (column, row int) {
+	looseThird := -looseColumn - looseRow
+	roundedColumn := math.Round(looseColumn)
+	roundedRow := math.Round(looseRow)
+	roundedThird := math.Round(looseThird)
+	movedColumn := math.Abs(roundedColumn - looseColumn)
+	movedRow := math.Abs(roundedRow - looseRow)
+	movedThird := math.Abs(roundedThird - looseThird)
 	switch {
-	case dq > dr && dq > ds:
-		rq = -rr - rs
-	case dr > ds:
-		rr = -rq - rs
+	case movedColumn > movedRow && movedColumn > movedThird:
+		roundedColumn = -roundedRow - roundedThird
+	case movedRow > movedThird:
+		roundedRow = -roundedColumn - roundedThird
 	}
-	return int(rq), int(rr)
+	return int(roundedColumn), int(roundedRow)
 }
 
 // steps6 is the six neighbours of a tile in offset coordinates, for even
@@ -59,26 +63,30 @@ var steps6 = [2][6][2]int{
 	{{-1, 0}, {1, 0}, {0, -1}, {1, -1}, {0, 1}, {1, 1}},
 }
 
-// around is the six neighbours of column c, row r, before any wrap or
+// around is the six neighbours of a column and row, before any wrap or
 // edge is applied.
-func around(c, r int) [6][2]int {
-	var out [6][2]int
-	for i, s := range steps6[r&1] {
-		out[i] = [2]int{c + s[0], r + s[1]}
+func around(column, row int) [6][2]int {
+	var neighbours [6][2]int
+	for place, shift := range steps6[row&1] {
+		neighbours[place] = [2]int{column + shift[0], row + shift[1]}
 	}
-	return out
+	return neighbours
 }
 
-// fromEdge is how far a point u, v is from the edge of a tile, given the
-// tile's middle cu, cv and its neighbours' middles: the nearest of the
+// fromEdge is how far a point is from the edge of a tile, given the
+// tile's middle and its neighbours' middles: the nearest of the
 // half-planes between the middle and each neighbour.
-func fromEdge(u, v, cu, cv float64, near [][2]float64) float64 {
+func fromEdge(along, across, midAlong, midAcross float64,
+	near [][2]float64) float64 {
 	best := math.Inf(1)
-	for _, n := range near {
-		du, dv := cu-n[0], cv-n[1]
-		l := math.Hypot(du, dv)
-		mu, mv := (cu+n[0])/2, (cv+n[1])/2
-		best = math.Min(best, ((u-mu)*du+(v-mv)*dv)/l)
+	for _, neighbour := range near {
+		gapAlong := midAlong - neighbour[0]
+		gapAcross := midAcross - neighbour[1]
+		length := math.Hypot(gapAlong, gapAcross)
+		betweenAlong := (midAlong + neighbour[0]) / 2
+		betweenAcross := (midAcross + neighbour[1]) / 2
+		best = math.Min(best, ((along-betweenAlong)*gapAlong+
+			(across-betweenAcross)*gapAcross)/length)
 	}
 	return best
 }
@@ -88,91 +96,96 @@ func fromEdge(u, v, cu, cv float64, near [][2]float64) float64 {
 // and rows it holds, from the origin toward plus x and plus z; a point
 // beyond them is still in a tile, but Tiles does not list it.
 type Flat struct {
-	Step         float64
+	//ninja:vow gate a value, whose fields are what it is
+	Step float64
+	//ninja:vow gate a value, whose fields are what it is
 	Across, Down int
 }
 
-// spacing is the step, with zero read as one.
-func (f Flat) spacing() float64 {
-	if f.Step <= 0 {
+// spacing is the step, and one when the step is zero or below it.
+func (flat Flat) spacing() float64 {
+	if flat.Step <= 0 {
 		return 1
 	}
-	return f.Step
+	return flat.Step
 }
 
 // lat is the lattice.
-func (f Flat) lat() lattice { return lattice{f.spacing()} }
+func (flat Flat) lat() lattice { return lattice{flat.spacing()} }
 
 // Nearest is the tile under a point, ignoring its height.
-func (f Flat) Nearest(p maths.Vec) Tile {
-	c, r := f.lat().nearest(p.X, p.Z)
-	return Tile{0, c, r}
+func (flat Flat) Nearest(point maths.Vec) Tile {
+	column, row := flat.lat().nearest(point.X, point.Z)
+	return Tile{0, column, row}
 }
 
 // Centre is the middle of a tile, on the plane.
-func (f Flat) Centre(tile Tile) maths.Vec {
-	u, v := f.lat().centre(tile.I, tile.J)
-	return maths.V(u, 0, v)
+func (flat Flat) Centre(tile Tile) maths.Vec {
+	along, across := flat.lat().centre(tile.Column, tile.Row)
+	return maths.V(along, 0, across)
 }
 
 // Neighbours is the six tiles round this one, fewer at the edge of the
 // extent, in order of ID.
-func (f Flat) Neighbours(tile Tile) []Tile {
-	var out []Tile
-	for _, n := range around(tile.I, tile.J) {
-		if f.holds(n[0], n[1]) {
-			out = append(out, Tile{0, n[0], n[1]})
+func (flat Flat) Neighbours(tile Tile) []Tile {
+	var kept []Tile
+	for _, next := range around(tile.Column, tile.Row) {
+		if flat.holds(next[0], next[1]) {
+			kept = append(kept, Tile{0, next[0], next[1]})
 		}
 	}
-	sort.Slice(out, func(a, b int) bool {
-		return f.ID(out[a]) < f.ID(out[b])
+	sort.Slice(kept, func(left, right int) bool {
+		return flat.ID(kept[left]) < flat.ID(kept[right])
 	})
-	return out
+	return kept
 }
 
 // holds is whether a column and row are inside the extent.
-func (f Flat) holds(c, r int) bool {
-	return c >= 0 && r >= 0 && c < f.Across && r < f.Down
+func (flat Flat) holds(column, row int) bool {
+	return column >= 0 && row >= 0 &&
+		column < flat.Across && row < flat.Down
 }
 
 // Edge is how far a point is from the edge of a tile, on the plane.
-func (f Flat) Edge(p maths.Vec, tile Tile) float64 {
-	l := f.lat()
-	cu, cv := l.centre(tile.I, tile.J)
+func (flat Flat) Edge(point maths.Vec, tile Tile) float64 {
+	grid := flat.lat()
+	midAlong, midAcross := grid.centre(tile.Column, tile.Row)
 	var near [][2]float64
-	for _, n := range around(tile.I, tile.J) {
-		u, v := l.centre(n[0], n[1])
-		near = append(near, [2]float64{u, v})
+	for _, next := range around(tile.Column, tile.Row) {
+		along, across := grid.centre(next[0], next[1])
+		near = append(near, [2]float64{along, across})
 	}
-	return fromEdge(p.X, p.Z, cu, cv, near)
+	return fromEdge(point.X, point.Z, midAlong, midAcross, near)
 }
 
 // ID is the row then the column, each in its own thirty-two bits, so two
 // tiles 2^32 columns apart share one; a flat extent is never so wide.
-func (f Flat) ID(tile Tile) int64 { return pair(tile.I, tile.J) }
+func (flat Flat) ID(tile Tile) int64 { return pair(tile.Column, tile.Row) }
 
 // pair is a column and a row as one number.
-func pair(c, r int) int64 { return int64(r)<<32 | int64(uint32(c)) }
+func pair(column, row int) int64 {
+	return int64(row)<<32 | int64(uint32(column))
+}
 
 // Spacing is the distance between neighbouring middles.
-func (f Flat) Spacing() float64 { return f.spacing() }
+func (flat Flat) Spacing() float64 { return flat.spacing() }
 
 // Tiles is every tile inside the extent, in order of ID.
-func (f Flat) Tiles() []Tile {
-	out := make([]Tile, 0, max(0, f.Across)*max(0, f.Down))
-	for r := 0; r < f.Down; r++ {
-		for c := 0; c < f.Across; c++ {
-			out = append(out, Tile{0, c, r})
+func (flat Flat) Tiles() []Tile {
+	kept := make([]Tile, 0, max(0, flat.Across)*max(0, flat.Down))
+	for row := 0; row < flat.Down; row++ {
+		for column := 0; column < flat.Across; column++ {
+			kept = append(kept, Tile{0, column, row})
 		}
 	}
-	return out
+	return kept
 }
 
 // Finer is the lattice at half the spacing, twice as many columns and
 // rows, with every middle of this one.
-func (f Flat) Finer() Tiling {
-	return Flat{Step: f.spacing() / 2, Across: 2 * f.Across,
-		Down: 2 * f.Down}
+func (flat Flat) Finer() Tiling {
+	return Flat{Step: flat.spacing() / 2, Across: 2 * flat.Across,
+		Down: 2 * flat.Down}
 }
 
 // Band is a hex lattice wrapped once round a cylinder of Radius about the y
@@ -182,200 +195,216 @@ func (f Flat) Finer() Tiling {
 // Angle is measured from plus z toward plus x, so a point on the cylinder at z
 // = Radius is in column zero.
 type Band struct {
+	//ninja:vow gate a value, whose fields are what it is
 	Radius float64
-	Width  float64
+	//ninja:vow gate a value, whose fields are what it is
+	Width float64
+	//ninja:vow gate a value, whose fields are what it is
 	Around int
 }
 
 // around is how many tiles go round, with fewer than six read as six.
-func (b Band) around() int { return max(6, b.Around) }
+func (band Band) around() int { return max(6, band.Around) }
 
 // spacing is the distance between neighbouring middles: the
 // circumference over Around.
-func (b Band) spacing() float64 {
-	return 2 * math.Pi * b.Radius / float64(b.around())
+func (band Band) spacing() float64 {
+	return 2 * math.Pi * band.Radius / float64(band.around())
 }
 
 // lat is the lattice.
-func (b Band) lat() lattice { return lattice{b.spacing()} }
+func (band Band) lat() lattice { return lattice{band.spacing()} }
 
 // rows is how many rows fit across the width.
-func (b Band) rows() int {
-	return max(1, int(math.Floor(b.Width/(b.spacing()*root3/2)))+1)
+func (band Band) rows() int {
+	return max(1,
+		int(math.Floor(band.Width/(band.spacing()*root3/2)))+1)
 }
 
-// unwrap is a point as the lattice sees it: u along the circumference, from
-// zero up to it, and v along y from the band's bottom.
-func (b Band) unwrap(p maths.Vec) (u, v float64) {
-	a := math.Atan2(p.X, p.Z)
-	if a < 0 {
-		a += 2 * math.Pi
+// unwrap is a point as the lattice sees it: along the circumference,
+// from zero up to it, and across along y from the band's bottom.
+func (band Band) unwrap(point maths.Vec) (along, across float64) {
+	angle := math.Atan2(point.X, point.Z)
+	if angle < 0 {
+		angle += 2 * math.Pi
 	}
-	return b.Radius * a, p.Y + b.Width/2
+	return band.Radius * angle, point.Y + band.Width/2
 }
 
 // wrap keeps a column inside the band.
-func (b Band) wrap(c int) int {
-	n := b.around()
-	return ((c % n) + n) % n
+func (band Band) wrap(column int) int {
+	count := band.around()
+	return ((column % count) + count) % count
 }
 
 // Nearest is the tile a point is in, by its angle round the axis and its
 // height, whatever its distance from the axis.
-func (b Band) Nearest(p maths.Vec) Tile {
-	u, v := b.unwrap(p)
-	c, r := b.lat().nearest(u, v)
-	return Tile{0, b.wrap(c), r}
+func (band Band) Nearest(point maths.Vec) Tile {
+	along, across := band.unwrap(point)
+	column, row := band.lat().nearest(along, across)
+	return Tile{0, band.wrap(column), row}
 }
 
 // Centre is the middle of a tile, on the cylinder.
-func (b Band) Centre(tile Tile) maths.Vec {
-	u, v := b.lat().centre(tile.I, tile.J)
-	a := u / b.Radius
-	return maths.V(b.Radius*math.Sin(a), v-b.Width/2, b.Radius*math.Cos(a))
+func (band Band) Centre(tile Tile) maths.Vec {
+	along, across := band.lat().centre(tile.Column, tile.Row)
+	angle := along / band.Radius
+	return maths.V(band.Radius*math.Sin(angle),
+		across-band.Width/2, band.Radius*math.Cos(angle))
 }
 
 // Neighbours is the six tiles round this one, wrapping round the band,
 // fewer at the band's rim, in order of ID.
-func (b Band) Neighbours(tile Tile) []Tile {
-	var out []Tile
-	for _, n := range around(tile.I, tile.J) {
-		if n[1] < 0 || n[1] >= b.rows() {
+func (band Band) Neighbours(tile Tile) []Tile {
+	var kept []Tile
+	for _, next := range around(tile.Column, tile.Row) {
+		if next[1] < 0 || next[1] >= band.rows() {
 			continue
 		}
-		t := Tile{0, b.wrap(n[0]), n[1]}
+		wrapped := Tile{0, band.wrap(next[0]), next[1]}
 		dup := false
-		for _, have := range out {
-			dup = dup || have == t
+		for _, have := range kept {
+			dup = dup || have == wrapped
 		}
 		if !dup {
-			out = append(out, t)
+			kept = append(kept, wrapped)
 		}
 	}
-	sort.Slice(out, func(x, y int) bool {
-		return b.ID(out[x]) < b.ID(out[y])
+	sort.Slice(kept, func(left, right int) bool {
+		return band.ID(kept[left]) < band.ID(kept[right])
 	})
-	return out
+	return kept
 }
 
 // Edge is how far a point is from the edge of a tile, measured on the
 // unwrapped cylinder, with the seam crossed where a neighbour is over it.
-func (b Band) Edge(p maths.Vec, tile Tile) float64 {
-	l := b.lat()
-	u, v := b.unwrap(p)
-	cu, cv := l.centre(tile.I, tile.J)
-	circ := 2 * math.Pi * b.Radius
+func (band Band) Edge(point maths.Vec, tile Tile) float64 {
+	grid := band.lat()
+	along, across := band.unwrap(point)
+	midAlong, midAcross := grid.centre(tile.Column, tile.Row)
+	circumference := 2 * math.Pi * band.Radius
 	// bring the point to the same side of the seam as the middle
-	if u-cu > circ/2 {
-		u -= circ
-	} else if cu-u > circ/2 {
-		u += circ
+	if along-midAlong > circumference/2 {
+		along -= circumference
+	} else if midAlong-along > circumference/2 {
+		along += circumference
 	}
 	var near [][2]float64
-	for _, n := range around(tile.I, tile.J) {
-		nu, nv := l.centre(n[0], n[1])
-		near = append(near, [2]float64{nu, nv})
+	for _, next := range around(tile.Column, tile.Row) {
+		nextAlong, nextAcross := grid.centre(next[0], next[1])
+		near = append(near, [2]float64{nextAlong, nextAcross})
 	}
-	return fromEdge(u, v, cu, cv, near)
+	return fromEdge(along, across, midAlong, midAcross, near)
 }
 
 // ID is the row then the column, each in its own thirty-two bits; a band
 // of more columns than that, as an orbital is, numbers its tiles row by
 // row instead, so no two share one.
-func (b Band) ID(tile Tile) int64 {
-	if n := b.around(); n > 1<<32 {
-		return int64(tile.J)*int64(n) + int64(tile.I)
+func (band Band) ID(tile Tile) int64 {
+	if count := band.around(); count > 1<<32 {
+		return int64(tile.Row)*int64(count) + int64(tile.Column)
 	}
-	return pair(tile.I, tile.J)
+	return pair(tile.Column, tile.Row)
 }
 
 // Spacing is the distance between neighbouring middles.
-func (b Band) Spacing() float64 { return b.spacing() }
+func (band Band) Spacing() float64 { return band.spacing() }
 
 // Tiles is every tile of the band, in order of ID.
-func (b Band) Tiles() []Tile {
-	rows, n := b.rows(), b.around()
-	out := make([]Tile, 0, rows*n)
-	for r := 0; r < rows; r++ {
-		for c := 0; c < n; c++ {
-			out = append(out, Tile{0, c, r})
+func (band Band) Tiles() []Tile {
+	rows, count := band.rows(), band.around()
+	kept := make([]Tile, 0, rows*count)
+	for row := 0; row < rows; row++ {
+		for column := 0; column < count; column++ {
+			kept = append(kept, Tile{0, column, row})
 		}
 	}
-	return out
+	return kept
 }
 
 // Finer is the band with twice as many tiles round, and so half the
 // spacing and twice the rows, with every middle of this one.
-func (b Band) Finer() Tiling {
-	return Band{Radius: b.Radius, Width: b.Width, Around: 2 * b.around()}
+func (band Band) Finer() Tiling {
+	return Band{Radius: band.Radius, Width: band.Width,
+		Around: 2 * band.around()}
 }
 
 // Distance is the straight line on the plane, ignoring height.
-func (f Flat) Distance(a, b maths.Vec) float64 {
-	return math.Hypot(a.X-b.X, a.Z-b.Z)
+func (flat Flat) Distance(from, to maths.Vec) float64 {
+	return math.Hypot(from.X-to.X, from.Z-to.Z)
 }
 
 // bounds is the extent's middle and its half-sizes across and down, from
 // the four corner tiles' middles.
-func (f Flat) bounds() (mid maths.Vec, hx, hz float64) {
-	a, d := max(1, f.Across), max(1, f.Down)
-	lo, hi := math.Inf(1), math.Inf(-1)
-	lz, hz2 := math.Inf(1), math.Inf(-1)
-	for _, t := range []Tile{{0, 0, 0}, {0, a - 1, 0}, {0, 0, d - 1},
-		{0, a - 1, d - 1}} {
-		c := f.Centre(t)
-		lo, hi = math.Min(lo, c.X), math.Max(hi, c.X)
-		lz, hz2 = math.Min(lz, c.Z), math.Max(hz2, c.Z)
+func (flat Flat) bounds() (mid maths.Vec, halfAcross, halfDown float64) {
+	across, down := max(1, flat.Across), max(1, flat.Down)
+	leastX, mostX := math.Inf(1), math.Inf(-1)
+	leastZ, mostZ := math.Inf(1), math.Inf(-1)
+	for _, corner := range []Tile{{0, 0, 0}, {0, across - 1, 0},
+		{0, 0, down - 1}, {0, across - 1, down - 1}} {
+		middle := flat.Centre(corner)
+		leastX = math.Min(leastX, middle.X)
+		mostX = math.Max(mostX, middle.X)
+		leastZ = math.Min(leastZ, middle.Z)
+		mostZ = math.Max(mostZ, middle.Z)
 	}
-	return maths.V((lo+hi)/2, 0, (lz+hz2)/2), (hi - lo) / 2, (hz2 - lz) / 2
+	return maths.V((leastX+mostX)/2, 0, (leastZ+mostZ)/2),
+		(mostX - leastX) / 2, (mostZ - leastZ) / 2
 }
 
 // Latitude is how far a point lies along north from the middle of the extent,
 // as a share of the extent's reach that way: north is taken in the plane, and a
 // north that points straight up gives zero.
-func (f Flat) Latitude(p, north maths.Vec) float64 {
-	n := maths.V(north.X, 0, north.Z)
-	if n.Len() < 1e-12 {
+func (flat Flat) Latitude(point, north maths.Vec) float64 {
+	axis := maths.V(north.X, 0, north.Z)
+	if axis.Len() < 1e-12 {
 		return 0
 	}
-	n = n.Unit()
-	mid, hx, hz := f.bounds()
-	reach := hx*math.Abs(n.X) + hz*math.Abs(n.Z)
+	axis = axis.Unit()
+	mid, halfAcross, halfDown := flat.bounds()
+	reach := halfAcross*math.Abs(axis.X) + halfDown*math.Abs(axis.Z)
 	if reach <= 0 {
 		return 0
 	}
-	return math.Min(1, math.Abs(p.Sub(mid).Dot(n))/reach)
+	return math.Min(1, math.Abs(point.Sub(mid).Dot(axis))/reach)
 }
 
-// Somewhere is a point of the extent: a across it and c down it.
-func (f Flat) Somewhere(a, _, c float64) maths.Vec {
-	mid, hx, hz := f.bounds()
-	return mid.Add(maths.V((a*2-1)*hx, 0, (c*2-1)*hz))
+// Somewhere is a point of the extent: a share across it and a share
+// down it.
+func (flat Flat) Somewhere(acrossShare, _, downShare float64) maths.Vec {
+	mid, halfAcross, halfDown := flat.bounds()
+	return mid.Add(maths.V((acrossShare*2-1)*halfAcross, 0,
+		(downShare*2-1)*halfDown))
 }
 
 // azimuth is a point's angle round the band, as Centre lays it out.
-func azimuth(p maths.Vec) float64 { return math.Atan2(p.X, p.Z) }
+func azimuth(point maths.Vec) float64 {
+	return math.Atan2(point.X, point.Z)
+}
 
 // Distance is along the cylinder: the shorter way round, times the
 // radius, and the difference along the axis, together.
-func (b Band) Distance(p, q maths.Vec) float64 {
-	round := math.Abs(math.Remainder(azimuth(p)-azimuth(q), 2*math.Pi))
-	return math.Hypot(round*b.Radius, p.Y-q.Y)
+func (band Band) Distance(from, to maths.Vec) float64 {
+	round := math.Abs(math.Remainder(azimuth(from)-azimuth(to),
+		2*math.Pi))
+	return math.Hypot(round*band.Radius, from.Y-to.Y)
 }
 
 // Latitude is how far a point lies from the band's mid-line toward its rims,
 // which are a band's poles: zero in the middle, one at a rim. North is the
 // band's own axis and the given one is not used.
-func (b Band) Latitude(p, _ maths.Vec) float64 {
-	if b.Width <= 0 {
+func (band Band) Latitude(point, _ maths.Vec) float64 {
+	if band.Width <= 0 {
 		return 0
 	}
-	return math.Min(1, math.Abs(p.Y)/(b.Width/2))
+	return math.Min(1, math.Abs(point.Y)/(band.Width/2))
 }
 
-// Somewhere is a point of the band: a round it and b along it.
-func (b Band) Somewhere(a, b2, _ float64) maths.Vec {
-	ang := a * 2 * math.Pi
-	return maths.V(b.Radius*math.Sin(ang), (b2*2-1)*b.Width/2,
-		b.Radius*math.Cos(ang))
+// Somewhere is a point of the band: a share round it and a share
+// along it.
+func (band Band) Somewhere(roundShare, alongShare, _ float64) maths.Vec {
+	angle := roundShare * 2 * math.Pi
+	return maths.V(band.Radius*math.Sin(angle),
+		(alongShare*2-1)*band.Width/2,
+		band.Radius*math.Cos(angle))
 }

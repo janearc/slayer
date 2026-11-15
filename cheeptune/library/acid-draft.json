@@ -1,0 +1,71 @@
+{
+	// an acid voice made from what the studio has today, to write the
+	// acid pieces against until the machine's own acid voicing lands. the
+	// lead is one saw, overdriven, through a low filter that rings and is
+	// snapped open by its own envelope on every note. it has no slide
+	// between notes, and a loud mark makes a note louder but does not
+	// open its filter further: both are being added to the machine. the
+	// bass is a plain low tone, the chords are short driven stabs, and
+	// the drums are a hard kick (k), a clap of noise (s), a closed tick
+	// (h) and a metal tock (t), the same four letters the machine's own
+	// acid voicings take, so a score fits any of them. picked by the composer on 2026-11-12 with nobody listening.
+	//
+	// this is the sound of glass-acid, a tune the owner kept on
+	// 2026-11-12 ("this is great"), after tossing it and after the
+	// machine's own acid voicing. it began as a stand-in and is now the
+	// thing itself: it is not to be retuned, replaced by @acid, or have
+	// its drum letters moved to the machine's meanings (its t is a tock,
+	// not a tom) without her. zappy-engine is written for it too.
+	"name": "acid-draft",
+	"machine": "studio",
+	"master": 0.27,
+	"reverb": {"size": 0.4, "decay": 1.2, "damping": 0.4, "level": 0.3},
+	"delay": {"beats": "3/4", "feedback": 0.4, "tone": 0.5, "level": 0.5},
+	"channels": [
+		{"kind": "analog", "role": "lead", "volume": 0.7, "place": -0.1,
+		 "send": {"reverb": 0.1, "delay": 0.2},
+		 "envelope": {"attack": 0.002, "decay": 0.25, "sustain": 0.5,
+		              "release": 0.04},
+		 "analog": {"oscillators": [{"shape": "saw"}],
+		            "drive": 0.6,
+		            "filter": {"cutoff": 350, "resonance": 0.85,
+		                       "follow": 0.3, "amount": 3.5,
+		                       "envelope": {"attack": 0, "decay": 0.18,
+		                                    "sustain": 0.1,
+		                                    "release": 0.1}}}},
+		{"kind": "analog", "role": "bass", "volume": 0.7,
+		 "envelope": {"attack": 0.003, "decay": 0.3, "sustain": 0.7,
+		              "release": 0.05},
+		 "analog": {"oscillators": [{"shape": "triangle"},
+		                            {"shape": "square", "octave": 1,
+		                             "level": 0.25}],
+		            "filter": {"cutoff": 250, "resonance": 0,
+		                       "follow": 0.6}}},
+		{"kind": "analog", "role": "pad", "volume": 0.35, "place": 0.35,
+		 "send": {"reverb": 0.3, "delay": 0.3},
+		 "envelope": {"attack": 0.003, "decay": 0.25, "sustain": 0.2,
+		              "release": 0.15},
+		 "analog": {"oscillators": [{"shape": "saw", "detune": -10},
+		                            {"shape": "saw", "detune": 10}],
+		            "drive": 0.3,
+		            "filter": {"cutoff": 1500, "resonance": 0.3,
+		                       "follow": 0.5, "amount": 2,
+		                       "envelope": {"attack": 0, "decay": 0.2,
+		                                    "sustain": 0.2,
+		                                    "release": 0.15}}}},
+		{"kind": "drum", "role": "perc", "volume": 0.9,
+		 "send": {"reverb": 0.15},
+		 "drums": {
+			"k": {"tone": 50, "sweep": 40, "fall": 0.04, "decay": 0.3,
+			      "click": 0.7},
+			"s": {"tone": 200, "sweep": 6, "fall": 0.03, "decay": 0.08,
+			      "click": 0.4, "noise": 0.7, "noise_decay": 0.16,
+			      "colour": 1500},
+			"h": {"noise": 0.4, "noise_decay": 0.025, "colour": 9000,
+			      "volume": 0.5},
+			"t": {"tone": 1200, "decay": 0.03, "click": 0.8,
+			      "noise": 0.1, "noise_decay": 0.02, "colour": 4000,
+			      "volume": 0.6}
+		 }}
+	]
+}

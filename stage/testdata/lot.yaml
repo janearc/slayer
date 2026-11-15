@@ -1,0 +1,96 @@
+# a lot, for stage's tests of adding a world into one that is there: one
+# of each piece that has a place, every number a multiple of a quarter, so
+# that moving it by a whole number of metres is exact. places are a map's:
+# x east, y north, z up. the body stands at nought, so that moving it is a
+# sum of one rounding.
+scene:
+  name: lot
+  film:
+    width: 64
+    height: 36
+    rays: 1
+    wide: 90
+    exposure: 2
+  world:
+    materials:
+      grass:
+        colour: {srgb_linear: [0.05, 0.06, 0.04]}
+        source: eye
+      paint:
+        colour: {srgb_linear: [0.5, 0.25, 0.125]}
+        source: eye
+    boxes:
+      lawn:
+        material: grass
+        middle: [1, 2.5, 3.25]
+        size: [4, 5, 6]
+        source: eye
+    spheres:
+      ball:
+        material: paint
+        middle: [-2.5, 0.75, 1.5]
+        radius: 0.5
+        source: eye
+      runner:
+        material: paint
+        middle: [4, 0.5, 0.25]
+        radius: 0.25
+        motion: lap
+        source: eye
+    motions:
+      lap:
+        seconds: 8
+        ease: linear
+        hold: true
+        frames:
+          - {percent: 0, at: [4, 0.5, 0.25]}
+          - {percent: 50, at: [6.5, 2.25, 1.5]}
+          - {percent: 100, at: [8, 4, 0.75]}
+    lamps:
+      porch:
+        at: [-2, 3.5, 7.5]
+        temperature: 2700
+        strength: 0.35
+        radius: 0.0625
+        source: eye
+    spots:
+      beam:
+        at: [0.5, -3, 4]
+        aim: [1.5, 0.25, 1]
+        cone: 20
+        soft: 5
+        temperature: 3000
+        strength: 40
+        source: eye
+    floods:
+      night:
+        colour: {srgb_linear: [0.01, 0.013, 0.025]}
+        strength: 2
+        source: eye
+    wisps:
+      haze:
+        colour: {swatch: red}
+        middle: [2.5, -1.5, 3]
+        radius: 2
+        thick: 0.5
+        seed: 7
+        scale: 2
+        amount: 0.5
+        source: eye
+    bodies:
+      saturn:
+        template: saturn
+        middle: [0, 0, 0]
+        tilt: 12
+        aurora: false
+        detail: 1
+    sky:
+      horizon: {srgb_linear: [0.5, 0.25, 0.125]}
+      zenith: {srgb_linear: [0.006, 0.01, 0.03]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye
+    suns:
+      sun:
+        toward: [0, 3, 4]
+        colour: {srgb_linear: [0.35, 0.34, 0.32]}
+        source: eye

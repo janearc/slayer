@@ -98,7 +98,7 @@ func middleLooksAhead(t *rapid.T) {
 		"wide"), none)
 	middle := glass.Ray(edgeWidth/pair, none, edgeWidth+whole, whole,
 		maths.Band{}).Dir
-	if math.Abs(middle.X) > tight || !(middle.Z < none) {
+	if !(math.Abs(middle.X) <= tight) || !(middle.Z < none) {
 		t.Fatalf("the middle of the picture looks %v", middle)
 	}
 }

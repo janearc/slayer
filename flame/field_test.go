@@ -207,7 +207,7 @@ func TestIgnitionFadesOpacityAndEmissionTogether(t *testing.T) {
 		truth = truth.Tick(age).(*Body)
 		tick := field.Tick(at).(*Field)
 		p := maths.V(0, .1, 0)
-		if math.Abs(tick.Density(p)/truth.Density(p)-.5) > 1e-12 {
+		if !(math.Abs(tick.Density(p)/truth.Density(p)-.5) <= 1e-12) {
 			t.Fatal("fade did not halve opacity at midpoint")
 		}
 		got := tick.Shine().At(p).Scale(tick.Density(p))

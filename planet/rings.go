@@ -71,6 +71,15 @@ func (ring Ring) Ringleted(seed uint64, strength, width float64) (Ring,
 // and 0.6 times as strong as the one before: picked.
 const ringletOctaves = 5
 
+// ringletFiner is how many times finer each layer of ringlets is than the one
+// before, ringletWeaker how strong it is against that one's, and ringletAcross
+// where across the ring's other two axes the noise is read: picked.
+const (
+	ringletFiner  = 2.3
+	ringletWeaker = 0.6
+	ringletAcross = 0.5
+)
+
 // share is how much of the ring's mean depth stands at a reach.
 func (made ringlets) share(reach float64) float64 {
 	if made.strength == 0 {
@@ -79,8 +88,8 @@ func (made ringlets) share(reach float64) float64 {
 	sum, size, strength := 0.0, 1/made.width, 1.0
 	for i := 0; i < ringletOctaves; i++ {
 		sum += strength * noise.Gradient(made.seed+uint64(i), size*reach,
-			0.5, 0.5)
-		size, strength = size*2.3, strength*0.6
+			ringletAcross, ringletAcross)
+		size, strength = size*ringletFiner, strength*ringletWeaker
 	}
 	return math.Max(0, 1+made.strength*sum)
 }

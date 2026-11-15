@@ -15,6 +15,14 @@ func validLocalBounds(bounds localBounds) bool {
 // checkComposition holds ordering and cross-field constraints after the
 // bundled schema checks scalar types, finite values and resource ceilings.
 func (plan plan) checkComposition() error {
+	if _, err := plan.volumeIllumination(); err != nil {
+		return err
+	}
+	for _, cloud := range plan.Clouds {
+		if cloud.High <= cloud.Low {
+			return fmt.Errorf("island: cloud layer heights must increase")
+		}
+	}
 	for index, band := range plan.Landcover {
 		if index > 0 && band.Below <= plan.Landcover[index-1].Below {
 			return fmt.Errorf("island: landcover height boundaries must increase")
@@ -41,6 +49,9 @@ func (plan plan) checkComposition() error {
 		names[object.Name] = true
 	}
 	if forest := site.Forest; forest != nil {
+		if forest.CrownAreaMatch && (forest.GeometryMinimum != "crown" || forest.CrownAreaSide == 0) {
+			return fmt.Errorf("island: crown material-area matching needs the crown floor and an explicit sampling side")
+		}
 		for _, member := range forest.Mixture {
 			if _, err := manufacture.KindNamed(member.Kind); err != nil {
 				return err
@@ -62,6 +73,9 @@ func (plan plan) checkComposition() error {
 		}
 	}
 	for _, mist := range site.Atmosphere {
+		if site.Budget.MistFloors > 0 && int64(mist.FloorSide)*int64(mist.FloorSide)*8 > site.Budget.MistFloors {
+			return fmt.Errorf("island: mist floor grid exceeds its cache payload allowance")
+		}
 		if !validLocalBounds(mist.Bounds) {
 			return fmt.Errorf("island: invalid mist footprint")
 		}

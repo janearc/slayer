@@ -3,7 +3,9 @@
 The named factory entries `spruce` and `norway` now use a draft physical
 foliage wrapper. It retains their seeded whorled scaffolds, including
 Norway's hanging branchlets, and replaces terminal foliage sleeves with
-shared recursive shoots. All execution checks wait for the review break.
+shared recursive shoots. The code and its tests are committed, among them
+`manufacture/norway_test.go`; this note was written before them and records
+no results. `game test -- ./manufacture/...` gives them.
 
 Norway's unmarked major-branch sleeves are removed rather than needled.
 Those branches show their retained bark; the hanging terminal branchlets

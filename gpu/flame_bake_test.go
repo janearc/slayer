@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
@@ -131,7 +131,7 @@ func TestFlameGridRetainsAUniformTemperature(t *testing.T) {
 	want := body.Shine().At(maths.V(0, 0.5, 0))
 	for i := 0; i < len(glow); i += 3 {
 		for c, value := range []float64{want.R, want.G, want.B} {
-			if math.Abs(float64(glow[i+c])-value) > 1e-6*max(1e-30, value) {
+			if !(math.Abs(float64(glow[i+c])-value) <= 1e-6*max(1e-30, value)) {
 				t.Fatal("constant-temperature lookup changed")
 			}
 		}

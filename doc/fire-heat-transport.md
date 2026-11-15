@@ -1,7 +1,9 @@
 # Heat can travel; the fuel stays put
 
-This is a code-only draft. The new CPU and Metal paths have been written
-and formatted, but have not been built, checked or rendered yet.
+The CPU and Metal paths are built and their tests are committed, in
+`fuelbed/advection_test.go`, `fuelbed/advection_metal_test.go` and the
+`fuelbed/a_*_contracts_test.go` files. This note records no test results;
+`game test -- ./fuelbed/...` gives them.
 
 The existing surface model now has an optional, explicitly supplied heat
 velocity. `fuelbed.NewAdvected` and `NewMetalAdvected` add the horizontal
@@ -89,7 +91,7 @@ transport direction. It also gives diagonal flow, ambient inflow and outflow
 examples.
 
 These are small authored arithmetic witnesses, not experimental fire
-observations. They have not been executed yet.
+observations. They are run by the tests named above.
 
 Review also needs actual CPU/Metal agreement over reacting fuel, joint
 timestep refusal, coefficient representability, zero-flow compatibility,
@@ -112,5 +114,5 @@ plus four float32 ulps at unity. Tiny weights can round or flush to zero. This
 check does not prove universal conservation or the error budget for arbitrary
 grids, coefficients or longer horizons.
 
-Those need their own stated acceptance cases. None of the new comparisons has
-run yet.
+Those need their own stated acceptance cases. The comparisons above are
+committed tests; this note does not record their observed errors.

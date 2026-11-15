@@ -46,7 +46,7 @@ func TestTheFinestLevelIsTheProfile(t *testing.T) {
 		middle := float64(k)*1e3 + 1e3
 		want := profile.Seen(middle, 0)
 		got := float64(baked.Seen(float32(middle), 1e3))
-		if math.Abs(got-want) > 1e-5 {
+		if !(math.Abs(got-want) <= 1e-5) {
 			t.Errorf("bin %d: %g, want %g", k, got, want)
 		}
 	}
@@ -59,7 +59,7 @@ func TestAWideRayReadsTheMeanLight(t *testing.T) {
 	baked := profile.Baked()
 	want := profile.Seen(2.5e3, 4e3)
 	got := float64(baked.Seen(2.5e3, 4e3))
-	if math.Abs(got-want) > 1e-5 {
+	if !(math.Abs(got-want) <= 1e-5) {
 		t.Errorf("%g, want %g", got, want)
 	}
 	if want > 1 {
@@ -73,7 +73,7 @@ func TestAWideRayReadsTheMeanLight(t *testing.T) {
 func TestBeyondTheTable(t *testing.T) {
 	baked := striped(t).Baked()
 	want := float32(-math.Log((1 + math.Exp(-opaque)) / 2))
-	if got := baked.Seen(4e3, 1e9); math.Abs(float64(got-want)) > 1e-5 {
+	if got := baked.Seen(4e3, 1e9); !(math.Abs(float64(got-want)) <= 1e-5) {
 		t.Errorf("across everything, %g, want %g", got, want)
 	}
 	if got := baked.Seen(9e3, 1); got != 0 {
@@ -86,7 +86,7 @@ func TestAnEvenTableIsItsDepthAtEveryWidth(t *testing.T) {
 	baked := table(t, row(1, 0.4), row(2, 0.4), row(3, 0.4)).Baked()
 	for _, across := range []float32{0, 500, 1e3, 1.7e3, 3e3, 1e6} {
 		got := baked.Seen(1.8e3, across)
-		if math.Abs(float64(got)-0.4) > 1e-5 {
+		if !(math.Abs(float64(got)-0.4) <= 1e-5) {
 			t.Errorf("across %g m, %g, want 0.4", across, got)
 		}
 	}

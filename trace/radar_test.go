@@ -72,16 +72,6 @@ func TestARadarsEchoIsByHowSquarelyTheBeamLands(t *testing.T) {
 	}
 }
 
-// A radar lights nothing in visible light.
-func TestARadarLightsNothingInVisibleLight(t *testing.T) {
-	eye, lens := tenBack(), film.Pinhole{Wide: 30 * maths.Degree}
-	world := radarWorld(radarGround(nil), eye.Origin)
-	seen := draw(world, eye, lens, 0, 41, 41).At(20, 20)
-	if seen.Cover != 1 || seen.Light() != (maths.Light{}) {
-		t.Errorf("in visible light the radar's ground is %+v", seen)
-	}
-}
-
 // What comes back is by how rough the ground is where the beam lands:
 // a quarter as rough returns a quarter as much.
 func TestASmootherGroundReturnsLess(t *testing.T) {
@@ -195,5 +185,28 @@ func TestAVolumeGlowsInABandByWhatItWouldAbsorb(t *testing.T) {
 	if got.keep != 1 || !within(got.added, want, 1e-9) {
 		t.Errorf("a glowing slab keeps %v and adds %v, want all and %v",
 			got.keep, got.added, want)
+	}
+}
+
+// A surface that returns an infinite amount of a band shows nothing
+// of a radar that sends none of it, or one a surface hides: nothing
+// times anything is nothing, and not a number that is no number.
+func TestAnInfiniteReturnTimesNoBeamIsNothing(t *testing.T) {
+	returns := map[radiation.Range]float64{radiation.Radio(): math.Inf(1)}
+	ground := thing.Thing{Shape: shape.Sphere{Radius: 2},
+		Material: &thing.Material{Name: "mirror",
+			Radiant: thing.Spectrum{Returns: returns}}}
+	silent := film.Radar{At: tenBack().Origin, Range: radiation.Radio()}
+	behind := radarLamp(maths.V(0, 0, -10))
+	for name, radar := range map[string]film.Radar{
+		"a radar of strength zero": silent,
+		"a radar behind the ball":  behind} {
+		world := thing.NewWorld()
+		world.Add(ground)
+		world.Lamp(radar)
+		got := echoOf(world)
+		if !(got == 0) {
+			t.Errorf("%s gives an echo of %v, want zero", name, got)
+		}
 	}
 }

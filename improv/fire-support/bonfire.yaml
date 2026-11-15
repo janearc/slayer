@@ -1,0 +1,43 @@
+# fire support, 2026-11-10: the manufactory's bonfire, alight, as
+# melancholia burns it, for the catalogue's still. The wood-fire
+# study scene (doc/fire-study.yaml), the camera stood back for the pyre.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: the bonfire, alight, on volcanic ground
+  renderer: gpu-native
+  seed: 7
+  light: none
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 1900
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263780
+    north: 2148780
+    across: 64
+    down: 64
+    step: 1
+  set:
+    things:
+      the fire:
+        kind: bonfire
+        seed: 1
+        east: 263812
+        north: 2148748
+        alight: true
+  film:
+    width: 1920
+    height: 1200
+    rays: 2
+    exposure: 400
+  cameras:
+    by the fire:
+      location:
+        loc_relative:
+          object: the fire
+          standoff_x: 7
+          standoff_y: -17
+          standoff_z: 1.8
+      orientation:
+        point_to: the fire
+        alpha: 11

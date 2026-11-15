@@ -14,6 +14,7 @@ import (
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/colour"
+	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/trace"
 )
@@ -62,33 +63,47 @@ type Clock interface {
 	Set(at time.Duration)
 }
 
+// Sampler traces a frame through the scene's lens at its animation time.
+// Both the CPU tracer and the Metal tracer implement this signature.
+type Sampler func(*thing.World, maths.Subspace, film.Sensor,
+	time.Duration, int, int, int) (*frame.Frame, error)
+
 // Scene is a world seen by an eye, drawn frame by frame.
 type Scene struct {
-	world *thing.World
-	eye   maths.Subspace
-	lens  film.Sensor
-	tone  colour.Tone
-	rays  int
-	pace  Pace
-	clock Clock
+	world  *thing.World
+	eye    maths.Subspace
+	lens   film.Sensor
+	tone   colour.Tone
+	rays   int
+	pace   Pace
+	clock  Clock
+	sample Sampler
 }
 
 // New is a scene drawn through lens and developed with tone. It casts
 // rays by rays through every pixel. The frames happen at pace. The clock
-// may be nil.
+// may be nil. An optional sampler selects the tracing backend; without
+// one the scene uses the CPU tracer.
 //
 // The world and the eye come later, from Place, so that a bad ask can be
 // refused before a world is built. A scene with no lens or fewer than one
 // ray is refused.
 func New(lens film.Sensor, tone colour.Tone, rays int, pace Pace,
-	clock Clock) (*Scene, error) {
+	clock Clock, samplers ...Sampler) (*Scene, error) {
 	if lens == nil || rays < fewest {
 		return nil, fmt.Errorf("cells: a scene needs a lens and "+
 			"at least %d ray a side, not %v and %d", fewest, lens,
 			rays)
 	}
+	sample := Sampler(trace.Sampled)
+	if len(samplers) > 1 || (len(samplers) == 1 && samplers[0] == nil) {
+		return nil, fmt.Errorf("cells: supply at most one non-nil sampler")
+	}
+	if len(samplers) == 1 {
+		sample = samplers[0]
+	}
 	return &Scene{lens: lens, tone: tone, rays: rays, pace: pace,
-		clock: clock}, nil
+		clock: clock, sample: sample}, nil
 }
 
 // Place puts the world and the eye in the scene.
@@ -105,7 +120,7 @@ func (scene *Scene) Frame(number, wide, high int) (image.Image, error) {
 	if scene.clock != nil {
 		scene.clock.Set(at)
 	}
-	drawn, err := trace.Sampled(scene.world, scene.eye, scene.lens, at,
+	drawn, err := scene.sample(scene.world, scene.eye, scene.lens, at,
 		wide, high, scene.rays)
 	if err != nil {
 		return nil, err

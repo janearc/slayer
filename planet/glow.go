@@ -103,6 +103,7 @@ func spread(lines map[float64]float64, power, middle, width float64) {
 type RingGlow struct {
 	ring        Ring
 	half, faint float64
+	shine       *GlowShine
 }
 
 // faintness is the glow slab's density against the ring's: picked, so
@@ -118,9 +119,10 @@ func NewRingGlow(ring Ring, thickness, radius float64, xrays Xrays,
 		return RingGlow{}, nil, fmt.Errorf("a glow %g m thick about a "+
 			"planet of %g m", thickness, radius)
 	}
-	slab := RingGlow{ring: ring, half: thickness / 2, faint: faintness}
 	shine := &GlowShine{ring: ring, thickness: thickness, radius: radius,
 		xrays: xrays, colour: seenAs(ring.glow.colour, exposure)}
+	slab := RingGlow{ring: ring, half: thickness / 2, faint: faintness,
+		shine: shine}
 	return slab, shine, nil
 }
 

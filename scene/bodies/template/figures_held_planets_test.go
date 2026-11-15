@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/celestial/radiation"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
@@ -12,10 +13,11 @@ import (
 	"github.com/janearc/slayer/scene/world"
 )
 
-// the template's figures are held here by literal, a body to a test.
-// each literal is typed from the template, not from a source. a figure
-// in hours is written in seconds, and one in degrees in degrees times
-// radPerDeg, so that nothing here goes through hours or deg.
+// the template's figures are held here, a body to a test, built through
+// the doors with the numbers spelled at the call site. each figure is
+// typed from the template, not from a source. a figure in hours is
+// written in seconds, and one in degrees in degrees times radPerDeg, so
+// that nothing here goes through hours or deg.
 const radPerDeg = math.Pi / 180
 
 // anyFeatures stands for a ground's Features where the figures are held:
@@ -29,8 +31,9 @@ func anyFeatures(*world.World) ([]world.Feature, error) { return nil, nil }
 // the sun: a star of 696,000 km, one solar mass, turning in 609 h
 // (2,192,400 s).
 func TestSolFiguresAreHeld(t *testing.T) {
-	holds(t, "sol", Sol(), bodies.Body{Name: "sol", Kind: bodies.Star,
-		Radius: 696000, Mass: bodies.Sun, Day: 2192400 * time.Second})
+	holds(t, "sol", its(t, Sol),
+		want(t, "sol", bodies.Star, 696000, bodies.Sun).
+			Turning(2192400*time.Second, measure.Radians(0)))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -39,12 +42,13 @@ func TestSolFiguresAreHeld(t *testing.T) {
 // mercury: 2439.7 km, 3.301e23 kg, 1407.6 h (5,067,360 s), 0.03
 // degrees of tilt.
 func TestMercuryFiguresAreHeld(t *testing.T) {
-	holds(t, "mercury", Mercury(), bodies.Body{Name: "mercury", Kind: bodies.Rock,
-		Radius: 2439.7, Mass: 3.301e23, Day: 5067360 * time.Second,
-		Tilt: 0.03 * radPerDeg,
-		Ground: &bodies.Ground{
-			Terrain: world.Terrain{Seed: 1, Ocean: 0, Plates: 6, Cold: 0.3},
-			Look:    world.Look{Lines: 0.3}}})
+	holds(t, "mercury", its(t, Mercury),
+		want(t, "mercury", bodies.Rock, 2439.7, 3.301e23,
+			wantGround(t, world.Terrain{Seed: 1, Ocean: 0,
+				Plates: 6, Cold: 0.3},
+				world.Look{Lines: 0.3})).
+			Turning(5067360*time.Second,
+				measure.Radians(0.03*radPerDeg)))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -54,16 +58,19 @@ func TestMercuryFiguresAreHeld(t *testing.T) {
 // degrees of tilt; an air 15.9 km high of 0.6 per km that passes radio
 // in full, and a ground that returns it at 0.9.
 func TestVenusFiguresAreHeld(t *testing.T) {
-	holds(t, "venus", Venus(), bodies.Body{Name: "venus", Kind: bodies.Rock,
-		Radius: 6051.8, Mass: 4.867e24, Day: 20997000 * time.Second,
-		Tilt: 177.4 * radPerDeg,
-		Ground: &bodies.Ground{
-			Terrain: world.Terrain{Seed: 2, Ocean: 0, Plates: 8},
-			Look:    world.Look{Lines: 0}, Features: anyFeatures,
-			Radiant: thing.Spectrum{Returns: map[radiation.Range]float64{radiation.Radio(): 0.9}},
-			Rough:   &world.Look{}},
-		Air: &bodies.Air{Height: 15.9, Dense: 0.6,
-			Radiant: thing.Spectrum{Passes: map[radiation.Range]float64{radiation.Radio(): 1}}}})
+	ground := wantGround(t, world.Terrain{Seed: 2, Ocean: 0, Plates: 8},
+		world.Look{Lines: 0}).
+		Featured(anyFeatures).
+		Radiating(thing.Spectrum{Returns: map[radiation.Range]float64{
+			radiation.Radio(): 0.9}}).
+		RadarRough(world.Look{})
+	air := wantAir(t, 15.9, 0.6).
+		Radiating(thing.Spectrum{Passes: map[radiation.Range]float64{
+			radiation.Radio(): 1}})
+	holds(t, "venus", its(t, Venus),
+		want(t, "venus", bodies.Rock, 6051.8, 4.867e24, ground, air).
+			Turning(20997000*time.Second,
+				measure.Radians(177.4*radPerDeg)))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -75,7 +82,10 @@ func TestVenusFiguresAreHeld(t *testing.T) {
 func TestVenusRoughnessIsHeldClassByClass(t *testing.T) {
 	want := [world.Biomes]float64{0.1, 0.15, 0.5, 0.18, 0.15, 0.22, 0.3,
 		0.35, 0.4, 0.95, 0.8, 0.7, 0.6}
-	got := Venus().Ground.Rough
+	got, worn := groundOf(t, its(t, Venus)).Rough()
+	if !worn {
+		t.Fatal("venus's ground wears no radar look")
+	}
 	for b, r := range want {
 		if got.Paints[b] != maths.Grey(r) {
 			t.Errorf("class %d is %v, want a grey of %v", b, got.Paints[b], r)
@@ -97,23 +107,32 @@ func TestVenusRoughnessIsHeldClassByClass(t *testing.T) {
 // 300 km at 67 degrees, 4 wide, 11 off the spin; and the moon on its
 // 384,400 km.
 func TestEarthFiguresAreHeld(t *testing.T) {
-	holds(t, "earth", Earth(), bodies.Body{Name: "earth", Kind: bodies.Rock,
-		Radius: 6371, Mass: 5.972e24, Day: 86148 * time.Second,
-		Tilt: 23.44 * radPerDeg,
-		Ground: &bodies.Ground{
-			Terrain: world.Terrain{Seed: 5, Ocean: 0.71, Plates: 12},
-			Look:    world.Look{Lines: 0.4}},
-		Air:    &bodies.Air{Height: 8.5, Dense: 0.012},
-		Clouds: &bodies.Clouds{Low: 2, High: 9, Cover: 0.55, Dense: 1, Seed: 5},
-		Cities: &bodies.Cities{Rungs: 3, Share: 0.12, Metro: 0.05, Seed: 5},
-		Aurora: &bodies.Aurora{Low: 100, High: 300, Lat: 67 * radPerDeg,
-			Width: 4 * radPerDeg, Tilt: 11 * radPerDeg, Strength: 0.006,
-			Curtains: 0.7, Seed: 5},
-		Moons: []bodies.Moon{{Body: bodies.Body{Name: "moon", Kind: bodies.Rock,
-			Radius: 1737.4, Mass: 7.342e22,
-			Ground: &bodies.Ground{
-				Terrain: world.Terrain{Seed: 6, Ocean: 0.3, Plates: 5, Cold: 0.2},
-				Look:    world.Look{Lines: 0.2}}}, Orbit: 384400}}})
+	clouds, err := bodies.NewClouds(
+		bodies.NewShell(bodies.Kilometres(2), bodies.Kilometres(9)),
+		maths.Share(0.55), bodies.PerKilometre(1), 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cities, err := bodies.NewCities(3, maths.Share(0.12),
+		maths.Share(0.05), maths.Light{}, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	moon := want(t, "moon", bodies.Rock, 1737.4, 7.342e22,
+		wantGround(t, world.Terrain{Seed: 6, Ocean: 0.3, Plates: 5,
+			Cold: 0.2}, world.Look{Lines: 0.2}))
+	holds(t, "earth", its(t, Earth),
+		want(t, "earth", bodies.Rock, 6371, 5.972e24,
+			wantGround(t, world.Terrain{Seed: 5, Ocean: 0.71,
+				Plates: 12}, world.Look{Lines: 0.4}),
+			wantAir(t, 8.5, 0.012),
+			clouds,
+			cities,
+			wantAurora(t, 100, 300, 67*radPerDeg, 4*radPerDeg,
+				11*radPerDeg, 0.006, 0.7, 5),
+			wantMoon(t, moon, 384400, 0)).
+			Turning(86148*time.Second,
+				measure.Radians(23.44*radPerDeg)))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -124,19 +143,18 @@ func TestEarthFiguresAreHeld(t *testing.T) {
 // 1.07e16 kg on 9376 km, and deimos of 6.2 km and 1.5e15 kg on 23,463
 // km, starting 2 radians round.
 func TestMarsFiguresAreHeld(t *testing.T) {
-	holds(t, "mars", Mars(), bodies.Body{Name: "mars", Kind: bodies.Rock,
-		Radius: 3389.5, Mass: 6.417e23, Day: 88632 * time.Second,
-		Tilt: 25.19 * radPerDeg,
-		Ground: &bodies.Ground{
-			Terrain:  world.Terrain{Seed: 4, Ocean: 0, Plates: 7, Cold: 0.25},
-			Look:     world.Look{Lines: 0.3},
-			Features: anyFeatures},
-		Air: &bodies.Air{Height: 11.1, Dense: 0.003},
-		Moons: []bodies.Moon{
-			{Body: bodies.Body{Name: "phobos", Kind: bodies.Rock, Radius: 11.1, Mass: 1.07e16},
-				Orbit: 9376},
-			{Body: bodies.Body{Name: "deimos", Kind: bodies.Rock, Radius: 6.2, Mass: 1.5e15},
-				Orbit: 23463, Phase: 2}}})
+	holds(t, "mars", its(t, Mars),
+		want(t, "mars", bodies.Rock, 3389.5, 6.417e23,
+			wantGround(t, world.Terrain{Seed: 4, Ocean: 0,
+				Plates: 7, Cold: 0.25},
+				world.Look{Lines: 0.3}).Featured(anyFeatures),
+			wantAir(t, 11.1, 0.003),
+			wantMoon(t, want(t, "phobos", bodies.Rock, 11.1,
+				1.07e16), 9376, 0),
+			wantMoon(t, want(t, "deimos", bodies.Rock, 6.2,
+				1.5e15), 23463, 2)).
+			Turning(88632*time.Second,
+				measure.Radians(25.19*radPerDeg)))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -145,13 +163,13 @@ func TestMarsFiguresAreHeld(t *testing.T) {
 // pluto: 1188.3 km, 1.303e22 kg, 153.3 h (551,880 s), 122.5 degrees
 // of tilt.
 func TestPlutoFiguresAreHeld(t *testing.T) {
-	holds(t, "pluto", Pluto(), bodies.Body{Name: "pluto", Kind: bodies.Rock,
-		Radius: 1188.3, Mass: 1.303e22, Day: 551880 * time.Second,
-		Tilt: 122.5 * radPerDeg,
-		Ground: &bodies.Ground{
-			Terrain:  world.Terrain{Seed: 18, Ocean: 0, Plates: 6, Cold: 0.4},
-			Look:     world.Look{Lines: 0.2},
-			Features: anyFeatures}})
+	holds(t, "pluto", its(t, Pluto),
+		want(t, "pluto", bodies.Rock, 1188.3, 1.303e22,
+			wantGround(t, world.Terrain{Seed: 18, Ocean: 0,
+				Plates: 6, Cold: 0.4},
+				world.Look{Lines: 0.2}).Featured(anyFeatures)).
+			Turning(551880*time.Second,
+				measure.Radians(122.5*radPerDeg)))
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -159,9 +177,10 @@ func TestPlutoFiguresAreHeld(t *testing.T) {
 //
 // charon: 606 km, 1.586e21 kg, 153.3 h (551,880 s), no tilt.
 func TestCharonFiguresAreHeld(t *testing.T) {
-	holds(t, "charon", Charon(), bodies.Body{Name: "charon", Kind: bodies.Rock,
-		Radius: 606, Mass: 1.586e21, Day: 551880 * time.Second,
-		Ground: &bodies.Ground{
-			Terrain: world.Terrain{Seed: 19, Ocean: 0, Plates: 5, Cold: 0.3},
-			Look:    world.Look{Lines: 0.2}}})
+	holds(t, "charon", its(t, Charon),
+		want(t, "charon", bodies.Rock, 606, 1.586e21,
+			wantGround(t, world.Terrain{Seed: 19, Ocean: 0,
+				Plates: 5, Cold: 0.3},
+				world.Look{Lines: 0.2})).
+			Turning(551880*time.Second, measure.Radians(0)))
 }

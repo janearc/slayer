@@ -1,3 +1,5 @@
+//go:build draw
+
 package gpu
 
 import (
@@ -11,22 +13,36 @@ import (
 
 // A reference mesh is flat unless both Smooth and vertex normals are present.
 // Keeping unused normals, or an unused Smooth flag, must not remove a scene.
+//
+// From 2026-11-12 a reference mesh that is smooth, standing by itself, is
+// drawn: its face carries its corners' normals and is bent by them and not
+// lifted, as slayer's tracer shades it. In a group it is still refused. And
+// a smooth mesh whose normals are no longer one to a vertex is refused
+// either way, by a name of its own: malformed data does not become a
+// picture by the door that smoothing opened.
 func TestReferenceMeshFlatCasesRemainEncodableInsideAndOutsideGroups(t *testing.T) {
 	points := []maths.Vec{{}, maths.XAxis, maths.YAxis}
 	faces := [][3]int{{0, 1, 2}}
 	normals := []maths.Vec{maths.XAxis, maths.XAxis, maths.XAxis}
+	const (
+		drawn   = ""
+		partial = "a smooth mesh without a normal for every vertex"
+	)
 	for _, test := range []struct {
 		name    string
 		smooth  bool
 		normal  []maths.Vec
 		refused bool
-		later   []maths.Vec
+		// direct is what the mesh standing by itself is refused as, or
+		// drawn when it is not refused
+		direct string
+		later  []maths.Vec
 	}{
-		{"flat", false, nil, false, nil},
-		{"flat with retained normals", false, normals, false, nil},
-		{"smooth flag without normals", true, nil, false, nil},
-		{"smooth with normals", true, normals, true, nil},
-		{"smooth with a late partial normal list", true, nil, true, normals[:1]},
+		{"flat", false, nil, false, drawn, nil},
+		{"flat with retained normals", false, normals, false, drawn, nil},
+		{"smooth flag without normals", true, nil, false, drawn, nil},
+		{"smooth with normals", true, normals, true, drawn, nil},
+		{"smooth with a late partial normal list", true, nil, true, partial, normals[:1]},
 	} {
 		for _, grouped := range []bool{false, true} {
 			name := test.name + "/direct"
@@ -67,24 +83,33 @@ func TestReferenceMeshFlatCasesRemainEncodableInsideAndOutsideGroups(t *testing.
 					reference.Normals = append([]maths.Vec(nil), test.later...)
 				}
 				encoded, err := encode(world, maths.Subspace{}, nil, 0, 4, 3)
-				if test.refused {
+				want := test.direct
+				if grouped && test.refused {
+					want = "a smooth reference mesh in a group"
+				}
+				if want != drawn {
 					var cause unsupported
-					want := "a smooth mesh"
-					if grouped {
-						want = "a smooth reference mesh in a group"
-					}
 					if !errors.As(err, &cause) || cause.what != want {
 						t.Fatalf("smooth reference lost its GPU refusal: %v", err)
 					}
 					return
 				}
 				if err != nil {
-					t.Fatalf("valid flat reference refused: %v", err)
+					t.Fatalf("valid reference refused: %v", err)
 				}
 				if len(encoded.faces.triangles) != 1 {
-					t.Fatal("flat reference lost its face")
+					t.Fatal("reference lost its face")
 				}
 				face := encoded.faces.triangles[0]
+				if test.refused {
+					// smooth, standing by itself: bent by its corners'
+					// normals, in their order, and not lifted
+					if !face.smooth || !face.unlifted ||
+						face.normals != [3]maths.Vec{maths.XAxis, maths.XAxis, maths.XAxis} {
+						t.Fatalf("smooth reference is encoded as %+v", face)
+					}
+					return
+				}
 				if face.smooth || face.corners != [3]maths.Vec{{}, maths.XAxis, maths.YAxis} ||
 					reference.Normal(maths.V(0.25, 0.25, 0)) != maths.ZAxis {
 					t.Fatal("unused reference normals changed geometric flat shading")

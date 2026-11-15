@@ -1,0 +1,56 @@
+{
+	// intent: an acid lead that stays open: a square wave (hollow, nasal)
+	// through the four-pole filter at higher resonance than @acid, a fold
+	// after the filter for a harder edge, and a note envelope that decays so
+	// each note has a front and a tail. the bass is a clean deep sub so the
+	// acid line is the only thing that squelches. chords and drums are
+	// @analog-drive's, with a harder kick.
+	"name": "square-acid",
+	"machine": "studio",
+	"master": 0.36,
+	"reverb": {"size": 0.3, "decay": 0.9, "damping": 0.4, "level": 0.3},
+	"channels": [
+		{"kind": "analog", "role": "lead", "volume": 0.5, "place": -0.1,
+		 "glide": 0.05, "send": {"reverb": 0.2},
+		 "envelope": {"attack": 0.002, "decay": 0.26, "sustain": 0.22,
+		              "release": 0.12},
+		 "analog": {"oscillators": [{"shape": "square", "width": 0.42}],
+		            "fold": 0.22, "overdrive": 0.25,
+		            "filter": {"poles": 4, "cutoff": 2600,
+		                       "resonance": 0.84, "follow": 0.8,
+		                       "amount": 2.2, "accent": 1.5, "snap": 0.5,
+		                       "envelope": {"attack": 0.002,
+		                                    "decay": 0.22, "sustain": 0.3,
+		                                    "release": 0.15}}}},
+		{"kind": "analog", "role": "pad", "volume": 0.5, "place": 0.4,
+		 "send": {"reverb": 0.3},
+		 "envelope": {"attack": 0.004, "decay": 0.4, "sustain": 0.4,
+		              "release": 0.25},
+		 "analog": {"oscillators": [{"shape": "square", "width": 0.25},
+		                            {"shape": "saw", "detune": -8}],
+		            "filter": {"cutoff": 2200, "resonance": 0.3,
+		                       "follow": 0.5}}},
+		{"kind": "analog", "role": "bass", "volume": 0.3,
+		 "envelope": {"attack": 0.003, "decay": 0.3, "sustain": 0.6,
+		              "release": 0.08},
+		 "analog": {"oscillators": [{"shape": "triangle"},
+		                            {"shape": "square", "octave": -1,
+		                             "level": 0.5}],
+		            "filter": {"cutoff": 420, "resonance": 0.15,
+		                       "follow": 0.4}}},
+		{"kind": "drum", "role": "perc", "volume": 1.0,
+		 "send": {"reverb": 0.15},
+		 "drums": {
+			"k": {"tone": 55, "sweep": 36, "fall": 0.035, "decay": 0.28,
+			      "click": 0.6},
+			"s": {"tone": 200, "sweep": 6, "fall": 0.03, "decay": 0.11,
+			      "click": 0.4, "noise": 0.7, "noise_decay": 0.17,
+			      "colour": 1500},
+			"h": {"noise": 0.45, "noise_decay": 0.035, "colour": 8000},
+			"t": {"tone": 130, "sweep": 12, "fall": 0.06, "decay": 0.22,
+			      "click": 0.3},
+			"o": {"noise": 0.45, "noise_decay": 0.28, "colour": 8000},
+			"b": {"tone": 800, "decay": 0.12, "click": 0.5}
+		 }}
+	]
+}

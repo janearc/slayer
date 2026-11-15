@@ -1,0 +1,12 @@
+# The level deck of beam-deck.yaml, scattering by a lobe: fable-team,
+# 2026-11-12. Asymmetry 0.85 is picked, the single lobe Jendersie and
+# d'Eon (2023, jendersie-deon-2023) draw clouds with; the tolerance is
+# beam-deck's. differs: how far, as a share of the light, the lobed
+# picture must stand from the even one, so the lobe is seen to arrive.
+weather: {extinction: 0.05, depth: 10, coverage: 1, seed: 34, asymmetry: 0.85}
+bounds: {min: {x: -5, y: -5, z: -5}, max: {x: 5, y: 5, z: 5}}
+base: -5
+ground: -10
+minimum: 0.1
+tolerance: 0.02
+differs: 0.1

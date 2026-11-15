@@ -14,6 +14,10 @@
 // altitude asked; the earth's colour; and white light, since reddening
 // is the atmosphere's and the tracer has none. the preview is linear
 // light by stops through srgb's transfer, with no film curve.
+//
+// The scene itself is scene/named's moonrise, which holds the tree, the
+// moon and the sun to their bounds; this command keeps the film, the
+// lens and the development.
 package main
 
 import (
@@ -23,6 +27,8 @@ import (
 	"io"
 	"os"
 	"time"
+
+	"github.com/janearc/slayer/scene/named"
 )
 
 // errAsked is a command asked for what it cannot draw.
@@ -57,17 +63,26 @@ func parse(arguments []string, say io.Writer) (asked, error) {
 	if err := flags.Parse(arguments); err != nil {
 		return asked{}, err
 	}
-	return given, given.sound()
+	if err := given.sound(); err != nil {
+		return asked{}, err
+	}
+	scene, err := named.Get("moonrise")
+	if err != nil {
+		return asked{}, err
+	}
+	if err := scene.Check(given.with()); err != nil {
+		return asked{}, fmt.Errorf("%w: %w", errAsked, err)
+	}
+	return given, nil
 }
 
-// sound is what is wrong with what was asked, by flag, or nothing.
+// sound is what is wrong with the film, the lens or the output asked for,
+// by flag, or nothing. The scene's own flags are held to their bounds by
+// the scene.
 func (given asked) sound() error {
 	for flag, good := range map[string]bool{
 		"-out":  given.out != "",
 		"-wide": given.wide > 0 && given.wide < 180,
-		"-sun":  given.sun >= 0 && given.sun <= 90,
-		"-moon": given.moon >= -5 && given.moon <= 90,
-		"-away": given.away > 0,
 		"-w":    given.width >= 1, "-h": given.height >= 1,
 		"-n": given.samples >= 1,
 	} {
@@ -76,6 +91,12 @@ func (given asked) sound() error {
 		}
 	}
 	return nil
+}
+
+// with is the scene's parameters as the flags give them.
+func (given asked) with() map[string]any {
+	return map[string]any{"kind": given.kind, "seed": given.seed,
+		"away": given.away, "moon": given.moon, "sun": given.sun}
 }
 
 // main is run, and the number it says.

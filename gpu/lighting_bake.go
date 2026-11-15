@@ -12,6 +12,14 @@ import (
 // bakeLighting shares the trace kernel's native hierarchy and scene buffers.
 // Every frame recomputes lighting; this cache does not lag moving lamps.
 func (encoded *scene) bakeLighting(kernel *metal.Kernel, inputs [][]byte) (time.Duration, error) {
+	return encoded.bakeLightingOn(kernel, copied(kernel, inputs))
+}
+
+// bakeLightingOn is bakeLighting with its grids run by run. Each job
+// changes the header and the boxes on the host between grids, so run
+// must give the device what the host holds at each call.
+func (encoded *scene) bakeLightingOn(kernel *metal.Kernel,
+	run grids) (time.Duration, error) {
 	before := kernel.GPUTime()
 	if err := kernel.Function("smoke_light"); err != nil {
 		return 0, err
@@ -23,8 +31,8 @@ func (encoded *scene) bakeLighting(kernel *metal.Kernel, inputs [][]byte) (time.
 			return kernel.GPUTime() - before, err
 		}
 		binary.LittleEndian.PutUint32(encoded.header.bytes[offset:], uint32(job.index))
-		err = kernel.GridBands(job.grid.cells[0]*job.grid.cells[1], job.grid.cells[2],
-			rows, 3, inputs, writer.consume)
+		err = run(job.grid.cells[0]*job.grid.cells[1], job.grid.cells[2],
+			3, writer.consume)
 		if err != nil {
 			return kernel.GPUTime() - before, err
 		}

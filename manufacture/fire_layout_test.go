@@ -87,11 +87,11 @@ func TestFireLayoutRejectsImpossibleOrIgnoredParameters(t *testing.T) {
 func TestFireFuelRadiusAccountsForItsLayout(t *testing.T) {
 	spec := burnerFixture()
 	spec.Layout = FireLayout{Pattern: "line", Count: 3, Length: measure.Metres(4)}
-	if math.Abs(spec.FuelRadius().InMetres()-2.6) > 1e-12 {
+	if !(math.Abs(spec.FuelRadius().InMetres()-2.6) <= 1e-12) {
 		t.Fatal("line fuel extent lost")
 	}
 	spec.Layout = FireLayout{Pattern: "cluster", Count: 3, Radius: measure.Metres(0.8)}
-	if math.Abs(spec.FuelRadius().InMetres()-1.4) > 1e-12 {
+	if !(math.Abs(spec.FuelRadius().InMetres()-1.4) <= 1e-12) {
 		t.Fatal("cluster fuel extent lost")
 	}
 }

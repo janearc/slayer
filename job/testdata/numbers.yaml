@@ -1,0 +1,30 @@
+# every number the job tests choose, with what it is and who chose it.
+numbers:
+  - name: within
+    value: 1e-9
+    says: how far an angle or a direction worked two ways may differ
+    kind: picked
+    by: the job slice's author, 2026-11-12; far above float64 rounding
+  - name: most-frames
+    value: 432000
+    says: the most frames the property tests draw, a day at five frames a second
+    kind: picked
+    by: the job slice's author, 2026-11-12; hillside's largest clock
+  - name: smooth-quarter-seconds
+    value: 0.5
+    unit: s
+    says: a quarter of the way through the two second smooth move
+    kind: picked
+    by: hillside's camera tests, 2026-11-07; moved here with the decoder
+  - name: smooth-quarter-z
+    value: 5.375
+    unit: m
+    says: where the smooth move from z 6 to z 2 is a quarter through
+    kind: picked
+    by: hillside's camera tests, 2026-11-07; 6 - 4 * 0.15625, by hand
+  - name: look-ahead
+    value: 1
+    unit: m
+    says: how high the look's targets stand, and how far east the second is
+    kind: picked
+    by: hillside's camera tests, 2026-11-07; moved here with the decoder

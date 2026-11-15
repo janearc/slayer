@@ -1,0 +1,10 @@
+# 2026/11/11 14:32:03.633346 [TestIdentityGeneratedRoundTrip] [rapid] draw pid: 1
+# 2026/11/11 14:32:03.633347 [TestIdentityGeneratedRoundTrip] [rapid] draw start: 0x1
+# 2026/11/11 14:32:03.633347 [TestIdentityGeneratedRoundTrip] round trip: {boot: pid:0 start:0} process owner identity is unknown
+# 
+v0.4.8#6321783551502768689
+0x0
+0x0
+0x0
+0x0
+0x0

@@ -1,0 +1,5 @@
+{"name":"small","tempo":240,"meter":4,"parts":[
+ {"role":"lead","bars":["c5:4","e5:4","g5:4","c6:4"]},
+ {"role":"pad","bars":["-:4","(c4 e4 g4):4","(c4 e4 g4):4","(c4 e4 g4):4"]},
+ {"role":"bass","bars":["c3:4","c3:4","g2:4","c3:4"]},
+ {"role":"perc","bars":["-:4","k - s -","k - s -","k:4"]}]}

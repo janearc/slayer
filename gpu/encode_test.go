@@ -1,3 +1,5 @@
+//go:build draw
+
 package gpu
 
 import (
@@ -122,20 +124,27 @@ func meshOf(t *testing.T, smooth, normals bool) *thing.Thing {
 	return &thing.Thing{Shape: mesh}
 }
 
-// only a smooth mesh that has its normals is refused: the kernel has no
-// smoothing yet, and a mesh with none to smooth with is flat
-func TestOnlyASmoothMeshWithNormalsIsRefused(t *testing.T) {
-	cases := []struct {
-		smooth, normals, refused bool
-	}{{true, true, true}, {true, false, false}, {false, true, false},
-		{false, false, false}}
+// a mesh is placed whether it is smooth or flat, with normals or with
+// none: one that is smooth and has its normals is bent by them, and any
+// other is flat. the anti-test: a smooth one whose normals are no longer
+// one to a vertex is refused, by name, and not read past their end
+func TestAMeshIsPlacedSmoothOrFlatAndRefusedWithTooFewNormals(t *testing.T) {
+	cases := []struct{ smooth, normals bool }{{true, true}, {true, false},
+		{false, true}, {false, false}}
 	for _, one := range cases {
-		err := fresh().place(meshOf(t, one.smooth, one.normals), 0)
-		got := err != nil
-		if got != one.refused {
-			t.Errorf("smooth %v, normals %v: refused %v, want %v",
-				one.smooth, one.normals, got, one.refused)
+		if err := fresh().place(meshOf(t, one.smooth, one.normals), 0); err != nil {
+			t.Errorf("smooth %v, normals %v: refused, %v", one.smooth,
+				one.normals, err)
 		}
+	}
+	short := meshOf(t, true, true)
+	made := short.Shape.(*shape.Mesh)
+	made.Normals = made.Normals[:1]
+	var cause unsupported
+	err := fresh().place(short, 0)
+	if !errors.As(err, &cause) ||
+		cause.what != "a smooth mesh without a normal for every vertex" {
+		t.Errorf("a smooth mesh with one normal for three vertices: %v", err)
 	}
 }
 

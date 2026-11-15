@@ -95,3 +95,14 @@ func volumeFalloff(distance, radius float64) float64 {
 }
 
 var _ Banded = Volume{}
+
+// Stands is where the middle of the emitting ball is.
+func (source Volume) Stands() maths.Vec { return source.point.At }
+
+// AtMost is the most light the ball sends any point a distance from its
+// middle: its brightest part by the ball's own falloff, which is largest
+// at the middle and falls with distance.
+func (source Volume) AtMost(distance float64) float64 {
+	return brightest(source.point.Strength) *
+		volumeFalloff(distance, source.radius)
+}

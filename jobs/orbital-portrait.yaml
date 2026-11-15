@@ -1,0 +1,18 @@
+# the orbital from far, in portrait: the pair round the lantern, 25
+# degrees above their plane, the hoops standing upright as the far view
+# has them. the eye is on the far view's own line but further out, 4,800
+# thousand km where the view has 3,600, held still and looking at the
+# lantern, so both hoops sit inside a frame 70 degrees from top to foot.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {named: orbital, with: {far: true}}
+film: {preset: portrait, tall: 70}
+renderer: gpu
+camera:
+  unit: a thousand kilometres
+  look-at: {x: 0, y: 0, z: 0}
+  up: {x: 1, y: 0, z: 0}
+  moves:
+    - from: {x: 0, y: 2028.6, z: 4350.2}
+      to: {x: 0, y: 2028.6, z: 4350.2}
+      duration: {value: 1, unit: s}
+outputs: {picture: ../renders/orbital-portrait.png}

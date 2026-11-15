@@ -52,30 +52,33 @@ func RenderIn(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	}
 	if band.Nanometres == 0 {
 		// the zero band is the whole visible at once
-		return render(seen), nil
+		return render(seen)
 	}
-	return renderIn(seen, band), nil
+	return renderIn(seen, band)
 }
 
 // renderIn is RenderIn of a view, which has been checked, in a band
-// that is not the zero band.
-func renderIn(seen view, band maths.Band) *frame.Frame {
+// that is not the zero band, or the error of a scene that cannot be drawn.
+func renderIn(seen view, band maths.Band) (*frame.Frame, error) {
 	width, height := seen.width, seen.height
 	// nothing bends in a band: the fields are left out
 	scene := stage(seen.world, seen.at)
+	if err := scene.refusal(); err != nil {
+		return nil, err
+	}
 	scene.fields = nil
 	return paint(width, height, func(x, y int) frame.Pixel {
 		ray := film.Look(seen.eye, seen.lens, x, y, width, height,
 			band)
 		return inBand(scene, ray, band, passes)
-	})
+	}), nil
 }
 
 // inBand is what one ray brings back in a band outside the visible: the
 // first thing met gives off what it gives off, echoes what radars reach
 // it, and passes what it passes of what lies behind, and so on through
 // what passes the band.
-func inBand(scene staged, ray maths.Ray, band maths.Band,
+func inBand(scene *staged, ray maths.Ray, band maths.Band,
 	left int) frame.Pixel {
 	met, found := scene.crowd.first(ray, 0)
 	far := math.Inf(1)
@@ -95,7 +98,7 @@ func inBand(scene staged, ray maths.Ray, band maths.Band,
 // the volumes in front of it take their share: what it gives off, what
 // it echoes of the radars that reach it, and what it passes of what
 // lies behind it. A thing whose material has no radiant gives nothing.
-func given(scene staged, met hit, ray maths.Ray, band maths.Band,
+func given(scene *staged, met hit, ray maths.Ray, band maths.Band,
 	left int) float64 {
 	material := met.thing.thing.Material
 	if material == nil || material.Radiant == nil {
@@ -117,7 +120,7 @@ func given(scene staged, met hit, ray maths.Ray, band maths.Band,
 // share of the band.
 //
 // A lamp lights in a band if it is an emit.Banded; a radar's beam is echo's.
-func lamplitIn(scene staged, placed placedThing, ray maths.Ray, dist float64,
+func lamplitIn(scene *staged, placed placedThing, ray maths.Ray, dist float64,
 	band maths.Band) float64 {
 	back := placed.thing.Material.Radiant.Scatters(band)
 	if back <= 0 {
@@ -158,7 +161,7 @@ func lamplitIn(scene staged, placed placedThing, ray maths.Ray, dist float64,
 // The way through is measured in the thing's own units, not the world's, as a
 // medium's density is: a ball of glass passes the same share of a band at any
 // scale, and a thing scaled up keeps its look.
-func passedThrough(scene staged, met hit, ray maths.Ray, band maths.Band,
+func passedThrough(scene *staged, met hit, ray maths.Ray, band maths.Band,
 	left int) float64 {
 	placed := met.thing
 	transmission := placed.thing.Material.Radiant.Through(band)
@@ -181,7 +184,7 @@ func passedThrough(scene staged, met hit, ray maths.Ray, band maths.Band,
 // band: for each beam, how squarely it lands times how rough the thing
 // is there times what it returns, if no surface stands in the way and
 // through whatever volumes do.
-func echo(scene staged, placed placedThing, ray maths.Ray, dist float64,
+func echo(scene *staged, placed placedThing, ray maths.Ray, dist float64,
 	band maths.Band) float64 {
 	material := placed.thing.Material
 	back := material.Radiant.Scatters(band)
@@ -199,16 +202,25 @@ func echo(scene staged, placed placedThing, ray maths.Ray, dist float64,
 	}
 	sum := 0.0
 	for _, lamp := range scene.lamps {
-		sum += back * rough * scene.beamed(lamp, point, normal, band)
+		beam := scene.beamed(lamp, point, normal, band)
+		if beam == unbeamed {
+			// an infinite return times no beam is no number
+			continue
+		}
+		sum += back * rough * beam
 	}
 	return sum
 }
+
+// unbeamed is what beamed returns for a lamp whose beam does not land, true by
+// definition: no beam is none of it.
+const unbeamed = 0.0
 
 // beamed is how much of one lamp's beam in a band lands on a point of a
 // surface: the beam's strength there times how squarely it lands, through the
 // volumes in its way. It is zero for a lamp that is no radar, one that does not
 // beam the band, and one a surface hides.
-func (scene staged) beamed(lamp thing.Lamp, point, normal maths.Vec,
+func (scene *staged) beamed(lamp thing.Lamp, point, normal maths.Vec,
 	band maths.Band) float64 {
 	beamer, is := lamp.(film.Beamer)
 	if !is {
@@ -238,7 +250,7 @@ type bandPassage struct {
 // throughIn is what the ray gathers from the volumes in a band outside
 // the visible: how much of the band from far gets through, and how much
 // the volumes give off in front of it.
-func throughIn(scene staged, ray maths.Ray, far float64,
+func throughIn(scene *staged, ray maths.Ray, far float64,
 	band maths.Band) bandPassage {
 	keep, added := 1.0, 0.0
 	across := crossings(scene.volumes, ray, far)

@@ -182,7 +182,7 @@ func TestTheTurnIsBetweenStarAndEye(t *testing.T) {
 		{0.6, 0.8, math.Pi, 0}, // 0.48 less 0.8 times 0.6: square on
 	} {
 		got := scatterTurn(look.star, look.eye, look.round)
-		if math.Abs(got-look.want) > 1e-12 {
+		if !(math.Abs(got-look.want) <= 1e-12) {
 			t.Errorf("%+v: %g", look, got)
 		}
 	}

@@ -28,7 +28,7 @@ import (
 // that does not follow: 300 dobson units are 8.06e18 molecules a square
 // centimetre, and at a peak cross section near 5e-21 (from memory, not
 // checked here) the column is 0.04 deep, 5e-6 a metre over 8 km, about
-// seventeen times this. kept as it was, as ruled.
+// seventeen times this. kept as it was, on purpose.
 //
 // Ultraviolet below about 300 nm is stopped by ozone's hartley band,
 // a cross section near 1e-17 square centimetres a molecule at 255 nm
@@ -150,7 +150,7 @@ func Haze() Gas {
 // so 1.16e-5 times 65 times 2.6, about 2e-3 a metre at 550 nm, falling
 // as the fourth power. but 92 bar at 735 K against 1 bar at 288 K is 36
 // times the molecules, not 65, which is venus's surface density in
-// kilograms a cubic metre: worked, 1.1e-3. kept as it was, as ruled.
+// kilograms a cubic metre: worked, 1.1e-3. kept as it was, on purpose.
 //
 // The cloud deck is not here: a shell that falls by one scale height
 // cannot hold a layer at fifty kilometres, and its optical depth of

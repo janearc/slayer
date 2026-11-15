@@ -37,6 +37,27 @@ var j2000 = time.Date(2000, time.January, 1, 12, 0, 0, 0, time.UTC)
 
 const degrees = math.Pi / 180
 
+// SunAmongStars is where the sun is among the stars at a moment, as seen
+// from the earth's centre: its right ascension and its declination, in
+// radians, against the equator of the date, and its distance in
+// astronomical units. It is the Naval Observatory's approximate
+// formulas [USNO], good to about an arcminute, and is the first half of
+// Sun, which goes on to turn the earth under it.
+func SunAmongStars(when time.Time) (ascension, declination, au float64) {
+	days := when.Sub(j2000).Hours() / 24
+	anomaly := (anomalyEpoch + anomalyRate*days) * degrees
+	mean := longitudeEpoch + longitudeRate*days
+	ecliptic := (mean + centreFirst*math.Sin(anomaly) +
+		centreSecond*math.Sin(2*anomaly)) * degrees
+	obliquity := (obliquityEpoch - obliquityRate*days) * degrees
+	au = distanceMean - distanceFirst*math.Cos(anomaly) -
+		distanceSecond*math.Cos(2*anomaly)
+	ascension = math.Atan2(math.Cos(obliquity)*math.Sin(ecliptic),
+		math.Cos(ecliptic))
+	declination = math.Asin(math.Sin(obliquity) * math.Sin(ecliptic))
+	return ascension, declination, au
+}
+
 // Sun is where the sun is in the sky of a place at a moment: a unit
 // vector with x east, y north and z up, and the sun's distance in
 // astronomical units. Latitude is degrees north, longitude degrees east.
@@ -46,19 +67,8 @@ const degrees = math.Pi / 180
 // Greenwich sidereal time [Me]. Refraction by the air is left out, so a
 // sun on the horizon is drawn about half a degree low.
 func Sun(latitude, longitude float64, when time.Time) (toward Vec, au float64) {
+	ascension, declination, au := SunAmongStars(when)
 	days := when.Sub(j2000).Hours() / 24
-	anomaly := (anomalyEpoch + anomalyRate*days) * degrees
-	mean := longitudeEpoch + longitudeRate*days
-	ecliptic := (mean + centreFirst*math.Sin(anomaly) +
-		centreSecond*math.Sin(2*anomaly)) * degrees
-	obliquity := (obliquityEpoch - obliquityRate*days) * degrees
-	au = distanceMean - distanceFirst*math.Cos(anomaly) -
-		distanceSecond*math.Cos(2*anomaly)
-
-	ascension := math.Atan2(math.Cos(obliquity)*math.Sin(ecliptic),
-		math.Cos(ecliptic))
-	declination := math.Asin(math.Sin(obliquity) * math.Sin(ecliptic))
-
 	sidereal := (siderealEpoch + siderealRate*days + longitude) * degrees
 	hour := sidereal - ascension
 	lat := latitude * degrees

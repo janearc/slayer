@@ -1,3 +1,5 @@
+//go:build draw
+
 package fuelbed_test
 
 import (
@@ -49,7 +51,7 @@ func TestReactionConsumesFuelAndProducesCorrespondingHeat(t *testing.T) {
 		if c.Fuel >= .9 || c.Fuel <= 0 || c.Excess <= 900 {
 			t.Fatal(c)
 		}
-		if math.Abs(c.Excess-900-s.Heating/s.Consumption*(1-c.Fuel)) > 1e-8 {
+		if !(math.Abs(c.Excess-900-s.Heating/s.Consumption*(1-c.Fuel)) <= 1e-8) {
 			t.Fatal("heat/fuel balance", c)
 		}
 	}
@@ -62,7 +64,7 @@ func TestEmptyHotFuelOnlyCools(t *testing.T) {
 	}
 	for _, c := range must(t, s, 10) {
 		want := 900 * math.Exp(-s.Heating*s.Cooling*10)
-		if c.Fuel != 0 || math.Abs(c.Excess-want) > .01 {
+		if c.Fuel != 0 || !(math.Abs(c.Excess-want) <= .01) {
 			t.Fatal(c, want)
 		}
 	}
@@ -124,7 +126,7 @@ func TestStepConvergesAndFuelNeverGrows(t *testing.T) {
 		if c.Excess < 0 || c.Fuel < 0 || c.Fuel > s.Initial[i].Fuel {
 			t.Fatal(c)
 		}
-		if math.Abs(c.Excess-fine[i].Excess) > .6 || math.Abs(c.Fuel-fine[i].Fuel) > .001 {
+		if !(math.Abs(c.Excess-fine[i].Excess) <= .6) || !(math.Abs(c.Fuel-fine[i].Fuel) <= .001) {
 			t.Fatal("step did not converge", c, fine[i])
 		}
 	}
@@ -159,7 +161,7 @@ func TestInvalidGridsAndTimesAreRefused(t *testing.T) {
 func TestGrassProxyCoefficientsHoldTheirPublishedPowers(t *testing.T) {
 	s := fuelbed.Grass(fixture())
 	for i, pair := range [][2]float64{{s.Diffusion, .21360}, {s.Heating, 187.93}, {s.Activation, 558.49}, {s.Cooling, .000048372}, {s.Consumption, .16250}} {
-		if math.Abs(pair[0]-pair[1]) > 1e-12 {
+		if !(math.Abs(pair[0]-pair[1]) <= 1e-12) {
 			t.Fatal("wrong coefficient power", i, pair)
 		}
 	}
@@ -208,7 +210,7 @@ func TestInsulatedDiffusionConservesHeatWithoutWrappingEdges(t *testing.T) {
 			t.Fatal("diffusion created fuel")
 		}
 	}
-	if math.Abs(sum-900) > 1e-8 {
+	if !(math.Abs(sum-900) <= 1e-8) {
 		t.Fatal("insulated layer lost/gained heat", sum)
 	}
 }

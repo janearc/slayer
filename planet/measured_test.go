@@ -46,12 +46,12 @@ func TestAMeasuredRingIsItsProfile(t *testing.T) {
 	for k, want := range []float64{0.2, 1.5, 0.05, 0.9} {
 		reach := 100 + float64(k) + 0.5
 		got := ring.depth * ring.share(reach, 0)
-		if math.Abs(got-want) > 1e-5 {
+		if !(math.Abs(got-want) <= 1e-5) {
 			t.Errorf("at %g m, depth %g, want %g", reach, got, want)
 		}
 	}
 	whole := profile.Seen(2500, 4000)
-	if math.Abs(ring.depth-whole) > 1e-12 {
+	if !(math.Abs(ring.depth-whole) <= 1e-12) {
 		t.Errorf("the ring's depth %g, want the stretch's %g", ring.depth,
 			whole)
 	}

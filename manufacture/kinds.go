@@ -17,7 +17,7 @@ import (
 // caller names a kind and gives a seed, and the seed picks every
 // number the row leaves open, from the range the row allows.
 //
-// the numbers in these rows are fiction, ruled so on 2026-10-06 when the
+// the numbers in these rows are fiction, decided 2026-10-06 when the
 // question was which published tables to use: they are made up to sound
 // right, by the author unless a row says whose, and none is measured.
 //
@@ -128,6 +128,21 @@ func table() map[string]maker {
 		rows[name] = row
 	}
 	for name, row := range summitRows() {
+		rows[name] = row
+	}
+	for name, row := range stageRows() {
+		rows[name] = row
+	}
+	for name, row := range truckRows() {
+		rows[name] = row
+	}
+	for name, row := range saucerRows() {
+		rows[name] = row
+	}
+	for name, row := range stackRows() {
+		rows[name] = row
+	}
+	for name, row := range lunarRows() {
 		rows[name] = row
 	}
 	rows["griffith"] = civicObservatory{}
@@ -301,6 +316,142 @@ func norwayWhorled() whorled {
 			wear: sleeveFoliage{joints: lengths(0.12, 0.2, 0.08),
 				sides: 4},
 		},
+	}
+}
+
+const (
+	// branchGrowth is how a grown tree's branches lengthen with its
+	// height: so many times taller, its branches that many times to
+	// this power as long. 2026-11-10: "they need to be much
+	// longer. probably scale branch length as much as you scale the
+	// tree height"; one.
+	branchGrowth = 1
+	// whorlFill is how a grown tree's whorls fill in: so many times
+	// taller, so many times to this power the branches in each, so the
+	// longer branches' tips stand no further apart than the root of it.
+	// Its whorls already come as many times more often up its height.
+	// picked, mine, 2026-11-10, with "increase frequency as well?
+	// probably not directly?".
+	whorlFill = 0.5
+	// grownGirth is a grown tree's branch's radius as a share of its own
+	// length: its foot 2.2 hundredths of its length across.
+	// 2026-11-10: "the branches should be a little bit thicker". picked
+	// by eye, not measured.
+	grownGirth = 0.011
+	// grownPieces is how many pieces a grown tree's limb is in, and
+	// grownWander the most it turns at a joint, in radians: limbs that
+	// flow and twist slightly, where three pieces kinked twice
+	// (2026-11-10: "they should be non-straight, but they should flow and
+	// twist just slightly"). picked by eye, mine.
+	grownPieces = 8
+	grownWander = 0.06
+)
+
+// resampled is joints, foot to tip, taken again at so many places along
+// the limb, each share eased between the two joints either side.
+func resampled(joints []joint, count int) []joint {
+	out := make([]joint, count)
+	last := float64(len(joints) - 1)
+	for at := range out {
+		place := float64(at) / float64(count-1) * last
+		low := min(int(place), len(joints)-2)
+		f := place - float64(low)
+		a, b := joints[low], joints[low+1]
+		out[at] = joint{ofGirth: a.ofGirth + f*(b.ofGirth-a.ofGirth),
+			ofLength: a.ofLength + f*(b.ofLength-a.ofLength)}
+	}
+	return out
+}
+
+// flowing is the architecture with its limbs in so many pieces that
+// wander, the same droop spread over their joints, and their bark and
+// foliage taken again at each joint. A foliage it cannot take again
+// leaves the limbs as they were.
+func (tree whorled) flowing(pieces int, wander float64) whorled {
+	clad, ok := tree.clad.(sleeveFoliage)
+	if !ok || tree.branch.pieces < 2 {
+		return tree
+	}
+	joints := tree.branch.pieces - 1
+	tree.branch = limbing{pieces: pieces,
+		droop:  tree.branch.droop * float64(joints) / float64(pieces-1),
+		wander: wander}
+	tree.bark.joints = resampled(tree.bark.joints, pieces+1)
+	clad.joints = resampled(clad.joints, pieces+1)
+	tree.clad = clad
+	return tree
+}
+
+// taller is the row with its height so many times over: the same seed
+// picks the same share of the taller span, so the same tree, taller,
+// with as many more whorls as fit, on a trunk as much thicker.
+//
+// its branches are not as much thicker (2026-11-10: "their
+// branches must not increase in proportion to their trunks"): each is
+// as thick as its own length asks, grownGirth of it. They are longer by
+// the times to branchGrowth's power, more to a whorl by whorlFill's, and
+// flow in grownPieces pieces rather than kink in three.
+func (row conifer) taller(times float64) conifer {
+	row.tall = span{row.tall.least * times, row.tall.most * times}
+	row.hangs.reach *= math.Pow(times, branchGrowth-1)
+	row.hangs.own = grownGirth
+	fill := math.Pow(times, whorlFill)
+	row.lowest = span{row.lowest.least * fill, row.lowest.most * fill}
+	row.grows = row.grows.flowing(grownPieces, grownWander)
+	return row
+}
+
+const (
+	// sideSpacing is how far apart a branched tree's side branches stand
+	// along a limb, in metres, and sideReach how long the longest is, as
+	// a share of the whole limb. picked by eye, mine, 2026-11-10.
+	sideSpacing = 0.35
+	sideReach   = 1.0 / 3
+)
+
+// branched is the row with side branches on its limbs: each piece of its
+// longest limb carries as many as fit at sideSpacing, and every limb as
+// many; each side branch in foliage of its own, so a bough is a fan of
+// sprays, not a line of them. A row that has branchlets already keeps
+// their shape and takes the spacing.
+func (row conifer) branched() conifer {
+	pieces := float64(row.grows.branch.pieces)
+	longest := row.hangs.reach * (row.tall.least + row.tall.most) / 2
+	each := math.Max(2, longest/pieces/sideSpacing)
+	sides := branchlets{
+		per:   span{0.8 * each, 1.2 * each},
+		shoot: limbing{pieces: 2, droop: 0.15},
+		set:   spruceSides(),
+		wear:  sleeveFoliage{joints: lengths(0.10, 0.18, 0.08), sides: 5},
+	}
+	// a side branch is sized against the piece it stands on, so a share
+	// of the whole limb is that share times the pieces, as the redwood's
+	// branchlets are
+	sides.set.reach = sideReach * pieces
+	if row.grows.shoots != nil {
+		sides.shoot = row.grows.shoots.shoot
+		sides.set = row.grows.shoots.set
+		sides.wear = row.grows.shoots.wear
+	}
+	row.grows.shoots = &sides
+	return row
+}
+
+// spruceSides is how a branched spruce sets its side branches along a
+// limb: each half a turn from the last, so they stand in two rows,
+// leaning 55 degrees out from the limb, shorter toward each piece's
+// tip; branched sets their reach. set by eye, mine, 2026-11-10; none is
+// measured.
+func spruceSides() habit {
+	return habit{
+		turn:  measure.Radians(fullTurn / 2),
+		start: 0.05, top: 0.95,
+		thinning: 0, fewest: 1,
+		stray: 0.1,
+		low:   measure.Degrees(55), lift: measure.Degrees(10),
+		sway:  measure.Degrees(10),
+		reach: 1, shortening: 0.3, uneven: 0.25,
+		girth: 0.4, least: 0.002,
 	}
 }
 

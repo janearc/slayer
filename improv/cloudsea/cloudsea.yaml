@@ -1,0 +1,462 @@
+# Authored hero-scene study, 2026-11-08.
+# Fictional introduced forest and observatory on the pinned USGS Kilauea DEM.
+# Clouds, beam display strength, layout and camera are artistic choices.
+# The selected 39 m / 798-panel ELT recipe retains authored enclosure geometry.
+# Four-beam visual reference: https://www.eso.org/public/teles-instr/paranal-observatory/vlt/vlt-instr/4lgsf/
+# Redwood mist context: https://research.fs.usda.gov/treesearch/69118
+# Prescribed mist is not transpiration, condensation or adaptive optics.
+# The Moon is a plain illuminated disc; its surface texture is omitted.
+#
+# The cloud sea corrected, fable-team, 2026-11-12: the scene.yaml of the 8
+# November hero study, from its renders folder (read only there),
+# changed here only as each comment below says: the guide stars (one aim
+# out of the enclosure's open slit, launch tubes, ESO's 30 cm beam), the
+# enclosure's heading, every complexity at demo (the finest), and cameras
+# added after the study's own. The mist is the study's.
+---
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: wooded summit observatory above a fuller cloud sea
+  renderer: gpu-native
+  seed: 11
+  light: moon
+  location:
+    lat: 19.413
+    lon: -155.25
+  timeofday: 2300
+  moon:
+    azimuth: 145
+    altitude: 35
+    disc: true
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263050
+    north: 2149520
+    across: 1600
+    down: 1600
+    step: 12
+    smooth: 2
+  recipes:
+    redwoods:
+      kind: coast-redwood
+    sequoias:
+      kind: giant-sequoia
+  # the guide stars, fable-team 2026-11-12, replacing the study's four splayed
+  # beams in this copy only. The exits are doc/golden-hour-site.yaml's
+  # front-rim pose for the elt at heading 0 (picked there, not an ESO
+  # layout), turned with the enclosure to heading 145 so they sit at its
+  # open slit. One boresight at the slit's authored 55 degrees, with
+  # GALACSI's 64-arcsecond offsets (eso-galacsi-layout). Radius: half of
+  # the 30 cm beam diameter on ESO's 4LGSF page (eso-4lgsf), taken as the
+  # 1/e^2 radius (picked: the page does not say which width). Divergence
+  # 0.002 degrees as golden-hour (picked). Display strength picked: the
+  # same total light as the study's 0.9 m beams at 6e7, so 6e7 x (0.9/0.15)^2.
+  laser-pointings:
+    science target:
+      azimuth: 145
+      altitude: 55
+  lasers:
+    front rim 1:
+      origin:
+        object: the observatory
+        east:
+          value: 33.328
+          unit: m
+        up:
+          value: 59.185
+          unit: m
+        south:
+          value: 19.702
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: 64
+          unit: arcsec
+        vertical:
+          value: 0
+          unit: arcsec
+      radius:
+        value: 0.15
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 2160000000
+    front rim 2:
+      origin:
+        object: the observatory
+        east:
+          value: 7.115
+          unit: m
+        up:
+          value: 59.185
+          unit: m
+        south:
+          value: 38.057
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: 0
+          unit: arcsec
+        vertical:
+          value: 64
+          unit: arcsec
+      radius:
+        value: 0.15
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 2160000000
+    front rim 3:
+      origin:
+        object: the observatory
+        east:
+          value: 28.426
+          unit: m
+        up:
+          value: 55.170
+          unit: m
+        south:
+          value: 30.135
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: -64
+          unit: arcsec
+        vertical:
+          value: 0
+          unit: arcsec
+      radius:
+        value: 0.15
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 2160000000
+    front rim 4:
+      origin:
+        object: the observatory
+        east:
+          value: 18.596
+          unit: m
+        up:
+          value: 55.170
+          unit: m
+        south:
+          value: 37.018
+          unit: m
+      pointing: science target
+      launcher: true
+      guide-star-offset:
+        horizontal:
+          value: 0
+          unit: arcsec
+        vertical:
+          value: -64
+          unit: arcsec
+      radius:
+        value: 0.15
+        unit: m
+      reach:
+        value: 1000
+        unit: m
+      divergence:
+        value: 0.002
+        unit: deg
+      wavelength:
+        value: 589
+        unit: nm
+      display-strength: 2160000000
+  weather:
+    low cloud:
+      kind: prescribed-mist
+      extinction:
+        value: 0.018
+        unit: m^-1
+      depth:
+        value: 130
+        unit: m
+      coverage: 0.7
+      seed: 23
+      # no asymmetry: droplets scatter forward (a single lobe of 0.85 is
+      # what Jendersie and d'Eon draw clouds with, jendersie-deon-2023),
+      # but the tracer scatters once, and with the moon behind the camera
+      # a forward lobe darkens the sea that many scatterings keep bright.
+      # Left even here, fable-team 2026-11-12; the key is there to say it.
+    thin air:
+      kind: prescribed-mist
+      extinction:
+        value: 8.0e-05
+        unit: m^-1
+      depth:
+        value: 900
+        unit: m
+      coverage: 1
+      seed: 24
+  atmosphere:
+    layers:
+      cloud deck:
+        weather: low cloud
+        extent: terrain
+        albedo: 0.95
+        base:
+          value: 70
+          unit: m
+      upper air:
+        weather: thin air
+        extent: terrain
+        albedo: 0.95
+        base:
+          value: 0
+          unit: m
+  set:
+    things:
+      the observatory:
+        kind: elt
+        seed: 5
+        east: 263450
+        north: 2149088
+        complexity: demo
+        # turned so its open slit faces the moon's side, south east;
+        # fable-team 2026-11-12, picked
+        heading:
+          value: 145
+          unit: deg
+    stands:
+      the redwood forest:
+        recipe: redwoods
+        complexity: demo
+        count: 4000
+        seed: 11
+        exclude:
+          around: the observatory
+          clearance:
+            value: 48
+            unit: m
+      the sequoia groves:
+        recipe: sequoias
+        complexity: demo
+        count: 1000
+        seed: 19
+        exclude:
+          around: the observatory
+          clearance:
+            value: 48
+            unit: m
+  film:
+    width: 1280
+    height: 720
+    rays: 2
+    exposure: 30000000
+    wide: 64
+  cameras:
+    southwest:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -500
+          standoff_y: -500
+          standoff_z: 230
+      orientation:
+        point_to: the observatory
+        alpha: -8
+    # The views below are fable-team's, 2026-11-12;
+    # southwest above is the study's own and unchanged. alpha tips the eye
+    # from level (set/shots.go facing), not toward what it points to.
+    #
+    # under-the-trees: low in the forest, 350 m southwest, looking up at
+    # the enclosure through the mist.
+    under-the-trees:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -230
+          standoff_y: -260
+          standoff_z: 3
+      orientation:
+        point_to: the observatory
+        alpha: 9
+    # over-the-deck: far out and high, the summit in the cloud.
+    over-the-deck:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -1100
+          standoff_y: -1000
+          standoff_z: 260
+      orientation:
+        point_to: the observatory
+        alpha: -7
+    # along-a-beam: 210 m southwest and low, looking up the beams from
+    # the enclosure's top.
+    along-a-beam:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -150
+          standoff_y: -150
+          standoff_z: 20
+      orientation:
+        point_to: the observatory
+        alpha: 32
+    # dome-close: the enclosure's moonlit side from the southeast, the
+    # forest behind it.
+    dome-close:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 170
+          standoff_y: -170
+          standoff_z: 35
+      orientation:
+        point_to: the observatory
+        alpha: 2
+    # with-the-moon: from the northwest over the treetops, facing the
+    # moon (azimuth 145, 35 up), the enclosure under it.
+    with-the-moon:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -210
+          standoff_y: 290
+          standoff_z: 45
+      orientation:
+        point_to: the observatory
+        alpha: 16.5
+    # deck-near: nearer and lower over the deck than over-the-deck, so
+    # less of the patch's edge shows.
+    deck-near:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -650
+          standoff_y: -600
+          standoff_z: 150
+      orientation:
+        point_to: the observatory
+        alpha: -6
+    # the study's own framings from the 8 November studies (the close,
+    # overhead and southeast folders of the hero 720 renders), copied
+    # unchanged; the study's southwest is the hero's, above.
+    close:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 220
+          standoff_y: -330
+          standoff_z: 120
+      orientation:
+        point_to: the observatory
+        alpha: -5
+    overhead:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 260
+          standoff_y: -330
+          standoff_z: 320
+      orientation:
+        point_to: the observatory
+        alpha: -30
+    south east overlook:
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 350
+          standoff_y: -550
+          standoff_z: 200
+      orientation:
+        point_to: the observatory
+        alpha: -7
+    # The walkthrough's cameras, fable-team, 2026-11-12.
+    #
+    # above: the plan. 2,000 m over the enclosure and 1 m south of it, so
+    # it has a heading and north is up; alpha tips the eye from level
+    # (set/shots.go facing), so -90 is straight down. At 64 degrees it
+    # sees 1,250 m each way at the enclosure's foot: the whole patch.
+    above:
+      title: "the plan, north up"
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: 0
+          standoff_y: -1
+          standoff_z: 2000
+      orientation:
+        point_to: the observatory
+        alpha: -90
+    # dome: the enclosure from 250 m southwest, a little above its top.
+    dome:
+      title: "the enclosure"
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -180
+          standoff_y: -180
+          standoff_z: 60
+      orientation:
+        point_to: the observatory
+        alpha: -3
+    # beams: from the clearing's edge, looking up the four beams.
+    beams:
+      title: "up the beams"
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -110
+          standoff_y: -70
+          standoff_z: 15
+      orientation:
+        point_to: the observatory
+        alpha: 50
+    # forest: low among the trees, looking toward the enclosure.
+    forest:
+      title: "in the forest"
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -230
+          standoff_y: -260
+          standoff_z: 5
+      orientation:
+        point_to: the observatory
+        alpha: 5
+    # deck: far out, 90 m over the enclosure's foot, above the deck's top
+    # (70 m over the lowest ground, 130 m deep), looking across it.
+    deck:
+      title: "across the cloud deck"
+      location:
+        loc_relative:
+          object: the observatory
+          standoff_x: -750
+          standoff_y: -650
+          standoff_z: 90
+      orientation:
+        point_to: the observatory
+        alpha: -2

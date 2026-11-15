@@ -131,11 +131,36 @@ numbers:
   says: successive shield outline contraction
   kind: picked
   by: Slayer's spacecraft templates, 2026-11-07
-- name: shield-shoulder
-  value: 0.22
-  says: shoulder offset along the shield length
+- name: shield-seam-step
+  value: 0.23
+  says: how far apart the seams across the sun-facing membrane are, per aperture diameter; about a metre and a half, by eye from NASA's picture
   kind: picked
-  by: Slayer's spacecraft templates, 2026-11-07
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: shield-seam-width
+  value: 0.006
+  says: a seam's width per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: shield-seam-inside
+  value: 0.86
+  says: how much of the kite's width or length a seam spans where it lies; less than all of it, so no seam reaches past the scalloped edge
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: shield-gap-centre
+  value: 0.02
+  says: the gap between sunshield layers at the shield's middle, per aperture diameter; less than at its edges, as NASA says the layers are, and by how much is picked
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: shield-sag
+  value: 0.07
+  says: how far each edge of the sunshield's kite is drawn in toward the middle at its deepest, as a share of the way out; by eye from NASA's picture of the sun-facing side
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: shield-edge-steps
+  value: 8
+  says: straight pieces in each edge of the sunshield's kite
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
 - name: white
   value: 0.78
   says: authored enclosure diffuse reflectance
@@ -201,11 +226,122 @@ numbers:
   says: service bus height per aperture diameter
   kind: picked
   by: Slayer's spacecraft templates, 2026-11-07
-- name: webb-bus-lift
-  value: 0.1
-  says: bus lift above the top shield per aperture diameter
+- name: webb-tower-rise
+  value: 0.25
+  says: how far above the top shield layer the tower stands the telescope, per aperture diameter; the tower's length is not in the papers
   kind: picked
-  by: Slayer's spacecraft templates, 2026-11-07
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-bus-drop
+  value: 0.03
+  says: the gap between the sun-facing shield layer and the top of the bus under it, per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-tower-radius
+  value: 0.04
+  says: tower radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-panels
+  value: 5
+  says: solar panels in the row; five, counted in NASA's picture of the sun-facing side
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-panel-width
+  value: 0.25
+  says: a solar panel's width per aperture diameter, by eye from NASA's picture
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-panel-length
+  value: 0.15
+  says: a solar panel's length along the row per aperture diameter, by eye from NASA's picture
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-panel-gap
+  value: 0.01
+  says: the gap between solar panels, and between the row and the pallet, per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-pallet-width
+  value: 0.12
+  says: a pallet's width per aperture diameter, by eye from NASA's picture
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-pallet-depth
+  value: 0.05
+  says: a pallet's depth under the shield per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-pallet-reach
+  value: 0.85
+  says: how far toward the shield's tip a pallet runs, as a share of the half length
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-boom-reach
+  value: 0.95
+  says: how far toward the shield's side corner a boom runs, as a share of the half width
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-boom-radius
+  value: 0.012
+  says: boom radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-ring-radius
+  value: 0.18
+  says: the radius of the round interface under the bus, per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-flap-width
+  value: 0.3
+  says: the aft flap's width per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-flap-length
+  value: 0.3
+  says: the aft flap's length per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-flap-at
+  value: 0.78
+  says: where the flap hangs, as a share of the shield's half length toward the aft tip
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-flap-tip
+  value: 35
+  unit: deg
+  says: how far the flap is tipped down toward the sun; its angle was set before launch and is not in the papers
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-antenna-radius
+  value: 0.06
+  says: antenna dish radius per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-antenna-drop
+  value: 0.05
+  says: how far under the bus the antenna hangs, per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-isim-width
+  value: 0.45
+  says: instrument module width per aperture diameter; its size is not in the papers
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-isim-height
+  value: 0.5
+  says: instrument module height per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-isim-depth
+  value: 0.3
+  says: instrument module depth behind the primary, per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
+- name: webb-isim-gap
+  value: 0.03
+  says: the gap between the primary's back and the instrument module, per aperture diameter
+  kind: picked
+  by: Slayer's spacecraft templates, 2026-11-12
 - name: solar-columns
   value: 8
   says: readable solar panel grid columns

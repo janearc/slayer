@@ -1,0 +1,28 @@
+{
+	"group": "zappy",
+	"mood": "curious, light on its feet",
+	"feeling": "Someone clever is working something out aloud, and is cheerfully interrupted by how bad the answer is.",
+	"intent": "Zappy's bed for explaining, the curious one: under a voice or words on screen, with the frightening fact at 0:31.",
+	"listen_for": "The bounce stopping at 0:29 so three notes ask a question alone, and the low floor at 0:31 that answers it; then the bounce picks up again as if nothing happened.",
+	"voicing": "@zappy-voice",
+	"tempo": 104,
+	"meter": 4,
+	"seconds": 49.79,
+	"parts": [
+		{"name": "asking", "bar": 1, "second": 0.0,
+		 "change": "a quiet bounce in the bass, then zappy's five notes over soft chords",
+		 "feels": "bright, curious: what is that"},
+		{"name": "working", "bar": 9, "second": 18.46,
+		 "change": "the chords move and the tempo steps up; three notes of the tune tried in new places",
+		 "feels": "getting closer, a little faster of thought"},
+		{"name": "wait", "bar": 14, "second": 29.26,
+		 "change": "everything stops but three quiet notes",
+		 "feels": "a held breath: wait"},
+		{"name": "the-fact", "bar": 15, "second": 31.33,
+		 "change": "a deep low note and one drum; the tune finishes slowly over it",
+		 "feels": "the floor opens: it is much bigger"},
+		{"name": "anyway", "bar": 19, "second": 40.56,
+		 "change": "the bounce and the five notes come back, and it stops on one short chord",
+		 "feels": "delighted anyway: so that is that"}
+	]
+}

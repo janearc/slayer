@@ -1,0 +1,28 @@
+{
+	"group": "slow start, fast finish",
+	"mood": "quiet village, then boss fight",
+	"feeling": "Safe and a little sad, then thrown into a fight for your life.",
+	"intent": "A calm intro that turns into action: the quiet before a raid, a trailer that starts at home and ends in battle.",
+	"listen_for": "The snare roll that ends at 0:20 and the whole fight crashing in.",
+	"voicing": "@leap-dmg",
+	"tempo": 96,
+	"meter": 4,
+	"seconds": 52.5,
+	"parts": [
+		{"name": "village", "bar": 1, "second": 0.0,
+		 "change": "a slow lead over held chords",
+		 "feels": "Home, at dusk"},
+		{"name": "rumor", "bar": 5, "second": 10.0,
+		 "change": "a soft backbeat and a moving bass",
+		 "feels": "Word of trouble"},
+		{"name": "boss", "bar": 9, "second": 20.0,
+		 "change": "sixteenth-note lead, galloping bass, driving drums",
+		 "feels": "The fight begins"},
+		{"name": "last-hit", "bar": 17, "second": 40.0,
+		 "change": "even faster: the lead races and the bass runs in sixteenths",
+		 "feels": "Nothing held back"},
+		{"name": "down", "bar": 21, "second": 50.0,
+		 "change": "a held chord and one kick",
+		 "feels": "Silence after the blow"}
+	]
+}

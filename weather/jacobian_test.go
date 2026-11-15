@@ -38,7 +38,7 @@ func TestTheJacobianKeepsTheFieldAndItsSquare(t *testing.T) {
 			scale += area * math.Abs(change)
 		}
 	}
-	if math.Abs(total) > 1e-12*scale || math.Abs(squared) > 1e-12*scale {
+	if !(math.Abs(total) <= 1e-12*scale) || !(math.Abs(squared) <= 1e-12*scale) {
 		t.Errorf("the field changes by %g, its square by %g, of %g",
 			total, squared, scale)
 	}
@@ -59,7 +59,7 @@ func TestAZonalFlowLeavesAZonalField(t *testing.T) {
 	}
 	for j := range grid.rows {
 		got := grid.jacobian(grid.walled(psi), grid.mirrored(field), 5, j)
-		if math.Abs(got) > 1e-12 {
+		if !(math.Abs(got) <= 1e-12) {
 			t.Errorf("row %d: %g, want nought", j, got)
 		}
 	}

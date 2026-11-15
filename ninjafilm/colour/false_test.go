@@ -235,7 +235,7 @@ func TestAStandingColourIsNeverBelowNoughtAndAsBrightAsWhite(t *testing.T) {
 				t.Errorf("%v at %g nm stands for %v, less than dark",
 					profile, band.Nanometres, light)
 			}
-			if math.Abs(light.Luminance()-whole) > within {
+			if !(math.Abs(light.Luminance()-whole) <= within) {
 				t.Errorf("%v at %g nm stands at luminance %v", profile,
 					band.Nanometres, light.Luminance())
 			}

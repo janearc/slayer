@@ -52,7 +52,7 @@ func TestFirebrandsRetainTheirIdentityRadiusAndAuthoredCoolingLine(t *testing.T)
 		if particle.ID() != 5 || particle.Age() != sample.age || particle.Radius() != measure.Metres(.02) {
 			t.Fatal("particle lost identity, time or physical radius")
 		}
-		if got := particle.Heat().InKelvin(); math.Abs(got-sample.kelvin) > 1e-10 {
+		if got := particle.Heat().InKelvin(); !(math.Abs(got-sample.kelvin) <= 1e-10) {
 			t.Fatalf("at %s heat %g K, authored linear value %g K", sample.age, got, sample.kelvin)
 		}
 	}
@@ -82,8 +82,8 @@ func TestReleasePositionsFillTheDiskWithoutAnAngularBias(t *testing.T) {
 		meanFourth += squared * squared
 	}
 	// Uniform disk area makes squared radius uniform on [0,1].
-	if math.Abs(meanX/count) > .05 || math.Abs(meanZ/count) > .05 ||
-		math.Abs(meanSquared/count-.5) > .03 || math.Abs(meanFourth/count-1.0/3) > .03 {
+	if !(math.Abs(meanX/count) <= .05) || !(math.Abs(meanZ/count) <= .05) ||
+		!(math.Abs(meanSquared/count-.5) <= .03) || !(math.Abs(meanFourth/count-1.0/3) <= .03) {
 		t.Fatalf("release disk bias: means %g,%g radial moments %g,%g", meanX/count, meanZ/count, meanSquared/count, meanFourth/count)
 	}
 }

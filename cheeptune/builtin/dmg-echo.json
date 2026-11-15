@@ -1,0 +1,25 @@
+{
+	// the lead, and a quiet late copy of it on the other pulse, a few
+	// cents flat and panned away. that is the reverb chip music can have.
+	"name": "dmg-echo",
+	"machine": "gameboy",
+	"channels": [
+		{"kind": "pulse", "role": "lead", "duty": 0.25, "volume": 0.9,
+		 "envelope": {"attack": 0.01, "decay": 0.4, "sustain": 0.55,
+		              "release": 0.3},
+		 "vibrato": {"rate": 5, "depth": 10, "delay": 0.3}},
+		{"kind": "pulse", "echo": "lead", "delay": "3/4", "gain": 0.35,
+		 "detune": -7, "duty": 0.5, "pan": "right",
+		 "envelope": {"attack": 0.02, "decay": 0.4, "sustain": 0.55,
+		              "release": 0.4}},
+		{"kind": "wave", "role": "bass", "table": "triangle",
+		 "envelope": {"attack": 0, "decay": 0.5, "sustain": 0.5,
+		              "release": 0.1}},
+		{"kind": "noise", "role": "perc", "hits": {
+			"k": {"shift": 7, "divisor": 3, "decay": 0.12},
+			"s": {"shift": 3, "divisor": 2, "decay": 0.15, "volume": 0.7},
+			"h": {"shift": 1, "divisor": 0, "decay": 0.04, "volume": 0.4}
+		}}
+	],
+	"drop": ["pad"]
+}

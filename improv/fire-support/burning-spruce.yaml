@@ -1,0 +1,44 @@
+# fire support, 2026-11-10: a spruce set alight, as melancholia's rim
+# trees and the Kilauea Iki sets' are, for the catalogue's picture of
+# it. The wood-fire study scene (doc/fire-study.yaml), the camera
+# stood back and tipped up to take in the whole tree.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
+scene:
+  name: a spruce alight on volcanic ground
+  renderer: gpu-native
+  seed: 7
+  light: none
+  location: {lat: 19.4165, lon: -155.2485}
+  timeofday: 1900
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263760
+    north: 2148800
+    across: 104
+    down: 104
+    step: 1
+  set:
+    things:
+      the tree:
+        kind: spruce
+        seed: 3
+        east: 263812
+        north: 2148748
+        alight: true
+  film:
+    width: 1920
+    height: 1200
+    rays: 2
+    exposure: 600
+  cameras:
+    back from the tree:
+      location:
+        loc_relative:
+          object: the tree
+          standoff_x: 10
+          standoff_y: -38
+          standoff_z: 1.6
+      orientation:
+        point_to: the tree
+        alpha: 16

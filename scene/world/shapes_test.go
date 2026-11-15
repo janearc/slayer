@@ -46,7 +46,7 @@ func TestAVolcanoRisesAsAConeWithACrater(t *testing.T) {
 		{0.975, 0.25 + 2.0/256},
 		{1, 0.25},
 	} {
-		if got := v.Shape(0.25, c.share); math.Abs(got-c.want) > 1e-6 {
+		if got := v.Shape(0.25, c.share); !(math.Abs(got-c.want) <= 1e-6) {
 			t.Errorf("a volcano at a share of %v is %v, want %v", c.share, got, c.want)
 		}
 	}

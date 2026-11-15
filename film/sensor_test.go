@@ -37,7 +37,7 @@ func TestPixelShapeKeepsCirclesRound(t *testing.T) {
 	x0, y0 := slope(p.Ray(100, 70, w, h, maths.Band{}))
 	x1, _ := slope(p.Ray(101, 70, w, h, maths.Band{}))
 	_, y1 := slope(p.Ray(100, 71, w, h, maths.Band{}))
-	if got := (x1 - x0) / (y0 - y1); math.Abs(got-0.75) > 1e-9 {
+	if got := (x1 - x0) / (y0 - y1); !(math.Abs(got-0.75) <= 1e-9) {
 		t.Fatalf("across over down is %v, want 0.75", got)
 	}
 }

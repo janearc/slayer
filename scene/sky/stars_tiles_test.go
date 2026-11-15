@@ -11,7 +11,7 @@ import (
 
 // coarse is the tiling most star tests walk: twelve splits is 1442 tiles,
 // few enough to look at every one.
-var coarse = hexes.Sphere{N: 12}
+var coarse = hexes.Sphere{Splits: 12}
 
 // dusk is a dark with a different part in each of red, green and blue, so
 // that a part swapped for another shows.
@@ -113,7 +113,7 @@ func TestEachTileHoldsAStarByItsHash(t *testing.T) {
 		n := float64(len(tiles))
 		mean := n * c.wantShare
 		sd := math.Sqrt(n * c.wantShare * (1 - c.wantShare))
-		if math.Abs(float64(lit)-mean) > 5*sd {
+		if !(math.Abs(float64(lit)-mean) <= 5*sd) {
 			t.Errorf("%s: %d of %d tiles hold a star, five spreads from %v",
 				c.name, lit, len(tiles), mean)
 		}
@@ -130,7 +130,7 @@ func TestEachTileHoldsAStarByItsHash(t *testing.T) {
 // of the tiles, a bright of one and a dark of nothing. one tile in 29 of
 // the 144002 is asked, and the same ones are held to the same hash.
 func TestStarsWithNothingSaidAreOnAHundredAndTwentySplits(t *testing.T) {
-	tl := hexes.Sphere{N: 120}
+	tl := hexes.Sphere{Splits: 120}
 	const seed = 3
 	st := Stars{Seed: seed}
 	tiles := tl.Tiles()
@@ -157,7 +157,7 @@ func TestStarsWithNothingSaidAreOnAHundredAndTwentySplits(t *testing.T) {
 		}
 	}
 	mean := float64(asked) * 0.2
-	if sd := math.Sqrt(float64(asked) * 0.2 * 0.8); math.Abs(float64(lit)-mean) > 5*sd {
+	if sd := math.Sqrt(float64(asked) * 0.2 * 0.8); !(math.Abs(float64(lit)-mean) <= 5*sd) {
 		t.Errorf("%d of %d tiles hold a star, five spreads from %v", lit, asked, mean)
 	}
 }

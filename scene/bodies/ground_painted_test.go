@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/hexes"
 	"github.com/janearc/slayer/scene/bodies"
@@ -31,6 +32,16 @@ func look() world.Look {
 	return l
 }
 
+// ground is a door-made ground of the tests' terrain and look.
+func ground(t *testing.T) bodies.Ground {
+	t.Helper()
+	g, err := bodies.NewGround(terrain(), look())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return g
+}
+
 // spread is n directions about the sphere, a fibonacci spiral: y steps
 // evenly from 1 to -1 and the turn about y is a golden angle each time.
 func spread(n int) []maths.Vec {
@@ -46,9 +57,9 @@ func spread(n int) []maths.Vec {
 
 // placed is the material of a rock body with the ground, placed at a
 // detail, as the one thing in its world.
-func placed(t *testing.T, g *bodies.Ground, detail int) *thing.Material {
+func placed(t *testing.T, g bodies.Ground, detail int) *thing.Material {
 	t.Helper()
-	b := bodies.Body{Name: "r", Kind: bodies.Rock, Radius: 8, Ground: g}
+	b := made(t, "r", bodies.Rock, 8, 1, g)
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.Vec{}, 0.5, detail); err != nil {
 		t.Fatal(err)
@@ -60,8 +71,8 @@ func placed(t *testing.T, g *bodies.Ground, detail int) *thing.Material {
 // a detail of zero, or under, is one.
 func TestAGroundIsTiledOnASphereSplitDetailTimes(t *testing.T) {
 	for detail, want := range map[int]int{-3: 1, 0: 1, 1: 1, 2: 2, 5: 5} {
-		m := placed(t, &bodies.Ground{Terrain: terrain(), Look: look()}, detail)
-		if got := m.Texture.(texture.Tiled).Tiling; got != hexes.Tiling(hexes.Sphere{N: want}) {
+		m := placed(t, ground(t), detail)
+		if got := m.Texture.(texture.Tiled).Tiling; got != hexes.Tiling(hexes.Sphere{Splits: want}) {
 			t.Errorf("a detail of %d is tiled %#v, want a split of %d", detail, got, want)
 		}
 	}
@@ -71,15 +82,19 @@ func TestAGroundIsTiledOnASphereSplitDetailTimes(t *testing.T) {
 // split of twice: 8 is 4, 12 is 6, 13 is 6, and 5, 2 and 1 are 2.
 func TestAMoonsGroundIsTiledAtHalfTheParentsDetail(t *testing.T) {
 	for detail, want := range map[int]int{8: 4, 12: 6, 13: 6, 5: 2, 2: 2, 1: 2} {
-		parent := bodies.Body{Name: "p", Kind: bodies.Star, Radius: 8, Mass: bodies.Sun,
-			Moons: []bodies.Moon{{Orbit: 4e5, Body: bodies.Body{Name: "m", Kind: bodies.Rock,
-				Radius: 2, Ground: &bodies.Ground{Terrain: terrain(), Look: look()}}}}}
+		moon, err := bodies.NewMoon(
+			made(t, "m", bodies.Rock, 2, 1, ground(t)),
+			bodies.Kilometres(4e5), measure.Radians(0))
+		if err != nil {
+			t.Fatal(err)
+		}
+		parent := made(t, "p", bodies.Star, 8, bodies.Sun, moon)
 		w := thing.NewWorld()
 		if err := parent.Place(w, maths.Vec{}, 0.5, detail); err != nil {
 			t.Fatal(err)
 		}
 		got := solidNamed(t, w, "m").Material.Texture.(texture.Tiled).Tiling
-		if got != hexes.Tiling(hexes.Sphere{N: want}) {
+		if got != hexes.Tiling(hexes.Sphere{Splits: want}) {
 			t.Errorf("a parent of detail %d has a moon tiled %#v, want a split of %d", detail, got, want)
 		}
 	}
@@ -88,12 +103,17 @@ func TestAMoonsGroundIsTiledAtHalfTheParentsDetail(t *testing.T) {
 // a moon whose ground cannot be made refuses the placing, by name, as
 // its parent's would.
 func TestAMoonWhoseGroundCannotBeMadeRefusesTheParent(t *testing.T) {
-	parent := bodies.Body{Name: "p", Kind: bodies.Star, Radius: 8, Mass: bodies.Sun,
-		Moons: []bodies.Moon{{Orbit: 4e5, Body: bodies.Body{Name: "m", Kind: bodies.Rock,
-			Radius: 2, Ground: &bodies.Ground{Terrain: terrain(),
-				Features: func(*world.World) ([]world.Feature, error) {
-					return nil, fmt.Errorf("no land for maxwell")
-				}}}}}}
+	homeless := ground(t).Featured(
+		func(*world.World) ([]world.Feature, error) {
+			return nil, fmt.Errorf("no land for maxwell")
+		})
+	moon, err := bodies.NewMoon(
+		made(t, "m", bodies.Rock, 2, 1, homeless),
+		bodies.Kilometres(4e5), measure.Radians(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parent := made(t, "p", bodies.Star, 8, bodies.Sun, moon)
 	if err := parent.Place(thing.NewWorld(), maths.Vec{}, 0.5, 4); err == nil ||
 		!strings.Contains(err.Error(), "m: no land for maxwell") {
 		t.Errorf("a parent with such a moon is placed with %v", err)
@@ -103,7 +123,7 @@ func TestAMoonWhoseGroundCannotBeMadeRefusesTheParent(t *testing.T) {
 // a rock with no ground is a mid-grey ball of its radius, 4 units.
 func TestARockWithNoGroundIsAMidGreyBall(t *testing.T) {
 	w := thing.NewWorld()
-	if err := (bodies.Body{Name: "r", Kind: bodies.Rock, Radius: 8}).Place(w, maths.Vec{}, 0.5, 4); err != nil {
+	if err := made(t, "r", bodies.Rock, 8, 1).Place(w, maths.Vec{}, 0.5, 4); err != nil {
 		t.Fatal(err)
 	}
 	ball := solidNamed(t, w, "r")
@@ -146,9 +166,12 @@ func TestAGroundWearsItsMapAndLightsAsDrawnMirrored(t *testing.T) {
 		name       string
 		turn, glow float64
 		gain       float64
-	}{{"turned nought", 0, 0, 0.004}, {"turned an eighth of a turn", math.Pi / 8, 0.5, 0.5}} {
-		g := &bodies.Ground{Terrain: terrain(), Look: look(), Map: dot(5, 1),
-			Lights: dot(1, 2), Turn: c.turn, Glow: c.glow}
+	}{{"turned zero", 0, 0, 0.004}, {"turned an eighth of a turn", math.Pi / 8, 0.5, 0.5}} {
+		g := ground(t).Mapped(dot(5, 1), measure.Radians(c.turn))
+		g, err := g.NightLit(dot(1, 2), maths.Share(c.glow))
+		if err != nil {
+			t.Fatal(err)
+		}
 		m := placed(t, g, 4)
 		onMap := toward(3*math.Pi/8-c.turn, math.Pi/8)
 		onLights := toward(-5*math.Pi/8-c.turn, -math.Pi/8)
@@ -174,11 +197,13 @@ func TestAGroundWearsItsMapAndLightsAsDrawnMirrored(t *testing.T) {
 // alone: the same world, painted by the same call, reads the same
 // everywhere, and the tiles' own paint does not.
 func TestAGroundWithAFinenessIsPaintedFiner(t *testing.T) {
-	g := &bodies.Ground{Terrain: terrain(), Look: look(),
-		Fine: &bodies.Fineness{Rungs: 2, Vary: 0.25, Mix: 0.5}}
-	m := placed(t, g, 4)
+	fineness, err := bodies.NewFineness(2, maths.Share(0.25), maths.Share(0.5))
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := placed(t, ground(t).Fined(fineness), 4)
 	tr := terrain()
-	tr.Tiling = hexes.Sphere{N: 4}
+	tr.Tiling = hexes.Sphere{Splits: 4}
 	ref := world.New(tr)
 	fine, tiles := ref.Fine(look(), 2, 0.25, 0.5), ref.Painted(look())
 	differs := false
@@ -196,8 +221,11 @@ func TestAGroundWithAFinenessIsPaintedFiner(t *testing.T) {
 // a map is worn in place of a fineness, as it is in place of the paint.
 func TestAMapIsWornInPlaceOfAFineness(t *testing.T) {
 	img := image.NewRGBA(image.Rect(0, 0, 8, 4))
-	g := &bodies.Ground{Terrain: terrain(), Look: look(), Map: img,
-		Fine: &bodies.Fineness{Rungs: 2, Vary: 0.25, Mix: 0.5}}
+	fineness, err := bodies.NewFineness(2, maths.Share(0.25), maths.Share(0.5))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := ground(t).Mapped(img, measure.Radians(0)).Fined(fineness)
 	if _, ok := placed(t, g, 4).Texture.(texture.Picture); !ok {
 		t.Error("a ground with a map and a fineness is not the map")
 	}
@@ -220,25 +248,23 @@ func TestARoughnessIsFinePaintedThreeRungsDown(t *testing.T) {
 	for i := range flat.Paints {
 		flat.Paints[i] = maths.Grey(0.5)
 	}
-	g := &bodies.Ground{Terrain: terrain(), Look: look(), Rough: &flat}
-	rough := placed(t, g, 4).Rough
+	rough := placed(t, ground(t).RadarRough(flat), 4).Rough
 	lo, hi := 1.0, 0.0
 	for _, p := range spread(3000) {
 		v := rough.At(p).R
-		if v < 0.425-1e-9 || v > 0.575+1e-9 {
+		if !(v >= 0.425-1e-9 && v <= 0.575+1e-9) {
 			t.Fatalf("a rough tile of a half reads %v, outside 0.425 to 0.575", v)
 		}
 		lo, hi = math.Min(lo, v), math.Max(hi, v)
 	}
-	if lo > 0.43 || hi < 0.57 {
+	if !(lo <= 0.43) || !(hi >= 0.57) {
 		t.Errorf("the roughness runs only %v to %v of 0.425 to 0.575", lo, hi)
 	}
 
 	classes := look()
-	g = &bodies.Ground{Terrain: terrain(), Look: look(), Rough: &classes}
-	rough = placed(t, g, 4).Rough
+	rough = placed(t, ground(t).RadarRough(classes), 4).Rough
 	tr := terrain()
-	tr.Tiling = hexes.Sphere{N: 4}
+	tr.Tiling = hexes.Sphere{Splits: 4}
 	ref := world.New(tr)
 	want := ref.Fine(classes, 3, 0.3, 0.35)
 	others := map[string]texture.Texture{
@@ -269,23 +295,27 @@ func TestARoughnessIsFinePaintedThreeRungsDown(t *testing.T) {
 //
 // the town and metro shares, rungs, glow and seed are the body's own.
 func TestCitiesAreLaidOnTheLandAndItsCoasts(t *testing.T) {
-	g := &bodies.Ground{Terrain: terrain(), Look: look(),
-		Features: func(w *world.World) ([]world.Feature, error) {
+	g := ground(t).Featured(
+		func(w *world.World) ([]world.Feature, error) {
 			seaAt := w.Tiling.Centre(w.Tiling.Nearest(maths.Up))
 			return []world.Feature{
 				world.Patch{At: maths.Up, Reach: 10, Of: world.Grass},
 				world.Patch{At: seaAt, Reach: 0.01, Of: world.Sea},
 			}, nil
-		}}
+		})
 	glow := maths.Light{R: 0.5, G: 0.25, B: 0.125}
-	b := bodies.Body{Name: "r", Kind: bodies.Rock, Radius: 8, Ground: g,
-		Cities: &bodies.Cities{Rungs: 3, Share: 0.5, Metro: 0.25, Glow: glow, Seed: 11}}
+	cities, err := bodies.NewCities(3, maths.Share(0.5),
+		maths.Share(0.25), glow, 11)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "r", bodies.Rock, 8, 1, g, cities)
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.Vec{}, 0.5, 4); err != nil {
 		t.Fatal(err)
 	}
 	shine := solidNamed(t, w, "r").Material.Shine.(texture.Cities)
-	tiling := hexes.Sphere{N: 4}
+	tiling := hexes.Sphere{Splits: 4}
 	if shine.Tiling != hexes.Tiling(tiling) || shine.Rungs != 3 || shine.Share != 0.5 ||
 		shine.Metro != 0.25 || shine.Glow != glow || shine.Seed != 11 {
 		t.Errorf("the cities are %+v", shine)
@@ -339,9 +369,13 @@ func TestCitiesOnAMapAreLaidByTheMap(t *testing.T) {
 			img.Set(x, y, c)
 		}
 	}
-	g := &bodies.Ground{Terrain: terrain(), Look: look(), Map: img}
-	b := bodies.Body{Name: "r", Kind: bodies.Rock, Radius: 8, Ground: g,
-		Cities: &bodies.Cities{Rungs: 3, Share: 0.5, Metro: 0.25, Seed: 11}}
+	cities, err := bodies.NewCities(3, maths.Share(0.5),
+		maths.Share(0.25), maths.Light{}, 11)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := made(t, "r", bodies.Rock, 8, 1,
+		ground(t).Mapped(img, measure.Radians(0)), cities)
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.Vec{}, 0.5, 4); err != nil {
 		t.Fatal(err)

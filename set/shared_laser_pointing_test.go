@@ -82,8 +82,8 @@ func (probe sharedLaserProbe) checkDirection(test *testing.T) {
 			test.Fatal(err)
 		}
 		azimuth, altitude := read.Lasers()[firstLaser].Pointing()
-		if math.Abs(azimuth-probe.row.ExpectedAzimuth) > probe.tolerance ||
-			math.Abs(altitude-probe.row.ExpectedAltitude) > probe.tolerance {
+		if !(math.Abs(azimuth-probe.row.ExpectedAzimuth) <= probe.tolerance) ||
+			!(math.Abs(altitude-probe.row.ExpectedAltitude) <= probe.tolerance) {
 			test.Fatal("shared direction or angular unit changed",
 				azimuth, altitude)
 		}
@@ -113,7 +113,7 @@ func (probe sharedLaserProbe) checkSeparation(test *testing.T) {
 		dot := before.Dot(after)
 		dot = min(singleLaser, max(-singleLaser, dot))
 		separation := math.Acos(dot) / maths.Degree * arcsecondsInDegree
-		if math.Abs(separation-probe.row.Separation) > probe.tolerance {
+		if !(math.Abs(separation-probe.row.Separation) <= probe.tolerance) {
 			test.Fatal("offset changed with boresight elevation", separation)
 		}
 	}

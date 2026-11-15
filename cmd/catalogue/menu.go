@@ -9,6 +9,7 @@ import (
 	"github.com/janearc/puzzlemouth/yamlfile"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/sky"
 )
 
 //go:embed menu.yaml
@@ -36,6 +37,25 @@ type entry struct {
 	Yaw        float64     `json:"view-yaw-deg" yaml:"view-yaw-deg"`
 	Up         string      `json:"view-up,omitempty" yaml:"view-up"`
 	Pitch      *float64    `json:"view-elevation-deg" yaml:"view-elevation-deg"`
+	Staging    *staging    `json:"staging,omitempty" yaml:"staging"`
+}
+
+// staging is an entry's own sky and lamps, lit in place of the plan's
+// studio: a spacecraft in space, say, with one sun and nothing behind it.
+type staging struct {
+	Sky     sky.Gradient `json:"sky" yaml:"sky"`
+	Sources []source     `json:"sources" yaml:"sources"`
+}
+
+// staged is the plan an entry is lit by: the plan, with the entry's own
+// sky and lamps in place of the studio's when it has them, unless the
+// plan asks for its studio whatever the entry has.
+func (entry entry) staged(plan plan) plan {
+	if entry.Staging != nil && !plan.Studio {
+		plan.Sky = entry.Staging.Sky
+		plan.Sources = entry.Staging.Sources
+	}
+	return plan
 }
 
 // camera raises a deep optical tube into view without changing its heading.
@@ -57,8 +77,13 @@ func (entry entry) vertical() maths.Vec {
 
 // readMenu checks both the schema and the actual factory vocabulary.
 func readMenu() (*menu, error) {
+	return parseMenu("menu.yaml", menuRaw)
+}
+
+// parseMenu is readMenu's checks over the bytes of any menu.
+func parseMenu(name string, raw []byte) (*menu, error) {
 	var made menu
-	err := readDocument("menu.yaml", menuRaw, menuSchema, &made)
+	err := readDocument(name, raw, menuSchema, &made)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +102,12 @@ func readMenu() (*menu, error) {
 			if !slices.Contains(levels, detail) {
 				return nil, fmt.Errorf("unknown detail %q",
 					detail)
+			}
+		}
+		if entry.Staging != nil {
+			if err := checkSources(entry.Staging.Sources); err != nil {
+				return nil, fmt.Errorf("catalogue kind %q is staged "+
+					"with %w", entry.Kind, err)
 			}
 		}
 	}

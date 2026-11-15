@@ -54,7 +54,7 @@ func across(normal maths.Vec) (first, second maths.Vec) {
 // irradiance from the sky over pi, the radiance a matte surface of
 // that colour sends back. a white surface under a sky of one radiance
 // everywhere is that radiance.
-func (scene staged) skylight(point, normal maths.Vec,
+func (scene *staged) skylight(point, normal maths.Vec,
 	colour maths.Light) maths.Light {
 	if scene.lighting == nil || colour == (maths.Light{}) {
 		return maths.Light{}

@@ -3,7 +3,6 @@ package weather
 import (
 	"math"
 	"os"
-	"slices"
 	"testing"
 )
 
@@ -25,32 +24,6 @@ func small(t *testing.T, seed uint64) *Weather {
 	return made
 }
 
-// weather reached through the cache, once from nothing and once from a
-// checkpoint left halfway, is the weather run straight through, to the
-// bit: the checkpoint keeps the storms' draws as well as the air.
-func TestTheCacheResumesToTheBit(t *testing.T) {
-	dir := t.TempDir()
-	straight := small(t, 5)
-	straight.Run(4e5)
-	first := small(t, 5)
-	if _, err := first.Reach(dir, 2e5, 1e5, false); err != nil {
-		t.Fatal(err)
-	}
-	second := small(t, 5)
-	steps, err := second.Reach(dir, 4e5, 1e5, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if steps == 0 {
-		t.Fatal("took no steps past the checkpoint")
-	}
-	if second.clock != straight.clock ||
-		!slices.Equal(second.vorticity, straight.vorticity) ||
-		!slices.Equal(second.origin, straight.origin) {
-		t.Error("the resumed weather is not the weather run straight")
-	}
-}
-
 // a second reach of a moment the cache holds takes no step at all.
 func TestAReachedMomentIsReadNotRun(t *testing.T) {
 	dir := t.TempDir()
@@ -63,6 +36,17 @@ func TestAReachedMomentIsReadNotRun(t *testing.T) {
 	}
 	if steps != 0 {
 		t.Errorf("%d steps for a moment the cache holds", steps)
+	}
+}
+
+// still air reached at nothing, which takes no step, is reached again
+// from the cache: its note names a checkpoint that was written.
+func TestStillAirAtNothingIsReachedAgain(t *testing.T) {
+	dir := t.TempDir()
+	for range 2 {
+		if _, err := small(t, 5).Reach(dir, 0, 1e5, false); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 

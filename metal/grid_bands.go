@@ -31,7 +31,7 @@ func (kernel *Kernel) GridBands(width, height, rows, per int,
 		return nil
 	}
 	rows = min(rows, height)
-	stream, err := kernel.openBands(width, rows, per, inputs)
+	stream, err := kernel.openBands(width, height, rows, per, inputs)
 	if err != nil {
 		return err
 	}
@@ -81,10 +81,12 @@ func (kernel *Kernel) validBands(width, height, rows, per int, inputs [][]byte,
 
 // openBands copies each input directly into its retained Metal buffer. The C
 // call completes its copy before returning and never retains the Go pointer.
-func (kernel *Kernel) openBands(width, rows, per int, inputs [][]byte) (unsafe.Pointer, error) {
+func (kernel *Kernel) openBands(width, height, rows, per int,
+	inputs [][]byte) (unsafe.Pointer, error) {
 	defer runtime.KeepAlive(kernel)
 	var why [1024]C.char
-	stream := C.slayer_metal_grid_begin(kernel.ctx, C.int(width), C.int(rows), C.int(per),
+	stream := C.slayer_metal_grid_begin(kernel.ctx, C.int(width), C.int(height),
+		C.int(rows), C.int(per),
 		C.int(len(inputs)), &why[0], C.int(len(why)))
 	if stream == nil {
 		return nil, errors.New("metal: " + C.GoString(&why[0]))

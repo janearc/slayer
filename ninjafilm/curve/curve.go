@@ -39,6 +39,11 @@ func New(least, most, slope float64) (made Curve, err error) {
 	return Curve{least, most, slope}, nil
 }
 
+// Least is the density the positive comes to where plenty of light
+// fell. It is the clearest the curve gets, and no light is too much
+// for it.
+func (tone Curve) Least() float64 { return tone.least }
+
 // Density is how dense the positive is where an exposure fell. One is
 // the exposure at the middle of the curve. None at all is the most
 // density, and less than none is none.

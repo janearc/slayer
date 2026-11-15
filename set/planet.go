@@ -31,6 +31,7 @@ type Planet struct {
 	columns               map[string][]Layer
 	zones                 []Zone
 	pole                  [2]float64
+	chart                 float64
 	rings                 []Ring
 	sky                   *[3]float64
 	storms                *Storms
@@ -294,6 +295,38 @@ func (made Planet) Pole() (azimuth, altitude float64) {
 	return made.pole[0], made.pole[1]
 }
 
+// unsaid marks a number the set did not say, where zero is a thing it
+// can say. It is defined as minus one, under every chart the reader
+// accepts.
+const unsaid = -1
+
+// noChart is a chart of zero points to a pixel: no chart. It is defined
+// as zero, the least the reader accepts.
+const noChart = 0
+
+// mostChart is the most points of a chart to a pixel the reader accepts.
+// Picked as a bound; the usual is two.
+const mostChart = 16
+
+// usualChart is how many points of a chart a pixel gets when the planet
+// does not say: two, at which the charted face of the giant in
+// sets/melancholia.yaml is 0.45 percent of the picture's mean light from
+// the face worked out for every ray, where one point is 1.7 percent.
+// measured at 1024 pixels wide and 16 rays.
+const usualChart = 2
+
+// Chart is how many points of a chart of the planet's face stand across a
+// pixel where the planet is nearest: the face is painted once onto the
+// chart and read between its points, in place of being worked out for
+// every ray. Two unless the planet says; zero is no chart, every ray
+// working the face out for itself.
+func (made Planet) Chart() float64 {
+	if made.chart == unsaid {
+		return usualChart
+	}
+	return made.chart
+}
+
 // Rings is the planet's rings, inner to outer.
 func (made Planet) Rings() []Ring { return slices.Clone(made.rings) }
 
@@ -393,7 +426,8 @@ func (made Set) Planet() (Planet, bool) {
 // has no real planet's face to draw; and its zones must cover it from
 // pole to pole, each naming a column it has.
 func (reading reader) planet(_, value *yaml.Node) error {
-	made := &Planet{columns: map[string][]Layer{}, pole: [2]float64{0, 90}}
+	made := &Planet{columns: map[string][]Layer{}, pole: [2]float64{0, 90},
+		chart: unsaid}
 	var madeUp, said bool
 	if err := reading.keys(value, reading.planetKeys(made, &madeUp,
 		&said), nil); err != nil {
@@ -428,6 +462,7 @@ func (reading reader) planetKeys(made *Planet, madeUp,
 		"gravity":   reading.number(&made.gravity, 0.01, 1e4),
 		"deck":      reading.number(&made.deck, 0, 1),
 		"from_star": reading.number(&made.fromStar, 1e-3, 1e5),
+		"chart":     reading.number(&made.chart, noChart, mostChart),
 		"columns":   reading.columns(made),
 		"zones":     reading.zones(made),
 		"pole": reading.block(map[string]step{

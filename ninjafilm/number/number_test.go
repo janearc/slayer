@@ -111,7 +111,7 @@ func sumAddsEachLampOnce(t *rapid.T) {
 			got, want)
 	}
 	grey := number.Sum(maths.Grey(red))
-	if math.Abs(grey-lamps*red) > toleranceLoose*math.Abs(red) {
+	if !(math.Abs(grey-lamps*red) <= toleranceLoose*math.Abs(red)) {
 		t.Fatalf("grey %v came to %v, want %v", red, grey, lamps*red)
 	}
 	for _, alone := range []float64{red, green, blue} {

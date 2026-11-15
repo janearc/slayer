@@ -195,7 +195,7 @@ func TestAThingOfOneFormIsThatFormAtItsSize(t *testing.T) {
 		t.Fatal(err)
 	}
 	bounds := things[0].Shape.(*mesh.Mesh).Bounds()
-	if got := bounds.Max.Y - bounds.Min.Y; math.Abs(got-tall) > close {
+	if got := bounds.Max.Y - bounds.Min.Y; !(math.Abs(got-tall) <= close) {
 		t.Errorf("a can %v tall is %v tall as a thing", tall, got)
 	}
 }

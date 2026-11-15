@@ -27,7 +27,7 @@ func TestAFaceFillsTheAngleOfHalfItsRectangle(t *testing.T) {
 		{2, -1}, {0.5, -1}, {7, -1}, {-2, 1}, {-0.5, 1}, {-7, 1}} {
 		want := each.sign * rectangle(4, 3, math.Abs(each.height)) / 2
 		got := made.solidAngle(0, maths.V(0, 0, each.height))
-		if math.Abs(got-want) > 1e-12 {
+		if !(math.Abs(got-want) <= 1e-12) {
 			t.Errorf("at %v the face fills %v, not %v", each.height, got,
 				want)
 		}
@@ -75,7 +75,7 @@ func TestRegularFacesFillEqualSharesFromTheMiddle(t *testing.T) {
 		"octahedron": {octahedron(t), math.Pi / 2}} {
 		for i := range each.made.faces {
 			got := each.made.solidAngle(i, maths.Vec{})
-			if math.Abs(got-each.share) > 1e-12 {
+			if !(math.Abs(got-each.share) <= 1e-12) {
 				t.Errorf("%s face %d fills %v, not %v", name, i, got,
 					each.share)
 			}
@@ -122,7 +122,7 @@ func TestTheFacesOfASolidFillTheSphereOnlyFromInside(t *testing.T) {
 		for i := range each.made.faces {
 			got += each.made.solidAngle(i, each.point)
 		}
-		if math.Abs(got-want) > 1e-12 {
+		if !(math.Abs(got-want) <= 1e-12) {
 			t.Errorf("from %v the faces fill %v, not %v", each.point, got,
 				want)
 		}
@@ -141,7 +141,7 @@ func TestAnOpenSolidHasNoInside(t *testing.T) {
 	for i := range open.faces {
 		sum += open.solidAngle(i, maths.Vec{})
 	}
-	if math.Abs(sum-10*math.Pi/3) > 1e-12 {
+	if !(math.Abs(sum-10*math.Pi/3) <= 1e-12) {
 		t.Fatalf("ten faces fill %v", sum)
 	}
 	if open.Inside(maths.Vec{}) {
@@ -165,8 +165,7 @@ func TestDistanceIsBelowNoughtDeepInsideASolid(t *testing.T) {
 		{maths.V(1, 1, -0.5), 0.5},
 		{maths.V(-2, 1, 1), 2},
 	} {
-		if got := skew.Distance(each.point); math.Abs(got-each.want) >
-			1e-12 {
+		if got := skew.Distance(each.point); !(math.Abs(got-each.want) <= 1e-12) {
 			t.Errorf("at %v the distance is %v, not %v", each.point, got,
 				each.want)
 		}

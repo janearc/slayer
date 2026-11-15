@@ -205,8 +205,8 @@ func TestASprawlGivenNoLightsIsSodium(t *testing.T) {
 		}
 		lit++
 		share := got.R / sodium.R
-		if math.Abs(got.G-share*sodium.G) > within ||
-			math.Abs(got.B-share*sodium.B) > within {
+		if !(math.Abs(got.G-share*sodium.G) <= within) ||
+			!(math.Abs(got.B-share*sodium.B) <= within) {
 			t.Errorf("%v gives off %v, not sodium's colour", tile, got)
 		}
 	}

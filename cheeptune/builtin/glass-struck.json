@@ -1,0 +1,38 @@
+{
+	// the studio machine. the lead struck on a bowl, the chords on
+	// plucked strings, a deep plain bass, drums barely there, and a very
+	// large room. made for glass-hour.
+	"name": "glass-struck",
+	"machine": "studio",
+	"master": 0.36,
+	"reverb": {"size": 1, "decay": 7, "damping": 0.35, "level": 0.6},
+	"channels": [
+		{"kind": "modal", "role": "lead", "volume": 0.7, "place": -0.1,
+		 "send": {"reverb": 0.6},
+		 "modal": {"set": "bowl", "hardness": 0.75, "decay": 6}},
+		{"kind": "pluck", "role": "pad", "volume": 0.6, "place": 0.35,
+		 "send": {"reverb": 0.5},
+		 "pluck": {"brightness": 0.7, "damping": 0.25, "position": 0.18,
+		           "decay": 5, "release": 1.5}},
+		{"kind": "analog", "role": "bass", "volume": 0.75,
+		 "send": {"reverb": 0.15},
+		 "envelope": {"attack": 0.01, "decay": 3, "sustain": 0.6,
+		              "release": 0.5},
+		 "analog": {"oscillators": [{"shape": "triangle"},
+		                            {"shape": "triangle", "octave": 1,
+		                             "level": 0.4}],
+		            "filter": {"cutoff": 400, "resonance": 0,
+		                       "follow": 0.5}}},
+		{"kind": "drum", "role": "perc", "volume": 0.4, "place": 0.2,
+		 "send": {"reverb": 0.8},
+		 "drums": {
+			"k": {"tone": 45, "sweep": 12, "fall": 0.06, "decay": 0.4},
+			"s": {"noise": 0.3, "noise_decay": 0.1, "colour": 3000},
+			"h": {"noise": 0.2, "noise_decay": 0.03, "colour": 9000},
+			"t": {"tone": 90, "sweep": 5, "fall": 0.1, "decay": 0.3},
+			"o": {"noise": 0.2, "noise_decay": 0.25, "colour": 9000},
+			"b": {"tone": 660, "struck": "bowl", "hardness": 0.7,
+			      "decay": 1.2}
+		 }}
+	]
+}

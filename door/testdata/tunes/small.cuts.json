@@ -1,0 +1,6 @@
+{"group":"tests","mood":"small and quiet",
+ "feeling":"nothing much","intent":"a test","listen_for":"the end",
+ "voicing":"@dmg-pad","tempo":240,"meter":4,"seconds":4,"parts":[
+ {"name":"first","bar":1,"second":0,"change":"one voice","feels":"alone"},
+ {"name":"second","bar":2,"second":1,"change":"all four","feels":"arrived"},
+ {"name":"last","bar":4,"second":3,"change":"a stop","feels":"done"}]}

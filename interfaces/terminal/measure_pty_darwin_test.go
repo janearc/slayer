@@ -65,7 +65,7 @@ func TestMeasuringATerminalGivesCellsPixelsAndTheShapeOfAPixel(t *testing.T) {
 			continue
 		}
 		if got.Cols != w.want.Cols || got.Rows != w.want.Rows || got.W != w.want.W || got.H != w.want.H ||
-			got.Measured != w.want.Measured || math.Abs(got.Pixel-w.want.Pixel) > 1e-12 {
+			got.Measured != w.want.Measured || !(math.Abs(got.Pixel-w.want.Pixel) <= 1e-12) {
 			t.Errorf("%s: got %+v, want %+v", w.what, got, w.want)
 		}
 	}

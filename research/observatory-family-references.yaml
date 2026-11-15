@@ -86,3 +86,18 @@ sources:
       - {name: SKA dish diameter, value: 15, unit: m}
       - {name: MeerKAT dish diameter, value: 13.5, unit: m}
     context: Offset sub-reflector and feed; keep this visibly distinct from an on-axis dish.
+  - key: eso-4lgsf
+    by: European Southern Observatory
+    from: https://www.eso.org/public/teles-instr/paranal-observatory/vlt/vlt-instr/4lgsf/
+    facts:
+      - {name: lasers, value: 4, unit: count}
+      - {name: power per laser, value: 22, unit: W}
+      - {name: beam diameter, value: 30, unit: cm}
+      - {name: sodium excited at, value: 90, unit: km}
+    context: >-
+      Fetched 2026-11-12, sha256 800c7fe4...d30b. "Each laser delivers 22
+      watts of power ... in a beam with a diameter of 30 centimetres." "the
+      4LGSF sends four laser beams into the skies to produce four
+      artificial stars by exciting sodium atoms located in the atmosphere
+      at an altitude of 90 kilometres." The page gives no wavelength and
+      no launch layout. The cloud-sea scene's own four-beam reference.

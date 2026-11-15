@@ -2,6 +2,10 @@ package occultation
 
 import "math"
 
+// Floor is the least light a table's depth is read from, so that a bin that
+// keeps none has a depth and not an infinite one: picked.
+const Floor = 1e-30
+
 // Baked is a profile as a table a gpu reads the way it reads a texture: the
 // light kept straight through each bin, at level zero, and the mean of each two
 // from the level below at every level above it, until one bin is left.
@@ -70,7 +74,7 @@ func (baked Baked) Seen(radius, across float32) float32 {
 	toward := level - float32(below)
 	kept := baked.read(below, radius)*(1-toward) +
 		baked.read(above, radius)*toward
-	return float32(-math.Log(float64(max(kept, 1e-30))))
+	return float32(-math.Log(float64(max(kept, Floor))))
 }
 
 // read is a level's light kept at a radius, straight between the

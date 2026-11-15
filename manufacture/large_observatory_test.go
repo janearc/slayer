@@ -100,7 +100,7 @@ func (data largeContract) checkPrimary(test *testing.T, polygon *mesh.Mesh) {
 		radius := math.Hypot(local.X, local.Dot(data.Tangent))
 		outer, inner = max(outer, radius), min(inner, radius)
 	}
-	if math.Abs(outer+outer-data.Aperture) > data.Tolerance ||
+	if !(math.Abs(outer+outer-data.Aperture) <= data.Tolerance) ||
 		inner < data.MinimumClearance {
 		test.Fatal("wrong primary extent or central clearance", outer, inner)
 	}

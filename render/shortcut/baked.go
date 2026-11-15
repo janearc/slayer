@@ -119,11 +119,11 @@ func (b *Baked) Tick(t time.Duration) medium.Medium {
 // Apply is the world with the plan's shortcuts taken where they can
 // be today: every volume whose material's name the plan bakes is baked
 // at the plan's resolution. The other shortcuts leave the world as it
-// is until render/trace takes them.
+// is until trace takes them.
 //
 // a gas volume baked loses its gas: the tracer no longer sees Gas() and
 // takes the plain density's way, a different picture (0.47 apart on a
-// hazy puff at 24). kept as it was, as ruled.
+// hazy puff at 24). kept as it was, on purpose.
 //
 // The world handed back is a copy; the one given is untouched, so the
 // exact render is always to hand.

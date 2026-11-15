@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
@@ -44,9 +44,9 @@ func TestLightingReservationUpdatesEverySmokeAndLeavesOtherRecords(t *testing.T)
 		encoded.smokes[1].index != 2 {
 		t.Fatal("fixture needs a direct puff followed by two cacheable smokes")
 	}
-	// Volume has thirteen 16-byte lanes; lighting is lane nine. Decode
+	// Volume has fifteen 16-byte lanes; lighting is lane nine. Decode
 	// the wire directly rather than using the writer's offset helper.
-	const stride, lighting, lanes = 13 * 16, 9 * 16, 4
+	const stride, lighting, lanes = 15 * 16, 9 * 16, 4
 	if len(encoded.volumes.bytes) != 3*stride {
 		t.Fatalf("fixture packed %d volume bytes", len(encoded.volumes.bytes))
 	}

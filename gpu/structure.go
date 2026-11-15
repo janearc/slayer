@@ -121,7 +121,8 @@ func (buffer *packer) row(made structure, given values) {
 var structures = []structure{sphereStruct,
 	triangleStruct, bendStruct, nodeStruct,
 	materialStruct, lampStruct, volumeStruct,
-	headerStruct, treeStruct, whorledStruct, instanceStruct}
+	headerStruct, treeStruct, whorledStruct, instanceStruct,
+	fieldStruct}
 
 // treeStack is how many boxes the kernel's walk of the tree can hold
 // waiting: the split at the middle face keeps a tree's depth near
@@ -136,6 +137,10 @@ const nowhere = 1e30
 // trace's own lampsAsked, so the two pick alike
 const lampsAsked = 8
 
+// refractions is how many clear surfaces a look may bend through:
+// trace's own refractions, so the two bend alike
+const refractions = 8
+
 // per is how many numbers the kernel gives back for every sample, and perRecord
 // how many more for each place it hands back to be painted.
 //
@@ -148,9 +153,16 @@ const (
 )
 
 // numbers is what the kernel is told of the numbers the two share, for
-// a scene that hands back so many records a sample.
-func numbers(records int) string {
+// a scene that hands back so many records a sample and holds so many
+// volumes. The kernel keeps a ray's crossings in arrays sized by
+// most_volumes, so a scene pays thread memory for the volumes it has
+// and no more.
+func numbers(records, volumes int) string {
 	return fmt.Sprintf(`constexpr constant int most_volumes = %d;
+constexpr constant int most_crossings = 2 * most_volumes;
+constexpr constant int refractions = `+fmt.Sprint(refractions)+`;
+constexpr constant int march_steps = 256;
+constexpr constant float march_touch = 1e-6;
 constexpr constant int tree_stack = %d;
 constexpr constant int per_sample = %d;
 constexpr constant int per_base = %d;
@@ -160,28 +172,132 @@ constexpr constant float nowhere = %g;
 constexpr constant int conifer_stack = %d;
 constexpr constant int most_conifer_depth = %d;
 constexpr constant int lamps_asked = %d;
+constexpr constant int field_seed_words = 16;
 constexpr constant int boxed_kind = %d;
+constexpr constant int shell_kind = %d;
 constexpr constant float beam_zero = %g;
 constexpr constant float beam_one = %g;
 constexpr constant float beam_half = %g;
 constexpr constant float beam_bound_radii = %g;
 constexpr constant float beam_radial_samples = %g;
 constexpr constant int beam_max_splits = %d;
-`, mostVolumes, treeStack, per+perRecord*records, per, perRecord,
+constexpr constant int lamp_polar = %d;
+constexpr constant int lamp_flood = %d;
+constexpr constant float flood_whole = %g;
+constexpr constant float flood_half = %g;
+constexpr constant int gas_on = %d;
+constexpr constant float gas_rayleigh = %.9g;
+constexpr constant float gas_four_pi = %.9g;
+constexpr constant float gas_lobe_power = %g;
+constexpr constant float gas_twice = %g;
+constexpr constant float clip_share = %g;
+constexpr constant float clip_rounding = %g;
+`, max(volumes, 1), treeStack, per+perRecord*records, per, perRecord,
 		records, nowhere, coniferStack, mostConiferDepth, lampsAsked,
-		boxedKind, float64(beamZero), float64(beamWhole), beamHalf,
+		boxedKind, shellKind, float64(beamZero), float64(beamWhole), beamHalf,
 		beamstep.Radii(), beamstep.RadialSamples(),
-		beamstep.MaximumSplits())
+		beamstep.MaximumSplits(), polarKind, floodKind, float64(beamWhole), beamHalf,
+		gasOn, rayleighLobe, fourPi, lobePower, float64(lobeTwice),
+		clipShare, clipRounding)
 }
+
+// clipShare and clipRounding are how far a hardware query's segment is
+// lengthened at each end past where it crosses the sphere round the scene.
+// clipShare is that share of the sphere's radius, picked as one percent so
+// a hit at the sphere's edge is never cut off by the hardware's own box
+// tests.
+//
+// clipRounding is that much of the ray's distance from the sphere, for the
+// rounding of the arithmetic that finds the crossing: clipUnits steps of
+// one float's last place, picked as eight times the two or three roundings
+// a dot or a cross product of a far origin makes.
+const (
+	clipShare    = 0.01
+	clipRounding = clipUnits * floatLastPlace
+	clipUnits    = 16
+	// floatLastPlace is the gap above one to the next 32-bit float,
+	// two to the minus twenty-three, true by definition of the format.
+	floatLastPlace = 1.0 / (1 << 23)
+)
 
 // beamWhole and beamHalf are defined as a unit cell and its midpoint.
 const beamWhole, beamHalf = 1, 0.5
 
-// prelude is the kernel's declaration of every number and structure
-// the two share, for a scene that hands back so many records a sample.
-func prelude(records int) string {
+// the counting numbers the kernel counts and indexes by, and the same
+// numbers as floats for its sums, each true by definition.
+const (
+	wholeZero = iota
+	wholeOne
+	wholeTwo
+	wholeThree
+	wholeFour
+	wholeFive
+)
+
+// beamTwo to beamFive are wholeTwo to wholeFive, as the floats the kernel's
+// sums use.
+const (
+	beamTwo   = float64(wholeTwo)
+	beamThree = float64(wholeThree)
+	beamFour  = float64(wholeFour)
+	beamFive  = float64(wholeFive)
+)
+
+// flatUnasked, flatYes and flatNo are what a ring's crossing knows of its
+// own flatness while a ray steps through it: not yet asked, flat, and not
+// flat. they are three names for three states, true by definition.
+const (
+	flatUnasked = iota
+	flatYes
+	flatNo
+)
+
+// seedHighWord is how far past a seed's low word its high word sits, in a
+// card's words, and seedHalfBits is how many bits the low half of a seed
+// holds. both are true by definition: a sixty-four bit seed is two
+// thirty-two bit words, low first.
+const (
+	seedHighWord = wholeOne
+	seedHalfBits = 32
+)
+
+// wholeNumbers is the kernel's declaration of the whole numbers and the
+// small floats its arithmetic is made of, the ones the numbers above name.
+func wholeNumbers() string {
 	var text strings.Builder
-	text.WriteString(numbers(records))
+	for _, one := range []struct {
+		name  string
+		whole int
+	}{{"whole_zero", wholeZero}, {"whole_one", wholeOne},
+		{"whole_two", wholeTwo}, {"whole_three", wholeThree},
+		{"flat_unasked", flatUnasked}, {"flat_yes", flatYes},
+		{"flat_no", flatNo}, {"seed_high_word", seedHighWord},
+		{"seed_half_bits", seedHalfBits}, {"hash_drop", hashDrop}} {
+		fmt.Fprintf(&text, "constexpr constant int %s = %d;\n", one.name,
+			one.whole)
+	}
+	for _, one := range []struct {
+		name string
+		part float64
+	}{{"beam_two", beamTwo}, {"beam_three", beamThree},
+		{"beam_four", beamFour}, {"beam_five", beamFive}} {
+		fmt.Fprintf(&text, "constexpr constant float %s = %g;\n", one.name,
+			one.part)
+	}
+	return text.String()
+}
+
+// prelude is the kernel's declaration of every number and structure
+// the two share, for a scene that hands back so many records a sample
+// and holds so many volumes.
+func prelude(records, volumes int) string {
+	var text strings.Builder
+	text.WriteString(numbers(records, volumes))
+	text.WriteString(wholeNumbers())
+	text.WriteString(reachNumbers())
+	text.WriteString(ringNumbers())
+	text.WriteString(wakeNumbers())
+	text.WriteString(exposureNumbers())
 	for _, made := range structures {
 		text.WriteString(made.msl())
 	}

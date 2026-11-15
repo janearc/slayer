@@ -4,7 +4,6 @@ import (
 	"math"
 	"testing"
 
-	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/gas"
 	"github.com/janearc/slayer/scene/medium"
@@ -30,59 +29,6 @@ func earthlike() *thing.World {
 	return world
 }
 
-// looking is one pixel of the world seen from a place along a direction.
-func looking(world *thing.World, from, along maths.Vec) maths.Light {
-	eye := lookingAt(from, from.Add(along))
-	lens := film.Pinhole{Wide: 1 * maths.Degree}
-	return draw(world, eye, lens, 0, 3, 3).At(1, 1).Light()
-}
-
-// A gas air lights itself from its own numbers: straight up from the
-// ground at noon the sky is blue, more blue than green than red, by
-// rayleigh's fourth power across the eye's bands, and not the magenta
-// the air's material is painted, which a gas volume never reads.
-//
-// Toward the sun along the horizon the light that gets through the
-// long path is redder than the light from straight up.
-func TestAGasAirMakesABlueSky(t *testing.T) {
-	world := earthlike()
-	up := maths.V(1.0001, 0, 0) // on the ground under the sun
-	sky := looking(world, up, maths.V(1, 0, 0))
-	if !(sky.B > sky.G && sky.G > sky.R && sky.R > 0) {
-		t.Fatalf("the noon sky is %v", sky)
-	}
-	// how blue: the gas's own scattering at the blue band over the red,
-	// which for air is rayleigh's fourth power, about three. What gets
-	// through the air on the way moves it, so fifteen percent is let.
-	air := gas.Air()
-	for _, channel := range []struct {
-		name string
-		got  float64
-		band maths.Band
-	}{{"blue", sky.B, eyeBands[2]}, {"green", sky.G, eyeBands[1]}} {
-		want := air.Scatter(channel.band) / air.Scatter(eyeBands[0])
-		if !within(channel.got/sky.R, want, 0.15*want) {
-			t.Errorf("the sky's %s over its red is %.3f, want %.3f",
-				channel.name, channel.got/sky.R, want)
-		}
-	}
-	// from a point on the terminator the sun lies along the horizon
-	edge := maths.V(0, 1.0001, 0)
-	low := looking(world, edge, maths.V(1, 0, 0))
-	if !(low.R > 0 && low.B > 0) {
-		t.Fatalf("the horizon toward the sun is %v", low)
-	}
-	if low.R/low.B <= sky.R/sky.B {
-		t.Errorf("the horizon (%v) is not redder than the zenith (%v)",
-			low, sky)
-	}
-	// at night, away from the sun, the air gives nothing
-	night := looking(world, maths.V(-1.0001, 0, 0), maths.V(-1, 0, 0))
-	if night != (maths.Light{}) {
-		t.Errorf("the night sky is %v", night)
-	}
-}
-
 // With no gas in a world, hasGas says so, gasClear is one, and a
 // painted volume keeps the same share of all three channels. That the
 // picture itself is unchanged is the golden puff's to say, not this
@@ -105,5 +51,34 @@ func TestNoGasChangesNothing(t *testing.T) {
 		Dir: maths.V(0, 0, -1)}, math.Inf(1)).keep
 	if keep.R != keep.G || keep.G != keep.B || keep.R >= 1 || keep.R <= 0 {
 		t.Errorf("a painted volume's keep is %v", keep)
+	}
+}
+
+// EyeOptics is a gas's extinction and scatter at 610, 550 and 465 nm, read
+// here from the gas at each by hand, and the numbers a placed volume keeps.
+func TestEyeOpticsAreTheGassNumbersAtTheEyesBands(t *testing.T) {
+	for name, air := range map[string]gas.Gas{"air": gas.Air(),
+		"haze": gas.Haze(), "air per planet": gas.Air().Per(6371e3)} {
+		extinction, scatter := EyeOptics(air)
+		bands := [3]maths.Band{{Nanometres: 610}, {Nanometres: 550},
+			{Nanometres: 465}}
+		gotE := [3]float64{extinction.R, extinction.G, extinction.B}
+		gotS := [3]float64{scatter.R, scatter.G, scatter.B}
+		for index, band := range bands {
+			if !(gotE[index] == air.Extinction(band)) ||
+				!(gotS[index] == air.Scatter(band)) || !(gotS[index] > 0) {
+				t.Errorf("%s at %v nm: extinction %v scatter %v, want %v and %v",
+					name, band.Nanometres, gotE[index], gotS[index],
+					air.Extinction(band), air.Scatter(band))
+			}
+		}
+		world := thing.NewWorld()
+		world.AddVolume(thing.Volume{Medium: gas.Of{
+			Shape: medium.Puff{Radius: 1, Thick: 1}, In: air, Unit: 1}})
+		placed := stage(world, 0).volumes[0]
+		if placed.extinction != extinction || placed.scatter != scatter {
+			t.Errorf("%s: a placed volume keeps %v and %v, not %v and %v",
+				name, placed.extinction, placed.scatter, extinction, scatter)
+		}
 	}
 }

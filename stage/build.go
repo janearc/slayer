@@ -26,9 +26,23 @@ const still = 0
 const metresPerKilometre = 1e3
 
 // a builder puts one of the lists a set's world says into the tracer's
-// world, its pieces wearing the materials built already.
+// world, its pieces wearing the materials built already, each place it
+// says moved by shift.
 type builder func(world *thing.World, said set.World,
-	worn map[string]*thing.Material) error
+	worn map[string]*thing.Material, shift maths.Vec) error
+
+// unmoved is the shift of no distance.
+var unmoved maths.Vec
+
+// moved is a place moved by a shift. A shift of nought leaves the place
+// as it is to the bit, where adding it would turn a minus nought to a
+// plain one.
+func moved(at, shift maths.Vec) maths.Vec {
+	if shift == unmoved {
+		return at
+	}
+	return at.Add(shift)
+}
 
 // builders are the lists that put something into the world, by the key
 // the set file writes each under. the materials and the motions are worn
@@ -36,20 +50,21 @@ type builder func(world *thing.World, said set.World,
 var builders = map[string]builder{
 	"boxes": boxes, "spheres": spheres, "lamps": lamps, "spots": spots,
 	"floods": floods, "sky": hang, "bodies": bodies, "suns": suns,
-	"wisps": wisps,
+	"wisps": wisps, "fizzes": fizzes,
 }
 
 // boxes puts each box in, as triangles about its middle.
 func boxes(world *thing.World, said set.World,
-	worn map[string]*thing.Material) error {
+	worn map[string]*thing.Material, shift maths.Vec) error {
 	for _, each := range said.Boxes() {
 		size := each.Size()
 		shaped, err := box(size.X, size.Y, size.Z)
 		if err != nil {
 			return fmt.Errorf("box %s: %w", each.Name(), err)
 		}
+		at := maths.Subspace{Origin: moved(each.Middle(), shift)}
 		world.Add(thing.Thing{Shape: shaped, Material: worn[each.Material()],
-			Motion: thing.Still(maths.Subspace{Origin: each.Middle()})})
+			Motion: thing.Still(at)})
 	}
 	return nil
 }
@@ -71,16 +86,17 @@ func box(wide, tall, deep float64) (*mesh.Mesh, error) {
 // spheres puts each sphere in, still at its middle or carried by its
 // motion from there.
 func spheres(world *thing.World, said set.World,
-	worn map[string]*thing.Material) error {
+	worn map[string]*thing.Material, shift maths.Vec) error {
 	runs := map[string]set.Motion{}
 	for _, each := range said.Motions() {
 		runs[each.Name()] = each
 	}
 	for _, each := range said.Spheres() {
+		start := moved(each.Middle(), shift)
 		var moving thing.Motion = thing.Still(
-			maths.Subspace{Origin: each.Middle()})
+			maths.Subspace{Origin: start})
 		if name, carried := each.Motion(); carried {
-			moving = keyed(runs[name], each.Middle())
+			moving = keyed(runs[name], start, shift)
 		}
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: each.Radius()},
 			Material: worn[each.Material()], Motion: moving})
@@ -88,13 +104,14 @@ func spheres(world *thing.World, said set.World,
 	return nil
 }
 
-// keyed is a motion's run, from a thing's place before it.
-func keyed(run set.Motion, base maths.Vec) thing.Keyed {
+// keyed is a motion's run, from a thing's place before it, each place in
+// the run moved by shift.
+func keyed(run set.Motion, base, shift maths.Vec) thing.Keyed {
 	length, ease, hold := run.Run()
 	var frames []thing.Keyframe
 	for _, each := range run.Frames() {
 		frames = append(frames, thing.Keyframe{Share: each.Share,
-			At: each.At})
+			At: moved(each.At, shift)})
 	}
 	return thing.Keyed{Frames: frames, Length: length, Ease: ease,
 		Hold: hold, Base: base}
@@ -102,14 +119,15 @@ func keyed(run set.Motion, base maths.Vec) thing.Keyed {
 
 // lamps lights each bulb, a black body's light from beyond its radius.
 func lamps(world *thing.World, said set.World,
-	_ map[string]*thing.Material) error {
+	_ map[string]*thing.Material, shift maths.Vec) error {
 	for _, each := range said.Lamps() {
 		heat, strength := each.Shine()
 		spectrum, _, err := blackbody(heat, strength)
 		if err != nil {
 			return fmt.Errorf("lamp %s: %w", each.Name(), err)
 		}
-		bulb := emit.Point{At: each.At(), Light: spectrum,
+		at := moved(each.At(), shift)
+		bulb := emit.Point{At: at, Light: spectrum,
 			Beyond: each.Radius()}
 		world.Lamp(bulb.When(still))
 	}
@@ -119,11 +137,12 @@ func lamps(world *thing.World, said set.World,
 // spots lights each spot, the colour libtheme gives a black body at its
 // temperature, so many times over.
 func spots(world *thing.World, said set.World,
-	_ map[string]*thing.Material) error {
+	_ map[string]*thing.Material, shift maths.Vec) error {
 	for _, each := range said.Spots() {
 		heat, strength := each.Shine()
 		cone, soft := each.Cone()
-		world.Lamp(film.Spot{At: each.At(), Aim: each.Aim(),
+		at := moved(each.At(), shift)
+		world.Lamp(film.Spot{At: at, Aim: each.Aim(),
 			Strength: swatches.Light(swatch.Planckian(heat)).Scale(strength),
 			Cone:     cone * maths.Degree, Soft: soft * maths.Degree})
 	}
@@ -132,7 +151,7 @@ func spots(world *thing.World, said set.World,
 
 // floods lights each flood, its colour so many times over.
 func floods(world *thing.World, said set.World,
-	_ map[string]*thing.Material) error {
+	_ map[string]*thing.Material, _ maths.Vec) error {
 	for _, each := range said.Floods() {
 		world.Lamp(film.Flood{
 			Strength: light(each.Colour()).Scale(each.Strength())})
@@ -140,9 +159,13 @@ func floods(world *thing.World, said set.World,
 	return nil
 }
 
-// hang hangs the sky: a gradient, or the stars.
+// hang hangs the sky: a gradient, or the stars. A world with a sky
+// already keeps it.
 func hang(world *thing.World, said set.World,
-	_ map[string]*thing.Material) error {
+	_ map[string]*thing.Material, _ maths.Vec) error {
+	if world.Sky != nil {
+		return nil
+	}
 	hung, _ := said.Sky()
 	if stars, starry := hung.Starry(); starry {
 		share, size, bright := stars.Look()
@@ -161,20 +184,24 @@ func hang(world *thing.World, said set.World,
 // moons' ground tiled so finely, and its axis and aurora as the set says
 // or its template has them.
 func bodies(world *thing.World, said set.World,
-	_ map[string]*thing.Material) error {
+	_ map[string]*thing.Material, shift maths.Vec) error {
 	for _, each := range said.Bodies() {
-		body, _ := template.Named(each.Template())
+		body, err := template.Named(each.Template())
+		if err != nil {
+			return fmt.Errorf("body %s: %w", each.Name(), err)
+		}
 		if tilt, tilted := each.Tilt(); tilted {
-			body.Tilt = tilt * maths.Degree
+			body = body.Tilting(measure.Degrees(tilt))
 		}
 		if shown, says := each.Aurora(); says && !shown {
-			body.Aurora = nil
+			body = body.WithoutAurora()
 		}
 		scale := metresPerKilometre / said.Unit()
 		if radius, sized := each.Radius(); sized {
-			scale = radius / body.Radius
+			scale = radius / body.Radius()
 		}
-		if err := body.Place(world, each.Middle(), scale,
+		middle := moved(each.Middle(), shift)
+		if err := body.Place(world, middle, scale,
 			each.Detail()); err != nil {
 			return fmt.Errorf("body %s: %w", each.Name(), err)
 		}
@@ -184,7 +211,7 @@ func bodies(world *thing.World, said set.World,
 
 // suns lights each sun, one way off.
 func suns(world *thing.World, said set.World,
-	_ map[string]*thing.Material) error {
+	_ map[string]*thing.Material, _ maths.Vec) error {
 	for _, each := range said.Suns() {
 		toward, err := along(each.Toward())
 		if err != nil {
@@ -211,16 +238,38 @@ func along(way maths.Vec) (maths.Vec, error) {
 // ragged by noise, which gives back its colour of the light that
 // crosses it.
 func wisps(world *thing.World, said set.World,
-	_ map[string]*thing.Material) error {
+	_ map[string]*thing.Material, shift maths.Vec) error {
 	for _, each := range said.Wisps() {
 		radius, thick := each.Ball()
 		seed, scale, amount := each.Ragged()
+		at := maths.Subspace{Origin: moved(each.Middle(), shift)}
 		world.AddVolume(thing.Volume{
 			Medium: medium.Wispy{Of: medium.Puff{Radius: radius,
 				Thick: thick}, Seed: seed, Scale: scale, Amount: amount},
 			Material: &thing.Material{Name: each.Name(),
 				Colour: light(each.Colour())},
-			Motion: thing.Still(maths.Subspace{Origin: each.Middle()}),
+			Motion: thing.Still(at),
+		})
+	}
+	return nil
+}
+
+// fizzes lets each fizz in, standing still on its foot: the mist of
+// bubbles too small to see, which gives back its colour of the light
+// that crosses it. The column does not move; its churn climbs at the
+// fizz's rise, when the tracer asks what it is at a moment.
+func fizzes(world *thing.World, said set.World,
+	_ map[string]*thing.Material, shift maths.Vec) error {
+	for _, each := range said.Fizzes() {
+		radius, height, thick := each.Column()
+		seed, churn := each.Churned()
+		at := maths.Subspace{Origin: moved(each.Foot(), shift)}
+		world.AddVolume(thing.Volume{
+			Medium: medium.Fizz{Radius: radius, Height: height,
+				Thick: thick, Rise: each.Rise(), Churn: churn, Seed: seed},
+			Material: &thing.Material{Name: each.Name(),
+				Colour: light(each.Colour())},
+			Motion: thing.Still(at),
 		})
 	}
 	return nil

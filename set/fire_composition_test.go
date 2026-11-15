@@ -42,7 +42,7 @@ func TestFireCompositionRetainsSourceUnitsAndShapeChoices(t *testing.T) {
 		t.Fatal("new controls lost")
 	}
 	lines := spec.Flame.Composition.Lines()
-	if len(lines) != 1 || math.Abs(lines[0].Wavelength.InMetres()-588.995e-9) > 1e-20 || lines[0].Convention != "air" || lines[0].Radiance != .01 {
+	if len(lines) != 1 || !(math.Abs(lines[0].Wavelength.InMetres()-588.995e-9) <= 1e-20) || lines[0].Convention != "air" || lines[0].Radiance != .01 {
 		t.Fatalf("line inputs changed: %+v", lines)
 	}
 }

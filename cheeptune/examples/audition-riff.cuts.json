@@ -1,0 +1,25 @@
+{
+	"group": "audition riff",
+	"mood": "frantic, glassy, a little menacing",
+	"feeling": "A short phrase that shows what an instrument does with a tune: short notes, one held note, a slide and a fast run.",
+	"intent": "The same ten seconds for every new instrument, so they can be told apart by ear and by measurement.",
+	"listen_for": "The held note in the second bar, the slide in the third, and the last bar where everything plays at once.",
+	"voicing": "@analog-drive",
+	"tempo": 100,
+	"meter": 4,
+	"seconds": 9.6,
+	"parts": [
+		{"name": "short-notes", "bar": 1, "second": 0.0,
+		 "change": "short lead notes, quarter-note bass, one chord stab",
+		 "feels": "a pulse, a phrase starting"},
+		{"name": "held-note", "bar": 2, "second": 2.4,
+		 "change": "the lead holds one note for two beats",
+		 "feels": "a note left to ring"},
+		{"name": "slide", "bar": 3, "second": 4.8,
+		 "change": "the lead slides up a third, a tom fill at the end",
+		 "feels": "leaning into the last bar"},
+		{"name": "everything", "bar": 4, "second": 7.2,
+		 "change": "every part plays at once: a run, chords, a fast bass, a full drum",
+		 "feels": "all of it together"}
+	]
+}

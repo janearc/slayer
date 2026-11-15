@@ -1,0 +1,35 @@
+name,x,y,z
+giant,-4,3,-12
+ball,3,-2,-9
+ball moved,-3,2,-8
+ball shaded,0.6,4,-9
+puff,0,2,-10
+sun toward,0.3,1,0.5
+far lamp at,0,2,90
+far lamp aim,0,0,-1
+star left,-3.5,1.5,-10
+star right,3.5,-1,-10
+orbit centre,0,0,-9
+spark,0,2.5,-9
+clay low,3,-2,-9
+mirror,-1,-1.5,-7
+glass,3,1,-6
+star behind glass,3,1,-12
+puff right,3,-1,-9
+puff centre,0,0,-10
+big puff centre,0,0,-20
+lamp a,0,2,60
+lamp b,-30,5,40
+lamp c,25,-8,50
+lamp inside,0.4,0.3,-10
+lamp corner,1.7,1.7,-8.2
+sun other,-0.8,0.5,0.3
+beam aim,0,0,-1
+near ball,0.1,0.05,-0.5
+caster,3.65,0.15,-7.9
+behind centre,0,0,4
+star behind puff,0,0,-14
+lamp huge,0,2,60
+narrow aim point,0.8,0.8,-10
+blocker,2.1,6.9,-6.6
+clay beside glass,3,-4,-9

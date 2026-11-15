@@ -9,6 +9,7 @@
 #import <Metal/Metal.h>
 #include <string.h>
 #include "bridge.h"
+#include "library.h"
 
 typedef struct {
 	void *device;
@@ -18,6 +19,8 @@ typedef struct {
 	void *commands;
 	void *encoder;
 	double gpu;
+	double limit; // seconds one batch may take before the wait gives up
+	int stuck;    // set when a batch outran its limit; the session is done
 } session;
 
 // tell writes why something failed into err, cut to fit
@@ -29,14 +32,12 @@ static void tell(char *err, int errlen, NSString *what) {
 	err[errlen - 1] = 0;
 }
 
-// library compiles the source on a device, or says why not
+// library is the source compiled on a device, through the process's
+// shared shader cache, or says why not
 static id<MTLLibrary> library(id<MTLDevice> device, const char *source,
                               char *err, int errlen) {
 	NSError *why = nil;
-	NSString *text = [NSString stringWithUTF8String:source];
-	id<MTLLibrary> made = [device newLibraryWithSource:text
-	                                           options:[MTLCompileOptions new]
-	                                             error:&why];
+	id<MTLLibrary> made = slayer_shared_library(device, source, &why);
 	if (made == nil) {
 		tell(err, errlen, [NSString stringWithFormat:@"compile: %@",
 		                   why.localizedDescription]);
@@ -103,6 +104,10 @@ void *slayer_session_open(const char *source, const char **kernels,
 	}
 }
 
+void slayer_session_limit(void *ctx, double seconds) {
+	((session *)ctx)->limit = seconds;
+}
+
 int slayer_session_buffer(void *ctx, long length, char *err, int errlen) {
 	@autoreleasepool {
 		session *s = ctx;
@@ -125,10 +130,16 @@ int slayer_session_buffer(void *ctx, long length, char *err, int errlen) {
 	}
 }
 
+// reading a buffer out of the array may hand it back retained and
+// autoreleased. Go's threads have no autorelease pool of their own, so
+// without one here that last reference is never dropped, and the buffer
+// outlives its session for as long as the process runs.
 void *slayer_session_contents(void *ctx, int buffer) {
-	session *s = ctx;
-	NSMutableArray *buffers = (__bridge NSMutableArray *)s->buffers;
-	return ((id<MTLBuffer>)buffers[buffer]).contents;
+	@autoreleasepool {
+		session *s = ctx;
+		NSMutableArray *buffers = (__bridge NSMutableArray *)s->buffers;
+		return ((id<MTLBuffer>)buffers[buffer]).contents;
+	}
 }
 
 // encoding is the batch's encoder, begun if there is none
@@ -149,6 +160,10 @@ int slayer_session_dispatch(void *ctx, int kernel, const int *buffers,
                             int errlen) {
 	@autoreleasepool {
 		session *s = ctx;
+		if (s->stuck) {
+			tell(err, errlen, slayer_stuck());
+			return 1;
+		}
 		NSArray *all = (__bridge NSArray *)s->pipelines;
 		NSArray *held = (__bridge NSArray *)s->buffers;
 		if (kernel < 0 || kernel >= (int)all.count) {
@@ -196,7 +211,12 @@ int slayer_session_commit(void *ctx, char *err, int errlen) {
 		s->commands = NULL;
 		[encoder endEncoding];
 		[commands commit];
-		[commands waitUntilCompleted];
+		NSString *why = nil;
+		if (!slayer_wait_command(commands, s->limit, @"the session batch", &why)) {
+			s->stuck = 1;
+			tell(err, errlen, why);
+			return 1;
+		}
 		if (commands.error != nil) {
 			tell(err, errlen, [NSString stringWithFormat:@"run: %@",
 			                   commands.error.localizedDescription]);
@@ -214,15 +234,19 @@ void slayer_session_close(void *ctx) {
 		return;
 	}
 	session *s = ctx;
-	if (s->encoder != NULL) {
-		id<MTLComputeCommandEncoder> encoder =
-			(__bridge_transfer id<MTLComputeCommandEncoder>)s->encoder;
-		[encoder endEncoding];
-		(void)(__bridge_transfer id)s->commands;
+	// under a pool, as every call from Go is: what these objects
+	// autorelease as they go has nowhere else to drain
+	@autoreleasepool {
+		if (s->encoder != NULL) {
+			id<MTLComputeCommandEncoder> encoder =
+				(__bridge_transfer id<MTLComputeCommandEncoder>)s->encoder;
+			[encoder endEncoding];
+			(void)(__bridge_transfer id)s->commands;
+		}
+		(void)(__bridge_transfer id)s->buffers;
+		(void)(__bridge_transfer id)s->pipelines;
+		(void)(__bridge_transfer id)s->queue;
+		(void)(__bridge_transfer id)s->device;
 	}
-	(void)(__bridge_transfer id)s->buffers;
-	(void)(__bridge_transfer id)s->pipelines;
-	(void)(__bridge_transfer id)s->queue;
-	(void)(__bridge_transfer id)s->device;
 	free(s);
 }

@@ -5,6 +5,13 @@
 // Rays travel from the camera to the nearest surface, accumulating emission,
 // direct lighting, sky illumination, and one mirror bounce.
 //
+// A surface with Material.Through above zero bends the ray by Snell's law and
+// reflects by the unpolarised Fresnel share, all of the light past the
+// critical angle. A partial reflection on a ray that has already bent is paid
+// and not followed, which dims a water ball seen against a bright surround by
+// about two in a hundred head on and a quarter at the rim. Every ray starts
+// in the air, so a camera placed inside water is drawn as if in air.
+//
 // Gravitational fields bend visible-light rays along geodesics. Volume
 // integration adds emission and scattering while attenuating the light behind
 // each sample. Gas media use their own scattering coefficients and currently do
@@ -14,9 +21,7 @@
 // volumes onto other objects is omitted, as is attenuation of lamp light by the
 // global haze model.
 //
-// This package was derived from the tracer at c5c2169. It includes field
-// traversal and volume-shadow fixes absent from the audited render/trace copy.
-// Callers migrating from that package must handle rendering errors.
+// Rendering entry points return an error beside the picture.
 package trace
 
 import (
@@ -48,6 +53,12 @@ const (
 	// bounces is how many times a ray may mirror off a glossy surface:
 	// once, so a hall of mirrors ends.
 	bounces = 1
+	// refractions is how many clear surfaces a look may bend through:
+	// enough for a bubble in a drink in a glass, which is six, air to
+	// glass to drink to bubble and back out, with two to spare; and an
+	// end, so two facing panes do not trap a ray. It was four until
+	// 2026-11-12, enough for a glass seen through both walls and no more.
+	refractions = 8
 	// nowhere is the distance of a ray that meets nothing.
 	nowhere = math.MaxFloat64
 	// strides is how many steps a ray takes across a volume it crosses,

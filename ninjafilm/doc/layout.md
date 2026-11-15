@@ -1,8 +1,10 @@
 # Package layout
 
-ninjafilm separates film primitives into small packages. Clients primarily
-use the top-level API and the lens, lights, maths, and sensor APIs; the
-remaining packages implement stock loading and development.
+ninjafilm separates film primitives into small packages. Of `lens`,
+`lights`, `maths` and `sensor`, only `lens` is used by the commands.
+`lights` and `sensor` are imported by their own tests alone, and `maths`
+by those two. The remaining packages implement stock loading and
+development.
 
 - **`ninjafilm`:** Stock selection through `Stocks` and `Roll`
 

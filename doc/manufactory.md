@@ -1,5 +1,9 @@
 # The manufactory: objects grown from seeds
 
+For the current contribution workflow and copyable factory API, read
+[Making mathematical models](making-models.md), including the Larson and
+recursive trees. The design history below preserves its original scope.
+
 A hillside contains trees, ferns, stones, fallen logs, discarded cans,
 and perhaps a fire after dark. The manufactory builds those objects from
 a kind and a seed rather than asking callers to place every triangle.
@@ -237,7 +241,7 @@ Each stage was planned as a separate commit with tests first and gate checks:
 7. Kind rows and `Make` for the initial solids.
 8. Spectra, spreads, light descriptions, and flicker.
 9. Gathered objects carrying lights: campfire, spotlight, and maser.
-10. Public client API and `cmd/hillside`, using seeds, counts, and forest
+10. Public client API and `hillside`, using seeds, counts, and forest
     placements. Flat-mesh budgets prevent uncontrolled forest allocation.
 11. `emit` reads descriptions and provides a one-beam light. Implemented
     through cone-limited points and `emit.Of`.
@@ -266,7 +270,7 @@ The original outstanding items were growth parameters still embedded in
 placements, leaflets along curved fronds, and bark roughening. The tree
 parameter work continues in [families.md](families.md).
 
-`cmd/hillside` used an exposure conversion of 2000, chosen by inspecting a
+`hillside` used an exposure conversion of 2000, chosen by inspecting a
 night campfire. It is a scene choice, not a measured conversion from watts
 to RGB light. Ground scattering also originally ignored object overlap,
 so a boulder could land on a fire.

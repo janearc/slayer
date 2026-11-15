@@ -37,7 +37,7 @@ func TestEverySwatchHasItsName(t *testing.T) {
 		}
 	}
 	slices.Sort(made)
-	if len(made) != 18 || !slices.Equal(made, Names()) {
+	if len(made) != 20 || !slices.Equal(made, Names()) {
 		t.Errorf("swatches.go makes %v, and the names are %v", made, Names())
 	}
 	for name, want := range map[string]swatch.Swatch{"rust": Rust,

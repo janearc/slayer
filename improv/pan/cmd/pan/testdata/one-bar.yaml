@@ -1,0 +1,6 @@
+# one bar of crypt over one dark still
+size: {width: 32, height: 16}
+fps: 2
+sound: {score: "@crypt", voicing: "@crypt-dmg", bars: [1, 1]}
+shots:
+  - {still: dark.png, bars: 1}

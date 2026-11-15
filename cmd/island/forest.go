@@ -32,7 +32,7 @@ func (site *siteBuilder) forest(minimum, maximum float64) error {
 	for index, member := range forest.Mixture {
 		mixture[index] = biome.Species{Recipe: member.Kind, Weight: member.Weight}
 		for variant := 0; variant < forest.Variety; variant++ {
-			value, err := site.load(prototypeKey{member.Kind, "hull", forest.Seed + uint64(variant)})
+			value, err := site.load(prototypeKey{kind: member.Kind, detail: "hull", seed: forest.Seed + uint64(variant)})
 			if err != nil {
 				return err
 			}
@@ -132,7 +132,7 @@ func (site *siteBuilder) forest(minimum, maximum float64) error {
 			return err
 		}
 		pose := maths.NewSubspace(position, basis.Then(maths.Rotation(maths.YAxis, candidate.Turn*2*math.Pi)), 1)
-		view, err := site.view.Assess(transformedBounds(envelope, pose), measure.Metres(diameter))
+		view, err := site.view.Span(transformedBounds(envelope, pose))
 		if err != nil {
 			return err
 		}
@@ -147,7 +147,7 @@ func (site *siteBuilder) forest(minimum, maximum float64) error {
 			site.record.Aggregated++
 			continue
 		}
-		value, err := site.load(prototypeKey{candidate.Recipe, detail, forest.Seed + uint64(variant)})
+		value, err := site.load(prototypeKey{kind: candidate.Recipe, detail: detail, seed: forest.Seed + uint64(variant)})
 		if err != nil {
 			return err
 		}

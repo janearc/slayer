@@ -14,9 +14,12 @@
 // Below that depth the map has nothing to say, and titan makes the ground
 // up. Each new corner is the middle of an edge. Its height is the mean of
 // the edge's two ends, moved up or down by an amount that is fixed by the
-// seed and the corner's place and nothing else. That is generated. It is
-// arithmetic, with no model in it, and it is not the world: no survey ever
-// saw it.
+// seed and the corner's name on grissom's mesh and nothing else. That is
+// generated. It is arithmetic, with no model in it, and it is not the
+// world: no survey ever saw it.
+//
+// The name is a whole number derived by integer arithmetic, so a gpu
+// refining the same ground derives the same moves the cpu does.
 //
 // How far a made corner moves comes from what the map showed nearby. Near
 // each measured corner titan reads how much the map's heights differ over
@@ -178,7 +181,7 @@ type Ground struct {
 	face   float64 // an icosahedron's edge on this world, in metres
 
 	guard sync.Mutex
-	kept  map[place]read
+	kept  map[uint64]read
 }
 
 // New is the ground of a world of a radius in metres, read from a map.
@@ -192,7 +195,7 @@ func New(from Provider, radius float64, seed uint64) (*Ground, error) {
 	first, second, _ := mesh.Faces()[none].Corners()
 	arc := math.Acos(vectorOf(first).dot(vectorOf(second)))
 	return &Ground{from: from, radius: radius, seed: seed,
-		face: arc * radius, kept: map[place]read{}}, nil
+		face: arc * radius, kept: map[uint64]read{}}, nil
 }
 
 // Edge is about how long a triangle's edge is at a depth, in metres.
@@ -232,9 +235,11 @@ func (ground *Ground) At(at *mesh.Point, detail float64) (*Sample, error) {
 		return nil, err
 	}
 	first, second, third := cell.Corners()
+	nameA, nameB, nameC := cell.CornerNames()
 	var shape [corners]corner
 	for i, each := range []mesh.Point{first, second, third} {
-		shape[i], err = ground.read(vectorOf(each))
+		name := []uint64{nameA, nameB, nameC}[i]
+		shape[i], err = ground.read(vectorOf(each), name)
 		if err != nil {
 			return nil, err
 		}
@@ -311,20 +316,26 @@ func (ground *Ground) step(shape [corners]corner, toward vector,
 // surfaces (Fournier, Fussell and Carpenter 1982; Peitgen and Saupe
 // 1988). it is written here from memory and was not read from either.
 //
-// The move depends on the corner's place and the seed alone, so two
-// triangles that share an edge make the same corner and the ground has no
-// cracks.
+// The move depends on the corner's name and the seed alone, so two
+// triangles that share an edge make the same corner and the ground has
+// no cracks.
+//
+// The name is grissom's: integer arithmetic from the edge's ends, so a
+// gpu refining the same ground derives the same moves; a position's
+// float bits would not survive the trip to 32-bit float. (the
+// renaming: 2026-11-10. it changed what ground a seed makes.)
 func (ground *Ground) middle(from, to corner, depth int) (corner, error) {
 	at := from.at.plus(to.at).unit()
+	name := mesh.EdgeName(from.name, to.name)
 	if ground.Edge(depth) >= ground.from.Finest(at.point()) {
-		return ground.read(at)
+		return ground.read(at, name)
 	}
 	// the curve along the edge that leaves each end at its own slope:
 	// its middle is the mean of the ends, raised by an eighth of the
 	// edge times how much the slopes close on each other
 	chord := to.at.minus(from.at)
 	span := math.Sqrt(chord.dot(chord))
-	made := corner{at: at, kind: Generated,
+	made := corner{at: at, name: name, kind: Generated,
 		height:  half * (from.height + to.height),
 		made:    half * (from.made + to.made),
 		differs: half * (from.differs + to.differs),
@@ -343,7 +354,7 @@ func (ground *Ground) middle(from, to corner, depth int) (corner, error) {
 			along.scaled(middle - half*(leaving+arriving)))
 	}
 	if made.spacing > none {
-		move := ground.spread(made, depth) * ground.drawn(at)
+		move := ground.spread(made, depth) * ground.drawn(name)
 		made.height += move
 		made.made += move
 	}
@@ -368,10 +379,11 @@ func (ground *Ground) spread(near corner, depth int) float64 {
 		(math.Exp2(near.hurst) * math.Sqrt(depths))
 }
 
-// drawn is a number for a place, with a mean of nought and a spread of
-// one, the same for a seed and a place for ever.
-func (ground *Ground) drawn(at vector) float64 {
-	even := unit(at.hashed(ground.seed))
+// drawn is a number for a corner's name, with a mean of nought and a
+// spread of one, the same for a seed and a name for ever.
+func (ground *Ground) drawn(name uint64) float64 {
+	bits := mix(ground.seed + golden)
+	even := unit(mix(bits ^ mix(name+golden)))
 	return math.Sqrt(uniform) * (even - half)
 }
 

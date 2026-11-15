@@ -17,7 +17,13 @@ import (
 type Field struct {
 	Mass, Spin float64
 	Reach      float64
-	Motion     Motion // nil is still, at the world's zero
+	// LetGo is the radius, in masses, past which a ray heading outward is
+	// let go straight; nought is the tracer's own, twelve. A shot that
+	// wants the bending to the reach sets it at the reach: past twelve
+	// the straight run is up to eight degrees short, which steps a disc's
+	// far rim and creases its face.
+	LetGo  float64
+	Motion Motion // nil is still, at the world's zero
 	// EyeTime and Eye are the eye's four-velocity when the eye is
 	// inside the reach, as the hole's march hands it back: the time
 	// part, and the space part in the field's own axes. Nought is an

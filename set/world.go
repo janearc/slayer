@@ -48,10 +48,76 @@ func (ground Terrain) Window() (west, north, across, down, step float64) {
 // it holds, in whites, which lands on white.
 type Film struct {
 	width, height, rays float64
+	fps                 float64
 	exposure            float64
 	wide                float64
 	rig                 *Rig
 	print               *[2]float64 // knee, top
+	sections            sectioning
+}
+
+// sectioning is what a film says of drawing in sections: the width a
+// frame must be over, the side of a section, and whether it said keep,
+// and what.
+type sectioning struct {
+	over, size float64
+	said, keep bool
+	drift      float64
+}
+
+// Drift is how much the film lets a kept section drift: the share of a
+// volume's light from the lamps that did not change that the lamps that
+// did may come to, and a section with the volume in sight still be kept
+// from the last frame. Zero unless the film says, and then a section
+// with a volume in sight is kept only when nothing changed.
+func (made Film) Drift() float64 { return made.sections.drift }
+
+const (
+	// sectionsOver is the width a frame must pass to be drawn in sections,
+	// for a film that says none. Picked: a frame of 320 draws quickly
+	// whole.
+	sectionsOver = 320
+	// sectionsSize is the side of a section in pixels, for a film that
+	// says none. Picked: 64 is small beside a 2K frame's bodies.
+	sectionsSize = 64
+	// notSaid is the over or size of a film that says none. It is defined
+	// as zero: the reader takes no less than one pixel for either.
+	notSaid = 0
+	// leastSide is the fewest pixels a section or a frame may be across.
+	// It is defined as one pixel.
+	leastSide = 1
+	// mostSide is the most pixels a frame may be across, as the film's
+	// width and height take it. Picked with them.
+	mostSide = 1e5
+	// leastDrift is a drift of none. It is defined as zero.
+	leastDrift = 0
+	// mostDrift is the whole of the light of the lamps that did not
+	// change. It is defined as one.
+	mostDrift = 1
+)
+
+// spoken is whether a film said a number of its sections, where it said
+// at least one pixel.
+func spoken(number float64) bool { return number != notSaid }
+
+// Sections is how the film's frames are drawn in pieces: a frame wider
+// than over pixels is drawn in sections size pixels square, and where
+// keep holds a section that cannot have changed since the last frame is
+// kept from it. A film that says nothing of sections has them at 320 and
+// 64, kept; keep false draws every section of every frame, to check the
+// kept ones against.
+func (made Film) Sections() (over, size int, keep bool) {
+	over, size, keep = sectionsOver, sectionsSize, true
+	if spoken(made.sections.over) {
+		over = int(made.sections.over)
+	}
+	if spoken(made.sections.size) {
+		size = int(made.sections.size)
+	}
+	if made.sections.said {
+		keep = made.sections.keep
+	}
+	return over, size, keep
 }
 
 // Print is the print's knee and top, and whether the film says a print.
@@ -154,6 +220,7 @@ type Thing struct {
 	height               float64
 	heading              *float64
 	alight               bool
+	space                spaceThing
 }
 
 // Name is the thing's name, which cameras use to find it.
@@ -267,8 +334,9 @@ func (reading reader) terrain(_, value *yaml.Node) error {
 func (reading reader) film(_, value *yaml.Node) error {
 	made := &reading.set.film
 	rig := &Rig{}
-	err := reading.keys(value, map[string]step{
+	steps := reading.with(map[string]step{
 		"print":    reading.printed(&made.print),
+		"sections": reading.sectioned(&made.sections),
 		"width":    reading.whole(&made.width, 1, 1e5),
 		"height":   reading.whole(&made.height, 1, 1e5),
 		"rays":     reading.whole(&made.rays, 1, 64),
@@ -283,7 +351,8 @@ func (reading reader) film(_, value *yaml.Node) error {
 			"focus": reading.text(&rig.focus)}),
 		"shutter":  reading.number(&rig.shutter, 1e-6, 1e5),
 		"glimpses": reading.whole(&rig.glimpses, 1, 1000),
-	}, nil)
+	}, reading.spaceFilm())
+	err := reading.keys(value, steps, nil)
 	if err != nil || *rig == (Rig{}) {
 		return err
 	}
@@ -301,6 +370,55 @@ func (reading reader) film(_, value *yaml.Node) error {
 	}
 	made.rig = rig
 	return nil
+}
+
+const (
+	// firstKey is the place of a mapping's first key in its content. It
+	// is defined as the first place, zero.
+	firstKey = 0
+	// valueAfter is how far after a key its value stands. It is defined
+	// as one: a mapping's content alternates keys and values.
+	valueAfter = 1
+	// pairWidth is how many places a key and its value take. It is
+	// defined as two.
+	pairWidth = 2
+)
+
+// sectionsStep reads a film's sections into a sectioning.
+type sectionsStep struct {
+	reading reader
+	into    *sectioning
+}
+
+// sectioned is a step that reads how a film draws in sections.
+func (reading reader) sectioned(into *sectioning) step {
+	return sectionsStep{reading: reading, into: into}.read
+}
+
+// saysKeep is whether a mapping has the key keep.
+func saysKeep(value *yaml.Node) bool {
+	for at := firstKey; at+valueAfter < len(value.Content); at += pairWidth {
+		if value.Content[at].Value == "keep" {
+			return true
+		}
+	}
+	return false
+}
+
+// read reads the keys over, size, keep and drift of a film's sections.
+func (from sectionsStep) read(_, value *yaml.Node) error {
+	into, reading := from.into, from.reading
+	said := false
+	err := reading.keys(value, map[string]step{
+		"over":  reading.whole(&into.over, leastSide, mostSide),
+		"size":  reading.whole(&into.size, leastSide, mostSide),
+		"keep":  reading.yes(&said),
+		"drift": reading.number(&into.drift, leastDrift, mostDrift),
+	}, nil)
+	if saysKeep(value) {
+		into.said, into.keep = true, said
+	}
+	return err
 }
 
 // printed is a step that reads a print: its knee, its top above the
@@ -359,10 +477,10 @@ func (reading reader) things(_, value *yaml.Node) error {
 	maximum := math.Sqrt(math.MaxFloat64)
 	return reading.each(value, func(name, block *yaml.Node) error {
 		made := Thing{name: name.Value}
-		err := reading.keys(block, map[string]step{
+		steps := reading.with(map[string]step{
 			"recipe":     reading.text(&made.recipe),
 			"complexity": reading.complexity(&made.complexity),
-			"kind":       reading.only(manufacture.KindNames()...),
+			"kind":       reading.kind,
 			"seed": reading.whole(&made.seed,
 				sceneScalarZero, mostSeed),
 			"east": reading.number(&made.east,
@@ -374,8 +492,15 @@ func (reading reader) things(_, value *yaml.Node) error {
 				sceneScalarZero, maximum),
 			"alight":        reading.yes(&made.alight),
 			"stands_in_for": reading.text(&made.standsIn),
-		}, nil)
+		}, reading.spaceThing(&made))
+		err := reading.keys(block, steps, nil)
 		made.kind = valueOf(block, "kind")
+		if err == nil && reading.second {
+			err = reading.standing(block, made)
+		}
+		if err == nil {
+			err = reading.owned(block, made)
+		}
 		reading.set.things = append(reading.set.things, made)
 		return err
 	})

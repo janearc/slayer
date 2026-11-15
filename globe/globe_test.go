@@ -51,7 +51,7 @@ func TestStraightDownIsTheHeight(t *testing.T) {
 	ball := mustGlobe(t, earth)
 	along, met := ball.Hit(maths.Ray{At: maths.V(0, earth+12, 0),
 		Dir: maths.V(0, -1, 0)}, 0, math.Inf(1))
-	if !met || math.Abs(along-12) > 1e-6 {
+	if !met || !(math.Abs(along-12) <= 1e-6) {
 		t.Errorf("straight down from 12 m the ground is %v m off", along)
 	}
 }
@@ -84,7 +84,7 @@ func TestAGrazingRayMeetsWhereExactArithmeticSays(t *testing.T) {
 		want := exact(earth, 1.7, radians)
 		got, met := ball.Hit(maths.Ray{At: maths.V(0, earth+1.7, 0),
 			Dir: below(radians)}, 0, math.Inf(1))
-		if !met || math.Abs(got-want) > 1e-3 {
+		if !met || !(math.Abs(got-want) <= 1e-3) {
 			t.Errorf("%g rad under level the ground is %.6f m off; "+
 				"exactly, %.6f", radians, got, want)
 		}
@@ -99,8 +99,8 @@ func TestTheGlobeFacesOutAndMeasuresHeight(t *testing.T) {
 	if !ball.Normal(at).Near(at.Unit(), 1e-15) {
 		t.Errorf("at %v the globe faces %v", at, ball.Normal(at))
 	}
-	if got := ball.Distance(maths.V(0, earth+250, 0)); math.Abs(
-		got-250) > 1e-6 {
+	if got := ball.Distance(maths.V(0, earth+250, 0)); !(math.Abs(
+		got-250) <= 1e-6) {
 		t.Errorf("250 m up is %g m from the globe", got)
 	}
 }

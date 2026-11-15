@@ -32,14 +32,14 @@ func TestTheGasRisesAsMcCaffreyFound(t *testing.T) {
 		const step = 1e-4
 		slope := (flame.travel(height+step) - flame.travel(height-step)) /
 			(2 * step)
-		if got := 1 / slope; math.Abs(got-want) > 1e-3*want {
+		if got := 1 / slope; !(math.Abs(got-want) <= 1e-3*want) {
 			t.Errorf("at %g m the gas rises %g m/s, not %g", height, got,
 				want)
 		}
 	}
 	later := body(t, bonfire).Tick(100 * time.Millisecond).(*Body)
 	now, then := flame.lifted(6), later.lifted(6)
-	if moved := now - then; math.Abs(moved-0.1*tongueSpeed*fifth) > 1e-9 {
+	if moved := now - then; !(math.Abs(moved-0.1*tongueSpeed*fifth) <= 1e-9) {
 		t.Errorf("in a tenth of a second the noise moved %g m", moved)
 	}
 }
@@ -53,7 +53,7 @@ func TestTheRegionsMeet(t *testing.T) {
 		const step = 1e-3
 		below := step / (flame.travel(border) - flame.travel(border-step))
 		above := step / (flame.travel(border+step) - flame.travel(border))
-		if math.Abs(below-above) > 0.02*below {
+		if !(math.Abs(below-above) <= 0.02*below) {
 			t.Errorf("at %g m the gas rises %g below and %g above", border,
 				below, above)
 		}

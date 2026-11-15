@@ -135,7 +135,7 @@ func TestAPointGivesTheWattsItIsGiven(t *testing.T) {
 		t.Fatal(err)
 	}
 	given := everything(lamp.Light())
-	if math.Abs(given-sixty) > sixty*wattsError {
+	if !(math.Abs(given-sixty) <= sixty*wattsError) {
 		t.Errorf("a %v W point gives %v W", sixty, given)
 	}
 }
@@ -166,7 +166,7 @@ func pointGivesItsWatts(t *rapid.T) {
 		t.Fatal(err)
 	}
 	given := everything(lamp.Light())
-	if math.Abs(given-watts) > watts*wattsError {
+	if !(math.Abs(given-watts) <= watts*wattsError) {
 		t.Fatalf("a %v W point gives %v W", watts, given)
 	}
 }

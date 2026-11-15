@@ -1,0 +1,7 @@
+version: 1
+job: summit-composite-job.yaml
+from: 0
+to: 48
+transport-scale: 2
+transport-rays: 1
+plate-every: 48

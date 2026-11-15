@@ -1,0 +1,25 @@
+{
+	"group": "eerie",
+	"mood": "brittle and glassy",
+	"feeling": "Walking on a frozen pond and hearing it crack.",
+	"intent": "A ice or glass scene, a slow-motion shatter, a tense museum or lab shot.",
+	"listen_for": "The wash of notes at 0:29 and how thin it goes again after it.",
+	"voicing": "@crypt-dmg",
+	"tempo": 66,
+	"meter": 4,
+	"seconds": 50.91,
+	"parts": [
+		{"name": "ice", "bar": 1, "second": 0.0,
+		 "change": "glassy stabs over a held bass",
+		 "feels": "Thin, brittle"},
+		{"name": "hairline", "bar": 5, "second": 14.55,
+		 "change": "a ticking hat and a nervous lead",
+		 "feels": "A line spreads under your feet"},
+		{"name": "crack", "bar": 9, "second": 29.09,
+		 "change": "a flurry of notes and a snare roll",
+		 "feels": "It breaks"},
+		{"name": "after", "bar": 11, "second": 36.36,
+		 "change": "sparse again: one low bass and a lead",
+		 "feels": "Cold water, silence"}
+	]
+}

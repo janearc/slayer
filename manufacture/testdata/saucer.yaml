@@ -1,0 +1,6 @@
+# The MCRN Larson's cabin light, as a scene finds it: by its name, inside
+# the glass of the dome, in red light. Red is the band from 620 to 750 nm
+# (the usual edges a colour table gives, picked, not read).
+name: cabin
+red-from: 620e-9
+red-to: 750e-9

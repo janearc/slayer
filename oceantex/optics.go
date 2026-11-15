@@ -1,6 +1,10 @@
 package oceantex
 
-import "math"
+import (
+	"math"
+
+	"github.com/janearc/slayer/maths"
+)
 
 var (
 	quanFry       = nums("quan-fry.coefficients")
@@ -35,14 +39,9 @@ func Index(salinity, celsius, nm float64) float64 {
 // Fresnel is the fraction of unpolarised light a flat air-water surface
 // reflects, given the cosine of the angle between the light and the
 // surface's normal, and the water's refractive index. Fresnel's equations
-// with Snell's law.
+// with Snell's law, as maths.Fresnel has them.
 func Fresnel(cosine, index float64) float64 {
-	cosine = math.Min(1, math.Max(0, cosine))
-	sine2 := (1 - cosine*cosine) / (index * index)
-	inside := math.Sqrt(1 - sine2) // cosine of the refracted angle
-	across := (cosine - index*inside) / (cosine + index*inside)
-	along := (index*cosine - inside) / (index*cosine + inside)
-	return (across*across + along*along) / 2
+	return maths.Fresnel(cosine, index)
 }
 
 // Roughness is the variance of the sea's slope along the wind and across
@@ -53,20 +52,20 @@ func Roughness(wind float64) (along, across float64) {
 	return alongSlope * wind, acrossOffset + acrossSlope*wind
 }
 
-// density is the chance of a slope: a Gaussian, the first-order form of
-// [CM54], per unit slope along and across the wind.
-func density(along, across, varAlong, varAcross float64) float64 {
+// SlopeChance is the chance of a slope: a Gaussian, the first-order
+// form of [CM54], per unit slope along and across the wind.
+func SlopeChance(along, across, varAlong, varAcross float64) float64 {
 	return math.Exp(-(along*along/varAlong+across*across/varAcross)/2) /
 		(2 * math.Pi * math.Sqrt(varAlong*varAcross))
 }
 
-// hidden is Smith's function: how much of a rough surface is hidden from
+// Hidden is Smith's function: how much of a rough surface is hidden from
 // a direction, from the cosine of the direction's angle to the vertical
 // and the slope variance along it. Lambda = (exp(-v^2)/(v sqrt(pi)) -
 // erfc(v))/2 with v = cot(angle)/(sqrt(2) sigma), as given for the sea in
 // Ross & Dion (SPIE 5572, 2004) after Smith (1967). The share of the
 // surface in view is 1/(1 + Lambda).
-func hidden(cosine, variance float64) float64 {
+func Hidden(cosine, variance float64) float64 {
 	if cosine <= 0 {
 		return math.Inf(1)
 	}

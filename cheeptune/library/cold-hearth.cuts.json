@@ -1,0 +1,25 @@
+{
+	"group": "sombre and slow",
+	"mood": "sombre and slow",
+	"feeling": "A quiet room after bad news, with one small warmth left in it.",
+	"intent": "A slow, wordless moment: an empty house, a letter, a long look at something that is gone.",
+	"listen_for": "The drum that starts like a heartbeat at 0:11 and the sudden bare note at 0:34.",
+	"voicing": "@tape-chords",
+	"tempo": 64,
+	"meter": 4,
+	"seconds": 41.25,
+	"parts": [
+		{"name": "embers", "bar": 1, "second": 0.0,
+		 "change": "one voice and a held chord, no drums",
+		 "feels": "Still and alone: nobody speaks"},
+		{"name": "heartbeat", "bar": 4, "second": 11.25,
+		 "change": "a soft double beat joins and the bass moves",
+		 "feels": "Something small is alive again"},
+		{"name": "flare", "bar": 7, "second": 22.5,
+		 "change": "the lead climbs in quarter notes and the drum is a full backbeat",
+		 "feels": "The grief turns to anger"},
+		{"name": "ash", "bar": 10, "second": 33.75,
+		 "change": "one bare note over a low root, then a single kick",
+		 "feels": "Everything is spent and quiet"}
+	]
+}

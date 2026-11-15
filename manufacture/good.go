@@ -34,18 +34,31 @@ type good struct {
 // starts a little way out so that the lamp's own housing, which it sits
 // against, does not shade everything it lights: emit calls that distance
 // Beyond.
+//
+// a light may have a name, which a scene addresses it by to program it:
+// a saucer's cabin, say. most have none.
 type lit struct {
 	made       light
 	at, toward maths.Vec
 	beyond     measure.Length
+	name       string
 }
 
 // lit is the thing carrying one more light.
 func (made good) lit(by light, at, toward maths.Vec,
 	beyond measure.Length,
 ) good {
+	return made.litAs("", by, at, toward, beyond)
+}
+
+// litAs is the thing carrying one more light, by a name a scene can
+// address it by.
+func (made good) litAs(name string, by light, at, toward maths.Vec,
+	beyond measure.Length,
+) good {
 	made.lights = append(append([]lit{}, made.lights...),
-		lit{made: by, at: at, toward: toward.Unit(), beyond: beyond})
+		lit{made: by, at: at, toward: toward.Unit(), beyond: beyond,
+			name: name})
 	return made
 }
 

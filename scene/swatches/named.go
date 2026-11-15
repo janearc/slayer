@@ -8,13 +8,14 @@ import (
 )
 
 // named is every paint and lamp by the name a file calls it: the paints,
-// the lamps and the gas giant's paints, each its own name in lower case.
+// the lamps, the gas giant's paints and an oak's two woods, each its own
+// name in lower case.
 var named = map[string]swatch.Swatch{
 	"chalk": Chalk, "clay": Clay, "paint": Paint, "slate": Slate,
 	"sea": Sea, "moss": Moss, "daylight": Daylight, "red": Red,
 	"green": Green, "blue": Blue, "horizon": Horizon, "zenith": Zenith,
 	"tungsten": Tungsten, "cream": Cream, "rust": Rust, "ochre": Ochre,
-	"storm": Storm, "ice": Ice,
+	"storm": Storm, "ice": Ice, "oak": Oak, "oaklate": OakLate,
 }
 
 // Named is the swatch of a name, and whether there is one by that name.

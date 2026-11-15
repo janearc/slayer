@@ -33,7 +33,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/janearc/slayer/schemas/ecosystem-v2.json",
   "title": "Slayer scene and edit, v2",
-  "description": "The scene format slayer is growing into: every key of v1, held to the reader by its parity test, and the keys the reader does not take yet. v2 adds a date, one anchor for a scene, the globe beyond a terrain patch, scenes set in space, things in orbit or placed relative to one another, an attitude, an instrument eye, a sky of catalogued stars, a star as a body with its corona, the lantern, culture orbitals and a nebula as kinds, camera moves relative to things, and an edit of shots cut to a song's timeline. No reader takes v2 yet: it is the specification the reader grows into, one key at a time, each moving into v1 when the reader takes it.",
+  "description": "The scene format slayer is growing into: every key of v1, held to the reader by its parity test, and the keys the reader does not take yet. v2 adds a date, one anchor for a scene, the globe beyond a terrain patch, scenes set in space, things in orbit or placed relative to one another, an attitude, an instrument eye, a sky of catalogued stars, a star as a body with its corona, the lantern, culture orbitals and a nebula as kinds, camera moves relative to things, and an edit of shots cut to a song's timeline. The reader takes v2 and keeps each key no stage draws yet, and hillside refuses a set that holds one, by the key's name. The first key drawn is a setting in space: manufactured things placed by east, north and height, a fixed camera and the sun as one distant lamp (hillside/afloat.go). The rest is the specification the stages grow into, one key at a time.",
   "$defs": {
     "scene": {
       "type": "object",
@@ -225,6 +225,19 @@
             "$ref": "#/$defs/camera"
           }
         },
+        "fantasy": {
+          "type": "object",
+          "properties": {
+            "lake": {"type": "number", "minimum": 0},
+            "lakeglow": {"type": "boolean"},
+            "moon": {"type": "number", "exclusiveMinimum": 0},
+            "moonglow": {"type": "number", "minimum": 0},
+            "giants": {"type": "number", "exclusiveMinimum": 0},
+            "close": {"type": "number", "exclusiveMinimum": 0},
+            "closeglow": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
         "moon": {
           "type": "object",
           "properties": {
@@ -250,6 +263,37 @@
             "altitude"
           ],
           "additionalProperties": false
+        },
+        "volume-illumination": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model",
+            "sky-samples"
+          ],
+          "properties": {
+            "model": {
+              "const": "isotropic-single"
+            },
+            "sky-samples": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 64,
+              "multipleOf": 2
+            }
+          }
+        },
+        "vibes": {
+          "enum": [
+            "on",
+            "off"
+          ]
+        },
+        "fastlight": {
+          "enum": [
+            "on",
+            "off"
+          ]
         },
         "volume-lighting": {
           "enum": [
@@ -928,7 +972,8 @@
                 "home",
                 "spitzer",
                 "hubble",
-                "webb"
+                "webb",
+                "saguaro"
               ]
             }
           },
@@ -1129,6 +1174,26 @@
             "geodss",
             "geodss-site",
             "guide-star-launcher",
+            "owl",
+            "owl-shelter",
+            "valley-oak",
+            "alder",
+            "poplar",
+            "manzanita",
+            "chaparral-brush",
+            "joshua-tree",
+            "saguaro",
+            "mcrn-larson",
+            "mcrn-larson-landed",
+            "apollo-csm",
+            "soyuz-ms",
+            "mercury-capsule",
+            "gemini",
+            "saturn-v",
+            "sls-block-1",
+            "saturn-v-apollo",
+            "apollo-lunar-module",
+            "saturn-ib",
             "point",
             "star",
             "lantern",
@@ -1462,7 +1527,27 @@
             "mssc-twin-1-2m",
             "geodss",
             "geodss-site",
-            "guide-star-launcher"
+            "guide-star-launcher",
+            "owl",
+            "owl-shelter",
+            "valley-oak",
+            "alder",
+            "poplar",
+            "manzanita",
+            "chaparral-brush",
+            "joshua-tree",
+            "saguaro",
+            "mcrn-larson",
+            "mcrn-larson-landed",
+            "apollo-csm",
+            "soyuz-ms",
+            "mercury-capsule",
+            "gemini",
+            "saturn-v",
+            "sls-block-1",
+            "saturn-v-apollo",
+            "apollo-lunar-module",
+            "saturn-ib"
           ]
         },
         "recipe": {
@@ -1726,6 +1811,11 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740992
+          },
+          "asymmetry": {
+            "type": "number",
+            "minimum": -0.99,
+            "maximum": 0.99
           }
         },
         "required": [
@@ -2262,6 +2352,65 @@
             "additionalProperties": false
           }
         },
+        "fizzes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "colour": {
+                "$ref": "#/$defs/colour"
+              },
+              "foot": {
+                "$ref": "#/$defs/triple"
+              },
+              "radius": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "thick": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1000000000000.0
+              },
+              "rise": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000000000000.0
+              },
+              "churn": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "seed": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740992
+              },
+              "source": {
+                "$ref": "#/$defs/source"
+              }
+            },
+            "required": [
+              "colour",
+              "foot",
+              "radius",
+              "height",
+              "thick",
+              "rise",
+              "churn",
+              "seed",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
         "motions": {
           "type": "object",
           "additionalProperties": {
@@ -2353,6 +2502,11 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "chart": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16
         },
         "from_star": {
           "type": "number",
@@ -2555,6 +2709,18 @@
               "type": "number",
               "minimum": 1,
               "maximum": 1000000000000.0
+            },
+            "pace": {
+              "description": "A film: seconds of weather that pass in a second of scene time, from the moment on. Unsaid, every frame shows the moment.",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000000000000.0
+            },
+            "turning": {
+              "description": "A film: degrees the planet turns eastward in a second of scene time. Unsaid, it does not turn.",
+              "type": "number",
+              "minimum": -3600,
+              "maximum": 3600
             }
           },
           "required": [
@@ -3381,6 +3547,30 @@
           "type": "number",
           "minimum": 0.01,
           "maximum": 179
+        },
+        "sections": {
+          "type": "object",
+          "properties": {
+            "over": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "keep": {
+              "type": "boolean"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
         },
         "print": {
           "type": "object",

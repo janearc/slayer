@@ -47,10 +47,33 @@ func TestSpotSwirlsWhatIsInsideItByTheEase(t *testing.T) {
 	)
 	swirlOf(spot, 0.9, 1.5, maths.Light{}, 0).check(t, "on a clean place",
 		swirled{lat, lon, stormPaint, in})
+	// a prior tint of (0.2, 0.4, 0.6) with a share of 0.5 keeps 0.5 * (1 - in)
+	// = 0.405022667351745113515600 of itself, and the spot adds in of its
+	// paint, so each channel is (kept * prior + in * paint) / after. the
+	// values are worked by hand.
 	prior := maths.RGB(0.2, 0.4, 0.6)
-	want := prior.Scale(0.5).Add(stormPaint.Scale(in)).Scale(1 / after)
+	want := maths.RGB(0.391558220664661, 0.4, 0.472294519556893)
 	swirlOf(spot, 0.9, 1.5, prior, 0.5).check(t, "on a place already tinted",
 		swirled{lat, lon, want, after})
+}
+
+// A spot at its ease of one half over a place already half covered
+// keeps half of that half: 0.25 of the old tint, and 0.5 of the spot's
+// paint, over a share of 0.5 + 0.5 * 0.5 = 0.75. grey over the same grey
+// is then (0.25 * 0.5 + 0.5 * 0.5) / 0.75 = 0.5, unchanged. red under
+// blue is (0.25, 0, 0.5) / 0.75 = (1/3, 0, 2/3). the point is 0.5 up from the
+// heart of a spot of size 1, at r of one half, where Smooth is 0.5.
+func TestSpotOverWhatIsThereKeepsTheOldTintByWhatItLeavesUncovered(t *testing.T) {
+	if got := maths.Smooth(0, 1, 0.5); got != 0.5 {
+		t.Fatalf("Smooth(0, 1, 0.5) is %v, want 0.5", got)
+	}
+	grey := maths.RGB(0.5, 0.5, 0.5)
+	spot := Spot{Lat: 0, Lon: 0, Size: 1, Stretch: 1, Turn: 0, Paint: grey}
+	swirlOf(spot, 0.5, 0, grey, 0.5).check(t, "grey over grey",
+		swirled{0.5, 0, grey, 0.75})
+	blue := Spot{Lat: 0, Lon: 0, Size: 1, Stretch: 1, Turn: 0, Paint: maths.RGB(0, 0, 1)}
+	swirlOf(blue, 0.5, 0, maths.RGB(1, 0, 0), 0.5).check(t, "blue over red",
+		swirled{0.5, 0, maths.RGB(1.0/3, 0, 2.0/3), 0.75})
 }
 
 // The longitude is brought to the same side as the spot's by a whole

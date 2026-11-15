@@ -88,7 +88,7 @@ func TestBeamCollimationAndGaussianRadius(test *testing.T) {
 		}
 		edgeAt := at.Add(maths.XAxis.Scale(data.Radius))
 		_, _, edge := beam.Light(edgeAt, maths.XAxis)
-		if math.Abs(edge.R/data.Source.Strength.R-data.GaussianRatio) > data.Tolerance {
+		if !(math.Abs(edge.R/data.Source.Strength.R-data.GaussianRatio) <= data.Tolerance) {
 			test.Fatal("radius is not the 1/e^2 intensity radius", edge)
 		}
 	}
@@ -116,7 +116,7 @@ func TestBeamEndsAndCopies(test *testing.T) {
 func TestDivergentBeamConservesTransversePower(test *testing.T) {
 	data := readBeamData(test)
 	beam := launchBeam(test, data, math.Atan(data.Slope))
-	if math.Abs(beam.Slope()-data.Slope) > data.Tolerance {
+	if !(math.Abs(beam.Slope()-data.Slope) <= data.Tolerance) {
 		test.Fatal("wrong radius growth", beam.Slope())
 	}
 	for _, height := range data.Heights {
@@ -127,7 +127,7 @@ func TestDivergentBeamConservesTransversePower(test *testing.T) {
 			_, _, light := beam.Light(at, maths.YAxis)
 			integral += light.R * data.Quadrature.Turn * radius * data.Quadrature.Step
 		}
-		if math.Abs(integral-data.Quadrature.Expected) > data.Quadrature.Tolerance {
+		if !(math.Abs(integral-data.Quadrature.Expected) <= data.Quadrature.Tolerance) {
 			test.Fatal("divergent beam changed integrated transverse power", height, integral)
 		}
 	}
@@ -177,7 +177,7 @@ func TestBeamCarriesTheSignedRGBOfAMonochromaticSpectrum(test *testing.T) {
 	}
 	edge := at.Add(maths.XAxis.Scale(data.Radius))
 	want := data.Line.Strength * data.GaussianRatio
-	if math.Abs(beam.Lands(edge, band)-want) > data.Tolerance {
+	if !(math.Abs(beam.Lands(edge, band)-want) <= data.Tolerance) {
 		test.Fatal("spectral beam lost its transverse envelope")
 	}
 	for _, height := range data.Outside {
@@ -196,12 +196,12 @@ func TestBeamProfileFollowsATiltedLaunch(test *testing.T) {
 		at := data.Source.At.Add(data.Tilt.Axis.Scale(height))
 		toward, distance, light := beam.Light(at, maths.ZAxis)
 		if toward.Add(data.Tilt.Axis).Len() > data.Tolerance ||
-			math.Abs(distance-height) > data.Tolerance || light != data.Source.Strength {
+			!(math.Abs(distance-height) <= data.Tolerance) || light != data.Source.Strength {
 			test.Fatal("tilted launch did not follow its axis", toward, distance, light)
 		}
 		edge := at.Add(data.Tilt.Across.Scale(data.Radius))
 		_, _, light = beam.Light(edge, maths.ZAxis)
-		if math.Abs(light.R/data.Source.Strength.R-data.GaussianRatio) > data.Tolerance {
+		if !(math.Abs(light.R/data.Source.Strength.R-data.GaussianRatio) <= data.Tolerance) {
 			test.Fatal("tilted transverse radius changed", light)
 		}
 	}

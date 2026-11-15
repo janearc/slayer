@@ -16,7 +16,7 @@ func (b byID) Paint(tile hexes.Tile) maths.Light {
 
 // A tiled surface asks its painter for every tile and darkens the edges.
 func TestTiledPaintsByTileAndLinesTheEdges(t *testing.T) {
-	tl := hexes.Sphere{N: 3}
+	tl := hexes.Sphere{Splits: 3}
 	td := Tiled{Tiling: tl, Paints: byID{tl}, Lines: 0.5}
 	for _, tile := range tl.Tiles() {
 		c := tl.Centre(tile)

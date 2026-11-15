@@ -108,7 +108,7 @@ func TestTheCheapestCutWeighsEachSideByItsBoxAndFaces(t *testing.T) {
 	corners, faces = strips(0, 0.5, 0, 1, 2)
 	grow, whole = growth(corners, faces)
 	_, _, cost = grow.best(0, 3, whole)
-	if want := 1 + (0.25*1+0.75*2)/1.25; math.Abs(cost-want) > 1e-12 {
+	if want := 1 + (0.25*1+0.75*2)/1.25; !(math.Abs(cost-want) <= 1e-12) {
 		t.Errorf("apart, the cost is %v, not %v", cost, want)
 	}
 }
@@ -301,7 +301,7 @@ func TestTheCheapestCutCanBeTheLastBin(t *testing.T) {
 	grow, whole := growth(corners, faces)
 	axis, split, cost := grow.best(0, 3, whole)
 	if want := 1 + 78.0/3400; axis != 0 || split != 14 ||
-		math.Abs(cost-want) > 1e-12 {
+		!(math.Abs(cost-want) <= 1e-12) {
 		t.Errorf("cut axis %d after bin %d at %v, not 0, 14, %v", axis,
 			split, cost, want)
 	}

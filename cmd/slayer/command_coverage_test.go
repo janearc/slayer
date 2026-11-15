@@ -43,7 +43,7 @@ func runCoverageCommand(t *testing.T, args ...string) ([]byte, error) {
 }
 
 func TestRealCommandHelpOrUsagePreservesItsPublicOptions(t *testing.T) {
-	out, err := runCoverageCommand(t, "-help")
+	out, err := runCoverageCommand(t, "draw", "--help")
 	code := 0
 	if err != nil {
 		var stopped *exec.ExitError
@@ -52,7 +52,8 @@ func TestRealCommandHelpOrUsagePreservesItsPublicOptions(t *testing.T) {
 		}
 		code = stopped.ExitCode()
 	}
-	if code != 2 || !strings.Contains(string(out), "usage: slayer set") {
+	if code != nothing || !strings.Contains(string(out), "--dry-run") ||
+		!strings.Contains(string(out), "--renderer") {
 		t.Fatalf("exit%d: %q", code, out)
 	}
 }

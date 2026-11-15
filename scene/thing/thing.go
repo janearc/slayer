@@ -46,6 +46,55 @@ type Material struct {
 	// Index is refractive index. Zero selects 1.5, the glass default.
 	// Reflection increases toward grazing incidence.
 	Gloss, Index float64
+	// Rank says which of two clear things a point inside both is made
+	// of: the one of the higher rank, and between equals the one the
+	// light entered last.
+	//
+	// Water poured in a glass is modelled as a body
+	// of water that runs a little way into the glass's wall; the glass
+	// outranks it, so where they overlap there is glass, and the
+	// surface where water meets glass has glass on one side and water on
+	// the other, with no gap of air and no two faces in one place. The
+	// zero rank is every clear thing's until one is given.
+	Rank int
+	// Through is the share of the light Fresnel does not reflect that
+	// the surface lets through, bent by Index: zero is opaque, one a
+	// clear dielectric like water or glass. The renderer follows the
+	// refracted ray through as many surfaces as trace's refractions.
+	//
+	// A material with Through above zero that is no metal reflects by
+	// Splits, the unpolarised Fresnel share for its index and the side
+	// the ray arrives from, and not by Mirrors' Schlick. A metal
+	// reflects by Reflects whatever its Through.
+	//
+	// A partial reflection on a ray that has already bent is paid and
+	// not followed. Every ray starts in the air, so a camera inside
+	// water is drawn as if in air.
+	Through float64
+	// Metal, when it is given, makes the surface a conductor: it mirrors
+	// by its complex index, a different share of each colour, scaled by
+	// Gloss, and Index no longer says how much it mirrors. Film, when it
+	// is given too, is a clear layer over the metal. See Reflects.
+	Metal *Metal
+	Film  *Film
+	// Satin is how far a glossy surface is from polished, for the
+	// highlights the lamps leave on it: zero is polished, whose
+	// highlight is a point too small to draw, and one is a broad sheen.
+	// Its square is the GGX width; see Microfacet. It does not blur
+	// what the surface mirrors.
+	Satin float64
+	// Crinkle, when it is given, wrinkles the surface: its normal
+	// tilts by noise, for how it mirrors and how it is lit.
+	Crinkle *Crinkle
+}
+
+// Dense is the refractive index a surface reflects and bends by:
+// Index, or glass's 1.5 where none is given.
+func (m *Material) Dense() float64 {
+	if m.Index <= 0 {
+		return 1.5
+	}
+	return m.Index
 }
 
 // Mirrors returns Schlick Fresnel reflectance at incidence cosine cos, scaled
@@ -58,14 +107,42 @@ func (m *Material) Mirrors(cos float64) float64 {
 	if m.Gloss > 1 {
 		return (&Material{Gloss: 1, Index: m.Index}).Mirrors(cos)
 	}
-	n := m.Index
-	if n <= 0 {
-		n = 1.5
-	}
+	n := m.Dense()
 	f0 := (n - 1) / (n + 1)
 	f0 *= f0
 	away := 1 - math.Max(0, math.Min(1, cos))
 	return m.Gloss * (f0 + (1-f0)*away*away*away*away*away)
+}
+
+// Splits returns the share a clear surface reflects, by Fresnel, by side:
+// the light arriving at incidence cosine cos that a surface which
+// transmits reflects, scaled by Gloss: the unpolarised
+// Fresnel reflectance of the boundary between air and a thing of index
+// Dense. Within says the light arrives from inside the thing; otherwise it
+// arrives from the air.
+//
+// Light past the critical angle, where nothing can be transmitted,
+// reflects entirely, at any Gloss. Otherwise nonpositive gloss returns
+// zero, and gloss above one is clamped to one.
+func (m *Material) Splits(cos float64, within bool) float64 {
+	n := m.Dense()
+	if within {
+		n = 1 / n
+	}
+	return m.SplitsBetween(cos, n)
+}
+
+// SplitsBetween is Splits for a boundary that need not have air on
+// either side: relative is the index of what the light goes into over
+// the index of what it comes from. Water against glass is 1.333 over
+// 1.5 going in and its inverse coming out. As Splits, light past the
+// critical angle reflects entirely, at any Gloss.
+func (m *Material) SplitsBetween(cos, relative float64) float64 {
+	share := maths.Fresnel(cos, relative)
+	if share >= 1 {
+		return 1
+	}
+	return math.Min(math.Max(m.Gloss, 0), 1) * share
 }
 
 // Roughness returns local-space texture luminance, or one without a texture.
@@ -220,6 +297,8 @@ func Sun(toward maths.Vec, strength maths.Light) Lamp {
 
 // World assembles surfaces, volumes, fields, lights, sky, and global haze.
 type World struct {
+	// VolumeIllumination's zero value keeps legacy lamp-only painted media.
+	VolumeIllumination VolumeIllumination
 	// RayOriginReference's zero value keeps the geometry-derived heuristic.
 	RayOriginReference RayOriginReference
 	Things             []*Thing

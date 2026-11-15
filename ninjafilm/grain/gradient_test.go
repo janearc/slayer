@@ -154,7 +154,7 @@ func TestGradientIsSeldomPastOne(t *testing.T) {
 func gradientStaysInBounds(t *rapid.T) {
 	seed := rapid.Uint64().Draw(t, "seed")
 	x, y, z := point(t)
-	if got := grain.Gradient(seed, x, y, z); math.Abs(got) > bound {
+	if got := grain.Gradient(seed, x, y, z); !(math.Abs(got) <= bound) {
 		t.Fatalf("the noise at %v, %v, %v is %v", x, y, z, got)
 	}
 }

@@ -1,0 +1,150 @@
+{
+	// zappy's bed for explaining, the curious mood. 22 bars, 49.79 s,
+	// 104 a minute with three small steps up and one back. d with a
+	// raised fourth (g#), the scale of wondering.
+	//
+	// the plan. three things, all from the ident. the motif: a4 d5 e5 a5
+	// | f#5. the call: its first three notes alone (a d e), a question.
+	// the floor: the ident's low b flat. and one new thing, a bounce: the
+	// bass in quiet eighths, root, fifth, octave, fifth, ninth, fifth,
+	// octave, fifth, which is the motif's own notes (d a e) kept turning.
+	//
+	// harmony, a bar each:
+	//   1-4   d d d d            the bounce alone, then the motif (3-4)
+	//   5-6   e/d e/d            the motif a step up: b e f# b | g#,
+	//                            the raised fourth on top (wondering)
+	//   7-8   d d                the motif, and its tail walks home f# e d
+	//   9-12  g a g a            working it out: the call on g (d g a),
+	//                            on a (e a b), again later in the bar,
+	//                            then climbing e a b c#
+	//   13    e/d                the climb's top, d6, held. louder.
+	//   14    nothing            the gap: the call alone and quiet, a d e,
+	//                            with no answer. every other voice rests.
+	//   15-16 b flat             the turn, where the fact lands: the
+	//                            ident's floor and a deep drum, and over
+	//                            it the answer the call was owed, a5 f#5,
+	//                            at half speed. the bounce has stopped.
+	//   17-18 c                  the floor steps up; the motif on c
+	//                            (g c d g | e), the way back opening.
+	//   19-21 d d e/d            anyway: the bounce and the motif again
+	//   22    d                  one short chord, the tune hops a d6 up to
+	//                            home, and it stops.
+	//
+	// time: a tick off every beat, strict, like a mechanism. while it is
+	// working things out the tempo steps up, 108 at bar 9, 112 at bar 11,
+	// 116 at bar 13: thought speeding up. at the turn (bar 15) it is back
+	// at 104 at once, and stays.
+	//
+	// loud and quiet: the bounce and the chords are p, the tune mp, bar 13
+	// mf, the gap p, the turn's bass f (the loudest thing in the piece),
+	// then back to p and mp. it is a bed: nothing is above mf but that
+	// one low note.
+	"name": "zappy-bed-curious",
+	"tempo": 104,
+	"meter": 4,
+	"loop": false,
+	"tempos": [
+		{"bar": 9, "tempo": 108},
+		{"bar": 11, "tempo": 112},
+		{"bar": 13, "tempo": 116},
+		{"bar": 15, "tempo": 104}
+	],
+	"parts": [
+		{"role": "lead", "bars": [
+			"-:4",
+			"-:4",
+			"- a4:1/2@mp d5:1/2@mp e5@mp a5",
+			"f#5:2@mp -:2",
+			"- b4:1/2@mp e5:1/2@mp f#5@mp b5",
+			"g#5:2@mp -:2",
+			"- a4:1/2@mp d5:1/2@mp e5@mp a5",
+			"f#5@mp e5@mp d5:2@mp",
+			"d5:1/2@mp g5:1/2@mp a5@mp -:2",
+			"e5:1/2@mp a5:1/2@mp b5@mp -:2",
+			"-:2 d5:1/2@mp g5:1/2@mp a5@mp",
+			"- e5:1/2@mp a5:1/2 b5 c#6",
+			"d6:2 -:2",
+			"- a4:1/2@p d5:1/2@p e5:2@p",
+			"a5:2@mp f#5:2@mp",
+			"-:4",
+			"- g4:1/2@mp c5:1/2@mp d5@mp g5@mp",
+			"e5:2@mp -:2",
+			"- a4:1/2@mp d5:1/2@mp e5@mp a5",
+			"f#5:2@mp -:2",
+			"- a4:1/2@mp d5:1/2@mp e5@mp f#5@mp",
+			"a5:1/2 d6:1/2 -:3"
+		]},
+		{"role": "pad", "bars": [
+			"-:4",
+			"(d3 a3 f#4):4@p",
+			"(d3 a3 f#4):4@p",
+			"(d3 a3 f#4):4@p",
+			"(d3 b3 e4 g#4):4@p",
+			"(d3 b3 e4 g#4):4@p",
+			"(d3 a3 f#4):4@p",
+			"(d3 a3 f#4):4@p",
+			"(g3 b3 d4):4@p",
+			"(a3 c#4 e4):4@p",
+			"(g3 b3 d4):4@p",
+			"(a3 c#4 e4):4@p",
+			"(d3 b3 e4 g#4):4@mp",
+			"-:4",
+			"(bb2 d4):4@mp",
+			"(bb2 d4 e4):4@p",
+			"(c3 g3 e4):4@p",
+			"(c3 g3 e4):4@p",
+			"(d3 a3 f#4):4@p",
+			"(d3 a3 f#4):4@p",
+			"(d3 b3 e4 g#4):4@p",
+			"(d3 a3 f#4 a4):1@mp -:3"
+		]},
+		{"role": "bass", "bars": [
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"d3:1/2@p b3:1/2@p e4:1/2@p b3:1/2@p g#4:1/2@p b3:1/2@p e4:1/2@p b3:1/2@p",
+			"d3:1/2@p b3:1/2@p e4:1/2@p b3:1/2@p g#4:1/2@p b3:1/2@p e4:1/2@p b3:1/2@p",
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"g2:1/2@p d3:1/2@p g3:1/2@p d3:1/2@p a3:1/2@p d3:1/2@p g3:1/2@p d3:1/2@p",
+			"a2:1/2@p e3:1/2@p a3:1/2@p e3:1/2@p b3:1/2@p e3:1/2@p a3:1/2@p e3:1/2@p",
+			"g2:1/2@p d3:1/2@p g3:1/2@p d3:1/2@p a3:1/2@p d3:1/2@p g3:1/2@p d3:1/2@p",
+			"a2:1/2@p e3:1/2@p a3:1/2@p e3:1/2@p b3:1/2@p e3:1/2@p a3:1/2@p e3:1/2@p",
+			"d3:1/2@mp b3:1/2@mp e4:1/2@mp b3:1/2@mp g#4:1/2@mp b3:1/2@mp e4@mp",
+			"-:4",
+			"bb1:4@f~",
+			"bb1:4",
+			"c2:4~",
+			"c2:2 c3:1/2@p g3:1/2@p c4:1/2@p g3:1/2@p",
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"d3:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p e4:1/2@p a3:1/2@p d4:1/2@p a3:1/2@p",
+			"d3:1/2@p b3:1/2@p e4:1/2@p b3:1/2@p g#4:1/2@p b3:1/2@p e4:1/2@p b3:1/2@p",
+			"d2 -:3"
+		]},
+		{"role": "perc", "bars": [
+			"-:4",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"t@p h:1/2@p h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"t@p h:1/2@p h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"t@p h:1/2@p h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"t@p h:1/2@p h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"t@p h:1/2@p h:1/2@p h:1/2@p h:1/2@p s@p",
+			"-:4",
+			"k -:3",
+			"-:4",
+			"-:4",
+			"-:2 -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"-:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p -:1/2 h:1/2@p",
+			"t@p -:3"
+		]}
+	]
+}

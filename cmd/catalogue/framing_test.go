@@ -43,7 +43,7 @@ func TestGroundObservatoryCameraUsesTheDeclaredElevation(test *testing.T) {
 		centre := object.bounds.Min.Add(object.bounds.Max).Scale(halfExtent)
 		direction := object.eye.Origin.Sub(centre)
 		pitch := math.Atan2(direction.Y, math.Hypot(direction.X, direction.Z))
-		if math.Abs(pitch/maths.Degree-data.Elevation) > data.Tolerance {
+		if !(math.Abs(pitch/maths.Degree-data.Elevation) <= data.Tolerance) {
 			test.Fatal("camera ignored its declared elevation", entry.Kind, pitch)
 		}
 	}
@@ -117,7 +117,7 @@ func TestLooseShootStemsReadUprightInTheCatalogue(test *testing.T) {
 		}
 		// The loose-shoot maker turns its main stem onto positive X.
 		stem := object.eye.Orientation.In(maths.XAxis)
-		if math.Abs(stem.X) > data.Tolerance || stem.Y <= zeroLength {
+		if !(math.Abs(stem.X) <= data.Tolerance) || stem.Y <= zeroLength {
 			test.Fatal("shoot stem reads sideways", entry.Kind, stem)
 		}
 	}

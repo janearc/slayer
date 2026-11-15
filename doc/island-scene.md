@@ -142,6 +142,25 @@ regional mist. The overview exposed a rectangular mist edge. Optional
 outer transition; zero retains rectangular support. This is an authored shape,
 not a condensation model. Moving-view transitions still need inspection.
 
+Optional `patch-scale-metres` separates the size of seeded weather patches
+from a layer's vertical depth. Omission keeps the original depth-based noise.
+Wind advects the same field at either scale; coverage remains an authored
+threshold, not a measured cloud fraction.
+
+Weather footprints can extend up to 200 km on each local coordinate axis,
+independently of the smaller forest limits. The terrain source must cover the
+entire projected floor; unsupported regions fail instead of becoming sea.
+Fixed floor-grid and density-grid allowances still bound preparation.
+
+These remain decks in the site's tangent frame. A broad regional deck can
+place weather away from the observatory, but is not a curved planetary
+atmosphere, a forecast or a condensation simulation.
+
+For weather that follows the sphere and continues offshore, use the separate
+[planetary cloud layers](island-clouds.md). Those fields use direct CPU/Metal
+evaluation and split occupied shell crossings; they do not enlarge a local
+floor grid into a planetary weather approximation.
+
 The original plain island stills below do not verify the added site.
 
 The site stills are retained locally under:
@@ -212,13 +231,14 @@ source extrema tighten regional height bounds.
 Region assessments and actual cell queries share the explicit cell allowance;
 candidates and instances keep their own limits. This does not make off-screen
 shadow influence complete. The pixel thresholds apply to the conservative
-projection criterion, which can exceed a tree's literal image height. The wider
-preset aggregates that criterion below 40 pixels; this is an authored
-quality/work tradeoff.
+projection criterion, which can exceed a tree's literal image height. The first
+snow/woodland movie aggregated that criterion below 40 pixels. The current
+example lowers it to 8; both are authored quality/work choices.
 
 `minimum-geometry-detail: clumps` replaces the hull tier with branch clumps,
-while preserving the aggregate cutoff. This avoids coarse conical silhouettes in
-the woodland preset; omission retains the hull tier.
+while preserving the aggregate cutoff. This avoids coarse conical silhouettes;
+omission retains the hull tier. The current example uses fitted crowns below
+the clump tier, as described later in this note.
 
 Only supports large enough to need individual trees enumerate candidates. The
 authored canopy appearance follows the same fixed spherical chart and blends in
@@ -236,9 +256,9 @@ region assessments, 1,940 cell visits and 63,566 generated candidates.
 At 300 km the whole support aggregates, with zero cell visits and zero generated
 candidates. The first full sixty-frame snow/woodland ascent completed under the
 guard in 94.97 s, with 726 MiB sampled process-tree RSS. Its contact sheet
-exposed coarse hull cones, so the preset now requests branch clumps for that
-tier. This revision still needs its own native moving-view inspection. Changed
-settings do not establish an isolated speedup over the original ascent.
+exposed coarse hull cones. A following clump-only study removed that tier but
+kept the abrupt aggregate transition. The later fitted-crown study is described
+below; changed settings do not establish an isolated speedup over this ascent.
 
 The [ascent plan](island-ascent-preview.yaml) supplies geographic camera and
 look-target keyframes, horizontal field of view, outgoing-segment easing and
@@ -264,6 +284,22 @@ does not prove clearance between frames. Radial up is rebuilt for each view.
 
 The path is authored choreography, not constant-speed physical travel or an
 orbit integration. Zoom reuses the checked angular interpolation in `camera`.
+
+Per-leg `smooth` easing stops coordinate motion at every waypoint. The original
+six-fps ascent also changes its look target along the climb. Its repeated
+slowdowns and changing framing are path choices, not evidence of dropped frames.
+
+The [continuous ascent](island-ascent-continuous.yaml) instead requests
+`interpolation: continuous`, linear key easing and 24 fps, with a fixed target.
+Coordinate velocities agree at shared waypoints, using cubic interpolation and
+the slower adjacent rate when both legs continue in the same direction.
+Reversals meet at zero rate. Coordinates stay between each leg's endpoints.
+
+This removes per-leg velocity resets; it does not enforce constant geographic
+speed, constant ascent rate or a fixed viewing angle. Camera, target and lens
+have continuous coordinate rates. Terrain clearance between frames, detail
+transitions and temporal sampling remain separate checks. The full continuous
+example is an input plan, not a claim that its 720 frames have been rendered.
 
 Source hashes, decoding caches and native min/max indices are prepared once.
 One bounded prototype cache is shared across frames; its face allowance applies
@@ -325,7 +361,7 @@ remain useful next steps; more triangles alone do not remove every artifact.
 
 ## First local evidence, 2026-11-09
 
-The owner's later screenshots exposed unresolved appearance faults in the
+Later screenshots exposed unresolved appearance faults in the
 snow/woodland study. Whole-tree hulls become conspicuous cones, and abrupt
 geometry-to-flat-colour replacement removes stands while they remain visible.
 The branch-clump floor removes the cone tier, but does not by itself solve
@@ -352,7 +388,7 @@ gallery.
 These controls support this specific repair, rather than a general proof of
 planet-scale intersection accuracy.
 
-The next local branch introduces an optional `minimum-geometry-detail: crown`.
+The island adapter provides optional `minimum-geometry-detail: crown`.
 It reduces a seeded specimen's clump bounds into eight height slices and four
 horizontal quadrants per material. Each occupied bin becomes an octahedron. Its original
 material and height distribution survive; fine branch gaps do not. These are
@@ -369,6 +405,56 @@ gaps.
 Crowns are retained and measured with the other detail prototypes before
 candidate placement. Overhead-area calibration still intersects the original
 clumps, rather than these simplified envelopes.
+
+Optional `match-crown-material-area` requires the crown floor and an explicit
+`crown-area-samples-side`. It probes each material separately in both the
+original clumps and the coarse crown, using the same specimen-local rectangle.
+Materials retain their original colour; names and colour channels do not
+decide which geometry to reduce.
+
+If a material has excess sampled overhead area, its crown is narrowed
+horizontally about the root axis by the square root of the source/crown area
+ratio. Exact continuous vertical projected area scales by that factor squared.
+Finite grid probes only estimate those areas. Height and the conservative
+visibility envelope remain unchanged; fit resolution belongs in the cache key.
+
+Zero sampled area is unresolved, and a target needing expansion exceeds this
+construction's remit. Both cases retain the original material geometry and
+record the limitation. Render records retain each material's source, before
+and after area, chosen scale, probe bounds and newly performed ray work.
+
+These separate material areas overlap; their sum is not union cover or a
+visible colour fraction. Narrowing does not match oblique silhouettes, gaps,
+directional shadows or physical canopy reflectance. The aggregate-cover sampling
+side remains independent of this fit's sampling side.
+
+Four matched native 320 by 180 stills, at sixteen samples per pixel, compare
+original clumps, unfitted crowns and two fit resolutions. All retain the same
+23,704 tree positions. Against the clump reference, whole-image mean absolute
+RGB code difference falls from 7.15 to 3.84 with the 32-side fit, and to 3.90
+with the 64-side fit. These are display-code differences in one view, not a
+physical or perceptual acceptance threshold.
+
+The local material comparison retains all images, effective scenes, source
+records and probe areas. The two fit resolutions give similar images here;
+their ordering does not prove convergence. The woodland example requests the
+32-side fit. Oblique silhouettes and moving transitions remain under review.
+
+The fitted ascent study, `2026-11-09-island-material-ascent-320`, contains
+180 actual native frames, four samples per pixel and a decoded thirty-second
+MP4 at six fps. Its scene clock spans one hour; the camera rises from 3,740 m
+to 300,000 m above the authored sphere. The guarded run took 389.52 s and
+sampled 766 MiB of process-tree RSS. It used the material-fit producer before
+the mist-floor cache was implemented.
+
+Frame PNGs, effective settings and source bytes were checked by hash. Across
+79,379 distinct root IDs, 1,328,747 repeated identity/position checks found
+no mismatch. Two crown fits and aggregate-area estimates remain unchanged
+across frames; all their probe work occurs in the first frame.
+
+The sampled PNGs still show the small mist bank and limited intermediate
+terrain detail. Stable metadata does not
+certify smooth transitions, and the ocean remains a smooth proxy.
 
 The revised woodland example lowers its aggregate cutoff from 40 to 8 in the
 conservative projected-displacement criterion and uses crowns below the clump
@@ -413,6 +499,36 @@ Render records separate total forest preparation, region selection (including
 any newly loaded detail prototypes) and candidate placement. These are elapsed
 wall times; selection and placement are parts of total preparation. Reduced
 height-read counts alone do not demonstrate a render-time improvement.
+
+An optional site budget, `mist-floor-cache-bytes`, retains source-projected
+floor grids across layers and frames. Its key includes the fixed world pose,
+horizontal bounds, grid side, projection tolerance and iteration limit. Camera
+translation and weather time are excluded because they do not alter that floor.
+The allowance covers retained float64 height payloads, not map metadata or grids
+still referenced by the current frame.
+
+A grid larger than the allowance is refused before allocation. Otherwise the
+least recently used entries are evicted as needed. Zero preserves uncached
+construction. Each frame records grid builds, hits, evictions, retained payload
+bytes, source queries and floor preparation time. Closing the session releases
+its retained floor entries.
+
+Only the ground projection is reused. Weather still advances with scene time,
+and its density grids and GPU inputs are rebuilt for every frame. This is a
+bounded preparation cache, not cached fog illumination or persistent GPU
+residency; a reduced query count alone is not a speed claim.
+
+Paired three-frame native controls retain identical PNG bytes with the cache
+disabled or enabled, while their weather images change over ten minutes of
+scene time. The shared 65 by 65 floor retains 33,800 bytes. After the first
+frame, both layers reuse it with zero new floor queries, instead of 22,202
+source-height queries and about 4.5 ms of floor preparation per frame.
+
+A second pair uses different grid sides under a 64 KiB allowance and forces
+eviction. Its PNGs also remain identical to the uncached reference. A grid
+larger than the allowance is refused by the parser. These controls cover
+reuse, eviction and budget refusal, rather than whole-render acceleration;
+the measured complete-frame times did not materially improve.
 
 The committed scene path at ecbc487 rendered actual native-Metal 320 by 180
 and 1280 by 720 studies on the M3 Max, with four samples per pixel. The wider

@@ -31,6 +31,8 @@ type objectPlan struct {
 }
 
 type forestPlan struct {
+	CrownAreaSide   int         `yaml:"crown-area-samples-side" json:"crown-area-samples-side,omitempty"`
+	CrownAreaMatch  bool        `yaml:"match-crown-material-area" json:"match-crown-material-area"`
 	AreaSide        int         `yaml:"aggregate-area-samples-side" json:"aggregate-area-samples-side,omitempty"`
 	GeometryMinimum string      `yaml:"minimum-geometry-detail" json:"minimum-geometry-detail,omitempty"`
 	Adaptive        bool        `yaml:"adaptive-regions" json:"adaptive-regions"`
@@ -56,6 +58,7 @@ type forestPlan struct {
 }
 
 type mistPlan struct {
+	PatchScale      float64     `yaml:"patch-scale-metres" json:"patch-scale-metres,omitempty"`
 	EdgeFade        float64     `yaml:"edge-fade-metres" json:"edge-fade-metres"`
 	Bounds          localBounds `yaml:"bounds-metres" json:"bounds-metres"`
 	Base            float64     `yaml:"base-metres" json:"base-metres"`
@@ -90,9 +93,10 @@ type sitePlan struct {
 	Atmosphere    []mistPlan      `yaml:"atmosphere" json:"atmosphere,omitempty"`
 	Lasers        *laserPlan      `yaml:"lasers" json:"lasers,omitempty"`
 	Budget        struct {
-		Cells      int `yaml:"cells" json:"cells"`
-		Candidates int `yaml:"candidates" json:"candidates"`
-		Instances  int `yaml:"instances" json:"instances"`
-		Faces      int `yaml:"prototype-faces" json:"prototype-faces"`
+		MistFloors int64 `yaml:"mist-floor-cache-bytes" json:"mist-floor-cache-bytes"`
+		Cells      int   `yaml:"cells" json:"cells"`
+		Candidates int   `yaml:"candidates" json:"candidates"`
+		Instances  int   `yaml:"instances" json:"instances"`
+		Faces      int   `yaml:"prototype-faces" json:"prototype-faces"`
 	} `yaml:"budget" json:"budget"`
 }

@@ -1,0 +1,28 @@
+{
+	"group": "slow start, fast finish",
+	"mood": "a hush that breaks",
+	"feeling": "A stillness that gets worse with every bar, then breaks.",
+	"intent": "A long build for a big reveal, a slow tease before a launch or a drop.",
+	"listen_for": "How each section is busier than the last, and the whole thing letting go at 0:41.",
+	"voicing": "@dmg-pad",
+	"tempo": 70,
+	"meter": 4,
+	"seconds": 89.14,
+	"parts": [
+		{"name": "hush", "bar": 1, "second": 0.0,
+		 "change": "a hushed lead and a held bass",
+		 "feels": "Held breath"},
+		{"name": "murmur", "bar": 5, "second": 13.71,
+		 "change": "chords and a sparse kick",
+		 "feels": "Murmuring"},
+		{"name": "rising", "bar": 9, "second": 27.43,
+		 "change": "eighth notes and a backbeat",
+		 "feels": "Rising"},
+		{"name": "storm", "bar": 13, "second": 41.14,
+		 "change": "sixteenths and a galloping drum: the full storm",
+		 "feels": "Everything let go"},
+		{"name": "end", "bar": 25, "second": 82.29,
+		 "change": "a held chord and a kick",
+		 "feels": "Calm after"}
+	]
+}

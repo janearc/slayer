@@ -1,0 +1,16 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  set: summit-interior.yaml
+film:
+  width: 320
+  height: 180
+  rays: 2
+at:
+  value: 0
+  unit: s
+camera:
+  name: low below the domes
+renderer: gpu
+outputs:
+  picture: 03-summit-interior.png

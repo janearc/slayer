@@ -21,6 +21,67 @@
     "exposure"
   ],
   "properties": {
+    "volume-lighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model",
+        "sky-samples"
+      ],
+      "properties": {
+        "model": {
+          "const": "isotropic-single"
+        },
+          "sky-grid": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low-metres",
+            "high-metres",
+            "nodes"
+          ],
+          "properties": {
+            "low-metres": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": -20000000,
+                "maximum": 20000000
+              }
+            },
+            "high-metres": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": -20000000,
+                "maximum": 20000000
+              }
+            },
+            "nodes": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 128
+              }
+            }
+          }
+        },
+      "sky-samples": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 64,
+          "multipleOf": 2
+        }
+      }
+    },
+    "cloud-layers": {"type": "array", "maxItems": 4, "items": {"$ref": "#/$defs/cloud"}},
     "landcover-transition-metres": {
       "type": "number", "minimum": 0, "maximum": 1000
     },
@@ -208,6 +269,15 @@
           "exclusiveMinimum": 0,
           "maximum": 10000
         },
+        "transition": {
+          "type": "object", "additionalProperties": false,
+          "required": ["seconds", "patches", "payload-bytes"],
+          "properties": {
+            "seconds": {"type": "number", "minimum": 0.001, "maximum": 3600},
+            "patches": {"type": "integer", "minimum": 1, "maximum": 2048},
+            "payload-bytes": {"type": "integer", "minimum": 1, "maximum": 268435456}
+          }
+        },
         "minimum-height-metres": {
           "type": "number",
           "minimum": -20000,
@@ -362,6 +432,20 @@
     }
   },
   "$defs": {
+    "cloud": {
+      "type": "object", "additionalProperties": false,
+      "required": ["low-height-metres", "high-height-metres", "patch-scale-metres", "extinction-per-metre", "coverage", "seed", "wind-metres-per-second", "colour-rgb"],
+      "properties": {
+        "low-height-metres": {"type": "number", "minimum": 0, "maximum": 20000},
+        "high-height-metres": {"type": "number", "minimum": 1, "maximum": 20000},
+        "patch-scale-metres": {"type": "number", "minimum": 100, "maximum": 200000},
+        "extinction-per-metre": {"type": "number", "minimum": 0, "maximum": 1},
+        "coverage": {"type": "number", "minimum": 0, "maximum": 1},
+        "seed": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+        "wind-metres-per-second": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": -100, "maximum": 100}},
+        "colour-rgb": {"$ref": "#/$defs/reflectance"}
+      }
+    },
     "longitude": {
       "type": "number",
       "minimum": -180,
@@ -559,6 +643,8 @@
       "properties": {
         "adaptive-regions": {"type": "boolean"},
         "aggregate-area-samples-side": {"type": "integer", "minimum": 8, "maximum": 128},
+        "match-crown-material-area": {"type": "boolean"},
+        "crown-area-samples-side": {"type": "integer", "minimum": 8, "maximum": 128},
         "minimum-geometry-detail": {"enum": ["hull", "clumps", "crown"]},
         "height-fade-metres": {"type": "number", "minimum": 0, "maximum": 20000},
         "edge-fade-metres": {"type": "number", "minimum": 0, "maximum": 20000},
@@ -670,13 +756,14 @@
         "floor-iterations"
       ],
       "properties": {
+        "patch-scale-metres": {"type": "number", "minimum": 1, "maximum": 200000},
         "edge-fade-metres": {
           "type": "number",
           "minimum": 0,
           "maximum": 20000
         },
         "bounds-metres": {
-          "$ref": "#/$defs/local-bounds"
+          "$ref": "#/$defs/weather-bounds"
         },
         "base-metres": {
           "type": "number",
@@ -731,6 +818,16 @@
           "minimum": 1,
           "maximum": 64
         }
+      }
+    },
+    "weather-bounds": {
+      "type": "object", "additionalProperties": false,
+      "required": ["min-east", "min-south", "max-east", "max-south"],
+      "properties": {
+        "min-east": {"type": "number", "minimum": -200000, "maximum": 200000},
+        "min-south": {"type": "number", "minimum": -200000, "maximum": 200000},
+        "max-east": {"type": "number", "minimum": -200000, "maximum": 200000},
+        "max-south": {"type": "number", "minimum": -200000, "maximum": 200000}
       }
     },
     "lasers": {
@@ -845,6 +942,7 @@
             "prototype-faces"
           ],
           "properties": {
+            "mist-floor-cache-bytes": {"type": "integer", "minimum": 0, "maximum": 8388608},
             "cells": {
               "type": "integer",
               "minimum": 0,

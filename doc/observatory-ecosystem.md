@@ -88,9 +88,12 @@ guarantee of an unobstructed beam at every pointing.
 Seeded construction and placement stay fixed across complexity levels. `Bounds`
 retains a common physical extent for clearance and atmosphere.
 
-The two loose shoots and the [spacecraft templates](space-observatories.md)
-also support all four levels. Other kinds currently accept `quick` only;
-unsupported levels are refused.
+Every kind whose recipe has a `madeAt` method takes all four levels (hull,
+clumps, quick, demo), among them the two loose shoots, the observatories and
+the [spacecraft templates](space-observatories.md). Only these kinds accept
+`quick` alone: bonfire, boulder, campfire, can, cobble, fern, home, the
+seven lasers, log, maser, pebble, spotlight and strobe; unsupported levels
+are refused.
 
 ## Atmosphere
 

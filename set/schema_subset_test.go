@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"slices"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -152,9 +153,48 @@ func readerKeySet(t *testing.T, file, method, anchor string) []string {
 	return found
 }
 
+// v2Also is, for a block of the reader named by its file, method and
+// anchor, the other literal maps of steps that hold the keys the reader
+// takes in a file that names schema version 2 and version 1 does not
+// have, each as file/method/anchor.
+var v2Also = map[string][]string{
+	"scene.go/scene/renderer":            {"space.go/spaceScene/setting"},
+	"world.go/film/rays":                 {"space.go/spaceFilm/fps"},
+	"scene.go/cameraKeys/eye":            {"space_cameras.go/spaceCamera/duration"},
+	"scene.go/locationKeys/loc_relative": {"space_cameras.go/spaceLocation/relative"},
+	"world.go/things/north": {"space_things.go/placing/place",
+		"space_things.go/starring/star", "space_things.go/lanterning/panels",
+		"space_things.go/orbiting/radius", "space_things.go/nebulous/thickness",
+		"space_world.go/spacecraft/orbit"},
+}
+
+// v2Unread is, for a block of the reader named the same way, the keys
+// schema version 2 has that the reader does not take yet.
+var v2Unread = map[string][]string{}
+
+// A schema version the reader reads against: its name and its text.
+type schemaVersion struct {
+	name string
+	raw  []byte
+	two  bool
+}
+
 func TestEcosystemSubsetAndReaderKeySetsStayInStep(t *testing.T) {
+	for _, version := range []schemaVersion{{"version 1", ecosystemRaw, false},
+		{"version 2", ecosystemV2Raw, true}} {
+		t.Run(version.name, func(t *testing.T) {
+			keySetsStayInStep(t, version)
+		})
+	}
+}
+
+// keySetsStayInStep requires each block of keys the reader reads to take
+// the keys the schema's block has, as far as the version goes: version
+// 1's without the keys only version 2 has, and version 2's but for the
+// ones the reader does not take yet.
+func keySetsStayInStep(t *testing.T, version schemaVersion) {
 	var schema map[string]any
-	if err := json.Unmarshal(ecosystemRaw, &schema); err != nil {
+	if err := json.Unmarshal(version.raw, &schema); err != nil {
 		t.Fatal(err)
 	}
 	for _, test := range []struct {
@@ -197,6 +237,7 @@ func TestEcosystemSubsetAndReaderKeySetsStayInStep(t *testing.T) {
 		{"pieces.go", "bodies", "aurora", []string{"$defs", "world", "properties", "bodies", "additionalProperties"}, nil},
 		{"pieces.go", "suns", "toward", []string{"$defs", "world", "properties", "suns", "additionalProperties"}, nil},
 		{"shapes.go", "wisps", "thick", []string{"$defs", "world", "properties", "wisps", "additionalProperties"}, nil},
+		{"shapes.go", "fizzes", "rise", []string{"$defs", "world", "properties", "fizzes", "additionalProperties"}, nil},
 		{"motion.go", "motions", "ease", []string{"$defs", "world", "properties", "motions", "additionalProperties"}, nil},
 		{"motion.go", "framed", "percent", []string{"$defs", "world", "properties", "motions", "additionalProperties", "properties", "frames", "items"}, nil},
 		{"hud.go", "hud", "theme", []string{"$defs", "hud"}, nil},
@@ -208,7 +249,8 @@ func TestEcosystemSubsetAndReaderKeySetsStayInStep(t *testing.T) {
 		{"world.go", "film", "rays", []string{"$defs", "film"}, nil},
 		{"world.go", "film", "focal", []string{"$defs", "film", "properties", "lens"}, nil},
 		{"world.go", "printed", "knee", []string{"$defs", "film", "properties", "print"}, nil},
-		{"scene.go", "cameras", "eye", []string{"$defs", "camera"}, nil},
+		{"scene.go", "cameraKeys", "eye", []string{"$defs", "camera"}, nil},
+		{"scene.go", "locationKeys", "loc_relative", []string{"$defs", "camera", "properties", "location"}, nil},
 		{"world.go", "stands", "within", []string{"$defs", "stand"}, nil},
 		{"world.go", "wedge", "near", []string{"$defs", "stand", "properties", "within"}, nil},
 		{"world.go", "things", "north", []string{"$defs", "thing"}, nil},
@@ -236,6 +278,24 @@ func TestEcosystemSubsetAndReaderKeySetsStayInStep(t *testing.T) {
 		slices.Sort(actual)
 		var wanted []string
 		readerKeys := readerKeySet(t, test.file, test.method, test.anchor)
+		name := test.file + "/" + test.method + "/" + test.anchor
+		for _, also := range v2Also[name] {
+			parts := strings.Split(also, "/")
+			keys := readerKeySet(t, parts[0], parts[1], parts[2])
+			if version.two {
+				readerKeys = append(readerKeys, keys...)
+			}
+		}
+		for _, key := range v2Unread[name] {
+			if slices.Contains(readerKeys, key) {
+				t.Fatal("stale unread key", test.path, key)
+			}
+			if version.two {
+				wanted = append(wanted, key)
+			}
+		}
+		slices.Sort(readerKeys)
+		readerKeys = slices.Compact(readerKeys)
 		for _, key := range test.omitted {
 			if !slices.Contains(readerKeys, key) {
 				t.Fatal("stale subset omission", test.path, key)
@@ -253,6 +313,73 @@ func TestEcosystemSubsetAndReaderKeySetsStayInStep(t *testing.T) {
 		slices.Sort(wanted)
 		if !reflect.DeepEqual(actual, wanted) {
 			t.Errorf("%v schema keys %v; reader subset %v", test.path, actual, wanted)
+		}
+	}
+}
+
+// v2Blocks are the blocks of keys that only schema version 2 has, each by
+// the reader's file, method and anchor and the path of its schema block.
+var v2Blocks = []keyBlock{
+	{"space.go", "frameStep", "at", []string{"$defs", "space-frame"}},
+	{"space_things.go", "placeStep", "at", []string{"$defs", "thing", "properties", "place"}},
+	{"space_things.go", "coronaStep", "reach", []string{"$defs", "corona"}},
+	{"space_things.go", "leanStep", "value", []string{"$defs", "thing", "properties", "lean"}},
+	{"space_things.go", "lightsStep", "kelvin", []string{"$defs", "thing", "properties", "lights"}},
+	{"space_things.go", "kelvinStep", "from", []string{"$defs", "thing", "properties", "lights", "properties", "kelvin"}},
+	{"space_things.go", "lengthStep", "unit", []string{"$defs", "space-length"}},
+	{"space_cameras.go", "moveStep", "ease", []string{"$defs", "move"}},
+	{"space_cameras.go", "relativeStep", "above_plane", []string{"$defs", "relative-place"}},
+	{"space_cameras.go", "degreesStep", "unit", []string{"$defs", "degrees"}},
+	{"space_cameras.go", "skyStep", "ra", []string{"$defs", "sky-direction"}},
+	{"space_cameras.go", "lookStep", "offset", []string{"$defs", "look"}},
+	{"space_cameras.go", "fieldStep", "from", []string{"$defs", "move", "properties", "field"}},
+	{"space_world.go", "anchorStep", "datum", []string{"$defs", "anchor"}},
+	{"space_world.go", "elevationStep", "value", []string{"$defs", "anchor", "properties", "elevation"}},
+	{"space_world.go", "globeStep", "planet", []string{"$defs", "globe"}},
+	{"space_world.go", "globeTerrainStep", "near", []string{"$defs", "globe", "properties", "terrain"}},
+	{"space_world.go", "nearStep", "file", []string{"$defs", "globe", "properties", "terrain", "properties", "near"}},
+	{"space_world.go", "beyondStep", "from", []string{"$defs", "globe", "properties", "terrain", "properties", "beyond"}},
+	{"space_world.go", "starSkyStep", "stars", []string{"$defs", "sky"}},
+	{"space_world.go", "starsStep", "faintest", []string{"$defs", "sky", "properties", "stars"}},
+	{"space_world.go", "orbitStep", "inclination", []string{"$defs", "orbit"}},
+	{"space_world.go", "attitudeStep", "shield", []string{"$defs", "attitude"}},
+	{"space_world.go", "instrumentStep", "pupil", []string{"$defs", "instrument-eye"}},
+}
+
+// keyBlock is one block of keys the reader reads: where in the reader its
+// literal map is, and where in the schema its properties are.
+type keyBlock struct {
+	file, method, anchor string
+	path                 []string
+}
+
+// The blocks that only version 2 has take exactly the keys its schema
+// gives them.
+func TestVersionTwoBlocksStayInStep(t *testing.T) {
+	var schema map[string]any
+	if err := json.Unmarshal(ecosystemV2Raw, &schema); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range v2Blocks {
+		block := schema
+		for _, key := range test.path {
+			next, ok := block[key].(map[string]any)
+			if !ok {
+				t.Fatal("schema object missing", test.path)
+			}
+			block = next
+		}
+		if block["additionalProperties"] != false {
+			t.Fatal("subset must be explicit", test.path)
+		}
+		var actual []string
+		for key := range block["properties"].(map[string]any) {
+			actual = append(actual, key)
+		}
+		slices.Sort(actual)
+		wanted := readerKeySet(t, test.file, test.method, test.anchor)
+		if !reflect.DeepEqual(actual, wanted) {
+			t.Errorf("%v schema keys %v; reader keys %v", test.path, actual, wanted)
 		}
 	}
 }

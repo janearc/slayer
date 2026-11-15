@@ -1,0 +1,44 @@
+{
+	// the studio machine. everything is a plucked string: a bright one
+	// for the lead with a duller one answering it a sixteenth late,
+	// the chords plucked whole, a long low string for the bass, and
+	// knocks on wood for drums. a small dry room.
+	"name": "wire-harp",
+	"machine": "studio",
+	"master": 0.4,
+	"reverb": {"size": 0.45, "decay": 1.6, "damping": 0.5, "level": 0.4},
+	"channels": [
+		{"kind": "pluck", "role": "lead", "volume": 0.9, "place": -0.25,
+		 "send": {"reverb": 0.35},
+		 "pluck": {"brightness": 0.95, "damping": 0.12, "position": 0.1,
+		           "decay": 4, "release": 0.8}},
+		{"kind": "pluck", "echo": "lead", "delay": "1/4", "gain": 0.45,
+		 "place": 0.45, "send": {"reverb": 0.5},
+		 "pluck": {"brightness": 0.5, "damping": 0.4, "position": 0.3,
+		           "decay": 3, "release": 0.8}},
+		{"kind": "pluck", "role": "pad", "volume": 0.5, "place": 0.2,
+		 "send": {"reverb": 0.4},
+		 "pluck": {"brightness": 0.6, "damping": 0.3, "position": 0.22,
+		           "decay": 4, "release": 1.2}},
+		{"kind": "pluck", "role": "bass", "volume": 0.9,
+		 "send": {"reverb": 0.1},
+		 "pluck": {"brightness": 0.45, "damping": 0.5, "position": 0.15,
+		           "decay": 5, "release": 0.4}},
+		{"kind": "drum", "role": "perc", "volume": 0.6, "place": 0.1,
+		 "send": {"reverb": 0.5},
+		 "drums": {
+			"k": {"tone": 70, "sweep": 12, "fall": 0.02, "decay": 0.12,
+			      "click": 0.5},
+			"s": {"tone": 320, "sweep": 4, "fall": 0.01, "decay": 0.05,
+			      "click": 0.6, "noise": 0.15, "noise_decay": 0.05,
+			      "colour": 2500},
+			"h": {"tone": 900, "decay": 0.02, "click": 0.5,
+			      "volume": 0.5},
+			"t": {"tone": 180, "sweep": 5, "fall": 0.02, "decay": 0.09,
+			      "click": 0.4},
+			"o": {"noise": 0.25, "noise_decay": 0.22, "colour": 5000},
+			"b": {"tone": 1200, "struck": "bar", "hardness": 0.9,
+			      "decay": 0.25}
+		 }}
+	]
+}

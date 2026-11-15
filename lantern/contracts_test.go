@@ -37,7 +37,7 @@ func TestLanternPlacesLayeredWornPanelsAndIndependentBeams(t *testing.T) {
 		}
 	}
 	light := lamp.light().When(0)
-	if math.Abs(light.Strength.G-38) > 1e-9 || light.Beyond != 1.02 {
+	if !(math.Abs(light.Strength.G-38) <= 1e-9) || light.Beyond != 1.02 {
 		t.Fatalf("star light %+v", light)
 	}
 	lamp.Orbits = 1
@@ -47,7 +47,7 @@ func TestLanternPlacesLayeredWornPanelsAndIndependentBeams(t *testing.T) {
 	}
 	lamp.Orbits = 3
 	out, wide, turn = lamp.shelled(2)
-	if out != 10 || math.Abs(wide-.2) > 1e-12 || turn != 15*time.Second || lamp.quickened(time.Minute, 2) != 15*time.Second {
+	if out != 10 || !(math.Abs(wide-.2) <= 1e-12) || turn != 15*time.Second || lamp.quickened(time.Minute, 2) != 15*time.Second {
 		t.Fatal("outer shell endpoints")
 	}
 }

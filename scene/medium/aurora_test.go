@@ -17,7 +17,7 @@ func TestAuroraIsAnOvalRoundEachPole(t *testing.T) {
 		return maths.V(math.Cos(lat)*math.Cos(lon), math.Sin(lat), math.Cos(lat)*math.Sin(lon)).Scale(10 + up)
 	}
 	north, south := a.Density(at(67*maths.Degree, 0.5, 0.26)), a.Density(at(-67*maths.Degree, 0.5, 0.26))
-	if north < 0.6 || math.Abs(north-south) > 1e-9 {
+	if north < 0.6 || !(math.Abs(north-south) <= 1e-9) {
 		t.Errorf("the ovals are %v north and %v south", north, south)
 	}
 	if d := a.Density(at(0, 0.5, 0.25)); d != 0 {

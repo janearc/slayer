@@ -170,7 +170,7 @@ quality cap; seed sampling alone once missed a 104,576-face Norway spruce.
 Chosen dimensions and colours retain author and date, following
 `spruceHabit` and `norwayShoots`.
 
-The original work boundary is `manufacture/`, `cmd/hillside/`, and this
+The original work boundary is `manufacture/`, `hillside/`, and this
 document. Tracer, GPU, and crowd changes belong to the engine work in
 `trace/` and `gpu/`. Request engine support rather than duplicating it here.
 

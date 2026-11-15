@@ -55,8 +55,9 @@ mutable slices. no full chemistry/equilibrium solver is promised.
 
 define a moving ignition band over placed tree centres, not a new volumetric
 fire per tree. batch nearby burning patches into bounded composite fields,
-preserving their distinct seed and ignition age. the current GPU world limit
-is 32 volumes.
+preserving their distinct seed and ignition age. the GPU sizes its
+crossing arrays to the scene's own volume count, with a ceiling of 256;
+a volume still costs thread memory, so batching stays worthwhile.
 
 optional smoke should aggregate sources at stand/front scale rather than
 silently overflowing it.
@@ -200,8 +201,8 @@ patch retains its own ignition time and seed; skipping or reversing frame
 order does not change the answer.
 
 patches are grouped spatially in fields of at most 64. construction
-conservatively refuses more than 32 simultaneous volumes or a scene budget
-above 8,192 living firebrands.
+conservatively refuses more volumes than gpu.VolumeLimit allows or a
+scene budget above 8,192 living firebrands.
 
 firebrands stop being born when their source's burning window ends. airborne
 particles continue their prescribed trajectories and cooling until their

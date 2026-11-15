@@ -114,7 +114,8 @@ func TestATieGoesToTheEarlierThing(t *testing.T) {
 	}
 	things := place(world, 0)
 	want, _ := everyFirst(things, alongZ, 0)
-	got, found := gathered(things).first(alongZ, 0)
+	grown := gathered(things)
+	got, found := grown.first(alongZ, 0)
 	if !found || want.thing.thing != things[0].thing ||
 		got.thing.thing != things[0].thing {
 		t.Errorf("the tie went to another than the first thing")
@@ -187,4 +188,54 @@ func TestTheTreeIsShallow(t *testing.T) {
 	if depth := seen.depth(0); 2*depth > deepest {
 		t.Errorf("the tree is %d deep; a walk holds %d", depth, deepest)
 	}
+}
+
+// depthBelow is how many branches deep the tree is under a node, the
+// node counting as one.
+func depthBelow(nodes []branch, at int) int {
+	if nodes[at].left == 0 {
+		return 1
+	}
+	return 1 + max(depthBelow(nodes, nodes[at].left),
+		depthBelow(nodes, nodes[at].right))
+}
+
+// A tree of many things is no deeper than a walk's stack holds, by the
+// count: 4,000 things split to runs of four or fewer is ceil(log2(1000))
+// = 10 deep, and the tree is 11 branches deep with the leaves counted.
+func TestAManyThingedTreeFitsTheWalksStack(t *testing.T) {
+	world := thing.NewWorld()
+	for i := range 4000 {
+		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.4},
+			Motion: resting(maths.V(float64(i%20), float64(i/20%20),
+				float64(i/400)))})
+	}
+	grown := gathered(place(world, 0))
+	if got, most := depthBelow(grown.nodes, 0), 11; got != most {
+		t.Errorf("4000 things make a tree %d branches deep, want %d", got,
+			most)
+	}
+}
+
+// A tree that would be deeper than a walk's stack is refused when it is
+// built, and not met as a write past the stack's end.
+func TestATreeTooDeepForTheStackIsRefused(t *testing.T) {
+	world := thing.NewWorld()
+	for i := range 8 {
+		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.4},
+			Motion: resting(maths.V(float64(i), 0, 0))})
+	}
+	made := crowd{things: place(world, 0)}
+	made.boxes = make([]maths.Box, len(made.things))
+	for i := range made.things {
+		made.boxes[i] = worldBox(&made.things[i])
+		made.order = append(made.order, i)
+	}
+	defer func() {
+		if recover() == nil {
+			t.Errorf("a branch at depth %d was built, past the walk's %d",
+				deepest, deepest)
+		}
+	}()
+	made.build(0, len(made.order), deepest)
 }

@@ -147,7 +147,7 @@ func TestWarpDecidesBetweenPlatesAsNearAsEachOther(t *testing.T) {
 // its own: the plates and the boundaries by the tests above, the noise
 // from its package, and the pouring by rank.
 func TestAHeightIsBasePlusStressPlusNoise(t *testing.T) {
-	tr := Terrain{Tiling: hexes.Sphere{N: 4}, Seed: 5, Ocean: 0.55, Plates: 7}
+	tr := Terrain{Tiling: hexes.Sphere{Splits: 4}, Seed: 5, Ocean: 0.55, Plates: 7}
 	w := New(tr)
 	ref := &World{Terrain: tr}
 	ref.lay()
@@ -172,7 +172,7 @@ func TestAHeightIsBasePlusStressPlusNoise(t *testing.T) {
 	}
 	want := byRank(height, tr.Ocean)
 	for i, tile := range w.Tiles() {
-		if math.Abs(w.Height(tile)-want[i]) > 1e-9 {
+		if !(math.Abs(w.Height(tile)-want[i]) <= 1e-9) {
 			t.Fatalf("tile %d is %v, want %v", i, w.Height(tile), want[i])
 		}
 	}

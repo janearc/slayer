@@ -1,0 +1,25 @@
+# a portrait short: a phone's tall frame, framed by its angle down the
+# picture, developed through a stock, with a title and a tune. the hour of
+# the moonrise runs in twenty seconds.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/moonlake.yaml}
+film: {preset: portrait, tall: 40}
+fps: 24
+duration: {value: 20, unit: s}
+scene-duration: {value: 3600, unit: s}
+stock: {name: dusk, seed: 7}
+titles:
+  rows: 24
+  elements:
+    title:
+      kind: text
+      words: moonlake
+      ink: ink
+      across: 0.5
+      down: 0.85
+      align: centre
+      from: {value: 1, unit: s}
+      until: {value: 6, unit: s}
+# a built-in tune and voicing; cheeptune/SCORING.md lists the rest.
+sound: {tune: "@crypt", voicing: "@crypt-dmg"}
+outputs: {movie: ../renders/moonlake-portrait.mp4}

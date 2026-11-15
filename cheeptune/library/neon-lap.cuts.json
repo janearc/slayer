@@ -1,0 +1,28 @@
+{
+	"group": "bright and driving",
+	"mood": "neon, fast, glittering",
+	"feeling": "A night race under signs and reflections, all speed and light.",
+	"intent": "Fast montage, a chase or a race, a game trailer, a high-energy title.",
+	"listen_for": "The two-bar silence at 0:23 and the burst that follows.",
+	"voicing": "@leap-dmg",
+	"tempo": 170,
+	"meter": 4,
+	"seconds": 42.35,
+	"parts": [
+		{"name": "green", "bar": 1, "second": 0.0,
+		 "change": "a leaping lead over a galloping bass and drum",
+		 "feels": "Lights go green"},
+		{"name": "lap", "bar": 9, "second": 11.29,
+		 "change": "the lead runs in sixteenths and the bass in sixteenths",
+		 "feels": "Cornering fast"},
+		{"name": "gap", "bar": 17, "second": 22.59,
+		 "change": "two bars of nothing",
+		 "feels": "The world stops"},
+		{"name": "flash", "bar": 19, "second": 25.41,
+		 "change": "everything returns higher and faster",
+		 "feels": "Full throttle through the finish"},
+		{"name": "end", "bar": 29, "second": 39.53,
+		 "change": "a held chord and a kick",
+		 "feels": "Flag"}
+	]
+}

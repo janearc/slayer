@@ -72,7 +72,7 @@ func TestASpotAimedWhereTheDotRoundsPastOne(t *testing.T) {
 	// down (1, 0, 5) the dot is 1.0000000000000002, found by search
 	ahead := Spot{Aim: maths.V(1, 0, 5), Strength: maths.Grey(26), Cone: 0.5}
 	if _, _, got := ahead.Light(maths.V(1, 0, 5), maths.Vec{}); math.IsNaN(
-		got.R) || math.Abs(got.R-1) > 1e-12 {
+		got.R) || !(math.Abs(got.R-1) <= 1e-12) {
 		t.Errorf("down the aim: %v, want 26 over 26", got)
 	}
 	// behind (1, 1, 1) at (-2, -2, -2) it is -1.0000000000000002
@@ -91,7 +91,7 @@ func TestASpotsEdge(t *testing.T) {
 	s := Spot{Cone: 0.5, Soft: 0.2}
 	for off, want := range map[float64]float64{0.1: 1, 0.3: 1, 0.4: 0.5,
 		0.45: 0.15625, 0.5: 0, 0.6: 0} {
-		if got := s.edge(off); math.Abs(got-want) > 1e-12 {
+		if got := s.edge(off); !(math.Abs(got-want) <= 1e-12) {
 			t.Errorf("%v off the aim: %v, want %v", off, got, want)
 		}
 	}
@@ -135,11 +135,11 @@ func TestALasersBeamAlongAndAcross(t *testing.T) {
 		}
 	}
 	_, _, edge := l.Light(maths.V(5, 3, 0), maths.Vec{})
-	if math.Abs(edge.R/math.Exp(-18)-1) > 1e-9 {
+	if !(math.Abs(edge.R/math.Exp(-18)-1) <= 1e-9) {
 		t.Errorf("three widths out: %v, want e^-18", edge.R)
 	}
 	_, _, one := l.Light(maths.V(5, 1, 0), maths.Vec{})
-	if math.Abs(one.R/math.Exp(-2)-1) > 1e-9 {
+	if !(math.Abs(one.R/math.Exp(-2)-1) <= 1e-9) {
 		t.Errorf("a width out: %v, want e^-2, as the doc says", one.R)
 	}
 	if _, _, past := l.Light(maths.V(5, 3.5, 0), maths.Vec{}); past.R != 0 {

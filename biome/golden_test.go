@@ -63,8 +63,8 @@ func pictured(test testing.TB) string {
 		shine := world.Shine()
 		for _, tile := range tiles(world) {
 			paint, light := world.Paint(tile), shine.Paint(tile)
-			fmt.Fprintf(&lines, "%d %d %d | %s | %s\n", tile.Face, tile.I,
-				tile.J, drawn(paint), drawn(light))
+			fmt.Fprintf(&lines, "%d %d %d | %s | %s\n", tile.Face, tile.Column,
+				tile.Row, drawn(paint), drawn(light))
 		}
 	}
 	return lines.String()

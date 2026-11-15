@@ -140,3 +140,27 @@ func TestAViewsFineViewHasAPixelARay(t *testing.T) {
 			fine.height, fine.rays)
 	}
 }
+
+// tilting is a sensor whose middle pixel looks straight ahead and whose every
+// other pixel looks turn radians to the side of it.
+type tilting struct{ turn float64 }
+
+func (t tilting) Ray(x, _, w, _ int, _ maths.Band) maths.Ray {
+	if x == w/2 {
+		return maths.Ray{Dir: maths.V(0, 0, -1)}
+	}
+	return maths.Ray{Dir: maths.V(math.Sin(t.turn), 0, -math.Cos(t.turn))}
+}
+
+// A pixel's angular width is the angle between its ray and its neighbour's,
+// down to angles far smaller than the cosine of an angle can carry: the cosine
+// of one part in ten million of a radian is one to within a few units in the
+// last place, and of one in a billion is one.
+func TestAPixelsAngleIsTheTurnBetweenRaysAtAnySize(t *testing.T) {
+	for _, turn := range []float64{1e-3, 1e-7, 1e-9} {
+		got := pixelAngle(maths.Local(), tilting{turn}, 8, 8)
+		if !(math.Abs(got-turn) <= 1e-9*turn) {
+			t.Errorf("rays %g radians apart give a pixel %g wide", turn, got)
+		}
+	}
+}

@@ -247,6 +247,94 @@ func (box Box) Hit(ray Ray, near, far float64) (enter, leave float64, ok bool) {
 	return enter, leave, true
 }
 
+// Inverse is the reciprocal of each component of v, for Box.Meets. A zero
+// component gives an infinity, which Meets never reads: it asks the ray's
+// own direction for zero first.
+//
+//ninja:vow practice a library: its callers are in other modules
+func (v Vec) Inverse() Vec { return Vec{unity / v.X, unity / v.Y, unity / v.Z} }
+
+// slack is the share by which a product by a reciprocal can differ from the
+// quotient Hit takes: a few units in the last place, widened to nine.
+const slack = 1e-15
+
+// soundLow and soundHigh bound the magnitudes of a distance for which that
+// share holds: near zero and near overflow the share is not the error.
+const (
+	soundLow  = 1e-280
+	soundHigh = 1e280
+)
+
+// Meets is whether Hit would say the ray meets the box between near and far,
+// for a ray whose Dir's reciprocal is inverse. It is for a walk of many boxes
+// by one ray, which takes the reciprocal once and divides by nothing, and it
+// says nothing of where the ray enters or leaves.
+//
+// It multiplies where Hit divides, so each distance may be a unit or two in
+// the last place from Hit's. It answers by that only when the answer is the
+// same for every distance within slack of its own, which is nearly always,
+// and otherwise it asks Hit: its answer is Hit's answer for every ray, box,
+// near and far, NaN and infinity included.
+//
+//ninja:vow practice a library: its callers are in other modules
+func (box Box) Meets(ray Ray, inverse Vec, near, far float64) bool {
+	// the widest interval the exact distances can fill, and the narrowest
+	lowWide, lowNarrow, highWide, highNarrow := near, near, far, far
+	for _, axis := range [...]struct{ at, dir, inv, lo, hi float64 }{
+		{ray.At.X, ray.Dir.X, inverse.X, box.Min.X, box.Max.X},
+		{ray.At.Y, ray.Dir.Y, inverse.Y, box.Min.Y, box.Max.Y},
+		{ray.At.Z, ray.Dir.Z, inverse.Z, box.Min.Z, box.Max.Z},
+	} {
+		if axis.dir == nought {
+			// as Hit asks it: NaN is outside, never inside
+			if !(axis.at >= axis.lo && axis.at <= axis.hi) {
+				return false
+			}
+			continue
+		}
+		// a box turned inside out, or a direction that is no number or so
+		// small or large that its reciprocal is not to the last place, is
+		// Hit's
+		size := math.Abs(axis.dir)
+		if !(axis.lo <= axis.hi) || !(size >= soundLow/1e20 && size <= soundHigh/1e20) {
+			return box.hits(ray, near, far)
+		}
+		nearer, farther := axis.lo-axis.at, axis.hi-axis.at
+		if axis.dir < nought {
+			nearer, farther = farther, nearer
+		}
+		first, last := nearer*axis.inv, farther*axis.inv
+		if !sound(first, nearer) || !sound(last, farther) {
+			return box.hits(ray, near, far)
+		}
+		in, out := math.Abs(first)*slack, math.Abs(last)*slack
+		lowWide, lowNarrow = max(lowWide, first-in), max(lowNarrow, first+in)
+		highWide, highNarrow = min(highWide, last+out), min(highNarrow, last-out)
+	}
+	if lowWide > highWide {
+		return false
+	}
+	if lowNarrow <= highNarrow && lowNarrow <= math.MaxFloat64 &&
+		highNarrow >= -math.MaxFloat64 {
+		return true
+	}
+	return box.hits(ray, near, far)
+}
+
+// sound is whether a distance t, got as a product from num, is one whose
+// error is the share Meets allows: a number of a size where a share of it is
+// the error, or zero from a zero.
+func sound(t, num float64) bool {
+	size := math.Abs(t)
+	return size >= soundLow && size <= soundHigh || t == nought && num == nought
+}
+
+// hits is Hit's answer without its distances.
+func (box Box) hits(ray Ray, near, far float64) bool {
+	_, _, ok := box.Hit(ray, near, far)
+	return ok
+}
+
 // Orientation is which way a subspace's axes point, as three arrows. They
 // say where its own x, y and z go in its parent's space. They are one
 // unit long and at right angles to each other.

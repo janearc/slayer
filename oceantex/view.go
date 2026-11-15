@@ -66,6 +66,42 @@ func newSurface(sea Sea, seconds float64, seed uint64) (*surface, error) {
 	return s, nil
 }
 
+type WaveCascade struct {
+	Field                         *Field
+	Reach                         float64
+	ResolvedAlong, ResolvedAcross float64
+}
+
+// WaveCascades builds the sea's patches of waves at the moment seconds, one
+// for each band of wavelengths, with each patch's field, highest crest or
+// deepest trough, and the slope variance it resolves along and across the
+// wind. It refuses a time that is negative or not finite, and any field
+// value that is not finite.
+func WaveCascades(sea Sea, seconds float64, seed uint64) ([]WaveCascade, error) {
+	if !finite(seconds) || seconds < 0 {
+		return nil, errors.New("oceantex: invalid wave time")
+	}
+	seaSurface, err := newSurface(sea, seconds, seed)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]WaveCascade, len(seaSurface.layers))
+	for index, layer := range seaSurface.layers {
+		for _, values := range [][]float64{layer.field.Height, layer.field.SlopeX, layer.field.SlopeY, layer.field.PushX, layer.field.PushY, layer.field.StretchXX, layer.field.StretchXY, layer.field.StretchYY} {
+			for _, value := range values {
+				if !finite(value) {
+					return nil, errors.New("oceantex: nonfinite wave field")
+				}
+			}
+		}
+		if !finite(layer.reach) || !finite(layer.gotAlong) || !finite(layer.gotAcross) {
+			return nil, errors.New("oceantex: nonfinite wave cascade")
+		}
+		result[index] = WaveCascade{Field: layer.field, Reach: layer.reach, ResolvedAlong: layer.gotAlong, ResolvedAcross: layer.gotAcross}
+	}
+	return result, nil
+}
+
 // share is how much of a layer a pixel shows, given how much sea the
 // pixel covers: all of it while the pixel is no bigger than a texel, none
 // once it covers two, and a straight line between.

@@ -6,6 +6,8 @@ import (
 )
 
 // spacecraftLooks uses authored display colours, not optical constants.
+// Webb's mirrors and sunshield are then made over from its surfaces file,
+// which names real metals; see webbSurfaces.
 func spacecraftLooks(design string) looks {
 	mirror := maths.Grey(spacecraftValue("white"))
 	if design == "webb" {

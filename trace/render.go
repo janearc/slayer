@@ -84,15 +84,17 @@ func (seen view) fine() view {
 }
 
 // pixelAngle estimates a pixel's angular width in radians using adjacent rays
-// at the image centre.
+// at the image centre. It is the angle between their directions, taken as the
+// arctangent of the length of their cross product over their dot product, which
+// stays exact at angles too small for a cosine to tell from one.
 func pixelAngle(eye maths.Subspace, lens film.Sensor, width,
 	height int) float64 {
 	middle := film.Look(eye, lens, width/2, height/2, width, height,
 		maths.Band{})
 	beside := film.Look(eye, lens, width/2+1, height/2, width, height,
 		maths.Band{})
-	cosine := math.Max(-1, math.Min(1, middle.Dir.Dot(beside.Dir)))
-	return math.Acos(cosine)
+	return math.Atan2(middle.Dir.Cross(beside.Dir).Len(),
+		middle.Dir.Dot(beside.Dir))
 }
 
 // Render traces the world at moment through lens from eye into a width by
@@ -105,7 +107,7 @@ func Render(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	if err != nil {
 		return nil, err
 	}
-	return render(seen), nil
+	return render(seen)
 }
 
 // paint evaluates pixel once per coordinate, distributing rows across
@@ -135,13 +137,17 @@ func paint(width, height int,
 	return painted
 }
 
-// render traces a validated view.
-func render(seen view) *frame.Frame {
+// render traces a validated view, or returns the error of a scene that
+// cannot be drawn.
+func render(seen view) (*frame.Frame, error) {
 	scene := stage(seen.world, seen.at)
+	if err := scene.refusal(); err != nil {
+		return nil, err
+	}
 	wide := seen.wide()
 	return paint(seen.width, seen.height, func(x, y int) frame.Pixel {
 		return seen.through(scene, wide, x, y)
-	})
+	}), nil
 }
 
 // wide returns the world's explicit angular pixel width when supplied,
@@ -154,7 +160,7 @@ func (seen view) wide() float64 {
 }
 
 // through traces the view's ray for pixel x, y through the staged scene.
-func (seen view) through(scene staged, wide float64, x, y int) frame.Pixel {
+func (seen view) through(scene *staged, wide float64, x, y int) frame.Pixel {
 	ray := film.Look(seen.eye, seen.lens, x, y, seen.width, seen.height,
 		maths.Band{})
 	if told := scene.walked; told != nil {
@@ -175,7 +181,10 @@ func Sampled(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	if err != nil {
 		return nil, err
 	}
-	fine := render(seen.fine())
+	fine, err := render(seen.fine())
+	if err != nil {
+		return nil, err
+	}
 	if rays == 1 {
 		return fine, nil
 	}

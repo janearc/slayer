@@ -223,7 +223,7 @@ func bloomAddsOnlyWhatSpilled(t *rapid.T) {
 	}
 	exposed := light * exposure
 	spilled := (exposed - whole) / data.Picked("bloom-spill-divisor") / exposure
-	if math.Abs(added-spilled) > within*lightMost {
+	if !(math.Abs(added-spilled) <= within*lightMost) {
 		t.Fatalf("a star of %v at exposure %v added %v, spilled %v", light,
 			exposure, added, spilled)
 	}

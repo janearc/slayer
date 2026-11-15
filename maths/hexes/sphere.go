@@ -7,38 +7,43 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// Sphere is the unit sphere with each icosahedron face split N times:
-// 10N^2+2 tiles, about Spacing apart. The zero Sphere is split once, the
-// bare icosahedron's twelve pentagons. It holds nothing but N, so a
+// Sphere is the unit sphere with each icosahedron face split Splits times:
+// 10*Splits^2+2 tiles, about Spacing apart. The zero Sphere is split once, the
+// bare icosahedron's twelve pentagons. It holds nothing but Splits, so a
 // tiling of any resolution costs nothing to make.
 //
-// A tile is named by the lattice corner at its middle: on face Face, I
-// steps toward the face's second corner and J toward its third, with I+J
-// at most N. A corner shared by several faces is named on the lowest
+// A tile is named by the lattice corner at its middle: on face Face, Column
+// steps toward the face's second corner and Row toward its third, with
+// Column+Row at most Splits. A corner shared by several faces is named on the lowest
 // numbered of them, so every tile has one name.
 //
 // Points are directions: Nearest takes any vector and reads its direction,
 // Centre is a unit vector, and Spacing and Edge are chords of the unit
 // sphere.
-type Sphere struct{ N int }
+type Sphere struct {
+	//ninja:vow gate a value, whose fields are what it is
+	Splits int
+}
 
-// n is the split, with zero read as one.
-func (t Sphere) n() int {
-	if t.N < 1 {
+// split is Splits, and one when Splits is below one.
+func (sphere Sphere) split() int {
+	if sphere.Splits < 1 {
 		return 1
 	}
-	return t.N
+	return sphere.Splits
 }
 
 // edge is the angle an icosahedron's edge subtends at its middle.
 var edge = math.Atan(2)
 
 // Spacing is about how far apart neighbouring middles are, in radians:
-// the icosahedron's edge over N. Measured, neighbours are between 0.8 and
+// the icosahedron's edge over Splits. Measured, neighbours are between 0.8 and
 // 1.2 of it, closest near the pentagons and furthest mid-face.
-func (t Sphere) Spacing() float64 { return edge / float64(t.n()) }
+func (sphere Sphere) Spacing() float64 {
+	return edge / float64(sphere.split())
+}
 
-// finest is the most a sphere is split: its count of tiles, ten N squared
+// finest is the most a sphere is split: its count of tiles, ten Splits squared
 // and two, is the most an int64 holds with room to spare.
 const finest = 500_000_000
 
@@ -47,12 +52,12 @@ const finest = 500_000_000
 // than finest splits, the finest.
 func SphereFor(radians float64) Sphere {
 	if math.IsNaN(radians) {
-		return Sphere{N: 1}
+		return Sphere{Splits: 1}
 	}
 	if radians <= edge/finest {
-		return Sphere{N: finest}
+		return Sphere{Splits: finest}
 	}
-	return Sphere{N: max(1, int(math.Round(edge/radians)))}
+	return Sphere{Splits: max(1, int(math.Round(edge/radians)))}
 }
 
 // Finer is the next rung down: split twice as often. Every middle of this
@@ -62,96 +67,105 @@ func SphereFor(radians float64) Sphere {
 // past half of finest it stops at finest, and a middle is no longer kept.
 // a Sphere made by hand past finest does not count its tiles, which
 // overflow.
-func (t Sphere) Finer() Tiling { return Sphere{N: min(finest, 2*t.n())} }
+func (sphere Sphere) Finer() Tiling {
+	return Sphere{Splits: min(finest, 2*sphere.split())}
+}
 
 // Count is how many tiles there are.
-func (t Sphere) Count() int {
-	n := t.n()
-	return 10*n*n + 2
+func (sphere Sphere) Count() int {
+	split := sphere.split()
+	return 10*split*split + 2
 }
 
 // ID is a number for the tile, different for every tile of the tiling and the
 // same forever, for hashing what is on it.
-func (t Sphere) ID(tile Tile) int64 {
-	n := int64(t.n())
-	i, j := int64(tile.I), int64(tile.J)
-	perFace := (n + 1) * (n + 2) / 2
-	return int64(tile.Face)*perFace + i*(n+1) - i*(i-1)/2 + j
+func (sphere Sphere) ID(tile Tile) int64 {
+	split := int64(sphere.split())
+	stepI, stepJ := int64(tile.Column), int64(tile.Row)
+	perFace := (split + 1) * (split + 2) / 2
+	return int64(tile.Face)*perFace +
+		stepI*(split+1) - stepI*(stepI-1)/2 + stepJ
 }
 
 // Centre is the middle of a tile: a unit direction.
-func (t Sphere) Centre(tile Tile) maths.Vec {
-	return t.corner(tile.Face, tile.I, tile.J)
+func (sphere Sphere) Centre(tile Tile) maths.Vec {
+	return sphere.corner(tile.Face, tile.Column, tile.Row)
 }
 
 // Nearest is the tile a direction is in.
-func (t Sphere) Nearest(p maths.Vec) Tile {
-	p = p.Unit()
-	n := t.n()
-	f := face(p)
-	_, v, w := bary(f, p)
-	fi, fj := v*float64(n), w*float64(n)
-	i0, j0 := int(math.Floor(fi)), int(math.Floor(fj))
+func (sphere Sphere) Nearest(point maths.Vec) Tile {
+	point = point.Unit()
+	split := sphere.split()
+	side := face(point)
+	_, secondWeight, thirdWeight := bary(side, point)
+	looseI := secondWeight * float64(split)
+	looseJ := thirdWeight * float64(split)
+	floorI, floorJ := int(math.Floor(looseI)), int(math.Floor(looseJ))
 	// the small triangle the direction crosses points up or down; its
 	// three corners are the candidates
-	cands := [3][2]int{{i0, j0}, {i0 + 1, j0}, {i0, j0 + 1}}
-	if fi-float64(i0)+fj-float64(j0) > 1 {
-		cands = [3][2]int{{i0 + 1, j0}, {i0, j0 + 1}, {i0 + 1, j0 + 1}}
+	candidates := [3][2]int{{floorI, floorJ}, {floorI + 1, floorJ},
+		{floorI, floorJ + 1}}
+	if looseI-float64(floorI)+looseJ-float64(floorJ) > 1 {
+		candidates = [3][2]int{{floorI + 1, floorJ},
+			{floorI, floorJ + 1}, {floorI + 1, floorJ + 1}}
 	}
-	best, bi, bj := math.Inf(1), 0, 0
-	for _, c := range cands {
-		i, j := clamp(c[0], c[1], n)
-		if d := apart(p, t.corner(f, i, j)); d < best {
-			best, bi, bj = d, i, j
+	best, bestI, bestJ := math.Inf(1), 0, 0
+	for _, candidate := range candidates {
+		stepI, stepJ := clamp(candidate[0], candidate[1], split)
+		gap := apart(point, sphere.corner(side, stepI, stepJ))
+		if gap < best {
+			best, bestI, bestJ = gap, stepI, stepJ
 		}
 	}
-	tile := t.walk(p, f, bi, bj, best)
-	return t.settle(p, tile)
+	tile := sphere.walk(point, side, bestI, bestJ, best)
+	return sphere.settle(point, tile)
 }
 
 // apart is how far two unit directions are, as the square of the chord. A dot
 // product is one less a hair for every neighbour at a fine rung and cannot tell
 // them apart; the chord keeps its digits.
-func apart(a, b maths.Vec) float64 {
-	d := a.Sub(b)
-	return d.Dot(d)
+func apart(one, other maths.Vec) float64 {
+	gap := one.Sub(other)
+	return gap.Dot(gap)
 }
 
 // walk steps to a neighbouring corner of the same face while one is nearer,
 // and stops at the nearest. In practice it takes no step at all: none in
 // 320,000 points tried; the bound is for safety.
-func (t Sphere) walk(p maths.Vec, f, i, j int, best float64) Tile {
-	n := t.n()
+func (sphere Sphere) walk(point maths.Vec, side, stepI, stepJ int,
+	best float64) Tile {
+	split := sphere.split()
 	for range 8 {
-		ni, nj, moved := i, j, false
-		for _, s := range steps {
-			ci, cj := i+s[0], j+s[1]
-			if ci < 0 || cj < 0 || ci+cj > n {
+		nextI, nextJ, moved := stepI, stepJ, false
+		for _, shift := range steps {
+			tryI, tryJ := stepI+shift[0], stepJ+shift[1]
+			if tryI < 0 || tryJ < 0 || tryI+tryJ > split {
 				continue
 			}
-			if d := apart(p, t.corner(f, ci, cj)); d < best {
-				best, ni, nj, moved = d, ci, cj, true
+			gap := apart(point, sphere.corner(side, tryI, tryJ))
+			if gap < best {
+				best, nextI, nextJ, moved = gap, tryI, tryJ, true
 			}
 		}
 		if !moved {
 			break
 		}
-		i, j = ni, nj
+		stepI, stepJ = nextI, nextJ
 	}
-	return t.canonical(f, i, j)
+	return sphere.canonical(side, stepI, stepJ)
 }
 
 // settle is one more look, across faces: a corner on the edge of a face
 // has neighbours on the next face, and one of them may be nearer still.
-func (t Sphere) settle(p maths.Vec, tile Tile) Tile {
-	if t.inside(tile) {
+func (sphere Sphere) settle(point maths.Vec, tile Tile) Tile {
+	if sphere.inside(tile) {
 		return tile
 	}
-	best := apart(p, t.Centre(tile))
-	var buf [6]Tile
-	for _, nb := range buf[:t.near(tile, &buf)] {
-		if d := apart(p, t.Centre(nb)); d < best {
-			best, tile = d, nb
+	best := apart(point, sphere.Centre(tile))
+	var room [6]Tile
+	for _, neighbour := range room[:sphere.near(tile, &room)] {
+		if gap := apart(point, sphere.Centre(neighbour)); gap < best {
+			best, tile = gap, neighbour
 		}
 	}
 	return tile
@@ -160,131 +174,138 @@ func (t Sphere) settle(p maths.Vec, tile Tile) Tile {
 // steps are the six lattice directions from a corner.
 var steps = [6][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, -1}, {-1, 1}}
 
-// clamp keeps a corner on its face: i and j at least zero, i+j at most n.
-func clamp(i, j, n int) (int, int) {
-	i, j = max(i, 0), max(j, 0)
-	if i+j > n {
-		j = max(n-i, 0)
-		i = n - j
+// clamp keeps a corner on its face: the steps at least zero, their sum
+// at most the split.
+func clamp(stepI, stepJ, split int) (int, int) {
+	stepI, stepJ = max(stepI, 0), max(stepJ, 0)
+	if stepI+stepJ > split {
+		stepJ = max(split-stepI, 0)
+		stepI = split - stepJ
 	}
-	return i, j
+	return stepI, stepJ
 }
 
 // inside is whether a tile's corner is strictly inside its face, where it
 // belongs to that face alone.
-func (t Sphere) inside(tile Tile) bool {
-	return tile.I > 0 && tile.J > 0 && tile.I+tile.J < t.n()
+func (sphere Sphere) inside(tile Tile) bool {
+	return tile.Column > 0 && tile.Row > 0 && tile.Column+tile.Row < sphere.split()
 }
 
-// corner is lattice corner (i, j) of face f, pushed out to the sphere.
-func (t Sphere) corner(f, i, j int) maths.Vec {
-	n := t.n()
-	a, b, c := verts[faces[f][0]], verts[faces[f][1]], verts[faces[f][2]]
-	return a.Scale(float64(n - i - j)).
-		Add(b.Scale(float64(i))).
-		Add(c.Scale(float64(j))).Unit()
+// corner is a lattice corner of a face, pushed out to the sphere.
+func (sphere Sphere) corner(side, stepI, stepJ int) maths.Vec {
+	split := sphere.split()
+	first := verts[faces[side][0]]
+	second := verts[faces[side][1]]
+	third := verts[faces[side][2]]
+	return first.Scale(float64(split - stepI - stepJ)).
+		Add(second.Scale(float64(stepI))).
+		Add(third.Scale(float64(stepJ))).Unit()
 }
 
 // canonical is the one name of a corner: itself when it is inside its
 // face, and otherwise the same corner on the lowest numbered face it is on.
-func (t Sphere) canonical(f, i, j int) Tile {
-	tile := Tile{f, i, j}
-	if t.inside(tile) {
+func (sphere Sphere) canonical(side, stepI, stepJ int) Tile {
+	tile := Tile{side, stepI, stepJ}
+	if sphere.inside(tile) {
 		return tile
 	}
-	q := t.corner(f, i, j)
-	for g := 0; g < f; g++ {
-		if gi, gj, ok := t.on(g, q); ok {
-			return Tile{g, gi, gj}
+	direction := sphere.corner(side, stepI, stepJ)
+	for other := 0; other < side; other++ {
+		if otherI, otherJ, ok := sphere.on(other, direction); ok {
+			return Tile{other, otherI, otherJ}
 		}
 	}
 	return tile
 }
 
-// on is the lattice corner of face g that a direction is, if it is one.
-func (t Sphere) on(g int, q maths.Vec) (i, j int, ok bool) {
-	if q.Dot(normals[g]) < 0.7 {
+// on is the lattice corner of a face that a direction is, if it is one.
+func (sphere Sphere) on(side int, direction maths.Vec) (stepI, stepJ int,
+	ok bool) {
+	if direction.Dot(normals[side]) < 0.7 {
 		return 0, 0, false // not near that face at all
 	}
-	n := float64(t.n())
-	u, v, w := bary(g, q)
+	split := float64(sphere.split())
+	firstWeight, secondWeight, thirdWeight := bary(side, direction)
 	const slack = 1e-9
-	if u < -slack || v < -slack || w < -slack {
+	if firstWeight < -slack || secondWeight < -slack ||
+		thirdWeight < -slack {
 		return 0, 0, false
 	}
-	fi, fj := v*n, w*n
-	i, j = int(math.Round(fi)), int(math.Round(fj))
-	if math.Abs(fi-float64(i)) > 1e-6 || math.Abs(fj-float64(j)) > 1e-6 {
+	looseI, looseJ := secondWeight*split, thirdWeight*split
+	stepI, stepJ = int(math.Round(looseI)), int(math.Round(looseJ))
+	if math.Abs(looseI-float64(stepI)) > 1e-6 ||
+		math.Abs(looseJ-float64(stepJ)) > 1e-6 {
 		return 0, 0, false
 	}
-	return i, j, true
+	return stepI, stepJ, true
 }
 
-// near fills buf with the tile's neighbours, five or six, and says how
+// near fills the room with the tile's neighbours, five or six, and says how
 // many: the lattice neighbours on its own face, and on every other face
 // the corner is on.
-func (t Sphere) near(tile Tile, buf *[6]Tile) int {
-	k := 0
-	add := func(f, i, j int) {
-		if i < 0 || j < 0 || i+j > t.n() {
+func (sphere Sphere) near(tile Tile, room *[6]Tile) int {
+	count := 0
+	add := func(side, stepI, stepJ int) {
+		if stepI < 0 || stepJ < 0 || stepI+stepJ > sphere.split() {
 			return
 		}
-		c := t.canonical(f, i, j)
-		for _, have := range buf[:k] {
-			if have == c {
+		named := sphere.canonical(side, stepI, stepJ)
+		for _, have := range room[:count] {
+			if have == named {
 				return
 			}
 		}
-		if k < len(buf) {
-			buf[k] = c
-			k++
+		if count < len(room) {
+			room[count] = named
+			count++
 		}
 	}
-	for _, s := range steps {
-		add(tile.Face, tile.I+s[0], tile.J+s[1])
+	for _, shift := range steps {
+		add(tile.Face, tile.Column+shift[0], tile.Row+shift[1])
 	}
-	if t.inside(tile) {
-		return k
+	if sphere.inside(tile) {
+		return count
 	}
-	q := t.Centre(tile)
-	for g := range faces {
-		if g == tile.Face {
+	direction := sphere.Centre(tile)
+	for other := range faces {
+		if other == tile.Face {
 			continue
 		}
-		if gi, gj, ok := t.on(g, q); ok {
-			for _, s := range steps {
-				add(g, gi+s[0], gj+s[1])
+		if otherI, otherJ, ok := sphere.on(other, direction); ok {
+			for _, shift := range steps {
+				add(other, otherI+shift[0], otherJ+shift[1])
 			}
 		}
 	}
-	return k
+	return count
 }
 
 // Neighbours is the tiles sharing an edge with this one: five for a
 // pentagon, six for a hexagon, in order of ID.
-func (t Sphere) Neighbours(tile Tile) []Tile {
-	var buf [6]Tile
-	out := append([]Tile(nil), buf[:t.near(tile, &buf)]...)
-	sort.Slice(out, func(a, b int) bool {
-		return t.ID(out[a]) < t.ID(out[b])
+func (sphere Sphere) Neighbours(tile Tile) []Tile {
+	var room [6]Tile
+	kept := append([]Tile(nil), room[:sphere.near(tile, &room)]...)
+	sort.Slice(kept, func(left, right int) bool {
+		return sphere.ID(kept[left]) < sphere.ID(kept[right])
 	})
-	return out
+	return kept
 }
 
 // Edge is how far a direction is from the edge of a tile, as a chord of the
 // unit sphere: zero on the edge, growing toward the middle, and less than zero
 // outside the tile. The edge with a neighbour is the plane square to the chord
 // between the two middles, halfway along it.
-func (t Sphere) Edge(p maths.Vec, tile Tile) float64 {
-	p = p.Unit()
-	c := t.Centre(tile)
-	var buf [6]Tile
+func (sphere Sphere) Edge(point maths.Vec, tile Tile) float64 {
+	point = point.Unit()
+	middle := sphere.Centre(tile)
+	var room [6]Tile
 	best := math.Inf(1)
-	for _, nb := range buf[:t.near(tile, &buf)] {
-		cn := t.Centre(nb)
-		d := c.Sub(cn)
-		mid := c.Add(cn).Scale(0.5)
-		best = math.Min(best, p.Sub(mid).Dot(d)/d.Len())
+	for _, neighbour := range room[:sphere.near(tile, &room)] {
+		nearMiddle := sphere.Centre(neighbour)
+		chord := middle.Sub(nearMiddle)
+		between := middle.Add(nearMiddle).Scale(0.5)
+		best = math.Min(best,
+			point.Sub(between).Dot(chord)/chord.Len())
 	}
 	return best
 }
@@ -292,45 +313,47 @@ func (t Sphere) Edge(p maths.Vec, tile Tile) float64 {
 // Tiles is every tile, in order of ID. It is 10N^2+2 long, so it is for
 // coarse tilings: a world's plates are decided on one, a sky's sample is
 // not.
-func (t Sphere) Tiles() []Tile {
-	n := t.n()
-	out := make([]Tile, 0, t.Count())
-	for f := range faces {
-		for i := 0; i <= n; i++ {
-			for j := 0; i+j <= n; j++ {
-				c := t.canonical(f, i, j)
-				if c == (Tile{f, i, j}) {
-					out = append(out, c)
+func (sphere Sphere) Tiles() []Tile {
+	split := sphere.split()
+	kept := make([]Tile, 0, sphere.Count())
+	for side := range faces {
+		for stepI := 0; stepI <= split; stepI++ {
+			for stepJ := 0; stepI+stepJ <= split; stepJ++ {
+				named := sphere.canonical(side, stepI, stepJ)
+				if named == (Tile{side, stepI, stepJ}) {
+					kept = append(kept, named)
 				}
 			}
 		}
 	}
-	return out
+	return kept
 }
 
 // face is which face a direction looks through: the one whose middle is
 // nearest, which for an icosahedron is the one the direction crosses.
-func face(p maths.Vec) int {
+func face(direction maths.Vec) int {
 	best, at := -2.0, 0
-	for f, n := range normals {
-		if d := p.Dot(n); d > best {
-			best, at = d, f
+	for side, normal := range normals {
+		if dot := direction.Dot(normal); dot > best {
+			best, at = dot, side
 		}
 	}
 	return at
 }
 
-// bary is where a direction crosses the plane of face f, as weights on its
+// bary is where a direction crosses the plane of a face, as weights on its
 // three corners: all three from zero to one inside the face.
-func bary(f int, p maths.Vec) (u, v, w float64) {
-	fc := planes[f]
-	a := verts[faces[f][0]]
-	q := p.Scale(normals[f].Dot(a) / normals[f].Dot(p))
-	v2 := q.Sub(a)
-	d20, d21 := v2.Dot(fc.v0), v2.Dot(fc.v1)
-	v = (fc.d11*d20 - fc.d01*d21) / fc.denom
-	w = (fc.d00*d21 - fc.d01*d20) / fc.denom
-	return 1 - v - w, v, w
+func bary(side int, direction maths.Vec) (firstWeight, secondWeight,
+	thirdWeight float64) {
+	held := planes[side]
+	first := verts[faces[side][0]]
+	landing := direction.Scale(
+		normals[side].Dot(first) / normals[side].Dot(direction))
+	fromFirst := landing.Sub(first)
+	d20, d21 := fromFirst.Dot(held.v0), fromFirst.Dot(held.v1)
+	secondWeight = (held.d11*d20 - held.d01*d21) / held.denom
+	thirdWeight = (held.d00*d21 - held.d01*d20) / held.denom
+	return 1 - secondWeight - thirdWeight, secondWeight, thirdWeight
 }
 
 // plane is what bary needs of a face, worked out once.
@@ -350,15 +373,17 @@ var (
 
 // icosahedron fills the tables.
 func init() {
-	g := (1 + math.Sqrt(5)) / 2
+	golden := (1 + math.Sqrt(5)) / 2
 	raw := [12]maths.Vec{
-		{X: -1, Y: g}, {X: 1, Y: g}, {X: -1, Y: -g}, {X: 1, Y: -g},
-		{Y: -1, Z: g}, {Y: 1, Z: g}, {Y: -1, Z: -g}, {Y: 1, Z: -g},
-		{X: g, Z: -1}, {X: g, Z: 1}, {X: -g, Z: -1},
-		{X: -g, Z: 1},
+		{X: -1, Y: golden}, {X: 1, Y: golden},
+		{X: -1, Y: -golden}, {X: 1, Y: -golden},
+		{Y: -1, Z: golden}, {Y: 1, Z: golden},
+		{Y: -1, Z: -golden}, {Y: 1, Z: -golden},
+		{X: golden, Z: -1}, {X: golden, Z: 1},
+		{X: -golden, Z: -1}, {X: -golden, Z: 1},
 	}
-	for i, v := range raw {
-		verts[i] = v.Unit()
+	for place, vertex := range raw {
+		verts[place] = vertex.Unit()
 	}
 	faces = [20][3]int{
 		{0, 11, 5}, {0, 5, 1}, {0, 1, 7}, {0, 7, 10}, {0, 10, 11},
@@ -366,12 +391,15 @@ func init() {
 		{3, 9, 4}, {3, 4, 2}, {3, 2, 6}, {3, 6, 8}, {3, 8, 9},
 		{4, 9, 5}, {2, 4, 11}, {6, 2, 10}, {8, 6, 7}, {9, 8, 1},
 	}
-	for f, tri := range faces {
-		a, b, c := verts[tri[0]], verts[tri[1]], verts[tri[2]]
-		normals[f] = a.Add(b).Add(c).Unit()
-		v0, v1 := b.Sub(a), c.Sub(a)
+	for side, triangle := range faces {
+		first := verts[triangle[0]]
+		second := verts[triangle[1]]
+		third := verts[triangle[2]]
+		normals[side] = first.Add(second).Add(third).Unit()
+		v0, v1 := second.Sub(first), third.Sub(first)
 		d00, d01, d11 := v0.Dot(v0), v0.Dot(v1), v1.Dot(v1)
-		planes[f] = plane{v0, v1, d00, d01, d11, d00*d11 - d01*d01}
+		planes[side] = plane{v0, v1, d00, d01, d11,
+			d00*d11 - d01*d01}
 	}
 }
 
@@ -379,23 +407,23 @@ func init() {
 // the arc cosine of their dot: below about 1.5e-8 it is zero, so at the finest
 // rungs neighbours are no distance apart, and a direction that is not one unit
 // long is not measured, its dot held to one.
-func (t Sphere) Distance(a, b maths.Vec) float64 {
-	return math.Acos(math.Max(-1, math.Min(1, a.Dot(b))))
+func (sphere Sphere) Distance(one, other maths.Vec) float64 {
+	return math.Acos(math.Max(-1, math.Min(1, one.Dot(other))))
 }
 
 // Latitude is how far a direction lies toward either pole along north: zero on
 // the equator, one at a pole, for a direction and a north one unit long. others
 // are not made so, and give more than one.
-func (t Sphere) Latitude(p, north maths.Vec) float64 {
-	return math.Abs(p.Dot(north))
+func (sphere Sphere) Latitude(direction, north maths.Vec) float64 {
+	return math.Abs(direction.Dot(north))
 }
 
 // Somewhere is the direction (2a-1, 2b-1, 2c-1): the sphere's points
 // from three even numbers, thicker toward the cube's corners, which is
 // how a world has scattered its plates since its first picture. the
 // cube's middle, which is no direction, is up.
-func (t Sphere) Somewhere(a, b, c float64) maths.Vec {
-	at := maths.V(a*2-1, b*2-1, c*2-1)
+func (sphere Sphere) Somewhere(shareX, shareY, shareZ float64) maths.Vec {
+	at := maths.V(shareX*2-1, shareY*2-1, shareZ*2-1)
 	if at == (maths.Vec{}) {
 		return maths.Up
 	}

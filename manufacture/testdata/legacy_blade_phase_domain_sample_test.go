@@ -43,7 +43,7 @@ func TestDiagnosticLegacyBladePhaseDomain(t *testing.T) {
 	minimum, index := math.Inf(1), -1
 	for blade := range foliageBudget {
 		value := math.Abs(math.Cos(float64(blade) * 2.4))
-		if value > 1.02 || math.Abs(math.Sin(float64(blade)*2.4)) > 1.02 {
+		if value > 1.02 || !(math.Abs(math.Sin(float64(blade)*2.4)) <= 1.02) {
 			t.Fatal("phase exceeds coordinate envelope", blade)
 		}
 		if value < minimum {

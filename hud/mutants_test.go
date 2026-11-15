@@ -220,7 +220,7 @@ func TestTheSceneSaysHowFarAThingIsMet(t *testing.T) {
 				Origin: maths.V(0, 0, -10),
 				Scale:  each.scale})})
 		t2, hit := Seen(world, 0).Hit(ray, each.near, 100)
-		if !hit || math.Abs(t2-each.want) > 1e-9 {
+		if !hit || !(math.Abs(t2-each.want) <= 1e-9) {
 			t.Errorf("%s: met at %v, %v; want %v", name, t2, hit,
 				each.want)
 		}

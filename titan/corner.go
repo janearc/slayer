@@ -81,20 +81,6 @@ func (way vector) margin(shape [corners]corner) float64 {
 		way.inside(shape[2].at, shape[0].at))
 }
 
-// place is a direction as the bits of its three parts: what a corner is
-// known by. Two triangles that share a corner reach it by the same sums,
-// so they reach the same bits.
-type place struct {
-	x, y, z uint64
-}
-
-// named is the direction's place. Nought is given one sign, so that it
-// has one name.
-func (way vector) named() place {
-	return place{math.Float64bits(way.x + none),
-		math.Float64bits(way.y + none), math.Float64bits(way.z + none)}
-}
-
 // The numbers a hash is mixed with. Each is splitmix64's, as Steele, Lea
 // and Flood published it in 2014; they are written here from memory.
 const (
@@ -111,22 +97,18 @@ func mix(bits uint64) uint64 {
 	return bits ^ bits>>31
 }
 
-// hashed is a number for a direction and a seed, the same for the pair
-// for ever.
-func (way vector) hashed(seed uint64) uint64 {
-	name := way.named()
-	bits := mix(seed + golden)
-	bits = mix(bits ^ mix(name.x+golden))
-	bits = mix(bits ^ mix(name.y+golden))
-	return mix(bits ^ mix(name.z+golden))
-}
-
 // unit is the top 53 bits of a hash as a number from nought up to one.
 func unit(bits uint64) float64 { return float64(bits>>11) / (1 << 53) }
 
 // corner is one corner of a triangle of the ground.
 type corner struct {
-	at     vector
+	at vector
+	// name is the corner's whole-numbered name on grissom's mesh: the
+	// same from every triangle that stands on it, and derived by
+	// integer arithmetic alone, so a gpu refining the same ground
+	// reaches the same names a cpu does. What a corner is made from
+	// hangs on its name and the seed and nothing else.
+	name   uint64
 	kind   Kind
 	height float64 // metres above the map's zero
 	made   float64 // how many of those metres are made
@@ -149,9 +131,9 @@ type read struct {
 	slope                           vector
 }
 
-// read is the corner at a direction, read from the map: its height, and
-// how rough the map is round it. Corners are kept, so the map is asked
-// about each once.
+// read is the corner at a direction, named on the mesh, read from the
+// map: its height, and how rough the map is round it. Corners are
+// kept by name, so the map is asked about each once.
 //
 // The roughness is read at the map's own spacing and at twice it, at six
 // places round the corner each time. The first is how much heights
@@ -159,8 +141,7 @@ type read struct {
 // exponent: one where a slope carries on, a half for a random walk,
 // nought where each step forgets the last. Twelve places are few, and a
 // reading outside nought to one is held to the nearer end.
-func (ground *Ground) read(at vector) (corner, error) {
-	name := at.named()
+func (ground *Ground) read(at vector, name uint64) (corner, error) {
 	ground.guard.Lock()
 	kept, found := ground.kept[name]
 	ground.guard.Unlock()
@@ -177,8 +158,8 @@ func (ground *Ground) read(at vector) (corner, error) {
 		ground.kept[name] = kept
 		ground.guard.Unlock()
 	}
-	return corner{at: at, kind: Measured, height: kept.height,
-		differs: kept.differs, hurst: kept.hurst,
+	return corner{at: at, name: name, kind: Measured,
+		height: kept.height, differs: kept.differs, hurst: kept.hurst,
 		spacing: kept.spacing, slope: kept.slope}, nil
 }
 

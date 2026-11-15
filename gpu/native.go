@@ -59,10 +59,11 @@ func (encoded *scene) populateAcceleration(plan nativePlan) (int, error) {
 			}
 		}
 	}
+	tops := encoded.ordered()
 	groups := make([]int, len(encoded.groups))
 	for i, group := range encoded.groups {
 		var places []metal.Placement
-		order, _ := topped(group.members)
+		order := tops.local[i]
 		for _, index := range order {
 			member := group.members[index]
 			placed, err := metal.Placed(meshes[member.root], nativeMatrix(member.space), 3)
@@ -77,8 +78,7 @@ func (encoded *scene) populateAcceleration(plan nativePlan) (int, error) {
 		}
 	}
 	var places []metal.Placement
-	order, _ := topped(encoded.standings)
-	for _, index := range order {
+	for _, index := range tops.order {
 		standing := encoded.standings[index]
 		child := meshes[standing.root]
 		if standing.group != 0 {
@@ -153,8 +153,8 @@ func (encoded *scene) nativeFirsts() []byte {
 		return first
 	}
 	var packed packer
-	order, _ := topped(encoded.standings)
-	for _, index := range order {
+	tops := encoded.ordered()
+	for _, index := range tops.order {
 		standing := encoded.standings[index]
 		first := 0
 		if standing.group == 0 {
@@ -164,9 +164,8 @@ func (encoded *scene) nativeFirsts() []byte {
 		}
 		packed.word(uint32(first))
 	}
-	for _, group := range encoded.groups {
-		order, _ := topped(group.members)
-		for _, index := range order {
+	for at, group := range encoded.groups {
+		for _, index := range tops.local[at] {
 			first := firstOf(group.members[index].root)
 			packed.word(uint32(first))
 		}

@@ -162,6 +162,47 @@ type Excited struct {
 	Excitations map[float64]float64
 	Width       float64
 	Passes      float64
+
+	// held is the lines sorted, set by Prepared.
+	held *heldLines
+}
+
+// line is one of an Excited's lines: its wavelength, its strength, and the
+// excitation it wants.
+type line struct {
+	nm, strength, excitation float64
+}
+
+// heldLines are an Excited's lines, shortest first, with what Excitation
+// answers where no line is the nearest. They are read, never changed, after
+// Prepared makes them, so render workers may share them.
+type heldLines struct {
+	lines []line
+	none  float64
+}
+
+// Prepared is the same gas with its lines sorted once, so that Emits and
+// Excitation, asked at every step of a march, do not sort them again. An
+// Excited built by a literal gives the same answers without it, only slower.
+// The prepared value does not see a change made to Lines or Excitations after
+// this call.
+func (e Excited) Prepared() Excited {
+	e.held = nil
+	held := &heldLines{none: e.excitationOf(0)}
+	for _, nm := range e.sortedLines(nil) {
+		held.lines = append(held.lines, line{nm, e.Lines[nm], e.excitationOf(nm)})
+	}
+	e.held = held
+	return e
+}
+
+// excitationOf is what Excitations says of a line: its entry where it has
+// one above zero, else one.
+func (e Excited) excitationOf(nm float64) float64 {
+	if x, is := e.Excitations[nm]; is && x > 0 {
+		return x
+	}
+	return 1
 }
 
 // Through is Passes, for any band.
@@ -173,20 +214,34 @@ func (e Excited) Emits(band maths.Band) float64 {
 	if width <= 0 {
 		width = 1
 	}
+	if e.held != nil {
+		return emitted(e.held.lines, band.Nanometres, width)
+	}
+	var buf [8]line
+	lines := buf[:0]
+	var nms [8]float64
+	for _, nm := range e.sortedLines(nms[:0]) {
+		lines = append(lines, line{nm: nm, strength: e.Lines[nm]})
+	}
+	return emitted(lines, band.Nanometres, width)
+}
+
+// emitted is the sum of the lines' gaussians at a wavelength, in the order
+// the lines are given.
+func emitted(lines []line, nm, width float64) float64 {
 	sum := 0.0
-	for _, line := range e.lines() {
-		strength := e.Lines[line]
-		d := (band.Nanometres - line) / width
+	for _, l := range lines {
+		strength := l.strength
+		d := (nm - l.nm) / width
 		sum += strength * math.Exp(-d*d)
 	}
 	return sum
 }
 
-// lines is the lines' wavelengths, shortest first.
-func (e Excited) lines() []float64 {
-	out := make([]float64, 0, len(e.Lines))
-	for line := range e.Lines {
-		out = append(out, line)
+// sortedLines is the lines' wavelengths, shortest first, appended to out.
+func (e Excited) sortedLines(out []float64) []float64 {
+	for nm := range e.Lines {
+		out = append(out, nm)
 	}
 	sort.Float64s(out)
 	return out
@@ -197,14 +252,24 @@ func (Excited) Scatters(maths.Band) float64 { return 0 }
 
 // Excitation is the nearest line's, or one.
 func (e Excited) Excitation(band maths.Band) float64 {
+	if e.held != nil {
+		nearest, apart := -1, math.Inf(1)
+		for i, l := range e.held.lines {
+			if d := math.Abs(band.Nanometres - l.nm); d < apart {
+				nearest, apart = i, d
+			}
+		}
+		if nearest < 0 {
+			return e.held.none
+		}
+		return e.held.lines[nearest].excitation
+	}
 	nearest, apart := 0.0, math.Inf(1)
-	for _, line := range e.lines() {
-		if d := math.Abs(band.Nanometres - line); d < apart {
-			nearest, apart = line, d
+	var nms [8]float64
+	for _, nm := range e.sortedLines(nms[:0]) {
+		if d := math.Abs(band.Nanometres - nm); d < apart {
+			nearest, apart = nm, d
 		}
 	}
-	if x, is := e.Excitations[nearest]; is && x > 0 {
-		return x
-	}
-	return 1
+	return e.excitationOf(nearest)
 }

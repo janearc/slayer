@@ -12,7 +12,7 @@ import (
 
 // Error is how far a picture with a shortcut is from the exact one:
 // the worst and the mean oklab distance over the pixels, both frames
-// developed the same way, as smokecheck judges a terminal against the real.
+// developed the same way, as smokejudge judges a terminal against the real.
 func Error(exact, taken *frame.Frame, tone colour.Tone) (worst, mean float64) {
 	a, b := tone.Develop(exact), tone.Develop(taken)
 	return Apart(a, b)

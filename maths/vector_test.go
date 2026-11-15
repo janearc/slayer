@@ -67,7 +67,7 @@ func TestALengthAndADirectionAtEverySize(test *testing.T) {
 		scale := float(test, row, "scale")
 		sized := vector(test, "three four nought").Scale(scale)
 		want := picked(test, "length-of-three-four-nought") * scale
-		if got := sized.Len(); math.Abs(got/want-unity) > picked(test, "one-part-in") {
+		if got := sized.Len(); !(math.Abs(got/want-unity) <= picked(test, "one-part-in")) {
 			test.Errorf("%s: a vector of 3, 4, 0 times %v is %v long",
 				row["name"], scale, got)
 		}

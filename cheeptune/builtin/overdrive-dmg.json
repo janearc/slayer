@@ -1,0 +1,28 @@
+{
+	// thin and bright. the narrowest pulse for the lead, stabs that
+	// shimmer at a tick a note, a square table in the bass for weight,
+	// and a tonal hit from the short register between the snares.
+	"name": "overdrive-dmg",
+	"machine": "gameboy",
+	"channels": [
+		{"kind": "pulse", "role": "lead", "duty": 0.125, "volume": 0.7,
+		 "envelope": {"attack": 0, "decay": 0.12, "sustain": 0.7,
+		              "release": 0.04},
+		 "vibrato": {"rate": 7, "depth": 10, "delay": 0.2}},
+		{"kind": "pulse", "role": "pad", "duty": 0.25, "volume": 0.5,
+		 "arp": 1, "pan": "right",
+		 "envelope": {"attack": 0, "decay": 0.1, "sustain": 0.3,
+		              "release": 0.02}},
+		{"kind": "wave", "role": "bass", "table": "square",
+		 "envelope": {"attack": 0, "decay": 0.06, "sustain": 0.5,
+		              "release": 0.01}},
+		{"kind": "noise", "role": "perc", "hits": {
+			"k": {"shift": 6, "divisor": 5, "decay": 0.07, "volume": 0.85},
+			"s": {"shift": 1, "divisor": 1, "decay": 0.1, "volume": 0.85},
+			"h": {"shift": 0, "divisor": 0, "short": true, "decay": 0.02,
+			      "volume": 0.3},
+			"t": {"shift": 3, "divisor": 1, "short": true, "decay": 0.06,
+			      "volume": 0.6}
+		}}
+	]
+}

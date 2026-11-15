@@ -1,0 +1,22 @@
+# Frames and sections the section tests draw. The frame is picked odd in
+# both sides so no section lines up with a whole number of anything. The
+# sections tile it: each is worked by hand from the frame's 23 by 17.
+frame: {width: 23, height: 17}
+# the eye is a pinhole of the given width, standing at across, height and depth.
+eye: {across: 0, height: 1.5, depth: 6, wide: 50}
+# rays a pixel: one, and three a side, which is nine.
+rays: [1, 3]
+# the refusals are tried at one ray a pixel.
+refused-rays: 1
+tiles:
+  - {name: top left, left: 0, top: 0, right: 10, bottom: 7}
+  - {name: top right, left: 10, top: 0, right: 23, bottom: 7}
+  - {name: bottom left, left: 0, top: 7, right: 5, bottom: 17}
+  - {name: bottom right, left: 5, top: 7, right: 23, bottom: 17}
+# sections that are refused: empty, or reaching outside the frame by one
+# pixel on each side in turn.
+refused:
+  - {name: empty, left: 0, top: 0, right: 0, bottom: 5}
+  - {name: left of the frame, left: -1, top: 0, right: 4, bottom: 4}
+  - {name: right of the frame, left: 0, top: 0, right: 24, bottom: 4}
+  - {name: below the frame, left: 3, top: 3, right: 9, bottom: 18}

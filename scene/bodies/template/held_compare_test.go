@@ -8,8 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
+	"github.com/janearc/celestial/radiation"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
+	"github.com/janearc/slayer/scene/thing"
+	"github.com/janearc/slayer/scene/world"
 )
 
 // the walk that holds a body to a literal written beside it. a number
@@ -140,6 +144,50 @@ func holds(t *testing.T, what string, got, want any) {
 	}
 }
 
+// walked is a body built to order for the walk's own test: every knob
+// is a constructor argument, so each case below differs from the base
+// in exactly one spelled way.
+type walked struct {
+	name     string
+	radiusKm float64
+	day      time.Duration
+	air      bool
+	featured bool
+	mooned   bool
+	glow     maths.Light
+	gives    float64
+}
+
+// base is the walked body every case bends one knob of.
+func base() walked {
+	return walked{name: "w", radiusKm: 100, day: time.Hour, air: true,
+		featured: true, mooned: true, gives: 1}
+}
+
+// build is the walked body, through the doors.
+func (knobs walked) build(t *testing.T) bodies.Body {
+	t.Helper()
+	ground := wantGround(t, world.Terrain{Seed: 1, Plates: 3},
+		world.Look{Lines: 0.1})
+	if knobs.featured {
+		ground = ground.Featured(anyFeatures)
+	}
+	parts := []bodies.Part{ground}
+	if knobs.air {
+		parts = append(parts, wantAir(t, 8, 0.01))
+	}
+	if knobs.mooned {
+		parts = append(parts,
+			wantMoon(t, want(t, "m", bodies.Rock, 1, 1), 100, 0))
+	}
+	return want(t, knobs.name, bodies.Rock, knobs.radiusKm, 1e20,
+		parts...).
+		Turning(knobs.day, measure.Radians(0.5)).
+		Glowing(knobs.glow, thing.Spectrum{
+			Gives: map[radiation.Range]float64{
+				radiation.XRay(): knobs.gives}})
+}
+
 // the walk sees what it should: a changed number, a part gone, a moon
 // dropped, a function missing, a map entry changed, a name changed, a
 // Duration out by more than a microsecond.
@@ -147,47 +195,44 @@ func holds(t *testing.T, what string, got, want any) {
 // it does not see a number out by one part in 1e13, a Duration out by
 // a nanosecond, or a colour, unless colours are asked for.
 func TestTheWalkSeesAChangeAndNotARounding(t *testing.T) {
-	if got := apart(Venus(), Venus()); len(got) != 0 {
+	if got := apart(base().build(t), base().build(t)); len(got) != 0 {
 		t.Errorf("the same body differs: %v", got)
+	}
+	bend := func(change func(*walked)) bodies.Body {
+		knobs := base()
+		change(&knobs)
+		return knobs.build(t)
 	}
 	for _, c := range []struct {
 		what   string
-		of     func() bodies.Body
-		change func(b *bodies.Body)
+		change func(*walked)
 	}{
-		{"a radius", Venus, func(b *bodies.Body) { b.Radius *= 1 + 1e-9 }},
-		{"a part gone", Venus, func(b *bodies.Body) { b.Air = nil }},
-		{"a moon dropped", Earth, func(b *bodies.Body) { b.Moons = nil }},
-		{"a function missing", Venus, func(b *bodies.Body) { b.Ground.Features = nil }},
-		{"a day out by two microseconds", Venus, func(b *bodies.Body) { b.Day += 2000 }},
-		{"a name", Venus, func(b *bodies.Body) { b.Name += "!" }},
-		{"a map entry", Venus, func(b *bodies.Body) {
-			scribble(reflect.ValueOf(&b.Ground.Radiant).Elem())
-		}},
+		{"a radius", func(k *walked) { k.radiusKm *= 1 + 1e-9 }},
+		{"a part gone", func(k *walked) { k.air = false }},
+		{"a moon dropped", func(k *walked) { k.mooned = false }},
+		{"a function missing", func(k *walked) { k.featured = false }},
+		{"a day out by two microseconds", func(k *walked) { k.day += 2000 }},
+		{"a name", func(k *walked) { k.name += "!" }},
+		{"a map entry", func(k *walked) { k.gives = 2 }},
 	} {
-		b := c.of()
-		c.change(&b)
-		if len(apart(b, c.of())) == 0 {
+		if len(apart(bend(c.change), base().build(t))) == 0 {
 			t.Errorf("the walk does not see %s", c.what)
 		}
 	}
 	for _, c := range []struct {
 		what   string
-		change func(b *bodies.Body)
+		change func(*walked)
 	}{
-		{"a rounding", func(b *bodies.Body) { b.Radius *= 1 + 1e-13 }},
-		{"a nanosecond", func(b *bodies.Body) { b.Day++ }},
-		{"a colour", func(b *bodies.Body) { b.Air.Colour.R++ }},
+		{"a rounding", func(k *walked) { k.radiusKm *= 1 + 1e-13 }},
+		{"a nanosecond", func(k *walked) { k.day++ }},
+		{"a colour", func(k *walked) { k.glow = maths.Grey(1) }},
 	} {
-		b := Venus()
-		c.change(&b)
-		if got := apart(b, Venus()); len(got) != 0 {
+		if got := apart(bend(c.change), base().build(t)); len(got) != 0 {
 			t.Errorf("the walk sees %s: %v", c.what, got)
 		}
 	}
-	b := Venus()
-	b.Air.Colour.R++
-	if len(apartWithColours(b, Venus())) == 0 {
+	coloured := bend(func(k *walked) { k.glow = maths.Grey(1) })
+	if len(apartWithColours(coloured, base().build(t))) == 0 {
 		t.Error("the walk with colours does not see a colour")
 	}
 }

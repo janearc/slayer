@@ -17,7 +17,7 @@ import (
 
 func near(t *testing.T, name string, got, want, within float64) {
 	t.Helper()
-	if math.IsNaN(got) || math.IsInf(got, 0) || math.IsNaN(want) || math.IsInf(want, 0) || math.Abs(got-want) > within {
+	if math.IsNaN(got) || math.IsInf(got, 0) || math.IsNaN(want) || math.IsInf(want, 0) || !(math.Abs(got-want) <= within) {
 		t.Errorf("%s is %v, not %v (within %v)", name, got, want, within)
 	}
 }
@@ -229,7 +229,7 @@ func TestDensitySumsToOne(t *testing.T) {
 		for j := 0; j < steps; j++ {
 			x := -reach + (float64(i)+0.5)*2*reach/steps
 			y := -reach + (float64(j)+0.5)*2*reach/steps
-			sum += density(x, y, a, c) * (2 * reach / steps) * (2 * reach / steps)
+			sum += SlopeChance(x, y, a, c) * (2 * reach / steps) * (2 * reach / steps)
 		}
 	}
 	near(t, "the density's sum", sum, 1, 1e-6)
@@ -282,7 +282,7 @@ func TestGlintConservesEnergy(t *testing.T) {
 			sine := math.Sqrt(1 - cosine*cosine)
 			eye := Vec{sine * math.Cos(turn), sine * math.Sin(turn), cosine}
 			half := Vec{sun.X + eye.X, sun.Y + eye.Y, sun.Z + eye.Z}.unit()
-			chance := density(-half.X/half.Z, -half.Y/half.Z, varA, varC)
+			chance := SlopeChance(-half.X/half.Z, -half.Y/half.Z, varA, varC)
 			radiance := Fresnel(sun.dot(half), index) * chance /
 				(4 * eye.Z * math.Pow(half.Z, 4))
 			sent += radiance * eye.Z * (2 * math.Pi / (steps * steps))
@@ -469,7 +469,7 @@ func TestSunFollowsTheCalendar(t *testing.T) {
 	near(t, "September equinox", declination(at(time.September, 23)), 0, 0.3)
 
 	noon, _ := Sun(50, 0, at(time.March, 20))
-	if math.Abs(noon.X) > 0.05 || noon.Y >= 0 {
+	if !(math.Abs(noon.X) <= 0.05) || noon.Y >= 0 {
 		t.Errorf("at Greenwich noon the sun is at %v, not due south", noon)
 	}
 	near(t, "noon height at 50 north", math.Asin(noon.Z)/degrees, 40, 0.5)
@@ -584,7 +584,7 @@ func TestTide(t *testing.T) {
 		t.Errorf("an unknown constituent was accepted")
 	}
 	sea, err := (Sea{Wind: 8, Fetch: 50e3}).Flood(3, tide, period/4)
-	if err != nil || math.Abs(sea.Depth-4.5) > 1e-9 {
+	if err != nil || !(math.Abs(sea.Depth-4.5) <= 1e-9) {
 		t.Errorf("flood depth is %v, %v", sea.Depth, err)
 	}
 	if _, err := (Sea{}).Flood(1, tide, period*3/4); err == nil {
@@ -603,6 +603,29 @@ func TestChopSharpensCrests(t *testing.T) {
 	}
 	if both >= 0 {
 		t.Errorf("the push stretches the crests")
+	}
+}
+
+func TestViewImagePixelCeiling(t *testing.T) {
+	limits, err := readLimits()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if limits.ImagePixels != 4096*4096 {
+		t.Fatalf("image pixel ceiling is %d, want %d", limits.ImagePixels, 4096*4096)
+	}
+}
+
+func TestViewChecksPixelCeilingBeforeRendering(t *testing.T) {
+	for _, camera := range []Camera{
+		{Eye: Subspace{Origin: Vec{Z: 2}}, Width: 4097, Height: 4096},
+		{Eye: Subspace{Origin: Vec{Z: 2}}, Width: 4096, Height: 4097},
+		{Eye: Subspace{Origin: Vec{Z: 2}}, Width: 1 << 30, Height: 1 << 30},
+	} {
+		_, err := View(Scene{}, camera)
+		if err == nil || !strings.Contains(err.Error(), "exceeds pixel budget") {
+			t.Errorf("camera %dx%d did not fail at the pixel ceiling before rendering: %v", camera.Width, camera.Height, err)
+		}
 	}
 }
 
@@ -778,7 +801,7 @@ func TestCameraIsPatternedOnSlayers(t *testing.T) {
 	east := LookAt(Vec{Z: 2}, Vec{X: 50, Z: 2})
 	ahead := east.Out(Vec{Z: -1})
 	above := east.Out(Vec{Y: 1})
-	if math.Abs(ahead.X-1) > 1e-12 || math.Abs(above.Z-1) > 1e-12 {
+	if !(math.Abs(ahead.X-1) <= 1e-12) || !(math.Abs(above.Z-1) <= 1e-12) {
 		t.Errorf("facing east: ahead %v, top of picture %v", ahead, above)
 	}
 	if LookAt(Vec{Z: 2}, Vec{Z: 2}) != Identity {

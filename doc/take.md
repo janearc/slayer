@@ -52,6 +52,12 @@ Every glimpse costs a render. One freezes motion regardless of speed;
 three or more begin to capture blur, though fast motion may need more.
 A stationary camera and scene need only one.
 
+That is a take's own arithmetic. A job's film on the gpu adds to it: inside
+each glimpse the kernel gives every ray of a pixel its own moment of the
+glimpse's share of the shutter and looks from the camera path there, so one
+glimpse blurs a camera's move. It does not blur things that move in the
+scene; those still want glimpses. See `shutter` in `job/README.md`.
+
 Time starts at zero, when the first frame opens. Use each glimpse's `At()`
 for both scene evaluation and camera placement, so moving objects and camera
 share the same clock.
@@ -59,7 +65,7 @@ share the same clock.
 ## Example
 
 `take/smoke_test.go` films two seconds of a ball on grey ground using every
-stock. `cmd/hillside` uses a one-frame take to sample its rig's shutter.
+stock. `hillside` uses a one-frame take to sample its rig's shutter.
 The test's structure is:
 
 ```go

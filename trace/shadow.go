@@ -25,16 +25,17 @@ const shadowSeed = 77
 func (volume placedVolume) opticalDepth(point, toward maths.Vec,
 	far float64) float64 {
 	ray := volume.at.RayIn(maths.Ray{At: point, Dir: toward})
-	inside, crossed := volume.span(ray, far/volume.scale)
-	if !crossed {
-		return 0
-	}
-	step := (inside.leave - inside.enter) / shades
-	jitter := volume.stagger(point, step)
 	depth := 0.0
-	for i := 0; i < shades; i++ {
-		at := ray.Point(inside.enter + (float64(i)+jitter)*step)
-		depth += volume.med.Density(at) * step
+	for _, inside := range volume.intervals(ray, far/volume.scale) {
+		if inside.leave <= inside.enter {
+			continue
+		}
+		step := (inside.leave - inside.enter) / shades
+		jitter := volume.stagger(point, step)
+		for i := 0; i < shades; i++ {
+			at := ray.Point(inside.enter + (float64(i)+jitter)*step)
+			depth += volume.med.Density(at) * step
+		}
 	}
 	return depth
 }
@@ -58,7 +59,7 @@ func (volume placedVolume) stagger(point maths.Vec, step float64) float64 {
 // shone is how much lamplight reaches a point in the world, as one
 // number: the luminance of each lamp's light after the surfaces,
 // volumes and gases in its way have taken their share of each channel.
-func shone(scene staged, point, facing maths.Vec) float64 {
+func shone(scene *staged, point, facing maths.Vec) float64 {
 	sum := 0.0
 	for _, lamp := range scene.lamps {
 		sum += scene.reaching(lamp, point, facing).light.Luminance()

@@ -52,7 +52,7 @@ func TestCheckerSize(t *testing.T) {
 // A wire is bright on a tiling's edges and black in the middle of a
 // tile.
 func TestWireIsBrightOnEdgesAndBlackWithin(t *testing.T) {
-	tl := hexes.Sphere{N: 4}
+	tl := hexes.Sphere{Splits: 4}
 	w := Wire{Tiling: tl, Light: maths.Grey(1)}
 	tile := tl.Nearest(maths.V(0.3, 0.9, 0.1).Unit())
 	if l := w.At(tl.Centre(tile)); l.Luminance() > 0.01 {

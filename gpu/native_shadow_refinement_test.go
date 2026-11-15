@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 //ninja:vow dojo fault injection needs the private Metal source and encoder
 package gpu
@@ -106,7 +106,7 @@ func refusedShadowKernel(t *testing.T, encoded *scene) *metal.Kernel {
 // rejectedShadowSource injects only a candidate refusal, not an empty scene.
 func rejectedShadowSource(t *testing.T, encoded *scene) string {
 	t.Helper()
-	text := sourceWith(encoded.records())
+	text := sourceWith(encoded.records(), encoded.counts.volumes)
 	function := strings.Index(text, "static Hit native_shadow_standing(")
 	if function < shadowFirst {
 		t.Fatal("native shadow refinement missing")

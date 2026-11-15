@@ -1,0 +1,25 @@
+{
+	// a round square lead that sings, with a little vibrato once a note
+	// has held; the chords broken into quick sixteenths underneath.
+	"name": "leap-dmg",
+	"machine": "gameboy",
+	"channels": [
+		{"kind": "pulse", "role": "lead", "duty": 0.5, "volume": 0.8,
+		 "envelope": {"attack": 0, "decay": 0.2, "sustain": 0.7,
+		              "release": 0.08},
+		 "vibrato": {"rate": 6.5, "depth": 14, "delay": 0.15}},
+		{"kind": "pulse", "role": "pad", "duty": 0.125, "volume": 0.4,
+		 "arp": "1/4", "detune": 5,
+		 "envelope": {"attack": 0, "decay": 0.3, "sustain": 0.6,
+		              "release": 0.05}},
+		{"kind": "wave", "role": "bass", "table": "triangle",
+		 "envelope": {"attack": 0, "decay": 0.2, "sustain": 0.5,
+		              "release": 0.02}},
+		{"kind": "noise", "role": "perc", "hits": {
+			"k": {"shift": 6, "divisor": 3, "decay": 0.08},
+			"s": {"shift": 2, "divisor": 1, "decay": 0.1, "volume": 0.75},
+			"h": {"shift": 0, "divisor": 1, "short": true, "decay": 0.025,
+			      "volume": 0.3}
+		}}
+	]
+}

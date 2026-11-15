@@ -140,7 +140,7 @@ func TestALettersVolumeIsItsAreaTimesItsDepth(t *testing.T) {
 		area, _ := covered(tris)
 		want := area * scale * scale * plain.Depth
 		got := volume(made(t, face, letter, plain))
-		if !(got > 0) || math.Abs(got-want) > 1e-9*want {
+		if !(got > 0) || !(math.Abs(got-want) <= 1e-9*want) {
 			t.Errorf("%q: volume %v, want %v", letter, got, want)
 		}
 	}

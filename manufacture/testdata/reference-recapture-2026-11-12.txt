@@ -1,0 +1,69 @@
+Geometry reference rows re-captured on 2026-11-12, with sign-off.
+
+What moved, and why. Each was a change made on purpose on the branch
+feat/materials-optics; the record hashes a thing's looks as well as its
+shape, so a new look moves a row as surely as a new shape does.
+
+- webb, eight rows, in spacecraft-reference-arm64.txt. Its mirrors
+  became gold and its sunshield aluminium, from the metals' published
+  optical constants (f4dd2058). Then its shape was rebuilt by its
+  papers: the bus under the shield, the tower, the instrument module,
+  the solar array, the antenna, the secondary at 7.169 m (cb53d7a0).
+- mcrn-larson, eight rows, in saucer-reference-arm64.txt. Its portholes
+  were given a glow of their own and it was given named lamps
+  (99b25f9a). An earlier commit on this branch said its records would
+  not move. That was wrong.
+- mcrn-larson-landed, eight rows, new, in saucer-reference-arm64.txt.
+  The kind was added on this branch (aea6e978) and had no rows.
+
+No other row moved. Before the re-capture the reference test failed on
+webb's eight and mcrn-larson's eight and on nothing else, and said the
+landed kind had no reference.
+
+How. The producer, run at af922bbf with the tree otherwise clean:
+
+    GOWORK=off go run ./manufacture/testdata/geometry_sample.go
+
+It printed 776 rows: the 768 recorded, and the landed Larson's eight.
+The 24 rows above were copied from its output into the two files, and
+then compared with its output again: byte for byte the same.
+geometry-records.yaml's totals went from 768 cases and 606 geometries to
+776 and 614; the 162 refusals did not change.
+
+Webb's eight rows were captured a second time the same morning, after
+its sun side was built from NASA's picture of it (the pallets, the
+booms, the row of five solar panels, the radiators, the round
+interface, the flap). The producer was run again on that tree; nothing
+but webb's rows differed from the first run, and webb's eight on disk
+are that second run's, byte for byte.
+
+The files after:
+
+    92438268bca1b19928eecdd89d9b8f6f1b5d3a620191641d5260ef616bebf949  saucer-reference-arm64.txt
+    ef1dde0ebcc9aa37859cc71ab73dd0da7ddb51a8d2cc2b479c7b1f66b6b5ef35  spacecraft-reference-arm64.txt
+
+The spacecraft file's checksum above is its sixth capture's, the
+latest: the sixth followed when the sun-facing membrane was given its
+seams, and again nothing but webb's rows differed from the run before.
+The fifth followed when the shield's layers were fanned, close
+at the middle and apart at the edges. That change was made in the
+plate every kind's flat plates are made of; the producer's whole output
+was compared with the run before, and nothing but webb's rows differed. A fourth capture of webb's eight followed the third, when its
+sunshield's outline became a kite with scalloped edges and its solar
+panels were sized to sit inside it. Nothing but webb's rows differed
+from the run before.
+
+A third capture of webb's eight, the same morning. The secondary's two
+numbers were moved into the research file as the paper's page has them,
+in millimetres, so the project's own check can hold them to the page.
+Dividing by a thousand in a different place moved the secondary by a
+rounding of the last bit, and the rows with it. Nothing but webb's rows
+differed from the second run.
+
+What this does not do. spacecraft-reference-provenance.json still
+describes the first capture: its base commit, its reference checksum
+and its list of source checksums are that capture's, and are now out of
+date for webb's rows. It was left as the record of what it records.
+What these rows prove is what the record always proved: that the things
+are built the same from one run to the next. They do not prove the
+things are right.

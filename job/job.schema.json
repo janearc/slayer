@@ -1,0 +1,952 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "slayer job",
+  "description": "A job says how to render a scene: the scene, the film, the time or span, the camera, the development, the titles and sound laid over it, and what comes out.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "The name of this schema, which says the document is a slayer job. Always https://github.com/janearc/slayer/schemas/job-v1.json; required.",
+      "const": "https://github.com/janearc/slayer/schemas/job-v1.json"
+    },
+    "scene": {
+      "description": "Which scene to render, in exactly one of four forms: set, smoke, named or frames. Required; for example {set: ../sets/moonlake.yaml}.",
+      "type": "object",
+      "properties": {
+        "set": {
+          "description": "A set file, its path relative to this job. For example ../sets/moonlake.yaml.",
+          "type": "string",
+          "minLength": 1
+        },
+        "smoke": {
+          "description": "A numbered smoke scene, counting from 1. For example 3.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "named": {
+          "description": "A scene built in Go, by its name; the parameters go in with. A bridge until the scene has a set file; for example fire-night.",
+          "type": "string",
+          "minLength": 1
+        },
+        "with": {
+          "description": "The named scene's parameters, checked by that scene and not by this schema. Only beside named; for example {seed: 7}.",
+          "type": "object"
+        },
+        "play": {
+          "description": "A cue sheet that plays the named scene's channels from the job's sound, which must be a tune; its path relative to this job. Only beside named; for example zappy-plays.yaml.",
+          "type": "string",
+          "minLength": 1
+        },
+        "frames": {
+          "description": "A directory of frames already rendered, .pfm or .png, taken in name order. Nothing is traced: only development, titles, sound and the film are done.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "film": {
+      "description": "The picture's size, rays and lens. Every key is optional; a preset gives a size and sometimes a rate, and a key written beside it stands over it.",
+      "type": "object",
+      "properties": {
+        "preset": {
+          "description": "A named size, and for the previews a rate, from the presets table. For example portrait (1080 by 1920) or video-preview (320 by 180 at 6 frames a second); 720 and 320 may be written bare.",
+          "enum": [
+            "portrait",
+            "portrait-preview",
+            "4k",
+            "2k",
+            "720",
+            720,
+            "320",
+            320,
+            "imax",
+            "imax-2k",
+            "video-preview",
+            "video-preview-720"
+          ]
+        },
+        "width": {
+          "description": "The picture's width in pixels, from 1 to 8192. Unsaid, it comes from the preset, then the set. For example 1920.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        },
+        "height": {
+          "description": "The picture's height in pixels, from 1 to 8192. Unsaid, it comes from the preset, then the set. For example 1080.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        },
+        "rays": {
+          "description": "Rays along each side of a pixel, from 1 to 16, so 4 is sixteen rays a pixel. Unsaid, the set's count is used.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "wide": {
+          "description": "The angle the lens sees across the picture, in degrees, above 0 and below 180. Say wide or tall, not both; for example 55.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 180
+        },
+        "tall": {
+          "description": "The angle the lens sees down the picture, in degrees, above 0 and below 180. The way to frame a tall picture; say wide or tall, not both. For example 60.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 180
+        },
+        "exposure": {
+          "description": "What one watt a steradian is in the picture's light, above 0. Unsaid, the set's exposure is used; for example 0.5.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000000.0
+        },
+        "aperture": {
+          "description": "How wide the lens is open, across, in the scene's own unit (metres for a set or a smoke), above 0. Things nearer or further than the focus are blurred, more the wider it is; say it beside focus. Unsaid, the lens is a pinhole and everything is sharp. On the gpu only. For example 0.1.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000000.0
+        },
+        "focus": {
+          "description": "How far off the lens is focused, in the scene's own unit (metres for a set or a smoke), above 0 and further than the aperture is wide. Say it beside aperture. For example 12.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000000.0
+        }
+      },
+      "additionalProperties": false
+    },
+    "renderer": {
+      "description": "Which renderer draws the frames: cpu, gpu, gpu-native-shadows or gpu-native. Unsaid, the command line or the set decides.",
+      "enum": [
+        "cpu",
+        "gpu",
+        "gpu-native-shadows",
+        "gpu-native"
+      ]
+    },
+    "quality": {
+      "description": "exact draws every frame in full; preview draws a quicker, rougher frame for looking. The default is exact.",
+      "enum": [
+        "exact",
+        "preview"
+      ]
+    },
+    "vibes": {
+      "description": "For films to watch, not to measure: turns every shortcut on. A flag: fastlight and a shortcut's own word stand over it. Refused with whatever a shortcut it turns on is refused with.",
+      "enum": [
+        "on",
+        "off"
+      ]
+    },
+    "fastlight": {
+      "description": "Fast light: turns the light shortcuts on, each an approximation. A flag: a shortcut's own word stands over it. Refused on the cpu, through a rig's lens, for a named scene, and beside a proof.",
+      "enum": [
+        "on",
+        "off"
+      ]
+    },
+    "shortcuts": {
+      "description": "The parts of a quicker picture, each on or off by name, standing over fastlight and vibes. Each is an approximation, and a picture drawn with one says so.",
+      "type": "object",
+      "properties": {
+        "lamp-store": {
+          "description": "Mist and smoke lit from a store of each lamp's light, once a frame. A shadow cast into mist goes as soft as a cell of the store. Refused with more than eight lamps, beside volume-lighting: cached, and as fastlight is.",
+          "enum": [
+            "on",
+            "off"
+          ]
+        },
+        "sky-looks": {
+          "description": "The sky's sixteen looks from a surface shared among a pixel's rays. Each ray takes its share, not all sixteen, so sky-lit shade is a little rougher within a pixel. Refused without lamp-store, and as fastlight is.",
+          "enum": [
+            "on",
+            "off"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "camera": {
+      "description": "The camera: {name: NAME} for one the scene defines, or a path of moves as a sequence plan writes one. A zoom may stand beside a name.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "A camera the scene defines, by its name. Not beside look-at, up, moves or unit; for example rim.",
+          "type": "string",
+          "minLength": 1
+        },
+        "unit": {
+          "description": "The unit of the path's points, which must be the scene's own: m, metres, for sets and smokes; a named scene's unit as the scene names it, for example a thousand kilometres. The renderer checks it against the scene. Required with a path.",
+          "type": "string",
+          "minLength": 1
+        },
+        "look-at": {
+          "$ref": "#/$defs/point",
+          "description": "The point the camera looks at, unless a move says its own look. Required with a path; for example {x: 0, y: 1, z: 0}."
+        },
+        "up": {
+          "$ref": "#/$defs/point",
+          "description": "Which way is up for the camera. The default is {x: 0, y: 1, z: 0}, the scene's up."
+        },
+        "moves": {
+          "description": "The camera's moves, in order, each starting where the last ended. Required with a path; from 1 to 1024 moves.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": {
+            "$ref": "#/$defs/move"
+          }
+        },
+        "zoom": {
+          "$ref": "#/$defs/zoom",
+          "description": "A change of the lens's angle across the picture over time, without moving the camera. For example {from: {value: 60, unit: deg}, to: {value: 20, unit: deg}, duration: {value: 8, unit: s}}."
+        }
+      },
+      "additionalProperties": false
+    },
+    "at": {
+      "$ref": "#/$defs/instant",
+      "description": "A still: the scene's time when the picture is taken, in seconds from 0 to 86400. Not beside fps or duration; for example {value: 20, unit: s}."
+    },
+    "fps": {
+      "description": "A film: frames a second, from 1 to 120. Unsaid, a preset's rate is used; for example 24.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 120
+    },
+    "duration": {
+      "$ref": "#/$defs/span",
+      "description": "A film: how long it plays, in seconds, from 0.001 to 3600. Required for a film; for example {value: 10, unit: s}."
+    },
+    "start": {
+      "$ref": "#/$defs/instant",
+      "description": "A film: the scene's time at the first frame, in seconds from 0 to 86400. The default is 0; for example {value: 40, unit: s}."
+    },
+    "scene-duration": {
+      "$ref": "#/$defs/scene-span",
+      "description": "A film: how much scene time the film spans, stretched over its duration, in seconds from 0.001 to 86400. Unsaid, scene time runs with the film; {value: 3600, unit: s} over 30 seconds is an hour in half a minute."
+    },
+    "shutter": {
+      "description": "Motion blur: each frame is drawn glimpses times across the part of its interval the angle leaves open, and the light averaged. Films only; absent, a frame is one instant.",
+      "type": "object",
+      "properties": {
+        "angle": {
+          "description": "How much of each frame's interval the shutter is open, in degrees above 0 and up to 360; 180 is half. For example {value: 180, unit: deg}.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "The angle in degrees, above 0 and up to 360.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 360
+            },
+            "unit": {
+              "description": "Always deg, degrees.",
+              "const": "deg"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "glimpses": {
+          "description": "How many times each frame is drawn while the shutter is open, from 1 to 64. A frame costs this many renders; for example 4.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        }
+      },
+      "required": [
+        "angle",
+        "glimpses"
+      ],
+      "additionalProperties": false
+    },
+    "print": {
+      "description": "Plain development: the tone curve from light to picture. Not beside stock; with neither, the scene's own print is used.",
+      "type": "object",
+      "properties": {
+        "knee": {
+          "description": "Where the curve's shoulder starts, as a share of white, from 0 up to but not 1. Required; for example 0.7.",
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "top": {
+          "description": "The brightest light the print holds, in whites, above 1; it lands on white. Required; for example 8.",
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 1000000000000.0
+        },
+        "bloom": {
+          "description": "How far bright light spreads into its neighbours, from 0 to 20 pixels. The default is 0, none; for example 2.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "stops": {
+          "description": "Exposure given at the print, in stops from -40 to 40; each stop doubles the light. A raw through a set's lens rig is in joules and sits far under white: moonlake's prints at 23. The default is 0; for example -1.",
+          "type": "number",
+          "minimum": -40,
+          "maximum": 40
+        }
+      },
+      "required": [
+        "knee",
+        "top"
+      ],
+      "additionalProperties": false
+    },
+    "stock": {
+      "description": "Development through a ninjafilm stock, with its grain and curve. Not beside print; for example {name: dusk, seed: 7}.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The stock, one of the shelf: soot, ash, smoke, dusk, pollen or lantern. Required.",
+          "enum": [
+            "soot",
+            "ash",
+            "smoke",
+            "dusk",
+            "pollen",
+            "lantern"
+          ]
+        },
+        "seed": {
+          "description": "Fixes the grain, so the same seed lays the same grain. A whole number from 0 to 4294967295; the default is 0.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "rated": {
+          "description": "Push or pull, in stops from -6 to 6: the stock developed as if it were that much faster or slower. The default is 0; for example 1.",
+          "type": "number",
+          "minimum": -6,
+          "maximum": 6
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "titles": {
+      "description": "Words, frames and bars drawn over the frames, as a set's hud writes them. For example {rows: 24, elements: {name: {kind: text, words: Moonlake, ink: ink, across: 0.5, down: 0.9}}}.",
+      "type": "object",
+      "properties": {
+        "theme": {
+          "description": "A colourway file the elements' roles come from, its path relative to this job. Unsaid, the hud's own default theme is used.",
+          "type": "string",
+          "minLength": 1
+        },
+        "rows": {
+          "description": "How many rows of cells the picture is laid out in, from 2 to 500; fewer rows is larger type. Unsaid, the hud's default.",
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 500
+        },
+        "elements": {
+          "description": "The elements, each by a name of your choosing, drawn in the order written, each over the ones before.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/title"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "sound": {
+      "description": "The soundtrack: {tune, voicing} for music rendered here, or {file, from, score} for an audio file. Cut at the film's end; silence after shorter sound.",
+      "type": "object",
+      "properties": {
+        "tune": {
+          "description": "The score of music rendered here, a path relative to this job or @name for a built-in. Needs voicing; for example ../improv/moonlake/score.yaml.",
+          "type": "string",
+          "minLength": 1
+        },
+        "voicing": {
+          "description": "What plays the tune's parts, a path relative to this job or @name for a built-in. Needs tune; for example @plain.",
+          "type": "string",
+          "minLength": 1
+        },
+        "file": {
+          "description": "An audio file, its path relative to this job. Not beside tune; for example ../music/take.wav.",
+          "type": "string",
+          "minLength": 1
+        },
+        "from": {
+          "$ref": "#/$defs/instant",
+          "description": "Where in the audio file the film's sound starts, in seconds from 0 to 86400. The default is 0; for example {value: 12.5, unit: s}."
+        },
+        "score": {
+          "description": "A score file giving the audio file's beats, its path relative to this job. Unsaid, the beats are estimated and said to be.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "dependentRequired": {
+        "tune": [
+          "voicing"
+        ],
+        "voicing": [
+          "tune"
+        ],
+        "from": [
+          "file"
+        ],
+        "score": [
+          "file"
+        ]
+      },
+      "additionalProperties": false
+    },
+    "outputs": {
+      "description": "What is written, by role, each a path relative to this job. A still writes picture or raw; a film writes frames, movie or both. With none, the verb's default place is used.",
+      "type": "object",
+      "properties": {
+        "picture": {
+          "description": "A still's picture, a .png. For example ../renders/moonlake.png.",
+          "type": "string",
+          "minLength": 1
+        },
+        "raw": {
+          "description": "A still's light before development, a .pfm, so it can be developed again. For example ../renders/moonlake.pfm.",
+          "type": "string",
+          "minLength": 1
+        },
+        "frames": {
+          "description": "A film's directory of numbered pictures. For example ../renders/moonlake-frames.",
+          "type": "string",
+          "minLength": 1
+        },
+        "movie": {
+          "description": "The film as an .mp4, with its sound. For example ../renders/moonlake.mp4.",
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "description": "One plain line saying what this render is, shown on its card on the renders page. No tab and no line break. For example: the lake at dusk, first try.",
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\t\\n\\r]+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "limits": {
+      "description": "Memory and time ceilings, read by the queue only; they never change the picture. For example {memory: {value: 16, unit: GiB}}.",
+      "type": "object",
+      "properties": {
+        "memory": {
+          "description": "The most memory the job may use, in GiB above 0 and up to 1024. For example {value: 16, unit: GiB}.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "The memory in GiB, above 0 and up to 1024.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1024
+            },
+            "unit": {
+              "description": "Always GiB, gibibytes.",
+              "const": "GiB"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "time": {
+          "description": "The longest the job may run, in seconds above 0 and up to 604800, a week. For example {value: 7200, unit: s}.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "The time in seconds, above 0 and up to 604800.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 604800
+            },
+            "unit": {
+              "description": "Always s, seconds.",
+              "const": "s"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "$schema",
+    "scene"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "instant": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "The time in seconds, from 0 to 86400, a day.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "unit": {
+          "description": "Always s, seconds.",
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "The span in seconds, from 0.001 to 3600, an hour.",
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 3600
+        },
+        "unit": {
+          "description": "Always s, seconds.",
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "scene-span": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "The span in seconds, from 0.001 to 86400, a day.",
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 86400
+        },
+        "unit": {
+          "description": "Always s, seconds.",
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "move-span": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "The span in seconds, above 0 and up to 3600, an hour.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 3600
+        },
+        "unit": {
+          "description": "Always s, seconds.",
+          "const": "s"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "description": "Metres east of the scene's origin.",
+          "type": "number",
+          "minimum": -1000000000.0,
+          "maximum": 1000000000.0
+        },
+        "y": {
+          "description": "Metres up from the scene's origin.",
+          "type": "number",
+          "minimum": -1000000000.0,
+          "maximum": 1000000000.0
+        },
+        "z": {
+          "description": "Metres south of the scene's origin.",
+          "type": "number",
+          "minimum": -1000000000.0,
+          "maximum": 1000000000.0
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "additionalProperties": false
+    },
+    "move": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/point",
+          "description": "Where the move starts, which is where the last one ended. For example {x: 0, y: 2, z: 10}."
+        },
+        "to": {
+          "$ref": "#/$defs/point",
+          "description": "Where the move ends; the same point as from makes a hold. For example {x: 0, y: 2, z: 4}."
+        },
+        "speed": {
+          "description": "Travel at a constant speed, in metres a second. Say speed or duration, not both; for example {value: 2, unit: m/s}.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "The speed in metres a second, above 0.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000000000.0
+            },
+            "unit": {
+              "description": "Always m/s, metres a second.",
+              "const": "m/s"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "duration": {
+          "$ref": "#/$defs/move-span",
+          "description": "Travel over this many seconds of scene time. Say speed or duration, not both; for example {value: 4, unit: s}."
+        },
+        "ease": {
+          "description": "linear moves at one pace; smooth starts and ends gently and needs a duration. The default is linear.",
+          "enum": [
+            "linear",
+            "smooth"
+          ]
+        },
+        "look": {
+          "description": "The move's own look: the point it looks at as it starts and as it ends, eased as the move is. A hold that looks from one point to another is a pan.",
+          "type": "object",
+          "properties": {
+            "from": {
+              "$ref": "#/$defs/point",
+              "description": "What the camera looks at as the move starts."
+            },
+            "to": {
+              "$ref": "#/$defs/point",
+              "description": "What the camera looks at as the move ends."
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "speed"
+          ]
+        },
+        {
+          "required": [
+            "duration"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "zoom-angle": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "The angle across the picture in degrees, above 0 and below 180.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 180
+        },
+        "unit": {
+          "description": "Always deg, degrees.",
+          "const": "deg"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "zoom": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/zoom-angle",
+          "description": "The lens's angle across the picture as the zoom starts. For example {value: 60, unit: deg}."
+        },
+        "to": {
+          "$ref": "#/$defs/zoom-angle",
+          "description": "The lens's angle across the picture as the zoom ends. For example {value: 20, unit: deg}."
+        },
+        "duration": {
+          "$ref": "#/$defs/scene-span",
+          "description": "How long the zoom takes, in seconds of scene time from the camera's start. For example {value: 8, unit: s}."
+        },
+        "ease": {
+          "description": "linear changes the angle at one pace; smooth starts and ends gently. The default is linear.",
+          "enum": [
+            "linear",
+            "smooth"
+          ]
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "duration"
+      ],
+      "additionalProperties": false
+    },
+    "share": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "ramp": {
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": -1000000000000.0,
+          "maximum": 1000000000000.0
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": {
+              "description": "The value until start.",
+              "type": "number",
+              "minimum": -1000000000000.0,
+              "maximum": 1000000000000.0
+            },
+            "to": {
+              "description": "The value it reaches over seconds after start.",
+              "type": "number",
+              "minimum": -1000000000000.0,
+              "maximum": 1000000000000.0
+            },
+            "start": {
+              "description": "When it starts to change, in seconds of film time. The default is 0.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "over": {
+              "description": "How many seconds it takes to change. The default is 0, at once.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "title": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "description": "What the element is: text, a frame or a bar. Required.",
+          "enum": [
+            "text",
+            "frame",
+            "bar"
+          ]
+        },
+        "words": {
+          "description": "What a text says. A text says words or a count, one of them; for example Moonlake.",
+          "type": "string",
+          "minLength": 1
+        },
+        "count": {
+          "$ref": "#/$defs/ramp",
+          "description": "A number a text writes out by its format, alone or as {from, to, start, over} to count across the film. Needs format."
+        },
+        "format": {
+          "description": "How a text writes its count, as Go's fmt writes a float64. For example %.0f m.",
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "$ref": "#/$defs/ramp",
+          "description": "How full a bar is, from 0 to 1, alone or as {from, to, start, over}. Required for a bar."
+        },
+        "left": {
+          "$ref": "#/$defs/share",
+          "description": "A frame's or bar's left edge, as a share of the picture's width from 0 to 1."
+        },
+        "top": {
+          "$ref": "#/$defs/share",
+          "description": "A frame's or bar's top edge, as a share of the picture's height from 0 to 1."
+        },
+        "right": {
+          "$ref": "#/$defs/share",
+          "description": "A frame's or bar's right edge, as a share of the picture's width from 0 to 1."
+        },
+        "bottom": {
+          "$ref": "#/$defs/share",
+          "description": "A frame's or bar's bottom edge, as a share of the picture's height from 0 to 1."
+        },
+        "across": {
+          "$ref": "#/$defs/share",
+          "description": "Where a text stands across the picture, as a share of its width from 0 to 1. For example 0.5, the middle."
+        },
+        "down": {
+          "$ref": "#/$defs/share",
+          "description": "Where a text stands down the picture, as a share of its height from 0 to 1. For example 0.9, near the foot."
+        },
+        "align": {
+          "description": "How a text sits on its place: left, centre or right. The default is left.",
+          "enum": [
+            "left",
+            "centre",
+            "right"
+          ]
+        },
+        "ink": {
+          "description": "The theme's role a text or a frame is drawn in. For example ink.",
+          "type": "string",
+          "minLength": 1
+        },
+        "ground": {
+          "description": "The theme's role behind a text's words. Unsaid, the words stand on the picture.",
+          "type": "string",
+          "minLength": 1
+        },
+        "fill": {
+          "description": "The theme's role a bar's full part is drawn in. For example ok.",
+          "type": "string",
+          "minLength": 1
+        },
+        "empty": {
+          "description": "The theme's role a bar's empty part is drawn in. For example dim.",
+          "type": "string",
+          "minLength": 1
+        },
+        "from": {
+          "$ref": "#/$defs/instant",
+          "description": "When the element appears, in seconds of film time. Unsaid, from the first frame; for example {value: 2, unit: s}."
+        },
+        "until": {
+          "$ref": "#/$defs/instant",
+          "description": "When the element goes, in seconds of film time, after from. Unsaid, to the last frame; for example {value: 6, unit: s}."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "dependentRequired": {
+        "count": [
+          "format"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "text"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "ink",
+              "across",
+              "down"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "words"
+                ]
+              },
+              {
+                "required": [
+                  "count"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "frame"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "ink",
+              "left",
+              "top",
+              "right",
+              "bottom"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "bar"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fill",
+              "empty",
+              "value",
+              "left",
+              "top",
+              "right",
+              "bottom"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

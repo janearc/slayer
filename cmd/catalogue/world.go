@@ -74,10 +74,11 @@ func (plan plan) compose(entry entry,
 		return nil, fmt.Errorf("%s needs %d stored faces; limit %d",
 			entry.Kind, faces, plan.FaceLimit)
 	}
-	if err := plan.illuminate(world, object.Descriptions()); err != nil {
+	lit := entry.staged(plan)
+	if err := lit.illuminate(world, object.Descriptions()); err != nil {
 		return nil, err
 	}
-	display := plan
+	display := lit
 	display.Camera = entry.camera(plan.Camera)
 	framed, frameError := display.view(world, object.Bounds(), faces,
 		entry.Yaw, entry.vertical())

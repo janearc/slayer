@@ -78,7 +78,7 @@ func TestTheNearestPointOfAFaceIsInTheRegionItIsOver(t *testing.T) {
 						"%v, not %v", turn, spin, each.point, got, want)
 				}
 				_, _, squared := made.nearest(point)
-				if math.Abs(squared-each.squared) > 1e-12 {
+				if !(math.Abs(squared-each.squared) <= 1e-12) {
 					t.Errorf("turn %d spin %d: over %v it is %v away, "+
 						"squared, not %v", turn, spin, each.point,
 						squared, each.squared)
@@ -92,7 +92,7 @@ func TestTheNearestPointOfAFaceIsInTheRegionItIsOver(t *testing.T) {
 // million million.
 func sameWeights(one, other weights) bool {
 	for i := range one {
-		if math.Abs(one[i]-other[i]) > 1e-12 {
+		if !(math.Abs(one[i]-other[i]) <= 1e-12) {
 			return false
 		}
 	}
@@ -202,7 +202,7 @@ func checkFlat(t *testing.T, name string, corners flat, turn, spin int,
 				got := made.pointAt(0, on)
 				want := at(wantX, wantY, 0)
 				if got.Sub(want).Len() > 1e-12*scale ||
-					math.Abs(on[0]+on[1]+on[2]-1) > 1e-12 {
+					!(math.Abs(on[0]+on[1]+on[2]-1) <= 1e-12) {
 					t.Fatalf("%s turn %d spin %d scale %v: over %v the "+
 						"nearest is %v at weights %v, not %v", name, turn,
 						spin, scale, point, got, on, want)

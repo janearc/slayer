@@ -1,0 +1,28 @@
+{
+	"group": "triumphant",
+	"mood": "bold and triumphant",
+	"feeling": "Squaring up in the sun and winning.",
+	"intent": "A hero shot, a win, a product launch with energy.",
+	"listen_for": "The half-time breakdown at 0:23 and the full return at 0:30.",
+	"voicing": "@leap-dmg",
+	"tempo": 126,
+	"meter": 4,
+	"seconds": 45.71,
+	"parts": [
+		{"name": "fanfare", "bar": 1, "second": 0.0,
+		 "change": "an open fanfare over a steady backbeat",
+		 "feels": "Bold, together"},
+		{"name": "drive", "bar": 5, "second": 7.62,
+		 "change": "driving eighths in the bass and lead",
+		 "feels": "Marching forward"},
+		{"name": "half", "bar": 13, "second": 22.86,
+		 "change": "half-time: slow notes and a slow drum",
+		 "feels": "The crowd holds its breath"},
+		{"name": "back", "bar": 17, "second": 30.48,
+		 "change": "the lead returns an octave higher and faster",
+		 "feels": "Victory, all at once"},
+		{"name": "end", "bar": 23, "second": 41.9,
+		 "change": "a held chord and a kick",
+		 "feels": "The flag, held up"}
+	]
+}

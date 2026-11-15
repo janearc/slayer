@@ -80,6 +80,7 @@ func New(sphere frame.Sphere, from Heights, region Region, detail Detail) (*Terr
 // Limited reports an unmet cell-span target, including near-plane uncertainty.
 // The count is sampled source positions, before mesh constructor storage.
 type Prepared struct {
+	Transition          *TransitionRecord
 	Surfaces            []*mesh.Mesh
 	Patches             []terrain.Patch
 	Origin              maths.Vec
@@ -95,8 +96,21 @@ type Prepared struct {
 func (ground *Terrain) Prepare(ctx context.Context, view footprint.Perspective,
 	origin frame.Relative,
 ) (Prepared, error) {
+	selection, err := ground.selectView(ctx, view)
+	if err != nil {
+		return Prepared{}, err
+	}
+	return ground.prepareSelection(ctx, selection, origin)
+}
+
+// selectView assesses the source quadtree without building sampled meshes.
+// A temporal owner can retain an identical representation without resampling it.
+func (ground *Terrain) selectView(ctx context.Context, view footprint.Perspective) (terrain.Selection, error) {
 	if ground == nil || ground.from == nil || ctx == nil {
-		return Prepared{}, fmt.Errorf("island: no prepared terrain source")
+		return terrain.Selection{}, fmt.Errorf("island: no prepared terrain source")
+	}
+	if err := ctx.Err(); err != nil {
+		return terrain.Selection{}, err
 	}
 	// A stitched fine edge may follow a coarse neighbour's distant height.
 	// The complete root box encloses every source point and every convex
@@ -105,16 +119,16 @@ func (ground *Terrain) Prepare(ctx context.Context, view footprint.Perspective,
 	// which do not enclose that leaf's final stitched representation.
 	rootBounds, _, err := ground.bounds(ground.root, false)
 	if err != nil {
-		return Prepared{}, err
+		return terrain.Selection{}, err
 	}
 	visible, err := view.Assess(rootBounds, measure.Metres(0))
 	if err != nil {
-		return Prepared{}, err
+		return terrain.Selection{}, err
 	}
 	if !visible.Visible {
-		return Prepared{Origin: origin.Origin()}, nil
+		return terrain.Selection{}, nil
 	}
-	selection, err := terrain.SelectPatches(ground.root, terrain.SelectionBudget{
+	return terrain.SelectPatches(ground.root, terrain.SelectionBudget{
 		Patches: ground.detail.Patches, Evaluations: ground.detail.Evaluations,
 		Depth: ground.detail.Depth, Target: ground.detail.CellPixels,
 	}, func(patch terrain.Patch) (terrain.PatchView, error) {
@@ -128,9 +142,10 @@ func (ground *Terrain) Prepare(ctx context.Context, view footprint.Perspective,
 		assessment, err := view.Assess(box, measure.Metres(spacing))
 		return terrain.PatchView{Visible: true, Score: assessment.Pixels}, err
 	})
-	if err != nil {
-		return Prepared{}, err
-	}
+}
+
+// prepareSelection samples a selection produced by this terrain's selector.
+func (ground *Terrain) prepareSelection(ctx context.Context, selection terrain.Selection, origin frame.Relative) (Prepared, error) {
 	vertices := vertexBook{terrain: ground, points: make(map[lattice]maths.Vec), edges: newEdgeIndex(selection.Patches)}
 	if ground.detail.NormalLongitude > 0 {
 		vertices.normals = make(map[lattice]maths.Vec)

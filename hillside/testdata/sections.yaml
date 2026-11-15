@@ -1,0 +1,17 @@
+# The scene the section tests keep sections of, picked by hand: a giant
+# that shows only its own light, a clay ball a lamp lights, and an eye at
+# the origin looking down the z axis. The frame is 96 by 64 pixels, which
+# is 6 by 4 sections of 16, so 24 sections.
+giant: {radius: 3, across: -4, height: 3, depth: -12, scale: 1, light: {red: 0.9, green: 0.5, blue: 0.2}, dark: {red: 0.3, green: 0.2, blue: 0.6}}
+ball: {radius: 1, across: 3, height: -2, depth: -9, grey: 0.7}
+# the lamp is twice as bright in the second frame.
+lamp: {across: 0.3, height: 1, depth: 0.5, first: 1, second: 2}
+frame: {width: 96, height: 64, samples: 2, wide: 60}
+sections: {over: 32, size: 16, count: 24}
+# a sequence keeps at least this many sections, and draws at least
+# this many again, of the count.
+at-least: {kept: 12, drawn: 2}
+# the frame is no wider than its sections start at, over this.
+small-frame-over: 96
+# the camera moves by this along x.
+moved-by: 0.5

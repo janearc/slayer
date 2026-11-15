@@ -11,7 +11,7 @@ game run demo camera
 
 `demos` lists the stable smoke numbers and the named scenes. `demo` draws one
 of them. Numbered smokes use the actual scene factories in `scene/smoke`. They
-are previews, without smokecheck's reference comparison or a test verdict.
+are previews, without the reference comparison of `slayer assess --smokes` or a test verdict.
 
 Named demos are `orbital`, `swarm`, `ring`, `hillside`, `moonrise`, `house`,
 and `camera`. These run the actual scene commands with modest first-look

@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
@@ -58,7 +58,7 @@ func TestFiniteVolumeLampOnGPUAgreesWithCPU(t *testing.T) {
 		want := []float64{way.X, way.Y, way.Z, far, light.R, light.G, light.B}
 		for c, value := range want {
 			actual := float64(got[7*i+c])
-			if math.IsNaN(actual) || math.IsInf(actual, 0) || math.Abs(actual-value) > 1e-5*max(1, math.Abs(value)) {
+			if math.IsNaN(actual) || math.IsInf(actual, 0) || !(math.Abs(actual-value) <= 1e-5*max(1, math.Abs(value))) {
 				t.Fatalf("distance %g channel %d: GPU %g CPU %g", distance, c, actual, value)
 			}
 		}

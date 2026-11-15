@@ -24,7 +24,7 @@ import (
 
 // World is the set's world, built: its boxes and spheres in the
 // materials they wear, its lamps, spots, floods and suns lit, its sky
-// hung, its bodies placed and its wisps of gas let in.
+// hung, its bodies placed and its wisps of gas and its fizzes let in.
 //
 // each list goes in where the set file writes it, and each piece in its
 // list's order, so the world drawn from a file is the same each time.
@@ -33,23 +33,39 @@ import (
 // see or too hot to hold, a box too thin to have faces, a sun whose way
 // is too short to point anywhere, and a body its template cannot place.
 func World(said set.World) (*thing.World, error) {
+	world := thing.NewWorld()
+	if err := Add(world, said, unmoved); err != nil {
+		return nil, err
+	}
+	return world, nil
+}
+
+// Add builds a set's world as World does, into a world that is there
+// already, each place the set says moved by shift. A world that has
+// things, lamps and a sky keeps them, in their order, and the set's come
+// after; a sky the world already has stays, and one it has none of is the
+// set's.
+//
+// shift is in the world's space, as every place a set says is. A flood, a
+// sun and a spot's aim name no place, so they do not move. On a refusal
+// the world may hold some of what was added, so a caller drops it.
+func Add(world *thing.World, said set.World, shift maths.Vec) error {
 	worn := map[string]*thing.Material{}
 	for _, each := range said.Materials() {
 		made, err := material(each)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		worn[each.Name()] = made
 	}
-	world := thing.NewWorld()
 	for _, key := range said.Order() {
 		if build, builds := builders[key]; builds {
-			if err := build(world, said, worn); err != nil {
-				return nil, err
+			if err := build(world, said, worn, shift); err != nil {
+				return err
 			}
 		}
 	}
-	return world, nil
+	return nil
 }
 
 // Lens is what the film's camera sees through: a pinhole as wide as the

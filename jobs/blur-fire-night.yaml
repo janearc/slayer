@@ -1,0 +1,28 @@
+# the night fire seen from among the trees, the camera running sideways
+# past their trunks and looking at the fire, with a lens and a shutter.
+# the lens is open thirty centimetres and focused twenty-four metres off,
+# about where a trunk the fire lights stands; the fire, as far again
+# behind it, is soft, and so are the dark trunks close by. the shutter is
+# open half of each frame's interval, so what the camera passes is
+# smeared by its move.
+#
+# on the gpu both are made in one render a frame, by the kernel. sixteen
+# rays a pixel are what the blur is made of; fewer is noise. take out
+# aperture and focus, or shutter, to see the frame without.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../doc/fire-night.yaml}
+film: {preset: portrait, rays: 4, tall: 60, aperture: 0.3, focus: 24}
+fps: 24
+duration: {value: 1.5, unit: s}
+start: {value: 26, unit: s}
+shutter: {angle: {value: 180, unit: deg}, glimpses: 1}
+camera:
+  unit: m
+  look-at: {x: 96, y: 10, z: 96}
+  moves:
+    - from: {x: 90.5, y: 10, z: 143.5}
+      to: {x: 96.5, y: 10, z: 142.4}
+      duration: {value: 1.5, unit: s}
+outputs:
+  frames: blur-fire-night
+  movie: blur-fire-night.mp4

@@ -2,6 +2,7 @@ package trace
 
 import (
 	"cmp"
+	"fmt"
 	"math"
 	"slices"
 
@@ -43,9 +44,12 @@ type branch struct {
 // leafSize is the most things a leaf holds before it is split.
 const leafSize = 4
 
-// deepest is the most branches a walk of the tree holds at once; a tree
-// split at the middle is far shallower for any count of things.
-const deepest = 128
+// deepest is the most branches a walk of the tree holds at once. A walk
+// holds one more branch than the tree is deep, and a tree split at the
+// middle into runs of leafSize or fewer is ceil(log2(things/leafSize))
+// deep: 28 for a billion things, and no more than 31 for eight billion,
+// which deepest of 32 holds. build refuses a tree deeper than that.
+const deepest = 32
 
 // gathered is a picture's things with the tree built over them.
 func gathered(things []placedThing) crowd {
@@ -59,14 +63,22 @@ func gathered(things []placedThing) crowd {
 		}
 	}
 	if len(made.order) > 0 {
-		made.build(0, len(made.order))
+		made.build(0, len(made.order), 0)
 	}
 	return made
 }
 
 // build makes the branch over a run of the order, split at the middle
-// of the things along the way they spread most, and is its place.
-func (made *crowd) build(from, to int) int {
+// of the things along the way they spread most, and is its place. depth
+// is how many branches are above it; a branch that a walk could not hold
+// with those above it is a programming error, which cannot arise from
+// fewer than eight billion things.
+func (made *crowd) build(from, to, depth int) int {
+	if depth >= deepest {
+		panic(fmt.Sprintf("trace: a tree of %d things is %d branches deep "+
+			"at %d things in a run, and a walk holds at most %d", len(made.order),
+			depth+1, to-from, deepest))
+	}
 	at := len(made.nodes)
 	made.nodes = append(made.nodes, branch{box: made.around(from, to),
 		from: from, to: to, shadows: made.shadowing(from, to)})
@@ -79,8 +91,8 @@ func (made *crowd) build(from, to int) int {
 			middle(made.boxes[other], axis))
 	})
 	half := from + (to-from)/2
-	left := made.build(from, half)
-	right := made.build(half, to)
+	left := made.build(from, half, depth+1)
+	right := made.build(half, to, depth+1)
 	made.nodes[at].left, made.nodes[at].right = left, right
 	return at
 }
@@ -126,17 +138,18 @@ type nearest struct {
 
 // first is the nearest thing the ray meets past near, and whether it
 // meets any.
-func (seen crowd) first(ray maths.Ray, near float64) (hit, bool) {
+func (seen *crowd) first(ray maths.Ray, near float64) (hit, bool) {
 	best := nearest{index: -1, dist: nowhere}
 	for _, index := range seen.everywhere {
 		best = seen.closer(best, index, ray, near)
 	}
 	var stack [deepest]int
 	top := seen.rooted(&stack)
+	inverse := ray.Dir.Inverse()
 	for top > 0 {
 		top--
 		node := &seen.nodes[stack[top]]
-		if _, _, ok := node.box.Hit(ray, near, best.dist); !ok {
+		if !node.box.Meets(ray, inverse, near, best.dist) {
 			continue
 		}
 		if node.left == 0 {
@@ -157,7 +170,7 @@ func (seen crowd) first(ray maths.Ray, near float64) (hit, bool) {
 
 // rooted puts the root on a walk's stack, if there is a tree, and is
 // how many branches the stack holds.
-func (seen crowd) rooted(stack *[deepest]int) int {
+func (seen *crowd) rooted(stack *[deepest]int) int {
 	if len(seen.nodes) == 0 {
 		return 0
 	}
@@ -169,7 +182,7 @@ func (seen crowd) rooted(stack *[deepest]int) int {
 // every thing in order decides it: a nearer thing wins, and at the same
 // distance the earlier one. The thing is asked up to just past the best,
 // so one met at the best's own distance is seen.
-func (seen crowd) closer(best nearest, index int, ray maths.Ray,
+func (seen *crowd) closer(best nearest, index int, ray maths.Ray,
 	near float64) nearest {
 	far := best.dist
 	if far < nowhere {
@@ -188,7 +201,7 @@ func (seen crowd) closer(best nearest, index int, ray maths.Ray,
 // blocked is whether anything that casts a shadow stands between a
 // point and a lamp far along the ray; far is +Inf for a lamp at
 // infinity.
-func (seen crowd) blocked(ray maths.Ray, far float64) bool {
+func (seen *crowd) blocked(ray maths.Ray, far float64) bool {
 	far = math.Min(far, nowhere)
 	for _, index := range seen.everywhere {
 		if seen.casts(index, ray, far) {
@@ -197,13 +210,14 @@ func (seen crowd) blocked(ray maths.Ray, far float64) bool {
 	}
 	var stack [deepest]int
 	top := seen.rooted(&stack)
+	inverse := ray.Dir.Inverse()
 	for top > 0 {
 		top--
 		node := &seen.nodes[stack[top]]
 		if !node.shadows {
 			continue
 		}
-		if _, _, ok := node.box.Hit(ray, 0, far); !ok {
+		if !node.box.Meets(ray, inverse, 0, far) {
 			continue
 		}
 		if node.left == 0 {
@@ -219,7 +233,7 @@ func (seen crowd) blocked(ray maths.Ray, far float64) bool {
 }
 
 // castsAny is whether any thing of a leaf stands in the ray's way.
-func (seen crowd) castsAny(leaf *branch, ray maths.Ray, far float64) bool {
+func (seen *crowd) castsAny(leaf *branch, ray maths.Ray, far float64) bool {
 	for _, index := range seen.order[leaf.from:leaf.to] {
 		if seen.casts(index, ray, far) {
 			return true
@@ -230,7 +244,7 @@ func (seen crowd) castsAny(leaf *branch, ray maths.Ray, far float64) bool {
 
 // casts is whether one thing stands in the ray's way: a clear thing
 // never does.
-func (seen crowd) casts(index int, ray maths.Ray, far float64) bool {
+func (seen *crowd) casts(index int, ray maths.Ray, far float64) bool {
 	placed := &seen.things[index]
 	if placed.thing.Clear() {
 		return false

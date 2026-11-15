@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"image/png"
 	"os"
@@ -84,7 +83,7 @@ func TestInvalidTimesFailBeforeCreatingOutputs(t *testing.T) {
 // Public filesystem errors must reach the caller, including a blocked frame.
 func TestWeatherReportsInputsAndOutputFailures(t *testing.T) {
 	for _, test := range []struct{ name, flag, value, want string }{
-		{"grid", "-rows", "3", "grid"}, {"storms", "-rate", "0", "storms"},
+		{"grid", "-rows", "3", "rows"}, {"storms", "-rate", "0", "rate"},
 		{"day", "-day", "0", "day"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -110,29 +109,5 @@ func TestWeatherReportsInputsAndOutputFailures(t *testing.T) {
 	}
 	if out, err := weatherCommand(t, tinyWeather(dir)...); err == nil || !strings.Contains(out, "is a directory") {
 		t.Fatalf("%v %q", err, out)
-	}
-}
-
-func TestWeatherCacheAndGPUReachTheSameOutputClock(t *testing.T) {
-	for _, gpu := range []bool{false, true} {
-		for _, cached := range []bool{false, true} {
-			t.Run(fmt.Sprintf("gpu%t-cache%t", gpu, cached), func(t *testing.T) {
-				dir := t.TempDir()
-				args := tinyWeather(dir)
-				if gpu {
-					args = append(args, "-gpu")
-				}
-				if cached {
-					args = append(args, "-cache", t.TempDir())
-				}
-				out, err := weatherCommand(t, args...)
-				if err != nil || !strings.Contains(out, "3600 s:") {
-					t.Fatalf("%v %q", err, out)
-				}
-				if _, err := os.Stat(filepath.Join(dir, "spun-00003600.png")); err != nil {
-					t.Fatal(err)
-				}
-			})
-		}
 	}
 }

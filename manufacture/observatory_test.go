@@ -31,7 +31,7 @@ func TestObservatoryMakesValidMeshesAtEveryComplexity(t *testing.T) {
 		if len(things) != 3 {
 			t.Errorf("%s has %d materials", detail, len(things))
 		}
-		if math.Abs(made.Bounds().Max.Y-16.56) > 1e-9 {
+		if !(math.Abs(made.Bounds().Max.Y-16.56) <= 1e-9) {
 			t.Errorf("unexpected enclosure extent %v", made.Bounds())
 		}
 	}

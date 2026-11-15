@@ -8,6 +8,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies/template"
 	"github.com/janearc/slayer/scene/shape"
+	skies "github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -17,9 +18,12 @@ func earthShot(b *testing.B) (*thing.World, maths.Subspace) {
 	b.Helper()
 	world := thing.NewWorld()
 	world.Lamp(thing.Sun(maths.V(-1, 0.2, 0.4), maths.RGB(1.2, 1.2, 1.2)))
-	earth := template.Earth()
-	earth.Moons = nil
-	err := earth.Place(world, maths.Vec{}, 1/earth.Radius, 8)
+	earth, err := template.Earth()
+	if err != nil {
+		b.Fatal(err)
+	}
+	earth = earth.WithoutMoons()
+	err = earth.Place(world, maths.Vec{}, 1/earth.Radius(), 8)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -30,6 +34,7 @@ func earthShot(b *testing.B) (*thing.World, maths.Subspace) {
 func drawEarth(b *testing.B, at time.Duration) {
 	world, eye := earthShot(b)
 	lens := film.Pinhole{Wide: 40 * maths.Degree}
+	b.ReportAllocs()
 	b.ResetTimer()
 	for range b.N {
 		draw(world, eye, lens, at, 32, 18)
@@ -54,6 +59,7 @@ func BenchmarkGasPicture(b *testing.B) {
 	world := earthlike()
 	eye := lookingAt(maths.V(0, 0, 3), maths.Vec{})
 	lens := film.Pinhole{Wide: 50 * maths.Degree}
+	b.ReportAllocs()
 	b.ResetTimer()
 	for range b.N {
 		draw(world, eye, lens, 0, 64, 36)
@@ -71,6 +77,7 @@ func BenchmarkThroughManyVolumes(b *testing.B) {
 			Medium: plate(0.05, near, near+3)})
 	}
 	scene := staging(plates...)
+	b.ReportAllocs()
 	b.ResetTimer()
 	for range b.N {
 		through(scene, alongZ, 1e9)
@@ -86,8 +93,38 @@ func BenchmarkFirstManyThings(b *testing.B) {
 			Motion: resting(maths.V(0, 0, float64(i)))})
 	}
 	crowded := gathered(place(world, 0))
+	b.ReportAllocs()
 	b.ResetTimer()
 	for range b.N {
 		crowded.first(alongZ, 0)
+	}
+}
+
+// BenchmarkSkyLitBall draws a ball on a floor under a sun and a sky, 64
+// by 36 pixels, so every surface hit gathers sky light.
+func BenchmarkSkyLitBall(b *testing.B) {
+	world := smoking()
+	world.Sky = skies.Gradient{Horizon: maths.Grey(1),
+		Zenith: maths.RGB(0.2, 0.4, 1)}
+	eye := lookingAt(maths.V(0, 2, 6), centre)
+	lens := film.Pinhole{}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for range b.N {
+		draw(world, eye, lens, 0, 64, 36)
+	}
+}
+
+// BenchmarkSmokePicture draws smoke over a glowing floor under a sun, 64
+// by 36 pixels, so rays march a painted volume.
+func BenchmarkSmokePicture(b *testing.B) {
+	world := puffed(2)
+	world.Lamp(thing.Sun(sunwards, maths.Grey(1)))
+	eye := lookingAt(maths.V(0, 2, 3), centre)
+	lens := film.Pinhole{Wide: 40 * maths.Degree}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for range b.N {
+		draw(world, eye, lens, 0, 64, 36)
 	}
 }

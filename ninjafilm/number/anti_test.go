@@ -73,7 +73,7 @@ func noLampIsCountedTwice(t *rapid.T) {
 	blue := lamp.Draw(t, "blue")
 	without := number.Sum(maths.RGB(red, green, none))
 	with := number.Sum(maths.RGB(red, green, blue))
-	if math.Abs(with-without-blue) > toleranceLoose*lampLimit {
+	if !(math.Abs(with-without-blue) <= toleranceLoose*lampLimit) {
 		t.Fatalf("lighting %v moved the sum from %v to %v", blue, without,
 			with)
 	}

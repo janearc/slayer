@@ -144,6 +144,21 @@ func (glass Thin) aperture() float64 {
 	return glass.focal / (pair * glass.stop)
 }
 
+// Opening is what the lens's rays are made of, for a drawer that makes
+// them itself: how far the open aperture reaches from the lens's middle,
+// how far off the focus is, and the width and height of what the frame
+// sees sharp at the focus. All four are in metres.
+//
+// A ray of Ray starts on the aperture and goes toward a point of that
+// width and height, the focus distance down minus z.
+//
+//ninja:vow practice slayer's gpu makes the lens's rays in its kernel
+func (glass Thin) Opening() (reach, focus, across, up float64) {
+	scale := glass.focus / glass.image
+	return glass.aperture(), glass.focus, glass.frame.width * scale,
+		glass.frame.height * scale
+}
+
 // acrossFilm is how far a pixel's middle lies to the right of the
 // middle of the film, as a share of the film's width.
 func acrossFilm(x, width int) float64 {

@@ -49,3 +49,15 @@ func TestEdgesAreLeftOut(t *testing.T) {
 		t.Errorf("an edge down the first cells: %+v", r)
 	}
 }
+
+// A report that compared nothing has shown nothing, so it is not honest:
+// a picture smaller than one terminal cell has no cell to compare.
+func TestAReportThatComparedNothingIsNotHonest(t *testing.T) {
+	r := Cells(flat(3, 4, clay), flat(1, 2, clay), 3, 2)
+	if r.Compared != 0 || r.Pixels != 2 {
+		t.Fatalf("a picture under one cell: %+v, want nothing compared", r)
+	}
+	if r.Honest() {
+		t.Errorf("compared=%d pixels=%d is honest", r.Compared, r.Pixels)
+	}
+}

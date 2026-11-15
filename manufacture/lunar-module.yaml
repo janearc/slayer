@@ -1,0 +1,36 @@
+# The Apollo lunar module, standing on its four footpads, in metres. As
+# in stacks.yaml, a number here has been read off a page and is not a
+# pinned source; where it says picked, nobody read it anywhere.
+#
+# It is plain: the descent stage is an eight-sided prism, the ascent
+# stage another of its published width, depth and height, and the gear
+# four legs, each one strut to one pad. The real ascent stage is a cabin
+# with tanks on its sides, and the real gear has more struts than one.
+overall: 7.04
+descent:
+  across: 4.22
+  height: 3.231
+ascent:
+  width: 4.29
+  depth: 4.04
+  height: 2.832
+gear:
+  span: 9.4
+  pad: 0.9
+  pad-thick: 0.15
+  strut: 0.07
+blanket: 25.4e-6
+read: >-
+  7.04 m tall with its legs out (NASA, Apollo 204 Review Board,
+  spacecraft page, "23ft, 1in. (legs extended)"). The descent stage is
+  an eight-sided prism 4.22 m across (NSSDCA, 1969-059C, "4.2 meters
+  across"; Wikipedia, Apollo Lunar Module, 13 ft 10 in) and 3.231 m high
+  (Wikipedia). The ascent stage is 2.832 m high, 4.29 m wide and 4.04 m
+  deep (Wikipedia; NSSDCA, "approximately 2.8 m high", "4.0 by 4.3
+  meters in width"). Its footpads' ends are 9.4 m apart across opposite
+  legs (NSSDCA, "The distance between the ends of the footpads on
+  opposite landing legs was 9.4 m"). All read 2026-11-10. How high the
+  descent stage stands off the ground is what is left of the 7.04 m
+  under the two stages: derived. The pads' size, the struts' thickness
+  and the blanket's thickness, a thousandth of an inch of Kapton, are
+  picked.

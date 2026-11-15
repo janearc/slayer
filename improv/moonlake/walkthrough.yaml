@@ -1,0 +1,196 @@
+# moonlake's walkthrough: a series of shorts that walk a stranger through
+# the set. Read by package walk (improv/walk/README.md says the form);
+# written by improv/moonlake/walkthrough.
+#
+# The sentences, names and words are drafts, to be rewritten. Every number on
+# screen says where it comes from in its `from`, and the comment over a
+# shot says how it was worked out. "places" is the table hillside
+# -places writes for sets/moonlake.yaml (walkthrough-places.csv, beside
+# this file): east, north and the ground's height under each thing, by
+# the usgs's 2019 lidar.
+#
+# The pictures and the sets they were drawn from (copies of
+# sets/moonlake.yaml with the fantasy block said, one camera first, and
+# their own film, lens or light) are in the renders recipe folder,
+# fable-team/sources/render-recipes/2026-11-12-moonlake-walk; sets.py
+# there writes them. The walkthrough command is told that folder.
+#
+# Sound: the song's quiet opening, before the drums at bar 1 (59.09 s),
+# counted back from bar 1 a bar at a time; a different bar for each.
+set: ../../sets/moonlake.yaml
+places: walkthrough-places.csv
+shorts:
+  - name: where you are standing
+    title: Where you are standing
+    sound: {bar: -33}
+    shots:
+      # the show's own picture, a frame of the 4k film before the drums;
+      # the camera is sets/moonlake.yaml's down: 20 m (standoff_z) over
+      # the west rise, whose ground is 1127.7 m (places), so 1147.7 m;
+      # the lake is the fantasy block's 1076, so 71.7 m below. The far
+      # tree is 1727.5 m east and 617.5 m south of the west rise: 1834.5
+      # m across the ground
+      - set: sets/walk-show.yaml
+        camera: down
+        picture: stills/show.png
+        seconds: 9
+        lit: show
+        window: {from: [0.134, 0, 0.732], to: [0.25, 0.12, 0.5]}
+        name: The show's view
+        figures:
+          - value: "20"
+            unit: m
+            says: up in the trees
+            from: sets/moonlake.yaml cameras.down standoff_z
+          - value: "71.7"
+            unit: m
+            says: above the water
+            from: places west rise 1127.7 + 20 - fantasy lake 1076
+          - value: "1.83"
+            unit: km
+            says: to the ridge
+            from: places west rise to the far tree, 1834.5 m
+        labels:
+          - {thing: the far tree, words: "the far tree, on the ridge"}
+          - {thing: rig shore left, words: "a laser tower, 20 m", side: left}
+        sentence: >-
+          The show is seen from 20 m up in spruces on the west rise,
+          looking down a flooded crater to a ridge.
+      # from 70 m over the far tree's ground (1195.5 m), so 1265.5 m,
+      # looking at the west rise; the moon's azimuth is 109.65 degrees
+      # (scene.moon), the camera faces 289.65, so the moon is straight
+      # behind it. The viewer's spot is the west rise's place, 20 m up.
+      # Lit by a sun on the moon's bearing, 30 degrees up, for
+      # inspection: the moon at 2.3 degrees grazes this side of the land
+      # and leaves it black
+      - set: sets/walk-ridge.yaml
+        camera: ridge
+        picture: stills/ridge.png
+        seconds: 12
+        lit: inspection
+        window: {from: [0, 0.3, 0.7], to: [0.35, 0.42, 0.3]}
+        name: Turn round
+        figures:
+          - value: "1.83"
+            unit: km
+            says: to the viewer
+            from: places west rise to the far tree, 1834.5 m
+          - value: "118"
+            unit: m
+            says: lower than us
+            from: places far tree 1195.5 + 70 - (west rise 1127.7 + 20)
+        labels:
+          - {at: [263104.5, 2148423.5, 1147.7], words: you are here}
+        sentence: >-
+          Now turn round. From over the ridge, with the moon at our back,
+          the viewer is that spot in the trees 1.83 km across the water.
+      - set: sets/walk-show.yaml
+        camera: down
+        picture: stills/show.png
+        seconds: 9
+        lit: show
+        window: {from: [0.25, 0.12, 0.5], to: [0.134, 0, 0.732]}
+        name: Back in the trees
+        figures:
+          - value: "10.8"
+            unit: m
+            says: nearest tree
+            from: places west rise to close left, 10.8 m east, 0.4 m north
+          - value: "13.0"
+            unit: m
+            says: the other
+            from: places west rise to close right, 9.6 m east, 8.7 m south
+        sentence: >-
+          The branches at the edges belong to two spruces 11 and 13 m
+          away. Everything else is far across the water.
+  - name: from above
+    title: The whole set, from above
+    sound: {bar: -27}
+    shots:
+      # sets/walk-plan.yaml's plan camera: 4400 m over the lookout's
+      # ground (1073.6 m), 518 m east and 185 m south of it, straight
+      # down, the far tree's way up the picture; a sun 55 degrees up for
+      # inspection. The ground is the terrain block: usgs-kilauea-2019-dem,
+      # 2400 m across and 1700 m down. The lake is the fantasy block's
+      # 1076 m; the lookout's ground is 1073.6 (places)
+      - set: sets/walk-plan.yaml
+        camera: plan
+        picture: stills/plan.png
+        seconds: 12
+        lit: inspection
+        name: The whole set
+        figures:
+          - value: "2.4"
+            unit: km
+            says: east to west
+            from: sets/moonlake.yaml terrain.across 2400
+          - value: "1.7"
+            unit: km
+            says: north to south
+            from: sets/moonlake.yaml terrain.down 1700
+          - value: "1076"
+            unit: m
+            says: the water line
+            from: sets/moonlake.yaml fantasy lake 1076
+        labels:
+          - {thing: the west rise, words: you stand here, side: left}
+          - {thing: the far tree, words: the far tree, side: right}
+          - {at: [263900, 2148150, 1076], words: the lake}
+          - {thing: the lookout, words: "the lookout, under water", side: right}
+        sentence: >-
+          Straight down. The ground is a survey of the real Kilauea Iki
+          crater; the show floods it to 1076 m. You look up this picture.
+      # the four stage towers, scaffold.go stageTowerRow: four bays of
+      # 2.57 m across, two deep, ten lifts of 2 m; rig rim left to rig
+      # rim right is 80.8 m east and 226.0 m north apart, 240.0 m
+      - set: sets/walk-plan.yaml
+        camera: plan
+        picture: stills/plan.png
+        seconds: 10
+        lit: inspection
+        window: {from: [0, 0, 1], to: [0.25, 0, 0.5]}
+        name: The ridge
+        figures:
+          - value: "4"
+            unit: ""
+            says: laser towers
+            from: sets/moonlake.yaml things rig rim and rig shore
+          - value: "20"
+            unit: m
+            says: tall each
+            from: manufacture/scaffold.go stageTowerRow, 10 lifts of 2 m
+          - value: "240"
+            unit: m
+            says: apart, on the ridge
+            from: places rig rim left to rig rim right
+        labels:
+          - {thing: rig rim left, words: a tower, side: left}
+          - {thing: rig rim right, words: a tower, side: right}
+          - {thing: the far tree, words: the far tree}
+        sentence: >-
+          The lasers stand on four 20 m scaffold towers: two on the ridge
+          240 m apart, two on the near shores.
+      - set: sets/walk-plan.yaml
+        camera: plan
+        picture: stills/plan.png
+        seconds: 10
+        lit: inspection
+        window: {from: [0.25, 0, 0.5], to: [0.3, 0.6, 0.4]}
+        name: Where you stand
+        figures:
+          - value: "1.83"
+            unit: km
+            says: to the ridge
+            from: places west rise to the far tree, 1834.5 m
+          - value: "1000"
+            unit: ""
+            says: other trees
+            from: sets/moonlake.yaml stands, 400 and 600
+        labels:
+          - {thing: the west rise, words: you stand here, side: left}
+          - {thing: rig shore left, words: a tower, side: right}
+          - {thing: rig shore right, words: a tower, side: right}
+        scale: {thing: the west rise}
+        sentence: >-
+          You stand at the west end among three spruces. The specks are a
+          thousand more trees, scattered over the rim.

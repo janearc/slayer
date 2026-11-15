@@ -22,6 +22,7 @@ import (
 type Shelf struct {
 	dir    string
 	client *http.Client
+	hash   func(path string) (string, error)
 }
 
 // NewShelf is a shelf in a directory, fetching through a client.
@@ -29,9 +30,27 @@ func NewShelf(dir string, client *http.Client) Shelf {
 	return Shelf{dir: dir, client: client}
 }
 
+// HashedBy is the shelf checking a file it is asked to read (Reads,
+// Check) against its pin by the sha256 a function gives for its path:
+// one that keeps the sha256s it has taken, so a large file is not read
+// whole on every run. Fetching and tending still read every byte. A nil
+// function is the sha256 of the file's bytes, each time.
+func (shelf Shelf) HashedBy(hash func(path string) (string, error)) Shelf {
+	shelf.hash = hash
+	return shelf
+}
+
+// hashed is the sha256 of the file at a path, by the shelf's function.
+func (shelf Shelf) hashed(at string) (string, error) {
+	if shelf.hash == nil {
+		return hashOf(at)
+	}
+	return shelf.hash(at)
+}
+
 // Placed is the variable that says where a person's shelf is: a
 // directory of their own that lasts past a reboot, so a dem of an
-// island is fetched once, and not a temporary one (ruled 2026-10-16).
+// island is fetched once, and not a temporary one (since 2026-10-16).
 const Placed = "SLAYER_SHELF"
 
 var errUnplaced = errors.New("sources: no shelf; set " + Placed +
@@ -57,13 +76,19 @@ var endings = map[string]bool{".pdf": true, ".tif": true, ".tiff": true,
 // Path is where a source's bytes are on the shelf: its key, and the
 // ending its url's path has, if it is one of the kinds sources come as.
 func (shelf Shelf) Path(source Source) string {
+	return filepath.Join(shelf.dir, fileName(source))
+}
+
+// fileName is the name a source's bytes have on the shelf: its key, and
+// the ending its url's path has.
+func fileName(source Source) string {
 	name := source.Key()
 	if from, err := url.Parse(source.From()); err == nil {
 		if ending := path.Ext(from.Path); endings[ending] {
 			name += ending
 		}
 	}
-	return filepath.Join(shelf.dir, name)
+	return name
 }
 
 // side is what the sidecar beside a source's bytes says: where they
@@ -82,8 +107,21 @@ var errFetch = errors.New("sources: not fetched")
 // Fetch brings a source onto the shelf, written beside its sidecar,
 // and says what it did. bytes already there that match the pin are
 // kept. bytes fetched that do not match the pin are refused and removed;
-// with no pin they are kept, and the hash is said for pinning.
+// with no pin they are kept, and the hash is said for pinning. a source
+// with a pinned member of its archive has the member unpacked, or kept
+// if it is there as pinned.
 func (shelf Shelf) Fetch(ctx context.Context, source Source,
+	now time.Time) (string, error) {
+	said, err := shelf.fetched(ctx, source, now)
+	if err != nil || source.row.Unpack == nil {
+		return said, err
+	}
+	more, err := shelf.unpackedFor(source)
+	return said + "; " + more, err
+}
+
+// fetched is Fetch of the source's own bytes, without its member.
+func (shelf Shelf) fetched(ctx context.Context, source Source,
 	now time.Time) (string, error) {
 	if source.Never() != "" {
 		return fmt.Sprintf("%s: never fetched: %s", source.Key(),
@@ -95,7 +133,7 @@ func (shelf Shelf) Fetch(ctx context.Context, source Source,
 	}
 	sum, size, err := shelf.download(ctx, source, at+".part")
 	if err == nil {
-		err = held(source, sum, size)
+		err = held(source.row.Sha256, source.row.Bytes, sum, size)
 	}
 	if err != nil {
 		os.Remove(at + ".part")
@@ -115,16 +153,16 @@ func (shelf Shelf) Fetch(ctx context.Context, source Source,
 		at), nil
 }
 
-// held is what is wrong with fetched bytes against the list's pin and
-// size, or nothing.
-func held(source Source, sum string, size int64) error {
-	if source.Pinned() && sum != source.row.Sha256 {
+// held is what is wrong with fetched bytes, their sha256 and size, against
+// the list's pin and size (empty and zero where it gives none), or nothing.
+func held(pin string, bytes int64, sum string, size int64) error {
+	if pin != "" && sum != pin {
 		return fmt.Errorf("%w: sha256 %s, the list pins %s", errFetch, sum,
-			source.row.Sha256)
+			pin)
 	}
-	if source.row.Bytes != 0 && size != source.row.Bytes {
+	if bytes != nothing && size != bytes {
 		return fmt.Errorf("%w: %d bytes, the list says %d", errFetch, size,
-			source.row.Bytes)
+			bytes)
 	}
 	return nil
 }
@@ -132,26 +170,32 @@ func held(source Source, sum string, size int64) error {
 // download writes a source's bytes to a path, hashing them as they come.
 func (shelf Shelf) download(ctx context.Context, source Source,
 	to string) (string, int64, error) {
-	asking, err := http.NewRequestWithContext(ctx, http.MethodGet,
-		source.From(), nil)
-	if err != nil {
-		return "", 0, err
+	if err := os.MkdirAll(shelf.dir, 0o755); err != nil {
+		return "", nothing, err
 	}
-	answer, err := shelf.client.Do(asking)
+	return download(ctx, shelf.client, source.From(), to)
+}
+
+// download writes the bytes at a url to a path through a getter, hashing
+// them as they come, and gives their sha256 and size.
+func download(ctx context.Context, get getter, from, to string) (string,
+	int64, error) {
+	asking, err := http.NewRequestWithContext(ctx, http.MethodGet, from, nil)
 	if err != nil {
-		return "", 0, err
+		return "", nothing, err
+	}
+	answer, err := get.Do(asking)
+	if err != nil {
+		return "", nothing, err
 	}
 	defer answer.Body.Close()
 	if answer.StatusCode != http.StatusOK {
-		return "", 0, fmt.Errorf("%w: %s answered %s", errFetch,
-			source.From(), answer.Status)
-	}
-	if err := os.MkdirAll(shelf.dir, 0o755); err != nil {
-		return "", 0, err
+		return "", nothing, fmt.Errorf("%w: %s answered %s", errFetch, from,
+			answer.Status)
 	}
 	file, err := os.Create(to)
 	if err != nil {
-		return "", 0, err
+		return "", nothing, err
 	}
 	hash := sha256.New()
 	size, err := io.Copy(io.MultiWriter(file, hash), answer.Body)
@@ -205,7 +249,7 @@ func (shelf Shelf) Check(source Source) (string, error) {
 	case !source.Pinned():
 		return "", fmt.Errorf("%s: not pinned in the list", source.Key())
 	}
-	sum, err := hashOf(shelf.Path(source))
+	sum, err := shelf.hashed(shelf.Path(source))
 	if err != nil {
 		return "", fmt.Errorf("%s: not on the shelf: %w", source.Key(), err)
 	}

@@ -24,9 +24,34 @@ var grey = &thing.Material{Name: "grey", Colour: maths.Grey(0.8)}
 var materialStruct = structure{"Material", []field{
 	floatField("colour", ""),
 	floatField("glow", ""),
-	floatField("mirror", "gloss, index"),
-	intField("info", "painted, shining"),
+	floatField("mirror", "gloss, index, through, satin"),
+	intField("info", "painted, shining, its rank among clear things"),
+	floatField("metal_n", "a metal's n in red, green, blue"),
+	floatField("metal_k", "its k in red, green, blue"),
+	floatField("film", "a metal: one, or none; its film's index, thickness"),
+	floatField("absorbs", "the film's absorption a metre, red, green, blue"),
+	floatField("crinkle", "its wrinkles' size, slope and seed"),
 }}
+
+// conductor is a material's metal and its film as the kernel reads
+// them: none but zeros for a surface that is not a metal, which the
+// kernel reads as Schlick's share, as Mirrors gives.
+func conductor(made *thing.Material) values {
+	if made.Metal == nil {
+		return values{"metal_n": {0, 0, 0}, "metal_k": {0, 0, 0},
+			"film": {0, 0, 0}, "absorbs": {0, 0, 0}}
+	}
+	n, k := made.Metal.N, made.Metal.K
+	parts := values{"metal_n": {n[0], n[1], n[2]},
+		"metal_k": {k[0], k[1], k[2]}, "film": {1, 0, 0},
+		"absorbs": {0, 0, 0}}
+	if film := made.Film; film != nil {
+		a := film.Absorbs
+		parts["film"] = []float64{1, film.Index, film.Thickness}
+		parts["absorbs"] = []float64{a[0], a[1], a[2]}
+	}
+	return parts
+}
 
 // painting is a material's two textures as they are at the picture's
 // time: its paint, the colour from place to place, and its shine, the
@@ -50,13 +75,23 @@ func (encoded *scene) material(made *thing.Material) int {
 		shine: ticked(made.Shine, encoded.at)}
 	encoded.paints = append(encoded.paints, textures)
 	encoded.glossy = encoded.glossy || made.Gloss > 0
+	encoded.cleared = encoded.cleared || made.Through > 0
 	colour, glow := made.Colour, made.Glow
-	encoded.materials.row(materialStruct, values{
+	row := values{
 		"colour": {colour.R, colour.G, colour.B},
 		"glow":   {glow.R, glow.G, glow.B},
-		"mirror": {made.Gloss, made.Index},
+		"mirror": {made.Gloss, made.Index, made.Through, made.Satin},
 		"info": wholes(flag(textures.paint != nil),
-			flag(textures.shine != nil))})
+			flag(textures.shine != nil), made.Rank)}
+	for name, numbers := range conductor(made) {
+		row[name] = numbers
+	}
+	row["crinkle"] = []float64{0, 0, 0}
+	if wrinkles := made.Crinkle; wrinkles != nil {
+		row["crinkle"] = []float64{wrinkles.Size, wrinkles.Slope,
+			float64(wrinkles.Seed)}
+	}
+	encoded.materials.row(materialStruct, row)
 	return index
 }
 
@@ -105,6 +140,9 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 	material := encoded.surface(placed.Material)
 	space, clear := placed.At(at), placed.Clear()
 	switch made := placed.Shape.(type) {
+	case shape.Plane:
+		encoded.plane(space, material, clear)
+		return nil
 	case shape.Sphere:
 		encoded.sphere(space, made.Radius, material, clear)
 		return nil
@@ -112,8 +150,13 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 		encoded.sphere(space, made.Radius(), material, clear)
 		return nil
 	case *shape.Mesh:
-		if made.Smooth && len(made.Normals) > 0 {
-			return unsupported{"a smooth mesh"}
+		// a mesh shaded smooth is bent by its corners' normals, as
+		// slayer's tracer bends it. its fields are public and can be
+		// changed after it is made, so one whose normals are no longer
+		// one to a vertex is refused here and not read past their end
+		if made.Smooth && len(made.Normals) > 0 &&
+			len(made.Normals) != len(made.Vertices) {
+			return unsupported{"a smooth mesh without a normal for every vertex"}
 		}
 		faces := func() []triangle { return meshFaces(made) }
 		encoded.stand(made, faces, space, material, clear)
@@ -124,6 +167,9 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 		return nil
 	case *shape.MeshGroup:
 		return encoded.group(made, space, material, clear)
+	case *shape.HeightField:
+		encoded.field(made, space, material, clear)
+		return nil
 	}
 	kind := fmt.Sprintf("a shape of kind %T", placed.Shape)
 	return unsupported{kind}
@@ -134,7 +180,7 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 // its own space, where its paint and shine are asked.
 var sphereStruct = structure{"Sphere", []field{
 	floatField("centre", "radius in w"),
-	intField("info", "material, clear"),
+	intField("info", "material, clear, primitive kind: 0 sphere, 1 plane"),
 	floatField("into_x", "the world into it, a row each, shift in w"),
 	floatField("into_y", ""),
 	floatField("into_z", ""),
@@ -152,6 +198,20 @@ func (encoded *scene) sphere(space maths.Subspace, radius float64,
 	given := values{
 		"centre": {centre.X, centre.Y, centre.Z, radius * scale},
 		"info":   wholes(material, flag(clear))}
+	into(space, given)
+	encoded.spheres.row(sphereStruct, given)
+	encoded.counts.spheres++
+}
+
+// plane shares the analytic primitive buffer; info.z distinguishes it.
+// Centre holds its world normal and signed offset, with local texture rows.
+func (encoded *scene) plane(space maths.Subspace, material int, clear bool) {
+	normal := space.Orientation.Out(maths.Up).Unit()
+	origin := space.Out(maths.Vec{})
+	given := values{
+		"centre": {normal.X, normal.Y, normal.Z, normal.Dot(origin)},
+		"info":   wholes(material, flag(clear), 1),
+	}
 	into(space, given)
 	encoded.spheres.row(sphereStruct, given)
 	encoded.counts.spheres++
@@ -184,13 +244,17 @@ func flag(set bool) int {
 // meshFaces is a shape.Mesh's faces in its own space. what a face is
 // made of, and whether it is clear, is the standing's.
 func meshFaces(made *shape.Mesh) []triangle {
+	smooth := made.Smooth && len(made.Normals) > 0
 	faces := make([]triangle, 0, len(made.Faces))
 	for _, face := range made.Faces {
-		var corners [3]maths.Vec
+		one := triangle{smooth: smooth, unlifted: smooth}
 		for corner, index := range face {
-			corners[corner] = made.Vertices[index]
+			one.corners[corner] = made.Vertices[index]
+			if smooth {
+				one.normals[corner] = made.Normals[index]
+			}
 		}
-		faces = append(faces, triangle{corners: corners})
+		faces = append(faces, one)
 	}
 	return faces
 }
@@ -329,16 +393,68 @@ var lampStruct = structure{"Lamp", []field{
 	floatField("toward", "the way of its cone, its width in w"),
 	floatField("extent", "sphere radius in x; "+
 		"beam exponent/radius/slope/reach in xyzw"),
+	floatField("second", "a polar lamp's second pole in xyz; "+
+		"the lamp's kind in w, nought for the rest"),
 }}
+
+// the kinds of lamp that are told apart by the w of second. an emit.Beams
+// is a polar lamp: its at and beyond, its strength, its soft edge, its
+// width and its first pole are the cone lamp's, and second holds its
+// other pole. a film.Flood is a flood: its at holds the way up of its
+// dome and its strength is its strength. any other lamp has no kind.
+const (
+	polarKind = 1
+	floodKind = 2
+)
+
+// worldUp is the way up a film.Flood with no Up of its own means, as
+// film.Flood's Light does.
+var worldUp = maths.V(0, 1, 0)
 
 // distantBeyond is the beyond that marks a lamp as distant
 const distantBeyond = -1
 
+// distantOf is a lamp that lies a way from everything, emit's or a
+// film.Sun, as the kernel reads one: the way to it, the light it lands,
+// and, for a sun drawn as a disc, its width, for the kernel to soften
+// its shadows across; for any other lamp, not distant.
+func distantOf(lamp thing.Lamp) (toward maths.Vec, light maths.Light,
+	disc float64, distant bool) {
+	switch source := lamp.(type) {
+	case emit.Distant:
+		toward, _, light = source.Light(maths.Vec{}, maths.Vec{})
+		return toward, light, 0, true
+	case film.Sun:
+		toward, _, light = source.Light(maths.Vec{}, maths.Vec{})
+		if source.Disc && source.Size > 0 {
+			disc = source.Size
+		}
+		return toward, light, disc, true
+	}
+	return maths.Vec{}, maths.Light{}, 0, false
+}
+
+// spotAsLit is a film.Spot as the point emitter the kernel already
+// draws: at the spot's place, as strong a unit away, and kept to the
+// spot's cone, whole within the cone less its soft edge and fading
+// across that edge.
+//
+// The two are one lamp: both fall by the inverse
+// square, and the spot's edge is the emitter's smooth step written the
+// other way up, so the kernel needs to know nothing new. refuseLamp
+// keeps out the spots this cannot say.
+func spotAsLit(spot film.Spot) emit.Lit {
+	return emit.Lit{At: spot.At, Strength: spot.Strength,
+		Toward: spot.Aim.Unit(), Width: spot.Cone - spot.Soft,
+		Soft: spot.Soft}
+}
+
 // beamZero is defined as no arriving light, or no excluded launch interior.
 const beamZero = 0
 
-// lampsOf appends every lamp: a point emitter at its time, or a distant
-// lamp, the same way and light at every point.
+// lampsOf appends every lamp: a point emitter at its time, a distant
+// lamp, the same way and light at every point, or a flood, which has no
+// way at all.
 func (encoded *scene) lampsOf(world *thing.World) {
 	encoded.counts.beams = beamZero
 	for _, lamp := range world.Lamps {
@@ -347,20 +463,25 @@ func (encoded *scene) lampsOf(world *thing.World) {
 			encoded.counts.beams++
 			continue
 		}
-		if sun, distant := lamp.(emit.Distant); distant {
-			toward, _, light := sun.Light(maths.Vec{}, maths.Vec{})
+		if encoded.ambientOf(lamp) {
+			continue
+		}
+		if toward, light, disc, distant := distantOf(lamp); distant {
 			way := append(point(toward), distantBeyond)
 			encoded.lamps.row(lampStruct, values{
 				"at":       way,
 				"strength": {light.R, light.G, light.B},
-				"toward":   {}, "extent": {}})
+				"toward":   {}, "extent": {disc}, "second": {}})
 			continue
 		}
 		var lit emit.Lit
 		radius := 0.0
-		if source, ok := lamp.(emit.Volume); ok {
+		switch source := lamp.(type) {
+		case emit.Volume:
 			lit, radius = source.Point(), source.Radius().InMetres()
-		} else {
+		case film.Spot:
+			lit = spotAsLit(source)
+		default:
 			lit = lamp.(emit.Lit)
 		}
 		strength := lit.Strength
@@ -369,9 +490,47 @@ func (encoded *scene) lampsOf(world *thing.World) {
 			"strength": {strength.R, strength.G, strength.B,
 				lit.Soft},
 			"toward": append(point(lit.Toward), lit.Width),
-			"extent": {radius}})
+			"extent": {radius}, "second": {}})
 	}
 	encoded.counts.lamps = len(world.Lamps)
+}
+
+// ambientOf appends a lamp that has no place of its own, a film.Flood, or
+// a polar emitter, as the kernel reads one, and says whether it was one.
+func (encoded *scene) ambientOf(lamp thing.Lamp) bool {
+	switch source := lamp.(type) {
+	case film.Flood:
+		up := source.Up
+		if up == (maths.Vec{}) {
+			up = worldUp
+		}
+		strength := source.Strength
+		encoded.lamps.row(lampStruct, values{
+			"at":       point(up.Unit()),
+			"strength": {strength.R, strength.G, strength.B},
+			"toward":   {}, "extent": {},
+			"second": {beamZero, beamZero, beamZero, floodKind}})
+		return true
+	case emit.Beams:
+		encoded.polarOf(source)
+		return true
+	}
+	return false
+}
+
+// polarOf appends beams as a lamp with two cones: where its poles point
+// at the time its clock holds, which a thing.Lamp has no time to say, so
+// it is read here, once, as the tracer reads it for every point of a
+// picture drawn at that time.
+func (encoded *scene) polarOf(beams emit.Beams) {
+	north, south := beams.Poles(*beams.Clock)
+	strength := beams.Strength()
+	encoded.lamps.row(lampStruct, values{
+		"at":       append(point(beams.At), beams.Beyond),
+		"strength": {strength.R, strength.G, strength.B, beams.Soft},
+		"toward":   append(point(north), beams.Width),
+		"extent":   {},
+		"second":   append(point(south), polarKind)})
 }
 
 // beamOf keeps collimated sources distinct from inverse-square point lamps.
@@ -385,7 +544,36 @@ func (encoded *scene) beamOf(beam *emit.Beam) {
 		"toward":   point(lit.Toward),
 		"extent": {emit.BeamExponent, beam.Radius().InMetres(),
 			beam.Slope(), beam.Reach().InMetres()},
+		"second": {},
 	})
+}
+
+// fieldStruct is a height field as the kernel reads it: where it is,
+// which samples are its, and the sizes its march bounds itself by.
+var fieldStruct = structure{"Field", []field{
+	floatField("origin", "scale in w"),
+	floatField("x", "the field's axes in the world"),
+	floatField("y", ""),
+	floatField("z", ""),
+	intField("data", "first sample, samples a side, material, clear"),
+	floatField("size", "extent, bottom, top, slant"),
+}}
+
+// field appends one height field: its placement, its samples flat
+// after whatever heights are already packed, and the measured sizes
+// shape.HeightField marches by on the cpu, so the two march alike.
+func (encoded *scene) field(made *shape.HeightField,
+	space maths.Subspace, material int, clear bool) {
+	samples, n, extent, bottom, top, slant := made.Pack()
+	first := len(encoded.heights.bytes) / 4
+	for _, height := range samples {
+		encoded.heights.word(math.Float32bits(float32(height)))
+	}
+	given := placedAt(space)
+	given["data"] = wholes(first, n, material, flag(clear))
+	given["size"] = []float64{extent, bottom, top, slant}
+	encoded.fields.row(fieldStruct, given)
+	encoded.counts.fields++
 }
 
 // headerStruct is the header as the kernel reads it.
@@ -399,14 +587,57 @@ var headerStruct = structure{"Header", []field{
 	intField("more", "volumes, strides, shades, trees"),
 	floatField("tuning", "lift, faint, evenly, spread"),
 	intField("tops", "mesh standings, the boxes of their tree"),
-	intField("look", "whether rays are given in x; narrow beam count in y"),
-	intField("lighting", "source volume during smoke preparation"),
+	intField("look", "whether rays are given in x; narrow beam count "+
+		"in y; height fields in z"),
+	intField("lighting", "source volume during smoke preparation; "+
+		"fast light's bake volume and lamp in x and y, and for its "+
+		"trace the samples a pixel's side in x where the sky's looks "+
+		"are shared, the grid lamps' bits in z, "+
+		"one past the beam tables' first number in w"),
+	intField("environment", "isotropic volume sky samples, zero keeps legacy lamps"),
+	floatField("bounds", "centre and radius of the sphere holding every standing mesh, world metres"),
+	floatField("sky_low", "incident grid bounds in world metres"),
+	floatField("sky_high", ""),
+	intField("sky_grid", "incident grid vertex counts and RGB float offset"),
+	floatField("close_origin", "the eye where the shutter closes"),
+	floatField("close_right", "that eye's axes in the world"),
+	floatField("close_back", ""),
+	floatField("optics", "a thin lens: aperture's reach, focus "+
+		"distance, width and height seen sharp at the focus"),
+	intField("exposure", "whether the shutter is open in x; whether "+
+		"the aperture is in y; samples along a pixel's side in z; "+
+		"the frame's seed in w"),
 }}
 
 // camera makes the header: the eye's place and axes, the lens, and how
-// many of everything there are.
-func (encoded *scene) camera(eye maths.Subspace, lens film.Pinhole,
+// many of everything there are. Its shutter is closed; a drawer that
+// holds one open writes it over the header after (see exposure.go).
+func (encoded *scene) camera(eye maths.Subspace, lens film.Sensor,
 	width, height int) {
+	counts := encoded.counts
+	given := viewValues(eye, lens, shutter{}, width, height)
+	for name, numbers := range (values{
+		"counts": wholes(counts.spheres, counts.triangles, counts.nodes,
+			counts.lamps),
+		"more": wholes(counts.volumes, strides, shades,
+			counts.trees),
+		"tuning": {lift, faint, evenly, encoded.spread},
+		"tops":   wholes(counts.instances, counts.tops),
+		"look": wholes(flag(encoded.looked), encoded.counts.beams,
+			counts.fields),
+		"lighting": wholes(beamZero), "environment": wholes(encoded.volumeSky),
+		"bounds": encoded.standingBounds()}) {
+		given[name] = numbers
+	}
+	encoded.incidentHeader(given)
+	encoded.header.row(headerStruct, given)
+}
+
+// cameraValues is the header's fields that the eye and the lens make:
+// the eye's place and axes, and the lens for a picture width by height
+// samples. A camera move changes these and nothing else in a scene.
+func cameraValues(eye maths.Subspace, lens film.Pinhole,
+	width, height int) values {
 	wide, pixelShape := lens.Wide, lens.Pixel
 	if wide == 0 {
 		wide = 60 * maths.Degree
@@ -414,23 +645,16 @@ func (encoded *scene) camera(eye maths.Subspace, lens film.Pinhole,
 	if pixelShape == 0 {
 		pixelShape = 1
 	}
-	axes, counts := eye.Orientation, encoded.counts
+	axes := eye.Orientation
 	aspect := float64(width) * pixelShape / float64(height)
-	encoded.header.row(headerStruct, values{
+	return values{
 		"origin": point(eye.Out(maths.Vec{})),
 		"right":  point(axes.Out(maths.XAxis)),
 		"up":     point(axes.Out(maths.YAxis)),
 		"back":   point(axes.Out(maths.ZAxis)),
 		"lens": {math.Tan(wide / 2), aspect, float64(width),
 			float64(height)},
-		"counts": wholes(counts.spheres, counts.triangles, counts.nodes,
-			counts.lamps),
-		"more": wholes(counts.volumes, strides, shades,
-			counts.trees),
-		"tuning":   {lift, faint, evenly, encoded.spread},
-		"tops":     wholes(counts.instances, counts.tops),
-		"look":     wholes(flag(encoded.looked), encoded.counts.beams),
-		"lighting": wholes(beamZero)})
+	}
 }
 
 // slayer's tracer's own numbers (trace), so the two march alike

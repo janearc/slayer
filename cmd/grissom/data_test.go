@@ -177,7 +177,7 @@ func TestViewerColourAndLabelControlsHaveFiniteEndpoints(t *testing.T) {
 	coloured := seen(sample)
 	view.chroma = len(chromas) - 1
 	grey := seen(sample)
-	if coloured == grey || math.Abs(float64(grey[0])-float64(grey[1])) > 1 || math.Abs(float64(grey[1])-float64(grey[2])) > 1 {
+	if coloured == grey || !(math.Abs(float64(grey[0])-float64(grey[1])) <= 1) || !(math.Abs(float64(grey[1])-float64(grey[2])) <= 1) {
 		t.Fatalf("chroma control: %v vs %v", coloured, grey)
 	}
 	view.lightness = .1

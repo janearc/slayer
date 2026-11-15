@@ -77,8 +77,7 @@ func TestDistanceIsToTheNearestFace(t *testing.T) {
 		{maths.V(0.1, 0.2, -0.45), -0.05},
 		{maths.V(1.5, 1.5, 1.5), math.Sqrt(3)},
 	} {
-		if got := made.Distance(each.point); math.Abs(got-each.want) >
-			1e-12 {
+		if got := made.Distance(each.point); !(math.Abs(got-each.want) <= 1e-12) {
 			t.Errorf("at %v the distance is %v, not %v", each.point, got,
 				each.want)
 		}

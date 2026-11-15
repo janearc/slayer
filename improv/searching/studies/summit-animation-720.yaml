@@ -1,0 +1,37 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  set: summit-interior.yaml
+film:
+  width: 1280
+  height: 720
+  rays: 2
+camera:
+  name: low below the domes
+  zoom:
+    from:
+      value: 60
+      unit: deg
+    to:
+      value: 62
+      unit: deg
+    duration:
+      value: 40
+      unit: s
+    ease: smooth
+renderer: gpu
+outputs:
+  frames: summit-animation-720-frames
+  movie: summit-animation-720.mp4
+fps: 6
+duration:
+  value: 8
+  unit: s
+scene-duration:
+  value: 40
+  unit: s
+sound:
+  file: ../b-m-a-s.opus
+  from:
+    value: 116
+    unit: s

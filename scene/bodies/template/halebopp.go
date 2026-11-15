@@ -1,6 +1,7 @@
 package template
 
 import (
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/swatches"
 )
@@ -14,21 +15,19 @@ import (
 // still.
 //
 // The shot aims it.
-func HaleBopp() bodies.Body {
-	return bodies.Body{Name: "hale-bopp", Kind: bodies.Rock, Radius: 30, Mass: 1e16,
-		Seed: 3,
-		Coma: &bodies.Coma{Radius: 1e6, Dense: 6e-6,
-			Colour: swatches.Light(swatches.ComaDust),
-			Glow:   swatches.Light(swatches.ComaGreen)},
-		Tails: []bodies.Tail{
-			{Length: 4e7, Base: 6e5, Spread: 0.08, Curve: 0.35, Dense: 2e-7,
-				Colour: swatches.Light(swatches.DustTail),
-				Wisp:   0.5, Seed: 97},
-			{Length: 6e7, Base: 3e5, Spread: 0.03, Curve: 0.02, Dense: 2e-7,
-				Colour: swatches.Light(swatches.IonTail),
-				Glow:   swatches.Light(swatches.IonGlow),
-				Wisp:   0.7,
-				Seed:   98},
-		},
-	}
+func HaleBopp() (bodies.Body, error) {
+	return comet("hale-bopp", km(30), kg(1e16),
+		bodies.PerKilometre(6e-6), km(1e6),
+		[2]maths.Light{swatches.Light(swatches.ComaDust),
+			swatches.Light(swatches.ComaGreen)},
+		tailOf{length: km(4e7), base: km(6e5), spread: 0.08,
+			curve: 0.35, loss: bodies.PerKilometre(2e-7),
+			colour: swatches.Light(swatches.DustTail),
+			wisp:   maths.Percent(50), seed: 97},
+		tailOf{length: km(6e7), base: km(3e5), spread: 0.03,
+			curve: 0.02, loss: bodies.PerKilometre(2e-7),
+			colour: swatches.Light(swatches.IonTail),
+			glow:   swatches.Light(swatches.IonGlow),
+			wisp:   maths.Percent(70), seed: 98},
+		3)
 }

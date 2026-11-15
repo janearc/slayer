@@ -162,7 +162,7 @@ func staysAmongItsColours(draw *rapid.T) {
 			draw.Fatalf("along %v is %v", share, got)
 		}
 	}
-	if math.Abs(got.R+got.G+got.B-one) > within {
+	if !(math.Abs(got.R+got.G+got.B-one) <= within) {
 		draw.Fatalf("along %v is %v, which adds to %v", share, got,
 			got.R+got.G+got.B)
 	}
@@ -210,7 +210,7 @@ func TestALightTooFaintIsDark(t *testing.T) {
 func sphere(test asker) *World {
 	test.Helper()
 	//ninja:vow stranger hexes makes no tiling; a Sphere is a plain value
-	tiling := hexes.Sphere{N: int(chosenNumber(test, "sphere-split"))}
+	tiling := hexes.Sphere{Splits: int(chosenNumber(test, "sphere-split"))}
 	return &World{Fields: Fields{Tiling: tiling,
 		Seed:   uint64(chosenNumber(test, "seed")),
 		Sprawl: chosenNumber(test, "sprawl")}}

@@ -34,12 +34,43 @@ func (layer optics) scattered() float64 {
 // cosine is turn, normalised so that over every way out it sums to four
 // pi: the gas's and the haze's, each weighed by how much it scatters.
 func (layer optics) phase(turn float64) float64 {
+	made := layer.leaf()
+	return made.phase(turn, made.lobe.at(turn))
+}
+
+// a leaf is a layer with all that does not depend on the angles worked
+// out: its optics as written, its whole depth and whether it has any, the
+// share of what it takes that it scatters, the gas's and haze's
+// scattering and their sum, and the haze's lobe.
+type leaf struct {
+	raw                 optics
+	tau, albedo         float64
+	open                bool
+	gas, haze, together float64
+	lobe                lobe
+	slot                int
+}
+
+// leaf is the layer worked out once.
+func (layer optics) leaf() leaf {
 	gas, haze := layer.scatter, layer.haze*layer.hazeAlbedo
-	if gas+haze == 0 {
+	tau := layer.depth()
+	made := leaf{raw: layer, tau: tau, open: tau > 0, gas: gas, haze: haze,
+		together: gas + haze, lobe: lobeOf(layer.hazeLean)}
+	if made.open {
+		made.albedo = layer.scattered() / tau
+	}
+	return made
+}
+
+// phase is how the leaf throws light turned through an angle whose cosine
+// is turn, given its haze's henyey phase at that turn, which every layer
+// with the same lobe shares: its optics' phase.
+func (layer *leaf) phase(turn, tilt float64) float64 {
+	if layer.together == 0 {
 		return 0
 	}
-	return (gas*rayleigh(turn) + haze*henyey(layer.hazeLean, turn)) /
-		(gas + haze)
+	return (layer.gas*rayleigh(turn) + layer.haze*tilt) / layer.together
 }
 
 // rayleigh is a molecule's phase: three quarters of one and the turn's
@@ -51,8 +82,22 @@ func rayleigh(turn float64) float64 {
 // henyey is the henyey-greenstein phase of a haze leaning forward by lean: zero
 // throws light alike every way, near one throws it on.
 func henyey(lean, turn float64) float64 {
+	return lobeOf(lean).at(turn)
+}
+
+// a lobe is henyey's phase of one lean, less the turn: the terms that
+// stay the same at every angle.
+type lobe struct{ rest, near, twice float64 }
+
+// lobeOf is the lobe of a haze leaning forward by lean.
+func lobeOf(lean float64) lobe {
 	square := lean * lean
-	return (1 - square) / math.Pow(1+square-2*lean*turn, 1.5)
+	return lobe{rest: 1 - square, near: 1 + square, twice: 2 * lean}
+}
+
+// at is henyey's phase through an angle whose cosine is turn.
+func (shape lobe) at(turn float64) float64 {
+	return shape.rest / math.Pow(shape.near-shape.twice*turn, 1.5)
 }
 
 // reflected is the light a column sends back toward an eye, as radiance
@@ -67,17 +112,30 @@ func henyey(lean, turn float64) float64 {
 // the deck sees what reaches it and sends back what all the depth
 // leaves.
 func reflected(stack []optics, deck, star, eye, turn float64) float64 {
+	leaves := make([]leaf, len(stack))
+	tilts := make([]float64, len(stack))
+	for k, layer := range stack {
+		leaves[k] = layer.leaf()
+		leaves[k].slot = k
+		tilts[k] = leaves[k].lobe.at(turn)
+	}
+	return shone(leaves, tilts, deck, star, eye, turn)
+}
+
+// shone is reflected for a stack already worked out, given each lobe's
+// henyey phase at the turn, by the leaves' slots.
+func shone(stack []leaf, tilts []float64, deck, star, eye,
+	turn float64) float64 {
 	slant := 1/star + 1/eye
 	above, light := 0.0, 0.0
-	for _, layer := range stack {
-		tau := layer.depth()
-		if tau > 0 {
-			albedo := layer.scattered() / tau
-			light += albedo * layer.phase(turn) / (4 * math.Pi) *
+	for k := range stack {
+		layer := &stack[k]
+		if layer.open {
+			light += layer.albedo * layer.phase(turn, tilts[layer.slot]) / (4 * math.Pi) *
 				star / (star + eye) * math.Exp(-above*slant) *
-				-math.Expm1(-tau*slant)
+				-math.Expm1(-layer.tau*slant)
 		}
-		above += tau
+		above += layer.tau
 	}
 	return light + deck*star/math.Pi*math.Exp(-above*slant)
 }

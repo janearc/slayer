@@ -100,7 +100,7 @@ func (app application) show(call pzm.Call) error {
 	return fmt.Errorf("no demo %q; use demo list", selector)
 }
 
-// showSmoke draws a real milestone without claiming a smokecheck verdict.
+// showSmoke draws a real milestone without claiming a smokejudge verdict.
 func showSmoke(call pzm.Call, given preview,
 	scene smoke.Smoke) error {
 	name := fmt.Sprintf("smoke-%d.png", scene.Number)

@@ -6,6 +6,11 @@
 # spread: each fire is lit and none catches from another.
 scene:
   name: kilauea iki forest alight
+  # drawn by the gpu's own ray queries for its meshes and shadows: at 960
+  # wide with 4 rays a side it takes 10.9 s where the kernel's own
+  # traversal takes 11.3 s, and the picture is 0.08 percent of mean light
+  # from it, the difference lying on the edges of bright things
+  renderer: gpu-native
   light: moon
   location:
     lat: 19.4165

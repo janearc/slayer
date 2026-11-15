@@ -1,0 +1,19 @@
+{
+	"group": "zappy",
+	"mood": "dry, then very large",
+	"feeling": "A small voice states a fact flatly and something enormous agrees with it.",
+	"intent": "Zappy's ident, the falling form: the same four seconds with the tune turned upside down, to choose between.",
+	"listen_for": "Five plucked notes that step down and come to rest on the home note, and at 0:02 the low floor that arrives under the last one and fits it.",
+	"voicing": "@zappy-voice",
+	"tempo": 126,
+	"meter": 4,
+	"seconds": 3.81,
+	"parts": [
+		{"name": "hello", "bar": 1, "second": 0.0,
+		 "change": "a ticking clock and four plucked notes falling, alone",
+		 "feels": "small, dry: a plain statement"},
+		{"name": "behind", "bar": 2, "second": 1.9,
+		 "change": "the last note lands on home and a deep floor opens under it",
+		 "feels": "something very large agrees"}
+	]
+}

@@ -237,7 +237,7 @@ func turned(passing float64) float64 {
 // The tracer's own bending, as it is, so that a change to it is seen
 // and the comments on loose and leave cannot go stale unnoticed. These
 // are not the true angles: the hole's own march from far to far turns a
-// ray more, and how near the tracer should come is a ruling to make.
+// ray more, and how near the tracer should come is still to be decided.
 //
 // The numbers are what this code gave on 2026-10-15, after libholemath
 // began stepping a ray by its own time, so that a photon's energy has

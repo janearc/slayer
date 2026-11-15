@@ -1,0 +1,287 @@
+# every number the section tests choose, with what it is and who chose it.
+numbers:
+  - name: frame-wide
+    value: 96
+    says: "width in pixels of the frame the section tests draw"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: frame-high
+    value: 64
+    says: "height in pixels of the frame the section tests draw"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: frame-side
+    value: 16
+    says: "side in pixels of a section of that frame"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: frame-sections
+    value: 24
+    says: "how many sections that frame has: six across by four down, counted"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: split-wide
+    value: 70
+    says: "width in pixels of the frame Split is shown dividing unevenly"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: split-high
+    value: 50
+    says: "height in pixels of the frame Split is shown dividing unevenly"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: split-side
+    value: 32
+    says: "side in pixels of the sections of that frame"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: tiny-wide
+    value: 3
+    says: "width in pixels of the frame Split is asked for a side of zero"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: tiny-high
+    value: 2
+    says: "height in pixels of the frame Split is asked for a side of zero"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: tiny-sections
+    value: 6
+    says: "how many sections a side of zero gives that frame: one pixel each, counted"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: split-sections
+    value: 6
+    says: "how many sections the uneven frame has: three across by two down, counted"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: lens-wide
+    value: 60
+    says: "the wide of the pinhole every section test looks through, as the field is given it"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: balls
+    value: 3000
+    says: "how many balls the sight test puts where some pixel's ray goes"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: seed-pixel-x
+    value: 1
+    says: "the stream of hashes that picks the pixel a ball is aimed at, across"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: seed-pixel-y
+    value: 2
+    says: "the stream of hashes that picks the pixel a ball is aimed at, down"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: seed-far
+    value: 3
+    says: "the stream of hashes that picks how far along the ray a ball is"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: seed-size-first
+    value: 4
+    says: "the first stream of hashes that picks a ball's size"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: seed-size-second
+    value: 5
+    says: "the second stream of hashes that picks a ball's size"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: ball-nearest
+    value: 5
+    says: "how far along its ray the nearest ball is put"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: ball-spread
+    value: 500
+    says: "how much further along its ray a ball may be put"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: ball-size-share
+    value: 0.2
+    says: "the largest share of its distance a ball's radius is"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: small-share
+    value: 0.01
+    says: "the share of its distance under which a ball's radius counts as small"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: met-share-most
+    value: 0.4
+    says: "the share of balls and sections met above which a sight is no use"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: behind-distance
+    value: -50
+    says: "how far along the middle ray the ball behind the eye is put"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: behind-radius
+    value: 1
+    says: "the radius of the ball behind the eye"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: inside-distance
+    value: 0.5
+    says: "how far along the middle ray the ball the eye is inside is put"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: inside-radius
+    value: 2
+    says: "the radius of the ball the eye is inside"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: giant-radius
+    value: 3
+    says: "the radius of the giant"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: giant-check
+    value: 1
+    says: "the size of a square of the giant's own light"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: ball-radius
+    value: 1
+    says: "the radius of the clay ball"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: clay-grey
+    value: 0.7
+    says: "how much of every colour the clay ball returns"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: lamp-dim
+    value: 1
+    says: "the strength of the lamp before it changes"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: lamp-bright
+    value: 2
+    says: "the strength of the lamp after it brightens"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: sample-count
+    value: 1
+    says: "how many samples a pixel of the traced frame takes"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: giant-shows
+    value: 0.25
+    says: "the red above which a pixel is counted as showing the giant"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: changed-least
+    value: 2
+    says: "the fewest sections a moved body must change"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: self-lit-kept-least
+    value: 12
+    says: "the fewest sections kept when only a lamp changes"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: giant-sections-least
+    value: 4
+    says: "the fewest kept sections that show the giant"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: field-mass
+    value: 1
+    says: "the mass of the field that bends rays"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: field-reach
+    value: 1
+    says: "the reach of the field that bends rays"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: moon-check
+    value: 0.5
+    says: "the size of a square of the moon's own light"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: moon-light
+    value: 0.9
+    says: "the light squares of the moon's own light"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: moon-dark
+    value: 0.4
+    says: "the dark squares of the moon's own light"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: probe-x
+    value: 70
+    says: "the column of the pixel at the clay ball"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: probe-y
+    value: 50
+    says: "the row of the pixel at the clay ball"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: puff-radius
+    value: 1.5
+    says: "the radius of the puff of smoke"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: puff-thick
+    value: 1
+    says: "the density at the middle of the puff of smoke"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: smoke-grey
+    value: 1
+    says: "how much of every colour the smoke returns"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: sun-strength
+    value: 3
+    says: "the strength of the sun that does not change"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: far-dim
+    value: 100
+    says: "the strength of the far lamp before it changes"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: far-brighter
+    value: 300
+    says: "the strength of the far lamp after it brightens"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: far-bright
+    value: 30000
+    says: "the strength of the far lamp when it is as bright on the puff as the sun"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: drift
+    value: 0.05
+    says: "the share of the steady light the changed lamps may come to"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: gained-least
+    value: 2
+    says: "the fewest sections a drift must keep that no drift kept"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: moved-least
+    value: 1
+    says: "the fewest kept sections that differ at all from the whole frame"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: far-cone
+    value: 1
+    says: "the half-angle in radians of the far lamp's cone"
+    kind: picked
+    by: the test author, 2026-11-11
+  - name: clay-section-index
+    value: 22
+    says: "which section the clay ball is in, counted row by row: row three of four, column four of six, from nought"
+    kind: picked
+    by: the test author, 2026-11-11

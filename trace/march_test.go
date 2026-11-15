@@ -42,7 +42,7 @@ func plate(density, near, far float64) slab {
 var alongZ = maths.Ray{At: maths.V(0, 0, -50), Dir: maths.V(0, 0, 1)}
 
 // staging is a world of volumes with no lamp, staged at zero.
-func staging(volumes ...thing.Volume) staged {
+func staging(volumes ...thing.Volume) *staged {
 	world := thing.NewWorld()
 	for _, each := range volumes {
 		world.AddVolume(each)
@@ -110,7 +110,7 @@ func TestThroughIsBeersLawAtAnyStride(t *testing.T) {
 
 // check holds one painted scene's keep and glow along alongZ to their
 // exact answers, with each crossing cut into so many steps.
-func check(t *testing.T, scene staged, cuts int, kept, glow float64) {
+func check(t *testing.T, scene *staged, cuts int, kept, glow float64) {
 	t.Helper()
 	got := throughGain(scene, alongZ, math.Inf(1), nil, cuts)
 	keep, added := got.keep, got.added
@@ -131,7 +131,7 @@ func TestOverlappingVolumesMultiply(t *testing.T) {
 	thin := thing.Volume{Medium: plate(0.3, -2, 1)}
 	thick := thing.Volume{Medium: plate(0.9, -1, 3)}
 	want := math.Exp(-(0.3*3 + 0.9*4))
-	for _, scene := range []staged{staging(thin, thick),
+	for _, scene := range []*staged{staging(thin, thick),
 		staging(thick, thin)} {
 		keep := through(scene, alongZ, math.Inf(1)).keep
 		if !within(keep.R, want, 1e-9) {

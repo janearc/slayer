@@ -1,0 +1,20 @@
+# every number diskcache's tests choose, with what it is and who chose it.
+numbers:
+  - name: testCap
+    value: 1600
+    unit: bytes
+    says: a test kind's cap, three test entries of about 454 bytes fit and four do not
+    kind: picked
+    by: the disk caches slice's author, 2026-11-12
+  - name: entryBytes
+    value: 300
+    unit: bytes
+    says: a test payload, so a header and three of them cross the cap
+    kind: picked
+    by: the disk caches slice's author, 2026-11-12
+  - name: minuteLater
+    value: 1
+    unit: minute
+    says: a step of a test clock, well inside heldFor
+    kind: picked
+    by: the disk caches slice's author, 2026-11-12

@@ -24,6 +24,10 @@ type Pillars struct {
 	Thick         float64
 	Seed          uint64
 	Filaments     float64
+
+	// held is the columns, set by Prepared.
+	held     []column
+	prepared bool
 }
 
 // column is one of the pillars: where it stands, how tall, how wide
@@ -34,13 +38,16 @@ type column struct {
 
 // columns is the pillars, each placed, sized and tapered by hash; a count of
 // zero or less is none.
-func (p Pillars) columns() []column {
+func (p Pillars) columns() []column { return p.appendColumns(nil) }
+
+// appendColumns is columns, appended to out, so that a caller with a buffer
+// of room for them does not allocate.
+func (p Pillars) appendColumns(out []column) []column {
 	if p.Count <= 0 {
-		return nil
+		return out
 	}
 	w := p.Width / 2
 	base := p.Width / (float64(p.Count) * 3.2)
-	out := make([]column, 0, p.Count)
 	for i := range p.Count {
 		k := int64(i)
 		out = append(out, column{
@@ -55,11 +62,35 @@ func (p Pillars) columns() []column {
 	return out
 }
 
+// Prepared is the same pillars with their columns placed once, so that
+// Density, asked at every step of a march, does not place them again. A
+// Pillars built by a literal gives the same answers without it: it places
+// its columns at each call, in a buffer on the stack when Count is eight or
+// fewer.
+//
+// The columns depend on Count, Height, Width and Seed only; a prepared
+// value does not see a later edit to any of them, and does not depend on
+// Thick or Filaments, which may change freely. A prepared value is not
+// written to again, so render workers may share it.
+func (p Pillars) Prepared() Pillars {
+	p.held, p.prepared = p.columns(), true
+	return p
+}
+
+// table is the columns, those Prepared held or else placed into buf.
+func (p Pillars) table(buf []column) []column {
+	if p.prepared {
+		return p.held
+	}
+	return p.appendColumns(buf)
+}
+
 // Tips is where the pillars end: the top of each column, where the
 // young stars are found.
 func (p Pillars) Tips() []maths.Vec {
 	var out []maths.Vec
-	for _, c := range p.columns() {
+	var buf [8]column
+	for _, c := range p.table(buf[:0]) {
 		out = append(out, maths.V(c.x, c.height, c.z))
 	}
 	return out
@@ -94,7 +125,8 @@ func (p Pillars) Density(at maths.Vec) float64 {
 		most = math.Max(most, 1-edge)
 	}
 	// the columns, each its own
-	for i, c := range p.columns() {
+	var buf [8]column
+	for i, c := range p.table(buf[:0]) {
 		h, base := c.height, c.base
 		if at.Y > h {
 			continue

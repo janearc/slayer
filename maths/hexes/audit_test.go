@@ -34,8 +34,8 @@ func TestAFlatOfNoSizeHasNoTiles(t *testing.T) {
 func TestSomewhereIsOnTheSphere(t *testing.T) {
 	for _, abc := range [][3]float64{{0.5, 0.5, 0.5}, {0, 0, 0},
 		{0.9, 0.1, 0.5}} {
-		p := (Sphere{N: 4}).Somewhere(abc[0], abc[1], abc[2])
-		if math.Abs(p.Len()-1) > 1e-12 {
+		p := (Sphere{Splits: 4}).Somewhere(abc[0], abc[1], abc[2])
+		if !(math.Abs(p.Len()-1) <= 1e-12) {
 			t.Errorf("somewhere %v is %v, %v long", abc, p, p.Len())
 		}
 	}
@@ -48,30 +48,30 @@ func TestASphereForAnySpacingCounts(t *testing.T) {
 	for _, radians := range []float64{math.NaN(), math.Inf(1), 0, -1, 1e-12,
 		1e-300} {
 		s := SphereFor(radians)
-		if s.N < 1 || s.N > finest || s.Count() < 12 {
-			t.Errorf("for %v: N %d, %d tiles", radians, s.N, s.Count())
+		if s.Splits < 1 || s.Splits > finest || s.Count() < 12 {
+			t.Errorf("for %v: N %d, %d tiles", radians, s.Splits, s.Count())
 		}
 	}
-	if SphereFor(math.NaN()).N != 1 || SphereFor(0).N != finest {
-		t.Errorf("NaN is %d, nought is %d", SphereFor(math.NaN()).N,
-			SphereFor(0).N)
+	if SphereFor(math.NaN()).Splits != 1 || SphereFor(0).Splits != finest {
+		t.Errorf("NaN is %d, nought is %d", SphereFor(math.NaN()).Splits,
+			SphereFor(0).Splits)
 	}
-	if SphereFor(edge/40).N != 40 {
-		t.Errorf("an ordinary spacing moved: %d", SphereFor(edge/40).N)
+	if SphereFor(edge/40).Splits != 40 {
+		t.Errorf("an ordinary spacing moved: %d", SphereFor(edge/40).Splits)
 	}
 }
 
 // the rung below the finest is the finest, and every rung down to it counts its
 // tiles: never a count less than zero.
 func TestTheFinestHasNoFinerRung(t *testing.T) {
-	s := Sphere{N: 1}
+	s := Sphere{Splits: 1}
 	for range 40 {
 		s = s.Finer().(Sphere)
 		if s.Count() < 12 {
 			t.Fatalf("%+v counts %d tiles", s, s.Count())
 		}
 	}
-	if s.N != finest {
+	if s.Splits != finest {
 		t.Errorf("forty rungs down is %+v, not the finest", s)
 	}
 }

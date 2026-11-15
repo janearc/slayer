@@ -9,7 +9,7 @@ import (
 
 var sea, moss = maths.RGB(0.1, 0.3, 0.6), maths.RGB(0.3, 0.5, 0.2)
 
-var hexed = Hexed{Tiling: hexes.Sphere{N: 4}, Palette: []maths.Light{sea,
+var hexed = Hexed{Tiling: hexes.Sphere{Splits: 4}, Palette: []maths.Light{sea,
 	moss}, Seed: 3, Lines: 0.5}
 
 // Every tile is one of the paints, the same at its middle and anywhere

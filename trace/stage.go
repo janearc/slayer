@@ -1,10 +1,12 @@
 package trace
 
 import (
+	"fmt"
 	"math"
-	"sort"
+	"slices"
 	"time"
 
+	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/beamstep"
 	"github.com/janearc/slayer/scene/gas"
@@ -148,12 +150,28 @@ func placeVolumes(world *thing.World, moment time.Duration) []placedVolume {
 		if optical, ok := volume.med.(gas.Optical); ok {
 			found := optical.Gas()
 			volume.gas = &found
-			volume.extinction = byEye(found.Extinction)
-			volume.scatter = byEye(found.Scatter)
+			volume.extinction, volume.scatter = EyeOptics(found)
 		}
 		volumes = append(volumes, volume)
 	}
 	return volumes
+}
+
+// refusal is why the staged scene cannot be drawn, or nil: a field that
+// celestial says is no hole, or a gas volume whose asymmetry is no lobe,
+// which would panic in a worker at its first lamp.
+func (scene *staged) refusal() error {
+	if scene.fault != nil {
+		return scene.fault
+	}
+	for _, each := range scene.volumes {
+		if each.gas != nil && !each.gas.IsLobe() {
+			return fmt.Errorf("trace: gas %s has an asymmetry of %v, "+
+				"which is no lobe: it must be between minus one and one, "+
+				"and neither of them", each.gas.Name, each.gas.Phase)
+		}
+	}
+	return nil
 }
 
 // staged is a world evaluated for one render time: placed objects, volumes, and
@@ -161,7 +179,12 @@ func placeVolumes(world *thing.World, moment time.Duration) []placedVolume {
 // later additions do not enter this render. Geometry, media, and materials
 // remain shared and must not change until rendering finishes.
 type staged struct {
-	lamps []thing.Lamp
+	// volumeSky is a fixed full-sphere quadrature for isotropic scattering.
+	// Empty keeps the legacy source term and lamp normalization.
+	volumeSky []maths.Vec
+	lamps     []thing.Lamp
+	// discs is the suns among lamps drawn as discs, found once
+	discs []film.Sun
 	beams *beamstep.Beams
 	sky   thing.Sky
 	// lighting is the sky as a table of each cell's mean, which is what
@@ -171,6 +194,8 @@ type staged struct {
 	crowd    crowd
 	volumes  []placedVolume
 	fields   []placedField
+	// fault is why a field is no hole, as fieldFault has it; nil if none
+	fault error
 	// gassy is whether any volume is a gas, worked out once a picture
 	gassy bool
 	// walked is a replay's steps, told as the pixel is made; nil in
@@ -184,15 +209,27 @@ type staged struct {
 
 // lifted offsets a ray origin along the surface normal to avoid intersecting
 // the surface it just left.
-func (scene staged) lifted(point, normal maths.Vec) maths.Vec {
+func (scene *staged) lifted(point, normal maths.Vec) maths.Vec {
 	return point.Add(normal.Scale(scene.lifting(point)))
 }
 
 // lifting computes the ray-origin offset as lift times the larger of scene
 // extent and distance from the origin. The latter handles unbounded geometry
-// excluded from the scene bounds.
-func (scene staged) lifting(point maths.Vec) float64 {
+// excluded from the scene bounds. Both can be nothing at once, at a plane
+// through the origin of an unbounded scene; a ray a surface sends onward
+// measures itself by its own travel too, through liftedAlong, and no
+// absolute length appears anywhere, so the picture scales.
+func (scene *staged) lifting(point maths.Vec) float64 {
 	return lift * max(scene.spread, point.Len())
+}
+
+// liftedAlong is lifted with the asking ray's own travel as one more
+// length to measure the lift by: the ray came from somewhere, and that
+// length scales with the scene when nothing else does.
+func (scene *staged) liftedAlong(point, normal, from maths.Vec) maths.Vec {
+	came := point.Sub(from).Len()
+	return point.Add(normal.Scale(
+		lift * max(scene.spread, point.Len(), came)))
 }
 
 // Spread returns a declared ray-origin reference, or the legacy reflecting
@@ -241,8 +278,9 @@ func spreadOf(boxes []maths.Box) float64 {
 	return size
 }
 
-// stage evaluates the world at a render time.
-func stage(world *thing.World, moment time.Duration) staged {
+// stage evaluates the world at a render time. The result is not changed
+// once a picture starts, so every worker of a render shares it.
+func stage(world *thing.World, moment time.Duration) *staged {
 	volumes := placeVolumes(world, moment)
 	// the lamps are copied before the sky is first read, so a sky that
 	// changes the world when it is read changes no lamp of this picture
@@ -252,17 +290,20 @@ func stage(world *thing.World, moment time.Duration) staged {
 		lighting = skytable.Of(world.Sky)
 	}
 	things := gathered(place(world, moment))
-	return staged{
-		lamps:    lamps,
-		beams:    beamstep.Of(lamps),
-		sky:      world.Sky,
-		lighting: lighting,
-		haze:     world.Haze,
-		crowd:    things,
-		volumes:  volumes,
-		fields:   placeFields(world, moment),
-		gassy:    hasGas(volumes),
-		spread:   rayOriginSpread(world, things.things),
+	return &staged{
+		volumeSky: world.VolumeIllumination.Directions(),
+		lamps:     lamps,
+		discs:     film.Disced(lamps),
+		beams:     beamstep.Of(lamps),
+		sky:       world.Sky,
+		lighting:  lighting,
+		haze:      world.Haze,
+		crowd:     things,
+		volumes:   volumes,
+		fields:    placeFields(world, moment),
+		fault:     fieldFault(world),
+		gassy:     hasGas(volumes),
+		spread:    rayOriginSpread(world, things.things),
 	}
 }
 
@@ -281,7 +322,7 @@ func (got reached) ambient() bool {
 
 // reaching evaluates a lamp at a point and normal. Zero contributions skip
 // shadow work; ambient light is unshadowed; directed light uses transmit.
-func (scene staged) reaching(lamp thing.Lamp, point,
+func (scene *staged) reaching(lamp thing.Lamp, point,
 	facing maths.Vec) reached {
 	toward, far, light := lamp.Light(point, facing)
 	got := reached{toward: toward, light: light}
@@ -295,7 +336,7 @@ func (scene staged) reaching(lamp thing.Lamp, point,
 // transmit returns per-channel transmission from a lamp far units along toward
 // to the point. Surfaces block the path; intervening volumes and gases
 // attenuate it.
-func (scene staged) transmit(from, toward maths.Vec,
+func (scene *staged) transmit(from, toward maths.Vec,
 	far float64) maths.Light {
 	if scene.crowd.blocked(maths.Ray{At: from, Dir: toward}, far) {
 		return maths.Light{}
@@ -328,6 +369,19 @@ func (volume placedVolume) span(ray maths.Ray, limit float64) (extent, bool) {
 	return inside, true
 }
 
+// intervals retains disjoint shell legs; ordinary media keep their one span.
+func (volume placedVolume) intervals(ray maths.Ray, limit float64) [2]extent {
+	if split, ok := volume.med.(medium.SplitSpanner); ok {
+		parts := split.Spans(ray, 0, limit)
+		return [2]extent{{parts[0].Enter, parts[0].Leave}, {parts[1].Enter, parts[1].Leave}}
+	}
+	inside, crossed := volume.span(ray, limit)
+	if !crossed {
+		return [2]extent{}
+	}
+	return [2]extent{inside}
+}
+
 // crossing stores world-space entry and exit distances and the ray transformed
 // into the volume's local coordinates.
 type crossing struct {
@@ -338,22 +392,37 @@ type crossing struct {
 
 // crossings returns volume intersections before far, sorted by entry distance.
 func crossings(volumes []placedVolume, ray maths.Ray, far float64) []crossing {
-	var across []crossing
+	return crossingsIn(nil, volumes, ray, far)
+}
+
+// crossingsIn is crossings with the result built on the end of room, so a
+// caller that passes an empty slice with capacity allocates only for
+// crossings beyond it. The result shares room's memory.
+func crossingsIn(room []crossing, volumes []placedVolume, ray maths.Ray,
+	far float64) []crossing {
+	across := room
 	for i := range volumes {
 		volume := &volumes[i]
 		local := volume.at.RayIn(ray)
-		inside, crossed := volume.span(local, math.Min(far,
-			nowhere)/volume.scale)
-		if !crossed {
-			continue
+		for _, inside := range volume.intervals(local, math.Min(far, nowhere)/volume.scale) {
+			if inside.leave <= inside.enter {
+				continue
+			}
+			across = append(across, crossing{volume: volume,
+				enter: inside.enter * volume.scale,
+				leave: inside.leave * volume.scale, local: local})
 		}
-		across = append(across, crossing{volume: volume,
-			enter: inside.enter * volume.scale,
-			leave: inside.leave * volume.scale, local: local})
 	}
 	if len(across) > 1 {
-		sort.SliceStable(across, func(i, after int) bool {
-			return across[i].enter < across[after].enter
+		slices.SortStableFunc(across, func(one, other crossing) int {
+			// less-than only: a NaN entry compares equal to every other
+			switch {
+			case one.enter < other.enter:
+				return -1
+			case other.enter < one.enter:
+				return 1
+			}
+			return 0
 		})
 	}
 	return across

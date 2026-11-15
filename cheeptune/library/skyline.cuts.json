@@ -1,0 +1,28 @@
+{
+	"group": "bright and driving",
+	"mood": "fast and glittering",
+	"feeling": "The city from a moving window at golden hour.",
+	"intent": "A fast time-lapse, a drive at speed, a travel reel with big pictures.",
+	"listen_for": "The drop to the kick alone at 0:15, and the lead bursting back an octave higher at 0:18.",
+	"voicing": "@overdrive-dmg",
+	"tempo": 156,
+	"meter": 4,
+	"seconds": 30.77,
+	"parts": [
+		{"name": "go", "bar": 1, "second": 0.0,
+		 "change": "a fast eighth-note lead and a steady drum",
+		 "feels": "Moving, windows down"},
+		{"name": "speed", "bar": 5, "second": 6.15,
+		 "change": "sixteenth bass and lead",
+		 "feels": "All the lights streaking"},
+		{"name": "kick", "bar": 11, "second": 15.38,
+		 "change": "kick only",
+		 "feels": "Nothing but heartbeat"},
+		{"name": "burst", "bar": 13, "second": 18.46,
+		 "change": "the lead returns an octave higher at full speed",
+		 "feels": "Over the top: open sky"},
+		{"name": "end", "bar": 19, "second": 27.69,
+		 "change": "a held chord and a kick",
+		 "feels": "Landed"}
+	]
+}

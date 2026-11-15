@@ -1,0 +1,42 @@
+{
+	// the shared audition riff for new studio instruments. about ten
+	// seconds, f sharp phrygian, 100 a minute. the lead is glass-hour's own
+	// phrase (its bars 5, 6, 7 and the run of bar 9): bar 1 short notes,
+	// bar 2 a held a5 of two beats, bar 3 short notes and a slide up from
+	// b4 to d5, bar 4 the run. the bass is glass-hour's: quarter notes,
+	// then the sixteenth figure with the octave jump in bar 4. two chord
+	// stabs (bars 1 and 3). four bars of drums with hits stacked: kick and
+	// hat together, snare and hat together, an open hat, a tom fill into
+	// bar 4. bar 4 is the bar where everything plays at once, with the
+	// chords on the off beats.
+	"name": "audition-riff",
+	"tempo": 100,
+	"meter": 4,
+	"loop": false,
+	"parts": [
+		{"role": "lead", "bars": [
+			"c#5:1/2 e5 g5 c#5:1/2 e5",
+			"- d5:1/2 f#5:1/2 a5:2",
+			"b4:1/2 d5 f#5 b4:1/2> d5",
+			"a5:1/2 c#6:1/2 b5:1/2 a5:1/2 f#5:1/2 e5:1/2 f#5:1/2 g5:1/2"
+		]},
+		{"role": "pad", "bars": [
+			"-:1/2 (f#3 c#4):1/2 -:3",
+			"-:4",
+			"-:1/2 (c3 g3):1/2 -:3",
+			"-:1/2 (f#3 a3 c#4):1/2 -:1/2 (f#3 a3 c#4):1/2 -:1/2 (f#3 a3 c#4):1/2 -:1/2 (f#3 a3 c#4):1/2"
+		]},
+		{"role": "bass", "bars": [
+			"f#2 f#2 f#2 f#2",
+			"g2 g2 g2 g2",
+			"c2 c2 c2 c2",
+			"f#2:1/4 f#2:1/4 f#3:1/4 f#2:1/4 f#2:1/4 f#2:1/4 f#3:1/4 f#2:1/4 f#2:1/4 f#2:1/4 f#3:1/4 f#2:1/4 f#2:1/4 f#2:1/4 f#3:1/4 f#2:1/4"
+		]},
+		{"role": "perc", "bars": [
+			"(k h):1/2 h:1/2 (s h):1/2 h:1/2 (k h):1/2 h:1/2 (s h):1/2 o:1/2",
+			"(k h):1/2 h:1/2 (s h):1/2 h:1/2 (k h):1/2 (k h):1/2 (s h):1/2 o:1/2",
+			"(k h):1/2 h:1/2 (s h):1/2 h:1/2 (k h):1/2 h:1/2 t:1/4 t:1/4 t:1/4 t:1/4",
+			"(k h):1/2 h:1/2 (k s h):1/2 h:1/2 (k h):1/2 h:1/2 (k s h):1/2 (o b):1/2"
+		]}
+	]
+}

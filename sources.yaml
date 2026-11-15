@@ -12,6 +12,33 @@
 # says why, in never. used, never released: the bytes are not shipped.
 
 sources:
+  - key: tully-2014-laniakea
+    title: "The Laniakea supercluster of galaxies"
+    by: "R. Brent Tully, Helene Courtois, Yehuda Hoffman and Daniel Pomarede, Nature 513, 71-73"
+    year: 2014
+    from: https://arxiv.org/pdf/1409.0880v1.pdf
+    doi: 10.1038/nature13674
+    licence: "author-posted arXiv preprint; local reference only, no redistribution"
+    sha256: d3782799fe85031d1850ccafcd83ecba711efd8b5750a8a2322de970cb51af0c
+    bytes: 10022344
+    fetched: 2026-11-14
+  - key: jendersie-deon-2023
+    title: "An Approximate Mie Scattering Function for Fog and Cloud Rendering"
+    by: "Johannes Jendersie and Eugene d'Eon, NVIDIA"
+    year: 2023
+    from: https://research.nvidia.com/labs/rtr/approximate-mie/publications/approximate-mie.pdf
+    licence: "author-hosted reference; local use only, no redistribution"
+    sha256: 1eebd25802c0377712e1742c88c5c7b79589aa461a8b486f878e0c33ebd08f49
+    bytes: 940522
+    fetched: 2026-11-12
+  - key: eso-4lgsf
+    sha256: 800c7fe42031e94b0b75ce3a974d0f0def40986c889cfab952995ef8445dd30b
+    bytes: 79047
+    fetched: 2026-11-12
+    title: Four Laser Guide Star Facility (4LGSF)
+    by: European Southern Observatory
+    from: https://www.eso.org/public/teles-instr/paranal-observatory/vlt/vlt-instr/4lgsf/
+    licence: "institutional reference; local use only, no source redistribution"
   - key: eso-galacsi-layout
     sha256: e042529d784d28159a5b2b4d9f87990534787bee567ae07f5d3fb59454e85296
     bytes: 48632
@@ -409,6 +436,11 @@ sources:
     sha256: afdc2953435f3bf635d1fc9cce288cebe372575c1e06bf276c1ce41b3114b287
     bytes: 1821440309
     fetched: 2026-10-16
+    # the one member the sets read, unpacked to unpacked/ and then its path
+    unpack:
+      member: kil_2019dem/kil_2019dem.tif
+      sha256: 696a6ef3084bd871df8e51464c3b03084a47ad8625c5a32c094d613a20a959c4
+      bytes: 1931428216
 
   # the moon
 
@@ -695,6 +727,15 @@ sources:
     sha256: 3cfbf40695fd23a92eb0db2c05926384782019b794926ab102fafd8fd19093ab
     bytes: 394717
     fetched: 2026-11-07
+  - key: mcelwain-2023-webb-telescope
+    title: "The James Webb Space Telescope Mission: Optical Telescope Element Design, Development, and Performance"
+    by: "McElwain and others, PASP 135, 058001"
+    year: 2023
+    from: https://arxiv.org/pdf/2301.01779v1.pdf
+    licence: "local reference only; the paper's bytes are not redistributed"
+    sha256: ab77d1c16b36f41ec91397d9649686ebfd11339a2787d736e7c15b4c9e2ababd
+    bytes: 20668170
+    fetched: 2026-11-11
   - key: cfht-observatory-manual
     sha256: 8be0bd2606554d1f5ca36b3321384356b22134f3356a2fc7d3082f76e3e9d593
     bytes: 45041
@@ -855,3 +896,190 @@ sources:
     by: Paul Ho, James Moran and Fred Lo
     from: https://lweb.cfa.harvard.edu/sma/general/Ho.pdf
     licence: "research reference; local use only, no source redistribution"
+
+  # magnetars: the real one that stands where zappy stands when the music
+  # stops. the review and the catalogue for the star, the observing papers
+  # for the 2004 giant flare from SGR 1806-20 and what it did to the air,
+  # and plain references for the familiar things it is set against.
+  - key: kaspi-beloborodov-2017-magnetars
+    sha256: f4115d2dc26c21d6807c3bdcc56795403e18b0775b225efafa5268b97f59530c
+    bytes: 3446156
+    fetched: 2026-11-12
+    title: Magnetars
+    by: "Victoria M. Kaspi and Andrei M. Beloborodov, ARA&A 55, 261"
+    year: 2017
+    from: https://arxiv.org/pdf/1703.00068v1.pdf
+    licence: "author-posted preprint; local reference only, no redistribution"
+  - key: olausen-kaspi-2014-catalog
+    sha256: f4c2a5f58ab465103546b27bf8bd00ffae1c9710089f2e8d4070b5fba72ff5ab
+    bytes: 968937
+    fetched: 2026-11-12
+    title: The McGill Magnetar Catalog
+    by: "S. A. Olausen and V. M. Kaspi, ApJS 212, 6"
+    year: 2014
+    from: https://arxiv.org/pdf/1309.4167v3.pdf
+    licence: "author-posted preprint; local reference only, no redistribution"
+  - key: hurley-2005-sgr1806-flare
+    sha256: a3faca3e9783793e4ea5d673180f17e6032cd11b6533463b5a4f746d09f2dab0
+    bytes: 213435
+    fetched: 2026-11-12
+    title: An exceptionally bright flare from SGR 1806-20 and the origins of short-duration gamma-ray bursts
+    by: "K. Hurley and others, Nature 434, 1098"
+    year: 2005
+    from: https://arxiv.org/pdf/astro-ph/0502329v2.pdf
+    licence: "author-posted preprint; local reference only, no redistribution"
+  - key: palmer-2005-sgr1806-flare
+    sha256: 9d3017bf38abdfc47371eb1d80357b17bcb02028ebbe1c15262a32e8eea1e367
+    bytes: 382587
+    fetched: 2026-11-12
+    title: Gamma ray observations of a giant flare from the magnetar SGR 1806-20
+    by: "D. M. Palmer and others, Nature 434, 1107"
+    year: 2005
+    from: https://arxiv.org/pdf/astro-ph/0503030v1.pdf
+    licence: "author-posted preprint; local reference only, no redistribution"
+  # the host answers the fetcher 403; these bytes were fetched by hand
+  # with a browser's user agent on 2026-11-12 and put on the shelf.
+  - key: inan-2007-sgr1806-ionosphere
+    sha256: 0f78dc1784dcfb9f357c2c2ebe985b9fa9b543e8928d9ffae4e8eb240acbf9a4
+    bytes: 768677
+    fetched: 2026-11-12
+    title: Massive disturbance of the daytime lower ionosphere by the giant gamma-ray flare from magnetar SGR 1806-20
+    by: "U. S. Inan and others, Geophysical Research Letters 34, L08103"
+    year: 2007
+    doi: 10.1029/2006GL029145
+    from: https://vlfstanford.ku.edu.tr/wp-content/uploads/2010/07/2007-08.pdf
+    licence: "the authors' group's posted copy of an AGU paper; local reference only, no redistribution"
+  - key: lai-2001-strong-fields
+    sha256: e5265b57cc18048f972216b32696bde6484e7172b1f0f76890e4f9add1698ee7
+    bytes: 605689
+    fetched: 2026-11-12
+    title: Matter in strong magnetic fields
+    by: "Dong Lai, Reviews of Modern Physics 73, 629"
+    year: 2001
+    from: https://arxiv.org/pdf/astro-ph/0009333v1.pdf
+    licence: "author-posted preprint; local reference only, no redistribution"
+  - key: maglab-mini-to-mighty
+    sha256: ae7d7f274a6249aac84239d052a1221f9ba72a643827971db240737ab9cc4c7a
+    bytes: 62506
+    fetched: 2026-11-12
+    title: "Magnets from Mini to Mighty"
+    by: National High Magnetic Field Laboratory
+    from: https://nationalmaglab.org/magnet-academy/read-science-stories/science-simplified/magnets-from-mini-to-mighty/
+    licence: "institutional reference; local use only, no source redistribution"
+  - key: nasa-earth-factsheet
+    sha256: 1b06e3ec31249d063d40d1b38837fac89ddcd2f4b25268b38e8a6d5f413e70ef
+    bytes: 5490
+    fetched: 2026-11-12
+    title: Earth Fact Sheet
+    by: NASA Goddard Space Flight Center, NSSDCA
+    from: https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html
+    licence: "government reference; local use only, no source redistribution"
+  - key: nasa-sun-factsheet
+    sha256: bcc186a518298636340e7975bf5a32da660cd656b90081f2e7c8aa7ec2b6561a
+    bytes: 7232
+    fetched: 2026-11-12
+    title: Sun Fact Sheet
+    by: NASA Goddard Space Flight Center, NSSDCA
+    from: https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html
+    licence: "government reference; local use only, no source redistribution"
+  # quasars, blazars and the photon ring: the quasar slice, 2026-11-12
+
+  - key: johnson-2020-photon-ring
+    title: "Universal interferometric signatures of a black hole's photon ring"
+    by: "Johnson, Lupsasca, Strominger and others, Science Advances 6, eaaz1310"
+    year: 2020
+    from: https://arxiv.org/pdf/1907.04329v2.pdf
+    doi: 10.1126/sciadv.aaz1310
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: 721438eee1c6f3d176ac5fdc3b196a20a9547cb778faa071a9bb95128479b8c9
+    bytes: 4253263
+    fetched: 2026-11-12
+  - key: eht-2019-m87-paper-one
+    title: "First M87 Event Horizon Telescope Results. I. The Shadow of the Supermassive Black Hole"
+    by: "Event Horizon Telescope Collaboration, ApJL 875, L1"
+    year: 2019
+    from: https://arxiv.org/pdf/1906.11238v1.pdf
+    doi: 10.3847/2041-8213/ab0ec7
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: be6604770bb0d0a6c2a81071518e89d5bc2f9b460f91390518804e0a1f454472
+    bytes: 2578342
+    fetched: 2026-11-12
+  - key: eht-2022-sgra-paper-one
+    title: "First Sagittarius A* Event Horizon Telescope Results. I. The Shadow of the Supermassive Black Hole in the Center of the Milky Way"
+    by: "Event Horizon Telescope Collaboration, ApJL 930, L12"
+    year: 2022
+    from: https://arxiv.org/pdf/2311.08680v2.pdf
+    doi: 10.3847/2041-8213/ac6674
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: df498bcaa7f11a5cf6ad15cec6f8d37cd0fad05f6a251505637206cdc01e3c47
+    bytes: 2786789
+    fetched: 2026-11-12
+  - key: johnson-2024-bhex
+    title: "The Black Hole Explorer: Motivation and Vision"
+    by: "Johnson and others, Proc. SPIE 13092"
+    year: 2024
+    from: https://arxiv.org/pdf/2406.12917v1.pdf
+    doi: 10.1117/12.3019835
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: ac7b920118e5db5b3b269730663220a4010e5867b14b0dc14eefd7135618840e
+    bytes: 10690004
+    fetched: 2026-11-12
+  - key: shemmer-2004-nir-quasars
+    title: "Near-infrared spectroscopy of high-redshift active galactic nuclei. I. A metallicity-accretion rate relationship"
+    by: "Shemmer, Netzer, Maiolino and others, ApJ 614, 547"
+    year: 2004
+    from: https://arxiv.org/pdf/astro-ph/0406559v1.pdf
+    doi: 10.1086/423607
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: b4ea7bac1cb0bdac72c3a6565829f39796b5af48c3f7a9a41608e27595897baa
+    bytes: 610163
+    fetched: 2026-11-12
+  - key: ge-2019-civ-blueshift
+    title: "The blueshift of C IV broad emission line in QSOs"
+    by: "Ge, Zhao, Bian and Green, AJ 157, 148"
+    year: 2019
+    from: https://arxiv.org/pdf/1903.08830v1.pdf
+    doi: 10.3847/1538-3881/ab0956
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: c4203f4faa66e648e3c6ae4ddacdea01f122098d0aec6c1de023331b259584e8
+    bytes: 551620
+    fetched: 2026-11-12
+  - key: oei-2024-porphyrion
+    title: "Black hole jets on the scale of the Cosmic Web"
+    by: "Oei, Hardcastle, Timmerman and others, Nature 633, 537"
+    year: 2024
+    from: https://arxiv.org/pdf/2411.08630v1.pdf
+    doi: 10.1038/s41586-024-07879-y
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: 373fab46f4e847b9dac3654059a59147412c5f68330ee8e3e8ad5b40df554744
+    bytes: 41032301
+    fetched: 2026-11-12
+  - key: nasa-neptune-fact-sheet
+    title: "Neptune Fact Sheet"
+    by: "nasa nssdca"
+    year: 2026
+    from: https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html
+    licence: "a us government work (nasa); a page that changes, pinned as fetched"
+    sha256: 4b9166f959be2b507eea77a9eef56f4e5679b693ba75151072a28bb228f44328
+    bytes: 11071
+    fetched: 2026-11-12
+  - key: strasburger-2011-peripheral-vision
+    title: "Peripheral vision and pattern recognition: A review"
+    by: "Strasburger, Rentschler and Juttner, Journal of Vision 11(5), 13"
+    year: 2011
+    from: https://pmc.ncbi.nlm.nih.gov/articles/PMC11073400/
+    doi: 10.1167/11.5.13
+    licence: "open access article as pmc serves it; a page that changes, pinned as fetched"
+    sha256: 76bc3b743ee2e7388d0c7838df8e3578f0105ca690a30520ce32ae6c191cec64
+    bytes: 1046144
+    fetched: 2026-11-12
+  - key: iau-2015-b3-nominal
+    title: "Nominal values for selected solar and planetary quantities: IAU 2015 Resolution B3"
+    by: "Prsa, Harmanec, Torres and others, AJ 152, 41"
+    year: 2016
+    from: https://arxiv.org/pdf/1605.09788v1.pdf
+    doi: 10.3847/0004-6256/152/2/41
+    licence: "author-posted preprint; local reference only, no redistribution"
+    sha256: 2b7bcd88a5169f3a18caae9326f3c51905721cd3b7c034d1de45f7b85d6f4a99
+    bytes: 122423
+    fetched: 2026-11-12

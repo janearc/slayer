@@ -117,14 +117,14 @@ func TestAWireFadesToNothingAtItsWidth(t *testing.T) {
 // asks for the tile of nothing, which is none; one with a tiling but no
 // palette is black too.
 func TestHexedWithHalfAWorldIsBlack(t *testing.T) {
-	if got := (Hexed{Palette: []maths.Light{sea}}).Paint(hexes.Tile{I: 1}); got != (maths.Light{}) {
+	if got := (Hexed{Palette: []maths.Light{sea}}).Paint(hexes.Tile{Column: 1}); got != (maths.Light{}) {
 		t.Errorf("no tiling painted %v", got)
 	}
 	tile, got := (Hexed{Palette: []maths.Light{sea}}).Tile(maths.Up)
 	if tile != (hexes.Tile{}) || got != (maths.Light{}) {
 		t.Errorf("no tiling gave the tile %v painted %v", tile, got)
 	}
-	if got := (Hexed{Tiling: oneTile{spacing: 1}}).Paint(hexes.Tile{I: 1}); got != (maths.Light{}) {
+	if got := (Hexed{Tiling: oneTile{spacing: 1}}).Paint(hexes.Tile{Column: 1}); got != (maths.Light{}) {
 		t.Errorf("no palette painted %v", got)
 	}
 }
@@ -134,7 +134,7 @@ func TestHexedPaletteOfOnePaintsEveryTileThatOne(t *testing.T) {
 	h := Hexed{Tiling: oneTile{spacing: 1}, Palette: []maths.Light{moss}}
 	for i := 0; i < 20; i++ {
 		h.Seed = uint64(i)
-		if got := h.Paint(hexes.Tile{I: i}); got != moss {
+		if got := h.Paint(hexes.Tile{Column: i}); got != moss {
 			t.Fatalf("seed %d tile %d is %v, not the one paint", i, i, got)
 		}
 	}

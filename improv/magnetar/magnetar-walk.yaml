@@ -1,0 +1,115 @@
+# magnetar-walk.yaml: the real magnetar's labelled stills, through
+# package walk. The sentences are drafts, to be rewritten; they are lines
+# of scene/named/magnetar-script.yaml, where each figure is held to its
+# registered or computed value, and every figure here names its source.
+#
+# The stills are traced at the scene's time 0, when the star has not
+# turned, so the magnetic equator's hoops cross the x axis where the
+# places put them. Lengths are in km, x y z with y up.
+places:
+  unit: km
+  at:
+    the star: [0, 0, 0]
+    the quantum hoop: [35.7, 0, 0]
+    the atoms hoop: [947.5, 0, 0]
+    the lab hoop: [16441, 0, 0]
+    the earth: [16441, 6371, 0]
+    the light cylinder: [360237, 0, 0]
+    the moon's distance: [-384400, 0, 0]
+    zappy's edge: [0, -3150, 0]
+    the world: [100000, 0, 0]
+shorts:
+  - name: field
+    title: the real magnetar and its field
+    shots:
+      - picture: magnetar-field.png
+        eye: {from: [0, 45.74, 215.19], look-at: [0, 0, 0], up: [0, 1, 0],
+          wide: 40}
+        seconds: 5
+        lit: drawing
+        window: {from: [0, 0.21875, 1], to: [0, 0.21875, 1]}
+        name: SGR 1806-20, at its true size
+        figures:
+          - {value: "10", unit: km, says: radius, at least,
+             from: "Kaspi and Beloborodov 2017, p23"}
+          - {value: "7.55", unit: s, says: one turn,
+             from: "McGill catalogue, via Kaspi and Beloborodov, Table 1"}
+          - {value: "2e15", unit: G, says: its field,
+             from: "McGill catalogue, via Kaspi and Beloborodov, Table 1"}
+        sentence: You cannot see a magnetic field. This is a drawing of one.
+  - name: shells
+    title: how far its danger reaches
+    shots:
+      - picture: magnetar-shells.png
+        eye: {from: [0, 1720.73, 2457.46], look-at: [0, 0, 0],
+          up: [0, 1, 0], wide: 40}
+        seconds: 6
+        lit: drawing
+        window: {from: [0, 0.21875, 1], to: [0, 0.21875, 1]}
+        name: where the field falls
+        figures:
+          - {value: "36", unit: km, says: light splits,
+             from: "dipole law from the catalogue field and B_Q, KB17 p25"}
+          - {value: "950", unit: km, says: atoms give way,
+             from: "dipole law and Lai 2001's atomic field, p2"}
+        labels:
+          - {thing: the quantum hoop, words: 36 km, side: right}
+          - {thing: the atoms hoop, words: 950 km, side: up}
+        sentence: Inside 950 km, the field outpulls an atom's grip on its electrons.
+  - name: far
+    title: the hoops far out, and where the dipole stops
+    shots:
+      - picture: magnetar-far.png
+        eye: {from: [0, 659612.9, 942024.85], look-at: [0, 0, 0],
+          up: [0, 1, 0], wide: 40}
+        seconds: 6
+        lit: drawing
+        window: {from: [0, 0.21875, 1], to: [0, 0.21875, 1]}
+        name: out to the light cylinder
+        figures:
+          - {value: "16,400", unit: km, says: lab record,
+             from: "dipole law and the MagLab's 45 T"}
+          - {value: "360,000", unit: km, says: dipole ends,
+             from: "c times 7.55 s over 2 pi"}
+        labels:
+          - {thing: the earth, words: an Earth to scale, side: up}
+          - {thing: the light cylinder, words: the light cylinder,
+             side: right}
+          - {thing: the moon's distance, words: the Moon's distance,
+             side: left}
+        sentence: Past 360,000 km it stops being a simple magnet. I stop there too.
+  - name: beside
+    title: zappy and the real one, at true sizes
+    shots:
+      - picture: magnetar-beside.png
+        eye: {from: [0, -12150, 31500], look-at: [0, 0, 0], up: [0, 1, 0],
+          wide: 40}
+        seconds: 5
+        lit: show
+        window: {from: [0, 0.21875, 1], to: [0, 0.21875, 1]}
+        name: the dot is the real one
+        figures:
+          - {value: "20", unit: km, says: real, across,
+             from: "Kaspi and Beloborodov 2017, p23, the 10 km end"}
+          - {value: "9,000", unit: km, says: me, radius,
+             from: "lantern/zappy.yaml, picked"}
+        labels:
+          - {thing: the star, words: the real one, side: up}
+          - {thing: zappy's edge, words: me, side: right}
+        sentence: To see it as large as me, we have to come 900 times closer.
+  - name: world
+    title: a world beside the real one
+    shots:
+      - picture: magnetar-world.png
+        eye: {from: [176452, 6371, 25484], look-at: [0, 0, 0],
+          up: [0, 1, 0], wide: 40}
+        seconds: 7
+        tag: The aurora is an illustration
+        window: {from: [0, 0.21875, 1], to: [0, 0.21875, 1]}
+        name: a world 100,000 km out
+        figures:
+          - {value: "4,000", unit: times, says: the Earth's field,
+             from: "dipole law; MagLab's 0.5 G for the Earth"}
+        labels:
+          - {thing: the star, words: the real one, side: left}
+        sentence: Here the star's field is 4,000 times the Earth's own.

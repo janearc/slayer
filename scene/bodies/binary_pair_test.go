@@ -25,11 +25,11 @@ import (
 // the lighter starts on the far side, half a turn round. each ball is
 // as wide as its body's radius in units.
 func TestAPairGoRoundTheirCentreByTheirMasses(t *testing.T) {
-	heavy := bodies.Body{Name: "heavy", Kind: bodies.Star, Radius: 8, Mass: 0.75 * bodies.Sun}
-	light := bodies.Body{Name: "light", Kind: bodies.Star, Radius: 4, Mass: 0.25 * bodies.Sun}
+	heavy := made(t, "heavy", bodies.Star, 8, 0.75*bodies.Sun)
+	light := made(t, "light", bodies.Star, 4, 0.25*bodies.Sun)
 	at := maths.V(1, 2, 3)
 	w := thing.NewWorld()
-	if err := bodies.Binary(w, heavy, light, at, auKm, 1e-8, 2); err != nil {
+	if err := bodies.Binary(w, heavy, light, at, bodies.Kilometres(auKm), 1e-8, 2); err != nil {
 		t.Fatal(err)
 	}
 	if len(w.Things) != 2 {
@@ -59,14 +59,14 @@ func TestAPairGoRoundTheirCentreByTheirMasses(t *testing.T) {
 // 2 pi sqrt(1 / (G / 2)), which is 12.6 days, and are not refused for
 // weighing under a kilogram together.
 func TestAPairOfUnderAKilogramGoRoundByKepler(t *testing.T) {
-	small := bodies.Body{Name: "s", Kind: bodies.Star, Radius: 1, Mass: 0.25}
+	small := made(t, "s", bodies.Star, 1, 0.25)
 	w := thing.NewWorld()
-	if err := bodies.Binary(w, small, small, maths.Vec{}, 1e-3, 1, 2); err != nil {
+	if err := bodies.Binary(w, small, small, maths.Vec{}, bodies.Kilometres(1e-3), 1, 2); err != nil {
 		t.Fatal(err)
 	}
 	period := w.Things[0].Motion.(thing.Orbit).Period.Seconds()
 	near(t, "their period", period, 2*math.Pi/omega(0.5, 1e-3), 1e-9)
-	if days := period / 86400; days < 12.5 || days > 12.7 {
+	if days := period / 86400; !(days >= 12.5 && days <= 12.7) {
 		t.Errorf("they go round in %v days", days)
 	}
 }
@@ -75,10 +75,10 @@ func TestAPairOfUnderAKilogramGoRoundByKepler(t *testing.T) {
 // is: one whose feature has nowhere to go refuses the pair, by name, and
 // names the body.
 func TestAPairIsGreyBallsAndRefusesAGroundThatCannotBeMade(t *testing.T) {
-	star := bodies.Body{Name: "star", Kind: bodies.Star, Radius: 1, Mass: bodies.Sun,
-		Glow: maths.Grey(5)}
+	star := made(t, "star", bodies.Star, 1, bodies.Sun).
+		Glowing(maths.Grey(5), nil)
 	w := thing.NewWorld()
-	if err := bodies.Binary(w, star, star, maths.Vec{}, 1e6, 1e-6, 2); err != nil {
+	if err := bodies.Binary(w, star, star, maths.Vec{}, bodies.Kilometres(1e6), 1e-6, 2); err != nil {
 		t.Fatal(err)
 	}
 	for i, th := range w.Things {
@@ -86,13 +86,17 @@ func TestAPairIsGreyBallsAndRefusesAGroundThatCannotBeMade(t *testing.T) {
 			t.Errorf("star %d is %v glowing %v", i, th.Material.Colour, th.Material.Glow)
 		}
 	}
-	bad := bodies.Body{Name: "bad", Kind: bodies.Rock, Radius: 1, Mass: bodies.Sun,
-		Ground: &bodies.Ground{Terrain: world.Terrain{Seed: 1, Ocean: 0.5},
-			Features: func(*world.World) ([]world.Feature, error) {
-				return nil, fmt.Errorf("no land for maxwell")
-			}}}
+	homeless, err := bodies.NewGround(
+		world.Terrain{Seed: 1, Ocean: 0.5}, world.Look{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	homeless = homeless.Featured(func(*world.World) ([]world.Feature, error) {
+		return nil, fmt.Errorf("no land for maxwell")
+	})
+	bad := made(t, "bad", bodies.Rock, 1, bodies.Sun, homeless)
 	for name, c := range map[string][2]bodies.Body{"first": {bad, star}, "second": {star, bad}} {
-		err := bodies.Binary(thing.NewWorld(), c[0], c[1], maths.Vec{}, 1e6, 1e-6, 2)
+		err := bodies.Binary(thing.NewWorld(), c[0], c[1], maths.Vec{}, bodies.Kilometres(1e6), 1e-6, 2)
 		if err == nil || !strings.Contains(err.Error(), "bad: no land for maxwell") {
 			t.Errorf("the %s is bad: %v", name, err)
 		}

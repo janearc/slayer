@@ -12,7 +12,6 @@ import (
 	"errors"
 	"math"
 	"runtime"
-	"unsafe"
 )
 
 // what Grid refuses
@@ -56,50 +55,24 @@ func (k *Kernel) Grid(width, height, rows, per int,
 	if rows <= 0 || rows > height {
 		rows = height
 	}
-	pointers, lengths, free := pinned(inputs)
-	defer free()
-	var why [1024]C.char
-	failed := C.slayer_metal_grid(k.ctx, C.int(width), C.int(height),
-		C.int(rows), C.int(per), pointers, lengths, C.int(len(inputs)),
-		(*C.float)(unsafe.Pointer(&out[0])), &why[0], C.int(len(why)))
+	// the streamed path copies each input straight into its retained
+	// Metal buffer, with no stop in C memory on the way
+	stream, err := k.openBands(width, height, rows, per, inputs)
+	if err != nil {
+		return nil, err
+	}
+	defer C.slayer_metal_grid_close(stream)
 	// k is not read after k.ctx, so without this its finalizer could
 	// free the context while the gpu still draws with it
-	runtime.KeepAlive(k)
-	if failed != 0 {
-		return nil, errors.New("metal: " + C.GoString(&why[0]))
+	defer runtime.KeepAlive(k)
+	for first := 0; first < height; first += rows {
+		down := min(rows, height-first)
+		band := out[first*width*per : (first+down)*width*per]
+		if err := k.readBand(stream, first, down, band); err != nil {
+			return nil, err
+		}
 	}
 	return out, nil
-}
-
-// pinned copies the inputs into C memory, which cgo lets C hold a
-// pointer to, and gives back the pointers, their lengths, and how to
-// let them go.
-func pinned(inputs [][]byte) (*unsafe.Pointer, *C.long, func()) {
-	if len(inputs) == 0 {
-		return nil, nil, func() {}
-	}
-	count := C.size_t(len(inputs))
-	pointerSize := C.size_t(unsafe.Sizeof(uintptr(0)))
-	pointers := unsafe.Slice((*unsafe.Pointer)(C.malloc(count*pointerSize)),
-		len(inputs))
-	longSize := C.size_t(unsafe.Sizeof(C.long(0)))
-	lengths := unsafe.Slice((*C.long)(C.malloc(count*longSize)),
-		len(inputs))
-	for index, input := range inputs {
-		lengths[index] = C.long(len(input))
-		pointers[index] = nil
-		if len(input) > 0 {
-			pointers[index] = C.CBytes(input)
-		}
-	}
-	free := func() {
-		for _, pointer := range pointers {
-			C.free(pointer)
-		}
-		C.free(unsafe.Pointer(&pointers[0]))
-		C.free(unsafe.Pointer(&lengths[0]))
-	}
-	return &pointers[0], &lengths[0], free
 }
 
 // gridFits checks positive dimensions before allocation and C-int narrowing.

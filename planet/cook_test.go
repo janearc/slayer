@@ -47,7 +47,7 @@ func TestCookingOnlyDeepens(t *testing.T) {
 // rung's foot, all the way toward the top.
 func TestLongCookedAirIsFull(t *testing.T) {
 	rung, toward := cookingFor(1e6).cookedBy(1e9)
-	if rung != rungs-2 || math.Abs(toward-1) > 1e-9 {
+	if rung != rungs-2 || !(math.Abs(toward-1) <= 1e-9) {
 		t.Errorf("rung %d toward %g, want %d toward 1", rung, toward, rungs-2)
 	}
 }
@@ -56,7 +56,7 @@ func TestLongCookedAirIsFull(t *testing.T) {
 func TestOneCookingIsOneMinusOneOverE(t *testing.T) {
 	rung, toward := cookingFor(1e6).cookedBy(1e6)
 	along := (float64(rung) + toward) / (rungs - 1)
-	if want := 1 - math.Exp(-1); math.Abs(along-want) > 1e-12 {
+	if want := 1 - math.Exp(-1); !(math.Abs(along-want) <= 1e-12) {
 		t.Errorf("%g of the way, want %g", along, want)
 	}
 }
@@ -82,7 +82,7 @@ func TestTheLadderRunsFromNoneToAll(t *testing.T) {
 	}
 	for k, made := range ladder {
 		want := cooked.depth * float64(k) / (rungs - 1)
-		if got := made[0].haze.depth; math.Abs(got-want) > 1e-12 {
+		if got := made[0].haze.depth; !(math.Abs(got-want) <= 1e-12) {
 			t.Errorf("rung %d: top haze depth %g, want %g", k, got, want)
 		}
 		if made[0].haze.albedo != cooked.albedo ||

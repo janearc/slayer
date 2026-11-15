@@ -1,0 +1,6 @@
+# What a planet says of its chart, in points to a pixel. Unsaid is two;
+# zero is no chart; the reader takes what lies between zero and sixteen.
+charts:
+  - {name: unsaid, line: "", chart: 2}
+  - {name: none, line: "    chart: 0\n", chart: 0}
+  - {name: one and a half, line: "    chart: 1.5\n", chart: 1.5}

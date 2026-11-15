@@ -22,7 +22,7 @@ func even() bands.Light {
 
 // bareBody is a body with no air over a deck of an albedo, one zone, or
 // two split at the equator with a layer over the north.
-func bareBody(t *testing.T, deck float64, north []Layer) Body {
+func bareBody(t testing.TB, deck float64, north []Layer) Body {
 	t.Helper()
 	whole, err := NewZone(-90, 90, nil)
 	zones := []Zone{whole}

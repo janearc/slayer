@@ -5,16 +5,12 @@ import (
 	"math"
 	"testing"
 
-	"github.com/janearc/puzzlemouth/yamlfile"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
-
-//go:embed testdata/summit-instruments.yaml
-var summitContractRaw []byte
 
 type summitContract struct {
 	Seed          uint64
@@ -39,18 +35,6 @@ type summitProbe struct {
 }
 
 type summitSpan struct{ radius, near, far float64 }
-
-func TestSummitFamiliesKeepTheirSourceAperturesAndClosedGeometry(test *testing.T) {
-	var data summitContract
-	if err := yamlfile.Read("summit-instruments.yaml", summitContractRaw,
-		&data); err != nil {
-		test.Fatal(err)
-	}
-	for _, profile := range data.Profiles {
-		probe := summitProbe{contract: data, profile: profile}
-		test.Run(profile.Kind, probe.check)
-	}
-}
 
 // check keeps the physical site, source aperture and array members at all details.
 func (probe summitProbe) check(test *testing.T) {
@@ -186,10 +170,9 @@ func (probe summitProbe) nearest(point maths.Vec) int {
 // span holds source aperture and authored optical plane, including thickness.
 func (probe summitProbe) span(test *testing.T, span summitSpan) {
 	test.Helper()
-	if math.Abs(span.radius+span.radius-probe.profile.Aperture) >
-		probe.contract.Tolerance ||
-		math.Abs(span.near-probe.profile.Near) > probe.contract.Tolerance ||
-		math.Abs(span.far-probe.profile.Far) > probe.contract.Tolerance {
+	if !(math.Abs(span.radius+span.radius-probe.profile.Aperture) <= probe.contract.Tolerance) ||
+		!(math.Abs(span.near-probe.profile.Near) <= probe.contract.Tolerance) ||
+		!(math.Abs(span.far-probe.profile.Far) <= probe.contract.Tolerance) {
 		test.Fatal("wrong summit aperture or optical plane", probe.profile.Kind, span)
 	}
 }

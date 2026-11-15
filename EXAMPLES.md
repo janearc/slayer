@@ -1,5 +1,10 @@
 # What Slayer draws
 
+For a first run, use the small [picture](jobs/first-picture.yaml) and
+[film](jobs/first-film.yaml) jobs with the [beginner guide](doc/getting-started.md).
+See [building](doc/building.md) for Game setup and
+[modes](doc/modes.md) for backend and speed choices.
+
 The numbered smoke scenes follow Slayer's rendering milestones. The larger
 scenes show how those capabilities combine: a lantern in space, an orbital
 landscape, a hillside, and a moonrise.
@@ -22,14 +27,16 @@ be traced to a capability. Add new scenes rather than renumbering passing
 ones; changes to existing scenes belong in separate, explained commits.
 
 ```sh
-game run smokecheck -- smoke          # All scenes.
-game run smokecheck -- smoke 9        # One scene.
-game run smokecheck -- smoke 9 -out /tmp/nine
+game run slayer -- assess --smokes          # All scenes.
+game run slayer -- assess --smokes 9        # One scene.
+game run slayer -- assess --smokes gas      # One group of scenes.
+game run slayer -- assess --smokes --small  # All, at half the size.
+game run slayer -- assess --smokes 9 --out /tmp/nine
 ```
 
-`-out` copies the terminal image, raster image, and comparison result to
+`--out` copies the terminal image, raster image, and comparison result to
 the chosen directory. Cached results are keyed by the rendering binary;
-`-fresh` bypasses the cache.
+`--fresh` bypasses the cache.
 
 ### Surfaces and direct light
 
@@ -132,6 +139,46 @@ the chosen directory. Cached results are keyed by the rendering binary;
     `$SLAYER_MARBLE/blue.jpg`.
 39. **Glass reflecting sky.** Fresnel reflection rises from about 5% at
     near-normal incidence to about 80% at a grazing angle.
+40. **Four atmospheres.** Balls of the earth's air, a haze, Venus's air and
+    Mars's air. Each is the colour its gas's numbers make it: blue, white,
+    a bright yellowish limb and dusty red.
+41. **A laser in haze.** A red beam crosses a ball of haze, shown along its
+    length, and lands as a spot on the floor.
+42. **A hill and a closed solid.** A height-field hill with a ripple beside
+    a faceted solid that is a closed mesh.
+43. **A glass fizzing.** A column of bubble haze, thick at its foot and
+    ragged with churn, on a dark floor.
+44. **The earth by night from a picture of its lights.** A graticule drawn
+    in code stands for the lights; the sun is behind the earth.
+45. **Three planets on a track of the caller's.** Three copies of one
+    planet on a circle round the eye, each showing the same coast.
+46. **A baked puff beside the exact one.** Smoke 9's puff twice; a plan
+    bakes the right one into a grid, and the two look alike.
+47. **A stage lit by ninjafilm's lamps.** Smoke 5's spot and flood, made by
+    ninjafilm, with a sun, a red laser and a radar that lights nothing
+    the eye sees.
+48. **Lead, aluminium and water on an x-ray film.** Three balls in front
+    of an x-ray source, seen at 60 keV. What each takes from the beam is
+    derived from its row of NIST's tables: lead is a black disc,
+    aluminium a shadow that deepens to its middle, water a lighter one
+    that takes a third of the beam through its middle.
+49. **A glass of water on a wooden table in an infinity cove.** A white
+    floor that turns up into a wall with no line, an oak table whose
+    grain is a tree's rings cut through by the board, and a tumbler of
+    clear glass with water in it, the water touching the glass.
+50. **Webb at the edge of where it may point, lit by the Larson.** The
+    James Webb Space Telescope with the sun 135 degrees from its line of
+    sight, and the MCRN Larson hovering over it in its shade, lamps lit.
+    What shows of Webb is by the Larson's light. With `SLAYER_STARS`
+    naming the folder the Bright Star Catalogue is in, the real stars
+    are behind them, where they are at that moment.
+51. **A ball of water with bubbles in it.** A ball of water floating
+    over the oak table, as water does in orbit, with seven bubbles of
+    air inside it: each a clear thing inside a clear thing, bright at
+    its rim where the water mirrors.
+52. **A glass of cola.** The tumbler filled with a dark drink: bubbles
+    rising in it, a ring of tan foam at the top, and the drops a fizzing
+    drink throws up over it.
 
 ## The lantern
 
@@ -200,8 +247,9 @@ The orbital can draw a film as numbered PNGs, with `-frames` and
 to the terminal instead; with `-keys` as well, it draws the next frame
 at each key press.
 
-It draws on the CPU only, because the GPU cannot yet draw its tiled
-textures, its nebula or its beams.
+`-gpu` draws the pictures on the graphics card, both views, within a
+small tolerance of the CPU's (`TestTheGPUDrawsOrbitalsViews` holds it
+to that). `-cells` still draws on the CPU, and refuses `-gpu`.
 
 doc/the-orbital-scene.md tells the story of the scene.
 
@@ -254,8 +302,9 @@ and seed always draw the same picture.
 - `-above` looks down from high over it, and `-from M -tilt D` looks
   down from M metres at D degrees.
 - `-variety N` makes only N of each kind and reuses them, so a large
-  forest keeps few faces. A command refuses more than `-faces`
-  triangles in all, a million and a half by default.
+  forest keeps few faces. A command refuses a hillside that keeps more than `-faces`
+  triangles in all. The default is a memory budget of 5 GB at the 1,300
+  bytes a kept face measured, about 3.8 million faces.
 - `-gpu` draws on the graphics card.
 - `-prove` draws nothing. Given the flags that drew a raw, it draws 64
   of its pixels again from scratch and proves each to the bit.
@@ -326,15 +375,37 @@ Each moment it writes three pictures, each a map of the whole planet:
 - Its bands;
 - The air's age, which turns haze from white toward brown.
 
+A job draws it too: `scene: {named: weather}`, with `show` choosing which
+map a film shows and `pace` how many seconds of weather a second of scene
+time is (an hour unsaid). `sets/weather-giant.yaml` is a giant alone, its
+weather run from still air over twelve seconds.
+
+## Scenes by name, in a job
+
+`slayer list scenes` says each named scene and what it takes. Beside the
+swarm, the orbital, the ring and moonrise there are two more:
+
+- **zappy**: the lantern grown up, a star in nested shells of black glass
+  that tumble, with two beams that spin and precess. A job may play its
+  channels from a tune (`scene: {named: zappy, play: SHEET}`).
+- **magnetar**: SGR 1806-20 at its true size, 10 km across: its field
+  turning, hoops where the field falls to named strengths, the 2004 giant
+  flare, and zappy beside it at its own size.
+
+```sh
+game run slayer -- draw jobs/orbital-portrait.yaml
+```
+
 ## Other commands
 
-- **Slayer**: `game run slayer -- set sets/widow.yaml` draws a set
-  file as a stranger would, from outside, and checks its terminal
-  picture against a real one.
-- **Develop**: `game run develop -- -out x.png a.pfm b.pfm` adds raws
-  together and develops them at an exposure, with an optional white
-  balance in kelvin.
+- **Slayer**: `game run slayer -- assess sets/widow.yaml --judge` draws a
+  set file as a stranger would, from outside, and checks its terminal
+  picture against a real one. `game run slayer -- draw JOB` draws a job;
+  `jobs/` holds nine, from a smoke still to a film through a lens with
+  the shutter open (`jobs/blur-fire-night.yaml`). `slayer list` says what
+  there is to draw; `slayer watch JOB` draws a job live as it is saved.
+- **Develop**: `game run slayer -- develop JOB a.pfm b.pfm --sum --out
+  x.png` adds raws together and develops them through the job's print or
+  stock, with an optional white balance in kelvin (`--white K`).
 - **Sources**: fetches and checks the published sources. OPERATION.md
   has the details.
-- **Lightbox**: `game run lightbox` serves the smokes folder at
-  http://localhost:8765.

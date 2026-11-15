@@ -1,0 +1,368 @@
+# every number the laid, chart and allocation tests choose, with what it
+# is and who chose it.
+numbers:
+  - name: alloc-exposure
+    value: 0.9
+    says: "the exposure of the giant's face in the test that its points make no garbage"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: ungridded-exposure
+    value: 1
+    says: "the exposure of a face whose flow is not a grid, or which has none"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-exposure
+    value: 3
+    says: "the exposure of the giant's face laid out and painted from its numbers"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-exposure
+    value: 3
+    says: "the exposure of the giant's face a chart is made of"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-lat-seed
+    value: 51
+    says: "the hash seed that picks the latitude of the points a chart is tried at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-lon-seed
+    value: 52
+    says: "the hash seed that picks the longitude of the points a chart is tried at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-clear-of-limb
+    value: 0.05
+    says: "the cosine of the angle between a point's up and the eye above which the eye sees it well clear of the limb"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-points
+    value: 20000
+    says: "how many points of the body a chart is tried at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-fine-cell
+    value: 0.5
+    says: "the fine chart's cell, in degrees"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-coarse-cell
+    value: 1
+    says: "the coarse chart's cell, in degrees"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-grid-down
+    value: 12
+    says: "how many fine cells south of the pole's end the point on the chart's grid is"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-grid-along
+    value: 31
+    says: "how many fine cells east of the front the point on the chart's grid is"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-grid-close
+    value: 1e-06
+    says: "how near, as a share of the green, a chart is to its face at a point of its grid; the chart keeps float32"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-finer-top
+    value: 2
+    says: "the top of the share the fine chart's mean difference must come under the coarse one's: two"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-finer-bottom
+    value: 3
+    says: "the bottom of that share: three, so two thirds"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-limb-grazing
+    value: 0.002
+    says: "the cosine under which a point is at the limb, where a chart asks the face"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-paint-cell
+    value: 0.25
+    says: "the cell, in degrees, of the chart that is shown to paint only the tiles asked for"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-paint-down
+    value: 10.1
+    says: "the latitude, in degrees from the south pole's end, of the one ray that paints a tile"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-paint-along
+    value: 20.1
+    says: "the longitude, in degrees, of the one ray that paints a tile"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-least-tiles
+    value: 100
+    says: "the fewest tiles the chart of that cell has, so that one is a small part"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-broad-degrees
+    value: 2
+    says: "the width of a wide pixel, in degrees at the body's radius, where a chart asks the face"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-ungridded-cell
+    value: 0.01
+    says: "the cell, in radians, asked of a chart of a face with no flow"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-rays-cell
+    value: 0.5
+    says: "the cell, in degrees, of the chart read by many rays at once"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-rays-down
+    value: -30.3
+    says: "the latitude, in degrees, every ray reads at the end"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-rays-along
+    value: 40.7
+    says: "the longitude, in degrees, every ray reads at the end"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-rays
+    value: 16
+    says: "how many rays read the chart at once"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: chart-ray-draws
+    value: 2000
+    says: "how many points each of those rays reads first"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-lat-seed
+    value: 31
+    says: "the hash seed that picks the latitude of the points a laid face is tried at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-lon-seed
+    value: 32
+    says: "the hash seed that picks the longitude of the points a laid face is tried at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-foot-seed
+    value: 33
+    says: "the hash seed that picks the width of the pixel at those points"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-points
+    value: 4000
+    says: "how many points of a laid face the painter is tried at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-footprint
+    value: 4000000.0
+    says: "the widest pixel, in metres, a laid face is tried at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-wide-every
+    value: 2
+    says: "every so many points the pixel has a width and the rest have none"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-close
+    value: 1e-09
+    says: "how near the painter must come to Within, against the brightest of the light's three: the two sum the same terms in a different order, in float64"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-bright-floor
+    value: 1e-12
+    says: "the brightness a point is held to at least when its difference is compared, so a dark point is not held to nothing"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-polar-from
+    value: 78
+    says: "the latitude, in degrees, past which a grid fades to its edge, and where polar points are counted"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-least-lit
+    value: 1000
+    says: "the fewest points that must be lit for the layout to be shown whole"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-least-glowing
+    value: 500
+    says: "the fewest points that must be in the airglow's band"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-least-polar
+    value: 30
+    says: "the fewest lit points that must be by the poles"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: laid-least-cleared
+    value: 200
+    says: "the fewest points the stand-in grid must clear"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: painter-floor
+    value: 0.05
+    says: "the least cosine of the latitude the painter widens a step by, as the face's own steepness does"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-close
+    value: 1e-12
+    says: "how near the painter's reading of a laid grid must come to the weather's own, against the size of what is read: the same sums in float64"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-points
+    value: 3000
+    says: "how many places the laid grid is read at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-lat-seed
+    value: 41
+    says: "the hash seed that picks the latitude of those places"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-lon-seed
+    value: 42
+    says: "the hash seed that picks the longitude of those places"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-wall-seed
+    value: 43
+    says: "the hash seed that picks how far past the walls the places past them are"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-wall-every
+    value: 3
+    says: "every so many places is past the walls, so a third of them are"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-wall-from
+    value: 76
+    says: "the latitude, in degrees, the places past the walls start at"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: read-wall-span
+    value: 14
+    says: "how many degrees past that the places past the walls reach, to the pole"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-across
+    value: 64
+    says: "how many cells the stand-in grid has round the planet"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-rows
+    value: 32
+    says: "how many rows of cells the stand-in grid has"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-limit
+    value: 80
+    says: "the latitude, in degrees, the stand-in grid's last rows stand inside of"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-wave-along
+    value: 5
+    says: "how many cells a wave of the stand-in grid's fields is a radian long, along a row"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-wave-down
+    value: 3
+    says: "how many rows a wave of the stand-in grid's fields is a radian long, down the grid"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-origin-swing
+    value: 0.2
+    says: "how far, in radians, the wave swings the stand-in grid's air from its row's latitude"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-spin-swing
+    value: 1.2
+    says: "how much spin the wave gives the stand-in grid, over twice the planet's"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-spin-noise
+    value: 0.2
+    says: "how much spin a hash adds to the stand-in grid, either way"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-spin-seed
+    value: 5
+    says: "the hash seed of the stand-in grid's spin"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-age-seed
+    value: 6
+    says: "the hash seed of the stand-in grid's age"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-age-span
+    value: 3000000.0
+    says: "how many seconds the stand-in grid's ages spread over"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: grid-age-floor
+    value: 100000.0
+    says: "how many seconds under none the stand-in grid's youngest age is, so some are below zero"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-across
+    value: 64
+    says: "how many cells the real weather's grid has round the planet; a power of two"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-rows
+    value: 32
+    says: "how many rows of cells the real weather's grid has"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-limit
+    value: 80
+    says: "the latitude, in degrees, the real weather's last rows stand inside of"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-radius
+    value: 60000000.0
+    says: "the radius of the planet the real weather is on, in metres"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: stirring-rate
+    value: 4e-17
+    says: "how many storms a second break out over a square metre"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: stirring-radius
+    value: 4000000.0
+    says: "how wide each of those storms is, in metres"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: stirring-strength
+    value: 3e-05
+    says: "how fast each of those storms spins at its middle, in radians a second"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-day
+    value: 36000
+    says: "the length of the real weather's day, in seconds"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-drag
+    value: 10000000.0
+    says: "the seconds over which friction slows the real weather's winds"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-relax
+    value: 10000000.0
+    says: "the seconds over which the real weather's bands' air is drawn back"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-seed
+    value: 7
+    says: "the seed the real weather's storms are stirred from"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+  - name: weather-run
+    value: 400000.0
+    says: "how many seconds the real weather is run, long enough to spin up storms and age its air"
+    kind: picked
+    by: the test author, kept as the tests had it before they were moved here, 2026-11-11

@@ -25,7 +25,7 @@ func TestADirectionAtAnySizeAndNoneAtAll(t *testing.T) {
 	}
 	nan, inf := math.NaN(), math.Inf(1)
 	for name, sky := range map[string]Sky{"gradient": g, "stars": Stars{},
-		"hexed": Hexed{Of: g, Tiling: hexes.Sphere{N: 4}}} {
+		"hexed": Hexed{Of: g, Tiling: hexes.Sphere{Splits: 4}}} {
 		for _, way := range []maths.Vec{{}, maths.V(nan, 0, 1), maths.V(inf, 0, 0)} {
 			if got := sky.Light(way); !math.IsNaN(got.R) {
 				t.Errorf("%s toward %v is %v, not no number", name, way, got)
@@ -42,8 +42,8 @@ func TestTheGradientBlendsByTheSine(t *testing.T) {
 	got := g.Light(maths.V(1, 1, 0))
 	h := math.Sqrt(0.5)
 	want := maths.RGB(0.9*(1-h)+0.3*h, 0.9*(1-h)+0.5*h, 0.9)
-	if math.Abs(got.R-want.R) > 1e-12 || math.Abs(got.G-want.G) > 1e-12 ||
-		math.Abs(got.B-want.B) > 1e-12 {
+	if !(math.Abs(got.R-want.R) <= 1e-12) || !(math.Abs(got.G-want.G) <= 1e-12) ||
+		!(math.Abs(got.B-want.B) <= 1e-12) {
 		t.Errorf("at 45 degrees the sky is %v, want %v", got, want)
 	}
 }

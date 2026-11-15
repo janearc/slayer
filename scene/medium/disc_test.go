@@ -26,13 +26,13 @@ func TestDisc(t *testing.T) {
 		{maths.V(5, 0, 0), 0},     // beyond the edge
 		{maths.V(2.2, 0.2, 0), 0}, // above the face
 	} {
-		if got := rings.Density(c.p); math.Abs(got-c.want) > 1e-12 {
+		if got := rings.Density(c.p); !(math.Abs(got-c.want) <= 1e-12) {
 			t.Errorf("at %v: %v, want %v", c.p, got, c.want)
 		}
 	}
 	down := maths.Ray{At: maths.V(2.5, 1, 0), Dir: maths.V(0, -1, 0)}
 	enter, leave, ok := rings.Span(down, 0, math.Inf(1))
-	if !ok || math.Abs(enter-0.95) > 1e-12 || math.Abs(leave-1.05) > 1e-12 {
+	if !ok || !(math.Abs(enter-0.95) <= 1e-12) || !(math.Abs(leave-1.05) <= 1e-12) {
 		t.Errorf("down through the ring spans %v to %v, %v", enter, leave, ok)
 	}
 	miss := maths.Ray{At: maths.V(5, 1, 0), Dir: maths.V(0, -1, 0)}
@@ -41,7 +41,7 @@ func TestDisc(t *testing.T) {
 	}
 	along := maths.Ray{At: maths.V(-10, 0, 0), Dir: maths.V(1, 0, 0)}
 	enter, leave, ok = rings.Span(along, 0, math.Inf(1))
-	if !ok || math.Abs(enter-6) > 1e-12 || math.Abs(leave-14) > 1e-12 {
+	if !ok || !(math.Abs(enter-6) <= 1e-12) || !(math.Abs(leave-14) <= 1e-12) {
 		t.Errorf("along the disc spans %v to %v, %v", enter, leave, ok)
 	}
 }

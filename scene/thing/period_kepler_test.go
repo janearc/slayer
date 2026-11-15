@@ -43,7 +43,7 @@ func TestPeriodIsKeplersLawForAUnitGM(t *testing.T) {
 // days. a mass or radius of one is a mass or radius all the same.
 func TestPeriodOfOneKilogramAtOneMetre(t *testing.T) {
 	want := 2 * math.Pi / math.Sqrt(6.67430e-11)
-	if got := Period(1, 1).Seconds(); math.Abs(got-want) > 1e-9*want {
+	if got := Period(1, 1).Seconds(); !(math.Abs(got-want) <= 1e-9*want) {
 		t.Errorf("one kilogram at one metre takes %v s, want %v", got, want)
 	}
 	if got := Period(1, 1).Seconds(); got < 769000 || got > 769200 {
@@ -75,7 +75,7 @@ func TestPeriodRefusesPastTheMost(t *testing.T) {
 	if did {
 		t.Errorf("an orbit of half a second under the most was refused: %q", under)
 	}
-	if got := Period(massFor(1, most-0.5), 1).Seconds(); math.Abs(got-(most-0.5)) > 1e-3 {
+	if got := Period(massFor(1, most-0.5), 1).Seconds(); !(math.Abs(got-(most-0.5)) <= 1e-3) {
 		t.Errorf("half a second under the most takes %v s", got)
 	}
 	if got, did := refusal(massFor(1, most+0.5), 1); !did {
@@ -113,7 +113,7 @@ func TestTheRefusalSaysHowManyYears(t *testing.T) {
 	if _, err := fmt.Sscanf(msg, "thing: an orbit of %g years is past the 292", &got); err != nil {
 		t.Fatalf("the refusal %q: %v", msg, err)
 	}
-	if math.Abs(got-years) > 1e-9*years {
+	if !(math.Abs(got-years) <= 1e-9*years) {
 		t.Errorf("the refusal says %v years, want %v: %q", got, years, msg)
 	}
 }

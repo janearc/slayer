@@ -13,10 +13,15 @@ import (
 // how long its friction and its bands take, its storms, a seed, the
 // moment of its weather a shot shows, in seconds since the weather
 // began, and how often to keep it on the way.
+//
+// for a film it may say how many seconds of weather pass in a second of
+// scene time, its pace, and how many degrees the planet turns eastward
+// in one, its turning; unsaid, every frame shows the moment, unturned.
 type Weather struct {
 	cells, day, drag, relax float64
 	rate, wide, strength    float64
 	seed, moment, every     float64
+	pace, turning           float64
 }
 
 // Weather is the planet's weather, and whether the set gives it any.
@@ -49,6 +54,13 @@ func (made Weather) Seed() uint64 { return uint64(made.seed) }
 // kept on the way, both in seconds.
 func (made Weather) Moment() (moment, every float64) {
 	return made.moment, made.every
+}
+
+// Film is how the weather goes on through a film: the seconds of weather
+// a second of scene time is, and the degrees the planet turns eastward in
+// one, each nothing where the set says none.
+func (made Weather) Film() (pace, turning float64) {
+	return made.pace, made.turning
 }
 
 // Heat is the temperature of the planet's cloud tops and the hottest a
@@ -167,9 +179,11 @@ func (reading reader) weathered(into **Weather) step {
 				"rate":     reading.number(&made.rate, 1e-30, 1),
 				"wide":     reading.number(&made.wide, 1, 1e9),
 				"strength": reading.number(&made.strength, 1e-12, 1)}),
-			"seed":   reading.whole(&made.seed, 0, mostSeed),
-			"moment": reading.number(&made.moment, 0, 1e12),
-			"every":  reading.number(&made.every, 1, 1e12),
+			"seed":    reading.whole(&made.seed, 0, mostSeed),
+			"moment":  reading.number(&made.moment, 0, 1e12),
+			"every":   reading.number(&made.every, 1, 1e12),
+			"pace":    reading.number(&made.pace, 1, 1e12),
+			"turning": reading.number(&made.turning, -3600, 3600),
 		}, nil)
 		if err != nil {
 			return err

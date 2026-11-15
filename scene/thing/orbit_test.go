@@ -15,15 +15,15 @@ import (
 func TestPeriodIsKeplers(t *testing.T) {
 	const jupiter, sun = 1.898e27, 1.989e30
 	io := Period(jupiter, 421.7e6)
-	if d := io.Hours() / 24; math.Abs(d-1.77) > 0.02 {
+	if d := io.Hours() / 24; !(math.Abs(d-1.77) <= 0.02) {
 		t.Errorf("io goes round in %.3f days", d)
 	}
 	year := Period(sun, 1.496e11)
-	if d := year.Hours() / 24; math.Abs(d-365.25) > 1 {
+	if d := year.Hours() / 24; !(math.Abs(d-365.25) <= 1) {
 		t.Errorf("the earth goes round in %.1f days", d)
 	}
 	a, b := Period(jupiter, 1e8), Period(jupiter, 4e8)
-	if r := float64(b) / float64(a); math.Abs(r-8) > 1e-6 {
+	if r := float64(b) / float64(a); !(math.Abs(r-8) <= 1e-6) {
 		t.Errorf("four times the radius takes %v times as long", r)
 	}
 	if Period(0, 1) != 0 || Period(1, 0) != 0 {
@@ -49,13 +49,13 @@ func TestOrbitGoesRound(t *testing.T) {
 		if !s.Origin.Near(c.want, 1e-9) || s.Scale != 0.5 {
 			t.Errorf("at %v: %v, want %v", c.t, s.Origin, c.want)
 		}
-		if d := s.Origin.Sub(o.Centre).Len(); math.Abs(d-5) > 1e-9 {
+		if d := s.Origin.Sub(o.Centre).Len(); !(math.Abs(d-5) <= 1e-9) {
 			t.Errorf("at %v the radius is %v", c.t, d)
 		}
 	}
 	tipped := Orbit{Radius: 1, Axis: maths.XAxis, Period: time.Second}
 	for _, tt := range []time.Duration{0, 300 * time.Millisecond, 700 * time.Millisecond} {
-		if x := tipped.At(tt).Origin.X; math.Abs(x) > 1e-9 {
+		if x := tipped.At(tt).Origin.X; !(math.Abs(x) <= 1e-9) {
 			t.Errorf("tipped about x, at %v it left the plane: x %v", tt, x)
 		}
 	}
@@ -158,7 +158,7 @@ func TestARoundBeamBoostsTheSideComing(t *testing.T) {
 	if !(coming > 2 && going < 0.5) {
 		t.Fatalf("coming %v, going %v", coming, going)
 	}
-	if other := b.Boost(maths.V(0, 0, 1), maths.V(-1, 0, 0)); math.Abs(other-coming) > 1e-9 {
+	if other := b.Boost(maths.V(0, 0, 1), maths.V(-1, 0, 0)); !(math.Abs(other-coming) <= 1e-9) {
 		t.Fatalf("across the axis the boost is %v, not %v", other, coming)
 	}
 	if far := b.Boost(maths.V(0, 0, -1), maths.V(4, 0, 0)); !(far < coming && far > 1) {
@@ -175,7 +175,7 @@ func TestABeamFlows(t *testing.T) {
 	if dir.Sub(maths.V(0, 0, -1)).Len() > 1e-12 || speed != 0.4 {
 		t.Errorf("a round beam at (1,0,0) flows %v at %v", dir, speed)
 	}
-	if _, speed := round.Flow(maths.V(4, 0, 0)); math.Abs(speed-0.2) > 1e-12 {
+	if _, speed := round.Flow(maths.V(4, 0, 0)); !(math.Abs(speed-0.2) <= 1e-12) {
 		t.Errorf("at four times At it flows at %v, not half", speed)
 	}
 	jet := Beam{Speed: 0.6}

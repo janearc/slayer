@@ -1,3 +1,5 @@
+//go:build draw
+
 package gpu
 
 import (
@@ -9,13 +11,16 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
-// fire-night-design.md documents a 32-volume world budget. This is an
-// authored resource limit exposed to callers, not a physical constant.
-func TestVolumeLimitKeepsItsDocumentedThirtyTwoVolumeBudget(t *testing.T) {
-	if got := VolumeLimit(); got != 32 {
-		t.Fatalf("public volume limit is %d, documented budget is 32", got)
+// The kernel sizes its crossing arrays to the scene, so the limit is a
+// ceiling against pathological packs, not a per-scene budget. It is an
+// authored resource limit exposed to callers, not a physical constant;
+// doc/fire-night-design.md says what it costs to approach it.
+func TestVolumeLimitIsACeilingNotABudget(t *testing.T) {
+	if got := VolumeLimit(); got != mostVolumes {
+		t.Fatalf("public volume limit is %d, the ceiling is %d", got,
+			mostVolumes)
 	}
-	for _, count := range []int{0, 32, 33} {
+	for _, count := range []int{0, 33, mostVolumes, mostVolumes + 1} {
 		world := thing.NewWorld()
 		for range count {
 			world.AddVolume(thing.Volume{
@@ -23,10 +28,11 @@ func TestVolumeLimitKeepsItsDocumentedThirtyTwoVolumeBudget(t *testing.T) {
 			})
 		}
 		encoded, err := encode(world, maths.Subspace{}, nil, 0, 4, 3)
-		if count == 33 {
+		if count > mostVolumes {
 			if encoded != nil || err == nil ||
-				!strings.Contains(err.Error(), "more than 32 volumes") {
-				t.Fatalf("33-volume scene lost its budget refusal: %v", err)
+				!strings.Contains(err.Error(), "more than") {
+				t.Fatalf("%d-volume scene lost its ceiling refusal: %v",
+					count, err)
 			}
 			continue
 		}

@@ -70,10 +70,12 @@ func (weather GroveWeather) validMist() bool {
 		weather.Extinction >= weatherZero &&
 		weatherFinite(weather.Depth) && weather.Depth > weatherZero &&
 		weatherFinite(weather.Coverage) &&
+		weatherFinite(weather.PatchScale) && weather.PatchScale >= weatherZero &&
 		weather.Coverage >= weatherZero &&
 		weather.Coverage <= weatherOne &&
 		weatherFinite(weather.Wind.Len()) &&
-		weatherFinite(weather.GroundFloor)
+		weatherFinite(weather.GroundFloor) &&
+		math.Abs(weather.Asymmetry) < weatherOne
 }
 
 // mistDensity shares the existing height fade and advected noise field.
@@ -85,10 +87,14 @@ func (weather GroveWeather) mistDensity(at maths.Vec, below, seconds,
 		return weatherZero
 	}
 	if weather.Coverage < weatherOne {
+		scale := weather.Depth
+		if weather.PatchScale > weatherZero {
+			scale = weather.PatchScale
+		}
 		advected := at.Sub(weather.Wind.Scale(seconds))
 		patch := noiseHalf + noiseHalf*noise.Fractal(weather.Seed,
-			advected.X/weather.Depth, advected.Y/weather.Depth,
-			advected.Z/weather.Depth, mistTuning.octaves)
+			advected.X/scale, advected.Y/scale,
+			advected.Z/scale, mistTuning.octaves)
 		threshold := weatherOne - weather.Coverage
 		weight *= maths.Smooth(threshold-mistTuning.shoulder,
 			threshold+mistTuning.shoulder, patch)

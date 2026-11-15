@@ -29,7 +29,8 @@ camera.
 The older set-file camera arrays use east, north, up; convert their north
 coordinate to negative z when writing this block.
 
-`look-at` is independent of travel. It stays fixed while the camera moves. The
+`look-at` is independent of travel. It stays fixed while the camera moves
+unless a move gives its own `look` (see the end of this document). The
 path must not pass through it. Up defaults to the scene's y axis; an optional
 `up: {x: ..., y: ..., z: ...}` supplies a nonzero alternative.
 
@@ -165,8 +166,11 @@ ffmpeg -framerate 24 -i out/fire-camera/frame-%06d.png \
 ```
 
 Encoding needs FFmpeg. PNGs and the resume manifest do not. Camera motion does
-not yet add motion blur, collision avoidance, a moving look target, curved
-splines, or geographic flight planning.
+not yet add collision avoidance, curved splines, or geographic flight
+planning. A sequence plan has no shutter; a job has one (`job/README.md`,
+`shutter`), and on the gpu it blurs a camera's move in one render a frame. A moving look target exists: a move in `hillside`'s
+sequence camera takes `look: {from, to}` (`camera.Move.Looking`). The
+`look-at` key described above stays fixed.
 
 The six-second forest preview attempted during development stopped at its 1.25
 GiB RSS watchdog before producing a frame. Both native and software GPU

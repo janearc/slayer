@@ -86,11 +86,11 @@ func measure(path string) (int64, string, error) {
 	return n, hex.EncodeToString(h.Sum(nil)), nil
 }
 
-// askTimeout is how long smokecheck waits on git or go for an answer about a
+// askTimeout is how long smokejudge waits on git or go for an answer about a
 // tree, for the record.
 const askTimeout = 20 * time.Second
 
-// slayerModule is slayer's module path, which its go.mod names. smokecheck
+// slayerModule is slayer's module path, which its go.mod names. smokejudge
 // lives in slayer now, and the trees it records are slayer's and
 // libtheme's.
 const slayerModule = "github.com/janearc/slayer"

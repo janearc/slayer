@@ -96,8 +96,8 @@ func TestEveryVertexOfTheGroundIsOnItsGrid(t *testing.T) {
 	cell := size / float64(side)
 	for index, at := range ground.Points() {
 		column, row := float64(index%(side+1)), float64(index/(side+1))
-		if math.Abs(at.X-column*cell) > 1e-12 || at.Y != 0 ||
-			math.Abs(at.Z-row*cell) > 1e-12 {
+		if !(math.Abs(at.X-column*cell) <= 1e-12) || at.Y != 0 ||
+			!(math.Abs(at.Z-row*cell) <= 1e-12) {
 			t.Errorf("vertex %d is %v, want %v, 0, %v", index, at,
 				column*cell, row*cell)
 		}
@@ -113,7 +113,7 @@ func TestEveryTriangleOfTheGroundIsHalfACellAndFacesUp(t *testing.T) {
 		corner, b, c := ground.Corners(index)
 		first, second := b.Sub(corner), c.Sub(corner)
 		turn := first.Cross(second)
-		if math.Abs(turn.Len()/2-cell*cell/2) > 1e-9 {
+		if !(math.Abs(turn.Len()/2-cell*cell/2) <= 1e-9) {
 			t.Errorf("face %d has area %v, want %v", index,
 				turn.Len()/2, cell*cell/2)
 		}
@@ -171,10 +171,10 @@ func TestOneSeedMakesTheForestItAlwaysDid(t *testing.T) {
 	}
 	for index, want := range pinned {
 		got := placed[index]
-		if math.Abs(got.At().X-want.At().X) > 1e-12 ||
-			math.Abs(got.At().Z-want.At().Z) > 1e-12 ||
-			math.Abs(got.Turn()-want.Turn()) > 1e-12 ||
-			math.Abs(got.Size()-want.Size()) > 1e-12 {
+		if !(math.Abs(got.At().X-want.At().X) <= 1e-12) ||
+			!(math.Abs(got.At().Z-want.At().Z) <= 1e-12) ||
+			!(math.Abs(got.Turn()-want.Turn()) <= 1e-12) ||
+			!(math.Abs(got.Size()-want.Size()) <= 1e-12) {
 			t.Errorf("place %d is %v, was %v", index, got, want)
 		}
 	}

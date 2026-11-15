@@ -1,0 +1,23 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  frames: black
+film:
+  width: 320
+  height: 180
+  rays: 2
+at:
+  value: 0
+  unit: s
+titles:
+  rows: 15
+  elements:
+    title:
+      kind: text
+      words: heard.
+      ink: ink
+      across: 0.5
+      down: 0.5
+      align: centre
+outputs:
+  picture: 01-title.png

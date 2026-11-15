@@ -1,5 +1,5 @@
 // Package compare checks a terminal rendering against the raster rendering of
-// the same scene. smokecheck uses it to verify that terminal output represents
+// the same scene. smokejudge uses it to verify that terminal output represents
 // the same image at a coarser resolution.
 package compare
 
@@ -23,7 +23,8 @@ type Report struct {
 }
 
 // Honest is whether every compared pixel is within what an eye can see.
-func (r Report) Honest() bool { return r.Worst <= ok.Eye }
+// A report that compared no pixel is not honest: it has shown nothing.
+func (r Report) Honest() bool { return r.Compared > 0 && r.Worst <= ok.Eye }
 
 // Cells compares text, the terminal's picture at one pixel per sextant, with
 // real, the same scene rendered bw by bh real pixels to each of text's.

@@ -20,6 +20,10 @@ int slayer_metal_function(void *ctx, const char *kernel, char *err, int errlen);
 // slayer_metal_name is the GPU's own name, for the record of what ran.
 const char *slayer_metal_name(void *ctx);
 
+// slayer_metal_limit sets the seconds one command may take before the
+// wait for it gives up with an error and the context is no longer used.
+void slayer_metal_limit(void *ctx, double seconds);
+
 // slayer_metal_points runs the kernel once per point: points is n packed
 // triples of floats, out has room for n floats, and the parameters are
 // copied to buffer 2 as given.
@@ -27,29 +31,46 @@ int slayer_metal_points(void *ctx, const float *points, int n,
                         const void *params, int paramlen,
                         float *out, char *err, int errlen);
 
-// slayer_metal_grid runs the kernel once per pixel of a picture width by
-// height, a band of rows at a time, so no one command runs long enough
-// for the system to stop it. the inputs, made into buffers once, are
-// bound at 0 to count-1; the band's part of out, width * rows * per
-// floats, at count; and the band's origin, two unsigned ints (0, first
-// row), at count+1.
-int slayer_metal_grid(void *ctx, int width, int height, int rows, int per,
-                      const void **inputs, const long *lengths, int count,
-                      float *out, char *err, int errlen);
-
-// A grid stream retains inputs and one output band. The caller retains ctx.
-// Bands use global row coordinates and are copied into the caller's buffer.
-void *slayer_metal_grid_open(void *ctx, int width, int rows, int per,
-                            const void **inputs, const long *lengths, int count,
-                            char *err, int errlen);
+// A grid stream retains inputs and one output band, and runs the kernel
+// once per pixel of a band of rows at a time, so no one command runs
+// long enough for the system to stop it. The inputs are bound at 0 to
+// count-1; the band's part of out, width * rows * per floats, at count;
+// and the band's origin, two unsigned ints (0, first row), at count+1.
+// The caller retains ctx. Bands use global row coordinates and are
+// copied into the caller's buffer.
 // Begin/add copy each input synchronously; no caller input pointer is retained.
 // A failed add leaves a closable stream. Bands require all count inputs.
-void *slayer_metal_grid_begin(void *ctx, int width, int rows, int per,
-                             int count, char *err, int errlen);
+// The stream draws the band after the one asked for ahead of the ask,
+// so sequential bands overlap the gpu's drawing with the caller's
+// reading; height bounds how far ahead it draws.
+void *slayer_metal_grid_begin(void *ctx, int width, int height, int rows,
+                             int per, int count, char *err, int errlen);
 int slayer_metal_grid_add(void *stream, const void *input, long length,
                           char *err, int errlen);
+// slayer_metal_grid_update replaces one added input's bytes, waiting out
+// anything drawn ahead first, so a stream kept between pictures uploads
+// only what changed. The same length lands in the same buffer; a new
+// length makes a new one.
+int slayer_metal_grid_update(void *stream, int index, const void *input,
+                             long length, char *err, int errlen);
 int slayer_metal_grid_band(void *stream, int first, int down, float *out,
                            char *err, int errlen);
+// slayer_metal_grid_same sets same to one when an added input holds
+// exactly length bytes and they are input's, read where the device reads
+// them; it copies nothing.
+int slayer_metal_grid_same(void *stream, int index, const void *input,
+                           long length, int *same, char *err, int errlen);
+// slayer_metal_grid_refresh copies into an added input of the same length
+// only the parts of chunk bytes that differ from input's, waiting out
+// anything drawn ahead first, and sets sent to the bytes it copied.
+int slayer_metal_grid_refresh(void *stream, int index, const void *input,
+                              long length, long chunk, long *sent, char *err,
+                              int errlen);
+// slayer_metal_grid_shape draws later bands at another size, keeping the
+// inputs: it waits out anything drawn ahead and makes new band buffers
+// only when the band's bytes change.
+int slayer_metal_grid_shape(void *stream, int width, int height, int rows,
+                            int per, char *err, int errlen);
 void slayer_metal_grid_close(void *stream);
 
 // slayer_metal_gpu is the seconds the gpu has spent on every command the
@@ -69,6 +90,9 @@ void slayer_metal_close(void *ctx);
 // slayer_metal_open.
 void *slayer_session_open(const char *source, const char **kernels,
                           int count, int *nodevice, char *err, int errlen);
+
+// slayer_session_limit is slayer_metal_limit for a session's batches.
+void slayer_session_limit(void *s, double seconds);
 
 // slayer_session_buffer makes a shared buffer of length bytes, zeroed,
 // and is its number, or -1 with err saying why.
@@ -102,5 +126,13 @@ int slayer_metal_accelerate(void *ctx, const void *vertices, long length,
                             int stride, const int32_t *nodes, int count,
                             const float *matrices, const uint32_t *references,
                             int root, int *unavailable, char *err, int errlen);
+// slayer_metal_reaccelerate is slayer_metal_accelerate for a context that
+// may have a hierarchy already: the new one takes its place once built,
+// and a build that fails leaves the old one.
+int slayer_metal_reaccelerate(void *ctx, const void *vertices, long length,
+                              int stride, const int32_t *nodes, int count,
+                              const float *matrices,
+                              const uint32_t *references, int root,
+                              int *unavailable, char *err, int errlen);
 
 #endif

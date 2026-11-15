@@ -1,0 +1,132 @@
+{
+	// intent: a clockwork kit that ticks and does not ring. noise ticks and a
+	// ratchet, a dull thud, a soft-mallet plate and a short tone both on f sharp,
+	// so nothing that rings is out of tune with the riff. plucked chords and bass.
+	"name": "clockwork-kit",
+	"machine": "studio",
+	"master": 0.45,
+	"reverb": {
+		"size": 0.35,
+		"decay": 1.0,
+		"damping": 0.5,
+		"level": 0.25
+	},
+	"channels": [
+		{
+			"kind": "analog",
+			"role": "lead",
+			"volume": 0.7,
+			"place": -0.1,
+			"send": {
+				"reverb": 0.2
+			},
+			"envelope": {
+				"attack": 0.003,
+				"decay": 0.3,
+				"sustain": 0.3,
+				"release": 0.08
+			},
+			"analog": {
+				"oscillators": [
+					{
+						"shape": "square"
+					},
+					{
+						"shape": "saw",
+						"detune": 5,
+						"level": 0.4
+					}
+				],
+				"filter": {
+					"cutoff": 2400,
+					"resonance": 0.3,
+					"follow": 0.8,
+					"amount": 2,
+					"envelope": {
+						"attack": 0.001,
+						"decay": 0.18,
+						"sustain": 0.25,
+						"release": 0.1
+					}
+				}
+			}
+		},
+		{
+			"kind": "pluck",
+			"role": "pad",
+			"volume": 0.6,
+			"place": 0.3,
+			"send": {
+				"reverb": 0.25
+			},
+			"pluck": {
+				"brightness": 0.6,
+				"damping": 0.45,
+				"position": 0.3,
+				"decay": 0.6,
+				"release": 0.12
+			}
+		},
+		{
+			"kind": "pluck",
+			"role": "bass",
+			"volume": 0.58,
+			"pluck": {
+				"brightness": 0.35,
+				"damping": 0.5,
+				"position": 0.4,
+				"decay": 0.5,
+				"release": 0.1
+			}
+		},
+		{
+			"kind": "drum",
+			"role": "perc",
+			"volume": 0.9,
+			"send": {
+				"reverb": 0.1
+			},
+			"drums": {
+				"k": {
+					"tone": 58,
+					"sweep": 14,
+					"fall": 0.03,
+					"decay": 0.14,
+					"click": 0.8
+				},
+				"s": {
+					"noise": 0.8,
+					"noise_decay": 0.02,
+					"colour": 2500,
+					"click": 0.8
+				},
+				"h": {
+					"tone": 1480,
+					"decay": 0.012,
+					"noise": 0.6,
+					"noise_decay": 0.012,
+					"colour": 3500,
+					"click": 0.5,
+					"volume": 0.5
+				},
+				"o": {
+					"noise": 0.5,
+					"noise_decay": 0.07,
+					"colour": 3000
+				},
+				"t": {
+					"tone": 185,
+					"struck": "plate",
+					"hardness": 0.25,
+					"decay": 0.12,
+					"click": 0.3
+				},
+				"b": {
+					"tone": 740,
+					"decay": 0.05,
+					"click": 0.5
+				}
+			}
+		}
+	]
+}

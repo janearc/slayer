@@ -28,14 +28,15 @@ type sequenceKey struct {
 }
 
 type sequencePlan struct {
-	Scene    string        `yaml:"scene" json:"scene"`
-	Frames   int           `yaml:"frames" json:"frames"`
-	FPS      int           `yaml:"fps" json:"fps"`
-	Duration float64       `yaml:"scene-duration-seconds" json:"scene-duration-seconds"`
-	Keys     []sequenceKey `yaml:"keyframes" json:"keyframes"`
-	raw      []byte
-	hash     string
-	zooms    []*camera.Zoom
+	Interpolation string        `yaml:"interpolation" json:"interpolation,omitempty"`
+	Scene         string        `yaml:"scene" json:"scene"`
+	Frames        int           `yaml:"frames" json:"frames"`
+	FPS           int           `yaml:"fps" json:"fps"`
+	Duration      float64       `yaml:"scene-duration-seconds" json:"scene-duration-seconds"`
+	Keys          []sequenceKey `yaml:"keyframes" json:"keyframes"`
+	raw           []byte
+	hash          string
+	zooms         []*camera.Zoom
 }
 
 // readSequence checks the track schema, endpoint clocks and non-wrapping legs,
@@ -63,6 +64,13 @@ func readSequence(path string) (*sequencePlan, error) {
 	}
 	if plan.Keys[0].Seconds != 0 || plan.Keys[len(plan.Keys)-1].Seconds != plan.Duration {
 		return nil, fmt.Errorf("island: keyframes must run from zero to scene duration")
+	}
+	if plan.Interpolation == "continuous" {
+		for _, key := range plan.Keys {
+			if key.Ease != "linear" {
+				return nil, fmt.Errorf("island: continuous interpolation requires linear key easing; segment easing would reset waypoint velocity")
+			}
+		}
 	}
 	for index, from := range plan.Keys[:len(plan.Keys)-1] {
 		to := plan.Keys[index+1]
@@ -111,6 +119,11 @@ func (sequence sequencePlan) sample(base *plan, index int) (*plan, error) {
 		return nil, err
 	}
 	result.Film.Wide = wide
+	if sequence.Interpolation == "continuous" {
+		result.Camera.At = sequence.curveLocation(leg, share, false)
+		result.Camera.Look = sequence.curveLocation(leg, share, true)
+		result.Film.Wide = sequence.coordinate(leg, share, func(key sequenceKey) float64 { return key.Wide })
+	}
 	result.Time = base.Time + seconds
 	raw, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {

@@ -1,0 +1,194 @@
+# markers for the walk package projection test: boulders at known
+# places, glowing alone under -closeglow
+# the full moon resting on kīlauea iki's east rim, seen from the crater
+# floor through a long lens, the trees on the rim before it. none of
+# them is alight in this set.
+#
+# the moon is full, at opposition, so it rises as the sun sets: this is
+# twilight, the sun below the western horizon. at opposition the moon
+# rises at the top of the earth's shadow, so the camera is low, on the
+# crater floor, where the far rim stands 4.67 degrees up and hides the
+# shadow's edge: everything in the frame is under it.
+#
+# measured: the ground (the usgs's 2019 lidar model); the moon's size,
+# distance and albedo (nasa's fact sheet); its light, the sun's through
+# that albedo; the sun's light; the air's dimming and reddening of
+# both, and the sky they light (rayleigh, bodhaine and the others).
+# picked: where the camera and the moon stand, the lens. the trees are
+# spruces standing in for ʻōhiʻa, until the manufactory grows it.
+#
+# not here yet, and so wrong in the picture: light the air scatters
+# more than once, which fills the earth's shadow with a dusky blue, so
+# the sky in the frame is black; ozone; the air's bending of light near
+# the horizon; and mauna loa, which in truth hides the sun to the west.
+scene:
+  # improv/moonlake, 2026-11-09: the moonrise set, the crater flooded
+  # with still water to 1076 m (hillside -lake 1076), seen from the rise
+  # at the west end, 1127 m, between two spruces. never merged
+  name: moonlake
+  # drawn by the gpu's own ray queries for its meshes and shadows: at 2048
+  # wide with 4 rays a side it takes 11.5 s where the kernel's own
+  # traversal takes 12.6 s, and the picture is 0.0001 percent of mean
+  # light from it, with 90 pixels in 2.4 million differing by over 1 percent
+  renderer: gpu-native
+  light: moon
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 1900
+  # the bearing from the lookout to the far tree on the rim, and resting
+  # on the rim: the rim at 4.67 degrees from the lookout, by the lidar,
+  # and the moon's middle a radius and a little more above it
+  moon:
+    azimuth: 109.65
+    # improv: low behind the rim, whose far tree's ground stands at +1.5
+    # degrees from the raised camera (1195.5 m over 1147.6 m, 1,834.5 m
+    # off), so the rim and its giant spruces cut the disc's foot and it
+    # reads as far behind the land, and so as huge
+    altitude: 2.3
+    face: svs-moon-kit-color
+  # opposite the moon, as a full moon's sun is, until an ephemeris gives
+  # the two for a date: the moon's way less half a turn
+  # improv: off opposition, a night or so before full. at opposition the
+  # lake, an earth-sized sphere, eclipses the moon it reflects
+  sun:
+    azimuth: 304
+    altitude: -12
+  # improv: the file form of the flags the lake picture is made with
+  # (-lake 1076 -moon 6 -moonglow 0.042 -giants 5). each key departs from
+  # what is measured, and the render prints a line for it. a flag given
+  # on the command line stands over its key
+  # fantasy:
+  #   lake: 1076
+  #   moon: 6
+  #   moonglow: 0.042
+  #   giants: 5
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    # improv: 400 m further west, to hold the rise the camera stands on
+    west: 262900
+    north: 2149000
+    across: 2400
+    down: 1700
+    step: 4
+  # a test frame at preview size: 480 pixels across the frame, two rays
+  # a side, two glimpses. the raw is joules a square metre of film, in
+  # libtheme's three channels, not yet a spectrum.
+  # improv: 16 by 9; 320 across for minute-long drafts, 2048 for the
+  # whole film, with four rays a side, sixteen a pixel, for its plates
+  # the pinhole fixture, fable-team 2026-11-12: the marker set with its
+  # film's rig taken off for a pinhole 45 degrees across, the angle the
+  # rig's 85 mm sees across its frame, so CameraOf's rigless case is
+  # tested against a traced picture as the rigged one is
+  film:
+    width: 640
+    height: 360
+    rays: 4
+    wide: 45
+  cameras:
+    down:
+      # improv, the first ask: "looking down at the water through
+      # trees": 20 m up among the spruces on the west rise, 6 degrees down
+      title: "looking down at the water through the trees"
+      orientation:
+        point_to: the far tree
+        alpha: -6
+      location:
+        loc_relative:
+          object: the west rise
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 20
+    above:
+      title: "straight down from 150 m over the lookout"
+      orientation:
+        point_to: the far tree
+        alpha: -90
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 150
+    across:
+      title: "the moon on the east rim, from the crater floor"
+      orientation:
+        point_to: the far tree
+        # tipped up so the rim sits low and the frame, 2.2 degrees high,
+        # runs from about 4.4 to 6.6: the moon on the ridge, and some 50
+        # m of sky above the rim
+        alpha: 5.5
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 2
+  set:
+    things:
+      the west rise:
+        kind: cobble
+        seed: 6
+        east: 263104.5
+        north: 2148423.5
+      the far tree:
+        kind: cobble
+        seed: 3
+        east: 264832
+        north: 2147806
+      the lookout:
+        kind: cobble
+        seed: 5
+        east: 263450
+        north: 2148300
+      close m1:
+        kind: boulder
+        seed: 70
+        east: 263470
+        north: 2148300
+      close m2:
+        kind: boulder
+        seed: 71
+        east: 263652.4
+        north: 2148337.2
+      close m3:
+        kind: boulder
+        seed: 72
+        east: 263900
+        north: 2148150
+      close m4:
+        kind: boulder
+        seed: 73
+        east: 263804
+        north: 2148448
+      close m5:
+        kind: boulder
+        seed: 74
+        east: 263596
+        north: 2148079
+      close m6:
+        kind: boulder
+        seed: 75
+        east: 264200
+        north: 2148000
+      close a1:
+        kind: boulder
+        seed: 80
+        east: 263430
+        north: 2148330
+      close a2:
+        kind: boulder
+        seed: 81
+        east: 263480
+        north: 2148320
+      close a3:
+        kind: boulder
+        seed: 82
+        east: 263425
+        north: 2148275
+      close a4:
+        kind: boulder
+        seed: 83
+        east: 263490
+        north: 2148270

@@ -70,7 +70,7 @@ func (a Aurora) Density(p maths.Vec) float64 {
 		// rays along the oval: a noise fine round the pole and
 		// stretched up, and folds coarser than the rays; the rays
 		// are no finer than a picture from orbit resolves, or the
-		// terminal's rays and smokecheck's land on them differently
+		// terminal's rays and smokejudge's land on them differently
 		o := maths.Upright(axis)
 		x, z := d.Dot(o.X), d.Dot(o.Z)
 		phi := math.Atan2(z, x)

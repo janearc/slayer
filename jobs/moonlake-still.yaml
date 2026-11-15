@@ -1,0 +1,9 @@
+# a still of a set: the full moon over kilauea iki's rim, at the set's own
+# film and lens, its picture and its light written beside each other.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/moonlake.yaml}
+film: {preset: 2k, rays: 2}
+at: {value: 0, unit: s}
+outputs:
+  picture: ../renders/moonlake.png
+  raw: ../renders/moonlake.pfm

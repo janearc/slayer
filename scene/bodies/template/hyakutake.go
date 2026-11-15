@@ -1,6 +1,7 @@
 package template
 
 import (
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/swatches"
 )
@@ -10,21 +11,19 @@ import (
 // hundred million kilometres, straight and blue.
 //
 // The shot aims it.
-func Hyakutake() bodies.Body {
-	return bodies.Body{Name: "hyakutake", Kind: bodies.Rock, Radius: 2, Mass: 1e13,
-		Seed: 5,
-		Coma: &bodies.Coma{Radius: 5e5, Dense: 1e-5,
-			Colour: swatches.Light(swatches.ComaDustCool),
-			Glow:   swatches.Light(swatches.ComaGreenBright)},
-		Tails: []bodies.Tail{
-			{Length: 8e6, Base: 4e5, Spread: 0.06, Curve: 0.3, Dense: 1.5e-7,
-				Colour: swatches.Light(swatches.DustTailPale),
-				Wisp:   0.5, Seed: 96},
-			{Length: 5e8, Base: 6e5, Spread: 0.01, Curve: 0.01, Dense: 3e-7,
-				Colour: swatches.Light(swatches.IonTail),
-				Glow:   swatches.Light(swatches.IonGlow),
-				Wisp:   0.7,
-				Seed:   95},
-		},
-	}
+func Hyakutake() (bodies.Body, error) {
+	return comet("hyakutake", km(2), kg(1e13),
+		bodies.PerKilometre(1e-5), km(5e5),
+		[2]maths.Light{swatches.Light(swatches.ComaDustCool),
+			swatches.Light(swatches.ComaGreenBright)},
+		tailOf{length: km(8e6), base: km(4e5), spread: 0.06,
+			curve: 0.3, loss: bodies.PerKilometre(1.5e-7),
+			colour: swatches.Light(swatches.DustTailPale),
+			wisp:   maths.Percent(50), seed: 96},
+		tailOf{length: km(5e8), base: km(6e5), spread: 0.01,
+			curve: 0.01, loss: bodies.PerKilometre(3e-7),
+			colour: swatches.Light(swatches.IonTail),
+			glow:   swatches.Light(swatches.IonGlow),
+			wisp:   maths.Percent(70), seed: 95},
+		5)
 }

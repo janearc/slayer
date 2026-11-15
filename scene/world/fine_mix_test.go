@@ -63,7 +63,7 @@ func TestAMixTakesTheKinOnlyOverItsLine(t *testing.T) {
 // a mix of zero never takes the kin, though some noise there is over 0.55,
 // which is counted, and the others do for some tiles and not others.
 func TestAMixIsTheNoiseOverALine(t *testing.T) {
-	w := New(Terrain{Tiling: hexes.Sphere{N: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
+	w := New(Terrain{Tiling: hexes.Sphere{Splits: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
 	look := paints()
 	fine := w.Tiling.Finer().Finer().Finer()
 	state := uint64(3)

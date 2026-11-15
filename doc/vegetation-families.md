@@ -1,8 +1,10 @@
 # Broadleaf, brush and Joshua-tree construction
 
-These factory additions are code drafts. Compilation, independent geometry
-checks, appearance records and CPU/Metal views are deferred to the review
-break. The older conifer captures do not validate these new families.
+These factory additions are committed with tests, among them the vegetation
+geometry reference in `manufacture/b_geometry_reference_contracts_test.go`.
+This note was written before them and records no results. Appearance records
+and CPU/Metal views are not recorded here. The older conifer captures do not
+validate these new families.
 
 The names are `valley-oak`, `alder`, `poplar`, `manzanita`,
 `chaparral-brush`, `joshua-tree` and `saguaro`. Oak forks without a continuing

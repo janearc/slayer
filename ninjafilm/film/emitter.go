@@ -49,8 +49,6 @@ type Beamer interface {
 // visible light. In its own range it lights what it reaches, so the
 // picture in that range is what scatters back. The range is one of
 // libtheme's radiation profiles, radiation.Radio for a radar.
-//
-//ninja:vow practice slayer's radar picture makes its radar here
 type Radar struct {
 	at       maths.Vec
 	band     radiation.Range
@@ -58,8 +56,6 @@ type Radar struct {
 }
 
 // NewRadar is a radar at a place, beaming a range with a strength.
-//
-//ninja:vow practice slayer's radar picture makes its radar here
 func NewRadar(at maths.Vec, band radiation.Range, strength float64) Radar {
 	return Radar{at, band, strength}
 }
@@ -90,16 +86,12 @@ func (radar Radar) Beams(band maths.Band) float64 {
 // not be one unit long. Its strength is the light arriving on a surface
 // facing it square. White paint that gives back all of a strength of 1
 // is a pixel of 1.
-//
-//ninja:vow practice slayer's scenes make their sun here
 type Sun struct {
 	toward   maths.Vec
 	strength maths.Light
 }
 
 // NewSun is a sun in a direction with a strength.
-//
-//ninja:vow practice slayer's scenes make their sun here
 func NewSun(toward maths.Vec, strength maths.Light) Sun {
 	return Sun{toward, strength}
 }
@@ -124,16 +116,12 @@ func (sun Sun) Light(maths.Vec, maths.Vec) (toward maths.Vec,
 //
 // Its up is the middle of the dome. Zero means the world's own up. Its
 // strength is the light on a surface facing straight up.
-//
-//ninja:vow practice slayer's scenes make their flood here
 type Flood struct {
 	up       maths.Vec
 	strength maths.Light
 }
 
 // NewFlood is a flood around an up with a strength.
-//
-//ninja:vow practice slayer's scenes make their flood here
 func NewFlood(up maths.Vec, strength maths.Light) Flood {
 	return Flood{up, strength}
 }
@@ -165,8 +153,6 @@ func (flood Flood) Light(_, normal maths.Vec) (toward maths.Vec,
 //
 // Its soft is how much of the cone the light takes to fade out at the
 // edge, in radians. Zero is a hard edge.
-//
-//ninja:vow practice slayer's scenes make their spot here
 type Spot struct {
 	at, aim    maths.Vec
 	strength   maths.Light
@@ -175,8 +161,6 @@ type Spot struct {
 
 // NewSpot is a spot at a place and aimed. It has a strength, a cone and
 // a soft edge.
-//
-//ninja:vow practice slayer's scenes make their spot here
 func NewSpot(at, aim maths.Vec, strength maths.Light, cone,
 	soft float64) Spot {
 	return Spot{at, aim, strength, cone, soft}

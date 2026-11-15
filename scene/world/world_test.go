@@ -8,7 +8,7 @@ import (
 	"github.com/janearc/slayer/maths/hexes"
 )
 
-var terran = Terrain{Tiling: hexes.Sphere{N: 14}, Seed: 5, Ocean: 0.6,
+var terran = Terrain{Tiling: hexes.Sphere{Splits: 14}, Seed: 5, Ocean: 0.6,
 	Plates: 11, Axis: maths.V(0.2, 1, 0)}
 
 // A world asked for sixty percent sea gets sixty percent, and its land
@@ -24,7 +24,7 @@ func TestTheSeaIsPouredToTheShareAsked(t *testing.T) {
 		top, bottom = math.Max(top, h), math.Min(bottom, h)
 	}
 	share := float64(under) / float64(len(w.Tiles()))
-	if math.Abs(share-0.6) > 0.02 {
+	if !(math.Abs(share-0.6) <= 0.02) {
 		t.Errorf("%.3f of the tiles are under the sea", share)
 	}
 	if top < 0.99 || bottom > -0.99 {

@@ -3,7 +3,9 @@ package gpu
 import (
 	"fmt"
 	"math"
+	"slices"
 	"sort"
+	"unsafe"
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
@@ -93,7 +95,7 @@ func (encoded *scene) stand(key any, local func() []triangle,
 	space maths.Subspace, material int, clear bool) {
 	at, seen := encoded.meshes[key]
 	if !seen {
-		at = encoded.pool(local())
+		at = encoded.pooled(encoded.grownFor(key, local))
 		encoded.meshes[key] = at
 	}
 	encoded.standings = append(encoded.standings, standing{root: at.root,
@@ -105,7 +107,23 @@ func (encoded *scene) stand(key any, local func() []triangle,
 // faces and the tree's boxes to the scene's, each tree's indices moved
 // past the ones already there.
 func (encoded *scene) pool(faces []triangle) pooled {
-	grown := grow(faces)
+	return encoded.pooled(grownOver(faces))
+}
+
+// grownFor is the tree over a mesh's faces in its own space: from the
+// retained drawer's keeper for one of slayer's meshes, where the scene
+// has a keeper, and grown from local otherwise.
+func (encoded *scene) grownFor(key any, local func() []triangle) tree {
+	if skin, ok := key.(*mesh.Mesh); ok && encoded.keeper != nil {
+		return encoded.keeper.grownFor(skin, local)
+	}
+	return grownOver(local())
+}
+
+// pooled adds a grown tree's faces and boxes to the scene's, each tree's
+// indices moved past the ones already there. It reads the tree and
+// never changes it, so a kept tree serves frame after frame.
+func (encoded *scene) pooled(grown tree) pooled {
 	firstFace := len(encoded.faces.triangles)
 	firstNode := len(encoded.faces.nodes)
 	encoded.faces.triangles = append(encoded.faces.triangles,
@@ -139,6 +157,59 @@ func pick(bit int, low, high float64) float64 {
 		return low
 	}
 	return high
+}
+
+// standingOrder is the tree over the standings and the order its leaves
+// hold them in, and the same for each group's members, as topped makes
+// them, with what they were made from.
+//
+// The instances, the native first faces and the native hierarchy all
+// read the order. Sorting the standings is most of topped's time, so an
+// encode works it once and hands it to all three.
+type standingOrder struct {
+	order      []int
+	nodes      []node
+	local      [][]int
+	localNodes [][]node
+	from       orderedFrom
+}
+
+// orderedFrom is what an order was made from: the standings and the
+// groups, each by where its elements are and how many. Standings are
+// only ever added, never changed in place, so an order whose standings
+// and groups are still these is the order topped makes of them now.
+type orderedFrom struct {
+	standings, groups *byte
+	count, groupCount int
+}
+
+// fromOf is what an order of the scene's standings now is made from.
+func fromOf(encoded *scene) orderedFrom {
+	return orderedFrom{
+		standings: (*byte)(unsafe.Pointer(unsafe.SliceData(
+			encoded.standings))),
+		groups: (*byte)(unsafe.Pointer(unsafe.SliceData(
+			encoded.groups))),
+		count: len(encoded.standings), groupCount: len(encoded.groups)}
+}
+
+// ordered is the scene's standing order, worked by topped the first time
+// it is asked and again whenever a standing or a group was added, or the
+// standings set anew, since.
+func (encoded *scene) ordered() *standingOrder {
+	from := fromOf(encoded)
+	if encoded.order != nil && encoded.order.from == from {
+		return encoded.order
+	}
+	made := &standingOrder{from: from}
+	made.order, made.nodes = topped(encoded.standings)
+	for _, group := range encoded.groups {
+		order, nodes := topped(group.members)
+		made.local = append(made.local, order)
+		made.localNodes = append(made.localNodes, nodes)
+	}
+	encoded.order = made
+	return made
 }
 
 // instancesOf writes every standing, in the order the leaves of their
@@ -180,7 +251,8 @@ func (encoded *scene) instancesWithin(bytes int) error {
 		return err
 	}
 
-	order, nodes := topped(encoded.standings)
+	tops := encoded.ordered()
+	order, nodes := tops.order, slices.Clone(tops.nodes)
 	placed := make([]standing, 0, len(order))
 	for _, index := range order {
 		placed = append(placed, encoded.standings[index])
@@ -188,7 +260,7 @@ func (encoded *scene) instancesWithin(bytes int) error {
 	// Global root stays at zero. Local roots and member ranges follow it.
 	roots := make([]int, len(encoded.groups))
 	for index, group := range encoded.groups {
-		localOrder, localNodes := topped(group.members)
+		localOrder, localNodes := tops.local[index], tops.localNodes[index]
 		firstNode, firstInstance := len(nodes), len(placed)
 		roots[index] = firstNode
 		for _, member := range localOrder {
@@ -236,6 +308,22 @@ func axes() []maths.Vec {
 
 // xyzName is an axis by its letter.
 func xyzName(index int) string { return string(rune('x' + index)) }
+
+// standingBounds is the centre and radius, in world metres, of the
+// sphere round the box that holds every standing, for the header's
+// bounds; with no standing it is all zeros, which no query reads.
+func (encoded *scene) standingBounds() []float64 {
+	if len(encoded.standings) == 0 {
+		return wholes(wholeZero, wholeZero, wholeZero, wholeZero)
+	}
+	round := empty()
+	for _, one := range encoded.standings {
+		round = round.fit(one.bounds.low).fit(one.bounds.high)
+	}
+	middle := round.low.Add(round.high).Scale(beamHalf)
+	radius := round.high.Sub(middle).Len()
+	return append(point(middle), radius)
+}
 
 // topLeaf is the most standings a leaf of their tree holds.
 const topLeaf = 2

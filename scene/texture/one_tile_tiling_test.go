@@ -15,11 +15,11 @@ type oneTile struct {
 	asked         *int
 }
 
-func (o oneTile) Nearest(maths.Vec) hexes.Tile { return hexes.Tile{I: 7} }
+func (o oneTile) Nearest(maths.Vec) hexes.Tile { return hexes.Tile{Column: 7} }
 
 func (o oneTile) Spacing() float64 { return o.spacing }
 
-func (o oneTile) ID(tile hexes.Tile) int64 { return int64(tile.I) }
+func (o oneTile) ID(tile hexes.Tile) int64 { return int64(tile.Column) }
 
 func (o oneTile) Edge(maths.Vec, hexes.Tile) float64 {
 	if o.asked != nil {

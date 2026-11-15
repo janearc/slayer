@@ -91,8 +91,9 @@ the top; `Look` takes it out through the eye's `Subspace`; `Swath(across,
 above)` and `Focal(wide, gauge)` are as slayer has them, and the gauge
 table is slayer's.
 
-it is a pattern, not an import. oceantex does not depend on slayer, so
-slayer's `film.Lens` cannot be handed to `View` as it is. three things
+it is a pattern, not an import. the camera imports nothing from slayer, so
+slayer's `film.Lens` cannot be handed to `View` as it is. the package as a
+whole does depend on slayer: `shore.go` imports `slayer/titan`. three things
 differ:
 
 - up here is z (x east, y north); slayer's is y. an eye with no turn

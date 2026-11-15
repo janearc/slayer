@@ -44,6 +44,18 @@ func SampledAccelerated(world *thing.World, eye maths.Subspace, lens film.Sensor
 	return nil, Profile{}, ErrNoMetal
 }
 
+// SampledFast is unavailable on platforms without Metal.
+func SampledFast(world *thing.World, eye maths.Subspace, lens film.Sensor,
+	at time.Duration, width, height, side int) (*frame.Frame, Profile, error) {
+	return nil, Profile{}, ErrNoMetal
+}
+
+// SampledFaster is unavailable on platforms without Metal.
+func SampledFaster(world *thing.World, eye maths.Subspace, lens film.Sensor,
+	at time.Duration, width, height, side int) (*frame.Frame, Profile, error) {
+	return nil, Profile{}, ErrNoMetal
+}
+
 // SampledCached is unavailable on platforms without Metal.
 func SampledCached(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	at time.Duration, width, height, side int) (*frame.Frame, Profile, error) {

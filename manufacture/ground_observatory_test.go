@@ -91,7 +91,7 @@ func (profile groundProfile) checkPrimary(test *testing.T, data groundContract,
 			along := point.Dot(data.MirrorTangent)
 			low, high = min(low, along), max(high, along)
 		}
-		if math.Abs(high-low-profile.Aperture) > data.Tolerance {
+		if !(math.Abs(high-low-profile.Aperture) <= data.Tolerance) {
 			test.Fatal("wrong primary aperture", profile.Design, high-low)
 		}
 		if pieces := connectedPanels(polygon); pieces != profile.Panels {

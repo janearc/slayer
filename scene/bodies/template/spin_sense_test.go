@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies"
 	"github.com/janearc/slayer/scene/thing"
@@ -21,13 +22,13 @@ func durationOf(seconds float64) time.Duration {
 // parts are not built.
 func quarterDayOn(t *testing.T, day, tilt float64) maths.Vec {
 	t.Helper()
-	spinner := bodies.Body{Name: "spinner", Kind: bodies.Star, Radius: 1,
-		Day: durationOf(day), Tilt: tilt}
+	spinner := want(t, "spinner", bodies.Star, 1, 1).
+		Turning(durationOf(day), measure.Radians(tilt))
 	w := thing.NewWorld()
 	if err := spinner.Place(w, maths.Vec{}, 1, 2); err != nil {
 		t.Fatal(err)
 	}
-	quarter := spinner.Day / 4
+	quarter := spinner.Day() / 4
 	if quarter < 0 {
 		quarter = -quarter
 	}
@@ -51,21 +52,22 @@ func quarterDayOn(t *testing.T, day, tilt float64) maths.Vec {
 // held too, near enough to tell a mutant from it.
 func TestEachBodyTurnsTheWayItsTiltSays(t *testing.T) {
 	backward := map[string]bool{"venus": true, "uranus": true, "pluto": true}
-	for _, b := range []bodies.Body{Sol(), Mercury(), Venus(), Earth(), Mars(),
-		Jupiter(), Saturn(), Uranus(), Neptune(), Pluto(), Charon(),
-		Magnetar(), Pulsar(), HotJupiter()} {
-		if b.Day <= 0 {
-			t.Errorf("%s has a day of %v; a spinning body's is positive", b.Name, b.Day)
+	for _, make := range []func() (bodies.Body, error){Sol, Mercury, Venus,
+		Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Charon,
+		Magnetar, Pulsar, HotJupiter} {
+		b := its(t, make)
+		if b.Day() <= 0 {
+			t.Errorf("%s has a day of %v; a spinning body's is positive", b.Name(), b.Day())
 			continue
 		}
-		got := quarterDayOn(t, b.Day.Seconds(), b.Tilt)
-		want := maths.V(0, math.Sin(b.Tilt), -math.Cos(b.Tilt))
+		got := quarterDayOn(t, b.Day().Seconds(), b.Tilt())
+		want := maths.V(0, math.Sin(b.Tilt()), -math.Cos(b.Tilt()))
 		if d := got.Sub(want).Len(); !(d < 1e-6) {
-			t.Errorf("%s: +x a quarter day on is %v, want %v", b.Name, got, want)
+			t.Errorf("%s: +x a quarter day on is %v, want %v", b.Name(), got, want)
 		}
-		if turnsBackward := got.Z > 0; turnsBackward != backward[b.Name] {
+		if turnsBackward := got.Z > 0; turnsBackward != backward[b.Name()] {
 			t.Errorf("%s turns backward: %v, want %v (+x went to z = %v)",
-				b.Name, turnsBackward, backward[b.Name], got.Z)
+				b.Name(), turnsBackward, backward[b.Name()], got.Z)
 		}
 	}
 }
@@ -88,18 +90,20 @@ func TestAQuarterDayTurnsPlusXTowardMinusZWhenThereIsNoTilt(t *testing.T) {
 // physics, worked by hand: the comets and the hole do not turn. a body
 // with no day stands still, and +x stays +x whatever the time.
 func TestBodiesWithNoDayDoNotTurn(t *testing.T) {
-	for _, b := range []bodies.Body{HaleBopp(), Hyakutake(), Quasar()} {
+	for _, make := range []func() (bodies.Body, error){HaleBopp, Hyakutake,
+		Quasar} {
+		b := its(t, make)
 		w := thing.NewWorld()
-		still := bodies.Body{Name: b.Name, Kind: bodies.Star, Radius: 1,
-			Day: b.Day, Tilt: b.Tilt}
+		still := want(t, b.Name(), bodies.Star, 1, 1).
+			Turning(b.Day(), measure.Radians(b.Tilt()))
 		if err := still.Place(w, maths.Vec{}, 1, 2); err != nil {
 			t.Fatal(err)
 		}
-		if b.Day != 0 || b.Tilt != 0 {
-			t.Errorf("%s has a day of %v and a tilt of %v, want none", b.Name, b.Day, b.Tilt)
+		if b.Day() != 0 || b.Tilt() != 0 {
+			t.Errorf("%s has a day of %v and a tilt of %v, want none", b.Name(), b.Day(), b.Tilt())
 		}
 		if _, spins := w.Things[0].Motion.(thing.Spin); spins {
-			t.Errorf("%s is carried by a spin", b.Name)
+			t.Errorf("%s is carried by a spin", b.Name())
 		}
 	}
 }

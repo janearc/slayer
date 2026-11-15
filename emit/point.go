@@ -139,3 +139,18 @@ func (lit Lit) falling(in maths.Vec, distance float64) float64 {
 
 // a Lit is a lamp slayer's tracer can use as it is, and lights in a band
 var _ Banded = Lit{}
+
+// Stands is where the emitter is.
+func (lit Lit) Stands() maths.Vec { return lit.At }
+
+// AtMost is the most light the emitter sends any point a distance from
+// it, whichever way the point lies: its brightest part by the inverse
+// square, with no cone taken off. At the emitter itself it has no end.
+func (lit Lit) AtMost(distance float64) float64 {
+	return brightest(lit.Strength) / (distance * distance)
+}
+
+// brightest is the largest of a light's three parts.
+func brightest(light maths.Light) float64 {
+	return math.Max(light.R, math.Max(light.G, light.B))
+}

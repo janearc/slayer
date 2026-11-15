@@ -49,7 +49,7 @@ func TestDegIsDegreesAsRadians(t *testing.T) {
 		{-45, -math.Pi / 4},
 		{360, 2 * math.Pi},
 	} {
-		if got := deg(c.in); math.Abs(got-c.want) > 1e-15 {
+		if got := deg(c.in).InRadians(); !(math.Abs(got-c.want) <= 1e-15) {
 			t.Errorf("deg(%v) = %v, want %v", c.in, got, c.want)
 		}
 	}
@@ -148,7 +148,7 @@ func TestRoughnessPaintsEachClassAGreyOfItsRoughness(t *testing.T) {
 		t.Error("a change to one roughness look reached the next")
 	}
 	if blank := roughness([world.Biomes]float64{}); blank.Paints[world.Sea] != maths.Grey(0) {
-		t.Errorf("a roughness of nought is %v, want black", blank.Paints[world.Sea])
+		t.Errorf("a roughness of zero is %v, want black", blank.Paints[world.Sea])
 	}
 }
 

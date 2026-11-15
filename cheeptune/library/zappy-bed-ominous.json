@@ -1,0 +1,122 @@
+{
+	// zappy's bed for explaining, the ominous mood. 80 a minute, 17 bars,
+	// 51.0 s. d, with the second and third degrees lowered (e flat, f).
+	//
+	// the plan. the same three things as the curious bed. the motif, in
+	// its minor form: a4 d5 e5 a5 | f5 (the last note a half step lower
+	// than the ident's f#). the call, a d e, which here is bent to a d
+	// e flat. the floor, the ident's low b flat. in place of the bounce
+	// there is a heartbeat: two soft kicks at the start of each bar, and
+	// a bass note that is held half a bar and let go, as glass-hour's is.
+	//
+	// harmony, a bar each:
+	//   1-4   d  d  d  d       heartbeat and an open fifth. the motif in
+	//                          minor arrives in bars 3-4.
+	//   5     e flat           the bass steps up a half step, as
+	//                          glass-hour's does, and the whole motif
+	//                          moves with it: bb4 eb5 f5 bb5
+	//   6     d                and slips back down onto a5 (b flat to a)
+	//   7     d + e flat       the call, bent: a d e flat. the chord has
+	//                          d, a and e flat in it and does not settle.
+	//   8     nothing          the heartbeat alone.
+	//   9-11  b flat           the turn, where the fact lands: the bass's
+	//                          loudest note, a hard drum, and a chord of
+	//                          b flat with e, a and d stacked over it.
+	//                          then the ident, major, two octaves up and
+	//                          very quiet (a5 d6 e6 a6 | f#6): the small
+	//                          tune a long way above the large thing.
+	//   12    a                the bass sinks a half step to a and the
+	//                          chord leans hard toward home. heartbeat
+	//                          twice as often.
+	//   13-14 d  d             home, and the minor motif once, louder
+	//                          than before.
+	//   15    e flat           the call on e flat (bb eb f)
+	//   16    d                the call answered downward: a d e d
+	//   17    d                one short open fifth, one kick, stop.
+	//
+	// loud and quiet: bars 1-8 are p and pp with the tune at mp; bar 9 is
+	// f and ff in the bass and drum and is the loudest bar; the high
+	// ident is pp; bars 13-14 are mp and mf; the end is p.
+	"name": "zappy-bed-ominous",
+	"tempo": 80,
+	"meter": 4,
+	"loop": false,
+	"parts": [
+		{"role": "lead", "bars": [
+			"-:4",
+			"-:4",
+			"- a4:1/2@p d5:1/2@p e5@p a5@mp",
+			"f5:3@mp -",
+			"- bb4:1/2@p eb5:1/2@p f5@p bb5@mp",
+			"a5:3@mp -",
+			"- a4:1/2@p d5:1/2@p eb5:2@mp",
+			"-:4",
+			"-:4",
+			"- a5:1/2@pp d6:1/2@pp e6@pp a6@p",
+			"f#6:4@p",
+			"-:4",
+			"- a4:1/2@mp d5:1/2@mp e5@mp a5",
+			"f5:3@mp -",
+			"- bb4:1/2@p eb5:1/2@p f5:2@p",
+			"- a4:1/2@p d5:1/2@p e5@p d5@p",
+			"d5@mp -:3"
+		]},
+		{"role": "pad", "bars": [
+			"(d3 a3):4@pp",
+			"(d3 a3):4@pp",
+			"(d3 a3):4@p",
+			"(d3 a3 f4):4@p",
+			"(eb3 bb3):4@p",
+			"(d3 a3):4@p",
+			"(d3 a3 eb4):4@p",
+			"-:4",
+			"(bb2 e3 a3 d4):4",
+			"(bb2 e3 a3 d4):4@mp",
+			"(bb2 e3 a3 d4):4@p",
+			"(a2 e3 g3 c#4):4@mp",
+			"(d3 a3 f4):4@mp",
+			"(d3 a3 f4):4@p",
+			"(eb3 bb3 g4):4@p",
+			"(d3 a3):4@p",
+			"(d3 a3 d4):1@mp -:3"
+		]},
+		{"role": "bass", "bars": [
+			"d2:2@mp -:2",
+			"d2:2@mp -:2",
+			"d2:2@mp -:2",
+			"d2:2@mp -:2",
+			"eb2:2@mp -:2",
+			"d2:2@mp -:2",
+			"d2:2@mp -:2",
+			"-:4",
+			"bb1:4@ff~",
+			"bb1:4",
+			"bb1:4@mp",
+			"a1:4",
+			"d2:2 -:2",
+			"d2:2@mp -:2",
+			"eb2:2@mp -:2",
+			"d2:4@mp",
+			"d2 -:3"
+		]},
+		{"role": "perc", "bars": [
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:2 h:1/2@pp h:1/2@pp",
+			"k:1/2@p k:1/2@pp -:3",
+			"k@f - t@mp -",
+			"-:4",
+			"-:4",
+			"k:1/2@mp k:1/2@p - k:1/2@mp k:1/2@p -",
+			"k:1/2@mp k:1/2@p -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k:1/2@p k:1/2@pp -:3",
+			"k@mp -:3"
+		]}
+	]
+}

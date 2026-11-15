@@ -23,7 +23,7 @@ func TestALineIsAGaussian(t *testing.T) {
 		{502, 0.73575888234}, {498, 0.73575888234},
 		{503, 0.21079844912}, {504, 0.03663127778}, {496, 0.03663127778},
 	} {
-		if got := e.Emits(maths.Band{Nanometres: c.nm}); math.Abs(got-c.want) > 1e-10 {
+		if got := e.Emits(maths.Band{Nanometres: c.nm}); !(math.Abs(got-c.want) <= 1e-10) {
 			t.Errorf("at %v nm the line gives %v, want %v", c.nm, got, c.want)
 		}
 	}
@@ -34,7 +34,7 @@ func TestALineIsAGaussian(t *testing.T) {
 // 1.10363832351.
 func TestLinesSum(t *testing.T) {
 	e := Excited{Lines: map[float64]float64{500: 2, 504: 1}, Width: 2}
-	if got := e.Emits(maths.Band{Nanometres: 502}); math.Abs(got-1.10363832351) > 1e-10 {
+	if got := e.Emits(maths.Band{Nanometres: 502}); !(math.Abs(got-1.10363832351) <= 1e-10) {
 		t.Errorf("between two lines the gas gives %v, want 1.10363832351", got)
 	}
 	// a line at zero counts once, and no line is added that is not there
@@ -53,13 +53,13 @@ func TestAWidthOfNothingIsOne(t *testing.T) {
 		for _, c := range []struct{ nm, want float64 }{
 			{500.5, 0.77880078307}, {501, 0.36787944117}, {500, 1},
 		} {
-			if got := e.Emits(maths.Band{Nanometres: c.nm}); math.Abs(got-c.want) > 1e-10 {
+			if got := e.Emits(maths.Band{Nanometres: c.nm}); !(math.Abs(got-c.want) <= 1e-10) {
 				t.Errorf("a width of %v at %v nm gives %v, want %v", w, c.nm, got, c.want)
 			}
 		}
 	}
 	half := Excited{Lines: map[float64]float64{500: 1}, Width: 0.5}
-	if got := half.Emits(maths.Band{Nanometres: 500.5}); math.Abs(got-0.36787944117) > 1e-10 {
+	if got := half.Emits(maths.Band{Nanometres: 500.5}); !(math.Abs(got-0.36787944117) <= 1e-10) {
 		t.Errorf("a width of a half at 0.5 nm gives %v, want exp(-1)", got)
 	}
 }

@@ -1,76 +1,111 @@
-// Command slayer draws the set files we write, from outside, the way a
-// stranger would, and keeps a note of every place it has to reach in.
+// Command slayer is Slayer's front door: package door's tool and its
+// verbs. See door/README.md.
 //
-//	slayer set FILE [-camera NAME] [-at T] [-k K] [-samples N] [-out DIR]
+//	slayer draw JOB [--out PATH] [--width N] [--height N] [--rays N]
+//	    [--at T] [--camera NAME] [--renderer NAME] [--quality NAME]
+//	    [--vibes on|off] [--fastlight on|off] [--lamp-store on|off]
+//	    [--sky-looks on|off] [--dry-run]
+//	slayer list [HEADING] [--json]
+//	slayer assess FILE [--judge] | --smokes [GROUP|N...]
+//	slayer develop JOB RAW... [--sum] [--white K] [--out PATH]
+//	slayer tunes DIR [--address HOST:PORT | --check | --films | --page]
+//	slayer watch JOB [the draw flags]
+//	slayer edit [JOB] [the draw flags]
+//	slayer schema [--where]
 //
-// set draws a set file as the terminal shows it and as a real picture,
-// judges the one against the other with the comparison, and writes the
-// real one again through the set's print. see draw.go, and doc/sets.md
-// for what a set file says.
+// Bare slayer at a terminal is slayer edit on the newest job here.
 //
-// slayer is not smokecheck. smokecheck is the gate on the smokes
-// (scene/smoke); slayer is ours, and it grows with whatever the next
-// picture needs. where slayer's own packages make that hard, the
-// difficulty is the finding.
+// One older verb is read ahead of the door, in its own flags, until it
+// moves onto it:
+//
+//	slayer render FILE [settings]
+//
+// render draws a set file, the whole of it, as hillside does: its things
+// and its world together. its settings are hillside's, so -w, -h and -n
+// say the size and the rays, and -out where the picture goes. see
+// render.go.
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
+	"io"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/janearc/slayer/render/compare"
-	"github.com/janearc/slayer/scene/thing"
+	"github.com/janearc/slayer/diskcache"
+	"github.com/janearc/slayer/door"
 )
 
-// the terminal slayer pretends to be, as smokecheck does: 179 by 50 cells of
-// sextants, each three real pixels across and four down
+// build, built, who and sessions are set by the linker; they say which build
+// this is.
+var build, built, who, sessions string
+
+// where os.Args holds the verb, and the arguments after it: the program's
+// name comes first.
 const (
-	textW, textH = 358, 150
-	across, down = 3, 4
+	verbAt = 1 // defined: the verb comes after the program's name
+	askAt  = 2 // defined: its arguments come after the verb
 )
 
-// main runs a verb.
+// the numbers slayer exits with, and a count of none.
+const (
+	nothing    = 0 // defined: no amount at all
+	exitFailed = 1 // defined: a verb failed
+	exitUsage  = 2 // defined: a verb that slayer does not have
+)
+
+// older is the verbs read ahead of the door, each in its own flags, and
+// the exit number it gives.
+var older = map[string]func(args []string, said, wrong io.Writer) int{
+	"render": render,
+}
+
+// moved is the verbs that went into the door's, each with what to type
+// now; one of them says so and exits as a verb slayer does not have.
+var moved = map[string]string{
+	"set":    "set is now: slayer assess FILE --judge",
+	"smokes": "smokes is now: slayer assess --smokes [GROUP|N...]",
+}
+
+// main runs an older verb by its word, or else the door, with a context
+// that control-c and a terminate cancel.
 func main() {
-	verbs := map[string]func([]string) (bool, error){
-		"set": draw,
+	// the build's digest is started now, from the binary as it starts: a
+	// binary rebuilt while this one runs must not have its digest put on
+	// what this one keeps (review of 2026-11-12); it is worked out beside
+	// the verb, so a quick one does not wait for it
+	go diskcache.Build() //nolint:errcheck // asked again, with its error, where used
+	if len(os.Args) > verbAt && moved[os.Args[verbAt]] != "" {
+		fmt.Fprintln(os.Stderr, "slayer: "+moved[os.Args[verbAt]])
+		os.Exit(exitUsage)
 	}
-	if len(os.Args) < 2 || verbs[os.Args[1]] == nil {
-		fmt.Fprintln(os.Stderr, "usage: slayer set FILE [-camera NAME] "+
-			"[-at T] [-k K] [-samples N] [-out DIR]")
-		os.Exit(2)
+	if len(os.Args) > verbAt && older[os.Args[verbAt]] != nil {
+		os.Exit(older[os.Args[verbAt]](os.Args[askAt:], os.Stdout,
+			os.Stderr))
 	}
-	honest, err := verbs[os.Args[1]](os.Args[2:])
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt,
+		syscall.SIGTERM)
+	code := front(ctx, os.Args[verbAt:], os.Stdout, os.Stderr)
+	stop()
+	os.Exit(code)
+}
+
+// front runs the door's tool on args and gives its exit number.
+func front(ctx context.Context, args []string, said, wrong io.Writer) int {
+	here, err := os.Getwd()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "slayer %s: %v\n", os.Args[1], err)
-		os.Exit(1)
+		fmt.Fprintf(wrong, "slayer: %v\n", err)
+		return exitUsage
 	}
-	if !honest {
-		os.Exit(1)
-	}
-}
-
-// Fineness is the least -k a world may be judged at, as smokecheck has it: a
-// world with a field is never judged by a reference coarser than twice.
-func Fineness(w *thing.World) int {
-	if len(w.Fields) > 0 {
-		return 2
-	}
-	return 1
-}
-
-// verdict is a comparison as it is kept: the numbers, and whether they
-// make it honest.
-type verdict struct {
-	compare.Report
-	Honest bool
-}
-
-// writeVerdict keeps a comparison's numbers beside its pictures.
-func writeVerdict(path string, r compare.Report) error {
-	b, err := json.MarshalIndent(verdict{r, r.Honest()}, "", "  ")
+	env, err := door.NewEnv(door.Given{Context: ctx, Build: build,
+		Built: built, Who: who, Sessions: sessions,
+		Environment: os.LookupEnv, Now: time.Now, Directory: here})
 	if err != nil {
-		return err
+		fmt.Fprintf(wrong, "slayer: %v\n", err)
+		return exitUsage
 	}
-	return os.WriteFile(path, append(b, '\n'), 0o644)
+	return door.Tool(env).Run(args, said, wrong)
 }

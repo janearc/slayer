@@ -2,6 +2,7 @@ package set
 
 import (
 	"fmt"
+	"github.com/janearc/slayer/scene/thing"
 	"maps"
 	"slices"
 
@@ -32,6 +33,7 @@ type Set struct {
 	sun                  *Sun
 	planet               *Planet
 	hud                  *Hud
+	fantasy              []Departure
 	world                *World
 	recipes              map[string]Recipe
 	weather              map[string]Mist
@@ -42,9 +44,24 @@ type Set struct {
 	atmosphereLayers     []AtmosphereLayer
 	renderer, complexity string
 	volumeLighting       string
-	seed                 float64
-	hasSeed              bool
-	windSpeed, windFrom  float64
+	// flags is the flags the set says, vibes and fastlight, each on or
+	// off; one it does not say is absent
+	flags               map[string]string
+	illumination        thing.VolumeIllumination
+	seed                float64
+	hasSeed             bool
+	windSpeed, windFrom float64
+	// settingWord, when and spaced are what a scene says in schema
+	// version 2 of where it is and when; undrawn is every version 2
+	// feature it holds that no stage draws yet.
+	settingWord string
+	when        *calendarDay
+	spaced      *spaceFrame
+	undrawn     []Undrawn
+	radii       []position
+	anchor      *anchorOf
+	globe       *globeOf
+	sky         *starSky
 }
 
 // Light is how the set is lit: ambient, the moon, or the sun.
@@ -93,6 +110,10 @@ type camera struct {
 	from             string
 	standoff         [3]float64 // metres from the asset it stands off
 	at, lookAt       *[3]float64
+	duration         *durationOf
+	instrument       string
+	relative         *relativePlace
+	moves            []move
 }
 
 // asset is one thing on the set: its kind, as its key says, and its
@@ -108,6 +129,9 @@ type step func(name, value *yaml.Node) error
 type reader struct {
 	file string
 	set  *Set
+	// second is whether the file names the version 2 schema, and so may
+	// say the keys that only version 2 has.
+	second bool
 }
 
 // Read is the set a set file asks for. It refuses a file that is not YAML, a
@@ -123,9 +147,9 @@ func Read(file string, source []byte) (Set, error) {
 		return Set{}, err
 	}
 	made := Set{complexity: "quick", recipes: map[string]Recipe{}, weather: map[string]Mist{}}
-	reading := reader{file: file, set: &made}
+	reading := reader{file: file, set: &made, second: saysVersionTwo(top)}
 	err = reading.keys(top, map[string]step{"scene": reading.scene,
-		"$schema": reading.only(EcosystemSchema)}, nil)
+		"$schema": reading.only(EcosystemSchema, ecosystemV2Schema)}, nil)
 	if err == nil && made.volumeLighting == "cached" && made.renderer != "gpu-native" {
 		return Set{}, fmt.Errorf("%s: cached volume lighting requires gpu-native", file)
 	}
@@ -149,6 +173,9 @@ func Read(file string, source []byte) (Set, error) {
 	}
 	if err == nil {
 		err = reading.foundAtmosphere()
+	}
+	if err == nil {
+		err = reading.foundVersionTwo()
 	}
 	if err == nil {
 		err = reading.pinned()

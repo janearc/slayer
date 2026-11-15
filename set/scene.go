@@ -13,11 +13,14 @@ var kinds = []string{"house"}
 // its cameras, and the set.
 func (reading reader) scene(_, value *yaml.Node) error {
 	made := reading.set
-	return reading.keys(value, map[string]step{
+	steps := reading.with(map[string]step{
 		"renderer": reading.word(&made.renderer,
 			"gpu", "cpu", "gpu-native-shadows", "gpu-native"),
-		"volume-lighting": reading.word(&made.volumeLighting, "direct", "cached"),
-		"complexity":      reading.complexity(&made.complexity),
+		"volume-lighting":     reading.word(&made.volumeLighting, "direct", "cached"),
+		"vibes":               reading.flag("vibes"),
+		"fastlight":           reading.flag("fastlight"),
+		"volume-illumination": reading.volumeIllumination,
+		"complexity":          reading.complexity(&made.complexity),
 		"seed": func(key, value *yaml.Node) error {
 			err := reading.whole(&made.seed, 0, mostSeed)(key, value)
 			made.hasSeed = err == nil
@@ -38,6 +41,7 @@ func (reading reader) scene(_, value *yaml.Node) error {
 		"moon":            reading.moon,
 		"sun":             reading.sun,
 		"planet":          reading.planet,
+		"fantasy":         reading.fantasy,
 		"hud":             reading.hud,
 		"world":           reading.world,
 		"location": reading.block(map[string]step{
@@ -55,7 +59,8 @@ func (reading reader) scene(_, value *yaml.Node) error {
 			"things": reading.things,
 			"stands": reading.stands,
 			"texts":  reading.texts}),
-	}, nil)
+	}, reading.spaceScene())
+	return reading.keys(value, steps, nil)
 }
 
 // cameras reads each camera, by its name. A camera stands off an asset
@@ -65,31 +70,50 @@ func (reading reader) cameras(_, value *yaml.Node) error {
 	return reading.each(value, func(name, block *yaml.Node) error {
 		shot := camera{name: name.Value, eye: "human"}
 		var at, lookAt [3]float64
-		err := reading.keys(block, map[string]step{
-			"title": reading.text(&shot.title),
-			"eye":   reading.only("human"),
-			"orientation": reading.block(map[string]step{
-				"point_to": reading.text(&shot.pointTo),
-				"alpha":    reading.number(&shot.alpha, -90, 90),
-				"look_at": reading.three(&lookAt, -farthest,
-					farthest)}),
-			"location": reading.block(map[string]step{
-				"loc_relative": reading.block(map[string]step{
-					"object": reading.text(&shot.from),
-					"standoff_x": reading.number(&shot.standoff[0],
-						math.Inf(-1), math.Inf(1)),
-					"standoff_y": reading.number(&shot.standoff[1],
-						math.Inf(-1), math.Inf(1)),
-					"standoff_z": reading.number(&shot.standoff[2],
-						math.Inf(-1), math.Inf(1))}),
-				"at": reading.three(&at, -farthest, farthest)}),
-		}, nil)
+		steps := reading.with(reading.cameraKeys(&shot, &at, &lookAt),
+			reading.spaceCamera(&shot))
+		err := reading.keys(block, steps, nil)
 		if err == nil {
 			err = reading.placed(block, &shot, at, lookAt)
 		}
 		reading.set.cameras = append(reading.set.cameras, shot)
 		return err
 	})
+}
+
+// cameraKeys is the steps that read a camera of schema version 1 into
+// shot: its title, its eye, where it points and where it stands.
+func (reading reader) cameraKeys(shot *camera, at,
+	lookAt *[3]float64) map[string]step {
+	return map[string]step{
+		"title": reading.text(&shot.title),
+		"eye":   reading.only("human"),
+		"orientation": reading.block(map[string]step{
+			"point_to": reading.text(&shot.pointTo),
+			"alpha":    reading.number(&shot.alpha, -90, 90),
+			"look_at": reading.three(lookAt, -farthest,
+				farthest)}),
+		"location": reading.locationKeys(shot, at),
+	}
+}
+
+// locationKeys is the step that reads where a camera stands: off an
+// asset, or at a place, or in schema version 2 by a thing's place.
+func (reading reader) locationKeys(shot *camera, at *[3]float64) step {
+	off := reading.block(map[string]step{
+		"object": reading.text(&shot.from),
+		"standoff_x": reading.number(&shot.standoff[0],
+			math.Inf(-1), math.Inf(1)),
+		"standoff_y": reading.number(&shot.standoff[1],
+			math.Inf(-1), math.Inf(1)),
+		"standoff_z": reading.number(&shot.standoff[2],
+			math.Inf(-1), math.Inf(1))})
+	places := map[string]step{
+		"loc_relative": off,
+		"at":           reading.three(at, -farthest, farthest),
+	}
+	steps := reading.with(places, reading.spaceLocation(shot))
+	return reading.block(steps)
 }
 
 // placed takes a camera's place and the place it looks at, when it says
@@ -102,6 +126,11 @@ func (reading reader) placed(block *yaml.Node, shot *camera, at,
 	stands, looks := says(location, "at"), says(orientation, "look_at")
 	offAsset := says(location, "loc_relative") ||
 		says(orientation, "point_to") || says(orientation, "alpha")
+	if says(location, "relative") && (stands || says(location, "loc_relative")) {
+		return reading.refuse(block, "camera %s stands at a place set by "+
+			"a thing, or at a place, or off an asset, not some of each",
+			shot.name)
+	}
 	switch {
 	case !stands && !looks:
 		return nil

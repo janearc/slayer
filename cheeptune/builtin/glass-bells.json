@@ -1,0 +1,51 @@
+{
+	// the studio machine. fm bells on the lead, a struck bowl holding the
+	// chords whole, a round bass, quiet synthesised drums, and a long
+	// bright room. made for glass-hour.
+	"name": "glass-bells",
+	"machine": "studio",
+	"master": 0.35,
+	"reverb": {"size": 0.9, "decay": 4.5, "damping": 0.25, "level": 0.5},
+	"channels": [
+		{"kind": "fm", "role": "lead", "volume": 0.6, "place": -0.15,
+		 "send": {"reverb": 0.55},
+		 "fm": {"arrangement": "pairs", "operators": [
+			{"ratio": 1, "level": 0.8,
+			 "envelope": {"attack": 0.002, "decay": 3.5, "sustain": 0,
+			              "release": 2.5}},
+			{"ratio": 3.5, "level": 0.14,
+			 "envelope": {"attack": 0, "decay": 1.4, "sustain": 0,
+			              "release": 1.2}},
+			{"ratio": 2.76, "level": 0.22,
+			 "envelope": {"attack": 0.002, "decay": 0.9, "sustain": 0,
+			              "release": 0.7}},
+			{"ratio": 5.4, "level": 0.1,
+			 "envelope": {"attack": 0, "decay": 0.5, "sustain": 0,
+			              "release": 0.4}}
+		 ]}},
+		{"kind": "modal", "role": "pad", "volume": 0.5, "place": 0.3,
+		 "send": {"reverb": 0.7},
+		 "modal": {"set": "bowl", "hardness": 0.35, "decay": 5}},
+		{"kind": "analog", "role": "bass", "volume": 0.7,
+		 "send": {"reverb": 0.1},
+		 "envelope": {"attack": 0.005, "decay": 2.5, "sustain": 0.5,
+		              "release": 0.35},
+		 "analog": {"oscillators": [{"shape": "triangle"},
+		                            {"shape": "saw", "level": 0.25}],
+		            "filter": {"cutoff": 700, "resonance": 0.1,
+		                       "follow": 0.5}}},
+		{"kind": "drum", "role": "perc", "volume": 0.8, "place": 0.1,
+		 "send": {"reverb": 0.3},
+		 "drums": {
+			"k": {"tone": 50, "sweep": 30, "fall": 0.05, "decay": 0.3,
+			      "click": 0.2},
+			"s": {"tone": 190, "decay": 0.09, "noise": 0.35,
+			      "noise_decay": 0.14, "colour": 1800, "volume": 0.5},
+			"h": {"noise": 0.3, "noise_decay": 0.045, "colour": 7000},
+			"t": {"tone": 110, "sweep": 7, "fall": 0.08, "decay": 0.25},
+			"o": {"noise": 0.3, "noise_decay": 0.28, "colour": 7000},
+			"b": {"tone": 880, "struck": "bar", "hardness": 0.8,
+			      "decay": 0.6}
+		 }}
+	]
+}

@@ -49,6 +49,7 @@ func Open(source, kernel string) (*Kernel, error) {
 		return nil, errors.New("metal: " + C.GoString(&why[0]))
 	}
 	k := &Kernel{ctx: ctx, device: C.GoString(C.slayer_metal_name(ctx))}
+	k.SetLimit(defaultLimit)
 	runtime.SetFinalizer(k, (*Kernel).Close)
 	return k, nil
 }
@@ -102,4 +103,25 @@ func (k *Kernel) Close() {
 		C.slayer_metal_close(k.ctx)
 		k.ctx = nil
 	}
+}
+
+// defaultLimit is how long the wait for one command lasts before it gives
+// up, unless SetLimit says otherwise. It is measured and picked: the longest
+// single command on Melancholia at 4096 by 3002 samples ran 1.2 s on the
+// device (the `timing` lines of a build that printed each command's GPU time,
+// from `hillside -set sets/melancholia.yaml -gpu -w 2048 -n 2`), and this is
+// fifty times that, since the device is often shared with other work.
+const defaultLimit = 60 * time.Second
+
+// SetLimit sets how long the wait for any one command of the kernel lasts
+// before it gives up with an error saying what it waited for. The command
+// is not cancelled: it may keep the device busy, and the kernel refuses
+// every later command, so a caller that sees the error closes the kernel
+// and does not reopen one in the same process on the same work.
+func (k *Kernel) SetLimit(limit time.Duration) {
+	if k.ctx == nil {
+		return
+	}
+	C.slayer_metal_limit(k.ctx, C.double(limit.Seconds()))
+	runtime.KeepAlive(k)
 }

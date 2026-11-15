@@ -27,7 +27,7 @@ func (s *spy) Light(toward maths.Vec) maths.Light {
 // a melt said as nothing is a quarter of the spacing. the walks are
 // counted, so the test fails if none of them is in a melt.
 func TestHexedMeltsByTheSmoothStepOfTheSeam(t *testing.T) {
-	tl := hexes.Sphere{N: 6}
+	tl := hexes.Sphere{Splits: 6}
 	cases := []struct {
 		name       string
 		soft, melt float64
@@ -82,7 +82,7 @@ func TestHexedMeltsByTheSmoothStepOfTheSeam(t *testing.T) {
 // the tile's middle and that is the one question. at the seam the flat
 // colour and the true sky are both asked, the middle first.
 func TestHexedAsksTheSkyOnceInsideATile(t *testing.T) {
-	tl := hexes.Sphere{N: 6}
+	tl := hexes.Sphere{Splits: 6}
 	for _, tile := range tl.Tiles() {
 		inside := &spy{}
 		(Hexed{Of: inside, Tiling: tl}).Light(tl.Centre(tile))

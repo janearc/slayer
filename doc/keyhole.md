@@ -19,8 +19,8 @@ hand.
 
 ## Who does what
 
-The split agreed with the observatory work's owner on 2026-11-08 is
-written in full in her coordination notes; in short:
+The split agreed with the observatory work on 2026-11-08 is written in
+full in its coordination notes; in short:
 
 - this branch, `keyhole`, from `feat/observatory-sites` at d270f3c:
   schema and reader parity, a look per camera move, the instrument eye,
@@ -30,10 +30,10 @@ written in full in her coordination notes; in short:
   kinds and catalogue, and the existing guide-star pointing and
   launchers.
 - shared, in small separate commits announced first: `set/recipes.go`,
-  `set/world.go`, `set/scene.go`, `cmd/hillside/scene.go`, the source
+  `set/world.go`, `set/scene.go`, `hillside/scene.go`, the source
   manifests and these docs. New kind names in the schema's enums are
   hers; parity changes are this branch's, kept apart.
-- the GPU's field transport is not touched without its owner.
+- the GPU's field transport is not touched by this work.
 
 ## The gaps, in order
 
@@ -51,7 +51,7 @@ written in full in her coordination notes; in short:
    its own look, a target that travels from one point to another as the
    camera does. Looks relative to the scene's objects, not only absolute
    metres, are still to come.
-5. **The frame.** Agreed with the observatory work's owner before orbit
+5. **The frame.** Agreed with the observatory work before orbit
    and weather. The scene map is east, north, up; the maths space is
    east, up, south; terrain staging rebases to its west, north and lowest
    point.
@@ -102,13 +102,13 @@ For the scene format that means:
   tree's size on the picture.
 - a detail budget the renderer spends by size on the picture.
 
-Terrain and vegetation are the observatory work's owner's or shared, so
-this note goes to her as a design proposal before anything is built.
+Terrain and vegetation belong to the observatory work or are shared, so
+this note is a design proposal before anything is built.
 
 ## Proposal: the frame and the eye
 
-Agreed with the observatory work's owner on 2026-11-08, amended by her
-review of b57fecd (her notes, slayer-world-frame-notes.txt). These are
+Agreed with the observatory work on 2026-11-08, amended by the review of
+b57fecd (slayer-world-frame-notes.txt). These are
 meanings, not a promise to build every effect now; the first slice is
 the smallest useful one. Nothing here is built yet.
 
@@ -157,7 +157,7 @@ a globe's radius less its height, and grazing shadow intersections, keep
 their stable predicates and their budgets.
 
 A planet-sized shape says whether its local terms need split precision.
-The GPU's field transport is not touched without its owner.
+The GPU's field transport is not touched by this work.
 
 **The eye is an optical port and a named approximation.** An instrument
 eye looks out of a named pupil on the instrument, with an optical axis,
@@ -205,4 +205,4 @@ uses it is read; a scene that misuses it is refused, by the schema where
 it can say so and by the reader where only it can.
 
 Small scoped tests, two workers, no mutation campaign; runs held
-whenever the machine's owner has called a hold.
+whenever the machine is held.

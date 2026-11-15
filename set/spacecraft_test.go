@@ -88,11 +88,11 @@ func (data spacecraftReaderContract) assertRecipe(test *testing.T, scene set.Set
 		}
 		found = true
 		bounds := part.Shape.Bounds()
-		if math.Abs(bounds.Max.X-bounds.Min.X-data.Aperture) > data.Tolerance {
+		if !(math.Abs(bounds.Max.X-bounds.Min.X-data.Aperture) <= data.Tolerance) {
 			test.Fatal("YAML aperture did not reach the mirror", bounds)
 		}
 	}
-	if !found || math.Abs(made.Bounds().Max.Y-data.Top) > data.Tolerance {
+	if !found || !(math.Abs(made.Bounds().Max.Y-data.Top) <= data.Tolerance) {
 		test.Fatal("YAML design did not reach the blueprint", made.Bounds())
 	}
 }

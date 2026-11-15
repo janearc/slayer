@@ -17,10 +17,10 @@ type vantage struct {
 	ray float64
 }
 
-// mostStretch is the most a ray's footprint is drawn out across a ring
+// MostStretch is the most a ray's footprint is drawn out across a ring
 // seen nearly edge on, so a ray grazing the plane still sees its largest
 // clumps: picked.
-const mostStretch = 100.0
+const MostStretch = 100.0
 
 // finest is the finest a ray from the eye tells apart at a point of the ring's
 // plane, in metres, across the orbit, the way the ring's clumps are narrow: the
@@ -34,7 +34,7 @@ func (from vantage) finest(x, z float64) float64 {
 		return 0
 	}
 	slant := point.Scale(1 / reach).Dot(toward.Scale(1 / distance))
-	squash := math.Max(1/mostStretch, math.Sqrt(math.Max(0, 1-slant*slant)))
+	squash := math.Max(1/MostStretch, math.Sqrt(math.Max(0, 1-slant*slant)))
 	return from.ray * distance / squash
 }
 

@@ -46,9 +46,7 @@ only appear where the source itself is visible. Surfaces in the swarm are
 lit now, as above. Volumes are not: the design has them scatter
 isotropically by their band-specific `Scatters` value.
 
-The older audited `render/trace` has no lamp term in a band at all. Before
-a GPU implementation, add and test the volume term on the CPU, then
-consolidate the tracer paths.
+Before a GPU implementation, add and test the volume term on the CPU.
 
 ## Proposed GPU representation
 

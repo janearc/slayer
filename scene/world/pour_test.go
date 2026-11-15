@@ -74,7 +74,7 @@ func TestTheSeaScalesHeightsUnderOneToo(t *testing.T) {
 		if k < 0.6 {
 			want = (k - 0.6) / 0.59
 		}
-		if math.Abs(e-want) > 1e-9 {
+		if !(math.Abs(e-want) <= 1e-9) {
 			t.Fatalf("the tile of height %v is %v, want %v", k, e, want)
 		}
 	}

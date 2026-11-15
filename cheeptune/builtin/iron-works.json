@@ -1,0 +1,56 @@
+{
+	// the studio machine. hard metal: the lead is a struck tube with a
+	// clanging fm tone laid over it, the chords are a struck plate, the
+	// bass is an fm growl, the drums are heavy and repeat off the beat.
+	"name": "iron-works",
+	"machine": "studio",
+	"master": 0.36,
+	"reverb": {"size": 0.7, "decay": 2.8, "damping": 0.3, "level": 0.4},
+	"delay": {"beats": "3/4", "feedback": 0.35, "tone": 0.6,
+	          "level": 0.5},
+	"channels": [
+		{"kind": "modal", "role": "lead", "volume": 1, "place": -0.2,
+		 "send": {"reverb": 0.45, "delay": 0.2},
+		 "modal": {"set": "tube", "hardness": 0.9, "decay": 3.5}},
+		{"kind": "fm", "role": "lead", "volume": 0.45, "place": 0.25,
+		 "send": {"reverb": 0.4},
+		 "fm": {"arrangement": "chain", "feedback": 0.3, "operators": [
+			{"ratio": 1, "level": 0.8,
+			 "envelope": {"attack": 0.001, "decay": 0.7, "sustain": 0,
+			              "release": 0.5}},
+			{"ratio": 1.41, "level": 0.22,
+			 "envelope": {"attack": 0, "decay": 0.35, "sustain": 0,
+			              "release": 0.3}}
+		 ]}},
+		{"kind": "modal", "role": "pad", "volume": 0.4, "place": 0.4,
+		 "send": {"reverb": 0.6},
+		 "modal": {"set": "plate", "hardness": 0.6, "decay": 2.5}},
+		{"kind": "fm", "role": "bass", "volume": 0.3,
+		 "send": {"reverb": 0.05},
+		 "fm": {"arrangement": "chain", "feedback": 0.6, "operators": [
+			{"ratio": 1, "level": 0.9,
+			 "envelope": {"attack": 0.003, "decay": 1.2, "sustain": 0.6,
+			              "release": 0.15}},
+			{"ratio": 2, "level": 0.2,
+			 "envelope": {"attack": 0, "decay": 0.5, "sustain": 0.35,
+			              "release": 0.15}}
+		 ]}},
+		{"kind": "drum", "role": "perc", "volume": 0.9,
+		 "send": {"reverb": 0.3, "delay": 0.25},
+		 "drums": {
+			"k": {"tone": 46, "sweep": 40, "fall": 0.05, "decay": 0.4,
+			      "click": 0.7},
+			"s": {"tone": 240, "sweep": 8, "fall": 0.03, "decay": 0.12,
+			      "click": 0.5, "noise": 0.6, "noise_decay": 0.2,
+			      "colour": 2500},
+			"h": {"tone": 1900, "decay": 0.03, "noise": 0.35,
+			      "noise_decay": 0.05, "colour": 9000},
+			"t": {"tone": 95, "sweep": 16, "fall": 0.08, "decay": 0.35,
+			      "click": 0.4},
+			"o": {"tone": 1900, "decay": 0.05, "noise": 0.4,
+			      "noise_decay": 0.35, "colour": 8000},
+			"b": {"tone": 520, "struck": "tube", "hardness": 0.9,
+			      "decay": 0.8}
+		 }}
+	]
+}

@@ -11,12 +11,16 @@ import (
 
 // weights are the elements this package knows, by symbol, at their
 // standard atomic weights; a symbol not here is refused. plutonium has
-// no stable form, and is at its longest-lived, 244.
+// no stable form, and is at its longest-lived, 244. lead's is its
+// atomic number, 82, over the ratio of number to mass, 0.39575, that
+// NIST's table of material constants gives it (xray.go), to the four
+// figures the table's ratio supports.
 var weights = map[string]float64{
 	"H": 1.008, "He": 4.0026, "C": 12.011, "N": 14.007, "O": 15.999,
-	"Ne": 20.180, "Na": 22.990, "Mg": 24.305, "Si": 28.085, "S": 32.06,
-	"Ar": 39.948, "Fe": 55.845, "Ni": 58.693, "Th": 232.04, "U": 238.03,
-	"Pu": 244.06,
+	"Ne": 20.180, "Na": 22.990, "Mg": 24.305, "Al": 26.982, "Si": 28.085,
+	"S": 32.06, "Ar": 39.948, "Fe": 55.845, "Ni": 58.693, "Th": 232.04,
+	"U": 238.03, "Pu": 244.06, "Ag": 107.87, "Au": 196.97, "Be": 9.0122,
+	"Ti": 47.867, "Pb": 207.2,
 }
 
 // within is how far from one a set of shares may sum, for the rounding
@@ -64,13 +68,27 @@ func (made Formula) Mass() float64 {
 	return sum
 }
 
-// Material is a formula and what is measured of it in bulk: for now
-// its density in grams a cubic centimetre; its refractive index by band
-// comes next
+// Material is a formula and what is measured of it in bulk: its
+// density in grams a cubic centimetre and its refractive index by band,
+// each where a source cites it.
+//
+// A material made of a formula and a
+// density has no optics yet, and Optics answers optics never made; a
+// material made of a formula and its optics has no density cited yet,
+// and Density answers nought until a source for one is found; a
+// material made of a formula alone says what it is made of, with
+// neither its density nor its optics cited yet.
+//
+// AtDensity gives any of
+// them a density with its source, and Attenuating its mass attenuation
+// coefficients, for x-rays and gamma rays.
 type Material struct {
 	name    string
 	made    Formula
 	density float64
+	weighed Source
+	optics  Optics
+	stops   Attenuations
 }
 
 // NewMaterial is a named material of a formula at a bulk density. It
@@ -91,11 +109,48 @@ func NewMaterial(name string, made Formula,
 	return Material{name: name, made: made, density: density}, nil
 }
 
+// NewSubstance is a named material that says what it is made of and
+// nothing more; its density and optics are not yet cited, so Density
+// answers nought and Optics answers optics never made. It refuses no
+// name and a formula never made.
+func NewSubstance(name string, made Formula) (Material, error) {
+	if name == "" {
+		return Material{}, refuse("a material with no name")
+	}
+	if len(made.parts) == 0 {
+		return Material{}, refuse("%s has no formula", name)
+	}
+	return Material{name: name, made: made}, nil
+}
+
+// NewOpticalMaterial is a named material of a formula with its optics,
+// and no bulk density cited for it: Density answers nought until a
+// source for one is found. It refuses no name, a formula never made, and
+// optics never made.
+func NewOpticalMaterial(name string, made Formula,
+	sight Optics) (Material, error) {
+	if name == "" {
+		return Material{}, refuse("a material with no name")
+	}
+	if len(made.parts) == 0 {
+		return Material{}, refuse("%s has no formula", name)
+	}
+	if len(sight.bands) == 0 {
+		return Material{}, refuse("%s has no optics", name)
+	}
+	return Material{name: name, made: made, optics: sight}, nil
+}
+
 // Name is the material's name
 func (kind Material) Name() string { return kind.name }
 
-// Density is the material's bulk density in grams a cubic centimetre
+// Density is the material's bulk density in grams a cubic centimetre;
+// nought when no density is cited for it
 func (kind Material) Density() float64 { return kind.density }
+
+// Optics is the material's refractive index by band, optics never made
+// when it has none
+func (kind Material) Optics() Optics { return kind.optics }
 
 // Fractions are shares of materials that sum to one. Only NewFractions
 // makes them, so a mix that does not sum cannot exist.

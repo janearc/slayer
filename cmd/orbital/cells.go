@@ -8,8 +8,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/janearc/slayer/film"
@@ -51,6 +49,11 @@ func givenFlags() given {
 	return found
 }
 
+// errGPUCells is what -cells says to -gpu: its frames are drawn by the
+// tracer, on the cpu.
+var errGPUCells = errors.New("-cells draws on the cpu: -gpu is for " +
+	"pictures")
+
 // errKeysAlone is what -keys says when there is no -cells to wait between.
 var errKeysAlone = errors.New("-keys is for -cells: it waits for a key " +
 	"between frames of terminal cells")
@@ -63,73 +66,38 @@ type cellsFlags struct {
 	first, frames int
 	rate, rays    int
 	printed       printing
-	keys          bool
+	keys, gpu     bool
 	in, out       *os.File
 }
 
 // cellsMode is the orbital drawn as cells, if the flags asked for it.
 // With in it is drawn a key at a time, and exit is how a signal ends it.
+// Its relay passes each frame's time on to the scene once it is built.
 type cellsMode struct {
 	on     bool
 	scene  *cells.Scene
 	stream *terminal.Stream
+	relay  *relay
 	in     *os.File
 	exit   func(int)
 }
 
-// shellExit is what a shell adds to a signal's number to say a command
-// died of it. It is defined as 128.
-const shellExit = 128
+// relay passes the time of each frame on to the scene's clock, so the
+// lantern's beams keep it. The cells mode is asked before the scene is
+// built, so the clock is followed later; until then there is none.
+type relay struct{ clock cells.Clock }
 
-// signalRoom is how many signals the watch holds. It is defined as one:
-// the first ends the session.
-const signalRoom = 1
-
-// hangup is a watch for the signals that stop a process, kept while a
-// terminal is taken over.
-type hangup struct {
-	caught  chan os.Signal
-	done    chan struct{}
-	over    chan struct{}
-	session *terminal.Session
-	exit    func(int)
-}
-
-// leaveOnSignal answers SIGTERM, SIGINT and SIGHUP by giving the terminal
-// back and exiting 128 plus the signal. Call stop when the session ends.
-func leaveOnSignal(session *terminal.Session, exit func(int)) *hangup {
-	watch := &hangup{caught: make(chan os.Signal, signalRoom),
-		done: make(chan struct{}), over: make(chan struct{}),
-		session: session, exit: exit}
-	signal.Notify(watch.caught, syscall.SIGTERM, syscall.SIGINT,
-		syscall.SIGHUP)
-	go watch.wait()
-	return watch
-}
-
-// wait is the watch: it ends the session on a signal, or ends with stop.
-func (watch *hangup) wait() {
-	defer close(watch.over)
-	select {
-	case got := <-watch.caught:
-		watch.session.End()
-		watch.exit(shellExit + int(got.(syscall.Signal)))
-	case <-watch.done:
+// Set tells the followed clock the time of the frame about to be drawn.
+func (passing *relay) Set(at time.Duration) {
+	if passing.clock != nil {
+		passing.clock.Set(at)
 	}
 }
 
-// stop ends the watch, and waits until it has ended.
-func (watch *hangup) stop() {
-	signal.Stop(watch.caught)
-	close(watch.done)
-	<-watch.over
+// follow is the cells mode passing each frame's time on to clock.
+func (mode cellsMode) follow(clock cells.Clock) {
+	mode.relay.clock = clock
 }
-
-// beams tells the lantern's beams the time of the frame about to be drawn.
-type beams struct{}
-
-// Set is the time the beams are drawn at.
-func (beams) Set(at time.Duration) { beamClock = at }
 
 // askCells reads the flags for -cells. Building a scene takes seconds.
 // So every refusal that can be made is made here, before it is. With no
@@ -143,6 +111,9 @@ func askCells(flags cellsFlags) (cellsMode, error) {
 	}
 	if flags.set[outFlag] || flags.set[rawFlag] {
 		return cellsMode{}, errFiles
+	}
+	if flags.gpu {
+		return cellsMode{}, errGPUCells
 	}
 	size, err := terminal.ParseSize(flags.size)
 	if err != nil {
@@ -160,8 +131,9 @@ func askCells(flags cellsFlags) (cellsMode, error) {
 		return cellsMode{}, err
 	}
 	lens := lensFor(flags.printed, terminal.SextantPixel)
+	passing := &relay{}
 	scene, err := cells.New(lens, developer(flags.printed), flags.rays,
-		pace, beams{})
+		pace, passing)
 	if err != nil {
 		return cellsMode{}, err
 	}
@@ -170,8 +142,8 @@ func askCells(flags cellsFlags) (cellsMode, error) {
 	if err != nil {
 		return cellsMode{}, err
 	}
-	return cellsMode{on: true, scene: scene, stream: stream, in: in,
-		exit: os.Exit}, nil
+	return cellsMode{on: true, scene: scene, stream: stream,
+		relay: passing, in: in, exit: os.Exit}, nil
 }
 
 // chat is where the orbital says what it is doing. Frames own standard
@@ -197,7 +169,7 @@ func (mode cellsMode) run(out *os.File, world *thing.World,
 		return err
 	}
 	defer session.End()
-	defer leaveOnSignal(session, mode.exit).stop()
+	defer terminal.LeaveOnSignal(session.End, mode.exit).Stop()
 	return mode.stream.RunBy(out, session.Next)
 }
 

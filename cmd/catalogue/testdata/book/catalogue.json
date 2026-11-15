@@ -1,0 +1,40 @@
+{
+  "cards": [
+    {
+      "entry": {
+        "kind": "webb",
+        "group": "space observatories",
+        "about": "A gold-looking segmented primary above five sunshield layers.",
+        "notes": "",
+        "details": ["quick"],
+        "references": null,
+        "view-yaw-deg": 0,
+        "view-elevation-deg": null
+      },
+      "detail": "quick",
+      "folder": "webb-quick",
+      "status": "native GPU render"
+    },
+    {
+      "entry": {
+        "kind": "fern",
+        "group": "plants",
+        "about": "Fronds carrying paired leaflets.",
+        "notes": "",
+        "details": ["quick"],
+        "references": null,
+        "view-yaw-deg": 0,
+        "view-elevation-deg": null
+      },
+      "detail": "quick",
+      "folder": "fern-quick",
+      "status": "native GPU render"
+    }
+  ],
+  "producer": {
+    "binary-sha256": "unverified test fixture",
+    "compiled-revision": "unknown",
+    "compiled-tree-modified": "unknown",
+    "go-version": "unknown"
+  }
+}

@@ -1,3 +1,5 @@
+//go:build draw
+
 package gpu
 
 import (
@@ -16,9 +18,11 @@ func TestMissingMaterialKeepsTheEstablishedGreyFallback(t *testing.T) {
 	missing, explicit := newScene(), newScene()
 	missing.material(nil)
 	explicit.material(&thing.Material{Colour: maths.Grey(.8)})
-	// Material is colour, glow, mirror and info: four 16-byte lanes.
-	if len(missing.materials.bytes) != 4*16 ||
-		len(explicit.materials.bytes) != 4*16 {
+	// Material is colour, glow, mirror and info, and a metal's n and k,
+	// its film and the film's absorption, and its crinkle: nine 16-byte
+	// lanes.
+	if len(missing.materials.bytes) != 9*16 ||
+		len(explicit.materials.bytes) != 9*16 {
 		t.Fatal("default or explicit material did not produce one complete record")
 	}
 	if !bytes.Equal(missing.materials.bytes, explicit.materials.bytes) {

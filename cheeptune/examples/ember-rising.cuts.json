@@ -1,0 +1,31 @@
+{
+	"group": "slow start, fast finish",
+	"mood": "village, then boss fight",
+	"feeling": "Quiet grief in a small place, then a hard turn into a fight you can win.",
+	"intent": "A video that starts somber and slow, then cuts to action: a story told in two halves.",
+	"listen_for": "The snare roll, the beat where the lead stops just before 0:18, and the fight crashing in after it.",
+	"voicing": "@leap-dmg",
+	"tempo": 132,
+	"meter": 4,
+	"seconds": 41.82,
+	"parts": [
+		{"name": "embers", "bar": 1, "second": 0.0,
+		 "change": "long single notes over held chords, a kick every other bar",
+		 "feels": "still and alone: a village at dusk"},
+		{"name": "doubt", "bar": 5, "second": 7.27,
+		 "change": "the chords fall to f; the lead is still slow",
+		 "feels": "heavier: something is wrong"},
+		{"name": "build", "bar": 9, "second": 14.55,
+		 "change": "the bass rises in eighths, a snare roll, then one beat of silence",
+		 "feels": "the floor drops out: tension"},
+		{"name": "fight", "bar": 11, "second": 18.18,
+		 "change": "everything arrives: eighth-note lead and bass, a full drum",
+		 "feels": "everything arrives: release"},
+		{"name": "last-stand", "bar": 19, "second": 32.73,
+		 "change": "the lead climbs higher; the drum fills the last bar of each four",
+		 "feels": "all or nothing: the last push"},
+		{"name": "end", "bar": 23, "second": 40.0,
+		 "change": "one held chord and a kick",
+		 "feels": "it is over: stillness"}
+	]
+}

@@ -87,17 +87,30 @@ func (g Gas) optics(band maths.Band) (absorb, scatter float64) {
 	if nm == 0 {
 		nm = 550
 	}
-	r := thing.Range(maths.Band{Nanometres: nm})
-	near := (r == radiation.Ultraviolet() || r == radiation.Infrared()) &&
-		nm > 300 && nm < 1200
-	if g.Visible != nil && (r == thing.Visible || near) {
-		return g.Visible(nm)
+	if g.Visible != nil {
+		// the range is only looked for where a rule might use it
+		r := thing.Range(maths.Band{Nanometres: nm})
+		near := (r == radiation.Ultraviolet() || r == radiation.Infrared()) &&
+			nm > 300 && nm < 1200
+		if r == thing.Visible || near {
+			return g.Visible(nm)
+		}
 	}
 	o, ok := thing.Lookup(g.Ranges, maths.Band{Nanometres: nm})
 	if !ok {
 		return math.Inf(1), 0
 	}
 	return o.Absorb, o.Scatter
+}
+
+// asymmetryLimit is the asymmetry a henyey-greenstein lobe stays strictly
+// inside, either way, by definition of the lobe.
+const asymmetryLimit = 1
+
+// IsLobe is whether the gas's asymmetry is one of a lobe: a number strictly
+// between minus one and one. PhaseAt refuses a gas for which it is false.
+func (g Gas) IsLobe() bool {
+	return math.Abs(g.Phase) < asymmetryLimit
 }
 
 // PhaseAt is how much of the scattered light goes at an angle whose cosine is
@@ -114,7 +127,7 @@ func (g Gas) PhaseAt(cos float64) float64 {
 		// rayleigh: three over sixteen pi times one plus cos squared
 		return 3 / (16 * math.Pi) * (1 + cos*cos)
 	}
-	if !(math.Abs(gg) < 1) {
+	if !g.IsLobe() {
 		panic(fmt.Sprintf("gas: %s's asymmetry of %v is no lobe: "+
 			"it is between minus one and one", g.Name, gg))
 	}

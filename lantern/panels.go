@@ -55,13 +55,25 @@ func (ring orbit) tumbleAxis(number int) maths.Vec {
 // poles. each sits a little nearer or further than the rest.
 func (ring orbit) panel(number, index, count int, shell,
 	wide float64) ([4]maths.Vec, maths.Vec) {
+	return ring.panelCovering(number, index, count, shell, wide,
+		func(radius float64) float64 {
+			return 0.9 * 2 * math.Pi * radius / float64(count)
+		})
+}
+
+// panelCovering is a panel as panel makes it, as long along the ring as
+// length says at its distance out: panel's is nine tenths of its share
+// of the ring, and a played shell's is what its glass is opened to.
+func (ring orbit) panelCovering(number, index, count int, shell,
+	wide float64, length func(radius float64) float64) ([4]maths.Vec,
+	maths.Vec) {
 	id := int64(number*100000 + index)
 	angle := ring.start + 2*math.Pi*float64(index)/float64(count)
 	radius := shell * (1 + 0.04*(noise.Hash(15, id)-0.5))
 	out := ring.across.Scale(math.Cos(angle)).
 		Add(ring.onward.Scale(math.Sin(angle)))
 	centre := out.Scale(radius)
-	long := 0.9 * 2 * math.Pi * radius / float64(count)
+	long := length(radius)
 	along := ring.across.Scale(-math.Sin(angle)).
 		Add(ring.onward.Scale(math.Cos(angle))).Scale(long / 2)
 	up := ring.pole.Scale(wide / 2)
@@ -89,10 +101,20 @@ func facingIn(corners []maths.Vec, first int, out maths.Vec) [][3]int {
 // small square side across facing the star, shell out from it.
 func ringMesh(ring orbit, number, panels int, shell, side,
 	wear float64) (*mesh.Mesh, error) {
+	panelled := func(index int) ([4]maths.Vec, maths.Vec) {
+		return ring.panel(number, index, panels, shell, side)
+	}
+	return ringMeshOf(number, panels, wear, panelled)
+}
+
+// ringMeshOf is one orbit's panels as one mesh, each made by made and
+// worn as wear says.
+func ringMeshOf(number, panels int, wear float64,
+	made func(index int) ([4]maths.Vec, maths.Vec)) (*mesh.Mesh, error) {
 	var corners []maths.Vec
 	var faces [][3]int
 	for index := range panels {
-		square, out := ring.panel(number, index, panels, shell, side)
+		square, out := made(index)
 		first := len(corners)
 		if wear <= 0 {
 			corners = append(corners, square[:]...)

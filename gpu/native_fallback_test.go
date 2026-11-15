@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
@@ -28,7 +28,7 @@ func TestNativeCountsExposeARefinementFaultMaskedBySoftware(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := sourceWith(encoded.records())
+	text := sourceWith(encoded.records(), encoded.counts.volumes)
 	function := strings.Index(text, "static Hit native_face(")
 	if function < 0 {
 		t.Fatal("native refinement function missing")

@@ -45,7 +45,7 @@ func TestTheLampsAskedAreWorthEveryLamp(t *testing.T) {
 			toward, _, light := lamp.Light(point, up)
 			all += worth(toward, light)
 		}
-		asked := scene.asked(point, up, worth)
+		asked := scene.asked(nil, point, up, worth)
 		for _, one := range asked {
 			got += one.counts * worth(one.toward, one.light)
 			if count <= lampsAsked && one.counts != 1 {
@@ -66,8 +66,8 @@ func TestTheLampsAskedAreWorthEveryLamp(t *testing.T) {
 func TestAPointAsksTheSameLamps(t *testing.T) {
 	scene := stage(suns(200), 0)
 	point, up := maths.V(0.3, 0, -0.7), maths.V(0, 1, 0)
-	first, again := scene.asked(point, up, byLight),
-		scene.asked(point, up, byLight)
+	first, again := scene.asked(nil, point, up, byLight),
+		scene.asked(nil, point, up, byLight)
 	if len(first) != len(again) {
 		t.Fatalf("%d lamps asked, then %d", len(first), len(again))
 	}

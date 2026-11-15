@@ -67,11 +67,11 @@ func scaleIsWidth(draw *rapid.T) {
 	wide, unit := fields(draw, nought), fields(draw, nought)
 	wide.Scale, unit.Scale = scale, unity
 	shrunk := maths.V(at.X/scale, at.Y/scale, at.Z/scale)
-	if math.Abs(wide.Height(at)-unit.Height(shrunk)) > within {
+	if !(math.Abs(wide.Height(at)-unit.Height(shrunk)) <= within) {
 		draw.Fatalf("at %v, scale %v: height %v, not %v", at, scale,
 			wide.Height(at), unit.Height(shrunk))
 	}
-	if math.Abs(wide.Wet(at)-unit.Wet(shrunk)) > within {
+	if !(math.Abs(wide.Wet(at)-unit.Wet(shrunk)) <= within) {
 		draw.Fatalf("at %v, scale %v: wet %v, not %v", at, scale,
 			wide.Wet(at), unit.Wet(shrunk))
 	}

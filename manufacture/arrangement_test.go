@@ -111,7 +111,7 @@ func TestTheSpruceTurnsByTheGoldenAngle(t *testing.T) {
 	golden := (1 + math.Sqrt(5)) / 2
 	want := 2 * math.Pi / (golden * golden)
 	got := spruceHabit().turn.InRadians()
-	if math.Abs(got-want) > close {
+	if !(math.Abs(got-want) <= close) {
 		t.Errorf("the spruce turns %v a whorl, the golden angle is %v",
 			got, want)
 	}
@@ -144,6 +144,7 @@ func TestWhorlsThatCannotBeAreRefused(t *testing.T) {
 		"uneven":     func(set *habit) { set.uneven = 1 },
 		"girth":      func(set *habit) { set.girth = 0 },
 		"least":      func(set *habit) { set.least = -0.5 },
+		"own":        func(set *habit) { set.own = math.Inf(1) },
 	}
 	for name, spoil := range spoils {
 		set := spruceHabit()
@@ -198,13 +199,13 @@ func TestARingIsEvenRoundItsMiddle(t *testing.T) {
 			t.Fatal(err)
 		}
 		foot := got.space.Origin
-		if foot.Y != 0 || math.Abs(foot.Len()-radius) > close {
+		if foot.Y != 0 || !(math.Abs(foot.Len()-radius) <= close) {
 			t.Errorf("place %d is at %v, not %v out on the ground",
 				index, foot, radius)
 		}
 		off := turnOf(foot)*count - float64(index)
 		off -= math.Round(off/count) * count
-		if math.Abs(off) > stray {
+		if !(math.Abs(off) <= stray) {
 			t.Errorf("place %d strays %v of the gap, past %v",
 				index, off, stray)
 		}
@@ -228,7 +229,7 @@ func TestARingWithNoStrayIsExact(t *testing.T) {
 			t.Fatal(err)
 		}
 		want := float64(index) / count
-		if math.Abs(turnOf(got.space.Origin)-want) > close {
+		if !(math.Abs(turnOf(got.space.Origin)-want) <= close) {
 			t.Errorf("place %d is %v of a turn round, not %v",
 				index, turnOf(got.space.Origin), want)
 		}
@@ -267,7 +268,7 @@ func TestARingsPartsLeanInOrOut(t *testing.T) {
 func leanUnlike(space maths.Subspace, lean float64) string {
 	axes, foot := space.Orientation, space.Origin
 	tilt := math.Acos(axes.Y.Dot(maths.Up)) / maths.Degree
-	if math.Abs(tilt-math.Abs(lean)) > 1e-9 {
+	if !(math.Abs(tilt-math.Abs(lean)) <= 1e-9) {
 		return fmt.Sprintf("it leans %v", tilt)
 	}
 	inward := -axes.Y.Dot(foot.Unit())
@@ -346,7 +347,7 @@ func TestARingUntwistedFacesItsMiddle(t *testing.T) {
 	for index := range 6 {
 		got, _ := round.at(size{}, 0, index, sow(4))
 		axes, out := got.space.Orientation, got.space.Origin.Unit()
-		if axes.X.Y != 0 || math.Abs(axes.X.Dot(out)) > close {
+		if axes.X.Y != 0 || !(math.Abs(axes.X.Dot(out)) <= close) {
 			t.Errorf("place %d: its x is %v, not level and round "+
 				"the ring", index, axes.X)
 		}
@@ -372,8 +373,8 @@ func TestARingTakesEachNumberFromItsOwnDraw(t *testing.T) {
 		}
 		off := turnOf(got.space.Origin)*count - float64(index)
 		off -= math.Round(off/count) * count
-		if want := stray * from.swing(0, index, 0); math.Abs(off-
-			want) > 1e-9 {
+		if want := stray * from.swing(0, index, 0); !(math.Abs(off-
+			want) <= 1e-9) {
 			t.Errorf("place %d strays %v, its draw says %v", index,
 				off, want)
 		}
@@ -382,7 +383,7 @@ func TestARingTakesEachNumberFromItsOwnDraw(t *testing.T) {
 		spun := turnOf(got.space.Orientation.X) -
 			turnOf(got.space.Origin) - 0.25
 		spun -= math.Floor(spun)
-		if want := from.draw(0, index, 1); math.Abs(spun-want) > 1e-9 {
+		if want := from.draw(0, index, 1); !(math.Abs(spun-want) <= 1e-9) {
 			t.Errorf("place %d is spun %v, its draw says %v",
 				index, spun, want)
 		}

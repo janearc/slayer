@@ -1,0 +1,7 @@
+# Experimental GPU lighting
+
+This package implements plate scaling, shifted moon disc, overhead and fixture additions, fire accumulation and shoulder, sky glow, strobes, back haze and the UFO beam used by the experimental hybrid compositor. Other lighting effects remain in the CPU lighting renderer and run in their historical order around these operations. Each request opens a Metal session, uploads its inputs and reads back the result; it does not yet keep the static passes resident across a stretch.
+
+The renderer uses top-down packed RGB images. Searchlight and laser geometry and visibility are planned on the CPU; their ordered Gaussian splats are binned into 32-pixel tiles and applied per pixel on Metal. Tile lists preserve splat order and are bounded. Planning, numerical accuracy and GPU throughput still need measurement. Moon placement checks both the destination sky mask and the source masks before interpolation. Fixture layers are applied in the supplied order; each queued layer has its own buffer so later uploads cannot change earlier dispatches. The configurable memory limit accounts for the Metal buffers, not the complete process working set.
+
+Inputs, scalar values and dimensions are validated, and unsupported effect flags are refused. Arithmetic is float32 on the GPU rather than the CPU renderer's float64 arithmetic. Equivalence with historical frames and full lighting performance remain to be measured.

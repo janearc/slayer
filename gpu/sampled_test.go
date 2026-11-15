@@ -1,10 +1,12 @@
-//go:build darwin
+//go:build draw && darwin
 
 package gpu
 
 import (
 	"errors"
+	"fmt"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/janearc/slayer/emit"
@@ -117,11 +119,15 @@ func orrery() (*thing.World, maths.Subspace) {
 
 // difference is how far apart two frames are: the mean difference in
 // light as a share of the mean light, the largest difference in any one
-// pixel as a share of the brightest, and the pixels whose cover or
-// depth disagree
+// pixel as a share of the brightest, the pixels whose cover or depth
+// disagree, the pixels whose light difference is not finite, and whether
+// the truth frame has no light at all
 type difference struct {
 	mean, largest float64
 	cover, depth  int
+	notFinite     int    // pixels whose light difference is NaN or infinite
+	first         [2]int // column and row of the first such pixel
+	dark          bool   // the truth frame has no light, so there is no mean
 }
 
 // compare measures two frames of the same size against each other
@@ -138,9 +144,15 @@ func compare(truth, drawn *frame.Frame, width, height int) difference {
 				math.Abs(float64(one.B-other.B))
 			total += light
 			brightest = math.Max(brightest, light)
+			if math.IsNaN(apart) || math.IsInf(apart, 0) {
+				if found.notFinite == 0 {
+					found.first = [2]int{column, row}
+				}
+				found.notFinite++
+			}
 			found.mean += apart
 			found.largest = math.Max(found.largest, apart)
-			if math.Abs(float64(one.Cover-other.Cover)) > 1e-3 {
+			if !(math.Abs(float64(one.Cover-other.Cover)) <= 1e-3) {
 				found.cover++
 			}
 			if !sameDepth(one.Depth, other.Depth) {
@@ -148,9 +160,36 @@ func compare(truth, drawn *frame.Frame, width, height int) difference {
 			}
 		}
 	}
-	found.mean /= total
-	found.largest /= brightest
+	if total == 0 {
+		found.dark = true
+	} else {
+		found.mean /= total
+		found.largest /= brightest
+	}
 	return found
+}
+
+// findings lists what is wrong with a difference, one message each, and
+// returns none when the frames agree within allowed. A black truth frame
+// is reported as nothing to compare, not as agreement.
+func findings(found difference, allowed tolerance) []string {
+	var out []string
+	if found.dark {
+		out = append(out, "the slayer frame has no light, so there is nothing to compare")
+	}
+	if found.notFinite > 0 {
+		out = append(out, fmt.Sprintf("%d pixels differ by a value that is "+
+			"not finite; the first is at column %d, row %d",
+			found.notFinite, found.first[0], found.first[1]))
+	} else if !(found.mean <= allowed.mean && found.largest <= allowed.largest) {
+		out = append(out, fmt.Sprintf("the gpu's light is %.6f off slayer's "+
+			"on average, and %.4f at most", found.mean, found.largest))
+	}
+	if found.cover > 0 || found.depth > 0 {
+		out = append(out, fmt.Sprintf("%d pixels' cover and %d pixels' "+
+			"depth differ", found.cover, found.depth))
+	}
+	return out
 }
 
 // sameDepth is two depths within a part in a thousand, or both nothing
@@ -214,19 +253,96 @@ func withinThrough(t *testing.T, world *thing.World, eye maths.Subspace,
 	}
 	found := compare(truth, drawn, width, height)
 	t.Logf("apart: %+v", found)
-	if found.mean > allowed.mean || found.largest > allowed.largest {
-		t.Errorf("the gpu's light is %.6f off slayer's on average, and "+
-			"%.4f at most", found.mean, found.largest)
-	}
-	if found.cover > 0 || found.depth > 0 {
-		t.Errorf("%d pixels' cover and %d pixels' depth differ",
-			found.cover, found.depth)
+	for _, problem := range findings(found, allowed) {
+		t.Error(problem)
 	}
 }
 
 // the gpu draws what slayer's tracer draws, near enough
 func TestTheGPUDrawsTheHallAsSlayerDoes(t *testing.T) {
 	world, eye := hall(t)
+	against(t, world, eye)
+}
+
+// the hall gilded: its glossy floor is Johnson and Christy's gold, and
+// a ball of aluminium under an amber film, as Kapton lies over a
+// blanket's aluminium, sits on it. the gpu mirrors each colour by its
+// own share, as slayer's tracer does.
+func TestTheGPUDrawsGoldAndFilmedMetalAsSlayerDoes(t *testing.T) {
+	world, eye := hall(t)
+	gold := &thing.Metal{N: [3]float64{0.21, 0.43, 1.31},
+		K: [3]float64{3.272, 2.455, 1.849}}
+	aluminium := &thing.Metal{N: [3]float64{1.1911, 0.93525, 0.6444},
+		K: [3]float64{7.0711, 6.3099, 5.3994}}
+	gilded := 0
+	for _, one := range world.Things {
+		if one.Material != nil && one.Material.Name == "floor" {
+			one.Material = &thing.Material{Name: "gold floor", Gloss: 1,
+				Metal: gold}
+			gilded++
+		}
+	}
+	if gilded != 1 {
+		t.Fatalf("%d floors gilded, want the hall's one", gilded)
+	}
+	blanket := &thing.Material{Name: "blanket", Gloss: 0.9,
+		Metal: aluminium, Film: &thing.Film{Index: 1.7, Thickness: 25e-6,
+			Absorbs: [3]float64{4e3, 3e4, 2e5}}}
+	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.6},
+		Material: blanket, Motion: at(0.2, -0.9, 3)})
+	against(t, world, eye)
+}
+
+// the gilded hall under a sun drawn as a disc, five degrees across so
+// its edges show at this size, standing where the gold floor mirrors it
+// to the eye: its disc in the mirror, its shadows softened across it, on
+// the gpu as in slayer's tracer.
+func TestTheGPUDrawsASunsDiscAsSlayerDoes(t *testing.T) {
+	world, eye := hall(t)
+	for _, one := range world.Things {
+		if one.Material != nil && one.Material.Name == "floor" {
+			one.Material = &thing.Material{Name: "gold floor", Gloss: 1,
+				Metal: thing.Gold()}
+		}
+	}
+	world.Lamp(film.Sun{Toward: maths.V(-0.15, 0.47, -0.87),
+		Strength: maths.RGB(2, 1.9, 1.7), Size: 5 * maths.Degree, Disc: true})
+	against(t, world, eye)
+}
+
+// a crinkled blanket in the gilded hall: aluminium under Kapton, its
+// face tilting by noise as a crumpled blanket's does, mirroring and
+// glinting in scattered pieces, on the gpu as in slayer's tracer.
+func TestTheGPUDrawsACrinkledBlanketAsSlayerDoes(t *testing.T) {
+	world, eye := hall(t)
+	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.9},
+		Material: &thing.Material{Name: "crinkled blanket", Gloss: 0.9,
+			Satin: 0.25, Metal: thing.Aluminium(), Film: thing.Kapton(25e-6),
+			Crinkle: &thing.Crinkle{Size: 0.2, Slope: 0.35, Seed: 5}},
+		Motion: at(0.2, -0.6, 3)})
+	against(t, world, eye)
+}
+
+// the gilded hall in satin: the lamp leaves highlights on the gold
+// floor, the blanket ball and a glossy painted ball, gold's gold and the
+// paint's white, on the gpu as in slayer's tracer, through the mirror
+// and the clear ball as well.
+func TestTheGPUDrawsHighlightsAsSlayerDoes(t *testing.T) {
+	world, eye := hall(t)
+	for _, one := range world.Things {
+		if one.Material != nil && one.Material.Name == "floor" {
+			one.Material = &thing.Material{Name: "satin gold", Gloss: 1,
+				Satin: 0.3, Metal: thing.Gold()}
+		}
+	}
+	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.6},
+		Material: &thing.Material{Name: "blanket", Gloss: 0.9, Satin: 0.5,
+			Metal: thing.Aluminium(), Film: thing.Kapton(25e-6)},
+		Motion: at(0.2, -0.9, 3)})
+	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.4},
+		Material: &thing.Material{Name: "gloss paint",
+			Colour: maths.RGB(0.7, 0.1, 0.1), Gloss: 1, Index: 1.5, Satin: 0.2},
+		Motion: at(-0.6, -1.1, 2.4)})
 	against(t, world, eye)
 }
 
@@ -263,10 +379,15 @@ func TestAFloorSeenHeadOnHasNoGaps(t *testing.T) {
 	againstAt(t, world, eye, 97, 65, 1)
 }
 
-// air is a gas, which the kernel refuses
-type air struct{ medium.Puff }
+// bespoke is a lamp of a kind of its own, which the tracer asks like any
+// other and the kernel has no way to read. It is private to this test so
+// that no later work on the kernel can make it a lamp the kernel draws.
+type bespoke struct{}
 
-func (air) Gas() gas.Gas { return gas.Gas{Name: "air"} }
+// Light is a lamp straight above, at no distance and one unit of light.
+func (bespoke) Light(_, _ maths.Vec) (maths.Vec, float64, maths.Light) {
+	return maths.V(0, 1, 0), math.Inf(1), maths.Grey(1)
+}
 
 // shine is a texture of one light
 type shine struct{}
@@ -283,26 +404,27 @@ func TestWhatItCannotDrawIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// a smooth mesh is drawn; one that has lost all but one of its
+	// normals since it was made is not
+	smooth.Normals = smooth.Normals[:1]
 	cases := map[string]func(*thing.World) film.Sensor{
-		"a sun": func(world *thing.World) film.Sensor {
-			world.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(1)))
+		"a lamp of its own kind": func(world *thing.World) film.Sensor {
+			world.Lamp(bespoke{})
 			return nil
 		},
-		"a plane": func(world *thing.World) film.Sensor {
-			world.Add(thing.Thing{Shape: shape.Plane{}})
-			return nil
-		},
-		"a smooth mesh": func(world *thing.World) film.Sensor {
+		"a smooth mesh without a normal for every vertex": func(world *thing.World) film.Sensor {
 			world.Add(thing.Thing{Shape: smooth})
 			return nil
 		},
-		"a gas": func(world *thing.World) film.Sensor {
-			world.AddVolume(thing.Volume{Medium: air{}})
+		"a gas with no lobe": func(world *thing.World) film.Sensor {
+			world.AddVolume(thing.Volume{Medium: gas.Of{
+				Shape: medium.Puff{Radius: 1, Thick: 1},
+				In:    gas.Gas{Name: "flat", Phase: 1}}})
 			return nil
 		},
-		"a field": func(world *thing.World) film.Sensor {
+		"multiple fields": func(world *thing.World) film.Sensor {
 			hole := &thing.Field{Mass: 1, Reach: 1}
-			world.Fields = append(world.Fields, hole)
+			world.Fields = append(world.Fields, hole, hole)
 			return nil
 		},
 		"the world's haze": func(world *thing.World) film.Sensor {
@@ -330,6 +452,76 @@ func TestWhatItCannotDrawIsRefused(t *testing.T) {
 		var refused unsupported
 		if !errors.As(err, &refused) {
 			t.Errorf("%s was not refused: %v", name, err)
+		}
+	}
+}
+
+// TestTheComparisonFailsOnWhatItCannotMeasure feeds compare two 2 by 2
+// frames by hand. Each truth pixel has light 0.5 in each channel, so the
+// whole truth frame has light 6.
+func TestTheComparisonFailsOnWhatItCannotMeasure(t *testing.T) {
+	lit := func() *frame.Frame {
+		f := frame.New(2, 2)
+		for i := range f.Pix {
+			f.Pix[i].R, f.Pix[i].G, f.Pix[i].B = 0.5, 0.5, 0.5
+		}
+		return f
+	}
+	dark := func() *frame.Frame { return frame.New(2, 2) }
+	nan := func() *frame.Frame {
+		f := lit()
+		f.Pix[1].G = float32(math.NaN())
+		return f
+	}
+	inf := func() *frame.Frame {
+		f := lit()
+		f.Pix[3].B = float32(math.Inf(1))
+		return f
+	}
+	off := func() *frame.Frame {
+		f := lit()
+		f.Pix[0].R = 1.5
+		return f
+	}
+	covered := func() *frame.Frame {
+		f := lit()
+		f.Pix[0].Cover = 1
+		return f
+	}
+	deep := func() *frame.Frame {
+		f := lit()
+		f.Pix[2].Depth = 5
+		return f
+	}
+	cases := []struct {
+		name         string
+		truth, drawn *frame.Frame
+		want         string // a substring of the one finding, or "" for none
+	}{
+		{"identical frames agree", lit(), lit(), ""},
+		{"a black truth frame", dark(), dark(), "has no light"},
+		{"a NaN pixel at column 1, row 0", lit(), nan(),
+			"1 pixels differ by a value that is not finite; the first is at column 1, row 0"},
+		{"an infinite pixel at column 1, row 1", lit(), inf(),
+			"not finite; the first is at column 1, row 1"},
+		{"one pixel's cover differs", lit(), covered(),
+			"1 pixels' cover and 0 pixels' depth differ"},
+		{"one pixel's depth differs", lit(), deep(),
+			"0 pixels' cover and 1 pixels' depth differ"},
+		{"a finite miss of one unit", lit(), off(),
+			"the gpu's light is 0.166667 off slayer's on average"},
+	}
+	for _, c := range cases {
+		msgs := findings(compare(c.truth, c.drawn, 2, 2), exact)
+		if c.want == "" {
+			if len(msgs) != 0 {
+				t.Errorf("%s: got findings %q, want none", c.name, msgs)
+			}
+			continue
+		}
+		if len(msgs) != 1 || !strings.Contains(msgs[0], c.want) {
+			t.Errorf("%s: got findings %q, want one containing %q",
+				c.name, msgs, c.want)
 		}
 	}
 }

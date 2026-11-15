@@ -66,8 +66,7 @@ func TestABridgeToTheRingsFirstCorner(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, _ := covered(tris); math.Abs(got-(outer.area()+hole.area())) >
-		1e-9 {
+	if got, _ := covered(tris); !(math.Abs(got-(outer.area()+hole.area())) <= 1e-9) {
 		t.Errorf("faces %v of %v", got, outer.area()+hole.area())
 	}
 }

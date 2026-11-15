@@ -1,3 +1,5 @@
+//go:build draw
+
 package fuelbed_test
 
 import (

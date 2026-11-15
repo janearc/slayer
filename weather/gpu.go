@@ -5,6 +5,7 @@ package weather
 import (
 	_ "embed"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"math"
 	"math/bits"
@@ -31,8 +32,7 @@ func (made *Weather) onDevice() (*device, error) {
 		return nil, fmt.Errorf("the gpu holds rows of 2048 cells at most, "+
 			"not %d", made.grid.across)
 	}
-	session, err := metal.OpenSession(kernels, "laplacian", "tendency",
-		"combine", "forward", "back", "sweep", "filter", "means")
+	session, err := opened()
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +54,28 @@ func (made *Weather) onDevice() (*device, error) {
 		return nil, err
 	}
 	return on, nil
+}
+
+// opened is a session with the weather's kernels; a machine with no
+// metal device is ErrNoGPU.
+func opened() (*metal.Session, error) {
+	session, err := metal.OpenSession(kernels, "laplacian", "tendency",
+		"combine", "forward", "back", "sweep", "filter", "means")
+	if errors.Is(err, metal.ErrNoDevice) {
+		return nil, fmt.Errorf("%w: %w", ErrNoGPU, err)
+	}
+	return session, err
+}
+
+// HasGPU is whether the weather's kernels open on this machine: a metal
+// device, and the kernels compiled for it.
+func HasGPU() bool {
+	session, err := opened()
+	if err != nil {
+		return false
+	}
+	session.Close()
+	return true
 }
 
 // sky is the kernels' sky struct for a step and its weights, packed as

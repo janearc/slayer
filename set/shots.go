@@ -72,10 +72,18 @@ func (s Set) Shot(name string, where Where) (Shot, error) {
 	return Shot{}, fmt.Errorf("the set has no camera %s", name)
 }
 
+// noMoves is the count of moves of a camera that does not move. It is
+// defined as zero.
+const noMoves = 0
+
 // shot stands the camera off the asset it is placed from and faces it
 // toward the asset it points to, tipped up from level; or stands it at
 // its place, facing the place it looks at.
 func (shooting camera) shot(where Where) (Shot, error) {
+	if shooting.relative != nil || len(shooting.moves) > noMoves {
+		return Shot{}, fmt.Errorf("moves, or stands at a place set by a " +
+			"thing, which a shot does not make yet")
+	}
 	if shooting.at != nil {
 		return shooting.standing()
 	}

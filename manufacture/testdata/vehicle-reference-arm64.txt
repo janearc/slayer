@@ -1,0 +1,48 @@
+daf-xf 5 hull REFUSED manufacture: daf-xf has no hull representation
+daf-xf 5 clumps REFUSED manufacture: daf-xf has no clumps representation
+daf-xf 5 quick ebba64c6db9debe75c5a10b4ac0f3af23f1826dd50eabe69387d4edc202a7ee1
+daf-xf 5 demo REFUSED manufacture: daf-xf has no demo representation
+daf-xf 11 hull REFUSED manufacture: daf-xf has no hull representation
+daf-xf 11 clumps REFUSED manufacture: daf-xf has no clumps representation
+daf-xf 11 quick ebba64c6db9debe75c5a10b4ac0f3af23f1826dd50eabe69387d4edc202a7ee1
+daf-xf 11 demo REFUSED manufacture: daf-xf has no demo representation
+hemtt 5 hull REFUSED manufacture: hemtt has no hull representation
+hemtt 5 clumps REFUSED manufacture: hemtt has no clumps representation
+hemtt 5 quick 0c86a6eea5a9aee2ef857caf36b5c5f684079feb1cb38b44e92f61db358835f4
+hemtt 5 demo REFUSED manufacture: hemtt has no demo representation
+hemtt 11 hull REFUSED manufacture: hemtt has no hull representation
+hemtt 11 clumps REFUSED manufacture: hemtt has no clumps representation
+hemtt 11 quick 0c86a6eea5a9aee2ef857caf36b5c5f684079feb1cb38b44e92f61db358835f4
+hemtt 11 demo REFUSED manufacture: hemtt has no demo representation
+kamaz 5 hull REFUSED manufacture: kamaz has no hull representation
+kamaz 5 clumps REFUSED manufacture: kamaz has no clumps representation
+kamaz 5 quick 1476c5804f704eadc67672b8d68ec071aae14bdc0b1b57dd8694140ef043dd72
+kamaz 5 demo REFUSED manufacture: kamaz has no demo representation
+kamaz 11 hull REFUSED manufacture: kamaz has no hull representation
+kamaz 11 clumps REFUSED manufacture: kamaz has no clumps representation
+kamaz 11 quick 1476c5804f704eadc67672b8d68ec071aae14bdc0b1b57dd8694140ef043dd72
+kamaz 11 demo REFUSED manufacture: kamaz has no demo representation
+scania-r 5 hull REFUSED manufacture: scania-r has no hull representation
+scania-r 5 clumps REFUSED manufacture: scania-r has no clumps representation
+scania-r 5 quick befa3247cd56ba9a8cdd43cb1afcdc3623ba4c929aac23be8307b211f65cc05c
+scania-r 5 demo REFUSED manufacture: scania-r has no demo representation
+scania-r 11 hull REFUSED manufacture: scania-r has no hull representation
+scania-r 11 clumps REFUSED manufacture: scania-r has no clumps representation
+scania-r 11 quick befa3247cd56ba9a8cdd43cb1afcdc3623ba4c929aac23be8307b211f65cc05c
+scania-r 11 demo REFUSED manufacture: scania-r has no demo representation
+tatra 5 hull REFUSED manufacture: tatra has no hull representation
+tatra 5 clumps REFUSED manufacture: tatra has no clumps representation
+tatra 5 quick c9025afed5303b6ea0420af61859e722d8fb909ec553d3b12ada103d0bb85217
+tatra 5 demo REFUSED manufacture: tatra has no demo representation
+tatra 11 hull REFUSED manufacture: tatra has no hull representation
+tatra 11 clumps REFUSED manufacture: tatra has no clumps representation
+tatra 11 quick c9025afed5303b6ea0420af61859e722d8fb909ec553d3b12ada103d0bb85217
+tatra 11 demo REFUSED manufacture: tatra has no demo representation
+unimog 5 hull REFUSED manufacture: unimog has no hull representation
+unimog 5 clumps REFUSED manufacture: unimog has no clumps representation
+unimog 5 quick 9874ff2409f83aa7089bd89e3d5df98bc1418e93d904e701f74c1028beceab2f
+unimog 5 demo REFUSED manufacture: unimog has no demo representation
+unimog 11 hull REFUSED manufacture: unimog has no hull representation
+unimog 11 clumps REFUSED manufacture: unimog has no clumps representation
+unimog 11 quick 9874ff2409f83aa7089bd89e3d5df98bc1418e93d904e701f74c1028beceab2f
+unimog 11 demo REFUSED manufacture: unimog has no demo representation

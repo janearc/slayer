@@ -1,0 +1,25 @@
+{
+	"group": "tense and sparse",
+	"mood": "creeping and uneasy",
+	"feeling": "A door that was shut is now open a hand-width.",
+	"intent": "A horror cold open, a slow push-in on a doorway, a reveal that has not come yet.",
+	"listen_for": "How little happens for the first half minute, and the sudden full bar at 0:34.",
+	"voicing": "@tape-echo",
+	"tempo": 84,
+	"meter": 3,
+	"seconds": 45.0,
+	"parts": [
+		{"name": "crack", "bar": 1, "second": 0.0,
+		 "change": "one repeated note, a creeping bass",
+		 "feels": "Do not look"},
+		{"name": "creak", "bar": 9, "second": 17.14,
+		 "change": "a heartbeat and a pulsing bass",
+		 "feels": "Your pulse is loud"},
+		{"name": "jolt", "bar": 17, "second": 34.29,
+		 "change": "everything at once",
+		 "feels": "There it is"},
+		{"name": "stop", "bar": 21, "second": 42.86,
+		 "change": "a low chord and a kick; then nothing",
+		 "feels": "Frozen"}
+	]
+}

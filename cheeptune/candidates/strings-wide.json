@@ -1,0 +1,62 @@
+{
+	// intent: a string section for the chords. two saws, one an octave up
+	// so the chords sit above the low-mid pile, a filter that follows the
+	// note, a short swell and a long release so a stab blooms and lingers.
+	// lead and bass are plain and are not the point.
+	"name": "strings-wide",
+	"machine": "studio",
+	"master": 0.4,
+	"reverb": {"size": 0.6, "decay": 2.2, "damping": 0.5, "level": 0.35},
+	"channels": [
+		{"kind": "analog", "role": "lead", "volume": 0.7, "place": -0.1,
+		 "send": {"reverb": 0.25},
+		 "envelope": {"attack": 0.004, "decay": 0.4, "sustain": 0.4,
+		              "release": 0.15},
+		 "vibrato": {"rate": 5, "depth": 7, "delay": 0.25},
+		 "analog": {"oscillators": [{"shape": "saw"},
+		                            {"shape": "square", "detune": 6,
+		                             "level": 0.6}],
+		            "filter": {"cutoff": 2200, "resonance": 0.25,
+		                       "follow": 0.8, "amount": 2,
+		                       "envelope": {"attack": 0.002, "decay": 0.25,
+		                                    "sustain": 0.3,
+		                                    "release": 0.15}}}},
+		{"kind": "analog", "role": "pad", "volume": 0.4, "place": 0.35,
+		 "voices": 12, "send": {"reverb": 0.5},
+		 "envelope": {"attack": 0.07, "decay": 0.8, "sustain": 0.75,
+		              "release": 1.1},
+		 "vibrato": {"rate": 5.2, "depth": 9, "delay": 0.15},
+		 "analog": {"oscillators": [{"shape": "saw", "detune": -9,
+		                             "level": 0.3},
+		                            {"shape": "saw", "detune": 9,
+		                             "octave": 1}],
+		            "filter": {"cutoff": 2600, "resonance": 0.15,
+		                       "follow": 0.8, "amount": 1,
+		                       "envelope": {"attack": 0.1, "decay": 1,
+		                                    "sustain": 0.6,
+		                                    "release": 1}}}},
+		{"kind": "analog", "role": "bass", "volume": 0.36,
+		 "envelope": {"attack": 0.004, "decay": 0.4, "sustain": 0.6,
+		              "release": 0.12},
+		 "analog": {"oscillators": [{"shape": "saw"},
+		                            {"shape": "square", "octave": -1,
+		                             "level": 0.6}],
+		            "filter": {"cutoff": 500, "resonance": 0.2,
+		                       "follow": 0.4, "amount": 1.5,
+		                       "envelope": {"attack": 0, "decay": 0.2,
+		                                    "sustain": 0.3,
+		                                    "release": 0.1}}}},
+		{"kind": "drum", "role": "perc", "volume": 0.8,
+		 "send": {"reverb": 0.15},
+		 "drums": {
+			"k": {"tone": 52, "sweep": 30, "fall": 0.045, "decay": 0.3,
+			      "click": 0.3},
+			"s": {"tone": 190, "decay": 0.1, "noise": 0.5,
+			      "noise_decay": 0.15, "colour": 1500},
+			"h": {"noise": 0.35, "noise_decay": 0.04, "colour": 6000},
+			"t": {"tone": 115, "sweep": 8, "fall": 0.07, "decay": 0.25},
+			"o": {"noise": 0.35, "noise_decay": 0.25, "colour": 6000},
+			"b": {"tone": 740, "decay": 0.12, "click": 0.3}
+		 }}
+	]
+}

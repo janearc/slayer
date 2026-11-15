@@ -32,7 +32,7 @@ func TestFiniteVolumeFalloffHasItsAnalyticLimits(t *testing.T) {
 	}
 	near := volumeFalloff(2*(1-1e-8), 2)
 	far := volumeFalloff(2*(1+1e-8), 2)
-	if math.Abs(near-far) > 1e-6 {
+	if !(math.Abs(near-far) <= 1e-6) {
 		t.Fatal("fluence jumps at source surface")
 	}
 	for _, distance := range []float64{20, 200, 2000} {
@@ -56,7 +56,7 @@ func TestFiniteVolumeFalloffAgreesWithDirectVolumeQuadrature(t *testing.T) {
 				integral += 3 * rho * rho / (distance*distance + rho*rho - 2*distance*rho*mu) / (rings * angles)
 			}
 		}
-		if math.Abs(volumeFalloff(distance, 1)-integral) > 2e-4*integral {
+		if !(math.Abs(volumeFalloff(distance, 1)-integral) <= 2e-4*integral) {
 			t.Fatal("finite-source integral changed")
 		}
 	}
@@ -88,7 +88,7 @@ func TestFiniteVolumeSpectrumUsesTheSameFalloffAndKeepsOtherBandsDark(t *testing
 		at := source.Point().At.Sub(maths.YAxis.Scale(distance))
 		_, _, light := source.Light(at, maths.YAxis)
 		landed := source.Lands(at, maths.Band{Nanometres: 550})
-		if math.Abs(landed-light.R) > 1e-12*max(1, light.R) || landed <= 0 {
+		if !(math.Abs(landed-light.R) <= 1e-12*max(1, light.R)) || landed <= 0 {
 			t.Fatal("band and visible falloff separated")
 		}
 		if source.Lands(at, maths.Band{Nanometres: 1.24}) != 0 {
@@ -100,7 +100,7 @@ func TestFiniteVolumeSpectrumUsesTheSameFalloffAndKeepsOtherBandsDark(t *testing
 func TestFiniteVolumeSeriesMeetTheClosedFormContinuously(t *testing.T) {
 	for _, ratio := range []float64{.25, 4} {
 		left, right := volumeFalloff(ratio*(1-1e-8), 1), volumeFalloff(ratio*(1+1e-8), 1)
-		if math.Abs(left-right) > 1e-6*left || left <= 0 || right <= 0 {
+		if !(math.Abs(left-right) <= 1e-6*left) || left <= 0 || right <= 0 {
 			t.Fatal("numerical series has a visible seam")
 		}
 	}
@@ -111,7 +111,7 @@ func TestFiniteVolumeSeriesMeetTheClosedFormContinuously(t *testing.T) {
 func TestFiniteVolumeFalloffAgreesWithTheIntegralNearItsCentre(t *testing.T) {
 	for _, ratio := range []float64{.1, .2, .24, .25} {
 		exact := 1.5 * (1 + (1-ratio*ratio)/(2*ratio)*math.Log((1+ratio)/(1-ratio)))
-		if math.Abs(volumeFalloff(ratio, 1)-exact) > 1.1e-8*exact {
+		if !(math.Abs(volumeFalloff(ratio, 1)-exact) <= 1.1e-8*exact) {
 			t.Fatal("near-source approximation exceeds its remainder bound")
 		}
 	}
@@ -122,7 +122,7 @@ func TestFiniteVolumeFalloffScalesAsAnInverseArea(t *testing.T) {
 		for _, ratio := range []float64{0, .1, .5, 1, 2, 4, 20} {
 			got := volumeFalloff(radius*ratio, radius) * radius * radius
 			want := volumeFalloff(ratio, 1)
-			if math.Abs(got-want) > 1e-12*max(1, want) {
+			if !(math.Abs(got-want) <= 1e-12*max(1, want)) {
 				t.Fatal("finite source lost its radius scaling")
 			}
 		}
@@ -132,7 +132,7 @@ func TestFiniteVolumeFalloffScalesAsAnInverseArea(t *testing.T) {
 func TestFiniteVolumeFalloffKeepsItsFarLimitWithoutCancellation(t *testing.T) {
 	for _, distance := range []float64{1e6, 1e9, 1e12} {
 		got := volumeFalloff(distance, 1) * distance * distance
-		if math.Abs(got-1) > 1e-10 {
+		if !(math.Abs(got-1) <= 1e-10) {
 			t.Fatal("far-source cancellation lost the light")
 		}
 	}

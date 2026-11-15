@@ -148,6 +148,62 @@ type light struct {
 	half, soft measure.Angle
 	flicker    seed
 	depth      float64
+	part       signal
+}
+
+// signal is a light's part in a programme that a set of lights keeps
+// together, over and over. For the first of each cycle every light is
+// lit. Then the lights are lit in turn, so many at once, going round
+// their places a lap at a time, until the cycle ends. A light that is
+// not lit is low: a share of itself. A light with no cycle has no
+// programme, and is always lit.
+type signal struct {
+	cycle, steady, lap time.Duration
+	place, places, lit int
+	low                float64
+}
+
+// sound is whether a programme can be kept: a cycle and a lap above
+// nought, a steady part that fits in the cycle, a place among the
+// places, no more lit at once than there are, and a low between nought
+// and one.
+func (part signal) sound() bool {
+	return part.cycle > 0 && part.lap > 0 && part.steady >= 0 &&
+		part.steady <= part.cycle && part.places > 0 && part.place >= 0 &&
+		part.place < part.places && part.lit >= 0 &&
+		part.lit <= part.places && share(part.low)
+}
+
+// share is how much of itself a light is at a time by its part in the
+// programme: one when it is lit, and its low when it is not.
+func (part signal) share(at time.Duration) float64 {
+	if part.cycle <= 0 {
+		return 1
+	}
+	into := at % part.cycle
+	if into < 0 {
+		into += part.cycle
+	}
+	if into < part.steady {
+		return 1
+	}
+	places := float64(part.places)
+	round := float64((into-part.steady)%part.lap) / float64(part.lap) * places
+	behind := math.Mod(round-float64(part.place)+places, places)
+	if behind < float64(part.lit) {
+		return 1
+	}
+	return part.low
+}
+
+// signalling is the light keeping a part in a programme, or why it
+// cannot.
+func (made light) signalling(part signal) (light, error) {
+	if !part.sound() {
+		return light{}, errLight
+	}
+	made.part = part
+	return made, nil
 }
 
 // newLight is a light of a spectrum and a power, spread a way, or why
@@ -235,11 +291,15 @@ const (
 // share is how much of itself the light is at a time: one, or for a
 // flickering light, noise by its seed between one less its depth and
 // one. it is the shape of emit's pulse.
+//
+// a light with a part in a programme is that share of what it would
+// otherwise be.
 func (made light) share(at time.Duration) float64 {
+	lit := made.part.share(at)
 	if !made.flicker.made() {
-		return 1
+		return lit
 	}
 	wave := noise.Gradient(made.flicker.number, at.Seconds()*flickers,
 		aside, aside)
-	return 1 - made.depth*asShare(wave)
+	return lit * (1 - made.depth*asShare(wave))
 }

@@ -51,11 +51,14 @@ func alongLongest(med medium.Medium, longest float64) int {
 
 // boxOf is a medium's grid over its box, with its paint and shine, the
 // three as they are at the picture's time.
-func boxOf(med medium.Medium, paint, shine texture.Texture) boxed {
+func boxOf(med medium.Medium, paint, shine texture.Texture, limits ...int) boxed {
 	bounds := med.Bounds()
 	size := bounds.Max.Sub(bounds.Min)
 	longest := math.Max(size.X, math.Max(size.Y, size.Z))
 	along := alongLongest(med, longest)
+	if len(limits) > 0 && limits[0] > 0 {
+		along = min(along, limits[0])
+	}
 	var cells [3]int
 	for axis, side := range []float64{size.X, size.Y, size.Z} {
 		share := side / longest

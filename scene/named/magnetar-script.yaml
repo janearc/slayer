@@ -1,0 +1,123 @@
+# magnetar-script.yaml: what zappy says over the real magnetar, in the
+# order it says it. These sentences are drafts, to be rewritten.
+#
+# Zappy hosts: first person, present tense, a pretend magnetar showing
+# the real one. Each figure in a sentence is written in digits and is
+# listed under figures with the name of the value behind it: a value in
+# the research data (research-derived-data.yml, with its source and
+# page) or one the scene computes from those (magnetar_script.go says
+# how). A figure with no value behind it, or one that is not that value
+# at the digits written, is refused by the package's test. Number words
+# are refused, so no figure hides in a word.
+#
+# Withdrawn, do not lift: an earlier table said the field falls to a
+# fridge magnet's 10 G at 585,000 km (1.5 Moon distances) and to the
+# Earth's 0.5 G at 1.59 million km. Both are past the light cylinder,
+# 360,000 km, where the field's lines open and the dipole law used for
+# them no longer holds; neither figure stands. The distances that stand
+# are inside it: 36 km, 950 km and 16,400 km, and the light cylinder.
+#
+# The magnetic axis's tilt of 30 degrees is picked for the picture, not
+# measured; no line says or implies a tilt.
+#
+# shot is the picture a line goes under: zappy, beside, field, shells,
+# world or flare. film marks the lines the short film says, one a bar.
+lines:
+  - say: "I'm just a pretend magnetar. I wanted to show you the real one."
+    shot: zappy
+  - say: "My star is 9,000 km to its edge. That was for the camera."
+    shot: zappy
+    figures: {"9,000": zappy-radius-km}
+  - say: "The real one is that dot. It is about 20 km across."
+    shot: beside
+    film: true
+    figures: {"20": magnetar-diameter-km}
+  - say: "To see it as large as me, we have to come 900 times closer."
+    shot: beside
+    film: true
+    figures: {"900": zappy-times-larger}
+  - say: "Its radius is 10 to 13 km. Nobody has measured this one's."
+    shot: field
+    figures: {"10": magnetar-radius-low-km, "13": magnetar-radius-high-km}
+  - say: "It really glows in X-rays. The colour here is my choice."
+    shot: field
+  - say: "You cannot see a magnetic field. This is a drawing of one."
+    shot: field
+    film: true
+  - say: "It turns every 7.55 seconds. Real ones take 2 to 12."
+    shot: field
+    figures: {"7.55": sgr1806-period-seconds,
+      "2": magnetar-period-shortest-seconds,
+      "12": magnetar-period-longest-seconds}
+  - say: "My beams go round every 1.5 seconds. I was showing off."
+    shot: field
+    figures: {"1.5": zappy-beam-spin-seconds}
+  - say: "Its field is 2,000,000,000,000,000 gauss. A fridge magnet is 10."
+    shot: shells
+    figures: {"2,000,000,000,000,000": sgr1806-field-gauss,
+      "10": fridge-magnet-gauss}
+  - say: "We know that from how fast its spin slows down."
+    shot: shells
+  - say: "Inside 36 km, empty space itself splits light by polarisation."
+    shot: shells
+    figures: {"36": reach-quantum-km}
+  - say: "This tracer cannot draw that. I am not going to pretend."
+    shot: shells
+  - say: "Inside 950 km, the field outpulls an atom's grip on its electrons."
+    shot: shells
+    film: true
+    figures: {"950": reach-atoms-km}
+  - say: "At 16,400 km it still beats the strongest magnet we ever built."
+    shot: shells
+    figures: {"16,400": reach-lab-km}
+  - say: "Past 360,000 km it stops being a simple magnet. I stop there too."
+    shot: shells
+    figures: {"360,000": light-cylinder-km}
+  - say: "That is 0.94 of the way to the Moon."
+    shot: shells
+    figures: {"0.94": light-cylinder-moon-distances}
+  - say: "Here is a world 100,000 km from it, with its aurora."
+    shot: world
+    film: true
+    figures: {"100,000": world-at-km}
+  - say: "The aurora is an illustration. Nobody has seen one here."
+    shot: world
+  - say: "Here the star's field is 4,000 times the Earth's own."
+    shot: world
+    film: true
+    figures: {"4,000": world-field-earth-times}
+  - say: "A flare would bring that world 130,000,000,000 years of sunlight."
+    shot: world
+    film: true
+    figures: {"130,000,000,000": world-flare-sunlight-years}
+  - say: "All of it in 0.2 seconds. The aurora is the least of it."
+    shot: world
+    figures: {"0.2": sgr1806-spike-seconds}
+  - say: "Its crust cracks under its own field. That is a starquake."
+    shot: flare
+  - say: "In 0.2 seconds it gave out what the Sun does in 56,000 years."
+    shot: flare
+    film: true
+    figures: {"0.2": sgr1806-spike-seconds,
+      "56,000": flare-sun-years-low}
+  - say: "Then it pulsed every 7.56 seconds for 380 seconds."
+    shot: flare
+    figures: {"7.56": sgr1806-tail-period-seconds,
+      "380": sgr1806-tail-seconds}
+  - say: "The tail here runs 20 times faster than it did."
+    shot: flare
+    film: true
+    figures: {"20": flare-speed}
+  - say: "It was 28,000 light years away. It still ionised our air."
+    shot: flare
+    figures: {"28,000": sgr1806-distance-light-years}
+  - say: "Down to 20 km above the ground, for over an hour."
+    shot: flare
+    figures: {"20": sgr1806-ionosphere-lowest-km}
+  - say: "At 1 light year, that flash is 8 to 13 minutes of sunlight at once."
+    shot: flare
+    figures: {"1": one-light-year, "8": flare-sunlight-minutes-low,
+      "13": flare-sunlight-minutes-high}
+  - say: "I'm only a pretend one. I find that a relief."
+    shot: zappy
+    film: true

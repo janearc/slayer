@@ -54,6 +54,20 @@ func (mr *MockLayMockRecorder) Across(pitch any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Across", reflect.TypeOf((*MockLay)(nil).Across), pitch)
 }
 
+// Clearest mocks base method.
+func (m *MockLay) Clearest(records []record.Record) maths.Light {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Clearest", records)
+	ret0, _ := ret[0].(maths.Light)
+	return ret0
+}
+
+// Clearest indicates an expected call of Clearest.
+func (mr *MockLayMockRecorder) Clearest(records any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clearest", reflect.TypeOf((*MockLay)(nil).Clearest), records)
+}
+
 // Site mocks base method.
 func (m *MockLay) Site(records []record.Record, seed uint64, x, y, frame int64) ([]record.Record, maths.Light) {
 	m.ctrl.T.Helper()

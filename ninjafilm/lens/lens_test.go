@@ -130,8 +130,8 @@ func TestALensSeesWhatItsFrameSays(t *testing.T) {
 	image := imageAt(focal*millimetre, focus)
 	wantNear := pair * math.Atan(wide/pair/image)
 	wantFar := pair * math.Atan(wide/pair/(focal*millimetre))
-	if math.Abs(near.Wide()-wantNear) > toleranceTight ||
-		math.Abs(far.Wide()-wantFar) > toleranceTight {
+	if !(math.Abs(near.Wide()-wantNear) <= toleranceTight) ||
+		!(math.Abs(far.Wide()-wantFar) <= toleranceTight) {
 		t.Errorf("wide %g and %g, want %g and %g", near.Wide(), far.Wide(),
 			wantNear, wantFar)
 	}
@@ -139,6 +139,47 @@ func TestALensSeesWhatItsFrameSays(t *testing.T) {
 	if got := near.Pixel(pixelsAcross); !(math.Abs(got-seen) <=
 		toleranceTight) {
 		t.Errorf("a pixel sees %g, want %g", got, seen)
+	}
+}
+
+// A lens's opening is what its rays are made of: the aperture's reach by
+// the stop, the focus it was made with, and the frame carried out to the
+// focus through the lens's middle.
+func TestAnOpeningIsTheApertureTheFocusAndTheFrameAtTheFocus(t *testing.T) {
+	glass := mustThin(t, focus)
+	image := imageAt(focal*millimetre, focus)
+	reach, away, across, up := glass.Opening()
+	wants := []struct {
+		name      string
+		got, want float64
+	}{
+		{"reach", reach, focal * millimetre / (pair * stop)},
+		{"focus", away, focus},
+		{"across", across, frameWide * millimetre * focus / image},
+		{"up", up, frameHigh * millimetre * focus / image},
+	}
+	for _, each := range wants {
+		if !(math.Abs(each.got-each.want) <= toleranceTight*each.want) {
+			t.Errorf("%s is %g, want %g", each.name, each.got, each.want)
+		}
+	}
+}
+
+// A ray of the lens aims inside its opening's sharp frame and starts
+// inside its reach; an opening is not the film's own size, which is
+// smaller by the image's distance over the focus.
+func TestAnOpeningIsNotTheFilmsOwnSize(t *testing.T) {
+	glass := mustThin(t, focus)
+	reach, away, across, _ := glass.Opening()
+	if !(across > frameWide*millimetre) {
+		t.Errorf("the sharp frame is %g m across, no wider than the film",
+			across)
+	}
+	ray := glass.Ray(none, none, pixelsAcross, pixelsDown, maths.Band{})
+	met := ray.At.Add(ray.Dir.Scale(-away / ray.Dir.Z))
+	if !(math.Abs(met.X) <= across/pair) || !(ray.At.Len() <= reach) {
+		t.Errorf("a ray from %v meets the focus at %v, outside an opening "+
+			"%g across with reach %g", ray.At, met, across, reach)
 	}
 }
 
@@ -328,17 +369,16 @@ func drawnLensSeesItsFrame(t *rapid.T) {
 	across := rapid.IntRange(whole, pixelsAcross).Draw(t, "across")
 	image := imageAt(length*millimetre, away)
 	wantWide := pair * math.Atan(wide*millimetre/pair/image)
-	if got := glass.Wide(); math.Abs(got-wantWide) > toleranceTight*wantWide {
+	if got := glass.Wide(); !(math.Abs(got-wantWide) <= toleranceTight*wantWide) {
 		t.Fatalf("the lens sees %v, want %v", got, wantWide)
 	}
 	wantPixel := wide * millimetre / float64(across) / image
-	if got := glass.Pixel(across); math.Abs(got-wantPixel) >
-		toleranceTight*wantPixel {
+	if got := glass.Pixel(across); !(math.Abs(got-wantPixel) <= toleranceTight*wantPixel) {
 		t.Fatalf("a pixel sees %v, want %v", got, wantPixel)
 	}
 	rows := frame.Rows(across)
 	square := float64(across) * high / wide
-	if math.Abs(float64(rows)-square) > half {
+	if !(math.Abs(float64(rows)-square) <= half) {
 		t.Fatalf("%d rows for %d across a %v by %v frame, want %v", rows,
 			across, wide, high, square)
 	}
