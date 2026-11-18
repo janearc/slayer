@@ -1,0 +1,74 @@
+heard. / complete v3 fast proof
+==============================
+
+Requested: whole film, 480 pixels wide, 6 fps, four rays per pixel,
+fastest available tracing and caching. Recipe: studies/heard-v3-proof-480.yaml.
+480 x 270, rays:2 means 2 x 2 primary samples. 1656 frames, 276 seconds on
+the video grid, full 275.949955-second revised Glass Hour audio retained.
+
+GPU FasterLighting uses native primary/shadow traversal, the per-frame
+lamp store and shared sky looks. Retained gpu.Frames keeps device buffers,
+compiled kernels and mesh trees. Dynamic world generations invalidate
+lighting/geometry correctly. Cached smoke lighting conflicts with the
+lamp store. Frozen surface plates are not used across moving cameras or
+instruments. The 1400 MiB process guard and 30 GiB free-disk floor remain.
+
+This cut has explicit shot coverage from the actual soundtrack spectrum
+through the full release tail. It refuses uncovered frames rather than
+falling back to the historical generic opening. Both Kecks, Subaru, Rubin
+and ELT use the updated factory meshes. GroundRig splits before material
+flattening, preserving the complete triangle inventory. Bases, service
+wings and piers are fixed; upper shells/forks slew and optics pitch.
+Both Kecks receive the same bounded correction and settled hold.
+
+Hawaii uses the approved Cloudsea USGS Kilauea source window, sampled at
+12.5 metres for this proof. Instrument placements, introduced forest,
+layered mist, lamps and laser mounts are authored scenery. Trees use
+shared clump prototypes. The sky's stars and Milky Way are procedural
+illustrations on one rotation clock. Interior shells stay present.
+
+The first and final crashes use the new composition, at bars 24 and 66.
+The repeated three-junction fold completes on the fourth bar's first
+beat, then holds. Spacecraft poses use absolute musical entrances so
+cuts do not restart their slews. The final view holds through the tail
+and fades only in its final three seconds.
+
+Preview limitations, not scientific claims:
+- Small mechanical acquisition corrections; full swept-clearance and
+  engineering articulation are not certified.
+- Griffith is new authored architectural massing, not a surveyed model.
+- Radio arrays retain the existing simplified antenna assemblies.
+- The four respondents are bounded authored proof geometry. Membranes,
+  enlarged junctions, bead-like filaments and sparse volumes establish
+  choreography; they are not the final cinematic surface treatment.
+- Gaia retains measured local-star identities and positions. Beyond that
+  sample, Milky Way, galaxy groups and the Laniakea-like web are explicitly
+  authored illustrations. A measured larger-scale catalogue and a seamless
+  physical-scale handoff remain unfinished.
+- The conversation establishes the four response timings. A full reveal
+  of different structures by observational band remains unfinished;
+  brightness changes are not measured spectral-band transport.
+- This is a fresh full proof of the revised edit, not a final acceptance
+  claim. Preserve the earlier rejected take and its labels.
+
+Checks before full production: factory inventory unchanged by rig splitting;
+fixed foundations, matched Keck pointing and settled hold; searching timing
+and pipeline tests. An 18-frame native motion pilot at the requested settings
+completed in 25.289 seconds before encoding (about 1.4 seconds per frame).
+Real traced paired-Keck, Subaru interior and large-fold frames inspected.
+
+Production recovery
+-------------------
+The first complete attempt reached503 PNGs, then the existing1400MiB
+peak-RSS guard stopped the full-detail orbital setup. No limit was raised.
+The orbital now exposes a checked floor-tiles setting, retaining7700 as
+its default. This distant480-wide proof uses512 floor tiles around each
+ring. Ring geometry, camera and the original scene defaults are preserved.
+Focused parameter-bound and film tests pass.
+
+Frames0..501 are retained from e391b863. The first orbital frame502 from
+the interrupted attempt is archived separately. Frames502..1655 are traced
+with9d1ac191 and the bounded floor texture. These two producer ranges are
+recorded in segments.json. Final assembly uses the complete original WAV
+once, with normal-speed6fps PNGs, through Game/FFmpeg. The final movie is
+480x270; native pilot/tail movies have two extra encoded padding rows.

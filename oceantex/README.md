@@ -2,8 +2,7 @@
 
 a CPU reference for the sea, from a beach toward orbit. Source attributions
 and authored choices are retained; several derivations still need review.
-See [the integration status](../doc/phone-ocean-integration.md) before using it
-in a scene. Colour goes through
+Colour goes through
 [libtheme-css](https://github.com/janearc/libtheme-css): its 1931 observer,
 its d65 and black body, its srgb.
 

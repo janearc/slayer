@@ -1,0 +1,1 @@
+sample-monolithic . :: go run ./manufacture/testdata/monolithic_sample.go

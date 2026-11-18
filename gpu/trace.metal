@@ -35,6 +35,10 @@ struct World {
 	device const float *boxes;
 	device const Field *fields;
 	device const float *heights;
+#ifdef SLAYER_OPTICAL_MEDIA
+	device const ClearMedium *clear_media;
+	constant OpticalInitialState *initial_media;
+#endif
 #ifdef SLAYER_NATIVE_MESHES
 	device const int *firsts;
 #endif
@@ -50,7 +54,24 @@ struct World {
     float4 momentum;
     float energy;
     int cuts;
+#ifdef SLAYER_WORK_COUNTS
+	// work is the diagnostic counts of what one sample did (work_counts.go)
+	thread uint *work;
+#endif
 };
+
+// SLAYER_WORK adds to one of a sample's diagnostic work counts, by its
+// slot in work_counts.go, in a build that counts; elsewhere it is nothing.
+#ifdef SLAYER_WORK_COUNTS
+#define SLAYER_WORK(slot, by) \
+	if (world.work != nullptr) { world.work[slot] += uint(by); }
+#define SLAYER_WORK_MOST(slot, value) \
+	if (world.work != nullptr) { \
+		world.work[slot] = max(world.work[slot], uint(value)); }
+#else
+#define SLAYER_WORK(slot, by)
+#define SLAYER_WORK_MOST(slot, value)
+#endif
 
 // nowhere is the finite miss-depth sentinel shared through structure.go.
 // Fast-math compilation does not give reliable infinity semantics, so the
@@ -69,6 +90,13 @@ struct Hit {
 	float scale;
 	// Internal hit provenance, not part of a host/device buffer layout.
 	int sphere_index = -1;
+	// the face's own way out, by its winding, where slayer's mesh shaded
+	// smooth was met: the normal before its corners bent it. nought for
+	// anything else, whose normal is its own.
+	float3 flat = float3(0);
+	// The exact interface normal for fields. Appearance keeps `normal`, which
+	// may be an independently sampled spectral shading normal.
+	float3 geometric = float3(0);
 };
 
 // sphere_hit uses the stable quadratic form shared with globe.Hit and
@@ -193,6 +221,7 @@ static Hit bent(Bend bend, Triangle face, float3 point, float2 weights,
 	float3 corners[3] = {face.corner_a.xyz, face.corner_b.xyz,
 	                     face.corner_c.xyz};
 	float3 blend = float3(0), lift = float3(0);
+	flat.flat = bend.normal_a.w == 0 ? flat.normal : float3(0);
 	for (int k = 0; k < 3; k++) {
 		blend += normals[k] * weighed[k];
 		float under = min(0.0f, dot(point - corners[k], normals[k]));
@@ -445,6 +474,7 @@ static Hit faces_near(World world, int root, float3 at, float3 way,
 	stack[depth++] = root;
 	while (depth > 0) {
 		Node box = world.nodes[stack[--depth]];
+		SLAYER_WORK(11, 1)
 		if (!box_hit(at, way, box, found.distance)) {
 			continue;
 		}
@@ -535,6 +565,12 @@ static float3 out_of(Instance placed, float3 normal) {
 	                 placed.out_z.xyz * normal.z);
 }
 
+// flat_out is out_of for a hit's own face normal, which is nought where
+// no smooth face was met, and stays nought.
+static float3 flat_out(Instance placed, float3 flat) {
+	return any(flat != 0) ? out_of(placed, flat) : flat;
+}
+
 // scale_of recovers instance scale from its world-to-local transform.
 static float scale_of(float4 into_x) { return 1 / length(into_x.xyz); }
 
@@ -555,6 +591,7 @@ static Hit group_hit(World world, int root, float3 at, float3 way,
 	stack[depth++] = root;
 	while (depth > 0) {
 		Node box = world.tops[stack[--depth]];
+		SLAYER_WORK(11, 1)
 		if (!box_hit(at, way, box, found.distance)) { continue; }
 		if (box.info.y == 0) {
 			stack[depth++] = box.info.x;
@@ -568,6 +605,7 @@ static Hit group_hit(World world, int root, float3 at, float3 way,
 			if (met.material < 0) { continue; }
 			found = {met.distance, 0, out_of(child, met.normal),
 			         moved_out(child, met.lift), fma(way, met.distance, at), 1};
+			found.flat = flat_out(child, met.flat);
 			if (any) { return found; }
 		}
 	}
@@ -617,31 +655,71 @@ static Hit native_shadow_standing(World world, Instance placed,
 	return instance_faces_hit(world, placed, at, way, 0, far, true);
 }
 
-// Native any-hit proposes one opaque standing. Analytic shapes remain in blocked.
-static Hit native_shadow(World world, float3 at, float3 way, float far) {
-	Hit found = {far, -1, float3(0)};
-	if (world.header->tops.x == 0 || !(far > 0)) { return found; }
-	float start, stop;
-	if (!native_clip(world.header->bounds, at, way, beam_zero, far, start, stop)) {
-		return found;
+// a refused candidate is counted, in a build that counts, by where along
+// the shadow the device met it: within refusal_end of either end, or
+// between (work_counts.go)
+constexpr constant float refusal_end = 1e-3f;
+
+// float_step is the gap between a float and the next, as a share of it:
+// the coarsest a float can be, met_floats' unit
+constexpr constant float float_step = 1.1920929e-7f;
+
+// refusal_counted counts one candidate the software check refused, met
+// at distance along a shadow far long from at, and keeps the most such
+// distance in floats of at's own size: a refusal within a few of them is
+// one the device and the software rounded apart.
+static void refusal_counted(World world, float3 at, float distance,
+                            float far) {
+	SLAYER_WORK(10, 1)
+	SLAYER_WORK_MOST(2, distance / (max(length(at), 1.0f) * float_step))
+	if (distance >= far * (1 - refusal_end)) {
+		SLAYER_WORK(3, 1)
+	} else if (distance <= far * refusal_end) {
+		SLAYER_WORK(4, 1)
+	} else {
+		SLAYER_WORK(7, 1)
 	}
-	ray r;
+}
+
+// shadow_ray is a shadow from at a way, far long, clipped to the scene's
+// bound; false when the bound is not on it
+static bool shadow_ray(World world, float3 at, float3 way, float far,
+                       thread ray &r, thread float &start) {
+	float stop;
+	if (world.header->tops.x == 0 || !(far > 0) ||
+	    !native_clip(world.header->bounds, at, way, beam_zero, far, start,
+	                 stop)) {
+		return false;
+	}
 	r.origin = fma(way, start, at);
 	r.direction = way;
 	r.min_distance = 0;
 	r.max_distance = stop - start;
+	return true;
+}
+
+// Native any-hit proposes one opaque standing. Analytic shapes remain in
+// blocked. A refused candidate does not prove that the rest of the ray is
+// clear, so the scene is walked in software from the start.
+static Hit native_shadow(World world, float3 at, float3 way, float far) {
+	Hit found = {far, -1, float3(0)};
+	ray r;
+	float start;
+	if (!shadow_ray(world, at, way, far, r, start)) { return found; }
 	intersector<instancing, max_levels<3>> query;
 	query.assume_geometry_type(geometry_type::triangle);
 	query.accept_any_intersection(true);
 	auto met = query.intersect(r, world.accelerated, 2u);
+	SLAYER_WORK(8, 1)
 	if (met.type != intersection_type::triangle) { return found; }
 	Instance placed = world.instances[int(met.instance_id[0])];
+	SLAYER_WORK(9, 1)
 	Hit checked = native_shadow_standing(world, placed, at, way, far);
 	if (checked.material >= 0) {
 		found.material = 0;
 		return found;
 	}
-	// A refused candidate does not prove that the rest of the ray is clear.
+	refusal_counted(world, at, start + met.distance, far);
 	return meshes_software(world, at, way, 0, far, true);
 }
 #endif
@@ -664,6 +742,7 @@ static Hit meshes_software(World world, float3 at, float3 way, float near,
 	stack[depth++] = 0;
 	while (depth > 0) {
 		Node box = world.tops[stack[--depth]];
+		SLAYER_WORK(11, 1)
 		if (!box_hit(at, way, box, found.distance)) {
 			continue;
 		}
@@ -694,6 +773,7 @@ static Hit meshes_software(World world, float3 at, float3 way, float near,
 			         out_of(placed, met.normal),
 			         moved_out(placed, met.lift), met.local,
 			         scale_of(placed.into_x)};
+			found.flat = flat_out(placed, met.flat);
 			if (any) {
 				return found;
 			}
@@ -759,6 +839,7 @@ static Hit native_first(World world, float3 at, float3 way,
 		met = native_face(world, child, triangle,
                           local_at, local_way, near, far);
 		met.normal = out_of(child, met.normal);
+		met.flat = flat_out(child, met.flat);
 		met.lift = moved_out(child, met.lift);
 		met.local = fma(local_way, met.distance, local_at);
 	} else {
@@ -768,11 +849,15 @@ static Hit native_first(World world, float3 at, float3 way,
 	}
 	if (met.material < 0) {
 		if (world.native_counts) { world.native_counts->w++; }
+		SLAYER_WORK(10, 1)
 		return meshes_software(world, at, way, near, far, false);
 	}
 	if (world.native_counts) { world.native_counts->z++; }
-	return {met.distance, placed.info.y, out_of(placed, met.normal),
-         moved_out(placed, met.lift), met.local, scale_of(placed.into_x)};
+	Hit made = {met.distance, placed.info.y, out_of(placed, met.normal),
+	            moved_out(placed, met.lift), met.local,
+	            scale_of(placed.into_x)};
+	made.flat = flat_out(placed, met.flat);
+	return made;
 }
 #endif
 
@@ -841,6 +926,42 @@ static float3 field_normal(World world, Field field, float x, float z) {
 	float tx = gx - column, tz = gz - row;
 	device const float *sample = world.heights + field.data.x +
 	                             row * n + column;
+	if (field.normal.z != 0) {
+		device const float *slope_x = world.heights + field.normal.x +
+		                              row * n + column;
+		device const float *slope_z = world.heights + field.normal.y +
+		                              row * n + column;
+		float low_x = slope_x[0] * (1 - tx) + slope_x[1] * tx;
+		float high_x = slope_x[n] * (1 - tx) + slope_x[n + 1] * tx;
+		float low_z = slope_z[0] * (1 - tx) + slope_z[1] * tx;
+		float high_z = slope_z[n] * (1 - tx) + slope_z[n + 1] * tx;
+		float dx = low_x * (1 - tz) + high_x * tz;
+		float dz = low_z * (1 - tz) + high_z * tz;
+		return normalize(float3(-dx, 1, -dz));
+	}
+	float low_x = (sample[1] - sample[0]) / step;
+	float high_x = (sample[n + 1] - sample[n]) / step;
+	float low_z = (sample[n] - sample[0]) / step;
+	float high_z = (sample[n + 1] - sample[1]) / step;
+	float dx = low_x * (1 - tz) + high_x * tz;
+	float dz = low_z * (1 - tx) + high_z * tx;
+	return normalize(float3(-dx, 1, -dz));
+}
+
+// field_geometric_normal follows the bilinear surface actually intersected.
+// It deliberately does not read the optional spectral shading-slope arrays.
+static float3 field_geometric_normal(World world, Field field,
+                                     float x, float z) {
+	int n = field.data.y;
+	float step = field.size.x / (n - 1);
+	float last = float(n - 1);
+	float gx = clamp((x + field.size.x / 2) / step, 0.0f, last);
+	float gz = clamp((z + field.size.x / 2) / step, 0.0f, last);
+	int column = min(int(gx), n - 2);
+	int row = min(int(gz), n - 2);
+	float tx = gx - column, tz = gz - row;
+	device const float *sample = world.heights + field.data.x +
+	                             row * n + column;
 	float low_x = (sample[1] - sample[0]) / step;
 	float high_x = (sample[n + 1] - sample[n]) / step;
 	float low_z = (sample[n] - sample[0]) / step;
@@ -898,9 +1019,12 @@ static Hit first(World world, float3 at, float3 way, float near,
 		}
 		float3 local = local_at + local_way * met;
 		float3 faces = field_normal(world, field, local.x, local.z);
+		float3 geometric = field_geometric_normal(world, field,
+		                                          local.x, local.z);
 		found = {met * scale, field.data.z,
 		         normalize(field_out(field, faces)), float3(0), local,
 		         scale};
+		found.geometric = normalize(field_out(field, geometric));
 	}
 	for (int index = 0; index < world.header->counts.x; index++) {
 		Sphere sphere = world.spheres[index];
@@ -1058,6 +1182,15 @@ static float volume_falloff(float distance, float radius) {
 // it has no way, and no shadow.
 static bool is_flood(Lamp lamp) { return lamp.second.w == lamp_flood; }
 
+// Source selection changes only the primary ray's gathered light. The
+// sampler still weighs the complete scene, keeping its picks and weights.
+enum SourcePart { all_sources, nonbeam_sources, beam_sources };
+static bool selected_lamp(Lamp lamp, SourcePart sources) {
+	bool beam = lamp.extent.y > beam_zero;
+	return sources == all_sources ||
+	       (sources == beam_sources ? beam : !beam);
+}
+
 // lamp_light agrees with emit.Lit, emit.Volume, emit.Beam, emit.Distant,
 // emit.Beams and film.Flood. Finite sources keep the centre-ray
 // approximation for shadows. seen is the way a surface faces, or the way
@@ -1163,26 +1296,40 @@ static float place_share(float3 point) {
 }
 
 // asked is trace's asked: the lamps a point asks, each with how many
-// times over it counts. with lamps_asked lamps or fewer, every lamp,
-// once. with more, lamps_asked picks spread evenly along the lamps'
-// worths laid end to end, from a start the point's place decides, each
-// pick counting its share of all the worth over its lamp's own. a lamp
-// is worth its light's luminance, times how squarely it lands for a
+// times over it counts, into asks, which holds lamps_every. with
+// lamps_every lamps or fewer, every lamp that sends light here, once.
+//
+// a lamp with a way that sends nothing here, as a spot past its cone,
+// is left out: every use of an ask multiplies by its light, so it adds
+// nothing, and trace's shadowed takes no shadow for it either. a lamp
+// with no way, a flood, is always asked, as trace asks it.
+//
+// with more, lamps_asked picks spread evenly along the lamps' worths
+// laid end to end, from a start the point's place decides, each pick
+// counting its share of all the worth over its lamp's own. a lamp is
+// worth its light's luminance, times how squarely it lands for a
 // surface facing normal; a normal of nought takes light every way, as a
 // bit of a volume does.
 static int asked(World world, float3 point, float3 normal,
                  thread Ask *asks) {
 	int lamps = world.header->counts.w;
-	if (lamps <= lamps_asked) {
+	if (lamps <= lamps_every) {
+		int kept = 0;
 		for (int index = 0; index < lamps; index++) {
-			asks[index] = {index, 1};
+			Reached reached = lamp_light(world.lamps[index], point);
+		SLAYER_WORK(1, 1)
+			if (any(reached.toward != 0) && all(reached.light == 0)) {
+				continue;
+			}
+			asks[kept++] = {index, 1};
 		}
-		return lamps;
+		return kept;
 	}
 	bool facing = any(normal != 0);
 	float total = 0;
 	for (int index = 0; index < lamps; index++) {
 		Reached reached = lamp_light(world.lamps[index], point);
+		SLAYER_WORK(1, 1)
 		float square = facing ? max(0.0f, dot(normal, reached.toward)) : 1;
 		total += luminance(reached.light) * square;
 	}
@@ -1194,6 +1341,7 @@ static int asked(World world, float3 point, float3 normal,
 	int taken = 0, made = 0;
 	for (int index = 0; index < lamps && taken < lamps_asked; index++) {
 		Reached reached = lamp_light(world.lamps[index], point);
+		SLAYER_WORK(1, 1)
 		float square = facing ? max(0.0f, dot(normal, reached.toward)) : 1;
 		float worth = luminance(reached.light) * square;
 		if (worth <= 0) {
@@ -1336,10 +1484,19 @@ static float shell_density(Volume volume, float3 local) {
 // from its baked cells when available or from its original field otherwise.
 // Bounds and occupied shell intervals keep the march outside empty regions.
 static float density(World world, Volume volume, float3 local) {
+	SLAYER_WORK(5, 1)
+#ifdef SLAYER_OPTICAL_MEDIA
+	if (volume.info.z == fizz_kind) { return fizz_at(world.boxes + volume.grid.w, local); }
+#endif
+	if (volume.info.z == propeller_kind) {
+		return propeller_at(world.boxes + volume.grid.w, local);
+	}
 	if (volume.info.z == ring_kind) {
 		return ring_density(world.boxes + volume.grid.w, local);
 	}
 	if (volume.info.z == wake_kind) {
+		SLAYER_WORK(6, ring_count(world.boxes + volume.grid.w,
+		                          wake_path_count))
 		return wake_density(world.boxes + volume.grid.w, local);
 	}
 	if (volume.info.z == shell_kind) {
@@ -1402,7 +1559,11 @@ static float2 span(Volume volume, float3 at, float3 way, float near,
 		} else if (dot(at.xz,at.xz)>volume.puff.y*volume.puff.y) return float2(1,0);
 		return float2(enter,leave);
 	}
-	if ((volume.info.z == boxed_kind && volume.info.x != 1) || volume.info.z == ring_kind) {
+#ifdef SLAYER_OPTICAL_MEDIA
+	if ((volume.info.z == boxed_kind && volume.info.x != 1) || volume.info.z == ring_kind || volume.info.z == propeller_kind || volume.info.z == fizz_kind) {
+#else
+	if ((volume.info.z == boxed_kind && volume.info.x != 1) || volume.info.z == ring_kind || volume.info.z == propeller_kind) {
+#endif
 		float3 low = volume.low.xyz, high = volume.high.xyz;
 		float2 across = slab(at.x, way.x, low.x, high.x);
 		float2 up = slab(at.y, way.y, low.y, high.y);
@@ -1610,7 +1771,8 @@ static float3 reach_of(World world, Volume volume, float3 local, int index,
 // and its glow; a boxed medium's paint and shine read from its grids at
 // the point of its own space, where it has them.
 static float3 scattered_direct(World world, Volume volume, float3 point,
-                        float3 local, float3 way) {
+                        float3 local, float3 way,
+                        SourcePart sources = all_sources) {
 	Material made = world.materials[volume.info.w];
 	float3 colour = made.colour.xyz, sum = made.glow.xyz;
 	int3 low;
@@ -1645,17 +1807,24 @@ static float3 scattered_direct(World world, Volume volume, float3 point,
 			}
 		}
 	}
+	if (sources == beam_sources) { sum = float3(0); }
 	// A medium with no scattering sends only its own emission.
 	// Skip light selection, geometry shadows and transmission in this case.
 	if (all(colour == float3(0))) { return sum; }
 	float phase = world.header->environment.x > 0 ? 1/(4*M_PI_F) : world.header->tuning.z;
-	if (world.header->environment.x > 0) { sum += colour*volume_sky_at(world,point); }
-	sum += colour * flooded(world, -way) * phase;
-	Ask asks[lamps_asked];
+	if (sources != beam_sources) {
+		if (world.header->environment.x > 0) {
+			sum += colour * volume_sky_at(world, point);
+		}
+		sum += colour * flooded(world, -way) * phase;
+	}
+	Ask asks[lamps_every];
 	int count = asked(world, point, float3(0), asks);
 	for (int index = 0; index < count; index++) {
 		Lamp lamp = world.lamps[asks[index].lamp];
+		if (!selected_lamp(lamp, sources)) { continue; }
 		Reached reached = lamp_light(lamp, point);
+		SLAYER_WORK(1, 1)
 		if (all(reached.toward == 0)) {
 			continue;
 		}
@@ -1683,12 +1852,13 @@ static float3 scattered_direct(World world, Volume volume, float3 point,
 // The optional grid caches the isotropic source term, not density or opacity;
 // a lopsided mist's depends on the way, so it is never taken from a grid.
 static float3 scattered(World world, Volume volume, float3 point,
-                        float3 local, float3 way) {
- if (volume.lighting.w < 0 || lopsided(volume) ||
+                        float3 local, float3 way,
+                        SourcePart sources = all_sources) {
+ if (sources != all_sources || volume.lighting.w < 0 || lopsided(volume) ||
      world.header->lighting.w > 0) {
   // no grid; a lopsided mist, whose light depends on the way; or the grid
   // is fast light's lamp store, read lamp by lamp
-  return scattered_direct(world,volume,point,local,way);
+  return scattered_direct(world,volume,point,local,way,sources);
  }
  Volume grid=volume;
  grid.grid=volume.lighting;
@@ -1754,10 +1924,11 @@ static float field_gain(World world,Volume volume,float3 point,float3 way) {
  constant float4 *f=world.gravity;
  bool circular=volume.flow.x!=0 && volume.beam.w>0 && volume.beam.w<1;
  float4 emitter=kerr_emitter(field_in(f,point),f[0].x,f[0].y,circular);
- float denominator=dot(world.momentum,emitter);
- if (!isfinite(denominator) || denominator==0) return 0;
- float shift=world.energy/denominator;
- return min(50.0f,shift*shift*shift*shift);
+ // trace's specificShiftGain: the cube of the whole shift, unclipped;
+ // a shift that is not a finite positive number gives no light.
+ float shift=world.energy/dot(world.momentum,emitter);
+ if (!isfinite(shift) || !(shift>0)) return 0;
+ return shift*shift*shift;
 }
 
 // BeamMarch is this ray's conservative refinement region. It changes only
@@ -1818,12 +1989,16 @@ static float gas_phase(float asymmetry, float cosine) {
 // weighed by the phase of the angle between the lamp's way of travel and
 // the ray's, except a lamp from everywhere, which is taken evenly.
 static float3 gas_gathered(World world, Volume volume, float3 point,
-                           float3 way) {
-	float3 sum = flooded(world, -way) * world.header->tuning.z;
-	Ask asks[lamps_asked];
+                           float3 way, SourcePart sources) {
+	float3 sum = sources == beam_sources ? float3(0) :
+	             flooded(world, -way) * world.header->tuning.z;
+	Ask asks[lamps_every];
 	int count = asked(world, point, float3(beam_zero), asks);
 	for (int index = whole_zero; index < count; index++) {
-		Reached reached = lamp_light(world.lamps[asks[index].lamp], point);
+		Lamp lamp = world.lamps[asks[index].lamp];
+		if (!selected_lamp(lamp, sources)) { continue; }
+		Reached reached = lamp_light(lamp, point);
+		SLAYER_WORK(1, 1)
 		if (all(reached.toward == beam_zero)) {
 			continue;
 		}
@@ -1844,9 +2019,10 @@ static float3 gas_gathered(World world, Volume volume, float3 point,
 // step sends on its gather times the gas's scatter and its length, of
 // what still showed.
 static void gas_step(World world, Volume volume, float3 point, float3 way,
-                     float length, thread Through &gathered) {
+                     float length, thread Through &gathered,
+                     SourcePart sources) {
 	float3 kept = exp(-volume.tint.xyz * length);
-	float3 light = gas_gathered(world, volume, point, way) *
+	float3 light = gas_gathered(world, volume, point, way, sources) *
 	               volume.scatter.xyz * length;
 	gathered.added += light * gathered.keep;
 	gathered.keep *= kept;
@@ -1871,7 +2047,8 @@ static float crossing_density(World world, Volume volume, Crossing crossing,
 	return known == flat_yes ? kept : density(world, volume, local);
 }
 
-static Through through(World world, float3 at, float3 way, float far) {
+static Through through(World world, float3 at, float3 way, float far,
+                       SourcePart sources = all_sources) {
 	Through gathered = {float3(1), float3(0)};
 	Crossing found[most_crossings];
 	int count = crossings(world, at, way, far, found);
@@ -1883,6 +2060,7 @@ static Through through(World world, float3 at, float3 way, float far) {
 	int strides = world.cuts > 0 ? world.cuts : world.header->more.y;
 	float faint = world.header->tuning.y;
 	while (shows(gathered.keep, faint)) {
+		SLAYER_WORK(0, 1)
 		int taken = -1;
 		float middle = 0, stride = 0;
 		int divided = beam_one;
@@ -1921,7 +2099,7 @@ static Through through(World world, float3 at, float3 way, float far) {
 		}
 		if (volume.air.x == gas_on) {
 			gas_step(world, volume, point, way,
-			         thick * stride / volume.origin.w, gathered);
+			         thick * stride / volume.origin.w, gathered, sources);
 			continue;
 		}
 		// each channel as trace's absorbed: its tint's times for a
@@ -1934,7 +2112,7 @@ static Through through(World world, float3 at, float3 way, float far) {
 			                           volume.tint.x));
 		}
         float3 gainPoint = at + way * ((found[taken].enter + found[taken].leave) * .5f);
-        float3 light = scattered(world, volume, point, local, way) *
+        float3 light = scattered(world, volume, point, local, way, sources) *
             field_gain(world, volume, world.gravity == nullptr ? point : gainPoint, way);
 		gathered.added += light * gathered.keep * absorb;
 		gathered.keep *= 1 - absorb;
@@ -2060,16 +2238,90 @@ static float3 unhidden(World world, Lamp lamp, float3 from, float3 toward,
 // be taken by: every lamp's that reaches it past the things and the
 // volumes, over pi, and the sky's. trace's surfaceAt is the surface's
 // glow and its colour times this, without the mirror.
+#ifdef SLAYER_OPTICAL_MEDIA
+static float fresnel(float cosine, float index);
+
+// Bit20 of the exact-integer diagnostic lane reports a failed lunar path.
+// The ordinary four native counters retain their low four bits apiece.
+static void ocean_moon_fault(World world) {
+	if (world.native_counts != nullptr) world.native_counts->w |= 256u;
+}
+
+static bool ocean_moon_blocked(World world, float3 point, float3 way, float far) {
+	for (int index=0; index<world.header->look.z; index++) {
+		Field field=world.fields[index];
+		int medium=world.materials[field.data.z].info.w;
+		if (medium>=0 && world.clear_media[medium].moon_light.w>0) continue;
+		if (field.data.w!=0) continue;
+		if (field_hit(world,field,field_in(field,point),field_turned(field,way),0,far/field.origin.w)>=0) return true;
+	}
+	for (int index=0; index<world.header->counts.x; index++) {
+		Sphere sphere=world.spheres[index];
+		int medium=world.materials[sphere.info.x].info.w;
+		if (medium>=0 && world.clear_media[medium].moon_light.w>0) continue;
+		if (sphere.info.y==0 && sphere_hit(point,way,sphere,0,far)>=0) return true;
+	}
+	for (int index=0; index<world.header->more.w; index++) {
+		Tree tree=world.trees[index];
+		Hit hit=conifer_hit(tree_in(tree,point),tree_turned(tree,way),tree,0,far/tree.origin.w);
+		if (hit.distance>=0) return true;
+	}
+	return meshes_hit(world,point,way,0,far,true).material>=0;
+}
+
+// The tagged source uses the same mean-interface approximation as the CPU.
+// It is evaluated inside the kernel, with no independent Moon photometry.
+static int ocean_moon_medium(World world, float3 point) {
+	for (int id = 0; id < world.initial_media->info.y; id++) {
+		ClearMedium water = world.clear_media[id];
+		float4 plane = water.moon_plane;
+		if (water.moon_light.w > 0 && point.y < plane.y &&
+			(plane.w<0 || (fabs(point.x-plane.x) < plane.w && fabs(point.z-plane.z) < plane.w))) return id;
+	}
+	return -1;
+}
+
+static Reached ocean_moon_incident(World world, ClearMedium water, float3 point) {
+	Reached result = {float3(0), 0, float3(0)};
+	float3 air = normalize(water.moon_air.xyz);
+	float index = water.moon_air.w;
+	if (!(water.moon_light.w > 0 && air.y > 0 && index > 0)) { ocean_moon_fault(world); return result; }
+	float3 toward = float3(air.x/index,
+		sqrt(max(0.0f, 1-(1-air.y*air.y)/(index*index))), air.z/index);
+	float distance = (water.moon_plane.y-point.y)/toward.y;
+	if (!(distance > 0) || !isfinite(distance)) { ocean_moon_fault(world); return result; }
+	float3 crossing = point+toward*distance;
+	if (water.moon_plane.w>0 && (fabs(crossing.x-water.moon_plane.x) > water.moon_plane.w ||
+		fabs(crossing.z-water.moon_plane.z) > water.moon_plane.w)) { ocean_moon_fault(world); return result; }
+	// Exclude the tagged interface itself, matching CPU blockedExcept(boundary).
+	// Its material transmission and the separate shadow-clear attribute differ.
+	if (ocean_moon_blocked(world, point, toward, distance) || ocean_moon_blocked(world, crossing, air, nowhere)) return result;
+	float projected = (1-fresnel(air.y,index))*air.y/toward.y;
+	result.toward = toward;
+	result.light = water.moon_light.xyz * projected *
+		exp(-water.extinction_mpu.xyz * distance * water.extinction_mpu.w);
+	if (water.profile.z>0) result.light *= clear(world,point,toward,distance);
+	result.far = distance;
+	return result;
+}
+#endif
 static float3 falling(World world, float3 point, float3 normal,
                       int leaving_sphere) {
 	float3 sum = skylit(world, point, normal, leaving_sphere);
 	sum += flooded(world, normal);
 	float3 from = lifted(world, point, normal);
-	Ask asks[lamps_asked];
+	Ask asks[lamps_every];
 	int count = asked(world, point, normal, asks);
 	for (int index = 0; index < count; index++) {
 		Lamp lamp = world.lamps[asks[index].lamp];
 		Reached reached = lamp_light(lamp, point);
+#ifdef SLAYER_OPTICAL_MEDIA
+		int moon_medium = ocean_moon_medium(world, point);
+		bool moon_refracted = moon_medium >= 0 && asks[index].lamp ==
+			int(world.clear_media[moon_medium].moon_light.w)-1;
+		if (moon_refracted) reached = ocean_moon_incident(world, world.clear_media[moon_medium], from);
+#endif
+		SLAYER_WORK(1, 1)
 		reached.light *= asks[index].counts;
 		float square = dot(normal, reached.toward);
 		if (square <= 0) {
@@ -2077,6 +2329,9 @@ static float3 falling(World world, float3 point, float3 normal,
 		}
 		float3 reach = square * unhidden(world, lamp, from, reached.toward,
 		                                 reached.far, leaving_sphere);
+#ifdef SLAYER_OPTICAL_MEDIA
+		if (moon_refracted) reach = float3(square);
+#endif
 		// matte: its colour over pi times the irradiance, as the cpu's
 		sum += reached.light * reach / M_PI_F;
 	}
@@ -2126,6 +2381,9 @@ constexpr constant int slips = 2 * refractions;
 struct Held {
 	float index;
 	int rank;
+#ifdef SLAYER_OPTICAL_MEDIA
+	int medium;
+#endif
 };
 
 // Inside is the clear media a look is in, in the order it entered
@@ -2153,19 +2411,33 @@ struct Boundary {
 
 // held_of is trace's of: the medium a clear material is.
 static Held held_of(Material made) {
+#ifdef SLAYER_OPTICAL_MEDIA
+	return {made.mirror.y > 0 ? made.mirror.y : 1.5f, made.info.z,
+	        made.info.w};
+#else
 	return {made.mirror.y > 0 ? made.mirror.y : 1.5f, made.info.z};
+#endif
 }
 
 // same is whether two media are one: one index and one rank.
 static bool same(Held one, Held other) {
+#ifdef SLAYER_OPTICAL_MEDIA
+	return one.index == other.index && one.rank == other.rank &&
+	       one.medium == other.medium;
+#else
 	return one.index == other.index && one.rank == other.rank;
+#endif
 }
 
 // medium is trace's look.medium: what the look is in. of the clear
 // media it is inside, the one of the highest rank, and among equals the
 // one it entered last; inside none, the air, of index one.
 static Held medium(Inside inside) {
+#ifdef SLAYER_OPTICAL_MEDIA
+	Held now = {1.0f, 0, -1};
+#else
 	Held now = {1.0f, 0};
+#endif
 	for (int at = 0; at < inside.holding; at++) {
 		if (at == 0 || inside.held[at].rank >= now.rank) {
 			now = inside.held[at];
@@ -2174,6 +2446,17 @@ static Held medium(Inside inside) {
 	return now;
 }
 
+#ifdef SLAYER_OPTICAL_MEDIA
+static Inside initial_inside(constant OpticalInitialState *initial) {
+	Inside inside;
+	inside.holding = min(max(initial->info.x, 0), most_held);
+	for (int at = 0; at < inside.holding; at++) {
+		OpticalInitialHeld source = initial->held[at];
+		inside.held[at] = {source.index, source.rank, source.medium};
+	}
+	return inside;
+}
+#endif
 // without is trace's look.without: the look no longer inside a medium,
 // the rest in their order. it leaves it once.
 static Inside without(Inside inside, Held one) {
@@ -2326,6 +2609,39 @@ static float3 shares(Material made, float clearness, float cosine,
 	return reflects(made, cosine);
 }
 
+// wake_foam is the bounded material mask shared with thing.WakeFoamResponse.
+// Object-local z grows south, so north is -local.z. Shared coherent noise
+// breaks up the authored pattern wavelength; it is not a sampled fluid.
+static float wake_foam(Material made, float3 local) {
+	float coverage = clamp(made.foam_shape.w, 0.0f, 1.0f);
+	float half_width = made.foam_shape.x;
+	float length = made.foam_shape.y;
+	float wavelength = made.foam_shape.z;
+	if (!(coverage > 0 && half_width > 0 && length > 0 && wavelength > 0)) {
+		return 0;
+	}
+	float forward_east = sin(made.foam_origin.z);
+	float forward_north = cos(made.foam_origin.z);
+	float delta_east = local.x - made.foam_origin.x;
+	float delta_north = -local.z - made.foam_origin.y;
+	float aft = -delta_east * forward_east - delta_north * forward_north;
+	float cross = delta_east * forward_north - delta_north * forward_east;
+	if (!(aft > 0 && aft < length && fabs(cross) < 2 * half_width)) {
+		return 0;
+	}
+	float longitudinal = sin(M_PI_F * aft / length);
+	float edge = 1 - fabs(cross) / (2 * half_width);
+	edge *= edge;
+	float lateral = exp(-0.5f * (cross / half_width) * (cross / half_width)) * edge;
+	float pattern = 0.5f + 0.5f * fractal(ulong(uint(made.foam_seed.x)),
+		aft / wavelength, cross / wavelength, 0, 1);
+	float threshold = 0.5f - made.foam_extra.x / 2;
+	float breakup = clamp((pattern - threshold) / made.foam_extra.x,
+		0.0f, 1.0f);
+	return clamp(coverage * longitudinal * lateral * breakup,
+		0.0f, coverage);
+}
+
 // smith is thing's smith: the share of a rough surface's tiny faces a
 // way of that cosine sees unshadowed.
 static float smith(float cosine, float a2) {
@@ -2358,11 +2674,19 @@ static float3 glinted(World world, float3 point, float3 normal, float3 look,
 	float alpha = satin * satin;
 	float3 sum = float3(0);
 	float3 from = lifted(world, point, normal);
-	Ask asks[lamps_asked];
+	Ask asks[lamps_every];
 	int count = asked(world, point, normal, asks);
 	for (int index = 0; index < count; index++) {
 		Lamp lamp = world.lamps[asks[index].lamp];
 		Reached reached = lamp_light(lamp, point);
+#ifdef SLAYER_OPTICAL_MEDIA
+		int moon_medium = ocean_moon_medium(world, point);
+		bool moon_refracted = moon_medium >= 0 && asks[index].lamp ==
+			int(world.clear_media[moon_medium].moon_light.w)-1 &&
+			!(made.mirror.z>0 && made.info.w==moon_medium);
+		if (moon_refracted) reached = ocean_moon_incident(world, world.clear_media[moon_medium], from);
+#endif
+		SLAYER_WORK(1, 1)
 		reached.light *= asks[index].counts;
 		float square = dot(normal, reached.toward);
 		if (square <= 0) {
@@ -2375,10 +2699,23 @@ static float3 glinted(World world, float3 point, float3 normal, float3 look,
 		}
 		float3 reach = unhidden(world, lamp, from, reached.toward,
 		                        reached.far, leaving_sphere);
+#ifdef SLAYER_OPTICAL_MEDIA
+		if (moon_refracted) reach = float3(1);
+#endif
 		sum += reached.light * reach * reflects(made, dot(half_way, look)) *
 		       lobe;
 	}
 	return sum;
+}
+
+static float3 wake_foam_light(World world, Hit hit, float3 point,
+		float3 normal, float3 look, Material made) {
+	Material foam = made;
+	foam.mirror.z = 0;
+	foam.mirror.w = made.foam_look.w;
+	return made.foam_look.xyz * falling(world, point + hit.lift,
+		normal, hit.sphere_index) + glinted(world, point + hit.lift,
+		normal, look, foam, hit.sphere_index);
 }
 
 // snell is trace's refracted: the way a clear surface bends an
@@ -2443,6 +2780,192 @@ static Painted dimmed(Painted place, float3 by) {
 	place.colour *= by, place.glow *= by;
 	return place;
 }
+#ifdef SLAYER_OPTICAL_MEDIA
+static float3 clear_transmission(World world, Held active, float distance) {
+	if (active.medium < 0) {
+		return float3(1);
+	}
+	if (active.medium >= world.initial_media->info.y) {
+		return float3(0);
+	}
+	ClearMedium optics = world.clear_media[active.medium];
+	float4 extinction = optics.extinction_mpu;
+	float metres = distance * extinction.w;
+	return float3(extinction.x == 0 ? 1 : exp(-extinction.x * metres),
+	              extinction.y == 0 ? 1 : exp(-extinction.y * metres),
+	              extinction.z == 0 ? 1 : exp(-extinction.z * metres));
+}
+
+// The sky is infinitely far away. Metal's fast-math mode cannot be relied
+// upon to evaluate exp(-sigma * INFINITY), so take the analytic limit in
+// each channel explicitly, including channels with no extinction.
+static float3 clear_sky_transmission(World world, Held active) {
+	if (active.medium < 0) { return float3(1); }
+	if (active.medium >= world.initial_media->info.y) { return float3(0); }
+	float3 extinction = world.clear_media[active.medium].extinction_mpu.xyz;
+	return float3(extinction.x == 0 ? 1 : 0,
+	              extinction.y == 0 ? 1 : 0,
+	              extinction.z == 0 ? 1 : 0);
+}
+
+// clear_single_scatter is the same bounded midpoint approximation as the CPU
+// ocean spot route: direct selected spots, opaque visibility, exact outgoing
+// extinction within each cell, and no source-path refraction through water.
+// Metal has no expm1. This five-term small-tau form evaluates the same
+// -expm1(-sigma*cell)/sigma cell integral without cancellation; at tau<=.01
+// its omitted term is below float32 roundoff. The zero-sigma limit is cell.
+static float clear_cell_integral(float sigma, float cell) {
+	float tau=sigma*cell;
+	if (tau<=0.01f) return cell*(1+tau*(-0.5f+tau*(1.0f/6+tau*(-1.0f/24+tau/120))));
+	return (1-exp(-tau))/sigma;
+}
+
+static float3 clear_single_scatter(World world, Held active, float3 at,
+				   float3 way, float distance, bool to_sky, int override_steps=0) {
+	if (active.medium < 0 ||
+	    active.medium >= world.initial_media->info.y) { return float3(0); }
+	ClearMedium medium = world.clear_media[active.medium];
+	int steps = int(medium.profile.x);
+	if (override_steps>0) steps=override_steps;
+	float max_distance = medium.profile.y;
+	if (steps <= 0 || !(max_distance > 0) || !(medium.extinction_mpu.w > 0)) {
+		return float3(0);
+	}
+	float ray_length = length(way);
+	if (!(ray_length > 0) || !isfinite(ray_length)) { return float3(0); }
+	float3 direction = way / ray_length;
+	float segment = to_sky ? max_distance :
+		min(distance * medium.extinction_mpu.w, max_distance);
+	if (!isfinite(segment) || !(segment > 0)) { return float3(0); }
+	float cell = segment / float(steps);
+	float cell_parameter = cell / medium.extinction_mpu.w;
+	float3 total = medium.extinction_mpu.xyz;
+	float3 scatter = medium.scatter_phase.xyz;
+	float asymmetry = medium.scatter_phase.w;
+	float3 result = float3(0);
+	for (int step = 0; step < steps; step++) {
+		float begin = float(step) * cell;
+		float3 point = at + direction * (float(step) + 0.5f) * cell_parameter;
+		float3 incident = float3(0);
+		if (medium.moon_light.w > 0) {
+			Reached moon = ocean_moon_incident(world, medium, point);
+			incident = moon.light * gas_phase(asymmetry,
+				clamp(dot(moon.toward,direction),-1.0f,1.0f));
+		}
+		for (int index = 0; index < world.header->counts.w; index++) {
+			Lamp lamp = world.lamps[index];
+			// The world preflight permits only authored film.Spots and direct-only
+			// floods. Spots have positive cone width; floods have no direction.
+			if (is_flood(lamp) || !(lamp.toward.w > 0)) { continue; }
+			Reached reached = lamp_light(lamp, point, -direction);
+			if (all(reached.light == float3(0)) ||
+			    !any(reached.toward != float3(0))) { continue; }
+			if (blocked(world, point, reached.toward, reached.far)) { continue; }
+			float cosine = clamp(dot(reached.toward, direction), -1.0f, 1.0f);
+			incident += reached.light * gas_phase(asymmetry, cosine);
+		}
+		for (int channel = 0; channel < 3; channel++) {
+			if (scatter[channel] == 0) { continue; }
+			float outgoing = exp(-total[channel] * begin);
+			float integral = clear_cell_integral(total[channel],cell);
+			result[channel] += incident[channel] * scatter[channel] *
+				outgoing * integral;
+		}
+	}
+	return result;
+}
+
+static bool ocean_mixed(World world,Held active) {
+	return active.medium>=0 && active.medium<world.initial_media->info.y &&
+		world.clear_media[active.medium].profile.z>0;
+}
+
+static float3 water_gap_source(World world,Held active,float3 at,float3 way,
+	float gap,float full) {
+	ClearMedium water=world.clear_media[active.medium];
+	int steps=int(water.profile.x);
+	if (!(gap>0) || steps<=0 || !(water.profile.y>0)) return float3(0);
+	if (water.profile.w>0) {
+		float cell=min(full*water.extinction_mpu.w,water.profile.y)/float(steps);
+		steps=max(1,int(ceil(min(gap*water.extinction_mpu.w,water.profile.y)/cell)));
+	}
+	return clear_single_scatter(world,active,at,way,gap,false,steps);
+}
+
+// Explicit cloud HG uses its own phase, including isotropic g=0. The legacy
+// water convention at g=0 remains Rayleigh in gas_phase and is not changed.
+static float cloud_henyey_greenstein(float g,float cosine) {
+	float a=fabs(g), near=1-a;
+	float aligned=g<0?-cosine:cosine;
+	float d=near*near+2*a*(1-aligned);
+	return ((1-g)*(1+g))/(gas_four_pi*d*sqrt(d));
+}
+
+// Interleave the same occupied cloud midpoints as CPU throughClear. Water is
+// accumulated only in the gaps, so no second full water integral is applied.
+static Through water_transport(World world,Held active,float3 at,float3 way,
+	float far,bool to_sky) {
+	if (!ocean_mixed(world,active)) return {
+		to_sky?clear_sky_transmission(world,active):clear_transmission(world,active,far),
+		clear_single_scatter(world,active,at,way,far,to_sky)};
+	ClearMedium water=world.clear_media[active.medium];
+	Through gathered={float3(1),float3(0)};
+	float3 direction=normalize(way);
+	Crossing found[most_crossings];
+	int count=crossings(world,at,direction,far,found);
+	int next[most_crossings]={};
+	int strides=world.header->more.y;
+	float cursor=0;
+	while (shows(gathered.keep,world.header->tuning.y)) {
+		int chosen=-1; float middle=0,stride=0;
+		for (int index=0;index<count;index++) {
+			if (next[index]>=strides) continue;
+			float size=(found[index].leave-found[index].enter)/float(strides);
+			float along=found[index].enter+(float(next[index])+.5f)*size;
+			if (chosen<0 || along<middle) { chosen=index;middle=along;stride=size; }
+		}
+		if (chosen<0) break;
+		next[chosen]++;
+		Volume volume=world.volumes[found[chosen].volume];
+		float3 point=at+direction*middle;
+		float thick=density(world,volume,inside(volume,point));
+		if (!(thick>0)) continue;
+		float gap=max(0.0f,middle-cursor);
+		gathered.added+=gathered.keep*water_gap_source(world,active,at+direction*cursor,direction,gap,far);
+		gathered.keep*=clear_transmission(world,active,gap);
+		float3 absorb=1-exp(-thick*stride/volume.origin.w*volume.tint.xyz);
+		Material made=world.materials[volume.info.w];
+		Reached moon=ocean_moon_incident(world,water,point);
+		float cosine=clamp(dot(moon.toward,direction),-1.0f,1.0f);
+		float phase=volume.air.y!=0 ?
+			cloud_henyey_greenstein(volume.scatter.w,cosine) :
+			gas_phase(water.scatter_phase.w,cosine);
+		float3 source=made.glow.xyz+made.colour.xyz*moon.light*
+			phase;
+		gathered.added+=gathered.keep*source*absorb;
+		gathered.keep*=1-absorb;
+		cursor=middle;
+	}
+	float gap=max(0.0f,far-cursor);
+	gathered.added+=gathered.keep*water_gap_source(world,active,at+direction*cursor,direction,gap,far);
+	gathered.keep*=to_sky?clear_sky_transmission(world,active):clear_transmission(world,active,gap);
+	return gathered;
+}
+
+static Seen clear_attenuate(World world, Seen seen, Held active,
+			    float3 at, float3 way, float distance, bool to_sky) {
+	Through transported=water_transport(world,active,at,way,distance,to_sky);
+	float3 keep=transported.keep;
+	seen.light *= keep;
+	seen.cover = 1 - (1 - seen.cover) * max(keep.x, max(keep.y, keep.z));
+	seen.weight *= keep;
+	seen.met = dimmed(seen.met, keep);
+	seen.mirrored = dimmed(seen.mirrored, keep);
+	seen.passed = dimmed(seen.passed, keep);
+	seen.light += transported.added;
+	return seen;
+}
+#endif
 
 // surfaced is what a ray brings back from a surface it met, without the
 // mirror: its glow and its colour times the light falling on it, or,
@@ -2471,11 +2994,12 @@ static Seen surfaced(World world, Hit hit, float3 point, float3 normal) {
 
 // behind is trace's end of shade: the volumes in front of what the ray
 // met, adding their light over it and dimming it, and the sky with it.
-static Seen behind(World world, float3 at, float3 way, Seen seen) {
+static Seen behind(World world, float3 at, float3 way, Seen seen,
+                   SourcePart sources = all_sources) {
 	if (world.header->more.x == 0) {
 		return seen;
 	}
-	Through gathered = through(world, at, way, seen.depth);
+	Through gathered = through(world, at, way, seen.depth, sources);
 	float3 keep = gathered.keep;
 	float most = max(keep.x, max(keep.y, keep.z));
 	seen.light = seen.light * gathered.keep + gathered.added;
@@ -2492,8 +3016,56 @@ static float3 facing(Hit hit, float3 way) {
 	return dot(hit.normal, way) > 0 ? -hit.normal : hit.normal;
 }
 
+// face_of is trace's face: where slayer's mesh shaded smooth was met,
+// the face's own way out turned to the side normal is on; anywhere else
+// there is no face apart from the normal, and it is normal itself.
+static float3 face_of(Hit hit, float3 normal) {
+	if (!any(hit.flat != 0)) {
+		return normal;
+	}
+	return dot(hit.flat, normal) < 0 ? -hit.flat : hit.flat;
+}
+
+// kept_above is trace's keptAbove: a mirrored way kept on the open side
+// of the face it leaves. turned about a smooth face's normal where the
+// eye grazes it, a way can point into the face; it is turned back about
+// the face's own plane, as far above it as it was below.
+static float3 kept_above(float3 way, float3 face) {
+	float under = dot(way, face);
+	return under >= 0 ? way : normalize(way - face * 2 * under);
+}
+
 // shade_plain is trace's shade at its last bounce: what a ray meets,
 // lit, and the volumes in front, with no mirror.
+#ifdef SLAYER_OPTICAL_MEDIA
+static Seen shade_plain(World world, float3 at, float3 way,
+			int leaving_sphere, Inside inside) {
+	Hit hit = first(world, at, way, 0, leaving_sphere);
+	Seen seen;
+	float distance;
+	if (hit.material < 0) {
+		seen = to_sky(way);
+		if (!ocean_mixed(world,medium(inside))) seen=behind(world,at,way,seen);
+		distance = nowhere;
+	} else {
+		float3 point = fma(way, hit.distance, at);
+		Material made = world.materials[hit.material];
+		float3 normal = crinkled(made, point, facing(hit, way), -way);
+		seen = surfaced(world, hit, point, normal);
+		seen.light += glinted(world, point + hit.lift, normal, -way, made,
+		                      hit.sphere_index);
+		float foam = made.mirror.z > 0 ? wake_foam(made, hit.local) : 0;
+		if (foam > 0) {
+			seen.light = seen.light * (1 - foam) +
+				wake_foam_light(world, hit, point, normal, -way, made) * foam;
+		}
+		if (!ocean_mixed(world,medium(inside))) seen=behind(world,at,way,seen);
+		distance = hit.distance * length(way);
+	}
+	return clear_attenuate(world, seen, medium(inside), at, way, distance,
+	                       hit.material < 0);
+}
+#else
 static Seen shade_plain(World world, float3 at, float3 way,
                         int leaving_sphere) {
 	Hit hit = first(world, at, way, 0, leaving_sphere);
@@ -2506,8 +3078,14 @@ static Seen shade_plain(World world, float3 at, float3 way,
 	Seen seen = surfaced(world, hit, point, normal);
 	seen.light += glinted(world, point + hit.lift, normal, -way, made,
 	                      hit.sphere_index);
+	float foam = made.mirror.z > 0 ? wake_foam(made, hit.local) : 0;
+	if (foam > 0) {
+		seen.light = seen.light * (1 - foam) +
+			wake_foam_light(world, hit, point, normal, -way, made) * foam;
+	}
 	return behind(world, at, way, seen);
 }
+#endif
 
 // shade is trace's shade at the first bounce: as shade_plain, and a
 // glossy surface mirrors what shade_plain sees along the mirrored ray.
@@ -2524,52 +3102,109 @@ static Seen shade_plain(World world, float3 at, float3 way,
 static Seen primary_behind(World world, float3 at, float3 way, Seen seen) {
 #if defined(SLAYER_COMPOSITE_PASS) && SLAYER_COMPOSITE_PASS == 1
 	return seen;
+#elif defined(SLAYER_COMPOSITE_PASS) && SLAYER_COMPOSITE_PASS == 3
+	return behind(world, at, way, seen, nonbeam_sources);
 #else
 	return behind(world, at, way, seen);
 #endif
 }
 
+#ifdef SLAYER_OPTICAL_MEDIA
+static Seen shade(World world, float3 at, float3 way,
+		  constant OpticalInitialState *initial) {
+	Inside inside = initial_inside(initial);
+	Held camera_medium = medium(inside);
+#else
 static Seen shade(World world, float3 at, float3 way) {
+#endif
 	Hit hit = first(world, at, way, 0);
 	if (hit.material < 0) {
+#ifdef SLAYER_OPTICAL_MEDIA
+		Seen sky = to_sky(way);
+		if (!ocean_mixed(world,camera_medium)) sky=primary_behind(world,at,way,sky);
+		return clear_attenuate(world, sky, camera_medium, at, way, nowhere, true);
+#else
 		return primary_behind(world, at, way, to_sky(way));
+#endif
 	}
 	float3 point = fma(way, hit.distance, at);
 	Material made = world.materials[hit.material];
 	float3 normal = crinkled(made, point, facing(hit, way), -way);
 	Seen seen = surfaced(world, hit, point, normal);
 	float clearness = clamp(made.mirror.z, 0.0f, 1.0f);
+	float foam_coverage = 0;
+	// Spectral slopes are appearance normals. A clear HeightField boundary
+	// instead uses the exact normal of the bilinear surface it intersects.
+	float3 optical_normal = normal;
+	if (clearness > 0 && dot(hit.geometric, hit.geometric) > 0) {
+		optical_normal = normalize(hit.geometric);
+		if (dot(optical_normal, way) > 0) optical_normal = -optical_normal;
+	}
+#ifdef SLAYER_OPTICAL_MEDIA
+	// The explicit camera stack was loaded before the first intersection.
+#else
 	// every look starts in the air, inside nothing, as trace's does
 	Inside inside;
 	inside.holding = 0;
+#endif
 	Boundary met = meets(inside, made);
-	float3 share = shares(made, clearness, -dot(normal, way), met);
-	if (most(share) > 0 || clearness > 0) {
+	float3 share = shares(made, clearness, -dot(optical_normal, way), met);
+	float3 clear_share = share;
+	if (clearness > 0 && made.film.x <= 0 && met.real) {
+		foam_coverage = wake_foam(made, hit.local);
+		if (foam_coverage > 0) {
+			clear_share = share;
+			share *= 1 - foam_coverage;
+			float3 fell = falling(world, point + hit.lift, normal,
+			                      hit.sphere_index);
+			float3 foam_light = made.foam_look.xyz * fell;
+			float3 clear_diffuse = (1 - clear_share) * (1 - clearness) *
+				(1 - foam_coverage);
+			seen.light = seen.light * clear_diffuse +
+				foam_light * foam_coverage;
+		}
+	}
+	if (foam_coverage == 0 && (most(share) > 0 || clearness > 0)) {
 		float3 keep = (1 - share) * (1 - clearness);
 		seen.light *= keep;
 		seen.met = dimmed(seen.met, keep);
 	}
 	// the lamps' highlights, over what it keeps, as trace adds them
 	seen.light += glinted(world, point + hit.lift, normal, -way, made,
-	                      hit.sphere_index);
+	                      hit.sphere_index) * (1 - foam_coverage);
+	if (foam_coverage > 0) {
+		Material foam_made = made;
+		foam_made.mirror.z = 0;
+		foam_made.mirror.w = made.foam_look.w;
+		seen.light += glinted(world, point + hit.lift, normal, -way,
+		                      foam_made, hit.sphere_index) * foam_coverage;
+	}
 	if (most(share) > 0) {
-		float3 bounce = way - normal * 2 * dot(way, normal);
-		float3 mirrored = normalize(bounce);
-		float3 from = lifted(world, point, normal);
+		float3 bounce = way - optical_normal * 2 * dot(way, optical_normal);
+		float3 bounce_face = dot(hit.geometric, hit.geometric) > 0 ?
+		                     optical_normal : face_of(hit, normal);
+		float3 mirrored = kept_above(normalize(bounce), bounce_face);
+		float3 from = lifted(world, point, optical_normal);
+#ifdef SLAYER_OPTICAL_MEDIA
+		Seen bounced = shade_plain(world, from, mirrored,
+		                           hit.sphere_index, inside);
+#else
 		Seen bounced = shade_plain(world, from, mirrored, hit.sphere_index);
+#endif
 		seen.light += bounced.light * share;
 		seen.weight = bounced.weight * share;
 		seen.sky = bounced.sky;
 		seen.mirrored = dimmed(bounced.met, share);
 	}
 	if (clearness > 0) {
-		float3 carry = (1 - share) * clearness;
+		float3 carry = (1 - clear_share) * clearness *
+			(1 - foam_coverage);
 		// crossed is how many clear surfaces the look has bent through
 		// and slipped how many it has passed that were no boundary, as
 		// trace counts them; leg_at is what the leg's own surface is to
 		// the look, worked out when the look met it
 		int crossed = 0, slipped = 0;
-		float3 leg_way = way, leg_normal = normal, leg_point = point;
+		float3 leg_way = way, leg_normal = optical_normal, leg_point = point;
 		Material leg_made = made;
 		Boundary leg_at = met;
 		for (int leg = 0; leg < refractions + slips; leg++) {
@@ -2599,20 +3234,45 @@ static Seen shade(World world, float3 at, float3 way) {
 			                     turned ? leg_normal : -leg_normal);
 			Hit next = first(world, from, bent, 0);
 			if (next.material < 0) {
+#ifdef SLAYER_OPTICAL_MEDIA
+				Held active=medium(inside);
+				bool moon_leg=active.medium>=0 && world.clear_media[active.medium].moon_light.w>0;
+				Through gathered=moon_leg?water_transport(world,active,from,bent,nowhere,true):through(world,from,bent,nowhere);
+#else
 				Through gathered = through(world, from, bent, nowhere);
+#endif
+#ifdef SLAYER_OPTICAL_MEDIA
+				float3 optical_keep = moon_leg?float3(1):clear_sky_transmission(world,active);
+				seen.light += carry * optical_keep * (gathered.added +
+					gathered.keep * sky_at(world, bent));
+#else
 				seen.light += carry * (gathered.added +
 					gathered.keep * sky_at(world, bent));
+#endif
 				break;
 			}
+#ifdef SLAYER_OPTICAL_MEDIA
+			Held active=medium(inside);
+			bool moon_leg=active.medium>=0 && world.clear_media[active.medium].moon_light.w>0;
+			Through gathered=moon_leg?water_transport(world,active,from,bent,next.distance,false):through(world,from,bent,next.distance);
+#else
 			Through gathered = through(world, from, bent, next.distance);
+#endif
 			float3 next_point = fma(bent, next.distance, from);
 			Material next_made = world.materials[next.material];
 			float3 next_normal = crinkled(next_made, next_point,
 				facing(next, bent), -bent);
 			float next_clear = clamp(next_made.mirror.z, 0.0f, 1.0f);
+			float3 next_optical_normal = next_normal;
+			if (next_clear > 0 &&
+			    dot(next.geometric, next.geometric) > 0) {
+				next_optical_normal = normalize(next.geometric);
+				if (dot(next_optical_normal, bent) > 0)
+					next_optical_normal = -next_optical_normal;
+			}
 			Boundary next_at = meets(inside, next_made);
 			float3 next_share = shares(next_made, next_clear,
-				-dot(next_normal, bent), next_at);
+				-dot(next_optical_normal, bent), next_at);
 			// trace's follows: whether the look can go on past this
 			// surface. a boundary costs one of its bends, a surface that
 			// is none one of its slips, and a thing it enters must have
@@ -2623,7 +3283,7 @@ static Seen shade(World world, float3 at, float3 way) {
 			// a surface that turns the ray back whole passes it on
 			// whole, to bend as a reflection at the next leg
 			bool next_turns = follows && next_at.real &&
-				turns(bent, next_normal, next_at.ratio);
+				turns(bent, next_optical_normal, next_at.ratio);
 			if (!follows) {
 				// where the look cannot go on the surface is opaque, as
 				// trace's, and one there that reflects all of what
@@ -2637,24 +3297,65 @@ static Seen shade(World world, float3 at, float3 way) {
 			float3 keep = (1 - next_share) * (1 - next_clear);
 			float3 shone = glinted(world, next_point + next.lift,
 				next_normal, -bent, next_made, next.sphere_index);
+			float next_foam = next_made.mirror.z > 0 && next_at.real ?
+				wake_foam(next_made, next.local) : 0;
+#ifdef SLAYER_OPTICAL_MEDIA
+			float3 optical_keep = moon_leg?float3(1):clear_transmission(world,active,next.distance*length(bent));
+#endif
+			if (next_foam > 0) {
+				float3 surface_light = (deep.light * keep + shone) *
+					(1 - next_foam) + wake_foam_light(world, next,
+					next_point, next_normal, -bent, next_made) * next_foam;
+#ifdef SLAYER_OPTICAL_MEDIA
+				seen.light += carry * optical_keep *
+					(gathered.added + gathered.keep * surface_light);
+#else
+				seen.light += carry *
+					(gathered.added + gathered.keep * surface_light);
+#endif
+			} else {
+#ifdef SLAYER_OPTICAL_MEDIA
+			seen.light += carry * optical_keep * gathered.added +
+				carry * optical_keep * gathered.keep * deep.light * keep +
+				carry * optical_keep * gathered.keep * shone;
+#else
 			seen.light += carry * gathered.added +
 				carry * gathered.keep * deep.light * keep +
 				carry * gathered.keep * shone;
+#endif
+			}
 			if (next_clear == 0) {
+#ifdef SLAYER_OPTICAL_MEDIA
+				seen.passed = dimmed(deep.met,
+					carry * optical_keep * gathered.keep * keep);
+#else
 				seen.passed = dimmed(deep.met,
 					carry * gathered.keep * keep);
+#endif
 				break;
 			}
+#ifdef SLAYER_OPTICAL_MEDIA
+			carry *= optical_keep * gathered.keep *
+				(next_turns ? 1 : (1 - next_share) * next_clear);
+#else
 			carry *= gathered.keep *
 				(next_turns ? 1 : (1 - next_share) * next_clear);
+#endif
+			carry *= 1 - next_foam;
 			leg_way = bent;
-			leg_normal = next_normal;
+			leg_normal = next_optical_normal;
 			leg_point = next_point;
 			leg_made = next_made;
 			leg_at = next_at;
 		}
 	}
+#ifdef SLAYER_OPTICAL_MEDIA
+	if (!ocean_mixed(world,camera_medium)) seen=primary_behind(world,at,way,seen);
+	return clear_attenuate(world, seen, camera_medium, at, way,
+		hit.distance * length(way), false);
+#else
 	return primary_behind(world, at, way, seen);
+#endif
 }
 
 // record writes a place to paint into a sample's numbers, at a record's
@@ -2824,6 +3525,44 @@ static int3 sky_share(constant Header *header, uint2 sample) {
 
 // Trace and smoke preparation share this scene ABI and initializer. Keep
 // their optional native buffers beside the common bindings, in one place.
+#ifdef SLAYER_OPTICAL_MEDIA
+#define SLAYER_SCENE_BUFFERS \
+ constant Header *header [[buffer(0)]], \
+ device const Sphere *spheres [[buffer(1)]], \
+ device const Triangle *triangles [[buffer(2)]], \
+ device const Node *nodes [[buffer(3)]], \
+ device const Material *materials [[buffer(4)]], \
+ device const Lamp *lamps [[buffer(5)]], \
+ device const Volume *volumes [[buffer(6)]], \
+ device const float *baked [[buffer(7)]], \
+ device const Tree *trees [[buffer(8)]], \
+ device const Instance *instances [[buffer(9)]], \
+ device const Node *tops [[buffer(10)]], \
+ device const float4 *sky [[buffer(11)]], \
+ device const Bend *bends [[buffer(12)]], \
+ device const float *rays [[buffer(13)]], \
+ device const float *boxes [[buffer(14)]], \
+ device const Field *fields [[buffer(15)]], \
+ device const float *heights [[buffer(16)]], \
+ device const ClearMedium *clear_media [[buffer(17)]], \
+ constant OpticalInitialState *initial_media [[buffer(18)]],
+
+#ifdef SLAYER_NATIVE_MESHES
+#define SLAYER_SAMPLE_BUFFERS \
+ device const int *firsts [[buffer(19)]], \
+ device float *out [[buffer(20)]], \
+ constant uint2 &origin [[buffer(21)]],
+#define SLAYER_FIRSTS_VALUE , firsts
+#define SLAYER_ACCELERATION_INDEX 22
+#else
+#define SLAYER_SAMPLE_BUFFERS \
+ device float *out [[buffer(19)]], \
+ constant uint2 &origin [[buffer(20)]],
+#define SLAYER_FIRSTS_VALUE
+#define SLAYER_ACCELERATION_INDEX 21
+#endif
+
+#else
 #define SLAYER_SCENE_BUFFERS \
  constant Header *header [[buffer(0)]], \
  device const Sphere *spheres [[buffer(1)]], \
@@ -2857,6 +3596,7 @@ static int3 sky_share(constant Header *header, uint2 sample) {
 #define SLAYER_FIRSTS_VALUE
 #define SLAYER_ACCELERATION_INDEX 19
 #endif
+#endif
 
 #ifdef SLAYER_NATIVE_SHADOWS
 #define SLAYER_ACCELERATION_BUFFER \
@@ -2873,10 +3613,17 @@ static int3 sky_share(constant Header *header, uint2 sample) {
  uint2 at [[thread_position_in_grid]], \
  uint2 grid [[threads_per_grid]] SLAYER_ACCELERATION_BUFFER
 
+#ifdef SLAYER_OPTICAL_MEDIA
+#define SLAYER_WORLD_INITIALIZER \
+ {header, spheres, triangles, nodes, materials, lamps, volumes, baked, \
+  trees, instances, tops, sky, bends, rays, boxes, fields, heights, \
+  clear_media, initial_media SLAYER_FIRSTS_VALUE SLAYER_ACCELERATION_VALUE, nullptr}
+#else
 #define SLAYER_WORLD_INITIALIZER \
  {header, spheres, triangles, nodes, materials, lamps, volumes, baked, \
   trees, instances, tops, sky, bends, rays, boxes, fields, heights \
   SLAYER_FIRSTS_VALUE SLAYER_ACCELERATION_VALUE, nullptr}
+#endif
 
 // trace draws one sample: twelve numbers, the light, the cover, the
 // sky's weight, the depth, and the way into the sky; and eleven more for
@@ -2898,15 +3645,45 @@ kernel void trace(SLAYER_TRACE_ARGUMENTS) {
 		Primary made = exposed(header, pixel);
 		from = made.from, way = made.way;
 	}
-#if defined(SLAYER_COMPOSITE_PASS) && SLAYER_COMPOSITE_PASS == 2
+#if defined(SLAYER_COMPOSITE_PASS) && \
+    (SLAYER_COMPOSITE_PASS == 2 || SLAYER_COMPOSITE_PASS == 4)
 	Hit hit = first(world, from, way, 0);
 	float depth = hit.material < 0 ? nowhere : hit.distance;
+#if SLAYER_COMPOSITE_PASS == 4
+	Through transport = through(world, from, way, depth, beam_sources);
+	float3 weight = float3(0);
+#else
 	Through transport = through(world, from, way, depth);
+	float3 weight = transport.keep;
+#endif
 	Seen seen = {transport.added, hit.material < 0 ? 0.0f : 1.0f,
-	             depth, transport.keep, float3(0), unpainted,
+	             depth, weight, float3(0), unpainted,
 	             unpainted, unpainted};
 #else
+#ifdef SLAYER_WORK_COUNTS
+	uint work[work_slots] = {};
+	world.work = work;
+#endif
+#ifdef SLAYER_ONLY_TO_Y
+	// a diagnostic window: only these pixels, at their own places in the
+	// whole picture, are drawn; the rest are nothing, at once
+	Seen seen = {float3(0), 0, nowhere, float3(0), float3(0), unpainted,
+	             unpainted, unpainted};
+	if (pixel.x >= SLAYER_ONLY_FROM_X && pixel.x < SLAYER_ONLY_TO_X &&
+	    pixel.y >= SLAYER_ONLY_FROM_Y && pixel.y < SLAYER_ONLY_TO_Y) {
+#ifdef SLAYER_OPTICAL_MEDIA
+		seen = shade(world, from, way, initial_media);
+#else
+		seen = shade(world, from, way);
+#endif
+	}
+#else
+#ifdef SLAYER_OPTICAL_MEDIA
+	Seen seen = shade(world, from, way, initial_media);
+#else
 	Seen seen = shade(world, from, way);
+#endif
+#endif
 #endif
 	device float *sample = out + (at.y * grid.x + at.x) * per_sample;
 	sample[0] = seen.light.x, sample[1] = seen.light.y;
@@ -2928,6 +3705,13 @@ kernel void trace(SLAYER_TRACE_ARGUMENTS) {
 	if (records > 2) {
 		record(sample, 2, seen.passed);
 	}
+#if defined(SLAYER_WORK_COUNTS) && !defined(SLAYER_COMPOSITE_PASS)
+	// the counts in place of the light and the depth: this build draws
+	// no picture to keep, and the cpu reads them before finishing
+	for (int slot = 0; slot < work_slots; slot++) {
+		sample[slot] = float(work[slot]);
+	}
+#endif
 }
 
 // bake writes one volume's density into its grid, a cell a thread: the
@@ -2978,6 +3762,7 @@ kernel void reach_grid(SLAYER_TRACE_ARGUMENTS) {
 	               (volume.x.xyz * local.x + volume.y.xyz * local.y +
 	                volume.z.xyz * local.z);
 	Reached reached = lamp_light(lamp, point);
+		SLAYER_WORK(1, 1)
 	float3 value = float3(0);
 	if (any(reached.toward != 0) &&
 	    !blocked(world, point, reached.toward, reached.far)) {

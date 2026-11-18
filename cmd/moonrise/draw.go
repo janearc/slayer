@@ -8,10 +8,10 @@ import (
 	"math"
 	"os"
 
-	"github.com/janearc/libtheme-css/spaces/srgb"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/raw"
+	"github.com/janearc/slayer/render/colour"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/named"
 	"github.com/janearc/slayer/trace"
@@ -49,13 +49,12 @@ func draw(built *named.Built, given asked) (*frame.Frame, error) {
 }
 
 // plain is a frame as a png with no film in it: its linear light by
-// the stops, cut at white, through srgb's transfer as libtheme has it.
+// the stops, cut at white, through the print's Encode, libtheme's curve.
 func plain(picture *frame.Frame, stops float64, out string) error {
 	gain := math.Exp2(stops)
 	shown := image.NewRGBA(image.Rect(0, 0, picture.W, picture.H))
 	level := func(linear float32) uint8 {
-		cut := math.Max(0, math.Min(1, float64(linear)*gain))
-		return uint8(math.Round(srgb.FromLinear(cut) * 255))
+		return colour.Encode(float64(linear) * gain)
 	}
 	for y := range picture.H {
 		for x := range picture.W {

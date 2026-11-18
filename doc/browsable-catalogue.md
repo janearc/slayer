@@ -91,9 +91,8 @@ game run catalogue -- render coast-redwood giant-sequoia webb --plan my-book.yam
 A kind produces only the requested details it actually supports. Selecting
 a kind that supports none of them is refused before output is created.
 
-The [menu](../cmd/catalogue/menu.yaml) records current support, and a test
-constructs every declared kind/detail pair. Unsupported detail is not relabelled
-as a successful render.
+The [menu](../cmd/catalogue/menu.yaml) records current support. Unsupported
+detail is not relabelled as a successful render.
 
 The plan also controls framing, distant lighting, background, attached-light
 exposure, tone and image budgets. Its distances scale with each specimen's
@@ -107,6 +106,16 @@ Loose shoots use their stem axis as the view's up, so they read upright.
 
 Ground templates also declare a viewing elevation to look through their
 observing slits. This changes the catalogue camera, not the telescope pose.
+
+An optional plan `orbit` turns that framed view without moving its target or
+changing its distance. Supply both angles in degrees, for example
+`orbit: {yaw: 20, pitch: -8}`. Yaw turns around the entry's up axis; pitch
+turns around the camera's resulting right axis. An orbit clamps the final
+elevation within 85 degrees of the horizon.
+
+An absent or zero orbit keeps the
+authored view exactly, and lighting is unchanged. The existing `wide` field
+still controls field of view from 5 to 120 degrees.
 
 For an inspection view, add `cutaway: true` to a copy of the plan. The book
 hides an observatory's enclosure and labels that view explicitly. The source
@@ -143,6 +152,3 @@ Source links distinguish measured reference dimensions from authored scenery.
 The named campfire and bonfire entries show their static fuel geometry;
 volumetric fire recipes and shared weather are separate scene capabilities.
 The book currently covers named factory kinds, not every possible scene recipe.
-
-The interface and renderer are still being validated on the catalogue branch.
-See the [feature backlog](feature-backlog.md) for the wider catalogue work.

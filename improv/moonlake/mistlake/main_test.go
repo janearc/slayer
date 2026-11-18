@@ -168,6 +168,7 @@ func TestCommandErrors(t *testing.T) {
 		{"water", -2, "", map[string]string{"WATERMASK": missing}, 1, "mistlake: open " + missing + ": no such file or directory\n"},
 		{"trees", -2, "", map[string]string{"TREEMASK": missing}, 1, "mistlake: open " + missing + ": no such file or directory\n"},
 		{"output", 1, dir, nil, 1, "mistlake: open " + dir + ": is a directory\n"},
+		{"configuration", 2, "NaN", nil, 1, "mistlake: nonfinite mist configuration\n"},
 		{"colour-count", -1, "", map[string]string{"MIST_COLOUR": "1,2"}, 2, "MIST_COLOUR=\"1,2\" is not r,g,b\n"},
 		{"colour-number", -1, "", map[string]string{"MIST_COLOUR": "1,no,3"}, 2, "MIST_COLOUR=\"1,no,3\" is not r,g,b\n"},
 		{"layers-number", -1, "", map[string]string{"MIST_THICK": "no"}, 2, "MIST_THICK=\"no\" is not a number of at least one\n"},

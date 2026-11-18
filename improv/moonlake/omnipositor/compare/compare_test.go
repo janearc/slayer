@@ -392,3 +392,74 @@ func writePFMValues(t *testing.T, path string, width, height int, values []float
 		t.Fatal(err)
 	}
 }
+
+// TestCompareImagesRefusesNil checks that a nil image on either side is an
+// error and not a panic.
+func TestCompareImagesRefusesNil(t *testing.T) {
+	img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	for _, pair := range [][2]image.Image{{nil, img}, {img, nil}} {
+		if _, err := CompareImages(pair[0], pair[1]); err == nil || !strings.Contains(err.Error(), "nil image") {
+			t.Errorf("nil image error: %v", err)
+		}
+	}
+}
+
+// TestComparePNGRefusesDifferentSizes checks that two readable PNGs of
+// different sizes are refused by name, and that no difference file is made.
+func TestComparePNGRefusesDifferentSizes(t *testing.T) {
+	dir := t.TempDir()
+	one, two, out := filepath.Join(dir, "one.png"), filepath.Join(dir, "two.png"), filepath.Join(dir, "diff.png")
+	writePNG(t, one, image.NewRGBA(image.Rect(0, 0, 1, 1)))
+	writePNG(t, two, image.NewRGBA(image.Rect(0, 0, 2, 1)))
+	if _, err := ComparePNG(one, two, out); err == nil || !strings.Contains(err.Error(), "sizes differ: 1x1 and 2x1") {
+		t.Fatalf("different sizes error: %v", err)
+	}
+	if _, err := os.Stat(out); err == nil {
+		t.Error("a difference file was written for a refused comparison")
+	}
+}
+
+// TestComparePNGRefusesABodyThatDoesNotDecode checks a file whose header
+// reads but whose pixels are missing.
+func TestComparePNGRefusesABodyThatDoesNotDecode(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "headless.png")
+	data := []byte{137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 'I', 'H', 'D', 'R', 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0, 0, 0, 0, 0}
+	binary.BigEndian.PutUint32(data[29:], crc32.ChecksumIEEE(data[12:29]))
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ComparePNG(path, path, ""); err == nil || !strings.Contains(err.Error(), "decode PNG") {
+		t.Fatalf("body error: %v", err)
+	}
+}
+
+// TestCompareRawRefusesAMissingFile checks that a PFM that is not there is
+// refused by name, on either side.
+func TestCompareRawRefusesAMissingFile(t *testing.T) {
+	dir := t.TempDir()
+	good := filepath.Join(dir, "good.pfm")
+	missing := filepath.Join(dir, "missing.pfm")
+	if err := raw.Write(good, frame.New(1, 1)); err != nil {
+		t.Fatal(err)
+	}
+	for _, pair := range [][2]string{{missing, good}, {good, missing}} {
+		if _, err := CompareRaw(pair[0], pair[1]); err == nil || !strings.Contains(err.Error(), "open raw") {
+			t.Errorf("CompareRaw(%q, %q): %v", pair[0], pair[1], err)
+		}
+	}
+}
+
+// TestPSNR checks the three cases of the ratio, with a hand-worked value:
+// a peak of 10 and a mean square of 4 is 10 log10(100/4), about 13.98 dB.
+func TestPSNR(t *testing.T) {
+	if got := psnr(10, 0, 3); !math.IsInf(got, 1) {
+		t.Errorf("no difference = %g, want +Inf", got)
+	}
+	if got := psnr(0, 5, 3); !math.IsInf(got, -1) {
+		t.Errorf("zero peak = %g, want -Inf", got)
+	}
+	if got := psnr(10, 12, 3); math.Abs(got-13.9794) > 1e-4 {
+		t.Errorf("psnr = %g, want 13.9794", got)
+	}
+}

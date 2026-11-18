@@ -60,8 +60,8 @@ At each moment it makes `spun-CLOCK`, `bands-CLOCK` and `aged-CLOCK`,
 CLOCK the weather's seconds, eight wide, as the command always named them.
 It runs on the gpu, in float32, where there is a metal device and no
 renderer is said, and says so; `renderer: cpu` runs it in float64. Its
-moments are kept in the weather cache, `SLAYER_WEATHER` or the user's
-cache, which hillside shares.
+moments are kept in the weather cache, `weather/` in the cache home
+(`SLAYER_CACHE`), which hillside shares.
 
 ## A scene
 

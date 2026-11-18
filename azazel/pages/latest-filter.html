@@ -1,0 +1,27 @@
+<script>
+(function () {
+  var came = location.pathname.match(/\/renders\/([^\/]+)\/compositing\//);
+  if (!came) { return; }
+  var team = came[1];
+  var cards = Array.prototype.slice.call(document.querySelectorAll('figure[data-folder]'));
+  var theirs = cards.filter(function (card) {
+    return card.dataset.folder.indexOf('-' + team + '-') >= 0;
+  });
+  if (theirs.length === 0) { return; }
+  var said = document.createElement('p');
+  said.className = 'lead';
+  var show = function (all) {
+    cards.forEach(function (card) { card.hidden = !all && theirs.indexOf(card) < 0; });
+    said.textContent = all
+      ? 'Everyone’s, ' + cards.length + ' folders. '
+      : team + '’s, ' + theirs.length + ' of the ' + cards.length + ' folders here: you came through ' + team + '’s folder. ';
+    var other = document.createElement('a');
+    other.href = '#';
+    other.textContent = all ? 'Show only ' + team + '’s' : 'Show everyone’s';
+    other.onclick = function () { show(!all); return false; };
+    said.appendChild(other);
+  };
+  document.querySelector('.grid').before(said);
+  show(false);
+})();
+</script>

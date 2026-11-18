@@ -3,7 +3,10 @@
 package gpu
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
+	"math"
 	"slices"
 	"time"
 
@@ -11,6 +14,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/thing"
+	"github.com/janearc/slayer/trace"
 )
 
 // Frames draws the pictures of a film, or of a live view, keeping on the
@@ -65,8 +69,9 @@ import (
 //
 // On the host it keeps the last frame's header, a few hundred bytes, its
 // paints, and the world it drew, to know a camera move when it sees one;
-// and the face trees of slayer's meshes the last frame drew, by the
-// mesh, so a mesh that only moves is not grown again (see keptTrees).
+// and the face trees of the meshes the last frame drew, by their bytes,
+// with its packed faces, so a mesh that only moves is neither grown nor
+// packed again (see keptTrees).
 type Frames struct {
 	mode         traversal
 	pass         CompositePass
@@ -80,8 +85,8 @@ type Frames struct {
 	// or empty where it kept it; rebuilt is why a kept frame built its
 	// hierarchy again, or empty where it kept that too
 	why, rebuilt string
-	// trees is the face trees of slayer's meshes the last frame drew,
-	// kept for the next; see keptTrees
+	// trees is the face trees and packed faces of the meshes the last
+	// frame drew, kept for the next; see keptTrees
 	trees *keptTrees
 }
 
@@ -96,7 +101,8 @@ type shot struct {
 	width, height, side int
 	// closing is the eye where the shutter closes, or nil for a shutter
 	// that is closed
-	closing *maths.Subspace
+	closing      *maths.Subspace
+	initialMedia []trace.InitialMedium
 }
 
 // view is the header's fields the shot's eye, lens and shutter make, for
@@ -118,6 +124,7 @@ type frameKey struct {
 	at                  time.Duration
 	width, height, side int
 	mode                traversal
+	initialMedia        [32]byte
 }
 
 // lastFrame is what a camera-only frame draws from: the last retained
@@ -149,7 +156,7 @@ func NewFrames(mode Mode) (*Frames, error) {
 // NewCompositeFrames retains a drawer for one contribution to a composite.
 // Only pinhole views without an open shutter are admitted for these passes.
 func NewCompositeFrames(mode Mode, pass CompositePass) (*Frames, error) {
-	if err := validPass(pass); err != nil {
+	if err := validPass(mode, pass); err != nil {
 		return nil, err
 	}
 	frames, err := NewFrames(mode)
@@ -178,9 +185,19 @@ func newFrames(mode traversal) *Frames {
 func (frames *Frames) Draw(world *thing.World, generation uint64,
 	eye maths.Subspace, lens film.Sensor, at time.Duration, width,
 	height, side int) (*frame.Frame, Profile, error) {
+	return frames.DrawWithInitialMedia(world, generation, eye, lens, at,
+		width, height, side, nil)
+}
+
+// DrawWithInitialMedia is Draw with an explicit ordered stack of clear media
+// containing the camera. The state participates in retained-frame identity.
+func (frames *Frames) DrawWithInitialMedia(world *thing.World,
+	generation uint64, eye maths.Subspace, lens film.Sensor, at time.Duration,
+	width, height, side int, media []trace.InitialMedium,
+) (*frame.Frame, Profile, error) {
 	take := shot{world: world, generation: generation, eye: eye,
 		lens: lens, at: at, width: width, height: height,
-		side: max(1, side)}
+		side: max(1, side), initialMedia: slices.Clone(media)}
 	return frames.measured(take)
 }
 
@@ -194,9 +211,22 @@ func (frames *Frames) Draw(world *thing.World, generation uint64,
 func (frames *Frames) DrawOpen(world *thing.World, generation uint64,
 	eye, closing maths.Subspace, lens film.Sensor, at time.Duration,
 	width, height, side int) (*frame.Frame, Profile, error) {
+	return frames.DrawOpenWithInitialMedia(world, generation, eye, closing,
+		lens, at, width, height, side, nil)
+}
+
+// DrawOpenWithInitialMedia is DrawOpen with a fixed explicit camera stack.
+// Moving a camera through or across an interface needs a time-varying stack,
+// which this API does not infer or support.
+func (frames *Frames) DrawOpenWithInitialMedia(world *thing.World,
+	generation uint64, eye, closing maths.Subspace, lens film.Sensor,
+	at time.Duration, width, height, side int,
+	media []trace.InitialMedium,
+) (*frame.Frame, Profile, error) {
 	take := shot{world: world, generation: generation, eye: eye,
 		lens: lens, at: at, width: width, height: height,
-		side: max(1, side), closing: &closing}
+		side: max(1, side), closing: &closing,
+		initialMedia: slices.Clone(media)}
 	return frames.measured(take)
 }
 
@@ -206,9 +236,23 @@ func (frames *Frames) measured(take shot) (*frame.Frame, Profile, error) {
 	if err := frames.usable(take.world); err != nil {
 		return nil, Profile{}, err
 	}
+	if len(take.initialMedia) > 0 || frames.pass != CompletePicture {
+		hasNamedOptics, err := trace.PrepareClearState(take.world,
+			take.initialMedia)
+		if err != nil {
+			return nil, Profile{}, err
+		}
+		if len(take.initialMedia) > 0 && take.closing != nil {
+			return nil, Profile{}, unsupported{"moving shutter with an explicit camera medium stack"}
+		}
+		if frames.pass != CompletePicture &&
+			(len(take.initialMedia) > 0 || hasNamedOptics) {
+			return nil, Profile{}, unsupported{"clear-medium transport in a composite pass"}
+		}
+	}
 	frames.transmission = nil
 	if frames.pass != CompletePicture {
-		if _, ok := take.lens.(film.Pinhole); !ok || take.closing != nil {
+		if !compositePinhole(take.lens) || take.closing != nil {
 			return nil, Profile{}, fmt.Errorf("gpu: composite passes require a closed pinhole shutter")
 		}
 		if frames.pass == VolumeTransport {
@@ -304,7 +348,45 @@ func cameraOnly(frames *Frames, take shot, mode traversal) bool {
 func keyOf(take shot, mode traversal) frameKey {
 	return frameKey{world: take.world, generation: take.generation,
 		at: take.at, width: take.width, height: take.height,
-		side: take.side, mode: mode}
+		side: take.side, mode: mode,
+		initialMedia: initialMediaKey(take.initialMedia)}
+}
+
+// initialMediaKey hashes a take's initial clear media into a key, so
+// takes with different media never share one.
+func initialMediaKey(media []trace.InitialMedium) [32]byte {
+	if len(media) == 0 {
+		return [32]byte{}
+	}
+	hash := sha256.New()
+	var word [8]byte
+	put := func(value uint64) {
+		binary.LittleEndian.PutUint64(word[:], value)
+		_, _ = hash.Write(word[:])
+	}
+	put(uint64(len(media)))
+	for _, each := range media {
+		put(math.Float64bits(each.Index))
+		put(uint64(int64(each.Rank)))
+		name := each.ClearMedium.Name()
+		put(uint64(len(name)))
+		_, _ = hash.Write([]byte(name))
+		coefficients := each.ClearMedium.Extinction()
+		put(math.Float64bits(coefficients.R))
+		put(math.Float64bits(coefficients.G))
+		put(math.Float64bits(coefficients.B))
+		put(math.Float64bits(each.ClearMedium.MetresPerUnit()))
+		scattering := each.ClearMedium.Scattering()
+		put(math.Float64bits(scattering.R))
+		put(math.Float64bits(scattering.G))
+		put(math.Float64bits(scattering.B))
+		put(math.Float64bits(each.ClearMedium.Phase()))
+		put(uint64(each.ClearMedium.InscatterSteps()))
+		put(math.Float64bits(each.ClearMedium.MaxInscatterDistanceMetres()))
+	}
+	var key [32]byte
+	copy(key[:], hash.Sum(nil))
+	return key
 }
 
 // perCall draws the frame as the per-call function does, touching
@@ -316,8 +398,9 @@ func (frames *Frames) perCall(take shot, mode traversal) (*frame.Frame,
 	if take.shutter().over(take.eye) {
 		return nil, timing{}, errShutterOverRays
 	}
-	return sampledLightingGrid(take.world, nil, take.eye, take.lens,
-		take.at, take.width, take.height, take.side, mode, cellsFor(mode))
+	return sampledLightingGridWithInitialMedia(take.world, nil, take.eye,
+		take.lens, take.at, take.width, take.height, take.side, mode,
+		cellsFor(mode), take.initialMedia)
 }
 
 // remember keeps what a camera-only frame after this one draws from.

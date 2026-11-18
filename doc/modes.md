@@ -62,7 +62,7 @@ the frame is drawn, while vibes chooses approximations in its light.
 Today vibes enables `lamp-store` and `sky-looks`, using their native
 traversal kernels. It does not simplify geometry or lower transport resolution.
 The shortcuts refuse CPU, named scenes, rig lenses, proofs and certain
-other combinations. More than eight lamps is refused by the lamp store.
+other combinations. More than sixteen lamps is refused by the lamp store.
 
 For dense meshes, compare `gpu-native` against `gpu` with shortcuts off
 first. The fast-light modes themselves use native primary and shadow
@@ -79,20 +79,6 @@ Use a conventional movie output such as `.mp4`, with `ffmpeg` available.
 Set the desired final dimensions, frame rate and sound in the job. Slayer
 does not upload to YouTube. Review the encoded film, including its sound,
 before publishing it yourself.
-
-## A third option for expensive moving mist
-
-The [Omnipositor scene adapter](../improv/moonlake/omnipositor/SCENE.md)
-can keep a full-resolution surface plate while tracing foreground mist at
-reduced dimensions. Its plan exposes `transport-scale`, `transport-rays`
-and `plate-every`. This is a separate command, not a `vibes` preset.
-
-Scale 2 halves each transport dimension, approximately quartering its
-pixel count. Reconstruction cannot restore missed thin beams or silhouettes.
-Plate reuse freezes surface lighting and shadows. Use fresh plates for
-camera motion, zoom or changing scenery/illumination. Compare against
-`--reference` across motion, not just at frame zero. The current adapter
-refuses sound and titles; add them in the edit.
 
 ## What each control actually changes
 
@@ -126,5 +112,5 @@ quality-preserving speedup. Cached frames must not masquerade as new traces.
 
 For a film, examine fine silhouettes, narrow beams, shadow motion, mist
 boundaries and temporal noise. State which model and approximation produced
-the accepted result. The [optimization guide](optimizations.md) separates
-implemented savings, dated measurements and ideas still under development.
+the accepted result. The [optimization guide](optimizations.md) lists the
+implemented savings.

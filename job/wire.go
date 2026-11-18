@@ -79,6 +79,7 @@ type filmWire struct {
 	Exposure float64 `yaml:"exposure" json:"exposure,omitempty"`
 	Aperture float64 `yaml:"aperture" json:"aperture,omitempty"`
 	Focus    float64 `yaml:"focus" json:"focus,omitempty"`
+	Mode     string  `yaml:"mode" json:"mode,omitempty"`
 }
 
 // point is a place in scene metres: x east, y up, z south.

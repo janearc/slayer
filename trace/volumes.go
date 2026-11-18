@@ -44,6 +44,154 @@ func through(scene *staged, ray maths.Ray, far float64) passage {
 	return throughGain(scene, ray, far, nil, strides)
 }
 
+// throughClear interleaves water extinction, water single-scattering, and
+// explicitly opted-in bounded clouds. Each local source is attenuated by the
+// water and cloud between it and the eye; later samples continue through
+// earlier segments. Transparent-boundary refraction remains unsupported.
+func throughClear(scene *staged, seen look, far float64,
+	water *thing.ClearMedium) passage {
+	ray := seen.ray
+	passed := untouched()
+	var crossingRoom [roomy]crossing
+	var gainRoom [roomy]float64
+	var takenRoom, partsRoom [roomy]int
+	across := crossingsIn(crossingRoom[:0], scene.volumes, ray, far)
+	gains := gainRoom[:0]
+	for range across {
+		gains = append(gains, 1)
+	}
+	steps := steppingIn(across, strides, takenRoom[:], partsRoom[:])
+	steps.refine = scene.beams.Ray(ray, far)
+	cursor := 0.0
+	for shows(passed.keep) {
+		step, found := steps.next()
+		if !found {
+			break
+		}
+		gap := math.Max(0, step.along-cursor)
+		passed.added = passed.added.Add(clearWaterScatterSegment(scene,
+			seen, ray, cursor, gap, far, water, passed.keep))
+		attenuatePassage(&passed, waterKeep(water, ray, gap))
+		crossed, index := &across[step.crossing], step.crossing
+		if crossed.volume.gas != nil {
+			passed = gasStep(scene, crossed, step, ray, gains[index], passed)
+		} else {
+			absorb := absorbed(crossed.volume, step.thick)
+			light := scatteredClear(scene, crossed, step, seen, water)
+			passed.added.R += light.R * passed.keep.R * absorb.R
+			passed.added.G += light.G * passed.keep.G * absorb.G
+			passed.added.B += light.B * passed.keep.B * absorb.B
+			passed.keep.R *= 1 - absorb.R
+			passed.keep.G *= 1 - absorb.G
+			passed.keep.B *= 1 - absorb.B
+			if scene.walked != nil {
+				strode(scene.walked, crossed, step, absorb, light,
+					passed.keep)
+			}
+		}
+		cursor = step.along
+	}
+	gap := math.Max(0, far-cursor)
+	passed.added = passed.added.Add(clearWaterScatterSegment(scene,
+		seen, ray, cursor, gap, far, water, passed.keep))
+	attenuatePassage(&passed, waterKeep(water, ray, gap))
+	return passed
+}
+
+// clearWaterScatterSegment adds the ocean's single-scattered sky source over
+// one water-only gap. The incoming camera-path transmission includes every
+// earlier water segment and local cloud step. oceanClearInscatter evaluates
+// the refracted air-side source and its incoming water/cloud path at each
+// sample, then applies outgoing water Beer within this gap.
+func clearWaterScatterSegment(scene *staged, seen look, ray maths.Ray,
+	begin, length, fullDistance float64, water *thing.ClearMedium, keep maths.Light,
+) maths.Light {
+	if water == nil || !water.HasScattering() || scene.oceanSun == nil ||
+		!sameClearMedium(scene.oceanSun.medium, water) || length <= 0 {
+		return maths.Light{}
+	}
+	segmentRay := maths.Ray{At: ray.Point(begin), Dir: ray.Dir}
+	segmentSeen := seen
+	segmentSeen.ray = segmentRay
+	steps := water.InscatterSteps()
+	if scene.oceanSun.waterStepMode == "ray-spacing" {
+		var valid bool
+		steps, valid = clearCloudWaterSteps(ray, fullDistance, length, water)
+		if !valid {
+			markClearInscatterFault(scene, clearInscatterNumericalOverflow)
+			return maths.Light{}
+		}
+	}
+	added := oceanClearInscatterSteps(scene, segmentSeen, segmentRay, length,
+		water, steps)
+	return added.Times(keep)
+}
+
+// clearCloudWaterSteps preserves the full ray's target water cell spacing in
+// each cloud gap. Ceil leaves each positive gap at least one cell; boundaries
+// can therefore add cells. This explicit quality tradeoff is not bit-exact.
+func clearCloudWaterSteps(ray maths.Ray, full, gap float64, water *thing.ClearMedium) (int, bool) {
+	metres := ray.Dir.Len() * water.MetresPerUnit()
+	if !finite(metres) || math.IsNaN(full) || math.IsNaN(gap) || metres <= 0 || full <= 0 || gap <= 0 || water.InscatterSteps() < 1 {
+		return 0, false
+	}
+	fullMetres := math.Min(full*metres, water.MaxInscatterDistanceMetres())
+	gapMetres := math.Min(gap*metres, water.MaxInscatterDistanceMetres())
+	cell := fullMetres / float64(water.InscatterSteps())
+	if !finite(fullMetres, gapMetres, cell) || cell <= 0 {
+		return 0, false
+	}
+	count := math.Ceil(gapMetres / cell)
+	if !finite(count) || count > float64(water.InscatterSteps()) {
+		return 0, false
+	}
+	return max(1, int(count)), true
+}
+
+// scatteredClear returns the light a volume adds at one step of the march.
+// Where the water is the ocean sun medium, it adds the ocean clear-cloud
+// source as well.
+func scatteredClear(scene *staged, crossed *crossing, step stride,
+	seen look, water *thing.ClearMedium) maths.Light {
+	point, direction := seen.ray.Point(step.along), seen.ray.Dir
+	material := crossed.volume.source.Material
+	if material == nil {
+		material = grey
+	}
+	sum := emits(material, crossed.volume.shine, step.local, 0)
+	if crossed.volume.source.Beam != nil {
+		sum = sum.Scale(boosted(crossed.volume, step.local, direction))
+	}
+	if material.Colour == (maths.Light{}) || scene.oceanSun == nil ||
+		!sameClearMedium(scene.oceanSun.medium, water) {
+		return sum
+	}
+	source, usable := oceanClearSourceWithPhase(scene, point, seen,
+		direction.Unit(), water, clearCloudPhaseOf(crossed.volume.med))
+	if usable {
+		sum = sum.Add(material.Colour.Times(source))
+	}
+	return sum
+}
+
+// waterKeep returns the light kept through the water over distance, as Beer
+// attenuation per channel. With no water, all light is kept.
+func waterKeep(water *thing.ClearMedium, ray maths.Ray,
+	distance float64) maths.Light {
+	if water == nil || distance <= 0 {
+		return maths.Grey(1)
+	}
+	metres := distance * ray.Dir.Len() * water.MetresPerUnit()
+	extinction := water.Extinction()
+	return maths.RGB(beerClear(extinction.R, metres),
+		beerClear(extinction.G, metres), beerClear(extinction.B, metres))
+}
+
+// attenuatePassage multiplies the light kept by a passage by keep.
+func attenuatePassage(passed *passage, keep maths.Light) {
+	passed.keep = passed.keep.Times(keep)
+}
+
 // shows is whether enough light still gets through for a march to go
 // on: any channel of keep above faint.
 func shows(keep maths.Light) bool {
@@ -287,7 +435,7 @@ func scattered(scene *staged, crossed *crossing, step stride, ray maths.Ray,
 	}
 	facing := dir.Neg()
 	lobe := asymmetryOf(crossed.volume.source.Medium)
-	var room [lampsAsked]lit
+	var room [lampsEvery]lit
 	for _, one := range scene.asked(room[:], point, facing, byLight) {
 		got := scene.shadowed(one, point)
 		if lobe != 0 && !one.ambient() {

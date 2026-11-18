@@ -23,6 +23,8 @@ type Shelf struct {
 	dir    string
 	client *http.Client
 	hash   func(path string) (string, error)
+	// progress, when set, is told how each download goes.
+	progress Progress
 }
 
 // NewShelf is a shelf in a directory, fetching through a client.
@@ -173,12 +175,25 @@ func (shelf Shelf) download(ctx context.Context, source Source,
 	if err := os.MkdirAll(shelf.dir, 0o755); err != nil {
 		return "", nothing, err
 	}
-	return download(ctx, shelf.client, source.From(), to)
+	key := source.Key()
+	return downloadVia(ctx, shelf.client, source.From(), to,
+		func(body io.Reader, total int64) io.Reader {
+			return shelf.watched(key, body, total)
+		})
 }
 
 // download writes the bytes at a url to a path through a getter, hashing
 // them as they come, and gives their sha256 and size.
 func download(ctx context.Context, get getter, from, to string) (string,
+	int64, error) {
+	return downloadVia(ctx, get, from, to, nil)
+}
+
+// downloadVia is download with the body read through a wrapper, given
+// the body and the length the server announced (-1 when it did not). A
+// nil wrapper reads the body as it is.
+func downloadVia(ctx context.Context, get getter, from, to string,
+	wrap func(body io.Reader, total int64) io.Reader) (string,
 	int64, error) {
 	asking, err := http.NewRequestWithContext(ctx, http.MethodGet, from, nil)
 	if err != nil {
@@ -198,7 +213,11 @@ func download(ctx context.Context, get getter, from, to string) (string,
 		return "", nothing, err
 	}
 	hash := sha256.New()
-	size, err := io.Copy(io.MultiWriter(file, hash), answer.Body)
+	var body io.Reader = answer.Body
+	if wrap != nil {
+		body = wrap(body, answer.ContentLength)
+	}
+	size, err := io.Copy(io.MultiWriter(file, hash), body)
 	if closing := file.Close(); err == nil {
 		err = closing
 	}

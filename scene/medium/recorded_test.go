@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
@@ -28,10 +29,19 @@ import (
 // difference (the commit that says so, "deceit sweep 3"). SLAYER_RECORD=1
 // writes it again; nothing else should.
 //
-// it holds the code to the recording, so a change moves nothing; it is not
-// evidence that the media are right, which a recording never is. the audit says
-// that, against physics and arithmetic by hand.
+// The historical recording remains unchanged. Jet bounds were deliberately
+// widened in 5df4eb66 to contain the previously clipped Gaussian skirt; jet
+// digests are separately recorded from the new bounds, which also determine
+// the density and ray sample coordinates. Independent analytic witnesses are in
+// jet_bounds_regression_test.go. All other media retain the original record.
+// A recording holds implementation output; it is not evidence of correctness.
 const recording = "testdata/recorded.txt"
+const jetSkirtRecording = "testdata/recorded-jet-skirt.txt"
+
+// jetLine distinguishes only the four jet specimens in the old recording.
+func jetLine(line string) bool {
+	return strings.HasPrefix(line, "jet\t") || strings.HasPrefix(line, "jet, ")
+}
 
 // recorded is every medium the recording holds, by name: each kind, with
 // the dressings and the edges its numbers can take.
@@ -191,6 +201,26 @@ func lines() []string {
 // recording's inputs: none lost, none added, none changed.
 func TestEveryMediumIsRecorded(t *testing.T) {
 	got := lines()
+	if path := os.Getenv("SLAYER_JET_SKIRT_RECORD"); path != "" {
+		if !filepath.IsAbs(path) {
+			t.Fatal("SLAYER_JET_SKIRT_RECORD must name an absolute output file")
+		}
+		var jet []string
+		for _, line := range got {
+			if jetLine(line) {
+				jet = append(jet, line)
+			}
+		}
+		if len(jet) != 16 {
+			t.Fatalf("expected 16 jet lines, got %d", len(jet))
+		}
+		head := "# Jet record after 5df4eb66 widened bounds to include the Gaussian skirt.\n" +
+			"# Sample positions and rays depend on bounds; density code is unchanged.\n"
+		if err := os.WriteFile(path, []byte(head+strings.Join(jet, "\n")+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
 	if os.Getenv("SLAYER_RECORD") == "1" {
 		head := "# scene/medium at ad2fff9, by digest: see recording " +
 			"in recorded_test.go\n"
@@ -208,12 +238,36 @@ func TestEveryMediumIsRecorded(t *testing.T) {
 	var want []string
 	scan := bufio.NewScanner(file)
 	for scan.Scan() {
-		if line := scan.Text(); !strings.HasPrefix(line, "#") {
+		if line := scan.Text(); !strings.HasPrefix(line, "#") && !jetLine(line) {
 			want = append(want, line)
 		}
 	}
 	if err := scan.Err(); err != nil {
 		t.Fatal(err)
+	}
+	jet, err := os.Open(jetSkirtRecording)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer jet.Close()
+	scan = bufio.NewScanner(jet)
+	count := 0
+	for scan.Scan() {
+		line := scan.Text()
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+		if !jetLine(line) {
+			t.Fatalf("non-jet line in jet skirt recording: %q", line)
+		}
+		want = append(want, line)
+		count++
+	}
+	if err := scan.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if count != 16 {
+		t.Fatalf("jet skirt recording has %d lines, want 16", count)
 	}
 	held := map[string]bool{}
 	for _, line := range want {

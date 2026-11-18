@@ -52,21 +52,14 @@ scales differ slightly in the delivered bytes; the reader retains both.
 The first sample centre is near longitude -156.19986124556166 and latitude
 20.399861183961665. The example region stays inside the interpolation domain.
 
-All 31,115,161 delivered samples were independently scanned. There were no
-NaNs, infinities or missing values; the measured stored range was
--5648.2431640625 to 4197.93603515625. The example's round height envelope
-encloses that full range, rather than estimating peaks from sparse queries.
+The stored range is -5648.2431640625 to 4197.93603515625. The example's round
+height envelope encloses that full range, rather than estimating peaks from
+sparse queries.
 
 The delivered TIFF's no-data text is -5649.243, not the NetCDF's -9999;
 comparison uses its float32 representation. No vertical CRS or unit GeoKeys
 are present. Metres, positive up and MSL EPSG:5714 come from NOAA's retained
-product guide and NCML. The retained inspection also records nonfatal TIFF
-metadata warnings; a complete independent libtiff decode exited successfully.
-
-The contemporary FETCHED.md, exact request, source documents, scan manifest
-and warnings are kept beside the local raster under the research adapter's
-`retained/hawaii-crm-2023-big-island` directory. Keep them with a copied source.
-Grid spacing is not a promise of equally fine measured coastal detail.
+product guide and NCML. Grid spacing is not a promise of equally fine measured coastal detail.
 
 ## Geometry follows the view
 
@@ -135,12 +128,9 @@ unchanged on CPU and GPU. Camera-relative planetary scenes can avoid a globe's
 diameter setting metre-scale offsets at small trees. This numerical control
 does not prove a floating-point intersection-error bound.
 
-The first native site studies now include a close 720p view and a 15 km
-overview. The close view shows the dome, source-grounded trees, four beams and
-regional mist. The overview exposed a rectangular mist edge. Optional
-`edge-fade-metres` now gives a bank elliptical horizontal support and a smooth
-outer transition; zero retains rectangular support. This is an authored shape,
-not a condensation model. Moving-view transitions still need inspection.
+Optional `edge-fade-metres` gives a bank elliptical horizontal support and a
+smooth outer transition; zero retains rectangular support. This is an
+authored shape, not a condensation model.
 
 Optional `patch-scale-metres` separates the size of seeded weather patches
 from a layer's vertical depth. Omission keeps the original depth-based noise.
@@ -161,33 +151,8 @@ For weather that follows the sphere and continues offshore, use the separate
 evaluation and split occupied shell crossings; they do not enlarge a local
 floor grid into a planetary weather approximation.
 
-The original plain island stills below do not verify the added site.
-
-The site stills are retained locally under:
-
-- `2026-11-09-sourced-observatory-320`: the first, distant placement study.
-- `2026-11-09-sourced-observatory-close-320-v2`: a closer north-side view.
-- `2026-11-09-sourced-observatory-close-720`: 1280 by 720, four samples per
-  pixel, 1,256 drawn trees and four visible beams; 12.68 s application time.
-- `2026-11-09-sourced-observatory-rise-320`: the original 15 km overview,
-  retained with its visible rectangular mist-bank termination.
-- `2026-11-09-sourced-observatory-rise-faded-320`: matched geometry and
-  camera with the edge fade; the bank's termination is now rounded and soft.
-- `2026-11-09-sourced-observatory-orbit-320`: 300 km camera height, whole
-  island coverage and aggregate forest appearance, with no root enumeration.
-
-These are actual inspected native-Metal stills with exact settings, PNG and
-producer hashes, source records and resource receipts. The initial close
-attempt refused its face budget before rendering; the successful input uses
-one prototype variety within an explicit two-million stored-face allowance.
-The 720p run sampled about 529 MiB process-tree RSS under the watchdog; this
-is not a guaranteed peak or a whole-system/GPU-memory measurement.
-
-All terrain selections still report a limited cell-span target. Faceting,
-thin-foliage aliasing at four samples, the uniform background and local weather
-support remain visible approximation limits. The zero-fade 720p study predates
-the boundary correction. None of these stills demonstrates temporal continuity,
-wave water or the CORONA/Keyhole instrument view.
+Faceting, thin-foliage aliasing at four samples, the uniform background and
+local weather support are visible approximation limits.
 
 The output keeps `island.png`, the exact `scene.yaml` and a `render.json`
 with source identities, executable hash and build info, image hash, origin,
@@ -217,11 +182,6 @@ colour. This is an appearance control, not a measured climate/vegetation map.
 The revised example uses that transition for authored high-elevation snow
 appearance. It is not fetched weather, snow depth, accumulation or tree loading.
 
-The first inspected normal/snow study,
-`2026-11-09-sourced-island-normal-snow-320`, used 261,313 bounded normal
-stencils and 1,045,252 source-height queries. It completed under the two-worker
-guard; this is not a controlled timing comparison or a physical snow validation.
-
 `forest.adaptive-regions` enables hierarchical support selection before cell
 enumeration. It first uses the declared full specimen envelope; a wholly
 subpixel region needs no individual roots. Nearer views measure all permitted
@@ -231,9 +191,8 @@ source extrema tighten regional height bounds.
 Region assessments and actual cell queries share the explicit cell allowance;
 candidates and instances keep their own limits. This does not make off-screen
 shadow influence complete. The pixel thresholds apply to the conservative
-projection criterion, which can exceed a tree's literal image height. The first
-snow/woodland movie aggregated that criterion below 40 pixels. The current
-example lowers it to 8; both are authored quality/work choices.
+projection criterion, which can exceed a tree's literal image height. The
+example uses 8, an authored quality/work choice.
 
 `minimum-geometry-detail: clumps` replaces the hull tier with branch clumps,
 while preserving the aggregate cutoff. This avoids coarse conical silhouettes;
@@ -250,15 +209,10 @@ snow show through instead of painting those peaks with aggregate forest colour.
 The wider example spans 40 km by 40 km at 20 candidates per hectare before
 elevation/clearance/edge filtering: an expectation of 3.2 million candidates,
 not a request to construct them all. Its introduced species and weather remain
-authored scenery. The first wider-forest still renders 1,639 trees after 437
-region assessments, 1,940 cell visits and 63,566 generated candidates.
+authored scenery.
 
 At 300 km the whole support aggregates, with zero cell visits and zero generated
-candidates. The first full sixty-frame snow/woodland ascent completed under the
-guard in 94.97 s, with 726 MiB sampled process-tree RSS. Its contact sheet
-exposed coarse hull cones. A following clump-only study removed that tier but
-kept the abrupt aggregate transition. The later fitted-crown study is described
-below; changed settings do not establish an isolated speedup over this ascent.
+candidates.
 
 The [ascent plan](island-ascent-preview.yaml) supplies geographic camera and
 look-target keyframes, horizontal field of view, outgoing-segment easing and
@@ -298,8 +252,7 @@ Reversals meet at zero rate. Coordinates stay between each leg's endpoints.
 This removes per-leg velocity resets; it does not enforce constant geographic
 speed, constant ascent rate or a fixed viewing angle. Camera, target and lens
 have continuous coordinate rates. Terrain clearance between frames, detail
-transitions and temporal sampling remain separate checks. The full continuous
-example is an input plan, not a claim that its 720 frames have been rendered.
+transitions and temporal sampling remain separate checks.
 
 Source hashes, decoding caches and native min/max indices are prepared once.
 One bounded prototype cache is shared across frames; its face allowance applies
@@ -317,76 +270,14 @@ first effective frame, and root `sequence.yaml` resolves to those settings.
 The command currently writes frames for an external movie encoder and refuses
 existing destinations; sequence resume is not implemented in this study path.
 
-The first native sequence is retained as `2026-11-09-sourced-island-ascent-320`:
-60 actual 320 by 180 frames with four samples per pixel, encoded to a
-ten-second, six-fps MP4. Its first camera is at 3,740 m radial height near the
-observatory; the last is at 300,000 m. These are heights above the authored
-reference sphere, not ground clearances. The one-hour scene clock reaches both
-endpoints exactly.
+The command's explicit ceilings permit 1,024 patches, 16,384 assessments and
+524,288 sampled points for denser studies. These are ceilings, not defaults or
+a quality guarantee; the target still reports a budget limit.
 
-Decode/count verification found all 60 movie frames; all PNG and
-effective-setting hashes were checked.
-
-Source/index preparation took 0.622 s once. The guarded run took 177.07 s;
-sampled process-tree RSS reached 663 MiB. This is not GPU-memory accounting or
-a controlled speed comparison. Across the records, 1,513 distinct tree IDs
-had 69,697 repeated identity/position comparisons with no mismatch. The final
-twelve frames aggregated the forest without root enumeration. Retained
-prototype geometry grew from 500,132 to 593,492 stored faces within its budget.
-
-The contact sheet shows the intended continuous widening from the dome to
-the island, but intermediate terrain remains visibly faceted and the authored
-height-colour boundaries are hard. Every frame reports a limited cell target.
-Identity checks do not establish flicker-free LOD transitions or physical water.
-The ocean remains smooth, the Sun fixed and the CORONA/Keyhole view unfinished.
-
-Refining this terrain also exposed a preparation cost: each vertex's seam lookup
-scanned every selected leaf. A new per-view edge index retains four references
-per leaf and considers only matching lattice lines, preserving coarsest-level
-and original-order tie rules. The command's explicit ceilings now permit 1,024
-patches, 16,384 assessments and 524,288 sampled points for denser studies.
-
-These are ceilings, not defaults or a quality guarantee; the target still
-reports a budget limit. A matched render of ascent frame 33 after the index
-change has exactly the same PNG bytes, patch list, source-point count and GPU
-input bytes. That compares one actual view, not every seam case. Its
-cold-command timing cannot be compared directly with a warm sequence frame.
-
-The denser 320p study selected 1,024 patches and 261,313 source points. It
-reduces the largest intermediate facets, but still reports a limited target.
-Its guarded command took 4.85 s and sampled 567 MiB process-tree RSS. Both
-studies retain their producer/source records and are linked from the local
-hero gallery. Source-height shading normals and smoother authored landcover
-remain useful next steps; more triangles alone do not remove every artifact.
-
-## First local evidence, 2026-11-09
-
-Later screenshots exposed unresolved appearance faults in the
-snow/woodland study. Whole-tree hulls become conspicuous cones, and abrupt
-geometry-to-flat-colour replacement removes stands while they remain visible.
-The branch-clump floor removes the cone tier, but does not by itself solve
-temporal transitions or supply aggregate canopy geometry. Further long movies
-are deferred until matched views hold those transitions.
-
-The 180-frame clump rerender finished before the attempted stop; its frames
-remain diagnostic.
-
-The dark ocean rings also reproduce with vegetation and mist removed. A matched
-diagnostic changed only the secondary-ray reference length: greater separation
-removes the rings. Planet-scale float32 self-intersections are implicated; these
-are not simulated waves. A larger global offset also alters land shadows and is
-not the proposed repair. The shader now tracks the originating sphere and
-excludes only that sphere from outward secondary queries, using convexity.
-
-Other occluders and inward rays remain tested. A matched native 320-pixel
-comparison retains the small offset and removes the bands. In the recorded water
-rectangle 2,967 of 14,400 pixels change; an interior land rectangle keeps all
-1,456 pixels unchanged. A separate negative-sun-altitude control remains dark.
-The image, exact settings and comparison record are retained in the local render
-gallery.
-
-These controls support this specific repair, rather than a general proof of
-planet-scale intersection accuracy.
+The shader tracks the originating sphere and excludes only that sphere from
+outward secondary queries, using convexity. Other occluders and inward rays
+are still tested. This does not prove a general bound on planet-scale
+intersection accuracy.
 
 The island adapter provides optional `minimum-geometry-detail: crown`.
 It reduces a seeded specimen's clump bounds into eight height slices and four
@@ -428,45 +319,15 @@ visible colour fraction. Narrowing does not match oblique silhouettes, gaps,
 directional shadows or physical canopy reflectance. The aggregate-cover sampling
 side remains independent of this fit's sampling side.
 
-Four matched native 320 by 180 stills, at sixteen samples per pixel, compare
-original clumps, unfitted crowns and two fit resolutions. All retain the same
-23,704 tree positions. Against the clump reference, whole-image mean absolute
-RGB code difference falls from 7.15 to 3.84 with the 32-side fit, and to 3.90
-with the 64-side fit. These are display-code differences in one view, not a
-physical or perceptual acceptance threshold.
+The woodland example requests the 32-side fit. Oblique silhouettes and moving
+transitions are not matched by it.
 
-The local material comparison retains all images, effective scenes, source
-records and probe areas. The two fit resolutions give similar images here;
-their ordering does not prove convergence. The woodland example requests the
-32-side fit. Oblique silhouettes and moving transitions remain under review.
-
-The fitted ascent study, `2026-11-09-island-material-ascent-320`, contains
-180 actual native frames, four samples per pixel and a decoded thirty-second
-MP4 at six fps. Its scene clock spans one hour; the camera rises from 3,740 m
-to 300,000 m above the authored sphere. The guarded run took 389.52 s and
-sampled 766 MiB of process-tree RSS. It used the material-fit producer before
-the mist-floor cache was implemented.
-
-Frame PNGs, effective settings and source bytes were checked by hash. Across
-79,379 distinct root IDs, 1,328,747 repeated identity/position checks found
-no mismatch. Two crown fits and aggregate-area estimates remain unchanged
-across frames; all their probe work occurs in the first frame.
-
-The sampled PNGs still show the small mist bank and limited intermediate
-terrain detail. Stable metadata does not
-certify smooth transitions, and the ocean remains a smooth proxy.
-
-The revised woodland example lowers its aggregate cutoff from 40 to 8 in the
+The woodland example sets its aggregate cutoff to 8 in the
 conservative projected-displacement criterion and uses crowns below the clump
 tier. This criterion is an upper bound, not a measured tree height in pixels.
 The work allowance is explicit: two million generated candidates, including
 repeated boundary work. Selection batches at most sixteen cells per region axis,
 reducing repeated halo visits.
-
-Cutoffs of 2 and 4 exhausted the declared instance allowance in the first
-comparison; those failed attempts are retained. At 8, the matched view retains
-23,704 crown/clump trees where the previous cutoff drew none. This is stronger
-appearance evidence, not a temporal pass.
 
 `aggregate-area-samples-side` optionally samples each seeded clump specimen
 from above on a fixed square grid. A ray counts once when any material is hit;
@@ -517,50 +378,3 @@ Only the ground projection is reused. Weather still advances with scene time,
 and its density grids and GPU inputs are rebuilt for every frame. This is a
 bounded preparation cache, not cached fog illumination or persistent GPU
 residency; a reduced query count alone is not a speed claim.
-
-Paired three-frame native controls retain identical PNG bytes with the cache
-disabled or enabled, while their weather images change over ten minutes of
-scene time. The shared 65 by 65 floor retains 33,800 bytes. After the first
-frame, both layers reuse it with zero new floor queries, instead of 22,202
-source-height queries and about 4.5 ms of floor preparation per frame.
-
-A second pair uses different grid sides under a 64 KiB allowance and forces
-eviction. Its PNGs also remain identical to the uncached reference. A grid
-larger than the allowance is refused by the parser. These controls cover
-reuse, eviction and budget refusal, rather than whole-render acceleration;
-the measured complete-frame times did not materially improve.
-
-The committed scene path at ecbc487 rendered actual native-Metal 320 by 180
-and 1280 by 720 studies on the M3 Max, with four samples per pixel. The wider
-view shows the whole sourced island and its relief at an authored 300 km
-camera height. It selected 256 patches and 16,641 source points; the cell-span
-target remained limited. That status is preserved in its render record.
-
-The 720p profile exposed a host-path mistake: the checked pinhole constructor
-returns a pointer, while the GPU encoder only recognized a pinhole value.
-It generated and uploaded 88,473,600 bytes of CPU rays unnecessarily. The
-host fix at 08eb2ac recognizes the pointer and uses GPU ray generation.
-
-Matched 720p inputs, sources and terrain selection were unchanged. Recorded
-input bytes fell from 90,896,784 to 2,423,184. Six of 921,600 decoded pixels
-changed, with a maximum RGB channel difference of 23/255; three pixels changed
-by more than one channel code. This comparison used macOS sips to decode both
-PNGs to bitmaps. It is a byte-difference observation, not a JND or temporal
-acceptance result. Both source PNGs were inspected and retained.
-
-One complete command measured 0.900 s before and 0.710 s after, including
-source checks and image writing. A single pair does not establish throughput;
-GPU trace time itself rose from about 28 to 57 ms. The established reduction
-is the unnecessary ray input, not a universal GPU speedup.
-
-The local render shelf keeps these under 2026-11-09-sourced-island-topology-320,
-2026-11-09-sourced-island-topology-720 and 2026-11-09-sourced-island-pinhole-720,
-with settings, source provenance and producer identities. The hero-stills page
-links the studies. Focused Game builds passed; no Slayer unit tests were run
-for this slice while other work was under way.
-
-The full task still needs richer regional ecosystem appearance, validated
-moving detail transitions, spherical sky/atmosphere, wave filtering and water
-lighting, accepted source/datum joins, GPU residency and the CORONA/Keyhole
-lookdown. The first source-grounded site and ascent are shared groundwork for
-that complete shot.

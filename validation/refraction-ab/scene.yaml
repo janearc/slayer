@@ -1,0 +1,107 @@
+# Synthetic refraction control: a clear finite slab with an opaque colored
+# sphere crossing it, in front of a high-contrast stripe chart. This is not a
+# liquid volume, has no absorption or scattering, and uses no site measurements.
+scene:
+  name: synthetic-flat-clear-interface-refraction-control
+  film:
+    wide: 38
+    exposure: 2
+    print: {knee: 0.7, top: 8, source: eye}
+  cameras:
+    front:
+      location:
+        at: [0, -7, 2.8]
+      orientation:
+        look_at: [0, 0.2, 0.15]
+  world:
+    sky:
+      horizon: {srgb_linear: [0.18, 0.22, 0.27]}
+      zenith: {srgb_linear: [0.045, 0.06, 0.09]}
+      ground: {srgb_linear: [0.06, 0.06, 0.065]}
+      source: eye
+    materials:
+      chart-black:
+        colour: {srgb_linear: [0.002, 0.003, 0.004]}
+        source: "synthetic contrast chart"
+      chart-white:
+        colour: {srgb_linear: [1, 1, 1]}
+        source: "synthetic contrast chart"
+      chart-red:
+        colour: {srgb_linear: [1, 0.025, 0.008]}
+        source: "synthetic contrast chart"
+      chart-cyan:
+        colour: {srgb_linear: [0.008, 0.7, 1]}
+        source: "synthetic contrast chart"
+      synthetic-clear-interface:
+        clear: {through: 1, index: 1.0, gloss: 1, rank: 0}
+        source: "synthetic interface control; not a measured water index"
+      opaque-blue-sphere:
+        colour: {srgb_linear: [0.025, 0.18, 0.95]}
+        source: "synthetic contrast sphere"
+    boxes:
+      chart-back:
+        material: chart-black
+        middle: [0, 2.2, 0.45]
+        size: [4.2, 0.08, 2.5]
+        source: "synthetic high-contrast target"
+      stripe-1:
+        material: chart-white
+        middle: [-1.55, 2.14, 0.45]
+        size: [0.16, 0.025, 2.1]
+        source: "synthetic high-contrast target"
+      stripe-2:
+        material: chart-white
+        middle: [-1.08, 2.14, 0.45]
+        size: [0.16, 0.025, 2.1]
+        source: "synthetic high-contrast target"
+      stripe-3:
+        material: chart-white
+        middle: [-0.61, 2.14, 0.45]
+        size: [0.16, 0.025, 2.1]
+        source: "synthetic high-contrast target"
+      stripe-4:
+        material: chart-white
+        middle: [-0.14, 2.14, 0.45]
+        size: [0.16, 0.025, 2.1]
+        source: "synthetic high-contrast target"
+      stripe-5:
+        material: chart-white
+        middle: [0.33, 2.14, 0.45]
+        size: [0.16, 0.025, 2.1]
+        source: "synthetic high-contrast target"
+      stripe-6:
+        material: chart-white
+        middle: [0.80, 2.14, 0.45]
+        size: [0.16, 0.025, 2.1]
+        source: "synthetic high-contrast target"
+      stripe-7:
+        material: chart-white
+        middle: [1.27, 2.14, 0.45]
+        size: [0.16, 0.025, 2.1]
+        source: "synthetic high-contrast target"
+      crossbar-red:
+        material: chart-red
+        middle: [0, 2.12, -0.12]
+        size: [3.8, 0.03, 0.11]
+        source: "synthetic high-contrast target"
+      crossbar-cyan:
+        material: chart-cyan
+        middle: [0, 2.12, 1.02]
+        size: [3.8, 0.03, 0.11]
+        source: "synthetic high-contrast target"
+      flat-clear-plate:
+        material: synthetic-clear-interface
+        middle: [0, 0, 0]
+        size: [3.8, 2.55, 0.18]
+        source: "synthetic geometry; finite-thickness clear slab, not a water surface"
+    spheres:
+      partly-crossing-sphere:
+        material: opaque-blue-sphere
+        middle: [0, -0.05, 0.48]
+        radius: 0.78
+        source: "synthetic opaque sphere crossing the slab plane"
+    floods:
+      broad-test-light:
+        colour: {srgb_linear: [2, 2, 2]}
+        strength: 1
+        source: "synthetic even illumination"

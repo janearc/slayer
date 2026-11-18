@@ -1,0 +1,107 @@
+/*
+ * twilight-deep -- twilight's ground taken darker: ink #38241e on ground
+ * #808a63, 4.0:1, chosen in paratune, with claude code's own colours tuned
+ * to match. the palette is darker so the accents still read on the deeper
+ * ground, and the statusline's bar is twilight's ramp moved by the same
+ * shift.
+ */
+:root {
+  --ground: #808a63; /* oklch(61% 0.057 119.8) */
+  --ink: #38241e; /* oklch(28% 0.033 37.4) */
+  --cursor: #38241e; /* oklch(28% 0.033 37.4) */
+  --cursor-ink: #808a63; /* oklch(61% 0.057 119.8) */
+  --surface-1: #7f794b; /* oklch(57% 0.065 101.8) */
+  --selection-ink: #38241e; /* oklch(28% 0.033 37.4) */
+  --black: #57696a; /* oklch(51% 0.022 200.7) */
+  --red: #4a1810; /* oklch(29% 0.078 31.4) */
+  --green: #1c2810; /* oklch(26% 0.045 130.8) */
+  --yellow: #3a2c08; /* oklch(30% 0.054 86.7) */
+  --blue: #141c3a; /* oklch(24% 0.059 270.2) */
+  --magenta: #3a1830; /* oklch(27% 0.064 339.7) */
+  --cyan: #10302e; /* oklch(28% 0.038 189.7) */
+  --white: #7f794b; /* oklch(57% 0.065 101.8) */
+  --bright-black: #2e2a1c; /* oklch(28% 0.025 94.1) */
+  --bright-red: #5a2015; /* oklch(33% 0.088 32.7) */
+  --bright-green: #263214; /* oklch(30% 0.052 127.3) */
+  --bright-yellow: #4a3a0c; /* oklch(36% 0.065 88.7) */
+  --bright-blue: #1c2850; /* oklch(29% 0.075 268.8) */
+  --bright-magenta: #4a2040; /* oklch(32% 0.078 337.2) */
+  --bright-cyan: #163c3a; /* oklch(33% 0.043 190.6) */
+  --bright-white: #a9a269; /* oklch(70% 0.077 102.1) */
+  --palette-17: #908a56; /* oklch(63% 0.072 102.6) */
+  --palette-18: #8d8654; /* oklch(61% 0.069 101.3) */
+  --palette-24: #898457; /* oklch(61% 0.063 102.7) */
+  --palette-31: #85815b; /* oklch(60% 0.054 102.8) */
+  --palette-38: #81805e; /* oklch(59% 0.049 106.4) */
+  --palette-67: #7d7c5e; /* oklch(58% 0.044 106.1) */
+  --palette-77: #263214; /* oklch(30% 0.052 127.3) */
+  --palette-81: #10302e; /* oklch(28% 0.038 189.7) */
+  --palette-103: #7a765c; /* oklch(56% 0.038 100.3) */
+  --palette-114: #1c2810; /* oklch(26% 0.045 130.8) */
+  --palette-139: #767158; /* oklch(55% 0.037 98.1) */
+  --palette-141: #3a1830; /* oklch(27% 0.064 339.7) */
+  --palette-148: #263214; /* oklch(30% 0.052 127.3) */
+  --palette-167: #4a1810; /* oklch(29% 0.078 31.4) */
+  --palette-169: #6f6750; /* oklch(51% 0.036 91.2) */
+  --palette-186: #4a3a0c; /* oklch(36% 0.065 88.7) */
+  --palette-197: #5a2015; /* oklch(33% 0.088 32.7) */
+  --palette-198: #685d48; /* oklch(48% 0.035 83.5) */
+  --palette-205: #6c624d; /* oklch(50% 0.034 85.5) */
+  --palette-208: #5a2a08; /* oklch(34% 0.083 50.6) */
+  --palette-211: #655944; /* oklch(47% 0.036 81.5) */
+  --palette-214: #4e4a23; /* oklch(40% 0.058 103.4) */
+  --palette-215: #514d27; /* oklch(41% 0.056 103.2) */
+  --palette-218: #62583f; /* oklch(46% 0.040 88.7) */
+  --palette-222: #544f2a; /* oklch(42% 0.055 101.7) */
+  --palette-223: #57512f; /* oklch(43% 0.051 99.5) */
+  --palette-224: #5a5332; /* oklch(44% 0.050 97.7) */
+  --palette-225: #5f563c; /* oklch(45% 0.041 91.2) */
+  --palette-239: #2e2a1c; /* oklch(28% 0.025 94.1) */
+  --palette-242: #3a3424; /* oklch(33% 0.028 89.9) */
+  --palette-251: #182040; /* oklch(25% 0.061 270.9) */
+  --palette-254: #5c5437; /* oklch(45% 0.045 94.5) */
+  --claude-text: #c5e699; /* oklch(88% 0.106 127.3) */
+  --claude-words: #20e1e7; /* oklch(83% 0.137 198.4) */
+  --claude-mode: #3e3e26; /* oklch(36% 0.038 108.2) */
+  --claude-rules: #ce773f; /* oklch(65% 0.130 51.3) */
+  --claude-spinner: #ffaa37; /* oklch(80% 0.157 69.3) */
+  --claude-added: #c19a43; /* oklch(71% 0.114 84.7) */
+  --claude-removed: #8c6b4e; /* oklch(55% 0.059 62.4) */
+  --claude-diff-code: #313b53; /* oklch(35% 0.044 266.7) */
+  --dim: #2e2a1c; /* oklch(28% 0.025 94.1) */
+  --heading: #3a1830; /* oklch(27% 0.064 339.7) */
+  --link: #141c3a; /* oklch(24% 0.059 270.2) */
+  --code: #1c2810; /* oklch(26% 0.045 130.8) */
+  --string: #3a2c08; /* oklch(30% 0.054 86.7) */
+  --gutter: #6e683e; /* oklch(51% 0.061 101.2) */
+  --cursor-line: #8c8553; /* oklch(61% 0.070 101.3) */
+  --panel: #8f8856; /* oklch(62% 0.069 101.3) */
+  --border: #6e683e; /* oklch(51% 0.061 101.2) */
+  --err: #4a1810; /* oklch(29% 0.078 31.4) */
+  --warn: #3a2c08; /* oklch(30% 0.054 86.7) */
+  --info: #141c3a; /* oklch(24% 0.059 270.2) */
+  --hint: #1c2810; /* oklch(26% 0.045 130.8) */
+  --nvim-black: #1c1a10; /* oklch(22% 0.019 none) */
+  --md-body: #38241e; /* oklch(28% 0.033 37.4) */
+  --md-heading: #3a1830; /* oklch(27% 0.064 339.7) */
+  --md-small-heading: #1c2850; /* oklch(29% 0.075 268.8) */
+  --md-link: #141c3a; /* oklch(24% 0.059 270.2) */
+  --md-link-text: #10302e; /* oklch(28% 0.038 189.7) */
+  --md-image-text: #3a3424; /* oklch(33% 0.028 89.9) */
+  --md-rule: #5a5f45; /* oklch(47% 0.040 116.8) */
+  --md-quote: #3a1830; /* oklch(27% 0.064 339.7) */
+  --md-code: #313b53; /* oklch(35% 0.044 266.7) */
+  --md-block-text: #2a2418; /* oklch(26% 0.023 84.3) */
+  --md-code-ground: #8f9970; /* oklch(66% 0.059 119.2) */
+  --md-block-ground: #767f5a; /* oklch(58% 0.055 119.3) */
+  --md-keyword: #4a1810; /* oklch(29% 0.078 31.4) */
+  --md-type: #263214; /* oklch(30% 0.052 127.3) */
+  --md-function: #10302e; /* oklch(28% 0.038 189.7) */
+  --md-string: #3a2c08; /* oklch(30% 0.054 86.7) */
+  --md-number: #3a1830; /* oklch(27% 0.064 339.7) */
+  --md-comment: #3a3424; /* oklch(33% 0.028 89.9) */
+  --md-operator: #38241e; /* oklch(28% 0.033 37.4) */
+  --md-name: #2a2418; /* oklch(26% 0.023 84.3) */
+  --md-error: #4a1810; /* oklch(29% 0.078 31.4) */
+  --md-subheading: #1c2850; /* oklch(29% 0.075 268.8) */
+}

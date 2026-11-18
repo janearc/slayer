@@ -27,15 +27,24 @@ func TestPlacesResumeWorkingFramesOfAnEarlierDay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	cache := t.TempDir()
 	at := func(by time.Duration) Env {
 		return envAt(t, Given{Context: context.Background(),
 			Directory: directory, Now: func() time.Time {
 				return noon().Add(by)
-			}}, rendersVariable, home, teamVariable, "team")
+			}}, rendersVariable, home, teamVariable, "team",
+			"SLAYER_CACHE", cache)
+	}
+	placed := func(by time.Duration, key string) places {
+		made, err := placesOf(placing{wanted: wanted, given: path,
+			env: at(by), key: key})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return made
 	}
 	const key = "the frames' key"
-	begun := placesOf(placing{wanted: wanted, given: path,
-		env: at(lateBy), key: key})
+	begun := placed(lateBy, key)
 	book, _, err := openLedger(begun.frames, key)
 	if err != nil {
 		t.Fatal(err)
@@ -46,15 +55,13 @@ func TestPlacesResumeWorkingFramesOfAnEarlierDay(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(begun.movie), folderMode); err != nil {
 		t.Fatal(err)
 	}
-	after := placesOf(placing{wanted: wanted, given: path,
-		env: at(earlyBy), key: key})
+	after := placed(earlyBy, key)
 	if after.movie != begun.movie || after.frames != begun.frames ||
 		after.resumed == "" {
 		t.Errorf("after midnight the film is placed %+v", after)
 	}
 	// anti-test of TestPlacesResumeWorkingFramesOfAnEarlierDay
-	other := placesOf(placing{wanted: wanted, given: path,
-		env: at(earlyBy), key: "another key"})
+	other := placed(earlyBy, "another key")
 	if other.movie == begun.movie || other.resumed != "" {
 		t.Errorf("another key resumed the earlier day: %+v", other)
 	}

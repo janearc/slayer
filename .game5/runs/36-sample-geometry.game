@@ -1,0 +1,1 @@
+sample-geometry . :: go run ./manufacture/testdata/geometry_sample.go

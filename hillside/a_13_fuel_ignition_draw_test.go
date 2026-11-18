@@ -11,7 +11,7 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
-// Decimal reference values come from the separate BigDecimal producer,
+// Decimal reference values come from the separate math/big producer,
 // using exact radius ratios from this authored 16-by-8 half-metre fixture.
 // This holds initial conditions; it makes no experimental calibration claim.
 func TestFuelBedIgnitionUsesCentredIsotropicDistancesAndKelvinExcess(t *testing.T) {

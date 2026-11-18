@@ -1,0 +1,1 @@
+check-tiers . :: go run ./tools/tiers check

@@ -1,0 +1,43 @@
+# Authored display mannequin; all coordinates and sizes are metres.
+# The head's base at 1.74 plus height 0.26 fixes the requested 2 m stature.
+# Shape proportions are picked, not anthropometric measurements.
+# Aluminium optics represent a manufactured scale figure, not human skin.
+material: aluminium
+finish: brushed
+ovals:
+  - at: {x: 0, y: 1.61, z: 0}
+    size: {x: 0.12, y: 0.19, z: 0.12}
+  - at: {x: 0, y: 1.74, z: 0}
+    size: {x: 0.19, y: 0.26, z: 0.22}
+  - at: {x: 0, y: 1.08, z: 0}
+    size: {x: 0.46, y: 0.60, z: 0.26}
+  - at: {x: 0, y: 0.94, z: 0}
+    size: {x: 0.32, y: 0.25, z: 0.23}
+  - at: {x: 0.12, y: 0, z: -0.07}
+    size: {x: 0.15, y: 0.13, z: 0.30}
+    paired: true
+  - at: {x: 0.14, y: 0.50, z: 0}
+    size: {x: 0.15, y: 0.15, z: 0.15}
+    paired: true
+  - at: {x: 0.23, y: 1.53, z: 0}
+    size: {x: 0.16, y: 0.17, z: 0.16}
+    paired: true
+  - at: {x: 0.31, y: 1.235, z: 0}
+    size: {x: 0.11, y: 0.11, z: 0.11}
+    paired: true
+  - at: {x: 0.36, y: 0.90, z: 0}
+    size: {x: 0.10, y: 0.18, z: 0.06}
+    paired: true
+limbs:
+  - from: {x: 0.12, y: 1.03, z: 0}
+    to: {x: 0.14, y: 0.57, z: 0}
+    radius: 0.075
+  - from: {x: 0.14, y: 0.57, z: 0}
+    to: {x: 0.12, y: 0.10, z: 0}
+    radius: 0.055
+  - from: {x: 0.23, y: 1.61, z: 0}
+    to: {x: 0.31, y: 1.29, z: 0}
+    radius: 0.055
+  - from: {x: 0.31, y: 1.29, z: 0}
+    to: {x: 0.36, y: 1.04, z: 0}
+    radius: 0.044

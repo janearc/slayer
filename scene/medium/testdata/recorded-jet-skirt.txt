@@ -1,0 +1,18 @@
+# Jet record after 5df4eb66 widened bounds to include the Gaussian skirt.
+# Sample positions and rays depend on bounds; density code is unchanged.
+jet	bounds	b4551868eea97ebfe4fa6439
+jet	density	3bccbc750a7cdae74c631278
+jet	span	554eac9d8768e825a21e9d73
+jet	ticked	7c199abf77d9a6afe368772f
+jet, flowing	bounds	0034a96fe30b36c87ea79ddc
+jet, flowing	density	b43be359c860d8b4662a4132
+jet, flowing	span	445d4677fb7a65cb4185af1d
+jet, flowing	ticked	6b3d04f237d18da86bf95680
+jet, knotted	bounds	d21e9bcb3c612b513a96f33f
+jet, knotted	density	faeba6287e2285a6b2936adc
+jet, knotted	span	e274ad6c994acc7944d613a6
+jet, knotted	ticked	0df2c8b55b6c3dd9c308676a
+jet, wide open	bounds	0886c495bfcfac5ea04b5177
+jet, wide open	density	2a72b1ad86dd3174ba7f2ed4
+jet, wide open	span	efecee117672725fb760764e
+jet, wide open	ticked	604a8eaaf6ad43329fead111

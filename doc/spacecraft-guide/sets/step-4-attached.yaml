@@ -1,0 +1,26 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: step 4, Cassini with Huygens attached
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      orbiter:
+        kind: cassini-huygens
+        seed: 17
+        complexity: demo
+        east: 0
+        north: 0
+  film: {width: 2048, height: 1152, rays: 2, exposure: 0.003, wide: 40}
+  cameras:
+    cruise:
+      title: Cassini with Huygens in its cruise position
+      location: {at: [-16, -14, 9]}
+      orientation: {look_at: [0, 1, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

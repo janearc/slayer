@@ -1,0 +1,3 @@
+visualguide-pdf . :: mkdir -p out
+visualguide-pdf . :: pandoc doc/visualguide/README.md --from gfm --to html5 --standalone --embed-resources --resource-path doc/visualguide --css doc/visualguide/print.css --syntax-highlighting none --toc --toc-depth 2 --metadata-file doc/visualguide/print.yaml --output out/visualguide.html
+visualguide-pdf . :: prince --style doc/visualguide/print-fonts.css out/visualguide.html --output out/visualguide.pdf

@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/janearc/slayer/diskcache"
 	"github.com/janearc/slayer/job"
 )
 
@@ -47,31 +48,41 @@ type placing struct {
 // out/ where it says none, and under the renders home where one is named
 // and an output is said with no directory or not said at all. A file
 // given from inside the renders home is in its folder already: its
-// outputs stay where it says them.
-func placesOf(from placing) places {
-	var made places
+// outputs stay where it says them. A film that keeps working frames
+// is refused where the cache home is not named.
+func placesOf(from placing) (places, error) {
 	home, hasHome := from.env.lookup(rendersVariable)
 	_, inside := relativeTo(home, filepath.Dir(from.given))
 	moves := hasHome && !inside
-	folder := from.datedFolder(home)
-	earlier := ""
-	if moves && !from.wanted.Clock().Still() {
-		earlier = from.earlierFolder(home)
-	}
-	if earlier != "" {
-		folder = earlier
-	}
-	if from.wanted.Clock().Still() {
-		made = from.still(folder, moves)
-	} else {
-		made = from.film(folder, moves)
-		made.resumed = earlier
+	made, err := from.laid(home, moves)
+	if err != nil {
+		return places{}, err
 	}
 	if moves && made.folder != "" {
 		made.copied = filepath.Join(home, made.folder,
 			from.name()+jobExtension)
 	}
-	return from.noted(made, home, hasHome)
+	return from.noted(made, home, hasHome), nil
+}
+
+// laid is the places of the picture or the film, before its copy and its
+// note: a film that moves resumes the folder of an earlier day where its
+// ledger is there.
+func (from placing) laid(home string, moves bool) (places, error) {
+	folder := from.datedFolder(home)
+	if from.wanted.Clock().Still() {
+		return from.still(folder, moves), nil
+	}
+	earlier := ""
+	if moves {
+		earlier = from.earlierFolder(home)
+	}
+	if earlier != "" {
+		folder = earlier
+	}
+	made, err := from.film(folder, moves)
+	made.resumed = earlier
+	return made, err
 }
 
 // name is the base name of the file given, without its extension.
@@ -106,7 +117,7 @@ func (from placing) earlierFolder(home string) string {
 	found, _ := filepath.Glob(pattern)
 	slices.Sort(found)
 	slices.Reverse(found)
-	planned := plannedFolder(from.workFolder(), from.key)
+	planned := from.plannedWork()
 	for _, folder := range found {
 		relative, _ := filepath.Rel(home, folder)
 		if relative == today {
@@ -117,6 +128,16 @@ func (from placing) earlierFolder(home string) string {
 		}
 	}
 	return ""
+}
+
+// plannedWork is the folder of the movie this film's working frames are
+// for; or nothing where there is no working folder to look in.
+func (from placing) plannedWork() string {
+	work, err := from.workFolder()
+	if err != nil {
+		return ""
+	}
+	return plannedFolder(work, from.key)
 }
 
 // plannedFolder is the folder of the movie a working folder's frames are
@@ -174,16 +195,17 @@ func (from placing) still(folder string, hasHome bool) places {
 	home, _ := from.env.lookup(rendersVariable)
 	picture, said := from.wanted.Outputs().Picture()
 	raw, hasRaw := from.wanted.Outputs().Raw()
+	forms := from.wanted.Outputs()
 	if !said {
 		picture = from.out(from.name() + pictureExtension)
 	}
-	if !hasHome || (said && !from.bare(picture)) {
+	if !hasHome || (said && (!forms.PictureBare() || !from.bare(picture))) {
 		return places{picture: picture, raw: raw}
 	}
 	inside := filepath.Join(home, folder)
 	made := places{folder: folder,
 		picture: filepath.Join(inside, filepath.Base(picture)), raw: raw}
-	if hasRaw && from.bare(raw) {
+	if hasRaw && forms.RawBare() && from.bare(raw) {
 		made.raw = filepath.Join(inside, filepath.Base(raw))
 	}
 	return made
@@ -191,12 +213,14 @@ func (from placing) still(folder string, hasHome bool) places {
 
 // film is a film's places: its frames and its movie, both under out/
 // where the job says neither.
-func (from placing) film(folder string, hasHome bool) places {
+func (from placing) film(folder string, hasHome bool) (places, error) {
 	made := from.saidFilm(folder, hasHome)
-	if made.frames == "" && made.movie != "" {
-		made.frames, made.work = from.workFolder(), true
+	if made.frames != "" || made.movie == "" {
+		return made, nil
 	}
-	return made
+	work, err := from.workFolder()
+	made.frames, made.work = work, true
+	return made, err
 }
 
 // saidFilm is a film's frames and movie as the job says them: under the
@@ -206,6 +230,7 @@ func (from placing) saidFilm(folder string, hasHome bool) places {
 	home, _ := from.env.lookup(rendersVariable)
 	frames, hasFrames := from.wanted.Outputs().Frames()
 	movie, hasMovie := from.wanted.Outputs().Movie()
+	forms := from.wanted.Outputs()
 	inside := filepath.Join(home, folder)
 	if !hasFrames && !hasMovie && hasHome {
 		return places{folder: folder,
@@ -218,10 +243,10 @@ func (from placing) saidFilm(folder string, hasHome bool) places {
 	if !hasHome {
 		return made
 	}
-	if hasFrames && from.bare(frames) {
+	if hasFrames && forms.FramesBare() && from.bare(frames) {
 		made.frames, made.folder = inside, folder
 	}
-	if hasMovie && from.bare(movie) {
+	if hasMovie && forms.MovieBare() && from.bare(movie) {
 		made.movie = filepath.Join(inside, filepath.Base(movie))
 		made.folder = folder
 	}
@@ -229,24 +254,22 @@ func (from placing) saidFilm(folder string, hasHome bool) places {
 }
 
 // workFolder is where a film that writes a movie and no frames keeps
-// its frames while it draws: under the renders home's cache, by team,
-// where the renders page makes no card of them, or under the system's
-// temporary folder where there is no renders home or no team. Its name
-// is the job's and a digest of the job file's path, so it is the same
-// folder on every day and for every version of the job.
-func (from placing) workFolder() string {
+// its frames while it draws: the frames folder of the cache home, by
+// team where SLAYER_TEAM is set and with no team folder where it is not,
+// since a person outside this machine has no team.
+//
+// It refuses by name where SLAYER_CACHE is not set; there is no other
+// place. Its name is the job's and a digest of the job file's path, so it
+// is the same folder on every day and for every version of the job.
+func (from placing) workFolder() (string, error) {
 	sum := sha256.Sum256([]byte(from.given))
 	name := from.name() + "-" + hex.EncodeToString(sum[:])[:workDigits]
-	home, hasHome := from.env.lookup(rendersVariable)
-	team, hasTeam := from.env.lookup(teamVariable)
-	if hasHome && hasTeam {
-		return filepath.Join(home, cacheFolder, team, name)
+	home, err := diskcache.Home(from.env.lookup)
+	if err != nil {
+		return "", err
 	}
-	temporary, said := from.env.lookup(tempVariable)
-	if !said {
-		temporary = os.TempDir()
-	}
-	return filepath.Join(temporary, workFolder, name)
+	team, _ := from.env.lookup(teamVariable)
+	return filepath.Join(home, workFolder, team, name), nil
 }
 
 // noted is the places with the note the job asks for, where it can be

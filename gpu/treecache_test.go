@@ -302,8 +302,11 @@ func TestCacheTreesTurnsTheCacheOnAndOff(t *testing.T) {
 	if tally := TreesCached(); tally.grown != 1 || tally.kept != 1 {
 		t.Fatalf("grown once and kept once, the small mesh not at all: %+v", tally)
 	}
+	if !TreesCached().Used() {
+		t.Error("a tally of trees kept and grown is not used")
+	}
 	stopCaching()
-	if tally := TreesCached(); tally != (TreeTally{}) {
+	if tally := TreesCached(); tally != (TreeTally{}) || tally.Used() {
 		t.Fatalf("off, yet it says %+v", tally)
 	}
 }

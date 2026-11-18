@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/step-6-saturn.yaml}
+renderer: gpu-native
+film: {preset: 2k, rays: 2}
+camera: {name: toward-saturn}
+outputs:
+  picture: ../images/step-6-saturn.png

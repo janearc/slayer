@@ -98,6 +98,8 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   the seed chooses reproducible values. Kinds include conifers, ferns,
   stones, logs, cans, fires, lamps, and a cliff house. Their dimensions and
   colours are fictional design choices unless explicitly identified otherwise.
+  `MaturityReport` counts what each kind is made of and which of its numbers
+  are measured or picked; `tools/maturity` prints it (`game run maturity`).
 - **forest:** ground geometry and seeded placements.
 - **mesh:** validated triangle surfaces, bounding hierarchies, and
   intersection designed to avoid cracks at shared edges.
@@ -111,6 +113,9 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   Tile-based reading avoids loading an entire multi-gigabyte raster.
 - **typography:** font outlines triangulated and extruded with bevels.
   Repeated letters share mesh geometry.
+- **materials/specimen:** current solid phases and pore water, with SI mass,
+  volume and density accounting. It supplies no hydration or optical model;
+  see [Porous material specimens](doc/specimens.md).
 - **materials:** elements, formulas, bulk materials, mixtures, and particles,
   with constructor validation. A material may carry optical constants per
   band and x-ray mass attenuation per energy, each reading with the row it
@@ -187,6 +192,10 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   bands of finished rows, and a meter that gives the share done and an
   honest time remaining as a plain line or a human one. It has no terminal
   code and does not import a tracer.
+- **render/workload:** bbolt observations of scene costs, keyed by complete
+  source/build/device/render/probe identity. Preserves independent memory
+  peaks and attempt/sample retry integrity; starts no work and grants no
+  admission. Runtime measurement and pressure decisions belong to callers.
 - **raw:** linear RGB stored in PFM files, for later development or summing
   into a long exposure. Coverage and depth are not stored.
 - **fermat:** deterministic replay of 64 pixels selected by a raw-image hash.
@@ -211,6 +220,9 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   [door/README.md](door/README.md).
 - **diskcache:** the one place exact results are kept between runs, a
   file an entry, with a cap a kind. See [doc/caches.md](doc/caches.md).
+- **treebolt:** the GPU's tree file, `trees.bolt`: its last-use record,
+  its listing, its cap and the rewrite that gives the disc back. See
+  [doc/caches.md](doc/caches.md).
 - **contrib/nvim:** `slayer.lua`, the job editing setup `slayer edit`
   loads.
 - **job:** reads and checks a job, the document that says how to render a
@@ -239,6 +251,9 @@ Each `improv/moonlake` program is its own command, written for one film;
   or a scene: a picture, labels at real places, scale bars and a panel
   with numbers and a sentence. Any set can use it.
 - **improv/host:** a host laid over any film, in time with its music.
+- **improv/visualizer:** a tune's instruments, a lane each, scrolling
+  past a playhead, with the place written large as bar.beat.sixteenth;
+  rgb24 frames for ffmpeg, like the metronome.
 - **improv/searching:** the heard. shoot: a checked song edit,
   retained observatory and radio sets, and authored blazar views. Its
   [README](improv/searching/README.md) covers the small native preview.
@@ -282,9 +297,10 @@ Each `improv/moonlake` program is its own command, written for one film;
 
 ## Azazel and internal packages
 
-- **azazel:** a planned queue for frames, films and checks; no runnable queue
-  exists yet. `azazel/internal` holds `budget`, `locking`, `processinfo` and
-  `publication`, private pieces for host capacity, locks, process
+- **azazel:** a foreground command queue under validation, with agent submission,
+  ordered dispatch and durable results. `azazel/internal` holds `queue`,
+  `budget`, `locking`, `processinfo` and `publication`, for host capacity,
+  locks, process
   observation and file publication. See [azazel/README.md](azazel/README.md).
 - **internal/appicon:** the artwork Slayer's viewers use.
 - **internal/commandtest:** builds real commands for their integration tests.

@@ -154,6 +154,9 @@ func instants(given asked, eye maths.Subspace) ([]time.Duration, error) {
 // the cpu it is empty.
 func exposed(world *thing.World, given asked, eye maths.Subspace) (
 	*frame.Frame, gpu.Profile, error) {
+	if err := refuseGPUInitialMediaAperture(given); err != nil {
+		return nil, gpu.Profile{}, err
+	}
 	moments, err := instants(given, eye)
 	if err != nil {
 		return nil, gpu.Profile{}, err
@@ -175,13 +178,19 @@ func exposed(world *thing.World, given asked, eye maths.Subspace) (
 // the renderer asked for, and what the device did.
 func glimpsed(world *thing.World, given asked, eye maths.Subspace,
 	moment time.Duration) (*frame.Frame, gpu.Profile, error) {
+	if err := refuseGPUInitialMediaAperture(given); err != nil {
+		return nil, gpu.Profile{}, err
+	}
 	glass, width, height, side := *given.glass, given.width, given.height,
 		given.samples
 	switch {
 	case !given.onGPU:
-		drawn, err := trace.Sampled(world, eye, glass, moment, width, height,
+		drawn, err := sampled(world, given, eye, glass, moment, width, height,
 			side)
 		return drawn, gpu.Profile{}, err
+	case len(given.initialMedia) > 0:
+		return gpu.SampledWithInitialMedia(framesMode(given), world, eye,
+			glass, moment, width, height, side, given.initialMedia)
 	case given.nativeMeshes:
 		return gpu.SampledAccelerated(world, eye, glass, moment, width,
 			height, side)

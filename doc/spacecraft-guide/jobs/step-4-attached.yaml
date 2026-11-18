@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/step-4-attached.yaml}
+renderer: gpu-native
+film: {preset: 2k, rays: 2}
+camera: {name: cruise}
+outputs:
+  picture: ../images/step-4-attached.png

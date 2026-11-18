@@ -11,6 +11,7 @@ import (
 
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/moonlight"
 	"github.com/janearc/slayer/scene/sky"
 )
 
@@ -90,6 +91,24 @@ func TestASetAfloatStandsItsCraft(t *testing.T) {
 	}
 	if !nearPoint(given.eye.Origin, maths.V(-10, 0, 0)) {
 		t.Errorf("the eye is at %v", given.eye.Origin)
+	}
+}
+
+func TestASetAfloatCanUseModeledMoonlight(t *testing.T) {
+	given := mustParse(t)
+	given.set = afloatSet(t, "light: sun", "light: moon\n  moon: {azimuth: 180, altitude: 45, disc: false}")
+	world, made, _, err := staged(given)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if made.lamps != 1 || len(world.Lamps) != 1 {
+		t.Fatalf("moonlight lamps=%d/%d, want one physically sourced distant moon", made.lamps, len(world.Lamps))
+	}
+	if _, ok := world.Lamps[0].(emit.Distant); !ok {
+		t.Fatalf("moonlight source is %T, want emit.Distant", world.Lamps[0])
+	}
+	if _, ok := world.Sky.(moonlight.Skies); !ok {
+		t.Fatalf("moonlit sky is %T, want computed moonlight skies", world.Sky)
 	}
 }
 
@@ -205,7 +224,7 @@ func TestASetAfloatHangsItsWorldsSky(t *testing.T) {
 }
 
 // A set in space refuses, by name, what it says that the stage does not
-// draw: a light that is not the sun or none, a sun not said, what stands
+// draw: a light that is not the sun, moon or none, a sun or moon not said, what stands
 // on ground, a planet, a burning craft, and the lake.
 func TestASetAfloatRefusesWhatItDoesNotDraw(t *testing.T) {
 	stand := "  set:\n    stands:\n      trees: {kind: spruce, count: 1, " +
@@ -215,7 +234,7 @@ func TestASetAfloatRefusesWhatItDoesNotDraw(t *testing.T) {
 		"        - {top: 0, bottom: 1, gases: {neon: 1}}\n    zones:\n" +
 		"      - {south: -90, north: 90, column: a}\n  film:"
 	for _, row := range []struct{ was, now, says string }{
-		{"light: sun", "light: moon", `not "moon"`},
+		{"light: sun", "light: moon", "says no moon"},
 		{"light: sun", "light: ambient", `not "ambient"`},
 		{"  sun: {azimuth: 180, altitude: -45}\n", "", "says no sun"},
 		{"  set:\n    things:\n", stand, "says stands"},

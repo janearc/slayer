@@ -2,20 +2,19 @@ package diskcache
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func TestHomeTakesTheCacheVariableFirst(t *testing.T) {
+func TestHomeIsTheCacheVariable(t *testing.T) {
 	home, err := Home(lookupOf(map[string]string{
-		homeVariable: "/fast/cache", rendersVariable: "/renders"}))
+		homeVariable: "/fast/cache", "SLAYER_RENDERS": "/renders"}))
 	if err != nil || home != "/fast/cache" {
 		t.Fatalf("home %q, %v; want /fast/cache", home, err)
 	}
 }
 
-// anti-test of TestHomeTakesTheCacheVariableFirst
+// anti-test of TestHomeIsTheCacheVariable
 func TestHomeRefusesARelativeCacheVariable(t *testing.T) {
 	_, err := Home(lookupOf(map[string]string{homeVariable: "cache"}))
 	if err == nil || !strings.Contains(err.Error(), homeVariable) {
@@ -23,39 +22,28 @@ func TestHomeRefusesARelativeCacheVariable(t *testing.T) {
 	}
 }
 
-func TestHomeIsTheRendersHomesCache(t *testing.T) {
-	home, err := Home(lookupOf(map[string]string{
-		rendersVariable: "/renders"}))
-	if err != nil || home != "/renders/cache" {
-		t.Fatalf("home %q, %v; want /renders/cache", home, err)
+// anti-test: with SLAYER_CACHE unset or empty, Home refuses by name,
+// whatever the renders home, the user's cache folder and the temporary
+// folder say, and nothing appears in any of them.
+func TestHomeUnsetRefusesAndWritesNothing(t *testing.T) {
+	folders := map[string]string{}
+	for _, name := range []string{"SLAYER_RENDERS", "HOME",
+		"XDG_CACHE_HOME", "TMPDIR"} {
+		folders[name] = t.TempDir()
 	}
-}
-
-// anti-test of TestHomeIsTheRendersHomesCache
-func TestHomeRefusesARelativeRendersHome(t *testing.T) {
-	_, err := Home(lookupOf(map[string]string{rendersVariable: "r"}))
-	if err == nil || !strings.Contains(err.Error(), rendersVariable) {
-		t.Fatalf("a relative %s was taken: %v", rendersVariable, err)
+	for _, said := range []map[string]string{folders, {homeVariable: ""}} {
+		for name, folder := range folders {
+			said[name] = folder
+		}
+		got, err := Home(lookupOf(said))
+		if err == nil || !strings.Contains(err.Error(), homeVariable) {
+			t.Fatalf("home %q, %v; want a refusal naming %s", got, err,
+				homeVariable)
+		}
 	}
-}
-
-func TestHomeIsTheUsersCacheWithNeither(t *testing.T) {
-	user, err := os.UserCacheDir()
-	if err != nil {
-		t.Fatal(err)
-	}
-	home, err := Home(lookupOf(map[string]string{homeVariable: ""}))
-	if err != nil || home != filepath.Join(user, userFolder) {
-		t.Fatalf("home %q, %v; want under %s", home, err, user)
-	}
-}
-
-// anti-test of TestHomeIsTheUsersCacheWithNeither
-func TestHomeWithNoUserCacheFolderSaysWhatToSet(t *testing.T) {
-	t.Setenv("HOME", "")
-	t.Setenv("XDG_CACHE_HOME", "")
-	_, err := Home(lookupOf(nil))
-	if err == nil || !strings.Contains(err.Error(), homeVariable) {
-		t.Fatalf("no user cache folder was not refused: %v", err)
+	for name, folder := range folders {
+		if found, _ := os.ReadDir(folder); len(found) != nothing {
+			t.Errorf("%s (%s) was written to: %v", name, folder, found)
+		}
 	}
 }

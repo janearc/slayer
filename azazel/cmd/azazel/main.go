@@ -1,17 +1,14 @@
-// Command azazel is the render queue's command. For now it has one verb,
-// and no queue.
-//
-//	azazel render FILE [settings]
-//
-// render draws a set file through the library slayer render uses, and
-// writes the picture where -out says. the queue's admission, locking and
-// publication are not wired to it; see azazel/engine.
+// Command azazel schedules Slayer jobs and retains the direct rendering adapter.
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"slices"
+	"strings"
+	"syscall"
 
 	"github.com/janearc/puzzlemouth/pzm"
 	"github.com/janearc/slayer/azazel/engine"
@@ -24,7 +21,7 @@ var build, built, who, sessions string
 
 // stamped is the tool that answers which build this is.
 func stamped() *pzm.Tool {
-	return pzm.New("azazel", "render a set file through the queue's engine",
+	return pzm.New("azazel", "submit and schedule Slayer jobs across agents",
 		pzm.Build(build), pzm.Built(built), pzm.Who(who), pzm.Sessions(sessions))
 }
 
@@ -39,9 +36,15 @@ const (
 // exitUsage is the number azazel exits with for a call it does not take.
 const exitUsage = 2 // defined: hillside's number for what it could not take
 
-// main runs the one verb, and gives its number. azazel --age and --who say
+// main routes queue and rendering verbs. azazel --age and --who say
 // which build this is.
 func main() {
+	if len(os.Args) > verbAt && queueEntry(os.Args[verbAt]) {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+		os.Exit(runQueue(ctx, os.Args[verbAt:], os.Stdout, os.Stderr))
+	}
+
 	if slices.Contains(os.Args, "--age") || slices.Contains(os.Args, "--who") {
 		os.Exit(stamped().Run(os.Args[verbAt:], os.Stdout, os.Stderr))
 	}
@@ -60,4 +63,13 @@ func main() {
 	stamp := hillside.Stamped(build, built, who, sessions)
 	os.Exit(engine.Render(os.Args[fileAt], os.Args[settingsAt:], os.Stdout,
 		os.Stderr, stamp))
+}
+
+// queueEntry preserves Pzm's verb aliases and flags before the verb.
+func queueEntry(word string) bool {
+	return strings.HasPrefix(word, "--") || slices.Contains([]string{
+		"schema", "init", "submit", "status", "cancel", "pause", "resume", "tune",
+		"work", "work-gpu", "recover", "execute", "execute-owned", "publish", "pages", "help",
+		"agent-help",
+	}, word)
 }

@@ -4,8 +4,10 @@ package gpu
 
 import (
 	_ "embed"
+	"fmt"
 	"math"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -15,6 +17,7 @@ import (
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
+	"github.com/janearc/slayer/trace"
 )
 
 //go:embed trace.metal
@@ -25,6 +28,12 @@ var ringSource string
 
 //go:embed wake.metal
 var wakeSource string
+
+//go:embed propeller.metal
+var propellerSource string
+
+//go:embed fizz.metal
+var fizzSource string
 
 // probeVolumes sizes the kernel's crossing arrays for source(): the
 // probes and the wisp bake read volumes by index and never walk
@@ -38,13 +47,94 @@ func source() string { return sourceWith(0, probeVolumes) }
 // sourceWith builds kernel source sized for the requested number of CPU
 // texture records per sample and the scene's own count of volumes.
 func sourceWith(records, volumes int) string {
-	return metal.GeodesicLibrary + metal.NoiseLibrary + prelude(records, volumes) + ringSource +
-		wakeSource + traceSource
+	return sourceWithState(records, volumes, false)
 }
+
+// sourceWithOpticalState is an opt-in ABI extension for named extinction and
+// explicit initial media. Ordinary source omits these bindings; independent
+// rendering features can still extend its source and their own layouts.
+func sourceWithOpticalState(records, volumes int) string {
+	return sourceWithState(records, volumes, true)
+}
+
+// sourceWithState builds the Metal source for the given record and volume
+// counts. optical selects the optical variant of the source.
+func sourceWithState(records, volumes int, optical bool) string {
+	text := diagnosticDefines() + metal.GeodesicLibrary + metal.NoiseLibrary +
+		prelude(records, volumes)
+	if optical {
+		text += clearMediumStruct.msl() + opticalStateDeclarations +
+			ringSource + wakeSource + propellerSource + fizzSource + traceSource
+		return "#define SLAYER_OPTICAL_MEDIA 1\n" + text
+	}
+	return stripOpticalMedia(text + ringSource + wakeSource + propellerSource + traceSource)
+}
+
+// stripOpticalMedia removes opt-in shader alternatives while preserving the
+// source bytes of each #else branch. This keeps optical-state bindings out
+// of kernels for scenes without optical media.
+func stripOpticalMedia(source string) string {
+	lines := strings.SplitAfter(source, "\n")
+	var output strings.Builder
+	inside, useOptical, nested := false, false, 0
+	for _, line := range lines {
+		marker := strings.TrimSpace(line)
+		switch {
+		case marker == "#ifdef SLAYER_OPTICAL_MEDIA" && !inside:
+			inside, useOptical, nested = true, false, 0
+			continue
+		case inside && (strings.HasPrefix(marker, "#if ") ||
+			strings.HasPrefix(marker, "#ifdef ") ||
+			strings.HasPrefix(marker, "#ifndef ")):
+			nested++
+			if useOptical {
+				output.WriteString(line)
+			}
+			continue
+		case inside && marker == "#else" && nested == 0:
+			useOptical = true
+			continue
+		case inside && marker == "#endif" && nested > 0:
+			nested--
+			if useOptical {
+				output.WriteString(line)
+			}
+			continue
+		case inside && marker == "#endif" && nested == 0:
+			inside, useOptical = false, false
+			continue
+		}
+		if !inside || useOptical {
+			output.WriteString(line)
+		}
+	}
+	if inside {
+		panic("gpu: unclosed SLAYER_OPTICAL_MEDIA shader branch")
+	}
+	return output.String()
+}
+
+const opticalStateDeclarations = `
+struct OpticalInitialHeld {
+	float index;
+	int rank;
+	int medium;
+	int reserved;
+};
+struct OpticalInitialState {
+	int4 info;
+	OpticalInitialHeld held[2 * refractions];
+};
+`
 
 // rows limits each GPU submission to a small batch of image rows to avoid the
 // system's long-running-command limit.
 const rows = 64
+
+// bandRows is, when not nought, the one height every band of a trace is
+// drawn at in place of rows: how the test shows that a picture does not
+// depend on its bands. Production leaves it nought.
+var bandRows int
 
 // Sampled renders a regular sample grid per pixel on the GPU and returns the
 // same frame representation as trace.Sampled. Unsupported scene features return
@@ -115,10 +205,44 @@ func (mode traversal) primary() bool {
 func measuredBackend(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	at time.Duration, width, height, side int, mode traversal,
 ) (*frame.Frame, Profile, error) {
+	return measuredBackendWithInitialMedia(world, eye, lens, at, width,
+		height, side, mode, nil)
+}
+
+// measuredBackendWithInitialMedia is the measured variant of the backend
+// call that also takes the initial clear media.
+func measuredBackendWithInitialMedia(world *thing.World, eye maths.Subspace,
+	lens film.Sensor, at time.Duration, width, height, side int,
+	mode traversal, media []trace.InitialMedium,
+) (*frame.Frame, Profile, error) {
 	start := time.Now()
-	picture, spent, err := sampledBackend(world, nil, eye, lens, at,
-		width, height, side, mode)
+	picture, spent, err := sampledBackendWithInitialMedia(world, nil, eye,
+		lens, at, width, height, side, mode, media)
 	return picture, spent.profile(time.Since(start)), err
+}
+
+// SampledWithInitialMedia draws in the requested traversal mode with an
+// explicit ordered camera stack. The mode preserves the caller's independent
+// lighting and native-traversal selection. Unsupported combinations fail
+// before opening a Metal kernel.
+func SampledWithInitialMedia(mode Mode, world *thing.World,
+	eye maths.Subspace, lens film.Sensor, at time.Duration, width, height,
+	side int, media []trace.InitialMedium) (*frame.Frame, Profile, error) {
+	selected, err := traversalFor(mode)
+	if err != nil {
+		return nil, Profile{}, err
+	}
+	return measuredBackendWithInitialMedia(world, eye, lens, at, width,
+		height, side, selected, media)
+}
+
+// traversalFor returns the traversal for a mode, or refuses a mode it does
+// not know.
+func traversalFor(mode Mode) (traversal, error) {
+	if !mode.known() {
+		return softwareTraversal, fmt.Errorf("%w: %d", errNoMode, mode)
+	}
+	return traversals[mode], nil
 }
 
 // profile is the timing as a caller reads it, with the call's whole wall
@@ -190,14 +314,30 @@ func sampledTimed(world *thing.World, trees []grown, eye maths.Subspace,
 func sampledBackend(world *thing.World, trees []grown, eye maths.Subspace,
 	lens film.Sensor, at time.Duration, width, height, side int,
 	mode traversal, volumeCells ...int) (*frame.Frame, timing, error) {
+	return sampledBackendWithInitialMedia(world, trees, eye, lens, at,
+		width, height, side, mode, nil, volumeCells...)
+}
+
+// sampledBackendWithInitialMedia is the sampled variant of the backend
+// call that also takes the initial clear media.
+func sampledBackendWithInitialMedia(world *thing.World, trees []grown,
+	eye maths.Subspace, lens film.Sensor, at time.Duration, width, height,
+	side int, mode traversal, media []trace.InitialMedium,
+	volumeCells ...int) (*frame.Frame, timing, error) {
 	if world != nil && len(world.Fields) > 0 {
+		if err := trace.ValidateClearState(world, media); err != nil {
+			return nil, timing{}, err
+		}
+		if len(media) > 0 {
+			return nil, timing{}, unsupported{"initial camera media with gravity fields"}
+		}
 		if mode != softwareTraversal {
 			return nil, timing{}, unsupported{"gravity with native traversal"}
 		}
 		return fieldSampled(world, eye, lens, at, width, height, side, volumeCells...)
 	}
-	return sampledLightingGrid(world, trees, eye, lens, at, width, height,
-		side, mode, cellsFor(mode), volumeCells...)
+	return sampledLightingGridWithInitialMedia(world, trees, eye, lens, at,
+		width, height, side, mode, cellsFor(mode), media, volumeCells...)
 }
 
 // sampledLightingGrid keeps the approximation resolution explicit for its
@@ -205,6 +345,17 @@ func sampledBackend(world *thing.World, trees []grown, eye maths.Subspace,
 func sampledLightingGrid(world *thing.World, trees []grown, eye maths.Subspace,
 	lens film.Sensor, at time.Duration, width, height, side int,
 	mode traversal, lightingCells int, volumeCells ...int) (*frame.Frame, timing, error) {
+	return sampledLightingGridWithInitialMedia(world, trees, eye, lens, at,
+		width, height, side, mode, lightingCells, nil, volumeCells...)
+}
+
+// sampledLightingGridWithInitialMedia is the sampled lighting-grid variant
+// of the backend call that also takes the initial clear media.
+func sampledLightingGridWithInitialMedia(world *thing.World, trees []grown,
+	eye maths.Subspace, lens film.Sensor, at time.Duration, width, height,
+	side int, mode traversal, lightingCells int,
+	media []trace.InitialMedium, volumeCells ...int,
+) (*frame.Frame, timing, error) {
 	var spent timing
 	side = max(1, side)
 	start := time.Now()
@@ -213,8 +364,9 @@ func sampledLightingGrid(world *thing.World, trees []grown, eye maths.Subspace,
 		spent.encode = time.Since(start)
 		return nil, spent, err
 	}
-	encoded, firsts, err := prepared(world, trees, eye, lens, at,
-		[2]int{fineWidth, fineHeight}, mode, lightingCells, nil, &spent, volumeCells...)
+	encoded, firsts, err := preparedWithInitialMedia(world, trees, eye,
+		lens, at, [2]int{fineWidth, fineHeight}, mode, lightingCells, nil,
+		media, &spent, volumeCells...)
 	if err != nil {
 		return nil, spent, err
 	}
@@ -226,6 +378,7 @@ func sampledLightingGrid(world *thing.World, trees []grown, eye maths.Subspace,
 		return nil, spent, err
 	}
 	defer kernel.Close()
+	kernel.FixBands(bandRows)
 	if mode != softwareTraversal {
 		start = time.Now()
 		plan, root, makeError := encoded.accelerationPlan()
@@ -259,7 +412,8 @@ func sampledLightingGrid(world *thing.World, trees []grown, eye maths.Subspace,
 	made, err := encoded.drawn(kernel, inputs, fineWidth, fineHeight, &band)
 	spent.inputBytes += made
 	spent.banded(&band, time.Since(start), setup)
-	spent.trace = kernel.GPUTime() - spent.accelerationGPU - spent.lighting
+	spent.trace = traceDeviceTime(kernel.GPUTime(), spent.accelerationGPU,
+		spent.lighting, spent.environment)
 	if err != nil {
 		return nil, spent, err
 	}
@@ -276,13 +430,25 @@ func prepared(world *thing.World, trees []grown, eye maths.Subspace,
 	lens film.Sensor, at time.Duration, fine [2]int, mode traversal,
 	lightingCells int, keeper *keptTrees, spent *timing, volumeCells ...int) (*scene, []byte,
 	error) {
+	return preparedWithInitialMedia(world, trees, eye, lens, at, fine, mode,
+		lightingCells, keeper, nil, spent, volumeCells...)
+}
+
+// preparedWithInitialMedia prepares a frame's scene with the take's initial
+// clear media and its volume cells.
+func preparedWithInitialMedia(world *thing.World, trees []grown,
+	eye maths.Subspace, lens film.Sensor, at time.Duration, fine [2]int,
+	mode traversal, lightingCells int, keeper *keptTrees,
+	media []trace.InitialMedium, spent *timing, volumeCells ...int,
+) (*scene, []byte, error) {
 	// Retained and native modes have no curved-ray transport yet.
 	if world != nil && len(world.Fields) > 0 {
 		return nil, nil, unsupported{"gravity in retained or native rendering"}
 	}
 	start := time.Now()
-	encoded, err := encodeKept(world, trees, eye, lens, at, fine[0],
-		fine[1], keeper, volumeCells...)
+	sceneReceipt(eye)
+	encoded, err := encodeKeptWithInitialMedia(world, trees, eye, lens, at,
+		fine[0], fine[1], keeper, media, volumeCells...)
 	if encoded != nil {
 		spent.counted(encoded)
 	}
@@ -326,6 +492,10 @@ func (spent *timing) counted(encoded *scene) {
 // for its records and volumes, with the native queries the mode asks.
 func (encoded *scene) source(mode traversal) string {
 	text := sourceWith(encoded.records(), encoded.counts.volumes)
+	if encoded.opticalState {
+		text = sourceWithOpticalState(encoded.records(),
+			encoded.counts.volumes)
+	}
 	if mode != softwareTraversal {
 		text = "#define SLAYER_NATIVE_SHADOWS 1\n" + text
 	}

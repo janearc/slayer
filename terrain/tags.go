@@ -127,8 +127,9 @@ func (raster *Raster) one(tags map[int]entry, tag int) int {
 }
 
 // take keeps what the tags say, refusing a raster that is not one band
-// of float32 heights in tiles or explicitly sized strips, uncompressed or
-// lzw, placed by positive pixel scales and a tiepoint at its first sample.
+// of float32 or signed 16-bit heights in tiles or explicitly sized strips,
+// uncompressed or lzw, placed by positive pixel scales and a tiepoint at its
+// first sample. The tiepoint's own east and north may be negative.
 // Projected legacy grids retain square scales; geographic grids retain both.
 func (raster *Raster) take(tags map[int]entry) error {
 	raster.width, raster.height = raster.one(tags, tagWidth),
@@ -162,9 +163,11 @@ func (raster *Raster) take(tags map[int]entry) error {
 		return fmt.Errorf("%w: no size", errRaster)
 	case raster.tileW < 1 || raster.tileH < 1:
 		return fmt.Errorf("%w: not tiled", errRaster)
-	case raster.one(tags, tagBits) != floatBits ||
-		raster.one(tags, tagFormat) != floating:
-		return fmt.Errorf("%w: not float32 samples", errRaster)
+	}
+	if err := raster.takeSamples(tags); err != nil {
+		return err
+	}
+	switch {
 	case raster.one(tags, tagSamples) > 1:
 		return fmt.Errorf("%w: more than one band", errRaster)
 	case raster.compression != uncompressed && raster.compression != lzwed:
@@ -189,6 +192,37 @@ func (raster *Raster) take(tags map[int]entry) error {
 		return err
 	}
 	return raster.place(tags)
+}
+
+// formatNames say, in a refusal, what a SampleFormat value means.
+var formatNames = map[int]string{
+	unsignedFormat: "unsigned integer", signedFormat: "signed integer",
+	floating: "floating point",
+}
+
+// takeSamples accepts float32 samples and signed 16-bit whole numbers, and
+// refuses every other width and format by naming it. The floating-point
+// predictor is for float samples only, so a whole-number raster that
+// declares it is refused.
+func (raster *Raster) takeSamples(tags map[int]entry) error {
+	bits, format := raster.one(tags, tagBits), raster.one(tags, tagFormat)
+	switch {
+	case bits == floatBits && format == floating:
+		return nil
+	case bits == signedBits && format == signedFormat:
+		raster.signed16 = true
+		if raster.predictor != 1 {
+			return fmt.Errorf("%w: predictor %d on signed 16-bit samples",
+				errRaster, raster.predictor)
+		}
+		return nil
+	}
+	name, known := formatNames[format]
+	if !known {
+		name = "unstated format"
+	}
+	return fmt.Errorf("%w: not float32 or signed 16-bit samples: %d-bit %s",
+		errRaster, bits, name)
 }
 
 // place keeps where the raster stands and what marks no height. a

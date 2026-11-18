@@ -1,0 +1,404 @@
+/*
+ * print.css: the print stylesheet for the spacecraft guide, copied from the visual guide's and changed only where the text names the guide.
+ *
+ * pandoc turns README.md into one HTML page with this file embedded, and
+ * Prince sets it on US Letter pages. the colours are Chroma's vaporwave
+ * theme, copied from ferruccio/native/internal/appearance/themes/vaporwave.css,
+ * so the printed guide matches the window it describes. the contrast is the
+ * theme's own and is not lightened here.
+ *
+ * fonts, all installed on the Mac and none shipped: Iowan Old Style for
+ * the text, Avenir Next for headings, captions and the running header,
+ * Iosevka for code.
+ *
+ * build it with `game run spacecraft-guide-pdf` from the checkout root.
+ */
+
+/* the theme's tokens, as named in vaporwave.css */
+:root {
+  --ground: #160d2b;
+  --ink: #cdc3d8;
+  --panel: #2a1a4d;
+  --border: #432c6b;
+  --bright-black: #5c4585;
+  --surface-1: #3a2260;
+  --heading: #ffa1ff;
+  --bright-magenta: #ffb5ff;
+  --red: #ffa4d4;
+  --link: #00dff9;
+  --bright-cyan: #74dcf2;
+  --dim: #d0afff;
+  --code: #9bcfa5;
+  --string: #e2bd7a;
+  --bright-white: #d3c9e8;
+  --cursor-line: #221540;
+
+  --text-font: "Iowan Old Style", Georgia, serif;
+  --display-font: "Avenir Next", "Helvetica Neue", sans-serif;
+  --code-font: "Iosevka", Menlo, monospace;
+}
+
+/* every page is the theme's dark ground; the cover has no margin boxes */
+@page {
+  size: 8.5in 11in;
+  margin: 0.95in 1in 1in 1in;
+  background: #160d2b;
+  @top-left {
+    content: string(section);
+    font: 600 8.5pt "Avenir Next", sans-serif;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ffa4d4;
+    vertical-align: bottom;
+    padding-bottom: 0.14in;
+    border-bottom: 0.75pt solid #432c6b;
+  }
+  @top-right {
+    content: "slayer: spacecraft";
+    font: 600 8.5pt "Avenir Next", sans-serif;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #d0afff;
+    vertical-align: bottom;
+    padding-bottom: 0.14in;
+    border-bottom: 0.75pt solid #432c6b;
+  }
+  @bottom-center {
+    content: counter(page);
+    font: 600 10pt "Avenir Next", sans-serif;
+    color: #74dcf2;
+  }
+}
+
+@page cover {
+  margin: 0;
+  background: #160d2b;
+  @top-left { content: normal; border: none; }
+  @top-right { content: normal; border: none; }
+  @bottom-center { content: normal; }
+}
+
+html {
+  background: var(--ground);
+  color: var(--ink);
+  font: 11.8pt/1.62 var(--text-font);
+  hyphens: manual;
+  orphans: 3;
+  widows: 3;
+}
+
+body {
+  margin: 0;
+  max-width: none;
+  padding: 0;
+  color: var(--ink);
+  background: var(--ground);
+}
+
+p {
+  margin: 0 0 0.85em;
+}
+
+strong {
+  color: var(--bright-white, #d3c9e8);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+/* the cover: the hero picture across the top, a sunset and a grid below */
+header#title-block-header {
+  page: cover;
+  break-after: page;
+  height: 11in;
+  box-sizing: border-box;
+  padding: 6.15in 1in 0 1in;
+  background-color: #160d2b;
+  background-image:
+    url(images/step-6-saturn.png),
+    repeating-linear-gradient(to bottom,
+      rgba(255, 161, 255, 0.6) 0, rgba(255, 161, 255, 0.6) 1.4pt,
+      transparent 1.4pt, transparent 0.32in),
+    linear-gradient(to bottom, #160d2b 0%, #3a2260 45%, #7a2f86 80%, #ffa4d4 100%);
+  background-position: 0 0, 0 8.45in, 0 8.45in;
+  background-size: 8.5in 4.78in, 8.5in 2.55in, 8.5in 2.55in;
+  background-repeat: no-repeat;
+}
+
+header#title-block-header h1.title {
+  margin: 0 0 0.12in;
+  break-before: auto;
+  font: 800 40pt/1.05 var(--display-font);
+  letter-spacing: -0.01em;
+  color: var(--heading);
+  border: none;
+  string-set: section "";
+}
+
+header#title-block-header p.subtitle {
+  margin: 0;
+  font: 500 16pt/1.3 var(--display-font);
+  letter-spacing: 0.04em;
+  color: var(--link);
+}
+
+/* contents */
+nav#TOC {
+  break-before: page;
+  break-after: page;
+  string-set: section "contents";
+}
+
+nav#TOC::before {
+  content: "contents";
+  display: block;
+  margin: 0 0 0.35in;
+  font: 800 28pt/1.1 var(--display-font);
+  color: var(--heading);
+  border-bottom: 1.5pt solid var(--link);
+  padding-bottom: 0.12in;
+}
+
+nav#TOC ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav#TOC > ul > li > a {
+  display: none;
+}
+
+nav#TOC > ul > li > ul > li {
+  margin: 0;
+  padding: 0.11in 0;
+  border-bottom: 0.5pt solid var(--border);
+  font: 600 13.5pt/1.3 var(--display-font);
+}
+
+nav#TOC a {
+  color: var(--ink);
+}
+
+nav#TOC a::after {
+  content: leader(" . ") target-counter(attr(href), page);
+  color: var(--link);
+}
+
+/* headings */
+h1, h2, h3, h4 {
+  font-family: var(--display-font);
+  color: var(--heading);
+  line-height: 1.15;
+  break-after: avoid;
+}
+
+h1 {
+  break-before: page;
+  string-set: section "slayer";
+  font-size: 40pt;
+  font-weight: 800;
+  margin: 0 0 0.3in;
+}
+
+h2 {
+  break-before: page;
+  string-set: section content();
+  font-size: 27pt;
+  font-weight: 800;
+  margin: 0 0 0.3in;
+  padding-bottom: 0.1in;
+  border-bottom: 1.5pt solid var(--link);
+}
+
+h3 {
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--bright-cyan);
+  margin: 1.5em 0 0.5em;
+}
+
+/* pictures at the full text width, never split from their caption */
+p:has(> img:only-child) {
+  margin: 1.1em 0 0.3em;
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+p > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0.75pt solid var(--border);
+}
+
+p:has(> img:only-child) + p {
+  margin-top: 0;
+  break-before: avoid;
+  font: italic 500 9.8pt/1.45 var(--display-font);
+  color: var(--dim);
+}
+
+h1 + p:has(> img:only-child) + p {
+  font: inherit;
+  color: inherit;
+  margin-top: 1.1em;
+}
+
+p:has(> img:only-child) + p em {
+  font-style: normal;
+}
+
+/* the eight small frames of step 7, four to a row */
+p:has(> img + img) {
+  font-size: 0;
+  line-height: 0;
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+p:has(> img + img) > img {
+  display: inline-block;
+  width: 23.4%;
+  margin: 0 1.4% 1.4% 0;
+}
+
+p:has(> img + img) > img:nth-child(4n) {
+  margin-right: 0;
+}
+
+/* the films: the poster frame and where the film is */
+p > a[href$=".mp4"] {
+  display: block;
+  break-inside: avoid;
+}
+
+p:has(> a[href$=".mp4"]:first-child) {
+  margin-bottom: 0;
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+p:has(> a[href$=".mp4"]:first-child) + p {
+  font: italic 500 9.8pt/1.45 var(--display-font);
+  color: var(--dim);
+}
+
+p:has(> a[href$=".mp4"]:first-child) + p em {
+  font-style: normal;
+}
+
+p > a[href$=".mp4"] img {
+  display: block;
+  width: 100%;
+  border: 0.75pt solid var(--border);
+}
+
+p > a[href$="step-7-orbit.mp4"]::after {
+  content: "film, in the repository at doc/spacecraft-guide/images/step-7-orbit.mp4";
+}
+
+p > a[href$=".mp4"]::after {
+  display: block;
+  padding: 0.07in 0.12in;
+  background: var(--surface-1);
+  border-left: 3pt solid var(--heading);
+  font: 700 9.5pt/1.3 var(--display-font);
+  letter-spacing: 0.04em;
+  color: var(--bright-magenta);
+}
+
+/* code: a lifted ground from the theme, wrapped so nothing runs off */
+pre {
+  margin: 0.9em 0 1.1em;
+  padding: 0.12in 0.16in;
+  background: var(--panel);
+  border-left: 3pt solid var(--link);
+  color: var(--ink);
+  font: 10pt/1.42 var(--code-font);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 4;
+  break-inside: avoid;
+}
+
+pre code {
+  font: inherit;
+  color: inherit;
+  background: none;
+  padding: 0;
+}
+
+/* a file name or a lead-in line stays with the code under it */
+p:has(+ pre) {
+  break-after: avoid;
+}
+
+/* the whole-file listings are longer than a page and may break */
+details pre {
+  break-inside: auto;
+}
+
+code {
+  font: 0.86em var(--code-font);
+  color: var(--code);
+  background: var(--panel);
+  padding: 0.03em 0.28em;
+  border-radius: 2pt;
+}
+
+/* the guide's collapsed listings print open */
+details > * {
+  display: block;
+}
+
+details > summary {
+  margin: 1.2em 0 0;
+  font: 700 10.5pt var(--display-font);
+  letter-spacing: 0.04em;
+  color: var(--string);
+  break-after: avoid;
+}
+
+/* quotes, lists, rules */
+blockquote {
+  margin: 1em 0;
+  padding: 0.04in 0.2in;
+  border-left: 3pt solid var(--heading);
+  background: var(--cursor-line, #221540);
+  break-inside: avoid;
+}
+
+blockquote p {
+  margin: 0.5em 0;
+}
+
+ul, ol {
+  margin: 0 0 0.9em;
+  padding-left: 1.4em;
+}
+
+li {
+  margin-bottom: 0.3em;
+}
+
+li::marker {
+  color: var(--link);
+}
+
+hr {
+  border: none;
+  border-top: 0.75pt solid var(--border);
+  margin: 1.4em 0;
+}
+
+/* the guide's own contents list is replaced by the contents page */
+h1 ~ p:has(+ ol) {
+  display: none;
+}
+
+h1 ~ p + ol:first-of-type {
+  display: none;
+}

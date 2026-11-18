@@ -422,6 +422,10 @@ func sequenceLight(plan sequencePlan, given asked,
 	if err != nil {
 		return drawnLight{}, err
 	}
+	world, err = sceneClockOceanWorldAt(world, at)
+	if err != nil {
+		return drawnLight{made: made}, err
+	}
 	given.at = at
 	if err = plan.exposing(&given, at); err != nil {
 		return drawnLight{made: made}, err

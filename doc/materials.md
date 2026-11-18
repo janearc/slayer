@@ -1,6 +1,10 @@
 # Materials and particle-bearing gases
 
-This design, recorded on 2026-10-04, describes composition as data: hydrogen
+For the implemented mass and volume accounting of porous solids, read
+[Porous material specimens](specimens.md). It keeps current solid phases,
+pore water and empty pores separate, without assigning appearance.
+
+This design describes composition as data: hydrogen
 with ice and tholin grains, an iron hull, or an invented material. Optical
 behaviour should follow the declared composition. The implementation may
 cover only part of this plan; the package APIs define current support.
@@ -39,7 +43,7 @@ absorption, scattering directionality, and emission. Plain and compound
 gases should supply that same interface so composition does not introduce
 a special tracer path.
 
-## What a material carries, as built by 2026-11-12
+## What a material carries
 
 This part is not design. It says what the `materials` package holds today
 for solid things, so a reader need not infer it from the plan above.
@@ -89,17 +93,3 @@ nebula:
   particles: {by_mass: 0.01, size_um: 0.1}
   made_of: {ice: 0.6, tholin: 0.3, iron: 0.1}
 ```
-
-## Implementation sequence
-
-Start with data types and constructors. Test unknown symbols, negative
-shares, totals such as 0.999, zero particle size, and missing optical data.
-Then compare the Mie calculation with published ice and silicate albedos.
-Finally connect compound gas through the same tracer interface as plain gas.
-
-## Unresolved choices
-
-- Select and cite optical-index tables for ice, silicate, iron, graphite,
-  and tholin.
-- Begin with a single grain size; add size distributions when a scene
-  requires them.

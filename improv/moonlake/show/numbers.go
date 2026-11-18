@@ -5,18 +5,16 @@ package show
 // defaults were picked for moonlake, 2026-11-09 and
 // 10, and moved here from cueshow unchanged.
 
-// beatsPerBar is how many beats make a bar. Defined by the song: it is
-// in four, bar 1 beat 1 the first drum beat (2026-11-09).
-const beatsPerBar = 4
+// unsaidMeter is how many beats make a bar in a score that names no
+// meter. Defined by moonlake's song: it is in four, bar 1 beat 1 the
+// first drum beat (2026-11-09). A score's own meter stands over it.
+const unsaidMeter = 4
 
 // stepsPerBeat is how many sixteenths a beat holds. Defined.
 const stepsPerBeat = 4
 
 // eighthsPerBeat is how many eighths a beat holds. Defined.
 const eighthsPerBeat = 2
-
-// onesPerBeat is how many bars' ones fall in a beat: a quarter. Defined.
-const onesPerBeat = 1.0 / beatsPerBar
 
 // floodsLookBack is how many of the floods' last hits are looked at for
 // a flash still showing. Picked in cueshow: a hit three steps back has

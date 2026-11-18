@@ -125,10 +125,6 @@ var atRest = kerr.NewVec4(1, 0, 0, 0)
 // from the hole's middle: black, as one hovering at the horizon is.
 const core = 0.2
 
-// shiftTop is the most a shift's gain may be, so one hot pixel does not
-// bloom the frame.
-const shiftTop = 50
-
 // in is a point of the world in the hole's space.
 func (field placedField) in(point maths.Vec) kerr.Vec3 {
 	return toHole(field.source.InHole(field.at.In(point)))
@@ -216,13 +212,17 @@ func (field placedField) emitter(volume *placedVolume,
 }
 
 // shifter is a field's gain on the volumes' light along a ray in it:
-// the shift of the light's energy from the volume to the eye, to the
-// fourth power, held to shiftTop. obs is the eye's four-velocity and
-// arrived the ray's momentum where it met the eye.
+// the shift of the light's energy from the volume to the eye. Specific
+// intensity divided by frequency cubed is invariant, so its gain is the
+// cube of the total gravitational and Doppler frequency shift.
 //
-// The volume's own motion is in the emitter's four-velocity, so a
-// beam's boost, a cube of the doppler factor, is not applied as well
-// inside a field. Outside one it is, so the two differ at the reach.
+// See Noble et al., ApJ 692 (2009),
+// https://doi.org/10.1088/0004-637X/692/1/411. obs is the eye's four-velocity
+// and arrived the ray's momentum where it met the eye. This is not a
+// fourth-power bolometric intensity transformation.
+//
+// A beam's motion is already in the emitter's four-velocity, so its flat-space
+// Doppler boost must not be applied a second time inside the field.
 //
 // It holds what is the same for a whole march. The ray's momentum
 // where it is changes at every step, and is handed to gain.
@@ -237,22 +237,21 @@ func (shift shifter) gain(crossed crossing, point maths.Vec,
 	momentum kerr.Vec4) float64 {
 	shifted := kerr.Shift(shift.arrived, shift.obs, momentum,
 		shift.field.emitter(crossed.volume, point))
-	return capped(shifted * shifted * shifted * shifted)
+	return specificShiftGain(shifted)
+}
+
+// specificShiftGain leaves physically large positive shifts unclipped; a
+// broken geodesic's non-finite or nonpositive frequency gives no light.
+func specificShiftGain(shifted float64) float64 {
+	if math.IsNaN(shifted) || math.IsInf(shifted, 0) || shifted <= 0 {
+		return 0
+	}
+	return shifted * shifted * shifted
 }
 
 // gainer is a gain on a crossing's light at a point of the world, as
 // throughGain asks for it; nil is no gain.
 type gainer func(crossed crossing, point maths.Vec) float64
-
-// capped is a gain held to shiftTop at most. A gain that is not a number, from
-// a geodesic gone wrong, is zero: that step is dark, where a NaN would spread
-// through every sum it joined.
-func capped(gain float64) float64 {
-	if math.IsNaN(gain) {
-		return 0
-	}
-	return math.Min(shiftTop, gain)
-}
 
 // bent is what a ray brings back when it enters a field: the volumes
 // before the entry, then a march along the geodesic inside, step by

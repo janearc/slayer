@@ -3,6 +3,7 @@ package set
 import (
 	"fmt"
 	"math"
+	"slices"
 
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
@@ -11,9 +12,12 @@ import (
 // Shot is one camera made ready to render: its name and title, where its
 // eye stands and which way it faces, and the lens it sees through.
 type Shot struct {
-	name, title string
-	eye         maths.Subspace
-	lens        film.Pinhole
+	name, title  string
+	eye          maths.Subspace
+	focus        maths.Vec
+	lens         film.Pinhole
+	initialMedia [maxCameraInitialMedia]Clear
+	mediaCount   int
 }
 
 // Name is the camera's key in the set file.
@@ -25,9 +29,37 @@ func (shot Shot) Title() string { return shot.title }
 // Eye is where the camera stands and which way it faces, in the world's space.
 func (shot Shot) Eye() maths.Subspace { return shot.eye }
 
-// Lens is what the camera sees through. Every camera has a film.Pinhole
-// for now, since the set file does not say a lens yet.
+// Focus is the authored look_at or point_to anchor in native world space.
+func (shot Shot) Focus() maths.Vec { return shot.focus }
+
+// Lens is what the camera sees through: a film.Pinhole as wide as the
+// camera says, or of no width where it says none and the film's lens is
+// used.
 func (shot Shot) Lens() film.Pinhole { return shot.lens }
+
+// InitialMedia is the ordered, explicitly authored clear material stack
+// containing this camera. The returned slice is independent of the set.
+func (shot Shot) InitialMedia() []Clear {
+	return slices.Clone(shot.initialMedia[:shot.mediaCount])
+}
+
+// packedMedia copies media into a fixed array, keeping its order.
+func packedMedia(media []Clear) (packed [maxCameraInitialMedia]Clear) {
+	copy(packed[:], media)
+	return packed
+}
+
+// how wide a camera's own lens may be, in degrees, as a film's may
+const (
+	narrowestLens = 0.01 // defined: the film's narrowest
+	widestLens    = 179  // defined: the film's widest, short of a half turn
+)
+
+// pinhole is the lens the camera says, as wide as it says in radians, or of
+// no width.
+func (shooting camera) pinhole() film.Pinhole {
+	return film.Pinhole{Wide: shooting.wide * maths.Degree}
+}
 
 // Where says where an asset stands, in the world's space. The set file names
 // its assets but does not place them yet, so whoever builds the scene
@@ -103,13 +135,17 @@ func (shooting camera) shot(where Where) (Shot, error) {
 		return Shot{}, err
 	}
 	return Shot{
-		name:  shooting.name,
-		title: shooting.title,
+		name:         shooting.name,
+		title:        shooting.title,
+		focus:        target,
+		initialMedia: packedMedia(shooting.initialMedia),
+		mediaCount:   len(shooting.initialMedia),
 		eye: maths.Subspace{
 			Origin: eye,
 			Orientation: maths.LookAtUp(eye, eye.Add(ahead),
 				upFor(ahead, heading)),
 		},
+		lens: shooting.pinhole(),
 	}, nil
 }
 
@@ -125,13 +161,17 @@ func (shooting camera) standing() (Shot, error) {
 			"where it stands, so it has no heading")
 	}
 	return Shot{
-		name:  shooting.name,
-		title: shooting.title,
+		name:         shooting.name,
+		title:        shooting.title,
+		focus:        look,
+		initialMedia: packedMedia(shooting.initialMedia),
+		mediaCount:   len(shooting.initialMedia),
 		eye: maths.Subspace{
 			Origin: eye,
 			Orientation: maths.LookAtUp(eye, look,
 				upFor(ahead, across.Unit())),
 		},
+		lens: shooting.pinhole(),
 	}, nil
 }
 
@@ -150,7 +190,8 @@ func fromMap(metres [3]float64) maths.Vec {
 // ground, its heading, then tipped up from level by alpha degrees.
 // Standing straight above or below what it points to gives no heading.
 func facing(from, to maths.Vec, alpha float64) (ahead, heading maths.Vec,
-	err error) {
+	err error,
+) {
 	across := to.Sub(from)
 	across.Y = 0
 	if across.Len() == 0 {

@@ -7,13 +7,10 @@ change of one byte in anything it was made from is a miss.
 
 ## Where
 
-`Home` is the folder every kind lives under, in this order:
-
-1. `SLAYER_CACHE`, an absolute folder, when it is set (as
-   `SLAYER_TREE_CACHE` names the tree cache's file).
-2. `cache/` under the renders home, `SLAYER_RENDERS`, when that is set.
-3. `slayer/` under the user's cache folder (`~/Library/Caches` on a
-   Mac).
+`Home` is the folder every kind lives under: `SLAYER_CACHE`, an
+absolute folder, and nothing else. There is no fallback to the renders
+home, the user's cache folder or the temporary folder. Where it is
+unset or not absolute, `Home` refuses by name and says how to set it.
 
 Each kind of thing kept has a folder of its own under the home, named
 for the kind. A kind is made by `NewKind` with its name, its cap in

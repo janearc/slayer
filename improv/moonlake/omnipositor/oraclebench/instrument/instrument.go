@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 )
 
@@ -153,7 +152,7 @@ func (p *Plan) Cleanup() error {
 	if !filepath.IsAbs(dir) || !filepath.IsAbs(timing) {
 		return errors.New("instrument: plan paths must be absolute")
 	}
-	if !strings.HasPrefix(timing, dir+string(os.PathSeparator)) || filepath.Base(timing) != "timing" {
+	if filepath.Dir(timing) != dir || filepath.Base(timing) != "timing" {
 		return errors.New("instrument: timing path is outside the owned private dir")
 	}
 	var cleanupErr error

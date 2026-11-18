@@ -79,3 +79,30 @@ func (reading reader) number(target *float64, least, most float64) step {
 		return nil
 	}
 }
+
+// boolean is a step that reads one YAML boolean.
+func (reading reader) boolean(target *bool) step {
+	return func(name, value *yaml.Node) error {
+		var amount bool
+		if value.Kind != yaml.ScalarNode || value.Tag != "!!bool" ||
+			value.Decode(&amount) != nil {
+			return reading.refuse(value, "%s takes true or false", name.Value)
+		}
+		*target = amount
+		return nil
+	}
+}
+
+// integer reads a bounded whole number into target.
+func (reading reader) integer(target *int, least, most int64) step {
+	return func(name, value *yaml.Node) error {
+		var amount int64
+		if value.Kind != yaml.ScalarNode || value.Tag != "!!int" ||
+			value.Decode(&amount) != nil || amount < least || amount > most {
+			return reading.refuse(value, "%s takes a whole number from %d to "+
+				"%d, not %q", name.Value, least, most, value.Value)
+		}
+		*target = int(amount)
+		return nil
+	}
+}

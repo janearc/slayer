@@ -8,32 +8,32 @@ import (
 	"testing"
 )
 
-// examples are the example jobs in jobs/, each with its scene's form and
-// whether it is a still.
+// examples are the example jobs in doc/examples/jobs/, each with its
+// scene's form and whether it is a still.
 var examples = map[string]struct {
 	form  string
 	still bool
 }{
-	"first-picture.yaml":    {formSmoke, true},
-	"first-film.yaml":       {formSmoke, false},
-	"moonlake-still.yaml":   {formSet, true},
-	"smoke-still.yaml":      {formSmoke, true},
-	"moonlake-film.yaml":    {formSet, false},
-	"portrait-short.yaml":   {formSet, false},
-	"frames-short.yaml":     {formFrames, false},
-	"short-fire-night.yaml": {formSet, false},
-	"blur-fire-night.yaml":  {formSet, false},
-	"lantern-portrait.yaml": {formNamed, true},
-	"orbital-portrait.yaml": {formNamed, true},
+	"first-picture.yaml":              {formSmoke, true},
+	"first-film.yaml":                 {formSmoke, false},
+	"smoke-still.yaml":                {formSmoke, true},
+	"lantern-portrait.yaml":           {formNamed, true},
+	"orbital-portrait.yaml":           {formNamed, true},
+	"city-clustered-10000.yaml":       {formSet, true},
+	"city-clustered-green-10000.yaml": {formSet, true},
+	"city-clustered-night-10000.yaml": {formSet, true},
+	"city-grid-10000.yaml":            {formSet, true},
+	"macrostructures.yaml":            {formSet, true},
 }
 
-// TestTheExampleJobsRead holds every example in jobs/ to a job that is
-// read, of its form, with every file it reads there to read.
+// TestTheExampleJobsRead holds every example in doc/examples/jobs/ to a
+// job that is read, of its form, with every file it reads there to read.
 func TestTheExampleJobsRead(t *testing.T) {
-	paths, err := filepath.Glob(filepath.Join(root, "jobs", "*.yaml"))
+	paths, err := filepath.Glob(
+		filepath.Join("..", "doc", "examples", "jobs", "*.yaml"))
 	if err != nil || len(paths) != len(examples) {
-		t.Fatalf("jobs/ holds %d examples, want %d: %v", len(paths),
-			len(examples), err)
+		t.Fatalf("doc/examples/jobs/ holds %d examples, want %d: %v",
+			len(paths), len(examples), err)
 	}
 	for _, path := range paths {
 		want, listed := examples[filepath.Base(path)]

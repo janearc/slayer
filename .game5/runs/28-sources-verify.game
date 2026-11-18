@@ -1,0 +1,1 @@
+sources-verify . :: go run ./cmd/sources verify

@@ -1,3 +1,8 @@
+// grissom needs celestial-data's netcdf adapter, which v0.0.4 does not
+// carry. It builds with -tags netcdf once a release does.
+
+//go:build netcdf
+
 // Command grissom is the survey viewer. It lays images onto the sky's
 // triangles and draws them on Metal, with the earth as hexes beside them.
 //
@@ -16,7 +21,9 @@
 // All colour is libtheme's. Each sky layer's hue is its wavelength's false
 // colour. The earth's land and sea are measured reflectances from the
 // USGS Spectral Library under libtheme's D65 daylight, and where the land
-// lies is Natural Earth's; both come through celestial-data.
+// lies is Natural Earth's; both come through celestial-data. With
+// --weather a gridded variable from a netCDF file, also through
+// celestial-data, is laid over the earth as cloud.
 package main
 
 /*
@@ -28,7 +35,7 @@ package main
 import "C"
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -59,6 +66,7 @@ import (
 	"github.com/janearc/libtheme-css/spaces/ok"
 	"github.com/janearc/libtheme-css/spaces/srgb"
 	"github.com/janearc/slayer/hud"
+	"github.com/janearc/slayer/internal/observability"
 	"github.com/janearc/slayer/observer"
 )
 
@@ -121,6 +129,9 @@ var view struct {
 	wideDepth            int
 	backColours          []byte
 	earth                earthMesh
+	// earthOnly loads no sky: the earth is all there is to see. noHud
+	// draws neither the text nor the crosshair.
+	earthOnly, noHud bool
 }
 
 // earthMesh is the earth's triangles, the hex each corner is, and the
@@ -142,99 +153,185 @@ type earthMesh struct {
 	// is shown: one past the last is the measured land and sea.
 	images  []earthImage
 	showing int
+	// the weather layer: each kept step's cover at every triangle, and the
+	// cover shown, one value a triangle, nil when there is no weather.
+	weather []weatherStep
+	cover   []float64
 }
 
 // outlines are the outline's strengths the o key cycles through.
 var outlines = []float64{0.35, 0.12, 0}
 
-// main loads the surveys and opens the window or writes offscreen views.
+// The stamps game builds into the command, as pzm reports them.
+var build, built, who, sessions string
+var finishSummary = func() {}
+
+// main runs grissom's two verbs: the window, and the offscreen draw.
+// puzzlemouth parses on this goroutine, which init locked to the main
+// thread, so Cocoa still gets it.
 func main() {
-	data := flag.String("data", "", "the sgra data directory")
-	earthData := flag.String("earth", "", "the directory holding celestial-data's earth files")
-	depth := flag.Int("depth", 13, "the mesh depth the sky's layers are laid at")
-	earthDepth := flag.Int("earth-depth", 7, "the mesh depth the earth's hexes are at")
-	shot := flag.String("shot", "", "draw one frame offscreen to this png and stop")
-	shotView := flag.Int("view", skyView, "the view a shot draws: 0 sky, 1 earth, 2 standing")
-	startGround := flag.Int("ground", 0, "the background to start at, as b steps")
-	startChroma := flag.Int("chroma", 0, "the colourfulness to start at, as c steps")
-	skyData := flag.String("sky", "", "the directory holding celestial-data's whole-sky maps")
-	wideDepth := flag.Int("wide-depth", 8, "the mesh depth the whole-sky maps are laid at")
-	startFov := flag.Float64("fov", 1, "the sky view's width to start at, in degrees")
-	look := flag.String("look", "", "lon,lat the earth view and the observer start over")
-	colourways := flag.String("colourways", "colourways", "the directory of the hud's colourways")
-	startTheme := flag.String("colourway", "twilight", "the hud colourway to start in")
-	startEarth := flag.Int("earth-image", 0, "the earth to start on, as m steps")
-	flag.Parse()
-	readThemes(*colourways, *startTheme)
+	os.Exit(execute())
+}
 
-	view.sources = []source{
-		{"8 um glow (GLIMPSE I4)", *data + "/data-irac/GLM_00000+0000_mosaic_I4.fits",
-			irac4, 0.45, 0.997, nil, 1, false},
-		{"3.6 um stars (GLIMPSE I1)", *data + "/data-irac/GLM_00000+0000_mosaic_I1.fits",
-			irac1, 0.70, 0.999, nil, 1, false},
-		{"radio 1.28 GHz (MeerKAT)", *data + "/data-meerkat/MeerKAT_Galactic_Centre_1284MHz-StokesI.fits",
-			radiation.HertzToNm(meerkatHz), 0.75, 0.998, nil, 0.8, false},
-		{"dust and gas column (PPMAP, Herschel)", *data + "/data-ppmap-l000_cdens/l000_cdens.fits",
-			0, 0.20, 0.99, []string{"3.6 um stars (GLIMPSE I1)", "8 um glow (GLIMPSE I4)"}, 0.7, false},
+// execute starts observability for grissom, then runs the tool.
+func execute() int {
+	stop, err := observability.Start("grissom")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "grissom observability:", err)
+	} else {
+		defer stop()
 	}
-	view.lightness = 0.75
-	view.outline = 1 // faded: at whole-sky widths full outlines shimmer
-	view.ground, view.chroma = *startGround, *startChroma
-	view.ra, view.dec, view.fov = 266.4168371, -29.0078106, *startFov
-	view.lon, view.lat, view.distance = -100, 30, 3.2
-	view.placeLon, view.placeLat = -122.4194, 37.7749
-	if *look != "" {
-		_, err := fmt.Sscanf(*look, "%f,%f", &view.lon, &view.lat)
-		must(err)
-		view.placeLon, view.placeLat = view.lon, view.lat
-	}
-	view.azimuth, view.altitude, view.placeFov = 180, 20, 60
-	view.clock = time.Now()
+	finishSummary = observability.StartSummary("grissom", os.Stderr)
+	defer finishSummary()
+	return tool(run).Run(os.Args[1:], os.Stdout, os.Stderr)
+}
 
-	skyCorners := buildSky(*depth)
-	backCorners := buildBack(*skyData, *wideDepth)
-	buildEarth(*earthData, *earthDepth)
-	view.earth.marked = -1
-	view.earth.showing = *startEarth
-	recolour()
+// run loads the surveys and opens the window or writes offscreen views.
+func run(settings options) error {
+	weather, err := openWeather(settings)
+	if err != nil {
+		return err
+	}
+	readThemes(settings.colourways, settings.colourway)
+	skyCorners, backCorners := start(settings)
+	if weather != nil {
+		weather.lay()
+	}
 	bg, _ := srgb.FromSwatch(ground())
 	C.viewer_background(C.double(bg.R), C.double(bg.G), C.double(bg.B))
 	log.Printf("%d sky triangles, %d earth triangles", len(view.cells), len(view.earth.hexOf)/3)
 	log.Print("sky: drag, scroll; e earth; p place at the crosshair; f stand there; , . clock; 1-4 layers; o outlines; = - lightness; c colour; b background; [ ] outline width; m cycles Blue Marble, Black Marble, measured earth; q quits")
-
 	meshes := [3]C.viewer_mesh{
 		meshOf(skyCorners, view.skyColours),
 		meshOf(backCorners, view.backColours),
 		meshOf(view.earth.corners, view.earth.colours),
 	}
-	if *shot != "" {
-		view.placed = true
-		faceCentre()
-		mark()
-		for _, each := range []int{skyView, earthView, placeView} {
-			if *shotView >= 0 && each != *shotView {
-				continue
-			}
-			view.mode = each
-			recolourEarth()
-			name := []string{"sky", "earth", "standing"}[each]
-			writeShot(*shot+"-"+name+".png", meshes)
-		}
+	if settings.into != "" {
+		return drawFilm(settings, func(path string) { writeShot(path, meshes) })
+	}
+	if settings.shot != "" {
+		drawShots(settings, meshes)
+		return nil
+	}
+	return openWindow(meshes)
+}
+
+// start sets the viewer's starting state, builds what the options ask
+// for and paints it. It gives the sky's and the whole-sky sphere's corners.
+func start(settings options) ([]float32, []float32) {
+	beginning := time.Now()
+	defer func() { observability.Observe("grissom_start_seconds", time.Since(beginning).Seconds()) }()
+	configure(settings)
+	var skyCorners, backCorners []float32
+	if !settings.earthOnly {
+		view.sources = skySources(settings.data)
+		phase := time.Now()
+		skyCorners = buildSky(settings.depth)
+		observability.Observe("grissom_sky_build_seconds", time.Since(phase).Seconds())
+		phase = time.Now()
+		backCorners = buildBack(settings.sky, settings.wideDepth)
+		observability.Observe("grissom_back_build_seconds", time.Since(phase).Seconds())
+	}
+	phase := time.Now()
+	buildEarth(settings.earth, settings.earthDepth)
+	observability.Observe("grissom_earth_build_seconds", time.Since(phase).Seconds())
+	view.earth.marked = -1
+	view.earth.showing = settings.earthImage
+	phase = time.Now()
+	repaint()
+	observability.Observe("grissom_repaint_seconds", time.Since(phase).Seconds())
+	observability.Set("grissom_sky_triangles", float64(len(view.cells)))
+	observability.Set("grissom_earth_triangles", float64(len(view.earth.hexOf)/3))
+	return skyCorners, backCorners
+}
+
+// repaint recolours what is loaded: the earth alone under --earth-only,
+// where there are no sky layers to take colours from, else everything.
+func repaint() {
+	if view.earthOnly {
+		recolourEarth()
 		return
 	}
+	recolour()
+}
+
+// The sky view's centre, Sgr A*, in degrees of right ascension and
+// declination.
+const (
+	centreRA  = 266.4168371
+	centreDec = -29.0078106
+)
+
+// configure sets where each view starts and what the viewer's controls
+// start at.
+func configure(settings options) {
+	view.lightness = 0.75
+	view.outline = 1 // faded: at whole-sky widths full outlines shimmer
+	view.ground, view.chroma = settings.ground, settings.chroma
+	view.ra, view.dec, view.fov = centreRA, centreDec, settings.fov
+	view.lon, view.lat, view.distance = -100, 30, settings.distance
+	view.placeLon, view.placeLat = -122.4194, 37.7749
+	view.earthOnly, view.noHud = settings.earthOnly, settings.noHud
+	if settings.earthOnly {
+		view.mode = earthView
+	}
+	if settings.look != "" {
+		_, err := fmt.Sscanf(settings.look, "%f,%f", &view.lon, &view.lat)
+		must(err)
+		view.placeLon, view.placeLat = view.lon, view.lat
+	}
+	view.azimuth, view.altitude, view.placeFov = 180, 20, 60
+	view.clock = time.Now()
+}
+
+// skySources are the detail images the sky is laid from, under a data
+// directory.
+func skySources(data string) []source {
+	return []source{
+		{"8 um glow (GLIMPSE I4)", data + "/data-irac/GLM_00000+0000_mosaic_I4.fits",
+			irac4, 0.45, 0.997, nil, 1, false},
+		{"3.6 um stars (GLIMPSE I1)", data + "/data-irac/GLM_00000+0000_mosaic_I1.fits",
+			irac1, 0.70, 0.999, nil, 1, false},
+		{"radio 1.28 GHz (MeerKAT)", data + "/data-meerkat/MeerKAT_Galactic_Centre_1284MHz-StokesI.fits",
+			radiation.HertzToNm(meerkatHz), 0.75, 0.998, nil, 0.8, false},
+		{"dust and gas column (PPMAP, Herschel)", data + "/data-ppmap-l000_cdens/l000_cdens.fits",
+			0, 0.20, 0.99, []string{"3.6 um stars (GLIMPSE I1)", "8 um glow (GLIMPSE I4)"}, 0.7, false},
+	}
+}
+
+// drawShots writes the views a draw asks for, each to its own png.
+func drawShots(settings options, meshes [3]C.viewer_mesh) {
+	view.placed = true
+	faceCentre()
+	mark()
+	for _, each := range shotViews(settings) {
+		view.mode = each
+		recolourEarth()
+		writeShot(settings.shot+"-"+shotNames[each]+".png", meshes)
+	}
+}
+
+// openWindow opens the window and draws until it closes.
+func openWindow(meshes [3]C.viewer_mesh) error {
 	if err := installIcons(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	title := C.CString("grissom")
 	defer C.free(unsafe.Pointer(title))
 	var why [1024]C.char
 	if C.viewer_run(meshes[0], meshes[1], meshes[2], title, &why[0], C.int(len(why))) != 0 {
-		log.Fatal(C.GoString(&why[0]))
+		return errors.New(C.GoString(&why[0]))
 	}
+	return nil
 }
 
-// meshOf is triangles' corners and colours as the window takes them.
+// meshOf is triangles' corners and colours as the window takes them. No
+// triangles is a mesh of count zero and no pointers: the window makes no
+// buffer for it and draws nothing, for Metal does not take an empty one.
 func meshOf(corners []float32, colours []byte) C.viewer_mesh {
+	if len(corners) == 0 {
+		return C.viewer_mesh{}
+	}
 	return C.viewer_mesh{
 		corners: (*C.float)(unsafe.Pointer(&corners[0])),
 		colours: (*C.uint8_t)(unsafe.Pointer(&colours[0])),
@@ -619,7 +716,7 @@ func recolourEarth() {
 	hexColours := make([][3]byte, len(view.earth.hexes))
 	parallel(len(view.earth.hexes), func(hex int) {
 		switch {
-		case hex == view.earth.marked && view.mode == earthView:
+		case hex == view.earth.marked && view.mode == earthView && !view.noHud:
 			hexColours[hex] = mark
 		case view.earth.showing < len(view.earth.images):
 			hexColours[hex] = seen(view.earth.images[view.earth.showing].light[hex])
@@ -633,6 +730,7 @@ func recolourEarth() {
 		colour := hexColours[hex]
 		copy(view.earth.colours[k*4:], []byte{colour[0], colour[1], colour[2], 255})
 	}
+	coverEarth()
 }
 
 // seen is a measured surface's colour as the viewer sets it: its
@@ -701,14 +799,26 @@ func lineColour() (float64, float64, float64) {
 
 // refresh recolours everything and hands it to the window.
 func refresh() {
-	recolour()
-	C.viewer_colours(C.viewer_sky, (*C.uint8_t)(unsafe.Pointer(&view.skyColours[0])), C.int(len(view.cells)))
-	C.viewer_colours(C.viewer_back, (*C.uint8_t)(unsafe.Pointer(&view.backColours[0])), C.int(view.backCount))
-	C.viewer_colours(C.viewer_earth, (*C.uint8_t)(unsafe.Pointer(&view.earth.colours[0])), C.int(len(view.earth.hexOf)/3))
+	repaint()
+	handColours(C.viewer_sky, view.skyColours)
+	handColours(C.viewer_back, view.backColours)
+	handColours(C.viewer_earth, view.earth.colours)
 	lamps, _ := srgb.FromSwatch(ground())
 	C.viewer_background(C.double(lamps.R), C.double(lamps.G), C.double(lamps.B))
 	log.Printf("lightness %.2f, chroma %.2f, background %.2f, width %.1f",
 		view.lightness, chromas[view.chroma], grounds[view.ground], widths[view.line])
+}
+
+// colourBytes is the bytes of colour a triangle has: four to a corner.
+const colourBytes = 12
+
+// handColours gives the window a mesh's colours. A mesh with none is not
+// in the window, as under --earth-only, and there is nothing to give.
+func handColours(which C.int, colours []byte) {
+	if len(colours) == 0 {
+		return
+	}
+	C.viewer_colours(which, (*C.uint8_t)(unsafe.Pointer(&colours[0])), C.int(len(colours)/colourBytes))
 }
 
 // mark finds the hex under the placed observer and marks it.
@@ -721,7 +831,7 @@ func mark() {
 		}
 	}
 	view.earth.marked = best
-	recolour()
+	repaint()
 }
 
 // goDrag turns the active view using Cocoa's drag distance in points.
@@ -770,7 +880,10 @@ func goScroll(dy C.double) {
 func goKey(key C.int) {
 	switch {
 	case key == 'q':
+		finishSummary()
 		os.Exit(0)
+	case key == 'e' && view.earthOnly:
+		// there is no sky to flip to.
 	case key == 'e':
 		view.Lock()
 		view.mode = map[bool]int{true: skyView, false: earthView}[view.mode == earthView]
@@ -871,6 +984,9 @@ func goView(out *C.float, width, height C.int) C.int {
 		from := scaled(toward, view.distance)
 		matrix = camera(scaled(toward, -1), pole, from, earthFov, width, height)
 		u[32], u[33], u[34] = float32(width)/2, float32(height)/2, 1
+		if view.noHud {
+			u[34] = 0
+		}
 	case placeView:
 		zenith, north, east := horizon()
 		az, alt := view.azimuth*math.Pi/180, view.altitude*math.Pi/180
@@ -1051,9 +1167,19 @@ func writeShot(path string, meshes [3]C.viewer_mesh) {
 	width, height := 1400, 1000
 	pixels := make([]byte, width*height*4)
 	var why [1024]C.char
+	measured := observability.Enabled()
+	var drawStarted time.Time
+	if measured {
+		drawStarted = time.Now()
+	}
 	if C.viewer_shot(meshes[0], meshes[1], meshes[2], C.int(width), C.int(height),
 		(*C.uint8_t)(unsafe.Pointer(&pixels[0])), &why[0], C.int(len(why))) != 0 {
 		log.Fatal(C.GoString(&why[0]))
+	}
+	var writeStarted time.Time
+	if measured {
+		observability.Observe("grissom_offscreen_draw_seconds", time.Since(drawStarted).Seconds())
+		writeStarted = time.Now()
 	}
 	for i := 0; i < len(pixels); i += 4 {
 		pixels[i], pixels[i+2] = pixels[i+2], pixels[i]
@@ -1063,6 +1189,10 @@ func writeShot(path string, meshes [3]C.viewer_mesh) {
 	must(err)
 	must(png.Encode(file, picture))
 	must(file.Close())
+	if measured {
+		observability.Observe("grissom_png_write_seconds", time.Since(writeStarted).Seconds())
+		observability.Add("grissom_shots_total", 1)
+	}
 	log.Printf("wrote %s", path)
 }
 
@@ -1189,7 +1319,7 @@ func readThemes(dir, start string) {
 // slayer's hud, drawn into a picture at half the window's pixels.
 func showHud(width, height int) {
 	rows := hudRows[view.hudSize]
-	if rows == 0 {
+	if rows == 0 || view.noHud {
 		if view.hudSaid != "off" {
 			C.viewer_hud(nil, 0, 0)
 			view.hudSaid = "off"
@@ -1256,6 +1386,12 @@ func hudWords() ([]string, []string) {
 	help := []string{
 		"drag look   scroll zoom   e earth or sky   p place at the crosshair   f stand there   comma period clock",
 		"1-8 layers   o outlines   = - lightness   c colour   b background   [ ] outline width   m earth   h hud size   t hud colours   q quit",
+	}
+	if view.earthOnly {
+		help = []string{
+			"drag turn   scroll nearer   p place at the crosshair   f stand there   comma period clock",
+			"o outlines   = - lightness   c colour   b background   [ ] outline width   m earth   h hud size   t hud colours   q quit",
+		}
 	}
 	return lines, help
 }

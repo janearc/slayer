@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --ground: #1c1a17; --ink: #efe6d6; --soft: #b9ad98; --edge: #3a352e; --note: #f2c879; }
+  body { margin: 0; padding: 24px 16px; background: var(--ground); color: var(--ink);
+         font: 17px/1.5 -apple-system, "Helvetica Neue", sans-serif; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  p.lead { color: var(--soft); margin: 0 0 24px; }
+  .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+  figure { margin: 0; border: 1px solid var(--edge); border-radius: 6px; overflow: hidden; background: #000; }
+  figure img, figure video { display: block; width: 100%; height: auto; }
+  figcaption { padding: 10px 12px; background: var(--ground); }
+  .note { color: var(--note); display: block; margin-bottom: 4px; }
+  .where { color: var(--soft); font-size: 16px; word-break: break-all; }
+  .recipe { display: inline-block; margin-top: 8px; padding: 4px 12px; border: 1px solid var(--note);
+            border-radius: 4px; color: var(--note); font-size: 16px; text-decoration: none; }
+  a { color: inherit; }
+</style>
+<title>Animations</title>
+<base href="../">
+</head>
+<body>
+<h1>Animations</h1>
+<p class="lead">Newest first, one card per folder. Made 2026-11-15 23:55. Press cmd-r after a new render.</p>
+<div class="grid">
+<figure data-folder="2026-11-07-atelier-chunks"><a href="animations/2026-11-07-atelier-chunks/chunks/000000/frames/frame-000001.png"><img loading="lazy" src="animations/2026-11-07-atelier-chunks/chunks/000000/frames/frame-000001.png" alt="animations/2026-11-07-atelier-chunks/chunks/000000/frames/frame-000001.png"></a><figcaption><span class="where">11-06 21:25 &middot; 2 file(s) &middot; animations/2026-11-07-atelier-chunks</span></figcaption></figure>
+<figure data-folder="2026-11-02-team-heard-film"><video src="animations/2026-11-02-team-heard-film/film.mp4" controls preload="metadata"></video><figcaption><span class="note">RENDERING since 10:00, about 30 minutes:</span><span class="note">6 files here</span><span class="where">11-06 21:23 &middot; 6 file(s) &middot; animations/2026-11-02-team-heard-film</span><a class="recipe" href="animations/2026-11-02-team-heard-film/index.html">open them all</a> </figcaption></figure>
+</div>
+<script>
+(function () {
+  var came = location.pathname.match(/\/renders\/([^\/]+)\/compositing\//);
+  if (!came) { return; }
+  var team = came[1];
+  var cards = Array.prototype.slice.call(document.querySelectorAll('figure[data-folder]'));
+  var theirs = cards.filter(function (card) {
+    return card.dataset.folder.indexOf('-' + team + '-') >= 0;
+  });
+  if (theirs.length === 0) { return; }
+  var said = document.createElement('p');
+  said.className = 'lead';
+  var show = function (all) {
+    cards.forEach(function (card) { card.hidden = !all && theirs.indexOf(card) < 0; });
+    said.textContent = all
+      ? 'Everyone’s, ' + cards.length + ' folders. '
+      : team + '’s, ' + theirs.length + ' of the ' + cards.length + ' folders here: you came through ' + team + '’s folder. ';
+    var other = document.createElement('a');
+    other.href = '#';
+    other.textContent = all ? 'Show only ' + team + '’s' : 'Show everyone’s';
+    other.onclick = function () { show(!all); return false; };
+    said.appendChild(other);
+  };
+  document.querySelector('.grid').before(said);
+  show(false);
+})();
+</script>
+</body>
+</html>

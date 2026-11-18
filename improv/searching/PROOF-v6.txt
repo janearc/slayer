@@ -1,0 +1,55 @@
+heard. v6 delivery — 15 November 2026
+
+Frozen continuation producer: e574f0f77713d5c32409541c69817ea72f70d120
+Continuation binary SHA256: a83b58aad1cf87823adae81a73bf0aab67d4ad020d7b007b82a77fd03ea57ef4
+Initial producer, including every 2K frame: 46ed47a8101237f29c80a6aecdb5f27c1d6b8157
+Initial binary SHA256: 67e08ab1583780191d177ba4ad635f11cfb609fa14a635972f556039a70b0d89
+Movie SHA256: ab9278b907d5edb15f09ac8e26bb56b43d87fc07ec5f50abfceeb09faa2f9ebb
+Source includes rc-v0.1.3 and feat/model-maturity, merge 8c84d8e4.
+This delivery record is written after rendering. A later documentation-only
+commit is not the producer and does not require a rebuilt executable.
+
+Film: the `heard-v6-full-480` render
+2005 freshly drawn 480 x 270 frames, six fps, 334.166667 seconds.
+Four primary samples/pixel; 63 completed bounded native processes,
+at most 36 frames through 1295, at most 12 through 1415, then at most 36.
+Original global frame grid. Initial 1400 MiB memory ceiling; authorized
+2800 MiB for continuation from 1416. The 30 GiB disk guard stayed unchanged.
+Twelve control frames match exactly across producers. Production took
+2772.81 wall seconds including the stopped attempt and recovery.
+Full v5 music, including its release, retained at original speed.
+
+2K review: the `heard-v6-review-2k` render
+76 freshly drawn 2048 x 1152 PNGs: 38 paired setups, film and detail views.
+Sixteen primary samples/pixel. Full receipts, copied recipes and hashes.
+Production helpers are retained in the home scratch-tools/heard-v6-film-review
+archive; image/video artifacts remain under the canonical renders tree.
+
+Verification: complete final audio/video decode; every 2K PNG decoded;
+dimensions, frame count, exact shot coverage, frame/recipe/source/binary
+hashes, soundtrack duration, native companion identity and all 41 script
+clock boundaries checked. Independent still/sequence continuity controls
+at global frames 1319 and 1694 match byte for byte. All 76 2K views inspected
+in paired sheets, selected 2K images at native size, and sampled motion
+sequences inspected. No browser playback or human audio listening claimed.
+
+Focused searching tests passed after the final producer changes. All 12
+primary-beam Metal tests and selected ground/inventory/Spitzer tests passed.
+Four mutation probes caught pivot, attachment, population and horizon errors.
+This is not whole-repository release acceptance.
+
+Barkeep followed actual completed frames and the live batch supervisor
+throughout production; its completion record is refreshed once after checks.
+
+Visual review remains open: muted ground lighting, visible surface and
+reflection facets, and some dark terrain shadow edges remain. Geometry,
+materials, authored cinematic lighting and primary beam treatment are
+documented in the making-of. No physical calibration is claimed.
+
+A previous long opening proof and a 36-frame chunk of this full take hit
+the memory guard; both remain preserved. The full take resumed at frame 1296
+with batches of at most 12; all overlapping frames matched byte for byte.
+The memory ceiling was doubled later, as recorded above.
+A one-frame movie control
+failed audio-duration validation and was
+replaced with native still controls; it is not part of the delivered movie.

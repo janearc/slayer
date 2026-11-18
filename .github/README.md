@@ -64,15 +64,14 @@ represented, rather than turning every needle into an enormous scaled leaf.
 After setup and a Game build, from the checkout root:
 
 ```sh
-game run slayer -- assess jobs/first-picture.yaml
-game run slayer -- draw jobs/first-picture.yaml
-game run slayer -- draw jobs/first-film.yaml
+game run slayer -- assess doc/examples/jobs/first-picture.yaml
+game run slayer -- draw doc/examples/jobs/first-picture.yaml
+game run slayer -- draw doc/examples/jobs/first-film.yaml
 ```
 
 The starter picture uses the CPU. The short film adds synthesized sound;
 movie output needs `ffmpeg`. Larger scenes have their own data and backend
-requirements. This development branch still has private review dependencies
-and a local Celestial pin: the build guide explains what must be prepared.
+requirements.
 
 ## Explore further
 

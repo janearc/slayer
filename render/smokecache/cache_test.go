@@ -49,17 +49,46 @@ func TestEveryFieldIsInTheKey(t *testing.T) {
 	}
 }
 
-// The cache is under $XDG_CACHE_HOME where that is set, and under the
-// user's cache directory where it is not.
-func TestRoot(t *testing.T) {
-	t.Setenv("XDG_CACHE_HOME", "/somewhere")
-	if got, _ := Root(); got != "/somewhere/smokecheck" {
-		t.Errorf("with XDG_CACHE_HOME, %s", got)
+// rootLookup is a lookup of a test's own variables.
+func rootLookup(said map[string]string) func(string) (string, bool) {
+	return func(name string) (string, bool) {
+		value, set := said[name]
+		return value, set
 	}
-	t.Setenv("XDG_CACHE_HOME", "")
-	dir, _ := os.UserCacheDir()
-	if got, _ := Root(); got != filepath.Join(dir, "smokecheck") {
-		t.Errorf("without, %s; want %s", got, filepath.Join(dir, "smokecheck"))
+}
+
+// The cache is the smoke folder under SLAYER_CACHE.
+func TestRoot(t *testing.T) {
+	got, err := Root(rootLookup(map[string]string{
+		"SLAYER_CACHE": "/somewhere"}))
+	if err != nil || got != "/somewhere/smoke" {
+		t.Errorf("with SLAYER_CACHE, %s, %v", got, err)
+	}
+}
+
+// anti-test: with SLAYER_CACHE unset, the cache is refused by name, even
+// where XDG_CACHE_HOME, the user's home, the renders home and the
+// temporary folder are given, and nothing is made in any of them.
+func TestRootUnsetIsRefusedAndWritesNothing(t *testing.T) {
+	folders := map[string]string{"XDG_CACHE_HOME": t.TempDir(),
+		"HOME": t.TempDir(), "SLAYER_RENDERS": t.TempDir(),
+		"TMPDIR": t.TempDir()}
+	got, err := Root(rootLookup(folders))
+	if err == nil || !strings.Contains(err.Error(), "SLAYER_CACHE") {
+		t.Errorf("no home gave %q, %v", got, err)
+	}
+	for name, folder := range folders {
+		if found, _ := os.ReadDir(folder); len(found) != 0 {
+			t.Errorf("%s was written to: %v", name, found)
+		}
+	}
+}
+
+// anti-test: a relative SLAYER_CACHE is refused by name.
+func TestRootRefusesARelativeHome(t *testing.T) {
+	_, err := Root(rootLookup(map[string]string{"SLAYER_CACHE": "r"}))
+	if err == nil || !strings.Contains(err.Error(), "SLAYER_CACHE") {
+		t.Errorf("a relative home was taken: %v", err)
 	}
 }
 

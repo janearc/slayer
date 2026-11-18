@@ -121,3 +121,13 @@ func clip(sample float32) float32 {
 	value := float64(sample)
 	return float32(math.Max(-fullScale, math.Min(fullScale, value)))
 }
+
+// Slice copies a range of stereo instants without first copying the whole
+// soundtrack. The returned Sound owns its samples, just like NewSound.
+// Endpoints are half-open and must describe at least one complete instant.
+func (sound Sound) Slice(first, last int) (Sound, error) {
+	if first < 0 || last <= first || last > sound.Length() {
+		return Sound{}, fmt.Errorf("movie: invalid sound slice [%d,%d) of %d instants", first, last, sound.Length())
+	}
+	return newSound(sound.rate, slices.Clone(sound.samples[first*channels:last*channels])), nil
+}

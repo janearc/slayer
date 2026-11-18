@@ -103,7 +103,7 @@ func TestDrawOverridesRefuseBadValues(t *testing.T) {
 // home not named touches nothing else.
 func TestPlacesWithNoOutputsAreUnderOut(t *testing.T) {
 	directory := t.TempDir()
-	env := envIn(t, context.Background(), directory)
+	env := envIn(t, context.Background(), directory, teamVariable, "team")
 	still := placedFor(t, env, written(t, directory, "lake.yaml",
 		stillJob(t, "")))
 	if still.picture != filepath.Join(directory, "out", "lake.png") ||
@@ -112,33 +112,73 @@ func TestPlacesWithNoOutputsAreUnderOut(t *testing.T) {
 	}
 	film := placedFor(t, env, written(t, directory, "move.yaml",
 		filmJob(t, "")))
-	temporary, _ := env.lookup(tempVariable)
+	cache, _ := env.lookup("SLAYER_CACHE")
 	if !film.work || !strings.HasPrefix(film.frames,
-		filepath.Join(temporary, workFolder, "move-")) ||
+		filepath.Join(cache, workFolder, "team", "move-")) ||
 		film.movie != filepath.Join(directory, "out", "move.mp4") {
 		t.Errorf("a film with no outputs is placed %+v", film)
 	}
 }
 
 // a film that writes a movie and no frames draws its frames in a working
-// folder under the renders home's cache, by team, where the page makes
-// no card; the anti-test: one that names its frames keeps them there,
-// and they are not working files.
+// folder under the cache home, by team, where the page makes no card;
+// the anti-test: one that names its frames keeps them there, and they
+// are not working files.
 func TestPlacesWorkingFramesUnderTheCache(t *testing.T) {
 	directory, home := t.TempDir(), t.TempDir()
 	env := envIn(t, context.Background(), directory,
 		rendersVariable, home, teamVariable, "team")
+	cache, _ := env.lookup("SLAYER_CACHE")
 	movie := placedFor(t, env, written(t, directory, "move.yaml",
 		filmJob(t, "outputs: {movie: move.mp4}\n")))
 	if !movie.work || !strings.HasPrefix(movie.frames,
-		filepath.Join(home, cacheFolder, "team", "move-")) {
+		filepath.Join(cache, workFolder, "team", "move-")) {
 		t.Errorf("a movie's working frames are placed %+v", movie)
 	}
 	// anti-test of TestPlacesWorkingFramesUnderTheCache
 	named := placedFor(t, env, written(t, directory, "named.yaml",
 		filmJob(t, "outputs: {frames: frames, movie: named.mp4}\n")))
-	if named.work || strings.Contains(named.frames, cacheFolder) {
+	if named.work || strings.HasPrefix(named.frames, cache) {
 		t.Errorf("frames the job names are placed %+v", named)
+	}
+}
+
+// a film that keeps working frames with no SLAYER_TEAM keeps them in
+// frames/NAME-DIGEST under the cache home, with no team folder, and is
+// not refused on account of the team.
+func TestWorkingFramesWithNoTeamHaveNoTeamFolder(t *testing.T) {
+	directory := t.TempDir()
+	path := written(t, directory, "move.yaml",
+		filmJob(t, "outputs: {movie: move.mp4}\n"))
+	env, _ := unhomed(t, "SLAYER_CACHE", directory, teamVariable, "")
+	got := placedFor(t, env, path)
+	if !got.work || filepath.Dir(got.frames) !=
+		filepath.Join(directory, workFolder) ||
+		!strings.HasPrefix(filepath.Base(got.frames), "move-") {
+		t.Errorf("working frames with no team are placed %+v", got)
+	}
+}
+
+// anti-test: a film that keeps working frames is refused by name where
+// SLAYER_CACHE is unset or relative, with the renders home named, and
+// nothing is made under the renders home, the user's cache, HOME or the
+// temporary folder.
+func TestWorkingFramesAreRefusedWithNoHome(t *testing.T) {
+	directory := t.TempDir()
+	path := written(t, directory, "move.yaml",
+		filmJob(t, "outputs: {movie: move.mp4}\n"))
+	wanted, err := jobOf(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, cache := range []string{"", "relative"} {
+		env, folders := unhomed(t, "SLAYER_CACHE", cache,
+			teamVariable, "team")
+		_, err := placesOf(placing{wanted: wanted, given: path, env: env})
+		if err == nil || !strings.Contains(err.Error(), "SLAYER_CACHE") {
+			t.Errorf("with cache %q, placed with %v", cache, err)
+		}
+		untouched(t, folders)
 	}
 }
 
@@ -212,9 +252,10 @@ func TestPlacesNoteOnlyUnderAHomeWithATeam(t *testing.T) {
 		env  Env
 		says string
 	}{
-		{envIn(t, context.Background(), directory), rendersVariable},
+		{envIn(t, context.Background(), directory, teamVariable, ""),
+			rendersVariable},
 		{envIn(t, context.Background(), directory, rendersVariable,
-			home), teamVariable},
+			home, teamVariable, ""), teamVariable},
 	} {
 		got := placedFor(t, each.env, path)
 		if got.notes != "" || !strings.Contains(got.why, each.says) {
@@ -238,7 +279,11 @@ func placedFor(t *testing.T, env Env, path string) places {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return placesOf(placing{wanted: wanted, given: path, env: env})
+	made, err := placesOf(placing{wanted: wanted, given: path, env: env})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return made
 }
 
 // sound with no movie, and a movie with no rate, are refused by name;

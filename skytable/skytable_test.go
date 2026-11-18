@@ -48,3 +48,40 @@ func TestNoSkyIsDark(t *testing.T) {
 		t.Errorf("no sky gives %v", got)
 	}
 }
+
+// flat is a sky of one light every way.
+type flat struct{ light maths.Light }
+
+// Light is the sky's light along a way, the same every way.
+func (sky flat) Light(maths.Vec) maths.Light { return sky.light }
+
+// the cells are the table's size, row by row from nadir to zenith and
+// column by column from negative z toward x, and a flat sky fills each
+// with its one light.
+func TestCellsAreRowByRowFromNadirAndEveryCellOfAFlatSky(t *testing.T) {
+	want := maths.Light{R: 0.25, G: 0.5, B: 1}
+	cells := skytable.Of(flat{want}).Cells()
+	if len(cells) != skytable.Rows*skytable.Columns {
+		t.Fatalf("the table has %d cells, want %d", len(cells),
+			skytable.Rows*skytable.Columns)
+	}
+	for place, got := range cells {
+		if math.Abs(got.R-want.R) > 1e-12 || math.Abs(got.G-want.G) > 1e-12 ||
+			math.Abs(got.B-want.B) > 1e-12 {
+			t.Fatalf("cell %d is %v, want %v", place, got, want)
+		}
+	}
+	lopsided := skytable.Of(lopsided{}).Cells()
+	nadir, zenith := lopsided[0], lopsided[(skytable.Rows-1)*skytable.Columns]
+	if nadir.G > 0.01 || zenith.G < 0.99 {
+		t.Errorf("green is %v at the nadir and %v at the zenith, want "+
+			"about 0 and 1", nadir.G, zenith.G)
+	}
+	middle := (skytable.Rows - 1) / 2 * skytable.Columns
+	east, west := lopsided[middle+skytable.Columns/4],
+		lopsided[middle+3*skytable.Columns/4]
+	if east.R < 0.99 || west.R > 0.01 {
+		t.Errorf("red is %v east and %v west at the horizon, want about 1 "+
+			"and 0", east.R, west.R)
+	}
+}

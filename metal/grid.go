@@ -65,15 +65,19 @@ func (k *Kernel) Grid(width, height, rows, per int,
 	// k is not read after k.ctx, so without this its finalizer could
 	// free the context while the gpu still draws with it
 	defer runtime.KeepAlive(k)
-	for first := 0; first < height; first += rows {
-		down := min(rows, height-first)
-		band := out[first*width*per : (first+down)*width*per]
-		if err := k.readBand(stream, first, down, band); err != nil {
-			return nil, err
-		}
+	place := func(first, down int) []float32 {
+		return out[first*width*per : (first+down)*width*per]
+	}
+	drawing := bandDrawing{kernel: k, stream: stream, height: height,
+		rows: k.bandRows(rows)}
+	if err := drawing.draw(place, keptInPlace); err != nil {
+		return nil, err
 	}
 	return out, nil
 }
+
+// keptInPlace is the consumer of a band already copied where it belongs.
+func keptInPlace(int, int, []float32) error { return nil }
 
 // gridFits checks positive dimensions before allocation and C-int narrowing.
 // The caller has already handled empty dimensions and nonpositive channels.

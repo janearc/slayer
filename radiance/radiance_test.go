@@ -72,3 +72,26 @@ func TestPlanckOfNothingIsNone(t *testing.T) {
 		}
 	}
 }
+
+// Planck guards at nought and no higher: a body of a kelvin or less, and
+// a wavelength of a nanometre or less, glow as celestial's law says, and
+// are not mistaken for none. Each pair is far enough from the law's
+// overflow for it to give light.
+func TestPlanckOfLessThanAUnitOfEitherStillGivesLight(t *testing.T) {
+	for name, each := range map[string]struct{ kelvin, nanometres float64 }{
+		"a kelvin, a millimetre":         {1, 1e6},
+		"half a kelvin, a millimetre":    {0.5, 1e6},
+		"a nanometre, a megakelvin":      {1e6, 1},
+		"half a nanometre, a megakelvin": {1e6, 0.5},
+	} {
+		got := radiance.Planck(measure.Kelvin(each.kelvin),
+			measure.Metres(each.nanometres*metresANanometre)).InWattsPerNanometre()
+		want := radiation.Planck(each.nanometres, each.kelvin)
+		if !(want > 0) {
+			t.Fatalf("%s: celestial gives %v, so this is not a case", name, want)
+		}
+		if !(math.Abs(got-want) <= relative*want) {
+			t.Errorf("%s: planck is %v, celestial's %v", name, got, want)
+		}
+	}
+}

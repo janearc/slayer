@@ -1,0 +1,74 @@
+{
+  "jobs": [
+    {
+      "attempt": 1,
+      "cancel_requested": false,
+      "executing": true,
+      "files": [
+        {
+          "path": "/capture/path-4",
+          "sha256": "1dba7e2e327c0380bd42bd50d420189969d2d72f20f6f4cc7a58c811a500aea9"
+        },
+        {
+          "path": "/capture/path-1",
+          "sha256": "42461cc5016ee519cdc9ec713c48f36257dbee9637d542284dcd7bc2ba823b72"
+        },
+        {
+          "path": "/capture/path-7",
+          "sha256": "6ce663fda6dd9407689ab15918d5d45f74f386a8fe1fd2c691e8d005244874ff"
+        },
+        {
+          "path": "/capture/path-3",
+          "sha256": "a184436bc2de355c8107cf9c51a5a92a9660b0e968213c8629f92117909403b0"
+        }
+      ],
+      "finished": "2026-11-15T23:50:12.803111Z",
+      "memory_pressure": "normal",
+      "peak_resident_bytes": 68501504,
+      "process_group": 31673,
+      "request": {
+        "agent": "preview-owner",
+        "args": [
+          "draw",
+          "/capture/path-7",
+          "--renderer",
+          "cpu",
+          "--width",
+          "640",
+          "--height",
+          "400",
+          "--rays",
+          "1",
+          "--quality",
+          "preview",
+          "--out",
+          "/capture/path-6"
+        ],
+        "command": "/capture/path-4",
+        "directory": "/capture/path-5",
+        "environment": {
+          "SLAYER_CACHE": "/capture/path-2"
+        },
+        "inputs": [
+          "/capture/path-7",
+          "/capture/path-3"
+        ],
+        "key": "ferruccio-ccfe456f-packaged-preview-v1",
+        "lane": "tests",
+        "timeout_seconds": 300
+      },
+      "result": {
+        "exit_code": 0,
+        "state": "succeeded"
+      },
+      "sequence": 3,
+      "started": "2026-11-15T23:50:10.7995Z",
+      "state": "succeeded",
+      "submitted": "2026-11-15T22:40:05.705545Z",
+      "worker": "NP6AXJ2UMNZOF6UI6KDBAATSP5"
+    }
+  ],
+  "observed_at": "2026-11-15T23:52:44Z",
+  "paused": "",
+  "version": 1
+}

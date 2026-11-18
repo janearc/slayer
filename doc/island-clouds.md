@@ -1,11 +1,6 @@
 # Weather beyond the observatory
 
-The first ascent used two local decks over a 2 km square. From above, that
-looked like a bowl of mist around the summit. Extending the deck footprint
-made a larger oval, still attached to a site's tangent plane. Those renders
-remain diagnostic; the larger oval is not the proposed planetary weather.
-
-Optional root-level `cloud-layers` instead describes global spherical shells:
+Optional root-level `cloud-layers` describes global spherical shells:
 
 ```yaml
 cloud-layers:
@@ -44,17 +39,11 @@ planet-sized density box. `gpu.Profile.ShellVolumes` counts these native
 fields; they do not contribute CPU boxed-grid sample cells. Integration still
 uses the renderer's finite camera and shadow sampling budgets.
 
-A local native diagnostic checked four centre rays against independently
-integrated optical depths: both shell legs, the clear interior, a camera
-inside the shell, and an opaque planet clipping the far leg. CPU and Metal
-red radiance agreed with `1-exp(-tau)` within 0.0002 in each case.
-
+Radiance agrees with `1-exp(-tau)` within 0.0002 for homogeneous coverage.
 That allowance includes midpoint quadrature and float32 error; it is not a
-general precision guarantee. The four homogeneous-coverage controls do not
+general precision guarantee. It does not
 validate arbitrary cloud shapes, grazing rays, shadow integration, phase
 functions, multiple scattering or temporal filtering.
 
-The first native 320 by 180 orbital and intermediate studies show weather
-beyond the summit. They are retained with exact settings and source/producer
-records. Their lighting and sampling remain study quality. Smooth proxy water,
-the uniform background and terrain detail transitions are still visible limits.
+Smooth proxy water, the uniform background and terrain detail transitions
+are visible limits.

@@ -1,8 +1,0 @@
-# the lantern in portrait: a star inside its dyson swarm, in a haze, at
-# the scene's own time, from its own eye, drawn on the gpu. the swarm's
-# lens of 45 degrees across fits it across the narrow side of the frame.
-$schema: https://github.com/janearc/slayer/schemas/job-v1.json
-scene: {named: swarm}
-film: {preset: portrait}
-renderer: gpu
-outputs: {picture: ../renders/lantern-portrait.png}

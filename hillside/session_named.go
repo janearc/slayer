@@ -24,7 +24,7 @@ package hillside
 // On the gpu a
 // film's frames go through one gpu.Frames: a world with nothing timed
 // keeps its generation while only the camera moves, and a timed one takes
-// a new one per frame.
+// a new one for each new time (see worldChanged).
 
 import (
 	"errors"
@@ -39,6 +39,7 @@ import (
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/maths"
 	scenes "github.com/janearc/slayer/scene/named"
+	"github.com/janearc/slayer/scene/thing"
 )
 
 // sceneNamed is defined as the form job.Scene's Form names a scene built
@@ -60,9 +61,24 @@ type namedFramer struct {
 	music time.Duration
 	clock job.Clock
 	// frames is the retained drawer where the scene is drawn on the gpu,
-	// and generation the last generation it was given
+	// generation the last generation it was given, and drawnAt the time
+	// of the frame it was given for
 	frames     *gpu.Frames
 	generation uint64
+	drawnAt    time.Duration
+}
+
+// worldChanged is whether a frame at a time can show another world than the
+// last frame drawn, so takes a new generation: the first frame, and a
+// frame at another time of a scene whose world changes with time. A
+// moved camera changes nothing in the world.
+//
+// A timed scene drawn again at the same time is the same world, and its
+// generation lets the drawer draw only the camera's move. Things that
+// only move to a new time are a new generation; the drawer keeps their
+// meshes by their bytes (see gpu.Frames).
+func worldChanged(first, timed bool, last, at time.Duration) bool {
+	return first || (timed && at != last)
 }
 
 // openNamed builds a named scene as a job asks: its with block checked
@@ -74,7 +90,7 @@ func openNamed(wanted job.Job, given asked) (*Session, error) {
 	if err != nil {
 		return nil, placed(wanted, err)
 	}
-	if given.fastLighting {
+	if given.fastLighting && !scene.AllowsFastLighting() {
 		return nil, placed(wanted, errFastNamed)
 	}
 	with := wanted.Scene().Parameters()
@@ -92,7 +108,7 @@ func openNamed(wanted job.Job, given asked) (*Session, error) {
 	given = given.namedBy(defaults, built)
 	source := &namedFramer{built: built, plan: cameraPlan(wanted)}
 	if given.onGPU {
-		if source.frames, err = gpu.NewFrames(gpu.Software); err != nil {
+		if source.frames, err = gpu.NewFrames(framesMode(given)); err != nil {
 			return nil, err
 		}
 	}
@@ -248,20 +264,32 @@ func startedAt(wanted job.Job, own time.Duration) []time.Duration {
 	return times
 }
 
+// eyed is the scene advanced to a time and what it is asked there, seen
+// from its eye or the job's path: the steps light takes before drawing.
+func (source *namedFramer) eyed(at time.Duration, given asked) (asked,
+	error) {
+	eye, err := source.advance(at)
+	if err != nil {
+		return given, err
+	}
+	given.eye = &eye
+	given.at = at
+	if !given.said.wide {
+		if wide, varies := source.built.WideAt(at); varies {
+			given.wide = wide / maths.Degree
+		}
+	}
+	err = source.plan.exposing(&given, at)
+	return given, err
+}
+
 // light is the scene at a time, told the time where it keeps its own,
 // seen from its eye or the job's path, drawn on the cpu, or on the gpu by
 // the session's retained drawer.
 func (source *namedFramer) light(at time.Duration, given asked) (
 	drawnLight, error) {
-	source.built.Set(at)
-	if source.sheet != nil {
-		values := source.sheet.At(source.clock.Playback(at - source.music))
-		if err := source.built.Play(values); err != nil {
-			return drawnLight{}, err
-		}
-	}
-	given.at = at
-	if err := source.plan.exposing(&given, at); err != nil {
+	given, err := source.eyed(at, given)
+	if err != nil {
 		return drawnLight{}, err
 	}
 	world := source.built.World()
@@ -272,13 +300,39 @@ func (source *namedFramer) light(at time.Duration, given asked) (
 		made.drawn, made.profile, err = drawMeasured(world, given, nothing)
 		return made, err
 	}
-	if source.built.Timed() || source.generation == nothing {
+	timed := source.built.Timed() || source.sheet != nil
+	if worldChanged(source.generation == nothing, timed, source.drawnAt,
+		at) {
 		source.generation++
 	}
-	var err error
+	source.drawnAt = at
 	made.drawn, made.profile, err = given.drawnBy(source.frames, world,
 		source.generation, *given.eye)
 	return made, err
+}
+
+// inspect advances the named source to a time, for inspection.
+func (source *namedFramer) inspect(at time.Duration) (*thing.World, error) {
+	if _, err := source.advance(at); err != nil {
+		return nil, err
+	}
+	return source.built.World(), nil
+}
+
+// advance updates the named scene at absolute time, captures its camera, then
+// applies cue-sheet values, preserving Frame's historical update order.
+func (source *namedFramer) advance(at time.Duration) (maths.Subspace, error) {
+	if err := source.built.Advance(at); err != nil {
+		return maths.Subspace{}, err
+	}
+	eye := source.built.Eye()
+	if source.sheet != nil {
+		values := source.sheet.At(source.clock.Playback(at - source.music))
+		if err := source.built.Play(values); err != nil {
+			return maths.Subspace{}, err
+		}
+	}
+	return eye, nil
 }
 
 // close lets the retained drawer go, where there is one.

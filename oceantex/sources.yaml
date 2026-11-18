@@ -1002,6 +1002,46 @@ integrate.high:
   read: "none"
   kind: "glue"
 
+cox-munk.total.offset:
+  value: 0.003
+  unit: "dimensionless"
+  from: "Cox & Munk 1954, J. Opt. Soc. Am. 44, 838-850"
+  url: "none"
+  fetched: "2026-11-16"
+  read: "none"
+  kind: "glue"
+  note: "the clean-surface fit to the total mean-square slope, sigma^2 = 0.003 + 0.00512 U, U at 12.5 m, as the brief of 2026-11-16 states it; not read at a url here. Cox and Munk fit the total apart from its two parts: cox-munk.along.slope and the two across numbers sum to 0.003 + 0.00508 U"
+
+cox-munk.total.slope:
+  value: 0.00512
+  unit: "per (m/s)"
+  from: "Cox & Munk 1954, J. Opt. Soc. Am. 44, 838-850"
+  url: "none"
+  fetched: "2026-11-16"
+  read: "none"
+  kind: "glue"
+  note: "see cox-munk.total.offset"
+
+slope.integrate.turns:
+  value: 360
+  unit: "steps"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-16"
+  read: "none"
+  kind: "glue"
+  note: "even steps in direction, over a full turn, in the sum that gives the slope a grid resolves; the sum over a patch's own grid checks it"
+
+slope.integrate.steps:
+  value: 600
+  unit: "steps"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-16"
+  read: "none"
+  kind: "glue"
+  note: "even steps in the logarithm of wave number, from integrate.low peak frequencies (deep water) to the grid's edge, in the same sum"
+
 seastate.wind.top:
   value: 80
   unit: "m/s"

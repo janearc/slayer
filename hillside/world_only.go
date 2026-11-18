@@ -21,6 +21,9 @@ var unshifted maths.Vec
 // a world, and no terrain, planet, things or stands for hillside to stand
 // anything on.
 func worldOnly(read set.Set) bool {
+	if _, groundlessAir := read.GroundlessAir(); groundlessAir {
+		return false
+	}
 	_, hasWorld := read.World()
 	_, grounded := read.Ground()
 	_, planeted := read.Planet()
@@ -75,16 +78,45 @@ func refused(given asked, err error) drawing {
 // own.
 func stagedWorld(read set.Set, given asked) drawing {
 	said, _ := read.World()
+	if err := refuseWorldOnlyOceanSun(read, given.set); err != nil {
+		return refused(given, err)
+	}
 	world, err := stage.World(said)
 	if err != nil {
 		return refused(given, fmt.Errorf("%s: %w", given.set, err))
 	}
 	world.VolumeIllumination = read.VolumeIllumination()
-	eye, err := cameraEye(read, given.camera)
+	making := &staging{given: given, world: world,
+		places: map[string]maths.Vec{}}
+	if read.Light() == "moon" {
+		if world.Sky != nil {
+			return refused(given, fmt.Errorf("%s: world-only light: moon cannot replace an authored world sky", given.set))
+		}
+		if err = making.mooned(read); err != nil {
+			return refused(given, fmt.Errorf("%s: %w", given.set, err))
+		}
+	}
+	if err = making.tagOceanDirectMoon(read); err != nil {
+		return refused(given, err)
+	}
+	if ocean := world.OceanSurface; ocean != nil && ocean.DirectMoonMeanPlane {
+		tag := making.given.oceanSunTag
+		ocean.SunRoute, ocean.SunLampIndex, ocean.FillLampIndex =
+			tag.route, tag.sun, tag.fill
+	}
+	shot, err := worldOnlyShot(read, given.camera)
 	if err != nil {
 		return refused(given, fmt.Errorf("%s: %w", given.set, err))
 	}
-	given.eye = eye
+	if err = making.given.withShotMedia(shot, said.Unit()); err != nil {
+		return refused(given, fmt.Errorf("%s: %w", given.set, err))
+	}
+	if err = making.given.resolveOceanInitialMedium(world); err != nil {
+		return refused(given, fmt.Errorf("%s: %w", given.set, err))
+	}
+	given = making.given
+	eye := shot.Eye()
+	given.eye = &eye
 	film, _ := read.Film()
 	if !given.said.wide {
 		given.wide = film.Wide()
@@ -98,39 +130,22 @@ func stagedWorld(read set.Set, given asked) drawing {
 		tone.Exposure = given.exposure
 		given.print = &tone
 	}
-	making := &staging{given: given, places: map[string]maths.Vec{}}
 	if given.overlay, err = making.overlaid(read); err != nil {
 		return refused(given, err)
 	}
 	return drawing{world: world, made: talliedWorld(world), given: given}
 }
 
-// cameraEye is where the set's camera of a name stands and faces, or
-// its first camera where the name is nothing, or nil and why not.
-func cameraEye(read set.Set, name string) (*maths.Subspace, error) {
-	if name == "" {
-		return firstEye(read)
+// worldOnlyShot preserves the world-half camera rule: a named camera is
+// selected directly; otherwise only the first authored camera is made.
+func worldOnlyShot(read set.Set, name string) (set.Shot, error) {
+	if name != "" {
+		return namedShot(read, name, nowhere)
 	}
-	shot, err := namedShot(read, name, nowhere)
-	if err != nil {
-		return nil, err
+	for _, each := range read.Cameras() {
+		return read.Shot(each, nowhere)
 	}
-	eye := shot.Eye()
-	return &eye, nil
-}
-
-// firstEye is where the set's first camera stands and faces, or nil and
-// why not.
-func firstEye(read set.Set) (*maths.Subspace, error) {
-	for _, name := range read.Cameras() {
-		shot, err := read.Shot(name, nowhere)
-		if err != nil {
-			return nil, err
-		}
-		eye := shot.Eye()
-		return &eye, nil
-	}
-	return nil, errors.New("no camera")
+	return set.Shot{}, errors.New("no camera")
 }
 
 // filmPrint is the print a film says, with its exposure, or nil where it

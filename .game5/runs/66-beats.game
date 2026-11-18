@@ -1,0 +1,2 @@
+# music: beats from audio, and the metronome that shows them.
+beats . :: go run ./cmd/beats

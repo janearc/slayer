@@ -1,0 +1,22 @@
+# Picked preparation/proof budgets, 2026-11-08.
+numbers:
+  - name: brick-side
+    value: 8
+    says: grid samples along a spatial occupancy brick
+    kind: picked
+    by: conservative packet preparation, 2026-11-08
+  - name: bytes
+    value: 1048576
+    says: maximum retained occupancy bit-array payload, 1 MiB
+    kind: picked
+    by: conservative packet preparation, 2026-11-08
+  - name: rays
+    value: 64
+    says: maximum rays in one proof query, matching an authored 8 by 8 packet
+    kind: picked
+    by: conservative packet preparation, 2026-11-08
+  - name: query-bricks
+    value: 4096
+    says: maximum brick tests per emptiness query before returning unknown
+    kind: picked
+    by: conservative packet preparation, 2026-11-08

@@ -12,6 +12,8 @@ import (
 type Recipe struct {
 	burn                                           *manufacture.BurnSpec
 	kind                                           string
+	batchPlacement                                 manufacture.CityBatchPlacementMode
+	vacantLotIndex                                 manufacture.CityVacantLotIndexMode
 	design                                         string
 	season                                         string
 	diameter, aperture, opening, azimuth, altitude float64
@@ -20,6 +22,16 @@ type Recipe struct {
 
 // Kind names the construction rule shared by these specimens.
 func (recipe Recipe) Kind() string { return recipe.kind }
+
+// BatchPlacement is the city's explicit material-batch placement mode, if set.
+func (recipe Recipe) BatchPlacement() manufacture.CityBatchPlacementMode {
+	return recipe.batchPlacement
+}
+
+// VacantLotIndex is the clustered city's vacant-lot enumeration mode, if set.
+func (recipe Recipe) VacantLotIndex() manufacture.CityVacantLotIndexMode {
+	return recipe.vacantLotIndex
+}
 
 // Construction selects the checked solid recipe. Volumetric fire uses Fire.
 func (recipe Recipe) Construction() (*manufacture.Kind, error) {
@@ -36,6 +48,18 @@ func (recipe Recipe) Construction() (*manufacture.Kind, error) {
 	}
 	if recipe.season != "" {
 		row, err = manufacture.WithSeason(row, recipe.season)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if recipe.batchPlacement != "" {
+		row, err = manufacture.WithCityBatchPlacement(row, recipe.batchPlacement)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if recipe.vacantLotIndex != "" {
+		row, err = manufacture.WithCityVacantLotIndex(row, recipe.vacantLotIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -115,6 +139,22 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 		err := reading.keys(block, map[string]step{
 			"kind":   reading.word(&r.kind, manufacture.KindNames()...),
 			"season": reading.word(&r.season, manufacture.SeasonNames()...),
+			"batch-placement": func(key, value *yaml.Node) error {
+				if err := reading.only(string(manufacture.CityBatchFused),
+					string(manufacture.CityBatchNested))(key, value); err != nil {
+					return err
+				}
+				r.batchPlacement = manufacture.CityBatchPlacementMode(value.Value)
+				return nil
+			},
+			"vacant-lot-index": func(key, value *yaml.Node) error {
+				if err := reading.only(string(manufacture.CityVacantLotIndexOn),
+					string(manufacture.CityVacantLotIndexOff))(key, value); err != nil {
+					return err
+				}
+				r.vacantLotIndex = manufacture.CityVacantLotIndexMode(value.Value)
+				return nil
+			},
 			"enclosure": reading.block(map[string]step{
 				"kind":     reading.only("dome"),
 				"diameter": reading.quantity(&r.diameter, "m", 1, 200),
@@ -147,6 +187,11 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 			return reading.refuse(block, "recipe %s is not an optical observatory", name.Value)
 		}
 		if r.season != "" {
+			if _, err := r.Construction(); err != nil {
+				return reading.refuse(block, "%v", err)
+			}
+		}
+		if r.batchPlacement != "" || r.vacantLotIndex != "" {
 			if _, err := r.Construction(); err != nil {
 				return reading.refuse(block, "%v", err)
 			}
@@ -190,6 +235,15 @@ func (reading reader) resolvedRecipes() error {
 		kind, detail, err := resolve(s.name, s.kind, s.recipe, s.complexity)
 		if err != nil {
 			return err
+		}
+		if s.recipe != "" {
+			config := reading.set.recipes[s.recipe]
+			if config.batchPlacement != "" {
+				return fmt.Errorf("%s: city batch placement recipe %q can only be used by an individual thing, not stand %s", reading.file, s.recipe, s.name)
+			}
+			if config.vacantLotIndex != "" {
+				return fmt.Errorf("%s: vacant lot index recipe %q can only be used by an individual thing, not stand %s", reading.file, s.recipe, s.name)
+			}
 		}
 		if kind == "fire" && s.alight != 0 {
 			return fmt.Errorf("%s: fire stand %s is already alight", reading.file, s.name)

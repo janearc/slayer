@@ -1,7 +1,7 @@
 # What Slayer draws
 
-For a first run, use the small [picture](jobs/first-picture.yaml) and
-[film](jobs/first-film.yaml) jobs with the [beginner guide](doc/getting-started.md).
+For a first run, use the small [picture](doc/examples/jobs/first-picture.yaml) and
+[film](doc/examples/jobs/first-film.yaml) jobs with the [beginner guide](doc/getting-started.md).
 See [building](doc/building.md) for Game setup and
 [modes](doc/modes.md) for backend and speed choices.
 
@@ -393,7 +393,7 @@ swarm, the orbital, the ring and moonrise there are two more:
   flare, and zappy beside it at its own size.
 
 ```sh
-game run slayer -- draw jobs/orbital-portrait.yaml
+game run slayer -- draw doc/examples/jobs/orbital-portrait.yaml
 ```
 
 ## Other commands
@@ -401,8 +401,8 @@ game run slayer -- draw jobs/orbital-portrait.yaml
 - **Slayer**: `game run slayer -- assess sets/widow.yaml --judge` draws a
   set file as a stranger would, from outside, and checks its terminal
   picture against a real one. `game run slayer -- draw JOB` draws a job;
-  `jobs/` holds nine, from a smoke still to a film through a lens with
-  the shutter open (`jobs/blur-fire-night.yaml`). `slayer list` says what
+  `doc/examples/jobs/` holds ten, from a smoke still to a city at night
+  and a film with music (`doc/examples/jobs/first-film.yaml`). `slayer list` says what
   there is to draw; `slayer watch JOB` draws a job live as it is saved.
 - **Develop**: `game run slayer -- develop JOB a.pfm b.pfm --sum --out
   x.png` adds raws together and develops them through the job's print or

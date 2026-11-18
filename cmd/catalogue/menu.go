@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"strings"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
 	"github.com/janearc/slayer/manufacture"
@@ -51,7 +52,7 @@ type staging struct {
 // sky and lamps in place of the studio's when it has them, unless the
 // plan asks for its studio whatever the entry has.
 func (entry entry) staged(plan plan) plan {
-	if entry.Staging != nil && !plan.Studio {
+	if entry.Staging != nil && !plan.Studio && plan.Presentation == "" {
 		plan.Sky = entry.Staging.Sky
 		plan.Sources = entry.Staging.Sources
 	}
@@ -89,6 +90,12 @@ func parseMenu(name string, raw []byte) (*menu, error) {
 	}
 	names := map[string]bool{}
 	for _, entry := range made.Entries {
+		if strings.TrimSpace(entry.About) == "" {
+			return nil, fmt.Errorf("catalogue kind %q needs an about description", entry.Kind)
+		}
+		if strings.TrimSpace(entry.Notes) == "" {
+			return nil, fmt.Errorf("catalogue kind %q needs notes", entry.Kind)
+		}
 		if _, err := manufacture.KindNamed(entry.Kind); err != nil {
 			return nil, err
 		}

@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/thing"
 )
 
 // crowd is a picture's things with a tree of boxes over them, so that a
@@ -202,8 +203,19 @@ func (seen *crowd) closer(best nearest, index int, ray maths.Ray,
 // point and a lamp far along the ray; far is +Inf for a lamp at
 // infinity.
 func (seen *crowd) blocked(ray maths.Ray, far float64) bool {
+	return seen.blockedExcept(ray, far, nil)
+}
+
+// blockedExcept is blocked while ignoring one exact staged boundary. It is
+// used only for the authored ocean mean-plane source path; every other opaque
+// object is still tested on both sides of the mean interface.
+func (seen *crowd) blockedExcept(ray maths.Ray, far float64,
+	skip *thing.Thing) bool {
 	far = math.Min(far, nowhere)
 	for _, index := range seen.everywhere {
+		if seen.things[index].thing == skip {
+			continue
+		}
 		if seen.casts(index, ray, far) {
 			return true
 		}
@@ -221,7 +233,7 @@ func (seen *crowd) blocked(ray maths.Ray, far float64) bool {
 			continue
 		}
 		if node.left == 0 {
-			if seen.castsAny(node, ray, far) {
+			if seen.castsAnyExcept(node, ray, far, skip) {
 				return true
 			}
 			continue
@@ -234,7 +246,16 @@ func (seen *crowd) blocked(ray maths.Ray, far float64) bool {
 
 // castsAny is whether any thing of a leaf stands in the ray's way.
 func (seen *crowd) castsAny(leaf *branch, ray maths.Ray, far float64) bool {
+	return seen.castsAnyExcept(leaf, ray, far, nil)
+}
+
+// castsAnyExcept is castsAny, but it ignores the thing skip.
+func (seen *crowd) castsAnyExcept(leaf *branch, ray maths.Ray,
+	far float64, skip *thing.Thing) bool {
 	for _, index := range seen.order[leaf.from:leaf.to] {
+		if seen.things[index].thing == skip {
+			continue
+		}
 		if seen.casts(index, ray, far) {
 			return true
 		}

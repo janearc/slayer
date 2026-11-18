@@ -178,7 +178,7 @@ func TestWhatCannotBeJudgedIsRefused(t *testing.T) {
 // the second, honest both times, with its two pictures and its verdict
 // copied to --out. Moved from smokecheck.
 func TestAssessJudgesASmokeAndServesItAgain(t *testing.T) {
-	t.Setenv("XDG_CACHE_HOME", t.TempDir())
+	t.Setenv("SLAYER_CACHE", t.TempDir())
 	out := t.TempDir()
 	for i, want := range []string{"drew 1, served 0", "drew 0, served 1"} {
 		got := assessed(t, t.TempDir(), "--smokes", "1", "--k", "1",

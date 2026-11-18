@@ -44,6 +44,7 @@ type digested struct {
 	once  sync.Once
 	paths map[string]string
 	sums  map[string]string
+	fixed map[string]string
 }
 
 // inputs is every file the document reads, by its name in the canonical
@@ -76,7 +77,11 @@ func (made *digested) of() map[string]string {
 	made.once.Do(func() {
 		made.sums = map[string]string{}
 		for name, path := range made.paths {
-			made.sums[name] = digestOf(path)
+			if fixed, has := made.fixed[name]; has {
+				made.sums[name] = fixed
+			} else {
+				made.sums[name] = digestOf(path)
+			}
 		}
 	})
 	copied := make(map[string]string, len(made.sums))

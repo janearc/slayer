@@ -1,0 +1,79 @@
+# The MCRN Larson, landed: its gear down and its stairs out. Every number
+# here is picked by eye, in metres, as the saucer's own are; none is
+# engineering. Each family names the material it is made of and the
+# finish it was given, and its look is made from the two.
+#
+# The ground is not booked. It lies where the stairs' foot stands, so the
+# top tread meets the belly disc: the stairs decide how high the saucer
+# sits, and the legs reach down to wherever that is.
+legs:
+  # three, a tripod, the first one straight behind the hull so that none
+  # stands in front of the stairs
+  count: 3
+  turn: 90
+  # where a leg meets the hull's underside, and where its foot stands,
+  # each as metres from the hull's axis
+  attach: 3.3
+  foot: 4.4
+  radius: 0.07
+  brace:
+    # a thinner strut from the flat of the underside to the same foot
+    attach: 1.9
+    radius: 0.04
+  pad:
+    radius: 0.3
+    thickness: 0.06
+  material: titanium
+  finish: weathered
+# how far in front of the hull's axis the stairs' foot stands, so the top
+# tread comes up under the belly disc
+foot: 2.7
+stairs:
+  steps: 9
+  rise: 0.2
+  going: 0.3
+  width: 1.3
+  treads:
+    depth: 0.28
+    thickness: 0.08
+    first:
+      y: 0.02
+      z: 0.0
+    material: aluminium
+    finish: brushed
+  stringers:
+    radius: 0.05
+    offset: 0.6
+    low:
+      y: 0.06
+      z: 0.14
+    high:
+      y: 1.62
+      z: -2.2
+    material: titanium
+    finish: weathered
+  # the rail stops short of the hull: it ends where the underside comes
+  # down to meet it, clear of the belly disc
+  rail:
+    radius: 0.03
+    offset: 0.67
+    low:
+      y: 1.0
+      z: 0.12
+    high:
+      y: 1.68
+      z: -0.9
+    material: titanium
+    finish: weathered
+  posts:
+    count: 2
+    radius: 0.03
+    offset: 0.67
+    first:
+      z: 0.1
+      bottom: 0.06
+      top: 1.0
+    y-step: 0.6
+    z-step: -0.9
+    material: titanium
+    finish: weathered

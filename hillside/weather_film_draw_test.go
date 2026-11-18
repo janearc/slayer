@@ -158,7 +158,7 @@ func lightOf(t *testing.T, wanted job.Job, index int) []float32 {
 // A planet alone, with no ground, opens as a film, and its first frame
 // is its still, its weather at the set's moment and unturned.
 func TestAGroundlessPlanetFilmsAndItsFirstFrameIsItsStill(t *testing.T) {
-	t.Setenv("SLAYER_WEATHER", t.TempDir())
+	t.Setenv("SLAYER_CACHE", t.TempDir())
 	path := giantSet(t, "      pace: 3600\n      turning: 90\n")
 	still := lightOf(t, giantJob(t, path, false), 0)
 	first := lightOf(t, giantJob(t, path, true), 0)
@@ -175,7 +175,7 @@ func TestAGroundlessPlanetFilmsAndItsFirstFrameIsItsStill(t *testing.T) {
 // anti-test: a set whose weather says no pace and no turning draws every
 // frame of a film as its still.
 func TestAWeatherWithNoPaceHoldsItsMoment(t *testing.T) {
-	t.Setenv("SLAYER_WEATHER", t.TempDir())
+	t.Setenv("SLAYER_CACHE", t.TempDir())
 	path := giantSet(t, "")
 	first := lightOf(t, giantJob(t, path, true), 0)
 	later := lightOf(t, giantJob(t, path, true), 1)
@@ -184,9 +184,8 @@ func TestAWeatherWithNoPaceHoldsItsMoment(t *testing.T) {
 	}
 }
 
-// anti-test: a world with nothing to stand on is refused as a film, by
-// name; the world half draws it as a still.
-func TestAWorldAloneIsNotFilmed(t *testing.T) {
+// a world-only set opens as a film and draws the requested frame.
+func TestAWorldAloneCanBeFilmed(t *testing.T) {
 	absolute, err := filepath.Abs(sessionWidow)
 	if err != nil {
 		t.Fatal(err)
@@ -194,9 +193,13 @@ func TestAWorldAloneIsNotFilmed(t *testing.T) {
 	wanted := jobFrom(t, fmt.Sprintf("scene: {set: %s}\nfilm: {width: 8, "+
 		"height: 8, rays: 1}\nrenderer: cpu\nfps: 1\n"+
 		"duration: {value: 1, unit: s}\n", absolute))
-	if _, err := Open(context.Background(), wanted, Stamp{}); err == nil ||
-		!strings.Contains(err.Error(), "the world half") {
-		t.Errorf("a world alone as a film: %v", err)
+	session, err := Open(context.Background(), wanted, Stamp{})
+	if err != nil {
+		t.Fatalf("a world alone as a film: %v", err)
+	}
+	defer session.Close()
+	if _, err := session.Frame(context.Background(), 0, Ask{}); err != nil {
+		t.Errorf("a world-only film frame: %v", err)
 	}
 }
 
@@ -204,7 +207,7 @@ func TestAWorldAloneIsNotFilmed(t *testing.T) {
 // again from still air, so the earlier frame is as a film from the start
 // draws it: the weather never runs backward.
 func TestAnEarlierFrameStartsTheWeatherAgain(t *testing.T) {
-	t.Setenv("SLAYER_WEATHER", t.TempDir())
+	t.Setenv("SLAYER_CACHE", t.TempDir())
 	path := giantSet(t, "      pace: 3600\n      turning: 90\n")
 	still := lightOf(t, giantJob(t, path, false), 0)
 	session, err := Open(context.Background(), giantJob(t, path, true),

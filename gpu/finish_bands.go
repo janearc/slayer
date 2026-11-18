@@ -45,6 +45,14 @@ func (band *bandFinisher) consume(first, down int, samples []float32) error {
 	if err := band.valid(first, down, samples); err != nil {
 		return err
 	}
+	stride := per + perRecord*band.finish.records
+	for sample := 0; sample < len(samples); sample += stride {
+		if uint32(samples[sample+11])&(1<<20) != 0 {
+			return fmt.Errorf("gpu: lunar mean-interface source path left its finite water footprint or became invalid")
+		}
+	}
+	workReceipt(first, down, band.picture.W*band.side,
+		per+perRecord*band.finish.records, samples)
 	counts := nativeCounts(samples, per+perRecord*band.finish.records)
 	band.native.Queries += counts.Queries
 	band.native.Candidates += counts.Candidates

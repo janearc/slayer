@@ -49,24 +49,12 @@ rotate with the camera or change randomly between frames. Surface illumination
 still uses its existing cosine-weighted hemisphere integration; sharing a sky
 does not mean those two integrals should share their angular weights.
 
-## Evidence and cost
-
-A local diagnostic ran CPU, software Metal and native Metal controls. Uniform
-sky results fell within independent energy bounds for a constant-density cube.
-A black lower-hemisphere blocker reduced the scattering into the independently
-bounded half-sky range. Directional illumination matched an analytic attenuated
-single-scattering integral, and pure emission retained its original response.
-
-The checked native directional value was 0.00655871 against 0.00655877 from
-the analytic reference. The legacy control was 0.04120956 against 0.04120999.
-The declared allowance was 0.00002, including float32 and midpoint integration.
-These small controls do not establish full-scene visual or temporal acceptance.
+## Cost
 
 The initial path evaluates sky shadows and medium transmission at each ray
 step. This is a direct reference path, not a performance improvement. Existing
-smoke source grids include the new source when enabled, but general weather
-source caching, spatial error controls and moving-view comparisons remain open.
-No time-lagged lighting cache is introduced by this change.
+smoke source grids include the new source when enabled. No time-lagged
+lighting cache is introduced by this change.
 
 ## Bounded incident-light preparation
 
@@ -100,29 +88,10 @@ blends to direct integration at the boundary; points outside use the direct
 path. The grid samples include both faces of each dimension. CPU rendering
 continues to integrate directly, providing a reference for this approximation.
 
-The initial native controls compare 16-cubed and 32-cubed grids with direct CPU
-transport in a constant-density box. Raw red differences were 0.0000947 and
-0.0000131 under an authored 0.0002 study allowance. This is not a general error
-bound. Clock and opaque-geometry changes refreshed the source; an outside-grid
-control matched direct native transport within float precision.
+The grid is an approximation, not a general error bound. Clock and
+opaque-geometry changes refresh the source.
 
 `EnvironmentWall`, `EnvironmentGPU` and `EnvironmentNodes` report this separate
 preparation. `TraceGPU` excludes it. Total cost must include both, including
 the source-grid readback and subsequent input upload. Boundary motion and
 broader scene accuracy still require their own comparisons.
-
-A matched native 720p pair retains the same terrain, objects and population
-records, including 36233 trees represented by geometry. The 64-cubed source
-grid's developed RGB differences have mean 0.0438 and maximum three code values
-against direct integration. These observations are not a JND or temporal
-acceptance criterion.
-
-That frame's grid preparation used 0.014 GPU seconds and 0.051 wall seconds;
-tracing used 1.00 GPU seconds against about 6.0 seconds for direct integration.
-A warm direct command took 15.0 seconds versus 12.3 seconds cached. Compilation
-and CPU preparation varied between commands, so that total is a recorded pair,
-not a general end-to-end speedup. Source and image bytes accompany the studies.
-
-The same 4K scene reaches its existing 150000-instance allowance before GPU
-rendering. The lighting improvement does not establish the 4K animation goal.
-Vegetation preparation, grouping and residency remain active work.

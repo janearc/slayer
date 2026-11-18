@@ -17,9 +17,9 @@ Named demos are `orbital`, `swarm`, `ring`, `hillside`, `moonrise`, `house`,
 and `camera`. These run the actual scene commands with modest first-look
 settings.
 
-The menu is checked from [catalogue.yaml](../cmd/demo/catalogue.yaml), where
-the preview choices are identified as authored. Their defaults do not replace
-the commands' own full-size settings.
+The menu is [catalogue.yaml](../cmd/demo/catalogue.yaml), where the preview
+choices are identified as authored. Their defaults do not replace the
+commands' own full-size settings.
 
 Images go to `out/demos/`. Moonrise also keeps its linear `.pfm` raw. Camera
 writes a poster and four seconds of numbered frames; its YAML plan describes
@@ -33,9 +33,7 @@ The named command is built into the output directory's `.bin/` first, so a
 source checkout does not need a full `game build` before showing a demo. This
 needs the module dependencies declared in `go.mod`.
 
-The current development tree still names private review versions; those must
-be available from the review proxy until the dependencies are released. No
-demo silently downloads a survey or treats missing external data as a
+No demo silently downloads a survey or treats missing external data as a
 successful picture.
 
 ## Terminal output and smaller previews
@@ -73,13 +71,9 @@ have their own [setup instructions](grissom-setup.md).
 
 ## Game dependency
 
-The Game version installed when this work began discarded arguments after the
-run name. That makes `game run demo N` lose N. The companion local branch
-`fix/run-demo-arguments` forwards literal arguments to the last configured run
-step, leaving earlier setup steps alone.
-
-It also passes application flags after `--`. Use a Game build containing that
-fix for the selector examples.
+Game builds that discard arguments after the run name make `game run demo N`
+lose N. A build that forwards literal arguments to the last configured run
+step, and application flags after `--`, is needed for the selector examples.
 
 On older builds, these fixed runs work without forwarding:
 
@@ -87,6 +81,3 @@ On older builds, these fixed runs work without forwarding:
 game run demos
 game run demo-one
 ```
-
-The Game fix is a separate change. No global binary or configuration is
-replaced by Slayer's demo command.

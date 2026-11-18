@@ -1,0 +1,13 @@
+The attempt-1 and attempt-2 control scenes are exactly `scene.yaml` copied
+without a patch, with SHA-256 recorded in sha256sums.txt. The remaining
+variants apply one of the three standard patches. Each patch replaces only
+the clear interface's single `clear: {through, index, gloss, rank}` line.
+
+Attempt 1 pair: index 1.0/gloss 1 vs index 1.333/gloss 1; index alone varies.
+Attempt 2 pair: index 1.0/gloss 0 vs index 1.333/gloss 0; index alone varies.
+
+The four exact original rendered job files are retained in the shared gallery.
+They differ only in the relative picture destination. The canonical job.yaml
+omits outputs and is copied next to each generated scene; Slayer's ordinary
+--out override supplies the corresponding destination. This normalizes only
+scene and output paths and preserves renderer, film size/rays, and scene time.

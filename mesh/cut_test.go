@@ -205,15 +205,51 @@ func sharedBox(faces int) ([]maths.Vec, [][3]int) {
 	return corners, made
 }
 
-// a mesh allocates its nodes once, at twice its faces, as a binary tree
-// of leaves cannot have more, and the root is the only node when the
-// faces make one leaf.
-func TestTheNodesAreAllocatedOnceAtTwiceTheFaces(t *testing.T) {
+// A finished hierarchy releases its worst-case construction reservation,
+// while retaining every live node and every face exactly once.
+func TestTheCompletedTreeReleasesUnusedNodeCapacity(t *testing.T) {
 	made, _, faces := ball(t, 2)
-	if cap(made.tree.nodes) != 2*len(faces) {
-		t.Errorf("%d faces have room for %d nodes", len(faces),
-			cap(made.tree.nodes))
+	tree := made.tree
+	if cap(tree.nodes) >= 2*len(faces) {
+		t.Errorf("%d faces retain the worst-case reservation of %d nodes",
+			len(faces), cap(tree.nodes))
 	}
+	seenNodes := make([]bool, len(tree.nodes))
+	seenFaces := make([]bool, len(faces))
+	var visit func(int)
+	visit = func(index int) {
+		if index < 0 || index >= len(tree.nodes) || seenNodes[index] {
+			t.Fatalf("invalid or repeated node %d", index)
+		}
+		seenNodes[index] = true
+		node := tree.nodes[index]
+		if node.count == 0 {
+			visit(node.first)
+			visit(node.first + 1)
+			return
+		}
+		if node.count < 0 || node.first < 0 || node.first > len(tree.order)-node.count {
+			t.Fatalf("invalid face run at node %d: %d + %d", index, node.first, node.count)
+		}
+		for _, face := range tree.order[node.first : node.first+node.count] {
+			if face < 0 || face >= len(faces) || seenFaces[face] {
+				t.Fatalf("invalid or repeated face %d", face)
+			}
+			seenFaces[face] = true
+		}
+	}
+	visit(0)
+	for index, seen := range seenNodes {
+		if !seen {
+			t.Errorf("node %d is unreachable", index)
+		}
+	}
+	for index, seen := range seenFaces {
+		if !seen {
+			t.Errorf("face %d is missing", index)
+		}
+	}
+
 	corners, few := strips(0, 2, 0, 1)
 	if got := grown(corners, spansFaces(few)); len(got.nodes) != 1 {
 		t.Errorf("a leaf of two faces made %d nodes", len(got.nodes))

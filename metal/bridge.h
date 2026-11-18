@@ -40,9 +40,9 @@ int slayer_metal_points(void *ctx, const float *points, int n,
 // copied into the caller's buffer.
 // Begin/add copy each input synchronously; no caller input pointer is retained.
 // A failed add leaves a closable stream. Bands require all count inputs.
-// The stream draws the band after the one asked for ahead of the ask,
-// so sequential bands overlap the gpu's drawing with the caller's
-// reading; height bounds how far ahead it draws.
+// A band is committed, waited out and copied in three calls, with at
+// most two bands in flight, so the caller decides when the display gets
+// a turn between bands, and reads one band while the next is drawn.
 void *slayer_metal_grid_begin(void *ctx, int width, int height, int rows,
                              int per, int count, char *err, int errlen);
 int slayer_metal_grid_add(void *stream, const void *input, long length,
@@ -53,8 +53,22 @@ int slayer_metal_grid_add(void *stream, const void *input, long length,
 // length makes a new one.
 int slayer_metal_grid_update(void *stream, int index, const void *input,
                              long length, char *err, int errlen);
-int slayer_metal_grid_band(void *stream, int first, int down, float *out,
-                           char *err, int errlen);
+// slayer_metal_grid_commit commits the band of down rows from first
+// without waiting: with nothing in flight, into the band buffer not last
+// waited out; with one band in flight, into the other buffer, which is
+// the one last waited out, so the caller copies that band first. It
+// refuses a third band in flight.
+int slayer_metal_grid_commit(void *stream, int first, int down, char *err,
+                             int errlen);
+// slayer_metal_grid_wait waits out the oldest band in flight. stopped is
+// one when the system stopped it for the display: the stream and its
+// kernel stay usable and the same rows may be committed again.
+int slayer_metal_grid_wait(void *stream, int *stopped, char *err,
+                           int errlen);
+// slayer_metal_grid_copy copies the band last waited out, down rows, into
+// out; down must be the rows that band was committed with.
+int slayer_metal_grid_copy(void *stream, int down, float *out, char *err,
+                           int errlen);
 // slayer_metal_grid_same sets same to one when an added input holds
 // exactly length bytes and they are input's, read where the device reads
 // them; it copies nothing.
@@ -71,6 +85,11 @@ int slayer_metal_grid_refresh(void *stream, int index, const void *input,
 // only when the band's bytes change.
 int slayer_metal_grid_shape(void *stream, int width, int height, int rows,
                             int per, char *err, int errlen);
+// slayer_metal_grid_settle waits out and forgets every band in flight,
+// whatever became of them, or forgets them unwaited when the kernel is
+// stuck, so a drawing that stopped early leaves the stream ready. It is
+// non-zero, with err saying why, when a band it waited out failed.
+int slayer_metal_grid_settle(void *stream, char *err, int errlen);
 void slayer_metal_grid_close(void *stream);
 
 // slayer_metal_gpu is the seconds the gpu has spent on every command the
@@ -134,5 +153,37 @@ int slayer_metal_reaccelerate(void *ctx, const void *vertices, long length,
                               const float *matrices,
                               const uint32_t *references, int root,
                               int *unavailable, char *err, int errlen);
+// A context holds the mesh structures its last two builds placed, under
+// their positions, and a group's structure while its placements and
+// children stay: a later build keeps what it can, refits a deformed mesh
+// where it may, and builds the rest. slayer_metal_acceleration_work says
+// how many nodes of the last build each of those were.
+void slayer_metal_acceleration_work(void *ctx, int *kept, int *refit,
+                                    int *built);
+
+// slayer_metal_acceleration_held is how many mesh structures the context
+// holds between builds, a mesh's spare counted as one more.
+int slayer_metal_acceleration_held(void *ctx);
+
+// the faults slayer_metal_acceleration_fault sets for a context's next
+// hierarchy build, which meets it once, for tests of a build that fails
+enum {
+	acceleration_fault_none = 0,       // defined: the build runs as it is
+	acceleration_fault_allocation = 1, // defined: after every structure is
+	                                   // described, one is said not made
+	acceleration_fault_command = 2,    // defined: the command runs, then
+	                                   // is said to have failed
+};
+
+// slayer_metal_acceleration_fault sets the fault the next build meets.
+void slayer_metal_acceleration_fault(void *ctx, int fault);
+
+// slayer_idle_nanoseconds is the system's time since the last keyboard,
+// mouse or trackpad input, read from IOHIDSystem's HIDIdleTime, or -1
+// when it cannot be read. It only reads.
+long long slayer_idle_nanoseconds(void);
+
+// slayer_display_asleep is one when the main display sleeps.
+int slayer_display_asleep(void);
 
 #endif

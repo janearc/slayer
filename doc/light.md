@@ -26,6 +26,16 @@ lighting. Surface sky lighting uses hemisphere samples with cosine weighting
 and checks visibility. It can illuminate shade even when no explicit lamp
 points at that surface.
 
+An afloat `setting: space` scene may choose `light: moon` and give a moon
+azimuth and altitude. Slayer stages its modeled full-moon distant source and
+the corresponding computed moonlit atmosphere sky; it does not infer lunar
+phase or position from a date and place.
+
+Participating ocean diffuse-sky transport samples that computed sky through
+the authored mean-plane interface. The direct moon lamp still illuminates
+visible surfaces through the ordinary surface path; it is not itself included
+in the ocean sky-scatter integral.
+
 ## Surfaces and shadows
 
 At the first surface, shading combines colour, emission, explicit lamps,

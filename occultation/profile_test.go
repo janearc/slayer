@@ -189,3 +189,37 @@ func TestSaturnsRingsAreWhereNasaSays(t *testing.T) {
 		}
 	}
 }
+
+// blank lines between rows are skipped and do not move the bins.
+func TestBlankLinesInATableAreSkipped(t *testing.T) {
+	profile := table(t, "\r\n", row(1, 0.5), "   \r\n", row(2, 1.5), "\r\n")
+	if profile.Inner() != 500 || profile.Outer() != 2500 {
+		t.Errorf("from %g to %g m, want 500 to 2500", profile.Inner(), profile.Outer())
+	}
+	if got := profile.Seen(1.5e3, 0); got != 1.5 {
+		t.Errorf("second bin %g, want 1.5", got)
+	}
+}
+
+// a line longer than the scanner's limit is an error, not a short table.
+func TestALineTooLongToScanIsRefused(t *testing.T) {
+	long := strings.Repeat("1", 70000) + "\n"
+	if _, err := Read(strings.NewReader(row(1, 1) + long)); err == nil {
+		t.Error("a line of 70000 characters was read")
+	}
+}
+
+// a stretch that is empty or runs backward has no mean depth, and the
+// mean of a stretch is its depths over its width.
+func TestTheMeanOfAnEmptyStretchIsNought(t *testing.T) {
+	profile := table(t, row(1, 1), row(2, 3))
+	for _, stretch := range [][2]float64{{1.5e3, 1.5e3}, {2e3, 1e3}} {
+		if got := profile.Mean(stretch[0], stretch[1]); got != 0 {
+			t.Errorf("mean from %g to %g is %g, want 0", stretch[0], stretch[1], got)
+		}
+	}
+	// the first bin is depth 1 and the second 3, so the whole is 2.
+	if got := profile.Mean(500, 2500); math.Abs(got-2) > 1e-12 {
+		t.Errorf("mean over both bins %g, want 2", got)
+	}
+}

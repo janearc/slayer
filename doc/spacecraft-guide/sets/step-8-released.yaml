@@ -1,0 +1,33 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: step 8, Huygens released from Cassini
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      orbiter:
+        kind: cassini
+        seed: 17
+        complexity: demo
+        east: 0
+        north: 0
+      probe:
+        kind: huygens
+        seed: 17
+        complexity: demo
+        east: 14
+        north: 0
+        height: {value: 6, unit: m}
+  film: {width: 2048, height: 1152, rays: 2, exposure: 0.003, wide: 45}
+  cameras:
+    release:
+      title: Cassini, and Huygens a little way off
+      location: {at: [-8, -34, 14]}
+      orientation: {look_at: [6, 0, 3]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

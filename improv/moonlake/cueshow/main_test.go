@@ -129,3 +129,47 @@ func TestFiniteNumberRefusesNaNAndInfinity(t *testing.T) {
 		}
 	}
 }
+
+// TestFiniteNumberRefusesWhatIsNotFinite checks a number is read as it
+// is written, and that a word, NaN and both infinities are refused, the
+// last three by name.
+func TestFiniteNumberRefusesWhatIsNotFinite(t *testing.T) {
+	if got, err := finiteNumber("-2.5e1"); err != nil || got != -25 {
+		t.Errorf("-2.5e1 read as %v (%v)", got, err)
+	}
+	if _, err := finiteNumber("soon"); err == nil {
+		t.Error("a word was read as a number")
+	}
+	for _, text := range []string{"NaN", "Inf", "-Inf"} {
+		_, err := finiteNumber(text)
+		if err == nil || !strings.Contains(err.Error(), text) {
+			t.Errorf("%s gave %v, not a refusal naming it", text, err)
+		}
+	}
+}
+
+// TestCueshowSaysItsUsageForTheWrongNumberOfWords checks that three and
+// six words print the usage line and nothing of the show.
+func TestCueshowSaysItsUsageForTheWrongNumberOfWords(t *testing.T) {
+	for _, words := range [][]string{
+		{"cueshow", "testdata/score.yaml", "testdata/cues.yaml"},
+		{"cueshow", "testdata/score.yaml", "testdata/cues.yaml", "1", "24", "extra"},
+	} {
+		args, stdout := os.Args, os.Stdout
+		read, write, err := os.Pipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+		os.Args, os.Stdout = words, write
+		main()
+		os.Args, os.Stdout = args, stdout
+		write.Close()
+		out, err := io.ReadAll(read)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := string(out); got != "cueshow score.yaml cues.yaml seconds [fps]\n" {
+			t.Errorf("%d words said %q", len(words), got)
+		}
+	}
+}

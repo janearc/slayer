@@ -30,11 +30,12 @@ func weatherFilm(t *testing.T, with, after string) string {
 		"duration: {value: 2, unit: s}\n"+after)
 }
 
-// cached keeps the weather's checkpoints in the test's own folder.
+// cached keeps the weather's checkpoints under a cache home of the
+// test's own.
 func cached(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
-	t.Setenv("SLAYER_WEATHER", dir)
+	t.Setenv("SLAYER_CACHE", dir)
 	return dir
 }
 

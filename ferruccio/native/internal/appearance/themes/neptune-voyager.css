@@ -1,0 +1,34 @@
+/*
+ * neptune-voyager -- neptune as voyager 2 showed it in august 1989, from
+ * the green and orange filters of its narrow angle camera (nasa/jpl,
+ * pia01492). the ground is the limb in shadow, greyed to her hue rule; the
+ * ink is the white clouds, lit to 11 to 1; the selection and the blues are
+ * the disc; dim text is the great dark spot. neptune has no red, green or
+ * yellow, so those are the screen's own wavelengths, as in fermi-long.
+ * samples in cmd/spectra/data/neptune-voyager.css. made by spectra,
+ * github.com/janearc/chroma/cmd/spectra, 2026-10-05.
+ */
+:root {
+  --ground: #111523; /* oklch(20% 0.029 271.4) */
+  --ink: #9acfff; /* oklch(83% 0.087 246.4) */
+  --cursor: #9acfff; /* oklch(83% 0.087 246.4) */
+  --selection-ink: #9acfff; /* oklch(83% 0.087 246.4) */
+  --cursor-ink: #111523; /* oklch(20% 0.029 271.4) */
+  --surface-1: #203480; /* oklch(36% 0.131 267.9) */
+  --black: #22293e; /* oklch(28% 0.040 269.6) */
+  --bright-black: #5474ff; /* oklch(61% 0.209 269.5) */
+  --red: #ff5e46; /* oklch(69% 0.200 31.1) */
+  --green: #1cac00; /* oklch(65% 0.216 141.7) */
+  --yellow: #979a00; /* oklch(66% 0.146 111.2) */
+  --blue: #6a8fff; /* oklch(68% 0.170 267.9) */
+  --cyan: #5b9ad2; /* oklch(67% 0.106 247.0) */
+  --magenta: #ff29f9; /* oklch(71% 0.305 329.6) */
+  --bright-red: #ff9581; /* oklch(78% 0.132 31.6) */
+  --bright-green: #24ce00; /* oklch(74% 0.247 141.7) */
+  --bright-yellow: #b4b900; /* oklch(76% 0.167 111.7) */
+  --bright-blue: #92b0ff; /* oklch(77% 0.119 267.7) */
+  --bright-cyan: #6db8fa; /* oklch(76% 0.121 246.8) */
+  --bright-magenta: #ff84f2; /* oklch(79% 0.197 331.3) */
+  --white: #72bdff; /* oklch(78% 0.121 246.7) */
+  --bright-white: #acd7ff; /* oklch(86% 0.072 246.8) */
+}

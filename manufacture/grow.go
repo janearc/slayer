@@ -33,6 +33,7 @@ type part struct {
 	fine     cut
 	of       slot
 	terminal bool // foliage carried by a terminal branchlet
+	rigTurn  bool // upper enclosure; metadata only, no change to the specimen
 }
 
 // skin is the part's surface in the thing's space.

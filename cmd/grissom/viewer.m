@@ -105,7 +105,10 @@ static const char *shaders =
 @implementation Mesh
 @end
 
+// meshOn is a mesh's buffers on the device, or nil for a mesh with no
+// triangles: Metal takes no buffer of length zero, so there is none.
 static Mesh *meshOn(id<MTLDevice> device, viewer_mesh from) {
+  if (from.count <= 0) return nil;
   Mesh *mesh = [Mesh new];
   mesh.count = from.count;
   mesh.corners =
@@ -121,6 +124,7 @@ static Mesh *meshOn(id<MTLDevice> device, viewer_mesh from) {
 
 static void drawMesh(id<MTLRenderCommandEncoder> encoder, Mesh *mesh,
                      float *uniforms) {
+  if (mesh == nil) return;
   [encoder setVertexBuffer:mesh.corners offset:0 atIndex:0];
   [encoder setVertexBuffer:mesh.colours offset:0 atIndex:1];
   [encoder setVertexBytes:uniforms
@@ -312,6 +316,7 @@ static MTLClearColor background = {0.02, 0.02, 0.03, 1};
 
 void viewer_colours(int which, const uint8_t *colours, int count) {
   @autoreleasepool {
+    if (meshes[which] == nil) return;
     memcpy(meshes[which].colours.contents, colours, (size_t)count * 12);
   }
 }

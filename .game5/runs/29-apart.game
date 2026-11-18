@@ -1,0 +1,2 @@
+# the harness's view of a commit, apart from slayer.
+apart . :: go run ./burning-trousers/cmd/apart

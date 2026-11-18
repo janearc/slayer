@@ -37,8 +37,7 @@ northward 55-degree boresight. Its four launch exits sit just outside the
 front truss rim, rather than at unrelated roof corners. This is an authored
 mount arrangement, not an ESO engineering layout.
 
-The [guide-star notes](guide-stars.md) and
-[site expansion](observatory-site-expansion.md) retain the primary references
+The [guide-star notes](guide-stars.md) retain the primary references
 for the outgoing beam and the optional 64-arcsecond GALACSI pattern.
 
 ## Working-site study

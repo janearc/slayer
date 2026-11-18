@@ -6,9 +6,8 @@ finishing samples and producing a film. Many savings are automatic and
 have no flag. Others deliberately change the answer and must be selected.
 
 This catalogue describes the integrated renderer, including the gravity
-prototype and the set compositor. Links to dated studies preserve their
-original measurement scope. A historical speedup is not a prediction for
-another scene, device or camera path.
+prototype and the set compositor. A speedup measured on one scene is not a
+prediction for another scene, device or camera path.
 
 ## Contracts before speed
 
@@ -23,6 +22,45 @@ Default rendering already has a finite-step model and finite bounce limits.
 Turning optional shortcuts off establishes a reference for that model,
 not a complete physical solution. [Modes](modes.md) keeps these choices
 separate.
+
+## So you want to produce content for YouTube
+
+Most of slayer is built so that a frame can be checked: the exact path,
+its controls and its proofs. Gonzo mode is the other half. It is for a
+film that has to look right, arrive quickly and go on YouTube, and it is
+honest that it is an approximation. It is named for Hunter S. Thompson's
+journalism, where the reporter is part of the story. Here the tracer is
+part of the picture too.
+
+Gonzo mode works differently from the rest of the renderer. The exact
+path answers each pixel by itself. Gonzo mode shares work between pixels
+and frames, and it guesses where light is coming from before it checks.
+That is why it is fast, and why it never runs unless the job asks for it.
+It is not a flag of its own.
+
+A job asks for it by choosing the fast path
+in [modes](modes.md): `renderer: gpu`, `vibes: on` and a short, low-ray
+draft first. With `vibes: off`, nothing below changes a pixel.
+
+### What it uses today
+
+- **Native Metal traversal.** Primary and shadow queries go through the
+  GPU's own ray-tracing hardware and acceleration structures. See
+  [native Metal mesh traversal](#native-metal-mesh-traversal).
+- **`lamp-store` and `sky-looks`.** Lamp light is baked into a per-frame
+  grid for mist and smoke, and sky directions are shared across a pixel's
+  rays. See [store illumination under explicit
+  approximations](#store-illumination-under-explicit-approximations). The
+  lamp store holds at most sixteen lamps.
+- **Section reuse.** A film reuses the sections of the scene that did not
+  change between frames. See [reuse sections whose scene did not
+  change](#reuse-sections-whose-scene-did-not-change).
+
+### Before you publish
+
+Gonzo frames are still slayer's frames. Caption them as rendered, not as
+measured. Review the encoded film with its sound. Slayer does not upload
+anything; you publish it yourself.
 
 ## Construct geometry once and share it
 
@@ -53,7 +91,7 @@ Analytic planes and discs avoid tessellating a mathematically simple shape.
 Dedicated shell, ring, wake and giant encodings avoid replacing every
 field by a generic callback or dense arbitrary mesh. These are supported
 type-specific paths, not a promise that arbitrary shapes run on Metal.
-See [native sampling](native-sampler.md) and the source validators.
+The source validators say which shapes qualify.
 
 ### View-dependent terrain and transitions
 
@@ -156,19 +194,6 @@ material and normal data. Candidate refinement and software fallback
 retain the current numerical contract; native misses do not trigger a
 blanket software retrace. Analytic primitives keep their own predicates.
 
-The dated 5000-tree 4K study retained sixteen samples per pixel and mist:
-software measured 511.769 seconds whole, native shadows 87.238 seconds,
-and the first native-primary implementation 64.057 seconds. Developed
-errors were respectively 0.1075% and 1.6341% of pixels beyond one JND,
-with worst errors 8.001596 and 8.662356 JND. The primary timing predates a
-later range-preparation fix.
-
-These are still-image results, not temporal
-acceptance or a completed animation budget. See the
-[shadow](native-shadow-traversal.md) and
-[primary](native-primary-traversal.md) records for exact scope and rejected
-alternatives.
-
 ## Evaluate expensive matter less often
 
 ### Density and emission bakes
@@ -182,20 +207,17 @@ Grid interpolation approximates the underlying continuous field.
 `gpu.NewRenderer(volumeCells)` explicitly bounds CPU-baked volume grids
 from 2 to 192 cells on their longest side. This can suit a small preview
 whose surface rays remain full resolution. It is not an automatic
-quality-preserving setting for every flame. See [native sampler](native-sampler.md).
+quality-preserving setting for every flame.
 
 ### CPU flame sampling and noise arithmetic
 
 The CPU flame sampler reuses a prepared representation rather than
 reevaluating a full procedural flame at every terminal sample. Its
-resolution/quality contract is separate from the GPU bake. The tests in
-`flame/sampled_test.go` and `trace/sampled_flame_draw_test.go` exercise
-query cost and image quality.
+resolution/quality contract is separate from the GPU bake.
 
 The noise implementation shares work in gradient/hash evaluation instead
 of repeating identical gradient calculations. That arithmetic optimization
-does not expose a quality flag. `maths/noise` reference tests and the
-gradient counterexamples protect the result. A microbenchmark of noise
+does not expose a quality flag. A microbenchmark of noise
 alone does not establish end-to-end film speed.
 
 ### Skip work with an exactly zero contribution
@@ -203,8 +225,7 @@ alone does not establish end-to-end film speed.
 Purely emissive media with no scattering do not need lamp-shadow queries
 to find their emission. The tracer bypasses that unused illumination work
 while retaining extinction and emission integration. Painted media that
-do scatter still ask lamps. `trace/emissive_cost_test.go` and GPU emission
-controls distinguish these cases. This is different from dropping light
+do scatter still ask lamps. This is different from dropping light
 because it seems faint.
 
 ### Spend more steps near narrow beams
@@ -232,7 +253,7 @@ outside and a boundary blend. Its CPU reference remains direct. It does
 not cache explicit lamps. [Volume environment lighting](volume-environment-lighting.md)
 records its controlled comparisons.
 
-`lamp-store` is GPU-only, supports up to eight lamps and applies to boxed
+`lamp-store` is GPU-only, supports up to sixteen lamps and applies to boxed
 mist/smoke rather than all procedural/gas media. Surfaces continue direct
 lighting: sampling their neighbouring dark grid cells would create patches.
 
@@ -241,11 +262,8 @@ kernel. At one ray per pixel it saves nothing; with four it assigns four
 of the sixteen directions to each ray. Both are selected by `fastlight`
 or `vibes`, with per-shortcut overrides. There is no lamp store on disk.
 
-The [fast-light study](fast-light.md) measured a cloud-sea pair at 115.8
-versus 46.6 trace seconds, with a 16.6 MB store and 0.19 device seconds
-of baking. Other exact runs varied substantially; retain its error
-measurements and workload context when citing the roughly 2.5-fold trace
-gain. No universal whole-film speedup follows from this pair.
+The [fast-light study](fast-light.md) gives its error measurements and
+workload context. No universal whole-film speedup follows from them.
 
 ## Stream output instead of retaining every raw sample
 
@@ -269,32 +287,6 @@ and ordinary pinhole rays generated on the GPU avoid that input grid.
 Shutter camera interpolation also avoids a separate full draw for every
 camera-time sample, but object motion still needs scene glimpses.
 
-## Decompose a film into contributions
-
-The [set compositor](../improv/moonlake/omnipositor/SCENE.md) separates a
-surface plate from foreground scattering and RGB transmission. Lower
-transport resolution reduces expensive volume pixels while keeping
-surface detail. Depth-aware reconstruction avoids blending across large
-depth discontinuities; it cannot recover a beam missed by all samples.
-
-Keeping scenery samples separate until composition avoids the error of
-multiplying two independently averaged quantities.
-
-Plate reuse avoids surface rendering across a chosen frame interval.
-It also freezes surface lighting, reflections and their volume shadows.
-
-Camera movement/zoom requires fresh plates; moving objects or changing
-sky lighting do too. Use scale 1, one sample at both stages and fresh
-plates as a decomposition control. Compare reduced plans with
-`--reference` across motion. Current composition uses host memory and
-Metal development; it is not a fully device-resident pipeline.
-
-The older Moonlake compositor additionally owns scene-specific ocean,
-matte, lamp, mist and development passes. Its
-[README](../improv/moonlake/omnipositor/README.md) and
-[profile](../improv/moonlake/omnipositor/PROFILE.md) distinguish those
-specialized passes from the ordinary-set adapter.
-
 ## Gravity-specific savings
 
 Mass-normalized coordinates keep Kerr integration in a useful numerical
@@ -308,8 +300,8 @@ ordinary trace readback policy.
 field identity. `LastTiming().SeedsCached` reports reuse. Moving the world
 clock alone need not change observer seeds, but a changed eye or field
 must invalidate them. It does not cache the traced picture or retain a
-native hierarchy. See [gravity integration](gravity-rc-integration.md),
-`gpu/field_cache.go` and [the gravity contract](../gpu/GRAVITY.md).
+native hierarchy. See `gpu/field_cache.go` and
+[the gravity contract](../gpu/GRAVITY.md).
 
 ## Disk caches and finished-work reuse
 
@@ -324,20 +316,6 @@ identity. Changing sound alone can reuse pictures, except when music cues
 drive the scene. Retaining raw PFM frames permits redevelopment without
 tracing. A frames-only job can assemble an existing sequence with sound
 and titles. Preserve unclipped raw light if later exposure changes matter.
-
-## Ideas that are not production speedups
-
-Wavefront queues, general pilot-ray mist reuse and radiance cascades for
-the 3D Metal world remain proposals/experiments. `render/emptyspace` has
-preparation contracts; that does not establish enabled packet transport.
-The cascades prototype is a separate 2D proof. Proposed `Skip`, `Distance`,
-`Once`, `Cutoff` and mist-once policies are not available rendering modes.
-
-The smaller private traversal stack and one-disc-shadow experiments were
-rejected for lacking a useful win. Fewer samples and accepting unrefined
-native hits failed the cited forest error budget. Keep these conclusions
-with their [performance](animation-performance.md) and
-[fast-light](fast-light.md) records rather than advertising them as options.
 
 ## Measure the complete job
 

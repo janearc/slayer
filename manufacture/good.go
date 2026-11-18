@@ -19,11 +19,12 @@ import (
 // made only by newGood and grow, dressed by in, lit by lit, and
 // gathered from others by gather.
 type good struct {
-	parts   []part
-	dressed looks
-	lights  []lit
-	extent  *maths.Box
-	groups  map[slot]*shape.MeshGroup
+	parts      []part
+	dressed    looks
+	lights     []lit
+	extent     *maths.Box
+	groups     map[slot]*shape.MeshGroup
+	groupParts map[slot]int
 }
 
 // lit is a light a thing carries: the light, where on the thing it is, which
@@ -111,8 +112,10 @@ func gather(things ...good) (good, error) {
 		for of, group := range one.groups {
 			if all.groups == nil {
 				all.groups = map[slot]*shape.MeshGroup{}
+				all.groupParts = map[slot]int{}
 			}
 			all.groups[renumbered[of]] = group
+			all.groupParts[renumbered[of]] = one.partCounts()[of]
 		}
 		all.lights = append(all.lights, one.lights...)
 	}
@@ -249,7 +252,8 @@ func (made good) faces() int {
 // things is the thing as a scene holds it, standing at a place: one thing.Thing
 // a matter, each a mesh or shared mesh group, in the order of the
 // matters. it refuses a thing of no parts, of too many faces, or with a matter
-// nobody gave a look, and whatever slayer's mesh refuses.
+// nobody gave a look, and whatever slayer's mesh refuses. a matter with a
+// rounded part in it is shaded smooth by shadings, its other faces flat.
 func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
 	if !shape.ValidPlacement(at) {
 		return nil, errors.New("manufacture: invalid placement")
@@ -257,7 +261,7 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
 	if len(made.parts) == 0 && len(made.groups) == 0 {
 		return nil, errGood
 	}
-	skins := made.skins()
+	skins, shadings := made.skins(), made.shadings()
 	// The flattening limit bounds temporary expanded surfaces. Groups
 	// retain their prototypes; the caller budgets their stored geometry.
 	flattened := 0
@@ -280,7 +284,7 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
 			continue
 		}
 		skin := skins[of]
-		mesh, err := skin.meshed()
+		mesh, err := skin.shaded(shadings[of])
 		if err != nil {
 			return nil, err
 		}

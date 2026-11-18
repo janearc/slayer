@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Prepare local build inputs; leave system tools and existing Game config alone.
 set -euo pipefail
-if [[ -n "${CODEX_THREAD_ID:-}" ]]; then export KEEL_SID="$CODEX_THREAD_ID"; fi
 
 usage() {
     cat <<'HELP'
@@ -14,16 +13,14 @@ clone and bootstrap Game locally (including Game's own checks).
 
 Install Git, Go and a C compiler first. On macOS, use the Xcode command-line
 tools. ffmpeg is optional for pictures, required for movie/audio workflows.
-This development tree also needs its prepared private review dependencies.
 
 Environment:
   GAME                    existing compatible Game executable
   SLAYER_BOOTSTRAP_DIR     absolute local setup directory outside this checkout
   SLAYER_SHELF             absolute source shelf outside this checkout
-  GOPROXY, GONOSUMDB       review proxy settings, when required by go.mod
 
 No system packages are installed and no personal Game config is rewritten.
-Read doc/building.md and doc/review-dependencies.md for setup limitations.
+Read doc/building.md for setup limitations.
 HELP
 }
 
@@ -81,13 +78,13 @@ if ! command -v ffmpeg >/dev/null 2>&1; then
 fi
 
 # Inspect the current single-line local replacements before doing network work.
-# A supplied review copy remains explicit; never rewrite go.mod behind the user.
+# Never rewrite go.mod behind the user.
 local_replacements=$(awk '$1 == "replace" && $(NF-1) == "=>" {p=$NF; if (substr(p,1,1)=="/" || substr(p,1,1)==".") print p}' go.mod)
 while IFS= read -r replacement; do
     [[ -n "$replacement" ]] || continue
     if [[ ! -d "$replacement" ]]; then
         printf 'Missing local module replacement: %s\n' "$replacement" >&2
-        printf 'Prepare the pinned copy; read doc/review-dependencies.md and doc/gravity-rc-integration.md.\n' >&2
+        printf 'Create that folder or remove the replace line from go.mod.\n' >&2
         failed=1
     fi
 done <<< "$local_replacements"
@@ -116,7 +113,7 @@ else
 fi
 if (( failed )); then exit 1; fi
 if [[ "$mode" == check ]]; then
-    printf 'Prerequisite inspection passed. Private module availability, source hashes and Metal device support still need their actual checks.\n'
+    printf 'Prerequisite inspection passed. Module downloads, source hashes and Metal device support still need their actual checks.\n'
     exit 0
 fi
 

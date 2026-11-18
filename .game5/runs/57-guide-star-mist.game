@@ -1,0 +1,1 @@
+guide-star-mist . :: ./bin/hillside -set doc/guide-star-mist.yaml -out out/guide-star-mist.png

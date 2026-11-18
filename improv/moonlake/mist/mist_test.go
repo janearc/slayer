@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
+	"errors"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
+	"syscall"
 	"testing"
 )
 
@@ -263,5 +267,50 @@ func TestLegacyZeroMasks(t *testing.T) {
 	}
 	if !math.IsNaN(float64(out.Pixels[0])) {
 		t.Fatal("zero-water legacy float32 division changed")
+	}
+}
+
+// TestPFMReadSaysHowItIsShort checks the error for each way a file is cut
+// short: before the header's end, with no pixels at all, and part way
+// through the pixels.
+func TestPFMReadSaysHowItIsShort(t *testing.T) {
+	// one pixel is three floats, twelve bytes
+	for _, each := range []struct {
+		name, text string
+		want       error
+	}{
+		{"no byte after the scale", "PF\n1 1\n-1", io.EOF},
+		{"no pixels", "PF\n1 1\n-1\n", io.EOF},
+		{"half a pixel", "PF\n1 1\n-1\n123456", io.ErrUnexpectedEOF},
+	} {
+		path := filepath.Join(t.TempDir(), "short.pfm")
+		if err := os.WriteFile(path, []byte(each.text), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := Read(path); !errors.Is(err, each.want) {
+			t.Errorf("%s: Read gave %v, want %v", each.name, err, each.want)
+		}
+	}
+}
+
+// TestPFMReadRefusesAPipe checks that a pipe is not read as a pfm, even
+// when its header is good, since its length is not known beforehand.
+func TestPFMReadRefusesAPipe(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "pipe.pfm")
+	if err := syscall.Mkfifo(path, 0600); err != nil {
+		t.Skipf("no pipes here: %v", err)
+	}
+	go func() {
+		pipe, err := os.OpenFile(path, os.O_WRONLY, 0)
+		if err != nil {
+			return
+		}
+		pipe.WriteString("PF\n1 1\n-1\n")
+		pipe.Close()
+	}()
+	if _, err := Read(path); err == nil ||
+		!strings.Contains(err.Error(), "not a regular pfm file") {
+		t.Errorf("Read of a pipe gave %v, want a refusal saying it is not "+
+			"a regular file", err)
 	}
 }

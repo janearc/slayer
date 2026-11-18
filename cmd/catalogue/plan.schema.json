@@ -1,75 +1,412 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$comment": "Authored allocation limits for small serial previews.",
-  "type": "object", "additionalProperties": false,
-  "required": ["width", "height", "rays", "seed", "details", "wide",
-    "camera", "distance", "sample-limit", "face-limit", "pixel-aspect",
-    "light-exposure", "minimum-coverage", "sky", "sources", "tone"],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "width",
+    "height",
+    "rays",
+    "seed",
+    "details",
+    "wide",
+    "camera",
+    "distance",
+    "sample-limit",
+    "face-limit",
+    "pixel-aspect",
+    "light-exposure",
+    "minimum-coverage",
+    "sky",
+    "sources",
+    "tone"
+  ],
   "properties": {
-    "cutaway": {"type": "boolean"},
-    "studio": {"type": "boolean"},
-    "width": {"type": "integer", "minimum": 1, "maximum": 3840},
-    "height": {"type": "integer", "minimum": 1, "maximum": 2160},
-    "rays": {"type": "integer", "minimum": 1, "maximum": 8},
-    "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
-    "details": {"type": "array", "minItems": 1, "uniqueItems": true,
-      "items": {"enum": ["hull", "clumps", "quick", "demo"]}},
-    "wide": {"type": "number", "minimum": 5, "maximum": 120},
-    "camera": {"$ref": "#/$defs/vector"},
-    "distance": {"type": "number", "minimum": 2, "maximum": 20},
-    "sample-limit": {"type": "integer", "minimum": 1, "maximum": 2000000},
-    "face-limit": {"type": "integer", "minimum": 1, "maximum": 1500000},
-    "pixel-aspect": {"type": "number", "const": 1},
-    "light-exposure": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
-    "minimum-coverage": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
-    "sky": {
-      "type": "object", "additionalProperties": false,
-      "required": ["horizon", "zenith", "ground"],
+    "presentation": {"enum": ["cove", "space"]},
+    "gaia-stars": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "sha256", "radius-deg", "zero-magnitude"],
       "properties": {
-        "horizon": {"$ref": "#/$defs/light"},
-        "zenith": {"$ref": "#/$defs/light"},
-        "ground": {"$ref": "#/$defs/light"}
+        "file": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "radius-deg": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "zero-magnitude": {"type": "number", "exclusiveMinimum": 0, "maximum": 100000}
+      }
+    },
+    "local-lights": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "at",
+          "strength"
+        ],
+        "properties": {
+          "at": {
+            "$ref": "#/$defs/vector"
+          },
+          "strength": {
+            "$ref": "#/$defs/local-strength"
+          }
+        }
+      }
+    },
+    "cutaway": {
+      "type": "boolean"
+    },
+    "studio": {
+      "type": "boolean"
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3840
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2160
+    },
+    "rays": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "details": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "hull",
+          "clumps",
+          "quick",
+          "demo"
+        ]
+      }
+    },
+    "wide": {
+      "type": "number",
+      "minimum": 5,
+      "maximum": 120
+    },
+    "camera": {
+      "$ref": "#/$defs/vector"
+    },
+    "distance": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 20
+    },
+    "sample-limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2000000
+    },
+    "face-limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1500000
+    },
+    "pixel-aspect": {
+      "type": "number",
+      "const": 1
+    },
+    "light-exposure": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1
+    },
+    "minimum-coverage": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1
+    },
+    "sky": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "horizon",
+        "zenith",
+        "ground"
+      ],
+      "properties": {
+        "horizon": {
+          "$ref": "#/$defs/light"
+        },
+        "zenith": {
+          "$ref": "#/$defs/light"
+        },
+        "ground": {
+          "$ref": "#/$defs/light"
+        }
       }
     },
     "sources": {
-      "type": "array", "minItems": 1, "maxItems": 4,
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
       "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["toward", "strength"],
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "toward",
+          "strength"
+        ],
         "properties": {
-          "toward": {"$ref": "#/$defs/vector"},
-          "strength": {"$ref": "#/$defs/light"}
+          "toward": {
+            "$ref": "#/$defs/vector"
+          },
+          "strength": {
+            "$ref": "#/$defs/light"
+          }
         }
       }
     },
     "tone": {
-      "type": "object", "additionalProperties": false,
-      "required": ["exposure", "knee", "top", "bloom"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exposure",
+        "knee",
+        "top",
+        "bloom"
+      ],
       "properties": {
-        "exposure": {"type": "number", "exclusiveMinimum": 0, "maximum": 16},
-        "knee": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
-        "top": {"type": "number", "exclusiveMinimum": 1, "maximum": 100},
-        "bloom": {"const": 0}
+        "exposure": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 16
+        },
+        "knee": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "top": {
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 100
+        },
+        "bloom": {
+          "const": 0
+        }
+      }
+    },
+    "interior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "at",
+        "look-at",
+        "stars",
+        "air-radius-metres",
+        "extinction-per-metre",
+        "beams"
+      ],
+      "properties": {
+        "at": {
+          "$ref": "#/$defs/vector"
+        },
+        "look-at": {
+          "$ref": "#/$defs/vector"
+        },
+        "air-radius-metres": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "extinction-per-metre": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.01
+        },
+        "stars": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "share",
+            "size",
+            "bright",
+            "dark",
+            "seed"
+          ],
+          "properties": {
+            "share": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            },
+            "size": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 0.6
+            },
+            "bright": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 16
+            },
+            "dark": {
+              "$ref": "#/$defs/light"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          }
+        },
+        "beams": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "at",
+              "toward",
+              "strength",
+              "radius-metres",
+              "reach-metres",
+              "divergence-deg"
+            ],
+            "properties": {
+              "at": {
+                "$ref": "#/$defs/vector"
+              },
+              "toward": {
+                "$ref": "#/$defs/vector"
+              },
+              "strength": {
+                "$ref": "#/$defs/local-strength"
+              },
+              "radius-metres": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1
+              },
+              "reach-metres": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 10000
+              },
+              "divergence-deg": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "orbit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "yaw",
+        "pitch"
+      ],
+      "properties": {
+        "yaw": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "pitch": {
+          "type": "number",
+          "minimum": -80,
+          "maximum": 80
+        }
       }
     }
   },
   "$defs": {
-    "vector": {
-      "type": "object", "additionalProperties": false,
-      "required": ["x", "y", "z"],
+    "local-strength": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "r",
+        "g",
+        "b"
+      ],
       "properties": {
-        "x": {"type": "number", "minimum": -100, "maximum": 100},
-        "y": {"type": "number", "minimum": -100, "maximum": 100},
-        "z": {"type": "number", "minimum": -100, "maximum": 100}
+        "r": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "g": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "b": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      }
+    },
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "y": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "z": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        }
       }
     },
     "light": {
-      "type": "object", "additionalProperties": false,
-      "required": ["r", "g", "b"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "r",
+        "g",
+        "b"
+      ],
       "properties": {
-        "r": {"type": "number", "minimum": 0, "maximum": 16},
-        "g": {"type": "number", "minimum": 0, "maximum": 16},
-        "b": {"type": "number", "minimum": 0, "maximum": 16}
+        "r": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "g": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "b": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16
+        }
       }
     }
   }

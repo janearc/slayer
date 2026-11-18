@@ -1,0 +1,116 @@
+# Underwater Alfa: one frame of a six-second, 6 fps portrait study.
+# This set is based on the surfaced Alfa frame in the underwater
+# gallery. The boat is lowered by 12 m and scene snapshots move its true
+# world position at 3.5 m/s along heading 340 degrees. The camera translates
+# with it at a fixed side/three-quarter offset; this is authored per still,
+# not native moving-camera support.
+#
+# There is no terrain or air model in this scene. `setting: space` supplies
+# the groundless stage. The blue sky, flood and local spot are shot lights,
+# not atmosphere or transported sunlight. The ocean is a finite 512 m sampled
+# spectral height field. Scene time advances with the boat in each snapshot.
+#
+# The water uses shot-selected synthetic extinction [0.03, 0.008, 0.004] m^-1,
+# not measured coastal water. Camera `initial-media` seeds the clear-interface
+# stack; it does not add participating scattering, caustics or wake foam.
+# The camera is about 110 m from the hull centre, below mean sea and outside
+# the Alfa's 9.5 m beam. The hull's keel origin is at up = -18.24 m.
+#
+# The renderer's finite wave patch and absent scattering leave visible
+# surface artifacts. The shot does not claim a physical wake or sunlight
+# transport. The local light and extinction are explicit composition choices.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: alfa off san onofre, submerged shot
+  setting: space
+  light: none
+  # Job settings select the full portrait size and one ray. Exposure 1102
+  # is inherited from the surfaced camera study, not metered underwater.
+  film:
+    width: 480
+    height: 270
+    rays: 1
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      # a clear dielectric at water's index, over a dark blue-green. the
+      # colour stands in for the water's own. extinction per metre is
+      # SYNTHETIC, red lost fastest, green and blue slowest, in the
+      # order of clean water's: not measured, not a coastal preset,
+      # until an agent's sourced presets are approved.
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.03, 0.008, 0.004]
+        source: "shot-selected synthetic clear-water extinction, not measured coastal water"
+    sky:
+      horizon: {srgb_linear: [0.12, 0.22, 0.34]}
+      zenith: {srgb_linear: [0.035, 0.09, 0.18]}
+      ground: {srgb_linear: [0.008, 0.025, 0.055]}
+      source: "authored submerged shot environment, not atmospheric transport"
+    spots:
+      underwater-shot-key:
+        at: [-1500, 0, -8]
+        aim: [0, 0, -1]
+        cone: 55
+        soft: 20
+        temperature: 6500
+        strength: 150
+        source: "authored local shot spotlight above submerged hull; not sun transport"
+    floods:
+      underwater-shot-fill:
+        colour: {srgb_linear: [0.15, 0.35, 0.8]}
+        strength: 15
+        source: "authored blue-green shot fill; not participating water scattering"
+    ocean:
+      # mean sea at z=0, a swell from the wind and fetch above.
+      material: seawater
+      middle: [-1500, 0, 0]
+      extent: {value: 512, unit: m}
+      samples: 257
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0.000000, unit: s}
+      source: "chosen: a moderate breeze off San Onofre, no shelf source"
+  set:
+    things:
+      alfa:
+        kind: alfa
+        seed: 1
+        # The source scene's keel origin was -6.24 m; this shot lowers it 12 m.
+        position:
+          east: {value: -1500.000000, unit: m}
+          north: {value: 0.000000, unit: m}
+          up: {value: -18.24, unit: m}
+        heading: {value: 340, unit: deg}
+  cameras:
+    # from seaward, 170 m south-west of the boat, on the sun's side of it
+    # so the sun is behind the camera, 4 m over the sea, looking a
+    # little up at the sail (z 6). a choice.
+    seaward:
+      title: "from seaward, low, the sun behind"
+      location: {at: [-1641, -95, 4]}
+      orientation: {look_at: [-1500, 0, 6]}
+    # from above the bow quarter, to judge the sun on the submerged hull:
+    # 50 m out from the bow on the sun's side (bearing 250 degrees from
+    # the bow at (-1514, 38)), 20 m up, looking down about 25 degrees at
+    # the forward hull at the waterline (z -4). a choice.
+    deck:
+      title: "from above the bow quarter, down at the forward hull"
+      location: {at: [-1604, -6, 48]}
+      orientation: {look_at: [-1500, 0, 0]}
+    underwater-control:
+      title: "side and below Alfa; hull lowered 12m, camera outside its beam"
+      location: {at: [-1402, 50, -15.12]}
+      orientation: {look_at: [-1500, 0, -15.12]}
+      initial-media: [seawater]

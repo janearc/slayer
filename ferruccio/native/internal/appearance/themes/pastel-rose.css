@@ -1,0 +1,56 @@
+/*
+ * pastel-rose -- made in paratune from pastel-rose.
+ */
+:root {
+  --ground: #f082f0; /* oklch(77% 0.189 327.2) */
+  --ink: #020709; /* oklch(12% 0.014 none) */
+  --cursor: #413700; /* oklch(34% 0.070 97.8) */
+  --cursor-ink: #b1a3ca; /* oklch(74% 0.057 301.4) */
+  --surface-1: #fb58e3; /* oklch(72% 0.246 334.2) */
+  --selection-ink: #6de002; /* oklch(81% 0.241 136.3) */
+  --black: #e577ff; /* oklch(74% 0.214 319.6) */
+  --red: #3cdddd; /* oklch(82% 0.127 195.0) */
+  --green: #ffffff; /* oklch(100% 0.000 none) */
+  --yellow: #ffff1d; /* oklch(97% 0.207 109.7) */
+  --blue: #00001a; /* oklch(10% 0.068 264.1) */
+  --cyan: #20ffff; /* oklch(91% 0.152 194.8) */
+  --magenta: #89fc00; /* oklch(89% 0.257 134.6) */
+  --bright-red: #a0254b; /* oklch(47% 0.160 7.7) */
+  --bright-green: #0a6aa0; /* oklch(50% 0.116 242.1) */
+  --bright-yellow: #ffff1d; /* oklch(97% 0.207 109.7) */
+  --bright-blue: #08020e; /* oklch(11% 0.037 309.9) */
+  --bright-cyan: #20ffff; /* oklch(91% 0.152 194.8) */
+  --bright-magenta: #00ff0b; /* oklch(87% 0.294 142.6) */
+  --white: #ffffff; /* oklch(100% 0.000 none) */
+  --bright-white: #ffffff; /* oklch(100% 0.000 none) */
+  --bright-black: #080609; /* oklch(13% 0.009 none) */
+  --claude-text: #121f2c; /* oklch(23% 0.031 249.3) */
+  --claude-removed: #f07099; /* oklch(71% 0.162 1.9) */
+  --claude-words: #7700c8; /* oklch(47% 0.246 302.0) */
+  --claude-code: #080808; /* oklch(13% 0.000 none) */
+  --claude-mode: #1400e9; /* oklch(43% 0.290 265.9) */
+  --claude-rules: #9384ff; /* oklch(68% 0.176 286.3) */
+  --claude-spinner: #99ca4e; /* oklch(78% 0.162 128.0) */
+  --claude-added: #536be2; /* oklch(57% 0.182 271.0) */
+  --claude-diff-code: #cfe7fc; /* oklch(92% 0.039 244.7) */
+  --md-heading-ground: #ff72ff; /* oklch(77% 0.235 327.5) */
+  --md-heading: #175d97; /* oklch(47% 0.115 248.8) */
+  --md-code-ground: #ff78ff; /* oklch(78% 0.226 327.5) */
+  --md-body: #501390; /* oklch(37% 0.182 298.5) */
+  --md-comment: #705a99; /* oklch(52% 0.100 299.0) */
+  --md-quote: #090011; /* oklch(11% 0.054 311.4) */
+  --md-operator: #070800; /* oklch(13% 0.029 113.9) */
+  --md-keyword: #1409e9; /* oklch(43% 0.288 265.9) */
+  --md-type: #44543c; /* oklch(42% 0.043 135.4) */
+  --md-string: #080800; /* oklch(13% 0.028 109.8) */
+  --md-number: #080800; /* oklch(13% 0.028 109.8) */
+  --md-name: #35155f; /* oklch(29% 0.123 298.0) */
+  --string: #000905; /* oklch(12% 0.025 168.5) */
+  --md-function: #a93b9c; /* oklch(54% 0.182 332.8) */
+  --md-code: #7d1034; /* oklch(39% 0.142 8.9) */
+  --md-link-text: #7552e9; /* oklch(56% 0.216 288.0) */
+  --md-strong: #ff556c; /* oklch(69% 0.205 16.6) */
+  --md-link: #852e79; /* oklch(46% 0.150 333.6) */
+  --heading: #79df00; /* oklch(81% 0.234 134.5) */
+  --warn: #f0e217; /* oklch(90% 0.187 105.0) */
+}

@@ -1,0 +1,2 @@
+frames/2026-11-01-studio-sky	The team's note wins: its file is later by name.
+frames/2026-11-04-workshop-salt&pepper	A <b>bold</b> & "quoted" note	with a third field left off

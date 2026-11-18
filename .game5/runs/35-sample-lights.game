@@ -1,0 +1,1 @@
+sample-lights . :: go run ./manufacture/testdata/light_sample.go

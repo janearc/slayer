@@ -11,5 +11,11 @@ smokes/results.jsonl
 smokes/index.html
 bin/
 
+# Local verification logs and coverage profiles.
+/checks/
+
 # slayer watch keeps its latest frame and status beside a job
 .*.watch/
+
+# Rendered proof frames are retained in the shared gallery, not this source tree.
+/renders/

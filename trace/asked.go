@@ -6,8 +6,15 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// lampsAsked bounds sampled nonambient lamps at a point in larger scenes.
-// Scenes at or below this total lamp count evaluate every lamp.
+// lampsEvery is the most lamps a scene may have and still light every
+// lamp exactly at every point. A street of six lamps under a sun, a
+// flood and a flare is nine, and lighting each exactly keeps the fast
+// light store, which keeps a grid a lamp, in step with the tracer.
+const lampsEvery = 16
+
+// lampsAsked is how many picks a point makes among its nonambient
+// lamps when the scene has more than lampsEvery: past that, lighting
+// every lamp at every point costs more than the sampling noise it saves.
 const lampsAsked = 8
 
 // lit holds a selected lamp's index, direction, distance, unoccluded light, and
@@ -23,9 +30,10 @@ type lit struct {
 // ambient reports whether this lamp uses the zero-direction ambient convention.
 func (one lit) ambient() bool { return (reached{toward: one.toward}).ambient() }
 
-// asked selects lamps and assigns sampling weights. Small scenes evaluate every
-// lamp. Larger scenes always retain ambient lamps and make lampsAsked weighted
-// selections among the remaining positive contributions.
+// asked selects lamps and assigns sampling weights. Scenes of lampsEvery
+// lamps or fewer evaluate every ambient lamp and every lamp that sends
+// light to the point; one that sends none adds nothing to any sum. Larger
+// scenes retain ambient lamps and pick lampsAsked among the rest by worth.
 //
 // Systematic samples are spaced across cumulative worth from a deterministic
 // position-derived offset. Brighter contributions are selected more often. Each
@@ -33,7 +41,7 @@ func (one lit) ambient() bool { return (reached{toward: one.toward}).ambient() }
 // of samples, accounting for repeated selections.
 //
 // room is the caller's scratch: the result is built in it from the start,
-// so a scene of lampsAsked lamps or fewer allocates nothing when room has
+// so a scene of lampsEvery lamps or fewer allocates nothing when room has
 // that capacity. The result shares room's memory and is good until the
 // caller next uses room. A room must belong to one goroutine.
 //
@@ -42,17 +50,31 @@ func (one lit) ambient() bool { return (reached{toward: one.toward}).ambient() }
 // over sampling offsets.
 func (scene *staged) asked(room []lit, point, facing maths.Vec,
 	worth func(toward maths.Vec, light maths.Light) float64) []lit {
-	every := len(scene.lamps) <= lampsAsked
+	return scene.askedExcept(room, point, facing, worth, -1)
+}
+
+// askedExcept is asked without one exact lamp index. The ocean mean-plane
+// source path uses it to keep the transmitted sun out of legacy straight-ray
+// lighting without allocating a filtered scene for each surface.
+func (scene *staged) askedExcept(room []lit, point, facing maths.Vec,
+	worth func(toward maths.Vec, light maths.Light) float64,
+	skip int) []lit {
+	every := len(scene.lamps) <= lampsEvery
 	kept := room[:0]
 	var rest []lit
 	var worths []float64
 	total := 0.0
 	for i, lamp := range scene.lamps {
+		if i == skip {
+			continue
+		}
 		toward, far, light := lamp.Light(point, facing)
 		one := lit{index: i, toward: toward, far: far, light: light,
 			counts: 1}
 		if every || one.ambient() {
-			kept = append(kept, one)
+			if one.ambient() || light != (maths.Light{}) {
+				kept = append(kept, one)
+			}
 			continue
 		}
 		if each := worth(toward, light); each > 0 {

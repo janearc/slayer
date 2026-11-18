@@ -10,6 +10,7 @@ import (
 	"github.com/janearc/slayer/globe"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
+	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
@@ -31,6 +32,23 @@ var materialStruct = structure{"Material", []field{
 	floatField("film", "a metal: one, or none; its film's index, thickness"),
 	floatField("absorbs", "the film's absorption a metre, red, green, blue"),
 	floatField("crinkle", "its wrinkles' size, slope and seed"),
+	floatField("foam_origin", "wake origin east, north, heading, speed in object units"),
+	floatField("foam_shape", "wake half-width, length, wavelength, maximum coverage"),
+	floatField("foam_look", "aerated-water diffuse reflectance RGB and satin"),
+	floatField("foam_extra", "authored breakup band"),
+	intField("foam_seed", "low 32 bits of the authored ocean seed"),
+}}
+
+// In optical-state renders only, Material.info.w carries a named medium ID.
+// clearMediumStruct is present only in an optical-state render. A row carries
+// total extinction, unit scale, and the opt-in bounded scattering profile.
+var clearMediumStruct = structure{"ClearMedium", []field{
+	floatField("extinction_mpu", "RGB inverse metres, metres per world unit"),
+	floatField("scatter_phase", "RGB inverse metres, phase asymmetry"),
+	floatField("profile", "integration steps, maximum distance in metres"),
+	floatField("moon_air", "validated lunar direction in air, water refractive index"),
+	floatField("moon_light", "actual staged lunar irradiance RGB, tagged lamp index plus one"),
+	floatField("moon_plane", "finite calm-water mean centre XYZ, half extent in world units"),
 }}
 
 // conductor is a material's metal and its film as the kernel reads
@@ -83,6 +101,9 @@ func (encoded *scene) material(made *thing.Material) int {
 		"mirror": {made.Gloss, made.Index, made.Through, made.Satin},
 		"info": wholes(flag(textures.paint != nil),
 			flag(textures.shine != nil), made.Rank)}
+	if encoded.opticalState {
+		row["info"] = append(row["info"], float64(encoded.mediumID(made.ClearMedium)))
+	}
 	for name, numbers := range conductor(made) {
 		row[name] = numbers
 	}
@@ -90,6 +111,28 @@ func (encoded *scene) material(made *thing.Material) int {
 	if wrinkles := made.Crinkle; wrinkles != nil {
 		row["crinkle"] = []float64{wrinkles.Size, wrinkles.Slope,
 			float64(wrinkles.Seed)}
+	}
+	row["foam_origin"] = []float64{0, 0, 0, 0}
+	row["foam_shape"] = []float64{0, 0, 0, 0}
+	row["foam_look"] = []float64{0, 0, 0, 0}
+	row["foam_extra"] = []float64{0, 0, 0, 0}
+	row["foam_seed"] = wholes(0)
+	if foam := made.WakeFoam; foam != nil && foam.Coverage > 0 {
+		seconds := encoded.at.Seconds()
+		if foam.FrozenTime {
+			seconds = foam.Seconds
+		}
+		row["foam_origin"] = []float64{
+			foam.OriginEast + math.Sin(foam.Heading)*foam.Speed*seconds,
+			foam.OriginNorth + math.Cos(foam.Heading)*foam.Speed*seconds,
+			foam.Heading, foam.Speed,
+		}
+		row["foam_shape"] = []float64{foam.HalfWidth, foam.Length,
+			foam.Wavelength, foam.Coverage}
+		row["foam_look"] = []float64{foam.Reflectance.R,
+			foam.Reflectance.G, foam.Reflectance.B, foam.Satin}
+		row["foam_extra"] = []float64{foam.Band}
+		row["foam_seed"] = wholes(int(foam.Seed))
 	}
 	encoded.materials.row(materialStruct, row)
 	return index
@@ -118,7 +161,8 @@ func ticked(painted texture.Texture, moment time.Duration) texture.Texture {
 // things puts every seen thing in the world in its place at time t:
 // spheres as a centre and a radius, and meshes each once in their own
 // space, under trees of their own, standing wherever a thing stands,
-// with a tree over the standings.
+// with a tree over the standings. The meshes' faces are packed once all
+// are placed, or taken whole from the last frame's (see keptPool).
 func (encoded *scene) things(world *thing.World, at time.Duration) error {
 	for _, placed := range world.Things {
 		if placed.Hidden() {
@@ -128,7 +172,7 @@ func (encoded *scene) things(world *thing.World, at time.Duration) error {
 			return err
 		}
 	}
-	if err := encoded.tree(encoded.faces); err != nil {
+	if err := encoded.packPool(); err != nil {
 		return err
 	}
 	return encoded.instancesOf()
@@ -137,6 +181,15 @@ func (encoded *scene) things(world *thing.World, at time.Duration) error {
 // place puts one thing where it is at time t: a sphere among the
 // spheres, or a mesh standing there.
 func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
+	if material := placed.Material; material != nil && material.WakeFoam != nil && material.WakeFoam.Coverage > 0 &&
+		(material.Texture != nil || material.Shine != nil ||
+			material.Glow != (maths.Light{})) {
+		return unsupported{"wake foam on a painted, shining or emissive material"}
+	}
+	if material := placed.Material; material != nil && material.WakeFoam != nil &&
+		!material.WakeFoam.Valid() {
+		return unsupported{"wake foam with invalid or out-of-range parameters"}
+	}
 	material := encoded.surface(placed.Material)
 	space, clear := placed.At(at), placed.Clear()
 	switch made := placed.Shape.(type) {
@@ -158,18 +211,25 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 			len(made.Normals) != len(made.Vertices) {
 			return unsupported{"a smooth mesh without a normal for every vertex"}
 		}
-		faces := func() []triangle { return meshFaces(made) }
-		encoded.stand(made, faces, space, material, clear)
+		grown := func() pendingMesh { return encoded.shapeTree(made) }
+		encoded.stand(made, grown, space, material, clear)
 		return nil
 	case *mesh.Mesh:
-		faces := func() []triangle { return slayersFaces(made) }
-		encoded.stand(made, faces, space, material, clear)
+		grown := func() pendingMesh { return encoded.slayersTree(made) }
+		encoded.stand(made, grown, space, material, clear)
 		return nil
 	case *shape.MeshGroup:
 		return encoded.group(made, space, material, clear)
 	case *shape.HeightField:
 		encoded.field(made, space, material, clear)
 		return nil
+	case *seaocean.InfiniteMeanContinuation:
+		if level, ok := made.ExactPlaneLevel(); ok && encoded.oceanMoon != nil &&
+			encoded.oceanMoon.Unbounded && placed == encoded.oceanMoon.Boundary {
+			shifted := maths.NewSubspace(space.Out(maths.V(0, level, 0)), space.Orientation, space.Scale)
+			encoded.plane(shifted, material, clear)
+			return nil
+		}
 	}
 	kind := fmt.Sprintf("a shape of kind %T", placed.Shape)
 	return unsupported{kind}
@@ -557,6 +617,7 @@ var fieldStruct = structure{"Field", []field{
 	floatField("z", ""),
 	intField("data", "first sample, samples a side, material, clear"),
 	floatField("size", "extent, bottom, top, slant"),
+	intField("normal", "x slope offset, z slope offset, interpolated-slope flag"),
 }}
 
 // field appends one height field: its placement, its samples flat
@@ -569,9 +630,24 @@ func (encoded *scene) field(made *shape.HeightField,
 	for _, height := range samples {
 		encoded.heights.word(math.Float32bits(float32(height)))
 	}
+	var normal []float64
+	if slopeX, slopeZ, ok := made.ApproximateShadingSlopes(); ok {
+		xOffset := len(encoded.heights.bytes) / 4
+		for _, slope := range slopeX {
+			encoded.heights.word(math.Float32bits(float32(slope)))
+		}
+		zOffset := len(encoded.heights.bytes) / 4
+		for _, slope := range slopeZ {
+			encoded.heights.word(math.Float32bits(float32(slope)))
+		}
+		normal = []float64{float64(xOffset), float64(zOffset), 1}
+	} else {
+		normal = []float64{0, 0, 0}
+	}
 	given := placedAt(space)
 	given["data"] = wholes(first, n, material, flag(clear))
 	given["size"] = []float64{extent, bottom, top, slant}
+	given["normal"] = wholes(int(normal[0]), int(normal[1]), int(normal[2]))
 	encoded.fields.row(fieldStruct, given)
 	encoded.counts.fields++
 }

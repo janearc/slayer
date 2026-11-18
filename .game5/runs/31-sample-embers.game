@@ -1,0 +1,3 @@
+# authored records that fixtures are made from. review them with renders
+# before replacing a fixture.
+sample-embers . :: go run ./embers/testdata/sample.go

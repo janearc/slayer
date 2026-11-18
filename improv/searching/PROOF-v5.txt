@@ -1,0 +1,40 @@
+heard. v5 / house of suns and the multitude
+
+88bars66BPM,334.131769s includingfullrelease;2005frames6fps,480x270,
+fourprimarysamples/pixel,FasterLighting and retainedGPUresources.
+
+Native lantern/Zappy panel builders replace the beaded stand-ins. Zappy
+has nested black-glass shells, turning/tumbling rings and visible
+precessing polar shafts. Lantern has48rings/64panels before outward
+count adjustment, warm core and moving apertures. Proof panels have
+zero wear to avoid unnecessary subpixel tessellation. Shafts are authored
+emissive geometry; this does not claim complete polar-beam transport.
+Fold now has3layered pleated wings, perforated grids, cross ribs, edge
+frames and hinge bearings. Occulter has72overlapping iris scales,
+edge channels and a structured corona. Allfour use these developed assets.
+
+Earth response begins68.1/243.636s. Sky contains roughly667times the
+baseline seeded star population plus resolved brighter stars, irregular
+luminous clouds and dark gaps. Multiple directional sources approximate
+collective illumination; they brighten the actual terrain, trees and
+observatory surfaces. This is authored fiction, not calibrated Galactic-
+centre photometry. No single enlargedsun or globalexposureflash.
+
+Lantern71-72 andZappy73-74 return prominently. Plunge75-76/269.091s:
+same established aperture, recognizable guides and actual miniature
+beings visible inside. The following rapid passage77-86 presents96
+individuals fromfourfamilies, eachwithatleast2framesat6fps. Sharedmesh
+families vary shellinventory, dimensions, internalattitude, phase and
+light. Finalwideholdsall96throughfullrelease. These are constructed
+variants, not96independently hand-sculpted character designs.
+
+Cached approvedv4frames44..545 are unchanged ground/orbital shots.
+Shotrecipes compare exactly; an independently traced Rubin frame96
+matchesv4SHA256 exactly. New opening spectrogramframes0..43 and all
+character/endingframes546..2004 are freshly traced with the v5 producer.
+segments.json retains actualproducer identities and perrange provenance.
+Never substitute rejected opening coverage. Originaltakes/music preserved.
+
+Nearby Gaia remains pinned; largercosmic geography and filaments are
+authored. True measured widecatalogue/observational-band reveal remainopen.
+Read SHOOT.md,MUSIC.md,EDIT-v5.txt. Newproof remainsforJane's review.

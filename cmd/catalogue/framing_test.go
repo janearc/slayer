@@ -17,9 +17,12 @@ var framingRaw []byte
 type framingContract struct {
 	From, To                       maths.Vec
 	Shift, Yaw, Padding, Tolerance float64
-	Elevation                      float64
 }
 
+// TestGroundObservatoryCameraUsesTheDeclaredElevation checks that each
+// large observatory is seen from the elevation its own menu entry
+// declares. The entries no longer share one: each is framed for its own
+// building.
 func TestGroundObservatoryCameraUsesTheDeclaredElevation(test *testing.T) {
 	var data framingContract
 	if err := yamlfile.Read("framing.yaml", framingRaw, &data); err != nil {
@@ -43,7 +46,10 @@ func TestGroundObservatoryCameraUsesTheDeclaredElevation(test *testing.T) {
 		centre := object.bounds.Min.Add(object.bounds.Max).Scale(halfExtent)
 		direction := object.eye.Origin.Sub(centre)
 		pitch := math.Atan2(direction.Y, math.Hypot(direction.X, direction.Z))
-		if !(math.Abs(pitch/maths.Degree-data.Elevation) <= data.Tolerance) {
+		if entry.Pitch == nil {
+			test.Fatal("no declared elevation", entry.Kind)
+		}
+		if !(math.Abs(pitch/maths.Degree-*entry.Pitch) <= data.Tolerance) {
 			test.Fatal("camera ignored its declared elevation", entry.Kind, pitch)
 		}
 	}

@@ -20,7 +20,5 @@ displacement checks. Only the final grounded specimen's detail measurement
 changes. The envelope still includes every permitted species, variant and
 detail, including foliage overhang.
 
-Independent 1000-pixel, 90-degree pinhole fixtures check centred and off-axis
-boxes against rational projected extents. Outside-frustum and near-plane
-controls also pass. These controls do not establish an approximation-error
-bound, matching canopy shadows or temporal acceptance of foliage transitions.
+This does not establish an approximation-error bound, matching canopy
+shadows or temporal acceptance of foliage transitions.

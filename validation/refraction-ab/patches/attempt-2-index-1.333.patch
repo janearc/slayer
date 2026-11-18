@@ -1,0 +1,11 @@
+--- a/scene.yaml
++++ b/scene.yaml
+@@ -33,7 +33,7 @@
+         colour: {srgb_linear: [0.008, 0.7, 1]}
+         source: "synthetic contrast chart"
+       synthetic-clear-interface:
+-        clear: {through: 1, index: 1.0, gloss: 1, rank: 0}
++        clear: {through: 1, index: 1.333, gloss: 0, rank: 0}
+         source: "synthetic interface control; not a measured water index"
+       opaque-blue-sphere:
+         colour: {srgb_linear: [0.025, 0.18, 0.95]}

@@ -222,9 +222,6 @@ type vec struct{ x, y, z float64 }
 // add is a plus b.
 func (a vec) add(b vec) vec { return vec{a.x + b.x, a.y + b.y, a.z + b.z} }
 
-// sub is a less b.
-func (a vec) sub(b vec) vec { return vec{a.x - b.x, a.y - b.y, a.z - b.z} }
-
 // scale is a so many times over.
 func (a vec) scale(s float64) vec { return vec{a.x * s, a.y * s, a.z * s} }
 
@@ -1480,31 +1477,12 @@ var (
 	shoreRight = vec{263578.1 - 263104.5, 2148129.0 - 2148423.5, waterZ + 8}
 )
 
-// the laser towers, sets/moonlake.yaml's rigs: the ground under each by
-// the lidar (improv/moonlake/rig-heights.yaml), rim left and right, then
-// shore left and right; and RIG_DECK, how far over its ground a head
-// stands on its tower's top deck, about 20.4 m on the stage tower.
+// rigDeck is RIG_DECK, how far over its ground a head stands on its
+// tower's top deck, about 20.4 m on the stage tower. the towers are
+// sets/moonlake.yaml's rigs, and package rig holds the ground under each.
 // unset, the heads stand where they stood before the towers: 6 m over
 // the far tree's ground, and 8 m over the water.
-var (
-	rigGround = [4]float64{1180.2, 1191.3, 1076.1, 1079.4}
-	rigDeck   = numberFrom("RIG_DECK", 0)
-)
-
-// onDeck is a head's place lifted onto its tower's top deck, when the
-// towers stand, and where it was when they do not.
-func onDeck(head vec, tower int) vec {
-	if rigDeck <= 0 {
-		return head
-	}
-	head.z = rigGround[tower] - (1076 + eyeOverLake) + rigDeck
-	return head
-}
-
-// bearing is the compass azimuth from one point to another, in degrees.
-func bearing(from, to vec) float64 {
-	return math.Atan2(to.x-from.x, to.y-from.y) * 180 / math.Pi
-}
+var rigDeck = numberFrom("RIG_DECK", 0)
 
 // lasers plays the heads: four, two on the far rim and two on the shores,
 // in two banks, the left heads and the right, each bank on its own pulse,

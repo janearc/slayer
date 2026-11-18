@@ -1,0 +1,6 @@
+# Bulk GaAs is a measured optical proxy for the photovoltaic face.
+# This does not include Ge, cover glass or antireflection layers.
+material: gallium-arsenide
+finish: polished
+by: Aspnes et al. (1986), doi:10.1063/1.337426, via refractiveindex.info
+says: Bulk optical constants are measured; polished finish is an authored choice.

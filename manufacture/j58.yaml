@@ -1,0 +1,203 @@
+# The Pratt & Whitney J58, the engine of the A-12 and the SR-71, lying
+# on its axis, in metres. A number marked read was read off a page that
+# `read` names; a number marked picked was read nowhere and was chosen,
+# for the reason beside it. No drawing of the engine with its stations
+# was found, so every station and every radius but the largest is
+# picked.
+#
+# From the front: the front frame with its inlet guide vanes round the
+# spinner, the nine-stage compressor, the burner, the two-stage turbine,
+# and the afterburner.
+length: 4.572   # read: 180 in, the 1966 engine register, through Wikipedia
+hot: 0.1524     # read: "plus 6 in when hot", the same page; held, not drawn
+diameter: 1.27  # read: 50 in, the same page; here the largest case
+envelope: 1.448 # read: 4 ft 9 in, all-aero; here across the bypass tubes
+mass: 2722      # read: about 6,000 lb dry, Wikipedia; held, not drawn
+pressure: 8.8   # read: overall pressure ratio at take-off, Wikipedia
+counts:
+  compressor: 9 # read: "a nine-stage compressor", TM-104330, PDF page 6
+  turbine: 2    # read: "driven by a two-stage turbine", page 6
+  cans: 8       # read: "an eight-can combustor", page 6
+  tubes: 6      # read: "six bleed-bypass tubes", page 6
+  bleed: 4      # read: "bled from the fourth stage of the compressor"
+# picked: where each section ends, metres aft of the compressor face.
+# The compressor is about a third of the length and the afterburner a
+# third, as the engine is usually described; nothing was measured.
+stations:
+  frame: 0.27
+  compressor: 1.65
+  burner: 2.29
+  turbine: 2.61
+  afterburner: 4.21
+# picked: radii, scaled down from the read 50 in. The face is the
+# compressor's tip at the front, the spinner its hub there, and the exit
+# its tip at the ninth stage. The hub between is derived from the read
+# pressure ratio; see j58.go.
+radii:
+  flange: 0.6
+  face: 0.54
+  spinner: 0.2
+  exit: 0.47
+  burner: 0.58
+  turbine: 0.6
+  wall: 0.025   # picked: the cases' thickness
+  rim: 0.02     # picked: how far a flange stands out of its case
+  seam: 0.03    # picked: how long a flange is along the axis
+# picked: the inlet guide vanes, how many and their size; not found
+vanes: {count: 20, chord: 0.12, thick: 0.012}
+# picked: blades on each of the nine compressor stages, more aft as the
+# blades get shorter, as compressors are built; the counts are not found
+blades:
+  compressor: [32, 34, 38, 40, 44, 46, 50, 52, 56]
+  chord: 0.08
+  thick: 0.006
+  gap: 0.006    # picked: the clearance between a blade's tip and its case
+# picked: the bypass tubes, none of whose sizes was found. A tube is
+# about as wide as the room between the read envelope and the read
+# diameter leaves, less a clearance; it rises from a ring at the fourth
+# stage, `rise` aft, and runs aft to the augmentor inlet, `enter` aft of
+# the turbine's end, where the report says the air is dumped.
+tubes: {across: 0.075, rise: 0.2, enter: 0.25}
+# picked: what shows of the eight cans outside the burner case, a fuel
+# boss over each can and the manifold ring that feeds them; not found
+cans: {boss: 0.05, height: 0.04, manifold: 0.024}
+# picked: the two turbine stages' hub radius, their blades and chord
+turbine: {hub: 0.42, blades: [60, 64], chord: 0.06}
+# picked: the afterburner's insides, none of whose sizes was found: the
+# turbine's tail cone, how long; how far aft of the turbine the spray
+# rings and the flame holders stand; the radii of the rings, a spray
+# ring and a flame holder on each; a spray ring's pipe, a holder's V
+# across its open end and its sheet; and the struts that hold them
+afterburner:
+  cone: 0.6
+  spray: 0.65
+  holder: 0.85
+  rings: [0.25, 0.42]
+  bar: 0.012
+  gutter: 0.05
+  sheet: 0.008
+  struts: 6
+# picked: the variable primary nozzle, drawn open, as at full
+# afterburner: its radius at its end, its flaps, each shown by a rib
+# where it overlaps the next, and the actuators that move them; the
+# report says only that "the primary nozzle area is variable"
+nozzle: {exit: 0.45, flaps: 16, rib: 0.012, actuators: 8, rod: 0.015}
+# picked: the four mount lugs a host holds the engine by, one each side
+# at the compressor's end and ahead of the aft flange, how far out their
+# pins stand, and a lug's length along the axis; where the J58's own
+# mounts are was not found
+mounts: {forward: 1.65, aft: 3.91, reach: 0.7, lug: 0.12}
+# What each part is made of. `alloy` is what the metal is, as far as a
+# source says; `material` and `finish` are the look slayer draws, from
+# the metals it has. Slayer has titanium's optics and no nickel alloy's
+# or steel's, so titanium stands in where the part is not titanium, and
+# says so.
+looks:
+  front frame:
+    material: titanium
+    finish: brushed
+    alloy: "not found; steel or titanium, the plan's reading, unsourced"
+  compressor case:
+    material: titanium
+    finish: brushed
+    alloy: "not found; steel or titanium, the plan's reading, unsourced"
+  inlet guide vane:
+    material: titanium
+    finish: satin
+    alloy: "not found"
+  spinner:
+    material: titanium
+    finish: satin
+    alloy: "not found"
+  compressor blade:
+    material: titanium
+    finish: satin
+    alloy: "not found"
+  # picked: the hot cases weathered, dull as a run engine's are, and not
+  # oxidised, which mirrored the dark studio as black; their heat tint is
+  # not drawn, and its colour is not found
+  burner case:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  turbine case:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  afterburner case:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  flange:
+    material: titanium
+    finish: frosted
+    alloy: "not found"
+  bypass tube:
+    material: titanium
+    finish: brushed
+    alloy: "not found"
+  can boss:
+    material: titanium
+    finish: weathered
+    alloy: "not found"
+  fuel manifold:
+    material: titanium
+    finish: satin
+    alloy: "not found"
+  turbine blade:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  turbine disc:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  tail cone:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  spray ring:
+    material: titanium
+    finish: satin
+    alloy: "not found"
+  flame holder:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  afterburner strut:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  primary nozzle:
+    material: titanium
+    finish: weathered
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  nozzle flap:
+    material: titanium
+    finish: frosted
+    alloy: "a nickel alloy, the plan's reading of a hot part; titanium stands in"
+  nozzle actuator:
+    material: titanium
+    finish: satin
+    alloy: "not found"
+  mount lug:
+    material: titanium
+    finish: frosted
+    alloy: "not found"
+read: >-
+  The counts are NASA TM-104330, Timothy R. Conners, "Predicted
+  Performance of a Thrust-Enhanced SR-71 Aircraft with an External
+  Payload", 1997 (NTRS 19970019923), PDF page 6, on the shelf as
+  nasa-tm104330-sr71-thrust-enhanced: "two 34,000 lbf (151,240 N)
+  thrust-class J58 afterburning turbojet engines", "a nine-stage
+  compressor driven by a two-stage turbine", "an eight-can combustor",
+  "bled from the fourth stage of the compressor and dumped into the
+  augmentor inlet through six bleed-bypass tubes". The length, 180 in,
+  the diameter, 50 in, the dry weight, about 6,000 lb, and the pressure
+  ratio, 8.8, are Wikipedia's Pratt & Whitney J58 page, read and not
+  shelved (the fetch was refused), which cites a 1966 engine register.
+  The 4 ft 9 in is all-aero's page, seen in a search result and not
+  opened; it gives the length as 17 ft 10 in, which disagrees with the
+  register, and the register is used. Reading 50 in as the largest case
+  and 4 ft 9 in as the width across the bypass tubes is this file's
+  choice; neither page says which it measures.

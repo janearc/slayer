@@ -91,7 +91,12 @@ func (row summitInstrument) array(detail string) (good, error) {
 		return good{}, err
 	}
 	bounds := maths.SegmentBox(row.Minimum, row.Maximum, spaceZero)
-	return good{dressed: one.dressed, groups: groups, extent: &bounds}, nil
+	counts := one.partCounts()
+	for material, count := range counts {
+		counts[material] = count * len(row.Array)
+	}
+	return good{dressed: one.dressed, groups: groups, extent: &bounds,
+		groupParts: counts}, nil
 }
 
 // arrayGroups uses one flat mesh per material and a checked local hierarchy.

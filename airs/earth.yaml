@@ -1,0 +1,335 @@
+# Earth's air, from the ground to the top of the 1976 standard atmosphere,
+# as numbers. Every number says read: where it was read, in what words, or
+# picked: nobody read it anywhere, and why it is what it is. A number that
+# is picked and has a range beside it (low, high) must lie within it.
+# Lengths are metres, pressures are pascals except where the unit says
+# hectopascals. The gas's density by height is not here: it is celestial's
+# standard atmosphere, sampled at the height of each shell's edges.
+#
+# Files read for this, kept in celestial's data store:
+#   documents/serdyuchenko-2014-o3-223K-data.txt (the cross sections),
+#   documents/serdyuchenko-2014-ozone-cross-sections.pdf (the paper),
+#   documents/us-standard-atmosphere-1976.pdf (no ozone in its text),
+#   ntrs/19940019882.pdf (Nimbus-7 TOMS user's guide, McPeters and others
+#   1993, here "the TOMS guide", Appendix D, p 83),
+#   ntrs/20070016619.pdf (Levy and others 2007, p 26, Table 1),
+#   ntrs/20060013189.pdf (Kaufman and others, p 3, Table 1).
+
+planet:
+  radius:
+    value: 6371008.7714
+    unit: m
+    read: >-
+      celestial v0.0.9, research/research-derived-data.yml,
+      earth-mean-radius-m: R1 of the geodetic reference system 1980,
+      "6 371 008.7714 m". slayer's scene/bodies/template/earth.go has
+      km(6371), the same rounded to the kilometre.
+  gravity:
+    value: 9.80665
+    unit: m s^-2
+    read: >-
+      celestial v0.0.9, atmosphere/standard.go, "gravity = 9.80665",
+      the 1976 standard atmosphere's own, defined there.
+  surface-pressure:
+    value: 101325
+    unit: Pa
+    read: >-
+      celestial v0.0.9, atmosphere/standard.go, "seaPressure =
+      101325.0", the 1976 standard atmosphere's sea level.
+
+gas:
+  carbon-dioxide:
+    value: 420
+    unit: parts a million
+    picked: >-
+      about today's carbon dioxide, as moonlight and Venus's nitrogen
+      stand-in take it. Rayleigh's cross section moves by a few parts in
+      a hundred thousand with it.
+  dry-air-mass:
+    value: 28.9595
+    unit: g mol^-1
+    read: >-
+      Bodhaine and others 1999, the text after equation 17, "m_a =
+      15.0556 (CO2) + 28.9595 g mol-1", as celestial v0.0.9
+      research-derived-data.yml has it, molar-mass-dry-air.
+  carbon-dioxide-mass-slope:
+    value: 15.0556
+    unit: g mol^-1
+    read: >-
+      The same line of Bodhaine and others 1999, and celestial's
+      molar-mass-co2-slope: the mass gained for each unit of carbon
+      dioxide's share by volume.
+  top:
+    value: 86000
+    unit: m
+    picked: >-
+      the top of celestial's standard atmosphere, 86 km geometric,
+      which refuses a height above it. The air above is about four
+      parts in a million of the column's mass. The brief asked for 100 km.
+
+# The shells: each run ends at its height and is cut into equal shells no
+# thicker than its thickness. The runs follow the gas, whose density
+# falls by e in 8 km, and the aerosol, whose scale height is 1.2 km, so
+# the lowest are the thinnest; the ozone's layers are a few km thick.
+shells:
+  picked: >-
+    500 m to 4 km, where the aerosol lies, its scale height 1.2 km; 1
+    km to 20 km, an eighth of the gas's scale height or less, and where
+    the lower ozone is; 2 km to 50 km, through the ozone layer, which
+    is some 15 km thick; 6 km to the top, where the air is under a
+    thousandth of the column's mass. 45 shells. No source.
+  runs:
+    - to: 4000
+      thickness: 500
+    - to: 20000
+      thickness: 1000
+    - to: 50000
+      thickness: 2000
+    - to: 86000
+      thickness: 6000
+
+ozone:
+  temperature:
+    value: 223
+    unit: K
+    picked: >-
+      the temperature of most of the ozone, 15 to 35 km, in the
+      standard atmosphere (the TOMS guide's mid-latitude profile has
+      217 K at 48 mbar and 214 K at 95 mbar, p 81). The cross sections
+      are kept for 193 to 293 K in steps of 10 K; 223 K is the nearest
+      to it. In the Chappuis band 223 K and 293 K differ by about one
+      percent (Serdyuchenko and others 2014, Table 3); in the Huggins
+      band, below 340 nm, by a third.
+  total:
+    value: 300
+    unit: Dobson units
+    picked: >-
+      about the global mean column. The TOMS guide's standard profiles
+      are for 275 and for 325 Dobson units at mid-latitude and not for
+      300, so the layers below are the means of the two. No source for
+      the global mean was read. 1 Dobson unit is 1 matm-cm.
+  # The layers are the TOMS guide's Umkehr layers. The guide gives only
+  # their central pressures, each half the one before. Each layer is
+  # taken to span a factor of two in pressure, from 1013.25 hectopascals
+  # down, and the guide's central pressures are the middles of these to
+  # about a percent (a test holds them to two). Within a layer the ozone
+  # is taken as one mixing ratio.
+  layers:
+    - name: Umkehr layers 0 and 1
+      bottom: 1013.25
+      top: 253.3125
+      amount: 29.0
+      read: >-
+        the TOMS guide, Appendix D, p 83, Mid Latitude (45 degrees),
+        "0,1": 28.0 at 275 Dobson units and 30.0 at 325, the mean.
+        Layers 0 and 1 are one row of the table; the table's
+        central pressures for them are 760 and 380 mbar.
+    - name: Umkehr layer 2
+      bottom: 253.3125
+      top: 126.65625
+      amount: 20.5
+      read: >-
+        the same table, row 2: 15.0 at 275 and 26.0 at 325, the mean.
+        Central pressure 190 mbar (p 81).
+    - name: Umkehr layer 3
+      bottom: 126.65625
+      top: 63.328125
+      amount: 37.0
+      read: >-
+        the same, row 3: 29.0 and 45.0. Central pressure 95 mbar.
+    - name: Umkehr layer 4
+      bottom: 63.328125
+      top: 31.6640625
+      amount: 66.35
+      read: >-
+        the same, row 4: 58.0 and 74.7. Central pressure 48 mbar.
+    - name: Umkehr layer 5
+      bottom: 31.6640625
+      top: 15.83203125
+      amount: 65.3
+      read: >-
+        the same, row 5: 63.7 and 66.9. Central pressure 24 mbar.
+    - name: Umkehr layer 6
+      bottom: 15.83203125
+      top: 7.916015625
+      amount: 41.15
+      read: >-
+        the same, row 6: 40.6 and 41.7. Central pressure 12 mbar.
+    - name: Umkehr layer 7
+      bottom: 7.916015625
+      top: 3.9580078125
+      amount: 24.5
+      read: >-
+        the same, row 7: 24.5 and 24.5. Central pressure 6 mbar.
+    - name: Umkehr layer 8
+      bottom: 3.9580078125
+      top: 1.97900390625
+      amount: 11.1
+      read: >-
+        the same, row 8: 11.1 and 11.1. Central pressure 3 mbar.
+    - name: Umkehr layer 9
+      bottom: 1.97900390625
+      top: 0.989501953125
+      amount: 3.7
+      read: >-
+        the same, row 9: 3.7 and 3.7. Central pressure 1.5 mbar.
+    - name: Umkehr layer 10
+      bottom: 0.989501953125
+      top: 0.4947509765625
+      amount: 1.4
+      read: >-
+        the same, row 10: 1.4 and 1.4. Central pressure 0.75 mbar.
+        Nothing above it: the table ends here, at about 55 km.
+  cross-section:
+    read: >-
+      Serdyuchenko, Gorshelev, Weber, Chehade and Burrows 2014, Atmos.
+      Meas. Tech. 7, 625, doi 10.5194/amt-7-625-2014, the 2013 version of
+      the data (22 July 2013), 223 K, 213 to 1100 nm at steps of 0.01 nm,
+      as the MPI-Mainz UV/VIS Spectral Atlas holds it:
+      uv-vis-spectral-atlas-mainz.org/uvvis_data/cross_sections/Ozone/
+      O3_Serdyuchenko(2014)_223K_213-1100nm(2013 version).txt, kept as
+      documents/serdyuchenko-2014-o3-223K-data.txt, 88668 lines,
+      read 2026-11-15. Each point here is the mean of the file's samples
+      from 5 nm below to 5 nm above it, 1000 of them, rounded to four
+      figures, in square centimetres a molecule. Between points the
+      cross section is taken as a straight line in its logarithm. The
+      file's integral over 410 to 690 nm is 6.145e-19 cm2 nm; the
+      paper's Table 3 has 6.15 for 221 K.
+    points:
+      - [300, 3.844e-19]
+      - [310, 9.628e-20]
+      - [320, 2.313e-20]
+      - [330, 5.146e-21]
+      - [340, 9.631e-22]
+      - [350, 1.573e-22]
+      - [360, 2.428e-23]
+      - [370, 4.297e-24]
+      - [380, 1.632e-24]
+      - [390, 3.547e-24]
+      - [400, 9.208e-24]
+      - [410, 2.018e-23]
+      - [420, 3.866e-23]
+      - [430, 6.815e-23]
+      - [440, 1.274e-22]
+      - [450, 1.686e-22]
+      - [460, 3.18e-22]
+      - [470, 3.692e-22]
+      - [480, 6.823e-22]
+      - [490, 7.748e-22]
+      - [500, 1.179e-21]
+      - [510, 1.536e-21]
+      - [520, 1.794e-21]
+      - [530, 2.545e-21]
+      - [540, 2.882e-21]
+      - [550, 3.285e-21]
+      - [560, 3.874e-21]
+      - [570, 4.576e-21]
+      - [580, 4.562e-21]
+      - [590, 4.435e-21]
+      - [600, 5.035e-21]
+      - [610, 4.711e-21]
+      - [620, 4.002e-21]
+      - [630, 3.499e-21]
+      - [640, 2.932e-21]
+      - [650, 2.444e-21]
+      - [660, 2.046e-21]
+      - [670, 1.654e-21]
+      - [680, 1.326e-21]
+      - [690, 1.077e-21]
+      - [700, 8.238e-22]
+      - [710, 6.921e-22]
+      - [720, 5.897e-22]
+      - [730, 4.479e-22]
+      - [740, 4.082e-22]
+      - [750, 3.972e-22]
+      - [760, 2.658e-22]
+      - [770, 2.447e-22]
+      - [780, 2.961e-22]
+      - [790, 1.947e-22]
+      - [800, 1.416e-22]
+      - [810, 1.737e-22]
+      - [820, 1.927e-22]
+      - [830, 8.874e-23]
+      - [840, 6.783e-23]
+      - [850, 1.156e-22]
+      - [860, 1.072e-22]
+      - [870, 4.391e-23]
+      - [880, 3.497e-23]
+      - [890, 4.681e-23]
+      - [900, 5.484e-23]
+      - [910, 2.485e-23]
+      - [920, 1.297e-23]
+      - [930, 1.312e-23]
+      - [940, 2.769e-23]
+      - [950, 2.37e-23]
+      - [960, 8.715e-24]
+      - [970, 3.665e-24]
+      - [980, 1.739e-24]
+      - [990, 1.676e-23]
+      - [1000, 7.757e-24]
+
+# A clear day's haze: an exponential layer from the ground, its depth at
+# the reference wavelength, the way it changes with colour by Angstrom's
+# law, and its albedo and asymmetry by wavelength.
+aerosol:
+  depth:
+    value: 0.1
+    unit: ""
+    picked: >-
+      a clear day. Shettle and Fenn 1979 was not reached. Kaufman and
+      others (NTRS 20060013189) Table 1 has the average depth at ten
+      AERONET sites, 2001 to 2005, at 0.14 (Rome) to 0.49 (Beijing),
+      every one of them a mean over hazy days as well as clear; a
+      typical figure, to be pinned.
+  reference:
+    value: 550
+    unit: nm
+    picked: >-
+      the middle of the visible, where aerosol depths are quoted.
+  angstrom:
+    value: 1.4
+    unit: ""
+    low: 1.02
+    high: 1.71
+    picked: >-
+      the Angstrom exponent, 440 to 870 nm, of Rome, 2001 to 2005,
+      1.40, Kaufman and others Table 1 (1), "mostly local pollution".
+      The ten sites there run from 1.02 (Kashidoo) to 1.71 (Mongu).
+      The brief's 1.3 is inside it. To be pinned.
+  scale-height:
+    value: 1200
+    unit: m
+    picked: >-
+      the height over which a clear day's aerosol falls by e, as
+      commonly given, 1 to 2 km; no source for it was reached. To be
+      pinned.
+  albedo:
+    read: >-
+      Levy, Remer, Mattoo, Vermote and Kaufman 2007 (NTRS 20070016619),
+      p 26, Table 1, the Continental model, "SSA/g (0.47/0.55/0.66/2.1
+      um) for tau 0.55 = 0.5": 0.90, 0.89, 0.88, and 0.67 at 2.1 um,
+      which is past the range here. Read from the page's image, not
+      only its text. Held at the ends. The model is for a depth of 0.5;
+      it is held at 0.1.
+    points:
+      - [470, 0.90]
+      - [550, 0.89]
+      - [660, 0.88]
+  asymmetry:
+    read: >-
+      The same table and model, second row: 0.64, 0.63, 0.63, and 0.79
+      at 2.1 um. Held at the ends.
+    points:
+      - [470, 0.64]
+      - [550, 0.63]
+      - [660, 0.63]
+
+ground:
+  picked: >-
+    a single albedo of 0.15, at every wavelength: the set's to say
+    later, as the ground's colour is. A grass and soil mean is about
+    that; no source was read. The two points are the ends of the
+    ozone's cross sections, 300 and 1000 nm.
+  points:
+    - [300, 0.15]
+    - [1000, 0.15]

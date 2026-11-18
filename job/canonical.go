@@ -45,12 +45,17 @@ func (wire document) canonical() ([]byte, error) {
 
 // canonicalFilm is the film without its preset's name: the preset has
 // already given its size and rate, which are what change the picture.
+// A mode of light is left out too: it is what a film that says no mode
+// draws, and a job that says it keeps the key it had without it.
 func canonicalFilm(film *filmWire) *filmWire {
 	if film == nil {
 		return nil
 	}
 	plain := *film
 	plain.Preset = ""
+	if plain.Mode == modeLight {
+		plain.Mode = ""
+	}
 	return &plain
 }
 

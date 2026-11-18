@@ -37,6 +37,8 @@ import (
 
 	"github.com/janearc/slayer/diskcache"
 	"github.com/janearc/slayer/door"
+	"github.com/janearc/slayer/improv/searching"
+	"github.com/janearc/slayer/internal/observability"
 )
 
 // build, built, who and sessions are set by the linker; they say which build
@@ -73,6 +75,18 @@ var moved = map[string]string{
 // main runs an older verb by its word, or else the door, with a context
 // that control-c and a terminate cancel.
 func main() {
+	os.Exit(runMain())
+}
+
+// runMain returns before main exits so the optional listeners close cleanly.
+func runMain() int {
+	defer startFrameEvents()()
+	defer startObservability(os.Stderr)()
+	defer observability.StartSummary("slayer", os.Stderr)()
+	if err := searching.RegisterSlayerScenes(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return exitFailed
+	}
 	// the build's digest is started now, from the binary as it starts: a
 	// binary rebuilt while this one runs must not have its digest put on
 	// what this one keeps (review of 2026-11-12); it is worked out beside
@@ -80,17 +94,36 @@ func main() {
 	go diskcache.Build() //nolint:errcheck // asked again, with its error, where used
 	if len(os.Args) > verbAt && moved[os.Args[verbAt]] != "" {
 		fmt.Fprintln(os.Stderr, "slayer: "+moved[os.Args[verbAt]])
-		os.Exit(exitUsage)
+		return exitUsage
 	}
 	if len(os.Args) > verbAt && older[os.Args[verbAt]] != nil {
-		os.Exit(older[os.Args[verbAt]](os.Args[askAt:], os.Stdout,
-			os.Stderr))
+		return older[os.Args[verbAt]](os.Args[askAt:], os.Stdout,
+			os.Stderr)
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt,
 		syscall.SIGTERM)
 	code := front(ctx, os.Args[verbAt:], os.Stdout, os.Stderr)
 	stop()
-	os.Exit(code)
+	return code
+}
+
+// startFrameEvents leaves rendering untouched when the optional handoff fails.
+func startFrameEvents() func() {
+	stop, err := observability.StartFrameEventsFromEnv()
+	if err != nil {
+		return func() {}
+	}
+	return stop
+}
+
+// startObservability reports a listener failure without refusing the job.
+func startObservability(wrong io.Writer) func() {
+	stop, err := observability.Start("slayer")
+	if err != nil {
+		fmt.Fprintf(wrong, "slayer: observability unavailable: %v\n", err)
+		return func() {}
+	}
+	return stop
 }
 
 // front runs the door's tool on args and gives its exit number.

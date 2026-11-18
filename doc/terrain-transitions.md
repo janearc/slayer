@@ -1,10 +1,8 @@
 # Terrain changes need time
 
-The island selector spends a finite patch allowance on each view. In the
-first moving studies it rebuilt that selection independently for every frame.
-At the budget edge, small camera moves replaced whole patches and changed
-ridge shapes and shading. A matched fixed-geometry control isolated those
-changes while keeping the camera, light and weather recipes the same.
+The island selector spends a finite patch allowance on each view and
+rebuilds that selection independently for every frame. At the budget edge,
+small camera moves replace whole patches and change ridge shapes and shading.
 
 Optional detail controls now give the terrain a transition owner:
 
@@ -43,28 +41,6 @@ are refused. Closing the scene releases retained transition ownership.
 
 Normal interpolation needs its own visual checks. Subdivision followed by
 normal normalization and the shadow-terminator lift can change shading even
-at the same geometric endpoint. These controls are an implementation study;
-they do not establish a flicker-free film, exact radiance continuity or
-clearance between camera samples.
-
-The first matched native study contains 36 frames at 320 by 180 and 24 fps.
-The original adaptive, fixed-mesh and transition versions retain the same
-camera and scene recipes; their first PNG bytes match. In the inspected
-terrain rectangle, maximum adjacent mean RGB-code change fell from 3.0622
-to 0.2855 with transitions. Motion and delayed detail contribute to this metric.
-
-A 71-frame move-and-hold control lets the terrain catch up after the camera
-stops. Its final PNG bytes match a fresh stateless render at the same view
-and scene time. This establishes convergence for that view, not an arbitrary
-moving track or high-resolution film.
-
-A separate CPU diagnostic intersected the endpoint meshes with independent
-rays, checked a genuinely intermediate surface and observed no source-height
-calls during the active transition. Clock reversal, cancellation, payload and
-patch refusal, unchanged-view reuse and reset were exercised too.
-
-Those rays recover endpoint geometry within the diagnostic's 0.000001 m
-allowance. Normal directions and shadow lift are approximate under subdivision:
-the authored probe observed a largest start-normal difference of 0.0431
-degrees and a shadow-lift difference of 1.26 m. These are limitations to inspect,
-not accepted general error bounds.
+at the same geometric endpoint. These controls do not establish a
+flicker-free film, exact radiance continuity or clearance between camera
+samples.

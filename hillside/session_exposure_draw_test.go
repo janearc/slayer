@@ -19,8 +19,8 @@ var exposureLens = fmt.Sprintf("film: {width: %d, height: %d, rays: %d, "+
 	"aperture: %g, focus: %g}\n", namedWidth, namedHeight, namedRays,
 	exposureAperture, exposureFocus)
 
-// lensJob is a still of the swarm through the tests' lens, with more.
-func lensJob(more string) string {
+// exposureLensJob is a still of the swarm through the tests' lens, with more.
+func exposureLensJob(more string) string {
 	return "scene: {named: swarm}\n" + exposureLens + more
 }
 
@@ -39,7 +39,7 @@ func asAsked(t *testing.T, session *Session) asked {
 // job says and focuses as far off, and is the lens the frame is seen
 // through
 func TestAJobsApertureMakesAThinLensOfTheFramesAngle(t *testing.T) {
-	given := asAsked(t, opening(t, jobFrom(t, lensJob(""))))
+	given := asAsked(t, opening(t, jobFrom(t, exposureLensJob(""))))
 	if err := (sequencePlan{}).exposing(&given, nothing); err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestAJobWithNoApertureIsAPinhole(t *testing.T) {
 // a world seen through the job's lens is told the angle one ray of the
 // picture sees, which rays from across the aperture do not say
 func TestAJobsLensTellsTheWorldWhatARaySees(t *testing.T) {
-	given := asAsked(t, opening(t, jobFrom(t, lensJob(""))))
+	given := asAsked(t, opening(t, jobFrom(t, exposureLensJob(""))))
 	if err := (sequencePlan{}).exposing(&given, nothing); err != nil {
 		t.Fatal(err)
 	}

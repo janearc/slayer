@@ -1,0 +1,191 @@
+# Sourced approximate placements; see maunakea-sources.txt.
+---
+height-model: authored-radial-offsets
+radius-metres: 6371000
+anchor:
+  longitude-deg: -155.5
+  latitude-deg: 19.5
+  height-metres: 0
+sources:
+- file: "$SLAYER_SHELF/../terrain/hawaii/noaa-crm/noaa-hawaii-crm2023-big-island-float.tif"
+  sha256: 37c3cf3b48849d599950f255e64fed2bed7eb744ef18bf73d2375e9f0fc0f830
+  geographic-crs: 4326
+  height-datum: MSL (NOAA CRM2023; EPSG:5714 in product guide)
+  height-offset-metres: 0
+raster-budget:
+  cache-total-bytes: 67108864
+  cache-tiles-per-source: 128
+  tile-bytes: 33554432
+  metadata-bytes: 16777216
+  height-index:
+    block-side: 32
+    total-bytes: 2097152
+region:
+  west: -155.53
+  south: 19.77
+  east: -155.42
+  north: 19.86
+detail:
+  patches: 1024
+  evaluations: 16384
+  depth: 14
+  side: 17
+  points: 524288
+  cell-pixels: 2
+  minimum-height-metres: -6000
+  maximum-height-metres: 4500
+  normal-step:
+    longitude-deg: 0.0002777777699999998
+    latitude-deg: 0.00027777776999999984
+camera:
+  at:
+    longitude-deg: -155.485
+    latitude-deg: 19.818
+    height-metres: 4580
+  look-at:
+    longitude-deg: -155.473
+    latitude-deg: 19.825
+    height-metres: 4120
+  near-metres: 0.1
+film:
+  width: 1280
+  height: 720
+  rays: 2
+  wide-deg: 50
+sun:
+  azimuth-deg: 270
+  altitude-deg: 22
+  strength-rgb:
+  - 2
+  - 1.6
+  - 1.2
+ground-rgb:
+- 0.25
+- 0.17
+- 0.12
+sky-rgb:
+- 0.12
+- 0.17
+- 0.25
+ocean:
+  height-metres: 0
+  colour-rgb:
+  - 0.01
+  - 0.06
+  - 0.1
+  gloss: 1
+  index: 1.34
+exposure: 1
+secondary-ray-reference-metres: 1
+landcover-transition-metres: 250
+landcover:
+- below-metres: 2500
+  colour-rgb:
+  - 0.13
+  - 0.16
+  - 0.09
+- below-metres: 4500
+  colour-rgb:
+  - 0.25
+  - 0.17
+  - 0.12
+site:
+  at:
+    longitude-deg: -155.47444444444446
+    latitude-deg: 19.82611111111111
+  light-exposure: 1.0e-06
+  objects:
+  - name: keck-i
+    kind: keck-i
+    seed: 5
+    detail: demo
+    east-metres: -28.669
+    south-metres: 18.299
+    above-metres: 0
+    heading-deg: 0
+  - name: keck-ii
+    kind: keck-ii
+    seed: 5
+    detail: demo
+    east-metres: 22.005
+    south-metres: -49.972
+    above-metres: 0
+    heading-deg: 0
+  - name: subaru
+    kind: subaru
+    seed: 5
+    detail: demo
+    east-metres: -164.67
+    south-metres: 67.512
+    above-metres: 0
+    heading-deg: 0
+  - name: irtf
+    kind: irtf
+    seed: 5
+    detail: demo
+    east-metres: 255.825
+    south-metres: -11.921
+    above-metres: 0
+    heading-deg: 0
+  - name: cfht
+    kind: cfht
+    seed: 5
+    detail: demo
+    east-metres: 582.511
+    south-metres: 95.551
+    above-metres: 0
+    heading-deg: 0
+  - name: gemini-north
+    kind: gemini-north
+    seed: 5
+    detail: demo
+    east-metres: 564.62
+    south-metres: 256.823
+    above-metres: 0
+    heading-deg: 0
+  - name: uh-88
+    kind: uh-88
+    seed: 5
+    detail: demo
+    east-metres: 524.161
+    south-metres: 346.933
+    above-metres: 0
+    heading-deg: 0
+  - name: ukirt
+    kind: ukirt
+    seed: 5
+    detail: demo
+    east-metres: 430.727
+    south-metres: 409.156
+    above-metres: 0
+    heading-deg: 0
+  - name: jcmt
+    kind: jcmt
+    seed: 5
+    detail: demo
+    east-metres: -267.436
+    south-metres: 367.332
+    above-metres: 0
+    heading-deg: 0
+  - name: SMA approximate compact configuration
+    kind: sma-array
+    seed: 5
+    detail: demo
+    east-metres: -370
+    south-metres: 205
+    above-metres: 0
+    heading-deg: 0
+  - name: VLBA Maunakea downslope
+    kind: vlba-maunakea
+    seed: 5
+    detail: demo
+    east-metres: 1981.374
+    south-metres: 2749.912
+    above-metres: 0
+    heading-deg: 0
+  budget:
+    mist-floor-cache-bytes: 65536
+    cells: 262144
+    candidates: 2000000
+    instances: 150000
+    prototype-faces: 2000000

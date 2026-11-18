@@ -89,9 +89,9 @@ var stillWrong = map[string]wrong{
 		"field is cut into 48. measured, cutting both into 48 " +
 		"leaves 12 pixels off by 1.2 percent, and only both at 800 " +
 		"pass: the plain march is itself no better than a percent"},
-	"a beamed jet": {pixels: 4, share: 0.4, why: "measured at 4 " +
-		"pixels, 36 percent dim: a cube of the doppler factor " +
-		"outside a field, a fourth power inside"},
+	"a beamed jet": {pixels: 4, share: 0.005, why: "measured at 4 " +
+		"pixels, at most 0.2 percent apart after making the field and " +
+		"non-field Doppler models consistent; the residual remains open"},
 }
 
 // wrong is a scene known to be wrong, why, and how wrong it may be

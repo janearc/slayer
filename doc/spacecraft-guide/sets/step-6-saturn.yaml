@@ -1,0 +1,32 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: step 6, Cassini with Saturn behind it
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      orbiter:
+        kind: cassini
+        seed: 17
+        complexity: demo
+        east: 0
+        north: 0
+  film: {width: 2048, height: 1152, rays: 2, exposure: 0.003, wide: 50}
+  cameras:
+    toward-saturn:
+      title: Cassini, with Saturn behind
+      location: {at: [-22, -19, 8]}
+      orientation: {look_at: [0, 1, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye
+    bodies:
+      saturn:
+        template: saturn
+        middle: [520000000, 400000000, -80000000]
+        radius: 60268000
+        detail: 3

@@ -13,18 +13,16 @@ package hillside
 // exposure, wide and renderer, and a job's camera by name, so a set
 // stands over only what the job leaves unsaid.
 //
-// A session draws from one of four sources, each a wrapping of a path
-// that exists: a set as a still (staged, then drawMeasured), a set as a
-// film (staged, then the retained scene, the job's camera path and the
-// keeper, or through the set's lens rig, session_rig.go), a numbered
-// smoke (its world, kept, and the same camera), and a scene built in Go
-// by name (session_named.go).
+// A session draws from four source types: stillFramer for a set still or
+// world-only film, timedFramer for retained set films and smokes,
+// rigFramer for a film through a set's lens rig (session_rig.go), and the
+// named scene source (session_named.go).
 //
 // They are one exported Session over a small private interface, framer,
 // so a caller never sees which it holds. A still has one frame; a film
 // has the job's. Frames already rendered are a later slice, and Open
-// refuses them by name. A film on the gpu keeps its scene on the device
-// between frames, through gpu.Frames, and Close lets it go.
+// refuses them by name. A retained film on the gpu keeps its scene on the
+// device between frames, through gpu.Frames, and Close lets it go.
 //
 // A film's shutter draws each frame once for each of its glimpses, and
 // the frame's light is their mean (session_shutter.go). On the gpu the
@@ -84,6 +82,24 @@ type Session struct {
 	closed  bool
 }
 
+// SceneComplexity is a read-only count snapshot of geometry and top-level
+// scene resources at one of a job's exact scene times. Geometry bytes cover
+// only shape-owned storage; this excludes materials, media payloads, caches,
+// native acceleration structures, working frames and process memory.
+type SceneComplexity struct {
+	At       time.Duration         `json:"at"`
+	Geometry thing.GeometryStorage `json:"geometry"`
+	Volumes  int                   `json:"volumes"`
+	Fields   int                   `json:"fields"`
+	Lamps    int                   `json:"lamps"`
+}
+
+// sceneInspector samples a staged source without tracing or exposing its
+// mutable World pointers.
+type sceneInspector interface {
+	inspect(time.Duration) (*thing.World, error)
+}
+
 // Ask is what may differ from one frame to the next without staging the
 // scene again: a width, a height and rays that stand over the job's, and
 // where to say rows as they finish. The zero Ask is the job's own frame.
@@ -115,8 +131,8 @@ type drawnLight struct {
 	given   asked
 }
 
-// framer is what a session draws from: a still's staged world, or a
-// film's retained one. It draws one frame at a scene time, as asked.
+// framer is what a session draws from: a staged world or a retained
+// scene. It draws one frame at a scene time, as asked.
 type framer interface {
 	light(at time.Duration, given asked) (drawnLight, error)
 }
@@ -202,6 +218,25 @@ const toneUnit = 1.0
 func (session *Session) Frame(ctx context.Context, index int,
 	ask Ask) (Drawn, error) {
 	return session.frame(ctx, index, ask)
+}
+
+// Inspect counts the world at the job's exact time for frame index without
+// drawing it. The returned value contains no scene pointers. Time-varying
+// scenes are advanced using the same absolute-time updates as Frame.
+func (session *Session) Inspect(index int) (SceneComplexity, error) {
+	world, err := session.inspected(index)
+	if err != nil {
+		return SceneComplexity{}, err
+	}
+	things := make([]thing.Thing, 0, len(world.Things))
+	for index, placed := range world.Things {
+		if placed == nil {
+			return SceneComplexity{}, fmt.Errorf("hillside: world thing %d is nil; cannot count geometry", index)
+		}
+		things = append(things, *placed)
+	}
+	return SceneComplexity{At: session.times[index], Geometry: thing.Storage(things),
+		Volumes: len(world.Volumes), Fields: len(world.Fields), Lamps: len(world.Lamps)}, nil
 }
 
 // Cached is what staging took from the disk caches and what it worked

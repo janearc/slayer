@@ -48,6 +48,9 @@ func Replay(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	} else {
 		made = averageOf(rays, ray)
 	}
+	if err := scene.refusal(); err != nil {
+		return frame.Pixel{}, nil, err
+	}
 	walked.ray = -1
 	walked.tell("the pixel", "pixel", made, "rays", rays*rays)
 	return made, walked.steps, nil

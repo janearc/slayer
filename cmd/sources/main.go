@@ -7,17 +7,27 @@
 //	    sources fetch [KEY ...]
 //	sources check
 //	sources path KEY
+//	sources verify
 //
-// run it where sources.yaml is, at slayer's root. it is on pzm. with no
-// shelf named, it refuses and says how to name one.
+// run it where sources.yaml is, at slayer's root. it is on pzm.
+//
+// SLAYER_SHELF names the citation shelf, the papers numbers are verified
+// against. when it is set it wins. when it is unset the shelf is the
+// shelf folder committed beside sources.yaml, so verify, check and path
+// need no setup. fetch never fills the tree: the list holds large data
+// that must not go there, so with no shelf named it refuses and says
+// how to name one.
 package main
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/janearc/puzzlemouth/numbers"
@@ -34,27 +44,50 @@ var build, built, who, sessions string
 // is gigabytes.
 const patience = 30 * time.Minute
 
-// main runs the command on the list where it is run, with the shelf the
-// environment names and the clock on the wall.
-func main() {
+// shelfDir is the directory of the citation shelf: the one SLAYER_SHELF
+// names, which wins, or the shelf folder beside the list when it is
+// unset. a value that is set and not usable is refused.
+func shelfDir(list string) (string, error) {
 	dir, err := sources.Here()
+	if err == nil {
+		return dir, nil
+	}
+	if os.Getenv(sources.Placed) == "" {
+		return filepath.Join(filepath.Dir(list), treeFolder), nil
+	}
+	return "", err
+}
+
+// treeFolder is the folder beside the list that holds the committed
+// sources.
+const treeFolder = "shelf"
+
+// main runs the command on the list where it is run, with the shelf
+// shelfDir gives and the clock on the wall.
+func main() {
+	const list = "sources.yaml"
+	dir, err := shelfDir(list)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
+	_, unnamed := sources.Here()
 	client := &http.Client{Timeout: patience}
-	made := tool(place{list: "sources.yaml",
+	made := tool(place{list: list,
 		shelf:    sources.NewShelf(dir, client),
+		unnamed:  unnamed,
 		now:      time.Now,
 		research: research.Read})
 	os.Exit(made.Run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
 // place is where the command works: its list, its shelf, its clock, and
-// the research data it holds to the list.
+// the research data it holds to the list. unnamed is the refusal fetch
+// gives when the environment names no shelf, or nothing.
 type place struct {
 	list     string
 	shelf    sources.Shelf
+	unnamed  error
 	now      func() time.Time
 	research func() (numbers.Numbers, error)
 }
@@ -105,8 +138,13 @@ says where a source's bytes are on this machine, by its key, so fermat
 and a person can open the page a number came from.`
 
 // fetch fetches the listed sources, or those named. With --dry-run it
-// says what it would fetch and fetches nothing.
+// says what it would fetch and fetches nothing. it refuses when no
+// shelf is named, as the list holds large data that must stay out of
+// the tree.
 func (at place) fetch(call pzm.Call) error {
+	if at.unnamed != nil {
+		return at.unnamed
+	}
 	list, err := sources.Read(at.list)
 	if err != nil {
 		return err
@@ -123,6 +161,50 @@ func (at place) fetch(call pzm.Call) error {
 		}
 		return nil
 	}
+	if columns, live := terminalColumns(call.Out()); live {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+		defer stop()
+		return at.fetchLive(ctx, call.Out(), columns, chosen)
+	}
+	return at.fetchLines(call.Out(), chosen)
+}
+
+// fetchLive fetches the sources with the live status drawn on out, and
+// ends with one summary line. a failure is printed above the status and
+// the rest are fetched. when ctx ends, it stops and leaves the terminal
+// as it found it.
+func (at place) fetchLive(ctx context.Context, out io.Writer,
+	columns func() int, chosen []sources.Source) error {
+	screen := newDisplay(out, columns, len(chosen))
+	shelf := at.shelf.Counting(screen.report)
+	if len(chosen) > 0 {
+		screen.start(chosen[0].Key())
+	}
+	screen.begin()
+	for _, source := range chosen {
+		if ctx.Err() != nil {
+			break
+		}
+		screen.start(source.Key())
+		said, err := shelf.Fetch(ctx, source, at.now())
+		if ctx.Err() != nil {
+			break
+		}
+		screen.record(source.Key(), said, err)
+	}
+	screen.finish(shelf.Path(sources.Source{}), ctx.Err() != nil)
+	if ctx.Err() != nil {
+		return errors.New("interrupted")
+	}
+	if failures := screen.count.failed; failures > 0 {
+		return fmt.Errorf("%d failed, said above", failures)
+	}
+	return nil
+}
+
+// fetchLines fetches the sources and says one line for each, as it
+// always has. it is what runs when out is not a terminal.
+func (at place) fetchLines(out io.Writer, chosen []sources.Source) error {
 	var failed []error
 	for _, source := range chosen {
 		said, err := at.shelf.Fetch(context.Background(), source, at.now())
@@ -130,7 +212,7 @@ func (at place) fetch(call pzm.Call) error {
 			failed = append(failed, err)
 			continue
 		}
-		if _, err := fmt.Fprintln(call.Out(), said); err != nil {
+		if _, err := fmt.Fprintln(out, said); err != nil {
 			return errors.Join(append(failed, err)...)
 		}
 	}

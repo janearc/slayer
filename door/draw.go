@@ -35,8 +35,10 @@ A film that writes frames resumes: a second run keeps every frame whose
 file is unchanged and draws the rest, when the job, the files it reads
 and the build are the same; frames of an earlier version are removed
 and drawn again. A film with a movie and no frames keeps its frames in
-a working folder while it draws, resumes from them, and removes them
-once the movie is written; --keep-frames keeps them there.
+a working folder, frames/TEAM under the cache home (SLAYER_CACHE,
+refused by name where not set; frames/ alone where SLAYER_TEAM is not
+set), while it draws, resumes from them, and removes them once the movie is written;
+--keep-frames keeps them there.
 
 A still drawn under the renders home is not drawn over one another job
 drew in the same folder unless --replace is given.
@@ -85,8 +87,11 @@ func (drawer drawing) planned(call pzm.Call, given string) (runner,
 		return runner{}, err
 	}
 	drawn := keysOf(wanted, drawer.env.build.drawnBy())
-	at := placesOf(placing{wanted: wanted, given: given,
+	at, err := placesOf(placing{wanted: wanted, given: given,
 		env: drawer.env, key: drawn.frames})
+	if err != nil {
+		return runner{}, err
+	}
 	if err := refused(wanted, at); err != nil {
 		return runner{}, err
 	}

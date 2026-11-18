@@ -3,6 +3,7 @@ package set
 import (
 	"math"
 
+	"github.com/janearc/slayer/airlight"
 	yaml "gopkg.in/yaml.v3"
 )
 
@@ -12,6 +13,7 @@ var kinds = []string{"house"}
 // scene reads the scene: its name, its light, where and when it is,
 // its cameras, and the set.
 func (reading reader) scene(_, value *yaml.Node) error {
+	reading.spaceCoordinates = reading.second && valueOf(value, "setting") == settingSpace
 	made := reading.set
 	steps := reading.with(map[string]step{
 		"renderer": reading.word(&made.renderer,
@@ -36,6 +38,8 @@ func (reading reader) scene(_, value *yaml.Node) error {
 		"atmosphere":      reading.atmosphere,
 		"name":            reading.text(&made.name),
 		"light":           reading.word(&made.light, "ambient", "moon", "sun", "none"),
+		"air":             reading.word(&made.air, airlight.Names()...),
+		"groundless-air":  reading.groundlessAir,
 		"terrain":         reading.terrain,
 		"film":            reading.film,
 		"moon":            reading.moon,
@@ -60,7 +64,66 @@ func (reading reader) scene(_, value *yaml.Node) error {
 			"stands": reading.stands,
 			"texts":  reading.texts}),
 	}, reading.spaceScene())
-	return reading.keys(value, steps, nil)
+	if err := reading.keys(value, steps, nil); err != nil {
+		return err
+	}
+	return reading.aired(value)
+}
+
+// aired refuses an air named under a light other than the sun, except the
+// explicitly referenced groundless Earth atmosphere's separate Moonlight
+// path. It refuses an air with a planet in the sky, whose light the computed
+// sky does not hold.
+func (reading reader) aired(value *yaml.Node) error {
+	made := reading.set
+	world, _ := made.Planet()
+	_, _, _, inSky := world.InSky()
+	_, groundless := made.GroundlessAir()
+	if groundless {
+		if made.air != "earth" {
+			return reading.refuse(value, "groundless-air requires air: earth; the explicit Earth mean-radius origin, reference altitude and earth-standard-land approximation cannot be applied to %q", made.air)
+		}
+		if _, hasTerrain := made.Ground(); hasTerrain {
+			return reading.refuse(value, "groundless-air is only for scenes without terrain")
+		}
+		if made.InSpace() || made.planet != nil {
+			return reading.refuse(value, "groundless-air cannot be combined with a space setting or planet")
+		}
+		if said, hasWorld := made.World(); hasWorld {
+			if said.Unit() != 1 {
+				return reading.refuse(value, "groundless-air requires world.unit 1 so the ocean and scene coordinates are metres; got %g", said.Unit())
+			}
+			if _, hasSky := said.Sky(); hasSky {
+				return reading.refuse(value, "groundless-air cannot be combined with a world sky; the Earth air supplies the sky")
+			}
+			if len(said.Lamps()) > 0 || len(said.Spots()) > 0 ||
+				len(said.Suns()) > 0 || len(said.Floods()) > 0 {
+				return reading.refuse(value, "groundless-air cannot be combined with world lamps, spots, suns or floods; scene light must come from the named Earth air")
+			}
+		}
+	}
+	switch {
+	case made.air == "":
+		return nil
+	case groundless && made.light == "moon":
+		if made.moon == nil {
+			return reading.refuse(value, "groundless Earth moonlight needs moon: with an azimuth and altitude")
+		}
+		// The groundless stage has an explicit mean-radius reference
+		// altitude. Its existing moonlight path builds the full lunar
+		// source and Moonlight sky at that altitude; it does not ask
+		// airlight to treat the Moon as a solar spectrum.
+		return nil
+	case made.light != "sun":
+		return reading.refuse(value, "air: %s is lit by the sun through "+
+			"it, so it takes light: sun, not %q", made.air, made.light)
+	case inSky:
+		return reading.refuse(value, "air: %s with a planet in the sky: "+
+			"the computed sky does not yet hold a planet's light, and "+
+			"the planet's sky would stand in the air's; take out the "+
+			"planet or the air", made.air)
+	}
+	return nil
 }
 
 // cameras reads each camera, by its name. A camera stands off an asset
@@ -86,14 +149,16 @@ func (reading reader) cameras(_, value *yaml.Node) error {
 func (reading reader) cameraKeys(shot *camera, at,
 	lookAt *[3]float64) map[string]step {
 	return map[string]step{
-		"title": reading.text(&shot.title),
-		"eye":   reading.only("human"),
+		"title":         reading.text(&shot.title),
+		"eye":           reading.only("human"),
+		"initial-media": reading.initialMediaNames(&shot.initialMediaNames),
 		"orientation": reading.block(map[string]step{
 			"point_to": reading.text(&shot.pointTo),
 			"alpha":    reading.number(&shot.alpha, -90, 90),
 			"look_at": reading.three(lookAt, -farthest,
 				farthest)}),
 		"location": reading.locationKeys(shot, at),
+		"wide":     reading.number(&shot.wide, narrowestLens, widestLens),
 	}
 }
 

@@ -20,6 +20,20 @@ import (
 	"github.com/janearc/slayer/trace"
 )
 
+// TestMain gives the tests a cache home of their own, so no test keeps
+// a smoke in a real cache.
+func TestMain(m *testing.M) {
+	home, err := os.MkdirTemp("", "smokejudge-cache")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	os.Setenv("SLAYER_CACHE", home)
+	code := m.Run()
+	os.RemoveAll(home)
+	os.Exit(code)
+}
+
 // the terminal the smokes pretend to be: 179 by 50 cells of sextants, two
 // pixels across a cell and three down, and a sextant three real pixels
 // across and four down

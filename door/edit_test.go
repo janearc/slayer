@@ -88,7 +88,7 @@ func editingIn(t *testing.T, directory string, machine programs,
 	variables ...string) editing {
 	t.Helper()
 	env := envIn(t, context.Background(), directory,
-		append([]string{homeName, directory, xdgCache,
+		append([]string{"SLAYER_CACHE",
 			filepath.Join(directory, "cache")}, variables...)...)
 	return editing{env: env, machine: machine,
 		watcher: watching{env: env}}
@@ -194,7 +194,7 @@ func toolWith(editor editing) *pzm.Tool {
 // is there and parses.
 func TestTheTemplateIsAJob(t *testing.T) {
 	directory := t.TempDir()
-	env := envIn(t, context.Background(), directory, homeName, directory)
+	env := envIn(t, context.Background(), directory)
 	schema, err := env.schemaCopy()
 	if err != nil {
 		t.Fatal(err)
@@ -227,7 +227,7 @@ func TestTheTemplateIsAJob(t *testing.T) {
 // when it is this build's.
 func TestTheSchemaCopyIsRefreshedWhenStale(t *testing.T) {
 	directory := t.TempDir()
-	env := envIn(t, context.Background(), directory, homeName, directory)
+	env := envIn(t, context.Background(), directory)
 	where, err := env.schemaCopy()
 	if err != nil {
 		t.Fatal(err)
@@ -253,13 +253,64 @@ func TestTheSchemaCopyIsRefreshedWhenStale(t *testing.T) {
 	}
 }
 
-// with no HOME there is no cache, and that is said by name.
+// unhomed is the door's surroundings with no SLAYER_CACHE, and with
+// the renders home, the user's cache, HOME and the temporary folder
+// each a folder of its own, so a test can see they stay empty. The
+// variables given, as name, value, name, value, are laid over them; a
+// value of nothing leaves the variable out. The folders are given back.
+func unhomed(t *testing.T, variables ...string) (Env, map[string]string) {
+	t.Helper()
+	folders := map[string]string{"SLAYER_RENDERS": t.TempDir(),
+		"HOME": t.TempDir(), "XDG_CACHE_HOME": t.TempDir(),
+		"TMPDIR": t.TempDir()}
+	said := map[string]string{}
+	for name, folder := range folders {
+		said[name] = folder
+	}
+	for i := nothing; i+one < len(variables); i += pair {
+		said[variables[i]] = variables[i+1]
+	}
+	env, err := NewEnv(Given{Context: context.Background(), Now: noon,
+		Directory: t.TempDir(),
+		Environment: func(name string) (string, bool) {
+			value, set := said[name]
+			return value, set
+		}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return env, folders
+}
+
+// untouched fails the test for each folder that has anything in it.
+func untouched(t *testing.T, folders map[string]string) {
+	t.Helper()
+	for name, folder := range folders {
+		if found, _ := os.ReadDir(folder); len(found) != nothing {
+			t.Errorf("%s (%s) was written to: %v", name, folder, found)
+		}
+	}
+}
+
+// anti-test: with no SLAYER_CACHE there is no cache, that is said by
+// name, and nothing is written to the other places it could have gone.
 // anti-test of TestTheSchemaCopyIsRefreshedWhenStale
 func TestNoHomeIsNoCache(t *testing.T) {
-	env := envIn(t, context.Background(), t.TempDir())
+	env, folders := unhomed(t)
 	if _, err := env.schemaCopy(); err == nil ||
-		!strings.Contains(err.Error(), "HOME") {
-		t.Errorf("no HOME gave %v", err)
+		!strings.Contains(err.Error(), "SLAYER_CACHE") {
+		t.Errorf("no SLAYER_CACHE gave %v", err)
+	}
+	untouched(t, folders)
+}
+
+// anti-test: a relative SLAYER_CACHE is refused by name.
+func TestARelativeHomeIsNoCache(t *testing.T) {
+	env := envIn(t, context.Background(), t.TempDir(), "SLAYER_CACHE",
+		"relative")
+	if _, err := env.schemaCopy(); err == nil ||
+		!strings.Contains(err.Error(), "SLAYER_CACHE") {
+		t.Errorf("a relative home gave %v", err)
 	}
 }
 
@@ -268,7 +319,7 @@ func TestNoHomeIsNoCache(t *testing.T) {
 func TestEditWritesTheAgentsFilesOnce(t *testing.T) {
 	directory := t.TempDir()
 	written(t, directory, scoringName, "mine")
-	env := envIn(t, context.Background(), directory, homeName, directory)
+	env := envIn(t, context.Background(), directory)
 	editor := editing{env: env}
 	var said strings.Builder
 	if err := editor.prepare(&said, filepath.Join(directory,
@@ -334,7 +385,7 @@ func TestEditDryRunWritesNothing(t *testing.T) {
 // else it prints the help and writes nothing.
 func TestBareSlayerAtATerminalEdits(t *testing.T) {
 	directory := t.TempDir()
-	env := envIn(t, context.Background(), directory, homeName, directory)
+	env := envIn(t, context.Background(), directory)
 	made := Tool(env)
 	made.AtTerminal(func(io.Reader, io.Writer) bool { return false })
 	// anti-test of TestBareSlayerAtATerminalEdits
@@ -372,10 +423,10 @@ func TestMachineRunsAProgram(t *testing.T) {
 }
 
 // schema prints the schema, and --where its copy's path; a file given
-// to it, or no HOME, is refused.
+// to it, or no SLAYER_CACHE, is refused.
 func TestSchemaVerb(t *testing.T) {
 	directory := t.TempDir()
-	env := envIn(t, context.Background(), directory, homeName, directory)
+	env := envIn(t, context.Background(), directory)
 	got := running(Tool(env), "schema", "--where")
 	where := strings.TrimSpace(got.said)
 	if got.code != nothing || !strings.HasSuffix(where, schemaName) {
@@ -388,11 +439,12 @@ func TestSchemaVerb(t *testing.T) {
 	if got := running(Tool(env), "schema", "a.yaml"); got.code == nothing {
 		t.Error("schema took a file")
 	}
-	homeless := envIn(t, context.Background(), directory)
+	homeless, folders := unhomed(t)
 	if got := running(Tool(homeless), "schema", "--where"); got.code ==
-		nothing || !strings.Contains(got.wrongSaid, "HOME") {
-		t.Errorf("--where with no HOME gave %q", got.wrongSaid)
+		nothing || !strings.Contains(got.wrongSaid, "SLAYER_CACHE") {
+		t.Errorf("--where with no home gave %q", got.wrongSaid)
 	}
+	untouched(t, folders)
 }
 
 // a file that is not YAML, or not there, is no job; a dry

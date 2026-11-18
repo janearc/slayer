@@ -87,17 +87,23 @@ func (row spacecraft) dimensions() spacecraftSize {
 		span:   aperture * spacecraftValue(row.design+"-span")}
 }
 
-// spacecraftRows supplies conveniences with source-backed default apertures.
+// spacecraftRows builds each telescope through rowOf, so a maturity
+// report knows whose measured aperture each is.
 func spacecraftRows() map[string]maker {
-	spitzer := research.Value("spitzer-primary-diameter-centimetres") /
-		centimetresPerMetre
 	return map[string]maker{
-		"spitzer": spacecraft{design: "spitzer",
-			aperture: measure.Metres(spitzer)},
-		"hubble": spacecraft{design: "hubble", aperture: measure.Metres(
-			research.Value("hubble-primary-diameter-metres"))},
-		"webb": spacecraft{design: "webb", aperture: measure.Metres(
-			research.Value("webb-primary-diameter-metres"))},
+		"spitzer": rowOf(func() spacecraft {
+			return spacecraft{design: "spitzer", aperture: measure.Metres(
+				research.Value("spitzer-primary-diameter-centimetres") /
+					centimetresPerMetre)}
+		}, "spitzer", "space-observatory"),
+		"hubble": rowOf(func() spacecraft {
+			return spacecraft{design: "hubble", aperture: measure.Metres(
+				research.Value("hubble-primary-diameter-metres"))}
+		}, "hubble"),
+		"webb": rowOf(func() spacecraft {
+			return spacecraft{design: "webb", aperture: measure.Metres(
+				research.Value("webb-primary-diameter-metres"))}
+		}, "webb"),
 	}
 }
 
@@ -154,16 +160,23 @@ func (row spacecraft) extent(size spacecraftSize) maths.Box {
 				size.shieldLength*spaceHalf), spaceZero)
 	}
 	bus := aperture * spacecraftValue("bus-height")
-	width := math.Max(size.radius, size.span*spaceHalf)
+	width := math.Max(size.radius+aperture*spacecraftValue("detail-relief"), size.span*spaceHalf)
 	top := math.Max(bus+size.length, size.span)
 	back := -size.radius
-	if row.design == "spitzer" {
-		width = math.Max(size.radius, aperture*
-			spacecraftValue("spitzer-panel-width")*spaceHalf)
-		offset := spacecraftValue("spitzer-panel-offset")
-		thickness := spacecraftValue("panel-thickness")
-		back = math.Min(back, -aperture*(offset+thickness*spaceHalf))
+	front := size.radius + aperture*spacecraftValue("detail-relief")
+	if row.design == "hubble" {
+		top += size.radius / spaceHalf
+		front = size.radius*spacecraftValue("hubble-door-out") +
+			aperture*spacecraftValue("detail-relief")
 	}
+	if row.design == "spitzer" {
+		panel := spitzerPanels(aperture)
+		width = math.Max(width, panel.width+panel.thickness)
+		top = math.Max(top, panel.height+panel.extension)
+		offset := spacecraftValue("spitzer-panel-offset")
+		back = math.Min(back, -aperture*offset-panel.width-panel.thickness)
+	}
+	back = math.Min(back, -front)
 	return maths.SegmentBox(maths.V(-width, spaceZero, back),
-		maths.V(width, top, size.radius), spaceZero)
+		maths.V(width, top, front), spaceZero)
 }

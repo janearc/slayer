@@ -1,0 +1,1 @@
+observability-grissom . :: go build -p=1 -o bin/grissom-observability ./cmd/grissom

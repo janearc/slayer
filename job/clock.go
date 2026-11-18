@@ -92,6 +92,22 @@ func (clock Clock) Frames() int {
 	return max(one, int(math.Round(wanted)))
 }
 
+// FrameTime is a frame's scene time, without allocating the full clock.
+// An out-of-range index or an uninitialized film clock is not a frame.
+func (clock Clock) FrameTime(index int) (time.Duration, bool) {
+	if index < 0 || index >= clock.Frames() {
+		return 0, false
+	}
+	if clock.still {
+		at, _ := clock.At()
+		return at, true
+	}
+	if clock.rate <= 0 {
+		return 0, false
+	}
+	return clock.frameTime(index), true
+}
+
 // Times is the scene's time at each frame, in order. A still's one frame
 // is at its at, or zero where it says none. A film's frame i is at start
 // plus i over the rate, or, with a scene duration, at its share of it.

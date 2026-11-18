@@ -15,6 +15,9 @@ import (
 // wherever you stand.
 type HeightField struct {
 	heights     []float64
+	smoothX     []float64
+	smoothZ     []float64
+	shadingMode string
 	n           int
 	extent      float64
 	top, bottom float64
@@ -76,6 +79,40 @@ func (field *HeightField) Pack() (heights []float64, n int,
 		field.top, field.slant
 }
 
+// HasApproximateSmoothNormals reports whether shading uses interpolated
+// finite-difference vertex slopes instead of each bilinear cell's exact slope.
+func (field *HeightField) HasApproximateSmoothNormals() bool {
+	return field != nil && field.shadingMode == "bilinear-vertex-slopes" &&
+		len(field.heights) > 0 &&
+		len(field.smoothX) == len(field.heights) &&
+		len(field.smoothZ) == len(field.heights)
+}
+
+// ApproximateShadingNormalMode names a shading-only normal approximation,
+// or is empty when the exact bilinear cell normal is in use.
+func (field *HeightField) ApproximateShadingNormalMode() string {
+	if field == nil || len(field.heights) == 0 ||
+		len(field.smoothX) != len(field.heights) ||
+		len(field.smoothZ) != len(field.heights) {
+		return ""
+	}
+	return field.shadingMode
+}
+
+// ApproximateShadingSlopes returns copies of the optional shading-only
+// vertex slopes in local x and z axes. The returned slices are empty when
+// this field uses its exact bilinear-cell normal. Copies keep a renderer
+// from mutating the field's geometry or its shading record.
+func (field *HeightField) ApproximateShadingSlopes() (x, z []float64, ok bool) {
+	if field == nil || len(field.heights) == 0 ||
+		len(field.smoothX) != len(field.heights) ||
+		len(field.smoothZ) != len(field.heights) {
+		return nil, nil, false
+	}
+	return append([]float64(nil), field.smoothX...),
+		append([]float64(nil), field.smoothZ...), true
+}
+
 // Bounds is the box round the square at its highest and lowest.
 func (field *HeightField) Bounds() maths.Box {
 	half := field.extent / 2
@@ -128,6 +165,16 @@ func (field *HeightField) Distance(p maths.Vec) float64 {
 // Normal is which way the surface faces over p: square to the cell's
 // own slopes, exactly.
 func (field *HeightField) Normal(p maths.Vec) maths.Vec {
+	if len(field.smoothX) != 0 {
+		return field.smoothNormal(p)
+	}
+	return field.GeometricNormal(p)
+}
+
+// GeometricNormal is the exact normal of the bilinear cell under p. Optional
+// interpolated slopes change Normal for shading only; refraction and TIR keep
+// using this geometry normal.
+func (field *HeightField) GeometricNormal(p maths.Vec) maths.Vec {
 	column, row, tx, tz := field.place(p.X, p.Z)
 	at := row*field.n + column
 	step := field.extent / float64(field.n-1)
@@ -139,5 +186,98 @@ func (field *HeightField) Normal(p maths.Vec) maths.Vec {
 	highZ := (field.heights[at+field.n+1] - field.heights[at+1]) / step
 	dx := lowX*(1-tz) + highX*tz
 	dz := lowZ*(1-tx) + highZ*tx
+	return maths.V(-dx, 1, -dz).Unit()
+}
+
+// WithApproximateSmoothNormals copies a field and changes only its shading
+// normals. It estimates slopes at each grid vertex with one-sided differences
+// at the outer edges and centered differences inside, then bilinearly blends
+// those slopes. This normal is intentionally not the exact normal of the
+// piecewise bilinear surface, and is not a measured or exact surface normal.
+// Bounds, packed heights, and Distance remain those of the original field.
+func (field *HeightField) WithApproximateSmoothNormals() (*HeightField, error) {
+	if field == nil || field.n < 2 || len(field.heights) != field.n*field.n {
+		return nil, errors.New("shape: approximate smooth normals need a valid height field")
+	}
+	step := field.extent / float64(field.n-1)
+	if !(step > 0) || math.IsInf(step, 0) || math.IsNaN(step) {
+		return nil, errors.New("shape: approximate smooth normals need finite sample spacing")
+	}
+	made := *field
+	made.heights = append([]float64(nil), field.heights...)
+	made.smoothX = make([]float64, len(field.heights))
+	made.smoothZ = make([]float64, len(field.heights))
+	made.shadingMode = "bilinear-vertex-slopes"
+	for row := range field.n {
+		for column := range field.n {
+			at := row*field.n + column
+			made.smoothX[at] = finiteDifference(field.heights, field.n,
+				at, column, 1, step)
+			made.smoothZ[at] = finiteDifference(field.heights, field.n,
+				at, row, field.n, step)
+			if math.IsNaN(made.smoothX[at]) || math.IsInf(made.smoothX[at], 0) ||
+				math.IsNaN(made.smoothZ[at]) || math.IsInf(made.smoothZ[at], 0) {
+				return nil, errors.New("shape: approximate smooth normals need finite vertex slopes")
+			}
+		}
+	}
+	return &made, nil
+}
+
+// WithApproximateSpectralNormals copies a height field and uses the supplied
+// spectral slopes at each grid vertex for shading. xSlopes and zSlopes are
+// derivatives in the field's local x and z axes, row by row. The resulting
+// bilinearly interpolated normal is intentionally not the exact normal of
+// the piecewise-bilinear geometry, and is not a measured surface normal.
+// Heights, bounds, packed samples, and Distance remain unchanged.
+func (field *HeightField) WithApproximateSpectralNormals(
+	xSlopes, zSlopes []float64,
+) (*HeightField, error) {
+	if field == nil || field.n < 2 || len(field.heights) != field.n*field.n {
+		return nil, errors.New("shape: spectral shading normals need a valid height field")
+	}
+	if len(xSlopes) != len(field.heights) || len(zSlopes) != len(field.heights) {
+		return nil, errors.New("shape: spectral shading slopes must match the height field")
+	}
+	for i := range xSlopes {
+		if math.IsNaN(xSlopes[i]) || math.IsInf(xSlopes[i], 0) ||
+			math.IsNaN(zSlopes[i]) || math.IsInf(zSlopes[i], 0) {
+			return nil, errors.New("shape: spectral shading slopes must be finite")
+		}
+	}
+	made := *field
+	made.heights = append([]float64(nil), field.heights...)
+	made.smoothX = append([]float64(nil), xSlopes...)
+	made.smoothZ = append([]float64(nil), zSlopes...)
+	made.shadingMode = "spectral-slopes"
+	return &made, nil
+}
+
+// finiteDifference is one vertex slope on the selected grid axis. Edges use
+// adjacent one-sided samples; interior vertices use their two-sided span.
+func finiteDifference(heights []float64, samples, at, coordinate, stride int,
+	step float64) float64 {
+	if coordinate == 0 {
+		return (heights[at+stride] - heights[at]) / step
+	}
+	if coordinate == samples-1 {
+		return (heights[at] - heights[at-stride]) / step
+	}
+	return (heights[at+stride] - heights[at-stride]) / (2 * step)
+}
+
+// smoothNormal interpolates the precomputed vertex slopes at p, then
+// normalizes the shading direction.
+func (field *HeightField) smoothNormal(p maths.Vec) maths.Vec {
+	column, row, tx, tz := field.place(p.X, p.Z)
+	at := row*field.n + column
+	lowX := field.smoothX[at]*(1-tx) + field.smoothX[at+1]*tx
+	highX := field.smoothX[at+field.n]*(1-tx) +
+		field.smoothX[at+field.n+1]*tx
+	lowZ := field.smoothZ[at]*(1-tx) + field.smoothZ[at+1]*tx
+	highZ := field.smoothZ[at+field.n]*(1-tx) +
+		field.smoothZ[at+field.n+1]*tx
+	dx := lowX*(1-tz) + highX*tz
+	dz := lowZ*(1-tz) + highZ*tz
 	return maths.V(-dx, 1, -dz).Unit()
 }

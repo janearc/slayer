@@ -1,0 +1,62 @@
+# Separate opt-in clustered city; approved grid geometry stays unchanged.
+# Physical metres, authored district/park/freeway organization, exact 10k lots.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: night windows above native tree rows and park groves
+  renderer: gpu-native
+  seed: 31
+  setting: space
+  light: none
+  set:
+    things:
+      city:
+        kind: city-clustered-night-10000
+        seed: 31
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  film:
+    width: 1280
+    height: 720
+    rays: 1
+    wide: 50
+    exposure: 1
+  cameras:
+    overview:
+      location: {at: [4100, -4600, 3200]}
+      orientation: {look_at: [0, 0, 0]}
+    park:
+      location: {at: [-250, -1500, 650]}
+      orientation: {look_at: [-900, -200, 0]}
+    interchange:
+      location: {at: [-450, 1700, 250]}
+      orientation: {look_at: [-896, 1217, 0]}
+    park canopy:
+      location: {at: [-700, -650, 30]}
+      orientation: {look_at: [-950, -250, 8]}
+    tree row:
+      location: {at: [-450, 256, 12]}
+      orientation: {look_at: [300, 256, 8]}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.1, 0.13, 0.09]}
+        source: eye
+    boxes:
+      foundation:
+        material: ground
+        middle: [0, 0, -0.2]
+        size: [5400, 5400, 0.3]
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.025, 0.035, 0.06]}
+      zenith: {srgb_linear: [0.004, 0.009, 0.025]}
+      ground: {srgb_linear: [0.004, 0.006, 0.009]}
+      source: eye
+    suns:
+      moon:
+        toward: [-4, -5, 7]
+        colour: {srgb_linear: [0.07, 0.09, 0.14]}
+        source: eye

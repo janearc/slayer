@@ -75,7 +75,7 @@ func (tone Tone) False(layers []Layer) *image.RGBA {
 			lights[y*across+x] = layered(layers, x, y)
 		}
 	}
-	return tone.picture(lights, across, down)
+	return tone.Picture(lights, across, down)
 }
 
 // sizeRefusal is what a layer of another size is refused with.

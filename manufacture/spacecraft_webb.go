@@ -52,6 +52,7 @@ func (row spacecraft) exposed(assembly *instrumentAssembly,
 		thickness: aperture * spacecraftValue("mirror-thickness")}
 	assembly.add(primary, space, spaceMirror)
 	row.secondary(assembly, size, space)
+	row.backplane(assembly, size, stand)
 }
 
 // warmSide hangs the bus under the shield, on the sun's side, with the

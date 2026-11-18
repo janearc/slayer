@@ -40,6 +40,21 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
+// refuseGPUInitialMediaAperture keeps an explicit camera stack from being
+// applied to thin-lens rays whose origins are spread across an aperture.
+// A point-camera stack does not prove that every aperture origin is inside
+// the named media. CPU tracing retains its existing lens behavior.
+func refuseGPUInitialMediaAperture(given asked) error {
+	if !given.onGPU || len(given.initialMedia) == 0 {
+		return nil
+	}
+	if given.glass == nil && given.optics.aperture == 0 &&
+		given.optics.opened == nil {
+		return nil
+	}
+	return fmt.Errorf("%s: GPU initial media currently require a pinhole camera; rig and thin-lens aperture rays may start outside the declared medium", given.set)
+}
+
 // optics is a job's lens and shutter as one draw takes them.
 type optics struct {
 	// aperture is how wide the job's lens is open, across, and focus how
@@ -144,10 +159,27 @@ func sightFor(given asked) film.Sensor {
 func (given asked) drawnBy(frames *gpu.Frames, world *thing.World,
 	generation uint64, eye maths.Subspace) (*frame.Frame, gpu.Profile,
 	error) {
+	if err := refuseGPUInitialMediaAperture(given); err != nil {
+		return nil, gpu.Profile{}, err
+	}
+	if given.wire {
+		// a retained drawer is the gpu's
+		return nil, gpu.Profile{}, errWireOnGPU
+	}
 	if closing := given.optics.closing; closing != nil {
+		if len(given.initialMedia) > 0 {
+			return frames.DrawOpenWithInitialMedia(world, generation, eye,
+				*closing, lensFor(given), given.at, given.width,
+				given.height, given.samples, given.initialMedia)
+		}
 		return frames.DrawOpen(world, generation, eye, *closing,
 			lensFor(given), given.at, given.width, given.height,
 			given.samples)
+	}
+	if len(given.initialMedia) > 0 {
+		return frames.DrawWithInitialMedia(world, generation, eye,
+			lensFor(given), given.at, given.width, given.height,
+			given.samples, given.initialMedia)
 	}
 	return frames.Draw(world, generation, eye, lensFor(given), given.at,
 		given.width, given.height, given.samples)

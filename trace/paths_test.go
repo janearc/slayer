@@ -56,6 +56,20 @@ func TestAThingsScaleIsItsSize(t *testing.T) {
 	}
 }
 
+func TestAHeightFieldHitKeepsPlacementScale(t *testing.T) {
+	field, err := shape.NewHeightField([]float64{0, 0, 0, 0}, 2, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	world := thing.NewWorld()
+	world.Add(thing.Thing{Shape: field,
+		Motion: thing.Still(maths.Subspace{Scale: 3})})
+	from := maths.Ray{At: maths.V(0, 6, 0), Dir: maths.V(0, -1, 0)}
+	if got := lone(world, from, 0); !within(float64(got.Depth), 6, 1e-6) {
+		t.Errorf("the scaled height field is %v away", got.Depth)
+	}
+}
+
 // creeping is a shape that says its surface is a thousandth further on until a
 // point is within half a unit of the plane z of zero, where it says the surface
 // is there. A march from far off needs thousands of steps to reach it: one that

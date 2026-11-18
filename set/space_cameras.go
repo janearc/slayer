@@ -86,6 +86,28 @@ func (reading reader) eyeStep(shot *camera) step {
 	}
 }
 
+// initialMediaNames reads an ordered list of clear material names containing
+// the camera. Resolution waits until the whole set has been read.
+func (reading reader) initialMediaNames(into *[]string) step {
+	return func(name, value *yaml.Node) error {
+		if value.Kind != yaml.SequenceNode || len(value.Content) == 0 ||
+			len(value.Content) > maxCameraInitialMedia {
+			return reading.refuse(value, "%s takes a list of 1 to %d clear material names", name.Value, maxCameraInitialMedia)
+		}
+		for _, member := range value.Content {
+			var material string
+			if member.Kind != yaml.ScalarNode || member.Tag != "!!str" {
+				return reading.refuse(member, "%s takes clear material names as words", name.Value)
+			}
+			if err := reading.text(&material)(name, member); err != nil {
+				return err
+			}
+			*into = append(*into, material)
+		}
+		return nil
+	}
+}
+
 // movesStep reads a camera's moves, at least one, in order.
 func (reading reader) movesStep(into *[]move) step {
 	return func(name, value *yaml.Node) error {

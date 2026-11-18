@@ -60,17 +60,11 @@ func (encoded *scene) group(made *shape.MeshGroup, space maths.Subspace,
 		for _, member := range made.Members() {
 			pooled, seen := encoded.meshes[member.Mesh]
 			if !seen {
-				var faces []triangle
-				switch solid := member.Mesh.(type) {
-				case *mesh.Mesh:
-					faces = slayersFaces(solid)
-				case *shape.Mesh:
-					if solid.Smooth && len(solid.Normals) > 0 {
-						return unsupported{"a smooth reference mesh in a group"}
-					}
-					faces = meshFaces(solid)
+				waiting, err := encoded.memberTree(member.Mesh)
+				if err != nil {
+					return err
 				}
-				pooled = encoded.pool(faces)
+				pooled = encoded.pend(waiting)
 				encoded.meshes[member.Mesh] = pooled
 			}
 			local.members = append(local.members, standing{root: pooled.root,
@@ -87,15 +81,31 @@ func (encoded *scene) group(made *shape.MeshGroup, space maths.Subspace,
 	return nil
 }
 
-// stand puts a mesh in the world at a space: its faces into the pool
-// the first time the mesh is seen, by its key, and a standing of it
-// every time. local makes its faces in its own space, when they are
-// needed.
-func (encoded *scene) stand(key any, local func() []triangle,
+// memberTree is a group member's tree for the pool. A group admits only
+// flat meshes of the two kinds (shape.NewMeshGroup), and a smooth
+// shape.Mesh put in one after is refused here.
+func (encoded *scene) memberTree(member shape.Shape) (pendingMesh, error) {
+	switch solid := member.(type) {
+	case *mesh.Mesh:
+		return encoded.slayersTree(solid), nil
+	case *shape.Mesh:
+		if solid.Smooth && len(solid.Normals) > 0 {
+			return pendingMesh{}, unsupported{
+				"a smooth reference mesh in a group"}
+		}
+		return encoded.shapeTree(solid), nil
+	}
+	return pendingMesh{tree: grownOver(nil)}, nil
+}
+
+// stand puts a mesh in the world at a space: its tree in line for the
+// pool the first time the mesh is seen this frame, by its key, and a
+// standing of it every time. grown is its tree, asked only when needed.
+func (encoded *scene) stand(key any, grown func() pendingMesh,
 	space maths.Subspace, material int, clear bool) {
 	at, seen := encoded.meshes[key]
 	if !seen {
-		at = encoded.pooled(encoded.grownFor(key, local))
+		at = encoded.pend(grown())
 		encoded.meshes[key] = at
 	}
 	encoded.standings = append(encoded.standings, standing{root: at.root,
@@ -103,26 +113,10 @@ func (encoded *scene) stand(key any, local func() []triangle,
 		bounds: worldBox(at.bounds, space)})
 }
 
-// pool grows a tree over a mesh's faces in its own space and adds the
-// faces and the tree's boxes to the scene's, each tree's indices moved
-// past the ones already there.
-func (encoded *scene) pool(faces []triangle) pooled {
-	return encoded.pooled(grownOver(faces))
-}
-
-// grownFor is the tree over a mesh's faces in its own space: from the
-// retained drawer's keeper for one of slayer's meshes, where the scene
-// has a keeper, and grown from local otherwise.
-func (encoded *scene) grownFor(key any, local func() []triangle) tree {
-	if skin, ok := key.(*mesh.Mesh); ok && encoded.keeper != nil {
-		return encoded.keeper.grownFor(skin, local)
-	}
-	return grownOver(local())
-}
-
 // pooled adds a grown tree's faces and boxes to the scene's, each tree's
 // indices moved past the ones already there. It reads the tree and
-// never changes it, so a kept tree serves frame after frame.
+// never changes it, so a kept tree serves frame after frame. packPool
+// pools the trees in line, in the order pend placed them.
 func (encoded *scene) pooled(grown tree) pooled {
 	firstFace := len(encoded.faces.triangles)
 	firstNode := len(encoded.faces.nodes)

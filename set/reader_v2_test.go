@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/set"
 )
 
@@ -25,11 +26,30 @@ const smallScene = `scene:
       location: {at: [0, -5, 2]}
 `
 
+// The later focus readout must preserve the authored target under either
+// schema, independently of the historical v1 digest projection.
+func TestCameraFocusPreservesAuthoredTargetAcrossSchemas(t *testing.T) {
+	for _, schema := range []string{v1Label, v2Label} {
+		made, err := set.Read("focus.yaml", []byte(schema+"\n"+smallScene))
+		if err != nil {
+			t.Fatal(err)
+		}
+		shot, err := made.Shot("only", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got, want := shot.Focus(), maths.V(0, 2, 0); got != want {
+			t.Errorf("%s focus = %v, want %v", schema, got, want)
+		}
+	}
+}
+
 // The four scenes written against v2 are read whole.
 func TestV2ScenesAreRead(t *testing.T) {
-	for _, name := range []string{"corona.yaml", "orbital-and-lantern.yaml",
-		"webb-looking-out.yaml", "keyhole-to-ground.yaml"} {
-		if _, err := set.Read("doc/"+name, draft(t, name)); err != nil {
+	for _, name := range []string{"doc/corona.yaml",
+		"doc/orbital-and-lantern.yaml", "set/testdata/webb-looking-out.yaml",
+		"set/testdata/keyhole-to-ground.yaml"} {
+		if _, err := set.Read(name, draft(t, name)); err != nil {
 			t.Errorf("%s: %v", name, err)
 		}
 	}

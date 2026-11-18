@@ -1,0 +1,1 @@
+fire-woodland . :: ./bin/hillside -set doc/fire-woodland.yaml -out out/fire-woodland.png

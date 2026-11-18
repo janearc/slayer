@@ -1,0 +1,3 @@
+# sets in doc/ drawn as stills, and the fire sequences checked without
+# drawing.
+smoke-one . :: ./bin/slayer assess --smokes 1

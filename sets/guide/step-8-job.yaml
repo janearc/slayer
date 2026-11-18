@@ -1,0 +1,9 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: step-8.yaml}
+film: {preset: 2k, rays: 2, tall: 60}
+renderer: gpu
+quality: exact
+camera: {name: under the sea}
+at: {value: 15.7, unit: s}
+outputs: {picture: step-8-2k.png}
+print: {knee: 0.7, top: 8, stops: 10}

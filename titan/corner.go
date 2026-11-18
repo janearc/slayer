@@ -123,12 +123,31 @@ type corner struct {
 	// steep. The map's at a measured corner; carried along an edge to a
 	// made one.
 	slope vector
+	// unknown is set where the map has no height at a measured corner.
+	// The corner is carried down the walk as it is, and its height of
+	// nought is not a height: missing says so when it is used.
+	unknown bool
+}
+
+// missing is the refusal for a corner the map has no height at, or
+// nothing if the map has one. It is asked where the corner's height is
+// used: as an end of an edge a corner is made on, and as a corner of the
+// triangle a sample blends.
+func (shape corner) missing() error {
+	if !shape.unknown {
+		return nil
+	}
+	here := shape.at.point()
+	return fmt.Errorf("%w: the map has no height at %.6f, %.6f, beside "+
+		"the place asked for", errRefused, here.Lon(), here.Lat())
 }
 
 // read is what the map says at a measured corner.
 type read struct {
 	height, differs, hurst, spacing float64
 	slope                           vector
+	// unknown is set where the map has no height at the corner.
+	unknown bool
 }
 
 // read is the corner at a direction, named on the mesh, read from the
@@ -160,10 +179,13 @@ func (ground *Ground) read(at vector, name uint64) (corner, error) {
 	}
 	return corner{at: at, name: name, kind: Measured,
 		height: kept.height, differs: kept.differs, hurst: kept.hurst,
-		spacing: kept.spacing, slope: kept.slope}, nil
+		spacing: kept.spacing, slope: kept.slope,
+		unknown: kept.unknown}, nil
 }
 
-// ask is what the map says at a direction and round it.
+// ask is what the map says at a direction and round it. Where the map
+// has no height the answer says so, and is kept like any other: the
+// corner refuses nothing until its height is used.
 func (ground *Ground) ask(at vector) (asked read, err error) {
 	here := at.point()
 	height, known, err := ground.from.Height(here)
@@ -171,8 +193,7 @@ func (ground *Ground) ask(at vector) (asked read, err error) {
 		return asked, err
 	}
 	if !known {
-		return asked, fmt.Errorf("%w: the map has no height at %.6f, "+
-			"%.6f", errRefused, here.Lon(), here.Lat())
+		return read{unknown: true}, nil
 	}
 	asked = read{height: height, hurst: smooth,
 		spacing: ground.from.Finest(here)}

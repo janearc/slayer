@@ -1,0 +1,8 @@
+# Two-second timing proof, not a finished reel or a final quality film.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: borrowed-light-beam.yaml}
+film: {width: 360, height: 320, rays: 1}
+fps: 6
+duration: {value: 2, unit: s}
+start: {value: 0, unit: s}
+outputs: {frames: beam-motion-frames, movie: beam-motion.mp4}

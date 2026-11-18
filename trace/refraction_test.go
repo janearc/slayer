@@ -134,6 +134,73 @@ func TestAHeightFieldPoolReadsAsThePlanePool(t *testing.T) {
 	}
 }
 
+func TestASpectralHeightFieldBoundaryRefractionUsesItsGeometricSide(t *testing.T) {
+	core, err := shape.NewHeightField(make([]float64, 9), 3, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	xSlopes, zSlopes := make([]float64, 9), make([]float64, 9)
+	for index := range xSlopes {
+		xSlopes[index] = 10
+	}
+	field, err := core.WithApproximateSpectralNormals(xSlopes, zSlopes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	material := water()
+	placed := placedThing{thing: &thing.Thing{Shape: field,
+		Material: material}, placement: placement{at: maths.Local(), scale: 1}}
+	met := hit{thing: placed}
+	point := maths.V(0, 0, 0)
+
+	// This above-water-oriented spectral normal would falsely predict TIR
+	// for a ray that the exact plane geometry transmits into air.
+	exiting := maths.V(0.6, 0.8, 0)
+	shading := met.normal(point, exiting)
+	if _, total := refracted(exiting, shading, 1/material.Dense()); !total {
+		t.Fatal("fixture did not make the shading normal predict false TIR")
+	}
+	optical := met.boundaryNormal(point, exiting)
+	if !optical.Near(maths.V(0, -1, 0), 1e-14) {
+		t.Fatalf("water-side optical normal = %v, want downward geometry normal", optical)
+	}
+	bent, total := refracted(exiting, optical, 1/material.Dense())
+	if total || !(bent.Y > 0) {
+		t.Fatalf("geometric exit refraction = %v, TIR=%t; want transmission into air", bent, total)
+	}
+	airOrigin := point.Add(optical.Scale(-lift))
+	if gap := field.Distance(airOrigin); !(gap > 0) {
+		t.Errorf("exit origin lies on the water side: signed gap %g", gap)
+	}
+	seen := look{holding: 1, inside: [mostHeld]held{of(material)}}
+	boundary := seen.meets(material)
+	if !boundary.real || boundary.entering {
+		t.Fatalf("exit boundary = %+v", boundary)
+	}
+	if next := seen.passed(maths.Ray{At: airOrigin, Dir: bent}, material,
+		boundary); next.holding != 0 || next.lastClearTIR {
+		t.Errorf("after geometric exit the look holds %d media and last-TIR=%t",
+			next.holding, next.lastClearTIR)
+	}
+
+	// A real water-to-air critical-angle ray still turns back into water
+	// when classified with the exact interface normal.
+	shallow := maths.V(math.Sqrt(.99), .1, 0)
+	reflected, total := refracted(shallow, optical, 1/material.Dense())
+	if !total {
+		t.Fatal("a ray past the geometric critical angle did not TIR")
+	}
+	reflected = shallow.Sub(optical.Scale(2 * shallow.Dot(optical))).Unit()
+	waterOrigin := point.Add(optical.Scale(lift))
+	if gap := field.Distance(waterOrigin); !(gap < 0) || !(reflected.Y < 0) {
+		t.Errorf("TIR left the water side: gap=%g reflected=%v", gap, reflected)
+	}
+	if next := seen.turnedBack(maths.Ray{At: waterOrigin, Dir: reflected}); next.holding != 1 || !next.lastClearTIR {
+		t.Errorf("TIR changed water stack to %d or last-TIR=%t",
+			next.holding, next.lastClearTIR)
+	}
+}
+
 // submerged is a look that starts inside a clear thing, as one that has
 // bent into it once: the thing is among those it is inside, and one of
 // its bends is spent. It is the eye's own look still, not a later leg.

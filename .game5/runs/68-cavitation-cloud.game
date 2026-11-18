@@ -1,0 +1,4 @@
+# cavitation: puzzlemouth writes an opt-in propeller field or a gas-particle
+# YAML; cavitation-clip plans a moving subject frame by frame, drawing
+# nothing (doc/examples/jobs/alfa).
+cavitation-cloud . :: go run ./cmd/cavitation cloud

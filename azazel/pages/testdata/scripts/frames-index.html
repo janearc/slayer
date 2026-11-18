@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --ground: #1c1a17; --ink: #efe6d6; --soft: #b9ad98; --edge: #3a352e; --note: #f2c879; }
+  body { margin: 0; padding: 24px 16px; background: var(--ground); color: var(--ink);
+         font: 17px/1.5 -apple-system, "Helvetica Neue", sans-serif; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  p.lead { color: var(--soft); margin: 0 0 24px; }
+  .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+  figure { margin: 0; border: 1px solid var(--edge); border-radius: 6px; overflow: hidden; background: #000; }
+  figure img, figure video { display: block; width: 100%; height: auto; }
+  figcaption { padding: 10px 12px; background: var(--ground); }
+  .note { color: var(--note); display: block; margin-bottom: 4px; }
+  .where { color: var(--soft); font-size: 16px; word-break: break-all; }
+  .recipe { display: inline-block; margin-top: 8px; padding: 4px 12px; border: 1px solid var(--note);
+            border-radius: 4px; color: var(--note); font-size: 16px; text-decoration: none; }
+  a { color: inherit; }
+</style>
+<title>Frames</title>
+<base href="../">
+</head>
+<body>
+<h1>Frames</h1>
+<p class="lead">Newest first, one card per folder. Made 2026-11-15 23:55. Press cmd-r after a new render.</p>
+<div class="grid">
+<figure data-folder="2026-11-08-team-r&amp;d"><a href="frames/2026-11-08-team-r&amp;d/one.png"><img loading="lazy" src="frames/2026-11-08-team-r&amp;d/one.png" alt="frames/2026-11-08-team-r&amp;d/one.png"></a><figcaption><span class="where">11-06 21:33 &middot; 1 file(s) &middot; frames/2026-11-08-team-r&amp;d</span></figcaption></figure>
+<figure data-folder="2026-11-05-studio-many"><a href="frames/2026-11-05-studio-many/frame-000064.png"><img loading="lazy" src="frames/2026-11-05-studio-many/frame-000064.png" alt="frames/2026-11-05-studio-many/frame-000064.png"></a><figcaption><span class="where">11-06 21:31 &middot; 66 file(s) &middot; frames/2026-11-05-studio-many</span></figcaption></figure>
+<figure data-folder="2026-11-04-workshop-salt&amp;pepper"><a href="frames/2026-11-04-workshop-salt&amp;pepper/index.html"><img loading="lazy" src="frames/2026-11-04-workshop-salt&amp;pepper/shot.jpg" alt="frames/2026-11-04-workshop-salt&amp;pepper/shot.jpg"></a><figcaption><span class="note">A &lt;b&gt;bold&lt;/b&gt; &amp; &quot;quoted&quot; note</span><span class="note">2 pictures here: click the picture to open them all</span><span class="where">11-06 21:28 &middot; 2 file(s) &middot; frames/2026-11-04-workshop-salt&amp;pepper</span></figcaption></figure>
+<figure data-folder="2026-11-03-fable-moonlake"><a href="frames/2026-11-03-fable-moonlake/shorts/one/frame-000000.png"><img loading="lazy" src="frames/2026-11-03-fable-moonlake/shorts/one/frame-000000.png" alt="frames/2026-11-03-fable-moonlake/shorts/one/frame-000000.png"></a><figcaption><span class="where">11-06 21:27 &middot; 3 file(s) &middot; frames/2026-11-03-fable-moonlake</span><a class="recipe" href="frames/2026-11-03-fable-moonlake/shorts/one/one-yaml.txt">the yaml it was drawn from</a></figcaption></figure>
+<figure data-folder="2026-11-01-studio-sky"><a href="frames/2026-11-01-studio-sky/a.png"><img loading="lazy" src="frames/2026-11-01-studio-sky/a.png" alt="frames/2026-11-01-studio-sky/a.png"></a><figcaption><span class="note">The team's note wins: its file is later by name.</span><span class="where">11-06 21:24 &middot; 5 file(s) &middot; frames/2026-11-01-studio-sky</span><a class="recipe" href="frames/2026-11-01-studio-sky/sky-yaml.txt">the yaml it was drawn from</a></figcaption></figure>
+</div>
+<script>
+(function () {
+  var came = location.pathname.match(/\/renders\/([^\/]+)\/compositing\//);
+  if (!came) { return; }
+  var team = came[1];
+  var cards = Array.prototype.slice.call(document.querySelectorAll('figure[data-folder]'));
+  var theirs = cards.filter(function (card) {
+    return card.dataset.folder.indexOf('-' + team + '-') >= 0;
+  });
+  if (theirs.length === 0) { return; }
+  var said = document.createElement('p');
+  said.className = 'lead';
+  var show = function (all) {
+    cards.forEach(function (card) { card.hidden = !all && theirs.indexOf(card) < 0; });
+    said.textContent = all
+      ? 'Everyone’s, ' + cards.length + ' folders. '
+      : team + '’s, ' + theirs.length + ' of the ' + cards.length + ' folders here: you came through ' + team + '’s folder. ';
+    var other = document.createElement('a');
+    other.href = '#';
+    other.textContent = all ? 'Show only ' + team + '’s' : 'Show everyone’s';
+    other.onclick = function () { show(!all); return false; };
+    said.appendChild(other);
+  };
+  document.querySelector('.grid').before(said);
+  show(false);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# HALF-PORTRAIT is the local1080x960(9:8) convention, not9:16.
+# Three metres per second forward, opposite the stern field downstream axis.
+template: template.yaml
+output: ../../../../out/alfa-underway-moonlight
+subject: alfa
+field: main-screw
+camera: underwater-60m
+width: 1080
+height: 960
+fps: 12
+seconds: 10
+velocity-metres-per-second: [-1.026, 2.82, 0]
+camera-tracking-fraction: 1

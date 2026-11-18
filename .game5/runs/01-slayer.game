@@ -1,0 +1,2 @@
+# the binaries, as game build stamps them. arguments follow --.
+slayer . :: ./bin/slayer

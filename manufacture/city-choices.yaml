@@ -1,0 +1,529 @@
+# Authored city scenery, 2026-11-15. Every value is picked, not measured.
+# Dimensions are metres; shares and counts are dimensionless.
+numbers:
+- name: blocks-across
+  value: 25
+  says: blocks across the default square city
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: lots-across
+  value: 4
+  says: lots across each default block
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: block-length
+  value: 128
+  unit: m
+  says: distance between major street centre lines
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: road-width
+  value: 14
+  unit: m
+  says: major street carriageway width
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: alley-width
+  value: 4
+  unit: m
+  says: cross alley width
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: setback
+  value: 4
+  unit: m
+  says: reserved clearance from roads and traffic circles
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: roundabout-radius
+  value: 18
+  unit: m
+  says: outside traffic circle radius
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: junction-interval
+  value: 5
+  says: blocks between traffic circle junctions
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: minimum-lot
+  value: 20
+  unit: m
+  says: smallest admitted square lot
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: population-limit
+  value: 100000
+  says: maximum admitted building count
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: chunk-faces
+  value: 60000
+  says: maximum triangle count in a material mesh batch
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: width-min
+  value: 10
+  unit: m
+  says: minimum building wall width
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: width-max
+  value: 18
+  unit: m
+  says: maximum building wall width
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: depth-min
+  value: 9
+  unit: m
+  says: minimum building wall depth
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: depth-max
+  value: 18
+  unit: m
+  says: maximum building wall depth
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: house-floors-min
+  value: 2
+  says: minimum rowhouse storey count
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: house-floors-max
+  value: 3
+  says: maximum rowhouse storey count
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: apartment-floors-min
+  value: 4
+  says: minimum apartment storey count
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: apartment-floors-max
+  value: 8
+  says: maximum apartment storey count
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: tower-floors-min
+  value: 12
+  says: minimum tower storey count
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: tower-floors-max
+  value: 23
+  says: maximum tower storey count
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: storey-min
+  value: 3
+  unit: m
+  says: minimum wall height per storey
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: storey-max
+  value: 3.5
+  unit: m
+  says: maximum wall height per storey
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: roof-thickness
+  value: 0.25
+  unit: m
+  says: flat roof slab thickness
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: roof-seat
+  value: 0.05
+  unit: m
+  says: roof penetration below the wall top
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: gable-rise
+  value: 1.65
+  unit: m
+  says: triangular roof rise above its foot
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: joint-overlap
+  value: 0.03
+  unit: m
+  says: tower massing overlap to avoid coincident floors
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: podium-height-share
+  value: 0.18
+  says: podium height as a share of total tower height
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: shaft-width-share
+  value: 0.76
+  says: tower shaft width and depth as shares of the podium
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: shaft-height-share
+  value: 0.75
+  says: shaft height as a share of total tower height
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: crown-width-share
+  value: 0.52
+  says: crown width and depth as shares of the podium
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: crown-base-share
+  value: 0.92
+  says: crown base height as a share of total tower height
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: crown-height-share
+  value: 0.08
+  says: crown height as a share of total tower height
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: crown-roof-share
+  value: 0.54
+  says: tower roof width and depth as shares of the podium
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: glazing-bands
+  value: 3
+  says: maximum glazing bands per represented elevation at quick detail
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: glazing-thickness
+  value: 0.08
+  unit: m
+  says: closed glazing panel depth
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: glazing-offset
+  value: 0.02
+  unit: m
+  says: panel centre distance outside the wall face
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: glazing-height
+  value: 1.25
+  unit: m
+  says: height of a broad glazing band
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: glazing-width-share
+  value: 0.72
+  says: front glazing span as a share of wall width
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: glazing-depth-share
+  value: 0.64
+  says: side glazing span as a share of wall depth
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: circle-arc-steps
+  value: 6
+  says: segments in each curved corner of a traffic circle
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: island-radius-share
+  value: 0.5
+  says: island radius as a share of outside carriageway radius
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: island-height
+  value: 0.16
+  unit: m
+  says: traffic island height above the street
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+- name: pavement-drop
+  value: 0.02
+  unit: m
+  says: lot paving depth below the street surface
+  kind: picked
+  by: an agent, city factory, 2026-11-15
+# Street level (demo), 2026-11-16. Picked for a reading of ordinary
+# buildings from the street, not measured. See city-detail.md.
+- name: facade-projection
+  value: 0.45
+  unit: m
+  says: slab edges, cornices and canopies stand this far out of the wall
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: reveal-depth
+  value: 0.25
+  unit: m
+  says: windows sit this far back from the wall plane
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: module-height
+  value: 2.9
+  unit: m
+  says: height of a facade strip; the storey's rest is its slab edge
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: bay-pitch
+  value: 3.6
+  unit: m
+  says: width of one window bay of a facade strip
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: rowhouse-window-width
+  value: 1.1
+  unit: m
+  says: rowhouse window opening width
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: rowhouse-window-height
+  value: 1.7
+  unit: m
+  says: rowhouse window opening height
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: apartment-window-width
+  value: 1.5
+  unit: m
+  says: apartment window opening width
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: apartment-window-height
+  value: 1.6
+  unit: m
+  says: apartment window opening height
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: tower-window-width
+  value: 2.6
+  unit: m
+  says: tower window opening width
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: tower-window-height
+  value: 2.2
+  unit: m
+  says: tower window opening height
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: sill-share
+  value: 0.55
+  says: share of a strip's solid wall height that lies below its windows
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: sill-thickness
+  value: 0.08
+  unit: m
+  says: window sill thickness
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: sill-projection
+  value: 0.12
+  unit: m
+  says: window sill reach out of the wall plane
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: sill-overhang
+  value: 0.08
+  unit: m
+  says: sill and lintel reach past each side of the opening
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: mullion-width
+  value: 0.09
+  unit: m
+  says: width of a window's middle mullion
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: mullion-depth
+  value: 0.12
+  unit: m
+  says: mullion depth out from the back of the reveal
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: lintel-height
+  value: 0.2
+  unit: m
+  says: rowhouse lintel height above the opening
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: lintel-projection
+  value: 0.06
+  unit: m
+  says: rowhouse lintel reach out of the wall plane
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: door-width
+  value: 1.6
+  unit: m
+  says: entrance opening width
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: door-height
+  value: 2.4
+  unit: m
+  says: entrance opening height above the strip's foot
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: canopy-gap
+  value: 0.12
+  unit: m
+  says: entrance canopy height above the door head
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: canopy-thickness
+  value: 0.15
+  unit: m
+  says: entrance canopy thickness
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: canopy-overhang
+  value: 0.45
+  unit: m
+  says: entrance canopy reach past each side of the door
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: pane-offset
+  value: 0.02
+  unit: m
+  says: glass stands this far out of the core at the back of the reveal
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: cornice-height
+  value: 0.4
+  unit: m
+  says: projecting coping at the top of each stack
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: parapet-height
+  value: 1.05
+  unit: m
+  says: parapet wall height above the cornice
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: parapet-thickness
+  value: 0.25
+  unit: m
+  says: parapet wall thickness
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: setback-floors
+  value: 6
+  says: fewest storeys at which an apartment sets back its top floor
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: setback-depth
+  value: 1.8
+  unit: m
+  says: apartment top-floor setback on every side
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: plant-gap
+  value: 0.6
+  unit: m
+  says: clear space between rooftop plant and round it
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: overrun-width
+  value: 2.4
+  unit: m
+  says: lift overrun width
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: overrun-depth
+  value: 2.8
+  unit: m
+  says: lift overrun depth
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: overrun-height
+  value: 2.5
+  unit: m
+  says: lift overrun height above the deck
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: cooler-width
+  value: 1.9
+  unit: m
+  says: rooftop cooling unit width
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: cooler-depth
+  value: 1.1
+  unit: m
+  says: rooftop cooling unit depth
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: cooler-height
+  value: 1.3
+  unit: m
+  says: rooftop cooling unit height
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: coolers
+  value: 3
+  says: most cooling units on one roof
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: tank-radius
+  value: 0.7
+  unit: m
+  says: rooftop water tank radius
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: tank-height
+  value: 2.1
+  unit: m
+  says: rooftop water tank height
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: mast-radius
+  value: 0.06
+  unit: m
+  says: rooftop mast radius
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: mast-height
+  value: 2.7
+  unit: m
+  says: rooftop mast height above the deck
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: plant-sides
+  value: 10
+  says: sides of a tank or mast prism
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: chimney-width
+  value: 0.8
+  unit: m
+  says: rowhouse chimney width
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: chimney-depth
+  value: 0.6
+  unit: m
+  says: rowhouse chimney depth
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: chimney-clearance
+  value: 0.1
+  unit: m
+  says: chimney top below the gable ridge
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: louvre-bands
+  value: 3
+  says: louvre bands round a tower's plant room
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: louvre-height
+  value: 0.3
+  unit: m
+  says: louvre band height
+  kind: picked
+  by: an agent, city detail, 2026-11-16
+- name: louvre-projection
+  value: 0.06
+  unit: m
+  says: louvre band reach out of the plant room wall
+  kind: picked
+  by: an agent, city detail, 2026-11-16

@@ -5,6 +5,11 @@ records what ran, and resumes work from verified results after interruption.
 This document describes the work being built, including the parts that do
 not exist yet. A completed primitive does not establish a working queue.
 
+The current foreground queue is documented in [the human guide](../doc/azazel.md).
+It is under validation; verified output publication and shared migration
+remain unfinished. The pressure-policy update below supersedes the earlier
+per-job memory-ceiling proposal for this rollout.
+
 ## boundaries
 
 Azazel lives under `azazel/` in the Slayer module, on its own branch.
@@ -15,9 +20,9 @@ Nilgai normalizes observations; Celestial owns physical quantities and
 models; Celestial-data obtains archive products. Those responsibilities
 remain with their packages.
 
-Game's existing lanes and Azazel's renders must draw from one host budget.
-The interface between them is durable records and locks on disk. Reading
-records is observation; acquiring an admission grant is authority to start.
+Azazel owns admission and renewable leases for its render jobs. Game builds
+and tests software; it is not the render scheduler. Direct Slayer renders
+and GPU tests currently need operator coordination with Azazel's queue.
 
 A Carrie pane discovers and presents that state through its configurable
 provider interface. Carrie does not schedule or own jobs.
@@ -25,10 +30,10 @@ provider interface. Carrie does not schedule or own jobs.
 The common admission operation must cover both reading the available
 budget and reserving it. Two callers must not each spend the same room.
 
-Every start needs it, including the first Game lane. Game currently measures
-the host only before opening extra lanes; that is not this requirement.
-The Game integration is a companion change, not something an Azazel-only
-test can claim to establish.
+Every render start needs an Azazel grant, including the first. A render lease
+is renewed by its supervisor and persists in the queue. An expired deadline
+does not establish that the old render has stopped: the inherited attempt
+lock and process group remain recovery fences.
 
 ## what a job carries
 
@@ -55,28 +60,62 @@ records its reason and does not turn a queued job into a failed result.
 The scheduler's observation records remain readable while work is held.
 
 Thread limits apply to each process. Worker counts and concurrent jobs
-also consume the shared budget. The development limit is two Go CPUs per
-process. A queue slot or a `GOMAXPROCS` value alone is not a memory limit.
+also consume the shared budget. Render processes default to eight Go workers,
+configurable per request. A queue slot or a `GOMAXPROCS` value alone is not
+a memory limit.
 
-Each job declares a memory ceiling. Admission reserves ceilings against
-the configured job budget. Host-pressure admission is an additional check;
-it must account for outstanding reservations that have not become measured
-usage, without subtracting the same resident bytes twice.
+The current rollout uses system memory pressure and records peak measured
+group residency. An RSS estimate is metadata, not a stop threshold, and the
+worker does not impose a small Go heap. The earlier reservation primitives
+remain available for designs that require them; they do not establish the
+aggregate admission or permission to restore an RSS ceiling.
 
 The running-job monitor measures the job's process group, not just its
-first process. Exceeding the job's ceiling stops the group. A sampled
+first process. Elevated system pressure stops the group. A sampled
 monitor can react only after a sample; it is not a kernel-enforced cap.
 
 The Darwin measurement and termination behavior must be established by a
 bounded platform check before it is relied upon.
 
-The operational guard for tonight is one heavy job, load below eight,
-swap below eight GiB, and at least thirty GiB free disk. Under the disk
-floor, running work stops and waiting work stays stopped.
+The worker defaults to four GPU attempts and two CPU attempts. GPU starts
+are spaced five seconds apart by default; both settings can be tuned live.
+Admission samples system pressure and available disk. The operator can
+choose whether elevated memory pressure stops work or is only recorded.
+
+Accumulated swap alone does not stop or hold a job.
+Under the disk floor or elevated pressure,
+running work stops and waiting work stays stopped.
 
 A host stop is latched and needs an explicit resume; a later favorable
 sample does not silently release the queue. These are configurable host
 policies, not physical constants or permission for a caller to raise them.
+
+## utilization under backlog
+
+The scheduling target is 100% GPU utilization while runnable GPU work is
+waiting. Admission should expand to use available capacity, subject to
+system pressure, disk safety and established attempt ownership. A fixed
+one-job limit does not satisfy this target merely because a job is running.
+
+Measure the GPU counter's name, value and sample time alongside completed
+work per unit time. Device and renderer counters must remain distinguishable.
+An admission change must improve useful throughput; a larger busy percentage
+alone does not establish that more work is being completed.
+
+CPU work remains independently eligible while GPU work runs. Bound aggregate
+admission and use the requested render worker count. Direct GPU users and
+Azazel do not yet share a grant, so transition coordination remains necessary.
+
+When backlog remains below the utilization target, expose the limiting
+reason: host pressure, disk, lane admission, recovery, or renderer work
+submission. If admission is the limit, increase it within measured capacity.
+If the renderer is the limit, profile and improve its submission pipeline.
+
+Acceptance needs measured backlog runs covering CPU/GPU overlap, capacity
+increases and pressure-driven holds. Restart and cancellation must retain
+every request and prevent duplicate execution with concurrent attempts.
+Bounded process tests cover overlap and dispatcher restart without replay.
+Full workload performance and the remaining publication checks are still open.
 
 ## lifetime and results
 
@@ -112,7 +151,7 @@ Health, metrics and the result gallery report missing checks as missing.
 3. Generated file and engine contracts, reviewed before their integration.
 4. Process identity, group supervision and host measurements, with generated
    mocks and bounded real-process checks where the operating system matters.
-5. Queue composition and the companion Game admission integration.
+5. Queue composition and Azazel-owned render admission.
 6. Pzm entry points, declared configuration, flags, status and service health.
 7. Slayer engine adapter, verified render results and restart behavior.
 8. Gallery, cache, baselines and the remaining original-plan features.

@@ -6,6 +6,17 @@ import (
 	"github.com/janearc/slayer/geom"
 )
 
+// ConiferParams controls the recursive reference conifer. Lengths are raw
+// geometry-coordinate units, matching the coordinates in Conifer's base;
+// the implementation builds upward along +Z.
+//
+// Depth is the last recursive level, starting at zero. TaperRate scales
+// branch radius per level, DepthScale scales height per level, BranchStart
+// is the initial branch elevation angle in radians, and Sides is passed to
+// Cone for the polygon count (Cone raises values below three to three).
+//
+// The parameters have no general validation beyond a negative Depth, which
+// makes Conifer return no triangles.
 type ConiferParams struct {
 	Height      float64
 	BaseRadius  float64
@@ -16,7 +27,8 @@ type ConiferParams struct {
 	Sides       int
 }
 
-// DefaultConiferParams is the shape of the plain recursive conifer, ten high.
+// DefaultConiferParams is the shape of the plain recursive conifer, ten
+// geometry units high.
 func DefaultConiferParams() ConiferParams {
 	return ConiferParams{
 		Height:      10,

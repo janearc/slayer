@@ -14,8 +14,8 @@ Read [package responsibilities](PACKAGES.md) before choosing where code goes,
 and repository [agent guidance](AGENTS.md) if you use a coding agent.
 
 Use Go from `go.mod`, compatible Game and your own source shelf/config.
-This development branch still needs prepared review dependencies. Run
-`./bootstrap.sh --check` for a setup diagnosis before downloading or building.
+Run `./bootstrap.sh --check` for a setup diagnosis before downloading or
+building.
 
 Work on a branch and keep the change small enough to review. State the
 behavior you want to change before touching shared geometry or transport.

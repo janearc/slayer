@@ -12,8 +12,8 @@ import (
 // at 85c1c37, when both spruces took physical needle shoots and their
 // foliage moved to shared mesh groups: a digest of every corner of
 // every face of the parts, matter by matter, at each seed from one to
-// twelve. doc/families.md asks that quick stay today's trees, face for
-// face; these are today's trees.
+// twelve. quick is to stay today's trees, face for face; these are
+// today's trees.
 var todaysTrees = map[string][12]string{
 	"spruce": {"b0cce761bece8c6a", "b3a7af1111ee150a", "e6f01496bfdbc704",
 		"f339177fc6db00b0", "8b60dff2a02e8d26", "0d6de3ab703c1906",

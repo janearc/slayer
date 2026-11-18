@@ -1,0 +1,236 @@
+# The MCRN Larson: a flying saucer patterned on the plain saucers Gary
+# Larson drew in The Far Side, named the way The Expanse names Mars's
+# navy. Every number here is picked by eye for that look; none is
+# engineering. Shares are of the hull's diameter unless they say so.
+numbers:
+- name: sides-hull
+  value: 12
+  says: turns around the hull at hull detail
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: sides-clumps
+  value: 24
+  says: turns around the hull at clumps detail
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: sides-quick
+  value: 48
+  says: turns around the hull at quick detail
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: sides-demo
+  value: 96
+  says: turns around the hull at demo detail
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: diameter
+  value: 12
+  unit: m
+  says: across the hull at its rim
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: belly
+  value: 0.35
+  says: the flat of the underside, as a share of the hull's radius
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: bowl
+  value: 0.06
+  says: how far the rim stands above the flat of the underside
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: band
+  value: 0.012
+  says: the rim's upright band
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: rise
+  value: 0.1
+  says: how far the top of the upper slope stands above the rim's band
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: dome
+  value: 0.5
+  says: the dome's width as a share of the hull's
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: dome-wall
+  value: 0.004
+  says: the thickness of the dome's glass
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: dome-seat
+  value: 0.0001
+  says: how far the dome's foot is set into the deck, so the glass's floor and the deck never share a plane; a ray bent down through the glass would meet both at once, and which it took was the mesh's choice
+  kind: picked
+  by: the MCRN Larson, 2026-11-13
+- name: dome-levels
+  value: 16
+  says: arcs from the dome's foot to its crown
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: disc
+  value: 0.3
+  says: the belly disc's radius, as a share of the hull's radius
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: disc-drop
+  value: 0.01
+  says: how far the belly disc hangs below the flat of the underside
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: portholes
+  value: 12
+  says: portholes around the upper slope
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: porthole
+  value: 0.02
+  says: a porthole's radius
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: porthole-depth
+  value: 0.006
+  says: how far a porthole stands proud of the slope
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: porthole-up
+  value: 0.45
+  says: where on the upper slope the portholes sit, from the rim up
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: glass-index
+  value: 1.5
+  says: the dome glass's index of refraction, a common glass's
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: oxide
+  value: 5e-9
+  unit: m
+  says: the rutile titanium grows over itself in air, a few nanometres, recalled and not read
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: satin
+  value: 0.3
+  says: how far the hull is from polished, for the sheen a sun leaves on it
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: weathered
+  value: 0.3
+  says: the share of what the hull does not mirror that its weathered face scatters
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: cabin-wave
+  value: 630e-9
+  unit: m
+  says: the cabin light's one line, a red lamp's, near enough; red, for Mars's navy
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: cabin-power
+  value: 100
+  unit: W
+  says: the cabin light's power, every way
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: cabin-up
+  value: 0.5
+  says: how far up the dome the cabin light hangs, as a share of its radius
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: cabin-beyond
+  value: 0.01
+  unit: m
+  says: how far out from the cabin light its light starts
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: structure
+  value: 0.25
+  says: the belly disc's grey
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: porthole-grey
+  value: 0.05
+  says: a dark porthole's grey, before it is lit
+  kind: picked
+  by: the MCRN Larson, 2026-11-11
+- name: rim-light-power
+  value: 60
+  unit: W
+  says: one running light's power, every way; a household lamp's. each porthole is one, named port-0 to port-11 going round, so the hull glows near each and the ground a little
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: porthole-glow
+  value: 0.0001
+  says: how brightly a porthole's own glass glows, in the tracer's light, in the running lights' colour; enough to read as a lit window at a night exposure
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: rim-light-heat
+  value: 3200
+  unit: K
+  says: a running light's colour, as a body that hot glows; a warm white
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: rim-light-out
+  value: 0.08
+  unit: m
+  says: how far proud of its porthole's face a running light's lamp stands, so the porthole does not shade it
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: belly-power
+  value: 1500
+  unit: W
+  says: the belly light's power, a floodlight's, down from the belly disc
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: belly-heat
+  value: 5000
+  unit: K
+  says: the belly light's colour, as a body that hot glows; a cool white beside the running lights
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: belly-half
+  value: 55
+  unit: deg
+  says: the belly light's cone, its half angle, wide enough to reach the feet of the legs when landed
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: belly-soft
+  value: 12
+  unit: deg
+  says: how far past its cone the belly light fades
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: belly-below
+  value: 0.05
+  unit: m
+  says: how far under the belly disc the belly light hangs, so the disc does not shade it
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: lights-cycle
+  value: 6
+  unit: s
+  says: how long the Larson's lights take to go through their programme once, before it starts again
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: lights-steady
+  value: 1.5
+  unit: s
+  says: for this long at the start of each cycle every light is lit; a still picture, taken at the start, has them all
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: lights-lap
+  value: 1.5
+  unit: s
+  says: after that the running lights chase round the rim, a lap this long; three laps fill the rest of the cycle
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: lights-lit
+  value: 3
+  says: how many running lights are lit at once while they chase
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12
+- name: lights-low
+  value: 0.06
+  says: how much of itself a light is when it is not lit; not nought, so the hull still shows
+  kind: picked
+  by: the MCRN Larson's lights, 2026-11-12

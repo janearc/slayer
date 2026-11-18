@@ -1,0 +1,77 @@
+/*
+ * vaporwave-dusk -- a small step from vaporwave: the ground a little
+ * lighter; the ink warm, dim, about 6:1; every colour muted, warmer and
+ * under 7:1, so nothing smears.
+ *
+ * vaporwave -- matched to ~/.config/nvim/colors/vaporwave.lua
+ *
+ * Every text colour is placed against a measured comfortable band rather than
+ * picked. Contrast has a ceiling as well as a floor: past it, light text on a
+ * dark ground halates and the strokes smear. Plain white here is 18.6:1, which
+ * is far past it. Nothing below exceeds about 12:1.
+ *
+ * The band is narrow, so the normal and bright halves of the palette cannot
+ * separate by brightness alone -- they would either be indistinguishable or
+ * push bright back through the ceiling. They separate by saturation instead,
+ * with only a small step in lightness.
+ */
+:root {
+  --ground: #271d3b; /* oklch(26% 0.056 297.7) */
+  --ink: #ab9d90; /* oklch(70% 0.025 65.3) */
+  --cursor: #b893b4; /* oklch(71% 0.063 329.8) */
+  --cursor-ink: #271d3b; /* oklch(26% 0.056 297.7) */
+  --surface-1: #3a2260; /* oklch(32% 0.106 297.9) */
+  --selection-ink: #ab9d90; /* oklch(70% 0.025 65.3) */
+  --black: #291f3e; /* oklch(27% 0.057 297.2) */
+  --red: #c9958f; /* oklch(72% 0.064 26.2) */
+  --green: #8f9580; /* oklch(66% 0.031 120.3) */
+  --yellow: #c4a57a; /* oklch(74% 0.068 75.4) */
+  --blue: #8a93a6; /* oklch(66% 0.030 265.3) */
+  --magenta: #b893b4; /* oklch(71% 0.063 329.8) */
+  --cyan: #84aeb0; /* oklch(72% 0.045 199.9) */
+  --white: #a3988e; /* oklch(69% 0.019 none) */
+  --bright-black: #7f746b; /* oklch(57% 0.019 none) */
+  --bright-red: #d1a09a; /* oklch(75% 0.059 26.5) */
+  --bright-green: #979d88; /* oklch(69% 0.031 120.3) */
+  --bright-yellow: #ccae84; /* oklch(77% 0.066 75.8) */
+  --bright-blue: #939caf; /* oklch(69% 0.030 265.4) */
+  --bright-magenta: #c19dbd; /* oklch(74% 0.061 329.8) */
+  --bright-cyan: #8eb8ba; /* oklch(75% 0.045 200.0) */
+  --bright-white: #ab9d90; /* oklch(70% 0.025 65.3) */
+  --palette-17: #2e2444; /* oklch(29% 0.058 297.0) */
+  --palette-18: #322849; /* oklch(30% 0.059 296.7) */
+  --palette-24: #2f3550; /* oklch(34% 0.048 273.9) */
+  --palette-31: #2f3d55; /* oklch(36% 0.046 260.9) */
+  --palette-38: #32465a; /* oklch(39% 0.043 249.0) */
+  --palette-67: #3b4a5c; /* oklch(40% 0.036 253.3) */
+  --palette-103: #45475f; /* oklch(41% 0.040 280.7) */
+  --palette-139: #4e4560; /* oklch(41% 0.046 299.6) */
+  --palette-169: #5e4560; /* oklch(43% 0.054 324.0) */
+  --palette-198: #6a465d; /* oklch(44% 0.060 341.1) */
+  --palette-205: #64465f; /* oklch(44% 0.056 332.4) */
+  --palette-211: #6e4b5c; /* oklch(46% 0.053 348.7) */
+  --palette-214: #8a6c40; /* oklch(55% 0.072 75.9) */
+  --palette-215: #866f46; /* oklch(55% 0.064 81.2) */
+  --palette-218: #725257; /* oklch(47% 0.043 8.4) */
+  --palette-222: #83704c; /* oklch(55% 0.057 82.9) */
+  --palette-223: #806b4e; /* oklch(54% 0.050 75.3) */
+  --palette-224: #7d6650; /* oklch(53% 0.044 65.3) */
+  --palette-225: #765a55; /* oklch(49% 0.038 30.0) */
+  --palette-251: #a99c8f; /* oklch(70% 0.024 67.4) */
+  --palette-254: #7a6152; /* oklch(51% 0.040 52.5) */
+  --claude-rules: #57445e; /* oklch(42% 0.049 316.8) */
+  --nvim-ink: #b0a295; /* oklch(72% 0.025 65.3) */
+  --dim: #9e9590; /* oklch(68% 0.013 none) */
+  --heading: #b893b4; /* oklch(71% 0.063 329.8) */
+  --link: #84aeb0; /* oklch(72% 0.045 199.9) */
+  --code: #94b08e; /* oklch(73% 0.057 140.2) */
+  --string: #c4a57a; /* oklch(74% 0.068 75.4) */
+  --gutter: #5c4585; /* oklch(44% 0.104 298.7) */
+  --cursor-line: #30264a; /* oklch(30% 0.064 295.0) */
+  --panel: #332850; /* oklch(31% 0.071 294.6) */
+  --border: #432c6b; /* oklch(35% 0.106 297.6) */
+  --err: #c9958f; /* oklch(72% 0.064 26.2) */
+  --warn: #c4a57a; /* oklch(74% 0.068 75.4) */
+  --info: #84aeb0; /* oklch(72% 0.045 199.9) */
+  --hint: #94b08e; /* oklch(73% 0.057 140.2) */
+}

@@ -53,10 +53,7 @@ responses, and effects influenced by topography but not apparently
 forest density at those study sites. This is evidence about responses
 to fog; it does not demonstrate that more trees produce more fog.
 
-Source key: `petreshen-2025-redwood-fog`. The PDF is archived separately
-on the source shelf; its first page was checked for publication and
-rights information. The full paper has not yet been reviewed for
-equations, measured rates, or parameter extraction.
+Source key: `petreshen-2025-redwood-fog`.
 
 ## What the recipe may choose
 
@@ -69,10 +66,4 @@ Keep geometry complexity separate from the grove's physical description:
 a change from foliage clumps to needles must not change the assumed
 canopy or water exchange merely because it changes the triangle count.
 This is a software requirement, not a finding of the cited studies.
-
-Before a measured value enters code, record its units, species, site,
-conditions, source key, page, and supporting text in
-`research/research-derived-data.yml`, following that file's convention.
-
-Derived values need their derivation; visual choices need their author
-and rationale. A plausible-looking fog field is not a measurement.
+A plausible-looking fog field is not a measurement.

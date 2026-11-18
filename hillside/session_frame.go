@@ -7,6 +7,7 @@ import (
 	"image"
 	"time"
 
+	"github.com/janearc/slayer/internal/observability"
 	"github.com/janearc/slayer/render/finish"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/render/progress"
@@ -62,7 +63,14 @@ func (session *Session) glimpsed(ctx context.Context, at time.Duration,
 		}
 		made, err := session.source.light(at+offset, given)
 		if err != nil {
+			if observability.Enabled() {
+				observability.Add("slayer_glimpse_failures_total", 1)
+			}
 			return Drawn{}, err
+		}
+		if observability.Enabled() {
+			observability.Add("slayer_glimpses_total", 1)
+			observeGPUProfile(made.profile)
 		}
 		if place == nothing {
 			drawn.lit = made
@@ -140,13 +148,31 @@ func told(sink progress.Sink, drawn *frame.Frame) {
 	}
 }
 
-// stillFramer draws a set as the still path does: its staged world, as
-// drawMeasured draws it, through a rig's lens where it has one.
+// stillFramer draws a staged world at a scene time, as drawMeasured
+// draws it, through a rig's lens where a still has one.
 type stillFramer struct {
 	world *thing.World
 	made  tally
+	given asked
 	// plan is the job's camera path and zoom, where it says them
 	plan sequencePlan
+}
+
+// inspect exposes the still's world at a time, along its camera path.
+func (still stillFramer) inspect(at time.Duration) (*thing.World, error) {
+	if err := still.plan.exposing(&still.given, at); err != nil {
+		return nil, err
+	}
+	return still.worldAt(at)
+}
+
+// eyed is what the still is asked at its time, seen from the job's
+// camera path where it says one: the steps light takes before drawing.
+func (still stillFramer) eyed(at time.Duration, given asked) (asked,
+	error) {
+	given.at = at
+	err := still.plan.exposing(&given, at)
+	return given, err
 }
 
 // light is the still's world drawn at its time as asked, from the job's
@@ -154,8 +180,12 @@ type stillFramer struct {
 // eye, and told the angle one ray sees at the width and rays asked.
 func (still stillFramer) light(at time.Duration,
 	given asked) (drawnLight, error) {
-	given.at = at
-	if err := still.plan.exposing(&given, at); err != nil {
+	given, err := still.eyed(at, given)
+	if err != nil {
+		return drawnLight{}, err
+	}
+	world, err := still.worldAt(at)
+	if err != nil {
 		return drawnLight{}, err
 	}
 	if given.lensed != nil {
@@ -166,20 +196,34 @@ func (still stillFramer) light(at time.Duration,
 		given.glass = &glass
 	}
 	if given.glass != nil {
-		still.world.Pixel = given.glass.Pixel(given.width * given.samples)
+		world.Pixel = given.glass.Pixel(given.width * given.samples)
 	}
-	given.footprint(still.world)
-	drawn, profile, err := drawMeasured(still.world, given,
+	given.footprint(world)
+	drawn, profile, err := drawMeasured(world, given,
 		still.made.across)
 	return drawnLight{drawn: drawn, profile: profile, made: still.made,
-		world: still.world, given: given}, err
+		world: world, given: given}, err
 }
 
 // timedFramer draws a retained scene as a film does: the scene at each
 // frame's time, through the job's camera path and zoom, kept from the
 // last frame where its film keeps sections.
 type timedFramer struct {
-	plan sequencePlan
+	plan  sequencePlan
+	given asked
+}
+
+// inspect returns the timed scene's world at a time, from its retained
+// frames.
+func (timed timedFramer) inspect(at time.Duration) (*thing.World, error) {
+	if timed.given.live == nil {
+		return nil, fmt.Errorf("hillside: this timed scene has no retained world to inspect")
+	}
+	world, _, err := timed.given.live.frameAt(at)
+	if err != nil {
+		return nil, err
+	}
+	return sceneClockOceanWorldAt(world, at)
 }
 
 // light is the retained scene at a time, drawn as asked.

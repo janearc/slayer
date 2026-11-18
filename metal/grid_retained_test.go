@@ -153,6 +153,9 @@ func TestAStreamDrawsAnotherShapeOverTheSameInputs(t *testing.T) {
 			wherePer); err != nil {
 			t.Fatal(err)
 		}
+		// the where kernel writes its band's first row, so the bands
+		// are fixed at the shape's most rows, where expected finds them
+		kernel.FixBands(shape[2])
 		out, err := stream.Draw()
 		if err != nil {
 			t.Fatal(err)

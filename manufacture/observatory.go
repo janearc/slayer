@@ -9,8 +9,17 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
-// Optical describes an authored optical observatory, in metres and angles.
-// Its surfaces suggest an instrument; they are not a calibrated optical model.
+// Optical describes an authored optical observatory. Diameter and Aperture
+// are in metres; Opening, Azimuth, and Altitude are angles. Observatory
+// requires positive diameter and aperture, aperture below 60% of diameter,
+// and diameter no greater than 200 metres. Opening must be 5 through 90
+// degrees, Azimuth must be finite, and Altitude must be finite and 0 through
+// 90 degrees.
+//
+// Azimuth is used as a rotation about +Y with its sign reversed; the source
+// does not normalize its angle. Segmented asks for a segmented primary mirror
+// outside the hull representation. These surfaces suggest an instrument; they
+// are not a calibrated optical model.
 type Optical struct {
 	Diameter, Aperture         measure.Length
 	Opening, Azimuth, Altitude measure.Angle
@@ -218,29 +227,40 @@ func (shape mirrorDish) backPlane() float64 { return -shape.depth * 0.2 }
 func (shape mirrorDish) panels() surface {
 	var skin surface
 	span := shape.radius / 5
+	for _, at := range shape.panelCentres() {
+		x, z := at.X, at.Z
+		height := func(x, z float64) float64 {
+			return shape.depth * (x*x + z*z) / (shape.radius * shape.radius)
+		}
+		centre := maths.V(x, height(x, z), z)
+		bottom := maths.V(x, -shape.depth*0.2, z)
+		for i := range 6 {
+			corner := func(i int) maths.Vec {
+				angle := fullTurn * float64(i%6) / 6
+				x, z := x+span*0.96*math.Cos(angle), z-span*0.96*math.Sin(angle)
+				return maths.V(x, height(x, z), z)
+			}
+			a, b := corner(i), corner(i+1)
+			lowA, lowB := maths.V(a.X, bottom.Y, a.Z), maths.V(b.X, bottom.Y, b.Z)
+			skin = append(skin, face{centre, a, b}, face{bottom, lowB, lowA})
+			skin = quad(skin, a, lowA, lowB, b)
+		}
+	}
+	return skin
+}
+
+// panelCentres is the actual generated tile population, before triangulation.
+func (shape mirrorDish) panelCentres() []maths.Vec {
+	var centres []maths.Vec
+	span := shape.radius / 5
 	for q := -4; q <= 4; q++ {
 		for r := -5; r <= 5; r++ {
 			x, z := 1.5*span*float64(q), math.Sqrt(3)*span*(float64(r)+float64(q)/2)
 			if math.Hypot(x, z)+span > shape.radius {
 				continue
 			}
-			height := func(x, z float64) float64 {
-				return shape.depth * (x*x + z*z) / (shape.radius * shape.radius)
-			}
-			centre := maths.V(x, height(x, z), z)
-			bottom := maths.V(x, -shape.depth*0.2, z)
-			for i := range 6 {
-				corner := func(i int) maths.Vec {
-					angle := fullTurn * float64(i%6) / 6
-					x, z := x+span*0.96*math.Cos(angle), z-span*0.96*math.Sin(angle)
-					return maths.V(x, height(x, z), z)
-				}
-				a, b := corner(i), corner(i+1)
-				lowA, lowB := maths.V(a.X, bottom.Y, a.Z), maths.V(b.X, bottom.Y, b.Z)
-				skin = append(skin, face{centre, a, b}, face{bottom, lowB, lowA})
-				skin = quad(skin, a, lowA, lowB, b)
-			}
+			centres = append(centres, maths.V(x, 0, z))
 		}
 	}
-	return skin
+	return centres
 }

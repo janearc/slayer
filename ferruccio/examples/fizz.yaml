@@ -1,0 +1,65 @@
+# a glass fizzing, with no glass yet.
+#
+# smoke forty-three's column as a set file, so it can be filmed: the
+# mist of bubbles too small to see, standing on a slate floor in
+# daylight, thick at its foot and thinning as it climbs and widens. it
+# is white as a foam is, since a bubble scatters every band alike.
+#
+# the churn climbs with the bubbles, at the fizz's rise. draw it at two
+# moments and it is two pictures; with a churn of nought, or a rise of
+# nought, it is one.
+#
+# places are metres, as a map's run: x east, y north, z up. every
+# number is the smoke's, which picked each by eye, and none is
+# measured. the glass, the drink and the bubbles big enough to see are
+# not here: a set cannot say a clear thing yet.
+scene:
+  name: fizz
+  film:
+    width: 1280
+    height: 720
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # level with the column's middle, far enough back that it fills the
+    # frame from the floor to its top
+    front:
+      title: "the column"
+      location:
+        at: [0, -4.5, 1]
+      orientation:
+        look_at: [0, 0, 1]
+  world:
+    materials:
+      slate:
+        colour: {swatch: slate}
+        source: eye
+    boxes:
+      # the floor, its upper face at nought
+      floor:
+        material: slate
+        middle: [0, 0, -0.05]
+        size: [60, 60, 0.1]
+        source: eye
+    fizzes:
+      column:
+        colour: {swatch: paint}
+        foot: [0, 0, 0]
+        radius: 0.4
+        height: 2
+        thick: 4
+        rise: 0.3
+        churn: 0.75
+        seed: 43
+        source: eye
+    suns:
+      # high, from the left and a little in front
+      day:
+        toward: [-0.5, -0.4, 0.75]
+        colour: {srgb_linear: [3, 3, 3]}
+        source: eye

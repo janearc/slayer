@@ -41,12 +41,23 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/carry"
 	"github.com/janearc/slayer/render/frame"
+	"github.com/janearc/slayer/scene/thing"
 )
 
 // rigFramer draws a set's retained scene through its rig, a glimpse at a
 // time, and exposes a frame's glimpses through its lens.
 type rigFramer struct {
-	plan sequencePlan
+	plan  sequencePlan
+	given asked
+}
+
+// inspect returns the rig's world at a time, from its retained frames.
+func (rig rigFramer) inspect(at time.Duration) (*thing.World, error) {
+	if rig.given.live == nil {
+		return nil, fmt.Errorf("hillside: this rig has no retained world to inspect")
+	}
+	world, _, err := rig.given.live.frameAt(at)
+	return world, err
 }
 
 // errTwoShutters is the refusal of a job's shutter beside a set's rig.
@@ -82,7 +93,7 @@ func openRigFilm(wanted job.Job, given asked) (*Session, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", given.set, err)
 	}
-	session := newSession(rigFramer{plan: cameraPlan(wanted)}, given,
+	session := newSession(rigFramer{plan: cameraPlan(wanted), given: given}, given,
 		wanted, given.tone())
 	session.offsets = offsets
 	return session, nil

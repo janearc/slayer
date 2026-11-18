@@ -1,6 +1,7 @@
 package manufacture
 
 import (
+	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 )
 
@@ -10,43 +11,52 @@ func (row spacecraft) enclosed(assembly *instrumentAssembly,
 ) {
 	aperture := size.aperture
 	bus := aperture * spacecraftValue("bus-height")
-	foot := maths.Local()
-	busProfile := turnedProfile{points: [][coordinatePair]float64{
-		{spaceZero, spaceZero}, {size.radius, spaceZero},
-		{size.radius, bus}, {spaceZero, bus}}}
-	busFine := assembly.fine
-	assembly.fine = cut{around: octagonSides}
-	assembly.add(busProfile, foot, spaceStructure)
-	assembly.fine = busFine
+	busProfile := []ComponentProfilePoint{
+		{Radius: measure.Metres(spaceZero), Height: measure.Metres(spaceZero)},
+		{Radius: measure.Metres(size.radius), Height: measure.Metres(spaceZero)},
+		{Radius: measure.Metres(size.radius), Height: measure.Metres(bus)},
+		{Radius: measure.Metres(spaceZero), Height: measure.Metres(bus)},
+	}
+	ComponentSpec{Form: ComponentDrum, Radius: measure.Metres(size.radius),
+		Height: measure.Metres(bus), Cuts: octagonSides, Profile: busProfile,
+		exact: &componentMetrics{radius: size.radius, height: bus,
+			profile: [][coordinatePair]float64{{spaceZero, spaceZero}, {size.radius, spaceZero},
+				{size.radius, bus}, {spaceZero, bus}}}}.appendTo(
+		assembly, spaceStructure)
 	wall := aperture * spacecraftValue("wall-thickness")
-	tube := turnedProfile{points: [][coordinatePair]float64{
-		{size.radius, spaceZero}, {size.radius, size.length},
-		{size.radius - wall, size.length},
-		{size.radius - wall, spaceZero}}}
+	// the tube is round, and its sides only stand for that: a polished
+	// one shaded flat mirrors the world as so many strips, each at its
+	// own angle, and draws a sawtooth inside the tube
 	tubeStart := maths.V(spaceZero, bus, spaceZero)
 	tubePose := maths.NewSubspace(tubeStart, maths.Identity, spaceOne)
-	assembly.add(tube, tubePose, body)
-	mirror := mirrorDish{radius: aperture * spaceHalf,
-		depth: aperture * spacecraftValue("mirror-depth")}
+	tubeProfile := []ComponentProfilePoint{
+		{Radius: measure.Metres(size.radius), Height: measure.Metres(spaceZero)},
+		{Radius: measure.Metres(size.radius), Height: measure.Metres(size.length)},
+		{Radius: measure.Metres(size.radius - wall), Height: measure.Metres(size.length)},
+		{Radius: measure.Metres(size.radius - wall), Height: measure.Metres(spaceZero)},
+	}
+	ComponentSpec{Form: ComponentDrum, Frame: tubePose,
+		Radius: measure.Metres(size.radius), Height: measure.Metres(size.length),
+		Smooth: true, Profile: tubeProfile,
+		exact: &componentMetrics{radius: size.radius, height: size.length,
+			profile: [][coordinatePair]float64{{size.radius, spaceZero},
+				{size.radius, size.length}, {size.radius - wall, size.length},
+				{size.radius - wall, spaceZero}}}}.appendTo(assembly, body)
+	// the primary is one paraboloid, which its rings and strips stand
+	// for, and is shaded as one, as the tube is
 	lift := bus + aperture*spacecraftValue("mirror-lift")
 	mirrorAt := maths.V(spaceZero, lift, spaceZero)
-	mirrorPose := maths.NewSubspace(mirrorAt, maths.Identity, spaceOne)
-	assembly.add(mirror, mirrorPose, spaceMirror)
+	ComponentSpec{Form: ComponentDish, Position: mirrorAt,
+		Radius: measure.Metres(aperture * spaceHalf),
+		Depth:  measure.Metres(aperture * spacecraftValue("mirror-depth")),
+		Smooth: true, exact: &componentMetrics{radius: aperture * spaceHalf,
+			depth: aperture * spacecraftValue("mirror-depth")}}.appendTo(assembly, spaceMirror)
 	if row.design == "spitzer" {
 		row.spitzerPanel(assembly, size)
 	} else {
 		row.hubblePanels(assembly, size)
 	}
-}
-
-// spitzerPanel keeps the shield behind the telescope housing.
-func (row spacecraft) spitzerPanel(assembly *instrumentAssembly,
-	size spacecraftSize,
-) {
-	width := size.aperture * spacecraftValue("spitzer-panel-width")
-	depth := size.aperture * spacecraftValue("spitzer-panel-offset")
-	assembly.solarPanel(width, size.span, size.aperture,
-		maths.V(-width*spaceHalf, spaceZero, -depth))
+	row.enclosedDetail(assembly, size)
 }
 
 // hubblePanels uses bilateral wings and a continuous support bar.

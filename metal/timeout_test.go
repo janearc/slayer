@@ -200,8 +200,8 @@ func TestASessionBatchOverTheLimitIsAnError(t *testing.T) {
 	}
 }
 
-// a band drawn ahead that outruns the limit is an error from the next
-// call that waits for it, here an update of an input, and not a silence.
+// a band drawn ahead that outruns the limit is an error from the drawing
+// that left it in flight, beside its consumer's own, and not a silence.
 func TestABandDrawnAheadThatTimesOutIsReported(t *testing.T) {
 	limit := 300 * time.Millisecond
 	kernel, err := Open(banded, "banded")
@@ -215,16 +215,13 @@ func TestABandDrawnAheadThatTimesOutIsReported(t *testing.T) {
 	defer stream.Close()
 	stop := errors.New("stop after the first band")
 	first := func(int, int, []float32) error { return stop }
-	if err := stream.DrawBands(first); !errors.Is(err, stop) {
+	err = stream.DrawBands(first)
+	if !errors.Is(err, stop) {
 		t.Fatalf("the first band came back as %v; want the consumer's own error", err)
-	}
-	err = stream.Update(0, trips(brief))
-	if err == nil {
-		t.Fatalf("an update waited out a band of %d trips under a limit of %v and said nothing", long, limit)
 	}
 	for _, want := range []string{"rows 4 to 7", "did not complete"} {
 		if !strings.Contains(err.Error(), want) {
-			t.Errorf("the update's error is %q; want it to say %q", err, want)
+			t.Errorf("the drawing's error is %q; want it to say %q", err, want)
 		}
 	}
 }

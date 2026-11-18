@@ -42,6 +42,10 @@ func OpenComposite(ctx context.Context, wanted job.Job, stamp Stamp) (*Composite
 		session.Close()
 		return nil, fmt.Errorf("composite: use a GPU set with a pinhole, without a lens rig or HUD")
 	}
+	if len(session.given.initialMedia) > 0 {
+		session.Close()
+		return nil, fmt.Errorf("composite: explicit camera initial media are not supported")
+	}
 	return &CompositeSession{Session: session}, nil
 }
 

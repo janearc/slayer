@@ -86,3 +86,24 @@ func TestPageReaderReportsMissingTextAndUnusablePDF(t *testing.T) {
 		t.Fatalf("bad PDF: %v", err)
 	}
 }
+
+// TestPageReaderAsksPopplerForOnePage puts a stand-in pdftotext first on
+// the path, and checks that pageOf asks it for the one page, in layout
+// mode, and returns what it printed.
+func TestPageReaderAsksPopplerForOnePage(t *testing.T) {
+	bin := t.TempDir()
+	script := "#!/bin/sh\necho \"args: $*\"\n"
+	if err := os.WriteFile(filepath.Join(bin, "pdftotext"), []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+	path := filepath.Join(t.TempDir(), "paper.pdf")
+	got, err := pageOf(path, 24)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "args: -layout -f 24 -l 24 " + path + " -\n"
+	if got != want {
+		t.Errorf("pageOf = %q, want %q", got, want)
+	}
+}

@@ -41,7 +41,7 @@ func TestAPictureCutFromALargerOneCopiesWhole(t *testing.T) {
 // black that zero times infinity made of it. a part that is no number is black
 // by rule.
 func TestEndlessLightIsWhiteAndNoNumberIsBlack(t *testing.T) {
-	px := Tone{Knee: 0.6}.pixel(maths.RGB(math.Inf(1), 0.3, 0.3))
+	px := printed(Tone{Knee: 0.6}, maths.RGB(math.Inf(1), 0.3, 0.3))
 	if px != (color.RGBA{255, 255, 255, 255}) {
 		t.Errorf("endless red through the knee is %v", px)
 	}

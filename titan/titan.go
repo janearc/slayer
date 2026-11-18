@@ -40,6 +40,11 @@
 //
 // Every Sample says which it is, and how many of its metres were made.
 // Nothing made is ever passed off as measured.
+//
+// Where the map has no height at a corner, titan does not make one up.
+// The corner is carried down as unknown, and the place is refused only
+// if that corner is beside it: an end of an edge made ground is built
+// on, or a corner of the last triangle.
 package titan
 
 import (
@@ -105,7 +110,9 @@ const (
 var errRefused = errors.New("refused")
 
 // Refused is wrapped by each refusal here. A ground with no map or no
-// size is refused. So is a place the map has no height for.
+// size is refused. So is a place the map has no height for, which means
+// the place's own neighbourhood: a corner of the last measured triangle
+// round it, or an end of an edge ground is made on there.
 func Refused() error { return errRefused }
 
 // Provider is a map of a world's heights. Titan reads the world from it
@@ -179,6 +186,9 @@ type Ground struct {
 	radius float64
 	seed   uint64
 	face   float64 // an icosahedron's edge on this world, in metres
+	// least is the least steepness made ground is given, rise over run,
+	// at edges no longer than longest metres: see Relief. Nought is none.
+	least, longest float64
 
 	guard sync.Mutex
 	kept  map[uint64]read
@@ -196,6 +206,43 @@ func New(from Provider, radius float64, seed uint64) (*Ground, error) {
 	arc := math.Acos(vectorOf(first).dot(vectorOf(second)))
 	return &Ground{from: from, radius: radius, seed: seed,
 		face: arc * radius, kept: map[uint64]read{}}, nil
+}
+
+// Relief gives the ground's made relief a least steepness, rise over run,
+// at every edge no longer than longest metres, where the map is flatter
+// than that. A flat map says only that the ground is flat over its own
+// samples' spacing; below that, the asker may know it is not: a plain
+// photographed from the ground, say. Corners the map has are never moved.
+// It refuses a steepness below nought, or a longest that is not a length.
+func (ground *Ground) Relief(slope, longest float64) error {
+	if !(slope >= none) || math.IsInf(slope, none) || !(longest > none) ||
+		math.IsInf(longest, none) {
+		return fmt.Errorf("%w: a relief is a steepness of nought or more "+
+			"and a longest edge above nought, not %g and %g", errRefused,
+			slope, longest)
+	}
+	ground.least, ground.longest = slope, longest
+	return nil
+}
+
+// reliefHurst is the Hurst exponent of the relief Relief asks for. It's
+// picked: rough enough that metres and tens of metres both show, smooth
+// enough that its slope carries on a little.
+const reliefHurst = 0.8
+
+// floor is how far, on average, a corner made at a depth is moved by the
+// least steepness Relief asked, by the same midpoint rule as the map's,
+// with reliefHurst and with the depths from longest down to an inchworm
+// sharing it. It is none at edges longer than longest, or with no relief.
+func (ground *Ground) floor(depth int) float64 {
+	long := ground.Edge(depth - 1)
+	if !(ground.least > none) || long > ground.longest {
+		return none
+	}
+	depths := math.Max(math.Log2(ground.longest/Inchworm), 1)
+	strays := 1 - math.Exp2(split*reliefHurst-split)
+	return ground.least * long * math.Sqrt(strays) /
+		(math.Exp2(reliefHurst) * math.Sqrt(depths))
 }
 
 // Edge is about how long a triangle's edge is at a depth, in metres.
@@ -223,7 +270,11 @@ func (ground *Ground) Kept() int {
 // pixel's footprint say. Detail the map has is measured. Finer than that
 // is generated, down to Inchworm and no further.
 //
-// It refuses a place the map has no height for.
+// It refuses a place the map has no height for: a corner the map does
+// not know is carried down the walk and refuses nothing until its height
+// is used, as an end of an edge a corner is made on or as a corner of the
+// triangle the place is blended from. Far corners the walk only passes
+// are not asked for a height. Nothing is filled in for a missing one.
 func (ground *Ground) At(at *mesh.Point, detail float64) (*Sample, error) {
 	if at == nil {
 		return nil, fmt.Errorf("%w: the ground at no place", errRefused)
@@ -247,6 +298,11 @@ func (ground *Ground) At(at *mesh.Point, detail float64) (*Sample, error) {
 	for depth := range deep {
 		shape, err = ground.step(shape, toward, depth+1)
 		if err != nil {
+			return nil, err
+		}
+	}
+	for _, each := range shape {
+		if err = each.missing(); err != nil {
 			return nil, err
 		}
 	}
@@ -330,6 +386,14 @@ func (ground *Ground) middle(from, to corner, depth int) (corner, error) {
 	if ground.Edge(depth) >= ground.from.Finest(at.point()) {
 		return ground.read(at, name)
 	}
+	// a corner is made from its ends' heights, so ends the map has
+	// none for refuse here
+	if err := from.missing(); err != nil {
+		return corner{}, err
+	}
+	if err := to.missing(); err != nil {
+		return corner{}, err
+	}
 	// the curve along the edge that leaves each end at its own slope:
 	// its middle is the mean of the ends, raised by an eighth of the
 	// edge times how much the slopes close on each other
@@ -362,7 +426,8 @@ func (ground *Ground) middle(from, to corner, depth int) (corner, error) {
 }
 
 // spread is how far, on average, a corner made at a depth is moved: the
-// rule middle's comment sets out, from what the map showed near it.
+// rule middle's comment sets out, from what the map showed near it, or
+// the floor Relief asked, whichever is further.
 func (ground *Ground) spread(near corner, depth int) float64 {
 	if !(near.spacing > none) {
 		return none
@@ -375,8 +440,9 @@ func (ground *Ground) spread(near corner, depth int) float64 {
 	// a Hurst exponent carried between corners can land a hair past
 	// one, where there is nothing to take a root of
 	strays := math.Max(1-math.Exp2(split*near.hurst-split), none)
-	return over * math.Sqrt(strays) /
+	rule := over * math.Sqrt(strays) /
 		(math.Exp2(near.hurst) * math.Sqrt(depths))
+	return math.Max(rule, ground.floor(depth))
 }
 
 // drawn is a number for a corner's name, with a mean of nought and a

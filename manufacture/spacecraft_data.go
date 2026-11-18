@@ -21,5 +21,6 @@ func spacecraftValue(name string) float64 {
 	if err != nil {
 		panic(err)
 	}
+	noted(value)
 	return value.Value
 }

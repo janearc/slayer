@@ -10,6 +10,7 @@ import (
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -101,6 +102,7 @@ func table() map[string]maker {
 		"home": homeRow()}
 	rows["guide-star-launcher"] = guideLauncher{}
 	rows["saguaro"] = saguaro{}
+	rows["human-scale-2m"] = scaleHuman{}
 	rows["optical-observatory"] = optical{Optical{
 		Diameter: measure.Metres(24), Aperture: measure.Metres(8),
 		Opening: measure.Degrees(35), Azimuth: measure.Degrees(180),
@@ -110,6 +112,9 @@ func table() map[string]maker {
 	rows["coast-redwood-shoot"] = shootKind{style: 1}
 	rows["giant-sequoia-shoot"] = shootKind{style: 2}
 	for name, row := range stoneRows() {
+		rows[name] = row
+	}
+	for name, row := range plateRows() {
 		rows[name] = row
 	}
 	for name, row := range spacecraftRows() {
@@ -145,6 +150,24 @@ func table() map[string]maker {
 	for name, row := range lunarRows() {
 		rows[name] = row
 	}
+	for name, row := range veneraRows() {
+		rows[name] = row
+	}
+	for name, row := range j58Rows() {
+		rows[name] = row
+	}
+	for name, row := range alfaRows() {
+		rows[name] = row
+	}
+	for name, row := range macroRows() {
+		rows[name] = row
+	}
+	for name, row := range cityRows() {
+		rows[name] = row
+	}
+	rows["city-clustered-10000"] = clusteredCityMaker{DefaultClusteredCity()}
+	rows["city-clustered-green-10000"] = clusteredCityMaker{greenClusteredCity(false)}
+	rows["city-clustered-night-10000"] = clusteredCityMaker{greenClusteredCity(true)}
 	rows["griffith"] = civicObservatory{}
 	rows["space-observatory"] = rows["spitzer"]
 	for name, row := range groundRows() {
@@ -194,11 +217,77 @@ func plain(name string, red, green, blue float64) *thing.Material {
 
 // stone is the row of a stone: how long its longest axis may be, in
 // metres, its middle axis as a share of that and its shortest as a
-// share of the middle, how worn it may be, and how finely it is cut.
+// share of the middle, how worn it may be, how far it may lean from
+// lying flat, in degrees, how much of its thickness is sunk in the ground,
+// as a share, how much of its face dust covers, as a share, how finely it
+// is cut, and whether it breaks as a plate of a layered rock does.
 type stone struct {
-	long, middle, short, worn span
-	around                    int
-	dressed                   looks
+	long, middle, short, worn, lean, sunk, dust span
+	around                                      int
+	dressed                                     looks
+	platy                                       bool
+}
+
+// the draws a stone's lean, its sinking and its dust are picked from, in
+// the picking part of its seed
+const (
+	leaning = 4 // defined: the draw after its three axes and its wear
+	sinking = 5 // defined: the draw after its lean
+	dusting = 6 // defined: the draw after its sinking
+)
+
+// the dust that lies on a plate
+const (
+	// dustShare is how much of the plate's own light the dust gives back.
+	// picked: the soil's, which the set picks at the same share of the
+	// plates' read reflectance, darker, as the lander's panoramas show it.
+	dustShare = 0.45 // picked: see above
+	// dustPatch is about how wide a patch of dust is, in metres. picked:
+	// a few centimetres, as the dust lies in the panoramas.
+	dustPatch = 0.04 // picked: see above
+)
+
+// dark basalt's share of the light it gives back, red, green and blue: the
+// ground the venus landers stood on, dark and nearly grey. read from the
+// venus surface reflectance abstract, ntrs 19870013979: page 166, figure 1,
+// albedo by band from the photometers of two landers; page 165, the text.
+const (
+	// darkRed: read, page 166, figure 1, about 6 per cent at 0.65 to 0.7 um.
+	darkRed = 0.06 // read: page 166
+	// darkGreen: read, page 166, figure 1, about 5 per cent at 0.55 to 0.6 um.
+	darkGreen = 0.05 // read: page 166
+	// darkBlue: picked. no band reaches below 0.5 um; page 165 says the
+	// later panoramas show rock and soil grey to within a tenth, so the blue
+	// is held within a tenth of the green.
+	darkBlue = 0.046 // picked: see above
+)
+
+// plateRows is the plates of a layered rock broken where it lies: a slab
+// and a chip, each far wider than it is thick, freshly broken, some
+// leaning, in dark basalt. their shapes are picked by looking at the
+// photographs a venus lander took of the ground it stood on.
+func plateRows() map[string]stone {
+	dark := looks{body: plain("dark basalt", darkRed, darkGreen, darkBlue)}
+	slab := stone{
+		long:    span{0.15, 0.9},  // picked: a hand to an arm long
+		middle:  span{0.5, 0.9},   // picked: plates, not rods
+		short:   span{0.04, 0.14}, // picked: centimetres to a decimetre thick
+		worn:    span{0, 0.25},    // picked: broken where it lies
+		lean:    span{0, 10},      // picked: most lie flat, some tilted
+		sunk:    span{0.4, 0.85},  // picked: bedded in the soil, near flush
+		dust:    span{0, 0},       // picked: none for now; the patches drew as even spots, not drifted soil (2026-11-15)
+		around:  24,               // picked: fine enough to be seen near
+		dressed: dark,
+		platy:   true,
+	}
+	chip := slab
+	chip.long = span{0.01, 0.12} // picked: grit to a palm across
+	chip.short = span{0.2, 0.5}  // picked: thicker for its size
+	chip.worn = span{0.1, 0.5}   // picked: a little rounded
+	chip.sunk = span{0, 0.4}     // picked: lying on the soil or in it
+	chip.dust = span{0, 0}       // picked: none, as on the slabs
+	chip.around = 6              // picked: as a pebble is cut
+	return map[string]stone{"slab": slab, "chip": chip}
 }
 
 // stoneRows is the three stones, named by size. the sizes at which the
@@ -220,7 +309,10 @@ func stoneRows() map[string]stone {
 		"boulder": boulder}
 }
 
-// made is a stone of this row from a seed.
+// made is a stone of this row from a seed, leaned about its longest axis
+// where its row lets it lean, so one long edge sinks into the ground and
+// the other lifts, and sunk by a share of its thickness where its row
+// sinks it.
 func (row stone) made(from seed) (good, error) {
 	long := row.long.metres(from.draw(picking, 0, 0))
 	middle := long.Times(row.middle.pick(from.draw(picking, 1, 0)))
@@ -231,7 +323,32 @@ func (row stone) made(from seed) (good, error) {
 	if err != nil {
 		return good{}, err
 	}
-	return shaped(shape, row.around, row.dressed)
+	if row.platy {
+		shape = shape.asPlate()
+	}
+	made, err := shaped(shape, row.around, row.dressing(from))
+	if err != nil || row.lean.most == 0 && row.sunk.most == 0 {
+		return made, err
+	}
+	lean := row.lean.degrees(from.draw(picking, leaning, 0))
+	depth := inScene(short) * row.sunk.pick(from.draw(picking, sinking, 0))
+	return made.placed(maths.Subspace{Origin: maths.V(0, -depth, 0),
+		Orientation: maths.About(maths.XAxis, lean.InRadians())})
+}
+
+// dressing is a stone's looks: its row's, or where its row dusts it, its
+// row's rock with dust lying on it in patches, as much as the seed draws,
+// the patches the seed's own.
+func (row stone) dressing(from seed) looks {
+	if row.dust.most == 0 {
+		return row.dressed
+	}
+	rock := *row.dressed[body]
+	rock.Texture = texture.Dusted{Rock: rock.Colour,
+		Dust:  rock.Colour.Scale(dustShare),
+		Share: row.dust.pick(from.draw(picking, dusting, 0)),
+		Patch: dustPatch, Seed: from.number}
+	return looks{body: &rock}
 }
 
 // shaped is a thing of one form, cut so many round, in its looks.

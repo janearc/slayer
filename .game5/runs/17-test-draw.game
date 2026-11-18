@@ -1,0 +1,1 @@
+test-draw . :: go run ./tools/tiers draw

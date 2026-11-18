@@ -1,0 +1,86 @@
+# the music timeline: how a sequence of shots is cut to a song. An
+# example only, 2026-11-09: no song has been read and no edit has been
+# made; the song and timeline it names do not exist yet.
+#
+# Written against set/ecosystem-v2.schema.json, ahead of the reader. Two
+# things work together.
+#
+# The timeline is written by a tool, not by hand. The beat tool reads
+# the decoded song and writes when each beat, bar, big hit and section
+# falls. Those are measured from the audio, so they are a tool's output,
+# never typed into a scene.
+#
+# The edit is written by hand. It names shots, the scene and camera each
+# comes from, and where it starts and ends, counted in the song's own bars
+# and sections, never in seconds. Change the song's tempo map and every
+# cut moves with it.
+#
+# Below, the edit, then a timeline in the shape the tool writes, so the
+# two read side by side. The timeline's numbers are empty: the song has
+# not been read yet.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+
+edit:
+  name: an example edit
+  # the song itself, kept outside any repository; the timeline is the
+  # beat tool's reading of it, written beside it. neither exists yet
+  music: song
+  timeline: timeline.yaml
+  film:
+    width: 3840
+    height: 2160
+    fps: 24
+  shots:
+    # the path: old renders as footage, oldest first, a cut every bar
+    - footage: ~/reels/tour-motion-preview-terminal.mp4
+      from: {section: intro, bar: 1}
+      to: {section: intro, bar: 3}
+    - footage: ~/reels/tumble-3s.mp4
+      from: {section: intro, bar: 3}
+      to: {section: intro, bar: 4}
+      # a big hit inside the span flashes to white for one frame
+      on-hit: flash
+    # a slayer scene as a shot, rendered for exactly this span
+    - scene: sets/widow-smoke.yaml
+      camera: eye
+      from: {section: verse, bar: 1}
+      to: {section: verse, bar: 5}
+    # the breaks: each word of the title is a section of its own. the
+    # dusk and cloud-sea scenes are kept beside their renders, outside
+    # the repository
+    - scene: renders/2026-11-09-horizon-moon-dusk-720/scene.yaml
+      camera: horizon and Moon behind the observatory
+      from: {section: blood, bar: 1}
+      to: {section: blood, end: true}
+    - scene: renders/2026-11-08-hero-720-cloud-sea/scene.yaml
+      # its first camera; named when the edit is made
+      camera: first
+      from: {section: milk, bar: 1}
+      to: {section: milk, end: true}
+    - scene: doc/keyhole-to-ground.yaml
+      camera: climb
+      from: {section: sky, bar: 1}
+      to: {section: sky, bar: 9}
+      # a camera's moves stretch or shrink to the span they are given
+      fit: stretch
+    - scene: doc/corona.yaml
+      camera: limb
+      from: {section: sky, bar: 9}
+      to: {section: sky, end: true}
+      fit: stretch
+    - scene: doc/webb-looking-out.yaml
+      camera: behind
+      from: {section: outro, bar: 1}
+      to: {section: outro, bar: 5}
+      fit: stretch
+    - scene: doc/orbital-and-lantern.yaml
+      camera: far
+      from: {section: outro, bar: 5}
+      to: {song: end}
+
+timeline:
+  tempo: []
+  beats: []
+  bars: []
+  hits: []
+  sections: []

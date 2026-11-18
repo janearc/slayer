@@ -1,0 +1,1 @@
+observatory . :: ./bin/hillside -set doc/observatory-ecosystem.yaml -out out/observatory.png

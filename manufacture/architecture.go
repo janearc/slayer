@@ -1,6 +1,6 @@
 package manufacture
 
-// a tree is an architecture, a foliage and its numbers (doc/families.md). the
+// a tree is an architecture, a foliage and its numbers. the
 // architecture is how it branches, a growth rule written once; the foliage is
 // what its last shoots bear; the numbers are its row's. a species of a known
 // architecture and foliage is a row and no code.
@@ -19,7 +19,7 @@ package manufacture
 // recursive foliage described in doc/conifer-foliage.md.
 type quality struct{ rung rung }
 
-// rung is one of the qualities doc/families.md names.
+// rung is one of the qualities a tree is made at.
 type rung int
 
 // quick is the legacy sleeve scaffold, face for face.

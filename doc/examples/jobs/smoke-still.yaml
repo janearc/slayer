@@ -1,0 +1,7 @@
+# a still of a smoke: the first numbered smoke, small and quick, drawn on
+# the cpu so it needs no gpu.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {smoke: 1}
+film: {preset: "320", rays: 1}
+renderer: cpu
+outputs: {picture: ../../../renders/smoke-1.png}

@@ -49,16 +49,12 @@ const (
 	teamVariable    = "SLAYER_TEAM"    // the team whose notes file it is
 	notesName       = "latest-notes.txt"
 	stillsFolder    = "frames"
-	// cacheFolder is under the renders home, where the renders page
-	// makes no cards; working frames go in it by team.
-	cacheFolder = "cache"
-	// workFolder is under the system's temporary folder, where working
-	// frames go when there is no renders home or no team.
-	workFolder   = "slayer-frames"
-	tempVariable = "TMPDIR"
-	filmsFolder  = "animations"
-	outFolder    = "out"
-	dateLayout   = "2006-01-02"
+	// workFolder is under the cache home, where the renders page makes
+	// no cards; working frames go in it by team.
+	workFolder  = "frames"
+	filmsFolder = "animations"
+	outFolder   = "out"
+	dateLayout  = "2006-01-02"
 	// datePattern is a glob that matches a date written in dateLayout.
 	datePattern = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
 )

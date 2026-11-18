@@ -1,0 +1,31 @@
+{
+  "agent": "preview-owner",
+  "args": [
+    "draw",
+    "/capture/path-7",
+    "--renderer",
+    "cpu",
+    "--width",
+    "640",
+    "--height",
+    "400",
+    "--rays",
+    "1",
+    "--quality",
+    "preview",
+    "--out",
+    "/capture/path-6"
+  ],
+  "command": "/capture/path-4",
+  "directory": "/capture/path-5",
+  "environment": {
+    "SLAYER_CACHE": "/capture/path-2"
+  },
+  "inputs": [
+    "/capture/path-7",
+    "/capture/path-3"
+  ],
+  "key": "ferruccio-ccfe456f-packaged-preview-v1",
+  "lane": "tests",
+  "timeout_seconds": 300
+}

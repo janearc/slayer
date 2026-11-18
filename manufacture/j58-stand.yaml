@@ -1,0 +1,70 @@
+# An engine test stand for the J58, as its own kind, in metres: a
+# cradle that holds the engine by its four mount pins, standing on thin
+# flexures over a concrete pad so that it moves fore and aft, its thrust
+# taken by a load cell to a post fixed to the pad, and a bellmouth on
+# the engine's face. No source for a stand was found, so every number
+# here is picked, for the reason beside it. The engine, its pins and
+# its axis are the j58's, in j58.yaml.
+pad: {long: 7.5, wide: 3.6, thick: 0.3} # picked: room round the engine and its bellmouth
+axis: 1.5   # picked: the engine's axis above the pad, its underside clear of the cradle and room to work under it
+# picked: the cradle's two rails, their section, how far out past the
+# pins they stand, and how far past the posts they run
+rail: {wide: 0.2, tall: 0.25, out: 0.3, margin: 0.4}
+# picked: the thin plates each rail stands on, which bend so the cradle
+# can move fore and aft against the load cell
+flexures: {tall: 0.15, thick: 0.03, count: 3}
+post: 0.18  # picked: a post's section
+pin: 0.04   # picked: a pin's radius, from its post into its lug
+reach: 0.05 # picked: how far each pin goes into its lug
+# picked: the load cell's radius and length, and the thrust post's section
+cell: {radius: 0.08, long: 0.3, post: 0.35}
+# picked: the bellmouth's lip radius, its length ahead of the face, its
+# wall, the corners along its curve, its two legs' radius, and how far
+# round from under the engine each leg stands, in degrees
+bell: {lip: 0.9, long: 0.6, wall: 0.012, steps: 8, leg: 0.04, splay: 35}
+# What each part is made of, and the look slayer draws. Slayer knows
+# steel's makeup and not its optics, so steel is painted; it has no
+# concrete, so the pad is a plain picked colour. Every colour is picked.
+looks:
+  pad:
+    material: none
+    colour: [0.52, 0.51, 0.49]
+    alloy: "concrete; slayer has no concrete, so a picked colour"
+  cradle:
+    material: steel
+    finish: painted
+    colour: [0.32, 0.36, 0.34]
+    alloy: "steel, picked; painted, as slayer has no steel optics"
+  flexure:
+    material: steel
+    finish: painted
+    colour: [0.25, 0.27, 0.27]
+    alloy: "steel, picked; painted, as slayer has no steel optics"
+  mount pin:
+    material: steel
+    finish: painted
+    colour: [0.2, 0.2, 0.21]
+    alloy: "steel, picked; painted, as slayer has no steel optics"
+  load cell:
+    material: steel
+    finish: painted
+    colour: [0.7, 0.6, 0.15]
+    alloy: "steel, picked; painted yellow, picked, so it is seen"
+  thrust post:
+    material: steel
+    finish: painted
+    colour: [0.32, 0.36, 0.34]
+    alloy: "steel, picked; painted, as slayer has no steel optics"
+  bellmouth:
+    material: aluminium
+    finish: brushed
+    alloy: "aluminium, picked; not found"
+read: >-
+  No source for a J58 test stand was found; see the plan,
+  PLAN-j58.md, section 6. The nearest cited arrangement is NASA's
+  full-scale YF-12 inlet on a boilerplate nacelle in the wind tunnel
+  (NTRS 19780024119, on the shelf as nasa-yf12-inlet-tunnel-1978),
+  which is a different rig. The parts are those a stand for a turbojet
+  is usually said to have: a cradle on a thrust frame with a load cell,
+  a bellmouth on the face, and a pad. Their every size and colour is
+  picked.

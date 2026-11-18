@@ -20,7 +20,7 @@ func TestDrawWeatherMovieIsTheMapItShows(t *testing.T) {
 	path := written(t, directory, "sky.yaml", weatherFilm(t, "",
 		"outputs: {movie: sky.mp4}\n"))
 	said := drew(t, envIn(t, context.Background(), directory,
-		tempVariable, t.TempDir()), path)
+		teamVariable, "team"), path)
 	facts, err := movie.Probe(filepath.Join(directory, "sky.mp4"))
 	if err != nil {
 		t.Fatal(err)
@@ -51,7 +51,7 @@ func TestDrawWeatherKeepsItsMapsWhenAsked(t *testing.T) {
 	path := written(t, directory, "sky.yaml", weatherFilm(t, "",
 		"outputs: {movie: sky.mp4}\n"))
 	said := drew(t, envIn(t, context.Background(), directory,
-		tempVariable, t.TempDir()), "--keep-frames", path)
+		teamVariable, "team"), "--keep-frames", path)
 	if !strings.Contains(said, "kept the working maps in") {
 		t.Errorf("the kept maps were not said: %q", said)
 	}

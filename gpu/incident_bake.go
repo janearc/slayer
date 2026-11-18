@@ -8,14 +8,10 @@ import (
 	"github.com/janearc/slayer/metal"
 )
 
-// bakeIncident evaluates the same direct sky integral at every grid node.
-// It always uses current geometry, density, light and clock. The pass reads no
-// interpolated source values, so it cannot recursively gather its own cache.
-func (encoded *scene) bakeIncident(kernel *metal.Kernel, inputs [][]byte) (time.Duration, error) {
-	return encoded.bakeIncidentOn(kernel, copied(kernel, inputs))
-}
-
-// bakeIncidentOn is bakeIncident with its grid run by run, which a
+// bakeIncidentOn evaluates the same direct sky integral at every grid node,
+// run by run. It always uses current geometry, density, light and clock. The
+// pass reads no interpolated source values, so it cannot recursively gather
+// its own cache. Its runs are the ones a
 // retained drawer gives over the inputs it holds.
 func (encoded *scene) bakeIncidentOn(kernel *metal.Kernel,
 	run grids) (time.Duration, error) {

@@ -10,9 +10,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/janearc/slayer/interfaces/file"
 	"github.com/janearc/slayer/job"
@@ -369,6 +371,57 @@ func TestSessionFilmOfASetIsTheSequencesFrames(t *testing.T) {
 		t.Fatal(err)
 	}
 	sameAsSequenced(t, path, sequenced(t, path))
+}
+
+// a world-only film draws authored motion at each absolute frame time,
+// while keeping the set's own print and camera.
+func TestSessionFilmOfAWorldOnlySetDrawsKeyedMotionAtEachTime(t *testing.T) {
+	raw, err := os.ReadFile(sessionWidow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(raw)
+	start := strings.Index(text, "    motions:\n")
+	end := strings.Index(text, "    wisps:\n")
+	if start < 0 || end < start {
+		t.Fatal("widow has no authored orbit block")
+	}
+	text = text[:start] + "    motions:\n      orbit:\n" +
+		"        seconds: 1\n        ease: linear\n        hold: true\n" +
+		"        frames:\n          - {percent: 0, at: [-45, 0, 0]}\n" +
+		"          - {percent: 100, at: [45, 0, 0]}\n" + text[end:]
+	text = strings.Replace(text,
+		"print: {knee: 0.7, top: 8, source: eye}",
+		"print: {knee: 0.5, top: 4, source: eye}", 1)
+	scene := filepath.Join(t.TempDir(), "widow.yaml")
+	if err := os.WriteFile(scene, []byte(text), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	wanted := jobFrom(t, fmt.Sprintf("scene: {set: %s}\nfilm: {width: %d, "+
+		"height: %d, rays: 1}\nfps: 1\nduration: {value: 2, unit: s}\n",
+		scene, sessionSmallWidth, sessionSmallHeight))
+	session := opening(t, wanted)
+	if len(session.Times()) != 2 || session.Times()[0] != 0 ||
+		session.Times()[1] != time.Second {
+		t.Fatalf("the world-only film times are %v", session.Times())
+	}
+	first, err := session.Frame(context.Background(), 0, Ask{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := session.Frame(context.Background(), 1, Ask{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.At() != 0 || second.At() != time.Second {
+		t.Fatalf("frames are at %v and %v", first.At(), second.At())
+	}
+	if slices.Equal(first.Light().Pix, second.Light().Pix) {
+		t.Fatal("the keyed world thing did not move between film times")
+	}
+	if tone := session.Tone(); tone.Knee != 0.5 || tone.Top != 4 {
+		t.Fatalf("the world-only film has tone %+v, want its authored print", tone)
+	}
 }
 
 // a smoke with bands is refused by name in a job, and still drawn as

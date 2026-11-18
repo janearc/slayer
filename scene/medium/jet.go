@@ -33,7 +33,7 @@ type Jet struct {
 
 // Bounds is the box both cones fit in.
 func (j Jet) Bounds() maths.Box {
-	r := j.Base/2 + j.Length*j.Spread
+	r := 2.5 * (j.Base/2 + j.Length*j.Spread)
 	return maths.Box{Min: maths.V(-r, -j.Length, -r),
 		Max: maths.V(r, j.Length, r)}
 }
@@ -45,7 +45,7 @@ func (j Jet) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
 	if !ok {
 		return 0, 0, false
 	}
-	wide := j.Base/2 + j.Length*j.Spread
+	wide := 2.5 * (j.Base/2 + j.Length*j.Spread)
 	enter, leave, ok = cylinder(wide, r, enter, leave)
 	if !ok {
 		return 0, 0, false

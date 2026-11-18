@@ -1,0 +1,5 @@
+# the one folder slayer keeps what it can work out again: baked ground
+# and skies, kept stills, pin checks, weather, smoke verdicts, GPU trees
+# and working frames. each builder's own, given in their game config
+# with set. there is no default and no fallback; slayer refuses without.
+SLAYER_CACHE the one absolute folder of what slayer works out again

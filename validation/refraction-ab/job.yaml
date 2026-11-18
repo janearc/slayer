@@ -1,0 +1,5 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: scene.yaml}
+renderer: cpu
+film: {width: 240, height: 135, rays: 1}
+at: {value: 0, unit: s}

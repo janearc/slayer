@@ -66,15 +66,16 @@ func (r *ramp) glide(to, start, seconds float64) {
 }
 
 // bursts is how long ago each burst still showing began, newest first:
-// a burst on the beat from, on the grid, and every bar after, up to the
-// moment at position. None before from, or without one.
-func bursts(seconds, position, from float64, beats []float64) []float64 {
+// a burst on the beat from, on the grid, and every bar of meter beats
+// after, up to the moment at position. None before from, or without one.
+func bursts(seconds, position, from, meter float64,
+	beats []float64) []float64 {
 	if from < 0 || position < from {
 		return nil
 	}
 	var since []float64
-	for n := math.Floor((position - from) / beatsPerBar); n >= 0; n-- {
-		ago := seconds - beatTime(from+beatsPerBar*n, beats)
+	for n := math.Floor((position - from) / meter); n >= 0; n-- {
+		ago := seconds - beatTime(from+meter*n, beats)
 		if ago >= burstSpan {
 			break
 		}
@@ -120,16 +121,18 @@ func gated(pulse string, decay, position float64) (float64, int) {
 }
 
 // inTurn is which of a list holds at a place on the grid, taken in turn
-// so many bars apiece from a place, and how far through its bars it is;
-// the first before the grid or the place, and nothing of an empty list.
-func inTurn(list []string, bars, from, position float64) (string, float64) {
+// so many bars of meter beats apiece from a place, and how far through
+// its bars it is; the first before the grid or the place, and nothing of
+// an empty list.
+func inTurn(list []string, bars, meter, from,
+	position float64) (string, float64) {
 	if len(list) == 0 {
 		return "", 0
 	}
 	if bars <= 0 || position < 0 || position < from {
 		return list[0], 0
 	}
-	turns := (position - from) / beatsPerBar / bars
+	turns := (position - from) / meter / bars
 	k := int(math.Floor(turns))
 	return list[k%len(list)], turns - float64(k)
 }
@@ -140,10 +143,14 @@ type floodHit struct {
 	count int
 }
 
-// floodSteps is how many flood hits fall in a beat, by mode.
-var floodSteps = map[string]float64{
-	floodsGrid16: stepsPerBeat, floodsGrid8: eighthsPerBeat,
-	floodsOnes: onesPerBeat,
+// floodSteps is how many flood hits fall in a beat, by mode, in a bar
+// of meter beats: the ones fall once a bar.
+func floodSteps(mode string, meter float64) (float64, bool) {
+	perBeat, ok := map[string]float64{
+		floodsGrid16: stepsPerBeat, floodsGrid8: eighthsPerBeat,
+		floodsOnes: 1 / meter,
+	}[mode]
+	return perBeat, ok
 }
 
 // gridHits is the floods' last hits on the grid at a moment.
@@ -177,11 +184,12 @@ func leadHits(seconds float64, lead []Note, hot int) []floodHit {
 }
 
 // flooded is the two floods' levels at a moment: each hit fires one
-// side, the sides in turn, and a hit falls by floodFlash.
-func flooded(mode string, seconds, position float64, beats []float64,
-	lead []Note, hot int) (left, right float64) {
+// side, the sides in turn, and a hit falls by floodFlash. A bar is
+// meter beats.
+func flooded(mode string, seconds, position, meter float64,
+	beats []float64, lead []Note, hot int) (left, right float64) {
 	var hits []floodHit
-	if perBeat, ok := floodSteps[mode]; ok {
+	if perBeat, ok := floodSteps(mode, meter); ok {
 		hits = gridHits(perBeat, seconds, position, beats)
 	} else if mode == floodsLead {
 		hits = leadHits(seconds, lead, hot)

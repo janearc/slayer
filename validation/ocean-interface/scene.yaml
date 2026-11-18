@@ -1,0 +1,48 @@
+# A synthetic staged wave-interface test. No site-specific measurements,
+# underwater absorption, scattering, shoreline, or full water lighting.
+scene:
+  name: synthetic-ocean-interface
+  film:
+    wide: 48
+    print: {knee: 0.7, top: 8, source: eye}
+  cameras:
+    front:
+      location: {at: [0, -18, 10]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    sky:
+      horizon: {srgb_linear: [0.30, 0.43, 0.50]}
+      zenith: {srgb_linear: [0.08, 0.17, 0.26]}
+      ground: {srgb_linear: [0.04, 0.08, 0.10]}
+      source: "synthetic validation palette"
+    materials:
+      interface:
+        clear: {through: 1, index: 1.333, gloss: 1, rank: 0}
+        source: "synthetic optical validation; not measured water"
+      marker:
+        colour: {srgb_linear: [0.72, 0.22, 0.07]}
+        source: "synthetic validation palette"
+    ocean:
+      material: interface
+      middle: [0, 0, 0]
+      extent: {value: 64, unit: m}
+      samples: 129
+      sea:
+        wind: {value: 8, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 200, unit: m}
+        toward: {value: 0.2, unit: rad}
+      seed: 41
+      time: {value: 18, unit: s}
+      source: "synthetic wave validation inputs"
+    spheres:
+      marker:
+        material: marker
+        middle: [0, 0, 0]
+        radius: 3
+        source: "synthetic test geometry"
+    floods:
+      validation-light:
+        colour: {srgb_linear: [1, 0.95, 0.9]}
+        strength: 1
+        source: "synthetic validation illumination"

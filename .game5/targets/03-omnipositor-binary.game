@@ -1,0 +1,1 @@
+omnipositor-binary . :: go build -o bin/omnipositor ./improv/moonlake/omnipositor/cmd/omnipositor

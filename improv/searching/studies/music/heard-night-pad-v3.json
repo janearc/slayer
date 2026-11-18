@@ -1,0 +1,214 @@
+{
+  "name": "heard-night-pad-v3",
+  "machine": "studio",
+  "master": 0.4,
+  "reverb": {
+    "size": 0.85,
+    "decay": 5,
+    "damping": 0.6,
+    "level": 0.45
+  },
+  "delay": {
+    "beats": "3/4",
+    "feedback": 0.45,
+    "tone": 0.45,
+    "level": 0.6
+  },
+  "channels": [
+    {
+      "kind": "fm",
+      "role": "lead",
+      "volume": 0.7,
+      "place": 0.1,
+      "send": {
+        "reverb": 0.35,
+        "delay": 0.5
+      },
+      "vibrato": {
+        "rate": 4.5,
+        "depth": 6,
+        "delay": 0.25
+      },
+      "fm": {
+        "arrangement": "chain",
+        "operators": [
+          {
+            "ratio": 1,
+            "level": 0.8,
+            "envelope": {
+              "attack": 0.02,
+              "decay": 1.5,
+              "sustain": 0.5,
+              "release": 0.9
+            }
+          },
+          {
+            "ratio": 1,
+            "level": 0.1,
+            "envelope": {
+              "attack": 0.01,
+              "decay": 0.8,
+              "sustain": 0.3,
+              "release": 0.6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "kind": "analog",
+      "role": "pad",
+      "volume": 0.4,
+      "place": -0.5,
+      "send": {
+        "reverb": 0.6
+      },
+      "envelope": {
+        "attack": 0.25,
+        "decay": 1.5,
+        "sustain": 0.8,
+        "release": 2.2
+      },
+      "analog": {
+        "oscillators": [
+          {
+            "shape": "saw",
+            "detune": -9
+          },
+          {
+            "shape": "saw",
+            "detune": 9
+          }
+        ],
+        "filter": {
+          "cutoff": 700,
+          "resonance": 0.2,
+          "follow": 0.4,
+          "amount": 1.2,
+          "envelope": {
+            "attack": 0.6,
+            "decay": 2,
+            "sustain": 0.4,
+            "release": 2
+          }
+        }
+      }
+    },
+    {
+      "kind": "analog",
+      "echo": "pad",
+      "delay": "1/8",
+      "gain": 0.8,
+      "volume": 0.4,
+      "place": 0.5,
+      "send": {
+        "reverb": 0.6
+      },
+      "envelope": {
+        "attack": 0.3,
+        "decay": 1.5,
+        "sustain": 0.8,
+        "release": 2.2
+      },
+      "analog": {
+        "oscillators": [
+          {
+            "shape": "saw",
+            "detune": -14
+          },
+          {
+            "shape": "square",
+            "width": 0.3,
+            "detune": 12
+          }
+        ],
+        "filter": {
+          "cutoff": 600,
+          "resonance": 0.2,
+          "follow": 0.4
+        }
+      }
+    },
+    {
+      "kind": "analog",
+      "role": "bass",
+      "volume": 0.8,
+      "envelope": {
+        "attack": 0.02,
+        "decay": 2,
+        "sustain": 0.7,
+        "release": 0.4
+      },
+      "analog": {
+        "oscillators": [
+          {
+            "shape": "triangle"
+          },
+          {
+            "shape": "square",
+            "octave": 1,
+            "level": 0.2
+          }
+        ],
+        "filter": {
+          "cutoff": 300,
+          "resonance": 0,
+          "follow": 0.6
+        }
+      }
+    },
+    {
+      "kind": "drum",
+      "role": "perc",
+      "volume": 0.6,
+      "send": {
+        "reverb": 0.4,
+        "delay": 0.15
+      },
+      "drums": {
+        "k": {
+          "tone": 48,
+          "sweep": 24,
+          "fall": 0.06,
+          "decay": 0.35,
+          "click": 0.1
+        },
+        "s": {
+          "tone": 170,
+          "decay": 0.1,
+          "noise": 0.3,
+          "noise_decay": 0.16,
+          "colour": 1200,
+          "volume": 0.5
+        },
+        "h": {
+          "noise": 0.25,
+          "noise_decay": 0.04,
+          "colour": 6000
+        },
+        "t": {
+          "tone": 100,
+          "sweep": 7,
+          "fall": 0.08,
+          "decay": 0.3
+        },
+        "o": {
+          "tone": 270,
+          "struck": "plate",
+          "hardness": 0.65,
+          "decay": 2.8,
+          "noise": 0.48,
+          "noise_decay": 2.4,
+          "colour": 3500,
+          "volume": 0.65
+        },
+        "b": {
+          "tone": 660,
+          "struck": "bar",
+          "hardness": 0.5,
+          "decay": 0.5
+        }
+      }
+    }
+  ]
+}

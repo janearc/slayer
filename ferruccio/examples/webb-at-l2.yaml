@@ -1,0 +1,71 @@
+# webb at l2: the James Webb Space Telescope at the edge of where it may
+# point, with the MCRN Larson hovering in its shade. smoke 50
+# (scene/smoke/webb.go) built by hand, said as a set. 2026-11-12.
+#
+# every number is smoke 50's, and each line says which of its constants
+# it is. places are the set's metres, as a map's run: x east, y north,
+# z up. smoke 50's frame is the world's (x east, y up, z south), so its
+# (x, y, z) is east x, north minus z, up y here.
+#
+# what this set cannot say, and so does not say:
+# - the stars. smoke 50 hangs the Bright Star Catalogue behind Webb when
+#   SLAYER_STARS names it, turned to Webb's frame at 2027-05-22 20:53
+#   UTC. scene.sky (gaia) and scene.frame are read and not drawn yet; the
+#   sky here is black, as smoke 50's is with SLAYER_STARS unset.
+# - the Larson's attitude. smoke 50 tips it about 55 degrees so its belly
+#   lamp is on the mirror (bellyToward). a thing here turns only by a
+#   heading, about the vertical, and thing.attitude is not drawn yet; the
+#   Larson hovers level, its belly lamp straight down.
+# - the made seed. smoke 50 makes both craft from seed 5 itself; a stage
+#   makes a thing from its seed stirred with the scene's.
+#
+# not right, as in smoke 50: the Larson is 12 m across and Webb's kite
+# shades a circle 11.78 m across at most, so its rim is in the sun and
+# burns white.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: webb at l2, lit by the larson
+  # picked: the scene's seed, stirred with each thing's own
+  seed: 50
+  setting: space
+  light: sun
+  # smoke 50's sun: 135 degrees from the mirror's line of sight
+  # (sunFromSight), on the shield's side, its way (0, -sin 135, -cos 135)
+  # in smoke 50's frame. that is due south and 45 degrees below level.
+  sun: {azimuth: 180, altitude: -45}
+  set:
+    things:
+      webb:
+        kind: webb
+        # madeSeed and madeDetail
+        seed: 5
+        complexity: quick
+        # smoke 50 stands Webb at its frame's origin (maths.Local)
+        east: 0
+        north: 0
+      larson:
+        kind: mcrn-larson
+        seed: 5
+        complexity: quick
+        # larsonX, larsonY and larsonZ: (0, 12, -12)
+        east: 0
+        north: 12
+        height: {value: 12, unit: m}
+  film:
+    # picked here: smoke 50 is drawn at whatever size its check asks
+    width: 1280
+    height: 720
+    # smoke 50's Samples
+    rays: 3
+    # lampExposure: a watt a steradian as this picture's light
+    exposure: 15000
+    # webbWide, degrees. the film says no print: hillside develops with
+    # its own, knee 0.7 and top 8, which are webbKnee and webbTop
+    wide: 45
+  cameras:
+    beside:
+      title: "beside the shield's nose, under the Larson"
+      # webbEyeX, webbEyeY, webbEyeZ: (-10, 4, -30)
+      location: {at: [-10, 30, 4]}
+      # webbLookX, webbLookY, webbLookZ: (0, 8, -6)
+      orientation: {look_at: [0, 6, 8]}

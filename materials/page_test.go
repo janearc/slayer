@@ -99,13 +99,12 @@ func TestAPageWithOneThingWrongIsRefusedByIt(t *testing.T) {
 	}
 }
 
-// Every page in the three books is made under its own name, and there
-// are thirteen in all: five metals, the yard's six and the x-ray
-// smoke's two. The anti-tests: no name is in two books, and a name in
+// Every page is made under its own name: five metals, one semiconductor,
+// the yard's six and the x-ray smoke's two. The anti-tests: no name is in two books, and a name in
 // none is refused by name.
 func TestEveryPageIsMadeUnderItsOwnName(t *testing.T) {
 	seen := map[string]bool{}
-	for _, book := range []map[string]page{metals, yard, xrays} {
+	for _, book := range []map[string]page{metals, semiconductors, yard, xrays} {
 		for name := range book {
 			if seen[name] {
 				t.Errorf("%s is in two books", name)
@@ -117,8 +116,8 @@ func TestEveryPageIsMadeUnderItsOwnName(t *testing.T) {
 			}
 		}
 	}
-	if len(seen) != 13 {
-		t.Errorf("%d materials by name, want 13", len(seen))
+	if len(seen) != 14 {
+		t.Errorf("%d materials by name, want 14", len(seen))
 	}
 	if made, err := ByName("osmium"); err == nil || made.Name() != "" ||
 		!strings.Contains(err.Error(), `no material "osmium"`) {

@@ -1,0 +1,2 @@
+# the citation shelf: fetch it, check it, verify every number against it.
+sources . :: go run ./cmd/sources

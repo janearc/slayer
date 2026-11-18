@@ -1,0 +1,34 @@
+/*
+ * pluto -- a light colourway, pluto as new horizons first showed it on
+ * 13 july 2015, the day before closest approach (nasa/jhuapl/swri,
+ * pia19708). the ground is the heart; the ink is the whale, darkened to 10
+ * to 1; the selection is the north polar cap, claude's band the midlands,
+ * dim text the disc. pluto has no red, green or blue to speak of, so the
+ * sixteen are the screen's own wavelengths, darkened to stand on the heart.
+ * samples in cmd/spectra/data/pluto-2015.css. made by spectra,
+ * github.com/janearc/chroma/cmd/spectra, 2026-10-05.
+ */
+:root {
+  --ground: #e9c29d; /* oklch(84% 0.066 65.2) */
+  --ink: #2a1b10; /* oklch(24% 0.031 56.9) */
+  --cursor: #2a1b10; /* oklch(24% 0.031 56.9) */
+  --selection-ink: #2a1b10; /* oklch(24% 0.031 56.9) */
+  --cursor-ink: #e9c29d; /* oklch(84% 0.066 65.2) */
+  --surface-1: #d6ae88; /* oklch(78% 0.069 65.0) */
+  --black: #d5b69a; /* oklch(80% 0.052 64.0) */
+  --bright-black: #635040; /* oklch(45% 0.036 61.8) */
+  --red: #880e00; /* oklch(40% 0.156 31.0) */
+  --green: #074e00; /* oklch(37% 0.123 141.7) */
+  --yellow: #444500; /* oklch(38% 0.083 110.7) */
+  --blue: #004282; /* oklch(38% 0.123 254.2) */
+  --cyan: #004b49; /* oklch(37% 0.064 191.7) */
+  --magenta: #7a0079; /* oklch(41% 0.186 328.8) */
+  --bright-red: #5c0600; /* oklch(30% 0.118 30.9) */
+  --bright-green: #033300; /* oklch(28% 0.093 141.7) */
+  --bright-yellow: #2c2d00; /* oklch(29% 0.063 111.1) */
+  --bright-blue: #002b59; /* oklch(29% 0.094 254.4) */
+  --bright-cyan: #00312f; /* oklch(28% 0.049 190.5) */
+  --bright-magenta: #530052; /* oklch(31% 0.142 329.0) */
+  --white: #2f251d; /* oklch(27% 0.021 60.4) */
+  --bright-white: #0f0703; /* oklch(14% 0.020 none) */
+}

@@ -10,7 +10,9 @@ name: compact spacecraft
 seed: 5
 height: 40
 aperture: 1
-top: 4.8
+# At a 1 m aperture, scale the 330 cm active panel and approximately 160 cm
+# extension by the 85 cm reference aperture: (330 + 160) / 85 metres.
+top: 5.764705882352941
 tolerance: 1.0e-9
 placement: "recipe: compact spacecraft\n        height: {value: 40, unit: m}"
 invalid:

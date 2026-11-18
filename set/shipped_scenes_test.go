@@ -10,11 +10,12 @@ import (
 )
 
 func TestShippedEcosystemScenesPassSchemaAndDomainChecks(t *testing.T) {
-	for _, name := range []string{"observatory-ecosystem.yaml", "observatory-4k.yaml",
-		"fire-study.yaml", "fire-cluster.yaml", "fire-night.yaml", "fire-fuel.yaml",
-		"fire-woodland.yaml"} {
+	for _, name := range []string{"doc/observatory-ecosystem.yaml",
+		"set/testdata/observatory-4k.yaml",
+		"doc/fire-study.yaml", "doc/fire-cluster.yaml", "doc/fire-night.yaml",
+		"doc/fire-fuel.yaml", "doc/fire-woodland.yaml"} {
 		t.Run(name, func(t *testing.T) {
-			path := filepath.Join("../doc", name)
+			path := filepath.Join("..", name)
 			raw, err := os.ReadFile(path)
 			if err != nil {
 				t.Fatal(err)

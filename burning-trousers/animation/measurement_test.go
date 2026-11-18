@@ -80,7 +80,7 @@ func BenchmarkCommitted4K(b *testing.B) {
 	if buildRevision != strings.TrimSpace(string(revision)) || modified != "false" {
 		b.Fatalf("renderer is not this clean commit: %s modified=%s", buildRevision, modified)
 	}
-	authored, err := os.ReadFile(filepath.Join(root, "doc", "observatory-4k.yaml"))
+	authored, err := os.ReadFile(filepath.Join(root, "set", "testdata", "observatory-4k.yaml"))
 	if err != nil {
 		b.Fatal(err)
 	}

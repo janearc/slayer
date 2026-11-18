@@ -1,0 +1,50 @@
+/*
+ * pastel-invert -- pastel, inverted (the screen negative), its ground
+ * and the colours on it turned greener and darker by eye.
+ */
+:root {
+  --ground: #88bb82; /* oklch(74% 0.097 142.0) */
+  --ink: #353535; /* oklch(33% 0.000 none) */
+  --cursor: #005191; /* oklch(43% 0.125 250.9) */
+  --cursor-ink: #beb794; /* oklch(78% 0.048 98.0) */
+  --surface-1: #8fac71; /* oklch(71% 0.088 129.7) */
+  --selection-ink: #1c1c1c; /* oklch(23% 0.000 none) */
+  --black: #d7ce9a; /* oklch(85% 0.069 99.4) */
+  --red: #066c7c; /* oklch(49% 0.084 212.7) */
+  --green: #aa3cb3; /* oklch(56% 0.200 324.7) */
+  --yellow: #514cb2; /* oklch(48% 0.157 280.9) */
+  --blue: #9d4d00; /* oklch(51% 0.129 53.5) */
+  --cyan: #ab4547; /* oklch(53% 0.134 21.7) */
+  --magenta: #06720c; /* oklch(48% 0.158 143.0) */
+  --bright-red: #043e4a; /* oklch(34% 0.058 216.4) */
+  --bright-green: #9d1aa6; /* oklch(50% 0.219 325.1) */
+  --bright-yellow: #322fa6; /* oklch(40% 0.183 275.2) */
+  --bright-blue: #513405; /* oklch(35% 0.071 73.0) */
+  --bright-cyan: #9d212c; /* oklch(46% 0.159 22.0) */
+  --bright-magenta: #04430f; /* oklch(33% 0.101 145.0) */
+  --white: #0a3359; /* oklch(32% 0.081 250.9) */
+  --bright-white: #1c1c1c; /* oklch(23% 0.000 none) */
+  --bright-black: #836409; /* oklch(52% 0.104 86.6) */
+  --claude-text: #992b57; /* oklch(47% 0.150 0.4) */
+  --claude-removed: #a0aa67; /* oklch(71% 0.090 115.7) */
+  --claude-words: #593d54; /* oklch(40% 0.053 333.0) */
+  --claude-code: #413f3f; /* oklch(37% 0.003 17.3) */
+  --claude-mode: #004194; /* oklch(40% 0.149 258.4) */
+  --claude-rules: #5a607e; /* oklch(50% 0.049 275.7) */
+  --claude-spinner: #000379; /* oklch(26% 0.178 264.1) */
+  --claude-added: #c99e5c; /* oklch(73% 0.098 76.9) */
+  --claude-diff-code: #791157; /* oklch(39% 0.152 345.6) */
+  --md-heading-ground: #88c077; /* oklch(75% 0.117 138.6) */
+  --md-heading: #b24942; /* oklch(54% 0.139 26.5) */
+  --md-code-ground: #8ab873; /* oklch(73% 0.107 135.7) */
+  --md-body: #17517c; /* oklch(42% 0.092 245.4) */
+  --md-comment: #9f6900; /* oklch(56% 0.120 73.8) */
+  --md-quote: #6a4600; /* oklch(42% 0.089 75.5) */
+  --md-operator: #302da6; /* oklch(39% 0.186 274.7) */
+  --md-keyword: #fb4e00; /* oklch(66% 0.219 37.5) */
+  --md-type: #3a2886; /* oklch(36% 0.149 285.0) */
+  --md-string: #003fd6; /* oklch(46% 0.235 263.2) */
+  --md-number: #0000a0; /* oklch(32% 0.221 264.1) */
+  --md-name: #644d8b; /* oklch(47% 0.100 299.7) */
+  --string: #612479; /* oklch(39% 0.145 314.9) */
+}

@@ -65,6 +65,12 @@ func grown(points []maths.Vec, faces []face) tree {
 		made.order[i] = i
 	}
 	grow.cut(0, 0, len(faces), 0)
+	// Construction reserves the binary tree's worst case. Most meshes use
+	// far fewer nodes; do not retain that unused capacity for the whole film.
+	// Copying preserves every node, its order, and every intersection result.
+	if len(made.nodes) < cap(made.nodes) {
+		made.nodes = slices.Clone(made.nodes)
+	}
 	return made
 }
 

@@ -69,6 +69,22 @@ draws with opened by draw's own runner (`tools`, then for a film
 `prepare`: the frames folder's ledger and the sound) and let go. It
 says what draw would write, or `NAME will not draw: why`.
 
+`--census PATH` writes the job's census to PATH as JSON (`census.go`):
+the scene opened by the same runner, then hillside's `Session.Census`
+of the first frame (a still's at `--at`), counted by `thing.Count`, with
+nothing drawn.
+
+Each placed thing says its faces; a mesh group its instanced faces, its
+stored faces (each distinct mesh once) and its instances; analytic shapes
+(spheres, planes, height fields with their grid) and volumes are listed by
+kind and never given faces.
+
+The receipt is the job file's sha256 and key, its scene and camera as the
+job says them, the set file's sha256, the frame's time, the camera as staged
+and the build and commit. `counts` says `staged, not visible`: these are the
+faces in the scene, not the faces seen or hit from the camera. Frames already
+rendered have nothing to count and are refused.
+
 `--judge` draws a set as the terminal shows it and as a real picture
 and judges the one against the other (what `slayer set` did), writing
 both, the look and the verdict to `--out`, `out/` unsaid. `--smokes`
@@ -135,13 +151,14 @@ bookkeeping, and the real workshop where it is about pixels.
   that writes a movie and no frames draws them in a working folder, and
   removes them once the movie is written and closed well.
   `--keep-frames` keeps them there.
-- The working folder is `cache/TEAM/NAME-` and a digest, under the
-  renders home when `SLAYER_RENDERS` and `SLAYER_TEAM` are set, else
-  under `slayer-frames/` in `TMPDIR` or the system's temporary folder.
+- The working folder is `frames/TEAM/NAME-` and a digest, under the
+  cache home (`SLAYER_CACHE`), with `SLAYER_TEAM` the team; with no
+  team it is `frames/NAME-` and a digest. Where `SLAYER_CACHE` is not
+  set the draw is refused by name; there is no other place.
   The digest is twelve hex digits of the sha256 of the job file's path,
   so one job has one working folder on every day.
-- The renders page makes no card under `renders/cache`; it would under
-  `renders/TEAM/cache`, so the cache is not under the team's folder.
+- The working folder is not under the renders home, so the renders page
+  makes no card of it.
 - With `SLAYER_RENDERS` set, outputs said with no directory (a bare name,
   which `job` resolves into the job file's own directory) and outputs not
   said go under it instead: a still in `frames/DATE-NAME/`, a film in
@@ -329,10 +346,10 @@ The programs on PATH, slayer's own path and running tmux are behind
 ## schema
 
 `slayer schema` prints the job schema. `--where` prints the path of
-its copy under the user's cache directory (`slayer/job-v1.schema.json`,
-found as `os.UserCacheDir` finds it, through the door's environment),
-written first when absent or not this build's. `slayer.lua` is kept
-beside it for the editor.
+its copy in the cache home (`schema/job-v1.schema.json` under
+`SLAYER_CACHE`, read through the door's environment; refused by name
+where it is not set), written first when absent or not this build's.
+`slayer.lua` is kept beside it for the editor.
 
 ## Tests with no anti-test, and why
 

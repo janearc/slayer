@@ -22,20 +22,23 @@ import (
 	"path/filepath"
 	"runtime/debug"
 	"strings"
+
+	"github.com/janearc/slayer/diskcache"
 )
 
-// Root is where the cache lives: $XDG_CACHE_HOME/smokecheck where that is
-// set, and the user's cache directory otherwise, ~/Library/Caches/smokecheck
-// on a Mac.
-func Root() (string, error) {
-	if x := os.Getenv("XDG_CACHE_HOME"); x != "" {
-		return filepath.Join(x, "smokecheck"), nil
-	}
-	dir, err := os.UserCacheDir()
+// resultsFolder is the folder of the cache home the smokes' results
+// live in.
+const resultsFolder = "smoke" // defined: the cache's name for smoke results
+
+// Root is where the cache lives: the smoke folder under the cache home,
+// which diskcache.Home finds from the lookup given. Where SLAYER_CACHE
+// is not set it refuses by name, and nothing is kept elsewhere.
+func Root(lookup diskcache.Lookup) (string, error) {
+	home, err := diskcache.Home(lookup)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "smokecheck"), nil
+	return filepath.Join(home, resultsFolder), nil
 }
 
 // Key is everything a smoke's pictures and verdict depend on.

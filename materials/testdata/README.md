@@ -16,6 +16,12 @@ Scientific Data 11, 94 (2024), doi 10.1038/s41597-023-02898-2.
 
 The files, and the paper each row the package reads comes from:
 
+- main/GaAs/nk/Aspnes.yml, gallium arsenide measured by D. E. Aspnes,
+  S. M. Kelso, R. A. Logan and R. Bhat, Optical properties of AlxGa1-xAs,
+  J. Appl. Phys. 60, 754-767 (1986), DOI 10.1063/1.337426. This complete
+  file was fetched separately through GitHub at the same release tag on
+  2026-11-15; its Git blob is c410ad16c2aa130c94dfa8cafa3f50767a385d6e.
+
 - main/Au/nk/Johnson.yml, gold as P. B. Johnson and R. W. Christy
   measured it: Optical constants of the noble metals, Phys. Rev. B 6,
   4370-4379 (1972).

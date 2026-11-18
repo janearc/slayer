@@ -16,6 +16,10 @@ const nativeLine = "\n  renderer: gpu-native\n"
 // nativeSets are the sets whose files say renderer: gpu-native and that
 // hillside draws, with the folder each lies in.
 var nativeSets = []string{
+	"doc/city-clustered-10000.yaml",
+	"doc/city-clustered-green-10000.yaml",
+	"doc/city-clustered-night-10000.yaml",
+	"doc/city-grid-10000.yaml",
 	"doc/fire-cluster.yaml",
 	"doc/fire-fuel.yaml",
 	"doc/fire-night.yaml",
@@ -24,9 +28,10 @@ var nativeSets = []string{
 	"doc/golden-hour-site.yaml",
 	"doc/guide-star-deck.yaml",
 	"doc/guide-star-mist.yaml",
-	"doc/quality-summit-golden.yaml",
-	"doc/quality-summit-moon.yaml",
-	"doc/quality-summit-yard.yaml",
+	"doc/macrostructures.yaml",
+	"hillside/testdata/quality-summit-golden.yaml",
+	"hillside/testdata/quality-summit-moon.yaml",
+	"hillside/testdata/quality-summit-yard.yaml",
 	"doc/space-hubble.yaml",
 	"doc/space-spitzer.yaml",
 	"doc/space-webb.yaml",
@@ -40,21 +45,21 @@ var nativeSets = []string{
 // so they are not drawn again; the coverage test reads both files and
 // requires that they differ in no other line.
 var nativeTwins = map[string]string{
-	"doc/quality-summit-golden-4k.yaml":      "doc/quality-summit-golden.yaml",
-	"doc/quality-summit-golden-preview.yaml": "doc/quality-summit-golden.yaml",
-	"doc/quality-summit-moon-4k.yaml":        "doc/quality-summit-moon.yaml",
-	"doc/quality-summit-moon-preview.yaml":   "doc/quality-summit-moon.yaml",
-	"doc/quality-summit-yard-preview.yaml":   "doc/quality-summit-yard.yaml",
+	"hillside/testdata/quality-summit-golden-4k.yaml":      "hillside/testdata/quality-summit-golden.yaml",
+	"hillside/testdata/quality-summit-golden-preview.yaml": "hillside/testdata/quality-summit-golden.yaml",
+	"hillside/testdata/quality-summit-moon-4k.yaml":        "hillside/testdata/quality-summit-moon.yaml",
+	"hillside/testdata/quality-summit-moon-preview.yaml":   "hillside/testdata/quality-summit-moon.yaml",
+	"hillside/testdata/quality-summit-yard-preview.yaml":   "hillside/testdata/quality-summit-yard.yaml",
 }
 
 // nativeRefused are the sets that say renderer: gpu-native and that
 // hillside does not draw yet: it refuses them by name before staging,
 // whatever the renderer. Each is listed with the refusal hillside says.
 var nativeRefused = map[string]string{
-	"doc/corona.yaml":              "../doc/corona.yaml:23:9: thing.kind: star is read and not yet drawn",
-	"doc/keyhole-to-ground.yaml":   "../doc/keyhole-to-ground.yaml:28:3: scene.date: 2026-06-21 is read and not yet drawn",
-	"doc/orbital-and-lantern.yaml": "../doc/orbital-and-lantern.yaml:24:9: thing.kind: lantern is read and not yet drawn",
-	"doc/webb-looking-out.yaml":    "../doc/webb-looking-out.yaml:21:3: scene.frame is read and not yet drawn",
+	"doc/corona.yaml":                     "../doc/corona.yaml:23:9: thing.kind: star is read and not yet drawn",
+	"set/testdata/keyhole-to-ground.yaml": "../set/testdata/keyhole-to-ground.yaml:28:3: scene.date: 2026-06-21 is read and not yet drawn",
+	"doc/orbital-and-lantern.yaml":        "../doc/orbital-and-lantern.yaml:24:9: thing.kind: lantern is read and not yet drawn",
+	"set/testdata/webb-looking-out.yaml":  "../set/testdata/webb-looking-out.yaml:21:3: scene.frame is read and not yet drawn",
 }
 
 // TestEverySetSayingNativeIsDrawn requires that each file in sets and doc

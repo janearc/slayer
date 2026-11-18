@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"image"
 	"image/color"
 	"image/png"
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -99,5 +101,137 @@ func TestTheSlateDrawsOnlyItsCorner(t *testing.T) {
 	}
 	if !changed {
 		t.Error("nothing was drawn in the top left")
+	}
+}
+
+// writeGrey writes a grey png of the given size and returns its path.
+func writeGrey(t *testing.T, dir string, width, height int) string {
+	t.Helper()
+	path := filepath.Join(dir, "frame.png")
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := png.Encode(file, img); err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
+// TestReadCuesKeepsKeyValueLines checks that readCues keeps what follows
+// the first equals sign and skips lines without one.
+func TestReadCuesKeepsKeyValueLines(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "cue.env")
+	text := "bar=97.1\nfire_lit=0.04\nnoise without a sign\nnote=a=b\nempty=\n"
+	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err := readCues(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]string{"bar": "97.1", "fire_lit": "0.04", "note": "a=b", "empty": ""}
+	if len(got) != len(want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	for key, value := range want {
+		if have, ok := got[key]; !ok || have != value {
+			t.Errorf("%s = %q (%v), want %q", key, have, ok, value)
+		}
+	}
+}
+
+// TestReadCuesRefusesAMissingFile checks that a file that is not there is
+// an error.
+func TestReadCuesRefusesAMissingFile(t *testing.T) {
+	if _, err := readCues(filepath.Join(t.TempDir(), "none.env")); err == nil {
+		t.Error("a cue file that is not there was read")
+	}
+}
+
+// TestReadCuesRefusesALineTooLongToScan checks that a scanner failure is
+// returned, not swallowed.
+func TestReadCuesRefusesALineTooLongToScan(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "cue.env")
+	long := make([]byte, 200000)
+	for i := range long {
+		long[i] = 'x'
+	}
+	if err := os.WriteFile(path, append([]byte("bar="), long...), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readCues(path); err == nil {
+		t.Error("a line over the scanner's limit was read")
+	}
+}
+
+// TestStampRefusals checks each way stamp turns a frame away and that the
+// frame is left as it was.
+func TestStampRefusals(t *testing.T) {
+	dir := t.TempDir()
+	if err := stamp(filepath.Join(dir, "none.png"), []string{"x"}, 1); err == nil {
+		t.Error("a frame that is not there was stamped")
+	}
+
+	notPNG := filepath.Join(dir, "text.png")
+	if err := os.WriteFile(notPNG, []byte("not a picture"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := stamp(notPNG, []string{"x"}, 1); err == nil || !strings.Contains(err.Error(), notPNG) {
+		t.Errorf("text taken for a png, or unnamed: %v", err)
+	}
+
+	small := writeGrey(t, t.TempDir(), 64, 40)
+	before, _ := os.ReadFile(small)
+	if err := stamp(small, []string{"x"}, 1); err == nil || !strings.Contains(err.Error(), "rows") {
+		t.Errorf("a frame too short for the rows: %v", err)
+	}
+	after, _ := os.ReadFile(small)
+	if !bytes.Equal(before, after) {
+		t.Error("a refused frame was changed")
+	}
+}
+
+// TestStampRefusesAFolderItCannotWriteIn checks that a frame in a folder
+// the slate cannot create a file in is an error, with the frame as it was.
+func TestStampRefusesAFolderItCannotWriteIn(t *testing.T) {
+	dir := t.TempDir()
+	path := writeGrey(t, dir, 640, 360)
+	before, _ := os.ReadFile(path)
+	if err := os.Chmod(dir, 0o500); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chmod(dir, 0o700)
+	if f, err := os.CreateTemp(dir, ".probe-*"); err == nil {
+		f.Close()
+		t.Skip("known: the folder is writable despite its mode, as for a superuser")
+	}
+	if err := stamp(path, []string{"x"}, 1); err == nil {
+		t.Error("stamped in a folder that cannot be written")
+	}
+	after, _ := os.ReadFile(path)
+	if !bytes.Equal(before, after) {
+		t.Error("the frame changed")
+	}
+}
+
+// TestStampLeavesNoTemporaryFile checks that a good stamp renames over the
+// frame and leaves no other file in the folder.
+func TestStampLeavesNoTemporaryFile(t *testing.T) {
+	dir := t.TempDir()
+	path := writeGrey(t, dir, 640, 360)
+	if err := stamp(path, []string{"frame 1"}, 1); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Name() != "frame.png" {
+		t.Errorf("folder holds %v, want only frame.png", entries)
 	}
 }

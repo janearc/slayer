@@ -11,6 +11,68 @@
 # Verification holds bytes and quoted numeric text. Roles, powers and units
 # also need review and the independent model/metadata checks in the tests.
 numbers:
+  - name: spitzer-cells-per-panel
+    value: 392
+    says: solar cells on each of the two panels
+    kind: measured
+    source:
+      key: spitzer-solar-panel-assembly
+      where: first paragraph
+      text: "392"
+      excerpt: "392 solar cells"
+  - name: spitzer-cell-short-centimetres
+    value: 5.5
+    unit: cm
+    says: short dimension of each solar cell
+    kind: measured
+    source:
+      key: spitzer-solar-panel-assembly
+      where: first paragraph
+      text: "5.5"
+      excerpt: "5.5 cm"
+  - name: spitzer-cell-long-centimetres
+    value: 6.5
+    unit: cm
+    says: long dimension of each solar cell
+    kind: measured
+    source:
+      key: spitzer-solar-panel-assembly
+      where: first paragraph
+      text: "6.5"
+      excerpt: "6.5 cm"
+  - name: spitzer-active-panel-length-centimetres
+    value: 330
+    unit: cm
+    says: length of each active panel in the 2022 engineering paper
+    kind: measured
+    source:
+      key: spitzer-on-orbit-performance-2022
+      where: section 2.1, lower solar-panel section
+      page: 5
+      text: "330"
+      excerpt: "330"
+  - name: spitzer-active-panel-width-centimetres
+    value: 72
+    unit: cm
+    says: width of each active panel in the 2022 engineering paper
+    kind: measured
+    source:
+      key: spitzer-on-orbit-performance-2022
+      where: section 2.1, lower solar-panel section
+      page: 5
+      text: "72"
+      excerpt: "72 cm"
+  - name: spitzer-shield-extension-centimetres
+    value: 160
+    unit: cm
+    says: approximate upper aluminium extension in the 2022 paper
+    kind: measured
+    source:
+      key: spitzer-on-orbit-performance-2022
+      where: section 2.1, upper solar-panel section
+      page: 5
+      text: "160"
+      excerpt: "160 cm"
   - name: owl-primary-curvature-metres
     value: 250
     unit: m

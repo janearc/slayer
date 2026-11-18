@@ -91,3 +91,15 @@ func TestAnEvenTableIsItsDepthAtEveryWidth(t *testing.T) {
 		}
 	}
 }
+
+// the table starts where the profile does and its finest bins are the
+// profile's, in metres.
+func TestATableKeepsTheProfilesStartAndStep(t *testing.T) {
+	baked := striped(t).Baked()
+	if baked.Inner() != 500 || baked.Step() != 1000 {
+		t.Errorf("inner %g and step %g, want 500 and 1000", baked.Inner(), baked.Step())
+	}
+	if baked.Outer() != 8500 {
+		t.Errorf("outer %g, want 8500", baked.Outer())
+	}
+}

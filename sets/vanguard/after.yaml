@@ -1,0 +1,5 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: borrowed-light-opening.yaml}
+film: {width: 360, height: 320, rays: 1}
+at: {value: 2, unit: s}
+outputs: {picture: after.png, raw: after.pfm}

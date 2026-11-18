@@ -67,8 +67,9 @@ func TestAToneIsAppliedToTheSumOfTheLayers(t *testing.T) {
 		t.Errorf("two eighths at twice the exposure came out %v, want 188", got)
 	}
 	// grey 40 through a knee of 0.6 and the default top of 100: 0.6 +
-	// 0.4*ln(99.5)/ln(249.5), about 0.933, which is under white
-	rolled := 0.6 + 0.4*math.Log(99.5)/math.Log(249.5)
+	// a*ln(1 + 39.4/a), a the shoulder's scale, about 0.95, under white
+	scale := scaleOf(0.6, 100) // defined: the tone's knee and its top
+	rolled := 0.6 + scale*math.Log1p(39.4/scale)
 	bright := Tone{Knee: 0.6}.False([]Layer{{Frame: of(40, 40, 40)}}).RGBAAt(0, 0)
 	if want := Encode(rolled); bright.R != want || bright.R == 255 {
 		t.Errorf("forty times white through the knee is %v, want %d", bright, want)

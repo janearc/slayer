@@ -115,7 +115,7 @@ func (leaf page) plain(name string, formula Formula) (Material, error) {
 // with what they take from an x-ray beam. It refuses a name it does not
 // know, by name.
 func ByName(name string) (Material, error) {
-	for _, book := range []map[string]page{metals, yard, xrays} {
+	for _, book := range []map[string]page{metals, semiconductors, yard, xrays} {
 		if leaf, known := book[name]; known {
 			return leaf.made(name)
 		}

@@ -26,16 +26,13 @@ func near(got, want maths.Light) bool {
 		math.Abs(got.G-want.G) < within && math.Abs(got.B-want.B) < within
 }
 
-// Above the knee light rolls off by the logarithm.
+// The shoulder's ends, from a table. The top itself lands on white. A
+// knee outside zero through one is no knee. Light under the knee is as
+// it is, and light past the top is white.
 //
-// Knee plus room times the log of one plus the light above the knee over the
-// room. All that is over the log of one plus the top above the knee over the
-// room. Room is the distance from the knee to white. Each case is worked from
-// that for a grey light. Its parts are all its luminance.
-//
-// The other cases are a knee outside zero through one, which is no knee. Others
-// are light under the knee and light past the top. The last is a colour too
-// saturated to fit. It bleaches along its hue.
+// Where the shoulder rolls light off between the knee and the top it is
+// worked from its solved scale, in shoulder_solved_test.go. The table's
+// rows for that were the old shoulder's, which turned a corner.
 func TestTheShoulderRollsLightOff(t *testing.T) {
 	for _, row := range rows(t, shoulderFile) {
 		tone := colour.NewTone(none, amount(t, row, "knee"),

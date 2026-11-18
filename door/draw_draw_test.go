@@ -5,6 +5,8 @@ package door
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -49,6 +51,97 @@ func TestDrawStillIsTheSessionsPicture(t *testing.T) {
 	if !bytes.Equal(pictureOf(t, picture).Pix, want.Pix) {
 		t.Error("the still is not the session's developed frame")
 	}
+}
+
+func TestDrawJobReportsTheOceanSpectrumOnceAndOmitsItForNoOcean(t *testing.T) {
+	directory := t.TempDir()
+	setPath, shelf := oceanSetForDoor(t, directory)
+	film := jobLine + "scene: {set: " + setPath + "}\n" +
+		"film: {width: 1, height: 1, rays: 1}\nrenderer: cpu\n" +
+		"fps: 2\nduration: {value: 1, unit: s}\n" +
+		"outputs: {frames: ocean-frames}\n"
+	jobPath := written(t, directory, "ocean-film.yaml", film)
+	t.Setenv("SLAYER_SHELF", shelf)
+	env := envIn(t, context.Background(), directory, "SLAYER_SHELF", shelf)
+	said := drew(t, env, jobPath)
+	if got := strings.Count(said, "ocean spectrum model estimate"); got != 1 {
+		t.Fatalf("two-frame job reported spectrum %d times; output: %s", got, said)
+	}
+	if !strings.Contains(said, "not observation") ||
+		!strings.Contains(said, "finite sampled wave field may differ") ||
+		!strings.Contains(said, "peak period=") {
+		t.Fatalf("door report omitted its model limitations or period: %s", said)
+	}
+
+	plain := written(t, directory, "plain.yaml",
+		stillJob(t, "outputs: {picture: plain.png}\n"))
+	plainOutput := drew(t, env, plain)
+	if strings.Contains(plainOutput, "ocean spectrum model estimate") {
+		t.Fatalf("a no-ocean job changed output: %s", plainOutput)
+	}
+}
+
+func oceanSetForDoor(t *testing.T, directory string) (setPath, shelf string) {
+	t.Helper()
+	raw, err := os.ReadFile("../terrain/testdata/fixture-plain.tif")
+	if err != nil {
+		t.Fatal(err)
+	}
+	shelf = filepath.Join(directory, "shelf")
+	if err := os.MkdirAll(shelf, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(shelf, "fixture.tif"), raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(raw)
+	registry := fmt.Sprintf("sources:\n  - key: fixture\n    from: https://example.test/fixture.tif\n    licence: test fixture\n    sha256: %s\n    bytes: %d\n",
+		hex.EncodeToString(sum[:]), len(raw))
+	if err := os.WriteFile(filepath.Join(directory, "sources.yaml"),
+		[]byte(registry), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	setPath = filepath.Join(directory, "ocean-set.yaml")
+	setText := `scene:
+  name: report-spectrum
+  light: none
+  terrain:
+    from: fixture
+    file: fixture.tif
+    west: 1001
+    north: 8999
+    across: 8
+    down: 8
+    step: 2
+  film: {width: 1, height: 1, rays: 1}
+  cameras:
+    front:
+      location: {at: [0, 2, 0]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    unit: 1
+    ocean:
+      material: water
+      middle: [0, 0, 0]
+      extent: {value: 8, unit: m}
+      samples: 9
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 12000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: eye
+    materials:
+      water:
+        clear: {through: 1, index: 1.33, gloss: 1, rank: 0}
+        source: eye
+`
+	if err := os.WriteFile(setPath, []byte(setText), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return setPath, shelf
 }
 
 // a still with raw light writes it beside the picture,
@@ -307,5 +400,39 @@ func TestDrawFramesAlreadyRendered(t *testing.T) {
 	if got.code == nothing || !strings.Contains(got.wrongSaid,
 		"shorten the duration") {
 		t.Errorf("too few plates gave %q", got.wrongSaid)
+	}
+}
+
+func TestDrawJobReportsConfiguredOceanSunOnce(t *testing.T) {
+	directory := t.TempDir()
+	setPath, shelf := oceanSetForDoor(t, directory)
+	raw, err := os.ReadFile(setPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(raw)
+	text = strings.Replace(text, "  light: none\n", "  light: sun\n  sun: {azimuth: 180, altitude: 35}\n", 1)
+	text = strings.Replace(text, "      material: water\n", "      material: water\n      direct-sun: mean-plane\n", 1)
+	text = strings.Replace(text, "location: {at: [0, 2, 0]}", "location: {at: [0, 2, 3]}", 1)
+	text = strings.Replace(text, "clear: {through: 1, index: 1.33, gloss: 1, rank: 0}\n        source: eye", "clear: {through: 1, index: 1.33, gloss: 1, rank: 0, extinction-per-metre: [0.1, 0.1, 0.1]}\n        source: synthetic validation", 1)
+	if !strings.Contains(text, "direct-sun: mean-plane") || !strings.Contains(text, "extinction-per-metre") {
+		t.Fatal("sun receipt fixture did not acquire its optical inputs")
+	}
+	if err := os.WriteFile(setPath, []byte(text), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	film := jobLine + "scene: {set: " + setPath + "}\n" +
+		"film: {width: 1, height: 1, rays: 1}\nrenderer: cpu\n" +
+		"fps: 2\nduration: {value: 1, unit: s}\n" +
+		"outputs: {frames: ocean-sun-frames}\n"
+	jobPath := written(t, directory, "ocean-sun-film.yaml", film)
+	t.Setenv("SLAYER_SHELF", shelf)
+	env := envIn(t, context.Background(), directory, "SLAYER_SHELF", shelf)
+	said := drew(t, env, jobPath)
+	if got := strings.Count(said, "direct-sun=mean-plane"); got != 1 {
+		t.Fatalf("two-frame job reported direct sun %d times: %s", got, said)
+	}
+	if !strings.Contains(said, "configured CPU approximation") || !strings.Contains(said, "actual effect depends on the rays") {
+		t.Fatalf("direct-sun receipt overstates what the setting proves: %s", said)
 	}
 }

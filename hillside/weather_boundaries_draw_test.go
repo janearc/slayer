@@ -56,16 +56,16 @@ func TestWeatherConstructionPropagatesGridAndCacheFailures(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("HOME", "")
-	t.Setenv("SLAYER_WEATHER", "")
-	if _, _, err := weathered(body, made, nil); err == nil || !strings.Contains(err.Error(), "HOME") {
+	t.Setenv("SLAYER_CACHE", "")
+	_, _, err = weathered(body, made, nil)
+	if err == nil || !strings.Contains(err.Error(), "SLAYER_CACHE") {
 		t.Fatalf("cache home refusal: %v", err)
 	}
 	blocked := filepath.Join(t.TempDir(), "blocked")
 	if err := os.WriteFile(blocked, []byte("keep me"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("SLAYER_WEATHER", blocked)
+	t.Setenv("SLAYER_CACHE", blocked)
 	if _, _, err := weathered(body, made, nil); err == nil || !strings.Contains(err.Error(), blocked) {
 		t.Fatalf("cache writer refusal: %v", err)
 	}

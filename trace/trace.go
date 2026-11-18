@@ -9,8 +9,15 @@
 // reflects by the unpolarised Fresnel share, all of the light past the
 // critical angle. A partial reflection on a ray that has already bent is paid
 // and not followed, which dims a water ball seen against a bright surround by
-// about two in a hundred head on and a quarter at the rim. Every ray starts
-// in the air, so a camera placed inside water is drawn as if in air.
+// about two in a hundred head on and a quarter at the rim.
+//
+// Render and Sampled start rays in air. Their additive WithInitialMedia forms
+// accept an explicit ordered index/rank stack for a camera already inside clear
+// media; they do not infer media from geometry.
+//
+// The CPU-only named ClearMedium option applies Beer-Lambert extinction to each
+// camera/refracted segment. It does not add in-scattering or refract direct
+// lamp paths.
 //
 // Gravitational fields bend visible-light rays along geodesics. Volume
 // integration adds emission and scattering while attenuating the light behind

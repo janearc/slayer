@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Atelier · a room for worlds</title>
+<style>
+:root{color-scheme:dark;font-size:24px;background:#1a222c;color:#dcdedb}
+body{font:1rem/1.75 system-ui,sans-serif;max-width:82rem;margin:2rem auto;padding:0 1.5rem;font-variant-ligatures:none;letter-spacing:.015em}
+h1,h2{font-family:Georgia,serif;font-weight:400;line-height:1.25}h1{font-size:3rem;margin:.3rem 0}h2{font-size:1.7rem}
+a{color:#f1dfc7;text-underline-offset:.2em}a:focus-visible,summary:focus-visible{outline:2px solid #f1dfc7;outline-offset:5px}
+p{max-width:58rem}figure{margin:2rem 0 3rem}img{display:block;width:100%;height:auto;border-radius:.5rem}figcaption{font-size:.8rem;margin:.6rem 0}
+details{background:#1c2631;padding:1rem 1.5rem;border-radius:.5rem;margin:1.5rem 0}summary{cursor:pointer}li{margin:.5rem 0}
+</style>
+<p>Slayer · Go and Fyne · local interface prototype</p>
+<h1>Atelier</h1>
+<p>A room for worlds. A landscape, a document, and space for what happens next.</p>
+<p>The native window opens on macOS. YAML editing, schema checks, settings, save/open and loading a still image work. Cameras, sequence and music are reserved areas. Render submission and terrain acquisition are not connected in this prototype.</p>
+<h2>The native window</h2>
+<figure><a href="15-native-ready.png"><img src="15-native-ready.png" alt="Native macOS Fyne window with the Maat Mons reference and YAML editor"></a><figcaption>Native GLFW canvas, captured by the application itself. Click for full resolution. <a href="15-native-ready.png.json">Capture receipt</a>.</figcaption></figure>
+<h2>The set workspace</h2>
+<figure><a href="09-venus-wide.png"><img loading="lazy" src="09-venus-wide.png" alt="Venus reference landscape beside the editable job YAML"></a><figcaption>Venus · software canvas at 1800 × 1120. This is the actual Fyne widget tree. <a href="09-venus-wide.png.json">Receipt</a>.</figcaption></figure>
+<figure><a href="10-settings-compact.png"><img loading="lazy" src="10-settings-compact.png" alt="Settings tab in the compact Fyne window"></a><figcaption>Settings · compact canvas at 1440 × 1000. Source and settings edit the same draft. <a href="10-settings-compact.png.json">Receipt</a>.</figcaption></figure>
+<figure><a href="11-titan-wide.png"><img loading="lazy" src="11-titan-wide.png" alt="Titan study with the full processed Huygens colour image"></a><figcaption>Titan · the mission reference is fitted whole. <a href="11-titan-wide.png.json">Receipt</a>.</figcaption></figure>
+<p>Planetary pictures are references, not Slayer output. Venus is NASA/JPL’s <a href="https://science.nasa.gov/photojournal/venus-3-d-perspective-view-of-maat-mons/">Magellan visualization of Maat Mons</a>, with simulated colour and vertical exaggeration 10×. Titan is the <a href="https://science.nasa.gov/photojournal/first-color-view-of-titans-surface/">processed Huygens colour surface view</a>, NASA/JPL/ESA/University of Arizona.</p>
+<details><summary>Room for motion and music</summary>
+<p>These are labelled placeholders for the design discussion. No timeline, camera movement, playback or music editing is implemented tonight.</p>
+<figure><a href="12-cameras.png"><img loading="lazy" src="12-cameras.png" alt="Reserved Cameras and movement workspace"></a><figcaption>Cameras and movement · <a href="12-cameras.png.json">receipt</a>.</figcaption></figure>
+<figure><a href="13-sequence.png"><img loading="lazy" src="13-sequence.png" alt="Reserved Sequence workspace"></a><figcaption>Sequence · <a href="13-sequence.png.json">receipt</a>.</figcaption></figure>
+<figure><a href="14-music.png"><img loading="lazy" src="14-music.png" alt="Reserved Music and sound workspace"></a><figcaption>Music and sound · <a href="14-music.png.json">receipt</a>.</figcaption></figure>
+</details>
+<details><summary>Earlier iterations, kept for comparison</summary>
+<p>Every saved visual iteration is retained, including the cramped first inspector and the earlier Titan reference.</p>
+<ul>
+<li><a href="01-venus-wide.png">01 · first Venus layout</a></li>
+<li><a href="02-venus-compact.png">02 · first compact layout</a></li>
+<li><a href="03-titan-wide.png">03 · initial monochrome Titan reference</a></li>
+<li><a href="05-native-venus.png">05 · first successful native window</a></li>
+<li><a href="06-venus-yaml-wide.png">06 · larger YAML pane</a></li>
+<li><a href="07-venus-settings-compact.png">07 · compact settings before the width correction</a></li>
+<li><a href="08-titan-wide.png">08 · whole colour Titan reference</a></li>
+</ul>
+<p>Attempt 04 crashed during Fyne’s explicit monitor-centering call and produced no image. Explicit centering was removed; the native window smoke then passed.</p>
+</details>
+<p><a href="MORNING.md">Morning notes and prototype boundaries</a> · <a href="CREDITS.md">Asset credits</a></p>
+</html>

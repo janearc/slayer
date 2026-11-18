@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/render/colour"
 	milestone "github.com/janearc/slayer/scene/smoke"
+	"github.com/janearc/slayer/set"
 )
 
 // The scene's forms a session opens, as job.Scene's Form names them.
@@ -50,7 +52,7 @@ func opened(ctx context.Context, wanted job.Job, stamp Stamp) (*Session,
 	if err != nil {
 		return nil, err
 	}
-	if err := cachingTrees(); err != nil {
+	if err := cachingTrees(os.LookupEnv); err != nil {
 		return nil, err
 	}
 	given, err := jobAsked(wanted)
@@ -81,6 +83,9 @@ func jobAsked(wanted job.Job) (asked, error) {
 		return asked{}, err
 	}
 	given.set, _ = wanted.Scene().Set()
+	if prepared, has := wanted.ImportedSet(); has {
+		given.preparedSet = &prepared
+	}
 	given.at, _ = wanted.Clock().At()
 	given = given.filmedBy(wanted.Film())
 	if name, said := wanted.Renderer(); said {
@@ -89,7 +94,11 @@ func jobAsked(wanted job.Job) (asked, error) {
 	}
 	lens, _ := wanted.Camera()
 	given.camera, _ = lens.Name()
+	_, given.cameraPath = lens.Path()
 	given = given.switchedBy(wanted).resolved(noSetFlags)
+	if err := wireRefusal(given); err != nil {
+		return asked{}, err
+	}
 	return given, given.sound()
 }
 
@@ -118,15 +127,9 @@ func (given asked) filmedBy(made job.Film) asked {
 	}
 	given.optics.aperture, _ = made.Aperture()
 	given.optics.focus, _ = made.Focus()
+	given.wire = made.Wire()
 	return given
 }
-
-// errWorldOnlyFilm is the refusal of a film of a set that is a world
-// alone, with no ground, planet or things: the world half draws it, and
-// draws stills.
-var errWorldOnlyFilm = errors.New("a set of a world with nothing to " +
-	"stand on is drawn by the world half, which draws stills; give it " +
-	"ground, a planet or things to film it")
 
 // openSet stages a set as a still or as a film, as the job's clock says.
 func openSet(wanted job.Job, given asked) (*Session, error) {
@@ -150,22 +153,41 @@ func openStill(wanted job.Job, given asked) (*Session, error) {
 		letGo(given)
 		return nil, err
 	}
-	still := stillFramer{world: world, made: made,
+	still := stillFramer{world: world, made: made, given: given,
 		plan: cameraPlan(wanted)}
 	return newSession(still, given, wanted, given.tone()), nil
 }
 
-// openFilm stages a set as the sequence path does, with its refusals:
-// a world with nothing to stand on, which only the world half draws, and
-// lighting it cannot retain. A planet alone, or a set in space, needs no
-// ground: nothing a film keeps from frame to frame is the ground's.
+// openFilm stages a set as a film, with refusals for lighting it cannot
+// retain. A world-only set uses its world half at each frame time; a
+// planet alone, or a set in space, needs no ground because the ground is
+// not what a film keeps from frame to frame.
 func openFilm(wanted job.Job, given asked) (*Session, error) {
-	read, err := readDrawable(given.set)
+	read, err := given.readSet()
 	if err != nil {
 		return nil, err
 	}
+	if sceneClockOcean(read) {
+		_, groundlessAir := read.GroundlessAir()
+		if !worldOnly(read) && !groundlessAir {
+			return nil, fmt.Errorf("%s: a scene-clock ocean film currently requires a world-only or groundless-air set", given.set)
+		}
+		lens, _ := wanted.Camera()
+		_, zoomed := lens.Zoom()
+		_, shuttered := wanted.Shutter()
+		switch {
+		case given.onGPU:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion currently requires the CPU renderer", given.set)
+		case given.cameraPath || zoomed:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion currently requires a fixed camera", given.set)
+		case shuttered:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion currently refuses a shutter", given.set)
+		case given.glass != nil:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion through a lens rig is not supported", given.set)
+		}
+	}
 	if worldOnly(read) {
-		return nil, fmt.Errorf("%s: %w", given.set, errWorldOnlyFilm)
+		return openWorldFilm(wanted, given, read)
 	}
 	_, _, given, err = staged(given)
 	if err != nil {
@@ -187,8 +209,46 @@ func openFilm(wanted job.Job, given asked) (*Session, error) {
 		letGo(given)
 		return nil, err
 	}
-	film := timedFramer{plan: cameraPlan(wanted)}
+	film := timedFramer{plan: cameraPlan(wanted), given: given}
 	return newSession(film, given, wanted, given.tone()), nil
+}
+
+// openWorldFilm draws a set's world half through the session at each film
+// time. It has no retained scenery to advance: thing.Motion is evaluated
+// by drawMeasured from given.at. World-only films use the per-call backend
+// just as their stills do, so GPU frames are not retained between calls.
+func openWorldFilm(wanted job.Job, given asked, read set.Set) (*Session, error) {
+	if sceneClockOcean(read) {
+		_, shuttered := wanted.Shutter()
+		camera, _ := wanted.Camera()
+		_, zoomed := camera.Zoom()
+		switch {
+		case given.onGPU:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion currently requires the CPU renderer", given.set)
+		case given.cameraPath || zoomed:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion currently requires a fixed camera", given.set)
+		case shuttered:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion currently refuses a shutter", given.set)
+		case given.glass != nil:
+			return nil, fmt.Errorf("%s: scene-clock ocean motion through a lens rig is not supported", given.set)
+		}
+	}
+	world, made, given, err := staged(given)
+	if err != nil {
+		letGo(given)
+		return nil, err
+	}
+	if given.glass != nil {
+		letGo(given)
+		return nil, fmt.Errorf("%s: a world-only film through a rig is not "+
+			"supported yet", given.set)
+	}
+	if err := rigZoom(wanted, given); err != nil {
+		letGo(given)
+		return nil, err
+	}
+	return newSession(stillFramer{world: world, made: made,
+		given: given, plan: cameraPlan(wanted)}, given, wanted, given.tone()), nil
 }
 
 // openSmoke stages a numbered smoke as a smoke sequence does, drawn by
@@ -218,7 +278,7 @@ func openSmoke(wanted job.Job, given asked) (*Session, error) {
 		tone.Exposure = given.exposure
 	}
 	given = smokeSeen(scene, given)
-	smoke := timedFramer{plan: cameraPlan(wanted)}
+	smoke := timedFramer{plan: cameraPlan(wanted), given: given}
 	return newSession(smoke, given, wanted, tone), nil
 }
 
@@ -265,10 +325,14 @@ func letGo(given asked) {
 }
 
 // newSession is a session of a staged source and what was asked of it,
-// the job's times, quality and film, and the scene's own tone.
+// the job's times, quality and film, and the scene's own tone; for a
+// wire picture, the plain tone its light is made for.
 func newSession(source framer, given asked, wanted job.Job,
 	tone colour.Tone) *Session {
 	quality, _ := wanted.Quality()
+	if given.wire {
+		tone = wireTone
+	}
 	return &Session{source: source, given: given, lens: wanted.Film(),
 		times: wanted.Times(), quality: quality, tone: tone}
 }

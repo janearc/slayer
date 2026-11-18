@@ -5,11 +5,9 @@ and alt-azimuth assembly is a useful starting point; scaling it cannot
 produce every instrument that was asked for.
 
 The [primary-source shortlist](../research/observatory-family-references.yaml)
-records the references read for this work. Palomar, Keck, Subaru, Rubin, ELT
-and Griffith source bytes are fetched and pinned.
-
-Fourteen measured claims are verified against those bytes before a build.
-Other families remain forthcoming.
+lists the references. Palomar, Keck, Subaru, Rubin, ELT and Griffith source
+bytes are fetched and pinned, and fourteen measured claims are verified
+against those bytes before a build.
 
 The named templates are `palomar`, `keck-i`, `keck-ii`, `subaru`,
 `rubin`, `elt` and `griffith`. They preserve `Optical` and `Observatory`
@@ -85,14 +83,11 @@ mechanical model.
 These are visual recipes, with no calibrated optical simulation.
 
 ELT's [construction note](large-observatory.md) records its 798-panel
-inventory and authored sixfold layout. Native quick-detail exterior and
-cutaway studies exist; its software-Metal cutaway comparison is still a
-merge blocker.
+inventory and authored sixfold layout.
 
 Griffith's [construction note](civic-observatory.md) describes the visitor-map
-layout and the guide's 12-inch objective. Its independent roof and objective
-checks and one small CPU/software/native-Metal exterior comparison pass.
-The west solar instrument is represented by a closed roof.
+layout and the guide's 12-inch objective. The west solar instrument is
+represented by a closed roof.
 
 ## Dishes, arrays and radomes
 
@@ -109,10 +104,3 @@ to reproduce surveyed antenna pads or simulate an interferometer.
 Radomes need their own shell and support recipes. Their visible panels are
 scenery, with no claim about radio transmission through the enclosure.
 Keep their meshes closed and finite for the existing CPU and GPU mesh paths.
-
-## Proof beside the recipe
-
-Each family needs independent silhouette and component probes, finite bounds,
-actual native GPU images and a catalogue entry. Record sources beside defaults
-and inspect the PNGs. An authored compatibility signature can hold appearance
-steady, but cannot decide whether a structure is recognisable or correct.

@@ -26,6 +26,12 @@
 # Captured by the producer when each was added; a new craft adds its
 # eight here. The file also holds the lunar module's eight,
 # apollo-lunar-module, which is a crewed craft and no stack.
-cases: 848
-geometries: 686
-refusals: 162
+# Later additions (later-reference-arm64.txt): 144 cases, 94 geometries and
+# 50 refusals, for the kinds that had no record: the plates (slab, chip),
+# the venera lander, human-scale-2m, the macro landforms and bridge,
+# arcology and spires, the city kinds, and from 2026-11-16 the j58 and
+# the j58-test-stand. Written by TestWriteLaterReference, which writes
+# rows only for kinds with none.
+cases: 992
+geometries: 780
+refusals: 212

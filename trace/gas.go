@@ -49,7 +49,7 @@ func gasStep(scene *staged, crossed *crossing, step stride, ray maths.Ray,
 	})
 	scatter := crossed.volume.scatter
 	var in maths.Light
-	var room [lampsAsked]lit
+	var room [lampsEvery]lit
 	for _, one := range scene.asked(room[:], point, dir.Neg(), byLight) {
 		got := scene.shadowed(one, point)
 		if got == (maths.Light{}) {

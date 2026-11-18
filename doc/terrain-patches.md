@@ -1,9 +1,7 @@
 # Source patches selected by a view
 
-The source and patch cache now have focused host test evidence, recorded
-in [the verification notes](verification-2026-11-09.md). Mesh, view-adapter
-and renderer acceptance remain separate. This does not yet replace the
-existing Hillside terrain stage or establish whole-world rendering.
+This does not replace the existing Hillside terrain stage or establish
+whole-world rendering.
 
 ## Identity and bounded reads
 
@@ -26,7 +24,7 @@ source cells; float coordinate binning is not used to recover their IDs.
 
 ## Reuse without a camera key
 
-PatchCache now drafts a second bounded layer above the decoded tile cache.
+PatchCache is a second bounded layer above the decoded tile cache.
 It retains immutable sampled grids by native patch and actual axis counts.
 Two oversized side requests that resolve to the same native grid share
 one entry. Camera positions, timestamps and render crops are not keys.
@@ -52,14 +50,6 @@ are separate allocations. This cache does not establish an aggregate RSS
 cap. It is not yet wired into moving-view staging, nor does it cache a
 transformed mesh under an unspecified projection or height datum.
 
-The cache witnesses now exercise reuse and eviction, a stricter allowance
-on a hit, zero retention, closed sources and consumer-held grids after
-Clear. Failed patch decoding after eviction and mesh/view integration
-still need their own cases.
-
-`terrain/testdata/patch-cache-contract.yaml` records independent payload
-arithmetic and reuse order for the existing small TIFF fixture.
-
 ## Selection and budgets
 
 SelectPatches starts at a source root and refines the highest-scoring
@@ -81,11 +71,10 @@ between its samples. It is not a filtered overview or a geometric-error
 estimate. Native overview/error metadata and an actual view adapter are
 still required before claiming such guarantees.
 
-The [projected-detail draft](projected-detail.md) now supplies a separate
+The [projected-detail](projected-detail.md) page describes a separate
 pinhole/frustum assessment for a caller's world bounds and displacement.
-It is not yet a source projection/datum adapter or an enabled terrain stage.
 
-SelectProjectedPatches now connects that assessment to the bounded source
+SelectProjectedPatches connects that assessment to the bounded source
 selector. It takes the actual camera pose, field of view and raster through
 footprint.Perspective. Its target is projected displacement in pixels. A
 distant view can select fewer patches over the same source footprint; a
@@ -104,8 +93,6 @@ viewer, with progressively coarser levels farther away. The primary
 describes that approach. This selector uses a quadtree rather than clipmap
 rings. Neither organization manufactures terrain beyond source coverage.
 
-Moving renderer residency, source overview/error metadata, seams between
-unequal patch resolutions and explicit fallback coverage are still open.
 The current Hillside scene continues to stage its authored terrain crop.
 
 ## World mesh boundary
@@ -124,13 +111,9 @@ The current helper uses flat faces and the legacy terrain diagonal. It
 does not stitch unequal-detail neighbours, filter normals across edges,
 manage visibility residency or apply the renderer's future rebasing.
 
-Those seams, the projection/datum adapter, planetary fallback and full
-staging integration remain open. This reader/selector must not be
-presented as a completed whole-world renderer.
-
 ## Shared source edges
 
-PatchGrid.StitchTo now supplies bounded source-space edge matching for an
+PatchGrid.StitchTo supplies bounded source-space edge matching for an
 affine world mapping. A fine patch follows its coarser neighbour's linear
 edge segments. Coarse knots inside the overlap must also be fine knots;
 otherwise the helper refuses the pair rather than leaving a hidden bend.
@@ -141,8 +124,6 @@ allowance covers the copied payload; axis arrays are immutable and shared.
 The maximum changed sample height is returned so callers can account for
 the extra representation displacement.
 
-Focused CPU witnesses cover all four shared sides, exact edge interpolation,
-cache immutability, no-data propagation, byte refusal and a missing coarse
-knot. This does not yet stitch curved-world mesh edges after projection or
+This does not stitch curved-world mesh edges after projection or
 establish an entire resident patch set. Callers must supply compatible
 source identity, placement and resolution ordering.

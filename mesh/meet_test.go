@@ -155,3 +155,16 @@ func TestARayThatMissesTheBoxDoesNoWork(t *testing.T) {
 		}
 	}
 }
+
+// a ray that runs along the plane of a face, down through the face's
+// own plane, sees it edge on: its three shares are all nought, and it
+// is not met.
+func TestARayAlongAFacesPlaneDoesNotMeetIt(t *testing.T) {
+	corners := []maths.Vec{maths.V(0, 0, 0), maths.V(0, 2, 0), maths.V(0, 0, 2)}
+	made := mustMesh(t, corners, [][3]int{{0, 1, 2}}, nil, false)
+	ray := maths.Ray{At: maths.V(0, 0.5, 1), Dir: maths.V(0, 0, -1)}
+	look := aimed(ray)
+	if _, _, ok := look.meets(made, 0, 0, math.Inf(1)); ok {
+		t.Error("a ray along a face's plane met the face")
+	}
+}

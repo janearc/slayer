@@ -1,0 +1,63 @@
+# Ferruccio first play: native Larson and authored two-metre scale human.
+# Coordinates are east, north, up in metres; height is elevation in space.
+# Explicit seed 5; quick is the named geometry budget for both models.
+# The native aluminium mannequin is exactly 2 m tall.
+# Pad, colours, camera and studio lights are authored display choices.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Larson playground
+  seed: 5
+  setting: space
+  light: none
+  set:
+    things:
+      larson:
+        kind: mcrn-larson-landed
+        seed: 5
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+      visitor:
+        kind: human-scale-2m
+        seed: 5
+        complexity: quick
+        east: 7
+        north: 1
+        height: {value: 0, unit: m}
+  film:
+    width: 640
+    height: 400
+    rays: 1
+    wide: 40
+    exposure: 1
+  cameras:
+    arrival:
+      location: {at: [18, -24, 12]}
+      orientation: {look_at: [1, 0, 2]}
+  world:
+    unit: 1
+    materials:
+      pad:
+        colour: {srgb_linear: [0.055, 0.07, 0.095]}
+        source: eye
+    boxes:
+      landing-pad:
+        material: pad
+        middle: [0, 0, -0.12]
+        size: [28, 28, 0.24]
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.022, 0.027, 0.05]}
+      zenith: {srgb_linear: [0.004, 0.007, 0.02]}
+      ground: {srgb_linear: [0.01, 0.013, 0.022]}
+      source: eye
+    suns:
+      key:
+        toward: [-4, -5, 7]
+        colour: {srgb_linear: [8, 7, 5.5]}
+        source: eye
+      rim:
+        toward: [8, 4, 4]
+        colour: {srgb_linear: [0.8, 1.1, 1.8]}
+        source: eye

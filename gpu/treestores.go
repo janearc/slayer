@@ -4,15 +4,17 @@ package gpu
 // can be measured against each other on the same scenes before one is
 // chosen (2026-11-12).
 //
-// SLAYER_TREE_STORE picks: unset or "bolt" is the
-// one file as it has always been; "files" keeps each tree as a file of
-// its own in diskcache; "pids": every run reads
-// one main bolt file read-only, writes what it grows to a bolt file of
-// its own named by its process, and at its end merges into a new main
-// file renamed into place, so no reader ever waits for a writer.
+// SLAYER_TREE_STORE picks the form, not the place: every form lives in
+// the cache home (SLAYER_CACHE), the one file beside the trees kind's
+// folder.
+//
+// Unset or "bolt" is the one file as it has always been; "files" keeps
+// each tree as a file of its own in diskcache; "pids": every run reads
+// one main bolt file read-only, writes what it grows to a bolt file of its
+// own named by its process, and at its end merges into a new main file
+// renamed into place, so no reader ever waits for a writer.
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -25,6 +27,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 
 	"github.com/janearc/slayer/diskcache"
+	"github.com/janearc/slayer/treebolt"
 )
 
 // storeVariable names the way trees are kept.
@@ -40,11 +43,12 @@ const (
 // treeKind keeps trees as files. Its cap is picked by the disk caches
 // slice's author, 2026-11-12: moonlake's trees are about 588 MB, so 8
 // GiB holds a dozen scenes' trees for one program.
-var treeKind = diskcache.MustKind("trees", treeCap,
+var treeKind = diskcache.MustKind(treebolt.KindName, treeCap,
 	"moonlake's trees are about 588 MB; this holds a dozen scenes'")
 
-// treeCap is the trees' cap in bytes; see treeKind.
-const treeCap = 8 << 30
+// treeCap is the trees' cap in bytes, the bolt file's as well; see
+// treeKind and treebolt.Cap.
+const treeCap = treebolt.Cap
 
 // The names of a per-process file and the merge's, beside the main one.
 const (
@@ -130,7 +134,10 @@ func (kept *treeShelf) own() string {
 // the main file, opened read-only.
 func (kept *treeShelf) lookOwnThenMain(key programKey) ([]byte, error) {
 	for _, path := range []string{kept.own(), kept.path} {
-		value, err := lookIn(path, key, kept.wait)
+		value, used, err := lookIn(path, key, kept.wait)
+		if value != nil && path == kept.path {
+			kept.want(key, used)
+		}
 		if value != nil || err != nil {
 			return value, err
 		}
@@ -138,29 +145,27 @@ func (kept *treeShelf) lookOwnThenMain(key programKey) ([]byte, error) {
 	return nil, nil
 }
 
-// lookIn is the value under a key in a bolt file, read-only, or nil
-// where the file or the key is not there.
+// lookIn is the value under a key in a bolt file, read-only, and when
+// it was last used, or nil where the file or the key is not there.
 func lookIn(path string, key programKey, wait time.Duration) ([]byte,
-	error) {
+	time.Time, error) {
+	var used time.Time
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		return nil, nil
+		return nil, used, nil
 	}
-	file, err := bolt.Open(path, fileMode,
-		&bolt.Options{Timeout: wait, ReadOnly: true})
+	file, err := treebolt.Open(path, wait, true)
 	if err != nil {
-		return nil, err
+		return nil, used, err
 	}
 	var value []byte
 	err = file.View(func(reading *bolt.Tx) error {
-		if bucket := reading.Bucket([]byte(treeBucket)); bucket != nil {
-			value = bytes.Clone(bucket.Get(key[:]))
-		}
+		value, used = treebolt.Get(reading, key[:])
 		return nil
 	})
-	return value, errors.Join(err, file.Close())
+	return value, used, errors.Join(err, file.Close())
 }
 
-// storeIn keeps a value under a key in a bolt file.
+// storeIn keeps a value under a key in a bolt file, used now.
 func storeIn(path string, key programKey, value []byte,
 	wait time.Duration) error {
 	file, err := bolt.Open(path, fileMode, &bolt.Options{Timeout: wait})
@@ -168,11 +173,7 @@ func storeIn(path string, key programKey, value []byte,
 		return err
 	}
 	err = file.Update(func(writing *bolt.Tx) error {
-		bucket, err := writing.CreateBucketIfNotExists([]byte(treeBucket))
-		if err != nil {
-			return err
-		}
-		return bucket.Put(key[:], value)
+		return treebolt.Put(writing, key[:], value, time.Now())
 	})
 	return errors.Join(err, file.Close())
 }
@@ -289,18 +290,8 @@ func copyTrees(from string, into *bolt.DB, wait time.Duration) error {
 		return err
 	}
 	err = source.View(func(reading *bolt.Tx) error {
-		bucket := reading.Bucket([]byte(treeBucket))
-		if bucket == nil {
-			return nil
-		}
 		return into.Update(func(writing *bolt.Tx) error {
-			made, err := writing.CreateBucketIfNotExists([]byte(treeBucket))
-			if err != nil {
-				return err
-			}
-			return bucket.ForEach(func(key, value []byte) error {
-				return made.Put(bytes.Clone(key), bytes.Clone(value))
-			})
+			return treebolt.Absorb(writing, reading)
 		})
 	})
 	return errors.Join(err, source.Close())

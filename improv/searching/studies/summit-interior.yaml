@@ -472,7 +472,7 @@ scene:
         heading:
           value: 0
           unit: deg
-      Janes Dobsonian:
+      36-inch Dobsonian:
         kind: dobsonian-36
         seed: 5
         east: 263392
@@ -481,7 +481,7 @@ scene:
         heading:
           value: 0
           unit: deg
-      Janes refractor:
+      5-inch refractor:
         kind: apo-refractor-5
         seed: 5
         east: 263398
@@ -490,7 +490,7 @@ scene:
         heading:
           value: 0
           unit: deg
-      Janes SCT:
+      24-inch SCT:
         kind: sct-24
         seed: 5
         east: 263404

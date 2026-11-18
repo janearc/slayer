@@ -126,34 +126,11 @@ normalizes once after rotation.
 These conditioning changes preserve the ray and avoid losing needle widths to
 distant-origin arithmetic.
 
-Construction tests also hold leaf lengths to the published ranges, check needle
-roots against twig surfaces, check recursive attachment and radius contraction,
-and shoot rays through the gaps in a spray.
-
-Whole-crown silhouette checks cover coast redwood at `quick`,
-seeds 5 and 11, from three sides. Their floors are visual regression choices,
-not field measurements. The foliage-only GPU check covers both species at
-`quick`, seed 5, without bark or shadows.
-
-The lit CPU/GPU fixture uses a separate authored regression budget: summed
-absolute RGB difference divided by CPU RGB energy must stay below `2e-3`,
-with at most four pixels disagreeing in surface coverage. These are fixture
-limits, not a general error bound for thin foliage.
-
-The restored-geometry run associated with `db2823d` measured a worst relative
-RGB difference of `0.00132864`, for redwood at `demo`; the other tree levels,
-observatory and both loose shoots were below it. The same bound is retained.
 The camera exception for horizontal loose shoots does not change tree views.
 
-Images stay outside the repository so the geometry can be inspected directly.
+## Spruce
 
-## Draft spruce extension, 8 November 2026
-
-The named spruce and Norway-spruce factory entries now have a draft
+The named spruce and Norway-spruce factory entries have a draft
 wrapper with radial needle shoots. The original conifer rows remain
 legacy references. [Spruce construction and limits](spruce-foliage.md)
 records its picked dimensions and qualitative botanical source.
-
-The earlier captures and test results in this document concern redwood
-and sequoia. They do not validate the new spruce construction. Builds,
-appearance captures and CPU/Metal checks are deferred to the review break.

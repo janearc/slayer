@@ -16,6 +16,21 @@ import (
 	"github.com/janearc/puzzlemouth/pzm"
 )
 
+// TestMain gives the tests a cache home of their own in the process's
+// environment, for what a session opens and reads from it, so no test
+// keeps anything in a real cache.
+func TestMain(m *testing.M) {
+	home, err := os.MkdirTemp("", "door-cache")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	os.Setenv("SLAYER_CACHE", home)
+	code := m.Run()
+	os.RemoveAll(home)
+	os.Exit(code)
+}
+
 //go:embed testdata/numbers.yaml
 var numbersRaw []byte
 
@@ -115,8 +130,8 @@ func envIn(t *testing.T, ctx context.Context, directory string,
 // variables given, as name, value, name, value.
 func envAt(t *testing.T, given Given, variables ...string) Env {
 	t.Helper()
-	set := map[string]string{tempVariable: t.TempDir(),
-		"SLAYER_CACHE": t.TempDir()}
+	set := map[string]string{"SLAYER_CACHE": t.TempDir(),
+		teamVariable: "team"}
 	for i := nothing; i+one < len(variables); i += pair {
 		set[variables[i]] = variables[i+1]
 	}

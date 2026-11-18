@@ -25,21 +25,6 @@ package gpu
 // point: trace's own skyLooks, so the two look alike. Defined there.
 const skyLooks = 16
 
-// shareSkyFor shares the sky's looks among a pixel's samples for a
-// mode that asks it, at so many samples along a pixel's side.
-//
-// The looks are shared only where they are dealt evenly: where a pixel's
-// samples divide sixteen (one, two or four along a side), or sixteen
-// divides them (eight, sixteen). At three a pixel would take nine of the
-// sixteen in a row, and at five some twice, so there every sample takes
-// all sixteen, as the exact tracer does (review of 2026-11-12).
-func (encoded *scene) shareSkyFor(mode traversal, side int) {
-	if mode == fasterTraversal && encoded.reach != nil &&
-		sharesEvenly(side) {
-		encoded.reach.shared = max(1, side)
-	}
-}
-
 // sharesEvenly is whether a pixel of side by side samples takes every
 // one of the sky's looks the same number of times when they are dealt.
 func sharesEvenly(side int) bool {

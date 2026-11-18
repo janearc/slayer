@@ -1,0 +1,33 @@
+/*
+ * fermi-long -- a long gamma-ray burst seen through libtheme's fermi
+ * profile, 10 kev to 300 gev carried onto visible. the ground is the deep
+ * indigo at its violet end; the ink is the whole burst as one colour, lit to
+ * 11 to 1. each of the terminal's colours is the wavelength the screen's own
+ * colour points at, lit to 6 to 1, or 8.5 for the brights. magenta is in no
+ * spectrum, so it is the screen's red mixed with violet. made by spectra,
+ * github.com/janearc/chroma/cmd/spectra, 2026-10-05.
+ */
+:root {
+  --ground: #1b0978; /* oklch(28% 0.166 274.5) */
+  --ink: #b57a52; /* oklch(63% 0.092 54.4) */
+  --cursor: #ffbc8b; /* oklch(85% 0.100 57.1) */
+  --cursor-ink: #0e0058; /* oklch(22% 0.139 272.8) */
+  --surface-1: #2a00c0; /* oklch(38% 0.244 272.6) */
+  --selection-ink: #ffbc8b; /* oklch(85% 0.100 57.1) */
+  --black: #1d0090; /* oklch(31% 0.197 272.6) */
+  --red: #ff5f47; /* oklch(69% 0.199 31.1) */
+  --green: #1cad00; /* oklch(65% 0.217 141.7) */
+  --yellow: #979b00; /* oklch(66% 0.146 111.6) */
+  --blue: #3696ff; /* oklch(67% 0.179 253.8) */
+  --cyan: #00a6a0; /* oklch(65% 0.113 190.3) */
+  --magenta: #ff2bf9; /* oklch(71% 0.304 329.6) */
+  --bright-red: #ff9581; /* oklch(78% 0.132 31.6) */
+  --bright-green: #24ce00; /* oklch(74% 0.247 141.7) */
+  --bright-yellow: #b4b900; /* oklch(76% 0.167 111.7) */
+  --bright-blue: #78b6ff; /* oklch(76% 0.124 253.3) */
+  --bright-cyan: #00c7c0; /* oklch(75% 0.129 190.3) */
+  --bright-magenta: #ff85f2; /* oklch(79% 0.196 331.3) */
+  --white: #fea158; /* oklch(79% 0.141 56.8) */
+  --bright-white: #ffc79f; /* oklch(87% 0.083 56.9) */
+  --bright-black: #5f72ff; /* oklch(61% 0.209 272.9) */
+}

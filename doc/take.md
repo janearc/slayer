@@ -1,9 +1,8 @@
 # Takes: moving a camera through time
 
 A take carries a camera along a path while the shutter opens for successive
-frames. It lives in `take/`, moved from ninjafilm on 2026-10-23 because it
-coordinates Slayer's scene and tracer. Slayer imports ninjafilm; the
-reverse dependency is deliberately excluded.
+frames. It lives in `take/` because it coordinates Slayer's scene and
+tracer.
 
 ## Timing and motion blur
 
@@ -64,9 +63,7 @@ share the same clock.
 
 ## Example
 
-`take/smoke_test.go` films two seconds of a ball on grey ground using every
-stock. `hillside` uses a one-frame take to sample its rig's shutter.
-The test's structure is:
+This films two seconds of a ball on grey ground using every stock:
 
 ```go
 roll, err := ninjafilm.Roll(stock, 1921)

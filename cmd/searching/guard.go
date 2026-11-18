@@ -9,7 +9,7 @@ import (
 	"github.com/janearc/puzzlemouth/pzm"
 )
 
-// guard leaves headroom under the owner's 1.5 GiB aggregate limit for
+// guard leaves headroom under the owner's doubled 3 GiB aggregate limit for
 // Game and the launcher. It samples this native/Go process once a second;
 // GOMEMLIMIT is only a soft Go-heap target and is not this guard.
 func guard(parent context.Context, call pzm.Call, disk string) (context.Context, context.CancelFunc, error) {
@@ -51,8 +51,8 @@ func resources(disk string) error {
 	if err := syscall.Getrusage(syscall.RUSAGE_SELF, &usage); err != nil {
 		return err
 	}
-	if usage.Maxrss > 1400*1024*1024 {
-		return fmt.Errorf("shoot process exceeded 1400 MiB peak RSS")
+	if usage.Maxrss > 2800*1024*1024 {
+		return fmt.Errorf("shoot process exceeded 2800 MiB peak RSS")
 	}
 	var volume syscall.Statfs_t
 	if err := syscall.Statfs(disk, &volume); err != nil {

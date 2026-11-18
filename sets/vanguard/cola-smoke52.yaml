@@ -1,0 +1,6 @@
+# Existing static cola milestone, a diagnostic, not a film or a measured drink.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {smoke: 52}
+film: {width: 360, height: 320, rays: 1}
+at: {value: 0, unit: s}
+outputs: {picture: cola-smoke52.png, raw: cola-smoke52.pfm}

@@ -40,6 +40,8 @@ var ErrNoScene = errors.New("named: no such scene")
 // Scene is one named scene: what it is, what it takes, what it is drawn
 // at by default, and how it is built.
 type Scene struct {
+	authored          *Authored
+	fastLighting      bool
 	name, about, unit string
 	renderers         []Renderer
 	parameters        []Parameter
@@ -80,6 +82,9 @@ func (scene Scene) Defaults() Defaults { return scene.defaults }
 // Check is whether the values would build: every key one of the scene's
 // parameters, every value of its kind and in its bounds.
 func (scene Scene) Check(with map[string]any) error {
+	if scene.authored != nil {
+		return scene.authored.Check(with)
+	}
 	_, err := scene.read(with)
 	return err
 }
@@ -89,8 +94,32 @@ func (scene Scene) Check(with map[string]any) error {
 // name; a parameter left out takes its default.
 func (scene Scene) Build(with map[string]any, said io.Writer) (*Built,
 	error) {
+	if scene.authored != nil {
+		if err := scene.authored.Check(with); err != nil {
+			return nil, err
+		}
+		if said == nil {
+			said = io.Discard
+		}
+		world, eye, advance, err := scene.authored.Build(with, said)
+		if err != nil {
+			return nil, err
+		}
+		if world == nil {
+			return nil, fmt.Errorf("authored scene %q returned no world", scene.name)
+		}
+		var lens func(time.Duration) float64
+		if scene.authored.Lens != nil {
+			lens, err = scene.authored.Lens(with)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return &Built{world: world, eye: eye, advance: advance, wide: lens}, nil
+	}
 	held, err := scene.read(with)
 	if err != nil {
+
 		return nil, err
 	}
 	if said == nil {
@@ -131,11 +160,13 @@ func (made Defaults) Tone() colour.Tone { return made.tone }
 // where the scene has lamps that keep their own time, their clock, or
 // where its light changes with time, what to tell it.
 type Built struct {
-	world  *thing.World
-	eye    maths.Subspace
-	clock  *time.Duration
-	played *lantern.Played
-	tick   func(at time.Duration)
+	advance func(time.Duration) (maths.Subspace, error)
+	wide    func(time.Duration) float64
+	world   *thing.World
+	eye     maths.Subspace
+	clock   *time.Duration
+	played  *lantern.Played
+	tick    func(at time.Duration)
 }
 
 // World is what is in the scene.
@@ -148,7 +179,7 @@ func (made *Built) Eye() maths.Subspace { return made.eye }
 // light that changes with it, so that Set must be told the time of each
 // frame before it is drawn.
 func (made *Built) Timed() bool {
-	return made.clock != nil || made.tick != nil
+	return made.clock != nil || made.tick != nil || made.advance != nil
 }
 
 // Set tells the scene's lamps the time of the frame about to be drawn. A

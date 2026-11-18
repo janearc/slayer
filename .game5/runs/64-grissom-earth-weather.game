@@ -1,0 +1,1 @@
+grissom-earth-weather . :: ./bin/grissom draw --earth-only --no-hud --distance 4.2 --earth ../local/data/earth --colourways ../local/data/colourways --weather ../local/data/weather/ECMWF_ERA-40_subset.nc

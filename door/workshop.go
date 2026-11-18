@@ -59,6 +59,16 @@ func (made sessionSource) Cached() []string {
 	return made.session.Cached()
 }
 
+// OceanSpectrumLine is the staged ocean's one-line spectrum-model estimate,
+// if the set authored an ocean.
+func (made sessionSource) OceanSpectrumLine() (string, bool) {
+	report, has := made.session.OceanSpectrum()
+	if !has {
+		return "", false
+	}
+	return report.Summary(), true
+}
+
 // Frame is the session's frame at the job's own size.
 func (made sessionSource) Frame(ctx context.Context, index int) (drawn,
 	error) {

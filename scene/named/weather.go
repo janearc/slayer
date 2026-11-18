@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"math"
+	"os"
 	"time"
 
 	"github.com/janearc/slayer/weather"
@@ -69,7 +70,13 @@ func weatherScene() Maps {
 		pictures:   []string{spunMap, bandsMap, agedMap},
 		parameters: weatherParameters(),
 		build:      buildWeather,
-		cache:      weather.CacheDir}
+		cache:      weatherCache}
+}
+
+// weatherCache is the weather's cache, the weather folder under the
+// cache home SLAYER_CACHE names; refused by name where it is not set.
+func weatherCache() (string, error) {
+	return weather.CacheDir(os.LookupEnv)
 }
 
 // weatherParameters are what the weather takes, as cmd/weather's flags

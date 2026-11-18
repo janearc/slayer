@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/janearc/slayer/diskcache"
 	"github.com/janearc/slayer/planet"
 	"github.com/janearc/slayer/set"
 	"github.com/janearc/slayer/weather"
@@ -62,7 +63,7 @@ func stillAir(written set.Weather, radius float64) (*weather.Weather,
 // began, by way of the cache, on the gpu where there is one, and says so.
 func reachedBy(sky *weather.Weather, written set.Weather,
 	moment float64) error {
-	dir, err := weatherCache()
+	dir, err := weatherCache(os.LookupEnv)
 	if err != nil {
 		return err
 	}
@@ -103,6 +104,8 @@ func lit(body planet.Body, made set.Planet,
 	return body, nil
 }
 
-// weatherCache is where weather is kept between shots: SLAYER_WEATHER,
-// or the system's cache for this user.
-func weatherCache() (string, error) { return weather.CacheDir() }
+// weatherCache is where weather is kept between shots: the weather
+// folder under the cache home, which the lookup says by SLAYER_CACHE.
+func weatherCache(lookup diskcache.Lookup) (string, error) {
+	return weather.CacheDir(lookup)
+}

@@ -38,6 +38,9 @@ func TestMain(suite *testing.M) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(exitFailed)
 	}
+	// the cache home both commands keep what they work out in, removed
+	// with the rest, so nothing is kept in a real cache.
+	os.Setenv("SLAYER_CACHE", filepath.Join(directory, "cache"))
 	azazel = filepath.Join(directory, "azazel")
 	slayer = filepath.Join(directory, "slayer")
 	err = commandtest.Build(".", ".", azazel, testing.CoverMode())
@@ -71,10 +74,8 @@ func run(t *testing.T, command string, args ...string) (string, int) {
 	return string(told), nothing
 }
 
-// azazel has one verb: with none, or with one it does not have, it says
-// how it is used and exits with two; render with no file does the same;
-// and a set it cannot draw gives hillside's number, one.
-func TestAzazelHasOneVerbAndRefusesTheRest(t *testing.T) {
+// Legacy rendering keeps its usage refusals and preserves Hillside failures.
+func TestAzazelRetainsLegacyRenderRefusals(t *testing.T) {
 	for _, x := range []struct {
 		args []string
 		code int

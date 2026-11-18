@@ -507,3 +507,27 @@ func TestSceneValuesAreData(t *testing.T) {
 		t.Fatalf("scene values changed or refused: %+v, %v", got, err)
 	}
 }
+
+// TestParseNamesTheFieldWhoseShapeIsWrong checks a bad entry of an array,
+// a collection where a scalar belongs, a word where a number belongs, a
+// negative number for an unsigned field and a broken second document
+// are each refused with the place named.
+func TestParseNamesTheFieldWhoseShapeIsWrong(t *testing.T) {
+	cases := []struct{ old, replacement, say string }{
+		{"mist_colour: [0.78, 0.88, 1.08]", "mist_colour: [0.78, fog, 1.08]", "night.mist_colour[1]"},
+		{"\nfps: 24", "\nfps: {rate: 24}", "fps: expected a scalar"},
+		{"\nfps: 24", "\nfps: [24]", "fps: expected a scalar"},
+		{"\nfps: 24", "\nfps: fast", "fps: expected a number"},
+		{"mist_seed: 3", "mist_seed: -1", "night.mist_seed"},
+	}
+	for _, each := range cases {
+		_, err := parseText(strings.Replace(validYAML, each.old, each.replacement, 1))
+		if err == nil || !strings.Contains(err.Error(), each.say) {
+			t.Errorf("%s gave %v, not a refusal naming %q", each.replacement, err, each.say)
+		}
+	}
+	if _, err := parseText(validYAML + "---\n{"); err == nil ||
+		!strings.Contains(err.Error(), "document") {
+		t.Errorf("a broken second document gave %v", err)
+	}
+}

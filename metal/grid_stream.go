@@ -219,18 +219,12 @@ func (s *GridStream) DrawBands(
 	}
 	defer runtime.KeepAlive(s.kernel)
 	samples := make([]float32, s.width*s.rows*s.per)
-	for first := 0; first < s.height; {
-		down := min(s.rows, s.height-first)
-		band := samples[:s.width*down*s.per]
-		if err := s.kernel.readBand(s.stream, first, down, band); err != nil {
-			return err
-		}
-		if err := consume(first, down, band); err != nil {
-			return err
-		}
-		first += down
+	place := func(_, down int) []float32 {
+		return samples[:s.width*down*s.per]
 	}
-	return nil
+	drawing := bandDrawing{kernel: s.kernel, stream: s.stream,
+		height: s.height, rows: s.kernel.bandRows(s.rows)}
+	return drawing.draw(place, consume)
 }
 
 // Close lets the stream's buffers go. Closing twice is harmless.

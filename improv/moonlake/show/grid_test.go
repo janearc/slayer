@@ -84,7 +84,8 @@ func TestTheGridPlacesAMoment(t *testing.T) {
 // a cue at bar.beat is that measured beat; at_sec is as it is.
 func TestACueAtBarAndBeatIsOnTheGrid(t *testing.T) {
 	beats := steady(12)
-	score := &Score{beats: beats, measured: make([]bool, len(beats))}
+	score := &Score{beats: beats, measured: make([]bool, len(beats)),
+		meter: unsaidMeter}
 	if got, err := score.Moment("2.3", nil); err != nil || got != beats[6] {
 		t.Errorf("2.3 is %v s (%v), not beat 6's %v", got, err, beats[6])
 	}
@@ -102,7 +103,8 @@ func TestACueAtBarAndBeatIsOnTheGrid(t *testing.T) {
 // and names what it was given.
 func TestACueOffTheGridIsRefused(t *testing.T) {
 	beats := steady(12)
-	score := &Score{beats: beats, measured: make([]bool, len(beats))}
+	score := &Score{beats: beats, measured: make([]bool, len(beats)),
+		meter: unsaidMeter}
 	for _, at := range []string{"4.1", "0.1", "1.5", "x", "1.y"} {
 		if _, err := score.Moment(at, nil); err == nil ||
 			!strings.Contains(err.Error(), at) {
@@ -155,7 +157,8 @@ func TestTheFiresBurstEveryFourBeatsFromTheirCue(t *testing.T) {
 		{5.5, []float64{0.25, 2.25}},
 		{12, []float64{1.5}},
 	} {
-		got := bursts(beatTime(each.position, beats), each.position, from, beats)
+		got := bursts(beatTime(each.position, beats), each.position, from,
+			unsaidMeter, beats)
 		if len(got) != len(each.want) {
 			t.Errorf("at %v the bursts are %v, not %v", each.position, got,
 				each.want)
@@ -168,7 +171,7 @@ func TestTheFiresBurstEveryFourBeatsFromTheirCue(t *testing.T) {
 			}
 		}
 	}
-	if got := bursts(3, 6, -1, beats); got != nil {
+	if got := bursts(3, 6, -1, unsaidMeter, beats); got != nil {
 		t.Errorf("unlit, the fires burst %v", got)
 	}
 }
@@ -208,13 +211,13 @@ func TestAListIsTakenInTurn(t *testing.T) {
 		{-1, "fan", 0}, {2, "fan", 0}, {4, "fan", 0}, {8, "fan", 0.5},
 		{12, "scan", 0}, {20, "beam", 0}, {28, "fan", 0},
 	} {
-		got, through := inTurn(looks, 2, 4, each.position)
+		got, through := inTurn(looks, 2, unsaidMeter, 4, each.position)
 		if got != each.want || !(math.Abs(through-each.through) <= near) {
 			t.Errorf("at %v: %s %.3f, not %s %.3f", each.position, got,
 				through, each.want, each.through)
 		}
 	}
-	if got, _ := inTurn(nil, 2, 0, 5); got != "" {
+	if got, _ := inTurn(nil, 2, unsaidMeter, 0, 5); got != "" {
 		t.Errorf("an empty list gives %q", got)
 	}
 }
@@ -223,20 +226,24 @@ func TestAListIsTakenInTurn(t *testing.T) {
 // flash falling by floodFlash.
 func TestTheFloodsAlternateSides(t *testing.T) {
 	beats := steady(40)
-	left, right := flooded("ones", beatTime(0, beats), 0, beats, nil, 0)
+	left, right := flooded("ones", beatTime(0, beats), 0, unsaidMeter, beats,
+		nil, 0)
 	if !(math.Abs(left-1) <= near) || right != 0 {
 		t.Errorf("on the first one, left %v and right %v", left, right)
 	}
-	left, right = flooded("ones", beatTime(4, beats), 4, beats, nil, 0)
+	left, right = flooded("ones", beatTime(4, beats), 4, unsaidMeter, beats,
+		nil, 0)
 	if !(math.Abs(right-1) <= near) || !(left <= 1e-6) {
 		t.Errorf("on the second one, left %v and right %v", left, right)
 	}
 	later := beatTime(4, beats) + floodFlash
-	_, right = flooded("ones", later, 4+floodFlash/0.5, beats, nil, 0)
+	_, right = flooded("ones", later, 4+floodFlash/0.5, unsaidMeter, beats,
+		nil, 0)
 	if !(math.Abs(right-math.Exp(-1)) <= 1e-6) {
 		t.Errorf("a flash floodFlash on is %v, not a third", right)
 	}
-	if left, right := flooded("off", 1, 2, beats, nil, 0); left != 0 || right != 0 {
+	if left, right := flooded("off", 1, 2, unsaidMeter, beats, nil,
+		0); left != 0 || right != 0 {
 		t.Errorf("off, the floods are %v and %v", left, right)
 	}
 }

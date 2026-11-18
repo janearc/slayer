@@ -22,11 +22,64 @@ import (
 // its longest axis lies along x, its shortest stands up, and its seed is which
 // stone it is.
 //
-// made only by newLump.
+// made only by newLump, and made a plate only by asPlate.
 type lump struct {
 	long, middle, short measure.Length
 	worn                float64
 	from                seed
+	broken              breaking
+}
+
+// breaking is how a stone not worn at all is roughened and broken; a worn
+// one gets less of each, down to none.
+//
+// how much of its radius noise may take, the power its coordinates are
+// raised to across and up, which swell it toward a box, how many planes
+// cleave it, how far from its middle the nearest lies and how far further
+// they spread, as shares of its radius, and whether the planes stand upright.
+//
+// what is left of one when each power is taken from it, squareless and
+// flatless, is kept as made, not worked out where a stone is shaped: a
+// stone's are worked out as constants, exactly, and a plate's from numbers,
+// in float64, and the two differ in the last place.
+type breaking struct {
+	roughest, squarest, flattest float64
+	squareless, flatless         float64
+	cleaves                      int
+	nearest, spread              float64
+	upright                      bool
+}
+
+// stoneBreaking is how a stone of any shape is broken: the numbers below,
+// with what is left of each power worked out as a constant.
+func stoneBreaking() breaking {
+	return breaking{roughest: roughest, squarest: squarest,
+		flattest: squarest, squareless: 1 - squarest, flatless: 1 - squarest,
+		cleaves: mostCleaves, nearest: nearest, spread: cleaveRange}
+}
+
+// complement is what is left of a share when it is taken from one, worked
+// out in float64 as a plate's always has been.
+func complement(share float64) float64 { return 1 - share }
+
+// how a plate of a layered rock is broken, where it differs from a stone:
+// picked by looking at the photographs a venus lander took of its ground,
+// on 2026-11-15. its top and bottom are the rock's layers, nearly flat,
+// and it breaks along joints that stand upright, into polygons.
+const (
+	plateRough   = 0.08 // picked: a layer's face is nearly smooth
+	plateFlat    = 0.15 // picked: its top swollen nearly flat
+	plateCleaves = 7    // picked: five to seven broken sides
+	plateNearest = 0.55 // picked: each side cut a little in
+)
+
+// asPlate is the stone broken as a plate is.
+func (made lump) asPlate() lump {
+	made.broken = breaking{roughest: plateRough, squarest: squarest,
+		flattest: plateFlat, squareless: complement(squarest),
+		flatless: complement(plateFlat), cleaves: plateCleaves,
+		nearest: plateNearest, spread: cleaveRange, upright: true}
+	return made
 }
 
 var errLump = errors.New("manufacture: a lump needs three axes above " +
@@ -45,7 +98,7 @@ func newLump(long, middle, short measure.Length, worn float64,
 		return lump{}, errLump
 	}
 	return lump{long: long, middle: middle, short: short, worn: worn,
-		from: from}, nil
+		from: from, broken: stoneBreaking()}, nil
 }
 
 // how a stone is roughened and broken. these are tuning, not
@@ -144,16 +197,28 @@ type plane struct {
 // cleaves is the planes that cleave this stone: fewer the more worn it
 // is, each facing a way and lying a distance drawn from the seed.
 func (made lump) cleaves() []plane {
-	count := int(math.Round(mostCleaves * (1 - made.worn)))
+	broken := made.broken
+	count := int(math.Round(float64(broken.cleaves) * (1 - made.worn)))
 	planes := make([]plane, count)
 	for index := range planes {
 		part, from := cleaving+index, made.from
-		facing := maths.V(from.swing(part, 0, 0),
-			from.swing(part, 0, 1), from.swing(part, 0, 2))
-		planes[index] = plane{facing: facing.Unit(),
-			out: nearest + cleaveRange*from.draw(part, 1, 0)}
+		planes[index] = plane{facing: made.cleaving(part),
+			out: broken.nearest + broken.spread*from.draw(part, 1, 0)}
 	}
 	return planes
+}
+
+// cleaving is the way a cleaving plane of a part of the seed faces: any way,
+// or for planes that stand upright, a way round the level drawn as a share
+// of a turn.
+func (made lump) cleaving(part int) maths.Vec {
+	from := made.from
+	if made.broken.upright {
+		round := fullTurn * from.draw(part, 0, 0)
+		return maths.V(math.Cos(round), 0, math.Sin(round))
+	}
+	return maths.V(from.swing(part, 0, 0), from.swing(part, 0, 1),
+		from.swing(part, 0, 2)).Unit()
 }
 
 // squared is a coordinate of the ball swollen toward a box: its size raised to
@@ -167,12 +232,13 @@ func squared(coordinate, power float64) float64 {
 // it is stretched to its axes: in by the noise, squared, back behind
 // every cleaving plane it is past, and no lower than the flat.
 func (made lump) shaped(on maths.Vec, planes []plane) maths.Vec {
-	fresh := 1 - made.worn
+	fresh, broken := 1-made.worn, made.broken
 	at := on.Scale(grain).Add(offLattice)
 	bump := noise.Fractal(made.from.number, at.X, at.Y, at.Z, octaves)
-	reach := 1 - roughest*fresh*asShare(bump)
-	power := squarest + (1-squarest)*made.worn
-	point := maths.V(squared(on.X, power), squared(on.Y, power),
+	reach := 1 - broken.roughest*fresh*asShare(bump)
+	power := broken.squarest + broken.squareless*made.worn
+	lift := broken.flattest + broken.flatless*made.worn
+	point := maths.V(squared(on.X, power), squared(on.Y, lift),
 		squared(on.Z, power)).Scale(reach)
 	for _, cleft := range planes {
 		if past := point.Dot(cleft.facing) - cleft.out; past > 0 {
@@ -231,6 +297,9 @@ func bounds(skin surface) (maths.Vec, maths.Vec) {
 // stretched back until it reaches as far each way as the ball it was
 // cut from: a stone asked for at three axes has them, however broken,
 // and a stone worn smooth is not moved at all.
+//
+// a plate's upright joints and its flat meet in lines, and the faces
+// pushed onto a line, three corners to it, have no area: they are left out.
 func (made lump) skin(fine cut) surface {
 	planes := made.cleaves()
 	round := ball(fine)
@@ -254,6 +323,9 @@ func (made lump) skin(fine cut) surface {
 		for corner, at := range one {
 			stone[index][corner] = each(at.Sub(foot), fit, times)
 		}
+	}
+	if made.broken.upright {
+		return stone.withArea()
 	}
 	return stone
 }

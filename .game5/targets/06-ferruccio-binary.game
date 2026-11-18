@@ -1,0 +1,1 @@
+ferruccio-binary . :: /bin/sh ferruccio/scripts/build-native.sh

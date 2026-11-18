@@ -43,10 +43,9 @@ should be identified as choices.
 - [Flags](doc/flags.md), [music](doc/music.md) and [caches](doc/caches.md):
   what departs from the exact picture, how tunes are written and chosen,
   and what is kept between runs.
+- [Visual guide](doc/visualguide/README.md): a picture-led first walk-through.
 - [Game workflow](doc/developing.md): setup, builds, runs and checks.
 - [Scenes and commands](EXAMPLES.md): smoke scenes and larger examples.
-- [Feature backlog](doc/feature-backlog.md): current plans, partial work,
-  and the next camera, demo and scenery features.
 - [One-command demos](doc/demos.md): a numbered smoke, an orbital,
   or a moving-camera preview, with PNG and terminal output.
 - [Camera motion](doc/camera-motion.md): YAML moves, speeds and holds
@@ -54,12 +53,12 @@ should be identified as choices.
 - [Package guide](PACKAGES.md): responsibilities and dependency boundaries.
 - [Manufactory catalogue](doc/catalogue.md): the kinds we can make,
   their variations, and how they reach the GPU.
+- [Imported geometry](set/IMPORTS.md): static glTF and GLB beside native
+  manufactured things, with explicit materials and source receipts.
 - [Fire recipes](doc/fire-recipes.md): standalone flames, source layouts,
   optional smoke, and the assumptions behind their inputs.
 - [Surface fuel study](doc/fire-fuel-design.md): a GPU heat/fuel prototype
   and its 720p overhead scene, with no timed ignition front.
-- [Wooded slope and moon](doc/fire-woodland-result.md): actual redwoods,
-  surface fire, a measured hillside and short native GPU clips.
 - [Running Grissom](doc/grissom-setup.md): the graphics viewer's workspace,
   survey files, Earth data, colourways, and first render.
 - [ninjafilm](ninjafilm/README.md): photographic stocks, optics, and grain.

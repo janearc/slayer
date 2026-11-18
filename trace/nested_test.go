@@ -265,9 +265,9 @@ func TestALegPastAClearSurfaceStartsFresh(t *testing.T) {
 			"want 0, true, 2", through.come, through.onward, through.crossed)
 	}
 	back := worn.turnedBack(worn.ray)
-	if back.come != 0 || !back.onward || back.crossed != 2 || back.holding != 0 {
+	if back.come != 0 || !back.onward || back.crossed != 2 || back.holding != 0 || !back.lastClearTIR {
 		t.Errorf("turned back the look has come %v, onward %v, bent %d, inside "+
-			"%d; want 0, true, 2, 0", back.come, back.onward, back.crossed,
-			back.holding)
+			"%d, last-TIR=%t; want 0, true, 2, 0, true", back.come,
+			back.onward, back.crossed, back.holding, back.lastClearTIR)
 	}
 }

@@ -108,9 +108,6 @@ The manifest records the actual scene timestamp for every frame. Resume
 checks those timestamps and the plan hash, so altered time compression or
 zoom cannot silently reuse an old sequence.
 
-The [wooded-summit result](camera-hyperlapse-result.md) records an actual
-thirty-second orbit and zoom, with all 180 frames and timestamps checked.
-
 ## A working wooded-slope plan
 
 For a first look without survey data, use the self-contained smoke plan:
@@ -141,7 +138,7 @@ the dependency and the menu.
 
 [fire-camera-sequence.yaml](fire-camera-sequence.yaml) moves sideways past the
 existing woodland fire and holds the ending view. It needs the same external
-terrain and lunar data as the [woodland scene](fire-woodland-result.md). Build
+terrain and lunar data as the woodland scene. Build
 first with `game build`, then:
 
 ```sh
@@ -171,8 +168,3 @@ planning. A sequence plan has no shutter; a job has one (`job/README.md`,
 `shutter`), and on the gpu it blurs a camera's move in one render a frame. A moving look target exists: a move in `hillside`'s
 sequence camera takes `look: {from, to}` (`camera.Move.Looking`). The
 `look-at` key described above stays fixed.
-
-The six-second forest preview attempted during development stopped at its 1.25
-GiB RSS watchdog before producing a frame. Both native and software GPU
-traversal reached that limit. It is not a completed camera demonstration or a
-measured optimization. Scene-preparation memory remains a performance task.

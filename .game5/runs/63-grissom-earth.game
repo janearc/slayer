@@ -1,0 +1,1 @@
+grissom-earth . :: ./bin/grissom draw --earth-only --earth ../local/data/earth --colourways ../local/data/colourways

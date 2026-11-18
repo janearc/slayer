@@ -44,12 +44,13 @@ func TestNoTwoRangesAreTheSameWidth(t *testing.T) {
 }
 
 // a range holds its low end and not its high one, and where ranges
-// overlap the narrowest answers. worked by hand from the limits:
+// overlap the narrowest answers. worked by hand from the limits; the
+// 121 is iso 21348:2007's (clause 6.5.3), as celestial's ledger cites it:
 //
 //	1e-5 gamma's low end; 1e-3 gamma's high end, x-ray's low end
 //	10 x-ray's high end, extreme ultraviolet's low end
-//	100 in extreme ultraviolet (110 wide) and ultraviolet (300): the first
-//	120 extreme ultraviolet's high end: ultraviolet
+//	100, 120 in extreme ultraviolet (111 wide) and ultraviolet (300): the first
+//	121 extreme ultraviolet's high end: ultraviolet
 //	360 in ultraviolet (300 wide) and visible (470): ultraviolet
 //	400 ultraviolet's high end: visible
 //	760, 829 in visible (470) and infrared (999,240): visible
@@ -72,7 +73,8 @@ func TestRangeEdgesAndOverlaps(t *testing.T) {
 	}{
 		{1e-6, radiation.Range{}}, {1e-5, radiation.Gamma()}, {1e-3, radiation.XRay()},
 		{10, radiation.ExtremeUltraviolet()}, {100, radiation.ExtremeUltraviolet()},
-		{120, radiation.Ultraviolet()}, {360, radiation.Ultraviolet()},
+		{120, radiation.ExtremeUltraviolet()}, {121, radiation.Ultraviolet()},
+		{360, radiation.Ultraviolet()},
 		{400, Visible}, {760, Visible}, {829, Visible}, {830, radiation.Infrared()},
 		{1e5, radiation.Infrared()}, {1e6, radiation.Microwave()},
 		{1.5e7, radiation.Radio()}, {1e11, radiation.Range{}},

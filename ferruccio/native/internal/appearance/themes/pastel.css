@@ -1,0 +1,49 @@
+/*
+ * pastel -- made in paratune from pastel.
+ */
+:root {
+  --ground: #4644a4; /* oklch(45% 0.151 279.5) */
+  --ink: #cacaca; /* oklch(84% 0.000 none) */
+  --cursor: #ffae6e; /* oklch(82% 0.124 58.1) */
+  --cursor-ink: #41486b; /* oklch(41% 0.059 274.8) */
+  --surface-1: #4355aa; /* oklch(48% 0.137 271.4) */
+  --selection-ink: #e3e3e3; /* oklch(92% 0.000 none) */
+  --black: #283165; /* oklch(33% 0.091 272.9) */
+  --red: #f99383; /* oklch(77% 0.126 29.7) */
+  --green: #55c34c; /* oklch(73% 0.188 142.1) */
+  --yellow: #aeb34d; /* oklch(74% 0.126 111.7) */
+  --blue: #62b2ff; /* oklch(75% 0.137 249.3) */
+  --cyan: #54bab8; /* oklch(73% 0.095 193.6) */
+  --magenta: #f98df3; /* oklch(79% 0.180 329.1) */
+  --bright-red: #fbc1b5; /* oklch(86% 0.069 31.8) */
+  --bright-green: #62e559; /* oklch(82% 0.215 142.3) */
+  --bright-yellow: #cdd059; /* oklch(83% 0.141 110.5) */
+  --bright-blue: #aecbfa; /* oklch(84% 0.073 260.0) */
+  --bright-cyan: #62ded3; /* oklch(83% 0.112 187.4) */
+  --bright-magenta: #fbbcf0; /* oklch(87% 0.098 332.5) */
+  --white: #f5cca6; /* oklch(87% 0.068 64.5) */
+  --bright-white: #e3e3e3; /* oklch(92% 0.000 none) */
+  --bright-black: #7c9bf6; /* oklch(71% 0.138 268.5) */
+  --claude-text: #29acbc; /* oklch(68% 0.109 207.5) */
+  --claude-removed: #5f5598; /* oklch(49% 0.105 288.7) */
+  --claude-words: #a6c2ab; /* oklch(79% 0.044 150.5) */
+  --claude-code: #bec0c0; /* oklch(81% 0.002 none) */
+  --claude-mode: #ffbe6b; /* oklch(84% 0.125 71.5) */
+  --claude-rules: #a59f81; /* oklch(70% 0.042 98.0) */
+  --claude-spinner: #fffc86; /* oklch(97% 0.140 107.5) */
+  --claude-added: #3661a3; /* oklch(49% 0.116 258.7) */
+  --claude-diff-code: #86eea8; /* oklch(87% 0.138 153.2) */
+  --md-heading-ground: #3c42c1; /* oklch(46% 0.194 273.7) */
+  --md-heading: #4db6bd; /* oklch(72% 0.096 201.3) */
+  --md-code-ground: #3f4aba; /* oklch(47% 0.175 273.3) */
+  --md-body: #e8ae83; /* oklch(79% 0.089 57.6) */
+  --md-comment: #6096ff; /* oklch(68% 0.166 262.4) */
+  --md-quote: #95b9ff; /* oklch(79% 0.108 263.2) */
+  --md-operator: #cfd259; /* oklch(84% 0.143 110.5) */
+  --md-keyword: #04b1ff; /* oklch(72% 0.162 238.9) */
+  --md-type: #c5d779; /* oklch(84% 0.121 118.0) */
+  --md-string: #ffc029; /* oklch(84% 0.164 83.1) */
+  --md-number: #ffff5f; /* oklch(97% 0.176 109.3) */
+  --md-name: #9bb274; /* oklch(73% 0.088 125.1) */
+  --string: #9edb86; /* oklch(83% 0.130 137.3) */
+}

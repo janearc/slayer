@@ -1,0 +1,1 @@
+space-spitzer . :: ./bin/hillside -set doc/space-spitzer.yaml -sky black -out out/space-spitzer.png

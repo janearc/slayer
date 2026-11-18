@@ -1,0 +1,10 @@
+game v0.5.0
+name slayer
+run fyne-checkpoint . :: ./bin/atelier
+run capture . :: ./bin/atelier-capture
+run bundle_fyne_checkpoint . :: /bin/sh scripts/bundle.sh
+run bundle_native .. :: /bin/sh ferruccio/scripts/bundle-gogpu.sh
+lint comments
+lint print
+lint exclaim
+lint shout

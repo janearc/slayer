@@ -1,0 +1,7 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: scene.yaml}
+renderer: cpu
+film: {width: 160, height: 90, rays: 1}
+at: {value: 0, unit: s}
+outputs:
+  picture: ../../renders/frames/clear-interface-validation.png

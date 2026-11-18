@@ -1,0 +1,50 @@
+/*
+ * vaporwave -- matched to ~/.config/nvim/colors/vaporwave.lua
+ *
+ * Every text colour is placed against a measured comfortable band rather than
+ * picked. Contrast has a ceiling as well as a floor: past it, light text on a
+ * dark ground halates and the strokes smear. Plain white here is 18.6:1, which
+ * is far past it. Nothing below exceeds about 12:1.
+ *
+ * The band is narrow, so the normal and bright halves of the palette cannot
+ * separate by brightness alone -- they would either be indistinguishable or
+ * push bright back through the ceiling. They separate by saturation instead,
+ * with only a small step in lightness.
+ */
+:root {
+  --ground: #160d2b; /* oklch(19% 0.058 294.0) */
+  --ink: #cdc3d8; /* oklch(83% 0.031 307.0) */
+  --cursor: #ffa2ff; /* oklch(84% 0.160 326.9) */
+  --cursor-ink: #160d2b; /* oklch(19% 0.058 294.0) */
+  --surface-1: #3a2260; /* oklch(32% 0.106 297.9) */
+  --selection-ink: #cdc3d8; /* oklch(83% 0.031 307.0) */
+  --black: #241245; /* oklch(24% 0.091 294.9) */
+  --red: #ffa4d4; /* oklch(82% 0.122 347.2) */
+  --green: #84d09c; /* oklch(79% 0.106 153.5) */
+  --yellow: #e2b97b; /* oklch(81% 0.092 77.2) */
+  --blue: #94c3ff; /* oklch(81% 0.099 254.9) */
+  --magenta: #ff9cfe; /* oklch(83% 0.169 327.3) */
+  --cyan: #6ccee2; /* oklch(80% 0.096 212.6) */
+  --white: #c6bbd9; /* oklch(81% 0.043 302.1) */
+  --bright-black: #5c4585; /* oklch(44% 0.104 298.7) */
+  --bright-red: #ffb8ee; /* oklch(86% 0.107 335.3) */
+  --bright-green: #8fdfa8; /* oklch(84% 0.111 153.5) */
+  --bright-yellow: #f3c684; /* oklch(85% 0.098 76.4) */
+  --bright-blue: #a0d3ff; /* oklch(85% 0.082 245.0) */
+  --bright-magenta: #ffb5ff; /* oklch(87% 0.127 326.6) */
+  --bright-cyan: #74dcf2; /* oklch(84% 0.101 213.2) */
+  --bright-white: #d3c9e8; /* oklch(85% 0.044 300.1) */
+  --dim: #d0afff; /* oklch(81% 0.116 302.8) */
+  --heading: #ffa1ff; /* oklch(83% 0.161 326.9) */
+  --link: #00dff9; /* oklch(83% 0.143 209.7) */
+  --code: #9bcfa5; /* oklch(81% 0.080 150.2) */
+  --string: #e2bd7a; /* oklch(82% 0.095 81.6) */
+  --gutter: #5c4585; /* oklch(44% 0.104 298.7) */
+  --cursor-line: #221540; /* oklch(24% 0.078 293.6) */
+  --panel: #2a1a4d; /* oklch(27% 0.090 294.0) */
+  --border: #432c6b; /* oklch(35% 0.106 297.6) */
+  --err: #ff8a9b; /* oklch(77% 0.142 11.8) */
+  --warn: #e2bd7a; /* oklch(82% 0.095 81.6) */
+  --info: #00dff9; /* oklch(83% 0.143 209.7) */
+  --hint: #9bcfa5; /* oklch(81% 0.080 150.2) */
+}

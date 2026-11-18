@@ -7,6 +7,10 @@ presets:
     width: 1080
     height: 1920
     by: picked, the job design note, 2026-11-12; a phone held upright
+  - name: half-portrait
+    width: 1080
+    height: 960
+    by: picked, 2026-11-16; half a portrait frame split horizontally
   - name: portrait-preview
     width: 360
     height: 640

@@ -23,6 +23,10 @@ build that runs it first. a paged source, a pdf, is read a page at a
 time by poppler's pdftotext; it reaches nothing outside and writes
 nothing.
 
+the shelf is the one SLAYER_SHELF names, and with that unset, the shelf
+folder committed beside the list, so a fresh clone verifies with no
+setup.
+
 this is a text-and-value check. it does not infer units, range endpoints,
 coefficient roles or powers from prose. those claims need source review
 and the model's independent checks.`
@@ -33,7 +37,9 @@ const pdfSuffix = ".pdf"
 // doubled is the bits a float64 holds, as strconv asks to be told.
 const doubled = 64
 
-// verify holds every measured number to its source, and says each.
+// verify holds every measured number to its source, and says each. the
+// sources are read from the shelf SLAYER_SHELF names or, with it unset,
+// from the shelf folder beside the list; see shelfDir.
 func (at place) verify(call pzm.Call) error {
 	list, err := sources.Read(at.list)
 	if err != nil {

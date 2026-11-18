@@ -1,0 +1,129 @@
+# alfa off san onofre: shot A of the water brief
+# (the-vorrh/plans/2026-11-16-water-brief.md), the skeleton. A surfaced
+# Project 705 Alfa about 1.5 km off the coast, seen from seaward in the
+# late afternoon. An agent owns this set and the boat; an agent owns the water.
+#
+# the frame. places are metres, x east, y north, z up. the origin is the
+# coast at San Onofre, 33.37 N, 117.56 W: the brief's own coordinate,
+# which I did not check against a map. the boat is 1.5 km west of it, a
+# choice, on a heading of 340 degrees (bow north-north-west), a choice:
+# along a coast that trends north-west.
+#
+# the air. there is no terrain yet, so the set runs under an agent's
+# groundless Earth air (doc/groundless-earth-air.md): `air: earth`, the
+# column sampled at 0 m over the Earth mean-radius datum, world.unit 1.
+# its boundary, earth-standard-land, is a land-albedo (0.15 grass and
+# soil) and continental-aerosol stand-in, NOT an offshore or coastal
+# measurement: the sky and the sea's glints take their light from it.
+# the kind `alfa` is in the v2 schema's list of things for this set.
+#
+# the light. the sun is set by azimuth and altitude, picked here, not
+# worked from the clock: the air does not derive the sun from latitude,
+# longitude or time of day (her doc says so; `timeofday` is stored and
+# read by nothing), so it does not move the sun. the azimuth and altitude
+# are oceantex.Sun, the Naval Observatory's approximate formulas, for
+# 33.37 N, 117.56 W at 2026-11-16 23:30 UTC, 15:30 Pacific standard time
+# (UTC-8): azimuth 236.2 degrees clockwise from north, altitude 13.4.
+#
+# the sea. `world.ocean` (an agent's, doc/sets.md) is one static instant of
+# her wave cascades, 512 m across, centred on the boat, 257 samples a
+# side. every sea input is chosen, none from a shelf source: a wind of
+# 7 m/s (a moderate breeze), a fetch of 50 km, deep water (depth 0),
+# waves going toward the east, the coast, seed 7, time 0. slayer draw
+# reports the spectrum model's estimate (not an observation, and the
+# finite sampled field may differ): significant height 1.06 m, peak
+# period about 4 s, at 42eb65da, 2026-11-16. the
+# field's edge is 256 m from the boat on each side; from the camera,
+# 170 m south-west of it, the edge falls behind the boat to the
+# north-east, out past the hull's far side, where the sea ends at the
+# black sky. the camera is in air above the water, so it names no
+# `initial-media`.
+#
+# `direct-sun: mean-plane` lights the submerged hull with the sun. it is
+# CPU only; it refracts with the horizontal mean-plane normal, not the
+# waves' (so no caustics or wave focusing); the water's coefficients are
+# the synthetic extinction below; and the water does not scatter.
+#
+# mean sea is at z=0 and the boat is placed by `position`, its keel at
+# up = -6.24 m, minus manufacture.Floating("alfa").Waterline.
+#
+# gaps, for an agent:
+# - the water's extinction is synthetic and it does not scatter. its
+#   colour is a stand-in.
+# - TERRAIN PLACEHOLDER: no terrain. the coast's relief, 1.5 km east of
+#   the boat, comes later from celestial-data's noaacrm adapter,
+#   extended. until then the sea runs to the horizon on every side.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: alfa off san onofre
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 236.2, altitude: 13.4}
+  # a test frame: small, one ray. the exposure is fixed at 1102, the
+  # value the meter gave this air and sun (the draw's receipt), so that
+  # matched renders share it.
+  film:
+    width: 480
+    height: 270
+    rays: 1
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      # a clear dielectric at water's index, over a dark blue-green. the
+      # colour stands in for the water's own. extinction per metre is
+      # SYNTHETIC, red lost fastest, green and blue slowest, in the
+      # order of clean water's: not measured, not a coastal preset,
+      # until an agent's sourced presets are approved.
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.5, 0.1, 0.06]
+        source: "synthetic extinction, not measured water; colour by eye"
+    ocean:
+      # mean sea at z=0, a swell from the wind and fetch above.
+      material: seawater
+      middle: [-1500, 0, 0]
+      extent: {value: 512, unit: m}
+      samples: 257
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a moderate breeze off San Onofre, no shelf source"
+  set:
+    things:
+      alfa:
+        kind: alfa
+        seed: 1
+        # up is minus manufacture.Floating("alfa").Waterline, 6.24 m
+        position:
+          east: {value: -1500, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: -6.24, unit: m}
+        heading: {value: 340, unit: deg}
+  cameras:
+    # from seaward, 170 m south-west of the boat, on the sun's side of it
+    # so the sun is behind the camera, 4 m over the sea, looking a
+    # little up at the sail (z 6). a choice.
+    # (this render copy keeps only the deck camera; the set has seaward too)
+    # from above the bow quarter, to judge the sun on the submerged hull:
+    # 50 m out from the bow on the sun's side (bearing 250 degrees from
+    # the bow at (-1514, 38)), 20 m up, looking down about 25 degrees at
+    # the forward hull at the waterline (z -4). a choice.
+    deck:
+      title: "from above the bow quarter, down at the forward hull"
+      location: {at: [-1561, 21, 20]}
+      orientation: {look_at: [-1509, 24, -4]}

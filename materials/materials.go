@@ -21,6 +21,9 @@ var weights = map[string]float64{
 	"S": 32.06, "Ar": 39.948, "Fe": 55.845, "Ni": 58.693, "Th": 232.04,
 	"U": 238.03, "Pu": 244.06, "Ag": 107.87, "Au": 196.97, "Be": 9.0122,
 	"Ti": 47.867, "Pb": 207.2,
+	// CIAAW standard atomic weights, read 2026-11-15:
+	// https://www.ciaaw.org/gallium.htm and /arsenic.htm.
+	"Ga": 69.723, "As": 74.921595,
 }
 
 // within is how far from one a set of shares may sum, for the rounding

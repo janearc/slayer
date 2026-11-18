@@ -1,9 +1,7 @@
 # Let the lens ask for detail
 
-The preparation helper in `scene/footprint` has compiled and passed
-independent host geometry checks. It is not an enabled whole-world
-renderer. [The verification record](verification-2026-11-09.md) separates
-that evidence from the remaining renderer and image checks.
+The preparation helper in `scene/footprint` is not an enabled whole-world
+renderer.
 
 The constructor takes a camera pose, horizontal pinhole field, actual
 raster dimensions, pixel width/height ratio and near distance. Nothing
@@ -53,22 +51,12 @@ The existing terrain selector accepts a callback returning visibility and a
 score. A world adapter can return Assess.Visible and Assess.Pixels for each
 source patch, then use a pixel target with its patch/work budgets.
 
-That adapter still needs source projection, an explicit height datum and
-conservative world bounds. It is not wired into Hillside in this slice.
+That adapter needs source projection, an explicit height datum and
+conservative world bounds.
 
 The same view can assess a full canopy envelope before choosing vegetation
 detail. Roots outside the image may still have visible branches. Population
 identity must remain fixed when its representation changes; the lens does not
 reseed the forest.
 
-Aggregate canopy and temporal transitions are still separate work.
-
-Review needs independent centre/edge projection calculations, a narrow field
-compared with a wide field, non-square pixels, rotated poses, world-origin
-translations, boxes at every frustum plane, the camera inside a box and
-near-plane crossings. A self-roundtrip alone is not evidence.
-
-Independent rational pinhole witnesses are recorded in
-`scene/footprint/testdata/pinhole-contract.yaml`. The geometry tests now
-read those authored expectations; the YAML itself remains a fixture,
-not captured production output.
+Aggregate canopy and temporal transitions are not covered.

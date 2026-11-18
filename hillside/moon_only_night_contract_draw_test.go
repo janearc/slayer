@@ -42,7 +42,7 @@ func TestMoonOnlyGuardDoesNotRemoveDaylightInputs(test *testing.T) {
 // readLightingInput checks the shipped recipe through the ordinary set reader.
 func readLightingInput(test *testing.T, name string) set.Set {
 	test.Helper()
-	path := filepath.Join("..", "doc", name)
+	path := filepath.Join("testdata", name)
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		test.Fatal(err)

@@ -52,7 +52,7 @@ func World(said set.World) (*thing.World, error) {
 func Add(world *thing.World, said set.World, shift maths.Vec) error {
 	worn := map[string]*thing.Material{}
 	for _, each := range said.Materials() {
-		made, err := material(each)
+		made, err := material(each, said.Unit())
 		if err != nil {
 			return err
 		}
@@ -85,10 +85,35 @@ func Print(said set.Film) colour.Tone {
 	return colour.Tone{Exposure: said.Exposure(), Knee: knee, Top: top}
 }
 
-// material is a material: its colour, its glow, or both; a glow is a
-// black body's light, or a colour.
-func material(said set.Material) (*thing.Material, error) {
+// material is a material: its colour, glow and clear interface, built for
+// the renderer.
+func material(said set.Material, metresPerUnit float64) (*thing.Material, error) {
 	made := &thing.Material{Name: said.Name()}
+	if clear, has := said.Clear(); has {
+		made.Through = clear.Through
+		made.Index = clear.Index
+		made.Gloss = clear.Gloss
+		made.Rank = clear.Rank
+		if name, extinction, optical := clear.OpticalMedium(); optical {
+			absorption, scattering, phaseG, steps, maxDistance, participating :=
+				clear.ParticipatingMedium()
+			var medium *thing.ClearMedium
+			var err error
+			if participating {
+				medium, err = thing.NewClearMediumWithScattering(name,
+					maths.RGB(absorption[0], absorption[1], absorption[2]),
+					maths.RGB(scattering[0], scattering[1], scattering[2]),
+					phaseG, metresPerUnit, steps, maxDistance)
+			} else {
+				medium, err = thing.NewClearMedium(name, maths.RGB(
+					extinction[0], extinction[1], extinction[2]), metresPerUnit)
+			}
+			if err != nil {
+				return nil, fmt.Errorf("material %s: %w", said.Name(), err)
+			}
+			made.ClearMedium = medium
+		}
+	}
 	if painted, has := said.Colour(); has {
 		made.Colour = light(painted)
 	}

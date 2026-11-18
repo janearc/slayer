@@ -1,0 +1,2 @@
+# the earth in grissom, from the sibling data layout in doc/grissom-setup.md.
+grissom-data ../celestial-data :: ./bin/celestial-data fetch-set grissom --into ../local/data

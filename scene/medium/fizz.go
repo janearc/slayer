@@ -82,3 +82,10 @@ func (f Fizz) Tick(at time.Duration) Medium {
 	f.risen = f.Rise * at.Seconds()
 	return f
 }
+
+// AdvectionDistance is the evaluated churn displacement along local +Y.
+// Placement may rotate that local axis into an authored downstream flow.
+func (f Fizz) AdvectionDistance() float64 { return f.risen }
+
+// ExpansionFactor is the existing chosen top-to-foot radius ratio.
+func (Fizz) ExpansionFactor() float64 { return spread }

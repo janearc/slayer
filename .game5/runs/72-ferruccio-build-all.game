@@ -1,0 +1,1 @@
+ferruccio-build-all . :: /bin/sh ferruccio/scripts/build-all.sh

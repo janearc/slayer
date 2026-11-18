@@ -1,0 +1,144 @@
+chip 5 hull REFUSED manufacture: chip has no hull representation
+chip 5 clumps REFUSED manufacture: chip has no clumps representation
+chip 5 quick a1bc4bd8f8af870bb601a58e9093851bf500cd531dcaf75daaec4c8416c8cb24
+chip 5 demo REFUSED manufacture: chip has no demo representation
+chip 11 hull REFUSED manufacture: chip has no hull representation
+chip 11 clumps REFUSED manufacture: chip has no clumps representation
+chip 11 quick 1857ba45e60a4f36f47e258070b29d9d0d4040f14db8a40f120648c73cd80f6f
+chip 11 demo REFUSED manufacture: chip has no demo representation
+city-apartment 5 hull af2ef29203f446806004cf97c48fca00d752be63e7149ae1bbabe41b9ab8abd4
+city-apartment 5 clumps REFUSED manufacture: city-apartment has no clumps representation
+city-apartment 5 quick 0d64093006105b2a039d0dc1171ffe2e09d1a073d65410632d64f98971fe7d83
+city-apartment 5 demo REFUSED manufacture: city-apartment has no demo representation
+city-apartment 11 hull 524a965a1c83a34b97498af47bda72eabedbf50f7ca23d987cae8c1a16c31174
+city-apartment 11 clumps REFUSED manufacture: city-apartment has no clumps representation
+city-apartment 11 quick d1cc5494191643b3ba6678ac2a862d76711afd1feff7933a25947e269efaf314
+city-apartment 11 demo REFUSED manufacture: city-apartment has no demo representation
+city-clustered-10000 5 hull 4f4aa465a39eb09b6ed4d85ef4f52ed6c5d9d1c15b8011fd2be3c38e4f33808f
+city-clustered-10000 5 clumps REFUSED manufacture: clustered city has no clumps representation
+city-clustered-10000 5 quick a8bb1047f31895210ce5ae85c689546804dda14bdcce7d0e72f86328bf1edbd8
+city-clustered-10000 5 demo REFUSED manufacture: clustered city has no demo representation
+city-clustered-10000 11 hull b237aeb31a786e6ce99c3c3c4ce1eaffa000fc1ace9a254824930411f8221b40
+city-clustered-10000 11 clumps REFUSED manufacture: clustered city has no clumps representation
+city-clustered-10000 11 quick 82a43e433d77e5ccd1b1a4ada1335e506592eae96c314f7dbb3048d0417c9b01
+city-clustered-10000 11 demo REFUSED manufacture: clustered city has no demo representation
+city-clustered-green-10000 5 hull 7a2535a74457d6ed19f749072749eecbceeb84a78a124a3b8e7eb00d08b21e6c
+city-clustered-green-10000 5 clumps REFUSED manufacture: clustered city has no clumps representation
+city-clustered-green-10000 5 quick b557a2099974e07ad31376ea35eee7e5d653d91eda68f430f64fc140068abdbf
+city-clustered-green-10000 5 demo REFUSED manufacture: clustered city has no demo representation
+city-clustered-green-10000 11 hull 56c220a94253ca98029cd31b9ba9ad8ae947e789201a272bae6319ecb6f05a26
+city-clustered-green-10000 11 clumps REFUSED manufacture: clustered city has no clumps representation
+city-clustered-green-10000 11 quick 06c4a6cc0f5734905fbb852a02539df469408a4a3c9f3438e5edc99383d4f5a0
+city-clustered-green-10000 11 demo REFUSED manufacture: clustered city has no demo representation
+city-clustered-night-10000 5 hull 11d93dbfde3821c46c6435143a06e78b491dc21061e8991ac838e0bdab44645d
+city-clustered-night-10000 5 clumps REFUSED manufacture: clustered city has no clumps representation
+city-clustered-night-10000 5 quick f4fbf4cd904a628d8c9bd340e88f5eb78cd99d6605b4fa244bc632196758b213
+city-clustered-night-10000 5 demo REFUSED manufacture: clustered city has no demo representation
+city-clustered-night-10000 11 hull a32e842f9a9e605d564ee9a1bd0acf2a0dd8e18d5aeb1bf7f2793254b96c052a
+city-clustered-night-10000 11 clumps REFUSED manufacture: clustered city has no clumps representation
+city-clustered-night-10000 11 quick be2c6a50a0d8e52e7b916e469bb0d716672b1577930841fe720a434fbc6c79e4
+city-clustered-night-10000 11 demo REFUSED manufacture: clustered city has no demo representation
+city-grid-10000 5 hull 8aa6ea640ac3e1dd9350f9e77e522f1b6588f29fcaa04b3617a285e0d589cb24
+city-grid-10000 5 clumps REFUSED manufacture: city has no clumps representation
+city-grid-10000 5 quick dad36bf1099a07385cbd16021a30f41e96a6ea8c09a6826b6de888b38b5ff865
+city-grid-10000 5 demo REFUSED manufacture: city has no demo representation
+city-grid-10000 11 hull bbc559b6c06ab3bd236257965616ed7a0b20285337adffd1f6ba72ee03436c44
+city-grid-10000 11 clumps REFUSED manufacture: city has no clumps representation
+city-grid-10000 11 quick 47f86d721644e5b2342e01fd27b2d5709f80a7ec0bd337547b9259b43544b43b
+city-grid-10000 11 demo REFUSED manufacture: city has no demo representation
+city-rowhouse 5 hull 77380a146434a2903f1a931763b56675c2a56ebea8296088850a627256c15b63
+city-rowhouse 5 clumps REFUSED manufacture: city-rowhouse has no clumps representation
+city-rowhouse 5 quick 558724503fa11882d9127be9fde80d79554e741d3805ee7d13dcaf4393dc3db2
+city-rowhouse 5 demo REFUSED manufacture: city-rowhouse has no demo representation
+city-rowhouse 11 hull c1709989754d21adde3a344791e19903f5b5eade8d5c02f5c60455a9f3da5030
+city-rowhouse 11 clumps REFUSED manufacture: city-rowhouse has no clumps representation
+city-rowhouse 11 quick 9c6b276c1ad6a7e80f8d28993edb72b4278a43f9d85a951f9300eb42f186a325
+city-rowhouse 11 demo REFUSED manufacture: city-rowhouse has no demo representation
+city-tower 5 hull 4d4eacb0be9984399b500b68e515df5dc39de5a2e13e58819b3098357b1e8013
+city-tower 5 clumps REFUSED manufacture: city-tower has no clumps representation
+city-tower 5 quick 840b54289bc12d6f450d415673c67bac50236112117a8787aa05f45f2be7bd79
+city-tower 5 demo REFUSED manufacture: city-tower has no demo representation
+city-tower 11 hull 20a36c43769fe568814f63a8c5883cd649c97af9f6d487ed493f5baa64d64d08
+city-tower 11 clumps REFUSED manufacture: city-tower has no clumps representation
+city-tower 11 quick 566aeb8ced1fdfa8aa67f6b9ce500860cb819b9f668d9586659fd32c7febe558
+city-tower 11 demo REFUSED manufacture: city-tower has no demo representation
+human-scale-2m 5 hull f606b9633fa71b3f9b999203bb05fe847b89446250aa0aab76ac71463ac56166
+human-scale-2m 5 clumps 72a4574f9975d3d56eccb78381e39ce87b4f7823566d0dc021861cdaa00b49ab
+human-scale-2m 5 quick 3b94f74815642caee04fa028c9bb1d4cd6b4849037da5fa89ab8e02bc7ed96c5
+human-scale-2m 5 demo b7719a7529fe155b2bdc4e933712ec3153065edf382f660c07b7a1bb3821144b
+human-scale-2m 11 hull f606b9633fa71b3f9b999203bb05fe847b89446250aa0aab76ac71463ac56166
+human-scale-2m 11 clumps 72a4574f9975d3d56eccb78381e39ce87b4f7823566d0dc021861cdaa00b49ab
+human-scale-2m 11 quick 3b94f74815642caee04fa028c9bb1d4cd6b4849037da5fa89ab8e02bc7ed96c5
+human-scale-2m 11 demo b7719a7529fe155b2bdc4e933712ec3153065edf382f660c07b7a1bb3821144b
+landform-caldera-volcano 5 hull 0eb01f3f78025f01fd9242062a57711057e6e3e25dcd7db864325cb71a01a1b7
+landform-caldera-volcano 5 clumps REFUSED manufacture: macro recipes have no clumps representation
+landform-caldera-volcano 5 quick b03cf380f5336812e3d79e42acd0045c1eee82d1ede0614db30bcd6f01fac03e
+landform-caldera-volcano 5 demo 3df02a496e9fdffe919093acc7c56ca468301d5a8bd966ed441ccbd5c034915a
+landform-caldera-volcano 11 hull 0412ace331133a5ff69513cc79f9956dd21bc3821087a0bfcc5b05524671e5df
+landform-caldera-volcano 11 clumps REFUSED manufacture: macro recipes have no clumps representation
+landform-caldera-volcano 11 quick df5f277282ca02b85da97da91020455eaee5019d3375ede375a3ec8c662e143c
+landform-caldera-volcano 11 demo d6e71a72035ba16ecbc3c82c62030bc0d2d67cb3c46e0f046f56c5b793acbd7e
+landform-mountain-massif 5 hull bef7e86ec28d4daeca4382cb940eb1b668b2759253016b9565edb8079b7ee0df
+landform-mountain-massif 5 clumps REFUSED manufacture: macro recipes have no clumps representation
+landform-mountain-massif 5 quick 2c69920b6622fb08407a96ae00dfd34db6fdf4f1e1a5e38a215187ea799323be
+landform-mountain-massif 5 demo 3464802700cd44b48b103660a990889f81c6be1bbc60e7dd379b625077bd000c
+landform-mountain-massif 11 hull f794d87e29c5e4e214498a72b0891f5e65dfe9dbce5e949bd939a5490688eccf
+landform-mountain-massif 11 clumps REFUSED manufacture: macro recipes have no clumps representation
+landform-mountain-massif 11 quick 161670afa5ce16c8720dbe6d93ea46cca1c58c34ff058454d2f3865af6a83ff1
+landform-mountain-massif 11 demo 3b39ad1de8bfdea95ea7700f9c62107e8d3549e282ca181da52c592436c51e08
+macro-inhabited-bridge 5 hull 28905fe6e6af6d43203eeed53113ff484e23c64d807b5181da155d946ad4a487
+macro-inhabited-bridge 5 clumps REFUSED manufacture: macro recipes have no clumps representation
+macro-inhabited-bridge 5 quick 530ecdff52157254d5b023eec750e3c9fc5963e578c6c7f0b6b0ece5082fb87f
+macro-inhabited-bridge 5 demo 66c8315a2dc19e425286c4ca0cc26089c973184421c7408e8bc21eaf4e3deb3d
+macro-inhabited-bridge 11 hull 354252938f8da523b469a4dad0e249bbbc8dda4565a5cb489cf0a73677a43595
+macro-inhabited-bridge 11 clumps REFUSED manufacture: macro recipes have no clumps representation
+macro-inhabited-bridge 11 quick 833a843a0b71ce620a16539c1dec8080cedb06443ae985d4f5bffa067d7f7f60
+macro-inhabited-bridge 11 demo e01ec30d4e952f53405e633ed3ea6fe1a341d9283a0875433968dd499f0f4981
+macro-terraced-arcology 5 hull 776ebe7fb506c724d3a5e8f8c979beae0d301d49f60b04bfe07fd4ea9a19790b
+macro-terraced-arcology 5 clumps REFUSED manufacture: macro recipes have no clumps representation
+macro-terraced-arcology 5 quick e250fa97a7d02eedd90e32070746d9c488941f3a3b58d87b7187b9235dced277
+macro-terraced-arcology 5 demo e250fa97a7d02eedd90e32070746d9c488941f3a3b58d87b7187b9235dced277
+macro-terraced-arcology 11 hull 9554164c99adc7f133fc018352c4dd28f596aa4e464f0f2179953dc99c1796d9
+macro-terraced-arcology 11 clumps REFUSED manufacture: macro recipes have no clumps representation
+macro-terraced-arcology 11 quick 164fb943c09e871be1ec9aa3369753f9ab6220cbd5da841b558418b766402513
+macro-terraced-arcology 11 demo 164fb943c09e871be1ec9aa3369753f9ab6220cbd5da841b558418b766402513
+macro-twisted-spires 5 hull 66981c047e7cfd519ec98a7ca04ea7027c431de5e742e4a116f9d3ca6b9ff15e
+macro-twisted-spires 5 clumps REFUSED manufacture: macro recipes have no clumps representation
+macro-twisted-spires 5 quick d75f9ca759c737cf136cd127486c157340989354889f7205c6e9e416204f3e3b
+macro-twisted-spires 5 demo 74d7b6e6db0a83189abe031956f4564866db69f0546dfed4438dba30e692b46b
+macro-twisted-spires 11 hull abe1e5f1868e9ec2afafb55a67a1104c8d461c360d5194657cc9238fed2cc68b
+macro-twisted-spires 11 clumps REFUSED manufacture: macro recipes have no clumps representation
+macro-twisted-spires 11 quick 703ba888a3de15d2c41efe1dd7179ab7bdea15e9a239bebf26abfef47b8a86ee
+macro-twisted-spires 11 demo a9b32c5bdc02230581a64647d87e2f5e0f124e09035705ee6ce65e1859027bb2
+slab 5 hull REFUSED manufacture: slab has no hull representation
+slab 5 clumps REFUSED manufacture: slab has no clumps representation
+slab 5 quick fb37511479d07085917d3e9426ff10718015f04779a129363aad3182d4e4693d
+slab 5 demo REFUSED manufacture: slab has no demo representation
+slab 11 hull REFUSED manufacture: slab has no hull representation
+slab 11 clumps REFUSED manufacture: slab has no clumps representation
+slab 11 quick 71c2fb5f1f2d7209a5a4f206cd20f3e445d196d5f27c246a1e271d3bba17547a
+slab 11 demo REFUSED manufacture: slab has no demo representation
+venera-lander 5 hull fcddb3eaa5477768b5555fe9550356acad64ec1343c002f7dd6f24c62411ba0d
+venera-lander 5 clumps f4f49a3f47a028f2bb18e0c1f087256a22b68c776f6174132a54d53ba40a54bc
+venera-lander 5 quick a4ca866c1f5284868fb931d72aa6b460221bae58b50de7e384181c20b6438e27
+venera-lander 5 demo cdf0bb3b58ee819c82f002dc707d124c726dd5bebe9adb4912904ab18e9e7fd3
+venera-lander 11 hull fcddb3eaa5477768b5555fe9550356acad64ec1343c002f7dd6f24c62411ba0d
+venera-lander 11 clumps f4f49a3f47a028f2bb18e0c1f087256a22b68c776f6174132a54d53ba40a54bc
+venera-lander 11 quick a4ca866c1f5284868fb931d72aa6b460221bae58b50de7e384181c20b6438e27
+venera-lander 11 demo cdf0bb3b58ee819c82f002dc707d124c726dd5bebe9adb4912904ab18e9e7fd3
+j58 5 hull 3a5e719466fddc4abea45dbb989d450e060b6fbd30b67772fdbc6d018fbaca44
+j58 5 clumps e9861e4fec730d692fac10fd5998741628c52fe52927c55c3dde8e9f13c16504
+j58 5 quick 549d8dae9bf8da7bafde57f9a3b245c06aa9e0cf2a5a82d4a074d49299021374
+j58 5 demo 2d7dd4938eb7f72cb166926bd63fdeaf850535dc64c9bb0691f42c0702977cb1
+j58 11 hull 3a5e719466fddc4abea45dbb989d450e060b6fbd30b67772fdbc6d018fbaca44
+j58 11 clumps e9861e4fec730d692fac10fd5998741628c52fe52927c55c3dde8e9f13c16504
+j58 11 quick 549d8dae9bf8da7bafde57f9a3b245c06aa9e0cf2a5a82d4a074d49299021374
+j58 11 demo 2d7dd4938eb7f72cb166926bd63fdeaf850535dc64c9bb0691f42c0702977cb1
+j58-test-stand 5 hull 19320de085655f5ca945bd53a8a3c9500a19782b6b77386f044c98633a1a1bfb
+j58-test-stand 5 clumps 512eb8d27503d3d70dc844398ce30302abdab58345dc14a31e6600891be7650b
+j58-test-stand 5 quick 4fcef411b7a46e17c06d45022e404ce7dda201597a3fd68aaaed88284ce715f9
+j58-test-stand 5 demo a91f6f90d0834b7cbde2f12e151cc278087db6edc02854495b184a492e535bb0
+j58-test-stand 11 hull 19320de085655f5ca945bd53a8a3c9500a19782b6b77386f044c98633a1a1bfb
+j58-test-stand 11 clumps 512eb8d27503d3d70dc844398ce30302abdab58345dc14a31e6600891be7650b
+j58-test-stand 11 quick 4fcef411b7a46e17c06d45022e404ce7dda201597a3fd68aaaed88284ce715f9
+j58-test-stand 11 demo a91f6f90d0834b7cbde2f12e151cc278087db6edc02854495b184a492e535bb0

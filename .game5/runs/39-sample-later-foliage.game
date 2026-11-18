@@ -1,0 +1,1 @@
+sample-later-foliage . :: go test -count=1 -run=^TestDiagnosticPrintLaterFoliageSamples$$ -v ./manufacture

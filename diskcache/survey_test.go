@@ -2,6 +2,7 @@ package diskcache
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
@@ -96,10 +97,14 @@ func TestUnderTheCapNothingGoes(t *testing.T) {
 	}
 }
 
-// parted is a .part file in the store's folder, last written at a time.
-func parted(t *testing.T, store *Store, name string, at time.Time) string {
+// parted is a .part file of a key's entry, named as a writer names one,
+// last written at a time.
+func parted(t *testing.T, store *Store, key Key, at time.Time) string {
 	t.Helper()
-	path := store.folder + "/" + name + partSuffix
+	path := store.path(key) + ".1-abcd" + partSuffix
+	if err := os.MkdirAll(filepath.Dir(path), folderMode); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.WriteFile(path, nil, fileMode); err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +116,7 @@ func parted(t *testing.T, store *Store, name string, at time.Time) string {
 
 func TestAStalePartIsRemoved(t *testing.T) {
 	store, ticking := testStore(t, "parts-stale")
-	stale := parted(t, store, "killed", started)
+	stale := parted(t, store, NewKey(store.kind).Text("a", "1"), started)
 	ticking.at = started.Add(staleParts + minuteLater)
 	if err := store.Put(NewKey(store.kind), nil); err != nil {
 		t.Fatal(err)
@@ -124,7 +129,7 @@ func TestAStalePartIsRemoved(t *testing.T) {
 // anti-test of TestAStalePartIsRemoved
 func TestAFreshPartIsLeftToItsWriter(t *testing.T) {
 	store, ticking := testStore(t, "parts-fresh")
-	fresh := parted(t, store, "writing", started)
+	fresh := parted(t, store, NewKey(store.kind).Text("a", "2"), started)
 	ticking.at = started.Add(minuteLater)
 	if err := store.Put(NewKey(store.kind), nil); err != nil {
 		t.Fatal(err)
@@ -157,7 +162,7 @@ func TestClearOfAFolderGoneSaysSo(t *testing.T) {
 // anti-test of TestUsageCountsEntriesAndTheirTimes
 func TestUsageDoesNotCountAPart(t *testing.T) {
 	store, _, _ := filled(t, "usage-part", 2)
-	parted(t, store, "writing", started)
+	parted(t, store, NewKey(store.kind).Text("a", "3"), started)
 	usage, err := store.Usage()
 	if err != nil || usage.Entries() != 2 {
 		t.Fatalf("usage %+v, %v; want the two entries, not the part",

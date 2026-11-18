@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 
 	"github.com/janearc/puzzlemouth/pzm"
+	"github.com/janearc/slayer/diskcache"
 	"github.com/janearc/slayer/job"
 )
 
@@ -21,24 +21,20 @@ const schemaHelp = `# schema
 slayer schema prints the job schema (job-v1): every key of a job file,
 with what it says, as the editor shows it on hover.
 
-slayer schema --where prints the path of a copy of it kept under the
-user's cache directory, written there first if it is absent or not this
-build's. A job file's first line names that path for the YAML language
-server: # yaml-language-server: $schema=PATH
+slayer schema --where prints the path of a copy of it kept in the
+schema folder of the cache home (SLAYER_CACHE), written there first if
+it is absent or not this build's. A job file's first line names that
+path for the YAML language server:
+# yaml-language-server: $schema=PATH
 `
 
-// The cache the editor's files are kept in, under the user's cache
-// directory, as os.UserCacheDir finds it, read through the door's
-// environment so a test can give another.
+// The cache the editor's files are kept in: the schema folder under the
+// cache home, which diskcache.Home finds through the door's environment
+// so a test can give another.
 const (
-	userCacheFolder = "slayer"
-	schemaName      = "job-v1.schema.json"
-	luaName         = "slayer.lua"
-	xdgCache        = "XDG_CACHE_HOME"
-	homeName        = "HOME"
-	darwinCache     = "Library/Caches" // defined by macOS
-	plainCache      = ".cache"         // defined by the XDG base directory spec
-	darwin          = "darwin"
+	schemaFolder = "schema" // defined: the cache's name for the editor's files
+	schemaName   = "job-v1.schema.json"
+	luaName      = "slayer.lua"
 )
 
 // schemaing is the schema verb.
@@ -68,30 +64,14 @@ func (verb schemaing) schema(call pzm.Call) error {
 	return err
 }
 
-// cacheDirectory is the user's cache directory, as os.UserCacheDir
-// finds it, from the door's environment.
-func (env Env) cacheDirectory() (string, error) {
-	if said, set := env.lookup(xdgCache); set && runtime.GOOS != darwin {
-		return said, nil
-	}
-	home, set := env.lookup(homeName)
-	if !set {
-		return "", errors.New("no cache directory: HOME is not set; set " +
-			"it, or XDG_CACHE_HOME")
-	}
-	if runtime.GOOS == darwin {
-		return filepath.Join(home, darwinCache), nil
-	}
-	return filepath.Join(home, plainCache), nil
-}
-
-// cached is the path of a file of slayer's in the cache.
+// cached is the path of a file of slayer's in the schema folder of the
+// cache home; it refuses by name where SLAYER_CACHE is not set.
 func (env Env) cached(name string) (string, error) {
-	directory, err := env.cacheDirectory()
+	home, err := diskcache.Home(env.lookup)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(directory, userCacheFolder, name), nil
+	return filepath.Join(home, schemaFolder, name), nil
 }
 
 // schemaCopy is the path of the schema's copy in the cache, written

@@ -1,0 +1,30 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: step 1, eight spacecraft side by side
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      # the front row, left to right
+      voyager-1: {kind: voyager-1, seed: 17, complexity: quick, east: -48, north: 0, height: {value: 0, unit: m}}
+      soho: {kind: soho, seed: 17, complexity: quick, east: -16, north: 0}
+      mariner-10: {kind: mariner-10, seed: 17, complexity: quick, east: 16, north: 0}
+      new-horizons: {kind: new-horizons, seed: 17, complexity: quick, east: 48, north: 0}
+      # the back row
+      jimo: {kind: jimo, seed: 17, complexity: quick, east: -48, north: 45}
+      cassini: {kind: cassini-huygens, seed: 17, complexity: quick, east: -16, north: 45}
+      prima: {kind: prima, seed: 17, complexity: quick, east: 16, north: 45}
+      webb: {kind: webb, seed: 17, complexity: quick, east: 48, north: 45}
+  film: {width: 2048, height: 1152, rays: 2, exposure: 0.004, wide: 52}
+  cameras:
+    lineup:
+      title: the two rows, from the sun's side
+      location: {at: [0, -130, 45]}
+      orientation: {look_at: [0, 22, 10]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

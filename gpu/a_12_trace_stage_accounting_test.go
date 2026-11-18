@@ -53,7 +53,9 @@ func TestTraceGPUTimingBalancesObservedCommandDurations(t *testing.T) {
 		t.Logf("%d actual commands: observed %v, reported %v (AS %v, lighting %v, trace %v)",
 			count, observed, reported, profile.AccelerationGPU,
 			profile.LightingGPU, profile.TraceGPU)
-		if count < 4 || profile.AccelerationGPU <= 0 ||
+		// The hierarchy's levels share one command buffer. The smoke grid
+		// and the trace each need at least one more.
+		if count < 3 || profile.AccelerationGPU <= 0 ||
 			profile.LightingGPU <= 0 || profile.TraceGPU <= 0 {
 			t.Fatal("observer fixture lost an actual GPU stage")
 		}

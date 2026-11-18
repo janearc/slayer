@@ -147,7 +147,7 @@ func TestSessionShutterOnTheGPUOverAHeldCameraIsThePlainFrame(t *testing.T) {
 // per-call draw through the lens the session made, to the bit, and it is
 // not the pinhole's frame
 func TestSessionLensOnTheGPUIsThePerCallDrawThroughIt(t *testing.T) {
-	wanted := jobFrom(t, lensJob("renderer: gpu\n"))
+	wanted := jobFrom(t, exposureLensJob("renderer: gpu\n"))
 	session := opening(t, wanted)
 	got := frameOrSkipped(t, session, nothing)
 	given := asAsked(t, session)

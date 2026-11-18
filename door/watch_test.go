@@ -20,7 +20,7 @@ func exampleEnv() (Env, string) {
 	cache, _ := os.MkdirTemp("", "slayer-example")
 	env, _ := NewEnv(Given{Context: context.Background(),
 		Environment: func(name string) (string, bool) {
-			if name == homeName || name == xdgCache {
+			if name == "SLAYER_CACHE" {
 				return cache, true
 			}
 			return "", false
@@ -32,18 +32,18 @@ func exampleEnv() (Env, string) {
 func Example_watch() {
 	env, top := exampleEnv()
 	var said bytes.Buffer
-	Tool(env).Run([]string{"watch", "../jobs/smoke-still.yaml",
+	Tool(env).Run([]string{"watch", "../doc/examples/jobs/smoke-still.yaml",
 		"--dry-run"}, &said, &said)
 	fmt.Print(strings.ReplaceAll(said.String(), top, ".."))
 	// Output:
-	// would watch ../jobs/smoke-still.yaml at preview quality
-	// would write ../jobs/.smoke-still.watch
+	// would watch ../doc/examples/jobs/smoke-still.yaml at preview quality
+	// would write ../doc/examples/jobs/.smoke-still.watch
 }
 
 func Example_edit() {
 	env, top := exampleEnv()
 	var said bytes.Buffer
-	Tool(env).Run([]string{"edit", "../jobs/smoke-still.yaml",
+	Tool(env).Run([]string{"edit", "../doc/examples/jobs/smoke-still.yaml",
 		"--dry-run"}, &said, &said)
 	for _, line := range strings.Split(said.String(), "\n") {
 		if strings.HasPrefix(line, "would lay out") {
@@ -51,7 +51,7 @@ func Example_edit() {
 			fmt.Println(strings.ReplaceAll(after, top, ".."))
 		}
 	}
-	// Output: watch ../jobs/smoke-still.yaml
+	// Output: watch ../doc/examples/jobs/smoke-still.yaml
 }
 
 func Example_schema() {
@@ -63,7 +63,7 @@ func Example_schema() {
 	Tool(env).Run([]string{"schema", "--where", "--dry-run"}, &said,
 		&said)
 	fmt.Println(strings.HasSuffix(strings.TrimSpace(said.String()),
-		filepath.Join(userCacheFolder, schemaName)))
+		filepath.Join(schemaFolder, schemaName)))
 	// Output:
 	// true
 	// true

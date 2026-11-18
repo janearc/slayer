@@ -23,6 +23,9 @@ func TestMain(m *testing.M) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	// the cache home the command and the tests keep what they work out
+	// in, removed with the rest, so nothing is kept in a real cache.
+	os.Setenv("SLAYER_CACHE", filepath.Join(directory, "cache"))
 	coverageCommand = filepath.Join(directory, "slayer")
 	if err = commandtest.Build(".", ".", coverageCommand, testing.CoverMode()); err != nil {
 		os.RemoveAll(directory)

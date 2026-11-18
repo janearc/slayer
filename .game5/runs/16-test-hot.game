@@ -1,0 +1,3 @@
+# plain `game check` and `go test ./...` run the non draw tier. test-draw runs only the tests the plain build
+# lacks, one package at a time; test-all is every test, the same way.
+test-hot . :: go run ./tools/tiers hot

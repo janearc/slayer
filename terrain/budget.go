@@ -25,6 +25,9 @@ const addressableBytes = int64(^uint(0) >> 1)
 const byteBits = 8
 const sampleBytes = floatBits / byteBits
 
+// signedBytes is defined by a signed 16-bit sample's width in bytes.
+const signedBytes = signedBits / byteBits
+
 // directoryCountBytes is defined by BigTIFF's uint64 directory-entry count.
 const directoryCountBytes = 64 / byteBits
 

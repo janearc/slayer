@@ -3,6 +3,7 @@ package set
 import (
 	"math"
 	"slices"
+	"strings"
 
 	"github.com/janearc/slayer/manufacture"
 	yaml "gopkg.in/yaml.v3"
@@ -11,11 +12,77 @@ import (
 // Terrain is the ground a set stands on, as it was measured: a window of
 // a published elevation model, named by its key in sources.yaml, read
 // from a file on the reader's shelf, in the model's own metres.
+//
+// A window is placed one of two ways. By west and north, in the model's own
+// metres, which is how every model but a map of a whole sphere is read. Or,
+// for a map of a sphere, by lat and lon: a place on the sphere, in degrees,
+// with the window laid round it in local metres, and optionally a detail,
+// which asks for ground finer than the map's, made from a seed.
 type Terrain struct {
 	from, file         string
 	west, north        float64
 	across, down, step float64
 	smooth             float64
+	lat, lon           float64
+	seed               float64
+	// reflectance is the share of red, green and blue light the ground
+	// gives back, linear, where the set says one.
+	reflectance [3]float64
+	// slope and longest are the relief a detail asks below the map, and
+	// relieved whether it asks one.
+	slope, longest float64
+	relieved       bool
+	// placed is whether the set placed the window by lat and lon, and
+	// detailed whether it asked for detail. A lat or a seed of nought is a
+	// place and a seed, so they are said apart from the numbers. reflected
+	// is whether the set said the ground's reflectance.
+	placed, detailed, reflected bool
+}
+
+// Relief is the relief the detail asks of the ground made below the map:
+// its least steepness, rise over run, the longest edge in metres it
+// reaches, and whether the set asked one.
+func (ground Terrain) Relief() (slope, longest float64, asked bool) {
+	return ground.slope, ground.longest, ground.relieved
+}
+
+// Reflectance is the share of red, green and blue light the ground gives
+// back, in linear light, and whether the set said it. A set that does not
+// say has the ground the stage gives every set.
+func (ground Terrain) Reflectance() (red, green, blue float64, said bool) {
+	shares := ground.reflectance
+	return shares[0], shares[1], shares[2], ground.reflected
+}
+
+// the bounds of the place a window may be asked for on a sphere
+const (
+	southPole   = -90  // defined: degrees south at the south pole
+	northPole   = 90   // defined: degrees north at the north pole
+	farWest     = -360 // defined: a longitude a whole turn west of the first
+	farEast     = 360  // defined: a longitude a whole turn east of the first
+	leastDetail = 0    // defined: the smallest seed, which is a whole number
+	noLight     = 0    // defined: a ground that gives back none of a light
+	allLight    = 1    // defined: a ground that gives back all of it
+	flattest    = 0    // defined: a relief of no steepness
+	steepest    = 10   // picked: past a cliff, so a typo is refused
+	// shortestRelief and longestRelief bound the longest edge a relief
+	// reaches, in metres: a centimetre, titan's finest, and the widest
+	// window a set may lay on a sphere's flat patch.
+	shortestRelief = 0.01 // defined: titan's inchworm
+	longestRelief  = 1e5  // defined: a window's widest across
+)
+
+// Place is the latitude and longitude, in degrees, the window is laid
+// round, and whether the set said one. A window that is placed has its own
+// local coordinates: see Window.
+func (ground Terrain) Place() (latitude, longitude float64, placed bool) {
+	return ground.lat, ground.lon, ground.placed
+}
+
+// Detail is the seed of the ground made below the map's own detail, and
+// whether the set asked for any. A set that did not ask has the map alone.
+func (ground Terrain) Detail() (seed uint64, asked bool) {
+	return uint64(ground.seed), ground.detailed
 }
 
 // Smooth is how wide, in metres, a gaussian blurs the model's heights, so its
@@ -31,7 +98,15 @@ func (ground Terrain) File() string { return ground.file }
 // Window is the window's first point, easting and northing in the
 // model's metres, how many metres it spans east and south, and how far
 // apart its points are.
+//
+// A window placed by lat and lon has no model's metres. Its metres are
+// local: east runs from nought at its west edge, north from nought at its
+// south edge, so its first point, the north-west corner, is at nought east
+// and as far north as the window is deep, and no coordinate is negative.
 func (ground Terrain) Window() (west, north, across, down, step float64) {
+	if _, _, placed := ground.Place(); placed {
+		return 0, ground.down, ground.across, ground.down, ground.step
+	}
 	return ground.west, ground.north, ground.across, ground.down,
 		ground.step
 }
@@ -218,7 +293,9 @@ type Thing struct {
 	seed                 float64
 	east, north          float64
 	height               float64
+	position             *WorldPosition
 	heading              *float64
+	partSpin             *PartSpin
 	alight               bool
 	space                spaceThing
 }
@@ -237,6 +314,15 @@ func (made Thing) At() (east, north float64) { return made.east, made.north }
 
 // Height is the optional lift above terrain, in metres. Zero stands on it.
 func (made Thing) Height() float64 { return made.height }
+
+// Position is the thing's explicit absolute east/north/up coordinate in
+// metres, and whether the set gave one. It is independent of terrain height.
+func (made Thing) Position() (WorldPosition, bool) {
+	if made.position == nil {
+		return WorldPosition{}, false
+	}
+	return *made.position, true
+}
 
 // Alight is whether it burns.
 func (made Thing) Alight() bool { return made.alight }
@@ -314,18 +400,96 @@ const (
 // terrain reads the set's terrain.
 func (reading reader) terrain(_, value *yaml.Node) error {
 	ground := &Terrain{}
+	wrote := map[string]bool{}
 	err := reading.keys(value, map[string]step{
-		"from":   reading.text(&ground.from),
-		"file":   reading.text(&ground.file),
-		"west":   reading.number(&ground.west, 0, math.Inf(1)),
-		"north":  reading.number(&ground.north, 0, math.Inf(1)),
+		"from": reading.text(&ground.from),
+		"file": reading.text(&ground.file),
+		"west": reading.noted(wrote,
+			reading.number(&ground.west, 0, math.Inf(1))),
+		"north": reading.noted(wrote,
+			reading.number(&ground.north, 0, math.Inf(1))),
+		"lat": reading.noted(wrote,
+			reading.number(&ground.lat, southPole, northPole)),
+		"lon": reading.noted(wrote,
+			reading.number(&ground.lon, farWest, farEast)),
+		"detail": reading.noted(wrote,
+			reading.block(map[string]step{"seed": reading.whole(
+				&ground.seed, leastDetail, mostSeed),
+				"relief": reading.relief(ground)})),
 		"across": reading.number(&ground.across, 1, 1e5),
 		"down":   reading.number(&ground.down, 1, 1e5),
 		"step":   reading.number(&ground.step, 0.01, 1e4),
 		"smooth": reading.number(&ground.smooth, 0, 1e4),
+		"reflectance": reading.noted(wrote,
+			reading.three(&ground.reflectance, noLight, allLight)),
 	}, nil)
 	reading.set.terrain = ground
-	return err
+	if err != nil {
+		return err
+	}
+	ground.placed, ground.detailed = wrote["lat"] && wrote["lon"],
+		wrote["detail"]
+	ground.reflected = wrote["reflectance"]
+	return reading.terrainPlace(value, wrote)
+}
+
+// relief is a step that reads the relief a detail asks below the map: its
+// least steepness, rise over run, and the longest edge, in metres, it
+// reaches up to, both said.
+func (reading reader) relief(ground *Terrain) step {
+	return func(_, value *yaml.Node) error {
+		err := reading.keys(value, map[string]step{
+			"slope": reading.number(&ground.slope, flattest, steepest),
+			"longest": reading.number(&ground.longest, shortestRelief,
+				longestRelief),
+		}, nil)
+		if err == nil {
+			err = reading.all(value, "a relief", "slope", "longest")
+		}
+		ground.relieved = err == nil
+		return err
+	}
+}
+
+// noted is a step that notes its key was written, in wrote, then reads it
+// as read does.
+func (reading reader) noted(wrote map[string]bool, read step) step {
+	return func(name, value *yaml.Node) error {
+		wrote[name.Value] = true
+		return read(name, value)
+	}
+}
+
+// terrainPlace refuses a terrain that is placed both ways, or half of the
+// way by lat and lon, or asked for detail where it has no sphere to lay
+// it on. wrote is the keys the terrain wrote.
+func (reading reader) terrainPlace(at *yaml.Node, wrote map[string]bool) error {
+	metres := wrote["west"] || wrote["north"]
+	degrees := wrote["lat"] || wrote["lon"]
+	switch {
+	case metres && degrees:
+		return reading.refuse(at, "terrain is placed by west and north, or "+
+			"by lat and lon, not both: it says %s and %s",
+			saidOf(wrote, "west", "north"), saidOf(wrote, "lat", "lon"))
+	case degrees && !(wrote["lat"] && wrote["lon"]):
+		return reading.refuse(at, "lat and lon go together: terrain says "+
+			"%s", saidOf(wrote, "lat", "lon"))
+	case wrote["detail"] && !degrees:
+		return reading.refuse(at, "detail is for terrain placed by lat and "+
+			"lon, which says neither")
+	}
+	return nil
+}
+
+// saidOf is the names, of those given, that were written, with and between.
+func saidOf(wrote map[string]bool, names ...string) string {
+	var said []string
+	for _, name := range names {
+		if wrote[name] {
+			said = append(said, name)
+		}
+	}
+	return strings.Join(said, " and ")
 }
 
 // film reads how the set's pictures are taken. a film with a rig says
@@ -471,9 +635,15 @@ func (reading reader) moon(_, value *yaml.Node) error {
 	return err
 }
 
+// mostSpaceCoordinate is the existing public thing schema cap, in metres.
+const mostSpaceCoordinate = 1e9
+
 // things reads each made thing, by its name.
 func (reading reader) things(_, value *yaml.Node) error {
-	unbounded := math.Inf(scenePositiveInfinity)
+	least, most := float64(sceneScalarZero), math.Inf(scenePositiveInfinity)
+	if reading.spaceCoordinates {
+		least, most = -mostSpaceCoordinate, mostSpaceCoordinate
+	}
 	maximum := math.Sqrt(math.MaxFloat64)
 	return reading.each(value, func(name, block *yaml.Node) error {
 		made := Thing{name: name.Value}
@@ -483,18 +653,30 @@ func (reading reader) things(_, value *yaml.Node) error {
 			"kind":       reading.kind,
 			"seed": reading.whole(&made.seed,
 				sceneScalarZero, mostSeed),
-			"east": reading.number(&made.east,
-				sceneScalarZero, unbounded),
-			"north": reading.number(&made.north,
-				sceneScalarZero, unbounded),
-			"heading": reading.heading(&made.heading),
+			"east":      reading.number(&made.east, least, most),
+			"north":     reading.number(&made.north, least, most),
+			"heading":   reading.heading(&made.heading),
+			"part-spin": reading.partSpin(&made.partSpin),
 			"height": reading.quantity(&made.height, "m",
 				sceneScalarZero, maximum),
+			"position":      reading.worldPosition(&made.position),
 			"alight":        reading.yes(&made.alight),
 			"stands_in_for": reading.text(&made.standsIn),
 		}, reading.spaceThing(&made))
 		err := reading.keys(block, steps, nil)
+		if err == nil && made.position != nil {
+			for _, key := range []string{"east", "north", "height", "place", "orbit", "around"} {
+				if says(block, key) {
+					return reading.refuse(valueNode(block, key),
+						"thing %s says position and %s; an absolute position stands alone",
+						made.name, key)
+				}
+			}
+		}
 		made.kind = valueOf(block, "kind")
+		if err == nil && made.partSpin != nil && !reading.spaceCoordinates {
+			err = reading.refuse(valueNode(block, "part-spin"), "part-spin is supported only with setting: space")
+		}
 		if err == nil && reading.second {
 			err = reading.standing(block, made)
 		}

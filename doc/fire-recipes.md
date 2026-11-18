@@ -154,19 +154,6 @@ tests compare the result with direct volume quadrature. direction, surface
 cosine and visibility still use the source centre, so nearby angular lighting
 and occlusion are approximations.
 
-## checks and remaining work
-
-tests cover units, refusal, copied inputs, repeatable time samples, distinct
-source phases, additive mixed-temperature overlap, GPU preparation, custom-field
-fallback and finite-source lighting. actual Metal grids are compared with the
-CPU model; the existing CPU/GPU fire image bounds remain.
-
-wind response, crown fuel consumption, transported smoke and temporal
-image-quality validation remain work. a short motion preview does not prove the
-720-frame animation budget. keep the forest benchmark separate.
-
-[validation notes](fire-validation.md) record checks and open review gates.
-
 ## night scenes and moving fronts
 
 [the night-fire study](fire-night-design.md) adds sourced emission lines,

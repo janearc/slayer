@@ -1,0 +1,52 @@
+Maunakea campus study, 2026-11-15
+
+Terrain is the retained NOAA Hawaii CRM2023 native-grid Big Island subset,
+SHA256 37c3cf3b48849d599950f255e64fed2bed7eb744ef18bf73d2375e9f0fc0f830.
+Its WGS84 grid is one arcsecond; heights are MSL, treated as radial offsets
+on the existing authored sphere. This does not resolve roads or foundations.
+
+Nine optical/submillimeter building positions use IfA's September25,1996
+aerial survey, published by NASA IRTF:
+https://irtfweb.ifa.hawaii.edu/observing/telescopeCoordinates.php
+https://legacy.ifa.hawaii.edu/mko-coordinates/coordinates.shtml
+The latitude/longitude columns are NAD83. For this coarse scenery preview
+they are treated as WGS84 without an epoch/datum transformation. The scene
+uses DEM heights, not that table's instrument elevations in feet.
+East/south offsets use a spherical small-angle conversion about
+19:49:34N,155:28:28W. Coordinates are scenery placement, not a new survey.
+
+VLBA position uses NRAO's WGS84 station list:
+https://science.nrao.edu/facilities/vlba/docs/manuals/oss2023B/sites
+19:48:04.97N,155:27:19.81W. Its quoted ellipsoid elevation is NOT mixed
+with NOAA MSL heights. The station is downslope and has a separate wide view.
+
+The SMA centre is approximately placed from the official summit map.
+Its eight-dish compact arrangement is authored, not surveyed pad locations
+or a claimed observing configuration:
+https://hilo.hawaii.edu/maunakea/maps/
+https://hilo.hawaii.edu/maunakea/documents/Maunakea-summit-map.pdf
+The map is historical and is not the current inventory.
+
+Inventory: KeckI/II, Subaru, IRTF, CFHT, GeminiNorth, UH88, UKIRT,
+JCMT, SMA and VLBA. UKIRT remains a building; UH announced science closure
+for September15,2026. CSO and HokuKea are omitted after their 2024 removal:
+https://www.hawaii.edu/news/2026/07/02/uh-continues-ukirt-decommissioning/
+https://www.hawaii.edu/news/2024/07/02/second-observatory-removed-maunakea/
+
+Building geometry, orientation, lighting, camera and ground colour are
+authored approximations. The Kecks share the same static pointing.
+No connecting service buildings, roads, survey-grade footprints, operating
+status telemetry or mechanically articulated tracking are represented.
+The other factory families have less detail than the revised Keck/Subaru.
+Sources checked through their primary web pages; no new shelf pin claimed.
+
+Heard F05 precinct revision: the sourced positions above now also place
+Subaru, IRTF, CFHT, Gemini North, UH88, UKIRT, JCMT and SMA around the Kecks.
+The local service buildings, mechanical plant, ladder and vent detail,
+connecting access-road paths and graded pads are authored approximations
+from the supplied UH summit map and photos. They are not survey geometry.
+Patchy snow and pale volcanic weathering are authored reference weather;
+vegetation is confined to lower altitude cover. CSO and HokuKea remain omitted.
+User reference map: https://hilo.hawaii.edu/maunakea/maps
+User supplied historical locator:
+https://hilo.hawaii.edu/maunakea/images/mk-summit-locator_2074x1706.png

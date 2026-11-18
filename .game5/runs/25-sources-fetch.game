@@ -1,0 +1,1 @@
+sources-fetch . :: go run ./cmd/sources fetch

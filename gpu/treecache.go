@@ -17,6 +17,7 @@ import (
 	berrors "go.etcd.io/bbolt/errors"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/treebolt"
 )
 
 // The trees the kernel walks are grown on the cpu, one for each mesh,
@@ -37,13 +38,17 @@ import (
 //
 // The cache never decides a picture: a tree it cannot read, cannot
 // trust or cannot store is grown as if it were not there, and counted,
-// the first such failure kept, for TreesCached to say. The file is never
-// emptied: it grows by a scene's trees for every program that draws it,
-// about 588 MB for moonlake's, and whoever owns the disk clears it.
+// the first such failure kept, for TreesCached to say.
+//
+// The key holds the program's hash, so every build that draws a scene
+// keeps its trees again, about 588 MB for moonlake's. Each tree is
+// stamped with when it was last used, and TrimTrees, at a run's end,
+// brings a file over its cap back under it, the least recently used
+// first; see package treebolt.
 
 const (
 	// treeBucket is the bucket the trees are kept in
-	treeBucket = "trees"
+	treeBucket = treebolt.Bucket
 	// fewestCached is the fewest faces worth a tree in the file; a
 	// smaller mesh grows in less time than a look at the file takes
 	fewestCached = 4096
@@ -55,7 +60,7 @@ const (
 	// stuck, and this one goes on without the file
 	lockWait = 6 * time.Minute
 	// fileMode is the file's permissions: its owner's alone
-	fileMode = 0o600
+	fileMode = treebolt.FileMode
 	// numberBytes is a float64's bytes, and a count's
 	numberBytes = 8
 	// pointNumbers is a point's numbers
@@ -106,7 +111,8 @@ var shelf atomic.Pointer[treeShelf]
 
 // treeShelf is the file trees are kept in, the program that grows them,
 // how long it waits for its turn, what it has done, why it stopped
-// using the file, when it has, and where it says so.
+// using the file, when it has, where it says so, and the trees it took
+// whose last use the file has yet to be told.
 type treeShelf struct {
 	path    string
 	program programKey
@@ -116,6 +122,7 @@ type treeShelf struct {
 	guard   sync.Mutex
 	tally   TreeTally
 	stop    error
+	touched map[programKey]bool
 }
 
 // TreeTally is what the tree cache did: trees taken from its file,
@@ -124,6 +131,12 @@ type treeShelf struct {
 type TreeTally struct {
 	kept, grown, failed int
 	first               error
+}
+
+// Used is whether the tree cache took, grew or failed on any tree; a
+// run that grew none has nothing to say about it.
+func (tally TreeTally) Used() bool {
+	return tally.kept+tally.grown+tally.failed > 0
 }
 
 // String is the tally in a line.
@@ -150,7 +163,7 @@ func CacheTrees(path string) error {
 		return err
 	}
 	kept := &treeShelf{path: path, wait: lockWait, said: os.Stderr,
-		form: form}
+		form: form, touched: map[programKey]bool{}}
 	if err := kept.hashProgram(); err != nil {
 		return fmt.Errorf("tree cache: %w", err)
 	}
@@ -286,8 +299,7 @@ func (kept *treeShelf) key(faces []triangle) programKey {
 // process's turn at it; a wait that runs out stops the shelf using the
 // file for the rest of the run.
 func (kept *treeShelf) open(reading bool) (*bolt.DB, error) {
-	file, err := bolt.Open(kept.path, fileMode,
-		&bolt.Options{Timeout: kept.wait, ReadOnly: reading})
+	file, err := treebolt.Open(kept.path, kept.wait, reading)
 	if errors.Is(err, berrors.ErrTimeout) {
 		err = fmt.Errorf("%s: held elsewhere past %v, so not used again "+
 			"this run: %w", kept.path, kept.wait, err)
@@ -311,11 +323,62 @@ func (kept *treeShelf) look(key programKey) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Join(err, file.Close())
 	}
-	var value []byte
-	if bucket := reading.Bucket([]byte(treeBucket)); bucket != nil {
-		value = bytes.Clone(bucket.Get(key[:]))
+	value, used := treebolt.Get(reading, key[:])
+	if value != nil {
+		kept.want(key, used)
 	}
 	return value, errors.Join(reading.Rollback(), file.Close())
+}
+
+// want notes a tree that was taken, to have its use written at the
+// run's end, when the use the file has is none or is old.
+func (kept *treeShelf) want(key programKey, used time.Time) {
+	if !treebolt.Stale(used, time.Now()) {
+		return
+	}
+	kept.guard.Lock()
+	defer kept.guard.Unlock()
+	if kept.touched == nil {
+		kept.touched = map[programKey]bool{}
+	}
+	kept.touched[key] = true
+}
+
+// TrimTrees ends a run's use of the tree file: it writes the use of the
+// trees the run took, then, if the file is over its cap, drops the least
+// recently used and writes the file fresh (see treebolt.Rewrite). It
+// says what it dropped, and nothing when it dropped nothing. It does
+// nothing when the cache is off, is kept as files, or gave up on its
+// file.
+func TrimTrees() (string, error) {
+	kept := shelf.Load()
+	if kept == nil || kept.form == asFiles || kept.stopped() != nil {
+		return "", nil
+	}
+	return kept.trimmed(treebolt.Standard, time.Now())
+}
+
+// trimmed is TrimTrees for a bound and a time.
+func (kept *treeShelf) trimmed(bound treebolt.Bound,
+	now time.Time) (string, error) {
+	kept.guard.Lock()
+	keys := make([][]byte, firstPlace, len(kept.touched))
+	for key := range kept.touched {
+		keys = append(keys, key[:])
+	}
+	kept.touched = map[programKey]bool{}
+	kept.guard.Unlock()
+	var err error
+	if len(keys) > firstPlace {
+		err = treebolt.Touch(kept.path, kept.wait, keys, now)
+	}
+	result, trim := treebolt.Trim(kept.path, kept.wait, bound, now)
+	if result.Dropped == firstPlace {
+		return "", errors.Join(err, trim)
+	}
+	return fmt.Sprintf("dropped the %d least recently used trees; the "+
+		"file went from %d to %d bytes", result.Dropped, result.Before,
+		result.After), errors.Join(err, trim)
 }
 
 // store keeps a value under a key, making the file and its bucket when
@@ -329,10 +392,7 @@ func (kept *treeShelf) store(key programKey, value []byte) error {
 	if err != nil {
 		return errors.Join(err, file.Close())
 	}
-	bucket, err := writing.CreateBucketIfNotExists([]byte(treeBucket))
-	if err == nil {
-		err = bucket.Put(key[:], value)
-	}
+	err = treebolt.Put(writing, key[:], value, time.Now())
 	if err != nil {
 		return errors.Join(err, writing.Rollback(), file.Close())
 	}

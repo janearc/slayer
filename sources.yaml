@@ -12,6 +12,51 @@
 # says why, in never. used, never released: the bytes are not shipped.
 
 sources:
+  - key: jimo-overview-2012
+    title: "An Overview of the Jupiter Icy Moons Orbiter: Mission, Environments, and Materials Challenges"
+    by: "Dave Edwards, NASA Marshall Space Flight Center"
+    year: 2012
+    from: https://ntrs.nasa.gov/api/citations/20120016895/downloads/20120016895.pdf
+    licence: "NASA technical reference; local study, no source redistribution."
+    sha256: 320147cdbd0e11f943e13afc5a36076b1bc9023985e3b5eed69e59718be3161d
+    bytes: 499257
+    fetched: 2026-11-15
+  - key: new-horizons-final-eis-2005
+    title: "Final Environmental Impact Statement for the New Horizons Mission, Volume 1"
+    by: "NASA"
+    year: 2005
+    from: https://www.nasa.gov/wp-content/uploads/2018/04/nh-feis_vol1_0.pdf
+    licence: "NASA institutional reference; local study, no source redistribution."
+    sha256: d9f1b8a1f444bc7b5188a52b763cbd50c839a0c25f4e8240f10e8aecb1240d93
+    bytes: 2386614
+    fetched: 2026-11-15
+  - key: spitzer-solar-panel-assembly
+    title: "The Solar Panel Assembly"
+    by: "Spitzer Science Center, Caltech/IPAC"
+    from: https://www.spitzer.caltech.edu/mission/the-solar-panel-assembly
+    licence: "Institutional mission reference; local use, no source redistribution."
+    sha256: b9d1a08595227b45cb379717fb730ef5555e03b5c571359a5740d006ffdcbb37
+    bytes: 18719
+    fetched: 2026-11-15
+  - key: spitzer-on-orbit-performance-2022
+    title: "On-orbit performance of the Spitzer Space Telescope: science meets engineering"
+    by: "M. W. Werner et al."
+    year: 2022
+    doi: 10.1117/1.JATIS.8.1.014002
+    from: https://ntrs.nasa.gov/api/citations/20230003459/downloads/Roellig_On-orbit%20performance%20of%20the%20Spitzer%20Space%20Telescope-%20science%20meets%20engineering.pdf
+    licence: "CC BY 4.0; credit Werner et al., JATIS 8(1), 014002 (2022)."
+    sha256: 3cabce90de013bf3925c041152de4a2f966c54706323fc9b4ea44e3d6030d6b8
+    bytes: 1994036
+    fetched: 2026-11-15
+  - key: gaia-dr3-bright-presentation
+    title: "Gaia DR3 bright-star sample for specimen presentations"
+    by: "ESA Gaia, DPAC; ARI Gaia archive service"
+    year: 2022
+    from: https://gaia.ari.uni-heidelberg.de/tap/sync?REQUEST=doQuery&LANG=ADQL&FORMAT=csv&QUERY=SELECT%20TOP%2012000%20source_id%2Cra%2Cdec%2Cphot_g_mean_mag%20FROM%20gaiadr3.gaia_source%20WHERE%20phot_g_mean_mag%20%3C%207
+    licence: "Public Gaia catalogue data; acknowledge ESA Gaia, DPAC and ARI. Local rendering reference."
+    sha256: 20abbcb2b2b4cb43db62a3d4bf2ab6a617452b9bd16a53a3e6d6a70439d5d4da
+    bytes: 799709
+    fetched: 2026-11-15
   - key: tully-2014-laniakea
     title: "The Laniakea supercluster of galaxies"
     by: "R. Brent Tully, Helene Courtois, Yehuda Hoffman and Daniel Pomarede, Nature 513, 71-73"
@@ -1083,3 +1128,120 @@ sources:
     sha256: 2b7bcd88a5169f3a18caae9326f3c51905721cd3b7c034d1de45f7b85d6f4a99
     bytes: 122423
     fetched: 2026-11-12
+  - key: schroeder-2016-venera-landers
+    title: "Impact and Crashworthiness Characteristics of Venera Type Landers for Future Venus Missions"
+    by: "Kevin Schroeder and Javid Bayandor (Virginia Tech), Jamshid Samareh (NASA Langley)"
+    year: 2016
+    from: https://ntrs.nasa.gov/api/citations/20170002533/downloads/20170002533.pdf
+    licence: "NASA Technical Reports Server, public document; an AIAA conference paper with a NASA author; local reference only, no redistribution"
+    sha256: 82e61bcd2887e045f91265ce6cf16097b2ce328e790ea698a03219e3eca36d61
+    bytes: 1531383
+    fetched: 2026-11-15
+  - key: usgs-magellan-venus-topography
+    title: "Venus Magellan Global Topography 4641m, version 2: a geotiff of the whole planet's heights"
+    by: "USGS Astrogeology Science Center, from NASA's Magellan radar altimeter"
+    from: https://planetarymaps.usgs.gov/mosaic/Venus_Magellan_Topography_Global_4641m_v02.tif
+    licence: "a us government work (usgs, nasa, jpl); not under copyright in the us"
+    sha256: 92dd2c8850b128f9dcceb400f1367e3df96229f5309840fee4275b74f192ea11
+    bytes: 67142279
+    fetched: 2026-11-15
+  - key: tsis1-hsrs-p1nm
+    title: "TSIS-1 Hybrid Solar Reference Spectrum, 0.1 nm bandwidth on a 0.025 nm grid: the sun above any air at one astronomical unit"
+    by: "Coddington and others 2021, LASP LISIRD"
+    year: 2021
+    from: https://lasp.colorado.edu/lisird/latis/dap/tsis1_hsrs_p1nm.csv
+    licence: "TSIS-1 HSRS, LASP; licence not stated in the file"
+    sha256: 3dea8b6cf3969b2f1021e23555d0c9a35772df2a0e9795c44d4c85877a41b2a7
+    bytes: 5397633
+    fetched: 2026-11-15
+  - key: pirtz-1979-san-onofre-concrete
+    title: "Studies of Concrete for San Onofre Nuclear Power Plant Containment Structures, Units 2 & 3: Final Report"
+    by: "David Pirtz; report UC SI 79-5, Structural Engineering Laboratory, University of California, Berkeley, for Bechtel Power Corporation"
+    year: 1979
+    from: https://escholarship.org/uc/item/1dp3d13n
+    licence: "University of California report posted on eScholarship by the university; local reference only, reuse terms not reviewed"
+    sha256: a98662366c445455022708b663c760c80296703727c1875145bc7e95ac922721
+    bytes: 3136494
+    fetched: 2026-11-13
+  # page 27 reports Ichikawa and Komukai, "Effect of burning conditions and
+  # minor components on the color of Portland cement clinker", Cement and
+  # Concrete Research 23, 933-938, 1993. That paper is not on the shelf and
+  # is not reachable from here; the thesis is cited for its account of it.
+  - key: moudilou-2000-cement-metals
+    title: "Cinétiques et mécanismes de relargage des métaux lourds présents en traces dans les matrices cimentaires"
+    by: "Emmanuel Moudilou; doctoral thesis, Université d'Orléans"
+    year: 2000
+    from: https://hal.science/tel-00002509/
+    licence: "deposited on HAL, the French open archive, under HAL's authorisation; local reference only, reuse terms not reviewed"
+    sha256: a5dd963862d26165805db95be1fcc1baaa8049f6657dd3bd90099fb36c8c551e
+    bytes: 3536978
+    fetched: 2026-11-13
+  - key: cia-oxcart-story-mcininch
+    title: "The Oxcart Story"
+    by: "Thomas P. McIninch, CIA Studies in Intelligence; released 1994 by the CIA Historical Review Program"
+    from: https://www.cia.gov/resources/csi/static/The-Oxcart-Story.pdf
+    licence: "CIA public release, a work of the US government; local reference only, no redistribution"
+    sha256: 98c6e33b6c6b44c5e1ae40bdcf35550c57783ed991092a770e16b7ce6fd9d6ab
+    bytes: 587171
+    fetched: 2026-11-16
+  - key: cia-alfa-ssn-thamm-2008
+    title: "The ALFA SSN: Challenging Paradigms, Finding New Truths, 1969-79"
+    by: "Gerhardt Thamm, CIA Studies in Intelligence 52(3)"
+    year: 2008
+    from: https://www.cia.gov/resources/csi/static/the-ALFA-SSN.pdf
+    licence: "CIA public release, a work of the US government; local reference only, no redistribution"
+    sha256: 5cb5b160af28f504a3c06d5c0755e4fcbbb5bead02e31856bc198554d45b8eeb
+    bytes: 254334
+    fetched: 2026-11-16
+  - key: nasa-tmx71779-yf12-throat-bypass
+    title: "A Throat-Bypass Stability System for a YF-12 Aircraft Research Inlet Using Self-Acting Mechanical Valves"
+    by: "Gary L. Cole, Miles O. Dustin and George H. Neiner, NASA Lewis Research Center"
+    year: 1975
+    from: https://ntrs.nasa.gov/api/citations/19750021055/downloads/19750021055.pdf
+    licence: "NASA Technical Reports Server, unclassified and unlimited; local reference only, no redistribution"
+    sha256: a00eb137b9e8a9590efd5d1dbe5b70e44e4fb27164645a85767244ef10653948
+    bytes: 882373
+    fetched: 2026-11-16
+  - key: nasa-yf12-inlet-tunnel-1978
+    title: "full-scale YF-12 flight inlet in the Lewis 10- by 10-Foot Supersonic Wind Tunnel"
+    by: "NASA Lewis Research Center, NTRS 19780024119"
+    year: 1978
+    from: https://ntrs.nasa.gov/api/citations/19780024119/downloads/19780024119.pdf
+    licence: "NASA Technical Reports Server, unclassified and unlimited; local reference only, no redistribution"
+    sha256: 0e0b52bd8ed16972c52ccca3f30e98236b30048d6e7e60b63df045afd9945803
+    bytes: 1543758
+    fetched: 2026-11-16
+  - key: nasa-tm104330-sr71-thrust-enhanced
+    title: "Predicted Performance of a Thrust-Enhanced SR-71 Aircraft with an External Payload"
+    by: "Timothy R. Conners, NASA Dryden Flight Research Center, TM-104330"
+    year: 1997
+    from: https://ntrs.nasa.gov/api/citations/19970019923/downloads/19970019923.pdf
+    licence: "NASA Technical Reports Server, unclassified and unlimited; local reference only, no redistribution"
+    sha256: 5d4b95f8e2c471ff3802747a9d3eca731c70aec948a3cd3f9b6cafb639cebd08
+    bytes: 934515
+    fetched: 2026-11-16
+  - key: flight-test-museum-a12
+    title: "A-12 CIA reconnaissance aircraft"
+    by: "Flight Test Historical Foundation, Blackbird Airpark"
+    from: https://flighttestmuseum.org/?p=9726
+    licence: "museum web page, no licence stated; local reading reference, no source redistribution"
+    sha256: a0722bcbc6201afa43862938acc39aa1cc1aca2ad2aa233fc9975bded3753a17
+    bytes: 143670
+    fetched: 2026-11-16
+  - key: russianships-project-705
+    title: "Project 705 Lira"
+    by: "RussianShips.info"
+    from: https://russianships.info/eng/submarines/project_705.htm
+    licence: "copyright RussianShips.info; local reading reference, no source redistribution"
+    sha256: 5e424bde99429619cc0d28cb4c61ab7c373d47cafb52d8ca1b902a8bbfdd3cc4
+    bytes: 20729
+    fetched: 2026-11-16
+  - key: fas-run-silent-run-deep
+    title: "Run Silent, Run Deep"
+    by: "Federation of American Scientists, Military Analysis Network"
+    year: 1998
+    from: https://fas.org/man/dod-101/sys/ship/deep.htm
+    licence: "FAS public web page; local reading reference, no source redistribution"
+    sha256: b19e49a3d2daa747e4e587449966cb62bb2357587a076a390f74413624e50443
+    bytes: 18789
+    fetched: 2026-11-16

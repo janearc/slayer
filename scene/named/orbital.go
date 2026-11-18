@@ -1,6 +1,7 @@
 package named
 
 import (
+	"fmt"
 	"io"
 	"math"
 	"time"
@@ -90,7 +91,7 @@ const (
 
 // orbitalScene is the pair of orbitals.
 func orbitalScene() Scene {
-	return Scene{name: "orbital",
+	return Scene{name: "orbital", fastLighting: true,
 		about: "two culture orbitals, one inside the other, turning " +
 			"opposite ways in a nebula; seen from inside under a far " +
 			"sun, or from far outside round zappy, the beamed star in its " +
@@ -110,6 +111,23 @@ func orbitalScene() Scene {
 // were.
 func orbitalParameters() []Parameter {
 	return []Parameter{
+		toggle("zappy-flares", false, "occasional false-colour illumination from Zappy's X-ray bursts"),
+		number("zappy-flare-offset", 0, between(0, 86400), "offset into the burst sequence in scene seconds"),
+		oneOf("surface-style", "mixed", []string{"mixed", "terraced-arcology", "twisted-spires", "inhabited-bridge"}, "inhabited macrostructure family; mixed alternates construction rules"),
+		whole("surface-structures", 0, between(0, 2048), "seeded inhabited macrostructures per ring; zero preserves the original floor"),
+		whole("surface-landforms", 0, between(0, 2048), "seeded mountain and caldera features per ring"),
+		toggle("surface-close", false, "look across the first inhabited surface site, travelling with its ring"),
+		toggle("surface-tour", false, "fly into and past the inhabited surface site"),
+		span("surface-tour-duration", 12*time.Second, "duration of the inhabited surface approach"),
+		span("surface-tour-offset", 0, "resume the inhabited surface approach from this local time"),
+		toggle("surface-night", false, "place the inhabited surface on the far sun's dark side"),
+		whole("surface-district", 0, between(0, 64), "additional distinct inhabited structures around the selected city"),
+		toggle("surface-relief", false, "add varied terrain around the inhabited surface site"),
+		toggle("surface-city", false, "reserve a dry site for the dense inhabited city"),
+		toggle("surface-urban-density", false, "add dense urban buildings, terraces, service surfaces and vegetation"),
+		toggle("surface-park-flythrough", false, "enable the experimental human-scale park flythrough"),
+		whole("floor-tiles", hexAround, between(16, hexAround), "floor texture tiles around each orbital; reduce for distant proofs"),
+		whole("floor-hex-metres", 0, between(0, 1000000), "physical floor cell width across flats in metres; zero retains legacy floor-tiles"),
 		toggle("far", false, "from far outside, 25 degrees above their "+
 			"plane, the hoops standing upright, lit by zappy"),
 		number("distance", orbitalDistance, unbounded,
@@ -141,10 +159,33 @@ func buildOrbital(held values, said io.Writer) (*Built, error) {
 		Colour: maths.RGB(gapRed, gapGreen, gapBlue),
 		Shine:  marble{seed: orbitalSeed}}
 	pair := nested()
+	if held.toggle("surface-park-flythrough") && (!held.toggle("surface-city") || !held.toggle("surface-tour")) {
+		return nil, fmt.Errorf("orbital surface-park-flythrough needs surface-city and surface-tour")
+	}
+	if held.toggle("surface-urban-density") && !held.toggle("surface-city") {
+		return nil, fmt.Errorf("orbital surface-urban-density needs surface-city")
+	}
+	if held.toggle("surface-tour") && (held.span("surface-tour-duration") <= 0 || held.span("surface-tour-offset") < 0) {
+		return nil, fmt.Errorf("orbital surface tour needs a positive duration and nonnegative offset")
+	}
+	var focus *orbitalSurfaceSite
 	for k, one := range pair {
-		if err := one.place(world, k, gapWall, held.span("day"),
-			said); err != nil {
+		district := 0
+		if k == 0 {
+			district = held.whole("surface-district")
+		}
+		relief := k == 0 && held.toggle("surface-relief")
+		city := k == 0 && held.toggle("surface-city")
+		park := k == 0 && held.toggle("surface-park-flythrough")
+		dense := k == 0 && (park || held.toggle("surface-urban-density"))
+		site, err := one.placeSurface(world, k, gapWall, held.span("day"),
+			held.whole("floor-tiles"), held.whole("floor-hex-metres"),
+			held.whole("surface-structures"), held.whole("surface-landforms"), district, relief, city, park, dense, held.choice("surface-style"), said)
+		if err != nil {
 			return nil, err
+		}
+		if focus == nil {
+			focus = site
 		}
 	}
 	gas := nebula{thick: nebulaThick * held.number("gas"),
@@ -154,10 +195,51 @@ func buildOrbital(held values, said io.Writer) (*Built, error) {
 		return nil, err
 	}
 	if held.toggle("far") {
-		return farView(world, held.number("distance"),
-			held.toggle("still"))
+		view, err := farView(world, held.number("distance"), held.toggle("still"))
+		if err != nil {
+			return nil, err
+		}
+		attachOrbitalCity(view, focus)
+		if held.toggle("zappy-flares") {
+			addOrbitalFlares(view, time.Duration(held.number("zappy-flare-offset")*float64(time.Second)))
+		}
+		return view, nil
 	}
-	return nearView(world), nil
+	view := nearView(world)
+	attachOrbitalCity(view, focus)
+	if held.toggle("surface-night") {
+		reverseOrbitalSun(world)
+	}
+	if held.toggle("surface-close") || held.toggle("surface-tour") {
+		if focus == nil {
+			return nil, fmt.Errorf("orbital surface-close needs surface-structures or surface-landforms")
+		}
+		view.advance = focus.camera
+		if held.toggle("surface-tour") {
+			view.advance = focus.tour(held.span("surface-tour-duration"), held.span("surface-tour-offset"))
+		}
+		view.eye, _ = view.advance(0)
+	}
+	if held.toggle("zappy-flares") {
+		addOrbitalFlares(view, time.Duration(held.number("zappy-flare-offset")*float64(time.Second)))
+	}
+	return view, nil
+}
+
+// attachOrbitalCity preserves any prior scene tick and updates every factory
+// fixture before the flare composes its own changing lamp into the scene.
+func attachOrbitalCity(view *Built, site *orbitalSurfaceSite) {
+	if site == nil || site.tick == nil {
+		return
+	}
+	previous := view.tick
+	view.tick = func(at time.Duration) {
+		if previous != nil {
+			previous(at)
+		}
+		site.tick(at)
+	}
+	view.tick(0)
 }
 
 // nearView lights the pair by a far sun, so the floor near the eye is in

@@ -1,0 +1,31 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: step 2, Voyager 1 alone in space
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      voyager-1:
+        kind: voyager-1
+        seed: 17
+        complexity: demo
+        east: 0
+        north: 0
+  film:
+    width: 2048
+    height: 1152
+    rays: 2
+    exposure: 0.003
+    wide: 45
+  cameras:
+    three-quarter:
+      title: Voyager 1 from the sunlit side
+      location: {at: [-30, -22, 16]}
+      orientation: {look_at: [-5, 0, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

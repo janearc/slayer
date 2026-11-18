@@ -1,6 +1,8 @@
 package cast
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/janearc/slayer/maths"
@@ -47,5 +49,26 @@ func TestALiftRaisesTheCentres(t *testing.T) {
 	box := m.Bounds()
 	if r := box.Max.X; r > 9.5+1e-9 {
 		t.Errorf("a floor lifted half a unit toward the axis reaches out to %g, want at most 9.5", r)
+	}
+}
+
+// loneTiles is a tiling whose tiles are in the wrong place to touch: the
+// tiles are a sphere's, but none says it has a neighbour.
+type loneTiles struct{ hexes.Tiling }
+
+// Neighbours says no tile has a neighbour.
+func (loneTiles) Neighbours(hexes.Tile) []hexes.Tile { return nil }
+
+// tiles that touch no other close no triangle, and the cast says so and
+// how many tiles it was given.
+func TestTilesThatTouchNothingCastNothing(t *testing.T) {
+	sphere := hexes.Sphere{Splits: 1}
+	m, n, err := Mesh(loneTiles{sphere}, func(p maths.Vec) maths.Vec { return p }, nil, false)
+	if err == nil || m != nil || n != 0 {
+		t.Fatalf("cast %v with %d triangles: %v", m, n, err)
+	}
+	want := fmt.Sprintf("the tiling's %d tiles close no triangles", len(sphere.Tiles()))
+	if !strings.Contains(err.Error(), want) {
+		t.Errorf("error %q lacks %q", err, want)
 	}
 }

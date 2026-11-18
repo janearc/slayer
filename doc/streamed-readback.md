@@ -1,10 +1,5 @@
 # Finish samples a band at a time
 
-The host streaming path has compiled and its focused finishing witnesses
-have passed. [The verification record](verification-2026-11-09.md) names
-those checks and the selected native scenes that ran. Matched device
-fields, buffer lifetime, memory and timing still need separate evidence.
-
 Metal already dispatches the picture in bands of at most 64 sample rows.
 Previously it copied all those bands into one Go raw-sample array before
 pixel averaging. That array grows with width, height, samples per pixel
@@ -64,20 +59,4 @@ CPU finishing happens between dispatches. Its measured wall time is
 separated from dispatch/readback wall time; GPU timestamps remain nested
 inside dispatch time. Native-query counters accumulate across all bands.
 
-This does not resolve the earlier woodland preparation failures by itself.
-Their retained geometry and encoding allocations still need investigation.
-It also does not reduce the number of rays or mist samples being traced.
-
-## Review inputs
-
-Compare raw streamed bands against full-grid results with global row
-addresses, short final bands and callback failures. Compare finished pixels
-against the original full-array averaging, including sample sides that do not
-divide 64, sky, textures, coverage, depth and native counters.
-
-Also check direct input order, empty placeholders, failure after a successful
-input allocation, caller storage released after preparation, and the runtime's
-stricter cgo pointer checks.
-
-Then measure a bounded 4K pilot, including preparation and development.
-No speedup, byte equality or lower process peak has been established yet.
+This does not reduce the number of rays or mist samples being traced.

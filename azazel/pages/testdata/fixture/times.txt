@@ -1,0 +1,34 @@
+1794000100	studio/latest-notes.txt
+1794000100	team/latest-notes.txt
+1794000900	studio/sources/skip.png
+1794000900	cache/skip.png
+1794000900	skel/skip.png
+1794000900	applications/skip.png
+1794000300	atelier/look.png
+1794000200	frames/2026-11-01-studio-sky/c.png
+1794000250	frames/2026-11-01-studio-sky/a.png
+1794000250	frames/2026-11-01-studio-sky/B.png
+1794000240	frames/2026-11-01-studio-sky/x-1.png
+1794000240	frames/2026-11-01-studio-sky/x_1.png
+1794000990	frames/2026-11-01-studio-sky/icon-sky.png
+1794000100	frames/2026-11-01-studio-sky/sky.yaml
+1794000100	frames/2026-11-01-studio-sky/recipe.txt
+link	frames/2026-11-01-studio-sky/linked.png	a.png
+1794000400	frames/2026-11-03-fable-moonlake/preview.png
+1794000450	frames/2026-11-03-fable-moonlake/shorts/one/frame-000000.png
+1794000420	frames/2026-11-03-fable-moonlake/shorts/two/frame-000000.png
+1794000100	frames/2026-11-03-fable-moonlake/shorts/one/one.yml
+1794000100	frames/2026-11-03-fable-moonlake/moon.yaml
+1794000500	frames/2026-11-04-workshop-salt&pepper/shot.jpg
+1794000480	frames/2026-11-04-workshop-salt&pepper/shot2.png
+1794000100	frames/2026-11-04-workshop-salt&pepper/index.html
+1794000600	frames/2026-11-05-studio-many/frame-%06d.png	65
+1794000560	frames/2026-11-05-studio-many/.hidden.png
+1794000100	frames/2026-11-06-studio-empty/recipe.txt
+1794000800	frames/2026-11-08-team-r&d/one.png
+1794000200	animations/2026-11-02-team-heard-film/frames/frame-%06d.png	5
+1794000210	animations/2026-11-02-team-heard-film/film.mp4
+1794000100	animations/2026-11-02-team-heard-film/index.html
+1794000100	animations/2026-11-02-team-heard-film/receipt.json
+1794000350	animations/2026-11-07-atelier-chunks/chunks/000000/frames/frame-%06d.png	2
+1794000340	animations/2026-11-07-atelier-chunks/chunks/000000/frames/sources/kept.png

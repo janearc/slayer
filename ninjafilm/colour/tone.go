@@ -1,5 +1,15 @@
 // Package colour is the film darkroom: it develops linear light into display
 // colours through exposure, optional bloom, and highlight compression.
+//
+// It is the single definition of slayer's own print: exposure, bloom, the
+// shoulder and its solved scale, the byte encoding, false colour, the
+// gauge's mask and its grain. render/colour keeps its names for its
+// callers and hands each picture here, holding no copy of its own.
+//
+// It is an ordinary package and not an internal one only because
+// render/colour and improv/ must import it, and Go lets an internal
+// package be imported from under ninjafilm alone. It is not a public
+// surface. The sRGB curve under Encode and Decode is libtheme's.
 package colour
 
 import (
@@ -67,6 +77,11 @@ func Develop(grid *frame.Frame, exposure float64) *image.RGBA {
 // lands on white. Everything between keeps its detail. Tops of one or
 // less are read as a hundred times white. Nought is among them.
 //
+// The roll-off is knee + a ln(1 + (y - knee)/a), a the scale solved once
+// when the tone is made. It leaves the knee at the slope it had below
+// it, one, so a smooth gradient that crosses the knee stays smooth: a
+// corner there drew a contour across it.
+//
 // The roll-off is by luminance. So a colour keeps its hue as it
 // brightens. No knee is the clamp.
 //
@@ -80,13 +95,35 @@ func Develop(grid *frame.Frame, exposure float64) *image.RGBA {
 //ninja:vow practice slayer's pictures hold their tone
 type Tone struct {
 	exposure, knee, top, bloom float64
+	// scale is the shoulder's, solved by NewTone; see Scale
+	scale float64
 }
 
-// NewTone is a tone of an exposure with a knee, a top and a bloom.
+// NewTone is a tone of an exposure with a knee, a top and a bloom. The
+// scale of its shoulder is solved here, once a tone and not once a pixel.
 //
 //ninja:vow practice slayer's pictures make their tone here
 func NewTone(exposure, knee, top, bloom float64) Tone {
-	return Tone{exposure, knee, top, bloom}
+	made := Tone{exposure: exposure, knee: knee, top: top, bloom: bloom}
+	if made.shouldered() {
+		made.scale = scaleOf(knee, made.topped())
+	}
+	return made
+}
+
+// shouldered is whether the tone has a shoulder: a knee between nought
+// and one. A knee of one has no room to roll in.
+func (tone Tone) shouldered() bool {
+	return tone.knee > none && tone.knee < whole
+}
+
+// topped is the tone's top, with a top of one or less read as the
+// default.
+func (tone Tone) topped() float64 {
+	if tone.top <= whole {
+		return topDefault
+	}
+	return tone.top
 }
 
 // exposed is the exposure, with zero read as one.
@@ -107,12 +144,15 @@ func (tone Tone) Develop(grid *frame.Frame) *image.RGBA {
 			lights[y*grid.W+x] = grid.At(x, y).Light()
 		}
 	}
-	return tone.picture(lights, grid.W, grid.H)
+	return tone.Picture(lights, grid.W, grid.H)
 }
 
-// picture is the lights as the bytes of the screen through the tone.
-// They are across by down. They are bloomed first if the tone blooms.
-func (tone Tone) picture(lights []maths.Light, across, down int) *image.RGBA {
+// Picture is the lights as the bytes of the screen through the tone.
+// They are across by down, a row at a time. They are bloomed first if
+// the tone blooms. render/colour develops its frames through it.
+//
+//ninja:vow practice slayer's pictures develop their lights here
+func (tone Tone) Picture(lights []maths.Light, across, down int) *image.RGBA {
 	if tone.bloom > none {
 		lights = Bloom(lights, across, down, tone.exposed(), tone.bloom)
 	}
@@ -145,10 +185,16 @@ func beyondWhite(lights []maths.Light, exposure float64) (over []maths.Light,
 	return over, found
 }
 
-// kernel is the weights of a gaussian of sigma radius out to the reach
-// where it is cut off. It gives that reach too. The weights add up to
-// one.
-func kernel(radius float64) (weights []float64, reach int) {
+// BloomWeights is the weights of a gaussian of sigma radius out to the
+// reach where it is cut off. It gives that reach too. The weights add up
+// to one. The radius is above nought; Bloom refuses one past the widest
+// before it asks.
+//
+// The Metal developer of improv/moonlake/omnipositor/gpudevelop blooms by
+// these weights, as float32s.
+//
+//ninja:vow practice slayer's gpu pictures weigh their bloom here
+func BloomWeights(radius float64) (weights []float64, reach int) {
 	reach = int(math.Ceil(reachSigmas * radius))
 	weights = make([]float64, pair*reach+whole)
 	var sum float64
@@ -233,7 +279,7 @@ func Bloom(lights []maths.Light, across, down int, exposure,
 		panic(fmt.Sprintf("colour: a bloom of %v pixels is past %v, "+
 			"wider than any picture", radius, widest))
 	}
-	weights, reach := kernel(radius)
+	weights, reach := BloomWeights(radius)
 	sideways := spread(over, weights, reach, across, down, false)
 	glow := spread(sideways, weights, reach, across, down, true)
 	// the glow goes back to the scale of the light by the reciprocal of
@@ -265,7 +311,8 @@ func (tone Tone) pixel(light maths.Light) color.RGBA {
 }
 
 // Squeeze is the shoulder. Light above the knee is rolled off toward
-// white by its luminance. Its hue is kept.
+// white by its luminance, as knee + a ln(1 + (y - knee)/a), a the
+// tone's Scale. Its hue is kept.
 //
 // Colours too saturated to fit at that luminance are drawn toward white
 // along their own hue until they do. That is how a bright thing
@@ -273,7 +320,7 @@ func (tone Tone) pixel(light maths.Light) color.RGBA {
 //
 //ninja:vow practice slayer's gpu pictures squeeze their light here
 func (tone Tone) Squeeze(light maths.Light) maths.Light {
-	if tone.knee <= none || tone.knee >= whole {
+	if !tone.shouldered() {
 		return light
 	}
 	luminance := light.Luminance()
@@ -285,14 +332,8 @@ func (tone Tone) Squeeze(light maths.Light) maths.Light {
 		// bleaches to white, whatever its hue
 		return maths.Grey(whole)
 	}
-	room := whole - tone.knee
-	top := tone.top
-	if top <= whole {
-		top = topDefault
-	}
-	rolled := math.Log1p((luminance - tone.knee) / room)
-	squeezed := tone.knee + room*rolled/math.Log1p((top-tone.knee)/room)
-	squeezed = math.Min(whole, squeezed)
+	rolled := math.Log1p((luminance - tone.knee) / tone.scale)
+	squeezed := math.Min(whole, tone.knee+tone.scale*rolled)
 	light = light.Scale(squeezed / luminance)
 	if brightest := max(light.R, light.G, light.B); brightest > whole {
 		// the part above the grey of the same luminance, shrunk
@@ -312,15 +353,66 @@ func (tone Tone) Squeeze(light maths.Light) maths.Light {
 // and the same on every machine. The language leaves their byte to the
 // machine.
 //
+// The byte is the count of steps at or below the amount, the steps being
+// where libtheme's curve steps. A table says how many are at or below
+// the start of the amount's slot, and the few inside it are counted from
+// there. The amount times a power of two is exact, so the slot is too.
+//
 //ninja:vow practice slayer encodes its colours here
 func Encode(amount float64) uint8 {
 	if math.IsNaN(amount) {
 		return none
 	}
 	amount = math.Max(none, math.Min(whole, amount))
-	curve := srgb.FromLinear(amount)
-	return uint8(math.Round(curve * byteMost))
+	count := int(slotted[int(amount*slots)])
+	for count < len(steps) && steps[count] <= amount {
+		count++
+	}
+	return uint8(count)
 }
+
+// slots is how many slots from nought to one Encode sorts an amount into.
+const slots = 4096 // defined: a power of two, so an amount's slot is exact
+
+// slotted is, for each slot's start, how many steps are at or below it.
+var slotted = func() (table [slots + whole]uint8) {
+	count := none
+	for slot := range table {
+		start := float64(slot) / slots
+		for count < len(steps) && steps[count] <= start {
+			count++
+		}
+		table[slot] = uint8(count)
+	}
+	return table
+}()
+
+// byCurve is the byte of an amount already clamped to nought through
+// one, by libtheme's curve itself.
+func byCurve(amount float64) uint8 {
+	return uint8(math.Round(srgb.FromLinear(amount) * byteMost))
+}
+
+// steps are the smallest amounts that encode to each byte from one
+// through the most, found by bisection on the curve over the floats
+// themselves. An amount is at or above steps[i] exactly when byCurve of
+// it is at least i + 1.
+var steps = func() (table [byteMost]float64) {
+	for index := range table {
+		want := uint8(index + whole)
+		low, high := uint64(none), math.Float64bits(whole)
+		for high-low > whole {
+			middle := low + (high-low)/pair
+			if byCurve(math.Float64frombits(middle)) >= want {
+				high = middle
+			} else {
+				low = middle
+			}
+		}
+		table[index] = math.Float64frombits(high)
+	}
+	return table
+}()
 
 // Decode is an srgb byte as linear light. It is Encode undone.
 //

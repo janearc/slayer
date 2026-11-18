@@ -38,7 +38,7 @@ func (survey surveyOptics) assemble(row groundObservatory,
 		"survey-camera-reflectance")
 	length := row.aperture * groundValue("survey-length")
 	rim := row.aperture * groundValue("truss-rim")
-	row.truss(assembly, pose, rim, length)
+	survey.frame(row, assembly, pose, rim, length)
 	survey.sharedBlank(row.aperture, assembly, pose)
 	row.secondaryOn(assembly, pose, rim, length)
 	surveyCameraOn(row.aperture, length, assembly, pose)
@@ -69,12 +69,12 @@ func (survey surveyOptics) sharedBlank(aperture float64,
 	assembly.add(backing, at, surveyBacking)
 }
 
-// surveyCameraOn keeps the housing clear of the secondary opening.
+// surveyCameraOn places the camera between M1/M3 and M2, facing the tertiary.
 func surveyCameraOn(aperture, length float64,
 	assembly *instrumentAssembly, pose maths.Subspace,
 ) {
 	depth := aperture * groundValue("survey-camera-length")
-	start := length - depth*groundValue("survey-camera-seat")
+	start := length * groundValue("survey-camera-station")
 	from := pose.Out(maths.YAxis.Scale(start))
 	to := pose.Out(maths.YAxis.Scale(start + depth))
 	radius := aperture * groundValue("survey-camera-radius")

@@ -1,0 +1,94 @@
+# Authored interior gallery view; see observatory-models.md.
+---
+width: 720
+height: 480
+rays: 2
+seed: 5
+details:
+- demo
+wide: 85
+camera:
+  x: 1.4
+  y: 0.8
+  z: -2
+distance: 2.8
+sample-limit: 2000000
+face-limit: 1500000
+pixel-aspect: 1
+light-exposure: 0.001
+minimum-coverage: 0.0001
+sky:
+  horizon:
+    r: 0.004
+    g: 0.006
+    b: 0.012
+  zenith:
+    r: 0.004
+    g: 0.006
+    b: 0.012
+  ground:
+    r: 0.004
+    g: 0.006
+    b: 0.012
+sources:
+- toward:
+    x: -1
+    y: 2
+    z: -2
+  strength:
+    r: 0.07
+    g: 0.12
+    b: 0.25
+- toward:
+    x: 2
+    y: 1
+    z: 1
+  strength:
+    r: 0.025
+    g: 0.04
+    b: 0.08
+tone:
+  exposure: 1
+  knee: 0.7
+  top: 8
+  bloom: 0
+studio: true
+cutaway: false
+local-lights:
+- at:
+    x: -20
+    y: 48
+    z: -20
+  strength:
+    r: 500
+    g: 300
+    b: 125
+- at:
+    x: 20
+    y: 48
+    z: -20
+  strength:
+    r: 500
+    g: 300
+    b: 125
+interior:
+  at:
+    x: 12
+    y: 35
+    z: -28
+  look-at:
+    x: 0
+    y: 75
+    z: -35
+  stars:
+    share: 0.08
+    size: 0.15
+    bright: 4
+    dark:
+      r: 0.001
+      g: 0.002
+      b: 0.006
+    seed: 29
+  air-radius-metres: 500
+  extinction-per-metre: 0.00012
+  beams: []

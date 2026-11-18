@@ -31,13 +31,13 @@ func suns(count int) *thing.World {
 
 // with nothing in the way, the lamps a point asks are worth, counted as
 // asked, exactly what every lamp is worth: with two hundred lamps as
-// with eight; with eight or fewer every lamp is asked once.
+// with eight; with lampsEvery or fewer every lamp is asked once.
 func TestTheLampsAskedAreWorthEveryLamp(t *testing.T) {
 	up := maths.V(0, 1, 0)
 	worth := func(toward maths.Vec, light maths.Light) float64 {
 		return light.Luminance() * math.Max(0, up.Dot(toward))
 	}
-	for _, count := range []int{3, 8, 200} {
+	for _, count := range []int{3, lampsAsked, 12, lampsEvery, 200} {
 		scene := stage(suns(count), 0)
 		point := maths.V(40, 0, 40)
 		all, got := 0.0, 0.0
@@ -48,16 +48,59 @@ func TestTheLampsAskedAreWorthEveryLamp(t *testing.T) {
 		asked := scene.asked(nil, point, up, worth)
 		for _, one := range asked {
 			got += one.counts * worth(one.toward, one.light)
-			if count <= lampsAsked && one.counts != 1 {
+			if count <= lampsEvery && one.counts != 1 {
 				t.Errorf("%d lamps: lamp %d counts %g", count, one.index,
 					one.counts)
 			}
 		}
-		if count <= lampsAsked && len(asked) != count {
+		if count <= lampsEvery && len(asked) != count {
 			t.Errorf("%d lamps, %d asked", count, len(asked))
 		}
 		if !(math.Abs(got-all) <= 1e-9*all) {
 			t.Errorf("%d lamps: worth %g asked, %g in all", count, got, all)
+		}
+	}
+}
+
+// lampsLit is the lamps a point asks under so many suns, in the order
+// asked, and how many of those count other than once.
+func lampsLit(count int) (indices []int, weighted int) {
+	up := maths.V(0, 1, 0)
+	scene := stage(suns(count), 0)
+	for _, one := range scene.asked(nil, maths.V(0.3, 0, -0.7), up,
+		byLight) {
+		indices = append(indices, one.index)
+		if one.counts != 1 {
+			weighted++
+		}
+	}
+	return indices, weighted
+}
+
+// between lampsAsked and lampsEvery lamps, a point lights every lamp,
+// in order and once each, with no picking: twelve lamps are twelve
+// asks, and eight are eight as before. The anti-tests: twenty lamps,
+// past lampsEvery, are still sampled, lampsAsked picks at most, some
+// counting more than once; and so are lampsEvery and one.
+func TestTwelveLampsAreEachLitAndTwentyAreSampled(t *testing.T) {
+	for _, count := range []int{lampsAsked, 12} {
+		indices, weighted := lampsLit(count)
+		if len(indices) != count || weighted != 0 {
+			t.Errorf("%d lamps: %d asked, %d weighted", count,
+				len(indices), weighted)
+		}
+		for place, index := range indices {
+			if index != place {
+				t.Errorf("%d lamps: ask %d is lamp %d", count, place,
+					index)
+			}
+		}
+	}
+	for _, count := range []int{lampsEvery + 1, 20} {
+		indices, weighted := lampsLit(count)
+		if len(indices) > lampsAsked || weighted == 0 {
+			t.Errorf("%d lamps: %d asked, %d weighted, not sampled",
+				count, len(indices), weighted)
 		}
 	}
 }

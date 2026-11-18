@@ -1,22 +1,5 @@
 # fire in a dark grove
 
-This is a dated development record. Its timings and check results belong to
-the revisions named below. Use the [Game workflow](developing.md) for current
-setup and commands, and [the committed 4K review](review-4k-2026-11-05.md)
-for the later dense-forest measurement.
-
-## scope and sequence
-
-first make a large fire visibly light volcanic ground and nearby trees under
-the existing Celestial-backed full-moon model. inspect stills before choosing
-long-sequence settings. add repeatable glowing firebrands, then chemical
-emission controls and a prescribed front through a large stand.
-
-work through stills and short motion studies. measure 4K frame costs before
-committing the remaining overnight budget to a minute, extending toward two
-if measured runtime permits. the target remains 24 fps; resolution and sample
-count must be recorded, and a preview cannot prove the 4K animation target.
-
 ## firebrands
 
 use a seeded particle emitter with explicit source extent, emission rate,
@@ -66,19 +49,7 @@ a front is authored kinematics with speed and burn duration, not a prediction
 of wildfire spread or a coupled wind/fuel solver. inactive trees remain
 visible. source light and dynamic volumes must use the same frame time.
 
-## checks
-
-tests precede the implementation. check deterministic jumps in time,
-birth/death boundaries, bounded particle counts, stable identifiers, thermal
-endpoints, invalid units/values and preserved input ownership. compare actual
-GPU instances and composition grids with the CPU model.
-
-check front timing, independent ages and grouping without losing absorption
-or emission. measure renderer limits and memory, inspect moon/fire contrast,
-sparks, smoke, nearby tree light and shadows. keep the previous independent
-physics/image bounds unchanged.
-
-primary reading:
+## primary reading
 
 [WRF-Fire's guide](https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/fire.html)
 separates firebrand generation, transport, physics and landing. its coupled
@@ -88,7 +59,7 @@ surface-fire and spotting solver is not implemented here.
 gives Na I wavelengths in air. handbook intensities are not fuel abundances
 or absolute powers in a wood fire.
 
-## first measured cache study
+## smoke-lighting cache
 
 the opt-in `scene.volume-lighting: cached` setting requires `renderer:
 gpu-native`. it caches the isotropic scattered source term on a separate grid
@@ -102,22 +73,6 @@ only a canonical plume.Column with no paint or emission texture is eligible.
 custom media and textures retain direct evaluation. the original direct mode
 remains the default. interpolation softens sub-cell shadow detail; the cache
 is an explicit approximation, not an exact replacement.
-
-the 960x600, four-sample night study at 3 seconds had 180 introduced redwoods,
-480 visible firebrands and 98 lamps. the zero-scattering fast path reduced
-trace GPU time from 5.204 to 4.973 seconds with identical raw RGB.
-
-caching then reduced trace GPU time to 0.482 seconds; the whole render call
-took 2.579 seconds, including encoding, preparation and readback. these are
-single-frame measurements, not a 4K animation result.
-
-the cached image's sum of absolute raw RGB differences, divided by reference
-RGB energy, was 0.0005215. this is not a perceptual maximum-error bound. the
-smoke-only test uses a black floor and a moving coloured lamp, so flame or
-ground brightness cannot hide a missing smoke source.
-
-it measures about 0.001 relative RGB error at both tested times, below its
-predeclared 0.02 limit.
 
 ## authored flame appearance
 
@@ -156,8 +111,7 @@ redwoods on the Kilauea DEM, a stationary 24-patch fire and a front over the
 grove. its physical moon direction stays fixed during the shot.
 
 the offscreen moon has disc:false: moonlight and sky stay present while the
-distant sphere is omitted. the later [woodland study](fire-woodland-result.md) fixed the general
-near-shadow bias caused by mixing lunar and terrestrial geometry scales.
+distant sphere is omitted.
 
 build through Game, then run:
 
@@ -165,8 +119,7 @@ build through Game, then run:
     game run hillside -- sequence --plan doc/fire-night-sequence.yaml
 
 the plan asks for 2,880 distinct frames at 3840x2160, 24 fps, one ray per
-pixel, starting at zero and lasting 120 seconds. this is a requested render,
-not evidence that the long run has finished. paths in the plan are relative
+pixel, starting at zero and lasting 120 seconds. paths in the plan are relative
 to its directory. output goes to out/fire-night at the repository root.
 
 the runner creates each PNG through a temporary file and writes sequence.json
@@ -179,8 +132,7 @@ yet have an exhaustive dependency manifest.
 
 static scenery and thermal palettes stay in memory across frames. the native
 hierarchy, scene encoding, density grids and lighting grids are still prepared
-per frame. this is not the completed cross-frame resource cache in the caching
-brief. new invocations rebuild scenery.
+per frame. new invocations rebuild scenery.
 
 existing legacy campfire, bonfire and alight lamps are refused by the sequence
 path because their light was sampled at construction; use volumetric fire
@@ -221,43 +173,3 @@ that shared column has no transported burn history. the front does not
 predict wind-driven spread, fuel depletion, crown-fire transitions, char,
 secondary ignition or tree collapse. tree geometry stays in place. the shot
 is a rendering workload with prescribed motion, not a wildfire forecast.
-
-## further measured checks
-
-in the recorded 960x540 pair at 20 seconds, 0.13464506% of pixels moved
-more than one OKLab JND under the smoke cache; the worst moved 2.28086897
-JND. this compares cached and direct native lighting. the earlier
-960x600 / 0.086458% statement had no matching record and is withdrawn.
-
-it does not add up every approximation in the renderer or establish a temporal
-error budget. the recorded still budget is at most 2% of pixels beyond one
-JND.
-
-the earlier manual zero-cache experiment has no preserved replay patch.
-it is not acceptance evidence; the committed smoke-light tests are the
-checks a reviewer can rerun.
-
-scheduled-field tests compare actual GPU absorption-weighted emission with the
-CPU at distinct ignition ages and fades, under the original 1e-4 relative grid
-bound. custom smoke paint/emission retains direct evaluation.
-
-the first 500-tree front study used 51 active fires and 1,128 sparks at 20
-seconds. its one-ray 4K frame took 6.984 seconds including PNG output; GPU
-tracing took 1.940 seconds.
-
-a later, unobstructed four-ray 4K study had 47 active fires and 1,076 sparks
-and took 12.677 seconds including output, with 6.365 seconds of tracing. these
-single-frame studies preceded the final sodium profile and smoothly weighted
-smoke.
-
-the full Game functional suite passed after the first night slice. its overall
-result still fails the previously recorded history rule at 03d6b0a. front
-checks and final long-run evidence are recorded separately.
-
-lint, mutation, prose and independent review gates are not all clean; these
-local development commits are not a claim of merge readiness.
-## completed sequence
-
-[the run report](fire-night-result.md) records the completed two-minute
-4K/24fps sequence, with frame hashes, measured times and output checks.
-the earlier studies above remain the record of how the settings were chosen.

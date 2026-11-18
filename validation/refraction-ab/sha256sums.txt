@@ -1,0 +1,22 @@
+# Canonical checked-in source.
+bf1426ef18a813f2dbc592dd0ca278b1e2182614dedad1d2893bd12bc0d2c442  validation/refraction-ab/scene.yaml
+69287704ec85243f3e7eee7e74d4e0a5c9b46981123d95cdc385eb2469d123f0  validation/refraction-ab/job.yaml
+b2206fd01c5c4625f071f6b3d187064cb2d4d506b783088c07c49226bd72e392  validation/refraction-ab/patches/attempt-1-index-1.333.patch
+08b2837f472615e8768b672a43a1642ecdf86803df990c19c916490c20363556  validation/refraction-ab/patches/attempt-2-index-1.0.patch
+6bc9a43bb4cea6378989026c70a16abed21c4ca28231c79561d950b5302e1bec  validation/refraction-ab/patches/attempt-2-index-1.333.patch
+# Exact scene hashes generated from the canonical scene and matching patch.
+bf1426ef18a813f2dbc592dd0ca278b1e2182614dedad1d2893bd12bc0d2c442  generated/attempt-1-index-1.0/scene.yaml
+bfa30fe44777a36a11dfdb06c3f6444732474b4b6b18227a589536bf00480b6c  generated/attempt-1-index-1.333/scene.yaml
+0a73fd6ccc062765a8e1c481eca489727e0a494372fd4ac3871601aaa7961840  generated/attempt-2-index-1.0/scene.yaml
+5320892e376d3f98ed93c93fae74c7c1a0b1d6378afbb47f84567112a1d5692d  generated/attempt-2-index-1.333/scene.yaml
+# Exact original job hashes from the four captured renders (jobs remain in gallery).
+bbba01add2d90407d0c85b43eded3569c963a6bd091ac8db15199393ccb72b99  gallery-originals/attempt-1-index-1.0/job.yaml
+ebe102fcc4349a87830963bb60ca342b818d41deb4ffa87f76b9fbf0cf48a254  gallery-originals/attempt-1-index-1.333/job.yaml
+1daa1dd1276675d7db97f823df42bd1059d22920c1a875aea1534ac0f7d9cbe7  gallery-originals/attempt-2-index-1.0/job.yaml
+fee236988685577b10785f77ccd51a572f17fce185053b502df3642821c02ec2  gallery-originals/attempt-2-index-1.333/job.yaml
+# Pinned renderer and captured PNG files.
+94170d16e1ca5229ceb432f4e9e84adafb933251b161706fe6373f87747d8f93  slayer-binary
+28a4e45fde65fc91aedb0db494e45f1254a1e19e3de8f0aaa5f7290179154eac  gallery/clear-index-1.0.png
+d361d2073f431e25228ae0d9b080c08d31a240782317726c9eff04299962f224  gallery/clear-index-1.333.png
+28a4e45fde65fc91aedb0db494e45f1254a1e19e3de8f0aaa5f7290179154eac  gallery/clear-gloss0-index-1.0.png
+762c28de1f4df1f7695f877c3247c09b969c4f24064754f235f9db90a41a0821  gallery/clear-gloss0-index-1.333.png

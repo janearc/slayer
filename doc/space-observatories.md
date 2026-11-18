@@ -1,6 +1,6 @@
 # Space observatory recipes
 
-Spitzer gets to come too. These templates give it a cryostat and shield
+These templates give Spitzer a cryostat and shield
 panel, give Hubble a long optical baffle and solar wings, and give Webb an
 open segmented primary on a tower above a layered sunshield, with its bus,
 solar panels and antenna under the shield on the sun's side.
@@ -42,10 +42,8 @@ structural dimensions rather than growing a different telescope for each
 seed. All four complexity levels share the same structural envelope and
 change circular tessellation.
 
-After building and fetching the source shelf, render a specimen with
-`game run space-spitzer`, `game run space-hubble` or `game run space-webb`.
-The PNG goes into `out/`. Each run uses the corresponding YAML in `doc/`
-and asks Hillside for a black sky.
+Render a specimen from `space-spitzer.yaml`, `space-hubble.yaml` or
+`space-webb.yaml` in `doc/`. Each asks Hillside for a black sky.
 
 Spitzer and Hubble have their optical axes along local +y. Webb has its
 primary face toward local -z above an XZ shield. These are construction
@@ -100,26 +98,8 @@ layers are not drawn, and Webb's structure keeps a picked dark grey.
 [shield]: https://science.nasa.gov/mission/webb/webbs-sunshield/
 [ote]: https://arxiv.org/abs/2301.01779
 
-The source tool fetches and pins the official pages and the paper.
-`game run sources-verify` holds all nine numerical claims to their archived
-text before a Game build; the paper's two are held to its page 6.
-The page bytes stay on the local source shelf and are not redistributed.
+## Limits
 
-## Geometry and GPU checks
-
-All three templates use the existing triangle-mesh route. Public geometry
-checks cover closed meshes, finite bounds, nominal apertures and silhouette
-probes at all four details. Webb's empty primary centre is checked separately.
-
-The [Metal test](../gpu/spacecraft_test.go) compares small CPU reference views
-with software and native GPU traversal at `quick` detail. It requires actual
-native closest-hit replies and reports fallback counts. The image budget and
-authored views are in its [fixture](../gpu/testdata/spacecraft.yaml).
-
-The separate spacecraft compatibility file holds authored geometry and
-materials at two seeds and four details. It supplements the 144 unchanged
-historical records; it does not establish physical accuracy.
-
-Inspected specimen PNGs, mutation testing and the broader Game gates remain
-part of this open OBS-2 work order. The full ground-based optical family,
-radio arrays and radomes are still separate work.
+All three templates use the existing triangle-mesh route. They do not
+establish physical accuracy. The full ground-based optical family, radio
+arrays and radomes are not covered here.

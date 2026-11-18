@@ -18,6 +18,11 @@ type Renderer struct {
 	Edit    *Edit
 	sets    map[string]*Set
 	drawers map[string]*gpu.Frames
+	flow    *flowSet
+	stars   *catalogueSet
+	named   *namedSet
+	active  string
+	stage   *heardStage
 }
 
 // NewRenderer takes no GPU resources until an actual frame is requested.
@@ -32,18 +37,60 @@ func (renderer *Renderer) Close() {
 		drawer.Close()
 	}
 	renderer.drawers = map[string]*gpu.Frames{}
+	renderer.sets = map[string]*Set{}
+	renderer.flow, renderer.stars, renderer.named = nil, nil, nil
+	renderer.stage = nil
+	renderer.active = ""
 }
 
 // Frame draws a real scene at a song instant. Site override is for the
 // representative stills only; an empty override obeys the checked edit.
 func (renderer *Renderer) Frame(ctx context.Context, at float64,
 	override string) (*image.RGBA, State, error) {
+	exposure, state, err := renderer.Expose(ctx, at, override)
+	if err != nil {
+		return nil, state, err
+	}
+	return exposure.Develop(), state, nil
+}
+
+// Expose traces one frame, leaving display work to its consumer. Calls on
+// a renderer remain sequential: its next scene update must follow the last
+// trace, but need not wait for that exposure's development or file output.
+func (renderer *Renderer) Expose(ctx context.Context, at float64,
+	override string) (*Exposure, State, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, State{}, err
 	}
 	state := renderer.Edit.At(at)
+	if renderer.Edit.Plan.FullCut && override == "" && at < renderer.Edit.Grid.Score.Beats.Times[0] {
+		picture := image.NewRGBA(image.Rect(0, 0, renderer.Edit.Plan.Width, renderer.Edit.Plan.Height))
+		for pixel := 3; pixel < len(picture.Pix); pixel += 4 {
+			picture.Pix[pixel] = 255
+		}
+		state.Site, state.Chapter = "slate", "before heard."
+		return &Exposure{picture: picture}, state, nil
+	}
 	if override != "" {
 		state.Site = override
+	}
+	if renderer.Edit.Plan.FullCut && override == "" {
+		if shot := renderer.Edit.shot(at); shot >= 0 {
+			renderer.keepOnly(fmt.Sprintf("shot-%d", shot))
+			return renderer.shotFrame(ctx, state, shot)
+		}
+	}
+	if renderer.Edit.Plan.CatalogueStudy != nil && override == "" &&
+		(!renderer.Edit.Plan.FullCut || at >= renderer.Edit.CatalogueStart && at < renderer.Edit.CatalogueEnd) {
+		renderer.keepOnly("catalogue")
+		return renderer.catalogueFrame(ctx, state)
+	}
+	if renderer.Edit.FlowAt(at) && override == "" {
+		renderer.keepOnly("flow")
+		return renderer.flowFrame(ctx, state)
+	}
+	if renderer.Edit.Plan.FullCut {
+		renderer.keepOnly(state.Site)
 	}
 	if state.Site != "hawaii" && state.Site != "atacama" &&
 		state.Site != "radio-hawaii" && state.Site != "radio-atacama" &&
@@ -62,7 +109,11 @@ func (renderer *Renderer) Frame(ctx context.Context, at float64,
 	drawer, ok := renderer.drawers[state.Site]
 	if !ok {
 		var err error
-		drawer, err = gpu.NewFrames(gpu.FasterLighting)
+		if len(set.Lasers) > 0 {
+			drawer, err = gpu.NewCompositeFrames(gpu.FasterLighting, gpu.WithoutPrimaryBeams)
+		} else {
+			drawer, err = gpu.NewFrames(gpu.FasterLighting)
+		}
 		if err != nil {
 			return nil, state, err
 		}
@@ -82,9 +133,19 @@ func (renderer *Renderer) Frame(ctx context.Context, at float64,
 	if err != nil {
 		return nil, state, err
 	}
-	picture := colour.Tone{Exposure: plan.Exposure, Knee: 0.5, Top: 12, Bloom: plan.Bloom}.Develop(frame)
-	grade(picture, state.Saturation)
-	return picture, state, nil
+	if len(set.Lasers) > 0 {
+		beams, err := renderer.drawBeams(set, state, eye, lens)
+		if err != nil {
+			return nil, state, err
+		}
+		frame, err = mergeBeamLight(frame, beams)
+		if err != nil {
+			return nil, state, err
+		}
+	}
+	return &Exposure{linear: frame,
+		tone:   colour.Tone{Exposure: plan.Exposure, Knee: 0.5, Top: 12, Bloom: plan.Bloom},
+		graded: true, saturation: state.Saturation}, state, nil
 }
 
 // grade drains a little display saturation on beat four, as an edit choice.

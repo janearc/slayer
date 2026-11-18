@@ -13,10 +13,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/moonlight"
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/set"
 	"github.com/janearc/slayer/stage"
+	"github.com/janearc/slayer/trace"
 )
 
 // worldSets are the set files that say a world, a film and a camera and
@@ -171,6 +174,77 @@ func TestAWorldOnlySetIsStagedAsTheStageStagesIt(t *testing.T) {
 				name, made.things, made.lamps, len(want.Things),
 				len(want.Lamps))
 		}
+	}
+}
+
+func TestWorldOnlyUnderwaterSceneStagesModeledMoonAndSkyTransport(t *testing.T) {
+	const authored = `"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: water under full moon
+  setting: space
+  light: moon
+  moon: {azimuth: 230, altitude: 22, disc: false}
+  film: {width: 1, height: 1, rays: 1, exposure: 100000, wide: 40}
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.03, 0.008, 0.004]
+          scatter:
+            coefficient-per-metre: [0.005, 0.003, 0.002]
+            phase-g: 0
+            steps: 8
+            max-distance: {value: 80, unit: m}
+        source: "synthetic test medium"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 16, unit: m}
+      samples: 9
+      sea:
+        wind: {value: 1, unit: m/s}
+        fetch: {value: 1000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 1
+      time: {value: 0, unit: s}
+      diffuse-sky-samples: 8
+      flat-mean:
+        mean-level: {value: 0, unit: m}
+        collar-width: {value: 4, unit: m}
+        extends-to-infinity: true
+      source: "test continuation"
+  cameras:
+    underwater-control:
+      location: {at: [0, -10, -10]}
+      orientation: {look_at: [0, 0, 0]}
+      initial-media: [seawater]
+`
+	read, err := set.Read("world-only-moon-ocean.yaml", []byte(authored))
+	if err != nil {
+		t.Fatal(err)
+	}
+	drawn := stagedWorld(read, asked{set: "world-only-moon-ocean.yaml"})
+	if drawn.err != nil {
+		t.Fatal(drawn.err)
+	}
+	if len(drawn.world.Lamps) != 1 {
+		t.Fatalf("staged moon lamps=%d, want one", len(drawn.world.Lamps))
+	}
+	if _, ok := drawn.world.Lamps[0].(emit.Distant); !ok {
+		t.Fatalf("moon lamp is %T, want the modeled distant source", drawn.world.Lamps[0])
+	}
+	if _, ok := drawn.world.Sky.(moonlight.Skies); !ok {
+		t.Fatalf("moon sky is %T, want the computed moonlit atmosphere sky", drawn.world.Sky)
+	}
+	if err := trace.ValidateClearState(drawn.world, drawn.given.initialMedia); err != nil {
+		t.Fatalf("world-only sky-scatter preflight: %v", err)
 	}
 }
 

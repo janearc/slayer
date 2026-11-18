@@ -64,7 +64,7 @@ func TestAssessOpensTheTitles(t *testing.T) {
 // anti-test of TestAssessSaysAFileWillDraw
 // anti-test of TestAssessDryRunsTheSmokes
 func TestAssessRefusesWhatItCannotDo(t *testing.T) {
-	t.Setenv("XDG_CACHE_HOME", t.TempDir())
+	t.Setenv("SLAYER_CACHE", t.TempDir())
 	directory := t.TempDir()
 	for _, refusal := range []struct {
 		args []string

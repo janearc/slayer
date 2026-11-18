@@ -19,11 +19,11 @@ const v2Name = "https://github.com/janearc/slayer/schemas/ecosystem-v2.json"
 // of the reader (2026-11-09).
 func v2Drafts() []string {
 	return []string{
-		"keyhole-to-ground.yaml",
-		"webb-looking-out.yaml",
-		"corona.yaml",
-		"orbital-and-lantern.yaml",
-		"music-timeline.yaml",
+		"set/testdata/keyhole-to-ground.yaml",
+		"set/testdata/webb-looking-out.yaml",
+		"doc/corona.yaml",
+		"doc/orbital-and-lantern.yaml",
+		"set/testdata/music-timeline.yaml",
 	}
 }
 
@@ -44,7 +44,7 @@ func v2Schema(t *testing.T) *yamlfile.Schema {
 // draft is one of the drafts, read from doc, or the test stops.
 func draft(t *testing.T, name string) []byte {
 	t.Helper()
-	raw, err := os.ReadFile(filepath.Join("..", "doc", name))
+	raw, err := os.ReadFile(filepath.Join("..", name))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestV2TakesEveryDraft(t *testing.T) {
 // place, and a value outside its kind, so taking the drafts is a check.
 func TestV2RefusesWhatItDoesNotSay(t *testing.T) {
 	schema := v2Schema(t)
-	keyhole := string(draft(t, "keyhole-to-ground.yaml"))
+	keyhole := string(draft(t, "set/testdata/keyhole-to-ground.yaml"))
 	for why, from := range map[string][2]string{
 		"an unknown key": {"        orbit:\n", "        orbits:\n"},
 		"a date that is not a day": {`date: "2026-06-21"`,

@@ -1,6 +1,21 @@
 # Authored visual proportions and appearance; no engineering replica.
 # Physical reference values live separately in research-derived-data.yml.
 numbers:
+- name: spitzer-seam-gap
+  value: 0.002
+  says: authored clearance between separate chevron leaves per aperture
+  kind: picked
+  by: an agent, Spitzer panel study, 2026-11-15
+- name: spitzer-cell-columns
+  value: 7
+  says: authored packing of the published 392 cells into seven columns and 56 rows
+  kind: picked
+  by: an agent, Spitzer panel study, 2026-11-15
+- name: spitzer-chevron-degrees
+  value: 20
+  says: authored fold of each solar panel about the centre seam
+  kind: picked
+  by: an agent, Spitzer panel study, 2026-11-15
 - name: sides-hull
   value: 12
   says: enclosure tessellation at hull detail
@@ -362,3 +377,103 @@ numbers:
   says: closed primary tile backing thickness per aperture diameter
   kind: picked
   by: Slayer's spacecraft templates, 2026-11-07
+- name: detail-relief
+  value: 0.012
+  says: raised trim depth per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: service-bay-width
+  value: 0.55
+  says: equipment panel width per housing radius
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: service-bay-height
+  value: 0.72
+  says: equipment panel height per bus height
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: spitzer-thermal-break
+  value: 0.16
+  says: thermal collar height above bus per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: enclosed-secondary-height
+  value: 0.84
+  says: secondary support height as tube length fraction
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: spider-radius
+  value: 0.006
+  says: secondary support radius per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: hubble-door-out
+  value: 1.05
+  says: opened door offset per housing radius
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: hubble-antenna-out
+  value: 0.22
+  says: dish centre offset as full wing span fraction
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: hubble-antenna-rise
+  value: 0.32
+  says: antenna boom rise per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: hubble-antenna-radius
+  value: 0.19
+  says: antenna dish radius per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: antenna-depth
+  value: 0.05
+  says: antenna dish depth per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-half-width
+  value: 0.31
+  says: rear frame half width per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-height
+  value: 0.83
+  says: rear frame height per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-gap
+  value: 0.04
+  says: rear frame distance behind primary per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-depth
+  value: 0.35
+  says: rear frame depth per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-member-radius
+  value: 0.009
+  says: rear frame member radius per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-levels
+  value: 4
+  says: rear frame vertical bays
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-radiator-width
+  value: 0.42
+  says: rear radiator width per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: backplane-radiator-height
+  value: 0.44
+  says: rear radiator height per aperture
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15
+- name: frame-joint-inset
+  value: 0.12
+  says: separation of meeting end caps per member radius
+  kind: picked
+  by: heard. spacecraft scenery study, 2026-11-15

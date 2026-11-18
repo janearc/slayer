@@ -30,6 +30,92 @@ type view struct {
 	at            time.Duration
 	width, height int
 	rays          int
+	inside        [mostHeld]held
+	holding       int
+}
+
+// InitialMedium is one explicitly supplied clear medium the camera starts
+// inside. Index corresponds to a clear surface material's Index (or Dense
+// default) and must be finite in [1e-9, 1e9], the renderer's supported safe
+// envelope. Rank is that material's Rank.
+//
+// At most MaxInitialMedia entries may be supplied. The slice passed to
+// RenderWithInitialMedia or SampledWithInitialMedia is ordered by entry: among
+// equal ranks, its last member is active, as it is for media crossed during
+// tracing.
+//
+// The renderer does not infer this state from geometry. The caller is
+// responsible for supplying the media that actually contain the camera and
+// for matching their Index and Rank to the boundary materials. Two clear
+// things with the same Index and Rank are one medium in the tracer's current
+// surface model.
+type InitialMedium struct {
+	// Index is the refractive index of this explicitly declared medium.
+	Index float64
+	// Rank determines which overlapping clear medium is active.
+	Rank int
+	// ClearMedium supplies this medium's optional homogeneous RGB
+	// extinction and scene-to-metre conversion. Its name and properties
+	// must match any boundary material carrying the same named identity.
+	ClearMedium *thing.ClearMedium
+}
+
+// MaxInitialMedia is the most media an initial camera state may contain. The
+// tracer uses the same bound for media accumulated while crossing surfaces.
+const MaxInitialMedia = mostHeld
+
+// initialMedia validates and copies a caller's ordered start state into the
+// same fixed stack used as a ray crosses clear surfaces.
+func initialMedia(media []InitialMedium) ([mostHeld]held, int, error) {
+	var inside [mostHeld]held
+	if len(media) > MaxInitialMedia {
+		return inside, 0, fmt.Errorf("trace: an initial medium stack holds at most %d entries, got %d",
+			MaxInitialMedia, len(media))
+	}
+	for i, each := range media {
+		if !finite(each.Index) || each.Index < 1e-9 || each.Index > 1e9 {
+			return inside, 0, fmt.Errorf("trace: initial medium %d index must be finite and between 1e-9 and 1e9, got %g",
+				i, each.Index)
+		}
+		current := held{index: each.Index, rank: each.Rank,
+			clearMedium: each.ClearMedium}
+		for prior := 0; prior < i; prior++ {
+			if current.clearMedium.Defined() &&
+				inside[prior].clearMedium.Name() == current.clearMedium.Name() {
+				return inside, 0, fmt.Errorf("trace: initial clear medium ID %q occurs more than once", current.clearMedium.Name())
+			}
+			if inside[prior].index == current.index &&
+				inside[prior].rank == current.rank {
+				if inside[prior].clearMedium.Name() == current.clearMedium.Name() {
+					return inside, 0, fmt.Errorf("trace: initial medium %d duplicates medium %d (index %g, rank %d)",
+						i, prior, each.Index, each.Rank)
+				}
+				return inside, 0, fmt.Errorf("trace: initial media at index %g rank %d have ambiguous identities", each.Index, each.Rank)
+			}
+		}
+		inside[i] = current
+	}
+	return inside, len(media), nil
+}
+
+// withInitialMedia adds a validated, caller-owned start state to a view.
+// An empty list preserves the view's original all-air zero state.
+func (seen view) withInitialMedia(media []InitialMedium) (view, error) {
+	if len(media) > 0 {
+		inside, holding, err := initialMedia(media)
+		if err != nil {
+			return view{}, err
+		}
+		seen.inside, seen.holding = inside, holding
+	}
+	if err := ValidateClearState(seen.world, media); err != nil {
+		return view{}, err
+	}
+	if err := validateOceanInitialMedia(seen.world, seen.eye, media,
+		seen.at); err != nil {
+		return view{}, err
+	}
+	return seen, nil
 }
 
 // newView validates a render request. It requires a world, finite camera
@@ -39,6 +125,12 @@ func newView(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	moment time.Duration, width, height, rays int) (view, error) {
 	if world == nil {
 		return view{}, errNoWorld
+	}
+	if err := ValidateClearState(world, nil); err != nil {
+		return view{}, err
+	}
+	if err := validateOceanDirectSunWorld(world); err != nil {
+		return view{}, err
 	}
 	from := eye.Origin
 	if !finite(from.X, from.Y, from.Z, eye.Scale) {
@@ -103,7 +195,21 @@ func pixelAngle(eye maths.Subspace, lens film.Sensor, width,
 // rendering; see newView for the limits.
 func Render(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	moment time.Duration, width, height int) (*frame.Frame, error) {
+	return RenderWithInitialMedia(world, eye, lens, moment, width, height, nil)
+}
+
+// RenderWithInitialMedia traces the world from a camera whose starting clear
+// media are explicitly given in entry order. An empty slice has exactly the
+// all-air behavior of Render. Initial media are values; they are copied and
+// validated before rendering starts.
+func RenderWithInitialMedia(world *thing.World, eye maths.Subspace,
+	lens film.Sensor, moment time.Duration, width, height int,
+	media []InitialMedium) (*frame.Frame, error) {
 	seen, err := newView(world, eye, lens, moment, width, height, 1)
+	if err != nil {
+		return nil, err
+	}
+	seen, err = seen.withInitialMedia(media)
 	if err != nil {
 		return nil, err
 	}
@@ -141,13 +247,18 @@ func paint(width, height int,
 // cannot be drawn.
 func render(seen view) (*frame.Frame, error) {
 	scene := stage(seen.world, seen.at)
+	scene.enableClearInscatterFault(seen)
 	if err := scene.refusal(); err != nil {
 		return nil, err
 	}
 	wide := seen.wide()
-	return paint(seen.width, seen.height, func(x, y int) frame.Pixel {
+	drawn := paint(seen.width, seen.height, func(x, y int) frame.Pixel {
 		return seen.through(scene, wide, x, y)
-	}), nil
+	})
+	if err := scene.refusal(); err != nil {
+		return nil, err
+	}
+	return drawn, nil
 }
 
 // wide returns the world's explicit angular pixel width when supplied,
@@ -168,7 +279,11 @@ func (seen view) through(scene *staged, wide float64, x, y int) frame.Pixel {
 		told.tell("a ray from the lens", "x", x, "y", y, "of", of,
 			"ray", ray)
 	}
-	return shade(scene, look{ray: ray, pixel: wide})
+	asked := look{ray: ray, pixel: wide}
+	if seen.holding > 0 {
+		asked.inside, asked.holding = seen.inside, seen.holding
+	}
+	return shade(scene, asked)
 }
 
 // Sampled traces rays by rays samples per pixel and averages linear light and
@@ -177,7 +292,21 @@ func (seen view) through(scene *staged, wide float64, x, y int) frame.Pixel {
 // Invalid sampling or a total count above mostPixels returns an error.
 func Sampled(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	moment time.Duration, width, height, rays int) (*frame.Frame, error) {
+	return SampledWithInitialMedia(world, eye, lens, moment, width, height,
+		rays, nil)
+}
+
+// SampledWithInitialMedia is Sampled with an explicit ordered stack of clear
+// media containing the camera. An empty slice has exactly the all-air
+// behavior of Sampled. See InitialMedium for the values' meaning and limits.
+func SampledWithInitialMedia(world *thing.World, eye maths.Subspace,
+	lens film.Sensor, moment time.Duration, width, height, rays int,
+	media []InitialMedium) (*frame.Frame, error) {
 	seen, err := newView(world, eye, lens, moment, width, height, rays)
+	if err != nil {
+		return nil, err
+	}
+	seen, err = seen.withInitialMedia(media)
 	if err != nil {
 		return nil, err
 	}

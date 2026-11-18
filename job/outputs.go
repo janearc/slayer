@@ -1,11 +1,29 @@
 package job
 
-import "time"
+import (
+	"path/filepath"
+	"time"
+)
+
+// outputForms remembers whether each output was written without a directory.
+// Resolution makes both bare and absolute sibling paths absolute, so this
+// information must be captured before resolution.
+type outputForms struct{ picture, raw, frames, movie bool }
+
+// formsOf records, for each output, whether it was named without a directory.
+func formsOf(wire *outputsWire) outputForms {
+	if wire == nil {
+		return outputForms{}
+	}
+	bare := func(path string) bool { return path != "" && filepath.Base(path) == path }
+	return outputForms{picture: bare(wire.Picture), raw: bare(wire.Raw), frames: bare(wire.Frames), movie: bare(wire.Movie)}
+}
 
 // Outputs is what the job writes, by role, each an absolute path. A job
 // that says none is written where its verb puts it.
 type Outputs struct {
-	wire outputsWire
+	wire  outputsWire
+	forms outputForms
 }
 
 // Outputs is the job's outputs.
@@ -13,8 +31,20 @@ func (job Job) Outputs() Outputs {
 	if job.wire.Outputs == nil {
 		return Outputs{}
 	}
-	return Outputs{*job.wire.Outputs}
+	return Outputs{wire: *job.wire.Outputs, forms: job.outputForms}
 }
+
+// PictureBare reports whether the picture was named without a directory.
+func (out Outputs) PictureBare() bool { return out.forms.picture }
+
+// RawBare reports whether raw light was named without a directory.
+func (out Outputs) RawBare() bool { return out.forms.raw }
+
+// FramesBare reports whether frames were named without a directory.
+func (out Outputs) FramesBare() bool { return out.forms.frames }
+
+// MovieBare reports whether the movie was named without a directory.
+func (out Outputs) MovieBare() bool { return out.forms.movie }
 
 // path is a path and whether the job said it.
 func path(said string) (string, bool) { return said, said != "" }

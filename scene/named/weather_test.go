@@ -5,6 +5,8 @@ import (
 	"errors"
 	"image"
 	"math"
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -252,12 +254,29 @@ func TestEachKindRefusesTheOthersNames(t *testing.T) {
 	}
 }
 
-// The weather's cache is the one hillside keeps: SLAYER_WEATHER where it
-// is set.
+// The weather's cache is the one hillside keeps: the weather folder
+// under SLAYER_CACHE.
 func TestTheWeathersCacheIsHillsides(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("SLAYER_WEATHER", dir)
-	if got, err := weatherMaps(t).Cache(); err != nil || got != dir {
-		t.Errorf("cache %q, %v; want %q", got, err, dir)
+	t.Setenv("SLAYER_CACHE", dir)
+	want := filepath.Join(dir, "weather")
+	if got, err := weatherMaps(t).Cache(); err != nil || got != want {
+		t.Errorf("cache %q, %v; want %q", got, err, want)
+	}
+}
+
+// anti-test: with SLAYER_CACHE unset the weather's cache is refused by
+// name, and nothing is made under the renders home.
+func TestTheWeathersCacheIsRefusedWithNoHome(t *testing.T) {
+	renders := t.TempDir()
+	t.Setenv("SLAYER_CACHE", "")
+	t.Setenv("SLAYER_RENDERS", renders)
+	got, err := weatherMaps(t).Cache()
+	if err == nil || !strings.Contains(err.Error(), "SLAYER_CACHE") {
+		t.Errorf("cache %q, %v; want a refusal naming SLAYER_CACHE", got,
+			err)
+	}
+	if found, _ := os.ReadDir(renders); len(found) != 0 {
+		t.Errorf("the renders home was written to: %v", found)
 	}
 }

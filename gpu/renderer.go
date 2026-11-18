@@ -8,6 +8,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/thing"
+	"github.com/janearc/slayer/trace"
 	"sync/atomic"
 	"time"
 )
@@ -58,5 +59,28 @@ func (renderer *Renderer) Sampled(world *thing.World, eye maths.Subspace,
 		picture, spent, err = sampledTimed(world, nil, eye, lens, at, width, height, side, renderer.volumeCells)
 	}
 	renderer.timing.Store(&FrameTiming{spent.encode, spent.compile, spent.bake, spent.trace, spent.average, spent.seedCached})
+	return picture, err
+}
+
+// SampledWithInitialMedia is Sampled with an explicit camera medium stack.
+// A gravity field cannot carry that state through its separate geodesic
+// kernel, so the combination is refused before opening a device kernel.
+func (renderer *Renderer) SampledWithInitialMedia(world *thing.World,
+	eye maths.Subspace, lens film.Sensor, at time.Duration, width, height,
+	side int, media []trace.InitialMedium) (*frame.Frame, error) {
+	if err := trace.ValidateClearState(world, media); err != nil {
+		return nil, err
+	}
+	if len(world.Fields) > 0 {
+		if len(media) > 0 {
+			return nil, unsupported{"initial camera media with gravity fields"}
+		}
+		return renderer.Sampled(world, eye, lens, at, width, height, side)
+	}
+	picture, spent, err := sampledBackendWithInitialMedia(world, nil, eye,
+		lens, at, width, height, side, softwareTraversal, media,
+		renderer.volumeCells)
+	renderer.timing.Store(&FrameTiming{spent.encode, spent.compile,
+		spent.bake, spent.trace, spent.average, spent.seedCached})
 	return picture, err
 }

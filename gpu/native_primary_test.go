@@ -6,6 +6,7 @@ import (
 	"errors"
 	"image"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/janearc/libtheme-css/spaces/ok"
@@ -118,10 +119,12 @@ func nativePlacedFixture(t *testing.T) (*thing.World, maths.Subspace) {
 
 func TestNativePrimaryRefusesUnsupportedScenes(t *testing.T) {
 	world := thing.NewWorld()
-	world.Add(thing.Thing{Shape: shape.Plane{}})
+	// Planes are supported now. A world-wide haze is still refused by the
+	// encoder and provides an independent pre-dispatch negative case.
+	world.Haze.Density = .1
 	picture, _, err := SampledAccelerated(world, maths.Subspace{}, film.Pinhole{}, 0, 4, 4, 1)
 	var why unsupported
-	if picture != nil || !errors.As(err, &why) {
+	if picture != nil || !errors.As(err, &why) || !strings.Contains(err.Error(), "haze") {
 		t.Fatalf("unsupported scene was not refused: %v", err)
 	}
 }

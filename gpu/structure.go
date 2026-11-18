@@ -133,8 +133,14 @@ const treeStack = 64
 // infinity of its own; it becomes the tracer's +Inf here
 const nowhere = 1e30
 
-// lampsAsked is how many lamps a point asks when the world has more:
-// trace's own lampsAsked, so the two pick alike
+// lampsEvery is the most lamps a world may have and have every one lit
+// exactly at every point: trace's own lampsEvery, so the two light
+// alike. The kernel's asks hold this many, and a flood and the fast
+// light store are taken up to it, since there nothing is picked.
+const lampsEvery = 16
+
+// lampsAsked is how many lamps a point picks when the world has more
+// than lampsEvery: trace's own lampsAsked, so the two pick alike
 const lampsAsked = 8
 
 // refractions is how many clear surfaces a look may bend through:
@@ -172,6 +178,7 @@ constexpr constant float nowhere = %g;
 constexpr constant int conifer_stack = %d;
 constexpr constant int most_conifer_depth = %d;
 constexpr constant int lamps_asked = %d;
+constexpr constant int lamps_every = %d;
 constexpr constant int field_seed_words = 16;
 constexpr constant int boxed_kind = %d;
 constexpr constant int shell_kind = %d;
@@ -194,7 +201,7 @@ constexpr constant float clip_share = %g;
 constexpr constant float clip_rounding = %g;
 `, max(volumes, 1), treeStack, per+perRecord*records, per, perRecord,
 		records, nowhere, coniferStack, mostConiferDepth, lampsAsked,
-		boxedKind, shellKind, float64(beamZero), float64(beamWhole), beamHalf,
+		lampsEvery, boxedKind, shellKind, float64(beamZero), float64(beamWhole), beamHalf,
 		beamstep.Radii(), beamstep.RadialSamples(),
 		beamstep.MaximumSplits(), polarKind, floodKind, float64(beamWhole), beamHalf,
 		gasOn, rayleighLobe, fourPi, lobePower, float64(lobeTwice),
@@ -297,6 +304,8 @@ func prelude(records, volumes int) string {
 	text.WriteString(reachNumbers())
 	text.WriteString(ringNumbers())
 	text.WriteString(wakeNumbers())
+	text.WriteString(propellerNumbers())
+	text.WriteString("#ifdef SLAYER_OPTICAL_MEDIA\n" + fizzNumbers() + "#endif\n")
 	text.WriteString(exposureNumbers())
 	for _, made := range structures {
 		text.WriteString(made.msl())

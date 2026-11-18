@@ -124,14 +124,15 @@ func TestABloomSpillsAcrossAndDown(t *testing.T) {
 // itself.
 //
 // the star is 4 times white; through a knee of 0.5 and the default top of 100
-// it is 0.5 + 0.5*ln(8)/ln(200) of the screen's white, and 5 times white would
-// be more.
+// it is 0.5 + a*ln(1 + 3.5/a) of the screen's white, a the shoulder's scale,
+// and 5 times white would be more.
 func TestABloomOfNoughtOrLessAddsNothing(t *testing.T) {
 	f := frame.New(3, 1)
 	for x, v := range []float64{0.1, 4, 0.1} {
 		f.Set(x, 0, frame.Pixel{R: float32(v), G: float32(v), B: float32(v), Cover: 1})
 	}
-	rolled := 0.5 + 0.5*math.Log(8)/math.Log(200)
+	scale := scaleOf(0.5, 100) // defined: the tone's knee and its top
+	rolled := 0.5 + scale*math.Log1p(3.5/scale)
 	for _, bloom := range []float64{0, -1} {
 		img := Tone{Knee: 0.5, Bloom: bloom}.Develop(f)
 		want := color.RGBA{Encode(rolled), Encode(rolled), Encode(rolled), 255}

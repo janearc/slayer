@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/interfaces/file"
+	"github.com/janearc/slayer/internal/observability"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/raw"
 	"github.com/janearc/slayer/render/frame"
@@ -70,6 +71,9 @@ func (run runner) draw() error {
 	if err != nil {
 		return err
 	}
+	if err := run.importReceipt(); err != nil {
+		return err
+	}
 	return run.noted()
 }
 
@@ -84,6 +88,9 @@ func (run runner) drawStill() error {
 	}
 	if run.keeping() {
 		if served, err := run.keptPicture(); served || err != nil {
+			if served && err == nil {
+				run.frameEvent(0, spent{}, true, true, false, false, false)
+			}
 			return err
 		}
 	}
@@ -137,6 +144,12 @@ func (run runner) copied() error {
 // source is closed again when either cannot be made. What the source's
 // staging took from the disk caches is said, a line each.
 func (run runner) tools() (kit, error) {
+	if observability.Enabled() {
+		started := time.Now()
+		defer func() {
+			observability.Observe("slayer_scene_setup_seconds", time.Since(started).Seconds())
+		}()
+	}
 	opened, err := run.shop.Source(run.ctx, run.wanted)
 	if err != nil {
 		return kit{}, err
@@ -166,15 +179,25 @@ type noting interface{ Cached() []string }
 // caches or worked out; a source that keeps nothing says nothing.
 func (run runner) cached(opened source) error {
 	noted, notes := opened.(noting)
-	if !notes {
-		return nil
+	if notes {
+		for _, line := range noted.Cached() {
+			if _, err := fmt.Fprintln(run.out, line); err != nil {
+				return err
+			}
+		}
 	}
-	for _, line := range noted.Cached() {
-		if _, err := fmt.Fprintln(run.out, line); err != nil {
+	if spectrum, has := opened.(oceanSpectrumNoting); has {
+		line, present := spectrum.OceanSpectrumLine()
+		if present {
+			_, err := fmt.Fprintln(run.out, line)
 			return err
 		}
 	}
 	return nil
+}
+
+type oceanSpectrumNoting interface {
+	OceanSpectrumLine() (string, bool)
 }
 
 // frame draws frame index and finishes it: developed, the set's hud and
@@ -202,6 +225,12 @@ func (run runner) frame(tools kit, index int, at time.Duration) (made,
 		}
 	}
 	titled := run.now()
+	if observability.Enabled() {
+		observability.Add("slayer_frames_drawn_total", 1)
+		observability.Observe("slayer_frame_draw_seconds", drew.Sub(start).Seconds())
+		observability.Observe("slayer_frame_develop_seconds", developed.Sub(drew).Seconds())
+		observability.Observe("slayer_frame_titles_seconds", titled.Sub(developed).Seconds())
+	}
 	return made{light: light.Light(), picture: picture,
 		spent: spent{draw: drew.Sub(start), develop: developed.Sub(drew),
 			titles: titled.Sub(developed)}}, nil
@@ -227,6 +256,7 @@ func (run runner) still(tools kit) error {
 		return err
 	}
 	if run.at.raw == "" {
+		run.frameEvent(0, finished.spent, false, true, false, false, false)
 		return nil
 	}
 	if err := os.MkdirAll(filepath.Dir(run.at.raw),
@@ -237,6 +267,9 @@ func (run runner) still(tools kit) error {
 		return err
 	}
 	_, err = fmt.Fprintf(run.out, "wrote %s\n", run.at.raw)
+	if err == nil {
+		run.frameEvent(0, finished.spent, false, true, false, false, false)
+	}
 	return err
 }
 

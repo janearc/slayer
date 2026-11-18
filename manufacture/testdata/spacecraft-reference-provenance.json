@@ -56,5 +56,104 @@
     "manufacture/tube.go": "648247fb1fda98db2f486f17bf4a105be4c95102db3b04969bb0612503708f28",
     "maths/space.go": "04a18785ecc8d37e15a1b4e528e009e0d483e63ecf026a493ce9ae9770fb2493",
     "scene/thing/construction.go": "4c289d746c6c39b2bda8f356c1d4be40c00533281a651b69deedb3f580d453dd"
+  },
+  "spitzerSolarUpdate20261115": {
+    "baseCommit": "e4dc745f4803fb0a82a301389dc89e5871abdf83",
+    "uncommittedDraft": true,
+    "producer": "TestSpacecraftAppearance with SPACECRAFT_REFERENCE_OUT to separate candidate",
+    "changedCases": [
+      [
+        "space-observatory",
+        "5",
+        "hull"
+      ],
+      [
+        "space-observatory",
+        "5",
+        "clumps"
+      ],
+      [
+        "space-observatory",
+        "5",
+        "quick"
+      ],
+      [
+        "space-observatory",
+        "5",
+        "demo"
+      ],
+      [
+        "space-observatory",
+        "11",
+        "hull"
+      ],
+      [
+        "space-observatory",
+        "11",
+        "clumps"
+      ],
+      [
+        "space-observatory",
+        "11",
+        "quick"
+      ],
+      [
+        "space-observatory",
+        "11",
+        "demo"
+      ],
+      [
+        "spitzer",
+        "5",
+        "hull"
+      ],
+      [
+        "spitzer",
+        "5",
+        "clumps"
+      ],
+      [
+        "spitzer",
+        "5",
+        "quick"
+      ],
+      [
+        "spitzer",
+        "5",
+        "demo"
+      ],
+      [
+        "spitzer",
+        "11",
+        "hull"
+      ],
+      [
+        "spitzer",
+        "11",
+        "clumps"
+      ],
+      [
+        "spitzer",
+        "11",
+        "quick"
+      ],
+      [
+        "spitzer",
+        "11",
+        "demo"
+      ]
+    ],
+    "referenceSHA256": "44f9d2ad3251ae035fb8129f6092fb62642767a74a8f01ae2122dc88fde3f236",
+    "review": "784 distinct cells, bounds and closed geometry at all four details; cove and Gaia-space solar-view previews inspected on Apple M3 Max; maturity remains pending",
+    "renderRoot": "$SLAYER_RENDERS/model-maturity-2026-11-15",
+    "sourceSHA256": {
+      "manufacture/spitzer_panel.go": "1a863d30e9dc693fdcb453611db1ea688530db7a9b52f8997e070f46cc21fc54",
+      "manufacture/spacecraft.go": "979db001ca0b5aae95d6fb53fe5e87c7763bf1b1871390965aac37b808f9e6be",
+      "manufacture/spacecraft-choices.yaml": "611f3ebfff648924d75b9b18a97aee30a76de7da3cf1af06724525afb00126a9",
+      "materials/semiconductors.go": "26f75dff7ae43b816bb16cbb0e02c4ef8d02eb494834584cb749a78190db97dc",
+      "materials/testdata/main/GaAs/nk/Aspnes.yml": "45565b33ad36fc8e65d3b0d63a1db6e8aed1e64177e7c6b0e53968c105b4fc9c",
+      "research/research-derived-data.yml": "6095f248d10055ba20b580dcdbfb286e094bcc92d3ab4b8dfefd8299bdf254b1",
+      "manufacture/spitzer-surfaces.yaml": "abf4bb5a79f33bcf7efe6c85c4115d639376f5b3db526164dc760b2f79138726"
+    }
   }
 }

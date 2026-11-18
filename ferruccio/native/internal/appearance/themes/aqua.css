@@ -1,0 +1,53 @@
+/*
+ * aqua -- a pale aqua ground with slate blue ink, 6.0:1, chosen in paratune.
+ * a bright ground narrows the pupil, and a narrow pupil is a lens stopped
+ * down: the letters land sharper. cool, not white, so it does not sting.
+ * accents are dark and cool so they read on the bright ground; cells 17 to
+ * 254 are the status-line bar's ramp, as tints of the ground.
+ */
+:root {
+  --ground: #a3ffff; /* oklch(94% 0.088 195.8) */
+  --ink: #505880; /* oklch(47% 0.066 274.9) */
+  --cursor: #505880; /* oklch(47% 0.066 274.9) */
+  --cursor-ink: #a3ffff; /* oklch(94% 0.088 195.8) */
+  --surface-1: #7fe0e6; /* oklch(85% 0.092 200.8) */
+  --selection-ink: #2a3050; /* oklch(32% 0.058 274.6) */
+  --black: #1e2a38; /* oklch(28% 0.031 252.7) */
+  --red: #8a2a3a; /* oklch(44% 0.130 14.7) */
+  --green: #1f5a3a; /* oklch(42% 0.082 156.3) */
+  --yellow: #6a5210; /* oklch(45% 0.085 87.1) */
+  --blue: #1f3a8a; /* oklch(38% 0.138 265.9) */
+  --magenta: #6a2a7a; /* oklch(41% 0.141 319.1) */
+  --cyan: #0a5a6a; /* oklch(43% 0.074 216.0) */
+  --white: #8fe6e6; /* oklch(87% 0.084 195.8) */
+  --bright-black: #4a6070; /* oklch(48% 0.037 240.1) */
+  --bright-red: #a03548; /* oklch(49% 0.141 13.6) */
+  --bright-green: #2a6a46; /* oklch(47% 0.088 156.0) */
+  --bright-yellow: #7a6018; /* oklch(50% 0.092 87.7) */
+  --bright-blue: #2a4aa0; /* oklch(44% 0.145 265.4) */
+  --bright-magenta: #7a3a8a; /* oklch(47% 0.140 319.2) */
+  --bright-cyan: #146a7a; /* oklch(48% 0.079 213.9) */
+  --bright-white: #b8ffff; /* oklch(95% 0.070 196.1) */
+  --palette-17: #9df6f6; /* oklch(92% 0.086 195.8) */
+  --palette-18: #99f1f1; /* oklch(90% 0.085 195.8) */
+  --palette-24: #95eced; /* oklch(89% 0.084 196.7) */
+  --palette-31: #91e8e9; /* oklch(88% 0.084 196.7) */
+  --palette-38: #8de3e5; /* oklch(86% 0.083 197.7) */
+  --palette-67: #89dfe1; /* oklch(85% 0.083 197.7) */
+  --palette-103: #85dadd; /* oklch(84% 0.083 198.6) */
+  --palette-139: #81d5d8; /* oklch(82% 0.082 198.7) */
+  --palette-169: #79ccd0; /* oklch(79% 0.081 199.7) */
+  --palette-198: #72c3c8; /* oklch(77% 0.080 200.8) */
+  --palette-205: #76c8cc; /* oklch(78% 0.080 199.7) */
+  --palette-211: #6ebec4; /* oklch(75% 0.079 201.9) */
+  --palette-214: #4f9aa3; /* oklch(64% 0.076 205.8) */
+  --palette-215: #529ea7; /* oklch(65% 0.076 205.6) */
+  --palette-218: #6abac0; /* oklch(74% 0.079 201.9) */
+  --palette-222: #56a3ab; /* oklch(67% 0.077 204.4) */
+  --palette-223: #5aa7af; /* oklch(68% 0.077 204.3) */
+  --palette-224: #5eacb3; /* oklch(70% 0.078 203.2) */
+  --palette-225: #66b5bb; /* oklch(72% 0.078 202.0) */
+  --palette-251: #505880; /* oklch(47% 0.066 274.9) */
+  --palette-254: #62b1b7; /* oklch(71% 0.078 202.0) */
+  --claude-rules: #7dd1d4; /* oklch(81% 0.082 198.7) */
+}

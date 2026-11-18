@@ -1,0 +1,71 @@
+{
+  "jobs": [
+    {
+      "attempt": 0,
+      "cancel_requested": false,
+      "executing": false,
+      "files": [
+        {
+          "path": "/capture/path-4",
+          "sha256": "1dba7e2e327c0380bd42bd50d420189969d2d72f20f6f4cc7a58c811a500aea9"
+        },
+        {
+          "path": "/capture/path-1",
+          "sha256": "42461cc5016ee519cdc9ec713c48f36257dbee9637d542284dcd7bc2ba823b72"
+        },
+        {
+          "path": "/capture/path-7",
+          "sha256": "6ce663fda6dd9407689ab15918d5d45f74f386a8fe1fd2c691e8d005244874ff"
+        },
+        {
+          "path": "/capture/path-3",
+          "sha256": "a184436bc2de355c8107cf9c51a5a92a9660b0e968213c8629f92117909403b0"
+        }
+      ],
+      "finished": "0001-01-01T00:00:00Z",
+      "memory_pressure": "",
+      "peak_resident_bytes": 0,
+      "request": {
+        "agent": "preview-owner",
+        "args": [
+          "draw",
+          "/capture/path-7",
+          "--renderer",
+          "cpu",
+          "--width",
+          "640",
+          "--height",
+          "400",
+          "--rays",
+          "1",
+          "--quality",
+          "preview",
+          "--out",
+          "/capture/path-6"
+        ],
+        "command": "/capture/path-4",
+        "directory": "/capture/path-5",
+        "environment": {
+          "SLAYER_CACHE": "/capture/path-2"
+        },
+        "inputs": [
+          "/capture/path-7",
+          "/capture/path-3"
+        ],
+        "key": "ferruccio-ccfe456f-packaged-preview-v1",
+        "lane": "tests",
+        "timeout_seconds": 300
+      },
+      "result": {
+        "exit_code": 0,
+        "state": ""
+      },
+      "sequence": 3,
+      "started": "0001-01-01T00:00:00Z",
+      "state": "queued",
+      "submitted": "2026-11-15T22:40:05.705545Z"
+    }
+  ],
+  "paused": "Team intake only: existing earlier-owner film must finish; output preservation and recovery acceptance remain open. queue-operator owns dispatch.",
+  "version": 1
+}

@@ -16,29 +16,33 @@ import (
 
 // Plan is an authored edit, not a measured account of the music or sites.
 type Plan struct {
-	Name           string    `yaml:"name"`
-	Music          string    `yaml:"music"`
-	Score          string    `yaml:"score"`
-	Width          int       `yaml:"width"`
-	Height         int       `yaml:"height"`
-	FPS            int       `yaml:"fps"`
-	Rays           int       `yaml:"rays"`
-	Lock           string    `yaml:"lock"`
-	RadioOne       string    `yaml:"radio-one"`
-	RadioTwo       string    `yaml:"radio-two"`
-	Reveal         string    `yaml:"reveal"`
-	CodaBars       int       `yaml:"coda-bars"`
-	SearchCutBars  int       `yaml:"search-cut-bars"`
-	BeatMotion     []float64 `yaml:"beat-motion"`
-	BeatTwoAccents []string  `yaml:"beat-two-accents"`
-	SearchDays     float64   `yaml:"search-days"`
-	Azimuth        float64   `yaml:"shared-azimuth-deg"`
-	Altitude       float64   `yaml:"shared-altitude-deg"`
-	Diameter       float64   `yaml:"optical-diameter-metres"`
-	Aperture       float64   `yaml:"optical-aperture-metres"`
-	ArrayCount     int       `yaml:"array-count"`
-	Exposure       float64   `yaml:"exposure"`
-	Bloom          float64   `yaml:"bloom"`
+	Name           string         `yaml:"name"`
+	Music          string         `yaml:"music"`
+	Score          string         `yaml:"score"`
+	Width          int            `yaml:"width"`
+	Height         int            `yaml:"height"`
+	FPS            int            `yaml:"fps"`
+	Rays           int            `yaml:"rays"`
+	Lock           string         `yaml:"lock"`
+	RadioOne       string         `yaml:"radio-one"`
+	RadioTwo       string         `yaml:"radio-two"`
+	Reveal         string         `yaml:"reveal"`
+	CodaBars       int            `yaml:"coda-bars"`
+	SearchCutBars  int            `yaml:"search-cut-bars"`
+	BeatMotion     []float64      `yaml:"beat-motion"`
+	BeatTwoAccents []string       `yaml:"beat-two-accents"`
+	SearchDays     float64        `yaml:"search-days"`
+	Azimuth        float64        `yaml:"shared-azimuth-deg"`
+	Altitude       float64        `yaml:"shared-altitude-deg"`
+	Diameter       float64        `yaml:"optical-diameter-metres"`
+	Aperture       float64        `yaml:"optical-aperture-metres"`
+	ArrayCount     int            `yaml:"array-count"`
+	Exposure       float64        `yaml:"exposure"`
+	Bloom          float64        `yaml:"bloom"`
+	FlowStudy      *FlowPlan      `yaml:"flow-study,omitempty"`
+	CatalogueStudy *CataloguePlan `yaml:"catalogue-study,omitempty"`
+	FullCut        bool           `yaml:"full-cut,omitempty"`
+	Shots          []ShotPlan     `yaml:"shots,omitempty"`
 }
 
 // Edit is a plan bound to its checked score, with all cuts in song seconds.
@@ -47,6 +51,10 @@ type Edit struct {
 	Grid                                   *beats.Grid
 	Lock, RadioOne, RadioTwo, Reveal, Coda float64
 	Accents                                []float64
+	FlowStart, FlowFold, FlowAnswer        float64
+	Catalogue                              *catalogue
+	CatalogueStart, CatalogueEnd           float64
+	ShotSpans                              [][2]float64
 }
 
 // Read checks the whole plan before any scene, decoder or GPU is opened.
@@ -57,6 +65,9 @@ func Read(path string) (*Edit, error) {
 	}
 	var plan Plan
 	if err := yamlfile.Read(path, raw, &plan); err != nil {
+		return nil, err
+	}
+	if err := resolveFlowGeometry(path, plan.FlowStudy); err != nil {
 		return nil, err
 	}
 	for _, value := range []*string{&plan.Music, &plan.Score} {
@@ -99,15 +110,24 @@ func Read(path string) (*Edit, error) {
 		}
 		edit.Accents = append(edit.Accents, at)
 	}
+	if err := edit.checkFlow(); err != nil {
+		return nil, err
+	}
+	if err := edit.readCatalogue(path); err != nil {
+		return nil, err
+	}
+	if err := edit.checkShots(); err != nil {
+		return nil, err
+	}
 	return edit, nil
 }
 
 // check keeps this first proof small and refuses non-finite authoring values.
 func (plan Plan) check() error {
 	if plan.Name == "" || plan.Music == "" || plan.Score == "" ||
-		plan.Width < 160 || plan.Width > 480 || plan.Height < 90 ||
-		plan.Height > 480 || plan.FPS < 1 || plan.FPS > 24 ||
-		plan.Rays < 1 || plan.Rays > 2 || plan.SearchCutBars < 1 ||
+		plan.Width < 160 || plan.Width > 2048 || plan.Height < 90 ||
+		plan.Height > 1152 || plan.FPS < 1 || plan.FPS > 24 ||
+		plan.Rays < 1 || plan.Rays > 4 || plan.SearchCutBars < 1 ||
 		plan.CodaBars < 1 || plan.ArrayCount < 1 || plan.ArrayCount > 40 ||
 		len(plan.BeatMotion) != 4 {
 		return fmt.Errorf("invalid or excessive preview plan")
@@ -128,6 +148,9 @@ func (plan Plan) check() error {
 
 // Cue maps a one-based bar.beat position onto the retained song grid.
 func (edit *Edit) Cue(written string) (float64, error) {
+	if written == "end" {
+		return edit.Grid.Score.Duration, nil
+	}
 	parts := strings.Split(written, ".")
 	if len(parts) != 2 {
 		return 0, fmt.Errorf("cue %q needs bar.beat", written)

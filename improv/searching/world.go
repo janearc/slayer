@@ -192,8 +192,10 @@ func (set *Set) observatory(plan Plan) error {
 	}
 	for range 4 {
 		laser, err := emit.NewBeam(emit.Lit{At: maths.V(0, 30, 0),
-			Toward: maths.YAxis, Strength: maths.RGB(180, 100, 12)},
-			measure.Metres(0.38), measure.Metres(650), measure.Degrees(0))
+			Toward:   maths.YAxis,
+			Strength: maths.RGB(180, 100, 12).Scale(guideBeamPeakGain)},
+			measure.Metres(guideBeamDiameterMetres/2),
+			measure.Metres(650), measure.Degrees(0))
 		if err != nil {
 			return err
 		}
@@ -274,6 +276,10 @@ func (set *Set) Update(plan Plan, state State) (maths.Subspace, float64, error) 
 	// Authored moon exposure keeps the moving dishes readable in this music
 	// preview; these strengths do not represent measured lunar irradiance.
 	set.Moon.Toward, set.Moon.Strength = moon, maths.RGB(0.24, 0.36, 0.64).Scale(math.Max(0, moon.Y))
+	if plan.FullCut {
+		// Authored warm, restrained moon exposure for the revised rough cut.
+		set.Moon.Strength = maths.RGB(0.16, 0.13, 0.09).Scale(math.Max(0, moon.Y))
+	}
 	set.World.Lamps[len(set.Lasers)] = set.Sun
 	set.World.Lamps[len(set.Lasers)+1] = set.Moon
 	set.World.Sky = siteSky{sun: sun, moon: moon, day: day}
@@ -285,11 +291,18 @@ func (set *Set) Update(plan Plan, state State) (maths.Subspace, float64, error) 
 	right := maths.V(math.Cos(az), 0, math.Sin(az))
 	up := right.Cross(axis).Unit()
 	centre := maths.V(0, plan.Diameter*0.19, 0).Add(axis.Scale(plan.Diameter * 0.52))
+	if plan.FullCut {
+		// Place the visible beam's start inside this generic instrument.
+		// This is an authored offset, not a telescope-specific launcher model.
+		centre = centre.Sub(axis.Scale(plan.Diameter * 0.35))
+	}
+	strength := maths.RGB(180, 100, 12).Scale(guideBeamPeakGain)
 	for index := range set.Lasers {
 		x, y := float64(index%2)*1.2-0.6, float64(index/2)*1.2-0.6
 		laser, err := emit.NewBeam(emit.Lit{At: centre.Add(right.Scale(x)).Add(up.Scale(y)),
-			Toward: axis, Strength: maths.RGB(180, 100, 12).Scale(1 + state.Flash*0.7)},
-			measure.Metres(0.38), measure.Metres(650), measure.Degrees(0))
+			Toward: axis, Strength: strength.Scale(1 + state.Flash*0.7)},
+			measure.Metres(guideBeamDiameterMetres/2),
+			measure.Metres(650), measure.Degrees(0))
 		if err != nil {
 			return maths.Subspace{}, 0, err
 		}

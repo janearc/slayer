@@ -1,6 +1,7 @@
 package set_test
 
 import (
+	"math"
 	"os"
 	"slices"
 	"strings"
@@ -71,6 +72,256 @@ func TestAWorldsMaterialsAreWhatTheySay(t *testing.T) {
 		heat != 1200 || luminance != 0.02 {
 		t.Errorf("the ember is %v and glows %v at %v K", ember, luminance,
 			heat)
+	}
+}
+
+// A clear set material keeps the renderer's complete clear-interface
+// controls, rather than reducing it to a visible colour.
+func TestAWorldsClearMaterialIsWhatItSays(t *testing.T) {
+	written := strings.Replace(built(t),
+		"colour: {srgb_linear: [0.05, 0.06, 0.04]}",
+		"clear: {through: 0.9, index: 1.333, gloss: 0.8, rank: -2}", 1)
+	made, err := set.Read("clear.yaml", []byte(written))
+	if err != nil {
+		t.Fatal(err)
+	}
+	world, _ := made.World()
+	materials := world.Materials()
+	clear, has := materials[0].Clear()
+	if !has || clear.Through != 0.9 || clear.Index != 1.333 ||
+		clear.Gloss != 0.8 || clear.Rank != -2 {
+		t.Errorf("clear material = %+v, %v", clear, has)
+	}
+	if _, has := materials[0].Colour(); has {
+		t.Error("clear material also has diffuse colour")
+	}
+}
+
+func TestClearMaterialReadsNamedOpticalExtinction(t *testing.T) {
+	written := strings.Replace(built(t),
+		"      grass:\n"+
+			"        colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        source: eye\n",
+		"      grass:\n"+
+			"        clear: {through: 1, index: 1.333, gloss: 1, rank: 0, "+
+			"extinction-per-metre: [0.015, 0.025, 0.04]}\n"+
+			"        source: synthetic validation values; not measured water\n", 1)
+	for _, schema := range []string{set.EcosystemSchema,
+		"https://github.com/janearc/slayer/schemas/ecosystem-v2.json"} {
+		for _, provenance := range []struct{ name, source string }{
+			{"plain string", "source: synthetic validation values; not measured water"},
+			{"quoted string", `source: "synthetic validation values; not measured water"`},
+		} {
+			t.Run(schema+"/"+provenance.name, func(t *testing.T) {
+				withProvenance := strings.Replace(written,
+					"source: synthetic validation values; not measured water",
+					provenance.source, 1)
+				source := strings.Replace(withProvenance, "scene:\n",
+					"$schema: "+schema+"\nscene:\n", 1)
+				made, err := set.Read("clear-optics.yaml", []byte(source))
+				if err != nil {
+					t.Fatal(err)
+				}
+				world, _ := made.World()
+				clear, has := world.Materials()[0].Clear()
+				name, extinction, optical := clear.OpticalMedium()
+				if !has || !optical || name != "grass" ||
+					extinction != [3]float64{0.015, 0.025, 0.04} {
+					t.Fatalf("optical clear material = name %q extinction %v, interface %v", name, extinction, has)
+				}
+			})
+		}
+	}
+}
+
+func TestClearMaterialRequiresExplicitOpticalSourceAndValidRGB(t *testing.T) {
+	base := strings.Replace(built(t),
+		"      grass:\n"+
+			"        colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        source: eye\n",
+		"      grass:\n"+
+			"        clear: {through: 1, index: 1.333, gloss: 1, "+
+			"extinction-per-metre: [0.1, 0.2, 0.3]}\n"+
+			"        source: eye\n", 1)
+	for _, test := range []struct{ name, replace, with, want string }{
+		{"unprovenanced eye source", "source: eye", "source: eye", "provenance"},
+		{"trimmed eye source", "source: eye", `source: " eye "`, "provenance"},
+		{"whitespace provenance", "source: eye", `source: "   "`, "string provenance"},
+		{"boolean provenance", "source: eye", "source: false", ""},
+		{"null provenance", "source: eye", "source: null", ""},
+		{"missing source", "        source: eye\n", "", "no source"},
+		{"negative coefficient", "[0.1, 0.2, 0.3]", "[-0.1, 0.2, 0.3]", ""},
+		{"wrong channel count", "[0.1, 0.2, 0.3]", "[0.1, 0.2]", ""},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			written := strings.Replace(base, test.replace, test.with, 1)
+			_, err := set.Read("invalid-clear-optics.yaml", []byte(written))
+			if err == nil || test.want != "" && !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("reader error = %v, want substring %q", err, test.want)
+			}
+		})
+	}
+}
+
+func TestClearMaterialRejectsInvalidForms(t *testing.T) {
+	base := strings.Replace(built(t),
+		"colour: {srgb_linear: [0.05, 0.06, 0.04]}",
+		"clear: {through: 0.9, index: 1.333, gloss: 0.8, rank: -2}", 1)
+	for _, change := range []struct{ was, now string }{
+		{"through: 0.9", "through: 0"},
+		{"through: 0.9", "through: 1.1"},
+		{"through: 0.9", "through: .nan"},
+		{"index: 1.333", "index: 0"},
+		{"index: 1.333", "index: 1e-10"},
+		{"index: 1.333", "index: 1e10"},
+		{"index: 1.333", "index: .inf"},
+		{"gloss: 0.8", "gloss: -0.1"},
+		{"gloss: 0.8", "gloss: 1.1"},
+		{"gloss: 0.8", "gloss: .nan"},
+		{"rank: -2", "rank: 1.5"},
+		{"rank: -2", "rank: 2147483648"},
+		{"clear: {through: 0.9, index: 1.333, gloss: 0.8, rank: -2}",
+			"clear: {through: 0.9, index: 1.333, rank: -2}"},
+		{"clear: {through: 0.9, index: 1.333, gloss: 0.8, rank: -2}",
+			"clear: {through: 0.9, index: 1.333, gloss: 0.8, other: 2}"},
+	} {
+		if !strings.Contains(base, change.was) {
+			t.Fatalf("base lacks %q", change.was)
+		}
+		written := strings.Replace(base, change.was, change.now, 1)
+		if _, err := set.Read("bad-clear.yaml", []byte(written)); err == nil {
+			t.Errorf("accepted invalid clear material change %q", change.now)
+		}
+	}
+}
+
+func TestClearMaterialMayHaveSurfaceColourAndGlow(t *testing.T) {
+	written := strings.Replace(built(t),
+		"colour: {srgb_linear: [0.05, 0.06, 0.04]}",
+		"colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        clear: {through: 0.9, index: 1.333, gloss: 0.8}", 1)
+	written = strings.Replace(written,
+		"glow: {temperature: 2700, luminance: 0.45}",
+		"glow: {temperature: 2700, luminance: 0.45}\n"+
+			"        clear: {through: 1, index: 0.8, gloss: 1}", 1)
+	if _, err := set.Read("combined-clear.yaml", []byte(written)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func cameraMediumSource(t *testing.T, materials, media string) string {
+	t.Helper()
+	text := strings.Replace(built(t),
+		"colour: {srgb_linear: [0.05, 0.06, 0.04]}", materials, 1)
+	return strings.Replace(text, "      title: \"the front\"\n",
+		"      title: \"the front\"\n      initial-media: "+media+"\n", 1)
+}
+
+func TestSetCameraResolvesOrderedClearInitialMedia(t *testing.T) {
+	source := cameraMediumSource(t,
+		"clear: {through: 1, index: 1.33, gloss: 1, rank: 2}",
+		"[grass]")
+	made, err := set.Read("camera-medium.yaml", []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	shot, err := made.Shot("front", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := shot.InitialMedia()
+	if len(got) != 1 || got[0] != (set.Clear{Through: 1, Index: 1.33,
+		Gloss: 1, Rank: 2}) {
+		t.Fatalf("camera media = %+v", got)
+	}
+	got[0].Index = 7
+	if again := shot.InitialMedia(); again[0].Index != 1.33 {
+		t.Fatalf("camera exposed mutable media: %+v", again)
+	}
+}
+
+func TestCameraInitialMediaRequiresUniqueClearMaterials(t *testing.T) {
+	base := cameraMediumSource(t,
+		"clear: {through: 1, index: 1.33, gloss: 1, rank: 2}", "[grass]")
+	for _, test := range []struct {
+		name, replacement string
+	}{
+		{"missing", "[absent]"},
+		{"opaque", "[lit-window]"},
+		{"repeated name", "[grass, grass]"},
+		{"empty", "[]"},
+		{"too many", "[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q]"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			written := strings.Replace(base, "initial-media: [grass]",
+				"initial-media: "+test.replacement, 1)
+			if _, err := set.Read("bad-camera-medium.yaml", []byte(written)); err == nil {
+				t.Fatal("invalid camera media accepted")
+			}
+		})
+	}
+	duplicateValue := strings.Replace(base,
+		"glow: {temperature: 2700, luminance: 0.45}",
+		"clear: {through: 1, index: 1.33, gloss: 1, rank: 2}", 1)
+	duplicateValue = strings.Replace(duplicateValue, "initial-media: [grass]",
+		"initial-media: [grass, lit-window]", 1)
+	if _, err := set.Read("duplicate-camera-medium.yaml", []byte(duplicateValue)); err == nil {
+		t.Fatal("two names for the same index/rank pair accepted")
+	}
+}
+
+func TestBothSetSchemasAcceptCameraInitialMedia(t *testing.T) {
+	for _, schema := range []string{
+		"https://github.com/janearc/slayer/schemas/ecosystem-v1.json",
+		"https://github.com/janearc/slayer/schemas/ecosystem-v2.json",
+	} {
+		t.Run(schema, func(t *testing.T) {
+			source := cameraMediumSource(t,
+				"clear: {through: 1, index: 1.33, gloss: 1}", "[grass]")
+			source = strings.Replace(source, "scene:\n", "$schema: "+schema+"\nscene:\n", 1)
+			if _, err := set.Read("camera-medium.yaml", []byte(source)); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestClearMaterialAcceptsMetalSafeIndexBounds(t *testing.T) {
+	for _, index := range []string{"1e-9", "1e9", "0.8"} {
+		written := strings.Replace(built(t),
+			"colour: {srgb_linear: [0.05, 0.06, 0.04]}",
+			"clear: {through: 1, index: "+index+", gloss: 1}", 1)
+		if _, err := set.Read("index-bound.yaml", []byte(written)); err != nil {
+			t.Errorf("index %s refused: %v", index, err)
+		}
+	}
+}
+
+func TestClearMaterialIsAcceptedByBothEcosystemSchemas(t *testing.T) {
+	for _, schema := range []string{
+		set.EcosystemSchema,
+		"https://github.com/janearc/slayer/schemas/ecosystem-v2.json",
+	} {
+		t.Run(schema, func(t *testing.T) {
+			written := strings.Replace(built(t), "scene:\n",
+				"$schema: "+schema+"\nscene:\n", 1)
+			written = strings.Replace(written,
+				"colour: {srgb_linear: [0.05, 0.06, 0.04]}",
+				"clear: {through: 0.9, index: 1.333, gloss: 0.8}", 1)
+			if _, err := set.Read("schema-clear.yaml", []byte(written)); err != nil {
+				t.Fatalf("valid clear material: %v", err)
+			}
+			bad := strings.Replace(written, "through: 0.9", "through: 1.1", 1)
+			if _, err := set.Read("schema-clear.yaml", []byte(bad)); err == nil {
+				t.Error("schema accepted out-of-range transmission")
+			}
+			for _, index := range []string{"1e-10", "1e10"} {
+				bad = strings.Replace(written, "index: 1.333", "index: "+index, 1)
+				if _, err := set.Read("schema-clear.yaml", []byte(bad)); err == nil {
+					t.Errorf("schema accepted out-of-range index %s", index)
+				}
+			}
+		})
 	}
 }
 
@@ -333,7 +584,7 @@ func TestABuiltWorldsMistakesAreRefused(t *testing.T) {
 			"temperature takes a number from 1 to 1e+06"},
 		{"glow: {temperature: 2700, luminance: 0.45}",
 			"lit: {temperature: 2700, luminance: 0.45}",
-			"lit is not a key here; this block takes [colour glow source]"},
+			"lit is not a key here; this block takes [clear colour glow source]"},
 		{"        glow: {temperature: 2700, luminance: 0.45}\n", "",
 			"material lit-window has no colour and no glow"},
 		{"        source: \"a thermocouple, 2026-10-05\"\n", "",
@@ -400,9 +651,9 @@ func TestABuiltWorldsMistakesAreRefused(t *testing.T) {
 		{"        toward: [0.5762, -0.8163, -0.04]\n", "",
 			"a sun says [toward colour source], all of them"},
 		{"    floods:", "    flood:",
-			"flood is not a key here; this block takes [bodies boxes " +
-				"fizzes floods lamps materials motions sky spheres spots " +
-				"suns unit wisps]"},
+			"flood is not a key here; this block takes [beams bodies boxes " +
+				"fizzes floods griffith-basin imports lamps materials " +
+				"motions ocean sky spheres spots suns unit vapor-cavities wisps]"},
 		{"      top: 8", "      top: 0.5",
 			"a top of 0.5 at or under a knee of 0.7"},
 		{"      knee: 0.7", "      knee: -0.7", "knee takes a number from 0"},
@@ -528,5 +779,66 @@ func TestAKeySaidTwiceIsRefusedAnywhere(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "is said twice") {
 			t.Errorf("%q: %v", written, err)
 		}
+	}
+}
+
+func TestClearMaterialReadsBoundedParticipatingProfile(t *testing.T) {
+	written := strings.Replace(built(t),
+		"      grass:\n"+
+			"        colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        source: eye\n",
+		"      grass:\n"+
+			"        clear:\n"+
+			"          through: 1\n"+
+			"          index: 1.333\n"+
+			"          gloss: 1\n"+
+			"          extinction-per-metre: [0.03, 0.008, 0.004]\n"+
+			"          scatter:\n"+
+			"            coefficient-per-metre: [0.01, 0.003, 0.001]\n"+
+			"            phase-g: 0.7\n"+
+			"            steps: 16\n"+
+			"            max-distance: {value: 40, unit: m}\n"+
+			"        source: synthetic teaching values; not measured water\n", 1)
+	for _, schema := range []string{set.EcosystemSchema,
+		"https://github.com/janearc/slayer/schemas/ecosystem-v2.json"} {
+		withSchema := strings.Replace(written, "scene:\n",
+			"$schema: "+schema+"\nscene:\n", 1)
+		made, err := set.Read("participating-water.yaml", []byte(withSchema))
+		if err != nil {
+			t.Fatalf("schema %s: %v", schema, err)
+		}
+		world, _ := made.World()
+		clear, _ := world.Materials()[0].Clear()
+		absorption, scattering, phase, steps, distance, has :=
+			clear.ParticipatingMedium()
+		if !has || math.Abs(absorption[0]-0.02) > 1e-15 ||
+			absorption[1] != 0.005 || absorption[2] != 0.003 ||
+			scattering != [3]float64{0.01, 0.003, 0.001} ||
+			phase != 0.7 || steps != 16 || distance != 40 {
+			t.Fatalf("participating clear = %v %v %g %d %g %t",
+				absorption, scattering, phase, steps, distance, has)
+		}
+	}
+}
+
+func TestClearMaterialRejectsScatterOutsideExtinction(t *testing.T) {
+	written := strings.Replace(built(t),
+		"      grass:\n"+
+			"        colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        source: eye\n",
+		"      grass:\n"+
+			"        clear:\n"+
+			"          through: 1\n"+
+			"          index: 1.333\n"+
+			"          gloss: 1\n"+
+			"          extinction-per-metre: [0.03, 0.008, 0.004]\n"+
+			"          scatter:\n"+
+			"            coefficient-per-metre: [0.01, 0.009, 0.001]\n"+
+			"            phase-g: 0.7\n"+
+			"            steps: 16\n"+
+			"            max-distance: {value: 40, unit: m}\n"+
+			"        source: synthetic teaching values; not measured water\n", 1)
+	if _, err := set.Read("scatter-exceeds-extinction.yaml", []byte(written)); err == nil || !strings.Contains(err.Error(), "exceeds") {
+		t.Fatalf("scatter/extinction error = %v, want exceeds", err)
 	}
 }

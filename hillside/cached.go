@@ -7,6 +7,8 @@ package hillside
 // 640 by 360). Each thing kept is keyed by every number it is made from
 // and the build, so a hit is the same to the bit as working it out.
 //
+// It lives under the cache home, SLAYER_CACHE, and nowhere else.
+//
 // What came from the cache and what was worked out is noted, one line a
 // thing, and the session gives the lines to whoever drew it.
 
@@ -20,6 +22,7 @@ import (
 	"time"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/airlight"
 	"github.com/janearc/slayer/diskcache"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/moonlight"
@@ -39,9 +42,12 @@ const skyCap = 64 << 20
 // cacheNote is one thing staging took from a cache or worked out: what,
 // whether it was a hit, when the entry was written, how long it took,
 // and on a miss why, and whether it was then kept.
+//
+// A note told is no cache's: a line staging says, its what, as it is.
 type cacheNote struct {
 	what    string
 	hit     bool
+	told    bool
 	written time.Time
 	spent   time.Duration
 	why     string
@@ -50,6 +56,9 @@ type cacheNote struct {
 
 // String is the note as the progress line says it.
 func (note cacheNote) String() string {
+	if note.told {
+		return note.what
+	}
 	if note.hit {
 		return fmt.Sprintf("%s: from the cache, worked out %s, read "+
 			"in %.3fs", note.what,
@@ -190,6 +199,27 @@ func skyKey(height measure.Length, toward maths.Vec,
 		Text("exposure", exactly(exposure))
 }
 
+// airKind keeps the light worked out in a named air, by package
+// airlight, an entry for each air and ground height. Its cap is picked,
+// 2026-11-15: an entry is about 1.6 MB at 21 wavelengths of 36 by 16 by
+// 8 bins, so 512 MiB keeps about three hundred.
+var airKind = diskcache.MustKind("air-fields", airCap, "an air's fields "+
+	"are about 1.6 MB; this keeps about three hundred")
+
+// airCap is the air fields' cap in bytes; see airKind.
+const airCap = 512 << 20
+
+// keptFields is the fields a plan decides, from the cache where they
+// were worked out before. The key is the plan's every part and not the
+// build: a walk takes minutes, and the plan's solver version says when
+// the code that walks it has changed what it gives.
+func keptFields(plan airlight.Plan) (*airlight.Fields, cacheNote, error) {
+	return throughCache(keeping[*airlight.Fields]{
+		key: plan.Keyed(diskcache.NewKey(airKind)), what: plan.Said(),
+		work: plan.Solve, bytes: (*airlight.Fields).Bytes,
+		from: airlight.FieldsFromBytes})
+}
+
 // pinKind keeps the sha256 a pinned file was found to have, under its
 // path, size, time, inode and device: a file none of those has changed
 // on is not read whole again to check its pin.
@@ -260,11 +290,7 @@ func statKey(path string) (diskcache.Key, error) {
 // cut before.
 func keptGround(path, sum string, cut groundCut) (terrain.Window,
 	cacheNote, error) {
-	key := diskcache.NewKey(groundKind).Built().Digest("model", sum).
-		Text("window", exactly(cut.west)+" "+exactly(cut.north)+" "+
-			strconv.Itoa(cut.across)+" "+strconv.Itoa(cut.down)+" "+
-			exactly(cut.step)).
-		Text("smooth", exactly(cut.smooth))
+	key := groundKey(sum, cut)
 	return throughCache(keeping[terrain.Window]{key: key,
 		what: "the ground", work: func() (terrain.Window, error) {
 			return cut.from(path)
@@ -272,11 +298,67 @@ func keptGround(path, sum string, cut groundCut) (terrain.Window,
 		bytes: terrain.Window.Bytes, from: terrain.WindowFromBytes})
 }
 
+// groundKey is the key of a ground: the pin of the model it is cut from,
+// the window, and the smoothing, and where the ground is laid on a sphere,
+// the place, its size in metres, whether titan makes it finer than the map
+// and the seed it does it by, and the relief it is asked for where one is.
+// Everything that decides a height is in it.
+func groundKey(sum string, cut groundCut) diskcache.Key {
+	key := diskcache.NewKey(groundKind).Built().Digest("model", sum).
+		Text("window", exactly(cut.west)+" "+exactly(cut.north)+" "+
+			strconv.Itoa(cut.across)+" "+strconv.Itoa(cut.down)+" "+
+			exactly(cut.step)).
+		Text("smooth", exactly(cut.smooth))
+	place := cut.place
+	if place == nil {
+		return key
+	}
+	key = key.Text("place", exactly(place.latitude)+" "+
+		exactly(place.longitude)+" "+exactly(place.across)+" "+
+		exactly(place.down)+" "+strconv.FormatBool(place.detailed)+" "+
+		strconv.FormatUint(place.seed, 10))
+	if place.relieved {
+		key = key.Text("relief", exactly(place.slope)+" "+
+			exactly(place.longest))
+	}
+	return key
+}
+
+// keptPlace is a set's ground laid on a sphere, cut from the map whose
+// pinned sha256 is sum: from the cache where it was cut before, with how
+// much of it was made.
+func keptPlace(path, sum string, cut groundCut) (placedGround, cacheNote,
+	error) {
+	return throughCache(keeping[placedGround]{key: groundKey(sum, cut),
+		what: "the ground on a sphere", work: func() (placedGround, error) {
+			return cut.placed(path)
+		},
+		bytes: placedGround.bytes, from: placedFromBytes})
+}
+
+// placed is the ground laid on a sphere, cut from the raster at a path.
+func (cut groundCut) placed(path string) (placedGround, error) {
+	raster, err := terrain.Open(path)
+	if err != nil {
+		return placedGround{}, err
+	}
+	defer raster.Close()
+	found, err := cut.onSphere(raster)
+	if err != nil {
+		return placedGround{}, err
+	}
+	window, err := found.window.Smoothed(cut.smooth)
+	found.window = window
+	return found, err
+}
+
 // groundCut is where a set's ground is cut from its model, how finely,
-// and how much it is smoothed.
+// and how much it is smoothed. place is where the ground is laid on a
+// sphere, or nil where it is cut by the model's own metres.
 type groundCut struct {
 	west, north, step, smooth float64
 	across, down              int
+	place                     *groundPlace
 }
 
 // from is the ground cut from the model at a path and smoothed.

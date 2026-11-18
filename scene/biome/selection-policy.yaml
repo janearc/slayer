@@ -1,0 +1,12 @@
+# Authored query work limits, 2026-11-08. Counts are not RSS limits.
+numbers:
+  - name: cells
+    value: 65536
+    says: maximum examined lattice cells in one region query
+    kind: picked
+    by: ecosystem streaming work, 2026-11-08
+  - name: candidates
+    value: 65536
+    says: maximum generated roots before habitat and view rejection
+    kind: picked
+    by: ecosystem streaming work, 2026-11-08

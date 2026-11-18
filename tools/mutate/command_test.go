@@ -38,8 +38,15 @@ func TestMain(m *testing.M) {
 
 func mutationFixture(t *testing.T, assertion string) (string, []byte) {
 	t.Helper()
+	return mutationFixtureOf(t, "package fixture\nfunc F() bool { return true }\n", assertion)
+}
+
+// mutationFixtureOf is a tracked, committed module holding that source and
+// a test whose body is the assertion; it gives the directory and the source.
+func mutationFixtureOf(t *testing.T, text, assertion string) (string, []byte) {
+	t.Helper()
 	dir := t.TempDir()
-	source := []byte("package fixture\nfunc F() bool { return true }\n")
+	source := []byte(text)
 	for name, data := range map[string][]byte{
 		"go.mod":    []byte("module example.invalid/mutation-fixture\n\ngo 1.26\n"),
 		"f.go":      source,
@@ -200,5 +207,43 @@ func TestMutatorReportsWhenTrackedSourceCannotBeRestored(t *testing.T) {
 	got, err := os.ReadFile(path)
 	if err != nil || string(got) != string(original) {
 		t.Fatal("failed write changed the original")
+	}
+}
+
+// TestMutatorRefusesATestThatFailsBeforeAnyChange checks a fixture whose
+// own test fails is refused by name and the file is left as it was.
+func TestMutatorRefusesATestThatFailsBeforeAnyChange(t *testing.T) {
+	dir, original := mutationFixture(t, `t.Fatal("broken from the start")`)
+	out, err := mutateIn(t, dir, "f.go")
+	if err == nil || !strings.Contains(out, "tests fail before any change") {
+		t.Fatalf("%v %q", err, out)
+	}
+	if got, _ := os.ReadFile(filepath.Join(dir, "f.go")); string(got) != string(original) {
+		t.Fatalf("file changed to %q", got)
+	}
+}
+
+// TestMutatorRefusesADirectory checks a tracked directory passes git's
+// tests but cannot be read as a file, and is refused with the reason.
+func TestMutatorRefusesADirectory(t *testing.T) {
+	dir, _ := mutationFixture(t, "if !F() {t.Fatal(\"false\")}")
+	out, err := mutateIn(t, dir, ".")
+	if err == nil || !strings.Contains(out, "directory") {
+		t.Fatalf("%v %q", err, out)
+	}
+}
+
+// TestMutatorCountsAChangeThatDoesNotCompile checks that a change that
+// breaks the build is counted apart from killed and survived ones: the
+// constant index 1 becomes 2, which is out of range for an array of two.
+func TestMutatorCountsAChangeThatDoesNotCompile(t *testing.T) {
+	dir, _ := mutationFixtureOf(t,
+		"package fixture\nfunc F() bool { a := [2]int{}; return a[1] == 0 }\n",
+		"if !F() {t.Fatal(\"false\")}")
+	out, err := mutateIn(t, dir, "f.go")
+	var exit *exec.ExitError
+	if !errors.As(err, &exit) || exit.ExitCode() != 1 ||
+		!strings.Contains(out, "4 changes, 2 killed, 1 survived, 1 did not compile") {
+		t.Fatalf("%v %q", err, out)
 	}
 }

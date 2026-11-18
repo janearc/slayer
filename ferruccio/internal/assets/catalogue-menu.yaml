@@ -1,0 +1,1130 @@
+# Authored descriptions of the current factory, 2026-11-07.
+# Listed detail support is held to actual construction by command tests.
+entries:
+  - kind: city-clustered-green-10000
+    group: City buildings
+    about: Clustered city districts with native tree rows, groves and meadow clearings.
+    notes: >-
+      Exactly ten thousand buildings, native valley-oak leaf-cell prototypes shared
+      across park groves and street rows, curved park paths and planted vacant
+      lots. Authored metre-scale scenery with connected elevated highways.
+    details: [hull, quick]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+  - kind: city-clustered-night-10000
+    group: City buildings
+    about: A native green city with discrete occupied and unlit facade windows.
+    notes: >-
+      Warm and cool panes vary by building and window. Six actual downward
+      fixtures illuminate ramp streets and park paths; surface emission does
+      not claim indirect road lighting. Native tree prototypes remain shared.
+    details: [hull, quick]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+  - kind: macro-terraced-arcology
+    group: Macrostructures and landforms
+    about: A stepped kilometre-scale arcology with galleries and an open courtyard.
+    notes: >-
+      Authored metre dimensions, mathematical scenery and a bounded native mesh
+      representation. No structural engineering or geological simulation.
+    details: [hull, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 35
+  - kind: macro-twisted-spires
+    group: Macrostructures and landforms
+    about: Three unequal twisted spires with open cores, ribs and planted sky bridges.
+    notes: >-
+      Authored metre dimensions, mathematical scenery and a bounded native mesh
+      representation. No structural engineering or geological simulation.
+    details: [hull, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 35
+  - kind: macro-inhabited-bridge
+    group: Macrostructures and landforms
+    about: An inhabited bridge on paired parabolic arches and vertical spandrels.
+    notes: >-
+      Authored metre dimensions, mathematical scenery and a bounded native mesh
+      representation. No structural engineering or geological simulation.
+    details: [hull, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 35
+  - kind: landform-mountain-massif
+    group: Macrostructures and landforms
+    about: A seeded radial mountain with ridged flanks and a snow summit.
+    notes: >-
+      Authored metre dimensions, mathematical scenery and a bounded native mesh
+      representation. No structural engineering or geological simulation.
+    details: [hull, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 35
+  - kind: landform-caldera-volcano
+    group: Macrostructures and landforms
+    about: A seeded volcanic flank with explicit rim, crater floor and glowing lava.
+    notes: >-
+      Authored metre dimensions, mathematical scenery and a bounded native mesh
+      representation. No structural engineering or geological simulation.
+    details: [hull, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 35
+  - kind: city-clustered-10000
+    group: City buildings
+    about: Ten thousand cluster-weighted lots, continuous parks and an elevated freeway.
+    notes: >-
+      Finite Poisson district centres drive a Gaussian intensity field. Fixed
+      building count, road lots, two large parks, separated carriageways and
+      four ground ramps constrain the realization; this is not raw Thomas
+      offspring. Authored metre dimensions and native material batches.
+    details: [hull, quick]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+  - kind: city-grid-10000
+    group: City buildings
+    about: Ten thousand individually seeded buildings on a connected street grid.
+    notes: >-
+      Twenty-five by twenty-five blocks, sixteen lots per block, cross alleys
+      and sixteen traffic circles. Metre-scale authored scenery with conservative
+      setbacks, a finite shared material palette and bounded baked mesh chunks.
+      No traffic simulation, interiors or attached lamps.
+    details: [hull, quick]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+  - kind: city-rowhouse
+    group: City buildings
+    about: A seeded two or three storey house with a gabled roof.
+    notes: Authored dimensions and materials; quick adds broad glazing bands.
+    details: [hull, quick]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+  - kind: city-apartment
+    group: City buildings
+    about: A seeded four to eight storey apartment building with a flat roof.
+    notes: Authored dimensions and materials; quick adds broad glazing bands.
+    details: [hull, quick]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+  - kind: city-tower
+    group: City buildings
+    about: A seeded twelve to twenty-three storey tower with podium and crown.
+    notes: Authored dimensions and materials; quick adds broad glazing bands.
+    details: [hull, quick]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+  - kind: human-scale-2m
+    group: Scale references
+    about: A standing two-meter human scale mannequin made mathematically.
+    notes: >-
+      Exactly two metres from the soles to the crown. Authored body proportions
+      and neutral stance, with aluminium optics; no measured anatomy or skin.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 12
+  - kind: dobsonian-36
+    group: Personal telescopes
+    about: A 36-inch Newtonian on a timber rocker and large altitude bearings.
+    notes: >-
+      Requested 36-inch aperture. Mirror box, paired V trusses, upper cage,
+      side focuser and a flat folding secondary. All proportions and materials
+      are authored scenery; this is not a working optical prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+    references:
+      - title: Obsession, mirror box, rocker and bearings
+        url: https://www.obsessiontelescopes.com/why_buy/
+  - kind: apo-refractor-5
+    group: Personal telescopes
+    about: A 5-inch apochromatic-refractor scenery on a counterweighted tripod.
+    notes: >-
+      Requested 5-inch aperture. Long tube, dew shield, rings, focuser,
+      diagonal and finder. The objective is an opaque polished proxy;
+      no glass prescription or colour-correction calculation is implemented.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+    references:
+      - title: Explore Scientific, 127 mm triplet construction reference
+        url: https://explorescientific.com/products/127mm-fcd100-apochromatic-refractor
+  - kind: sct-24
+    group: Personal telescopes
+    about: A 24-inch Schmidt-Cassegrain scenery on a fork and pier.
+    notes: >-
+      Requested 24-inch aperture. Short tube, primary, secondary, corrector
+      proxy, finder and rear focuser. Tube and mount proportions are authored;
+      the corrector is opaque scenery and does not refract light.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 25
+    references:
+      - title: Celestron, Schmidt-Cassegrain construction and corrector
+        url: https://www.celestron.com/blogs/knowledgebase/the-ultimate-guide-to-celestron-optical-tubes
+  - kind: griffith
+    group: Ground observatories
+    about: A public observatory with a domed rotunda and two rooftop instruments.
+    notes: >-
+      The east refractor has the guide's nominal 12-inch objective. Wings,
+      rotunda and rear planetarium follow the visitor map's layout in broad
+      strokes. All building sizes, tube length and materials are authored.
+      The west solar roof is closed; no working coelostat or lens prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 25
+    view-elevation-deg: 25
+    references:
+      - title: Griffith Observatory, student guide, page 17
+        url: https://griffithobservatory.org/wp-content/uploads/2023/02/Module1_Student_Guide.pdf
+      - title: Griffith Observatory, visitor map, main level
+        url: https://griffithobservatory.org/wp-content/uploads/2021/03/GOMap_03112021.pdf
+  - kind: elt
+    group: Ground observatories
+    about: A dense segmented primary and open truss with five mirror roles.
+    notes: >-
+      Nominal 39 m primary and 798 installed panels from ESO. The central
+      opening, panel positions, secondary and relay dimensions, supports and
+      96 m by 90 m enclosure are authored approximations. The mirror figures
+      do not implement a calibrated optical prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+    references:
+      - title: ESO, ELT facts
+        url: https://elt.eso.org/about/facts/
+      - title: ESO, ELT primary mirror technical concept
+        url: https://elt.eso.org/mirror/M1/
+  - kind: rubin
+    group: Ground observatories
+    about: A survey telescope, faceted enclosure and long tiered service wing.
+    notes: >-
+      Physical 8.4 m primary blank, 3.4 m secondary and 5 m tertiary surface
+      from Rubin's mirror descriptions. The enclosure, supports, figures,
+      camera housing and tiered service wing are authored
+      scenery choices.
+      Effective aperture is a different quantity from the physical blank.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 18
+    references:
+      - title: Rubin Observatory, telescope key numbers
+        url: https://rubinobservatory.org/for-scientists/rubin-101/key-numbers
+      - title: Rubin Observatory, mirrors
+        url: https://rubinobservatory.org/explore/how-rubin-works/technology/mirrors
+      - title: Rubin Observatory, summit facility and service building
+        url: https://rubinobservatory.org/explore/how-rubin-works/technology/summit-facility
+  - kind: palomar
+    group: Ground observatories
+    about: A long optical tube carried by a tilted horseshoe mount.
+    notes: >-
+      Nominal 200-inch primary; Caltech's rounded 42 m dome diameter and
+      41 m height. The support proportions, slit and pointing are authored.
+      This suggests the Hale telescope without an engineering replica.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 55
+    references:
+      - title: Caltech, the Hale telescope
+        url: https://sites.astro.caltech.edu/palomar/about/telescopes/hale.html
+  - kind: keck-i
+    group: Ground observatories
+    about: An open truss above a 36-panel primary, inside a domed enclosure.
+    notes: >-
+      Nominal 10 m primary and 36 segments from Keck's telescope page.
+      The enclosure dimensions and support geometry are authored scenery.
+      Keck I and II share this template; place them as distinct site objects.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 15
+    references:
+      - title: W. M. Keck Observatory, the telescopes
+        url: https://keckobservatory.org/our-story/telescopes/
+  - kind: keck-ii
+    group: Ground observatories
+    about: The second instance of the segmented-primary Keck-like family.
+    notes: >-
+      Uses the same nominal 10 m, 36-segment template as keck-i.
+      Site names, pointing and laser launchers belong to the scene.
+      Enclosure and support proportions remain authored.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 15
+    references:
+      - title: W. M. Keck Observatory, the telescopes
+        url: https://keckobservatory.org/our-story/telescopes/
+  - kind: subaru
+    group: Ground observatories
+    about: An open telescope inside a tall cylindrical rotating enclosure.
+    notes: >-
+      Effective 8.2 m primary, 40 m enclosure base and 43 m height from
+      NAOJ's parameters. The mirror figure, slit, roof and mount proportions
+      are authored. Effective aperture is not a claim about the glass blank.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 35
+    view-elevation-deg: 12
+    references:
+      - title: NAOJ, Subaru telescope parameters
+        url: https://subarutelescope.org/Telescope/Parameters/
+  - kind: spruce
+    group: Conifers
+    about: A whorled spruce with a clear trunk and radial branches.
+    notes: >-
+      Draft replacement of legacy sleeves with shared recursive shoots and
+      physical needles around each twig. Four picked radial ranks alternate
+      their phase; all dimensions remain authored. New views and appearance
+      records are deferred to the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: norway
+    group: Conifers
+    about: A taller spruce with hanging branchlets.
+    notes: >-
+      The hanging branchlet scaffold now carries draft recursive needle
+      shoots. Needle dimensions and arrangement are authored scenery;
+      this is not a growth or phyllotaxis model. Geometry, appearance and
+      CPU/Metal checks await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, Norway spruce foliage and branch habit
+        url: https://landscapeplants.oregonstate.edu/plants/picea-abies
+  - kind: coast-redwood
+    group: Conifers
+    about: Flared bark, a tall crown and recursively branched flat sprays.
+    notes: Authored crown; leaf lengths have botanical references. Not a growth model.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, coast redwood foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoia-sempervirens
+  - kind: giant-sequoia
+    group: Conifers
+    about: A broad flared trunk and dense sprays with scale-like foliage.
+    notes: Authored crown; source-backed scale lengths do not calibrate the whole tree.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, giant sequoia foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoiadendron-giganteum
+  - kind: coast-redwood-shoot
+    view-up: x
+    group: Foliage
+    about: A loose redwood spray for looking at the actual reusable foliage.
+    notes: These are the shared shoot meshes used by the redwood crown.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, coast redwood foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoia-sempervirens
+  - kind: giant-sequoia-shoot
+    view-up: x
+    group: Foliage
+    about: A loose sequoia shoot, down to its individual foliage at demo detail.
+    notes: Authored recursive branching with source-backed scale lengths.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, giant sequoia foliage
+        url: https://landscapeplants.oregonstate.edu/plants/sequoiadendron-giganteum
+  - kind: fern
+    group: Understory
+    about: Arched fronds carrying paired leaflets.
+    notes: Seeded dimensions and arrangement, with a shared green appearance.
+    details: [quick]
+  - kind: log
+    group: Wood and stone
+    about: A fallen log with broken branch stubs.
+    notes: Bark on the whole surface; exposed end grain is not implemented.
+    details: [quick]
+  - kind: pebble
+    group: Wood and stone
+    about: A small worn granite lump.
+    notes: Size classes were recalled, not verified; wornness is an authored control.
+    details: [quick]
+  - kind: cobble
+    group: Wood and stone
+    about: A seeded granite cobble, between a pebble and a boulder.
+    notes: Authored proportions and cleaving; not a measured erosion model.
+    details: [quick]
+  - kind: boulder
+    group: Wood and stone
+    about: An angular granite boulder with seeded lumps and cleaves.
+    notes: The seed chooses form within the construction row's ranges.
+    details: [quick]
+  - kind: slab
+    group: Wood and stone
+    about: A thin, broken basalt plate of the kind Venera 13 found lying on the plain.
+    notes: >-
+      Red and green reflectance read from Pieters and others 1987 (NTRS
+      19870013979, pages 165 and 166); size, thinness, wear and bedding are
+      picked by eye from the lander's panoramas.
+    details: [quick]
+  - kind: chip
+    group: Wood and stone
+    about: A small, thick basalt fragment, grit to a palm across, from the same plain.
+    notes: >-
+      The slab's rock at a smaller size class; its proportions and rounding
+      are picked, not measured.
+    details: [quick]
+  - kind: can
+    group: Props
+    about: Somebody's aluminium can, upright or lying where it was left.
+    notes: Fixed dimensions recalled from memory; no pull tab or label.
+    details: [quick]
+  - kind: home
+    group: Buildings
+    about: Cantilevered storeys, flat slabs and glowing reflective panes.
+    notes: Glazing suggests occupied rooms; there are no furnished interiors.
+    details: [quick]
+  - kind: stage-scaffold
+    group: Buildings
+    about: One tower of a festival stage's scaffolding, about 15 by 8 by 40 m, decked every fifth lift, for lasers and pyro to stand on.
+    notes: A ringlock system's bay, lift and tube, from memory; which outer bays are braced is the seed's.
+    details: [quick]
+  - kind: stage-tower
+    group: Buildings
+    about: A show's tower, about 10 by 5 by 20 m, with laser heads, flame units, moving heads, hung speaker columns and road cases on its decks.
+    notes: The gear is black housings only, nothing lit; it faces the tower's front, the side its heading turns to the audience.
+    details: [quick]
+  - kind: hemtt
+    group: Vehicles
+    about: Oshkosh's HEMTT, the M977 A4 eight-wheel-drive cargo truck, 10.39 by 2.44 by 3.0 m, its spare tyre lying behind the cab.
+    notes: Length, width, height, track, wheelbase and tyres from Oshkosh's brochure; each pair's axle spacing, the cab and the bed are picked to look right.
+    details: [quick]
+  - kind: kamaz
+    group: Vehicles
+    about: The KAMAZ-43118, a six-wheel-drive cargo truck, 9.27 by 2.55 by 3.11 m, its cab over its engine.
+    notes: Size and tyres from listings, the wheelbase from a body-builder's catalogue; the cab and bed are picked.
+    details: [quick]
+  - kind: unimog
+    group: Vehicles
+    about: The Unimog U 5023, 5.95 by 2.4 by 2.87 m, its axles 3.85 m apart and 460 mm clear underneath, its cab behind a short bonnet, with a short bed.
+    notes: Size, wheelbase, clearance and tyres as Mercedes-Benz publishes them; the track, bonnet and bed are picked.
+    details: [quick]
+  - kind: tatra
+    group: Vehicles
+    about: The Tatra T 815-7 eight-wheel-drive cargo truck, 10.72 by 2.5 by 3.42 m, on its backbone tube with swinging half-axles, 410 mm clear underneath.
+    notes: Width, track, clearance, tyres and cab from Tatra's sheet; length, height and axle spacing from valka.cz; the bed is picked.
+    details: [quick]
+  - kind: scania-r
+    group: Vehicles
+    about: A Scania R tractor unit, two axles, its normal cab 3.53 m high, twin tyres on its drive axle and a fifth wheel for a trailer.
+    notes: The cab's height as Scania publishes it; the wheelbase, length and tyres are picked.
+    details: [quick]
+  - kind: daf-xf
+    group: Vehicles
+    about: A DAF XF tractor unit, two axles, its wheelbase 3.8 m, its Super Space Cab tall and flat-fronted, a fifth wheel for a trailer.
+    notes: The wheelbase as published; the cab's height, the length and the tyres are picked.
+    details: [quick]
+  - kind: campfire
+    group: Fire and lamps
+    about: A stone ring, leaning sticks and an attached flickering light.
+    notes: The named kind supplies geometry and light. A fire recipe supplies flames.
+    details: [quick]
+  - kind: bonfire
+    group: Fire and lamps
+    about: A tall pyre of leaning logs.
+    notes: Geometry only; scene fire is supplied separately. No attached lamp.
+    details: [quick]
+  - kind: spotlight
+    group: Fire and lamps
+    about: A mounted lamp with a soft-edged thermal cone beam.
+    notes: Temperature, power and angles are authored display choices.
+    details: [quick]
+  - kind: maser
+    group: Fire and lamps
+    about: A mounted dish carrying a radio emitter.
+    notes: The housing is visible; its radio beam is not shown by an RGB picture.
+    details: [quick]
+  - kind: laser-green
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 532 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; the line is the usual show module's.
+    details: [quick]
+  - kind: laser-red
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 638 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; the line is the usual show module's.
+    details: [quick]
+  - kind: laser-blue
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 445 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; the line is the usual show module's.
+    details: [quick]
+  - kind: laser-cyan
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 488 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; 488 nm is the argon line.
+    details: [quick]
+  - kind: laser-amber
+    group: Fire and lamps
+    about: A show laser on a stand, shining one 589 nm line through a narrow opening.
+    notes: Power and beam numbers are authored to sound right; 589 nm is sodium's line.
+    details: [quick]
+  - kind: laser-magenta
+    group: Fire and lamps
+    about: A show laser head mixing the red and blue lines from one mouth.
+    notes: Power and beam numbers are authored to sound right; the lines share its power evenly.
+    details: [quick]
+  - kind: laser-white
+    group: Fire and lamps
+    about: A show laser head mixing the red, green and blue lines from one mouth.
+    notes: Power and beam numbers are authored to sound right; the lines share its power evenly.
+    details: [quick]
+  - kind: strobe
+    group: Fire and lamps
+    about: A stage strobe on a stand, a spotlight's cousin, wide, white and cold.
+    notes: Temperature, power and angles are authored display choices.
+    details: [quick]
+  - kind: optical-observatory
+    group: Observatories
+    about: A slitted dome, mount, open truss and primary mirror.
+    notes: Visual assembly; not a calibrated optical bench or a real-site replica.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: -145
+  - kind: spitzer
+    group: Observatories
+    about: Spitzer gets to come too. Cryostat, baffle and a solar shield.
+    notes: 784 separate solar cells at published dimensions; authored packing and body. Overall-height discrepancy and layered materials remain under review.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    references:
+      - title: Caltech/IPAC, Spitzer telescope
+        url: https://www.spitzer.caltech.edu/mission/the-telescope
+      - title: Caltech/IPAC, Spitzer spacecraft
+        url: https://www.spitzer.caltech.edu/mission/the-spacecraft
+      - title: Caltech/IPAC, Spitzer solar panel assembly
+        url: https://www.spitzer.caltech.edu/mission/the-solar-panel-assembly
+      - title: Werner et al., on-orbit Spitzer performance (2022)
+        url: https://doi.org/10.1117/1.JATIS.8.1.014002
+  - kind: hubble
+    group: Observatories
+    about: A long optical tube and two gridded solar wings.
+    notes: Source-backed default aperture; authored tube, bus and wing proportions.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Hubble optics
+        url: https://science.nasa.gov/mission/hubble/observatory/design/optics/
+  - kind: webb
+    group: Observatories
+    about: A gold segmented primary on a tower above five aluminium sunshield layers, its bus and solar panels on the sun's side.
+    notes: Referenced aperture, counts, shield lengths and secondary; gold and aluminium by their optical constants; authored figure, gaps and sizes of the bus, tower and instrument module.
+    details: [hull, clumps, quick, demo]
+    # Seen from the sun's side, below the shield: the mirror's side is the
+    # side Webb keeps in shadow, and from there, with nothing else in space
+    # to light it, it drew black (catalogue of 2026-11-15). Authored view.
+    view-yaw-deg: 180
+    view-elevation-deg: -30
+    # In space: nothing behind it, and one sun. Webb may point only 85 to
+    # 135 degrees from the sun (STScI, JWST user documentation, "JWST
+    # Field of Regard"), and its sky is darkest at 135, so the sun lies
+    # 135 degrees from the mirror's line of sight (-z here) on the
+    # shield's side (-y): toward (0, -sin 135, -cos 135). The direction
+    # is measured; the strength is the studio's key light, authored.
+    staging:
+      sky:
+        horizon: {r: 0, g: 0, b: 0}
+        zenith: {r: 0, g: 0, b: 0}
+        ground: {r: 0, g: 0, b: 0}
+      sources:
+        - toward: {x: 0, y: -0.7071067811865476, z: 0.7071067811865476}
+          strength: {r: 2.4, g: 2.3, b: 2.1}
+    references:
+      - title: NASA, Webb telescope overview
+        url: https://science.nasa.gov/mission/webb/science-overview/science-explainers/telescope-overview/
+      - title: NASA, Webb sunshield
+        url: https://science.nasa.gov/mission/webb/webbs-sunshield/
+  - kind: mcrn-larson
+    group: Visitors
+    about: A flying saucer, the MCRN Larson, weathered titanium under a glass dome.
+    notes: Patterned on the plain saucers Gary Larson drew in The Far Side, named as The Expanse names Mars's navy; our own geometry, picked by eye.
+    details: [hull, clumps, quick, demo]
+    # In space, by one sun from the studio key light's way.
+    staging:
+      sky:
+        horizon: {r: 0, g: 0, b: 0}
+        zenith: {r: 0, g: 0, b: 0}
+        ground: {r: 0, g: 0, b: 0}
+      sources:
+        - toward: {x: -1, y: 2, z: -2}
+          strength: {r: 2.4, g: 2.3, b: 2.1}
+    references:
+      - title: Gary Larson, The Far Side
+        url: https://www.thefarside.com/
+      - title: James S. A. Corey, The Expanse
+        url: https://en.wikipedia.org/wiki/The_Expanse_(novel_series)
+  - kind: apollo-csm
+    group: Crewed spacecraft
+    about: The Apollo command and service module, standing on its engine bell, 10.11 m tall and 3.91 m across.
+    notes: Diameters and lengths read from NASA's Apollo 204 spacecraft page, NSSDCA and Wikipedia, and not yet pinned; the bell's top, the command module's apex and every look are picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Apollo 204 Review Board, the spacecraft
+        url: https://www.nasa.gov/wp-content/uploads/static/history/Apollo204/spacecraft.html
+      - title: NSSDCA, Apollo 7 command and service module
+        url: https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1968-089A
+  - kind: apollo-lunar-module
+    group: Crewed spacecraft
+    about: The Apollo lunar module on its four footpads, 7.04 m tall and 9.4 m across them, its descent stage in a gold blanket.
+    notes: Heights, widths and the pads' span read from NASA's Apollo 204 spacecraft page, NSSDCA and Wikipedia, and not yet pinned. The ascent stage is one eight-sided prism and each leg one strut; the blanket is Kapton over aluminium by their optical constants.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NSSDCA, Apollo 11 lunar module
+        url: https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1969-059C
+      - title: NASA, Apollo 204 Review Board, the spacecraft
+        url: https://www.nasa.gov/wp-content/uploads/static/history/Apollo204/spacecraft.html
+  - kind: venera-lander
+    group: Planetary landers
+    about: The Venera 9 to 14 lander, standing on its impact ring, 1.97 m tall and 2.15 m across its drag plate, a placeholder.
+    notes: The ring's radius, the payload's height and size, the plate's width, the eighteen legs and the heat shield's 2.4 m read from the Schroeder, Bayandor and Samareh report, and not yet pinned. The ring's tube, the legs' and the plate's thickness, the can and every finish are picked, and where the legs meet the module is picked; the vessel and the shield are held and not drawn.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA Technical Reports Server, 20170002533, Schroeder, Bayandor and Samareh
+        url: https://ntrs.nasa.gov/citations/20170002533
+  - kind: j58
+    group: Engines
+    about: The Pratt & Whitney J58, the A-12's engine, lying on its axis, 4.572 m long and 1.27 m across its largest case.
+    notes: The length, the diameter and the pressure ratio are read from Wikipedia's page, which cites a 1966 engine register, and are not pinned; the nine compressor stages, the two turbine stages, the eight cans and the six bypass tubes are read from NASA TM-104330, pinned on the shelf. Every station, every radius but the largest, the blade counts and every look are picked; titanium stands in for the nickel alloys of the hot parts.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA TM-104330, Conners, Predicted Performance of a Thrust-Enhanced SR-71 Aircraft with an External Payload
+        url: https://ntrs.nasa.gov/citations/19970019923
+      - title: Wikipedia, Pratt & Whitney J58
+        url: https://en.wikipedia.org/wiki/Pratt_%26_Whitney_J58
+  - kind: j58-test-stand
+    group: Engines
+    about: A J58 on its test stand, a cradle holding the engine by its four mount pins on a 7.5 m pad, with a load cell and a bellmouth.
+    notes: No source for a J58 stand was found; every size, place and colour of the stand is picked, and so are where the engine's mount lugs are. The pad is a plain colour, as slayer has no concrete, and the steel is painted, as slayer has no optics for steel. The engine is the j58 kind, placed by its own mount.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, full-scale YF-12 inlet on a boilerplate nacelle in the wind tunnel, the nearest cited test arrangement
+        url: https://ntrs.nasa.gov/citations/19780024119
+  - kind: alfa
+    group: Vessels
+    about: Project 705 "Lira", NATO's Alfa class, the titanium attack submarine, on its keel, 81.4 m long and 9.5 m in beam, with its sail, bow planes, cruciform stern, thruster pods and one fixed-pitch propeller.
+    notes: The length, beam, draught and displacements are russianships.info's, on the shelf; the 1969 estimate, the reserve buoyancy, the rescue sphere in the sail and the sail's rubber coating are the CIA's history of the Alfa, on the shelf. Wikipedia's draught, 7.6 m, is kept beside the 6.24 m as a named choice and is not shelved. The hull's form, every part's size, the blade count and every look are chosen from photographs; the sail wears its cited rubber coat, painted black, and the hull is bare titanium by default and painted as a choice in its sizes file.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: russianships.info, Project 705 Lira
+        url: https://russianships.info/eng/submarines/project_705.htm
+      - title: CIA Studies in Intelligence, Thamm, The ALFA SSN
+        url: https://www.cia.gov/resources/csi/static/the-ALFA-SSN.pdf
+      - title: Wikipedia, Alfa-class submarine
+        url: https://en.wikipedia.org/wiki/Alfa-class_submarine
+  - kind: alfa-hero
+    group: Vessels
+    about: The 81.4 m Project 705 Alfa in an authored near-black finish, with the same hull, sail and screw arrangement as alfa.
+    notes: This is alfa with its painted finish selected, not a different submarine. Length, beam, draught and displacement follow the same shelved sources as alfa. American Submariner identifies the five-blade main screw and two two-blade auxiliary screws; their dimensions and the fitted geometry are chosen from photographs. The outer hull's near-black coat is an artistic choice, not an established historical paint specification. Propeller titanium remains a material stand-in in this model. The constructor adds no pump-jet, wake, cavitation or residual gas; water and gas fields are authored separately in a scene.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: russianships.info, Project 705 Lira
+        url: https://russianships.info/eng/submarines/project_705.htm
+      - title: CIA Studies in Intelligence, Thamm, The ALFA SSN
+        url: https://www.cia.gov/resources/csi/static/the-ALFA-SSN.pdf
+      - title: American Submariner, Third Quarter 2023, Project 705—Lira, pages 22–23
+        url: https://ufdcimages.uflib.ufl.edu/AA/00/04/07/89/00111/2023-%20Issue%203.pdf
+  - kind: soyuz-ms
+    group: Crewed spacecraft
+    about: Soyuz MS, standing on its service module, 7.48 m tall, without its solar arrays.
+    notes: Every size is from one secondary page, which the Russian page disagrees with; unverified. The orbital module's roundness is three straight lengths, and every look is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Wikipedia, Soyuz (spacecraft)
+        url: https://en.wikipedia.org/wiki/Soyuz_(spacecraft)
+  - kind: mercury-capsule
+    group: Crewed spacecraft
+    about: The Mercury capsule, standing on its heat shield, 3.3 m tall and 1.8 m across, without its escape tower.
+    notes: Its two sizes are from a secondary page; how its height is shared among its three lengths, and every look, are picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Wikipedia, Mercury capsule
+        url: https://en.wikipedia.org/wiki/Mercury_capsule
+  - kind: gemini
+    group: Crewed spacecraft
+    about: The Gemini spacecraft, standing on its adapter, 5.736 m tall and 3.048 m across its base.
+    notes: Sizes from a secondary page and the heat shield's width from NASA's familiarization manual, which gives a different overall length; every look is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Gunter's Space Page, Gemini
+        url: https://space.skyrocket.de/doc_sdat/gemini.htm
+  - kind: saturn-v
+    group: Launchers
+    about: The Saturn V launch vehicle, its three stages and instrument unit, 85.6 m tall and 10.06 m across, without the Apollo spacecraft on top.
+    notes: Stage lengths and diameters are NASA's, as a search of nasa.gov relayed them; how the third stage is shared with its skirt is picked. No fins, no engines, and not its white and black paint.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Apollo 4 press kit
+        url: https://ntrs.nasa.gov/api/citations/19670031260/downloads/19670031260.pdf
+      - title: NASA, The Enduring Legacy of Saturn V Launch Vehicle Flight
+        url: https://ntrs.nasa.gov/api/citations/20200002830/downloads/20200002830.pdf
+  - kind: saturn-ib
+    group: Launchers
+    about: The Saturn IB launch vehicle, its two stages and instrument unit, 43.16 m tall and 6.61 m across, with no spacecraft on top.
+    notes: Stage lengths and diameters are as Wikipedia's Saturn IB page gives them, read 2026-11-12, and are not pinned; its infobox and its text disagree by eight centimetres on the second stage's width, and the text's is used. No fins, no engines, and plain white where the first stage's tanks were black and white.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Wikipedia, Saturn IB
+        url: https://en.wikipedia.org/wiki/Saturn_IB
+  - kind: saturn-v-apollo
+    group: Launchers
+    about: The Apollo-Saturn V as it stood on the pad, with the Apollo spacecraft and its escape tower, 110.64 m tall, NASA's 363 feet.
+    notes: The stages and the total height are NASA's; the lunar module adapter's length is unverified, and the escape tower's is what is left of the 363 feet. No fins, no engines, and not its black markings.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Apollo 4 press kit
+        url: https://ntrs.nasa.gov/api/citations/19670031260/downloads/19670031260.pdf
+  - kind: sls-block-1
+    group: Launchers
+    about: The Space Launch System, Block 1, its core stage, two solid rocket boosters and upper stage, 86.7 m tall, without Orion on top.
+    notes: The core stage's and boosters' sizes are NASA's; the upper stage's is a table row inferred to be it; the adapter's height is picked. No engines, and not the core's orange foam.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Space Launch System reference
+        url: https://www.nasa.gov/reference/space-launch-system/
+      - title: NASA, SLS core stage fact sheet
+        url: https://www.nasa.gov/wp-content/uploads/2020/02/sls_core_stage_fact_sheet_04262021_508.pdf
+  - kind: mcrn-larson-landed
+    group: Visitors
+    about: The MCRN Larson landed, on three legs, its stairs down from the belly.
+    notes: The same saucer with its gear down. The legs and the stairs are picked by eye; the stairs are built by the stairs constructor, and each part's look is made from the material and the finish it names.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Gary Larson, The Far Side
+        url: https://www.thefarside.com/
+      - title: James S. A. Corey, The Expanse
+        url: https://en.wikipedia.org/wiki/The_Expanse_(novel_series)
+  - kind: space-observatory
+    group: Observatories
+    about: The default Spitzer template behind the custom spacecraft recipe.
+    notes: This named convenience is an alias, not a fourth spacecraft design.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    references:
+      - title: Caltech/IPAC, Spitzer telescope
+        url: https://www.spitzer.caltech.edu/mission/the-telescope
+  - kind: mobile-crane
+    group: Summit yard
+    about: A parked lattice-boom crane with deployed outriggers and a hanging hook.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: mirror-gantry
+    group: Summit yard
+    about: A wide travelling beam, hoist trolley and suspended hook.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: scaffold-tower
+    group: Summit yard
+    about: Braced scaffold bays, timber decks and top rails.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: service-truck
+    group: Summit yard
+    about: A closed service body, cab, bumper, wheels and roof rack.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: utility-pickup
+    group: Summit yard
+    about: A summit pickup with an open cargo bed.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: equipment-trailer
+    group: Summit yard
+    about: A box trailer with a tow frame and a parking jack.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: shipping-crate
+    group: Summit yard
+    about: A timber shipping crate with metal straps and pallet runners.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: equipment-cabinet
+    group: Summit yard
+    about: A weatherproof cabinet on a low plinth.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: generator
+    group: Summit yard
+    about: A stationary diesel-generator proxy with louvers and an exhaust.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: cooling-unit
+    group: Summit yard
+    about: A paired-fan cooling cabinet with external pipe stubs.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: access-stairs
+    group: Summit yard
+    about: Eight open treads, stringers and sloping handrails.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: work-platform
+    group: Summit yard
+    about: A raised work deck with legs and side rails.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: handrail
+    group: Summit yard
+    about: A freestanding three-post safety railing.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: cable-tray
+    group: Summit yard
+    about: An open ladder tray with three dark cable runs.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: weather-mast
+    group: Summit yard
+    about: An instrument crossarm, sensor proxies, antenna and guy wires.
+    notes: Authored parked scenery in metres; no engineering or load rating.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 20
+  - kind: cfht
+    group: Maunakea families
+    about: A yoke-mounted reflector inside a slitted dome and service wing.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.cfht.hawaii.edu/Instruments/ObservatoryManual/CFHT_ObservatoryManual_%28Sec_4%29.html
+  - kind: gemini-north
+    group: Maunakea families
+    about: An open reflector beneath a tall vented enclosure.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.gemini.edu/images/pio/handouts/gn_telescope_handout.pdf
+  - kind: irtf
+    group: Maunakea families
+    about: A compact infrared reflector, yoke and service annex.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/maunakea-telescopes/
+  - kind: uh-88
+    group: Maunakea families
+    about: A closed optical tube and yoke inside a small summit dome.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/maunakea-telescopes/
+  - kind: ukirt
+    group: Maunakea families
+    about: A small infrared reflector and dome; science closure was announced for 2026.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking. The announced science closure is September15,2026; this template does not imply continuing operations.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/ukirt/about-us/
+      - title: University of Hawaii, announced science closure
+        url: https://www.hawaii.edu/news/2026/07/02/uh-continues-ukirt-decommissioning/
+  - kind: jcmt
+    group: Maunakea families
+    about: A deep dish and quadrupod inside a broadly opened faceted house.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.eaobservatory.org/jcmt/public/jcmt/
+  - kind: sma-antenna
+    group: Maunakea families
+    about: A single six-metre radio dish on a compact altitude cradle.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.cfa.harvard.edu/facilities-technology/telescopes-instruments/submillimeter-array-maunakea-hi
+  - kind: sma-array
+    group: Maunakea families
+    about: Eight shared antenna prototypes in an authored compact layout.
+    notes: Published eight six-metre antennas and f/0.4 primary ratio. Layout, mounts and feeds are authored, not surveyed SMA pad coordinates.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://lweb.cfa.harvard.edu/sma/general/Ho.pdf
+  - kind: vlba-maunakea
+    group: Maunakea families
+    about: A large radio dish, altitude cradle and station control building.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://www.vlba.nrao.edu/whatis/
+  - kind: panstarrs-1
+    group: Haleakala families
+    about: A compact survey reflector in its own small dome.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://panstarrs.ifa.hawaii.edu/
+  - kind: panstarrs-2
+    group: Haleakala families
+    about: The second survey-telescope family with a different authored annex.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://panstarrs.ifa.hawaii.edu/
+  - kind: faulkes-north
+    group: Haleakala families
+    about: An open reflector beneath a broadly opened clamshell proxy.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://lco.global/observatory/telescopes/2m0/
+  - kind: dkist
+    group: Haleakala families
+    about: An off-axis solar instrument inside a round-pupil calotte proxy.
+    notes: Published four-metre clear pupil and offset secondary; authored figure and housing, not a calibrated Gregorian prescription.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 20
+    view-elevation-deg: 55
+    references:
+      - title: Primary family reference
+        url: https://nso.edu/dkist-at-a-glance/
+  - kind: atlas-haleakala
+    group: Haleakala families
+    about: A short wide-field camera on a counterweighted mount.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://fallingstar.com/specifications.php
+  - kind: tlrs-4
+    group: Haleakala families
+    about: A small ranging telescope and opaque corrector inside a dome.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://ilrs.gsfc.nasa.gov/network/stations/active/HA4T_station_info.html
+  - kind: solarc
+    group: Haleakala families
+    about: An unobstructed off-axis coronagraph proxy and sliding-roof house.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/haleakala-observatories/
+  - kind: mees-solar
+    group: Haleakala families
+    about: The Mees facility family with an explicitly picked small solar tube.
+    notes: The quarter-metre tube is explicitly picked; the references establish the Mees facility, not this proxy aperture.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/history-of-ifa-maui/
+  - kind: aeos
+    group: Haleakala families
+    about: An open tracking reflector with its housing panels parked low.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://boeing.mediaroom.com/2012-06-20-Boeing-Completes-Upgrade-of-AEOS-Telescope-at-Maui-Space-Surveillance-Complex
+  - kind: mssc-1-6m
+    group: Haleakala families
+    about: A closed reflector with an outer gimbal ring.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/history-of-ifa-maui/
+  - kind: mssc-twin-1-2m
+    group: Haleakala families
+    about: Two parallel infrared tubes on a common central support.
+    notes: Source-labelled aperture; all other dimensions, poses and coatings are authored scenery. No calibrated optics or tracking.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://about.ifa.hawaii.edu/facility/history-of-ifa-maui/
+  - kind: geodss
+    group: Haleakala families
+    about: A nominal metre-class tracker, dome and control cabin.
+    notes: Nominal metre-class family from a historical inventory, not the separate102cm physical specification or a current full site survey.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://files.hawaii.gov/dbedt/erp/EA_EIS_Library/2009-05-08-MA-SDEIS-Advanced-Tech-Solar-Telescope-V1.pdf
+  - kind: geodss-site
+    group: Haleakala families
+    about: Three shared dome prototypes in an authored site layout.
+    notes: Nominal metre-class family from a historical inventory, not the separate102cm physical specification or a current full site survey.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 30
+    references:
+      - title: Primary family reference
+        url: https://files.hawaii.gov/dbedt/erp/EA_EIS_Library/2009-05-08-MA-SDEIS-Advanced-Tech-Solar-Telescope-V1.pdf
+
+  - kind: guide-star-launcher
+    group: Observatory equipment
+    about: An open launch tube with two collars and an attachment shoe.
+    notes: Authored scenery; positive y is the outgoing axis, and the exit is at the upper bound.
+    details: [hull, clumps, quick, demo]
+
+  - kind: owl
+    group: Historical and unbuilt concepts
+    about: The unbuilt 100-m OWL concept, observing in the open.
+    notes: >-
+      Selected 2005 Blue Book baseline: 3048 spherical primary panels and
+      216 flat secondary panels. Tapered modular space frame, deep mirror
+      cell, azimuth rail, altitude cradle and four corrector roles are
+      authored scenery. Panel positions are not an ESO segment survey.
+      The roll-away shelter is independently placeable as owl-shelter.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    view-elevation-deg: 25
+    references:
+      - title: ESO OWL Blue Book overview, 2005
+        url: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/2_Overview.pdf
+      - title: ESO OWL enclosure and infrastructure concept
+        url: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/11_Enclosure_and_infrastructures.pdf
+
+  - kind: owl-shelter
+    group: Historical and unbuilt concepts
+    about: A parked roll-away shelter for the OWL scenery family.
+    notes: >-
+      The Blue Book describes a hangar that moves away for observations.
+      Four open arch modules, bogies and short parking rails form this
+      authored interpretation. Span, wall section and parked positions are
+      picked; hinge motion, travel and a surveyed enclosure are not modelled.
+    details: [hull, clumps, quick, demo]
+    view-yaw-deg: 0
+    references:
+      - title: ESO OWL enclosure and infrastructure concept
+        url: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/11_Enclosure_and_infrastructures.pdf
+  - kind: valley-oak
+    group: Broadleaf trees
+    about: A spreading forked oak with lobed physical leaves.
+    notes: >-
+      Deciduous family scenery with a branching scaffold and fixed-size
+      twig cells. All dimensions and colours are picked. Seasonal recipes
+      can change the palette or remove leaves while retaining the wood.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: UC ANR, California oak identification and ecology
+        url: https://www.ucanr.edu/site/uc-oaks/california-oak-tree-species-id-and-ecology
+  - kind: alder
+    group: Broadleaf trees
+    about: A continuing leader with lateral branches and oval blades.
+    notes: >-
+      An authored alder-family treatment, without species identification.
+      Physical leaf cells are shared without scaling their blades to the
+      tree. Summer, autumn and winter are discrete scenery states.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: poplar
+    group: Broadleaf trees
+    about: A tall leader-based crown with deltoid leaf outlines.
+    notes: >-
+      An authored poplar-family treatment with picked branching and colours.
+      Leaf size stays fixed across specimen scale and detail. Winter drops
+      the deciduous blades and keeps the woody twigs.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: manzanita
+    group: Desert and chaparral
+    about: A red-barked multi-stem shrub with small oval blades.
+    notes: >-
+      Authored evergreen family scenery, without a particular species or
+      measured growth model. Separate basal stems carry branching twigs
+      and shared physical-size leaf cells.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: chaparral-brush
+    group: Desert and chaparral
+    about: Low multi-stem brush with narrow evergreen blades.
+    notes: >-
+      A generic authored brush recipe rather than a botanical species.
+      Short forks and small leaf cells supply a different architecture
+      from the conifers. Dimensions, counts and colours are picked.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+  - kind: joshua-tree
+    group: Desert and chaparral
+    about: Forked stems ending in green blade rosettes and brown leaf skirts.
+    notes: >-
+      Terminal stiff blades and persistent old foliage follow the qualitative
+      Joshua-tree habit. Dimensions, counts, branching and angles are picked.
+      The old-leaf skirt is a separate material and downward arrangement.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Oregon State University, Joshua-tree foliage habit
+        url: https://landscapeplants.oregonstate.edu/plants/yucca-brevifolia
+  - kind: saguaro
+    group: Desert and chaparral
+    about: A pleated upright cactus with rounded tips and curved rising arms.
+    notes: >-
+      An authored column-and-arm recipe, including unbranched specimens.
+      Quick and demo add fixed-size shared spine cones on the upright runs;
+      bends and caps have no spines. Dimensions and pleat counts are picked.
+      Code draft; geometry and CPU/Metal views await the review break.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: National Park Service, saguaro arms and pleats
+        url: https://www.nps.gov/tont/learn/nature/saguaro.htm

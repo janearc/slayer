@@ -1,0 +1,19 @@
+{
+ "$schema":"https://json-schema.org/draft/2020-12/schema",
+ "title":"Azazel job request",
+ "type":"object",
+ "additionalProperties":false,
+ "required":["agent","key","command","args","directory","lane","timeout_seconds"],
+ "properties":{
+  "agent":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9._-]*$","maxLength":128},
+  "key":{"type":"string","minLength":1,"maxLength":128},
+  "command":{"type":"string","pattern":"^/","maxLength":4096},
+  "directory":{"type":"string","pattern":"^/","maxLength":4096},
+  "args":{"type":"array","maxItems":256,"items":{"type":"string","maxLength":8192}},
+  "inputs":{"type":"array","maxItems":128,"items":{"type":"string","pattern":"^/","maxLength":4096}},
+  "environment":{"type":"object","maxProperties":64,"additionalProperties":false,"patternProperties":{"^SLAYER_[A-Z0-9_]+$":{"type":"string","maxLength":8192}}},
+  "lane":{"enum":["gpu","tests","mutants"]},
+  "timeout_seconds":{"type":"integer","minimum":1,"maximum":604800},
+  "memory_bytes":{"description":"Optional historical estimate; never a stop threshold","type":"integer","minimum":0,"maximum":9223372036854775807}
+ }
+}

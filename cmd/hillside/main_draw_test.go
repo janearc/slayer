@@ -15,6 +15,20 @@ import (
 	"github.com/janearc/slayer/internal/commandtest"
 )
 
+// TestMain gives the tests a cache home of their own, which the commands
+// they run read from the environment, so nothing is kept in a real cache.
+func TestMain(m *testing.M) {
+	home, err := os.MkdirTemp("", "hillside-command-cache")
+	if err != nil {
+		os.Stderr.WriteString(err.Error() + "\n")
+		os.Exit(1)
+	}
+	os.Setenv("SLAYER_CACHE", home)
+	code := m.Run()
+	os.RemoveAll(home)
+	os.Exit(code)
+}
+
 // the old command keeps its short flags: -w, -h and -n set the size and the
 // rays of the picture it draws.
 func TestHillsideStillTakesItsShortSizeFlags(t *testing.T) {

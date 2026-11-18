@@ -2,11 +2,11 @@
 // checking the score by eye against the song. It writes raw rgb24 frames
 // to stdout for ffmpeg to put the song under.
 //
-// Four squares, one per beat in the bar, flash on each measured beat
-// time, beat one white and two to four green; the bar and beat are
-// written large; a dot says whether the beat was measured or counted
-// through a break; each cue from the sheet flashes a band with what it
-// sets.
+// One square per beat in the bar, as many as the score's meter (four
+// when it names none), flashes on each measured beat time, beat one
+// white and the rest green; the bar and beat are written large; a dot
+// says whether the beat was measured or counted through a break; each
+// cue from the sheet flashes a band with what it sets.
 //
 //	game run metronome -- draw --score score.yaml --cues cues.yaml \
 //	  --fps FPS --width W --height H | ffmpeg -f rawvideo \
@@ -23,7 +23,6 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
-	"os"
 	"strconv"
 
 	"github.com/janearc/puzzlemouth/pzm"
@@ -207,10 +206,4 @@ func text(frame *image.RGBA, words string, cx, cy, scale int, c color.RGBA) {
 			fill(frame, r, c)
 		}
 	}
-}
-
-// fail says what went wrong on stderr and stops with a failing status.
-func fail(err error) {
-	fmt.Fprintln(os.Stderr, "metronome:", err)
-	os.Exit(1)
 }

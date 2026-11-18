@@ -43,6 +43,13 @@ type Normaler interface {
 	Normal(p maths.Vec) maths.Vec
 }
 
+// GeometricNormaler is a shape whose appearance normal may differ from its
+// exact surface normal. Optical boundaries use this normal for the side a ray
+// enters, reflects toward, or refracts into; Normal remains the shading normal.
+type GeometricNormaler interface {
+	GeometricNormal(p maths.Vec) maths.Vec
+}
+
 // Normal is which way the surface faces at p: exactly, when the shape knows,
 // and otherwise the direction its distance grows fastest.
 func Normal(s Shape, p maths.Vec) maths.Vec {
@@ -58,6 +65,15 @@ func Normal(s Shape, p maths.Vec) maths.Vec {
 		d(0, e, 0)-d(0, -e, 0),
 		d(0, 0, e)-d(0, 0, -e),
 	).Unit()
+}
+
+// GeometricNormal is the exact surface normal when a shape distinguishes it
+// from its shading normal, and otherwise the shape's ordinary normal.
+func GeometricNormal(s Shape, p maths.Vec) maths.Vec {
+	if n, ok := s.(GeometricNormaler); ok {
+		return n.GeometricNormal(p)
+	}
+	return Normal(s, p)
 }
 
 // Sphere is a ball of the given radius, centred on its own zero.

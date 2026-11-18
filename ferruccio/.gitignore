@@ -1,0 +1,6 @@
+bin/
+.DS_Store
+checks/
+captures/
+out/
+*.app/

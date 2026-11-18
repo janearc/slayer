@@ -37,7 +37,12 @@ func (refused refusal) Unwrap() []error {
 // source is where a job's words came from: name for its messages, base
 // for the paths it writes, and file, the job file, or nothing for a job
 // lifted from a plan.
-type source struct{ name, base, file string }
+type source struct {
+	name, base, file string
+	inputs           *digested
+	imported         *importSnapshot
+	outputForms      *outputForms
+}
 
 // admitted is a job checked and built from its words: the schema's
 // checks, its paths resolved, its preset applied, the checks a schema
@@ -53,6 +58,10 @@ func admitted(from source, raw []byte) (Job, error) {
 	var wire document
 	if err = node.Decode(&wire); err != nil {
 		return Job{}, fmt.Errorf("%s: %w", from.name, err)
+	}
+	if from.outputForms == nil {
+		forms := formsOf(wire.Outputs)
+		from.outputForms = &forms
 	}
 	wire.resolve(from.base)
 	wire.preset()

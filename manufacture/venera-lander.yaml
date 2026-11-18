@@ -1,0 +1,169 @@
+# The lander of Venera 9 to 14, which Vega 1 and 2 carried again,
+# standing on its impact ring, in metres. A number here was read off a
+# page, and `read` says which; where it says picked, nobody read it
+# anywhere, and it was chosen by eye from a picture `read` names.
+#
+# From the ground up: a hollow ring that crushed on landing, eighteen
+# short legs, the payload module, a round pressure vessel in its
+# insulation, a flat drag plate that slowed the fall through the thick
+# air, and on top the can that held the parachutes, with the aerial
+# wound round it.
+shell: 2.4
+ring:
+  radius: 0.9
+  tube: 0.09
+  wide: 0.22
+  teeth: 90
+  tooth: {tall: 0.08, base: 0.06, thick: 0.006}
+  holes: 72
+  hole: 0.012
+skirt:
+  across: 0.86
+  tall: 0.12
+  slat: 0.02
+  slats: 36
+legs:
+  count: 18
+  strut: 0.03
+  boss: 0.03
+  foot: {wide: 0.12, tall: 0.05, deep: 0.14}
+module:
+  across: 1.0
+  vessel: 0.8
+  height: 0.65
+  band: 0.14
+  proud: 0.012
+  window: 0.09
+  housing: 0.14
+  fittings: 12
+  box: {wide: 0.1, tall: 0.08, deep: 0.08}
+plate:
+  across: 2.15
+  thick: 0.03
+  dish: 0.04
+  lip: 0.06
+  rim: 0.05
+  hub: 0.6
+  stay: 0.035
+  stays: 12
+  seam: 0.012
+bolt: 0.008
+bolts: {plate: 48, band: 48, cap: 24}
+cable: 0.008
+pipe: 0.02
+booms: {strut: 0.012, head: 0.14, girth: 0.09}
+can:
+  across: 0.8
+  height: 0.7
+  core: 0.7
+  cap: 0.06
+  ribs: 10
+  stiffeners: 16
+  lugs: 4
+arm:
+  length: 0.6
+  wide: 0.09
+  rail: 0.008
+  rungs: 9
+caps: {across: 0.22, deep: 0.07, thick: 0.006}
+chart: {wide: 0.16, tall: 0.08, post: 0.05, thick: 0.008}
+# each coat a matte paint, as red, green and blue shares of the light it
+# gives back; every colour is picked, as `read` says
+coats:
+  impact ring: {red: 0.5, green: 0.47, blue: 0.43}
+  leg: {red: 0.4, green: 0.38, blue: 0.35}
+  payload module: {red: 0.62, green: 0.58, blue: 0.52}
+  module band: {red: 0.3, green: 0.27, blue: 0.24}
+  camera window: {red: 0.05, green: 0.05, blue: 0.06}
+  equipment box: {red: 0.44, green: 0.42, blue: 0.39}
+  drag plate: {red: 0.56, green: 0.34, blue: 0.18}
+  plate stay: {red: 0.42, green: 0.22, blue: 0.1}
+  parachute can: {red: 0.26, green: 0.25, blue: 0.24}
+  aerial: {red: 0.8, green: 0.78, blue: 0.74}
+  spring arm: {red: 0.82, green: 0.8, blue: 0.76}
+  lens cap: {red: 0.88, green: 0.87, blue: 0.84}
+  ring hole: {red: 0.04, green: 0.04, blue: 0.04}
+  module skirt: {red: 0.2, green: 0.19, blue: 0.18}
+  bolt: {red: 0.34, green: 0.32, blue: 0.3}
+  cable: {red: 0.15, green: 0.14, blue: 0.13}
+  pipe: {red: 0.52, green: 0.5, blue: 0.47}
+  boom head: {red: 0.86, green: 0.85, blue: 0.82}
+  chart panel: {red: 0.18, green: 0.18, blue: 0.18}
+  chart white: {red: 0.86, green: 0.86, blue: 0.84}
+  chart red: {red: 0.62, green: 0.1, blue: 0.08}
+  chart green: {red: 0.12, green: 0.45, blue: 0.16}
+  chart blue: {red: 0.1, green: 0.16, blue: 0.55}
+mass: 660
+read: >-
+  Schroeder, Bayandor and Samareh, "Impact and Crashworthiness
+  Characteristics of Venera Type Landers for Future Venus Missions"
+  (NASA Technical Reports Server, 20170002533; brought home through
+  celestial-data's ntrs-fetch and read 2026-11-15). Page 2: the lander
+  entered "encapsulated in a 2.4 m spherical heat shield", and "The
+  payload module was roughly one meter in diameter, 80 cm diameter
+  pressure vessel with the remaining thickness contributed to by the
+  insulation". Page 3: "There were 18 legs that connected the payload
+  module to the impact ring". Page 16: "The Venera 9 and 10 landers mass
+  were 660 kg each". Its Figure 17, page 21, gives, for the model its authors
+  made of the lander as flown, "Payload Height 0.65 m", "Impact Ring
+  Radius 0.9 m" and "Drag Plate Radius 2.15 m". The plate rode inside
+  the 2.4 m shell, so it cannot be 4.3 m across: 2.15 m is taken here as
+  how far across it is, which is this file's reading and not the
+  report's words. The payload height, "the distance the payload module
+  initially was above the impact ring", is taken as from the ring's
+  middle to the module's middle: also this file's reading. The ring's
+  tube, the legs' thickness, the plate's thickness, and the can's width
+  and height are picked, by eye from the report's Figure 1, page 2, a
+  photograph of Venera 9's lander; the can was 0.9 m across until the
+  aerial went on it, and is 0.8 m since, for in Figure 1 it is a little
+  over a third as wide as the plate. The can's core, its cap and the ten
+  turns of the aerial, drawn as flat ribs, are picked by eye from Figure
+  1 and from the museum models on a reference sheet of pictures of the
+  lander gathered 2026-11-15. The plate's dish, the lip and rim round
+  its edge, the collar under its middle (its hub) and its twelve stays
+  are picked by eye from Figure 1, where the lip shows, and from that
+  sheet, where the stays show under the plate. Page 10: "the original
+  Venera lander, utilized a Tri-leg configuration with 18 total legs";
+  that the legs stand three to a foot, six feet round the ring, is this
+  file's reading of the name and of Figure 15(c), page 19, and the
+  brackets at the feet and the bosses where the legs meet the module
+  are picked by eye from Figure 1. The ring's width, wider than it is
+  tall as the flat band of Figure 1, is picked; so are the ninety
+  triangular teeth round its outer edge and their size, by eye from
+  Venera 13's own photographs on the reference sheet, where the teeth
+  stand along the ring's top. Page 3: "the impact ring had holes
+  perforating the outer surface of the metallic shell"; their number
+  (72) and size are picked by eye from Figure 1, where they show as a
+  row round the ring's wall. The dark skirt of upright slats under the
+  module, its width, height and thirty-six slats, is picked by eye from
+  Figure 1. The plate's seams, two rings and one straight seam over each
+  stay, and the bolt rings, round the plate's lip, along both edges of
+  the band where Figure 1 shows rows of rivets round the body, and round
+  the can's cap, are picked by eye from Figure 1 and the reference
+  sheet, with the bolts' size and counts. The cable round the module
+  above its fittings and the cables from the round fittings up over the
+  module's shoulder are picked. The two pipes that come down from under
+  the plate and bend in to the module, and the two booms rising from the
+  ring with white egg-shaped heads, are picked by eye from Figure 1,
+  which shows both; what the booms carried is not in the report or the
+  sheet. On the can, the sixteen upright stiffeners on its core that
+  show between the aerial's turns, the aerial's lead winding down to the
+  plate, and the four lugs on the cap's flange are picked by eye from
+  Figure 1. Round the module, the
+  band where the museum models carry their lettering (its height and
+  how proud it stands), the two camera housings and their windows, and
+  the twelve fittings round the equator, every other one a box, with
+  their sizes, are picked by eye from that sheet. Outside, the
+  instruments as Venera 13's photographs show them after landing: the
+  spring-loaded arm, a ladder-like scale of two rails and nine rungs
+  lying flat on the ground, deployed out from the ring's wall and
+  pointing away from the lander, with a pad at its far end; the two white lens
+  caps, curved shells lying beyond the ring; and a colour chart of four
+  patches on posts on the ring. Every size and place of these is picked
+  by eye from those photographs, and the chart's patches are picked
+  colours, not read ones. Every coat's colour is
+  picked from that sheet: a warm grey body with a darker band, the plate a brown-orange
+  with its stays darker, the arm and the lens caps white as they show
+  in Venera 13's photographs, the aerial lighter than the can it is wound
+  on, as Figure 1 shows it. NSSDCA's own records of these landers were
+  asked for the same day and did not come.

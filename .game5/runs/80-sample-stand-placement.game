@@ -1,0 +1,1 @@
+sample-stand-placement . :: go run ./hillside/testdata/stand_placement_reference.go

@@ -1,0 +1,3 @@
+# gogpu is fetched and patched here by ferruccio/scripts/patch-gogpu.sh
+gogpu/
+gogpu.new/

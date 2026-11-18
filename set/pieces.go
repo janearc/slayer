@@ -3,6 +3,7 @@ package set
 import (
 	"math"
 	"slices"
+	"strings"
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/bodies/template"
@@ -22,20 +23,116 @@ import (
 // as its source: eye, for judged by eye, or the measurement they were
 // read from.
 type World struct {
-	unit      float64
-	order     []string
-	materials []Material
-	boxes     []Box
-	spheres   []Sphere
-	lamps     []Lamp
-	spots     []Spotlight
-	floods    []Flood
-	sky       *Sky
-	bodies    []Body
-	suns      []Sunlight
-	wisps     []Wisp
-	fizzes    []Fizz
-	motions   []Motion
+	unit          float64
+	order         []string
+	materials     []Material
+	ocean         *WaveSurface
+	boxes         []Box
+	spheres       []Sphere
+	lamps         []Lamp
+	beams         []Beam
+	spots         []Spotlight
+	floods        []Flood
+	sky           *Sky
+	bodies        []Body
+	suns          []Sunlight
+	wisps         []Wisp
+	fizzes        []Fizz
+	vaporCavities []VaporCavitation
+	motions       []Motion
+	imports       []Import
+	griffith      *GriffithBasin
+}
+
+// GriffithBasin is the authored Los Angeles approximation from the Heard
+// Griffith stage, placed as one reusable procedural landscape in a set.
+type GriffithBasin struct {
+	at             *WorldPosition
+	heading        float64
+	scale          float64
+	relief         float64
+	cityForward    float64
+	ridgeForward   float64
+	cityDetail     float64
+	terrainSamples int
+	lightScale     float64
+	lightFootprint float64
+}
+
+// Griffith returns the optional procedural Griffith/LA ridge and city.
+func (made World) Griffith() (GriffithBasin, bool) {
+	if made.griffith == nil {
+		return GriffithBasin{}, false
+	}
+	return *made.griffith, true
+}
+
+// At is the landscape's absolute map position in metres.
+func (made GriffithBasin) At() WorldPosition {
+	if made.at == nil {
+		return WorldPosition{}
+	}
+	return *made.at
+}
+
+// Heading is clockwise from north in degrees.
+func (made GriffithBasin) Heading() float64 { return made.heading }
+
+// Scale is the authored landscape scale; an omitted scale keeps native 1:1 metres.
+func (made GriffithBasin) Scale() float64 {
+	if made.scale == 0 {
+		return 1
+	}
+	return made.scale
+}
+
+// ReliefScale is the authored vertical scale of the ridge; zero means native.
+func (made GriffithBasin) ReliefScale() float64 {
+	if made.relief == 0 {
+		return 1
+	}
+	return made.relief
+}
+
+// CityForward is the local distance in metres that moves city blocks toward
+// the seaward side; negative values bring the authored skyline closer.
+func (made GriffithBasin) CityForward() float64 { return made.cityForward }
+
+// RidgeForward moves the authored Griffith ridge toward the inland side in
+// local metres, allowing the basin city to sit on the seaward side.
+func (made GriffithBasin) RidgeForward() float64 { return made.ridgeForward }
+
+// CityDetail is the deterministic fraction of repeated neighbourhood lots.
+func (made GriffithBasin) CityDetail() float64 {
+	if made.cityDetail == 0 {
+		return 1
+	}
+	return made.cityDetail
+}
+
+// TerrainSamples is the square ridge mesh edge size, including its vertices.
+func (made GriffithBasin) TerrainSamples() int {
+	if made.terrainSamples == 0 {
+		return 513
+	}
+	return made.terrainSamples
+}
+
+// LightScale is the emissive cue gain for city windows and street lamps.
+func (made GriffithBasin) LightScale() float64 {
+	if made.lightScale == 0 {
+		return 1
+	}
+	return made.lightScale
+}
+
+// LightFootprint scales and spaces window/light geometry for far-view
+// resolution; one leaves the authored size unchanged.
+func (made GriffithBasin) LightFootprint() float64 {
+	if made.lightFootprint == 0 {
+		return 1
+	}
+	return made.lightFootprint
 }
 
 // Unit is how many metres one of the world's units is.
@@ -57,6 +154,11 @@ func (made World) Wisps() []Wisp { return slices.Clone(made.wisps) }
 // Fizzes is every fizz, in the order written.
 func (made World) Fizzes() []Fizz { return slices.Clone(made.fizzes) }
 
+// VaporCavities are the bounded authored propeller-vapor density fields.
+func (made World) VaporCavities() []VaporCavitation {
+	return slices.Clone(made.vaporCavities)
+}
+
 // Motions is every motion, in the order written.
 func (made World) Motions() []Motion { return slices.Clone(made.motions) }
 
@@ -70,6 +172,14 @@ func (made Set) World() (World, bool) {
 
 // Materials is every material, in the order written.
 func (made World) Materials() []Material { return slices.Clone(made.materials) }
+
+// OceanSurface is one finite, explicitly sampled procedural wave sheet.
+func (made World) OceanSurface() (WaveSurface, bool) {
+	if made.ocean == nil {
+		return WaveSurface{}, false
+	}
+	return *made.ocean, true
+}
 
 // Boxes is every box, in the order written.
 func (made World) Boxes() []Box { return slices.Clone(made.boxes) }
@@ -113,13 +223,77 @@ func (made Colour) Swatch() (string, bool) {
 	return made.swatch, made.swatch != ""
 }
 
-// A Material is what a thing is made of: a colour, or a glow, or both. a
-// glow is a black body's light at a luminance, or a colour.
+// A Material describes a set-authored surface: its colour, glow, or clear
+// dielectric interface. Colour and glow may be combined with one another
+// and with the clear interface.
 type Material struct {
 	name   string
+	source string
 	colour *Colour
 	glow   *[2]float64 // kelvin, luminance
 	glows  *Colour
+	clear  *Clear
+}
+
+// Clear describes a renderer clear dielectric surface. Through is the share
+// passed, from above zero through one. Index is the refractive index, in the
+// numeric-safe range 1e-9 through 1e9. Gloss scales Fresnel reflection, from
+// zero through one. Rank selects the medium where clear surfaces overlap.
+// Optional RGB extinction-per-metre describes unscattered attenuation in
+// this named medium; it does not describe scattering or direct-light transport.
+type Clear struct {
+	Through float64
+	Index   float64
+	Gloss   float64
+	Rank    int
+	// mediumName is the material key, the stable ID shared by its
+	// boundaries and an explicitly authored camera start stack.
+	mediumName string
+	// extinction is optional RGB inverse metres. Nil preserves the
+	// historical clear-interface-only behavior.
+	extinction    *[3]float64
+	participating *clearScattering
+}
+
+type clearScattering struct {
+	coefficient [3]float64
+	phaseG      float64
+	steps       int
+	maxDistance float64
+}
+
+// OpticalMedium is the optional named unscattered-extinction descriptor
+// carried by this clear interface. The material's key supplies its stable ID.
+func (made Clear) OpticalMedium() (name string, extinction [3]float64,
+	has bool) {
+	if made.extinction == nil {
+		return "", [3]float64{}, false
+	}
+	return made.mediumName, *made.extinction, true
+}
+
+// ParticipatingMedium returns absorption, scattering and the explicit bounded
+// source-integration settings when this clear material opts into scattering.
+func (made Clear) ParticipatingMedium() (absorption, scattering [3]float64,
+	phaseG float64, steps int, maxDistanceMetres float64, has bool) {
+	if made.participating == nil || made.extinction == nil {
+		return [3]float64{}, [3]float64{}, 0, 0, 0, false
+	}
+	scatter := made.participating.coefficient
+	var absorb [3]float64
+	for channel := range absorb {
+		absorb[channel] = made.extinction[channel] - scatter[channel]
+	}
+	return absorb, scatter, made.participating.phaseG,
+		made.participating.steps, made.participating.maxDistance, true
+}
+
+// Clear is the material's clear dielectric interface, if it has one.
+func (made Material) Clear() (Clear, bool) {
+	if made.clear == nil {
+		return Clear{}, false
+	}
+	return *made.clear, true
 }
 
 // Glowing is the colour the material glows with, and whether its glow
@@ -332,23 +506,54 @@ func (reading reader) world(_, value *yaml.Node) error {
 	steps := map[string]step{
 		"unit": reading.number(&made.unit, math.SmallestNonzeroFloat64,
 			farthest),
-		"materials": reading.materials,
-		"boxes":     reading.boxes,
-		"spheres":   reading.spheres,
-		"lamps":     reading.lamps,
-		"spots":     reading.spotlights,
-		"floods":    reading.floods,
-		"sky":       reading.backdrop,
-		"bodies":    reading.bodies,
-		"suns":      reading.suns,
-		"wisps":     reading.wisps,
-		"fizzes":    reading.fizzes,
-		"motions":   reading.motions,
+		"ocean":          reading.waveSurface,
+		"materials":      reading.materials,
+		"boxes":          reading.boxes,
+		"spheres":        reading.spheres,
+		"lamps":          reading.lamps,
+		"beams":          reading.beams,
+		"spots":          reading.spotlights,
+		"floods":         reading.floods,
+		"sky":            reading.backdrop,
+		"bodies":         reading.bodies,
+		"suns":           reading.suns,
+		"wisps":          reading.wisps,
+		"fizzes":         reading.fizzes,
+		"vapor-cavities": reading.vaporCavities,
+		"motions":        reading.motions,
+		"imports":        reading.imports,
+		"griffith-basin": reading.griffithBasin(&made.griffith),
 	}
 	for key, read := range steps {
 		steps[key] = ordered(made, key, read)
 	}
 	return reading.keys(value, steps, nil)
+}
+
+// griffithBasin returns a step that reads a basin block into the target.
+func (reading reader) griffithBasin(into **GriffithBasin) step {
+	return func(_, value *yaml.Node) error {
+		made := &GriffithBasin{}
+		err := reading.keys(value, map[string]step{
+			"at":                   reading.worldPosition(&made.at),
+			"heading":              reading.quantity(&made.heading, "deg", 0, 360),
+			"scale":                reading.number(&made.scale, 0.01, 10),
+			"relief-scale":         reading.number(&made.relief, 0.01, 2),
+			"city-forward":         reading.quantity(&made.cityForward, "m", -2000, 2000),
+			"ridge-forward":        reading.quantity(&made.ridgeForward, "m", 0, 10000),
+			"city-detail":          reading.number(&made.cityDetail, 0.1, 1),
+			"terrain-samples":      reading.integer(&made.terrainSamples, 129, 513),
+			"city-light-scale":     reading.number(&made.lightScale, 1e-9, 20),
+			"city-light-footprint": reading.number(&made.lightFootprint, 0.5, 6),
+		}, nil)
+		if err == nil {
+			err = reading.all(value, "a Griffith basin placement", "at", "heading")
+		}
+		if err == nil {
+			*into = made
+		}
+		return err
+	}
 }
 
 // ordered is a step that notes its key in the world's order, then reads.
@@ -365,25 +570,136 @@ func (reading reader) materials(_, value *yaml.Node) error {
 		made := Material{name: name.Value}
 		var source string
 		colour := Colour{}
+		clear := Clear{}
+		sourceStep := reading.source(&source)
+		if says(valueNode(block, "clear"), "extinction-per-metre") {
+			sourceStep = reading.provenance(&source)
+		}
 		err := reading.keys(block, map[string]step{
 			"colour": reading.colour(&colour),
 			"glow":   reading.glowed(&made),
-			"source": reading.source(&source),
+			"clear":  reading.clear(&clear),
+			"source": sourceStep,
 		}, nil)
 		if err == nil {
 			err = reading.all(block, "a material", "source")
 		}
-		if err == nil && !says(block, "colour") && !says(block, "glow") {
+		if err == nil && clear.extinction != nil &&
+			(source == "" || source == "eye") {
+			err = reading.refuse(block,
+				"material %s has optical extinction but no explicit provenance; name measured data or label synthetic values", name.Value)
+		}
+		if err == nil && !says(block, "colour") && !says(block, "glow") &&
+			!says(block, "clear") {
 			err = reading.refuse(block, "material %s has no colour and "+
-				"no glow", made.name)
+				"no glow or clear interface", made.name)
 		}
 		if says(block, "colour") {
 			made.colour = &colour
+		}
+		if says(block, "clear") {
+			if clear.extinction != nil {
+				clear.mediumName = name.Value
+			}
+			made.clear = &clear
+		}
+		if reading.importProvenance {
+			made.source = source
 		}
 		reading.set.world.materials = append(reading.set.world.materials,
 			made)
 		return err
 	})
+}
+
+// provenance reads a nonempty scalar source for authored optical data.
+// Unlike source's historical measured-source grammar, this does not depend
+// on YAML quoting; the stored text must still say what the values represent.
+func (reading reader) provenance(target *string) step {
+	return func(name, value *yaml.Node) error {
+		text := strings.TrimSpace(value.Value)
+		if value.Kind != yaml.ScalarNode || value.Tag != "!!str" ||
+			text == "" || text == "eye" {
+			return reading.refuse(value,
+				"%s takes a nonempty string provenance other than eye", name.Value)
+		}
+		*target = value.Value
+		return nil
+	}
+}
+
+// clear reads the renderer's transmissive dielectric surface fields.
+func (reading reader) clear(target *Clear) step {
+	return func(_, value *yaml.Node) error {
+		err := reading.keys(value, map[string]step{
+			"through": reading.number(&target.Through,
+				math.SmallestNonzeroFloat64, 1),
+			"index": reading.number(&target.Index, 1e-9, 1e9),
+			"gloss": reading.number(&target.Gloss, 0, 1),
+			"rank":  reading.integer(&target.Rank, -2147483648, 2147483647),
+			"extinction-per-metre": reading.optionalTriple(
+				&target.extinction, 0, brightest),
+			"scatter": reading.clearScatter(&target.participating),
+		}, nil)
+		if err == nil {
+			err = reading.all(value, "a clear interface", "through",
+				"index", "gloss")
+		}
+		if err == nil && target.participating != nil {
+			if target.extinction == nil {
+				err = reading.refuse(valueNode(value, "scatter"),
+					"clear scattering requires extinction-per-metre")
+			} else {
+				err = reading.all(valueNode(value, "scatter"),
+					"a bounded clear-medium scattering profile",
+					"coefficient-per-metre", "phase-g", "steps", "max-distance")
+			}
+			if err == nil {
+				for channel, coefficient := range target.participating.coefficient {
+					if coefficient > target.extinction[channel] {
+						err = reading.refuse(valueNode(value, "scatter"),
+							"clear scattering coefficient %g exceeds extinction %g in channel %d",
+							coefficient, target.extinction[channel], channel)
+						break
+					}
+				}
+			}
+		}
+		return err
+	}
+}
+
+// clearScatter returns a step that reads a clear-scattering block into
+// the target.
+func (reading reader) clearScatter(target **clearScattering) step {
+	return func(_, value *yaml.Node) error {
+		made := &clearScattering{}
+		err := reading.keys(value, map[string]step{
+			"coefficient-per-metre": reading.three(&made.coefficient, 0, brightest),
+			"phase-g": reading.number(&made.phaseG,
+				-math.Nextafter(1, 0), math.Nextafter(1, 0)),
+			"steps": reading.integer(&made.steps, 1, 64),
+			"max-distance": reading.quantity(&made.maxDistance, "m",
+				math.SmallestNonzeroFloat64, farthest),
+		}, nil)
+		if err == nil {
+			*target = made
+		}
+		return err
+	}
+}
+
+// optionalTriple reads a three-channel array when the key is present.
+func (reading reader) optionalTriple(target **[3]float64, least,
+	most float64) step {
+	return func(name, value *yaml.Node) error {
+		var parts [3]float64
+		if err := reading.three(&parts, least, most)(name, value); err != nil {
+			return err
+		}
+		*target = &parts
+		return nil
+	}
 }
 
 // glowed is a step that reads a material's glow: a black body's

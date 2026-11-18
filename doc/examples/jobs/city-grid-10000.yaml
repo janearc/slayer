@@ -1,0 +1,7 @@
+# Authored overview of the independent ten-thousand-building factory recipe.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../../../doc/city-grid-10000.yaml}
+camera: {name: overview}
+film: {width: 1280, height: 720, rays: 1}
+outputs:
+  picture: ../../../out/city-grid-10000.png

@@ -22,6 +22,9 @@ func (made Sun) Tint() (red, green, blue float64) {
 	return made.tint[sunRed], made.tint[sunGreen], made.tint[sunBlue]
 }
 
+// Tinted is whether the set says a tint for its sun at all.
+func (made Sun) Tinted() bool { return made.tint != nil }
+
 type sunTintReader struct {
 	reading reader
 	sun     *Sun

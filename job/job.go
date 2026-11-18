@@ -16,14 +16,16 @@ import (
 // Job is a checked job: its paths absolute, its preset applied, its
 // camera built. It is made by Read, Lift or With, and never changes.
 type Job struct {
-	name      string
-	file      string
-	wire      document
-	lens      Camera
-	canonical []byte
+	name        string
+	file        string
+	wire        document
+	lens        Camera
+	canonical   []byte
+	outputForms outputForms
 	// inputs is the files the job reads and their digests, shared by
 	// the copies of one job and worked out once.
-	inputs *digested
+	inputs   *digested
+	imported *importSnapshot
 }
 
 // Read is the job in the file at path, checked. A refusal says what was
@@ -60,9 +62,22 @@ func built(from source, root *yaml.Node, wire document) (Job, error) {
 		return Job{}, refuse(from.name, root, nil,
 			"the job cannot be written in its canonical form: "+err.Error())
 	}
+	inputs, imported := from.inputs, from.imported
+	if inputs == nil {
+		inputs = &digested{paths: wire.inputs()}
+		imported, err = freezeImported(wire.Scene.Set, inputs)
+		if err != nil {
+			return Job{}, err
+		}
+	}
+	var forms outputForms
+	if from.outputForms != nil {
+		forms = *from.outputForms
+	}
 	return Job{name: from.name, file: from.file, wire: wire, lens: lens,
-		canonical: canonical,
-		inputs:    &digested{paths: wire.inputs()}}, nil
+		outputForms: forms,
+		canonical:   canonical,
+		inputs:      inputs, imported: imported}, nil
 }
 
 // Schema is the schema's bytes, for the editor.

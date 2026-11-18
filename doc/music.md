@@ -13,7 +13,7 @@ jobs, auditioning, synthesis and music-driven pictures.
 
 ## Put music under a film
 
-Use the [first-film job](../jobs/first-film.yaml) for a small complete
+Use the [first-film job](examples/jobs/first-film.yaml) for a small complete
 example. A synthesized soundtrack needs a score and a voicing:
 
 ```yaml
@@ -29,7 +29,7 @@ job; `@name` selects an embedded item. Discover current names through:
 game run slayer -- list tunes
 game run slayer -- list voicings
 game run slayer -- list library
-game run slayer -- draw jobs/first-film.yaml --dry-run
+game run slayer -- draw doc/examples/jobs/first-film.yaml --dry-run
 ```
 
 Then draw the job normally. `ffmpeg` must be available for movie output.
@@ -125,23 +125,19 @@ and checked against its score.
 
 ## Voicings
 
-`slayer list voicings` says the 15 built in: 8 for the studio (`@acid`,
+`slayer list voicings` says the built-in ones: for the studio (`@acid`,
 `@acid-clockwork`, `@analog-drive`, `@glass-bells`, `@glass-struck`,
-`@iron-works`, `@night-pad`, `@wire-harp`) and 7 for the Game Boy
+`@iron-works`, `@night-pad`, `@wire-harp`) and for the Game Boy
 (`@crypt-dmg`, `@dmg-echo`, `@dmg-pad`, `@leap-dmg`, `@overdrive-dmg`,
 `@tape-chords`, `@tape-echo`).
 
-`slayer list tunes` says the 5 built-in scores. A voicing a library tune
+`slayer list tunes` says the built-in scores. A voicing a library tune
 was written for lives in the library beside it. `slayer tunes DIR
 --sounds` with voicing names writes a sheet with one note of each instrument.
 
-Eleven candidate voicings for the studio are in `cheeptune/candidates`
-with `WANTED.md` files saying what the studio could not yet do. They are
-not built in and not listed.
-
 ## The library
 
-33 tunes written for videos are compiled in, each named `@NAME`
+The tunes written for videos are compiled in, each named `@NAME`
 (`slayer list library`). A library tune may not take a built-in's name.
 In code, `OpenTune` and `Library` read it. A job names one:
 
@@ -185,10 +181,7 @@ follow a voice's envelope, or step a rotation/value on each strike. Bar
 positions are counted from one; explicit seconds are also supported.
 Drum-hit and velocity filters can select which notes trigger a cue.
 
-Read [the cue format](../cuesheet/doc.go) and the
-[Moonlake worked show](../improv/moonlake/README.md) before authoring one.
-Moonlake's original show tooling and the general cuesheet engine remain
-distinct interfaces; use the invocation belonging to the example.
+Read [the cue format](../cuesheet/doc.go) before authoring one.
 
 A synthesized piece knows its bars and notes directly. A measured recording
 supplies an irregular beat grid through `cuesheet.Measured`; it is not
@@ -235,8 +228,7 @@ The metronome emits raw RGB24 frames, not a movie by itself:
 game run metronome -- draw --score score.yaml --cues cues.yaml --fps 24 --width 640 --height 360
 ```
 
-Mux those frames with the same original song using the worked workflow
-in [Moonlake](../improv/moonlake/README.md). An empty `cues: []` sheet
+Mux those frames with the same original song. An empty `cues: []` sheet
 checks beats alone. Verify downbeat phase, quiet breaks and drift by eye
 and ear.
 

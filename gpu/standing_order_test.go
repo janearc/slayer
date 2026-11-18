@@ -163,7 +163,7 @@ func TestAStaleOrderIsNeverHanded(t *testing.T) {
 		t.Fatal("the previous frame's order was handed to this frame")
 	}
 	worked := now.ordered()
-	now.stand(spark, func() []triangle { return meshFaces(spark) },
+	now.stand(spark, func() pendingMesh { return now.shapeTree(spark) },
 		maths.Subspace{Origin: maths.V(9, 9, 9)}, 0, false)
 	if again := now.ordered(); again == worked ||
 		len(again.order) != len(now.standings) {

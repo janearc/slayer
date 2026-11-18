@@ -37,8 +37,8 @@ workflow or a claim that complex percussion is solved.
 
 Every beat has a `measured` mark: one for local onset support, zero for
 counted-through time. This does not mean human verification. The visual
-metronome labels an estimated grid accordingly. It currently visualizes
-four-beat bars; another meter is refused rather than drawn incorrectly.
+metronome labels an estimated grid accordingly. It draws a bar of the
+score's `meter` (four when unsaid): three squares for a score in three.
 
 The score carries the audio file's SHA256. A job supplied with this
 score refuses different audio bytes, even when the path is unchanged.

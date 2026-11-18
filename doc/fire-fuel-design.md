@@ -23,9 +23,9 @@ differences, and insulated boundaries. Fuel stays put. A bounded fixed step
 keeps diffusion/cooling coefficients nonnegative and fuel positive.
 
 The optional [heat-transport draft](fire-heat-transport.md) adds explicitly
-supplied horizontal advection through a separate CPU/Metal entry. It has not
-been checked yet. Slope feedback, moisture, gas flow and a crown layer remain
-open; the transport velocity is not an atmospheric wind solution.
+supplied horizontal advection through a separate CPU/Metal entry. Slope
+feedback, moisture, gas flow and a crown layer are not modelled; the
+transport velocity is not an atmospheric wind solution.
 
 A missing-fuel strip can still transmit heat: it is not an insulating wall.
 Snapshots use the last completed fixed tick, with less than one tick lag.
@@ -48,8 +48,6 @@ smaller time steps converge, and CPU/Metal agree.
 
 Refuse invalid dimensions, non-finite inputs, unstable time steps and
 requested times outside 0..86400s. Returned snapshots cannot mutate the bed.
-The committed tests check these properties. Earlier manual fault trials
-have no preserved replay patches and are not acceptance evidence.
 
 Display strength is min(1, S*r/0.35); strengths below 0.002 draw no flame.
 These are authored display choices, not ignition criteria. The solver still

@@ -59,9 +59,28 @@ func (raster *Raster) tile(index int) ([]float32, error) {
 	return samples, nil
 }
 
-// decode reads one encoded float at a time through a fixed-size reader buffer.
-// It never drains unbounded extra output from a corrupt compressed stream.
+// decodeSigned reads signed 16-bit samples, whole numbers in the file's byte
+// order, into the float32 the rest of the reader uses. Every such number is
+// exact in a float32, so no height is rounded.
+func (raster *Raster) decodeSigned(input io.Reader, count int) ([]float32, error) {
+	samples := make([]float32, count)
+	var word [signedBytes]byte
+	for index := range samples {
+		if _, err := io.ReadFull(input, word[:]); err != nil {
+			return nil, err
+		}
+		samples[index] = float32(int16(raster.order.Uint16(word[:])))
+	}
+	return samples, nil
+}
+
+// decode reads one encoded sample at a time through a fixed-size reader
+// buffer. It never drains unbounded extra output from a corrupt compressed
+// stream.
 func (raster *Raster) decode(input io.Reader, count int) ([]float32, error) {
+	if raster.signed16 {
+		return raster.decodeSigned(input, count)
+	}
 	if raster.predictor == 3 {
 		return raster.decodeFloating(input, count)
 	}

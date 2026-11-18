@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/film"
-	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/thing"
 
 	scenes "github.com/janearc/slayer/scene/named"
@@ -115,14 +114,16 @@ func TestAWrongKeptTreeIsSeen(t *testing.T) {
 		t.Fatal(err)
 	}
 	keeper.turn()
-	var meshes []*mesh.Mesh
-	for skin := range keeper.kept {
-		meshes = append(meshes, skin)
+	var meshes []meshKey
+	for key := range keeper.kept {
+		meshes = append(meshes, key)
 	}
 	if len(meshes) < 2 {
 		t.Fatalf("zappy kept %d trees; two are needed to swap", len(meshes))
 	}
 	keeper.kept[meshes[0]] = keeper.kept[meshes[1]]
+	// the pool is let go, so the frame packs its faces from the trees
+	keeper.pool = nil
 	want, err := encodeGrown(world, nil, built.Eye(), nil, at, zappyAcross,
 		zappyDown)
 	if err != nil {
@@ -159,7 +160,8 @@ func TestAKeeperHoldsOnlyTheLastFrame(t *testing.T) {
 		drawn := len(encoded.meshes)
 		keeper.turn()
 		most = max(most, drawn)
-		if keeper.held() != drawn {
+		// meshes with the same faces share one tree
+		if keeper.held() == 0 || keeper.held() > drawn {
 			t.Fatalf("frame %d drew %d meshes and %d trees are held",
 				index, drawn, keeper.held())
 		}

@@ -1,0 +1,78 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+
+scene:
+  name: moonlit surfaced Project705Alfa underway, no city
+  light: moon
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  moon: {azimuth: 56.2, altitude: 30.0}
+  film:
+    width: 960
+    height: 540
+    rays: 1
+    exposure: 100
+    wide: 50
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.5, 0.1, 0.06]
+        source: "synthetic extinction, not measured water; colour by eye"
+    ocean:
+      material: seawater
+      middle: [-1500, 0, 0]
+      extent: {value: 512, unit: m}
+      samples: 257
+      shading-normal: spectral-slopes
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: {{SECONDS}}, unit: s}
+      surface-wake:
+        origin: [-1545.902645, 0.257687, 0]
+        heading: {value: 1.5707963267948966, unit: rad}
+        speed: {value: 15, unit: m/s}
+        amplitude: {value: 0.4, unit: m}
+        half-width: {value: 30, unit: m}
+        length: {value: 90, unit: m}
+        wavelength: {value: 24, unit: m}
+        add-to-spectral-shading: true
+        foam:
+          coverage: 0.75
+          band: 0.2
+          reflectance: [0.9, 0.92, 0.94]
+          satin: 0.8
+          pattern-wavelength: {value: 1, unit: m}
+          width-scale: 0.35
+      source: "chosen: a moderate breeze off San Onofre, no shelf source"
+  set:
+    things:
+      alfa:
+        kind: alfa-hero
+        seed: 1
+        position:
+          east: {value: {{HULL_EAST}}, unit: m}
+          north: {value: 0.000000, unit: m}
+          up: {value: -6.24, unit: m}
+        heading: {value: 90, unit: deg}
+  cameras:
+    seaward:
+      title: "from seaward, low, the sun behind"
+      location: {at: [-1641, -95, 4]}
+      orientation: {look_at: [-1500, 0, 6]}
+    deck:
+      title: "rear-quarter hull and wake framing diagnostic"
+      location: {at: [{{CAMERA_EAST}}, -50.000000, 20.000000]}
+      orientation: {look_at: [{{AIM_EAST}}, 0.000000, 0.000000]}

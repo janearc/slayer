@@ -186,6 +186,12 @@ func (reading reader) foundEcosystems() error {
 			if !found || row.Kind() == "fire" {
 				return fmt.Errorf("%s: ecosystem %s needs a solid recipe %s", reading.file, region.name, member.Recipe)
 			}
+			if row.batchPlacement != "" {
+				return fmt.Errorf("%s: city batch placement recipe %q cannot be used by ecosystem %s", reading.file, member.Recipe, region.name)
+			}
+			if row.vacantLotIndex != "" {
+				return fmt.Errorf("%s: vacant lot index recipe %q cannot be used by ecosystem %s", reading.file, member.Recipe, region.name)
+			}
 			if _, err := row.Construction(); err != nil {
 				return fmt.Errorf("%s: ecosystem %s: %w", reading.file, region.name, err)
 			}

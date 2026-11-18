@@ -1,6 +1,9 @@
 package manufacture
 
-import "github.com/janearc/slayer/maths"
+import (
+	"github.com/janearc/slayer/maths"
+	"math"
+)
 
 // surveyCladding is a separate exterior surface, hidden with the enclosure.
 const surveyCladding slot = surveyCamera + spaceOne
@@ -21,7 +24,12 @@ func (survey surveyOptics) facility(assembly *instrumentAssembly,
 	base := facilityValue("base-height")
 	wall := facilityValue("wall")
 	assembly.add(groundDrum(radius, radius-wall, base), maths.Local(), body)
-	survey.upperEnclosure(assembly, radius, wall, base, row.height)
+	shoulder := groundDrum(radius, radius*facilityValue("upper-radius-share"), wall)
+	assembly.add(shoulder, maths.NewSubspace(maths.YAxis.Scale(base-wall-facilityValue("joint-gap")), maths.Identity, spaceOne), body)
+	firstTurn := len(assembly.object.parts)
+	survey.upperEnclosure(assembly, radius*facilityValue("upper-radius-share"), wall, base, row.height)
+	survey.panelDetails(assembly, radius*facilityValue("upper-radius-share"), base, row.height)
+	assembly.turnSince(firstTurn)
 	survey.serviceWing(assembly)
 }
 
@@ -58,10 +66,13 @@ func (survey surveyOptics) serviceWing(assembly *instrumentAssembly) {
 		x, y := facilityValue(tier+"-east"), facilityValue(tier+"-floor")
 		corner := maths.V(x, y, -depth*spaceHalf)
 		height := facilityValue(tier + "-height")
-		assembly.box(width, height, depth, corner, body)
+		assembly.add(surveyTier{width: width, height: height, depth: depth,
+			inset: facilityValue("wing-inset")},
+			maths.NewSubspace(corner, maths.Identity, spaceOne), body)
 		corner.Y += height + facilityValue("joint-gap")
-		assembly.box(width, facilityValue("roof-sheet"), depth,
-			corner, surveyCladding)
+		corner.Z += facilityValue("wing-inset")
+		assembly.box(width-facilityValue("wing-inset"), facilityValue("roof-sheet"),
+			depth-2*facilityValue("wing-inset"), corner, body)
 	}
 	survey.loadingDoors(assembly)
 }
@@ -69,11 +80,15 @@ func (survey surveyOptics) serviceWing(assembly *instrumentAssembly) {
 // loadingDoors make the long wing read as a service facility.
 func (survey surveyOptics) loadingDoors(assembly *instrumentAssembly) {
 	for _, entry := range []string{"loading", "personnel"} {
+		slope := facilityValue("wing-inset") / facilityValue("lower-height")
+		height := facilityValue(entry + "-height")
+		width := facilityValue(entry + "-width")
 		corner := maths.V(facilityValue(entry+"-east"),
 			facilityValue(entry+"-floor"), facilityValue(entry+"-south"))
-		assembly.box(facilityValue(entry+"-width"),
-			facilityValue(entry+"-height"), facilityValue("door-depth"),
-			corner, surveyCladding)
+		corner.X += width * spaceHalf
+		corner.Z += slope * corner.Y
+		assembly.add(boxShape(width, height*math.Sqrt(1+slope*slope), facilityValue("door-depth")),
+			tiltedFrame(corner, math.Atan(slope)), surveyCladding)
 	}
 }
 

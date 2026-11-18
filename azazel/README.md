@@ -1,34 +1,22 @@
 # azazel
 
-Start with [the Azazel guide](../doc/azazel.md) for commands, implemented
-components, test entry points and the boundary of the unfinished queue.
+Azazel is Slayer's command scheduler. Agents submit existing foreground
+Slayer commands to a shared durable queue; one worker admits and supervises
+them and retains their outcomes. Game builds and checks Azazel.
 
-Azazel is Slayer's planned queue for frames, films and checks.
-The [design](DESIGN.md) describes it; no runnable queue exists yet.
+Start with [the human guide](../doc/azazel.md), or run
+`bin/azazel --agent-help` for the agent workflow and a complete request.
+`bin/azazel schema` prints the YAML/JSON contract.
 
-You should be able to ask for a render, leave it waiting, and come back to
-a verified result while the machine stays usable. Its record will identify
-the executable and inputs, resource use and checks. Interrupted work will
-resume from verified outputs.
+The queue is under validation and is not ready for the shared render
+migration. The guide identifies remaining recovery, output-preservation,
+resource and gallery work. Process success does not establish a verified
+picture or film.
 
-The private pieces cover memory and host decisions, stop transitions,
-[snapshot publication](internal/publication/README.md) and
-[nonblocking locks](internal/locking/README.md), plus
-[native process observations](internal/processinfo/README.md).
+The [design](DESIGN.md) describes the complete system. The
+[Bookshelf review](BOOKSHELF-REVIEW.md) records the source guidance and
+current implementation boundaries. Private [reservations](OWNED-RESERVATIONS.md)
+and [transactions](TRANSACTION.md) remain separate from render attempt leases.
 
-The private pieces also include [owned reservations](OWNED-RESERVATIONS.md)
-and [locked admission/publication transactions](TRANSACTION.md). Their
-successful results are checked internal state transitions, not live grants.
-Read [render admission](../doc/render-admission.md) for the current user-facing
-boundary between Game lanes, direct rendering and the unfinished queue.
-
-The [local design](internal/publication/LOCAL-DESIGN.md) records publication
-witnesses and source reviews. Selected comments have a reviewed Qwen pass.
-Final independent acceptance and private test-boundary design remain open.
-
-[azazel/engine](engine/README.md) draws one set file through the library
-`slayer render` uses, and `azazel render` is the command over it. It is not
-the queue, and the pieces above are not wired to it.
-
-Shared admission, recovery, supervision and engine integration remain.
-The command and configuration will use Pzm. Flipr is not required.
+The older [engine](engine/README.md) adapter backs direct `azazel render`;
+that entry point does not submit to the queue.

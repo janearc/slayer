@@ -1,11 +1,5 @@
 # Broadleaf, brush and Joshua-tree construction
 
-These factory additions are committed with tests, among them the vegetation
-geometry reference in `manufacture/b_geometry_reference_contracts_test.go`.
-This note was written before them and records no results. Appearance records
-and CPU/Metal views are not recorded here. The older conifer captures do not
-validate these new families.
-
 The names are `valley-oak`, `alder`, `poplar`, `manzanita`,
 `chaparral-brush`, `joshua-tree` and `saguaro`. Oak forks without a continuing
 leader. Alder and poplar keep a stronger leader. Manzanita and brush start
@@ -107,11 +101,7 @@ promise of cheaper geometry.
 
 Products use the existing closed-mesh and shared-mesh-group routes.
 They introduce no new GPU primitive or special CPU-only foliage path.
-That design intent still needs the scoped CPU/Metal checks at review.
 
 The prototype cache is keyed by kind, detail and a bounded variant count.
 It does not add an entry per tree, world position or animation frame.
 Scaffolds, cell attachments and explicit blades also have input budgets.
-
-The global forest selector, projected-size detail selection, mixed-biome
-examples and seasonal transitions remain separate work.

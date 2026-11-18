@@ -26,7 +26,7 @@ states.
 | none (exact) | nothing: the reference | anything measured, catalogued or judged; anything not said to be otherwise | |
 | `vibes` | turns on every shortcut below | films to watch, going to a video site where they are compressed | a measurement, a smoke, the catalogue, a picture cited as evidence |
 | `fastlight` | turns on the light shortcuts, `lamp-store` and `sky-looks` | the same, for scenes with mist or smoke | the same |
-| `lamp-store` | mist and smoke are lit from a store of each lamp's light; a shadow cast into mist is as soft as a cell (12.5 m on the cloud sea); about 2 percent of the picture's light differs | a faster frame of mist or smoke under a few lamps | a picture whose mist shadows are the subject; more than eight lamps (refused) |
+| `lamp-store` | mist and smoke are lit from a store of each lamp's light; a shadow cast into mist is as soft as a cell (12.5 m on the cloud sea); about 2 percent of the picture's light differs | a faster frame of mist or smoke under a few lamps | a picture whose mist shadows are the subject; more than sixteen lamps (refused) |
 | `sky-looks` | the sky's sixteen looks from a surface point are shared among a pixel's rays; sky-lit shade is a little rougher within a pixel; no change at one ray a pixel | a faster frame at four rays a pixel or more | one ray a pixel (nothing changes); without `lamp-store` (refused) |
 | `fantasy` (a set's block) | the scene says values the physics does not; its keys are below | pictures that are made to be looked at | a claim about what a place looks like; anything where the measured value is wanted |
 | science workflow (no single switch) | adds independent checks and replay where supported | claiming a picture is right | combining with any shortcut (refused) |
@@ -77,32 +77,20 @@ toward every lamp at every step. Surfaces do not read it and should not:
 a surface point lies between cells inside its own trunk or ground, which
 hold no light.
 
-Measured on the cloud sea's hero camera, 1920 by 1080, four rays a
-pixel, on a GPU shared with a dozen other renders, two frames drawn one
-after the other: exact 115.8 s of trace and 136 s for the whole command;
-lamp store 46.6 s of trace and 89 s for the whole command. About two and
-a half times on the trace.
+A store is not kept on disk.
 
-The same exact frame traced in 41 to 54 s earlier that day, so read the
-ratio and not the seconds. The pictures differ by 1.98 percent of the
-exact picture's light in sum, all of it in the mist between the trees.
-The store is 16.6 MB on the cloud sea and its bake is 0.19 s of device
-time. A store is not kept on disk.
-
-Refused by name: more than eight lamps (the exact tracer picks among
+Refused by name: more than sixteen lamps (the exact tracer picks among
 them at each point), and beside `volume-lighting: cached`.
 
 ## sky-looks
 
 The tracer takes sixteen looks at the sky from every surface point a
 camera ray meets, with a shadow ray along each, at every ray of a pixel.
-That is the larger part of a forest frame: on the cloud sea about 133
-million shadow rays and 24 to 27 s of a 28 to 31 s frame. Shared, the
+That is the larger part of a forest frame. Shared, the
 sixteen are dealt round the pixel's rays: at four rays a pixel each takes
 four, at sixteen each takes one.
 
 It needs `lamp-store`, since the two are drawn by one mode of the kernel.
-No timing of it is recorded in `fast-light.md` yet.
 
 ## fantasy
 

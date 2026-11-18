@@ -1,0 +1,28 @@
+# generated mocks, each from the interface it stands in for. mockgen is
+# pinned in go.mod as a tool. burning-trousers/mocks has its own, made by
+# go generate there.
+mocks . :: go tool mockgen -write_package_comment=false -destination take/mocks/motion.go -package mocks github.com/janearc/slayer/scene/thing Motion
+mocks . :: go tool mockgen -write_package_comment=false -destination interfaces/terminal/mocks/writer.go -package mocks io Writer
+mocks . :: go tool mockgen -write_package_comment=false -destination render/cells/mocks/clock.go -package mocks github.com/janearc/slayer/render/cells Clock
+mocks . :: go tool mockgen -write_package_comment=false -destination interfaces/terminal/mocks/source.go -package mocks github.com/janearc/slayer/interfaces/terminal Source
+mocks . :: go tool mockgen -write_package_comment=false -destination titan/mocks/sphere.go -package mocks github.com/janearc/slayer/titan Sphere
+mocks . :: go tool mockgen -write_package_comment=false -destination airlight/mocks/air.go -package mocks github.com/janearc/slayer/airlight Air
+mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/lay.go -package mocks github.com/janearc/slayer/ninjafilm/lay Lay
+mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/shelf.go -package mocks github.com/janearc/slayer/ninjafilm/roll Shelf
+mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/projection.go -package mocks github.com/janearc/slayer/ninjafilm/film Projection
+mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/emitter.go -package mocks github.com/janearc/slayer/ninjafilm/film Emitter
+mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/beamer.go -package mocks github.com/janearc/slayer/ninjafilm/film Beamer
+mocks . :: go tool mockgen -source=cmd/catalogue/resume.go -destination=cmd/catalogue/drawer_mock_test.go -package=main
+mocks . :: go tool mockgen -write_command_comment=false -source=hillside/session.go -destination=hillside/session_mock_test.go -package=hillside
+mocks . :: go tool mockgen -write_command_comment=false -source=door/seams.go -destination=door/seams_mock_test.go -package=door
+mocks . :: go tool mockgen -write_command_comment=false -source=render/live/seams.go -destination=render/live/seams_mock_test.go -package=live
+mocks . :: go tool mockgen -write_command_comment=false -write_package_comment=false -destination=hillside/context_mock_test.go -package=hillside context Context
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/publication/filesystem.go -destination=azazel/internal/publication/filesystem_mock_test.go -package=publication
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/publication/immutable_filesystem.go -destination=azazel/internal/publication/immutable_filesystem_mock_test.go -package=publication
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/monitor.go -destination=azazel/internal/queue/monitor_mock_test.go -package=queue
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/files.go -destination=azazel/internal/queue/files_mock_test.go -package=queue
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/dispatch.go -destination=azazel/internal/queue/dispatch_mock_test.go -package=queue
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/capacity.go -destination=azazel/internal/queue/capacity_mock_test.go -package=queue
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/execute.go -destination=azazel/internal/queue/execute_mock_test.go -package=queue
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/worker.go -destination=azazel/internal/queue/worker_mock_test.go -package=queue
+mocks . :: go tool mockgen -write_package_comment=false -source=ferruccio/native/cmd/ferruccio/proof_stop.go -destination=ferruccio/native/cmd/ferruccio/proof_stop_mock_test.go -package=main -mock_names=proofPreview=MockProofPreview

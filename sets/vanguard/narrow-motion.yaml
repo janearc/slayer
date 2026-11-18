@@ -1,0 +1,8 @@
+# Two-second timing proof. A still holds the blocker from 0.7s to 1.3s.
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: borrowed-light-beam-hold.yaml}
+film: {width: 360, height: 320, rays: 1}
+fps: 6
+duration: {value: 2, unit: s}
+start: {value: 0, unit: s}
+outputs: {frames: narrow-motion-frames, movie: narrow-motion.mp4}

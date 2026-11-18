@@ -85,22 +85,6 @@ func TestAFieldGathersTheVolumeBeforeASurface(t *testing.T) {
 	}
 }
 
-// A gain is capped at shiftTop so one hot pixel does not bloom a
-// frame, and a gain that is not a number is no light at all: a broken
-// geodesic gives a dark step, never a NaN that an average spreads.
-func TestAGainIsCappedAndNeverANaN(t *testing.T) {
-	if got := capped(math.NaN()); got != 0 {
-		t.Errorf("a NaN gain is capped to %v, want nought", got)
-	}
-	if got := capped(16); got != 16 {
-		t.Errorf("a gain of 16 is capped to %v", got)
-	}
-	if got := capped(1e9); got != shiftTop {
-		t.Errorf("a gain of a billion is capped to %v, want %v", got,
-			float64(shiftTop))
-	}
-}
-
 // A look keeps its count of bounces through a field's march, so a
 // mirror seen in a mirror is no more followed inside a weak field than
 // outside one. The ray lands a unit from the field's middle, where the

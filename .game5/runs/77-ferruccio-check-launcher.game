@@ -1,0 +1,1 @@
+ferruccio-check-launcher . :: /bin/sh ferruccio/scripts/patch-gogpu.sh && cd ferruccio/native && env CGO_ENABLED=0 go test -count=1 -run TestLaunch ./cmd/ferruccio

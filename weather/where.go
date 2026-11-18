@@ -2,8 +2,9 @@ package weather
 
 import (
 	"errors"
-	"os"
 	"path/filepath"
+
+	"github.com/janearc/slayer/diskcache"
 )
 
 // ErrNoGPU is a machine the weather's kernels cannot run on: not a mac,
@@ -11,20 +12,18 @@ import (
 var ErrNoGPU = errors.New("weather: no metal device to run on; " +
 	"run on the cpu")
 
-// cacheVariable is defined as the environment variable that names where
-// weather is kept between shots, over the user's cache.
-const cacheVariable = "SLAYER_WEATHER"
+// cacheFolder is the folder of the cache home the weather is kept in.
+const cacheFolder = "weather" // defined: the cache's name for weather
 
 // CacheDir is where weather is kept between shots, so a job, a hillside
-// set and the weather command share checkpoints: SLAYER_WEATHER, or
-// slayer/weather under the system's cache for this user.
-func CacheDir() (string, error) {
-	if dir := os.Getenv(cacheVariable); dir != "" {
-		return dir, nil
-	}
-	dir, err := os.UserCacheDir()
+// set and the weather command share checkpoints: the weather folder
+// under the cache home, which diskcache.Home finds from the lookup
+// given. Where the home is not set, it refuses by name and nothing is
+// kept anywhere else.
+func CacheDir(lookup diskcache.Lookup) (string, error) {
+	home, err := diskcache.Home(lookup)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "slayer", "weather"), nil
+	return filepath.Join(home, cacheFolder), nil
 }

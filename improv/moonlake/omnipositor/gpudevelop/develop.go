@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/metal"
+	ninjacolour "github.com/janearc/slayer/ninjafilm/colour"
 	"github.com/janearc/slayer/render/colour"
 )
 
@@ -48,8 +49,9 @@ func allocationBytes(w, h, reach int) (int, error) {
 // New returns a Developer for frames of w by h pixels. It refuses sizes over
 // the buffer ceiling, a tone that is nonfinite or not a float32, a bad
 // exposure, a Bloom over 100000 pixels, a Knee that is not a float32
-// interval, and a stage over 1 GiB. A Top of 1 or less becomes 100; the blur
-// reach is 3 times Bloom, rounded up. The caller must Close it.
+// interval, and a stage over 1 GiB. The shoulder's scale and the bloom's
+// weights and reach are the tone's print's, ninjafilm/colour's, made
+// float32 for the kernels. The caller must Close it.
 func New(w, h int, tone colour.Tone) (*Developer, error) {
 	if w <= 0 || h <= 0 || w > maxBufferBytes/16 || h > maxBufferBytes/16/w {
 		return nil, errors.New("gpudevelop: dimensions exceed the buffer ceiling")
@@ -70,17 +72,12 @@ func New(w, h int, tone colour.Tone) (*Developer, error) {
 	if knee > 0 && knee < 1 && (float32(knee) == 0 || float32(knee) == 1) {
 		return nil, errors.New("gpudevelop: knee loses its interval in float32")
 	}
-	top := tone.Top
-	if top <= 1 {
-		top = 100
-	}
-	denom := 1.0
-	if knee > 0 && knee < 1 {
-		denom = math.Log1p((top - knee) / (1 - knee))
-	}
-	reach := 0
+	// the shoulder's scale is the print's own: the kernel finish restates
+	// the shoulder around it and must not solve it again
+	scale := tone.Print().Scale()
+	weights, reach := []float64{1}, 0 // defined: no bloom is one weight
 	if tone.Bloom > 0 {
-		reach = int(math.Ceil(3 * tone.Bloom))
+		weights, reach = ninjacolour.BloomWeights(tone.Bloom)
 	}
 	if _, err := allocationBytes(w, h, reach); err != nil {
 		return nil, err
@@ -99,22 +96,11 @@ func New(w, h int, tone colour.Tone) (*Developer, error) {
 			return nil, fmt.Errorf("gpudevelop: allocate: %w", err)
 		}
 	}
-	weights := make([]float64, 2*reach+1)
-	sum := 0.0
-	for i := range weights {
-		delta := float64(i - reach)
-		v := 1.0
-		if delta != 0 {
-			v = math.Exp(-delta * delta / (2 * tone.Bloom * tone.Bloom))
-		}
-		weights[i] = v
-		sum += v
-	}
 	for i, v := range weights {
-		d.weights.Numbers()[i] = float32(v / sum)
+		d.weights.Numbers()[i] = float32(v)
 	}
 	d.params = make([]byte, 24)
-	for i, v := range []uint32{uint32(w), uint32(h), uint32(reach), math.Float32bits(float32(e)), math.Float32bits(float32(knee)), math.Float32bits(float32(denom))} {
+	for i, v := range []uint32{uint32(w), uint32(h), uint32(reach), math.Float32bits(float32(e)), math.Float32bits(float32(knee)), math.Float32bits(float32(scale))} {
 		binary.LittleEndian.PutUint32(d.params[i*4:], v)
 	}
 	return d, nil
@@ -271,7 +257,7 @@ func prelude() string {
 }
 
 const kernelBody = `
-struct Params { uint w; uint h; uint reach; float exposure; float knee; float denominator; };
+struct Params { uint w; uint h; uint reach; float exposure; float knee; float scale; };
 #pragma clang fp reassociate(off) contract(off)
 float2 twoSum(float a, float b) {
     volatile float sum = a+b;
@@ -349,11 +335,14 @@ kernel void finish(device const float *in [[buffer(zero)]], device const float *
                    uint2 at [[thread_position_in_grid]]) {
     uint i = at.y*p.w+at.x;
     float3 l = readRGB(in,i)*p.exposure+readRGB(glow,i);
+    // the shoulder is defined once, by Tone.Squeeze and Tone.Scale in
+    // ninjafilm/colour; this restates it for the GPU, which cannot call
+    // Go, and p.scale is that Scale. TestTheKernelsShoulderIsTheTones
+    // holds the two together.
     if (p.knee>black && p.knee<white) {
         float y = luminance(l);
         if (y>p.knee) {
-            float room = white-p.knee;
-            float squeezed = min(white,p.knee+room*log(one+(y-p.knee)/room)/p.denominator);
+            float squeezed = min(white,p.knee+p.scale*log(one+(y-p.knee)/p.scale));
             l *= squeezed/y;
             float peak = max(l.r,max(l.g,l.b));
             if (peak>white) { l = float3(squeezed)+(l-float3(squeezed))*((white-squeezed)/(peak-squeezed)); }

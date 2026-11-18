@@ -1,0 +1,200 @@
+# Fictional macrostructure and terrain scenery, 2026-11-15.
+# Every dimension, proportion, colour and budget is authored, not measured.
+numbers:
+- name: terraced-arcology-width
+  value: 1800
+  unit: m
+  says: outside arcology footprint across x
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: terraced-arcology-depth
+  value: 1500
+  unit: m
+  says: outside arcology footprint across z
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: terraced-arcology-height
+  value: 2200
+  unit: m
+  says: arcology roof height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: twisted-spires-width
+  value: 1500
+  unit: m
+  says: spire-cluster footprint width
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: twisted-spires-depth
+  value: 1500
+  unit: m
+  says: spire-cluster footprint depth
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: twisted-spires-height
+  value: 4000
+  unit: m
+  says: highest spire elevation
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: inhabited-bridge-width
+  value: 6000
+  unit: m
+  says: bridge footprint and nominal span envelope
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: inhabited-bridge-depth
+  value: 1200
+  unit: m
+  says: bridge footprint depth
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: inhabited-bridge-height
+  value: 1500
+  unit: m
+  says: highest bridge pavilion elevation
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: maximum-length
+  value: 1000000000
+  unit: m
+  says: largest admitted physical dimension for fictional planetary scenery
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: spire-twist-degrees
+  value: 120
+  unit: deg
+  says: tallest tower total end-to-end twist
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: face-budget
+  value: 20000
+  says: maximum generated faces per recipe
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: segments-hull
+  value: 6
+  says: coarse loft and profile subdivisions
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: segments-quick
+  value: 12
+  says: normal loft and profile subdivisions
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: segments-demo
+  value: 24
+  says: fine loft and profile subdivisions
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: arcology-tiers
+  value: 8
+  says: occupied terrace ring count
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: courtyard-share
+  value: 0.18
+  says: central clear courtyard as a share of the footprint
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: arcology-taper-share
+  value: 0.55
+  says: width and depth contraction at the highest terrace
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: occupied-height-share
+  value: 0.72
+  says: occupied part of each terrace pitch
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: park-thickness-share
+  value: 0.003
+  says: planted terrace slab height as a share of total height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: foundation-height-share
+  value: 0.02
+  says: spire foundation height as a share of total height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: spire-width-share
+  value: 0.16
+  says: tower base width and depth as shares of cluster footprint
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: spire-taper-share
+  value: 0.7
+  says: tower section contraction over its height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: rib-radius-share
+  value: 0.006
+  says: helical rib radius as a share of smaller footprint dimension
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: bridge-span-share
+  value: 0.9
+  says: parabolic arch span as a share of footprint width
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: bridge-deck-height-share
+  value: 0.65
+  says: gallery floor height as a share of overall bridge height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: bridge-deck-thickness-share
+  value: 0.12
+  says: inhabited gallery height as a share of overall height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: arch-radius-share
+  value: 0.035
+  says: structural arch tube radius as a share of bridge depth
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: mountain-massif-radius
+  value: 5000
+  unit: m
+  says: mountain footprint radius
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: mountain-massif-height
+  value: 2500
+  unit: m
+  says: mountain summit height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: caldera-volcano-radius
+  value: 7000
+  unit: m
+  says: volcano footprint radius
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: caldera-volcano-height
+  value: 3500
+  unit: m
+  says: caldera rim height
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: caldera-radius
+  value: 700
+  unit: m
+  says: inside rim radius
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: caldera-depth
+  value: 600
+  unit: m
+  says: crater floor depth below the rim
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: landform-roughness-share
+  value: 0.2
+  says: seeded flank modulation amplitude
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15
+- name: landform-exponent
+  value: 1.35
+  says: power-law radial flank profile exponent
+  kind: picked
+  by: an agent, macrostructure family, 2026-11-15

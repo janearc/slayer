@@ -5,9 +5,7 @@ from an observer's location, at a given instant, in a given frame?
 The Sun over a hillside, Kepler-16b through the Sun's gravitational lens,
 and a merger timed at two detectors all need that same foundation.
 
-This note records the 2026-10-14 package plan and its intended sequence.
-It is not an inventory of the currently imported celestial library.
-The planned layer depends on measure and remains independent of rendering.
+The celestial layer depends on measure and remains independent of rendering.
 
 ## Core concepts
 
@@ -58,36 +56,3 @@ roughly 548 AU, at `R^2c^2 / (4GM)`.
 For a target, the focal line extends away from the Sun opposite the target's
 direction. These locations are calculated rather than stored as fixed
 positions.
-
-## Gravitational waves
-
-A merger's light and waves share a sky location and distance. The proposed
-wave layer adds:
-
-- A merger object with two waveform polarizations and their orientation.
-- A ground-based interferometer with a location and two arm directions,
-  using a closed-form antenna pattern.
-- Arrival delays from the detector separation projected along propagation,
-  divided by c, supporting sky localization.
-
-Build this after solar and lunar positions. Celestial supplies geometry
-and timing; the renderer owns visual representation.
-
-## Implementation sequence
-
-Each stage uses independently published test answers with citations:
-
-1. Calendar and two-part Julian dates: Meeus examples 7.a and 7.b;
-   then time scales using IERS leap-second tables.
-2. Sidereal time, Earth sites, and local coordinates: Meeus 12.a,
-   12.b, and 13.b.
-3. Low-accuracy solar position, about 0.01 degrees: Meeus 25.a.
-4. Solar-lens focal distance from IAU constants and target direction.
-
-Later additions retain the same interfaces: the Moon (Meeus 47.a), planets,
-stars with proper motion, Keplerian and circumbinary orbits, Lagrange
-points, detectors, and JPL ephemerides where the initial accuracy is
-insufficient.
-
-Keep rendering dependencies out. Tests must use external expectations,
-and every empirical or chosen value must identify its origin.

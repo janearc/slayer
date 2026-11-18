@@ -28,7 +28,7 @@ See [package boundaries](../PACKAGES.md).
 | `cpu` | Go reference | broad scene support, selected-pixel replay, no GPU lighting shortcuts |
 | `gpu` | Metal software hierarchy | supported scenes; float32 device arithmetic and baked fields |
 | `gpu-native-shadows` | native mesh shadow queries | keeps software primary queries; explicit numerical alternative |
-| `gpu-native` | native closest mesh and shadow queries | fastest measured dense-forest traversal in the dated studies |
+| `gpu-native` | native closest mesh and shadow queries | native closest-hit traversal for meshes |
 
 Native modes need the supported Metal ray-tracing API on macOS 14 or
 later. All GPU paths validate scene support and return named errors.
@@ -36,11 +36,6 @@ Native queries accelerate meshes; analytic and procedural shapes keep
 their own intersections. A hardware closest-hit candidate is refined
 with Slayer's triangle predicate; failed refinement can use software
 fallback. A native miss remains a miss. This is not a byte-exact cache.
-
-The [shadow](native-shadow-traversal.md) and
-[primary](native-primary-traversal.md) studies record tolerances, rejected
-trades and measured stills. Their timings are historical workload results;
-they do not establish every scene's speed or temporal stability.
 
 ## Geometry and fields
 
@@ -65,8 +60,6 @@ changes volume detail, not surface raster resolution. Use its `Sampled`
 method through the `render/cells` sampler interface when that policy is
 appropriate; the ordinary `gpu.Sampled` policy is unchanged.
 
-See [native scene sampling](native-sampler.md) for the adapter contract.
-
 ## Cameras and time
 
 `rays: n` means `n*n` samples per pixel. Pinhole rays and thin-lens rays
@@ -79,6 +72,25 @@ still plays thirty seconds. A shutter with several `glimpses` renders
 several scene instants and averages linear light. GPU camera motion can
 also vary the eye per sample within a glimpse. That blurs camera movement;
 it does not integrate moving objects continuously between world snapshots.
+
+The CPU `trace.RenderWithInitialMedia` and
+`trace.SampledWithInitialMedia` APIs and the opt-in Metal APIs can start
+camera rays inside an explicit ordered stack of clear media. A set camera's
+`initial-media` names that stack; the same staged values go to either backend.
+
+Each entry supplies the refractive index and rank used by clear boundary
+materials, and Slayer does not infer containment from scene geometry. Existing
+calls without a stack still start in air. A moving job camera is refused
+because a fixed authored stack cannot follow it.
+
+Metal also refuses positive in-scattering, composite passes with optical
+state, and initial media with its gravity kernel. Neither initial stack adds
+scattering or attenuates lamp-to-surface paths; volume/gravity combinations
+remain unsupported.
+
+The set-camera Metal route currently requires a pinhole: it refuses a rig or
+thin-lens aperture because the aperture's distributed ray origins may not all
+lie inside the declared stack. CPU tracing keeps its existing lens behavior.
 
 ## Retained film resources
 
@@ -118,9 +130,8 @@ reflections and their volume shadows. Transport returns foreground
 scattered light S and RGB transmission T, stopped at the first surface.
 Composition is `S + T * plate` in linear light, before development.
 
-The [Omnipositor scene guide](../improv/moonlake/omnipositor/SCENE.md)
-defines the actual plan and CLI. Reducing transport resolution and reusing
-a plate are visible approximations. A reused plate freezes surface
+Reducing transport resolution and reusing a plate are visible
+approximations. A reused plate freezes surface
 illumination too. Camera motion or zoom requires fresh plates.
 
 Thin
@@ -147,9 +158,8 @@ refraction, gas optics and cached incident-sky grids; axial beam lights
 are unsupported. Mirror behavior remains limited. These restrictions are
 part of the prototype, not silently substituted approximations.
 
-Read
-[gravity integration](gravity-rc-integration.md) and
-[the kernel contract](../gpu/GRAVITY.md) before building a gravity scene.
+Read [the kernel contract](../gpu/GRAVITY.md) before building a gravity
+scene.
 
 ## What correctness means here
 
@@ -160,8 +170,7 @@ baked grids and CPU/device arithmetic need their own comparison contracts.
 Unchanged-input repeatability within a path does not establish equality
 between backends or across every native process.
 
-Use CPU reference checks, the independent `burning-trousers` harness and
-selected-pixel replay where supported. Keep raw light, development, source
+Use CPU reference checks and selected-pixel replay where supported. Keep raw light, development, source
 revision, scene inputs and temporal comparisons with numerical claims.
 [Light](light.md), [modes](modes.md) and [optimizations](optimizations.md)
 explain which choices alter the model or estimator.

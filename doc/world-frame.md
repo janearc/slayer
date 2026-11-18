@@ -1,11 +1,7 @@
 # One anchor, many render origins
 
-The frame math in `scene/frame` has compiled and passed independent host
-geometry checks. [The verification record](verification-2026-11-09.md)
-names the tested pin and scope.
-
-It does not yet change scene YAML, terrain placement, a camera, a
-spacecraft or the GPU encoder.
+The frame math in `scene/frame` does not change scene YAML, terrain
+placement, a camera, a spacecraft or the GPU encoder.
 
 ## Fixed world coordinates
 
@@ -62,19 +58,10 @@ Radius/height cancellation, grazing intersections and large scalar shape
 parameters still need their own stable formulations and checks. The
 existing triangle and native-shadow predicates remain separate work.
 
-## Source and compatibility adapters
+## Projection and height datum
 
-A projected raster coordinate is not a latitude or longitude. A future
-world declaration must identify matching projected/geographic anchor
-coordinates, a projection and an explicit height datum. A DEM's
+A projected raster coordinate is not a latitude or longitude. A DEM's
 orthometric height cannot silently become height above this sphere.
 
-The current staged west, north and minimum height are a legacy render
-convenience. They will need an explicit compatibility transform into the
-fixed frame. That transform and a projection/datum adapter are not built
-by this slice, and existing scenes retain their current staging.
-
 The terrain source reader's Coverage and ReadGrid remain source-local.
-They describe available data without setting a world boundary. Terrain
-selection, missing-coverage policy, regional vegetation and projected
-detail budgets must use the fixed world frame through those adapters.
+They describe available data without setting a world boundary.

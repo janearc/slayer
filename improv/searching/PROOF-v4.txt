@@ -1,0 +1,34 @@
+heard. v4 / pacing and continuous opening proof
+
+Merged the 15 November notes and the earlier screenplay's final sequence.
+New Glass Hour v4: quiet orbital pause83.636-89.091s, then quickening pulse;
+low semitone tension and eighth-note momentum at112.727s. Complete original-
+speed synthesis, all72bars/66BPM and release tail. Numerical checks do not
+replace listening; the music and edit are still for review.
+
+All1656frames freshly rendered480x270/6fps/four primary samples per pixel.
+Native FasterLighting, per-frame light cache, shared sky looks and retained
+GPU frames. Unchanged1400MiB peak memory guard. Orbital uses bounded512-tile
+floor texture; geometry/camera unchanged from v3.
+
+Each spacecraft now alone against deep space, distinct starting attitude
+and body roll, common final optical axis. No common planet/backdrop lineup.
+Close horizon radio shot185.455-189.091s: all12 dishes turn/tilt, piers fixed;
+starlight approximation, faint twilight sky, no atmospheric infill volumes.
+
+Continuous absolute-time logarithmic retreat189.091-216.364s. All geometry
+shares one coordinate system and one uniform GPU rebase. Nearby Gaia remains
+pinned measured positions, with enlarged display markers and fading at distance.
+Milky Way, neighbours, larger field, strands and fold are authored imagery,
+NOT a measured larger-scale catalogue or reconstructed flow solution.
+No discrete cut between these layers. The earlier ending's faint strands,
+three-junction recognition, changed aperture field and directed return pulse
+continue in that same set. Earth cut preserves the final absolute-time pose.
+
+Still a rough proof: respondents use simple authored surfaces, wider field
+uses sparse display geometry, true observational band structure remains open.
+No scientific claim of physical illuminated cables or instantaneous signaling.
+Tiny respondents inside the final field remain a script intention; the same
+colored fold junctions currently provide the visual scale correspondence.
+
+Read SHOOT.md, MUSIC.md and EDIT-v4.txt. V3 takes and original music preserved.

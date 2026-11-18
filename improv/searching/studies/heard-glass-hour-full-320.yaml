@@ -1,0 +1,146 @@
+# Full-length editorial draft. Glass Hour, original score speed, 4 fps.
+# Ground coverage is provisional; missing shots have explicit slates.
+# Zappy uses its default 12 rings / 4 panels, with picked preview wear 0.15.
+---
+name: heard. / Glass Hour / full script draft at 320 and four fps
+width: 320
+height: 180
+fps: 4
+rays: 1
+lock: '22.1'
+radio-one: '23.1'
+radio-two: '25.1'
+reveal: '27.1'
+coda-bars: 4
+search-cut-bars: 2
+beat-motion:
+- 1
+- 0.45
+- 0.18
+- 0.03
+beat-two-accents: []
+search-days: 6
+shared-azimuth-deg: 25
+shared-altitude-deg: 55
+optical-diameter-metres: 38
+optical-aperture-metres: 8
+array-count: 19
+exposure: 1.7
+bloom: 0.65
+flow-study:
+  provenance: authored-previs
+  start: '51.1'
+  fold: '57.1'
+  answer: '59.1'
+  eye:
+  - -20
+  - -4
+  - 14
+  wide-degrees: 64
+  return-path: 0
+  geometry:
+    file: flow-geometry-b.yaml
+    sha256: 22422bcd0778455331e988d0c87a288826d3560643381e4316c216dcbf822b06
+  travel:
+    to:
+    - 15
+    - 12
+    - 70
+    look-from:
+    - -20
+    - -4
+    - 5
+    look-to:
+    - 0
+    - 0
+    - 0
+    until: '55.1'
+full-cut: true
+catalogue-study:
+  file: "$SLAYER_SHELF/../catalogues/2026-11-14-gaia-previs/stars.json"
+  sha256: 90d3dd2b55023d37942a8d7d6be4958890e3a4bf39a06c90da0d79ae902cbc4e
+  start: '49.1'
+  end: '51.1'
+  near-parsecs: 1
+  far-parsecs: 1500
+  eye-direction:
+  - 0.5
+  - 0.6
+  - 1
+  wide-degrees: 64
+  point-radius-pixels: 0.65
+  home-radius-pixels: 2.5
+shots:
+- from: '1.1'
+  until: '2.1'
+  scene: slate
+  caption: Spectrogram opening (pending)
+  time-scale: 0
+  orbit-degrees: 0
+- from: '2.1'
+  until: '3.1'
+  scene: slate
+  caption: heard.
+  time-scale: 0
+  orbit-degrees: 0
+- from: '27.1'
+  until: '33.1'
+  scene: orbital
+  caption: 'The orbital and Zappy: authored geometry, original scene lighting.'
+  wide-degrees: 64
+  time-scale: 1
+  orbit-degrees: 12
+  with:
+    far: true
+    distance: 5200
+    day: 60s
+- from: '33.1'
+  until: '37.1'
+  scene: swarm
+  caption: The lantern answers. Its panel swarm moves in its own scene clock.
+  wide-degrees: 45
+  time-scale: 1
+  orbit-degrees: 12
+  with:
+    orbits: 24
+    panels: 48
+- from: '37.1'
+  until: '39.1'
+  scene: slate
+  caption: Folding respondent (pending)
+  time-scale: 0
+  orbit-degrees: 0
+- from: '39.1'
+  until: '41.1'
+  scene: slate
+  caption: Occulter (pending)
+  time-scale: 0
+  orbit-degrees: 0
+- from: '41.1'
+  until: '43.1'
+  scene: zappy
+  caption: Zappy answers; reduced panel wear for this timing draft.
+  wide-degrees: 55
+  time-scale: 1
+  orbit-degrees: -10
+  with:
+    orbits: 12
+    panels: 4
+    distance: 200
+    wear: 0.15
+- from: '43.1'
+  until: '45.1'
+  scene: swarm
+  caption: The lantern holds. This is provisional coverage for the ensemble response.
+  wide-degrees: 45
+  time-scale: 1
+  orbit-degrees: -10
+  with:
+    orbits: 24
+    panels: 48
+- from: '45.1'
+  until: '49.1'
+  scene: slate
+  caption: Space instruments turn (pending)
+  time-scale: 0
+  orbit-degrees: 0

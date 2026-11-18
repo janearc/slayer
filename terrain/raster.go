@@ -41,6 +41,14 @@ const (
 	floatBits    = 32
 )
 
+// the sample formats a tiff's SampleFormat tag names, and the one integer
+// width this reads, all defined by the TIFF 6.0 specification
+const (
+	unsignedFormat = 1  // defined: SampleFormat unsigned integer
+	signedFormat   = 2  // defined: SampleFormat two's complement integer
+	signedBits     = 16 // defined: the width of a signed integer sample read
+)
+
 var errRaster = errors.New("terrain: not a raster this reads")
 
 // A Raster is an elevation model on disk: its size in samples, its
@@ -52,6 +60,8 @@ type Raster struct {
 	big, placed     bool
 	closed          bool
 	stripped        bool
+	signed16        bool
+	sphere          sphereKeys
 	width, height   int
 	tileW, tileH    int
 	offsets, counts []uint64

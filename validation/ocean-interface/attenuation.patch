@@ -1,0 +1,11 @@
+--- a/scene.yaml
++++ b/scene.yaml
+@@ -17,7 +17,7 @@
+       source: "synthetic validation palette"
+     materials:
+       interface:
+-        clear: {through: 1, index: 1.333, gloss: 1, rank: 0}
++        clear: {through: 1, index: 1.333, gloss: 1, rank: 0, extinction-per-metre: [0.6, 0.2, 0.05]}
+         source: "synthetic optical validation; not measured water"
+       marker:
+         colour: {srgb_linear: [0.72, 0.22, 0.07]}

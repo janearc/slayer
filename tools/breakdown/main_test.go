@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -194,5 +195,19 @@ func TestWithNoLinesEveryShareIsNought(t *testing.T) {
 	if empty := table(nil); !strings.Contains(empty, "total") ||
 		strings.Contains(empty, "NaN") {
 		t.Errorf("the empty table is\n%s", empty)
+	}
+}
+
+// outside a git folder there is nothing to list, and tracked says git
+// could not.
+func TestTrackedOutsideAGitFolderSaysGitFailed(t *testing.T) {
+	bare := t.TempDir()
+	t.Setenv("GIT_CEILING_DIRECTORIES", filepath.Dir(bare))
+	t.Chdir(bare)
+	paths, err := tracked()
+	if err == nil || paths != nil ||
+		!strings.Contains(err.Error(), "git ls-files") {
+		t.Errorf("tracked in a folder with no git gave %v, %v; want a "+
+			"refusal naming git ls-files", paths, err)
 	}
 }

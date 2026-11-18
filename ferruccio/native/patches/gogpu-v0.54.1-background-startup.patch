@@ -1,0 +1,499 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 22bc32f..d07f37a 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
+ 
+ ## [Unreleased]
+ 
++### Added
++
++- **macOS: `Config.Background` and `Config.WithBackground(bool)` start the app without taking focus or showing the window.** macOS only; other systems ignore it. Default is off, and then start-up is unchanged. When on, the activation policy is Accessory (windows allowed, no Dock icon) instead of Regular, `activateIgnoringOtherApps` is not called, and the start-up `Show` is skipped. The window, Metal surface and device are still created, and the window is drawn while hidden. A later `Window.Show()` shows the native window and `Window.Visible()` reports the same state throughout. The policy does not change on `Show`.
++
+ ## [0.54.1] - 2026-11-08
+ 
+ ### Fixed
+diff --git a/app.go b/app.go
+index 7fe8108..3d84d0a 100644
+--- a/app.go
++++ b/app.go
+@@ -548,6 +548,9 @@ func (a *App) initPlatform() (platform.PlatformWindow, error) {
+ 	// Initialize platform manager (process-level) — must be on main thread.
+ 	platform.SetLogger(slogger())
+ 	a.manager = newPlatformManagerFn()
++	if background, ok := a.manager.(interface{ SetBackground(bool) }); ok {
++		background.SetBackground(a.config.Background)
++	}
+ 	if err := a.manager.Init(); err != nil {
+ 		return nil, err
+ 	}
+@@ -561,6 +564,7 @@ func (a *App) initPlatform() (platform.PlatformWindow, error) {
+ 
+ 	// Create primary platform window.
+ 	platWindow, err := a.manager.CreateWindow(platform.Config{
++		Background:  a.config.Background,
+ 		Title:       a.config.Title,
+ 		Width:       a.config.Width,
+ 		Height:      a.config.Height,
+@@ -1002,6 +1006,8 @@ type windowFrame struct {
+ func (a *App) registerPrimaryWindow(platWindow platform.PlatformWindow) {
+ 	a.windowManager = newWindowManager()
+ 	internalID := a.windowManager.allocate()
++	// Only macOS skips the start-up Show; other systems ignore Background.
++	startHidden := a.config.Background && runtime.GOOS == "darwin"
+ 	a.primaryWindow = &Window{
+ 		id:              internalID,
+ 		platformID:      platWindow.ID(),
+@@ -1011,7 +1017,8 @@ func (a *App) registerPrimaryWindow(platWindow platform.PlatformWindow) {
+ 		onDraw:          a.onDraw,
+ 		onResize:        a.onResize,
+ 		headerAlignment: a.config.HeaderAlignment,
+-		visible:         true,
++		visible:         !startHidden,
++		startHidden:     startHidden,
+ 	}
+ 	a.primaryPlatformID = platWindow.ID()
+ 	a.windowManager.add(a.primaryWindow)
+@@ -1027,7 +1034,7 @@ func (a *App) renderFrameMultiThread() {
+ 	frames := make([]windowFrame, 0, len(a.windowManager.order))
+ 	for _, id := range a.windowManager.order {
+ 		w := a.windowManager.windows[id]
+-		if w == nil || !w.visible {
++		if w == nil || !w.renders() {
+ 			continue
+ 		}
+ 		pw, ph := w.platWindow.PhysicalSize()
+@@ -1333,7 +1340,7 @@ func (a *App) frameCallbackReady() bool {
+ 	defer a.windowManager.mu.RUnlock()
+ 	for _, id := range a.windowManager.order {
+ 		w := a.windowManager.windows[id]
+-		if w == nil || !w.visible || w.platWindow == nil {
++		if w == nil || !w.renders() || w.platWindow == nil {
+ 			continue
+ 		}
+ 		if fg, ok := w.platWindow.(platform.FrameGater); ok && !fg.FrameCallbackReady() {
+diff --git a/background_config_test.go b/background_config_test.go
+new file mode 100644
+index 0000000..04bc694
+--- /dev/null
++++ b/background_config_test.go
+@@ -0,0 +1,87 @@
++package gogpu
++
++import (
++	"errors"
++	"testing"
++
++	"github.com/gogpu/gogpu/internal/platform"
++)
++
++// TestBackgroundStartupIsExplicit preserves normal defaults and value-builder semantics.
++func TestBackgroundStartupIsExplicit(t *testing.T) {
++	original := DefaultConfig()
++	if original.Background {
++		t.Fatal("normal startup defaults to background")
++	}
++	background := original.WithBackground(true)
++	if !background.Background || original.Background {
++		t.Fatal("background builder did not preserve original config")
++	}
++	if background.WithBackground(false).Background {
++		t.Fatal("background cannot be disabled")
++	}
++}
++
++// backgroundStartupManager stops before native window creation while observing
++// the actual application's ordering and window configuration boundary.
++type backgroundStartupManager struct {
++	platform.PlatformManager
++	t                                            *testing.T
++	configured, background, initialized, created bool
++	windowBackground                             bool
++	stop                                         error
++}
++
++func (manager *backgroundStartupManager) SetBackground(background bool) {
++	if manager.initialized {
++		manager.t.Fatal("background policy arrived after platform initialization")
++	}
++	manager.configured, manager.background = true, background
++}
++
++func (manager *backgroundStartupManager) Init() error {
++	if !manager.configured {
++		manager.t.Fatal("platform initialized before background policy was configured")
++	}
++	manager.initialized = true
++	return nil
++}
++
++func (manager *backgroundStartupManager) CreateWindow(config platform.Config) (platform.PlatformWindow, error) {
++	if !manager.initialized {
++		manager.t.Fatal("window creation preceded platform initialization")
++	}
++	manager.created, manager.windowBackground = true, config.Background
++	return nil, manager.stop
++}
++
++// TestBackgroundPolicyPrecedesPlatformInit verifies the real startup boundary
++// without constructing a native window, surface or graphics device.
++func TestBackgroundPolicyPrecedesPlatformInit(t *testing.T) {
++	for _, test := range []struct {
++		name   string
++		config Config
++	}{
++		{name: "normal default", config: DefaultConfig()},
++		{name: "background", config: DefaultConfig().WithBackground(true)},
++	} {
++		t.Run(test.name, func(t *testing.T) {
++			stop := errors.New("stop before native window creation")
++			manager := &backgroundStartupManager{t: t, stop: stop}
++			original := newPlatformManagerFn
++			newPlatformManagerFn = func() platform.PlatformManager { return manager }
++			t.Cleanup(func() { newPlatformManagerFn = original })
++			application := &App{config: test.config}
++			window, err := application.initPlatform()
++			if !errors.Is(err, stop) || window != nil {
++				t.Fatalf("startup did not stop at fake window boundary: %v, %v", window, err)
++			}
++			if !manager.configured || !manager.initialized || !manager.created {
++				t.Fatalf("incomplete startup: %+v", manager)
++			}
++			if manager.background != test.config.Background || manager.windowBackground != test.config.Background {
++				t.Fatalf("background policy lost: app=%v platform=%v window=%v", test.config.Background, manager.background, manager.windowBackground)
++			}
++		})
++	}
++}
+diff --git a/background_window_test.go b/background_window_test.go
+new file mode 100644
+index 0000000..283bf66
+--- /dev/null
++++ b/background_window_test.go
+@@ -0,0 +1,35 @@
++package gogpu
++
++import (
++	"testing"
++
++	"github.com/gogpu/gogpu/internal/platform"
++)
++
++// showCountingWindow counts the native Show and Hide calls it receives.
++type showCountingWindow struct {
++	platform.PlatformWindow
++	shows, hides int
++}
++
++func (window *showCountingWindow) Show() { window.shows++ }
++func (window *showCountingWindow) Hide() { window.hides++ }
++
++// TestStartHiddenWindowRecordsVisibility checks that a window started hidden
++// reports not visible but is still drawn, and that a later Show reaches the
++// native window and makes the record match. Hide stops drawing.
++func TestStartHiddenWindowRecordsVisibility(t *testing.T) {
++	native := &showCountingWindow{}
++	window := &Window{platWindow: native, startHidden: true}
++	if window.Visible() || !window.renders() {
++		t.Fatalf("started hidden: visible %v renders %v", window.Visible(), window.renders())
++	}
++	window.Show()
++	if native.shows != 1 || !window.Visible() || !window.renders() {
++		t.Fatalf("after Show: native %d visible %v", native.shows, window.Visible())
++	}
++	window.Hide()
++	if native.hides != 1 || window.Visible() || window.renders() {
++		t.Fatalf("after Hide: native %d visible %v", native.hides, window.Visible())
++	}
++}
+diff --git a/config.go b/config.go
+index 6097b3e..27ee325 100644
+--- a/config.go
++++ b/config.go
+@@ -38,6 +38,10 @@ const (
+ 
+ // Config configures the application.
+ type Config struct {
++	// Background keeps macOS startup hidden and prevents application activation.
++	// Other operating systems currently ignore this option. Default is false.
++	Background bool
++
+ 	// Title is the window title.
+ 	Title string
+ 
+@@ -424,3 +428,10 @@ const (
+ 	// TabbingDisallowed explicitly prevents the window from being grouped into tabs.
+ 	TabbingDisallowed TabbingMode = 2
+ )
++
++// WithBackground returns a copy with hidden, nonactivating macOS startup enabled.
++// Other operating systems currently ignore this option.
++func (c Config) WithBackground(background bool) Config {
++	c.Background = background
++	return c
++}
+diff --git a/internal/platform/darwin/application.go b/internal/platform/darwin/application.go
+index 6b9c373..b878901 100644
+--- a/internal/platform/darwin/application.go
++++ b/internal/platform/darwin/application.go
+@@ -21,6 +21,8 @@ var (
+ // Application manages the NSApplication lifecycle.
+ // There is only one NSApplication per process.
+ type Application struct {
++	background bool
++
+ 	mu              sync.Mutex
+ 	nsApp           ID
+ 	pool            ID
+@@ -42,6 +44,27 @@ func GetApplication() *Application {
+ 	return app
+ }
+ 
++// SetBackground configures startup policy before Init; initialized applications
++// retain their original activation policy.
++func (a *Application) SetBackground(background bool) {
++	a.mu.Lock()
++	defer a.mu.Unlock()
++	if !a.initialized {
++		a.background = background
++	}
++}
++
++// activationPolicyFor returns the activation policy for the startup mode.
++// Background uses accessory: windows are allowed, there is no Dock icon.
++// Prohibited is not used because Apple documents that such an application
++// may not create windows.
++func activationPolicyFor(background bool) NSApplicationActivationPolicy {
++	if background {
++		return NSApplicationActivationPolicyAccessory
++	}
++	return NSApplicationActivationPolicyRegular
++}
++
+ // Init initializes the NSApplication.
+ // This must be called before creating windows or processing events.
+ func (a *Application) Init() error {
+@@ -71,8 +94,10 @@ func (a *Application) Init() error {
+ 		return errors.New("darwin: failed to get NSApplication")
+ 	}
+ 
+-	// Set activation policy to regular app (with dock icon)
+-	a.nsApp.SendInt(selectors.setActivationPolicy, int64(NSApplicationActivationPolicyRegular))
++	// Set activation policy: regular (with dock icon), or accessory in
++	// background mode.
++	policy := activationPolicyFor(a.background)
++	a.nsApp.SendInt(selectors.setActivationPolicy, int64(policy))
+ 
+ 	// Create default application menu (ADR-016: Cmd+Q, Cmd+H, Cmd+M).
+ 	if a.appName == "" {
+@@ -84,7 +109,9 @@ func (a *Application) Init() error {
+ 	a.nsApp.Send(selectors.finishLaunching)
+ 
+ 	// Activate the application
+-	a.nsApp.SendBool(selectors.activateIgnoringOtherApps, true)
++	if !a.background {
++		a.nsApp.SendBool(selectors.activateIgnoringOtherApps, true)
++	}
+ 
+ 	a.initialized = true
+ 	return nil
+diff --git a/internal/platform/darwin/application_background_test.go b/internal/platform/darwin/application_background_test.go
+new file mode 100644
+index 0000000..b84c52e
+--- /dev/null
++++ b/internal/platform/darwin/application_background_test.go
+@@ -0,0 +1,22 @@
++//go:build darwin
++
++package darwin
++
++import "testing"
++
++// TestActivationPolicyFor checks the policy chosen for each startup mode.
++// Background must allow windows (accessory); Prohibited must never be used.
++func TestActivationPolicyFor(t *testing.T) {
++	// Values are Apple's NSApplicationActivationPolicy constants.
++	const regular, accessory, prohibited = 0, 1, 2
++	if got := activationPolicyFor(false); got != regular {
++		t.Fatalf("background off: policy %d, want regular %d", got, regular)
++	}
++	got := activationPolicyFor(true)
++	if got != accessory {
++		t.Fatalf("background on: policy %d, want accessory %d", got, accessory)
++	}
++	if got == prohibited {
++		t.Fatal("background on must not use prohibited")
++	}
++}
+diff --git a/internal/platform/platform.go b/internal/platform/platform.go
+index 38e3858..e947374 100644
+--- a/internal/platform/platform.go
++++ b/internal/platform/platform.go
+@@ -20,6 +20,10 @@ func NewWindowID() WindowID {
+ 
+ // Config holds platform-agnostic window configuration.
+ type Config struct {
++	// Background skips the native Show of the start-up path on macOS.
++	// Later calls to Show present the window.
++	Background bool
++
+ 	Title                string
+ 	Width                int
+ 	Height               int
+diff --git a/internal/platform/platform_darwin.go b/internal/platform/platform_darwin.go
+index 08cdc34..ff6dc89 100644
+--- a/internal/platform/platform_darwin.go
++++ b/internal/platform/platform_darwin.go
+@@ -59,6 +59,8 @@ type darwinWindow struct {
+ // darwinPlatform implements Platform for macOS using Cocoa/AppKit.
+ // Holds process-level state and a primary window for single-window API.
+ type darwinPlatform struct {
++	background bool
++
+ 	mu  sync.RWMutex
+ 	app *darwin.Application
+ 
+@@ -99,12 +101,16 @@ func (p *darwinPlatform) ScaleFactor() float64 {
+ 
+ // --- PlatformManager implementation on darwinPlatform ---
+ 
++// SetBackground configures nonactivating startup before Init.
++func (p *darwinPlatform) SetBackground(background bool) { p.background = background }
++
+ // Init initializes the macOS platform subsystem (process-level, no window).
+ func (p *darwinPlatform) Init() error {
+ 	p.mu.Lock()
+ 	defer p.mu.Unlock()
+ 
+ 	p.app = darwin.GetApplication()
++	p.app.SetBackground(p.background)
+ 	if err := p.app.Init(); err != nil {
+ 		return err
+ 	}
+@@ -215,6 +221,8 @@ func (p *darwinPlatform) CreateWindow(config Config) (PlatformWindow, error) {
+ 		id:        id,
+ 		window:    w.window,
+ 		frameless: config.Frameless,
++
++		startHidden: config.Background,
+ 	}
+ 
+ 	if config.MinWidth > 0 || config.MinHeight > 0 {
+@@ -343,6 +351,7 @@ type darwinPlatformWindow struct {
+ 	window          *darwin.Window
+ 	lastScale       float64
+ 	frameless       bool
++	startHidden     bool // skips the next native Show, the start-up one
+ 	hitTestCallback func(x, y float64) gpucontext.HitTestResult
+ 	callbackMu      sync.RWMutex
+ }
+@@ -530,11 +539,22 @@ func (dw *darwinPlatformWindow) Close() {
+ 	}
+ }
+ 
++// showUnlessStartHidden calls show, except that the first call is skipped
++// when startHidden is set. It clears startHidden, so only the start-up show
++// is skipped and every later show reaches the native window.
++func showUnlessStartHidden(startHidden *bool, show func()) {
++	if *startHidden {
++		*startHidden = false
++		return
++	}
++	show()
++}
++
+ func (dw *darwinPlatformWindow) Show() {
+ 	if dw.window == nil {
+ 		return
+ 	}
+-	dw.window.Show()
++	showUnlessStartHidden(&dw.startHidden, dw.window.Show)
+ 	dw.platform.mu.RLock()
+ 	var surface *darwin.Surface
+ 	for _, w := range dw.platform.windows {
+diff --git a/internal/platform/platform_darwin_background_test.go b/internal/platform/platform_darwin_background_test.go
+new file mode 100644
+index 0000000..67e3b72
+--- /dev/null
++++ b/internal/platform/platform_darwin_background_test.go
+@@ -0,0 +1,33 @@
++//go:build darwin
++
++package platform
++
++import "testing"
++
++// TestStartHiddenSkipsOnlyStartupShow checks that the start-up show is
++// skipped and every later show reaches the native window.
++func TestStartHiddenSkipsOnlyStartupShow(t *testing.T) {
++	shown := 0
++	show := func() { shown++ }
++
++	startHidden := true
++	showUnlessStartHidden(&startHidden, show) // start-up show
++	if shown != 0 || startHidden {
++		t.Fatalf("start-up show: native shows %d, startHidden %v", shown, startHidden)
++	}
++	showUnlessStartHidden(&startHidden, show) // later public Show
++	showUnlessStartHidden(&startHidden, show)
++	if shown != 2 {
++		t.Fatalf("later shows reached native %d times, want 2", shown)
++	}
++}
++
++// TestNormalStartupShowsNative checks the default: no show is skipped.
++func TestNormalStartupShowsNative(t *testing.T) {
++	shown := 0
++	startHidden := false
++	showUnlessStartHidden(&startHidden, func() { shown++ })
++	if shown != 1 {
++		t.Fatalf("normal start-up reached native %d times, want 1", shown)
++	}
++}
+diff --git a/window_manager.go b/window_manager.go
+index 38ef8eb..9fe0aed 100644
+--- a/window_manager.go
++++ b/window_manager.go
+@@ -33,6 +33,9 @@ type Window struct {
+ 	surface    *RenderTarget
+ 	platWindow platform.PlatformWindow // underlying platform window
+ 
++	// startHidden: started hidden by Config.Background; drawn, not shown.
++	startHidden bool
++
+ 	// Header configuration
+ 	headerAlignment HeaderAlignment
+ 
+@@ -144,16 +147,24 @@ func (w *Window) PhysicalSize() (int, int) {
+ }
+ 
+ // Visible returns whether the window is currently visible and rendering.
++// A window started with Config.Background is not visible until Show.
+ func (w *Window) Visible() bool {
+ 	return w.visible
+ }
+ 
++// renders reports whether the render loop draws this window. A window that
++// started hidden by Config.Background is drawn before its first Show.
++func (w *Window) renders() bool {
++	return w.visible || w.startHidden
++}
++
+ // Show makes the window visible and gives it input focus.
+ func (w *Window) Show() {
+ 	if w.platWindow != nil {
+ 		w.platWindow.Show()
+ 	}
+ 	w.visible = true
++	w.startHidden = false
+ }
+ 
+ // Hide hides the window.
+@@ -162,6 +173,7 @@ func (w *Window) Hide() {
+ 		w.platWindow.Hide()
+ 	}
+ 	w.visible = false
++	w.startHidden = false
+ }
+ 
+ // SetPosition moves the window to the given logical screen position

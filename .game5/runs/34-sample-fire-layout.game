@@ -1,0 +1,1 @@
+sample-fire-layout . :: go run ./manufacture/testdata/fire_layout_sample.go

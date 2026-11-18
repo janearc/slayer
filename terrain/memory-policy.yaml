@@ -1,0 +1,28 @@
+# Picked per-raster memory budgets, 2026-11-08.
+# These bound payload storage, not whole-process RSS or a collection of rasters.
+numbers:
+  - name: window-bytes
+    value: 67108864
+    says: maximum returned strict-window float64 payload, 64 MiB
+    kind: picked
+    by: terrain streaming work, 2026-11-08
+  - name: retained-bytes
+    value: 67108864
+    says: decoded sample payload retained per raster, 64 MiB
+    kind: picked
+    by: terrain streaming work, 2026-11-08
+  - name: tile-bytes
+    value: 33554432
+    says: largest decoded float32 tile payload, 32 MiB
+    kind: picked
+    by: terrain streaming work, 2026-11-08
+  - name: metadata-bytes
+    value: 16777216
+    says: raw TIFF directory and external tag payload budget, 16 MiB
+    kind: picked
+    by: terrain streaming work, 2026-11-08
+  - name: retained-tiles
+    value: 2048
+    says: upper cache entry count to bound bookkeeping for very small tiles
+    kind: picked
+    by: terrain streaming work, 2026-11-08

@@ -89,27 +89,38 @@ func (one hoop) turning(day time.Duration) thing.Motion {
 // seed for its number, its gap wall, and its hull, all turning together;
 // and says what its floor holds
 func (one hoop) place(world *thing.World, number int,
-	gapWall *thing.Material, day time.Duration, said io.Writer) error {
-	tiles := hexes.Band{Radius: one.radius, Width: bandWidth,
-		Around: hexAround}
-	painted := biome.Make(biome.Fields{Tiling: tiles,
-		Seed: uint64(orbitalSeed + number), Scale: floorScale,
-		Sea: floorSea, Sprawl: floorSprawl})
+	gapWall *thing.Material, day time.Duration, floorTiles, hexMetres int, said io.Writer) error {
+	_, err := one.placeSurface(world, number, gapWall, day, floorTiles, hexMetres, 0, 0, 0, false, false, false, false, "mixed", said)
+	return err
+}
+
+// placeSurface retains the legacy floor and optionally adds seeded native geometry.
+func (one hoop) placeSurface(world *thing.World, number int,
+	gapWall *thing.Material, day time.Duration, floorTiles, hexMetres,
+	structures, landforms, district int, relief, city, park, dense bool, style string, said io.Writer) (*orbitalSurfaceSite, error) {
+	tiles := hexes.Band{Radius: one.radius, Width: bandWidth, Around: floorTiles}
+	painted := biome.Make(biome.Fields{Tiling: tiles, Seed: uint64(orbitalSeed + number), Scale: floorScale, Sea: floorSea, Sprawl: floorSprawl})
 	painted.Lights = urbanLights
-	fmt.Fprintf(said, "ring %d: %d rivers, %d lakes, %d volcanoes, "+
-		"%d cities\n", number, painted.Rivers, painted.Lakes,
-		painted.Volcanoes, painted.Cities)
-	floorMat := &thing.Material{Name: "floor",
-		Texture: texture.Tiled{Tiling: tiles, Paints: painted,
-			Lines: floorLines},
-		Shine: texture.Tiled{Tiling: tiles, Paints: painted.Shine()}}
+	fmt.Fprintf(said, "ring %d: %d rivers, %d lakes, %d volcanoes, %d cities\n", number, painted.Rivers, painted.Lakes, painted.Volcanoes, painted.Cities)
+	var floorMat *thing.Material
+	if hexMetres > 0 {
+		paint := newOrbitalMetreFloor(one.radius, hexMetres, uint64(orbitalSeed+number))
+		paint.geography = painted
+		paint.macro = tiles
+		glow := paint
+		glow.glowing = true
+		floorMat = &thing.Material{Name: "floor", Texture: paint, Shine: glow}
+		fmt.Fprintf(said, "ring %d: implicit floor cells %.9g metres across flats over finite macro geography, footprint-filtered\n", number, paint.tiles.Spacing()*1e6)
+	} else {
+		floorMat = &thing.Material{Name: "floor", Texture: texture.Tiled{Tiling: tiles, Paints: painted, Lines: floorLines}, Shine: texture.Tiled{Tiling: tiles, Paints: painted.Shine()}}
+	}
 	// the outside is hull: the people live on the inside, so it is dark
 	hull := &thing.Material{Name: "hull",
 		Colour: maths.RGB(hullRed, hullGreen, hullBlue),
 		Gloss:  hullGloss, Index: hullIndex}
 	floor, facing, rest, err := hoopMeshes(0, one.radius, number == 0)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	turning := one.turning(day)
 	world.Add(thing.Thing{Shape: floor, Material: floorMat,
@@ -117,7 +128,7 @@ func (one hoop) place(world *thing.World, number int,
 	world.Add(thing.Thing{Shape: facing, Material: gapWall,
 		Motion: turning})
 	world.Add(thing.Thing{Shape: rest, Material: hull, Motion: turning})
-	return nil
+	return one.surfaceFeatures(world, painted, floorMat, number, day, structures, landforms, district, relief, city, park, dense, style, said)
 }
 
 // pathsOf is the bands' paths through the gas, each placed once

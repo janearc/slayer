@@ -66,14 +66,35 @@ Exactly one of:
 ### film
 
 `preset`, `width`, `height`, `rays`, `wide`, `tall`, `exposure`,
-`aperture`, `focus`. All are optional. A preset gives width and height, and some give a rate; a key
+`aperture`, `focus`, `mode`. All are optional. A preset gives width and height, and some give a rate; a key
 written beside a preset stands over it.
+
+`mode: wire` draws the edges of what the picture's first rays meet, in
+place of their light: the same rays, camera, time and things as the
+light picture, so the two lie one over the other exactly. On a mesh face
+a pixel within half a pixel of the face's nearest edge is white, and the
+face between is a faint grey.
+
+A surface with no polygons (a sphere, a plane, a globe, a marched shape)
+is a flat dim blue, with no edges made up for it. A height field is that
+blue with its sample cells drawn in a pale blue: the cells are real, but
+they are not polygons.
+
+A shape that is none of these is a dim magenta. The sky and every volume
+are black; nothing is lit or shadowed. The edge's width, its light and the
+tints are picked.
+
+The wire is drawn on the cpu only, and `renderer: gpu` or a gpu set is
+refused by name. It develops through a plain tone, exposure one; a job's
+print or stock still stands over that. `mode: light` is the default, and
+a job that says it has the key it would without it.
 
 The presets are data, in `presets.yaml`:
 
 | Preset | Size | Rate |
 |---|---|---|
 | `portrait` | 1080 by 1920 | |
+| `half-portrait` | 1080 by 960 | |
 | `portrait-preview` | 360 by 640 | 6 |
 | `4k` | 3840 by 2160 | |
 | `2k` | 2048 by 1152 | |

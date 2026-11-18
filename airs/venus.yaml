@@ -1,0 +1,379 @@
+# Venus's air, from the ground to the top of its upper haze, as numbers.
+# Every number says read: where it was read, in what words, or picked:
+# nobody read it anywhere, and from what range it was picked. A number
+# that is picked and has a range beside it (low, high) must lie within
+# it. Lengths are metres; the units a source prints them in are in the
+# notes. Titov and others 2018 is Space Science Reviews 214, 126; its
+# pages are the journal's, "Page N of 61".
+
+planet:
+  radius:
+    value: 6051800
+    unit: m
+    read: >-
+      slayer's scene/bodies/template/venus.go, which makes the planet
+      with km(6051.8). That file does not name where it had it.
+  gravity:
+    value: 8.87
+    unit: m s^-2
+    picked: >-
+      the value commonly given for Venus's surface; no source for it
+      is in the tree or in the facts file. To be pinned.
+  surface-pressure:
+    value: 92
+    unit: bar
+    read: >-
+      Wikipedia, Atmosphere of Venus, read 2026-11-15. Titov and others
+      2018 gives no figure in the pages read here.
+  distance:
+    value: 0.7233
+    unit: au
+    picked: >-
+      Venus's mean distance from the sun, as commonly given. To pin: to
+      NASA's Venus fact sheet, which has not been read.
+
+gas:
+  carbon-dioxide:
+    value: 0.965
+    unit: fraction by volume
+    read: >-
+      Johnson and de Oliveira 2019, Earth and Space Science 6, 1299,
+      Table 2, "selected value", read through a page summary on
+      2026-11-15, not in the paper itself.
+  nitrogen:
+    value: 0.035
+    unit: fraction by volume
+    read: >-
+      The same table and the same reading as carbon dioxide's share.
+  carbon-dioxide-mass:
+    value: 0.0440095
+    unit: kg mol^-1
+    picked: >-
+      carbon dioxide's molar mass as commonly tabulated. To be pinned.
+  nitrogen-mass:
+    value: 0.0280134
+    unit: kg mol^-1
+    picked: >-
+      molecular nitrogen's molar mass as commonly tabulated. To be
+      pinned.
+  surface-density:
+    value: 65
+    unit: kg m^-3
+    picked: >-
+      a stand-in for the table of the Venus International Reference
+      Atmosphere (Seiff and others 1985), which was not reached. 65 is
+      the figure Wikipedia's Atmosphere of Venus page gives, its
+      footnote 29, read 2026-11-15.
+  scale-height:
+    value: 15900
+    unit: m
+    picked: >-
+      a stand-in for the same table. 15.9 km is in slayer's
+      scene/gas/air.go, in the comment on Venus, citing Seiff and
+      others 1985.
+  top:
+    value: 90000
+    unit: m
+    picked: >-
+      the top of Titov and others 2018 Table 1's upper haze, 70 to 90
+      km. The air above, about a third of one percent of the column's
+      mass, is left out.
+  shell:
+    value: 1000
+    unit: m
+    picked: >-
+      the thickest a shell of air may be, so that its gas, whose
+      density falls by an eleventh across a kilometre of the column's
+      scale height, is well enough taken as its mean. No source.
+  absorption:
+    value: 0
+    unit: m^-1
+    picked: >-
+      the gas's own absorption is left at nought: carbon dioxide's
+      bands begin near 1 micrometre and no source for their strength
+      was reached. The solver's visible is the range this is held for.
+  stand-in:
+    value: 420
+    unit: parts a million
+    picked: >-
+      nitrogen's Rayleigh cross section is taken from celestial's dry
+      air, with its carbon dioxide at 420 parts a million, as
+      moonlight does. Dry air stands in for nitrogen; the difference
+      is a few percent of 3.5 percent of the gas's scattering.
+  refraction:
+    constant: 0
+    terms:
+      - [6.99100e-2, 166.175]
+      - [1.44720e-3, 79.609]
+      - [6.42941e-5, 56.3064]
+      - [5.21306e-5, 46.0196]
+      - [1.46847e-6, 0.0584738]
+    shortest: 180.7
+    longest: 1694.5
+    temperature: 273.15
+    pressure: 101325
+    read: >-
+      Bideau-Mehu, Guern, Abjean and Johannin-Gilles, Optics
+      Communications 9, 432 (1973), formula 6 of the
+      refractiveindex.info database v2026-05-24, main/CO2/nk/
+      Bideau-Mehu.yml: n - 1 = constant + sum of numerator over
+      (pole less the wavelength in micrometres to the minus two). The
+      wavelength_range there is 0.1807 to 1.6945 micrometres, held here
+      in nanometres as shortest and longest. The conditions there are
+      "Standard conditions: 0 C, 760 torr (101.325 kPa)", temperature
+      273.15 and pressure 101325, from which the ideal gas law gives
+      the molecules a cubic metre the index holds at.
+
+particles:
+  real:
+    value: 1.44
+    read: >-
+      Titov and others 2018, p 29, "a refractive index of 1.44 +- 0.02
+      at lambda = 0.55 um (Hansen and Hovenier 1974)", sulphuric acid
+      at about 75 percent by weight. It is held at 1.44 at every
+      wavelength in the visible, which is picked; the drift with
+      wavelength is not in a source reached.
+    unit: ""
+  imaginary:
+    value: 0
+    picked: >-
+      sulphuric acid does not absorb in the visible; no table of its
+      imaginary part was reached (Palmer and Williams 1975 has none on
+      the shelf).
+    unit: ""
+  reference:
+    value: 630
+    unit: nm
+    read: >-
+      Titov and others 2018, p 5, Table 1: "Optical depth, tau (at 0.63
+      um)".
+
+# Each layer is a cloud or a haze: its heights, its optical depth at the
+# reference wavelength, and its modes. A mode is a log-normal
+# population: diameter is twice its geometric mean radius, in
+# micrometres; number is the average number density in a cubic
+# centimetre, which only sets the modes' shares of the layer, so a layer
+# of one mode may say 1; width is the geometric standard deviation.
+# The depths are picked within Table 1's ranges so that together they
+# are 30, the low end of Titov's "The total aerosol opacity is 30-50"
+# (p 16).
+layers:
+  - name: lower haze
+    bottom: 31000
+    top: 47500
+    read: >-
+      The top is the bottom of the lower cloud, Table 1. The bottom is
+      picked at 31 km within the lower haze's depths Titov and others
+      2018 gives: "extends down to ~33 km" (p 6), "30-40 km" (p 16),
+      "33-48 km" (p 53), and Tomasko's "about 30 km" (NTRS 19830011401).
+    depth:
+      value: 2.0
+      unit: ""
+      low: 0.5
+      high: 3.0
+      picked: >-
+        Satoh and others 2009 via Titov p 16: "the lower haze has total
+        opacity of 0.5-3 and consists of very small particles". Taken
+        at 1.74 um there, and held here at 630 nm.
+    modes:
+      - diameter: 0.3
+        number: 1
+        read: >-
+          picked from the mode 1 diameters of Table 1, 0.3 to 0.4 um,
+          the smallest, for "very small particles"; only one mode, so
+          its number density is not a share.
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            no width is given for the lower haze; 1.3, as for the
+            modes of the cloud with none.
+  - name: lower cloud
+    bottom: 47500
+    top: 50500
+    read: >-
+      Titov and others 2018 Table 1 (Esposito and others 1983), p 5,
+      "Lower cloud 47.5-50.5".
+    depth:
+      value: 10.2
+      unit: ""
+      low: 6.0
+      high: 12.0
+      picked: >-
+        Table 1: "6.0-12.0". Picked so that the layers sum to 30.
+    modes:
+      - diameter: 0.4
+        number: 1200
+        read: "Table 1: Mode 1: 0.4 um, 1200 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            no width for this mode in Titov; 1.3, the width read for
+            mode 2 (see the upper cloud's), as the nearest.
+      - diameter: 2.0
+        number: 50
+        read: "Table 1: Mode 2: 2.0 um, 50 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            from the effective variance 0.07 to 0.076 for mode 2 (see
+            the upper cloud's).
+      - diameter: 8.0
+        number: 50
+        read: "Table 1: Mode 3: 8.0 um, 50 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            no width for mode 3 in Titov; taken as mode 2's.
+  - name: middle cloud
+    bottom: 50500
+    top: 56500
+    read: >-
+      Titov and others 2018 Table 1, p 5, "Middle cloud 50.5-56.5".
+    depth:
+      value: 9.5
+      unit: ""
+      low: 8.0
+      high: 10.0
+      picked: >-
+        Table 1: "8.0-10.0". Picked so that the layers sum to 30.
+        Tomasko (NTRS 19830011401, ms p 9) says the middle and lower
+        clouds together are about 17; these two are 19.7.
+    modes:
+      - diameter: 0.3
+        number: 300
+        read: "Table 1: Mode 1: 0.3 um, 300 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            no width for this mode in Titov; 1.3, as the lower cloud's.
+      - diameter: 2.5
+        number: 50
+        read: "Table 1: Mode 2: 2.5 um, 50 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            from the effective variance 0.07 to 0.076 for mode 2 (see
+            the upper cloud's).
+      - diameter: 7.0
+        number: 10
+        read: "Table 1: Mode 3: 7.0 um, 10 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            no width for mode 3 in Titov; taken as mode 2's.
+  - name: upper cloud
+    bottom: 56500
+    top: 70000
+    read: >-
+      Titov and others 2018 Table 1, p 5, "Upper cloud 56.5-70".
+    depth:
+      value: 7.5
+      unit: ""
+      low: 6.0
+      high: 8.0
+      picked: >-
+        Table 1: "6.0-8.0". Picked so that the layers sum to 30.
+    modes:
+      - diameter: 0.4
+        number: 1500
+        read: "Table 1: Mode 1: 0.4 um, 1500 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          picked: >-
+            no width for this mode in Titov; 1.3, as the lower cloud's.
+      - diameter: 2.0
+        number: 50
+        read: "Table 1: Mode 2: 2.0 um, 50 cm-3."
+        width:
+          value: 1.3
+          unit: ""
+          read: >-
+            Titov and others 2018 p 28: Rossi and others 2015 find "reff
+            ~ 1 um and its variance veff ~ 0.07", and Lee and others
+            2017 "reff = 1.26 um and variance veff = 0.076", for mode 2
+            in the upper cloud. For a log-normal, veff = exp((ln sigma)
+            squared) - 1, so sigma is 1.30 and 1.31; 1.30 taken.
+  - name: upper haze
+    bottom: 70000
+    top: 90000
+    read: >-
+      Titov and others 2018 Table 1, p 5, "Upper haze 70-90".
+    depth:
+      value: 0.8
+      unit: ""
+      low: 0.2
+      high: 1.0
+      picked: >-
+        Table 1: "0.2-1.0". Picked so that the layers sum to 30.
+    modes:
+      - diameter: 0.4
+        number: 500
+        read: "Table 1: 0.4 um, 500 cm-3."
+        width:
+          value: 1.5
+          unit: ""
+          read: >-
+            Titov and others 2018 p 26, Fig 22: "a unimodal log-normal
+            size distribution with reff = 0.3 um and veff = 0.18"
+            (SPICAV-SOIR, a different data set from Table 1's, whose
+            0.4 um diameter is a radius of 0.2). veff = exp((ln sigma)
+            squared) - 1 gives sigma = 1.502; 1.5 taken.
+
+# Absorbers the cloud and the air hold that the solver must have, not yet
+# in: each is an absorption in a range of heights, at wavelengths
+# shorter than a limit. Both are nought until fitted.
+absorbers:
+  - name: ultraviolet absorber of the upper cloud
+    bottom: 64000
+    top: 70000
+    below: 500
+    read: >-
+      Tomasko, NTRS 19830011401, ms p 8-9: "about 22 W m-2 are absorbed
+      shortward of 0.5 um in the atmosphere above 64 km altitude,
+      partly by SO2 (shortward of 0.35 um) but mostly by an ultraviolet
+      absorber".
+    absorption:
+      value: 0
+      unit: m^-1
+      picked: >-
+        nought for now. To be fitted so that the column absorbs
+        Tomasko's power above 64 km: 22 W m-2 shortward of 0.5 um.
+  - name: blue absorber between 15 and 40 km
+    bottom: 15000
+    top: 40000
+    below: 600
+    read: >-
+      Tomasko, NTRS 19830011401, ms p 8-9: "Between 40 and 15 km
+      altitude an additional 15-20 W m-2 are absorbed, largely by an
+      ultraviolet absorber shortward of 0.6 um".
+    absorption:
+      value: 0
+      unit: m^-1
+      picked: >-
+        nought for now. To be fitted so that the column absorbs
+        Tomasko's power between 40 and 15 km: 15 to 20 W m-2.
+
+# The ground's albedo, at wavelengths in nanometres.
+ground:
+  read: >-
+    Pieters and others 1987 (NTRS 19870013979), Figure 1, the Venera 9
+    and 10 albedo from Ekonomov and others 1980, read off the plot by
+    eye on 2026-11-15: about 4 percent near 0.55 um, 4 to 5 near 0.63,
+    5 to 6 near 0.72, about 7 near 0.8, and 12 (Venera 9) to 17 (Venera
+    10) near 1.0, with error bars of several percent there. Where the
+    notes give a range, the middle is taken: 0.045, 0.055 and 0.145.
+    Good to a percent or two at best, and not Ekonomov's own table.
+  points:
+    - [550, 0.04]
+    - [630, 0.045]
+    - [720, 0.055]
+    - [800, 0.07]
+    - [1000, 0.145]

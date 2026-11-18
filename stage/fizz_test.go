@@ -86,6 +86,14 @@ func TestAFizzIsTheColumnItSays(t *testing.T) {
 	}
 }
 
+func TestAFizzClearWaterOptInBuildsBoundedCloud(t *testing.T) {
+	volume := fizzOf(t, "seed: 43\n        source: eye",
+		"seed: 43\n        clear-water: true\n        source: eye")
+	if _, ok := volume.Medium.(interface{ ClearMediumOverlay() }); !ok {
+		t.Fatalf("opted-in fizz medium is %T, want marked cloud", volume.Medium)
+	}
+}
+
 // a fizz does not walk: its foot is where it stands at every moment,
 // whatever its rise. Only its churn climbs.
 func TestAFizzsFootStaysWhereItStands(t *testing.T) {

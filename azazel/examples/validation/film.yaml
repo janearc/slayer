@@ -1,0 +1,21 @@
+{
+  "$schema": "https://github.com/janearc/slayer/schemas/job-v1.json",
+  "scene": {
+    "smoke": 1
+  },
+  "renderer": "cpu",
+  "film": {
+    "width": 64,
+    "height": 36,
+    "rays": 1
+  },
+  "fps": 2,
+  "duration": {
+    "value": 1.5,
+    "unit": "s"
+  },
+  "outputs": {
+    "frames": "/ABS/FRESH/ANIMATION",
+    "movie": "/ABS/FRESH/ANIMATION/film.mp4"
+  }
+}

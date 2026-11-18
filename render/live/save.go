@@ -28,7 +28,7 @@ const (
 )
 
 // indent is how far the job file is indented when written back. Picked
-// by the author of this slice, 2026-11-12: the jobs in jobs/ indent so.
+// 2026-11-12: the example jobs in doc/examples/jobs/ indent so.
 const indent = 2
 
 // withEdits is the job file's YAML with the edits made in it, its

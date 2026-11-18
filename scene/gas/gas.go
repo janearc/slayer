@@ -132,7 +132,28 @@ func (g Gas) PhaseAt(cos float64) float64 {
 			"it is between minus one and one", g.Name, gg))
 	}
 	d := 1 + gg*gg - 2*gg*cos
-	return (1 - gg*gg) / (4 * math.Pi * math.Pow(d, 1.5))
+	denominator := 4 * math.Pi * math.Pow(d, 1.5)
+	phase := (1 - gg*gg) / denominator
+	// Preserve the original arithmetic whenever it remains representable.
+	// Only fall back when cancellation made the denominator or result
+	// invalid, as when g=Nextafter(1, 0) and cos=1.
+	if d > 0 && !math.IsInf(d, 0) && !math.IsNaN(d) &&
+		denominator > 0 && !math.IsInf(denominator, 0) &&
+		!math.IsNaN(denominator) && phase > 0 && !math.IsInf(phase, 0) &&
+		!math.IsNaN(phase) {
+		return phase
+	}
+	// Expand around the lobe's narrow direction. This retains the small
+	// positive denominator lost by cancellation in the direct form.
+	var stableD float64
+	if gg > 0 {
+		near := 1 - gg
+		stableD = near*near + 2*gg*(1-cos)
+	} else {
+		near := 1 + gg
+		stableD = near*near - 2*gg*(1+cos)
+	}
+	return (1 - gg*gg) / (4 * math.Pi * math.Pow(stableD, 1.5))
 }
 
 // Inscatter is the light a step of a ray gathers from a lamp at a

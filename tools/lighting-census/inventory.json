@@ -1,0 +1,652 @@
+{
+  "schema_version": 1,
+  "purpose": "Descriptive snapshot only; no scene/backend support or timing is established by this inventory.",
+  "source": {
+    "revision_at_inventory": "bd09dcb6d2bab4d17e687da3cdc1b9147db985a0",
+    "registry": "scene/smoke/smoke.go",
+    "registry_sha256": "a3bd497acfbfcb923144c5f154efb111e58662be91334157819d4eac303f616b",
+    "runtime_discovery": "scene/smoke.All()",
+    "limits": "The registry hash is not a digest of scene implementations, dependencies, external assets, device, settings, or built executable.",
+    "independent_controls_reference": "doc/render-optimization-controls.md",
+    "independent_controls_reference_sha256": "6864a847e64278ae279d30fde9ad81d0ed75b808f70bd62a1bd68ce8e1bcbe16"
+  },
+  "outcome_states": {
+    "unknown": "No successful run or authoritative refusal has been observed for this exact case.",
+    "supported": "Only a successful, validated run of the exact scene, mode and settings can establish support.",
+    "refused": "A renderer or preflight explicitly refused this exact case; retain the reason."
+  },
+  "fidelity_categories": {
+    "reference_model": "CPU configured tracer reference; finite steps, thresholds and incomplete physical transport still apply.",
+    "numerical_alternative": "Alternative backend or native traversal; compare numerically with a pinned reference, not assumed bit-identical.",
+    "approximate_lighting": "An explicit lighting approximation; compare raw radiance, developed images and temporal behavior.",
+    "same_mode_exact_reuse": "Retained drawing is compared bit-for-bit with the same mode per call under its invalidation contract.",
+    "scene_equivalence_target": "The control claims equivalent scene geometry or content; independent scene and rendered-output comparisons must establish equivalence for the tested case."
+  },
+  "approaches": [
+    {
+      "id": "cpu",
+      "api": "trace.Sampled",
+      "fidelity": "reference_model",
+      "support_default": "unknown"
+    },
+    {
+      "id": "gpu-software",
+      "api": "gpu.SampledMeasured",
+      "fidelity": "numerical_alternative",
+      "support_default": "unknown"
+    },
+    {
+      "id": "gpu-native-shadows",
+      "api": "gpu.SampledNative",
+      "fidelity": "numerical_alternative",
+      "support_default": "unknown"
+    },
+    {
+      "id": "gpu-native-meshes",
+      "api": "gpu.SampledAccelerated",
+      "fidelity": "numerical_alternative",
+      "support_default": "unknown"
+    },
+    {
+      "id": "gpu-cached-lighting",
+      "api": "gpu.SampledCached",
+      "fidelity": "approximate_lighting",
+      "support_default": "unknown"
+    },
+    {
+      "id": "gpu-fast-lighting",
+      "api": "gpu.SampledFast",
+      "fidelity": "approximate_lighting",
+      "support_default": "unknown"
+    },
+    {
+      "id": "gpu-faster-lighting",
+      "api": "gpu.SampledFaster",
+      "fidelity": "approximate_lighting",
+      "support_default": "unknown"
+    }
+  ],
+  "controls": [
+    {
+      "id": "retained-frames",
+      "scope": "API",
+      "effect": "Reuse across frames with generation-based invalidation; reference against per-call same mode bit-for-bit.",
+      "fidelity": "same_mode_exact_reuse"
+    },
+    {
+      "id": "lamp-store",
+      "scope": "job shortcut",
+      "effect": "Approximate boxed-medium per-lamp transmission; surface lighting remains on its original path.",
+      "fidelity": "approximate_lighting"
+    },
+    {
+      "id": "sky-looks",
+      "scope": "job shortcut",
+      "effect": "Share surface sky looks among pixel samples when supported; requires lamp-store.",
+      "fidelity": "approximate_lighting"
+    },
+    {
+      "id": "fastlight",
+      "scope": "job umbrella flag",
+      "effect": "Enables both lighting shortcuts unless individually overridden.",
+      "fidelity": "approximate_lighting"
+    },
+    {
+      "id": "vibes",
+      "scope": "job umbrella flag",
+      "effect": "Currently enables the lighting shortcuts unless overridden.",
+      "fidelity": "approximate_lighting"
+    },
+    {
+      "id": "volume-lighting-cached",
+      "scope": "scene option",
+      "effect": "Select cached smoke lighting; not an independent extra layer to stack on lamp-store.",
+      "fidelity": "approximate_lighting"
+    },
+    {
+      "id": "batch-placement",
+      "scope": "eligible individual city recipes",
+      "choices": [
+        "fused",
+        "nested"
+      ],
+      "fidelity": "scene_equivalence_target",
+      "covered_in_first_matrix": false,
+      "effect": "Compare independent city placement transformations; preserve exact geometry. Other contexts may refuse."
+    },
+    {
+      "id": "vacant-lot-index",
+      "scope": "green and night clustered-city recipes",
+      "choices": [
+        "on",
+        "off"
+      ],
+      "fidelity": "scene_equivalence_target",
+      "covered_in_first_matrix": false,
+      "effect": "Compare indexed and rescan lot selection; preserve equivalent landscape geometry. Other contexts refuse."
+    },
+    {
+      "id": "share-anatomy-prototypes",
+      "scope": "authored Heard individual or authored-multitude stages",
+      "choices": [
+        "true",
+        "false"
+      ],
+      "fidelity": "scene_equivalence_target",
+      "covered_in_first_matrix": false,
+      "effect": "Compare shared and separate anatomy meshes, preserving geometry, materials and motion. Other stages refuse."
+    }
+  ],
+  "static_constraints": [
+    {
+      "rule": "The six GPU APIs select alternative modes, not six independent booleans.",
+      "source": "gpu/sampled.go; gpu/frames.go"
+    },
+    {
+      "rule": "Native traversal is explicitly refused for worlds with gravity fields by sampledBackend.",
+      "source": "gpu/sampled.go"
+    },
+    {
+      "rule": "At the pinned revision lamp-store refuses more lamps than the configured per-point lamp count; this limit may change.",
+      "source": "gpu/reach.go; trace/asked.go"
+    },
+    {
+      "rule": "The job interface refuses lighting shortcuts with CPU, named scenes, rig lenses, proof, or cached volume lighting; the API-level smoke experiment is a different entry point.",
+      "source": "doc/flags.md; doc/modes.md"
+    },
+    {
+      "rule": "Sky-looks requires lamp-store. Grid sharing only occurs at supported sample-side values; one sample has no saving.",
+      "source": "job/flags.go; gpu/light_modes.go"
+    },
+    {
+      "rule": "An unset asset variable can make Reads omit paths; RequireInputs and content identity must be checked explicitly before execution.",
+      "source": "scene/smoke/smoke.go; scene/smoke/inputs.go"
+    },
+    {
+      "rule": "Scene 6 has NoSmall; 29, 35, 36 and 37 are marked heavy. 38 and 50 declare external inputs.",
+      "source": "scene/smoke/smoke.go"
+    },
+    {
+      "rule": "City batch-placement, city vacant-lot-index and Heard share-anatomy-prototypes are independent scene controls; the numbered-smoke mode matrix does not vary them. Proposed independent retention, projected-geometry and texture controls are not present generally.",
+      "source": "doc/render-optimization-controls.md"
+    }
+  ],
+  "estimate": {
+    "scene_count": 52,
+    "approach_count": 7,
+    "single_frame_single_repeat_planned_attempts_before_refusals": 364,
+    "single_frame_three_repeats_attempts_before_refusals": 1092,
+    "meaning": "Arithmetic case counts only, not a claim about runtime, GPU capacity, supported cases, usable speedups, or temporal coverage. Every planned mode includes an initial draw and an identical-time repeat: up to 728 primary visible frame draws (104 CPU plus 624 GPU) at one time if every case runs. Additional spectral passes, scene times, retries and ablations add work.",
+    "primary_visible_frame_draws_one_time_with_repeats_before_refusals": 728
+  },
+  "scenes": [
+    {
+      "number": 1,
+      "name": "a ball on a floor",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 2,
+      "name": "two lamps",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 3,
+      "name": "a ball on a set",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 4,
+      "name": "red, green and blue on the set",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 5,
+      "name": "a spotlight on the set",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 6,
+      "name": "a world of hexes",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": true,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 7,
+      "name": "a planet",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 8,
+      "name": "a floor and a ring in hexes",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 9,
+      "name": "smoke on the set",
+      "group": "gas",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 10,
+      "name": "a gas giant",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 11,
+      "name": "a ringed giant",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 12,
+      "name": "a planet with features",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 13,
+      "name": "a ringed giant through a long lens",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 14,
+      "name": "a gas giant in detail",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 15,
+      "name": "the giants",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 16,
+      "name": "the rocks",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 17,
+      "name": "moons on orbits",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 18,
+      "name": "hubble looks at jupiter",
+      "group": "lens",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 19,
+      "name": "a satellite looks down",
+      "group": "lens",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 20,
+      "name": "a magnetar behind a giant, in gamma and x-ray",
+      "group": "energy",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 21,
+      "name": "magellan maps venus",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 22,
+      "name": "the ringed giant on super 8",
+      "group": "lens",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 23,
+      "name": "the ringed giant on imax",
+      "group": "lens",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 24,
+      "name": "io looks up at jupiter",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 25,
+      "name": "a quasar and its jets",
+      "group": "energy",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 26,
+      "name": "a blazar, down the jet",
+      "group": "energy",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 27,
+      "name": "a pulsar turns",
+      "group": "energy",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 28,
+      "name": "a magnetar flares",
+      "group": "energy",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 29,
+      "name": "the pillars of creation",
+      "group": "gas",
+      "heavy": true,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 30,
+      "name": "the earth by night",
+      "group": "earth",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 31,
+      "name": "the bullet cluster, in its palette",
+      "group": "gas",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 32,
+      "name": "the aurora from orbit",
+      "group": "earth",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 33,
+      "name": "a world beside a magnetar",
+      "group": "energy",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 34,
+      "name": "a hot jupiter, its air blown off",
+      "group": "gas",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 35,
+      "name": "hale-bopp",
+      "group": "gas",
+      "heavy": true,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 36,
+      "name": "the photon ring",
+      "group": "holes",
+      "heavy": true,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 37,
+      "name": "falling in",
+      "group": "holes",
+      "heavy": true,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 38,
+      "name": "the blue marble",
+      "group": "earth",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": true,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 39,
+      "name": "a windscreen catches the sky",
+      "group": "earth",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 40,
+      "name": "four atmospheres",
+      "group": "gas",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 41,
+      "name": "a laser in haze",
+      "group": "gas",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 42,
+      "name": "a hill and a closed solid",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 43,
+      "name": "a glass fizzing",
+      "group": "gas",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 44,
+      "name": "the earth by night from a picture of its lights",
+      "group": "earth",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 45,
+      "name": "three planets on a track of the caller's",
+      "group": "worlds",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 46,
+      "name": "a baked puff beside the exact one",
+      "group": "gas",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 47,
+      "name": "a stage lit by ninjafilm's lamps",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 48,
+      "name": "lead, aluminium and water on an x-ray film",
+      "group": "energy",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 49,
+      "name": "a glass of water on a wooden table in an infinity cove",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 50,
+      "name": "Webb at the edge of where it may point, lit by the Larson",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": true,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 51,
+      "name": "a ball of water with bubbles in it",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    },
+    {
+      "number": 52,
+      "name": "a glass of cola",
+      "group": "light",
+      "heavy": false,
+      "no_small": false,
+      "declared_external_inputs": false,
+      "mode_support": "unknown"
+    }
+  ]
+}

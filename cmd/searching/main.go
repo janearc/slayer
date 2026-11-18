@@ -23,7 +23,29 @@ func main() {
 	defer stop()
 	tool := pzm.New("searching", "Something answers: a song-driven shoot",
 		pzm.Build(build), pzm.Built(built), pzm.Who(who), pzm.Sessions(sessions))
+	tool.Verb("music", verb.NoShort, "render an authored score and its exact beat clock",
+		"Writes a WAV, source documents, grid and receipt into a new directory.",
+		"Example_music", verb.NewFacts(verb.WritesTo("the named new music directory"), verb.LeavesAlone, verb.ThisMachine, verb.NoOne, verb.Light), music,
+		pzm.Value("voicing", verb.NoShort, "checked Cheeptune voicing file"),
+		pzm.Value("out", verb.NoShort, "new output directory"))
 	reads := verb.NewFacts(verb.WritesNothing, verb.LeavesAlone, verb.ThisMachine, verb.NoOne, verb.Light)
+	tool.Verb("progress", verb.NoShort, "watch completed frames and report to Barkeep",
+		"Writes progress.json beside a take; optionally publishes a Barkeep status file or HTTP update.",
+		"Example_progress", verb.NewFacts(verb.WritesTo("progress.json and the selected local Barkeep destination"),
+			verb.Changes, verb.ThisMachine, verb.NoOne, verb.Light),
+		func(call pzm.Call) error { return progress(ctx, call) },
+		pzm.Value("from", verb.NoShort, "first source frame, zero unsaid"),
+		pzm.Value("frames", verb.NoShort, "expected frames, remaining song unsaid"),
+		pzm.Value("pid", verb.NoShort, "producer PID; detects stopped incomplete jobs"),
+		pzm.Value("progress-file", verb.NoShort, "atomic five-integer status file for the Barkeep side column"),
+		pzm.Switch("follow", verb.NoShort, "watch every ten seconds until completion or interrupt"),
+		pzm.Value("barkeep", verb.NoShort, "existing loopback Barkeep HTTP address"),
+		pzm.Value("barkeep-kind", verb.NoShort, "configured message kind"),
+		pzm.Value("barkeep-signal", verb.NoShort, "configured render signal"))
+	tool.Verb("explain", verb.NoShort, "publish the synchronized making-of view",
+		"Checks a completed render and binds its companion to the same movie, plan and score.",
+		"Example_explain", verb.NewFacts(verb.WritesTo("companion files beside the completed take"),
+			verb.LeavesAlone, verb.ThisMachine, verb.NoOne, verb.Light), behind)
 	writes := verb.NewFacts(verb.WritesTo("the named new output"), verb.LeavesAlone, verb.ThisMachine, verb.NoOne, verb.FullGPU)
 	tool.Verb("plan", verb.NoShort, "print the checked story timing",
 		"Reads SHOOT.yaml and its source-bound score; draws nothing.", "Example_plan", reads,
@@ -46,6 +68,8 @@ func main() {
 		"Example_render", writes, func(call pzm.Call) error { return render(ctx, call) },
 		pzm.Value("from", verb.NoShort, "first frame, zero unsaid"),
 		pzm.Value("frames", verb.NoShort, "frame count, remaining song unsaid"),
+		pzm.Switch("defer-movie", verb.NoShort, "close scene resources before encoding saved PNGs and sound"),
+		pzm.Switch("serial", verb.NoShort, "finish each frame before drawing the next; comparison control"),
 		pzm.Value("limit-seconds", verb.NoShort, "wall limit, 600 unsaid"),
 		pzm.Value("out", verb.NoShort, "output directory"))
 	os.Exit(tool.RunWith(os.Args[1:], os.Stdin, os.Stdout, os.Stderr))

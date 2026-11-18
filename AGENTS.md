@@ -23,8 +23,8 @@ current command help define the live interface.
 Development runs through Game, driven by the `.game` file in the repo root:
 
 - `game build` builds and stamps binaries into `bin/`. It runs a pre-build
-  source verification (`go run ./cmd/sources verify`), which fails until the
-  source shelf is fetched.
+  source verification (`go run ./cmd/sources verify`), which reads the
+  committed `shelf/` unless `SLAYER_SHELF` names another.
 - `game run <name>` runs the named runs declared in `.game` (hillside,
   smoke-one, observatory, check-film, ...). Application runs use the `bin/`
   binaries: rebuild after changing Go code.
@@ -34,19 +34,18 @@ Development runs through Game, driven by the `.game` file in the repo root:
   which needs a Game build with the argument-forwarding fix (Game issue 2).
   Older Game builds silently discard those words.
 
-The source shelf (`SLAYER_SHELF`, an absolute path outside every checkout,
-set in the Game config under the Slayer project block) holds the papers and
-datasets pinned in `sources.yaml`:
+The source shelf holds the papers and datasets pinned in `sources.yaml`.
+It is `shelf/` in the tree unless `SLAYER_SHELF` (an absolute path, set in
+the Game config under the Slayer project block) names another; fetch
+needs it named:
 
     game run sources-fetch
     game run sources-check
     game run sources-verify
 
-Use the Go version in `go.mod`. The `replace` directive pinning
-`github.com/janearc/celestial` to a local directory is a development pin;
-celestial and celestial-data come from review candidates through a file
-proxy, see doc/review-dependencies.md. The pin must be gone before a
-release is cut.
+Use the Go version in `go.mod`. Slayer's own dependencies are released
+versions and come through the public Go proxy; a fresh clone needs no
+preparation.
 
 ## Test settings and gates
 

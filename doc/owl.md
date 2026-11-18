@@ -63,14 +63,3 @@ on a scene seed. Keep the parked shelter outside the instrument's envelope.
 The authored instrument is north-facing at 55 degrees before placement.
 Its enclosure is a separate object, so a catalogue view can show the
 instrument without shrinking it into a much larger empty site boundary.
-
-## Implementation status
-
-This is code prepared for the next review break. The new source snapshots
-are downloaded and pinned, but normal source verification, geometry checks,
-GPU comparisons, compatibility capture and specimen renders are deferred.
-No new appearance reference has been recorded from this draft.
-
-The four details retain the same panel inventories, optical figure and
-physical envelopes. Circular supports and shelter arches vary their
-tessellation. Those are implementation claims awaiting the planned checks.

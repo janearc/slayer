@@ -1,0 +1,201 @@
+# Project 705 "Lira", NATO's Alfa class, the titanium attack submarine,
+# in metres. A number marked measured was read off a shelf file that
+# `read` names, with its page or line; a number marked read was read on
+# a web page that is not on the shelf; a number marked chosen was read
+# nowhere and was chosen, from photographs, for the reason beside it.
+#
+# The hull's own space: metres, y up, the keel (the hull's lowest point)
+# at y nought, the centreline on x nought, the bow toward minus z and the
+# stern toward plus z, the middle of the length at z nought. Starboard is
+# plus x.
+length: 81.4 # measured: Project 705, russianships-project-705 line 278
+beam: 9.5    # measured: russianships line 279; Wikipedia agrees (read)
+# The two draughts the sources give disagree, so both are kept by name
+# and `draught` says which one sets the surfaced waterline. The body is
+# not set by it: a draught moves only the line. 6.24 is the default: a
+# round hull drawn to this file immerses about the share of its volume
+# at 6.24 that the measured displacements say, and at 7.6 it would leave
+# about half the reserve buoyancy Thamm gives (see alfa_test.go).
+draughts:
+  russianships: 6.24 # measured: russianships line 280
+  wikipedia: 7.6     # read, not shelved: Wikipedia's Alfa page, its fetch refused
+draught: russianships
+# held, not drawn: the displacements, in tonnes, and the depths, in
+# metres. The hull is not fitted to the submerged displacement: 3,150 t
+# is about 3,073 cubic metres of sea water at 1.025 t a cubic metre
+# (chosen), less than a spheroid 81.4 m long and 9.5 m across holds
+# (3,847), so no round hull of this size can hold so little. The drawn
+# hull holds 4,412 cubic metres; the rest is taken as free-flooding
+# space the displacement does not count (see alfa_test.go).
+displacement:
+  surfaced: 2300  # measured: russianships line 275
+  submerged: 3150 # measured: russianships line 276
+depth:
+  operating: 320 # measured: russianships line 285
+  maximum: 400   # measured: russianships line 286
+reserve: 0.3     # measured: "nearly 30 percent", Thamm page 3; held
+# chosen, from photographs: the body of revolution. Its nose rounds up
+# to the full beam over `nose`, a superellipse of power `bluntness` (two
+# is an ellipse); it runs parallel to the tail; its tail tapers over
+# `tail` to the `stern` radius by the power `taper`; and the propeller
+# boss runs `boss` from there to the length.
+hull:
+  nose: 14
+  bluntness: 2
+  tail: 27.5
+  taper: 1.8
+  stern: 0.9
+  boss: 2.5
+# chosen, from photographs: the sail, the Alfa's long low "limousine"
+# fairing. `front` is how far aft of the bow its leading edge stands.
+# Each section is a level of it: `up` above the hull's top (the first
+# below it, inside the hull), `lead` how far aft of the front its
+# leading edge stands there, its `chord` and how `wide` it is. Its plan
+# is rounded ahead and tapers aft. It is drawn smooth through these on a
+# spline: flared wide at the deck into a fillet, its front leaning back
+# and its back sloping down to the deck, its crown rounded.
+sail:
+  front: 24
+  sections:
+    - {up: -1.6, lead: 0, chord: 22, wide: 4.6}
+    - {up: 0, lead: 0.2, chord: 22, wide: 5.4}
+    - {up: 0.6, lead: 0.5, chord: 21.1, wide: 4.5}
+    - {up: 1.8, lead: 1, chord: 19.6, wide: 4.3}
+    - {up: 3, lead: 1.8, chord: 17.4, wide: 4.0}
+    - {up: 4, lead: 3, chord: 14.4, wide: 3.4}
+    - {up: 4.6, lead: 4.6, chord: 10.6, wide: 2.0}
+# chosen: the rescue sphere in the sail (Thamm pages 8 and 10), where
+# "37 to 39 husky Russians would just fit"; its size is not found. Its
+# centre stands `aft` of the sail's front and `up` above the hull's top,
+# and it keeps `clear` of the sail's skin.
+sphere: {diameter: 3.2, aft: 8, up: 1.9, clear: 0.15}
+# chosen, from photographs: the bow planes, drawn out, their middle
+# `aft` of the bow at the axis's height, their `span` out from the hull.
+# They and the stern's fins, rudders and stern planes are NACA four-digit
+# symmetrical sections, `thick` their thickness (chosen; see alfa_stern.go)
+planes: {aft: 9, chord: 2.8, span: 2.6, thick: 0.4}
+# chosen, from photographs: the cruciform stern. The fins' leading edge
+# at their root, inside the hull, stands `aft` of the bow; their `chord`
+# there, and `tip` at the tip, their trailing edge square to the axis,
+# `thick` through. The stabilisers reach `across` from the axis, the
+# upper fin `up` and the lower `down`. The rudders behind the upright
+# fins and the stern planes behind the stabilisers are `rudder` and
+# `flap` long. American Submariner (2023, pp. 22–23) identifies two
+# two-blade auxiliary propellers on electric-motor pods at the stern-plane
+# tips. Their count/location are source-backed; size is chosen from photos.
+stern:
+  aft: 67.5
+  chord: 6
+  tip: 3.6
+  thick: 0.5
+  across: 4.2
+  up: 4.2
+  down: 4.2
+  rudder: 1.6
+  flap: 1.4
+pods: {long: 4.2, radius: 0.45}
+# American Submariner (2023, pp. 22–23) identifies one five-blade,
+# non-skewback main propeller. Its size and pitch are not found: chosen.
+# `aft` is how far aft of the hull's end its blades' middle stands, on
+# the boss; `chord` is a blade's, a little narrower at its root and tip
+# and wider between; `pitch` is the pitch over the diameter. The source
+# says the blade is non-skewback, so `skew` is zero.
+propeller:
+  blades: 5
+  diameter: 4.2
+  aft: 0.7
+  chord: 1.1
+  thick: 0.12
+  pitch: 1.0
+  skew: 0
+auxiliary: {blades: 2, scale: 0.24} # sourced count; scale chosen, not measured
+# The finish is a choice: `finish` names one of `finishes`. Bare titanium
+# remains the ordinary kind's default. `painted` is a chosen near-black
+# coat for the dedicated `alfa-hero` kind, following the dark surfaced
+# photos and the stated black-hull direction; the pressure hull's titanium
+# and the sail's rubber coating do not establish an outer-hull paint.
+# Each finish has a dry look and a wet one. The wet look is
+# not worn by any face: the water decides where the hull is wet.
+finish: bare
+finishes:
+  bare:
+    dry: {material: titanium, finish: weathered}
+    wet: {material: titanium, finish: polished}
+  painted:
+    dry: {material: titanium, finish: painted, colour: [0.012, 0.012, 0.014]}
+    wet: {material: titanium, finish: painted, colour: [0.008, 0.008, 0.01]}
+# What each part is made of. A part that wears `coat` wears the chosen
+# finish's dry look; the others wear their own. `alloy` is what a source
+# says it is.
+looks:
+  hull:
+    coat: true
+    alloy: "the pressure hull is titanium alloy ('titanium alloy plates', Thamm page 10); the outer hull's metal is not found"
+  wet hull:
+    coat: true
+    alloy: "the hull, wet; a role for the water, worn by no face"
+  sail:
+    material: tyre
+    finish: painted
+    colour: [0.05, 0.05, 0.05]
+    alloy: "the 'rubber antisonar coating of the ALFA sail', Thamm page 10; its colour is chosen"
+  rescue sphere:
+    material: titanium
+    finish: satin
+    alloy: "not found; inside the sail, not seen"
+  propeller boss:
+    coat: true
+    alloy: "not found"
+  bow plane:
+    coat: true
+    alloy: "not found"
+  stern fin:
+    coat: true
+    alloy: "not found"
+  rudder:
+    coat: true
+    alloy: "not found"
+  stern plane:
+    coat: true
+    alloy: "not found"
+  thruster pod:
+    coat: true
+    alloy: "not found"
+  propeller blade:
+    material: titanium
+    finish: satin
+    alloy: "not found; titanium stands in, as slayer has no bronze"
+  auxiliary propeller blade:
+    material: titanium
+    finish: satin
+    alloy: "not found; titanium stands in, as slayer has no bronze"
+  mast and antenna:
+    material: titanium
+    finish: satin
+    alloy: "not found; feature types identified in American Submariner (2023), dimensions chosen"
+  deck fitting:
+    coat: true
+    alloy: "not found; covers and condenser scoop are photo-derived approximations"
+read: >-
+  Project 705 is russianships.info's page, on the shelf as
+  russianships-project-705, read only: its length, 81.4 m (705K 79.6 m),
+  beam, 9.5 m, draught, 6.24 m, displacements, 2,300 t surfaced and
+  3,150 t submerged, depths, 320 m and 400 m, and "1 fixed pitch
+  propeller, 2x136 hp electric motors, 2 variable pitch vane-type
+  propellers", lines 275 to 290. The
+  CIA's "The ALFA SSN", Thamm, 2008, on the shelf as
+  cia-alfa-ssn-thamm-2008, gives the 1969 estimate, about 79 m and
+  nearly 30 percent reserve buoyancy (page 3), the rescue sphere in the
+  sail (pages 8 and 10), the rubber antisonar coating of the sail and
+  the titanium alloy plates (page 10). The FAS page, fas-run-silent-run-deep, line 133,
+  says the Alfas were "constructed of titanium". Wikipedia's Alfa page
+  was read and not shelved, its fetch refused, and no source adapter
+  fetches it: its draught of 7.6 m. American Submariner, Third Quarter
+  2023, "Project 705—Lira", pp. 22–23, identifies one five-blade,
+  non-skewback main screw, two two-blade auxiliary screws on motor pods
+  at the stern-plane tips, the sail masts, and a starboard aft condenser
+  scoop. These feature types/counts are sourced, not dimensions. Article:
+  https://ufdcimages.uflib.ufl.edu/AA/00/04/07/89/00111/2023-%20Issue%203.pdf.
+  No dimensioned drawings of the form or fittings were found. Mast seats,
+  covers, scoop dimensions and auxiliary screw size are authored
+  approximations, not measurements.

@@ -43,22 +43,4 @@ For an exposed instrument study, set `cutaway: true` in a catalogue plan.
 The catalogue labels that view and hides only the enclosure; a scene's
 ordinary manufactured object remains complete.
 
-## Merge checks
-
-Independent geometry checks cover all five named mirrors, closed finite
-meshes, the physical envelope, exactly 798 primary components, the nominal
-aperture and the central opening. Those checks pass at all four details.
-
-The earlier 216 appearance records are unchanged; eight ELT records are
-kept separately with their producer hashes. Scoped checks of both scene
-readers and the catalogue's pointing also pass.
-
-The exposed assembly's earlier CPU/Metal discrepancy was resolved by the
-[ordinary triangle precision change](triangle-precision.md). The original
-cutaway view and RGB acceptance budget were retained. This is a bounded
-comparison of that assembly, not a general watertightness guarantee.
-
-The quick-detail exterior and labelled cutaway have inspected native PNGs,
-with settings, actual native refinement counts and producer records.
-The [OWL draft](owl.md) follows a different open-frame concept and awaits
-its own checks; the ELT results do not validate that new geometry.
+The [OWL draft](owl.md) follows a different open-frame concept.

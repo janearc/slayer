@@ -109,8 +109,7 @@ The [landed version](../manufacture/saucer_landed.go) reuses the flying
 body, adds its tripod and a flight from the shared stairs constructor,
 then raises the body so the feet define the ground origin. Its checked
 [gear recipe](../manufacture/saucer-landed.yaml) keeps structural dimensions
-and material choices visible. Tests check ground contact, stair clearance,
-the top tread and legs staying out of the stair approach.
+and material choices visible.
 
 Separate material looks give the hull titanium optics and an oxide film,
 the dome transmission/refraction, and portholes a visible glow. Attached
@@ -184,3 +183,11 @@ supported backends and a useful camera. Keep geometry/reference changes
 reviewable and record representation cost before scattering thousands.
 Use [testing](testing.md) for checks and
 [contributing](../CONTRIBUTING.md) for commit and review conventions.
+
+The [city building recipes](city-buildings.md) provide standalone architectural
+families and a reusable street grid with exactly 10,000 seeded buildings,
+cross alleys, traffic circles and material-batched native geometry.
+
+The [macrostructure and terrain recipes](macrostructures.md) add typed
+kilometre-scale arcologies, twisted spires, inhabited bridges, mountains
+and calderas, with formulae and existing biome placement metadata.

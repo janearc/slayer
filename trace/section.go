@@ -65,6 +65,9 @@ func SampledEach(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	drawn := make([]*frame.Frame, len(boxes))
 	for at, box := range boxes {
 		drawn[at] = fine.section(scene, wide, box, rays)
+		if err := scene.refusal(); err != nil {
+			return nil, err
+		}
 	}
 	return drawn, nil
 }

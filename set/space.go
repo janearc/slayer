@@ -266,7 +266,8 @@ func (made Film) framesASecond() int { return int(made.fps) }
 func (reading reader) standing(block *yaml.Node, made Thing) error {
 	ways := noWays
 	for _, way := range []bool{says(block, "east") || says(block, "north"),
-		says(block, "place"), says(block, "orbit"), says(block, "around")} {
+		says(block, "position"), says(block, "place"), says(block, "orbit"),
+		says(block, "around")} {
 		if way {
 			ways++
 		}
@@ -277,7 +278,7 @@ func (reading reader) standing(block *yaml.Node, made Thing) error {
 			"together, or neither", made.name)
 	case ways != oneWay:
 		return reading.refuse(block, "thing %s says where it stands in "+
-			"one way: east and north, or place, or orbit, or around; not "+
+			"one way: east and north, position, place, orbit or around; not "+
 			"%d of them", made.name, ways)
 	}
 	return nil

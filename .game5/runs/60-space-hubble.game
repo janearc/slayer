@@ -1,0 +1,1 @@
+space-hubble . :: ./bin/hillside -set doc/space-hubble.yaml -sky black -out out/space-hubble.png

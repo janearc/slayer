@@ -32,6 +32,8 @@ const (
 	shellKind
 	ringKind
 	wakeKind
+	propellerKind
+	fizzKind
 )
 
 // tinted is a medium thicker to some light than to other, as soot is to
@@ -101,20 +103,45 @@ func (encoded *scene) volumeAt(volume *thing.Volume, at time.Duration) error {
 		return unsupported{"an axial beam in a field"}
 	}
 	first := len(encoded.volumes.bytes)
+	var cloudPhase float64
+	var explicitCloudPhase bool
 	defer func() {
 		if len(encoded.volumes.bytes) > first {
 			encoded.volumeBeam(first, volume.Beam)
+			if explicitCloudPhase {
+				encoded.cloudPhaseLast(cloudPhase)
+			}
 		}
 	}()
 	med := volume.Medium
+	clearCloud := false
 	if shell, ok := med.(*medium.ShellWeather); ok && shell == nil {
 		return unsupported{"a nil spherical weather shell"}
 	}
 	if moving, ok := med.(medium.Timed); ok {
 		med = moving.Tick(at)
 	}
+	if cloud, ok := med.(medium.ClearCloud); ok {
+		if encoded.oceanMoon == nil || !encoded.oceanMoon.MixedCloud {
+			return unsupported{"clear-cloud transport outside the opted-in finite lunar route"}
+		}
+		cloudPhase, explicitCloudPhase = cloud.PhaseAsymmetry()
+		if explicitCloudPhase {
+			if err := metalCloudAsymmetry(cloudPhase); err != nil {
+				return err
+			}
+		}
+		med = cloud.DensityField()
+		clearCloud = true
+	}
 	material := encoded.material(volume.Material)
 	textures := encoded.paints[material]
+	if fizz, ok := med.(medium.Fizz); ok && clearCloud {
+		if textures != (painting{}) {
+			return unsupported{"a spatially painted clear-cloud Fizz"}
+		}
+		return encoded.fizzVolume(volume.At(at), fizz, material)
+	}
 	air, gassy := med.(gas.Optical)
 	var optics airing
 	if gassy {
@@ -144,6 +171,13 @@ func (encoded *scene) volumeAt(volume *thing.Volume, at time.Duration) error {
 // medium as a grid over its box.
 func (encoded *scene) plainVolume(space maths.Subspace, med medium.Medium,
 	textures painting, material int, gassy bool, optics airing) error {
+	if field, ok := med.(medium.PropellerCavitation); ok && textures == (painting{}) {
+		if err := encoded.propellerVolume(space, field, material); err != nil {
+			return err
+		}
+		encoded.airIf(gassy, optics)
+		return nil
+	}
 	if shell, ok := med.(*medium.ShellWeather); ok {
 		if textures != (painting{}) || shell.Parameters().Radius <= 0 {
 			return unsupported{"an invalid or textured spherical weather shell"}

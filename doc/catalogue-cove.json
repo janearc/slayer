@@ -1,0 +1,27 @@
+{
+  "presentation": "cove",
+  "studio": true,
+  "width": 640,
+  "height": 480,
+  "rays": 2,
+  "seed": 1,
+  "details": ["quick"],
+  "wide": 45,
+  "camera": {"x": 1.4, "y": 0.8, "z": -2},
+  "distance": 3.3,
+  "sample-limit": 2000000,
+  "face-limit": 1500000,
+  "pixel-aspect": 1,
+  "light-exposure": 0.001,
+  "minimum-coverage": 0.0001,
+  "sky": {
+    "horizon": {"r": 0.7, "g": 0.7, "b": 0.7},
+    "zenith": {"r": 0.7, "g": 0.7, "b": 0.7},
+    "ground": {"r": 0.7, "g": 0.7, "b": 0.7}
+  },
+  "sources": [
+    {"toward": {"x": -1, "y": 2, "z": -2}, "strength": {"r": 2.4, "g": 2.4, "b": 2.4}},
+    {"toward": {"x": 2, "y": 1, "z": 1}, "strength": {"r": 0.8, "g": 0.8, "b": 0.8}}
+  ],
+  "tone": {"exposure": 1, "knee": 0.7, "top": 8, "bloom": 0}
+}

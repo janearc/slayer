@@ -1,0 +1,787 @@
+{
+  "scope": "Initial priority and science-mission seed across NASA, ESA and JAXA; not a complete world census. Crewed vehicles, Earth-orbiting fleets, additional agencies, failures and further unlaunched studies remain to survey.",
+  "complete": false,
+  "reviewed-on": "2026-11-15",
+  "missions": [
+    {
+      "kind": "jimo",
+      "name": "Jupiter Icy Moons Orbiter",
+      "priority": 1,
+      "flight": "unlaunched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://ntrs.nasa.gov/citations/20060008914"
+        }
+      ],
+      "notes": "Cancelled concept. Freeze one documented design revision before geometry; do not combine different JIMO studies."
+    },
+    {
+      "kind": "new-horizons",
+      "name": "New Horizons",
+      "priority": 1,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://science.nasa.gov/mission/new-horizons/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "cassini",
+      "name": "Cassini orbiter",
+      "priority": 2,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/Science_Exploration/Space_Science/Cassini-Huygens_overview"
+        }
+      ],
+      "notes": "Separate orbiter model; paired mission with Huygens."
+    },
+    {
+      "kind": "huygens",
+      "name": "Huygens probe",
+      "priority": 2,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/Science_Exploration/Space_Science/Cassini-Huygens_overview"
+        }
+      ],
+      "notes": "Separate probe model; entry/descent and landed configurations need explicit variants."
+    },
+    {
+      "kind": "voyager-1",
+      "name": "Voyager 1",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "voyager-2",
+      "name": "Voyager 2",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "pioneer-10",
+      "name": "Pioneer 10",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "pioneer-11",
+      "name": "Pioneer 11",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "galileo",
+      "name": "Galileo orbiter",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "galileo-probe",
+      "name": "Galileo atmospheric probe",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "juno",
+      "name": "Juno",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "ulysses",
+      "name": "Ulysses",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "magellan",
+      "name": "Magellan",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "messenger",
+      "name": "MESSENGER",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "mariner-10",
+      "name": "Mariner 10",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "dawn",
+      "name": "Dawn",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "near-shoemaker",
+      "name": "NEAR Shoemaker",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "deep-space-1",
+      "name": "Deep Space 1",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "deep-impact",
+      "name": "Deep Impact",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "stardust",
+      "name": "Stardust",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "osiris-rex",
+      "name": "OSIRIS-REx",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "genesis",
+      "name": "Genesis",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "mars-global-surveyor",
+      "name": "Mars Global Surveyor",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "mars-odyssey",
+      "name": "2001 Mars Odyssey",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "mars-reconnaissance-orbiter",
+      "name": "Mars Reconnaissance Orbiter",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "maven",
+      "name": "MAVEN",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "mars-pathfinder",
+      "name": "Mars Pathfinder",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "phoenix",
+      "name": "Phoenix",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "insight",
+      "name": "InSight",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "spirit",
+      "name": "Spirit",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "opportunity",
+      "name": "Opportunity",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "curiosity",
+      "name": "Curiosity",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "perseverance",
+      "name": "Perseverance",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "lunar-reconnaissance-orbiter",
+      "name": "Lunar Reconnaissance Orbiter",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "clementine",
+      "name": "Clementine",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "hubble",
+      "name": "Hubble Space Telescope",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "webb",
+      "name": "James Webb Space Telescope",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "spitzer",
+      "name": "Spitzer Space Telescope",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "chandra",
+      "name": "Chandra X-ray Observatory",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "kepler",
+      "name": "Kepler",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "tess",
+      "name": "TESS",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.nasa.gov/a-to-z-of-nasa-missions/"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "giotto",
+      "name": "Giotto",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "rosetta",
+      "name": "Rosetta",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "philae",
+      "name": "Philae",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "mars-express",
+      "name": "Mars Express",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "venus-express",
+      "name": "Venus Express",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "smart-1",
+      "name": "SMART-1",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "herschel",
+      "name": "Herschel",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "planck",
+      "name": "Planck",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "gaia",
+      "name": "Gaia",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "xmm-newton",
+      "name": "XMM-Newton",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/About_Us/ESOC/ESOC_mission_history"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "hayabusa",
+      "name": "Hayabusa",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "kaguya",
+      "name": "Kaguya",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "nozomi",
+      "name": "Nozomi",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "hiten",
+      "name": "Hiten",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "sakigake",
+      "name": "Sakigake",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "suisei",
+      "name": "Suisei",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "akari",
+      "name": "AKARI",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "suzaku",
+      "name": "Suzaku",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://darts.isas.jaxa.jp/en/missions"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "kind": "darwin",
+      "name": "Darwin interferometer concept",
+      "priority": 3,
+      "flight": "unlaunched",
+      "references": [
+        {
+          "title": "Agency mission record",
+          "url": "https://www.esa.int/ESA_Multimedia/Images/2015/06/Darwin_s_six_telescopes"
+        }
+      ],
+      "notes": "Studied but not pursued; fleet topology changed across studies, so one revision must be selected."
+    }
+  ]
+}

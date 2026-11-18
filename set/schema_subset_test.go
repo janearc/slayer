@@ -166,6 +166,23 @@ var v2Also = map[string][]string{
 		"space_things.go/starring/star", "space_things.go/lanterning/panels",
 		"space_things.go/orbiting/radius", "space_things.go/nebulous/thickness",
 		"space_world.go/spacecraft/orbit"},
+	"ocean_surface.go/waveSurface/material": {"ocean_surface.go/waveSurface/motion"},
+	"ocean_surface.go/waveSurface/shading-normal": {
+		"ocean_surface.go/waveSurface/motion"},
+	"ocean_surface.go/waveSurface/in-scatter": {
+		"ocean_surface.go/waveSurface/motion"},
+	"ocean_surface.go/waveSurface/diffuse-sky-samples": {
+		"ocean_surface.go/waveSurface/motion"},
+	"ocean_surface.go/waveSurface/clear-cloud-sky-samples": {
+		"ocean_surface.go/waveSurface/motion"},
+	"ocean_surface.go/waveSurface/clear-cloud-water-step-mode": {
+		"ocean_surface.go/waveSurface/motion"},
+	"ocean_surface.go/waveSurface/flat-mean": {
+		"ocean_surface.go/waveSurface/motion"},
+	"world.go/things/position": {"space_things.go/placing/place",
+		"space_things.go/starring/star", "space_things.go/lanterning/panels",
+		"space_things.go/orbiting/radius", "space_things.go/nebulous/thickness",
+		"space_world.go/spacecraft/orbit"},
 }
 
 // v2Unread is, for a block of the reader named the same way, the keys
@@ -225,11 +242,31 @@ func keySetsStayInStep(t *testing.T, version schemaVersion) {
 		{"planet.go", "swarm", "slope", []string{"$defs", "planet-storms", "properties", "swarm"}, nil},
 		{"planet.go", "spots", "turn", []string{"$defs", "planet-storms", "properties", "spots", "items"}, nil},
 		{"pieces.go", "world", "motions", []string{"$defs", "world"}, nil},
+		{"pieces.go", "world", "vapor-cavities", []string{"$defs", "world"}, nil},
+		{"pieces.go", "world", "ocean", []string{"$defs", "world"}, nil},
+		{"ocean_surface.go", "waveSurface", "material", []string{"$defs", "world", "properties", "ocean"}, nil},
+		{"ocean_surface.go", "waveSurface", "shading-normal", []string{"$defs", "world", "properties", "ocean"}, nil},
+		{"ocean_surface.go", "waveSurface", "flat-mean", []string{"$defs", "world", "properties", "ocean"}, nil},
+		{"ocean_surface.go", "waveSurface", "mean-level", []string{"$defs", "world", "properties", "ocean", "properties", "flat-mean"}, nil},
+		{"ocean_surface.go", "waveSurface", "collar-width", []string{"$defs", "world", "properties", "ocean", "properties", "flat-mean"}, nil},
+		{"ocean_surface.go", "waveSurface", "extends-to-infinity", []string{"$defs", "world", "properties", "ocean", "properties", "flat-mean"}, nil},
+		{"ocean_surface.go", "waveSurface", "wind", []string{"$defs", "ocean-sea"}, nil},
+		{"ocean_surface.go", "waveSurface", "roughness", []string{"$defs", "world", "properties", "ocean", "properties", "glint"}, nil},
+		{"recipes.go", "quantity", "value", []string{"$defs", "ocean-extent"}, nil},
 		{"pieces.go", "materials", "glow", []string{"$defs", "world", "properties", "materials", "additionalProperties"}, nil},
+		{"pieces.go", "clear", "through", []string{"$defs", "world", "properties", "materials", "additionalProperties", "properties", "clear"}, nil},
+		{"pieces.go", "clear", "extinction-per-metre", []string{"$defs", "world", "properties", "materials", "additionalProperties", "properties", "clear"}, nil},
+		{"pieces.go", "clear", "scatter", []string{"$defs", "world", "properties", "materials", "additionalProperties", "properties", "clear"}, nil},
+		{"pieces.go", "clearScatter", "coefficient-per-metre", []string{"$defs", "world", "properties", "materials", "additionalProperties", "properties", "clear", "properties", "scatter"}, nil},
+		{"ocean_surface.go", "waveSurface", "in-scatter", []string{"$defs", "world", "properties", "ocean"}, nil},
+		{"ocean_surface.go", "waveSurface", "diffuse-sky-samples", []string{"$defs", "world", "properties", "ocean"}, nil},
+		{"ocean_surface.go", "waveSurface", "clear-cloud-sky-samples", []string{"$defs", "world", "properties", "ocean"}, nil},
+		{"ocean_surface.go", "waveSurface", "clear-cloud-water-step-mode", []string{"$defs", "world", "properties", "ocean"}, nil},
 		{"pieces.go", "colour", "swatch", []string{"$defs", "colour"}, nil},
 		{"pieces.go", "boxes", "size", []string{"$defs", "world", "properties", "boxes", "additionalProperties"}, nil},
 		{"shapes.go", "spheres", "motion", []string{"$defs", "world", "properties", "spheres", "additionalProperties"}, nil},
 		{"pieces.go", "lamps", "radius", []string{"$defs", "world", "properties", "lamps", "additionalProperties"}, nil},
+		{"beams.go", "beams", "divergence", []string{"$defs", "world", "properties", "beams", "additionalProperties"}, nil},
 		{"spots.go", "spotlights", "cone", []string{"$defs", "world", "properties", "spots", "additionalProperties"}, nil},
 		{"pieces.go", "floods", "strength", []string{"$defs", "world", "properties", "floods", "additionalProperties"}, nil},
 		{"pieces.go", "backdrop", "horizon", []string{"$defs", "world", "properties", "sky"}, nil},
@@ -238,6 +275,7 @@ func keySetsStayInStep(t *testing.T, version schemaVersion) {
 		{"pieces.go", "suns", "toward", []string{"$defs", "world", "properties", "suns", "additionalProperties"}, nil},
 		{"shapes.go", "wisps", "thick", []string{"$defs", "world", "properties", "wisps", "additionalProperties"}, nil},
 		{"shapes.go", "fizzes", "rise", []string{"$defs", "world", "properties", "fizzes", "additionalProperties"}, nil},
+		{"shapes.go", "vaporCavities", "tip-radius", []string{"$defs", "world", "properties", "vapor-cavities", "additionalProperties"}, nil},
 		{"motion.go", "motions", "ease", []string{"$defs", "world", "properties", "motions", "additionalProperties"}, nil},
 		{"motion.go", "framed", "percent", []string{"$defs", "world", "properties", "motions", "additionalProperties", "properties", "frames", "items"}, nil},
 		{"hud.go", "hud", "theme", []string{"$defs", "hud"}, nil},
@@ -254,6 +292,9 @@ func keySetsStayInStep(t *testing.T, version schemaVersion) {
 		{"world.go", "stands", "within", []string{"$defs", "stand"}, nil},
 		{"world.go", "wedge", "near", []string{"$defs", "stand", "properties", "within"}, nil},
 		{"world.go", "things", "north", []string{"$defs", "thing"}, nil},
+		{"world.go", "things", "position", []string{"$defs", "thing"}, nil},
+		{"world_position.go", "worldPosition", "east", []string{"$defs", "world-position"}, nil},
+		{"recipes.go", "quantity", "value", []string{"$defs", "signed-metres"}, nil},
 		{"world.go", "terrain", "from", []string{"$defs", "terrain"}, nil},
 	} {
 		block := schema

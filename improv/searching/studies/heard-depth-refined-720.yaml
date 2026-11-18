@@ -1,0 +1,55 @@
+# Authored geometry; reduced diffuse layers for bounded motion proofs.
+---
+name: heard. / the distance between us / authored depth study
+width: 1280
+height: 720
+fps: 6
+rays: 1
+lock: '22.1'
+radio-one: '23.1'
+radio-two: '25.1'
+reveal: '27.1'
+coda-bars: 4
+search-cut-bars: 4
+beat-motion:
+- 1
+- 0.45
+- 0.18
+- 0.03
+beat-two-accents: []
+search-days: 6
+shared-azimuth-deg: 25
+shared-altitude-deg: 55
+optical-diameter-metres: 38
+optical-aperture-metres: 8
+array-count: 19
+exposure: 1.7
+bloom: 0.65
+flow-study:
+  provenance: authored-previs
+  start: '49.1'
+  fold: '57.1'
+  answer: '59.1'
+  eye:
+  - -20
+  - -4
+  - 14
+  wide-degrees: 64
+  return-path: 0
+  geometry:
+    file: flow-geometry-b.yaml
+    sha256: 22422bcd0778455331e988d0c87a288826d3560643381e4316c216dcbf822b06
+  travel:
+    to:
+    - 15
+    - 12
+    - 70
+    look-from:
+    - -20
+    - -4
+    - 5
+    look-to:
+    - 0
+    - 0
+    - 0
+    until: '55.1'

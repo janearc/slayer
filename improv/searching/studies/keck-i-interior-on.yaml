@@ -1,0 +1,124 @@
+# Authored enclosed study; see observatory-models.md.
+---
+width: 720
+height: 480
+rays: 2
+seed: 5
+details:
+- demo
+wide: 85
+camera:
+  x: 1.4
+  y: 0.8
+  z: -2
+distance: 2.8
+sample-limit: 2000000
+face-limit: 1500000
+pixel-aspect: 1
+light-exposure: 0.001
+minimum-coverage: 0.0001
+sky:
+  horizon:
+    r: 0.004
+    g: 0.006
+    b: 0.012
+  zenith:
+    r: 0.004
+    g: 0.006
+    b: 0.012
+  ground:
+    r: 0.004
+    g: 0.006
+    b: 0.012
+sources:
+- toward:
+    x: -1
+    y: 2
+    z: -2
+  strength:
+    r: 0.07
+    g: 0.12
+    b: 0.25
+- toward:
+    x: 2
+    y: 1
+    z: 1
+  strength:
+    r: 0.025
+    g: 0.04
+    b: 0.08
+tone:
+  exposure: 1
+  knee: 0.7
+  top: 8
+  bloom: 0
+studio: true
+cutaway: false
+local-lights:
+- at:
+    x: -7
+    y: 12
+    z: -3
+  strength:
+    r: 80
+    g: 48
+    b: 20
+- at:
+    x: 7
+    y: 12
+    z: -3
+  strength:
+    r: 80
+    g: 48
+    b: 20
+interior:
+  at:
+    x: 6
+    y: 10
+    z: -9
+  look-at:
+    x: 0
+    y: 27
+    z: -14
+  stars:
+    share: 0.08
+    size: 0.15
+    bright: 4
+    dark:
+      r: 0.001
+      g: 0.002
+      b: 0.006
+    seed: 29
+  air-radius-metres: 500
+  extinction-per-metre: 0.00012
+  beams:
+  - at:
+      x: -2
+      y: 15
+      z: -7
+    toward:
+      x: 0
+      y: 0.819152
+      z: -0.573576
+    strength:
+      r: 4000
+      g: 2000
+      b: 50
+    radius-metres: 0.15
+    reach-metres: 500
+    divergence-deg: 0.002
+  - at:
+      x: 2
+      y: 15
+      z: -7
+    toward:
+      x: 0
+      y: 0.819152
+      z: -0.573576
+    strength:
+      r: 4000
+      g: 2000
+      b: 50
+    radius-metres: 0.15
+    reach-metres: 500
+    divergence-deg: 0.002

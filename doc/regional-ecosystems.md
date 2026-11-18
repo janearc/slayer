@@ -1,9 +1,7 @@
 # A population belongs to its region
 
-This implementation is committed with tests, in `scene/biome`; this note was
-written before them and records no results. Renders are not recorded here.
-It adds authored mixed populations and a local terrain adapter; it does not
-yet stream a whole world.
+This is implemented in `scene/biome`. It adds authored mixed populations
+and a local terrain adapter; it does not yet stream a whole world.
 
 ## Fixed roots
 
@@ -105,21 +103,12 @@ projection/datum conversion, curved-world placement, visible-size detail,
 aggregate distant canopy and persistent moving-frame residency are not
 implemented by this population slice.
 
-A future visible-region query must include a halo for maximum canopy
-extent. Selecting only roots inside the image would clip branches whose
-roots lie just outside it. Canopy bounds and temporal acceptance remain
-requirements for the streamed-world adapter.
-
 The default query work limits are picked in `selection-policy.yaml` and read
 through Puzzlemouth. The library applies its supplied per-query limit;
 Hillside now shares one default allowance across all ecosystem regions in that
 prepared scene.
 
 Exhaustion refuses preparation, rather than quietly dropping later regions or
-granting each another full allowance. Rendering and source managers must also
-bound their combined populations, geometry prototypes and live terrain
-resources.
+granting each another full allowance.
 
-These are count/work limits, not a world-wide memory cap. A visible-world
-manager must budget the active view's regions and distant representations
-instead of trying to enumerate every root on a planet.
+These are count/work limits, not a world-wide memory cap.

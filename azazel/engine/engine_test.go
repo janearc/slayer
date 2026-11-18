@@ -12,6 +12,20 @@ import (
 	"github.com/janearc/slayer/hillside"
 )
 
+// TestMain gives the tests a cache home of their own, so nothing a draw
+// keeps is kept in a real cache.
+func TestMain(m *testing.M) {
+	home, err := os.MkdirTemp("", "engine-cache")
+	if err != nil {
+		os.Stderr.WriteString(err.Error() + "\n")
+		os.Exit(1)
+	}
+	os.Setenv("SLAYER_CACHE", home)
+	code := m.Run()
+	os.RemoveAll(home)
+	os.Exit(code)
+}
+
 // widow is a set file that says a world and no ground, so it draws with
 // no shelf of sources.
 const widow = "../../sets/widow.yaml"

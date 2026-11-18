@@ -26,6 +26,21 @@ BOOL slayer_wait_command(id<MTLCommandBuffer> commands, double limit,
 // slayer_stuck is the sentence a caller says when it will not use a
 // context or session again because a command outran its limit.
 NSString *slayer_stuck(void);
+
+// slayer_stopped_for_display is whether a command's error is the system
+// stopping it so the display could present: on Apple Silicon the window
+// server draws on the same gpu. Such a command was stopped cleanly; the
+// device is fine and the same work may be sent again in smaller parts.
+BOOL slayer_stopped_for_display(NSError *why);
+
+// slayer_command_failure is what failed and the system's words for why,
+// with the error's domain and code, which say which case it was.
+NSString *slayer_command_failure(NSString *what, NSError *why);
+
+// slayer_keeps_encoder_states is whether commands are made to keep each
+// encoder's execution state for a failure to say: when SLAYER_BAND_TIMES
+// asks for the bands' receipts, and not otherwise.
+BOOL slayer_keeps_encoder_states(void);
 #endif
 
 // slayer_shared_library_count is how many distinct sources the cache

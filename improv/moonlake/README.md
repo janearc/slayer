@@ -48,8 +48,9 @@ The renders, with a README each, are kept outside this repository, under
     lightshow free-runs as before. Editing `cues.yaml` is how the show
     changes; nothing recompiles.
   - `metronome`: the score checked by eye against the song. Raw frames
-    to ffmpeg with the song under them: four squares flash on each
-    measured beat (beat one white), the bar and beat written large, a
+    to ffmpeg with the song under them: a square a beat, the score's
+    meter of them (four when unsaid), flashes on each measured beat
+    (beat one white), the bar and beat written large, a
     word for measured or counted-through, and a band for each cue as it
     fires.
 

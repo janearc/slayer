@@ -35,6 +35,14 @@ and every piece draw would draw with is opened and let go: no frame is
 drawn and nothing is written. It says what it would draw and each file
 draw would write.
 
+slayer assess FILE --census PATH stages FILE as draw stages it, counts
+its first frame's world (a still's at --at, where given) and writes the
+census to PATH as JSON, drawing nothing: each placed thing's faces, a
+mesh group's instanced and stored faces and its instances, analytic
+shapes and volumes by kind with no faces, and the receipt (the job's
+sha256, its scene and camera, the time, the build). The faces are the
+ones staged in the scene, not the ones visible or hit from the camera.
+
 slayer assess FILE --judge draws a set file as the terminal shows it
 and as a real picture, judges the one against the other, and writes
 both, the real one again through the set's print, and the verdict, to
@@ -74,7 +82,7 @@ var (
 	judgeTakes  = []string{judgeFlag, "out", "at", "camera", kFlag, samplesFlag}
 	smokesTakes = []string{smokesFlag, "out", kFlag, smallFlag, freshFlag}
 	checkTakes  = append([]string{"out", "width", "height", "rays", "at",
-		"camera", "renderer", "quality"}, switchNames()...)
+		"camera", "renderer", "quality", censusFlag}, switchNames()...)
 )
 
 // The judges assess hands a judgement to: a set's here, the smokes'
@@ -141,7 +149,8 @@ func (held assessing) check(call pzm.Call, given string) error {
 	if err != nil {
 		return fmt.Errorf("%s will not draw: %w", name, err)
 	}
-	if err := opens(run); err != nil {
+	lines, err := held.opened(call, run)
+	if err != nil {
 		return fmt.Errorf("%s will not draw: %w", name, err)
 	}
 	wanted, at := run.wanted, run.at
@@ -149,8 +158,8 @@ func (held assessing) check(call pzm.Call, given string) error {
 	if frames := wanted.Clock().Frames(); !wanted.Clock().Still() {
 		what = fmt.Sprintf("a film of %d frames", frames)
 	}
-	lines := []string{fmt.Sprintf("%s will draw, as %s; nothing was "+
-		"drawn", name, what)}
+	lines = append([]string{fmt.Sprintf("%s will draw, as %s; nothing "+
+		"was drawn", name, what)}, lines...)
 	for _, line := range at.written() {
 		lines = append(lines, "draw would write "+line)
 	}
@@ -161,24 +170,45 @@ func (held assessing) check(call pzm.Call, given string) error {
 	return err
 }
 
-// opens makes, by draw's own runner and in draw's order, every refusal
+// opened opens and lets go every piece draw would draw with, and where
+// the call asks for a census, writes it from the scene so opened; it
+// says the census written, a line, or nothing.
+func (held assessing) opened(call pzm.Call, run runner) ([]string,
+	error) {
+	if !call.Given(censusFlag) {
+		return nil, opens(run)
+	}
+	path := resolved(call.Value(censusFlag), held.env.directory)
+	if err := censused(run, path); err != nil {
+		return nil, err
+	}
+	return []string{"wrote the census " + path}, nil
+}
+
+// opens makes every refusal draw makes before its first frame, opens the
+// pieces draw would draw with and lets them go. It writes nothing.
+func opens(run runner) error {
+	tools, err := opening(run)
+	if err != nil {
+		return err
+	}
+	return tools.source.Close()
+}
+
+// opening makes, by draw's own runner and in draw's order, every refusal
 // draw makes before its first frame: for a still, a picture another job
 // drew; for a film, its sound, movie settings and frames folder; then
-// the source, developer and titles opened and let go. It writes
-// nothing.
-func opens(run runner) error {
+// the source, developer and titles opened, the source left open for the
+// caller to close.
+func opening(run runner) (kit, error) {
 	refusal := run.unclaimed
 	if !run.wanted.Clock().Still() {
 		refusal = run.looked
 	}
 	if err := refusal(); err != nil {
-		return err
+		return kit{}, err
 	}
-	tools, err := run.tools()
-	if err != nil {
-		return err
-	}
-	return tools.source.Close()
+	return run.tools()
 }
 
 // judge draws a set both ways and judges it, or in a dry run says the
@@ -307,10 +337,12 @@ func (held assessing) smokeWords(call pzm.Call) []string {
 	return words
 }
 
-// declareAssess adds assess to the tool: it writes only when it judges.
+// declareAssess adds assess to the tool: it writes only when it judges
+// or counts.
 func declareAssess(made *pzm.Tool, env Env, shop workshop) {
 	writes := verb.WritesTo("with --judge or --smokes, the pictures " +
-		"and verdicts, in --out and the smoke cache")
+		"and verdicts, in --out and the smoke cache, and with --census " +
+		"the census")
 	judges := verb.NewFacts(writes, verb.Changes, verb.ThisMachine,
 		verb.NoOne, verb.FullCPU)
 	held := assessing{env: env, shop: shop}
@@ -326,7 +358,9 @@ func declareAssess(made *pzm.Tool, env Env, shop workshop) {
 		pzm.Switch(smallFlag, verb.NoShort, "judge the smokes at half "+
 			"the size"),
 		pzm.Switch(freshFlag, verb.NoShort, "draw again what the smoke "+
-			"cache holds"))
+			"cache holds"),
+		pzm.Value(censusFlag, verb.NoShort, "write the geometry staged "+
+			"for the first frame to this file, as JSON"))
 	made.Verb("assess", verb.NoShort, "say whether a file will draw, "+
 		"or judge a set or the smokes", assessHelp, "Example_assess",
 		judges, held.assess, flags...)

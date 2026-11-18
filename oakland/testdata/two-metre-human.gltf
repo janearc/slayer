@@ -1,0 +1,209 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Oakland CC0 fixture"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "torso",
+      "mesh": 0,
+      "translation": [
+        0,
+        1.25,
+        0
+      ],
+      "scale": [
+        0.48,
+        0.78,
+        0.24
+      ]
+    },
+    {
+      "name": "pelvis",
+      "mesh": 0,
+      "translation": [
+        0,
+        0.78,
+        0
+      ],
+      "scale": [
+        0.42,
+        0.3,
+        0.25
+      ]
+    },
+    {
+      "name": "head",
+      "mesh": 0,
+      "translation": [
+        0,
+        1.86,
+        0
+      ],
+      "scale": [
+        0.28,
+        0.28,
+        0.28
+      ]
+    },
+    {
+      "name": "neck",
+      "mesh": 0,
+      "translation": [
+        0,
+        1.66,
+        0
+      ],
+      "scale": [
+        0.14,
+        0.14,
+        0.14
+      ]
+    },
+    {
+      "name": "left-arm",
+      "mesh": 0,
+      "translation": [
+        -0.36,
+        1.25,
+        0
+      ],
+      "scale": [
+        0.2,
+        0.72,
+        0.2
+      ]
+    },
+    {
+      "name": "right-arm",
+      "mesh": 0,
+      "translation": [
+        0.36,
+        1.25,
+        0
+      ],
+      "scale": [
+        0.2,
+        0.72,
+        0.2
+      ]
+    },
+    {
+      "name": "left-leg",
+      "mesh": 0,
+      "translation": [
+        -0.14,
+        0.34,
+        0
+      ],
+      "scale": [
+        0.22,
+        0.68,
+        0.25
+      ]
+    },
+    {
+      "name": "right-leg",
+      "mesh": 0,
+      "translation": [
+        0.14,
+        0.34,
+        0
+      ],
+      "scale": [
+        0.22,
+        0.68,
+        0.25
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "shared-cube-part",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "human-fixture-slot"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "two-metre-human.bin",
+      "byteLength": 648
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 288
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 288,
+      "byteLength": 288
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 576,
+      "byteLength": 72
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        -0.5,
+        -0.5,
+        -0.5
+      ],
+      "max": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5123,
+      "count": 36,
+      "type": "SCALAR"
+    }
+  ]
+}

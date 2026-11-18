@@ -33,7 +33,7 @@ func TestScatteredStandRepeatsItsFourChosenSeededForms(t *testing.T) {
 	if stage.made.burning != 0 || len(stage.world.Volumes) != 0 || len(stage.world.Lamps) != 0 {
 		t.Fatal("a stand requesting no fire ignited real specimens")
 	}
-	// Independent Ruby PCG128/DXSM fixture in testdata; not measured data.
+	// Independent PCG128/DXSM fixture in testdata, in math/big; not measured data.
 	wantPlaces := [][3]float64{
 		{1062.28056547676, 8960.671286481736, 2378.875},
 		{1086.823009738792, 8955.673148228278, 2755.375},

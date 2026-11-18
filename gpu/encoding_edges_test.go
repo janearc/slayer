@@ -53,6 +53,9 @@ func TestGroupEncodingRechecksMutableReferenceMeshNormals(t *testing.T) {
 	if err := encoded.group(group, maths.Subspace{}, 0, false); err != nil {
 		t.Fatal(err)
 	}
+	if err := encoded.packPool(); err != nil {
+		t.Fatal(err)
+	}
 	if len(encoded.groups) != 1 || len(encoded.faces.triangles) != 1 {
 		t.Fatal("reference group lost or copied its face")
 	}

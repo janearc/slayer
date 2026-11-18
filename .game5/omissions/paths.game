@@ -1,0 +1,29 @@
+# not distributing this
+cmd/quorum
+
+# not distributing this
+cmd/show
+
+# not ready for this to distribute
+azazel/internal/locking/DESIGN.md
+azazel/internal/locking/RELEASE.md
+azazel/internal/publication/LOCAL-DESIGN.md
+doc/camera-hyperlapse-result.md
+doc/feature-backlog.md
+doc/golden-hour-site.yaml
+doc/mist-packet-contract.md
+doc/music-timeline.yaml
+doc/phone-ocean-integration.md
+doc/phone-source-checks.md
+doc/review-2026-11-04.md
+doc/terrain-streaming.md
+hillside/main_draw_test.go
+manufacture/offered_test.go
+manufacture/rows_test.go
+
+# don't need to share this with the world
+DEBT.md
+
+# the cited sources verification reads by default: in git for whoever
+# builds, never distributed.
+shelf

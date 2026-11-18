@@ -10,6 +10,32 @@ type SourceReference struct {
 	GeographicCRS, ProjectedCRS int
 	AngularUnits, LinearUnits   int
 	VerticalCRS, VerticalUnits  int
+	// Transform is the projection method, ProjCoordTrans, key 3075.
+	Transform int
+}
+
+// The GeoKey ids, directory tags and codes below are defined by OGC
+// GeoTIFF1.1, document 19-008r4, sections 7.1.2 and 7.5 and Annex B.
+const (
+	geoKeyDirectory    = 34735 // defined: GeoKeyDirectoryTag
+	geoKeyDoubles      = 34736 // defined: GeoDoubleParamsTag
+	keySemiMajor       = 2057  // defined: GeogSemiMajorAxisGeoKey
+	keySemiMinor       = 2058  // defined: GeogSemiMinorAxisGeoKey
+	keyTransform       = 3075  // defined: ProjCoordTransGeoKey
+	keyParallel        = 3078  // defined: ProjStdParallel1GeoKey
+	keyFalseEast       = 3082  // defined: ProjFalseEastingGeoKey
+	keyFalseNorth      = 3083  // defined: ProjFalseNorthingGeoKey
+	keyCentreLongitude = 3088  // defined: ProjCenterLongGeoKey
+	keyCentreLatitude  = 3089  // defined: ProjCenterLatGeoKey
+)
+
+// sphereKeys are the GeoKeys, held as doubles, that an equirectangular
+// projection on a sphere needs. An absent key is zero, as GeoTIFF defaults it.
+type sphereKeys struct {
+	semiMajor, semiMinor            float64
+	parallel                        float64
+	falseEast, falseNorth           float64
+	centreLongitude, centreLatitude float64
 }
 
 // Reference reports declared source metadata, not a resolved datum transform.
@@ -18,8 +44,7 @@ func (raster *Raster) Reference() SourceReference { return raster.reference }
 // readReference reads the GeoKey directory into the raster's reference, if
 // the file carries one; a file without one is not an error.
 func (raster *Raster) readReference(tags map[int]entry) error {
-	const directoryTag = 34735 // GeoKeyDirectoryTag, OGC GeoTIFF1.1 section7.1.2.
-	raw, present := tags[directoryTag]
+	raw, present := tags[geoKeyDirectory]
 	if !present {
 		return nil
 	}
@@ -31,12 +56,22 @@ func (raster *Raster) readReference(tags map[int]entry) error {
 		return fmt.Errorf("terrain: unsupported or truncated GeoKey directory")
 	}
 	ref := SourceReference{}
+	measures := sphereKeys{}
 	wanted := map[uint64]*int{
 		1024: &ref.Model, 1025: &ref.RasterType,
 		2048: &ref.GeographicCRS, 2054: &ref.AngularUnits,
 		3072: &ref.ProjectedCRS, 3076: &ref.LinearUnits,
 		4096: &ref.VerticalCRS, 4099: &ref.VerticalUnits,
+		keyTransform: &ref.Transform,
 	}
+	measured := map[uint64]*float64{
+		keySemiMajor: &measures.semiMajor, keySemiMinor: &measures.semiMinor,
+		keyParallel: &measures.parallel, keyFalseEast: &measures.falseEast,
+		keyFalseNorth:      &measures.falseNorth,
+		keyCentreLongitude: &measures.centreLongitude,
+		keyCentreLatitude:  &measures.centreLatitude,
+	}
+	doubles := raster.reals(tags[geoKeyDoubles])
 	seen := map[uint64]bool{}
 	for i := 0; i < int(keys[3]); i++ {
 		row := keys[4+4*i : 8+4*i]
@@ -50,8 +85,14 @@ func (raster *Raster) readReference(tags map[int]entry) error {
 			}
 			*target = int(row[3])
 		}
+		if target, ok := measured[row[0]]; ok {
+			if row[1] != geoKeyDoubles || row[2] != 1 || row[3] >= uint64(len(doubles)) {
+				return fmt.Errorf("terrain: GeoKey %d is not one value of the doubles tag", row[0])
+			}
+			*target = doubles[row[3]]
+		}
 	}
-	raster.reference = ref
+	raster.reference, raster.sphere = ref, measures
 	return nil
 }
 

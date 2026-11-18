@@ -21,13 +21,13 @@ your own set.
 
 ## Your first picture
 
-The [first-picture job](../jobs/first-picture.yaml) draws smoke 1 at
+The [first-picture job](examples/jobs/first-picture.yaml) draws smoke 1 at
 160 by 90 on the CPU. It needs no Metal device or external terrain.
 
 ```sh
-game run slayer -- assess jobs/first-picture.yaml
-game run slayer -- draw jobs/first-picture.yaml --dry-run
-game run slayer -- draw jobs/first-picture.yaml
+game run slayer -- assess doc/examples/jobs/first-picture.yaml
+game run slayer -- draw doc/examples/jobs/first-picture.yaml --dry-run
+game run slayer -- draw doc/examples/jobs/first-picture.yaml
 ```
 
 Assessment checks the input without drawing. Dry run prints the resolved
@@ -38,7 +38,7 @@ in these jobs are relative to the job file, not your terminal directory.
 Try a larger picture and more samples:
 
 ```sh
-game run slayer -- draw jobs/first-picture.yaml --width 320 --height 180 --rays 2
+game run slayer -- draw doc/examples/jobs/first-picture.yaml --width 320 --height 180 --rays 2
 ```
 
 Rays are counted **per axis**: 2 means four rays per pixel, 4 means
@@ -50,7 +50,7 @@ edges and sampling noise; they cannot repair a wrong camera.
 Copy the job, change its `print` settings, and develop the existing PFM:
 
 ```sh
-game run slayer -- develop jobs/first-picture.yaml out/first-picture.pfm
+game run slayer -- develop doc/examples/jobs/first-picture.yaml out/first-picture.pfm
 ```
 
 This uses the job's current development settings without tracing again.
@@ -59,14 +59,14 @@ the display of the light; adding a lamp changes the world itself.
 
 ## Your first film and soundtrack
 
-The [first-film job](../jobs/first-film.yaml) makes three seconds at six
+The [first-film job](examples/jobs/first-film.yaml) makes three seconds at six
 frames per second, with a synthesized score. The scene is stationary:
 this example checks frames, sound and encoding before camera animation.
 Movie output needs `ffmpeg` on PATH.
 
 ```sh
-game run slayer -- draw jobs/first-film.yaml --dry-run
-game run slayer -- draw jobs/first-film.yaml
+game run slayer -- draw doc/examples/jobs/first-film.yaml --dry-run
+game run slayer -- draw doc/examples/jobs/first-film.yaml
 ```
 
 It writes `out/first-film.mp4` and numbered PNGs in `out/first-film/`.
@@ -75,10 +75,6 @@ Longer films require more frames. Control-C stops between frames; an
 unchanged job, inputs and build can resume completed frames at the same
 output location. Read [output and resume](../door/README.md) before moving
 or reusing a long render's files.
-
-Study [short-fire-night](../jobs/short-fire-night.yaml) next. It adds
-portrait framing, changing fire, a film stock and a title. Begin with
-smaller dimensions before attempting full portrait output.
 
 ## Make the scene yours
 

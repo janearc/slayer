@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"sync/atomic"
 	"time"
 
 	"github.com/janearc/slayer/film"
@@ -164,6 +165,38 @@ func (scene *staged) refusal() error {
 	if scene.fault != nil {
 		return scene.fault
 	}
+	switch scene.oceanSunFault.Load() {
+	case oceanSunInvalidPath:
+		return fmt.Errorf("trace: ocean mean-plane sun path has an invalid intersection or direction")
+	case oceanSunNoBoundary:
+		if miss := scene.oceanSunMiss.Load(); miss != nil {
+			return fmt.Errorf("trace: ocean mean-plane source path missed %s boundary: world ray origin=%+v direction=%+v; local origin=%+v direction=%+v signed-gap=%g; view ray origin=%+v direction=%+v signed-gap=%g scale=%g sample-local=%+v sample-gap=%g pre-sample-hit=(%g,%t) shape-hit=(%g,%t) crowd-first=(%g,%t,boundary=%t) sample=%+v along=%g state={crossed:%d slipped:%d bounce:%d holding:%d onward:%t last-clear-TIR:%t}", miss.shape, miss.worldOrigin, miss.worldDirection, miss.localOrigin, miss.localDirection, miss.localSignedGap, miss.viewOrigin, miss.viewDirection, miss.viewSignedGap, miss.viewScale, miss.viewSampleLocal, miss.viewSampleGap, miss.viewBeforeSampleDist, miss.viewBeforeSampleHit, miss.viewBoundaryDistance, miss.viewBoundaryHit, miss.viewCrowdDistance, miss.viewCrowdHit, miss.viewCrowdBoundary, miss.sample, miss.sampleAlong, miss.crossed, miss.slipped, miss.bounce, miss.holding, miss.onward, miss.lastClearTIR)
+		}
+		return fmt.Errorf("trace: ocean mean-plane source path does not meet the configured boundary; the path may leave its finite footprint")
+	}
+	if scene.clearInscatterFault != nil {
+		switch scene.clearInscatterFault.Load() {
+		case clearInscatterAmbientUnsupported:
+			return fmt.Errorf("trace: clear-medium in-scattering refuses a directionless ambient lamp")
+		case clearInscatterNumericalOverflow:
+			return fmt.Errorf("trace: clear-medium in-scattering produced an unrepresentable source or path")
+		}
+	}
+	for _, each := range scene.crowd.things {
+		material := each.thing.Material
+		if material != nil && material.WakeFoam != nil && material.WakeFoam.Coverage > 0 &&
+			(material.Texture != nil || material.Shine != nil ||
+				material.Glow != (maths.Light{})) {
+			return fmt.Errorf("trace: wake foam refuses a painted, shining or emissive material")
+		}
+		if material != nil && material.WakeFoam != nil && material.WakeFoam.Coverage > 0 &&
+			(scene.oceanSun != nil || scene.oceanSpotInscatter) {
+			return fmt.Errorf("trace: wake foam cannot be combined with mean-plane or participating source approximations")
+		}
+		if material != nil && material.WakeFoam != nil && !material.WakeFoam.Valid() {
+			return fmt.Errorf("trace: wake foam parameters are invalid or outside their authored bounds")
+		}
+	}
 	for _, each := range scene.volumes {
 		if each.gas != nil && !each.gas.IsLobe() {
 			return fmt.Errorf("trace: gas %s has an asymmetry of %v, "+
@@ -179,6 +212,7 @@ func (scene *staged) refusal() error {
 // later additions do not enter this render. Geometry, media, and materials
 // remain shared and must not change until rendering finishes.
 type staged struct {
+	seconds float64
 	// volumeSky is a fixed full-sphere quadrature for isotropic scattering.
 	// Empty keeps the legacy source term and lamp normalization.
 	volumeSky []maths.Vec
@@ -196,6 +230,9 @@ type staged struct {
 	fields   []placedField
 	// fault is why a field is no hole, as fieldFault has it; nil if none
 	fault error
+	// clearInscatterFault is a runtime refusal for a custom lamp whose
+	// direction cannot be established before camera-path samples are evaluated.
+	clearInscatterFault *atomic.Uint32
 	// gassy is whether any volume is a gas, worked out once a picture
 	gassy bool
 	// walked is a replay's steps, told as the pixel is made; nil in
@@ -205,6 +242,14 @@ type staged struct {
 	// a share of it as their local offset; nonreflecting geometry still
 	// casts shadows without enlarging this scale
 	spread float64
+	// oceanSun is non-nil only for the explicit CPU mean-plane direct-sun
+	// approximation. Its source and boundary were validated before workers.
+	oceanSun           *oceanDirectSun
+	oceanSpotInscatter bool
+	oceanSunFault      atomic.Uint32
+	oceanSunMiss       atomic.Pointer[oceanSunPathMiss]
+	oceanEventBoundary *thing.Thing
+	oceanEventLimit    int
 }
 
 // lifted offsets a ray origin along the surface normal to avoid intersecting
@@ -290,7 +335,7 @@ func stage(world *thing.World, moment time.Duration) *staged {
 		lighting = skytable.Of(world.Sky)
 	}
 	things := gathered(place(world, moment))
-	return &staged{
+	made := &staged{
 		volumeSky: world.VolumeIllumination.Directions(),
 		lamps:     lamps,
 		discs:     film.Disced(lamps),
@@ -304,6 +349,49 @@ func stage(world *thing.World, moment time.Duration) *staged {
 		fault:     fieldFault(world),
 		gassy:     hasGas(volumes),
 		spread:    rayOriginSpread(world, things.things),
+		oceanSpotInscatter: world.OceanSurface != nil &&
+			world.OceanSurface.SpotInscatter,
+		seconds: moment.Seconds(),
+	}
+	if ocean := world.OceanSurface; ocean != nil && ocean.InterfaceEvents > 0 {
+		made.oceanEventBoundary, made.oceanEventLimit = ocean.Boundary,
+			ocean.InterfaceEvents
+	}
+	if ocean := world.OceanSurface; ocean != nil &&
+		(ocean.MeanPlaneSource() || ocean.Boundary != nil &&
+			(oceanDiffuseSkyCandidate(world, ocean.Boundary.Material) ||
+				oceanClearCloudSkyCandidate(world, ocean.Boundary.Material))) {
+		made.oceanSun = oceanDirectSunOf(world)
+		if made.oceanSun != nil {
+			for index := range made.crowd.things {
+				if made.crowd.things[index].thing == made.oceanSun.boundary {
+					made.oceanSun.placedBoundary = &made.crowd.things[index]
+					break
+				}
+			}
+		}
+	}
+	return made
+}
+
+// enableClearInscatterFault allocates a concurrent refusal flag only for a
+// render that starts in, or can enter, a participating medium. The ocean
+// route is the only supported participating boundary, so checking its
+// material is constant work; ordinary non-scattering worlds keep the legacy
+// zero-state path.
+func (scene *staged) enableClearInscatterFault(seen view) {
+	for _, each := range seen.inside[:seen.holding] {
+		if each.clearMedium.HasScattering() {
+			scene.clearInscatterFault = &atomic.Uint32{}
+			return
+		}
+	}
+	if seen.world != nil && seen.world.OceanSurface != nil &&
+		seen.world.OceanSurface.Boundary != nil {
+		material := seen.world.OceanSurface.Boundary.Material
+		if material != nil && material.ClearMedium.HasScattering() {
+			scene.clearInscatterFault = &atomic.Uint32{}
+		}
 	}
 }
 

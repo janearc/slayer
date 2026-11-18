@@ -4,6 +4,7 @@ import (
 	"math"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -90,6 +91,117 @@ func builtFrom(t *testing.T, said set.World) *thing.World {
 		t.Fatal(err)
 	}
 	return world
+}
+
+func TestWorldBuildsNamedExtinctionUsingWorldMetresPerUnit(t *testing.T) {
+	t.Helper()
+	raw, err := os.ReadFile("../set/testdata/built.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := strings.Replace(string(raw), "  world:\n",
+		"  world:\n    unit: 2\n", 1)
+	source = strings.Replace(source,
+		"      grass:\n"+
+			"        colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        source: eye\n",
+		"      grass:\n"+
+			"        clear: {through: 1, index: 1.333, gloss: 1, "+
+			"extinction-per-metre: [0.1, 0.2, 0.3]}\n"+
+			"        source: synthetic validation; not measured water\n", 1)
+	read, err := set.Read("scaled-clear-world.yaml", []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	said, _ := read.World()
+	world, err := stage.World(said)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, each := range world.Things {
+		if each.Material == nil || each.Material.Name != "grass" {
+			continue
+		}
+		medium := each.Material.ClearMedium
+		if medium == nil || medium.Name() != "grass" ||
+			medium.Extinction() != maths.RGB(0.1, 0.2, 0.3) ||
+			medium.MetresPerUnit() != 2 {
+			t.Fatalf("staged material optical descriptor = %+v, want authored coefficients at 2 m/world unit", medium)
+		}
+		return
+	}
+	t.Fatal("staged world has no thing wearing the clear optical material")
+}
+
+func TestWorldBuildsAuthoredDiffuseSkyBudgetOnOceanBoundaryCopy(t *testing.T) {
+	raw, err := os.ReadFile("../set/testdata/built.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := strings.Replace(string(raw), "  world:\n",
+		"  world:\n"+
+			"    ocean:\n"+
+			"      material: grass\n"+
+			"      direct-sun: mean-plane\n"+
+			"      diffuse-sky-samples: 24\n"+
+			"      middle: [0, 0, 0]\n"+
+			"      extent: {value: 64, unit: m}\n"+
+			"      samples: 9\n"+
+			"      sea:\n"+
+			"        wind: {value: 0, unit: m/s}\n"+
+			"        fetch: {value: 0, unit: m}\n"+
+			"        depth: {value: 0, unit: m}\n"+
+			"        toward: {value: 0, unit: rad}\n"+
+			"      seed: 7\n"+
+			"      time: {value: 0, unit: s}\n"+
+			"      source: \"synthetic authored ocean test\"\n"+
+			"      flat-mean:\n"+
+			"        mean-level: {value: 0, unit: m}\n"+
+			"        collar-width: {value: 16, unit: m}\n"+
+			"        extends-to-infinity: true\n", 1)
+	source = strings.Replace(source,
+		"      grass:\n"+
+			"        colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        source: eye\n",
+		"      grass:\n"+
+			"        clear:\n"+
+			"          through: 1\n"+
+			"          index: 1.333\n"+
+			"          gloss: 1\n"+
+			"          extinction-per-metre: [0.1, 0.1, 0.1]\n"+
+			"          scatter:\n"+
+			"            coefficient-per-metre: [0.01, 0.02, 0.03]\n"+
+			"            phase-g: 0.25\n"+
+			"            steps: 8\n"+
+			"            max-distance: {value: 12, unit: m}\n"+
+			"        source: \"synthetic coefficients; not measured water\"\n", 1)
+	read, err := set.Read("authored-diffuse-sky-ocean.yaml", []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	said, _ := read.World()
+	built, err := stage.World(said)
+	if err != nil {
+		t.Fatal(err)
+	}
+	boundary := built.OceanSurface.Boundary
+	if boundary == nil || boundary.Material == nil ||
+		boundary.Material.ClearMedium == nil {
+		t.Fatal("authored ocean did not stage its clear boundary medium")
+	}
+	if got := boundary.Material.ClearMedium.DiffuseSkyInscatterSamples(); got != 24 {
+		t.Fatalf("staged diffuse sky samples=%d, want 24", got)
+	}
+	for _, each := range built.Things {
+		if each == boundary || each.Material == nil || each.Material.Name != "grass" {
+			continue
+		}
+		if got := each.Material.ClearMedium.DiffuseSkyInscatterSamples(); got != 0 {
+			t.Fatalf("sky opt-in leaked onto non-ocean grass material with %d samples", got)
+		}
+		return
+	}
+	t.Fatal("fixture has no non-ocean thing to verify material isolation")
 }
 
 // sameWorld says where two worlds differ, piece by piece, as exact as

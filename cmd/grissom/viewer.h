@@ -13,7 +13,8 @@ const char *viewer_icons(const uint8_t *light, size_t light_size,
                          const uint8_t *dark, size_t dark_size);
 
 // viewer_mesh is triangles to draw: count * 9 floats of corners on the
-// unit sphere, and count * 3 * 4 bytes of colour, rgba a corner.
+// unit sphere, and count * 3 * 4 bytes of colour, rgba a corner. A count
+// of zero is no mesh; its pointers are not read.
 typedef struct {
   const float *corners;
   const uint8_t *colours;

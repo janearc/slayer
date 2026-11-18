@@ -2,9 +2,10 @@
 # set: the set file staged, from the root of the repository.
 # kept_faces: the faces the set keeps, from the tally line the command prints.
 # peak_bytes: "maximum resident set size" of `/usr/bin/time -l`, the largest of
-# five runs of this set and doc/quality-summit-moon.yaml, taken on 2026-11-10
+# five runs of this set and hillside/testdata/quality-summit-moon.yaml, taken
+# on 2026-11-10
 # on a Mac with 48 GB.
 # command: SLAYER_SHELF=<shelf> /usr/bin/time -l hillside -set <set> -w 64 -h 36 -n 1
-set: doc/quality-summit-moon-4k.yaml
+set: hillside/testdata/quality-summit-moon-4k.yaml
 kept_faces: 1419096
 peak_bytes: 1733869568

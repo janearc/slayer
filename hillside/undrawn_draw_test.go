@@ -107,12 +107,12 @@ func TestTheSpaceStagesFeaturesAreDrawnAndNoOthers(t *testing.T) {
 // it: past the setting, which the space stage draws, to the next.
 func TestTheFourScenesAreRefusedByTheirFirstUndrawnFeature(t *testing.T) {
 	for file, want := range map[string]string{
-		"corona.yaml":              "../doc/corona.yaml:23:9: thing.kind: star is read and not yet drawn",
-		"orbital-and-lantern.yaml": "../doc/orbital-and-lantern.yaml:24:9: thing.kind: lantern is read and not yet drawn",
-		"webb-looking-out.yaml":    "../doc/webb-looking-out.yaml:21:3: scene.frame is read and not yet drawn",
-		"keyhole-to-ground.yaml":   "../doc/keyhole-to-ground.yaml:28:3: scene.date: 2026-06-21 is read and not yet drawn",
+		"doc/corona.yaml":                     "../doc/corona.yaml:23:9: thing.kind: star is read and not yet drawn",
+		"doc/orbital-and-lantern.yaml":        "../doc/orbital-and-lantern.yaml:24:9: thing.kind: lantern is read and not yet drawn",
+		"set/testdata/webb-looking-out.yaml":  "../set/testdata/webb-looking-out.yaml:21:3: scene.frame is read and not yet drawn",
+		"set/testdata/keyhole-to-ground.yaml": "../set/testdata/keyhole-to-ground.yaml:28:3: scene.date: 2026-06-21 is read and not yet drawn",
 	} {
-		given := mustParse(t, "-set", filepath.Join("..", "doc", file))
+		given := mustParse(t, "-set", filepath.Join("..", file))
 		_, _, _, err := staged(given)
 		if err == nil || err.Error() != want {
 			t.Errorf("%s: staged says %v, want %q", file, err, want)

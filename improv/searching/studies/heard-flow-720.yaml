@@ -1,0 +1,43 @@
+# Authored geometry and light; NOT a measured Laniakea reconstruction.
+# Seeds 1411/1412. Scene units, colours and widths are artistic choices.
+# Cyan marks the fictional return destination, not our measured position.
+---
+name: heard. / flow and answering pulse / authored previs
+width: 1280
+height: 720
+fps: 6
+rays: 2
+lock: '48.4'
+radio-one: '61.1'
+radio-two: '73.1'
+reveal: '85.1'
+coda-bars: 4
+search-cut-bars: 4
+beat-motion:
+- 1
+- 0.45
+- 0.18
+- 0.03
+beat-two-accents: []
+search-days: 6
+shared-azimuth-deg: 25
+shared-altitude-deg: 55
+optical-diameter-metres: 38
+optical-aperture-metres: 8
+array-count: 19
+exposure: 1.6
+bloom: 0.8
+flow-study:
+  provenance: authored-previs
+  start: '117.1'
+  fold: '121.1'
+  answer: '123.1'
+  eye:
+  - 0
+  - 0
+  - 50
+  wide-degrees: 72
+  return-path: 31
+  geometry:
+    file: flow-geometry-a.yaml
+    sha256: 8594d9129e04be441c57b7e6ff741e5c59cbbb3bc9b17c59c96cd60883752226

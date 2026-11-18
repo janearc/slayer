@@ -50,3 +50,13 @@ func readDrawable(path string) (set.Set, error) {
 	}
 	return read, err
 }
+
+// readSet stages the bytes frozen by the job, or the ordinary file path when
+// the job has no imported geometry. Both forms retain all undrawn refusals.
+func (given asked) readSet() (set.Set, error) {
+	if given.preparedSet == nil {
+		return readDrawable(given.set)
+	}
+	read := *given.preparedSet
+	return read, refuseUndrawn(read, given.set, drawnFeatures)
+}

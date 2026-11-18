@@ -39,8 +39,9 @@ import (
 //
 // What it leaves alone: surfaces are lit exactly, as before; a gas, a
 // puff, a wisp, a shell, a ring and a wake are lit exactly, as before.
-// A world with more lamps than a point asks (lampsAsked) is refused by
-// name, since the exact tracer picks among those and a store would not.
+// A world with more lamps than are each lit at a point (lampsEvery) is
+// refused by name, since the exact tracer picks among those and a store
+// would not.
 
 // reachCells is how many cells a lamp's grid has along its medium's
 // longest side, the others as many as keep the cells near cubes. Picked
@@ -87,8 +88,8 @@ type errTooManyLamps struct{ lamps int }
 // Error says how many lamps there are and how many a store keeps.
 func (found errTooManyLamps) Error() string {
 	return fmt.Sprintf("gpu: fast light keeps a store for every lamp "+
-		"and this world has %d, more than the %d a point asks; draw it "+
-		"with exact lighting", found.lamps, lampsAsked)
+		"and this world has %d, more than the %d a point lights each "+
+		"of; draw it with exact lighting", found.lamps, lampsEvery)
 }
 
 // reachNumbers is the kernel's declaration of the store's sizes.
@@ -153,23 +154,13 @@ func reachDims(grid boxed, cells int) [3]int {
 	return dims
 }
 
-// cellsFor is how many cells a mode's light grids have along their
-// longest side: the lamp store's for fast light, the smoke source
-// grid's for the rest, which only the cached mode reads.
-func cellsFor(mode traversal) int {
-	if mode.stored() {
-		return reachCells
-	}
-	return lightCells
-}
-
 // reserveReachAt makes room among the boxes for the lamp store, at a
 // longest side of cells, and writes each medium's grid into its
 // volume's row. Production gives it reachCells; the resolution study
-// varies it. A world with more lamps than a point asks, or a store past
+// varies it. A world with more than lampsEvery lamps, or a store past
 // the boxes' byte limit, is refused by name.
 func (encoded *scene) reserveReachAt(cells int) error {
-	if encoded.counts.lamps > lampsAsked {
+	if encoded.counts.lamps > lampsEvery {
 		return errTooManyLamps{encoded.counts.lamps}
 	}
 	store := &reachStore{grids: encoded.reached}

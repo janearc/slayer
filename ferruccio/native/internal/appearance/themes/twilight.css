@@ -1,0 +1,65 @@
+/*
+ * twilight -- a ground that is not dark and letters that are not bright,
+ * so the ground cannot shine up through the text in rivers: an amber
+ * ground with deep navy ink, 8.9:1, chosen in paratune. dark text on a
+ * lightish ground.
+ */
+:root {
+  --ground: #ffac4e; /* oklch(81% 0.145 66.3) */
+  --ink: #051759; /* oklch(25% 0.120 265.1) */
+  --cursor: #051759; /* oklch(25% 0.120 265.1) */
+  --cursor-ink: #ffac4e; /* oklch(81% 0.145 66.3) */
+  --surface-1: #e8963a; /* oklch(74% 0.143 64.9) */
+  --selection-ink: #051759; /* oklch(25% 0.120 265.1) */
+  --black: #2a2418; /* oklch(26% 0.023 84.3) */
+  --red: #6e2a1f; /* oklch(38% 0.099 31.3) */
+  --green: #2f3a1f; /* oklch(33% 0.047 126.9) */
+  --yellow: #5a4410; /* oklch(40% 0.073 84.5) */
+  --blue: #24365a; /* oklch(34% 0.068 263.1) */
+  --magenta: #5a2a4a; /* oklch(36% 0.083 341.5) */
+  --cyan: #1f4a4a; /* oklch(38% 0.048 195.4) */
+  --white: #ec9c42; /* oklch(76% 0.140 65.6) */
+  --bright-black: #4a3d2b; /* oklch(37% 0.034 75.4) */
+  --bright-red: #84362a; /* oklch(44% 0.110 30.8) */
+  --bright-green: #3b4826; /* oklch(38% 0.056 126.1) */
+  --bright-yellow: #6e5418; /* oklch(46% 0.083 84.3) */
+  --bright-blue: #2f4470; /* oklch(39% 0.080 263.8) */
+  --bright-magenta: #6e3459; /* oklch(41% 0.095 343.1) */
+  --bright-cyan: #285c5c; /* oklch(44% 0.055 195.4) */
+  --bright-white: #ffbd6e; /* oklch(84% 0.123 69.8) */
+  --palette-17: #f6a64b; /* oklch(79% 0.141 66.4) */
+  --palette-18: #f0a249; /* oklch(77% 0.138 66.5) */
+  --palette-24: #ea9f4c; /* oklch(76% 0.133 66.0) */
+  --palette-31: #e39c4f; /* oklch(75% 0.126 65.9) */
+  --palette-38: #dc9a52; /* oklch(74% 0.119 66.5) */
+  --palette-67: #d69652; /* oklch(72% 0.114 65.9) */
+  --palette-103: #d08f50; /* oklch(70% 0.112 63.3) */
+  --palette-139: #ca884d; /* oklch(68% 0.111 61.0) */
+  --palette-169: #be7c46; /* oklch(64% 0.108 58.4) */
+  --palette-198: #b2703f; /* oklch(61% 0.106 55.7) */
+  --palette-205: #b87643; /* oklch(63% 0.106 56.9) */
+  --palette-211: #ad6c3b; /* oklch(59% 0.105 55.9) */
+  --palette-214: #855a1f; /* oklch(50% 0.093 70.9) */
+  --palette-215: #8a5d22; /* oklch(52% 0.094 69.8) */
+  --palette-218: #a86a37; /* oklch(58% 0.103 58.1) */
+  --palette-222: #8f6025; /* oklch(53% 0.096 68.8) */
+  --palette-223: #946229; /* oklch(54% 0.097 66.4) */
+  --palette-224: #99642c; /* oklch(55% 0.099 64.4) */
+  --palette-225: #a36834; /* oklch(57% 0.101 59.9) */
+  --palette-251: #051759; /* oklch(25% 0.120 265.1) */
+  --palette-254: #9e6630; /* oklch(56% 0.100 62.1) */
+  --claude-rules: #c4824a; /* oklch(66% 0.109 59.5) */
+  --dim: #4a3d2b; /* oklch(37% 0.034 75.4) */
+  --heading: #5a2a4a; /* oklch(36% 0.083 341.5) */
+  --link: #24365a; /* oklch(34% 0.068 263.1) */
+  --code: #2f3a1f; /* oklch(33% 0.047 126.9) */
+  --string: #5a4410; /* oklch(40% 0.073 84.5) */
+  --gutter: #b87643; /* oklch(63% 0.106 56.9) */
+  --cursor-line: #f0a249; /* oklch(77% 0.138 66.5) */
+  --panel: #f6a64b; /* oklch(79% 0.141 66.4) */
+  --border: #c4824a; /* oklch(66% 0.109 59.5) */
+  --err: #6e2a1f; /* oklch(38% 0.099 31.3) */
+  --warn: #5a4410; /* oklch(40% 0.073 84.5) */
+  --info: #24365a; /* oklch(34% 0.068 263.1) */
+  --hint: #2f3a1f; /* oklch(33% 0.047 126.9) */
+}

@@ -2,7 +2,6 @@ package diskcache
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 )
 
@@ -10,32 +9,26 @@ import (
 // test's own.
 type Lookup func(name string) (string, bool)
 
-// Home is the folder every kind lives under: SLAYER_CACHE where it is
-// set, cache/ under SLAYER_RENDERS where that is, and slayer/ under the
-// user's cache folder otherwise. A home said that is not absolute is
-// refused by name, since the folder would move with the working one.
+// Home is the folder every cache slayer keeps lives under, and the one
+// rule that finds it: SLAYER_CACHE, an absolute folder. Nothing else is
+// read; there is no fallback to the renders home, the user's cache folder
+// or the temporary folder.
+//
+// Where SLAYER_CACHE is unset, empty or not absolute, Home refuses by name
+// and says how to set it, and whoever asked keeps nothing. Every package
+// that keeps a cache asks Home, and puts its files in a folder of its own
+// under it.
 func Home(lookup Lookup) (string, error) {
-	if said, set := lookup(homeVariable); set && said != "" {
-		return absolute(homeVariable, said)
+	said, set := lookup(homeVariable)
+	if !set || said == "" {
+		return "", fmt.Errorf("diskcache: %s is not set; set it to "+
+			"the one absolute folder slayer keeps what it can work "+
+			"out again, in your game config or your shell",
+			homeVariable)
 	}
-	if renders, set := lookup(rendersVariable); set && renders != "" {
-		home, err := absolute(rendersVariable, renders)
-		return filepath.Join(home, rendersFolder), err
-	}
-	user, err := os.UserCacheDir()
-	if err != nil {
-		return "", fmt.Errorf("diskcache: no %s, no %s and no user "+
-			"cache folder (%w); set %s to a folder", homeVariable,
-			rendersVariable, err, homeVariable)
-	}
-	return filepath.Join(user, userFolder), nil
-}
-
-// absolute is a folder a variable said, refused where it is relative.
-func absolute(variable, said string) (string, error) {
 	if !filepath.IsAbs(said) {
 		return "", fmt.Errorf("diskcache: %s is %q, which is not an "+
-			"absolute folder; give it one", variable, said)
+			"absolute folder; give it one", homeVariable, said)
 	}
 	return filepath.Clean(said), nil
 }

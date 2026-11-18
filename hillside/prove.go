@@ -33,6 +33,10 @@ func keep(drawn *frame.Frame, path string) error {
 // when it fails or cannot be made.
 func proving(world *thing.World, given asked, across float64,
 	arguments []string, said, wrong io.Writer) int {
+	if len(given.initialMedia) > 0 {
+		fmt.Fprintln(wrong, "hillside: initial media: pixel replay does not support an explicit start stack")
+		return 1
+	}
 	eye, lens := eyeFor(given, across), lensFor(given)
 	replay := func(x, y int) (frame.Pixel, []trace.Step, error) {
 		if given.glass != nil {

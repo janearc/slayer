@@ -6,6 +6,15 @@ import (
 	"github.com/janearc/slayer/geom"
 )
 
+// ProperConiferParams controls the whorled reference conifer. Lengths are raw
+// geometry-coordinate units, matching the coordinates in ConiferProper's
+// base; the implementation builds upward along +Z. CrownStart is the first
+// whorl's fractional height, BranchLength scales branch length relative to
+// Height, and Seed changes branch placement and dimensions deterministically.
+//
+// Whorls sets the number of trunk whorls; PerWhorl is the branch count before
+// the implementation tapers counts toward the crown. These values have no
+// general constructor validation.
 type ProperConiferParams struct {
 	Height       float64
 	TrunkRadius  float64
@@ -16,7 +25,8 @@ type ProperConiferParams struct {
 	Seed         uint64
 }
 
-// DefaultProperConiferParams is the shape of ninja's conifer, ten high.
+// DefaultProperConiferParams is the shape of ninja's conifer, ten geometry
+// units high.
 func DefaultProperConiferParams() ProperConiferParams {
 	return ProperConiferParams{
 		Height:       10,

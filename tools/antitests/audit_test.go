@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -178,5 +181,120 @@ func TestNameOfATest(t *testing.T) {
 func TestNameOfNearlyATest(t *testing.T) {
 	if isTestName("Testx") || isTestName("Benchmark") || isTestName("test") {
 		t.Error("Testx, Benchmark and test are not tests")
+	}
+}
+
+// writeTestFile writes a Go source file under dir, making dir if needed.
+func writeTestFile(t *testing.T, dir, name, source string) {
+	t.Helper()
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, name), []byte(source), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// TestAPackageWithNoPositivesHasNothingUnanswered checks that the ratio of
+// a package whose tests are all anti-tests, or that has no tests, is one.
+func TestAPackageWithNoPositivesHasNothingUnanswered(t *testing.T) {
+	if got := (report{}).ratio(); got != 1 {
+		t.Errorf("empty report ratio %g, want 1", got)
+	}
+	dir := t.TempDir()
+	writeTestFile(t, dir, "only_test.go", "package only\n\nimport \"testing\"\n\n"+
+		"// anti-test of TestGone\nfunc TestAnti(t *testing.T) {}\n")
+	rep, err := auditDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rep.positives != 0 || rep.antis != 1 || rep.ratio() != 1 || len(rep.missing) != 1 {
+		t.Errorf("counted %+v", rep)
+	}
+}
+
+// TestASourceFileThatDoesNotParseIsAUsageError checks that auditDir
+// returns the parse error and that run names it and exits with usage.
+func TestASourceFileThatDoesNotParseIsAUsageError(t *testing.T) {
+	dir := t.TempDir()
+	writeTestFile(t, dir, "broken_test.go", "package broken\n\nfunc TestX(\n")
+	if _, err := auditDir(dir); err == nil {
+		t.Fatal("a file that does not parse was audited")
+	}
+	var out, errOut bytes.Buffer
+	if code := run([]string{dir}, &out, &errOut); code != exitUsage ||
+		!strings.Contains(errOut.String(), "broken_test.go") {
+		t.Errorf("code %d, stderr %q", code, errOut.String())
+	}
+}
+
+// TestADirectoryNameThatIsNotAPatternIsAUsageError checks that a bracket
+// the glob cannot read is returned as an error.
+func TestADirectoryNameThatIsNotAPatternIsAUsageError(t *testing.T) {
+	if _, err := auditDir("bad[dir"); err == nil {
+		t.Error("a malformed glob was accepted")
+	}
+}
+
+// TestEllipsisAloneWalksTheWorkingDirectory checks that "..." with no
+// root walks from the working directory and leaves out the directories the
+// walk skips.
+func TestEllipsisAloneWalksTheWorkingDirectory(t *testing.T) {
+	root := t.TempDir()
+	src := "package p\n\nimport \"testing\"\n\nfunc TestX(t *testing.T) {}\n"
+	for _, dir := range []string{"a", "plain/inner", "_", "testdata", "vendor",
+		"secrets", ".hidden", "_under", "empty"} {
+		if dir == "empty" {
+			if err := os.MkdirAll(filepath.Join(root, dir), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			continue
+		}
+		writeTestFile(t, filepath.Join(root, dir), "x_test.go", src)
+	}
+	t.Chdir(root)
+	got, err := expand([]string{"..."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"_", "a", "plain/inner"}
+	if !slices.Equal(got, want) {
+		t.Errorf("dirs %v, want %v", got, want)
+	}
+}
+
+// TestAWalkOfADirectoryThatIsNotThereIsAnError checks that expand returns
+// the error and that run exits with usage.
+func TestAWalkOfADirectoryThatIsNotThereIsAnError(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "none") + "/..."
+	if _, err := expand([]string{missing}); err == nil {
+		t.Error("walked a directory that is not there")
+	}
+	var out, errOut bytes.Buffer
+	if code := run([]string{missing}, &out, &errOut); code != exitUsage || errOut.Len() == 0 {
+		t.Errorf("code %d, stderr %q", code, errOut.String())
+	}
+}
+
+// TestAnUnknownFlagIsAUsageError checks that a flag run does not know
+// exits with usage and is said on the error stream.
+func TestAnUnknownFlagIsAUsageError(t *testing.T) {
+	var out, errOut bytes.Buffer
+	if code := run([]string{"-nope", "testdata/clean"}, &out, &errOut); code != exitUsage ||
+		!strings.Contains(errOut.String(), "nope") {
+		t.Errorf("code %d, stderr %q", code, errOut.String())
+	}
+}
+
+// TestOldMarkersAreListedInTheOutput checks that run prints each old
+// marker with its file and line.
+func TestOldMarkersAreListedInTheOutput(t *testing.T) {
+	var out, errOut bytes.Buffer
+	run([]string{"testdata/old"}, &out, &errOut)
+	for _, want := range []string{"  old marker: testdata/old/old_test.go:7\n",
+		"  old marker: testdata/old/old_test.go:10\n", "old 2\n"} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("output %q lacks %q", out.String(), want)
+		}
 	}
 }

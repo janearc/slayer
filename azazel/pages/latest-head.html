@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --ground: #1c1a17; --ink: #efe6d6; --soft: #b9ad98; --edge: #3a352e; --note: #f2c879; }
+  body { margin: 0; padding: 24px 16px; background: var(--ground); color: var(--ink);
+         font: 17px/1.5 -apple-system, "Helvetica Neue", sans-serif; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  p.lead { color: var(--soft); margin: 0 0 24px; }
+  .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+  figure { margin: 0; border: 1px solid var(--edge); border-radius: 6px; overflow: hidden; background: #000; }
+  figure img, figure video { display: block; width: 100%; height: auto; }
+  figcaption { padding: 10px 12px; background: var(--ground); }
+  .note { color: var(--note); display: block; margin-bottom: 4px; }
+  .where { color: var(--soft); font-size: 16px; word-break: break-all; }
+  .recipe { display: inline-block; margin-top: 8px; padding: 4px 12px; border: 1px solid var(--note);
+            border-radius: 4px; color: var(--note); font-size: 16px; text-decoration: none; }
+  a { color: inherit; }
+</style>

@@ -1,0 +1,4 @@
+# the demos, and the visual guide as a PDF: pandoc makes one HTML page
+# with doc/visualguide/print.css embedded, Prince sets it on Letter
+# pages. writes out/visualguide.pdf.
+demos . :: go run ./cmd/demo list

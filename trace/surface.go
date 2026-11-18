@@ -8,6 +8,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/render/frame"
+	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
@@ -116,6 +117,36 @@ func (met hit) normal(point, dir maths.Vec) maths.Vec {
 	return met.thing.toward(skin.NormalAt(met.on.met), dir)
 }
 
+// boundaryNormal keeps the side of a clear HeightField boundary tied to its
+// bilinear geometry even when its spectral shading normal points elsewhere.
+// Other shapes retain their established normal behavior.
+func (met hit) boundaryNormal(point, dir maths.Vec) maths.Vec {
+	material := met.thing.thing.Material
+	if material != nil && material.Through > 0 {
+		if _, hasGeometryNormal :=
+			met.thing.thing.Shape.(shape.GeometricNormaler); hasGeometryNormal {
+			local := met.thing.at.In(point)
+			return met.thing.toward(shape.GeometricNormal(
+				met.thing.thing.Shape, local), dir)
+		}
+	}
+	return met.normal(point, dir)
+}
+
+// face is the face's own way out where the ray met it, turned to the
+// side normal is on: for slayer's mesh shaded smooth, the flat face its
+// corners' normals bend. Anywhere else there is no face apart from the
+// normal, and it is normal itself.
+func (met hit) face(normal maths.Vec) maths.Vec {
+	skin, isMesh := met.thing.thing.Shape.(*mesh.Mesh)
+	if !isMesh || !met.on.meshed || met.on.grouped || !skin.Smooth() {
+		return normal
+	}
+	one, two, three := skin.Corners(met.on.met.Face())
+	return met.thing.toward(two.Sub(one).Cross(three.Sub(one)),
+		normal.Neg())
+}
+
 // lifted is where the light at a point the ray met is asked from: on
 // slayer's mesh shaded smooth, the point raised to the curved surface
 // its normals draw, so a light grazing it is not cut into teeth by the
@@ -152,12 +183,19 @@ type look struct {
 	// inside is the clear media the look is in, in the order it
 	// entered them, and holding how many of them there are: what a clear
 	// surface has on each side of it is worked out from these. A medium
-	// is an index and a rank, not a thing: two sheets of one glass are
-	// its way in and its way out.
+	// is an index and rank, optionally with a named optical identity: two
+	// sheets of one glass are its way in and its way out.
 	crossed int
 	slipped int
 	inside  [mostHeld]held
 	holding int
+	// lastClearTIR records whether the most recent clear-boundary event
+	// reflected at the critical angle. It follows later mirror legs so
+	// medium-sample diagnostics can distinguish reflection from transmission.
+	lastClearTIR bool
+	// oceanEvents counts every followed reflection or transmission at the
+	// explicitly tagged ocean, independently on each copied ray branch.
+	oceanEvents int
 }
 
 // held is a clear medium a look is inside: its index, and its rank among
@@ -166,13 +204,26 @@ type look struct {
 // and a thing of its own, are the way into and the way out of the same
 // glass or the same water.
 type held struct {
-	index float64
-	rank  int
+	index       float64
+	rank        int
+	clearMedium *thing.ClearMedium
+}
+
+// same reports whether two held media have the same index and rank, and the
+// same named medium.
+func (one held) same(other held) bool {
+	if one.index != other.index || one.rank != other.rank {
+		return false
+	}
+	// Unnamed media retain the historical index/rank identity. Named
+	// media also require their stable optical ID to match.
+	return one.clearMedium.Name() == other.clearMedium.Name()
 }
 
 // of is the medium a clear material is.
 func of(material *thing.Material) held {
-	return held{index: material.Dense(), rank: material.Rank}
+	return held{index: material.Dense(), rank: material.Rank,
+		clearMedium: material.ClearMedium}
 }
 
 const (
@@ -192,7 +243,7 @@ const (
 // in is whether the look is inside a clear medium.
 func (seen look) in(one held) bool {
 	for _, each := range seen.inside[:seen.holding] {
-		if each == one {
+		if each.same(one) {
 			return true
 		}
 	}
@@ -218,7 +269,7 @@ func (seen look) medium() (held, bool) {
 func (seen look) without(one held) look {
 	kept, left := 0, false
 	for _, each := range seen.inside[:seen.holding] {
-		if each != one || left {
+		if !each.same(one) || left {
 			seen.inside[kept] = each
 			kept++
 			continue
@@ -259,7 +310,7 @@ func (seen look) meets(material *thing.Material) boundary {
 	if seen.in(one) {
 		after, _ := seen.without(one).medium()
 		return boundary{relative: after.index / before.index,
-			real: before == one}
+			real: before.same(one)}
 	}
 	if some && one.rank < before.rank {
 		// outranked by what the look is already in: no boundary
@@ -305,6 +356,7 @@ func (seen look) mirrored(ray maths.Ray) look {
 func (seen look) passed(ray maths.Ray, material *thing.Material,
 	at boundary) look {
 	seen.ray, seen.come, seen.onward = ray, 0, true
+	seen.lastClearTIR = false
 	if at.real {
 		seen.crossed++
 	} else {
@@ -323,6 +375,7 @@ func (seen look) passed(ray maths.Ray, material *thing.Material,
 func (seen look) turnedBack(ray maths.Ray) look {
 	seen.ray, seen.come, seen.onward = ray, 0, true
 	seen.crossed++
+	seen.lastClearTIR = true
 	return seen
 }
 
@@ -339,24 +392,34 @@ func shade(scene *staged, seen look) frame.Pixel {
 		defer func() { told.bounce = before }()
 	}
 	var drawn frame.Pixel
+	var distance float64
 	if into, enters := entering(scene.fields, ray); enters {
 		// a surface before the field is the picture as usual
 		met, found := scene.crowd.first(ray, 0)
 		if !found || met.dist > into.dist {
+			distance = into.dist
 			if told != nil {
 				told.tell("the ray enters a field", "at",
 					into.dist)
 			}
 			return bent(scene, seen, into)
 		}
+		distance = met.dist
 		drawn = surfaceAt(scene, seen, met)
 	} else {
-		drawn = surface(scene, seen)
+		drawn, distance = surface(scene, seen)
 	}
+	water := activeClearMedium(seen)
 	if len(scene.volumes) == 0 {
-		return drawn
+		return clearMediumSegment(scene, seen, drawn, ray, distance)
 	}
-	gathered := through(scene, ray, float64(drawn.Depth))
+	mixedClearCloud := water != nil && clearCloudVolumes(scene.volumes)
+	var gathered passage
+	if mixedClearCloud {
+		gathered = throughClear(scene, seen, distance, water)
+	} else {
+		gathered = through(scene, ray, float64(drawn.Depth))
+	}
 	if told != nil {
 		told.tell("the volumes along the ray", "keep", gathered.keep,
 			"add", gathered.added)
@@ -366,13 +429,31 @@ func shade(scene *staged, seen look) frame.Pixel {
 	}
 	light := drawn.Light().Times(gathered.keep).Add(gathered.added)
 	open := (1 - float64(drawn.Cover)) * most(gathered.keep)
-	return pixelOf(light, float32(1-open), drawn.Depth)
+	pixel := pixelOf(light, float32(1-open), drawn.Depth)
+	if mixedClearCloud {
+		return pixel
+	}
+	return attenuateClearSegment(pixel, water, ray, distance)
+}
+
+// clearCloudVolumes reports whether there is at least one volume and every
+// volume is a clear-cloud overlay.
+func clearCloudVolumes(volumes []placedVolume) bool {
+	if len(volumes) == 0 {
+		return false
+	}
+	for index := range volumes {
+		if _, ok := volumes[index].med.(interface{ ClearMediumOverlay() }); !ok {
+			return false
+		}
+	}
+	return true
 }
 
 // surface is what one ray brings back from the surfaces alone: the first
 // thing it meets, lit by every lamp that can see that point through the
 // volumes in the way, or the sky.
-func surface(scene *staged, seen look) frame.Pixel {
+func surface(scene *staged, seen look) (frame.Pixel, float64) {
 	ray := seen.ray
 	met, found := scene.crowd.first(ray, 0)
 	if !found {
@@ -387,9 +468,22 @@ func surface(scene *staged, seen look) frame.Pixel {
 			told.tell("the ray meets nothing, so the sky", "along",
 				ray.Dir, "light", sky)
 		}
-		return pixelOf(sky, 0, float32(endless))
+		return pixelOf(sky, 0, float32(endless)), endless
 	}
-	return surfaceAt(scene, seen, met)
+	return surfaceAt(scene, seen, met), met.dist
+}
+
+// activeClearMedium returns the clear medium the look is inside. It returns
+// nil when the look is in no medium, or the medium does not exist.
+func activeClearMedium(seen look) *thing.ClearMedium {
+	if seen.holding == 0 {
+		return nil
+	}
+	active, exists := seen.medium()
+	if !exists {
+		return nil
+	}
+	return active.clearMedium
 }
 
 // named is what a look met, for a replay to say: its material, its
@@ -420,6 +514,16 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	if material.Crinkle != nil {
 		normal = material.Crinkle.Crinkled(point, normal, ray.Dir.Neg())
 	}
+	// By default optics follow the final shading normal, including crinkle.
+	// A clear HeightField is the exception: its spectral normal is for
+	// appearance, while the exact bilinear normal owns interface sides.
+	opticalNormal := normal
+	if material.Through > 0 {
+		if _, hasGeometryNormal :=
+			met.thing.thing.Shape.(shape.GeometricNormaler); hasGeometryNormal {
+			opticalNormal = met.boundaryNormal(point, ray.Dir)
+		}
+	}
 	// how far the point is from the eye: along this ray, and whatever
 	// way the look had come before it
 	away := seen.come + dist
@@ -437,7 +541,7 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	}
 	emitted := emits(material, placed.shine, local, footprint)
 	lifted := met.lifted(point)
-	lit := scene.lamplight(lifted, normal, colour)
+	lit := scene.oceanLamplight(lifted, normal, colour, seen, placed.thing)
 	// a replay tells the sky's share, so it asks for it here. A picture
 	// asks only where the surface keeps its own colour, below: sixteen
 	// rays cast for light that is multiplied by zero are not cast.
@@ -490,7 +594,7 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	// is outranked by one the look is already in, or the thing left was
 	// not what the look was in, the surface is no boundary: nothing
 	// mirrors and nothing bends, and the light goes straight on.
-	reflects := material.Reflects(-normal.Dot(ray.Dir))
+	reflects := material.Reflects(-opticalNormal.Dot(ray.Dir))
 	var at boundary
 	if material.Through > 0 {
 		at = seen.meets(material)
@@ -499,23 +603,31 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		reflects = maths.Light{}
 		if at.real {
 			reflects = maths.Grey(material.SplitsBetween(
-				-normal.Dot(ray.Dir), at.relative))
+				-opticalNormal.Dot(ray.Dir), at.relative))
 		}
 	}
 	share := math.Max(reflects.R, math.Max(reflects.G, reflects.B))
 	through := math.Min(math.Max(material.Through, 0), 1)
+	oceanBudget := scene.oceanEventBudget(placed.thing)
+	oceanPolicy := oceanBudget > 0 && material.Through > 0
+	follows := seen.bounce == 0 && seen.follows(at)
+	if oceanPolicy {
+		follows = seen.oceanEvents < oceanBudget &&
+			(!at.entering || seen.holding < mostHeld)
+	}
 	var bent maths.Vec
 	var total bool
-	if through > 0 && seen.bounce == 0 && seen.follows(at) {
+	if through > 0 && follows {
 		bent = ray.Dir
 		if at.real {
-			bent, total = refracted(ray.Dir, normal, at.relative)
+			bent, total = refracted(ray.Dir, opticalNormal, at.relative)
 		}
 		if total {
-			bent = ray.Dir.Sub(normal.Scale(2 * ray.Dir.Dot(normal))).Unit()
+			bent = ray.Dir.Sub(opticalNormal.Scale(
+				2 * ray.Dir.Dot(opticalNormal))).Unit()
 			share, reflects = 1, maths.Grey(1)
 		}
-	} else {
+	} else if !oceanPolicy {
 		through = 0
 		// a clear surface that reflects all of what arrives, where
 		// nothing can follow it, lights as the opaque surface it is
@@ -526,10 +638,13 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	// an unfollowed mirror keeps the surface whole, as it always has;
 	// on a bent leg fresnel's share is a toll light pays and does not
 	// come back, which is why two panes dim twice.
-	if share > 0 && seen.crossed == 0 && seen.bounce >= bounces {
+	if !oceanPolicy && share > 0 && seen.crossed == 0 && seen.bounce >= bounces {
 		share, reflects = 0, maths.Light{}
 	}
 	follow := share > 0 && seen.crossed == 0
+	if oceanPolicy {
+		follow = share > 0 && follows
+	}
 	if share > 0 || through > 0 {
 		// each colour keeps what it does not mirror and does not let
 		// through: none of it, for a mirror of all that arrives or a
@@ -542,8 +657,16 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		}
 		kept := sum.Times(left)
 		if follow {
-			off := shade(scene, seen.mirrored(scene.bounced(ray,
-				point, normal)))
+			departure := scene.bounced(ray, point, opticalNormal, met.face(opticalNormal))
+			departure.At = scene.interfaceOrigin(placed, point, opticalNormal, ray.At)
+			reflected := seen.mirrored(departure)
+			if oceanPolicy {
+				reflected.oceanEvents++
+			}
+			if total {
+				reflected.lastClearTIR = true
+			}
+			off := shade(scene, reflected)
 			kept = kept.Add(off.Light().Times(reflects))
 			if told != nil {
 				told.tell("a mirror, by fresnel's share", "share",
@@ -560,18 +683,24 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 				passes = maths.Light{}
 			}
 		}
+		if oceanPolicy && !follows {
+			passes = maths.Light{}
+		}
 		if passes != (maths.Light{}) {
 			// a reflected bend stays on the ray's side of the
 			// surface, and inside whatever it was inside
-			side := normal.Scale(-1)
+			side := opticalNormal.Scale(-1)
 			if total {
-				side = normal
+				side = opticalNormal
 			}
-			enter := maths.Ray{At: scene.liftedAlong(point, side,
+			enter := maths.Ray{At: scene.interfaceOrigin(placed, point, side,
 				ray.At), Dir: bent}
 			beyond := seen.passed(enter, material, at)
 			if total {
 				beyond = seen.turnedBack(enter)
+			}
+			if oceanPolicy {
+				beyond.oceanEvents++
 			}
 			past := shade(scene, beyond)
 			kept = kept.Add(past.Light().Times(passes))
@@ -585,15 +714,38 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		sum = sum.Add(scene.skylight(lifted, normal, colour))
 	}
 	// the lamps' highlights, over what it keeps, mirrors and passes
-	if material.Satin > 0 {
-		glint := scene.glint(lifted, normal, ray.Dir.Neg(), material)
+	if glints(material) {
+		glint := scene.oceanGlint(lifted, normal, ray.Dir.Neg(), material,
+			seen, placed.thing)
 		sum = sum.Add(glint)
 		if told != nil {
 			told.tell("the lamps' highlights", "glint", glint)
 		}
 	}
+	if foam := material.WakeFoam; foam != nil && throughFoam(material, at) {
+		coverage := foam.At(local, scene.seconds)
+		if coverage > 0 {
+			opaque := *material
+			opaque.WakeFoam, opaque.Through = nil, 0
+			opaque.Colour, opaque.Satin = foam.Reflectance, foam.Satin
+			light := scene.oceanLamplight(lifted, normal, opaque.Colour,
+				seen, placed.thing).Add(scene.skylight(lifted, normal, opaque.Colour))
+			if glints(&opaque) {
+				light = light.Add(scene.oceanGlint(lifted, normal, ray.Dir.Neg(),
+					&opaque, seen, placed.thing))
+			}
+			sum = sum.Scale(1 - coverage).Add(light.Scale(coverage))
+		}
+	}
 	hazed := scene.air(ray.Dir, away, sum)
 	return pixelOf(hazed, 1, float32(dist))
+}
+
+// throughFoam limits the mixture to real clear boundaries. The clear branch
+// keeps its original IOR, initial medium and TIR state; its complete response
+// is weighted by the uncovered fraction before combining opaque foam light.
+func throughFoam(material *thing.Material, at boundary) bool {
+	return material.Through > 0 && material.Metal == nil && at.real
 }
 
 // lamplight is what the lamps light a point of a surface with: the
@@ -605,13 +757,20 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 // the surface.
 func (scene *staged) lamplight(point, normal maths.Vec,
 	colour maths.Light) maths.Light {
+	return scene.lamplightExcept(point, normal, colour, -1)
+}
+
+// lamplightExcept is lamplight without the lamp at index skip.
+func (scene *staged) lamplightExcept(point, normal maths.Vec,
+	colour maths.Light, skip int) maths.Light {
 	var sum maths.Light
 	told := scene.walked
 	squarely := func(toward maths.Vec, light maths.Light) float64 {
 		return light.Luminance() * math.Max(0, normal.Dot(toward))
 	}
-	var room [lampsAsked]lit
-	for _, one := range scene.asked(room[:], point, normal, squarely) {
+	var room [lampsEvery]lit
+	for _, one := range scene.askedExcept(room[:], point, normal,
+		squarely, skip) {
 		i, toward, far := one.index, one.toward, one.far
 		light := one.light.Scale(one.counts)
 		if one.ambient() {
@@ -656,27 +815,32 @@ func (scene *staged) lamplight(point, normal maths.Vec,
 // Not the surface's colour: a highlight is the lamp's own light, tinted
 // only by what the surface mirrors, so gold's is gold and gloss paint's
 // is white. Lamps that light from everywhere leave none.
-func (scene staged) glint(point, normal, look maths.Vec,
+func (scene *staged) glint(point, normal, look maths.Vec,
 	material *thing.Material) maths.Light {
-	satin := math.Min(material.Satin, 1)
+	return scene.glintExcept(point, normal, look, material, -1)
+}
+
+// glintExcept is glint without the lamp at index skip.
+func (scene *staged) glintExcept(point, normal, look maths.Vec,
+	material *thing.Material, skip int) maths.Light {
 	viewed := normal.Dot(look)
-	if !(satin > 0) || !(viewed > 0) {
+	if !glints(material) || !(viewed > 0) {
 		return maths.Light{}
 	}
-	alpha := satin * satin
 	var sum maths.Light
 	squarely := func(toward maths.Vec, light maths.Light) float64 {
 		return light.Luminance() * math.Max(0, normal.Dot(toward))
 	}
-	var room [lampsAsked]lit
-	for _, one := range scene.asked(room[:], point, normal, squarely) {
+	var room [lampsEvery]lit
+	for _, one := range scene.askedExcept(room[:], point, normal,
+		squarely, skip) {
 		light := one.light.Scale(one.counts)
 		square := normal.Dot(one.toward)
 		if one.ambient() || square <= 0 || light == (maths.Light{}) {
 			continue
 		}
 		half := one.toward.Add(look).Unit()
-		lobe := thing.Microfacet(normal.Dot(half), square, viewed, alpha)
+		lobe := highlight(material, normal.Dot(half), square, viewed)
 		if !(lobe > 0) {
 			continue
 		}
@@ -688,11 +852,29 @@ func (scene staged) glint(point, normal, look maths.Vec,
 	return sum
 }
 
+// glints is whether a material leaves the lamps' highlights on it: a
+// Satin or a slope variance above nought.
+func glints(material *thing.Material) bool {
+	return material.Satin > 0 || material.SlopeVariance > 0
+}
+
+// highlight is a material's highlight lobe at the cosines facing, lit
+// and viewed: Beckmann's for its slope variance where it has one, and
+// otherwise GGX's, as wide as its Satin, at most one, squared.
+func highlight(material *thing.Material, facing, lit,
+	viewed float64) float64 {
+	if material.SlopeVariance > 0 {
+		return thing.Beckmann(facing, lit, viewed, material.SlopeVariance)
+	}
+	satin := math.Min(material.Satin, 1)
+	return thing.Microfacet(facing, lit, viewed, satin*satin)
+}
+
 // unhidden is how much of lamp i's light gets from a point to it along
 // toward, through whatever stands between: and for a sun drawn as a
 // disc, the share of its disc unhidden, sought along the ways across it
 // its Spread gives, so its shadows soften by its width.
-func (scene staged) unhidden(i int, from, toward maths.Vec,
+func (scene *staged) unhidden(i int, from, toward maths.Vec,
 	far float64) maths.Light {
 	if sun, ok := scene.lamps[i].(film.Sun); ok && sun.Disc && sun.Size > 0 {
 		ways := sun.Spread()
@@ -727,14 +909,31 @@ func refracted(dir, normal maths.Vec,
 }
 
 // bounced is the ray a mirror at a point sends an arriving ray off
-// along: turned about the normal, and lifted off the surface so it
-// does not meet the point it left.
-func (scene *staged) bounced(ray maths.Ray, point,
-	normal maths.Vec) maths.Ray {
+// along: turned about the normal, kept above the face it leaves, and
+// lifted off the surface so it does not meet the point it left.
+func (scene *staged) bounced(ray maths.Ray, point, normal,
+	face maths.Vec) maths.Ray {
 	way := ray.Dir.Sub(normal.Scale(2 * ray.Dir.Dot(normal))).Unit()
 	return maths.Ray{At: scene.liftedAlong(point, normal, ray.At),
-		Dir: way}
+		Dir: keptAbove(way, face)}
 }
+
+// keptAbove is a mirrored way kept on the open side of the face it leaves.
+// A smooth face's normal is not its own: where the eye grazes it, the
+// way turned about that normal can point into the face, and would meet
+// it at once. Such a way is turned back about the face's own plane, as
+// far above it as it was below. A way above the face is as it was, so
+// the two agree where the way lies along the face.
+func keptAbove(way, face maths.Vec) maths.Vec {
+	under := way.Dot(face)
+	if under >= faceLevel {
+		return way
+	}
+	return way.Sub(face.Scale(2 * under)).Unit()
+}
+
+// faceLevel is the reach of a way along a face's normal that lies in it.
+const faceLevel = 0 // defined: neither above nor below
 
 // skyAt is the sky's light from the direction toward, or no light
 // with no sky.
@@ -764,4 +963,16 @@ func (scene *staged) air(along maths.Vec, dist float64,
 			haze, "light", hazed)
 	}
 	return hazed
+}
+
+// interfaceOrigin preserves ordinary lifts while preventing an exact ocean
+// departure from crossing a neighboring bilinear crease.
+func (scene *staged) interfaceOrigin(placed placedThing, point, side, from maths.Vec) maths.Vec {
+	origin := scene.liftedAlong(point, side, from)
+	water, ok := placed.thing.Shape.(*seaocean.InfiniteMeanContinuation)
+	if !ok {
+		return origin
+	}
+	local := placed.at.In(point)
+	return placed.at.Out(water.OffsetToSide(local, placed.at.In(origin).Sub(local)))
 }

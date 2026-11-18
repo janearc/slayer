@@ -1,0 +1,44 @@
+heard. v3 - editorial boundaries, not an executable render plan
+72 bars / 66 BPM / 4 beats; first frame at or after cue, four fps.
+Times are absolute score seconds; end boundaries are exclusive.
+Release tail continues after bar 72; final duration comes from music.json.
+
+01  bars 1-2  0.000000..7.272727s  frames 0..29  Listening
+02  bars 3-4  7.272727..14.545455s  frames 30..58  Two listeners
+03  bars 5-5  14.545455..18.181818s  frames 59..72  Somewhere else
+04  bars 6-7  18.181818..25.454545s  frames 73..101  Under Subaru
+05  bars 8-9  25.454545..32.727273s  frames 102..130  The large listener
+06  bars 10-11  32.727273..40.000000s  frames 131..159  What they are looking at
+07  bars 12-12  40.000000..43.636364s  frames 160..174  A city still awake
+08  bars 13-13  43.636364..47.272727s  frames 175..189  Sunset
+09  bars 14-14  47.272727..50.909091s  frames 190..203  Dawn without relief
+10  bars 15-16  50.909091..58.181818s  frames 204..232  An unfinished search
+11  bars 17-17  58.181818..61.818182s  frames 233..247  The last decision
+12  bars 18-19  61.818182..69.090909s  frames 248..276  They have found something
+13  bars 20-21  69.090909..76.363636s  frames 277..305  The first radio field
+14  bars 22-23  76.363636..83.636364s  frames 306..334  The second radio field
+15  bars 24-25  83.636364..90.909091s  frames 335..363  First answer: the orbital
+16  bars 26-27  90.909091..98.181818s  frames 364..392  Zappy speaks
+17  bars 28-31  98.181818..112.727273s  frames 393..450  The lantern
+18  bars 32-35  112.727273..127.272727s  frames 451..509  The small fold
+19  bars 36-39  127.272727..141.818182s  frames 510..567  The shaped absence
+20  bars 40-43  141.818182..156.363636s  frames 568..625  A conversation
+21  bars 44-44  156.363636..160.000000s  frames 626..639  Separate, faster
+22  bars 45-45  160.000000..163.636364s  frames 640..654  Accumulating
+23  bars 46-47  163.636364..170.909091s  frames 655..683  All four
+24  bars 48-48  170.909091..174.545455s  frames 684..698  The conversation stops
+25  bars 49-52  174.545455..189.090909s  frames 699..756  The instruments above us
+26  bars 53-54  189.090909..196.363636s  frames 757..785  Leaving our position
+27  bars 55-56  196.363636..203.636364s  frames 786..814  The galaxy
+28  bars 57-58  203.636364..210.909091s  frames 815..843  Neighbours
+29  bars 59-60  210.909091..218.181818s  frames 844..872  Laniakea
+30  bars 61-62  218.181818..225.454545s  frames 873..901  Something in the pattern
+31  bars 63-66  225.454545..240.000000s  frames 902..959  The same gesture
+32  bars 67-68  240.000000..247.272727s  frames 960..989  An answer comes back
+33  bars 69-72  247.272727..261.818182s  frames 990..1047  Heard
+
+2.3 title 5.454545s; 18.1 lock 61.818182s; 24.1 first crash 83.636364s.
+44.1-45.1 individual cuts; 45.1-46.1 accumulating composite.
+46.1-48.1 exactly eight beats together, 163.636364..170.909091s.
+32.1-36.1 small fold; 63.1-67.1 same four-stage gesture at enormous scale.
+66.1 completion/crash 236.363636s; 67.1 return pulse 240.000000s.

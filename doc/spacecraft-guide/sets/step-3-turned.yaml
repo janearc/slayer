@@ -1,0 +1,41 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: step 3, Voyager 1 turned three ways
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      heading-0:
+        kind: voyager-1
+        seed: 17
+        complexity: quick
+        east: -26
+        north: 0
+        heading: {value: 0, unit: deg}
+      heading-90:
+        kind: voyager-1
+        seed: 17
+        complexity: quick
+        east: 0
+        north: 0
+        heading: {value: 90, unit: deg}
+      heading-180:
+        kind: voyager-1
+        seed: 17
+        complexity: quick
+        east: 26
+        north: 0
+        heading: {value: 180, unit: deg}
+  film: {width: 2048, height: 1152, rays: 2, exposure: 0.003, wide: 80}
+  cameras:
+    row:
+      title: three headings, from the sun's side
+      location: {at: [-6, -36, 15]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

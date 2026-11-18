@@ -1,0 +1,68 @@
+# Borrowed Light, wider-cone anchor diagnostic. Everything is synthetic.
+# Coordinates are metres east, north, up. The spotlight is a conical point
+# source, not a laser. Its width and intensity change with distance.
+# The stationary receiving sphere is placed near the editorial 0.62,0.42
+# image anchor. A darker sphere crosses between it and the light in 2 s.
+scene:
+  name: borrowed-light-anchor-study
+  volume-illumination: {model: isotropic-single, sky-samples: 2}
+  film:
+    width: 360
+    height: 320
+    rays: 1
+    wide: 55
+    exposure: 1
+    print: {knee: 0.8, top: 8, source: eye}
+  cameras:
+    observer:
+      title: opening light study
+      location: {at: [0, -8, 1.5]}
+      orientation: {look_at: [0, 0, -0.3]}
+  world:
+    materials:
+      black-object:
+        colour: {srgb_linear: [0.08, 0.08, 0.08]}
+        source: eye
+      receiver:
+        colour: {srgb_linear: [0.5, 0.5, 0.5]}
+        source: eye
+    spheres:
+      occluder:
+        material: black-object
+        middle: [0, 0, 0]
+        radius: 0.32
+        motion: crossing
+        source: eye
+      receiver:
+        material: receiver
+        middle: [0.9, 0, 0.4]
+        radius: 0.25
+        source: eye
+    motions:
+      crossing:
+        seconds: 2
+        ease: linear
+        hold: true
+        frames:
+          - {percent: 0, at: [-1, 0, 2.375]}
+          - {percent: 50, at: [-1, 0, 1.475]}
+          - {percent: 100, at: [-1, 0, 0.575]}
+    wisps:
+      dust:
+        colour: {srgb_linear: [0.8, 0.8, 0.8]}
+        middle: [0, 0, 0]
+        radius: 8
+        thick: 0.16
+        seed: 41
+        scale: 8
+        amount: 0.000001
+        source: eye
+    spots:
+      shaft:
+        at: [-9, 0, 6]
+        aim: [9.9, 0, -5.6]
+        cone: 2.5
+        soft: 0.75
+        temperature: 6000
+        strength: 10000
+        source: eye

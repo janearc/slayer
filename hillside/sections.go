@@ -106,16 +106,16 @@ func (keep *keeper) close() {
 // whole when every section is kept, and otherwise drawn whole.
 //
 // A film with a rig or a job's opened lens, a frame no wider than the
-// film's sections start at, or no keeper, is drawn whole.
+// film's sections start at, a wire picture, or no keeper, is drawn whole.
 func (keep *keeper) picture(world *thing.World, given asked,
 	across float64) (*frame.Frame, gpu.Profile, error) {
 	if given.composite != nil {
 		return drawMeasured(world, given, across)
 	}
 	eye, lens := eyeFor(given, across), lensFor(given)
-	if keep == nil || given.glass != nil || given.optics.opened != nil ||
+	if keep == nil || len(given.initialMedia) > 0 || given.glass != nil || given.optics.opened != nil ||
 		given.cachedLighting || given.fastLighting || !given.sections.keep ||
-		given.width <= given.sections.over {
+		given.width <= given.sections.over || given.wire {
 		return keep.measured(world, given, across)
 	}
 	drawn, err := keep.next(world, given, eye, lens)

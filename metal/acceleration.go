@@ -252,6 +252,40 @@ func (kernel *Kernel) accelerate(plan *Acceleration, root int,
 	return nil
 }
 
+// accelerationWork is how many nodes the kernel's last hierarchy build
+// kept as it held them, refit and built: what the bridge decided from
+// the bytes it was given, read by the tests of its keeping rules.
+func (kernel *Kernel) accelerationWork() (kept, refit, built int) {
+	var keeping, refitting, building C.int
+	C.slayer_metal_acceleration_work(kernel.ctx, &keeping, &refitting,
+		&building)
+	return int(keeping), int(refitting), int(building)
+}
+
+// accelerationHeld is how many mesh structures the kernel holds between
+// hierarchy builds, a mesh's spare counted as one more: what the tests
+// of the bound on what is held read.
+func (kernel *Kernel) accelerationHeld() int {
+	return int(C.slayer_metal_acceleration_held(kernel.ctx))
+}
+
+// accelerationFault is a fault the kernel's next hierarchy build meets
+// once, set by the tests of a build that fails.
+type accelerationFault int
+
+// The faults a test may set, bridge.h's: one after every structure is
+// described, as an allocation that failed, and one after the command
+// ran, as a command that failed.
+const (
+	faultAllocation accelerationFault = C.acceleration_fault_allocation
+	faultCommand    accelerationFault = C.acceleration_fault_command
+)
+
+// failNextBuild sets the fault the kernel's next hierarchy build meets.
+func (kernel *Kernel) failNextBuild(fault accelerationFault) {
+	C.slayer_metal_acceleration_fault(kernel.ctx, C.int(fault))
+}
+
 // accelerationCounts checks the C int counts as well as Go staging products.
 func accelerationCounts(nodes, instances int) bool {
 	return nodes >= 0 && nodes <= math.MaxInt32 && nodes <= math.MaxInt/3 &&

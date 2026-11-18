@@ -40,29 +40,19 @@ This schema intentionally excludes legacy `scene.hud`, `scene.planet` and
 is not a schema for the full legacy Set language.
 
 Files using those legacy fields keep the reader without `$schema`.
-`TestEcosystemSubsetAndReaderKeySetsStayInStep` holds the seven core object key
-sets to their declared subset; shipped scenes and plans are also read in tests.
-These checks do not turn domain relationships into schema rules.
+The schema does not turn domain relationships into rules.
 
 Legacy sets without `$schema` retain their existing reader and diagnostics;
 their YAML front door also goes through Puzzlemouth. No new CLI parser or flags
 were added for these recipes.
 
-The bundled schema and contextual source excerpts require APIs absent from
-Puzzlemouth v0.1.3. The current `go.mod` pins released v0.1.4, which contains
-them and requires Go 1.27.3.
-
-Follow [review dependencies](review-dependencies.md) for a
-standalone checkout; a parent Go workspace is optional, not a substitute for
-release pins.
-
-The original companion work was on `feat/source-excerpts` at
-`c5f3f53`, following `feat/yaml-json-schema`.
+The bundled schema and contextual source excerpts require Puzzlemouth
+v0.1.4, which requires Go 1.27.3.
 
 ## Complexity
 
 The scene gives a default, with overrides on specimens and stands. It uses the
-four names already recorded in `families.md`:
+four names:
 
 - `hull`: the specimen's coarse silhouette.
 - `clumps`: coarse foliage surfaces or assembly detail.
@@ -133,14 +123,8 @@ depth, subject to the existing 192-cell longest-axis cap.
 Thin canopy edges in a kilometre scale field can be blurred or missed. The CPU
 evaluates the field directly; agreement is approximate, not bit equality.
 
-`gpu/ecosystem_test.go` renders each new kind at every complexity against the
-CPU and checks that the grove actually attenuates light on the GPU. The
-integration render has one observatory, 5,000 trees, and one mist volume. PNGs
-and diagnostic logs stay outside the repositories.
+The integration render has one observatory, 5,000 trees, and one mist volume.
 
 Deciduous trees, Joshua trees, saguaros, brush, radomes and antenna arrays
-remain further work. [General fire recipes](fire-recipes.md) now stand
+are not provided. [General fire recipes](fire-recipes.md) stand
 independently of trees.
-
-This scene is the first complete slice, not a claim that the whole ecosystem
-catalogue is built.

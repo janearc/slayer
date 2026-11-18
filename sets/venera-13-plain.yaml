@@ -1,0 +1,213 @@
+# the venera lander on the plain it came down on, from map data: venera 13.
+#
+# the place is venera 13's landing place, 7 30 south, 303 east (the english
+# wikipedia page on venera 13 gives "7°30′S 303°00′E", read on
+# 2026-11-15). in magellan's map this is one point inside a single sample,
+# 4.6 km across, so what the map knows of the ground here is its height
+# and its slope over kilometres, and nothing finer.
+#
+# what is the map's: the ground's shape down to 4.6 km. a ramp, or a
+# swell, over the 200 m of this window.
+#
+# what is made: everything finer. package titan carves the map's triangles
+# down to a quarter of a metre and moves each new corner by an amount fixed
+# by the seed and the corner's place on the sphere, as steep and as jagged
+# as the map's own slope says and no more. it is arithmetic with a seed, and
+# it is not venus: no probe saw it. the run says how much of the ground was
+# made, and the same seed makes the same ground.
+#
+# what is venus's here: the sky, the sun and the light on the ground.
+# `air: venus` asks for venus's air worked from its sources (airs/venus.yaml,
+# doc/sky-from-the-air.md): package airlight follows the sun's light through
+# the air's shells at 21 wavelengths, from 380 to 780 nm, and the sky, the
+# sun's lamp and the exposure come from that. nothing in the light is
+# painted, and there is no fill lamp: the sky lights the ground.
+#
+# what is still not right:
+# - the ultraviolet and blue absorbers are at nought in airs/venus.yaml, so
+#   the light is too blue and too bright, until they are fitted to
+#   tomasko's measured absorbed power.
+# - the soil is one flat colour, with no grain finer than the chips.
+# - the relief below the map is made, from a picked steepness, and no
+#   probe measured it.
+# - there is no aerial perspective yet between the camera and the ground.
+#
+# places are local metres on a patch laid on the sphere: the place asked
+# for (lat and lon) is the middle of the window, east runs 0 to across from
+# the west edge and north 0 to down from the south edge, so the middle is
+# 100 east, 100 north, and the lander stands there.
+scene:
+  name: the venera 13 lander on its plain, made below the map
+  light: sun
+  air: venus
+  # location reads longitudes from -180 to 180, so 303 east is written -57
+  location:
+    lat: -7.5
+    lon: -57
+  timeofday: 1200
+  # picked: high in the south-east, so the plate's shadow falls short
+  # and the legs are lit. it is the sun as it stood when the set was
+  # made, not venera 13's sun at its landing.
+  sun:
+    azimuth: 135
+    altitude: 55
+  terrain:
+    from: usgs-magellan-venus-topography
+    lat: -7.5
+    lon: 303
+    across: 200
+    down: 200
+    step: 0.25
+    # the seed of everything made below the map's 4.6 km: picked, venera 13
+    # the relief: the map is flat over its 4.6 km samples, but the lander's
+    # panoramas show low rises and hollows and a near horizon. so titan is
+    # asked to make the ground below the map at least 20 in 100 steep at
+    # edges up to 60 m, about a metre of rise and fall: both picked by eye
+    # from the panoramas (8 in 100 over 100 m, step07, did not show). the
+    # map's own samples are never moved, and the run counts this ground as
+    # made.
+    detail:
+      seed: 13
+      relief: {slope: 0.2, longest: 60}
+    # the soil's share of red, green and blue light, linear. the ground the
+    # landers saw gave back about 5 per cent in the green and 6 in the red,
+    # and was grey to within a tenth (ntrs 19870013979, page 166, figure 1,
+    # and page 165). the plates are given that (manufacture's dark basalt);
+    # the soil between is picked at 0.45 of it, much darker, as it looks in
+    # the lander's panoramas, the same share manufacture picks for the dust
+    # it lays on the plates.
+    reflectance: [0.027, 0.023, 0.021]
+  # a test frame: small, one ray
+  film:
+    width: 640
+    height: 400
+    rays: 1
+  cameras:
+    beside:
+      title: "the lander, from a few metres off, at a person's eye"
+      orientation:
+        point_to: the lander
+        alpha: -4
+      location:
+        loc_relative:
+          object: the lander
+          standoff_x: -5
+          standoff_y: -4
+          standoff_z: 1.6
+    # from the north-west of the lander, so it looks south-east, toward
+    # the sun's azimuth, tipped 20 degrees up so the sky is in the frame
+    sunward:
+      title: "the sky toward the sun, 20 degrees above the horizon"
+      orientation:
+        point_to: the lander
+        alpha: 20
+      location:
+        loc_relative:
+          object: the lander
+          standoff_x: -4
+          standoff_y: 4
+          standoff_z: 1.6
+    # low across the plain, half a metre up and thirty metres off, so the
+    # ground between reads as ground and the lander sits small on it
+    across:
+      title: "across the plain to the lander, half a metre up, thirty metres off"
+      orientation:
+        point_to: the lander
+        alpha: -1
+      location:
+        loc_relative:
+          object: the lander
+          standoff_x: -30
+          standoff_y: -12
+          standoff_z: 0.5
+    # from above, looking down on the lander and the made ground around it
+    above:
+      title: "down on the lander and the ground around it, from twelve metres up"
+      orientation:
+        point_to: the lander
+        alpha: -55
+      location:
+        loc_relative:
+          object: the lander
+          standoff_x: -7
+          standoff_y: -3
+          standoff_z: 12
+    # what venera 13's own camera saw: on the lander, 0.9 m above the
+    # ground, looking out and down 50 degrees through a wide lens, the near
+    # ground filling the frame and the impact ring across its foot. all
+    # picked, none read: the height, about where the cameras sat on the
+    # module; the lens; the place 0.7 m out from the lander's middle,
+    # inside the ring's 0.9; and the westward look, so the sun from the
+    # south-east rakes across the plates. it points to the plate in view.
+    lander:
+      title: "the ground as the lander's camera saw it, 0.9 m up, 50 degrees down"
+      wide: 90
+      orientation:
+        point_to: the plate in view
+        alpha: -50
+      location:
+        loc_relative:
+          object: the lander
+          standoff_x: -0.7
+          standoff_y: 0
+          standoff_z: 0.9
+  set:
+    things:
+      the lander:
+        kind: venera-lander
+        seed: 9
+        east: 100
+        north: 100
+      # a plate west of the lander that its camera points to
+      the plate in view:
+        kind: slab
+        seed: 31
+        east: 97
+        north: 100
+    # the ground venera 13 photographed: plates of a layered rock, broken
+    # where they lie, with dark fine soil and small grains between them.
+    # the plates are slabs and the grains chips, both dark basalt, from
+    # manufacture's plate rows. every count and reach here is picked, by
+    # looking at the lander's panoramas: plates over most of the ground
+    # near the lander, two stands of them so there are eight shapes and not
+    # four, fewer further out, and chips among them where a camera is near.
+    # within six metres of the lander, where its own camera looks, plates
+    # lie two deep, so they overlap in layers, packed close, with grains
+    # thick between. nothing is kept clear of the lander: it came down on
+    # the plates, and its ring sits on them.
+    stands:
+      plates close:
+        kind: slab
+        count: 600
+        seed: 25
+        within: {of: the lander, from: 0, to: 360, near: 0, far: 6}
+      plates close again:
+        kind: slab
+        count: 600
+        seed: 26
+        within: {of: the lander, from: 0, to: 360, near: 0, far: 6}
+      grains close:
+        kind: chip
+        count: 30000
+        seed: 27
+        within: {of: the lander, from: 0, to: 360, near: 0, far: 6}
+      slabs near:
+        kind: slab
+        count: 40000
+        seed: 21
+        within: {of: the lander, from: 0, to: 360, near: 0, far: 60}
+      slabs between:
+        kind: slab
+        count: 20000
+        seed: 23
+        within: {of: the lander, from: 0, to: 360, near: 0, far: 60}
+      slabs far:
+        kind: slab
+        count: 20000
+        seed: 22
+        within: {of: the lander, from: 0, to: 360, near: 60, far: 140}
+      chips:
+        kind: chip
+        count: 60000
+        seed: 24
+        within: {of: the lander, from: 0, to: 360, near: 0, far: 45}

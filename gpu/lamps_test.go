@@ -112,12 +112,40 @@ func TestTheBeamsPicturesChangeWithTheClock(t *testing.T) {
 	}
 }
 
-// the flood among many lamps is refused by name: the tracer keeps every
-// ambient lamp and picks among the rest, which the kernel does not do.
+// streetLamps is how many lamps beside a flood light the nine-lamp
+// street: six street lamps, a sun and a flare.
+const streetLamps = 8
+
+// a street's nine lamps, a flood among them, are each lit at every
+// point, past lampsAsked and within lampsEvery: the gpu draws them,
+// where it once refused the flood, and draws them as slayer's tracer.
+func TestTheGPUDrawsAFloodAmongNineLampsAsSlayerDoes(t *testing.T) {
+	world, eye := lamplit(t)
+	world.Lamp(film.Flood{Up: maths.V(0.3, 1, -0.2),
+		Strength: maths.RGB(0.3, 0.3, 0.35)})
+	for index := range streetLamps - 2 {
+		along := float64(index) - 2.5
+		world.Lamp(emit.Lit{At: maths.V(along*2, 4, 3-along),
+			Strength: maths.RGB(6, 4.5, 2.5)})
+	}
+	world.Lamp(film.Sun{Toward: maths.V(-0.4, 0.7, 0.3).Unit(),
+		Strength: maths.RGB(0.8, 0.75, 0.7)})
+	world.Lamp(emit.Lit{At: maths.V(-3, 9, -1),
+		Strength: maths.RGB(20, 4, 2)})
+	if lamps := len(world.Lamps); lamps <= lampsAsked ||
+		lamps > lampsEvery {
+		t.Fatalf("the street has %d lamps", lamps)
+	}
+	againstAt(t, world, eye, lampWide, lampHigh, lampSide)
+}
+
+// the flood among many lamps is refused by name: past lampsEvery the
+// tracer keeps every ambient lamp and picks among the rest, which the
+// kernel does not do.
 func TestAFloodAmongManyLampsIsRefused(t *testing.T) {
 	world := thing.NewWorld()
 	world.Lamp(film.Flood{Strength: maths.Grey(1)})
-	for range lampsAsked {
+	for range lampsEvery {
 		world.Lamp(emit.Lit{At: maths.V(0, 5, 0), Strength: maths.Grey(1)})
 	}
 	_, err := Sampled(world, maths.Subspace{}, nil, 0, 4, 4, 1)

@@ -73,8 +73,9 @@ func ReadScore(path string) (*Score, error) {
 	return ParseScore(raw)
 }
 
-// ParseScore reads a score from its yaml. A grid of under two beats, or
-// one that does not rise, is refused by name.
+// ParseScore reads a score from its yaml. A score that names no meter
+// is in four. A meter under one, a grid of under two beats, or one that
+// does not rise, is refused by name.
 func ParseScore(raw []byte) (*Score, error) {
 	var on written
 	if err := yaml.Unmarshal(raw, &on); err != nil {
@@ -82,10 +83,11 @@ func ParseScore(raw []byte) (*Score, error) {
 	}
 	times := on.Score.Beats.Times
 	if on.Score.Meter == 0 {
-		on.Score.Meter = 4 // Existing Moonlake scores are four beats to a bar.
+		on.Score.Meter = unsaidMeter
 	}
-	if on.Score.Meter != 4 {
-		return nil, fmt.Errorf("%w: Moonlake visualizer needs meter 4", ErrShow)
+	if on.Score.Meter < 1 {
+		return nil, fmt.Errorf("%w: the score's meter is %d; a bar needs "+
+			"one beat or more", ErrShow, on.Score.Meter)
 	}
 	if len(times) < 2 {
 		return nil, fmt.Errorf("%w: the score has %d beats; a grid needs "+
@@ -126,7 +128,8 @@ func (of *Score) Duration() float64 { return of.duration }
 // Estimated says this score still needs its visual and musical check.
 func (of *Score) Estimated() bool { return of.status == "estimated" }
 
-// Meter is the beats to a bar, four for older Moonlake scores.
+// Meter is the beats to a bar: the score's own, or four for a score
+// that names none.
 func (of *Score) Meter() int { return of.meter }
 
 // Beats is every beat's time, in seconds, a copy.
@@ -141,11 +144,12 @@ func (of *Score) Track(name string) []Note {
 // BarTime is the time of a bar and beat on the grid, both from one, or
 // an error naming the bar when the score lacks it.
 func (of *Score) BarTime(bar, beat int) (float64, error) {
-	index := (bar-1)*beatsPerBar + beat - 1
-	if bar < 1 || beat < 1 || beat > beatsPerBar || index >= len(of.beats) {
+	meter := of.meter
+	index := (bar-1)*meter + beat - 1
+	if bar < 1 || beat < 1 || beat > meter || index >= len(of.beats) {
 		return 0, fmt.Errorf("%w: bar %d beat %d is off the grid: the score "+
 			"has bars 1 to %d, beats 1 to %d", ErrShow, bar, beat,
-			(len(of.beats)+beatsPerBar-1)/beatsPerBar, beatsPerBar)
+			(len(of.beats)+meter-1)/meter, meter)
 	}
 	return of.beats[index], nil
 }

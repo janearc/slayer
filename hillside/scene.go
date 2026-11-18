@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/airlight"
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/globe"
 	"github.com/janearc/slayer/maths"
@@ -21,6 +22,7 @@ import (
 	"github.com/janearc/slayer/set"
 	"github.com/janearc/slayer/sources"
 	"github.com/janearc/slayer/terrain"
+	"github.com/janearc/slayer/trace"
 )
 
 // with -set, the set file says the world and the film; these flags say
@@ -90,6 +92,19 @@ type staging struct {
 	west           float64
 	north          float64
 	lowest         float64
+	groundlessAir  bool
+	airAltitude    float64
+	// airedSun is the exact value and insertion index emitted by aired; it
+	// is never inferred by matching floating-point light values.
+	airedSun *stagedDistantSource
+	// lunarSource is the exact modeled Moon emitter inserted by moonlit.
+	lunarSource *stagedDistantSource
+	// airedSky is the exact atmosphere sky installed beside that source.
+	airedSky thing.Sky
+	// airFieldsProvider is a narrow staging seam for deterministic tests;
+	// production leaves it nil and reads the pinned cache or solves the plan.
+	airFieldsProvider func(string) (*airlight.Fields, airlight.Plan,
+		cacheNote, error)
 }
 
 // standing is one thing as the stage stood it: the thing's name or its
@@ -133,13 +148,28 @@ func refuseFantasy(read set.Set, given asked) error {
 // staged is the world a set file asks for, and what was asked, with the
 // set's film and its first camera in it.
 func staged(given asked) (*thing.World, tally, asked, error) {
-	read, err := readDrawable(given.set)
+	read, err := given.readSet()
 	if err != nil {
 		return nil, tally{}, given, err
+	}
+	if err := refuseTerrainOpticalUnit(read); err != nil {
+		return nil, tally{}, given, err
+	}
+	if authored, has := read.World(); has {
+		if surface, ocean := authored.OceanSurface(); ocean {
+			report, err := oceanSpectrumEstimate(surface)
+			if err != nil {
+				return nil, tally{}, given, fmt.Errorf("%s: %w", given.set, err)
+			}
+			given.oceanSpectrum = &report
+		}
 	}
 	given, err = filmed(read, given)
 	if err == nil {
 		err = refuseFantasy(read, given)
+	}
+	if err == nil {
+		err = refuseGlintOnGPU(read, given)
 	}
 	if err != nil {
 		return nil, tally{}, given, err
@@ -159,7 +189,14 @@ func staged(given asked) (*thing.World, tally, asked, error) {
 		}
 	}()
 	world, inSpace := read.Planet()
+	firstLamp := len(stage.world.Lamps)
 	err = stage.place(read, world, inSpace)
+	if err == nil {
+		err = stage.tagOceanDirectMoon(read)
+	}
+	if err == nil {
+		err = stage.tagOceanDirectSun(read, firstLamp)
+	}
 	if err == nil {
 		err = stage.lasers(read)
 	}
@@ -228,6 +265,9 @@ func (stage *staging) place(read set.Set, world set.Planet,
 	case planeted && !grounded:
 		stage.spaced(world)
 		return nil
+	}
+	if reference, has := read.GroundlessAir(); has {
+		return stage.placeGroundlessAir(read, reference)
 	}
 	if err := stage.terrain(read); err != nil {
 		return err
@@ -309,6 +349,13 @@ func (stage *staging) eye(read set.Set) (maths.Subspace, error) {
 			return maths.Subspace{}, fmt.Errorf("%s: %w", stage.given.set,
 				err)
 		}
+		stage.given = stage.given.lensOf(shot)
+		if err := stage.given.withShotMedia(shot, worldMetresPerUnit(read)); err != nil {
+			return maths.Subspace{}, fmt.Errorf("%s: %w", stage.given.set, err)
+		}
+		if err := stage.given.resolveOceanInitialMedium(stage.world); err != nil {
+			return maths.Subspace{}, fmt.Errorf("camera %s: %w", shot.Name(), err)
+		}
 		return shot.Eye(), nil
 	}
 	shots, err := read.Shots(stage.where)
@@ -316,7 +363,151 @@ func (stage *staging) eye(read set.Set) (maths.Subspace, error) {
 		return maths.Subspace{}, fmt.Errorf("%s: no camera: %v",
 			stage.given.set, err)
 	}
+	stage.given = stage.given.lensOf(shots[0])
+	if err := stage.given.withShotMedia(shots[0], worldMetresPerUnit(read)); err != nil {
+		return maths.Subspace{}, fmt.Errorf("%s: %w", stage.given.set, err)
+	}
+	if err := stage.given.resolveOceanInitialMedium(stage.world); err != nil {
+		return maths.Subspace{}, fmt.Errorf("camera %s: %w", shots[0].Name(), err)
+	}
 	return shots[0].Eye(), nil
+}
+
+// resolveOceanInitialMedium connects the camera's authored named medium to
+// the ocean boundary's configured copy. The ocean-level sky sample budget is
+// attached only to that boundary; matching base coefficients, units, bounds,
+// optical index and rank must still agree before the camera stack adopts it.
+func (given *asked) resolveOceanInitialMedium(world *thing.World) error {
+	if given == nil || world == nil || world.OceanSurface == nil ||
+		world.OceanSurface.Boundary == nil ||
+		world.OceanSurface.Boundary.Material == nil {
+		return nil
+	}
+	material := world.OceanSurface.Boundary.Material
+	wanted := material.ClearMedium
+	if wanted == nil || wanted.DiffuseSkyInscatterSamples() == 0 {
+		return nil
+	}
+	for index := range given.initialMedia {
+		initial := &given.initialMedia[index]
+		got := initial.ClearMedium
+		if got == nil || got.Name() != wanted.Name() {
+			continue
+		}
+		if initial.Index != material.Dense() || initial.Rank != material.Rank ||
+			!sameClearMediumBase(got, wanted) {
+			return fmt.Errorf("initial ocean medium %q does not match its configured boundary", wanted.Name())
+		}
+		if got.DiffuseSkyInscatterSamples() != 0 &&
+			got.DiffuseSkyInscatterSamples() != wanted.DiffuseSkyInscatterSamples() {
+			return fmt.Errorf("initial ocean medium %q has %d sky samples, boundary has %d", wanted.Name(), got.DiffuseSkyInscatterSamples(), wanted.DiffuseSkyInscatterSamples())
+		}
+		initial.ClearMedium = wanted
+	}
+	return nil
+}
+
+// sameClearMediumBase reports whether two clear media share their optical
+// base: name, absorption and scattering.
+func sameClearMediumBase(one, other *thing.ClearMedium) bool {
+	return one != nil && other != nil && one.Name() == other.Name() &&
+		one.Absorption() == other.Absorption() &&
+		one.Scattering() == other.Scattering() &&
+		one.Extinction() == other.Extinction() &&
+		one.Phase() == other.Phase() &&
+		one.MetresPerUnit() == other.MetresPerUnit() &&
+		one.InscatterSteps() == other.InscatterSteps() &&
+		one.MaxInscatterDistanceMetres() ==
+			other.MaxInscatterDistanceMetres()
+}
+
+// withShotMedia carries a set camera's explicitly authored start stack to
+// tracing. A moving camera would leave its declared containing medium, so
+// that combination is refused at stage for either backend.
+func (given *asked) withShotMedia(shot set.Shot,
+	metresPerUnit float64) error {
+	media := shot.InitialMedia()
+	if len(media) == 0 {
+		return nil
+	}
+	withMedia := *given
+	withMedia.initialMedia = make([]trace.InitialMedium, len(media))
+	if err := refuseGPUInitialMediaAperture(withMedia); err != nil {
+		return fmt.Errorf("camera %s: %w", shot.Name(), err)
+	}
+	if given.cameraPath {
+		return fmt.Errorf("camera %s has initial media and a moving job camera; a fixed start medium cannot follow camera motion", shot.Name())
+	}
+	converted := make([]trace.InitialMedium, len(media))
+	for index, each := range media {
+		converted[index] = trace.InitialMedium{Index: each.Index,
+			Rank: each.Rank}
+		if name, extinction, optical := each.OpticalMedium(); optical {
+			absorption, scattering, phaseG, steps, maxDistance, participating :=
+				each.ParticipatingMedium()
+			var medium *thing.ClearMedium
+			var err error
+			if participating {
+				medium, err = thing.NewClearMediumWithScattering(name,
+					maths.RGB(absorption[0], absorption[1], absorption[2]),
+					maths.RGB(scattering[0], scattering[1], scattering[2]),
+					phaseG, metresPerUnit, steps, maxDistance)
+			} else {
+				medium, err = thing.NewClearMedium(name, maths.RGB(
+					extinction[0], extinction[1], extinction[2]), metresPerUnit)
+			}
+			if err != nil {
+				return fmt.Errorf("camera %s initial medium %s: %w",
+					shot.Name(), name, err)
+			}
+			converted[index].ClearMedium = medium
+		}
+	}
+	given.initialMedia = converted
+	return nil
+}
+
+// worldMetresPerUnit is how far one coordinate unit of the set's world
+// travels in metres. A set without a world uses the renderer's metre unit.
+func worldMetresPerUnit(read set.Set) float64 {
+	world, has := read.World()
+	if !has {
+		return 1
+	}
+	return world.Unit()
+}
+
+// refuseTerrainOpticalUnit keeps a metres-authored terrain frame from being
+// combined with a world whose coordinates claim a different metres scale.
+// The terrain path currently rebases world-half coordinates in metres but
+// does not scale ordinary world-half shapes.
+func refuseTerrainOpticalUnit(read set.Set) error {
+	if _, grounded := read.Ground(); !grounded {
+		return nil
+	}
+	world, has := read.World()
+	if !has || world.Unit() == 1 {
+		return nil
+	}
+	for _, material := range world.Materials() {
+		clear, has := material.Clear()
+		if !has {
+			continue
+		}
+		if _, _, optical := clear.OpticalMedium(); optical {
+			return fmt.Errorf("terrain-backed named clear media require world.unit 1 because terrain and world-half coordinates are metres; got %g", world.Unit())
+		}
+	}
+	return nil
+}
+
+// lensOf is what was asked, seen through the camera's own lens where it
+// says how wide one is and the job did not say a width of its own.
+func (given asked) lensOf(shot set.Shot) asked {
+	if wide := shot.Lens().Wide; wide > 0 && !given.said.wide {
+		given.wide = wide / maths.Degree
+	}
+	return given
 }
 
 // namedShot is the set's camera of a name, made ready. A name the set
@@ -338,8 +529,8 @@ func (stage *staging) where(name string) (maths.Vec, bool) {
 }
 
 // light is the sky and its light: the full moon where the set says
-// where it stands, or else the sun or the moon as hillside's own are,
-// picked.
+// where it stands; the sun through the air the set names, computed; or
+// else the sun or the moon as hillside's own are, picked.
 func (stage *staging) light(read set.Set) error {
 	if read.Light() == "none" {
 		stage.world.Sky = sky.Gradient{}
@@ -351,6 +542,9 @@ func (stage *staging) light(read set.Set) error {
 			return err
 		}
 		return stage.skies(read, way)
+	}
+	if read.Air() != "" {
+		return stage.aired(read)
 	}
 	if sun, has := read.Sunlit(); has && read.Light() == "sun" {
 		azimuth, altitude := sun.Where()
@@ -437,6 +631,7 @@ func (stage *staging) moonlit(moon set.Moon) (maths.Vec, error) {
 	if err != nil {
 		return way, err
 	}
+	stage.lunarSource = &stagedDistantSource{index: len(stage.world.Lamps), lamp: lamp}
 	stage.world.Lamp(lamp)
 	stage.made.lamps++
 	return way, nil
@@ -501,15 +696,7 @@ func (stage *staging) terrain(read set.Set) error {
 		return err
 	}
 	stage.given.cached = append(stage.given.cached, asset.checked)
-	west, north, across, down, step := ground.Window()
-	stage.west, stage.north = west, north
-	var note cacheNote
-	stage.ground, note, err = keptGround(asset.path, asset.sum,
-		groundCut{west: west, north: north, step: step,
-			smooth: ground.Smooth(), across: int(across/step) + 1,
-			down: int(down/step) + 1})
-	stage.given.cached = append(stage.given.cached, note)
-	if err != nil {
+	if err := stage.cutGround(ground, asset); err != nil {
 		return err
 	}
 	surface, lowest, err := stage.ground.Ground()
@@ -519,8 +706,53 @@ func (stage *staging) terrain(read set.Set) error {
 	stage.lowest = lowest
 	stage.groundExtent = surface.Bounds()
 	stage.given.floor = lowest
-	stage.world.Add(thing.Thing{Shape: surface,
-		Material: &thing.Material{Name: "basalt", Colour: basalt}})
+	stage.world.Add(thing.Thing{Shape: surface, Material: groundLook(ground)})
+	return nil
+}
+
+// groundLook is what the ground is made of: the reflectance the set says,
+// or else hillside's own basalt.
+func groundLook(ground set.Terrain) *thing.Material {
+	red, green, blue, said := ground.Reflectance()
+	if !said {
+		return &thing.Material{Name: "basalt", Colour: basalt}
+	}
+	return &thing.Material{Name: "ground",
+		Colour: maths.RGB(red, green, blue)}
+}
+
+// cutGround is the ground cut from the pinned model, by its own metres or
+// laid on a sphere about the place the set says, and kept as stage.ground.
+// Ground on a sphere puts a sentence about how much of it is made in the
+// tally.
+func (stage *staging) cutGround(ground set.Terrain,
+	asset *pinnedAsset) error {
+	west, north, across, down, step := ground.Window()
+	stage.west, stage.north = west, north
+	cut := groundCut{west: west, north: north, step: step,
+		smooth: ground.Smooth(), across: int(across/step) + 1,
+		down: int(down/step) + 1}
+	latitude, longitude, placed := ground.Place()
+	if !placed {
+		var note cacheNote
+		var err error
+		stage.ground, note, err = keptGround(asset.path, asset.sum, cut)
+		stage.given.cached = append(stage.given.cached, note)
+		return err
+	}
+	seed, detailed := ground.Detail()
+	slope, longest, relieved := ground.Relief()
+	cut.place = &groundPlace{latitude: latitude, longitude: longitude,
+		across: across, down: down, detailed: detailed, seed: seed,
+		source: ground.From(), relieved: relieved, slope: slope,
+		longest: longest}
+	found, note, err := keptPlace(asset.path, asset.sum, cut)
+	stage.given.cached = append(stage.given.cached, note)
+	if err != nil {
+		return err
+	}
+	stage.ground = found.window
+	stage.made.ground = found.sentence(ground.From())
 	return nil
 }
 
@@ -641,15 +873,19 @@ func (stage *staging) at(east, north float64) (maths.Vec, error) {
 // stand stands every thing and every stand the set names on its ground.
 func (stage *staging) stand(read set.Set) error {
 	for i, each := range read.Things() {
-		east, north := each.At()
-		place, err := stage.at(east, north)
-		if err != nil {
-			return fmt.Errorf("%s: %w", each.Name(), err)
+		place, absolute := stage.absolutePosition(each)
+		if !absolute {
+			east, north := each.At()
+			var err error
+			place, err = stage.at(east, north)
+			if err != nil {
+				return fmt.Errorf("%s: %w", each.Name(), err)
+			}
+			place.Y += each.Height()
 		}
-		place.Y += each.Height()
 		stage.places[each.Name()] = place
 		stage.note(each.Name(), each.Kind(), place)
-		_, err = stage.putRecipe(each.Kind(), each.Recipe(), each.Complexity(),
+		_, err := stage.putRecipe(each.Kind(), each.Recipe(), each.Complexity(),
 			each.Seed(), uint64(i), place, each.Alight(), each.Name())
 		if err != nil {
 			return fmt.Errorf("%s: %w", each.Name(), err)
@@ -666,6 +902,23 @@ func (stage *staging) stand(read set.Set) error {
 		}
 	}
 	return stage.ecosystems(read)
+}
+
+// absolutePosition turns a named east/north/up placement in the map's
+// metres into the terrain-local right-handed frame. A false result keeps
+// the historical terrain-sampled placement path.
+func (stage *staging) absolutePosition(each set.Thing) (maths.Vec, bool) {
+	position, has := each.Position()
+	if !has {
+		return maths.Vec{}, false
+	}
+	if stage.groundlessAir {
+		return maths.V(position.East(), position.Up(),
+			-position.North()), true
+	}
+	return maths.V(position.East()-stage.west,
+		position.Up()-stage.lowest,
+		stage.north-position.North()), true
 }
 
 // tries is how many places a seed offers a stand's thing before the

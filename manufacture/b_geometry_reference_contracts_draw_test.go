@@ -96,11 +96,16 @@ func TestAuthoredCatalogueMatchesItsGeometryRecords(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer stacks.Close()
+	later, err := os.Open("testdata/later-reference-arm64.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer later.Close()
 	names := map[string]bool{}
 	seen := map[string]bool{}
 	scan := bufio.NewScanner(io.MultiReader(file, additions, ground, survey, large, civic,
 		personal, yard, summit, launcher, vegetation, stage, vehicles, saucers,
-		stacks))
+		stacks, later))
 	cases, geometries, refusals := 0, 0, 0
 	for scan.Scan() {
 		row := strings.Fields(scan.Text())

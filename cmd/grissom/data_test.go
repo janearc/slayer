@@ -1,3 +1,5 @@
+//go:build netcdf
+
 package main
 
 import (
@@ -219,5 +221,22 @@ func TestSparseMarbleKeepsUnobservedFineCellsBlack(t *testing.T) {
 	}
 	if empty == 0 || lit == 0 {
 		t.Fatalf("sparse image filled%d empty%d", lit, empty)
+	}
+}
+
+// TestEarthWithoutPhotographsKeepsOnlyTheMeasuredEarth checks that an
+// earth directory missing a photograph is read without it.
+func TestEarthWithoutPhotographsKeepsOnlyTheMeasuredEarth(t *testing.T) {
+	viewerFixture(t)
+	_, earth, _, _ := viewerFiles(t)
+	if err := os.Remove(filepath.Join(earth, "world.200407.3x5400x2700.jpg")); err != nil {
+		t.Fatal(err)
+	}
+	buildEarth(earth, 1)
+	if len(view.earth.images) != 1 || view.earth.images[0].name != "Black Marble, 2016, at night" {
+		t.Fatalf("images %+v, want only the black marble", view.earth.images)
+	}
+	if len(view.earth.hexes) != 42 {
+		t.Fatalf("hexes %d, want 42", len(view.earth.hexes))
 	}
 }

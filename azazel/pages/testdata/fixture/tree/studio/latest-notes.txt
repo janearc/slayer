@@ -1,0 +1,4 @@
+frames/2026-11-01-studio-sky	The studio's note, which the team's replaces.
+animations/2026-11-02-team-heard-film	RENDERING since 10:00, about 30 minutes:
+a line with no tab is no note
+frames/2026-11-03-fable-moonlake/shorts/one	The first short, a card of its own.

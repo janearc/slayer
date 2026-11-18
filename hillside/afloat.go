@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/janearc/slayer/emit"
+	"github.com/janearc/slayer/hillside/placement"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/set"
 )
@@ -75,6 +76,7 @@ var craftParts = []craftPart{
 // word light: says, and how it lights the stage.
 var spaceLights = map[string]func(stage *staging, read set.Set) error{
 	"sun":  (*staging).sunned,
+	"moon": (*staging).mooned,
 	"none": func(*staging, set.Set) error { return nil },
 }
 
@@ -86,7 +88,7 @@ func (stage *staging) afloat(read set.Set) error {
 	}
 	lit, known := spaceLights[read.Light()]
 	if !known {
-		return fmt.Errorf("%s: a scene in space is lit by light: sun or "+
+		return fmt.Errorf("%s: a scene in space is lit by light: sun, moon or "+
 			"light: none, not %q", stage.given.set, read.Light())
 	}
 	if !hangsASky(read) {
@@ -101,6 +103,20 @@ func (stage *staging) afloat(read set.Set) error {
 		}
 	}
 	return nil
+}
+
+// mooned stages the set's moonlight, or refuses when the set has no moon.
+func (stage *staging) mooned(read set.Set) error {
+	moon, has := read.Moonlit()
+	if !has {
+		return fmt.Errorf("%s: light: moon says no moon: where it stands",
+			stage.given.set)
+	}
+	way, err := stage.moonlit(moon)
+	if err != nil {
+		return err
+	}
+	return stage.skies(read, way)
 }
 
 // groundless refuses a set in space that says a part that stands on
@@ -166,7 +182,11 @@ func (stage *staging) craft(each set.Thing) error {
 	at := afloatAt(each)
 	stage.places[each.Name()] = at.Origin
 	stage.note(each.Name(), each.Kind(), at.Origin)
-	return stage.add(one, each.Kind(), at, each.Seed(), false)
+	start := len(stage.world.Things)
+	if err := stage.add(one, each.Kind(), at, each.Seed(), false); err != nil {
+		return err
+	}
+	return stage.partSpin(start, each)
 }
 
 // stockedCraft is a thing's kind as the manufactory makes it at its
@@ -191,11 +211,5 @@ func (stage *staging) stockedCraft(each set.Thing) (kept, error) {
 // (east, height, minus north) in the scene's metres, turned clockwise
 // from north by its heading, or not turned where it says none.
 func afloatAt(each set.Thing) maths.Subspace {
-	east, north := each.At()
-	turn := float64(placementZero)
-	if angle, said := each.Heading(); said {
-		turn = -angle * maths.Degree
-	}
-	return maths.Subspace{Origin: maths.V(east, each.Height(), -north),
-		Orientation: maths.About(maths.YAxis, turn)}
+	return placement.SpaceAt(each)
 }

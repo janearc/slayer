@@ -26,5 +26,6 @@ func groundValue(name string) float64 {
 	if err != nil {
 		panic(err)
 	}
+	noted(number)
 	return number.Value
 }

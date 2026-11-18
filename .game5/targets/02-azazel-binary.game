@@ -1,0 +1,3 @@
+# game build makes every cmd/* into bin/. these are the binaries that
+# live elsewhere, and two instrumented builds for profiling.
+azazel-binary . :: go build -o bin/azazel ./azazel/cmd/azazel

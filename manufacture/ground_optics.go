@@ -26,6 +26,8 @@ func (row groundObservatory) optics(assembly *instrumentAssembly,
 		rim = aperture * groundValue("tube-radius")
 		wall := aperture * groundValue("tube-wall")
 		assembly.add(groundDrum(rim, rim-wall, length), pose, leaf)
+	} else if row.keck {
+		row.keckTube(assembly, pose, rim, length)
 	} else {
 		row.truss(assembly, pose, rim, length)
 	}
@@ -74,18 +76,17 @@ func (row groundObservatory) secondaryOn(assembly *instrumentAssembly,
 		depth: row.aperture * groundValue("mirror-sag") * spaceHalf}
 	if row.survey != nil {
 		radius = row.survey.secondary * spaceHalf
-		camera := row.aperture * groundValue("survey-camera-radius")
-		clearance := row.aperture *
-			groundValue("survey-camera-clearance")
 		depth := row.aperture * groundValue("mirror-sag") * spaceHalf
-		mirror = surveyMirror{outer: radius, inner: camera + clearance,
-			depth:   depth,
+		// M2 is a solid convex face. The camera is below it, not through it.
+		mirror = surveySecondary{radius: radius, depth: depth,
 			backing: row.aperture * groundValue("mirror-thickness")}
 	}
 	flipped := tiltedFrame(maths.YAxis.Scale(length), math.Pi)
 	secondary := flipped.Within(pose)
 	assembly.add(mirror, secondary, spaceSecondary)
-	row.secondaryRods(assembly, pose, rim, length, radius)
+	if !row.keck && row.survey == nil {
+		row.secondaryRods(assembly, pose, rim, length, radius)
+	}
 }
 
 // secondaryRods shares the three-point support between telescope families.

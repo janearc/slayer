@@ -1,0 +1,1 @@
+sample-flame . :: go run ./flame/testdata/sample.go

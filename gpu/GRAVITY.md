@@ -1,10 +1,8 @@
 # Metal gravity work
 
 The prototype is integrated with the RC in `feat/sextant-throughput`.
-[The integration guide](../doc/gravity-rc-integration.md) describes the
-current dependency pin and unsupported combinations. Branch/workspace
-paths and measurements below retain their original prototype context;
-they are not setup instructions for a fresh clone.
+Branch/workspace paths and measurements below retain their original
+prototype context; they are not setup instructions for a fresh clone.
 
 What is called Celestial's `hole.MetalLibrary` below is Slayer's
 `metal.GeodesicLibrary` since 2026-11-14: the same shader, kept in

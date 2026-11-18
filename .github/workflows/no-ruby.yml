@@ -1,0 +1,21 @@
+# slayer holds no ruby: tools are go, and scripts are sh. a push or pull
+# request that carries a .rb file is refused, naming each one.
+name: no ruby
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  no-ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: refuse .rb files
+        run: |
+          found=$(git ls-files '*.rb')
+          if [ -n "$found" ]; then
+            echo "slayer holds no ruby; these must be go or sh:"
+            echo "$found"
+            exit 1
+          fi

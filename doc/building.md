@@ -33,7 +33,6 @@ file is readable text: inspect it to see what each target actually does.
 | macOS, Xcode command-line tools, usable Metal device | Metal rendering and GPU tests |
 | `ffmpeg` on PATH | movie encoding and audio decoding |
 | source shelf | normal pre-build verification |
-| prepared review dependencies | this development branch; see below |
 
 CPU-only rendering does not require Metal. Metal kernels compile at runtime;
 a successful Go build does not establish GPU conformance. Native mesh
@@ -56,62 +55,53 @@ the words after `--` reach the application. Older builds discarded them.
 
 ## Configure the source shelf
 
-In your Game config, normally `~/.config/game/config`, add:
-
-```text
-project slayer
-    set SLAYER_SHELF /absolute/path/outside/checkouts/slayer-shelf
-```
-
-The shelf holds papers and datasets pinned in `sources.yaml`. Keep it
-outside Git checkouts. It is separate from renders and Grissom survey
-data. With `GAME_HOME` set, Game reads that home's `.config/game/config`;
-use your own home. Road and dist remotes are optional for local builds.
+The shelf holds the papers and datasets pinned in `sources.yaml`. A
+release does not include it, so name a folder of your own, outside any
+Git checkout, in your shell:
 
 ```sh
+export SLAYER_SHELF="$HOME/slayer/sources"
 game run sources-fetch
 game run sources-check
 game run sources-verify
 ```
 
+Put the `export` in your shell's startup file so later builds find the
+shelf. Fetch downloads about 2 GB, most of it one elevation model of
+Kilauea, and keeps what it already has. The shelf is separate from
+renders and Grissom survey data.
+
+Game passes a project's `set` values only for the variables the repository
+declares with `needs`, and `SLAYER_SHELF` is not declared. So `set
+SLAYER_SHELF` in your Game config does not reach these runs. Use the shell.
+
+With `SLAYER_SHELF` unset, verify, check and path read `shelf/` in the
+checkout, which only a working tree of the road has.
+
 These bootstrap runs work before binaries exist. Fetch needs source access;
 preserve the downloaded shelf for offline use. Check holds bytes to hashes.
 Verify also checks source pages or excerpts behind published numeric values.
 
-## Prepare the development dependencies
+## Dependencies
 
-This branch still uses private Celestial and celestial-data review versions
-and an absolute Celestial `replace` in `go.mod`. A fresh clone on another
-machine therefore needs preparation. Follow [review dependencies](review-dependencies.md)
-for the file proxy and [gravity integration](gravity-rc-integration.md)
-for the extra Metal patch.
-
-The replacement directory must exist or be deliberately replaced by an
-identical prepared dependency on your machine. The tracked
-`dependencies/patches/celestial-metal.patch` preserves the gravity additions;
-keep the RC's other APIs when applying it. Removing the pin and selecting
-an older public module can lose required interfaces.
+Slayer's dependencies come through the public Go proxy.
 
 Set `GOWORK=off` when checking a standalone checkout so an enclosing
-workspace cannot silently supply different modules. A public release needs
-published dependency pins and removal of the machine-local replacement.
+workspace cannot silently supply different modules.
 
 ## Build and run
 
-On the shared development machine, use two Go workers and serialize builds:
+Build, then check the binary and a dry run:
 
 ```sh
-export GOMAXPROCS=2
-export GOFLAGS=-p=1
 game build
 bin/slayer --age
 game run slayer -- --help
-game run slayer -- draw jobs/first-picture.yaml --dry-run
+game run slayer -- draw doc/examples/jobs/first-picture.yaml --dry-run
 ```
 
 `game build` verifies the shelf and builds stamped commands into `bin/`.
 Application runs use those binaries: rebuild after changing Go code.
-Follow the machine's lane policy for builds and renders.
 
 A named target such as `game build camera-binary` executes the custom
 recipe in `.game`. Its raw `go build` does not automatically receive the
@@ -155,9 +145,6 @@ Confirm the shared queue is available before substantial rendering.
 
 Full draw and coverage runs can be expensive; choose them deliberately.
 Cache hits and skipped Metal tests do not establish fresh GPU execution.
-See [development](developing.md) for coverage accounting, harness history
-rules and release requirements. [Render admission](render-admission.md)
-explains Game lanes and the current boundary of Azazel's queue work.
 
 ## Common setup failures
 
@@ -165,8 +152,6 @@ explains Game lanes and the current boundary of Azazel's queue work.
 |---|---|
 | unknown `.game` version or `gomaxprocs` key | selected Game executable and `--age` |
 | source verification fails | shelf path, pinned bytes and source fetch |
-| private module unavailable | review proxy and documented checksum exception |
-| replacement directory missing | prepared Celestial dependency path |
 | missing dependency symbol | revision, `go.mod` and `GOWORK` |
 | Metal unavailable at render time | Mac tools, device or a supported CPU alternative |
 | movie encoding fails | `ffmpeg` on PATH |
@@ -212,14 +197,6 @@ home), outside the checkout. Override `SLAYER_BOOTSTRAP_DIR` or
 or `go.mod`. It prints the environment exports for later Game commands;
 use those in your shell to keep selecting the same home, shelf and runner.
 
-This development branch's private modules and absolute replacement still
-need the preparation described above. Set the review proxy variables before
-setup. A missing pinned directory is refused before network work; the
-script cannot manufacture the private dependency or silently substitute a
-public version. It becomes a simpler public bootstrap once release pins
-replace those development dependencies.
-
-`game run check-bootstrap` tests the script with controlled tool boundaries:
-read-only inspection, missing-pin refusal, ordered setup, repeatability,
-failed dependency/source stops and preservation of unmanaged configuration.
-It performs no downloads, system installation or rendering.
+Slayer's dependencies are public releases, so setup needs no private input.
+A local `replace` in `go.mod` whose directory is missing is refused before
+network work.

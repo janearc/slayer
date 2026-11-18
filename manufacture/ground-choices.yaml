@@ -1,0 +1,2544 @@
+# Authored visual structure and appearance; source dimensions are separate.
+# These templates suggest instruments, without an engineering prescription.
+numbers:
+  - name: keck-frame-reflectance
+    value: 0.6
+    says: pale frame diffuse reflectance; authored photographic interpretation
+    kind: picked
+    by: an agent, Keck instrument study, 2026-11-14
+  - name: keck-middle-frame-height
+    value: 0.48
+    says: middle octagon height per optical structure length; authored photographic interpretation
+    kind: picked
+    by: an agent, Keck instrument study, 2026-11-14
+  - name: keck-upper-frame-radius
+    value: 0.46
+    says: upper octagon radius per primary aperture; authored photographic interpretation
+    kind: picked
+    by: an agent, Keck instrument study, 2026-11-14
+  - name: keck-frame-member-radius
+    value: 0.014
+    says: main frame member radius per primary aperture; authored photographic interpretation
+    kind: picked
+    by: an agent, Keck instrument study, 2026-11-14
+  - name: keck-secondary-cage-radius
+    value: 0.11
+    says: secondary cage radius per primary aperture; authored photographic interpretation
+    kind: picked
+    by: an agent, Keck instrument study, 2026-11-14
+  - name: keck-secondary-cage-depth
+    value: 0.22
+    says: secondary cage depth per primary aperture; authored photographic interpretation
+    kind: picked
+    by: an agent, Keck instrument study, 2026-11-14
+  - name: keck-secondary-member-radius
+    value: 0.005
+    says: secondary cage member radius per primary aperture; authored photographic interpretation
+    kind: picked
+    by: an agent, Keck instrument study, 2026-11-14
+  - name: keck-primary-height
+    value: 0.35
+    says: optical pivot height per enclosure height; authored to clear the inner shell
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-plinth-height
+    value: 3.0
+    says: fixed base height in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-slit-width
+    value: 9.0
+    says: parallel opening width in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-lower-shutter-top
+    value: 12.0
+    says: lower shutter top in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-housing-offset
+    value: 0.5
+    says: housing centre offset from slit edge in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-housing-radius
+    value: 0.32
+    says: shutter housing section radius in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-housing-top
+    value: 26.4
+    says: shutter housing top in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-shutter-battens
+    value: 4
+    says: lower shutter batten count; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-batten-step
+    value: 1.8
+    says: vertical batten spacing in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-batten-height
+    value: 0.12
+    says: batten height in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-batten-depth
+    value: 0.12
+    says: batten depth in metres; authored from owner photograph
+    kind: picked
+    by: an agent, Keck silhouette correction, 2026-11-14
+  - name: keck-trim-reflectance
+    value: 0.23
+    says: neutral dark display finish on seams and vent covers; authored scenery
+    kind: picked
+    by: an agent, Keck exterior study, 2026-11-14
+  - name: keck-track-steps
+    value: 24
+    says: segments per curved track; authored scenery
+    kind: picked
+    by: an agent, Keck exterior study, 2026-11-14
+  - name: subaru-shoulder-height
+    value: 0.43
+    says: equipment belt top as a fraction of total height; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-upper-radius
+    value: 0.84
+    says: upper drum radius relative to overall radius; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-base-radius
+    value: 0.87
+    says: white base radius relative to overall radius; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-belt-radius
+    value: 0.94
+    says: equipment belt radius relative to overall radius; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-cladding-reflectance
+    value: 0.36
+    says: neutral exterior metal display reflectance; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-tower-width
+    value: 0.24
+    says: service tower width per overall radius; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-tower-depth
+    value: 0.28
+    says: service tower depth per overall radius; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-tower-height
+    value: 0.57
+    says: service tower height per total height; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-door-width
+    value: 1.4
+    says: authored personnel door width in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-door-height
+    value: 2.4
+    says: authored personnel door height in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-panel-count
+    value: 48
+    says: upper drum seam count; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-seam-width
+    value: 0.12
+    says: raised seam width in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-seam-depth
+    value: 0.3
+    says: raised seam depth in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-shutter-edge-width
+    value: 0.8
+    says: shutter edge housing width in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-shutter-edge-depth
+    value: 1.0
+    says: shutter edge housing depth in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-vent-count
+    value: 16
+    says: equipment belt ventilation panel count; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-vent-floor
+    value: 1.1
+    says: vent height above belt floor in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-vent-width
+    value: 2.5
+    says: vent panel width in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-vent-height
+    value: 2.8
+    says: vent panel height in metres; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: subaru-walkway-posts
+    value: 48
+    says: outside walkway guard post count; authored photographic interpretation
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: detail-member-sides
+    value: 16
+    says: maximum circular cuts for small supports, independent of mirror cuts
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: rib-joint-metres
+    value: 0.002
+    says: each capped rib member stops this far from its joint in metres
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: enclosure-rib-radius
+    value: 0.008
+    says: interior shell rib radius per primary aperture
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: enclosure-rib-count
+    value: 12
+    says: authored meridian or wall support count
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: dome-rib-steps
+    value: 8
+    says: straight segments per curved shell support
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: dome-rib-top-deg
+    value: 80
+    says: support stop below the dome apex in degrees from horizontal
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: detail-clearance
+    value: 2
+    says: support clearance in member radii
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: slit-track-radius
+    value: 0.012
+    says: shutter track radius per primary aperture
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: gallery-height
+    value: 0.66
+    says: interior deck height as a share of the base wall
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: gallery-wall-clearance
+    value: 2
+    says: deck clearance in shell wall thicknesses
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: gallery-width
+    value: 0.09
+    says: deck width as a share of shell radius
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: gallery-deck-metres
+    value: 0.15
+    says: authored access deck thickness in metres
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: gallery-post-metres
+    value: 0.04
+    says: authored railing post radius in metres
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: gallery-rail-metres
+    value: 1.1
+    says: authored railing rise above deck in metres
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: gallery-post-count
+    value: 16
+    says: railing stations around each edge of the deck
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: cell-outer-share
+    value: 0.82
+    says: mirror cell outer radius as a share of the optical support ring
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: cell-inner-share
+    value: 0.36
+    says: mirror cell inner radius as a share of its outer radius
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: cell-beam-radius
+    value: 0.012
+    says: mirror cell member radius per primary aperture
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: mirror-cell-spokes
+    value: 12
+    says: radial members behind the primary
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: survey-facility-beam-radius
+    value: 0.18
+    says: authored service wing member radius in metres
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: survey-roof-beams
+    value: 6
+    says: roof members per service wing tier
+    kind: picked
+    by: an agent, observatory detail correction, 2026-11-14
+  - name: elt-curved-support-seat
+    value: 0.1
+    says: curved relay support inset as a share of its visual sag
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-flat-support-seat
+    value: 0.5
+    says: flat relay support end as a share of the disk thickness
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-enclosure-diameter
+    value: 96
+    says: authored enclosure diameter in metres, not an ESO dimension
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-enclosure-height
+    value: 90
+    says: authored enclosure height in metres, not an ESO dimension
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-primary-hole-rings
+    value: 5
+    says: minimum axial-lattice radius for the authored central opening
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-truss-length
+    value: 1.1
+    says: optical structure length per primary aperture, fitting the enclosure
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-secondary-diameter
+    value: 0.108
+    says: visual secondary diameter per primary aperture, not measured M2 data
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-tertiary-diameter
+    value: 0.097
+    says: visual tertiary diameter per primary aperture
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-fourth-diameter
+    value: 0.064
+    says: visual fourth mirror diameter per primary aperture
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-fifth-diameter
+    value: 0.069
+    says: visual fifth mirror diameter per primary aperture
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-tertiary-height
+    value: 0.05
+    says: tertiary height above the primary plane per aperture
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-fold-height
+    value: 0.35
+    says: folding mirror height as a share of the optical structure length
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-fifth-offset
+    value: 0.28
+    says: fifth mirror lateral offset per primary aperture
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-fold-tilt
+    value: 45
+    unit: deg
+    says: picked folding mirror tilt, without a calibrated beam prescription
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-relay-sag
+    value: 0.005
+    says: tertiary visual figure depth per primary aperture
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: elt-relay-support
+    value: 0.006
+    says: relay support radius per primary aperture
+    kind: picked
+    by: Slayer's large-observatory study, 2026-11-07
+  - name: survey-radial-minimum
+    value: 2
+    says: minimum radial steps in the authored annular mirror figure
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-radial-cuts-per-step
+    value: 8
+    says: circular cuts per radial step in the mirror profile detail
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-enclosure-diameter
+    value: 30
+    says: picked enclosure diameter in metres for the survey scenery template
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-enclosure-height
+    value: 30
+    says: picked enclosure height in metres for the survey scenery template
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-length
+    value: 0.65
+    says: compact optical structure length per primary aperture
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-surface-gap
+    value: 0.002
+    says: separation in metres between the two visible mirror surfaces
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-tertiary-sag
+    value: 0.5
+    says: tertiary visual sag as a share of the primary's picked sag
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-blank-depth
+    value: 0.06
+    says: shared backing depth per primary aperture, not measured glass thickness
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-blank-radius
+    value: 0.995
+    says: backing radius share under the two reflective skins
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-camera-radius
+    value: 0.12
+    says: camera housing radius per primary aperture
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-camera-length
+    value: 0.18
+    says: camera housing length per primary aperture
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-camera-reflectance
+    value: 0.1
+    says: diffuse neutral camera housing shade
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: survey-blank-reflectance
+    value: 0.3
+    says: neutral visible glass-backing proxy shade
+    kind: picked
+    by: Slayer's survey-observatory study, 2026-11-07
+  - name: enclosure-joint-gap
+    value: 0.001
+    says: joint clearance per radius between separately closed shell pieces
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: sides-hull
+    value: 12
+    says: circular cuts for the silhouette
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: sides-clumps
+    value: 24
+    says: circular cuts for the rough structural view
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: sides-quick
+    value: 48
+    says: circular cuts for the quick view
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: sides-demo
+    value: 96
+    says: circular cuts for the close view
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: opening-deg
+    value: 50
+    says: open observing slit angle
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: altitude-deg
+    value: 55
+    says: telescope elevation in the specimen
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: wall-share
+    value: 0.025
+    says: shell thickness as a share of enclosure radius
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: keck-enclosure-diameter
+    value: 30
+    says: scenery enclosure diameter in metres; not a Keck measurement
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: keck-enclosure-height
+    value: 28
+    says: scenery enclosure height in metres; not a Keck measurement
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: palomar-length
+    value: 3.8
+    says: closed optical tube length per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: open-length
+    value: 1.5
+    says: open optical structure length per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: tube-radius
+    value: 0.58
+    says: tube outer radius per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: tube-wall
+    value: 0.04
+    says: tube wall thickness per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: primary-height
+    value: 0.35
+    says: primary height as a share of the enclosure height
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: mirror-sag
+    value: 0.035
+    says: shallow visual mirror figure per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: mirror-thickness
+    value: 0.007
+    says: closed panel backing per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: tile-fill
+    value: 0.97
+    says: hexagonal panel radius share, leaving visible gaps
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: truss-radius
+    value: 0.012
+    says: support rod radius per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: truss-members
+    value: 6
+    says: longitudinal members around the open telescope
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: truss-rim
+    value: 0.56
+    says: outer support ring radius per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: rim-thickness
+    value: 0.025
+    says: support ring width and height per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: secondary-share
+    value: 0.15
+    says: secondary diameter per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: pier-width
+    value: 0.38
+    says: pedestal width per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: pier-height
+    value: 0.6
+    says: pedestal height as a share of primary height
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: fork-width
+    value: 0.1
+    says: fork arm width per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: fork-offset
+    value: 0.68
+    says: fork arm offset per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: fork-depth
+    value: 0.18
+    says: fork arm depth per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: bearing-radius
+    value: 0.055
+    says: axis bearing radius per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: polar-altitude-deg
+    value: 35
+    says: visible polar-axis elevation; not site calibration
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: polar-footprint
+    value: 0.35
+    says: equatorial pier footprint per enclosure radius
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: polar-support
+    value: 0.12
+    says: equatorial support radius per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: horseshoe-outer
+    value: 0.85
+    says: horseshoe outer radius per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: horseshoe-inner
+    value: 0.65
+    says: horseshoe inner radius per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: horseshoe-height
+    value: 0.12
+    says: horseshoe axial thickness per primary aperture
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: horseshoe-opening-deg
+    value: 120
+    says: gap in the closed horseshoe arc
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: cylinder-base
+    value: 0.28
+    says: cylindrical enclosure base as a share of total height
+    kind: picked
+    by: an agent, Subaru exterior study, 2026-11-14
+  - name: enclosure-reflectance
+    value: 0.78
+    says: neutral painted enclosure reflectance
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: structure-reflectance
+    value: 0.12
+    says: neutral support reflectance
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: tube-reflectance
+    value: 0.45
+    says: neutral tube reflectance
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: mirror-reflectance
+    value: 0.75
+    says: neutral visible mirror reflectance
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: mirror-gloss
+    value: 0.9
+    says: authored visible mirror gloss
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: mirror-index
+    value: 8
+    says: authored Fresnel proxy, not measured metal optical data
+    kind: picked
+    by: Slayer's ground-observatory study, 2026-11-07
+  - name: civic-terrace-width
+    value: 72
+    says: terrace width in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-terrace-depth
+    value: 44
+    says: terrace depth in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-terrace-height
+    value: 1
+    says: terrace height in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-wing-width
+    value: 18
+    says: each wing width in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-wing-depth
+    value: 16
+    says: wing depth in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-wing-height
+    value: 8
+    says: wing height in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-tower-offset
+    value: 23
+    says: east and west tower distance from centre in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-tower-radius
+    value: 6
+    says: instrument dome radius in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-tower-wall
+    value: 3
+    says: drum height above the wing in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-planetarium-radius
+    value: 13
+    says: planetarium radius in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-planetarium-offset
+    value: 7
+    says: planetarium centre behind entrance in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-planetarium-wall
+    value: 6
+    says: planetarium drum height in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-planetarium-roof
+    value: 2
+    says: planetarium cap height in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-top
+    value: 20
+    says: maximum building height including terrace in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-entry-width
+    value: 18
+    says: entrance and portico width in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-entry-front
+    value: -12
+    says: entrance front along local Z in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-entry-depth
+    value: 12
+    says: entrance depth toward planetarium in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-entry-height
+    value: 6
+    says: entrance height above terrace in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-canopy-depth
+    value: 5
+    says: portico canopy depth in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-canopy-height
+    value: 1
+    says: canopy thickness in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-columns
+    value: 4
+    says: number of portico columns; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-column-setback
+    value: 1.7
+    says: column distance in front of entrance in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-column-radius
+    value: 0.45
+    says: column radius in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-roof-thickness
+    value: 0.12
+    says: instrument shell thickness in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-pier-height
+    value: 4
+    says: refractor bearing height above wing in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-pier-radius
+    value: 0.3
+    says: refractor pier radius in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-tube-length
+    value: 3.6
+    says: refractor tube length in metres, not its focal length; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-tube-wall
+    value: 0.025
+    says: refractor tube wall in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-objective-thickness
+    value: 0.015
+    says: opaque objective proxy thickness in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-roof-cuts-per-level
+    value: 4
+    says: circular cuts per vertical subdivision of closed roofs; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-wall-reflectance
+    value: 0.76
+    says: neutral wall shade; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-roof-reflectance
+    value: 0.23
+    says: neutral dark copper proxy shade, not measured metal data; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-rotunda-radius
+    value: 8
+    says: central rotunda radius in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-rotunda-wall
+    value: 11
+    says: rotunda wall height in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-rotunda-roof
+    value: 8
+    says: rotunda cap height in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-rotunda-offset
+    value: -3
+    says: rotunda centre along local Z in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-hall-width
+    value: 46
+    says: hall joining the wings in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: civic-hall-depth
+    value: 8
+    says: hall depth in metres; authored, not a Griffith measurement
+    kind: picked
+    by: Slayer civic observatory study, 2026-11-08
+  - name: personal-altitude-deg
+    value: 55
+    says: instrument elevation in degrees; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-tube-radius
+    value: 0.6
+    says: tube outer radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-tube-wall
+    value: 0.04
+    says: tube wall per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-objective-thickness
+    value: 0.012
+    says: opaque objective proxy thickness per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-mount-arm
+    value: 0.13
+    says: mount arm thickness per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-bearing-thickness
+    value: 0.07
+    says: altitude bearing thickness per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-box-wall
+    value: 0.05
+    says: mirror box panel thickness per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-box-joint
+    value: 0.002
+    says: clearance between separately closed mirror box panels per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-focuser-length
+    value: 0.4
+    says: side focuser reach per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-focuser-radius
+    value: 0.08
+    says: focuser tube radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-rear-focuser
+    value: 0.8
+    says: rear focuser length per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-diagonal-length
+    value: 0.5
+    says: diagonal reach per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-eyepiece-length
+    value: 0.45
+    says: eyepiece length per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-foot-height
+    value: 0.15
+    says: tripod endpoint height per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-leg-radius
+    value: 0.15
+    says: tripod leg radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-head-width
+    value: 1.6
+    says: tripod mount head width per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-head-height
+    value: 1
+    says: tripod mount head height per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-weight-offset
+    value: 4
+    says: counterweight shaft lateral reach per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-weight-drop
+    value: 3
+    says: counterweight shaft downward reach per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-weight-shaft
+    value: 0.12
+    says: counterweight shaft radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-weight-radius
+    value: 0.7
+    says: counterweight radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-weight-depth
+    value: 0.6
+    says: counterweight thickness per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-fork-depth
+    value: 0.5
+    says: short tube fork depth per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-obstruction
+    value: 0.16
+    says: opaque SCT secondary housing radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-glass-red
+    value: 0.08
+    says: opaque lens proxy red shade; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-glass-green
+    value: 0.15
+    says: opaque lens proxy green shade; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-glass-blue
+    value: 0.2
+    says: opaque lens proxy blue shade; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-glass-index
+    value: 1.52
+    says: picked coating index proxy, not a glass prescription; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-aperture-inches
+    value: 36
+    says: the requested aperture in international inches
+    kind: picked
+    by: the author's request, 2026-11-08
+  - name: personal-dobsonian-36-seat
+    value: 1
+    says: authored seat for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-length
+    value: 4
+    says: authored length for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-width
+    value: 1.05
+    says: authored width for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-height
+    value: 5
+    says: authored height for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-front
+    value: 3.2
+    says: authored front for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-back
+    value: 1.2
+    says: authored back for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-base-height
+    value: 0.1
+    says: authored base-height for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-base-radius
+    value: 0.9
+    says: authored base-radius for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-rocker-width
+    value: 1.5
+    says: authored rocker-width for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-rocker-height
+    value: 0.8
+    says: authored rocker-height for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-rocker-depth
+    value: 1.4
+    says: authored rocker-depth for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-bearing-radius
+    value: 0.5
+    says: authored bearing-radius for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-bearing-offset
+    value: 0.66
+    says: authored bearing-offset for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-box-width
+    value: 1.2
+    says: authored box-width for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-box-height
+    value: 0.6
+    says: authored box-height for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-red
+    value: 0.36
+    says: authored red for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-green
+    value: 0.19
+    says: authored green for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-dobsonian-36-blue
+    value: 0.08
+    says: authored blue for the dobsonian-36 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-aperture-inches
+    value: 5
+    says: the requested aperture in international inches
+    kind: picked
+    by: the author's request, 2026-11-08
+  - name: personal-apo-refractor-5-seat
+    value: 11
+    says: authored seat for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-length
+    value: 7
+    says: authored length for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-width
+    value: 5
+    says: authored width for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-height
+    value: 18.2
+    says: authored height for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-front
+    value: 7
+    says: authored front for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-back
+    value: 5
+    says: authored back for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-tripod-height
+    value: 10
+    says: authored tripod-height for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-tripod-spread
+    value: 4.5
+    says: authored tripod-spread for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-red
+    value: 0.76
+    says: authored red for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-green
+    value: 0.78
+    says: authored green for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-apo-refractor-5-blue
+    value: 0.8
+    says: authored blue for the apo-refractor-5 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-aperture-inches
+    value: 24
+    says: the requested aperture in international inches
+    kind: picked
+    by: the author's request, 2026-11-08
+  - name: personal-sct-24-seat
+    value: 2.8
+    says: authored seat for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-length
+    value: 2.8
+    says: authored length for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-width
+    value: 1.2
+    says: authored width for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-height
+    value: 6
+    says: authored height for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-front
+    value: 3.2
+    says: authored front for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-back
+    value: 1.2
+    says: authored back for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-pier-height
+    value: 1.6
+    says: authored pier-height for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-pier-radius
+    value: 0.9
+    says: authored pier-radius for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-fork-width
+    value: 1.6
+    says: authored fork-width for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-fork-height
+    value: 1.4
+    says: authored fork-height for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-red
+    value: 0.2
+    says: authored red for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-green
+    value: 0.24
+    says: authored green for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-24-blue
+    value: 0.3
+    says: authored blue for the sct-24 scenery template, dimensions per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-foot-radius
+    value: 0.28
+    says: tripod foot pad radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-shield-radius
+    value: 0.68
+    says: refractor dew shield radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-shield-length
+    value: 1.2
+    says: dew shield projection in front of objective per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-ring-lower
+    value: 2
+    says: lower tube ring position per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-ring-upper
+    value: 4.5
+    says: upper tube ring position per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-ring-inner
+    value: 0.602
+    says: tube ring inner radius per aperture, including joint clearance; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-ring-outer
+    value: 0.68
+    says: tube ring outer radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-ring-depth
+    value: 0.15
+    says: tube ring axial depth per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-finder-offset
+    value: 0.8
+    says: finder axis lateral offset per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-finder-seat
+    value: 0.75
+    says: finder rear position as a share of tube length; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-finder-length
+    value: 0.45
+    says: finder tube length per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-finder-radius
+    value: 0.04
+    says: finder tube radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-finder-bracket
+    value: 0.025
+    says: finder bracket radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-focuser-length
+    value: 0.25
+    says: SCT rear focuser length per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-cage-bottom
+    value: 0.6
+    says: lower truss ring position per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-cage-radius
+    value: 0.55
+    says: lower truss ring radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-cage-thickness
+    value: 0.05
+    says: truss ring radial and axial thickness per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-truss-pairs
+    value: 4
+    says: number of authored paired V trusses; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-truss-spread-deg
+    value: 22.5
+    says: angular spread of a V truss toward its upper joints; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-diagonal-radius
+    value: 0.12
+    says: Newtonian flat secondary radius per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-diagonal-tilt-deg
+    value: 45
+    says: Newtonian flat secondary fold angle; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-sct-secondary-sag
+    value: 0.006
+    says: visual SCT secondary figure depth per aperture; authored
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-shield-joint
+    value: 0.002
+    says: axial clearance between closed tube and dew shield per aperture
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-leg-head-offset
+    value: 0.6
+    says: tripod leg attachment radius under the mount head per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-focuser-joint
+    value: 0.04
+    says: axial inset of capped tubes into the diagonal housing per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+  - name: personal-diagonal-housing
+    value: 0.22
+    says: diagonal housing side length per aperture; authored scenery choice
+    kind: picked
+    by: Slayer personal telescope study, 2026-11-08
+
+  # Picked yard-equipment display colours, not measured coatings.
+  - name: yard-ochre-red
+    value: 0.76
+    kind: picked
+    says: authored yard ochre red reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-ochre-green
+    value: 0.48
+    kind: picked
+    says: authored yard ochre green reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-ochre-blue
+    value: 0.1
+    kind: picked
+    says: authored yard ochre blue reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-steel-red
+    value: 0.28
+    kind: picked
+    says: authored yard steel red reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-steel-green
+    value: 0.31
+    kind: picked
+    says: authored yard steel green reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-steel-blue
+    value: 0.34
+    kind: picked
+    says: authored yard steel blue reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-tyre-red
+    value: 0.025
+    kind: picked
+    says: authored yard tyre red reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-tyre-green
+    value: 0.026
+    kind: picked
+    says: authored yard tyre green reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-tyre-blue
+    value: 0.028
+    kind: picked
+    says: authored yard tyre blue reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-window-red
+    value: 0.1
+    kind: picked
+    says: authored yard window red reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-window-green
+    value: 0.17
+    kind: picked
+    says: authored yard window green reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-window-blue
+    value: 0.21
+    kind: picked
+    says: authored yard window blue reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-white-red
+    value: 0.78
+    kind: picked
+    says: authored yard white red reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-white-green
+    value: 0.79
+    kind: picked
+    says: authored yard white green reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-white-blue
+    value: 0.77
+    kind: picked
+    says: authored yard white blue reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-timber-red
+    value: 0.48
+    kind: picked
+    says: authored yard timber red reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-timber-green
+    value: 0.29
+    kind: picked
+    says: authored yard timber green reflectance
+    by: Slayer summit yard study, 2026-11-08
+  - name: yard-timber-blue
+    value: 0.13
+    kind: picked
+    says: authored yard timber blue reflectance
+    by: Slayer summit yard study, 2026-11-08
+
+  # Rubin facility proportions are scenery cues, not measured dimensions.
+  - name: survey-facility-base-height
+    value: 10.0
+    says: authored facility base-height, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-wall
+    value: 0.45
+    says: authored facility wall, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-joint-gap
+    value: 0.04
+    says: authored facility joint-gap, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-roof-height
+    value: 4.0
+    says: authored facility roof-height, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-roof-top-share
+    value: 0.72
+    says: authored facility roof-top-share, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-facets
+    value: 12
+    says: authored facility facets, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-cladding-reflectance
+    value: 0.32
+    says: authored facility cladding-reflectance, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-roof-sheet
+    value: 0.12
+    says: authored facility roof-sheet, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-lower-east
+    value: 15.6
+    says: authored facility lower-east, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-lower-floor
+    value: 0.0
+    says: authored facility lower-floor, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-lower-width
+    value: 50.0
+    says: authored facility lower-width, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-lower-depth
+    value: 22.0
+    says: authored facility lower-depth, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-lower-height
+    value: 5.0
+    says: authored facility lower-height, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-middle-east
+    value: 15.9
+    says: authored facility middle-east, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-middle-floor
+    value: 5.16
+    says: authored facility middle-floor, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-middle-width
+    value: 38.0
+    says: authored facility middle-width, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-middle-depth
+    value: 20.0
+    says: authored facility middle-depth, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-middle-height
+    value: 4.0
+    says: authored facility middle-height, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-upper-east
+    value: 16.2
+    says: authored facility upper-east, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-upper-floor
+    value: 9.32
+    says: authored facility upper-floor, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-upper-width
+    value: 22.0
+    says: authored facility upper-width, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-upper-depth
+    value: 17.0
+    says: authored facility upper-depth, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-upper-height
+    value: 3.0
+    says: authored facility upper-height, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-door-depth
+    value: 0.04
+    says: authored facility door-depth, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-loading-east
+    value: 53.0
+    says: authored facility loading-east, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-loading-floor
+    value: 0.15
+    says: authored facility loading-floor, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-loading-south
+    value: -11.04
+    says: authored facility loading-south, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-loading-width
+    value: 6.0
+    says: authored facility loading-width, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-loading-height
+    value: 4.2
+    says: authored facility loading-height, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-personnel-east
+    value: 45.0
+    says: authored facility personnel-east, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-personnel-floor
+    value: 0.12
+    says: authored facility personnel-floor, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-personnel-south
+    value: -11.04
+    says: authored facility personnel-south, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-personnel-width
+    value: 1.3
+    says: authored facility personnel-width, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-personnel-height
+    value: 2.2
+    says: authored facility personnel-height, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+  - name: survey-facility-east-bound
+    value: 66.0
+    says: authored facility east-bound, metres unless a share or count
+    kind: picked
+    by: Slayer summit facility study, 2026-11-08
+
+  # Picked summit structures, display surfaces and optical proxy figures.
+  - name: summit-altitude-deg
+    value: 55
+    says: authored summit altitude-deg; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-roof-reflectance
+    value: 0.32
+    says: authored summit roof-reflectance; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-lens-gap
+    value: 0.02
+    says: authored summit lens-gap; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-off-axis-offset
+    value: 0.8
+    says: authored summit off-axis-offset; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-off-axis-secondary
+    value: 0.12
+    says: authored summit off-axis-secondary; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-off-axis-sag
+    value: 0.01
+    says: authored summit off-axis-sag; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-off-axis-foot
+    value: 0.55
+    says: authored summit off-axis-foot; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-off-axis-arm
+    value: 0.035
+    says: authored summit off-axis-arm; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-off-axis-joint
+    value: 0.14
+    says: authored summit off-axis-joint; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-twin-axis-offset
+    value: 1.0
+    says: authored summit twin-axis-offset; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-twin-polar-foot
+    value: 0.6
+    says: authored summit twin-polar-foot; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-twin-bearing-lower
+    value: 0.05
+    says: authored summit twin-bearing-lower; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-twin-bearing-back
+    value: 0.1
+    says: authored summit twin-bearing-back; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-twin-polar-radius
+    value: 0.12
+    says: authored summit twin-polar-radius; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-focal-ratio
+    value: 0.4
+    says: authored summit radio-focal-ratio; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-feed-seat
+    value: 0.85
+    says: authored summit radio-feed-seat; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-feed-radius
+    value: 0.055
+    says: authored summit radio-feed-radius; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-feed-sag
+    value: 0.004
+    says: authored summit radio-feed-sag; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-feed-arms
+    value: 4
+    says: authored summit radio-feed-arms; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-arm-foot
+    value: 0.48
+    says: authored summit radio-arm-foot; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-arm-height
+    value: 0.91
+    says: authored summit radio-arm-height; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-arm-tip
+    value: 0.85
+    says: authored summit radio-arm-tip; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-arm-radius
+    value: 0.009
+    says: authored summit radio-arm-radius; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-cabin-width
+    value: 0.3
+    says: authored summit radio-cabin-width; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-cabin-depth
+    value: 0.3
+    says: authored summit radio-cabin-depth; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-cabin-height
+    value: 0.25
+    says: authored summit radio-cabin-height; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-cabin-gap
+    value: 0.04
+    says: authored summit radio-cabin-gap; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-pier-width
+    value: 0.32
+    says: authored summit radio-pier-width; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-yoke-width
+    value: 0.85
+    says: authored summit radio-yoke-width; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-yoke-arm
+    value: 0.07
+    says: authored summit radio-yoke-arm; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-yoke-depth
+    value: 0.18
+    says: authored summit radio-yoke-depth; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-yoke-width
+    value: 2.2
+    says: authored summit yoke-width; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-yoke-depth
+    value: 0.3
+    says: authored summit yoke-depth; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-yoke-arm
+    value: 0.2
+    says: authored summit yoke-arm; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-polar-footprint
+    value: 0.6
+    says: authored summit polar-footprint; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-polar-attachment
+    value: 0.8
+    says: authored summit polar-attachment; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-polar-brace-radius
+    value: 0.04
+    says: authored summit polar-brace-radius; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-german-pier-width
+    value: 0.35
+    says: authored summit german-pier-width; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-german-pier-height
+    value: 0.68
+    says: authored summit german-pier-height; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-german-head-height
+    value: 0.65
+    says: authored summit german-head-height; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-german-polar-reach
+    value: 0.4
+    says: authored summit german-polar-reach; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-german-axis-radius
+    value: 0.12
+    says: authored summit german-axis-radius; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-counter-reach
+    value: 1.4
+    says: authored summit counter-reach; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-counter-depth
+    value: 0.3
+    says: authored summit counter-depth; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-counter-radius
+    value: 0.22
+    says: authored summit counter-radius; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-gimbal-radius
+    value: 0.95
+    says: authored summit gimbal-radius; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-gimbal-thickness
+    value: 0.07
+    says: authored summit gimbal-thickness; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-vent-panels
+    value: 12
+    says: authored summit vent-panels; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-vent-offset
+    value: 0.1
+    says: authored summit vent-offset; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-vent-seat
+    value: 0.42
+    says: authored summit vent-seat; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-vent-width
+    value: 0.035
+    says: authored summit vent-width; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-vent-height
+    value: 0.12
+    says: authored summit vent-height; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-vent-depth
+    value: 0.12
+    says: authored summit vent-depth; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-clamshell-opening-deg
+    value: 150
+    says: authored summit clamshell-opening-deg; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-calotte-opening-deg
+    value: 20
+    says: authored summit calotte-opening-deg; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-calotte-levels
+    value: 12
+    says: authored summit calotte-levels; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-retracted-wall
+    value: 0.25
+    says: authored summit retracted-wall; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-retracted-height
+    value: 0.25
+    says: authored summit retracted-height; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-sliding-roof-width
+    value: 0.65
+    says: authored summit sliding-roof-width; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-sliding-roof-depth
+    value: 0.2
+    says: authored summit sliding-roof-depth; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-screen-base-height
+    value: 0.2
+    says: authored summit screen-base-height; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-screen-opening-deg
+    value: 100
+    says: authored summit screen-opening-deg; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-screen-facets
+    value: 12
+    says: authored summit screen-facets; dimensions follow the construction family
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-radial-levels
+    value: 8
+    says: picked radial subdivisions in the radio paraboloid
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+  - name: summit-radio-shell-thickness
+    value: 0.003
+    says: picked axial radio dish thickness divided by aperture
+    kind: picked
+    by: Slayer summit instrument study, 2026-11-08
+
+  - name: launcher-length
+    value: 3
+    says: authored launcher length, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-radius
+    value: 0.24
+    says: authored launcher radius, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-wall
+    value: 0.025
+    says: authored launcher wall, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-rear-collar
+    value: 0.18
+    says: authored launcher rear-collar, share of tube length
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-front-collar
+    value: 0.78
+    says: authored launcher front-collar, share of tube length
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-collar-length
+    value: 0.12
+    says: authored launcher collar-length, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-shoe-width
+    value: 0.65
+    says: authored launcher shoe-width, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-shoe-length
+    value: 1.6
+    says: authored launcher shoe-length, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-shoe-start
+    value: 0.4
+    says: authored launcher shoe-start, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: launcher-half-width
+    value: 0.4
+    says: authored launcher half-width, metres
+    kind: picked
+    by: picked, 2026-11-08
+
+  - name: owl-altitude-deg
+    value: 55
+    says: parked optical altitude in degrees
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-primary-seat
+    value: 45
+    says: primary centre height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-structure-length
+    value: 92
+    says: primary to secondary display spacing in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-extent-width
+    value: 86
+    says: reserved east/west half-width in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-extent-height
+    value: 145
+    says: reserved upper envelope in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-extent-front
+    value: 90
+    says: reserved northward envelope in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-extent-back
+    value: 90
+    says: reserved southward envelope in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-primary-hole-rings
+    value: 9
+    says: excluded inner axial-lattice radius, not a measured obstruction
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-secondary-hole-rings
+    value: 1
+    says: the first annular ring is already omitted by the sector lattice; zero and one both retain the same open centre
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-panel-fill
+    value: 0.975
+    says: panel circumradius share of the display lattice pitch
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-panel-thickness
+    value: 0.12
+    says: axial backing depth in metres, not the source blank thickness
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-primary-frame-radius
+    value: 54
+    says: lower upper-frame radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-secondary-frame-radius
+    value: 16
+    says: upper upper-frame radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-upper-bays
+    value: 5
+    says: number of tapered upper truss bays
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-azimuth-modules
+    value: 12
+    says: number of radial space-frame modules
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-frame-rod-radius
+    value: 0.45
+    says: structural member radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-cell-depth
+    value: 32
+    says: lower mirror-cell depth along the optical axis in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-cell-bottom-radius
+    value: 22
+    says: lower mirror-cell radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-lower-bays
+    value: 3
+    says: number of lower mirror-cell bays
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-joint-inset
+    value: 1.6
+    says: member-end inset in multiples of member radius
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-joint-width
+    value: 4
+    says: closed joint block width per member radius
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-platform-height
+    value: 1.5
+    says: observing platform height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-platform-radius
+    value: 78
+    says: observing platform radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-azimuth-rail-radius
+    value: 70
+    says: outer azimuth rail radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-rail-width
+    value: 1.2
+    says: azimuth rail radial width in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-rail-height
+    value: 0.6
+    says: azimuth rail height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-altitude-wheel-radius
+    value: 16
+    says: altitude wheel outer radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-altitude-wheel-thickness
+    value: 4
+    says: altitude wheel axial thickness in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-altitude-wheel-offset
+    value: 62
+    says: altitude wheel east/west centre offset in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-wheel-rim
+    value: 2
+    says: altitude wheel radial wall in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-bearing-radius
+    value: 2
+    says: altitude axle radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-bearing-base-width
+    value: 12
+    says: bearing plinth width in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-bearing-base-length
+    value: 64
+    says: bearing plinth length in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-bearing-base-height
+    value: 2
+    says: bearing plinth height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-bearing-foot-height
+    value: 2.5
+    says: raked leg foot height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-bearing-foot-reach
+    value: 28
+    says: raked leg fore/aft reach in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-bearing-leg-radius
+    value: 1.6
+    says: raked leg radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-third-diameter
+    value: 8.2
+    says: corrector tertiary display diameter in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-third-height
+    value: 28
+    says: tertiary optical-frame height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-fourth-diameter
+    value: 8.0
+    says: corrector fourth display diameter in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-fourth-height
+    value: 48
+    says: fourth optical-frame height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-fifth-diameter
+    value: 3.2
+    says: corrector fifth display diameter in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-fifth-height
+    value: 37
+    says: fifth optical-frame height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-fifth-offset
+    value: 6
+    says: fifth optical-frame east offset in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-sixth-diameter
+    value: 2.3
+    says: corrector sixth display diameter in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-sixth-height
+    value: 37
+    says: sixth optical-frame height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-sixth-offset
+    value: 11
+    says: sixth optical-frame east offset in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-fold-deg
+    value: 45
+    says: folding mirror display angle in degrees
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-corrector-thickness
+    value: 0.14
+    says: flat corrector backing depth in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-corrector-sag
+    value: 0.3
+    says: curved corrector display sag in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-corrector-support-radius
+    value: 0.3
+    says: corrector support radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-arches
+    value: 4
+    says: parked roof module count for the roll-away interpretation
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-arch-step
+    value: 9
+    says: parked arch station spacing in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-arch-depth
+    value: 6
+    says: closed arch module depth in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-radius
+    value: 96
+    says: parked hangar half-span in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-height
+    value: 140
+    says: parked hangar arch height above chassis in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-wall
+    value: 3
+    says: closed arch visual thickness in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-roof-seat
+    value: 3
+    says: arch foot height above rail ground in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-bogie-width
+    value: 8
+    says: bogie chassis width in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-bogie-depth
+    value: 8
+    says: bogie chassis length in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-chassis-seat
+    value: 1.6
+    says: bogie chassis bottom height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-chassis-height
+    value: 1.4
+    says: bogie chassis height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-wheel-thickness
+    value: 1.2
+    says: bogie wheel axial thickness in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-wheel-radius
+    value: 1
+    says: bogie wheel radius in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-wheel-seat
+    value: 1.3
+    says: bogie wheel axis height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-wheel-offset
+    value: 2.5
+    says: bogie wheel fore/aft offset in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-rail-width
+    value: 2
+    says: parking rail width in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-rail-height
+    value: 0.3
+    says: parking rail height in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-rail-front
+    value: 8
+    says: parking rail extension before the first arch in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-rail-length
+    value: 52
+    says: parking rail length in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-extent-width
+    value: 102
+    says: reserved shelter east/west half-width in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-extent-height
+    value: 146
+    says: reserved shelter upper envelope in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-front
+    value: 10
+    says: reserved shelter northward envelope in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+
+  - name: owl-shelter-back
+    value: 46
+    says: reserved shelter southward envelope in metres
+    kind: picked
+    by: OWL scenery study, 2026-11-08
+  - name: survey-camera-station
+    value: 0.39
+    says: camera lower face as a share of primary-to-secondary spacing; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-frame-reflectance
+    value: 0.5
+    says: neutral painted truss reflectance; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-frame-waist
+    value: 0.96
+    says: lower truss radius as a share of the upper ring radius; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-frame-member
+    value: 0.012
+    says: brace radius per primary diameter; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-frame-stations
+    value: 8
+    says: paired diagonal support stations around the optical axis; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-top-ring-depth
+    value: 0.07
+    says: upper cage depth per primary diameter; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-spider-radius
+    value: 0.007
+    says: secondary support radius per primary diameter; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-upper-radius-share
+    value: 0.82
+    says: upper enclosure radius per fixed base radius; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-wing-inset
+    value: 2
+    says: roof inset in metres on both long sides and the outer end of a tier; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-panel-seam
+    value: 0.035
+    says: cladding seam radius in metres; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-vent-rows
+    value: 4
+    says: vent groups up each enclosure facet; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-vent-slats
+    value: 4
+    says: horizontal louvers per vent group; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-vent-pitch
+    value: 0.22
+    says: louver pitch in metres; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-vent-radius
+    value: 0.045
+    says: louver section radius in metres; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-vent-width-share
+    value: 0.7
+    says: louver length per facet width; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-shutter-width
+    value: 0.65
+    says: shutter track housing width in metres; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-facility-shutter-depth
+    value: 0.5
+    says: shutter track housing depth in metres; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15
+  - name: survey-primary-height
+    value: 0.52
+    says: optical pivot height per enclosure height; authored photographic approximation
+    kind: picked
+    by: an agent, Rubin model study, 2026-11-15

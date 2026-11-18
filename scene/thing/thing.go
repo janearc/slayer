@@ -12,6 +12,7 @@ import (
 
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 	"github.com/janearc/slayer/scene/medium"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/sky"
@@ -68,9 +69,14 @@ type Material struct {
 	// reflects by Reflects whatever its Through.
 	//
 	// A partial reflection on a ray that has already bent is paid and
-	// not followed. Every ray starts in the air, so a camera inside
-	// water is drawn as if in air.
+	// not followed. Existing trace entry points start in the air; the
+	// explicit trace.WithInitialMedia entry points can seed a camera's
+	// clear-medium state when the caller supplies it.
 	Through float64
+	// ClearMedium names this boundary's homogeneous interior for the CPU
+	// tracer's unscattered Beer-Lambert transport. Its zero value preserves
+	// the historical unattenuated clear-surface behavior.
+	ClearMedium *ClearMedium
 	// Metal, when it is given, makes the surface a conductor: it mirrors
 	// by its complex index, a different share of each colour, scaled by
 	// Gloss, and Index no longer says how much it mirrors. Film, when it
@@ -83,9 +89,96 @@ type Material struct {
 	// Its square is the GGX width; see Microfacet. It does not blur
 	// what the surface mirrors.
 	Satin float64
+	// SlopeVariance, when above nought, is the mean-square slope, both
+	// ways across the surface together, of tiny faces too small for its
+	// shape to carry. Its highlights then take Beckmann's lobe of that
+	// slope in place of Satin's GGX lobe. See Beckmann.
+	SlopeVariance float64
 	// Crinkle, when it is given, wrinkles the surface: its normal
 	// tilts by noise, for how it mirrors and how it is lit.
 	Crinkle *Crinkle
+	// WakeFoam is an optional, bounded opaque aerated-water mixture on a
+	// surface wake. Nil or zero Coverage leaves the material unchanged.
+	WakeFoam *WakeFoamResponse
+}
+
+// WakeFoamResponse is a shot-authored diffuse surface response within the
+// surface wake. Coordinates and dimensions use the ocean field's local metres;
+// the stage converts authored map units once. It is an appearance mixture,
+// not fluid, bubble, or cavitation simulation.
+type WakeFoamResponse struct {
+	OriginEast, OriginNorth float64
+	Heading, Speed          float64
+	HalfWidth, Length       float64
+	Wavelength              float64
+	Coverage, Band          float64
+	Reflectance             maths.Light
+	Satin                   float64
+	// FrozenTime uses Seconds instead of the render clock for snapshot oceans.
+	FrozenTime bool
+	Seconds    float64
+	Seed       uint32
+}
+
+// Valid reports whether this authored response is finite and bounded.
+func (foam WakeFoamResponse) Valid() bool {
+	if foam.Coverage == 0 {
+		return true
+	}
+	finite := func(value float64) bool { return !math.IsNaN(value) && !math.IsInf(value, 0) }
+	if foam.FrozenTime && (!finite(foam.Seconds) || foam.Seconds < 0) {
+		return false
+	}
+	return finite(foam.OriginEast) && finite(foam.OriginNorth) &&
+		finite(foam.Heading) && finite(foam.Speed) && foam.Speed >= 0 &&
+		finite(foam.HalfWidth) && foam.HalfWidth > 0 &&
+		finite(foam.Length) && foam.Length > 0 &&
+		finite(foam.Wavelength) && foam.Wavelength > 0 &&
+		foam.Wavelength <= foam.Length &&
+		finite(foam.Coverage) && foam.Coverage > 0 && foam.Coverage <= 1 &&
+		finite(foam.Band) && foam.Band > 0 && foam.Band <= 1 &&
+		foam.Reflectance.R >= 0 && foam.Reflectance.R <= 1 &&
+		foam.Reflectance.G >= 0 && foam.Reflectance.G <= 1 &&
+		foam.Reflectance.B >= 0 && foam.Reflectance.B <= 1 &&
+		finite(foam.Satin) && foam.Satin > 0 && foam.Satin <= 1
+}
+
+// At returns bounded foam coverage at a local east/up/south point and scene
+// time. The breakup bands derive their period from the authored wake wavelength.
+func (foam WakeFoamResponse) At(local maths.Vec, seconds float64) float64 {
+	if foam.FrozenTime {
+		seconds = foam.Seconds
+	}
+	if foam.Coverage <= 0 || !foam.Valid() || math.IsNaN(seconds) || math.IsInf(seconds, 0) || seconds < 0 {
+		return 0
+	}
+	forwardEast, forwardNorth := math.Sin(foam.Heading), math.Cos(foam.Heading)
+	centerEast := foam.OriginEast + forwardEast*foam.Speed*seconds
+	centerNorth := foam.OriginNorth + forwardNorth*foam.Speed*seconds
+	deltaEast, deltaNorth := local.X-centerEast, -(local.Z)-centerNorth
+	aft := -deltaEast*forwardEast - deltaNorth*forwardNorth
+	cross := deltaEast*forwardNorth - deltaNorth*forwardEast
+	if aft <= 0 || aft >= foam.Length || foam.Coverage <= 0 {
+		return 0
+	}
+	longitudinal := math.Sin(math.Pi * aft / foam.Length)
+	width := 2 * foam.HalfWidth
+	if math.Abs(cross) >= width {
+		return 0
+	}
+	// Smoothly fade the mask to zero at the authored support edge.
+	edge := 1 - math.Abs(cross)/width
+	edge *= edge
+	lateral := math.Exp(-0.5*math.Pow(cross/foam.HalfWidth, 2)) * edge
+	// One coherent-noise octave breaks the patch at the authored scale.
+	// The affine map takes its signed base band into coverage coordinates.
+	pattern := 0.5 + 0.5*noise.Fractal(uint64(foam.Seed),
+		aft/foam.Wavelength, cross/foam.Wavelength, 0, 1)
+	// The signed noise's zero contour separates patches; Band softens its edge.
+	threshold := 0.5 - foam.Band/2
+	breakup := math.Max(0, math.Min(1, (pattern-threshold)/foam.Band))
+	return math.Max(0, math.Min(foam.Coverage,
+		foam.Coverage*longitudinal*lateral*breakup))
 }
 
 // Dense is the refractive index a surface reflects and bends by:
@@ -288,6 +381,107 @@ func (v *Volume) At(at time.Duration) maths.Subspace {
 // light-emission contract.
 type Lamp = film.Emitter
 
+// OceanSurface identifies an authored finite ocean interface for CPU
+// transport. Boundary is the exact staged sheet, Mean is its horizontal mean
+// plane in world coordinates, and ExtentMetres/MetresPerUnit describe its
+// finite square footprint.
+//
+// DirectSunMeanPlane and DirectMoonMeanPlane select mutually exclusive,
+// explicitly authored directional source routes for the CPU-only source-path
+// approximation. SunRoute records which validated hillside insertion contract
+// supplied the light.
+//
+// SunLampIndex identifies the one tagged direct emitter; FillLampIndex
+// identifies the ordinary-ground legacy fill, or is -1 for the groundless-air
+// route. Negative indexes mean absent. SmoothNormalApproximation records the
+// selected CPU-only bilinear vertex-slope shading normal.
+// ShadingNormalApproximation names any explicit CPU-only shading-normal mode
+// on the ocean.
+type OceanSurface struct {
+	Boundary             *Thing
+	WaveMotion           *OceanWaveMotion
+	Mean                 maths.Vec
+	ExtentMetres         float64
+	MetresPerUnit        float64
+	DirectSunMeanPlane   bool
+	DirectMoonMeanPlane  bool
+	InterfaceEvents      int
+	SpotInscatter        bool
+	InfiniteMeanPlane    bool
+	ClearCloudSkySamples int
+	// ClearCloudWaterStepMode is per-gap (legacy) or explicit ray-spacing.
+	ClearCloudWaterStepMode    string
+	SmoothNormalApproximation  bool
+	ShadingNormalApproximation string
+	SunRoute                   OceanSunRoute
+	SunLampIndex               int
+	FillLampIndex              int
+}
+
+// MaxOceanInterfaceEvents is the picked upper bound on explicitly authored
+// CPU ocean-interface traversal, limiting the branching transport work.
+const MaxOceanInterfaceEvents = 16
+
+// MeanPlaneSource reports an explicit directional Sun or Moon source route.
+func (ocean *OceanSurface) MeanPlaneSource() bool {
+	return ocean != nil && (ocean.DirectSunMeanPlane || ocean.DirectMoonMeanPlane)
+}
+
+// OceanWaveConfig is a copied wave recipe for one explicitly timed ocean.
+type OceanWaveConfig struct {
+	WindMetresPerSecond float64
+	FetchMetres         float64
+	DepthMetres         float64
+	TowardRadians       float64
+	ExtentMetres        float64
+	Samples             int
+	Seed                uint64
+	SceneClock          bool
+	ShadingNormal       string
+	FlatMean            bool
+	InfiniteMeanPlane   bool
+	MeanLevelMetres     float64
+	CollarWidthMetres   float64
+	SurfaceWake         *OceanSurfaceWakeConfig
+}
+
+// OceanSurfaceWakeConfig is a copied authored surface-height wake envelope.
+// Its craft path is explicit and independent of Alfa's model or hydrodynamics.
+type OceanSurfaceWakeConfig struct {
+	OriginEastMetres, OriginNorthMetres                              float64
+	HeadingRadians, SpeedMetresPerSecond                             float64
+	AmplitudeMetres, HalfWidthMetres, LengthMetres, WavelengthMetres float64
+	AddToSpectralShading                                             bool
+}
+
+// OceanWaveMotion keeps its recipe private so scene consumers cannot change
+// the staged wave inputs between frames. It is nil for snapshot oceans.
+type OceanWaveMotion struct{ config OceanWaveConfig }
+
+// NewOceanWaveMotion copies a wave recipe into immutable scene metadata.
+func NewOceanWaveMotion(config OceanWaveConfig) *OceanWaveMotion {
+	return &OceanWaveMotion{config: config}
+}
+
+// Config returns a copy of the immutable wave recipe.
+func (motion *OceanWaveMotion) Config() OceanWaveConfig {
+	if motion == nil {
+		return OceanWaveConfig{}
+	}
+	return motion.config
+}
+
+// OceanSunRoute names the scene path that staged the opt-in Sun or Moon
+// approximation. Each route has a distinct, validated lamp contract.
+type OceanSunRoute uint8
+
+const (
+	OceanSunRouteUnspecified OceanSunRoute = iota
+	OceanSunRouteGround
+	OceanSunRouteGroundlessAir
+	OceanSunRouteMoon
+)
+
 // Sun constructs a directional solar lamp with apparent diameter 0.53 degrees,
 // matching the Sun viewed from Earth.
 func Sun(toward maths.Vec, strength maths.Light) Lamp {
@@ -302,9 +496,11 @@ type World struct {
 	// RayOriginReference's zero value keeps the geometry-derived heuristic.
 	RayOriginReference RayOriginReference
 	Things             []*Thing
-	Volumes            []*Volume
-	Fields             []*Field
-	Lamps              []Lamp
+	// OceanSurface is nil unless the set stages an authored ocean sheet.
+	OceanSurface *OceanSurface
+	Volumes      []*Volume
+	Fields       []*Field
+	Lamps        []Lamp
 	// Sky supplies distant light by direction. Nil returns black for rays
 	// that miss all geometry.
 	Sky Sky

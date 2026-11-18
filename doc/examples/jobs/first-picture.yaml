@@ -1,0 +1,8 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {smoke: 1}
+renderer: cpu
+film: {width: 160, height: 90, rays: 1}
+at: {value: 0, unit: s}
+outputs:
+  picture: ../../../out/first-picture.png
+  raw: ../../../out/first-picture.pfm

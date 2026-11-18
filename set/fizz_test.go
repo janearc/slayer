@@ -51,6 +51,16 @@ func TestAFizzIsWhatItSays(t *testing.T) {
 	}
 }
 
+func TestAFizzCanExplicitlyOptIntoClearWaterComposition(t *testing.T) {
+	if !fizzRead(t, "seed: 43\n        source: eye",
+		"seed: 43\n        clear-water: true\n        source: eye").Fizzes()[0].ClearWater() {
+		t.Fatal("clear-water opt-in was not read")
+	}
+	if fizzRead(t).Fizzes()[0].ClearWater() {
+		t.Fatal("ordinary fizz became clear-water compatible by default")
+	}
+}
+
 // a fizz is not a wisp: a world that says one fizz and no wisp holds one
 // fizz and no wisp, and its fizzes come in the order of its keys.
 func TestAFizzIsNotAWisp(t *testing.T) {

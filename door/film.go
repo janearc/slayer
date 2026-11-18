@@ -10,6 +10,7 @@ import (
 
 	"github.com/janearc/slayer/interfaces/file"
 	"github.com/janearc/slayer/interfaces/movie"
+	"github.com/janearc/slayer/internal/observability"
 	"github.com/janearc/slayer/render/progress"
 )
 
@@ -236,11 +237,28 @@ func (going *filming) frame(tools kit, index int) error {
 		return err
 	}
 	cost.encode = going.run.now().Sub(encoding)
+	if observability.Enabled() {
+		if kept {
+			observability.Add("slayer_frames_kept_total", 1)
+			if going.run.at.movie != "" {
+				observability.Observe("slayer_frame_kept_read_seconds", cost.write.Seconds())
+			}
+		} else if going.book != nil {
+			observability.Observe("slayer_frame_write_seconds", cost.write.Seconds())
+		}
+		if going.run.at.movie != "" {
+			observability.Observe("slayer_frame_movie_encode_seconds", cost.encode.Seconds())
+		}
+	}
 	going.total = going.total.plus(cost)
 	if err := going.meter.FrameDone(); err != nil {
 		return err
 	}
-	return going.progress(index, cost, kept)
+	if err := going.progress(index, cost, kept); err != nil {
+		return err
+	}
+	going.run.frameEvent(index, cost, kept, false, !kept && going.book != nil, kept && going.run.at.movie != "", going.run.at.movie != "")
+	return nil
 }
 
 // picture is frame index's picture: read back where the ledger keeps it

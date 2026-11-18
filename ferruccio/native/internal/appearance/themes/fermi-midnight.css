@@ -1,0 +1,50 @@
+/*
+ * fermi-midnight -- a dark colourway, tuned in paratune from fermi-long.
+ */
+:root {
+  --ground: #0a0e30; /* oklch(19% 0.067 272.9) */
+  --ink: #7e848c; /* oklch(61% 0.014 none) */
+  --cursor: #c9c9c9; /* oklch(84% 0.000 none) */
+  --cursor-ink: #7b82b2; /* oklch(62% 0.073 277.6) */
+  --surface-1: #2d3458; /* oklch(34% 0.064 274.1) */
+  --selection-ink: #937a68; /* oklch(60% 0.041 57.6) */
+  --black: #131939; /* oklch(23% 0.062 272.6) */
+  --red: #aa5f52; /* oklch(57% 0.100 30.8) */
+  --green: #53894b; /* oklch(58% 0.108 141.2) */
+  --yellow: #7a7d47; /* oklch(57% 0.075 111.3) */
+  --blue: #5078ab; /* oklch(57% 0.092 255.0) */
+  --cyan: #538685; /* oklch(58% 0.055 194.2) */
+  --magenta: #a850a3; /* oklch(57% 0.156 329.5) */
+  --bright-red: #b17c72; /* oklch(64% 0.068 30.9) */
+  --bright-green: #5c9e54; /* oklch(64% 0.126 141.7) */
+  --bright-yellow: #8e9252; /* oklch(64% 0.087 111.7) */
+  --bright-blue: #6e8bae; /* oklch(63% 0.063 253.5) */
+  --bright-cyan: #5e9a97; /* oklch(64% 0.063 191.7) */
+  --bright-magenta: #ab73a6; /* oklch(63% 0.099 329.8) */
+  --white: #af8462; /* oklch(65% 0.071 59.4) */
+  --bright-white: #be9f8d; /* oklch(73% 0.045 51.8) */
+  --bright-black: #4b5d9d; /* oklch(49% 0.105 270.4) */
+  --palette-17: #0d182f; /* oklch(21% 0.048 263.5) */
+  --palette-18: #101b34; /* oklch(23% 0.051 264.7) */
+  --palette-24: #001623; /* oklch(19% 0.040 235.5) */
+  --palette-31: #001a24; /* oklch(20% 0.039 225.9) */
+  --palette-38: #011e26; /* oklch(22% 0.038 219.3) */
+  --palette-67: #092035; /* oklch(24% 0.050 248.9) */
+  --palette-103: #22213c; /* oklch(26% 0.050 284.1) */
+  --palette-139: #372138; /* oklch(29% 0.051 325.3) */
+  --palette-169: #63024b; /* oklch(34% 0.143 342.0) */
+  --palette-198: #77003c; /* oklch(37% 0.149 0.1) */
+  --palette-205: #6e0042; /* oklch(35% 0.146 352.8) */
+  --palette-211: #75083c; /* oklch(37% 0.143 0.2) */
+  --palette-214: #523600; /* oklch(36% 0.075 76.7) */
+  --palette-215: #553003; /* oklch(35% 0.076 64.0) */
+  --palette-218: #642147; /* oklch(36% 0.106 348.6) */
+  --palette-222: #493402; /* oklch(34% 0.068 83.0) */
+  --palette-223: #503008; /* oklch(34% 0.069 66.4) */
+  --palette-224: #4e3030; /* oklch(35% 0.044 19.5) */
+  --palette-225: #4e2e4e; /* oklch(35% 0.068 326.9) */
+  --palette-251: #80807f; /* oklch(60% 0.001 none) */
+  --palette-254: #393838; /* oklch(34% 0.001 none) */
+  --palette-28: #113c0a; /* oklch(31% 0.091 141.1) */
+  --palette-88: #561a12; /* oklch(31% 0.091 30.4) */
+}

@@ -155,3 +155,69 @@ func TestASpecIsAFileAndItsLines(t *testing.T) {
 		}
 	}
 }
+
+// TestRunRefusesACommandThatCannotStart checks the start error comes back
+// and no tests are left recorded as running.
+func TestRunRefusesACommandThatCannotStart(t *testing.T) {
+	s := newTestSession(t)
+	if _, err := s.run(filepath.Join(t.TempDir(), "no-such-command")); err == nil {
+		t.Fatal("a command that is not there ran")
+	}
+	if s.tests != nil {
+		t.Error("the session kept a command that never started")
+	}
+}
+
+// TestTryStopsWhenTheFileCannotBeWritten checks that a file that cannot be
+// written ends the run with the write error, not with a count.
+func TestTryStopsWhenTheFileCannotBeWritten(t *testing.T) {
+	s := newTestSession(t)
+	if err := os.Chmod(s.path, 0o444); err != nil {
+		t.Fatal(err)
+	}
+	survived, err := try(s, []change{{offset: 0, from: "b", to: "c", line: 1}}, []string{"version"})
+	if err == nil || survived != 0 {
+		t.Errorf("try gave %d and %v", survived, err)
+	}
+}
+
+// TestTryEndsWithTheStopWhenTheSessionIsStopped checks a stop that comes
+// while a change is under test ends the loop with errStopped and counts
+// nothing.
+func TestTryEndsWithTheStopWhenTheSessionIsStopped(t *testing.T) {
+	s := newTestSession(t)
+	program := filepath.Join(t.TempDir(), "slow.go")
+	text := "package main\nimport \"time\"\nfunc main() { time.Sleep(time.Minute) }\n"
+	if err := os.WriteFile(program, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	type outcome struct {
+		survived int
+		err      error
+	}
+	done := make(chan outcome, 1)
+	go func() {
+		survived, err := try(s, []change{{offset: 0, from: "b", to: "c", line: 1}}, []string{"run", program})
+		done <- outcome{survived, err}
+	}()
+	for range 500 {
+		s.lock.Lock()
+		running := s.tests != nil
+		s.lock.Unlock()
+		if running {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if err := s.stop(); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case got := <-done:
+		if !errors.Is(got.err, errStopped) || got.survived != 0 {
+			t.Errorf("try gave %d and %v", got.survived, got.err)
+		}
+	case <-time.After(20 * time.Second):
+		t.Fatal("try did not end when the session stopped")
+	}
+}

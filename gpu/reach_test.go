@@ -307,9 +307,11 @@ func TestReachHeaderSaysTheStoreOnlyWhenItIsToBeRead(t *testing.T) {
 }
 
 // TestFastLightRefusesMoreLampsThanAPointAsks is the refusal, by name,
-// and its near miss: exactly as many lamps as a point asks is taken.
+// and its near misses: nine lamps, past lampsAsked, are each lit at
+// every point and taken, as are exactly lampsEvery; one more is refused.
 func TestFastLightRefusesMoreLampsThanAPointAsks(t *testing.T) {
-	for _, lamps := range []int{lampsAsked, lampsAsked + 1} {
+	for _, lamps := range []int{lampsAsked + 1, lampsEvery,
+		lampsEvery + 1} {
 		world, eye := smokeUnderLamps(t)
 		world.Lamps = nil
 		for index := range lamps {
@@ -322,7 +324,7 @@ func TestFastLightRefusesMoreLampsThanAPointAsks(t *testing.T) {
 		}
 		err = encoded.reserveReachAt(4)
 		var refused errTooManyLamps
-		if lamps <= lampsAsked {
+		if lamps <= lampsEvery {
 			if err != nil || encoded.reach == nil {
 				t.Fatalf("%d lamps were refused: %v", lamps, err)
 			}

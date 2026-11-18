@@ -15,11 +15,6 @@ Use any of these as a scene thing's kind:
 - access-stairs, work-platform and handrail;
 - cable-tray and weather-mast.
 
-For a local specimen book:
-
-    game run catalogue -- render mobile-crane scaffold-tower service-truck \
-      --out out/summit-yard
-
 The geometry book is manufacture/yard-equipment.yaml, read by Puzzlemouth.
 All lengths are metres. Its closed boxes and rods become ordinary mesh
 parts; round members change tessellation across the four detail levels.

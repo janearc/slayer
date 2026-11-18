@@ -22,5 +22,6 @@
 //   - Score.BeatAt is the beat a moment is in: its bar, its place in the
 //     bar, whether it was measured, and how long since it struck.
 //
-// Bar 1 beat 1 is the first beat of the grid. A bar is four beats.
+// Bar 1 beat 1 is the first beat of the grid. A bar is the score's
+// meter in beats, four when the score names none.
 package show

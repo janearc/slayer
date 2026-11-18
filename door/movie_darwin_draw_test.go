@@ -185,7 +185,8 @@ func TestDrawKeepsWorkingFramesWhenAsked(t *testing.T) {
 	path := written(t, directory, "short.yaml",
 		filmJob(t, "outputs: {movie: short.mp4}\n"))
 	said := drew(t, env, path, "--keep-frames")
-	kept := files(t, filepath.Join(home, cacheFolder))
+	cache, _ := env.lookup("SLAYER_CACHE")
+	kept := files(t, filepath.Join(cache, workFolder))
 	if len(kept) != filmFrames(t)+one ||
 		!strings.Contains(said, "kept the working frames in") {
 		t.Errorf("kept %v, said %q", kept, said)

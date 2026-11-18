@@ -274,3 +274,23 @@ func TestAPngsAlphaIsNotLight(t *testing.T) {
 
 // abs is the size of a number.
 func abs(number int) int { return max(number, -number) }
+
+// TestAPlateThatCannotBeOpenedIsRefusedByName checks a frame the reader
+// has no permission to open stops the directory, with the file named.
+func TestAPlateThatCannotBeOpenedIsRefusedByName(t *testing.T) {
+	directory := t.TempDir()
+	pfmIn(t, directory, "a.pfm", 2, 2, 0.5)
+	locked := filepath.Join(directory, "b.pfm")
+	pfmIn(t, directory, "b.pfm", 2, 2, 0.5)
+	if err := os.Chmod(locked, 0o000); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chmod(locked, 0o600)
+	if file, err := os.Open(locked); err == nil {
+		file.Close()
+		t.Skip("the file opens despite its mode, so it cannot be refused")
+	}
+	if _, err := OpenPlates(directory); err == nil || !strings.Contains(err.Error(), "b.pfm") {
+		t.Errorf("OpenPlates gave %v, not a refusal naming b.pfm", err)
+	}
+}

@@ -16,6 +16,13 @@ opening and develops them into a frame.
   linear light for that eye and time.
 - **a roll:** ninjafilm loads the chosen stock.
 
+## Half-portrait delivery
+
+A Slayer job can use `film: {preset: half-portrait}` to render a 1080 by
+960 pixel frame, one half of a 1080 by 1920 portrait split top and bottom.
+The frame is 9:8. This sets pixel dimensions; the physical film gauge and
+camera framing remain the choices of the shot. See [job presets](../../job/README.md#film).
+
 ## The rendering loop
 
 The camera is slayer's. It hands each glimpse of a frame to the

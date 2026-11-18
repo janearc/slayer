@@ -1,0 +1,28 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: step 5a, Webb's mirror facing black space
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 340, altitude: 20}
+  set:
+    things:
+      webb:
+        kind: webb
+        seed: 5
+        complexity: quick
+        east: 0
+        north: 0
+  film: {width: 2048, height: 1152, rays: 2, exposure: 0.01, wide: 45}
+  cameras:
+    mirror:
+      title: the mirror, from above the shield
+      location: {at: [-11, 32, 9]}
+      orientation: {look_at: [0, 0, 4]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0, 0, 0]}
+      zenith: {srgb_linear: [0, 0, 0]}
+      ground: {srgb_linear: [0, 0, 0]}
+      source: eye

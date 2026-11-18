@@ -1,0 +1,83 @@
+# Synthetic validation geometry only. This models a finite clear dielectric
+# plate and a partly intersecting opaque coloured sphere. It contains no
+# liquid volume,
+# water absorption, scattering, sea surface, or measured San Onofre parameters.
+scene:
+  name: synthetic-clear-plate-and-crossing-sphere
+  film:
+    wide: 48
+    print: {knee: 0.7, top: 8, source: eye}
+  cameras:
+    front:
+      location:
+        at: [0, -6, 3.2]
+      orientation:
+        look_at: [0, 0.15, 0.25]
+  world:
+    sky:
+      horizon: {srgb_linear: [0.12, 0.16, 0.2]}
+      zenith: {srgb_linear: [0.025, 0.04, 0.07]}
+      ground: {srgb_linear: [0.025, 0.025, 0.03]}
+      source: "synthetic validation palette"
+    materials:
+      chart-dark:
+        colour: {srgb_linear: [0.025, 0.03, 0.035]}
+        source: "synthetic validation palette"
+      chart-light:
+        colour: {srgb_linear: [0.75, 0.78, 0.8]}
+        source: "synthetic validation palette"
+      chart-warm:
+        colour: {srgb_linear: [0.7, 0.12, 0.035]}
+        source: "synthetic validation palette"
+      chart-cool:
+        colour: {srgb_linear: [0.025, 0.28, 0.48]}
+        source: "synthetic validation palette"
+      synthetic-clear-interface:
+        colour: {srgb_linear: [0.12, 0.28, 0.32]}
+        clear: {through: 0.98, index: 1.333, gloss: 1, rank: 0}
+        source: "synthetic dielectric test value; not a water measurement"
+      synthetic-opaque-sphere:
+        colour: {srgb_linear: [0.12, 0.38, 0.72]}
+        source: "synthetic validation palette"
+    boxes:
+      chart:
+        material: chart-dark
+        middle: [0, 2.2, 0.35]
+        size: [4, 0.08, 2.3]
+        source: "synthetic test geometry"
+      chart-white-left:
+        material: chart-light
+        middle: [-1.15, 2.14, 0.45]
+        size: [0.48, 0.025, 1.35]
+        source: "synthetic test geometry"
+      chart-white-right:
+        material: chart-light
+        middle: [1.15, 2.14, 0.45]
+        size: [0.48, 0.025, 1.35]
+        source: "synthetic test geometry"
+      chart-warm:
+        material: chart-warm
+        middle: [-0.42, 2.14, 0.95]
+        size: [0.72, 0.025, 0.34]
+        source: "synthetic test geometry"
+      chart-cool:
+        material: chart-cool
+        middle: [0.42, 2.14, -0.25]
+        size: [0.72, 0.025, 0.34]
+        source: "synthetic test geometry"
+      flat-clear-plate:
+        material: synthetic-clear-interface
+        middle: [0, 0, 0]
+        size: [3.8, 2.55, 0.035]
+        source: "synthetic test geometry; finite-thickness dielectric plate"
+    spheres:
+      partly-crossing-sphere:
+        material: synthetic-opaque-sphere
+        middle: [0, -0.05, 0.48]
+        radius: 0.78
+        source: "synthetic test geometry; lower cap crosses plate plane"
+    floods:
+      broad-test-light:
+        colour: {srgb_linear: [1.1, 1.05, 0.98]}
+        strength: 1
+        source: "synthetic validation illumination"

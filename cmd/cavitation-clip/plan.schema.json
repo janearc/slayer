@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "template",
+    "output",
+    "subject",
+    "field",
+    "camera",
+    "width",
+    "height",
+    "fps",
+    "seconds",
+    "velocity-metres-per-second",
+    "camera-tracking-fraction"
+  ],
+  "properties": {
+    "template": {
+      "type": "string",
+      "minLength": 1
+    },
+    "output": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "field": {
+      "type": "string",
+      "minLength": 1
+    },
+    "camera": {
+      "type": "string",
+      "minLength": 1
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 4096
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 4096
+    },
+    "fps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60
+    },
+    "seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60
+    },
+    "velocity-metres-per-second": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100
+      }
+    },
+    "camera-tracking-fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "renderer": {
+      "type": "string",
+      "enum": [
+        "cpu",
+        "gpu"
+      ],
+      "default": "cpu"
+    },
+    "attached-fizzes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Explicit Fizz names whose feet share the rigid subject trajectory; omitted leaves every Fizz fixed."
+    },
+    "rays": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64
+    },
+    "vertical-view-deg": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 179
+    },
+    "camera-orbit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "centre",
+        "radius-m",
+        "azimuth-deg",
+        "turns"
+      ],
+      "properties": {
+        "centre": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number",
+            "minimum": -10000000.0,
+            "maximum": 10000000.0
+          }
+        },
+        "radius-m": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000.0
+        },
+        "azimuth-deg": {
+          "type": "number",
+          "minimum": -36000,
+          "maximum": 36000
+        },
+        "turns": {
+          "type": "number",
+          "minimum": -10,
+          "maximum": 10
+        },
+        "elevation-deg": {
+          "type": "number",
+          "minimum": -89,
+          "maximum": 89
+        },
+        "elevation-amplitude-deg": {
+          "type": "number",
+          "minimum": -89,
+          "maximum": 89
+        },
+        "elevation-cycles": {
+          "type": "number",
+          "minimum": -10,
+          "maximum": 10
+        },
+        "elevation-phase-deg": {
+          "type": "number",
+          "minimum": -36000,
+          "maximum": 36000
+        },
+        "surface-up-m": {
+          "type": "number",
+          "minimum": -10000000.0,
+          "maximum": 10000000.0
+        }
+      }
+    },
+    "start-seconds": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 86400,
+      "default": 0,
+      "description": "Native source clock offset in seconds; positional trajectories still start at elapsed zero."
+    }
+  }
+}

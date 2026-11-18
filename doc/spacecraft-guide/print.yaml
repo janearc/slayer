@@ -1,0 +1,5 @@
+# metadata for the printed guide: the cover's title and address.
+# a game run cannot carry a quoted argument with spaces, so they live here.
+lang: en
+title: "how to operate spacecraft in slayer"
+subtitle: https://github.com/janearc/slayer

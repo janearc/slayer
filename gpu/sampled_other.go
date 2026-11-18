@@ -10,6 +10,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/thing"
+	"github.com/janearc/slayer/trace"
 )
 
 // ErrNoMetal is every draw off a mac: the kernel is Metal, and this is
@@ -27,6 +28,14 @@ func Sampled(world *thing.World, eye maths.Subspace, lens film.Sensor,
 func SampledMeasured(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	at time.Duration, width, height, side int,
 ) (*frame.Frame, Profile, error) {
+	return nil, Profile{}, ErrNoMetal
+}
+
+// SampledWithInitialMedia is unavailable off a Mac. It never silently draws
+// in air when the caller explicitly supplies a camera medium.
+func SampledWithInitialMedia(mode Mode, world *thing.World,
+	eye maths.Subspace, lens film.Sensor, at time.Duration, width, height,
+	side int, media []trace.InitialMedium) (*frame.Frame, Profile, error) {
 	return nil, Profile{}, ErrNoMetal
 }
 

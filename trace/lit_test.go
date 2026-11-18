@@ -9,6 +9,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/shape"
+	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -31,12 +32,13 @@ func TestAFloodLeavesNoHighlight(t *testing.T) {
 	}
 }
 
-// Under more lamps than a point asks, a highlight is still the sum of
-// theirs: more suns than lampsAsked, lying one way and sharing one
-// sun's light among them, leave the highlight the one sun leaves. The
-// anti-test is the same suns under the floor, which leave none.
+// Under more lamps than a point lights every one of, a highlight is
+// still the sum of theirs: more suns than lampsEvery, lying one way and
+// sharing one sun's light among them, leave the highlight the one sun
+// leaves. The anti-test is the same suns under the floor, which leave
+// none.
 func TestAHighlightUnderManyLampsIsTheSumOfTheirs(t *testing.T) {
-	const many = lampsAsked + 4
+	const many = lampsEvery + 4
 	crowded := func(toward maths.Vec) *thing.World {
 		world := thing.NewWorld()
 		world.Add(thing.Thing{Shape: shape.Plane{}, Material: lacquer(0.3)})
@@ -126,6 +128,41 @@ func TestACrinkledFloorIsLitUnevenly(t *testing.T) {
 	least, most := spread(&thing.Crinkle{Size: 0.05, Slope: 0.4, Seed: 7})
 	if !(least >= 0) || !(most-least > 0.01) {
 		t.Errorf("a crinkled floor is lit from %v to %v", least, most)
+	}
+}
+
+func TestOpaqueCrinkledMirrorUsesItsFinalNormalForOptics(t *testing.T) {
+	point := maths.V(0.37, 0, 0.29)
+	direction := maths.V(0.2, -1, 0.1).Unit()
+	ray := maths.Ray{At: point.Sub(direction), Dir: direction}
+	crinkle := &thing.Crinkle{Size: 0.05, Slope: 0.4, Seed: 7}
+	normal := crinkle.Crinkled(point, maths.Up, direction.Neg())
+	if normal.Near(maths.Up, 1e-8) {
+		t.Fatal("fixture did not tilt the opaque surface")
+	}
+	wrinkled := &thing.Material{Gloss: 1, Index: 1.33, Crinkle: crinkle}
+	flat := &thing.Material{Gloss: 1, Index: 1.33}
+	wrinkledShare := wrinkled.Reflects(-normal.Dot(direction))
+	flatShare := flat.Reflects(-maths.Up.Dot(direction))
+	if wrinkledShare == flatShare {
+		t.Fatalf("fixture has equal crinkled and flat reflectance: %v", flatShare)
+	}
+	paintedSky := sky.Gradient{Horizon: maths.Grey(10),
+		Zenith: maths.Grey(10), Ground: maths.Grey(10)}
+	render := func(material *thing.Material) maths.Light {
+		world := thing.NewWorld()
+		world.Add(thing.Thing{Shape: shape.Plane{}, Material: material})
+		world.Sky = paintedSky
+		return lone(world, ray, 0).Light()
+	}
+	got := render(wrinkled)
+	want := paintedSky.Horizon.Times(wrinkledShare)
+	if !within(got.R, want.R, 1e-6) ||
+		!within(got.G, want.G, 1e-6) || !within(got.B, want.B, 1e-6) {
+		t.Fatalf("opaque crinkled mirror returns %v, want final-normal Fresnel %v", got, want)
+	}
+	if got == render(flat) {
+		t.Fatal("opaque mirror ignored Crinkle when choosing its optical normal")
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	_ "embed"
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"github.com/janearc/puzzlemouth/numbers"
 )
@@ -41,5 +42,20 @@ func Value(name string) float64 {
 	if err != nil {
 		panic(fmt.Errorf("research: %w", err))
 	}
+	if see := observer.Load(); see != nil {
+		(*see)(*number)
+	}
 	return number.Value
+}
+
+// observer, when set, is told of every number Value hands out.
+var observer atomic.Pointer[func(numbers.Number)]
+
+// Observe has see told of each number Value reads from now on, until the
+// function it returns is called. It is for a report of which measured
+// numbers a piece of code reads; one observer is kept at a time, and the
+// function returned puts back whichever was there before.
+func Observe(see func(numbers.Number)) (stop func()) {
+	before := observer.Swap(&see)
+	return func() { observer.Store(before) }
 }

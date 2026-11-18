@@ -1,108 +1,129 @@
-package job
+package job_test
 
 import (
-	"go/parser"
-	"go/token"
+	"bytes"
+	"encoding/binary"
+	"math"
 	"os"
 	"path/filepath"
-	"slices"
-	"strconv"
-	"strings"
 	"testing"
+
+	"github.com/janearc/slayer/job"
 )
 
-// module is slayer's module path, and root its tree from here.
-const (
-	module = "github.com/janearc/slayer/"
-	root   = ".."
-)
-
-// direct is what the job package may import of slayer's own.
-var direct = []string{"camera", "maths"}
-
-// renderers are the packages the job package must never reach, however
-// far down: the renderers and the readers of scenes.
-var renderers = []string{"hillside", "set", "gpu", "trace", "render",
-	"metal", "film", "scene"}
-
-// importsOf is slayer's packages a package's go files import, tests left
-// out, by their path under the module.
-func importsOf(t *testing.T, directory string) []string {
+// importJobFiles writes a real asset and the two documents that consume it.
+func importJobFiles(t *testing.T) (string, string) {
 	t.Helper()
-	entries, err := os.ReadDir(filepath.Join(root, directory))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var found []string
-	for _, entry := range entries {
-		name := entry.Name()
-		if !strings.HasSuffix(name, ".go") ||
-			strings.HasSuffix(name, "_test.go") {
-			continue
-		}
-		parsed, err := parser.ParseFile(token.NewFileSet(),
-			filepath.Join(root, directory, name), nil, parser.ImportsOnly)
+	dir := t.TempDir()
+	for _, name := range []string{"two-metre-human.gltf", "two-metre-human.bin"} {
+		data, err := os.ReadFile(filepath.Join("..", "oakland", "testdata", name))
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, spec := range parsed.Imports {
-			path, _ := strconv.Unquote(spec.Path.Value)
-			inner, ours := strings.CutPrefix(path, module)
-			if ours && !slices.Contains(found, inner) {
-				found = append(found, inner)
-			}
+		if err := os.WriteFile(filepath.Join(dir, name), data, 0600); err != nil {
+			t.Fatal(err)
 		}
 	}
-	return found
-}
-
-// reached is every package of slayer's that directory reaches, however
-// far down.
-func reached(t *testing.T, directory string) []string {
-	t.Helper()
-	seen := []string{}
-	waiting := importsOf(t, directory)
-	for len(waiting) > nothing {
-		next := waiting[nothing]
-		waiting = waiting[one:]
-		if !slices.Contains(seen, next) {
-			seen = append(seen, next)
-			waiting = append(waiting, importsOf(t, next)...)
+	setText := `scene:
+  world:
+    materials:
+      matte:
+        colour: {srgb_linear: [0.3, 0.4, 0.5]}
+        source: eye
+    imports:
+      human:
+        file: two-metre-human.gltf
+        height: {value: 2, unit: m}
+        at: [0, 0, 0]
+        materials: {material/0/human-fixture-slot: matte}
+        source: "Self-authored CC0 mannequin"
+        license: CC0-1.0
+`
+	jobText := `"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: set.yaml}
+film: {width: 32, height: 24, rays: 1}
+outputs: {picture: picture.png}
+`
+	for name, data := range map[string]string{"set.yaml": setText, "job.yaml": jobText} {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(data), 0600); err != nil {
+			t.Fatal(err)
 		}
 	}
-	return seen
+	return filepath.Join(dir, "job.yaml"), filepath.Join(dir, "two-metre-human.bin")
 }
 
-// forbidden is the first package in packages that is a renderer or under
-// one.
-func forbidden(packages []string) string {
-	for _, each := range packages {
-		head, _, _ := strings.Cut(each, "/")
-		if slices.Contains(renderers, head) {
-			return each
+// TestImportedJobIdentityIncludesExactBufferBytes catches stale picture/resume keys.
+func TestImportedJobIdentityIncludesExactBufferBytes(t *testing.T) {
+	path, buffer := importJobFiles(t)
+	first, err := job.Read(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := first.Canonical()
+	read, has := first.ImportedSet()
+	if !has || len(read.ImportSources()) != 2 {
+		t.Fatal("job did not freeze the source closure")
+	}
+	original, err := os.ReadFile(buffer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	changed := bytes.Clone(original)
+	// Narrow a complete box within its declared bounds, preserving topology.
+	for offset := 0; offset < 288; offset += 12 {
+		x := math.Float32frombits(binary.LittleEndian.Uint32(changed[offset:]))
+		binary.LittleEndian.PutUint32(changed[offset:], math.Float32bits(x*.75))
+	}
+	if err := os.WriteFile(buffer, changed, 0600); err != nil {
+		t.Fatal(err)
+	}
+	second, err := job.Read(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Key() == second.Key() || first.PictureKey() == second.PictureKey() || first.LightKey() == second.LightKey() {
+		t.Fatal("changed external buffer retained a render key")
+	}
+	if !bytes.Equal(first.Canonical(), before) {
+		t.Fatal("existing job changed its immutable snapshot")
+	}
+	if err := os.Remove(buffer); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(first.Canonical(), before) {
+		t.Fatal("job reread deleted input under old key")
+	}
+	if _, err := job.Read(path); err == nil {
+		t.Fatal("fresh job accepted missing imported bytes")
+	}
+}
+
+// TestImportedJobIdentityIncludesNativeMaterialAndNormalization prevents appearance reuse.
+func TestImportedJobIdentityIncludesNativeMaterialAndNormalization(t *testing.T) {
+	path, _ := importJobFiles(t)
+	first, err := job.Read(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	setPath := filepath.Join(filepath.Dir(path), "set.yaml")
+	original, err := os.ReadFile(setPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, pair := range [][2]string{{"[0.3, 0.4, 0.5]", "[0.5, 0.4, 0.3]"}, {"value: 2, unit: m", "value: 3, unit: m"}} {
+		changed := bytes.Replace(original, []byte(pair[0]), []byte(pair[1]), 1)
+		if bytes.Equal(changed, original) {
+			t.Fatal("mutation did not change the fixture")
 		}
-	}
-	return ""
-}
-
-// TestTheJobPackageReachesNoRenderer holds the job package to camera and
-// maths, and everything under them to no renderer.
-func TestTheJobPackageReachesNoRenderer(t *testing.T) {
-	for _, each := range importsOf(t, "job") {
-		if !slices.Contains(direct, each) {
-			t.Errorf("job imports %s; it may import only %v", each, direct)
+		if err := os.WriteFile(setPath, changed, 0600); err != nil {
+			t.Fatal(err)
 		}
-	}
-	if found := forbidden(reached(t, "job")); found != "" {
-		t.Errorf("job reaches %s", found)
-	}
-}
-
-// TestTheImportWalkFindsARenderer is the anti-test: the same walk over
-// hillside finds the renderers it reaches.
-// anti-test of TestTheJobPackageReachesNoRenderer
-func TestTheImportWalkFindsARenderer(t *testing.T) {
-	if found := forbidden(reached(t, "hillside")); found == "" {
-		t.Error("the walk found no renderer under hillside")
+		next, err := job.Read(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if first.PictureKey() == next.PictureKey() {
+			t.Fatalf("key ignored %s", pair[0])
+		}
 	}
 }

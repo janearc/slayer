@@ -158,7 +158,7 @@ lists the verbs; `slayer --agent-help` gives the same verb map for an agent. A v
 |---|---|
 | `draw JOB` | draws a job, a sequence plan or a set file: frames, a movie with its sound, titles, a stock |
 | `list [HEADING]` | says what there is: scenes, smokes, presets, stocks, tunes, voicings, library, kinds |
-| `assess FILE` | says whether a file will draw, drawing nothing; `--judge` judges a set, `--smokes` the smokes |
+| `assess FILE` | says whether a file will draw, drawing nothing; `--judge` judges a set, `--smokes` the smokes, `--census PATH` writes the geometry it stages |
 | `develop JOB RAW...` | develops light already drawn through a job's print or stock |
 | `tunes DIR` | serves a tune library's voting page, or checks, films or pages its tunes |
 | `cache` | says what the disk caches hold; `--clear [KIND]` empties them |
@@ -183,7 +183,7 @@ would write, and draws nothing.
 To make a short on a team's renders home:
 
 ```sh
-SLAYER_RENDERS=~/renders SLAYER_TEAM=me slayer draw jobs/short-fire-night.yaml
+SLAYER_RENDERS=~/renders SLAYER_TEAM=me slayer draw doc/examples/jobs/first-film.yaml
 ```
 
 A still goes into `frames/DATE-NAME/` and a film into `animations/DATE-
@@ -290,7 +290,7 @@ establish correctness independently of the implementation.
 
 ### Running the tests
 
-Tests are in tiers (doc/test-tiers.md). Plain `go test ./...` and
+Tests are in tiers. Plain `go test ./...` and
 `game check` run the non draw tier: no GPU device is opened and nothing is
 drawn, and the scope is substantially smaller than the draw tier.
 

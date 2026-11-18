@@ -26,7 +26,25 @@ type source struct {
 	Strength maths.Light `json:"strength" yaml:"strength"`
 }
 
+type localLight struct {
+	At       maths.Vec   `json:"at" yaml:"at"`
+	Strength maths.Light `json:"strength" yaml:"strength"`
+}
+
+// orbit turns an authored camera while keeping its centre and distance.
+type orbit struct {
+	Yaw   float64 `json:"yaw" yaml:"yaw"`
+	Pitch float64 `json:"pitch" yaml:"pitch"`
+}
+
 type plan struct {
+	Presentation string    `json:"presentation,omitempty" yaml:"presentation"`
+	Gaia         *gaiaPlan `json:"gaia-stars,omitempty" yaml:"gaia-stars"`
+	starField    *sky.Catalogue
+	Interior     *interiorPlan `json:"interior,omitempty" yaml:"interior"`
+	LocalLights  []localLight  `json:"local-lights,omitempty" yaml:"local-lights"`
+	Orbit        orbit         `json:"orbit,omitempty" yaml:"orbit"`
+
 	Width         int          `json:"width" yaml:"width"`
 	Height        int          `json:"height" yaml:"height"`
 	Rays          int          `json:"rays" yaml:"rays"`
@@ -50,6 +68,21 @@ type plan struct {
 	Studio bool `json:"studio" yaml:"studio"`
 	raw    []byte
 }
+
+// orbitLimit is the farthest final view may rise above or below its horizon.
+const orbitLimit = 85
+
+// minimumOrbitYaw and maximumOrbitYaw are the accepted signed turns in degrees.
+const (
+	minimumOrbitYaw = -180
+	maximumOrbitYaw = 180
+)
+
+// minimumOrbitPitch and maximumOrbitPitch are the accepted signed turns in degrees.
+const (
+	minimumOrbitPitch = -80
+	maximumOrbitPitch = 80
+)
 
 // zeroLength is defined as a direction with no length.
 const zeroLength = 0
@@ -80,12 +113,25 @@ func readPlan(name string, raw []byte) (*plan, error) {
 	if err := made.check(); err != nil {
 		return nil, err
 	}
+	if made.Gaia != nil {
+		var err error
+		made.starField, err = made.Gaia.load()
+		if err != nil {
+			return nil, err
+		}
+	}
 	made.raw = raw
 	return &made, nil
 }
 
 // check holds allocation and camera invariants after structural validation.
 func (plan plan) check() error {
+	if (plan.Presentation == "space") != (plan.Gaia != nil) {
+		return fmt.Errorf("space presentation requires a pinned Gaia catalogue")
+	}
+	if plan.Presentation != "" && plan.Interior != nil {
+		return fmt.Errorf("catalogue presentation and interior are separate views")
+	}
 	samples := int64(plan.Width) * int64(plan.Height) *
 		int64(plan.Rays) * int64(plan.Rays)
 	if samples > plan.SampleLimit {
@@ -98,7 +144,29 @@ func (plan plan) check() error {
 		!(horizontal > zeroLength) {
 		return fmt.Errorf("catalogue camera needs a finite heading")
 	}
+	for _, angle := range []float64{plan.Orbit.Yaw, plan.Orbit.Pitch} {
+		if math.IsNaN(angle) || math.IsInf(angle, bothInfinitySigns) {
+			return fmt.Errorf("catalogue orbit angles must be finite")
+		}
+	}
+	if plan.Orbit.Yaw < minimumOrbitYaw ||
+		plan.Orbit.Yaw > maximumOrbitYaw ||
+		plan.Orbit.Pitch < minimumOrbitPitch ||
+		plan.Orbit.Pitch > maximumOrbitPitch {
+		return fmt.Errorf("catalogue orbit is outside its angle limits")
+	}
+	for _, lamp := range plan.LocalLights {
+		for _, value := range []float64{lamp.At.X, lamp.At.Y, lamp.At.Z, lamp.Strength.R, lamp.Strength.G, lamp.Strength.B} {
+			if math.IsNaN(value) || math.IsInf(value, 0) {
+				return fmt.Errorf("catalogue local light must be finite")
+			}
+		}
+		if lamp.Strength.R < 0 || lamp.Strength.G < 0 || lamp.Strength.B < 0 {
+			return fmt.Errorf("catalogue local light must be nonnegative")
+		}
+	}
 	if err := checkSources(plan.Sources); err != nil {
+
 		return err
 	}
 	for _, detail := range plan.Details {

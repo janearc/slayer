@@ -1,0 +1,58 @@
+/*
+ * twilight-burnt -- burnt green ink on a darker orange, twilight as it began
+ * on 2026-10-01, before the ground went bright; with claude code's colours
+ * dark on the orange.
+ */
+:root {
+  --ground: #b37f53; /* oklch(64% 0.088 60.5) */
+  --ink: #1c2210; /* oklch(24% 0.033 123.9) */
+  --cursor: #2f3a1f; /* oklch(33% 0.047 126.9) */
+  --cursor-ink: #b37f53; /* oklch(64% 0.088 60.5) */
+  --surface-1: #d4a070; /* oklch(74% 0.089 63.5) */
+  --selection-ink: #1c2210; /* oklch(24% 0.033 123.9) */
+  --black: #2a2418; /* oklch(26% 0.023 84.3) */
+  --red: #6e2a1f; /* oklch(38% 0.099 31.3) */
+  --green: #2f3a1f; /* oklch(33% 0.047 126.9) */
+  --yellow: #5a4410; /* oklch(40% 0.073 84.5) */
+  --blue: #24365a; /* oklch(34% 0.068 263.1) */
+  --magenta: #5a2a4a; /* oklch(36% 0.083 341.5) */
+  --cyan: #1f4a4a; /* oklch(38% 0.048 195.4) */
+  --white: #b07a4e; /* oklch(62% 0.090 59.3) */
+  --bright-black: #4a3d2b; /* oklch(37% 0.034 75.4) */
+  --bright-red: #84362a; /* oklch(44% 0.110 30.8) */
+  --bright-green: #3b4826; /* oklch(38% 0.056 126.1) */
+  --bright-yellow: #6e5418; /* oklch(46% 0.083 84.3) */
+  --bright-blue: #2f4470; /* oklch(39% 0.080 263.8) */
+  --bright-magenta: #6e3459; /* oklch(41% 0.095 343.1) */
+  --bright-cyan: #285c5c; /* oklch(44% 0.055 195.4) */
+  --bright-white: #cc976a; /* oklch(72% 0.088 61.1) */
+  --palette-17: #ad7b50; /* oklch(62% 0.086 61.0) */
+  --palette-18: #a9794f; /* oklch(61% 0.083 61.5) */
+  --palette-24: #ae7f57; /* oklch(63% 0.080 61.0) */
+  --palette-31: #a87e5a; /* oklch(63% 0.072 61.5) */
+  --palette-38: #a27d5c; /* oklch(62% 0.065 62.9) */
+  --palette-67: #9e7a5a; /* oklch(61% 0.064 62.8) */
+  --palette-103: #9c7458; /* oklch(59% 0.065 56.1) */
+  --palette-139: #9a6e55; /* oklch(58% 0.067 50.6) */
+  --palette-169: #94634c; /* oklch(55% 0.073 45.9) */
+  --palette-198: #8f5942; /* oklch(52% 0.080 43.7) */
+  --palette-205: #925e47; /* oklch(53% 0.077 44.5) */
+  --palette-211: #8d5a3f; /* oklch(52% 0.078 48.3) */
+  --palette-214: #7d6122; /* oklch(51% 0.087 84.3) */
+  --palette-215: #806426; /* oklch(52% 0.087 84.2) */
+  --palette-218: #8b5c3b; /* oklch(52% 0.078 55.2) */
+  --palette-222: #82652a; /* oklch(52% 0.085 82.6) */
+  --palette-223: #85642d; /* oklch(53% 0.084 77.9) */
+  --palette-224: #876230; /* oklch(52% 0.082 72.5) */
+  --palette-225: #8a5e37; /* oklch(52% 0.079 61.2) */
+  --palette-251: #1c2210; /* oklch(24% 0.033 123.9) */
+  --palette-254: #896033; /* oklch(52% 0.081 66.9) */
+  --claude-text: #1c2210; /* oklch(24% 0.033 123.9) */
+  --claude-words: #f0c890; /* oklch(85% 0.085 75.5) */
+  --claude-mode: #3a1830; /* oklch(27% 0.064 339.7) */
+  --claude-rules: #976850; /* oklch(56% 0.070 47.9) */
+  --claude-spinner: #1c2210; /* oklch(24% 0.033 123.9) */
+  --claude-added: #9a7048; /* oklch(58% 0.077 63.9) */
+  --claude-removed: #a86a4a; /* oklch(58% 0.092 47.6) */
+  --claude-diff-code: #1c2210; /* oklch(24% 0.033 123.9) */
+}

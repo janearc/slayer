@@ -9,9 +9,11 @@ import (
 
 // Moment is what the lights are doing at one moment, as lightshow obeys
 // it: every cue up to the moment folded, and the grid's pulses, sweeps
-// and strobes worked out for the frame that starts there.
+// and strobes worked out for the frame that starts there. A bar is the
+// score's meter in beats.
 type Moment struct {
 	seconds, position      float64
+	meter                  float64
 	now                    state
 	colour                 [3]float64
 	sweep                  float64
@@ -35,16 +37,17 @@ func (of *Sheet) At(seconds, fps float64) (Moment, error) {
 		return Moment{}, fmt.Errorf("%w: a frame rate of %v; give one "+
 			"above nought", ErrShow, fps)
 	}
-	beats := of.score.beats
+	beats, meter := of.score.beats, float64(of.score.meter)
 	made := Moment{seconds: seconds, now: of.fold(seconds),
-		position: gridAt(seconds, beats)}
+		position: gridAt(seconds, beats), meter: meter}
 	made.palette()
 	made.white, made.magenta = made.strobed(of.score.tracks["lead"], fps)
 	made.lasers()
 	made.floodLeft, made.floodRight = flooded(made.now.floods, seconds,
-		made.position, beats, of.score.tracks["lead"], made.now.hot)
+		made.position, meter, beats, of.score.tracks["lead"], made.now.hot)
 	made.searchlights()
-	made.bursts = bursts(seconds, made.position, made.now.fireFrom, beats)
+	made.bursts = bursts(seconds, made.position, made.now.fireFrom, meter,
+		beats)
 	made.fireLit = lit(seconds, made.position, made.now.fireFrom, beats)
 	made.moon = made.moonLevel()
 	return made, nil
@@ -57,9 +60,9 @@ func (made *Moment) palette() {
 	if made.position < 0 {
 		return
 	}
-	beat := int(made.position) % beatsPerBar
+	beat := int(made.position) % int(made.meter)
 	made.colour = paletteColours[made.now.palette[beat%len(made.now.palette)]]
-	made.sweep = made.position / beatsPerBar / made.now.sweepBars
+	made.sweep = made.position / made.meter / made.now.sweepBars
 	made.sweep -= math.Floor(made.sweep)
 }
 
@@ -118,11 +121,11 @@ func (made *Moment) lasers() {
 		made.parity = hit % 2
 	}
 	made.figure, made.figurePhase = inTurn(made.now.figures,
-		made.now.figureBars, made.now.figuresFrom, made.position)
+		made.now.figureBars, made.meter, made.now.figuresFrom, made.position)
 	if made.figure == "" {
 		made.figure = restFigure
 	}
-	made.banks, _ = inTurn(made.now.banks, made.now.banksBars,
+	made.banks, _ = inTurn(made.now.banks, made.now.banksBars, made.meter,
 		made.now.banksFrom, made.position)
 	if made.banks == "" {
 		made.banks = restBanks
@@ -139,16 +142,16 @@ func (made *Moment) lasers() {
 func (made *Moment) searchlights() {
 	now, position := made.now, made.position
 	if position >= 0 && now.spotBars > 0 {
-		phase := position / beatsPerBar / now.spotBars
+		phase := position / made.meter / now.spotBars
 		phase -= math.Floor(phase)
 		made.spotAim = sweepTurn * (1 - math.Abs(2*phase-1))
 	}
 	if position >= 0 && now.searchBars > 0 {
-		made.searchPhase = position / beatsPerBar / now.searchBars
+		made.searchPhase = position / made.meter / now.searchBars
 		made.searchPhase -= math.Floor(made.searchPhase)
 	}
 	made.move, made.movePhase = inTurn(now.searchMoves, now.searchMoveBars,
-		now.searchMovesFrom, position)
+		made.meter, now.searchMovesFrom, position)
 	if made.move == "" {
 		made.move = restMove
 	}
@@ -213,6 +216,6 @@ func (made Moment) bar() string {
 	if made.position < 0 {
 		return "intro"
 	}
-	beat := int(made.position)
-	return fmt.Sprintf("%d.%d", beat/beatsPerBar+1, beat%beatsPerBar+1)
+	beat, meter := int(made.position), int(made.meter)
+	return fmt.Sprintf("%d.%d", beat/meter+1, beat%meter+1)
 }

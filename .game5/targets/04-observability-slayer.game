@@ -1,0 +1,1 @@
+observability-slayer . :: go build -p=1 -o bin/slayer-observability ./cmd/slayer

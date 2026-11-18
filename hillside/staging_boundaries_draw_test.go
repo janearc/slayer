@@ -205,11 +205,23 @@ func TestPinnedAssetRefusalsAndCorruptMoonUseTheCheckedBytes(t *testing.T) {
 	if _, _, err := pinnedSource("fixture", "", near); err == nil {
 		t.Fatal("missing shelf home accepted")
 	}
-	if _, err := weatherCache(); err == nil {
-		t.Fatal("missing cache home accepted")
+	renders := t.TempDir()
+	none := func(name string) (string, bool) {
+		return renders, name == "SLAYER_RENDERS"
 	}
-	t.Setenv("SLAYER_WEATHER", t.TempDir())
-	if got, err := weatherCache(); err != nil || got != os.Getenv("SLAYER_WEATHER") {
+	if _, err := weatherCache(none); err == nil ||
+		!strings.Contains(err.Error(), "SLAYER_CACHE") {
+		t.Fatalf("missing cache home accepted: %v", err)
+	}
+	if found, _ := os.ReadDir(renders); len(found) != 0 {
+		t.Fatalf("the renders home was written to: %v", found)
+	}
+	home := t.TempDir()
+	said := func(name string) (string, bool) {
+		return home, name == "SLAYER_CACHE"
+	}
+	want := filepath.Join(home, "weather")
+	if got, err := weatherCache(said); err != nil || got != want {
 		t.Fatalf("explicit weather cache: %s %v", got, err)
 	}
 }

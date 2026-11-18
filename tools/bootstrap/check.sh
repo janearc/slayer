@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Controlled tool boundaries: never download, install or draw during this check.
 set -euo pipefail
-if [[ -n "${CODEX_THREAD_ID:-}" ]]; then export KEEL_SID="$CODEX_THREAD_ID"; fi
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)
 work=$(mktemp -d "${TMPDIR:-/tmp}/slayer-bootstrap-test.XXXXXX")
 trap 'rm -rf "$work"' EXIT

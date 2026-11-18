@@ -52,6 +52,15 @@ func toolDrawing(ctx context.Context, drawing drawer) *pzm.Tool {
 		"# list\n\nNames, descriptions and supported detail levels.\n",
 		"Example_list", reads, list)
 	app := application{context: ctx, drawer: drawing}
+	made.Verb("resources", verb.NoShort, "audit geometry storage for every model representation",
+		"# resources\n\nJSON lines for each advertised detail, seed 1, without drawing.\nCounts shared geometry once and reports construction allocations separately.\nThese are not native or whole-process working-set estimates. Failed rows remain visible.\n",
+		"Example_resources", reads, resources)
+	made.Verb("inventory", verb.NoShort, "measure model parts and report maturity gaps",
+		"# inventory\n\nJSON inventory at quick detail, seed 1. Optional kind names select models.\nPart counts preserve panels and instances; maturity review remains explicit.\n",
+		"Example_inventory", reads, inventory)
+	made.Verb("census", verb.NoShort, "compare researched missions with the factory",
+		"# census\n\nJSON report from a cited, explicitly incomplete mission survey.\nOptional mission kind names select rows. Unlaunched concepts remain eligible.\n",
+		"Example_census", reads, census)
 	made.Verb("render", verb.NoShort, "render a searchable specimen book",
 		renderHelp, "Example_render", draws, app.render,
 		pzm.Value("plan", verb.NoShort,

@@ -26,9 +26,16 @@ func (assembly *instrumentAssembly) add(shape form,
 func (assembly *instrumentAssembly) box(width, height, depth float64,
 	at maths.Vec, material slot,
 ) {
-	centre := at.Add(maths.V(width*spaceHalf, spaceZero, depth*spaceHalf))
-	assembly.add(boxShape(width, height, depth),
-		maths.NewSubspace(centre, maths.Identity, spaceOne), material)
+	assembly.boxAt(width, height, depth, at, maths.Local(), material)
+}
+
+// boxAt places a closed box from its minimum corner in a supplied frame.
+func (assembly *instrumentAssembly) boxAt(width, height, depth float64,
+	corner maths.Vec, pose maths.Subspace, material slot,
+) {
+	centre := corner.Add(maths.V(width*spaceHalf, spaceZero, depth*spaceHalf))
+	local := maths.NewSubspace(centre, maths.Identity, spaceOne)
+	assembly.add(boxShape(width, height, depth), local.Within(pose), material)
 }
 
 // rod aligns a checked tube between explicit endpoints.

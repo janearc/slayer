@@ -10,9 +10,11 @@ import (
 // Override is one value the command line lays over a job. It is made by
 // Output, Width, Height, Rays, At, CameraName, Renderer or Quality.
 type Override struct {
-	key   string
-	empty bool
-	apply func(wire *document) error
+	key    string
+	empty  bool
+	output bool
+	movie  bool
+	apply  func(wire *document) error
 }
 
 // With is the job with the command line's values laid over it, checked
@@ -21,6 +23,7 @@ type Override struct {
 func (job Job) With(overrides ...Override) (Job, error) {
 	name := "the command line over " + job.name
 	wire := job.wire
+	forms := job.outputForms
 	for _, each := range overrides {
 		if each.empty {
 			return Job{}, refusal{fmt.Errorf("%s: %s is empty; give "+
@@ -29,11 +32,22 @@ func (job Job) With(overrides ...Override) (Job, error) {
 		if err := each.apply(&wire); err != nil {
 			return Job{}, err
 		}
+		if each.output {
+			switch {
+			case !wire.film():
+				forms.picture = false
+			case each.movie:
+				forms.movie = false
+			default:
+				forms.frames = false
+			}
+		}
 	}
 	// the marshalling cannot fail: the wire was JSON when it was read
 	raw, _ := json.Marshal(wire)
 	from := source{name: name, base: filepath.Dir(job.file),
-		file: job.file}
+		file: job.file, inputs: job.inputs, imported: job.imported,
+		outputForms: &forms}
 	return admitted(from, raw)
 }
 
@@ -41,7 +55,8 @@ func (job Job) With(overrides ...Override) (Job, error) {
 // working directory: a still's picture, or a film's movie where path
 // ends .mp4 and its frames where it does not. Other roles are kept.
 func Output(path string) Override {
-	return Override{key: "output", empty: path == "",
+	return Override{key: "output", empty: path == "", output: true,
+		movie: filepath.Ext(path) == movieExtension,
 		apply: func(wire *document) error {
 			absolute, err := filepath.Abs(path)
 			if err != nil {

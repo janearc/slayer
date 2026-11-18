@@ -1,10 +1,5 @@
 # Heat can travel; the fuel stays put
 
-The CPU and Metal paths are built and their tests are committed, in
-`fuelbed/advection_test.go`, `fuelbed/advection_metal_test.go` and the
-`fuelbed/a_*_contracts_test.go` files. This note records no test results;
-`game test -- ./fuelbed/...` gives them.
-
 The existing surface model now has an optional, explicitly supplied heat
 velocity. `fuelbed.NewAdvected` and `NewMetalAdvected` add the horizontal
 advection term in Mandel et al., equation (1), section 2:
@@ -83,36 +78,7 @@ and is merely draped over terrain for display. A future physical coupling
 must define how atmospheric velocity reaches that layer and how its
 horizontal coordinates relate to the world's local tangent frame.
 
-## Review witnesses
-
-`fuelbed/testdata/advection-contract.yaml` gives independent transport-only
-steps with fuel absent, so a changed reaction rate cannot hide a reversed
-transport direction. It also gives diagonal flow, ambient inflow and outflow
-examples.
-
-These are small authored arithmetic witnesses, not experimental fire
-observations. They are run by the tests named above.
-
-Review also needs actual CPU/Metal agreement over reacting fuel, joint
-timestep refusal, coefficient representability, zero-flow compatibility,
-rewinds, owned snapshots and resource cleanup on failed submissions.
-
-The proposed float32 acceptance budget is a maximum absolute per-cell
-difference of 0.1 K in excess temperature and 1e-4 in fuel fraction, compared
-with CPU binary64 at 0, 1, 10, 2 and 10 seconds. The repeated times require a
-rewind/replay, not just a forward final-state comparison.
-
-The reacting comparison uses the existing 3 by 3 reference bed, 1 m cells,
-0.01 s steps and its original reaction/diffusion/cooling coefficients, with
-authored east/south velocity 0.5/0.25 m/s. Transport-only witnesses use a 1e-5
-K absolute budget through two steps; CPU arithmetic is held to 1e-12 K there.
-
-These are limits set before execution, not observed errors.
-
 Encoded thermal weights are checked nonnegative and their sum is limited to 1
 plus four float32 ulps at unity. Tiny weights can round or flush to zero. This
 check does not prove universal conservation or the error budget for arbitrary
 grids, coefficients or longer horizons.
-
-Those need their own stated acceptance cases. The comparisons above are
-committed tests; this note does not record their observed errors.

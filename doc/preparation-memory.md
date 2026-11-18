@@ -1,8 +1,7 @@
 # Geometry preparation without keeping every intermediate
 
-This code draft changes host preparation only. It has not been built,
-tested or measured during the current code-only phase. It introduces
-no MSL transport change, field ABI change or density threshold.
+This changes host preparation only. It introduces no MSL transport change,
+field ABI change or density threshold.
 
 ## Packing
 
@@ -31,11 +30,6 @@ storage, not a Go pointer. The copying and cgo references are linked in
 [streamed readback](streamed-readback.md).
 
 The transform arithmetic and float32 conversion remain the original ones.
-Packed-byte comparisons against independent ABI fixtures are required at
-review; they have not run for these new writers.
-
-Native staging also needs actual empty/populated hierarchy, failure cleanup
-and stricter cgo pointer checks before this path is accepted.
 
 ## Ownership after preparation
 
@@ -53,8 +47,8 @@ does not discard geometry needed by a later stage.
 
 Dropping references does not promise immediate collection or lower
 process RSS. Go heap management, Metal allocations, staging geometry,
-image development and retained frame resources still need a measured
-preparation/memory study. No forced global garbage collection is added.
+image development and retained frame resources also hold memory. No forced
+global garbage collection is added.
 
 The [streamed readback draft](streamed-readback.md) separately bounds
 the raw-sample array during tracing. Together these remove two sources

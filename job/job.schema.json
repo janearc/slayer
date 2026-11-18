@@ -52,6 +52,7 @@
           "description": "A named size, and for the previews a rate, from the presets table. For example portrait (1080 by 1920) or video-preview (320 by 180 at 6 frames a second); 720 and 320 may be written bare.",
           "enum": [
             "portrait",
+            "half-portrait",
             "portrait-preview",
             "4k",
             "2k",
@@ -112,6 +113,13 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1000000000000.0
+        },
+        "mode": {
+          "description": "What the picture shows. light, the default, is the traced light. wire is the edges of every mesh face the first ray of each pixel meets, from the same camera and time, with nothing lit: a surface with no polygons is a flat tint, a height field shows its sample cells, and the sky and volumes are black. wire is drawn on the cpu only; renderer gpu is refused.",
+          "enum": [
+            "light",
+            "wire"
+          ]
         }
       },
       "additionalProperties": false

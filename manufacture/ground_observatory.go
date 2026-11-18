@@ -12,6 +12,7 @@ type groundObservatory struct {
 	diameter, height, aperture float64
 	segments                   int
 	equatorial, cylindrical    bool
+	keck                       bool
 	survey                     *surveyOptics
 	large                      *largeOptics
 	pointing                   *maths.Subspace
@@ -20,29 +21,38 @@ type groundObservatory struct {
 // metresPerInch is defined by the international inch, exactly 0.0254 m.
 const metresPerInch = 0.0254
 
-// groundRows keeps measured defaults distinct from enclosure choices.
+// groundRows keeps measured defaults distinct from enclosure choices. Each
+// row is built through rowOf, so a maturity report knows whose numbers
+// these are.
 func groundRows() map[string]maker {
-	keck := groundObservatory{
-		diameter: groundValue("keck-enclosure-diameter"),
-		height:   groundValue("keck-enclosure-height"),
-		aperture: research.Value("keck-primary-metres"),
-		segments: int(research.Value("keck-primary-segments"))}
-	haleAperture := research.Value("palomar-primary-inches") * metresPerInch
-	hale := groundObservatory{
-		diameter: research.Value("palomar-enclosure-diameter-metres"),
-		height:   research.Value("palomar-enclosure-height-metres"),
-		aperture: haleAperture, equatorial: true}
-	subaru := groundObservatory{
-		diameter:    research.Value("subaru-enclosure-base-metres"),
-		height:      research.Value("subaru-enclosure-height-metres"),
-		aperture:    research.Value("subaru-primary-effective-metres"),
-		cylindrical: true}
+	keck := rowOf(func() groundObservatory {
+		return groundObservatory{
+			keck:     true,
+			diameter: groundValue("keck-enclosure-diameter"),
+			height:   groundValue("keck-enclosure-height"),
+			aperture: research.Value("keck-primary-metres"),
+			segments: int(research.Value("keck-primary-segments"))}
+	}, "keck-i", "keck-ii")
+	hale := rowOf(func() groundObservatory {
+		haleAperture := research.Value("palomar-primary-inches") * metresPerInch
+		return groundObservatory{
+			diameter: research.Value("palomar-enclosure-diameter-metres"),
+			height:   research.Value("palomar-enclosure-height-metres"),
+			aperture: haleAperture, equatorial: true}
+	}, "palomar")
+	subaru := rowOf(func() groundObservatory {
+		return groundObservatory{
+			diameter:    research.Value("subaru-enclosure-base-metres"),
+			height:      research.Value("subaru-enclosure-height-metres"),
+			aperture:    research.Value("subaru-primary-effective-metres"),
+			cylindrical: true}
+	}, "subaru")
 	return map[string]maker{
 		"palomar": hale,
 		"keck-i":  keck, "keck-ii": keck,
 		"subaru": subaru,
-		"rubin":  surveyGround(),
-		"elt":    largeGround(),
+		"rubin":  rowOf(surveyGround, "rubin"),
+		"elt":    rowOf(largeGround, "elt"),
 	}
 }
 
@@ -61,6 +71,7 @@ func (row groundObservatory) madeAt(from seed, detail string) (good, error) {
 		around: int(groundValue("sides-" + detail))},
 		object: good{dressed: groundLooks()}}
 	row.enclosure(assembly)
+	row.enclosureDetails(assembly)
 	pose := row.opticalFrame()
 	if row.equatorial {
 		row.polarMount(assembly)
@@ -68,6 +79,7 @@ func (row groundObservatory) madeAt(from seed, detail string) (good, error) {
 		row.forkMount(assembly)
 	}
 	row.optics(assembly, pose)
+	row.opticsDetails(assembly, pose)
 	radius := row.diameter * spaceHalf
 	bounds := maths.SegmentBox(maths.V(-radius, spaceZero, -radius),
 		maths.V(radius, row.height, radius), spaceZero)
@@ -89,6 +101,12 @@ func (row groundObservatory) opticalFrame() maths.Subspace {
 	}
 	angle := groundValue("altitude-deg")*maths.Degree - math.Pi*spaceHalf
 	height := row.height * groundValue("primary-height")
+	if row.keck {
+		height = row.height * groundValue("keck-primary-height")
+	}
+	if row.survey != nil {
+		height = row.height * groundValue("survey-primary-height")
+	}
 	return tiltedFrame(maths.YAxis.Scale(height), angle)
 }
 

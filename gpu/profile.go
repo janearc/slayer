@@ -3,8 +3,9 @@ package gpu
 import "time"
 
 // Profile records a render call's measured costs, without changing its image.
-// Top-level wall stages are disjoint. GPU times sit inside their corresponding
-// wall stages, and BoxedCPU.Wall sits inside Encode; neither is added again.
+// Top-level wall stages are disjoint. GPU times sum command-buffer execution
+// intervals attributed to the stage; those intervals may overlap and their
+// sum need not fit inside its wall time. BoxedCPU.Wall sits inside Encode.
 // Total excludes caller construction.
 type Profile struct {
 	// Environment records current-frame incident-sky lattice preparation.
@@ -52,6 +53,12 @@ type Profile struct {
 	// SkyShared is whether fast light shared the sky's looks among a
 	// pixel's samples.
 	SkyShared bool
+}
+
+// traceDeviceTime isolates trace commands from the kernel's cumulative GPU
+// clock. Environment and lighting commands are counted in their own stages.
+func traceDeviceTime(after, before, lighting, environment time.Duration) time.Duration {
+	return after - before - lighting - environment
 }
 
 // FrameInputs counts a retained frame's traffic to the device. Held is

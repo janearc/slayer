@@ -1,0 +1,103 @@
+# reel sea glitter: the water shot of Borrowed Light. Open sea, no coast
+# and no horizon in frame, the camera 20 m up looking down at it, a low
+# sun ahead of the camera, so the sun's glitter path runs up the frame
+# toward it. The ocean is the subject; there is nothing else in the set.
+#
+# the frame. places are metres, x east, y north, z up. mean sea is z=0.
+# the ocean is centred on the origin and 512 m across; the cameras stand
+# 230 m south of its middle, 26 m in from its south edge, so the sea runs
+# about 480 m ahead of them. the far edge of every camera's frame is 3
+# degrees or more below level and meets the sea inside the field, so the
+# field's edge, the horizon and the experimental flat-mean far field are
+# all out of frame.
+#
+# the air. An agent's groundless Earth air (doc/groundless-earth-air.md):
+# `air: earth`, the column sampled at 0 m over the Earth mean-radius
+# datum, world.unit 1. its boundary, earth-standard-land, is a land
+# albedo (0.15) and continental aerosol stand-in, not an offshore
+# measurement; the sky the sea mirrors comes from it. no fill lamp, no
+# painted sky: the light is the air's sun and sky and the water's
+# Fresnel reflection of them.
+#
+# the light. the sun is set by azimuth and altitude, a choice: due north,
+# 17.5 degrees up. on a flat sea the sun's mirror point lies 17.5 degrees
+# below level along azimuth 0, and each camera is aimed relative to it.
+#
+# the sea. `world.ocean`, one static instant of an agent's wave cascades,
+# 512 m across at 513 samples a side (1 m spacing). every input chosen,
+# none from a shelf source: a wind of 7 m/s, a fetch of 500 km, which is
+# past the fetch at which oceantex.Sea.grown caps a 7 m/s sea as fully
+# developed (Pierson and Moskowitz), deep water, waves running toward
+# the north (toward the sun), seed 7, time 0. the draw's receipt reports
+# the spectrum's significant height and peak period.
+#
+# the water. a clear dielectric at water's index, no extinction: from
+# above, this shot sees only its surface. the colour is a dark stand-in
+# for what the water sends back up, by eye, as in the San Onofre set.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: reel sea glitter
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 0, altitude: 17.5}
+  # a proof frame; the jobs say the size, the rays and the lens.
+  film:
+    width: 360
+    height: 320
+    rays: 2
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+        source: "water's refractive index; colour by eye, a stand-in"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 512, unit: m}
+      samples: 513
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 500000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 1.5708, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a 7 m/s wind, fully developed, no shelf source"
+  cameras:
+    # each stands at (0, -230, 20) and looks at a point on mean sea; the
+    # pitch is the angle down to it and the heading its azimuth, west of
+    # north negative. on a 9 by 8 frame 30 degrees tall the flat-sea
+    # mirror point falls, worked by hand for a pinhole:
+    # a: pitch 20, heading -4.335: at 0.62 across, 0.42 down.
+    a:
+      title: "pitch 20 down, heading 4.3 west of the sun"
+      location: {at: [0, -230, 20]}
+      orientation: {look_at: [-4.1536, -175.207, 0]}
+    # b: pitch 18, heading -2: a little right of middle, near the middle
+    # down; more of the far sea in frame.
+    b:
+      title: "pitch 18 down, heading 2 west of the sun"
+      location: {at: [0, -230, 20]}
+      orientation: {look_at: [-2.1482, -168.484, 0]}
+    # c: pitch 23, heading -7: further right and higher in the frame;
+    # steeper, more of the near sea.
+    c:
+      title: "pitch 23 down, heading 7 west of the sun"
+      location: {at: [0, -230, 20]}
+      orientation: {look_at: [-5.7421, -183.234, 0]}
+    # a diagnostic, not a shot: the same eye looking straight at the sun,
+    # to see whether the sky the sea mirrors holds a sun disc.
+    sun:
+      title: "diagnostic: straight at the sun"
+      location: {at: [0, -230, 20]}
+      orientation: {look_at: [0, -134.63, 50.07]}

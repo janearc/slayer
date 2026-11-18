@@ -84,3 +84,54 @@ NSString *slayer_stuck(void) {
 	return @"a command timed out earlier and may still be running on the "
 	       @"device; do not reuse this one";
 }
+
+// the stop as it was measured on a stopped band of the city, 2026-11-16:
+// MTLCommandBufferErrorDomain code 1, "Impacting Interactivity
+// (0000000e:kIOGPUCommandBufferCallbackErrorImpactingInteractivity)",
+// over an underlying IOGPUCommandQueueErrorDomain code 14, its encoder
+// faulted. metal's own code is only "internal"; the underlying one names it.
+static NSString *const displayStopDomain = @"IOGPUCommandQueueErrorDomain";
+
+// displayStopCode is kIOGPUCommandBufferCallbackErrorImpactingInteractivity.
+static const NSInteger displayStopCode = 0xe;
+
+BOOL slayer_stopped_for_display(NSError *why) {
+	NSError *under = why.userInfo[NSUnderlyingErrorKey];
+	return why != nil &&
+	       [why.domain isEqualToString:MTLCommandBufferErrorDomain] &&
+	       [under.domain isEqualToString:displayStopDomain] &&
+	       under.code == displayStopCode;
+}
+
+// encoder_states is each encoder's execution state, from a command made
+// to keep them, which is what says whether the kernel ran, faulted or
+// was never reached when the command stopped
+static NSString *encoder_states(NSError *why) {
+	NSArray *infos = why.userInfo[MTLCommandBufferEncoderInfoErrorKey];
+	NSMutableArray<NSString *> *states = [NSMutableArray array];
+	for (id<MTLCommandBufferEncoderInfo> info in infos) {
+		[states addObject:[NSString stringWithFormat:@"%@ state %ld",
+		                   info.label, (long)info.errorState]];
+	}
+	return [states componentsJoinedByString:@", "];
+}
+
+NSString *slayer_command_failure(NSString *what, NSError *why) {
+	NSString *said = [NSString stringWithFormat:@"%@: %@ (%@ code %ld)",
+	                  what, why.localizedDescription, why.domain,
+	                  (long)why.code];
+	if (!slayer_keeps_encoder_states()) {
+		return said;
+	}
+	return [NSString stringWithFormat:@"%@; encoders: [%@]; user info: %@",
+	        said, encoder_states(why), why.userInfo];
+}
+
+BOOL slayer_keeps_encoder_states(void) {
+	static BOOL kept;
+	static dispatch_once_t once;
+	dispatch_once(&once, ^{
+		kept = getenv("SLAYER_BAND_TIMES") != NULL;
+	});
+	return kept;
+}

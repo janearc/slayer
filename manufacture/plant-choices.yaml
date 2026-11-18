@@ -1,0 +1,387 @@
+---
+numbers:
+- name: maximum-axes
+  value: 512
+  says: maximum woody axes per specimen
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-cells
+  value: 1024
+  says: maximum physical foliage cells per specimen
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-orders
+  value: 8
+  says: maximum recursive stem order
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-children
+  value: 8
+  says: maximum children at a branch
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-stems
+  value: 16
+  says: maximum basal stems
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-fork-deg
+  value: 89
+  says: exclusive branch fork angle ceiling in degrees
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-cell-blades
+  value: 512
+  says: maximum explicit blades in one shared foliage cell
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-cell-twigs
+  value: 32
+  says: maximum lateral twigs in one foliage cell
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: maximum-twig-pairs
+  value: 32
+  says: maximum pairs of blades on one twig
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: cell-variants
+  value: 2
+  says: finite physical microform variants per kind
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: root-lean
+  value: 0.025
+  says: basal stem lean per tree scale
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: leader-angle-share
+  value: 0.12
+  says: leader fork angle relative to lateral forks
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: length-variation
+  value: 0.12
+  says: seeded branch length variation as a share
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: branch-inset
+  value: 1
+  says: child root inset per child radius
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: leaf-camber
+  value: 0.08
+  says: midrib rise per blade width
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: deltoid-shoulder
+  value: 0.25
+  says: longitudinal position of deltoid blade shoulders
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: twig-taper
+  value: 0.45
+  says: tip to base radius of a foliage-cell twig
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: twig-sides
+  value: 6
+  says: circular sides of a foliage-cell twig
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: twig-divergence-deg
+  value: 137.5
+  says: picked divergence between foliage-cell laterals
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: twig-contraction
+  value: 0.45
+  says: lateral twig contraction along the cell
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: twig-rise
+  value: 0.22
+  says: upward component before a lateral direction is normalized
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: leaf-lift
+  value: 0.3
+  says: leaf direction lift in the twig frame
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: leaf-turn-variation
+  value: 0.35
+  says: seeded leaf out-of-plane direction share
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: rosette-angle-variation
+  value: 22
+  says: seeded rosette angular variation in degrees
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: skirt-angle-deg
+  value: 145
+  says: downward old-leaf skirt direction in degrees
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: skirt-drop
+  value: 0.06
+  says: old-leaf rosette attachment drop in metres
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: stem-sides-hull
+  value: 5
+  says: coarse woody cross-section sides
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: stem-sides-clumps
+  value: 6
+  says: clump woody cross-section sides
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: stem-sides-quick
+  value: 8
+  says: quick woody cross-section sides
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: stem-sides-demo
+  value: 12
+  says: fine woody cross-section sides
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: leaf-sides-quick
+  value: 12
+  says: longitudinal strips in a quick physical blade
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: leaf-sides-demo
+  value: 24
+  says: longitudinal strips in a fine physical blade
+  kind: picked
+  by: vegetation scenery study, 2026-11-08
+- name: cactus-height-minimum
+  value: 4.0
+  says: upright trunk run minimum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-height-maximum
+  value: 9.0
+  says: upright trunk run maximum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-radius-minimum
+  value: 0.22
+  says: outer trunk radius minimum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-radius-maximum
+  value: 0.38
+  says: outer trunk radius maximum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-arms-minimum
+  value: 0
+  says: minimum arms, without inferring an age
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-arms-maximum
+  value: 5
+  says: maximum arms in this scenery recipe
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-ribs
+  value: 12
+  says: picked longitudinal pleat count
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-pleat-depth
+  value: 0.12
+  says: cosine pleat modulation share
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-attachment-minimum
+  value: 0.3
+  says: arm attachment minimum share of trunk run
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-attachment-maximum
+  value: 0.72
+  says: arm attachment maximum share of trunk run
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-root-radius-share
+  value: 0.45
+  says: radial arm root position inside the trunk
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-arm-radius-share
+  value: 0.6
+  says: arm radius relative to trunk radius
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-arm-turn-variation
+  value: 0.035
+  says: seeded arm direction variation in turns
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-arm-run-minimum
+  value: 1.0
+  says: upright arm run minimum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-arm-run-maximum
+  value: 3.7
+  says: upright arm run maximum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-bend-minimum
+  value: 0.5
+  says: arm bend radius minimum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-bend-maximum
+  value: 1.05
+  says: arm bend radius maximum in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-length
+  value: 0.03
+  says: fixed physical spine cone length in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-radius
+  value: 0.0015
+  says: fixed physical spine cone base radius in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-spacing
+  value: 0.18
+  says: approximate upright spine row spacing in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-root-share
+  value: 0.99
+  says: spine root position within a pleat crest
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-maximum-spines
+  value: 8192
+  says: instance budget per whole cactus
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-sides-quick
+  value: 3
+  says: quick physical spine cone sides
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-sides-demo
+  value: 5
+  says: fine physical spine cone sides
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-green-r
+  value: 0.19
+  says: authored cactus skin red channel
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-green-g
+  value: 0.32
+  says: authored cactus skin green channel
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-green-b
+  value: 0.13
+  says: authored cactus skin blue channel
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-r
+  value: 0.58
+  says: authored spine red channel
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-g
+  value: 0.48
+  says: authored spine green channel
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-spine-b
+  value: 0.28
+  says: authored spine blue channel
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-curve-hull
+  value: 2
+  says: hull quarter-circle arm sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-cap-hull
+  value: 2
+  says: hull rounded tip sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-sides-hull
+  value: 8
+  says: hull column circumferential sides
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-curve-clumps
+  value: 4
+  says: clumps quarter-circle arm sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-cap-clumps
+  value: 3
+  says: clumps rounded tip sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-sides-clumps
+  value: 12
+  says: clumps column circumferential sides
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-curve-quick
+  value: 8
+  says: quick quarter-circle arm sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-cap-quick
+  value: 5
+  says: quick rounded tip sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-sides-quick
+  value: 36
+  says: quick column circumferential sides
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-curve-demo
+  value: 12
+  says: demo quarter-circle arm sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-cap-demo
+  value: 8
+  says: demo rounded tip sections
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: cactus-sides-demo
+  value: 60
+  says: demo column circumferential sides
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: maximum-cactus-count
+  value: 16384
+  says: upper bound for private cactus integer controls
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: maximum-pleat-depth
+  value: 0.45
+  says: picked modulation ceiling preserving a positive column radius
+  kind: picked
+  by: cactus scenery study, 2026-11-08
+- name: maximum-cactus-metres
+  value: 128
+  says: upper bound for private cactus physical ranges in metres
+  kind: picked
+  by: cactus scenery study, 2026-11-08

@@ -1,57 +1,912 @@
 ## unreleased
 
-- CONTRACT CHANGE, the dependency: Slayer requires celestial v0.0.9 as
+## v0.1.3 18 november
+
+- Known: `grissom` is not built in this release. It reads weather
+  through celestial-data's netCDF adapter, which celestial-data v0.0.4
+  does not carry; `cmd/grissom` builds only with `-tags netcdf`, and
+  that build fails until a celestial-data release does.
+
+- Known: `TestVersionOneReadsAsItAlwaysDid` in `set` is disabled for
+  this release. Seven set readings moved with the telescope names and
+  the sets moved out of `doc/`, and are not yet re-recorded.
+
+- Known: `TestNoOpticsShaderSourceMatchesBaselineWithSpectralNormals` in
+  `gpu` is disabled for this release. The gravity fix changed the shader
+  source, and its baseline is not yet re-recorded.
+
+- Known: `TestNoCommitChangesTheHarnessAndWhatItJudges` in
+  `burning-trousers/rules` is disabled for this release. Two commits of
+  it change the harness and what it judges together. All three tests
+  return in 0.1.4.
+
+- Slayer requires celestial-data v0.0.4 and celestial v0.0.10, and its
+  `go.mod` has no `replace`, so a clone no longer names a folder on
+  one machine.
+
+- Fixed: on the GPU, light from a volume inside a gravity field took the
+  frequency shift to the fourth power, held to 50, while the CPU took its
+  cube, unclipped. The GPU now takes the cube too, with no light for a
+  shift that is not a finite positive number, and the two agree again.
+  A world with no field draws as before.
+
+- The example jobs are in `doc/examples/jobs/`: ten single-file jobs,
+  from a smoke still to a film with music and a city at night, and
+  `alfa/`, a submarine clip planned frame by frame. Each reads only files
+  in the repository. Jobs that need data slayer does not ship, such as a
+  terrain model or a star catalogue, are not among them yet.
+
+- Sets name the three amateur telescopes they place by what they are:
+  `36-inch Dobsonian`, `5-inch refractor` and `24-inch SCT`. Their kinds,
+  `dobsonian-36`, `apo-refractor-5` and `sct-24`, are unchanged.
+
+- Ferruccio builds against gogpu v0.54.1 with one patch, in
+  `ferruccio/native/patches/`: on macOS the app can start in the
+  background without taking focus. `ferruccio/scripts/patch-gogpu.sh`
+  applies it to the released module before a build.
+
+- The build configuration is `.game5/`, read by game5, in place of `.game`.
+
+- A job's film may say `mode: wire`: the edges of every mesh face the
+  picture's first rays meet, from the same rays, camera, time and things
+  as the light picture, so the two lie one over the other.
+
+  Edges are a pixel wide at any size; a surface with no polygons is a
+  flat tint, a height field shows its sample cells, the sky and volumes
+  are black, and nothing is lit. CPU only (`trace.Wire`); `renderer: gpu`
+  is refused by name. A job that says no mode, or `mode: light`, keeps its
+  key and its picture. See `job/README.md`.
+
+- `film: {preset: half-portrait}` is 1080 by 960 pixels, 9:8: one half of
+  a 1080 by 1920 portrait frame split top and bottom. It sets pixel
+  size only; the gauge and the camera's framing stay the shot's. See
+  `job/README.md` and `ninjafilm/doc/filming.md`.
+
+- `slayer assess JOB --census PATH` writes the geometry a job stages
+  for its first frame to PATH as JSON, drawing nothing: each placed
+  thing's faces, a mesh group's instanced and stored faces and its
+  instances, analytic shapes and volumes by kind with no faces, and a
+  height field's grid.
+
+  It ends with a receipt: the job's sha256 and key, its scene and camera,
+  the set's sha256, the time, the camera as staged, the build and commit.
+
+  The scene is opened by draw's own runner, so the counts
+  are the ones draw traces; they are faces staged, not faces visible.
+  New: `thing.Count`, `hillside.Session.Census`.
+
+- Moonlake's visual metronome and its show package read the score's
+  `meter`: a score in three draws three squares a bar, and its bars,
+  cues and the lights' bar arithmetic count three. A score that names no
+  meter is in four, as before, and its frames and cue lines are
+  unchanged.
+
+- `visualizer draw` films a tune's instruments for placing a part by ear
+  and by eye.
+
+  It writes raw rgb24 frames to standard output, for ffmpeg
+  to put the song under, as the moonlake metronome does: the playhead as
+  `BAR.BEAT.SIXTEENTH` counted from one, a square for each beat of the
+  bar and a tick for each sixteenth, and a lane for each argument of the
+  form `NAME=SCORE#ROLE`, its notes scrolling past a fixed line and
+  glowing while they sound (a percussion lane has a row for each hit).
+
+  `--fps`, `--width`, `--height` and `--seconds` (the score's length and
+  two more when left out) are the flags.
+
+  The scores are read with
+  `cheeptune.ReadScore`; they must agree on tempo and meter, and bar one
+  beat one is the start of the song. See `improv/visualizer`.
+
+- The GPU's tree file, `trees.bolt`, is bounded and listed like every
+  other cache. It had no cap and never shrank: its key holds the running
+  program's hash, so every build that drew a scene kept the scene's trees
+  again (about 588 MB for moonlake's) beside the last build's, and it
+  reached 35 GB of a 40 GB cache. Each tree now has a recorded last use.
+
+  At a run's end the run writes the use of the trees it took and, if the
+  file is over 8 GiB, drops the least recently used until 6 GiB remain
+  (never one used in the last ten minutes) and writes the file fresh under
+  its own lock, renaming it over the old, which is what gives the disc
+  back; a process that waited for the lock opens the new file.
+
+  The trees of an older build have no recorded use and go first. `slayer
+  cache` lists it as `trees (one file)`, and `slayer cache --clear trees`
+  and `--clear` clear it as well as the `trees` folder, one kind kept two
+  ways.
+
+  Pictures do not change; a cache changes only speed.
+
+  New package
+  `treebolt`; see `doc/caches.md`.
+
+- A scene of nine to sixteen lamps now lights every lamp at every point.
+
+  The exact tracer picked among them past eight, so a nine-lamp scene
+  (six street lamps, a sun, a flood and a flare) was sampled; a scene of
+  eight or fewer, or of more than sixteen, is unchanged, and the Metal
+  kernel does the same.
+
+  The lamp store takes up to sixteen lamps where
+  it took eight, and refuses more by name. A lamp with a direction that
+  sends no light to a point is no longer asked about there, which changes
+  no picture: the city wave went from 86.5 s to 0.455 s.
+
+- The GPU is told less to do again. A film's retained drawer keeps its
+  mesh trees and packed faces across frames by a sha256 of their bytes,
+  where it kept only slayer's own meshes by pointer and rebuilt the rest
+  every frame: the heard finale's 39,112 meshes cost about fifteen
+  seconds a frame for nothing.
+
+  A timed scene drawn again at the time it was
+  last drawn keeps its generation, so a moved camera takes the
+  camera-only path.
+
+  Metal builds a hierarchy in one command, a level to an
+  encoder, keeps every mesh structure and rebuilds only the nodes that
+  changed, and reuses its vertex, scratch and instance buffers; and it
+  holds a mesh that no node placed in the last two passes no longer, so a
+  film whose meshes rebuild every frame stops holding one more structure a
+  frame. No picture is meant to change.
+
+- A band that the window server stops is drawn again.
+
+  On Apple Silicon the
+  system stops a GPU command that keeps the display from presenting
+  (`MTLCommandBufferErrorDomain` code 1 over `IOGPUCommandQueueErrorDomain`
+  code 14).
+
+  Such a stop is now known by those codes, and its band is sent
+  again half as tall after 100 ms, up to eight stops, and then fails
+  naming its rows.
+
+  Each band's receipt says the time since the machine's
+  last input and whether the display sleeps.
+
+  A drawing that stops early
+  waits out the bands in flight.
+
+  `SLAYER_BAND_TIMES` adds each band's
+  time on the device and, on a failure, its encoders' states;
+  `SLAYER_BANDS` fixes the band heights; `SLAYER_WORK_COUNTS` counts
+  twelve kinds of work in each sample, in place of its light, and
+  `SLAYER_ONLY` draws a window of the picture at its place in the whole,
+  for finding what holds the device.
+
+  All are off unless set, and a picture does not depend on its bands,
+  which a test shows bit for bit.
+
+- Contract change, an environment variable: `SLAYER_TREE_CACHE` is gone.
+
+  The GPU's trees are kept in the cache home, `SLAYER_CACHE`, always, in
+  `trees.bolt` beside the `trees` folder, and `SLAYER_TREE_STORE` only
+  picks the form. A run that needs the trees and has no `SLAYER_CACHE`
+  refuses by name, where it used to grow a cache of its own without a
+  word. Help prints with `SLAYER_CACHE` unset. The trees line is
+  said only when the cache took or grew a tree.
+
+- `sources fetch` shows a live two-line status on a terminal, with a
+  spinner, the bytes that have come and how many sources are done, redrawn
+  in place; where output is not a terminal it writes one line a source, as
+  before. It names the first source before the first draw.
+
+- `azazel/pages` keeps what the operator sees of a render: the render folder's
+  page, as `frames-index.sh` writes it, never over a page made by hand
+  (set aside once, as `index-before-azazel.html`); the film so far,
+  `partial.mp4`, with its music, at the rate the render's files say;
+  `latest.html` and the two indexes, as `latest.sh` and `indexes.sh`
+  write them; and Barkeep's line. Every write is whole, by a rename.
+
+  A job request may say `pictures`, the folder's count when the render is
+  done, for Barkeep's total. `azazel publish` publishes one folder once,
+  for the operator. `azazel pages --serve` is the queue's one coordinator,
+  reading the ledger as `status` does; the operator starts it for now.
+
+- `manufacture.MaturityReport` counts, for every kind, its parts, its
+  separate constructed pieces, its mesh faces, the details it can be made
+  at, its size, and the named numbers it reads, measured and picked apart.
+  Pieces do not change with tessellation. `tools/maturity` prints the
+  table (`game run maturity`). It counts and does not judge; see
+  `doc/object-maturity.md`.
+
+- `research.Observe` lets a caller watch which measured numbers are read.
+
+- `simulation/waves` keeps a mode's contribution when its drift or
+  acceleration coefficient, or its phase, is too small to hold by itself
+  and the spectrum it multiplies is large. Four results that were nought
+  or five parts in a thousand million out are now right to rounding. The
+  Metal path and its float32 range are unchanged.
+
+- The print has one definition, in `ninjafilm/colour`. `render/colour`
+  held a copy of its tone, bloom, encoding, false colour, mask and grain,
+  and `ninjafilm/colour` held another with the old cornered shoulder;
+  `render/colour` now keeps its names and hands each picture to
+  `ninjafilm/colour`, and its pictures are the same to the bit.
+
+  `ninjafilm/colour`'s `Tone.Scale` is the shoulder's solved scale. The
+  Metal developer in `improv/moonlake/omnipositor/gpudevelop` restated
+  the old shoulder with a denominator of its own; it now takes that
+  scale and the bloom's weights from the print, and a draw-tagged test
+  holds its bytes to the CPU's within a bound derived from float32.
+
+  Films through a stock change where the screen's shoulder rolled light
+  off, as the plain prints did when the corner went.
+
+- The print's shoulder no longer turns a corner at its knee. Above the
+  knee it was knee + room ln(1 + (y - knee)/room) / ln(1 + (top -
+  knee)/room), whose slope there is about 0.17 at a top of a hundred
+  where the light below has a slope of one: a smooth gradient that
+  crossed the knee showed a contour, the seam across Venus's sky.
+
+  It is now knee + a ln(1 + (y - knee)/a), the scale a solved once a
+  picture by bisection over the floats so the top still lands on white.
+  Below the knee nothing changes; the hue is kept and a saturated colour
+  bleaches as before. Every picture with light above a knee changes.
+
+  The computed sky no longer turns with azimuth at the zenith. Inside
+  the centre of the top and bottom view bins, 14.4 degrees from the pole
+  on Earth's bins, the reading is drawn toward the bin's mean round the
+  azimuths, by (1 - s)^2 (1 + s), s the look's sine over the centre's.
+  A ring 0.9 degrees from Earth's noon zenith swung by 76% of its light
+  and now swings by 5%; the light the air scatters once there swings 6%.
+
+  Earth's noon sky was checked against an exact sum of the light its
+  shells scatter once, with a bound past it: the solver's top bin at 550
+  nm is 1.21 times the light scattered once, inside the bound of 1.25.
+  The zenith over a level grey card is 0.35 to 0.46 of it by the sum;
+  the field's 0.45 is the air's.
+
+- The computed sky and sun are no longer purple. `airlight` handed each
+  of its 21 wavelengths to moonlight's `Picture` as one line, and the
+  picture weighs a line by the observer's mean over a 24-an-octave bin
+  that is narrower than the 20 nm the line stands for and not centred on
+  it: light of even power came out x 0.341 y 0.323, not a third each.
+
+  Each wavelength's power is now laid evenly over its own band, and the
+  same light is white. Earth's zenith moves from x 0.262 y 0.256, below
+  the black-body locus, to x 0.258 y 0.265, above it. Sets with no air
+  draw as before.
+
+- A set may name Earth's air, `air: earth`: `airs.Earth` walked at
+  4,000,000 photons a wavelength, on finer bins than Venus's, 32 of the
+  view's cosine and 16 of azimuth, since Earth's clear sky changes
+  fastest near the horizon and about the sun. `sets/kilauea-iki-noon.yaml`
+  is the first set under it.
+
+  The computed sky is read as a cubic through the bins' centres, by
+  Steffen's slopes, so its slope runs on unbroken across each centre.
+  Read linearly, the bins' noise made a crease at a centre that showed as
+  a curved seam across Venus's sky. The sky above the horizon and the
+  light from below are read apart, each held to the horizon.
+
+  The sun's spectrum is read from the shelf, pinned in `sources.yaml` as
+  `tsis1-hsrs-p1nm`; `airlight/sun.csv`, of the entry below, is gone.
+  `airlight.Named` takes the sun, and `airlight.NewPlan` takes a
+  `Known`, which now holds the air's bins.
+
+  Refused, each saying why: an air with a planet in the sky, whose light
+  the computed sky does not hold; and `-sky black` under an air, whose
+  sky is its air's.
+
+- A terrain set lit by the sun may name an air, `scene: {air: venus}`,
+  and its sky, its sun and its exposure are then the air's, computed:
+  no painted gradient, no fill lamp. Sets that name no air draw as
+  before.
+
+  Package `airlight` walks the air with `skylight` at 21 wavelengths
+  from 380 to 780 nm, from the set's ground, and reads it through the
+  CIE observer by moonlight's route. `NewSky` is the sky, `Sun` the one
+  distant lamp, `Meter` the exposure an incident meter gives.
+
+  The meter's exposure is used where neither the job nor the film says
+  one. The fields are kept in the `air-fields` disc cache, keyed by the
+  air's columns and sun at every wavelength and the walk's settings.
+  The first run of an air and a ground walks for minutes.
+
+  The run says the air, the wavelengths, the photons, the time or the
+  cache, and the exposure. An unknown air is refused naming the known
+  ones; so are an air under a light other than the sun and a tinted
+  sun under an air.
+
+  `sets/venera-13-plain.yaml` names Venus's air and gains a camera,
+  `sunward`, with the sky in the frame. The sun's spectrum is kept in
+  `airlight/sun.csv`, the TSIS-1 spectrum averaged to whole nanometres,
+  since it is not on the shelf a render reads.
+
+- `skylight` is new: light in a planet's air at one wavelength, worked
+  out by following photons through spherical shells with as many
+  scatterings as the air asks. Nothing uses it yet.
+
+  `Solve` takes a `Column` of `Shell`s and a `Grid` of kept heights and
+  bins. It gives a `Field` of radiance by height, sun zenith, view
+  cosine and azimuth, with the direct sun's `Transmittance` and the
+  counts behind each bin, and a `Budget` of where the light went.
+
+  Its checks: the budget balances, no air gives no sky, a thin layer
+  gives single scattering, and slabs agree with a separate plane walk.
+
+- `mie` is the scattering of light by a homogeneous sphere, after Bohren
+  and Huffman. `Sphere` gives the extinction and scattering efficiencies
+  and the asymmetry parameter for a size parameter and a complex index.
+  It refuses a size under 1e-4 or over 20,000, and an index with gain,
+  no real part, or equal to one.
+
+- `mie.Population` is a log-normal distribution of radii. Its `Average`
+  gives, at a wavelength, the mean extinction cross section, the
+  single-scattering albedo, the asymmetry (weighted by scattering) and
+  the mean geometric cross section of a particle, by a fixed sum of 257
+  radii out to four standard deviations of the log radius.
+
+- `airs` is a planet's air as the solver of light in air takes it.
+  `airs.Venus(nanometres)` gives the shells from the ground to 90 km,
+  each with the gas's Rayleigh scattering and absorption and the
+  particles' extinction, albedo and asymmetry, all a metre, and the
+  ground's albedo. Its numbers are in `venus.yaml`, each noted as read,
+  with where, or picked, with its range.
+
+- Venus's cloud and hazes are Titov and others 2018's Table 1 modes,
+  scattered by `mie` and scaled to a depth picked at 630 nm. The gas is
+  carbon dioxide and nitrogen: Rayleigh cross sections from
+  Bideau-Mehu's index and the King factor in celestial's research data,
+  with celestial's dry air in nitrogen's place. The ultraviolet and blue
+  absorbers Tomasko describes are in the data at nought, to be fitted.
+
+- `airs.ReadSun` reads the TSIS-1 spectrum, and `Sun.AtVenus` gives a
+  band of it at Venus's mean distance, in watts a square metre a
+  nanometre.
+
+- `airs.Earth(nanometres)` is Earth's air beside Venus's, from 300 to
+  1000 nm, as data and not paint: celestial's standard atmosphere and
+  Rayleigh cross section, the Nimbus-7 TOMS ozone profile at 300 Dobson
+  units with Serdyuchenko and others' cross sections, and a clear day's
+  aerosol. Each number in `earth.yaml` is noted as read or picked.
+  `Column` gains `AbsorptionDepth`.
+
+- A set's `world` may hold an `ocean`: one finite, still sample of sea,
+  drawn as a height field with a clear interface.
+
+  It names a world
+  material that has a `clear` block, a `middle` (east, north, up), a
+  square `extent`, `samples` a side (2 to 1024), the sea (`wind`,
+  `fetch`, `depth`, `toward`), a `seed`, a `time` and a `source`; none
+  has a default, and the reader refuses one that is missing.
+
+  The run
+  reports the spectrum model's significant height and peak period once
+  per scene, labelled as the model's estimate and not a measurement.
+
+  `shading-normal: bilinear-vertex-slopes` or `spectral-slopes` smooths
+  the sheet's normals; `glint` (`artistic` with a `roughness`, or
+  `cox-munk`, derived from the wind) shades the sun's highlight below one
+  cell; `motion: scene-clock` (version 2 sets) draws each frame of a film
+  with the sea at that frame's time. `cox-munk` is CPU only and `renderer:
+  gpu` refuses it by name.
+
+  A camera inside the sea must still name its
+  medium.
+
+  Nothing here is a shore, a choppy displacement or a coastal
+  coefficient. See `doc/sets.md` and `doc/water-ocean-design.md`.
+
+- Water that takes light out as it goes: a material's `clear` block may say
+  `extinction-per-metre: [red, green, blue]`, the Beer-Lambert loss in
+  inverse metres over each path through the water, which needs a `source`
+  string.
+
+  A camera that stands in a clear material says so with
+  `initial-media: [NAME]`, the ordered stack it starts in; slayer does
+  not infer it from where the camera is. At most 16 media may be named.
+
+  Both are read on the CPU and on Metal for a fixed camera; a moving job
+  camera, a composite pass and the gravity kernel refuse them.
+
+  A material
+  that says nothing draws as before.
+
+  No water coefficients are supplied:
+  the values are the set's, and it says whether they are measured or
+  picked. See `doc/sets.md`.
+
+- A `clear` block may also say `scatter: {coefficient-per-metre, phase-g,
+  steps, max-distance}`, single scattering in the same water.
+
+  The
+  coefficient may not exceed the extinction in any channel; the rest is
+  absorption.
+
+  With `world.ocean.in-scatter: spot-lamps`, the spots below
+  the water's surface and pointing down light the water the camera sees
+  through; flood and other lights do not, and the lamp's light is not
+  bent at the surface. Both CPU and Metal draw it, for a fixed camera
+  and a closed shutter. See `doc/ocean-spot-scattering.md`.
+
+- Sun and moon in the water.
+
+  `world.ocean.direct-sun: mean-plane` (CPU
+  only; `renderer: gpu` is refused) lights surfaces under the sea by the
+  sun refracted through the flat mean surface, with Fresnel loss and the
+  water's extinction over the path to the sampled wave.
+
+  It needs `light:
+  sun`, one named extinction-only ocean and no other directed lamp,
+  volume or haze. `direct-moon: mean-plane` does the same for `light:
+  moon`, on the CPU and, for calm water, on Metal. A set may not say
+  both.
+
+  The run's receipt says `direct-sun=mean-plane`. The waves' own
+  normals, focusing and caustics are in neither. See
+  `doc/ocean-mean-plane-direct-sun.md` and `doc/ocean-direct-moon.md`.
+
+- A scene with no ground may stand under Earth's air: `air: earth` with
+  `groundless-air: {coordinate-origin: earth-mean-radius,
+  reference-altitude, boundary: earth-standard-land}`.
+
+  The sky and the
+  sun are the air's, computed, at that one height over the Earth's mean
+  radius; a full moon is `light: moon` with a `moon` azimuth and
+  altitude.
+
+  Every manufactured thing then needs an explicit `position`
+  (east, north, up in metres; new for set things, and refused beside the
+  old `east`, `north` and `height`), and `world.unit` must be 1.
+
+  The
+  boundary is the air model's fixed 0.15 land albedo and continental
+  aerosol, not an offshore measurement. See `doc/groundless-earth-air.md`.
+
+- A sea that goes on: `world.ocean.flat-mean` takes `mean-level`,
+  `collar-width` and `extends-to-infinity: true`, and past a smooth collar
+  the sea is an infinite flat plane at the mean level, solved exactly
+  where it is a plane. It does not add distant waves.
+
+  It is CPU only;
+  Metal draws it only where every wave sample is the mean, which it
+  lowers to a plane, and refuses displaced water.
+
+  Three opt-ins need it
+  and are refused without: `interface-events` (1 to 16 reflections and
+  refractions followed at the sea's surface, so a ray one wave reflects
+  can leave through another; CPU only; the default is the old one
+  mirror), and `diffuse-sky-samples` and `clear-cloud-sky-samples` (1 to
+  256 sky directions refracted into the water).
+
+  `shading-normal` cannot
+  be said beside `flat-mean`. See `doc/ocean-interface-events.md`.
+
+- A wake on the sea: `world.ocean.surface-wake` (`origin`, `heading`,
+  `speed`, `amplitude`, `half-width`, `length`, `wavelength`,
+  `add-to-spectral-shading`) raises a tapered train of troughs and ridges
+  behind an authored point, in the same height field slayer intersects.
+
+  It is a shape, not a fluid solve; the craft's own motion must be
+  authored to match, and slayer does not bind them.
+
+  Under
+  `shading-normal: spectral-slopes` it must say `add-to-spectral-shading:
+  true`, and refuses it otherwise. `foam` (`coverage`, `band`,
+  `reflectance`, `satin`, optionally `pattern-wavelength` and
+  `width-scale`) mixes an opaque, rough white into the wake's surface by
+  a noise mask; CPU and Metal draw it.
+
+  A textured, emissive or shining
+  surface refuses foam, as do the mean-plane lights. See
+  `doc/ocean-surface-wake.md` and `doc/ocean-wake-foam.md`.
+
+- Clouds of fine bubbles in water, as scattering and not as spheres.
+
+  A set's `fizzes` or `vapor-cavities` entry may say `clear-water: true`,
+  which wraps it in a `ClearCloud` and lets the water's extinction and
+  single scattering act between samples of the cloud's own density;
+  `phase-g` (above -1 and below 1; 0 is isotropic) gives the cloud its
+  own Henyey-Greenstein scattering where it would otherwise follow the
+  water's (whose 0 is Rayleigh), and needs `clear-water`.
+
+  A `fizzes`
+  entry takes an `axis` to point its column along a slipstream; nothing
+  said keeps it upright.
+
+  `vapor-cavities` (`blades` 1 to 16, `rpm`,
+  `slipstream-mps`, `tip-radius`, `core-radius-m`, `length-m`,
+  `density-per-m`, the `fragment-*` breakup, and `visual-onset: true`)
+  draws a helical vapour core from each blade tip, locked to the screw;
+  its pressure keys shape the picture and predict no onset.
+
+  CPU draws all of it; Metal draws it for the calm-water moonlit route. New:
+  `medium.NewClearCloud`, `NewClearCloudWithHenyeyGreenstein` and
+  `NewPropellerCavitation`; `manufacture.NewCavitationCloud`. `game run
+  cavitation-cloud` and `cavitation-field` write the YAML. See
+  `doc/alfa-cavitation-cloud.md`, `doc/alfa-propeller-cavitation.md`,
+  `doc/residual-bubble-population.md` and `doc/clear-cloud-phase.md`.
+
+- `world.ocean.clear-cloud-water-step-mode` is `per-gap`, the default, or
+  `ray-spacing`. The default repeats the water's whole scatter budget in
+  every gap between cloud samples; `ray-spacing` spreads it by distance
+  along the ray. It is a different quadrature that trades quality for
+  time, not the same picture.
+
+- A hidden cloud no longer stops the GPU drawing the sea. A world whose
+  only volumes are hidden clear-water clouds was refused as a mixed cloud
+  and water draw; it now draws as the sea, named medium and all, and the
+  refusal is kept for a cloud that is visible.
+
+- Metal draws the moonlit sea under the Alfa: finite, flat water or a
+  calm infinite plane, the tagged moon through it, and a native
+  propeller or Fizz cloud under it, front to back, with no density grid
+  and no particle geometry.
+
+  Waves, sky samples, clouds that cross the
+  surface and arbitrary cloud fields are refused by name, not drawn
+  wrongly; so are Fizz controls too small for float32 to hold.
+
+  `game run
+  check-gpu-water-moon`, `check-gpu-water-propeller` and
+  `check-gpu-calm-infinite` run the contracts, each with a `-metal` twin
+  that uses the device. See `doc/gpu-water-moon.md` and
+  `doc/gpu-calm-infinite.md`.
+
+- In a gravitational field the CPU tracer shifts an emitting volume's
+  light by the cube of the total gravitational and Doppler frequency
+  shift, since specific intensity over frequency cubed is invariant
+  (Noble and others, ApJ 692, 2009). It was the fourth power held to
+  50. A hot pixel is no longer clipped, and a ray whose shift is not a
+  positive number gives no light, where a bad geodesic could spread a
+  NaN. A picture drawn through a field with a moving emitter, a jet
+  among them, changes.
+
+- `part-spin` turns one material group of a placed thing in a space
+  set: `material` (the exact name; none matching is an error), `pivot-metres`
+  and `axis` (the factory's own x, y, z, with y up), `rpm` (signed, to a
+  million) and `phase-radians`. It moves the group's shared geometry by the
+  thing's motion on CPU and GPU, and makes no new mesh.
+
+  A YAML anchor on
+  `rpm` can give a cavity field the same speed; a cavity never turns a
+  blade by being there. A ground set refuses it. See `doc/part-spin.md`.
+
+- `titan` refuses a place only when the map lacks a height beside it. A
+  measured corner the map does not know is carried down the walk as
+  unknown, and refuses when its height is used: as an end of an edge a
+  corner is made on, or a corner of the last triangle. Gaps in the map
+  far from the place, as Magellan's are, no longer refuse it.
+
+- A set's `terrain` may be placed by `lat` and `lon` on a map of a sphere,
+  with `detail: {seed}` to ask for ground finer than the map, made by
+  `titan`. `titan.NewSphereMap` is the map as titan's `Provider`,
+  `terrain.BuildWindow` makes a window from heights worked out by the
+  caller, and hillside's run says how much of the ground was made.
+
+  A window placed by `west` and `north` reads as before; giving both is
+  refused. `sets/venera-13-plain.yaml` stands the lander at Venera 13's
+  landing place. The disc cache for ground on a sphere is keyed by the
+  place, the window, the seed and whether detail is asked.
+
+- `terrain` reads signed 16-bit samples and one projection, equirectangular
+  on a sphere, from a file's own GeoKeys. It adds `EquirectangularSphere`,
+  `EquirectangularElevation` (bilinear by longitude and latitude, absent
+  beside no-data) and `GroundSpacing`, for the USGS Magellan Venus topography
+  in `sources.yaml`. `doc/terrain-streaming.md` says what is still not read.
+
+- The Hubble and Spitzer tubes are shaded as the round tubes they are.
+  Each was 96 flat polished strips, and each strip mirrored the world at
+  its own angle, 7.5 degrees from the next: a shadow's edge seen in the
+  inner wall broke into a black sawtooth, one tooth a strip.
+
+  The tube's faces are unchanged; its corners carry the round wall's normals
+  (`roundProfile` in `manufacture`). Their primary mirrors carry the
+  paraboloid's (`roundDish`), and no longer mirror in rings. Other turned
+  parts and dishes stay flat.
+
+- A mirror on a smooth face keeps its mirrored ray above the face. Where
+  the eye grazed it, the ray turned about the smooth normal could point
+  into the face and meet it at once; it is now turned back about the
+  face's own plane, on the CPU (`trace`) and in the kernel alike.
+
+- `materials/specimen` accounts for identified solid masses and densities,
+  porosity and partial pore saturation in SI units. It derives specimen
+  volumes and wet/dry density without assigning appearance. Numeric refusals
+  name the failing input or calculation; generated expectations derive from
+  inputs independently. See `doc/specimens.md` for scope and numerical limits.
+
+- Contract change, the dependency: Slayer requires celestial v0.0.9 as
   released, and `go.mod` replaces nothing. The Metal geodesic shader is
   Slayer's own, `metal.GeodesicLibrary`, with the two march numbers it
   needs beside it. celestial is not changed.
+
 - With celestial v0.0.9 the extreme ultraviolet ends at 121 nm where it
   ended at 120, so `scene/thing`'s `Range` answers extreme ultraviolet for
   a band at 120 nm. Ultraviolet is 100 to 400 nm as before.
-- KNOWN: `TestRangeEdgesAndOverlaps` in `scene/thing` is disabled for this
+
+- Known: `TestRangeEdgesAndOverlaps` in `scene/thing` is disabled for this
   release. Its row at 120 nm was written for the earlier limit.
+
 - Tests run in four tiers: hot path, non draw, draw, and all tests.
   `game check` and `go test ./...` run the non draw tier and open no GPU
   device. `game run test-draw` runs the draw tier one package at a time.
-  `doc/test-tiers.md` says how each is run and how a test is placed.
+
 - The film compositor is in the tree, under `improv/moonlake/omnipositor`,
   with the packages it is built on (`lights`, `cues`, `ocean`, `mist`,
   `matte`, `develop`) and azazel's budget and process work. `DEBT.md` says
   what it owes, the light show told twice among them.
+
 - One placed Kerr field renders on Metal through `gpu.Sampled`.
-  `gpu/GRAVITY.md` and `doc/gravity-rc-integration.md` say what it refuses.
+  `gpu/GRAVITY.md` says what it refuses.
+
 - The Larson's dome is set into its deck, not standing on it.
-- CONTRACT CHANGE, names in a scene: three cameras of `improv/cloudsea`
+
+- Contract change, names in a scene: three cameras of `improv/cloudsea`
   lost a prefix and are `close`, `overhead` and `south east overlook`.
+
 - The plans and jobs of `improv/searching` and `improv/magnetar` name
   their sound, score and outputs with no machine path. A plan's song and
   score are read from beside it; a job's outputs go under a renders home
   when one is set, and beside the job when not.
+
 - Every function, method and type has a comment above it, and notes of
   who asked for a thing and who decided it are taken out of code and docs.
 
+- The full Glass Hour editorial draft runs at 320 pixels and four fps,
+  with marked missing shots. Its final flow scene holds through the music
+  release instead of returning to the earlier observatory coda.
+
+- Short searching previews retain only their excerpt's audio. An optional
+  `--defer-movie` mode writes PNGs, releases the scene, then encodes them;
+  its receipt separates encoding time from drawing and PNG output.
+
+- Hubble and Spitzer gain service hardware and housing details; Webb gains
+  a braced rear structure. Authored proportions remain separate from
+  retained physical dimensions. Small studio studies expose current limits.
+
+- The heard. flow study supports an eased logarithmic camera retreat.
+  A music preparation verb binds a Cheeptune composition and voicing to
+  exact sample duration, source hashes and a browser-readable beat grid.
+  Tempo changes and silent bars retain their positions.
+
+- Catalogue plans can place a camera inside an intact observatory, with
+  checked procedural skies, thin air and paired beam studies. Matched
+  on/off recipes cover both Kecks, Subaru, Rubin and ELT. Sourced Maunakea
+  layout studies place the campus and downslope VLBA on retained terrain.
+
+- Rubin's photographic model now has a narrower vented enclosure, sloping
+  service tiers and a triangulated optical frame. The camera sits between
+  the mirrors; M2 has an intact convex face. Dimensions beyond the retained
+  mirror diameters remain authored, and the model is still static.
+
+- Keck's instrument gains an angular braced frame and a secondary cage.
+  A curved-envelope regression catches the upper ring piercing the dome,
+  which the rectangular bounds check missed. Catalogue night studies use
+  checked local light sources to illuminate reflective mirror surfaces.
+
+- The Project 705 Alfa is a kind, `alfa`, and `alfa-hero`, the same boat
+  in a near-black paint where `alfa` is bare titanium.
+
+  It is made from
+  slayer's own lofts and turned parts, with no imported mesh: a hull, a
+  sail with its rescue sphere, bow planes, a cruciform stern, a five-blade
+  main screw and two two-blade screws on pods. Length and beam are cited;
+  the shape and every other size are authored from photographs, and
+  `manufacture/alfa.yaml` says which is which.
+
+  `quick` is the default;
+  `complexity: demo` adds four antenna rods, two sail covers and a scoop
+  plate. See `doc/alfa-model.md`. The sets `sets/alfa-san-onofre.yaml`
+  and its `-deck-on` and `-deck-off` pair stand it on a sea under
+  Earth's air.
+
+- The Pratt and Whitney J58 and its test stand are kinds, `j58` and
+  `j58-test-stand`.
+
+  The engine has its cases, compressor face, six bypass
+  tubes, burner, turbine, afterburner with two flame holders, and a
+  variable nozzle of sixteen flaps; four mount lugs, two a side.
+
+  The stand is a cradle on flexures over a base pad, with a pin into
+  each lug, a load cell and thrust post, and a bellmouth on two legs, and
+  places an engine by its lugs. The engine's largest radius is read and
+  the rest picked; no source for a stand was found, so every size of it
+  is picked (`j58-stand.yaml`).
+
+  Eight sources for the A-12, the J58 and
+  Project 705 are pinned in `sources.yaml` with their bytes on the shelf.
+
+- The Venera lander is a kind, `venera-lander`, remodelled from the
+  lander's photographs: the sphere with its band and two camera windows,
+  the dished drag plate with its lip, collar and twelve stays, the tri-leg
+  struts, the ring and its teeth, the parachute can with its aerial
+  wound round it, and the spring arm lying flat on the ground with the
+  lens caps and colour chart. Every part is matte grey paint, not metal.
+
+  Its bolts, ring holes, legs, stays and pipes are shared mesh groups, so
+  `demo` constructs: it drew 171,876 faces and was refused over the
+  100,000 limit, and now stores 63,852 and draws all of them.
+
+  `slab` and `chip` are new kinds, plates and grains of dark basalt that
+  break along upright joints and lie packed in layers by the lander, with
+  no dust on them for now; a plate has no face without area.
+
+  A terrain
+  may say `reflectance: [red, green, blue]`, the share of light the soil
+  gives back, and `detail: {seed, relief: {slope, longest}}` asks `titan`
+  for ground below the map at least that steep, up to that many metres
+  an edge. `sets/venera-13-plain.yaml` uses all of them and gains cameras
+  `across` and `above`.
+
+  `sets/venera-lander-on-basalt.yaml`
+  stands the lander on a Hawaiian lava lake, as a test of the kind.
+
+- City buildings are kinds: `city-rowhouse`, `city-apartment` and
+  `city-tower`, seeded for their size, storeys and materials, and the
+  recipes `city-grid-10000`, `city-clustered-10000`,
+  `city-clustered-green-10000` and `city-clustered-night-10000`.
+
+  `city-grid-10000` is a 3.2 km square of 10,000 lots with cross alleys,
+  setbacks and raised roundabout islands.
+
+  Disjoint surfaces are baked
+  into material meshes of at most 60,000 faces. `hull` and `quick` are
+  the two levels; `demo` adds a street level of shared facade strips,
+  with recessed openings, sills, mullions, lintels on rowhouses, and an
+  entrance with a canopy.
+
+  A recipe may say `batch-placement: nested` to choose the older transform
+  path, which changes allocation and not the picture. `game run
+  check-city` checks it. New: `manufacture.City`, `PlanCity` and
+  `DefaultCityGrid`. See `doc/city-buildings.md`.
+
+- Five kilometre-scale kinds: `macro-terraced-arcology`,
+  `macro-twisted-spires`, `macro-inhabited-bridge`,
+  `landform-mountain-massif` and `landform-caldera-volcano`.
+
+  Their sizes
+  and looks are authored, and none changes a shot that does not name it.
+
+  `world.griffith-basin` puts the Griffith ridge and its Los Angeles
+  basin, made by the shared `scene/city` package, into a set, with `at`,
+  `heading`, `scale`, `relief-scale`, `city-forward`, `ridge-forward`,
+  `city-detail`, `terrain-samples`, `city-light-scale` and
+  `city-light-footprint`. See `doc/macrostructures.md` and
+  `doc/griffith-basin.md`.
+
+- The catalogue's card for Webb looks from the sun's side. Webb is staged
+  with its measured sun 135 degrees from the mirror's line of sight, on
+  the shield's side, and the camera looked at the mirror's side, which the
+  shield keeps in shadow: with nothing else in space to light it, the
+  card drew black.
+
+  The camera now turns 180 degrees and looks up from 30
+  below at the bus, the panel and the shield's sunlit underside. The
+  sun's direction is unchanged.
+
+  The catalogue menu also lists `slab`
+  and `chip`, which it refused to run without.
+
+- A narrower guide beam. Ground scenes in `improv/searching` draw the
+  guide-star beam 30 cm across, the nominal width published for the ESO
+  4LGSF (`eso-4lgsf` in `sources.yaml`), where it was 76 cm, and the
+  peak is rescaled so the beam carries the light it did.
+
+  The beam's
+  scattering is drawn as a second pass at full output resolution and
+  added in linear light before exposure, bloom and tone, with its
+  geometry and extinction as before. Surface beam lighting stays in the
+  first pass. See `improv/searching/README.md`.
+
+- The heard. progress watcher reports completed PNGs, bytes, recent pace
+  and a provisional ETA without restarting a render. An atomic status file
+  feeds the Barkeep side column; a separate adapter can send meter messages
+  and render-state signals through Carrie's Barkeep API.
+  A busy message queue is left alone; incomplete frames are not counted.
+
+- The heard. sequence overlaps GPU drawing with the previous frame's CPU
+  development, PNG writing and movie submission. Work is bounded to two
+  frames, output stays ordered, and errors join the output worker before
+  cleanup. A serial control and stage timings support matched comparisons.
+
+- The heard. preview can combine checked named-scene cuts, a pinned Gaia
+  display sample and its authored flow study. Missing shots have explicit
+  slates. A synchronized making-of page uses the same movie and frozen beat
+  grid; changed recipes or scores are refused before it is published.
+
+- heard. has an opt-in YAML flow study: explicit 3D paths, beat-driven
+  travelling light, a local fold, fixed landmarks and an answering pulse.
+  The searching preview accepts up to 1280 by 720. The study's geometry
+  is authored, not a measured Laniakea reconstruction or a plasma model.
+
 - Welcoming GitHub landing page, contributing and practical testing guides,
   mathematical-model examples for the Larson and trees, and an Azazel guide.
+
 - Local bootstrap with read-only prerequisite inspection, isolated Game
   configuration, module/source preparation and a Game build.
 
 - New beginner and build guides, including Game's purpose and setup,
   with small runnable picture and soundtrack-film jobs.
+
 - Expanded renderer, light, modes, optimization and music documentation,
   covering retained resources, section reuse, native traversal, field and
   light grids, streaming, compositing, gravity and render admission.
+
+- `doc/optimizations.md` has a section for a film that has to look right,
+  arrive quickly and go on YouTube, "So you want to produce content for
+  YouTube", which calls that path gonzo mode. It is not a flag of its own:
+  a job asks for it with `renderer: gpu`, `vibes: on` and a short, low-ray
+  draft first, and with `vibes: off` nothing in it changes a pixel.
+
+  It
+  lists what gonzo mode uses today (native Metal traversal, `lamp-store`
+  and `sky-looks`, section reuse), says that reservoir resampling for
+  many lights and rasterized first hits are not built, and says to caption
+  such frames as rendered and not as measured. Slayer uploads nothing.
+
+- A visual guide to slayer, `doc/visualguide/README.md`, with its pictures
+  and film, linked from the README. `game run visualguide-pdf` sets it as
+  a Letter-size PDF, `out/visualguide.pdf`, with pandoc and Prince.
+
+- The guide's tools. `catalogue resources [KIND...]` builds each model at
+  every detail it offers, seed 1, and writes a JSON line for each without
+  drawing; a failed row stays an error row and the exit fails.
+
+  `game run scene-complexity -- report JOB.yaml` counts a job's first
+  frame without drawing (`--frames first,last,12` or `--all`).
+
+  `game run workload-preflight -- report` sets a recorded memory peak
+  beside the host's capacity and says so when it has no evidence; it
+  advises, never admits and never changes a job. See
+  `doc/model-resources.md` and `doc/render-optimization-controls.md`.
+
+- Optional metrics and profiles, off unless asked. `SLAYER_METRICS_ADDR`
+  serves Prometheus text on `/metrics`, and `SLAYER_PPROF_ADDR` Go profiles
+  on loopback, from `slayer`, `azazel work --serve` and `grissom`, one
+  address a process; a listener that cannot start is
+  reported and the work goes on.
+
+  Azazel does not pass its addresses to
+  its renderers; a job's `environment` may.
+
+  `SLAYER_OBSERVE_FRAMES: "on"` in
+  a queue request's `environment` writes `SEQUENCE.ATTEMPT.frames.jsonl`
+  beside the queue logs: each frame's index, scene time, kept or drawn
+  and stage times, best effort, in at most 64 MiB, and a receipt with no
+  terminal line is incomplete. The endpoint has no authentication; bind
+  it to loopback. See `doc/observability.md` and `doc/azazel.md`.
+
+- `grissom` has three verbs, `window`, `draw` (`--shot`, `--view`) and
+  `film`, which draws the earth turning to PNG frames (`--into`,
+  `--frames` 372, `--turns` 2, `--tilt` 35). `--weather FILE` (with
+  `--weather-var` and, for `window` and `draw`, `--weather-time`) lays a
+  netCDF cloud cover over the earth; `--earth-only`, `--no-hud` and
+  `--distance` frame it. See `doc/grissom-setup.md`.
+
+- Ferruccio, a separate application for editing a slayer YAML file on
+  macOS, comes into the tree under `ferruccio/`: open, check, edit, save
+  and render a 640 by 360 preview through Slayer's own tracer, with Stop
+  for that render's process group. `game run ferruccio-package` builds
+  `bin/Ferruccio.app`. It installs nothing; see `ferruccio/README.md`.
+
+- The heard. preview can combine checked named-scene cuts, a pinned Gaia
+  display sample and its authored flow study. Missing shots have explicit
+  slates. A synchronized making-of page uses the same movie and frozen beat
+  grid; changed recipes or scores are refused before it is published.
+
+- heard. has an opt-in YAML flow study: explicit 3D paths, beat-driven
+  travelling light, a local fold, fixed landmarks and an answering pulse.
+  The searching preview accepts up to 1280 by 720. The study's geometry
+  is authored, not a measured Laniakea reconstruction or a plasma model.
 
 - Omnipositor can composite ordinary GPU set jobs from a sharp scenery
   plate and the scene's 3D scattered light and RGB transmission. The new
   `scene` verb exposes reduced mist resolution and explicit plate reuse,
   with a full-render comparison path. Moving cameras require fresh plates;
   this is an artistic preview mode. See its `SCENE.md` for limitations.
+
 - Editable audio beat grids and a cue clock for supplied music, with a
   source hash, explicit estimated status and optional aligned drum stem.
+
 - Named scenes play cues on playback time during a hyperlapse, instead of
   accelerating their music clock with scene time. Audio trims retain the
   original song's bar numbering.
+
 - The visual metronome labels estimates and takes Pzm flags through
   `game run metronome -- draw`; its positional invocation is replaced.
+
 - Something answers is a small multi-set music shoot: YAML song cues,
   beat-shaped continuous camera motion, optical searches, a shared lock,
   two dish fields and stylized blazar component views. Its preview command
@@ -1029,6 +1884,18 @@ Nothing here changes a picture. It is what the tests found.
   Its descent stage wears a blanket of Kapton over aluminium, thing's
   own film over thing's own metal, which is why such a blanket is gold.
   It is plain: each stage an eight-sided prism, each leg one strut.
+- `venera-lander` is the lander of Venera 9 to 14, which Vega 1 and 2
+  flew again, standing on its impact ring: 1.97 m tall and 2.15 m
+  across its drag plate. It is a placeholder and has a maker of its own,
+  `manufacture/venera_lander.go`, with its sizes in `venera-lander.yaml`
+  and where each was read: Schroeder, Bayandor and Samareh, NASA
+  Technical Reports Server 20170002533, pinned in `sources.yaml`.
+
+  A flat ring, eighteen struts, a sphere for the payload module, a disc
+  for the plate and a cylinder for the parachute can, all titanium. Where
+  the legs meet the module, the ring's tube and every finish are picked.
+  The pressure vessel, the heat shield and the mass are held and checked,
+  and not drawn. Its eight reference records are not yet captured.
 - Owed, and asked for: the rest of the plan's launchers
   (Redstone, Atlas, Titan II, Saturn IB, the R-7 family, Proton, Delta
   IV, Centaur, Atlas V, Titan IIIE and IVB, Ariane 5, the shuttle),
@@ -1372,9 +2239,7 @@ on record before those, and "landed" below means merged, not accepted.
 
 ### The GPU, more muscular
 
-Stage 0 of doc/gpu-muscle-design.md, stage 1, stage 4 and part of
-stage 2 landed; the design doc records what each stage is and what
-remains open.
+Stage 0, stage 1, stage 4 and part of stage 2 landed.
 
 - Stage 0, nothing paid twice while its inputs are unchanged: one
   compile per distinct kernel source through a shared cache; Grid on
@@ -1872,7 +2737,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   alone is not a completed render.
 - Broader optical/OWL acceptance, general ALMA/SKA recipes, radomes,
   CORONA reconnaissance scenery, gravitational-wave instruments and the flyby
-  remain on the [feature backlog](doc/feature-backlog.md).
+  remain open.
 
 ### Guide-star light, mist and the night sky
 
@@ -1903,8 +2768,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
 - Corrected three Moon-only night inputs that also supplied warm solar
   twilight. Added independent surface and occluded-mist direction references
   plus scene-intent guards. **Light-1 remains open:** surfaces sample sky
-  illumination, while painted mist scatters explicit lamps. See
-  [lighting regressions](doc/lighting-regression.md).
+  illumination, while painted mist scatters explicit lamps.
 
 ### Fire, smoke, sparks and fuel
 
@@ -1991,7 +2855,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   bounds and certified sample prefixes. Interpolation halos and independent
   emission count; exterior queries and exhausted proof budgets are unknown.
   **No renderer uses these skips yet.** A pilot ray's miss proves nothing
-  about its neighbours. See [the packet contract](doc/mist-packet-contract.md).
+  about its neighbours.
 - Partial stream cleanup, native size narrowing and preallocation limits are
   explicit. Host finishing has focused evidence; matched device fields,
   lifetimes, moving views and whole-process memory/timing still need checks.
@@ -2067,7 +2931,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   Donelan/Banner and the complete TMA piecewise-cap attribution remain pending;
   see [the source check](doc/phone-source-checks.md).
 - Imported `titan` and `oceantex` as CPU references, preserving original file
-  hashes in `doc/phone-import-manifest.json`. Titan provides a geographic
+  hashes. Titan provides a geographic
   height-provider boundary, seeded finer detail and measured/generated
   reporting; it is not a resident terrain renderer.
 - Oceantex provides spectra, Fourier wave fields, sea states, optics, colour,
@@ -2078,8 +2942,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   package is connected to Hillside or Metal. Whole-cascade wave filtering,
   unresolved slope variance, wind-height conventions, ray-march exhaustion,
   planetary curvature and source verification need work before runtime use.
-  Passing package tests does not establish physical or GPU acceptance. See
-  [the integration status](doc/phone-ocean-integration.md).
+  Passing package tests does not establish physical or GPU acceptance.
 
 ### Scene schemas, Grissom and development
 
@@ -2166,9 +3029,8 @@ out where they belong; this inventory is not a fresh test or release verdict.
   workloads and quality settings. Neither proves the dense sixteen-sample
   forest's eight-hour target, a whole-world shot or the current tip's gates.
 - Full current-branch tests, coverage, lint/sweep/Shuriken, wider mutations
-  and visual/performance acceptance remain separate work. The focused
-  [verification record](doc/verification-2026-11-09.md) names earlier scopes
-  and limits; this changelog update runs no new unit tests.
+  and visual/performance acceptance remain separate work. This changelog
+  update runs no new unit tests.
 
 ## v0.1.0 - v0.1.1 06 november
 

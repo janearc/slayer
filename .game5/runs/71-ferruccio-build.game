@@ -1,0 +1,3 @@
+# ferruccio: built and stamped by game, gogpu patched first; its checks
+# never open a window.
+ferruccio-build . :: /bin/sh ferruccio/scripts/build-native.sh

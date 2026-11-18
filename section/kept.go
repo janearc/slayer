@@ -161,7 +161,7 @@ func selfLit(made *thing.Material) bool {
 	return made != nil && made.Colour == dark &&
 		made.Texture == nil && made.Rough == nil && made.Radiant == nil &&
 		absent(made.Gloss) && absent(made.Through) && absent(made.Satin) &&
-		made.Crinkle == nil
+		absent(made.SlopeVariance) && made.Crinkle == nil
 }
 
 // keeps is whether a section with this sight shows at the second moment

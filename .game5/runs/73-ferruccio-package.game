@@ -1,0 +1,1 @@
+ferruccio-package . :: /bin/sh ferruccio/scripts/bundle-gogpu.sh

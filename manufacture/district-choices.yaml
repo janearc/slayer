@@ -1,0 +1,163 @@
+# Clustered-city display choices, 2026-11-15; all authored, not measured.
+numbers:
+- name: blocks-across
+  value: 40
+  says: blocks across each clustered-city axis
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: building-count
+  value: 10000
+  says: exact requested building count
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: parent-spacing
+  value: 1000
+  unit: m
+  says: inverse square root of parent intensity
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: cluster-spread
+  value: 420
+  unit: m
+  says: Gaussian axis standard deviation
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: mean-offspring
+  value: 500
+  says: Poisson offspring expectation
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: long-park-width
+  value: 640
+  unit: m
+  says: long park width
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: long-park-depth
+  value: 2304
+  unit: m
+  says: long park depth
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: wide-park-width
+  value: 1536
+  unit: m
+  says: wide park width
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: wide-park-depth
+  value: 512
+  unit: m
+  says: wide park depth
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: highway-width
+  value: 36
+  unit: m
+  says: total width including median gap
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: highway-median
+  value: 4
+  unit: m
+  says: gap between elevated carriageways
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: highway-clearance
+  value: 18
+  unit: m
+  says: reserved ground beside highway decks
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: highway-elevation
+  value: 8
+  unit: m
+  says: deck top above local streets
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: tree-height
+  value: 14
+  unit: m
+  says: mean instanced hull tree height
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: tree-spacing
+  value: 64
+  unit: m
+  says: street row spacing
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: park-tree-spacing
+  value: 32
+  unit: m
+  says: park candidate planting spacing
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: tree-prototypes
+  value: 4
+  says: bounded native plant geometry prototype count
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: window-pitch
+  value: 3.6
+  unit: m
+  says: facade window bay pitch
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: window-width
+  value: 1.2
+  unit: m
+  says: individual facade window width
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: window-height
+  value: 1.1
+  unit: m
+  says: individual facade window height
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: window-offset
+  value: 0.02
+  unit: m
+  says: pane offset outside wall
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: minimum-occupancy-share
+  value: 0.12
+  says: minimum occupied-window share of a building
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: occupancy-range-share
+  value: 0.7
+  says: seeded building occupancy range
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: warm-light-share
+  value: 0.8
+  says: warm share of occupied windows
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: lamp-temperature
+  value: 2700
+  unit: K
+  says: authored area-light colour temperature
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: lamp-power
+  value: 1500
+  unit: W
+  says: downward area fixture radiant power proxy
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: lamp-half-angle
+  value: 65
+  unit: deg
+  says: area fixture full-strength half-angle
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15
+- name: lamp-soft-angle
+  value: 10
+  unit: deg
+  says: area fixture soft cone edge
+  kind: picked
+  by: an agent, clustered city study, 2026-11-15

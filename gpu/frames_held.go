@@ -122,8 +122,9 @@ func (frames *Frames) retained(take shot, mode traversal) (*frame.Frame,
 		return nil, spent, err
 	}
 	fine := [2]int{width, height}
-	encoded, firsts, err := prepared(take.world, nil, take.eye, take.lens,
-		take.at, fine, mode, cellsFor(mode), frames.trees, &spent)
+	encoded, firsts, err := preparedWithInitialMedia(take.world, nil,
+		take.eye, take.lens, take.at, fine, mode, cellsFor(mode),
+		frames.trees, take.initialMedia, &spent)
 	if err != nil {
 		return nil, spent, err
 	}
@@ -152,7 +153,7 @@ func (frames *Frames) retained(take shot, mode traversal) (*frame.Frame,
 func (state *held) traced(take shot, encoded *scene, inputs [][]byte,
 	fine [2]int, spent *timing) (*frame.Frame, error) {
 	spent.device = state.kernel.Device()
-	base := state.kernel.GPUTime() - spent.accelerationGPU
+	base := state.kernel.GPUTime()
 	run := state.grids(inputs, spent)
 	if err := encoded.lit(state.kernel, run, state.key.mode,
 		spent); err != nil {
@@ -190,8 +191,8 @@ func (state *held) traced(take shot, encoded *scene, inputs [][]byte,
 	sending := spent.dispatch
 	spent.banded(&band, time.Since(start), setup)
 	spent.dispatch += sending
-	spent.trace = state.kernel.GPUTime() - base - spent.accelerationGPU -
-		spent.lighting
+	spent.trace = traceDeviceTime(state.kernel.GPUTime(), base,
+		spent.lighting, spent.environment)
 	return band.picture, err
 }
 
@@ -273,6 +274,7 @@ func openHeld(next candidate, plan *metal.Acceleration, root int,
 	if err != nil {
 		return nil, err
 	}
+	kernel.FixBands(bandRows)
 	if plan != nil {
 		start = time.Now()
 		err = kernel.Accelerate(plan, root)

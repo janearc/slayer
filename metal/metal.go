@@ -10,7 +10,8 @@ package metal
 
 /*
 #cgo CFLAGS: -x objective-c -fobjc-arc
-#cgo LDFLAGS: -framework Metal -framework Foundation
+#cgo LDFLAGS: -framework Metal -framework Foundation -framework IOKit
+#cgo LDFLAGS: -framework CoreGraphics
 #include <stdlib.h>
 #include "bridge.h"
 */
@@ -32,6 +33,24 @@ var ErrNoDevice = errors.New("metal: no metal device")
 type Kernel struct {
 	ctx    unsafe.Pointer
 	device string
+	// fixed, when not nought, is the one height every grid band is drawn
+	// at, in place of the caller's
+	fixed int
+	// pretendStops is how many band waits from now report the system
+	// stopping their band for the display, after waiting it out; for the
+	// tests of what follows a stop, which the system cannot be asked for
+	pretendStops int
+}
+
+// FixBands has every grid band drawn rows tall, as far as the band
+// buffers hold, instead of as tall as the caller's rows; nought restores
+// them. A picture does not change with its bands; this is how that is
+// shown, and how a slow band is drawn again at a known size.
+func (k *Kernel) FixBands(rows int) {
+	k.fixed = max(0, rows)
+	if k.fixed == 0 {
+		k.fixed = max(0, environmentBands)
+	}
 }
 
 // Open compiles a kernel from Metal source and readies it to run.
@@ -50,6 +69,7 @@ func Open(source, kernel string) (*Kernel, error) {
 	}
 	k := &Kernel{ctx: ctx, device: C.GoString(C.slayer_metal_name(ctx))}
 	k.SetLimit(defaultLimit)
+	k.FixBands(0)
 	runtime.SetFinalizer(k, (*Kernel).Close)
 	return k, nil
 }

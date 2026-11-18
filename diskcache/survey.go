@@ -46,31 +46,79 @@ type held struct {
 	used time.Time
 }
 
-// listed is every entry in the store's folder, least recently used
-// first, and every .part file, each apart.
+// listed is every entry the store wrote, least recently used first, and
+// every .part file of one, each apart. An entry is a regular file at
+// folder/FAN/NAME, NAME a key's name and FAN its first fanDigits; a part is
+// such a name, a dot and more, ending in .part.
+//
+// Nothing else is listed: a file at the folder's root, a file of another
+// name, a key's name in another fan folder, a file below a fan folder and a
+// symbolic link are strangers, which the store never counts or removes.
 func (store *Store) listed() ([]held, []held, error) {
 	var entries, parts []held
-	err := filepath.WalkDir(store.folder, func(path string,
-		each fs.DirEntry, err error) error {
-		if err != nil || each.IsDir() {
-			return ignoreGone(err)
+	fans, err := os.ReadDir(store.folder)
+	if err != nil {
+		return nil, nil, ignoreGone(err)
+	}
+	for _, fan := range fans {
+		if !fan.IsDir() || len(fan.Name()) != fanDigits {
+			continue
 		}
-		info, err := each.Info()
+		more, extra, err := fanned(store.folder, fan.Name())
 		if err != nil {
-			return ignoreGone(err)
+			return nil, nil, err
 		}
-		found := held{path: path, size: info.Size(), used: info.ModTime()}
-		if strings.HasSuffix(path, partSuffix) {
-			parts = append(parts, found)
-		} else {
-			entries = append(entries, found)
-		}
-		return nil
-	})
+		entries = append(entries, more...)
+		parts = append(parts, extra...)
+	}
 	slices.SortFunc(entries, func(one, other held) int {
 		return one.used.Compare(other.used)
 	})
-	return entries, parts, err
+	return entries, parts, nil
+}
+
+// fanned is the entries and the parts in one fan folder of a store's
+// folder, as listed says.
+func fanned(folder, fan string) ([]held, []held, error) {
+	var entries, parts []held
+	files, err := os.ReadDir(filepath.Join(folder, fan))
+	if err != nil {
+		return nil, nil, ignoreGone(err)
+	}
+	for _, each := range files {
+		name := each.Name()
+		if !each.Type().IsRegular() || !strings.HasPrefix(name, fan) {
+			continue
+		}
+		info, err := each.Info()
+		if err != nil {
+			if ignoreGone(err) != nil {
+				return nil, nil, err
+			}
+			continue
+		}
+		found := held{path: filepath.Join(folder, fan, name),
+			size: info.Size(), used: info.ModTime()}
+		if isName(name) {
+			entries = append(entries, found)
+		} else if isPartName(name) {
+			parts = append(parts, found)
+		}
+	}
+	return entries, parts, nil
+}
+
+// isName is whether a file name is a key's: a sha256 in lower-case hex.
+func isName(name string) bool {
+	return len(name) == digestLength && strings.Trim(name, hexLetters) == ""
+}
+
+// isPartName is whether a file name is a writer's .part of an entry: a
+// key's name, a dot, anything, and the suffix.
+func isPartName(name string) bool {
+	return len(name) >= digestLength+len(partSuffix) &&
+		isName(name[:digestLength]) && name[digestLength] == '.' &&
+		strings.HasSuffix(name, partSuffix)
 }
 
 // ignoreGone is nil for a file another run removed meanwhile.

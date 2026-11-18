@@ -62,7 +62,7 @@ func coloursAre(t *testing.T, what string, got frame.Pixel, want maths.Light,
 // gathers on its straight way out to the edge of the reach the light of
 // the glowing volumes along it, shifted.
 //
-// the shift is the fourth power of a still eye's ratio to a still
+// the shift is the cube of a still eye's ratio to a still
 // emitter's: the root of one less 2 over r, for the emitter at r, over
 // the root of one less 2 over 20, for the eye at 20 M. beyond the reach
 // it sees the plain picture, with no shift.
@@ -73,11 +73,11 @@ func coloursAre(t *testing.T, what string, got frame.Pixel, want maths.Light,
 // the same in a world twice the size, the field and the blocks.
 //
 // worked: the white block gives off 1 - exp(-1) times the gain at 30 M,
-// ((1 - 2/30)/(1 - 2/20))^2, and lets exp(-1) through; the red one gives
+// ((1 - 2/30)/(1 - 2/20))^(3/2), and lets exp(-1) through; the red one gives
 // 1 - exp(-1) of red and lets the same through; the sky is behind both.
 func TestPortedALeavingRayGathersItsLegShifted(t *testing.T) {
 	keep := math.Exp(-1)
-	gain := math.Pow((1-2.0/30)/(1-2.0/20), 2)
+	gain := math.Pow((1-2.0/30)/(1-2.0/20), 1.5)
 	inside := (1 - keep) * gain
 	for _, scale := range []float64{1, 2} {
 		w := holeWorld(thing.Still(maths.Subspace{Scale: scale}))
@@ -95,6 +95,21 @@ func TestPortedALeavingRayGathersItsLegShifted(t *testing.T) {
 			t.Errorf("scale %v: the sky is at %v", scale, got.Depth)
 		}
 	}
+}
+
+// A thin emitting cube at 4 M, observed from 20 M, gives a strong-field
+// redshift with a closed-form Schwarzschild answer. Its half-width is small
+// enough that the midpoint shift approximates the volume integral closely;
+// optical depth is one and the ray then falls into the black hole.
+func TestJetFieldGainStrongStationaryEmitter(t *testing.T) {
+	w := holeWorld(nil)
+	w.AddVolume(thing.Volume{Medium: cube{k: 50, half: .01},
+		Material: glowGiven(maths.Grey(1)), Motion: stayed(maths.V(0, 0, -4), 1)})
+	eye := maths.Ray{At: maths.V(0, 0, -20), Dir: maths.ZAxis}
+	got := lone(w, eye, 0)
+	shift := math.Sqrt((1 - 2.0/4) / (1 - 2.0/20))
+	want := (1 - math.Exp(-1)) * shift * shift * shift
+	coloursAre(t, "strong-field specific intensity", got, maths.Grey(want), 3e-4)
 }
 
 // a ray out of the field to a surface covers its pixel, and the depth it hands

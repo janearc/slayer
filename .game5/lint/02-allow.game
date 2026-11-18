@@ -1,0 +1,4 @@
+allow README.md words paragraph rows
+
+# "concrete" there is the material a home is built of, not the buzzword
+allow manufacture/home.go words

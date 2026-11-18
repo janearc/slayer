@@ -3,9 +3,11 @@ package show
 import "sort"
 
 // Beat is the beat a moment is in: the last beat of the grid at or
-// before it. Before the first beat a moment is in none.
+// before it, and the score's meter, which says its bar. Before the
+// first beat a moment is in none.
 type Beat struct {
 	index    int
+	meter    int
 	struck   float64
 	since    float64
 	measured bool
@@ -21,9 +23,9 @@ func (of *Score) BeatAt(seconds float64) Beat {
 	}
 	index--
 	if index < 0 {
-		return Beat{index: -1}
+		return Beat{index: -1, meter: of.meter}
 	}
-	return Beat{index: index, struck: of.beats[index],
+	return Beat{index: index, meter: of.meter, struck: of.beats[index],
 		since: seconds - of.beats[index], measured: of.measured[index]}
 }
 
@@ -39,7 +41,7 @@ func (of Beat) Bar() int {
 	if !of.On() {
 		return 0
 	}
-	return of.index/beatsPerBar + 1
+	return of.index/of.meter + 1
 }
 
 // InBar is the beat's place in its bar, from one: one is the downbeat.
@@ -48,7 +50,7 @@ func (of Beat) InBar() int {
 	if !of.On() {
 		return 0
 	}
-	return of.index%beatsPerBar + 1
+	return of.index%of.meter + 1
 }
 
 // Downbeat is whether the beat is its bar's first.

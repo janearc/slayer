@@ -1,0 +1,1 @@
+terrain-fixture . :: go test -count=1 ./terrain -run=WriteThePlainFixture

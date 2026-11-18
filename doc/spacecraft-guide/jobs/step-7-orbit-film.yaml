@@ -1,0 +1,19 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/step-6-saturn.yaml}
+renderer: gpu-native
+film: {preset: 720, rays: 2}
+fps: 4
+duration: {value: 2, unit: s}
+camera:
+  unit: m
+  look-at: {x: 0, y: 1, z: 0}
+  moves:
+    - from: {x: 0, y: 9, z: 30}
+      to: {x: -21, y: 9, z: 21}
+      duration: {value: 1, unit: s}
+    - from: {x: -21, y: 9, z: 21}
+      to: {x: -30, y: 9, z: 0}
+      duration: {value: 1, unit: s}
+outputs:
+  frames: ../images/step-7-frames
+  movie: ../images/step-7-orbit.mp4

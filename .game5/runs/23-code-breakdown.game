@@ -1,0 +1,4 @@
+# what slayer is made of: the files git tracks, by kind (go, go tests,
+# metal, objective-c, markdown and the rest), with each kind's files,
+# lines and share of the lines. it reads and changes nothing.
+code-breakdown . :: go run ./tools/breakdown

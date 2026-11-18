@@ -255,6 +255,12 @@ func (plan plan) visible(picture *frame.Frame) error {
 		}
 		if coverage > zeroCoverage {
 			depth := float64(pixel.Depth)
+			// Air can attenuate a sky ray without a surface hit. Such a
+			// pixel is valid but does not count toward specimen coverage.
+			if math.IsInf(depth, 1) && plan.Interior != nil &&
+				plan.Interior.Extinction > 0 {
+				continue
+			}
 			if !(depth > zeroLength) ||
 				math.IsInf(depth, bothInfinitySigns) {
 				return errors.New("invalid covered depth")

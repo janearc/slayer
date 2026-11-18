@@ -9,8 +9,9 @@ import (
 	"github.com/janearc/slayer/mesh"
 )
 
-// MeshMember places one immutable flat mesh inside a single-material group.
-// Repeated members can share a mesh; their geometry is never expanded.
+// MeshMember places a flat mesh inside a single-material group. NewMeshGroup
+// currently accepts only nonnil *mesh.Mesh and *shape.Mesh values. Repeated
+// members may share the same mesh; their geometry is not expanded.
 type MeshMember struct {
 	Mesh  Shape
 	Space maths.Subspace
@@ -31,8 +32,17 @@ type groupNode struct {
 	first, count int
 }
 
-// NewMeshGroup checks transforms and builds the member hierarchy once.
-// Materials belong to the enclosing thing, as they do for an ordinary mesh.
+// NewMeshGroup checks members and builds their hierarchy once. It accepts 1
+// through 1,073,741,823 members (MaxInt32/2), each a nonnil *mesh.Mesh or
+// *shape.Mesh with at least one face. Meshes must be flat: *mesh.Mesh values
+// with corner normals and *shape.Mesh values with Smooth and normals are
+// refused. Other Shape implementations, including nested MeshGroups, are
+// refused.
+//
+// Each member's placement must have finite coordinates, a finite nonnegative
+// uniform scale, and a right-handed orthonormal orientation (within 1e-9).
+// A zero scale means identity scale. Materials belong to the enclosing thing, as
+// they do for an ordinary mesh.
 func NewMeshGroup(members []MeshMember) (*MeshGroup, error) {
 	if !groupMemberCount(len(members)) {
 		return nil, fmt.Errorf("shape: invalid mesh group member count")
@@ -173,6 +183,12 @@ func (group *MeshGroup) split(node, first, last int) {
 
 // Members returns placements without exposing the group's mutable slice.
 func (group *MeshGroup) Members() []MeshMember { return append([]MeshMember(nil), group.members...) }
+
+// MemberCount is the number of placements, without copying their array.
+func (group *MeshGroup) MemberCount() int { return len(group.members) }
+
+// Member reads one placement by value without exposing the group's array.
+func (group *MeshGroup) Member(index int) MeshMember { return group.members[index] }
 
 // Bounds encloses all instances in the group's own coordinates.
 func (group *MeshGroup) Bounds() maths.Box { return group.nodes[0].box }

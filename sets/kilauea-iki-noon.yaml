@@ -1,0 +1,106 @@
+# kīlauea iki at noon, under earth's air: the same window of the crater
+# as kilauea-iki.yaml, its north rim and the west of its floor, the trees
+# and ferns standing where they stand there, none of them alight.
+#
+# what is earth's here: the sky, the sun and the light on the ground.
+# `air: earth` asks for earth's air worked from its sources (airs/earth.yaml,
+# doc/sky-from-the-air.md): the 1976 us standard atmosphere, its ozone and
+# a clear day's haze. package airlight follows the sun's light through the
+# air's shells at 21 wavelengths, from 380 to 780 nm, from the crater's
+# floor, and the sky, the sun's lamp and the exposure come from that.
+# nothing in the light is painted, there is no tint and no fill lamp: the
+# sky lights the ground.
+#
+# what is still not right:
+# - the haze is a typical clear day's, picked, not one measured at this
+#   place: no aerosol from a measured place, hawaii's or any.
+# - the ground's colour is still hillside's basalt, not the crater's
+#   measured reflectance; the air's own ground is a flat 0.15.
+# - there is no haze between the camera and the ground: the far rim is as
+#   clear as the near floor.
+scene:
+  name: kilauea iki at noon, under earth's air
+  light: sun
+  air: earth
+  location:
+    lat: 19.4165
+    lon: -155.2485
+  timeofday: 1200
+  # picked: high in the south-south-east, near where a noon sun stands
+  # over the crater in winter. it is not worked from the date.
+  sun:
+    azimuth: 160
+    altitude: 60
+  terrain:
+    from: usgs-kilauea-2019-dem
+    file: unpacked/kil_2019dem/kil_2019dem.tif
+    west: 263000
+    north: 2149000
+    across: 1600
+    down: 1000
+    step: 4
+  # a test frame: small, one ray; the exposure is the meter's
+  film:
+    width: 640
+    height: 400
+    rays: 1
+  cameras:
+    # on the crater's floor at the lookout moonrise stands on, looking
+    # across the floor to the north rim, where the rim tree stands
+    floor:
+      title: "from the crater's floor, across it to the rim"
+      orientation:
+        point_to: the rim tree
+        alpha: 8
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 2
+    # the same place, looking the same way, 25 degrees up: the sky
+    up:
+      title: "from the crater's floor, 25 degrees up, the sky over the rim"
+      orientation:
+        point_to: the rim tree
+        alpha: 25
+      location:
+        loc_relative:
+          object: the lookout
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 2
+  set:
+    things:
+      # moonrise's lookout, a stone on the crater's floor
+      the lookout:
+        kind: cobble
+        seed: 5
+        east: 263450
+        north: 2148300
+      the rim tree:
+        kind: spruce
+        seed: 3
+        east: 263800
+        north: 2148620
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+    stands:
+      ferns on the wall:
+        kind: fern
+        count: 600
+        seed: 7
+        above: 1110
+        stands_in_for: "ʻamaʻu, with a temperate fern's numbers"
+      trees on the rim:
+        kind: spruce
+        count: 160
+        seed: 11
+        above: 1150
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
+      trees on the wall:
+        kind: spruce
+        count: 90
+        seed: 13
+        above: 1110
+        below: 1150
+        stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"

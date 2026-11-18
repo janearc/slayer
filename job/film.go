@@ -59,6 +59,20 @@ func (made Film) Exposure() (float64, bool) {
 	return saidNumber(made.wire.Exposure)
 }
 
+// The film's modes, as a job writes them.
+const (
+	// modeLight is the picture of the light, what a film that says no
+	// mode draws
+	modeLight = "light"
+	// modeWire is the picture of the edges of every mesh face the first
+	// rays meet, in place of their light
+	modeWire = "wire"
+)
+
+// Wire is whether the film asks for the wire picture: the edges of the
+// mesh faces each pixel's first rays meet, and not their light.
+func (made Film) Wire() bool { return made.wire.Mode == modeWire }
+
 // Aperture is how wide the lens is open, across, in the scene's own
 // unit, and whether the job said it. A lens that says none is a pinhole:
 // everything is sharp.

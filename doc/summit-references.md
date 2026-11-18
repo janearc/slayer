@@ -1,6 +1,5 @@
 # Summit references beside the recipes
 
-The source shelf now has pinned local copies of the references below.
 Apertures belong to their optical roles: a clear aperture, mirror blank
 and enclosure diameter are different quantities. The recipes must keep
 those roles when they start using these numbers.
@@ -57,21 +56,6 @@ The older inventory pages are historical evidence. Current operations
 and small-instrument membership still need their own review; the available
 building and instrument families do not imply continuous operation.
 
-## Fetch record
-
-The normal Game source command downloaded twelve initial references.
-UKIRT, the IfA Maunakea inventory and the IfA Maui history failed Go's
-certificate-chain check. System curl with verified TLS fetched their
-actual bytes, which were imported with ordinary source sidecars and pins.
-
-Both Go and curl timed out connecting to the IRTF technical host. A public
-Space Command article returned HTTP 403 through both tools. Neither is
-represented as a successful fetch; use the pinned IfA inventory for IRTF
-and obtain another primary GEODSS reference before adding measured data.
-
-All imported files keep their actual URL, hash, size and fetch time.
-No TLS verification was disabled. Source bytes stay on the private shelf.
-
 [ukirt-end]:
 https://www.hawaii.edu/news/2026/07/02/uh-continues-ukirt-decommissioning/
 [removed]:
@@ -91,11 +75,3 @@ aperture and a smaller auxiliary instrument.
 The factory's GEODSS class value is consequently labelled nominal, not
 a claim that every installed or upgraded optical surface is exactly
 1.000 m. Keep the historical and current inventory contexts separate.
-
-These two PDFs and the other institution pages now support 21 quantities
-in the research ledger. Each has a role, source key and exact excerpt;
-the PDF entries retain their physical file page numbers.
-
-The government PDF returned HTTP 403 to the Go fetcher but downloaded
-through system curl with verified TLS. Its real bytes, hash and fetch
-sidecar were imported, then kept by the normal Game fetch command.

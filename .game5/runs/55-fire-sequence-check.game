@@ -1,0 +1,1 @@
+fire-sequence-check . :: ./bin/hillside sequence --plan doc/fire-fuel-sequence.yaml --dry-run

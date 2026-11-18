@@ -1,0 +1,328 @@
+# Authored architectures and physical foliage, not measured growth data.
+# Algorithm references and qualitative botanical sources are in doc/vegetation-families.md.
+---
+profiles:
+- status: picked
+  by: vegetation scenery study
+  date: '2026-11-08'
+  form: twig
+  scale:
+    minimum: 9
+    maximum: 16
+  slenderness: 0.026
+  trunk: 0.35
+  reach: 0.25
+  contraction: 0.66
+  radius-power: 1.6
+  taper: 0.58
+  fork: 48
+  twist: 150
+  upward: 0.12
+  leader-gain: 1.1
+  stem-spread: 0
+  orders: 4
+  children: 3
+  stems: 1
+  leader: false
+  deciduous: true
+  bark:
+    r: 0.27
+    g: 0.2
+    b: 0.13
+  green:
+    r: 0.09
+    g: 0.24
+    b: 0.06
+  autumn:
+    r: 0.52
+    g: 0.25
+    b: 0.035
+  dry:
+    r: 0.25
+    g: 0.16
+    b: 0.08
+  leaf-shape: lobed
+  leaf-length: 0.1
+  leaf-width: 0.065
+  leaf-thickness: 0.0012
+  lobes: 4
+  lobe-depth: 0.34
+  cell-length: 0.75
+  cell-spacing: 0.65
+  twig-count: 10
+  twig-length: 0.28
+  twig-radius: 0.0035
+  leaf-pairs: 12
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: valley-oak
+- status: picked
+  by: vegetation scenery study
+  date: '2026-11-08'
+  form: twig
+  scale:
+    minimum: 12
+    maximum: 20
+  slenderness: 0.018
+  trunk: 0.42
+  reach: 0.18
+  contraction: 0.7
+  radius-power: 1.6
+  taper: 0.58
+  fork: 35
+  twist: 150
+  upward: 0.25
+  leader-gain: 1.3
+  stem-spread: 0
+  orders: 4
+  children: 3
+  stems: 1
+  leader: true
+  deciduous: true
+  bark:
+    r: 0.34
+    g: 0.32
+    b: 0.28
+  green:
+    r: 0.09
+    g: 0.24
+    b: 0.06
+  autumn:
+    r: 0.52
+    g: 0.25
+    b: 0.035
+  dry:
+    r: 0.25
+    g: 0.16
+    b: 0.08
+  leaf-shape: oval
+  leaf-length: 0.11
+  leaf-width: 0.075
+  leaf-thickness: 0.0012
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.75
+  cell-spacing: 0.65
+  twig-count: 10
+  twig-length: 0.28
+  twig-radius: 0.0035
+  leaf-pairs: 12
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: alder
+- status: picked
+  by: vegetation scenery study
+  date: '2026-11-08'
+  form: twig
+  scale:
+    minimum: 14
+    maximum: 24
+  slenderness: 0.016
+  trunk: 0.4
+  reach: 0.17
+  contraction: 0.72
+  radius-power: 1.6
+  taper: 0.58
+  fork: 28
+  twist: 150
+  upward: 0.3
+  leader-gain: 1.32
+  stem-spread: 0
+  orders: 4
+  children: 3
+  stems: 1
+  leader: true
+  deciduous: true
+  bark:
+    r: 0.42
+    g: 0.4
+    b: 0.34
+  green:
+    r: 0.09
+    g: 0.24
+    b: 0.06
+  autumn:
+    r: 0.52
+    g: 0.25
+    b: 0.035
+  dry:
+    r: 0.25
+    g: 0.16
+    b: 0.08
+  leaf-shape: deltoid
+  leaf-length: 0.1
+  leaf-width: 0.09
+  leaf-thickness: 0.0012
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.75
+  cell-spacing: 0.65
+  twig-count: 10
+  twig-length: 0.28
+  twig-radius: 0.0035
+  leaf-pairs: 12
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: poplar
+- status: picked
+  by: vegetation scenery study
+  date: '2026-11-08'
+  form: twig
+  scale:
+    minimum: 1.5
+    maximum: 3.2
+  slenderness: 0.035
+  trunk: 0.28
+  reach: 0.3
+  contraction: 0.66
+  radius-power: 1.6
+  taper: 0.58
+  fork: 56
+  twist: 150
+  upward: 0.18
+  leader-gain: 1.1
+  stem-spread: 0.1
+  orders: 4
+  children: 2
+  stems: 5
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.38
+    g: 0.075
+    b: 0.035
+  green:
+    r: 0.13
+    g: 0.24
+    b: 0.1
+  autumn:
+    r: 0.52
+    g: 0.25
+    b: 0.035
+  dry:
+    r: 0.25
+    g: 0.16
+    b: 0.08
+  leaf-shape: oval
+  leaf-length: 0.05
+  leaf-width: 0.03
+  leaf-thickness: 0.0015
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.24
+  cell-spacing: 0.26
+  twig-count: 6
+  twig-length: 0.1
+  twig-radius: 0.0018
+  leaf-pairs: 8
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: manzanita
+- status: picked
+  by: vegetation scenery study
+  date: '2026-11-08'
+  form: twig
+  scale:
+    minimum: 0.5
+    maximum: 1.4
+  slenderness: 0.018
+  trunk: 0.3
+  reach: 0.32
+  contraction: 0.66
+  radius-power: 1.6
+  taper: 0.58
+  fork: 55
+  twist: 150
+  upward: 0.12
+  leader-gain: 1.1
+  stem-spread: 0.12
+  orders: 3
+  children: 2
+  stems: 7
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.27
+    g: 0.2
+    b: 0.13
+  green:
+    r: 0.2
+    g: 0.27
+    b: 0.12
+  autumn:
+    r: 0.52
+    g: 0.25
+    b: 0.035
+  dry:
+    r: 0.25
+    g: 0.16
+    b: 0.08
+  leaf-shape: lance
+  leaf-length: 0.045
+  leaf-width: 0.016
+  leaf-thickness: 0.0012
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.2
+  cell-spacing: 0.24
+  twig-count: 6
+  twig-length: 0.08
+  twig-radius: 0.0015
+  leaf-pairs: 6
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: chaparral-brush
+- status: picked
+  by: vegetation scenery study
+  date: '2026-11-08'
+  form: rosette
+  scale:
+    minimum: 3
+    maximum: 8
+  slenderness: 0.029
+  trunk: 0.42
+  reach: 0.25
+  contraction: 0.62
+  radius-power: 1.6
+  taper: 0.58
+  fork: 50
+  twist: 150
+  upward: 0.25
+  leader-gain: 1.1
+  stem-spread: 0
+  orders: 3
+  children: 2
+  stems: 1
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.32
+    g: 0.26
+    b: 0.17
+  green:
+    r: 0.2
+    g: 0.29
+    b: 0.08
+  autumn:
+    r: 0.52
+    g: 0.25
+    b: 0.035
+  dry:
+    r: 0.25
+    g: 0.16
+    b: 0.08
+  leaf-shape: lance
+  leaf-length: 0.28
+  leaf-width: 0.035
+  leaf-thickness: 0.003
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.12
+  cell-spacing: 0.4
+  twig-count: 0
+  twig-length: 0
+  twig-radius: 0.012
+  leaf-pairs: 0
+  rosette-leaves: 72
+  rosette-angle: 68
+  kind: joshua-tree

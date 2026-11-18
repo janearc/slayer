@@ -97,6 +97,24 @@ func TestABoxIsWhereItSays(t *testing.T) {
 	}
 }
 
+// A set-authored clear dielectric reaches the staged renderer material with
+// every interface field intact.
+func TestAClearSetMaterialReachesTheStagedThing(t *testing.T) {
+	world := built(t,
+		"colour: {srgb_linear: [0.05, 0.06, 0.04]}",
+		"colour: {srgb_linear: [0.05, 0.06, 0.04]}\n"+
+			"        clear: {through: 0.92, index: 0.8, gloss: 0.75, rank: 3}")
+	if len(world.Things) == 0 || world.Things[0].Material == nil {
+		t.Fatal("staged yard has no lawn material")
+	}
+	material := world.Things[0].Material
+	if material.Name != "grass" || material.Through != 0.92 ||
+		material.Index != 0.8 || material.Gloss != 0.75 ||
+		material.Rank != 3 || material.Colour != maths.RGB(0.05, 0.06, 0.04) {
+		t.Errorf("staged clear material = %+v", material)
+	}
+}
+
 // a glow is a black body's light at the luminance asked, warm for a
 // bulb's heat; a material may glow and have a colour both.
 func TestAGlowIsABlackBodysLight(t *testing.T) {

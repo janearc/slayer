@@ -1,0 +1,2 @@
+# the catalogue of every kind slayer makes, its book and its numbers.
+catalogue-list . :: go run ./cmd/catalogue list

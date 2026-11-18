@@ -3,10 +3,9 @@
 The [browsable specimen book](browsable-catalogue.md) adds local search,
 detail views, source notes and actual GPU render records to this written list.
 
-The catalogue menu holds 106 kinds. The specimen book draws one picture
+The catalogue menu holds 125 kinds. The specimen book draws one picture
 of each, and `game run catalogue-list` lists them. Each name makes a
-specimen from a seed. Some entries await review; the notes on each say
-which.
+specimen from a seed.
 
 The dimensions below describe the current rows, not caller-set options. Except
 where noted, these are authored choices, not measured botanical or engineering
@@ -41,8 +40,7 @@ materials. The draft named-factory wrapper replaces foliage sleeves with
 shared recursive shoots and physical needles around each twig.
 
 The seed varies dimensions and branch placement. The original whorled
-row remains as a legacy reference. New geometry and appearance checks are
-deferred. [Draft foliage and its sources](spruce-foliage.md).
+row remains as a legacy reference. [Draft foliage and its sources](spruce-foliage.md).
 
 ### norway
 
@@ -184,9 +182,9 @@ from `Lights`. [Construction row](../manufacture/home.go).
 
 - dobsonian-36: open 36-inch Newtonian, timber rocker, mirror box,
   paired trusses, altitude bearings and side focuser.
-- apo-refractor-5: her 5-inch refractor with dew shield, rings, diagonal,
+- apo-refractor-5: a 5-inch refractor with dew shield, rings, diagonal,
   finder and counterweighted tripod.
-- sct-24: her 24-inch short-tube instrument, corrector proxy, secondary,
+- sct-24: a 24-inch short-tube instrument, corrector proxy, secondary,
   fork, pier and rear focuser.
 
 All four details preserve the requested apertures and physical envelope.
@@ -206,15 +204,14 @@ a functioning optical prescription.
   instrument domes. Its east refractor has a nominal 12-inch objective;
   [building dimensions and materials](civic-observatory.md) are authored.
 - `elt`: a five-mirror assembly around a 798-panel primary with a central
-  opening. Its [merge checks](large-observatory.md) are still in progress;
-  the exposed CPU/GPU image comparison is not yet accepted.
+  opening. See [large observatory](large-observatory.md).
 
 The new named templates have fixed pointing and dimensions, with four surface
 details. Their ordinary closed meshes use the existing CPU and GPU routes.
 
 Source dimensions and authored support proportions remain separate; the Keck
 enclosure dimensions are authored. [Family design](observatory-family-design.md)
-records the sources and work still required for the remaining instruments.
+records the sources for the remaining instruments.
 
 ## Space observatories
 
@@ -256,6 +253,79 @@ number of it is picked by eye, in metres; none is engineering.
   1.8 m across, without its escape tower.
 - `soyuz-ms`: Soyuz MS on its service module, 7.48 m tall, without its
   solar arrays. Every size of it is unverified.
+
+## Planetary landers
+
+- `venera-lander`: the lander of Venera 9 to 14, standing on its impact
+  ring, 1.97 m tall and 2.15 m across its drag plate. A placeholder of
+  plain shapes: a ring, eighteen legs, a round payload module, a plate
+  and a parachute can, all titanium.
+
+## Engines
+
+- `j58`: the Pratt & Whitney J58, the A-12's engine, lying on its axis,
+  4.572 m long and 1.27 m across its largest case. Its counts, nine
+  compressor stages, two turbine stages, eight cans and six bypass
+  tubes, are NASA's; its length and diameter are a 1966 register's,
+  read through a secondary page.
+
+  Its stations, its radii but the
+  largest and its looks are picked, in
+  [its sizes file](../manufacture/j58.yaml). It is its own kind so that
+  a nacelle or a stand can place it by its mount.
+- `j58-test-stand`: a J58 on a test stand, a cradle on flexures over a
+  pad, holding the engine by its four mount pins, a load cell between
+  the cradle and a thrust post, and a bellmouth on the face. No source
+  for a stand was found; every number of it is picked, in
+  [its sizes file](../manufacture/j58-stand.yaml).
+
+## Vessels
+
+- `alfa`: Project 705 "Lira", NATO's Alfa class, the titanium attack
+  submarine, on its keel, 81.4 m long and 9.5 m in beam: its hull, its
+  sail with the rescue sphere inside it, two bow planes, a cruciform
+  stern with rudders, stern planes and a thruster pod on each
+  stabiliser's tip, one sourced five-blade non-skewback main screw, and
+  two sourced two-blade auxiliary screws on motor pods at the stern-plane tips.
+
+  Its
+  length, beam, draught and displacements are russianships.info's, and
+  the rescue sphere and the sail's rubber coating are the CIA's history
+  of the boat; both are on the shelf.
+
+  Its form, its parts' sizes, the
+  propeller dimensions and its looks are chosen from photographs, in
+  [its sizes file](../manufacture/alfa.yaml), where every number says
+  whether it was measured or chosen. `alfa` keeps its bare-titanium
+  default; `alfa-hero` selects a black coat without changing it.
+
+  At demo
+  complexity the model adds approximate photo-derived mast/antenna forms,
+  sail covers and a starboard condenser scoop.
+
+  Feature identities and
+  propeller blade counts come from *American Submariner*, Third Quarter
+  2023, pp. 22–23; dimensions and placements are not measured.
+
+  See
+  [the detail-model notes](alfa-model.md).
+
+For the water, the boat's own space is in metres with y up, the keel at
+y nought, the centreline on x nought, the bow toward minus z and
+starboard toward plus x.
+
+Its hull is one closed solid, wound
+counterclockwise as seen from outside; the sail, planes and fins are
+closed solids of their own, sunk into it.
+
+`manufacture.Floating("alfa")`
+gives the surfaced waterline above the keel (6.24 m, the default of the
+two cited draughts; Wikipedia's 7.6 m is the other, by name), the name
+of the look the hull wears, `hull`, and the look `wet hull`, which no
+face wears: the water decides where the hull is wet.
+
+The finish is a
+choice in the sizes file: bare titanium by default, or painted dark.
 
 ## Launchers
 
@@ -314,31 +384,12 @@ loose shoots and observatory recipes use the [YAML scene](observatory-ecosystem.
 Its `-variety` option reuses a limited number of specimens at many places.
 That saves repeated geometry; it does not create additional kinds.
 
-## GPU support belongs to the kind
+## GPU support
 
-A new kind must work through the GPU kernel before it is called
-supported. Its catalogue entry needs to say how it reaches the kernel
-and what has actually been checked. A CPU-only picture is insufficient.
-
-There are two existing routes. Named kinds expose meshes or shared mesh
-groups through `Things`; the GPU pools and instances their geometry. Separate
-kernel conifer representations reconstruct geometry from compact tree
-parameters. Adding a named kind does not add that second route for it.
-
-The existing hillside CPU/GPU comparison exercises boulder, fern,
-spruce, campfire, and spotlight together. It is not a per-kind GPU
-certification of the whole catalogue. The kernel also has dedicated tests
-for its older procedural trees, cones, transformed meshes, and lights.
-
-For additions, check intersections and normals, placement and scale,
-materials and shadows, and attached light where present. A procedural
-kernel representation also needs seed and parameter agreement with the
-CPU construction, plus bounded traversal and storage.
-
-Choose geometry whose CPU and kernel representations can be maintained
-together. A new primitive or growth rule may require encoding, shared
-GPU structure declarations, intersection code, and validation. Those
-changes are part of delivering the kind.
+Named kinds expose meshes or shared mesh groups through `Things`; the GPU
+pools and instances their geometry. Separate kernel conifer representations
+reconstruct geometry from compact tree parameters. A named kind does not use
+that second route.
 
 ## Where the catalogue is thin
 
@@ -354,13 +405,8 @@ There is no named furniture or general optical component family.
 The spotlight and maser demonstrate
 geometry carrying light; they do not provide a general instrument kit.
 
-New species that share an architecture can mostly add rows. New
-families may need construction rules shared by several kinds. Keep
-those rules reusable, with dimensions and provenance beside each row.
-
-The quality ladder and further tree architectures in
-[families.md](families.md) remain partly planned. The older export
-`ConiferProper` is a reference constructor, not another named kind.
+The older export `ConiferProper` is a reference constructor, not another
+named kind.
 [manufactory.md](manufactory.md) records the original design and history.
 
 [Redwood groves and their atmosphere](redwood-atmosphere.md) records
@@ -375,9 +421,6 @@ complexity, terrain placement, and a shared grove atmosphere.
 recipe, firebrands and a prescribed front over placed fuel. These use
 bounded GPU fields and shared instances; they are scene recipes, rather
 than additional names in KindNamed.
-
-[The run report](fire-night-result.md)
-records the completed 4K animation and the checks it actually passed.
 
 ## Summit yard
 

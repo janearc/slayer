@@ -2,6 +2,7 @@ package hillside
 
 import (
 	"github.com/janearc/slayer/emit"
+	"github.com/janearc/slayer/hillside/placement"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
@@ -84,8 +85,7 @@ func manufacturedRecipe(given asked, name string, pick int, detail string,
 func manufacturedKind(given asked, row manufacture.Kind, pick int,
 	detail string,
 ) (kept, error) {
-	one, err := manufacture.MakeWithComplexity(row,
-		manufacture.Sow(stir(given.seed, pick)), detail)
+	one, err := placement.Make(placement.Construction{Kind: row, SceneSeed: given.seed, ObjectSeed: pick, Complexity: detail})
 	if err != nil {
 		return kept{}, err
 	}

@@ -1,0 +1,13 @@
+/*
+ * print-fonts.css: names the one font Prince cannot find by family.
+ *
+ * Prince does not find Iowan Old Style by name, so its file is named here.
+ * pandoc cannot embed a file: address, so Prince reads this sheet itself
+ * (see the visualguide-pdf run in .game). it reads the first face of the
+ * collection, the Roman. bold and italic are made from it, which the guide
+ * uses only a little.
+ */
+@font-face {
+  font-family: "Iowan Old Style";
+  src: url("file:///System/Library/Fonts/Supplemental/Iowan%20Old%20Style.ttc");
+}

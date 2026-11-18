@@ -1,0 +1,9 @@
+# SLAYER_SHELF names the citation shelf, the papers numbers are verified
+# against. it defaults to shelf/ in the tree, so it is not declared with
+# needs; a builder who keeps a shelf elsewhere sets it in their game
+# config with set, and it then wins.
+
+# before slayer builds or is checked, every measured number in its
+# research data is held to its source: pinned, on the citation shelf
+# (shelf/ in the tree unless SLAYER_SHELF names another), on its page.
+pre-build . :: go run ./cmd/sources verify

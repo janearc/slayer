@@ -37,7 +37,7 @@ func (held *shelf) close() {
 // binary the cache is off: every smoke then renders, and nothing is kept.
 func openShelf(fresh bool) *shelf {
 	held := &shelf{fresh: fresh}
-	root, err := cache.Root()
+	root, err := cache.Root(os.LookupEnv)
 	if err != nil {
 		held.off = err.Error()
 		return held

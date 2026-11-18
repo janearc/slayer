@@ -155,6 +155,7 @@ func TestCommandErrors(t *testing.T) {
 		{"mask", -2, "", map[string]string{"WATERMASK": missing}, 1, "seamatte: open " + missing + ": no such file or directory\n"},
 		{"front", -2, "", map[string]string{"FRONT": missing}, 1, "seamatte: open " + missing + ": no such file or directory\n"},
 		{"output", 2, dir, nil, 1, "seamatte: open " + dir + ": is a directory\n"},
+		{"configuration", 3, "NaN", nil, 1, "seamatte: nonfinite matte configuration\n"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			args := append([]string(nil), base...)

@@ -53,11 +53,3 @@ picked scenery values; the source does not define our Gaussian radius.
 
 [eso]:
 https://www.eso.org/public/teles-instr/paranal-observatory/vlt/vlt-instr/4lgsf/
-
-CPU density checks hold the deck profile at equal heights over different
-terrain elevations. Scene checks hold layer order, optics, vertical bounds
-and retention. An actual Metal comparison checks a beam scattered through
-the deck against the CPU reference.
-
-A moving film is still needed to assess noise advection, beam stability
-and foliage changes together.
