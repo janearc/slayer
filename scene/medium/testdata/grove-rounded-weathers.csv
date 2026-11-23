@@ -1,0 +1,4 @@
+name,depth,extinction,coverage
+rounded,8,0.01,1
+thin,1e-300,0.01,0.5
+unit,1,0.01,1

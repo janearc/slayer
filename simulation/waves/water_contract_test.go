@@ -54,7 +54,8 @@ func TestWaterRemovesOnlyRoundoffRateMean(t *testing.T) {
 	for y := range config.Shape.Height {
 		for x := range config.Shape.Width {
 			index := y*config.Shape.Width + x
-			initial.Rate[index] = complex(math.Cos(2*math.Pi*float64(x)/float64(config.Shape.Width))+5e-15, 0)
+			across, width := float64(x), float64(config.Shape.Width)
+			initial.Rate[index] = complex(math.Cos(2*math.Pi*across/width)+5e-15, 0)
 		}
 	}
 	before := slices.Clone(initial.Rate)

@@ -1,0 +1,1 @@
+soho-format . :: gofmt -w manufacture/soho.go manufacture/soho_test.go manufacture/kinds.go

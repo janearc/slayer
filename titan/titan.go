@@ -58,9 +58,9 @@ import (
 
 // The lengths and counts titan is built with.
 const (
-	// Inchworm is the shortest edge titan splits to, in metres: a
+	// inchworm is the shortest edge titan splits to, in metres: a
 	// centimetre. It's picked: the ground is asked for no finer.
-	Inchworm = 0.01
+	inchworm = 0.01
 	// around is how many places titan reads round a corner to learn how
 	// rough the map is there. It's picked: one each sixth of a turn.
 	around = 6
@@ -106,14 +106,11 @@ const (
 	halfTurn = 180
 )
 
-// errRefused is what Refused gives.
-var errRefused = errors.New("refused")
-
-// Refused is wrapped by each refusal here. A ground with no map or no
+// errRefused is wrapped by each refusal here. A ground with no map or no
 // size is refused. So is a place the map has no height for, which means
 // the place's own neighbourhood: a corner of the last measured triangle
 // round it, or an end of an edge ground is made on there.
-func Refused() error { return errRefused }
+var errRefused = errors.New("refused")
 
 // Provider is a map of a world's heights. Titan reads the world from it
 // and never asks it for more than it has.
@@ -130,22 +127,22 @@ type Provider interface {
 	Source() string
 }
 
-// Kind is where a height came from.
-type Kind int
+// kind is where a height came from.
+type kind int
 
 // The kinds.
 const (
-	// Measured heights are the map's: read at its own samples, and
+	// measured heights are the map's: read at its own samples, and
 	// joined flat across the triangles between them.
-	Measured Kind = iota
+	measured kind = iota
 	// Generated heights hold ground the map never saw. Titan made it,
 	// by rule, below the map's finest.
 	Generated
 )
 
 // String is the kind in a word.
-func (kind Kind) String() string {
-	if kind == Measured {
+func (kind kind) String() string {
+	if kind == measured {
 		return "measured"
 	}
 	return "generated"
@@ -155,7 +152,7 @@ func (kind Kind) String() string {
 type Sample struct {
 	height, made, edge float64
 	depth              int
-	kind               Kind
+	kind               kind
 	source             string
 }
 
@@ -167,17 +164,7 @@ func (sample Sample) Height() float64 { return sample.height }
 func (sample Sample) Made() float64 { return sample.made }
 
 // Kind is whether the height is the map's or holds made ground.
-func (sample Sample) Kind() Kind { return sample.kind }
-
-// Depth is how many times the mesh was split to reach the triangle the
-// place is in.
-func (sample Sample) Depth() int { return sample.depth }
-
-// Edge is about how long that triangle's edges are, in metres.
-func (sample Sample) Edge() float64 { return sample.edge }
-
-// Source is what the map under the sample says it is.
-func (sample Sample) Source() string { return sample.source }
+func (sample Sample) Kind() kind { return sample.kind }
 
 // Ground is a world's surface: a map, the size of the world it maps, and
 // a seed for what the map leaves out.
@@ -235,40 +222,33 @@ const reliefHurst = 0.8
 // with reliefHurst and with the depths from longest down to an inchworm
 // sharing it. It is none at edges longer than longest, or with no relief.
 func (ground *Ground) floor(depth int) float64 {
-	long := ground.Edge(depth - 1)
+	long := ground.edge(depth - 1)
 	if !(ground.least > none) || long > ground.longest {
 		return none
 	}
-	depths := math.Max(math.Log2(ground.longest/Inchworm), 1)
+	depths := math.Max(math.Log2(ground.longest/inchworm), 1)
 	strays := 1 - math.Exp2(split*reliefHurst-split)
 	return ground.least * long * math.Sqrt(strays) /
 		(math.Exp2(reliefHurst) * math.Sqrt(depths))
 }
 
-// Edge is about how long a triangle's edge is at a depth, in metres.
-func (ground *Ground) Edge(depth int) float64 {
+// edge is about how long a triangle's edge is at a depth, in metres.
+func (ground *Ground) edge(depth int) float64 {
 	return ground.face / math.Exp2(float64(depth))
 }
 
-// Depth is the first depth whose triangles have edges no longer than a
-// length in metres, and never one finer than Inchworm.
-func (ground *Ground) Depth(metres float64) int {
-	metres = math.Max(metres, Inchworm)
+// depth is the first depth whose triangles have edges no longer than a
+// length in metres, and never one finer than inchworm.
+func (ground *Ground) depth(metres float64) int {
+	metres = math.Max(metres, inchworm)
 	depth := int(math.Ceil(math.Log2(ground.face / metres)))
 	return max(depth, none)
-}
-
-// Kept is how many of the map's corners the ground is holding.
-func (ground *Ground) Kept() int {
-	ground.guard.Lock()
-	defer ground.guard.Unlock()
-	return len(ground.kept)
 }
 
 // At is the ground at a place, in as much detail as asked: detail is the
 // length in metres of the smallest thing the asker wants to see, a
 // pixel's footprint say. Detail the map has is measured. Finer than that
-// is generated, down to Inchworm and no further.
+// is generated, down to inchworm and no further.
 //
 // It refuses a place the map has no height for: a corner the map does
 // not know is carried down the walk and refuses nothing until its height
@@ -279,7 +259,7 @@ func (ground *Ground) At(at *mesh.Point, detail float64) (*Sample, error) {
 	if at == nil {
 		return nil, fmt.Errorf("%w: the ground at no place", errRefused)
 	}
-	deep := ground.Depth(detail)
+	deep := ground.depth(detail)
 	toward := vectorOf(*at)
 	cell, err := mesh.Locate(at, none)
 	if err != nil {
@@ -383,7 +363,7 @@ func (ground *Ground) step(shape [corners]corner, toward vector,
 func (ground *Ground) middle(from, to corner, depth int) (corner, error) {
 	at := from.at.plus(to.at).unit()
 	name := mesh.EdgeName(from.name, to.name)
-	if ground.Edge(depth) >= ground.from.Finest(at.point()) {
+	if ground.edge(depth) >= ground.from.Finest(at.point()) {
 		return ground.read(at, name)
 	}
 	// a corner is made from its ends' heights, so ends the map has
@@ -432,11 +412,11 @@ func (ground *Ground) spread(near corner, depth int) float64 {
 	if !(near.spacing > none) {
 		return none
 	}
-	long := ground.Edge(depth - 1) // the edge whose middle is made
+	long := ground.edge(depth - 1) // the edge whose middle is made
 	over := near.differs * long / near.spacing
 	// every depth from the map's to an inchworm's adds its own slope,
 	// so each is given its share of the map's
-	depths := math.Max(math.Log2(near.spacing/Inchworm), 1)
+	depths := math.Max(math.Log2(near.spacing/inchworm), 1)
 	// a Hurst exponent carried between corners can land a hair past
 	// one, where there is nothing to take a root of
 	strays := math.Max(1-math.Exp2(split*near.hurst-split), none)
@@ -471,7 +451,7 @@ func (ground *Ground) sample(shape [corners]corner, toward vector,
 		weights[i] = math.Max(toward.dot(next.cross(last)), none)
 		whole += weights[i]
 	}
-	found := &Sample{depth: depth, edge: ground.Edge(depth),
+	found := &Sample{depth: depth, edge: ground.edge(depth),
 		source: ground.from.Source()}
 	var here corner
 	for i, each := range shape {
@@ -515,10 +495,10 @@ func (ground *Ground) noise(near corner, toward vector, deep int) float64 {
 	}
 	var over float64
 	for depth := 1; depth <= deep; depth++ {
-		if ground.Edge(depth) >= near.spacing {
+		if ground.edge(depth) >= near.spacing {
 			continue
 		}
-		waves := ground.radius / (grain * ground.Edge(depth))
+		waves := ground.radius / (grain * ground.edge(depth))
 		over += hint * ground.spread(near, depth) *
 			smoothed(ground.seed+uint64(depth), toward.scaled(waves))
 	}

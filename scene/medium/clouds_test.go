@@ -7,38 +7,67 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
+// cloudsLayer is the layer of cloud the cover test samples, with the cover
+// and the seed the test chose for it.
+func cloudsLayer(t *testing.T) Clouds {
+	t.Helper()
+	return Clouds{
+		Radius: picked(t, "clouds-radius"),
+		Low:    picked(t, "clouds-low"),
+		High:   picked(t, "clouds-high"),
+		Cover:  picked(t, "clouds-cover"),
+		Thick:  picked(t, "clouds-thick"),
+		Seed:   uint64(pickedCount(t, "clouds-seed")),
+	}
+}
+
 // Clouds sit in their layer and nowhere else, a cover of a half clouds
 // about two thirds of the sphere, as Clouds says, and they are thickest
 // low in the layer. over twenty seeds a half clouds 0.64 to 0.71.
 func TestCloudsCoverTheirShare(t *testing.T) {
-	c := Clouds{Radius: 10, Low: 0.5, High: 1.5, Cover: 0.5, Thick: 1, Seed: 3}
-	if c.Density(maths.V(10.2, 0, 0)) != 0 || c.Density(maths.V(11.6, 0, 0)) != 0 {
+	cloudy := cloudsLayer(t)
+	below := maths.V(picked(t, "clouds-below-layer"), nought, nought)
+	above := maths.V(picked(t, "clouds-above-layer"), nought, nought)
+	if cloudy.Density(below) != nought || cloudy.Density(above) != nought {
 		t.Error("cloud outside the layer")
 	}
-	clouded, n := 0, 0
-	for i := range 400 {
-		d := scatter(i)
-		if c.Density(d.Scale(10.8)) > 0 {
+	samples := pickedCount(t, "clouds-samples")
+	bodyHeight := picked(t, "clouds-body-height")
+	clouded, sampled := nought, nought
+	for place := range samples {
+		direction := scatter(t, place)
+		if cloudy.Density(direction.Scale(bodyHeight)) > nought {
 			clouded++
 		}
-		n++
+		sampled++
 	}
-	if share := float64(clouded) / float64(n); share < 0.55 || share > 0.8 {
+	share := float64(clouded) / float64(sampled)
+	shareLeast := picked(t, "clouds-share-least")
+	shareMost := picked(t, "clouds-share-most")
+	if share < shareLeast || share > shareMost {
 		t.Errorf("%.2f of the sphere is clouded for a cover of a half", share)
 	}
 	// where there is cloud, the layer is thicker low than at the top
-	for i := range 400 {
-		d := scatter(i)
-		low, top := c.Density(d.Scale(10.8)), c.Density(d.Scale(11.45))
-		if low > 0 && !(top < low) {
+	topHeight := picked(t, "clouds-top-height")
+	for place := range samples {
+		direction := scatter(t, place)
+		low := cloudy.Density(direction.Scale(bodyHeight))
+		top := cloudy.Density(direction.Scale(topHeight))
+		if low > nought && !(top < low) {
 			t.Fatalf("the top of the cloud is %v, the body %v", top, low)
 		}
 	}
 }
 
-// scatter is the i-th of a spread of directions over the sphere, by
+// scatter is the place-th of a spread of directions over the sphere, by
 // hash, so a test samples the whole sphere and not one patch of it.
-func scatter(i int) maths.Vec {
-	k := int64(i)
-	return maths.V(noise.Hash(1, k)-0.5, noise.Hash(2, k)-0.5, noise.Hash(3, k)-0.5).Unit()
+func scatter(t *testing.T, place int) maths.Vec {
+	t.Helper()
+	index := int64(place)
+	seedX := uint64(pickedCount(t, "clouds-scatter-seed-x"))
+	seedY := uint64(pickedCount(t, "clouds-scatter-seed-y"))
+	seedZ := uint64(pickedCount(t, "clouds-scatter-seed-z"))
+	return maths.V(noise.Hash(seedX, index)-halfway,
+		noise.Hash(seedY, index)-halfway,
+		noise.Hash(seedZ, index)-halfway).Unit()
 }

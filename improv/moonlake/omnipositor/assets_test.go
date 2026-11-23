@@ -45,7 +45,8 @@ func assetFireDir(t *testing.T, count int) string {
 	for index := 0; index < count; index++ {
 		image := lights.Image{Width: 2, Height: 2, Light: make([]float64, 12)}
 		image.Light[0] = float64(index + 1)
-		if err := lights.Write(filepath.Join(dir, fmt.Sprintf("%03d.pfm", index)), image, -1); err != nil {
+		framePath := filepath.Join(dir, fmt.Sprintf("%03d.pfm", index))
+		if err := lights.Write(framePath, image, -1); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -393,7 +394,8 @@ func TestCacheRejectsChangedIdentityAfterEviction(t *testing.T) {
 func TestAssetFireDirectoryEntryLimit(t *testing.T) {
 	dir := t.TempDir()
 	for i := 0; i < 4097; i++ {
-		if err := os.WriteFile(filepath.Join(dir, fmt.Sprint(i)), nil, 0600); err != nil {
+		emptyPath := filepath.Join(dir, fmt.Sprint(i))
+		if err := os.WriteFile(emptyPath, nil, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -410,7 +412,8 @@ func TestAssetSpotPasses(t *testing.T) {
 			fmt.Fprintf(&text, "spot_%s_%d: {path: %q}\n", side, i, s.Passes.Nodisc)
 		}
 	}
-	if err := yaml.Unmarshal([]byte(text.String()), &s.Passes); err != nil {
+	passesText := text.String()
+	if err := yaml.Unmarshal([]byte(passesText), &s.Passes); err != nil {
 		t.Fatal(err)
 	}
 	a, err := LoadAssets(s)

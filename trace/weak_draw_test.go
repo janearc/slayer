@@ -60,22 +60,6 @@ func weakJet() *thing.World {
 	return world
 }
 
-// weakHaze is the solid scene in haze of its own colour.
-func weakHaze() *thing.World {
-	world := smoking()
-	world.Haze = thing.Haze{Density: 0.1, Colour: maths.Grey(0.25)}
-	return world
-}
-
-// weakMirror is the solid scene on a glossy floor under a white sky.
-func weakMirror() *thing.World {
-	world := smoking()
-	world.Things[0].Material = &thing.Material{Name: "glass",
-		Colour: maths.Grey(0.1), Gloss: 1}
-	world.Sky = even(maths.Grey(1))
-	return world
-}
-
 // stillWrong is the weak-field scenes the tracer gets wrong today, and
 // what is wrong with each. A scene named here has to fail: the day it
 // passes, the test says to take its line out.

@@ -68,9 +68,10 @@ func TestOceanScatteringSunCrossesInterfaceAndAttenuatesInWater(t *testing.T) {
 
 func TestOceanSingleScatterIntegratesRefractedSunAlongWaterRay(t *testing.T) {
 	world, medium, boundary, _, _ := oceanParticipatingFixture(t, 0)
+	sphereAt := resting(maths.V(0, -2, 1))
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
 		Material: &thing.Material{Colour: maths.Grey(.8)},
-		Motion:   resting(maths.V(0, -2, 1))})
+		Motion:   sphereAt})
 	const index = 1.333
 	eye := mediumEye(maths.V(0, -2, -4), maths.V(0, 0, 1))
 	media := []InitialMedium{{Index: index, Rank: 0, ClearMedium: medium}}
@@ -113,9 +114,10 @@ func TestOceanSingleScatterIntegratesRefractedSunAlongWaterRay(t *testing.T) {
 
 func TestOceanSingleScatterRespectsOpaqueSunBlocker(t *testing.T) {
 	world, _, _, seen, _ := oceanParticipatingFixture(t, 0)
+	sphereAt := resting(maths.V(0, -1, 0))
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: .2},
 		Material: &thing.Material{Colour: maths.Grey(.5)},
-		Motion:   resting(maths.V(0, -1, 0))})
+		Motion:   sphereAt})
 	scene := stage(world, 0)
 	_, got, usable := scene.oceanSunAtSample(maths.V(0, -2, 0), seen)
 	if !usable {
@@ -157,9 +159,10 @@ func TestOceanSingleScatterAirStartRecordsNumericFault(t *testing.T) {
 		t.Fatal(err)
 	}
 	world.Lamps[world.OceanSurface.SunLampIndex] = sun
+	sphereAt := resting(maths.V(0, -2, -2))
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: .25},
 		Material: &thing.Material{Colour: maths.Grey(.8)},
-		Motion:   resting(maths.V(0, -2, -2))})
+		Motion:   sphereAt})
 	eye := mediumEye(maths.V(0, 2, -2), maths.V(0, -1, 0))
 	view, err := newView(world, eye, film.Pinhole{}, 0, 1, 1, 1)
 	if err != nil {

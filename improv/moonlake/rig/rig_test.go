@@ -17,7 +17,7 @@ var show = NewLayout(71.7, 20.4)
 // apart is how far two points are.
 func apart(one, other Point) float64 {
 	gap := one.Add(other.Scale(-1))
-	return math.Sqrt(gap.Dot(gap))
+	return math.Sqrt(gap.dot(gap))
 }
 
 // TestToward: north, east and up are where a compass says.
@@ -32,7 +32,7 @@ func TestToward(t *testing.T) {
 			t.Errorf("%v %v is %v", each.azimuth, each.altitude, got)
 		}
 	}
-	if got := Bearing(Point{}, Point{1, 1, 0}); math.Abs(got-45) > 1e-12 {
+	if got := bearing(Point{}, Point{1, 1, 0}); math.Abs(got-45) > 1e-12 {
 		t.Errorf("north east is %v", got)
 	}
 }
@@ -63,7 +63,7 @@ func TestHeadsStandOnTheTowers(t *testing.T) {
 	if bare[2].Origin[2] != show.Water()+shoreHeadUp {
 		t.Errorf("without towers the shore head is %v up", bare[2].Origin[2])
 	}
-	if heads[2].Aim == heads[3].Aim || heads[0].Aim != Azimuth+halfTurn {
+	if heads[2].Aim == heads[3].Aim || heads[0].Aim != azimuth+halfTurn {
 		t.Errorf("the heads aim %v", heads)
 	}
 }
@@ -90,7 +90,7 @@ func TestFigureWays(t *testing.T) {
 			t.Errorf("%s has %d ways, not %d", figure, len(ways), count)
 		}
 		for _, way := range ways {
-			if math.Abs(way.Dot(way)-1) > 1e-9 {
+			if math.Abs(way.dot(way)-1) > 1e-9 {
 				t.Errorf("%s has a way %v not a unit long", figure, way)
 			}
 		}
@@ -115,14 +115,14 @@ func TestSweep(t *testing.T) {
 func TestSearchlights(t *testing.T) {
 	left, right := show.Searchlight(0), show.Searchlight(1)
 	middle := left.Add(right).Scale(half)
-	behind := show.FarTree().Add(Toward(Azimuth, 0).Scale(searchBehind)).
+	behind := show.farTree().Add(Toward(azimuth, 0).Scale(searchBehind)).
 		Add(Point{0, 0, searchUp})
 	if apart(middle, behind) > near ||
 		math.Abs(apart(left, right)-2*searchApart) > 1e-9 {
 		t.Errorf("the first two stand at %v and %v", left, right)
 	}
 	at := show.SearchWay("viewer", 0, 8, 0, 0)
-	if home := show.Searchlight(0).Scale(-1).Unit(); at.Dot(home) < 0.999 {
+	if home := show.Searchlight(0).Scale(-1).unit(); at.dot(home) < 0.999 {
 		t.Errorf("a viewer beam points %v, not at the eye", at)
 	}
 	shut := show.SearchWay("fan", 2, 8, 0, 0)
@@ -142,7 +142,7 @@ func TestSearchlights(t *testing.T) {
 // the eye, the ship's apex over the water, and a beam down ends on it.
 func TestPlaces(t *testing.T) {
 	strobes := show.Strobes()
-	if math.Abs(strobes[0][2]-show.FarTree()[2]-whiteUp) > 1e-9 ||
+	if math.Abs(strobes[0][2]-show.farTree()[2]-whiteUp) > 1e-9 ||
 		apart(strobes[0], strobes[1]) < magentaLeft {
 		t.Errorf("the strobes stand at %v", strobes)
 	}

@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/janearc/celestial/bands"
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/libtheme-css/primitives/swatch"
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
+	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/oceantex"
 	"github.com/janearc/slayer/scene/bodies/template"
 	"github.com/janearc/slayer/scene/medium"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/swatches"
@@ -51,33 +53,79 @@ func moved(at, shift maths.Vec) maths.Vec {
 // the set file writes each under. the materials and the motions are worn
 // and ridden by others; builders that need world scale read it from said.
 var builders = map[string]builder{
-	"ocean": oceanSurface, "boxes": boxes, "spheres": spheres,
-	"lamps": lamps, "beams": beams, "spots": spots,
+	"ocean": oceanSurface, "boxes": boxes, "channels": channels,
+	"spheres": spheres, "lamps": lamps, "lamp-fields": crowds,
+	"beams": beams, "spots": spots,
 	"floods": floods, "sky": hang, "bodies": bodies, "suns": suns,
 	"wisps": wisps, "fizzes": fizzes, "vapor-cavities": vaporCavities,
 	"imports": imports,
 }
 
-// oceanSurface builds the world's explicitly sampled finite wave sheet.
-// Wave geometry and sea parameters are SI; placement is expressed in the
-// world's units and scaled by its metre-per-unit value.
+// oceanSurface builds the world's explicitly sampled finite wave sheet, or
+// where the set says it unbounded, a sea with no edge. The sea is the
+// manufactory's (manufacture.Sea), put in the world where the set's ocean
+// stands among its lists. Wave geometry and sea parameters are SI;
+// placement is expressed in the world's units and scaled by its
+// metre-per-unit value.
 func oceanSurface(world *thing.World, said set.World,
 	worn map[string]*thing.Material, shift maths.Vec) error {
 	surface, has := said.OceanSurface()
 	if !has {
 		return nil
 	}
+	made, err := seaOf(said, surface, shift)
+	if err != nil {
+		return err
+	}
+	return made.Staged(world, seaWear(worn, said, surface))
+}
+
+// SeaFor is the manufactory's sea a set's world says, without its water
+// made: the object a plan asks its box of. It is false where the world
+// says no ocean.
+func SeaFor(said set.World, shift maths.Vec) (manufacture.Sea, bool, error) {
+	surface, has := said.OceanSurface()
+	if !has {
+		return manufacture.Sea{}, false, nil
+	}
+	made, err := seaOf(said, surface, shift)
+	return made, err == nil, err
+}
+
+// seaWear is how the sea the set says is worn: a sea with no edge by its
+// glint from its own bands, a sheet by its material and what the set asks
+// of it.
+func seaWear(worn map[string]*thing.Material, said set.World,
+	surface set.WaveSurface) manufacture.Wear {
+	return func(open *arid.Sea) (*thing.Material, error) {
+		if surface.Unbounded() {
+			material, err := seaGlazed(worn[surface.Material()], surface,
+				open)
+			if err != nil {
+				return nil, fmt.Errorf("ocean glint: %w", err)
+			}
+			return material, nil
+		}
+		return sheetMaterial(worn, said, surface)
+	}
+}
+
+// seaOf is the manufactory's sea of a set's ocean: what it is made of,
+// where it stands and how the world's ocean says it was made.
+func seaOf(said set.World, surface set.WaveSurface,
+	shift maths.Vec) (manufacture.Sea, error) {
 	scale := 1 / said.Unit()
 	if math.IsNaN(scale) || math.IsInf(scale, 0) || scale <= 0 {
-		return fmt.Errorf("ocean: world unit %g produces an invalid metre scale", said.Unit())
+		return manufacture.Sea{}, fmt.Errorf("ocean: world unit %g produces an invalid metre scale", said.Unit())
 	}
-	wind, fetch, depth, toward := surface.Sea()
+	if surface.Unbounded() {
+		return openSea(said, surface, shift, scale)
+	}
 	normalMode := surface.ShadingNormalApproximation()
-	var surfaceWake *seaocean.SurfaceWake
-	var motionWake *thing.OceanSurfaceWakeConfig
+	var surfaceWake *arid.SurfaceWake
 	if authoredWake, hasWake := surface.SurfaceWake(); hasWake {
 		middle, origin := surface.MapMiddle(), authoredWake.Origin()
-		wake := seaocean.SurfaceWake{
+		wake := arid.SurfaceWake{
 			OriginEastMetres:     (origin[0] - middle[0]) * said.Unit(),
 			OriginNorthMetres:    (origin[1] - middle[1]) * said.Unit(),
 			HeadingRadians:       authoredWake.HeadingRadians(),
@@ -89,58 +137,49 @@ func oceanSurface(world *thing.World, said set.World,
 			AddToSpectralShading: authoredWake.AddToSpectralShading(),
 		}
 		surfaceWake = &wake
-		copy := thing.OceanSurfaceWakeConfig(wake)
-		motionWake = &copy
 	}
-	field, err := seaocean.NewHeightField(seaocean.HeightFieldConfig{
-		Sea: oceantex.Sea{Wind: wind, Fetch: fetch, Depth: depth,
-			Toward: toward},
-		Extent: surface.Extent(), Samples: surface.Samples(),
-		Seed: surface.Seed(), Seconds: surface.Seconds(),
-		SpectralShadingNormals: normalMode == seaocean.SpectralSlopeNormals,
-		SurfaceWake:            surfaceWake,
-	})
+	model, err := SeaOf(surface)
 	if err != nil {
-		return fmt.Errorf("ocean: %w", err)
+		return manufacture.Sea{}, fmt.Errorf("ocean: %w", err)
 	}
-	if normalMode == seaocean.SmoothNormalBilinearVertexSlopes {
-		field, err = field.WithApproximateSmoothNormals()
-		if err != nil {
-			return fmt.Errorf("ocean shading-normal: %w", err)
-		}
-	}
-	var authoredShape shape.Shape = field
+	sheet := &manufacture.Sheet{Extent: surface.Extent(),
+		Samples: surface.Samples(), Normal: normalMode, Wake: surfaceWake}
 	if continuation, has := surface.FlatMean(); has {
-		if continuation.ExtendsToInfinity() {
-			collared, err := seaocean.NewInfiniteMeanContinuation(field,
-				continuation.MeanLevelMetres(), continuation.CollarWidthMetres())
-			if err != nil {
-				return fmt.Errorf("ocean infinite mean-plane: %w", err)
-			}
-			authoredShape = collared
-		} else {
-			collared, err := seaocean.NewFlatMeanContinuation(field,
-				continuation.MeanLevelMetres(), continuation.CollarWidthMetres())
-			if err != nil {
-				return fmt.Errorf("ocean flat-mean: %w", err)
-			}
-			authoredShape = collared
-		}
+		sheet.Mean = &manufacture.MeanPlane{
+			Level:    continuation.MeanLevelMetres(),
+			Collar:   continuation.CollarWidthMetres(),
+			Infinite: continuation.ExtendsToInfinity()}
 	}
-	at := maths.Subspace{Origin: moved(surface.Middle(), shift),
+	return manufacture.Sea{Model: model, Seconds: surface.Seconds(),
+		Seed: surface.Seed(), Sheet: sheet, At: seaAt(surface, shift, scale),
+		Optics: sheetOptics(said, surface, normalMode),
+		Motion: sheetMotion(surface, model, normalMode, surfaceWake)}, nil
+}
+
+// seaAt is where a sea's boundary stands: at the ocean's middle, moved by
+// shift, and scaled by the world's metres a unit.
+func seaAt(surface set.WaveSurface, shift maths.Vec,
+	scale float64) maths.Subspace {
+	return maths.Subspace{Origin: moved(surface.Middle(), shift),
 		Scale: scale}
+}
+
+// sheetMaterial is the material a finite sheet wears: its glint, then the
+// diffuse sky in-scattering and the wake foam the set asks of it.
+func sheetMaterial(worn map[string]*thing.Material, said set.World,
+	surface set.WaveSurface) (*thing.Material, error) {
 	material, err := glazed(worn[surface.Material()], surface)
 	if err != nil {
-		return fmt.Errorf("ocean glint: %w", err)
+		return nil, fmt.Errorf("ocean glint: %w", err)
 	}
 	if skySamples := surface.DiffuseSkySamples(); skySamples > 0 {
 		if material.ClearMedium == nil {
-			return fmt.Errorf("ocean diffuse-sky in-scattering needs a participating clear medium on material %q", surface.Material())
+			return nil, fmt.Errorf("ocean diffuse-sky in-scattering needs a participating clear medium on material %q", surface.Material())
 		}
 		configured, err := material.ClearMedium.WithDiffuseSkyInscatter(
 			skySamples)
 		if err != nil {
-			return fmt.Errorf("ocean diffuse-sky in-scattering: %w", err)
+			return nil, fmt.Errorf("ocean diffuse-sky in-scattering: %w", err)
 		}
 		own := *material
 		own.ClearMedium = configured
@@ -151,11 +190,11 @@ func oceanSurface(world *thing.World, said set.World,
 			if surface.DirectSunMode() != "" || surface.DirectMoonMode() != "" || surface.DiffuseSkySamples() > 0 ||
 				surface.ClearCloudSkySamples() > 0 || surface.InscatterSource() != "" ||
 				material.ClearMedium.HasScattering() {
-				return fmt.Errorf("ocean wake foam cannot be combined with mean-plane or participating source approximations")
+				return nil, fmt.Errorf("ocean wake foam cannot be combined with mean-plane or participating source approximations")
 			}
 			if material.Texture != nil || material.Shine != nil ||
 				material.Glow != (maths.Light{}) {
-				return fmt.Errorf("ocean wake foam refuses painted, shining or emissive base material %q", surface.Material())
+				return nil, fmt.Errorf("ocean wake foam refuses painted, shining or emissive base material %q", surface.Material())
 			}
 			middle, origin := surface.MapMiddle(), authoredWake.Origin()
 			reflectance := authoredFoam.Reflectance()
@@ -181,35 +220,24 @@ func oceanSurface(world *thing.World, said set.World,
 			}
 			material = &own
 			if !own.WakeFoam.Valid() {
-				return fmt.Errorf("ocean wake foam parameters exceed their finite authored bounds")
+				return nil, fmt.Errorf("ocean wake foam parameters exceed their finite authored bounds")
 			}
 		}
 	}
-	boundary := world.Add(thing.Thing{Shape: authoredShape,
-		Material: material, Motion: thing.Still(at)})
+	return material, nil
+}
+
+// sheetOptics is how the world's ocean says a finite sheet was made: the
+// metres a unit is, the sun and moon routes, the interface events and
+// sources the set asks, the continuation and the shading normal. The
+// boundary, wave motion, mean and extent are put in as the sea is staged.
+func sheetOptics(said set.World, surface set.WaveSurface,
+	normalMode string) thing.OceanSurface {
 	infiniteMeanPlane := false
 	if continuation, has := surface.FlatMean(); has {
 		infiniteMeanPlane = continuation.ExtendsToInfinity()
 	}
-	var waveMotion *thing.OceanWaveMotion
-	if surface.Motion() == "scene-clock" {
-		motion := thing.OceanWaveConfig{WindMetresPerSecond: wind,
-			FetchMetres: fetch, DepthMetres: depth, TowardRadians: toward,
-			ExtentMetres: surface.Extent(), Samples: surface.Samples(),
-			Seed: surface.Seed(), SceneClock: true,
-			ShadingNormal: normalMode}
-		motion.SurfaceWake = motionWake
-		if continuation, has := surface.FlatMean(); has {
-			motion.FlatMean = true
-			motion.InfiniteMeanPlane = continuation.ExtendsToInfinity()
-			motion.MeanLevelMetres = continuation.MeanLevelMetres()
-			motion.CollarWidthMetres = continuation.CollarWidthMetres()
-		}
-		waveMotion = thing.NewOceanWaveMotion(motion)
-	}
-	world.OceanSurface = &thing.OceanSurface{Boundary: boundary,
-		WaveMotion: waveMotion, Mean: at.Origin, ExtentMetres: surface.Extent(),
-		MetresPerUnit:              said.Unit(),
+	return thing.OceanSurface{MetresPerUnit: said.Unit(),
 		DirectSunMeanPlane:         surface.DirectSunMode() == "mean-plane",
 		DirectMoonMeanPlane:        surface.DirectMoonMode() == "mean-plane",
 		InterfaceEvents:            surface.InterfaceEvents(),
@@ -217,10 +245,35 @@ func oceanSurface(world *thing.World, said set.World,
 		InfiniteMeanPlane:          infiniteMeanPlane,
 		ClearCloudSkySamples:       surface.ClearCloudSkySamples(),
 		ClearCloudWaterStepMode:    surface.ClearCloudWaterStepMode(),
-		SmoothNormalApproximation:  normalMode == seaocean.SmoothNormalBilinearVertexSlopes,
+		SmoothNormalApproximation:  normalMode == arid.SmoothNormalBilinearVertexSlopes,
 		ShadingNormalApproximation: normalMode,
 		SunLampIndex:               -1, FillLampIndex: -1}
-	return nil
+}
+
+// sheetMotion is the recipe of a sheet that moves with the scene clock, or
+// nil for one that stands at its moment.
+func sheetMotion(surface set.WaveSurface, model oceantex.Sea,
+	normalMode string, wake *arid.SurfaceWake) *thing.OceanWaveConfig {
+	if surface.Motion() != "scene-clock" {
+		return nil
+	}
+	motion := thing.OceanWaveConfig{WindMetresPerSecond: model.Wind,
+		FetchMetres: model.Fetch, DepthMetres: model.Depth,
+		TowardRadians: model.Toward,
+		ExtentMetres:  surface.Extent(), Samples: surface.Samples(),
+		Seed: surface.Seed(), SceneClock: true,
+		ShadingNormal: normalMode}
+	if wake != nil {
+		copy := thing.OceanSurfaceWakeConfig(*wake)
+		motion.SurfaceWake = &copy
+	}
+	if continuation, has := surface.FlatMean(); has {
+		motion.FlatMean = true
+		motion.InfiniteMeanPlane = continuation.ExtendsToInfinity()
+		motion.MeanLevelMetres = continuation.MeanLevelMetres()
+		motion.CollarWidthMetres = continuation.CollarWidthMetres()
+	}
+	return &motion
 }
 
 // glazed is the material the ocean sheet wears: the one the world
@@ -231,7 +284,7 @@ func oceanSurface(world *thing.World, said set.World,
 // An artistic glint sets the copy's Satin to the authored roughness, a
 // look chosen by eye for the tracer's GGX lobe and not a measured sea.
 // A cox-munk glint sets its slope variance to the slope the sea leaves
-// below one cell, for Beckmann's lobe: see seaocean.GlintSlopes.
+// below one cell, for Beckmann's lobe: see arid.GlintSlopes.
 func glazed(worn *thing.Material,
 	surface set.WaveSurface) (*thing.Material, error) {
 	glint := surface.Glint()
@@ -241,10 +294,12 @@ func glazed(worn *thing.Material,
 		own.Satin = glint.Roughness()
 		return &own, nil
 	case set.GlintCoxMunk:
-		wind, fetch, depth, toward := surface.Sea()
-		budget, err := seaocean.GlintSlopes(oceantex.Sea{Wind: wind,
-			Fetch: fetch, Depth: depth, Toward: toward},
-			surface.Extent(), surface.Samples())
+		model, err := SeaOf(surface)
+		if err != nil {
+			return nil, err
+		}
+		budget, err := arid.GlintSlopes(model, surface.Extent(),
+			surface.Samples())
 		if err != nil {
 			return nil, err
 		}
@@ -264,11 +319,23 @@ func boxes(world *thing.World, said set.World,
 		if err != nil {
 			return fmt.Errorf("box %s: %w", each.Name(), err)
 		}
-		at := maths.Subspace{Origin: moved(each.Middle(), shift)}
 		world.Add(thing.Thing{Shape: shaped, Material: worn[each.Material()],
-			Motion: thing.Still(at)})
+			Motion: thing.Still(boxPlace(each, shift))})
 	}
 	return nil
+}
+
+// boxPlace is where a box stands: its middle, moved by shift, and turned
+// about the vertical by its heading. A heading is clockwise seen from above,
+// and a turn about the vertical axis is counterclockwise, so it is negated,
+// as a thing's heading is. A box with no heading keeps the zero turn it
+// always had.
+func boxPlace(each set.Box, shift maths.Vec) maths.Subspace {
+	var turn maths.Orientation
+	if heading, said := each.Heading(); said {
+		turn = maths.Rotation(maths.YAxis, -heading*maths.Degree)
+	}
+	return maths.NewSubspace(moved(each.Middle(), shift), turn, 0)
 }
 
 // box is a box of triangles about its own middle, each face turning
@@ -322,9 +389,28 @@ func keyed(run set.Motion, base, shift maths.Vec) thing.Keyed {
 // lamps lights each bulb, a black body's light from beyond its radius.
 func lamps(world *thing.World, said set.World,
 	_ map[string]*thing.Material, shift maths.Vec) error {
-	for _, each := range said.Lamps() {
+	return lit(world, said.Lamps(), shift)
+}
+
+// crowds lights each lamp the set's lamp-fields scatter, as lamps does.
+func crowds(world *thing.World, said set.World,
+	_ map[string]*thing.Material, shift maths.Vec) error {
+	return lit(world, said.LampFields(), shift)
+}
+
+// lit puts each bulb in the world. A black body is worked out once for
+// each temperature and strength: a crowd says one.
+func lit(world *thing.World, bulbs []set.Lamp, shift maths.Vec) error {
+	type shine struct{ heat, strength float64 }
+	made := map[shine]bands.Light{}
+	for _, each := range bulbs {
 		heat, strength := each.Shine()
-		spectrum, _, err := blackbody(heat, strength)
+		spectrum, found := made[shine{heat, strength}]
+		var err error
+		if !found {
+			spectrum, _, err = blackbody(heat, strength)
+			made[shine{heat, strength}] = spectrum
+		}
 		if err != nil {
 			return fmt.Errorf("lamp %s: %w", each.Name(), err)
 		}
@@ -547,6 +633,7 @@ func vaporCavities(world *thing.World, said set.World,
 		coreRadius, density := each.Core()
 		pressureDeficit, recovery := each.PressureRecovery()
 		fragmentSeed, fragmentScale, fragmentContrast := each.Fragments()
+		wander, wanderScale, spreadStart, spread := each.Dispersal()
 		field, err := medium.NewPropellerCavitation(medium.PropellerCavitationConfig{
 			Blades: each.Blades(),
 			Origin: moved(each.Origin(), shift), Axis: each.Axis(),
@@ -555,7 +642,7 @@ func vaporCavities(world *thing.World, said set.World,
 			PressureDeficitPa: pressureDeficit, RecoveryPaPerM: recovery,
 			VisualOnset:    each.VisualOnset(),
 			FragmentScaleM: fragmentScale, FragmentContrast: fragmentContrast,
-			FragmentSeed: fragmentSeed,
+			FragmentSeed: fragmentSeed, WanderM: wander, WanderScaleM: wanderScale, SpreadStartM: spreadStart, SpreadPerM: spread,
 		})
 		if err != nil {
 			return fmt.Errorf("vapor-cavities %q: %w", each.Name(), err)

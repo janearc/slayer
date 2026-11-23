@@ -1,16 +1,22 @@
 package emit
 
 import (
-	"errors"
 	"math"
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/thing"
 )
 
+// refusal is a refusal of this package, held as a constant so that no one
+// can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (r refusal) Error() string { return string(r) }
+
 // ErrDistant is a distant light with no way to come from, or a light
 // that is less than none or has no end.
-var ErrDistant = errors.New("emit: no such distant light")
+const ErrDistant refusal = "emit: no such distant light"
 
 // Distant is light from so far away that it comes one way, as strong,
 // to every point: a sun seen from a planet. its light is what it lands

@@ -1,0 +1,36 @@
+# A grey heron from the bird maker standing with no feather on: the
+# outline of trunk, neck and head lofted through its stations, the
+# bill, the eyes, the bare face and legs. The outline is checked from
+# the side here and from above in bird-grey-heron-outline-above.yaml.
+# Lit by the worked sun and sky; the sun's place is picked.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: grey heron outline, side
+  seed: 7
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 35}
+  set:
+    things:
+      bird:
+        kind: bird-grey-heron-outline
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  film:
+    width: 480
+    height: 300
+    rays: 4
+    wide: 39
+  cameras:
+    side:
+      title: "from the south, level with the chest"
+      location: {at: [0.12, -2.0, 0.55]}
+      orientation: {look_at: [0.12, 0, 0.52]}

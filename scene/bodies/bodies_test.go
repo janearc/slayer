@@ -178,7 +178,7 @@ func TestGroundsHaveTheirFeatures(t *testing.T) {
 		tr.Features = fs
 		w := world.New(tr)
 		n := 0
-		for _, tile := range w.Tiles() {
+		for _, tile := range w.Tiling.Tiles() {
 			if w.Biome(tile) == want {
 				n++
 			}
@@ -405,7 +405,9 @@ func TestAuroraIsPlaced(t *testing.T) {
 	up := 200 / e.Radius()
 	axis := maths.About(maths.XAxis, oval.Tilt()).Out(maths.Up)
 	o := maths.Upright(axis)
-	on := axis.Scale(math.Sin(oval.Lat())).Add(o.X.Scale(math.Cos(oval.Lat()))).Scale(1 + up)
+	sine := math.Sin(oval.Lat())
+	cosine := math.Cos(oval.Lat())
+	on := axis.Scale(sine).Add(o.X.Scale(cosine)).Scale(1 + up)
 	if d := aurora.Medium.Density(on); d <= 0 {
 		t.Errorf("the oval is dark: %v", d)
 	}

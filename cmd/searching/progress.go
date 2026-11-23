@@ -219,13 +219,13 @@ func progress(ctx context.Context, call pzm.Call) error {
 		}
 		if path := call.Value("progress-file"); path != "" {
 			if err := publishProgress(path, []byte(reading.column())); err != nil {
-				return fmt.Errorf("Barkeep status file: %w", err)
+				return fmt.Errorf("the Barkeep status file: %w", err)
 			}
 		}
 		fmt.Fprintln(call.Out(), reading.line())
 		if bar != nil {
 			if err := bar.update(ctx, reading); err != nil {
-				return fmt.Errorf("Barkeep update: %w", err)
+				return fmt.Errorf("the Barkeep update: %w", err)
 			}
 		}
 		if !call.On("follow") || strings.HasPrefix(reading.Status, "completed") || strings.HasPrefix(reading.Status, "stopped") {

@@ -27,8 +27,10 @@ func lines(args ...string) (int, []string, string) {
 	var out, errOut strings.Builder
 	status := run(append([]string{"maturity"}, args...), &out, &errOut, three)
 	var got []string
-	for _, line := range strings.Split(strings.TrimRight(out.String(), "\n"), "\n") {
-		got = append(got, strings.Join(strings.Fields(line), " "))
+	trimmed := strings.TrimRight(out.String(), "\n")
+	for _, line := range strings.Split(trimmed, "\n") {
+		words := strings.Fields(line)
+		got = append(got, strings.Join(words, " "))
 	}
 	return status, got, errOut.String()
 }

@@ -8,10 +8,9 @@
 // a world and times satellite orbits from the primary's mass; the
 // caller supplies a scale to suit the shot.
 //
-// Sizes, masses, and durations were originally entered from memory and are not
-// yet verified against published sources. Mark each verified value beside its
-// declaration and cite its source; NASA planetary fact sheets are the intended
-// starting point.
+// Lengths are in kilometres, masses in kilograms, angles in radians and
+// times are a time.Duration. A physical figure names its published
+// source beside its declaration; one that does not is not yet verified.
 package bodies
 
 import (
@@ -19,6 +18,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/janearc/celestial/si"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/hexes"
 	"github.com/janearc/slayer/scene/medium"
@@ -42,29 +42,73 @@ const (
 // Sun is the sun's mass in kilograms, the unit the big masses come in.
 const Sun = 1.989e30
 
-// lightSpeed is the speed of light, in metres a second.
-const lightSpeed = 299792458.0
+// lightSpeed is the speed of light, in metres a second, as the SI
+// defines it and celestial carries it.
+const lightSpeed = si.Speed
+
+// metresPerKilometre is defined: a kilometre is a thousand metres.
+const metresPerKilometre = 1000
+
+// horizonPerMass is defined: a hole's horizon radius is twice its mass
+// as a length, 2GM over c squared.
+const horizonPerMass = 2
+
+// reverse is defined: the factor that turns a direction round.
+const reverse = -1
+
+// fullTurn is defined: a circle, in radians.
+const fullTurn = 2 * math.Pi
+
+// secondsPerJulianYear is defined: the Julian year is 365.25 days of
+// 86400 seconds.
+const secondsPerJulianYear = 365.25 * 86400
 
 // jetsOffset keeps a body's jets from growing from the same noise as
 // its disc: the jets' seed is the body's plus this.
-const jetsOffset = 4
+var jetsOffset = uint64(pick("jets-seed-offset"))
+
+// moonDetailDivisor and moonDetailLeast set a moon's tiling from its
+// primary's: the detail over the divisor, and no fewer than the least.
+var (
+	moonDetailDivisor = int(pick("moon-detail-divisor"))
+	moonDetailLeast   = int(pick("moon-detail-least"))
+)
+
+// The dressing of a hole's horizon and field, each a number picked.
+var (
+	holeReach         = pick("hole-reach")
+	horizonBallMargin = pick("horizon-ball-margin")
+	horizonHexSplits  = int(pick("horizon-hex-splits"))
+)
+
+// The wisps of a coma and a tail, each a number picked.
+var (
+	comaWispDivisor = pick("coma-wisp-divisor")
+	comaWispAmount  = pick("coma-wisp-amount")
+	tailWispWidths  = pick("tail-wisp-widths")
+)
+
+// orbitYearsLimit is the years of a period at and past which an orbit
+// is refused, a little short of what a time.Duration holds.
+var orbitYearsLimit = pick("orbit-years-limit")
 
 // Omega is how fast a circular orbit goes round the body at a radius,
 // in radians a second, by kepler. It is zero for a body with no mass or
-// less, and for a radius of zero or less.
+// less, and for a radius that is zero, less, or not a number.
 func (body *Body) Omega(radius Span) float64 {
 	around := radius.InKilometres()
-	if body.mass <= 0 || around <= 0 {
-		return 0
+	if body.mass <= nought || !(around > nought) {
+		return nought
 	}
-	metres := around * 1000
+	metres := around * metresPerKilometre
 	return math.Sqrt(thing.G * body.mass / (metres * metres * metres))
 }
 
 // Schwarzschild is the radius of a hole of a mass, in kilometres: worked
 // out in metres, where G lives, and brought to kilometres at the end.
 func Schwarzschild(mass float64) float64 {
-	return 2 * thing.G * mass / (lightSpeed * lightSpeed) / 1000
+	return horizonPerMass * thing.G * mass / (lightSpeed * lightSpeed) /
+		metresPerKilometre
 }
 
 // Place puts the body's parts into the world at a point, with scale
@@ -83,7 +127,7 @@ func (body Body) Place(into *thing.World, at maths.Vec, scale float64,
 	lean := maths.Rotation(maths.XAxis, body.tilt)
 	space := maths.Subspace{Origin: at, Orientation: lean}
 	var motion thing.Motion = thing.Still(space)
-	if body.day != 0 {
+	if body.day != nought {
 		// the body turns on its own axis once a day
 		motion = thing.Spin{In: space, Axis: lean.Out(maths.Up),
 			Period: body.day}
@@ -93,7 +137,7 @@ func (body Body) Place(into *thing.World, at maths.Vec, scale float64,
 	}
 	for place, moon := range body.moons {
 		err := orbitable(body.name+"'s "+moon.body.name, body.mass,
-			moon.orbit*1000)
+			moon.orbit*metresPerKilometre)
 		if err != nil {
 			return err
 		}
@@ -101,7 +145,8 @@ func (body Body) Place(into *thing.World, at maths.Vec, scale float64,
 		if err != nil {
 			return err
 		}
-		err = moon.body.build(into, orbit, scale, max(2, detail/2))
+		err = moon.body.build(into, orbit, scale,
+			max(moonDetailLeast, detail/moonDetailDivisor))
 		if err != nil {
 			return err
 		}
@@ -126,7 +171,7 @@ func (body Body) PlaceOn(into *thing.World, motion thing.Motion,
 // It is an error when the body has no moon at the place.
 func (body Body) Orbit(place int, at maths.Vec,
 	scale float64) (thing.Orbit, error) {
-	if place < 0 || place >= len(body.moons) {
+	if place < nought || place >= len(body.moons) {
 		return thing.Orbit{}, fmt.Errorf("bodies: %s has %d moons: "+
 			"there is none at place %d", body.name, len(body.moons),
 			place)
@@ -135,7 +180,7 @@ func (body Body) Orbit(place int, at maths.Vec,
 	lean := maths.Rotation(maths.XAxis, body.tilt)
 	return thing.Orbit{Centre: at, Radius: moon.orbit * scale,
 		Axis:   lean.Out(maths.Up),
-		Period: thing.Period(body.mass, moon.orbit*1000),
+		Period: thing.Period(body.mass, moon.orbit*metresPerKilometre),
 		Phase:  moon.phase, Locked: true}, nil
 }
 
@@ -203,6 +248,13 @@ func (body Body) build(into *thing.World, motion thing.Motion, scale float64,
 	case Hole:
 		body.buildHole(into, motion, scale)
 	}
+	return body.buildAtmosphere(into, motion, scale, radius)
+}
+
+// buildAtmosphere puts the body's air, aurora and clouds into the world,
+// each round the radius, as volumes carried by the body's motion.
+func (body Body) buildAtmosphere(into *thing.World, motion thing.Motion,
+	scale, radius float64) error {
 	if air := body.air; air != nil {
 		into.AddVolume(thing.Volume{
 			Medium: medium.Air{Radius: radius,
@@ -220,7 +272,7 @@ func (body Body) build(into *thing.World, motion thing.Motion, scale float64,
 				Low:  aurora.low * scale,
 				High: aurora.high * scale, Lat: aurora.lat,
 				Width: aurora.width, Axis: axis,
-				Thick:    1 / (aurora.high - aurora.low) / scale,
+				Thick:    unity / (aurora.high - aurora.low) / scale,
 				Curtains: aurora.curtains, Seed: aurora.seed},
 			Material: &thing.Material{Name: body.name + " aurora",
 				Shine: texture.Aurora{Radius: radius,
@@ -244,10 +296,17 @@ func (body Body) build(into *thing.World, motion thing.Motion, scale float64,
 				Cover: clouds.cover,
 				Thick: clouds.dense / scale, Seed: clouds.seed},
 			Material: &thing.Material{Name: body.name + " clouds",
-				Colour: maths.Grey(1)},
+				Colour: maths.Grey(unity)},
 			Motion: motion,
 		})
 	}
+	return body.buildMatter(into, motion, scale, radius)
+}
+
+// buildMatter puts the body's rings, jets, flare and coma into the world,
+// as volumes carried by the body's motion.
+func (body Body) buildMatter(into *thing.World, motion thing.Motion,
+	scale, radius float64) error {
 	if rings := body.rings; rings != nil {
 		into.AddVolume(thing.Volume{
 			Medium: medium.Disc{Inner: rings.inner * radius,
@@ -266,7 +325,7 @@ func (body Body) build(into *thing.World, motion thing.Motion, scale float64,
 	}
 	if flare := body.flare; flare != nil {
 		into.AddVolume(thing.Volume{
-			Medium: medium.Puff{Radius: 1, Thick: flare.opacity},
+			Medium: medium.Puff{Radius: unity, Thick: flare.opacity},
 			Material: &thing.Material{Name: body.name + " flare",
 				Glow: flare.glow, Radiant: flare.radiant},
 			Motion: thing.Growing{Of: motion, From: flare.at,
@@ -278,13 +337,21 @@ func (body Body) build(into *thing.World, motion thing.Motion, scale float64,
 			Medium: medium.Wispy{Of: medium.Puff{
 				Radius: coma.radius * scale,
 				Thick:  coma.dense / scale}, Seed: body.seed,
-				Scale:  coma.radius * scale / 3,
-				Amount: 0.5},
+				Scale:  coma.radius * scale / comaWispDivisor,
+				Amount: comaWispAmount},
 			Material: &thing.Material{Name: body.name + " coma",
 				Colour: coma.colour, Glow: coma.glow},
 			Motion: motion,
 		})
 	}
+	return body.buildStreams(into, motion, scale, radius)
+}
+
+// buildStreams puts the body's tails and plumes into the world, as
+// volumes carried by the body's motion. It refuses a tail that cannot
+// stream.
+func (body Body) buildStreams(into *thing.World, motion thing.Motion,
+	scale, radius float64) error {
 	if err := body.buildTails(into, motion, scale); err != nil {
 		return err
 	}
@@ -315,32 +382,47 @@ func (body Body) buildHole(into *thing.World, motion thing.Motion,
 	//
 	// the hexes, a dressing, want a ball to be drawn on, just
 	// outside the horizon, since nothing on it can be seen
-	massLength := schwarzschild / 2
+	massLength := schwarzschild / horizonPerMass
 	spinLength := math.Abs(body.spin) * massLength
 	into.AddField(thing.Field{Mass: massLength, Spin: spinLength,
-		Reach: 20 * schwarzschild, Motion: turnedFor(body.spin, motion)})
-	if body.edge.hexes > 0 {
+		Reach:  holeReach * schwarzschild,
+		Motion: turnedFor(body.spin, motion)})
+	body.buildHorizon(into, motion, scale, massLength, spinLength)
+}
+
+// buildHorizon puts the dressed ball just outside a hole's horizon into
+// the world, when it has hexes, and then the hole's disc. The hole's mass
+// and spin are lengths in the world's units.
+func (body Body) buildHorizon(into *thing.World, motion thing.Motion,
+	scale, massLength, spinLength float64) {
+	if body.edge.hexes > nought {
 		light := body.edge.light
 		if light == (maths.Light{}) {
-			light = maths.Grey(1)
+			light = maths.Grey(unity)
 		}
 		// the horizon's kerr-schild radius, as
 		// holemath.Hole.Horizon has it, which bodies does not
 		// import on purpose: its reach at the poles; at the
 		// equator it reaches root(rplus^2 + spin^2)
-		rplus := massLength + math.Sqrt(math.Max(0,
+		rplus := massLength + math.Sqrt(math.Max(nought,
 			massLength*massLength-spinLength*spinLength))
 		into.Add(thing.Thing{
 			Shape: shape.Sphere{
-				Radius: 1.02 * math.Sqrt(rplus*rplus+
+				Radius: horizonBallMargin * math.Sqrt(rplus*rplus+
 					spinLength*spinLength)},
 			Material: &thing.Material{Name: body.name + " horizon",
 				Shine: texture.Wire{
-					Tiling: hexes.Sphere{Splits: 6},
+					Tiling: hexes.Sphere{Splits: horizonHexSplits},
 					Light:  light.Scale(body.edge.hexes)}},
 			Motion: motion,
 		})
 	}
+	body.buildDisc(into, motion, scale)
+}
+
+// buildDisc puts a hole's disc into the world, beamed when the gas moves.
+func (body Body) buildDisc(into *thing.World, motion thing.Motion,
+	scale float64) {
 	if disc := body.disc; disc != nil {
 		volume := thing.Volume{
 			Medium: medium.Disc{Inner: disc.inner * scale,
@@ -356,10 +438,10 @@ func (body Body) buildHole(into *thing.World, motion thing.Motion,
 					Bright:  disc.bright,
 					Streaks: disc.streaks,
 					Shear:   disc.shear, Seed: body.seed,
-					Omega: body.Omega(Kilometres(1 / scale))}},
+					Omega: body.Omega(Kilometres(unity / scale))}},
 			Motion: motion,
 		}
-		if disc.speed > 0 {
+		if disc.speed > nought {
 			volume.Beam = &thing.Beam{Axis: maths.Up,
 				Speed: disc.speed, Round: true,
 				At: disc.inner * scale}
@@ -375,15 +457,16 @@ func (body Body) buildTails(into *thing.World, motion thing.Motion,
 	scale float64) error {
 	for _, tail := range body.tails {
 		// away from the sun, bending back along the trail
-		at := motion.At(0).Origin
+		at := motion.At(nought).Origin
 		if at == tail.sun {
 			return fmt.Errorf("bodies: %s is at its sun, so its "+
 				"tail has no way to stream: call Aimed with a sun "+
 				"somewhere else", body.name)
 		}
-		away := at.Add(tail.sun.Scale(-1)).Unit()
-		back := tail.trail.Scale(-1)
-		back = back.Add(away.Scale(-away.Dot(back))).Unit()
+		away := at.Add(tail.sun.Scale(reverse)).Unit()
+		back := tail.trail.Scale(reverse)
+		along := away.Dot(back)
+		back = back.Add(away.Scale(-along)).Unit()
 		if back == (maths.Vec{}) || math.IsNaN(back.X) {
 			back = maths.Upright(away).X
 		}
@@ -393,11 +476,11 @@ func (body Body) buildTails(into *thing.World, motion thing.Motion,
 			Length: tail.length * scale,
 			Base:   tail.base * scale, Spread: tail.spread,
 			Curve: tail.curve, Thick: tail.dense / scale}
-		if tail.wisp > 0 {
+		if tail.wisp > nought {
 			// wisps a few base widths long, so they are several
 			// pixels from any distance the tail is seen at
 			made = medium.Wispy{Of: made, Seed: tail.seed,
-				Scale:  3 * tail.base * scale,
+				Scale:  tailWispWidths * tail.base * scale,
 				Amount: tail.wisp}
 		}
 		into.AddVolume(thing.Volume{
@@ -416,7 +499,7 @@ func (body Body) buildTails(into *thing.World, motion thing.Motion,
 // second, of jets moving at a share of the speed of light from a base a
 // width in kilometres wide.
 func jetFlow(speed, base float64) float64 {
-	return speed * lightSpeed / 1000 / base
+	return speed * lightSpeed / metresPerKilometre / base
 }
 
 // buildJets puts the body's jets into the world: a cone of glowing gas
@@ -448,7 +531,7 @@ func (body Body) buildJets(into *thing.World, motion thing.Motion, jets *Jets,
 
 // groundTiling is the sphere a ground is made on, split detail times.
 func (Body) groundTiling(detail int) hexes.Tiling {
-	return hexes.Sphere{Splits: max(1, detail)}
+	return hexes.Sphere{Splits: max(unity, detail)}
 }
 
 // World is the world a rock body's ground is made from: its terrain on
@@ -482,9 +565,10 @@ func (body Body) World(detail int) (*world.World, error) {
 // each body at the scale, and refuses a distance that is negative or
 // not a finite number.
 //
-// each is drawn as a rock's grey ground, whatever its kind: a pair of
-// stars comes out two grey balls with no glow. Day, tilt, air and moons
-// are not read, and the two do not keep a face to each other.
+// Each is drawn as a ball of its ground, whatever its kind, or a grey
+// one when it has none: a pair of stars comes out two grey balls with no
+// glow. Day, tilt, air and moons are not read, and the two do not keep a
+// face to each other.
 func Binary(into *thing.World, one, other Body, at maths.Vec,
 	apart Span, scale float64, detail int) error {
 	if into == nil {
@@ -495,34 +579,18 @@ func Binary(into *thing.World, one, other Body, at maths.Vec,
 		" placed at a point that", at); err != nil {
 		return fmt.Errorf("bodies: %w", err)
 	}
-	for _, body := range []Body{one, other} {
-		if err := body.sound(scale); err != nil {
-			return err
-		}
-	}
-	distance := apart.InKilometres()
-	if !nonNegativeFinite(distance) {
-		return fmt.Errorf("bodies: %s and %s are %v km apart: "+
-			"kilometres, zero or above, finite", one.name,
-			other.name, distance)
-	}
-	total := one.mass + other.mass
-	if !(total > 0) {
-		return fmt.Errorf("bodies: %s and %s have no mass to go "+
-			"round each other by", one.name, other.name)
-	}
-	if err := orbitable(one.name+" and "+other.name, total,
-		distance*1000); err != nil {
+	distance, total, err := pairable(one, other, apart, scale)
+	if err != nil {
 		return err
 	}
 	oneRadius := distance * other.mass / total
 	otherRadius := distance * one.mass / total
-	period := thing.Period(total, distance*1000)
+	period := thing.Period(total, distance*metresPerKilometre)
 	for _, pairing := range []struct {
 		body   Body
 		radius float64
 		phase  float64
-	}{{one, oneRadius, 0}, {other, otherRadius, math.Pi}} {
+	}{{one, oneRadius, nought}, {other, otherRadius, halfTurn}} {
 		ground, err := pairing.body.groundMaterial(detail)
 		if err != nil {
 			return err
@@ -537,6 +605,33 @@ func Binary(into *thing.World, one, other Body, at maths.Vec,
 		})
 	}
 	return nil
+}
+
+// pairable is the distance in kilometres and the mass of two bodies
+// together, when they can go round each other at a scale: each sound,
+// the distance finite and not below zero, some mass between them, and an
+// orbit that can be timed. It refuses otherwise, with the names.
+func pairable(one, other Body, apart Span,
+	scale float64) (distance, total float64, err error) {
+	for _, body := range []Body{one, other} {
+		if err := body.sound(scale); err != nil {
+			return nought, nought, err
+		}
+	}
+	distance = apart.InKilometres()
+	if !nonNegativeFinite(distance) {
+		return nought, nought, fmt.Errorf("bodies: %s and %s are %v km "+
+			"apart: kilometres, zero or above, finite", one.name,
+			other.name, distance)
+	}
+	total = one.mass + other.mass
+	if !(total > nought) {
+		return nought, nought, fmt.Errorf("bodies: %s and %s have no "+
+			"mass to go round each other by", one.name, other.name)
+	}
+	err = orbitable(one.name+" and "+other.name, total,
+		distance*metresPerKilometre)
+	return distance, total, err
 }
 
 // halfTurn is the turn that takes a space's up to its down: half a
@@ -565,10 +660,11 @@ const noSpin = 0
 func retrograde(spin float64) bool { return spin < noSpin }
 
 // sound is what is wrong with the body at a scale, if anything, by
-// name: a body not made by NewBody, a complaint a verb recorded, a scale that is not a size, a
-// radius that is not a size (Resized can set one), or a hole spinning
-// at its mass or past, which has no horizon to draw. The checks that
-// need no scale are made by the part constructors.
+// name: a body not made by NewBody, a complaint a verb recorded, a
+// scale that is not a size, a radius that is not a size (Resized can
+// set one), or a hole spinning at its mass or past, which has no
+// horizon to draw. The checks that need no scale are made by the part
+// constructors.
 func (body Body) sound(scale float64) error {
 	if !body.made {
 		return errors.New("bodies: a Body{} was not made by NewBody")
@@ -576,20 +672,22 @@ func (body Body) sound(scale float64) error {
 	if body.complaint != nil {
 		return fmt.Errorf("bodies: %s: %w", body.name, body.complaint)
 	}
-	if !(scale > 0) || math.IsInf(scale, 1) {
+	if !(scale > nought) || math.IsInf(scale, infinitePositive) {
 		return fmt.Errorf("bodies: %s at a scale of %v: a scale is "+
 			"kilometres to the world's units, above zero",
 			body.name, scale)
 	}
-	if !(body.radius > 0) || math.IsInf(body.radius, 1) {
+	if !(body.radius > nought) ||
+		math.IsInf(body.radius, infinitePositive) {
 		return fmt.Errorf("bodies: %s resized to %v km: kilometres, "+
 			"above zero", body.name, body.radius)
 	}
-	if body.kind != Hole && (math.IsNaN(body.spin) || math.IsInf(body.spin, 0)) {
+	if body.kind != Hole && (math.IsNaN(body.spin) ||
+		math.IsInf(body.spin, anySign)) {
 		return fmt.Errorf("bodies: %s spins at %v: the spin must be a "+
 			"finite number", body.name, body.spin)
 	}
-	if body.kind == Hole && !(math.Abs(body.spin) < 1) {
+	if body.kind == Hole && !(math.Abs(body.spin) < unity) {
 		return fmt.Errorf("bodies: %s spins at %v of its mass: at "+
 			"one or past, in either direction, a hole has no "+
 			"horizon", body.name, body.spin)
@@ -602,15 +700,16 @@ func (body Body) sound(scale float64) error {
 // years, and this refuses one of 292 years or more first, a little on
 // the safe side, as an error with the names.
 func orbitable(names string, mass, metres float64) error {
-	if mass <= 0 || metres <= 0 {
+	if mass <= nought || metres <= nought {
 		return nil
 	}
-	years := 2 * math.Pi *
+	years := fullTurn *
 		math.Sqrt(metres*metres*metres/(thing.G*mass)) /
-		(365.25 * 86400)
-	if !(years < 292) {
-		return fmt.Errorf("bodies: %s go round in %v years: 292 or "+
-			"more is past what a time.Duration holds", names, years)
+		secondsPerJulianYear
+	if !(years < orbitYearsLimit) {
+		return fmt.Errorf("bodies: %s go round in %v years: %v or "+
+			"more is past what a time.Duration holds", names, years,
+			orbitYearsLimit)
 	}
 	return nil
 }

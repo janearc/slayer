@@ -29,8 +29,9 @@ func TestPartCountRetainsPanelsThroughSharingAndPlacement(t *testing.T) {
 		t.Fatalf("a shadowed primitive was counted twice: %d", got)
 	}
 	assembly.object.parts = nil
-	moved, err := assembly.object.placed(maths.NewSubspace(
-		maths.V(4, 5, 6), maths.Identity, 2))
+	subspace := maths.NewSubspace(
+		maths.V(4, 5, 6), maths.Identity, 2)
+	moved, err := assembly.object.placed(subspace)
 	if err != nil {
 		t.Fatal(err)
 	}

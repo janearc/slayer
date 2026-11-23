@@ -119,10 +119,12 @@ func TestFingerprint(t *testing.T) {
 	if err != nil || got != "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad" {
 		t.Errorf("digest = %q, %v", got, err)
 	}
-	if empty, err := fingerprint(t.Context(), writeFile(t, t.TempDir(), "empty", "")); err != nil || empty != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" {
+	emptyPath := writeFile(t, t.TempDir(), "empty", "")
+	if empty, err := fingerprint(t.Context(), emptyPath); err != nil || empty != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" {
 		t.Errorf("empty digest = %q, %v", empty, err)
 	}
-	if _, err := fingerprint(t.Context(), filepath.Join(t.TempDir(), "none")); err == nil {
+	nonePath := filepath.Join(t.TempDir(), "none")
+	if _, err := fingerprint(t.Context(), nonePath); err == nil {
 		t.Error("a missing file was accepted")
 	}
 	ctx, cancel := context.WithCancel(t.Context())

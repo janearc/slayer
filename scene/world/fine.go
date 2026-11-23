@@ -24,9 +24,9 @@ func (w *World) Fine(look Look, rungs int, vary, mix float64) texture.Texture {
 	return &fineness{w: w, look: look, rungs: rungs, vary: vary, mix: mix}
 }
 
-// Across is how many pixels wide a tile is, about, when a fine texture
+// tilePixels is how many pixels wide a tile is, about, when a fine texture
 // picks its own rung.
-const Across = 6
+const tilePixels = 6
 
 // fineness is a world's surface on a fine rung, fixed or chosen by the
 // pixel asking.
@@ -65,7 +65,7 @@ func (f *fineness) Within(p maths.Vec, footprint float64) maths.Light {
 	if f.rungs > 0 || footprint <= 0 {
 		return f.At(p)
 	}
-	want := Across * footprint
+	want := tilePixels * footprint
 	rungs := 0
 	for s := f.w.Tiling.Spacing(); s > want && rungs < 40; s /= 2 {
 		rungs++

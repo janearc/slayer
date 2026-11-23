@@ -50,11 +50,13 @@ func song(t *testing.T, seconds int) string {
 	const rate = 8000
 	var data []byte
 	for i := 0; i < rate*seconds; i++ {
-		data = binary.LittleEndian.AppendUint16(data, uint16(int16((i%80)*200)))
+		level := int16((i % 80) * 200)
+		data = binary.LittleEndian.AppendUint16(data, uint16(level))
 	}
 	var out []byte
 	out = append(out, "RIFF"...)
-	out = binary.LittleEndian.AppendUint32(out, uint32(36+len(data)))
+	riffSize := uint32(36 + len(data))
+	out = binary.LittleEndian.AppendUint32(out, riffSize)
 	out = append(out, "WAVEfmt "...)
 	out = binary.LittleEndian.AppendUint32(out, 16)
 	out = binary.LittleEndian.AppendUint16(out, 1)
@@ -64,7 +66,8 @@ func song(t *testing.T, seconds int) string {
 	out = binary.LittleEndian.AppendUint16(out, 2)
 	out = binary.LittleEndian.AppendUint16(out, 16)
 	out = append(out, "data"...)
-	out = binary.LittleEndian.AppendUint32(out, uint32(len(data)))
+	dataSize := uint32(len(data))
+	out = binary.LittleEndian.AppendUint32(out, dataSize)
 	out = append(out, data...)
 	path := filepath.Join(t.TempDir(), "song.wav")
 	if err := os.WriteFile(path, out, 0o644); err != nil {

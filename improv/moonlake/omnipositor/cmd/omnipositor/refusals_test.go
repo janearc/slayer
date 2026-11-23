@@ -17,24 +17,31 @@ import (
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/encoder"
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/identity"
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/settings"
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
+	"go.uber.org/mock/gomock"
 )
+
+// nothingAccepted is the number of writes a writer takes before it refuses,
+// when it refuses from the first.
+const nothingAccepted = 0 // defined: a writer that takes no write at all
+
+// accepted is a write that takes everything it is given.
+func accepted(given []byte) (int, error) { return len(given), nil }
 
 // failAfter is a writer that accepts a set number of writes and then refuses
 // every later one.
-type failAfter struct{ left int }
-
-// Write accepts the write while any are left and refuses it after that.
-func (w *failAfter) Write(p []byte) (int, error) {
-	if w.left <= 0 {
-		return 0, errors.New("write refused")
-	}
-	w.left--
-	return len(p), nil
+func failAfter(t *testing.T, left int) *mocks.MockWriter {
+	writer := mocks.NewMockWriter(gomock.NewController(t))
+	taken := writer.EXPECT().Write(gomock.Any()).DoAndReturn(accepted).
+		MaxTimes(left)
+	writer.EXPECT().Write(gomock.Any()).
+		Return(0, errors.New("write refused")).AnyTimes().After(taken)
+	return writer
 }
 
 // runInto runs the tool with args, sending standard output to out, and
 // returns the exit status and what was written to standard error.
-func runInto(out *failAfter, args ...string) (int, string) {
+func runInto(out *mocks.MockWriter, args ...string) (int, string) {
 	var errs bytes.Buffer
 	code := tool().Run(args, out, &errs)
 	return code, errs.String()
@@ -102,13 +109,13 @@ func TestCompareReportsWriteFailures(t *testing.T) {
 	}
 	for _, args := range [][]string{{"compare", a, b}, {"compare", pfm, pfm}} {
 		for allowed := 0; allowed < 3; allowed++ {
-			code, errs := runInto(&failAfter{left: allowed}, args...)
+			code, errs := runInto(failAfter(t, allowed), args...)
 			if code == 0 || !strings.Contains(errs, "write refused") {
 				t.Errorf("%v with %d writes allowed: %d %q", args, allowed, code, errs)
 			}
 		}
 	}
-	code, errs := runInto(&failAfter{}, "compare", a, b, "--dry-run")
+	code, errs := runInto(failAfter(t, nothingAccepted), "compare", a, b, "--dry-run")
 	if code == 0 || !strings.Contains(errs, "write refused") {
 		t.Errorf("dry run: %d %q", code, errs)
 	}
@@ -133,7 +140,7 @@ func TestWriteMetricsFormat(t *testing.T) {
 		t.Errorf("expected 259 lines, got %d", got)
 	}
 	for allowed := 0; allowed < 2; allowed++ {
-		if err := writeMetrics(&failAfter{left: allowed}, 0.5, 30, histogram); err == nil {
+		if err := writeMetrics(failAfter(t, allowed), 0.5, 30, histogram); err == nil {
 			t.Errorf("writes allowed %d: no error", allowed)
 		}
 	}
@@ -144,14 +151,17 @@ func TestWriteMetricsFormat(t *testing.T) {
 func TestWriteDifferenceRemovesFailedFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "difference.png")
-	err := writeDifference(path, image.NewNRGBA(image.Rect(0, 0, 0, 0)))
+	empty := image.NewNRGBA(image.Rect(0, 0, 0, 0))
+	err := writeDifference(path, empty)
 	if err == nil || !strings.Contains(err.Error(), "write difference PNG") {
 		t.Fatalf("empty image: %v", err)
 	}
 	if _, statErr := os.Stat(path); !errors.Is(statErr, os.ErrNotExist) {
 		t.Fatalf("failed write left a file: %v", statErr)
 	}
-	if err := writeDifference(filepath.Join(dir, "no-such-dir", "d.png"), image.NewNRGBA(image.Rect(0, 0, 1, 1))); err == nil || !strings.Contains(err.Error(), "create difference PNG") {
+	missingPath := filepath.Join(dir, "no-such-dir", "d.png")
+	pixel := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	if err := writeDifference(missingPath, pixel); err == nil || !strings.Contains(err.Error(), "create difference PNG") {
 		t.Fatalf("missing directory: %v", err)
 	}
 }
@@ -298,7 +308,8 @@ func TestReadInputShapes(t *testing.T) {
 	}
 	big := bytes.Repeat([]byte("ab"), 35000)
 	path := writeFile(t, dir, "big", string(big))
-	got, err := readInput(context.Background(), path, int64(len(big)))
+	size := int64(len(big))
+	got, err := readInput(context.Background(), path, size)
 	if err != nil || !bytes.Equal(got, big) {
 		t.Errorf("multi-read file: %d bytes, %v", len(got), err)
 	}
@@ -527,7 +538,9 @@ func TestAtomicPNGRefusals(t *testing.T) {
 	if err := atomicPNG(context.Background(), filepath.Join(dir, "none", "f.png"), img, false); err == nil {
 		t.Error("wrote into a missing directory")
 	}
-	if err := atomicPNG(context.Background(), filepath.Join(dir, "f.png"), image.NewRGBA(image.Rect(0, 0, 0, 0)), false); err == nil {
+	emptyPath := filepath.Join(dir, "f.png")
+	emptyImage := image.NewRGBA(image.Rect(0, 0, 0, 0))
+	if err := atomicPNG(context.Background(), emptyPath, emptyImage, false); err == nil {
 		t.Error("encoded an empty image")
 	}
 	target := filepath.Join(dir, "f.png")
@@ -571,7 +584,8 @@ func TestDecodeRGBARefusesNonPNG(t *testing.T) {
 		t.Error("decoded text")
 	}
 	want := color.RGBA{R: 200, G: 100, B: 50, A: 255}
-	got, err := decodeRGBA(pngBytes(t, resumeImageWith(want)))
+	encoded := pngBytes(t, resumeImageWith(want))
+	got, err := decodeRGBA(encoded)
 	if err != nil || got.RGBAAt(0, 0) != want {
 		t.Errorf("round trip: %v %v", got, err)
 	}
@@ -698,7 +712,8 @@ func TestRenderStretchRunRoute(t *testing.T) {
 			return consume(compositor.Result{Index: 4})
 		},
 		"wrong size": func(_ context.Context, _ compositor.Config, consume func(compositor.Result) error) error {
-			return consume(compositor.Result{Index: 4, Image: image.NewRGBA(image.Rect(0, 0, 3, 2))})
+			wrongSize := image.NewRGBA(image.Rect(0, 0, 3, 2))
+			return consume(compositor.Result{Index: 4, Image: wrongSize})
 		},
 		"too many": func(ctx context.Context, c compositor.Config, consume func(compositor.Result) error) error {
 			if err := good(ctx, c, consume); err != nil {
@@ -736,7 +751,8 @@ func TestRenderStretchSteps(t *testing.T) {
 	c := compositor.Config{From: 4, To: 5, FPS: 24, Width: 2, Height: 2}
 	o := stretchOptions{from: 4, to: 5, encode: filepath.Join(dir, "m.mp4"), ffmpeg: "/x/ffmpeg", out: dir}
 	frames := func(_ context.Context, _ compositor.Config, consume func(compositor.Result) error) error {
-		return consume(compositor.Result{Index: 4, Image: image.NewRGBA(image.Rect(0, 0, 2, 2))})
+		blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+		return consume(compositor.Result{Index: 4, Image: blank})
 	}
 	refused := errors.New("check refused")
 	for failAt := 1; failAt <= 3; failAt++ {

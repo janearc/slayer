@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/janearc/slayer/geom"
+	"github.com/janearc/slayer/maths/noise"
 )
 
 // ProperConiferParams controls the whorled reference conifer. Lengths are raw
@@ -56,14 +57,9 @@ const (
 // unit is a number from zero up to one, the same for the same seed and the same
 // three whole numbers.
 func unit(seed uint64, a, b, c int) float64 {
-	z := seed + 0x9e3779b97f4a7c15*uint64(a+1) +
+	z := seed + noise.Golden*uint64(a+1) +
 		0xbf58476d1ce4e5b9*uint64(b+1) + 0x94d049bb133111eb*uint64(c+1)
-	z ^= z >> 30
-	z *= 0xbf58476d1ce4e5b9
-	z ^= z >> 27
-	z *= 0x94d049bb133111eb
-	z ^= z >> 31
-	return float64(z>>11) / (1 << 53)
+	return noise.Stirred(z)
 }
 
 // across is unit moved to run from minus one to one.

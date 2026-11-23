@@ -15,8 +15,6 @@ import (
 const extension = ".mp4"
 
 // Request is what a caller asks for. NewSettings checks it.
-//
-//ninja:vow practice NewSettings takes one
 type Request struct {
 	Path    string //ninja:vow gate a request, whose fields are what is asked
 	Width   int    // pixels across each frame
@@ -30,8 +28,6 @@ type Request struct {
 
 // Settings is a checked Request: everything New needs, and the H.264
 // level the picture will be coded at.
-//
-//ninja:vow practice NewSettings makes one and New takes it
 type Settings struct {
 	path    string
 	picture image.Point
@@ -51,19 +47,14 @@ func NewSettings(request Request) (Settings, error) {
 	if err != nil {
 		return Settings{}, err
 	}
-	coded, err := checkSize(request.Width, request.Height, request.Pad)
+	height, err := codedHeight(request.Width, request.Height, request.Pad)
 	if err != nil {
 		return Settings{}, err
 	}
-	if request.Rate <= 0 || request.Rate > mostRate {
-		return Settings{}, fmt.Errorf("movie: a rate of %d frames a "+
-			"second: give a whole number from 1 to %d, such as 24",
-			request.Rate, mostRate)
+	if err := checkTiming(request.Rate, request.Frames); err != nil {
+		return Settings{}, err
 	}
-	if request.Frames <= 0 {
-		return Settings{}, fmt.Errorf("movie: a movie of %d frames: "+
-			"give how many frames it holds, one or more", request.Frames)
-	}
+	coded := image.Pt(request.Width, height)
 	asked := newDemand(coded, request.Rate)
 	chosen, err := levelFor(asked)
 	if err != nil {
@@ -72,8 +63,28 @@ func NewSettings(request Request) (Settings, error) {
 	picture := image.Pt(request.Width, request.Height)
 	return Settings{path: path, picture: picture, coded: coded,
 		rate: request.Rate, frames: request.Frames, sound: request.Sound,
-		replace: request.Replace, level: chosen,
+		replace: request.Replace, level: *chosen,
 		bitRate: asked.bitRate}, nil
+}
+
+// checkTiming refuses a rate that is not a whole number of frames a
+// second within the most offered, and a count of frames that is none, or
+// more than a duration can count.
+func checkTiming(rate, frames int) error {
+	if !positive(rate) || rate > mostRate {
+		return fmt.Errorf("movie: a rate of %d frames a "+
+			"second: give a whole number from 1 to %d, such as 24",
+			rate, mostRate)
+	}
+	if !positive(frames) {
+		return fmt.Errorf("movie: a movie of %d frames: "+
+			"give how many frames it holds, one or more", frames)
+	}
+	if int64(frames) > mostFrames {
+		return fmt.Errorf("movie: a movie of %d frames is longer than a "+
+			"duration can count: give at most %d", frames, mostFrames)
+	}
+	return nil
 }
 
 // checkPath is the absolute path a movie is written to: one ending
@@ -97,33 +108,56 @@ func checkPath(path string, replace bool) (string, error) {
 		return "", fmt.Errorf("movie: the output directory %s does not "+
 			"exist: make it first", folder)
 	}
-	if _, err := os.Lstat(absolute); err == nil && !replace {
-		return "", fmt.Errorf("movie: %s already exists: set Replace "+
-			"to write over it", absolute)
+	if err := vacant(absolute, replace); err != nil {
+		return "", err
 	}
 	return absolute, nil
 }
 
-// checkSize is the coded size of a picture: the width even, and the
-// height a multiple of 16, padded at the foot only when asked.
-func checkSize(width, height int, pad bool) (image.Point, error) {
-	if width <= 0 || height <= 0 {
-		return image.Point{}, fmt.Errorf("movie: a picture %dx%d: both "+
+// vacant refuses a path with something at it, unless the caller asked to
+// replace it and it is not a directory, which a movie cannot replace.
+func vacant(absolute string, replace bool) error {
+	existing, err := os.Lstat(absolute)
+	if err != nil {
+		return nil
+	}
+	if !replace {
+		return fmt.Errorf("movie: %s already exists: set Replace "+
+			"to write over it", absolute)
+	}
+	if existing.IsDir() {
+		return fmt.Errorf("movie: %s is a directory: a movie cannot "+
+			"replace one", absolute)
+	}
+	return nil
+}
+
+// codedHeight is the height a picture is coded at: the width even, no
+// side beyond what any level holds, and the height a multiple of 16,
+// padded at the foot only when asked.
+func codedHeight(width, height int, pad bool) (int, error) {
+	if !positive(width) || !positive(height) {
+		return zero, fmt.Errorf("movie: a picture %dx%d: both "+
 			"sides must be above nought", width, height)
 	}
-	if width%pair != 0 {
-		return image.Point{}, fmt.Errorf("movie: a width of %d is odd: "+
+	if width > mostPictureSide || height > mostPictureSide {
+		return zero, fmt.Errorf("movie: a picture %dx%d: a side is over "+
+			"%d pixels, which no H.264 level holds", width, height,
+			mostPictureSide)
+	}
+	if width%pair != zero {
+		return zero, fmt.Errorf("movie: a width of %d is odd: "+
 			"H.264 halves the colour across, so give an even width",
 			width)
 	}
 	coded := int(macroblocks(height)) * macroblock
 	if coded != height && !pad {
-		return image.Point{}, fmt.Errorf("movie: a height of %d is not "+
+		return zero, fmt.Errorf("movie: a height of %d is not "+
 			"a multiple of %d, and QuickTime will not play it: set Pad "+
 			"to add %d black rows at the foot", height, macroblock,
 			coded-height)
 	}
-	return image.Pt(width, coded), nil
+	return coded, nil
 }
 
 // Path is the absolute path the movie is published at.
@@ -146,8 +180,12 @@ func (settings Settings) Rate() int { return settings.rate }
 // Frames is how many frames the movie holds.
 func (settings Settings) Frames() int { return settings.frames }
 
-// Duration is how long the movie plays.
+// Duration is how long the movie plays; nought for settings that
+// NewSettings did not make, which have no rate to divide by.
 func (settings Settings) Duration() time.Duration {
+	if !positive(settings.rate) {
+		return zero
+	}
 	return time.Duration(settings.frames) * time.Second /
 		time.Duration(settings.rate)
 }

@@ -15,7 +15,7 @@ fire, an orbital, a star in shells of glass) use it as they are.
 1. A set file whose cameras the shots name (`set.Read`). Its film must
    have a rig (frame and lens), since that is how the tracer frames a
    picture, and so how a place is projected; or, with no rig, say how
-   `wide` it sees, and it is the pinhole hillside draws: that angle
+   `wide` it sees, and it is the pinhole the session draws: that angle
    across, square pixels, a still the film's own shape (`rigless`,
    tested against `testdata/pinhole`).
 2. Where its named things stand: the table `hillside -set SET -places

@@ -27,8 +27,9 @@ func TestGreysAreApartByTheCubeRoots(t *testing.T) {
 	for _, pair := range [][2]float64{{0.18, 0.2}, {0.01, 0.012},
 		{1, 4}} {
 		want := math.Abs(math.Cbrt(pair[0])-math.Cbrt(pair[1])) / 0.02
-		got := float64(divergence.Apart(maths.Grey(pair[0]),
-			maths.Grey(pair[1])))
+		first := maths.Grey(pair[0])
+		second := maths.Grey(pair[1])
+		got := float64(divergence.Apart(first, second))
 		if !(math.Abs(got/want-1) <= 1e-4) {
 			t.Errorf("greys %g and %g are %.5f JND; cube roots say %.5f",
 				pair[0], pair[1], got, want)
@@ -64,7 +65,7 @@ func TestTheShareMovedIsCounted(t *testing.T) {
 	still := greyFrame(10, 10, 0.2, 0)
 	for _, moved := range []struct {
 		pixels int
-		share  divergence.Share
+		share  float64
 		within bool
 	}{{0, 0, true}, {1, 0.01, true}, {2, 0.02, true}, {3, 0.03, false}} {
 		seen, err := divergence.Compare(still,
@@ -72,7 +73,8 @@ func TestTheShareMovedIsCounted(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if seen.Past(1) != moved.share || seen.Within() != moved.within {
+		if float64(seen.Past(1)) != moved.share ||
+			seen.Within() != moved.within {
 			t.Errorf("%d moved: %g past one JND, within %v", moved.pixels,
 				seen.Past(1), seen.Within())
 		}

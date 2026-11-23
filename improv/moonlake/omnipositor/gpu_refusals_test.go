@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/improv/moonlake/lights"
 	"github.com/janearc/slayer/render/colour"
+	"github.com/janearc/slayer/session"
 )
 
 // TestGPULightPlansBeforeDrawing checks that the searchlight and laser
@@ -80,7 +80,7 @@ func TestRenderSceneRefusesBeforeOpeningASession(t *testing.T) {
 		t.Fatal(err)
 	}
 	consume := func(SceneResult) error { t.Fatal("a frame was delivered"); return nil }
-	stamp := hillside.Stamped("", "", "", "")
+	stamp := session.Stamped("", "", "", "")
 	var noContext context.Context
 	if err := RenderScene(noContext, plan, wanted, stamp, false, consume); err == nil || !strings.Contains(err.Error(), "context and consumer") {
 		t.Errorf("no context: %v", err)

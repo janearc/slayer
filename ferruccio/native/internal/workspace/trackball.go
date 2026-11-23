@@ -11,6 +11,10 @@ import (
 	"math"
 )
 
+// ballLabelLineRatio is the height of a ball label as a multiple of the
+// chosen text size, so the label grows with the size.
+const ballLabelLineRatio = 1.5
+
 // cameraBall rolls a virtual sphere, retaining the authored camera horizon.
 // Banking is a separate camera capability, not discarded state hidden by the ball.
 type cameraBall struct {
@@ -281,13 +285,14 @@ func (ball *cameraBall) Draw(canvas widget.Canvas, view geometry.Rect) {
 		ink = appearance.Pink
 	}
 	canvas.StrokeCircle(c, r, ink, 2)
-	label := geometry.Rect{Min: geometry.Pt(b.Min.X, b.Min.Y+3), Max: geometry.Pt(b.Max.X, b.Min.Y+24)}
+	lineHeight := ball.work.size * ballLabelLineRatio
+	label := geometry.Rect{Min: geometry.Pt(b.Min.X, b.Min.Y+3), Max: geometry.Pt(b.Max.X, b.Min.Y+3+lineHeight)}
 	title := "Orbit"
 	if ball.translation {
 		title = "Travel"
 	}
-	canvas.DrawText(title, label, 16, appearance.Ink, false, widget.TextAlignCenter)
-	label.Min.Y = b.Max.Y - 30
+	canvas.DrawText(title, label, ball.work.size, appearance.Ink, false, widget.TextAlignCenter)
+	label.Min.Y = b.Max.Y - 6 - lineHeight
 	label.Max.Y = b.Max.Y - 6
 	text := "Roll to orbit"
 	if ball.translation {
@@ -302,7 +307,7 @@ func (ball *cameraBall) Draw(canvas widget.Canvas, view geometry.Rect) {
 			text = fmt.Sprintf("%.2f m", ball.displacement.Len())
 		}
 	}
-	canvas.DrawText(text, label, 16, appearance.Ink, false, widget.TextAlignCenter)
+	canvas.DrawText(text, label, ball.work.size, appearance.Ink, false, widget.TextAlignCenter)
 	if ball.work.ui.Window().Context().FocusedWidget() == ball.work.viewer && ball.work.play.mode == "look" {
 		canvas.StrokeRoundRect(b, appearance.Pink, 18, 2)
 	}

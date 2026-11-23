@@ -115,9 +115,10 @@ func BenchmarkCommitted4K(b *testing.B) {
 		b.Fatal(err)
 	}
 	executableHash := hashFile(b, binary)
+	terrainFile := filepath.Join(shelf, ground.File())
 	record := measurement{Revision: buildRevision, ExecutableSHA256: executableHash,
 		SourceCatalogueSHA256: hashFile(b, filepath.Join(root, "sources.yaml")),
-		TerrainSHA256:         hashFile(b, filepath.Join(shelf, ground.File())),
+		TerrainSHA256:         hashFile(b, terrainFile),
 		Width:                 width, Height: height, SamplesPerPixel: side * side, Trees: trees}
 	save := func() {
 		b.Helper()
@@ -147,7 +148,8 @@ func BenchmarkCommitted4K(b *testing.B) {
 			started := time.Now()
 			runError := cmd.Run()
 			elapsed := time.Since(started).Seconds()
-			log := append(bytes.Clone(said.Bytes()), wrong.Bytes()...)
+			cloned := bytes.Clone(said.Bytes())
+			log := append(cloned, wrong.Bytes()...)
 			if err := os.WriteFile(base+".log", log, 0644); err != nil {
 				b.Fatal(err)
 			}
@@ -189,7 +191,9 @@ func BenchmarkCommitted4K(b *testing.B) {
 			save()
 			b.Logf("%s completed in %.6f seconds", renderer, elapsed)
 		}
-		comparison := comparePNGs(b, readPNG(b, filepath.Join(out, "gpu.png")), readPNG(b, filepath.Join(out, "gpu-native.png")))
+		gpuPicture := readPNG(b, filepath.Join(out, "gpu.png"))
+		nativePicture := readPNG(b, filepath.Join(out, "gpu-native.png"))
+		comparison := comparePNGs(b, gpuPicture, nativePicture)
 		record.Comparison = &comparison
 		save()
 		fraction := float64(comparison.BeyondOneJND) / float64(comparison.Pixels)

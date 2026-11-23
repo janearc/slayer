@@ -1,0 +1,70 @@
+# one sampan, large in frame, by day, at the fullest detail: from the quay
+# side, from above, at its bow quarter for the number painted there, and
+# from astern for its stern. the air, the sun and the sea are those of
+# sets/boats-by-day-sampans.yaml, which are those of sets/alfa-san-onofre.yaml;
+# the sea's `direct-sun: mean-plane` is left out, as there, because a boat
+# carries its lights.
+#
+# places are metres, x east, y north, z up. the boat's origin is at its
+# waterline, so it stands at up 0, the sea's height, heading north, a choice.
+# its port side faces the camera `quay`, 12 m west of it. the frames are set
+# by a typical length, 6.5 m, and the boat's own may be a little more or less.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: one sampan by day
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 236.2, altitude: 13.4}
+  film:
+    width: 1280
+    height: 720
+    rays: 2
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.5, 0.1, 0.06]
+        source: "synthetic extinction, not measured water; colour by eye"
+    ocean:
+      material: seawater
+      middle: [-1500, 0, 0]
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a moderate breeze off San Onofre, no shelf source"
+  set:
+    things:
+      sampan: {kind: sampan, seed: 3, complexity: demo, position: {east: {value: -1500, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+  cameras:
+    quay:
+      title: "from the quay side, 12 m off its port side and 2 m up"
+      location: {at: [-1512, 0, 2.2]}
+      orientation: {look_at: [-1500, 0, 0.6]}
+    above:
+      title: "from above and to its port, 9 m up"
+      location: {at: [-1507, -2, 9]}
+      orientation: {look_at: [-1500, 0, 0.3]}
+    number:
+      title: "at its bow quarter, where its number is painted"
+      location: {at: [-1504, 6, 1.6]}
+      orientation: {look_at: [-1500, 2.5, 0.4]}
+    stern:
+      title: "from astern, for its stern and what hangs there"
+      location: {at: [-1500, -9, 2]}
+      orientation: {look_at: [-1500, -3, 0.5]}

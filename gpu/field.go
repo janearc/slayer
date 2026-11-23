@@ -62,7 +62,7 @@ func fieldSampled(world *thing.World, eye maths.Subspace, lens film.Sensor,
 func fieldSampledUsing(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	at time.Duration, width, height, side int, ops fieldOperations, cells ...int) (*frame.Frame, timing, error) {
 	var spent timing
-	if len(world.Fields) != MaxGravityFields {
+	if len(world.Fields) != maxGravityFields {
 		return nil, spent, unsupported{"multiple fields"}
 	}
 	field := world.Fields[0]

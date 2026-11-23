@@ -1,0 +1,17 @@
+# every number solid_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: solid-tolerance
+    value: 1e-12
+    says: how far a solid angle or a distance may be from its want
+    kind: picked
+    by: a thousand times past the float64 step near four pi, wide enough for the sums of a few faces
+  - name: solid-rectangle-long
+    value: 4
+    says: how long the rectangle is whose angle is half that of the face
+    kind: picked
+    by: a whole length that is neither the width nor a half of it, so the two sides are told apart
+  - name: solid-rectangle-wide
+    value: 3
+    says: how wide the rectangle is whose angle is half that of the face
+    kind: picked
+    by: the whole width below the length, so the rectangle is not a square

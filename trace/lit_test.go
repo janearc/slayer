@@ -26,7 +26,8 @@ func TestAFloodLeavesNoHighlight(t *testing.T) {
 	}
 	both := floored(lacquer(0.3), mirrored)
 	both.Lamp(film.Flood{Strength: maths.Grey(lamplit)})
-	sun := lone(floored(lacquer(0.3), mirrored), downAtFloor, 0).Light()
+	floor := floored(lacquer(0.3), mirrored)
+	sun := lone(floor, downAtFloor, 0).Light()
 	if got := lone(both, downAtFloor, 0).Light(); got != sun || !(sun.R > 0) {
 		t.Errorf("a flood and a sun leave %v, the sun alone %v", got, sun)
 	}
@@ -43,17 +44,20 @@ func TestAHighlightUnderManyLampsIsTheSumOfTheirs(t *testing.T) {
 		world := thing.NewWorld()
 		world.Add(thing.Thing{Shape: shape.Plane{}, Material: lacquer(0.3)})
 		for range many {
-			world.Lamp(thing.Sun(toward, maths.Grey(lamplit/many)))
+			light := maths.Grey(lamplit / many)
+			world.Lamp(thing.Sun(toward, light))
 		}
 		return world
 	}
-	one := lone(floored(lacquer(0.3), mirrored), downAtFloor, 0).Light().R
+	floor := floored(lacquer(0.3), mirrored)
+	one := lone(floor, downAtFloor, 0).Light().R
 	got := lone(crowded(mirrored), downAtFloor, 0).Light().R
 	if !(one > 0) || !within(got, one, one*1e-5) {
 		t.Errorf("%d suns leave a highlight of %v, one sun of their "+
 			"light together %v", many, got, one)
 	}
-	if got := bright(lone(crowded(maths.V(1, -1, 0)), downAtFloor, 0)); got != 0 {
+	underFloor := crowded(maths.V(1, -1, 0))
+	if got := bright(lone(underFloor, downAtFloor, 0)); got != 0 {
 		t.Errorf("%d suns under the floor leave a highlight of %v", many, got)
 	}
 }
@@ -63,10 +67,12 @@ func TestAHighlightUnderManyLampsIsTheSumOfTheirs(t *testing.T) {
 // is a Satin fine and still squarable, a thousandth, which leaves one.
 func TestASatinTooFineToSquareLeavesNoHighlight(t *testing.T) {
 	const finest = 1e-170 // its square, 1e-340, is below the least float
-	if got := lone(floored(lacquer(finest), mirrored), downAtFloor, 0).Light(); got != (maths.Light{}) {
+	finestFloor := floored(lacquer(finest), mirrored)
+	if got := lone(finestFloor, downAtFloor, 0).Light(); got != (maths.Light{}) {
 		t.Errorf("a Satin of %v leaves %v", finest, got)
 	}
-	if got := bright(lone(floored(lacquer(1e-3), mirrored), downAtFloor, 0)); !(got > 0) {
+	thousandthFloor := floored(lacquer(1e-3), mirrored)
+	if got := bright(lone(thousandthFloor, downAtFloor, 0)); !(got > 0) {
 		t.Errorf("a Satin of a thousandth leaves a highlight of %v", got)
 	}
 }
@@ -97,7 +103,8 @@ func TestAWideSunIsSeenInTheSkyAndAPointSunIsNot(t *testing.T) {
 		t.Errorf("0.11 radians from the sun's middle the sky shows %v", got)
 	}
 	point := thing.NewWorld()
-	point.Lamp(thing.Sun(toward, maths.Grey(strength)))
+	light := maths.Grey(strength)
+	point.Lamp(thing.Sun(toward, light))
 	if got := lone(point, at, 0).Light(); got != (maths.Light{}) {
 		t.Errorf("a sun not drawn as a disc shows %v in the sky", got)
 	}
@@ -112,12 +119,14 @@ func TestACrinkledFloorIsLitUnevenly(t *testing.T) {
 		world := thing.NewWorld()
 		world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{
 			Colour: maths.Grey(1), Crinkle: crinkle}})
-		world.Lamp(thing.Sun(maths.V(1, 2, 0), maths.Grey(math.Pi)))
+		along := maths.V(1, 2, 0)
+		light := maths.Grey(math.Pi)
+		world.Lamp(thing.Sun(along, light))
 		least, most = math.Inf(1), math.Inf(-1)
 		for place := range 40 {
 			x := float64(place) * 0.037
-			got := bright(lone(world, maths.Ray{At: maths.V(x, 1, 0),
-				Dir: maths.V(0, -1, 0)}, 0))
+			ray := maths.Ray{At: maths.V(x, 1, 0), Dir: maths.V(0, -1, 0)}
+			got := bright(lone(world, ray, 0))
 			least, most = math.Min(least, got), math.Max(most, got)
 		}
 		return least, most
@@ -136,7 +145,7 @@ func TestOpaqueCrinkledMirrorUsesItsFinalNormalForOptics(t *testing.T) {
 	direction := maths.V(0.2, -1, 0.1).Unit()
 	ray := maths.Ray{At: point.Sub(direction), Dir: direction}
 	crinkle := &thing.Crinkle{Size: 0.05, Slope: 0.4, Seed: 7}
-	normal := crinkle.Crinkled(point, maths.Up, direction.Neg())
+	normal := crinkle.CrinkledWithin(point, maths.Up, direction.Neg(), 0)
 	if normal.Near(maths.Up, 1e-8) {
 		t.Fatal("fixture did not tilt the opaque surface")
 	}
@@ -199,7 +208,9 @@ func TestAReplayTellsWhatALookDidAndSeesTheSame(t *testing.T) {
 	cube := thing.NewWorld()
 	cube.Add(thing.Thing{Shape: aCube(t),
 		Material: &thing.Material{Name: "clay", Colour: maths.Grey(1)}})
-	cube.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(math.Pi)))
+	along := maths.V(0, 1, 0)
+	light := maths.Grey(math.Pi)
+	cube.Lamp(thing.Sun(along, light))
 	looks := map[string]struct {
 		world       *thing.World
 		ray         maths.Ray

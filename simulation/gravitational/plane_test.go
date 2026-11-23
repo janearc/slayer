@@ -279,7 +279,8 @@ func TestVacuumZeroInitialStrainCanCarryIndependentRate(t *testing.T) {
 	}
 	planeProfiles(t, got, 32)
 	for i := range got.Plus {
-		planeClose(t, got.Plus[i], 1e-21*math.Cos(2*math.Pi*float64(i)/32)/(2*math.Pi), 1e-21)
+		turn := float64(i)
+		planeClose(t, got.Plus[i], 1e-21*math.Cos(2*math.Pi*turn/32)/(2*math.Pi), 1e-21)
 	}
 }
 

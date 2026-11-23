@@ -69,7 +69,8 @@ func differentGlimpseChangesPrint(t *rapid.T) {
 	made := loaded(t, ctrl, stock, rapid.Uint64().Draw(t, "seed"))
 	both := glimpses(t, columns, rows, single+single)
 	alone := printed(t, made, both[first])
-	if sameLight(alone, printed(t, made, meanOf(both))) {
+	meanPrint := printed(t, made, meanOf(both))
+	if sameLight(alone, meanPrint) {
 		t.Skip("glimpses whose mean the film prints as the first")
 	}
 	together, err := made.Print(first, both)
@@ -88,7 +89,8 @@ func differentGlimpseChangesPrint(t *rapid.T) {
 func TestAStopOverIsNotAStopUnder(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	made := loaded(t, ctrl, grainyStock(t, largeWidth), grainySeed)
-	flat := uniform(spreadAcross, spreadDown, maths.Grey(grey()))
+	shade := maths.Grey(grey())
+	flat := uniform(spreadAcross, spreadDown, shade)
 	over := printed(t, made.Rated(whole), flat)
 	under := printed(t, made.Rated(-whole), flat)
 	if reflect.DeepEqual(over.Pix, under.Pix) {

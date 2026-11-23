@@ -50,7 +50,7 @@ func gasStep(scene *staged, crossed *crossing, step stride, ray maths.Ray,
 	scatter := crossed.volume.scatter
 	var in maths.Light
 	var room [lampsEvery]lit
-	for _, one := range scene.asked(room[:], point, dir.Neg(), byLight) {
+	for _, one := range scene.marched(room[:], point, dir.Neg(), byLight) {
 		got := scene.shadowed(one, point)
 		if got == (maths.Light{}) {
 			// a lamp that sends nothing here has no direction worth

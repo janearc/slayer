@@ -26,7 +26,8 @@ func TestEarthShippedFileIsReadAndChecked(t *testing.T) {
 		t.Error(err)
 	}
 	if len(earthRead.numbers()) < 12 || len(earthRead.Ozone.Layers) == 0 { // picked: far fewer than the file holds
-		t.Errorf("the file was read as %d numbers", len(earthRead.numbers()))
+		counted := len(earthRead.numbers())
+		t.Errorf("the file was read as %d numbers", counted)
 	}
 }
 

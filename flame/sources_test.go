@@ -31,11 +31,12 @@ func TestAFlamesSourcesAddUpToItsLight(t *testing.T) {
 	var whole maths.Light
 	for i := range fine * fine * fine {
 		x, y, z := i%fine, i/fine%fine, i/(fine*fine)
-		at := box.Min.Add(maths.V((float64(x)+0.5)*size.X,
-			(float64(y)+0.5)*size.Y, (float64(z)+0.5)*size.Z))
+		offset := maths.V((float64(x)+0.5)*size.X,
+			(float64(y)+0.5)*size.Y, (float64(z)+0.5)*size.Z)
+		at := box.Min.Add(offset)
 		glow := fire.glows.at(fire.Heat(at)).Times(tint)
-		whole = whole.Add(glow.Scale(fire.Density(at) * size.X * size.Y *
-			size.Z))
+		lit := glow.Scale(fire.Density(at) * size.X * size.Y * size.Z)
+		whole = whole.Add(lit)
 	}
 	for _, cells := range []int{12, 24} {
 		sources := fire.Sources(cells)

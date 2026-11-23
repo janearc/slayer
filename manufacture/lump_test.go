@@ -185,7 +185,8 @@ func TestALumpIsCutAsFinelyAsAsked(t *testing.T) {
 		21: 1280, 40: 1280, 41: 5120, 64: 5120}
 	made := mustLump(t, 1, 1, 1, 1, 1)
 	for around, want := range faces {
-		if got := len(made.skin(mustCut(t, around))); got != want {
+		cut := mustCut(t, around)
+		if got := len(made.skin(cut)); got != want {
 			t.Errorf("%d round: %d faces, not %d", around, got,
 				want)
 		}

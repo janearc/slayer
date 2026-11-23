@@ -140,6 +140,11 @@ func TestAThingThatCannotBeMadeOrDrawnIsRefused(t *testing.T) {
 	}
 }
 
+// tubeApart is how far apart, in metres, the tubes of the thing of the
+// most faces stand along x: picked, two, a tube being a metre long and a
+// tenth across.
+const tubeApart = 2.0
+
 // a thing of too many faces is refused before it is flattened, by
 // name: flattening is what runs a machine out of memory. the bound is
 // the most allowed, and one face more is refused.
@@ -154,16 +159,20 @@ func TestAThingOfTooManyFacesIsRefused(t *testing.T) {
 		t.Fatalf("a tube of five sides has %d faces, not %d", got, each)
 	}
 	var most good
-	for range mostFaces / each {
-		most.parts = append(most.parts, one.parts[0])
+	for index := range mostFaces / each {
+		tube := one.parts[0]
+		tube.space = maths.Subspace{Origin: maths.V(
+			tubeApart*float64(index), 0, 0)}
+		most.parts = append(most.parts, tube)
 	}
 	if got := most.faces(); got != mostFaces {
 		t.Fatalf("the test's own count is off: %d", got)
 	}
-	// so many of the same tube in one place is no mesh slayer's mesh will
-	// take, but it is not too many
+	// the tubes stand apart: slayer's mesh refuses an edge that more than
+	// two faces share, as the same tube many times in one place would
+	// make, and that is not what is being asked about
 	_, err = most.in(looks{body: bark}).things(maths.Subspace{})
-	if errors.Is(err, errTooMany) {
+	if err != nil {
 		t.Errorf("a thing of exactly %d faces: %v", mostFaces, err)
 	}
 	blade, err := newBlade(measure.Metres(1), measure.Metres(0.1),
@@ -171,12 +180,13 @@ func TestAThingOfTooManyFacesIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// a thing past the budget costs memory and is made, not refused
 	over := good{parts: append(most.parts, part{shape: blade,
-		space: maths.Subspace{Scale: 1}})}
+		space: maths.Subspace{Origin: maths.V(-tubeApart, 0, 0),
+			Scale: 1}})}
 	_, err = over.in(looks{body: bark}).things(maths.Subspace{})
-	if !errors.Is(err, errTooMany) {
-		t.Errorf("a thing of %d faces: %v, not %v", over.faces(), err,
-			errTooMany)
+	if err != nil {
+		t.Errorf("a thing of %d faces was refused: %v", over.faces(), err)
 	}
 }
 

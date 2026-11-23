@@ -14,16 +14,11 @@ const (
 	aliasFloor = -50
 	// naiveAlias is the least a wave with no correction leaves there.
 	naiveAlias = -40
-	// pluckCents is how far a plucked string may be from its note.
-	pluckCents = 3
 	// driveAliasFloor is the most the drive stage at full push may
 	// leave under a saw at c6, and driveAliasGain how much better than
 	// a plain tangent it must be, in decibels.
 	driveAliasFloor = -45
 	driveAliasGain  = 9
-	// decayTolerance is how far a measured decay may be from the stated
-	// one, as a share.
-	decayTolerance = 0.15
 )
 
 // waveLength is how many samples of a wave the tests measure: a power of

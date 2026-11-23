@@ -323,6 +323,21 @@ func TestTheGPUDrawsACrinkledBlanketAsSlayerDoes(t *testing.T) {
 	against(t, world, eye)
 }
 
+// a painted ball whose wrinkles are two millimetres across, far finer
+// than a pixel of the hall's picture where it stands: slayer's tracer
+// fades their tilt with the pixel's width and draws the ball smooth, and
+// the gpu does as slayer does and does not glitter. The blanket above is
+// the other side of it: wrinkles a pixel can show, drawn whole by both.
+func TestTheGPUFadesWrinklesFinerThanAPixelAsSlayerDoes(t *testing.T) {
+	world, eye := hall(t)
+	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.9},
+		Material: &thing.Material{Name: "fine stucco",
+			Colour:  maths.RGB(0.8, 0.6, 0.4),
+			Crinkle: &thing.Crinkle{Size: 0.002, Slope: 0.35, Seed: 5}},
+		Motion: at(0.2, -0.6, 3)})
+	against(t, world, eye)
+}
+
 // the gilded hall in satin: the lamp leaves highlights on the gold
 // floor, the blanket ball and a glossy painted ball, gold's gold and the
 // paint's white, on the gpu as in slayer's tracer, through the mirror

@@ -17,7 +17,8 @@ func BenchmarkGroupedMeshEncoding(b *testing.B) {
 	faces := make([][3]int, 0, side*side*2)
 	for y := 0; y <= side; y++ {
 		for x := 0; x <= side; x++ {
-			points = append(points, maths.V(float64(x), float64(y), 0))
+			corner := maths.V(float64(x), float64(y), 0)
+			points = append(points, corner)
 		}
 	}
 	for y := 0; y < side; y++ {
@@ -32,8 +33,9 @@ func BenchmarkGroupedMeshEncoding(b *testing.B) {
 	}
 	members := make([]shape.MeshMember, 64)
 	for i := range members {
+		corner := maths.V(float64(i*40), 0, 0)
 		members[i] = shape.MeshMember{Mesh: prototype, Space: maths.NewSubspace(
-			maths.V(float64(i*40), 0, 0), maths.Identity, 1)}
+			corner, maths.Identity, 1)}
 	}
 	group, err := shape.NewMeshGroup(members)
 	if err != nil {

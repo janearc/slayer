@@ -1,0 +1,1 @@
+check-prima-spacecraft . :: go test -p=1 ./manufacture -run ^TestSpacecraftProfilesKeepClosedBoundedGeometryAtEveryDetail$|^TestSpacecraftConstructorRefusesInvalidSizesAndUnknownDesigns$|^TestPrimaComplexityReceipt$|^TestPrimaStudyFinishesUsePickedConductorAnalogues$ -v -count=1 -timeout=5m

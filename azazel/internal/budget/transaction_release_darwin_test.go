@@ -30,7 +30,8 @@ func transactionReleaseFixture(t *testing.T, full bool) (*admissionTransaction, 
 		state.ledger.limit = admissionEntryLimit
 		state.ledger.reservations = nil
 		for i := 0; i < admissionEntryLimit; i++ {
-			state.ledger.reservations = append(state.ledger.reservations, ownedMemoryReservation{id: reservationIdentity(fmt.Sprintf("held-%d", i)), owner: state.owners[0], amount: 1})
+			held := reservationIdentity(fmt.Sprintf("held-%d", i))
+			state.ledger.reservations = append(state.ledger.reservations, ownedMemoryReservation{id: held, owner: state.owners[0], amount: 1})
 		}
 		binding.limit = state.ledger.limit
 	}
@@ -164,7 +165,7 @@ func TestReleaseRefusesUncertainInputs(t *testing.T) {
 			case "proof-binding":
 				request.proof.binding.limit++
 			case "state":
-				data, state := releaseReadState(t, dir)
+				_, state := releaseReadState(t, dir)
 				state.stop.generation++
 				data, err := encodeAdmissionRecord(state)
 				if err != nil {

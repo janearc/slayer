@@ -13,7 +13,8 @@ func TestQuadAreaFloorKeepsItsExactGeometricEndpoint(t *testing.T) {
 	// side of the authored rejection floor; no constructor is replaced.
 	const floor = 1e-14
 	lower := math.Nextafter(math.Nextafter(floor, 0), 0)
-	higher := math.Nextafter(math.Nextafter(floor, math.Inf(1)), math.Inf(1))
+	above := math.Nextafter(floor, math.Inf(1))
+	higher := math.Nextafter(above, math.Inf(1))
 	for _, test := range []struct {
 		width float64
 		faces int

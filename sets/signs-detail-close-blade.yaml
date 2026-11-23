@@ -1,0 +1,56 @@
+# the signs detail study, a close view of a blade sign's fixings: the top
+# of the blade sign of seed 2, turned a quarter, from 8 m off: the two arms
+# of the bracket on bolted plates at the wall, the stay, the caps on the
+# cabinet, the conduit that rises from it to a junction box, and the first
+# stacked tube letter, from manufacture/cities/signdraw.go, drawn from
+# manufacture/cities/cultures/sign.yaml. the wall is not drawn.
+#
+# places are metres, as a map's run: x east, y north, z up. there is no sun
+# and no sky: the light is the sign's own, and one plain dim lamp, a choice
+# of this study, picked by eye, so that the parts that are not lit can be
+# seen. the street, the lamp and the camera are choices of this study.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: signs detail close blade
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 60
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    close:
+      title: "8 m off, at the top of the sign, from the wall's side"
+      location:
+        at: [-10.6, -8, 12.6]
+      orientation:
+        look_at: [-10.6, 0, 12.6]
+  set:
+    things:
+      tube: {kind: sign-blade, seed: 2, complexity: quick, east: -10, north: 0, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+  world:
+    unit: 1
+    lamps:
+      plain-dim:
+        at: [-10.6, -8, 18]
+        temperature: 5000
+        strength: 130
+        radius: 0.3
+        source: eye
+    materials:
+      street:
+        colour: {srgb_linear: [0.02, 0.02, 0.025]}
+        clear: {through: 0.03, index: 1.5, gloss: 1, rank: 0}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye

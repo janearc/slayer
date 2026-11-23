@@ -72,7 +72,8 @@ func (s *Sheet) Image() *image.RGBA {
 		cw = max(cw, f.img.Bounds().Dx())
 		ch = max(ch, f.img.Bounds().Dy())
 	}
-	cols := min(max(s.columns, 1), max(len(s.frames), 1))
+	frameCount := max(len(s.frames), 1)
+	cols := min(max(s.columns, 1), frameCount)
 	rows := (len(s.frames) + cols - 1) / cols
 	w := gap + cols*(cw+gap)
 	h := gap + rows*(ch+label+gap)

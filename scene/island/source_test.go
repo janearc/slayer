@@ -70,7 +70,8 @@ func writeRaster(t *testing.T, extra ...tiffEntry) *terrain.Raster {
 	body := make([]byte, 8)
 	for row := range 4 {
 		for column := range 4 {
-			body = order.AppendUint32(body, math.Float32bits(float32(column+10*row)))
+			height := float32(column + 10*row)
+			body = order.AppendUint32(body, math.Float32bits(height))
 		}
 	}
 	entries := []tiffEntry{shorts(256, 4), shorts(257, 4), shorts(258, 32), shorts(259, 1),
@@ -85,15 +86,18 @@ func writeRaster(t *testing.T, extra ...tiffEntry) *terrain.Raster {
 		table = order.AppendUint16(table, entry.kind)
 		table = order.AppendUint32(table, entry.count)
 		if len(entry.raw) > 4 {
-			table = order.AppendUint32(table, uint32(len(body)))
+			offset := uint32(len(body))
+			table = order.AppendUint32(table, offset)
 			body = append(body, entry.raw...)
 			continue
 		}
 		table = append(table, entry.raw...)
-		table = append(table, make([]byte, 4-len(entry.raw))...)
+		padding := make([]byte, 4-len(entry.raw))
+		table = append(table, padding...)
 	}
 	directory := uint32(len(body))
-	body = order.AppendUint16(body, uint16(len(entries)))
+	count := uint16(len(entries))
+	body = order.AppendUint16(body, count)
 	body = append(body, table...)
 	body = append(body, 0, 0, 0, 0)
 	copy(body, "II")
@@ -119,11 +123,11 @@ func TestNewRasterHeightsChecksItsReference(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	crs, datum, offset := source.Reference()
-	if crs != 4326 || datum != "test datum" || offset.InMetres() != 25 {
-		t.Fatalf("reference %d, %q, %v", crs, datum, offset)
+	if source.crs != 4326 || source.datum != "test datum" || source.offset != 25 {
+		t.Fatalf("reference %d, %q, %v", source.crs, source.datum, source.offset)
 	}
-	if _, err := NewRasterHeights(writeRaster(t, degreeKeys(1, 0)), 4326, "area", measure.Metres(0)); err != nil {
+	raster := writeRaster(t, degreeKeys(1, 0))
+	if _, err := NewRasterHeights(raster, 4326, "area", measure.Metres(0)); err != nil {
 		t.Fatalf("an area-registered source with no vertical units: %v", err)
 	}
 	closed := writeRaster(t, degreeKeys(2, 0))
@@ -163,7 +167,8 @@ func TestNewRasterHeightsChecksItsReference(t *testing.T) {
 // at a sample, between two samples and between four, each raised by the
 // declared offset, and an absent answer outside the raster.
 func TestRasterHeightsInterpolatesAndOffsets(t *testing.T) {
-	source, err := NewRasterHeights(writeRaster(t, degreeKeys(2, 9001)), 4326, "datum", measure.Metres(100))
+	raster := writeRaster(t, degreeKeys(2, 9001))
+	source, err := NewRasterHeights(raster, 4326, "datum", measure.Metres(100))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,11 +199,12 @@ func TestRasterHeightsInterpolatesAndOffsets(t *testing.T) {
 // no bound, an indexed one reports its extremes plus the offset, and a
 // region off the raster has none.
 func TestRasterHeightsRangeNeedsAnIndex(t *testing.T) {
-	source, err := NewRasterHeights(writeRaster(t, degreeKeys(2, 9001)), 4326, "datum", measure.Metres(100))
+	raster := writeRaster(t, degreeKeys(2, 9001))
+	source, err := NewRasterHeights(raster, 4326, "datum", measure.Metres(100))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if low, high, has, err := source.HeightRange(-1, -2, 2, 1); err != nil || has || low != 0 || high != 0 {
+	if low, high, has, err := source.heightRange(-1, -2, 2, 1); err != nil || has || low != 0 || high != 0 {
 		t.Fatalf("unindexed: %g, %g, %v, %v", low, high, has, err)
 	}
 	indexed, err := source.Indexed(context.Background(), 2, 1<<20)
@@ -208,25 +214,26 @@ func TestRasterHeightsRangeNeedsAnIndex(t *testing.T) {
 	if source.index != nil {
 		t.Fatal("indexing changed the source it was made from")
 	}
-	low, high, has, err := indexed.HeightRange(-1, -2, 2, 1)
+	low, high, has, err := indexed.heightRange(-1, -2, 2, 1)
 	if err != nil || !has || low != 100 || high != 133 {
 		t.Fatalf("indexed: %g, %g, %v, %v", low, high, has, err)
 	}
-	if _, _, has, err := indexed.HeightRange(50, 50, 51, 51); err != nil || has {
+	if _, _, has, err := indexed.heightRange(50, 50, 51, 51); err != nil || has {
 		t.Fatalf("off the raster: %v, %v", has, err)
 	}
-	if _, _, _, err := indexed.HeightRange(math.NaN(), 0, 1, 1); err == nil {
+	if _, _, _, err := indexed.heightRange(math.NaN(), 0, 1, 1); err == nil {
 		t.Fatal("a region that is not a number was accepted")
 	}
 	var nobody *RasterHeights
-	if _, _, has, err := nobody.HeightRange(0, 0, 1, 1); has || err != nil {
+	if _, _, has, err := nobody.heightRange(0, 0, 1, 1); has || err != nil {
 		t.Fatalf("nil source: %v, %v", has, err)
 	}
 }
 
 // TestIndexedRefusals checks the refusals of Indexed.
 func TestIndexedRefusals(t *testing.T) {
-	source, err := NewRasterHeights(writeRaster(t, degreeKeys(2, 9001)), 4326, "datum", measure.Metres(0))
+	raster := writeRaster(t, degreeKeys(2, 9001))
+	source, err := NewRasterHeights(raster, 4326, "datum", measure.Metres(0))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,8 +271,8 @@ type boundedStub struct {
 	err       error
 }
 
-// HeightRange answers as configured.
-func (stub *boundedStub) HeightRange(float64, float64, float64, float64) (float64, float64, bool, error) {
+// heightRange answers as configured.
+func (stub *boundedStub) heightRange(float64, float64, float64, float64) (float64, float64, bool, error) {
 	return stub.low, stub.high, stub.has, stub.err
 }
 
@@ -340,24 +347,24 @@ func TestLayersRangeCoversEveryLayer(t *testing.T) {
 		}
 		return layers
 	}
-	low, high, has, err := build(bounded(2, 5), bounded(-3, 4), bounded(0, 9)).HeightRange(0, 0, 1, 1)
+	low, high, has, err := build(bounded(2, 5), bounded(-3, 4), bounded(0, 9)).heightRange(0, 0, 1, 1)
 	if err != nil || !has || low != -3 || high != 9 {
 		t.Fatalf("union: %g, %g, %v, %v", low, high, has, err)
 	}
-	if _, _, has, err := build(bounded(2, 5), &layerStub{}).HeightRange(0, 0, 1, 1); has || err != nil {
+	if _, _, has, err := build(bounded(2, 5), &layerStub{}).heightRange(0, 0, 1, 1); has || err != nil {
 		t.Errorf("a layer with no range method: %v, %v", has, err)
 	}
-	if _, _, has, err := build(bounded(2, 5), &boundedStub{}).HeightRange(0, 0, 1, 1); has || err != nil {
+	if _, _, has, err := build(bounded(2, 5), &boundedStub{}).heightRange(0, 0, 1, 1); has || err != nil {
 		t.Errorf("a layer with no data: %v, %v", has, err)
 	}
-	if _, _, has, err := build(&boundedStub{err: sentinel}, bounded(2, 5)).HeightRange(0, 0, 1, 1); has || !errors.Is(err, sentinel) {
+	if _, _, has, err := build(&boundedStub{err: sentinel}, bounded(2, 5)).heightRange(0, 0, 1, 1); has || !errors.Is(err, sentinel) {
 		t.Errorf("a layer that failed: %v, %v", has, err)
 	}
 	var nobody *Layers
-	if _, _, has, err := nobody.HeightRange(0, 0, 1, 1); has || err != nil {
+	if _, _, has, err := nobody.heightRange(0, 0, 1, 1); has || err != nil {
 		t.Errorf("nil layers: %v, %v", has, err)
 	}
-	if _, _, has, err := (&Layers{}).HeightRange(0, 0, 1, 1); has || err != nil {
+	if _, _, has, err := (&Layers{}).heightRange(0, 0, 1, 1); has || err != nil {
 		t.Errorf("empty layers: %v, %v", has, err)
 	}
 }

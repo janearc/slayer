@@ -13,10 +13,10 @@ import (
 // streaks it is not.
 func TestThinDiscIsHotInsideAndCoolOutside(t *testing.T) {
 	d := Thin{Inner: 1, Outer: 25, Hot: 25000, Bright: 1}
-	if k := d.Temperature(49.0 / 36); math.Abs(k-25000) > 1 {
+	if k := d.temperature(49.0 / 36); math.Abs(k-25000) > 1 {
 		t.Errorf("the hottest ring is %v kelvin", k)
 	}
-	if k := d.Temperature(25); k > 5000 || k < 3500 {
+	if k := d.temperature(25); k > 5000 || k < 3500 {
 		t.Errorf("the rim is %v kelvin", k)
 	}
 	inner, rim := d.At(maths.V(1.4, 0, 0)), d.At(maths.V(24.5, 0, 0))

@@ -80,7 +80,7 @@ func TestAFieldTheStarLacksHasNoHoop(t *testing.T) {
 	body := realStar()
 	for _, field := range []float64{twiceOut * body.field, 0,
 		math.NaN(), -body.field} {
-		if _, err := body.reach(field); !errors.Is(err, ErrField) {
+		if _, err := body.reach(field); !errors.Is(err, errField) {
 			t.Errorf("%g G: %v; want ErrField", field, err)
 		}
 	}
@@ -106,7 +106,8 @@ func TestAFieldLineIsTheDipoles(t *testing.T) {
 	}
 	for _, at := range points {
 		theta := math.Acos(at.Y / at.Len())
-		if !alike(at.Len(), apex*math.Pow(math.Sin(theta), 2)) {
+		sine := math.Sin(theta)
+		if !alike(at.Len(), apex*math.Pow(sine, 2)) {
 			t.Fatalf("%v is off the line", at)
 		}
 	}
@@ -115,18 +116,18 @@ func TestAFieldLineIsTheDipoles(t *testing.T) {
 // anti-tests: a line that would not leave the star, and a tube with one
 // point or no thickness, are refused.
 func TestALineThatCannotBeDrawnIsRefused(t *testing.T) {
-	if _, err := fieldLine(1, 1, 0); !errors.Is(err, ErrLines) {
+	if _, err := fieldLine(1, 1, 0); !errors.Is(err, errLines) {
 		t.Errorf("a line at the surface: %v", err)
 	}
-	if _, err := fieldLine(0, 1, 0); !errors.Is(err, ErrLines) {
+	if _, err := fieldLine(0, 1, 0); !errors.Is(err, errLines) {
 		t.Errorf("a star of no size: %v", err)
 	}
 	var made tube
 	if err := made.add([]maths.Vec{{}}, 1, false); !errors.Is(err,
-		ErrLines) {
+		errLines) {
 		t.Errorf("one point: %v", err)
 	}
-	if err := made.add(circle(1), 0, true); !errors.Is(err, ErrLines) {
+	if err := made.add(circle(1), 0, true); !errors.Is(err, errLines) {
 		t.Errorf("no thickness: %v", err)
 	}
 }
@@ -156,26 +157,27 @@ func TestTheFlaresLightCurve(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if lit.Brightness(lit.start-time.Millisecond) != single {
+	if lit.brightness(lit.start-time.Millisecond) != single {
 		t.Error("the star brightens before the flare")
 	}
 	peak := lit.start + lit.rise
-	if lit.Brightness(peak) != single+flarePeak {
-		t.Errorf("at the peak %g, want %g", lit.Brightness(peak),
+	if lit.brightness(peak) != single+flarePeak {
+		t.Errorf("at the peak %g, want %g", lit.brightness(peak),
 			single+flarePeak)
 	}
-	for at := lit.start; at < lit.Over(); at += time.Millisecond {
-		if lit.Brightness(at) > lit.Brightness(peak) {
+	over := lit.start + lit.spike + time.Duration(float64(lit.tail)/lit.speed)
+	for at := lit.start; at < over; at += time.Millisecond {
+		if lit.brightness(at) > lit.brightness(peak) {
 			t.Fatalf("at %v brighter than the peak", at)
 		}
 	}
-	if lit.Brightness(lit.Over()) != single {
-		t.Errorf("after the tail %g", lit.Brightness(lit.Over()))
+	if lit.brightness(over) != single {
+		t.Errorf("after the tail %g", lit.brightness(over))
 	}
 	pulse := time.Duration(float64(lit.period) / lit.speed)
 	crest := lit.start + lit.spike + pulse
-	if !(lit.Brightness(crest) > lit.Brightness(crest+pulse/2)) ||
-		!(lit.Brightness(crest) > lit.Brightness(crest-pulse/2)) {
+	if !(lit.brightness(crest) > lit.brightness(crest+pulse/2)) ||
+		!(lit.brightness(crest) > lit.brightness(crest-pulse/2)) {
 		t.Error("the tail does not crest at the spin period, sped up")
 	}
 }
@@ -190,9 +192,6 @@ func TestTheFlaresTimesAreMeasured(t *testing.T) {
 		if !alike(got.Seconds(), research.Value(name)) {
 			t.Errorf("%s: %v", name, got)
 		}
-	}
-	if lit.Over() != lit.spike+lit.tail {
-		t.Errorf("at its true pace the tail is over at %v", lit.Over())
 	}
 }
 

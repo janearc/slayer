@@ -1,0 +1,4 @@
+name,toward-x,toward-y,toward-z,want
+along the flow,0,0,-1,8
+against the flow,0,0,1,0.125
+across the flow,0,1,0,0.512

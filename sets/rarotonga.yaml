@@ -1,0 +1,235 @@
+# rarotonga, cook islands, from its east coast: landscape and water only,
+# drawn at 15:30 on 20 november 2026.
+#
+# the ground: 161 x 161 heights 98.75 m apart over a square 15800 m a side
+# centred at 21.233 south, 159.784 west, kept on the shelf as
+# rarotonga-terrain-tiles-99m (its entry in sources.yaml says where it was
+# cut from and what was and was not checked). the land is Mapzen Terrain
+# Tiles at zoom 13; the sea bed is the same tiles' offshore basemap, whose
+# resolution varies, and within the cutter's slope of the shore (0.35 m plus
+# 0.28 m a metre) not the tiles' own. heights are metres above sea level,
+# -2297.28 to 537.08. the frame is metres east and north of the square's
+# south-west corner, the centre at 7900 e, 7900 n; the window is the whole
+# survey at its own spacing, unsmoothed.
+#
+# what 99 m ground cannot show. a sample every 99 m has no reef: a reef flat
+# is a few hundred metres across and a metre or two deep, and the reef crest
+# a few metres wide, so no sample holds the crest or the passage through it.
+# the lagoon is two or three samples wide and the bed in it is the cutter's
+# ramp or the coarse basemap, not a lagoon floor of sand and coral heads.
+# there are no coral heads, no beach as a strip of sand 30 m wide, no
+# stream mouth, no cliff and no overhang. the shore is one step of at most
+# a metre between a land sample (0.45 m or more) and a sea sample (0.35 m
+# deep or more). the island itself looks wrong in this survey: it runs about
+# 12 km north to south by the 0.45 m test and has a hill 6 km north of the
+# centre, and the island as I remember it is about 10 km by 7 and has no
+# such hill. no other source for the place is on this machine, so this is
+# not checked, and the ground is drawn as the shelf has it.
+#
+# the ground's colour is a cover: four surfaces laid by rule on the height
+# above the sea and the slope of the ground, each blended across a stated
+# width (set/terrain_cover.go; doc/sets.md). rock is the ground under all,
+# forest is laid over it on the hills, grass over both on the low gentle
+# plain, and sand over all of them at the shore and in the water.
+#
+# the colours are the nearest the library has, and no better. each is a
+# linear reflectance from scene/swatches' Earth palette (Rock, Forest,
+# Grass, Beach), which the earth template typed and which has not been
+# checked against a measurement. the tree holds no measured reflectance for
+# basalt, coral sand, wet sand or rainforest. the palette's Beach is a tan
+# sand, not the white of a coral lagoon, and no sample here holds a coral
+# head or a patch of reef, so the lagoon floor is sand all the way. what
+# would put numbers in their place is a measured visible reflectance, from a
+# source named in the layer's own `source`, of weathered basalt, of coral
+# sand dry and wet, and of rainforest and grass cover.
+#
+# the rules' numbers, each with its reason. sea level is 0, the datum of
+# the heights; the terrain says no sea, so the cover says the level, and
+# the reader refuses an ocean whose middle stands at another height.
+#   sand, height from -8 to 3 m, edges blended over 2 m. the foot, 8 m
+#   under, is picked. this water's attenuation is 0.2656, 0.0584 and 0.0141
+#   per metre for red, green and blue; at 8 m, down and back up 16 m, red
+#   has 1.4 percent left, green 39 and blue 80, so the water has taken the
+#   red from the bed there and not the bed's whole colour. 8 m is about two
+#   red lengths (3.8 m each); the green length is about 17 m. the top,
+#   3 m, is picked: the survey's shore is one step of under a metre, and the
+#   beach and the sea's wash of it are a few metres high at most.
+#   sand, slope to 0.45 (full to 0.3), blended over 0.3: 0.6 is the tangent
+#   of 31 degrees, the least angle dry sand is commonly said to stand at.
+#   a general fact, not read from a source in the tree. the cutter's bed is
+#   a ramp of 0.28 a metre (see sources.yaml), so the whole bed near the
+#   shore is gentle enough, and the rule cuts off only the mountains.
+#   grass, height from 3 to 18 m blended over 6, slope to 0.3 blended over
+#   0.2: the low plain between the shore and the hills, picked: the island's
+#   plain is a few tens of metres at most. the slope's foot is picked, a
+#   gentle plain's.
+#   forest, height from 15 m blended over 10, slope to 1.0 blended over 0.6
+#   (full to 0.7, none from 1.3): the hills carry forest up their sides, and
+#   a face past 52 degrees (1.3) is bare rock. picked.
+# the survey is 99 m between samples, so the slope read is a slope over
+# about that, smoothed over each triangle: a cliff, a gully, a beach, and
+# the plain's width are all finer than the survey, so these rules colour
+# what the survey holds and nothing it does not.
+#
+# the sea: sea level at 0, the datum of the heights. the waves are the sea
+# the set language builds from a wind (oceantex's cascades, four bands of
+# wave 4096, 512, 64 and 8 m across summed at every point, so the sea has no
+# edge: the ocean says no extent and no samples). the wind is chosen for the
+# picture: 14 m/s toward the north-west (135 degrees, 2.356 rad from east
+# counterclockwise), the south-east trade blowing hard, over a fetch of 100
+# km, so the sea is young and steep; no measurement stands behind the
+# figures. the depth is deep. the sea meets the ground: over a depth d its
+# waves are the open waves times d over the depth that carries them whole
+# (from the bands' summed reach and McCowan's 0.78), so the shallow lagoon
+# is nearly flat, and the sea does not stand over land. there is no foam on
+# the reef. the bands repeat, the longest every 4096 m and the finest every
+# 8 m.
+#
+# the swell: the southern ocean's, which reaches this island from the
+# south-south-west; it travels toward the north-north-east, 1.178 rad from
+# east counterclockwise. its height and period, 3 m and 14 s, are chosen for
+# the picture. no page stands behind them: the wave atlas pages for this
+# island refused to be read.
+#
+# the water: pure seawater's attenuation, absorption (Pope and Fry 1997)
+# plus scattering (Morel 1974) as oceantex holds them, at 610, 550 and 465 nm
+# for red, green and blue: 0.2656, 0.0584 and 0.0141 per metre. no
+# chlorophyll, no sediment, no light scattered back up out of the water. the
+# glint is oceantex's own, cox and munk's total slope for the wind less what
+# the bands resolve, as a beckmann lobe. the sun's light is not carried
+# through the surface, so the bed is lit as if there were no water.
+#
+# the sun: 21.233 south, 159.784 west, 20 november 2026, 15:30 on a clock
+# ten hours behind utc. scene/daylight.Sun, noaa's fractional-year equations,
+# gives azimuth 263.49 and altitude 46.84 degrees, geometric. the set says
+# the date, the clock and its offset from utc, and the reader works the sun
+# from them. the afternoon is chosen: behind the cameras that look east.
+# the sky and the light's colour are worked from the air, `air: earth`; no
+# fill lamp, no horizon colour.
+#
+# places. the world half (the ocean's middle) is in the survey's frame. a
+# camera's at and look_at are east from the west edge, north as the survey's
+# north less 15800 (so the centre is at -7900), and up from the lowest ground
+# in the window, 2297.28 m below sea level, so sea level is at up 2297.28.
+# the cameras stand off the south-east coast, 5.2 to 5.6 km east and 1.4
+# to 2.2 km north of the centre, where land over 5 m comes to within a few
+# hundred metres of the water, and each looks at it (a fan of rays through
+# the survey's own heights found land in 22 to 69 percent of each frame):
+#   beach  4 m over the sea at 5400 e, 1800 n, toward 210 degrees (south-
+#          south-west), land on the right
+#   close  6 m over the sea at the same place, toward 180 degrees, down the coast
+#   reef   30 m over the sea 1.4 km off the north-east shore, back at the island
+#   low    2 m over the sea at 5600 e, 1400 n, level, toward 240 degrees
+#   high   4500 m up over the sea, looking down at the island
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: rarotonga from its east coast
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: -21.233
+    lon: -159.784
+  date: "2026-11-20"
+  timeofday: 1530
+  utc-offset: {value: -10, unit: h}
+  terrain:
+    from: rarotonga-terrain-tiles-99m
+    west: 0
+    north: 15800
+    across: 15800
+    down: 15800
+    step: 98.75
+    cover:
+      level: 0
+      layers:
+        - name: rock
+          reflectance: [0.19, 0.16, 0.12]
+          source: "scene/swatches Earth.Rock, typed by the earth template, not checked against a measurement"
+        - name: forest
+          reflectance: [0.045, 0.19, 0.040]
+          source: "scene/swatches Earth.Forest, typed by the earth template, not checked against a measurement"
+          height: {from: 15, blend: 10}
+          slope: {until: 1.0, blend: 0.6}
+        - name: grass
+          reflectance: [0.21, 0.39, 0.058]
+          source: "scene/swatches Earth.Grass, typed by the earth template, not checked against a measurement"
+          height: {from: 3, until: 18, blend: 6}
+          slope: {until: 0.3, blend: 0.2}
+        - name: sand
+          reflectance: [0.69, 0.55, 0.26]
+          source: "scene/swatches Earth.Beach, typed by the earth template, not checked against a measurement"
+          height: {from: -8, until: 3, blend: 2}
+          slope: {until: 0.45, blend: 0.3}
+  film:
+    width: 1600
+    height: 900
+    rays: 2
+    wide: 60
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  set:
+    # the island's own trees, sown by rule over the whole survey, each stand
+    # from its seed, between heights over the sea and no steeper than its
+    # steepest, rise over run. the cook islands' database calls utu and hala
+    # native from the lowlands to the mountains; both are sown on the
+    # lowland ring here, hala to 60 m and utu to 120 m, where the cameras on
+    # the beach see them. the heights, the steepness and the counts are
+    # picked. a tree stands at the height of the survey's nearest post, and
+    # the posts are 99 m apart, so a tree may stand as much as its slope
+    # times 70 m in or over the ground drawn between them: the steepest,
+    # 0.15, keeps that under about 10 m, and keeps the trees on the flat
+    # ring. the sources are in manufacture/plant-profiles.yaml beside each
+    # kind.
+    stands:
+      utu a: {kind: barringtonia-asiatica, count: 2000, seed: 701, complexity: clumps, above: 1, below: 120, steepest: 0.15}
+      utu b: {kind: barringtonia-asiatica, count: 2000, seed: 702, complexity: clumps, above: 1, below: 120, steepest: 0.15}
+      hala a: {kind: pandanus-tectorius, count: 2000, seed: 711, complexity: clumps, above: 1, below: 60, steepest: 0.15}
+      hala b: {kind: pandanus-tectorius, count: 2000, seed: 712, complexity: clumps, above: 1, below: 60, steepest: 0.15}
+  world:
+    unit: 1
+    materials:
+      seawater:
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.2656, 0.0584, 0.0141]
+        source: "pure seawater: absorption, Pope and Fry 1997, and scattering, Morel 1974, from oceantex at 610, 550 and 465 nm; no chlorophyll, no sediment"
+    ocean:
+      material: seawater
+      middle: [7900, 7900, 0]
+      sea:
+        wind: {value: 14, unit: m/s}
+        fetch: {value: 100000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 2.356, unit: rad}
+      swell: {height: {value: 3, unit: m}, period: {value: 14, unit: s}, toward: {value: 1.178, unit: rad}}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen for the picture: a 14 m/s south-east trade over 100 km, a young steep sea, and a 3 m, 14 s swell from the south-south-west; no measurement behind the figures"
+      glint: {model: cox-munk}
+  cameras:
+    beach:
+      title: "4 m over the sea off the south-east coast, south-south-west, land on the right"
+      location: {at: [13300, -6100, 2301.28]}
+      orientation: {look_at: [12800, -6966, 2317.28]}
+    close:
+      title: "6 m over the sea at the same place, down the coast to the south"
+      location: {at: [13300, -6100, 2303.28]}
+      orientation: {look_at: [13300, -7100, 2317.28]}
+    reef:
+      title: "30 m over the sea, 1.4 km off the shore, back at the island"
+      location: {at: [12300, -3700, 2327.28]}
+      orientation: {look_at: [10700, -4100, 2297.28]}
+    low:
+      title: "2 m over the sea, level, west-south-west to the coast and the horizon"
+      location: {at: [13500, -6500, 2299.28]}
+      orientation: {look_at: [12634, -7000, 2299.28]}
+    high:
+      title: "4500 m up over the sea, down on the island"
+      location: {at: [13900, -3900, 6797.28]}
+      orientation: {look_at: [7900, -7400, 2297.28]}

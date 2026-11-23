@@ -22,7 +22,8 @@ func TestTheWalksOverTilesEnd(t *testing.T) {
 		{"two boundaries side by side", 2, []int{0, 1}},
 		{"a boundary at the end of a row of three", 3, []int{0}},
 	} {
-		w := on(chained(c.n, along(c.n)...), 1)
+		pairs := along(c.n)
+		w := on(chained(c.n, pairs...), 1)
 		ends(t, "spread, with "+c.name, func() {
 			w.spread(make([]float64, c.n), c.front)
 		})
@@ -35,10 +36,13 @@ func TestTheWalksOverTilesEnd(t *testing.T) {
 		{"two tiles of sea side by side", []float64{-0.5, -0.5}},
 		{"sea at the end of a row of three", []float64{-0.5, 0.3, 0.3}},
 	} {
-		w := on(chained(len(c.height), along(len(c.height))...), 1)
+		count := len(c.height)
+		pairs := along(count)
+		w := on(chained(count, pairs...), 1)
 		w.height = c.height
 		ends(t, "the count from the sea, with "+c.name, func() { w.toSea() })
 	}
-	w := on(chained(2, along(2)...), 1)
+	pairs := along(2)
+	w := on(chained(2, pairs...), 1)
 	ends(t, "the reach of a feature", func() { w.within(w.Tiling.Centre(w.tiles[0]), 1) })
 }

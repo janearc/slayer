@@ -23,7 +23,11 @@ func (row clusteredCityMaker) madeAt(from seed, detail string) (good, error) {
 	batch := newCityBatch()
 	batch.placement = row.spec.Grid.BatchPlacement
 	for _, building := range layout.base.buildings {
-		batch.addBuilding(building, detail, row.spec.Night)
+		choice := detail
+		if row.spec.DetailView != nil {
+			choice = row.spec.DetailView.detail(building, detail, row.spec.Night)
+		}
+		batch.addBuilding(building, choice, row.spec.Night)
 	}
 	var infill []CityBuilding
 	if row.spec.ParkRelief {

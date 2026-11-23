@@ -13,9 +13,9 @@ type foot struct {
 // note keeps a line, each line of a note with several its own, and lets
 // the oldest go past the rows the foot has.
 func (shown *foot) note(text string) {
-	for _, line := range strings.Split(strings.TrimSpace(text), "\n") {
-		shown.notes = append(shown.notes, line)
-	}
+	trimmed := strings.TrimSpace(text)
+	shown.notes = append(shown.notes,
+		strings.Split(trimmed, "\n")...)
 	if extra := len(shown.notes) - FootRows; extra > none {
 		shown.notes = shown.notes[extra:]
 	}

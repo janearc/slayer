@@ -32,6 +32,6 @@ func (moon Satellite) Radius() measure.Length { return moon.radius }
 // Distance is the moon's mean distance, its orbit's semimajor axis.
 func (moon Satellite) Distance() measure.Length { return moon.distance }
 
-// Albedo is the moon's geometric albedo: how bright it is full, against
+// geometricAlbedo is the moon's geometric albedo: how bright it is full, against
 // a white disc as big that sends all its light back.
-func (moon Satellite) Albedo() float64 { return moon.albedo }
+func (moon Satellite) geometricAlbedo() float64 { return moon.albedo }

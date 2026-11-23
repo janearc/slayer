@@ -40,7 +40,7 @@ func Builtin() (scores, voicings []string) {
 			continue
 		}
 		name := "@" + strings.TrimSuffix(e.Name(), ".json")
-		switch kind, _ := Kind(b); kind {
+		switch kind, _ := kind(b); kind {
 		case "score":
 			scores = append(scores, name)
 		case "voicing":

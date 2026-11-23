@@ -49,7 +49,7 @@ func TestSearchCapturedOutputs(t *testing.T) {
 		t.Run(test.move, func(t *testing.T) {
 			sky, front, config, input := searchFixture()
 			input.Move = test.move
-			AddSearchlights(sky, front, config, input)
+			addSearchlights(sky, front, config, input)
 			if got := effectDigest(sky.Light); got != test.sky {
 				t.Fatalf("sky=%s want %s", got, test.sky)
 			}
@@ -69,7 +69,7 @@ func hazeFixture() (Image, Image, BackHazeInput) {
 		}
 	}
 	return front, trees, BackHazeInput{Camera: search.Camera, Moon: search.Moon,
-		Positions: Backlights(1129.6 - 1076), Levels: [2]float64{0.8, 0.4}, Gain: 0.6, Seconds: 1.25}
+		Positions: backlights(1129.6 - 1076), Levels: [2]float64{0.8, 0.4}, Gain: 0.6, Seconds: 1.25}
 }
 
 func TestHazeCapturedOutputs(t *testing.T) {
@@ -99,7 +99,7 @@ func TestSearchMasksGateAndInstanceIsolation(t *testing.T) {
 			original := slices.Clone(sky.Light)
 			open, closeTrees := slices.Clone(input.Open), slices.Clone(input.CloseTrees)
 			input.Gate = 0.009 / input.Level
-			AddSearchlights(sky, front, config, input)
+			addSearchlights(sky, front, config, input)
 			if !slices.Equal(sky.Light, original) || slices.ContainsFunc(front.Light, func(v float64) bool { return v != 0 }) {
 				t.Fatal("subthreshold gate changed images")
 			}
@@ -108,20 +108,20 @@ func TestSearchMasksGateAndInstanceIsolation(t *testing.T) {
 				input.Open[i] = false
 				input.CloseTrees[i] = true
 			}
-			AddSearchlights(sky, front, config, input)
+			addSearchlights(sky, front, config, input)
 			if !slices.Equal(sky.Light, original) || slices.ContainsFunc(front.Light, func(v float64) bool { return v != 0 }) {
 				t.Fatal("occlusion did not suppress light")
 			}
 			copy(input.Open, open)
 			copy(input.CloseTrees, closeTrees)
-			AddSearchlights(sky, front, config, input)
+			addSearchlights(sky, front, config, input)
 			wantSky, wantFront := slices.Clone(sky.Light), slices.Clone(front.Light)
 			otherSky, otherFront, otherConfig, otherInput := searchFixture()
 			otherConfig.Gain, otherConfig.Count, otherInput.Phase = 0.7, 3, 0.91
-			AddSearchlights(otherSky, otherFront, otherConfig, otherInput)
+			addSearchlights(otherSky, otherFront, otherConfig, otherInput)
 			copy(sky.Light, original)
 			clear(front.Light)
-			AddSearchlights(sky, front, config, input)
+			addSearchlights(sky, front, config, input)
 			if !slices.Equal(sky.Light, wantSky) || !slices.Equal(front.Light, wantFront) {
 				t.Fatal("another invocation changed output")
 			}
@@ -136,7 +136,7 @@ func TestSearchViewerFrontRouting(t *testing.T) {
 	sky, front, config, input := searchFixture()
 	input.Move, input.ShoreRow = "viewer", 2.25
 	original := slices.Clone(sky.Light)
-	AddSearchlights(sky, front, config, input)
+	addSearchlights(sky, front, config, input)
 	if !slices.ContainsFunc(front.Light, func(v float64) bool { return v > 0 }) {
 		t.Fatal("viewer beam did not reach front")
 	}
@@ -152,7 +152,7 @@ func TestSearchViewerFrontRouting(t *testing.T) {
 	}
 	copy(sky.Light, original)
 	clear(front.Light)
-	AddSearchlights(sky, front, config, input)
+	addSearchlights(sky, front, config, input)
 	if !slices.Equal(sky.Light, original) || slices.ContainsFunc(front.Light, func(v float64) bool { return v != 0 }) {
 		t.Fatal("close trees failed to cut viewer beam")
 	}

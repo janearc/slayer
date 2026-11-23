@@ -29,7 +29,7 @@ type Ringlet struct{ made ringlets }
 
 // RingletTerm is the ring's ringlets, and whether it has any.
 func (ring Ring) RingletTerm() (Ringlet, bool) {
-	return Ringlet{made: ring.ringlets}, ring.ringlets.strength != 0
+	return Ringlet{made: ring.ringlets}, ring.ringlets.strength != nothing
 }
 
 // Seed is the noise's seed; layer i's seed is this plus i.
@@ -58,7 +58,7 @@ type Stretch struct{ made measured }
 
 // StretchTerm is the ring's measured stretch, and whether it has one.
 func (ring Ring) StretchTerm() (Stretch, bool) {
-	return Stretch{made: ring.measured}, ring.measured.wide != 0
+	return Stretch{made: ring.measured}, ring.measured.wide != nothing
 }
 
 // Baked is the profile as a table of levels, finest first.
@@ -76,7 +76,7 @@ type Grain struct{ made grains }
 
 // GrainTerm is the ring's grains, and whether it has any.
 func (ring Ring) GrainTerm() (Grain, bool) {
-	has := ring.grains.clumping != 0 && ring.grains.pattern != nil
+	has := ring.grains.clumping != nothing && ring.grains.pattern != nil
 	return Grain{made: ring.grains}, has
 }
 
@@ -119,7 +119,7 @@ func (term Grain) Weights() []float64 {
 	size := term.made.largest
 	for range term.Layers() {
 		found = append(found, term.made.weight(size))
-		size /= 2
+		size /= double
 	}
 	return found
 }
@@ -127,9 +127,9 @@ func (term Grain) Weights() []float64 {
 // Layers is how many layers of clumps are drawn, a layer for each doubling of
 // size from the largest down to the smallest, no more than the most.
 func (term Grain) Layers() int {
-	count := 0
+	var count int
 	for size := term.made.largest; count < mostLayers &&
-		size >= term.made.smallest; size /= 2 {
+		size >= term.made.smallest; size /= double {
 		count++
 	}
 	return count
@@ -202,7 +202,7 @@ func (shine *GlowShine) Lift() float64 {
 // spreading is what an x-ray's power is spread over: a sphere's four pi
 // steradians of the glow's light, and the two pi squared of the band's ring
 // of light's own spreading, true by definition.
-const spreading = 2 * math.Pi * math.Pi * 4 * math.Pi
+const spreading = circle * math.Pi * sphere
 
 // Source is the x-ray power, times the band's lift over the plane and the
 // ring's yield, over the spreading and the slab's thickness: what the glow's

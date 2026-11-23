@@ -1,9 +1,13 @@
 // Package thing describes scene objects, materials, motion, volumes, and
 // lights. A World assembles them for the renderer.
 //
-// Nested transforms place objects relative to their parents. Nested, Within,
-// Spin, Growing, and Orbit compose those placements over time, using
+// Nested transforms place objects relative to their parents. Nested, Spin,
+// Growing, Orbit and Keyed compose those placements over time, using
 // maths.Subspace for coordinate transformations.
+//
+// Census and Storage count what a world holds. OceanSurface records an
+// authored ocean for the renderers. Made joins a measured material to a
+// finish from finishes.yaml.
 package thing
 
 import (
@@ -11,6 +15,7 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/film"
+	"github.com/janearc/slayer/materials"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/noise"
 	"github.com/janearc/slayer/scene/medium"
@@ -19,10 +24,25 @@ import (
 	"github.com/janearc/slayer/scene/texture"
 )
 
+const (
+	thingNought = 0   // defined: no amount
+	thingUnity  = 1   // defined: one amount, the whole of a share
+	thingPair   = 2   // defined: two, the parts of a pair
+	thingHalf   = 0.5 // defined: one over two
+)
+
+// thingBeamSpeedCap is the fastest share of light speed a rotating beam is
+// allowed to reach, read from picks.yaml.
+var thingBeamSpeedCap = pick("beam-speed-cap")
+
 // Material describes surface response. Instances are shared: modifying one
 // changes every object referencing it. Do not mutate it during rendering.
 type Material struct {
 	Name string
+	// Source records supplied optical provenance for water with observations.
+	Source string
+	// WaterComposition retains sourced observations independently of optics.
+	WaterComposition *materials.WaterComposition
 	// Colour is diffuse RGB reflectance, with each channel from zero to
 	// one.
 	Colour maths.Light
@@ -34,6 +54,12 @@ type Material struct {
 	// Shine overrides Glow with local-space emission, such as lava or a hot
 	// disc.
 	Shine texture.Texture
+	// IndependentEmission adds a surface's emitted light without reducing it
+	// by reflection or transmission. This is an explicit CPU-only approximation
+	// for emitters carried at a transparent boundary. Without it, emission is
+	// mixed with what the surface reflects and transmits. Metal encoding
+	// refuses this option.
+	IndependentEmission bool
 	// Radiant describes band-dependent emission and transmission. Without
 	// it, the material is opaque and dark outside visible rendering.
 	Radiant Radiant
@@ -44,8 +70,9 @@ type Material struct {
 	// full glass or polished-surface response. The renderer follows one
 	// reflected ray.
 	//
-	// Index is refractive index. Zero selects 1.5, the glass default.
-	// Reflection increases toward grazing incidence.
+	// Index is refractive index. An index at or below zero selects 1.5,
+	// the glass default; see Dense. Reflection increases toward grazing
+	// incidence.
 	Gloss, Index float64
 	// Rank says which of two clear things a point inside both is made
 	// of: the one of the higher rank, and between equals the one the
@@ -64,8 +91,8 @@ type Material struct {
 	// refracted ray through as many surfaces as trace's refractions.
 	//
 	// A material with Through above zero that is no metal reflects by
-	// Splits, the unpolarised Fresnel share for its index and the side
-	// the ray arrives from, and not by Mirrors' Schlick. A metal
+	// SplitsBetween, the unpolarised Fresnel share for its index and the
+	// side the ray arrives from, and not by mirrors' Schlick. A metal
 	// reflects by Reflects whatever its Through.
 	//
 	// A partial reflection on a ray that has already bent is paid and
@@ -74,13 +101,14 @@ type Material struct {
 	// clear-medium state when the caller supplies it.
 	Through float64
 	// ClearMedium names this boundary's homogeneous interior for the CPU
-	// tracer's unscattered Beer-Lambert transport. Its zero value preserves
-	// the historical unattenuated clear-surface behavior.
+	// tracer's unscattered Beer-Lambert transport. Nil leaves a clear
+	// surface unattenuated.
 	ClearMedium *ClearMedium
 	// Metal, when it is given, makes the surface a conductor: it mirrors
 	// by its complex index, a different share of each colour, scaled by
 	// Gloss, and Index no longer says how much it mirrors. Film, when it
-	// is given too, is a clear layer over the metal. See Reflects.
+	// is given too, is a clear layer over the metal; without a Metal it
+	// is ignored. See Reflects.
 	Metal *Metal
 	Film  *Film
 	// Satin is how far a glossy surface is from polished, for the
@@ -120,27 +148,41 @@ type WakeFoamResponse struct {
 	Seed       uint32
 }
 
+// thingFinite reports whether a value is neither not-a-number nor infinite.
+func thingFinite(value float64) bool {
+	return !math.IsNaN(value) && !math.IsInf(value, thingNought)
+}
+
+// thingShare reports whether a value lies from nought to unity, both
+// included.
+func thingShare(value float64) bool {
+	return value >= thingNought && value <= thingUnity
+}
+
 // Valid reports whether this authored response is finite and bounded.
 func (foam WakeFoamResponse) Valid() bool {
-	if foam.Coverage == 0 {
+	if foam.Coverage == thingNought {
 		return true
 	}
-	finite := func(value float64) bool { return !math.IsNaN(value) && !math.IsInf(value, 0) }
-	if foam.FrozenTime && (!finite(foam.Seconds) || foam.Seconds < 0) {
+	if foam.FrozenTime &&
+		(!thingFinite(foam.Seconds) || foam.Seconds < thingNought) {
 		return false
 	}
-	return finite(foam.OriginEast) && finite(foam.OriginNorth) &&
-		finite(foam.Heading) && finite(foam.Speed) && foam.Speed >= 0 &&
-		finite(foam.HalfWidth) && foam.HalfWidth > 0 &&
-		finite(foam.Length) && foam.Length > 0 &&
-		finite(foam.Wavelength) && foam.Wavelength > 0 &&
+	return thingFinite(foam.OriginEast) && thingFinite(foam.OriginNorth) &&
+		thingFinite(foam.Heading) &&
+		thingFinite(foam.Speed) && foam.Speed >= thingNought &&
+		thingFinite(foam.HalfWidth) && foam.HalfWidth > thingNought &&
+		thingFinite(foam.Length) && foam.Length > thingNought &&
+		thingFinite(foam.Wavelength) && foam.Wavelength > thingNought &&
 		foam.Wavelength <= foam.Length &&
-		finite(foam.Coverage) && foam.Coverage > 0 && foam.Coverage <= 1 &&
-		finite(foam.Band) && foam.Band > 0 && foam.Band <= 1 &&
-		foam.Reflectance.R >= 0 && foam.Reflectance.R <= 1 &&
-		foam.Reflectance.G >= 0 && foam.Reflectance.G <= 1 &&
-		foam.Reflectance.B >= 0 && foam.Reflectance.B <= 1 &&
-		finite(foam.Satin) && foam.Satin > 0 && foam.Satin <= 1
+		thingFinite(foam.Coverage) && foam.Coverage > thingNought &&
+		foam.Coverage <= thingUnity &&
+		thingFinite(foam.Band) && foam.Band > thingNought &&
+		foam.Band <= thingUnity &&
+		thingShare(foam.Reflectance.R) && thingShare(foam.Reflectance.G) &&
+		thingShare(foam.Reflectance.B) &&
+		thingFinite(foam.Satin) && foam.Satin > thingNought &&
+		foam.Satin <= thingUnity
 }
 
 // At returns bounded foam coverage at a local east/up/south point and scene
@@ -149,8 +191,9 @@ func (foam WakeFoamResponse) At(local maths.Vec, seconds float64) float64 {
 	if foam.FrozenTime {
 		seconds = foam.Seconds
 	}
-	if foam.Coverage <= 0 || !foam.Valid() || math.IsNaN(seconds) || math.IsInf(seconds, 0) || seconds < 0 {
-		return 0
+	if foam.Coverage <= thingNought || !foam.Valid() ||
+		!thingFinite(seconds) || seconds < thingNought {
+		return thingNought
 	}
 	forwardEast, forwardNorth := math.Sin(foam.Heading), math.Cos(foam.Heading)
 	centerEast := foam.OriginEast + forwardEast*foam.Speed*seconds
@@ -158,92 +201,90 @@ func (foam WakeFoamResponse) At(local maths.Vec, seconds float64) float64 {
 	deltaEast, deltaNorth := local.X-centerEast, -(local.Z)-centerNorth
 	aft := -deltaEast*forwardEast - deltaNorth*forwardNorth
 	cross := deltaEast*forwardNorth - deltaNorth*forwardEast
-	if aft <= 0 || aft >= foam.Length || foam.Coverage <= 0 {
-		return 0
+	if aft <= thingNought || aft >= foam.Length {
+		return thingNought
 	}
 	longitudinal := math.Sin(math.Pi * aft / foam.Length)
-	width := 2 * foam.HalfWidth
+	width := thingPair * foam.HalfWidth
 	if math.Abs(cross) >= width {
-		return 0
+		return thingNought
 	}
 	// Smoothly fade the mask to zero at the authored support edge.
-	edge := 1 - math.Abs(cross)/width
+	edge := thingUnity - math.Abs(cross)/width
 	edge *= edge
-	lateral := math.Exp(-0.5*math.Pow(cross/foam.HalfWidth, 2)) * edge
+	lateral := math.Exp(-thingHalf*math.Pow(cross/foam.HalfWidth, thingPair)) *
+		edge
 	// One coherent-noise octave breaks the patch at the authored scale.
 	// The affine map takes its signed base band into coverage coordinates.
-	pattern := 0.5 + 0.5*noise.Fractal(uint64(foam.Seed),
-		aft/foam.Wavelength, cross/foam.Wavelength, 0, 1)
+	pattern := thingHalf + thingHalf*noise.Fractal(uint64(foam.Seed),
+		aft/foam.Wavelength, cross/foam.Wavelength, thingNought, thingUnity)
 	// The signed noise's zero contour separates patches; Band softens its edge.
-	threshold := 0.5 - foam.Band/2
-	breakup := math.Max(0, math.Min(1, (pattern-threshold)/foam.Band))
-	return math.Max(0, math.Min(foam.Coverage,
+	threshold := thingHalf - foam.Band/thingPair
+	breakup := math.Max(thingNought,
+		math.Min(thingUnity, (pattern-threshold)/foam.Band))
+	return math.Max(thingNought, math.Min(foam.Coverage,
 		foam.Coverage*longitudinal*lateral*breakup))
 }
 
+// glassIndex is the refractive index of glass, which a surface or a film
+// that gives none, or one at or below zero, is read as having.
+var glassIndex = pick("glass-index")
+
 // Dense is the refractive index a surface reflects and bends by:
-// Index, or glass's 1.5 where none is given.
-func (m *Material) Dense() float64 {
-	if m.Index <= 0 {
-		return 1.5
+// Index, or glass's 1.5 where none is given or it is at or below zero.
+func (material *Material) Dense() float64 {
+	if material.Index <= thingNought {
+		return glassIndex
 	}
-	return m.Index
+	return material.Index
 }
 
 // Mirrors returns Schlick Fresnel reflectance at incidence cosine cos, scaled
 // by Gloss. Nonpositive gloss returns zero; values above one are clamped so
 // reflected light cannot exceed incident light.
-func (m *Material) Mirrors(cos float64) float64 {
-	if m.Gloss <= 0 {
-		return 0
+func (material *Material) Mirrors(cos float64) float64 {
+	if material.Gloss <= thingNought {
+		return thingNought
 	}
-	if m.Gloss > 1 {
-		return (&Material{Gloss: 1, Index: m.Index}).Mirrors(cos)
+	if material.Gloss > thingUnity {
+		clamped := &Material{Gloss: thingUnity, Index: material.Index}
+		return clamped.Mirrors(cos)
 	}
-	n := m.Dense()
-	f0 := (n - 1) / (n + 1)
-	f0 *= f0
-	away := 1 - math.Max(0, math.Min(1, cos))
-	return m.Gloss * (f0 + (1-f0)*away*away*away*away*away)
+	index := material.Dense()
+	normal := (index - thingUnity) / (index + thingUnity)
+	normal *= normal
+	inside := math.Min(thingUnity, cos)
+	away := thingUnity - math.Max(thingNought, inside)
+	return material.Gloss *
+		(normal + (thingUnity-normal)*away*away*away*away*away)
 }
 
-// Splits returns the share a clear surface reflects, by Fresnel, by side:
+// SplitsBetween returns the share a clear surface reflects, by Fresnel:
 // the light arriving at incidence cosine cos that a surface which
-// transmits reflects, scaled by Gloss: the unpolarised
-// Fresnel reflectance of the boundary between air and a thing of index
-// Dense. Within says the light arrives from inside the thing; otherwise it
-// arrives from the air.
+// transmits reflects, scaled by Gloss: the unpolarised Fresnel
+// reflectance of a boundary where relative is the index of what the light
+// goes into over the index of what it comes from.
 //
-// Light past the critical angle, where nothing can be transmitted,
-// reflects entirely, at any Gloss. Otherwise nonpositive gloss returns
-// zero, and gloss above one is clamped to one.
-func (m *Material) Splits(cos float64, within bool) float64 {
-	n := m.Dense()
-	if within {
-		n = 1 / n
-	}
-	return m.SplitsBetween(cos, n)
-}
-
-// SplitsBetween is Splits for a boundary that need not have air on
-// either side: relative is the index of what the light goes into over
-// the index of what it comes from. Water against glass is 1.333 over
-// 1.5 going in and its inverse coming out. As Splits, light past the
-// critical angle reflects entirely, at any Gloss.
-func (m *Material) SplitsBetween(cos, relative float64) float64 {
+// Water against glass is
+// 1.333 over 1.5 going in and its inverse coming out. Light past the
+// critical angle, where nothing can be transmitted, reflects entirely, at
+// any Gloss. Otherwise nonpositive gloss returns zero, and gloss above one
+// is clamped to one.
+func (material *Material) SplitsBetween(cos, relative float64) float64 {
 	share := maths.Fresnel(cos, relative)
-	if share >= 1 {
-		return 1
+	if share >= thingUnity {
+		return thingUnity
 	}
-	return math.Min(math.Max(m.Gloss, 0), 1) * share
+	gloss := math.Max(material.Gloss, thingNought)
+	return math.Min(gloss, thingUnity) * share
 }
 
 // Roughness returns local-space texture luminance, or one without a texture.
-func (m *Material) Roughness(local maths.Vec) float64 {
-	if m.Rough == nil {
-		return 1
+func (material *Material) Roughness(local maths.Vec) float64 {
+	if material.Rough == nil {
+		return thingUnity
 	}
-	return m.Rough.At(local).Luminance()
+	return material.Rough.At(local).Luminance()
 }
 
 // Attrs controls exceptional visibility and collision behaviour. The zero value
@@ -255,21 +296,23 @@ type Attrs struct {
 }
 
 // Clear reports whether the object is excluded from shadow casting.
-func (t *Thing) Clear() bool { return t.Attrs.Clear }
+func (thing *Thing) Clear() bool { return thing.Attrs.Clear }
 
-// Motion returns an object's subspace at elapsed time t.
+// Motion returns an object's subspace at elapsed time.
 type Motion interface {
-	At(t time.Duration) maths.Subspace
+	At(elapsed time.Duration) maths.Subspace
 }
 
 // still is a time-independent transform.
 type still maths.Subspace
 
 // At returns the stationary transform for any time.
-func (s still) At(time.Duration) maths.Subspace { return maths.Subspace(s) }
+func (placement still) At(time.Duration) maths.Subspace {
+	return maths.Subspace(placement)
+}
 
 // Still constructs a stationary motion.
-func Still(s maths.Subspace) Motion { return still(s) }
+func Still(placement maths.Subspace) Motion { return still(placement) }
 
 // Thing combines local geometry, a material, motion, and visibility flags.
 type Thing struct {
@@ -280,18 +323,15 @@ type Thing struct {
 }
 
 // Hidden reports whether the object is excluded from rendering and shadows.
-func (t *Thing) Hidden() bool { return t.Attrs.Hidden }
-
-// Ghost reports whether the object passes through other objects.
-func (t *Thing) Ghost() bool { return t.Attrs.Ghost }
+func (thing *Thing) Hidden() bool { return thing.Attrs.Hidden }
 
 // At returns the object's transform at time at, or the identity placement when
 // no motion is supplied.
-func (t *Thing) At(at time.Duration) maths.Subspace {
-	if t.Motion == nil {
-		return maths.Subspace{}
+func (thing *Thing) At(at time.Duration) maths.Subspace {
+	if thing.Motion == nil {
+		return maths.Local()
 	}
-	return t.Motion.At(at)
+	return thing.Motion.At(at)
 }
 
 // Volume combines a density field, material, and motion. Rays integrate through
@@ -327,107 +367,159 @@ type Beam struct {
 //
 // Rotational flow follows the tangent, scales as sqrt(At/radius) when At is
 // set, and is capped at 0.99c. Flow on the axis is zero.
-func (b Beam) Flow(at maths.Vec) (dir maths.Vec, speed float64) {
-	axis := b.Axis
-	if axis == (maths.Vec{}) {
+func (beam Beam) Flow(at maths.Vec) (direction maths.Vec, speed float64) {
+	axis := beam.Axis
+	if axis == thingNoDirection {
 		axis = maths.Up
 	}
 	axis = axis.Unit()
-	if !b.Round {
-		if at.Dot(axis) < 0 {
-			return axis.Neg(), b.Speed
+	if !beam.Round {
+		if at.Dot(axis) < thingNought {
+			return axis.Neg(), beam.Speed
 		}
-		return axis, b.Speed
+		return axis, beam.Speed
 	}
-	out := at.Add(axis.Scale(-at.Dot(axis)))
-	r := out.Len()
-	if r == 0 {
-		return maths.Vec{}, 0
+	along := at.Dot(axis)
+	out := at.Add(axis.Scale(-along))
+	radius := out.Len()
+	if radius == thingNought {
+		return thingNoDirection, thingNought
 	}
-	speed = b.Speed
-	if b.At > 0 {
-		speed = math.Min(0.99, speed*math.Sqrt(b.At/r))
+	speed = beam.Speed
+	if beam.At > thingNought {
+		ratio := math.Sqrt(beam.At / radius)
+		speed = math.Min(thingBeamSpeedCap, speed*ratio)
 	}
-	return axis.Cross(out.Scale(1 / r)), speed
+	return axis.Cross(out.Scale(thingUnity / radius)), speed
 }
+
+// thingNoDirection is the vector with no length: the direction of nothing.
+var thingNoDirection = maths.V(thingNought, thingNought, thingNought)
 
 // Boost returns the Doppler emission multiplier toward a direction at a
 // local-space point. Stationary or invalid-speed flows return one.
-func (b Beam) Boost(toward, at maths.Vec) float64 {
-	if b.Speed <= 0 || b.Speed >= 1 {
-		return 1
+func (beam Beam) Boost(toward, at maths.Vec) float64 {
+	if beam.Speed <= thingNought || beam.Speed >= thingUnity {
+		return thingUnity
 	}
-	flow, speed := b.Flow(at)
-	if speed == 0 {
-		return 1
+	flow, speed := beam.Flow(at)
+	if speed == thingNought {
+		return thingUnity
 	}
-	gamma := 1 / math.Sqrt(1-speed*speed)
-	delta := 1 / (gamma * (1 - speed*flow.Dot(toward.Unit())))
+	gamma := thingUnity / math.Sqrt(thingUnity-speed*speed)
+	aligned := flow.Dot(toward.Unit())
+	delta := thingUnity / (gamma * (thingUnity - speed*aligned))
 	return delta * delta * delta
 }
 
 // Hidden reports whether the volume is excluded from the image.
-func (v *Volume) Hidden() bool { return v.Attrs.Hidden }
+func (volume *Volume) Hidden() bool { return volume.Attrs.Hidden }
 
 // At returns the volume transform at time at, or identity without motion.
-func (v *Volume) At(at time.Duration) maths.Subspace {
-	if v.Motion == nil {
-		return maths.Subspace{}
+func (volume *Volume) At(at time.Duration) maths.Subspace {
+	if volume.Motion == nil {
+		return maths.Local()
 	}
-	return v.Motion.At(at)
+	return volume.Motion.At(at)
 }
 
 // Lamp aliases film.Emitter. The world holds lamps; film defines their
 // light-emission contract.
 type Lamp = film.Emitter
 
-// OceanSurface identifies an authored finite ocean interface for CPU
-// transport. Boundary is the exact staged sheet, Mean is its horizontal mean
-// plane in world coordinates, and ExtentMetres/MetresPerUnit describe its
-// finite square footprint.
+// OceanSurface identifies an authored finite ocean interface for the
+// renderers. It is a record: thing refuses no combination of its fields.
+// trace refuses, when a render starts, the combinations it cannot draw, and
+// gpu refuses the CPU-only ones. Each field says when it is read.
 //
-// DirectSunMeanPlane and DirectMoonMeanPlane select mutually exclusive,
-// explicitly authored directional source routes for the CPU-only source-path
-// approximation. SunRoute records which validated hillside insertion contract
-// supplied the light.
-//
-// SunLampIndex identifies the one tagged direct emitter; FillLampIndex
-// identifies the ordinary-ground legacy fill, or is -1 for the groundless-air
-// route. Negative indexes mean absent. SmoothNormalApproximation records the
-// selected CPU-only bilinear vertex-slope shading normal.
-// ShadingNormalApproximation names any explicit CPU-only shading-normal mode
-// on the ocean.
+// A zero OceanSurface with only a Boundary is a plain sea. The optional
+// source routes and transport approximations below are all off in it, but
+// its lamp indexes are zero, which names lamp 0, and not absent.
 type OceanSurface struct {
-	Boundary             *Thing
-	WaveMotion           *OceanWaveMotion
-	Mean                 maths.Vec
-	ExtentMetres         float64
-	MetresPerUnit        float64
-	DirectSunMeanPlane   bool
-	DirectMoonMeanPlane  bool
-	InterfaceEvents      int
-	SpotInscatter        bool
-	InfiniteMeanPlane    bool
+	// Boundary is the exact staged sheet. It is one of the world's Things.
+	Boundary *Thing
+	// WaveMotion is the staged wave recipe for a sea that moves with the
+	// scene clock, and nil for a snapshot sea.
+	WaveMotion *OceanWaveMotion
+	// Mean is the boundary's origin in world coordinates, the point its
+	// horizontal mean plane passes through. The Moon route refuses a
+	// boundary whose origin is elsewhere.
+	Mean maths.Vec
+	// ExtentMetres is the side of the finite square footprint, in metres.
+	// A source route and a clear-cloud sky source need it finite and above
+	// zero.
+	ExtentMetres float64
+	// MetresPerUnit converts the world's distance units to metres. A source
+	// route needs it finite, above zero and equal to the boundary's
+	// ClearMedium.MetresPerUnit.
+	MetresPerUnit float64
+	// DirectSunMeanPlane selects the direct Sun route, the refracted
+	// mean-plane Sun that is a CPU-only approximation. It needs SunRoute
+	// Ground or GroundlessAir, and is refused with DirectMoonMeanPlane.
+	DirectSunMeanPlane bool
+	// DirectMoonMeanPlane selects the direct Moon route, in place of the
+	// Sun route. It needs SunRoute Moon and FillLampIndex -1. A flat finite
+	// height field or an exact calm infinite plane is drawn by both the CPU
+	// and the GPU.
+	DirectMoonMeanPlane bool
+	// InterfaceEvents is how many interface crossings one ray may follow.
+	// Zero is off. Above zero it needs a visible clear boundary that is no
+	// metal and has the exact infinite mean-plane continuation as its
+	// shape, and at most MaxOceanInterfaceEvents. The GPU refuses it.
+	InterfaceEvents int
+	// SpotInscatter opts the ocean's medium into in-scattering of spot
+	// lamps. It is read where the boundary's ClearMedium scatters, and
+	// is refused with wake foam and with the Moon route.
+	SpotInscatter bool
+	// InfiniteMeanPlane says the boundary is continued past its finite
+	// sheet by the exact infinite mean plane. Diffuse-sky in-scattering
+	// and a clear-cloud sky source need it, and the boundary's shape must
+	// then be that continuation. The GPU refuses it except with the Moon
+	// route. OceanWaveConfig carries the same choice for the recipe.
+	InfiniteMeanPlane bool
+	// ClearCloudSkySamples is how many sky directions a clear-cloud
+	// volume's source reads. Zero is off. Above zero it needs a Sky and
+	// the infinite continuation, and the Moon route refuses it.
 	ClearCloudSkySamples int
-	// ClearCloudWaterStepMode is per-gap (legacy) or explicit ray-spacing.
-	ClearCloudWaterStepMode    string
-	SmoothNormalApproximation  bool
+	// ClearCloudWaterStepMode is "ray-spacing" to step the water at the
+	// ray's own spacing. Empty, "per-gap" or any other word gives the
+	// whole water budget to every gap between cloud volumes.
+	ClearCloudWaterStepMode string
+	// SmoothNormalApproximation is true when ShadingNormalApproximation
+	// is the bilinear vertex-slope mode. It is a record of what the stage
+	// chose; the renderers shade from the boundary's own height field and
+	// read neither.
+	SmoothNormalApproximation bool
+	// ShadingNormalApproximation names the shading-normal mode the stage
+	// chose for the boundary, or is empty for the exact cell normal.
 	ShadingNormalApproximation string
-	SunRoute                   OceanSunRoute
-	SunLampIndex               int
-	FillLampIndex              int
+	// SunRoute says which staged path supplied the source lamp. It is read
+	// only when DirectSunMeanPlane or DirectMoonMeanPlane is set, and
+	// OceanSunRouteUnspecified is then refused.
+	SunRoute OceanSunRoute
+	// SunLampIndex is the place in the world's lamps of the one tagged
+	// direct emitter, an emit.Distant that points above the horizon. It is
+	// read only with a source route, and a negative index, absent, is then
+	// refused. Its zero value is lamp 0.
+	SunLampIndex int
+	// FillLampIndex is the place of the ordinary-ground fill lamp, which
+	// must differ from SunLampIndex on the Ground route and be -1, absent,
+	// on the GroundlessAir and Moon routes. Its zero value is lamp 0.
+	FillLampIndex int
 }
 
-// MaxOceanInterfaceEvents is the picked upper bound on explicitly authored
+// MaxOceanInterfaceEvents is the upper bound on explicitly authored
 // CPU ocean-interface traversal, limiting the branching transport work.
 const MaxOceanInterfaceEvents = 16
 
 // MeanPlaneSource reports an explicit directional Sun or Moon source route.
 func (ocean *OceanSurface) MeanPlaneSource() bool {
-	return ocean != nil && (ocean.DirectSunMeanPlane || ocean.DirectMoonMeanPlane)
+	return ocean != nil &&
+		(ocean.DirectSunMeanPlane || ocean.DirectMoonMeanPlane)
 }
 
 // OceanWaveConfig is a copied wave recipe for one explicitly timed ocean.
+// InfiniteMeanPlane is the recipe's copy of OceanSurface.InfiniteMeanPlane.
 type OceanWaveConfig struct {
 	WindMetresPerSecond float64
 	FetchMetres         float64
@@ -446,7 +538,8 @@ type OceanWaveConfig struct {
 }
 
 // OceanSurfaceWakeConfig is a copied authored surface-height wake envelope.
-// Its craft path is explicit and independent of Alfa's model or hydrodynamics.
+// Its craft path is explicit and independent of any craft's model or
+// hydrodynamics.
 type OceanSurfaceWakeConfig struct {
 	OriginEastMetres, OriginNorthMetres                              float64
 	HeadingRadians, SpeedMetresPerSecond                             float64
@@ -456,19 +549,33 @@ type OceanSurfaceWakeConfig struct {
 
 // OceanWaveMotion keeps its recipe private so scene consumers cannot change
 // the staged wave inputs between frames. It is nil for snapshot oceans.
+// The recipe, wake included, is copied in and copied out.
 type OceanWaveMotion struct{ config OceanWaveConfig }
 
-// NewOceanWaveMotion copies a wave recipe into immutable scene metadata.
+// NewOceanWaveMotion copies a wave recipe, and the surface wake it points
+// to, into immutable scene metadata. A later change to the caller's wake
+// does not reach the motion.
 func NewOceanWaveMotion(config OceanWaveConfig) *OceanWaveMotion {
-	return &OceanWaveMotion{config: config}
+	return &OceanWaveMotion{config: config.detached()}
 }
 
-// Config returns a copy of the immutable wave recipe.
+// Config returns a copy of the immutable wave recipe, with a copy of its
+// surface wake. A change to what it returns does not reach the motion.
 func (motion *OceanWaveMotion) Config() OceanWaveConfig {
 	if motion == nil {
 		return OceanWaveConfig{}
 	}
-	return motion.config
+	return motion.config.detached()
+}
+
+// detached is the recipe with a wake of its own, a copy of the one it
+// points to, so that two holders of recipes never share a wake.
+func (config OceanWaveConfig) detached() OceanWaveConfig {
+	if config.SurfaceWake != nil {
+		wake := *config.SurfaceWake
+		config.SurfaceWake = &wake
+	}
+	return config
 }
 
 // OceanSunRoute names the scene path that staged the opt-in Sun or Moon
@@ -476,9 +583,16 @@ func (motion *OceanWaveMotion) Config() OceanWaveConfig {
 type OceanSunRoute uint8
 
 const (
+	// OceanSunRouteUnspecified is no route: a source flag with it is
+	// refused.
 	OceanSunRouteUnspecified OceanSunRoute = iota
+	// OceanSunRouteGround is the Sun over ordinary ground, with a Sun lamp
+	// and a distinct fill lamp.
 	OceanSunRouteGround
+	// OceanSunRouteGroundlessAir is the Sun with no ground, under a staged
+	// sky and with no fill lamp.
 	OceanSunRouteGroundlessAir
+	// OceanSunRouteMoon is the Moon as the source, with no fill lamp.
 	OceanSunRouteMoon
 )
 
@@ -491,7 +605,7 @@ func Sun(toward maths.Vec, strength maths.Light) Lamp {
 
 // World assembles surfaces, volumes, fields, lights, sky, and global haze.
 type World struct {
-	// VolumeIllumination's zero value keeps legacy lamp-only painted media.
+	// VolumeIllumination's zero value lights painted media by lamps alone.
 	VolumeIllumination VolumeIllumination
 	// RayOriginReference's zero value keeps the geometry-derived heuristic.
 	RayOriginReference RayOriginReference
@@ -506,10 +620,60 @@ type World struct {
 	Sky Sky
 	// Haze applies global atmospheric attenuation. Its zero value is clear.
 	Haze Haze
+	// Glow is nil unless a flat layer of air holds the city's own light.
+	Glow Glow
 	// Pixel optionally fixes the angular texture footprint in radians. Zero
 	// derives it from the render. A shot can set this to retain the same
 	// texture detail across different output resolutions.
 	Pixel float64
+	// Filter is where in a pixel its rays start, and so how they are
+	// joined, where a picture takes more than one ray a pixel. The zero
+	// value, GridFilter, starts each ray at the middle of its own square of
+	// the pixel.
+	Filter Filter
+}
+
+// Filter is where in a pixel its rays start, by film.Place. A pixel is
+// the plain mean of its own rays under every one; the filter is taken by
+// where the rays start, and is named for the shape they are spread
+// under, across the pixel.
+type Filter uint8
+
+// The filters. A grid is a regular grid, each ray at the middle of its
+// own square of the pixel. The other three spread the rays evenly by a
+// sequence.
+//
+// A box spreads them over the pixel's own square; a trapezoid, flat
+// over half the pixel and sloped half a pixel each side, a pixel and a
+// half wide; a tent, sloped all the way from its middle, two wide.
+const (
+	GridFilter Filter = iota
+	BoxFilter
+	TrapezoidFilter
+	TentFilter
+)
+
+// The widths of the slope at each side of a filter's shape, in pixels:
+// a box has none, a tent is all slope, and a trapezoid is defined here
+// as half of each.
+const (
+	boxRamp       = 0
+	trapezoidRamp = 0.5
+	tentRamp      = 1
+)
+
+// Ramp is how wide the slope at each side of the filter's shape is, in
+// pixels, and whether the rays are spread at all: a grid's are not.
+func (filter Filter) Ramp() (ramp float64, spread bool) {
+	switch filter {
+	case BoxFilter:
+		return boxRamp, true
+	case TrapezoidFilter:
+		return trapezoidRamp, true
+	case TentFilter:
+		return tentRamp, true
+	}
+	return boxRamp, false
 }
 
 // Sky aliases sky.Sky so scene declarations can use one package.
@@ -533,25 +697,27 @@ type Haze struct {
 func NewWorld() *World { return &World{} }
 
 // Add appends a surface and returns its stored pointer.
-func (w *World) Add(t Thing) *Thing {
-	p := &t
-	w.Things = append(w.Things, p)
-	return p
+func (world *World) Add(added Thing) *Thing {
+	stored := &added
+	world.Things = append(world.Things, stored)
+	return stored
 }
 
 // AddVolume appends a volume and returns its stored pointer.
-func (w *World) AddVolume(v Volume) *Volume {
-	p := &v
-	w.Volumes = append(w.Volumes, p)
-	return p
+func (world *World) AddVolume(added Volume) *Volume {
+	stored := &added
+	world.Volumes = append(world.Volumes, stored)
+	return stored
 }
 
 // AddField appends a field and returns its stored pointer.
-func (w *World) AddField(f Field) *Field {
-	p := &f
-	w.Fields = append(w.Fields, p)
-	return p
+func (world *World) AddField(added Field) *Field {
+	stored := &added
+	world.Fields = append(world.Fields, stored)
+	return stored
 }
 
 // Lamp appends an emitter to the world.
-func (w *World) Lamp(l Lamp) { w.Lamps = append(w.Lamps, l) }
+func (world *World) Lamp(added Lamp) {
+	world.Lamps = append(world.Lamps, added)
+}

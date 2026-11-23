@@ -274,7 +274,8 @@ func TestStormRecipesKeepBoundsAndSeeds(t *testing.T) {
 		t.Fatal("unresolved turbulence not filtered")
 	}
 	flow := storms.flow(5, maths.V(1, 2, 3), 0)
-	if !(math.Abs(flow.Dot(maths.V(1, 2, 3))) <= 1e-10) {
+	along := flow.Dot(maths.V(1, 2, 3))
+	if !(math.Abs(along) <= 1e-10) {
 		t.Fatal("flow left sphere tangent")
 	}
 	folded, stretch := storms.folded(maths.V(0, 1, 0), 0, 1)
@@ -409,7 +410,8 @@ func TestStormColumnsBlendWithoutSeamsAndCookingChangesTheirLight(t *testing.T) 
 	}
 	for _, latitude := range []float64{-10, -1, 0, 1, 10} {
 		up := face.ways.toward(latitude, 0)
-		light := face.Within(up.Scale(body.Radius()), 1)
+		radius := body.Radius()
+		light := face.Within(up.Scale(radius), 1)
 		if !(light.G > 0) || math.IsInf(light.G, 0) {
 			t.Fatal("storm lost finite reflected light")
 		}
@@ -420,7 +422,8 @@ func TestStormColumnsBlendWithoutSeamsAndCookingChangesTheirLight(t *testing.T) 
 		if mark.held != 1 || (i == 0 && mark.capped < .99) || (i == 1 && mark.cleared < .99) {
 			t.Fatalf("vortex marks %+v", mark)
 		}
-		if !math.IsInf(whirl.within(whirl.middle.Neg()), 1) {
+		opposite := whirl.middle.Neg()
+		if !math.IsInf(whirl.within(opposite), 1) {
 			t.Fatal("vortex crossed far hemisphere")
 		}
 	}
@@ -503,7 +506,8 @@ func TestAirglowReachesTheNightFaceOnlyInsideItsBand(t *testing.T) {
 		t.Fatal(err)
 	}
 	face := NewFace(body, maths.V(0, 1, 0), maths.V(0, 0, -1), maths.V(0, 0, 1e9), even(), 1)
-	if light := face.At(maths.V(0, 0, body.Radius())); !(light.G > 0) {
+	surface := maths.V(0, 0, body.Radius())
+	if light := face.At(surface); !(light.G > 0) {
 		t.Fatal("sodium airglow never reached the night face")
 	}
 	outside := face.ways.toward(30, 0).Scale(body.Radius())

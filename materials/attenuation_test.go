@@ -12,7 +12,7 @@ import (
 // stopping is a coefficient at an energy, read somewhere, for the tests
 func stopping(t *testing.T, energy, muOverRho float64) Attenuation {
 	t.Helper()
-	stop, err := NewAttenuation(energy, muOverRho, somewhere(t))
+	stop, err := newAttenuation(energy, muOverRho, somewhere(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +28,7 @@ func slab(t *testing.T, muOverRho, density float64) Material {
 	if err != nil {
 		t.Fatal(err)
 	}
-	kind, err := iron(t).AtDensity(density, somewhere(t))
+	kind, err := iron(t).atDensity(density, somewhere(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func slab(t *testing.T, muOverRho, density float64) Material {
 
 func TestAnAttenuationAnswersWhatItWasMadeOf(t *testing.T) {
 	where := somewhere(t)
-	stop, err := NewAttenuation(0.06, 5.021, where)
+	stop, err := newAttenuation(0.06, 5.021, where)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,11 +71,11 @@ func TestAnAttenuationRefusesNonsense(t *testing.T) {
 		"a coefficient below numbers": {0.06, math.Inf(-1)},
 	}
 	for name, bad := range refused {
-		if _, err := NewAttenuation(bad[0], bad[1], where); err == nil {
+		if _, err := newAttenuation(bad[0], bad[1], where); err == nil {
 			t.Errorf("%s: an attenuation was made", name)
 		}
 	}
-	if _, err := NewAttenuation(0.06, 1, Source{}); err == nil {
+	if _, err := newAttenuation(0.06, 1, Source{}); err == nil {
 		t.Error("an attenuation read nowhere was made")
 	}
 }
@@ -243,7 +243,7 @@ func TestAllHandsOutACopy(t *testing.T) {
 }
 
 func TestAMaterialAtADensityCarriesItAndItsSource(t *testing.T) {
-	where, err := NewSource("a table", "iron, a page", "a paper",
+	where, err := newSource("a table", "iron, a page", "a paper",
 		"26 Fe Iron 7.874E+00")
 	if err != nil {
 		t.Fatal(err)
@@ -256,7 +256,7 @@ func TestAMaterialAtADensityCarriesItAndItsSource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dense, err := bare.AtDensity(7.874, where)
+	dense, err := bare.atDensity(7.874, where)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -287,18 +287,18 @@ func TestAtDensityRefusesNonsense(t *testing.T) {
 		"NaN":          math.NaN(),
 		"past numbers": math.Inf(1),
 	} {
-		if _, err := iron(t).AtDensity(density, where); err == nil {
+		if _, err := iron(t).atDensity(density, where); err == nil {
 			t.Errorf("a density of %s was given", name)
 		}
 	}
-	_, err := iron(t).AtDensity(7.874, Source{})
+	_, err := iron(t).atDensity(7.874, Source{})
 	if err == nil {
 		t.Fatal("a density read nowhere was given")
 	}
 	if !strings.Contains(err.Error(), "iron") {
 		t.Errorf("the refusal does not name the material: %v", err)
 	}
-	if _, err := (Material{}).AtDensity(7.874, where); err == nil {
+	if _, err := (Material{}).atDensity(7.874, where); err == nil {
 		t.Error("a material never made was given a density")
 	}
 	// iron of the tests was made at a density with no source
@@ -446,12 +446,12 @@ func TestPassingIsBeerAndLamberts(t *testing.T) {
 		first := rapid.Float64Range(0, 0.5).Draw(draw, "first")
 		second := rapid.Float64Range(0, 0.5).Draw(draw, "second")
 
-		where, err := NewSource("a release", "a material", "a paper",
+		where, err := newSource("a release", "a material", "a paper",
 			"a row")
 		if err != nil {
 			draw.Fatal(err)
 		}
-		stop, err := NewAttenuation(0.06, muOverRho, where)
+		stop, err := newAttenuation(0.06, muOverRho, where)
 		if err != nil {
 			draw.Fatal(err)
 		}

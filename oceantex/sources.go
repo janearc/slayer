@@ -12,9 +12,9 @@ import (
 //go:embed sources.yaml
 var sourcesYAML string
 
-// Source is one number, or one list of numbers, and where it came from:
+// source is one number, or one list of numbers, and where it came from:
 // an entry of sources.yaml.
-type Source struct {
+type source struct {
 	Name    string
 	Values  []float64 // one value, or a table
 	Unit    string
@@ -28,7 +28,7 @@ type Source struct {
 
 // sources is sources.yaml, read once at start-up. A file that does not
 // parse stops the program: the numbers are not optional.
-var sources = func() map[string]Source {
+var sources = func() map[string]source {
 	parsed, err := parseSources(sourcesYAML)
 	if err != nil {
 		panic("oceantex: sources.yaml: " + err.Error())
@@ -38,8 +38,8 @@ var sources = func() map[string]Source {
 
 // Sources is every number the package uses and where it came from, in
 // name order.
-func Sources() []Source {
-	out := make([]Source, 0, len(sources))
+func Sources() []source {
+	out := make([]source, 0, len(sources))
 	for _, s := range sources {
 		s.Values = slices.Clone(s.Values)
 		out = append(out, s)
@@ -74,12 +74,12 @@ type sourceEntry struct {
 }
 
 // parseSources reads the complete ledger through Pzm's strict reader.
-func parseSources(text string) (map[string]Source, error) {
+func parseSources(text string) (map[string]source, error) {
 	var entries map[string]sourceEntry
 	if err := yamlfile.Read("sources.yaml", []byte(text), &entries); err != nil {
 		return nil, err
 	}
-	out := make(map[string]Source, len(entries))
+	out := make(map[string]source, len(entries))
 	for name, entry := range entries {
 		if name == "" || (entry.Value != nil) == (len(entry.Values) > 0) {
 			return nil, fmt.Errorf("source %q needs one value or a table", name)
@@ -96,7 +96,7 @@ func parseSources(text string) (map[string]Source, error) {
 		if entry.From == "" || entry.URL == "" || entry.Fetched == "" || entry.Read == "" || entry.Kind == "" {
 			return nil, fmt.Errorf("source %q is missing attribution", name)
 		}
-		out[name] = Source{Name: name, Values: values, Unit: entry.Unit, From: entry.From,
+		out[name] = source{Name: name, Values: values, Unit: entry.Unit, From: entry.From,
 			URL: entry.URL, Fetched: entry.Fetched, Read: entry.Read, Kind: entry.Kind, Note: entry.Note}
 	}
 	return out, nil

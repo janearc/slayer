@@ -12,10 +12,10 @@ import "math"
 // wherever it was when the note was let go, after which it is silent.
 
 // gated is the envelope of a channel that gives none.
-var gated = &Envelope{Attack: gateAttack, Sustain: 1, Release: gateRelease}
+var gated = &envelope{Attack: gateAttack, Sustain: 1, Release: gateRelease}
 
 // orGated is the envelope, or the gate when there is none.
-func orGated(e *Envelope) *Envelope {
+func orGated(e *envelope) *envelope {
 	if e == nil {
 		return gated
 	}
@@ -23,7 +23,7 @@ func orGated(e *Envelope) *Envelope {
 }
 
 // held is the level at age seconds of a note still held.
-func (e *Envelope) held(age float64) float64 {
+func (e *envelope) held(age float64) float64 {
 	if age < e.Attack {
 		return age / e.Attack
 	}
@@ -35,7 +35,7 @@ func (e *Envelope) held(age float64) float64 {
 }
 
 // level is the level at age seconds of a note held for gate seconds.
-func (e *Envelope) level(age, gate float64) float64 {
+func (e *envelope) level(age, gate float64) float64 {
 	if age < gate {
 		return e.held(age)
 	}
@@ -49,7 +49,7 @@ func (e *Envelope) level(age, gate float64) float64 {
 // envelopeRun steps an envelope a sample at a time, working the curve out
 // once a block and moving in a straight line between.
 type envelopeRun struct {
-	envelope *Envelope
+	envelope *envelope
 	gate     float64
 	sample   int
 	level    float64
@@ -57,7 +57,7 @@ type envelopeRun struct {
 }
 
 // newEnvelopeRun is an envelope at the first sample of a note.
-func newEnvelopeRun(e *Envelope, gate float64) *envelopeRun {
+func newEnvelopeRun(e *envelope, gate float64) *envelopeRun {
 	e = orGated(e)
 	return &envelopeRun{envelope: e, gate: gate, level: e.level(0, gate)}
 }
@@ -78,7 +78,7 @@ func (r *envelopeRun) next() float64 {
 // bendRun is a channel's vibrato as a ratio on the frequency, stepped the
 // way an envelope is.
 type bendRun struct {
-	vibrato *Vibrato
+	vibrato *vibrato
 	strike  *strike // for its slides; nil when the note has none
 	sample  int
 	ratio   float64
@@ -87,7 +87,7 @@ type bendRun struct {
 
 // newBendRun is a note's vibrato and slides at its first sample; with
 // neither the ratio stays at one.
-func newBendRun(vb *Vibrato, st *strike) *bendRun {
+func newBendRun(vb *vibrato, st *strike) *bendRun {
 	b := &bendRun{vibrato: vb, ratio: 1}
 	if len(st.path) > 0 {
 		b.strike = st

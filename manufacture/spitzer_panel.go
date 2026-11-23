@@ -42,7 +42,8 @@ func spitzerPanels(aperture float64) spitzerPanelSize {
 
 // spitzerPanel builds both chevron leaves and the published 392 cells on
 // each. The seven columns, folding angle and thickness are picked scenery
-// choices, not recovered engineering drawings. See doc/spitzer-maturity.md.
+// choices, not recovered engineering drawings. See
+// doc/model/spacecraft/spitzer-maturity.md.
 func (row spacecraft) spitzerPanel(assembly *instrumentAssembly, size spacecraftSize) {
 	look, err := spitzerCellSurface(spitzerSurfaceRaw)
 	if err != nil {
@@ -52,45 +53,57 @@ func (row spacecraft) spitzerPanel(assembly *instrumentAssembly, size spacecraft
 	look.Name = "solar array"
 	assembly.object.dressed[leaf] = look
 	panel := spitzerPanels(size.aperture)
+	for _, side := range []float64{-spaceOne, spaceOne} {
+		// the rails across a leaf's ends stand a rail's width past its
+		// sides, so the leaf stands that far up from the floor, and the
+		// lowest face of its frame is on the floor and not under it
+		rise := spitzerLeaf(panel, side, maths.Local()).rail()
+		pose := spitzerChevron(side, size.aperture, rise)
+		spitzerLeaf(panel, side, pose).lay(assembly)
+		// the upper extension is a bare panel in line with the leaf,
+		// past the end of its cells; it is shorter by the rise, so that
+		// the leaf and it end at the published length
+		left := math.Min(spaceZero, side*panel.width)
+		assembly.boxAt(panel.width, panel.extension-rise, panel.thickness,
+			maths.V(left, panel.height, spaceZero), pose, spaceFoil)
+	}
+}
+
+// spitzerChevron is where a leaf stands: turned by the chevron angle
+// about the seam, a seam gap apart from the other leaf, behind the
+// optical axis, and a rise up from the floor.
+func spitzerChevron(side, aperture, rise float64) maths.Subspace {
+	angle := side * spacecraftValue("spitzer-chevron-degrees") * math.Pi / 180
+	seam := aperture * spacecraftValue("spitzer-seam-gap")
+	return maths.NewSubspace(maths.V(side*seam*spaceHalf, rise,
+		-aperture*spacecraftValue("spitzer-panel-offset")),
+		maths.Rotation(maths.YAxis, angle), spaceOne)
+}
+
+// spitzerLeaf is one leaf as an array: a single panel out from the seam,
+// its cells on the face towards -z at the published size, packed into the
+// chosen columns, with a bus bar filling each gap between columns. The
+// leaf has no yoke, as it hangs from the seam.
+func spitzerLeaf(panel spitzerPanelSize, side float64,
+	pose maths.Subspace,
+) solarArray {
 	columns := int(spacecraftValue("spitzer-cell-columns"))
 	rows := int(research.Value("spitzer-cells-per-panel")) / columns
-	xStep, yStep := panel.width/float64(columns), panel.height/float64(rows)
-	for _, side := range []float64{-spaceOne, spaceOne} {
-		angle := side * spacecraftValue("spitzer-chevron-degrees") * math.Pi / 180
-		seam := size.aperture * spacecraftValue("spitzer-seam-gap")
-		pose := maths.NewSubspace(maths.V(side*seam*spaceHalf, spaceZero,
-			-size.aperture*spacecraftValue("spitzer-panel-offset")),
-			maths.Rotation(maths.YAxis, angle), spaceOne)
-		left := math.Min(spaceZero, side*panel.width)
-		start := len(assembly.object.parts)
-		assembly.box(panel.width, panel.height, panel.thickness,
-			maths.V(left, spaceZero, spaceZero), spaceStructure)
-		assembly.box(panel.width, panel.extension, panel.thickness,
-			maths.V(left, panel.height, spaceZero), spaceFoil)
-		for column := range columns {
-			x := left + (float64(column)+spaceHalf)*xStep - panel.cellWidth*spaceHalf
-			for line := range rows {
-				y := (float64(line)+spaceHalf)*yStep - panel.cellHeight*spaceHalf
-				assembly.box(panel.cellWidth, panel.cellHeight, panel.thickness*spaceHalf,
-					maths.V(x, y, -panel.thickness*spaceHalf), leaf)
-			}
-		}
-		// Continuous reflector strips occupy the spaces between columns.
-		// They are counted as strips, not as invented individual tiles.
-		gap := xStep - panel.cellWidth
-		for strip := range columns + spaceOne {
-			x, width := left+float64(strip)*xStep-gap*spaceHalf, gap
-			if strip == spaceZero {
-				x, width = left, gap*spaceHalf
-			} else if strip == columns {
-				width = gap * spaceHalf
-			}
-			assembly.box(width, panel.height, panel.thickness*spaceHalf,
-				maths.V(x, spaceZero, -panel.thickness*spaceHalf), spaceFoil)
-		}
-		for index := start; index < len(assembly.object.parts); index++ {
-			part := &assembly.object.parts[index]
-			part.space = part.space.Within(pose)
-		}
+	middle := maths.V(spaceZero, panel.height*spaceHalf,
+		panel.thickness*spaceHalf)
+	return solarArray{
+		frame: solarFrame(middle, maths.V(side, spaceZero, spaceZero),
+			maths.V(spaceZero, spaceZero, -spaceOne)).Within(pose),
+		panels: solarPanels{along: spaceOne, across: spaceOne,
+			width: panel.width, depth: panel.height,
+			thickness: panel.thickness},
+		cells: solarCells{columns: columns, rows: rows,
+			width: panel.cellWidth, depth: panel.cellHeight,
+			height: panel.thickness * spaceHalf,
+			pitchX: panel.width / float64(columns),
+			pitchZ: panel.height / float64(rows), barShare: spaceOne},
+		looks: solarLooks{cell: leaf, bar: spaceFoil,
+			substrate: spaceStructure, frame: spacePanel,
+			hardware: spaceStructure},
 	}
 }

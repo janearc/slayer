@@ -11,7 +11,7 @@ import (
 type gameboy struct{}
 
 // kinds are the Game Boy's channels.
-func (gameboy) kinds() []string { return Kinds }
+func (gameboy) kinds() []string { return kinds }
 
 // percussive is the noise channel.
 func (gameboy) percussive(kind string) bool { return kind == "noise" }
@@ -28,9 +28,9 @@ func (g gameboy) check(v *Voicing) ([]error, map[string]int) {
 	for i := range v.Channels {
 		c := &v.Channels[i]
 		at := fmt.Sprintf("channel %d (%s)", i+1, c.Kind)
-		if !known(c.Kind, Kinds) {
+		if !known(c.Kind, kinds) {
 			fail("channel %d: unknown kind %q; kinds are %s",
-				i+1, c.Kind, strings.Join(Kinds, ", "))
+				i+1, c.Kind, strings.Join(kinds, ", "))
 			continue
 		}
 		count[c.Kind]++
@@ -71,7 +71,7 @@ func (v *Voicing) noStudioMix() []error {
 }
 
 // studioField names the first studio field a channel carries, or nothing.
-func (c *Channel) studioField() string {
+func (c *channel) studioField() string {
 	for _, f := range []struct {
 		name string
 		set  bool
@@ -90,7 +90,7 @@ func (c *Channel) studioField() string {
 }
 
 // check is one channel's fields against its kind, on the Game Boy.
-func (c *Channel) check(at string) []error {
+func (c *channel) check(at string) []error {
 	errs := c.does(at)
 	fail := func(f string, a ...any) {
 		errs = append(errs, fmt.Errorf(at+": "+f, a...))
@@ -134,7 +134,7 @@ func (c *Channel) check(at string) []error {
 	case "pulse":
 		if c.Duty == nil {
 			fail("a pulse needs a duty: 0.125, 0.25, 0.5 or 0.75")
-		} else if !knownFloat(*c.Duty, Duties) {
+		} else if !knownFloat(*c.Duty, duties) {
 			fail("duty %v; the hardware has 0.125, 0.25, 0.5, 0.75",
 				*c.Duty)
 		}

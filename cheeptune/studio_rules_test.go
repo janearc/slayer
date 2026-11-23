@@ -26,14 +26,14 @@ func studioChannelOf(kind, role, fields string) string {
 func TestEveryGoodStudioChannelIsRead(t *testing.T) {
 	for kind, fields := range map[string]string{"fm": goodFM,
 		"analog": goodAnalog, "pluck": goodPluck, "modal": goodModal} {
-		_, err := ParseVoicing(studioVoicing(
-			studioChannelOf(kind, "lead", fields), ""))
+		channel := studioChannelOf(kind, "lead", fields)
+		_, err := ParseVoicing(studioVoicing(channel, ""))
 		if err != nil {
 			t.Errorf("a plain %s channel: %v", kind, err)
 		}
 	}
-	_, err := ParseVoicing(studioVoicing(
-		studioChannelOf("drum", "perc", goodDrums), ""))
+	drumChannel := studioChannelOf("drum", "perc", goodDrums)
+	_, err := ParseVoicing(studioVoicing(drumChannel, ""))
 	if err != nil {
 		t.Errorf("a plain drum channel: %v", err)
 	}
@@ -236,7 +236,7 @@ func TestTheStudioRefusesWhatAChannelCannotSound(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = Bind(s, v)
+		_, err = bindVoicing(s, v)
 		return err
 	}
 	wantErr(t, bind(`{"role": "perc", "bars": ["s:4"]}`, drum),
@@ -256,14 +256,14 @@ func TestTheStudioRefusesWhatAChannelCannotSound(t *testing.T) {
 	// are refused when the plan is made. only perc holds hits, so the
 	// score puts each where it does not belong by way of the voicing.
 	s, _ := ParseScore(slow(`{"role": "perc", "bars": ["k:4"]}`))
-	v, _ := ParseVoicing(studioVoicing(
-		studioChannelOf("fm", "perc", goodFM), ""))
-	_, err := Bind(s, v)
+	fmChannel := studioChannelOf("fm", "perc", goodFM)
+	v, _ := ParseVoicing(studioVoicing(fmChannel, ""))
+	_, err := bindVoicing(s, v)
 	wantErr(t, err, `hit "k" on a pitched channel`)
 	s, _ = ParseScore(slow(`{"role": "lead", "bars": ["c4:4"]}`))
-	v, _ = ParseVoicing(studioVoicing(
-		studioChannelOf("drum", "lead", goodDrums), ""))
-	_, err = Bind(s, v)
+	leadDrumChannel := studioChannelOf("drum", "lead", goodDrums)
+	v, _ = ParseVoicing(studioVoicing(leadDrumChannel, ""))
+	_, err = bindVoicing(s, v)
 	wantErr(t, err, "a note on a drum channel; it plays hits")
 }
 
@@ -309,8 +309,9 @@ func TestAFullChannelTakesTheOldestVoiceAlreadyLetGo(t *testing.T) {
 }
 
 func TestAVoicingSaysWhichOfItsChannelsPlayHits(t *testing.T) {
-	v, err := ParseVoicing(studioVoicing(fmPair("2")+","+
-		studioChannelOf("drum", "perc", goodDrums), ""))
+	fmChannels := fmPair("2")
+	drumChannel := studioChannelOf("drum", "perc", goodDrums)
+	v, err := ParseVoicing(studioVoicing(fmChannels+","+drumChannel, ""))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -346,7 +347,7 @@ func TestEveryLibraryTuneFitsEveryStudioVoicing(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if _, err := Bind(s, v); err != nil {
+			if _, err := bindVoicing(s, v); err != nil {
 				t.Errorf("%s through %s: %v", tune, name, err)
 			}
 		}

@@ -157,13 +157,15 @@ func TestAChangedPoseKeepsTheIndependentCentreBound(t *testing.T) {
 		Orientation: maths.Orientation{X: maths.V(0, 0, 1),
 			Y: maths.V(0, 1, 0), Z: maths.V(-1, 0, 0)}}
 	view := checkedView(t, book, 1, eye)
+	east := pointBox(maths.V(110, 20, 30))
 	// This camera looks east. The point is 100 metres east of its eye.
-	got, err := view.Assess(pointBox(maths.V(110, 20, 30)), measure.Metres(1))
+	got, err := view.Assess(east, measure.Metres(1))
 	if err != nil {
 		t.Fatal(err)
 	}
 	checkAssessment(t, got, book.Cases["centre"])
-	hidden, err := view.Assess(pointBox(maths.V(-90, 20, 30)), measure.Metres(0))
+	west := pointBox(maths.V(-90, 20, 30))
+	hidden, err := view.Assess(west, measure.Metres(0))
 	if err != nil || hidden.Visible {
 		t.Fatal("the same camera retained a point behind it", hidden, err)
 	}

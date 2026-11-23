@@ -6,7 +6,7 @@ values with source-path identity, retained through movement and YAML reordering.
 Names in native things and imports remain distinct even when equal.
 
 Native east/north/height edits are supported for explicit placements in a
-schema-checked space set. This is the metre ENU contract of hillside/afloat.go,
+schema-checked space set. This is the metre ENU contract of session/afloat.go,
 not terrain height or a relative/orbital placement. Heading is clockwise degrees
 from north, as set/heading.go defines; omitted space headings mean zero.
 

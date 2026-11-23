@@ -141,7 +141,8 @@ func TestCacheExpiresAtFirstLeaseAndReportsAge(t *testing.T) {
 	if _, ok = cache.read(now.Add(500 * time.Millisecond)); ok {
 		t.Fatal("cached beyond lease")
 	}
-	late := values(cache.withAge(now.Add(600 * time.Millisecond)))
+	lateCache := cache.withAge(now.Add(600 * time.Millisecond))
+	late := values(lateCache)
 	if late["azazel_render_group_footprint_known"] != 0 {
 		t.Fatal(late)
 	}
@@ -159,7 +160,8 @@ func TestCacheExpiresAtFirstLeaseAndReportsAge(t *testing.T) {
 func TestCollectionAgeIncludesSlowObservation(t *testing.T) {
 	start := time.Unix(100, 0)
 	cache := collectorCache{taken: start, finished: start.Add(2 * time.Second), until: start.Add(time.Second), leaseUntil: start.Add(1500 * time.Millisecond), samples: []observability.Sample{{Name: "azazel_render_group_resident_known", Value: 1}, {Name: "azazel_render_group_resident_bytes", Value: 8}}}
-	got := values(cache.withAge(start.Add(2 * time.Second)))
+	aged := cache.withAge(start.Add(2 * time.Second))
+	got := values(aged)
 	if got["azazel_collection_age_seconds"] != 2 || got["azazel_collection_duration_seconds"] != 2 || got["azazel_render_group_resident_known"] != 0 {
 		t.Fatal(got)
 	}

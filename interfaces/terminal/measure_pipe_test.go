@@ -14,18 +14,18 @@ import (
 // and report a screen of zero cells, which is a different error, about a
 // terminal that was reached.
 func TestMeasuringAPipeSaysItIsNotATerminal(t *testing.T) {
-	r, w, err := os.Pipe()
+	reader, writer, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer r.Close()
-	defer w.Close()
-	_, err = Measure(r)
+	defer reader.Close()
+	defer writer.Close()
+	_, err = Measure(reader)
 	if err == nil {
 		t.Fatal("a pipe was measured")
 	}
 	if !strings.Contains(err.Error(), "is not a terminal that says its size") ||
-		!strings.Contains(err.Error(), r.Name()) {
+		!strings.Contains(err.Error(), reader.Name()) {
 		t.Errorf("got %q, want it to name the file and say it is not a terminal", err)
 	}
 	if strings.Contains(err.Error(), "says it is") {

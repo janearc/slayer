@@ -54,8 +54,9 @@ func TestNewBodyReadsBackEveryCoreArgumentFromItsOwnReader(t *testing.T) {
 // a clouds layer, a tail and an aurora are each made from arguments that
 // differ from one another, and each reader gives back its own.
 func TestPartConstructorsReadBackDistinctArgumentsFromTheirOwnReaders(t *testing.T) {
+	cloudShell := bodies.NewShell(bodies.Kilometres(3), bodies.Kilometres(9))
 	clouds, err := bodies.NewClouds(
-		bodies.NewShell(bodies.Kilometres(3), bodies.Kilometres(9)),
+		cloudShell,
 		maths.Share(0.4), bodies.PerKilometre(0.05), 7)
 	if err != nil {
 		t.Fatal(err)
@@ -91,12 +92,14 @@ func TestPartConstructorsReadBackDistinctArgumentsFromTheirOwnReaders(t *testing
 			tail.Glow(), tail.Seed())
 	}
 
+	auroraShell := bodies.NewShell(bodies.Kilometres(80), bodies.Kilometres(500))
+	auroraColours := bodies.NewAuroraColours(maths.RGB(1, 0, 0), maths.RGB(0, 1, 0),
+		maths.RGB(0, 0, 1))
 	aurora, err := bodies.NewAurora(
-		bodies.NewShell(bodies.Kilometres(80), bodies.Kilometres(500)),
+		auroraShell,
 		measure.Radians(0.3), measure.Radians(0.04), measure.Radians(0.2),
 		maths.Share(0.7), maths.Share(0.25), 13,
-		bodies.NewAuroraColours(maths.RGB(1, 0, 0), maths.RGB(0, 1, 0),
-			maths.RGB(0, 0, 1)))
+		auroraColours)
 	if err != nil {
 		t.Fatal(err)
 	}

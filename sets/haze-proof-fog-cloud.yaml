@@ -1,0 +1,109 @@
+# the proof of the air over a bay (sets/haze-proof.yaml) with two airs far
+# apart in height: the fog in the streets and the deck of cloud, as sets/
+# haze-proof-all.yaml says them, where their numbers and sources are
+# written. the beam starts in the fog.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a proof of the street fog and the cloud over a bay
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.5186
+    lon: 114.0151
+  timeofday: 1725
+  sun:
+    azimuth: 247.73
+    altitude: 2.37
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.5186
+    lon: 114.0151
+    across: 2000
+    down: 1500
+    step: 10
+    smooth: 60
+    sea: {value: 0, unit: m}
+  weather:
+    wind:
+      from: {value: 45, unit: deg}
+      speed: {value: 5, unit: m/s}
+    street fog:
+      kind: prescribed-mist
+      extinction: {value: 0.006, unit: m^-1}
+      depth: {value: 40, unit: m}
+      edge: {value: 15, unit: m}
+      coverage: 0.8
+      size: {value: 120, unit: m}
+      seed: 5
+      asymmetry: 0.85
+      angstrom: 0
+    high cloud:
+      kind: prescribed-cloud
+      extinction: {value: 0.04, unit: m^-1}
+      base: {value: 1800, unit: m}
+      top: {value: 3400, unit: m}
+      coverage: 0.55
+      size: {value: 900, unit: m}
+      seed: 9
+      asymmetry: 0.85
+  atmosphere:
+    layers:
+      street fog:
+        weather: street fog
+        extent: terrain
+        albedo: 1
+        toward: {object: tower 100, reach: {value: 900, unit: m}, least: 0.05}
+      cloud deck:
+        weather: high cloud
+        extent: terrain
+        albedo: 1
+        beyond: {value: 8000, unit: m}
+        toward: {object: the cloud marker, reach: {value: 7000, unit: m}, least: 0}
+  lasers:
+    bay beam:
+      origin:
+        object: tower 113
+        east: {value: 0, unit: m}
+        up: {value: 30, unit: m}
+        south: {value: 25, unit: m}
+      launcher: true
+      pointing: {azimuth: 248, altitude: 8}
+      radius: {value: 0.25, unit: m}
+      reach: {value: 2500, unit: m}
+      divergence: {value: 0.03, unit: deg}
+      wavelength: {value: 532, unit: nm}
+      display-strength: 10000000000
+  film:
+    width: 640
+    height: 360
+    rays: 2
+    wide: 70
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    sun:
+      title: "from 30 m over the shore by the towers, out over the bay toward the low sun"
+      location:
+        at: [1250, -500, 30]
+      orientation:
+        look_at: [-601, -1258, 0]
+    bay:
+      title: "from the water 1.2 km south of the towers, 20 m up, looking north at them"
+      location:
+        at: [1200, -1500, 20]
+      orientation:
+        look_at: [1350, -340, 200]
+  recipes:
+    t033: {kind: tower, irregularity: 0.99, script: simplified-chinese, pins: {plan: rounded, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t100: {kind: tower, irregularity: 0.22, script: simplified-chinese, pins: {plan: y, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t113: {kind: tower, irregularity: 0.36, script: simplified-chinese, pins: {plan: rounded, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+  set:
+    things:
+      tower 033: {recipe: t033, seed: 1561, complexity: quick, east: 1332.5, north: 1264.2, heading: {value: 337.7, unit: deg}}
+      tower 100: {recipe: t100, seed: 2700, complexity: quick, east: 1468.0, north: 1060.4, heading: {value: 337.7, unit: deg}}
+      tower 113: {recipe: t113, seed: 2921, complexity: quick, east: 1369.0, north: 1175.4, heading: {value: 337.7, unit: deg}}
+      the fishing boat at anchor: {kind: fishing-boat-at-anchor, seed: 31, complexity: demo, position: {east: {value: 550, unit: m}, north: {value: 700, unit: m}, up: {value: 0, unit: m}}, heading: {value: 59, unit: deg}}
+      the cloud marker: {kind: human-scale-2m, seed: 1, east: 1950, north: 1450}

@@ -7,35 +7,73 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// auroraTested is the aurora the test below holds, read from the chosen
+// numbers.
+func auroraTested(t *testing.T) Aurora {
+	t.Helper()
+	return Aurora{Radius: picked(t, "aurora-radius"),
+		Low:   picked(t, "aurora-low"),
+		High:  picked(t, "aurora-high"),
+		Lat:   picked(t, "aurora-latitude-degrees") * maths.Degree,
+		Width: picked(t, "aurora-width-degrees") * maths.Degree,
+		Thick: unity,
+		Seed:  uint64(pickedCount(t, "aurora-seed"))}
+}
+
+// auroraAt is the point at a latitude and longitude, up above the radius of
+// the shell's base.
+func auroraAt(radius, latitude, longitude, up float64) maths.Vec {
+	return maths.V(math.Cos(latitude)*math.Cos(longitude), math.Sin(latitude),
+		math.Cos(latitude)*math.Sin(longitude)).Scale(radius + up)
+}
+
 // An aurora is a glow on an oval round each magnetic pole, in its
 // shell, brightest at the bottom, and nothing at the equator or beyond
 // the shell; curtains vary it along the oval.
 func TestAuroraIsAnOvalRoundEachPole(t *testing.T) {
-	a := Aurora{Radius: 10, Low: 0.2, High: 0.6, Lat: 67 * maths.Degree,
-		Width: 4 * maths.Degree, Thick: 1, Seed: 3}
-	at := func(lat, lon, up float64) maths.Vec {
-		return maths.V(math.Cos(lat)*math.Cos(lon), math.Sin(lat), math.Cos(lat)*math.Sin(lon)).Scale(10 + up)
-	}
-	north, south := a.Density(at(67*maths.Degree, 0.5, 0.26)), a.Density(at(-67*maths.Degree, 0.5, 0.26))
-	if north < 0.6 || !(math.Abs(north-south) <= 1e-9) {
+	aurora := auroraTested(t)
+	radius := aurora.Radius
+	pole := picked(t, "aurora-latitude-degrees") * maths.Degree
+	longitude := picked(t, "aurora-longitude")
+	bottom := picked(t, "aurora-bottom-up")
+	northPoint := auroraAt(radius, pole, longitude, bottom)
+	southPoint := auroraAt(radius, -picked(t, "aurora-latitude-degrees")*
+		maths.Degree, longitude, bottom)
+	north, south := aurora.Density(northPoint), aurora.Density(southPoint)
+	if north < picked(t, "aurora-north-least") ||
+		!(math.Abs(north-south) <= picked(t, "aurora-tolerance")) {
 		t.Errorf("the ovals are %v north and %v south", north, south)
 	}
-	if d := a.Density(at(0, 0.5, 0.25)); d != 0 {
-		t.Errorf("the equator glows %v", d)
+	equatorUp := picked(t, "aurora-equator-up")
+	equator := auroraAt(radius, nought, longitude, equatorUp)
+	if density := aurora.Density(equator); density != nought {
+		t.Errorf("the equator glows %v", density)
 	}
-	if d := a.Density(at(67*maths.Degree, 0.5, 0.1)); d != 0 {
-		t.Errorf("below the shell glows %v", d)
+	under := auroraAt(radius, pole, longitude, picked(t, "aurora-under-up"))
+	if density := aurora.Density(under); density != nought {
+		t.Errorf("below the shell glows %v", density)
 	}
-	if lo, hi := a.Density(at(67*maths.Degree, 0.5, 0.26)), a.Density(at(67*maths.Degree, 0.5, 0.55)); !(hi < 0.3*lo) {
-		t.Errorf("the bottom is %v and the top %v", lo, hi)
+	topPoint := auroraAt(radius, pole, longitude, picked(t, "aurora-top-up"))
+	low, high := aurora.Density(northPoint), aurora.Density(topPoint)
+	if !(high < picked(t, "aurora-top-share")*low) {
+		t.Errorf("the bottom is %v and the top %v", low, high)
 	}
-	a.Curtains = 0.8
-	var low, high float64 = 10, 0
-	for lon := 0.0; lon < 6.28; lon += 0.05 {
-		d := a.Density(at(67*maths.Degree, lon, 0.26))
-		low, high = math.Min(low, d), math.Max(high, d)
+	auroraCurtainsVary(t, aurora, pole)
+}
+
+// auroraCurtainsVary checks that with curtains the density along the oval
+// varies by more than a factor of two.
+func auroraCurtainsVary(t *testing.T, aurora Aurora, pole float64) {
+	t.Helper()
+	aurora.Curtains = picked(t, "aurora-curtains")
+	var low, high float64 = picked(t, "aurora-low-start"), nought
+	turn, step := picked(t, "aurora-turn"), picked(t, "aurora-step")
+	up := picked(t, "aurora-bottom-up")
+	for longitude := float64(nought); longitude < turn; longitude += step {
+		density := aurora.Density(auroraAt(aurora.Radius, pole, longitude, up))
+		low, high = math.Min(low, density), math.Max(high, density)
 	}
-	if !(high > 2*low) {
+	if !(high > double*low) {
 		t.Errorf("curtains vary the oval only from %v to %v", low, high)
 	}
 }

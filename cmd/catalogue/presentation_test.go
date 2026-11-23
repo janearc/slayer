@@ -73,7 +73,8 @@ func TestSpacePresentationLoadsOnlyPinnedStarsAndKeepsItsSun(t *testing.T) {
 	if err := os.WriteFile(file, []byte(gaiaFixture), 0600); err != nil {
 		t.Fatal(err)
 	}
-	p.Gaia = &gaiaPlan{File: file, SHA256: fmt.Sprintf("%x", sha256.Sum256([]byte(gaiaFixture))), Radius: .1, Zero: 1}
+	fixtureSum := sha256.Sum256([]byte(gaiaFixture))
+	p.Gaia = &gaiaPlan{File: file, SHA256: fmt.Sprintf("%x", fixtureSum), Radius: .1, Zero: 1}
 	gaia, err := json.Marshal(p.Gaia)
 	if err != nil {
 		t.Fatal(err)

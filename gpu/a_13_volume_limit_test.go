@@ -14,7 +14,7 @@ import (
 // The kernel sizes its crossing arrays to the scene, so the limit is a
 // ceiling against pathological packs, not a per-scene budget. It is an
 // authored resource limit exposed to callers, not a physical constant;
-// doc/fire-night-design.md says what it costs to approach it.
+// doc/model/fire/fire-night-design.md says what it costs to approach it.
 func TestVolumeLimitIsACeilingNotABudget(t *testing.T) {
 	if got := VolumeLimit(); got != mostVolumes {
 		t.Fatalf("public volume limit is %d, the ceiling is %d", got,

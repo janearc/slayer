@@ -35,7 +35,7 @@ type Moment struct {
 func (of *Sheet) At(seconds, fps float64) (Moment, error) {
 	if !(fps > 0) || math.IsInf(fps, 0) {
 		return Moment{}, fmt.Errorf("%w: a frame rate of %v; give one "+
-			"above nought", ErrShow, fps)
+			"above nought", errShow, fps)
 	}
 	beats, meter := of.score.beats, float64(of.score.meter)
 	made := Moment{seconds: seconds, now: of.fold(seconds),
@@ -70,7 +70,7 @@ func (made *Moment) palette() {
 // lattice, burning the first share of each grid subdivision, or riding
 // the lead's loud notes inside the frame. The magenta gel takes the off
 // subdivisions, and the lead's hardest notes.
-func (made *Moment) strobed(lead []Note, fps float64) (white, magenta int) {
+func (made *Moment) strobed(lead []scoreNote, fps float64) (white, magenta int) {
 	switch made.now.strobes {
 	case strobesLattice:
 		return latticeFires, latticeFires
@@ -95,7 +95,7 @@ func (made *Moment) strobed(lead []Note, fps float64) (white, magenta int) {
 }
 
 // leadStrobes is the strobes a lead note starting in the frame fires.
-func (made *Moment) leadStrobes(lead []Note, fps float64) (white,
+func (made *Moment) leadStrobes(lead []scoreNote, fps float64) (white,
 	magenta int) {
 	for _, one := range lead {
 		if one.start < made.seconds || one.start >= made.seconds+1/fps {
@@ -197,7 +197,7 @@ func (made Moment) Lines() string {
 	fmt.Fprintf(&out, "search_move=%s\nsearch_move_phase=%.4f\n"+
 		"search_gate=%.4f\n", made.move, made.movePhase, made.searchGate)
 	fmt.Fprintf(&out, "master=%.4f\noverhead=%.4f\nexposure=%.3f\n",
-		made.Master(), made.Overhead(), now.exposure.at(at))
+		made.master(), made.Overhead(), now.exposure.at(at))
 	fmt.Fprintf(&out, "fire=%.4f\n", now.fire.at(at))
 	var since []string
 	for _, ago := range made.bursts {

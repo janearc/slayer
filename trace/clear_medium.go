@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/gas"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -279,7 +279,7 @@ func validateClearCloudSourceWorld(world *thing.World) error {
 				return fmt.Errorf("trace: finite clear-cloud lunar interface must be calm and flat")
 			}
 		}
-	} else if _, ok := ocean.Boundary.Shape.(*seaocean.InfiniteMeanContinuation); !ok {
+	} else if _, ok := ocean.Boundary.Shape.(*arid.InfiniteMeanContinuation); !ok {
 		return fmt.Errorf("trace: clear-cloud sky source requires an actual infinite mean-plane continuation shape")
 	}
 	if ocean.ExtentMetres <= 0 || ocean.MetresPerUnit <= 0 ||
@@ -515,7 +515,7 @@ func validateOceanScatteringWorld(world *thing.World,
 		if !ocean.InfiniteMeanPlane {
 			return fmt.Errorf("trace: diffuse-sky in-scattering requires the explicit infinite mean-plane ocean continuation")
 		}
-		if _, ok := ocean.Boundary.Shape.(*seaocean.InfiniteMeanContinuation); !ok {
+		if _, ok := ocean.Boundary.Shape.(*arid.InfiniteMeanContinuation); !ok {
 			return fmt.Errorf("trace: diffuse-sky in-scattering requires an actual infinite mean-plane continuation shape")
 		}
 	}
@@ -526,7 +526,7 @@ func validateOceanScatteringWorld(world *thing.World,
 		if !world.OceanSurface.InfiniteMeanPlane {
 			return fmt.Errorf("trace: diffuse-sky in-scattering requires the explicit infinite mean-plane ocean continuation")
 		}
-		if _, ok := world.OceanSurface.Boundary.Shape.(*seaocean.InfiniteMeanContinuation); !ok {
+		if _, ok := world.OceanSurface.Boundary.Shape.(*arid.InfiniteMeanContinuation); !ok {
 			return fmt.Errorf("trace: diffuse-sky in-scattering requires an actual infinite mean-plane continuation shape")
 		}
 	}
@@ -558,8 +558,8 @@ func validateOceanScatteringBoundary(world *thing.World,
 		return fmt.Errorf("trace: ocean in-scattering boundary must be present and visible in the world")
 	}
 	switch boundary.Shape.(type) {
-	case *shape.HeightField, *seaocean.FlatMeanContinuation,
-		*seaocean.InfiniteMeanContinuation:
+	case *shape.HeightField, *arid.FlatMeanContinuation,
+		*arid.InfiniteMeanContinuation:
 	default:
 		return fmt.Errorf("trace: ocean in-scattering requires a supported ocean heightfield boundary")
 	}
@@ -577,10 +577,7 @@ func validateOceanScatteringBoundary(world *thing.World,
 // sameClearMedium reports whether two clear media have equal values. Two nil
 // media are the same; a nil and a non-nil medium are not.
 func sameClearMedium(one, other *thing.ClearMedium) bool {
-	if one == nil || other == nil {
-		return one == nil && other == nil
-	}
-	return *one == *other
+	return one.SameOpticalIdentity(other)
 }
 
 // attenuateClearSegment dims pixel by the medium's extinction over the part

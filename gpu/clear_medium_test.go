@@ -34,13 +34,15 @@ func TestGPUOpticalPackingCarriesNamedAndInitialState(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !encoded.opticalState || len(encoded.inputs()) != 19 {
+		buffers := len(encoded.inputs())
 		t.Fatalf("optical state = %v, input buffers = %d; want enabled and 19",
-			encoded.opticalState, len(encoded.inputs()))
+			encoded.opticalState, buffers)
 	}
 	if got := int32(binary.LittleEndian.Uint32(encoded.materials.bytes[60:])); got != 0 {
 		t.Fatalf("Material.info.w medium ID = %d, want 0", got)
 	}
-	if got := int32(binary.LittleEndian.Uint32(encoded.materials.bytes[materialStruct.size()+60:])); got != 0 {
+	word := binary.LittleEndian.Uint32(encoded.materials.bytes[materialStruct.size()+60:])
+	if got := int32(word); got != 0 {
 		t.Fatalf("second boundary medium ID = %d, want shared ID 0", got)
 	}
 	if len(encoded.clearMedia.bytes) != clearMediumStruct.size() ||
@@ -116,8 +118,9 @@ func TestGPUOrdinaryPackingKeepsTheLegacyInputLayout(t *testing.T) {
 	}
 	if encoded.opticalState || len(encoded.inputs()) != 17 ||
 		len(encoded.clearMedia.bytes) != 0 || len(encoded.initialState.bytes) != 0 {
+		inputs := len(encoded.inputs())
 		t.Fatalf("ordinary input layout changed: optical=%v inputs=%d media=%d initial=%d",
-			encoded.opticalState, len(encoded.inputs()), len(encoded.clearMedia.bytes),
+			encoded.opticalState, inputs, len(encoded.clearMedia.bytes),
 			len(encoded.initialState.bytes))
 	}
 	if got := binary.LittleEndian.Uint32(encoded.materials.bytes[60:]); got != 0 {

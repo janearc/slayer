@@ -60,7 +60,7 @@ func (made prepared) Things(at maths.Subspace) ([]thing.Thing, error) {
 	}
 	parts := slices.Clone(made.parts)
 	for i := range parts {
-		parts[i].Motion = thing.Still(at)
+		parts[i].Motion = thing.Still(parts[i].At(0).Within(at))
 	}
 	return parts, nil
 }

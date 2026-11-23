@@ -64,7 +64,7 @@ func Sunlight() Spectrum {
 func Full() Spectrum {
 	moon := Moon()
 	size := moon.Radius().Over(moon.Distance())
-	return Sunlight().scaled(moon.Albedo() * size * size)
+	return Sunlight().scaled(moon.geometricAlbedo() * size * size)
 }
 
 // Disc is the full moon's own radiance, its face's light toward the
@@ -74,7 +74,7 @@ func Full() Spectrum {
 // of a white disc sending all the sun's light back alike every way: the
 // sun's light over pi.
 func Disc() Spectrum {
-	return Sunlight().scaled(Moon().Albedo() / math.Pi)
+	return Sunlight().scaled(Moon().geometricAlbedo() / math.Pi)
 }
 
 // scaled is the light times a share.

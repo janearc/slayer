@@ -191,13 +191,15 @@ func buildingGeometryDigest(test *testing.T, things []thing.Thing) string {
 			test.Fatalf("unexpected shape type %T", thing.Shape)
 		}
 		points, faces := polygon.Points(), polygon.Faces()
-		write(uint64(len(points)))
+		pointCount := uint64(len(points))
+		write(pointCount)
 		for _, point := range points {
 			write(math.Float64bits(point.X))
 			write(math.Float64bits(point.Y))
 			write(math.Float64bits(point.Z))
 		}
-		write(uint64(len(faces)))
+		faceCount := uint64(len(faces))
+		write(faceCount)
 		for _, face := range faces {
 			write(uint64(face[0]))
 			write(uint64(face[1]))

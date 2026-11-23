@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/janearc/puzzlemouth/pzm"
+	"github.com/janearc/puzzlemouth/verb"
 	"github.com/janearc/slayer/job"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -24,6 +25,16 @@ The flags stand over the job: --out, --width, --height, --rays, --at,
 each on or off: --vibes, --fastlight, --lamp-store and --sky-looks.
 --dry-run prints the job as it will
 be drawn and each file it would write, and writes nothing.
+
+--fetch-terrain fetches the datasets the set names (its terrain, and
+its moon's face) that are not on the shelf, SLAYER_SHELF, checks them
+against the sources.yaml nearest the set, and then draws. --refresh-terrain
+fetches them all again, replaces a file only with a good one, and then
+draws. One at a time. Nothing is downloaded unless one is given.
+
+--places PATH writes a table of where each thing of the set was stood
+(of, kind, east, north and height, in metres), as a table of commas, and
+draws as well; the picture is drawn, not taken from the cache.
 
 With no outputs said, a still goes to out/NAME.png and a film to
 out/NAME/ and out/NAME.mp4. When SLAYER_RENDERS names a renders home,
@@ -43,8 +54,21 @@ set), while it draws, resumes from them, and removes them once the movie is writ
 A still drawn under the renders home is not drawn over one another job
 drew in the same folder unless --replace is given.
 
-Control-c stops between frames, throws the movie away and leaves the
-frames to resume.
+A still drawn on the processor says how far it is on standard error
+every fifteen seconds: rows finished of all, rows taken up, the time
+taken and the time left. Each row is kept under the cache home as it
+is finished, so a still that is stopped, or whose process dies, is
+picked up from its rows when the same job is drawn again by the same
+build, and is the same picture to the byte. The rows are removed once
+the still is written. --fresh takes up no rows. A still through a lens
+rig, of several shutter glimpses, or told ray by ray neither says how
+far it is nor keeps its rows.
+
+Control-c or a terminate stops a still within a ray of each row being
+drawn, keeping the rows finished. A film's frame drawn whole on the
+processor stops the same way, keeping nothing of that frame; a film
+drawn on the graphics card stops between frames. Either way the movie
+is thrown away and the frames written are left to resume.
 `
 
 // drawing is the draw verb, with what it runs under.
@@ -59,21 +83,72 @@ func (drawer drawing) draw(call pzm.Call) error {
 	if len(call.Args()) != one {
 		return errors.New("draw takes one file: slayer draw JOB")
 	}
+	way, tends, err := tendAsked(call, drawTends)
+	if err != nil {
+		return err
+	}
 	given := call.Args()[nothing]
 	if !filepath.IsAbs(given) {
 		given = filepath.Join(drawer.env.directory, given)
 	}
 	run, err := drawer.planned(call, given)
+	if err == nil {
+		run, err = run.withPlaces(call, drawer.env.directory)
+	}
 	if err != nil {
 		return err
 	}
 	if call.DryRun() {
-		return dryRun(call.Out(), run.wanted, run.at)
+		return dryDraw(call.Out(), run, way, tends)
+	}
+	if tends {
+		if err := tended(call.Out(), way, run.wanted); err != nil {
+			return err
+		}
 	}
 	run.replace, run.keepFrames = call.On(replaceFlag), call.On(keepFlag)
 	run.fresh = call.On(freshFlag)
 	_, run.keeps = drawer.shop.(pieces)
 	return run.draw()
+}
+
+// dryDraw is draw's dry run: the job and the files it would write, and
+// the tending of the terrain it would do, which it does not.
+func dryDraw(out io.Writer, run runner, way tendWay, tends bool) error {
+	if err := dryRun(out, run.wanted, run.at); err != nil {
+		return err
+	}
+	if !tends {
+		return nil
+	}
+	return wouldTend(out, way, run.wanted)
+}
+
+// declareDraw adds draw to the tool: it writes the job's outputs, and
+// the places table and the shelf where it is asked to; the shelf is
+// fetched to from outside the machine.
+func declareDraw(made *pzm.Tool, drawer drawing) {
+	writes := verb.WritesTo("the job's outputs, and its folder and " +
+		"note under the renders home, with --places the places " +
+		"table, and with --fetch-terrain or --refresh-terrain the shelf")
+	draws := verb.NewFacts(writes, verb.Changes, verb.Outside,
+		verb.NoOne, verb.FullGPU)
+	flags := append(jobFlags(),
+		pzm.Switch(replaceFlag, verb.NoShort,
+			"draw a still over one another job drew"),
+		pzm.Switch(keepFlag, verb.NoShort,
+			"keep a movie's working frames once it is written"),
+		pzm.Switch(freshFlag, verb.NoShort, "draw a still even where "+
+			"the cache holds its picture or its rows"),
+		pzm.Value(placesFlag, verb.NoShort, "write where each thing "+
+			"was stood to this file, as commas"),
+		pzm.Switch(fetchTerrainFlag, verb.NoShort, "fetch the datasets "+
+			"the shelf lacks for the set, then draw"),
+		pzm.Switch(refreshTerrainFlag, verb.NoShort, "fetch the set's "+
+			"datasets again, replacing the shelf's, then draw"))
+	made.Verb("draw", verb.NoShort, "carry out a job here and write "+
+		"what it asks", drawHelp, "Example_draw", draws, drawer.draw,
+		flags...)
 }
 
 // planned is the runner for the file given: its job with the call's

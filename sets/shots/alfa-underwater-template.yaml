@@ -7,8 +7,9 @@
 #
 # There is no terrain or air model in this scene. `setting: space` supplies
 # the groundless stage. The blue sky, flood and local spot are shot lights,
-# not atmosphere or transported sunlight. The ocean is a finite 512 m sampled
-# spectral height field. Scene time advances with the boat in each snapshot.
+# not atmosphere or transported sunlight. The ocean is the sea with no edge,
+# the wave bands of the wind summed at every point. Scene time advances
+# with the boat in each snapshot.
 #
 # The water uses shot-selected synthetic extinction [0.03, 0.008, 0.004] m^-1,
 # not measured coastal water. Camera `initial-media` seeds the clear-interface
@@ -16,7 +17,7 @@
 # The camera is about 110 m from the hull centre, below mean sea and outside
 # the Alfa's 9.5 m beam. The hull's keel origin is at up = -18.24 m.
 #
-# The renderer's finite wave patch and absent scattering leave visible
+# The renderer's absent scattering leaves visible
 # surface artifacts. The shot does not claim a physical wake or sunlight
 # transport. The local light and extinction are explicit composition choices.
 "$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
@@ -69,11 +70,9 @@ scene:
         strength: 15
         source: "authored blue-green shot fill; not participating water scattering"
     ocean:
-      # mean sea at z=0, a swell from the wind and fetch above.
+      # mean sea at z=0, a sea from the wind and fetch below.
       material: seawater
       middle: [-1500, 0, 0]
-      extent: {value: 512, unit: m}
-      samples: 257
       sea:
         wind: {value: 7, unit: m/s}
         fetch: {value: 50000, unit: m}

@@ -17,7 +17,7 @@ import (
 // stops gamma to nothing and passes the visible mostly; the ten micron
 // window passes; ultraviolet at 250 nm is stopped within metres;
 // radio comes through; the phase functions integrate to one over the
-// sphere; and the spectrum for a unit says the same as beer's law.
+// sphere.
 func TestAirFromItsOwnNumbers(t *testing.T) {
 	air := Air()
 	blue, red := air.Scatter(maths.Band{Nanometres: 450}), air.Scatter(maths.Band{Nanometres: 650})
@@ -58,8 +58,8 @@ func TestAirFromItsOwnNumbers(t *testing.T) {
 		t.Errorf("haze throws %v forward and %v back", fwd, back)
 	}
 	s := air.Spectrum(1000)
-	if !(math.Abs(s.Passes[thing.Visible]-air.Transmit(maths.Band{Nanometres: 550}, 1000)) <= 1e-12) {
-		t.Errorf("the spectrum passes %v of the visible a kilometre; beer says %v", s.Passes[thing.Visible], air.Transmit(maths.Band{Nanometres: 550}, 1000))
+	if !(math.Abs(s.Passes[thing.Visible()]-air.Transmit(maths.Band{Nanometres: 550}, 1000)) <= 1e-12) {
+		t.Errorf("the spectrum passes %v of the visible a kilometre; beer says %v", s.Passes[thing.Visible()], air.Transmit(maths.Band{Nanometres: 550}, 1000))
 	}
 	if s.Passes[radiation.Gamma()] > 0.05 {
 		t.Errorf("the spectrum passes %v of gamma a kilometre", s.Passes[radiation.Gamma()])
@@ -78,7 +78,7 @@ func TestAirFromItsOwnNumbers(t *testing.T) {
 // gas: at twice the distance the log of the brightness has fallen by
 // the extinction times the distance, and off the beam there is nothing.
 func TestALaserThroughHazeFallsByBeersLaw(t *testing.T) {
-	haze := Haze().Per(1000) // a world unit is a kilometre
+	haze := Haze().per(1000) // a world unit is a kilometre
 	laser := film.Laser{At: maths.V(0, 0, 0), Aim: maths.V(1, 0, 0), Width: 0.01, Strength: maths.RGB(0, 1, 0), Length: 100}
 	lamps := []thing.Lamp{laser}
 	through := Uniform(haze, 1)
@@ -139,8 +139,10 @@ func TestVenusAndMarsHaveTheirOwnAirs(t *testing.T) {
 		t.Errorf("mars: scatter %v, radio %v", mars.Scatter(green), mars.Transmit(radio, 50e3))
 	}
 	blue, red := maths.Band{Nanometres: 465}, maths.Band{Nanometres: 610}
-	if mars.Absorb(blue) <= mars.Absorb(red) {
-		t.Errorf("mars's dust absorbs blue %v and red %v", mars.Absorb(blue), mars.Absorb(red))
+	absorbsBlue, _ := mars.optics(blue)
+	absorbsRed, _ := mars.optics(red)
+	if absorbsBlue <= absorbsRed {
+		t.Errorf("mars's dust absorbs blue %v and red %v", absorbsBlue, absorbsRed)
 	}
 	for _, g := range []Gas{venus, mars} {
 		if len(g.Sources) < 4 {

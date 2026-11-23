@@ -77,7 +77,9 @@ func TestCompareImagesRejectsOversizedImage(t *testing.T) {
 }
 
 func TestCompareImagesRejectsDifferentSizes(t *testing.T) {
-	_, err := CompareImages(image.NewRGBA(image.Rect(0, 0, 1, 1)), image.NewRGBA(image.Rect(0, 0, 2, 1)))
+	narrow := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	wide := image.NewRGBA(image.Rect(0, 0, 2, 1))
+	_, err := CompareImages(narrow, wide)
 	if err == nil {
 		t.Fatal("expected size mismatch error")
 	}
@@ -88,7 +90,8 @@ func TestComparePNGWritesDifference(t *testing.T) {
 	a := filepath.Join(dir, "a.png")
 	b := filepath.Join(dir, "b.png")
 	difference := filepath.Join(dir, "difference.png")
-	writePNG(t, a, image.NewRGBA(image.Rect(0, 0, 1, 1)))
+	unchanged := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	writePNG(t, a, unchanged)
 	changed := image.NewRGBA(image.Rect(0, 0, 1, 1))
 	changed.SetRGBA(0, 0, color.RGBA{R: 3, A: 255})
 	writePNG(t, b, changed)
@@ -118,8 +121,10 @@ func TestComparePNGDoesNotOverwriteInputs(t *testing.T) {
 	directory := t.TempDir()
 	oracle := filepath.Join(directory, "oracle.png")
 	candidate := filepath.Join(directory, "candidate.png")
-	writePNG(t, oracle, image.NewRGBA(image.Rect(0, 0, 1, 1)))
-	writePNG(t, candidate, image.NewRGBA(image.Rect(0, 0, 1, 1)))
+	oracleImage := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	writePNG(t, oracle, oracleImage)
+	candidateImage := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	writePNG(t, candidate, candidateImage)
 	original, err := os.ReadFile(oracle)
 	if err != nil {
 		t.Fatal(err)
@@ -157,7 +162,8 @@ func TestComparePNGRejectsBadInput(t *testing.T) {
 	dir := t.TempDir()
 	valid := filepath.Join(dir, "valid.png")
 	bad := filepath.Join(dir, "bad.png")
-	writePNG(t, valid, image.NewRGBA(image.Rect(0, 0, 1, 1)))
+	validImage := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	writePNG(t, valid, validImage)
 	if err := os.WriteFile(bad, []byte("not png"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -263,7 +269,8 @@ func TestCompareRawRejectsInvalidValues(t *testing.T) {
 	if err := raw.Write(a, frame.New(1, 1)); err != nil {
 		t.Fatal(err)
 	}
-	writePFMValues(t, b, 1, 1, []float32{float32(math.NaN()), 0, 0})
+	notANumber := float32(math.NaN())
+	writePFMValues(t, b, 1, 1, []float32{notANumber, 0, 0})
 	if _, err := CompareRaw(a, b); err == nil {
 		t.Fatal("expected non-finite raw value error")
 	}
@@ -281,7 +288,8 @@ func TestCompareRawScalesBeforeNarrowing(t *testing.T) {
 		t.Fatal(err)
 	}
 	wanted := frame.New(1, 1)
-	value := float32(float64(float32(1e-40)) * 1e40)
+	tiny := float32(1e-40)
+	value := float32(float64(tiny) * 1e40)
 	wanted.Set(0, 0, frame.Pixel{R: value, G: value, B: value})
 	if err := raw.Write(candidate, wanted); err != nil {
 		t.Fatal(err)
@@ -409,8 +417,10 @@ func TestCompareImagesRefusesNil(t *testing.T) {
 func TestComparePNGRefusesDifferentSizes(t *testing.T) {
 	dir := t.TempDir()
 	one, two, out := filepath.Join(dir, "one.png"), filepath.Join(dir, "two.png"), filepath.Join(dir, "diff.png")
-	writePNG(t, one, image.NewRGBA(image.Rect(0, 0, 1, 1)))
-	writePNG(t, two, image.NewRGBA(image.Rect(0, 0, 2, 1)))
+	oneImage := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	writePNG(t, one, oneImage)
+	twoImage := image.NewRGBA(image.Rect(0, 0, 2, 1))
+	writePNG(t, two, twoImage)
 	if _, err := ComparePNG(one, two, out); err == nil || !strings.Contains(err.Error(), "sizes differ: 1x1 and 2x1") {
 		t.Fatalf("different sizes error: %v", err)
 	}

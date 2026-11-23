@@ -9,32 +9,32 @@ import (
 	"github.com/janearc/slayer/set"
 )
 
-// Lens is a rig's frame and lens: the frame's width and height and the
+// lens is a rig's frame and lens: the frame's width and height and the
 // focal length in millimetres, and how many metres off it is focused.
-type Lens struct {
+type lens struct {
 	frameWidth, frameHeight, focal, focus float64
 	pinhole                               bool
 }
 
-// NewLens is a lens, refused unless the frame and focal length are more
+// newLens is a lens, refused unless the frame and focal length are more
 // than nothing and the focus is further off than the focal length, as
 // ninjafilm/lens.NewThin refuses them.
-func NewLens(frameWidth, frameHeight, focal, focus float64) (Lens, error) {
+func newLens(frameWidth, frameHeight, focal, focus float64) (lens, error) {
 	if !(frameWidth > 0) || !(frameHeight > 0) || !(focal > 0) ||
 		!(focus > focal*millimetre) || math.IsInf(focus, 0) ||
 		math.IsInf(frameWidth, 0) || math.IsInf(frameHeight, 0) {
-		return Lens{}, fmt.Errorf("%w: a lens of %v by %v mm at %v mm, "+
+		return lens{}, fmt.Errorf("%w: a lens of %v by %v mm at %v mm, "+
 			"focused %v m off; give a frame and focal length over nothing "+
-			"and a finite focus beyond the focal length", ErrWalk,
+			"and a finite focus beyond the focal length", errWalk,
 			frameWidth, frameHeight, focal, focus)
 	}
-	return Lens{frameWidth: frameWidth, frameHeight: frameHeight,
+	return lens{frameWidth: frameWidth, frameHeight: frameHeight,
 		focal: focal, focus: focus}, nil
 }
 
 // image is how far behind the lens the film stands, in millimetres: the
 // lens law's image of the focus, as ninjafilm/lens.NewThin puts it.
-func (glass Lens) image() float64 {
+func (glass lens) image() float64 {
 	if glass.pinhole {
 		return glass.focal
 	}
@@ -46,7 +46,7 @@ func (glass Lens) image() float64 {
 // eye stands and how it faces, its lens, and the picture's size.
 type Camera struct {
 	eye           maths.Subspace
-	glass         Lens
+	glass         lens
 	width, height int
 	// unit is what the camera's places are measured in, for its scale
 	// bars; level is whether its bars lie on level ground, as a set's
@@ -55,17 +55,17 @@ type Camera struct {
 	level bool
 }
 
-// NewCamera is a camera, refused for a picture under a pixel across.
+// newCamera is a camera, refused for a picture under a pixel across.
 // The picture's height follows from the frame's shape, rounded, as the
 // tracer's rig makes it.
-func NewCamera(eye maths.Subspace, glass Lens, width int) (Camera, error) {
+func newCamera(eye maths.Subspace, glass lens, width int) (Camera, error) {
 	if width < 1 {
 		return Camera{}, fmt.Errorf("%w: a picture %d across; give one "+
-			"pixel or more", ErrWalk, width)
+			"pixel or more", errWalk, width)
 	}
 	if glass.focal == 0 {
 		return Camera{}, fmt.Errorf("%w: a camera with no lens; make one "+
-			"with NewLens", ErrWalk)
+			"with CameraOf", errWalk)
 	}
 	height := int(math.Round(float64(width) * glass.frameHeight /
 		glass.frameWidth))
@@ -90,7 +90,7 @@ func NewEye(from, lookAt, up maths.Vec) (Eye, error) {
 		math.Abs(ahead.Unit().Dot(up.Unit())) > 1-roundingSlack {
 		return Eye{}, fmt.Errorf("%w: an eye at %v looking at %v with up "+
 			"%v; look somewhere else, with an up across the look",
-			ErrWalk, from, lookAt, up)
+			errWalk, from, lookAt, up)
 	}
 	return Eye{from: from, lookAt: lookAt, up: up}, nil
 }
@@ -104,7 +104,7 @@ func PinholeCamera(eye Eye, wide float64, size image.Point,
 		unit == "" {
 		return Camera{}, fmt.Errorf("%w: a pinhole %v degrees wide on a "+
 			"picture of %v in %q; give an angle between nought and %v, a "+
-			"picture, and a unit", ErrWalk, wide, size, unit,
+			"picture, and a unit", errWalk, wide, size, unit,
 			halfTurnDegrees)
 	}
 	return pinholeAt(maths.Subspace{Origin: eye.from,
@@ -119,7 +119,7 @@ func PinholeCamera(eye Eye, wide float64, size image.Point,
 func pinholeAt(eye maths.Subspace, wide float64, size image.Point,
 	unit string) Camera {
 	across := float64(size.X)
-	glass := Lens{frameWidth: across, frameHeight: float64(size.Y),
+	glass := lens{frameWidth: across, frameHeight: float64(size.Y),
 		focal:   across * half / math.Tan(wide*maths.Degree*half),
 		pinhole: true}
 	return Camera{eye: eye, glass: glass, width: size.X, height: size.Y,
@@ -132,7 +132,7 @@ const halfTurnDegrees = 180.0
 // CameraOf is a camera of a set by name, its eye where the set puts it
 // among its places, through the set's rig, the picture so many pixels
 // across. A film with no rig that says how wide it sees is the pinhole
-// hillside draws it with (rigless). A set with neither, a camera it
+// the session draws it with (rigless). A set with neither, a camera it
 // lacks, or a lens focused on a thing not among the places, is refused
 // by name.
 func CameraOf(read set.Set, name string, places Places, width int) (Camera,
@@ -141,12 +141,12 @@ func CameraOf(read set.Set, name string, places Places, width int) (Camera,
 	rig, rigged := film.Rig()
 	if !has || (!rigged && !(film.Wide() > 0)) {
 		return Camera{}, fmt.Errorf("%w: the set has no film with a rig "+
-			"(frame and lens) or a wide; give its film one", ErrWalk)
+			"(frame and lens) or a wide; give its film one", errWalk)
 	}
 	shot, err := read.Shot(name, places.where)
 	if err != nil {
 		return Camera{}, fmt.Errorf("%w: %w; the set's cameras are %v",
-			ErrWalk, err, read.Cameras())
+			errWalk, err, read.Cameras())
 	}
 	if !rigged {
 		return rigless(shot.Eye(), film, width)
@@ -155,19 +155,19 @@ func CameraOf(read set.Set, name string, places Places, width int) (Camera,
 	at, found := places.where(focus)
 	if !found {
 		return Camera{}, fmt.Errorf("%w: the lens is focused on %q, which "+
-			"is not among the places", ErrWalk, focus)
+			"is not among the places", errWalk, focus)
 	}
 	across, down := rig.Frame()
-	glass, err := NewLens(across, down, focal,
+	glass, err := newLens(across, down, focal,
 		at.Sub(shot.Eye().Origin).Len())
 	if err != nil {
 		return Camera{}, err
 	}
-	return NewCamera(shot.Eye(), glass, width)
+	return newCamera(shot.Eye(), glass, width)
 }
 
 // rigless is a set's camera whose film has no rig, only how wide it
-// sees: the pinhole hillside draws it with (film.Pinhole, the angle
+// sees: the pinhole the session draws it with (film.Pinhole, the angle
 // across the picture, square pixels), the picture so many pixels across
 // and as high as the film's own shape makes it, rounded, in metres on
 // level ground as a set's places are.
@@ -177,7 +177,7 @@ func rigless(eye maths.Subspace, film set.Film, width int) (Camera,
 	if width < 1 || across < 1 || down < 1 {
 		return Camera{}, fmt.Errorf("%w: a picture %d across from a film "+
 			"of %d by %d; give a pixel or more and a film with a size",
-			ErrWalk, width, across, down)
+			errWalk, width, across, down)
 	}
 	height := int(math.Round(float64(width) * float64(down) /
 		float64(across)))
@@ -187,13 +187,10 @@ func rigless(eye maths.Subspace, film set.Film, width int) (Camera,
 	return view, nil
 }
 
-// Size is the picture's width and height in pixels.
-func (view Camera) Size() (width, height int) {
+// size is the picture's width and height in pixels.
+func (view Camera) size() (width, height int) {
 	return view.width, view.height
 }
-
-// Eye is where the camera stands.
-func (view Camera) Eye() Place { return placeOf(view.eye.Origin) }
 
 // Pixel is where a place falls on a picture: its column and row, the
 // middle of the top left pixel at nought and nought; whether the place
@@ -213,9 +210,6 @@ func (seen Pixel) Y() float64 { return seen.y }
 // has no pixel; its X and Y are nought.
 func (seen Pixel) Ahead() bool { return seen.ahead }
 
-// On is whether the place falls on the picture.
-func (seen Pixel) On() bool { return seen.on }
-
 // Project is the pixel a place is drawn at: seen along the ray through
 // the lens's middle onto the film at the image distance, as the tracer's
 // thin lens sees it (ninjafilm/lens.Thin.Ray).
@@ -223,16 +217,16 @@ func (view Camera) Project(at Place) Pixel {
 	return view.projected(view.eye.In(at.world()))
 }
 
-// Toward is the pixel a way in the sky is drawn at, as far off as the
+// toward is the pixel a way in the sky is drawn at, as far off as the
 // moon, at an azimuth from north toward east and an altitude over the
 // level, in degrees: where the eye's own position no longer matters.
-func (view Camera) Toward(azimuth, altitude float64) Pixel {
+func (view Camera) toward(azimuth, altitude float64) Pixel {
 	way := skyward(azimuth, altitude)
 	return view.projected(view.eye.Orientation.In(way))
 }
 
 // skyward is a way in the world's space from an azimuth and altitude in
-// degrees, as hillside's skyward makes it: north is minus z, east plus x.
+// degrees, as the session's skyward makes it: north is minus z, east plus x.
 func skyward(azimuth, altitude float64) maths.Vec {
 	round, up := azimuth*maths.Degree, altitude*maths.Degree
 	return maths.V(math.Cos(up)*math.Sin(round), math.Sin(up),

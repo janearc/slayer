@@ -1,0 +1,5 @@
+name,y,z,nearEnter,nearLeave,farEnter,farLeave
+shell-weather-spans-through-the-middle,0,-300,170,190,410,430
+shell-weather-spans-clipping-the-shell-only,120,-300,250,350,0,0
+shell-weather-spans-missing-the-shell,500,-300,0,0,0,0
+shell-weather-spans-from-inside-the-hollow,0,0,0,0,110,130

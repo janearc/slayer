@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"syscall"
 	"time"
+
+	"github.com/janearc/slayer/azazel/internal/footprint"
 )
 
 // Executor runs a selected job and reports whether its lifetime is known.
@@ -38,7 +40,8 @@ func (s Store) lockFile(name string) (*os.File, error) {
 		return nil, err
 	}
 	if err = private(path, false); err == nil {
-		err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+		lockDescriptor := int(file.Fd())
+		err = syscall.Flock(lockDescriptor, syscall.LOCK_EX|syscall.LOCK_NB)
 	}
 	if err != nil {
 		file.Close()
@@ -117,6 +120,9 @@ func (s Store) Recover(ctx context.Context, seq uint64, owner string, stopped bo
 		return fmt.Errorf("recovery needs explicit confirmation that this attempt and its descendants have stopped")
 	}
 	lock, err := s.workerLock()
+	if errors.Is(err, ErrActive) {
+		return fmt.Errorf("%w: %w", ErrWorkerServing, err)
+	}
 	if err != nil {
 		return err
 	}
@@ -125,7 +131,21 @@ func (s Store) Recover(ctx context.Context, seq uint64, owner string, stopped bo
 }
 
 // recoverAttempt preserves unstarted work and refuses live or unknown groups.
+// A group recorded under another boot is not this boot's and is not probed.
 func (s Store) recoverAttempt(ctx context.Context, seq uint64, owner string, attested bool) error {
+	boot, err := footprint.BootID()
+	return s.recoverAttemptOnBoot(ctx, seq, owner, attested, boot, err == nil)
+}
+
+// foreignBoot reports whether job's group was recorded under a boot other
+// than boot. An unrecorded or unknown boot never counts as foreign.
+func foreignBoot(job Job, boot string, known bool) bool {
+	return known && footprint.ValidBootID(job.ProcessBootID) && job.ProcessBootID != boot
+}
+
+// recoverAttemptOnBoot is recoverAttempt for a given boot identity; known is
+// false when this boot's identity could not be read.
+func (s Store) recoverAttemptOnBoot(ctx context.Context, seq uint64, owner string, attested bool, boot string, known bool) error {
 	snapshot, err := s.Status(ctx)
 	if err != nil {
 		return err
@@ -142,7 +162,8 @@ func (s Store) recoverAttempt(ctx context.Context, seq uint64, owner string, att
 		return err
 	}
 	defer lease.Close()
-	if job.ProcessGroup > 1 && !errors.Is(syscall.Kill(-job.ProcessGroup, 0), syscall.ESRCH) {
+	foreign := foreignBoot(*job, boot, known)
+	if !foreign && job.ProcessGroup > 1 && !errors.Is(syscall.Kill(-job.ProcessGroup, 0), syscall.ESRCH) {
 		return fmt.Errorf("%w: process group %d still exists or is unknown", ErrActive, job.ProcessGroup)
 	}
 	if !job.Executing {
@@ -151,5 +172,9 @@ func (s Store) recoverAttempt(ctx context.Context, seq uint64, owner string, att
 	if job.ProcessGroup == 0 && !attested {
 		return fmt.Errorf("%w: launch outcome requires operator inspection", ErrActive)
 	}
-	return s.finish(ctx, seq, owner, Result{State: Interrupted, ExitCode: -1, Reason: "supervisor ended; process group confirmed stopped"})
+	reason := "supervisor ended; process group confirmed stopped"
+	if foreign {
+		reason = "supervisor ended; its process group was recorded under another boot, so it is gone"
+	}
+	return s.finish(ctx, seq, owner, Result{State: Interrupted, ExitCode: -1, Reason: reason})
 }

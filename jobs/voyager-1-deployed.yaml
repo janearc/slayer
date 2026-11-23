@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/voyager-1-hero.yaml}
+renderer: gpu-native
+film: {width: 1080, height: 960, rays: 4, wide: 45, exposure: 0.01}
+camera: {name: deployed}
+outputs:
+  picture: ../out/voyager-1-deployed-wip.png

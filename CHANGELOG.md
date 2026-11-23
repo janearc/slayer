@@ -1,4 +1,534 @@
-## unreleased
+## slayer 0.1.4 23 nov 2026
+
+this is an incremental release. the code is a lot cleaner, the documentation
+is getting better, and it's better organized. for the most part, it builds,
+and should do so easily on your system if you follow quickstart.md.
+
+if you have questions, drop me a line at `jmich@fastmail.nl`. i will be
+reorganizing a little bit, primarily moving models out to their own
+repository, so that this repository can focus on the tracer and renderer.
+
+- Changed: the observatory summit is two sets, `sets/golden-hour-summit.yaml`
+  (the golden hour, was `doc/golden-hour-site.yaml`) and
+  `sets/moonlit-summit.yaml` (a low full moon at 23:00, was
+  `session/testdata/quality-summit-moon-preview.yaml`). The other
+  `quality-summit-*` sets are gone. `slayer draw FILE --width W --height H
+  --rays N` draws either at another size, and `--camera` picks a camera.
+
+- Added: `slayer draw --fetch-terrain` and `--refresh-terrain` tend the
+  set's datasets and then draw; `slayer assess --check-terrain` exits 1
+  where the shelf differs from the source.
+
+- Added: `--places PATH` on `slayer draw` and `slayer assess` writes the
+  table of where each thing was stood, as `hillside -places` did.
+
+- Changed: the package that opens a job, stages its set and draws its
+  frames is `session`; it was `hillside`. Code that imports
+  `github.com/janearc/slayer/hillside` imports
+  `github.com/janearc/slayer/session`, and the names in it are the same.
+
+  The command `hillside` is on its way out. What it drew from a set file
+  or a sequence plan, `slayer draw FILE` draws; `slayer assess FILE` says
+  whether a file will draw, and how many frames, without drawing.
+
+- Added: `sets/spitzer-specimen.yaml`, `sets/hubble-specimen.yaml` and
+  `sets/webb-specimen.yaml`: one telescope each, in space, under one sun
+  and a black sky. They take the place of `doc/space-spitzer.yaml`,
+  `doc/space-hubble.yaml` and `doc/space-webb.yaml` for looking at a
+  craft; those hang it 100 m over a patch of ground and are black only
+  under the old command's `-sky black`.
+
+- Added: `slayer prove JOB RAW`, which does what `hillside -prove` did:
+  it replays chosen pixels of a raw drawn on the cpu through the exact
+  tracer and holds each to the raw bit for bit. `--pixel "X,Y;X,Y"` names
+  pixels, `--many N` has the raw's own bytes pick more, `--frame N` says
+  which frame of a film the raw is, and `--proof DIR` says where the
+  sheet goes.
+
+- Changed: `hillside` has no `-faces` flag, and no scene is refused for
+  how many faces it keeps. A command line that passes `-faces` now fails;
+  leave it out. No thing is refused for its faces or its leaves either: a
+  thing past the old face budget is flattened and a tree past its cell
+  budget is grown, and both are drawn. Only a tree whose cells cannot be
+  counted is refused, by its own error.
+
+  Portofino's holm oaks, some past 1024 cells, now draw.
+
+- Changed: a film's pixel samples start at the points of the
+  (0,2)-sequence, moved to the middles of their strata, and a set's film
+  says the filter they are spread under: `tent`, `trapezoid`, `box` or
+  `grid`, the tent where it says none. The pattern of each pixel's own
+  left a grain along every straight edge; a straight edge is now drawn
+  the same all along it, and sixteen rays give seventeen even shades.
+
+  A picture drawn from a set that names no filter is drawn from other
+  points than before, so its noise and its edges change; its mean light
+  does not. Both schemas say the filter, and `doc/sets.md` says what each
+  costs in contrast.
+
+- Changed: a set that gives a sun an azimuth without an altitude, or an
+  altitude without an azimuth, is refused by the schemas. A moon scene
+  whose date and place work a sun above the horizon is refused by the set
+  reader.
+
+- Fixed: bright single-pixel specks in haze lit by many lamps. A step
+  through a medium walked the lamp tree from its root, and where the point
+  was inside a node's box, or near it for the box's size, the node's worth
+  was wrong: a lamp close by was taken rarely and then counted for it, a
+  weight many times the step's light.
+
+  A step now splits such a node, after Conty Estevez and Kulla, "Importance
+  sampling of many lights with adaptive tree splitting" (2018), into at most
+  eight nodes and takes one lamp from each, and takes a sun at every step and
+  not by chance.
+
+  While the split is not full, no pick weighs more than four times the light of
+  its node's lamps; where lamps are thick the eighth node, the one round
+  the point, is still walked the old way, and some grain stays there.
+
+  The mean light is the same; a picture with lamps in air is drawn with other
+  noise, and a step may ask up to eight lamps of the tree where it asked
+  one, so such a picture takes two to five times as long to draw. The
+  picture meter reads lamp-lit fog more truly for it: a one-ray picture
+  with the old pick mostly missed the lamps and opened the exposure.
+
+- Fixed: the shoulder is continuous at the knee for a saturated colour.
+  A colour whose luminance was under the knee but whose brightest part was
+  over white was clipped a part at a time, and the same colour a hair over
+  the knee was drawn toward white, so the print jumped there.
+
+  Such a colour is now drawn toward white along its hue under the knee as
+  above it. A colour that fits under white is unchanged. The GPU developer's
+  kernel restates the same.
+
+- Fixed: `noise.Fractal` and `noise.Fractals` at a point where every
+  coordinate is zero, with a very large number of octaves, no longer loop
+  for every octave. The sum ends when an octave's share has fallen to
+  nothing, and the result is the same.
+
+- Fixed: black lines along the crests of a sea. A look mirrored off one
+  wave into the next met the second past the bounce limit and was drawn
+  by clear water's own colour, which is none. Water there now takes the
+  sky along its mirrored way by Fresnel's share, on the CPU and on the
+  GPU, whose last bounce had kept the black lines.
+
+- Fixed: nested rings and shards in the sea near the camera. A look
+  leaving the sea started inside the touch within which the sea's search
+  counts a ray as met, so a bent look began above the surface it had just
+  crossed and met it again. It now starts two touches away, on the side
+  it leaves toward, on both tracers. The sea's shading slopes are read by
+  cubic convolution, which has no kinks at the sample lines.
+
+- Fixed: a rough sea mirrored the sky as polished metal. The slope the
+  waves do not carry, and that of the bands a pixel is too wide to show,
+  went to the sun's highlight alone, so the mirrored sky saw a surface
+  with no wave shorter than the finest band.
+
+  A look that enters a sea from above is now mirrored by four small faces
+  drawn from the same Gaussian of slopes as the highlight, each weighed by the
+  area it shows the eye and Fresnel's share at its tilt; the last bounce's sky
+  the same. The bend is not roughened.
+
+- Fixed: almost no white water where a sea meets the land. Land samples
+  beside the water carried no breaking share, so the water between them
+  and the next sample read as barely breaking. At the waterline every
+  wave has broken, and it now shows.
+
+- Fixed: a ray over a sea with no edge that used up its search steps was
+  dropped as a miss. It now ends on the mean plane and is counted.
+
+- Fixed: grain in a wrinkled surface drawn at more than one sample a
+  pixel. Both tracers faded a wrinkle by the width of one sample, not of
+  the finished pixel, so at four samples a side the fade began four times
+  too far away. The kernel now reads the samples along a pixel's side from
+  the exposure row, which a closed shutter carries too, and the processor
+  measures the finished pixel's width. Texture footprints stay a sample's.
+
+- Fixed: a ridge of surveyed ground shaded by the wrong side. Where a mesh
+  is shaded smooth and the normal its corners blend to opposes the face
+  the eye sees, as the ground's does at a ridge where a survey has four
+  metres between samples, the point the lamps and the sky were asked from
+  was raised under the face, where every ray is shut out.
+
+  Such a normal is now turned over to the eye's side of the face, and the
+  point is not lifted across it. Where a smooth normal does not oppose the
+  face, a mesh is shaded as any shape is.
+
+- Fixed: a lit window of a tower drawn at a coarse level lost its light.
+  A band drawn bare, and a window drawn coarse, now keep their lit windows.
+
+- Fixed: a draw on the GPU kept waiting on the device after its context
+  was cancelled. The wait now ends with the context, and a stop lowers the
+  ceiling on a band's size.
+
+- Fixed: `azazel`, the queue. A render whose supervisor died while the
+  render lived is written in the ledger, with its process group and since
+  when, and cancelling it signals the group. A group recorded under
+  another boot is not taken as ours. A stored start time after now no
+  longer holds the GPU's spacing, and a lease held by a running render is
+  renewed.
+
+- Changed: a bridge's deck concrete has no gloss. At a gloss of 0.1 the
+  slab was a faint but perfect mirror, since a surface's gloss is not
+  blurred by its roughness: the water showed on the deck's underside and
+  a laser beam drew a sharp line across its edge. Rough concrete throws no
+  mirror image, so its gloss is nought. Every bridge made from the bridge
+  culture changes.
+
+- Changed: the GPU draw refuses a world with a lamp tree and more than
+  seven distant lamps, suns. A step through a medium asks every distant
+  lamp, a lamp outside the tree and eight from it, and the kernel holds
+  sixteen asks; a world with eight suns and a tree would have lost a
+  lamp of the tree with no word, and drawn unlike the CPU.
+
+  It is now refused with the numbers, and the world can be drawn on the CPU or
+  with fewer suns. A world with no lamp tree is unchanged.
+
+- Changed: `noise.Fractal` and `noise.Fractals` give NaN for a point with a
+  coordinate that is NaN or infinite, as `noise.Gradient` does. They gave
+  zero. A caller that passed such a point and read zero as no noise now
+  reads NaN.
+
+- Changed: `noise.Fractals` panics when `into` is shorter than `seeds`. It
+  wrote past the length of `into` when its capacity allowed.
+
+- `noise.Gradient`, `noise.Fractal` and `noise.Fractals` are not exact to the
+  last bit across machines: the compiler fuses multiplies and adds on arm64
+  and not on amd64. The recorded bit tests for them run on arm64 only.
+
+- Changed: `maths.Rotation`, `maths.Upright` and `maths.LookAtUp` give an
+  orientation of no numbers for a vector too long for `Len` to measure, a
+  part past about 1e154, as they do for one that is no number or infinite.
+  They gave an orientation that was not a turn. `maths.View` already refused
+  such a vector, and its error no longer calls a finite vector non-finite.
+
+- Changed: `maths.Fresnel` gives NaN for an index of zero or less, an index
+  that is no number, and an infinite index. It gave one at some cosines and
+  NaN at others for an index of zero, and a number with no meaning for a
+  negative index.
+
+- Changed: where two runs of a row of a `contour` stand meet, the second is
+  drawn from another number if its first bay is the colour of the last bay
+  of the first and its culture says no two neighbours share a colour. The
+  terraces each kept that rule within themselves and not across the joint,
+  where it was broken one joint in as many as the palette has colours.
+
+  `cities.Run`, which `TerraceRun` gives, now carries `First`, `Last` and
+  `Differ`. A stand's runs may be drawn from other numbers than before, so
+  its colours may change where a joint clashed; a stand with no clash, and
+  every stand that is not a `contour`, is unchanged.
+
+- Changed: a still that says no exposure is exposed by what its camera
+  sees. It was exposed by the sky meter alone, a level grey card under the
+  sun and the sky; at sunset a level card is lit by the sky alone, so a
+  camera looking toward the low sun through haze printed white, and
+  `futian-shore` showed a blown-out sky and haze.
+
+  Once the still is staged, the picture meter draws a 48 pixel wide picture of
+  the first frame, one ray a pixel, keeps no rows, and sets the print's
+  exposure so the picture's log-average luminance prints at the grey card's
+  0.18. The lights stay as the sky meter made them.
+
+  A set or job that says an exposure is not metered. `futian-shore` prints at
+  0.33 times its old exposure.
+
+- Changed: a set's film `print` rows, knee, top and source, develop its
+  picture on the staged path too. They were heard on the other path only,
+  and a staged set was developed by the tone `hillside` chose. A film that
+  says no print keeps that tone, and its exposure stays with the lamps.
+
+- Changed: a scene of more than sixteen lamps that stand at a place and
+  fall off by the inverse square picks its lamps from a tree built once a
+  picture, on the CPU and on the GPU. Every step of a ray through haze
+  priced every such lamp: `futian-shore` has 5,161, most of them lit
+  windows, about 1.5 million lamp lights a pixel and three quarters of a
+  CPU draw's time.
+
+  A point on a surface now walks the tree and takes eight lamps; a step
+  through a medium splits the tree, as the fix for specks in haze above says.
+  The mean light is the same; the noise is not. A scene of sixteen lamps or
+  fewer is drawn as before.
+
+- Changed: the GPU draws what it refused. A sea with no edge, and the
+  Beckmann highlight of a sea with `cox-munk` glint, which `hillside`
+  refused to draw on the GPU and said so; flat air and its glow; a tube,
+  as its own mesh, grown once a tube and stood where it is placed; and a
+  clear sheet with vertex slopes as the tracer draws it. It now refuses a
+  ground cover, and a posed mesh painted at its rest points, by name.
+
+- Changed: a draw on the GPU holds less memory and sets up faster. The
+  meshes' trees are grown on every processor before encoding; a slayer
+  mesh's faces and its own tree are packed straight into the kernel's
+  bytes; the device holds a stream's triangles once, not twice; the
+  encode's freed memory is handed back when it is done, which gave back
+  2.8 GiB on the nine-block `neon-street-nine`.
+
+  A band's size is worked from its time, down to part of a row. The kernel
+  walks only the beam lamps in a beam march, only the cone lamps in a clear
+  single scatter, and skips a volume whose box a shadow ray misses; spheres
+  and conifers stand under one box tree.
+
+- Changed: wrinkles and procedural textures finer than a pixel fade to
+  flat by the pixel's footprint, asphalt, paving, stucco, canvas and the
+  rest, on the CPU and on the GPU, which had left them to grain.
+
+- Changed: the manufactory's solar arrays are made by one maker, from
+  boxes and tubes: the wings of Webb, Hubble, Mariner, Roman, SOHO and
+  Spitzer are arrays with cells and covers, hinged or rolled, where they
+  were slabs and crossed bars. Their counts of parts change. See
+  `sets/arrays-webb.yaml`, `sets/arrays-hubble.yaml`,
+  `sets/arrays-mariner.yaml` and `sets/arrays-close.yaml`.
+
+- Changed: many Go packages export fewer names. Names that only a
+  package's own code or tests used are unexported or gone, in
+  `manufacture`, `manufacture/cities`, `thing`, `shape`, `mesh`, `gas`,
+  `skyglow`, `titan`, `terrain`, `planet`, `mie`, `quasar`, `embers`,
+  `texture`, `diskcache` and others, and many refusals are constants.
+
+  A caller outside the repository that named one fails to build. Names a
+  package readme teaches, or that the changelog called unfinished, were
+  put back.
+
+- Changed: while `SLAYER_SCROOGE=1` is set, a draw with a sea with no edge
+  takes it as its mean plane past where a pixel is as wide as the sea is
+  tall, on the CPU and on the GPU; a shadow ray asks whether it meets the
+  sea and not where; a beam march refines inside each beam's cylinder and
+  not the union of the boxes; a named building, and each thing and member
+  of a stand, is made part by part at the rung its span in pixels asks.
+
+  Also, a tower's gargoyles are made only as fine as the picture shows:
+  under a pixel the wall stands for the mount, up to four pixels a plain
+  block of its box, above that the gargoyle whole, and a tower out of
+  view makes none. Unset, a draw makes everything, as before.
+
+- Added: five mangrove kinds, `kandelia-obovata`, `aegiceras-corniculatum`,
+  `avicennia-marina`, `bruguiera-gymnorhiza` and `sonneratia-apetala`,
+  profiles in `manufacture/plant-profiles.yaml`. A profile may now carry a
+  `roots` block, upright pencils or arching props that show above the
+  ground; the mangroves do, and the other kinds are unchanged.
+
+  The `above` and `below` of a stand already stood it in a band of heights, so
+  a shore is a stand between a little over the sea and high water; see
+  `sets/mangrove-shore.yaml` and `sets/mangrove-study.yaml`. The geometry
+  reference rows for the new kinds are not yet recorded.
+
+- Added to `maths/noise`: `Mix`, splitmix64's finaliser; `Unit`, the top 53
+  bits of a hash as a number from zero up to one; `Golden`, the odd constant
+  a word is stepped by before it is mixed; and `Bits3`, the whole 64 bit
+  hash of a seed and three indices, which `Hash3` takes the top of. Packages
+  that stirred a word themselves ask here.
+
+- Added: rows of terraces on a steep slope. A stand of the habit
+  `contour` with a `climb` lays rows along the ground's contours, one
+  above the next with a lane between, each bay founded at the ground
+  outside its door on a plinth to the lowest ground under it, doors
+  downhill or uphill as the set says. Sets that do not use `climb` are
+  unchanged. See `doc/sets.md` and `sets/terraces-on-a-steep-coast.yaml`.
+
+- Added: scrooge, in `maths/strategies/scrooge`, and the switch
+  `SLAYER_SCROOGE=1`, on trial. A set is a description, and a draw made
+  all of it before the first ray, at any picture size; with the switch
+  set, a draw makes no more of the set than its picture can show, and
+  nothing finer than a pixel shows.
+
+  It holds the node, the resolver, the cut and the pixel's footprint, and
+  imports only `maths`. See `doc/scrooge.md`. `SLAYER_TRIAL_PLAN=1` leaves out
+  the things and stand members the camera cannot see, to measure the plan
+  against the same binary without it.
+
+- Added: `maths/strategies`, with a box tree by the surface area
+  heuristic laid out for a fixed stack, one light tree for the tracer and
+  the GPU, cut for a point and walked from a node or by power, and the
+  eye, moved here from `manufacture/sensor`. `mesh` lets a caller read a
+  tree's boxes and its order, grown at the first ask. `maths` has
+  `NewRay`, `NewBox` and `NewBand`.
+
+- Added: `assess --plan`, which says what a picture needs of its set
+  from its numbers. It places each thing, sizes each from its kind's
+  extent and each stand from its designs and region, and says how many
+  pixels each covers at the job's size and camera: build, average or
+  drop. Nothing is made.
+
+  `assess --refusals` says what the GPU path would refuse in a file's first
+  frame, every refusal and not the first, grouped by reason. See
+  `doc/plan-before-staging.md`.
+
+- Added: environment switches. `SLAYER_CPUPROFILE` names a file for a CPU
+  profile of the draw; `SLAYER_HEAPPROFILE` names a file for a heap
+  profile taken at the heap's peak; `SLAYER_MEMORY_STAGES=1` writes
+  process-memory observations as JSON lines to standard error;
+  `SLAYER_LOW_RETENTION=1` pools each mesh as it is grown, which holds
+  less memory and rebuilds the trees of an unchanged frame.
+
+  See `doc/memory-stages-trial.md` and `doc/low-retention-trial.md`.
+
+- Added: a still keeps its rows under the cache, picks up from them, and
+  says its progress on standard error, as `door` does. A rig's instants
+  keep no rows, since a row's key holds no instant. The help says which
+  stills keep none and how a film's frame stops. `diskcache` removes one
+  entry by its key.
+
+- Added: the restir shortcut, `restir`, under `fastlight` or `vibes`:
+  direct light from a crowd of lamps by reservoirs over a light tree,
+  with noise, bias and a lag in time that the job records by name. It
+  never changes a picture drawn with the shortcuts off.
+
+  A set says a crowd in one `lamp-fields` block, a count of lamps scattered by
+  a seed from one block; see `sets/restir-crowd-1k.yaml`, and the same at 10k
+  and 100k. See `doc/restir.md`. A lamp may have a colour of its own, carried
+  from a drawn lamp to the tracer.
+
+- Added: a sea with no edge. A set's ocean that says no extent and no
+  samples is the sea with no edge: wave bands summed at every point, drawn
+  by both renderers, with a swell the set can say, and met by the ground
+  where the set has one. `arid`, `oceantex` and `hillside` carry it; the
+  packages `scene/ocean` and `scene/cove` are now in `arid`.
+
+  A fourth band of short waves, bands read at eight samples a wave, peaked
+  crests, short waves riding long ones, and a bound on each step by
+  place. A set's draw says the sea asked, held and drawn. See
+  `sets/waves-open-water.yaml`, `sets/waves-quay.yaml` and
+  `sets/grazing-sea.yaml`.
+
+- Added: surf. What the bottom does to a sea's waves as they come in:
+  they shoal by group speed, turn toward the shallows, break in a share
+  that gives a foam coverage laid on the highest crests, and run up the
+  beach. A surfing sea's foam is laid over its water. The sea's line in a
+  set says crests and breaking, and a sea with no edge over ground takes
+  the surf.
+
+- Added: ground by rule. A terrain's `made` key lays ground finer than a
+  window's survey, with its seed, steepness, flutes and beds, as the
+  camera sees it; a terrain `cover` colours the ground by height above
+  the sea and slope, rock, grass and sand, each surface blended across a
+  stated width.
+
+  A stand may say how steep its ground may be; a window placed by latitude and
+  longitude may be made too; a near window may lie inside a far one; a degree
+  grid is read as a map of the earth. See `sets/honopu.yaml`,
+  `sets/rarotonga.yaml` and `sets/portofino.yaml`, and `doc/sets.md`.
+
+- Added: a set's sun worked from a date, a clock time and a place. A box
+  may have a `heading`, from 0 through 360 degrees, so a quay can follow a
+  shore that is not along east and west. A `channel` is a walled cut for
+  still water in flat ground, and the habit `frontage` lays terraces,
+  trees and boats along its line; see `sets/groningen.yaml`. A stand that
+  floats says its least water.
+
+- Added: the air in a set. A mist's particles and gas, a lid, a thinning,
+  a cloud deck, a layer's reach and bent plumes; `Aerosol`, a flat layer
+  of haze by Angstrom's law, 1.3 by default; flat air over no terrain and
+  no globe, with the glow of a city's emitters added to the march and
+  solved by `skyglow`; and a terrain layer that may reach past the
+  terrain's edge.
+
+  See `doc/atmosphere-layers.md`, `doc/skyglow.md`, `sets/haze-proof.yaml` and
+  `sets/skyglow-clear.yaml`.
+
+- Added: towers. Facades are drawn by detail level, each storey and its
+  windows levelled separately: curtain wall, stone reveals, concrete
+  panels, rooms behind clear glass, a ground floor with plinth, lit lobby
+  and shops, roofs with telescopes and billboards, and balconies. Six
+  skins, lobed and elliptical plans, planted towers, and one generator
+  from the seed at an irregularity; see `sets/tower-skins-lineup.yaml`.
+
+  Fasteners, bolts down posts and anchor plates on bands, and gargoyles,
+  creatures carved in granite or concrete on a corbel or in a cornice row
+  with exposed spouts; see `sets/gargoyle-tower-gothic.yaml`.
+
+- Added: signs and shops. The kinds `sign-roof`, `sign-screen` and
+  `sign-blade`, and a tower pin `signs`: true tube letters on standoffs,
+  five makes of face, frames, cabinets and feeds, awnings, trades and wear,
+  in Latin capitals or Simplified Chinese (`script` on a recipe, with the
+  two Noto faces pinned on the shelf).
+
+  The kinds `frontage-one` and `retail-block`, units as yaml data, and a
+  podium of shops on each wall of a tower that fronts open ground. See
+  `sets/signs-study-kinds.yaml` and `sets/retail-street.yaml`.
+  `typography.Outlines` gives the rings of each letter's outline.
+
+- Added: the `street` kind, a cambered road with dishes, kerbs, footways,
+  paint and gratings, wet as a film a recipe says; lashings, cables across
+  a street with lanterns, banners and bundles; weathering agents laid on
+  any surface by rule, graffiti drawn as shapes in layers and a wet agent
+  that damps walls low where a wet street splashes them.
+
+  See `sets/wet-road-wet.yaml`, `sets/lashings-street-03.yaml` and
+  `sets/graffiti-sheet.yaml`.
+
+- Added: the `superblock` kind, a parcel built over plot by plot, planned
+  at nought and grown over at one, with people, crowding and accretion
+  said in the set; `neon-street.yaml`, one hundred and forty-four towers
+  in a street, and `futian-shore.yaml`, a city on a shore with
+  mangroves, boats, a village, a fan of beams and lasers. A laser is an
+  object of the manufactory.
+
+- Added: dwellings and boats. The kinds `yurt`, `winnebago` and
+  `bivouac`; `village-house` and `village`, a recipe that says its
+  parcel; `condominium`; `pier`; a `bridge` whose structure is buildings;
+  a scavenged cluster built of whole kinds docked in orbit.
+
+  The boats `sampan`, `fishing-boat` and `ferry`, each by seed with their
+  lights and each also `-at-anchor`, with hull plating, bulwarks, deck gear
+  and painted letters at the detail level.
+
+  Buildings on a slope stand each on a plinth to the lowest ground under it.
+  See `sets/yurt-study.yaml`, `sets/boats-by-day-sampans.yaml` and
+  `sets/bridge-of-buildings.yaml`.
+
+- Added: animals. `bioforms/skeleton`, a shared package of bones posed by
+  turning joints, with bone forms, composed turns, aiming, skin weighed by
+  nearness and a fin's web stretched between rays.
+
+  Built on it: the walrus, the orca, the harbor seal and `hawaiian-monk-seal`,
+  each with bones, a skin bound to them and poses, hauled out, at sea or
+  swimming.
+
+  One bird maker, a species a row of `manufacture/birds.yaml`, among them
+  `white-tern`, `grey-heron`, `great-frigatebird` and
+  `white-tailed-tropicbird`.
+
+  One fish maker, a species a row of `manufacture/fish.yaml`, with
+  `convict-tang`, `dusky-grouper`, `mediterranean-chromis`, `european-perch`
+  and `flathead-grey-mullet`; and `giant-kelp` with a stream of air bubbles,
+  and `kelp-forest`. See `sets/bioforms/` and `sets/kelp-forest.yaml`.
+
+- Added: seven native plant kinds as profile rows, `pandanus-tectorius`,
+  `scaevola-taccada`, `metrosideros-polymorpha`, `barringtonia-asiatica`,
+  `quercus-ilex`, `erica-arborea` and `salix-alba`, each citing the page
+  that calls it native, sown by height, slope and distance in
+  `sets/honopu.yaml`, `sets/rarotonga.yaml`, `sets/portofino.yaml` and
+  `sets/groningen.yaml`. See `sets/native-flora-study.yaml`.
+
+- Added: spacecraft. Voyager 1 and 2 with their deployed assemblies, New
+  Horizons, Cassini and Huygens, SOHO, Mariner 10, the deployed JIMO
+  concept, the deployed Roman observatory with its fabric shade, weather
+  satellites and the PRIMA far-infrared concept; a nickel-aluminium
+  bronze material with its optical estimates stated; and propeller trails
+  that disperse with bounded meander and radial dilution.
+
+  See `sets/voyager-1-hero.yaml`, `sets/roman-observatory.yaml` and
+  `sets/prima-spacecraft.yaml`.
+
+- Added: `ferruccio` has a Settings sheet, on command and comma and in the
+  menu, and the flags `--renderer` and `--processors`, resolved from flag,
+  environment, then file.
+
+  `ferruccio look` prints the newest look at a set, or all of them, from the
+  file `set.looks.txt` beside it; a Describe button and the D key write a
+  look.
+
+  `ferruccio check` says whether the working display would take each set. A
+  failed render shows the child's last line first and keeps its output. `open`
+  refuses without a cache, naming `--cache` and `SLAYER_CACHE`.
+
+- Added: every maker says how big it is and whether an eye sees it, and
+  `manufacture.RungsOf` says which complexities a kind makes without
+  making one. The sea, a plume, a text, an ecosystem and an atmosphere
+  layer are objects of the manufactory, each with its box.
+
+- Removed: `flame.Sampled`, the roman candle of `embers`, and
+  `cheeptune.Pairs`, which only tests called.
 
 ## v0.1.3 18 november
 
@@ -207,7 +737,7 @@
   at, its size, and the named numbers it reads, measured and picked apart.
   Pieces do not change with tessellation. `tools/maturity` prints the
   table (`game run maturity`). It counts and does not judge; see
-  `doc/object-maturity.md`.
+  `doc/model/spacecraft/object-maturity.md`.
 
 - `research.Observe` lets a caller watch which measured numbers are read.
 
@@ -386,7 +916,7 @@
   medium.
 
   Nothing here is a shore, a choppy displacement or a coastal
-  coefficient. See `doc/sets.md` and `doc/water-ocean-design.md`.
+  coefficient. See `doc/sets.md` and `doc/model/ocean/water-ocean-design.md`.
 
 - Water that takes light out as it goes: a material's `clear` block may say
   `extinction-per-metre: [red, green, blue]`, the Beer-Lambert loss in
@@ -418,7 +948,7 @@
   the water's surface and pointing down light the water the camera sees
   through; flood and other lights do not, and the lamp's light is not
   bent at the surface. Both CPU and Metal draw it, for a fixed camera
-  and a closed shutter. See `doc/ocean-spot-scattering.md`.
+  and a closed shutter. See `doc/model/ocean/ocean-spot-scattering.md`.
 
 - Sun and moon in the water.
 
@@ -435,7 +965,8 @@
 
   The run's receipt says `direct-sun=mean-plane`. The waves' own
   normals, focusing and caustics are in neither. See
-  `doc/ocean-mean-plane-direct-sun.md` and `doc/ocean-direct-moon.md`.
+  `doc/model/ocean/ocean-mean-plane-direct-sun.md` and
+  `doc/model/ocean/ocean-direct-moon.md`.
 
 - A scene with no ground may stand under Earth's air: `air: earth` with
   `groundless-air: {coordinate-origin: earth-mean-radius,
@@ -452,7 +983,7 @@
 
   The
   boundary is the air model's fixed 0.15 land albedo and continental
-  aerosol, not an offshore measurement. See `doc/groundless-earth-air.md`.
+  aerosol, not an offshore measurement. See `doc/model/sky/groundless-earth-air.md`.
 
 - A sea that goes on: `world.ocean.flat-mean` takes `mean-level`,
   `collar-width` and `extends-to-infinity: true`, and past a smooth collar
@@ -471,7 +1002,7 @@
   256 sky directions refracted into the water).
 
   `shading-normal` cannot
-  be said beside `flat-mean`. See `doc/ocean-interface-events.md`.
+  be said beside `flat-mean`. See `doc/model/ocean/ocean-interface-events.md`.
 
 - A wake on the sea: `world.ocean.surface-wake` (`origin`, `heading`,
   `speed`, `amplitude`, `half-width`, `length`, `wavelength`,
@@ -490,7 +1021,8 @@
 
   A textured, emissive or shining
   surface refuses foam, as do the mean-plane lights. See
-  `doc/ocean-surface-wake.md` and `doc/ocean-wake-foam.md`.
+  `doc/model/ocean/ocean-surface-wake.md` and
+  `doc/model/ocean/ocean-wake-foam.md`.
 
 - Clouds of fine bubbles in water, as scattering and not as spheres.
 
@@ -515,8 +1047,10 @@
   `medium.NewClearCloud`, `NewClearCloudWithHenyeyGreenstein` and
   `NewPropellerCavitation`; `manufacture.NewCavitationCloud`. `game run
   cavitation-cloud` and `cavitation-field` write the YAML. See
-  `doc/alfa-cavitation-cloud.md`, `doc/alfa-propeller-cavitation.md`,
-  `doc/residual-bubble-population.md` and `doc/clear-cloud-phase.md`.
+  `doc/model/boat/alfa-cavitation-cloud.md`,
+  `doc/model/boat/alfa-propeller-cavitation.md`,
+  `doc/model/ocean/residual-bubble-population.md` and
+  `doc/model/sky/clear-cloud-phase.md`.
 
 - `world.ocean.clear-cloud-water-step-mode` is `per-gap`, the default, or
   `ray-spacing`. The default repeats the water's whole scatter budget in
@@ -541,8 +1075,8 @@
   `game run
   check-gpu-water-moon`, `check-gpu-water-propeller` and
   `check-gpu-calm-infinite` run the contracts, each with a `-metal` twin
-  that uses the device. See `doc/gpu-water-moon.md` and
-  `doc/gpu-calm-infinite.md`.
+  that uses the device. See `doc/design/gpu-water-moon.md` and
+  `doc/design/gpu-calm-infinite.md`.
 
 - In a gravitational field the CPU tracer shifts an emitting volume's
   light by the cube of the total gravitational and Doppler frequency
@@ -561,7 +1095,7 @@
 
   A YAML anchor on
   `rpm` can give a cavity field the same speed; a cavity never turns a
-  blade by being there. A ground set refuses it. See `doc/part-spin.md`.
+  blade by being there. A ground set refuses it. See `doc/model/spacecraft/part-spin.md`.
 
 - `titan` refuses a place only when the map lacks a height beside it. A
   measured corner the map does not know is carried down the walk as
@@ -605,7 +1139,7 @@
   porosity and partial pore saturation in SI units. It derives specimen
   volumes and wet/dry density without assigning appearance. Numeric refusals
   name the failing input or calculation; generated expectations derive from
-  inputs independently. See `doc/specimens.md` for scope and numerical limits.
+  inputs independently. See `doc/model/material/specimens.md` for scope and numerical limits.
 
 - Contract change, the dependency: Slayer requires celestial v0.0.9 as
   released, and `go.mod` replaces nothing. The Metal geodesic shader is
@@ -688,7 +1222,7 @@
 
   `quick` is the default;
   `complexity: demo` adds four antenna rods, two sail covers and a scoop
-  plate. See `doc/alfa-model.md`. The sets `sets/alfa-san-onofre.yaml`
+  plate. See `doc/model/boat/alfa-model.md`. The sets `sets/alfa-san-onofre.yaml`
   and its `-deck-on` and `-deck-off` pair stand it on a sea under
   Earth's air.
 
@@ -750,7 +1284,7 @@
   A recipe may say `batch-placement: nested` to choose the older transform
   path, which changes allocation and not the picture. `game run
   check-city` checks it. New: `manufacture.City`, `PlanCity` and
-  `DefaultCityGrid`. See `doc/city-buildings.md`.
+  `DefaultCityGrid`. See `doc/model/city/city-buildings.md`.
 
 - Five kilometre-scale kinds: `macro-terraced-arcology`,
   `macro-twisted-spires`, `macro-inhabited-bridge`,
@@ -763,7 +1297,7 @@
   basin, made by the shared `scene/city` package, into a set, with `at`,
   `heading`, `scale`, `relief-scale`, `city-forward`, `ridge-forward`,
   `city-detail`, `terrain-samples`, `city-light-scale` and
-  `city-light-footprint`. See `doc/macrostructures.md` and
+  `city-light-footprint`. See `doc/model/terrain/macrostructures.md` and
   `doc/griffith-basin.md`.
 
 - The catalogue's card for Webb looks from the sun's side. Webb is staged
@@ -2275,7 +2809,7 @@ Stage 0, stage 1, stage 4 and part of stage 2 landed.
   and recorded, not generalized.
 
   The figures are as recorded on 2026-11-10 in
-  doc/volume-environment-lighting.md; no command in the repository
+  doc/model/sky/volume-environment-lighting.md; no command in the repository
   reproduces them and they were not rerun.
 - The same 4K scene still reaches its 150,000-instance allowance
   before GPU rendering begins. Vegetation preparation, grouping and
@@ -2668,7 +3202,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
 - Added coast redwoods, giant sequoias and their separate shoot specimens.
   Recursive foliage uses physical needles or scales and bounded shared shoot
   prototypes on CPU and GPU. Construction notes retain botanical dimensions,
-  algorithm references and authored choices. See [conifer foliage](doc/conifer-foliage.md).
+  algorithm references and authored choices. See [conifer foliage](doc/model/vegetation/conifer-foliage.md).
 - Drafted physical recursive shoots for the named spruce and Norway spruce
   entries while retaining their legacy scaffold/reference constructors.
   Foliage carriers are identified by role, including spruce without hanging
@@ -2680,7 +3214,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
 - Added named summer, autumn and winter recipes through `WithSeason` and
   YAML. Deciduous winter removes blades while retaining wood and the leaf-on
   reserved envelope; evergreen foliage remains. These are discrete authored
-  states, not simulated phenology. See [vegetation families](doc/vegetation-families.md).
+  states, not simulated phenology. See [vegetation families](doc/model/vegetation/vegetation-families.md).
 - Added bounded spatial populations in `scene/biome`, separate from the
   older top-level `biome`. Region/seed/cell/ordinal identities and independent
   draws keep candidate positions, recipe, geometry seed and heading stable
@@ -2688,7 +3222,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
 - Added local `scene.ecosystems` mixtures, density and elevation filters,
   exclusions, prototype variety, detail and optional shared atmosphere.
   Regions share one preparation work allowance; exhaustion returns an error
-  rather than dropping later regions. See [regional ecosystems](doc/regional-ecosystems.md).
+  rather than dropping later regions. See [regional ecosystems](doc/model/vegetation/regional-ecosystems.md).
 - Hillside mixed populations still use the cropped planar terrain stage. Final ground
   placement and filtering can change with the crop. Whole-world residency,
   aggregate distant canopy, projected-size vegetation detail and inspected
@@ -2713,7 +3247,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
 - Added Spitzer, Hubble and Webb spacecraft templates and checked custom
   apertures. Webb has 18 primary panels and five shield layers. These are
   ordinary scenery meshes, not compound optical prescriptions or orbits.
-  See [space observatories](doc/space-observatories.md).
+  See [space observatories](doc/model/spacecraft/space-observatories.md).
 - Added Maunakea families `cfht`, `gemini-north`, `irtf`, `uh-88`, `ukirt`,
   `jcmt`, `sma-antenna`, `sma-array` and `vlba-maunakea`, alongside Keck and
   Subaru. Shared dish/array components preserve prototypes without expansion.
@@ -2721,7 +3255,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   `dkist`, `atlas-haleakala`, `tlrs-4`, `solarc`, `mees-solar`, `aeos`,
   `mssc-1-6m`, `mssc-twin-1-2m`, `geodss` and `geodss-site`. Source notes
   distinguish current, ended and removed facilities, nominal apertures and
-  picked instrument proxies. See [Hawaiian observatories](doc/hawaiian-observatories.md).
+  picked instrument proxies. See [Hawaiian observatories](doc/model/observatory/hawaiian-observatories.md).
 - Added the personal telescopes `dobsonian-36`, `apo-refractor-5` and `sct-24`, with their
   mounts, bases and characteristic structure at the requested apertures.
   Their opaque objectives remain display proxies.
@@ -2729,7 +3263,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   tower, service truck, utility pickup, equipment trailer, shipping crate,
   equipment cabinet, generator, cooling unit, access stairs, work platform,
   handrail, cable tray and weather mast. Their dimensions and parked poses
-  are authored. See [yard equipment](doc/yard-equipment.md).
+  are authored. See [yard equipment](doc/model/observatory/yard-equipment.md).
 - Added optional height above terrain and explicit placement headings,
   retained by relative camera and named launch placements. Added golden-hour
   working-site YAML and summit/yard/Moon study inputs. These include access
@@ -2754,7 +3288,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   adaptive-optics loop are not supplied by these outgoing beams.
 - Added bounded beam-aware volume sampling on CPU and GPU. Samples refine
   near conservative beam intervals while Gaussian tails retain ordinary
-  integration; the bounds do not cut the light off. See [guide stars](doc/guide-stars.md).
+  integration; the bounds do not cut the light off. See [guide stars](doc/model/observatory/guide-stars.md).
 - Added prescribed grove mist over canopy footprints and regional mist over
   clearings. Overlapping atmosphere layers can combine terrain-following
   weather, level cloud decks and thinner upper air, clipped by the ground.
@@ -2794,7 +3328,7 @@ out where they belong; this inventory is not a fresh test or release verdict.
   weight checks refuse invalid steps. Ambient inflow and fuel staying put
   are explicit; the supplied velocity is not coupled atmospheric wind.
   Reacting CPU/Metal acceptance and spread studies remain open. See
-  [heat transport](doc/fire-heat-transport.md).
+  [heat transport](doc/model/fire/fire-heat-transport.md).
 - Added finite isotropic volume lights in `emit`, with ball-averaged falloff
   held to independent ray quadrature. Composite flame fields and their
   finite lights prepare through Metal; shared thermal palettes avoid
@@ -2804,8 +3338,8 @@ out where they belong; this inventory is not a fresh test or release verdict.
   rig use is refused. This is an approximation with recorded image budgets,
   not exact transmission reuse or a persistent scene cache.
 - Crown ignition, moisture, slope feedback, firebrand spotting, transported
-  burn history and coupled smoke remain open. See [fire recipes](doc/fire-recipes.md)
-  and the separate [surface-fuel model](doc/fire-fuel-design.md).
+  burn history and coupled smoke remain open. See [fire recipes](doc/model/fire/fire-recipes.md)
+  and the separate [surface-fuel model](doc/model/fire/fire-fuel-design.md).
 
 ### GPU traversal, preparation and readback
 

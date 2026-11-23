@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"os"
 )
@@ -37,6 +38,8 @@ const (
 const (
 	uncompressed = 1
 	lzwed        = 5
+	deflated     = 8
+	oldDeflated  = 32946
 	floating     = 3
 	floatBits    = 32
 )
@@ -51,11 +54,12 @@ const (
 
 var errRaster = errors.New("terrain: not a raster this reads")
 
-// A Raster is an elevation model on disk: its size in samples, its
+// A Raster is an elevation model read on demand: its size in samples, its
 // tiles, where its first sample's corner is, how far apart samples are,
 // and what it says where it has no height.
 type Raster struct {
-	file            *os.File
+	file            io.ReaderAt
+	closeFile       func() error
 	order           binary.ByteOrder
 	big, placed     bool
 	closed          bool
@@ -81,7 +85,7 @@ type Raster struct {
 // Open is the raster in a file, its tags read and checked, its samples
 // not read until asked for.
 func Open(path string) (*Raster, error) {
-	budget, err := DefaultRasterBudget()
+	budget, err := defaultRasterBudget()
 	if err != nil {
 		return nil, err
 	}
@@ -103,21 +107,49 @@ func OpenWithBudget(path string, budget RasterBudget) (*Raster, error) {
 		file.Close()
 		return nil, err
 	}
-	raster := &Raster{file: file, budget: budget,
-		fileBytes: info.Size(), cache: newTileCache(budget.CacheBytes, budget.CacheTiles),
-		noData: float32(math.Inf(-1))}
-	if err := raster.readTags(); err != nil {
+	raster, err := openReader(file, info.Size(), budget)
+	if err != nil {
 		file.Close()
 		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	raster.closeFile = file.Close
+	return raster, nil
+}
+
+// OpenReader reads an elevation raster from a bounded random-access
+// source, such as an embedded GeoTIFF. The caller owns the source.
+func OpenReader(source io.ReaderAt, size int64) (*Raster, error) {
+	budget, err := defaultRasterBudget()
+	if err != nil {
+		return nil, err
+	}
+	return openReader(source, size, budget)
+}
+
+// openReader is OpenReader with the budget given: it reads the raster's
+// tags from the source and keeps a sample cache of the budget's size. It
+// refuses a missing source and a size below nought.
+func openReader(source io.ReaderAt, size int64, budget RasterBudget) (*Raster, error) {
+	if source == nil || size < 0 {
+		return nil, fmt.Errorf("%w: missing source or invalid size", errRaster)
+	}
+	raster := &Raster{file: io.NewSectionReader(source, 0, size), budget: budget,
+		fileBytes: size, cache: newTileCache(budget.CacheBytes, budget.CacheTiles),
+		noData: float32(math.Inf(-1))}
+	if err := raster.readTags(); err != nil {
+		return nil, err
 	}
 	return raster, nil
 }
 
-// Close lets go of the file.
+// Close clears the sample cache and releases any file opened by Open.
 func (raster *Raster) Close() error {
 	raster.closed = true
 	raster.cache.clear()
-	return raster.file.Close()
+	if raster.closeFile != nil {
+		return raster.closeFile()
+	}
+	return nil
 }
 
 // DiscardCache releases decoded samples while leaving the file available.

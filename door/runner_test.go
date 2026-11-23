@@ -59,8 +59,9 @@ func benched(t *testing.T, ctx context.Context, after string) bench {
 	t.Helper()
 	control := gomock.NewController(t)
 	directory := t.TempDir()
-	wanted, err := job.Read(written(t, directory, "film.yaml",
-		filmJob(t, after)))
+	file := written(t, directory, "film.yaml",
+		filmJob(t, after))
+	wanted, err := job.Read(file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,8 +89,10 @@ func (made bench) frameAt(t *testing.T, index int,
 	t.Helper()
 	control := gomock.NewController(t)
 	light := &frame.Frame{}
+	width := number(t, "width")
+	height := number(t, "height")
 	picture := image.NewRGBA(image.Rect(nothing, nothing,
-		number(t, "width"), number(t, "height")))
+		width, height))
 	picture.Pix[index] = byte(index + one)
 	drawn := NewMockdrawn(control)
 	made.source.EXPECT().Frame(made.run.ctx, index).Return(drawn,
@@ -105,8 +108,9 @@ func (made bench) frameAt(t *testing.T, index int,
 		made.clock.on(developSeconds)
 	})
 	drawn.EXPECT().Overlay(picture).Return(nil)
+	rate := number(t, "fps")
 	made.titles.EXPECT().Draw(picture, filmTime(index,
-		number(t, "fps"))).Return(nil).Do(func(*image.RGBA,
+		rate)).Return(nil).Do(func(*image.RGBA,
 		time.Duration) {
 		made.clock.on(titleSeconds)
 	})
@@ -217,8 +221,9 @@ func TestRunnerResumesFromWorkingFrames(t *testing.T) {
 	if err := first.run.draw(); !errors.Is(err, context.Canceled) {
 		t.Fatalf("the interrupted film gave %v", err)
 	}
+	name := fmt.Sprintf(frameName, nothing)
 	if _, err := os.Stat(filepath.Join(folder,
-		fmt.Sprintf(frameName, nothing))); err != nil {
+		name)); err != nil {
 		t.Fatalf("the interrupted film left no frame: %v", err)
 	}
 	second := benchedIn(t, context.Background(), folder)
@@ -233,8 +238,8 @@ func TestRunnerResumesFromWorkingFrames(t *testing.T) {
 	if err := second.run.draw(); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(second.said.String(), fmt.Sprintf(
-		"frame 1 of %d: kept", filmFrames(t))) {
+	kept := fmt.Sprintf("frame 1 of %d: kept", filmFrames(t))
+	if !strings.Contains(second.said.String(), kept) {
 		t.Errorf("the first frame was not kept: %q", second.said)
 	}
 	if _, err := os.Stat(folder); err == nil {

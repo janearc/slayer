@@ -119,14 +119,14 @@ func TestCommentsGoAndStringsStay(t *testing.T) {
 
 func TestKindReadsKeysNotText(t *testing.T) {
 	sc := []byte("{\n// no channels here\n\"parts\": []}")
-	if k, err := Kind(sc); k != "score" {
+	if k, err := kind(sc); k != "score" {
 		t.Errorf("a score mentioning channels in a comment is %q (%v)",
 			k, err)
 	}
-	if k, _ := Kind([]byte(`{"channels": []}`)); k != "voicing" {
+	if k, _ := kind([]byte(`{"channels": []}`)); k != "voicing" {
 		t.Errorf("voicing read as %q", k)
 	}
-	_, err := Kind([]byte(`{"layers": []}`))
+	_, err := kind([]byte(`{"layers": []}`))
 	wantErr(t, err, "neither a score", "layers")
 }
 

@@ -70,22 +70,22 @@ func TestThinProfilePeaksWhereTheDerivativeSays(t *testing.T) {
 func TestThinTemperatureIsTheShareOfHot(t *testing.T) {
 	d := Thin{Inner: 2, Outer: 60, Hot: 25000, Bright: 1}
 	for _, c := range shares {
-		if got, want := d.Temperature(2*c.r), 25000*c.share; !within(got, want, 1e-8) {
+		if got, want := d.temperature(2*c.r), 25000*c.share; !within(got, want, 1e-8) {
 			t.Errorf("at %v inner radii the temperature is %v, want %v", c.r, got, want)
 		}
 	}
-	if got := d.Temperature(2 * 49.0 / 36); got != 25000 {
+	if got := d.temperature(2 * 49.0 / 36); got != 25000 {
 		t.Errorf("at the peak the temperature is %v, not the hottest", got)
 	}
 	for _, r := range []float64{0, 1, 2, 60.5, 100} {
-		if got := d.Temperature(r); got != 0 {
+		if got := d.temperature(r); got != 0 {
 			t.Errorf("at %v the temperature is %v, not nought", r, got)
 		}
 	}
 	for _, inner := range []float64{0, -1} {
 		bad := Thin{Inner: inner, Outer: 60, Hot: 25000, Bright: 1}
 		for _, r := range []float64{0, 0.5, 3} {
-			if got := bad.Temperature(r); got != 0 {
+			if got := bad.temperature(r); got != 0 {
 				t.Errorf("an inner radius of %v at %v is %v kelvin", inner, r, got)
 			}
 		}
@@ -104,7 +104,7 @@ func TestThinDiscIsDarkBelowFiveHundredKelvin(t *testing.T) {
 		what string
 	}{{499, false, "499"}, {500, true, "500"}, {500.5, true, "500.5"}, {501, true, "501"}} {
 		d := Thin{Inner: 1, Outer: 10, Hot: c.hot, Bright: 1}
-		if k := d.Temperature(49.0 / 36); k != c.hot {
+		if k := d.temperature(49.0 / 36); k != c.hot {
 			t.Fatalf("the peak of a disc of %v is %v kelvin", c.what, k)
 		}
 		got := d.At(p)

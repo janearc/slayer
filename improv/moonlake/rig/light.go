@@ -19,21 +19,21 @@ type Layer struct {
 // right (lightshow's FLOOD_PASSES: the film's are the backlights).
 func Floods(names [2]string, left, right, gain float64) []Layer {
 	return []Layer{{names[0], gain * left, [3]float64{1, 1, 1}},
-		{names[1], gain * right, Gel}}
+		{names[1], gain * right, gel}}
 }
 
-// Gel is the magenta gel the right flood and the magenta strobe shine
+// gel is the magenta gel the right flood and the magenta strobe shine
 // through. Lightshow's.
-var Gel = [3]float64{1, 0.25, 0.85}
+var gel = [3]float64{1, 0.25, 0.85}
 
-// OverheadColour is the overhead's daylight colour, a cool blue that is
+// overheadColour is the overhead's daylight colour, a cool blue that is
 // not quite tungsten's. Lightshow's.
-var OverheadColour = [3]float64{0.62, 0.8, 1.0}
+var overheadColour = [3]float64{0.62, 0.8, 1.0}
 
 // Overhead is the ship's light as a layer: the overhead pass, gain
-// times the cue's level, through OverheadColour.
+// times the cue's level, through overheadColour.
 func Overhead(level, gain float64) Layer {
-	return Layer{"overhead", gain * level, OverheadColour}
+	return Layer{"overhead", gain * level, overheadColour}
 }
 
 // Add lays a layer's pass into a frame's light: both three channels a

@@ -64,7 +64,7 @@ carry recursively branched shoots with individual needles or scales. Their
 surface detail changes across levels; their physical leaf lengths do not.
 
 Shared mesh groups reuse the shoots on both CPU and GPU. [Conifer
-foliage](conifer-foliage.md) records the rules, botanical sources, and model
+foliage](model/vegetation/conifer-foliage.md) records the rules, botanical sources, and model
 choices. The two original spruces retain their legacy previews.
 
 These remain authored crown approximations. They do not model the full range of
@@ -80,7 +80,7 @@ retains a common physical extent for clearance and atmosphere.
 
 Every kind whose recipe has a `madeAt` method takes all four levels (hull,
 clumps, quick, demo), among them the two loose shoots, the observatories and
-the [spacecraft templates](space-observatories.md). Only these kinds accept
+the [spacecraft templates](model/spacecraft/space-observatories.md). Only these kinds accept
 `quick` alone: bonfire, boulder, campfire, can, cobble, fern, home, the
 seven lasers, log, maser, pebble, spotlight and strobe; unsupported levels
 are refused.
@@ -102,7 +102,7 @@ the patches; optional boundary fade softens each canopy edge.
 The scattering colour, 0.95 grey, is also authored.
 
 These are not values derived from the [redwood
-references](redwood-atmosphere.md), and the scene does not claim a moisture
+references](model/vegetation/redwood-atmosphere.md), and the scene does not claim a moisture
 balance or condensation simulation.
 
 A physical grove model would require sourced species and environmental
@@ -126,5 +126,5 @@ evaluates the field directly; agreement is approximate, not bit equality.
 The integration render has one observatory, 5,000 trees, and one mist volume.
 
 Deciduous trees, Joshua trees, saguaros, brush, radomes and antenna arrays
-are not provided. [General fire recipes](fire-recipes.md) stand
+are not provided. [General fire recipes](model/fire/fire-recipes.md) stand
 independently of trees.

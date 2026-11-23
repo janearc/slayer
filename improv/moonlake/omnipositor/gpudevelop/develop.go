@@ -341,12 +341,13 @@ kernel void finish(device const float *in [[buffer(zero)]], device const float *
     // holds the two together.
     if (p.knee>black && p.knee<white) {
         float y = luminance(l);
+        float squeezed = y;
         if (y>p.knee) {
-            float squeezed = min(white,p.knee+p.scale*log(one+(y-p.knee)/p.scale));
+            squeezed = min(white,p.knee+p.scale*log(one+(y-p.knee)/p.scale));
             l *= squeezed/y;
-            float peak = max(l.r,max(l.g,l.b));
-            if (peak>white) { l = float3(squeezed)+(l-float3(squeezed))*((white-squeezed)/(peak-squeezed)); }
         }
+        float peak = max(l.r,max(l.g,l.b));
+        if (peak>white) { l = float3(squeezed)+(l-float3(squeezed))*((white-squeezed)/(peak-squeezed)); }
     }
     out[four*i] = encode(l.r);
     out[four*i+one] = encode(l.g);

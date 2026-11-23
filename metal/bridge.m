@@ -689,7 +689,7 @@ int slayer_metal_grid_wait(void *handle, int *stopped, char *err,
 		NSString *what = band_named(stream->kernel, taken.first, taken.down);
 		if (await_as(stream->kernel, flying, what, @"run", stopped, err,
 		             errlen) != 0) {
-			return 1;
+			return slayer_waits_stopped() ? 2 : 1;
 		}
 		stream->ready_band = taken.band;
 		stream->ready_down = taken.down;
@@ -777,6 +777,9 @@ typedef struct {
 	int count;
 	const float *matrices;
 	const uint32_t *references;
+	// lent is a borrowed buffer holding the vertices' bytes, or NULL;
+	// the pass reads it in place and keeps no reference to it
+	const void *lent;
 } hierarchy;
 
 // the words of a node as acceleration.go stages them, and the kind that
@@ -908,6 +911,9 @@ static const long passes_held = 2;
 @property(nonatomic) NSMutableSet *consumed;
 @property(nonatomic) NSMutableSet *written;
 @property(nonatomic) id points;
+// lent is whether points is the caller's buffer, which the context
+// must not keep or write into
+@property(nonatomic) BOOL lent;
 @property(nonatomic) id scratchBuffer;
 @end
 
@@ -1406,11 +1412,22 @@ static BOOL needs_points(SlayerBuilds *builds, const hierarchy *plan) {
 }
 
 // copied_points is the plan's vertices in a buffer the device reads: the
-// one the context kept from the last pass, when it is the same length,
-// and else a new one. nothing reads it between passes: a built or refit
-// structure keeps no reference to the vertices it was made from.
+// buffer the plan lends, when it holds exactly them, so the vertices are
+// on the device once; else the one the context kept from the last pass,
+// when it is the same length, and else a new one. nothing reads it
+// between passes: a built or refit structure keeps no reference to the
+// vertices it was made from. a lent buffer is not the context's: the
+// pass is marked lent, and the context does not keep it.
 static id<MTLBuffer> copied_points(id<MTLDevice> device, SlayerHeld *held,
-                                   const hierarchy *plan) {
+                                   const hierarchy *plan,
+                                   SlayerBuilds *builds) {
+	if (plan->lent != NULL) {
+		id<MTLBuffer> lent = (__bridge id<MTLBuffer>)plan->lent;
+		if (plan->length > 0 && lent.length == (NSUInteger)plan->length) {
+			builds.lent = YES;
+			return lent;
+		}
+	}
 	id<MTLBuffer> kept = held.points;
 	if (kept == nil || plan->length <= 0 ||
 	    kept.length != (NSUInteger)plan->length) {
@@ -1442,7 +1459,7 @@ static int prepare(context *c, const hierarchy *plan, SlayerBuilds *builds,
 	plan_meshes(held, builds, plan);
 	id<MTLBuffer> points = nil;
 	if (needs_points(builds, plan)) {
-		points = copied_points(device, held, plan);
+		points = copied_points(device, held, plan, builds);
 		if (points == nil) {
 			say(err, errlen, @"could not allocate acceleration vertices");
 			return 1;
@@ -1626,7 +1643,11 @@ static void hold(context *c, SlayerBuilds *builds, int root) {
 	SlayerHeld *held = held_by(c);
 	hold_meshes(held, builds);
 	held.nodes = [builds.made copy];
-	if (builds.points != nil) {
+	if (builds.lent) {
+		// the vertices live in a buffer the caller keeps: holding one
+		// of the context's own as well would be the second copy
+		held.points = nil;
+	} else if (builds.points != nil) {
 		held.points = builds.points;
 	}
 	if (builds.scratchBuffer != nil) {
@@ -1757,6 +1778,27 @@ int slayer_metal_acceleration_held(void *ctx) {
 void slayer_metal_acceleration_fault(void *ctx, int fault) {
 	context *c = ctx;
 	c->fault = fault;
+}
+
+int slayer_metal_accelerate_over(void *ctx, void *stream, int index,
+                                 int replace, const void *vertices,
+                                 long length, int stride,
+                                 const int32_t *nodes, int count,
+                                 const float *matrices,
+                                 const uint32_t *references, int root,
+                                 int *unavailable, char *err, int errlen) {
+	grid_stream *over = stream;
+	if (over == NULL || over->kernel != ctx || index < 0 ||
+	    index >= over->inputs) {
+		say(err, errlen, @"invalid grid input to build over");
+		return 1;
+	}
+	NSArray<id<MTLBuffer>> *inputs =
+		(__bridge NSArray<id<MTLBuffer>> *)over->inputs_held;
+	const void *lent = (__bridge const void *)inputs[(NSUInteger)index];
+	hierarchy plan = {vertices, length, stride, nodes, count, matrices,
+	                  references, lent};
+	return accelerate(ctx, &plan, root, replace, unavailable, err, errlen);
 }
 
 int slayer_metal_reaccelerate(void *ctx, const void *vertices, long length,

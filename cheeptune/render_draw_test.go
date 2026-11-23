@@ -197,8 +197,8 @@ func TestTheSameScoreThroughTwoVoicingsIsTheSameTune(t *testing.T) {
 		}
 		if a[i].Vol > 0 && math.Round(a[i].Pitch) != math.Round(b[i].Pitch) {
 			t.Fatalf("tick %d at %.3f s: %s in one voicing, %s in the "+
-				"other", i, a[i].At, NoteName(int(math.Round(a[i].Pitch))),
-				NoteName(int(math.Round(b[i].Pitch))))
+				"other", i, a[i].At, noteName(int(math.Round(a[i].Pitch))),
+				noteName(int(math.Round(b[i].Pitch))))
 		}
 	}
 }

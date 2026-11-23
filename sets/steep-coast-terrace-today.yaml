@@ -1,0 +1,98 @@
+# what a terrace does on steep ground today, before the cliff keys: a study
+# of the thing as it stands, kept so the picture can be drawn again.
+#
+# the ground is copernicus glo-30, tile n22 e114 (a surface model: it holds
+# the tops of what stands there), a window 1000 m across and 800 m down
+# round 22.2140 north, 114.2450 east, on the west face of the peninsula on
+# the south-east of hong kong island. this is a proof of the mechanism on a
+# steep coast, and it is not portofino. from the sea the model rises about
+# 100 m in 170 m there, which the heights of the tile say (read, not
+# recalled). its sea is the model's nought, lifted half a metre.
+#
+# the sun is where scene/daylight.Sun, noaa's fractional-year equations,
+# puts it for 22.2135 north, 114.2450 east at 16:00 china standard time
+# (utc+8) on 20 november 2026: azimuth 237.97, altitude 19.83, geometric.
+#
+# two kinds of terrace are put on it. "the row" is one thing, a terrace
+# stood at one place by east and north. "the lattice" is a stand of the
+# lattice habit, which the session makes for the ground under each
+# site. places are metres in the terrain window: east from its west edge,
+# north from its south edge. a camera stood off a thing stands off where
+# the thing stands on the ground.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a terrace on a steep coast, as it stands today
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.2135
+    lon: 114.2450
+  timeofday: 1600
+  sun:
+    azimuth: 237.97
+    altitude: 19.83
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.2140
+    lon: 114.2450
+    across: 1000
+    down: 800
+    step: 10
+    sea: {value: 0.5, unit: m}
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 45
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    water:
+      title: "from a mast 25 m over the water, looking east at the face"
+      location:
+        at: [150, -360, 25]
+      orientation:
+        look_at: [400, -360, 60]
+    plan:
+      title: "straight down from 600 m over the face"
+      wide: 40
+      location:
+        at: [400, -360, 600]
+      orientation:
+        look_at: [400, -359, 0]
+    above:
+      title: "from 120 m over the water, looking down on the face"
+      location:
+        at: [150, -360, 120]
+      orientation:
+        look_at: [400, -360, 40]
+    along:
+      title: "from 140 m west of the row, at the height of its floor, looking at its base"
+      location:
+        at: [250, -320, 74]
+      orientation:
+        look_at: [390, -320, 74]
+  set:
+    things:
+      the lattice heart: {kind: human-scale-2m, seed: 1, east: 440, north: 300}
+      the row:
+        kind: terrace-portofino
+        seed: 3
+        complexity: quick
+        east: 400
+        north: 520
+        height: {value: 0, unit: m}
+        heading: {value: 90, unit: deg}
+    stands:
+      the lattice:
+        kind: terrace-portofino
+        habit: lattice
+        count: 3
+        seed: 5
+        complexity: quick
+        within: {of: the lattice heart, from: 0, to: 360, near: 0, far: 120}
+  world:
+    unit: 1

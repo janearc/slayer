@@ -10,10 +10,12 @@ import (
 // Aurora is a body's aurora: a glow in a shell between Low and High above
 // Radius, in an oval round each magnetic pole at Lat from the pole's equator,
 // Width wide, the pole's Axis in the body's own space, up when none is given.
+// Lat and Width are angles in radians.
 //
 // at the oval's heart the density is zero at the shell's bottom, rises to about
 // three quarters of Thick a tenth of the way up, and thins by e over every
-// third of the shell above that.
+// third of the shell above that. The shell is cut flat at High, where about a
+// twentieth of the peak remains.
 //
 // Curtains is a dressing: the oval broken into rays and folds along its length,
 // as the eye sees them, zero for a smooth band. Seed makes a night's own.
@@ -29,55 +31,61 @@ type Aurora struct {
 }
 
 // Bounds is the cube the shell's top just fits in.
-func (a Aurora) Bounds() maths.Box {
-	r := a.Radius + a.High
-	return maths.Box{Min: maths.V(-r, -r, -r), Max: maths.V(r, r, r)}
+func (aurora Aurora) Bounds() maths.Box {
+	return cube(aurora.Radius + aurora.High)
 }
 
 // Span is where a ray crosses the shell's top.
-func (a Aurora) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	return sphere(a.Radius+a.High, r, near, far)
+func (aurora Aurora) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	return sphere(aurora.Radius+aurora.High, ray, near, far)
 }
 
 // Density is the oval here, if the point is in the shell.
-func (a Aurora) Density(p maths.Vec) float64 {
-	if a.High <= a.Low || a.Width <= 0 {
-		return 0
+func (aurora Aurora) Density(point maths.Vec) float64 {
+	if aurora.High <= aurora.Low || aurora.Width <= nought {
+		return nought
 	}
-	up := p.Len() - a.Radius
-	if up < a.Low || up > a.High {
-		return 0
+	above := point.Len() - aurora.Radius
+	if above < aurora.Low || above > aurora.High {
+		return nought
 	}
-	axis := a.Axis
+	axis := aurora.Axis
 	if axis == (maths.Vec{}) {
 		axis = maths.Up
 	}
 	axis = axis.Unit()
-	d := p.Unit()
-	lat := math.Asin(math.Max(-1, math.Min(1, d.Dot(axis))))
+	direction := point.Unit()
+	toAxis := direction.Dot(axis)
+	sine := math.Max(-unity, math.Min(unity, toAxis))
+	latitude := math.Asin(sine)
 	// the oval, either pole
-	off := (math.Abs(lat) - a.Lat) / a.Width
+	off := (math.Abs(latitude) - aurora.Lat) / aurora.Width
 	oval := math.Exp(-off * off)
-	if oval < 1e-3 {
-		return 0
+	if oval < chosen.auroraFloor {
+		return nought
 	}
 	// brightest near the bottom, rising from nothing over the first
 	// tenth of the shell so the lower border is soft, thinning upward
-	h := (up - a.Low) / (a.High - a.Low)
-	profile := math.Exp(-h*3) * maths.Smooth(0, 0.1, h)
-	density := a.Thick * oval * profile
-	if a.Curtains > 0 {
-		// rays along the oval: a noise fine round the pole and
-		// stretched up, and folds coarser than the rays; the rays
-		// are no finer than a picture from orbit resolves, or the
-		// terminal's rays and smokejudge's land on them differently
-		o := maths.Upright(axis)
-		x, z := d.Dot(o.X), d.Dot(o.Z)
+	height := (above - aurora.Low) / (aurora.High - aurora.Low)
+	profile := math.Exp(-height*chosen.auroraFall) *
+		maths.Smooth(nought, chosen.auroraSoft, height)
+	density := aurora.Thick * oval * profile
+	if aurora.Curtains > nought {
+		// rays along the oval: a noise fine round the pole and stretched
+		// up, and folds coarser than the rays
+		upright := maths.Upright(axis)
+		x, z := direction.Dot(upright.X), direction.Dot(upright.Z)
 		phi := math.Atan2(z, x)
 		cos, sin := math.Cos(phi), math.Sin(phi)
-		rays := noise.Fractal(a.Seed, 24*cos, 24*sin, 2*h, 2)
-		folds := noise.Fractal(a.Seed+1, 6*cos, 6*sin, 0, 2)
-		density *= math.Max(0, 1+a.Curtains*(2*rays+folds))
+		rays := noise.Fractal(aurora.Seed, chosen.auroraRays*cos,
+			chosen.auroraRays*sin, chosen.auroraStretch*height,
+			chosen.auroraOctaves)
+		folds := noise.Fractal(aurora.Seed+chosen.auroraFoldSeed,
+			chosen.auroraFolds*cos, chosen.auroraFolds*sin, nought,
+			chosen.auroraOctaves)
+		density *= math.Max(nought, unity+aurora.Curtains*
+			(chosen.auroraRayWeight*rays+folds))
 	}
 	return density
 }

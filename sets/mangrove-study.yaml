@@ -1,0 +1,105 @@
+# mangrove study: twelve mangroves of Shenzhen Bay's kinds, each from a
+# seed of its own, standing in a row on flat ground. in front, nine of the
+# low native kinds (kandelia obovata, aegiceras corniculatum, avicennia
+# marina, bruguiera gymnorhiza); behind them, three of the tall planted
+# sonneratia apetala. each shows its roots above the ground: the pencils of
+# avicennia, the cones of sonneratia, the props of kandelia and bruguiera.
+# the heights, leaf sizes and root habits are recalled, not looked up, and
+# not measured; every number is in manufacture/plant-profiles.yaml, with
+# the status of each.
+#
+# places are metres, as a map's run: x east, y north, z up. the ground,
+# the suns and the sky are the planted tower's (sets/tower-planted.yaml),
+# as they are there, picked by eye there; this study chooses none of its
+# own. the cameras are this study's.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: mangrove study
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 80
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # a person's height, thirty metres south of the front row
+    person:
+      title: "from a person's height, thirty metres off the row"
+      location:
+        at: [0, -30, 1.7]
+      orientation:
+        look_at: [0, 0, 3]
+    # from above and south, looking down at the whole row
+    above:
+      title: "from twenty four metres up, looking down the row"
+      location:
+        at: [0, -32, 24]
+      orientation:
+        look_at: [0, 6, 2]
+    # the second avicennia, its field of pencil roots, from the south
+    pencils:
+      title: "a base of avicennia and its upright pencil roots"
+      location:
+        at: [-5.5, -3.4, 1.1]
+      orientation:
+        look_at: [-5.5, -0.4, 0.2]
+    # the first sonneratia, the cones about its foot, from the south east
+    cones:
+      title: "a base of sonneratia and its cone roots"
+      location:
+        at: [-7.5, 10.4, 1.3]
+      orientation:
+        look_at: [-10, 14, 0.5]
+    # the first bruguiera, its propped base
+    props:
+      title: "a base of bruguiera and its propped roots"
+      location:
+        at: [0, -3.2, 1]
+      orientation:
+        look_at: [0, 0, 0.4]
+  set:
+    things:
+      kandelia one: {kind: kandelia-obovata, seed: 1, complexity: demo, east: -22, north: 0, height: {value: 0, unit: m}}
+      kandelia two: {kind: kandelia-obovata, seed: 2, complexity: demo, east: -16.5, north: 0, height: {value: 0, unit: m}}
+      avicennia one: {kind: avicennia-marina, seed: 3, complexity: demo, east: -11, north: 0, height: {value: 0, unit: m}}
+      avicennia two: {kind: avicennia-marina, seed: 4, complexity: demo, east: -5.5, north: 0, height: {value: 0, unit: m}}
+      bruguiera one: {kind: bruguiera-gymnorhiza, seed: 5, complexity: demo, east: 0, north: 0, height: {value: 0, unit: m}}
+      bruguiera two: {kind: bruguiera-gymnorhiza, seed: 6, complexity: demo, east: 5.5, north: 0, height: {value: 0, unit: m}}
+      aegiceras one: {kind: aegiceras-corniculatum, seed: 7, complexity: demo, east: 11, north: 0, height: {value: 0, unit: m}}
+      aegiceras two: {kind: aegiceras-corniculatum, seed: 8, complexity: demo, east: 16.5, north: 0, height: {value: 0, unit: m}}
+      kandelia three: {kind: kandelia-obovata, seed: 9, complexity: demo, east: 22, north: 0, height: {value: 0, unit: m}}
+      sonneratia one: {kind: sonneratia-apetala, seed: 10, complexity: demo, east: -10, north: 14, height: {value: 0, unit: m}}
+      sonneratia two: {kind: sonneratia-apetala, seed: 11, complexity: demo, east: 0, north: 14, height: {value: 0, unit: m}}
+      sonneratia three: {kind: sonneratia-apetala, seed: 12, complexity: demo, east: 10, north: 14, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.6, 0.7, 0.4]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.58, 0.8]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.14]}
+      zenith: {srgb_linear: [0.01, 0.025, 0.1]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

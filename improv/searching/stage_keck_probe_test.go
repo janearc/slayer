@@ -23,7 +23,7 @@ func TestMaunaKeaFoundationsMeetPreparedTerrain(t *testing.T) {
 	}
 	defer raster.Close()
 	s := &heardStage{world: thing.NewWorld()}
-	p := &StagePlan{Eye: [3]float64{-150, 46, -190}, Look: [3]float64{-35, 10, 32}, Wide: 72}
+	p := &stagePlan{Eye: [3]float64{-150, 46, -190}, Look: [3]float64{-35, 10, 32}, Wide: 72}
 	if err := s.maunaKeaGround(p, raster); err != nil {
 		t.Fatal(err)
 	}

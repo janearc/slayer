@@ -149,7 +149,8 @@ func refWithin(face *Face, p maths.Vec, footprint float64) maths.Light {
 			refGlowed(face, marked.cleared, lo, hi) +
 			refGlowedAt(face, came, eye, lo, hi)*front) * face.exposure
 	}
-	red, green, blue := srgb.Light(observer.Swatch(bands.Lines(lines)))
+	spectrum := bands.Lines(lines)
+	red, green, blue := srgb.Light(observer.Swatch(spectrum))
 	return maths.RGB(math.Max(0, red), math.Max(0, green),
 		math.Max(0, blue))
 }
@@ -168,7 +169,8 @@ func probesOf(face *Face, seed int64, n int) []probe {
 	radius := 6e7
 	around := func(centre maths.Vec, along float64) maths.Vec {
 		side := maths.V(r.NormFloat64(), r.NormFloat64(), r.NormFloat64())
-		side = side.Sub(centre.Scale(side.Dot(centre))).Unit()
+		across := side.Dot(centre)
+		side = side.Sub(centre.Scale(across)).Unit()
 		return side.Scale(math.Sqrt(1 - along*along)).Add(centre.Scale(along))
 	}
 	eyeWay := face.eye.Unit()
@@ -188,7 +190,8 @@ func probesOf(face *Face, seed int64, n int) []probe {
 		case 3:
 			up = around(face.star, (r.Float64()-0.5)*2e-3)
 		case 4:
-			up = around(face.pole.Scale(float64(1-2*(k/6%2))),
+			spin := float64(1 - 2*(k/6%2))
+			up = around(face.pole.Scale(spin),
 				1-r.Float64()*1e-3)
 		default:
 			up = around(face.star.Scale(-1), r.Float64()*0.9)
@@ -390,7 +393,8 @@ func TestWithinIsTheStartingArithmeticBitForBit(t *testing.T) {
 		if !face.quick {
 			t.Errorf("%s: the face's sums do not agree with the observer's", name)
 		}
-		probes := probesOf(face, int64(len(name)), 2400)
+		seed := int64(len(name))
+		probes := probesOf(face, seed, 2400)
 		if got := differing(face, probes); got != 0 {
 			t.Errorf("%s: %d of %d points differ, on one goroutine", name,
 				got, len(probes))
@@ -401,7 +405,8 @@ func TestWithinIsTheStartingArithmeticBitForBit(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				bad[g] = differing(face, probesOf(face, int64(g)+100, 600))
+				probes := probesOf(face, int64(g)+100, 600)
+				bad[g] = differing(face, probes)
 			}()
 		}
 		wg.Wait()
@@ -584,7 +589,8 @@ func TestWithinNoticesAHoistedValueGoneWrong(t *testing.T) {
 		seen := 0
 		for name, face := range faces {
 			bad := spoiled(face, spoil)
-			seen += differing(bad, probesOf(face, int64(len(name)), 1200))
+			seed := int64(len(name))
+			seen += differing(bad, probesOf(face, seed, 1200))
 		}
 		if seen == 0 {
 			t.Errorf("%s: no face's picture changed", what)

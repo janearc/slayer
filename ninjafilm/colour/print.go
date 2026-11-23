@@ -18,8 +18,6 @@ var grainHeight = data.Picked("grain-height")
 //
 // The pixel is the width over the height of the pixel of the picture.
 // Pictures already that shape are left alone.
-//
-//ninja:vow practice slayer's pictures are masked to their gauge here
 func Masked(img *image.RGBA, aspect, pixel float64) *image.RGBA {
 	bounds := img.Bounds()
 	across, down := bounds.Dx(), bounds.Dy()
@@ -72,8 +70,6 @@ func blacken(img *image.RGBA, keep image.Rectangle) {
 // Clumps finer than a pixel average out inside it. The amount falls by
 // the size. So a fine gauge at a coarse picture is nearly clean, which
 // is what a fine gauge is for.
-//
-//ninja:vow practice slayer's pictures are grained to their gauge here
 func Grained(img *image.RGBA, size, amount float64, seed uint64) *image.RGBA {
 	bounds := img.Bounds()
 	out := clone(img)

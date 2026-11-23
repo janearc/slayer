@@ -1,5 +1,5 @@
 # Authored architectures and physical foliage, not measured growth data.
-# Algorithm references and qualitative botanical sources are in doc/vegetation-families.md.
+# Algorithm references and qualitative botanical sources are in doc/model/vegetation/vegetation-families.md.
 ---
 profiles:
 - status: picked
@@ -326,3 +326,846 @@ profiles:
   rosette-leaves: 72
   rosette-angle: 68
   kind: joshua-tree
+# The five mangrove kinds of Shenzhen Bay below. Their ranges for height,
+# leaf length and width, and the habit and height of the roots, are RECALLED
+# from memory, not looked up and not measured: each is named in a comment
+# beside it. Every other number is picked by looking at the study's draws.
+# Leaf and root sizes are physical metres. A tree's scale is not its height:
+# the crown stands about four fifths of the scale. Colours are picked.
+- status: picked
+  by: mangrove study, 2026-11-20; heights, leaf sizes and root habit recalled
+    from memory, not looked up and not measured; the rest picked
+  date: '2026-11-20'
+  form: twig
+  # scale: native stands two to six metres tall (recalled)
+  scale:
+    minimum: 3
+    maximum: 7
+  slenderness: 0.015
+  trunk: 0.28
+  reach: 0.34
+  contraction: 0.74
+  radius-power: 1.6
+  taper: 0.6
+  fork: 50
+  twist: 150
+  upward: 0.22
+  leader-gain: 1.1
+  stem-spread: 0.15
+  orders: 4
+  children: 3
+  stems: 2
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.3
+    g: 0.2
+    b: 0.14
+  green:
+    r: 0.06
+    g: 0.2
+    b: 0.07
+  autumn:
+    r: 0.06
+    g: 0.2
+    b: 0.07
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: oval
+  # leaf: obovate, about nine by four centimetres, thick (recalled)
+  leaf-length: 0.09
+  leaf-width: 0.04
+  leaf-thickness: 0.0015
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.25
+  cell-spacing: 0.25
+  twig-count: 10
+  twig-length: 0.2
+  twig-radius: 0.002
+  leaf-pairs: 6
+  rosette-leaves: 0
+  rosette-angle: 70
+  # roots: a buttressed, propped base (recalled); counts and sizes picked
+  roots:
+    habit: prop
+    count:
+      minimum: 4
+      maximum: 8
+    height:
+      minimum: 0.25
+      maximum: 0.6
+    radius: 0.03
+    tip: 0.5
+    spread: 0.07
+  kind: kandelia-obovata
+- status: picked
+  by: mangrove study, 2026-11-20; heights and leaf sizes recalled from
+    memory, not looked up and not measured; the base is picked, the brief
+    named no roots for it; the rest picked
+  date: '2026-11-20'
+  form: twig
+  # scale: a shrub of one and a half to four metres (recalled)
+  scale:
+    minimum: 1.8
+    maximum: 4
+  slenderness: 0.014
+  trunk: 0.26
+  reach: 0.34
+  contraction: 0.72
+  radius-power: 1.6
+  taper: 0.6
+  fork: 55
+  twist: 150
+  upward: 0.15
+  leader-gain: 1.1
+  stem-spread: 0.12
+  orders: 4
+  children: 3
+  stems: 3
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.33
+    g: 0.27
+    b: 0.2
+  green:
+    r: 0.09
+    g: 0.23
+    b: 0.08
+  autumn:
+    r: 0.09
+    g: 0.23
+    b: 0.08
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: oval
+  # leaf: obovate, about six by three and a half centimetres (recalled)
+  leaf-length: 0.06
+  leaf-width: 0.035
+  leaf-thickness: 0.0012
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.3
+  cell-spacing: 0.3
+  twig-count: 10
+  twig-length: 0.2
+  twig-radius: 0.0016
+  leaf-pairs: 6
+  rosette-leaves: 0
+  rosette-angle: 70
+  roots:
+    habit: prop
+    count:
+      minimum: 3
+      maximum: 5
+    height:
+      minimum: 0.1
+      maximum: 0.25
+    radius: 0.014
+    tip: 0.5
+    spread: 0.05
+  kind: aegiceras-corniculatum
+- status: picked
+  by: mangrove study, 2026-11-20; heights, leaf sizes, pencil root heights
+    and thickness recalled from memory, not looked up and not measured; the
+    count and the field of roots picked; the rest picked
+  date: '2026-11-20'
+  form: twig
+  # scale: three to six metres in these stands (recalled)
+  scale:
+    minimum: 3.2
+    maximum: 7
+  slenderness: 0.016
+  trunk: 0.3
+  reach: 0.32
+  contraction: 0.74
+  radius-power: 1.6
+  taper: 0.6
+  fork: 45
+  twist: 150
+  upward: 0.3
+  leader-gain: 1.1
+  stem-spread: 0.1
+  orders: 4
+  children: 3
+  stems: 2
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.36
+    g: 0.33
+    b: 0.28
+  green:
+    r: 0.08
+    g: 0.2
+    b: 0.08
+  autumn:
+    r: 0.08
+    g: 0.2
+    b: 0.08
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: oval
+  # leaf: elliptic, about six and a half by three centimetres, thick (recalled)
+  leaf-length: 0.065
+  leaf-width: 0.03
+  leaf-thickness: 0.0015
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.25
+  cell-spacing: 0.25
+  twig-count: 10
+  twig-length: 0.2
+  twig-radius: 0.0018
+  leaf-pairs: 6
+  rosette-leaves: 0
+  rosette-angle: 70
+  # roots: a field of upright pencils ten to thirty centimetres tall,
+  # about a centimetre thick (recalled); how many, and how wide a field, picked
+  roots:
+    habit: pencil
+    count:
+      minimum: 40
+      maximum: 80
+    height:
+      minimum: 0.1
+      maximum: 0.3
+    radius: 0.007
+    tip: 0.6
+    spread: 0.4
+  kind: avicennia-marina
+- status: picked
+  by: mangrove study, 2026-11-20; heights, leaf sizes and root habit recalled
+    from memory, not looked up and not measured; the rest picked
+  date: '2026-11-20'
+  form: twig
+  # scale: a tree of the native stands, to about seven metres (recalled)
+  scale:
+    minimum: 3.5
+    maximum: 8
+  slenderness: 0.02
+  trunk: 0.34
+  reach: 0.3
+  contraction: 0.74
+  radius-power: 1.6
+  taper: 0.6
+  fork: 40
+  twist: 150
+  upward: 0.3
+  leader-gain: 1.15
+  stem-spread: 0
+  orders: 4
+  children: 3
+  stems: 1
+  leader: true
+  deciduous: false
+  bark:
+    r: 0.28
+    g: 0.2
+    b: 0.15
+  green:
+    r: 0.05
+    g: 0.19
+    b: 0.07
+  autumn:
+    r: 0.05
+    g: 0.19
+    b: 0.07
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: oval
+  # leaf: elliptic, about twelve by five and a half centimetres (recalled)
+  leaf-length: 0.12
+  leaf-width: 0.055
+  leaf-thickness: 0.002
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.35
+  cell-spacing: 0.28
+  twig-count: 8
+  twig-length: 0.3
+  twig-radius: 0.0025
+  leaf-pairs: 5
+  rosette-leaves: 0
+  rosette-angle: 70
+  # roots: buttressed and kneed bases (recalled); the knees are drawn as
+  # propped buttresses, and the counts and sizes are picked
+  roots:
+    habit: prop
+    count:
+      minimum: 5
+      maximum: 9
+    height:
+      minimum: 0.35
+      maximum: 0.8
+    radius: 0.045
+    tip: 0.45
+    spread: 0.1
+  kind: bruguiera-gymnorhiza
+- status: picked
+  by: mangrove study, 2026-11-20; height, leaf sizes and root habit recalled
+    from memory, not looked up and not measured; cone height and the field
+    of roots picked; the rest picked
+  date: '2026-11-20'
+  form: twig
+  # scale: the planted stands behind the native ones, to about fifteen
+  # metres (recalled)
+  scale:
+    minimum: 9
+    maximum: 16
+  slenderness: 0.014
+  trunk: 0.4
+  reach: 0.24
+  contraction: 0.74
+  radius-power: 1.6
+  taper: 0.6
+  fork: 35
+  twist: 150
+  upward: 0.12
+  leader-gain: 1.3
+  stem-spread: 0
+  orders: 4
+  children: 3
+  stems: 1
+  leader: true
+  deciduous: false
+  bark:
+    r: 0.3
+    g: 0.26
+    b: 0.2
+  green:
+    r: 0.1
+    g: 0.24
+    b: 0.08
+  autumn:
+    r: 0.1
+    g: 0.24
+    b: 0.08
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: lance
+  # leaf: oblong, about eight by three centimetres, hanging (recalled)
+  leaf-length: 0.08
+  leaf-width: 0.03
+  leaf-thickness: 0.0012
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.35
+  cell-spacing: 0.28
+  twig-count: 8
+  twig-length: 0.26
+  twig-radius: 0.002
+  leaf-pairs: 6
+  rosette-leaves: 0
+  rosette-angle: 70
+  # roots: upright cones taller than the pencils, up to about a metre
+  # (recalled as taller; the height itself picked)
+  roots:
+    habit: pencil
+    count:
+      minimum: 20
+      maximum: 45
+    height:
+      minimum: 0.3
+      maximum: 0.9
+    radius: 0.03
+    tip: 0.15
+    spread: 0.2
+  kind: sonneratia-apetala
+# Native kinds of the island and coast sets below. Each row's source is the
+# comment over it, and what was read from that source is quoted beside the
+# number it set; a number with no quotation is picked. A tree's scale is not
+# its height: the crown stands about four fifths of the scale.
+#
+# pandanus tectorius, hala. "Indigenous", "Tree, Small, 15 to 30" feet,
+# "Hala leaves (lau hala) are from 2 to 6 feet long and are spiraled at the
+# end of the branch", "wide branched", "Dark Green", "thick aerial roots":
+# https://nativeplants.hawaii.edu/plants/pandanus-tectorius/ . "Native" in
+# the Cook Islands, "Prop-roots split and used for walls of traditional
+# houses": https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=6472
+# The rosette's downward blades stand for the older leaves that hang below
+# a hala crown's upright ones.
+- status: picked
+  by: native flora study; height, leaf length, the rosette at the branch
+    end and the aerial roots read from the sources named above it; the
+    rest picked
+  date: '2026-11-20'
+  form: rosette
+  # scale: a crown of four and a half to nine metres, from 15 to 30 feet
+  scale:
+    minimum: 5.5
+    maximum: 11
+  slenderness: 0.03
+  trunk: 0.38
+  reach: 0.3
+  contraction: 0.66
+  radius-power: 1.6
+  taper: 0.6
+  fork: 42
+  twist: 150
+  upward: 0.3
+  leader-gain: 1.1
+  stem-spread: 0
+  orders: 3
+  children: 2
+  stems: 1
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.32
+    g: 0.29
+    b: 0.24
+  green:
+    r: 0.05
+    g: 0.16
+    b: 0.06
+  autumn:
+    r: 0.05
+    g: 0.16
+    b: 0.06
+  dry:
+    r: 0.3
+    g: 0.26
+    b: 0.1
+  leaf-shape: lance
+  # leaf: one metre long, within "2 to 6 feet"; six wide, within "5-7 cm
+  # (2-2.75 in) in width" (https://en.wikipedia.org/wiki/Pandanus_tectorius,
+  # read through a second reader's summary; not a flora)
+  leaf-length: 1
+  leaf-width: 0.06
+  leaf-thickness: 0.003
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.15
+  cell-spacing: 0.4
+  twig-count: 0
+  twig-length: 0
+  twig-radius: 0.03
+  leaf-pairs: 0
+  rosette-leaves: 40
+  rosette-angle: 72
+  # roots: "thick aerial roots"; their count, height and spread are picked
+  roots:
+    habit: prop
+    count:
+      minimum: 4
+      maximum: 9
+    height:
+      minimum: 0.7
+      maximum: 1.6
+    radius: 0.035
+    tip: 0.6
+    spread: 0.12
+  kind: pandanus-tectorius
+# scaevola taccada, naupaka kahakai. "Indigenous", "Shrub, Medium, 6 to 10"
+# feet, "grows to widths of 15 feet or more", leaves "about 2 to 9 inches
+# long" and "oval-shaped", "Light Green" and "Medium Green", "somewhat to
+# moderately succulent", natural zone "Less than 150" feet, tolerates "Salt
+# Spray": https://nativeplants.hawaii.edu/plants/scaevola-sericea/ (the page
+# is titled Scaevola taccada).
+- status: picked
+  by: native flora study; height, spread, leaf length, outline and the
+    zone it grows in read from the source named above it; the rest picked
+  date: '2026-11-20'
+  form: twig
+  # scale: a shrub of one to two and a half metres tall, within "6 to 10"
+  # feet; its stems splay wide, toward the "15 feet or more" across; picked
+  scale:
+    minimum: 1.3
+    maximum: 3
+  slenderness: 0.02
+  trunk: 0.15
+  reach: 0.45
+  contraction: 0.68
+  radius-power: 1.6
+  taper: 0.58
+  fork: 70
+  twist: 150
+  upward: 0.05
+  leader-gain: 1.1
+  stem-spread: 0.6
+  orders: 3
+  children: 3
+  stems: 6
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.4
+    g: 0.36
+    b: 0.3
+  green:
+    r: 0.15
+    g: 0.3
+    b: 0.11
+  autumn:
+    r: 0.15
+    g: 0.3
+    b: 0.11
+  dry:
+    r: 0.25
+    g: 0.2
+    b: 0.1
+  leaf-shape: oval
+  # leaf: twelve centimetres, within "2 to 9 inches"; the width and the
+  # thickness of a succulent leaf are picked
+  leaf-length: 0.12
+  leaf-width: 0.05
+  leaf-thickness: 0.002
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.3
+  cell-spacing: 0.3
+  twig-count: 6
+  twig-length: 0.15
+  twig-radius: 0.004
+  leaf-pairs: 5
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: scaevola-taccada
+# metrosideros polymorpha, ohia lehua. "Endemic", "Shrub" and "Tree", the
+# largest "Tree, Large, Greater than 50" feet, "Leaves range beween a half
+# and 3 inches long", "Dark Green", "Light Green" and "Medium Green", found
+# "from near sea level to over 7,200 feet":
+# https://nativeplants.hawaii.edu/plants/metrosideros-polymorpha/
+- status: picked
+  by: native flora study; habit, leaf length and the heights it grows at
+    read from the source named above it; the rest picked
+  date: '2026-11-20'
+  form: twig
+  # scale: a tree of five to eleven metres, between the shrub and the
+  # "Greater than 50" feet the source allows; picked
+  scale:
+    minimum: 6
+    maximum: 14
+  slenderness: 0.022
+  trunk: 0.3
+  # crown: narrower than tall, "generally the canopy is 10 to 20 feet wide"
+  # (the source page, through a second reader's summary); reach and fork
+  # picked for it
+  reach: 0.2
+  contraction: 0.68
+  radius-power: 1.6
+  taper: 0.58
+  fork: 35
+  twist: 150
+  upward: 0.2
+  leader-gain: 1.1
+  stem-spread: 0
+  orders: 5
+  children: 3
+  stems: 1
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.3
+    g: 0.26
+    b: 0.22
+  green:
+    r: 0.08
+    g: 0.19
+    b: 0.08
+  autumn:
+    r: 0.08
+    g: 0.19
+    b: 0.08
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: oval
+  # leaf: five centimetres, within "a half and 3 inches"; three wide,
+  # within "1-5.5 cm wide" (https://www.plantsofhawaii.org/detail/%7B8AA1EF0B-8E46-4CB5-A7DA-E8D7E35C3A6D%7D,
+  # read through a second reader's summary)
+  leaf-length: 0.05
+  leaf-width: 0.03
+  leaf-thickness: 0.0015
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.4
+  cell-spacing: 0.35
+  twig-count: 6
+  twig-length: 0.25
+  twig-radius: 0.002
+  leaf-pairs: 10
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: metrosideros-polymorpha
+# barringtonia asiatica, utu. "Native; Land, lowlands - mountains (+++)
+# (mid-elev.)" in the Cook Islands, "A large low-branching tree to 20m",
+# leaves "very large, green with pale veins; long-oval with broad, rounded
+# tip; to 60x25cm":
+# https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=5803
+- status: picked
+  by: native flora study; height, the low branching and the leaf outline
+    and its greatest size read from the source named above it; the rest
+    picked
+  date: '2026-11-20'
+  form: twig
+  # scale: a crown of seven to fourteen metres, under "to 20m"
+  scale:
+    minimum: 9
+    maximum: 18
+  slenderness: 0.028
+  trunk: 0.2
+  reach: 0.3
+  contraction: 0.66
+  radius-power: 1.6
+  taper: 0.58
+  fork: 55
+  twist: 150
+  upward: 0.12
+  leader-gain: 1.1
+  stem-spread: 0
+  orders: 5
+  children: 3
+  stems: 1
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.3
+    g: 0.27
+    b: 0.23
+  green:
+    r: 0.06
+    g: 0.2
+    b: 0.06
+  autumn:
+    r: 0.06
+    g: 0.2
+    b: 0.06
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: oval
+  # leaf: forty by seventeen centimetres, under "to 60x25cm"; the page's
+  # broad, rounded tip (obovate) is drawn oval, the nearest outline the
+  # maker has
+  leaf-length: 0.4
+  leaf-width: 0.17
+  leaf-thickness: 0.002
+  lobes: 0
+  lobe-depth: 0
+  # cells: long shoots with long side twigs, for a dense spreading crown;
+  # picked
+  cell-length: 1
+  cell-spacing: 0.55
+  twig-count: 6
+  twig-length: 0.7
+  twig-radius: 0.006
+  leaf-pairs: 7
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: barringtonia-asiatica
+# quercus ilex, holm oak. "can grow up to 25 m", "The crown is broad, domed,
+# with ascending branches and often with low stems", "The bark is
+# brownish-black", "the leaf is generally lanceolate to oval, 3-7 cm long",
+# "shiny blackish-green on the upper side":
+# https://forest.jrc.ec.europa.eu/media/atlas/Quercus_ilex.pdf . On the
+# promontory, "le sclerofille mediterranee, rappresentate, in primo luogo,
+# dal leccio Quercus ilex", and "lembi di lecceta" come down near the sea
+# where the waves are less: the marine reserve's coastal handbook,
+# https://www.portofinoamp.it/come/didattica/3ambientecostierodispensedefinitiveecorrette2012.pdf
+- status: picked
+  by: native flora study; height, crown, bark, leaf outline and length and
+    the colour's darkness read from the sources named above it; the rest
+    picked
+  date: '2026-11-20'
+  form: twig
+  # scale: six to thirteen metres of crown, the coppice and maquis of the
+  # promontory rather than the 25 m the atlas allows; picked
+  scale:
+    minimum: 7
+    maximum: 16
+  slenderness: 0.026
+  trunk: 0.25
+  reach: 0.28
+  contraction: 0.66
+  radius-power: 1.6
+  taper: 0.58
+  fork: 55
+  twist: 150
+  upward: 0.1
+  leader-gain: 1.1
+  stem-spread: 0
+  orders: 5
+  children: 3
+  stems: 1
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.13
+    g: 0.11
+    b: 0.09
+  green:
+    r: 0.05
+    g: 0.12
+    b: 0.05
+  autumn:
+    r: 0.05
+    g: 0.12
+    b: 0.05
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: oval
+  # leaf: six centimetres, within "3-7 cm"; two and a half wide, within
+  # "2-5 cm wide" (https://en.wikipedia.org/wiki/Quercus_ilex, read through
+  # a second reader's summary; not a flora)
+  leaf-length: 0.06
+  leaf-width: 0.025
+  leaf-thickness: 0.0015
+  lobes: 0
+  lobe-depth: 0
+  # cells: long shoots with long side twigs, so a crown of them closes over
+  # its dome, as the atlas's "broad, domed" crown is; picked
+  cell-length: 0.55
+  cell-spacing: 0.3
+  twig-count: 6
+  twig-length: 0.4
+  twig-radius: 0.0025
+  leaf-pairs: 14
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: quercus-ilex
+# erica arborea, tree heath. On the promontory, with the holm oak,
+# "lentisco, Pistacia lentiscus, tino, Viburnum tinus, erica, Erica arborea",
+# and "le foglie delle piante sono piuttosto piccole (erica e pini) per
+# limitare la traspirazione": the marine reserve's coastal handbook,
+# https://www.portofinoamp.it/come/didattica/3ambientecostierodispensedefinitiveecorrette2012.pdf
+# No size was read: the height, the needle leaf's length and width and the
+# colours are picked, and its leaves, borne in whorls, are drawn in pairs.
+- status: picked
+  by: native flora study; that it grows among the holm oaks and that its
+    leaves are small read from the source named above it; every number
+    picked
+  date: '2026-11-20'
+  form: twig
+  scale:
+    minimum: 1.6
+    maximum: 4
+  slenderness: 0.014
+  trunk: 0.25
+  reach: 0.3
+  contraction: 0.7
+  radius-power: 1.6
+  taper: 0.58
+  fork: 30
+  twist: 150
+  upward: 0.4
+  leader-gain: 1.1
+  stem-spread: 0.12
+  orders: 4
+  children: 3
+  stems: 3
+  leader: false
+  deciduous: false
+  bark:
+    r: 0.2
+    g: 0.13
+    b: 0.09
+  green:
+    r: 0.05
+    g: 0.12
+    b: 0.05
+  autumn:
+    r: 0.05
+    g: 0.12
+    b: 0.05
+  dry:
+    r: 0.25
+    g: 0.17
+    b: 0.09
+  leaf-shape: lance
+  leaf-length: 0.006
+  leaf-width: 0.001
+  leaf-thickness: 0.0005
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.2
+  cell-spacing: 0.22
+  twig-count: 8
+  twig-length: 0.08
+  twig-radius: 0.0012
+  leaf-pairs: 28
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: erica-arborea
+# salix alba, white willow. "oorspronkelijk inheems" in the Netherlands,
+# growing "Langs wegen, waterkanten (o.a. langs sloten in weiland en langs
+# rivieren)", "6,00-20,00 m.", "De langwerpige, 5 tot 10 cm lange bladeren
+# hebben een wigvormige voet, een toegespitste top":
+# https://www.verspreidingsatlas.nl/1116
+- status: picked
+  by: native flora study; height, the waterside it grows at and the leaf's
+    length and outline read from the source named above it; the rest
+    picked
+  date: '2026-11-20'
+  form: twig
+  # scale: a crown of six and a half to fourteen metres, within "6,00-20,00 m"
+  scale:
+    minimum: 8
+    maximum: 18
+  slenderness: 0.024
+  trunk: 0.3
+  reach: 0.24
+  contraction: 0.7
+  radius-power: 1.6
+  taper: 0.58
+  fork: 45
+  twist: 150
+  upward: 0.2
+  leader-gain: 1.1
+  stem-spread: 0.04
+  orders: 5
+  children: 3
+  stems: 1
+  leader: false
+  deciduous: true
+  bark:
+    r: 0.3
+    g: 0.28
+    b: 0.25
+  green:
+    r: 0.12
+    g: 0.17
+    b: 0.1
+  autumn:
+    r: 0.42
+    g: 0.36
+    b: 0.08
+  dry:
+    r: 0.25
+    g: 0.2
+    b: 0.1
+  leaf-shape: lance
+  # leaf: eight centimetres, within "5 tot 10 cm", narrow-pointed at both
+  # ends ("wigvormige voet, een toegespitste top"); one wide, within
+  # "0.5-1.5 cm wide" (https://en.wikipedia.org/wiki/Salix_alba, read
+  # through a second reader's summary; not a flora)
+  leaf-length: 0.08
+  leaf-width: 0.01
+  leaf-thickness: 0.0012
+  lobes: 0
+  lobe-depth: 0
+  cell-length: 0.55
+  cell-spacing: 0.45
+  twig-count: 6
+  twig-length: 0.4
+  twig-radius: 0.0025
+  leaf-pairs: 14
+  rosette-leaves: 0
+  rosette-angle: 70
+  kind: salix-alba

@@ -25,16 +25,6 @@ import (
 // H264_High_4_1 for 4.1. Defined by VTCompressionProperties.h.
 const profilePrefix = "H264_High_"
 
-// ticksPerFrame is how finely the video track counts time, in ticks a
-// frame. Picked by the package author, 2026-11-12: any whole number
-// keeps frame i at exactly i/rate; 512 is what ffmpeg writes at 24.
-const ticksPerFrame = 512
-
-// soundChunk is how many stereo pairs are handed to the writer at a
-// time. Picked by the package author, 2026-11-12: four AAC packets,
-// about a tenth of a second at 44100.
-const soundChunk = 4096
-
 // bridge is a movie being written through AVFoundation. The writer
 // calls frame, finish, cancel and release one at a time; interrupt may
 // come from any goroutine, so it and release share a lock.
@@ -77,7 +67,7 @@ func openPipe(settings Settings, temporary string) (pipe, error) {
 		ask.sound_count = C.long(len(heard) / channels)
 		ask.sound_chunk = C.long(soundChunk)
 	}
-	var why [whyLength]C.char
+	why := make([]C.char, whyLength)
 	handle := C.slayer_movie_open(&ask, &why[0], C.int(len(why)))
 	if handle == nil {
 		return nil, errors.New("movie: " + C.GoString(&why[0]))
@@ -88,7 +78,7 @@ func openPipe(settings Settings, temporary string) (pipe, error) {
 // frame hands over one picture, shown at index/rate seconds.
 func (movie *bridge) frame(index int, picture *image.RGBA) error {
 	rows := (*C.uint8_t)(unsafe.Pointer(&picture.Pix[0]))
-	var why [whyLength]C.char
+	why := make([]C.char, whyLength)
 	failed := C.slayer_movie_frame(movie.handle, C.long(index), rows,
 		C.long(picture.Stride), &why[0], C.int(len(why)))
 	if failed != 0 {
@@ -99,7 +89,7 @@ func (movie *bridge) frame(index int, picture *image.RGBA) error {
 
 // finish ends the movie after frames pictures and waits for the file.
 func (movie *bridge) finish(frames int) error {
-	var why [whyLength]C.char
+	why := make([]C.char, whyLength)
 	failed := C.slayer_movie_finish(movie.handle, C.long(frames), &why[0],
 		C.int(len(why)))
 	if failed != 0 {
@@ -135,7 +125,7 @@ func probeFile(path string) (Facts, error) {
 	where := C.CString(path)
 	defer C.free(unsafe.Pointer(where))
 	var read C.slayer_movie_facts
-	var why [whyLength]C.char
+	why := make([]C.char, whyLength)
 	if C.slayer_movie_probe(where, C.double(waitLimit.Seconds()), &read,
 		&why[0], C.int(len(why))) != 0 {
 		return Facts{}, errors.New("movie: " + C.GoString(&why[0]))
@@ -172,7 +162,7 @@ func decodeSound(path string, rate int) ([]float32, int, error) {
 	defer C.free(unsafe.Pointer(where))
 	var count C.long
 	var held C.int
-	var why [whyLength]C.char
+	why := make([]C.char, whyLength)
 	out := C.slayer_movie_sound(where, C.int(rate),
 		C.double(waitLimit.Seconds()), &count, &held, &why[0],
 		C.int(len(why)))
@@ -198,7 +188,7 @@ func openFilm(path string, from float64, size image.Point) (pictures,
 	where := C.CString(path)
 	defer C.free(unsafe.Pointer(where))
 	var read C.slayer_film_facts
-	var why [whyLength]C.char
+	why := make([]C.char, whyLength)
 	handle := C.slayer_film_open(where, C.double(from), C.int(size.X),
 		C.int(size.Y), C.double(waitLimit.Seconds()), &read, &why[0],
 		C.int(len(why)))
@@ -216,7 +206,7 @@ func openFilm(path string, from float64, size image.Point) (pictures,
 func (film *filmBridge) next(into *image.RGBA) (float64, bool, error) {
 	rows := (*C.uint8_t)(unsafe.Pointer(&into.Pix[0]))
 	var at C.double
-	var why [whyLength]C.char
+	why := make([]C.char, whyLength)
 	switch C.slayer_film_next(film.handle, rows, C.long(into.Stride), &at,
 		&why[0], C.int(len(why))) {
 	case C.slayer_film_frame:

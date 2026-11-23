@@ -5,10 +5,10 @@ import (
 	"math"
 	"time"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -164,10 +164,10 @@ func validateOceanDirectSunWorld(world *thing.World) error {
 		return fmt.Errorf("trace: ocean mean-plane direct sun needs a finite boundary, positive extent and positive metres-per-unit")
 	}
 	switch ocean.Boundary.Shape.(type) {
-	case *shape.HeightField, *seaocean.FlatMeanContinuation,
-		*seaocean.InfiniteMeanContinuation:
+	case *shape.HeightField, *arid.FlatMeanContinuation,
+		*arid.InfiniteMeanContinuation, *arid.Sea:
 	default:
-		return fmt.Errorf("trace: ocean mean-plane direct sun requires the staged finite wave or flat-mean continuation boundary")
+		return fmt.Errorf("trace: ocean mean-plane direct sun requires the staged finite wave, flat-mean continuation or unbounded sea boundary")
 	}
 	foundBoundary := false
 	for _, each := range world.Things {

@@ -8,123 +8,150 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// The file the mesh tree benchmarks read, and the places in a face that
+// the tests ask for by name.
+const (
+	meshtreeStreamsFile = "testdata/meshtree-streams.csv"
+	meshtreeFirst       = 0 // defined: the first corner of a face
+	meshtreeSecond      = 1 // defined: the second corner of a face
+	meshtreeThird       = 2 // defined: the third corner of a face
+)
+
+// meshtreeRing is the place in a ball's corners of the one at slice
+// around of ring i, the rings counted from the one under the north pole.
+func meshtreeRing(slices, i, around int) int {
+	return unity + (i-unity)*slices + around%slices
+}
+
 // lumpy is a ball with bumps on it, made of rings of slices: two faces
 // for every slice of every ring, and one at each pole.
-func lumpy(slices, rings int) ([]maths.Vec, [][3]int) {
-	vs := []maths.Vec{maths.V(0, 1, 0)}
-	for i := 1; i < rings; i++ {
+func lumpy(tester testing.TB, slices,
+	rings int) ([]maths.Vec, []triangleCorners) {
+	tester.Helper()
+	height := trianglePicked(tester, "meshtree-bump-height")
+	latitude := trianglePicked(tester, "meshtree-bump-latitude")
+	longitude := trianglePicked(tester, "meshtree-bump-longitude")
+	vs := []maths.Vec{maths.V(nought, unity, nought)}
+	for i := unity; i < rings; i++ {
 		th := math.Pi * float64(i) / float64(rings)
-		for j := range slices {
-			ph := 2 * math.Pi * float64(j) / float64(slices)
-			r := 1 + 0.1*math.Sin(5*th)*math.Cos(7*ph)
-			vs = append(vs, maths.V(r*math.Sin(th)*math.Cos(ph),
-				r*math.Cos(th), r*math.Sin(th)*math.Sin(ph)))
+		for around := range slices {
+			ph := pair * math.Pi * float64(around) / float64(slices)
+			radius := unity + height*math.Sin(latitude*th)*
+				math.Cos(longitude*ph)
+			x := radius * math.Sin(th) * math.Cos(ph)
+			y := radius * math.Cos(th)
+			z := radius * math.Sin(th) * math.Sin(ph)
+			vs = append(vs, maths.V(x, y, z))
 		}
 	}
-	vs = append(vs, maths.V(0, -1, 0))
-	ring := func(i, j int) int { return 1 + (i-1)*slices + j%slices }
-	south := len(vs) - 1
-	var fs [][3]int
-	for j := range slices {
-		fs = append(fs, [3]int{0, ring(1, j+1), ring(1, j)},
-			[3]int{south, ring(rings-1, j), ring(rings-1, j+1)})
-		for i := 1; i < rings-1; i++ {
-			a, b := ring(i, j), ring(i, j+1)
-			c, d := ring(i+1, j+1), ring(i+1, j)
-			fs = append(fs, [3]int{a, b, c}, [3]int{a, c, d})
+	vs = append(vs, maths.V(nought, -unity, nought))
+	south := len(vs) - unity
+	var fs []triangleCorners
+	for around := range slices {
+		north := triangleCorners{nought,
+			meshtreeRing(slices, unity, around+unity),
+			meshtreeRing(slices, unity, around)}
+		last := rings - unity
+		below := triangleCorners{south, meshtreeRing(slices, last, around),
+			meshtreeRing(slices, last, around+unity)}
+		fs = append(fs, north, below)
+		for i := unity; i < rings-unity; i++ {
+			fs = append(fs, meshtreeBand(slices, i, around)...)
 		}
 	}
 	return vs, fs
 }
 
-// soup is n faces of every size from a hundredth to four tenths, strewn
+// meshtreeBand is the two faces of the slice around of the ring i,
+// between it and the ring below.
+func meshtreeBand(slices, i, around int) []triangleCorners {
+	upperLeft := meshtreeRing(slices, i, around)
+	upperRight := meshtreeRing(slices, i, around+unity)
+	lowerRight := meshtreeRing(slices, i+unity, around+unity)
+	lowerLeft := meshtreeRing(slices, i+unity, around)
+	return []triangleCorners{{upperLeft, upperRight, lowerRight},
+		{upperLeft, lowerRight, lowerLeft}}
+}
+
+// soup is faces of every size from a hundredth to four tenths, strewn
 // through the cube from -1 to 1, overlapping as they fall.
-func soup(rng *rand.Rand, n int) ([]maths.Vec, [][3]int) {
+func soup(rng *rand.Rand, faces int) ([]maths.Vec, []triangleCorners) {
+	smallest := triangleChosen("meshtree-soup-smallest")
+	spread := triangleChosen("meshtree-soup-spread")
 	var vs []maths.Vec
-	var fs [][3]int
-	for range n {
-		mid := within(rng, 1)
-		size := 0.01 * math.Pow(40, rng.Float64())
-		for range 3 {
-			vs = append(vs, mid.Add(anyway(rng).Scale(size)))
+	var fs []triangleCorners
+	for range faces {
+		mid := within(rng, unity)
+		size := smallest * math.Pow(spread, rng.Float64())
+		for range cornersOfAFace {
+			offset := anyway(rng).Scale(size)
+			vs = append(vs, mid.Add(offset))
 		}
-		fs = append(fs, [3]int{len(vs) - 3, len(vs) - 2, len(vs) - 1})
+		fs = append(fs, triangleCorners{len(vs) - cornersOfAFace,
+			len(vs) - pair, len(vs) - unity})
 	}
 	return vs, fs
-}
-
-// every is the nearest face the ray meets, found by asking every face.
-func every(m *Mesh, r maths.Ray, near, far float64) (float64, int, bool) {
-	q, best, which := ready(r), far, -1
-	for i := range m.tris {
-		if t, _, ok := q.meet(&m.tris[i], near, best); ok {
-			best, which = t, i
-		}
-	}
-	if which < 0 {
-		return 0, -1, false
-	}
-	return best, which, true
-}
-
-// nearestOfAll is how far p is from the nearest face, squared, found by
-// asking every face.
-func nearestOfAll(m *Mesh, p maths.Vec) float64 {
-	best := math.Inf(1)
-	for _, tr := range m.tris {
-		a, b, c := vec(tr.p[0]), vec(tr.p[1]), vec(tr.p[2])
-		w := closest(p, a, b, c)
-		d := a.Scale(w[0]).Add(b.Scale(w[1])).Add(c.Scale(w[2]))
-		best = math.Min(best, d.Sub(p).Dot(d.Sub(p)))
-	}
-	return best
 }
 
 // benchRays are rays from all round a ball, aimed into it.
-func benchRays() []maths.Ray {
-	rng := rand.New(rand.NewPCG(14, 15))
-	rays := make([]maths.Ray, 4096)
+func benchRays(tester testing.TB) []maths.Ray {
+	tester.Helper()
+	rng := triangleStream(tester, meshtreeStreamsFile, "bench")
+	count := int(trianglePicked(tester, "meshtree-bench-rays"))
+	rays := make([]maths.Ray, count)
+	standoff := trianglePicked(tester, "meshtree-bench-standoff")
+	aim := trianglePicked(tester, "meshtree-bench-aim")
 	for i := range rays {
-		rays[i] = aimed(anyway(rng).Scale(3), inBall(rng, 1.1))
+		rays[i] = aimed(anyway(rng).Scale(standoff), inBall(rng, aim))
 	}
 	return rays
 }
 
+// meshtreeBall is the lumpy ball the benchmarks are run against.
+func meshtreeBall(tester testing.TB) ([]maths.Vec, []triangleCorners) {
+	tester.Helper()
+	slices := int(trianglePicked(tester, "meshtree-lumpy-slices"))
+	rings := int(trianglePicked(tester, "meshtree-lumpy-rings"))
+	return lumpy(tester, slices, rings)
+}
+
 // BenchmarkMeshHit is rays a second against a hundred thousand faces.
-func BenchmarkMeshHit(b *testing.B) {
-	vs, fs := lumpy(250, 201)
-	m := made(b, vs, fs, nil, false)
-	rays, n := benchRays(), 0
-	for b.Loop() {
-		m.Hit(rays[n%len(rays)], 0, forever)
-		n++
+func BenchmarkMeshHit(bench *testing.B) {
+	vs, fs := meshtreeBall(bench)
+	built := made(bench, vs, fs, nil, false)
+	rays, count := benchRays(bench), nought
+	for bench.Loop() {
+		built.Hit(rays[count%len(rays)], nought, forever)
+		count++
 	}
-	b.ReportMetric(float64(n)/b.Elapsed().Seconds(), "rays/s")
-	b.ReportMetric(float64(len(fs)), "faces")
+	bench.ReportMetric(float64(count)/bench.Elapsed().Seconds(), "rays/s")
+	faces := float64(len(fs))
+	bench.ReportMetric(faces, "faces")
 }
 
 // BenchmarkMeshNormal is normals a second, where the rays met the faces.
-func BenchmarkMeshNormal(b *testing.B) {
-	vs, fs := lumpy(250, 201)
-	m := made(b, vs, fs, nil, false)
+func BenchmarkMeshNormal(bench *testing.B) {
+	vs, fs := meshtreeBall(bench)
+	built := made(bench, vs, fs, nil, false)
 	var at []maths.Vec
-	for _, r := range benchRays() {
-		if t, ok := m.Hit(r, 0, forever); ok {
-			at = append(at, r.Point(t))
+	for _, ray := range benchRays(bench) {
+		if distance, ok := built.Hit(ray, nought, forever); ok {
+			at = append(at, ray.Point(distance))
 		}
 	}
-	n := 0
-	for b.Loop() {
-		m.Normal(at[n%len(at)])
-		n++
+	count := nought
+	for bench.Loop() {
+		built.Normal(at[count%len(at)])
+		count++
 	}
-	b.ReportMetric(float64(n)/b.Elapsed().Seconds(), "normals/s")
+	bench.ReportMetric(float64(count)/bench.Elapsed().Seconds(),
+		"normals/s")
 }
 
 // BenchmarkNewMesh is checking and building a hundred thousand faces.
-func BenchmarkNewMesh(b *testing.B) {
-	vs, fs := lumpy(250, 201)
-	for b.Loop() {
-		made(b, vs, fs, nil, false)
+func BenchmarkNewMesh(bench *testing.B) {
+	vs, fs := meshtreeBall(bench)
+	for bench.Loop() {
+		made(bench, vs, fs, nil, false)
 	}
 }

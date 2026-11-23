@@ -13,8 +13,12 @@ var (
 	// holds it.
 	EarthRadius = num("earth.radius")
 
+	// BreakingRatio is the most a wave's height, trough to crest, can be
+	// of the depth of the water under it before it breaks: McCowan's
+	// limit [Mc94], 0.78, as sources.yaml holds it.
+	BreakingRatio = num("breaking.crest")
+
 	saturated  = num("breaking.saturated")
-	crestLimit = num("breaking.crest")
 	overRMS    = num("waveheight.rms")
 	foamFresh  = num("foam.fresh")
 	surfFull   = num("surf.full")
@@ -159,8 +163,8 @@ func (shore *Shore) read(grid []float64, x, y float64) float64 {
 	return low*(1-ty) + high*ty
 }
 
-// Holds is whether a place is inside the shore's square.
-func (shore *Shore) Holds(x, y float64) bool {
+// holds is whether a place is inside the shore's square.
+func (shore *Shore) holds(x, y float64) bool {
 	return math.Abs(x) <= shore.extent/2 && math.Abs(y) <= shore.extent/2
 }
 
@@ -210,7 +214,7 @@ func (shore *Shore) meet(sea Sea) {
 	}
 	peak := sea.Peak()
 	deep := Sea{Wind: sea.Wind, Fetch: sea.Fetch}
-	_, outside := deep.turning(peak * peak / Gravity)
+	_, outside := deep.turning(peak * peak / gravity)
 	arriving := sea.Height() / overRMS // root-mean-square height
 	shore.rms = arriving
 	for at, height := range shore.height {
@@ -234,15 +238,15 @@ func (shore *Shore) meet(sea Sea) {
 // sea's depth: the dispersion relation, omega^2 = g k tanh(k h), solved
 // for k by Newton's method from the deep-water answer.
 func (s Sea) number(omega float64) float64 {
-	k := omega * omega / Gravity
+	k := omega * omega / gravity
 	if s.Depth <= 0 {
 		return k
 	}
 	for range 30 {
 		tanh := math.Tanh(k * s.Depth)
 		sech := 1 / math.Cosh(k*s.Depth)
-		miss := Gravity*k*tanh - omega*omega
-		rate := Gravity * (tanh + k*s.Depth*sech*sech)
+		miss := gravity*k*tanh - omega*omega
+		rate := gravity * (tanh + k*s.Depth*sech*sech)
 		next := k - miss/rate
 		if math.Abs(next-k) <= 1e-12*k {
 			return next
@@ -293,7 +297,7 @@ func (shore *Shore) foam(x, y, open float64) float64 {
 		return 0
 	}
 	wave := 2 * open * shore.read(shore.shoal, x, y)
-	breaking := math.Max(wave/(crestLimit*depth)-1, 0) / surfFull
+	breaking := math.Max(wave/(BreakingRatio*depth)-1, 0) / surfFull
 	broken := shore.read(shore.surf, x, y) * 2 * open / shore.rms
 	return math.Min(math.Max(breaking, broken), 1)
 }

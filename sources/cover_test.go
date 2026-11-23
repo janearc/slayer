@@ -227,13 +227,15 @@ func TestFetchRefusesWhatCannotBeMadeOrRead(t *testing.T) {
 			t.Fatal(err)
 		}
 		defer os.Chmod(parent, 0o755)
-		_, err := coverRun(NewShelf(filepath.Join(parent, "shelf"), nil), stub, Fetching, "")
+		inside := NewShelf(filepath.Join(parent, "shelf"), nil)
+		_, err := coverRun(inside, stub, Fetching, "")
 		coverMust(t, "a shelf that cannot be made", err, "permission denied")
 		_, err = coverRun(NewShelf(parent, nil), stub, Fetching, "")
 		coverMust(t, "a folder that cannot be made", err, "permission denied")
 	}
 	lost := &stubOrigin{products: []*Product{product}, fetchPath: filepath.Join(t.TempDir(), "nowhere")}
-	_, err := coverRun(NewShelf(t.TempDir(), nil), lost, Fetching, "")
+	bare := NewShelf(t.TempDir(), nil)
+	_, err := coverRun(bare, lost, Fetching, "")
 	coverMust(t, "a file that is not there", err, "no such file")
 }
 
@@ -264,7 +266,8 @@ func TestRefreshOfAnArchiveSaysWhatItUnpackedAndWhatChanged(t *testing.T) {
 		t.Errorf("a second refresh said %q, %v", said, err)
 	}
 	stub.body = []byte("not a zip")
-	_, err = coverRun(NewShelf(t.TempDir(), nil), stub, Refreshing, "unpacked/m.tif")
+	unpacking := NewShelf(t.TempDir(), nil)
+	_, err = coverRun(unpacking, stub, Refreshing, "unpacked/m.tif")
 	coverMust(t, "an archive that is not a zip", err, "d: ")
 	archiveDir := t.TempDir()
 	if err := os.Mkdir(filepath.Join(archiveDir, "d.zip"), 0o755); err != nil {

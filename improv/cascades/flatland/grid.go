@@ -9,9 +9,9 @@ import "math"
 // green and blue.
 const Bands = 3
 
-// StepLength is the march step in cells. Picked: half a cell, small enough
+// stepLength is the march step in cells. Picked: half a cell, small enough
 // to read every cell a ray crosses.
-const StepLength = 0.5
+const stepLength = 0.5
 
 // tinyOpacity is the opacity per cell below which a cell counts as empty
 // when dividing emissivity by opacity. Picked: far below anything the scene
@@ -56,8 +56,8 @@ func (grid *Grid) Set(column, row int, opacity, emissivity [Bands]float64) {
 		grid.opacity[slot] = opacity[band]
 		grid.emissivity[slot] = emissivity[band]
 		grid.attenuation[slot], grid.emission[slot] =
-			stepTerms(opacity[band], emissivity[band], StepLength)
-		grid.opticalStep[slot] = opacity[band] * StepLength
+			stepTerms(opacity[band], emissivity[band], stepLength)
+		grid.opticalStep[slot] = opacity[band] * stepLength
 	}
 }
 

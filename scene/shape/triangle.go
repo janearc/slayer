@@ -104,6 +104,7 @@ func ready(r maths.Ray) query {
 // So a ray through an edge or a corner meets exactly one of the faces there,
 // and never slips between them.
 func (q *query) meet(t *tri, near, far float64) (float64, bool, bool) {
+	askedAbout()
 	ax, ay, az := q.shear(&t.p[0])
 	bx, by, bz := q.shear(&t.p[1])
 	cx, cy, cz := q.shear(&t.p[2])

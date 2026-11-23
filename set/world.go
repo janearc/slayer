@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/janearc/slayer/manufacture"
+	"github.com/janearc/slayer/manufacture/cities"
+	"github.com/janearc/slayer/scene/thing"
 	yaml "gopkg.in/yaml.v3"
 )
 
@@ -37,6 +39,39 @@ type Terrain struct {
 	// place and a seed, so they are said apart from the numbers. reflected
 	// is whether the set said the ground's reflectance.
 	placed, detailed, reflected bool
+	// sea is the elevation of still water that fills the low ground, in
+	// metres on the model's own datum, and watered whether the set says
+	// one: nought is the sea.
+	sea     float64
+	watered bool
+	// near is a finer window cut from the same model about a place of its
+	// own inside this one, which the coarser window does not draw where
+	// the near window lies.
+	near *Terrain
+	// cover is the rule that colours the ground by height above the sea
+	// and slope, where the set says one.
+	cover *Cover
+	// made is the ground the set asks made finer than a window's survey
+	// where its camera resolves finer, where it asks any.
+	made *Made
+}
+
+// Near is the finer window the terrain holds inside it, and whether the
+// set says one. It is placed by lat and lon like the terrain it is in,
+// and says its own across, down and step; the model, the smoothing and
+// the sea are the terrain's. A set's places are metres in the terrain's
+// own window, so the near window is a place in it, not another frame.
+func (ground Terrain) Near() (Terrain, bool) {
+	if ground.near == nil {
+		return Terrain{}, false
+	}
+	return *ground.near, true
+}
+
+// Sea is the elevation of the still water the ground is flooded to, in
+// metres on the model's own datum, and whether the set says there is any.
+func (ground Terrain) Sea() (elevation float64, said bool) {
+	return ground.sea, ground.watered
 }
 
 // Relief is the relief the detail asks of the ground made below the map:
@@ -115,6 +150,9 @@ func (ground Terrain) Window() (west, north, across, down, step float64) {
 // high, so many rays along each side of a pixel, and the exposure, what
 // a watt a steradian is in the picture's light.
 //
+// and a filter, where in a pixel its rays start and so how its edges
+// are drawn: the tent unless the film says another.
+//
 // or, in place of the height and the exposure, a rig: a camera with a
 // frame, a lens and a shutter.
 //
@@ -123,6 +161,7 @@ func (ground Terrain) Window() (west, north, across, down, step float64) {
 // it holds, in whites, which lands on white.
 type Film struct {
 	width, height, rays float64
+	filter              string
 	fps                 float64
 	exposure            float64
 	wide                float64
@@ -243,6 +282,26 @@ func (made Film) Size() (width, height, rays int) {
 	return int(made.width), int(made.height), int(made.rays)
 }
 
+// filters is what a film's filter may say, and the filter each word is:
+// the tent two pixels wide, the trapezoid a pixel and a half wide and
+// the box one pixel wide, which a pixel's rays are spread under; and
+// the grid, each ray at the middle of its own square of the pixel.
+var filters = map[string]thing.Filter{
+	"tent":      thing.TentFilter,
+	"trapezoid": thing.TrapezoidFilter,
+	"box":       thing.BoxFilter,
+	"grid":      thing.GridFilter,
+}
+
+// Filter is where in a pixel the film's rays start, and so how its
+// edges are drawn: the tent where the film says none.
+func (made Film) Filter() thing.Filter {
+	if made.filter == "" {
+		return thing.TentFilter
+	}
+	return filters[made.filter]
+}
+
 // Exposure is the film's exposure.
 func (made Film) Exposure() float64 { return made.exposure }
 
@@ -271,11 +330,15 @@ func (made Moon) Disc() bool { return made.disc }
 func (made Moon) Face() string { return made.face }
 
 // A Sun is the sun in the set's sky: how far round from north toward
-// east, and how high above the horizon, in degrees. below the horizon
-// it lights only the air: twilight.
+// east, and how high above the horizon, in degrees. A typed sun below
+// the horizon lights only the air: twilight, on a moon or planet set. A
+// worked sun at or below the horizon is down (see Down).
 type Sun struct {
 	azimuth, altitude float64
 	tint              *[sunChannels]float64
+	// worked is whether the set's place, date and clock time put the sun
+	// where it is, and not the set's azimuth and altitude
+	worked bool
 }
 
 // Where is the sun's azimuth and altitude, in degrees.
@@ -298,6 +361,8 @@ type Thing struct {
 	partSpin             *PartSpin
 	alight               bool
 	space                spaceThing
+	cluster              clusterAsk
+	superblock           superblockAsk
 }
 
 // Name is the thing's name, which cameras use to find it.
@@ -335,6 +400,7 @@ func (made Thing) StandsIn() string { return made.standsIn }
 type Stand struct {
 	name, kind, standsIn string
 	recipe, complexity   string
+	habit                string
 	excluded             string
 	clearance            float64
 	weather              string
@@ -342,7 +408,30 @@ type Stand struct {
 	count, seed          float64
 	alight               float64
 	above, below         float64
+	leastWater           float64
+	steepest             float64
 	within               *wedge
+	area                 *area
+	climb                *cities.Climb
+	frontage             *frontage
+}
+
+// an area is a rectangle of the terrain, in metres east and north of its
+// south west corner, which a grid fills: the west and south edges are in
+// it and the east and north are not.
+type area struct {
+	west, south, east, north float64
+}
+
+// Area is the rectangle of terrain the stand's grid fills, in metres east
+// and north of the terrain's south west corner, and whether the set gives
+// one.
+func (made Stand) Area() (west, south, east, north float64, has bool) {
+	if made.area == nil {
+		return 0, 0, 0, 0, false
+	}
+	at := made.area
+	return at.west, at.south, at.east, at.north, true
 }
 
 // a wedge is the ground a stand grows in, seen from a thing: between two
@@ -359,6 +448,25 @@ type wedge struct {
 func (made Stand) Band() (above, below float64) {
 	return made.above, made.below
 }
+
+// LeastWater is the least depth of water, in metres, over the ground where
+// a stand of a kind that floats may stand. unsaid, it is three metres.
+func (made Stand) LeastWater() float64 {
+	if made.leastWater == noLeastWater {
+		return defaultLeastWater
+	}
+	return made.leastWater
+}
+
+// noLeastWater is what a stand that says no least water holds, and
+// defaultLeastWater what it then means: the deepest draught of the boats
+// is about two metres, and the ground is sampled at its step.
+const noLeastWater, defaultLeastWater = 0, 3.0
+
+// Steepest is the most the ground may rise in a metre of run where the
+// stand grows, along the ground's steepest way. unsaid, it grows on
+// ground of any steepness.
+func (made Stand) Steepest() float64 { return made.steepest }
 
 // Within is the wedge the stand grows in: the thing it is seen from, the
 // bearings it runs between, clockwise from north, its nearest and
@@ -386,6 +494,10 @@ func (made Stand) Count() (count int, seed uint64) {
 
 // Alight is how many of them burn.
 func (made Stand) Alight() int { return int(made.alight) }
+
+// Habit is the name of the habit that lays the stand out, or nothing for a
+// stand laid out evenly over its ground as a stand always was.
+func (made Stand) Habit() string { return made.habit }
 
 // StandsIn is what the stand's kind stands in for, or nothing.
 func (made Stand) StandsIn() string { return made.standsIn }
@@ -422,15 +534,73 @@ func (reading reader) terrain(_, value *yaml.Node) error {
 		"smooth": reading.number(&ground.smooth, 0, 1e4),
 		"reflectance": reading.noted(wrote,
 			reading.three(&ground.reflectance, noLight, allLight)),
+		"sea": reading.noted(wrote, reading.quantity(&ground.sea, "m",
+			-deepestSea, highestSea)),
+		"near":  reading.nearer(ground),
+		"cover": reading.cover(ground),
+		"made":  reading.made(ground),
 	}, nil)
 	reading.set.terrain = ground
 	if err != nil {
 		return err
 	}
+	if ground.cover != nil && wrote["reflectance"] {
+		return reading.refuse(value, "a terrain says its reflectance or "+
+			"its cover, not both: the first surface of a cover is the "+
+			"ground's reflectance")
+	}
 	ground.placed, ground.detailed = wrote["lat"] && wrote["lon"],
 		wrote["detail"]
+	ground.watered = wrote["sea"]
 	ground.reflected = wrote["reflectance"]
-	return reading.terrainPlace(value, wrote)
+	if err := reading.coverLevel(value, ground); err != nil {
+		return err
+	}
+	if err := reading.terrainPlace(value, wrote); err != nil {
+		return err
+	}
+	if err := reading.terrainNear(value, ground); err != nil {
+		return err
+	}
+	return reading.terrainMade(value, ground)
+}
+
+// nearer is a step that reads the finer window a terrain holds: the place
+// of its middle by lat and lon, its size and its step, all of them said.
+func (reading reader) nearer(ground *Terrain) step {
+	return func(_, value *yaml.Node) error {
+		finer := &Terrain{placed: true}
+		err := reading.keys(value, map[string]step{
+			"lat":    reading.number(&finer.lat, southPole, northPole),
+			"lon":    reading.number(&finer.lon, farWest, farEast),
+			"across": reading.number(&finer.across, 1, 1e5),
+			"down":   reading.number(&finer.down, 1, 1e5),
+			"step":   reading.number(&finer.step, 0.01, 1e4),
+		}, nil)
+		if err == nil {
+			err = reading.all(value, "a near window", "lat", "lon",
+				"across", "down", "step")
+		}
+		ground.near = finer
+		return err
+	}
+}
+
+// terrainNear refuses a near window in a terrain that is not placed by lat
+// and lon, or whose step is not finer than the terrain's own.
+func (reading reader) terrainNear(at *yaml.Node, ground *Terrain) error {
+	switch {
+	case ground.near == nil:
+		return nil
+	case !ground.placed:
+		return reading.refuse(at, "a near window is laid about a place "+
+			"by lat and lon in a terrain placed so, which this is not")
+	case ground.near.step >= ground.step:
+		return reading.refuse(at, "a near window is finer than the "+
+			"terrain it is in: its step %g m is not under %g m",
+			ground.near.step, ground.step)
+	}
+	return nil
 }
 
 // relief is a step that reads the relief a detail asks below the map: its
@@ -504,6 +674,8 @@ func (reading reader) film(_, value *yaml.Node) error {
 		"width":    reading.whole(&made.width, 1, 1e5),
 		"height":   reading.whole(&made.height, 1, 1e5),
 		"rays":     reading.whole(&made.rays, 1, 64),
+		"filter": reading.word(&made.filter, "tent", "trapezoid", "box",
+			"grid"),
 		"exposure": reading.number(&made.exposure, 1e-12, 1e12),
 		"wide":     reading.number(&made.wide, 0.01, 179),
 		"frame": reading.block(map[string]step{
@@ -618,6 +790,10 @@ func (reading reader) sun(_, value *yaml.Node) error {
 		"azimuth":  reading.number(&made.azimuth, 0, 360),
 		"altitude": reading.number(&made.altitude, -90, 90),
 	}, nil)
+	if err == nil && says(value, "azimuth") != says(value, "altitude") {
+		err = reading.refuse(value, "a sun says its azimuth and its "+
+			"altitude, both or neither")
+	}
 	reading.set.sun = made
 	return err
 }
@@ -649,7 +825,7 @@ func (reading reader) things(_, value *yaml.Node) error {
 		made := Thing{name: name.Value}
 		steps := reading.with(map[string]step{
 			"recipe":     reading.text(&made.recipe),
-			"complexity": reading.complexity(&made.complexity),
+			"complexity": reading.placedComplexity(&made.complexity),
 			"kind":       reading.kind,
 			"seed": reading.whole(&made.seed,
 				sceneScalarZero, mostSeed),
@@ -662,6 +838,20 @@ func (reading reader) things(_, value *yaml.Node) error {
 			"position":      reading.worldPosition(&made.position),
 			"alight":        reading.yes(&made.alight),
 			"stands_in_for": reading.text(&made.standsIn),
+			"parts":         reading.clusterParts(&made.cluster.parts),
+			"count": reading.whole(&made.cluster.count, 1,
+				mostClusterParts),
+			"band_spacing": reading.quantity(&made.cluster.bandSpacing,
+				"m", leastBandSpacing, maximum),
+			"parcel":  reading.parcel(&made.superblock),
+			"ceiling": reading.whole(&made.superblock.ceiling, 1, mostCeiling),
+			"habit":   reading.only(manufacture.SuperblockHabit),
+			"accretion": reading.accretion(
+				&made.superblock),
+			"occupants": reading.whole(&made.superblock.occupants, 1,
+				mostOccupants),
+			"crowding": reading.number(&made.superblock.crowding,
+				leastCrowding, mostCrowding),
 		}, reading.spaceThing(&made))
 		err := reading.keys(block, steps, nil)
 		if err == nil && made.position != nil {
@@ -674,6 +864,12 @@ func (reading reader) things(_, value *yaml.Node) error {
 			}
 		}
 		made.kind = valueOf(block, "kind")
+		made.superblock.habit = valueOf(block, "habit")
+		made.superblock.drawn = made.superblock.drawn || !says(block,
+			"accretion")
+		if err == nil {
+			err = reading.superblockKeys(block, made)
+		}
 		if err == nil && made.partSpin != nil && !reading.spaceCoordinates {
 			err = reading.refuse(valueNode(block, "part-spin"), "part-spin is supported only with setting: space")
 		}
@@ -692,10 +888,10 @@ func (reading reader) things(_, value *yaml.Node) error {
 func (reading reader) stands(_, value *yaml.Node) error {
 	return reading.each(value, func(name, block *yaml.Node) error {
 		made := Stand{name: name.Value, above: math.Inf(-1),
-			below: math.Inf(1)}
+			below: math.Inf(1), steepest: math.Inf(1)}
 		err := reading.keys(block, map[string]step{
 			"recipe":     reading.text(&made.recipe),
-			"complexity": reading.complexity(&made.complexity),
+			"complexity": reading.placedComplexity(&made.complexity),
 			"exclude": reading.block(map[string]step{
 				"around":    reading.text(&made.excluded),
 				"clearance": reading.quantity(&made.clearance, "m", 0, 1e5)}),
@@ -710,22 +906,69 @@ func (reading reader) stands(_, value *yaml.Node) error {
 			"stands_in_for": reading.text(&made.standsIn),
 			"above":         reading.number(&made.above, -1e4, 1e4),
 			"below":         reading.number(&made.below, -1e4, 1e4),
+			"least-water":   reading.quantity(&made.leastWater, "m", 0.01, 1e4),
+			"steepest":      reading.number(&made.steepest, flattest, steepest),
 			"within":        reading.wedge(&made.within),
+			"area":          reading.rectangle(&made.area),
+			"habit":         reading.only(cities.HabitNames()...),
+			"climb":         reading.climb(&made.climb),
+			"frontage":      reading.frontage(&made.frontage),
 		}, nil)
 		made.kind = valueOf(block, "kind")
-		switch {
-		case err != nil:
-		case made.alight > made.count:
-			err = reading.refuse(block, "stand %s has %v alight of %v",
-				made.name, made.alight, made.count)
-		case made.above >= made.below:
-			err = reading.refuse(block, "stand %s grows above %v and "+
-				"below %v, which is nowhere", made.name, made.above,
-				made.below)
+		made.habit = valueOf(block, "habit")
+		if err == nil {
+			err = reading.standFits(block, made)
+		}
+		if err == nil {
+			err = reading.standSlope(block, made)
 		}
 		reading.set.stands = append(reading.set.stands, made)
 		return err
 	})
+}
+
+// standFits refuses a stand whose parts cannot stand together: a habit with
+// no ground to lay over, a climb or a frontage on a habit that takes none,
+// more alight than it has, or heights that leave no ground.
+func (reading reader) standFits(block *yaml.Node, made Stand) error {
+	contoured := made.habit == cities.HabitContour
+	fronted := made.habit == cities.HabitFrontage
+	switch {
+	case fronted != (made.frontage != nil) ||
+		fronted && (made.within != nil || made.area != nil):
+		return reading.refuse(block, "stand %s: the habit frontage takes a "+
+			"frontage along a channel and no within region or area, and a "+
+			"frontage is for no other habit", made.name)
+	case made.habit != "" && !fronted && made.within == nil &&
+		made.area == nil:
+		return reading.refuse(block, "stand %s has the habit %s, which "+
+			"lays out sites over a within region or an area, and says "+
+			"neither", made.name, made.habit)
+	case contoured != (made.climb != nil) ||
+		contoured && made.within == nil:
+		return reading.refuse(block, "stand %s: the habit contour takes "+
+			"a climb and a within region, and a climb is for no other "+
+			"habit", made.name)
+	case made.alight > made.count:
+		return reading.refuse(block, "stand %s has %v alight of %v",
+			made.name, made.alight, made.count)
+	case made.above >= made.below:
+		return reading.refuse(block, "stand %s grows above %v and "+
+			"below %v, which is nowhere", made.name, made.above,
+			made.below)
+	}
+	return nil
+}
+
+// standSlope refuses a steepest on a stand laid by a habit: a habit lays
+// its sites by its own rule and reads no slope, so the key would be lost.
+func (reading reader) standSlope(block *yaml.Node, made Stand) error {
+	if made.habit != "" && !math.IsInf(made.steepest, 1) {
+		return reading.refuse(block, "stand %s has the habit %s and says "+
+			"steepest; only a stand scattered over terrain reads the "+
+			"ground's slope", made.name, made.habit)
+	}
+	return nil
 }
 
 // wedge reads the ground a stand grows in, every part said: the thing
@@ -752,6 +995,35 @@ func (reading reader) wedge(into **wedge) step {
 		case !(got.far > got.near):
 			return reading.refuse(value, "within reaches from %v to %v m, "+
 				"which is nowhere", got.near, got.far)
+		}
+		*into = &got
+		return nil
+	}
+}
+
+// rectangle reads the area a stand's grid fills, every edge said, the east
+// beyond the west and the north beyond the south.
+func (reading reader) rectangle(into **area) step {
+	return func(_, value *yaml.Node) error {
+		got := area{west: math.NaN(), south: math.NaN(), east: math.NaN(),
+			north: math.NaN()}
+		err := reading.keys(value, map[string]step{
+			"west":  reading.number(&got.west, -1e7, 1e7),
+			"south": reading.number(&got.south, -1e7, 1e7),
+			"east":  reading.number(&got.east, -1e7, 1e7),
+			"north": reading.number(&got.north, -1e7, 1e7),
+		}, nil)
+		switch {
+		case err != nil:
+			return err
+		case math.IsNaN(got.west) || math.IsNaN(got.south) ||
+			math.IsNaN(got.east) || math.IsNaN(got.north):
+			return reading.refuse(value, "area says west, south, east and "+
+				"north")
+		case !(got.east > got.west) || !(got.north > got.south):
+			return reading.refuse(value, "area has its east beyond its west "+
+				"and its north beyond its south, not %v to %v and %v to %v",
+				got.west, got.east, got.south, got.north)
 		}
 		*into = &got
 		return nil

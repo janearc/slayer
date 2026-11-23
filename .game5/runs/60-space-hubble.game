@@ -1,1 +1,1 @@
-space-hubble . :: ./bin/hillside -set doc/space-hubble.yaml -sky black -out out/space-hubble.png
+space-hubble . :: ./bin/slayer draw sets/hubble-specimen.yaml --out out/space-hubble.png

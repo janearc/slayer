@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/gpu"
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/gpudevelop"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/render/frame"
+	"github.com/janearc/slayer/session"
 )
 
 // SceneTiming records host wall time and GPU trace time separately. Plate
@@ -39,7 +39,7 @@ type SceneResult struct {
 // draws every full frame; a composite draws a sharp plate and primary volume
 // transport separately. Both use the same Metal developer and scene clock.
 // Reuse and reduced-resolution transport are explicit visual approximations.
-func RenderScene(ctx context.Context, plan ScenePlan, wanted job.Job, stamp hillside.Stamp, reference bool, consume func(SceneResult) error) error {
+func RenderScene(ctx context.Context, plan ScenePlan, wanted job.Job, stamp session.Stamp, reference bool, consume func(SceneResult) error) error {
 	if ctx == nil || consume == nil {
 		return fmt.Errorf("composite scene: context and consumer are required")
 	}
@@ -49,16 +49,16 @@ func RenderScene(ctx context.Context, plan ScenePlan, wanted job.Job, stamp hill
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	session, err := hillside.OpenComposite(ctx, wanted, stamp)
+	composite, err := session.OpenComposite(ctx, wanted, stamp)
 	if err != nil {
 		return err
 	}
-	defer session.Close()
-	w, h := session.Size()
+	defer composite.Close()
+	w, h := composite.Size()
 	if w%plan.Scale != 0 || h%plan.Scale != 0 {
 		return fmt.Errorf("composite scene: staged size does not divide by transport scale")
 	}
-	tone := session.Tone()
+	tone := composite.Tone()
 	if curve, yes := wanted.Print(); yes {
 		tone.Knee, tone.Top = curve.Knee(), curve.Top()
 		if bloom, said := curve.Bloom(); said {
@@ -76,17 +76,17 @@ func RenderScene(ctx context.Context, plan ScenePlan, wanted job.Job, stamp hill
 		return err
 	}
 	defer developer.Close()
-	ask, err := hillside.NewAsk(w/plan.Scale, h/plan.Scale, plan.Rays, nil)
+	ask, err := session.NewAsk(w/plan.Scale, h/plan.Scale, plan.Rays, nil)
 	if err != nil {
 		return err
 	}
 	side, _ := wanted.Film().Rays()
-	plateAsk, err := hillside.NewAsk(w*side, h*side, 1, nil)
+	plateAsk, err := session.NewAsk(w*side, h*side, 1, nil)
 	if err != nil {
 		return err
 	}
 	var plate *frame.Frame
-	var view hillside.Drawn
+	var view session.Drawn
 	plateIndex := -1
 	for index := plan.From; index < plan.To; index++ {
 		if err := ctx.Err(); err != nil {
@@ -96,7 +96,7 @@ func RenderScene(ctx context.Context, plan ScenePlan, wanted job.Job, stamp hill
 		var linear *frame.Frame
 		if reference {
 			start := time.Now()
-			view, _, err = session.Pass(ctx, index, hillside.Ask{}, gpu.CompletePicture)
+			view, _, err = composite.Pass(ctx, index, session.Ask{}, gpu.CompletePicture)
 			if err != nil {
 				return err
 			}
@@ -107,7 +107,7 @@ func RenderScene(ctx context.Context, plan ScenePlan, wanted job.Job, stamp hill
 		} else {
 			if plate == nil || (index-plan.From)%plan.PlateEvery == 0 {
 				start := time.Now()
-				view, _, err = session.Pass(ctx, index, plateAsk, gpu.SurfacePlate)
+				view, _, err = composite.Pass(ctx, index, plateAsk, gpu.SurfacePlate)
 				if err != nil {
 					return err
 				}
@@ -116,7 +116,7 @@ func RenderScene(ctx context.Context, plan ScenePlan, wanted job.Job, stamp hill
 				timing.TraceGPUSeconds = view.Profile().TraceGPU.Seconds()
 			}
 			start := time.Now()
-			volume, transmission, err := session.Pass(ctx, index, ask, gpu.VolumeTransport)
+			volume, transmission, err := composite.Pass(ctx, index, ask, gpu.VolumeTransport)
 			if err != nil {
 				return err
 			}

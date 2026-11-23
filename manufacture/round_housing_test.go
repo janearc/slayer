@@ -187,7 +187,8 @@ func housingWall(test *testing.T, housing *mesh.Mesh, from maths.Vec,
 
 // between is the angle between two ways one long, in degrees.
 func between(ways [2]maths.Vec) float64 {
+	alignment := ways[housingNear].Dot(ways[housingFar])
 	cosine := math.Max(-housingFar, math.Min(housingFar,
-		ways[housingNear].Dot(ways[housingFar])))
+		alignment))
 	return math.Acos(cosine) / maths.Degree
 }

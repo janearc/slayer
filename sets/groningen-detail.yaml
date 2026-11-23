@@ -1,0 +1,68 @@
+# groningen, up close, at the demo detail level: the row of brick and
+# stucco houses seen from the street with a narrow lens, drawn part by
+# part as the portofino detail is, from the same decomposition. made by
+# the cities package, through the manufactory's kind terrace-groningen.
+#
+# places are metres, as a map's run: x east, y north, z up. the row runs
+# east from the origin with its front to the south. the sun, the colours
+# and the cameras are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: groningen detail
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    close:
+      title: "windows up close"
+      location:
+        at: [30, -18, 4]
+      orientation:
+        look_at: [30, 0, 4]
+    street:
+      title: "along the street, at eye height"
+      location:
+        at: [-6, -20, 2]
+      orientation:
+        look_at: [30, 0, 5]
+  set:
+    things:
+      row:
+        kind: terrace-groningen
+        seed: 1
+        complexity: demo
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      street:
+        colour: {srgb_linear: [0.1, 0.095, 0.09]}
+        source: eye
+    boxes:
+      ground:
+        material: street
+        middle: [0, 0, -1]
+        size: [3000, 3000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.7, -0.6, 0.3]
+        colour: {srgb_linear: [2.2, 1.6, 1.0]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.25, 0.2, 0.17]}
+      zenith: {srgb_linear: [0.03, 0.05, 0.1]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye

@@ -1,0 +1,4 @@
+# the front door, by name. game build makes every cmd/* into bin/ too;
+# this is so that `game build slayer` makes the one binary a reader
+# needs first, whatever else in cmd/ does or does not build that day.
+slayer . :: go build -o bin/slayer ./cmd/slayer

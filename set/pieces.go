@@ -1,19 +1,22 @@
 package set
 
 import (
+	"fmt"
 	"math"
 	"slices"
 	"strings"
 
+	"github.com/janearc/slayer/materials"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 	"github.com/janearc/slayer/scene/bodies/template"
 	"github.com/janearc/slayer/scene/swatches"
 	yaml "gopkg.in/yaml.v3"
 )
 
 // World is the set's world said piece by piece, as the tracer holds it:
-// what things are made of, the boxes and spheres made of them, the
-// lamps, spots, floods and suns that light them, the sky, the bodies,
+// what things are made of, the boxes, channels and spheres made of them,
+// the lamps, spots, floods and suns that light them, the sky, the bodies,
 // the wisps of gas, the fizzes, and the motions that carry things.
 //
 // its places are in the world's unit, a metre unless it says, as a
@@ -28,8 +31,10 @@ type World struct {
 	materials     []Material
 	ocean         *WaveSurface
 	boxes         []Box
+	channels      []Channel
 	spheres       []Sphere
 	lamps         []Lamp
+	crowds        []Lamp
 	beams         []Beam
 	spots         []Spotlight
 	floods        []Flood
@@ -42,6 +47,7 @@ type World struct {
 	motions       []Motion
 	imports       []Import
 	griffith      *GriffithBasin
+	weathering    *Weathering
 }
 
 // GriffithBasin is the authored Los Angeles approximation from the Heard
@@ -187,6 +193,10 @@ func (made World) Boxes() []Box { return slices.Clone(made.boxes) }
 // Lamps is every lamp, in the order written.
 func (made World) Lamps() []Lamp { return slices.Clone(made.lamps) }
 
+// LampFields is every lamp the set's lamp-fields scatter, field by
+// field in the order written, each named for its field and its number.
+func (made World) LampFields() []Lamp { return slices.Clone(made.crowds) }
+
 // Floods is every flood, in the order written.
 func (made World) Floods() []Flood { return slices.Clone(made.floods) }
 
@@ -253,7 +263,17 @@ type Clear struct {
 	// historical clear-interface-only behavior.
 	extinction    *[3]float64
 	participating *clearScattering
+	water         *materials.WaterComposition
+	waterSource   string
 }
+
+// WaterComposition returns the independent water observations, when present.
+func (made Clear) WaterComposition() (*materials.WaterComposition, bool) {
+	return made.water, made.water != nil
+}
+
+// WaterOpticalSource is the separately supplied optical-coefficient source.
+func (made Clear) WaterOpticalSource() string { return made.waterSource }
 
 type clearScattering struct {
 	coefficient [3]float64
@@ -326,10 +346,12 @@ func (made Material) Glow() (temperature, luminance float64, has bool) {
 }
 
 // A Box is a box of a material, its middle at a place, so wide, deep and
-// tall, in metres.
+// tall, in metres. It may be turned about its middle, by a heading in
+// degrees clockwise seen from above; with none its width runs east and west.
 type Box struct {
 	name, material string
 	middle, size   [3]float64
+	heading        *float64
 }
 
 // Name is the box's name.
@@ -509,8 +531,10 @@ func (reading reader) world(_, value *yaml.Node) error {
 		"ocean":          reading.waveSurface,
 		"materials":      reading.materials,
 		"boxes":          reading.boxes,
+		"channels":       reading.channels,
 		"spheres":        reading.spheres,
 		"lamps":          reading.lamps,
+		"lamp-fields":    reading.lampFields,
 		"beams":          reading.beams,
 		"spots":          reading.spotlights,
 		"floods":         reading.floods,
@@ -522,6 +546,7 @@ func (reading reader) world(_, value *yaml.Node) error {
 		"vapor-cavities": reading.vaporCavities,
 		"motions":        reading.motions,
 		"imports":        reading.imports,
+		"weathering":     reading.weathering,
 		"griffith-basin": reading.griffithBasin(&made.griffith),
 	}
 	for key, read := range steps {
@@ -601,9 +626,12 @@ func (reading reader) materials(_, value *yaml.Node) error {
 			if clear.extinction != nil {
 				clear.mediumName = name.Value
 			}
+			if clear.water != nil {
+				clear.waterSource = source
+			}
 			made.clear = &clear
 		}
-		if reading.importProvenance {
+		if reading.importProvenance || clear.water != nil {
 			made.source = source
 		}
 		reading.set.world.materials = append(reading.set.world.materials,
@@ -639,7 +667,8 @@ func (reading reader) clear(target *Clear) step {
 			"rank":  reading.integer(&target.Rank, -2147483648, 2147483647),
 			"extinction-per-metre": reading.optionalTriple(
 				&target.extinction, 0, brightest),
-			"scatter": reading.clearScatter(&target.participating),
+			"scatter":           reading.clearScatter(&target.participating),
+			"water-composition": reading.waterComposition(&target.water),
 		}, nil)
 		if err == nil {
 			err = reading.all(value, "a clear interface", "through",
@@ -666,6 +695,44 @@ func (reading reader) clear(target *Clear) step {
 			}
 		}
 		return err
+	}
+}
+
+// waterComposition reads observations separately from optical coefficients.
+func (reading reader) waterComposition(target **materials.WaterComposition) step {
+	return func(_, value *yaml.Node) error {
+		var salinity, sediment, turbidity *materials.WaterObservation
+		observation := func(target **materials.WaterObservation) step {
+			return func(_ *yaml.Node, block *yaml.Node) error {
+				var made materials.WaterObservation
+				err := reading.keys(block, map[string]step{
+					"value":     reading.number(&made.Value, 0, brightest),
+					"source":    reading.provenance(&made.Source),
+					"at":        reading.provenance(&made.At),
+					"qualifier": reading.provenance(&made.Qualifier),
+				}, nil)
+				if err == nil {
+					err = reading.all(block, "a water observation", "value", "source")
+				}
+				if err == nil {
+					*target = &made
+				}
+				return err
+			}
+		}
+		if err := reading.keys(value, map[string]step{
+			"salinity":                        observation(&salinity),
+			"suspended-sediment-mg-per-litre": observation(&sediment),
+			"turbidity-fnu":                   observation(&turbidity),
+		}, nil); err != nil {
+			return err
+		}
+		composition, err := materials.NewWaterComposition(salinity, sediment, turbidity)
+		if err != nil {
+			return reading.refuse(value, "%s", err)
+		}
+		*target = composition
+		return nil
 	}
 }
 
@@ -735,7 +802,8 @@ func (reading reader) boxes(_, value *yaml.Node) error {
 			"middle":   reading.three(&made.middle, -farthest, farthest),
 			"size": reading.three(&made.size,
 				math.SmallestNonzeroFloat64, farthest),
-			"source": reading.source(&source),
+			"heading": reading.heading(&made.heading),
+			"source":  reading.source(&source),
 		}, nil)
 		if err == nil {
 			err = reading.all(block, "a box", "material", "middle", "size",
@@ -965,3 +1033,63 @@ func valueNode(block *yaml.Node, key string) *yaml.Node {
 	}
 	return nil
 }
+
+// lampFields reads each crowd of lamps, by its name: count lamps scattered
+// by a seed evenly through the box from low to high, all of one
+// temperature, strength and radius. The same words make the same lamps,
+// each named for the field and its number. A scene with a hundred
+// thousand lamps says it in one block and not in a hundred thousand.
+func (reading reader) lampFields(_, value *yaml.Node) error {
+	return reading.each(value, func(name, block *yaml.Node) error {
+		var count, seed float64
+		var low, high [3]float64
+		var temperature, strength, radius float64
+		var source string
+		err := reading.keys(block, map[string]step{
+			"count":       reading.number(&count, 1, mostCrowd),
+			"seed":        reading.number(&seed, 0, 1<<53),
+			"low":         reading.three(&low, -farthest, farthest),
+			"high":        reading.three(&high, -farthest, farthest),
+			"temperature": reading.number(&temperature, 1, hottest),
+			"strength":    reading.number(&strength, 0, brightest),
+			"radius":      reading.number(&radius, 0, farthest),
+			"source":      reading.source(&source),
+		}, nil)
+		if err == nil {
+			err = reading.all(block, "a lamp field", "count", "seed", "low",
+				"high", "temperature", "strength", "radius", "source")
+		}
+		if err != nil {
+			return err
+		}
+		if count != math.Trunc(count) || seed != math.Trunc(seed) {
+			return reading.refuse(block, "count and seed are whole numbers")
+		}
+		for axis := range 3 {
+			if high[axis] < low[axis] {
+				return reading.refuse(block, "a lamp field's high is below "+
+					"its low")
+			}
+		}
+		// splitmix64; the seed is stirred once first, so that two seeds are
+		// not one stream a step apart
+		state := noise.Mix(uint64(seed) + 0x632be59bd9b4e019)
+		unit := func() float64 {
+			state += noise.Golden
+			return noise.Stirred(state)
+		}
+		for index := range int(count) {
+			var at [3]float64
+			for axis := range 3 {
+				at[axis] = low[axis] + unit()*(high[axis]-low[axis])
+			}
+			reading.set.world.crowds = append(reading.set.world.crowds, Lamp{
+				name: fmt.Sprintf("%s-%d", name.Value, index), at: at,
+				temperature: temperature, strength: strength, radius: radius})
+		}
+		return nil
+	})
+}
+
+// mostCrowd is the most lamps one field may scatter.
+const mostCrowd = 1e6

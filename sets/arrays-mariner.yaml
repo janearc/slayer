@@ -1,0 +1,34 @@
+# Mariner 10's two solar wings, seen from above and to one side. The
+# set's axes are east x, north y, up z. One camera, so a picture before a
+# change and a picture after it can be set side by side.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Mariner 10's solar wings
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 40}
+  set:
+    things:
+      mariner:
+        kind: mariner-10
+        seed: 5
+        complexity: quick
+        east: 0
+        north: 0
+  film:
+    width: 1600
+    height: 900
+    rays: 2
+    exposure: 0.003
+    wide: 45
+  cameras:
+    wings:
+      title: both wings from above
+      location: {at: [4, -7, 5]}
+      orientation: {look_at: [0, 0, 0.4]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

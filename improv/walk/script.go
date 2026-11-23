@@ -114,11 +114,6 @@ type Script struct {
 	shorts []Short
 }
 
-// Shorts is the script's shorts, in the order it gives them.
-func (script Script) Shorts() []Short {
-	return append([]Short(nil), script.shorts...)
-}
-
 // Short is the short of a name, and whether the script has one.
 func (script Script) Short(name string) (Short, bool) {
 	for _, each := range script.shorts {
@@ -153,11 +148,11 @@ type stage struct {
 func ReadScript(path, pictures string) (Script, error) {
 	source, err := os.ReadFile(path)
 	if err != nil {
-		return Script{}, fmt.Errorf("%w: %w", ErrWalk, err)
+		return Script{}, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	var said written
 	if err := yaml.Unmarshal(source, &said); err != nil {
-		return Script{}, fmt.Errorf("%w: %s: %w", ErrWalk, path, err)
+		return Script{}, fmt.Errorf("%w: %s: %w", errWalk, path, err)
 	}
 	where, err := stageOf(said, filepath.Dir(path))
 	if err != nil {
@@ -175,7 +170,7 @@ func ReadScript(path, pictures string) (Script, error) {
 	}
 	if len(said.Shorts) == 0 {
 		return Script{}, fmt.Errorf("%w: %s has no shorts; give it one",
-			ErrWalk, path)
+			errWalk, path)
 	}
 	var script Script
 	for _, each := range said.Shorts {
@@ -185,7 +180,7 @@ func ReadScript(path, pictures string) (Script, error) {
 		}
 		if _, twice := script.Short(short.name); twice {
 			return Script{}, fmt.Errorf("%w: %s: the short %q is given "+
-				"twice", ErrWalk, path, short.name)
+				"twice", errWalk, path, short.name)
 		}
 		script.shorts = append(script.shorts, short)
 	}
@@ -201,7 +196,7 @@ func stageOf(said written, dir string) (stage, error) {
 	if said.Places.Kind != yaml.ScalarNode ||
 		said.Places.Decode(&tablePath) != nil || tablePath == "" {
 		return stage{}, fmt.Errorf("%w: a script with a set names its "+
-			"places table, relative to it", ErrWalk)
+			"places table, relative to it", errWalk)
 	}
 	read, err := readSet(filepath.Join(dir, said.Set))
 	if err != nil {
@@ -209,7 +204,7 @@ func stageOf(said written, dir string) (stage, error) {
 	}
 	table, err := os.ReadFile(filepath.Join(dir, tablePath))
 	if err != nil {
-		return stage{}, fmt.Errorf("%w: %w", ErrWalk, err)
+		return stage{}, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	places, err := ReadPlaces(table)
 	if err != nil {
@@ -231,13 +226,13 @@ func sceneOf(given yaml.Node, dir string) (stage, error) {
 	if given.Kind != yaml.MappingNode || given.Decode(&said) != nil ||
 		said.Unit == "" {
 		return stage{}, fmt.Errorf("%w: a script with no set gives its "+
-			"places as {unit, at: {name: [x, y, z]}}", ErrWalk)
+			"places as {unit, at: {name: [x, y, z]}}", errWalk)
 	}
 	made.unit = said.Unit
 	for name, numbers := range said.At {
 		if len(numbers) != placeShares {
 			return stage{}, fmt.Errorf("%w: the place %q is %v; give x, y "+
-				"and z", ErrWalk, name, numbers)
+				"and z", errWalk, name, numbers)
 		}
 		at, err := made.placeOf(numbers)
 		if err != nil {
@@ -252,11 +247,11 @@ func sceneOf(given yaml.Node, dir string) (stage, error) {
 func readSet(path string) (set.Set, error) {
 	source, err := os.ReadFile(path)
 	if err != nil {
-		return set.Set{}, fmt.Errorf("%w: %w", ErrWalk, err)
+		return set.Set{}, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	read, err := set.Read(path, source)
 	if err != nil {
-		return set.Set{}, fmt.Errorf("%w: %w", ErrWalk, err)
+		return set.Set{}, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	return read, nil
 }
@@ -281,13 +276,13 @@ func (where stage) setFor(path string) (set.Set, error) {
 func (where stage) short(said writtenShort) (Short, error) {
 	if said.Name == "" || said.Title == "" || len(said.Shots) == 0 {
 		return Short{}, fmt.Errorf("%w: a short needs a name, a title and "+
-			"a shot; %q has not", ErrWalk, said.Name)
+			"a shot; %q has not", errWalk, said.Name)
 	}
 	made := Short{name: said.Name, title: said.Title, host: where.host}
 	if said.Sound != nil {
 		if said.Sound.Bar == nil {
 			return Short{}, fmt.Errorf("%w: short %s: the sound names no "+
-				"bar; give the bar it starts at", ErrWalk, said.Name)
+				"bar; give the bar it starts at", errWalk, said.Name)
 		}
 		made.bar, made.sounded = *said.Sound.Bar, true
 	}
@@ -321,7 +316,7 @@ func tagOf(lit, own string) (string, error) {
 	if own != "" {
 		if lit != "" || utf8.RuneCountInString(own) > tagMost {
 			return "", fmt.Errorf("%w: the tag %q beside lit %q; give "+
-				"one of the two, a tag of at most %d characters", ErrWalk,
+				"one of the two, a tag of at most %d characters", errWalk,
 				own, lit, tagMost)
 		}
 		return own, nil
@@ -329,7 +324,7 @@ func tagOf(lit, own string) (string, error) {
 	tag, known := lighting[lit]
 	if !known {
 		return "", fmt.Errorf("%w: lit %q; say show, plate, inspection "+
-			"or drawing, or give a tag in your own words", ErrWalk, lit)
+			"or drawing, or give a tag in your own words", errWalk, lit)
 	}
 	return tag, nil
 }
@@ -385,7 +380,7 @@ func (where stage) pictured(said writtenShot) (still, *Camera, error) {
 	if !where.scene {
 		if said.Eye != nil {
 			return still{}, nil, fmt.Errorf("%w: a shot of a set with an "+
-				"eye; name one of the set's cameras", ErrWalk)
+				"eye; name one of the set's cameras", errWalk)
 		}
 		read, err := where.setFor(said.Set)
 		if err != nil {
@@ -397,7 +392,7 @@ func (where stage) pictured(said writtenShot) (still, *Camera, error) {
 	if said.Camera != "" || said.Set != "" {
 		return still{}, nil, fmt.Errorf("%w: the shot names camera %q and "+
 			"set %q, and the script names no set; give the shot an eye, "+
-			"or the script a set and places", ErrWalk, said.Camera,
+			"or the script a set and places", errWalk, said.Camera,
 			said.Set)
 	}
 	picture, err := where.stillOf(said.Picture)
@@ -414,7 +409,7 @@ func (where stage) eyed(said writtenEye, size image.Point) (Camera, error) {
 	for i, numbers := range [][]float64{said.From, said.LookAt, said.Up} {
 		if len(numbers) != placeShares {
 			return Camera{}, fmt.Errorf("%w: an eye's from, look-at and up "+
-				"are each x, y and z; one is %v", ErrWalk, numbers)
+				"are each x, y and z; one is %v", errWalk, numbers)
 		}
 		points[i] = maths.V(numbers[0], numbers[1], numbers[2])
 	}
@@ -425,7 +420,7 @@ func (where stage) eyed(said writtenEye, size image.Point) (Camera, error) {
 	if where.unit == "" {
 		return Camera{}, fmt.Errorf("%w: a shot with an eye in a script "+
 			"whose places say no unit; give the script places with a "+
-			"unit", ErrWalk)
+			"unit", errWalk)
 	}
 	return PinholeCamera(eye, said.Wide, size, where.unit)
 }
@@ -435,13 +430,13 @@ func (where stage) eyed(said writtenEye, size image.Point) (Camera, error) {
 func sentenceFits(sentence string, seconds float64) error {
 	if !(seconds > 0) {
 		return fmt.Errorf("%w: a shot of %v seconds; give it time",
-			ErrWalk, seconds)
+			errWalk, seconds)
 	}
 	needs := float64(utf8.RuneCountInString(sentence)) / readingRate
 	if needs > seconds {
 		return fmt.Errorf("%w: %q takes %.1f s to read at %g characters "+
 			"a second, and the shot is %g s; shorten it or lengthen the "+
-			"shot", ErrWalk, sentence, needs, readingRate, seconds)
+			"shot", errWalk, sentence, needs, readingRate, seconds)
 	}
 	return nil
 }
@@ -451,19 +446,19 @@ const mostFigures = 3
 
 // figuresOf checks a shot's figures: each has a value, a unit or words,
 // and where it comes from.
-func figuresOf(said []writtenFigure) ([]Figure, error) {
+func figuresOf(said []writtenFigure) ([]figure, error) {
 	if len(said) > mostFigures {
 		return nil, fmt.Errorf("%w: %d figures; the panel has room for %d",
-			ErrWalk, len(said), mostFigures)
+			errWalk, len(said), mostFigures)
 	}
-	var made []Figure
+	var made []figure
 	for _, each := range said {
 		if each.Value == "" || each.From == "" {
 			return nil, fmt.Errorf("%w: the figure %q %s says no value or "+
-				"no from; every number says where it comes from", ErrWalk,
+				"no from; every number says where it comes from", errWalk,
 				each.Value, each.Unit)
 		}
-		made = append(made, Figure{value: each.Value, unit: each.Unit,
+		made = append(made, figure{value: each.Value, unit: each.Unit,
 			says: each.Says, from: each.From})
 	}
 	return made, nil
@@ -478,7 +473,7 @@ func panelFits(sentence string, figures []writtenFigure, hosted bool) error {
 	}
 	if len(rows) > sentenceRows {
 		return fmt.Errorf("%w: %q takes %d rows; the panel has room for "+
-			"%d: shorten it", ErrWalk, sentence, len(rows), sentenceRows)
+			"%d: shorten it", errWalk, sentence, len(rows), sentenceRows)
 	}
 	column := (frameSize.X - 2*margin) / max(len(figures), 1)
 	for _, each := range figures {
@@ -497,7 +492,7 @@ func panelFits(sentence string, figures []writtenFigure, hosted bool) error {
 		if max(number+unitGap+unit, says) > column-unitGap {
 			return fmt.Errorf("%w: the figure %q %s, %q, is wider than "+
 				"its column of %d pixels; shorten it or give fewer",
-				ErrWalk, each.Value, each.Unit, each.Says, column)
+				errWalk, each.Value, each.Unit, each.Says, column)
 		}
 	}
 	return nil
@@ -518,7 +513,7 @@ func hostFrames(dir string) ([]string, error) {
 	frames, err := filepath.Glob(filepath.Join(dir, "*.png"))
 	if err != nil || len(frames) == 0 {
 		return nil, fmt.Errorf("%w: the host %s has no png frames; give a "+
-			"folder of its clip's frames", ErrWalk, dir)
+			"folder of its clip's frames", errWalk, dir)
 	}
 	return frames, nil
 }

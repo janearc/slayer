@@ -146,7 +146,7 @@ func gridSpec() *tiffSpec {
 // no-data cell.
 func TestReadGridSamplesTheContainingCells(t *testing.T) {
 	raster := openSpec(t, gridSpec())
-	request := GridRequest{West: 102.5, North: 49.5, Step: 1, Across: 4, Down: 3}
+	request := gridRequest{West: 102.5, North: 49.5, Step: 1, Across: 4, Down: 3}
 	grid, err := raster.ReadGrid(request, 1<<20)
 	if err != nil {
 		t.Fatal(err)
@@ -180,27 +180,27 @@ func TestReadGridSamplesTheContainingCells(t *testing.T) {
 // TestReadGridRefusesBadRequests checks each refusal of a grid request.
 func TestReadGridRefusesBadRequests(t *testing.T) {
 	raster := openSpec(t, gridSpec())
-	good := GridRequest{West: 100.5, North: 49.5, Step: 1, Across: 2, Down: 2}
-	with := func(edit func(*GridRequest)) GridRequest {
+	good := gridRequest{West: 100.5, North: 49.5, Step: 1, Across: 2, Down: 2}
+	with := func(edit func(*gridRequest)) gridRequest {
 		request := good
 		edit(&request)
 		return request
 	}
 	cases := []struct {
 		name    string
-		request GridRequest
+		request gridRequest
 		limit   int64
 		want    string
 	}{
-		{"no columns", with(func(r *GridRequest) { r.Across = 0 }), 1 << 20, "invalid source grid layout"},
-		{"no rows", with(func(r *GridRequest) { r.Down = 0 }), 1 << 20, "invalid source grid layout"},
-		{"NaN west", with(func(r *GridRequest) { r.West = math.NaN() }), 1 << 20, "invalid source grid layout"},
-		{"infinite north", with(func(r *GridRequest) { r.North = math.Inf(-1) }), 1 << 20, "invalid source grid layout"},
-		{"zero step", with(func(r *GridRequest) { r.Step = 0 }), 1 << 20, "invalid source grid layout"},
-		{"negative step", with(func(r *GridRequest) { r.Step = -1 }), 1 << 20, "invalid source grid layout"},
+		{"no columns", with(func(r *gridRequest) { r.Across = 0 }), 1 << 20, "invalid source grid layout"},
+		{"no rows", with(func(r *gridRequest) { r.Down = 0 }), 1 << 20, "invalid source grid layout"},
+		{"NaN west", with(func(r *gridRequest) { r.West = math.NaN() }), 1 << 20, "invalid source grid layout"},
+		{"infinite north", with(func(r *gridRequest) { r.North = math.Inf(-1) }), 1 << 20, "invalid source grid layout"},
+		{"zero step", with(func(r *gridRequest) { r.Step = 0 }), 1 << 20, "invalid source grid layout"},
+		{"negative step", with(func(r *gridRequest) { r.Step = -1 }), 1 << 20, "invalid source grid layout"},
 		{"negative limit", good, -1, "invalid source grid byte budget"},
 		{"one byte short", good, 4*9 - 1, "payload budget"},
-		{"coordinates overflow", with(func(r *GridRequest) { r.West, r.Step, r.Across = 1.7e308, 1.7e308, 3 }), 1 << 20, "coordinates overflow"},
+		{"coordinates overflow", with(func(r *gridRequest) { r.West, r.Step, r.Across = 1.7e308, 1.7e308, 3 }), 1 << 20, "coordinates overflow"},
 	}
 	for _, each := range cases {
 		if _, err := raster.ReadGrid(each.request, each.limit); err == nil || !strings.Contains(err.Error(), each.want) {
@@ -234,7 +234,7 @@ func TestReadGridReportsAnUnreadableTile(t *testing.T) {
 	if err := os.Truncate(path, 8); err != nil {
 		t.Fatal(err)
 	}
-	request := GridRequest{West: 100.5, North: 49.5, Step: 1, Across: 2, Down: 2}
+	request := gridRequest{West: 100.5, North: 49.5, Step: 1, Across: 2, Down: 2}
 	if _, err := raster.ReadGrid(request, 1<<20); err == nil {
 		t.Error("a grid was read from a cut file")
 	}
@@ -253,13 +253,13 @@ func TestWindowRefusesBadRequestsAndClosedSources(t *testing.T) {
 		"one row":    func() error { _, err := raster.Window(100, 50, 2, 1, 1); return err },
 		"zero step":  func() error { _, err := raster.Window(100, 50, 2, 2, 0); return err },
 		"NaN step":   func() error { _, err := raster.Window(100, 50, 2, 2, math.NaN()); return err },
-		"budget":     func() error { _, err := raster.WindowWithBudget(100, 50, 2, 2, 1, 31); return err },
+		"budget":     func() error { _, err := raster.windowWithBudget(100, 50, 2, 2, 1, 31); return err },
 	} {
 		if err := call(); err == nil {
 			t.Errorf("%s: no refusal", name)
 		}
 	}
-	window, err := raster.WindowWithBudget(100.5, 49.5, 3, 2, 1, 6*8)
+	window, err := raster.windowWithBudget(100.5, 49.5, 3, 2, 1, 6*8)
 	if err != nil {
 		t.Fatal(err)
 	}

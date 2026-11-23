@@ -71,9 +71,17 @@ shelf. Fetch downloads about 2 GB, most of it one elevation model of
 Kilauea, and keeps what it already has. The shelf is separate from
 renders and Grissom survey data.
 
-Game passes a project's `set` values only for the variables the repository
-declares with `needs`, and `SLAYER_SHELF` is not declared. So `set
-SLAYER_SHELF` in your Game config does not reach these runs. Use the shell.
+You can name the shelf in your Game config instead of the shell. Game
+passes a `set` value to its runs only for a variable the repository
+declares, and Slayer declares that it wants `SLAYER_SHELF`:
+
+```
+set SLAYER_SHELF /absolute/path/to/slayer/sources
+```
+
+That reaches what Game starts: `game check`, `game build` and `game run`.
+A command you start yourself, such as `go test` or `slayer draw`, reads
+your shell.
 
 With `SLAYER_SHELF` unset, verify, check and path read `shelf/` in the
 checkout, which only a working tree of the road has.
@@ -81,6 +89,22 @@ checkout, which only a working tree of the road has.
 These bootstrap runs work before binaries exist. Fetch needs source access;
 preserve the downloaded shelf for offline use. Check holds bytes to hashes.
 Verify also checks source pages or excerpts behind published numeric values.
+
+## Beach surveys
+
+The measured beach surveys are too large for the tree, and a release does
+not include them. The `scene/beachsurvey` package reads them from the
+`beachsurvey` folder inside the folder `SLAYER_DATA` names: one `.json`
+page and one `.bin.gz` height grid for each survey.
+
+```sh
+export SLAYER_DATA="$HOME/slayer/data"
+```
+
+With `SLAYER_DATA` unset, a survey is refused with a message that names
+the variable, and the tests that read a survey are skipped. Slayer
+declares that it wants this one too, so a `set SLAYER_DATA` line in your
+Game config reaches what Game starts.
 
 ## Dependencies
 

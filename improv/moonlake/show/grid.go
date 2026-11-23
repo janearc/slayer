@@ -172,7 +172,7 @@ func gridHits(perBeat, seconds, position float64,
 }
 
 // leadHits is the lead's loud notes that may still show at a moment.
-func leadHits(seconds float64, lead []Note, hot int) []floodHit {
+func leadHits(seconds float64, lead []scoreNote, hot int) []floodHit {
 	var hits []floodHit
 	for i, one := range lead {
 		at := one.start
@@ -187,7 +187,7 @@ func leadHits(seconds float64, lead []Note, hot int) []floodHit {
 // side, the sides in turn, and a hit falls by floodFlash. A bar is
 // meter beats.
 func flooded(mode string, seconds, position, meter float64,
-	beats []float64, lead []Note, hot int) (left, right float64) {
+	beats []float64, lead []scoreNote, hot int) (left, right float64) {
 	var hits []floodHit
 	if perBeat, ok := floodSteps(mode, meter); ok {
 		hits = gridHits(perBeat, seconds, position, beats)

@@ -1,0 +1,155 @@
+# a superblock grown over: the block of superblock-planned.yaml, the same
+# parcel, people and seed, at an accretion of one. the court is built full
+# but for its lanes and a few yards left as light wells, floors are added
+# on the slabs' roofs at heights that match nothing below, rooms are carried
+# out over the air, walkways, cables and pipes cross and run along the
+# lanes, and the roofs are railed and hung with washing.
+#
+# the plan is still under it: the slabs' storeys come from the three
+# thousand four hundred people they were planned for
+# (manufacture/cities/superblock*.go). nothing is placed by hand. the parcel
+# is 120 by 80 metres at the quick level, as superblock-planned.yaml says.
+#
+# the weathering's age is not said: it follows the block's accretion, from
+# five years planned to forty-five accreted, so at one it is the oldest of
+# the three and the agents have laid the most. motorhomes stand in berths on
+# the roofs, parts of the scavenged method, as many as the accretion lets.
+#
+# dusk going into night on flat ground; the sun is on the western horizon.
+# places are metres, x east, y north, z up, the parcel's middle at the
+# origin. every number of the light is a choice of this study, by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: superblock accreted
+  setting: space
+  light: none
+  set:
+    things:
+      block:
+        kind: superblock
+        habit: accreted
+        seed: 7
+        complexity: quick
+        parcel:
+          width: {value: 120, unit: m}
+          depth: {value: 80, unit: m}
+        ceiling: 14
+        occupants: 3400
+        crowding: 1
+        accretion: 1
+        parts: {winnebago: 1}
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    corner:
+      title: "from the south-west street corner, at eye height"
+      wide: 70
+      location: {at: [-69, -50, 1.7]}
+      orientation: {look_at: [-35, -25, 16]}
+    above:
+      title: "from 90 m up, south-east of the block"
+      location: {at: [90, -120, 90]}
+      orientation: {look_at: [0, 0, 10]}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.05, 0.05, 0.055]}
+        source: eye
+    boxes:
+      flat:
+        material: ground
+        middle: [0, 0, -1]
+        size: [1200, 1200, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-1, 0.2, 0.03]
+        colour: {srgb_linear: [1.4, 0.55, 0.3]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.15, 0.14]}
+      zenith: {srgb_linear: [0.02, 0.04, 0.1]}
+      ground: {srgb_linear: [0.02, 0.02, 0.022]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 5
+      age:
+        from: block
+        planned: 5
+        accreted: 45
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        rain:
+          kind: rain
+          on: [wall, podium]
+          colour: {srgb_linear: [0.02, 0.018, 0.016]}
+          strength: 0.7
+          settle: 12
+          level: 0.2
+          length: 2.2
+          spacing: 0.5
+          share: 0.75
+        soot:
+          kind: soot
+          on: [wall, podium]
+          colour: {srgb_linear: [0.012, 0.011, 0.01]}
+          strength: 0.7
+          settle: 25
+          reach: 4
+          share: 0.4
+          grain: 0.8
+          shelter: 2.5
+          catch: 0.5
+        moss:
+          kind: moss
+          on: [wall, podium]
+          colour: {srgb_linear: [0.04, 0.11, 0.025]}
+          strength: 0.95
+          settle: 15
+          reach: 3.5
+          share: 0.75
+          grain: 0.45
+          shade: 0.35
+          north: 0.4
+          shelter: 1.8
+          catch: 1.5
+        rust:
+          kind: rust
+          on: [rail, cage, pipe, mast]
+          colour: {srgb_linear: [0.25, 0.085, 0.03]}
+          strength: 0.95
+          settle: 20
+          level: 0.2
+          length: 3
+          spacing: 0.35
+          share: 0.8
+          grain: 0.3
+        graffiti:
+          kind: graffiti
+          on: [wall, podium]
+          colour: {srgb_linear: [0.6, 0.05, 0.04]}
+          other: {srgb_linear: [0.05, 0.25, 0.6]}
+          strength: 1
+          settle: 10
+          level: 0.2
+          grain: 0.9
+          low: 0.4
+          high: 2.4
+          share: 0.18
+          catch: 2

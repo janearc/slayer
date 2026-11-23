@@ -128,6 +128,16 @@ type placedVolume struct {
 	// Tinted medium, asked once when the volume is placed; nil for a
 	// medium as thick to every channel.
 	tint *maths.Light
+	// bounds is the medium's box in its own space, asked once when the
+	// volume is placed: a bent plume works its box out afresh at every
+	// ask, from numbers that are the same for the whole picture
+	bounds maths.Box
+	// world is that box in the world, and walled whether it has one: a
+	// ray that misses it misses the volume, and is told so before it is
+	// taken into the volume's space. A medium of no finite box is not
+	// walled, and every ray asks it.
+	world  maths.Box
+	walled bool
 }
 
 // placeVolumes evaluates visible volumes at a time, omitting hidden entries and
@@ -153,6 +163,8 @@ func placeVolumes(world *thing.World, moment time.Duration) []placedVolume {
 			volume.gas = &found
 			volume.extinction, volume.scatter = EyeOptics(found)
 		}
+		volume.bounds = volume.med.Bounds()
+		volume.world, volume.walled = boxOut(volume.at, volume.bounds)
 		volumes = append(volumes, volume)
 	}
 	return volumes
@@ -217,10 +229,16 @@ type staged struct {
 	// Empty keeps the legacy source term and lamp normalization.
 	volumeSky []maths.Vec
 	lamps     []thing.Lamp
+	// tree is the standing lamps as a tree to pick among, and others
+	// every other lamp's index, built once; no tree for a scene of few
+	// lamps. See lamptree.go.
+	tree   *lampTree
+	others []int
 	// discs is the suns among lamps drawn as discs, found once
 	discs []film.Sun
 	beams *beamstep.Beams
 	sky   thing.Sky
+	glow  thing.Glow
 	// lighting is the sky as a table of each cell's mean, which is what
 	// lights a surface, as the gpu's kernel reads it; nil with no sky
 	lighting *skytable.Table
@@ -242,6 +260,8 @@ type staged struct {
 	// a share of it as their local offset; nonreflecting geometry still
 	// casts shadows without enlarging this scale
 	spread float64
+	// marching is the things a march draws, which the lift must clear
+	marching marchedThings
 	// oceanSun is non-nil only for the explicit CPU mean-plane direct-sun
 	// approximation. Its source and boundary were validated before workers.
 	oceanSun           *oceanDirectSun
@@ -264,8 +284,12 @@ func (scene *staged) lifted(point, normal maths.Vec) maths.Vec {
 // through the origin of an unbounded scene; a ray a surface sends onward
 // measures itself by its own travel too, through liftedAlong, and no
 // absolute length appears anywhere, so the picture scales.
+//
+// Where a march draws a thing, the offset is no less than its marched
+// surface is cleared by, as marchedThings.clear has it.
 func (scene *staged) lifting(point maths.Vec) float64 {
-	return lift * max(scene.spread, point.Len())
+	return max(lift*max(scene.spread, point.Len()),
+		scene.marching.clear(point))
 }
 
 // liftedAlong is lifted with the asking ray's own travel as one more
@@ -273,8 +297,7 @@ func (scene *staged) lifting(point maths.Vec) float64 {
 // length scales with the scene when nothing else does.
 func (scene *staged) liftedAlong(point, normal, from maths.Vec) maths.Vec {
 	came := point.Sub(from).Len()
-	return point.Add(normal.Scale(
-		lift * max(scene.spread, point.Len(), came)))
+	return point.Add(normal.Scale(max(scene.lifting(point), lift*came)))
 }
 
 // Spread returns a declared ray-origin reference, or the legacy reflecting
@@ -341,6 +364,7 @@ func stage(world *thing.World, moment time.Duration) *staged {
 		discs:     film.Disced(lamps),
 		beams:     beamstep.Of(lamps),
 		sky:       world.Sky,
+		glow:      world.Glow,
 		lighting:  lighting,
 		haze:      world.Haze,
 		crowd:     things,
@@ -349,9 +373,13 @@ func stage(world *thing.World, moment time.Duration) *staged {
 		fault:     fieldFault(world),
 		gassy:     hasGas(volumes),
 		spread:    rayOriginSpread(world, things.things),
+		marching:  marchedBy(things.things),
 		oceanSpotInscatter: world.OceanSurface != nil &&
 			world.OceanSurface.SpotInscatter,
 		seconds: moment.Seconds(),
+	}
+	if len(lamps) > lampsEvery {
+		made.tree, made.others = treeOf(lamps)
 	}
 	if ocean := world.OceanSurface; ocean != nil && ocean.InterfaceEvents > 0 {
 		made.oceanEventBoundary, made.oceanEventLimit = ocean.Boundary,
@@ -448,8 +476,7 @@ func (volume placedVolume) span(ray maths.Ray, limit float64) (extent, bool) {
 	if exact, can := volume.med.(medium.Spanner); can {
 		inside.enter, inside.leave, crossed = exact.Span(ray, 0, limit)
 	} else {
-		box := volume.med.Bounds()
-		inside.enter, inside.leave, crossed = box.Hit(ray, 0, limit)
+		inside.enter, inside.leave, crossed = volume.bounds.Hit(ray, 0, limit)
 	}
 	if !crossed || inside.leave <= inside.enter {
 		return extent{}, false
@@ -491,6 +518,9 @@ func crossingsIn(room []crossing, volumes []placedVolume, ray maths.Ray,
 	across := room
 	for i := range volumes {
 		volume := &volumes[i]
+		if !volume.meets(ray, math.Min(far, nowhere)) {
+			continue
+		}
 		local := volume.at.RayIn(ray)
 		for _, inside := range volume.intervals(local, math.Min(far, nowhere)/volume.scale) {
 			if inside.leave <= inside.enter {

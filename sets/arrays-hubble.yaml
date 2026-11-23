@@ -1,0 +1,35 @@
+# Hubble's two solar wings from the side the cells face. The set's axes
+# are east x, north y, up z; the craft's own are x, up y, and z, so its
+# own z is south here. One camera, so a picture before a change and a
+# picture after it can be set side by side.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Hubble's solar wings
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      hubble:
+        kind: hubble
+        seed: 5
+        complexity: quick
+        east: 0
+        north: 0
+  film:
+    width: 1600
+    height: 900
+    rays: 2
+    exposure: 0.003
+    wide: 45
+  cameras:
+    wings:
+      title: the two wings and the body between them
+      location: {at: [14, -20, 11]}
+      orientation: {look_at: [0, 0, 5]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

@@ -1,0 +1,131 @@
+# The four fish in their skins, each in two poses: at a phase of its
+# stroke (the kind by the species' name), and gliding (the kind with
+# -glide). Proportions, markings and their sources are in
+# manufacture/fish.yaml.
+#
+# the frame. places are metres, x east, y north, z up. the swimming fish
+# stand twenty metres apart along the east; each gliding one stands
+# twenty-five metres east and thirty south of its swimming one, so no
+# camera sees the other pose. all in open air, lit by the sun through
+# the air; the sun is typed as azimuth and altitude, chosen. a side
+# camera stands south of its fish, a quarter camera south-east and
+# above.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: four fish in their skins
+  seed: 11
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 160, altitude: 40}
+  set:
+    things:
+      tuna:
+        kind: pacific-bluefin-tuna
+        seed: 11
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      yellowtail:
+        kind: california-yellowtail
+        seed: 12
+        position:
+          east: {value: 20, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      barracuda:
+        kind: california-barracuda
+        seed: 13
+        position:
+          east: {value: 40, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      sardine:
+        kind: pacific-sardine
+        seed: 14
+        position:
+          east: {value: 60, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      tuna gliding:
+        kind: pacific-bluefin-tuna-glide
+        seed: 11
+        position:
+          east: {value: 25, unit: m}
+          north: {value: -30, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      yellowtail gliding:
+        kind: california-yellowtail-glide
+        seed: 12
+        position:
+          east: {value: 45, unit: m}
+          north: {value: -30, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      barracuda gliding:
+        kind: california-barracuda-glide
+        seed: 13
+        position:
+          east: {value: 65, unit: m}
+          north: {value: -30, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      sardine gliding:
+        kind: pacific-sardine-glide
+        seed: 14
+        position:
+          east: {value: 85, unit: m}
+          north: {value: -30, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  film:
+    width: 800
+    height: 450
+    rays: 2
+    wide: 39
+  cameras:
+    tuna-side:
+      location: {at: [0, -3.6, 0]}
+      orientation: {look_at: [0, 0, 0]}
+    tuna-quarter:
+      location: {at: [1.8, -2.9, 1.3]}
+      orientation: {look_at: [0, 0, 0]}
+    tuna-glide:
+      location: {at: [25, -33.6, 0]}
+      orientation: {look_at: [25, -30, 0]}
+    yellowtail-side:
+      location: {at: [20, -1.6, 0]}
+      orientation: {look_at: [20, 0, 0]}
+    yellowtail-quarter:
+      location: {at: [20.8, -1.3, .55]}
+      orientation: {look_at: [20, 0, 0]}
+    yellowtail-glide:
+      location: {at: [45, -31.6, 0]}
+      orientation: {look_at: [45, -30, 0]}
+    barracuda-side:
+      location: {at: [40, -1.6, 0]}
+      orientation: {look_at: [40, 0, 0]}
+    barracuda-quarter:
+      location: {at: [40.8, -1.3, .55]}
+      orientation: {look_at: [40, 0, 0]}
+    barracuda-glide:
+      location: {at: [65, -31.6, 0]}
+      orientation: {look_at: [65, -30, 0]}
+    sardine-side:
+      location: {at: [60, -0.42, 0]}
+      orientation: {look_at: [60, 0, 0]}
+    sardine-quarter:
+      location: {at: [60.21, -0.34, .15]}
+      orientation: {look_at: [60, 0, 0]}
+    sardine-glide:
+      location: {at: [85, -30.42, 0]}
+      orientation: {look_at: [85, -30, 0]}

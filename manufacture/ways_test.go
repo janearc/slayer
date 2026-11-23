@@ -11,12 +11,17 @@ import (
 	"github.com/janearc/slayer/geom"
 )
 
-func unitOf(v geom.Vec3) geom.Vec3 { return v.Scale(1 / v.Length()) }
+// lengthOf is the distance from the origin to v.
+func lengthOf(v geom.Vec3) float64 { return math.Sqrt(v.Dot(v)) }
+
+func unitOf(v geom.Vec3) geom.Vec3 { return v.Scale(1 / lengthOf(v)) }
 
 // angleBetween is the angle between two directions, in degrees, with no
 // regard to which way along its line each one points
 func angleBetween(a, b geom.Vec3) float64 {
-	cos := math.Abs(unitOf(a).Dot(unitOf(b)))
+	first := unitOf(a)
+	second := unitOf(b)
+	cos := math.Abs(first.Dot(second))
 	return math.Acos(math.Min(1, cos)) * 180 / math.Pi
 }
 
@@ -56,7 +61,7 @@ func TestWayABranchPointsWhereItPoints(t *testing.T) {
 			}
 			for corner := range 3 {
 				edge := face.V[(corner+1)%3].Sub(face.V[corner])
-				if edge.Length() < 0.5*step {
+				if lengthOf(edge) < 0.5*step {
 					continue
 				}
 				checked++
@@ -116,8 +121,9 @@ func TestWayNoWhorlSitsOnTheOneBelow(t *testing.T) {
 	for whorl := 0; whorl+1 < p.Whorls; whorl++ {
 		for k := range BranchCount(p, whorl) {
 			for j := range BranchCount(p, whorl+1) {
-				gap := math.Mod(math.Abs(azimuth(whorl, k)-
-					azimuth(whorl+1, j)), 2*math.Pi)
+				difference := azimuth(whorl, k) -
+					azimuth(whorl+1, j)
+				gap := math.Mod(math.Abs(difference), 2*math.Pi)
 				pairs++
 				if math.Min(gap, 2*math.Pi-gap) < 0.03 {
 					aligned++
@@ -186,7 +192,8 @@ func TestWayABranchIsOneConnectedThing(t *testing.T) {
 	}
 	reach := 0.0
 	for _, point := range barkPoints {
-		reach = math.Max(reach, point.Sub(b.Base).Length())
+		offset := point.Sub(b.Base)
+		reach = math.Max(reach, lengthOf(offset))
 	}
 	if reach < 2.5*step || reach > 3.4*step {
 		t.Errorf("the bark reaches %v from the trunk; a branch of length %v "+

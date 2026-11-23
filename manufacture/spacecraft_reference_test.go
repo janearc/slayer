@@ -13,7 +13,7 @@ import (
 // their authored records. Explicit capture writes a separate file for review.
 func TestSpacecraftAppearance(t *testing.T) {
 	var rows strings.Builder
-	for _, name := range []string{"hubble", "space-observatory", "spitzer", "webb"} {
+	for _, name := range []string{"hubble", "space-observatory", "spitzer", "webb", "roman"} {
 		row, err := KindNamed(name)
 		if err != nil {
 			t.Fatal(err)
@@ -30,7 +30,8 @@ func TestSpacecraftAppearance(t *testing.T) {
 		}
 	}
 	if out := os.Getenv("SPACECRAFT_REFERENCE_OUT"); out != "" {
-		if err := os.WriteFile(out, []byte(rows.String()), 0644); err != nil {
+		text := rows.String()
+		if err := os.WriteFile(out, []byte(text), 0644); err != nil {
 			t.Fatal(err)
 		}
 		return

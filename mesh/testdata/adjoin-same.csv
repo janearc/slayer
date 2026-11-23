@@ -1,0 +1,5 @@
+name,one,other
+joined directly,0,1
+joined the other way round,2,3
+joined in a chain,3,4
+joined through another,2,4

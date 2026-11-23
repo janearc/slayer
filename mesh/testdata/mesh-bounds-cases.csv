@@ -1,0 +1,4 @@
+name,lowx,lowy,lowz,topx,topy,topz
+cube,-0.5,-0.5,-0.5,0.5,0.5,0.5
+tetrahedron,0,0,0,4,3,2
+two faces,0,0,2,1,1,2

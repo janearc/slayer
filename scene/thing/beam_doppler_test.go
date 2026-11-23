@@ -7,6 +7,36 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// The tables the beam tests read, each row named in its name column.
+const (
+	beamDopplerBoosts      = "testdata/beam-doppler-boosts.csv"
+	beamDopplerSpeeds      = "testdata/beam-doppler-speeds.csv"
+	beamDopplerRoundBoosts = "testdata/beam-doppler-round-boosts.csv"
+	beamDopplerJetFlows    = "testdata/beam-doppler-jet-flows.csv"
+	beamDopplerRoundFlows  = "testdata/beam-doppler-round-flows.csv"
+	beamDopplerSlowings    = "testdata/beam-doppler-slowings.csv"
+)
+
+// beamDopplerNowhere is the vector of no length and no way.
+var beamDopplerNowhere = maths.V(nought, nought, nought)
+
+// beamDopplerPick is a number the beam tests chose, by its name in
+// numbers.yaml after the stem beam-doppler.
+func beamDopplerPick(t *testing.T, name string) float64 {
+	t.Helper()
+	return picked(t, "beam-doppler-"+name)
+}
+
+// beamDopplerVec is the vector whose three columns are the prefix with x,
+// y and z after it.
+func beamDopplerVec(
+	t *testing.T, row map[string]string, prefix string,
+) maths.Vec {
+	t.Helper()
+	return maths.V(cell(t, row, prefix+"x"), cell(t, row, prefix+"y"),
+		cell(t, row, prefix+"z"))
+}
+
 // the boost is delta cubed, with delta = 1 / (gamma (1 - beta cos)).
 // worked by hand for a jet at 0.6 c, where gamma = 1 / sqrt(1 - 0.36)
 // = 1.25:
@@ -16,24 +46,15 @@ import (
 //	across the way:  delta = 1 / 1.25 = 0.8,             boost 0.512
 //	at cos 0.8:      delta = 1 / (1.25 * 0.52) = 1/0.65, boost 1/0.274625
 func TestBeamBoostIsDeltaCubed(t *testing.T) {
-	b := Beam{Speed: 0.6}
-	up := maths.V(0, 1, 0)
-	for _, c := range []struct {
-		name   string
-		toward maths.Vec
-		at     maths.Vec
-		want   float64
-	}{
-		{"at the eye", maths.Up, up, 8},
-		{"at the eye, not one unit long", maths.V(0, 3, 0), up, 8},
-		{"away from it", maths.Up.Neg(), up, 0.125},
-		{"across the way", maths.XAxis, up, 0.512},
-		{"at cos 0.8", maths.V(0.6, 0.8, 0), up, 1 / 0.274625},
-		{"the lower jet at the eye", maths.Up.Neg(), maths.V(0, -1, 0), 8},
-		{"the lower jet away from it", maths.Up, maths.V(0, -1, 0), 0.125},
-	} {
-		if got := b.Boost(c.toward, c.at); !(math.Abs(got-c.want) <= 1e-12*c.want) {
-			t.Errorf("%s: %v, want %v", c.name, got, c.want)
+	beam := Beam{Speed: beamDopplerPick(t, "jet-speed")}
+	tolerance := beamDopplerPick(t, "tolerance")
+	for _, row := range readSheet(t, beamDopplerBoosts) {
+		toward := beamDopplerVec(t, row, "toward-")
+		at := beamDopplerVec(t, row, "at-")
+		want := cell(t, row, "want") / cell(t, row, "over")
+		got := beam.Boost(toward, at)
+		if !(math.Abs(got-want) <= tolerance*want) {
+			t.Errorf("%s: %v, want %v", row["name"], got, want)
 		}
 	}
 }
@@ -42,15 +63,20 @@ func TestBeamBoostIsDeltaCubed(t *testing.T) {
 // boosts nothing: one, whichever way it is seen from. past light's speed
 // gamma is no number, and at it, endless.
 func TestABeamOutOfRangeBoostsNothing(t *testing.T) {
-	for _, speed := range []float64{0, -0.5, 1, 1.5, 2, 100} {
-		b := Beam{Speed: speed}
-		for _, toward := range []maths.Vec{maths.Up, maths.Up.Neg(), maths.XAxis} {
-			if got := b.Boost(toward, maths.V(0, 1, 0)); got != 1 {
-				t.Errorf("a beam at %v seen along %v boosts %v, want 1", speed, toward, got)
+	radius := beamDopplerPick(t, "unit-radius")
+	directions := []maths.Vec{maths.Up, maths.Up.Neg(), maths.XAxis}
+	for _, row := range readSheet(t, beamDopplerSpeeds) {
+		speed := cell(t, row, "speed")
+		beam := Beam{Speed: speed}
+		for _, toward := range directions {
+			if got := beam.Boost(toward, maths.Up); got != unity {
+				t.Errorf("a beam at %v seen along %v boosts %v, want 1",
+					speed, toward, got)
 			}
 		}
-		round := Beam{Speed: speed, Round: true, At: 1}
-		if got := round.Boost(maths.V(0, 0, -1), maths.V(1, 0, 0)); got != 1 {
+		round := Beam{Speed: speed, Round: true, At: radius}
+		toward := maths.V(nought, nought, -unity)
+		if got := round.Boost(toward, maths.XAxis); got != unity {
 			t.Errorf("a round beam at %v boosts %v, want 1", speed, got)
 		}
 	}
@@ -60,8 +86,11 @@ func TestABeamOutOfRangeBoostsNothing(t *testing.T) {
 // number: At is so large that At over the radius, at a point a ten-billionth
 // out, is endless, and zero of endless is no number.
 func TestABeamOfNoSpeedBoostsNothingAnywhere(t *testing.T) {
-	b := Beam{Speed: 0, Round: true, At: 1e300}
-	if got := b.Boost(maths.Up, maths.V(1e-10, 0, 0)); got != 1 {
+	huge := beamDopplerPick(t, "huge-radius")
+	beam := Beam{Speed: nought, Round: true, At: huge}
+	offset := beamDopplerPick(t, "near-axis-offset")
+	at := maths.V(offset, nought, nought)
+	if got := beam.Boost(maths.Up, at); got != unity {
 		t.Errorf("a beam of no speed boosts %v, want 1", got)
 	}
 }
@@ -69,11 +98,20 @@ func TestABeamOfNoSpeedBoostsNothingAnywhere(t *testing.T) {
 // round, the gas on the axis is still, so light from it is not boosted,
 // whichever way it goes, down to a direction of no number.
 func TestStillGasOnTheAxisIsNotBoosted(t *testing.T) {
-	b := Beam{Speed: 0.6, Round: true, At: 1}
-	for _, toward := range []maths.Vec{maths.Up, maths.XAxis, {}, maths.V(math.NaN(), 0, 0)} {
-		for _, at := range []maths.Vec{{}, maths.V(0, 5, 0), maths.V(0, -2, 0)} {
-			if got := b.Boost(toward, at); got != 1 {
-				t.Errorf("on the axis at %v seen along %v the boost is %v, want 1", at, toward, got)
+	beam := Beam{Speed: beamDopplerPick(t, "jet-speed"), Round: true,
+		At: beamDopplerPick(t, "unit-radius")}
+	up := beamDopplerPick(t, "axis-point-up")
+	down := beamDopplerPick(t, "axis-point-down")
+	unknown := maths.V(math.NaN(), nought, nought)
+	directions := []maths.Vec{maths.Up, maths.XAxis, beamDopplerNowhere,
+		unknown}
+	points := []maths.Vec{beamDopplerNowhere, maths.V(nought, up, nought),
+		maths.V(nought, down, nought)}
+	for _, toward := range directions {
+		for _, at := range points {
+			if got := beam.Boost(toward, at); got != unity {
+				t.Errorf("on the axis at %v seen along %v the boost is %v, "+
+					"want 1", at, toward, got)
 			}
 		}
 	}
@@ -84,16 +122,18 @@ func TestStillGasOnTheAxisIsNotBoosted(t *testing.T) {
 // 0.8 * sqrt(9/16) = 0.6, and so gamma 1.25 and the same deltas as a
 // jet at 0.6 c, with the flow along -z at +x.
 func TestARoundBeamBoostsByItsFlowThere(t *testing.T) {
-	b := Beam{Speed: 0.8, Round: true, At: 9}
-	at := maths.V(16, 3, 0)
-	for _, c := range []struct {
-		toward maths.Vec
-		want   float64
-	}{
-		{maths.V(0, 0, -1), 8}, {maths.V(0, 0, 1), 0.125}, {maths.Up, 0.512},
-	} {
-		if got := b.Boost(c.toward, at); !(math.Abs(got-c.want) <= 1e-12*c.want) {
-			t.Errorf("seen along %v the boost is %v, want %v", c.toward, got, c.want)
+	beam := Beam{Speed: beamDopplerPick(t, "round-beam-speed"), Round: true,
+		At: beamDopplerPick(t, "round-beam-radius")}
+	at := maths.V(beamDopplerPick(t, "round-point-east"),
+		beamDopplerPick(t, "round-point-north"), nought)
+	tolerance := beamDopplerPick(t, "tolerance")
+	for _, row := range readSheet(t, beamDopplerRoundBoosts) {
+		toward := beamDopplerVec(t, row, "toward-")
+		want := cell(t, row, "want")
+		got := beam.Boost(toward, at)
+		if !(math.Abs(got-want) <= tolerance*want) {
+			t.Errorf("seen along %v the boost is %v, want %v",
+				toward, got, want)
 		}
 	}
 }
@@ -102,25 +142,46 @@ func TestARoundBeamBoostsByItsFlowThere(t *testing.T) {
 // side, on the equator as well, and along an axis of its own, as long
 // as one unit.
 func TestAJetFlowsAwayFromItsOrigin(t *testing.T) {
-	jet := Beam{Speed: 0.6}
-	for _, c := range []struct {
-		at, want maths.Vec
-	}{
-		{maths.V(0, 0.5, 0), maths.Up}, {maths.V(1, 0, 0), maths.Up},
-		{maths.V(0, 2, 0), maths.Up}, {maths.V(0, -0.5, 0), maths.Up.Neg()},
-		{maths.V(0, 0, 0), maths.Up},
-	} {
-		if dir, speed := jet.Flow(c.at); dir != c.want || speed != 0.6 {
-			t.Errorf("at %v the jet flows %v at %v, want %v at 0.6", c.at, dir, speed, c.want)
+	speed := beamDopplerPick(t, "jet-speed")
+	jet := Beam{Speed: speed}
+	for _, row := range readSheet(t, beamDopplerJetFlows) {
+		at := beamDopplerVec(t, row, "at-")
+		want := beamDopplerVec(t, row, "want-")
+		if dir, flow := jet.Flow(at); dir != want || flow != speed {
+			t.Errorf("at %v the jet flows %v at %v, want %v at 0.6",
+				at, dir, flow, want)
 		}
 	}
-	tipped := Beam{Speed: 0.6, Axis: maths.V(3, 0, 0)}
-	if dir, _ := tipped.Flow(maths.V(2, 0, 0)); dir != maths.XAxis {
+	beamDopplerCheckTipped(t, speed)
+}
+
+// beamDopplerCheckTipped holds an axis of three units of x to flow one
+// unit long, away from the origin on either side.
+func beamDopplerCheckTipped(t *testing.T, speed float64) {
+	t.Helper()
+	length := beamDopplerPick(t, "tipped-axis-length")
+	tipped := Beam{Speed: speed, Axis: maths.V(length, nought, nought)}
+	point := beamDopplerPick(t, "tipped-point")
+	east := maths.V(point, nought, nought)
+	if dir, _ := tipped.Flow(east); dir != maths.XAxis {
 		t.Errorf("an axis of (3, 0, 0) flows %v at +x, want one unit of x", dir)
 	}
-	if dir, _ := tipped.Flow(maths.V(-2, 0, 0)); dir != maths.XAxis.Neg() {
+	west := maths.V(-point, nought, nought)
+	if dir, _ := tipped.Flow(west); dir != maths.XAxis.Neg() {
 		t.Errorf("an axis of (3, 0, 0) flows %v at -x", dir)
 	}
+}
+
+// beamDopplerRoundFlow is the round beam of a row, at the speed, about the
+// axis in its columns, with the point it is asked at and the way it should
+// flow there.
+func beamDopplerRoundFlow(
+	t *testing.T, row map[string]string, speed float64,
+) (beam Beam, at, want maths.Vec) {
+	t.Helper()
+	axis := beamDopplerVec(t, row, "axis-")
+	beam = Beam{Speed: speed, Round: true, Axis: axis}
+	return beam, beamDopplerVec(t, row, "at-"), beamDopplerVec(t, row, "want-")
 }
 
 // a round flow goes round the axis, counterclockwise seen from its end,
@@ -129,24 +190,36 @@ func TestAJetFlowsAwayFromItsOrigin(t *testing.T) {
 // at (1, 2, 0) about up that is (1, 0, 0), and up cross x is -z. about
 // x, the point (5, 0, 2) is (0, 0, 2) square to it, and x cross z is -y.
 func TestARoundFlowGoesRoundTheAxis(t *testing.T) {
-	up := Beam{Speed: 0.4, Round: true}
-	if dir, speed := up.Flow(maths.V(1, 2, 0)); dir != maths.V(0, 0, -1) || speed != 0.4 {
-		t.Errorf("about up at (1, 2, 0) the flow is %v at %v, want -z at 0.4", dir, speed)
+	rows := readSheet(t, beamDopplerRoundFlows)
+	speed := beamDopplerPick(t, "round-flow-speed")
+	row := rows.row(t, beamDopplerRoundFlows, "about up at (1 2 0)")
+	beam, at, want := beamDopplerRoundFlow(t, row, speed)
+	if dir, flow := beam.Flow(at); dir != want || flow != speed {
+		t.Errorf("about up at (1, 2, 0) the flow is %v at %v, want -z at 0.4",
+			dir, flow)
 	}
-	if dir, _ := up.Flow(maths.V(1, -7, 0)); dir != maths.V(0, 0, -1) {
+	row = rows.row(t, beamDopplerRoundFlows, "about up at (1 -7 0)")
+	beam, at, want = beamDopplerRoundFlow(t, row, speed)
+	if dir, _ := beam.Flow(at); dir != want {
 		t.Errorf("about up at (1, -7, 0) the flow is %v, want -z", dir)
 	}
-	x := Beam{Speed: 0.4, Round: true, Axis: maths.XAxis}
-	if dir, _ := x.Flow(maths.V(5, 0, 2)); dir != maths.V(0, -1, 0) {
+	row = rows.row(t, beamDopplerRoundFlows, "about x at (5 0 2)")
+	beam, at, want = beamDopplerRoundFlow(t, row, speed)
+	if dir, _ := beam.Flow(at); dir != want {
 		t.Errorf("about x at (5, 0, 2) the flow is %v, want -y", dir)
 	}
 }
 
 // on the axis the gas is still: a flow of no way and no speed.
 func TestTheFlowOnTheAxisIsStill(t *testing.T) {
-	b := Beam{Speed: 0.4, Round: true, At: 1}
-	for _, at := range []maths.Vec{{}, maths.V(0, 5, 0), maths.V(0, -1, 0)} {
-		if dir, speed := b.Flow(at); dir != (maths.Vec{}) || speed != 0 {
+	beam := Beam{Speed: beamDopplerPick(t, "round-flow-speed"), Round: true,
+		At: beamDopplerPick(t, "unit-radius")}
+	up := beamDopplerPick(t, "axis-point-up")
+	points := []maths.Vec{beamDopplerNowhere, maths.V(nought, up, nought),
+		maths.V(nought, -unity, nought)}
+	for _, at := range points {
+		dir, speed := beam.Flow(at)
+		if dir != beamDopplerNowhere || speed != nought {
 			t.Errorf("on the axis at %v the flow is %v at %v", at, dir, speed)
 		}
 	}
@@ -159,19 +232,14 @@ func TestTheFlowOnTheAxisIsStill(t *testing.T) {
 // is held to 0.99; 0.5 * sqrt(1/0.0625) = 2, held to 0.99; and with no
 // At, 0.4 anywhere.
 func TestARoundFlowSlowsByTheSquareRootAndIsHeld(t *testing.T) {
-	for _, c := range []struct {
-		b    Beam
-		at   maths.Vec
-		want float64
-	}{
-		{Beam{Speed: 0.8, Round: true, At: 9}, maths.V(16, 0, 0), 0.6},
-		{Beam{Speed: 0.9, Round: true, At: 4}, maths.V(1, 0, 0), 0.99},
-		{Beam{Speed: 0.5, Round: true, At: 1}, maths.V(0.25, 0, 0), 0.99},
-		{Beam{Speed: 0.4, Round: true}, maths.V(4, 0, 0), 0.4},
-		{Beam{Speed: 0.4, Round: true}, maths.V(0.01, 0, 0), 0.4},
-	} {
-		if _, got := c.b.Flow(c.at); !(math.Abs(got-c.want) <= 1e-12) {
-			t.Errorf("%+v at %v flows at %v, want %v", c.b, c.at, got, c.want)
+	tolerance := beamDopplerPick(t, "tolerance")
+	for _, row := range readSheet(t, beamDopplerSlowings) {
+		beam := Beam{Speed: cell(t, row, "speed"), Round: true,
+			At: cell(t, row, "at")}
+		at := maths.V(cell(t, row, "east"), nought, nought)
+		want := cell(t, row, "want")
+		if _, got := beam.Flow(at); !(math.Abs(got-want) <= tolerance) {
+			t.Errorf("%+v at %v flows at %v, want %v", beam, at, got, want)
 		}
 	}
 }

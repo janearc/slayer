@@ -1,3 +1,5 @@
+//go:build draw
+
 package manufacture
 
 import (

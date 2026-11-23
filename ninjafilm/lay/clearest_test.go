@@ -143,7 +143,8 @@ func clearestIsTheMean(t *rapid.T) {
 			for _, one := range here {
 				dense = dense.Add(one.Clearest())
 			}
-			total = total.Add(filter.Times(record.Passed(dense)))
+			passed := record.Passed(dense)
+			total = total.Add(filter.Times(passed))
 		}
 		mean := total.Scale(whole / float64(fieldSites))
 		bound := sigmas * examplePass * float64(len(lamps)) /

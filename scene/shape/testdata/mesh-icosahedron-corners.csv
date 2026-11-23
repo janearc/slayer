@@ -1,0 +1,13 @@
+name,plain-axis,plain-sign,gold-axis,gold-sign
+corner-1,0,-1,1,1
+corner-2,0,1,1,1
+corner-3,0,-1,1,-1
+corner-4,0,1,1,-1
+corner-5,1,-1,2,1
+corner-6,1,1,2,1
+corner-7,1,-1,2,-1
+corner-8,1,1,2,-1
+corner-9,2,-1,0,1
+corner-10,2,1,0,1
+corner-11,2,-1,0,-1
+corner-12,2,1,0,-1

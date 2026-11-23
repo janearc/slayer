@@ -19,9 +19,9 @@ import (
 	"path/filepath"
 	"runtime/debug"
 
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/thing"
+	"github.com/janearc/slayer/session"
 )
 
 // censusFlag names the file assess writes the census to.
@@ -45,9 +45,9 @@ const unknownCommit = "unknown"
 // censusFrame is the frame a census counts: the first.
 const censusFrame = 0
 
-// counter is a source that counts its staged world: a hillside session.
+// counter is a source that counts its staged world: a session.
 type counter interface {
-	Census(index int) (hillside.Census, error)
+	Census(index int) (session.Census, error)
 }
 
 // errUncounted is the refusal of a census of frames already rendered.
@@ -55,7 +55,7 @@ var errUncounted = errors.New("this scene is frames already rendered, " +
 	"pictures with no staged geometry to count")
 
 // Census is the session's census of a frame.
-func (made sessionSource) Census(index int) (hillside.Census, error) {
+func (made sessionSource) Census(index int) (session.Census, error) {
 	return made.session.Census(index)
 }
 
@@ -135,7 +135,7 @@ func writeCensus(run runner, opened source, path string) error {
 }
 
 // censusOf is the census file for what was counted, with its receipt.
-func censusOf(run runner, census hillside.Census) (censusFile, error) {
+func censusOf(run runner, census session.Census) (censusFile, error) {
 	given, err := os.ReadFile(run.given)
 	if err != nil {
 		return censusFile{}, err
@@ -199,7 +199,7 @@ func commitOf() (commit, modified string) {
 }
 
 // eyeWrittenOf is the staged camera as written; nil where none is said.
-func eyeWrittenOf(eye *hillside.Eye) *eyeWritten {
+func eyeWrittenOf(eye *session.Eye) *eyeWritten {
 	if eye == nil {
 		return nil
 	}

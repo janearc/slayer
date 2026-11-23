@@ -117,8 +117,9 @@ func TestALookThatSweepsThroughTheCameraIsRefused(test *testing.T) {
 // finite. A counterexample from review 015, round 2.
 func TestALookTooFarApartIsRefusedNotMissed(test *testing.T) {
 	far := 4e153
-	move := looking(test, timed(test, place(-far, 0, 0),
-		place(far, 0, 0), time.Second, ""),
+	journey := timed(test, place(-far, 0, 0),
+		place(far, 0, 0), time.Second, "")
+	move := looking(test, journey,
 		place(far, 0, 0), place(-far, 0, 0))
 	_, err := camera.New([]camera.Move{move}, place(1, 1, 1), maths.Up)
 	if err == nil || !strings.Contains(err.Error(), "numeric range") {
@@ -132,8 +133,8 @@ func TestALookAtNoPlaceIsRefused(test *testing.T) {
 	hold := timed(test, stand, stand, time.Second, "")
 	for _, target := range []maths.Vec{place(math.NaN(), 0, 0),
 		place(math.Inf(1), 0, 0)} {
-		if _, err := hold.Looking(target, stand.Add(place(1, 0,
-			0))); err == nil {
+		ahead := stand.Add(place(1, 0, 0))
+		if _, err := hold.Looking(target, ahead); err == nil {
 			test.Errorf("a look at %v was taken", target)
 		}
 	}

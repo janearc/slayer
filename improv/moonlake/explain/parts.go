@@ -22,7 +22,7 @@ func NewBeat(bar, inBar, perBar int, since float64, measured bool) (Beat,
 		inBar > perBar || !(since >= 0) {
 		return Beat{}, fmt.Errorf("%w: bar %d beat %d of %d, %v s since; "+
 			"bars and beats count from one, a bar holds 1 to %d beats, "+
-			"and since is nought or more", ErrExplain, bar, inBar, perBar,
+			"and since is nought or more", errExplain, bar, inBar, perBar,
 			since, mostBeats)
 	}
 	return Beat{on: true, measured: measured, bar: bar, inBar: inBar,
@@ -34,7 +34,7 @@ func NewBeat(bar, inBar, perBar int, since float64, measured bool) (Beat,
 func OffGrid(perBar int) (Beat, error) {
 	if perBar < 1 || perBar > mostBeats {
 		return Beat{}, fmt.Errorf("%w: a bar of %d beats; a bar holds 1 "+
-			"to %d", ErrExplain, perBar, mostBeats)
+			"to %d", errExplain, perBar, mostBeats)
 	}
 	return Beat{perBar: perBar}, nil
 }
@@ -75,7 +75,7 @@ func NewLight(label string, colour color.RGBA, level, ring Reading) (
 	Light, error) {
 	if label == "" || level == nil {
 		return Light{}, fmt.Errorf("%w: a light needs a label and a level",
-			ErrExplain)
+			errExplain)
 	}
 	if ring == nil {
 		ring = func(float64) (float64, error) { return 0, nil }

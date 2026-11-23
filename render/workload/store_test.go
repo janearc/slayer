@@ -249,7 +249,7 @@ func TestWorkloadCorruptionNeverReturnsPartialEvidence(t *testing.T) {
 			}
 			profile, found, err := store.Lookup(identity)
 			if !errors.Is(err, ErrCorrupt) || found || len(profile.Observations) != 0 {
-				t.Fatal(fmt.Sprintf("served corrupt evidence: %+v %v %v", profile, found, err))
+				t.Fatalf("served corrupt evidence: %+v %v %v", profile, found, err)
 			}
 		})
 	}

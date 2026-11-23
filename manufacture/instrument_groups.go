@@ -62,9 +62,6 @@ func componentMesh(prototypes map[[sha256.Size]byte]*mesh.Mesh,
 	piece part,
 ) (*mesh.Mesh, error) {
 	skin := piece.shape.skin(piece.fine)
-	if len(skin) > mostFaces {
-		return nil, errTooMany
-	}
 	key := componentFingerprint(skin)
 	polygon := prototypes[key]
 	if polygon == nil {

@@ -52,8 +52,8 @@ func oldPicture(made Hud, img *image.RGBA, rows int, at time.Duration,
 		cell, _ := cover.At(place.X, place.Y)
 		corner := image.Pt(place.X*wide, place.Y*high)
 		min := img.Bounds().Min.Add(corner)
-		paint(img, image.Rectangle{min, min.Add(image.Pt(wide, high))},
-			cell, face)
+		far := min.Add(image.Pt(wide, high))
+		paint(img, image.Rectangle{min, far}, cell, face)
 	}
 	return nil
 }

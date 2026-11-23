@@ -16,6 +16,7 @@ import (
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/raw"
 	"github.com/janearc/slayer/render/frame"
+	"github.com/janearc/slayer/trace"
 )
 
 // runner draws a planned job and writes what it asks for.
@@ -46,6 +47,17 @@ type kit struct {
 	source    source
 	developer developer
 	titles    titler // nil where the job says none
+	// rows is where a still's rows are kept and said; nil for a film
+	rows *keptRows
+}
+
+// keepingSource is a source whose frame keeps its rows as they are
+// drawn and takes up those an earlier draw of the same frame kept, as a
+// session does; a frame it draws where no rows are kept, on the
+// graphics card, says its progress on said.
+type keepingSource interface {
+	FrameKeeping(ctx context.Context, index int, rows trace.Rows,
+		said io.Writer) (drawn, error)
 }
 
 // made is one frame, drawn and finished, and where its time went.
@@ -98,16 +110,35 @@ func (run runner) drawStill() error {
 	if err != nil {
 		return err
 	}
-	err = errors.Join(run.still(tools), tools.source.Close())
+	tools.rows = run.rowsKept()
+	err = run.still(tools)
+	tools.rows.close()
+	if err == nil {
+		tools.rows.forget()
+	}
+	err = errors.Join(err, tools.source.Close())
 	if err != nil || !run.keeping() {
 		return err
 	}
 	return run.keepPicture()
 }
 
+// light is frame index's light from the kit's source, its rows kept
+// where the kit has rows and the source keeps them.
+func (tools kit) light(ctx context.Context, index int) (drawn, error) {
+	keeping, keeps := tools.source.(keepingSource)
+	if tools.rows == nil || !keeps {
+		return tools.source.Frame(ctx, index)
+	}
+	return keeping.FrameKeeping(ctx, index, tools.rows, tools.rows.out)
+}
+
 // keeping is whether this still's picture goes through the cache: the
-// real workshop's, and with no raw asked for, since the raw is not kept.
-func (run runner) keeping() bool { return run.keeps && run.at.raw == "" }
+// real workshop's, and with no raw and no places table asked for, since
+// neither is kept.
+func (run runner) keeping() bool {
+	return run.keeps && run.at.raw == "" && run.at.stood == ""
+}
 
 // unclaimed refuses a still whose picture is already in its folder
 // under the renders home and was drawn from another job file, by name,
@@ -155,6 +186,9 @@ func (run runner) tools() (kit, error) {
 		return kit{}, err
 	}
 	if err := run.cached(opened); err != nil {
+		return kit{}, errors.Join(err, opened.Close())
+	}
+	if err := run.placed(opened); err != nil {
 		return kit{}, errors.Join(err, opened.Close())
 	}
 	tools := kit{source: opened}
@@ -205,7 +239,7 @@ type oceanSpectrumNoting interface {
 func (run runner) frame(tools kit, index int, at time.Duration) (made,
 	error) {
 	start := run.now()
-	light, err := tools.source.Frame(run.ctx, index)
+	light, err := tools.light(run.ctx, index)
 	if err != nil {
 		return made{}, err
 	}

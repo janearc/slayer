@@ -1,0 +1,46 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# the rings test with the sea and the camera lifted 5 m, picked, to see
+# whether the shards are the air's ground at altitude nought showing
+# through the troughs of a sea whose mean is also at nought.
+scene:
+  name: rings on the sea, lifted
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 236.2, altitude: 24}
+  film:
+    width: 1600
+    height: 1000
+    rays: 2
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      seawater:
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.2656, 0.0584, 0.0141]
+        source: "pure seawater, as honopu.yaml has it: Pope and Fry 1997, Morel 1974, from oceantex"
+    ocean:
+      material: seawater
+      middle: [0, 0, 5]
+      sea:
+        wind: {value: 3, unit: m/s}
+        fetch: {value: 5000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "the bay seal's sea: a light breeze in a sheltered bay, no shelf source"
+  cameras:
+    swell:
+      title: "low over the water, 3 m off the middle"
+      location: {at: [2.2, -2.2, 5.7]}
+      orientation: {look_at: [0.1, 0, 5.0]}

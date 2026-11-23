@@ -70,7 +70,8 @@ func chromaticity(light moonlight.Spectrum) swatch.XY {
 func lookSpectrum(fields *Fields, zenith float64,
 	look maths.Vec) moonlight.Spectrum {
 	view := axisOf((look.Y+one)/two, fields.views)
-	round := axisOf(folded(roundOf(look))/math.Pi, fields.azimuths)
+	foldedRound := folded(roundOf(look))
+	round := axisOf(foldedRound/math.Pi, fields.azimuths)
 	return fields.seen(func(wave int) float64 {
 		slice := fields.slice(wave, zenith)
 		at := func(row, column int) float64 {
@@ -279,10 +280,11 @@ func reportZenithAndHorizon(t *testing.T, fields *Fields, degrees float64) {
 		lower.Y, luminous(low)/luminous(top))
 	for row := middle; row < middle+lowestRows; row++ {
 		cosine := centre(row, fields.views)*two - one
+		rowLuminance := luminous(rowSpectrum(fields, zenith,
+			row))
 		t.Logf("  view bin %d, %.2f degrees up: luminance %.4g, the mean "+
 			"round the azimuths, at a unit of sun", row,
-			math.Asin(cosine)/degree, luminous(rowSpectrum(fields, zenith,
-				row)))
+			math.Asin(cosine)/degree, rowLuminance)
 	}
 }
 

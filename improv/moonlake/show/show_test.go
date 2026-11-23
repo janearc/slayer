@@ -52,9 +52,9 @@ func TestTheBeatAtAMomentIsTheScores(t *testing.T) {
 				beat.Since(), each.index, each.bar, each.beat, each.since)
 		}
 	}
-	if beat := score.BeatAt(4.25); !beat.Downbeat() || beat.Struck() != 4.0 {
-		t.Errorf("4.25 s: downbeat %v, struck %v", beat.Downbeat(),
-			beat.Struck())
+	if beat := score.BeatAt(4.25); beat.InBar() != 1 || beat.struck != 4.0 {
+		t.Errorf("4.25 s: in bar %v, struck %v", beat.InBar(),
+			beat.struck)
 	}
 }
 
@@ -64,7 +64,7 @@ func TestBeforeTheGridNoBeatIsLit(t *testing.T) {
 	score := testScore(t)
 	before := score.BeatAt(1.99)
 	if before.On() || before.Bar() != 0 || before.InBar() != 0 ||
-		before.Downbeat() {
+		before.InBar() == 1 {
 		t.Errorf("before the grid: on %v, bar %d.%d", before.On(),
 			before.Bar(), before.InBar())
 	}
@@ -76,7 +76,7 @@ func TestBeforeTheGridNoBeatIsLit(t *testing.T) {
 // a carried beat is marked as carried: measured says which beats the
 // drums played.
 func TestACarriedBeatIsMarkedCarried(t *testing.T) {
-	score, err := ParseScore([]byte(`score:
+	score, err := parseScore([]byte(`score:
   beats:
     times: [1, 2, 3, 4]
     measured: [1, 0, 0, 1]`))
@@ -94,7 +94,7 @@ func TestACarriedBeatIsMarkedCarried(t *testing.T) {
 // the anti-test: a score with no measured list carries every beat, and
 // a grid that is too short or does not rise is refused by name.
 func TestAScoreWithoutAGridIsRefused(t *testing.T) {
-	score, err := ParseScore([]byte("score: {beats: {times: [1, 2]}}"))
+	score, err := parseScore([]byte("score: {beats: {times: [1, 2]}}"))
 	if err != nil || score.BeatAt(1).Measured() {
 		t.Errorf("no measured list: %v, measured %v", err,
 			score.BeatAt(1).Measured())
@@ -104,8 +104,8 @@ func TestAScoreWithoutAGridIsRefused(t *testing.T) {
 		"score: {beats: {times: [2, 1]}}": "do not rise",
 		"score: [":                        "the score",
 	} {
-		if _, err := ParseScore([]byte(raw)); err == nil ||
-			!errors.Is(err, ErrShow) || !strings.Contains(err.Error(), says) {
+		if _, err := parseScore([]byte(raw)); err == nil ||
+			!errors.Is(err, errShow) || !strings.Contains(err.Error(), says) {
 			t.Errorf("%q gave %v, not a refusal saying %q", raw, err, says)
 		}
 	}
@@ -117,7 +117,7 @@ func TestAScoreWithoutAGridIsRefused(t *testing.T) {
 // a score's notes come back with their start, end and loudness, and a
 // track it lacks is empty.
 func TestAScoreKeepsItsNotes(t *testing.T) {
-	score, err := ParseScore([]byte(`score:
+	score, err := parseScore([]byte(`score:
   tracks:
     chant:
       - {at_sec: 1.5, dur: 0.25, vel: 70}
@@ -127,15 +127,16 @@ func TestAScoreKeepsItsNotes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	notes := score.Track("chant")
-	if len(notes) != 2 || notes[0].Start() != 1.5 || notes[0].End() != 1.75 ||
-		notes[0].Vel() != 70 || notes[1].Start() != 3 {
+	notes := score.tracks["chant"]
+	if len(notes) != 2 || notes[0].start != 1.5 ||
+		notes[0].start+notes[0].length != 1.75 ||
+		notes[0].vel != 70 || notes[1].start != 3 {
 		t.Errorf("the chant reads back as %+v", notes)
 	}
 	if score.Duration() != 9 || len(score.Beats()) != 2 {
 		t.Errorf("duration %v, beats %v", score.Duration(), score.Beats())
 	}
-	if lead := score.Track("lead"); len(lead) != 0 {
+	if lead := score.tracks["lead"]; len(lead) != 0 {
 		t.Errorf("a track the score lacks has %d notes", len(lead))
 	}
 }
@@ -153,8 +154,8 @@ func TestACueFiresAtItsBarAndNotBefore(t *testing.T) {
 		t.Fatal(err)
 	}
 	// 1.1 sets rig 0.5, beams 4; 2.1 (4 s) fades the rig to 1
-	if before.Rig() != 0.5 || before.Beams() != 4 {
-		t.Errorf("in bar one: rig %v, beams %d", before.Rig(), before.Beams())
+	if before.Rig() != 0.5 || before.now.beams != 4 {
+		t.Errorf("in bar one: rig %v, beams %d", before.Rig(), before.now.beams)
 	}
 	// 3.1 at 6 s sets moon 1 and its pulse; before it the moon is 0.2
 	if moon, _ := sheet.At(5.99, 24); !(math.Abs(moon.Moon()-0.2) <= near) {
@@ -163,8 +164,8 @@ func TestACueFiresAtItsBarAndNotBefore(t *testing.T) {
 	if moon, _ := sheet.At(6.0, 24); !(math.Abs(moon.Moon()-1) <= near) {
 		t.Errorf("on its cue the moon is %v, not 1", moon.Moon())
 	}
-	if after.Overhead() != 0 || after.Search() != 0 || after.StrobesOn() ||
-		after.FloodsOn() {
+	if after.Overhead() != 0 || after.now.search != 0 ||
+		after.now.strobes != restStrobes || after.now.floods != restFloods {
 		t.Errorf("parts no cue set moved: %v", after.Lines())
 	}
 }
@@ -180,12 +181,12 @@ func TestASheetOffTheGridIsRefusedByName(t *testing.T) {
 		`cues: [{at: "1.1", search_moves: [spin]}]`: `"spin"`,
 		`cues: [`: "the cue sheet",
 	} {
-		if _, err := ParseSheet([]byte(raw), score); err == nil ||
+		if _, err := parseSheet([]byte(raw), score); err == nil ||
 			!strings.Contains(err.Error(), says) {
 			t.Errorf("%s gave %v, not a refusal naming %s", raw, err, says)
 		}
 	}
-	if _, err := ParseSheet([]byte("cues: []"), nil); err == nil {
+	if _, err := parseSheet([]byte("cues: []"), nil); err == nil {
 		t.Error("a sheet with no score was read")
 	}
 	if _, err := ReadSheet("testdata/none.yaml", score); err == nil {
@@ -209,7 +210,7 @@ func TestEachCueIsFiredWithItsWords(t *testing.T) {
 		t.Errorf("1.1 fired at %v as %q, kill %v", first.At(), first.Words(),
 			first.Kill())
 	}
-	if fired[0].Words() != "0.0s  " || !fired[0].Sets(PartMaster) ||
+	if fired[0].Words() != "0.0s  " || !fired[0].Sets(partMaster) ||
 		!fired[0].Sets(PartMoon) {
 		t.Errorf("the first cue fired as %q", fired[0].Words())
 	}
@@ -219,7 +220,7 @@ func TestEachCueIsFiredWithItsWords(t *testing.T) {
 // nought and nothing else.
 func TestACueSetsOnlyWhatItNames(t *testing.T) {
 	score := testScore(t)
-	sheet, err := ParseSheet([]byte(`cues:
+	sheet, err := parseSheet([]byte(`cues:
   - {at: "1.1", rig: 0, strobes: lead, mist: 0.5, sweep_bars: 2}
   - {at: "1.2", rig: 0.3}`), score)
 	if err != nil {
@@ -245,7 +246,7 @@ func TestACueSetsOnlyWhatItNames(t *testing.T) {
 // frame, the lasers with their pulse, the searchlights struck on the beat.
 func TestTheLevelsOfAFrame(t *testing.T) {
 	score := testScore(t)
-	sheet, err := ParseSheet([]byte(`cues:
+	sheet, err := parseSheet([]byte(`cues:
   - {at: "1.1", rig: 1, strobes: lead, hot: 80, hotter: 85, floods: ones,
      search: 0.5, search_beat: 1, pulse: "x...............", decay: 1}`),
 		score)
@@ -253,8 +254,9 @@ func TestTheLevelsOfAFrame(t *testing.T) {
 		t.Fatal(err)
 	}
 	on, _ := sheet.At(2.0, 24)
-	if !on.Strobe() || !on.StrobesOn() || on.Lasers() != 1 ||
-		on.Floods() != 1 || on.Searchlights() != 0.5 || !on.FloodsOn() {
+	if !on.Strobe() || on.now.strobes == restStrobes || on.Lasers() != 1 ||
+		on.Floods() != 1 || on.Searchlights() != 0.5 ||
+		on.now.floods == restFloods {
 		t.Errorf("on the first beat: %v", on.Lines())
 	}
 	off, _ := sheet.At(2.25, 24)
@@ -274,7 +276,7 @@ func TestTheLevelsOfAFrame(t *testing.T) {
 // the anti-test: a moon behind the rim shows nothing, however bright its
 // cue sets it.
 func TestAMoonBehindTheRimIsDark(t *testing.T) {
-	sheet, err := ParseSheet([]byte(`cues: [{at_sec: 0, moon: 1, moon_alt: 0}]`),
+	sheet, err := parseSheet([]byte(`cues: [{at_sec: 0, moon: 1, moon_alt: 0}]`),
 		testScore(t))
 	if err != nil {
 		t.Fatal(err)
@@ -282,7 +284,7 @@ func TestAMoonBehindTheRimIsDark(t *testing.T) {
 	if hidden, _ := sheet.At(1, 24); hidden.Moon() != 0 {
 		t.Errorf("behind the rim the moon is %v", hidden.Moon())
 	}
-	if sheet.Score() == nil {
+	if sheet.score == nil {
 		t.Error("the sheet lost its score")
 	}
 }
@@ -305,7 +307,7 @@ func TestGridStrobesBurnTheirDuty(t *testing.T) {
 		{"lattice", 2.0, -1, -1},
 		{"off", 2.0, 0, 0},
 	} {
-		sheet, err := ParseSheet([]byte(`cues: [{at_sec: 0, strobes: `+
+		sheet, err := parseSheet([]byte(`cues: [{at_sec: 0, strobes: `+
 			each.mode+`, duty: 0.3}]`), score)
 		if err != nil {
 			t.Fatal(err)
@@ -321,7 +323,7 @@ func TestGridStrobesBurnTheirDuty(t *testing.T) {
 // a moment says itself as cueshow's lines: every key, the lists taken in
 // turn from their cues, and the bar, or intro before the grid.
 func TestAMomentSaysItselfAsCueshowsLines(t *testing.T) {
-	sheet, err := ParseSheet([]byte(`cues:
+	sheet, err := parseSheet([]byte(`cues:
   - {at_sec: 0, master: 0.5, floods: lead, hot: 70}
   - {at: "2.1", figures: [scan, beam], figure_bars: 1, banks: [offset],
      search_moves: [chase, fan], search_move_bars: 1}`), testScore(t))
@@ -330,7 +332,7 @@ func TestAMomentSaysItselfAsCueshowsLines(t *testing.T) {
 	}
 	early, _ := sheet.At(1, 24)
 	if !strings.Contains(early.Lines(), "bar=intro\n") ||
-		early.Master() != 0.5 {
+		early.master() != 0.5 {
 		t.Errorf("before the grid:\n%s", early.Lines())
 	}
 	// the lead's 90 at 2.0 s fires the left flood, 80 at 2.75 the right

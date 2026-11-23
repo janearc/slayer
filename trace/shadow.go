@@ -24,6 +24,9 @@ const shadowSeed = 77
 // is no grain.
 func (volume placedVolume) opticalDepth(point, toward maths.Vec,
 	far float64) float64 {
+	if !volume.meets(maths.Ray{At: point, Dir: toward}, far) {
+		return 0
+	}
 	ray := volume.at.RayIn(maths.Ray{At: point, Dir: toward})
 	depth := 0.0
 	for _, inside := range volume.intervals(ray, far/volume.scale) {
@@ -44,8 +47,10 @@ func (volume placedVolume) opticalDepth(point, toward maths.Vec,
 // the length of one step toward a lamp.
 const wobblesPerStep = 2
 
-// stagger is how far into its first step a march toward a lamp starts, from
-// zero to one, by a smooth noise over the point of the world.
+// stagger is how far into its first step a march toward a lamp starts, about
+// zero to one, by a smooth noise over the point of the world. The noise is
+// seldom past one either way and can be a little, so a start can fall a
+// hair before its step or a hair past it.
 //
 // step is the step's length in the medium's own units, which in the world is
 // that times the volume's scale, so the noise turns over wobblesPerStep times

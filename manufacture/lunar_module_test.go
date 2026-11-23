@@ -97,7 +97,8 @@ func TestALunarModuleThatCannotBeBuiltIsRefused(t *testing.T) {
 		if !strings.Contains(whole, each.was) {
 			t.Fatalf("%s: the file has no %q to change", name, each.was)
 		}
-		_, err := readLunar([]byte(strings.Replace(whole, each.was, each.is, 1)))
+		edited := strings.Replace(whole, each.was, each.is, 1)
+		_, err := readLunar([]byte(edited))
 		if err == nil {
 			t.Errorf("%s: read without refusal", name)
 			continue

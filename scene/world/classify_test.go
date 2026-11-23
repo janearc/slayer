@@ -18,7 +18,7 @@ func classed(t *testing.T, c *chart, seed uint64, cold float64,
 	w.height = height
 	w.fixed = make([]Biome, len(height))
 	for i := range w.fixed {
-		w.fixed[i] = Unfixed
+		w.fixed[i] = unfixed
 	}
 	ends(t, "classify", w.classify)
 	return w.biome
@@ -80,23 +80,23 @@ func TestColdIsLatitudeHeightAndTheWorld(t *testing.T) {
 // rain at 1, 4, 5, 8 and 9 tiles is 0.8538, 0.5313, 0.4538, 0.2823 and
 // 0.2410: jungle, forest, grass, grass, desert.
 func TestRainFallsWithTheDistanceFromTheSea(t *testing.T) {
-	for _, c := range []struct {
+	for _, each := range []struct {
 		tiles int
 		want  map[int]Biome
 	}{
 		{10, map[int]Biome{1: Forest, 2: Grass, 3: Desert, 4: Desert}},
 		{10000, map[int]Biome{1: Jungle, 4: Forest, 5: Grass, 8: Grass, 9: Desert}},
 	} {
-		ch := chained(c.tiles, along(c.tiles)...)
-		height := make([]float64, c.tiles)
+		ch := chained(each.tiles, along(each.tiles)...)
+		height := make([]float64, each.tiles)
 		for i := range height {
 			height[i] = 0.5
 		}
 		height[0] = -0.5
 		got := classed(t, ch, 1, 0, height)
-		for k, want := range c.want {
+		for k, want := range each.want {
 			if got[k] != want {
-				t.Errorf("%d tiles, %d from the sea: %d, want %d", c.tiles, k,
+				t.Errorf("%d tiles, %d from the sea: %d, want %d", each.tiles, k,
 					got[k], want)
 			}
 		}
@@ -129,22 +129,22 @@ func TestTheNoiseOfColdAndRain(t *testing.T) {
 	}
 	var probes []probe
 	for len(probes) < 24 {
-		p, margin, want := place(), 0.004, Tundra
+		point, margin, want := place(), 0.004, Tundra
 		if len(probes)%2 == 1 {
 			margin, want = -0.004, Desert
 		}
-		n := noise.Fractal(seed+60, p.X*4, p.Y*4, p.Z*4, 3)
-		probes = append(probes, probe{p, (0.88 + margin - 0.225 - 0.12*n) / 1.05, want})
+		n := noise.Fractal(seed+60, point.X*4, point.Y*4, point.Z*4, 3)
+		probes = append(probes, probe{point, (0.88 + margin - 0.225 - 0.12*n) / 1.05, want})
 	}
 	for len(probes) < 48 {
-		p := place()
-		m := noise.Fractal(seed+61, p.X*3, p.Y*3, p.Z*3, 3)
+		point := place()
+		m := noise.Fractal(seed+61, point.X*3, point.Y*3, point.Z*3, 3)
 		if r := math.Exp(-0.5) + 0.3*m; math.Abs(r-0.5) < 0.006 {
 			want := Forest
 			if r < 0.5 {
 				want = Grass
 			}
-			probes = append(probes, probe{p, 0, want})
+			probes = append(probes, probe{point, 0, want})
 		}
 	}
 	ch := chained(1 + len(probes))

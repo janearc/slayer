@@ -11,7 +11,7 @@ var glintSea = Sea{Wind: 7, Fetch: 500000, Toward: math.Pi / 2}
 
 // Cox and Munk's clean-surface slope at 7 m/s is 0.003 + 0.00512 * 7.
 func TestCoxMunkSlopeAtSevenMetresASecond(t *testing.T) {
-	if got := CoxMunkSlope(7); math.Abs(got-0.03884) > 1e-12 {
+	if got := coxMunkSlope(7); math.Abs(got-0.03884) > 1e-12 {
 		t.Fatalf("Cox and Munk at 7 m/s = %v, want 0.03884", got)
 	}
 }
@@ -19,12 +19,12 @@ func TestCoxMunkSlopeAtSevenMetresASecond(t *testing.T) {
 // Anti-test: the slope is both ways together, not the along-wind
 // variance alone, and a calm or backward wind leaves only the offset.
 func TestCoxMunkSlopeIsBothWaysAndCalmIsTheOffset(t *testing.T) {
-	along, _ := Roughness(7)
-	if CoxMunkSlope(7) == along {
+	along, _ := roughness(7)
+	if coxMunkSlope(7) == along {
 		t.Fatal("the slope is the along-wind variance alone")
 	}
 	for _, wind := range []float64{0, -3} {
-		if got := CoxMunkSlope(wind); got != 0.003 {
+		if got := coxMunkSlope(wind); got != 0.003 {
 			t.Errorf("wind %v gives %v, want the calm 0.003", wind, got)
 		}
 	}
@@ -34,7 +34,7 @@ func TestCoxMunkSlopeIsBothWaysAndCalmIsTheOffset(t *testing.T) {
 func TestResolvedSlopeRisesWithFinerGrids(t *testing.T) {
 	last := 0.0
 	for _, spacing := range []float64{4, 2, 1, 0.5, 0.25} {
-		got := glintSea.ResolvedSlope(spacing)
+		got := glintSea.resolvedSlope(spacing)
 		if !(got > last) {
 			t.Errorf("a %v m grid resolves %v, no more than the coarser %v",
 				spacing, got, last)
@@ -48,11 +48,11 @@ func TestResolvedSlopeRisesWithFinerGrids(t *testing.T) {
 // nothing of what a 1 m grid does.
 func TestResolvedSlopeOfNoSeaIsNothing(t *testing.T) {
 	for _, sea := range []Sea{{Wind: 0, Fetch: 500000}, {Wind: 7}} {
-		if got := sea.ResolvedSlope(1); got != 0 {
+		if got := sea.resolvedSlope(1); got != 0 {
 			t.Errorf("%+v resolves %v", sea, got)
 		}
 	}
-	coarse, fine := glintSea.ResolvedSlope(1000), glintSea.ResolvedSlope(1)
+	coarse, fine := glintSea.resolvedSlope(1000), glintSea.resolvedSlope(1)
 	if !(coarse < fine/1000) {
 		t.Errorf("a 1 km grid resolves %v of a 1 m grid's %v", coarse, fine)
 	}
@@ -61,12 +61,12 @@ func TestResolvedSlopeOfNoSeaIsNothing(t *testing.T) {
 // The integral agrees with the sum over a patch's own grid, which holds
 // the same waves: 512 m at 512 a side, 1 m cells, against a 1 m grid.
 func TestResolvedSlopeMatchesAPatchSum(t *testing.T) {
-	patch, err := NewPatch(glintSea, 512, 512, 1)
+	patch, err := newPatch(glintSea, 512, 512, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	along, across := patch.Resolved()
-	got, want := glintSea.ResolvedSlope(1), along+across
+	along, across := patch.resolved()
+	got, want := glintSea.resolvedSlope(1), along+across
 	if math.Abs(got/want-1) > 0.02 {
 		t.Errorf("integral %v, patch sum %v", got, want)
 	}
@@ -79,8 +79,8 @@ func TestSlopeBudgetAtTheReelSeaGrid(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if budget.Total != CoxMunkSlope(7) ||
-		budget.Resolved != glintSea.ResolvedSlope(1) ||
+	if budget.Total != coxMunkSlope(7) ||
+		budget.Resolved != glintSea.resolvedSlope(1) ||
 		budget.Unresolved != budget.Total-budget.Resolved ||
 		budget.Nyquist != math.Pi || budget.Floored || budget.Exceeds {
 		t.Fatalf("budget at 1 m = %+v", budget)

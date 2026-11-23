@@ -33,14 +33,16 @@ func writeClicks(t *testing.T, path string, seconds int) {
 	}
 	var out bytes.Buffer
 	out.WriteString("RIFF")
-	binary.Write(&out, binary.LittleEndian, uint32(36+data.Len()))
+	riffSize := uint32(36 + data.Len())
+	binary.Write(&out, binary.LittleEndian, riffSize)
 	out.WriteString("WAVEfmt ")
 	for _, field := range []any{uint32(16), uint16(1), uint16(2),
 		uint32(rate), uint32(rate * 4), uint16(4), uint16(16)} {
 		binary.Write(&out, binary.LittleEndian, field)
 	}
 	out.WriteString("data")
-	binary.Write(&out, binary.LittleEndian, uint32(data.Len()))
+	dataSize := uint32(data.Len())
+	binary.Write(&out, binary.LittleEndian, dataSize)
 	out.Write(data.Bytes())
 	if err := os.WriteFile(path, out.Bytes(), 0o644); err != nil {
 		t.Fatal(err)
@@ -254,7 +256,8 @@ func TestAnalyseRefusesAFileThatIsNotAudio(t *testing.T) {
 	audio := filepath.Join(dir, "track.wav")
 	writeClicks(t, audio, 6)
 	for _, args := range [][]string{{text}, {audio, "--drums", text}} {
-		out := filepath.Join(dir, fmt.Sprintf("score-%d.yaml", len(args)))
+		scoreName := fmt.Sprintf("score-%d.yaml", len(args))
+		out := filepath.Join(dir, scoreName)
 		code, _, errs := analyseRun(append(args, "--out", out)...)
 		if code == 0 || !strings.Contains(errs, "movie:") {
 			t.Errorf("%v: exit %d, error %q, want the movie reader's "+

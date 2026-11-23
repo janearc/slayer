@@ -17,7 +17,7 @@ import (
 	"github.com/gogpu/ui/widget"
 	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
 	"github.com/janearc/slayer/ferruccio/native/internal/headless"
-	"github.com/janearc/slayer/hillside/placement"
+	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 )
 

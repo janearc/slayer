@@ -93,7 +93,8 @@ func TestAnotherWorkerCannotStartWhileTheFirstOwnsExecution(t *testing.T) {
 	}
 	executor := NewMockExecutor(gomock.NewController(t))
 	executor.EXPECT().Run(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, j Job, _ io.Writer) Result {
-		if err := s.Work(t.Context(), NewMockExecutor(gomock.NewController(t)), false); !errors.Is(err, ErrActive) {
+		idle := NewMockExecutor(gomock.NewController(t))
+		if err := s.Work(t.Context(), idle, false); !errors.Is(err, ErrActive) {
 			t.Fatal(err)
 		}
 		if err := s.Recover(t.Context(), j.Sequence, j.Worker, true); !errors.Is(err, ErrActive) {

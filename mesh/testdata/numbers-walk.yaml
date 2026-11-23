@@ -1,0 +1,97 @@
+# every number walk_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: walk-ball-subdivisions
+    value: 3
+    says: how many times the faces of the ball are divided
+    kind: picked
+    by: enough faces, twelve hundred and eighty, for a tree several levels deep
+  - name: walk-points
+    value: 1000
+    says: how many points each walk is asked about
+    kind: picked
+    by: a thousand is many enough for the counts to settle and few enough to run quickly
+  - name: walk-sphere-seed-first
+    value: 7
+    says: the first part of the seed of the points on spheres
+    kind: picked
+    by: any seed fixes the points; this one gives the points the bounds were taken from
+  - name: walk-sphere-seed-second
+    value: 8
+    says: the second part of the seed of the points on spheres
+    kind: picked
+    by: the next whole number after the first part, so the two differ
+  - name: walk-row-seed-first
+    value: 9
+    says: the first part of the seed of the points round a row of faces
+    kind: picked
+    by: a seed other than the spheres', so the two sets of points differ
+  - name: walk-row-seed-second
+    value: 10
+    says: the second part of the seed of the points round a row of faces
+    kind: picked
+    by: the next whole number after the first part, so the two differ
+  - name: walk-row-faces
+    value: 40
+    says: how many faces the row has, each place along it a power of two
+    kind: picked
+    by: two runs of twenty doublings, so the row spans sizes from one to half a million
+  - name: walk-row-doublings
+    value: 20
+    says: how many doublings of place a run of the row goes through
+    kind: picked
+    by: a million and a half stays well inside what a float64 holds exactly
+  - name: walk-row-growth
+    value: 0.5
+    says: how much farther along the second run of the row stands than the first
+    kind: picked
+    by: half as far again, so the second run lies between the places of the first
+  - name: walk-row-reach-doublings
+    value: 21
+    says: how many doublings along the row the random points reach
+    kind: picked
+    by: one more than the row's last doubling, so points fall past its end
+  - name: walk-row-spread
+    value: 5
+    says: the spread of the random points across the row
+    kind: picked
+    by: several times the height of a face, so points are near and far from it
+  - name: walk-best-face
+    value: 3
+    says: the place of the best face so far, to which others are compared
+    kind: picked
+    by: between the faces the cases try, so some are earlier and some later
+  - name: walk-best-squared
+    value: 1
+    says: how far the best face so far is, squared, or how far along
+    kind: picked
+    by: a distance the cases can match, undercut and overshoot
+  - name: walk-square-height
+    value: 2
+    says: the height on z of the square of two faces
+    kind: picked
+    by: a height off the plane the point is taken at, so the distance is not zero
+  - name: walk-over-distance
+    value: 2
+    says: how far the point over the square is from it
+    kind: picked
+    by: the point's height less the square's, worked out from the files
+  - name: walk-most-nodes
+    value: 107
+    says: the most nodes a walk may enter for one point
+    kind: picked
+    by: the most measured, 102, and a twentieth more
+  - name: walk-most-faces
+    value: 60
+    says: the most faces a walk may try for one point
+    kind: picked
+    by: the most measured, 57, and a twentieth more
+  - name: walk-total-nodes
+    value: 37753
+    says: the most nodes the walks for all the points may enter together
+    kind: picked
+    by: the total measured, 35955, and a twentieth more
+  - name: walk-total-faces
+    value: 17225
+    says: the most faces the walks for all the points may try together
+    kind: picked
+    by: the total measured, 16405, and a twentieth more

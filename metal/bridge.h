@@ -24,6 +24,13 @@ const char *slayer_metal_name(void *ctx);
 // wait for it gives up with an error and the context is no longer used.
 void slayer_metal_limit(void *ctx, double seconds);
 
+// slayer_stop_waits stops every wait for a command, in every context and
+// session of the process, when stop is non-zero, and lets them wait
+// again when it is zero. A stopped wait returns at its next look, the
+// context or session it waited in is not used again, and the command it
+// waited for is left to the device.
+void slayer_stop_waits(int stop);
+
 // slayer_metal_points runs the kernel once per point: points is n packed
 // triples of floats, out has room for n floats, and the parameters are
 // copied to buffer 2 as given.
@@ -62,7 +69,8 @@ int slayer_metal_grid_commit(void *stream, int first, int down, char *err,
                              int errlen);
 // slayer_metal_grid_wait waits out the oldest band in flight. stopped is
 // one when the system stopped it for the display: the stream and its
-// kernel stay usable and the same rows may be committed again.
+// kernel stay usable and the same rows may be committed again. It
+// returns 2, not 1, when the wait was stopped by slayer_stop_waits.
 int slayer_metal_grid_wait(void *stream, int *stopped, char *err,
                            int errlen);
 // slayer_metal_grid_copy copies the band last waited out, down rows, into
@@ -153,6 +161,19 @@ int slayer_metal_reaccelerate(void *ctx, const void *vertices, long length,
                               const float *matrices,
                               const uint32_t *references, int root,
                               int *unavailable, char *err, int errlen);
+// slayer_metal_accelerate_over is slayer_metal_accelerate, or with
+// replace the reaccelerate, reading the vertices from input index of a
+// grid stream of the same context, in place, instead of making a copy of
+// them. The input must already hold exactly the vertices' bytes; one of
+// another length is not used and the vertices are copied as they are
+// without it. The context keeps no reference to the input after the call.
+int slayer_metal_accelerate_over(void *ctx, void *stream, int index,
+                                 int replace, const void *vertices,
+                                 long length, int stride,
+                                 const int32_t *nodes, int count,
+                                 const float *matrices,
+                                 const uint32_t *references, int root,
+                                 int *unavailable, char *err, int errlen);
 // A context holds the mesh structures its last two builds placed, under
 // their positions, and a group's structure while its placements and
 // children stay: a later build keeps what it can, refits a deformed mesh

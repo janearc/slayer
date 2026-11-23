@@ -35,8 +35,10 @@ func TestPictureWrapsTheSphere(t *testing.T) {
 	// by the package's own spin (TestAThinDiscWindsWithTime) is east of
 	// plus x: the map is drawn mirrored, as it was first drawn, and held
 	// so. this holds what is, not what is right.
-	minusZ := pic.At(maths.V(math.Cos(-0.3), 0, math.Sin(-0.3)))
-	plusZ := pic.At(maths.V(math.Cos(0.3), 0, math.Sin(0.3)))
+	minusZPoint := maths.V(math.Cos(-0.3), 0, math.Sin(-0.3))
+	minusZ := pic.At(minusZPoint)
+	plusZPoint := maths.V(math.Cos(0.3), 0, math.Sin(0.3))
+	plusZ := pic.At(plusZPoint)
 	if !(minusZ.R > 0.9 && minusZ.B < 0.1) || !(plusZ.B > 0.9 && plusZ.R < 0.1) {
 		t.Errorf("toward minus z is %v and toward plus z is %v", minusZ, plusZ)
 	}
@@ -46,8 +48,10 @@ func TestPictureWrapsTheSphere(t *testing.T) {
 	if (Picture{}).At(maths.XAxis) != (maths.Light{}) {
 		t.Error("no picture gave light")
 	}
+	right := maths.V(math.Cos(0.3), 0, math.Sin(0.3))
+	left := maths.V(math.Cos(-0.3), 0, math.Sin(-0.3))
 	// the right half is blue: water; the left is red: land
-	if !pic.Water(maths.V(math.Cos(0.3), 0, math.Sin(0.3))) || pic.Water(maths.V(math.Cos(-0.3), 0, math.Sin(-0.3))) {
+	if !pic.Water(right) || pic.Water(left) {
 		t.Error("the map's water is not where its blue is")
 	}
 }

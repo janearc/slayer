@@ -1,5 +1,3 @@
-//go:build netcdf
-
 package main
 
 // A weather layer for the earth: a gridded variable read through

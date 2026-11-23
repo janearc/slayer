@@ -2,6 +2,8 @@ package set
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/manufacture"
@@ -16,8 +18,16 @@ type Recipe struct {
 	vacantLotIndex                                 manufacture.CityVacantLotIndexMode
 	design                                         string
 	season                                         string
+	script                                         string
+	carries                                        []string
 	diameter, aperture, opening, azimuth, altitude float64
 	segmented                                      bool
+	tower                                          manufacture.TowerSpec
+	bridge                                         manufacture.BridgeSpec
+	street                                         manufacture.StreetSpec
+	lashings                                       manufacture.LashingsSpec
+	parcel                                         superblockAsk
+	digest                                         string
 }
 
 // Kind names the construction rule shared by these specimens.
@@ -33,6 +43,14 @@ func (recipe Recipe) VacantLotIndex() manufacture.CityVacantLotIndexMode {
 	return recipe.vacantLotIndex
 }
 
+// Script is the script the recipe asks the words of its signs to be in,
+// or nothing if it says none, which is Latin capitals.
+func (recipe Recipe) Script() string { return recipe.script }
+
+// Carries are the trades the recipe asks every building it makes to
+// carry a sign of, once each, whatever the weights of the sign culture say.
+func (recipe Recipe) Carries() []string { return slices.Clone(recipe.carries) }
+
 // Construction selects the checked solid recipe. Volumetric fire uses Fire.
 func (recipe Recipe) Construction() (*manufacture.Kind, error) {
 	if recipe.kind == "space-observatory" {
@@ -42,6 +60,22 @@ func (recipe Recipe) Construction() (*manufacture.Kind, error) {
 	row, err := manufacture.KindNamed(recipe.kind)
 	if recipe.kind == "optical-observatory" {
 		row, err = manufacture.Observatory(recipe.Optical())
+	}
+	if recipe.kind == "tower" && err == nil {
+		row, err = manufacture.Tower(recipe.tower)
+	}
+	if recipe.kind == "bridge" && err == nil {
+		row, err = manufacture.Bridge(recipe.bridge)
+	}
+	if recipe.kind == "street" && err == nil {
+		row, err = manufacture.Street(recipe.street)
+	}
+	if recipe.kind == manufacture.LashedStreetKind && err == nil {
+		row, err = manufacture.LashedStreet(recipe.lashings)
+	}
+	if recipe.kind == manufacture.VillageKind && err == nil {
+		row, err = manufacture.Village(manufacture.VillageSpec{
+			Width: recipe.parcel.width, Depth: recipe.parcel.depth})
 	}
 	if err != nil {
 		return nil, err
@@ -60,6 +94,13 @@ func (recipe Recipe) Construction() (*manufacture.Kind, error) {
 	}
 	if recipe.vacantLotIndex != "" {
 		row, err = manufacture.WithCityVacantLotIndex(row, recipe.vacantLotIndex)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if recipe.script != "" || len(recipe.carries) > 0 {
+		row, err = manufacture.WithScript(row, recipe.script,
+			recipe.carries)
 		if err != nil {
 			return nil, err
 		}
@@ -114,6 +155,13 @@ func (reading reader) complexity(target *string) step {
 	return reading.word(target, manufacture.Complexities()...)
 }
 
+// placedComplexity accepts what complexity does, or levelled: a thing or
+// a stand drawn as finely as the set's camera sees it.
+func (reading reader) placedComplexity(target *string) step {
+	return reading.word(target, append(manufacture.Complexities(),
+		manufacture.Levelled)...)
+}
+
 // quantity checks both the value and its unit; a missing half is an error.
 func (reading reader) quantity(target *float64, unit string, lo, hi float64) step {
 	return func(_, node *yaml.Node) error {
@@ -128,7 +176,7 @@ func (reading reader) quantity(target *float64, unit string, lo, hi float64) ste
 
 // recipes reads construction independently of placement.
 func (reading reader) recipes(_, node *yaml.Node) error {
-	return reading.each(node, func(name, block *yaml.Node) error {
+	return reading.each(node, reading.digested(func(name, block *yaml.Node) error {
 		if valueOf(block, "kind") == "fire" {
 			return reading.fireRecipe(name, block)
 		}
@@ -136,9 +184,19 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 			return reading.spacecraftRecipe(name, block)
 		}
 		r := Recipe{}
-		err := reading.keys(block, map[string]step{
-			"kind":   reading.word(&r.kind, manufacture.KindNames()...),
-			"season": reading.word(&r.season, manufacture.SeasonNames()...),
+		steps := map[string]step{
+			"kind":         reading.word(&r.kind, manufacture.KindNames()...),
+			"season":       reading.word(&r.season, manufacture.SeasonNames()...),
+			"script":       reading.word(&r.script, manufacture.SignScripts()...),
+			"carries":      reading.words(&r.carries),
+			"irregularity": reading.irregularity(&r.tower, &r.bridge),
+			"pins":         reading.towerPins(&r.tower),
+			"span":         reading.quantity(&r.bridge.Span, "m", 1, bridgeMostSpan),
+			"bare":         reading.boolean(&r.bridge.Bare),
+			"depth":        reading.bridgeDepth(&r.bridge),
+			"wetness":      reading.number(&r.street.Wetness, 0, 1),
+			"parcel":       reading.parcel(&r.parcel),
+			"length":       reading.quantity(&r.street.Length, "m", 8, 100),
 			"batch-placement": func(key, value *yaml.Node) error {
 				if err := reading.only(string(manufacture.CityBatchFused),
 					string(manufacture.CityBatchNested))(key, value); err != nil {
@@ -172,12 +230,48 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 				"pointing": reading.block(map[string]step{
 					"azimuth":  reading.number(&r.azimuth, 0, 360),
 					"altitude": reading.number(&r.altitude, 0, 90)})}),
-		}, nil)
-		if err != nil {
+		}
+		maps.Copy(steps, reading.lashingKeys(&r.lashings))
+		if err := reading.keys(block, steps, nil); err != nil {
+			return err
+		}
+		if err := reading.lashingsRefused(r, name, block); err != nil {
 			return err
 		}
 		if r.kind == "" {
 			return reading.refuse(block, "recipe %s needs a kind", name.Value)
+		}
+		if r.kind != "tower" && r.kind != "bridge" && says(block, "irregularity") {
+			return reading.refuse(block, "recipe %s is not a tower or a bridge", name.Value)
+		}
+		if r.kind != "tower" && says(block, "pins") {
+			return reading.refuse(block, "recipe %s is not a tower", name.Value)
+		}
+		if r.kind != "bridge" && (says(block, "span") ||
+			says(block, "depth") || says(block, "bare")) {
+			return reading.refuse(block, "recipe %s is not a bridge", name.Value)
+		}
+		if r.bridge.Bare && says(block, "depth") {
+			return reading.refuse(block, "recipe %s is a bare bridge, "+
+				"which has no lots to nest, so no depth", name.Value)
+		}
+		if r.kind != "street" && says(block, "wetness") {
+			return reading.refuse(block, "recipe %s is not a street", name.Value)
+		}
+		if r.kind != manufacture.VillageKind && says(block, "parcel") {
+			return reading.refuse(block, "recipe %s is not a village, so "+
+				"it has no parcel", name.Value)
+		}
+		if r.kind != "street" && r.kind != manufacture.LashedStreetKind &&
+			says(block, "length") {
+			return reading.refuse(block, "recipe %s is not a street or a "+
+				"lashed street, so it has no length", name.Value)
+		}
+		if r.kind == "tower" || r.kind == "bridge" || r.kind == "street" ||
+			r.kind == manufacture.VillageKind {
+			if _, err := r.Construction(); err != nil {
+				return reading.refuse(block, "%v", err)
+			}
 		}
 		if r.kind == "optical-observatory" {
 			if _, err := manufacture.Observatory(r.Optical()); err != nil {
@@ -186,7 +280,7 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 		} else if says(block, "enclosure") || says(block, "telescope") {
 			return reading.refuse(block, "recipe %s is not an optical observatory", name.Value)
 		}
-		if r.season != "" {
+		if r.season != "" || r.script != "" || len(r.carries) > 0 {
 			if _, err := r.Construction(); err != nil {
 				return reading.refuse(block, "%v", err)
 			}
@@ -198,7 +292,7 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 		}
 		reading.set.recipes[name.Value] = r
 		return nil
-	})
+	}))
 }
 
 // resolvedRecipes runs after all blocks so references work in either order.

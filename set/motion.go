@@ -64,7 +64,7 @@ func (reading reader) motions(_, value *yaml.Node) error {
 		err := reading.keys(block, map[string]step{
 			"seconds": reading.number(&made.seconds, 1/float64(time.Second),
 				longest),
-			"ease":   reading.word(&made.ease, thing.Eases...),
+			"ease":   reading.word(&made.ease, thing.Eases()...),
 			"hold":   reading.yes(&made.hold),
 			"frames": reading.framed(&made.frames),
 		}, nil)

@@ -9,8 +9,6 @@ import (
 
 // Sound is a stereo soundtrack: float32 samples in -1..1, left then
 // right, at a stated rate. The zero Sound is no sound at all.
-//
-//ninja:vow practice NewSound and ReadSound make one and Request takes it
 type Sound struct {
 	rate    int
 	samples []float32 // interleaved, left then right
@@ -24,11 +22,11 @@ func NewSound(rate int, interleaved []float32) (Sound, error) {
 		return Sound{}, fmt.Errorf("movie: a sound at %d samples a "+
 			"second is not offered: use one of %v", rate, soundRates)
 	}
-	if len(interleaved) == 0 {
+	if len(interleaved) == zero {
 		return Sound{}, fmt.Errorf("movie: a sound with no samples: " +
 			"leave the Sound out for a movie with no audio track")
 	}
-	if len(interleaved)%channels != 0 {
+	if len(interleaved)%channels != zero {
 		return Sound{}, fmt.Errorf("movie: %d samples is not whole "+
 			"stereo pairs: give left then right for every instant",
 			len(interleaved))
@@ -57,8 +55,8 @@ func (sound Sound) Length() int { return len(sound.samples) / channels }
 
 // Duration is how long the sound plays.
 func (sound Sound) Duration() time.Duration {
-	if sound.rate == 0 {
-		return 0
+	if !positive(sound.rate) {
+		return zero
 	}
 	seconds := float64(sound.Length()) / float64(sound.rate)
 	return time.Duration(seconds * float64(time.Second))
@@ -68,7 +66,7 @@ func (sound Sound) Duration() time.Duration {
 func (sound Sound) Samples() []float32 { return slices.Clone(sound.samples) }
 
 // present is whether there is any sound: the zero Sound has none.
-func (sound Sound) present() bool { return sound.rate != 0 }
+func (sound Sound) present() bool { return sound.rate != zero }
 
 // instantOf is the first instant of the sound that plays with frame
 // index at that frame rate: index * soundRate / frameRate, rounded
@@ -90,44 +88,53 @@ func (sound Sound) span(first, last, frameRate int) []float32 {
 	return out
 }
 
-// fromChannels is a sound from interleaved decoded samples with that
-// many channels: mono is put on both sides, stereo kept, and more
-// refused. Samples past full scale are clipped to it.
-func fromChannels(rate, count int, decoded []float32) (Sound, error) {
+// stereoOf is the samples of interleaved decoded sound with that many
+// channels as stereo: mono is put on both sides, stereo kept, and more
+// refused, as is a sound with no whole instant in it. Samples past full
+// scale are clipped to it.
+func stereoOf(count int, decoded []float32) ([]float32, error) {
 	if count != mono && count != channels {
-		return Sound{}, fmt.Errorf("movie: the sound has %d channels: "+
+		return nil, fmt.Errorf("movie: the sound has %d channels: "+
 			"only mono and stereo are read", count)
 	}
-	if len(decoded) == 0 {
-		return Sound{}, fmt.Errorf("movie: the sound holds no samples")
+	if len(decoded) == zero {
+		return nil, fmt.Errorf("movie: the sound holds no samples")
 	}
 	for place, sample := range decoded {
 		if math.IsNaN(float64(sample)) {
-			return Sound{}, fmt.Errorf("movie: decoded sample %d is not "+
+			return nil, fmt.Errorf("movie: decoded sample %d is not "+
 				"a number: the file is damaged", place)
 		}
 	}
-	out := make([]float32, 0, len(decoded)/count*channels)
-	for place := 0; place+count <= len(decoded); place += count {
+	out := make([]float32, zero, len(decoded)/count*channels)
+	lastChannel := count - one
+	for place := zero; place+count <= len(decoded); place += count {
 		left := clip(decoded[place])
-		right := clip(decoded[place+count-1])
+		right := clip(decoded[place+lastChannel])
 		out = append(out, left, right)
 	}
-	return newSound(rate, out), nil
+	if len(out) == zero {
+		return nil, fmt.Errorf("movie: the sound holds %d samples, fewer "+
+			"than one instant of %d channels", len(decoded), count)
+	}
+	return out, nil
 }
 
 // clip keeps a decoded sample within full scale.
 func clip(sample float32) float32 {
 	value := float64(sample)
-	return float32(math.Max(-fullScale, math.Min(fullScale, value)))
+	within := math.Min(fullScale, value)
+	return float32(math.Max(-fullScale, within))
 }
 
 // Slice copies a range of stereo instants without first copying the whole
 // soundtrack. The returned Sound owns its samples, just like NewSound.
 // Endpoints are half-open and must describe at least one complete instant.
 func (sound Sound) Slice(first, last int) (Sound, error) {
-	if first < 0 || last <= first || last > sound.Length() {
-		return Sound{}, fmt.Errorf("movie: invalid sound slice [%d,%d) of %d instants", first, last, sound.Length())
+	if first < zero || last <= first || last > sound.Length() {
+		return Sound{}, fmt.Errorf("movie: invalid sound slice [%d,%d) "+
+			"of %d instants", first, last, sound.Length())
 	}
-	return newSound(sound.rate, slices.Clone(sound.samples[first*channels:last*channels])), nil
+	from, to := first*channels, last*channels
+	return newSound(sound.rate, slices.Clone(sound.samples[from:to])), nil
 }

@@ -1,0 +1,95 @@
+# bridge of buildings: a span of about two kilometres over flat dark water,
+# whose structure is buildings. the pylons are towers, one each side of the
+# deck; the deck is a level with terraces and condominiums down both sides
+# of a street; the main cables hang between the pylon tops with hangers to
+# the deck; the approaches step down to the shore as lower buildings. dusk
+# into night. made by the cities package (manufacture/cities), through the
+# manufactory's kind bridge, from manufacture/cities/cultures/bridge.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the bridge
+# runs east and west along x. the water, the shores, the sun and the
+# cameras are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: bridge of buildings
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    whole:
+      title: "the whole bridge, from the south"
+      location:
+        at: [0, -2300, 120]
+      orientation:
+        look_at: [0, 0, 70]
+    street:
+      title: "along the deck street, at eye height"
+      location:
+        at: [-900, 0, 76.7]
+      orientation:
+        look_at: [0, 0, 74]
+    pylon:
+      title: "up at a pylon, from the water"
+      location:
+        at: [-260, -330, 2]
+      orientation:
+        look_at: [-260, 0, 120]
+  recipes:
+    span:
+      kind: bridge
+      irregularity: 0.5
+      span: {value: 2000, unit: m}
+      depth: 2
+  set:
+    things:
+      the bridge:
+        recipe: span
+        seed: 3
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  world:
+    unit: 1
+    materials:
+      water:
+        colour: {srgb_linear: [0.01, 0.014, 0.02]}
+        source: eye
+      land:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+    boxes:
+      water:
+        material: water
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+      west shore:
+        material: land
+        middle: [-2000, 0, 0]
+        size: [1900, 3000, 4]
+        source: eye
+      east shore:
+        material: land
+        middle: [2000, 0, 0]
+        size: [1900, 3000, 4]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [0.9, 0.4, 0.22]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.08, 0.05, 0.06]}
+      zenith: {srgb_linear: [0.004, 0.008, 0.025]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

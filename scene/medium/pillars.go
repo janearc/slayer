@@ -7,6 +7,55 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
+// stackColumns is how many columns Density places on the stack, so a Pillars
+// of that many or fewer, built by a literal, allocates nothing per call.
+const stackColumns = 8 // defined: the size Prepared's documentation states
+
+// The shapes of the pillars are chosen for the picture, in choices.yaml.
+//
+// Placement: the columns' base is the width over the count times
+// pillarsBaseDivisor; a column's height is pillarsHeightLeast of Height plus
+// up to pillarsHeightRange more; the hashes of x, z and height are the seed
+// plus pillarsSeedX, pillarsSeedZ and pillarsSeedHeight.
+//
+// The wall: a pillarsWall share of Height, ragged by pillarsWallRag of Height
+// of noise read at pillarsWallScale over pillarsWallOctaves octaves, soft over
+// pillarsWallEdge of Height.
+//
+// The columns: tapering by pillarsTaper; their noise read at
+// pillarsNoiseScale over the base, from the seed plus pillarsSeedNoise, over
+// pillarsOctaves octaves, building the column out by pillarsBuild of a base;
+// the edge soft over pillarsEdge of a base.
+//
+// The filaments: noise stretched
+// pillarsStretch times along y, read at pillarsStreak over the base from the
+// seed plus pillarsSeedStreak, over pillarsStreakOctaves octaves, thinning
+// where it is below pillarsStreakThreshold.
+var (
+	fog                  = choice("pillars-fog")
+	pillarsBaseDivisor   = choice("pillars-base-divisor")
+	pillarsHeightLeast   = choice("pillars-height-least")
+	pillarsHeightRange   = choice("pillars-height-range")
+	pillarsSeedX         = choiceSeed("pillars-seed-x")
+	pillarsSeedZ         = choiceSeed("pillars-seed-z")
+	pillarsSeedHeight    = choiceSeed("pillars-seed-height")
+	pillarsWall          = choice("pillars-wall")
+	pillarsWallRag       = choice("pillars-wall-rag")
+	pillarsWallScale     = choice("pillars-wall-scale")
+	pillarsWallOctaves   = choiceCount("pillars-wall-octaves")
+	pillarsWallEdge      = choice("pillars-wall-edge")
+	pillarsTaper         = choice("pillars-taper")
+	pillarsNoiseScale    = choice("pillars-noise-scale")
+	pillarsSeedNoise     = choiceSeed("pillars-seed-noise")
+	pillarsOctaves       = choiceCount("pillars-octaves")
+	pillarsBuild         = choice("pillars-build")
+	pillarsEdge          = choice("pillars-edge")
+	pillarsStreak        = choice("pillars-streak")
+	pillarsStretch       = choice("pillars-stretch")
+	pillarsSeedStreak    = choiceSeed("pillars-seed-streak")
+	pillarsStreakOctaves = choiceCount("pillars-streak-octaves")
+)
+
 // Pillars is a nebula's pillars of gas, as the eagle's: Count columns standing
 // on a wall of gas along the bottom, up y, none taller than Height, spread
 // across Width, each tapering as it rises, rounded at the tip, and eaten into
@@ -38,24 +87,27 @@ type column struct {
 
 // columns is the pillars, each placed, sized and tapered by hash; a count of
 // zero or less is none.
-func (p Pillars) columns() []column { return p.appendColumns(nil) }
+func (pillars Pillars) columns() []column { return pillars.appendColumns(nil) }
 
 // appendColumns is columns, appended to out, so that a caller with a buffer
 // of room for them does not allocate.
-func (p Pillars) appendColumns(out []column) []column {
-	if p.Count <= 0 {
+func (pillars Pillars) appendColumns(out []column) []column {
+	if pillars.Count <= nought {
 		return out
 	}
-	w := p.Width / 2
-	base := p.Width / (float64(p.Count) * 3.2)
-	for i := range p.Count {
-		k := int64(i)
+	half := pillars.Width / double
+	base := pillars.Width / (float64(pillars.Count) * pillarsBaseDivisor)
+	for index := range pillars.Count {
+		hashed := int64(index)
 		out = append(out, column{
-			x: -w + p.Width*(float64(i)+0.5)/float64(p.Count) +
-				(noise.Hash(p.Seed+1, k)-0.5)*base,
-			z: (noise.Hash(p.Seed+2, k) - 0.5) * 2 * base,
-			height: p.Height *
-				(0.55 + 0.45*noise.Hash(p.Seed+3, k)),
+			x: -half + pillars.Width*(float64(index)+halfway)/
+				float64(pillars.Count) +
+				(noise.Hash(pillars.Seed+pillarsSeedX, hashed)-halfway)*base,
+			z: (noise.Hash(pillars.Seed+pillarsSeedZ, hashed) - halfway) *
+				double * base,
+			height: pillars.Height * (pillarsHeightLeast +
+				pillarsHeightRange*
+					noise.Hash(pillars.Seed+pillarsSeedHeight, hashed)),
 			base: base,
 		})
 	}
@@ -72,91 +124,104 @@ func (p Pillars) appendColumns(out []column) []column {
 // value does not see a later edit to any of them, and does not depend on
 // Thick or Filaments, which may change freely. A prepared value is not
 // written to again, so render workers may share it.
-func (p Pillars) Prepared() Pillars {
-	p.held, p.prepared = p.columns(), true
-	return p
+func (pillars Pillars) Prepared() Pillars {
+	pillars.held, pillars.prepared = pillars.columns(), true
+	return pillars
 }
 
 // table is the columns, those Prepared held or else placed into buf.
-func (p Pillars) table(buf []column) []column {
-	if p.prepared {
-		return p.held
+func (pillars Pillars) table(buf []column) []column {
+	if pillars.prepared {
+		return pillars.held
 	}
-	return p.appendColumns(buf)
+	return pillars.appendColumns(buf)
 }
 
 // Tips is where the pillars end: the top of each column, where the
 // young stars are found.
-func (p Pillars) Tips() []maths.Vec {
-	var out []maths.Vec
-	var buf [8]column
-	for _, c := range p.table(buf[:0]) {
-		out = append(out, maths.V(c.x, c.height, c.z))
+func (pillars Pillars) Tips() []maths.Vec {
+	var tips []maths.Vec
+	var stack [stackColumns]column
+	for _, one := range pillars.table(stack[:nought]) {
+		tips = append(tips, maths.V(one.x, one.height, one.z))
 	}
-	return out
+	return tips
 }
 
 // Bounds is the box the pillars stand in, as deep as it is wide.
-func (p Pillars) Bounds() maths.Box {
-	w := p.Width / 2
-	return maths.Box{Min: maths.V(-w, 0, -w), Max: maths.V(w, p.Height, w)}
+func (pillars Pillars) Bounds() maths.Box {
+	half := pillars.Width / double
+	return corners(maths.V(-half, nought, -half),
+		maths.V(half, pillars.Height, half))
 }
 
-// fog is the thin gas between the pillars, as a share of Thick: enough
-// to catch a little starlight, not enough to grey the picture.
-const fog = 0.003
+// wall is the gas along the bottom, a share of the height, ragged on top: how
+// much of the pillars' Thick it is at the point, or zero above it.
+func (pillars Pillars) wall(point maths.Vec) float64 {
+	ragged := pillarsWallRag * pillars.Height * noise.Fractal(pillars.Seed,
+		point.X/pillars.Height*pillarsWallScale, nought,
+		point.Z/pillars.Height*pillarsWallScale, pillarsWallOctaves)
+	top := pillarsWall*pillars.Height + ragged
+	if !(point.Y < top) {
+		return nought
+	}
+	edge := maths.Smooth(top-pillarsWallEdge*pillars.Height, top, point.Y)
+	return unity - edge
+}
+
+// rise is one column's share of Thick at the point: tapering as it rises,
+// domed at the tip, eaten into by noise, and streaked when Filaments says so.
+func (pillars Pillars) rise(one column, index int, point maths.Vec) float64 {
+	height, base := one.height, one.base
+	if point.Y > height {
+		return nought
+	}
+	radius := base * (unity - pillarsTaper*point.Y/height)
+	// the tip, a dome a radius deep
+	if from := height - radius; point.Y > from {
+		dome := (point.Y - from) / radius
+		radius *= math.Sqrt(math.Max(nought, unity-dome*dome))
+	}
+	across := math.Hypot(point.X-one.x, point.Z-one.z)
+	// eaten into by noise: the edge wanders, the tip is knobbed
+	frequency := pillarsNoiseScale / base
+	seed := pillars.Seed + pillarsSeedNoise + uint64(index)
+	x, y, z := point.X*frequency, point.Y*frequency, point.Z*frequency
+	grain := noise.Fractal(seed, x, y, z, pillarsOctaves)
+	// built out by the noise, by up to about a whole base and in
+	// by a seventh, half a base out on the whole, so the columns
+	// are fat, solid and knobbed rather than wispy
+	across += (grain - halfway) * pillarsBuild * base
+	got := unity - maths.Smooth(radius-pillarsEdge*base, radius, across)
+	if pillars.Filaments > nought && got > nought {
+		// streaks up the column: a noise stretched along y, ragged at
+		// every scale, thinning the gas where it is low
+		streak := pillarsStreak / base
+		fine := noise.Fractal(seed+pillarsSeedStreak, point.X*streak,
+			point.Y*streak/pillarsStretch, point.Z*streak,
+			pillarsStreakOctaves)
+		got *= unity - pillars.Filaments*math.Min(unity,
+			math.Max(nought, halfway-fine))
+	}
+	return got
+}
 
 // Density is the wall, the columns and the fog, whichever is most.
-func (p Pillars) Density(at maths.Vec) float64 {
-	if p.Height <= 0 || p.Width <= 0 || p.Count <= 0 {
-		return 0
+func (pillars Pillars) Density(point maths.Vec) float64 {
+	if pillars.Height <= nought || pillars.Width <= nought ||
+		pillars.Count <= nought {
+		return nought
 	}
-	w := p.Width / 2
-	if at.Y < 0 || at.Y > p.Height || math.Abs(at.X) > w ||
-		math.Abs(at.Z) > w {
-		return 0
+	half := pillars.Width / double
+	if point.Y < nought || point.Y > pillars.Height ||
+		math.Abs(point.X) > half || math.Abs(point.Z) > half {
+		return nought
 	}
-	most := fog
-	// the wall along the bottom, a fifth of the height, ragged on top
-	ragged := 0.06 * p.Height * noise.Fractal(p.Seed, at.X/p.Height*3, 0,
-		at.Z/p.Height*3, 3)
-	if top := 0.2*p.Height + ragged; at.Y < top {
-		edge := maths.Smooth(top-0.08*p.Height, top, at.Y)
-		most = math.Max(most, 1-edge)
-	}
+	most := math.Max(fog, pillars.wall(point))
 	// the columns, each its own
-	var buf [8]column
-	for i, c := range p.table(buf[:0]) {
-		h, base := c.height, c.base
-		if at.Y > h {
-			continue
-		}
-		r := base * (1 - 0.35*at.Y/h)
-		// the tip, a dome a radius deep
-		if from := h - r; at.Y > from {
-			u := (at.Y - from) / r
-			r *= math.Sqrt(math.Max(0, 1-u*u))
-		}
-		rho := math.Hypot(at.X-c.x, at.Z-c.z)
-		// eaten into by noise: the edge wanders, the tip is knobbed
-		f := 1.5 / base
-		seed := p.Seed + 10 + uint64(i)
-		x, y, z := at.X*f, at.Y*f, at.Z*f
-		n := noise.Fractal(seed, x, y, z, 4)
-		// built out by the noise, by up to about a whole base and in
-		// by a seventh, half a base out on the whole, so the columns
-		// are fat, solid and knobbed rather than wispy
-		rho += (n - 0.5) * 0.9 * base
-		got := 1 - maths.Smooth(r-0.3*base, r, rho)
-		if p.Filaments > 0 && got > 0 {
-			// streaks up the column: a noise stretched three
-			// times along y, ragged at every scale, thinning
-			// the gas where it is low
-			g := 3 / base
-			m := noise.Fractal(seed+50, at.X*g, at.Y*g/3, at.Z*g, 4)
-			got *= 1 - p.Filaments*math.Min(1, math.Max(0, 0.5-m))
-		}
-		most = math.Max(most, got)
+	var stack [stackColumns]column
+	for index, one := range pillars.table(stack[:nought]) {
+		most = math.Max(most, pillars.rise(one, index, point))
 	}
-	return p.Thick * most
+	return pillars.Thick * most
 }

@@ -1,0 +1,525 @@
+# every number the planet package chose that is not true by definition, with
+# what it is and why it was chosen. the code asks for each by name, through
+# pick. a number true by definition is a constant in the code whose comment
+# says it is defined. where the code gave no reason for a number, its row
+# says so, and none is made up.
+numbers:
+  - name: sodium-d2
+    value: 588.995095
+    unit: nm
+    says: "sodium's d2 line, in nanometres in air"
+    kind: picked
+    by: "nist's atomic spectra database, rated aa (nist-asd-na-i-visible on the shelf); its place in the project's sources is to be pinned"
+  - name: sodium-d1
+    value: 589.592424
+    unit: nm
+    says: "sodium's d1 line, in nanometres in air"
+    kind: picked
+    by: "nist's atomic spectra database, rated aa (nist-asd-na-i-visible on the shelf); its place in the project's sources is to be pinned"
+  - name: d-line-share
+    value: 0.5
+    says: "how much of the airglow each of sodium's two d lines holds"
+    kind: picked
+    by: "the two lines are taken as alike in strength; their measured ratio is not looked up"
+  - name: glow-grazing
+    value: 0.05
+    says: "the least cosine of the eye's height a thin glowing layer is taken at"
+    kind: picked
+    by: "it keeps the layer's path through it finite at the limb; no reason for the number itself was written down"
+  - name: pole-cosine-floor
+    value: 0.05
+    says: "the least cosine of a latitude that a front's east-west step is widened by"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: front-step
+    value: 1.0
+    unit: degrees
+    says: "how many degrees across a front is read"
+    kind: picked
+    by: "about three weather cells at 1024 round, so the solver's ripples a cell wide are not taken for fronts"
+  - name: front-most
+    value: 6.0
+    says: "how many times a front brightens the airglow at most"
+    kind: picked
+    by: "it keeps the steepest edge the weather draws finite; no reason for the number itself was written down"
+  - name: calm-rows
+    value: 32
+    says: "how many rows the even grid over the airglow band is read on, to find its calm"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: calm-round
+    value: 128
+    says: "how many columns the even grid over the airglow band is read on, to find its calm"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: tint-blue-wavelength
+    value: 400
+    unit: nm
+    says: "the wavelength a tint's blue value is set at, held shorter"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: tint-red-wavelength
+    value: 700
+    unit: nm
+    says: "the wavelength a tint's red value is set at, held longer"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: layer-share-tolerance
+    value: 1.0e-9
+    says: "how far the shares of a layer's gases may sum from one and still be taken as summing to it"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: ladder-rungs
+    value: 16
+    says: "how many steps of cooking each zone's column is made in, from fresh to full"
+    kind: picked
+    by: "the face reads between two rungs in a straight line and a haze's light is not straight in its depth, so more rungs come closer to its own; no reason for sixteen was written down"
+  - name: flow-lift
+    value: 2.0
+    says: "how far a vortex's spin, against twice the planet's, lifts or sinks its air, per unit of spin"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: flow-mark-start
+    value: 0.3
+    says: "the spin past which a vortex of a flow shows a cap or a clearing"
+    kind: picked
+    by: "at a tenth, turbulence crossed it nearly everywhere"
+  - name: flow-mark-span
+    value: 0.3
+    says: "how much more spin than flow-mark-start brings a vortex's cap or clearing in full"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: flow-fade-start
+    value: 70.0
+    unit: degrees
+    says: "the latitude past which a flow fades into the plain bands"
+    kind: picked
+    by: "inside the weather's walls at 80 degrees"
+  - name: flow-wall
+    value: 78.0
+    unit: degrees
+    says: "the latitude at which a flow's fade into the plain bands is complete"
+    kind: picked
+    by: "inside the weather's walls at 80 degrees, where a flow's last row fans out to the pole"
+  - name: neon-strength-1
+    value: 0.00128145
+    says: "the numerator of the first term of neon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-ne-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: neon-pole-1
+    value: 184.661
+    says: "the pole, in square micrometres, of the first term of neon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-ne-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: neon-strength-2
+    value: 0.0220486
+    says: "the numerator of the second term of neon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-ne-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: neon-pole-2
+    value: 376.840
+    says: "the pole, in square micrometres, of the second term of neon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-ne-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: krypton-strength-1
+    value: 0.00253637
+    says: "the numerator of the first term of krypton's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-kr-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: krypton-pole-1
+    value: 65.4742
+    says: "the pole, in square micrometres, of the first term of krypton's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-kr-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: krypton-strength-2
+    value: 0.00273649
+    says: "the numerator of the second term of krypton's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-kr-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: krypton-pole-2
+    value: 73.698
+    says: "the pole, in square micrometres, of the second term of krypton's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-kr-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: krypton-strength-3
+    value: 0.0620802
+    says: "the numerator of the third term of krypton's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-kr-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: krypton-pole-3
+    value: 181.08
+    says: "the pole, in square micrometres, of the third term of krypton's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-kr-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: xenon-strength-1
+    value: 0.00322869
+    says: "the numerator of the first term of xenon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-xe-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: xenon-pole-1
+    value: 46.301
+    says: "the pole, in square micrometres, of the first term of xenon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-xe-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: xenon-strength-2
+    value: 0.00355393
+    says: "the numerator of the second term of xenon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-xe-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: xenon-pole-2
+    value: 59.578
+    says: "the pole, in square micrometres, of the second term of xenon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-xe-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: xenon-strength-3
+    value: 0.0606764
+    says: "the numerator of the third term of xenon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-xe-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: xenon-pole-3
+    value: 112.74
+    says: "the pole, in square micrometres, of the third term of xenon's refractive index fit"
+    kind: picked
+    by: "bideau-mehu, guern, abjean and johannin-gilles 1981, as the refractiveindex.info database gives it (rii-xe-bideau-mehu); its place in the project's sources is to be pinned"
+  - name: methane-index-constant
+    value: 4869.8
+    says: "the constant of methane's refractive index less one, times 1e8"
+    kind: picked
+    by: "he and others' table 1 (acp-21-14927), after sneep and ubachs 2005; its place in the project's sources is to be pinned"
+  - name: methane-index-strength
+    value: 4.1023e+14
+    says: "the numerator of methane's refractive index less one, times 1e8"
+    kind: picked
+    by: "he and others' table 1 (acp-21-14927), after sneep and ubachs 2005; its place in the project's sources is to be pinned"
+  - name: methane-index-pole
+    value: 1.133e+10
+    says: "the pole of methane's refractive index less one, in reciprocal centimetres squared"
+    kind: picked
+    by: "he and others' table 1 (acp-21-14927), after sneep and ubachs 2005; its place in the project's sources is to be pinned"
+  - name: methane-index-number
+    value: 2.546899e+25
+    says: "the number of molecules a cubic metre at which methane's refractive index was measured"
+    kind: picked
+    by: "he and others' table 1 (acp-21-14927), 2.546899e19 a cubic centimetre at 288.15 k and 101,325 pascals; its place in the project's sources is to be pinned"
+  - name: neon-molar-mass
+    value: 0.0201797
+    unit: kg/mol
+    says: "neon's molar mass"
+    kind: picked
+    by: "iupac's standard atomic weight; its place in the project's sources is to be pinned"
+  - name: krypton-molar-mass
+    value: 0.083798
+    unit: kg/mol
+    says: "krypton's molar mass"
+    kind: picked
+    by: "iupac's standard atomic weight; its place in the project's sources is to be pinned"
+  - name: xenon-molar-mass
+    value: 0.131293
+    unit: kg/mol
+    says: "xenon's molar mass"
+    kind: picked
+    by: "iupac's standard atomic weight; its place in the project's sources is to be pinned"
+  - name: methane-molar-mass
+    value: 0.016043
+    unit: kg/mol
+    says: "methane's molar mass"
+    kind: picked
+    by: "iupac's standard atomic weights; its place in the project's sources is to be pinned"
+  - name: zns-ag-yield
+    value: 0.18
+    says: "the share of absorbed x-ray power zinc sulphide doped with silver gives back as light"
+    kind: picked
+    by: "quoted by saleh, lynn and mccloy 2017; its place in the project's sources is to be pinned"
+  - name: zns-ag-peak
+    value: 450
+    unit: nm
+    says: "the middle of the light zinc sulphide doped with silver gives back"
+    kind: picked
+    by: "eljen's data sheet; its place in the project's sources is to be pinned"
+  - name: zns-ag-width
+    value: 80
+    unit: nm
+    says: "the width at half height of the light zinc sulphide doped with silver gives back"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: csi-tl-yield
+    value: 0.12
+    says: "the share of absorbed x-ray power caesium iodide doped with thallium gives back as light"
+    kind: picked
+    by: "worked from the lbl scintillator library's 55,000 to 61,000 photons a mev and its 560 nm peak, about 12 percent; its place in the project's sources is to be pinned"
+  - name: csi-tl-peak
+    value: 560
+    unit: nm
+    says: "the middle of the light caesium iodide doped with thallium gives back"
+    kind: picked
+    by: "the lbl scintillator library's peak; its place in the project's sources is to be pinned"
+  - name: csi-tl-width
+    value: 120
+    unit: nm
+    says: "the width at half height of the light caesium iodide doped with thallium gives back"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: bell-widths
+    value: 3
+    says: "how many widths either side of its middle a phosphor's bell of light is spread over"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: glow-faintness
+    value: 1.0e-12
+    says: "the density of a ring's glow slab against the ring's"
+    kind: picked
+    by: "so small the slab stops none of the light behind it"
+  - name: grain-emptiest
+    value: 0.95
+    says: "the share of a ring's plane its grains leave empty at the greatest clumping, which leaves a twentieth holding matter"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: grain-samples
+    value: 4096
+    says: "how many points of the plane a ring's grains are read at to find where their fill's edge falls"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: grain-tail-share
+    value: 20
+    says: "the tails of the sampled values, one in this many from either end, the softness of a clump's edge is read between"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: grain-point-seed-offset
+    value: 24301
+    says: "what a ring's seed is mixed with, by exclusive or, to draw the points its grains are read at (0x5eed)"
+    kind: picked
+    by: "picked; no reason was written down"
+  - name: grain-spread-seed-offset
+    value: 14
+    says: "what a ring's seed is mixed with, by exclusive or, to read the pattern that finds the spread of one layer (0x0e)"
+    kind: picked
+    by: "picked; no reason was written down"
+  - name: grain-settle-span
+    value: 64
+    says: "how many of the largest clumps across the points a ring's grains are read at lie"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: grain-settle-depth
+    value: 0.5
+    says: "where on the pattern's third axis the spread of one layer is read, in cells"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: grain-soft-share
+    value: 0.1
+    says: "how soft a clump's edge is, as a share of the spread between the sampled values' tails"
+    kind: picked
+    by: "a tenth of the layers' spread; no further reason was written down"
+  - name: grain-most-layers
+    value: 14
+    says: "the most doublings of size a ring's grains are drawn with"
+    kind: picked
+    by: "so a wide range of sizes costs no more than this"
+  - name: grain-hidden-widths
+    value: 3.75
+    says: "how many standard deviations of the hidden layers wide smoothstep's edge is taken over"
+    kind: picked
+    by: "smoothstep's slope at the middle matched to a normal spread's gives about 3.76; the code takes 3.75"
+  - name: moonlet-density
+    value: 900.0
+    unit: kg/m3
+    says: "a moonlet's density"
+    kind: picked
+    by: "about water ice's; moonlets in the rings of a ringed planet measure lower, being porous"
+  - name: moonlet-gap-reach
+    value: 6.0
+    says: "how many hill radii either side of its orbit a moonlet clears"
+    kind: picked
+    by: "between 4 and 9, the range read from two moonlets that hold gaps in a ringed planet's rings, one at a gap 325 km wide and about 19 km of hill radius, the other at 42 km and about 5"
+  - name: moonlet-wake
+    value: 400.0
+    says: "how many hill radii long a propeller's cleared lobes reach along the orbit, either side of the moonlet"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: moonlet-edge-width
+    value: 0.5
+    says: "how wide a gap's soft edge is, in the widths of the gap"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: moonlet-most
+    value: 10000
+    says: "the most moonlets a ring may be given"
+    kind: picked
+    by: "a ray's share of the ring loops over every moonlet, so the count is held to what a picture can afford; the number itself is by eye"
+  - name: ringlet-octaves
+    value: 5
+    says: "how many layers of ringlets there are, each finer and weaker than the one before"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: ringlet-finer
+    value: 2.3
+    says: "how many times finer each layer of ringlets is than the one before"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: ringlet-weaker
+    value: 0.6
+    says: "how strong each layer of ringlets is against the one before"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: ringlet-across
+    value: 0.5
+    says: "where across the ring's other two axes the ringlets' noise is read"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: ring-most-stretch
+    value: 100.0
+    says: "the most a ray's footprint is drawn out across a ring seen nearly edge on"
+    kind: picked
+    by: "so a ray grazing the plane still sees its largest clumps"
+  - name: agree-leave-out-two
+    value: 2
+    says: "which bands the second trial light of the agreement check leaves out, every this many"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: agree-leave-out-three
+    value: 3
+    says: "which bands the third trial light of the agreement check leaves out, every this many"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: agree-power-step
+    value: 0.37
+    says: "how much more power each band of the agreement check's trial light gets than the last"
+    kind: picked
+    by: "so no two bands are alike"
+  - name: jet-core-turbulence
+    value: 0.15
+    says: "how turbulent the air is at a jet's core, against one in the lanes where the jets turn about"
+    kind: picked
+    by: "after juno's pictures, laminar belts beside folded lanes"
+  - name: jet-lane-sharpness
+    value: 4
+    says: "how sharply the turbulence gathers into the lanes where the jets turn about"
+    kind: picked
+    by: "after juno's pictures, laminar belts beside folded lanes"
+  - name: vortex-stilling
+    value: 0.7
+    says: "how much of the air's turbulence a vortex stills where it holds its air"
+    kind: picked
+    by: "so its middle keeps the soft spiral grain juno's ovals show"
+  - name: turbulence-most-octaves
+    value: 16
+    says: "the most layers of turbulence, drawn where no pixel says how fine to stop, and the most drawn anywhere"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: turbulence-reach
+    value: 12.0
+    unit: degrees
+    says: "how far turbulence of strength one moves a latitude"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: fold-reach
+    value: 0.5
+    says: "how far each fold carries the air along its flow, in eddies"
+    kind: picked
+    by: "one long jump through a random field tears neighbouring pixels apart into noise; small steps along a smooth flow draw the air out into filaments instead"
+  - name: fold-stream-octaves
+    value: 3
+    says: "how many octaves the flow's stream function holds"
+    kind: picked
+    by: "small steps along a smooth flow draw the air out into filaments; no reason for three was written down"
+  - name: fold-steps
+    value: 8
+    says: "how many small steps each fold takes along its flow"
+    kind: picked
+    by: "small steps along a smooth flow draw the air out into filaments; no reason for eight was written down"
+  - name: fold-averaging
+    value: 2.0
+    says: "how many eddies a pixel must be drawn across by the folds before half of what they move is kept and half taken as its mean"
+    kind: picked
+    by: "as the pixel's light would average the filaments it cannot tell apart; no reason for two was written down"
+  - name: stream-nudge
+    value: 1.0e-3
+    says: "how far apart, in eddies, the stream function is read either side of a point to find its slope"
+    kind: picked
+    by: "far below an eddy"
+  - name: fold-most
+    value: 8
+    says: "the most times the flow may fold back on itself"
+    kind: picked
+    by: "so a set cannot ask a cost without end"
+  - name: fold-seed-stride
+    value: 1000
+    says: "how far apart the seeds of successive folds are"
+    kind: picked
+    by: "picked; no reason was written down"
+  - name: lift-seed-offset
+    value: 300
+    says: "how far the seed of the lift is from the turbulence's seed"
+    kind: picked
+    by: "picked; no reason was written down"
+  - name: fold-least-apart
+    value: 1.0e-6
+    says: "the least distance, in eddies, the second point a fold is read at stands from the first"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: frame-front-floor
+    value: 1.0e-9
+    says: "how short the way toward the eye may be, over the eye's distance, once the pole's part of it is taken out, before the frame takes a front of its own"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: spot-ovalness
+    value: 1.7
+    says: "how many times wider east to west than north to south a spot is drawn"
+    kind: picked
+    by: "near the great red spot's of recent decades, not pinned"
+  - name: swarm-most-spots
+    value: 2000
+    says: "the most spots a swarm may hold"
+    kind: picked
+    by: "so a set cannot ask a cost without end"
+  - name: swarm-turn
+    value: 2.5
+    says: "how far a swarm's spots turn at their middles, in half turns"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: swarm-highest
+    value: 75.0
+    unit: degrees
+    says: "how near the poles a swarm's spots are placed"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: swarm-largest
+    value: 30.0
+    unit: degrees
+    says: "the largest radius a swarm's spots may be given"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: vortex-holding
+    value: 0.3
+    says: "how far in from a vortex's edge, as a share of its radius, it holds its air whole against the jets"
+    kind: picked
+    by: "after juno's pictures"
+  - name: vortex-core
+    value: 0.6
+    says: "how far in from a vortex's edge, as a share of its radius, its cap or clearing is full"
+    kind: picked
+    by: "after juno's pictures"
+  - name: vortex-collar
+    value: 0.92
+    says: "how far out, as a share of a white oval's radius, its dark ring lies"
+    kind: picked
+    by: "after juno's pictures"
+  - name: vortex-collar-width
+    value: 0.08
+    says: "how wide a white oval's dark ring is, as a share of its radius"
+    kind: picked
+    by: "after juno's pictures"
+  - name: vortex-collar-clearing
+    value: 0.6
+    says: "how much of a clearing the dark ring of a white oval shows"
+    kind: picked
+    by: "picked by eye; no reason was written down"
+  - name: line-room
+    value: 16
+    says: "how many bands the pool's maps start with room for"
+    kind: picked
+    by: "the eye's own band count"
+  - name: chart-most-across
+    value: 16384
+    says: "the most points a chart holds round the equator"
+    kind: picked
+    by: "it holds the chart's table of tiles to a few megabytes however fine a cell is asked for; the number itself is by eye"

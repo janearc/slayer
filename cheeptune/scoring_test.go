@@ -51,7 +51,8 @@ func TestThePageQuotesEachExampleFileWhole(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(text, strings.TrimRight(string(b), "\n")) {
+		quoted := strings.TrimRight(string(b), "\n")
+		if !strings.Contains(text, quoted) {
 			t.Errorf("SCORING.md does not quote examples/%s.json", name)
 		}
 	}

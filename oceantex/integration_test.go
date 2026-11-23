@@ -14,7 +14,7 @@ func TestReferenceOceanRefusesUnboundedAllocationsBeforeRendering(t *testing.T) 
 	}{
 		{1 << 30, 1}, {2, math.Inf(1)}, {2, math.NaN()},
 	} {
-		if _, err := NewPatch(Sea{}, row.n, row.extent, 1); err == nil {
+		if _, err := newPatch(Sea{}, row.n, row.extent, 1); err == nil {
 			t.Fatal("unsafe wave grid accepted", row)
 		}
 	}

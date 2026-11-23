@@ -10,6 +10,9 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
+	"go.uber.org/mock/gomock"
 )
 
 const reuseScore = `score:
@@ -164,12 +167,6 @@ func TestErrorsReturnWithoutExitingAndKeepEvaluationOrder(t *testing.T) {
 			t.Fatal("nonfinite FPS accepted")
 		}
 	}
-	if _, err := Load("../cueshow/testdata/no-such-score", "../cueshow/testdata/cues.yaml"); err == nil {
-		t.Fatal("missing score accepted")
-	}
-	if _, err := Load("../cueshow/testdata/score.yaml", "../cueshow/testdata/no-such-cues"); err == nil {
-		t.Fatal("missing cues accepted")
-	}
 }
 
 func TestQuantizationMatchesTextRoundTripWithoutChangingRawFrame(t *testing.T) {
@@ -225,13 +222,12 @@ func TestQuantizationMatchesTextRoundTripWithoutChangingRawFrame(t *testing.T) {
 	}
 }
 
-type failingWriter struct{}
-
-func (failingWriter) Write(p []byte) (int, error) { return 0, errors.New("writer failed") }
-
 func TestWriteToReportsWriterFailure(t *testing.T) {
 	frame := frameAt(t, parsed(t, ""), 0, 24)
-	if n, err := frame.WriteTo(failingWriter{}); n != 0 || err == nil || err.Error() != "writer failed" {
+	failing := mocks.NewMockWriter(gomock.NewController(t))
+	failing.EXPECT().Write(gomock.Any()).Return(0, errors.New("writer failed")).
+		AnyTimes()
+	if n, err := frame.WriteTo(failing); n != 0 || err == nil || err.Error() != "writer failed" {
 		t.Fatal(fmt.Sprint(n, err))
 	}
 }

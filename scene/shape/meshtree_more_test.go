@@ -6,100 +6,275 @@ import (
 	"math/rand/v2"
 	"slices"
 	"sort"
+	"strconv"
 	"testing"
-	"time"
 
 	"github.com/janearc/slayer/maths"
 )
 
-// held is the faces under tree node i, by their numbers in the mesh,
-// smallest first.
-func held(m *Mesh, i int32) []int {
-	var out []int
-	var under func(i int32)
-	under = func(i int32) {
-		nd := m.nodes[i]
-		if nd.count > 0 {
-			for k := nd.next; k < nd.next+nd.count; k++ {
-				out = append(out, int(m.tris[k].face))
-			}
-			return
-		}
-		under(i + 1)
-		under(nd.next)
+// The axes of space, in the order the parts of a vector are kept.
+const (
+	meshtreeMoreAxisX = 0 // defined: the first axis
+	meshtreeMoreAxisY = 1 // defined: the second axis
+	meshtreeMoreAxisZ = 2 // defined: the third axis
+)
+
+// meshtreeMoreAxes is how many axes space has.
+const meshtreeMoreAxes = 3 // defined: space has three axes
+
+// meshtreeMoreRoot is the node a tree begins at.
+const meshtreeMoreRoot int32 = nought // defined: the first node is the root
+
+// meshtreeMoreFirst is the first half of a cut node, which comes next
+// after it in the tree.
+const meshtreeMoreFirst int32 = unity // defined: the node after the cut
+
+// The csv files this file reads, each a table of rows by name.
+const (
+	meshtreeMoreHalvings = "testdata/meshtree-more-halvings.csv"
+	meshtreeMoreNested   = "testdata/meshtree-more-nested.csv"
+	meshtreeMoreClusters = "testdata/meshtree-more-clusters.csv"
+	meshtreeMoreCuts     = "testdata/meshtree-more-cuts.csv"
+	meshtreeMoreSlabs    = "testdata/meshtree-more-slabs.csv"
+	meshtreeMoreMisses   = "testdata/meshtree-more-misses.csv"
+	meshtreeMoreLongest  = "testdata/meshtree-more-longest.csv"
+	meshtreeMoreAway     = "testdata/meshtree-more-away.csv"
+	meshtreeMoreWindings = "testdata/meshtree-more-windings.csv"
+	meshtreeMorePlaces   = "testdata/meshtree-more-places.csv"
+	meshtreeMoreSeeds    = "testdata/meshtree-more-seeds.csv"
+)
+
+// meshtreeMoreOrigin is the point where all three parts are nought.
+var meshtreeMoreOrigin = maths.V(nought, nought, nought)
+
+// meshtreeMorePicked is picked for a test or a benchmark alike.
+func meshtreeMorePicked(tb testing.TB, name string) float64 {
+	tb.Helper()
+	chosen, err := chosenNumbers()
+	if err != nil {
+		tb.Fatal(err)
 	}
-	under(i)
-	slices.Sort(out)
-	return out
+	number, err := chosen.Get(name)
+	if err != nil {
+		tb.Fatal(err)
+	}
+	return number.Value
 }
 
-// walk calls f for every node of the tree with its depth, the root at 0.
-func walk(m *Mesh, f func(i int32, depth int)) {
-	var down func(i int32, depth int)
-	down = func(i int32, depth int) {
-		f(i, depth)
-		if nd := m.nodes[i]; nd.count == 0 {
-			down(i+1, depth+1)
-			down(nd.next, depth+1)
+// meshtreeMoreVector is the vector in the columns prefix-x, prefix-y and
+// prefix-z of a row.
+func meshtreeMoreVector(t *testing.T, row map[string]string,
+	prefix string) maths.Vec {
+	t.Helper()
+	return maths.V(cell(t, row, prefix+"-x"), cell(t, row, prefix+"-y"),
+		cell(t, row, prefix+"-z"))
+}
+
+// meshtreeMoreFlag is the true or false in a column of a row, or a stop.
+func meshtreeMoreFlag(t *testing.T, row map[string]string,
+	column string) bool {
+	t.Helper()
+	got, err := strconv.ParseBool(row[column])
+	if err != nil {
+		t.Fatalf("%s of %q: %v", column, row["name"], err)
+	}
+	return got
+}
+
+// meshtreeMoreGroup is a column of the rows of a csv file whose group
+// column is group, in the order of the file.
+func meshtreeMoreGroup(t *testing.T, file, group,
+	column string) []float64 {
+	t.Helper()
+	var found []float64
+	for _, row := range readSheet(t, file) {
+		if row["group"] == group {
+			found = append(found, cell(t, row, column))
 		}
 	}
-	down(0, 0)
+	return found
+}
+
+// meshtreeMorePlacesOf is the places, as vectors, of the rows of a csv file
+// whose group column is group, in the order of the file.
+func meshtreeMorePlacesOf(t *testing.T, file, group string) []maths.Vec {
+	t.Helper()
+	var found []maths.Vec
+	for _, row := range readSheet(t, file) {
+		if row["group"] == group {
+			found = append(found, meshtreeMoreVector(t, row, "place"))
+		}
+	}
+	return found
+}
+
+// meshtreeMoreRandom is the random stream whose two seeds are in the row of
+// the seeds file called name.
+func meshtreeMoreRandom(t *testing.T, name string) *rand.Rand {
+	t.Helper()
+	row := readSheet(t, meshtreeMoreSeeds).row(t, meshtreeMoreSeeds, name)
+	first := uint64(cellCount(t, row, "first"))
+	second := uint64(cellCount(t, row, "second"))
+	return rand.New(rand.NewPCG(first, second))
+}
+
+// meshtreeMoreRay is the ray from at, going along direction.
+func meshtreeMoreRay(at, direction maths.Vec) maths.Ray {
+	return maths.Ray{At: at, Dir: direction}
+}
+
+// meshtreeMoreBox is the box from low to high.
+func meshtreeMoreBox(low, high maths.Vec) maths.Box {
+	return maths.Box{Min: low, Max: high}
+}
+
+// meshtreeMoreParts is the parts of a point, one for each axis.
+func meshtreeMoreParts(point maths.Vec) [meshtreeMoreAxes]float64 {
+	return [meshtreeMoreAxes]float64{point.X, point.Y, point.Z}
+}
+
+// meshtreeMoreShifted is a face with each of its corners numbered by more.
+func meshtreeMoreShifted(face [cornersOfAFace]int,
+	by int) [cornersOfAFace]int {
+	var shifted [cornersOfAFace]int
+	for place, corner := range face {
+		shifted[place] = corner + by
+	}
+	return shifted
+}
+
+// meshtreeMoreCorners is the numbers of the corners of the face that
+// begins at first, one after another.
+func meshtreeMoreCorners(first int) [cornersOfAFace]int {
+	return [cornersOfAFace]int{first, first + secondCorner,
+		first + thirdCorner}
+}
+
+// meshtreeMoreCollector gathers the faces under a node of a tree.
+type meshtreeMoreCollector struct {
+	mesh  *Mesh
+	found []int
+}
+
+// under adds the faces under node to those found.
+func (collector *meshtreeMoreCollector) under(node int32) {
+	cut := collector.mesh.nodes[node]
+	if cut.count > nought {
+		for place := cut.next; place < cut.next+cut.count; place++ {
+			face := collector.mesh.tris[place].face
+			collector.found = append(collector.found, int(face))
+		}
+		return
+	}
+	collector.under(node + unity)
+	collector.under(cut.next)
+}
+
+// held is the faces under tree node i, by their numbers in the mesh,
+// smallest first.
+func held(mesh *Mesh, i int32) []int {
+	collector := &meshtreeMoreCollector{mesh: mesh}
+	collector.under(i)
+	slices.Sort(collector.found)
+	return collector.found
+}
+
+// meshtreeMoreWalker goes down a tree, calling visit at every node.
+type meshtreeMoreWalker struct {
+	mesh  *Mesh
+	visit func(i int32, depth int)
+}
+
+// down visits node i and then, if it is a cut, the nodes under it.
+func (walker meshtreeMoreWalker) down(i int32, depth int) {
+	walker.visit(i, depth)
+	if cut := walker.mesh.nodes[i]; cut.count == nought {
+		walker.down(i+unity, depth+unity)
+		walker.down(cut.next, depth+unity)
+	}
+}
+
+// walk calls visit for every node of the tree with its depth, the root at
+// nought.
+func walk(mesh *Mesh, visit func(i int32, depth int)) {
+	walker := meshtreeMoreWalker{mesh: mesh, visit: visit}
+	walker.down(meshtreeMoreRoot, nought)
 }
 
 // shapeOf writes the tree as its leaves' sizes: a leaf is its count, and a
 // cut is its two halves in brackets.
-func shapeOf(m *Mesh, i int32) string {
-	nd := m.nodes[i]
-	if nd.count > 0 {
-		return fmt.Sprint(nd.count)
+func shapeOf(mesh *Mesh, i int32) string {
+	cut := mesh.nodes[i]
+	if cut.count > nought {
+		return fmt.Sprint(cut.count)
 	}
-	return "(" + shapeOf(m, i+1) + " " + shapeOf(m, nd.next) + ")"
+	return "(" + shapeOf(mesh, i+unity) + " " + shapeOf(mesh, cut.next) + ")"
 }
 
-// nest adds a triangle about the point c for each size s: its corners are
-// c+(s,0,0), c+(0,s,0) and c+(-s,-s,0), which turn counterclockwise seen
-// from above and add up to 3c. With c and s whole numbers each middle is c
-// exactly, and each box is flat at c's height, 2s across and 2s up.
-func nest(vs *[]maths.Vec, fs *[][3]int, c maths.Vec, sizes ...float64) {
-	for _, s := range sizes {
-		n := len(*vs)
-		*vs = append(*vs, c.Add(maths.V(s, 0, 0)), c.Add(maths.V(0, s, 0)),
-			c.Add(maths.V(-s, -s, 0)))
-		*fs = append(*fs, [3]int{n, n + 1, n + 2})
+// nest adds a triangle about the point centre for each of the sizes: its
+// corners are c+(s,0,0), c+(0,s,0) and c+(-s,-s,0), which turn
+// counterclockwise seen from above and add up to 3c. With c and s whole
+// numbers each middle is c exactly, and each box is flat at c's height,
+// 2s across and 2s up.
+func nest(vertices *[]maths.Vec, faces *[][cornersOfAFace]int,
+	centre maths.Vec, sizes ...float64) {
+	for _, size := range sizes {
+		first := len(*vertices)
+		right := centre.Add(maths.V(size, nought, nought))
+		upward := centre.Add(maths.V(nought, size, nought))
+		behind := centre.Add(maths.V(-size, -size, nought))
+		*vertices = append(*vertices, right, upward, behind)
+		*faces = append(*faces, meshtreeMoreCorners(first))
 	}
 }
 
 // grown is nest at each of the places in at, with the sizes for each, made
 // into one mesh.
-func grown(t testing.TB, at []maths.Vec, sizes ...[]float64) *Mesh {
-	var vs []maths.Vec
-	var fs [][3]int
-	for i, c := range at {
-		nest(&vs, &fs, c, sizes[i]...)
+func grown(test testing.TB, at []maths.Vec, sizes ...[]float64) *Mesh {
+	var vertices []maths.Vec
+	var faces [][cornersOfAFace]int
+	for i, centre := range at {
+		nest(&vertices, &faces, centre, sizes[i]...)
 	}
-	return made(t, vs, fs, nil, false)
+	return made(test, vertices, faces, nil, false)
+}
+
+// meshtreeMoreCensus is what a walk of a tree counts: how deep it goes,
+// and how many faces its leaves hold, and which leaves hold too many.
+type meshtreeMoreCensus struct {
+	t        *testing.T
+	why      string
+	mesh     *Mesh
+	leafMost int
+	deepest  int
+	total    int
+}
+
+// visit counts the node i at depth.
+func (census *meshtreeMoreCensus) visit(i int32, depth int) {
+	census.deepest = max(census.deepest, depth)
+	count := census.mesh.nodes[i].count
+	if int(count) > census.leafMost {
+		census.t.Errorf("%s: a leaf holds %d faces", census.why, count)
+		return
+	}
+	census.total += int(count)
 }
 
 // bounded holds a tree to what the code relies on: no leaf past eight
 // faces, every face in a leaf, and nothing deeper than the 128 places a
 // walk has to keep its way back.
-func bounded(t *testing.T, why string, m *Mesh) {
+func bounded(t *testing.T, why string, mesh *Mesh) {
 	t.Helper()
-	deep, total := 0, 0
-	walk(m, func(i int32, depth int) {
-		deep = max(deep, depth)
-		if c := m.nodes[i].count; c > 8 {
-			t.Errorf("%s: a leaf holds %d faces", why, c)
-		} else {
-			total += int(c)
-		}
-	})
-	if deep >= 128 {
-		t.Errorf("%s: the tree is %d deep", why, deep)
+	census := &meshtreeMoreCensus{t: t, why: why, mesh: mesh,
+		leafMost: pickedCount(t, "meshtree-more-leaf-most")}
+	walk(mesh, census.visit)
+	if census.deepest >= pickedCount(t, "meshtree-more-walk-places") {
+		t.Errorf("%s: the tree is %d deep", why, census.deepest)
 	}
-	if total != len(m.Faces) {
-		t.Errorf("%s: the leaves hold %d of %d faces", why, total,
-			len(m.Faces))
+	if census.total != len(mesh.Faces) {
+		t.Errorf("%s: the leaves hold %d of %d faces", why, census.total,
+			len(mesh.Faces))
 	}
 }
 
@@ -110,23 +285,18 @@ func bounded(t *testing.T, why string, m *Mesh) {
 // Worked by hand: nine cut at 9/2, four and five; ten, five and five;
 // seventeen, eight and nine, and the nine again four and five.
 func TestFacesWithOneMiddleAreHalvedByCount(t *testing.T) {
-	for _, c := range []struct {
-		n    int
-		want string
-	}{
-		{1, "1"}, {2, "2"}, {3, "3"}, {5, "5"}, {8, "8"}, {9, "(4 5)"},
-		{10, "(5 5)"}, {16, "(8 8)"}, {17, "(8 (4 5))"},
-		{18, "((4 5) (4 5))"},
-	} {
-		sizes := make([]float64, c.n)
+	for _, row := range readSheet(t, meshtreeMoreHalvings) {
+		count := cellCount(t, row, "count")
+		sizes := make([]float64, count)
 		for i := range sizes {
-			sizes[i] = float64(i + 1)
+			sizes[i] = float64(i + unity)
 		}
-		m := grown(t, []maths.Vec{{}}, sizes)
-		if got := shapeOf(m, 0); got != c.want {
-			t.Errorf("%d faces: %s, want %s", c.n, got, c.want)
+		at := []maths.Vec{meshtreeMoreOrigin}
+		mesh := grown(t, at, sizes)
+		if got := shapeOf(mesh, meshtreeMoreRoot); got != row["want"] {
+			t.Errorf("%d faces: %s, want %s", count, got, row["want"])
 		}
-		bounded(t, fmt.Sprint(c.n, " faces"), m)
+		bounded(t, fmt.Sprint(count, " faces"), mesh)
 	}
 }
 
@@ -138,15 +308,22 @@ func TestFacesWithOneMiddleAreHalvedByCount(t *testing.T) {
 // 326.25. The cheapest cut, four and four, costs 311.25*4 + 311.25*4 =
 // 2490, and 1+2490/326.25 is 8.63, past the 8 a leaf costs.
 func TestFacesThatOverlapStayOneLeaf(t *testing.T) {
-	var vs []maths.Vec
-	var fs [][3]int
-	for i := range 8 {
-		d := maths.V(float64(i)/8, 0, 0)
-		vs = append(vs, maths.V(-5, -5, 0).Add(d), maths.V(5, -5, 0).Add(d),
-			maths.V(0, 10, 0).Add(d))
-		fs = append(fs, [3]int{3 * i, 3*i + 1, 3*i + 2})
+	copies := pickedCount(t, "meshtree-more-overlap-copies")
+	divisions := picked(t, "meshtree-more-overlap-divisions")
+	base := picked(t, "meshtree-more-overlap-half-base")
+	apex := picked(t, "meshtree-more-overlap-apex")
+	var vertices []maths.Vec
+	var faces [][cornersOfAFace]int
+	for i := range copies {
+		shift := maths.V(float64(i)/divisions, nought, nought)
+		left := maths.V(-base, -base, nought).Add(shift)
+		right := maths.V(base, -base, nought).Add(shift)
+		top := maths.V(nought, apex, nought).Add(shift)
+		vertices = append(vertices, left, right, top)
+		faces = append(faces, meshtreeMoreCorners(cornersOfAFace*i))
 	}
-	if got := shapeOf(made(t, vs, fs, nil, false), 0); got != "8" {
+	mesh := made(t, vertices, faces, nil, false)
+	if got := shapeOf(mesh, meshtreeMoreRoot); got != fmt.Sprint(copies) {
 		t.Errorf("eight overlapping faces are %s", got)
 	}
 }
@@ -160,15 +337,21 @@ func TestFacesThatOverlapStayOneLeaf(t *testing.T) {
 // 1+812736/91592 is 9.87, past the 9 a leaf of them would cost. Cut, they
 // are eight and one.
 func TestMoreThanEightFacesAreCutWhateverALeafCosts(t *testing.T) {
-	var vs []maths.Vec
-	var fs [][3]int
-	nest(&vs, &fs, maths.V(0, 0, 0), 100, 101, 102, 103, 104, 105, 106, 107)
-	nest(&vs, &fs, maths.V(1, 0, 0), 100)
-	m := made(t, vs, fs, nil, false)
-	if got := shapeOf(m, 0); got != "(8 1)" {
-		t.Errorf("nine faces, one off to the side: %s, want (8 1)", got)
+	var vertices []maths.Vec
+	var faces [][cornersOfAFace]int
+	eight := meshtreeMoreGroup(t, meshtreeMoreNested, "eight", "size")
+	ninth := meshtreeMoreGroup(t, meshtreeMoreNested, "ninth", "size")
+	aside := maths.V(picked(t, "meshtree-more-ninth-aside"), nought, nought)
+	nest(&vertices, &faces, meshtreeMoreOrigin, eight...)
+	nest(&vertices, &faces, aside, ninth...)
+	mesh := made(t, vertices, faces, nil, false)
+	want := fmt.Sprintf("(%d %d)", len(eight), len(ninth))
+	if got := shapeOf(mesh, meshtreeMoreRoot); got != want {
+		t.Errorf("nine faces, one off to the side: %s, want %s", got, want)
 	}
-	if got := held(m, 1); !slices.Equal(got, []int{0, 1, 2, 3, 4, 5, 6, 7}) {
+	got := held(mesh, meshtreeMoreFirst)
+	wantFaces := upTo(nought, len(eight)-unity)
+	if !slices.Equal(got, wantFaces) {
 		t.Errorf("the first half holds %v", got)
 	}
 }
@@ -181,14 +364,17 @@ func TestMoreThanEightFacesAreCutWhateverALeafCosts(t *testing.T) {
 // 8 + 2*408 = 824 for either cut, over 808 for the box. 1+824/808 is 2.02,
 // under the 3 a leaf of them costs.
 func TestThreeFacesFarApartAreCut(t *testing.T) {
-	two := grown(t, []maths.Vec{{}, maths.V(100, 0, 0)}, []float64{1},
-		[]float64{1})
-	if got := shapeOf(two, 0); got != "2" {
+	size := []float64{picked(t, "meshtree-more-far-size")}
+	one := maths.V(picked(t, "meshtree-more-far-one-along"), nought, nought)
+	two := maths.V(picked(t, "meshtree-more-far-two-along"), nought, nought)
+	twice := grown(t, []maths.Vec{meshtreeMoreOrigin, one}, size, size)
+	if got := shapeOf(twice, meshtreeMoreRoot); got != "2" {
 		t.Errorf("two faces far apart are %s, want 2", got)
 	}
-	three := grown(t, []maths.Vec{{}, maths.V(100, 0, 0), maths.V(200, 0, 0)},
-		[]float64{1}, []float64{1}, []float64{1})
-	if got := shapeOf(three, 0); got != "(1 2)" && got != "(2 1)" {
+	three := grown(t, []maths.Vec{meshtreeMoreOrigin, one, two}, size, size,
+		size)
+	got := shapeOf(three, meshtreeMoreRoot)
+	if got != "(1 2)" && got != "(2 1)" {
 		t.Errorf("three faces far apart are %s, want a cut", got)
 	}
 }
@@ -200,15 +386,21 @@ func TestThreeFacesFarApartAreCut(t *testing.T) {
 // and the three up to 6, area 72, so the cut costs 5*200 + 3*72 = 1216,
 // over 20160 for the box: 1.06 against the 8 a leaf of eight costs.
 func TestTwoFarClustersAreSplitAtTheRoot(t *testing.T) {
-	m := grown(t, []maths.Vec{{}, maths.V(1000, 0, 0)},
-		[]float64{1, 2, 3, 4, 5}, []float64{1, 2, 3})
-	if got := shapeOf(m, 0); got != "(5 3)" {
-		t.Fatalf("two clusters are %s, want (5 3)", got)
+	five := meshtreeMoreGroup(t, meshtreeMoreClusters, "five", "size")
+	three := meshtreeMoreGroup(t, meshtreeMoreClusters, "three", "size")
+	apart := maths.V(picked(t, "meshtree-more-cluster-apart"), nought, nought)
+	mesh := grown(t, []maths.Vec{meshtreeMoreOrigin, apart}, five, three)
+	want := fmt.Sprintf("(%d %d)", len(five), len(three))
+	if got := shapeOf(mesh, meshtreeMoreRoot); got != want {
+		t.Fatalf("two clusters are %s, want %s", got, want)
 	}
-	if got := held(m, 1); !slices.Equal(got, []int{0, 1, 2, 3, 4}) {
+	lower := upTo(nought, len(five)-unity)
+	if got := held(mesh, meshtreeMoreFirst); !slices.Equal(got, lower) {
 		t.Errorf("the first cluster is %v", got)
 	}
-	if got := held(m, m.nodes[0].next); !slices.Equal(got, []int{5, 6, 7}) {
+	upper := upTo(len(five), len(five)+len(three)-unity)
+	second := mesh.nodes[meshtreeMoreRoot].next
+	if got := held(mesh, second); !slices.Equal(got, upper) {
 		t.Errorf("the second cluster is %v", got)
 	}
 }
@@ -217,15 +409,17 @@ func TestTwoFarClustersAreSplitAtTheRoot(t *testing.T) {
 // across, one at each of the places, which the root must have cut in two.
 func cutAt(t *testing.T, at ...maths.Vec) (low, high []int) {
 	t.Helper()
+	size := []float64{picked(t, "meshtree-more-cut-size")}
 	sizes := make([][]float64, len(at))
 	for i := range sizes {
-		sizes[i] = []float64{1}
+		sizes[i] = size
 	}
-	m := grown(t, at, sizes...)
-	if m.nodes[0].count > 0 {
+	mesh := grown(t, at, sizes...)
+	root := mesh.nodes[meshtreeMoreRoot]
+	if root.count > nought {
 		t.Fatalf("the root of %d faces is a leaf", len(at))
 	}
-	return held(m, 1), held(m, m.nodes[0].next)
+	return held(mesh, meshtreeMoreFirst), held(mesh, root.next)
 }
 
 // A cut that leaves one face alone is a cut like any other, at whichever
@@ -238,14 +432,16 @@ func cutAt(t *testing.T, at ...maths.Vec) (low, high []int) {
 // bins 0, 14 and 15: the last alone costs 2*380 + 8 = 768, and the first
 // alone, 8 + 2*936 = 1880.
 func TestAFaceAloneAtEitherEndIsCutOff(t *testing.T) {
-	low, high := cutAt(t, maths.V(0, 50, 0), maths.V(7, 0, 0),
-		maths.V(100, 0, 0))
-	if !slices.Equal(low, []int{0}) || !slices.Equal(high, []int{1, 2}) {
+	first := meshtreeMorePlacesOf(t, meshtreeMoreCuts, "first-alone")
+	low, high := cutAt(t, first...)
+	if !slices.Equal(low, []int{nought}) ||
+		!slices.Equal(high, []int{unity, pair}) {
 		t.Errorf("the first alone: %v and %v", low, high)
 	}
-	low, high = cutAt(t, maths.V(0, 0, 0), maths.V(93, 0, 0),
-		maths.V(100, 50, 0))
-	if !slices.Equal(low, []int{0, 1}) || !slices.Equal(high, []int{2}) {
+	last := meshtreeMorePlacesOf(t, meshtreeMoreCuts, "last-alone")
+	low, high = cutAt(t, last...)
+	if !slices.Equal(low, []int{nought, unity}) ||
+		!slices.Equal(high, []int{pair}) {
 		t.Errorf("the last alone: %v and %v", low, high)
 	}
 }
@@ -257,49 +453,87 @@ func TestAFaceAloneAtEitherEndIsCutOff(t *testing.T) {
 // 0, 1, 3 and 15 of the 100. The first alone costs 8 + 3*368 = 1112; the
 // first two, 2*48 + 2*328 = 752; the first three, 3*88 + 8 = 272.
 func TestTheCheapestCutIsTheOneTaken(t *testing.T) {
-	low, high := cutAt(t, maths.V(0, 0, 0), maths.V(10, 0, 0),
-		maths.V(20, 0, 0), maths.V(100, 0, 0))
-	if !slices.Equal(low, []int{0, 1, 2}) || !slices.Equal(high, []int{3}) {
+	places := meshtreeMorePlacesOf(t, meshtreeMoreCuts, "four-in-a-row")
+	low, high := cutAt(t, places...)
+	last := len(places) - unity
+	if !slices.Equal(low, upTo(nought, pair)) ||
+		!slices.Equal(high, []int{last}) {
 		t.Errorf("four in a row: %v and %v", low, high)
 	}
 }
 
-// chain is n triangles in a row along x, each ten times the size of the
-// last and ten times as far out: the one of rank k has corners
+// chain is count triangles in a row along x, each ten times the size of
+// the last and ten times as far out: the one of rank k has corners
 // (x-s,-s), (x+s,-s) and (x,2s) with x = sign * 10^k and s = x/10. The
 // faces are numbered out of order, and the rank of face j is rank[j].
-func chain(t *testing.T, n int, sign float64) (*Mesh, []int) {
-	var vs []maths.Vec
-	var fs [][3]int
-	rank := make([]int, n)
-	for j := range n {
-		k := (j * 37) % n
-		rank[j] = k
-		x, s := sign*math.Pow10(k), math.Pow10(k)/10
-		vs = append(vs, maths.V(x-s, -s, 0), maths.V(x+s, -s, 0),
-			maths.V(x, 2*s, 0))
-		fs = append(fs, [3]int{3 * j, 3*j + 1, 3*j + 2})
+func chain(t *testing.T, count int, sign float64) (*Mesh, []int) {
+	t.Helper()
+	stride := pickedCount(t, "meshtree-more-chain-stride")
+	tenth := picked(t, "meshtree-more-chain-tenth")
+	var vertices []maths.Vec
+	var faces [][cornersOfAFace]int
+	rank := make([]int, count)
+	for face := range count {
+		k := (face * stride) % count
+		rank[face] = k
+		x, size := sign*math.Pow10(k), math.Pow10(k)/tenth
+		left := maths.V(x-size, -size, nought)
+		right := maths.V(x+size, -size, nought)
+		top := maths.V(x, pair*size, nought)
+		vertices = append(vertices, left, right, top)
+		faces = append(faces, meshtreeMoreCorners(cornersOfAFace*face))
 	}
-	return made(t, vs, fs, nil, false), rank
+	return made(t, vertices, faces, nil, false), rank
 }
 
 // ranks is the ranks of the faces under node i, smallest first.
-func ranks(m *Mesh, rank []int, i int32) []int {
+func ranks(mesh *Mesh, rank []int, i int32) []int {
 	var out []int
-	for _, f := range held(m, i) {
-		out = append(out, rank[f])
+	for _, face := range held(mesh, i) {
+		out = append(out, rank[face])
 	}
 	slices.Sort(out)
 	return out
 }
 
-// upTo is the ranks from lo to hi, both included.
-func upTo(lo, hi int) []int {
+// upTo is the ranks from low to high, both included.
+func upTo(low, high int) []int {
 	var out []int
-	for k := lo; k <= hi; k++ {
+	for k := low; k <= high; k++ {
 		out = append(out, k)
 	}
 	return out
+}
+
+// meshtreeMoreChained is a chain, with the rank of each of its faces and
+// how many faces it has.
+type meshtreeMoreChained struct {
+	mesh   *Mesh
+	rank   []int
+	length int
+}
+
+// step checks the node at depth of a chain of the given sign: it holds
+// every rank but the highest depth ones, and cuts off the highest alone.
+// It is the node of the rest that step gives back.
+func (chained meshtreeMoreChained) step(t *testing.T, sign float64,
+	at int32, depth int) int32 {
+	t.Helper()
+	present := ranks(chained.mesh, chained.rank, at)
+	want := upTo(nought, chained.length-unity-depth)
+	if !slices.Equal(present, want) {
+		t.Fatalf("chain %v depth %d: ranks %v", sign, depth, present)
+	}
+	rest, alone := at+unity, chained.mesh.nodes[at].next
+	if sign < nought {
+		rest, alone = alone, rest
+	}
+	cut := ranks(chained.mesh, chained.rank, alone)
+	if chained.mesh.nodes[alone].count != unity ||
+		!slices.Equal(cut, []int{chained.length - unity - depth}) {
+		t.Fatalf("chain %v depth %d: the one alone is %v", sign, depth, cut)
+	}
+	return rest
 }
 
 // Faces that each stand ten times as far out as the one before are cut
@@ -316,39 +550,85 @@ func upTo(lo, hi int) []int {
 // Mirrored, it is the lowest face, which is the farthest out, that goes
 // alone, and the halves are the other way about.
 func TestACutPerFaceThenHalvesAtTheDepthLimit(t *testing.T) {
-	const n = 80
-	for _, sign := range []float64{1, -1} {
-		m, rank := chain(t, n, sign)
-		bounded(t, fmt.Sprint("chain ", sign), m)
-		at := int32(0)
-		for d := 0; d < 64; d++ {
-			if want := upTo(0, n-1-d); !slices.Equal(ranks(m, rank, at), want) {
-				t.Fatalf("chain %v depth %d: ranks %v", sign, d,
-					ranks(m, rank, at))
-			}
-			rest, alone := at+1, m.nodes[at].next
-			if sign < 0 {
-				rest, alone = alone, rest
-			}
-			if m.nodes[alone].count != 1 ||
-				!slices.Equal(ranks(m, rank, alone), []int{n - 1 - d}) {
-				t.Fatalf("chain %v depth %d: the one alone is %v", sign, d,
-					ranks(m, rank, alone))
-			}
-			at = rest
+	length := pickedCount(t, "meshtree-more-chain-length")
+	limit := pickedCount(t, "meshtree-more-depth-limit")
+	each := pickedCount(t, "meshtree-more-halved-each")
+	for _, sign := range []float64{unity, -unity} {
+		mesh, rank := chain(t, length, sign)
+		chained := meshtreeMoreChained{mesh: mesh, rank: rank, length: length}
+		bounded(t, fmt.Sprint("chain ", sign), mesh)
+		at := meshtreeMoreRoot
+		for depth := nought; depth < limit; depth++ {
+			at = chained.step(t, sign, at, depth)
 		}
-		first, second := at+1, m.nodes[at].next
-		low, high := upTo(0, 7), upTo(8, 15)
-		if sign < 0 {
+		first, second := at+unity, mesh.nodes[at].next
+		low, high := upTo(nought, each-unity), upTo(each, each+each-unity)
+		if sign < nought {
 			low, high = high, low
 		}
-		if m.nodes[first].count != 8 || m.nodes[second].count != 8 ||
-			!slices.Equal(ranks(m, rank, first), low) ||
-			!slices.Equal(ranks(m, rank, second), high) {
-			t.Errorf("chain %v depth 64: halves %v and %v, want %v and %v",
-				sign, ranks(m, rank, first), ranks(m, rank, second), low, high)
+		if int(mesh.nodes[first].count) != each ||
+			int(mesh.nodes[second].count) != each ||
+			!slices.Equal(ranks(mesh, rank, first), low) ||
+			!slices.Equal(ranks(mesh, rank, second), high) {
+			t.Errorf("chain %v depth %d: halves %v and %v, want %v and %v",
+				sign, limit, ranks(mesh, rank, first),
+				ranks(mesh, rank, second), low, high)
 		}
 	}
+}
+
+// meshtreeMoreHairCase is a mesh, and the hair its boxes are expected to
+// be let out by: worked by hand, or nought where the formula is left to
+// say.
+type meshtreeMoreHairCase struct {
+	why  string
+	mesh *Mesh
+	hair float64
+}
+
+// meshtreeMoreHairCheck is what a walk of a mesh's tree checks: that the
+// box of each node is the box of its faces let out by a hair.
+type meshtreeMoreHairCheck struct {
+	t    *testing.T
+	why  string
+	mesh *Mesh
+	hair float64
+}
+
+// visit checks the box of node i, at depth.
+func (check meshtreeMoreHairCheck) visit(i int32, depth int) {
+	faces := spanOf(check.mesh, held(check.mesh, i))
+	got := check.mesh.nodes[i].box
+	hair := check.hair
+	want := meshtreeMoreBox(
+		maths.V(faces.lo[meshtreeMoreAxisX]-hair,
+			faces.lo[meshtreeMoreAxisY]-hair,
+			faces.lo[meshtreeMoreAxisZ]-hair),
+		maths.V(faces.hi[meshtreeMoreAxisX]+hair,
+			faces.hi[meshtreeMoreAxisY]+hair,
+			faces.hi[meshtreeMoreAxisZ]+hair))
+	if got != want {
+		check.t.Errorf("%s: node %d at depth %d is %v, want %v", check.why,
+			i, depth, got, want)
+	}
+}
+
+// meshtreeMoreCheckHair walks the tree of a case, with the hair a mesh's
+// longest side leaves as a share, and holds every box to it.
+func meshtreeMoreCheckHair(t *testing.T, each meshtreeMoreHairCase,
+	share float64) {
+	t.Helper()
+	mesh := each.mesh
+	bounds := mesh.Bounds()
+	size := bounds.Max.Sub(bounds.Min)
+	hair := share * math.Max(size.X, math.Max(size.Y, size.Z))
+	if each.hair != nought && hair != each.hair {
+		t.Fatalf("%s: the sides are %v, so the hair is %g, not %g",
+			each.why, size, hair, each.hair)
+	}
+	check := meshtreeMoreHairCheck{t: t, why: each.why, mesh: mesh,
+		hair: hair}
+	walk(mesh, check.visit)
 }
 
 // Every node's box is the box of its faces let out by a hair on every
@@ -359,48 +639,38 @@ func TestACutPerFaceThenHalvesAtTheDepthLimit(t *testing.T) {
 // times up and twice deep: its sides are 2, 8 and 4, so the hair is 8e-9.
 // The faces' boxes are found here from the corners, face by face.
 func TestEveryBoxIsItsFacesLetOutByAHair(t *testing.T) {
-	rng := rand.New(rand.NewPCG(20, 21))
-	sv, sf := soup(rng, 600)
-	cv, cf := cube(3, false)
-	for i := range cv {
-		cv[i] = maths.V(cv[i].X, 4*cv[i].Y, 2*cv[i].Z)
+	rng := meshtreeMoreRandom(t, "hair")
+	soupFaces := pickedCount(t, "meshtree-more-hair-soup-faces")
+	soupVertices, soupCorners := soup(rng, soupFaces)
+	cubeCells := pickedCount(t, "meshtree-more-hair-cube-cells")
+	cubeVertices, cubeCorners := cube(cubeCells, false)
+	up := picked(t, "meshtree-more-hair-stretch-up")
+	deep := picked(t, "meshtree-more-hair-stretch-deep")
+	for i := range cubeVertices {
+		corner := cubeVertices[i]
+		cubeVertices[i] = maths.V(corner.X, up*corner.Y, deep*corner.Z)
 	}
-	ch, _ := chain(t, 80, 1)
-	for _, c := range []struct {
-		why  string
-		mesh *Mesh
-		hair float64 // by hand, or 0 where it is left to the formula
-	}{
-		{"a stretched cube", made(t, cv, cf, nil, false), 8e-9},
-		{"a soup", made(t, sv, sf, nil, false), 0},
-		{"a chain", ch, 0},
+	length := pickedCount(t, "meshtree-more-chain-length")
+	chained, _ := chain(t, length, unity)
+	stretched := made(t, cubeVertices, cubeCorners, nil, false)
+	soupy := made(t, soupVertices, soupCorners, nil, false)
+	byHand := picked(t, "meshtree-more-hair-stretched")
+	share := picked(t, "meshtree-more-hair-share")
+	for _, each := range []meshtreeMoreHairCase{
+		{"a stretched cube", stretched, byHand},
+		{"a soup", soupy, nought},
+		{"a chain", chained, nought},
 	} {
-		m := c.mesh
-		b := m.Bounds()
-		size := b.Max.Sub(b.Min)
-		hair := 1e-9 * math.Max(size.X, math.Max(size.Y, size.Z))
-		if c.hair != 0 && hair != c.hair {
-			t.Fatalf("%s: the sides are %v, so the hair is %g, not %g",
-				c.why, size, hair, c.hair)
-		}
-		walk(m, func(i int32, depth int) {
-			s, got := spanOf(m, held(m, i)), m.nodes[i].box
-			want := maths.Box{
-				Min: maths.V(s.lo[0]-hair, s.lo[1]-hair, s.lo[2]-hair),
-				Max: maths.V(s.hi[0]+hair, s.hi[1]+hair, s.hi[2]+hair)}
-			if got != want {
-				t.Errorf("%s: node %d at depth %d is %v, want %v", c.why, i,
-					depth, got, want)
-			}
-		})
+		meshtreeMoreCheckHair(t, each, share)
 	}
 }
 
-// boxAt is where a ray from at, going along way, enters the box from lo to
-// hi, and whether it does before far, from near.
-func boxAt(at, way, lo, hi maths.Vec, near, far float64) (float64, bool) {
-	q := ready(maths.Ray{At: at, Dir: way})
-	return q.box(&maths.Box{Min: lo, Max: hi}, near, far)
+// boxAt is where a ray from at, going along way, enters the box from low to
+// high, and whether it does before far, from near.
+func boxAt(at, way, low, high maths.Vec, near, far float64) (float64, bool) {
+	query := ready(meshtreeMoreRay(at, way))
+	box := meshtreeMoreBox(low, high)
+	return query.box(&box, near, far)
 }
 
 // The box test says where a ray enters a box, and whether it does.
@@ -410,41 +680,17 @@ func boxAt(at, way, lo, hi maths.Vec, near, far float64) (float64, bool) {
 // enters the box at the latest of the slabs' starts and no sooner than
 // near, if that is no later than the earliest of their ends and far.
 func TestARayEntersABoxWhereItsSlabsSay(t *testing.T) {
-	zero, one := maths.V(0, 0, 0), maths.V(1, 1, 1)
-	inf := math.Inf(1)
-	for _, c := range []struct {
-		why       string
-		at, way   maths.Vec
-		near, far float64
-		enter     float64
-		ok        bool
-	}{
-		{"along x", maths.V(-1, .5, .5), maths.V(1, 0, 0), 0, inf, 1, true},
-		{"back along x", maths.V(2, .5, .5), maths.V(-1, 0, 0), 0, inf, 1,
-			true},
-		{"a way of 2 halves the distance", maths.V(-1, .5, .5),
-			maths.V(2, 0, 0), 0, inf, .5, true},
-		{"a near past the entry", maths.V(-1, .5, .5), maths.V(1, 0, 0),
-			1.5, inf, 1.5, true},
-		{"a near past the leaving", maths.V(-1, .5, .5), maths.V(1, 0, 0),
-			2.5, inf, 2.5, false},
-		{"a far short of the entry", maths.V(-1, .5, .5), maths.V(1, 0, 0),
-			0, .5, 1, false},
-		{"started past the box", maths.V(3, .5, .5), maths.V(1, 0, 0),
-			0, inf, 0, false},
-		{"started on its far side", maths.V(1, .5, .5), maths.V(1, 0, 0),
-			0, inf, 0, true},
-		{"across the corner of its slabs", maths.V(-1, 4, .5),
-			maths.V(1, -1, 0), 0, inf, 3, false},
-		{"touching the corner", maths.V(0, 2, .5), maths.V(1, -1, 0), 0, inf,
-			1, true},
-		{"slantwise through", maths.V(-1, 1.5, .5), maths.V(1, -1, 0), 0,
-			inf, 1, true},
-	} {
-		enter, ok := boxAt(c.at, c.way, zero, one, c.near, c.far)
-		if ok != c.ok || (ok && enter != c.enter) {
-			t.Errorf("%s: enters at %v, %v; want %v, %v", c.why, enter, ok,
-				c.enter, c.ok)
+	one := maths.V(unity, unity, unity)
+	for _, row := range readSheet(t, meshtreeMoreSlabs) {
+		at := meshtreeMoreVector(t, row, "at")
+		way := meshtreeMoreVector(t, row, "way")
+		near, far := cell(t, row, "near"), cell(t, row, "far")
+		enter, ok := boxAt(at, way, meshtreeMoreOrigin, one, near, far)
+		wantEnter := cell(t, row, "enter")
+		wantOK := meshtreeMoreFlag(t, row, "enters")
+		if ok != wantOK || (ok && enter != wantEnter) {
+			t.Errorf("%s: enters at %v, %v; want %v, %v", row["name"],
+				enter, ok, wantEnter, wantOK)
 		}
 	}
 }
@@ -457,27 +703,28 @@ func TestARayEntersABoxWhereItsSlabsSay(t *testing.T) {
 // the y slab is entered at (at.y - 1), which for at.y of 2 plus 2^-41
 // (4.5e-13) is 1 plus 4.5e-13, and for 2^-39 (1.8e-12) 1 plus 1.8e-12.
 func TestASlabMissedByAHairIsLetThrough(t *testing.T) {
-	zero, one := maths.V(0, 0, 0), maths.V(1, 1, 1)
-	for _, c := range []struct {
-		miss float64
-		ok   bool
-	}{
-		{0, true}, {0x1p-41, true}, {0x1p-39, false},
-	} {
-		at := maths.V(0, 2+c.miss, .5)
-		if enter, ok := boxAt(at, maths.V(1, -1, 0), zero, one, 0,
-			math.Inf(1)); ok != c.ok {
-			t.Errorf("missing by %g: %v at %v, want %v", c.miss, ok, enter,
-				c.ok)
+	one := maths.V(unity, unity, unity)
+	height := picked(t, "meshtree-more-miss-at-y")
+	way := maths.V(unity, -unity, nought)
+	for _, row := range readSheet(t, meshtreeMoreMisses) {
+		miss := cell(t, row, "miss")
+		at := maths.V(nought, height+miss, half)
+		enter, ok := boxAt(at, way, meshtreeMoreOrigin, one, nought, forever)
+		if want := meshtreeMoreFlag(t, row, "lets"); ok != want {
+			t.Errorf("missing by %g: %v at %v, want %v", miss, ok, enter,
+				want)
 		}
 	}
 }
 
 // area is a box's whole surface: for 2 by 3 by 5, twice 6+15+10.
 func TestTheAreaOfABox(t *testing.T) {
-	b := maths.Box{Max: maths.V(2, 3, 5)}
-	if got := area(b); got != 62 {
-		t.Errorf("a box 2 by 3 by 5 has area %v, want 62", got)
+	sides := maths.V(picked(t, "meshtree-more-area-width"),
+		picked(t, "meshtree-more-area-length"),
+		picked(t, "meshtree-more-area-height"))
+	want := picked(t, "meshtree-more-area-surface")
+	if got := area(meshtreeMoreBox(meshtreeMoreOrigin, sides)); got != want {
+		t.Errorf("a box 2 by 3 by 5 has area %v, want %v", got, want)
 	}
 }
 
@@ -485,25 +732,24 @@ func TestTheAreaOfABox(t *testing.T) {
 // their sides, each axis the longest in turn, and one where the first is
 // longer than the second but not than the third.
 func TestTheLongestAxisOfABox(t *testing.T) {
-	for _, c := range []struct {
-		d    maths.Vec
-		want int
-	}{
-		{maths.V(3, 2, 1), 0}, {maths.V(1, 3, 2), 1}, {maths.V(1, 2, 3), 2},
-		{maths.V(2, 3, 1), 1}, {maths.V(2, 1, 3), 2},
-	} {
-		if got := longest(maths.Box{Max: c.d}); got != c.want {
-			t.Errorf("a box %v across: axis %d, want %d", c.d, got, c.want)
+	for _, row := range readSheet(t, meshtreeMoreLongest) {
+		sides := meshtreeMoreVector(t, row, "side")
+		box := meshtreeMoreBox(meshtreeMoreOrigin, sides)
+		want := cellCount(t, row, "axis")
+		if got := longest(box); got != want {
+			t.Errorf("a box %v across: axis %d, want %d", sides, got, want)
 		}
 	}
 }
 
 // along is a point's part on the axis 0, 1 or 2.
 func TestAPointAlongAnAxis(t *testing.T) {
-	v := maths.V(1, 2, 3)
-	for axis, want := range []float64{1, 2, 3} {
-		if got := along(v, axis); got != want {
-			t.Errorf("axis %d of %v is %v, want %v", axis, v, got, want)
+	row := readSheet(t, meshtreeMorePlaces).row(t, meshtreeMorePlaces,
+		"along")
+	point := meshtreeMoreVector(t, row, "point")
+	for axis, want := range meshtreeMoreParts(point) {
+		if got := along(point, axis); got != want {
+			t.Errorf("axis %d of %v is %v, want %v", axis, point, got, want)
 		}
 	}
 }
@@ -512,43 +758,69 @@ func TestAPointAlongAnAxis(t *testing.T) {
 // either end: from the box of 0 to 1, a point 2 past a side is 4 away,
 // and one 3 past on one axis and 2 and 1 on the others is 9+4+1.
 func TestHowFarAPointIsFromABox(t *testing.T) {
-	b := maths.Box{Max: maths.V(1, 1, 1)}
-	for _, c := range []struct {
-		p    maths.Vec
-		want float64
-	}{
-		{maths.V(.5, .5, .5), 0}, {maths.V(1, 0, .5), 0},
-		{maths.V(3, .5, .5), 4}, {maths.V(-2, .5, .5), 4},
-		{maths.V(.5, 4, .5), 9}, {maths.V(.5, -1, .5), 1},
-		{maths.V(.5, .5, 3), 4}, {maths.V(.5, .5, -3), 9},
-		{maths.V(4, 3, -1), 9 + 4 + 1},
-	} {
-		if got := away(b, c.p); got != c.want {
-			t.Errorf("%v is %v from the box, want %v", c.p, got, c.want)
+	box := meshtreeMoreBox(meshtreeMoreOrigin, maths.V(unity, unity, unity))
+	for _, row := range readSheet(t, meshtreeMoreAway) {
+		point := meshtreeMoreVector(t, row, "point")
+		want := cell(t, row, "square-x") + cell(t, row, "square-y") +
+			cell(t, row, "square-z")
+		if got := away(box, point); got != want {
+			t.Errorf("%v is %v from the box, want %v", point, got, want)
 		}
 	}
+}
+
+// meshtreeMoreAsker puts the questions to a mesh, over a point at aim
+// along x and along y.
+type meshtreeMoreAsker struct {
+	aim float64
+}
+
+// bounds asks for the box.
+func (asker meshtreeMoreAsker) bounds(mesh *Mesh) { mesh.Bounds() }
+
+// hit asks for the hit of a ray from above, straight down.
+func (asker meshtreeMoreAsker) hit(mesh *Mesh) {
+	mesh.Hit(down(asker.aim, asker.aim), nought, forever)
+}
+
+// normal asks for the normal at a point.
+func (asker meshtreeMoreAsker) normal(mesh *Mesh) {
+	mesh.Normal(maths.V(asker.aim, asker.aim, unity))
+}
+
+// distance asks for the distance to a point.
+func (asker meshtreeMoreAsker) distance(mesh *Mesh) {
+	mesh.Distance(maths.V(asker.aim, asker.aim, unity))
+}
+
+// meshtreeMoreSayPanic is deferred to say what a question panicked with:
+// it is a fault if that is not want.
+func meshtreeMoreSayPanic(t *testing.T, name, want string) {
+	if got := recover(); got != want {
+		t.Errorf("%s: panicked with %v, want %q", name, got, want)
+	}
+}
+
+// meshtreeMoreAskUnbuilt puts a question to a Mesh that was not built.
+func meshtreeMoreAskUnbuilt(t *testing.T, name string, ask func(*Mesh),
+	want string) {
+	defer meshtreeMoreSayPanic(t, name, want)
+	ask(&Mesh{Vertices: []maths.Vec{meshtreeMoreOrigin, maths.XAxis,
+		maths.Up}, Faces: [][cornersOfAFace]int{{nought, unity, pair}}})
 }
 
 // A Mesh not made by NewMesh says what is wrong with it, in words, from
 // whichever question is put to it.
 func TestAMeshNotBuiltSaysWhatIsWrong(t *testing.T) {
 	const want = "shape: a Mesh is made by NewMesh, which builds its tree"
-	for name, ask := range map[string]func(m *Mesh){
-		"Bounds":   func(m *Mesh) { m.Bounds() },
-		"Hit":      func(m *Mesh) { m.Hit(down(.1, .1), 0, forever) },
-		"Normal":   func(m *Mesh) { m.Normal(maths.V(.1, .1, 1)) },
-		"Distance": func(m *Mesh) { m.Distance(maths.V(.1, .1, 1)) },
+	asker := meshtreeMoreAsker{aim: picked(t, "meshtree-more-unbuilt-aim")}
+	for name, ask := range map[string]func(mesh *Mesh){
+		"Bounds":   asker.bounds,
+		"Hit":      asker.hit,
+		"Normal":   asker.normal,
+		"Distance": asker.distance,
 	} {
-		func() {
-			defer func() {
-				if got := recover(); got != want {
-					t.Errorf("%s: panicked with %v, want %q", name, got,
-						want)
-				}
-			}()
-			ask(&Mesh{Vertices: []maths.Vec{{}, maths.XAxis, maths.Up},
-				Faces: [][3]int{{0, 1, 2}}})
-		}()
+		meshtreeMoreAskUnbuilt(t, name, ask, want)
 	}
 }
 
@@ -556,8 +828,10 @@ func TestAMeshNotBuiltSaysWhatIsWrong(t *testing.T) {
 // point is, even so far out that every distance squared is past what a
 // double holds: worked by hand, 1e200 squared is endless.
 func TestTheOnlyFaceIsNearestFromAnywhere(t *testing.T) {
-	m := lone(t)
-	if got := m.Normal(maths.V(1e200, 0, 0)); got != maths.V(0, 0, 1) {
+	mesh := lone(t)
+	out := picked(t, "meshtree-more-far-out")
+	want := maths.V(nought, nought, unity)
+	if got := mesh.Normal(maths.V(out, nought, nought)); got != want {
 		t.Errorf("the normal from 1e200 out is %v, want up", got)
 	}
 }
@@ -569,353 +843,394 @@ func TestTheOnlyFaceIsNearestFromAnywhere(t *testing.T) {
 // from inside it and a cube twice the size round it, out through both;
 // from between the two, out through the larger alone.
 func TestWindingCountsFacesLeftLessFacesEntered(t *testing.T) {
-	vs, fs := cube(1, false)
-	one := made(t, vs, fs, nil, false)
-	n, k := len(vs), len(fs)
-	for i := range n {
-		vs = append(vs, vs[i].Scale(2))
+	cells := pickedCount(t, "meshtree-more-winding-cells")
+	vertices, faces := cube(cells, false)
+	one := made(t, vertices, faces, nil, false)
+	count, inner := len(vertices), len(faces)
+	for i := range count {
+		vertices = append(vertices, vertices[i].Scale(pair))
 	}
-	for _, f := range fs[:k] {
-		fs = append(fs, [3]int{f[0] + n, f[1] + n, f[2] + n})
+	for _, face := range faces[:inner] {
+		faces = append(faces, meshtreeMoreShifted(face, count))
 	}
-	two := made(t, vs, fs, nil, false)
-	for _, c := range []struct {
-		why  string
-		m    *Mesh
-		r    maths.Ray
-		want int
-	}{
-		{"from inside", one, maths.Ray{At: maths.V(.1, .2, .3),
-			Dir: maths.V(.48, .6, .64)}, 1},
-		{"from outside going away", one, maths.Ray{At: maths.V(3, .2, .3),
-			Dir: maths.V(1, 0, 0)}, 0},
-		{"through", one, maths.Ray{At: maths.V(-3, .2, .3),
-			Dir: maths.V(1, 0, 0)}, 0},
-		{"from inside both", two, maths.Ray{At: maths.V(.1, .2, .3),
-			Dir: maths.V(.48, .6, .64)}, 2},
-		{"from between", two, maths.Ray{At: maths.V(1.5, .2, .3),
-			Dir: maths.V(1, 0, 0)}, 1},
-	} {
-		if got := c.m.winding(c.r); got != c.want {
-			t.Errorf("%s: %d, want %d", c.why, got, c.want)
+	meshes := map[string]*Mesh{"one": one,
+		"two": made(t, vertices, faces, nil, false)}
+	for _, row := range readSheet(t, meshtreeMoreWindings) {
+		at := meshtreeMoreVector(t, row, "at")
+		direction := meshtreeMoreVector(t, row, "dir")
+		ray := meshtreeMoreRay(at, direction)
+		want := cellCount(t, row, "want")
+		if got := meshes[row["mesh"]].winding(ray); got != want {
+			t.Errorf("%s: %d, want %d", row["name"], got, want)
 		}
 	}
 }
 
 // span is the box of some faces, found from their corners.
-type span struct{ lo, hi [3]float64 }
+type span struct{ lo, hi [meshtreeMoreAxes]float64 }
 
-// spanOf is the box of the faces fs of m.
-func spanOf(m *Mesh, fs []int) span {
-	inf := math.Inf(1)
-	s := span{[3]float64{inf, inf, inf}, [3]float64{-inf, -inf, -inf}}
-	for _, f := range fs {
-		for _, v := range m.Faces[f] {
-			p := m.Vertices[v]
-			for k, c := range [3]float64{p.X, p.Y, p.Z} {
-				s.lo[k] = math.Min(s.lo[k], c)
-				s.hi[k] = math.Max(s.hi[k], c)
+// spanOf is the box of the faces of the mesh numbered in faces.
+func spanOf(mesh *Mesh, faces []int) span {
+	var lowest, highest [meshtreeMoreAxes]float64
+	for k := range lowest {
+		lowest[k], highest[k] = forever, -forever
+	}
+	found := span{lowest, highest}
+	for _, face := range faces {
+		for _, vertex := range mesh.Faces[face] {
+			point := mesh.Vertices[vertex]
+			for k, part := range meshtreeMoreParts(point) {
+				found.lo[k] = math.Min(found.lo[k], part)
+				found.hi[k] = math.Max(found.hi[k], part)
 			}
 		}
 	}
-	return s
+	return found
 }
 
 // surface is twice the sum of the three products of the sides.
-func (s span) surface() float64 {
-	x, y, z := s.hi[0]-s.lo[0], s.hi[1]-s.lo[1], s.hi[2]-s.lo[2]
-	return 2 * (x*y + y*z + z*x)
+func (found span) surface() float64 {
+	x := found.hi[meshtreeMoreAxisX] - found.lo[meshtreeMoreAxisX]
+	y := found.hi[meshtreeMoreAxisY] - found.lo[meshtreeMoreAxisY]
+	z := found.hi[meshtreeMoreAxisZ] - found.lo[meshtreeMoreAxisZ]
+	return pair * (x*y + y*z + z*x)
 }
 
-// plan is what the tree may do with the faces fs of m at a depth, by brute
-// force from their corners alone, trying every cut. Along the axis the
-// middles spread furthest on, the faces fall into sixteen bins, and the
-// cut between two bins is cheap where the faces below times the surface of
-// their box, and the faces above times theirs, come to least. A leaf of
-// eight or fewer is kept instead when a cut, priced as a box and the cost
-// over the box's surface, is no cheaper than the faces tested one by one.
-// Past depth 64, or without a spread, eight or fewer make a leaf and more
-// are cut in half by their order along the axis.
+// meshtreeMorePlanner is what plan works with: the mesh, and the numbers
+// its tree is cut by.
+type meshtreeMorePlanner struct {
+	mesh       *Mesh
+	alwaysLeaf int
+	leafMost   int
+	depthLimit int
+	bins       int
+	lastBin    int
+	tieBelow   float64
+	tieAbove   float64
+}
+
+// meshtreeMoreNewPlanner is a planner for a mesh.
+func meshtreeMoreNewPlanner(t *testing.T, mesh *Mesh) meshtreeMorePlanner {
+	t.Helper()
+	return meshtreeMorePlanner{
+		mesh:       mesh,
+		alwaysLeaf: pickedCount(t, "meshtree-more-plan-always-leaf"),
+		leafMost:   pickedCount(t, "meshtree-more-leaf-most"),
+		depthLimit: pickedCount(t, "meshtree-more-depth-limit"),
+		bins:       pickedCount(t, "meshtree-more-plan-bins"),
+		lastBin:    pickedCount(t, "meshtree-more-plan-last-bin"),
+		tieBelow:   picked(t, "meshtree-more-plan-tie-below"),
+		tieAbove:   picked(t, "meshtree-more-plan-tie-above"),
+	}
+}
+
+// meshtreeMoreSpread is where the middles of some faces lie: each one, and
+// the lowest and the highest on each axis.
+type meshtreeMoreSpread struct {
+	middles   [][meshtreeMoreAxes]float64
+	low, high [meshtreeMoreAxes]float64
+}
+
+// widest is the axis the middles spread furthest on, the first of equals.
+func (spread meshtreeMoreSpread) widest() int {
+	axis := meshtreeMoreAxisX
+	for k := meshtreeMoreAxisY; k < meshtreeMoreAxes; k++ {
+		if spread.high[k]-spread.low[k] >
+			spread.high[axis]-spread.low[axis] {
+			axis = k
+		}
+	}
+	return axis
+}
+
+// middleOf is the middle of a face of the planner's mesh: its corners
+// added up and divided by their count.
+func (planner meshtreeMorePlanner) middleOf(
+	face int) [meshtreeMoreAxes]float64 {
+	var sum, middle [meshtreeMoreAxes]float64
+	for _, vertex := range planner.mesh.Faces[face] {
+		point := planner.mesh.Vertices[vertex]
+		for k, part := range meshtreeMoreParts(point) {
+			sum[k] += part
+		}
+	}
+	for k := range sum {
+		middle[k] = sum[k] / float64(cornersOfAFace)
+	}
+	return middle
+}
+
+// spreadOf is where the middles of the faces lie.
+func (planner meshtreeMorePlanner) spreadOf(faces []int) meshtreeMoreSpread {
+	spread := meshtreeMoreSpread{
+		middles: make([][meshtreeMoreAxes]float64, len(faces))}
+	for i, face := range faces {
+		middle := planner.middleOf(face)
+		spread.middles[i] = middle
+		for k := range middle {
+			if i == nought {
+				spread.low[k], spread.high[k] = middle[k], middle[k]
+			}
+			spread.low[k] = math.Min(spread.low[k], middle[k])
+			spread.high[k] = math.Max(spread.high[k], middle[k])
+		}
+	}
+	return spread
+}
+
+// meshtreeMorePrices are the cuts tried between the bins, the cost of each
+// by the bin it is before, the faces below it, and the least cost.
+type meshtreeMorePrices struct {
+	cost  []float64
+	below [][]int
+	best  float64
+}
+
+// divide is the faces below the bin cut, and the faces from it up.
+func (planner meshtreeMorePlanner) divide(faces []int,
+	spread meshtreeMoreSpread, axis, cut int) (under, over []int) {
+	width := spread.high[axis] - spread.low[axis]
+	for i, face := range faces {
+		place := float64(planner.bins) *
+			(spread.middles[i][axis] - spread.low[axis]) / width
+		if min(int(place), planner.lastBin) < cut {
+			under = append(under, face)
+		} else {
+			over = append(over, face)
+		}
+	}
+	return under, over
+}
+
+// price tries every cut between two bins along the axis.
+func (planner meshtreeMorePlanner) price(faces []int,
+	spread meshtreeMoreSpread, axis int) meshtreeMorePrices {
+	prices := meshtreeMorePrices{cost: make([]float64, planner.bins),
+		below: make([][]int, planner.bins), best: forever}
+	for k := unity; k < planner.bins; k++ {
+		under, over := planner.divide(faces, spread, axis, k)
+		if len(under) == nought || len(over) == nought {
+			continue
+		}
+		prices.cost[k] = spanOf(planner.mesh, under).surface()*
+			float64(len(under)) +
+			spanOf(planner.mesh, over).surface()*float64(len(over))
+		prices.below[k] = under
+		prices.best = math.Min(prices.best, prices.cost[k])
+	}
+	return prices
+}
+
+// meshtreeMoreHas is whether cut is one of cuts.
+func meshtreeMoreHas(cuts [][]int, cut []int) bool {
+	for _, each := range cuts {
+		if slices.Equal(each, cut) {
+			return true
+		}
+	}
+	return false
+}
+
+// choices says whether a leaf is allowed, and which cuts are as cheap as
+// the cheapest, for faces cut by price.
+func (planner meshtreeMorePlanner) choices(faces []int,
+	spread meshtreeMoreSpread, axis int) (leaf bool, cuts [][]int) {
+	prices := planner.price(faces, spread, axis)
+	count := len(faces)
+	cheaper := unity + prices.best/spanOf(planner.mesh, faces).surface()
+	leaf = count <= planner.leafMost &&
+		cheaper >= float64(count)*planner.tieBelow
+	if count <= planner.leafMost &&
+		cheaper >= float64(count)*planner.tieAbove {
+		return leaf, nil
+	}
+	for k := unity; k < planner.bins; k++ {
+		if prices.below[k] != nil &&
+			prices.cost[k] <= prices.best*planner.tieAbove {
+			slices.Sort(prices.below[k])
+			if !meshtreeMoreHas(cuts, prices.below[k]) {
+				cuts = append(cuts, prices.below[k])
+			}
+		}
+	}
+	return leaf, cuts
+}
+
+// meshtreeMoreByAxis orders faces by where their middles lie on an axis.
+type meshtreeMoreByAxis struct {
+	faces   []int
+	order   []int
+	middles [][meshtreeMoreAxes]float64
+	axis    int
+}
+
+// less is whether the face at place first of the order lies before the
+// face at place second.
+func (by meshtreeMoreByAxis) less(first, second int) bool {
+	lower := by.middles[slices.Index(by.faces, by.order[first])]
+	higher := by.middles[slices.Index(by.faces, by.order[second])]
+	return lower[by.axis] < higher[by.axis]
+}
+
+// meshtreeMoreLowerHalf is the lower half of the faces by their order along
+// the axis, smallest numbers first.
+func meshtreeMoreLowerHalf(faces []int, spread meshtreeMoreSpread,
+	axis int) []int {
+	order := slices.Clone(faces)
+	by := meshtreeMoreByAxis{faces: faces, order: order,
+		middles: spread.middles, axis: axis}
+	sort.Slice(order, by.less)
+	lower := slices.Clone(order[:len(faces)/pair])
+	slices.Sort(lower)
+	return lower
+}
+
+// plan is what the tree may do with the faces of the mesh at a depth, by
+// brute force from their corners alone, trying every cut. Along the axis
+// the middles spread furthest on, the faces fall into sixteen bins, and
+// the cut between two bins is cheap where the faces below times the
+// surface of their box, and the faces above times theirs, come to least.
+//
+// A leaf of eight or fewer is kept instead when a cut, priced as a box
+// and the cost over the box's surface, is no cheaper than the faces tested
+// one by one. Past depth 64, or without a spread, eight or fewer make a
+// leaf and more are cut in half by their order along the axis.
 //
 // Prices within a billionth of each other are taken as equal, so either
 // choice is allowed: leaf says a leaf is, and cuts are the first halves
 // that are.
-func plan(m *Mesh, fs []int, depth int) (leaf bool, cuts [][]int) {
-	n := len(fs)
-	if n <= 2 {
+func (planner meshtreeMorePlanner) plan(faces []int,
+	depth int) (leaf bool, cuts [][]int) {
+	count := len(faces)
+	if count <= planner.alwaysLeaf {
 		return true, nil
 	}
-	mids := make([][3]float64, n)
-	var lo, hi [3]float64
-	for i, f := range fs {
-		var sum [3]float64
-		for _, v := range m.Faces[f] {
-			p := m.Vertices[v]
-			sum[0], sum[1], sum[2] = sum[0]+p.X, sum[1]+p.Y, sum[2]+p.Z
-		}
-		for k := range sum {
-			mids[i][k] = sum[k] / 3
-			if i == 0 {
-				lo[k], hi[k] = mids[i][k], mids[i][k]
-			}
-			lo[k] = math.Min(lo[k], mids[i][k])
-			hi[k] = math.Max(hi[k], mids[i][k])
-		}
+	spread := planner.spreadOf(faces)
+	axis := spread.widest()
+	if depth < planner.depthLimit && spread.high[axis] > spread.low[axis] {
+		return planner.choices(faces, spread, axis)
 	}
-	axis := 0
-	for k := 1; k < 3; k++ {
-		if hi[k]-lo[k] > hi[axis]-lo[axis] {
-			axis = k
-		}
-	}
-	if depth < 64 && hi[axis] > lo[axis] {
-		width := hi[axis] - lo[axis]
-		cost := make([]float64, 16)
-		below := make([][]int, 16)
-		best := math.Inf(1)
-		for k := 1; k < 16; k++ {
-			var under, over []int
-			for i, f := range fs {
-				bin := min(int(16*(mids[i][axis]-lo[axis])/width), 15)
-				if bin < k {
-					under = append(under, f)
-				} else {
-					over = append(over, f)
-				}
-			}
-			if len(under) == 0 || len(over) == 0 {
-				continue
-			}
-			cost[k] = spanOf(m, under).surface()*float64(len(under)) +
-				spanOf(m, over).surface()*float64(len(over))
-			below[k] = under
-			best = math.Min(best, cost[k])
-		}
-		cheaper := 1 + best/spanOf(m, fs).surface()
-		leaf = n <= 8 && cheaper >= float64(n)*(1-1e-9)
-		if n <= 8 && cheaper >= float64(n)*(1+1e-9) {
-			return leaf, nil
-		}
-		for k := 1; k < 16; k++ {
-			if below[k] != nil && cost[k] <= best*(1+1e-9) {
-				slices.Sort(below[k])
-				if !slices.ContainsFunc(cuts, func(c []int) bool {
-					return slices.Equal(c, below[k])
-				}) {
-					cuts = append(cuts, below[k])
-				}
-			}
-		}
-		return leaf, cuts
-	}
-	if n <= 8 {
+	if count <= planner.leafMost {
 		return true, nil
 	}
-	order := slices.Clone(fs)
-	sort.Slice(order, func(a, b int) bool {
-		return mids[slices.Index(fs, order[a])][axis] <
-			mids[slices.Index(fs, order[b])][axis]
-	})
-	half := slices.Clone(order[:n/2])
-	slices.Sort(half)
-	return false, [][]int{half}
+	return false, [][]int{meshtreeMoreLowerHalf(faces, spread, axis)}
 }
 
-// scatter is n triangles of about the given size, strewn through the cube
-// from -spread to spread, overlapping as they fall.
-func scatter(rng *rand.Rand, n int, spread, size float64) ([]maths.Vec, [][3]int) {
-	var vs []maths.Vec
-	var fs [][3]int
-	for range n {
-		mid := within(rng, spread)
-		s := size * (0.5 + rng.Float64())
-		for range 3 {
-			vs = append(vs, mid.Add(anyway(rng).Scale(s)))
+// scatter is count triangles of about the given size, strewn through the
+// cube from -spread to spread, overlapping as they fall.
+func scatter(rng *rand.Rand, count int, spread,
+	size float64) ([]maths.Vec, [][cornersOfAFace]int) {
+	var vertices []maths.Vec
+	var faces [][cornersOfAFace]int
+	for range count {
+		middle := within(rng, spread)
+		scale := size * (half + rng.Float64())
+		for range cornersOfAFace {
+			direction := anyway(rng).Scale(scale)
+			vertices = append(vertices, middle.Add(direction))
 		}
-		fs = append(fs, [3]int{len(vs) - 3, len(vs) - 2, len(vs) - 1})
+		first := len(vertices) - cornersOfAFace
+		faces = append(faces, meshtreeMoreCorners(first))
 	}
-	return vs, fs
+	return vertices, faces
 }
 
-// lumps is n lumps of 30 small triangles each, strewn through the cube
-// from -3 to 3.
-func lumps(rng *rand.Rand, n int) ([]maths.Vec, [][3]int) {
-	var vs []maths.Vec
-	var fs [][3]int
-	for range n {
-		v, f := scatter(rng, 30, 0.05, 0.1)
-		c, base := within(rng, 3), len(vs)
-		for _, p := range v {
-			vs = append(vs, p.Add(c))
+// lumps is count lumps of small triangles each, strewn through the cube
+// from the reach to minus it.
+func lumps(test testing.TB, rng *rand.Rand,
+	count int) ([]maths.Vec, [][cornersOfAFace]int) {
+	each := int(meshtreeMorePicked(test, "meshtree-more-lump-faces"))
+	spread := meshtreeMorePicked(test, "meshtree-more-lump-spread")
+	size := meshtreeMorePicked(test, "meshtree-more-lump-size")
+	reach := meshtreeMorePicked(test, "meshtree-more-lump-reach")
+	var vertices []maths.Vec
+	var faces [][cornersOfAFace]int
+	for range count {
+		lumpVertices, lumpFaces := scatter(rng, each, spread, size)
+		centre, base := within(rng, reach), len(vertices)
+		for _, point := range lumpVertices {
+			vertices = append(vertices, point.Add(centre))
 		}
-		for _, f := range f {
-			fs = append(fs, [3]int{f[0] + base, f[1] + base, f[2] + base})
+		for _, face := range lumpFaces {
+			faces = append(faces, meshtreeMoreShifted(face, base))
 		}
 	}
-	return vs, fs
+	return vertices, faces
+}
+
+// meshtreeMoreBrute is what a walk of a tree checks: that each node is a
+// leaf or a cut that brute force allows there.
+type meshtreeMoreBrute struct {
+	t       *testing.T
+	name    string
+	mesh    *Mesh
+	planner meshtreeMorePlanner
+	leaves  int
+	cuts    int
+}
+
+// visit checks node i at depth.
+func (brute *meshtreeMoreBrute) visit(i int32, depth int) {
+	faces := held(brute.mesh, i)
+	leaf, halves := brute.planner.plan(faces, depth)
+	if brute.mesh.nodes[i].count > nought {
+		brute.leaves++
+		if !leaf {
+			brute.t.Errorf("%s: node %d at depth %d of %d faces is a "+
+				"leaf, and a cut is meant", brute.name, i, depth,
+				len(faces))
+		}
+		return
+	}
+	brute.cuts++
+	got := held(brute.mesh, i+unity)
+	if !meshtreeMoreHas(halves, got) {
+		brute.t.Errorf("%s: node %d at depth %d of %d faces is cut "+
+			"%d and %d, and no cut brute force allows does that",
+			brute.name, i, depth, len(faces), len(got), len(faces)-len(got))
+	}
+}
+
+// meshtreeMoreBruteMeshes is the meshes the brute force is tried on, the
+// soup, the thin, the thick, the lumps and the chains, by name.
+func meshtreeMoreBruteMeshes(t *testing.T) ([]string, []*Mesh) {
+	t.Helper()
+	rng := meshtreeMoreRandom(t, "brute")
+	names := []string{"a soup", "thin", "thick", "lumps", "chain", "mirror"}
+	var meshes []*Mesh
+	vertices, faces := soup(rng, pickedCount(t,
+		"meshtree-more-brute-soup-faces"))
+	meshes = append(meshes, made(t, vertices, faces, nil, false))
+	vertices, faces = scatter(rng, pickedCount(t,
+		"meshtree-more-brute-thin-faces"),
+		picked(t, "meshtree-more-brute-thin-spread"),
+		picked(t, "meshtree-more-brute-thin-size"))
+	meshes = append(meshes, made(t, vertices, faces, nil, false))
+	vertices, faces = scatter(rng, pickedCount(t,
+		"meshtree-more-brute-thick-faces"),
+		picked(t, "meshtree-more-brute-thick-spread"),
+		picked(t, "meshtree-more-brute-thick-size"))
+	meshes = append(meshes, made(t, vertices, faces, nil, false))
+	vertices, faces = lumps(t, rng, pickedCount(t,
+		"meshtree-more-brute-lumps"))
+	meshes = append(meshes, made(t, vertices, faces, nil, false))
+	length := pickedCount(t, "meshtree-more-chain-length")
+	upward, _ := chain(t, length, unity)
+	mirrored, _ := chain(t, length, -unity)
+	return names, append(meshes, upward, mirrored)
 }
 
 // Every node of the tree is a leaf or a cut that brute force allows there,
 // found again from the corners, for faces strewn thinly, thickly and in
 // lumps, and for the chains.
 func TestEveryNodeIsCutAsBruteForceAllows(t *testing.T) {
-	rng := rand.New(rand.NewPCG(30, 31))
-	var meshes []*Mesh
-	names := []string{"a soup", "thin", "thick", "lumps", "chain", "mirror"}
-	vs, fs := soup(rng, 3000)
-	meshes = append(meshes, made(t, vs, fs, nil, false))
-	vs, fs = scatter(rng, 1500, 1, 0.05)
-	meshes = append(meshes, made(t, vs, fs, nil, false))
-	vs, fs = scatter(rng, 400, 0.2, 0.5)
-	meshes = append(meshes, made(t, vs, fs, nil, false))
-	vs, fs = lumps(rng, 40)
-	meshes = append(meshes, made(t, vs, fs, nil, false))
-	up, _ := chain(t, 80, 1)
-	down, _ := chain(t, 80, -1)
-	meshes = append(meshes, up, down)
-	for w, m := range meshes {
-		leaves, cuts := 0, 0
-		walk(m, func(i int32, depth int) {
-			fs := held(m, i)
-			leaf, halves := plan(m, fs, depth)
-			if m.nodes[i].count > 0 {
-				leaves++
-				if !leaf {
-					t.Errorf("%s: node %d at depth %d of %d faces is a "+
-						"leaf, and a cut is meant", names[w], i, depth,
-						len(fs))
-				}
-				return
-			}
-			cuts++
-			got := held(m, i+1)
-			if !slices.ContainsFunc(halves, func(h []int) bool {
-				return slices.Equal(h, got)
-			}) {
-				t.Errorf("%s: node %d at depth %d of %d faces is cut "+
-					"%d and %d, and no cut brute force allows does that",
-					names[w], i, depth, len(fs), len(got), len(fs)-len(got))
-			}
-		})
-		bounded(t, names[w], m)
-		t.Logf("%s: %d faces, %d leaves, %d cuts", names[w], len(m.Faces),
-			leaves, cuts)
-	}
-}
-
-// plates is n big triangles one above another, a unit apart from z = 0
-// up, each 20 across and 20 up, so that a ray along z through the middle
-// meets every one.
-func plates(t testing.TB, n int) *Mesh {
-	var vs []maths.Vec
-	var fs [][3]int
-	for k := range n {
-		z := float64(k)
-		vs = append(vs, maths.V(-10, -10, z), maths.V(10, -10, z),
-			maths.V(0, 10, z))
-		fs = append(fs, [3]int{3 * k, 3*k + 1, 3*k + 2})
-	}
-	return made(t, vs, fs, nil, false)
-}
-
-// quickest is the least time, over a few tries, that doing f takes.
-func quickest(f func()) time.Duration {
-	best := time.Hour
-	for range 7 {
-		start := time.Now()
-		f()
-		best = min(best, time.Since(start))
-	}
-	return best
-}
-
-// The tree finds a ray's face among many quickly: ten rays down a tower of
-// twenty thousand faces take less than asking every face once. A tower is
-// the worst case for a tree that does not look in the nearer box first,
-// which meets every face on the way to the nearest. Rays go down it and up
-// it, so that either child may be the nearer.
-//
-// Worked by hand: from 5 below the first plate, at z = 0, the ray meets
-// it at 5; from 20004, 5 above the last, at z = 19999, also at 5.
-func TestTheNearerBoxIsLookedInFirstForARay(t *testing.T) {
-	const n = 20000
-	m := plates(t, n)
-	for _, c := range []struct {
-		why string
-		r   maths.Ray
-		t   float64
-	}{
-		{"from below", maths.Ray{At: maths.V(0, 0, -5),
-			Dir: maths.V(0, 0, 1)}, 5},
-		{"from above", maths.Ray{At: maths.V(0, 0, n+4),
-			Dir: maths.V(0, 0, -1)}, 5},
-	} {
-		if got, _, ok := m.first(c.r, 0, forever); !ok || got != c.t {
-			t.Fatalf("%s: met at %v, %v; want %v", c.why, got, ok, c.t)
-		}
-		all := quickest(func() { every(m, c.r, 0, forever) })
-		few := quickest(func() {
-			for range 10 {
-				m.first(c.r, 0, forever)
-			}
-		})
-		t.Logf("%s: ten rays %v, every face once %v", c.why, few, all)
-		if few > all {
-			t.Errorf("%s: ten rays took %v, longer than every face once, %v",
-				c.why, few, all)
-		}
-	}
-}
-
-// The same for the nearest face to a point, from below the tower and from
-// above it. Worked by hand: 5 from the first plate or the last, so 25
-// squared.
-func TestTheNearerBoxIsLookedInFirstForAPoint(t *testing.T) {
-	const n = 20000
-	m := plates(t, n)
-	for _, c := range []struct {
-		why string
-		p   maths.Vec
-		d2  float64
-	}{
-		{"from below", maths.V(0, 0, -5), 25},
-		{"from above", maths.V(0, 0, n+4), 25},
-	} {
-		if _, _, d2 := m.nearest(c.p); d2 != c.d2 {
-			t.Fatalf("%s: nearest is %v away squared, want %v", c.why, d2,
-				c.d2)
-		}
-		all := quickest(func() { nearestOfAll(m, c.p) })
-		few := quickest(func() {
-			for range 10 {
-				m.nearest(c.p)
-			}
-		})
-		t.Logf("%s: ten points %v, every face once %v", c.why, few, all)
-		if few > all {
-			t.Errorf("%s: ten points took %v, longer than every face once, "+
-				"%v", c.why, few, all)
-		}
-	}
-}
-
-// A ray that misses the whole mesh is turned away at the root by winding,
-// as it is by a hit: ten of them take less than asking every face once.
-func TestAWindingRayThatMissesIsTurnedAwayAtTheRoot(t *testing.T) {
-	const n = 20000
-	m := plates(t, n)
-	r := maths.Ray{At: maths.V(100, 100, -5), Dir: maths.V(0, 0, 1)}
-	if got := m.winding(r); got != 0 {
-		t.Fatalf("a ray that misses winds %d", got)
-	}
-	all := quickest(func() { every(m, r, 0, forever) })
-	few := quickest(func() {
-		for range 10 {
-			m.winding(r)
-		}
-	})
-	t.Logf("ten rays %v, every face once %v", few, all)
-	if few > all {
-		t.Errorf("ten rays took %v, longer than every face once, %v", few, all)
+	names, meshes := meshtreeMoreBruteMeshes(t)
+	for which, mesh := range meshes {
+		brute := &meshtreeMoreBrute{t: t, name: names[which], mesh: mesh,
+			planner: meshtreeMoreNewPlanner(t, mesh)}
+		walk(mesh, brute.visit)
+		bounded(t, names[which], mesh)
+		t.Logf("%s: %d faces, %d leaves, %d cuts", names[which],
+			len(mesh.Faces), brute.leaves, brute.cuts)
 	}
 }

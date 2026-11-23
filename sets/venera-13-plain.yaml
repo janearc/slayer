@@ -18,7 +18,8 @@
 #
 # what is venus's here: the sky, the sun and the light on the ground.
 # `air: venus` asks for venus's air worked from its sources (airs/venus.yaml,
-# doc/sky-from-the-air.md): package airlight follows the sun's light through
+# doc/model/sky/sky-from-the-air.md): package airlight follows the sun's
+# light through
 # the air's shells at 21 wavelengths, from 380 to 780 nm, and the sky, the
 # sun's lamp and the exposure come from that. nothing in the light is
 # painted, and there is no fill lamp: the sky lights the ground.

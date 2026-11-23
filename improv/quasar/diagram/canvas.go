@@ -84,8 +84,8 @@ func (paper canvas) dot(x, y, radius float64, colour color.RGBA) {
 // line paints a straight line between two points in masses.
 func (paper canvas) line(from, to rings.Point, colour color.RGBA,
 	width float64) {
-	x0, y0 := paper.view.Place(from)
-	x1, y1 := paper.view.Place(to)
+	x0, y0 := paper.view.place(from)
+	x1, y1 := paper.view.place(to)
 	length := math.Hypot(x1-x0, y1-y0)
 	marks := int(length/stride) + one
 	for mark := range marks + one {
@@ -97,7 +97,7 @@ func (paper canvas) line(from, to rings.Point, colour color.RGBA,
 // disc paints a filled circle about the hole's centre of a radius in
 // masses.
 func (paper canvas) disc(radius float64, colour color.RGBA) {
-	x, y := paper.view.Place(rings.Point{})
+	x, y := paper.view.place(rings.Point{})
 	scale := float64(paper.view.side) / (two * paper.view.reach)
 	paper.dot(x, y, radius*scale, colour)
 }
@@ -114,7 +114,7 @@ func (paper canvas) circle(radius float64, colour color.RGBA,
 		angle := two * math.Pi * float64(step) / float64(steps)
 		point := rings.Point{Along: radius * math.Cos(angle),
 			Up: radius * math.Sin(angle)}
-		x, y := paper.view.Place(point)
+		x, y := paper.view.place(point)
 		paper.dot(x, y, width/two, colour)
 	}
 }
@@ -134,7 +134,7 @@ func (paper canvas) ray(ray Ray, disc rings.Disc) {
 		if lands && crossings > ray.Order {
 			end := onPlane(from, to)
 			paper.line(from, end, ray.Colour, rayWidth)
-			x, y := paper.view.Place(end)
+			x, y := paper.view.place(end)
 			paper.dot(x, y, landing, ray.Colour)
 			return
 		}

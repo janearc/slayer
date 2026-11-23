@@ -9,7 +9,8 @@ import (
 // enclosedDetail adds service hardware around the optical opening. NASA
 // and Spitzer mission diagrams establish the component families; their
 // display sizes and placements are authored in spacecraft-choices.yaml.
-// See doc/space-instrument-studies.md for the references and limits.
+// See doc/model/spacecraft/space-instrument-studies.md for the references
+// and limits.
 func (row spacecraft) enclosedDetail(a *instrumentAssembly, size spacecraftSize) {
 	aperture := size.aperture
 	bus := aperture * spacecraftValue("bus-height")

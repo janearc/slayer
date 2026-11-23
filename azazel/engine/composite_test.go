@@ -9,6 +9,10 @@ import (
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/identity"
 )
 
+// never is the stop of a composite that does not stop: no context at all,
+// which Composite refuses.
+var never context.Context
+
 func compositeRequest() CompositeRequest {
 	return CompositeRequest{Config: compositor.Config{From: 2, To: 4}, Estimate: CompositeEstimate{MemoryBytes: 1024, DiskBytes: 2048, CPUWorkers: 1}}
 }
@@ -36,7 +40,7 @@ func TestCompositeRejectsInvalidRequestsBeforeAdmission(t *testing.T) {
 			t.Fatalf("invalid request: %v", err)
 		}
 	}
-	if err := Composite(nil, compositeRequest(), func(CompositeFrame) error { return nil }); err == nil {
+	if err := Composite(never, compositeRequest(), func(CompositeFrame) error { return nil }); err == nil {
 		t.Fatal("nil context accepted")
 	}
 	if err := Composite(context.Background(), compositeRequest(), nil); err == nil {

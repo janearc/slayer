@@ -1,0 +1,51 @@
+# the signs study, the three kinds: a roof sign, a screen and a blade sign
+# standing on their own on a dark wet street at night, seen from 60 m off
+# at 10 m up. each is a kind (sign-roof, sign-screen, sign-blade) from
+# manufacture/cities/signdraw.go, its words, colour and look drawn from its
+# seed out of manufacture/cities/cultures/sign.yaml. each carries lamps of
+# the colour of its glass, which light the street and what stands near.
+#
+# places are metres, as a map's run: x east, y north, z up. there is no sun
+# and no sky: the only light is the signs'. the street's colour and the
+# camera are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: signs study kinds
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 80
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    across:
+      title: "three signs from 60 m, at 10 m up"
+      location:
+        at: [0, -60, 10]
+      orientation:
+        look_at: [0, 0, 8]
+  set:
+    things:
+      roof: {kind: sign-roof, seed: 4, complexity: quick, east: -30, north: 0, height: {value: 0, unit: m}}
+      screen: {kind: sign-screen, seed: 7, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+      blade: {kind: sign-blade, seed: 11, complexity: quick, east: 28, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      street:
+        # wet asphalt: nearly opaque, and it mirrors at a low angle
+        colour: {srgb_linear: [0.02, 0.02, 0.025]}
+        clear: {through: 0.03, index: 1.5, gloss: 1, rank: 0}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye

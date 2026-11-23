@@ -27,11 +27,11 @@ type machine interface {
 	// role, so the voicing can check what is dropped.
 	check(v *Voicing) (errs []error, plays map[string]int)
 	// fits is whether a channel can sound an event.
-	fits(c *Channel, e event) error
+	fits(c *channel, e event) error
 	// percussive is whether a kind plays hits and not notes.
 	percussive(kind string) bool
 	// render runs the machine over a plan.
-	render(pl *Plan) (*Piece, error)
+	render(pl *plan) (*Piece, error)
 }
 
 // machines is every machine there is, by the name a voicing gives it.
@@ -40,8 +40,8 @@ var machines = map[string]machine{
 	"studio":  studio{},
 }
 
-// Machines are the names a voicing's machine may take, in order.
-var Machines = machineNames()
+// machineNameList are the names a voicing's machine may take, in order.
+var machineNameList = machineNames()
 
 // machineNames is the table's keys, sorted.
 func machineNames() []string {

@@ -3,7 +3,7 @@
 # 0.71 assumes 1 - the mean radiative share; 0.0024 is the mean soot yield:
 # NIST TN 2314, abstract. extinction is converted from 632 to 550 nm.
 # 21 MJ/kg is nominal net combustion energy, not measured effective energy.
-# see fire-recipes.md for sources, derivation and model limits.
+# see model/fire/fire-recipes.md for sources, derivation and model limits.
 $schema: https://github.com/janearc/slayer/schemas/ecosystem-v1.json
 scene:
   name: a wood fire on volcanic ground

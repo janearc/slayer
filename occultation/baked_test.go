@@ -14,7 +14,8 @@ func striped(t *testing.T) Profile {
 		if k%2 == 1 {
 			depth = 99
 		}
-		rows = append(rows, row(float64(k+1), depth))
+		number := float64(k + 1)
+		rows = append(rows, row(number, depth))
 	}
 	return table(t, rows...)
 }
@@ -45,7 +46,8 @@ func TestTheFinestLevelIsTheProfile(t *testing.T) {
 	for k := range 8 {
 		middle := float64(k)*1e3 + 1e3
 		want := profile.Seen(middle, 0)
-		got := float64(baked.Seen(float32(middle), 1e3))
+		narrow := float32(middle)
+		got := float64(baked.Seen(narrow, 1e3))
 		if !(math.Abs(got-want) <= 1e-5) {
 			t.Errorf("bin %d: %g, want %g", k, got, want)
 		}
@@ -72,7 +74,8 @@ func TestAWideRayReadsTheMeanLight(t *testing.T) {
 // table there is nothing.
 func TestBeyondTheTable(t *testing.T) {
 	baked := striped(t).Baked()
-	want := float32(-math.Log((1 + math.Exp(-opaque)) / 2))
+	kept := math.Exp(-opaque)
+	want := float32(-math.Log((1 + kept) / 2))
 	if got := baked.Seen(4e3, 1e9); !(math.Abs(float64(got-want)) <= 1e-5) {
 		t.Errorf("across everything, %g, want %g", got, want)
 	}
@@ -99,7 +102,7 @@ func TestATableKeepsTheProfilesStartAndStep(t *testing.T) {
 	if baked.Inner() != 500 || baked.Step() != 1000 {
 		t.Errorf("inner %g and step %g, want 500 and 1000", baked.Inner(), baked.Step())
 	}
-	if baked.Outer() != 8500 {
-		t.Errorf("outer %g, want 8500", baked.Outer())
+	if baked.outer() != 8500 {
+		t.Errorf("outer %g, want 8500", baked.outer())
 	}
 }

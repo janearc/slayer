@@ -1,0 +1,5 @@
+name,normals,smooth,want
+both,1,1,1
+no normals,0,1,0
+no ask,1,0,0
+neither,0,0,0

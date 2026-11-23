@@ -86,14 +86,15 @@ func bind(t *testing.T, sc, vc []byte) error {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = Bind(s, v)
+	_, err = bindVoicing(s, v)
 	return err
 }
 
 func TestARoleNobodyPlaysMustBeDropped(t *testing.T) {
 	sc := score(4, false, `{"role": "lead", "bars": ["c4:4"]},
 		{"role": "pad", "bars": ["(c4 e4):4"]}`)
-	wantErr(t, bind(t, sc, voicing(lead, "")),
+	unbound := bind(t, sc, voicing(lead, ""))
+	wantErr(t, unbound,
 		"pad: no channel plays it and it is not dropped")
 	if err := bind(t, sc, voicing(lead, `"pad"`)); err != nil {
 		t.Errorf("pad dropped, still refused: %v", err)
@@ -103,32 +104,37 @@ func TestARoleNobodyPlaysMustBeDropped(t *testing.T) {
 func TestPitchesAndHitsGoWhereTheyCanSound(t *testing.T) {
 	noise := `{"kind": "noise", "role": "perc",
 		"hits": {"k": {"shift": 1, "divisor": 1, "decay": 0.1}}}`
-	wantErr(t, bind(t,
+	noteBound := bind(t,
 		score(4, false, `{"role": "perc", "bars": ["c4:4"]}`),
-		voicing(noise, "")),
+		voicing(noise, ""))
+	wantErr(t, noteBound,
 		"a note on the noise channel")
-	wantErr(t, bind(t,
+	pitchedBound := bind(t,
 		score(4, false, `{"role": "lead", "bars": ["k:4"]}`),
-		voicing(lead, "")),
+		voicing(lead, ""))
+	wantErr(t, pitchedBound,
 		`hit "k" on a pitched channel`)
-	wantErr(t, bind(t,
+	unknownBound := bind(t,
 		score(4, false, `{"role": "perc", "bars": ["s:4"]}`),
-		voicing(noise, "")),
+		voicing(noise, ""))
+	wantErr(t, unknownBound,
 		`hit "s" is not one of k`)
 }
 
 func TestANoteOutsideTheRegisterIsRefused(t *testing.T) {
-	wantErr(t, bind(t,
+	outside := bind(t,
 		score(4, false, `{"role": "lead", "bars": ["b1:4"]}`),
-		voicing(lead, "")),
+		voicing(lead, ""))
+	wantErr(t, outside,
 		"b1 is outside the pulse range c2 to c8")
 }
 
 func TestAnEchoOfADroppedRoleIsRefused(t *testing.T) {
-	wantErr(t, bind(t,
+	echoed := bind(t,
 		score(4, false, `{"role": "lead", "bars": ["c4:4"]},
 			{"role": "pad", "bars": ["c4:4"]}`),
 		voicing(lead+`, {"kind": "pulse", "echo": "pad", "delay": "1",
-			"gain": 0.5, "duty": 0.5}`, `"pad"`)),
+			"gain": 0.5, "duty": 0.5}`, `"pad"`))
+	wantErr(t, echoed,
 		"echoes pad, which is dropped")
 }

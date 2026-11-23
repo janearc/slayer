@@ -11,16 +11,26 @@ import (
 // in the taking never leaves a meeting outside it. A shape with no edge
 // has none.
 func worldBox(placed *placedThing) maths.Box {
-	local := placed.thing.Shape.Bounds()
-	if !edged(local) {
+	box, edges := boxOut(placed.at, placed.thing.Shape.Bounds())
+	if !edges {
 		return maths.Everywhere()
+	}
+	return box
+}
+
+// boxOut is a box in a placement's own space as a box in the world, each
+// corner taken out and widened a hair, and whether it has one: a box
+// with no edge has none.
+func boxOut(at maths.Subspace, local maths.Box) (maths.Box, bool) {
+	if !edged(local) {
+		return maths.Box{}, false
 	}
 	box := emptyBox()
 	for corner := range 8 {
-		at := placed.at.Out(cornerOf(local, corner))
-		box = joined(box, maths.Box{Min: at, Max: at})
+		out := at.Out(cornerOf(local, corner))
+		box = joined(box, maths.Box{Min: out, Max: out})
 	}
-	return widened(box)
+	return widened(box), true
 }
 
 // cornerOf is one of a box's eight corners, by the bits of its number:

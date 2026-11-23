@@ -36,10 +36,12 @@ func TestProgressColumn(t *testing.T) {
 	}
 	reading.Status, reading.Written = "completed movie", 10
 	path := filepath.Join(t.TempDir(), "render-progress.txt")
-	if err := os.WriteFile(path, bytes.Repeat([]byte("old"), 100), 0600); err != nil {
+	stale := bytes.Repeat([]byte("old"), 100)
+	if err := os.WriteFile(path, stale, 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := publishProgress(path, []byte(reading.column())); err != nil {
+	column := reading.column()
+	if err := publishProgress(path, []byte(column)); err != nil {
 		t.Fatal(err)
 	}
 	raw, err := os.ReadFile(path)
@@ -60,7 +62,9 @@ func TestProgressCountsFinishedPNGs(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, name := range []string{"frame-000010.png", "frame-000009.png", "frame-000011.png"} {
-		if err := writePNG(filepath.Join(root, "frames", name), image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+		framePath := filepath.Join(root, "frames", name)
+		blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+		if err := writePNG(framePath, blank); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -87,10 +91,12 @@ func TestProgressRecentPace(t *testing.T) {
 	start := time.Unix(1000, 0)
 	var frames []completedPNG
 	for index := range 40 {
-		frames = append(frames, completedPNG{at: start.Add(time.Duration(index) * time.Millisecond)})
+		offset := time.Duration(index) * time.Millisecond
+		frames = append(frames, completedPNG{at: start.Add(offset)})
 	}
 	for index := range 30 {
-		frames = append(frames, completedPNG{at: start.Add(time.Duration(index+1) * 4 * time.Second)})
+		offset := time.Duration(index+1) * 4 * time.Second
+		frames = append(frames, completedPNG{at: start.Add(offset)})
 	}
 	now := start.Add(120 * time.Second)
 	reading := measureProgress(progressReading{Total: 100}, frames, now)

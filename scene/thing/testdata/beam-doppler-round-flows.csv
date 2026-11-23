@@ -1,0 +1,4 @@
+name,axis-x,axis-y,axis-z,at-x,at-y,at-z,want-x,want-y,want-z
+about up at (1 2 0),0,0,0,1,2,0,0,0,-1
+about up at (1 -7 0),0,0,0,1,-7,0,0,0,-1
+about x at (5 0 2),1,0,0,5,0,2,0,-1,0

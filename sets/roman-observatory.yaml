@@ -1,0 +1,54 @@
+# NASA Roman Space Telescope display model, constructed from NASA's published
+# observatory views and dimensions; internal panel layout and bus details are
+# authored visual proportions, not flight CAD.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Roman Space Telescope, three-quarter view
+  seed: 5017
+  setting: space
+  light: sun
+  sun: {azimuth: 135, altitude: 40}
+  recipes:
+    roman-observatory:
+      kind: space-observatory
+      spacecraft:
+        design: roman
+        aperture: {value: 2.4, unit: m}
+  set:
+    things:
+      roman:
+        recipe: roman-observatory
+        seed: 17
+        complexity: demo
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  cameras:
+    roman-three-quarter:
+      title: three-quarter view of the Roman observatory
+      location: {at: [12.5, 19.5, 8.2]}
+      orientation: {look_at: [0, 1.2, 0.4]}
+  film:
+    width: 1080
+    height: 960
+    rays: 4
+    exposure: 1
+    wide: 28
+  world:
+    unit: 1
+    floods:
+      cool-space-fill:
+        colour: {srgb_linear: [0.08, 0.10, 0.16]}
+        strength: 1
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.018, 0.025, 0.045]}
+      zenith: {srgb_linear: [0.004, 0.008, 0.018]}
+      ground: {srgb_linear: [0.008, 0.010, 0.016]}
+      source: eye
+    suns:
+      cool-rim:
+        toward: [8, 4, 4]
+        colour: {srgb_linear: [0.8, 1.1, 1.8]}
+        source: eye

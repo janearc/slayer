@@ -1,0 +1,8 @@
+name,toward-x,toward-y,toward-z,at-x,at-y,at-z,want,over
+at the eye,0,1,0,0,1,0,8,1
+"at the eye, not one unit long",0,3,0,0,1,0,8,1
+away from it,0,-1,0,0,1,0,0.125,1
+across the way,1,0,0,0,1,0,0.512,1
+at cos 0.8,0.6,0.8,0,0,1,0,1,0.274625
+the lower jet at the eye,0,-1,0,0,-1,0,8,1
+the lower jet away from it,0,1,0,0,-1,0,0.125,1

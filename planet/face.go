@@ -22,15 +22,15 @@ type Zone struct {
 // NewZone is a zone, refused if its latitudes are out of order or off
 // the planet, or its column's layers are out of order.
 func NewZone(south, north float64, column []Layer) (Zone, error) {
-	if !(south >= -90 && north <= 90 && north > south) {
+	if !(south >= -poleLatitude && north <= poleLatitude && north > south) {
 		return Zone{}, fmt.Errorf("a zone from %g to %g degrees", south,
 			north)
 	}
-	for i := 1; i < len(column); i++ {
-		if column[i].top < column[i-1].bottom {
+	for i := adjacent; i < len(column); i++ {
+		if column[i].top < column[i-adjacent].bottom {
 			return Zone{}, fmt.Errorf("layer %d starts at %g pascals, "+
 				"above the last one's bottom at %g", i, column[i].top,
-				column[i-1].bottom)
+				column[i-adjacent].bottom)
 		}
 	}
 	return Zone{south: south, north: north, column: column}, nil
@@ -56,10 +56,10 @@ type Body struct {
 }
 
 // Marked is the body with the columns its vortices show: a cap, the high
-// haze an anticyclone lifts in its middle, white on jupiter; and a
+// haze an anticyclone lifts in its middle, white on a gas giant; and a
 // clearing, the deeper cloud a cyclone opens to, dark.
 func (body Body) Marked(cap, clearing []Layer) (Body, error) {
-	if len(cap) == 0 || len(clearing) == 0 {
+	if len(cap) == nothing || len(clearing) == nothing {
 		return body, fmt.Errorf("a cap of %d layers and a clearing of %d",
 			len(cap), len(clearing))
 	}
@@ -77,7 +77,8 @@ func (body Body) Stormy(storms Storms) Body {
 // shear brings up and stirs, showing at a band's edge by a strength from zero
 // to one, and fading into the bands either side.
 func (body Body) Churned(column []Layer, strength float64) (Body, error) {
-	if !(strength >= 0 && strength <= 1) || len(column) == 0 {
+	if !(strength >= nothing && strength <= whole) ||
+		len(column) == nothing {
 		return body, fmt.Errorf("a churn of strength %g and %d layers",
 			strength, len(column))
 	}
@@ -87,11 +88,12 @@ func (body Body) Churned(column []Layer, strength float64) (Body, error) {
 
 // NewBody is a body, refused if its zones leave a latitude uncovered.
 func NewBody(radius, gravity, deck float64, zones []Zone) (Body, error) {
-	if !(radius > 0) || !(gravity > 0) || !(deck >= 0 && deck <= 1) {
+	if !(radius > nothing) || !(gravity > nothing) ||
+		!(deck >= nothing && deck <= whole) {
 		return Body{}, fmt.Errorf("a body of radius %g, gravity %g and "+
 			"deck %g", radius, gravity, deck)
 	}
-	south := -90.0
+	south := -poleLatitude
 	for _, zone := range zones {
 		if zone.south != south {
 			return Body{}, fmt.Errorf("a gap or overlap at %g degrees",
@@ -99,7 +101,7 @@ func NewBody(radius, gravity, deck float64, zones []Zone) (Body, error) {
 		}
 		south = zone.north
 	}
-	if south != 90 {
+	if south != poleLatitude {
 		return Body{}, fmt.Errorf("zones stop at %g degrees", south)
 	}
 	return Body{radius: radius, gravity: gravity, deck: deck,
@@ -149,13 +151,13 @@ func NewFace(body Body, pole, star, eye maths.Vec, light bands.Light,
 	for i, zone := range body.zones {
 		norths[i], columns[i] = zone.north, zone.column
 	}
-	churned, capped, cleared := -1, -1, -1
+	churned, capped, cleared := absent, absent, absent
 	if body.churn != nil {
 		churned = len(columns)
 		columns = append(columns, body.churn)
 	}
 	if body.cap != nil {
-		capped, cleared = len(columns), len(columns)+1
+		capped, cleared = len(columns), len(columns)+adjacent
 		columns = append(columns, body.cap, body.clearing)
 	}
 	stacks := make([][][]leaf, len(columns))
@@ -188,7 +190,7 @@ func NewFace(body Body, pole, star, eye maths.Vec, light bands.Light,
 // bands, for a body that cooks, and none for one that does not.
 func laddersOf(body Body, light bands.Light) [][][][]leaf {
 	var ladders [][][][]leaf
-	if body.cooking > 0 {
+	if body.cooking > nothing {
 		for _, zone := range body.zones {
 			var rungsOf [][][]leaf
 			for _, column := range body.ladder(zone.column) {
@@ -222,8 +224,9 @@ func stacksOf(column []Layer, light bands.Light,
 // by a pole. two unit ways can dot to an ulp past one, which arcsine
 // would make no number, so the dot is held to one at most.
 func latitudeOf(up, pole maths.Vec) float64 {
-	return math.Asin(math.Max(-1, math.Min(1, up.Dot(pole)))) /
-		maths.Degree
+	sine := up.Dot(pole)
+	held := math.Max(-whole, math.Min(whole, sine))
+	return math.Asin(held) / maths.Degree
 }
 
 // blend is the zone a latitude in degrees falls in, the zone across the
@@ -233,20 +236,20 @@ func (face *Face) blend(latitude float64) (here, there int,
 	share float64) {
 	here = face.zoneOf(latitude)
 	width := face.storms.edge
-	if !(width > 0) {
-		return here, here, 0
+	if !(width > nothing) {
+		return here, here, nothing
 	}
-	if here > 0 {
-		if in := latitude - face.norths[here-1]; in < width {
-			return here, here - 1, 0.5 * (1 - in/width)
+	if here > nothing {
+		if in := latitude - face.norths[here-adjacent]; in < width {
+			return here, here - adjacent, half * (whole - in/width)
 		}
 	}
-	if here < len(face.norths)-1 {
+	if here < len(face.norths)-adjacent {
 		if in := face.norths[here] - latitude; in < width {
-			return here, here + 1, 0.5 * (1 - in/width)
+			return here, here + adjacent, half * (whole - in/width)
 		}
 	}
-	return here, here, 0
+	return here, here, nothing
 }
 
 // zoneOf is the zone a latitude in degrees falls in.
@@ -256,7 +259,7 @@ func (face *Face) zoneOf(latitude float64) int {
 			return i
 		}
 	}
-	return len(face.norths) - 1
+	return len(face.norths) - adjacent
 }
 
 // centre is a band's middle wavelength, in nanometres, by its log.
@@ -269,11 +272,11 @@ func centre(band bands.Band) float64 {
 // degrees, or its own zone where it has but one.
 func (face *Face) neighbour(latitude float64) int {
 	here := face.zoneOf(latitude)
-	below, above := here-1, here+1
+	below, above := here-adjacent, here+adjacent
 	switch {
-	case below < 0 && above >= len(face.norths):
+	case below < nothing && above >= len(face.norths):
 		return here
-	case below < 0:
+	case below < nothing:
 		return above
 	case above >= len(face.norths):
 		return below
@@ -312,16 +315,17 @@ type blend struct {
 // modelled.
 func (face *Face) mixAt(latitude, lift float64, marked marks) mix {
 	here, there, share := face.blend(latitude)
-	if share == 0 {
+	if share == nothing {
 		there = face.neighbour(latitude)
 	}
 	made := mix{here: here}
-	made.add(there, math.Min(1, share+0.5*math.Max(0, -lift)))
-	if face.churned >= 0 {
-		made.add(face.churned, math.Min(1,
-			face.churning*(2*share+math.Max(0, lift))))
+	sunk := half * math.Max(nothing, -lift)
+	made.add(there, math.Min(whole, share+sunk))
+	if face.churned >= nothing {
+		raised := double*share + math.Max(nothing, lift)
+		made.add(face.churned, math.Min(whole, face.churning*raised))
 	}
-	if face.capped >= 0 {
+	if face.capped >= nothing {
 		made.add(face.cleared, marked.cleared)
 		made.add(face.capped, marked.capped)
 	}
@@ -339,7 +343,7 @@ func (made *mix) blends() []blend { return made.held[:made.taken] }
 // add takes so much of a column into the mix, if any. the mix holds its
 // blends itself, so a point of the face makes no list.
 func (made *mix) add(column int, share float64) {
-	if share > 0 {
+	if share > nothing {
 		made.held[made.taken] = blend{column, share}
 		made.taken++
 	}
@@ -347,33 +351,35 @@ func (made *mix) add(column int, share float64) {
 
 // At is the light a point of the body sends toward the eye, every layer
 // of its storms drawn. the night side and the far side send none.
-func (face *Face) At(p maths.Vec) maths.Light { return face.Within(p, 0) }
+func (face *Face) At(point maths.Vec) maths.Light {
+	return face.Within(point, nothing)
+}
 
 // Within is the light a point of the body sends toward the eye, for a
 // pixel so many metres wide there: its storms drawn down to the finest
 // the pixel tells apart, so far off they cost little and alias none.
-func (face *Face) Within(p maths.Vec, footprint float64) maths.Light {
-	up := p.Unit()
-	toward := face.eye.Sub(p).Unit()
+func (face *Face) Within(point maths.Vec, footprint float64) maths.Light {
+	up := point.Unit()
+	toward := face.eye.Sub(point).Unit()
 	star, eye := up.Dot(face.star), up.Dot(toward)
-	if !(eye > 0) {
-		return maths.Light{}
+	if !(eye > nothing) {
+		return noLight
 	}
-	mixed, marked, came := face.airAt(up, footprint/p.Len())
-	front := 0.0
-	if face.airglow > 0 && math.Abs(came) < face.airband {
-		front = face.front(up, footprint/p.Len())
+	mixed, marked, came := face.airAt(up, footprint/point.Len())
+	var front float64
+	if face.airglow > nothing && math.Abs(came) < face.airband {
+		front = face.front(up, footprint/point.Len())
 	}
-	reached := 0.0
-	if star > 0 {
-		reached = shadowed(face.rings, p, face.star, face.pole)
+	var reached float64
+	if star > nothing {
+		reached = shadowed(face.rings, point, face.star, face.pole)
 	}
 	at := sight{mixed: mixed, marked: marked, star: star, eye: eye,
 		turn: -face.star.Dot(toward), reached: reached, came: came,
 		front: front}
 	red, green, blue := srgb.Light(face.colour(&at))
-	return maths.RGB(math.Max(0, red), math.Max(0, green),
-		math.Max(0, blue))
+	return maths.RGB(math.Max(nothing, red), math.Max(nothing, green),
+		math.Max(nothing, blue))
 }
 
 // a sight is what Within works out of a point before it draws its bands: the
@@ -395,19 +401,19 @@ type sight struct {
 func (face *Face) colour(at *sight) swatch.Swatch {
 	held := linePool.Get().(*lineBox)
 	defer linePool.Put(held)
-	powers := held.v[:0]
-	if at.reached > 0 {
-		held.t = face.tilted(held.t, at.turn)
-		at.tilts = held.t
+	powers := held.powers[:nothing]
+	if at.reached > nothing {
+		held.tilts = face.tilted(held.tilts, at.turn)
+		at.tilts = held.tilts
 	}
 	for i := range face.shades {
 		powers = append(powers, face.bandLight(at, i))
 	}
-	held.v = powers
+	held.powers = powers
 	if face.quick {
 		return colourOf(face.shades, face.unit, powers)
 	}
-	lines := held.m
+	lines := held.byCentre
 	clear(lines)
 	for i, each := range face.shades {
 		lines[each.centre] = powers[i]
@@ -419,8 +425,8 @@ func (face *Face) colour(at *sight) swatch.Swatch {
 // what the mix sends back of it, and the glows.
 func (face *Face) bandLight(at *sight, i int) float64 {
 	shade := &face.shades[i]
-	sent := 0.0
-	if at.reached > 0 {
+	var sent float64
+	if at.reached > nothing {
 		sent = face.sent(at, i)
 	}
 	return (shade.power*at.reached*sent +
@@ -435,19 +441,19 @@ var linePool = sync.Pool{New: newLineBox}
 
 // newLineBox is a box for the pool.
 func newLineBox() any {
-	return &lineBox{m: make(map[float64]float64, lineRoom)}
+	return &lineBox{byCentre: make(map[float64]float64, lineRoom)}
 }
 
-// lineRoom is how many bands the pool's maps start with room for: picked,
-// from the eye's own band count.
-const lineRoom = 16
+// lineRoom is how many bands the pool's maps start with room for.
+var lineRoom = pickCount("line-room")
 
 // lineBox is scratch in the pool, boxed so that putting it back does not
-// allocate.
+// allocate: the bands' light by the middle of each band, and as a list, and
+// the phase of each lobe.
 type lineBox struct {
-	m map[float64]float64
-	v []float64
-	t []float64
+	byCentre map[float64]float64
+	powers   []float64
+	tilts    []float64
 }
 
 // airAt is the mix of columns a way of the face shows, the marks its
@@ -488,14 +494,14 @@ func (face *Face) from(at *sight, column, i int) float64 {
 		return shone(face.stacks[column][i], at.tilts, face.deck, at.star,
 			at.eye, at.turn)
 	}
-	rungs := face.ladders[column]
-	below := shone(rungs[at.mixed.rung][i], at.tilts, face.deck, at.star,
+	cooked := face.ladders[column]
+	below := shone(cooked[at.mixed.rung][i], at.tilts, face.deck, at.star,
 		at.eye, at.turn)
-	if at.mixed.toward == 0 {
+	if at.mixed.toward == nothing {
 		return below
 	}
-	above := shone(rungs[at.mixed.rung+1][i], at.tilts, face.deck, at.star,
-		at.eye, at.turn)
+	above := shone(cooked[at.mixed.rung+adjacent][i], at.tilts, face.deck,
+		at.star, at.eye, at.turn)
 	return below + at.mixed.toward*(above-below)
 }
 
@@ -535,7 +541,7 @@ func seatStacks(stacks [][]leaf, made []lobe, places map[lobe]int) []lobe {
 // tilted is the henyey phase of each of the face's lobes at a turn, in
 // place of the slice given, which it makes room in as it needs.
 func (face *Face) tilted(into []float64, turn float64) []float64 {
-	into = into[:0]
+	into = into[:nothing]
 	for _, shape := range face.lobes {
 		into = append(into, shape.at(turn))
 	}

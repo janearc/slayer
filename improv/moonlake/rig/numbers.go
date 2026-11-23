@@ -12,9 +12,9 @@ const (
 	half     = 0.5
 )
 
-// Azimuth is the bearing from the eye to the far tree, and the moon's,
+// azimuth is the bearing from the eye to the far tree, and the moon's,
 // in degrees. From sets/moonlake.yaml, scene.moon.azimuth.
-const Azimuth = 109.65
+const azimuth = 109.65
 
 // The eye's place on the map and the lake's height: the west rise
 // (sets/moonlake.yaml things) and the fantasy block's lake, metres.

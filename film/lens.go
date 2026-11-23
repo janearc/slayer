@@ -111,6 +111,14 @@ func (l Lens) Ray(x, y, w, h int, band maths.Band) maths.Ray {
 	return Pinhole{Wide: l.Wide(), Pixel: l.Pixel}.Ray(x, y, w, h, band)
 }
 
+// RayThrough is the pinhole's ray through a place of the pixel, across
+// and down from its middle in pixels, for the lens's angle.
+func (l Lens) RayThrough(x, y int, across, down float64, w, h int,
+	band maths.Band) maths.Ray {
+	return Pinhole{Wide: l.Wide(), Pixel: l.Pixel}.RayThrough(x, y, across,
+		down, w, h, band)
+}
+
 // Swath is the lens, on super 35, that sees a strip of ground across
 // kilometres wide from above kilometres up, were it aimed straight down;
 // where it is aimed is its camera's. A camera named by what it covers, as

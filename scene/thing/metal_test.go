@@ -7,13 +7,104 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// gold is Johnson and Christy's gold (1972), at their wavelengths
-// nearest the tracer's red, green and blue: 617, 549 and 471 nm.
-var gold = Metal{N: [3]float64{0.21, 0.43, 1.31}, K: [3]float64{3.272, 2.455, 1.849}}
+// The tables the metal tests read, beside numbers.yaml. A row of each is
+// asked for by its name column.
+const (
+	metalReadingsFile    = "testdata/metal-readings.csv"
+	metalFaceOnFile      = "testdata/metal-face-on.csv"
+	metalAbsorbsFile     = "testdata/metal-absorbs.csv"
+	metalLooksFile       = "testdata/metal-looks.csv"
+	metalMirrorLooksFile = "testdata/metal-mirror-looks.csv"
+)
+
+// metalColours is how many colours a metal's readings are in.
+const metalColours = 3 // defined: red, green and blue
 
 // nearly is whether got is within tolerance of want; a NaN never is.
 func nearly(got, want, tolerance float64) bool {
 	return math.Abs(got-want) <= tolerance
+}
+
+// metalRow is the row of a table beside these tests with a name.
+func metalRow(t *testing.T, file, name string) map[string]string {
+	t.Helper()
+	return readSheet(t, file).row(t, file, name)
+}
+
+// metalThree is a row's number for red, green and blue, from the columns
+// the prefix names: n-red, n-green and n-blue for the prefix n.
+func metalThree(t *testing.T, row map[string]string,
+	prefix string) [metalColours]float64 {
+	t.Helper()
+	return [metalColours]float64{cell(t, row, prefix+"-red"),
+		cell(t, row, prefix+"-green"), cell(t, row, prefix+"-blue")}
+}
+
+// metalRead is the metal a row of the readings table names.
+func metalRead(t *testing.T, name string) Metal {
+	t.Helper()
+	row := metalRow(t, metalReadingsFile, name)
+	return Metal{N: metalThree(t, row, "n"), K: metalThree(t, row, "k")}
+}
+
+// metalFaceOn is the share of red, green and blue a row of the face-on
+// table names.
+func metalFaceOn(t *testing.T, name string) maths.Light {
+	t.Helper()
+	row := metalRow(t, metalFaceOnFile, name)
+	return maths.RGB(cell(t, row, "red"), cell(t, row, "green"),
+		cell(t, row, "blue"))
+}
+
+// metalAbsorbs is how much per metre of red, green and blue a row of the
+// absorption table swallows.
+func metalAbsorbs(t *testing.T, name string) [metalColours]float64 {
+	t.Helper()
+	return metalThree(t, metalRow(t, metalAbsorbsFile, name), "absorbs")
+}
+
+// metalCosines is the cosines of the looks a table holds, in the order
+// written.
+func metalCosines(t *testing.T, file string) []float64 {
+	t.Helper()
+	var cosines []float64
+	for _, row := range readSheet(t, file) {
+		cosines = append(cosines, cell(t, row, "cosine"))
+	}
+	return cosines
+}
+
+// metalSweep is the cosines from nought to one in as many even steps as
+// the picked number of the name says.
+func metalSweep(t *testing.T, name string) []float64 {
+	t.Helper()
+	steps := pickedCount(t, name)
+	cosines := make([]float64, steps+unity)
+	for step := range cosines {
+		cosines[step] = float64(step) / float64(steps)
+	}
+	return cosines
+}
+
+// metalSame is whether two lights are within tolerance in every colour.
+func metalSame(got, want maths.Light, tolerance float64) bool {
+	return nearly(got.R, want.R, tolerance) &&
+		nearly(got.G, want.G, tolerance) && nearly(got.B, want.B, tolerance)
+}
+
+// metalFinite is whether every colour of a light is a number.
+func metalFinite(light maths.Light) bool {
+	for _, share := range []float64{light.R, light.G, light.B} {
+		if math.IsNaN(share) || math.IsInf(share, nought) {
+			return false
+		}
+	}
+	return true
+}
+
+// metalUnder is a glossy surface of a metal under a film.
+func metalUnder(metal *Metal, film Film) Material {
+	return Material{Gloss: unity, Metal: metal, Film: &film}
 }
 
 // Face on, a conductor reflects ((n-1)^2 + k^2) / ((n+1)^2 + k^2): for
@@ -22,30 +113,54 @@ func nearly(got, want, tolerance float64) bool {
 // The anti-test: at grazing it is no colour at all, for every surface
 // mirrors all of every colour there.
 func TestGoldReflectsMostOfRedAndLeastOfBlueFaceOn(t *testing.T) {
-	made := Material{Gloss: 1, Metal: &gold}
-	got := made.Reflects(1)
-	want := maths.RGB(0.930978291, 0.786915760, 0.401478098)
-	if !nearly(got.R, want.R, 1e-9) || !nearly(got.G, want.G, 1e-9) ||
-		!nearly(got.B, want.B, 1e-9) {
+	gold := metalRead(t, "gold-rounded")
+	made := Material{Gloss: unity, Metal: &gold}
+	got, want := made.Reflects(unity), metalFaceOn(t, "gold-rounded")
+	if !metalSame(got, want, picked(t, "metal-awk-tolerance")) {
 		t.Errorf("gold reflects %v face on, want %v", got, want)
 	}
-	if got := made.Reflects(0); !nearly(got.R, 1, 1e-12) ||
-		!nearly(got.G, 1, 1e-12) || !nearly(got.B, 1, 1e-12) {
-		t.Errorf("gold reflects %v at grazing, want all of every colour", got)
+	grazing := made.Reflects(nought)
+	if !metalSame(grazing, maths.Grey(unity),
+		picked(t, "metal-grazing-tolerance")) {
+		t.Errorf("gold reflects %v at grazing, want all of every colour",
+			grazing)
+	}
+}
+
+// Gold, as the package makes it from materials' readings, reflects what
+// its own doc says face on, to the doc's two places, and is a colour: red
+// over green over blue. The anti-test: silver, made the same way, is
+// not, its red and blue within a hundredth.
+func TestGoldFromMaterialsIsAsItsDocSays(t *testing.T) {
+	made := Material{Gloss: unity, Metal: Gold()}
+	got := made.Reflects(unity)
+	if !metalSame(got, metalFaceOn(t, "gold-doc"), picked(t, "metal-doc-tolerance")) {
+		t.Errorf("Gold reflects %v face on, its doc says %v", got,
+			metalFaceOn(t, "gold-doc"))
+	}
+	if !(got.R > got.G && got.G > got.B) {
+		t.Errorf("Gold reflects %v face on: not red over green over blue", got)
+	}
+	silver := (&Material{Gloss: unity, Metal: Silver()}).Reflects(unity)
+	if !(silver.R-silver.B < picked(t, "metal-white-spread")) {
+		t.Errorf("Silver reflects %v face on: a colour", silver)
 	}
 }
 
 // At grazing every surface reflects all of every colour, and from face
 // on to grazing a metal's share never leaves zero to one.
 func TestAConductorReflectsAllAtGrazingAndNeverMore(t *testing.T) {
-	for c := range 3 {
-		if got := Conductor(0, gold.N[c], gold.K[c]); !nearly(got, 1, 1e-12) {
-			t.Errorf("gold's colour %d reflects %v at grazing", c, got)
+	gold := metalRead(t, "gold-rounded")
+	for colour := range gold.N {
+		got := Conductor(nought, gold.N[colour], gold.K[colour])
+		if !nearly(got, unity, picked(t, "metal-grazing-tolerance")) {
+			t.Errorf("gold's colour %d reflects %v at grazing", colour, got)
 		}
-		for step := range 101 {
-			cos := float64(step) / 100
-			if got := Conductor(cos, gold.N[c], gold.K[c]); !(got >= 0 && got <= 1) {
-				t.Fatalf("gold's colour %d reflects %v at cosine %v", c, got, cos)
+		for _, cos := range metalSweep(t, "metal-sweep-steps") {
+			got := Conductor(cos, gold.N[colour], gold.K[colour])
+			if !(got >= nought && got <= unity) {
+				t.Fatalf("gold's colour %d reflects %v at cosine %v", colour,
+					got, cos)
 			}
 		}
 	}
@@ -56,23 +171,27 @@ func TestAConductorReflectsAllAtGrazingAndNeverMore(t *testing.T) {
 // conductor that does absorb is no dielectric, and face on it mirrors
 // more than glass of its n does.
 func TestAConductorWithNoAbsorptionIsADielectric(t *testing.T) {
-	for step := range 21 {
-		cos := float64(step) / 20
-		if got, want := Conductor(cos, 1.5, 0), Dielectric(cos, 1.5); !nearly(got, want, 1e-12) {
+	glass := picked(t, "metal-glass-index")
+	for _, cos := range metalSweep(t, "metal-dielectric-steps") {
+		got, want := Conductor(cos, glass, nought), dielectric(cos, glass)
+		if !nearly(got, want, picked(t, "metal-dielectric-tolerance")) {
 			t.Errorf("at cosine %v the conductor gives %v, the dielectric %v",
 				cos, got, want)
 		}
 	}
-	if got, glass := Conductor(1, 1.5, 2), Dielectric(1, 1.5); !(got > glass+0.3) {
+	absorbing := Conductor(unity, glass, picked(t, "metal-absorbing-k"))
+	plain := dielectric(unity, glass)
+	if !(absorbing > plain+picked(t, "metal-absorbing-margin")) {
 		t.Errorf("a conductor with a k of 2 mirrors %v face on, glass %v",
-			got, glass)
+			absorbing, plain)
 	}
-	// face on, glass reflects ((1.5-1)/(1.5+1))^2 = 0.04
-	if got := Dielectric(1, 1.5); !nearly(got, 0.04, 1e-15) {
-		t.Errorf("glass reflects %v face on, want 0.04", got)
+	faceOn := picked(t, "metal-glass-face-on")
+	if !nearly(plain, faceOn, picked(t, "metal-glass-face-on-tolerance")) {
+		t.Errorf("glass reflects %v face on, want %v", plain, faceOn)
 	}
-	// from inside water, past its critical angle, all of it
-	if got := Dielectric(0.3, 1/1.333); got != 1 {
+	water := picked(t, "metal-water-index")
+	got := dielectric(picked(t, "metal-critical-cosine"), unity/water)
+	if got != unity {
 		t.Errorf("past the critical angle water reflects %v, want all", got)
 	}
 }
@@ -81,21 +200,26 @@ func TestAConductorWithNoAbsorptionIsADielectric(t *testing.T) {
 // thickness. The anti-test is a film that lets nothing through, which
 // shows none of the metal under it: only its own front.
 func TestAFilmBetweenNothingAndEverything(t *testing.T) {
-	bare := Material{Gloss: 1, Metal: &gold}
-	thin := Material{Gloss: 1, Metal: &gold, Film: &Film{Index: 1}}
-	dark := Material{Gloss: 1, Metal: &gold, Film: &Film{Index: 1.7,
-		Thickness: 25e-6, Absorbs: [3]float64{1e9, 1e9, 1e9}}}
-	for _, cos := range []float64{1, 0.7, 0.3, 0.05} {
-		b, f := bare.Reflects(cos), thin.Reflects(cos)
-		if !nearly(b.R, f.R, 1e-12) || !nearly(b.G, f.G, 1e-12) || !nearly(b.B, f.B, 1e-12) {
+	gold := metalRead(t, "gold-rounded")
+	bare := Material{Gloss: unity, Metal: &gold}
+	thin := metalUnder(&gold, Film{Index: unity})
+	index := picked(t, "metal-dark-index")
+	opaque := picked(t, "metal-opaque-absorption")
+	dark := metalUnder(&gold, Film{Index: index,
+		Thickness: picked(t, "metal-dark-thickness"),
+		Absorbs:   [metalColours]float64{opaque, opaque, opaque}})
+	tolerance := picked(t, "metal-film-tolerance")
+	for _, cos := range metalCosines(t, metalLooksFile) {
+		bareLight, thinLight := bare.Reflects(cos), thin.Reflects(cos)
+		if !metalSame(thinLight, bareLight, tolerance) {
 			t.Errorf("at cosine %v an empty film gives %v, the bare metal %v",
-				cos, f, b)
+				cos, thinLight, bareLight)
 		}
-		front := Dielectric(cos, 1.7)
-		d := dark.Reflects(cos)
-		if !nearly(d.R, front, 1e-12) || !nearly(d.B, front, 1e-12) {
+		front, shown := dielectric(cos, index), dark.Reflects(cos)
+		if !nearly(shown.R, front, tolerance) ||
+			!nearly(shown.B, front, tolerance) {
 			t.Errorf("at cosine %v an opaque film gives %v, its front %v",
-				cos, d, front)
+				cos, shown, front)
 		}
 	}
 }
@@ -105,45 +229,37 @@ func TestAFilmBetweenNothingAndEverything(t *testing.T) {
 // The anti-test: it is a grey and not a colour, its red and its blue
 // within six hundredths, where gold's are half apart.
 func TestTitaniumIsAWarmGreyFaceOn(t *testing.T) {
-	made := Material{Gloss: 1, Metal: Titanium()}
-	got := made.Reflects(1)
-	want := maths.RGB(0.608895790, 0.581832774, 0.550221981)
-	if !nearly(got.R, want.R, 1e-9) || !nearly(got.G, want.G, 1e-9) ||
-		!nearly(got.B, want.B, 1e-9) {
+	made := Material{Gloss: unity, Metal: Titanium()}
+	got, want := made.Reflects(unity), metalFaceOn(t, "titanium")
+	if !metalSame(got, want, picked(t, "metal-awk-tolerance")) {
 		t.Errorf("titanium reflects %v face on, want %v", got, want)
 	}
-	yellow := (&Material{Gloss: 1, Metal: Gold()}).Reflects(1)
-	if !(got.R-got.B < 0.06) || !(yellow.R-yellow.B > 0.5) {
+	yellow := (&Material{Gloss: unity, Metal: Gold()}).Reflects(unity)
+	if !(got.R-got.B < picked(t, "metal-grey-spread")) ||
+		!(yellow.R-yellow.B > picked(t, "metal-colour-spread")) {
 		t.Errorf("titanium's red and blue are %v apart, gold's %v",
 			got.R-got.B, yellow.R-yellow.B)
 	}
 }
 
-// Face on, the other three metals, worked with awk the same way from
+// Face on, the other two metals, worked with awk the same way from
 // the readings materials holds: silver 0.986930029 of red, 0.982836296
 // of green and 0.978572181 of blue; aluminium 0.913060575, 0.914118518
-// and 0.919091051; beryllium 0.537446060, 0.535614617 and 0.535542035.
-// Silver and aluminium are white mirrors and beryllium a grey one. The
-// anti-test: none of the three is a colour, its three shares within a
-// hundredth of one another.
-func TestSilverAluminiumAndBerylliumFaceOn(t *testing.T) {
-	metals := map[string]struct {
-		made *Metal
-		want maths.Light
-	}{
-		"silver":    {Silver(), maths.RGB(0.986930029, 0.982836296, 0.978572181)},
-		"aluminium": {Aluminium(), maths.RGB(0.913060575, 0.914118518, 0.919091051)},
-		"beryllium": {Beryllium(), maths.RGB(0.537446060, 0.535614617, 0.535542035)},
-	}
+// and 0.919091051. Silver and aluminium are white mirrors. The
+// anti-test: neither is a colour, its three shares within a hundredth of
+// one another.
+func TestSilverAndAluminiumFaceOn(t *testing.T) {
+	metals := map[string]*Metal{"silver": Silver(),
+		"aluminium": Aluminium()}
 	for name, each := range metals {
-		got := (&Material{Gloss: 1, Metal: each.made}).Reflects(1)
-		if !nearly(got.R, each.want.R, 1e-9) || !nearly(got.G, each.want.G, 1e-9) ||
-			!nearly(got.B, each.want.B, 1e-9) {
-			t.Errorf("%s reflects %v face on, want %v", name, got, each.want)
+		got := (&Material{Gloss: unity, Metal: each}).Reflects(unity)
+		want := metalFaceOn(t, name)
+		if !metalSame(got, want, picked(t, "metal-awk-tolerance")) {
+			t.Errorf("%s reflects %v face on, want %v", name, got, want)
 		}
 		most := math.Max(got.R, math.Max(got.G, got.B))
 		least := math.Min(got.R, math.Min(got.G, got.B))
-		if !(most-least < 0.01) {
+		if !(most-least < picked(t, "metal-white-spread")) {
 			t.Errorf("%s's shares are %v apart: a colour", name, most-least)
 		}
 	}
@@ -156,24 +272,27 @@ func TestSilverAluminiumAndBerylliumFaceOn(t *testing.T) {
 // red and least of blue: a blanket's gold. The anti-test: Kapton of no
 // thickness swallows nothing, and the aluminium under it is no gold.
 func TestKaptonPassesRedAndSwallowsBlue(t *testing.T) {
-	const thick = 40e-6
+	thick := picked(t, "metal-kapton-thickness")
 	film := Kapton(thick)
-	if film.Index != 1.7 || film.Thickness != thick {
+	if film.Index != picked(t, "metal-kapton-index") || film.Thickness != thick {
 		t.Errorf("Kapton is %+v", *film)
 	}
-	want := [3]float64{0.799315, 0.301194, 0.001114}
+	passes := metalFaceOn(t, "kapton-passes")
+	want := [metalColours]float64{passes.R, passes.G, passes.B}
 	for colour, absorbs := range film.Absorbs {
-		if got := math.Exp(-absorbs * thick); !nearly(got, want[colour], 1e-6) {
+		got := math.Exp(-absorbs * thick)
+		if !nearly(got, want[colour], picked(t, "metal-kapton-tolerance")) {
 			t.Errorf("40 microns of Kapton passes %v of colour %d, want %v",
 				got, colour, want[colour])
 		}
 	}
-	blanket := Material{Gloss: 1, Metal: Aluminium(), Film: Kapton(25e-6)}
-	if got := blanket.Reflects(1); !(got.R > got.G && got.G > got.B) {
+	blanketThick := picked(t, "metal-blanket-thickness")
+	blanket := metalUnder(Aluminium(), *Kapton(blanketThick))
+	if got := blanket.Reflects(unity); !(got.R > got.G && got.G > got.B) {
 		t.Errorf("Kapton over aluminium reflects %v face on: not gold", got)
 	}
-	none := Material{Gloss: 1, Metal: Aluminium(), Film: Kapton(0)}
-	if got := none.Reflects(1); got.R > got.G && got.G > got.B {
+	none := metalUnder(Aluminium(), *Kapton(nought))
+	if got := none.Reflects(unity); got.R > got.G && got.G > got.B {
 		t.Errorf("Kapton of no thickness over aluminium reflects %v: gold", got)
 	}
 }
@@ -182,10 +301,10 @@ func TestKaptonPassesRedAndSwallowsBlue(t *testing.T) {
 // anti-test is in the same line: it is clear, and absorbs nothing in
 // any colour, where Kapton's film does.
 func TestRutileIsAClearFilmAtDevoresIndex(t *testing.T) {
-	const thick = 5e-9
+	thick := picked(t, "metal-rutile-thickness")
 	oxide := Rutile(thick)
-	if oxide.Index != 2.65 || oxide.Thickness != thick ||
-		oxide.Absorbs != [3]float64{} {
+	if oxide.Index != picked(t, "metal-rutile-index") ||
+		oxide.Thickness != thick || oxide.Absorbs != [metalColours]float64{} {
 		t.Errorf("rutile is %+v", *oxide)
 	}
 }
@@ -194,34 +313,106 @@ func TestRutileIsAClearFilmAtDevoresIndex(t *testing.T) {
 // a silver metal gold, as Kapton turns a blanket's aluminium. The
 // anti-test is the same metal bare, which is not gold.
 func TestAnAmberFilmGildsSilverMetal(t *testing.T) {
-	aluminium := Metal{N: [3]float64{1.1911, 0.93525, 0.6444},
-		K: [3]float64{7.0711, 6.3099, 5.3994}}
-	bare := Material{Gloss: 1, Metal: &aluminium}
-	if got := bare.Reflects(1); got.R > got.G && got.G > got.B {
+	aluminium := metalRead(t, "aluminium-rounded")
+	bare := Material{Gloss: unity, Metal: &aluminium}
+	if got := bare.Reflects(unity); got.R > got.G && got.G > got.B {
 		t.Errorf("bare aluminium reflects %v face on: gold", got)
 	}
-	blanket := Material{Gloss: 1, Metal: &aluminium, Film: &Film{Index: 1.7,
-		Thickness: 25e-6, Absorbs: [3]float64{4e3, 3e4, 2e5}}}
-	got := blanket.Reflects(1)
+	blanket := metalUnder(&aluminium, Film{
+		Index:     picked(t, "metal-kapton-index"),
+		Thickness: picked(t, "metal-blanket-thickness"),
+		Absorbs:   metalAbsorbs(t, "amber")})
+	got := blanket.Reflects(unity)
 	if !(got.R > got.G && got.G > got.B) {
 		t.Errorf("Kapton over aluminium reflects %v face on: not gold", got)
 	}
 }
 
 // Anything but a metal reflects as it always has: the same share of all
-// three colours, to the last bit, so no picture made before moves. The
+// three colours, to the last bit, so a picture of one does not move. The
 // anti-test: a metal with no gloss on it mirrors nothing, whatever its
 // colour.
 func TestANonMetalReflectsAsMirrorsDoes(t *testing.T) {
-	glass := Material{Gloss: 1, Index: 1.5}
-	for _, cos := range []float64{1, 0.5, 0.1, 0} {
+	glass := Material{Gloss: unity, Index: picked(t, "metal-glass-index")}
+	for _, cos := range metalCosines(t, metalMirrorLooksFile) {
 		want := glass.Mirrors(cos)
 		if got := glass.Reflects(cos); got != maths.Grey(want) {
-			t.Errorf("glass reflects %v at cosine %v, Mirrors %v", got, cos, want)
+			t.Errorf("glass reflects %v at cosine %v, Mirrors %v", got, cos,
+				want)
 		}
 	}
-	plain := Material{Colour: maths.Grey(0.5), Metal: &gold}
-	if got := plain.Reflects(1); got != (maths.Light{}) {
+	gold := metalRead(t, "gold-rounded")
+	plain := Material{Colour: maths.Grey(picked(t, "metal-plain-grey")),
+		Metal: &gold}
+	if got := plain.Reflects(unity); got != maths.RGB(nought, nought, nought) {
 		t.Errorf("a metal with no gloss reflects %v", got)
+	}
+}
+
+// A metal with no index at all, n and k nought, reflects all of every
+// colour at every look, and never a value that is not a number: face on,
+// Conductor's equations divide nothing by nothing there. The anti-test is
+// gold, which does not reflect all of its blue face on.
+func TestAMetalWithNoIndexReflectsAll(t *testing.T) {
+	bare := Material{Gloss: unity, Metal: &Metal{}}
+	for _, cos := range append(metalCosines(t, metalLooksFile), nought) {
+		if got := bare.Reflects(cos); got != maths.Grey(unity) {
+			t.Errorf("a metal with no index reflects %v at cosine %v", got, cos)
+		}
+	}
+	if got := Conductor(unity, nought, nought); got != unity {
+		t.Errorf("Conductor of no index face on is %v, want all", got)
+	}
+	gold := Material{Gloss: unity, Metal: Gold()}
+	if got := gold.Reflects(unity); !(got.B < unity) {
+		t.Errorf("gold reflects %v of blue face on, as a bare metal does", got.B)
+	}
+}
+
+// A film of no index, or of one below nought, is glass: it reflects what
+// a film of glass's index does, bit for bit, and always a number. The
+// anti-test: a film of another index does not reflect as glass does.
+func TestAFilmOfNoIndexIsGlass(t *testing.T) {
+	gold := metalRead(t, "gold-rounded")
+	thick := picked(t, "metal-dark-thickness")
+	glass := metalUnder(&gold, Film{Thickness: thick,
+		Index: picked(t, "metal-glass-index")})
+	for _, index := range []float64{nought, picked(t, "metal-negative-index")} {
+		made := metalUnder(&gold, Film{Index: index, Thickness: thick})
+		for _, cos := range append(metalCosines(t, metalLooksFile), nought) {
+			got, want := made.Reflects(cos), glass.Reflects(cos)
+			if got != want || !metalFinite(got) {
+				t.Errorf("a film of index %v reflects %v at cosine %v, "+
+					"glass %v", index, got, cos, want)
+			}
+		}
+	}
+	other := metalUnder(&gold, Film{Thickness: thick,
+		Index: picked(t, "metal-dark-index")})
+	if other.Reflects(unity) == glass.Reflects(unity) {
+		t.Error("a film of another index reflects as glass does")
+	}
+}
+
+// A metal with no index under a film that absorbs nothing reflects all of
+// every colour at every look, grazing too, where the film's front reflects
+// all and the bounces between film and metal would sum by dividing
+// nothing by nothing. The anti-test: the same under an amber film does not.
+func TestABareMetalUnderAClearFilmReflectsAll(t *testing.T) {
+	glass := picked(t, "metal-glass-index")
+	thick := picked(t, "metal-dark-thickness")
+	lossless := metalUnder(&Metal{}, Film{Index: glass, Thickness: thick})
+	tolerance := picked(t, "metal-film-tolerance")
+	for _, cos := range append(metalCosines(t, metalLooksFile), nought) {
+		got := lossless.Reflects(cos)
+		if !metalSame(got, maths.Grey(unity), tolerance) {
+			t.Errorf("a clear film over a bare metal reflects %v at cosine %v",
+				got, cos)
+		}
+	}
+	dim := metalUnder(&Metal{}, Film{Index: glass, Thickness: thick,
+		Absorbs: metalAbsorbs(t, "amber")})
+	if got := dim.Reflects(unity); !(got.B < unity-tolerance) {
+		t.Errorf("an amber film over a bare metal reflects %v of blue", got.B)
 	}
 }

@@ -343,10 +343,10 @@ func TestFrontAndBackFacesFaceStraightOut(t *testing.T) {
 			continue
 		}
 		normals, _ := solid.CornerNormals(i)
-		for _, n := range normals {
-			if n != maths.V(0, 0, math.Copysign(1, turn.Z)) {
+		for _, normal := range normals {
+			if normal != maths.V(0, 0, math.Copysign(1, turn.Z)) {
 				t.Fatalf("face %d faces %v, a corner %v",
-					i, turn, n)
+					i, turn, normal)
 			}
 		}
 	}

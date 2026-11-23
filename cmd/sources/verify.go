@@ -19,9 +19,11 @@ holds every measured number in slayer's research data to its source:
 the source pinned in the list and on the shelf at its pin, the text the
 data quotes on the page it names, and the value the data holds the one
 that text says. a number that fails any of them fails the verb, and the
-build that runs it first. a paged source, a pdf, is read a page at a
-time by poppler's pdftotext; it reaches nothing outside and writes
-nothing.
+build that runs it first. it prints nothing when every number holds,
+and one line for each that does not.
+
+a paged source, a pdf, is read a page at a time by poppler's pdftotext;
+it reaches nothing outside and writes nothing.
 
 the shelf is the one SLAYER_SHELF names, and with that unset, the shelf
 folder committed beside the list, so a fresh clone verifies with no
@@ -37,10 +39,13 @@ const pdfSuffix = ".pdf"
 // doubled is the bits a float64 holds, as strconv asks to be told.
 const doubled = 64
 
-// verify holds every measured number to its source, and says each. the
-// sources are read from the shelf SLAYER_SHELF names or, with it unset,
-// from the shelf folder beside the list; see shelfDir.
-func (at place) verify(call pzm.Call) error {
+// verify holds every measured number to its source. it says nothing of a
+// number that holds, and why of each that does not, so a build that runs
+// it first shows a line only when there is something to mend.
+//
+// the sources are read from the shelf SLAYER_SHELF names or, with it
+// unset, from the shelf folder beside the list; see shelfDir.
+func (at place) verify(_ pzm.Call) error {
 	list, err := sources.Read(at.list)
 	if err != nil {
 		return err
@@ -53,11 +58,6 @@ func (at place) verify(call pzm.Call) error {
 	for _, number := range data {
 		if err := at.verified(list, number); err != nil {
 			failed = append(failed, err)
-			continue
-		}
-		from := *number.From
-		if _, err := fmt.Fprintf(call.Out(), "%s: %s, %s\n", number.Name, from.Text, whereIn(from)); err != nil {
-			return errors.Join(append(failed, err)...)
 		}
 	}
 	return errors.Join(failed...)

@@ -357,21 +357,6 @@ numbers:
   says: the gap between the primary's back and the instrument module, per aperture diameter
   kind: picked
   by: Slayer's spacecraft templates, 2026-11-12
-- name: solar-columns
-  value: 8
-  says: readable solar panel grid columns
-  kind: picked
-  by: Slayer's spacecraft templates, 2026-11-07
-- name: solar-rows
-  value: 4
-  says: readable solar panel grid rows
-  kind: picked
-  by: Slayer's spacecraft templates, 2026-11-07
-- name: solar-grid-width
-  value: 0.008
-  says: grid bar width per aperture diameter
-  kind: picked
-  by: Slayer's spacecraft templates, 2026-11-07
 - name: mirror-thickness
   value: 0.005
   says: closed primary tile backing thickness per aperture diameter
@@ -477,3 +462,993 @@ numbers:
   says: separation of meeting end caps per member radius
   kind: picked
   by: heard. spacecraft scenery study, 2026-11-15
+- name: prima-tube-length
+  value: 2.35
+  says: optical tube length per 1.8 m primary; chosen to match the NASA/JPL concept silhouette
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-tube-height
+  value: 2.82
+  says: full height from the bus bottom to open tube rim, per primary diameter
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-tube-radius
+  value: 0.56
+  says: open baffle radius per primary diameter, sized to clear the 1.8 m primary and match NASA/JPL concept
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-shield-span
+  value: 4.6
+  says: broad dark shield full-width share of the primary diameter, picked from concept
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-shield-length
+  value: 5.5
+  says: broad dark shield length share of the primary diameter, picked from concept
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-bus-height
+  value: 0.42
+  says: service bus height share of primary diameter, picked from concept
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-bus-width
+  value: 1.35
+  says: service bus width share of primary diameter, picked from concept
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-bus-depth
+  value: 1.55
+  says: service bus depth share of primary diameter, picked from concept
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-tube-wall
+  value: 0.055
+  says: optical baffle wall thickness per primary diameter, picked for readable open tube
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-mirror-depth
+  value: 0.022
+  says: shallow primary dish sag per diameter, display geometry only
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-shield-layers
+  value: 4
+  says: dark folded-looking shield plates; visual simplification, not a published layer count
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-shield-contraction
+  value: 0.045
+  says: inset share between dark shield outlines
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-shield-thickness
+  value: 0.032
+  says: plate thickness per primary diameter
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-shield-layer-gap
+  value: 0.22
+  says: separation between dark shield plates per primary diameter
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-strut-radius
+  value: 0.014
+  says: support truss radius per primary diameter
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-truss-inset
+  value: 0.92
+  says: attachment point share toward the dark shield's corners
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-mirror-look
+  value: 0.48
+  says: authored display reflectance for the primary
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-body-look
+  value: 0.055
+  says: authored dark reflective optical baffle appearance
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-structure-look
+  value: 0.16
+  says: authored dark structure reflectance
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-shield-look
+  value: 0.028
+  says: authored near-black shield reflectance
+  kind: picked
+  by: PRIMA visual concept, 2026-11-17
+- name: prima-hull-back-z
+  value: -2.38
+  says: aft body station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-back-width
+  value: 1.00
+  says: aft body half-width in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-back-top
+  value: 0.20
+  says: aft upper shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-back-bottom
+  value: -0.72
+  says: aft lower shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-back-bevel
+  value: 0.14
+  says: aft shell corner bevel in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-aft-z
+  value: -1.78
+  says: aft-bus cross-section station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-aft-width
+  value: 1.62
+  says: aft-bus half-width in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-aft-top
+  value: 0.34
+  says: aft-bus upper shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-aft-bottom
+  value: -0.78
+  says: aft-bus lower shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-aft-bevel
+  value: 0.20
+  says: aft-bus corner bevel in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-mid-z
+  value: -0.55
+  says: mid-body cross-section station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-mid-width
+  value: 1.53
+  says: mid-body half-width in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-mid-top
+  value: 0.48
+  says: mid-body upper shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-mid-bottom
+  value: -0.74
+  says: mid-body lower shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-mid-bevel
+  value: 0.18
+  says: mid-body corner bevel in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-fore-z
+  value: 0.78
+  says: forward equipment bay station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-fore-width
+  value: 1.17
+  says: forward equipment bay half-width in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-fore-top
+  value: 0.44
+  says: forward equipment bay upper height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-fore-bottom
+  value: -0.56
+  says: forward equipment bay lower height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-fore-bevel
+  value: 0.15
+  says: forward equipment bay corner bevel in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-nose-z
+  value: 1.32
+  says: nose cross-section station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-nose-width
+  value: 0.87
+  says: nose half-width in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-nose-top
+  value: 0.26
+  says: nose upper shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-nose-bottom
+  value: -0.40
+  says: nose lower shell height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-nose-bevel
+  value: 0.11
+  says: nose corner bevel in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-spine-width
+  value: 0.54
+  says: top equipment spine width in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-spine-height
+  value: 0.09
+  says: top equipment spine height in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-spine-length
+  value: 3.18
+  says: top equipment spine length in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-front-z
+  value: 2.12
+  says: forward canopy station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-aft-z
+  value: -2.50
+  says: aft canopy station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-front-outer
+  value: 1.24
+  says: forward outer half-span in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-aft-outer
+  value: 2.13
+  says: aft outer half-span in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-front-inner
+  value: 0.52
+  says: forward inner edge in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-aft-inner
+  value: 0.43
+  says: aft inner edge in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-layer-shrink
+  value: 0.035
+  says: outline contraction between stacked canopy layers
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-thickness
+  value: 0.060
+  says: canopy skin thickness in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-layer-gap
+  value: 0.13
+  says: vertical layer spacing in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-upper
+  value: 1.14
+  says: height of upper canopy surface in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-dish
+  value: -0.080
+  says: upward crown of each canopy membrane in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-rib-radius
+  value: 0.020
+  says: edge frame and transverse rib radius in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-rib-one-z
+  value: -1.55
+  says: first canopy transverse rib station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-rib-two-z
+  value: -0.45
+  says: second canopy transverse rib station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-rib-three-z
+  value: 0.68
+  says: third canopy transverse rib station in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-stanchion-radius
+  value: 0.034
+  says: short canopy-to-hull support radius in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-radiator-thickness
+  value: 0.075
+  says: side radiator panel thickness in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-radiator-height
+  value: 1.06
+  says: side radiator panel height in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-radiator-length
+  value: 3.05
+  says: side radiator panel length in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-radiator-centre-x
+  value: 1.68
+  says: radiator centre distance from the hull in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-radiator-centre-y
+  value: -0.05
+  says: radiator centre height in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-radiator-centre-z
+  value: -1.13
+  says: radiator centre fore-aft station in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-optical-height
+  value: -0.20
+  says: telescope axis lowered under the canopy in primary-aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-optical-start-z
+  value: 0.00
+  says: aft optical baffle station in aperture shares, moving its mouth ahead of the canopy edge
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-optical-wall
+  value: 0.060
+  says: open baffle wall thickness in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-primary-station-z
+  value: 0.20
+  says: primary mirror station relative to the tube aft in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-primary-sag
+  value: 0.055
+  says: display-only primary dish sag in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-secondary-radius
+  value: 0.20
+  says: secondary mirror radius relative to the primary aperture
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-secondary-sag
+  value: 0.035
+  says: display-only secondary mirror sag in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-secondary-station-share
+  value: 0.83
+  says: secondary mirror station as a share of baffle length
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-truss-frame-x
+  value: 0.76
+  says: optical truss half-width in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-truss-frame-y
+  value: 0.66
+  says: optical truss half-height in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-truss-frame-radius
+  value: 0.042
+  says: optical truss member radius in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-spider-radius
+  value: 0.020
+  says: secondary spider vane radius in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-radius
+  value: 0.17
+  says: small top antenna reflector radius in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-x
+  value: 1.38
+  says: top antenna lateral position in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-y
+  value: 1.20
+  says: top antenna pedestal height in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-z
+  value: -1.20
+  says: top antenna fore-aft position in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-depth
+  value: 0.025
+  says: top antenna dish depth in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-feed-height
+  value: 0.28
+  says: top antenna feed height above the dish in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-width
+  value: 0.09
+  says: gold equipment port width in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-height
+  value: 0.075
+  says: gold equipment port height in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-depth
+  value: 0.12
+  says: gold equipment port depth in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-red
+  value: 0.035
+  says: picked display-space red channel for the graphite bus
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-green
+  value: 0.043
+  says: picked display-space green channel for the graphite bus
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-hull-blue
+  value: 0.060
+  says: picked display-space blue channel for the graphite bus
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-red
+  value: 0.018
+  says: picked display-space red channel for dark canopy fabric
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-green
+  value: 0.028
+  says: picked display-space green channel for dark canopy fabric
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-canopy-blue
+  value: 0.055
+  says: picked display-space blue channel for dark canopy fabric
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-panel-red
+  value: 0.25
+  says: picked display-space red channel for silver radiator surfaces
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-panel-green
+  value: 0.38
+  says: picked display-space green channel for silver radiator surfaces
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-panel-blue
+  value: 0.56
+  says: picked display-space blue channel for silver radiator surfaces
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-gold-red
+  value: 0.88
+  says: picked display-space red channel for gold ports and feed
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-gold-green
+  value: 0.36
+  says: picked display-space green channel for gold ports and feed
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-gold-blue
+  value: 0.10
+  says: picked display-space blue channel for gold ports and feed
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-mirror-red
+  value: 0.54
+  says: picked display-space red channel for cool silver mirrors
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-mirror-green
+  value: 0.68
+  says: picked display-space green channel for cool silver mirrors
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-mirror-blue
+  value: 0.82
+  says: picked display-space blue channel for cool silver mirrors
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-truss-red
+  value: 0.28
+  says: picked display-space red channel for silver structural members
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-truss-green
+  value: 0.38
+  says: picked display-space green channel for silver structural members
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-truss-blue
+  value: 0.55
+  says: picked display-space blue channel for silver structural members
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-feed-radius
+  value: 0.012
+  says: top antenna feed support radius in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-antenna-feed-width
+  value: 0.075
+  says: top antenna feed housing width in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-count
+  value: 6
+  says: visible equipment ports on each bus flank
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-start-z
+  value: -1.75
+  says: first equipment port station in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-z-step
+  value: 0.34
+  says: equipment port spacing along the bus in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-height-y
+  value: -0.38
+  says: lower gold equipment port row height in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-port-row-gap
+  value: 0.16
+  says: vertical separation between alternating port rows in aperture shares
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: prima-structure-sides
+  value: 24
+  says: cross-section sides for long structural members
+  kind: picked
+  by: NASA-JPL concept study, 2026-11-17
+- name: roman-bus-width
+  value: 1.5
+  says: spacecraft bus width per 2.4 metre primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bus-height
+  value: 0.68
+  says: spacecraft bus height per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bus-length
+  value: 2.1
+  says: spacecraft bus length per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bus-center-z
+  value: 0.46
+  says: bus centre aft of the primary axis per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-barrel-radius
+  value: 0.58
+  says: optical barrel outside radius per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-barrel-length
+  value: 1.95
+  says: outer barrel length per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-barrel-wall
+  value: 0.055
+  says: barrel wall width per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-width
+  value: 0.72
+  says: one of two solar-panel rows width per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-depth
+  value: 0.60
+  says: one of three solar-panel columns depth per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-thickness
+  value: 0.025
+  says: solar-panel layer thickness per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-gap
+  value: 0.035
+  says: spacing between adjoining solar panels per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-grid-width
+  value: 0.014
+  says: visible solar-cell grid rib width per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-grid-columns
+  value: 5
+  says: visible solar-cell divisions across each panel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-array-y
+  value: 0.77
+  says: array deck height above spacecraft origin per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-radius
+  value: 0.21
+  says: high-gain antenna radius per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-depth
+  value: 0.035
+  says: high-gain antenna dish depth per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-envelope-below
+  value: 0.64
+  says: authored model envelope below the spacecraft origin per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-envelope-above
+  value: 1.65
+  says: authored model envelope above the spacecraft origin per primary mirror
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-barrel-shoulder
+  value: 0.12
+  says: outer-barrel shoulder start as a fraction of barrel length
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-barrel-rear-taper
+  value: 0.86
+  says: rear-barrel radius share after the outer taper
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-baffle-opening
+  value: 0.35
+  says: inner baffle opening share of the barrel wall
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-mirror-depth
+  value: 0.045
+  says: shallow mirror figure depth per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-primary-depth
+  value: 0.84
+  says: primary mirror depth as barrel-length fraction
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-secondary-position
+  value: 0.23
+  says: secondary mirror position as barrel-length fraction from the aperture
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-secondary-radius
+  value: 0.09
+  says: secondary mirror radius per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-spider-radius
+  value: 0.012
+  says: secondary mirror support radius per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-cover-depth
+  value: 0.62
+  says: upper aperture-cover depth per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-cover-thickness
+  value: 0.045
+  says: aperture-cover panel thickness per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-cover-width
+  value: 1.06
+  says: aperture-cover width as a share of barrel diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-cover-rise
+  value: 1.04
+  says: aperture-cover height as a share of barrel radius
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-cover-setback
+  value: 0.12
+  says: aperture-cover distance aft of the outer-barrel lip per aperture
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-cover-cheek
+  value: 0.045
+  says: aperture-cover side-cheek thickness per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-cover-cheek-height
+  value: 1.2
+  says: side-cheek height as a share of barrel radius
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bay-width
+  value: 0.23
+  says: avionics bay width per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bay-height
+  value: 0.22
+  says: avionics bay height per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bay-depth
+  value: 0.035
+  says: avionics bay side relief per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bay-first-z
+  value: 0.14
+  says: first avionics bay position from the bus front per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bay-step
+  value: 0.54
+  says: spacing between avionics bays per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bay-y
+  value: -0.30
+  says: avionics bay height below the bus centre per bus height
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-bay-rail
+  value: 0.12
+  says: avionics bay rail size per bay dimension
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-width
+  value: 0.43
+  says: one of the Wide Field and Coronagraph module widths per primary
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-height
+  value: 0.29
+  says: instrument module height per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-depth
+  value: 0.58
+  says: instrument module depth per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-gap
+  value: 0.10
+  says: gap between the two instrument modules per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-setback
+  value: 0.16
+  says: instrument-module centre offset aft of bus centre per primary
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-face
+  value: 0.83
+  says: instrument face width and height share
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-face-depth
+  value: 0.045
+  says: instrument face relief per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-instrument-face-inset
+  value: 0.085
+  says: instrument face inset as a share of its module dimensions
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-blanket-height
+  value: 0.94
+  says: side blanket height as a share of bus height
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-blanket-depth
+  value: 0.72
+  says: side blanket length as a share of bus length
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-blanket-thickness
+  value: 0.025
+  says: thermal-blanket side relief per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-lower-shield-width
+  value: 0.72
+  says: one lower instrument shield panel width per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-lower-shield-gap
+  value: 0.04
+  says: clearance between lower thermal shield panels per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-lower-shield-depth
+  value: 0.82
+  says: lower instrument shield panel depth per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-lower-shield-thickness
+  value: 0.018
+  says: lower instrument shield panel thickness per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-lower-shield-drop
+  value: 0.00
+  says: lower shield drop below the instrument modules per primary
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-columns
+  value: 3
+  says: authored SASS arrangement columns along the observatory
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-rows
+  value: 2
+  says: authored SASS arrangement rows across the observatory
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-first-z
+  value: -0.82
+  says: first SASS panel start along the observatory per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-array-rail-radius
+  value: 0.018
+  says: SASS support rail radius per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-rail-aft
+  value: 0.16
+  says: SASS aft rail extension per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-panel-rail-forward
+  value: 0.16
+  says: SASS forward rail extension per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-x
+  value: 0.61
+  says: high-gain antenna lateral offset per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-base-y
+  value: 0.31
+  says: high-gain antenna mast base height per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-base-z
+  value: 1.45
+  says: high-gain antenna mast base position aft per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-height
+  value: 1.38
+  says: high-gain antenna centre height per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-z
+  value: 2.12
+  says: high-gain antenna centre position aft per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-mast-radius
+  value: 0.018
+  says: high-gain antenna mast radius per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-spokes
+  value: 6
+  says: authored high-gain dish support spoke count
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-spoke-radius
+  value: 0.008
+  says: high-gain dish spoke radius per primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-antenna-spoke-inner
+  value: 0.10
+  says: authored inner hub clearance fraction of antenna primary diameter
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-housing-red
+  value: 0.43
+  says: authored warm-white housing reflectance red channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-housing-green
+  value: 0.46
+  says: authored warm-white housing reflectance green channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-housing-blue
+  value: 0.49
+  says: authored warm-white housing reflectance blue channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-structure-reflectance
+  value: 0.22
+  says: authored graphite structure diffuse reflectance
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-solar-red
+  value: 0.025
+  says: authored solar-cell blue-black reflectance red channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-solar-green
+  value: 0.055
+  says: authored solar-cell blue-black reflectance green channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-solar-blue
+  value: 0.16
+  says: authored solar-cell blue-black reflectance blue channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-foil-red
+  value: 0.62
+  says: authored silver-gold blanket reflectance red channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-foil-green
+  value: 0.58
+  says: authored silver-gold blanket reflectance green channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17
+- name: roman-foil-blue
+  value: 0.48
+  says: authored silver-gold blanket reflectance blue channel
+  kind: picked
+  by: Roman manufactory model, 2026-11-17

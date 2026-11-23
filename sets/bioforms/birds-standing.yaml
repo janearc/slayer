@@ -1,0 +1,58 @@
+# Every standing row of the bird maker in a line, about a metre apart,
+# west to east: black-faced spoonbill, little egret, grey heron,
+# Pacific reef heron, yellow-legged gull, white tern. A wide, low frame
+# so each bird has its share of it. Lit by the worked sun and sky; the
+# sun's place is picked.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: birds standing
+  seed: 7
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 35}
+  set:
+    things:
+      spoonbill:
+        kind: bird-black-faced-spoonbill-standing
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position: {east: {value: -2.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
+      egret:
+        kind: bird-little-egret-standing
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position: {east: {value: -1.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
+      heron:
+        kind: bird-grey-heron-standing
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position: {east: {value: -0.5, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
+      reef heron:
+        kind: bird-pacific-reef-heron-standing
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position: {east: {value: 0.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
+      gull:
+        kind: bird-yellow-legged-gull-standing
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position: {east: {value: 1.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
+      tern:
+        kind: bird-white-tern-standing
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position: {east: {value: 2.5, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
+  film:
+    width: 1440
+    height: 400
+    rays: 4
+    wide: 39
+  cameras:
+    side:
+      title: "from the south, the line across the frame"
+      location: {at: [0, -9, 0.5]}
+      orientation: {look_at: [0, 0, 0.48]}

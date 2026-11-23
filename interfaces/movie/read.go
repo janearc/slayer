@@ -32,7 +32,11 @@ func ReadSound(path string) (Sound, error) {
 	if err != nil {
 		return Sound{}, err
 	}
-	return fromChannels(readRate, count, decoded)
+	samples, err := stereoOf(count, decoded)
+	if err != nil {
+		return Sound{}, err
+	}
+	return newSound(readRate, samples), nil
 }
 
 // readable refuses a path that is not a file that can be opened.

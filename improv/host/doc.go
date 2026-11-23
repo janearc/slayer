@@ -19,8 +19,8 @@
 //   - when the host is speaking, as spans of seconds;
 //   - the box the host may move in, in the frame's pixels.
 //
-// The pure parts take a Moment, what is happening at an instant, and say
-// which clip shows (Pick), where the host is (Place), how bright it
-// flickers (Flicker), and how much the picture lifts (Lift). The motion
-// is seeded, so a frame drawn twice is the same frame.
+// The pure parts take a moment, what is happening at an instant, and say
+// which clip shows, where the host is, how bright it flickers, and how
+// much the picture lifts. The motion is seeded, so a frame drawn twice is
+// the same frame.
 package host

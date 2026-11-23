@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/maths"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -43,7 +43,7 @@ func TestOceanMoonPlanCopiesTaggedEmitterAndRejectsDisplacement(t *testing.T) {
 	if _, err := PlanOceanMoon(world, 0); err == nil || !strings.Contains(err.Error(), "displaced water") {
 		t.Fatalf("unsupported interface passed kernel plan: %v", err)
 	}
-	continuation, err := seaocean.NewInfiniteMeanContinuation(field, 0, 4)
+	continuation, err := arid.NewInfiniteMeanContinuation(field, 0, 4)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestOceanMoonPlanCopiesTaggedEmitterAndRejectsDisplacement(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	boundary.Shape, err = seaocean.NewInfiniteMeanContinuation(flat, 0, 4)
+	boundary.Shape, err = arid.NewInfiniteMeanContinuation(flat, 0, 4)
 	if err != nil {
 		t.Fatal(err)
 	}

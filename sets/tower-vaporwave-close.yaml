@@ -1,0 +1,73 @@
+# tower vaporwave close: two vaporwave towers at the demo level, seen up
+# close at dusk: veined marble in the bars and in the pastel bands, which
+# glow a little of their colour, and glass block in the windows, square
+# blocks in pale joints, each bright at its middle where the glass bulges
+# and darker at its rim, in the pastel of the band below it.
+#
+# places are metres, as a map's run: x east, y north, z up. the towers
+# stand side by side, their fronts at y of minus fifteen. every number is
+# a choice of this study, picked by eye. the first camera is the one
+# drawn; to draw the other, put it first.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower vaporwave close
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "at the foot of the pink tower, looking up its face"
+      wide: 80
+      location:
+        at: [6, -26, 1.7]
+      orientation:
+        look_at: [2, -15, 22]
+    across:
+      title: "forty metres across from the pink tower, at its middle"
+      wide: 45
+      location:
+        at: [4, -55, 26]
+      orientation:
+        look_at: [4, -15, 26]
+  recipes:
+    pink-teal: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: vaporwave, colour: pink, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    lilac-mint: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: vaporwave, colour: lilac, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      pink: {recipe: pink-teal, seed: 8, complexity: demo, east: 0, north: 0, height: {value: 0, unit: m}}
+      lilac: {recipe: lilac-mint, seed: 9, complexity: demo, east: 40, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      plaza:
+        colour: {srgb_linear: [0.5, 0.42, 0.48]}
+        source: eye
+    boxes:
+      plaza:
+        material: plaza
+        middle: [0, 0, -1]
+        size: [4000, 4000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.5, -0.8, 0.2]
+        colour: {srgb_linear: [1.8, 0.8, 0.9]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.6, 0.9]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.7, 0.25, 0.4]}
+      zenith: {srgb_linear: [0.05, 0.04, 0.25]}
+      ground: {srgb_linear: [0.08, 0.04, 0.08]}
+      source: eye

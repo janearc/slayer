@@ -39,7 +39,8 @@ func writeTiff(t *testing.T, path string) {
 	var offsets, counts []uint32
 	for tileRow := range downs {
 		for tileCol := range across {
-			offsets = append(offsets, uint32(8+len(data)))
+			start := uint32(8 + len(data))
+			offsets = append(offsets, start)
 			counts = append(counts, uint32(tile))
 			for y := range fixtureTile {
 				for x := range fixtureTile {
@@ -85,7 +86,8 @@ func writeTiff(t *testing.T, path string) {
 		{tagScale, 12, 3, doubles(fixtureSpacing, fixtureSpacing, 0)},
 		{tagTiepoint, 12, 6, doubles(0, 0, 0, fixtureWest, fixtureNorth, 0)},
 		{tagNoData, 2, 6, noData}}
-	directory := binary.LittleEndian.AppendUint16(nil, uint16(len(entries)))
+	entryCount := uint16(len(entries))
+	directory := binary.LittleEndian.AppendUint16(nil, entryCount)
 	for _, each := range entries {
 		directory = binary.LittleEndian.AppendUint16(directory, uint16(each[0]))
 		directory = binary.LittleEndian.AppendUint16(directory, uint16(each[1]))
@@ -101,7 +103,8 @@ func writeTiff(t *testing.T, path string) {
 	}
 	directory = append(directory, 0, 0, 0, 0)
 	head := []byte{'I', 'I', 42, 0}
-	head = binary.LittleEndian.AppendUint32(head, uint32(8+len(data)))
+	directoryAt := uint32(8 + len(data))
+	head = binary.LittleEndian.AppendUint32(head, directoryAt)
 	whole := append(append(head, data...), directory...)
 	if err := os.WriteFile(path, whole, 0o644); err != nil {
 		t.Fatal(err)
@@ -238,7 +241,8 @@ func TestWhatIsNotARasterIsRefused(t *testing.T) {
 	if _, err := Open(junk); err == nil {
 		t.Error("junk was read")
 	}
-	if _, err := Open(filepath.Join(t.TempDir(), "gone.tif")); err == nil {
+	gone := filepath.Join(t.TempDir(), "gone.tif")
+	if _, err := Open(gone); err == nil {
 		t.Error("a missing file was read")
 	}
 }

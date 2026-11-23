@@ -1,0 +1,175 @@
+# The pier, 2026-11-19. A deck over water on rows of piles, with a long
+# low shed on it, as the piers of a working waterfront are. The deck's top
+# stands above the sea by the deck height, and the piles go down below it.
+# Nothing is measured; each number says whether it was picked, and by what.
+# Lengths are metres, colours are shares of light.
+culture: pier
+says: a wharf pier, a shed on a deck on piles
+elements:
+- element: length
+  says: how far the pier reaches out from the shore
+  scope: district
+  draw: range
+  unit: m
+  least: 120
+  most: 260
+  kind: picked
+  by: "pier study, 2026-11-19, by eye, the piers of a fishing waterfront"
+- element: width
+  says: width of the deck
+  scope: district
+  draw: range
+  unit: m
+  least: 14
+  most: 22
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: deck-height
+  says: height of the top of the deck over the sea, which is the origin's height
+  scope: district
+  draw: range
+  unit: m
+  least: 3.2
+  most: 3.2
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: deck-thickness
+  says: thickness of the deck
+  scope: district
+  draw: range
+  unit: m
+  least: 0.5
+  most: 0.5
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: pile-pitch
+  says: distance between piles along a row
+  scope: district
+  draw: range
+  unit: m
+  least: 6
+  most: 6
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: pile-width
+  says: width of a pile, both ways
+  scope: district
+  draw: range
+  unit: m
+  least: 0.6
+  most: 0.6
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: pile-depth
+  says: how far below the sea a pile goes, past any floor the pier is drawn over
+  scope: district
+  draw: range
+  unit: m
+  least: 16
+  most: 16
+  kind: picked
+  by: "pier study, 2026-11-19, by eye, deeper than the bay at the piers"
+- element: pile-rows
+  says: how many rows of piles run along the pier, one at each edge and the rest between
+  scope: district
+  draw: range
+  unit: rows
+  whole: true
+  least: 3
+  most: 3
+  kind: picked
+  by: "pier study, 2026-11-19, picked"
+- element: shed-start
+  says: where along the pier its shed begins, as a share of the length
+  scope: district
+  draw: range
+  unit: share of the length
+  least: 0.08
+  most: 0.25
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: shed-share
+  says: how much of the pier's length the shed takes
+  scope: district
+  draw: range
+  unit: share of the length
+  least: 0.45
+  most: 0.65
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: shed-apron
+  says: deck left clear on each side of the shed
+  scope: district
+  draw: range
+  unit: m
+  least: 3.5
+  most: 3.5
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: shed-height
+  says: height of the shed's wall over the deck
+  scope: district
+  draw: range
+  unit: m
+  least: 6
+  most: 9
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: deck-colour
+  says: the planks and concrete of the deck
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: planks, weight: 3, colour: [0.2, 0.17, 0.13], gloss: 0.1}
+  - {name: concrete, weight: 1, colour: [0.25, 0.25, 0.24], gloss: 0.05}
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: pile-colour
+  says: the creosoted timber of the piles
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: creosote, weight: 1, colour: [0.045, 0.035, 0.03], gloss: 0.15}
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: palette
+  says: the colours of the sheds, weathered
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: grey, weight: 3, colour: [0.3, 0.31, 0.32]}
+  - {name: blue, weight: 2, colour: [0.15, 0.22, 0.32]}
+  - {name: red, weight: 1, colour: [0.32, 0.12, 0.09]}
+  - {name: white, weight: 1, colour: [0.55, 0.55, 0.53]}
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: cladding
+  says: corrugated sheet; the colour is a tint on the shed's colour and the gloss is the sheet's
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: sheet, weight: 1, colour: [1, 1, 1], gloss: 0.3}
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"
+- element: roof-form
+  says: the form of the shed's roof
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: flat, weight: 1}
+  kind: picked
+  by: "pier study, 2026-11-19, picked"
+- element: roof-colour
+  says: the colour of the shed's roof and parapet
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: tar, weight: 1, colour: [0.08, 0.08, 0.085], gloss: 0.1}
+  kind: picked
+  by: "pier study, 2026-11-19, by eye"

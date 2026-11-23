@@ -34,7 +34,8 @@ func readChosen() (numbers.Numbers, error) {
 func pickedFloat(name string) float32 {
 	number, err := chosen.Get(name)
 	if err != nil {
-		panic(errors.Join(unread, fmt.Errorf("carry: %w", err)))
+		wrapped := fmt.Errorf("carry: %w", err)
+		panic(errors.Join(unread, wrapped))
 	}
 	return float32(number.Value)
 }

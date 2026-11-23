@@ -19,10 +19,10 @@ var (
 	foamScale     = num("monahan.scale")
 	foamPower     = num("monahan.power")
 
-	// FoamReflectance is the effective reflectance of whitecaps in
+	// foamReflectance is the effective reflectance of whitecaps in
 	// visible light [K84], lower than fresh foam because a whitecap thins
 	// as it ages.
-	FoamReflectance = num("koepke.foam.reflectance")
+	foamReflectance = num("koepke.foam.reflectance")
 )
 
 // Index is the refractive index of seawater against air, by the empirical
@@ -44,10 +44,10 @@ func Fresnel(cosine, index float64) float64 {
 	return maths.Fresnel(cosine, index)
 }
 
-// Roughness is the variance of the sea's slope along the wind and across
+// roughness is the variance of the sea's slope along the wind and across
 // it, as [CM54] measured from photographs of sun glitter over a clean
 // surface. They measured the wind at 12.5 metres.
-func Roughness(wind float64) (along, across float64) {
+func roughness(wind float64) (along, across float64) {
 	wind = math.Max(wind, 0)
 	return alongSlope * wind, acrossOffset + acrossSlope*wind
 }
@@ -77,9 +77,9 @@ func Hidden(cosine, variance float64) float64 {
 	return (math.Exp(-v*v)/(v*math.Sqrt(math.Pi)) - math.Erfc(v)) / 2
 }
 
-// Whitecaps is the fraction of the sea covered by whitecaps at a wind
+// whitecaps is the fraction of the sea covered by whitecaps at a wind
 // speed ten metres up, by the robust fit of [MO80].
-func Whitecaps(wind float64) float64 {
+func whitecaps(wind float64) float64 {
 	if wind <= 0 {
 		return 0
 	}

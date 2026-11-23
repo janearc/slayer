@@ -9,10 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"syscall"
 	"time"
 
 	bolt "go.etcd.io/bbolt"
+	bolterrors "go.etcd.io/bbolt/errors"
 )
 
 const recordVersion = 3
@@ -290,9 +292,18 @@ func (st *Snapshot) job(seq uint64) (*Job, error) {
 	return &st.Jobs[seq-1], nil
 }
 
-// Cancel only accepts the original agent and retains running ownership.
+// Cancel only accepts the agent that submitted the job and retains running
+// ownership.
+// When the ledger says the job's supervisor is gone, nothing else would read
+// the request, so Cancel signals the render's group itself.
 func (s Store) Cancel(ctx context.Context, seq uint64, agent string) error {
-	return s.transact(ctx, false, func(st *Snapshot) error {
+	return s.cancel(ctx, seq, agent, nativeSignaller())
+}
+
+// cancel is Cancel with the means of signalling a group given.
+func (s Store) cancel(ctx context.Context, seq uint64, agent string, via groupSignaller) error {
+	var orphan Job
+	err := s.transact(ctx, false, func(st *Snapshot) error {
 		j, err := st.job(seq)
 		if err != nil {
 			return err
@@ -307,9 +318,16 @@ func (s Store) Cancel(ctx context.Context, seq uint64, agent string) error {
 		}
 		if j.State == Running {
 			j.CancelRequested = true
+			if strings.HasPrefix(j.Held, supervisorGonePrefix) {
+				orphan = *j
+			}
 		}
 		return nil
 	})
+	if err != nil || orphan.Sequence == 0 {
+		return err
+	}
+	return signalOrphan(orphan, via)
 }
 
 // Pause records a reason and leaves pending jobs queued.
@@ -395,7 +413,7 @@ func openDatabaseMode(ctx context.Context, path string, readOnly bool) (*bolt.DB
 			return nil, err
 		}
 		db, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 50 * time.Millisecond, ReadOnly: readOnly})
-		if !errors.Is(err, bolt.ErrTimeout) {
+		if !errors.Is(err, bolterrors.ErrTimeout) {
 			return db, err
 		}
 	}

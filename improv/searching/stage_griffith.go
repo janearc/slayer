@@ -132,7 +132,7 @@ func (s *heardStage) griffithArchitecture() error {
 			return err
 		}
 	}
-	temp := &Set{World: s.world, prototypes: map[string][]thing.Thing{}}
+	temp := &set{World: s.world, prototypes: map[string][]thing.Thing{}}
 	for i := range 230 {
 		a := float64(i) * 2.399963229728653
 		r := 75 + 6*math.Sqrt(float64(i))

@@ -24,7 +24,7 @@ type repeatsRun struct {
 }
 
 // newRepeatsRun is a delay at rest, its length the beats at this tempo.
-func newRepeatsRun(d *Repeats, beatSeconds float64) *repeatsRun {
+func newRepeatsRun(d *repeats, beatSeconds float64) *repeatsRun {
 	n := int(math.Round(d.beats.float() * beatSeconds * studioRate))
 	cutoff := repeatsDarkest *
 		math.Pow(repeatsBrightest/repeatsDarkest, d.Tone)
@@ -67,7 +67,7 @@ type repeatsBank struct {
 }
 
 // newRepeatsBank is the delay for a score, a line a tempo.
-func newRepeatsBank(d *Repeats, s *Score) *repeatsBank {
+func newRepeatsBank(d *repeats, s *Score) *repeatsBank {
 	bank := &repeatsBank{}
 	for _, span := range s.tempoSpans() {
 		bank.runs = append(bank.runs, newRepeatsRun(d, span.beatSeconds))

@@ -1,0 +1,6 @@
+name,mesh,at-x,at-y,at-z,dir-x,dir-y,dir-z,want
+from inside,one,.1,.2,.3,.48,.6,.64,1
+from outside going away,one,3,.2,.3,1,0,0,0
+through,one,-3,.2,.3,1,0,0,0
+from inside both,two,.1,.2,.3,.48,.6,.64,2
+from between,two,1.5,.2,.3,1,0,0,1

@@ -1,0 +1,132 @@
+# tower cyberpunk grime: two towers under the cyberpunk layer at the demo
+# level, at dusk: air conditioners with their fans' grilles, runs of duct
+# with flanges and an elbow down, cables sagging between hooks, boxes
+# bolted to the wall with a conduit down from each, over the quick
+# level's pipes, vents, boxes and gantries. The world's weathering runs
+# grime down the wall from under every one of them, rusts their steel and
+# runs the rust below, and the writers go for the wet walls. The towers
+# say nothing of the grime: it is the world's.
+#
+# places are metres, as a map's run: x east, y north, z up. the towers
+# stand side by side, their fronts at y of minus fifteen. every number is
+# a choice of this study, picked by eye. the first camera is the one
+# drawn; to draw the other, put it first.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower cyberpunk grime
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "at the foot of the curtain tower, looking up its wall"
+      wide: 80
+      location:
+        at: [8, -24, 1.7]
+      orientation:
+        look_at: [2, -15, 26]
+    across:
+      title: "forty metres across from the curtain tower, at its middle"
+      wide: 55
+      location:
+        at: [4, -55, 28]
+      orientation:
+        look_at: [4, -15, 26]
+  recipes:
+    curtain: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: curtain, cyber: true, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, cyber: true, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      curtain: {recipe: curtain, seed: 4, complexity: demo, east: 0, north: 0, height: {value: 0, unit: m}}
+      concrete: {recipe: concrete, seed: 7, complexity: demo, east: 40, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      street:
+        colour: {srgb_linear: [0.03, 0.03, 0.035]}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [4000, 4000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.5, -0.8, 0.25]
+        colour: {srgb_linear: [1.8, 0.9, 0.6]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.18]}
+      zenith: {srgb_linear: [0.02, 0.03, 0.12]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        grime:
+          kind: rain
+          on: [wet]
+          colour: {srgb_linear: [0.008, 0.008, 0.007]}
+          strength: 0.85
+          settle: 6
+          level: 0.2
+          length: 6
+          spacing: 0.35
+          share: 0.85
+        soot:
+          kind: soot
+          colour: {srgb_linear: [0.01, 0.009, 0.008]}
+          strength: 0.6
+          settle: 15
+          reach: 14
+          share: 0.4
+          grain: 1.2
+          shelter: 3
+          catch: 0.5
+        rust:
+          kind: rust
+          on: [steel]
+          colour: {srgb_linear: [0.14, 0.06, 0.03]}
+          strength: 0.4
+          settle: 10
+          level: 0.2
+          length: 3
+          spacing: 0.25
+          share: 0.3
+          grain: 0.3
+        graffiti:
+          kind: graffiti
+          seek: [shutter, wet]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.8, 0.1, 0.5]}
+          other: {srgb_linear: [0.1, 0.7, 0.6]}
+          line: {srgb_linear: [0.012, 0.012, 0.014]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.6
+          low: 0.3
+          high: 2.4
+          share: 0.4
+          heaven: 0.4
+          behind: 0.6
+          shelter: 8
+          sought: 1.5
+          shunned: 0.03
+          catch: 2

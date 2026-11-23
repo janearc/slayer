@@ -16,7 +16,7 @@ import (
 // rebuild the manufactory catalogue, and arrays share antenna prototypes.
 type Renderer struct {
 	Edit    *Edit
-	sets    map[string]*Set
+	sets    map[string]*set
 	drawers map[string]*gpu.Frames
 	flow    *flowSet
 	stars   *catalogueSet
@@ -27,7 +27,7 @@ type Renderer struct {
 
 // NewRenderer takes no GPU resources until an actual frame is requested.
 func NewRenderer(edit *Edit) *Renderer {
-	return &Renderer{Edit: edit, sets: map[string]*Set{}, drawers: map[string]*gpu.Frames{}}
+	return &Renderer{Edit: edit, sets: map[string]*set{}, drawers: map[string]*gpu.Frames{}}
 }
 
 // Close releases every retained drawer. A preview cannot leave native
@@ -37,7 +37,7 @@ func (renderer *Renderer) Close() {
 		drawer.Close()
 	}
 	renderer.drawers = map[string]*gpu.Frames{}
-	renderer.sets = map[string]*Set{}
+	renderer.sets = map[string]*set{}
 	renderer.flow, renderer.stars, renderer.named = nil, nil, nil
 	renderer.stage = nil
 	renderer.active = ""
@@ -100,7 +100,7 @@ func (renderer *Renderer) Expose(ctx context.Context, at float64,
 	set, ok := renderer.sets[state.Site]
 	if !ok {
 		var err error
-		set, err = NewSet(renderer.Edit.Plan, state.Site)
+		set, err = newSet(renderer.Edit.Plan, state.Site)
 		if err != nil {
 			return nil, state, err
 		}
@@ -120,7 +120,7 @@ func (renderer *Renderer) Expose(ctx context.Context, at float64,
 		renderer.drawers[state.Site] = drawer
 	}
 	plan := renderer.Edit.Plan
-	eye, wide, err := set.Update(plan, state)
+	eye, wide, err := set.update(plan, state)
 	if err != nil {
 		return nil, state, err
 	}

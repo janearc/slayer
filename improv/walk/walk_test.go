@@ -3,6 +3,7 @@ package walk
 import (
 	"errors"
 	"image"
+	"image/color"
 	"image/png"
 	"math"
 	"os"
@@ -116,7 +117,7 @@ func TestProjectMarkers(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, height := view.Size(); height != size.Y {
+		if _, height := view.size(); height != size.Y {
 			t.Fatalf("%s: the camera makes %d rows, the still has %d",
 				name, height, size.Y)
 		}
@@ -146,7 +147,7 @@ func TestProjectMarkersNearMiss(t *testing.T) {
 	}
 	moved := view.eye
 	moved.Origin = moved.Origin.Add(maths.V(0, 0, 5))
-	wrong, err := NewCamera(moved, view.glass, size.X)
+	wrong, err := newCamera(moved, view.glass, size.X)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,23 +188,23 @@ func TestProjectBehindAndOff(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	eye := view.Eye()
-	far, _ := places.Of("the far tree")
-	behind, _ := NewPlace(2*eye.East()-far.East(),
-		2*eye.North()-far.North(), eye.Height())
-	if seen := view.Project(behind); seen.Ahead() || seen.On() {
+	eye := placeOf(view.eye.Origin)
+	far, _ := places.of("the far tree")
+	behind, _ := NewPlace(2*eye.east-far.east,
+		2*eye.north-far.north, eye.height)
+	if seen := view.Project(behind); seen.Ahead() || seen.on {
 		t.Errorf("a place behind the eye is %+v", seen)
 	}
 	// north east, 65 degrees round from the line of sight: ahead, and
 	// off the side of a picture 45 degrees across
-	aside, _ := NewPlace(eye.East()+300, eye.North()+300, eye.Height())
-	if seen := view.Project(aside); !seen.Ahead() || seen.On() {
+	aside, _ := NewPlace(eye.east+300, eye.north+300, eye.height)
+	if seen := view.Project(aside); !seen.Ahead() || seen.on {
 		t.Errorf("a place well off the side is %+v", seen)
 	}
-	if seen := view.Project(far); !seen.Ahead() || !seen.On() {
+	if seen := view.Project(far); !seen.Ahead() || !seen.on {
 		t.Errorf("the far tree, which the camera points to, is %+v", seen)
 	}
-	if seen := view.Toward(270, 10); seen.Ahead() {
+	if seen := view.toward(270, 10); seen.Ahead() {
 		t.Errorf("a way behind the camera is ahead: %+v", seen)
 	}
 }
@@ -222,7 +223,7 @@ func TestCameraOfRefuses(t *testing.T) {
 	if _, err := CameraOf(read, "down", places, 0); err == nil {
 		t.Error("a picture of no width was made")
 	}
-	if _, err := NewCamera(maths.Subspace{}, Lens{}, 10); err == nil {
+	if _, err := newCamera(maths.Subspace{}, lens{}, 10); err == nil {
 		t.Error("a camera with no lens was made")
 	}
 }
@@ -233,13 +234,14 @@ func overhead(t *testing.T, height float64, width int) (Camera, Place) {
 	t.Helper()
 	ground, _ := NewPlace(1000, 2000, 50)
 	eye := ground.world().Add(maths.V(0, height, 0))
-	glass, err := NewLens(36, 36, 50, height)
+	glass, err := newLens(36, 36, 50, height)
 	if err != nil {
 		t.Fatal(err)
 	}
-	view, err := NewCamera(maths.Subspace{Origin: eye,
-		Orientation: maths.LookAtUp(eye, ground.world(),
-			maths.V(0, 0, -1))}, glass, width)
+	orientation := maths.LookAtUp(eye, ground.world(),
+		maths.V(0, 0, -1))
+	view, err := newCamera(maths.Subspace{Origin: eye,
+		Orientation: orientation}, glass, width)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -258,17 +260,17 @@ func TestScaleBar(t *testing.T) {
 	if err != nil || math.Abs(per-want) > 1e-9*want {
 		t.Fatalf("a metre is %v pixels (%v); want %v", per, err, want)
 	}
-	bar, err := view.ScaleBar(ground, 400)
+	scale, err := view.ScaleBar(ground, 400)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 400 pixels is 144 m at this height; the round length under it 100
-	if bar.Metres() != 100 || math.Abs(bar.Pixels()-100*want) > 1e-6 ||
-		bar.Words() != "100 m" {
-		t.Errorf("the bar is %v m, %v pixels, %q", bar.Metres(),
-			bar.Pixels(), bar.Words())
+	if scale.metres != 100 || math.Abs(scale.pixels-100*want) > 1e-6 ||
+		scale.Words() != "100 m" {
+		t.Errorf("the bar is %v m, %v pixels, %q", scale.metres,
+			scale.pixels, scale.Words())
 	}
-	seen := bar.At()
+	seen := scale.at
 	if math.Abs(seen.X()-(width-1)/2.0) > 1e-6 {
 		t.Errorf("the bar's place is at column %v, not the middle", seen.X())
 	}
@@ -281,7 +283,7 @@ func TestScaleBarRefuses(t *testing.T) {
 	if _, err := view.ScaleBar(ground, 0); err == nil {
 		t.Error("a bar of no pixels was made")
 	}
-	above, _ := NewPlace(ground.East(), ground.North(), 2000)
+	above, _ := NewPlace(ground.east, ground.north, 2000)
 	if _, err := view.PerMetre(above); err == nil {
 		t.Error("a bar behind the camera was measured")
 	}
@@ -304,10 +306,10 @@ func TestReadPlaces(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if at, found := read.Of("a b"); !found || at.Height() != 3 {
+	if at, found := read.of("a b"); !found || at.height != 3 {
 		t.Errorf("a b is %+v, %v", at, found)
 	}
-	if _, found := read.Of("c"); found {
+	if _, found := read.of("c"); found {
 		t.Error("a name not in the table was found")
 	}
 	for _, table := range []string{
@@ -318,16 +320,52 @@ func TestReadPlaces(t *testing.T) {
 		header + "a,cobble,1,2,NaN\n",
 		header + "a,cobble,1,2\n",
 	} {
-		if _, err := ReadPlaces([]byte(table)); !errors.Is(err, ErrWalk) {
+		if _, err := ReadPlaces([]byte(table)); !errors.Is(err, errWalk) {
 			t.Errorf("%q was read: %v", table, err)
 		}
 	}
-	one, _ := NewPlace(0, 0, 0)
-	other, _ := NewPlace(3, 4, 12)
-	if one.Apart(other) != 13 || one.Across(other) != 5 {
-		t.Errorf("apart %v, across %v", one.Apart(other), one.Across(other))
-	}
 }
+
+// contrast is the ratio of two colours' relative luminances, the
+// lighter's over the darker's, each with a twentieth added, as WCAG 2.1
+// defines it: 1 to 21.
+func contrast(one, other color.RGBA) float64 {
+	a, b := luminance(one)+contrastFlare, luminance(other)+contrastFlare
+	return math.Max(a, b) / math.Min(a, b)
+}
+
+// contrastFlare is the twentieth WCAG 2.1 adds to each luminance.
+// Defined by WCAG 2.1, contrast ratio.
+const contrastFlare = 0.05
+
+// luminance is an sRGB colour's relative luminance, WCAG 2.1's weights
+// of its linear channels.
+func luminance(colour color.RGBA) float64 {
+	return lumaRed*linear(colour.R) + lumaGreen*linear(colour.G) +
+		lumaBlue*linear(colour.B)
+}
+
+// The channels' weights in luminance. Defined by WCAG 2.1, from
+// ITU-R BT.709.
+const lumaRed, lumaGreen, lumaBlue = 0.2126, 0.7152, 0.0722
+
+// linear is an sRGB channel's linear light, as WCAG 2.1 gives it.
+func linear(channel uint8) float64 {
+	share := float64(channel) / math.MaxUint8
+	if share <= srgbKnee {
+		return share / srgbToe
+	}
+	return math.Pow((share+srgbOffset)/(1+srgbOffset), srgbPower)
+}
+
+// The sRGB curve's knee, toe slope, offset and power. Defined by
+// WCAG 2.1, relative luminance.
+const (
+	srgbKnee   = 0.04045
+	srgbToe    = 12.92
+	srgbOffset = 0.055
+	srgbPower  = 2.4
+)
 
 // TestContrast holds the frame's words to the house band, by
 // arithmetic, and its accent to a state chip's level.
@@ -336,12 +374,12 @@ func TestContrast(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ink := Contrast(tones["ink"], tones["ground"])
+	ink := contrast(tones["ink"], tones["ground"])
 	if ink < proseLeast || ink > proseMost {
 		t.Errorf("ink on ground is %.2f to 1; the band is %v to %v", ink,
 			proseLeast, proseMost)
 	}
-	if accent := Contrast(tones["ok"], tones["ground"]); accent < chipLeast {
+	if accent := contrast(tones["ok"], tones["ground"]); accent < chipLeast {
 		t.Errorf("the accent on ground is %.2f to 1; under %v", accent,
 			chipLeast)
 	}
@@ -349,10 +387,10 @@ func TestContrast(t *testing.T) {
 	white.R, white.G, white.B = 255, 255, 255
 	black := white
 	black.R, black.G, black.B = 0, 0, 0
-	if got := Contrast(black, white); math.Abs(got-21) > 1e-9 {
+	if got := contrast(black, white); math.Abs(got-21) > 1e-9 {
 		t.Errorf("black on white is %v, not 21", got)
 	}
-	if got := Contrast(white, white); got != 1 {
+	if got := contrast(white, white); got != 1 {
 		t.Errorf("white on white is %v, not 1", got)
 	}
 	if _, err := paletteOf(hud.Theme{}); err == nil {

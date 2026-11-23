@@ -16,9 +16,9 @@ type swirled struct {
 	tintBy   float64
 }
 
-func swirlOf(s Spot, lat, lon float64, tint maths.Light, tintBy float64) swirled {
-	a, b, c, d := s.swirl(lat, lon, tint, tintBy)
-	return swirled{a, b, c, d}
+func swirlOf(spot Spot, lat, lon float64, tint maths.Light, tintBy float64) swirled {
+	a, b, light, d := spot.swirl(lat, lon, tint, tintBy)
+	return swirled{a, b, light, d}
 }
 
 // check says what is wrong with a swirl, if anything.

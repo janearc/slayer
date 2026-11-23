@@ -6,8 +6,8 @@ import (
 
 	"github.com/gogpu/ui/event"
 	"github.com/gogpu/ui/geometry"
-	"github.com/janearc/slayer/hillside/placement"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 )
 

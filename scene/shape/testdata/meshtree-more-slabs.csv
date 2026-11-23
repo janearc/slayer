@@ -1,0 +1,12 @@
+name,at-x,at-y,at-z,way-x,way-y,way-z,near,far,enter,enters
+along x,-1,.5,.5,1,0,0,0,inf,1,true
+back along x,2,.5,.5,-1,0,0,0,inf,1,true
+a way of 2 halves the distance,-1,.5,.5,2,0,0,0,inf,.5,true
+a near past the entry,-1,.5,.5,1,0,0,1.5,inf,1.5,true
+a near past the leaving,-1,.5,.5,1,0,0,2.5,inf,2.5,false
+a far short of the entry,-1,.5,.5,1,0,0,0,.5,1,false
+started past the box,3,.5,.5,1,0,0,0,inf,0,false
+started on its far side,1,.5,.5,1,0,0,0,inf,0,true
+across the corner of its slabs,-1,4,.5,1,-1,0,0,inf,3,false
+touching the corner,0,2,.5,1,-1,0,0,inf,1,true
+slantwise through,-1,1.5,.5,1,-1,0,0,inf,1,true

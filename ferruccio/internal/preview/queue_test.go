@@ -301,6 +301,13 @@ func TestQueueUnconfirmedCancelAndForeignStatusRetainInput(t *testing.T) {
 					return nil, nil
 				}).After(observed)
 				expectStatus(t, runner, tools, func() ([]byte, error) { return nil, errors.New("status unavailable") }).After(cancelling)
+			} else {
+				// A foreign job never matches; observation is given up with the job cancelled first.
+				expectGiveUp(t, runner, tools, func() ([]byte, error) {
+					own := request
+					own.Agent = "other"
+					return jobSnapshot(t, own, "succeeded", "", false), nil
+				}, observed)
 			}
 			err := (queueClient{runner: runner}).run(ctx, tools, plan, io.Discard, func(update Update) {
 				if update.Held == "hold" {
@@ -388,7 +395,7 @@ func TestQueueMalformedTerminalDoesNotProveCleanupOrSuccess(t *testing.T) {
 			runner := NewMockRunner(gomock.NewController(t))
 			var request queueRequest
 			submit := expectSubmit(t, runner, tools, plan, &request, nil)
-			expectStatus(t, runner, tools, func() ([]byte, error) {
+			reply := func() ([]byte, error) {
 				queuePNG(t, plan, 16, 12)
 				raw := queueJSON(t, queueJob{Sequence: 41, Request: request, State: "succeeded", Result: queueResult{State: "succeeded"}})
 				var job map[string]any
@@ -404,7 +411,9 @@ func TestQueueMalformedTerminalDoesNotProveCleanupOrSuccess(t *testing.T) {
 					job["request"].(map[string]any)["memory_bytes"] = 1
 				}
 				return queueJSON(t, map[string]any{"version": 1, "jobs": []any{job}}), nil
-			}).After(submit)
+			}
+			observed := expectStatus(t, runner, tools, reply).After(submit)
+			expectGiveUp(t, runner, tools, reply, observed)
 			if err := (queueClient{runner: runner}).run(context.Background(), tools, plan, io.Discard, nil); err == nil {
 				t.Fatal("malformed terminal accepted")
 			}
@@ -587,12 +596,20 @@ func TestQueueUncertainProcessResultRetainsFrozenInput(t *testing.T) {
 	runner := NewMockRunner(gomock.NewController(t))
 	var request queueRequest
 	submit := expectSubmit(t, runner, tools, plan, &request, nil)
-	expectStatus(t, runner, tools, func() ([]byte, error) {
+	uncertain := func() ([]byte, error) {
 		job := queueJob{Sequence: 41, Request: request, State: "failed", Result: queueResult{State: "failed", ExitCode: 1, Uncertain: true}}
 		return queueJSON(t, map[string]any{"version": 1, "jobs": []queueJob{job}}), nil
-	}).After(submit)
-	if err := (queueClient{runner: runner}).run(context.Background(), tools, plan, io.Discard, nil); err == nil {
+	}
+	observed := expectStatus(t, runner, tools, uncertain).After(submit)
+	// An uncertain result is no confirmed end. Observation is given up with
+	// the job cancelled first, and the result read after is uncertain still.
+	expectGiveUp(t, runner, tools, uncertain, observed)
+	err := (queueClient{runner: runner}).run(context.Background(), tools, plan, io.Discard, nil)
+	if err == nil {
 		t.Fatal("uncertain process result accepted")
+	}
+	if !strings.Contains(err.Error(), "frozen input retained") {
+		t.Fatalf("the refusal does not say the input is kept: %v", err)
 	}
 	if err := plan.Close(); err != nil {
 		t.Fatal(err)

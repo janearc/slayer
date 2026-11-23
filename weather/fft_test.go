@@ -12,12 +12,15 @@ func TestFFTIsTheDiscreteTransform(t *testing.T) {
 	const n = 16
 	row := make([]complex128, n)
 	for i := range row {
-		row[i] = complex(math.Sin(float64(3*i)+0.5), math.Cos(float64(i*i)))
+		sine := math.Sin(float64(3*i) + 0.5)
+		cosine := math.Cos(float64(i * i))
+		row[i] = complex(sine, cosine)
 	}
 	want := make([]complex128, n)
 	for k := range want {
 		for i, x := range row {
-			want[k] += x * cmplx.Exp(complex(0, -2*math.Pi*float64(k*i)/n))
+			angle := -2 * math.Pi * float64(k*i) / n
+			want[k] += x * cmplx.Exp(complex(0, angle))
 		}
 	}
 	got := append([]complex128(nil), row...)

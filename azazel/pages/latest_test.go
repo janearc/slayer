@@ -34,7 +34,8 @@ func publishFixtureGallery(t *testing.T) string {
 func TestGalleryMatchesTheScripts(t *testing.T) {
 	root := publishFixtureGallery(t)
 	for name, script := range galleryNames {
-		got := withoutMade(read(t, filepath.Join(root, name)))
+		galleryPage := read(t, filepath.Join(root, name))
+		got := withoutMade(galleryPage)
 		if want := withoutMade(expected(t, script)); got != want {
 			t.Errorf("%s differs from %s:\n%s", name, script, got)
 		}
@@ -69,7 +70,8 @@ func TestGalleryComparisonSeesOneSecond(t *testing.T) {
 		publishGallery(); err != nil {
 		t.Fatal(err)
 	}
-	got := withoutMade(read(t, filepath.Join(root, latestName)))
+	latestPage := read(t, filepath.Join(root, latestName))
+	got := withoutMade(latestPage)
 	if got == withoutMade(expected(t, "latest.html")) {
 		t.Fatal("a changed tree still matched the script's page")
 	}

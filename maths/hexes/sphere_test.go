@@ -18,18 +18,18 @@ func random(k int64) maths.Vec {
 // ID: exactly twelve pentagons and the rest hexagons. That count is the
 // Goldberg polyhedron's, and a tiling off by one tile has a seam somewhere.
 func TestTwelvePentagonsAndTheRestHexagons(t *testing.T) {
-	for _, n := range []int{1, 2, 5, 16} {
-		tl := Sphere{Splits: n}
+	for _, number := range []int{1, 2, 5, 16} {
+		tl := Sphere{Splits: number}
 		tiles := tl.Tiles()
-		if len(tiles) != tl.Count() || tl.Count() != 10*n*n+2 {
-			t.Fatalf("n=%d: %d tiles, want %d", n, len(tiles),
-				10*n*n+2)
+		if len(tiles) != tl.count() || tl.count() != 10*number*number+2 {
+			t.Fatalf("n=%d: %d tiles, want %d", number, len(tiles),
+				10*number*number+2)
 		}
 		five, six := 0, 0
 		ids := map[int64]bool{}
 		for _, tile := range tiles {
 			if ids[tl.ID(tile)] {
-				t.Fatalf("n=%d: two tiles share id %d", n,
+				t.Fatalf("n=%d: two tiles share id %d", number,
 					tl.ID(tile))
 			}
 			ids[tl.ID(tile)] = true
@@ -39,12 +39,13 @@ func TestTwelvePentagonsAndTheRestHexagons(t *testing.T) {
 			case 6:
 				six++
 			default:
-				t.Fatalf("n=%d: tile %v has %d neighbours", n,
-					tile, len(tl.Neighbours(tile)))
+				count := len(tl.Neighbours(tile))
+				t.Fatalf("n=%d: tile %v has %d neighbours", number,
+					tile, count)
 			}
 		}
 		if five != 12 {
-			t.Fatalf("n=%d: %d pentagons", n, five)
+			t.Fatalf("n=%d: %d pentagons", number, five)
 		}
 	}
 }
@@ -100,15 +101,15 @@ func TestEdgeIsNoughtBetweenNeighbours(t *testing.T) {
 	tiles := tl.Tiles()
 	for i := 0; i < len(tiles); i += 37 {
 		tile := tiles[i]
-		c := tl.Centre(tile)
-		n := tl.Centre(tl.Neighbours(tile)[0])
-		mid := c.Add(n).Unit()
+		centre := tl.Centre(tile)
+		normal := tl.Centre(tl.Neighbours(tile)[0])
+		mid := centre.Add(normal).Unit()
 		if e := tl.Edge(mid, tile); !(math.Abs(e) <= 1e-9) {
 			t.Fatalf("tile %v: midpoint is %v from the edge", tile,
 				e)
 		}
-		nearer := c.Scale(3).Add(n).Unit()
-		if tl.Edge(c, tile) <= tl.Edge(nearer, tile) {
+		nearer := centre.Scale(3).Add(normal).Unit()
+		if tl.Edge(centre, tile) <= tl.Edge(nearer, tile) {
 			t.Fatalf("tile %v: the middle is no further from the "+
 				"edge", tile)
 		}
@@ -121,10 +122,10 @@ func TestEveryMiddleIsAMiddleOneRungFiner(t *testing.T) {
 	tl := Sphere{Splits: 5}
 	fine := tl.Finer().(Sphere)
 	for _, tile := range tl.Tiles() {
-		c := tl.Centre(tile)
-		if got := fine.Centre(fine.Nearest(c)); !got.Near(c, 1e-12) {
+		centre := tl.Centre(tile)
+		if got := fine.Centre(fine.Nearest(centre)); !got.Near(centre, 1e-12) {
 			t.Fatalf("tile %v's middle %v is %v on the finer rung",
-				tile, c, got)
+				tile, centre, got)
 		}
 	}
 }
@@ -132,8 +133,8 @@ func TestEveryMiddleIsAMiddleOneRungFiner(t *testing.T) {
 // Spacing is the icosahedron's edge over n, and SphereFor undoes it; the
 // zero Tiling is the icosahedron.
 func TestSpacing(t *testing.T) {
-	if (Sphere{}).Count() != 12 {
-		t.Fatalf("the zero tiling has %d tiles", (Sphere{}).Count())
+	if (Sphere{}).count() != 12 {
+		t.Fatalf("the zero tiling has %d tiles", (Sphere{}).count())
 	}
 	if got := (Sphere{Splits: 10}).Spacing(); !(math.Abs(got-math.Atan(2)/10) <= 1e-12) {
 		t.Fatalf("spacing at 10 is %v", got)
@@ -155,23 +156,23 @@ func TestAManholeOnAState(t *testing.T) {
 		t.Fatalf("the manhole rung is %d splits", tl.Splits)
 	}
 	for k := range int64(200) {
-		p := random(k)
-		tile := tl.Nearest(p)
-		c := tl.Centre(tile)
-		if off := p.Sub(c).Len(); off > tl.Spacing() {
+		point := random(k)
+		tile := tl.Nearest(point)
+		centre := tl.Centre(tile)
+		if off := point.Sub(centre).Len(); off > tl.Spacing() {
 			t.Fatalf("point %d: middle %v away, spacing %v", k, off,
 				tl.Spacing())
 		}
-		if e := tl.Edge(p, tile); e < -1e-12 {
+		if e := tl.Edge(point, tile); e < -1e-12 {
 			t.Fatalf("point %d: %v outside its own tile", k, e)
 		}
-		if tl.Nearest(p) != tile {
+		if tl.Nearest(point) != tile {
 			t.Fatalf("point %d: a different tile the second time", k)
 		}
 		for _, nb := range tl.Neighbours(tile) {
-			d := c.Sub(tl.Centre(nb)).Len()
-			if d > 1.3*tl.Spacing() || d < 0.7*tl.Spacing() {
-				t.Fatalf("point %d: a neighbour %v away", k, d)
+			distance := centre.Sub(tl.Centre(nb)).Len()
+			if distance > 1.3*tl.Spacing() || distance < 0.7*tl.Spacing() {
+				t.Fatalf("point %d: a neighbour %v away", k, distance)
 			}
 		}
 	}
@@ -180,22 +181,24 @@ func TestAManholeOnAState(t *testing.T) {
 func BenchmarkNearestCoarse(b *testing.B) {
 	tl := Sphere{Splits: 12}
 	for i := range b.N {
-		tl.Nearest(random(int64(i % 1000)))
+		seed := int64(i % 1000)
+		tl.Nearest(random(seed))
 	}
 }
 
 func BenchmarkNearestFine(b *testing.B) {
 	tl := Sphere{Splits: 1 << 23}
 	for i := range b.N {
-		tl.Nearest(random(int64(i % 1000)))
+		seed := int64(i % 1000)
+		tl.Nearest(random(seed))
 	}
 }
 
 func BenchmarkEdgeCoarse(b *testing.B) {
 	tl := Sphere{Splits: 12}
-	p := random(7)
-	tile := tl.Nearest(p)
+	point := random(7)
+	tile := tl.Nearest(point)
 	for range b.N {
-		tl.Edge(p, tile)
+		tl.Edge(point, tile)
 	}
 }

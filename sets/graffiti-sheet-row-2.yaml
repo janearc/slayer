@@ -1,0 +1,163 @@
+# graffiti sheet, row two: the six walls of throw-ups from
+# graffiti-sheet.yaml, the same walls, writers, colourways and light,
+# seen closer in a picture of their own (draw it at 4800 by 800).
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: graffiti sheet row two
+  setting: space
+  light: none
+  film:
+    width: 4800
+    height: 800
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    row:
+      title: "row two, six walls of throw-ups, square-on from seventy metres"
+      wide: 40
+      location:
+        at: [0, -71.4, 19.4]
+      orientation:
+        look_at: [0, 0, 19.4]
+  set:
+    things:
+      scale:
+        kind: human-scale-2m
+        seed: 5
+        complexity: demo
+        east: -9
+        north: -1.5
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      backdrop: {colour: {srgb_linear: [0.02, 0.02, 0.025]}, source: eye}
+      sheet-wall-07-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-08-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+      sheet-wall-09-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-10-shutter: {colour: {srgb_linear: [0.09, 0.10, 0.11]}, source: eye}
+      sheet-wall-11-grey: {colour: {srgb_linear: [0.2, 0.2, 0.2]}, source: eye}
+      sheet-wall-12-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+    boxes:
+      backdrop: {material: backdrop, middle: [0, 0.6, 15], size: [200, 0.6, 60], source: eye}
+      wall-07: {material: sheet-wall-07-brick, middle: [-17.25, 0, 19.4318], size: [4.5, 0.3, 2.0455], source: eye}
+      wall-08: {material: sheet-wall-08-wet, middle: [-10.8, 0, 19.2273], size: [3.6, 0.3, 2.4545], source: eye}
+      wall-09: {material: sheet-wall-09-concrete, middle: [-4.4, 0, 19.0], size: [4.4, 0.3, 2.0], source: eye}
+      wall-10: {material: sheet-wall-10-shutter, middle: [2.5, 0, 19.3182], size: [5.0, 0.3, 2.2727], source: eye}
+      wall-11: {material: sheet-wall-11-grey, middle: [10.5, 0, 19.0909], size: [3.0, 0.3, 2.7273], source: eye}
+      wall-12: {material: sheet-wall-12-brick, middle: [19.25, 0, 19.0909], size: [3.5, 0.3, 3.1818], source: eye}
+    suns:
+      even:
+        toward: [0.15, -1, 0.25]
+        colour: {srgb_linear: [3.0, 3.0, 3.0]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.5, 0.5, 0.5]}
+      zenith: {srgb_linear: [0.5, 0.5, 0.5]}
+      ground: {srgb_linear: [0.5, 0.5, 0.5]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        # 07 orange and blue, cream outline
+        w07-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-07]
+          colour: {srgb_linear: [0.9, 0.35, 0.03]}
+          other: {srgb_linear: [0.05, 0.25, 0.85]}
+          line: {srgb_linear: [0.95, 0.95, 0.9]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.5
+          low: 18.4
+          high: 20.46
+          share: 0.6
+        # 08 gold and crimson, black outline
+        w08-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-08]
+          colour: {srgb_linear: [0.9, 0.65, 0.1]}
+          other: {srgb_linear: [0.7, 0.03, 0.1]}
+          line: {srgb_linear: [0.03, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.8
+          low: 17.99
+          high: 20.46
+          share: 0.7
+        # 09 purple and pink, white outline
+        w09-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-09]
+          colour: {srgb_linear: [0.4, 0.05, 0.7]}
+          other: {srgb_linear: [0.9, 0.3, 0.6]}
+          line: {srgb_linear: [0.9, 0.9, 0.95]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 2.2
+          low: 17.99
+          high: 20.01
+          share: 0.75
+        # 10 silver and sky blue, black outline
+        w10-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-10]
+          colour: {srgb_linear: [0.6, 0.62, 0.65]}
+          other: {srgb_linear: [0.1, 0.5, 0.9]}
+          line: {srgb_linear: [0.02, 0.03, 0.05]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 2.5
+          low: 18.17
+          high: 20.46
+          share: 0.75
+        # 11 bubblegum and aqua, dark outline
+        w11-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-11]
+          colour: {srgb_linear: [0.9, 0.3, 0.55]}
+          other: {srgb_linear: [0.1, 0.8, 0.7]}
+          line: {srgb_linear: [0.05, 0.05, 0.08]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3.0
+          low: 17.72
+          high: 20.46
+          share: 1
+        # 12 forest and cream, black outline
+        w12-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-12]
+          colour: {srgb_linear: [0.03, 0.4, 0.1]}
+          other: {srgb_linear: [0.85, 0.8, 0.5]}
+          line: {srgb_linear: [0.02, 0.03, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3.5
+          low: 17.49
+          high: 20.69
+          share: 1

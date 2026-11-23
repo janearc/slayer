@@ -1,0 +1,7 @@
+name,blades,origin_x,origin_y,origin_z,axis_x,axis_y,axis_z,tip_radius,rpm,slipstream,length,core_radius,density,deficit,recovery,onset,fragment_scale,fragment_contrast,fragment_seed
+standard,5,10,-20,30,0,0,4,2.1,300,20,40,0.2,0.8,12000,600,on,0,0,0
+recovery,5,0,0,0,0,0,1,2,300,20,40,0.2,1,6000,600,on,0,0,0
+silent,5,0,0,0,0,0,1,2,300,20,20,0.2,1,1000,100,off,0,0,0
+two-blade,2,0,0,0,0,0,1,2,300,20,40,.2,1,12000,600,on,0,0,0
+fragments,5,0,0,0,0,0,1,2,300,20,40,.2,1,12000,600,on,.5,1,705
+bounded,5,0,0,0,0,0,1,2,300,20,20,0.2,1,1000,100,on,0,0,0

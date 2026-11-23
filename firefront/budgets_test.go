@@ -26,7 +26,8 @@ func TestGroupWindowsBudgetGapsAndHalfOpenTargetWindows(t *testing.T) {
 	// Group windows are [0,6) and [2,8), including their dark gaps.
 	// Targets occupy [0,2), [2,4), [4,6), [6,8), with no overlap.
 	if len(plan.Groups()) != 2 || plan.PeakGroups() != 2 {
-		t.Fatalf("group budget: %d in %d groups", plan.PeakGroups(), len(plan.Groups()))
+		groups := len(plan.Groups())
+		t.Fatalf("group budget: %d in %d groups", plan.PeakGroups(), groups)
 	}
 	for _, test := range []struct {
 		tail time.Duration
@@ -44,7 +45,8 @@ func TestGroupWindowsBudgetGapsAndHalfOpenTargetWindows(t *testing.T) {
 		if second == 8 {
 			want = 0
 		}
-		if got := len(plan.Active(time.Duration(second) * time.Second)); got != want {
+		moment := time.Duration(second) * time.Second
+		if got := len(plan.Active(moment)); got != want {
 			t.Fatalf("at %ds: %d active, want %d", second, got, want)
 		}
 	}

@@ -112,20 +112,29 @@ func TestALightIsTheSameAtEveryPowerOfTwoOfAWay(t *testing.T) {
 		for _, w := range ways {
 			var base, far maths.Light
 			ends(t, name, func() { base = sky.Light(w) })
-			ends(t, name, func() { far = sky.Light(w.Scale(math.Ldexp(1, beyond[0]))) })
+			ends(t, name, func() {
+				scaled := w.Scale(math.Ldexp(1, beyond[0]))
+				far = sky.Light(scaled)
+			})
 			if !near(base, far, 1e-6) {
 				t.Errorf("%s toward %v: %v, and out of range %v", name, w, base, far)
 			}
 			for _, k := range measured {
 				var got maths.Light
-				ends(t, name, func() { got = sky.Light(w.Scale(math.Ldexp(1, k))) })
+				ends(t, name, func() {
+					scaled := w.Scale(math.Ldexp(1, k))
+					got = sky.Light(scaled)
+				})
 				if got != base {
 					t.Errorf("%s toward %v times 2^%d: %v, want %v", name, w, k, got, base)
 				}
 			}
 			for _, k := range beyond {
 				var got maths.Light
-				ends(t, name, func() { got = sky.Light(w.Scale(math.Ldexp(1, k))) })
+				ends(t, name, func() {
+					scaled := w.Scale(math.Ldexp(1, k))
+					got = sky.Light(scaled)
+				})
 				if got != far {
 					t.Errorf("%s toward %v times 2^%d: %v, want %v", name, w, k, got, far)
 				}

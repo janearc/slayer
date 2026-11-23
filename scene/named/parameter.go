@@ -1,7 +1,6 @@
 package named
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -28,15 +27,15 @@ const (
 )
 
 // the refusals a scene makes of the values it is given
-var (
+const (
 	// ErrNoParameter is a key the scene has no parameter for.
-	ErrNoParameter = errors.New("named: no such parameter")
+	ErrNoParameter refusal = "named: no such parameter"
 	// ErrKind is a value of the wrong kind for its parameter.
-	ErrKind = errors.New("named: a value of the wrong kind")
+	ErrKind refusal = "named: a value of the wrong kind"
 	// ErrBounds is a number outside its parameter's bounds.
-	ErrBounds = errors.New("named: a value out of bounds")
+	ErrBounds refusal = "named: a value out of bounds"
 	// ErrChoice is a name not among its parameter's choices.
-	ErrChoice = errors.New("named: not one of the choices")
+	ErrChoice refusal = "named: not one of the choices"
 )
 
 // Parameter is one thing a scene takes: its name, kind, default, bounds

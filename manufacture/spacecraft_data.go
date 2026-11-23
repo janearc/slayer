@@ -24,3 +24,8 @@ func spacecraftValue(name string) float64 {
 	noted(value)
 	return value.Value
 }
+
+// primaValue reads the authored dimensions of the PRIMA visual concept.
+func primaValue(name string) float64 {
+	return spacecraftValue("prima-" + name)
+}

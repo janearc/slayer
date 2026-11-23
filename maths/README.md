@@ -5,11 +5,6 @@ points, directions, rays, bounding boxes, orientations, subspaces, RGB
 light, and smooth interpolation. The package reads no files and keeps no
 internal state. Coordinates are right-handed, with y up and negative z forward.
 
-The baseline is Slayer's `maths` at `3b6549b` on `slay-onto-planet`, derived
-from Lamb's `maths` at `ad2fff9` after a line-by-line review. The initial
-copy preserved those files byte for byte; subsequent commits describe
-their changes.
-
 `maths/hexes` and `maths/noise` are separate packages. This package imports
 neither.
 

@@ -15,15 +15,15 @@ import (
 func TestAFineTileVariesByItsOwnHash(t *testing.T) {
 	const seed = 5
 	c := chained(6)
-	w := on(c, seed)
-	w.biome = []Biome{Grass, Grass, Grass, Grass, Grass, Grass}
+	world := on(c, seed)
+	world.biome = []Biome{Grass, Grass, Grass, Grass, Grass, Grass}
 	look := paints()
 	base := look.Paints[Grass]
 	for _, vary := range []float64{0, 0.4} {
-		tx := w.Fine(look, 0, vary, 0)
+		tx := world.Fine(look, 0, vary, 0)
 		for i := range c.at {
-			h := noise.Hash(seed+91, int64(i)) - 0.5
-			want := base.Scale(1 + vary*h)
+			hash := noise.Hash(seed+91, int64(i)) - 0.5
+			want := base.Scale(1 + vary*hash)
 			got := tx.At(c.at[i])
 			if !close12(got.R, want.R) || !close12(got.G, want.G) ||
 				!close12(got.B, want.B) {
@@ -41,16 +41,16 @@ func TestAFineTileVariesByItsOwnHash(t *testing.T) {
 // at zero, which zero is not over), and is forest, grass's kin, at 2 (a line at
 // -0.45).
 func TestAMixTakesTheKinOnlyOverItsLine(t *testing.T) {
-	w := on(chained(1), 5)
-	w.biome = []Biome{Grass}
+	world := on(chained(1), 5)
+	world.biome = []Biome{Grass}
 	look := paints()
-	for _, c := range []struct {
+	for _, each := range []struct {
 		mix  float64
 		want Biome
 	}{{0, Grass}, {0.5, Grass}, {1.1, Grass}, {2, Forest}} {
-		got := w.Fine(look, 0, 0, c.mix).At(maths.Vec{})
-		if got != look.Paints[c.want] {
-			t.Errorf("a mix of %v is %v, want the paint of %d", c.mix, got, c.want)
+		got := world.Fine(look, 0, 0, each.mix).At(maths.Vec{})
+		if got != look.Paints[each.want] {
+			t.Errorf("a mix of %v is %v, want the paint of %d", each.mix, got, each.want)
 		}
 	}
 }

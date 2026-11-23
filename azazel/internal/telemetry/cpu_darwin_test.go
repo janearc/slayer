@@ -13,22 +13,26 @@ func TestCPUUtilizationUsesTwoSamplesAndReportsUnknown(t *testing.T) {
 	read := func(ticks [4]uint32) func() ([4]uint32, error) {
 		return func() ([4]uint32, error) { return ticks, nil }
 	}
-	first := values(meter.sample(now, read([4]uint32{10, 20, 30, 40})))
+	firstSample := meter.sample(now, read([4]uint32{10, 20, 30, 40}))
+	first := values(firstSample)
 	if first["azazel_host_cpu_busy_known"] != 0 {
 		t.Fatal(first)
 	}
-	second := values(meter.sample(now.Add(5*time.Second), read([4]uint32{20, 30, 50, 40})))
+	secondSample := meter.sample(now.Add(5*time.Second), read([4]uint32{20, 30, 50, 40}))
+	second := values(secondSample)
 	if second["azazel_host_cpu_busy_known"] != 1 || math.Abs(second["azazel_host_cpu_busy_percent"]-50) > 0.001 || second["azazel_host_cpu_sample_window_seconds"] != 5 {
 		t.Fatal(second)
 	}
-	failed := values(meter.sample(now.Add(6*time.Second), func() ([4]uint32, error) { return [4]uint32{}, errors.New("unavailable") }))
+	failedSample := meter.sample(now.Add(6*time.Second), func() ([4]uint32, error) { return [4]uint32{}, errors.New("unavailable") })
+	failed := values(failedSample)
 	if failed["azazel_host_cpu_busy_known"] != 0 {
 		t.Fatal(failed)
 	}
 	if _, ok := failed["azazel_host_cpu_busy_percent"]; ok {
 		t.Fatal("invented CPU usage", failed)
 	}
-	unchanged := values(meter.sample(now.Add(7*time.Second), read([4]uint32{20, 30, 50, 40})))
+	unchangedSample := meter.sample(now.Add(7*time.Second), read([4]uint32{20, 30, 50, 40}))
+	unchanged := values(unchangedSample)
 	if unchanged["azazel_host_cpu_busy_known"] != 0 {
 		t.Fatal(unchanged)
 	}
@@ -49,11 +53,13 @@ func TestCPUReversedSampleTimeKeepsTheNewerBaseline(t *testing.T) {
 	}
 	meter.sample(now, read([4]uint32{10, 10, 10, 10}))
 	meter.sample(now.Add(10*time.Second), read([4]uint32{20, 20, 30, 10}))
-	got := values(meter.sample(now.Add(5*time.Second), read([4]uint32{25, 25, 35, 10})))
+	reversedSample := meter.sample(now.Add(5*time.Second), read([4]uint32{25, 25, 35, 10}))
+	got := values(reversedSample)
 	if got["azazel_host_cpu_busy_known"] != 0 {
 		t.Fatal(got)
 	}
-	got = values(meter.sample(now.Add(20*time.Second), read([4]uint32{30, 30, 50, 10})))
+	newerSample := meter.sample(now.Add(20*time.Second), read([4]uint32{30, 30, 50, 10}))
+	got = values(newerSample)
 	if got["azazel_host_cpu_sample_window_seconds"] != 10 || got["azazel_host_cpu_busy_percent"] != 50 {
 		t.Fatal(got)
 	}
@@ -67,12 +73,14 @@ func TestCPUShortIntervalsAccumulateBeforeReporting(t *testing.T) {
 	}
 	meter.sample(now, read([4]uint32{10, 10, 10, 10}))
 	for _, offset := range []time.Duration{100 * time.Millisecond, 500 * time.Millisecond} {
-		got := values(meter.sample(now.Add(offset), read([4]uint32{11, 10, 11, 10})))
+		sampled := meter.sample(now.Add(offset), read([4]uint32{11, 10, 11, 10}))
+		got := values(sampled)
 		if got["azazel_host_cpu_busy_known"] != 0 {
 			t.Fatal(got)
 		}
 	}
-	got := values(meter.sample(now.Add(2*time.Second), read([4]uint32{20, 20, 30, 10})))
+	windowSample := meter.sample(now.Add(2*time.Second), read([4]uint32{20, 20, 30, 10}))
+	got := values(windowSample)
 	if got["azazel_host_cpu_sample_window_seconds"] != 2 || got["azazel_host_cpu_busy_percent"] != 50 {
 		t.Fatal(got)
 	}

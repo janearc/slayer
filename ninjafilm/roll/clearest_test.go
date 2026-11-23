@@ -18,8 +18,8 @@ func TestARollsClearestIsItsLays(t *testing.T) {
 		clearest := lamps(t, "clearest", whole)
 		laid := mocks.NewMockLay(ctrl)
 		laid.EXPECT().Clearest(records).Return(clearest).Times(once)
-		made := loaded(t, ctrl, roll.NewStock(super35(t), laid, records),
-			grainySeed)
+		stock := roll.NewStock(super35(t), laid, records)
+		made := loaded(t, ctrl, stock, grainySeed)
 		if got := made.Clearest(); got != clearest {
 			t.Fatalf("the lay passes %v, the roll says %v", clearest, got)
 		}

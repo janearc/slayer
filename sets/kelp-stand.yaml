@@ -1,0 +1,54 @@
+# a stand of kelp: the kind kelp-forest-slack, one hundred and forty-four
+# plants by seed on a jittered grid, stood in air on a pale floor and seen
+# from a distance by the worked sun and sky, with no water in the picture,
+# so the stand itself is seen. places are metres, x east, y north, z up; the
+# floor is at z=0 and the surface would be twelve metres up. the air is the
+# groundless Earth air of sets/alfa-san-onofre.yaml; the sun is picked for
+# looking.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: kelp stand
+  seed: 1
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 220, altitude: 50}
+  film:
+    width: 640
+    height: 360
+    rays: 1
+    exposure: 1102
+    wide: 60
+  world:
+    unit: 1
+    materials:
+      pale-floor:
+        colour: {srgb_linear: [0.55, 0.5, 0.4]}
+        source: eye
+    boxes:
+      floor:
+        material: pale-floor
+        middle: [0, 0, -0.05]
+        size: [400, 400, 0.1]
+        source: eye
+  set:
+    things:
+      forest:
+        kind: kelp-forest-moderate
+        seed: 1
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  cameras:
+    side:
+      title: "from the side, level with the stand's middle"
+      location: {at: [0, -70, 6]}
+      orientation: {look_at: [0, 0, 6]}
+    inside:
+      title: "inside the stand, looking along a row"
+      location: {at: [-14, -14, 2]}
+      orientation: {look_at: [14, 14, 5]}

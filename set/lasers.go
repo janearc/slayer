@@ -97,7 +97,8 @@ func (laser Laser) Spectrum() (float64, float64) {
 }
 
 // lasers reads finite outgoing beams. Display strength deliberately does not
-// claim watts or a measured sodium return. The beam model is in guide-stars.md.
+// claim watts or a measured sodium return. The beam model is in
+// doc/model/observatory/guide-stars.md.
 func (reading reader) lasers(_, node *yaml.Node) error {
 	return reading.each(node, reading.laser)
 }

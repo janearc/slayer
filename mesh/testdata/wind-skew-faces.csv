@@ -1,0 +1,5 @@
+name,first,second,third
+the face with no part along x,0,2,1
+the face with no part along z,0,1,3
+the face with no part along y,0,3,2
+the slanted face,1,2,3

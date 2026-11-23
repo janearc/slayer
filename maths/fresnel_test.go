@@ -8,7 +8,7 @@ import (
 )
 
 // Fresnel's share for unpolarised light, worked by hand at an index of
-// 1.33, the water the trace tests use.
+// 1.33, the water the trace tests use. fresnel.csv has each case.
 //
 // Square on, ((n - 1) / (n + 1))^2 = (0.33 / 2.33)^2 = 0.141631^2 =
 // 0.0200593.
@@ -30,32 +30,56 @@ import (
 // The critical angle is asin(1 / 1.33) = 48.75 degrees. At 60 degrees,
 // cosine 0.5, the sine is 0.866025, more than 1 / 1.33 = 0.751880, so
 // nothing is transmitted and the share is exactly one.
-func TestFresnelSharesByHand(t *testing.T) {
-	const n = 1.33
-	for _, c := range []struct {
-		what       string
-		cos, index float64
-		want, tol  float64
-	}{
-		{"square on from the air", 1, n, 0.0200593, 1e-7},
-		{"45 degrees from the air", 0.707107, n, 0.027521, 2e-6},
-		{"the same boundary from the water", 0.846958, 1 / n, 0.027521, 2e-6},
-		{"past the critical angle", 0.5, 1 / n, 1, 0},
-		{"grazing from the air", 0, n, 1, 0},
-	} {
-		got := maths.Fresnel(c.cos, c.index)
-		if !(math.Abs(got-c.want) <= c.tol) {
-			t.Errorf("%s: share %v, want %v", c.what, got, c.want)
+func TestFresnelSharesByHand(test *testing.T) {
+	rows := read(test, fresnelFile)
+	if len(rows) == nought {
+		test.Fatal("there are no worked shares")
+	}
+	for _, row := range rows {
+		got := maths.Fresnel(float(test, row, "cosine"), float(test, row, "index"))
+		want, tolerance := float(test, row, "want"), float(test, row, "tolerance")
+		if !(math.Abs(got-want) <= tolerance) {
+			test.Errorf("%s: share %v, want %v", row["name"], got, want)
 		}
 	}
 }
 
 // Fresnel holds a cosine outside zero to one at the nearest end of it.
-func TestFresnelClampsTheCosine(t *testing.T) {
-	if got, want := maths.Fresnel(1.5, 1.33), maths.Fresnel(1, 1.33); got != want {
-		t.Errorf("a cosine of 1.5 gives %v, want %v", got, want)
+func TestFresnelClampsTheCosine(test *testing.T) {
+	water := picked(test, "water-index")
+	past, below := picked(test, "cosine-past-one"), picked(test, "cosine-below-zero")
+	if got, want := maths.Fresnel(past, water), maths.Fresnel(unity, water); got != want {
+		test.Errorf("a cosine of %v gives %v, want %v", past, got, want)
 	}
-	if got := maths.Fresnel(-0.5, 1.33); got != 1 {
-		t.Errorf("a cosine of -0.5 gives %v, want 1", got)
+	if got := maths.Fresnel(below, water); got != unity {
+		test.Errorf("a cosine of %v gives %v, want 1", below, got)
+	}
+}
+
+// An index of zero or less, no index, and an infinite index are no medium,
+// and the share into one is no number, at any cosine.
+func TestFresnelIntoNoMediumIsNoNumber(test *testing.T) {
+	rows := read(test, refusedIndexesFile)
+	if len(rows) == nought {
+		test.Fatal("there are no indexes to refuse")
+	}
+	for _, row := range rows {
+		cosine, index := float(test, row, "cosine"), float(test, row, "index")
+		if got := maths.Fresnel(cosine, index); !math.IsNaN(got) {
+			test.Errorf("%s: share %v, want no number", row["name"], got)
+		}
+	}
+}
+
+// anti-test: at the cosines the refused indexes are asked at, a medium that
+// is one is given a share from nought to one, so the refusal is not passed
+// by a Fresnel that is no number everywhere.
+func TestFresnelIntoAMediumIsAShare(test *testing.T) {
+	water := picked(test, "water-index")
+	for _, row := range read(test, refusedIndexesFile) {
+		got := maths.Fresnel(float(test, row, "cosine"), water)
+		if math.IsNaN(got) || got < nought || got > unity {
+			test.Errorf("%s: into the water the share is %v", row["name"], got)
+		}
 	}
 }

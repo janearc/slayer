@@ -15,8 +15,7 @@ type patchRectangle struct {
 }
 
 func (rect patchRectangle) patch() Patch {
-	return Patch{MinColumn: rect.MinColumn, MaxColumn: rect.MaxColumn,
-		MinRow: rect.MinRow, MaxRow: rect.MaxRow, Level: rect.Level}
+	return Patch(rect)
 }
 
 type patchBook struct {

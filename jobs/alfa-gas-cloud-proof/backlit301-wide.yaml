@@ -1,0 +1,23 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  set: "./backlit301-wide-set.yaml"
+film:
+  width: 540
+  height: 480
+  rays: 2
+  tall: 65
+renderer: gpu
+quality: exact
+camera:
+  name: underwater-60m
+at:
+  value: 0.7
+  unit: s
+outputs:
+  picture: "../../out/alfa-gas-cloud-proof/backlit301-wide.png"
+  raw: "../../out/alfa-gas-cloud-proof/backlit301-wide.pfm"
+print:
+  knee: 0.7
+  top: 8
+  stops: 10

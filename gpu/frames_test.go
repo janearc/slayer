@@ -447,7 +447,7 @@ func TestFramesRefuseAfterAnErrorAndAfterClose(t *testing.T) {
 	}
 	_, _, again := frames.Draw(world, 3, eye, shotLens, 0, shotWidth,
 		shotHeight, shotSide)
-	if !errors.Is(again, ErrFramesFailed) || !errors.Is(again, err) {
+	if !errors.Is(again, errFramesFailed) || !errors.Is(again, err) {
 		t.Errorf("a draw after an error says %v", again)
 	}
 	frames.Close()

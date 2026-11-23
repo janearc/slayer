@@ -148,7 +148,8 @@ func TestConformReportsASourceFailureAtEitherEnd(t *testing.T) {
 			}
 			return slope(longitude, latitude)
 		})
-		book := bookFor(testTerrain(t, failing, testDetail()), leaves)
+		failingTerrain := testTerrain(t, failing, testDetail())
+		book := bookFor(failingTerrain, leaves)
 		if _, err := book.conform(lattice{4, 1}, 2); !errors.Is(err, sentinel) {
 			t.Errorf("%s: error %v", name, err)
 		}
@@ -227,7 +228,8 @@ func TestSurfaceReportsASourceFailure(t *testing.T) {
 	failing := heightFunc(func(longitude, latitude float64) (float64, bool, error) {
 		return 0, false, sentinel
 	})
-	book := bookFor(testTerrain(t, failing, testDetail()), []terrain.Patch{patch})
+	failingTerrain := testTerrain(t, failing, testDetail())
+	book := bookFor(failingTerrain, []terrain.Patch{patch})
 	if _, err := book.surface(patch, originAt(t, maths.Vec{})); !errors.Is(err, sentinel) {
 		t.Fatalf("plain read: error %v", err)
 	}
@@ -313,7 +315,8 @@ func TestNormalAtRefusals(t *testing.T) {
 			}
 		})
 	}
-	book := bookFor(testTerrain(t, flat(0), short), nil)
+	shortTerrain := testTerrain(t, flat(0), short)
+	book := bookFor(shortTerrain, nil)
 	for column := range 9 {
 		if _, err := book.normalAt(lattice{column, 8}); err != nil {
 			t.Fatalf("stencil %d: %v", column, err)

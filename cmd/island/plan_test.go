@@ -62,16 +62,19 @@ func TestReadPlanRefusals(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			text := strings.Replace(minimalScene, tc.from, tc.to, 1)
-			_, err := readPlan(writeFile(t, t.TempDir(), "scene.yaml", text))
+			scenePath := writeFile(t, t.TempDir(), "scene.yaml", text)
+			_, err := readPlan(scenePath)
 			if err == nil || !strings.Contains(err.Error(), tc.want) {
 				t.Errorf("error = %v, want one containing %q", err, tc.want)
 			}
 		})
 	}
-	if _, err := readPlan(filepath.Join(t.TempDir(), "absent.yaml")); err == nil {
+	absent := filepath.Join(t.TempDir(), "absent.yaml")
+	if _, err := readPlan(absent); err == nil {
 		t.Error("a missing scene file was accepted")
 	}
-	if _, err := readPlan(writeFile(t, t.TempDir(), "scene.yaml", "{")); err == nil {
+	unparsable := writeFile(t, t.TempDir(), "scene.yaml", "{")
+	if _, err := readPlan(unparsable); err == nil {
 		t.Error("unparsable YAML was accepted")
 	}
 }

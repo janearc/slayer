@@ -27,8 +27,6 @@ var errExpose = errors.New("ninjafilm: an exposure is a shutter open for " +
 // What comes out is in joules a square metre of film for each watt a
 // square metre a steradian of the light the glimpses were rendered in.
 // Nothing is clipped. It is a raw.
-//
-//ninja:vow practice slayer's film step makes the raw here; tests only so far
 func (glass Thin) Expose(open time.Duration, glimpses []*frame.Frame) (
 	exposed *frame.Frame, err error) {
 	if open <= none || len(glimpses) == none ||
@@ -71,8 +69,6 @@ func (glass Thin) pixelOf(x, y int, open time.Duration,
 // then taken once by the gathering and the share of time. So the same
 // glimpses make the same pixel bit for bit. Its cover is the mean of
 // the glimpses. Its depth is the nearest any of them met.
-//
-//ninja:vow practice slayer's replay proves one pixel here; tests only so far
 func (glass Thin) Exposing(x, y, width, height int, open time.Duration,
 	seen []frame.Pixel) frame.Pixel {
 	if len(seen) == none {

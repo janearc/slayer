@@ -14,13 +14,13 @@ import (
 // reached can be seen, and it fixes what it is told for a share.
 type probe struct {
 	reach float64
-	share func(p maths.Vec) float64
+	share func(point maths.Vec) float64
 	class func(share float64) Biome
 }
 
 func (f probe) Footprint() (maths.Vec, float64) { return maths.Vec{}, f.reach }
-func (f probe) Share(p, _ maths.Vec, _ float64) float64 {
-	return f.share(p)
+func (f probe) Share(point, _ maths.Vec, _ float64) float64 {
+	return f.share(point)
 }
 func (f probe) Shape(height, _ float64) float64 { return height + 100 }
 func (f probe) Class(share float64) Biome       { return f.class(share) }
@@ -32,9 +32,10 @@ func row() *World {
 	for i := range at {
 		at[i] = maths.V(float64(i), 0, 0)
 	}
-	w := on(placed(at, along(5)...), 1)
-	w.height = []float64{0, 1, 2, 3, 4}
-	return w
+	pairs := along(5)
+	world := on(placed(at, pairs...), 1)
+	world.height = []float64{0, 1, 2, 3, 4}
+	return world
 }
 
 // the tiles a feature reaches are the ones whose middles are within its
@@ -68,11 +69,11 @@ func TestCarveShapesWhatIsWithinTheEdge(t *testing.T) {
 			if share < 0.5 {
 				return Lava
 			}
-			return Unfixed
+			return unfixed
 		}}}
 	ends(t, "carve", w.carve)
 	want := []float64{100, 1, 102, 3, 4}
-	fixed := []Biome{Lava, Unfixed, Unfixed, Unfixed, Unfixed}
+	fixed := []Biome{Lava, unfixed, unfixed, unfixed, unfixed}
 	for i := range want {
 		if w.height[i] != want[i] || w.fixed[i] != fixed[i] {
 			t.Errorf("tile %d is %v and %d, want %v and %d", i, w.height[i],
@@ -102,11 +103,11 @@ func TestAHeartOutsideTheWorldChangesNothing(t *testing.T) {
 		Ocean: 0.3, Plates: 3}
 	plain := New(tr)
 	tr.Features = []Feature{Plateau{At: maths.V(500, 0, 500), Reach: 1000, Top: 5}}
-	w := New(tr)
-	for _, tile := range plain.Tiles() {
-		if w.Height(tile) != plain.Height(tile) || w.Biome(tile) != plain.Biome(tile) {
-			t.Fatalf("tile %v changed from %v to %v", tile, plain.Height(tile),
-				w.Height(tile))
+	world := New(tr)
+	for i, tile := range plain.tiles {
+		if world.height[i] != plain.height[i] || world.Biome(tile) != plain.Biome(tile) {
+			t.Fatalf("tile %v changed from %v to %v", tile, plain.height[i],
+				world.height[i])
 		}
 	}
 	if _, ok := plain.Find(maths.V(500, 0, 500), func(Biome) bool { return true }); ok {

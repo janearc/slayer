@@ -126,9 +126,9 @@ func (scene Scene) lighting() (*lighting, error) {
 	l.water = lightOf(lit(lamp, white, waterPart(scene.Chlorophyll)))
 	// GLUE: one refractive index, at one wavelength, for every wavelength.
 	l.index = Index(scene.Salinity, scene.Celsius, indexAt)
-	l.along, l.across = Roughness(scene.Sea.Wind)
+	l.along, l.across = roughness(scene.Sea.Wind)
 	l.windSin, l.windCos = math.Sincos(scene.Sea.Toward)
-	l.foam = Whitecaps(scene.Sea.Wind)
+	l.foam = whitecaps(scene.Sea.Wind)
 	l.down = l.sun.Z
 	return l, nil
 }
@@ -149,7 +149,7 @@ func (scene Scene) LightingConstants() (LightingConstants, error) {
 	if err != nil {
 		return LightingConstants{}, err
 	}
-	return LightingConstants{Sun: light.sun, Sunlight: [3]float64(light.sunlight), Water: [3]float64(light.water), Index: light.index, Along: light.along, Across: light.across, WindSin: light.windSin, WindCos: light.windCos, Foam: light.foam, Down: light.down, SlopeFloor: slopeFloor, ViewFloor: viewFloor, GlintGeometry: glintGeometry, GlintTilt: glintTilt, FoamReflectance: FoamReflectance}, nil
+	return LightingConstants{Sun: light.sun, Sunlight: [3]float64(light.sunlight), Water: [3]float64(light.water), Index: light.index, Along: light.along, Across: light.across, WindSin: light.windSin, WindCos: light.windCos, Foam: light.foam, Down: light.down, SlopeFloor: slopeFloor, ViewFloor: viewFloor, GlintGeometry: glintGeometry, GlintTilt: glintTilt, FoamReflectance: foamReflectance}, nil
 }
 
 // spread is the slope variance along a compass direction, from the
@@ -218,7 +218,7 @@ func (l *lighting) seen(
 
 	// Whitecaps cover a fraction of everything, as a matte white of
 	// [K84]'s reflectance. GLUE: an even veil, not patches.
-	white := l.sunlight.times(FoamReflectance * l.down / math.Pi)
+	white := l.sunlight.times(foamReflectance * l.down / math.Pi)
 	return seen.times(1 - l.foam).plus(white.times(l.foam))
 }
 

@@ -1,8 +1,8 @@
 package workingview
 
 import (
-	"github.com/janearc/slayer/hillside/placement"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/session/placement"
 	"math"
 )
 

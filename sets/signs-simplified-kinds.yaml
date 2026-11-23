@@ -1,0 +1,92 @@
+# the signs study in simplified Chinese, the four kinds: a roof sign, a
+# screen, a blade sign and an awning's valance, each standing on its own on
+# a dark wet street at night, and a camera close to each. each is a kind
+# (sign-roof, sign-screen, sign-blade, sign-awning) from
+# manufacture/cities/signdraw.go with script: simplified-chinese, so its
+# words, and the font they are set in, are the sign culture's for that
+# script: manufacture/cities/cultures/sign.yaml, the faces being the sources
+# noto-sans-sc-bold and noto-serif-sc-bold that sources.yaml pins and the
+# shelf SLAYER_SHELF names keeps. each carries lamps of the colour of its
+# glass, which light the street and what stands near.
+#
+# places are metres, as a map's run: x east, y north, z up. there is no sun
+# and no sky: the light is the signs' own and one plain dim lamp by the
+# awning. the street's colour, the lamp, the seeds and the cameras are
+# choices of this study, picked by eye. a roof sign, a screen and an awning
+# face south, so their cameras stand south of them and look north; a blade
+# sign's bracket runs south and its letters face east and west, so its camera
+# stands to its west and looks east.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: signs study in simplified Chinese
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 640
+    rays: 2
+    wide: 60
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    roof:
+      title: "26 m off the roof sign, at 6 m up"
+      location:
+        at: [-40, -26, 6]
+      orientation:
+        look_at: [-40, 0, 6]
+    screen:
+      title: "30 m off the screen, at 7 m up"
+      location:
+        at: [0, -30, 7]
+      orientation:
+        look_at: [0, 0, 7]
+    blade:
+      title: "12 m off the blade sign, to its west, the side its letters face, at 12 m up"
+      location:
+        at: [28, -1, 12]
+      orientation:
+        look_at: [40, -1, 12]
+    awning:
+      title: "15 m off the awning, at 2.8 m up"
+      location:
+        at: [60, -15, 2.8]
+      orientation:
+        look_at: [60, 0, 2]
+  recipes:
+    roof: {kind: sign-roof, script: simplified-chinese}
+    screen: {kind: sign-screen, script: simplified-chinese}
+    blade: {kind: sign-blade, script: simplified-chinese}
+    awning: {kind: sign-awning, script: simplified-chinese}
+  set:
+    things:
+      roof: {recipe: roof, seed: 2, complexity: quick, east: -40, north: 0, height: {value: 0, unit: m}}
+      screen: {recipe: screen, seed: 1, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+      blade: {recipe: blade, seed: 3, complexity: quick, east: 40, north: 0, height: {value: 0, unit: m}}
+      awning: {recipe: awning, seed: 11, complexity: quick, east: 60, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    lamps:
+      # one plain dim lamp by the awning, a choice of this study, so that the
+      # painted valance, which glows nowhere, can be seen
+      plain-dim:
+        at: [60, -7, 4]
+        temperature: 5000
+        strength: 130
+        radius: 0.3
+        source: eye
+    materials:
+      street:
+        # wet asphalt: nearly opaque, and it mirrors at a low angle
+        colour: {srgb_linear: [0.02, 0.02, 0.025]}
+        clear: {through: 0.03, index: 1.5, gloss: 1, rank: 0}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye

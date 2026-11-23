@@ -1,0 +1,21 @@
+name,ease,x,want,working
+ease-half,ease,0.3125,0.5375,t=1/2; x .375*.25+.375*.25+.125; y .375*.1+.375*1+.125
+ease-quarter,ease,0.15625,0.1984375,t=1/4; x .421875*.25+.140625*.25+.015625; y .421875*.1+.140625*1+.015625
+no-name,,0.3125,0.5375,no name is ease
+ease-in-half,ease-in,0.6575,0.5,t=1/2; x .375*.42+.375*1+.125; y .375*0+.375*1+.125
+ease-in-quarter,ease-in,0.3334375,0.15625,t=1/4; x .421875*.42+.140625*1+.015625; y .140625+.015625
+ease-out-half,ease-out,0.3425,0.5,t=1/2; x .375*0+.375*.58+.125; y .375*0+.375*1+.125
+ease-out-quarter,ease-out,0.0971875,0.15625,t=1/4; x .421875*0+.140625*.58+.015625; y .140625+.015625
+ease-in-out-half,ease-in-out,0.5,0.5,t=1/2; x .375*.42+.375*.58+.125; y .375*0+.375*1+.125
+ease-in-out-quarter,ease-in-out,0.274375,0.15625,t=1/4; x .421875*.42+.140625*.58+.015625; y .140625+.015625
+linear-three-tenths,linear,0.3,0.3,linear
+linear-nine-tenths,linear,0.9,0.9,linear
+unknown-name,swoop,0.3,0.3,an unknown name is linear
+ease-start,ease,0,0,ends
+ease-end,ease,1,1,ends
+ease-in-start,ease-in,0,0,ends
+ease-in-end,ease-in,1,1,ends
+ease-out-start,ease-out,0,0,ends
+ease-out-end,ease-out,1,1,ends
+ease-in-out-start,ease-in-out,0,0,ends
+ease-in-out-end,ease-in-out,1,1,ends

@@ -886,23 +886,34 @@ tide.speeds:
 # ------------------------------------------------------------- the views
 
 view.cascade.extents:
-  values: [4096, 512, 64]
+  values: [4096, 512, 64, 8]
   unit: "m"
   from: "none"
   url: "none"
-  fetched: "2026-11-09"
+  fetched: "2026-11-20"
   read: "none"
   kind: "glue"
-  note: "the sizes of the tiled wave patches a perspective view is built from"
+  note: "the sizes of the tiled wave patches a perspective view is built from. Picked: each an eighth of the one before; the 8 m patch holds waves from 6 cm to half a metre, the relief of water within a few tens of metres of a low camera, which without it was only roughness"
 
 view.cascade.grid:
-  value: 256
+  value: 1024
   unit: "samples a side"
   from: "none"
   url: "none"
-  fetched: "2026-11-09"
+  fetched: "2026-11-20"
   read: "none"
   kind: "glue"
+  note: "picked with view.cascade.cut: at 256 and a cut at the Nyquist wave number the peak wave of a 7 m/s sea, 41 m, had 2.6 samples in the 4096 m patch and a straight-line read drew it at 60% of its height (measured). 1024 with a cut of a quarter holds the same waves, down to half a metre, at eight samples or more each, for sixteen times the memory"
+
+view.cascade.cut:
+  value: 0.25
+  unit: "share of the Nyquist wave number"
+  from: "Keys 1981, IEEE Trans. Acoust. Speech Signal Process. 29, 1153-1160"
+  url: "none"
+  fetched: "2026-11-20"
+  read: "none"
+  kind: "glue"
+  note: "each patch carries waves up to this share of the shortest its grid can hold, so its shortest wave has eight samples. Picked: at eight samples a wave a straight-line read keeps 0.95 of a wave's height and cubic convolution (Keys, a = -1/2) 0.99, worked from their frequency responses; at four, 0.81 and 0.94; at two, 0.41 and 0.49. The responses are worked here, not read from the paper"
 
 view.filter.keep:
   value: 1
@@ -1197,3 +1208,75 @@ shore.march.widen:
   read: "none"
   kind: "glue"
   note: "far from the eye a ray over a shore may step this many pixel footprints at a time"
+
+swell.spread.exponent:
+  value: 75
+  unit: "dimensionless"
+  from: "Goda, Random Seas and Design of Maritime Structures (2000), the table of s_max: swell of a long decay distance"
+  url: "none"
+  fetched: "2026-11-20"
+  read: "none"
+  kind: "glue"
+  note: "the s of the cos^(2s)(theta/2) spread of a swell. Written from the book's table, not read at a url here, so it is held as a model choice until it is: sourced would say a page was read. The table's value for swell that has run a short way is 25."
+
+swell.slope.low:
+  value: 0.5
+  unit: "peak frequencies"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-20"
+  read: "none"
+  kind: "glue"
+  note: "lowest frequency of the sum that gives a swell's own mean-square slope. Picked: half the peak, below which the swell's spectrum holds next to nothing."
+
+swell.slope.high:
+  value: 3
+  unit: "peak frequencies"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-20"
+  read: "none"
+  kind: "glue"
+  note: "highest frequency of that sum. Picked: a swell is long waves, and the slope its spectrum's tail adds grows as the log of this limit, so it is held near the peak; the wind sea's Cox and Munk slope carries the short waves."
+
+swell.slope.steps:
+  value: 2000
+  unit: "steps"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-20"
+  read: "none"
+  kind: "glue"
+  note: "even steps in the logarithm of frequency in that sum. Picked."
+
+# ------------------------------------------------------- crests and breaking
+
+crest.rounds:
+  value: 8
+  unit: "rounds"
+  from: "none"
+  url: "none"
+  fetched: "2026-11-20"
+  read: "none"
+  kind: "glue"
+  note: "fixed-point rounds used to find where the water at a place came from, when a patch is read where its water is. Picked: the error falls by the displacement's gradient each round, under a half in any sea that does not fold, so eight leave under a hundredth of it"
+
+breaking.acceleration:
+  value: 0.5
+  unit: "share of gravity"
+  from: "Snyder, Smith & Kennedy 1983, J. Phys. Oceanogr. 13, 1505-1518 (Part III); the threshold mechanism of Snyder & Kennedy 1983, J. Phys. Oceanogr. 13, 1482-1492"
+  url: "https://scilit.com/publications/25cbc948ffe838543eba95f2eb7aac5c"
+  fetched: "2026-11-20"
+  read: "search"
+  kind: "sourced"
+  note: "a wave breaks where the surface's downward acceleration passes this share of gravity. Read in a search's summary of Part III's abstract (observed accelerations consistent with a threshold of about 0.5 g); the page itself refused the read, so the abstract is still to be read whole. Half of gravity is also the downward acceleration at the crest of Stokes' steepest wave, from recall, not read"
+
+beaufort.mirror:
+  value: 0.514444
+  unit: "m/s"
+  from: "US National Weather Service, Beaufort Wind Scale"
+  url: "https://www.weather.gov/mfl/beaufort"
+  fetched: "2026-11-20"
+  read: "search"
+  kind: "sourced"
+  note: "force 0, 0 to 1 knots: \"Sea like a mirror.\" Force 1, 1 to 3 knots: \"Ripples with the appearance of scales are formed, but without foam crests.\" One knot is 1852 m an hour. Under it the sea is given no slope its bands do not hold, for a mirrored look: Cox and Munk's fit keeps 0.003 at no wind, which no mirror of still water shows"

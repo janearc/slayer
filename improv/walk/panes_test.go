@@ -13,9 +13,9 @@ func TestLayoutsTile(t *testing.T) {
 	for name, layout := range map[string]Layout{"wide": Wide(),
 		"tall": Tall()} {
 		covered := 0
-		names := layout.Names()
-		if len(names) != 4 {
-			t.Fatalf("%s has panes %v", name, names)
+		names := []string{PaneViewer, PaneExplain, PaneAbove, PaneMoon}
+		if len(layout.panes) != len(names) {
+			t.Fatalf("%s has panes %v", name, layout.panes)
 		}
 		for i, one := range names {
 			place, err := layout.Pane(one)
@@ -37,7 +37,7 @@ func TestLayoutsTile(t *testing.T) {
 			t.Errorf("%s: the panes cover %d of %d pixels", name, covered,
 				size.X*size.Y)
 		}
-		if _, err := layout.Pane("side"); !errors.Is(err, ErrWalk) {
+		if _, err := layout.Pane("side"); !errors.Is(err, errWalk) {
 			t.Errorf("%s: a pane it lacks: %v", name, err)
 		}
 	}
@@ -61,7 +61,7 @@ func TestLaidFits(t *testing.T) {
 	pane := image.Rect(0, 0, 100, 100)
 	boxed := image.NewRGBA(pane)
 	fill(boxed, pane, ground)
-	Laid(boxed, picture, pane, Letterbox)
+	Laid(boxed, picture, pane, letterbox)
 	if boxed.RGBAAt(50, 10) != ground || boxed.RGBAAt(50, 90) != ground ||
 		boxed.RGBAAt(10, 50).R != 0 || boxed.RGBAAt(90, 50).R != 255 {
 		t.Error("the letterbox is not the picture's whole, banded")

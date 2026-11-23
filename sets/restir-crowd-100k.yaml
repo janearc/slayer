@@ -1,0 +1,70 @@
+# a crowd of 100000 small lights over a ground with a few objects.
+#
+# the demo for restir (doc/restir.md): one ground, a few things, and a
+# field of lamps whose count is the one number below. metres, x east,
+# y north, z up. every size and strength is chosen by eye; the strength
+# is divided by the count so the picture's total light is about the
+# same at every count.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: restir crowd 100k
+  renderer: gpu
+  seed: 1
+  setting: space
+  light: none
+  set:
+    things: {}
+  film:
+    width: 320
+    height: 180
+    rays: 1
+    wide: 60
+    exposure: 1
+  cameras:
+    front:
+      location: {at: [0, -22, 6]}
+      orientation: {look_at: [0, 0, 1.5]}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.5, 0.5, 0.5]}
+        source: eye
+      stone:
+        colour: {srgb_linear: [0.6, 0.35, 0.25]}
+        source: eye
+      moss:
+        colour: {srgb_linear: [0.25, 0.5, 0.3]}
+        source: eye
+    boxes:
+      floor:
+        material: ground
+        middle: [0, 0, -0.1]
+        size: [30, 30, 0.2]
+        source: eye
+      plinth:
+        material: stone
+        middle: [-3, 1, 0.75]
+        size: [2, 2, 1.5]
+        source: eye
+    spheres:
+      ball:
+        material: moss
+        middle: [2, -1, 1]
+        radius: 1
+        source: eye
+      small ball:
+        material: stone
+        middle: [5, 3, 0.6]
+        radius: 0.6
+        source: eye
+    lamp-fields:
+      crowd:
+        count: 100000
+        seed: 17
+        low: [-12, -12, 0.4]
+        high: [12, 12, 4]
+        temperature: 3000
+        strength: 0.003
+        radius: 0.02
+        source: eye

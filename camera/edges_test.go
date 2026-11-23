@@ -21,11 +21,13 @@ func TestAVectorIsInReachUpToExactlyReachAndNoFurther(test *testing.T) {
 	if !inReach(at) {
 		test.Errorf("a vector of length reach is out of reach")
 	}
-	past := maths.V(math.Nextafter(reach(), math.Inf(1)), 0, 0)
+	beyond := math.Nextafter(reach(), math.Inf(1))
+	past := maths.V(beyond, 0, 0)
 	if inReach(past) {
 		test.Errorf("a vector a step past reach is in reach")
 	}
-	before := maths.V(math.Nextafter(reach(), nothing), 0, 0)
+	inside := math.Nextafter(reach(), nothing)
+	before := maths.V(inside, 0, 0)
 	if !inReach(before) {
 		test.Errorf("a vector a step inside reach is out of reach")
 	}

@@ -11,7 +11,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
 	"github.com/janearc/slayer/internal/observability"
+	"go.uber.org/mock/gomock"
 )
 
 type sinkFunc func(context.Context, string) (bool, error)
@@ -72,9 +74,15 @@ func TestReporterNormalStopSendsFinalWithinBudget(t *testing.T) {
 	}
 }
 
-type neverWriter struct{}
+// waitsForEver is a write that never comes back.
+func waitsForEver([]byte) (int, error) { select {} }
 
-func (neverWriter) Write([]byte) (int, error) { select {} }
+// neverWriter is a writer whose every write waits for ever.
+func neverWriter(t *testing.T) *mocks.MockWriter {
+	writer := mocks.NewMockWriter(gomock.NewController(t))
+	writer.EXPECT().Write(gomock.Any()).DoAndReturn(waitsForEver).AnyTimes()
+	return writer
+}
 
 func TestInvalidReporterConfigurationDoesNotWaitForLog(t *testing.T) {
 	t.Setenv("AZAZEL_STATS_BARKEEP", "invalid")
@@ -84,7 +92,7 @@ func TestInvalidReporterConfigurationDoesNotWaitForLog(t *testing.T) {
 	t.Setenv("AZAZEL_STATS_VENDETTA_AS", "")
 	before := observability.SummaryFailures()
 	started := time.Now()
-	stop := StartReporter(context.Background(), Collector{}, neverWriter{})
+	stop := StartReporter(context.Background(), Collector{}, neverWriter(t))
 	stop()
 	if time.Since(started) > time.Second || observability.SummaryFailures() <= before {
 		t.Fatal("invalid config blocked or was not counted")
@@ -156,7 +164,8 @@ func TestBarkeepDoesNotQueueBehindOtherMessages(t *testing.T) {
 				t.Fatal(body, err)
 			}
 		}
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"queued":` + string(rune('0'+queued)) + `}`))}, nil
+		digit := string(rune('0' + queued))
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"queued":` + digit + `}`))}, nil
 	})}
 	sink := barkeepSink{address: "http://127.0.0.1:1", kind: "stats", client: client}
 	if sent, err := sink.Send(context.Background(), "status"); sent || err != nil || posts != 0 {

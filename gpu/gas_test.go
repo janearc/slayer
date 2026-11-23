@@ -228,7 +228,7 @@ func TestAGasVolumeCarriesTheTracersNumbers(t *testing.T) {
 		if err := encoded.volumesOf(world, 0); err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
-		per := air.Per(1000)
+		per := gas.Of{In: air, Unit: 1000}.Gas()
 		tint, scatter := volumeRow(encoded, "tint"), volumeRow(encoded, "scatter")
 		for index, nm := range bands {
 			band := maths.Band{Nanometres: nm}

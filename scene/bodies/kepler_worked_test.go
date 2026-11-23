@@ -65,9 +65,11 @@ func mooned(t *testing.T, mass, orbitKm, phase float64) bodies.Body {
 // the rate, and shows.
 func TestOmegaIsKeplersAtTheEarthsOrbitAndTheGeostationaryOne(t *testing.T) {
 	sun := made(t, "sun", bodies.Star, 1, bodies.Sun)
-	near(t, "the sun's omega at one au", sun.Omega(bodies.Kilometres(auKm)), 2*math.Pi/siderealYear, 5e-4)
+	oneAu := bodies.Kilometres(auKm)
+	near(t, "the sun's omega at one au", sun.Omega(oneAu), 2*math.Pi/siderealYear, 5e-4)
 	earth := made(t, "earth", bodies.Star, 1, earthMass)
-	near(t, "the earth's omega at 42,164 km", earth.Omega(bodies.Kilometres(geoKm)), 2*math.Pi/siderealDay, 1e-4)
+	geostationary := bodies.Kilometres(geoKm)
+	near(t, "the earth's omega at 42,164 km", earth.Omega(geostationary), 2*math.Pi/siderealDay, 1e-4)
 }
 
 // Omega at other radii and masses is 2 pi / T, T from r^3 / GM, to the last few
@@ -75,14 +77,17 @@ func TestOmegaIsKeplersAtTheEarthsOrbitAndTheGeostationaryOne(t *testing.T) {
 // kilometre: they are rates, not zero.
 func TestOmegaOfSmallMassesAndRadiiIsKeplersToo(t *testing.T) {
 	half := made(t, "b", bodies.Star, 1, 0.5)
-	near(t, "half a kilogram at a kilometre", half.Omega(bodies.Kilometres(1)),
+	aKilometre := bodies.Kilometres(1)
+	near(t, "half a kilogram at a kilometre", half.Omega(aKilometre),
 		omega(0.5, 1), 1e-12)
 	sun := made(t, "b", bodies.Star, 1, bodies.Sun)
-	near(t, "a sun at half a kilometre", sun.Omega(bodies.Kilometres(0.5)),
+	halfAKilometre := bodies.Kilometres(0.5)
+	near(t, "a sun at half a kilometre", sun.Omega(halfAKilometre),
 		omega(bodies.Sun, 0.5), 1e-12)
 	earth := made(t, "b", bodies.Star, 1, earthMass)
+	tenThousand := bodies.Kilometres(1e4)
 	near(t, "the earth at ten thousand kilometres",
-		earth.Omega(bodies.Kilometres(1e4)), omega(earthMass, 1e4), 1e-12)
+		earth.Omega(tenThousand), omega(earthMass, 1e4), 1e-12)
 }
 
 // the sun's schwarzschild radius, r_s = 2GM/c^2, is 2.95325 km by the
@@ -157,9 +162,12 @@ func TestAMoonGoesRoundProgradeFromXTowardMinusZ(t *testing.T) {
 		t.Fatal(err)
 	}
 	r := auKm * 1e-8
-	nearVec(t, "the moon at the start", o.At(0).Origin, at.Add(maths.V(r, 0, 0)), 1e-9)
-	nearVec(t, "a quarter on", o.At(o.Period/4).Origin, at.Add(maths.V(0, 0, -r)), 1e-9)
-	nearVec(t, "half on", o.At(o.Period/2).Origin, at.Add(maths.V(-r, 0, 0)), 1e-9)
+	atStart := at.Add(maths.V(r, 0, 0))
+	nearVec(t, "the moon at the start", o.At(0).Origin, atStart, 1e-9)
+	atQuarter := at.Add(maths.V(0, 0, -r))
+	nearVec(t, "a quarter on", o.At(o.Period/4).Origin, atQuarter, 1e-9)
+	atHalf := at.Add(maths.V(-r, 0, 0))
+	nearVec(t, "half on", o.At(o.Period/2).Origin, atHalf, 1e-9)
 }
 
 // a moon is placed on the orbit Orbit gives it, so the moon is as

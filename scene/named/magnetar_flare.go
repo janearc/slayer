@@ -75,9 +75,9 @@ func measured(name string, unit time.Duration) time.Duration {
 	return time.Duration(research.Value(name) * float64(unit))
 }
 
-// Brightness is how many times its quiet glow the star shines at a
+// brightness is how many times its quiet glow the star shines at a
 // moment of the scene: one before the flare and after its tail.
-func (lit flare) Brightness(at time.Duration) float64 {
+func (lit flare) brightness(at time.Duration) float64 {
 	since := at - lit.start
 	if since < 0 {
 		return single
@@ -113,10 +113,4 @@ func (lit flare) tailed(since time.Duration) float64 {
 	pulse := math.Pow((single+math.Cos(2*math.Pi*turns))/diameter,
 		pulseSharpness)
 	return flarePulse * math.Exp(-flareFade*into) * (single - into) * pulse
-}
-
-// Over is when, in the scene's time, the tail has ended.
-func (lit flare) Over() time.Duration {
-	return lit.start + lit.spike +
-		time.Duration(float64(lit.tail)/lit.speed)
 }

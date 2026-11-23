@@ -5,6 +5,12 @@ import (
 	"math"
 )
 
+// What a portion is counted in, each defined.
+const (
+	eitherSign       = 0   // defined: the sign math.IsInf takes to ask for an infinity of either sign
+	percentsInAWhole = 100 // defined: a percent is a hundredth, so a whole is a hundred of them
+)
+
 // Portion is a part of a whole, said one of two ways: Percent(50) for
 // fifty percent, or Share(0.5) for the same thing as a fraction. It is
 // made inline, so it carries any complaint privately; the constructor
@@ -22,27 +28,28 @@ type Portion struct {
 // hundred, or no number at all is no percent either.
 func Percent(amount float64) Portion {
 	switch {
-	case math.IsNaN(amount) || math.IsInf(amount, 0):
+	case math.IsNaN(amount) || math.IsInf(amount, eitherSign):
 		return Portion{complaint: fmt.Errorf(
 			"maths: Percent(%v) is no number", amount)}
-	case amount > 0 && amount < 1:
+	case amount > nought && amount < unity:
 		return Portion{complaint: fmt.Errorf(
 			"maths: Percent(%v) reads as a fraction: write "+
 				"Percent(%v) for the percent, or Share(%v) "+
-				"for the fraction", amount, amount*100, amount)}
-	case amount < 0 || amount > 100:
+				"for the fraction", amount, amount*percentsInAWhole,
+			amount)}
+	case amount < nought || amount > percentsInAWhole:
 		return Portion{complaint: fmt.Errorf(
 			"maths: Percent(%v) is outside nought to a hundred",
 			amount)}
 	}
-	return Portion{share: amount / 100}
+	return Portion{share: amount / percentsInAWhole}
 }
 
 // Share is a portion said as a fraction of one: Share(0.5) is half, and
 // small shares like Share(0.006) are at home here. Outside nought to
 // one, or no number at all, is no share.
 func Share(amount float64) Portion {
-	if math.IsNaN(amount) || amount < 0 || amount > 1 {
+	if math.IsNaN(amount) || amount < nought || amount > unity {
 		return Portion{complaint: fmt.Errorf(
 			"maths: Share(%v) is outside nought to one", amount)}
 	}

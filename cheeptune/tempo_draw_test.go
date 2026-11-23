@@ -16,7 +16,7 @@ func TestTheStudioPlaysAMarkedNoteLouderOrSofterByItsGain(t *testing.T) {
 		return rms(seconds(p, 0.5, 1.5))
 	}
 	plain := loud("a4:4")
-	for mark, gain := range Marks {
+	for mark, gain := range marks {
 		got := loud("a4:4@"+mark) / plain
 		if math.Abs(got-gain) > 0.01 {
 			t.Errorf("a note marked %s is %.3f of an unmarked one, "+
@@ -87,10 +87,10 @@ func TestBothMachinesThePlayheadAndTheSheetHonourATempoChange(
 			{"name": "b", "bar": 4, "second": ` + second + `,
 			 "change": "c", "feels": "f"}]}`)
 	}
-	if _, err := ParseCuts(sheet("10"), s); err != nil {
+	if _, err := parseCuts(sheet("10"), s); err != nil {
 		t.Errorf("a sheet with the changed second: %v", err)
 	}
-	_, err = ParseCuts(sheet("12"), s)
+	_, err = parseCuts(sheet("12"), s)
 	wantErr(t, err, "bar 4 starts at 10.00 s")
 }
 

@@ -41,7 +41,8 @@ func yard(t *testing.T, changes ...string) string {
 // read is the yard's set, as written or changed.
 func read(t *testing.T, changes ...string) set.Set {
 	t.Helper()
-	made, err := set.Read("yard.yaml", []byte(yard(t, changes...)))
+	text := []byte(yard(t, changes...))
+	made, err := set.Read("yard.yaml", text)
 	if err != nil {
 		t.Fatal(err)
 	}

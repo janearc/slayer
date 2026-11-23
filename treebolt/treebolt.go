@@ -9,7 +9,7 @@
 //
 // bbolt never gives pages back to the filesystem: deleting an entry
 // leaves the file as large as it was. So the bound is kept by rewriting
-// the file: Rewrite takes the file's lock, writes the entries it keeps
+// the file: rewrite takes the file's lock, writes the entries it keeps
 // into a new file beside it, and renames that over the old one.
 //
 // The lock is the same one every reader and writer takes, so none is
@@ -42,8 +42,8 @@ const (
 	usedBucket = "used"
 	// FileMode is the file's permissions: its owner's alone.
 	FileMode = 0o600
-	// TempSuffix is added to the file's name for the one being written.
-	TempSuffix = ".compacting"
+	// tempSuffix is added to the file's name for the one being written.
+	tempSuffix = ".compacting"
 )
 
 // The sizes the bound is set by.
@@ -53,10 +53,10 @@ const (
 	// or the other. It holds about thirteen of moonlake's scenes' trees
 	// for one program.
 	Cap int64 = 8 << 30
-	// Target is what a rewrite brings the live entries down to: three
+	// target is what a rewrite brings the live entries down to: three
 	// quarters of Cap, so the next 2 GiB of new trees do not rewrite the
 	// file again.
-	Target = Cap - Cap/4
+	target = Cap - Cap/4
 	// Why is the line the listing gives for the cap.
 	Why = "moonlake's trees are about 588 MB; this holds a dozen " +
 		"scenes' for one program"
@@ -64,14 +64,14 @@ const (
 
 // The times the bound is kept by.
 const (
-	// HeldFor is how long after its last use a tree is never removed to
+	// heldFor is how long after its last use a tree is never removed to
 	// make room, as for every other kind: a run that has just read one
 	// may read it again for its next frame.
-	HeldFor = 10 * time.Minute
-	// TouchGrain is how stale a tree's last use must be before a read
+	heldFor = 10 * time.Minute
+	// touchGrain is how stale a tree's last use must be before a read
 	// writes it again: a use within the hour is not worth a write, and
 	// the order of trees days apart does not change by it.
-	TouchGrain = time.Hour
+	touchGrain = time.Hour
 	// ListWait is how long the listing waits for the file's lock, which
 	// a rewrite of a large file holds for a minute or so.
 	ListWait = 5 * time.Second
@@ -99,20 +99,20 @@ const (
 type Bound struct{ Cap, Target int64 }
 
 // Standard is the bound the file is kept to.
-var Standard = Bound{Cap: Cap, Target: Target}
+func Standard() Bound { return Bound{Cap: Cap, Target: target} }
 
-// Entry is one tree in the file: its key, its bytes with the key's, and
+// treeEntry is one tree in the file: its key, its bytes with the key's, and
 // when it was last used; the zero time where no use was ever recorded,
 // as for every tree an older build kept.
-type Entry struct {
+type treeEntry struct {
 	Key  []byte
 	Size int64
 	Used time.Time
 }
 
-// Choose says which of a file's entries a rewrite leaves out: the keys,
+// choice says which of a file's entries a rewrite leaves out: the keys,
 // as strings.
-type Choose func(all []Entry) map[string]bool
+type choice func(all []treeEntry) map[string]bool
 
 // Result is what a rewrite did: the file's bytes before and after, the
 // entries it kept and the entries it left out.
@@ -190,9 +190,9 @@ func usedOf(tx *bolt.Tx, key []byte) time.Time {
 }
 
 // Stale is whether a tree last used at that time wants its use written
-// again at now: it was never recorded, or is older than TouchGrain.
+// again at now: it was never recorded, or is older than touchGrain.
 func Stale(used, now time.Time) bool {
-	return used.IsZero() || now.Sub(used) > TouchGrain
+	return used.IsZero() || now.Sub(used) > touchGrain
 }
 
 // Put keeps a tree under a key, used at now, in a write transaction,
@@ -271,14 +271,14 @@ func Absorb(writing, reading *bolt.Tx) error {
 
 // entriesOf is every tree a read transaction holds, with its bytes and
 // its last use.
-func entriesOf(reading *bolt.Tx) []Entry {
+func entriesOf(reading *bolt.Tx) []treeEntry {
 	bucket := reading.Bucket([]byte(Bucket))
-	var all []Entry
+	var all []treeEntry
 	if bucket == nil {
 		return all
 	}
 	_ = bucket.ForEach(func(key, value []byte) error {
-		all = append(all, Entry{Key: bytes.Clone(key),
+		all = append(all, treeEntry{Key: bytes.Clone(key),
 			Size: int64(len(key) + len(value)),
 			Used: usedOf(reading, key)})
 		return nil
@@ -317,7 +317,7 @@ func Look(path string, wait time.Duration) (Usage, error) {
 }
 
 // add counts entries into the usage.
-func (made *Usage) add(all []Entry) {
+func (made *Usage) add(all []treeEntry) {
 	made.Entries = len(all)
 	for _, each := range all {
 		made.Live += each.Size
@@ -334,12 +334,12 @@ func (made *Usage) add(all []Entry) {
 	}
 }
 
-// Evict is the choice that brings the live bytes to the bound's target
+// evict is the choice that brings the live bytes to the bound's target
 // when the file is over its cap: the least recently used go first, the
 // ones with no recorded use before any other, and never a tree used
-// within HeldFor of now. When the file is not over, none goes.
-func Evict(bound Bound, now time.Time, disc int64) Choose {
-	return func(all []Entry) map[string]bool {
+// within heldFor of now. When the file is not over, none goes.
+func evict(bound Bound, now time.Time, disc int64) choice {
+	return func(all []treeEntry) map[string]bool {
 		drop := map[string]bool{}
 		if disc <= bound.Cap {
 			return drop
@@ -349,11 +349,11 @@ func Evict(bound Bound, now time.Time, disc int64) Choose {
 			live += each.Size
 		}
 		order := slices.Clone(all)
-		slices.SortStableFunc(order, func(one, other Entry) int {
+		slices.SortStableFunc(order, func(one, other treeEntry) int {
 			return one.Used.Compare(other.Used)
 		})
 		for _, each := range order {
-			if live <= bound.Target || now.Sub(each.Used) < HeldFor {
+			if live <= bound.Target || now.Sub(each.Used) < heldFor {
 				break
 			}
 			drop[string(each.Key)] = true
@@ -363,8 +363,8 @@ func Evict(bound Bound, now time.Time, disc int64) Choose {
 	}
 }
 
-// Everything is the choice that leaves nothing in.
-func Everything(all []Entry) map[string]bool {
+// everything is the choice that leaves nothing in.
+func everything(all []treeEntry) map[string]bool {
 	drop := make(map[string]bool, len(all))
 	for _, each := range all {
 		drop[string(each.Key)] = true
@@ -382,20 +382,20 @@ func Trim(path string, wait time.Duration, bound Bound,
 	if disc <= bound.Cap {
 		return Result{Before: disc, After: disc}, nil
 	}
-	return Rewrite(path, wait, Evict(bound, now, disc))
+	return rewrite(path, wait, evict(bound, now, disc))
 }
 
 // Clear removes every tree and gives the disc back, and says how many
 // there were. A file not made yet has none.
 func Clear(path string, wait time.Duration) (Result, error) {
-	return Rewrite(path, wait, Everything)
+	return rewrite(path, wait, everything)
 }
 
-// Rewrite writes a new file of the trees choose leaves in and renames it
+// rewrite writes a new file of the trees choose leaves in and renames it
 // over the old one, all while holding the old one's lock, so no process
 // is inside the file while it is swapped. A file not made yet is left
 // not made. A failed rewrite leaves the old file as it was.
-func Rewrite(path string, wait time.Duration, choose Choose) (Result,
+func rewrite(path string, wait time.Duration, choose choice) (Result,
 	error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		return Result{}, nil
@@ -408,10 +408,10 @@ func Rewrite(path string, wait time.Duration, choose Choose) (Result,
 	return result, errors.Join(err, source.Close())
 }
 
-// rewriteFrom is Rewrite of a file that is open and locked.
-func rewriteFrom(source *bolt.DB, choose Choose) (Result, error) {
+// rewriteFrom is rewrite of a file that is open and locked.
+func rewriteFrom(source *bolt.DB, choose choice) (Result, error) {
 	path := source.Path()
-	temp := path + TempSuffix
+	temp := path + tempSuffix
 	_ = os.Remove(temp)
 	reading, err := source.Begin(false)
 	if err != nil {

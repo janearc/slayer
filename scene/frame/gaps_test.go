@@ -60,11 +60,13 @@ func TestCompassRefusesBadDirectionsAndPoints(t *testing.T) {
 	here := maths.V(0, 0, 0)
 	cases := map[string]func() error{
 		"azimuth not a number": func() error {
-			_, err := sphere.Compass(here, measure.Radians(math.NaN()), measure.Radians(0))
+			azimuth := measure.Radians(math.NaN())
+			_, err := sphere.Compass(here, azimuth, measure.Radians(0))
 			return err
 		},
 		"elevation infinite": func() error {
-			_, err := sphere.Compass(here, measure.Radians(0), measure.Radians(math.Inf(1)))
+			elevation := measure.Radians(math.Inf(1))
+			_, err := sphere.Compass(here, measure.Radians(0), elevation)
 			return err
 		},
 		"past the zenith": func() error {
@@ -131,7 +133,8 @@ func TestPlacementRefusesABadOrigin(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pose, err := relative.Placement(maths.Subspace{Origin: maths.V(0, math.Inf(1), 0), Scale: 1})
+	infinite := maths.V(0, math.Inf(1), 0)
+	pose, err := relative.Placement(maths.Subspace{Origin: infinite, Scale: 1})
 	if err == nil || pose != (maths.Subspace{}) {
 		t.Errorf("got %v, %v", pose, err)
 	}

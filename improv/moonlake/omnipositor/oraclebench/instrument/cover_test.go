@@ -25,7 +25,8 @@ func TestANilPlanSaysNothingAndRefusesCleanup(t *testing.T) {
 // TestBuildReportsAPrivateDirectoryItCannotMake checks that a temporary
 // directory that does not exist is an error and no plan.
 func TestBuildReportsAPrivateDirectoryItCannotMake(t *testing.T) {
-	t.Setenv("TMPDIR", filepath.Join(t.TempDir(), "missing"))
+	gone := filepath.Join(t.TempDir(), "missing")
+	t.Setenv("TMPDIR", gone)
 	plan, err := Build(Options{Executable: "/bin/true"})
 	if err == nil || plan != nil {
 		t.Errorf("build without a temporary directory: %v, %v", plan, err)

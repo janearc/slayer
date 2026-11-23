@@ -11,7 +11,7 @@ type PlannedSplat struct {
 	SkyOnly             bool
 }
 
-// PlanSearchlights lists the splats AddSearchlights would draw for a width by
+// PlanSearchlights lists the splats addSearchlights would draw for a width by
 // height frame, without drawing them. Splats for moves other than viewer are
 // marked SkyOnly. It refuses bad sizes, mask lengths, a count outside 1 to
 // 256, values not finite, and a camera that does not match the frame. It

@@ -28,7 +28,8 @@ func (read sheetText) words() string {
 	for _, each := range read.runs {
 		all = append(all, each.text)
 	}
-	return strings.Join(strings.Fields(strings.Join(all, " ")), " ")
+	joined := strings.Join(all, " ")
+	return strings.Join(strings.Fields(joined), " ")
 }
 
 var (
@@ -62,7 +63,8 @@ func unescape(body string) string {
 		rest := body[index+firstName:]
 		if code := octalEscape.FindString(rest); code != "" {
 			value, _ := strconv.ParseUint(code, octalBase, byteBits)
-			made.WriteRune(winAnsiRune(byte(value)))
+			octet := byte(value)
+			made.WriteRune(winAnsiRune(octet))
 			index += len(code)
 			continue
 		}
@@ -128,8 +130,8 @@ func titleSheet(sheets []sheetText, kind string) int {
 func TestPDFHasACoverContentsAndOneSheetPerSpecimen(test *testing.T) {
 	// cards is defined as a book that fits one contents sheet.
 	const cards = 5
-	sheets := readSheets(test, composeDocument(test,
-		writeTestBook(test, cards)))
+	document := composeDocument(test, writeTestBook(test, cards))
+	sheets := readSheets(test, document)
 	if want := coverSheets + firstName + cards; len(sheets) != want {
 		test.Fatalf("got %d sheets, want %d", len(sheets), want)
 	}
@@ -152,8 +154,8 @@ func TestPDFHasACoverContentsAndOneSheetPerSpecimen(test *testing.T) {
 func TestEveryCardsWordsAreOnItsOwnSheet(test *testing.T) {
 	// cards is defined as a few cards, enough to mix up.
 	const cards = 3
-	sheets := readSheets(test, composeDocument(test,
-		writeTestBook(test, cards)))
+	document := composeDocument(test, writeTestBook(test, cards))
+	sheets := readSheets(test, document)
 	for index := range cards {
 		kind := fmt.Sprintf("kind-%d", index)
 		words := sheets[titleSheet(sheets, kind)].words()
@@ -178,8 +180,8 @@ func TestContentsNumbersAreTheSheetsSpecimensAreOn(test *testing.T) {
 	// cards is defined as enough specimens that the contents runs to
 	// a second sheet.
 	const cards = 70
-	sheets := readSheets(test, composeDocument(test,
-		writeTestBook(test, cards)))
+	document := composeDocument(test, writeTestBook(test, cards))
+	sheets := readSheets(test, document)
 	if first := titleSheet(sheets, "kind-0"); first <= coverSheets+
 		firstName {
 		test.Fatalf("the contents did not run to a second sheet (kind-0"+
@@ -218,7 +220,8 @@ func TestLongNotesRunOnToASecondSheetInsideTheMargins(test *testing.T) {
 	made := testBook(twoCards)
 	made.Cards[noEntries].Entry.Notes = strings.Repeat(testNotes+" ",
 		repeats)
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	if len(sheets) <= coverSheets+firstName+twoCards {
 		test.Fatal("long notes did not run on to another sheet")
 	}
@@ -236,7 +239,8 @@ func TestLongNotesRunOnToASecondSheetInsideTheMargins(test *testing.T) {
 	}
 	// proportions ends each sentence once, so a lost word shows here
 	// even where a sentence is split across sheets.
-	if strings.Count(strings.Join(wordsOf(sheets), " "),
+	allWords := wordsOf(sheets)
+	if strings.Count(strings.Join(allWords, " "),
 		"proportions.") != repeats+firstName {
 		test.Fatal("the long notes lost words in the wrapping")
 	}
@@ -282,7 +286,8 @@ const minimumSize = 11.0
 
 func TestAShortBookStaysOnOneSheetEach(test *testing.T) {
 	made := testBook(oneCard)
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	for _, each := range sheets {
 		if strings.Contains(each.words(), "continued") {
 			test.Fatal("a short card ran on to a second sheet")
@@ -363,8 +368,8 @@ func TestThePictureAndWordsOfARenderedCardAreNotAFailurePage(test *testing.T) {
 func TestEveryLaterSheetHasTheTitleAndItsNumberInTheFoot(test *testing.T) {
 	// cards is defined as a few cards.
 	const cards = 3
-	sheets := readSheets(test, composeDocument(test,
-		writeTestBook(test, cards)))
+	document := composeDocument(test, writeTestBook(test, cards))
+	sheets := readSheets(test, document)
 	if strings.Contains(sheets[noEntries].words(), "Page ") {
 		test.Fatal("the cover carries a page number")
 	}
@@ -424,7 +429,8 @@ func TestProvenanceNamesTheBinaryAndTheDevice(test *testing.T) {
 }
 
 func TestReferencesAreLinksAndAnOutlineListsGroupsAndKinds(test *testing.T) {
-	raw := string(composeDocument(test, writeTestBook(test, twoCards)))
+	document := composeDocument(test, writeTestBook(test, twoCards))
+	raw := string(document)
 	if strings.Count(raw, "/URI ("+testURL+")") < twoCards {
 		test.Fatal("the references are not link annotations")
 	}
@@ -513,13 +519,15 @@ func TestACoverThatCannotFitOneSheetIsRefused(test *testing.T) {
 
 func TestADetailIsNamedInTheContentsOnlyWhenTheBookHasMore(test *testing.T) {
 	made := testBook(twoCards)
-	one := readSheets(test, composeDocument(test, lay(test, made)))
+	oneDocument := composeDocument(test, lay(test, made))
+	one := readSheets(test, oneDocument)
 	if strings.Contains(one[coverSheets].words(), "(quick)") {
 		test.Fatal("a book of one detail names it on every row")
 	}
 	made.Cards[oneCard].Detail = "demo"
 	made.Cards[oneCard].Folder = "kind-1-demo"
-	two := readSheets(test, composeDocument(test, lay(test, made)))
+	twoDocument := composeDocument(test, lay(test, made))
+	two := readSheets(test, twoDocument)
 	if !strings.Contains(two[coverSheets].words(), "kind-1 (demo)") {
 		test.Fatal("two details are not told apart:",
 			two[coverSheets].words())
@@ -529,7 +537,8 @@ func TestADetailIsNamedInTheContentsOnlyWhenTheBookHasMore(test *testing.T) {
 func TestABookWithoutAProducerIsComposedAndSaysUnknown(test *testing.T) {
 	made := testBook(oneCard)
 	made.Producer = nil
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	if strings.Contains(sheets[noEntries].words(), "Made by") {
 		test.Fatal("the cover names a producer the book lacks")
 	}
@@ -543,7 +552,8 @@ func TestACardsOwnBinaryIsNamedBeforeTheBooks(test *testing.T) {
 	made := testBook(oneCard)
 	made.Cards[noEntries].Producer = &producer{BinarySHA256: "0ddba11",
 		Revision: "beef"}
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	words := sheets[coverSheets+firstName].words()
 	if !strings.Contains(words, "Binary 0ddba11") ||
 		!strings.Contains(words, "Compiled revision beef") {
@@ -553,9 +563,10 @@ func TestACardsOwnBinaryIsNamedBeforeTheBooks(test *testing.T) {
 
 func TestAHashTooWideToShareALineGoesUnderItsLabel(test *testing.T) {
 	made := testBook(oneCard)
-	made.Cards[noEntries].Settings = strings.Repeat("ab", int(columnWidth/
-		courier.measure("a", hashStyle.size)))
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	across := columnWidth / courier.measure("a", hashStyle.size)
+	made.Cards[noEntries].Settings = strings.Repeat("ab", int(across))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	var label, value run
 	for _, shown := range sheets[coverSheets+firstName].runs {
 		if shown.text == "Settings" {
@@ -575,7 +586,8 @@ func TestAKindTooLongForTheContentsRowWrapsInsteadOfCrossingTheNumber(
 	test *testing.T) {
 	made := testBook(oneCard)
 	made.Cards[noEntries].Entry.Kind = strings.Repeat("long-kind ", 12)
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	for _, shown := range sheets[coverSheets].runs {
 		assertInside(test, shown)
 	}
@@ -610,7 +622,8 @@ func TestAnUnreadableRenderRecordIsRefusedByName(test *testing.T) {
 func TestACardWithNoSettingsHashNamesNone(test *testing.T) {
 	made := testBook(oneCard)
 	made.Cards[noEntries].Settings = ""
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	if strings.Contains(sheets[coverSheets+firstName].words(),
 		"Settings") {
 		test.Fatal("a card without a hash shows one")
@@ -620,7 +633,8 @@ func TestACardWithNoSettingsHashNamesNone(test *testing.T) {
 func TestACutawayCardSaysSo(test *testing.T) {
 	made := testBook(twoCards)
 	made.Cards[noEntries].Cutaway = true
-	sheets := readSheets(test, composeDocument(test, lay(test, made)))
+	document := composeDocument(test, lay(test, made))
+	sheets := readSheets(test, document)
 	if !strings.Contains(sheets[coverSheets+firstName].words(),
 		"Cutaway view: enclosure hidden.") ||
 		strings.Contains(sheets[coverSheets+firstName+firstName].words(),

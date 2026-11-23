@@ -25,7 +25,8 @@ func TestAMethodHoldsANonFiniteValueAndTheBodyRefusesThePart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	aurora, err := bodies.NewAurora(bodies.NewShell(km(1), km(2)),
+	auroraShell := bodies.NewShell(km(1), km(2))
+	aurora, err := bodies.NewAurora(auroraShell,
 		measure.Radians(0), measure.Radians(0), measure.Radians(0),
 		maths.Share(0.5), maths.Share(0.5), 1, bodies.AuroraColours{})
 	if err != nil {
@@ -52,6 +53,7 @@ func TestAMethodHoldsANonFiniteValueAndTheBodyRefusesThePart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	pixel := image.NewRGBA(image.Rect(0, 0, 1, 1))
 	for name, c := range map[string]struct {
 		part bodies.Part
 		want string
@@ -62,7 +64,7 @@ func TestAMethodHoldsANonFiniteValueAndTheBodyRefusesThePart(t *testing.T) {
 		"flare":   {flare.Radiating(bad), "Flare.Radiating's radiant gives NaN"},
 		"ground":  {ground.Radiating(bad), "Ground.Radiating's radiant gives NaN"},
 		"air":     {air.Radiating(bad), "Air.Radiating's radiant gives NaN"},
-		"turn":    {ground.Mapped(image.NewRGBA(image.Rect(0, 0, 1, 1)), measure.Radians(nan)), "Ground.Mapped's turn is NaN"},
+		"turn":    {ground.Mapped(pixel, measure.Radians(nan)), "Ground.Mapped's turn is NaN"},
 		"profile": {rings.Profiled([]float64{1, nan}), "Rings.Profiled's element 1 is NaN"},
 	} {
 		_, err := bodies.NewBody("a", bodies.Rock, km(1),

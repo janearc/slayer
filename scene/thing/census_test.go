@@ -11,37 +11,91 @@ import (
 	"github.com/janearc/slayer/scene/shape"
 )
 
-// gridSide is the test height field's samples a side.
-const gridSide = 3
+// The places in a list of corners, and what a face is made of; each true
+// by definition.
+const (
+	censusCorners = 3            // defined: the corners of a triangle
+	censusFirst   = nought       // defined: the first place in a list
+	censusSecond  = unity        // defined: the place after the first
+	censusThird   = pair         // defined: the place after the second
+	censusFourth  = pair + unity // defined: the place after the third
+	censusNoFaces = nought       // defined: an analytic shape has none
+)
 
-// triangle is a mesh of one face.
-func triangle(t *testing.T) *mesh.Mesh {
+// The csv files the census tests read.
+const (
+	censusThings = "testdata/census-things.csv"
+	censusTotals = "testdata/census-totals.csv"
+	censusKinds  = "testdata/census-analytic.csv"
+)
+
+// The rows and columns the census tests ask for by name.
+const (
+	censusKnown  = "known"
+	censusHeight = "height-field"
+	censusPlane  = "plane"
+	censusSphere = "sphere"
+	censusGrids  = "grids"
+	censusGridAt = "grid-place"
+	censusCount  = "count"
+	censusFaces  = "faces"
+)
+
+// censusFaceKey is the key json gives a face count.
+const censusFaceKey = "faces"
+
+// censusGridSide is the test height field's samples a side.
+func censusGridSide(t *testing.T) int {
 	t.Helper()
-	made, err := mesh.New([]maths.Vec{maths.V(0, 0, 0), maths.V(1, 0, 0),
-		maths.V(0, 1, 0)}, [][3]int{{0, 1, 2}}, nil, false)
+	return pickedCount(t, "census-grid-side")
+}
+
+// censusSphereShape is the sphere the census tests count.
+func censusSphereShape(t *testing.T) shape.Sphere {
+	t.Helper()
+	return shape.Sphere{Radius: picked(t, "census-sphere-radius")}
+}
+
+// censusMesh is a mesh of the corners and faces, or a stop.
+func censusMesh(t *testing.T, corners []maths.Vec,
+	faces [][censusCorners]int) *mesh.Mesh {
+	t.Helper()
+	made, err := mesh.New(corners, faces, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return made
+}
+
+// triangle is a mesh of one face.
+func triangle(t *testing.T) *mesh.Mesh {
+	t.Helper()
+	corners := []maths.Vec{maths.V(nought, nought, nought),
+		maths.V(unity, nought, nought), maths.V(nought, unity, nought)}
+	faces := [][censusCorners]int{
+		{censusFirst, censusSecond, censusThird}}
+	return censusMesh(t, corners, faces)
 }
 
 // square is a mesh of two faces.
 func square(t *testing.T) *mesh.Mesh {
 	t.Helper()
-	made, err := mesh.New([]maths.Vec{maths.V(0, 0, 0), maths.V(1, 0, 0),
-		maths.V(1, 1, 0), maths.V(0, 1, 0)}, [][3]int{{0, 1, 2},
-		{0, 2, 3}}, nil, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return made
+	corners := []maths.Vec{maths.V(nought, nought, nought),
+		maths.V(unity, nought, nought), maths.V(unity, unity, nought),
+		maths.V(nought, unity, nought)}
+	faces := [][censusCorners]int{
+		{censusFirst, censusSecond, censusThird},
+		{censusFirst, censusThird, censusFourth}}
+	return censusMesh(t, corners, faces)
 }
 
-// grid is a flat height field gridSide samples a side.
+// grid is a flat height field censusGridSide samples a side.
 func grid(t *testing.T) *shape.HeightField {
 	t.Helper()
-	made, err := shape.NewHeightField(make([]float64, gridSide*gridSide),
-		gridSide, 1)
+	side := censusGridSide(t)
+	heights := make([]float64, side*side)
+	made, err := shape.NewHeightField(heights, side,
+		picked(t, "census-grid-spacing"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,9 +116,74 @@ func knownWorld(t *testing.T) *World {
 	}
 	return &World{Things: []*Thing{{Shape: one,
 		Material: &Material{Name: "hull"}}, {Shape: two}, {Shape: group},
-		{Shape: shape.Sphere{Radius: 1}}, {Shape: shape.Plane{}},
+		{Shape: censusSphereShape(t)}, {Shape: shape.Plane{}},
 		{Shape: grid(t)}, {Shape: one, Attrs: Attrs{Hidden: true}}},
 		Volumes: []*Volume{{Medium: medium.Puff{}}, {Medium: medium.Puff{}}}}
+}
+
+// censusKnownTotals is the row of counts the known world must give.
+func censusKnownTotals(t *testing.T) map[string]string {
+	t.Helper()
+	rows := readSheet(t, censusTotals)
+	return rows.row(t, censusTotals, censusKnown)
+}
+
+// censusKindCount is the count in a named row of the analytic table.
+func censusKindCount(t *testing.T, name string) int {
+	t.Helper()
+	rows := readSheet(t, censusKinds)
+	return cellCount(t, rows.row(t, censusKinds, name), censusCount)
+}
+
+// censusHasNoFaces says a worked face count stands for a shape with none.
+func censusHasNoFaces(want int) bool { return want < censusNoFaces }
+
+// censusCheckFaces checks each placed thing's faces against its row.
+func censusCheckFaces(t *testing.T, got Census) {
+	t.Helper()
+	for index, each := range readSheet(t, censusThings) {
+		want := cellCount(t, each, censusFaces)
+		row := got.Placed[index]
+		if censusHasNoFaces(want) != (row.Faces == nil) ||
+			(row.Faces != nil && *row.Faces != want) {
+			t.Errorf("thing %d: faces %v, want %d", index, row.Faces, want)
+		}
+	}
+}
+
+// censusCheckGroup checks the group's kind, stored faces and instances.
+func censusCheckGroup(t *testing.T, got Census, row map[string]string) {
+	t.Helper()
+	group := got.Placed[cellCount(t, row, "groupPlace")]
+	if group.Kind != kindMeshGroup ||
+		*group.StoredFaces != cellCount(t, row, "groupStored") ||
+		group.Instances != cellCount(t, row, "groupInstances") {
+		t.Errorf("the group: %+v", group)
+	}
+}
+
+// censusCheckTotals checks the totals against the known world's row.
+func censusCheckTotals(t *testing.T, total censusTotal,
+	row map[string]string) {
+	t.Helper()
+	if total.FacesStaged != cellCount(t, row, "staged") ||
+		total.FacesStored != cellCount(t, row, "stored") ||
+		total.Instances != cellCount(t, row, "instances") ||
+		total.Things != cellCount(t, row, "things") ||
+		total.Hidden != cellCount(t, row, "hidden") ||
+		total.HiddenFaces != cellCount(t, row, "hiddenFaces") {
+		t.Errorf("the totals: %+v", total)
+	}
+}
+
+// censusCheckVolumes checks the volumes are counted by kind.
+func censusCheckVolumes(t *testing.T, got Census, row map[string]string) {
+	t.Helper()
+	want := kindCount{Kind: "medium.Puff", Count: cellCount(t, row, "puffs")}
+	if len(got.Volumes) != cellCount(t, row, "volumeKinds") ||
+		got.Volumes[censusFirst] != want {
+		t.Errorf("the volumes: %+v", got.Volumes)
+	}
 }
 
 // a world of known geometry counts exactly: each mesh its faces, the
@@ -75,46 +194,37 @@ func TestACensusOfKnownGeometryIsExact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	faces := []int{1, 2, 5, -1, -1, -1, 1}
-	for index, want := range faces {
-		row := got.Placed[index]
-		if (want < 0) != (row.Faces == nil) ||
-			(row.Faces != nil && *row.Faces != want) {
-			t.Errorf("thing %d: faces %v, want %d", index, row.Faces, want)
-		}
+	row := censusKnownTotals(t)
+	censusCheckFaces(t, got)
+	censusCheckGroup(t, got, row)
+	censusCheckTotals(t, got.Total, row)
+	first := got.Placed[censusFirst]
+	if first.Material != "hull" || first.Kind != kindMesh {
+		t.Errorf("the first thing: %+v", first)
 	}
-	group := got.Placed[2]
-	if group.Kind != kindMeshGroup || *group.StoredFaces != 3 ||
-		group.Instances != 4 {
-		t.Errorf("the group: %+v", group)
-	}
-	total := got.Total
-	if total.FacesStaged != 9 || total.FacesStored != 3 ||
-		total.Instances != 4 || total.Things != 7 || total.Hidden != 1 ||
-		total.HiddenFaces != 1 {
-		t.Errorf("the totals: %+v", total)
-	}
-	if got.Placed[0].Material != "hull" || got.Placed[0].Kind != kindMesh {
-		t.Errorf("the first thing: %+v", got.Placed[0])
-	}
-	if len(got.Volumes) != 1 || got.Volumes[0] !=
-		(KindCount{Kind: "medium.Puff", Count: 2}) {
-		t.Errorf("the volumes: %+v", got.Volumes)
-	}
+	censusCheckVolumes(t, got, row)
+}
+
+// censusAnalyticWorld is a sphere, a plane, a height field and a second
+// sphere, in that order.
+func censusAnalyticWorld(t *testing.T) *World {
+	t.Helper()
+	return &World{Things: []*Thing{{Shape: censusSphereShape(t)},
+		{Shape: shape.Plane{}}, {Shape: grid(t)}, {Shape: shape.Sphere{}}}}
 }
 
 // the anti-test: an analytic shape is never given faces. The sphere, the
 // plane and the height field are counted by kind, the height field says
 // its grid, and none of them adds a face to the totals.
 func TestAnAnalyticShapeIsNeverGivenFaces(t *testing.T) {
-	world := &World{Things: []*Thing{{Shape: shape.Sphere{Radius: 1}},
-		{Shape: shape.Plane{}}, {Shape: grid(t)}, {Shape: shape.Sphere{}}}}
-	got, err := Count(world)
+	got, err := Count(censusAnalyticWorld(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []KindCount{{Kind: kindHeightField, Count: 1},
-		{Kind: "shape.Plane", Count: 1}, {Kind: "shape.Sphere", Count: 2}}
+	want := []kindCount{
+		{Kind: kindHeightField, Count: censusKindCount(t, censusHeight)},
+		{Kind: "shape.Plane", Count: censusKindCount(t, censusPlane)},
+		{Kind: "shape.Sphere", Count: censusKindCount(t, censusSphere)}}
 	if len(got.Analytic) != len(want) {
 		t.Fatalf("the analytic shapes: %+v", got.Analytic)
 	}
@@ -124,16 +234,25 @@ func TestAnAnalyticShapeIsNeverGivenFaces(t *testing.T) {
 				got.Analytic[index], want[index])
 		}
 	}
-	if got.Total.FacesStaged != 0 || got.Total.FacesStored != 0 {
+	if got.Total.FacesStaged != censusNoFaces ||
+		got.Total.FacesStored != censusNoFaces {
 		t.Errorf("analytic shapes made faces: %+v", got.Total)
 	}
-	if len(got.Grids) != 1 || got.Grids[0] != (GridCount{Index: 2,
-		Samples: gridSide}) {
-		t.Errorf("the grids: %+v", got.Grids)
-	}
+	censusCheckGrids(t, got)
 	text, err := json.Marshal(got.Placed)
-	if err != nil || strings.Contains(string(text), "faces") {
+	if err != nil || strings.Contains(string(text), censusFaceKey) {
 		t.Errorf("an analytic row says faces: %s (%v)", text, err)
+	}
+}
+
+// censusCheckGrids checks the one height field, its place and its side.
+func censusCheckGrids(t *testing.T, got Census) {
+	t.Helper()
+	want := gridCount{Index: censusKindCount(t, censusGridAt),
+		Samples: censusGridSide(t)}
+	if len(got.Grids) != censusKindCount(t, censusGrids) ||
+		got.Grids[censusFirst] != want {
+		t.Errorf("the grids: %+v", got.Grids)
 	}
 }
 

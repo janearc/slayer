@@ -244,12 +244,8 @@ func (seen *crowd) blockedExcept(ray maths.Ray, far float64,
 	return false
 }
 
-// castsAny is whether any thing of a leaf stands in the ray's way.
-func (seen *crowd) castsAny(leaf *branch, ray maths.Ray, far float64) bool {
-	return seen.castsAnyExcept(leaf, ray, far, nil)
-}
-
-// castsAnyExcept is castsAny, but it ignores the thing skip.
+// castsAnyExcept is whether any thing of a leaf stands in the ray's way,
+// but it ignores the thing skip.
 func (seen *crowd) castsAnyExcept(leaf *branch, ray maths.Ray,
 	far float64, skip *thing.Thing) bool {
 	for _, index := range seen.order[leaf.from:leaf.to] {
@@ -264,12 +260,12 @@ func (seen *crowd) castsAnyExcept(leaf *branch, ray maths.Ray,
 }
 
 // casts is whether one thing stands in the ray's way: a clear thing
-// never does.
+// never does. It asks only whether the ray meets the thing and not where
+// (touches).
 func (seen *crowd) casts(index int, ray maths.Ray, far float64) bool {
 	placed := &seen.things[index]
 	if placed.thing.Clear() {
 		return false
 	}
-	_, ok := placed.meet(ray, 0, far)
-	return ok
+	return placed.touches(ray, 0, far)
 }

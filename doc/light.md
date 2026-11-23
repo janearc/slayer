@@ -14,6 +14,11 @@ along camera rays, but the tracer does not solve general indirect lighting
 from every glowing object onto everything nearby. Scene construction must
 supply the corresponding lamp when that effect is needed.
 
+The default surface mixture weights emission by the portion retained by
+the surface after reflection and transmission. A CPU material can opt into
+`IndependentEmission` to add its own surface emission separately, for
+example a luminous wake on clear water. Metal encoding refuses this option.
+
 `emit` supplies point/conical, polar, finite Gaussian beam, finite volume
 and distant sources. Their geometry, falloff and units differ. A finite
 disc source gives soft shadows through multiple source directions. A beam
@@ -109,7 +114,7 @@ not repeatedly illuminate one another, and isotropic painted mist does
 not model measured droplet asymmetry or polarization.
 
 See
-[volume environment lighting](volume-environment-lighting.md) for equations,
+[volume environment lighting](model/sky/volume-environment-lighting.md) for equations,
 controls and the optional incident-sky interpolation grid.
 
 ## The three kinds of stored light

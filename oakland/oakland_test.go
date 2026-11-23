@@ -37,7 +37,8 @@ func TestReadHumanKeepsClosureAndSharedGeometry(t *testing.T) {
 		t.Fatalf("source closure = %#v", closure)
 	}
 	for _, source := range closure {
-		data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source.Path())))
+		relative := filepath.FromSlash(source.Path())
+		data, err := os.ReadFile(filepath.Join(root, relative))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -424,7 +425,8 @@ func TestMultipleScenesRequireExplicitSelection(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(asset.Instances()) != 1 {
-		t.Fatalf("selected scene has %d instances, want one", len(asset.Instances()))
+		instances := len(asset.Instances())
+		t.Fatalf("selected scene has %d instances, want one", instances)
 	}
 }
 

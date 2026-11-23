@@ -1,7 +1,6 @@
 // Package gas supplies band-dependent absorption, scattering, and phase
 // functions. Extinction combines absorption and scattering losses. Emission is
-// not implemented: Gives returns no spectrum, and stored line data does not yet
-// produce emitted light.
+// not implemented: stored line data does not yet produce emitted light.
 //
 // The same coefficients serve view rays, lamp transmission, and cutoffs.
 // Comments distinguish sourced values from unverified or artistically tuned
@@ -24,7 +23,7 @@ type Gas struct {
 	Name    string
 	Sources []string
 	// Ranges are the numbers by range: libtheme's radiation profiles
-	// and thing.Visible for the eye's. A range not in it is opaque. A
+	// and thing.Visible() for the eye's. A range not in it is opaque. A
 	// band takes the narrowest range the table declares, as a
 	// thing.Spectrum does.
 	Ranges map[radiation.Range]Optics
@@ -45,12 +44,6 @@ type Gas struct {
 type Optics struct {
 	Absorb  float64
 	Scatter float64
-}
-
-// Absorb is the absorption per metre in a band.
-func (g Gas) Absorb(band maths.Band) float64 {
-	a, _ := g.optics(band)
-	return a
 }
 
 // Scatter is the scattering per metre in a band.
@@ -92,7 +85,7 @@ func (g Gas) optics(band maths.Band) (absorb, scatter float64) {
 		r := thing.Range(maths.Band{Nanometres: nm})
 		near := (r == radiation.Ultraviolet() || r == radiation.Infrared()) &&
 			nm > 300 && nm < 1200
-		if r == thing.Visible || near {
+		if r == thing.Visible() || near {
 			return g.Visible(nm)
 		}
 	}
@@ -179,7 +172,7 @@ func (g Gas) Spectrum(unit float64) *thing.Spectrum {
 	}
 	if g.Visible != nil {
 		a, s := g.Visible(550)
-		passes[thing.Visible] = math.Exp(-(a + s) * unit)
+		passes[thing.Visible()] = math.Exp(-(a + s) * unit)
 	}
 	return &thing.Spectrum{Passes: passes,
 		Gives: map[radiation.Range]float64{}}

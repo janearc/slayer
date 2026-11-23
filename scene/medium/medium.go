@@ -14,6 +14,26 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
+// The numbers every medium's arithmetic is written with, each true by
+// definition.
+const (
+	nought  = 0   // defined: the additive identity
+	unity   = 1   // defined: the multiplicative identity
+	halfway = 0.5 // defined: maps noise from minus one to one onto nought to one
+	double  = 2   // defined: the factor between a radius and a width
+)
+
+// origin is the middle of a medium's own space.
+var origin = maths.V(nought, nought, nought)
+
+// cube is the box of a half width about the origin.
+func cube(half float64) maths.Box { return maths.SegmentBox(origin, origin, half) }
+
+// corners is the box between two corners, taken in either order.
+func corners(first, second maths.Vec) maths.Box {
+	return maths.SegmentBox(first, second, nought)
+}
+
 // Medium is anything with a thickness at every point.
 type Medium interface {
 	// Density is how thick the medium is at p, per unit of distance in
@@ -24,13 +44,10 @@ type Medium interface {
 	// look: twice as big and half as thick per unit of the world, the
 	// same through the middle. A giant at any size is as opaque as its
 	// numbers say.
-	Density(p maths.Vec) float64
-	// Bounds is the box outside which the density is zero, so a ray marches
-	// only where there is something to add up.
-	//
-	// Plume, Jet and Tail reach past theirs, as they were first drawn:
-	// Plume by a quarter of Thick at its side, the other two by a
-	// hundredth. they are not widened here.
+	Density(point maths.Vec) float64
+	// Bounds is the box outside which the density is exactly zero, at
+	// every point, so a ray marches only where there is something to add
+	// up. Inside it the density may be zero too.
 	Bounds() maths.Box
 }
 
@@ -39,7 +56,7 @@ type Medium interface {
 // is the same at every time.
 type Timed interface {
 	Medium
-	Tick(t time.Duration) Medium
+	Tick(at time.Duration) Medium
 }
 
 // Spanner is a medium that can say exactly where a ray enters and leaves
@@ -49,7 +66,7 @@ type Timed interface {
 type Spanner interface {
 	// Span is where the ray enters and leaves the medium between near
 	// and far, if it does.
-	Span(r maths.Ray, near, far float64) (enter, leave float64, ok bool)
+	Span(ray maths.Ray, near, far float64) (enter, leave float64, ok bool)
 }
 
 // Interval is one contiguous occupied ray segment in a medium's local units.
@@ -59,25 +76,27 @@ type Interval struct{ Enter, Leave float64 }
 // SplitSpanner preserves both sides of a hollow shell without marching its
 // empty interior. At most two disjoint intervals are returned, nearest first.
 type SplitSpanner interface {
-	Spans(r maths.Ray, near, far float64) [2]Interval
+	Spans(ray maths.Ray, near, far float64) [shellLegs]Interval
 }
 
-// sphere is where a ray enters and leaves a ball of radius rad about the
+// sphere is where a ray enters and leaves a ball of the radius about the
 // origin, between near and far: the two roots, each kept inside the range.
-func sphere(rad float64, r maths.Ray, near, far float64) (float64, float64,
-	bool) {
+func sphere(radius float64, ray maths.Ray, near, far float64) (float64,
+	float64, bool) {
 	// Name the fused operations used by the recorded arm64 renderer.
 	// Otherwise coverage instrumentation can change which product the
 	// compiler rounds first, moving the same ray's roots by a last bit.
-	b := math.FMA(r.At.Z, r.Dir.Z, math.FMA(r.At.X, r.Dir.X, r.At.Y*r.Dir.Y))
-	squared := math.FMA(r.At.Z, r.At.Z, math.FMA(r.At.Y, r.At.Y, r.At.X*r.At.X))
-	c := math.FMA(-rad, rad, squared)
-	disc := math.FMA(b, b, -c)
-	if disc < 0 {
-		return 0, 0, false
+	along := math.FMA(ray.At.Z, ray.Dir.Z,
+		math.FMA(ray.At.X, ray.Dir.X, ray.At.Y*ray.Dir.Y))
+	squared := math.FMA(ray.At.Z, ray.At.Z,
+		math.FMA(ray.At.Y, ray.At.Y, ray.At.X*ray.At.X))
+	offset := math.FMA(-radius, radius, squared)
+	discriminant := math.FMA(along, along, -offset)
+	if discriminant < nought {
+		return nought, nought, false
 	}
-	root := math.Sqrt(disc)
-	enter, leave := math.Max(-b-root, near), math.Min(-b+root, far)
+	root := math.Sqrt(discriminant)
+	enter, leave := math.Max(-along-root, near), math.Min(-along+root, far)
 	return enter, leave, leave > enter
 }
 
@@ -90,22 +109,23 @@ type Puff struct {
 }
 
 // Bounds is the cube the puff just fits in.
-func (p Puff) Bounds() maths.Box {
-	r := p.Radius
-	return maths.Box{Min: maths.V(-r, -r, -r), Max: maths.V(r, r, r)}
+func (puff Puff) Bounds() maths.Box {
+	return cube(puff.Radius)
 }
 
 // Span is where a ray crosses the puff's ball.
-func (p Puff) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	return sphere(p.Radius, r, near, far)
+func (puff Puff) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	return sphere(puff.Radius, ray, near, far)
 }
 
 // Density is Thick at the middle, falling smoothly to zero at the edge.
-func (p Puff) Density(at maths.Vec) float64 {
-	if p.Radius <= 0 {
-		return 0
+func (puff Puff) Density(point maths.Vec) float64 {
+	if puff.Radius <= nought {
+		return nought
 	}
-	return p.Thick * (1 - maths.Smooth(0, 1, at.Len()/p.Radius))
+	return puff.Thick * (unity - maths.Smooth(nought, unity,
+		point.Len()/puff.Radius))
 }
 
 // Wispy is a medium made ragged by noise: its density thinned by a fractal
@@ -124,37 +144,48 @@ type Wispy struct {
 }
 
 // Bounds is the medium's own.
-func (w Wispy) Bounds() maths.Box {
-	if w.Of == nil {
-		return maths.Box{}
+func (wispy Wispy) Bounds() maths.Box {
+	if wispy.Of == nil {
+		return corners(origin, origin)
 	}
-	return w.Of.Bounds()
+	return wispy.Of.Bounds()
 }
 
 // Span is the medium's own, when it has one; otherwise its box's.
-func (w Wispy) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	if sp, ok := w.Of.(Spanner); ok {
-		return sp.Span(r, near, far)
+func (wispy Wispy) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	if spanner, ok := wispy.Of.(Spanner); ok {
+		return spanner.Span(ray, near, far)
 	}
-	return w.Bounds().Hit(r, near, far)
+	return wispy.Bounds().Hit(ray, near, far)
+}
+
+// Tick is the wisps of the medium as it is at a time: the medium moves as
+// it does, when it does, and the noise stands still.
+func (wispy Wispy) Tick(at time.Duration) Medium {
+	if timed, ok := wispy.Of.(Timed); ok {
+		wispy.Of = timed.Tick(at)
+	}
+	return wispy
 }
 
 // Density is the medium's, thinned by the noise at that point.
-func (w Wispy) Density(p maths.Vec) float64 {
-	if w.Of == nil {
-		return 0
+func (wispy Wispy) Density(point maths.Vec) float64 {
+	if wispy.Of == nil {
+		return nought
 	}
-	d := w.Of.Density(p)
-	if d == 0 {
-		return 0
+	density := wispy.Of.Density(point)
+	if density == nought {
+		return nought
 	}
-	scale := w.Scale
-	if scale <= 0 {
-		scale = 1
+	scale := wispy.Scale
+	if scale <= nought {
+		scale = unity
 	}
-	n := noise.Fractal(w.Seed, p.X/scale, p.Y/scale, p.Z/scale, 4)
-	thin := math.Max(0, math.Min(1, w.Amount))
-	return d * (1 - thin*(0.5+0.5*n))
+	grain := noise.Fractal(wispy.Seed, point.X/scale, point.Y/scale,
+		point.Z/scale, chosen.wispyOctaves)
+	thin := math.Max(nought, math.Min(unity, wispy.Amount))
+	return density * (unity - thin*(halfway+halfway*grain))
 }
 
 // Giant is the body of a gas giant: clear above Radius, and below it
@@ -169,25 +200,25 @@ type Giant struct {
 }
 
 // Bounds is the cube the giant just fits in.
-func (g Giant) Bounds() maths.Box {
-	r := g.Radius
-	return maths.Box{Min: maths.V(-r, -r, -r), Max: maths.V(r, r, r)}
+func (giant Giant) Bounds() maths.Box {
+	return cube(giant.Radius)
 }
 
 // Span is where a ray crosses the giant's ball: its cloud tops.
-func (g Giant) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	return sphere(g.Radius, r, near, far)
+func (giant Giant) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	return sphere(giant.Radius, ray, near, far)
 }
 
 // Density is zero outside Radius and rises smoothly to Thick by Depth below it,
 // staying there all the way down.
-func (g Giant) Density(p maths.Vec) float64 {
-	if g.Radius <= 0 || g.Depth <= 0 {
-		return 0
+func (giant Giant) Density(point maths.Vec) float64 {
+	if giant.Radius <= nought || giant.Depth <= nought {
+		return nought
 	}
-	below := g.Radius - p.Len()
-	if below <= 0 {
-		return 0
+	below := giant.Radius - point.Len()
+	if below <= nought {
+		return nought
 	}
-	return g.Thick * maths.Smooth(0, g.Depth, below)
+	return giant.Thick * maths.Smooth(nought, giant.Depth, below)
 }

@@ -132,8 +132,9 @@ func linesOf(keys, defs map[string]described, indent string) []string {
 		if each.Description == "" && each.Ref != "" {
 			each = defs[strings.TrimPrefix(each.Ref, defsPrefix)]
 		}
+		oneLined := oneLine(each.Description)
 		lines = append(lines, fmt.Sprintf("%s- `%s`: %s", indent, name,
-			oneLine(each.Description)))
+			oneLined))
 		lines = append(lines, linesOf(each.Properties, defs,
 			indent+guideIndent)...)
 	}

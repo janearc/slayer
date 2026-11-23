@@ -17,7 +17,7 @@ import (
 // and rings the high modes; a soft blow is a long pulse and rings only
 // the low ones.
 
-// Modal is a modal channel's sound. Set names a shipped object (modes.go)
+// modal is a modal channel's sound. Set names a shipped object (modes.go)
 // or modes lists the object's own. Hardness is the blow, nought (a soft
 // mallet) to one (metal on metal). Decay is the seconds the lowest mode
 // takes to fall sixty decibels; a named set's higher modes die faster.
@@ -25,17 +25,17 @@ import (
 // Release, when it is given, is the seconds the sound takes to die once
 // the note is let go, as if a hand were laid on it; without it the object
 // rings on freely.
-type Modal struct {
+type modal struct {
 	Set      string  `json:"set"`
-	Modes    []Mode  `json:"modes"`
+	Modes    []mode  `json:"modes"`
 	Hardness float64 `json:"hardness"`
 	Decay    float64 `json:"decay"`
 	Release  float64 `json:"release"`
 }
 
-// Mode is one resonance: its frequency as a ratio to the note, the
+// mode is one resonance: its frequency as a ratio to the note, the
 // seconds it takes to fall sixty decibels, and its level.
-type Mode struct {
+type mode struct {
 	Ratio float64 `json:"ratio"`
 	Decay float64 `json:"decay"`
 	Level float64 `json:"level"`
@@ -74,7 +74,7 @@ func setNames() string {
 }
 
 // checkModal is a modal channel's own rules.
-func checkModal(c *Channel, q *quarrel) {
+func checkModal(c *channel, q *quarrel) {
 	m := c.Modal
 	_, named := modeSets[m.Set]
 	switch {
@@ -106,13 +106,13 @@ func checkModal(c *Channel, q *quarrel) {
 
 // modalEngine is a modal channel ready to sound.
 type modalEngine struct {
-	modal *Modal
-	modes []Mode
+	modal *modal
+	modes []mode
 }
 
 // buildModal is the engine for a checked modal channel: the channel's own
 // modes, or a named set's with the times its loss gives them.
-func buildModal(c *Channel) engine {
+func buildModal(c *channel) engine {
 	e := &modalEngine{modal: c.Modal, modes: c.Modal.Modes}
 	if set, ok := modeSets[c.Modal.Set]; ok {
 		e.modes = setModes(set, c.Modal.Decay)
@@ -122,11 +122,11 @@ func buildModal(c *Channel) engine {
 
 // setModes is a named set's modes with the times its loss gives them,
 // the lowest ringing for the decay.
-func setModes(set modeSet, decay float64) []Mode {
-	var modes []Mode
+func setModes(set modeSet, decay float64) []mode {
+	var modes []mode
 	for i, ratio := range set.ratios {
 		rings := decay / math.Pow(ratio/set.ratios[0], set.loss)
-		modes = append(modes, Mode{Ratio: ratio,
+		modes = append(modes, mode{Ratio: ratio,
 			Decay: math.Max(rings, modeTimeLeast),
 			Level: set.levels[i]})
 	}

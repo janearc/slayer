@@ -104,6 +104,9 @@ func (work *Workspace) setPlayMode(mode string) {
 
 // changePose creates one source-history entry and one debounced native draw.
 func (work *Workspace) changePose(east, north, heading float64) error {
+	if err := work.fullRenderRefusal("changing the scene"); err != nil {
+		return err
+	}
 	if work.play.selected == "" {
 		return fmt.Errorf("choose an object in the world first")
 	}
@@ -153,6 +156,9 @@ func (work *Workspace) playKey(key *event.KeyEvent) bool {
 		return true
 	case event.KeyL:
 		work.setPlayMode("look")
+		return true
+	case event.KeyD:
+		work.describeView()
 		return true
 	case event.KeyEscape:
 		work.play.disclosure = ""
@@ -209,7 +215,7 @@ func (work *Workspace) selectedObject() (draft.Object, bool) {
 func (work *Workspace) playLayout() widget.Widget {
 	idle := func() bool { return false }
 	top := primitives.HBox(
-		primitives.Text("ferruccio").FontSize(28).Color(appearance.Pink),
+		primitives.Text("ferruccio").FontSize(work.size*headingSizeRatio).Color(appearance.Pink),
 		primitives.Expanded(work.scenePicker()),
 		work.action("Open…", false, idle, work.open),
 		work.action("Save…", false, idle, func() { work.save(false) }),
@@ -238,6 +244,7 @@ func (work *Workspace) playLayout() widget.Widget {
 		work.action("Undo", false, idle, func() { work.undoCamera(work.ui.Window().Context(), false) }),
 		work.action("Redo", false, idle, func() { work.undoCamera(work.ui.Window().Context(), true) }),
 		work.action("Made from", work.play.disclosure == "construction", func() bool { return work.play.selected == "" }, func() { work.toggleDisclosure("construction") }),
+		work.action("Describe · D", false, idle, work.describeView),
 	).Gap(12).PaddingXY(24, 14).Background(appearance.Panel)
 	readout := primitives.HBox(primitives.Expanded(work.live(work.playReadout)), work.themePicker(), work.action("Type size", false, idle, func() {
 		if work.size >= 24 {
@@ -361,7 +368,7 @@ func (work *Workspace) returnToWorld() {
 func (work *Workspace) drawControl() widget.Widget {
 	if work.Running() {
 		return work.action("Stop", false, func() bool { return false }, func() {
-			work.stopPreview()
+			work.cancelRender()
 			work.caption = work.retainedImageCaption(work.status)
 			work.rebuild()
 		})

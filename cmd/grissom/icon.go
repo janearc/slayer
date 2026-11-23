@@ -1,5 +1,3 @@
-//go:build netcdf
-
 package main
 
 /*

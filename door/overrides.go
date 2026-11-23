@@ -43,8 +43,9 @@ func switchOverrides() []override {
 	var made []override
 	for _, each := range job.Switches() {
 		name := each.Name()
+		switchLine := each.Line()
 		made = append(made, override{verb.Name(name),
-			verb.Help(each.Line()), "on or off",
+			verb.Help(switchLine), "on or off",
 			func(value, _ string) (job.Override, bool) {
 				return job.Flagged(name, value == switchOn),
 					value == switchOn || value == switchOff

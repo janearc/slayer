@@ -78,8 +78,9 @@ func topicNamed(name string) (topic, error) {
 		return each.name == name
 	})
 	if at < nothing {
+		headingNames := topicNames()
 		return topic{}, fmt.Errorf("there is no heading %q; the "+
-			"headings are %s", name, strings.Join(topicNames(), ", "))
+			"headings are %s", name, strings.Join(headingNames, ", "))
 	}
 	return topics[at], nil
 }
@@ -106,9 +107,11 @@ func list(call pzm.Call) error {
 		}
 		return sayEntries(call.Out(), chosen, asJSON)
 	}
+	wordCount := len(call.Args())
+	headingNames := topicNames()
 	return fmt.Errorf("list takes one heading or none, not %d words: "+
-		"slayer list [%s]", len(call.Args()),
-		strings.Join(topicNames(), "|"))
+		"slayer list [%s]", wordCount,
+		strings.Join(headingNames, "|"))
 }
 
 // sayHeadings writes each topic and what it is, or as JSON every

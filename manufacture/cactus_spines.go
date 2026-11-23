@@ -1,6 +1,7 @@
 package manufacture
 
 import (
+	"errors"
 	"math"
 	"sync"
 
@@ -9,6 +10,11 @@ import (
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/shape"
 )
+
+// errUncountedSpines is a stem whose spines along it are not a count: a
+// run or a spacing of nought, or one that is not a number.
+var errUncountedSpines = errors.New("manufacture: a stem's spines along it " +
+	"are not a count")
 
 // cactusSpineCache has only the two supported physical-spine detail keys.
 var cactusSpineCache sync.Map
@@ -69,10 +75,9 @@ func (column cactusColumn) spines(members []shape.MeshMember,
 	prototype *mesh.Mesh,
 ) ([]shape.MeshMember, error) {
 	stem := column.stem
-	room := int(cactusValue("maximum-spines")) - len(members)
 	ratio := stem.run / cactusValue("spine-spacing")
-	if !positive(ratio) || ratio >= float64(room/stem.ribs+spaceOne) {
-		return nil, errTooMany
+	if !positive(ratio) {
+		return nil, errUncountedSpines
 	}
 	count := int(ratio)
 	for row := range count {

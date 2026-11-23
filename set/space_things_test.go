@@ -140,12 +140,14 @@ func TestALengthInRadiiNeedsAStar(t *testing.T) {
 
 // A kind of version 2 is refused in a file that names version 1.
 func TestKindsOfVersionTwoAreRefusedOutsideIt(t *testing.T) {
-	text := strings.Replace(v2Text(defaultFilm, one("a", "star", "")),
+	source := v2Text(defaultFilm, one("a", "star", ""))
+	text := strings.Replace(source,
 		ecosystemV2Schema, EcosystemSchema, 1)
 	if _, err := Read("t.yaml", []byte(text)); err == nil {
 		t.Error("a version 1 file with a star was taken")
 	}
-	legacy := strings.Replace(v2Text(defaultFilm, one("a", "star", "")),
+	legacySource := v2Text(defaultFilm, one("a", "star", ""))
+	legacy := strings.Replace(legacySource,
 		`"$schema": `+ecosystemV2Schema+"\n", "", 1)
 	if _, err := Read("t.yaml", []byte(legacy)); err == nil {
 		t.Error("a legacy file with a star was taken")

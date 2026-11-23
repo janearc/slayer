@@ -58,7 +58,6 @@ var (
 	whiteColour   = [3]float64{1, 1, 1}
 	magentaColour = [3]float64{1, 0.25, 0.85}
 	shipColour    = [3]float64{0.82, 0.9, 1.0}
-	darkColour    = [3]float64{0.55, 0.55, 0.55}
 )
 
 // drawRig draws the whole rig on a pane at a moment: every fixture

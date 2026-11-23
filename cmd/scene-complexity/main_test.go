@@ -106,11 +106,13 @@ func TestWriteReportsSetJobAndRetainsFailureRows(t *testing.T) {
 	}
 	path := writeJob(t, "scene: {set: "+setPath+"}\nrenderer: cpu\n")
 	var output bytes.Buffer
-	err = writeReports(t.Context(), []string{path, filepath.Join(t.TempDir(), "missing.yaml")}, "", false, &output)
+	missing := filepath.Join(t.TempDir(), "missing.yaml")
+	err = writeReports(t.Context(), []string{path, missing}, "", false, &output)
 	if err == nil || !strings.Contains(err.Error(), "failed") {
 		t.Fatalf("expected a reported failure: %v", err)
 	}
-	lines := strings.Split(strings.TrimSpace(output.String()), "\n")
+	trimmed := strings.TrimSpace(output.String())
+	lines := strings.Split(trimmed, "\n")
 	if len(lines) != 2 {
 		t.Fatalf("got %d JSON rows: %s", len(lines), output.String())
 	}

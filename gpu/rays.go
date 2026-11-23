@@ -43,6 +43,11 @@ type through struct {
 	eye           maths.Subspace
 	lens          film.Sensor
 	width, height int
+	// side is the samples along a pixel's side where they are spread
+	// over their pixels, and ramp the width of the slope of the filter
+	// they are spread under; nought where each starts at its own middle
+	side int
+	ramp float64
 }
 
 // lensRays readies the rays through a lens: every sample's ray now when
@@ -93,11 +98,21 @@ func (lensed *through) work(jobs <-chan int, made []byte, first int,
 	for y := range jobs {
 		at := (y - first) * lensed.width * rayStride
 		for x := range lensed.width {
-			ray := film.Look(lensed.eye, lensed.lens, x, y, lensed.width,
-				lensed.height, maths.Band{})
-			putRay(made[at+x*rayStride:], ray)
+			putRay(made[at+x*rayStride:], lensed.look(x, y))
 		}
 	}
+}
+
+// look is a sample's ray: through its middle, or, where the samples are
+// spread, through the place film.Within gives it in its pixel.
+func (lensed *through) look(x, y int) maths.Ray {
+	if lensed.side == wholeZero {
+		return film.Look(lensed.eye, lensed.lens, x, y, lensed.width,
+			lensed.height, maths.Band{})
+	}
+	across, down := film.Within(x, y, lensed.side, lensed.ramp)
+	return film.LookThrough(lensed.eye, lensed.lens, x, y, across, down,
+		lensed.width, lensed.height, maths.Band{})
 }
 
 // putRay writes a ray's start and its way, six float32s, as the scene's

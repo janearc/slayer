@@ -81,6 +81,7 @@ import (
 
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 	thin "github.com/janearc/slayer/ninjafilm/lens"
 )
 
@@ -144,22 +145,8 @@ func turned(share float64) uint64 {
 // seedOf is a frame's seed: its time in nanoseconds, stirred as SplitMix64
 // stirs a number, and cut to the header's thirty-two bits.
 func seedOf(at time.Duration) uint32 {
-	stirred := uint64(at) + splitGolden
-	stirred = (stirred ^ stirred>>splitFirst) * splitOnce
-	stirred = (stirred ^ stirred>>splitSecond) * splitTwice
-	return uint32(stirred ^ stirred>>splitThird)
+	return uint32(noise.Mix(uint64(at) + noise.Golden))
 }
-
-// SplitMix64's numbers, defined by Steele, Lea and Flood's generator, as
-// the kernel's unit_of has them.
-const (
-	splitGolden = 0x9e3779b97f4a7c15
-	splitOnce   = 0xbf58476d1ce4e5b9
-	splitTwice  = 0x94d049bb133111eb
-	splitFirst  = 30
-	splitSecond = 27
-	splitThird  = 31
-)
 
 // thinOf is the lens as a thin lens, and whether it is one, by value or
 // by pointer.
@@ -200,8 +187,12 @@ func (open shutter) over(eye maths.Subspace) bool {
 
 // viewValues is the header's fields that the eye, the lens and the
 // shutter make, for a picture width by height samples. A camera move,
-// another focus or another shutter changes these and nothing else. With
-// the shutter closed and no aperture the exposure's rows are all nought.
+// another focus or another shutter changes these and nothing else.
+//
+// With the shutter closed and no aperture the exposure's rows are all nought
+// but the samples along a pixel's side, which a wrinkle fades by. The
+// samples start at their middles; a drawer that spreads them writes that
+// over the header after (see spread.go).
 func viewValues(eye maths.Subspace, lens film.Sensor, open shutter, width,
 	height int) values {
 	pinhole, _ := pinholeOf(lens)
@@ -213,7 +204,8 @@ func viewValues(eye maths.Subspace, lens film.Sensor, open shutter, width,
 	given["optics"] = opticsOf(eye, glass, opened)
 	given["close_origin"], given["close_right"] = nil, nil
 	given["close_back"] = nil
-	given["exposure"] = wholes(wholeZero, flag(opened))
+	given["exposure"] = closedExposure(opened, open.side)
+	given["spread"] = nil
 	if !open.over(eye) {
 		return given
 	}
@@ -224,6 +216,21 @@ func viewValues(eye maths.Subspace, lens film.Sensor, open shutter, width,
 	given["exposure"] = wholes(wholeOne, flag(opened),
 		max(open.side, wholeOne), int(int32(seedOf(open.at))))
 	return given
+}
+
+// closedExposure is the header's exposure row with the shutter closed:
+// whether the aperture is open, and the samples along a pixel's side,
+// one at least.
+func closedExposure(opened bool, side int) []float64 {
+	return wholes(wholeZero, flag(opened), max(side, wholeOne))
+}
+
+// sideFor writes into the header the samples along a pixel's side, which
+// the per-call encode, whose shutter is always closed, is not given.
+func (encoded *scene) sideFor(lens film.Sensor, side int) {
+	_, opened := thinOf(lens)
+	headerStruct.patch(encoded.header.bytes,
+		values{"exposure": closedExposure(opened, side)})
 }
 
 // opticsOf is a thin lens as the header holds it, or nothing for a lens

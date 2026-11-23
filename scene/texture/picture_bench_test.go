@@ -14,7 +14,10 @@ func benchPicture() Picture {
 	r := rand.New(rand.NewSource(1))
 	for y := 0; y < 128; y++ {
 		for x := 0; x < 256; x++ {
-			img.Set(x, y, color.RGBA{uint8(r.Intn(256)), uint8(r.Intn(256)), uint8(r.Intn(256)), 255})
+			red := uint8(r.Intn(256))
+			green := uint8(r.Intn(256))
+			blue := uint8(r.Intn(256))
+			img.Set(x, y, color.RGBA{red, green, blue, 255})
 		}
 	}
 	return Picture{Image: img, Turn: 0.3}

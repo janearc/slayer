@@ -81,10 +81,14 @@ func TestPortedALeavingRayGathersItsLegShifted(t *testing.T) {
 	inside := (1 - keep) * gain
 	for _, scale := range []float64{1, 2} {
 		w := holeWorld(thing.Still(maths.Subspace{Scale: scale}))
-		w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: glowGiven(maths.Grey(1)),
-			Motion: stayed(maths.V(0, 0, -30*scale), scale)})
-		w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: glowGiven(maths.RGB(1, 0, 0)),
-			Motion: stayed(maths.V(0, 0, -60*scale), scale)})
+		white := glowGiven(maths.Grey(1))
+		whiteAt := stayed(maths.V(0, 0, -30*scale), scale)
+		w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: white,
+			Motion: whiteAt})
+		red := glowGiven(maths.RGB(1, 0, 0))
+		redAt := stayed(maths.V(0, 0, -60*scale), scale)
+		w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: red,
+			Motion: redAt})
 		got := lone(w, maths.Ray{At: maths.V(0, 0, -20*scale), Dir: maths.V(0, 0, -1)}, 0)
 		want := maths.RGB(inside+keep*((1-keep)+0), inside, inside-keep*keep)
 		coloursAre(t, "a ray out of the field", got, want, 1e-6)
@@ -103,8 +107,10 @@ func TestPortedALeavingRayGathersItsLegShifted(t *testing.T) {
 // optical depth is one and the ray then falls into the black hole.
 func TestJetFieldGainStrongStationaryEmitter(t *testing.T) {
 	w := holeWorld(nil)
+	glow := glowGiven(maths.Grey(1))
+	emitterAt := stayed(maths.V(0, 0, -4), 1)
 	w.AddVolume(thing.Volume{Medium: cube{k: 50, half: .01},
-		Material: glowGiven(maths.Grey(1)), Motion: stayed(maths.V(0, 0, -4), 1)})
+		Material: glow, Motion: emitterAt})
 	eye := maths.Ray{At: maths.V(0, 0, -20), Dir: maths.ZAxis}
 	got := lone(w, eye, 0)
 	shift := math.Sqrt((1 - 2.0/4) / (1 - 2.0/20))
@@ -118,11 +124,14 @@ func TestJetFieldGainStrongStationaryEmitter(t *testing.T) {
 
 func TestPortedALeavingRayThatMeetsASurfaceCoversTheWay(t *testing.T) {
 	w := holeWorld(nil)
-	w.AddVolume(thing.Volume{Medium: cube{k: math.Ln2 / 2, half: 1}, Material: glowGiven(maths.Grey(0)),
-		Motion: stayed(maths.V(0, 0, -30), 1)})
+	dark := glowGiven(maths.Grey(0))
+	blockAt := stayed(maths.V(0, 0, -30), 1)
+	w.AddVolume(thing.Volume{Medium: cube{k: math.Ln2 / 2, half: 1}, Material: dark,
+		Motion: blockAt})
+	wallAt := thing.Still(maths.Subspace{Origin: maths.V(0, 0, -100),
+		Orientation: maths.Orientation{X: maths.XAxis, Y: maths.ZAxis, Z: maths.YAxis.Neg()}})
 	w.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 0, -100),
-			Orientation: maths.Orientation{X: maths.XAxis, Y: maths.ZAxis, Z: maths.YAxis.Neg()}})})
+		Motion: wallAt})
 	got := lone(w, maths.Ray{At: maths.V(0, 0, -20), Dir: maths.V(0, 0, -1)}, 0)
 	coloursAre(t, "a wall seen through half", got, maths.Grey(0.5), 1e-6)
 	if got.Cover != 1 {
@@ -156,19 +165,23 @@ func ballBefore(at maths.Vec, radius float64) *thing.World {
 // is seen, as the field is not yet entered.
 func TestPortedWhatLiesBeforeTheFieldIsSeenAsItIsAndWhatLiesBehindTheHoleIsHidden(t *testing.T) {
 	ahead := maths.Ray{At: maths.V(0, 0, -100), Dir: maths.V(0, 0, 1)}
-	coloursAre(t, "a ball before the field", lone(ballBefore(maths.V(0, 0, -55), 1), ahead, 0),
+	before := ballBefore(maths.V(0, 0, -55), 1)
+	coloursAre(t, "a ball before the field", lone(before, ahead, 0),
 		maths.Grey(0.6), 1e-6)
-	coloursAre(t, "a ball behind the hole", lone(ballBefore(maths.V(0, 0, 20), 1), ahead, 0),
+	behind := ballBefore(maths.V(0, 0, 20), 1)
+	coloursAre(t, "a ball behind the hole", lone(behind, ahead, 0),
 		maths.Light{}, 0)
 
 	w := holeWorld(nil)
+	wallAt := thing.Still(maths.Subspace{Origin: maths.V(0, 0, -40),
+		Orientation: maths.Orientation{X: maths.XAxis, Y: maths.ZAxis, Z: maths.YAxis.Neg()}})
 	w.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Glow: maths.Grey(0.6)},
-		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 0, -40),
-			Orientation: maths.Orientation{X: maths.XAxis, Y: maths.ZAxis, Z: maths.YAxis.Neg()}})})
+		Motion: wallAt})
 	coloursAre(t, "a wall at the reach", lone(w, ahead, 0), maths.Grey(0.6), 1e-6)
 
 	near := maths.Ray{At: maths.V(0, 0, -40.5), Dir: maths.V(0, 0, 1)}
-	coloursAre(t, "a ball by the eye", lone(ballBefore(maths.V(0, 0, -40.3), 0.1), near, 0),
+	byTheEye := ballBefore(maths.V(0, 0, -40.3), 0.1)
+	coloursAre(t, "a ball by the eye", lone(byTheEye, near, 0),
 		maths.Grey(0.6), 1e-6)
 }
 
@@ -182,16 +195,22 @@ func TestPortedWhatLiesBeforeTheFieldIsSeenAsItIsAndWhatLiesBehindTheHoleIsHidde
 func TestPortedWhatLiesBetweenTheEyeAndTheFieldIsSeenThrough(t *testing.T) {
 	into := maths.Ray{At: maths.V(0, 0, -100), Dir: maths.V(0, 0, 1)}
 	w := holeWorld(nil)
-	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: glowGiven(maths.RGB(1, 0.5, 0.25)),
-		Motion: stayed(maths.V(0, 0, -70), 1)})
-	coloursAre(t, "a block in front of the hole", lone(w, into, 0),
-		maths.RGB(1, 0.5, 0.25).Scale(1-math.Exp(-1)), 1e-6)
+	glow := glowGiven(maths.RGB(1, 0.5, 0.25))
+	blockAt := stayed(maths.V(0, 0, -70), 1)
+	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: glow,
+		Motion: blockAt})
+	want := maths.RGB(1, 0.5, 0.25).Scale(1 - math.Exp(-1))
+	coloursAre(t, "a block in front of the hole", lone(w, into, 0), want, 1e-6)
 
 	w = holeWorld(nil)
-	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 0.2}, Material: glowGiven(maths.RGB(1, 0.5, 0.25)),
-		Motion: stayed(maths.V(0, 0, -40.25), 1)})
-	coloursAre(t, "a block in the gap by the reach", lone(w, maths.Ray{At: maths.V(0, 0, -40.5), Dir: maths.V(0, 0, 1)}, 0),
-		maths.RGB(1, 0.5, 0.25).Scale(1-math.Exp(-0.2)), 1e-6)
+	gapGlow := glowGiven(maths.RGB(1, 0.5, 0.25))
+	gapAt := stayed(maths.V(0, 0, -40.25), 1)
+	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 0.2}, Material: gapGlow,
+		Motion: gapAt})
+	gapWant := maths.RGB(1, 0.5, 0.25).Scale(1 - math.Exp(-0.2))
+	gapRay := maths.Ray{At: maths.V(0, 0, -40.5), Dir: maths.V(0, 0, 1)}
+	coloursAre(t, "a block in the gap by the reach", lone(w, gapRay, 0),
+		gapWant, 1e-6)
 }
 
 // a field of a mass so small it bends nothing a picture shows is a
@@ -227,8 +246,9 @@ func TestPortedAFieldOfNoMassIsAWindow(t *testing.T) {
 			z     float64
 			glows maths.Light
 		}{{-70, maths.RGB(1, 0, 0)}, {-20, maths.RGB(0, 1, 0)}} {
+			at := stayed(maths.V(0, 3, v.z), 1)
 			w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: glowGiven(v.glows),
-				Motion: stayed(maths.V(0, 3, v.z), 1)})
+				Motion: at})
 		}
 		return w
 	}
@@ -236,8 +256,9 @@ func TestPortedAFieldOfNoMassIsAWindow(t *testing.T) {
 	e := math.Exp(-1)
 
 	w := window()
+	ballAt := stayed(maths.V(0, 3, -10), 1)
 	w.Add(thing.Thing{Shape: shape.Sphere{Radius: 1}, Material: &thing.Material{Glow: maths.Grey(0.5)},
-		Motion: stayed(maths.V(0, 3, -10), 1)})
+		Motion: ballAt})
 	got := lone(w, ray, 0)
 	coloursAre(t, "red, green and a ball", got, maths.RGB((1-e)+e*e*0.5, e*(1-e)+e*e*0.5, e*e*0.5), 1e-4)
 	if got.Cover != 1 || !(got.Depth > 87 && got.Depth <= 89.01) {
@@ -245,10 +266,14 @@ func TestPortedAFieldOfNoMassIsAWindow(t *testing.T) {
 	}
 
 	w = window()
-	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: glowGiven(maths.RGB(0, 0, 1)),
-		Motion: stayed(maths.V(0, 3, 20), 1)})
-	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: glowGiven(maths.RGB(1, 1, 0)),
-		Motion: stayed(maths.V(0, 3, 70), 1)})
+	blue := glowGiven(maths.RGB(0, 0, 1))
+	blueAt := stayed(maths.V(0, 3, 20), 1)
+	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: blue,
+		Motion: blueAt})
+	yellow := glowGiven(maths.RGB(1, 1, 0))
+	yellowAt := stayed(maths.V(0, 3, 70), 1)
+	w.AddVolume(thing.Volume{Medium: cube{k: 0.5, half: 1}, Material: yellow,
+		Motion: yellowAt})
 	got = lone(w, ray, 0)
 	coloursAre(t, "red, green, blue, yellow and the sky", got,
 		maths.RGB((1-e)*(1+e*e*e), (1-e)*(e+e*e*e), e*e*(1-e)+e*e*e*e), 1e-4)
@@ -269,8 +294,10 @@ func TestPortedAMarchEndsWhenNothingBehindShows(t *testing.T) {
 	w.Lamps = nil
 	w.Sky = compass{}
 	w.AddField(thing.Field{Mass: 1e-6, Reach: 40})
-	w.AddVolume(thing.Volume{Medium: cube{k: 4, half: 1}, Material: glowGiven(maths.Grey(1)),
-		Motion: stayed(maths.V(0, 3, -20), 1)})
+	glow := glowGiven(maths.Grey(1))
+	blockAt := stayed(maths.V(0, 3, -20), 1)
+	w.AddVolume(thing.Volume{Medium: cube{k: 4, half: 1}, Material: glow,
+		Motion: blockAt})
 	got := lone(w, maths.Ray{At: maths.V(0, 3, -100), Dir: maths.V(0, 0, 1)}, 0)
 	if got.R != got.B || !(got.R > 0.999 && got.R < 1) {
 		t.Errorf("through the thick block: %+v, want grey just under 1", got)

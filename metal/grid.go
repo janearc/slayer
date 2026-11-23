@@ -26,10 +26,12 @@ var (
 // buffers from 0, as given; the picture is its next buffer, and the band's
 // first row the one after that.
 //
-// It draws the picture in bands of at most rows rows, one command each, so no
-// single command runs long enough for the system to stop it; the inputs are
-// made into buffers once for all the bands. Rows of zero or less is the whole
-// picture at once.
+// It draws the picture in bands, one command each; the inputs are made into
+// buffers once for all the bands. rows is the most rows a band holds, which
+// sizes the band buffers; zero or less lets a band hold the whole picture. How
+// many rows each band does hold is decided by the bands' times
+// (band_heights.go): the first is one row, and each after it at most twice
+// the last, unless FixBands fixes them.
 func (k *Kernel) Grid(width, height, rows, per int,
 	inputs [][]byte) ([]float32, error) {
 	if k.ctx == nil {
@@ -68,8 +70,7 @@ func (k *Kernel) Grid(width, height, rows, per int,
 	place := func(first, down int) []float32 {
 		return out[first*width*per : (first+down)*width*per]
 	}
-	drawing := bandDrawing{kernel: k, stream: stream, height: height,
-		rows: k.bandRows(rows)}
+	drawing := k.drawingOf(stream, height, rows)
 	if err := drawing.draw(place, keptInPlace); err != nil {
 		return nil, err
 	}

@@ -63,11 +63,11 @@ func TestTerrainSampleRegistrationHasNoHalfCellShift(t *testing.T) {
 
 func TestTerrainGeographicSourceCannotEnterLegacyMetreWindow(t *testing.T) {
 	r := Raster{placed: true, reference: SourceReference{Model: 2}}
-	_, err := r.WindowWithBudget(0, 0, 2, 2, 1, 32)
+	_, err := r.windowWithBudget(0, 0, 2, 2, 1, 32)
 	if err == nil || !strings.Contains(err.Error(), "geographic") {
 		t.Fatal(err)
 	}
-	_, err = r.ReadGrid(GridRequest{Across: 2, Down: 2, Step: 1}, 64)
+	_, err = r.ReadGrid(gridRequest{Across: 2, Down: 2, Step: 1}, 64)
 	if err == nil || !strings.Contains(err.Error(), "geographic") {
 		t.Fatal(err)
 	}

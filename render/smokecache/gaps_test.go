@@ -61,7 +61,8 @@ func TestStoreFailures(t *testing.T) {
 		if err := os.MkdirAll(parent, 0o755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(parent, key().Name()), []byte("x"), 0o644); err != nil {
+		target := filepath.Join(parent, key().Name())
+		if err := os.WriteFile(target, []byte("x"), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		e, err := Store(root, key(), "record", false, fill("a"))

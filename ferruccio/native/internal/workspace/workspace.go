@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gogpu/gogpu"
@@ -41,6 +42,8 @@ type Options struct {
 	Evidence                 string
 	Starter                  string
 	SuppressAutomaticPreview bool
+	// Settings is where the person's settings are read and saved.
+	Settings SettingsSource
 }
 
 // Workspace owns UI-thread state; background work returns only immutable results.
@@ -64,6 +67,14 @@ type Workspace struct {
 	acceptedText, acceptedPath          string
 	cancel                              context.CancelFunc
 	cancelRequested                     bool
+	fullRunning                         bool
+	unresolvedJob                       uint64
+	unresolvedPlan                      *preview.Plan
+	resolving                           bool
+	lastResolve                         time.Time
+	resolutions                         chan resolution
+	exampleFolder, reducedNote          string
+	renderBlocked                       bool
 	log                                 *boundedLog
 	closing, closeHook                  bool
 	lastCheck                           time.Time
@@ -80,6 +91,11 @@ type Workspace struct {
 	working                             workingState
 	library                             []sceneEntry
 	autoPreview                         bool
+	// settings says where settings are read and saved. wantSettings asks the
+	// next tick to open the sheet, from any thread; sheet is the one open.
+	settings     SettingsSource
+	wantSettings atomic.Bool
+	settingsOpen bool
 	// drawn says what drew the most recent Export.
 	drawn Drawn
 }
@@ -102,7 +118,7 @@ func New(host *gogpu.App, ui *app.App, options Options) (*Workspace, error) {
 	if err != nil {
 		return nil, err
 	}
-	work := &Workspace{host: host, ui: ui, options: options, size: 16, theme: appearance.Theme(), results: make(chan renderResult, 1), progress: make(chan renderProgress, 32), log: &boundedLog{}}
+	work := &Workspace{host: host, ui: ui, options: options, settings: options.Settings, size: 16, theme: appearance.Theme(), results: make(chan renderResult, 1), resolutions: make(chan resolution, 1), progress: make(chan renderProgress, 32), log: &boundedLog{}}
 	work.composition = "observe"
 	if options.Composition != "" {
 		if options.Composition != "play" && options.Composition != "observe" && options.Composition != "compose" {
@@ -142,6 +158,8 @@ func New(host *gogpu.App, ui *app.App, options Options) (*Workspace, error) {
 	})
 	work.editor.SetEscapeHandler(work.returnToWorld)
 	work.viewer = newImageView()
+	work.viewer.settingsHandler = work.requestSettings
+	work.editor.SetSettingsHandler(work.requestSettings)
 	work.viewer.SetNavigateHandler(func(yaw, pitch, zoom float64) {
 		work.problem(work.Navigate(yaw, pitch, zoom))
 	})
@@ -161,6 +179,7 @@ func New(host *gogpu.App, ui *app.App, options Options) (*Workspace, error) {
 			_, _ = work.log.Write([]byte("Starting view: " + err.Error() + "\n"))
 		}
 	}
+	work.noteMissingCache()
 	work.rebuild()
 	return work, nil
 }
@@ -190,6 +209,7 @@ func (work *Workspace) Tick() {
 					work.invalidate()
 				} else {
 					work.closing = true
+					work.releaseExample()
 					work.host.Quit()
 				}
 			})
@@ -201,6 +221,9 @@ func (work *Workspace) Tick() {
 		work.validate()
 		work.invalidate()
 	}
+	work.openSettingsIfAsked()
+	work.drainResolution()
+	work.recheckUnresolved()
 	work.drainProgress()
 	select {
 	case result := <-work.results:
@@ -226,12 +249,19 @@ func (work *Workspace) startRender(full bool) error {
 	if work.cancel != nil {
 		return fmt.Errorf("a preview is already running")
 	}
+	if err := work.refuseWhileUnresolved(); err != nil {
+		return err
+	}
 	if !work.rendererConfigured() {
 		return fmt.Errorf("configure the preview queue, renderer and shared render destination before drawing")
 	}
+	tools := work.renderTools()
+	if err := work.refuseWithoutCache(tools); err != nil {
+		return err
+	}
 	request := work.previewRequest(time.Now())
 	if full {
-		request.Profile = preview.Profile{Full: true, CPURenderer: true}
+		request.Profile = work.ownRender(preview.Profile{Full: true})
 		request.DirectoryPrefix = strings.Replace(request.DirectoryPrefix, "-preview-", "-full-", 1)
 	}
 	measured := observability.Enabled()
@@ -252,6 +282,7 @@ func (work *Workspace) startRender(full bool) error {
 	generation := work.generation
 	work.cancel = cancel
 	work.cancelRequested = false
+	work.fullRunning = full
 	work.diagnostic = ""
 	work.log.reset()
 	work.queueState, work.queueHeld = "", ""
@@ -276,7 +307,7 @@ func (work *Workspace) startRender(full bool) error {
 			started = time.Now()
 		}
 		var observation preview.Update
-		err := preview.RunObserved(ctx, work.options.Tools, plan, work.log, func(update preview.Update) {
+		err := preview.RunObserved(ctx, tools, plan, work.log, func(update preview.Update) {
 			observation = update
 			select {
 			case work.progress <- renderProgress{update: update, generation: generation}:
@@ -360,13 +391,23 @@ func (work *Workspace) rebuild() {
 
 // validate keeps invalid drafts editable and reports the schema's real error.
 func (work *Workspace) validate() {
-	if err := work.state.document.Check(); err != nil {
+	err := work.state.document.Check()
+	if err != nil {
 		work.status = "Draft needs attention"
 		work.diagnostic = err.Error()
 	} else {
 		work.status = "YAML checked · " + work.state.document.Kind()
 		work.diagnostic = ""
 	}
+	work.refreshRenderBlocked(err == nil)
+}
+
+// refreshRenderBlocked recomputes whether Render preview is unavailable for
+// reasons other than a render being under way. It runs when the source, the
+// path or the settings change, so painting never checks a schema or reads the
+// settings file.
+func (work *Workspace) refreshRenderBlocked(valid bool) {
+	work.renderBlocked = work.state.path == "" || !work.rendererConfigured() || !valid
 }
 
 // problem retains an actionable error in the visible status and detail dialog.
@@ -398,6 +439,9 @@ func (work *Workspace) protect(action func()) {
 
 // open chooses an existing file through the native macOS picker.
 func (work *Workspace) open() {
+	if work.refuseWhileFull("opening another file") {
+		return
+	}
 	work.protect(func() {
 		paths, err := work.host.ShowOpenFileDialog(gogpu.FileDialogOptions{Title: "Open a Slayer YAML file"})
 		if err != nil {
@@ -412,6 +456,7 @@ func (work *Workspace) open() {
 			return
 		}
 		work.resetDocumentView()
+		work.releaseExample()
 		work.exampleDraft = false
 		work.study = ""
 		work.selectSpecimen()
@@ -463,6 +508,7 @@ func (work *Workspace) save(as bool) bool {
 		return false
 	}
 	work.state.path = absolute
+	work.refreshRenderBlocked(work.state.document.Check() == nil)
 	work.exampleDraft = false
 	work.status = "Saved · " + filepath.Base(path)
 	work.invalidate()
@@ -475,7 +521,7 @@ func (work *Workspace) example(name string) error {
 	var folder string
 	if _, isStudy := studyForExample(name); isStudy {
 		var err error
-		path, study, err = copyBundledStudy(work.options.Examples, name)
+		path, study, err = copyBundledStudy(work.examplesFolder(), name)
 		if err != nil {
 			return err
 		}
@@ -485,7 +531,7 @@ func (work *Workspace) example(name string) error {
 		if filepath.IsAbs(clean) || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
 			return fmt.Errorf("example path escapes its bundled folder")
 		}
-		examples, err := filepath.Abs(work.options.Examples)
+		examples, err := filepath.Abs(work.examplesFolder())
 		if err != nil {
 			return err
 		}
@@ -520,10 +566,23 @@ func (work *Workspace) example(name string) error {
 		_ = os.RemoveAll(folder)
 		return err
 	}
+	work.releaseExample()
+	work.exampleFolder = folder
 	work.exampleDraft = true
 	work.study = study
 	work.selectSpecimen()
 	return nil
+}
+
+// releaseExample removes the temporary folder holding the open example's
+// copy. It runs when the document closes: another document replaces it, or
+// the window quits.
+func (work *Workspace) releaseExample() {
+	if work.exampleFolder == "" {
+		return
+	}
+	_ = os.RemoveAll(work.exampleFolder)
+	work.exampleFolder = ""
 }
 
 // chooseExample protects the draft before opening an editable bundled example.
@@ -533,6 +592,9 @@ func (work *Workspace) chooseExample(name string) {
 
 // chooseCatalogueExample declares the identity of a bundled study explicitly.
 func (work *Workspace) chooseCatalogueExample(name, specimen string) {
+	if work.refuseWhileFull("choosing an example") {
+		return
+	}
 	work.protect(func() {
 		if err := work.example(name); err != nil {
 			work.problem(err)
@@ -558,6 +620,9 @@ func (work *Workspace) chooseCatalogueExample(name, specimen string) {
 
 // reference displays credited mission imagery without pretending it is a render.
 func (work *Workspace) reference(place string) {
+	if work.refuseWhileFull("choosing a reference image") {
+		return
+	}
 	name, credit := "venus.jpg", "Venus · NASA / JPL Magellan · mission reference"
 	if place == "titan" {
 		name, credit = "titan-colour.jpg", "Titan · NASA / JPL / ESA / University of Arizona · mission reference"
@@ -583,7 +648,8 @@ func (work *Workspace) reference(place string) {
 	work.invalidate()
 }
 
-// showImage decodes a bounded real image, including a renderer's PNG output.
+// showImage decodes a real image, including a renderer's PNG output. A
+// picture over the viewer's limit is shown reduced and reducedNote says so.
 func (work *Workspace) showImage(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -594,8 +660,8 @@ func (work *Workspace) showImage(path string) error {
 	if err != nil {
 		return err
 	}
-	if configuration.Width <= 0 || configuration.Height <= 0 || int64(configuration.Width)*int64(configuration.Height) > 64*1024*1024 {
-		return fmt.Errorf("image exceeds the 64 megapixel viewer limit")
+	if configuration.Width <= 0 || configuration.Height <= 0 {
+		return fmt.Errorf("image has no pixels")
 	}
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
 		return err
@@ -604,6 +670,7 @@ func (work *Workspace) showImage(path string) error {
 	if err != nil {
 		return err
 	}
+	picture, work.reducedNote = reduceForViewer(picture, viewerPixelLimit)
 	work.working.photograph = picture
 	work.working.displayed = false
 	work.viewer.set(picture)
@@ -651,24 +718,34 @@ func (work *Workspace) action(label string, primary bool, disabled func() bool, 
 	return control
 }
 
+const (
+	// brandSizeRatio sizes the window's name as a multiple of the chosen text size.
+	brandSizeRatio = 1.875
+	// headingSizeRatio sizes a heading as a multiple of the chosen text size.
+	headingSizeRatio = 1.75
+)
+
 // layout gives the real image most of the window and keeps YAML always visible.
 func (work *Workspace) layout() widget.Widget {
+	if work.settingsOpen {
+		return work.settingsSheet()
+	}
 	if work.composition == "play" {
 		return work.playLayout()
 	}
 	idle := func() bool { return false }
 	busy := func() bool { return work.cancel != nil }
 	top := primitives.HBox(
-		primitives.Text("ferruccio").FontSize(30).Color(appearance.Pink),
+		primitives.Text("ferruccio").FontSize(work.size*brandSizeRatio).Color(appearance.Pink),
 		work.action("Observe", work.composition == "observe", idle, func() { work.composition = "observe"; work.rebuild() }),
 		work.action("Compose", work.composition == "compose", idle, func() { work.composition = "compose"; work.rebuild() }),
 		primitives.Expanded(primitives.Box()),
 		work.action("Open…", false, idle, work.open), work.action("Save", false, idle, func() { work.save(false) }), work.action("Save as…", false, idle, func() { work.save(true) }),
 		work.action("Render preview", true, func() bool {
-			return busy() || work.state.path == "" || !work.rendererConfigured() || work.state.document.Check() != nil
+			return busy() || work.renderBlocked
 		}, func() { work.problem(work.StartPreview()) }),
 		work.action("Stop", false, func() bool { return !work.Running() }, func() {
-			work.stopPreview()
+			work.cancelRender()
 			work.invalidate()
 		}),
 	).Gap(10).PaddingXY(20, 14).Background(appearance.Panel)
@@ -681,7 +758,10 @@ func (work *Workspace) layout() widget.Widget {
 	).Width(180).Padding(16).Gap(14).Background(appearance.Panel)
 	picture := primitives.VBox(work.live(func() string {
 		return strings.TrimSuffix(work.state.document.Name(), filepath.Ext(work.state.document.Name()))
-	}).FontSize(28), primitives.Expanded(work.viewer), work.live(func() string { return work.caption }), work.action("Open image…", false, idle, func() {
+	}).FontSize(work.size*headingSizeRatio), primitives.Expanded(work.viewer), work.live(func() string { return work.caption }), work.action("Open image…", false, idle, func() {
+		if work.refuseWhileFull("opening an image") {
+			return
+		}
 		paths, err := work.host.ShowOpenFileDialog(gogpu.FileDialogOptions{Title: "View a PNG or JPEG"})
 		if err != nil {
 			work.problem(err)
@@ -694,7 +774,7 @@ func (work *Workspace) layout() widget.Widget {
 			}
 			work.stopPreview()
 			work.output = ""
-			work.caption = "Image · " + filepath.Base(paths[0])
+			work.caption = "Image · " + filepath.Base(paths[0]) + work.reducedNote
 			work.invalidate()
 		}
 	})).Padding(18).Gap(12).Background(appearance.Ground)

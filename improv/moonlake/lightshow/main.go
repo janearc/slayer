@@ -754,7 +754,7 @@ func ufoBeam(sky, front, trees, water *picture, cam camera, moon [3]float64,
 }
 
 // the overhead: OVERHEAD_GAIN times the pass's rendered daylight at
-// full, through package rig's OverheadColour
+// full, through package rig's overhead colour
 var overheadGain = numberFrom("OVERHEAD_GAIN", 1)
 
 // the fires: FIRE_FRAMES is the fire pass rendered from ignition, NNN.pfm
@@ -1468,14 +1468,6 @@ func strobes(sky *picture, open []bool, rim func(int) int, cam camera,
 	}
 	return total
 }
-
-// the shore installations, on the left shore and the right tongue, cast
-// from row 640 of the 2K frame, 8 m over the water, from the eye; the
-// right beside its fire, the left where its fire first stood
-var (
-	shoreLeft  = vec{263652.4 - 263104.5, 2148337.2 - 2148423.5, waterZ + 8}
-	shoreRight = vec{263578.1 - 263104.5, 2148129.0 - 2148423.5, waterZ + 8}
-)
 
 // rigDeck is RIG_DECK, how far over its ground a head stands on its
 // tower's top deck, about 20.4 m on the stage tower. the towers are

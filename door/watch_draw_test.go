@@ -6,9 +6,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/render/live"
+	"github.com/janearc/slayer/session"
 )
 
 // the stager opens a session that draws the frame at the size asked,
@@ -20,7 +20,7 @@ func TestSessionsStageAJob(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stage, err := sessions{stamp: hillside.Stamp{}}.Stage(
+	stage, err := sessions{stamp: session.Stamp{}}.Stage(
 		context.Background(), wanted)
 	if err != nil {
 		t.Fatal(err)

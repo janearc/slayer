@@ -14,7 +14,7 @@ import (
 
 // pinholeDir is the rigless fixture: the marker set with its film's rig
 // taken off for a pinhole 45 degrees across, and a mask of each
-// camera's still traced from it by hillside, white where a marker
+// camera's still traced from it by the session, white where a marker
 // glows. The places are the marker set's own.
 var pinholeDir = filepath.Join("testdata", "pinhole")
 
@@ -36,7 +36,8 @@ func pinholeSet(t *testing.T, from, to string) (set.Set, Places) {
 		if !strings.Contains(string(source), from) {
 			t.Fatalf("the fixture has no %q to change", from)
 		}
-		source = []byte(strings.Replace(string(source), from, to, 1))
+		replaced := strings.Replace(string(source), from, to, 1)
+		source = []byte(replaced)
 	}
 	read, err := set.Read(path, source)
 	if err != nil {
@@ -57,7 +58,7 @@ func TestRiglessMarkers(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, height := view.Size(); height != size.Y {
+		if _, height := view.size(); height != size.Y {
 			t.Fatalf("%s: the camera makes %d rows, the still has %d",
 				name, height, size.Y)
 		}
@@ -113,12 +114,12 @@ func TestRiglessNearMiss(t *testing.T) {
 func TestRiglessRefuses(t *testing.T) {
 	bare, places := pinholeSet(t, pinholeWide, "")
 	if _, err := CameraOf(bare, "down", places, 320); err == nil ||
-		!errors.Is(err, ErrWalk) || !strings.Contains(err.Error(), "wide") {
+		!errors.Is(err, errWalk) || !strings.Contains(err.Error(), "wide") {
 		t.Errorf("a film with no rig and no wide gave %v", err)
 	}
 	read, _ := pinholeSet(t, "", "")
 	if _, err := CameraOf(read, "down", places, 0); err == nil ||
-		!errors.Is(err, ErrWalk) {
+		!errors.Is(err, errWalk) {
 		t.Errorf("a picture no pixels across gave %v", err)
 	}
 	rigged, _ := markerSet(t)

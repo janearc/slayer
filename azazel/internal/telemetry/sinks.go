@@ -250,7 +250,7 @@ type barkeepSink struct {
 func barkeepAddress(address string) (string, error) {
 	parsed, err := url.Parse(address)
 	if err != nil || parsed.Scheme != "http" || parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.Port() == "" || (parsed.Path != "" && parsed.Path != "/") || !net.ParseIP(parsed.Hostname()).IsLoopback() {
-		return "", fmt.Errorf("Barkeep requires a loopback HTTP address")
+		return "", fmt.Errorf("the Barkeep requires a loopback HTTP address")
 	}
 	return strings.TrimSuffix(address, "/"), nil
 }
@@ -294,7 +294,7 @@ func (bar barkeepSink) request(ctx context.Context, path string, payload any) (i
 		return 0, err
 	}
 	if len(body) > 8192 || response.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("Barkeep %s returned %s", path, response.Status)
+		return 0, fmt.Errorf("the Barkeep %s returned %s", path, response.Status)
 	}
 	var status struct {
 		Queued *int `json:"queued"`

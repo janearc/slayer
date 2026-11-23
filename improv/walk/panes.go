@@ -68,25 +68,13 @@ func (layout Layout) Pane(name string) (image.Rectangle, error) {
 	place, found := layout.panes[name]
 	if !found {
 		return image.Rectangle{}, fmt.Errorf("%w: the layout has no pane "+
-			"%q", ErrWalk, name)
+			"%q", errWalk, name)
 	}
 	return place, nil
 }
 
-// Names is the layout's panes' names.
-func (layout Layout) Names() []string {
-	names := make([]string, 0, len(layout.panes))
-	for _, name := range []string{PaneViewer, PaneExplain, PaneAbove,
-		PaneMoon} {
-		if _, found := layout.panes[name]; found {
-			names = append(names, name)
-		}
-	}
-	return names
-}
-
 // Fit is how a picture of another shape goes into a pane: Crop fills it
-// and cuts the picture's middle to the pane's shape; Letterbox shows the
+// and cuts the picture's middle to the pane's shape; letterbox shows the
 // whole picture as large as fits, the rest left as it was. Neither ever
 // stretches it.
 type Fit int
@@ -94,7 +82,7 @@ type Fit int
 // The two fits.
 const (
 	Crop Fit = iota
-	Letterbox
+	letterbox
 )
 
 // Laid lays a picture into a pane of a frame by a fit, scaled with its
@@ -104,7 +92,7 @@ func Laid(frame, picture *image.RGBA, pane image.Rectangle, fit Fit) {
 	across := float64(pane.Dx()) / float64(source.X)
 	down := float64(pane.Dy()) / float64(source.Y)
 	scale := math.Max(across, down)
-	if fit == Letterbox {
+	if fit == letterbox {
 		scale = math.Min(across, down)
 	}
 	width := int(math.Round(float64(source.X) * scale))

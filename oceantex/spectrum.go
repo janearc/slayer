@@ -4,8 +4,8 @@ import "math"
 
 // Every number below is read from sources.yaml by the name in quotes.
 var (
-	// Gravity is standard gravity, metres a second squared.
-	Gravity = num("gravity.standard")
+	// gravity is standard gravity, metres a second squared.
+	gravity = num("gravity.standard")
 
 	alphaScale  = num("jonswap.alpha.scale")
 	alphaPower  = num("jonswap.alpha.power")
@@ -52,6 +52,10 @@ type Sea struct {
 	// is deep water. The depth is the same everywhere in a sea: there is
 	// no sloping beach.
 	Depth float64
+	// Swell is a train of long waves from a distant wind, added to the
+	// wind sea, or nil for none. A sea with no swell is the wind sea
+	// alone, exactly.
+	Swell *Swell
 }
 
 // grown is the fetch that counts: the sea's own, or the fetch at which
@@ -63,7 +67,7 @@ type Sea struct {
 // JONSWAP peak reaches that.
 func (s Sea) grown() float64 {
 	full := math.Pow(peakScale/fullPeak, 1/peakPower) *
-		s.Wind * s.Wind / Gravity
+		s.Wind * s.Wind / gravity
 	return math.Min(s.Fetch, full)
 }
 
@@ -73,7 +77,7 @@ func (s Sea) grown() float64 {
 // exponent -0.33. This is an approximation, not its exact transcription;
 // see doc/phone-source-checks.md for the retained original and conventions.
 func (s Sea) Peak() float64 {
-	return peakScale * math.Pow(Gravity*Gravity/(s.Wind*s.grown()), peakPower)
+	return peakScale * math.Pow(gravity*gravity/(s.Wind*s.grown()), peakPower)
 }
 
 // shallow is how much of a deep-water spectrum survives at a frequency in
@@ -83,7 +87,7 @@ func (s Sea) shallow(omega float64) float64 {
 	if s.Depth <= 0 {
 		return 1
 	}
-	w := omega * math.Sqrt(s.Depth/Gravity)
+	w := omega * math.Sqrt(s.Depth/gravity)
 	switch {
 	case w <= tmaKnee:
 		return tmaHalf * w * w
@@ -93,48 +97,46 @@ func (s Sea) shallow(omega float64) float64 {
 	return 1
 }
 
-// Frequency is the variance of surface height per unit angular frequency,
+// frequency is the variance of surface height per unit angular frequency,
 // in square metres seconds a radian: the JONSWAP spectrum [H73], times
 // the TMA depth factor where the water is shallow.
-func (s Sea) Frequency(omega float64) float64 {
+func (s Sea) frequency(omega float64) float64 {
 	if omega <= 0 || s.Wind <= 0 || s.Fetch <= 0 {
 		return 0
 	}
 	peak := s.Peak()
-	alpha := alphaScale * math.Pow(s.Wind*s.Wind/(s.grown()*Gravity), alphaPower)
+	alpha := alphaScale * math.Pow(s.Wind*s.Wind/(s.grown()*gravity), alphaPower)
 	width := widthBelow
 	if omega > peak {
 		width = widthAbove
 	}
 	r := math.Exp(-(omega - peak) * (omega - peak) /
 		(2 * width * width * peak * peak))
-	return alpha * Gravity * Gravity / math.Pow(omega, tailPower) *
+	return alpha * gravity * gravity / math.Pow(omega, tailPower) *
 		math.Exp(-peakDecay*math.Pow(peak/omega, rolloff)) *
 		math.Pow(peakGamma, r) * s.shallow(omega)
 }
 
 // Height is the significant wave height in metres: four times the square
-// root of the spectrum's sum, as wave buoys report it.
+// root of the spectrum's sum, as wave buoys report it. The swell's
+// variance, where the sea has one, is in the sum.
 func (s Sea) Height() float64 {
-	if s.Wind <= 0 || s.Fetch <= 0 {
-		return 0
-	}
-	peak := s.Peak()
-	lo, hi := math.Log(sumLow*peak), math.Log(sumHigh*peak)
 	var sum float64
-	for i := 0; i < int(sumSteps); i++ {
-		// even steps in the logarithm of frequency
-		omega := math.Exp(lo + (float64(i)+0.5)*(hi-lo)/sumSteps)
-		sum += s.Frequency(omega) * omega * (hi - lo) / sumSteps
+	if !(s.Wind <= 0 || s.Fetch <= 0) {
+		peak := s.Peak()
+		sum = logSum(sumLow*peak, sumHigh*peak, sumSteps, s.frequency)
+	}
+	if s.Swell != nil {
+		sum += s.swellVariance()
 	}
 	return heightTimes * math.Sqrt(sum)
 }
 
-// Spread is how the energy at one frequency is shared among directions:
+// spread is how the energy at one frequency is shared among directions:
 // the share per radian at angle theta from the wind. It is the
 // sech-squared form of [D85], extended above 1.6 peak frequencies by
 // Banner, as [Ho15] gives it. Over a full turn it sums to one.
-func Spread(omega, peak, theta float64) float64 {
+func spread(omega, peak, theta float64) float64 {
 	ratio := omega / peak
 	var beta float64
 	switch {
@@ -155,28 +157,38 @@ func Spread(omega, peak, theta float64) float64 {
 // omega^2 = g k tanh(k h), which is omega^2 = g k where the water is deep.
 func (s Sea) turning(k float64) (omega, slope float64) {
 	if s.Depth <= 0 || k*s.Depth > 20 {
-		omega = math.Sqrt(Gravity * k)
-		return omega, Gravity / (2 * omega)
+		omega = math.Sqrt(gravity * k)
+		return omega, gravity / (2 * omega)
 	}
 	kh := k * s.Depth
 	tanh := math.Tanh(kh)
 	sech := 1 / math.Cosh(kh)
-	omega = math.Sqrt(Gravity * k * tanh)
-	return omega, Gravity * (tanh + kh*sech*sech) / (2 * omega)
+	omega = math.Sqrt(gravity * k * tanh)
+	return omega, gravity * (tanh + kh*sech*sech) / (2 * omega)
 }
 
-// Wavenumber is the spectrum by wave vector: the variance of surface
+// wavenumber is the spectrum by wave vector: the variance of surface
 // height per unit area of wavenumber space, in metres to the fourth, for
-// waves travelling along (kx, ky) radians a metre.
+// waves travelling along (kx, ky) radians a metre. It is the wind sea's
+// and, where the sea has one, the swell's.
+func (s Sea) wavenumber(kx, ky float64) float64 {
+	wind := s.windWavenumber(kx, ky)
+	if s.Swell == nil {
+		return wind
+	}
+	return wind + s.swellWavenumber(kx, ky)
+}
+
+// windWavenumber is the wind sea's spectrum by wave vector.
 //
-// It is Frequency times Spread, carried across by the dispersion relation
+// It is frequency times spread, carried across by the dispersion relation
 // and divided by k for the polar area element [Ho15, eq. 61].
-func (s Sea) Wavenumber(kx, ky float64) float64 {
+func (s Sea) windWavenumber(kx, ky float64) float64 {
 	k := math.Hypot(kx, ky)
 	if k == 0 || s.Wind <= 0 || s.Fetch <= 0 {
 		return 0
 	}
 	omega, slope := s.turning(k)
 	theta := math.Remainder(math.Atan2(ky, kx)-s.Toward, 2*math.Pi)
-	return s.Frequency(omega) * Spread(omega, s.Peak(), theta) * slope / k
+	return s.frequency(omega) * spread(omega, s.Peak(), theta) * slope / k
 }

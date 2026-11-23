@@ -1,0 +1,97 @@
+# The creatures a gargoyle may be carved as, 2026-11-19. A gargoyle takes
+# only the shape of a creature the manufactory already has, and carves it
+# in stone on a corbel. Adding a creature is one entry here: its name, the
+# study it is taken from, and how it is posed. A cornice cycles through
+# these entries in the order written, so a fifth entry gives a cornice of
+# five its fifth creature.
+#
+# Every creature is in its own frame: the animals that swim or walk face
+# along x with y up. The turns are in degrees, in this order: roll about
+# the creature's own x, pitch about its z, yaw about the vertical, and
+# then lean, how far the whole is tipped about the line along the wall,
+# positive out of the wall. The block's frame has the wall's face in the
+# plane z is nought, the wall on the side of negative z, and the top of
+# the corbel's slab at y is nought. Lengths are metres in the creature's
+# own frame, and scale is how large the creature is carved against that.
+# Nothing here is measured. Every number was picked by eye, against a
+# render of the creature on its corbel, and each entry says so.
+#
+# study     the name of the creature's study in manufacture
+# held      the point of the creature, in its own frame, held in place on
+#           the block: where it comes out of the wall, or where it grips
+# up, out   how far over the slab that point is held, in metres, and how
+#           far from the wall's face, as a share of how far the slab
+#           stands out
+# mouth     the creature's spout, in its own frame: its mouth, or for a
+#           squid its funnel
+creatures:
+- name: allosaurus
+  says: a snarling head and neck out of the wall, the lower jaw the spout
+  study: allosaurus
+  scale: 2.2
+  roll: 0
+  pitch: -20
+  yaw: -50
+  lean: 0
+  held: [1.3, 1.65, 0]
+  up: 0.2
+  out: 0.2
+  mouth: [3.1, 2.14, 0]
+  kind: picked
+  by: "gargoyle study, 2026-11-19, by eye against a render"
+- name: orca
+  says: a blunt head and shoulders, nose down, the snout the spout
+  study: orca
+  scale: 2.2
+  roll: 0
+  pitch: -30
+  yaw: -130
+  lean: 0
+  held: [1.4, -0.56, 0]
+  up: 0.5
+  out: 0.2
+  mouth: [2.95, -0.25, 0]
+  kind: picked
+  by: "gargoyle study, 2026-11-19, by eye against a render"
+- name: pliosaur
+  says: a long-jawed head reaching out of the wall, the tip of its jaw the spout
+  study: pliosaur
+  scale: 1.6
+  roll: 0
+  pitch: -35
+  yaw: -50
+  lean: 0
+  held: [1.7, 0, 0]
+  up: 1.4
+  out: 0.3
+  mouth: [4.0, 0.02, 0]
+  kind: picked
+  by: "gargoyle study, 2026-11-19, by eye against a render"
+- name: squid
+  says: a grotesque, the mantle up against the wall and the arms hanging over the corbel, the funnel the spout
+  study: squid
+  scale: 3
+  roll: -90
+  pitch: -90
+  yaw: 0
+  lean: -28
+  held: [0.06, 0, 0]
+  up: 0.3
+  out: 0.5
+  mouth: [0.035, -0.105, 0]
+  kind: picked
+  by: "gargoyle study, 2026-11-19, by eye against a render"
+- name: hatzegopteryx
+  says: a crouched flying animal on the slab, wings raised and swept back, its long beak out over the edge, the tip the spout
+  study: hatzegopteryx
+  scale: 0.75
+  roll: 0
+  pitch: -30
+  yaw: -90
+  lean: 0
+  held: [-0.3, -0.6, 0]
+  up: 1.1
+  out: 0.7
+  mouth: [3.0, 0.1, 0]
+  kind: picked
+  by: "gargoyle study, 2026-11-19, by eye against a render"

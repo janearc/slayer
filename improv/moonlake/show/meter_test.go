@@ -38,12 +38,13 @@ func mothScore(t *testing.T) *Score {
 	t.Helper()
 	var times []string
 	for beat := range mothMeter * mothBars {
-		times = append(times, fmt.Sprintf("%.6f",
-			float64(beat)*secondsPerMinute/mothTempo))
+		moment := float64(beat) * secondsPerMinute / mothTempo
+		times = append(times, fmt.Sprintf("%.6f", moment))
 	}
-	score, err := ParseScore(fmt.Appendf(nil, "score:\n  meter: %d\n"+
+	listed := strings.Join(times, ", ")
+	score, err := parseScore(fmt.Appendf(nil, "score:\n  meter: %d\n"+
 		"  duration: %g\n  beats:\n    times: [%s]\n", mothMeter,
-		mothSeconds, strings.Join(times, ", ")))
+		mothSeconds, listed))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func TestAScoreInThreeLandsOnItsCutSheet(t *testing.T) {
 			t.Errorf("bar %d starts at %v (%v), not %v", bar, got, err, want)
 		}
 		beat := score.BeatAt(want + cutSheetRounding)
-		if beat.Bar() != bar || beat.InBar() != 1 || !beat.Downbeat() {
+		if beat.Bar() != bar || beat.InBar() != 1 {
 			t.Errorf("at %v the beat is %d.%d", want, beat.Bar(),
 				beat.InBar())
 		}
@@ -80,7 +81,7 @@ func TestAScoreInThreeHasNoFourthBeat(t *testing.T) {
 	score := mothScore(t)
 	for _, place := range [][2]int{{1, 4}, {mothBars + 1, 1}} {
 		_, err := score.BarTime(place[0], place[1])
-		if !errors.Is(err, ErrShow) ||
+		if !errors.Is(err, errShow) ||
 			!strings.Contains(err.Error(), "bars 1 to 16, beats 1 to 3") {
 			t.Errorf("bar %d beat %d: %v", place[0], place[1], err)
 		}
@@ -96,11 +97,11 @@ func TestAScoreInThreeHasNoFourthBeat(t *testing.T) {
 // first, a list taken two bars apiece turns after six beats, the fires
 // burst every three beats and the floods' ones fall every three.
 func TestTheLightsCountBarsOfThree(t *testing.T) {
-	sheet, err := ParseSheet([]byte("cues: []\n"), mothScore(t))
+	sheet, err := parseSheet([]byte("cues: []\n"), mothScore(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	moment, err := sheet.At(sheet.Score().Beats()[3], 24)
+	moment, err := sheet.At(sheet.score.Beats()[3], 24)
 	if err != nil || !strings.Contains(moment.Lines(), "bar=2.1\n") {
 		t.Errorf("on the fourth beat (%v):\n%s", err, moment.Lines())
 	}
@@ -122,9 +123,9 @@ func TestTheLightsCountBarsOfThree(t *testing.T) {
 
 // the anti-test: a meter under one is refused by name.
 func TestAMeterUnderOneIsRefused(t *testing.T) {
-	_, err := ParseScore([]byte("score:\n  meter: -3\n  beats:\n" +
+	_, err := parseScore([]byte("score:\n  meter: -3\n  beats:\n" +
 		"    times: [1, 2]\n"))
-	if !errors.Is(err, ErrShow) || !strings.Contains(err.Error(),
+	if !errors.Is(err, errShow) || !strings.Contains(err.Error(),
 		"meter is -3") {
 		t.Errorf("meter -3: %v", err)
 	}

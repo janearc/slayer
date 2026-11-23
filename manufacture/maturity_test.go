@@ -65,22 +65,35 @@ func TestMaturityListsEveryKindOnceInOrder(t *testing.T) {
 }
 
 // TestMaturityCountsTheTelescopesGeometry pins the part counts, looks and
-// sizes of the three space telescopes, which were counted by hand from a
+// sizes of the space telescopes, which were counted by hand from a
 // separate probe on 15 November 2026.
 func TestMaturityCountsTheTelescopesGeometry(t *testing.T) {
 	rows := reportByName(t)
 	for _, want := range []struct {
-		name  string
-		parts int
-		size  [3]float64
+		name                  string
+		parts, looks, members int
+		size                  [3]float64
 	}{
-		{"spitzer", 831, [3]float64{4.08, 4.90, 2.59}},
-		{"hubble", 55, [3]float64{12.00, 16.06, 3.69}},
-		{"webb", 90, [3]float64{14.16, 11.64, 21.20}},
+		// The looks are counted from spacecraftLooks: eight matters,
+		// which are the body, the solar cells, the two mirrors, the
+		// structure, the foil, the radiator panel and the gold hardware.
+		// Webb adds the cover glass of its cells and the bus bars between
+		// them, which are polished as its mirror is and are not the
+		// mirror: ten. Roman adds its shade, its second string of cells,
+		// two blankets and the metalwork of its array, and the shade and
+		// the string are numbered as the panel and the gold hardware
+		// are, which Roman never builds: eleven.
+		{"spitzer", 57, 8, 784, [3]float64{4.08, 4.90, 2.59}},
+		{"hubble", 104, 8, 576, [3]float64{12.00, 16.06, 3.69}},
+		{"webb", 183, 10, 1920, [3]float64{14.16, 11.64, 21.20}},
+		{"roman", 190, 11, 1152, [3]float64{4.40, 5.50, 12.70}},
 	} {
 		got := rows[want.name]
-		if got.Parts != want.parts || got.Looks != 6 || got.Lights != 0 ||
-			got.MeshMembers != 0 || got.MeshFaces != 0 {
+		looks := want.looks
+		// the cells of each array are placements of one mesh, so they
+		// are counted as mesh members and not as parts
+		if got.Parts != want.parts || got.Looks != looks || got.Lights != 0 ||
+			got.MeshMembers != want.members || got.MeshFaces == 0 {
 			t.Errorf("%s: parts %d looks %d lights %d meshes %d faces %d",
 				want.name, got.Parts, got.Looks, got.Lights, got.MeshMembers, got.MeshFaces)
 		}
@@ -136,6 +149,8 @@ func TestMaturityGivesEachRowItsOwnMeasuredNumbers(t *testing.T) {
 		"webb": {"webb-primary-diameter-metres", "webb-primary-segments",
 			"webb-secondary-diameter-millimetres", "webb-secondary-vertex-millimetres",
 			"webb-shield-layers", "webb-shield-length-metres", "webb-shield-width-metres"},
+		"roman": {"roman-deployed-length-metres", "roman-deployed-width-metres",
+			"roman-primary-diameter-metres"},
 		"mcrn-larson": nil,
 	} {
 		if got := rows[name].Measured; !slices.Equal(got, want) {
@@ -223,6 +238,59 @@ func TestEveryKindHasAFamily(t *testing.T) {
 	}
 	if familyOf(nil) != "other" {
 		t.Error("a maker nobody knows was given a family")
+	}
+}
+
+// TestEachKindIsInTheFamilyItBelongsTo checks the word a family is, for one
+// kind of every maker that was left without one: a living thing is an
+// animal, kelp an alga is a plant, a gargoyle is an ornament of a building,
+// a frontage or a shop block is a city building, a street and its signs are
+// the city, and a stream of bubbles is water. Each kind named must exist,
+// so that a kind renamed fails here and is not skipped.
+func TestEachKindIsInTheFamilyItBelongsTo(t *testing.T) {
+	want := [][2]string{
+		{"bird-grey-heron-standing", "animal"},
+		{"california-barracuda", "animal"},
+		{"pacific-sardine-school-500", "animal"},
+		{"harbor-seal", "animal"},
+		{"harbor-seal-bones", "animal"},
+		{"hawaiian-monk-seal-hauled", "animal"},
+		{"giant-kelp", "plant"},
+		{"kelp-forest", "plant"},
+		{"gargoyle-orca-granite", "architectural ornament"},
+		{"gargoyle-cornice-granite", "architectural ornament"},
+		{"frontage", "city building"},
+		{"retail-block", "city building"},
+		{"street", "city"},
+		{"lashed-street", "city"},
+		{"sign-awning", "city"},
+		{"bubble-stream", "water"},
+	}
+	rows := table()
+	for _, pair := range want {
+		name, family := pair[0], pair[1]
+		how, found := rows[name]
+		if !found {
+			t.Errorf("%s is not a kind", name)
+			continue
+		}
+		if got := familyOf(how); got != family {
+			t.Errorf("%s is of the family %q, want %q", name, got, family)
+		}
+	}
+}
+
+// TestNoOtherKindIsWater checks that the new word is kept to the one kind
+// that is water, so that it does not become a second "other".
+func TestNoOtherKindIsWater(t *testing.T) {
+	var water []string
+	for name, how := range table() {
+		if familyOf(how) == "water" {
+			water = append(water, name)
+		}
+	}
+	if !slices.Equal(water, []string{"bubble-stream"}) {
+		t.Errorf("the kinds of water are %v, want only bubble-stream", water)
 	}
 }
 
@@ -361,8 +429,8 @@ func TestPiecesInJoinsTrianglesThatShareACorner(t *testing.T) {
 // detail: cutting finer makes no hardware.
 func TestMaturityCountsPiecesAndNotCuts(t *testing.T) {
 	rows := reportByName(t)
-	for name, want := range map[string]int{"elt": 972, "keck-i": 205, "webb": 107,
-		"hubble": 55, "rubin": 300, "daf-xf": 26, "log": 3} {
+	for name, want := range map[string]int{"elt": 972, "keck-i": 205, "webb": 2120,
+		"hubble": 680, "rubin": 300, "daf-xf": 26, "log": 3} {
 		if got := rows[name].Pieces; got != want {
 			t.Errorf("%s: %d pieces, want %d", name, got, want)
 		}

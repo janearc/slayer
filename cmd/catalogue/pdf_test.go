@@ -19,9 +19,6 @@ import (
 // tests need.
 const oneCard, twoCards = 1, 2
 
-// once is defined as the first occurrence alone.
-const once = 1
-
 // testPictureWide and testPictureHigh are defined as the book's
 // frame in the plan, four columns to three rows, at its smallest.
 const testPictureWide, testPictureHigh = 4, 3

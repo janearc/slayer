@@ -58,7 +58,8 @@ func workBody(t *testing.T) []byte {
 // can make a decode fail.
 func sealWork(body []byte) []byte {
 	sum := sha256.Sum256(body)
-	return append(append([]byte(nil), body...), sum[:]...)
+	copied := append([]byte(nil), body...)
+	return append(copied, sum[:]...)
 }
 
 // TestWorkBodyOffsets checks that the offsets used below land on the fields
@@ -131,6 +132,7 @@ func TestDecodeWorkRecordRefusesEveryTruncation(t *testing.T) {
 // digest is right.
 func TestDecodeWorkRecordRefusesBadFields(t *testing.T) {
 	put64 := func(b []byte, at int, v uint64) { binary.BigEndian.PutUint64(b[at:], v) }
+	infinite := math.Float64bits(math.Inf(1))
 	cases := map[string]func([]byte) []byte{
 		"wrong marker":       func(b []byte) []byte { b[0] = 'X'; return b },
 		"wrong version":      func(b []byte) []byte { b[4] = 2; return b },
@@ -138,7 +140,7 @@ func TestDecodeWorkRecordRefusesBadFields(t *testing.T) {
 		"long boot length":   func(b []byte) []byte { b[5], b[6] = 0, 129; return b },
 		"bad boot character": func(b []byte) []byte { b[7] = '/'; return b },
 		"zero load":          func(b []byte) []byte { put64(b, offLoad, 0); return b },
-		"infinite load":      func(b []byte) []byte { put64(b, offLoad, math.Float64bits(math.Inf(1))); return b },
+		"infinite load":      func(b []byte) []byte { put64(b, offLoad, infinite); return b },
 		"zero swap":          func(b []byte) []byte { put64(b, offSwap, 0); return b },
 		"zero disk":          func(b []byte) []byte { put64(b, offDisk, 0); return b },
 		"stop byte two":      func(b []byte) []byte { b[offStopped] = 2; return b },
@@ -158,7 +160,8 @@ func TestDecodeWorkRecordRefusesBadFields(t *testing.T) {
 		"bytes left over":   func(b []byte) []byte { return append(b, 0) },
 	}
 	for name, mutate := range cases {
-		body := mutate(append([]byte(nil), workBody(t)...))
+		copied := append([]byte(nil), workBody(t)...)
+		body := mutate(copied)
 		if _, err := decodeWorkRecord(sealWork(body)); !errors.Is(err, errWorkRecord) {
 			t.Errorf("%s: %v", name, err)
 		}
@@ -166,7 +169,8 @@ func TestDecodeWorkRecordRefusesBadFields(t *testing.T) {
 	if _, err := decodeWorkRecord(make([]byte, workRecordLimit+1)); !errors.Is(err, errWorkRecord) {
 		t.Errorf("oversize data: %v", err)
 	}
-	if _, err := decodeWorkRecord(append(workBody(t), make([]byte, sha256.Size)...)); !errors.Is(err, errWorkRecord) {
+	padded := append(workBody(t), make([]byte, sha256.Size)...)
+	if _, err := decodeWorkRecord(padded); !errors.Is(err, errWorkRecord) {
 		t.Errorf("wrong digest: %v", err)
 	}
 }
@@ -326,7 +330,10 @@ func TestWorkLedgerReleaseRefusesBadRequests(t *testing.T) {
 func TestWorkLedgerReserveHoldsAtEntryLimit(t *testing.T) {
 	ledger := workLedger{limits: workLimits{memory: 1 << 20, workers: 1 << 20, gpuSlots: 1}}
 	for i := 0; i < admissionEntryLimit; i++ {
-		id := reservationIdentity("r" + string(rune('a'+i%26)) + string(rune('a'+i/26%26)) + string(rune('a'+i/676)))
+		first := string(rune('a' + i%26))
+		second := string(rune('a' + i/26%26))
+		third := string(rune('a' + i/676))
+		id := reservationIdentity("r" + first + second + third)
 		ledger.held = append(ledger.held, workReservation{id: id, owner: workOwner, need: workNeed{memory: 1, workers: 1}})
 	}
 	if _, ok := ledger.usage(); !ok {
@@ -369,7 +376,8 @@ func rawAdmissionIntent(nested []byte) []byte {
 	w.token("boot-1")
 	w.owner(reservationOwner{name: "game", incarnation: "attempt-1"})
 	w.data = append(w.data, make([]byte, 2*sha256.Size)...)
-	w.u64(uint64(len(nested)))
+	size := uint64(len(nested))
+	w.u64(size)
 	w.data = append(w.data, nested...)
 	sum := sha256.Sum256(w.data)
 	return append(w.data, sum[:]...)

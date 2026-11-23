@@ -54,7 +54,7 @@ func cardUnder(t *testing.T, fields *Fields, way maths.Vec,
 		t.Fatal(err)
 	}
 	lamp := Sun(fields, way, exposure).Scale(way.Unit().Y / lampOver)
-	sky := skyOnCard(NewSky(fields, way, exposure)).Scale(one / math.Pi)
+	sky := skyOnCard(newSky(fields, way, exposure)).Scale(one / math.Pi)
 	return lamp.Add(sky).Scale(grey).Luminance()
 }
 

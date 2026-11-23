@@ -34,6 +34,15 @@ const (
 	scalesFile       = "testdata/scales.csv"
 	smoothFile       = "testdata/smooth.csv"
 	shortsFile       = "testdata/shorts.csv"
+
+	infiniteReachesFile = "testdata/infinite-reaches.csv"
+	stepsFile           = "testdata/steps.csv"
+	farsFile            = "testdata/fars.csv"
+	extremesFile        = "testdata/extremes.csv"
+	neighboursFile      = "testdata/neighbours.csv"
+	portionsFile        = "testdata/portions.csv"
+	fresnelFile         = "testdata/fresnel.csv"
+	refusedIndexesFile  = "testdata/refused-indexes.csv"
 )
 
 // table is one csv file read: its rows, each by the names in its first row.
@@ -53,7 +62,7 @@ func read(test reporter, file string) table {
 	loadersLock.Lock()
 	load, ok := loaders[file]
 	if !ok {
-		load = sync.OnceValues(func() (table, error) { return load1(file) })
+		load = sync.OnceValues(loading{file}.load)
 		loaders[file] = load
 	}
 	loadersLock.Unlock()
@@ -63,6 +72,12 @@ func read(test reporter, file string) table {
 	}
 	return rows
 }
+
+// loading is a csv file to be read once, by name.
+type loading struct{ file string }
+
+// load reads the file.
+func (named loading) load() (table, error) { return load1(named.file) }
 
 // load1 reads a csv file from disk.
 func load1(file string) (table, error) {
@@ -113,13 +128,16 @@ func float(test reporter, row map[string]string, column string) float64 {
 }
 
 // chosenNumbers is numbers.yaml, read once.
-var chosenNumbers = sync.OnceValues(func() (numbers.Numbers, error) {
+var chosenNumbers = sync.OnceValues(readNumbers)
+
+// readNumbers reads numbers.yaml.
+func readNumbers() (numbers.Numbers, error) {
 	raw, err := os.ReadFile(numbersFile)
 	if err != nil {
 		return numbers.Numbers{}, err
 	}
 	return numbers.Read(numbersFile, raw)
-})
+}
 
 // picked is a number someone chose, by its name in numbers.yaml.
 func picked(test reporter, name string) float64 {
@@ -133,6 +151,12 @@ func picked(test reporter, name string) float64 {
 		test.Fatal(err)
 	}
 	return number.Value
+}
+
+// count is a picked number that counts something, as an int.
+func count(test reporter, name string) int {
+	test.Helper()
+	return int(picked(test, name))
 }
 
 // vector is a named vector of vectors.csv.

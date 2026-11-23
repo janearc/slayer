@@ -22,7 +22,8 @@ func TestFuelPatchesKeepGapsAndTheirPhysicalBounds(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, patch := range patches {
-		if field.Density(patch.At.Add(maths.V(0, 0.2, 0))) <= 0 {
+		above := patch.At.Add(maths.V(0, 0.2, 0))
+		if field.Density(above) <= 0 {
 			t.Fatal("source patch is empty")
 		}
 	}
@@ -99,7 +100,8 @@ func TestFuelFieldTimeAndSourceLightStayTogether(t *testing.T) {
 	changed := false
 	for _, patch := range patchFixture() {
 		for i := range 20 {
-			p := patch.At.Add(maths.V(0, 0.04+float64(i)*0.05, 0))
+			rise := maths.V(0, 0.04+float64(i)*0.05, 0)
+			p := patch.At.Add(rise)
 			changed = changed || field.Density(p) != later.Density(p)
 			if shine.At(p) != later.Shine().At(p) {
 				t.Fatal("emission and density clocks separated")
@@ -132,7 +134,9 @@ func TestFuelFieldPreservesAdditiveTransportAcrossSeededSamples(t *testing.T) {
 		field = field.Tick(at).(*Field)
 		p := maths.V(0, .01+float64(v)/256*f.Height, 0)
 		a, b := field.Pieces()[0].Body, field.Pieces()[1].Body
-		want := a.Shine().At(p).Scale(a.Density(p)).Add(b.Shine().At(p).Scale(b.Density(p)))
+		fromA := a.Shine().At(p).Scale(a.Density(p))
+		fromB := b.Shine().At(p).Scale(b.Density(p))
+		want := fromA.Add(fromB)
 		got := field.Shine().At(p).Scale(field.Density(p))
 		return math.Abs(got.R-want.R)+math.Abs(got.G-want.G)+math.Abs(got.B-want.B) <=
 			1e-12*max(1, want.R+want.G+want.B)

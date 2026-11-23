@@ -75,14 +75,15 @@ func TestHeardLaunchersFollowTheirActualOpticalAssembly(t *testing.T) {
 			t.Fatal(err)
 		}
 		s := &heardStage{world: thing.NewWorld()}
-		s.world.Lamp(thing.Sun(maths.YAxis, maths.Grey(1)))
-		if err := s.groundRig(name, maths.V(13, 2, -7), &StagePlan{}); err != nil {
+		light := maths.Grey(1)
+		s.world.Lamp(thing.Sun(maths.YAxis, light))
+		if err := s.groundRig(name, maths.V(13, 2, -7), &stagePlan{}); err != nil {
 			t.Fatal(err)
 		}
 		if len(rig.Launchers) == 0 || len(s.beams) != len(rig.Launchers) {
 			t.Fatal("missing attached hardware", name)
 		}
-		p := &StagePlan{Aim: [2]float64{-30, 40}, Elevation: [2]float64{-15, 20}}
+		p := &stagePlan{Aim: [2]float64{-30, 40}, Elevation: [2]float64{-15, 20}}
 		for _, u := range []float64{0, .2, .5, 1, .2} {
 			if err := s.updateGround(p, State{At: 12}, u); err != nil {
 				t.Fatal(err)
@@ -90,7 +91,8 @@ func TestHeardLaunchersFollowTheirActualOpticalAssembly(t *testing.T) {
 			pose := s.objects[2].things[0].At(0)
 			for i, exit := range rig.Launchers {
 				got := s.beamPose(s.beams[i], p, u)
-				if got.Origin.Sub(pose.Out(exit.Origin)).Len() > 1e-8 || got.Orientation.Out(maths.YAxis).Sub(pose.Orientation.Out(exit.Orientation.Out(maths.YAxis))).Len() > 1e-8 {
+				exitAxis := exit.Orientation.Out(maths.YAxis)
+				if got.Origin.Sub(pose.Out(exit.Origin)).Len() > 1e-8 || got.Orientation.Out(maths.YAxis).Sub(pose.Orientation.Out(exitAxis)).Len() > 1e-8 {
 					t.Fatal("detached beam", name, u)
 				}
 			}
@@ -113,7 +115,7 @@ func TestHeardSpacecraftRotatesAroundItsBoundsCentre(t *testing.T) {
 			t.Fatal("construction foot used as centre", name)
 		}
 		for _, at := range []float64{174, 176, 180, 185, 174} {
-			s.updateSpace(&StagePlan{Kind: "space", Craft: name}, State{At: at}, .5)
+			s.updateSpace(&stagePlan{Kind: "space", Craft: name}, State{At: at}, .5)
 			for _, part := range obj.things {
 				if part.At(0).Out(obj.pivot).Sub(obj.at).Len() > 1e-8 {
 					t.Fatal("centre moves during slew", name, at)

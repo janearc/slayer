@@ -1,0 +1,5 @@
+numbers:
+  - {name: seed, value: 17, unit: count, says: the seed both twins are made from in the Voyager tests, kind: picked, by: any one seed will do and the twins are compared with each other}
+  - {name: least-parts, value: 100, unit: count, says: the fewest parts a Voyager of several subsystems may have, kind: picked, by: well under the parts of the model and far above a bare bus}
+  - {name: least-faces, value: 3000, unit: count, says: the fewest faces a Voyager at the quick detail may have, kind: picked, by: well under the faces of the model and far above a bare bus}
+  - {name: face-limit, value: 100000, unit: count, says: the most faces one thing may be flattened from, kind: picked, by: the face limit of Things that the demo detail is kept under}

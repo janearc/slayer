@@ -174,7 +174,8 @@ func TestReadYAMLAndJSON(t *testing.T) {
 	if _, err := beats.Read(write("broken.yaml", "score: [unclosed")); err == nil {
 		t.Error("malformed file accepted")
 	}
-	if _, err := beats.Read(write("one.yaml", strings.Replace(yaml, "[1, 1.5]", "[1]", 1))); err == nil {
+	shorter := strings.Replace(yaml, "[1, 1.5]", "[1]", 1)
+	if _, err := beats.Read(write("one.yaml", shorter)); err == nil {
 		t.Error("a grid that fails its check was accepted")
 	}
 }

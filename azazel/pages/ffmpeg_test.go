@@ -80,7 +80,8 @@ func tone() []byte {
 	write(uint32(samples * sampleBytes))
 	for index := range samples {
 		phase := 2 * math.Pi * tonePitch * float64(index) / toneRate
-		write(int16(toneLoud * math.Sin(phase)))
+		sample := int16(toneLoud * math.Sin(phase))
+		write(sample)
 	}
 	return out.Bytes()
 }
@@ -204,8 +205,8 @@ func TestFfmpegMakesTheFilmQuickTimePlays(t *testing.T) {
 	if err := made.encode(t.Context(), folder.path(root), look); err != nil {
 		t.Fatal(err)
 	}
-	kinds := probe(t, encoder.Probe, filepath.Join(folder.path(root),
-		partialName))
+	partialPath := filepath.Join(folder.path(root), partialName)
+	kinds := probe(t, encoder.Probe, partialPath)
 	if len(kinds["video"]) != 1 || len(kinds["audio"]) != 1 {
 		t.Fatalf("the film's streams: %+v", kinds)
 	}
@@ -218,8 +219,7 @@ func TestFfmpegMakesTheFilmQuickTimePlays(t *testing.T) {
 		length(t, picture.Duration)) > 1.0/filmRate {
 		t.Fatalf("the film is not what QuickTime plays: %+v", kinds)
 	}
-	refuseSilentCopy(t, encoder, filepath.Join(folder.path(root),
-		partialName))
+	refuseSilentCopy(t, encoder, partialPath)
 }
 
 // refuseSilentCopy copies a film without its sound, and checks that the
@@ -271,10 +271,12 @@ func publishWithoutAFilm(t *testing.T, root string, folder Folder) string {
 	if _, err := Publish(t.Context(), settings, folder, 0); err != nil {
 		t.Fatal(err)
 	}
-	if regularFile(filepath.Join(folder.path(root), partialName)) {
+	partialPath := filepath.Join(folder.path(root), partialName)
+	if regularFile(partialPath) {
 		t.Fatal("a partial film was made")
 	}
-	return read(t, filepath.Join(folder.path(root), pageName))
+	pagePath := filepath.Join(folder.path(root), pageName)
+	return read(t, pagePath)
 }
 
 // TestDisagreeingRatesMakeNoFilm is the anti-test: with the receipt and
@@ -287,7 +289,8 @@ func TestDisagreeingRatesMakeNoFilm(t *testing.T) {
 	if err := os.WriteFile(set, []byte("fps: 24\n"), listing); err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Contains([]byte(publishWithoutAFilm(t, root, folder)),
+	pageText := publishWithoutAFilm(t, root, folder)
+	if !bytes.Contains([]byte(pageText),
 		[]byte("disagree")) {
 		t.Fatal("the page did not say the rates disagree")
 	}
@@ -306,7 +309,8 @@ func TestNoMusicMakesNoFilm(t *testing.T) {
 // TestMusicNotMatchingItsDigestMakesNoFilm: music that is not what the
 // receipt's digest says gets no film.
 func TestMusicNotMatchingItsDigestMakesNoFilm(t *testing.T) {
-	root, folder := gappedFilm(t, "6", digest([]byte("other music")))
+	otherMusic := digest([]byte("other music"))
+	root, folder := gappedFilm(t, "6", otherMusic)
 	scoreMusic(t, folder.path(root), tone(), "")
 	page := publishWithoutAFilm(t, root, folder)
 	if !bytes.Contains([]byte(page), []byte("does not match")) {

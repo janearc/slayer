@@ -192,8 +192,9 @@ func (b thinBin) noise() float64 {
 // each with the reference's mean over it.
 func thinBins(field *Field, worked reference) []thinBin {
 	zenith := spanOf(none, math.Pi, thinBand, thinZeniths)
+	viewCount := float64(field.views)
 	lowest := int(math.Round((lowestCosine + one) / two *
-		float64(field.views)))
+		viewCount))
 	var bins []thinBin
 	for v := lowest; v < field.views; v++ {
 		view := spanOf(-one, one, v, field.views)
@@ -311,7 +312,8 @@ func TestSwappedCosinesAreCaught(t *testing.T) {
 		return singly(checkedDepth, view, sun, round)
 	}
 	bins := checkedBins(t, swapped)
-	if thinAgrees(bins, multipleBound(checkedDepth, lowestSun())) == nil {
+	lowSun := lowestSun()
+	if thinAgrees(bins, multipleBound(checkedDepth, lowSun)) == nil {
 		t.Error("the swapped cosines agree")
 	}
 }
@@ -323,7 +325,8 @@ func TestASkyTooBrightIsCaught(t *testing.T) {
 	for index := range bins {
 		bins[index].got *= brighter
 	}
-	if thinAgrees(bins, multipleBound(checkedDepth, lowestSun())) == nil {
+	lowSun := lowestSun()
+	if thinAgrees(bins, multipleBound(checkedDepth, lowSun)) == nil {
 		t.Error("a sky six percent too bright agrees")
 	}
 }
@@ -379,10 +382,12 @@ func TestAnExcessThatStaysIsCaught(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	all := summarise(thinBins(field, singlyAt(thinnest)), everyBin)
+	singlyAtThinnest := singlyAt(thinnest)
+	all := summarise(thinBins(field, singlyAtThinnest), everyBin)
 	stayed := all.mean + keptExcess
+	lowSun := lowestSun()
 	if excessWithin(stayed, all.error,
-		multipleBound(thinnest, lowestSun())) == nil {
+		multipleBound(thinnest, lowSun)) == nil {
 		t.Errorf("an excess of %g that stayed passes", keptExcess)
 	}
 }

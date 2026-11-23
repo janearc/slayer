@@ -1,0 +1,135 @@
+# the proof of the air over a bay (sets/haze-proof.yaml) with the plumes
+# alone: the boat's soot, the cooking fires and the street steam, as sets/
+# haze-proof-all.yaml says them, where their numbers and sources are
+# written, in clear air but for a thin even haze for the beam to show in.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a proof of the plumes over a bay
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.5186
+    lon: 114.0151
+  timeofday: 1725
+  sun:
+    azimuth: 247.73
+    altitude: 2.37
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.5186
+    lon: 114.0151
+    across: 2000
+    down: 1500
+    step: 10
+    smooth: 60
+    sea: {value: 0, unit: m}
+  weather:
+    wind:
+      from: {value: 45, unit: deg}
+      speed: {value: 5, unit: m/s}
+    over the lid:
+      kind: prescribed-mist
+      extinction: {value: 0.00015, unit: m^-1}
+      depth: {value: 1000, unit: m}
+      coverage: 1
+      seed: 4
+      asymmetry: 0.63
+      angstrom: 1.4
+  atmosphere:
+    layers:
+      over the lid:
+        weather: over the lid
+        extent: terrain
+        albedo: 0.89
+        base: {value: 0, unit: m}
+        beyond: {value: 4000, unit: m}
+  plumes:
+    boat stack:
+      from: {object: the fishing boat at anchor, east: {value: 0, unit: m}, up: {value: 9, unit: m}, south: {value: 0, unit: m}}
+      mouth: {value: 0.25, unit: m}
+      exit: {value: 10, unit: m/s}
+      temperature: {value: 650, unit: K}
+      air-temperature: {value: 293, unit: K}
+      rate: {value: 1.5, unit: g/s}
+      mass-extinction: {value: 10, unit: m^2/g}
+      albedo: 0.2
+      asymmetry: 0.63
+      angstrom: 1
+      reach: {value: 1500, unit: m}
+      lid: {value: 250, unit: m}
+      source: "IMPROVE's elemental carbon for the mass extinction; the rest chosen"
+    cooking fires:
+      from: {object: tower 100, east: {value: 0, unit: m}, up: {value: 4, unit: m}, south: {value: 0, unit: m}}
+      count: 6
+      spread: {value: 150, unit: m}
+      seed: 11
+      mouth: {value: 0.4, unit: m}
+      exit: {value: 2, unit: m/s}
+      temperature: {value: 450, unit: K}
+      air-temperature: {value: 293, unit: K}
+      rate: {value: 1.5, unit: g/s}
+      mass-extinction: {value: 2.8, unit: m^2/g}
+      albedo: 0.9
+      asymmetry: 0.63
+      angstrom: 1.8
+      reach: {value: 600, unit: m}
+      lid: {value: 250, unit: m}
+      source: "IMPROVE's small organic mass for the mass extinction; the rest chosen"
+    street steam:
+      from: {object: tower 113, east: {value: 0, unit: m}, up: {value: 0.5, unit: m}, south: {value: 0, unit: m}}
+      count: 8
+      spread: {value: 180, unit: m}
+      seed: 12
+      mouth: {value: 0.6, unit: m}
+      exit: {value: 3, unit: m/s}
+      temperature: {value: 373, unit: K}
+      air-temperature: {value: 293, unit: K}
+      rate: {value: 80, unit: g/s}
+      mass-extinction: {value: 0.3, unit: m^2/g}
+      albedo: 1
+      asymmetry: 0.85
+      angstrom: 0
+      reach: {value: 60, unit: m}
+      lid: {value: 250, unit: m}
+      source: "worked for 5 um droplets; the amounts chosen"
+  lasers:
+    bay beam:
+      origin:
+        object: tower 113
+        east: {value: 0, unit: m}
+        up: {value: 30, unit: m}
+        south: {value: 25, unit: m}
+      launcher: true
+      pointing: {azimuth: 248, altitude: 8}
+      radius: {value: 0.25, unit: m}
+      reach: {value: 2500, unit: m}
+      divergence: {value: 0.03, unit: deg}
+      wavelength: {value: 532, unit: nm}
+      display-strength: 10000000000
+  film:
+    width: 640
+    height: 360
+    rays: 2
+    wide: 70
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    bay:
+      title: "from the water 1.2 km south of the towers, 20 m up, looking north at them"
+      location:
+        at: [1200, -1500, 20]
+      orientation:
+        look_at: [1350, -340, 200]
+  recipes:
+    t033: {kind: tower, irregularity: 0.99, script: simplified-chinese, pins: {plan: rounded, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t100: {kind: tower, irregularity: 0.22, script: simplified-chinese, pins: {plan: y, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t113: {kind: tower, irregularity: 0.36, script: simplified-chinese, pins: {plan: rounded, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+  set:
+    things:
+      tower 033: {recipe: t033, seed: 1561, complexity: quick, east: 1332.5, north: 1264.2, heading: {value: 337.7, unit: deg}}
+      tower 100: {recipe: t100, seed: 2700, complexity: quick, east: 1468.0, north: 1060.4, heading: {value: 337.7, unit: deg}}
+      tower 113: {recipe: t113, seed: 2921, complexity: quick, east: 1369.0, north: 1175.4, heading: {value: 337.7, unit: deg}}
+      the fishing boat at anchor: {kind: fishing-boat-at-anchor, seed: 31, complexity: demo, position: {east: {value: 550, unit: m}, north: {value: 700, unit: m}, up: {value: 0, unit: m}}, heading: {value: 59, unit: deg}}

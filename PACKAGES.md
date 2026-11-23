@@ -66,6 +66,11 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   world; a view selects geometry while source coverage and frame stay fixed.
 - **titan:** the ground of a world: heights from a map as far as the map goes
   and made up below that, on grissom's mesh.
+- **titan/over:** a height map laid finer as a mesh, one stretch of it or
+  every cell as finely as an eye resolves it, its survey kept where it was
+  and detail made along the surface's normal from the map's own fall line,
+  drainage, slope and roughness. It imports `mesh` and `maths`, and is
+  imported by scenes and by `session` for a set's made ground.
 
 ## Light sources
 
@@ -89,6 +94,8 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
 - **moonlight:** full-moon illumination derived from solar radiation,
   lunar size, distance, albedo, and atmospheric transmission.
 - **skytable:** sampled sky illumination shared by CPU and GPU shading.
+- **skyglow:** the glow a flat layer of air gathers from a city's own
+  light, worked by orders of scattering on a grid; both tracers read it.
 - **lantern:** a star inside orbiting reflective panels: a Dyson swarm
   casting shafts of light through its gaps.
 
@@ -100,6 +107,12 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   colours are fictional design choices unless explicitly identified otherwise.
   `MaturityReport` counts what each kind is made of and which of its numbers
   are measured or picked; `tools/maturity` prints it (`game run maturity`).
+- **weathering:** what happens to a place, laid over every surface of a
+  set's world by agents (rain streaks, soot, dust, moss, ivy, graffiti,
+  rust, spalled brick, vacancy, a mineral source, glitter, nanomachines, a
+  festival), each with a rule for where it can land and an age that only
+  lays more. Colour only: it reads the CPU tracer's face direction through
+  `texture.Oriented`. A set says it in `world.weathering`.
 - **forest:** ground geometry and seeded placements.
 - **mesh:** validated triangle surfaces, bounding hierarchies, and
   intersection designed to avoid cracks at shared edges.
@@ -115,7 +128,7 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   Repeated letters share mesh geometry.
 - **materials/specimen:** current solid phases and pore water, with SI mass,
   volume and density accounting. It supplies no hydration or optical model;
-  see [Porous material specimens](doc/specimens.md).
+  see [Porous material specimens](doc/model/material/specimens.md).
 - **materials:** elements, formulas, bulk materials, mixtures, and particles,
   with constructor validation. A material may carry optical constants per
   band and x-ray mass attenuation per energy, each reading with the row it
@@ -151,6 +164,15 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
   implement the model.
 - **occultation:** ring optical-depth profiles from published Voyager
   stellar-occultation measurements.
+- **arid:** slayer's water in one package, gathered a piece at a time. It
+  holds the tracer's wave surfaces: a sampled height field, the flat plane
+  beyond it and a surface wake (from `scene/ocean`), and the cove that
+  stages a shore with its water (from `scene/cove`).
+
+  Still to come in:
+  `scene/seaside`, `simulation/waves` and `oceantex`; the
+  lake show in `improv/moonlake` and the water inside `session`, `trace`,
+  `gpu` and `set` are left where they are. See [its README](arid/README.md).
 - **oceantex:** the sea drawn from any point of view, a beach to orbit, from
   published formulas and measurements. It imports `titan` for its shore.
 
@@ -215,7 +237,7 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
 ## Scene input and camera timing
 
 - **door:** the `slayer` tool and its verbs (draw, list, tunes, assess,
-  develop, cache, watch, edit, schema); it joins hillside, finish and movie
+  develop, cache, watch, edit, schema); it joins session, finish and movie
   and draws nothing itself. `cmd/slayer` is a thin `main`. See
   [door/README.md](door/README.md).
 - **diskcache:** the one place exact results are kept between runs, a
@@ -231,7 +253,7 @@ scenes. Import paths below are relative to `github.com/janearc/slayer/`.
 - **set:** YAML scene settings delegated to their owning packages, with
   file/line/column errors. Example files live in `sets/`. See
   [doc/sets.md](doc/sets.md).
-- **hillside:** stages a set, a smoke or the procedural hillside and
+- **session:** stages a set, a smoke or the procedural hillside and
   draws it. `Run` is its command line; `Open(ctx, job, stamp)` is its
   library door: a session that stages a job's scene once and draws its
   frames, at any size asked, as undeveloped light.

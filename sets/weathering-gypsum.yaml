@@ -1,0 +1,125 @@
+# a street downwind of a gypsum mine, with a glitter factory on the corner:
+# the row of houses of midwest-detail.yaml, at the demo detail level, and
+# in the world half a heap of gypsum a hundred and fifty metres west and a
+# factory at the street's west corner. the wind blows from the mine along
+# the street. mineral dust from the mine thins with its distance and
+# opens downwind; the factory's glitter settles on what faces up, and
+# thins as the dust does. neither is in the houses.
+#
+# places are metres, as a map's run: x east, y north, z up. the row runs
+# east from the origin with its front to the south. every number is a
+# choice of this study, picked by eye, and says so.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: weathering gypsum
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "along the street from the factory's corner"
+      wide: 40
+      location:
+        at: [92, -24, 5]
+      orientation:
+        look_at: [10, 0, 4]
+  set:
+    things:
+      row:
+        kind: terrace-midwest
+        seed: 1
+        complexity: demo
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      street:
+        colour: {srgb_linear: [0.1, 0.095, 0.09]}
+        source: eye
+      gypsum:
+        colour: {srgb_linear: [0.5, 0.49, 0.45]}
+        source: eye
+      factory:
+        colour: {srgb_linear: [0.16, 0.17, 0.19]}
+        source: eye
+    boxes:
+      ground:
+        material: street
+        middle: [0, 0, -1]
+        size: [3000, 3000, 2]
+        source: eye
+      heap:
+        material: gypsum
+        middle: [-150, -30, 6]
+        size: [60, 40, 12]
+        source: eye
+      works:
+        material: factory
+        middle: [-14, 5, 6]
+        size: [14, 12, 12]
+        source: eye
+      stack:
+        material: factory
+        middle: [-17, 7, 18]
+        size: [2, 2, 14]
+        source: eye
+    suns:
+      west:
+        toward: [-0.7, -0.6, 0.3]
+        colour: {srgb_linear: [2.2, 1.6, 1.0]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.25, 0.2, 0.17]}
+      zenith: {srgb_linear: [0.03, 0.05, 0.1]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 21
+      age: 20
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0.1, 0]
+      agents:
+        # gypsum dust from the heap, thinning with distance and opening
+        # downwind along the street
+        dust:
+          kind: mineral
+          on: [street, roof, factory]
+          colour: {srgb_linear: [0.55, 0.54, 0.5]}
+          at: [-150, -30, 0]
+          strength: 1
+          settle: 6
+          tilt: 0.5
+          reach: 330
+          spread: 0.5
+          upwind: 0.05
+          grain: 1
+        # glitter from the works, settling downwind of it
+        glitter:
+          kind: glitter
+          on: [street, roof]
+          colour: {srgb_linear: [4, 4, 4.5]}
+          at: [-12, 2, 0]
+          strength: 1
+          settle: 3
+          tilt: 0.5
+          reach: 45
+          spread: 0.45
+          upwind: 0
+          grain: 3
+          fleck: 0.05
+          share: 0.12

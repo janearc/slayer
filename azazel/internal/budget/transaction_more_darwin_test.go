@@ -67,7 +67,8 @@ func TestStableLockFailures(t *testing.T) {
 	})
 	t.Run("removed", func(t *testing.T) {
 		tx, _ := transactionCommitFixture(t)
-		if err := os.Remove(filepath.Join(tx.directory.Name(), "lock")); err != nil {
+		lockPath := filepath.Join(tx.directory.Name(), "lock")
+		if err := os.Remove(lockPath); err != nil {
 			t.Fatal(err)
 		}
 		if err := tx.stableLock(); !errors.Is(err, unix.ENOENT) {
@@ -194,7 +195,8 @@ func TestPublishCheckFirstChecks(t *testing.T) {
 	if err := tx.publishCheck(ctx, "point"); !errors.Is(err, context.Canceled) {
 		t.Errorf("done context: %v", err)
 	}
-	if err := os.Remove(filepath.Join(tx.directory.Name(), "lock")); err != nil {
+	lockPath := filepath.Join(tx.directory.Name(), "lock")
+	if err := os.Remove(lockPath); err != nil {
 		t.Fatal(err)
 	}
 	if err := tx.publishCheck(context.Background(), "point"); !errors.Is(err, unix.ENOENT) {
@@ -219,17 +221,20 @@ func TestAdmitFailsWhenFilesChange(t *testing.T) {
 			}
 		},
 		"state removed": func(t *testing.T, tx *admissionTransaction) {
-			if err := os.Remove(filepath.Join(tx.directory.Name(), "state")); err != nil {
+			statePath := filepath.Join(tx.directory.Name(), "state")
+			if err := os.Remove(statePath); err != nil {
 				t.Fatal(err)
 			}
 		},
 		"intent removed": func(t *testing.T, tx *admissionTransaction) {
-			if err := os.Remove(filepath.Join(tx.directory.Name(), "intent")); err != nil {
+			intentPath := filepath.Join(tx.directory.Name(), "intent")
+			if err := os.Remove(intentPath); err != nil {
 				t.Fatal(err)
 			}
 		},
 		"intent damaged": func(t *testing.T, tx *admissionTransaction) {
-			if err := os.WriteFile(filepath.Join(tx.directory.Name(), "intent"), []byte("bad"), 0600); err != nil {
+			intentPath := filepath.Join(tx.directory.Name(), "intent")
+			if err := os.WriteFile(intentPath, []byte("bad"), 0600); err != nil {
 				t.Fatal(err)
 			}
 		},
@@ -253,12 +258,14 @@ func TestAdmitFailsWhenFilesChange(t *testing.T) {
 func TestReleaseFailsWhenFilesChange(t *testing.T) {
 	cases := map[string]func(t *testing.T, tx *admissionTransaction){
 		"state removed": func(t *testing.T, tx *admissionTransaction) {
-			if err := os.Remove(filepath.Join(tx.directory.Name(), "state")); err != nil {
+			statePath := filepath.Join(tx.directory.Name(), "state")
+			if err := os.Remove(statePath); err != nil {
 				t.Fatal(err)
 			}
 		},
 		"intent removed": func(t *testing.T, tx *admissionTransaction) {
-			if err := os.Remove(filepath.Join(tx.directory.Name(), "intent")); err != nil {
+			intentPath := filepath.Join(tx.directory.Name(), "intent")
+			if err := os.Remove(intentPath); err != nil {
 				t.Fatal(err)
 			}
 		},
@@ -271,7 +278,8 @@ func TestReleaseFailsWhenFilesChange(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := os.WriteFile(filepath.Join(tx.directory.Name(), "intent"), encoded, 0600); err != nil {
+			intentPath := filepath.Join(tx.directory.Name(), "intent")
+			if err := os.WriteFile(intentPath, encoded, 0600); err != nil {
 				t.Fatal(err)
 			}
 		},
@@ -390,7 +398,8 @@ func TestAdmitReturnsCancellationAfterMeasure(t *testing.T) {
 	if _, err := tx.admit(ctx, request, measure); !errors.Is(err, context.Canceled) {
 		t.Fatalf("got %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(tx.directory.Name(), "intent-prepared")); !errors.Is(err, os.ErrNotExist) {
+	preparedPath := filepath.Join(tx.directory.Name(), "intent-prepared")
+	if _, err := os.Stat(preparedPath); !errors.Is(err, os.ErrNotExist) {
 		t.Errorf("wrote after cancellation: %v", err)
 	}
 }

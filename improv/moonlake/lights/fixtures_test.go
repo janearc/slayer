@@ -10,7 +10,7 @@ import (
 func TestFixturePlanFixedOrderAndOriginalIntensities(t *testing.T) {
 	config := FixtureConfig{FloodPasses: [2]string{"back-left", "back-right"}, FloodGain: 400, SpotGain: 150}
 	for _, aim := range []float64{-1, 0, 0.25, 1, 1.75, 2, 3} {
-		cue := FixtureCues{FloodLeft: 0.2, FloodRight: 0.3, Spots: 0.4, SpotAim: aim, HasColour: true, Colour: [3]float64{0.2, 0.4, 0.8}}
+		cue := fixtureCues{FloodLeft: 0.2, FloodRight: 0.3, Spots: 0.4, SpotAim: aim, HasColour: true, Colour: [3]float64{0.2, 0.4, 0.8}}
 		clamped := math.Max(0, math.Min(2, aim))
 		near := math.Min(1, math.Floor(clamped))
 		f := clamped - near
@@ -32,7 +32,7 @@ func TestFixturePlanFixedOrderAndOriginalIntensities(t *testing.T) {
 			}
 		}
 		for range 16 {
-			got, err := PlanFixtures(config, cue)
+			got, err := planFixtures(config, cue)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -45,14 +45,14 @@ func TestFixturePlanFixedOrderAndOriginalIntensities(t *testing.T) {
 
 func TestFixtureThresholdAndUntintedSpots(t *testing.T) {
 	config := FixtureConfig{FloodPasses: [2]string{"left", "right"}, FloodGain: 1, SpotGain: 1}
-	layers, err := PlanFixtures(config, FixtureCues{FloodLeft: 0.001, FloodRight: 0.000999, Spots: -1})
+	layers, err := planFixtures(config, fixtureCues{FloodLeft: 0.001, FloodRight: 0.000999, Spots: -1})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(layers, []FixtureLayer{{"left", 0.001, [3]float64{1, 1, 1}}}) {
 		t.Fatalf("threshold: %+v", layers)
 	}
-	layers, err = PlanFixtures(config, FixtureCues{Spots: 1, SpotAim: 0.5, Colour: [3]float64{9, 8, 7}})
+	layers, err = planFixtures(config, fixtureCues{Spots: 1, SpotAim: 0.5, Colour: [3]float64{9, 8, 7}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,8 +67,8 @@ func TestFixtureExplicitPassesExactOperationOrderAndNoInputMutation(t *testing.T
 	t.Setenv("PASSES", "/missing")
 	t.Setenv("FLOOD_GAIN", "invalid")
 	config := FixtureConfig{FloodPasses: [2]string{"left", "right"}, FloodGain: 0.13, SpotGain: 0.27}
-	cue := FixtureCues{FloodLeft: 0.31, FloodRight: 0.41, Spots: 0.73, SpotAim: 0.37, HasColour: true, Colour: [3]float64{0.12, 0.34, 0.56}}
-	layers, err := PlanFixtures(config, cue)
+	cue := fixtureCues{FloodLeft: 0.31, FloodRight: 0.41, Spots: 0.73, SpotAim: 0.37, HasColour: true, Colour: [3]float64{0.12, 0.34, 0.56}}
+	layers, err := planFixtures(config, cue)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestFixtureInvalidInputsNeverMutateOutput(t *testing.T) {
 		t.Fatal("accepted invalid output")
 	}
 	for _, value := range []float64{math.NaN(), math.Inf(1), math.Inf(-1)} {
-		if _, err := PlanFixtures(FixtureConfig{}, FixtureCues{SpotAim: value}); err == nil {
+		if _, err := planFixtures(FixtureConfig{}, fixtureCues{SpotAim: value}); err == nil {
 			t.Fatal("accepted nonfinite aim")
 		}
 		for _, layer := range []FixtureLayer{{"first", value, [3]float64{1, 1, 1}}, {"first", 1, [3]float64{value, 1, 1}}} {
@@ -157,7 +157,7 @@ func TestFixtureConcurrentIndependentInputs(t *testing.T) {
 			t.Parallel()
 			for range 8 {
 				sky := Image{1, 1, make([]float64, 3)}
-				layers, err := PlanFixtures(FixtureConfig{FloodPasses: [2]string{"left", "right"}, FloodGain: 2}, FixtureCues{FloodLeft: level})
+				layers, err := planFixtures(FixtureConfig{FloodPasses: [2]string{"left", "right"}, FloodGain: 2}, fixtureCues{FloodLeft: level})
 				if err != nil {
 					t.Fatal(err)
 				}

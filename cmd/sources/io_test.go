@@ -7,13 +7,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
 	"github.com/janearc/slayer/sources"
+	"go.uber.org/mock/gomock"
 )
 
 // failedSourceOutput models a closed pipe at the command's output boundary.
-type failedSourceOutput struct{ err error }
-
-func (out failedSourceOutput) Write([]byte) (int, error) { return 0, out.err }
+func failedSourceOutput(t *testing.T, err error) *mocks.MockWriter {
+	writer := mocks.NewMockWriter(gomock.NewController(t))
+	writer.EXPECT().Write(gomock.Any()).Return(0, err).AnyTimes()
+	return writer
+}
 
 func TestSourceCommandsPropagateOutputFailures(t *testing.T) {
 	at, made := verifying("6.84", "6.84")
@@ -22,10 +26,12 @@ func TestSourceCommandsPropagateOutputFailures(t *testing.T) {
 	if code := tool(at).Run([]string{"fetch"}, &out, &out); code != 0 {
 		t.Fatal(out.String())
 	}
-	for _, args := range [][]string{{"fetch", "--dry-run"}, {"fetch"}, {"check"}, {"path", "candle"}, {"verify"}} {
+	// verify is not among them: it writes nothing when every number
+	// holds, as this rig's does, so it has no output to fail.
+	for _, args := range [][]string{{"fetch", "--dry-run"}, {"fetch"}, {"check"}, {"path", "candle"}} {
 		var wrong bytes.Buffer
 		want := errors.New("the source output pipe closed")
-		code := tool(at).Run(args, failedSourceOutput{want}, &wrong)
+		code := tool(at).Run(args, failedSourceOutput(t, want), &wrong)
 		if code != 1 || !strings.Contains(wrong.String(), want.Error()) {
 			t.Fatalf("%v: %d %s", args, code, wrong.String())
 		}
@@ -51,7 +57,8 @@ func TestSourceVerificationRejectsWrongNumericTextAndUnreadablePinnedPDF(t *test
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := os.WriteFile(at.list, []byte(strings.Replace(string(raw), "/candle.txt", "/candle.pdf", 1)), 0600); err != nil {
+			changed := strings.Replace(string(raw), "/candle.txt", "/candle.pdf", 1)
+			if err := os.WriteFile(at.list, []byte(changed), 0600); err != nil {
 				t.Fatal(err)
 			}
 		}

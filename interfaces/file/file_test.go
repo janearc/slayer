@@ -101,7 +101,8 @@ func TestAPictureThatCannotBeWrittenKeepsTheFile(t *testing.T) {
 // a picture is written readable by all and writable by its owner.
 func TestAPictureIsWrittenInItsMode(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "mode.png")
-	if err := PNG(path, image.NewRGBA(image.Rect(0, 0, 1, 1)), 1); err !=
+	blank := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	if err := PNG(path, blank, 1); err !=
 		nil {
 		t.Fatal(err)
 	}

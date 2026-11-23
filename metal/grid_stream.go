@@ -222,8 +222,7 @@ func (s *GridStream) DrawBands(
 	place := func(_, down int) []float32 {
 		return samples[:s.width*down*s.per]
 	}
-	drawing := bandDrawing{kernel: s.kernel, stream: s.stream,
-		height: s.height, rows: s.kernel.bandRows(s.rows)}
+	drawing := s.kernel.drawingOf(s.stream, s.height, s.rows)
 	return drawing.draw(place, consume)
 }
 

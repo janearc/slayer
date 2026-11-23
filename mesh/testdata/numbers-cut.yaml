@@ -1,0 +1,97 @@
+# every number cut_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: cut-narrow
+    value: 0.5
+    says: how wide each face of a row is when the faces stand apart
+    kind: picked
+    by: half of the one between neighbours, so no two boxes of the row touch
+  - name: cut-wide
+    value: 2
+    says: how wide each face of a row is when the faces overlap
+    kind: picked
+    by: twice the step between neighbours, so each box reaches past the next face's start
+  - name: cut-row-length
+    value: 6
+    says: how many faces the row has whose last three are cut
+    kind: picked
+    by: twice the three that are cut, so the run is not the whole row
+  - name: cut-node-room
+    value: 8
+    says: how many places the nodes of the tree being cut have room for
+    kind: picked
+    by: more than the few nodes a cut of three faces makes, so none is made in a full list
+  - name: cut-run-from
+    value: 3
+    says: the place in the order where the run that is cut starts
+    kind: picked
+    by: the middle of the row, so faces lie on both sides of the run
+  - name: cut-run-depth
+    value: 62
+    says: how deep in the tree the run is when it is cut
+    kind: picked
+    by: two short of the deepest depth, so only one more cut is allowed below it
+  - name: cut-few-faces
+    value: 3
+    says: how many faces the small rows have whose cut is asked for
+    kind: picked
+    by: the fewest faces for which the heuristic is weighed at all
+  - name: cut-weighed-cost
+    value: 3
+    says: the cost of the cheapest cut of three faces two wide on a row
+    kind: picked
+    by: the cost worked out by hand from the boxes of the two sides
+  - name: cut-share-first
+    value: 0.25
+    says: the weight of the first side's box in the cost of three faces apart
+    kind: picked
+    by: worked out by hand from the box of the first face and the box of all three
+  - name: cut-share-rest
+    value: 0.75
+    says: the weight of the other side's box in the cost of three faces apart
+    kind: picked
+    by: worked out by hand from the box of the last two faces and the box of all three
+  - name: cut-share-whole
+    value: 1.25
+    says: the weight of the box of all three faces apart, that the sides are divided by
+    kind: picked
+    by: worked out by hand from the box of all three faces
+  - name: cut-tolerance
+    value: 1e-12
+    says: how far a cost may be from the one worked out by hand
+    kind: picked
+    by: many digits past the rounding of a sum of a few terms, and far under any difference a wrong cut makes
+  - name: cut-small-ball
+    value: 2
+    says: how many times the ball whose tree is checked for spare room is halved
+    kind: picked
+    by: a ball with a few hundred faces, enough that a reservation of two nodes a face is plainly larger than the tree
+  - name: cut-ball
+    value: 3
+    says: how many times the ball whose tree is checked box by box is halved
+    kind: picked
+    by: one halving more than the small ball, so the tree is deeper
+  - name: cut-row-count
+    value: 300
+    says: how many faces the row has that is each twice as far along as the last
+    kind: picked
+    by: more than the depth reached, and beyond the range at which a distance is told from the one before
+  - name: cut-last-gain
+    value: 78
+    says: the part of the cost of the last bin's cut that comes from the strip and the pair
+    kind: picked
+    by: worked out by hand from the boxes of the faces in the comment of the test
+  - name: cut-last-whole
+    value: 3400
+    says: what that part of the cost is divided by, the area of the box of all three faces
+    kind: picked
+    by: worked out by hand from the boxes of the faces in the comment of the test
+  - name: cut-last-bin
+    value: 14
+    says: the bin after which the cheapest cut is, which is the one before the last
+    kind: picked
+    by: the bin of the strip's middle less one, as the comment of the test works out
+  - name: cut-shared-faces
+    value: 4
+    says: how many faces with one box and one middle the run has
+    kind: picked
+    by: more than the two that make a leaf, so a cut is asked for and cannot be made

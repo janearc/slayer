@@ -60,7 +60,9 @@ func (cache *collectorCache) withAge(now time.Time) []observability.Sample {
 		}
 		out = append(out, sample)
 	}
-	return append(out, observability.Sample{Name: "azazel_collection_age_seconds", Value: max(0, now.Sub(cache.taken).Seconds())}, observability.Sample{Name: "azazel_collection_duration_seconds", Value: max(0, cache.finished.Sub(cache.taken).Seconds())})
+	ageSeconds := now.Sub(cache.taken).Seconds()
+	durationSeconds := cache.finished.Sub(cache.taken).Seconds()
+	return append(out, observability.Sample{Name: "azazel_collection_age_seconds", Value: max(0, ageSeconds)}, observability.Sample{Name: "azazel_collection_duration_seconds", Value: max(0, durationSeconds)})
 }
 
 // NewCollector makes one independent CPU sampling history for this worker.
@@ -97,7 +99,8 @@ func (c Collector) collect() ([]observability.Sample, time.Time) {
 	out := hostSamples(nativeHost{}, c.Directory)
 	out = append(out, observability.Sample{Name: "azazel_collection_available", Value: 1})
 	if c.cpu != nil {
-		out = append(out, c.cpu.sample(time.Now(), nativeCPUTicks)...)
+		cpuSampledAt := time.Now()
+		out = append(out, c.cpu.sample(cpuSampledAt, nativeCPUTicks)...)
 	}
 	gpu, gpuKnown := queue.MetricsGPUDeviceUtilization()
 	out = append(out, observability.Sample{Name: "azazel_gpu_device_utilization_available", Value: flag(gpuKnown)})

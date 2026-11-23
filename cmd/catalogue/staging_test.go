@@ -42,7 +42,8 @@ func readStaging(test *testing.T) stagingContract {
 
 // degreesBetween is the angle between two ways, in degrees.
 func degreesBetween(one, other maths.Vec) float64 {
-	return math.Acos(one.Unit().Dot(other.Unit())) / maths.Degree
+	alignment := one.Unit().Dot(other.Unit())
+	return math.Acos(alignment) / maths.Degree
 }
 
 func TestAStagedEntryIsLitByItsStagingAndNotTheStudio(test *testing.T) {

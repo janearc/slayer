@@ -36,10 +36,12 @@ func TestParticipatingClearMediumIntegratesOneOutgoingPathAgainstAnalyticSource(
 	const distance = 2.0
 	incident := maths.RGB(2, 3, 4)
 	world := thing.NewWorld()
+	endpoint := resting(maths.V(0, distance, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Name: "black endpoint"},
-		Motion:   resting(maths.V(0, distance, 0))})
-	world.Lamp(thing.Sun(maths.V(1, 0, 0), incident))
+		Motion:   endpoint})
+	along := maths.V(1, 0, 0)
+	world.Lamp(thing.Sun(along, incident))
 	got, err := RenderWithInitialMedia(world,
 		mediumEye(maths.Vec{}, maths.Up), film.Pinhole{}, 0, 1, 1,
 		[]InitialMedium{{Index: 1, ClearMedium: medium}})
@@ -142,9 +144,10 @@ func TestZeroScatteringKeepsLegacyClearMediumPictureBitForBit(t *testing.T) {
 		t.Fatal(err)
 	}
 	world := thing.NewWorld()
+	wall := resting(maths.V(0, 4, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.RGB(0.8, 0.6, 0.4)},
-		Motion:   resting(maths.V(0, 4, 0))})
+		Motion:   wall})
 	render := func(medium *thing.ClearMedium) frame.Pixel {
 		t.Helper()
 		made, err := RenderWithInitialMedia(world,
@@ -174,12 +177,15 @@ func TestZeroExtinctionNamedBoundariesPreserveNoMediumPicture(t *testing.T) {
 			entry.ClearMedium, exit.ClearMedium = zero, zero
 		}
 		world.Add(thing.Thing{Shape: shape.Plane{}, Material: entry})
+		exitAt := resting(maths.V(0, 2, 0))
 		world.Add(thing.Thing{Shape: shape.Plane{}, Material: exit,
-			Motion: resting(maths.V(0, 2, 0))})
+			Motion: exitAt})
+		sphereAt := resting(maths.V(0, 3, 0))
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.25},
 			Material: &thing.Material{Glow: maths.Grey(1)},
-			Motion:   resting(maths.V(0, 3, 0))})
-		made, err := Render(world, mediumEye(maths.V(0, -1, 0), maths.Up),
+			Motion:   sphereAt})
+		from := maths.V(0, -1, 0)
+		made, err := Render(world, mediumEye(from, maths.Up),
 			film.Pinhole{}, 0, 1, 1)
 		if err != nil {
 			t.Fatal(err)
@@ -204,10 +210,13 @@ func TestParticipatingClearMediumHonoursIndependentStepAndDistanceBudgets(t *tes
 	}
 	worldFor := func(distance float64) *thing.World {
 		world := thing.NewWorld()
+		endpoint := resting(maths.V(0, distance, 0))
 		world.Add(thing.Thing{Shape: shape.Plane{},
 			Material: &thing.Material{Name: "black endpoint"},
-			Motion:   resting(maths.V(0, distance, 0))})
-		world.Lamp(thing.Sun(maths.V(1, 0, 0), maths.Grey(1)))
+			Motion:   endpoint})
+		along := maths.V(1, 0, 0)
+		light := maths.Grey(1)
+		world.Lamp(thing.Sun(along, light))
 		return world
 	}
 	render := func(medium *thing.ClearMedium, distance float64) frame.Pixel {
@@ -253,7 +262,9 @@ func TestParticipatingClearMediumRefusesUnmodeledLightPaths(t *testing.T) {
 		},
 		"too many lamps": func(world *thing.World) {
 			for range maxClearInscatterLamps + 1 {
-				world.Lamp(thing.Sun(maths.V(1, 0, 0), maths.Grey(1)))
+				along := maths.V(1, 0, 0)
+				light := maths.Grey(1)
+				world.Lamp(thing.Sun(along, light))
 			}
 		},
 		"field": func(world *thing.World) {
@@ -300,7 +311,9 @@ func TestParticipatingClearMediumRefusesFiniteNumericOverflow(t *testing.T) {
 			t.Fatal(err)
 		}
 		world := thing.NewWorld()
-		world.Lamp(thing.Sun(maths.V(1, 0, 0), maths.Grey(1e300)))
+		along := maths.V(1, 0, 0)
+		light := maths.Grey(1e300)
+		world.Lamp(thing.Sun(along, light))
 		if _, err := RenderWithInitialMedia(world,
 			mediumEye(maths.Vec{}, maths.Up), film.Pinhole{}, 0, 1, 1,
 			[]InitialMedium{{Index: 1, ClearMedium: medium}}); err == nil {
@@ -314,7 +327,9 @@ func TestParticipatingClearMediumRefusesFiniteNumericOverflow(t *testing.T) {
 			t.Fatal(err)
 		}
 		world := thing.NewWorld()
-		world.Lamp(thing.Sun(maths.V(1, 0, 0), maths.Grey(1)))
+		along := maths.V(1, 0, 0)
+		light := maths.Grey(1)
+		world.Lamp(thing.Sun(along, light))
 		if _, err := RenderWithInitialMedia(world,
 			mediumEye(maths.Vec{}, maths.Up), film.Pinhole{}, 0, 1, 1,
 			[]InitialMedium{{Index: 1, ClearMedium: medium}}); err == nil {
@@ -369,7 +384,8 @@ func opticalScatteringWater(t *testing.T, name string) *thing.ClearMedium {
 
 func TestClearMediumDoesNotChangeLegacyRenderWithoutOptics(t *testing.T) {
 	world := mediumWorld()
-	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.25}, Material: &thing.Material{Glow: maths.Grey(1)}, Motion: resting(maths.V(0, 3, 0))})
+	sphereAt := resting(maths.V(0, 3, 0))
+	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.25}, Material: &thing.Material{Glow: maths.Grey(1)}, Motion: sphereAt})
 	eye := mediumEye(maths.V(0, -1, 0), maths.Up)
 	legacy, err := Render(world, eye, film.Pinhole{}, 0, 1, 1)
 	if err != nil {
@@ -490,13 +506,15 @@ func TestClearMediumUsesFloat64HitDistanceNotPixelDepth(t *testing.T) {
 		Through: 1, Gloss: 1, Index: 1.33, ClearMedium: water,
 	}})
 	targetDistance := 1_000_000.07
+	targetAt := resting(maths.V(0, targetDistance, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, targetDistance, 0))})
+		Motion:   targetAt})
 	if float64(float32(targetDistance)) == targetDistance {
 		t.Fatal("fixture distance is exactly representable in pixel depth")
 	}
-	got, err := Render(world, mediumEye(maths.V(0, -1, 0), maths.Up),
+	from := maths.V(0, -1, 0)
+	got, err := Render(world, mediumEye(from, maths.Up),
 		film.Pinhole{}, 0, 1, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -504,7 +522,8 @@ func TestClearMediumUsesFloat64HitDistanceNotPixelDepth(t *testing.T) {
 	distance := targetDistance
 	fresnel := 1 - maths.Fresnel(1, 1.33)
 	want := fresnel * math.Exp(-1e-5*distance)
-	if !within(float64(got.At(0, 0).R), want, 2e-9) {
+	red := float64(got.At(0, 0).R)
+	if !within(red, want, 2e-9) {
 		t.Fatalf("long-path transmission = %.12g, want %.12g using float64 distance %.12g (pixel depth %.12g)",
 			got.At(0, 0).R, want, distance, float32(distance))
 	}
@@ -516,8 +535,10 @@ func TestClearMediumNestedRankAndExitRestoreTheLowerMedium(t *testing.T) {
 	glass := opticalWater(t, "test-glass", maths.RGB(0.4, 0.3, 0.2), 1)
 	glassBoundary := &thing.Material{Name: "glass boundary", Through: 1, Gloss: 1, Index: 1.5, Rank: 2, ClearMedium: glass}
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: glassBoundary})
-	world.Add(thing.Thing{Shape: shape.Plane{}, Material: glassBoundary, Motion: resting(maths.V(0, 2, 0))})
-	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Glow: maths.Grey(1)}, Motion: resting(maths.V(0, 3, 0))})
+	exitAt := resting(maths.V(0, 2, 0))
+	world.Add(thing.Thing{Shape: shape.Plane{}, Material: glassBoundary, Motion: exitAt})
+	targetAt := resting(maths.V(0, 3, 0))
+	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Glow: maths.Grey(1)}, Motion: targetAt})
 	from := maths.V(0, -1, 0)
 	initial := []InitialMedium{{Index: 1.33, Rank: 0, ClearMedium: water}}
 	got, err := RenderWithInitialMedia(world, mediumEye(from, maths.Up), film.Pinhole{}, 0, 1, 1, initial)
@@ -538,10 +559,13 @@ func TestInitialOpticalMediumAttenuatesBeforeItsExitBoundary(t *testing.T) {
 	world := thing.NewWorld()
 	boundaryWater := opticalWater(t, "test-water", maths.RGB(0.2, 0.1, 0.05), 3)
 	initialWater := opticalWater(t, "test-water", maths.RGB(0.2, 0.1, 0.05), 3)
-	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Name: "water exit", Through: 1, Gloss: 1, Index: 1.33, ClearMedium: boundaryWater}, Motion: resting(maths.V(0, 2, 0))})
-	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Glow: maths.Grey(1)}, Motion: resting(maths.V(0, 3, 0))})
+	exitAt := resting(maths.V(0, 2, 0))
+	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Name: "water exit", Through: 1, Gloss: 1, Index: 1.33, ClearMedium: boundaryWater}, Motion: exitAt})
+	targetAt := resting(maths.V(0, 3, 0))
+	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Glow: maths.Grey(1)}, Motion: targetAt})
 	initial := []InitialMedium{{Index: 1.33, ClearMedium: initialWater}}
-	got, err := RenderWithInitialMedia(world, mediumEye(maths.V(0, 0, 0), maths.Up), film.Pinhole{}, 0, 1, 1, initial)
+	from := maths.V(0, 0, 0)
+	got, err := RenderWithInitialMedia(world, mediumEye(from, maths.Up), film.Pinhole{}, 0, 1, 1, initial)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -561,10 +585,12 @@ func TestClearMediumRejectsDistinctIDsAtSameIndexAndRank(t *testing.T) {
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{
 		Through: 1, Index: 1.33, Rank: 0, ClearMedium: one,
 	}})
+	exitAt := resting(maths.V(0, 2, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{
 		Through: 1, Index: 1.33, Rank: 0, ClearMedium: two,
-	}, Motion: resting(maths.V(0, 2, 0))})
-	if _, err := newView(world, mediumEye(maths.V(0, -1, 0), maths.Up),
+	}, Motion: exitAt})
+	from := maths.V(0, -1, 0)
+	if _, err := newView(world, mediumEye(from, maths.Up),
 		film.Pinhole{}, 0, 1, 1, 1); err == nil {
 		t.Fatal("distinct medium IDs at one legacy index/rank stack key were accepted")
 	}
@@ -575,15 +601,17 @@ func TestClearMediumRejectsAmbiguousIDsAndUnsupportedVolumes(t *testing.T) {
 	two := opticalWater(t, "same-water", maths.RGB(0.2, 0.2, 0.3), 1)
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Through: 1, Index: 1.33, ClearMedium: one}})
-	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Through: 1, Index: 1.33, ClearMedium: two}, Motion: resting(maths.V(0, 1, 0))})
-	if _, err := newView(world, mediumEye(maths.V(0, -1, 0), maths.Up), film.Pinhole{}, 0, 1, 1, 1); err == nil {
+	secondAt := resting(maths.V(0, 1, 0))
+	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Through: 1, Index: 1.33, ClearMedium: two}, Motion: secondAt})
+	from := maths.V(0, -1, 0)
+	if _, err := newView(world, mediumEye(from, maths.Up), film.Pinhole{}, 0, 1, 1, 1); err == nil {
 		t.Fatal("one optical medium ID with different coefficients was accepted")
 	}
 
 	world = thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Through: 1, Index: 1.33, ClearMedium: one}})
 	world.AddVolume(thing.NewVolume(medium.Puff{Radius: 1, Thick: 0.2}, nil))
-	if _, err := newView(world, mediumEye(maths.V(0, -1, 0), maths.Up), film.Pinhole{}, 0, 1, 1, 1); err == nil {
+	if _, err := newView(world, mediumEye(from, maths.Up), film.Pinhole{}, 0, 1, 1, 1); err == nil {
 		t.Fatal("mixed clear optical medium and volume transport was accepted")
 	}
 }
@@ -651,10 +679,11 @@ func TestClearCloudScattersRefractedSkyWithWaterOnBothLegs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	cloudAt := thing.Still(maths.Subspace{Origin: maths.V(0, -2, 0)})
 	world.AddVolume(thing.Volume{Medium: cloud,
 		Material: &thing.Material{Name: "sub-resolution cavitation",
 			Colour: maths.Grey(.8)},
-		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, -2, 0)})})
+		Motion: cloudAt})
 	if err := ValidateClearState(world,
 		[]InitialMedium{{Index: index, ClearMedium: water}}); err != nil {
 		t.Fatalf("supported source/cloud composition refused: %v", err)
@@ -686,7 +715,8 @@ func TestInitialClearMediumMustMatchNamedBoundaryProperties(t *testing.T) {
 	initial := opticalWater(t, "same-water", maths.RGB(0.1, 0.2, 0.4), 1)
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Through: 1, Index: 1.33, ClearMedium: boundary}})
-	seen, err := newView(world, mediumEye(maths.V(0, -1, 0), maths.Up), film.Pinhole{}, 0, 1, 1, 1)
+	from := maths.V(0, -1, 0)
+	seen, err := newView(world, mediumEye(from, maths.Up), film.Pinhole{}, 0, 1, 1, 1)
 	if err != nil {
 		t.Fatal(err)
 	}

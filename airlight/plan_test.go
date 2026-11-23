@@ -149,6 +149,9 @@ func TestEachInputMovesTheKey(t *testing.T) {
 		"the seed":           func(plan *Plan) { plan.seed++ },
 		"the workers":        func(plan *Plan) { plan.workers++ },
 		"the solver version": func(plan *Plan) { plan.version = otherSolver },
+		"the span of suns":   func(plan *Plan) { plan.suns.To /= two },
+		"the crossings":      func(plan *Plan) { plan.wanted++ },
+		"the most photons":   func(plan *Plan) { plan.most++ },
 	} {
 		made := changed(plain)
 		change(&made)

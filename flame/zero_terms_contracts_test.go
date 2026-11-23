@@ -17,7 +17,7 @@ func TestLineOnlyCompositionDoesNotAdvertiseThermalContinuumBands(t *testing.T) 
 	}
 	expected := bands.Lines(map[float64]float64{588.995: 2, 589.5924: 1})
 	first, last := expected.Span()
-	gotFirst, gotLast := profile.Spectrum(spec.Reference).Span()
+	gotFirst, gotLast := profile.spectrum(spec.Reference).Span()
 	if gotFirst != first || gotLast != last {
 		t.Fatalf("line-only span %v..%v, want %v..%v", gotFirst, gotLast, first, last)
 	}

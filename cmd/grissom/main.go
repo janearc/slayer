@@ -1,8 +1,3 @@
-// grissom needs celestial-data's netcdf adapter, which v0.0.4 does not
-// carry. It builds with -tags netcdf once a release does.
-
-//go:build netcdf
-
 // Command grissom is the survey viewer. It lays images onto the sky's
 // triangles and draws them on Metal, with the earth as hexes beside them.
 //

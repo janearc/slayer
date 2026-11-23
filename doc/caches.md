@@ -29,9 +29,10 @@ its record, its length, its sha256) is a miss and is never served.
 |---|---|---|---|
 | `skies` | the moonlit and twilit sky tables | the build, the height, the direction, the light and the exposure | 64 MiB |
 | `ground` | a set's elevation window, cut from the model and smoothed | the build, the model's pinned sha256, the window, its step and the smoothing | 2 GiB |
-| `air-fields` | a named air's light at a set's ground, by wavelength (package airlight) | the air's name, its columns and sun at every wavelength, the ground, the wavelengths, the grid, the photons, the seed, the workers and the solver's version, not the build | 512 MiB |
+| `air-fields` | a named air's light at a set's ground, by wavelength, for the pair of the sun's zenith bins the set reads (package airlight) | the air's name, its columns and sun at every wavelength, the ground, the wavelengths, the grid, the span of suns, the photons, the crossings wanted and the most photons, the seed, the workers and the solver's version, not the build | 512 MiB |
 | `pin-checks` | the sha256 a pinned file was found to have | its path, size, modified time, inode and device | 4 MiB |
 | `pictures` | a set's finished still | the job's picture key, the build and the nearest `sources.yaml` | 4 GiB |
+| `rows` | each finished row of a set's still drawn on the processor, until the still is written | the job's light key, the build, the nearest `sources.yaml` and the row's number | 2 GiB |
 | `trees` | the GPU's trees: a file each with `SLAYER_TREE_STORE=files`, or one bbolt file, `trees.bolt`, otherwise | the hash of the running program and of the mesh's faces | 8 GiB, for either way |
 
 Over its cap a kind removes its least recently used entries, never one
@@ -114,7 +115,7 @@ Also kept, outside `slayer cache`:
   `pids` (each run writes its own file and merges into the main one at its
   end, which the bound is kept to as for `bolt`).
 - The weather's moments, in `weather/` in the cache home, shared by
-  hillside.
+  the session package.
 - A film's frames are working files in `frames/TEAM/NAME-DIGEST` under
   the cache home, with a `manifest.json`; `SLAYER_TEAM` names the team;
   with none, `frames/NAME-DIGEST`. They are removed when the movie is

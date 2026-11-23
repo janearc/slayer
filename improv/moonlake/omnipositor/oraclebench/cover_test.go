@@ -35,7 +35,8 @@ func TestParseBSDTimeRefusals(t *testing.T) {
 	if _, err := ParseBSDTime(iotest.ErrReader(iotest.ErrTimeout)); err == nil || !strings.Contains(err.Error(), "read time output") {
 		t.Errorf("read failure: %v", err)
 	}
-	if _, err := ParseBSDTime(strings.NewReader(strings.Repeat("a", 2<<20))); err == nil || !strings.Contains(err.Error(), "read time output") {
+	oversize := strings.Repeat("a", 2<<20)
+	if _, err := ParseBSDTime(strings.NewReader(oversize)); err == nil || !strings.Contains(err.Error(), "read time output") {
 		t.Errorf("line over the limit: %v", err)
 	}
 	cases := []struct{ name, text, want string }{

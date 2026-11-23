@@ -1,0 +1,56 @@
+# A bull walrus swimming, as a study in a studio with no water: the body
+# straight, the head in line, the fore flippers laid back along the flanks
+# and the hind flippers trailing behind the shanks, the loins bent to one
+# side as in a stroke. The pose is made by turning joints of the skeleton
+# under the hide (manufacture/walrus_pose.go). The lights are the studio's,
+# chosen by eye.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Walrus fresh 5 swimming study
+  seed: 17
+  setting: space
+  light: none
+  set:
+    things:
+      walrus:
+        kind: walrus-fresh-5-swimming
+        seed: 17
+        east: 0
+        north: 0
+  film:
+    width: 1600
+    height: 1000
+    rays: 1
+    exposure: 1.05
+    wide: 38
+  cameras:
+    side:
+      location: {at: [0, 7.2, 0.6]}
+      orientation: {look_at: [0, 0, 0]}
+    top:
+      location: {at: [0.01, 0.4, 7.4]}
+      orientation: {look_at: [0, 0, 0]}
+    quarter:
+      location: {at: [4, 5.2, 2]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.10, 0.14, 0.17]}
+      zenith: {srgb_linear: [0.18, 0.23, 0.28]}
+      ground: {srgb_linear: [0.05, 0.07, 0.08]}
+      source: eye
+    suns:
+      key:
+        toward: [0.36, 0.82, 0.44]
+        colour: {srgb_linear: [1.45, 1.34, 1.23]}
+        source: eye
+      rim:
+        toward: [-0.3, 0.5, -0.85]
+        colour: {srgb_linear: [0.63, 0.77, 0.88]}
+        source: eye
+    floods:
+      fill:
+        colour: {srgb_linear: [0.21, 0.24, 0.29]}
+        strength: 1
+        source: eye

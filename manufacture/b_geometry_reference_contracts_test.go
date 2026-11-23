@@ -1,5 +1,3 @@
-//go:build darwin && arm64
-
 package manufacture
 
 import (
@@ -21,6 +19,10 @@ import (
 // of plants or an exact-pixel GPU comparison. The original 144 entries and
 // their provenance are unchanged; additions have separate files and producer
 // records, captured after their independent geometry checks.
+//
+// The digest here is built on every machine, since a test may set two
+// digests made on one machine against each other. The records are
+// Darwin/ARM64's, and the tests that read them are built only there.
 
 func referenceWrite(h hash.Hash, values any) {
 	if err := binary.Write(h, binary.LittleEndian, values); err != nil {
@@ -48,7 +50,7 @@ func referenceGeometry(h hash.Hash, solid shape.Shape, seen map[shape.Shape]int)
 	switch made := solid.(type) {
 	case *mesh.Mesh:
 		referenceWrite(h, byte(1))
-		referenceWrite(h, int64(made.FaceCount()))
+		referenceCount(h, made.FaceCount())
 		for i := range made.FaceCount() {
 			a, b, c := made.Corners(i)
 			referenceVector(h, a)
@@ -64,21 +66,21 @@ func referenceGeometry(h hash.Hash, solid shape.Shape, seen map[shape.Shape]int)
 		}
 	case *shape.Mesh:
 		referenceWrite(h, byte(2))
-		referenceWrite(h, int64(len(made.Faces)))
+		referenceCount(h, len(made.Faces))
 		for _, face := range made.Faces {
 			for _, corner := range face {
 				referenceVector(h, made.Vertices[corner])
 			}
 		}
 		referenceWrite(h, made.Smooth)
-		referenceWrite(h, int64(len(made.Normals)))
+		referenceCount(h, len(made.Normals))
 		for _, normal := range made.Normals {
 			referenceVector(h, normal)
 		}
 	case *shape.MeshGroup:
 		members := made.Members()
 		referenceWrite(h, byte(3))
-		referenceWrite(h, int64(len(members)))
+		referenceCount(h, len(members))
 		for _, member := range members {
 			referenceSpace(h, member.Space)
 			referenceGeometry(h, member.Mesh, seen)
@@ -86,6 +88,11 @@ func referenceGeometry(h hash.Hash, solid shape.Shape, seen map[shape.Shape]int)
 	default:
 		panic(fmt.Sprintf("unrecorded manufactured shape %T", solid))
 	}
+}
+
+// referenceCount writes a count as the 64-bit integer the record keeps.
+func referenceCount(into hash.Hash, count int) {
+	referenceWrite(into, int64(count))
 }
 
 // referenceEpoch is defined as the stationary specimen's zero time.

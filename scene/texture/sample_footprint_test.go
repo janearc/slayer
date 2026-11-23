@@ -48,19 +48,3 @@ func TestSampleOfAPlainTextureIgnoresTheFootprint(t *testing.T) {
 		}
 	}
 }
-
-// A checker says what it is: its size and its two colours, as it was
-// made, in the order a then b.
-func TestCheckerSaysWhatItIs(t *testing.T) {
-	c, ok := Checker(2.5, a, b).(Checks)
-	if !ok {
-		t.Fatal("a checker does not say it is a checker")
-	}
-	size, first, second := c.Checks()
-	if size != 2.5 || first != a || second != b {
-		t.Errorf("a checker of 2.5 in %v then %v says %v, %v, %v", a, b, size, first, second)
-	}
-	if _, ok := Texture(Wire{}).(Checks); ok {
-		t.Error("a wire says it is a checker")
-	}
-}

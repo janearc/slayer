@@ -84,10 +84,12 @@ func TestShellComaTailAndCloudsReadBackTheirArguments(t *testing.T) {
 // The aurora, the cities and the jets give back what they were made
 // with, and the colours give back their three.
 func TestAuroraCitiesAndJetsReadBackTheirArguments(t *testing.T) {
-	aurora, err := bodies.NewAurora(bodies.NewShell(km(1), km(5)),
+	auroraShell := bodies.NewShell(km(1), km(5))
+	auroraColours := bodies.NewAuroraColours(lit(1, 2, 3),
+		lit(4, 5, 6), lit(7, 8, 9))
+	aurora, err := bodies.NewAurora(auroraShell,
 		rad(0.5), rad(0.25), rad(0.125), maths.Share(0.6),
-		maths.Share(0.8), 21, bodies.NewAuroraColours(lit(1, 2, 3),
-			lit(4, 5, 6), lit(7, 8, 9)))
+		maths.Share(0.8), 21, auroraColours)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -307,7 +309,8 @@ func TestABodyGivesBackEachPartItWears(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	clouds, err := bodies.NewClouds(bodies.NewShell(km(2), km(11)),
+	cloudShell := bodies.NewShell(km(2), km(11))
+	clouds, err := bodies.NewClouds(cloudShell,
 		maths.Share(0.4), nothing, 13)
 	if err != nil {
 		t.Fatal(err)
@@ -317,7 +320,8 @@ func TestABodyGivesBackEachPartItWears(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	aurora, err := bodies.NewAurora(bodies.NewShell(km(1), km(5)),
+	auroraShell := bodies.NewShell(km(1), km(5))
+	aurora, err := bodies.NewAurora(auroraShell,
 		rad(0.5), rad(0.25), rad(0.125), maths.Share(0.6),
 		maths.Share(0.8), 21, bodies.AuroraColours{})
 	if err != nil {
@@ -496,7 +500,8 @@ func TestPartConstructorsSayWhatIsWrong(t *testing.T) {
 			return e
 		}, "fineness mix"},
 		{"night lights glow", func() error {
-			_, e := ground(t).NightLit(image.NewGray(image.Rect(0, 0, 1, 1)),
+			dark := image.NewGray(image.Rect(0, 0, 1, 1))
+			_, e := ground(t).NightLit(dark,
 				maths.Share(2))
 			return e
 		}, "night lights"},
@@ -552,7 +557,8 @@ func TestPartConstructorsSayWhatIsWrong(t *testing.T) {
 			return e
 		}, "goes nowhere"},
 		{"moon holding a complaint", func() error {
-			_, e := bodies.NewMoon(heavy(t).Turning(time.Hour, rad(nan)),
+			notANumber := rad(nan)
+			_, e := bodies.NewMoon(heavy(t).Turning(time.Hour, notANumber),
 				km(1), rad(0))
 			return e
 		}, "as a moon"},

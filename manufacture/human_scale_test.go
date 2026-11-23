@@ -48,8 +48,9 @@ func TestScaleHumanRefusesAnUnsownSeed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	seed := unsown(manufacture.Sow(1))
 	made, err := manufacture.MakeWithComplexity(row,
-		unsown(manufacture.Sow(1)), "quick")
+		seed, "quick")
 	if err == nil || made.PartCount() != 0 {
 		t.Fatal("unsown construction returned a scale human")
 	}

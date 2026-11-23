@@ -41,7 +41,8 @@ func missing(page string) []string {
 func TestAgentHelpHoldsEveryFlagAndShortcutOfTheSchema(t *testing.T) {
 	if len(job.Switches()) < len([]string{"vibes", "fastlight",
 		"lamp-store"}) {
-		t.Fatalf("the schema declares %d switches", len(job.Switches()))
+		declared := len(job.Switches())
+		t.Fatalf("the schema declares %d switches", declared)
 	}
 	if lost := missing(agentHelp(t)); len(lost) > nothing {
 		t.Errorf("--agent-help does not hold %v", lost)

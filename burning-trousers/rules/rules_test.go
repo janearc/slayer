@@ -317,7 +317,8 @@ func TestNoCommitChangesTheHarnessAndWhatItJudges(t *testing.T) {
 			broke[commit] = true
 			continue
 		}
-		judges := slices.Compact(slices.Sorted(slices.Values(others)))
+		ordered := slices.Sorted(slices.Values(others))
+		judges := slices.Compact(ordered)
 		t.Errorf("%s changes the harness, burning-trousers, and what it "+
 			"judges, %s, in one commit.\n%s", commit[:7],
 			strings.Join(judges, ", "), apart)

@@ -1,1 +1,1 @@
-fire-cluster . :: ./bin/hillside -set doc/fire-cluster.yaml -out out/fire-cluster.png
+fire-cluster . :: ./bin/slayer draw doc/fire-cluster.yaml --out out/fire-cluster.png

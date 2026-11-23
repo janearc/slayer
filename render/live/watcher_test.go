@@ -30,8 +30,9 @@ func TestWatchDrawsCoarseThenFine(t *testing.T) {
 	stager.EXPECT().Stage(gomock.Any(), gomock.Any()).
 		Return(stageOf(control, one, drew), nil).Times(one)
 	path := jobFile(t, stillJob)
+	screen := screenOf(control, make(chan terminal.Event), shown, nil)
 	watching := watcherOn(t, path, stager,
-		screenOf(control, make(chan terminal.Event), shown, nil), noon(),
+		screen, noon(),
 		make(chan time.Time))
 	running(t, watching)
 	want := ladderFor(facts{width: 40, height: 30}, testScreen())
@@ -83,8 +84,10 @@ func TestWatchStopsAtTheCeiling(t *testing.T) {
 	stager := NewMockStager(control)
 	stager.EXPECT().Stage(gomock.Any(), gomock.Any()).Return(stage, nil)
 	shown := make(chan *terminal.Cells, 16)
-	watching := watcherOn(t, jobFile(t, stillJob), stager,
-		screenOf(control, make(chan terminal.Event), shown, nil), now,
+	jobPath := jobFile(t, stillJob)
+	screen := screenOf(control, make(chan terminal.Event), shown, nil)
+	watching := watcherOn(t, jobPath, stager,
+		screen, now,
 		make(chan time.Time))
 	running(t, watching)
 	await(t, drew, "the first rung")
@@ -115,8 +118,10 @@ func TestWatchFoldsKeysIntoOneChange(t *testing.T) {
 			Drawn, error) {
 			asked <- index
 			<-gate
-			return drawnOf(control, max(one, size.Width()),
-				max(one, size.Height())), nil
+			width := max(one, size.Width())
+			height := max(one, size.Height())
+			return drawnOf(control, width,
+				height), nil
 		}).AnyTimes()
 	stager := NewMockStager(control)
 	stager.EXPECT().Stage(gomock.Any(), gomock.Any()).Return(gated, nil)
@@ -152,8 +157,9 @@ func TestWatchKeepsThePictureThroughABadSave(t *testing.T) {
 	path := jobFile(t, stillJob)
 	ticks := make(chan time.Time)
 	now := noon()
+	screen := screenOf(control, make(chan terminal.Event), nil, footed)
 	watching := watcherOn(t, path, stager,
-		screenOf(control, make(chan terminal.Event), nil, footed), now,
+		screen, now,
 		ticks)
 	running(t, watching)
 	for range ladderFor(facts{width: 40, height: 30}, testScreen()) {
@@ -185,7 +191,8 @@ func save(t *testing.T, path, text string) {
 	if err := os.WriteFile(path, []byte(text), fileMode); err != nil {
 		t.Fatal(err)
 	}
-	later := time.Now().Add(time.Duration(len(text)) * time.Second)
+	age := time.Duration(len(text)) * time.Second
+	later := time.Now().Add(age)
 	if err := os.Chtimes(path, later, later); err != nil {
 		t.Fatal(err)
 	}
@@ -279,8 +286,8 @@ func TestNewTakesEveryPiece(t *testing.T) {
 	if err != nil || watching == nil {
 		t.Fatalf("a whole watcher was refused: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(filepath.Dir(path),
-		".test.watch")); err == nil {
+	watchPath := filepath.Join(filepath.Dir(path), ".test.watch")
+	if _, err := os.Stat(watchPath); err == nil {
 		t.Error("a watcher with no folder given wrote one")
 	}
 }
@@ -365,8 +372,9 @@ func TestWatchFollowsTheSet(t *testing.T) {
 		"film: {width: 40, height: 30, rays: 1}\n")
 	ticks := make(chan time.Time)
 	now := noon()
+	screen := screenOf(control, make(chan terminal.Event), nil, nil)
 	watching := watcherOn(t, path, stager,
-		screenOf(control, make(chan terminal.Event), nil, nil), now, ticks)
+		screen, now, ticks)
 	running(t, watching)
 	await(t, staged, "the first staging")
 	tick := func() {

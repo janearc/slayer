@@ -1,0 +1,5 @@
+name,scale,origin_x,radius
+zero radius,0,0,0
+nan radius,0,0,nan
+negative scale,-1,0,5
+nan origin,0,nan,5

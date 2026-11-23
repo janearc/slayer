@@ -14,19 +14,19 @@ import (
 // black for a side with none. written here, not taken from mean.
 func lightAverage(px [6]color.RGBA, p int, set bool) color.RGBA {
 	var r, g, b float64
-	n := 0
-	for i, c := range px {
+	count := 0
+	for i, pixel := range px {
 		if (p>>i&1 == 1) == set {
-			r += colour.Decode(c.R)
-			g += colour.Decode(c.G)
-			b += colour.Decode(c.B)
-			n++
+			r += colour.Decode(pixel.R)
+			g += colour.Decode(pixel.G)
+			b += colour.Decode(pixel.B)
+			count++
 		}
 	}
-	if n == 0 {
+	if count == 0 {
 		return color.RGBA{A: 255}
 	}
-	return color.RGBA{colour.Encode(r / float64(n)), colour.Encode(g / float64(n)), colour.Encode(b / float64(n)), 255}
+	return color.RGBA{colour.Encode(r / float64(count)), colour.Encode(g / float64(count)), colour.Encode(b / float64(count)), 255}
 }
 
 // spread is dist's own sum as the doc gives it: the squared difference
@@ -41,11 +41,11 @@ func spread(a, b color.RGBA) float64 {
 func errorOf(px [6]color.RGBA, p int) float64 {
 	fg, bg := lightAverage(px, p, true), lightAverage(px, p, false)
 	e := 0.0
-	for i, c := range px {
+	for i, pixel := range px {
 		if p>>i&1 == 1 {
-			e += spread(c, fg)
+			e += spread(pixel, fg)
 		} else {
-			e += spread(c, bg)
+			e += spread(pixel, bg)
 		}
 	}
 	return e
@@ -75,12 +75,15 @@ func TestSplitPicksTheClosestOfAll64(t *testing.T) {
 		case 1: // two colours, split any way, a little off
 			a, b, cut := shade(), shade(), rng.IntN(64)
 			for i := range px {
-				c := a
+				pixel := a
 				if cut>>i&1 == 1 {
-					c = b
+					pixel = b
 				}
-				off := func(v uint8) uint8 { return uint8(min(255, max(0, int(v)+rng.IntN(9)-4))) }
-				px[i] = color.RGBA{off(c.R), off(c.G), off(c.B), 255}
+				off := func(v uint8) uint8 {
+					floor := max(0, int(v)+rng.IntN(9)-4)
+					return uint8(min(255, floor))
+				}
+				px[i] = color.RGBA{off(pixel.R), off(pixel.G), off(pixel.B), 255}
 			}
 		default: // three colours, which ties more often
 			palette := [3]color.RGBA{shade(), shade(), shade()}
@@ -170,13 +173,13 @@ func TestSplitOfBlackAndWhiteFindsEachArrangement(t *testing.T) {
 // and the same colour for the foreground: nothing is drawn in it, and
 // the cell says so. worked by hand, for any colour at all.
 func TestSixPixelsOfOneColourAreASpaceOfThatColour(t *testing.T) {
-	for _, c := range []color.RGBA{
+	for _, pixel := range []color.RGBA{
 		{90, 90, 90, 255}, {200, 10, 90, 255}, {0, 0, 0, 255},
 		{255, 255, 255, 255}, {1, 254, 128, 255},
 	} {
-		px := [6]color.RGBA{c, c, c, c, c, c}
-		if got, want := split(px), (Cell{Rune: ' ', Fg: c, Bg: c, Pattern: 0}); got != want {
-			t.Errorf("six of %v: got %+v, want %+v", c, got, want)
+		px := [6]color.RGBA{pixel, pixel, pixel, pixel, pixel, pixel}
+		if got, want := split(px), (Cell{Rune: ' ', Fg: pixel, Bg: pixel, Pattern: 0}); got != want {
+			t.Errorf("six of %v: got %+v, want %+v", pixel, got, want)
 		}
 	}
 }
@@ -191,7 +194,7 @@ func TestSixPixelsOfOneColourAreASpaceOfThatColour(t *testing.T) {
 func TestMeanIsTheAverageOfASideAsLight(t *testing.T) {
 	black, white, red := color.RGBA{0, 0, 0, 255}, color.RGBA{255, 255, 255, 255}, color.RGBA{255, 0, 0, 255}
 	grey := color.RGBA{12, 34, 56, 255}
-	for _, w := range []struct {
+	for _, each := range []struct {
 		what string
 		px   [6]color.RGBA
 		p    uint8
@@ -204,8 +207,8 @@ func TestMeanIsTheAverageOfASideAsLight(t *testing.T) {
 		{"no pixels set is black", [6]color.RGBA{grey, grey, grey, grey, grey, grey}, 0, true, black},
 		{"no pixels unset is black", [6]color.RGBA{grey, grey, grey, grey, grey, grey}, 63, false, black},
 	} {
-		if got := mean(w.px, w.p, w.set); got != w.want {
-			t.Errorf("%s: got %v, want %v", w.what, got, w.want)
+		if got := mean(each.px, each.p, each.set); got != each.want {
+			t.Errorf("%s: got %v, want %v", each.what, got, each.want)
 		}
 	}
 }
@@ -218,7 +221,7 @@ func TestMeanIsTheAverageOfASideAsLight(t *testing.T) {
 // weight alone: a difference of 10 in one part is 0.3*100 = 30,
 // 0.59*100 = 59 and 0.11*100 = 11.
 func TestDistWeighsRedGreenAndBlue(t *testing.T) {
-	for _, w := range []struct {
+	for _, each := range []struct {
 		a, b color.RGBA
 		want float64
 	}{
@@ -229,8 +232,8 @@ func TestDistWeighsRedGreenAndBlue(t *testing.T) {
 		{color.RGBA{0, 0, 10, 255}, color.RGBA{0, 0, 0, 255}, 11},
 		{color.RGBA{0, 0, 10, 255}, color.RGBA{0, 0, 10, 255}, 0},
 	} {
-		if got := dist(w.a, w.b); !(math.Abs(got-w.want) <= 1e-9) {
-			t.Errorf("dist(%v, %v) = %v, want %v", w.a, w.b, got, w.want)
+		if got := dist(each.a, each.b); !(math.Abs(got-each.want) <= 1e-9) {
+			t.Errorf("dist(%v, %v) = %v, want %v", each.a, each.b, got, each.want)
 		}
 	}
 }

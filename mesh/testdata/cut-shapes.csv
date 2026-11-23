@@ -1,0 +1,8 @@
+name,wide,places,want
+one,2,0,[0]
+two,2,0 1,[0 1]
+three apart,0.5,0 1 2,([0] [1 2])
+three tied,2,0 1 2,[0 1 2]
+three nearly,1,0 0.01 0.02,[0 1 2]
+out of order,0.5,2 0 1,([1] [0 2])
+a straggler,2,0 1 2 3 100,(([0 1] [2 3]) [4])

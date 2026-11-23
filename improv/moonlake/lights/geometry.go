@@ -78,12 +78,12 @@ func (c Camera) Ray(x, y int) Vec {
 		c.Focal)).Unit()
 }
 
-// ConeChord finds where a ray from the origin along d is inside an upright
+// coneChord finds where a ray from the origin along d is inside an upright
 // cone with its tip at apex, whose radius is slope times the height below the
 // tip, cut off below height low. It returns the distances along d where the
 // ray enters and leaves, and false when it is never inside for a positive
 // length. Distances are counted from the origin and start at zero.
-func ConeChord(d, apex Vec, slope, low float64) (float64, float64, bool) {
+func coneChord(d, apex Vec, slope, low float64) (float64, float64, bool) {
 	k2 := slope * slope
 	a := d.X*d.X + d.Y*d.Y - k2*d.Z*d.Z
 	b := -2*(d.X*apex.X+d.Y*apex.Y) + 2*k2*apex.Z*d.Z

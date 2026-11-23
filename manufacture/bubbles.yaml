@@ -1,0 +1,23 @@
+# A stream of air bubbles rising through water, in metres. The kind's
+# origin is where the stream is born; a set puts that origin where it
+# wants it, on an animal or under a breaking wave. y is up. Each figure
+# says where it came from in its basis, which begins with one of four
+# words: cited (a published page that was read, named after the colon),
+# derived (worked from other figures here), recalled (from memory, not
+# read this session) or picked (chosen to look right).
+read: "published pages read in the session that wrote this file, and what each gave"
+sources:
+  wikipedia-bubble: "https://en.wikipedia.org/wiki/Bubble_(physics), read: the refractive index of air is approximately 1.0003 and that of water approximately 1.333; a bubble is seen because its index differs from the liquid's"
+figures:
+  count: {least: 80, most: 200, basis: "picked: bubbles in a stream"}
+  radius: {least: 0.0005, most: 0.004, basis: "recalled: bubbles a millimetre to a centimetre across are what released air breaks into; no page read gave a range"}
+  height: {least: 4, most: 6, basis: "picked: how far a stream is drawn above its origin before it begins again"}
+  spread: {least: 0.01, most: 0.05, basis: "picked: how wide a stream is where it is born"}
+  flare: {least: 0.03, most: 0.08, basis: "picked: how far a bubble wanders out for each metre it climbs"}
+physics:
+  surface-tension: {value: 0.0728, unit: "N/m", basis: "recalled: water against air at 20 C"}
+  density: {value: 1025, unit: "kg/m3", basis: "recalled: sea water"}
+  gravity: {value: 9.81, unit: "m/s2", basis: "picked: the usual figure for the sea's surface"}
+  shape-coefficient: {value: 0.163, unit: "none", basis: "recalled: not read, the oblateness of a bubble, an aspect of 1 over (1 + 0.163 Eo^0.757), Eo the Eotvos number; the form is a rising bubble's in the literature (Clift, Grace and Weber, 1978)"}
+  shape-power: {value: 0.757, unit: "none", basis: "recalled: not read, with shape-coefficient"}
+  air-index: {value: 1.0003, unit: "none", basis: "cited: wikipedia-bubble"}

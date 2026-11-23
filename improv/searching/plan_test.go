@@ -24,7 +24,8 @@ func shootFiles(t *testing.T, change func(plan string) string) string {
 	}
 	var times, marks []string
 	for index := range 40 {
-		times = append(times, fmt.Sprint(float64(index)/2))
+		halved := float64(index) / 2
+		times = append(times, fmt.Sprint(halved))
 		marks = append(marks, "1")
 	}
 	score := fmt.Sprintf(`score:
@@ -120,7 +121,8 @@ func TestReadBindsAPlanToItsScore(t *testing.T) {
 // TestReadKeepsAbsolutePaths checks that a plan naming its files by full
 // path is not rewritten beside itself.
 func TestReadKeepsAbsolutePaths(t *testing.T) {
-	elsewhere := filepath.Join(filepath.Dir(shootFiles(t, nil)), "song.bin")
+	shootPath := shootFiles(t, nil)
+	elsewhere := filepath.Join(filepath.Dir(shootPath), "song.bin")
 	path := shootFiles(t, func(plan string) string {
 		return replaceLine(plan, "music", "music: "+elsewhere)
 	})
@@ -156,7 +158,8 @@ func TestReadRefusals(t *testing.T) {
 			}
 		})
 	}
-	if _, err := Read(filepath.Join(t.TempDir(), "none.yaml")); err == nil {
+	none := filepath.Join(t.TempDir(), "none.yaml")
+	if _, err := Read(none); err == nil {
 		t.Error("a missing plan was read")
 	}
 	broken := filepath.Join(t.TempDir(), "broken.yaml")
@@ -172,7 +175,8 @@ func TestReadRefusals(t *testing.T) {
 // bound to it and expects the grid to be refused.
 func TestReadRefusesAScoreForOtherAudio(t *testing.T) {
 	path := shootFiles(t, nil)
-	if err := os.WriteFile(filepath.Join(filepath.Dir(path), "song.bin"), []byte("another song"), 0o644); err != nil {
+	songPath := filepath.Join(filepath.Dir(path), "song.bin")
+	if err := os.WriteFile(songPath, []byte("another song"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := Read(path); err == nil || !strings.Contains(err.Error(), "different audio") {
@@ -188,7 +192,8 @@ func TestReadRefusesATripleMeter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(score, []byte(strings.Replace(string(raw), "meter: 4", "meter: 3", 1)), 0o644); err != nil {
+	changed := strings.Replace(string(raw), "meter: 4", "meter: 3", 1)
+	if err := os.WriteFile(score, []byte(changed), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := Read(path); err == nil || !strings.Contains(err.Error(), "four-beat bars") {
@@ -204,7 +209,8 @@ func TestReadRefusesABadScore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(score, []byte(strings.Replace(string(raw), "status: estimated", "status: guessed", 1)), 0o644); err != nil {
+	guessed := strings.Replace(string(raw), "status: estimated", "status: guessed", 1)
+	if err := os.WriteFile(score, []byte(guessed), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := Read(path); err == nil || !strings.Contains(err.Error(), "status") {

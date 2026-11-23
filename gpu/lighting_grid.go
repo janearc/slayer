@@ -27,11 +27,6 @@ func fieldOffset(made structure, name string) int {
 	panic("gpu: missing buffer field " + name)
 }
 
-// reserveLighting keeps source-grid ranges fixed before GPU preparation.
-func (encoded *scene) reserveLighting() {
-	encoded.reserveLightingAt(lightCells)
-}
-
 // reserveLightingAt prepares a positive longest-side resolution. Production
 // uses lightCells; the independent comparison varies it without global state.
 func (encoded *scene) reserveLightingAt(cells int) {

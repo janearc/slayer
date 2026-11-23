@@ -28,8 +28,9 @@ func Made(kind materials.Material, finish Finish) (*Material, error) {
 		return nil, fmt.Errorf("thing: a material never made")
 	}
 	look := &Material{Name: kind.Name(), Gloss: row.Gloss, Satin: row.Satin}
-	if len(row.Colour) == 3 {
-		look.Colour = maths.RGB(row.Colour[0], row.Colour[1], row.Colour[2])
+	if len(row.Colour) == metalBands {
+		look.Colour = maths.RGB(row.Colour[metalRed], row.Colour[metalGreen],
+			row.Colour[metalBlue])
 	}
 	if row.Paint {
 		look.Colour = finish.colour
@@ -46,7 +47,7 @@ func Made(kind materials.Material, finish Finish) (*Material, error) {
 		read := sight.At(band)
 		look.Metal.N[at], look.Metal.K[at] = read.N(), read.K()
 	}
-	if row.FilmIndex > 0 {
+	if row.FilmIndex > metalNone {
 		look.Film = &Film{Index: row.FilmIndex, Thickness: row.FilmThickness}
 	}
 	return look, nil

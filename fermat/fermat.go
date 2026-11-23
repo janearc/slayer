@@ -32,9 +32,9 @@ const Many = 64
 // dimensions, and sampling, as trace.Replay does.
 type Replay func(x, y int) (frame.Pixel, []trace.Step, error)
 
-// Pixel records one selected location, saved RGB, replayed result, calculation
-// steps, and any error encountered during replay.
-type Pixel struct {
+// checkedPixel records one selected location, saved RGB, replayed result,
+// calculation steps, and any error encountered during replay.
+type checkedPixel struct {
 	X, Y  int
 	Kept  frame.Pixel
 	Made  frame.Pixel
@@ -42,9 +42,9 @@ type Pixel struct {
 	Err   error
 }
 
-// Holds reports a successful replay with bitwise RGB agreement. PFM stores
+// holds reports a successful replay with bitwise RGB agreement. PFM stores
 // neither coverage nor depth, so they are not compared.
-func (pixel Pixel) Holds() bool {
+func (pixel checkedPixel) holds() bool {
 	if pixel.Err != nil {
 		return false
 	}
@@ -62,13 +62,13 @@ type Proof struct {
 	Sum           string
 	Width, Height int
 	Asked         string
-	Pixels        []Pixel
+	Pixels        []checkedPixel
 }
 
 // Holds reports whether every selected pixel matches.
 func (proof Proof) Holds() bool {
 	for _, pixel := range proof.Pixels {
-		if !pixel.Holds() {
+		if !pixel.holds() {
 			return false
 		}
 	}
@@ -101,21 +101,21 @@ func Prove(path, asked string, named [][2]int, many int,
 	proof := Proof{Raw: path, Sum: hex.EncodeToString(sum[:]),
 		Width: kept.W, Height: kept.H, Asked: asked}
 	taken := map[[2]int]bool{}
-	for _, at := range append(named, Picks(sum, kept.W, kept.H, many)...) {
+	for _, at := range append(named, picks(sum, kept.W, kept.H, many)...) {
 		if taken[at] {
 			continue
 		}
 		taken[at] = true
-		pixel := Pixel{X: at[0], Y: at[1], Kept: kept.At(at[0], at[1])}
+		pixel := checkedPixel{X: at[0], Y: at[1], Kept: kept.At(at[0], at[1])}
 		pixel.Made, pixel.Steps, pixel.Err = replay(at[0], at[1])
 		proof.Pixels = append(proof.Pixels, pixel)
 	}
 	return proof, nil
 }
 
-// Picks returns distinct coordinates selected from a generator seeded by sum,
+// picks returns distinct coordinates selected from a generator seeded by sum,
 // in selection order. Images with at most many pixels return every coordinate.
-func Picks(sum [32]byte, width, height, many int) [][2]int {
+func picks(sum [32]byte, width, height, many int) [][2]int {
 	all := width * height
 	if all <= 0 || many <= 0 {
 		return nil
@@ -137,7 +137,7 @@ func Picks(sum [32]byte, width, height, many int) [][2]int {
 func (proof Proof) String() string {
 	held := 0
 	for _, pixel := range proof.Pixels {
-		if pixel.Holds() {
+		if pixel.holds() {
 			held++
 		}
 	}

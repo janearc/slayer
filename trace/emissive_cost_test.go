@@ -40,8 +40,9 @@ func TestEmissiveVolumeDoesNotTraceZeroScatteringShadows(t *testing.T) {
 func TestPaintedScatteringStillAsksLamps(t *testing.T) {
 	calls := 0
 	world := thing.NewWorld()
+	texture := flat(maths.Grey(1))
 	world.AddVolume(thing.Volume{Medium: medium.Puff{Radius: 1, Thick: 2},
-		Material: &thing.Material{Texture: flat(maths.Grey(1))}})
+		Material: &thing.Material{Texture: texture}})
 	world.Lamp(watchedLamp{&calls})
 	got := lone(world, maths.Ray{At: maths.V(0, -3, 0), Dir: maths.Up}, 0)
 	if calls == 0 || got.R <= 0 {

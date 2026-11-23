@@ -1,0 +1,39 @@
+# webb, a specimen view: the telescope alone in space, lit by the sun.
+# not an orbit. sources and visual choices:
+# doc/model/spacecraft/space-observatories.md.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Webb, a specimen
+  # picked: the scene's seed, stirred with the thing's own
+  seed: 11
+  setting: space
+  light: sun
+  # picked: on the mirror's side and above the shield, so the mirror
+  # and the five layers are lit; the real telescope keeps its mirror in
+  # the shield's shade, and this view does not
+  sun: {azimuth: 30, altitude: 40}
+  set:
+    things:
+      the telescope:
+        kind: webb
+        seed: 5
+        complexity: demo
+        east: 0
+        north: 0
+  film:
+    width: 960
+    height: 720
+    rays: 3
+    # picked: sunlight on the shield's film, held under the film's white
+    exposure: 0.003
+    wide: 45
+  cameras:
+    specimen:
+      title: the mirror and the five sunshield layers
+      location:
+        loc_relative:
+          object: the telescope
+          standoff_x: 12
+          standoff_y: 30
+          standoff_z: 14
+      orientation: {point_to: the telescope, alpha: -20}

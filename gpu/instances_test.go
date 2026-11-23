@@ -9,6 +9,12 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
+// holds is whether another box lies wholly within this one.
+func (bounds box) holds(inner box) bool {
+	return lower(bounds.low, inner.low) == bounds.low &&
+		higher(bounds.high, inner.high) == bounds.high
+}
+
 // A mesh standing in a hundred places is in the pool once: its faces
 // and its tree's boxes are written one time, each place is a standing
 // of its own, and the standings have a tree over them, each in exactly

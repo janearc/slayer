@@ -1,0 +1,86 @@
+# portofino, as a town climbing a cliff: the staging of
+# sets/terraces-on-a-steep-coast.yaml laid at the harbour.
+#
+# what is recalled, not measured: the harbour is about 44.303 north,
+# 9.209 east; it lies in the tile n44 e009, which covers 44 to 45 north and
+# 9 to 10 east; and the houses stand round its inner quays on ground that
+# climbs steeply from the water. none of this was read from a map or a
+# model. the place of the first row, "the foot", is a guess at the north
+# west quay, 470 m east and 430 m north in the window, and must be moved
+# to the quay's real place once the heights can be read: the habit needs
+# ground that falls where the foot stands, and refuses flat ground and
+# water. the lane is a stair's width, 3 m, picked.
+#
+# the sun: where scene/daylight.Sun, noaa's fractional-year equations,
+# puts it for 44.303 north, 9.209 east at 15:00 central european time
+# (utc+1) on 20 november 2026: azimuth 221.49, altitude 15.17, geometric,
+# without refraction. it is worked from the place and the date. the
+# date is the one the steep-coast study is drawn on, not portofino's.
+#
+# the window is 1000 m across and 800 m down round the harbour, at a 10 m
+# step, smoothed by a gaussian 20 m wide (picked), and the glo-30 model is
+# a surface model: it holds the tops of what stands there, roofs and
+# trees, and not the bare earth, so the houses that stand there now will
+# be in the ground the new ones are stood on. the sea is nought lifted
+# half a metre, as in the study.
+#
+# places of things are metres in the terrain window: east from its west
+# edge, north from its south edge. a camera's at and look_at are east from
+# the west edge, north as the window's northing less its 800 m depth, and
+# up from the lowest ground in the window.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: portofino, a town climbing a cliff
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 44.303
+    lon: 9.209
+  timeofday: 1500
+  sun:
+    azimuth: 221.49
+    altitude: 15.17
+  terrain:
+    from: copernicus-glo30-n44-e009
+    lat: 44.303
+    lon: 9.209
+    across: 1000
+    down: 800
+    step: 10
+    smooth: 20
+    sea: {value: 0.5, unit: m}
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 50
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    harbour:
+      title: "from the water, off the foot of the town, looking up at it (a guess, to be set when the ground is read)"
+      location:
+        at: [700, -400, 15]
+      orientation:
+        look_at: [470, -370, 60]
+  set:
+    things:
+      the foot: {kind: human-scale-2m, seed: 1, east: 470, north: 430}
+    stands:
+      the town:
+        kind: terrace-portofino
+        habit: contour
+        count: 8
+        seed: 7
+        complexity: quick
+        within: {of: the foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 4
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+  world:
+    unit: 1

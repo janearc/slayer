@@ -14,9 +14,10 @@ import (
 // command was stopped cleanly: the device is fine.
 //
 // So a band the system stops for the display is sent again, half as tall,
-// a row at least, after the display has had a turn; a band that outruns
-// the kernel's limit is still the end of the kernel. A pixel's light never
-// depends on its band: the kernels address samples by their whole rows.
+// a row at least, after the display has had a turn. Bands are sized by
+// their time (see band_heights.go), so the kernel's limit is met only by
+// a device that has hung. A pixel's light never depends on its band: the
+// kernels address samples by their whole rows.
 
 // stopTurn is the wait after the system stopped a band for the display,
 // before the same rows are sent again: several frames of the display, so

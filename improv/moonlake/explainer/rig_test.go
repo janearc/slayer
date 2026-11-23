@@ -2,6 +2,8 @@ package main
 
 import (
 	"math"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/janearc/slayer/improv/moonlake/explain"
@@ -29,11 +31,21 @@ func ours(t *testing.T) (moonlake, *explain.Script) {
 	return moonlake{score: score, sheet: sheet, fired: sheet.Fired()}, script
 }
 
+// writtenText writes text to a file in a temporary folder and says where.
+func writtenText(t *testing.T, text string) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "written.yaml")
+	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
 // small is a show of sixteen beats half a second apart from 2 s, its
 // strobes cued on at bar 2 and its rig at bar 3.
 func small(t *testing.T) moonlake {
 	t.Helper()
-	score, err := show.ParseScore([]byte(`score:
+	score, err := show.ReadScore(writtenText(t, `score:
   beats:
     times: [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5,
             8.0, 8.5, 9.0, 9.5]
@@ -41,7 +53,7 @@ func small(t *testing.T) moonlake {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sheet, err := show.ParseSheet([]byte(`cues:
+	sheet, err := show.ReadSheet(writtenText(t, `cues:
   - {at: "2.1", strobes: grid8, duty: 0.1}
   - {at: "3.1", rig: 1}`), score)
 	if err != nil {

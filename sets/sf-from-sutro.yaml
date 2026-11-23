@@ -1,0 +1,241 @@
+# san francisco from sutro: the east slope below the tower, at eye height on
+# a street among the houses about 250 m up, looking east-northeast over the
+# castro and the mission to the financial district, across the bay to
+# treasure island and the bay bridge, at dusk into night.
+#
+# the ground is noaa's cudem topobathy model of the bay, cut twice from the
+# one tile: a far window, 11.4 by 9.2 km at a 20 m step, out to treasure
+# island and past it, and inside it a near window of 1.4 by 1.2 km at the
+# 3 m step the model gives, about the camera. the far window does not draw
+# where the near one lies. the bay is filled to the sea at nought.
+#
+# the tile ends at 37.7498 north, so the window's south edge is at 37.7502.
+# places are metres in the far window: east runs 0 to 11400 from the west
+# edge, north 0 to 9200 from the south edge; the middle is 37.7916 north and
+# 122.395 west. the camera stands near 37.7559 north, 122.4508 west, which
+# is 799 east and 635 north: in the middle of a street of the grid, moved
+# from the spot first taken, which was inside a block. the grid's turn is
+# picked, not measured.
+#
+# the houses are laid by the grid habit and the san-francisco culture, in
+# rectangles that share one street lattice and lay no block twice: within
+# about four hundred metres of the camera at the demo level, the middle
+# distance at quick, and the far city at hull. the financial district is
+# towers on a lattice from the tower generator, left out of the grid: most
+# plain, a few tall. the bay bridge is the bridge kind, bare, from the
+# embarcadero to yerba buena island, its axis 43.4 degrees east of north.
+# the houses stand where the grid puts them, across the open slopes and
+# parks too: the grid does not know a park.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: san francisco from sutro
+  light: sun
+  air: earth
+  location:
+    lat: 37.7916
+    lon: -122.395
+  timeofday: 1700
+  # picked: the last degree above the horizon in the west-south-west,
+  # behind the camera, as the sun stands at dusk in november. not worked
+  # from the date. the sun mode wants it above the horizon.
+  sun:
+    azimuth: 245
+    altitude: 1
+  terrain:
+    from: noaa-cudem-sf-ncei19-n38x00-w122x50-2022
+    lat: 37.7916
+    lon: -122.395
+    across: 11400
+    down: 9200
+    step: 20
+    sea: {value: 0, unit: m}
+    near: {lat: 37.7574, lon: -122.4468, across: 1400, down: 1200, step: 3}
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 70
+  cameras:
+    sutro:
+      title: "from sixteen metres over a street below sutro tower, over the roofs to the bay bridge"
+      # the first row of houses ahead is nine to eleven metres high and a
+      # few tens of metres away, and shuts out the city from eye height,
+      # as the street camera shows; this one stands above their roofs.
+      orientation:
+        point_to: the view
+        alpha: 0
+      location:
+        loc_relative:
+          object: the camera
+          standoff_x: 3
+          standoff_y: 3
+          standoff_z: 16
+    street:
+      title: "from a street below sutro tower, at eye height"
+      orientation:
+        point_to: the view
+        alpha: 0
+      location:
+        loc_relative:
+          object: the camera
+          # a few metres off the marker, which is a person's height and
+          # would close round a camera that stood in it
+          standoff_x: 3
+          standoff_y: 3
+          standoff_z: 1.7
+    above:
+      title: "the same view from sixty metres over the street"
+      orientation:
+        point_to: the view
+        alpha: 0
+      location:
+        loc_relative:
+          object: the camera
+          standoff_x: 0
+          standoff_y: 0
+          standoff_z: 60
+    plan:
+      title: "the whole window from the south and high above, looking north"
+      # a place here is east, north and up of the window's north west
+      # corner's own frame: a northing is the window's less its 9200 m depth
+      orientation:
+        look_at: [5700, -4600, 0]
+      location:
+        at: [5700, -9800, 14000]
+  recipes:
+    plain tower:
+      kind: tower
+      irregularity: 0.06
+      pins:
+        room: {value: 130, unit: m}
+    tall tower:
+      kind: tower
+      irregularity: 0.3
+      pins:
+        room: {value: 130, unit: m}
+    bay bridge:
+      kind: bridge
+      irregularity: 0.05
+      span: {value: 3100, unit: m}
+      bare: true
+  set:
+    things:
+      the camera:
+        kind: human-scale-2m
+        seed: 1
+        east: 799
+        north: 635
+      the view:
+        kind: human-scale-2m
+        seed: 1
+        # five kilometres from the camera on a bearing of 54 degrees, so
+        # that the financial district and the bridge, which from here lies
+        # nearly end on, are in the frame with the castro
+        east: 4845
+        north: 3575
+      the financial district:
+        kind: human-scale-2m
+        seed: 1
+        east: 5305
+        north: 4700
+      the bay bridge:
+        recipe: bay bridge
+        seed: 1
+        complexity: hull
+        heading: {value: 313.4, unit: deg}
+        position:
+          east: {value: 7348, unit: m}
+          north: {value: 5450, unit: m}
+          up: {value: 0, unit: m}
+    stands:
+      # within four hundred metres of the camera: the demo level
+      near rows:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 3
+        above: 1.5
+        complexity: demo
+        area: {west: 547, south: 347, east: 1197, north: 997}
+      # the middle distance round it: quick
+      middle west:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 4
+        above: 1.5
+        complexity: quick
+        area: {west: 250, south: 0, east: 547, north: 1922}
+      middle east:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 5
+        above: 1.5
+        complexity: quick
+        area: {west: 1197, south: 0, east: 2300, north: 1922}
+      middle south:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 6
+        above: 1.5
+        complexity: quick
+        area: {west: 547, south: 0, east: 1197, north: 347}
+      middle north:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 7
+        above: 1.5
+        complexity: quick
+        area: {west: 547, south: 997, east: 1197, north: 1922}
+      # the far city: hull. the financial district's box, 4689 to 5920
+      # east and 4088 to 5367 north, is left to the towers.
+      far north:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 9
+        above: 1.5
+        complexity: hull
+        area: {west: 250, south: 1922, east: 2300, north: 6368}
+      far middle:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 10
+        above: 1.5
+        complexity: hull
+        area: {west: 2300, south: 0, east: 4689, north: 6368}
+      far shore:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 11
+        above: 1.5
+        complexity: hull
+        area: {west: 5920, south: 0, east: 6100, north: 6368}
+      far below the district:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 12
+        above: 1.5
+        complexity: hull
+        area: {west: 4689, south: 0, east: 5920, north: 4088}
+      far above the district:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 13
+        above: 1.5
+        complexity: hull
+        area: {west: 4689, south: 5367, east: 5920, north: 6368}
+      # the financial district: plain towers about, a few tall in the middle
+      district towers:
+        recipe: plain tower
+        habit: lattice
+        count: 26
+        seed: 21
+        above: 1.5
+        complexity: quick
+        within: {of: the financial district, from: 0, to: 360, near: 190, far: 620}
+      district tall towers:
+        recipe: tall tower
+        habit: lattice
+        count: 4
+        seed: 22
+        above: 1.5
+        complexity: quick
+        within: {of: the financial district, from: 0, to: 360, near: 0, far: 190}

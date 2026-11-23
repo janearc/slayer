@@ -37,11 +37,22 @@ func MakeWithComplexity(row kind, from seed, detail string) (good, error) {
 }
 
 // Bounds is the specimen's local extent, independent of representation.
+// Native surfaces without an explicit extent are enclosed at their local
+// time-zero placements; unbounded surfaces conservatively enclose everywhere.
 func (made good) Bounds() maths.Box {
 	if made.extent != nil {
 		return *made.extent
 	}
 	box := partBounds(made.parts)
+	for _, part := range made.native {
+		local := part.Shape.Bounds()
+		for _, value := range []float64{local.Min.X, local.Min.Y, local.Min.Z, local.Max.X, local.Max.Y, local.Max.Z} {
+			if math.IsNaN(value) || math.IsInf(value, 0) {
+				return maths.Everywhere()
+			}
+		}
+		box = enclosing(box, transformed(local, part.At(0)))
+	}
 	for _, group := range made.groups {
 		box = enclosing(box, group.Bounds())
 	}

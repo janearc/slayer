@@ -1,0 +1,1 @@
+cassini-huygens-build . :: go build -p=1 -o bin/cassini-huygens-slayer ./cmd/slayer

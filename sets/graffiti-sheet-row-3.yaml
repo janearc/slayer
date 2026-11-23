@@ -1,0 +1,163 @@
+# graffiti sheet, row three: the six walls of pieces from
+# graffiti-sheet.yaml, the same walls, writers, colourways and light,
+# seen closer in a picture of their own (draw it at 4800 by 800).
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: graffiti sheet row three
+  setting: space
+  light: none
+  film:
+    width: 4800
+    height: 800
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    row:
+      title: "row three, six walls of pieces, square-on from seventy metres"
+      wide: 40
+      location:
+        at: [0, -71.4, 12.2]
+      orientation:
+        look_at: [0, 0, 12.2]
+  set:
+    things:
+      scale:
+        kind: human-scale-2m
+        seed: 5
+        complexity: demo
+        east: -9
+        north: -1.5
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      backdrop: {colour: {srgb_linear: [0.02, 0.02, 0.025]}, source: eye}
+      sheet-wall-13-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-14-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+      sheet-wall-15-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-16-grey: {colour: {srgb_linear: [0.2, 0.2, 0.2]}, source: eye}
+      sheet-wall-17-shutter: {colour: {srgb_linear: [0.09, 0.10, 0.11]}, source: eye}
+      sheet-wall-18-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+    boxes:
+      backdrop: {material: backdrop, middle: [0, 0.6, 15], size: [200, 0.6, 60], source: eye}
+      wall-13: {material: sheet-wall-13-concrete, middle: [-22.75, 0, 12.7273], size: [3.5, 0.3, 3.1818], source: eye}
+      wall-14: {material: sheet-wall-14-wet, middle: [-14.0, 0, 11.8182], size: [4.0, 0.3, 1.8182], source: eye}
+      wall-15: {material: sheet-wall-15-brick, middle: [-6.75, 0, 11.25], size: [4.5, 0.3, 2.0455], source: eye}
+      wall-16: {material: sheet-wall-16-grey, middle: [2.75, 0, 11.25], size: [5.5, 0.3, 2.5], source: eye}
+      wall-17: {material: sheet-wall-17-shutter, middle: [12.5, 0, 12.5], size: [5.0, 0.3, 2.2727], source: eye}
+      wall-18: {material: sheet-wall-18-concrete, middle: [21.0, 0, 12.2727], size: [6.0, 0.3, 2.7273], source: eye}
+    suns:
+      even:
+        toward: [0.15, -1, 0.25]
+        colour: {srgb_linear: [3.0, 3.0, 3.0]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.5, 0.5, 0.5]}
+      zenith: {srgb_linear: [0.5, 0.5, 0.5]}
+      ground: {srgb_linear: [0.5, 0.5, 0.5]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        # 13 magenta and yellow, black outline
+        w13-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-13]
+          colour: {srgb_linear: [0.85, 0.02, 0.6]}
+          other: {srgb_linear: [0.95, 0.85, 0.05]}
+          line: {srgb_linear: [0.02, 0.02, 0.03]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3.5
+          low: 11.13
+          high: 14.33
+          share: 1
+        # 14 ice and navy, white outline
+        w14-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-14]
+          colour: {srgb_linear: [0.5, 0.8, 0.95]}
+          other: {srgb_linear: [0.02, 0.05, 0.35]}
+          line: {srgb_linear: [0.9, 0.95, 1.0]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 4.0
+          low: 10.9
+          high: 12.74
+          share: 1
+        # 15 coral and turquoise, black outline
+        w15-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-15]
+          colour: {srgb_linear: [0.95, 0.25, 0.2]}
+          other: {srgb_linear: [0.05, 0.7, 0.65]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 4.5
+          low: 10.22
+          high: 12.28
+          share: 1
+        # 16 electric blue and orange, white outline
+        w16-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-16]
+          colour: {srgb_linear: [0.02, 0.2, 0.95]}
+          other: {srgb_linear: [0.95, 0.45, 0.02]}
+          line: {srgb_linear: [0.95, 0.95, 0.95]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 5.5
+          low: 9.99
+          high: 12.51
+          share: 1
+        # 17 acid green and black, pale outline
+        w17-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-17]
+          colour: {srgb_linear: [0.35, 0.95, 0.03]}
+          other: {srgb_linear: [0.03, 0.04, 0.03]}
+          line: {srgb_linear: [0.85, 0.9, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 5.0
+          low: 11.35
+          high: 13.65
+          share: 1
+        # 18 plum and gold, cream outline
+        w18-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-18]
+          colour: {srgb_linear: [0.3, 0.03, 0.25]}
+          other: {srgb_linear: [0.85, 0.6, 0.08]}
+          line: {srgb_linear: [0.9, 0.85, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 6.0
+          low: 10.9
+          high: 13.65
+          share: 1

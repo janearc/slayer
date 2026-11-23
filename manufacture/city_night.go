@@ -25,7 +25,11 @@ func nightCityLooks() looks {
 // night glazing with actual separated panes and seeded unoccupied windows.
 func districtBuildingParts(building CityBuilding, detail string, night bool) []part {
 	design := cityBuildingDesign(building.Kind, sow(building.Seed))
-	parts := design.parts(detail)
+	massDetail := detail
+	if detail == cityDistantLit {
+		massDetail = "hull"
+	}
+	parts := design.parts(massDetail)
 	if !night || detail == "hull" {
 		return parts
 	}
@@ -58,6 +62,9 @@ func districtBuildingParts(building CityBuilding, detail string, night bool) []p
 			for bay := range count {
 				centre := (float64(bay)+.5)/float64(count)*long - long/2
 				role := cityPaneRole(own, wall, floor, bay)
+				if detail == cityDistantLit && role == cityGlass {
+					continue
+				}
 				var a, b, c, d maths.Vec
 				if wall < 2 {
 					z := depth/2 + .02

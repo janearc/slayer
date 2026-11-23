@@ -43,7 +43,8 @@ func homeOf(folder string) string { return filepath.Dir(folder) }
 
 func TestCacheSaysTheTreeFileLikeTheOtherKinds(t *testing.T) {
 	env, store := cacheEnv(t)
-	path := treeFileIn(t, homeOf(store.Folder()), noon())
+	home := homeOf(store.Folder())
+	path := treeFileIn(t, home, noon())
 	got := running(Tool(env), "cache")
 	for _, want := range []string{"trees (one file): 3 entries, ",
 		"MiB on disc, ", "of 8192 MiB", "(moonlake's trees are about",
@@ -70,7 +71,8 @@ func TestCacheClearTreesClearsTheFileToo(t *testing.T) {
 
 func TestCacheClearWithNoKindClearsTheFileToo(t *testing.T) {
 	env, store := cacheEnv(t)
-	path := treeFileIn(t, homeOf(store.Folder()), noon())
+	home := homeOf(store.Folder())
+	path := treeFileIn(t, home, noon())
 	got := running(Tool(env), "cache", "--clear")
 	usage, err := treebolt.Look(path, time.Minute)
 	if got.code != nothing || err != nil || usage.Entries != nothing {
@@ -81,7 +83,8 @@ func TestCacheClearWithNoKindClearsTheFileToo(t *testing.T) {
 
 func TestCacheClearDryRunSaysTheFileAndKeepsIt(t *testing.T) {
 	env, store := cacheEnv(t)
-	path := treeFileIn(t, homeOf(store.Folder()), noon())
+	home := homeOf(store.Folder())
+	path := treeFileIn(t, home, noon())
 	got := running(Tool(env), "cache", "--clear", "trees", "--dry-run")
 	usage, err := treebolt.Look(path, time.Minute)
 	if got.code != nothing || err != nil || usage.Entries != treesMade ||
@@ -95,7 +98,8 @@ func TestCacheClearDryRunSaysTheFileAndKeepsIt(t *testing.T) {
 // anti-test: clearing another kind leaves the tree file as it was.
 func TestCacheClearOfAnotherKindLeavesTheTreeFileAlone(t *testing.T) {
 	env, store := cacheEnv(t)
-	path := treeFileIn(t, homeOf(store.Folder()), noon())
+	home := homeOf(store.Folder())
+	path := treeFileIn(t, home, noon())
 	got := running(Tool(env), "cache", "--clear", "door-verb-test")
 	usage, err := treebolt.Look(path, time.Minute)
 	if got.code != nothing || err != nil || usage.Entries != treesMade ||
@@ -109,7 +113,8 @@ func TestCacheClearOfAnotherKindLeavesTheTreeFileAlone(t *testing.T) {
 // not make one.
 func TestCacheMakesNoTreeFileToSayIt(t *testing.T) {
 	env, store := cacheEnv(t)
-	path := filepath.Join(homeOf(store.Folder()), treebolt.File)
+	home := homeOf(store.Folder())
+	path := filepath.Join(home, treebolt.File)
 	got := running(Tool(env), "cache")
 	if got.code != nothing ||
 		!strings.Contains(got.said, "trees (one file): 0 entries") {

@@ -87,7 +87,8 @@ func TestASmootherGroundReturnsLess(t *testing.T) {
 func TestAThingThatReturnsNothingIsDarkToARadar(t *testing.T) {
 	wall := thing.Thing{Shape: shape.Sphere{Radius: 2},
 		Material: &thing.Material{Name: "wall"}}
-	if got := echoOf(radarWorld(wall, tenBack().Origin)); got != 0 {
+	origin := tenBack().Origin
+	if got := echoOf(radarWorld(wall, origin)); got != 0 {
 		t.Errorf("a wall returns %v", got)
 	}
 }
@@ -97,12 +98,16 @@ func TestAThingThatReturnsNothingIsDarkToARadar(t *testing.T) {
 // adds nothing; a radar of another range adds nothing; and a radar
 // behind the ball leaves the side the eye sees dark.
 func TestWhatAddsNothingToAnEcho(t *testing.T) {
-	alone := echoOf(radarWorld(radarGround(nil), tenBack().Origin))
+	ground := radarGround(nil)
+	origin := tenBack().Origin
+	alone := echoOf(radarWorld(ground, origin))
 	if !within(alone, 0.8, 1e-3) {
 		t.Fatalf("the radar alone returns %v, want 0.8", alone)
 	}
 	sunlit := radarWorld(radarGround(nil), tenBack().Origin)
-	sunlit.Lamp(thing.Sun(maths.V(0, 0, 1), maths.Grey(9)))
+	along := maths.V(0, 0, 1)
+	light := maths.Grey(9)
+	sunlit.Lamp(thing.Sun(along, light))
 	if got := echoOf(sunlit); got != alone {
 		t.Errorf("with a sun beside the radar the echo is %v, not %v",
 			got, alone)

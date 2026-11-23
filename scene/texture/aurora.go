@@ -21,20 +21,30 @@ type Aurora struct {
 	Fringe, Bottom, Top maths.Light
 }
 
-// At is the colour at p's height.
-func (a Aurora) At(p maths.Vec) maths.Light {
-	if a.High <= a.Low {
-		return a.Bottom
+// auroraFringeTop is how far up the shell, as a share of it, the fringe
+// has blended into the bottom colour.
+var auroraFringeTop = pickedNumber("aurora-fringe-top")
+
+// auroraBottomTop is how far up the shell, as a share of it, the bottom
+// colour begins to blend into the top.
+var auroraBottomTop = pickedNumber("aurora-bottom-top")
+
+// At is the colour at the point's height.
+func (aurora Aurora) At(point maths.Vec) maths.Light {
+	if aurora.High <= aurora.Low {
+		return aurora.Bottom
 	}
-	h := (p.Len() - a.Radius - a.Low) / (a.High - a.Low)
+	height := (point.Len() - aurora.Radius - aurora.Low) /
+		(aurora.High - aurora.Low)
 	switch {
-	case h < 0.15:
-		t := maths.Smooth(0, 0.15, h)
-		return a.Fringe.Scale(1 - t).Add(a.Bottom.Scale(t))
-	case h < 0.35:
-		return a.Bottom
+	case height < auroraFringeTop:
+		share := maths.Smooth(nought, auroraFringeTop, height)
+		return aurora.Fringe.Scale(unity - share).
+			Add(aurora.Bottom.Scale(share))
+	case height < auroraBottomTop:
+		return aurora.Bottom
 	default:
-		t := maths.Smooth(0.35, 1, h)
-		return a.Bottom.Scale(1 - t).Add(a.Top.Scale(t))
+		share := maths.Smooth(auroraBottomTop, unity, height)
+		return aurora.Bottom.Scale(unity - share).Add(aurora.Top.Scale(share))
 	}
 }

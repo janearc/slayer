@@ -73,7 +73,8 @@ func TestFiniteVolumeLightRejectsInvalidInputs(t *testing.T) {
 			t.Fatal("invalid strength accepted")
 		}
 	}
-	if _, err := NewVolume(Lit{At: maths.V(math.Inf(1), 0, 0), Strength: maths.Grey(1)}, measure.Metres(1)); err == nil {
+	unbounded := maths.V(math.Inf(1), 0, 0)
+	if _, err := NewVolume(Lit{At: unbounded, Strength: maths.Grey(1)}, measure.Metres(1)); err == nil {
 		t.Fatal("invalid location accepted")
 	}
 }

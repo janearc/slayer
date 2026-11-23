@@ -8,28 +8,20 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
-// the numbers of a wake's gas. wakeNone and wakeOne are zero and one, and
-// wakePlus is the sign of the infinity a path nowhere near is. wakeHalf is
-// the half that maps noise from minus one to one onto nought to one.
-// wakeSquare is the power of the ridge's bell, a gaussian.
+// the numbers of a wake's gas that are true by definition: wakePlus is the
+// sign of the infinity a path nowhere near is, wakeSquare is the power of the
+// ridge's bell, a gaussian, and wakeOctave is the fewest octaves a grain has.
 //
-// the rest are picked, for the picture: wakeFade is where the gas begins to
-// thin toward the edge, as a share of the reach; wakeSwept is where the
-// channel's clearing begins, as a share of its clear; wakeRidge is the width
-// of the banks, as a share of the clear; wakeBank is how many times the open
-// gas the banks hold; wakeLift is how many times the cubed noise is lifted,
-// so that its mean gas stays near the thick.
+// the rest are chosen, for the picture, in choices.yaml: wake-fade is where
+// the gas begins to thin toward the edge, as a share of the reach; wake-swept
+// is where the channel's clearing begins, as a share of its clear; wake-ridge
+// is the width of the banks, as a share of the clear; wake-bank is how many
+// times the open gas the banks hold; wake-lift is how many times the cubed
+// noise is lifted, so that its mean gas stays near the thick.
 const (
-	wakeNone   = 0.0
-	wakeOne    = 1.0
-	wakePlus   = 1
-	wakeHalf   = 0.5
-	wakeSquare = 2
-	wakeFade   = 0.45
-	wakeSwept  = 0.55
-	wakeRidge  = 0.3
-	wakeBank   = 2.2
-	wakeLift   = 3
+	wakePlus   = 1 // defined: the sign of positive infinity
+	wakeSquare = 2 // defined: a gaussian's power
+	wakeOctave = 1 // defined: the fewest octaves a grain has
 )
 
 // Path is a circle a band follows through a wake: its plane, in a subspace
@@ -45,9 +37,9 @@ type Path struct {
 // negative or not finite; a scale of zero is one, as everywhere else.
 func NewPath(space maths.Subspace, radius float64) (*Path, error) {
 	origin := space.Origin
-	if !weatherFinite(radius) || radius <= wakeNone ||
+	if !weatherFinite(radius) || radius <= nought ||
 		!weatherFinite(origin.X+origin.Y+origin.Z) ||
-		!weatherFinite(space.Scale) || space.Scale < wakeNone {
+		!weatherFinite(space.Scale) || space.Scale < nought {
 		return nil, fmt.Errorf("medium: a path of radius %v in a space of "+
 			"origin %v and scale %v, want a positive finite radius and a "+
 			"finite origin and scale of at least zero", radius, origin,
@@ -74,7 +66,7 @@ type Grain struct {
 // octaves layers. It refuses a scale that is not a positive finite number,
 // and fewer than one octave.
 func NewGrain(seed uint64, scale float64, octaves int) (*Grain, error) {
-	if !weatherFinite(scale) || scale <= wakeNone || octaves < 1 {
+	if !weatherFinite(scale) || scale <= nought || octaves < wakeOctave {
 		return nil, fmt.Errorf("medium: a grain of scale %v and %d octaves, "+
 			"want a positive finite scale and at least one octave", scale,
 			octaves)
@@ -91,8 +83,8 @@ func (grain Grain) Scale() float64 { return grain.scale }
 // Octaves is how many layers the noise has.
 func (grain Grain) Octaves() int { return grain.octaves }
 
-// Wake is a nebula with the channel something has swept through it: ragged
-// gas of density about Thick everywhere in a ball of Reach, thinning to
+// Wake is a cloud of gas with the channel something has swept through it:
+// ragged gas of density about Thick everywhere in a ball of Reach, thinning to
 // nothing toward its edge, almost none within Clear of the paths, and what
 // was swept piled in banks along the channel's edges, as a moon clears a gap
 // in saturn's rings and banks it up.
@@ -113,10 +105,10 @@ type Wake struct {
 // nil one.
 func NewWake(reach, clear, thick float64, grain *Grain,
 	paths []*Path) (*Wake, error) {
-	bad := !weatherFinite(reach) || reach <= wakeNone ||
-		!weatherFinite(clear) || clear <= wakeNone ||
-		!weatherFinite(thick) || thick < wakeNone ||
-		grain == nil || len(paths) == 0
+	bad := !weatherFinite(reach) || reach <= nought ||
+		!weatherFinite(clear) || clear <= nought ||
+		!weatherFinite(thick) || thick < nought ||
+		grain == nil || len(paths) == nought
 	var held []Path
 	for _, path := range paths {
 		if path == nil {
@@ -133,95 +125,93 @@ func NewWake(reach, clear, thick float64, grain *Grain,
 			len(paths))
 	}
 	return &Wake{reach: reach, clear: clear, thick: thick, grain: *grain,
-		paths: held, fade: wakeFade, swept: wakeSwept, ridge: wakeRidge,
-		bank: wakeBank, lift: wakeLift}, nil
+		paths: held, fade: chosen.wakeFade, swept: chosen.wakeSwept,
+		ridge: chosen.wakeRidge, bank: chosen.wakeBank,
+		lift: chosen.wakeLift}, nil
 }
 
 // Reach is the radius of the wake's ball.
-func (n *Wake) Reach() float64 { return n.reach }
+func (wake *Wake) Reach() float64 { return wake.reach }
 
 // Clear is the radius of the channel about each path.
-func (n *Wake) Clear() float64 { return n.clear }
+func (wake *Wake) Clear() float64 { return wake.clear }
 
 // Thick is the gas's density away from the edge and the channel, before the
 // noise.
-func (n *Wake) Thick() float64 { return n.thick }
+func (wake *Wake) Thick() float64 { return wake.thick }
 
 // Grain is the noise the gas is ragged by.
-func (n *Wake) Grain() Grain { return n.grain }
+func (wake *Wake) Grain() Grain { return wake.grain }
 
-// Paths are the paths of the channel, a copy of the wake's own.
-func (n *Wake) Paths() []*Path {
-	var paths []*Path
-	for k := range n.paths {
-		paths = append(paths, &n.paths[k])
+// Paths are the paths of the channel, each a copy: changing one does not
+// change the wake.
+func (wake *Wake) Paths() []*Path {
+	paths := make([]*Path, nought, len(wake.paths))
+	for _, held := range wake.paths {
+		own := held
+		paths = append(paths, &own)
 	}
 	return paths
 }
 
 // Fade is where the gas begins to thin toward the edge, as a share of the
 // reach.
-func (n *Wake) Fade() float64 { return n.fade }
+func (wake *Wake) Fade() float64 { return wake.fade }
 
 // Swept is where the channel's clearing begins, as a share of its clear.
-func (n *Wake) Swept() float64 { return n.swept }
+func (wake *Wake) Swept() float64 { return wake.swept }
 
 // Ridge is the width of the banks along the channel's edge, as a share of
 // the clear, and how many times the open gas they hold.
-func (n *Wake) Ridge() (width, bank float64) { return n.ridge, n.bank }
+func (wake *Wake) Ridge() (width, bank float64) { return wake.ridge, wake.bank }
 
 // Lift is how many times the cubed noise is lifted.
-func (n *Wake) Lift() float64 { return n.lift }
+func (wake *Wake) Lift() float64 { return wake.lift }
 
-// Bounds is the cube that holds the nebula, its reach each way from the
+// Bounds is the cube that holds the wake, its reach each way from the
 // middle.
-func (n *Wake) Bounds() maths.Box {
-	r := n.reach
-	return maths.Box{Min: maths.V(-r, -r, -r), Max: maths.V(r, r, r)}
+func (wake *Wake) Bounds() maths.Box {
+	return cube(wake.reach)
 }
 
-// Span is the nebula's ball, so a march starts on the gas.
-func (n *Wake) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	b := r.At.Dot(r.Dir)
-	c := r.At.Dot(r.At) - n.reach*n.reach
-	disc := b*b - c
-	if disc < wakeNone {
-		return wakeNone, wakeNone, false
-	}
-	root := math.Sqrt(disc)
-	enter, leave := math.Max(-b-root, near), math.Min(-b+root, far)
-	return enter, leave, leave > enter
+// Span is the wake's ball, so a march starts on the gas.
+func (wake *Wake) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	return sphere(wake.reach, ray, near, far)
 }
 
-// fromPaths is how far p is from the nearest path, the circle at its radius
-// in its own plane.
-func (n *Wake) fromPaths(p maths.Vec) float64 {
+// fromPaths is how far the point is from the nearest path, the circle at its
+// radius in its own plane.
+func (wake *Wake) fromPaths(point maths.Vec) float64 {
 	nearest := math.Inf(wakePlus)
-	for _, one := range n.paths {
-		q := one.space.In(p)
-		away := math.Hypot(math.Hypot(q.X, q.Z)-one.radius, q.Y)
+	for _, one := range wake.paths {
+		local := one.space.In(point)
+		away := math.Hypot(math.Hypot(local.X, local.Z)-one.radius, local.Y)
 		nearest = math.Min(nearest, away)
 	}
 	return nearest
 }
 
-// Density is the nebula's gas at p: ragged, thin to its edge, and cleared
-// round the paths.
-func (n *Wake) Density(p maths.Vec) float64 {
-	if p.Len() > n.reach {
-		return wakeNone
+// Density is the wake's gas at the point: ragged, thin to its edge, and
+// cleared round the paths. It is never below zero.
+func (wake *Wake) Density(point maths.Vec) float64 {
+	if point.Len() > wake.reach {
+		return nought
 	}
-	scale := n.grain.scale
-	// ragged at every size, as a nebula is
-	rag := wakeHalf + wakeHalf*noise.Fractal(n.grain.seed, p.X/scale,
-		p.Y/scale, p.Z/scale, n.grain.octaves)
+	scale := wake.grain.scale
+	// ragged at every size. Gradient noise can pass minus one, which would
+	// take the raggedness below zero, and its cube with it, so it is kept
+	// at zero
+	rag := math.Max(nought, halfway+halfway*noise.Fractal(wake.grain.seed,
+		point.X/scale, point.Y/scale, point.Z/scale, wake.grain.octaves))
 	// cubed, so most of it is thin and the wisps stand out against the dark
-	base := n.thick * rag * rag * rag * n.lift
+	base := wake.thick * rag * rag * rag * wake.lift
 	// thinning to nothing toward its edge, so it has no rim to show
-	base *= wakeOne - maths.Smooth(n.fade*n.reach, n.reach, p.Len())
+	base *= unity - maths.Smooth(wake.fade*wake.reach, wake.reach, point.Len())
 	// how far from the nearest path
-	d := n.fromPaths(p)
-	swept := maths.Smooth(n.swept*n.clear, n.clear, d)
-	ridge := math.Exp(-math.Pow((d-n.clear)/(n.ridge*n.clear), wakeSquare))
-	return base * (swept + n.bank*ridge)
+	distance := wake.fromPaths(point)
+	swept := maths.Smooth(wake.swept*wake.clear, wake.clear, distance)
+	ridge := math.Exp(-math.Pow((distance-wake.clear)/(wake.ridge*wake.clear),
+		wakeSquare))
+	return base * (swept + wake.bank*ridge)
 }

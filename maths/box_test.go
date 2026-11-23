@@ -81,32 +81,21 @@ func TestAnInfiniteReachMeetsNothing(test *testing.T) {
 	}
 }
 
-// Four of those from numbers are met as worked.
-// The last row is the way pointing in, long enough to reach.
+// Four of those from numbers are met as worked, as infinite-reaches.csv has
+// them, each box and ray by the names of vectors.csv. The last row is the way
+// pointing in, long enough to reach.
 func TestTheSameReachFromNumbersIsMet(test *testing.T) {
-	inf := math.Inf(infinity)
-	for _, row := range []struct {
-		name        string
-		box         maths.Box
-		at, dir     maths.Vec
-		near, far   float64
-		enter, left float64
-	}{
-		{"a unit box along x", unitBox(test), maths.V(nought, nought, nought),
-			maths.XAxis, -inf, 10, -1, 1},
-		{"a face at infinity on x", maths.Box{
-			Min: maths.V(-inf, -unity, -unity), Max: maths.V(inf, unity, unity)},
-			maths.V(nought, nought, nought), maths.V(unity, unity, nought), -inf, unity, -1, 1},
-		{"a face at infinity on y", maths.Box{
-			Min: maths.V(-unity, -inf, -unity), Max: maths.V(unity, inf, unity)},
-			maths.V(nought, nought, nought), maths.V(unity, unity, nought), -inf, unity, -1, 1},
-		{"a way that reaches down to the box", unitBox(test),
-			vector(test, "high above"), vector(test, "down"), nought, inf, 4, 6},
-	} {
-		enter, left, ok := row.box.Hit(maths.Ray{At: row.at, Dir: row.dir}, row.near, row.far)
-		if !ok || enter != row.enter || left != row.left {
-			test.Errorf("%s: %v, %v, %v; want %v, %v, true", row.name, enter, left, ok,
-				row.enter, row.left)
+	rows := read(test, infiniteReachesFile)
+	if len(rows) == nought {
+		test.Fatal("no reaches to meet")
+	}
+	for _, row := range rows {
+		box := maths.Box{Min: vector(test, row["min"]), Max: vector(test, row["max"])}
+		ray := maths.Ray{At: vector(test, row["at"]), Dir: vector(test, row["dir"])}
+		enter, left, ok := box.Hit(ray, float(test, row, "near"), float(test, row, "far"))
+		if !ok || enter != float(test, row, "enter") || left != float(test, row, "left") {
+			test.Errorf("%s: %v, %v, %v; want %v, %v, true", row["name"], enter, left, ok,
+				row["enter"], row["left"])
 		}
 	}
 }

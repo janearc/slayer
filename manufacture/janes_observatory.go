@@ -1,8 +1,8 @@
 package manufacture
 
-// Jane's observatory: the three telescopes made for her, a 36-inch
-// Dobsonian, a 5-inch apochromatic refractor and a 24-inch
-// Schmidt-Cassegrain, each its own catalogue kind.
+// The personal telescopes: a 36-inch Dobsonian, a 5-inch apochromatic
+// refractor and a 24-inch Schmidt-Cassegrain, each its own catalogue
+// kind.
 
 import (
 	"math"

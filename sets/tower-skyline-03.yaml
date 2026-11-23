@@ -1,0 +1,86 @@
+# tower skyline 03: forty towers on a lattice of blocks, each drawing its
+# own irregularity from the skyline's distribution, so most are ordinary
+# and a few are strange, and each drawing its skin, its use and its layers
+# from the same: most wear the plain curtain, some mirror, granite,
+# concrete, gothic stone, cantilevered glass, pastel or steel, and a few
+# wear the cyberpunk layer or are planted. at dusk into night. the towers
+# are made by the cities package (manufacture/cities), through the
+# manufactory's kind tower, from manufacture/cities/cultures/tower.yaml;
+# the lattice is the habit of manufacture/cities/towerlattice.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the ground,
+# the sun, the sky and the cameras are choices of this study, picked by
+# eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower skyline 03
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 62
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    far:
+      title: "the skyline, from the south"
+      location:
+        at: [-560, -780, 330]
+      orientation:
+        look_at: [0, 0, 60]
+  recipes:
+    skyline:
+      kind: tower
+      irregularity: drawn
+      pins:
+        # the lattice block, so a tower of several shafts is drawn
+        # narrower or with fewer rather than over the next block
+        room: {value: 130, unit: m}
+  set:
+    things:
+      centre:
+        recipe: skyline
+        seed: 7
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+    stands:
+      the city:
+        recipe: skyline
+        habit: lattice
+        count: 40
+        seed: 13
+        complexity: quick
+        within: {of: centre, from: 0, to: 360, near: 60, far: 450}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.05, 0.05, 0.055]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.6, 0.7, 0.4]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.58, 0.8]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.14]}
+      zenith: {srgb_linear: [0.01, 0.025, 0.1]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

@@ -12,7 +12,7 @@
 //	                           even after one fails
 //	tiers check [-before FILE] [-v] [PATTERN...]
 //	                           list the tree both ways and compare; with
-//	                           patterns (./hillside), only those packages
+//	                           patterns (./session), only those packages
 //
 // The default FILE is tools/tiers/before.txt, one `package<TAB>name` per
 // line. check lists the tree with `go test -list` twice, once plain (the
@@ -83,7 +83,8 @@ func snapshot(file string, out, errOut io.Writer) int {
 		fmt.Fprintln(errOut, "tiers:", err)
 		return exitUsage
 	}
-	if err := os.WriteFile(file, []byte(format(all)), 0o644); err != nil {
+	formatted := format(all)
+	if err := os.WriteFile(file, []byte(formatted), 0o644); err != nil {
 		fmt.Fprintln(errOut, "tiers:", err)
 		return exitUsage
 	}

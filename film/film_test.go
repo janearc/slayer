@@ -93,17 +93,20 @@ func TestASpotMakesAPool(t *testing.T) {
 	if !toward.Near(up, 1e-12) || !near(far, 4) {
 		t.Errorf("under the spot: toward %v, %v away", toward, far)
 	}
-	if !near(light(maths.V(0, 0, 0)), 1) { // 16 over 4 squared
-		t.Errorf("under the spot, %v", light(maths.V(0, 0, 0)))
+	underSpot := maths.V(0, 0, 0)
+	if !near(light(underSpot), 1) { // 16 over 4 squared
+		t.Errorf("under the spot, %v", light(underSpot))
 	}
-	if !near(light(maths.V(0, 2, 0)), 4) { // half as far, four times
-		t.Errorf("halfway up, %v", light(maths.V(0, 2, 0)))
+	halfwayUp := maths.V(0, 2, 0)
+	if !near(light(halfwayUp), 4) { // half as far, four times
+		t.Errorf("halfway up, %v", light(halfwayUp))
 	}
 	edge := 4 * math.Tan(25*maths.Degree) // halfway through the soft
 	if l := light(maths.V(edge, 0, 0)); !(l > 0 && l < 1) {
 		t.Errorf("in the soft edge, %v", l)
 	}
-	if l := light(maths.V(4*math.Tan(31*maths.Degree), 0, 0)); l != 0 {
+	pastEdge := 4 * math.Tan(31*maths.Degree)
+	if l := light(maths.V(pastEdge, 0, 0)); l != 0 {
 		t.Errorf("past the cone, %v", l)
 	}
 }

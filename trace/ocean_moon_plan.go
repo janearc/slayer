@@ -5,9 +5,9 @@ import (
 	"math"
 	"time"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/medium"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -131,7 +131,7 @@ func kernelMoonPlane(ocean *thing.OceanSurface) (level, extent float64, unbounde
 			}
 		}
 		return heights[0], size, false, nil
-	case *seaocean.InfiniteMeanContinuation:
+	case *arid.InfiniteMeanContinuation:
 		if mean, ok := field.ExactPlaneLevel(); ok && ocean.InfiniteMeanPlane {
 			return mean, 0, true, nil
 		}

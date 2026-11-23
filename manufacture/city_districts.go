@@ -17,16 +17,16 @@ type CityPark struct {
 	Width, Depth measure.Length
 }
 
-// CityHighway has separated elevated carriageways and ground connections.
+// cityHighway has separated elevated carriageways and ground connections.
 // Width includes the median gap. Clearance reserves land beside its decks.
-type CityHighway struct {
+type cityHighway struct {
 	From, To                            maths.Vec
 	Width, Median, Clearance, Elevation measure.Length
 }
 
-// CityRamp is a cubic elevated-to-ground connection to a local grid street.
+// cityRamp is a cubic elevated-to-ground connection to a local grid street.
 // Controls are physical metre positions; Width is its carriageway width.
-type CityRamp struct {
+type cityRamp struct {
 	Points [4]maths.Vec
 	Width  measure.Length
 }
@@ -39,7 +39,7 @@ type ClusteredCitySpec struct {
 	Count    int
 	Process  NeymanScottSpec
 	Parks    []CityPark
-	Highways []CityHighway
+	Highways []cityHighway
 	Trees    *CityTreeSpec
 	// ParkRelief adds shaped, planted terrain within park reservations.
 	ParkRelief bool
@@ -51,6 +51,9 @@ type ClusteredCitySpec struct {
 	// the cached default. An explicit mode requires Trees.
 	VacantLotIndex CityVacantLotIndexMode
 	Night          bool
+	// DetailView optionally simplifies small night buildings before batching.
+	// Its eye and building bounds must be in the same city coordinate space.
+	DetailView *cityDetailView
 }
 
 // DefaultClusteredCity reserves large parks and a diagonal freeway while
@@ -65,7 +68,7 @@ func DefaultClusteredCity() ClusteredCitySpec {
 		Parks: []CityPark{
 			{Name: "long central park", At: maths.V(-900, 0, 200), Width: measure.Metres(districtValue("long-park-width")), Depth: measure.Metres(districtValue("long-park-depth"))},
 			{Name: "western landscape park", At: maths.V(850, 0, -1500), Width: measure.Metres(districtValue("wide-park-width")), Depth: measure.Metres(districtValue("wide-park-depth"))},
-		}, Highways: []CityHighway{{From: maths.V(-2600, 0, -2200), To: maths.V(2600, 0, 800),
+		}, Highways: []cityHighway{{From: maths.V(-2600, 0, -2200), To: maths.V(2600, 0, 800),
 			Width: measure.Metres(districtValue("highway-width")), Median: measure.Metres(districtValue("highway-median")), Clearance: measure.Metres(districtValue("highway-clearance")), Elevation: measure.Metres(districtValue("highway-elevation"))}},
 	}
 }
@@ -78,6 +81,10 @@ func ClusteredCity(spec ClusteredCitySpec) (Kind, error) {
 	if spec.Trees != nil {
 		copy := *spec.Trees
 		spec.Trees = &copy
+	}
+	if spec.DetailView != nil {
+		copy := *spec.DetailView
+		spec.DetailView = &copy
 	}
 	spec.Parks = slices.Clone(spec.Parks)
 	spec.Highways = slices.Clone(spec.Highways)
@@ -92,8 +99,8 @@ type ClusteredCityLayout struct {
 	parks         []CityPark
 	parkRelief    bool
 	parkPathWidth measure.Length
-	highways      []CityHighway
-	ramps         []CityRamp
+	highways      []cityHighway
+	ramps         []cityRamp
 	parents       []ClusterPoint
 	trees         []CityTree
 }
@@ -105,18 +112,6 @@ type cityVacantLot struct {
 
 // Buildings returns exactly the admitted population in stable seed order.
 func (city ClusteredCityLayout) Buildings() []CityBuilding { return city.base.Buildings() }
-
-// Parks returns owned landscape reservations.
-func (city ClusteredCityLayout) Parks() []CityPark { return slices.Clone(city.parks) }
-
-// Highways returns owned elevated highway corridors.
-func (city ClusteredCityLayout) Highways() []CityHighway { return slices.Clone(city.highways) }
-
-// Ramps returns actual highway-to-local-street connections.
-func (city ClusteredCityLayout) Ramps() []CityRamp { return slices.Clone(city.ramps) }
-
-// Parents returns the Poisson centres used by the conditioned district field.
-func (city ClusteredCityLayout) Parents() []ClusterPoint { return slices.Clone(city.parents) }
 
 // check validates feature dimensions before sampling or geometry allocation.
 func (spec ClusteredCitySpec) check() error {

@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-// StagePlan describes one v3 proof shot. Positions use local metres for
+// stagePlan describes one v3 proof shot. Positions use local metres for
 // ground scenes and explicitly authored display units for respondents.
-type StagePlan struct {
+type stagePlan struct {
 	Identity   int                 `yaml:"identity,omitempty" json:"identity,omitempty"`
 	Kind       string              `yaml:"kind"`
 	Eye        [3]float64          `yaml:"eye"`
@@ -33,8 +33,8 @@ type StagePlan struct {
 	Catalogue  *CataloguePlan      `yaml:"catalogue,omitempty"`
 	Burst      bool                `yaml:"burst,omitempty"`
 	Plunge     bool                `yaml:"plunge,omitempty"`
-	Anatomy    *AnatomyPlan        `yaml:"anatomy,omitempty" json:"anatomy,omitempty"`
-	Population []AuthoredBeingPlan `yaml:"population,omitempty" json:"population,omitempty"`
+	Anatomy    *anatomyPlan        `yaml:"anatomy,omitempty" json:"anatomy,omitempty"`
+	Population []authoredBeingPlan `yaml:"population,omitempty" json:"population,omitempty"`
 	// ShareAnatomyPrototypes defaults to true for authored individual and
 	// multitude stages. False builds separate but identical octahedron and
 	// sail meshes; materials, placements and motion remain per component.
@@ -42,7 +42,7 @@ type StagePlan struct {
 }
 
 // check rejects a plan with an unknown kind or out-of-range values.
-func (p *StagePlan) check() error {
+func (p *stagePlan) check() error {
 	switch p.Kind {
 	case "individual", "authored-multitude", "owl", "kecks", "rubin", "subaru", "elt", "griffith", "compact-radio", "spread-radio", "zappy", "fold", "lantern", "occulter", "conversation", "accumulate", "together", "withdraw", "space", "milky-way", "galaxies", "laniakea", "huge-fold", "answer", "consequence", "listening", "continuous-field", "multitude":
 	default:
@@ -205,7 +205,7 @@ func (r *Renderer) stageFrame(ctx context.Context, state State, index int) (*Exp
 }
 
 // newHeardStage builds the scene for one heard stage plan.
-func newHeardStage(p *StagePlan, music string) (*heardStage, error) {
+func newHeardStage(p *stagePlan, music string) (*heardStage, error) {
 	s := &heardStage{world: thing.NewWorld()}
 	if p.Kind == "multitude" {
 		return s, s.makeMultitude()
@@ -224,7 +224,7 @@ func newHeardStage(p *StagePlan, music string) (*heardStage, error) {
 }
 
 // update moves the stage to its state at progress u and returns the eye.
-func (s *heardStage) update(p *StagePlan, state State, u float64) (maths.Subspace, error) {
+func (s *heardStage) update(p *stagePlan, state State, u float64) (maths.Subspace, error) {
 	if s.cosmos != nil {
 		return s.updateContinuousField(state.At, p.Plunge), nil
 	}

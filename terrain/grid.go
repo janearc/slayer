@@ -2,9 +2,9 @@ package terrain
 
 import "fmt"
 
-// GridRequest describes a grid in the source's own projected coordinates.
+// gridRequest describes a grid in the source's own projected coordinates.
 // Rows proceed southward. Sampling selects the containing source cell.
-type GridRequest struct {
+type gridRequest struct {
 	West, North, Step float64
 	Across, Down      int
 }
@@ -12,13 +12,13 @@ type GridRequest struct {
 // Grid retains source absence separately from a zero-metre elevation.
 // It is a sampled source grid, not a filtered overview or world-space mesh.
 type Grid struct {
-	request GridRequest
+	request gridRequest
 	heights []float64
 	present []bool
 }
 
 // Layout returns the source-coordinate sampling request without exposing data.
-func (grid Grid) Layout() GridRequest { return grid.request }
+func (grid Grid) Layout() gridRequest { return grid.request }
 
 // At returns a sampled height and its availability. Outside the grid is absent.
 func (grid Grid) At(column, row int) (float64, bool) {
@@ -36,7 +36,7 @@ const gridAvailabilityBytes = 1
 // ReadGrid reads bounded samples and an availability mask for source fallback.
 // limitBytes covers returned array payloads, separately from the tile cache.
 // A missing height is masked; corrupt data and resource failures are errors.
-func (raster *Raster) ReadGrid(request GridRequest, limitBytes int64) (Grid, error) {
+func (raster *Raster) ReadGrid(request gridRequest, limitBytes int64) (Grid, error) {
 	if err := raster.projectedCoordinates(); err != nil {
 		return Grid{}, err
 	}
@@ -62,7 +62,7 @@ func (raster *Raster) ReadGrid(request GridRequest, limitBytes int64) (Grid, err
 }
 
 // capacity checks dimensions, byte products and final coordinates before make.
-func (request GridRequest) capacity(limitBytes, bytesPerSample int64) (int, error) {
+func (request gridRequest) capacity(limitBytes, bytesPerSample int64) (int, error) {
 	if request.Across < 1 || request.Down < 1 || !finiteCoordinate(request.West) ||
 		!finiteCoordinate(request.North) || !finiteCoordinate(request.Step) || request.Step <= 0 {
 		return 0, fmt.Errorf("terrain: invalid source grid layout")
@@ -82,7 +82,7 @@ func (request GridRequest) capacity(limitBytes, bytesPerSample int64) (int, erro
 }
 
 // location retains float64 source coordinates until a world adapter transforms.
-func (request GridRequest) location(column, row int) (float64, float64) {
+func (request gridRequest) location(column, row int) (float64, float64) {
 	return request.West + float64(column)*request.Step,
 		request.North - float64(row)*request.Step
 }

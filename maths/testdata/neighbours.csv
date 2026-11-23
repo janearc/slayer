@@ -1,0 +1,5 @@
+name,places,direction
+the distance itself,0,up
+one place down,1,down
+two places up,2,up
+three places down,3,down

@@ -33,8 +33,6 @@ type sizeWire struct {
 
 // UnmarshalYAML reads a size written as a preset's name or as
 // {width, height}.
-//
-//ninja:vow waste yaml.v3 resolves this exported method by name
 func (size *sizeWire) UnmarshalYAML(node *yaml.Node) error {
 	if node.Kind == yaml.ScalarNode {
 		return node.Decode(&size.Preset)

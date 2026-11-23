@@ -131,22 +131,22 @@ func keptInside(box, area image.Rectangle) image.Rectangle {
 // place and of what is taken, else on the first other side that does,
 // else on its own side. A place the window has moved off the picture is
 // not drawn. It says where its words went.
-func (label Label) draw(frame *image.RGBA, part window, tones palette,
+func (caption label) draw(frame *image.RGBA, part window, tones palette,
 	taken []image.Rectangle) (image.Rectangle, error) {
-	point := onFrame(label.at, part)
+	point := onFrame(caption.at, part)
 	if !point.In(pictureArea()) {
 		return image.Rectangle{}, nil
 	}
-	wide, err := measure(label.words, labelSize)
+	wide, err := measure(caption.words, labelSize)
 	if err != nil {
 		return image.Rectangle{}, err
 	}
 	box := labelBox(image.Pt(wide+2*labelPad, int(labelSize)+2*labelPad),
-		point, label.side, taken)
+		point, caption.side, taken)
 	foot := nearestEdge(box, point)
 	line(frame, foot, point, leaderWidth+2*dotRing, tones["ground"])
 	line(frame, foot, point, leaderWidth, tones["ink"])
-	if _, err := placedPlate(frame, label.words, box.Min, labelSize,
+	if _, err := placedPlate(frame, caption.words, box.Min, labelSize,
 		tones); err != nil {
 		return box, err
 	}

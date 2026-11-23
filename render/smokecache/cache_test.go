@@ -178,7 +178,8 @@ func TestInputsAreKeyedByWhatTheSmokeReads(t *testing.T) {
 			t.Errorf("%s kept the same inputs", name)
 		}
 	}
-	t.Setenv("SLAYER_MARBLE", filepath.Join(t.TempDir(), "gone"))
+	gone := filepath.Join(t.TempDir(), "gone")
+	t.Setenv("SLAYER_MARBLE", gone)
 	if _, err := Inputs([]string{"$SLAYER_MARBLE"}, reads); err == nil {
 		t.Error("a folder that is not there was keyed")
 	}

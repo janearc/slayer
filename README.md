@@ -55,9 +55,9 @@ should be identified as choices.
   their variations, and how they reach the GPU.
 - [Imported geometry](set/IMPORTS.md): static glTF and GLB beside native
   manufactured things, with explicit materials and source receipts.
-- [Fire recipes](doc/fire-recipes.md): standalone flames, source layouts,
+- [Fire recipes](doc/model/fire/fire-recipes.md): standalone flames, source layouts,
   optional smoke, and the assumptions behind their inputs.
-- [Surface fuel study](doc/fire-fuel-design.md): a GPU heat/fuel prototype
+- [Surface fuel study](doc/model/fire/fire-fuel-design.md): a GPU heat/fuel prototype
   and its 720p overhead scene, with no timed ignition front.
 - [Running Grissom](doc/grissom-setup.md): the graphics viewer's workspace,
   survey files, Earth data, colourways, and first render.
@@ -91,7 +91,7 @@ exports and current command help define the live interface.
 Game; harness changes belong in their own commits, as described in
 [burning-trousers/INSIDE.md](burning-trousers/INSIDE.md).
 
-The [night-fire study](doc/fire-night-design.md) builds a moonlit grove with
+The [night-fire study](doc/model/fire/fire-night-design.md) builds a moonlit grove with
 firebrands and a prescribed ignition front. It includes a checked YAML scene
 and a resumable Pzm sequence plan, with the model choices and sources beside
 them.

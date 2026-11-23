@@ -13,15 +13,20 @@ import (
 )
 
 // runDirect is an explicitly authorized foreground shared-Slayer invocation.
+// It starts Slayer itself, with no Game lane in between: the person at the
+// keyboard does not queue behind batch work. Azazel's road is another one.
 func runDirect(ctx context.Context, tools Tools, plan *Plan, output io.Writer, notify func(Update)) error {
 	if ctx == nil || plan == nil || plan.state == nil {
 		return fmt.Errorf("prepare a preview before rendering")
 	}
-	if !filepath.IsAbs(tools.Game) || !filepath.IsAbs(tools.Slayer) {
-		return fmt.Errorf("configure absolute Game and shared Slayer executable paths")
+	if !filepath.IsAbs(tools.Slayer) {
+		return fmt.Errorf("configure an absolute shared Slayer executable path")
 	}
 	if plan.Kind == "catalogue" {
 		return fmt.Errorf("direct Slayer preview does not interpret catalogue settings")
+	}
+	if err := RequireCache(tools); err != nil {
+		return err
 	}
 	if _, err := os.Stat(filepath.Join(plan.Directory, requestName)); err == nil {
 		return fmt.Errorf("prepare a new direct preview; this plan already belongs to Azazel")
@@ -44,14 +49,19 @@ func runDirect(ctx context.Context, tools Tools, plan *Plan, output io.Writer, n
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	arguments := append([]string{"lane", plan.lane(), "--"}, argv...)
-	if err := plan.writeDirectIntent(tools, argv, arguments); err != nil {
+	if err := plan.writeDirectIntent(tools, argv); err != nil {
 		return err
 	}
 	if output == nil {
 		output = io.Discard
 	}
-	command := exec.CommandContext(ctx, tools.Game, arguments...)
+	transcript, err := os.OpenFile(filepath.Join(plan.Directory, TranscriptName), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+	if err != nil {
+		return fmt.Errorf("keep the render's output: %w", err)
+	}
+	defer transcript.Close()
+	output = io.MultiWriter(output, transcript)
+	command := exec.CommandContext(ctx, argv[0], argv[1:]...)
 	command.Dir, command.Env = filepath.Dir(plan.Input), environment(tools)
 	command.Stdout, command.Stderr = output, output
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
@@ -100,7 +110,7 @@ func runDirect(ctx context.Context, tools Tools, plan *Plan, output io.Writer, n
 	if err := plan.record(tools); err != nil {
 		return err
 	}
-	return plan.recordDirectIdentity(tools, argv, arguments)
+	return plan.recordDirectIdentity(tools, argv)
 }
 
 // setDirectUncertain records whether a started shared Slayer preview still

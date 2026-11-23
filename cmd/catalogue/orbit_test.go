@@ -37,9 +37,11 @@ func TestCatalogueOrbitYawTurnsAroundYForAnUprightEntry(test *testing.T) {
 	base := specimenFor(test, plan, entry)
 	plan.Orbit.Yaw = -51
 	turned := specimenFor(test, plan, entry)
+	baseCentre := centreOf(base)
 	want := maths.Rotation(maths.YAxis, -51*maths.Degree).
-		Out(base.eye.Origin.Sub(centreOf(base)))
-	nearVector(test, turned.eye.Origin.Sub(centreOf(turned)), want)
+		Out(base.eye.Origin.Sub(baseCentre))
+	turnedCentre := centreOf(turned)
+	nearVector(test, turned.eye.Origin.Sub(turnedCentre), want)
 	preservesDistance(test, plan, base, turned)
 }
 
@@ -179,14 +181,16 @@ func TestCatalogueOrbitPlanSchemaRequiresBothFiniteBoundedAngles(test *testing.T
 		"orbit: {yaw: 181, pitch: 0}\n",
 		"orbit: {yaw: 0, pitch: -81}\n",
 	} {
-		if _, err := readPlan("bad-orbit.yaml",
-			append(append([]byte(nil), planRaw...), []byte("\n"+suffix)...)); err == nil {
+		copied := append([]byte(nil), planRaw...)
+		badPlan := append(copied, []byte("\n"+suffix)...)
+		if _, err := readPlan("bad-orbit.yaml", badPlan); err == nil {
 			test.Fatal("schema accepted invalid orbit", suffix)
 		}
 	}
-	valid, err := readPlan("orbit.yaml", append(
-		append([]byte(nil), planRaw...),
-		[]byte("\norbit: {yaw: -180, pitch: 80}\n")...))
+	kept := append([]byte(nil), planRaw...)
+	orbited := append(kept,
+		[]byte("\norbit: {yaw: -180, pitch: 80}\n")...)
+	valid, err := readPlan("orbit.yaml", orbited)
 	if err != nil || valid.Orbit != (orbit{Yaw: -180, Pitch: 80}) {
 		test.Fatal("schema rejected boundary orbit", valid, err)
 	}

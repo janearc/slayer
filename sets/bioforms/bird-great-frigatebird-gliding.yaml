@@ -1,0 +1,31 @@
+# The great frigatebird of the bird maker gliding alone, from below and
+# behind the quarter, so the forked tail and the bent wings show. Lit by
+# the worked sun and sky; the sun's place is picked.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: frigatebird gliding
+  seed: 7
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 35}
+  set:
+    things:
+      frigatebird:
+        kind: bird-great-frigatebird-gliding
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position: {east: {value: 0, unit: m}, north: {value: 0, unit: m}, up: {value: 3, unit: m}}
+  film:
+    width: 480
+    height: 300
+    rays: 4
+    wide: 39
+  cameras:
+    below:
+      title: "south-west and below, looking up at the tail and wings"
+      location: {at: [-1.6, -2.4, 1.6]}
+      orientation: {look_at: [-0.1, 0, 3.0]}

@@ -421,7 +421,8 @@ func TestAllAppearanceNumbersFinite(t *testing.T) {
 		switch value.Kind() {
 		case reflect.Struct:
 			for i := range value.NumField() {
-				visit(value.Field(i), strings.TrimPrefix(field+"."+value.Type().Field(i).Tag.Get("yaml"), "."))
+				tag := value.Type().Field(i).Tag.Get("yaml")
+				visit(value.Field(i), strings.TrimPrefix(field+"."+tag, "."))
 			}
 		case reflect.Array:
 			for i := range value.Len() {

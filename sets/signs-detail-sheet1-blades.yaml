@@ -1,0 +1,60 @@
+# the signs detail study, sheet one, blade signs: four blade signs, each
+# turned a quarter so that a face is square to the camera, a cabinet on a
+# bracket with a stay and a feed, each made another way: stacked open tube
+# letters (sign-blade seed 2), stacked channel letters (seed 10), a lit box
+# (seed 4) and stacked letters on a board with a border of bulbs (seed 16),
+# from manufacture/cities/signdraw.go, drawn from manufacture/cities/
+# cultures/sign.yaml. the wall they hang from is not drawn.
+#
+# places are metres, as a map's run: x east, y north, z up. there is no sun
+# and no sky: the light is the signs' own, and one plain dim lamp, a choice
+# of this study, picked by eye, so that the parts that are not lit can be
+# seen. the street, the lamp and the camera are choices of this study.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: signs detail sheet one blades
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 60
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    square:
+      title: "square-on, 26 m off, at the height of the signs' middles"
+      location:
+        at: [0, -26, 8]
+      orientation:
+        look_at: [0, 0, 8]
+  set:
+    things:
+      tube: {kind: sign-blade, seed: 2, complexity: quick, east: -10, north: 0, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      channel: {kind: sign-blade, seed: 10, complexity: quick, east: -3, north: 0, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      box: {kind: sign-blade, seed: 4, complexity: quick, east: 4, north: 0, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      bulb: {kind: sign-blade, seed: 16, complexity: quick, east: 11, north: 0, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+  world:
+    unit: 1
+    lamps:
+      plain-dim:
+        at: [0, -26, 20]
+        temperature: 5000
+        strength: 1350
+        radius: 0.5
+        source: eye
+    materials:
+      street:
+        colour: {srgb_linear: [0.02, 0.02, 0.025]}
+        clear: {through: 0.03, index: 1.5, gloss: 1, rank: 0}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye

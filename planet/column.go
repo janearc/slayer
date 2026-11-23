@@ -3,11 +3,24 @@ package planet
 import (
 	"fmt"
 	"math"
+
+	"github.com/janearc/celestial/si"
 )
 
-// avogadro is molecules in a mole, exact since 2019 by the si's own
-// definition
-const avogadro = 6.02214076e23
+// avogadro is molecules in a mole, as celestial's si package holds it:
+// exact by the si's own definition since 2019.
+const avogadro = si.Avogadro
+
+// tintBlue and tintRed are the wavelengths, in nanometres, a tint's two
+// values are set at, from picks.yaml.
+var (
+	tintBlue = pick("tint-blue-wavelength")
+	tintRed  = pick("tint-red-wavelength")
+)
+
+// shareTolerance is how far the shares of a layer's gases may sum from one
+// and still be taken as summing to it, so a sum rounded off is not refused.
+var shareTolerance = pick("layer-share-tolerance")
 
 // A Gas is a gas by what light does to it: its scattering cross-section
 // at a wavelength in nanometres, square metres a molecule, and its molar
@@ -20,12 +33,15 @@ type Gas struct {
 }
 
 // NewGas is a gas from its cross-section and molar mass, refused if the mass is
-// not greater than zero.
+// not greater than zero or there is no cross-section.
 func NewGas(name string, section func(nm float64) float64,
 	molar float64) (Gas, error) {
-	if !(molar > 0) {
+	if !(molar > nothing) {
 		return Gas{}, fmt.Errorf("gas %s: a molar mass of %g kg", name,
 			molar)
+	}
+	if section == nil {
+		return Gas{}, fmt.Errorf("gas %s: no scattering cross-section", name)
 	}
 	return Gas{name: name, section: section, molar: molar}, nil
 }
@@ -48,8 +64,8 @@ type Haze struct {
 
 // NewHaze is a grey haze, refused outside what a haze can be.
 func NewHaze(depth, albedo, lean float64) (Haze, error) {
-	if !(depth >= 0) || !(albedo >= 0 && albedo <= 1) ||
-		!(lean > -1 && lean < 1) {
+	if !(depth >= nothing) || !(albedo >= nothing && albedo <= whole) ||
+		!(lean > -whole && lean < whole) {
 		return Haze{}, fmt.Errorf("a haze of depth %g, albedo %g and "+
 			"lean %g", depth, albedo, lean)
 	}
@@ -72,7 +88,7 @@ type tint struct{ blue, red float64 }
 
 // blued is the tint with its value at 400 nm set, refused outside zero to one.
 func (made tint) blued(blue float64) (tint, error) {
-	if !(blue >= 0 && blue <= 1) {
+	if !(blue >= nothing && blue <= whole) {
 		return made, fmt.Errorf("an albedo of %g in the blue", blue)
 	}
 	made.blue = blue
@@ -81,7 +97,8 @@ func (made tint) blued(blue float64) (tint, error) {
 
 // at is the tint at a wavelength in nanometres.
 func (made tint) at(nm float64) float64 {
-	share := math.Max(0, math.Min(1, (nm-400)/300))
+	share := math.Max(nothing, math.Min(whole,
+		(nm-tintBlue)/(tintRed-tintBlue)))
 	return made.blue + share*(made.red-made.blue)
 }
 
@@ -103,21 +120,22 @@ type Layer struct {
 // haze. shares must be greater than zero and sum to one.
 func NewLayer(top, bottom float64, gases []Gas, shares []float64,
 	haze Haze) (Layer, error) {
-	if !(top >= 0) || !(bottom > top) || len(gases) != len(shares) ||
-		len(gases) == 0 {
+	if !(top >= nothing) || !(bottom > top) || len(gases) != len(shares) ||
+		len(gases) == nothing {
 		return Layer{}, fmt.Errorf("a layer from %g to %g pascals with "+
 			"%d gases and %d shares", top, bottom, len(gases), len(shares))
 	}
-	sum, parts := 0.0, make([]part, len(gases))
+	var sum float64
+	parts := make([]part, len(gases))
 	for i, gas := range gases {
-		if !(shares[i] > 0) {
+		if !(shares[i] > nothing) {
 			return Layer{}, fmt.Errorf("%s at a share of %g", gas.name,
 				shares[i])
 		}
 		sum += shares[i]
 		parts[i] = part{gas: gas, share: shares[i]}
 	}
-	if math.Abs(sum-1) > 1e-9 {
+	if math.Abs(sum-whole) > shareTolerance {
 		return Layer{}, fmt.Errorf("shares summing to %g, not one", sum)
 	}
 	return Layer{top: top, bottom: bottom, parts: parts, haze: haze}, nil
@@ -127,7 +145,7 @@ func NewLayer(top, bottom float64, gases []Gas, shares []float64,
 // layer's pressures, under a gravity in metres a second squared: the
 // weight of the air over its mean molecule's mass.
 func (layer Layer) molecules(gravity float64) float64 {
-	molar := 0.0
+	var molar float64
 	for _, each := range layer.parts {
 		molar += each.share * each.gas.molar
 	}

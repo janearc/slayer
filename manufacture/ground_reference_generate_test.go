@@ -41,7 +41,8 @@ func TestWriteGroundReference(t *testing.T) {
 			}
 		}
 		path := filepath.Join(destination, family+"-reference-arm64.txt")
-		if err := os.WriteFile(path, []byte(out.String()), 0o644); err != nil {
+		text := out.String()
+		if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
 			t.Fatal(err)
 		}
 	}

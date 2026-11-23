@@ -28,13 +28,13 @@ var held = []struct {
 		radiation.Gamma():       {Absorb: 3.3e-3},
 		radiation.XRay():        {Absorb: 0.6},
 		radiation.Ultraviolet(): {Absorb: 1e-2, Scatter: 6e-5},
-		thing.Visible:           {Absorb: 3e-7, Scatter: 1.16e-5},
+		thing.Visible():         {Absorb: 3e-7, Scatter: 1.16e-5},
 		radiation.Infrared():    {Absorb: 5e-5, Scatter: 1e-7},
 		radiation.Microwave():   {Absorb: 1e-6},
 		radiation.Radio():       {Absorb: 1e-7},
 	}},
 	{Haze(), 0.7, map[radiation.Range]Optics{
-		thing.Visible:           {Absorb: 1e-5, Scatter: 1e-4},
+		thing.Visible():         {Absorb: 1e-5, Scatter: 1e-4},
 		radiation.Ultraviolet(): {Absorb: 2e-5, Scatter: 1.5e-4},
 		radiation.Infrared():    {Absorb: 5e-6, Scatter: 3e-5},
 		radiation.Microwave():   {},
@@ -46,7 +46,7 @@ var held = []struct {
 		radiation.Gamma():       {Absorb: 0.21},
 		radiation.XRay():        {Absorb: 39},
 		radiation.Ultraviolet(): {Absorb: 1e-2, Scatter: 1e-2},
-		thing.Visible:           {Absorb: 1e-6, Scatter: 2e-3},
+		thing.Visible():         {Absorb: 1e-6, Scatter: 2e-3},
 		radiation.Infrared():    {Absorb: 1e-2, Scatter: 1e-5},
 		radiation.Microwave():   {Absorb: 1e-7},
 		radiation.Radio():       {Absorb: 1e-7},
@@ -55,7 +55,7 @@ var held = []struct {
 		radiation.Gamma():       {Absorb: 3e-5},
 		radiation.XRay():        {Absorb: 5e-3},
 		radiation.Ultraviolet(): {Absorb: 1e-6, Scatter: 6e-5},
-		thing.Visible:           {Absorb: 1e-5, Scatter: 3.5e-5},
+		thing.Visible():         {Absorb: 1e-5, Scatter: 3.5e-5},
 		radiation.Infrared():    {Absorb: 1e-4, Scatter: 1e-5},
 		radiation.Microwave():   {Absorb: 1e-9},
 		radiation.Radio():       {Absorb: 1e-9},
@@ -98,7 +98,7 @@ func TestEachRangeAnswersFromItsTable(t *testing.T) {
 		} {
 			b := maths.Band{Nanometres: c.nm}
 			want := h.ranges[c.r]
-			if got := h.gas.Absorb(b); got != want.Absorb {
+			if got, _ := h.gas.optics(b); got != want.Absorb {
 				t.Errorf("%s at %v nm absorbs %v, held at %v", h.gas.Name, c.nm, got, want.Absorb)
 			}
 			if got := h.gas.Scatter(b); got != want.Scatter {

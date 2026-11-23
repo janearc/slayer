@@ -1,0 +1,982 @@
+# The winnebago, 2026-11-19. A motorhome of the common American kind: a
+# tall box body, a lower box cab at its front, six wheels (one front axle
+# and a rear pair), a windscreen, side windows and an entry door on the kerb
+# side. No dimension is measured. Each says in its "by" whether it was picked
+# as a round figure or set by eye against what such a vehicle looks like.
+# Dimensions are metres, except where a unit says otherwise; counts have no
+# unit; colours are shares of light, each channel from zero to one, and
+# gloss is how much of a mirror a surface is. The circle side counts, for
+# the wheels, are in yurt.yaml: the designs share them.
+#
+# The vehicle faces along z, front toward positive z. Its kerb side, the
+# side of the road the vehicle stops at in traffic that keeps right, is the
+# negative x side, and the entry door is there. Places along its length are
+# metres from the middle of the body, forward positive.
+numbers:
+- name: body-length
+  value: 9
+  unit: m
+  says: length of the body box, from its rear to the cab's back
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: body-width
+  value: 2.5
+  unit: m
+  says: width of the body box, the most a road vehicle may be in most countries
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: roof-height
+  value: 3.3
+  unit: m
+  says: height of the body's roof above the ground
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: ground-clearance
+  value: 0.5
+  unit: m
+  says: height of the underside of the body and the cab above the ground
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: cab-length
+  value: 1.8
+  unit: m
+  says: length of the cab box, standing in front of the body
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: cab-width
+  value: 2.4
+  unit: m
+  says: width of the cab box, a little narrower than the body
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: cab-roof
+  value: 2.3
+  unit: m
+  says: height of the cab's roof above the ground, lower than the body's
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: tyre-radius
+  value: 0.5
+  unit: m
+  says: radius of a tyre, so a metre tall
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: tyre-width
+  value: 0.3
+  unit: m
+  says: how wide a tyre is, along its axle
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: wheel-track
+  value: 2
+  unit: m
+  says: distance between the inner faces of the two tyres of an axle
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: front-axle-setback
+  value: 0.8
+  unit: m
+  says: how far behind the cab's nose the front axle stands
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: rear-axle-setback
+  value: 2
+  unit: m
+  says: how far in from the body's rear the first rear axle stands
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: rear-axles
+  value: 2
+  says: how many axles the rear has, side by side along the length; two makes six wheels
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: rear-axle-gap
+  value: 1.3
+  unit: m
+  says: distance between one rear axle and the next
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: window-count
+  value: 3
+  says: how many windows each side of the body has
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: window-width
+  value: 1
+  unit: m
+  says: width of a side window
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: window-height
+  value: 0.8
+  unit: m
+  says: height of a side window
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: window-thickness
+  value: 0.06
+  unit: m
+  says: thickness of a pane, half of it standing out of the wall
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: window-sill
+  value: 1.4
+  unit: m
+  says: height of the lower edge of a side window above the ground
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: window-first
+  value: -3.2
+  unit: m
+  says: place along the length of the rearmost side window, from the body's middle
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: window-gap
+  value: 2.2
+  unit: m
+  says: distance along the length between the middles of two side windows
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: screen-width
+  value: 2.1
+  unit: m
+  says: width of the windscreen, a little under the cab's
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: screen-height
+  value: 0.85
+  unit: m
+  says: height of the windscreen
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: screen-sill
+  value: 1.25
+  unit: m
+  says: height of the lower edge of the windscreen above the ground
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-width
+  value: 0.7
+  unit: m
+  says: width of the entry door
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-height
+  value: 1.9
+  unit: m
+  says: height of the entry door
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-thickness
+  value: 0.06
+  unit: m
+  says: thickness of the entry door, half of it standing out of the wall
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-sill
+  value: 0.5
+  unit: m
+  says: height of the entry door's foot above the ground, the first step
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-place
+  value: 3.2
+  unit: m
+  says: place along the length of the entry door, from the body's middle
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: sleeps
+  value: 4
+  says: how many people it sleeps, a double bed and a dinette that makes up
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: floor-area
+  value: 20
+  unit: m^2
+  says: floor area inside, a little under the body's footprint for its walls
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: pitch-area
+  value: 120
+  unit: m^2
+  says: ground one pitch takes in a motorhome park, the vehicle and its clearance
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked, an RV park site"
+# The footprint a habit lays the vehicle out by. A pitch is the ground one
+# vehicle has, 8 m across and 15 m along, which is the pitch-area above;
+# the vehicle stands along its lane, and a lane of 6 m runs between every
+# pair of rows. The lanes run east and west, so the vehicles face east and
+# every door, on the kerb side, is on the south side.
+- name: winnebago-pitch-width
+  value: 8
+  unit: m
+  says: width of a pitch across its lane, room for the vehicle, an awning and a table
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked, an RV park site"
+- name: winnebago-pitch-depth
+  value: 15
+  unit: m
+  says: length of a pitch along its lane, room for the vehicle and a car
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked, an RV park site"
+- name: winnebago-lane-width
+  value: 6
+  unit: m
+  says: width of the lane between two rows of pitches
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked, an RV park lane"
+- name: winnebago-lane-heading
+  value: 90
+  unit: deg
+  says: bearing the lanes run along, clockwise from north, so east and west, and the way each vehicle faces
+  kind: picked
+  by: "winnebago study, 2026-11-19, picked"
+- name: body-red
+  value: 0.8
+  says: red of the body, white gelcoat
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: body-green
+  value: 0.78
+  says: green of the body, white gelcoat
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: body-blue
+  value: 0.72
+  says: blue of the body, white gelcoat
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: body-gloss
+  value: 0.25
+  says: how much of a mirror the body is
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: cab-red
+  value: 0.55
+  says: red of the cab, painted a warm grey
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: cab-green
+  value: 0.53
+  says: green of the cab, painted a warm grey
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: cab-blue
+  value: 0.5
+  says: blue of the cab, painted a warm grey
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: cab-gloss
+  value: 0.3
+  says: how much of a mirror the cab's paint is
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: glazing-red
+  value: 0.04
+  says: red of the glazing, dark tinted glass
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: glazing-green
+  value: 0.05
+  says: green of the glazing, dark tinted glass
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: glazing-blue
+  value: 0.07
+  says: blue of the glazing, dark tinted glass
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: glazing-gloss
+  value: 0.9
+  says: how much of a mirror the glazing is, nearly all
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: tyre-red
+  value: 0.03
+  says: red of the tyres, black rubber
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: tyre-green
+  value: 0.03
+  says: green of the tyres, black rubber
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: tyre-blue
+  value: 0.03
+  says: blue of the tyres, black rubber
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: tyre-gloss
+  value: 0.05
+  says: how much of a mirror the tyres are
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-red
+  value: 0.72
+  says: red of the entry door, the body's white a little dulled by its trim
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-green
+  value: 0.7
+  says: green of the entry door, the body's white a little dulled by its trim
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-blue
+  value: 0.64
+  says: blue of the entry door, the body's white a little dulled by its trim
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+- name: entry-gloss
+  value: 0.3
+  says: how much of a mirror the entry door is
+  kind: picked
+  by: "winnebago study, 2026-11-19, by eye"
+# The detail below is drawn at the demo level only: the body's panel seams,
+# the rounded nose, frames round the windows, the door's handle and step,
+# mirrors, a ladder, an air-conditioner, an awning, wheel arches and lamps.
+# Heights are above the ground; places along the length are from the middle
+# of the body, forward positive; places across are from the middle, away
+# from it. Kelvin is the heat of a lamp's light.
+- name: nose-radius
+  value: 0.3
+  unit: m
+  says: radius the cab's front corners are rounded to
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: nose-facets
+  value: 6
+  says: number of flat facets each rounded front corner of the cab is cut into
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: seam-width
+  value: 0.012
+  unit: m
+  says: width of a seam between two body panels
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: seam-proud
+  value: 0.008
+  unit: m
+  says: how far a seam or a belt stands out of the body's wall
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: panel-length
+  value: 1.6
+  unit: m
+  says: about how long a body panel is along the vehicle, so where the seams fall
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: belt-at
+  value: 1.05
+  unit: m
+  says: height of the belt seam that runs the length of each side
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: belt-height
+  value: 0.06
+  unit: m
+  says: height of the belt seam
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: roof-rail-height
+  value: 0.05
+  unit: m
+  says: height of the rail along each side of the roof's edge
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: roof-rail-proud
+  value: 0.03
+  unit: m
+  says: how far the roof rail stands out of the body's wall
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: window-bar
+  value: 0.05
+  unit: m
+  says: width of the bars of the frame round a window
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: trim-depth
+  value: 0.1
+  unit: m
+  says: depth of a window frame's bars, through the wall's plane
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: cab-window-width
+  value: 0.8
+  unit: m
+  says: width of the window in each side of the cab
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: cab-window-height
+  value: 0.6
+  unit: m
+  says: height of the window in each side of the cab
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: cab-window-sill
+  value: 1.25
+  unit: m
+  says: height of the foot of the window in each side of the cab
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: rear-window-width
+  value: 0.9
+  unit: m
+  says: width of the window in the rear of the body
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: rear-window-height
+  value: 0.6
+  unit: m
+  says: height of the window in the rear of the body
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: rear-window-sill
+  value: 1.7
+  unit: m
+  says: height of the foot of the window in the rear of the body
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: handle-width
+  value: 0.03
+  unit: m
+  says: width of the entry door's handle
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: handle-height
+  value: 0.14
+  unit: m
+  says: height of the entry door's handle
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: handle-proud
+  value: 0.05
+  unit: m
+  says: how far the entry door's handle stands out of the door
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: handle-at
+  value: 1.0
+  unit: m
+  says: height of the entry door's handle above the door's foot
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: step-depth
+  value: 0.3
+  unit: m
+  says: how far the step before the entry door stands out of the wall
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: step-top
+  value: 0.25
+  unit: m
+  says: height of the step's tread above the ground
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: mirror-arm
+  value: 0.25
+  unit: m
+  says: how far a mirror's arm reaches out of the cab's side
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: mirror-arm-thickness
+  value: 0.03
+  unit: m
+  says: side of the square section of a mirror's arm
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: mirror-glass-width
+  value: 0.04
+  unit: m
+  says: thickness of a mirror's glass, across the vehicle
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: mirror-glass-height
+  value: 0.3
+  unit: m
+  says: height of a mirror's glass
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: mirror-glass-depth
+  value: 0.18
+  unit: m
+  says: length of a mirror's glass, along the vehicle
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: mirror-at
+  value: 1.55
+  unit: m
+  says: height of a mirror's arm above the ground
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: mirror-forward
+  value: 0.35
+  unit: m
+  says: how far forward of the body's front face a mirror stands
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ladder-width
+  value: 0.38
+  unit: m
+  says: width of the ladder up the rear of the body, between its rails
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ladder-offset
+  value: 0.8
+  unit: m
+  says: how far toward the off side the middle of the ladder stands from the middle of the rear
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ladder-foot
+  value: 1.0
+  unit: m
+  says: height of the ladder's foot above the ground
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ladder-top-gap
+  value: 0.1
+  unit: m
+  says: how far below the roof the ladder's rails end
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ladder-rail
+  value: 0.04
+  unit: m
+  says: side of the square section of a ladder's rail and rung
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ladder-pitch
+  value: 0.3
+  unit: m
+  says: how far apart the ladder's rungs are
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ac-width
+  value: 0.9
+  unit: m
+  says: width of the air-conditioner on the roof, across the vehicle
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ac-length
+  value: 1.3
+  unit: m
+  says: length of the air-conditioner on the roof, along the vehicle
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ac-height
+  value: 0.28
+  unit: m
+  says: height of the air-conditioner's shroud
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ac-base
+  value: 0.03
+  unit: m
+  says: height of the plate the air-conditioner stands on, which is a little wider than it
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: ac-place
+  value: -1.2
+  unit: m
+  says: where along the roof the air-conditioner stands
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: fan-radius
+  value: 0.28
+  unit: m
+  says: radius of the fan housing on top of the air-conditioner
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: grille-bar
+  value: 0.02
+  unit: m
+  says: thickness of the bars of the grille over the fan, and of the vehicle's front grille's depth
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-length
+  value: 3.6
+  unit: m
+  says: length of the roll-out awning along the kerb side
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-reach
+  value: 1.6
+  unit: m
+  says: how far the awning is rolled out from the wall
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-top
+  value: 2.7
+  unit: m
+  says: height of the awning's roller above the ground
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-drop
+  value: 0.5
+  unit: m
+  says: how far the awning's outer edge hangs below its roller
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-case-radius
+  value: 0.07
+  unit: m
+  says: radius of the awning's roller and its case
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-leaf
+  value: 0.02
+  unit: m
+  says: thickness of the awning's fabric
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-arm
+  value: 0.03
+  unit: m
+  says: side of the square section of an awning's arm
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-arm-foot
+  value: 2.0
+  unit: m
+  says: height at which an awning's arm is fixed to the wall
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-place
+  value: 0.5
+  unit: m
+  says: where along the body the middle of the awning stands
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: arch-gap
+  value: 0.12
+  unit: m
+  says: how far a wheel arch reaches past the tyre's radius
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: arch-proud
+  value: 0.03
+  unit: m
+  says: how far a wheel arch's plate stands out of the wall
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: arch-facets
+  value: 12
+  says: number of flat facets a wheel arch's half circle is cut into
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: bumper-height
+  value: 0.22
+  unit: m
+  says: height of the front bumper
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: bumper-proud
+  value: 0.12
+  unit: m
+  says: how far the front bumper stands out of the cab's front face
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: bumper-at
+  value: 0.42
+  unit: m
+  says: height of the front bumper's foot above the ground
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: grille-width
+  value: 0.6
+  unit: m
+  says: width of the grille between the headlamps
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: grille-height
+  value: 0.3
+  unit: m
+  says: height of the grille between the headlamps
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-width
+  value: 0.28
+  unit: m
+  says: width of a headlamp
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-height
+  value: 0.16
+  unit: m
+  says: height of a headlamp
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-depth
+  value: 0.08
+  unit: m
+  says: how deep a headlamp is, half of it standing out of the face
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-spread
+  value: 0.65
+  unit: m
+  says: how far from the middle each headlamp stands
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-at
+  value: 0.78
+  unit: m
+  says: height of a headlamp's foot above the ground
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-heat
+  value: 3200
+  unit: K
+  says: heat of the light of a headlamp, a halogen's
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-strength
+  value: 2
+  unit: luminance
+  says: luminance at a metre of a headlamp, in the kit's relative light, as a set's lamp is given
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-width
+  value: 0.14
+  unit: m
+  says: width of a tail lamp
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-height
+  value: 0.3
+  unit: m
+  says: height of a tail lamp
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-depth
+  value: 0.06
+  unit: m
+  says: how deep a tail lamp is, half of it standing out of the rear
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-spread
+  value: 1.0
+  unit: m
+  says: how far from the middle each tail lamp stands
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-at
+  value: 0.6
+  unit: m
+  says: height of a tail lamp's foot above the ground
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-heat
+  value: 1900
+  unit: K
+  says: heat of the light of a tail lamp, a red one's
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-strength
+  value: 0.25
+  unit: luminance
+  says: luminance at a metre of a tail lamp, in the kit's relative light, as a set's lamp is given
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+# What a winnebago at any level stays inside: the body and the cab's box,
+# and these reaches more, for the awning and the mirrors sideways, the
+# roof's fittings up, and the bumper, lamps and ladder at the ends.
+- name: reach-side
+  value: 2.0
+  unit: m
+  says: how far fittings may stand out of the body's side
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: reach-top
+  value: 0.6
+  unit: m
+  says: how far fittings may stand above the body's roof
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: reach-end
+  value: 0.5
+  unit: m
+  says: how far fittings may stand beyond the body's rear and the cab's front
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: seam-red
+  value: 0.42
+  says: red of a seam between body panels, a darker line than the paint
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: seam-green
+  value: 0.41
+  says: green of a seam between body panels
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: seam-blue
+  value: 0.37
+  says: blue of a seam between body panels
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: seam-gloss
+  value: 0.2
+  says: how much of a mirror a seam is
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: trim-red
+  value: 0.68
+  says: red of the frames round the windows, brushed aluminium
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: trim-green
+  value: 0.68
+  says: green of the frames round the windows, brushed aluminium
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: trim-blue
+  value: 0.66
+  says: blue of the frames round the windows, brushed aluminium
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: trim-gloss
+  value: 0.45
+  says: how much of a mirror the window frames are
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: fitting-red
+  value: 0.1
+  says: red of the fittings, black plastic and painted steel
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: fitting-green
+  value: 0.1
+  says: green of the fittings, black plastic and painted steel
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: fitting-blue
+  value: 0.11
+  says: blue of the fittings, black plastic and painted steel
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: fitting-gloss
+  value: 0.3
+  says: how much of a mirror the fittings are
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: plant-red
+  value: 0.84
+  says: red of the air-conditioner's shroud, off-white moulded plastic
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: plant-green
+  value: 0.83
+  says: green of the air-conditioner's shroud, off-white moulded plastic
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: plant-blue
+  value: 0.79
+  says: blue of the air-conditioner's shroud, off-white moulded plastic
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: plant-gloss
+  value: 0.25
+  says: how much of a mirror the air-conditioner's shroud is
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-red
+  value: 0.12
+  says: red of the awning's fabric, a faded blue-green
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-green
+  value: 0.36
+  says: green of the awning's fabric, a faded blue-green
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-blue
+  value: 0.4
+  says: blue of the awning's fabric, a faded blue-green
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: awning-gloss
+  value: 0.05
+  says: how much of a mirror the awning's fabric is
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: step-red
+  value: 0.14
+  says: red of the step, diamond plate in the dark
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: step-green
+  value: 0.14
+  says: green of the step, diamond plate in the dark
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: step-blue
+  value: 0.15
+  says: blue of the step, diamond plate in the dark
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: step-gloss
+  value: 0.15
+  says: how much of a mirror the step is
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: arch-red
+  value: 0.05
+  says: red of the wheel arches, black
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: arch-green
+  value: 0.05
+  says: green of the wheel arches, black
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: arch-blue
+  value: 0.055
+  says: blue of the wheel arches, black
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: arch-gloss
+  value: 0.1
+  says: how much of a mirror the wheel arches are
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-red
+  value: 0.92
+  says: red of a headlamp's lens, clear and a little warm
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-green
+  value: 0.88
+  says: green of a headlamp's lens, clear and a little warm
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-blue
+  value: 0.74
+  says: blue of a headlamp's lens, clear and a little warm
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: headlamp-gloss
+  value: 0.9
+  says: how much of a mirror a headlamp's lens is
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-red
+  value: 0.72
+  says: red of a tail lamp's lens, red
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-green
+  value: 0.05
+  says: green of a tail lamp's lens, red
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-blue
+  value: 0.04
+  says: blue of a tail lamp's lens, red
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"
+- name: taillamp-gloss
+  value: 0.8
+  says: how much of a mirror a tail lamp's lens is
+  kind: picked
+  by: "winnebago detail, 2026-11-19, by eye"

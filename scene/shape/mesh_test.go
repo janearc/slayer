@@ -9,93 +9,199 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// cube is the cube from -1 to 1 on each axis, each side cut n by n into
-// squares and each square into two faces, corner to corner. With split,
-// each side has corners of its own, at the same places as its
-// neighbours'.
-func cube(n int, split bool) ([]maths.Vec, [][3]int) {
-	x, y, z := maths.V(1, 0, 0), maths.V(0, 1, 0), maths.V(0, 0, 1)
-	sides := [6][3]maths.Vec{ // out, then two ways across it, u by v out
+// The counts and places the mesh tests make with, each true by definition.
+const (
+	meshCorners    = 3 // defined: the corners of a triangle
+	meshAxes       = 3 // defined: the axes of space
+	meshCubeSides  = 6 // defined: the sides of a cube
+	meshKinds      = 4 // defined: the kinds of point cubePoint draws
+	meshFirst      = 0 // defined: the first place in a list
+	meshSecond     = 1 // defined: the second place in a list
+	meshThird      = 2 // defined: the third place in a list
+	meshFourth     = 3 // defined: the fourth place in a list
+	meshGoldenRoot = 5 // defined: the golden ratio is (1 + sqrt 5) / 2
+)
+
+// The kinds of point cubePoint draws.
+const (
+	meshKindCorner = 0 // defined: a corner of the cube
+	meshKindEdge   = 1 // defined: a place on an edge of the cube
+	meshKindLine   = 2 // defined: a place on a line a side is cut along
+)
+
+// The tables the mesh tests read.
+const (
+	meshCornersFile  = "testdata/mesh-icosahedron-corners.csv"
+	meshFacesFile    = "testdata/mesh-icosahedron-faces.csv"
+	meshOverlapsFile = "testdata/mesh-overlap-points.csv"
+)
+
+// meshFace is a triangle, as the places of its three corners.
+type meshFace = [meshCorners]int
+
+// meshSide is one side of the cube: the way out of it, then the two ways
+// across it, u by v out.
+type meshSide struct{ out, across, along maths.Vec }
+
+// meshSides are the six sides of the cube, by the way each faces.
+func meshSides() []meshSide {
+	x, y, z := maths.XAxis, maths.YAxis, maths.ZAxis
+	return []meshSide{
 		{x, y, z}, {x.Neg(), z, y}, {y, z, x},
 		{y.Neg(), x, z}, {z, x, y}, {z.Neg(), y, x},
 	}
-	var vs []maths.Vec
-	var fs [][3]int
-	at := map[maths.Vec]int{}
-	corner := func(p maths.Vec) int {
-		if i, ok := at[p]; ok && !split {
-			return i
-		}
-		vs = append(vs, p)
-		at[p] = len(vs) - 1
-		return len(vs) - 1
+}
+
+// meshCornerSet is the corners of a cube so far. With split, each side
+// has corners of its own, at the same places as its neighbours'.
+type meshCornerSet struct {
+	vertices []maths.Vec
+	at       map[maths.Vec]int
+	split    bool
+}
+
+// corner is the place of a corner at point, made if it is not there yet.
+func (set *meshCornerSet) corner(point maths.Vec) int {
+	if place, found := set.at[point]; found && !set.split {
+		return place
 	}
-	s := func(i int) float64 { return -1 + 2*float64(i)/float64(n) }
-	for _, side := range sides {
-		out, u, v := side[0], side[1], side[2]
-		grid := make([][]int, n+1)
-		for i := range grid {
-			grid[i] = make([]int, n+1)
-			for j := range grid[i] {
-				p := out.Add(u.Scale(s(i))).Add(v.Scale(s(j)))
-				grid[i][j] = corner(p)
-			}
-		}
-		for i := range n {
-			for j := range n {
-				a, b := grid[i][j], grid[i+1][j]
-				c, d := grid[i+1][j+1], grid[i][j+1]
-				fs = append(fs, [3]int{a, b, c},
-					[3]int{a, c, d})
-			}
+	set.vertices = append(set.vertices, point)
+	place := len(set.vertices) - unity
+	set.at[point] = place
+	return place
+}
+
+// meshCut is the place of the cut-th line across a side cut count ways,
+// from -1 to 1.
+func meshCut(count, cut int) float64 {
+	return -unity + pair*float64(cut)/float64(count)
+}
+
+// meshGrid is the corners of one side cut count by count, as their places
+// in the set.
+func meshGrid(set *meshCornerSet, side meshSide, count int) [][]int {
+	grid := make([][]int, count+unity)
+	for row := range grid {
+		grid[row] = make([]int, count+unity)
+		for column := range grid[row] {
+			across := side.across.Scale(meshCut(count, row))
+			along := side.along.Scale(meshCut(count, column))
+			point := side.out.Add(across).Add(along)
+			grid[row][column] = set.corner(point)
 		}
 	}
-	return vs, fs
+	return grid
+}
+
+// meshSquares is the two faces of each square of a grid, corner to corner.
+func meshSquares(grid [][]int) []meshFace {
+	var faces []meshFace
+	count := len(grid) - unity
+	for row := range count {
+		for column := range count {
+			origin, forward := grid[row][column], grid[row+unity][column]
+			opposite := grid[row+unity][column+unity]
+			sideways := grid[row][column+unity]
+			faces = append(faces, meshFace{origin, forward, opposite},
+				meshFace{origin, opposite, sideways})
+		}
+	}
+	return faces
+}
+
+// cube is the cube from -1 to 1 on each axis, each side cut count by
+// count into squares and each square into two faces, corner to corner.
+// With split, each side has corners of its own, at the same places as its
+// neighbours'.
+func cube(count int, split bool) ([]maths.Vec, [][meshCorners]int) {
+	set := &meshCornerSet{at: map[maths.Vec]int{}, split: split}
+	var faces []meshFace
+	for _, side := range meshSides() {
+		grid := meshGrid(set, side, count)
+		faces = append(faces, meshSquares(grid)...)
+	}
+	return set.vertices, faces
+}
+
+// meshIcosahedron is the corners of the icosahedron in the unit sphere,
+// read from the table: each has a plain place of one or minus one on one
+// axis and a golden place on another.
+func meshIcosahedron(t *testing.T) []maths.Vec {
+	t.Helper()
+	golden := (unity + math.Sqrt(meshGoldenRoot)) / pair
+	var vertices []maths.Vec
+	for _, row := range readSheet(t, meshCornersFile) {
+		var place [meshAxes]float64
+		place[cellCount(t, row, "plain-axis")] = cell(t, row, "plain-sign")
+		place[cellCount(t, row, "gold-axis")] = cell(t, row, "gold-sign") *
+			golden
+		vertex := maths.V(place[meshFirst], place[meshSecond],
+			place[meshThird])
+		vertices = append(vertices, vertex.Unit())
+	}
+	return vertices
+}
+
+// meshIcosahedronFaces is the faces of the icosahedron, read from the
+// table.
+func meshIcosahedronFaces(t *testing.T) []meshFace {
+	t.Helper()
+	var faces []meshFace
+	for _, row := range readSheet(t, meshFacesFile) {
+		faces = append(faces, meshFace{cellCount(t, row, "first"),
+			cellCount(t, row, "second"), cellCount(t, row, "third")})
+	}
+	return faces
 }
 
 // icosphere is the icosahedron in the unit sphere, each face split in
 // four level times, every new corner pushed out to the sphere.
-func icosphere(level int) ([]maths.Vec, [][3]int) {
-	g := (1 + math.Sqrt(5)) / 2
-	vs := []maths.Vec{
-		maths.V(-1, g, 0), maths.V(1, g, 0), maths.V(-1, -g, 0),
-		maths.V(1, -g, 0), maths.V(0, -1, g), maths.V(0, 1, g),
-		maths.V(0, -1, -g), maths.V(0, 1, -g), maths.V(g, 0, -1),
-		maths.V(g, 0, 1), maths.V(-g, 0, -1), maths.V(-g, 0, 1),
-	}
-	for i := range vs {
-		vs[i] = vs[i].Unit()
-	}
-	fs := [][3]int{
-		{0, 11, 5}, {0, 5, 1}, {0, 1, 7}, {0, 7, 10}, {0, 10, 11},
-		{1, 5, 9}, {5, 11, 4}, {11, 10, 2}, {10, 7, 6}, {7, 1, 8},
-		{3, 9, 4}, {3, 4, 2}, {3, 2, 6}, {3, 6, 8}, {3, 8, 9},
-		{4, 9, 5}, {2, 4, 11}, {6, 2, 10}, {8, 6, 7}, {9, 8, 1},
-	}
+func icosphere(t *testing.T, level int) ([]maths.Vec, [][meshCorners]int) {
+	t.Helper()
+	vertices, faces := meshIcosahedron(t), meshIcosahedronFaces(t)
 	for range level {
-		fs = quarter(&vs, fs)
+		faces = quarter(&vertices, faces)
 	}
-	return vs, fs
+	return vertices, faces
+}
+
+// meshMiddles are the middles of the edges made so far, by the two corners
+// each lies between.
+type meshMiddles struct {
+	vertices *[]maths.Vec
+	made     map[[pair]int]int
+}
+
+// between is the place of the middle of the edge from first to second,
+// pushed out to the unit sphere, and made when it is first asked for.
+func (middles meshMiddles) between(first, second int) int {
+	key := [pair]int{min(first, second), max(first, second)}
+	if place, found := middles.made[key]; found {
+		return place
+	}
+	vertices := *middles.vertices
+	middle := vertices[first].Add(vertices[second]).Unit()
+	*middles.vertices = append(vertices, middle)
+	place := len(*middles.vertices) - unity
+	middles.made[key] = place
+	return place
 }
 
 // quarter splits each face in four at its edges' middles, pushed out to
 // the unit sphere, each new face turning as the old one did.
-func quarter(vs *[]maths.Vec, fs [][3]int) [][3]int {
-	mids := map[[2]int]int{}
-	mid := func(a, b int) int {
-		k := [2]int{min(a, b), max(a, b)}
-		if i, ok := mids[k]; ok {
-			return i
-		}
-		*vs = append(*vs, (*vs)[a].Add((*vs)[b]).Unit())
-		mids[k] = len(*vs) - 1
-		return len(*vs) - 1
-	}
-	var next [][3]int
-	for _, f := range fs {
-		a, b, c := mid(f[0], f[1]), mid(f[1], f[2]), mid(f[2], f[0])
-		next = append(next, [3]int{f[0], a, c}, [3]int{f[1], b, a},
-			[3]int{f[2], c, b}, [3]int{a, b, c})
+func quarter(vs *[]maths.Vec, fs [][meshCorners]int) [][meshCorners]int {
+	middles := meshMiddles{vertices: vs, made: map[[pair]int]int{}}
+	var next [][meshCorners]int
+	for _, face := range fs {
+		first, second := face[meshFirst], face[meshSecond]
+		third := face[meshThird]
+		firstSecond := middles.between(first, second)
+		secondThird := middles.between(second, third)
+		thirdFirst := middles.between(third, first)
+		next = append(next, meshFace{first, firstSecond, thirdFirst},
+			meshFace{second, secondThird, firstSecond},
+			meshFace{third, thirdFirst, secondThird},
+			meshFace{firstSecond, secondThird, thirdFirst})
 	}
 	return next
 }
@@ -106,17 +212,22 @@ func anyway(rng *rand.Rand) maths.Vec {
 		rng.NormFloat64()).Unit()
 }
 
-// within is a point anywhere in the cube from -s to s.
-func within(rng *rand.Rand, s float64) maths.Vec {
-	return maths.V(s*(2*rng.Float64()-1), s*(2*rng.Float64()-1),
-		s*(2*rng.Float64()-1))
+// meshSpread is a place anywhere from -reach to reach.
+func meshSpread(rng *rand.Rand, reach float64) float64 {
+	return reach * (pair*rng.Float64() - unity)
 }
 
-// inBall is a point anywhere in the ball of radius s.
-func inBall(rng *rand.Rand, s float64) maths.Vec {
+// within is a point anywhere in the cube from -reach to reach.
+func within(rng *rand.Rand, reach float64) maths.Vec {
+	return maths.V(meshSpread(rng, reach), meshSpread(rng, reach),
+		meshSpread(rng, reach))
+}
+
+// inBall is a point anywhere in the ball of radius reach.
+func inBall(rng *rand.Rand, reach float64) maths.Vec {
 	for {
-		if p := within(rng, s); p.Len() < s {
-			return p
+		if point := within(rng, reach); point.Len() < reach {
+			return point
 		}
 	}
 }
@@ -127,67 +238,190 @@ func aimed(at, to maths.Vec) maths.Ray {
 }
 
 // angle is between two directions, true however small.
-func angle(a, b maths.Vec) float64 {
-	return math.Atan2(a.Cross(b).Len(), a.Dot(b))
+func angle(first, second maths.Vec) float64 {
+	return math.Atan2(first.Cross(second).Len(), first.Dot(second))
 }
 
 // passes is how near the middle the ray's line comes.
-func passes(r maths.Ray) float64 {
-	return r.At.Sub(r.Dir.Scale(r.At.Dot(r.Dir))).Len()
+func passes(ray maths.Ray) float64 {
+	along := ray.At.Dot(ray.Dir)
+	foot := ray.Dir.Scale(along)
+	return ray.At.Sub(foot).Len()
 }
 
-func TestNewMeshNamesTheTriangleAtFault(t *testing.T) {
-	sq := []maths.Vec{maths.V(0, 0, 0), maths.V(1, 0, 0),
-		maths.V(1, 1, 0), maths.V(0, 1, 0)}
-	halves := [][3]int{{0, 1, 2}, {0, 2, 3}}
-	nowhere := append([]maths.Vec(nil), sq...)
-	nowhere[3] = maths.V(0, math.NaN(), 0)
-	inline := []maths.Vec{maths.V(0, 0, 0), maths.V(1, 1, 1),
-		maths.V(2, 2, 2)}
-	flat := []maths.Vec{maths.Up, maths.Up, {}, maths.Up}
-	inside, sides := cube(1, false)
-	for i := range sides {
-		sides[i][1], sides[i][2] = sides[i][2], sides[i][1]
-	}
-	_, twisted := cube(1, false)
-	twisted[5][1], twisted[5][2] = twisted[5][2], twisted[5][1]
-	for _, c := range []struct {
-		why  string
-		vs   []maths.Vec
-		fs   [][3]int
-		ns   []maths.Vec
-		want string
-	}{
-		{"no faces", sq, nil, nil, "at least one triangle"},
-		{"a vertex not there", sq, [][3]int{{0, 1, 2}, {0, 2, 7}},
+// meshStream is a random stream seeded by the two numbers whose names
+// start with stem.
+func meshStream(t *testing.T, stem string) *rand.Rand {
+	t.Helper()
+	high := uint64(pickedCount(t, stem+"-high"))
+	low := uint64(pickedCount(t, stem+"-low"))
+	return rand.New(rand.NewPCG(high, low))
+}
+
+// meshFault is a mesh made wrongly, and the words that name the fault.
+type meshFault struct {
+	why      string
+	vertices []maths.Vec
+	faces    []meshFace
+	normals  []maths.Vec
+	want     string
+}
+
+// meshSquare is the unit square in the floor, corner by corner.
+func meshSquare() []maths.Vec {
+	zero := maths.V(nought, nought, nought)
+	return []maths.Vec{zero, maths.V(unity, nought, nought),
+		maths.V(unity, unity, nought), maths.V(nought, unity, nought)}
+}
+
+// meshHalves are the two triangles of the square, cut corner to corner.
+func meshHalves() []meshFace {
+	return []meshFace{{meshFirst, meshSecond, meshThird},
+		{meshFirst, meshThird, meshFourth}}
+}
+
+// meshFaultsInFaces are meshes whose faces are made wrongly, each with the
+// words NewMesh names the fault in.
+func meshFaultsInFaces(t *testing.T) []meshFault {
+	t.Helper()
+	square, halves := meshSquare(), meshHalves()
+	zero := maths.V(nought, nought, nought)
+	inline := []maths.Vec{zero, maths.V(unity, unity, unity),
+		maths.V(pair, pair, pair)}
+	missing := pickedCount(t, "mesh-fault-missing-vertex")
+	first, second, third := meshFirst, meshSecond, meshThird
+	return []meshFault{
+		{"no faces", square, nil, nil, "at least one triangle"},
+		{"a vertex not there", square,
+			[]meshFace{{first, second, third}, {first, third, missing}},
 			nil, "triangle 1 names vertex 7, and there are 4"},
-		{"a vertex before the first", sq, [][3]int{{-1, 1, 2}}, nil,
+		{"a vertex before the first", square,
+			[]meshFace{{-unity, second, third}}, nil,
 			"triangle 0 names vertex -1"},
-		{"a corner twice", sq, [][3]int{{0, 1, 2}, {0, 2, 2}}, nil,
-			"triangle 1 has no area"},
-		{"corners in a line", inline, [][3]int{{0, 1, 2}}, nil,
+		{"a corner twice", square,
+			[]meshFace{{first, second, third}, {first, third, third}},
+			nil, "triangle 1 has no area"},
+		{"corners in a line", inline, halves[:unity], nil,
 			"triangle 0 has no area"},
+	}
+}
+
+// meshFaultsInCorners are meshes whose corners or normals are made
+// wrongly, each with the words NewMesh names the fault in.
+func meshFaultsInCorners(t *testing.T) []meshFault {
+	t.Helper()
+	square, halves := meshSquare(), meshHalves()
+	nowhere := append([]maths.Vec(nil), square...)
+	nowhere[meshFourth] = maths.V(nought, math.NaN(), nought)
+	zero := maths.V(nought, nought, nought)
+	flat := []maths.Vec{maths.Up, maths.Up, zero, maths.Up}
+	short := pickedCount(t, "mesh-fault-short-normals")
+	return []meshFault{
 		{"a corner nowhere", nowhere, halves, nil,
 			"triangle 1: vertex 3 is not a finite point"},
-		{"a normal short", sq, halves, sq[:3],
+		{"a normal short", square, halves, square[:short],
 			"3 normals for 4 vertices"},
-		{"a normal pointing nowhere", sq, halves, flat,
+		{"a normal pointing nowhere", square, halves, flat,
 			"triangle 0: the normal at vertex 2 points nowhere"},
-		{"neighbours turning apart", sq,
-			[][3]int{{0, 1, 2}, {0, 3, 2}}, nil,
+	}
+}
+
+// meshFaultsInWinding are meshes whose faces turn the wrong way, each
+// with the words NewMesh names the fault in.
+func meshFaultsInWinding(t *testing.T) []meshFault {
+	t.Helper()
+	inside, sides := cube(unity, false)
+	for index := range sides {
+		sides[index][meshSecond], sides[index][meshThird] =
+			sides[index][meshThird], sides[index][meshSecond]
+	}
+	_, twisted := cube(unity, false)
+	turned := pickedCount(t, "mesh-fault-twisted-face")
+	twisted[turned][meshSecond], twisted[turned][meshThird] =
+		twisted[turned][meshThird], twisted[turned][meshSecond]
+	apart := []meshFace{{meshFirst, meshSecond, meshThird},
+		{meshFirst, meshFourth, meshThird}}
+	return []meshFault{
+		{"neighbours turning apart", meshSquare(), apart, nil,
 			"triangles 0 and 1 both run from vertex 2 to vertex 0"},
 		{"one face of a cube turned", inside, twisted, nil,
 			"triangles 0 and 5 both run"},
 		{"a cube inside out", inside, sides, nil,
 			"the closed piece with triangle 0 in it is inside out"},
-	} {
-		m, err := NewMesh(c.vs, c.fs, c.ns, false)
+	}
+}
+
+// NewMesh names the triangle, the corner or the pair of faces at fault,
+// for each way a mesh can be made wrongly.
+func TestNewMeshNamesTheTriangleAtFault(t *testing.T) {
+	faults := meshFaultsInFaces(t)
+	faults = append(faults, meshFaultsInCorners(t)...)
+	faults = append(faults, meshFaultsInWinding(t)...)
+	for _, fault := range faults {
+		built, err := NewMesh(fault.vertices, fault.faces, fault.normals,
+			false)
 		switch {
 		case err == nil:
-			t.Errorf("%s: made a mesh of %d faces", c.why,
-				len(m.Faces))
-		case !strings.Contains(err.Error(), c.want):
-			t.Errorf("%s: %q, wanting %q", c.why, err, c.want)
+			t.Errorf("%s: made a mesh of %d faces", fault.why,
+				len(built.Faces))
+		case !strings.Contains(err.Error(), fault.want):
+			t.Errorf("%s: %q, wanting %q", fault.why, err, fault.want)
+		}
+	}
+}
+
+// meshCentre is the middle of a face: the mean of its three corners.
+func meshCentre(vertices []maths.Vec, face meshFace) maths.Vec {
+	sum := vertices[face[meshFirst]].Add(vertices[face[meshSecond]]).
+		Add(vertices[face[meshThird]])
+	return sum.Scale(unity / float64(meshCorners))
+}
+
+// meshFacesOutwardOnTheBall fails unless each face of the icosphere has a
+// normal that points out, and a ray from outside meets its outside.
+func meshFacesOutwardOnTheBall(t *testing.T) {
+	t.Helper()
+	vs, fs := icosphere(t, pickedCount(t, "mesh-turning-level"))
+	ball := made(t, vs, fs, nil, false)
+	if !ball.Closed() {
+		t.Fatal("the icosphere is not closed")
+	}
+	outside := picked(t, "mesh-turning-outside")
+	zero := maths.V(nought, nought, nought)
+	for _, face := range fs {
+		middle := meshCentre(vs, face)
+		if normal := ball.Normal(middle); normal.Dot(middle) <= nought {
+			t.Fatalf("at %v the normal %v points in", middle, normal)
+		}
+		ray := aimed(middle.Scale(outside), zero)
+		_, index, ok := ball.first(ray, nought, forever)
+		if !ok {
+			t.Fatalf("a ray at %v missed", middle)
+		}
+		prepared := ready(ray)
+		_, front, _ := prepared.meet(&ball.tris[index], nought, forever)
+		if !front {
+			t.Fatalf("a ray from outside at %v met the inside", middle)
+		}
+	}
+}
+
+// meshNormalsOutwardOnTheBox fails unless a flat face on each side of the
+// cube has a normal that points out.
+func meshNormalsOutwardOnTheBox(t *testing.T) {
+	t.Helper()
+	cvs, cfs := cube(pickedCount(t, "mesh-turning-box-cuts"), true)
+	box := made(t, cvs, cfs, nil, false)
+	tolerance := picked(t, "mesh-turning-normal-tolerance")
+	acrossShare := picked(t, "mesh-turning-across")
+	alongShare := picked(t, "mesh-turning-along")
+	for k := range meshCubeSides {
+		out := cubeSide(k)
+		across := maths.V(out.Y, out.Z, out.X).Scale(acrossShare)
+		along := maths.V(out.Z, out.X, out.Y).Scale(alongShare)
+		at := out.Add(across).Add(along)
+		if normal := box.Normal(at); !normal.Near(out, tolerance) {
+			t.Errorf("the cube's side at %v faces %v", at, normal)
 		}
 	}
 }
@@ -195,56 +429,38 @@ func TestNewMeshNamesTheTriangleAtFault(t *testing.T) {
 // Faces turn counterclockwise seen from outside, so a flat face's normal
 // points out, and a ray from outside meets the outside of the face.
 func TestAMeshTurnsCounterclockwiseFromOutside(t *testing.T) {
-	vs, fs := icosphere(2)
-	ball := made(t, vs, fs, nil, false)
-	if !ball.Closed() {
-		t.Fatal("the icosphere is not closed")
-	}
-	for _, f := range fs {
-		mid := vs[f[0]].Add(vs[f[1]]).Add(vs[f[2]]).Scale(1.0 / 3)
-		if n := ball.Normal(mid); n.Dot(mid) <= 0 {
-			t.Fatalf("at %v the normal %v points in", mid, n)
-		}
-		r := aimed(mid.Scale(3), maths.Vec{})
-		_, i, ok := ball.first(r, 0, forever)
-		if !ok {
-			t.Fatalf("a ray at %v missed", mid)
-		}
-		q := ready(r)
-		if _, front, _ := q.meet(&ball.tris[i], 0, forever); !front {
-			t.Fatalf("a ray from outside at %v met the inside", mid)
-		}
-	}
-	cvs, cfs := cube(2, true)
-	box := made(t, cvs, cfs, nil, false)
-	for k := range 6 {
-		out := cubeSide(k)
-		at := out.Add(maths.V(out.Y, out.Z, out.X).Scale(0.3)).
-			Add(maths.V(out.Z, out.X, out.Y).Scale(0.6))
-		if n := box.Normal(at); !n.Near(out, 1e-12) {
-			t.Errorf("the cube's side at %v faces %v", at, n)
-		}
-	}
+	meshFacesOutwardOnTheBall(t)
+	meshNormalsOutwardOnTheBox(t)
+}
+
+// meshBoxDistance is the box from -1 to 1's own distance at point, less
+// than nothing inside.
+func meshBoxDistance(point maths.Vec) float64 {
+	past := maths.V(math.Abs(point.X)-unity, math.Abs(point.Y)-unity,
+		math.Abs(point.Z)-unity)
+	gap := maths.V(math.Max(past.X, nought), math.Max(past.Y, nought),
+		math.Max(past.Z, nought)).Len()
+	deepest := math.Max(past.X, math.Max(past.Y, past.Z))
+	return gap + math.Min(deepest, nought)
 }
 
 // Inside and Distance on the cube are the box's own: inside is within it,
 // and the distance is the box's distance, less than nothing inside.
 func TestInsideAndDistanceOnACube(t *testing.T) {
-	vs, fs := cube(3, false)
-	m := made(t, vs, fs, nil, false)
-	rng := rand.New(rand.NewPCG(5, 6))
-	for range 5000 {
-		p := within(rng, 2)
-		q := maths.V(math.Abs(p.X)-1, math.Abs(p.Y)-1, math.Abs(p.Z)-1)
-		gap := maths.V(math.Max(q.X, 0), math.Max(q.Y, 0),
-			math.Max(q.Z, 0)).Len()
-		want := gap + math.Min(math.Max(q.X, math.Max(q.Y, q.Z)), 0)
-		if in := m.Inside(p); in != (want < 0) {
-			t.Fatalf("at %v, inside %v; want %v", p, in, want < 0)
+	vs, fs := cube(pickedCount(t, "mesh-inside-cuts"), false)
+	built := made(t, vs, fs, nil, false)
+	rng := meshStream(t, "mesh-inside-seed")
+	reach := picked(t, "mesh-inside-reach")
+	tolerance := picked(t, "mesh-inside-tolerance")
+	for range pickedCount(t, "mesh-inside-rays") {
+		point := within(rng, reach)
+		want := meshBoxDistance(point)
+		if in := built.Inside(point); in != (want < nought) {
+			t.Fatalf("at %v, inside %v; want %v", point, in, want < nought)
 		}
-		if got := m.Distance(p); math.Abs(got-want) > 1e-12 {
+		if got := built.Distance(point); math.Abs(got-want) > tolerance {
 			t.Fatalf("at %v, %v from the surface; want %v",
-				p, got, want)
+				point, got, want)
 		}
 	}
 }
@@ -253,52 +469,53 @@ func TestInsideAndDistanceOnACube(t *testing.T) {
 // both is inside, as a point in either is. Counting faces crossed in
 // twos would say the overlap was out.
 func TestOverlappingPiecesAreInsideEachOther(t *testing.T) {
-	vs, fs := cube(1, false)
-	n, k := len(vs), len(fs)
-	for _, v := range vs[:n] {
-		vs = append(vs, v.Add(maths.V(1, 0.5, 0.25)))
+	vs, fs := cube(unity, false)
+	count, faces := len(vs), len(fs)
+	shift := maths.V(unity, half, picked(t, "mesh-overlap-shift-z"))
+	for _, vertex := range vs[:count] {
+		vs = append(vs, vertex.Add(shift))
 	}
-	for _, f := range fs[:k] {
-		fs = append(fs, [3]int{f[0] + n, f[1] + n, f[2] + n})
+	for _, face := range fs[:faces] {
+		fs = append(fs, meshFace{face[meshFirst] + count,
+			face[meshSecond] + count, face[meshThird] + count})
 	}
-	m := made(t, vs, fs, nil, false)
-	for _, c := range []struct {
-		at   maths.Vec
-		want bool
-	}{
-		{maths.V(-0.5, 0, 0), true}, {maths.V(0.5, 0.5, 0.5), true},
-		{maths.V(1.5, 0.5, 0.5), true}, {maths.V(0, -1.5, 0), false},
-		{maths.V(2.5, 0, 0), false},
-	} {
-		if got := m.Inside(c.at); got != c.want {
-			t.Errorf("inside at %v: %v, want %v", c.at, got, c.want)
+	built := made(t, vs, fs, nil, false)
+	for _, row := range readSheet(t, meshOverlapsFile) {
+		at := maths.V(cell(t, row, "x"), cell(t, row, "y"), cell(t, row, "z"))
+		want := row["inside"] == "true"
+		if got := built.Inside(at); got != want {
+			t.Errorf("inside at %v: %v, want %v", at, got, want)
 		}
 	}
 }
 
 // A mesh with an edge of its own encloses nothing.
 func TestAnOpenMeshHasNoInside(t *testing.T) {
-	m := lone(t)
-	if m.Closed() {
+	built := lone(t)
+	if built.Closed() {
 		t.Error("one triangle is closed")
 	}
-	p := maths.V(0.25, 0.25, -0.5)
-	if in, d := m.Inside(p), m.Distance(p); in ||
-		math.Abs(d-0.5) > 1e-15 {
-		t.Errorf("under it: inside %v, %v away", in, d)
+	offset := picked(t, "mesh-open-offset")
+	point := maths.V(offset, offset, picked(t, "mesh-open-depth"))
+	tolerance := picked(t, "mesh-open-tolerance")
+	if in, away := built.Inside(point), built.Distance(point); in ||
+		math.Abs(away-half) > tolerance {
+		t.Errorf("under it: inside %v, %v away", in, away)
 	}
 }
 
 // inradius is the nearest any face's plane comes to the zero: the ball
 // that size is inside the icosphere, which is inside the unit ball.
-func inradius(vs []maths.Vec, fs [][3]int) float64 {
-	in := math.Inf(1)
-	for _, f := range fs {
-		a, b, c := vs[f[0]], vs[f[1]], vs[f[2]]
-		n := b.Sub(a).Cross(c.Sub(a)).Unit()
-		in = math.Min(in, math.Abs(n.Dot(a)))
+func inradius(vs []maths.Vec, fs [][meshCorners]int) float64 {
+	nearest := math.Inf(unity)
+	for _, face := range fs {
+		first, second := vs[face[meshFirst]], vs[face[meshSecond]]
+		third := vs[face[meshThird]]
+		normal := second.Sub(first).Cross(third.Sub(first)).Unit()
+		offset := math.Abs(normal.Dot(first))
+		nearest = math.Min(nearest, offset)
 	}
-	return in
+	return nearest
 }
 
 // A tessellated sphere against the sphere, over ten thousand rays a
@@ -314,10 +531,14 @@ func inradius(vs []maths.Vec, fs [][3]int) float64 {
 // that well. The band, one less in, quarters each time the faces split in
 // four, and the gap with it.
 func TestATessellatedSphereAgreesWithTheSphere(t *testing.T) {
-	lastBand, lastGap := math.Inf(1), math.Inf(1)
-	for level := 2; level <= 5; level++ {
+	lastBand, lastGap := math.Inf(unity), math.Inf(unity)
+	first := pickedCount(t, "mesh-sphere-first-level")
+	last := pickedCount(t, "mesh-sphere-last-level")
+	bandShrink := picked(t, "mesh-band-shrink")
+	gapShrink := picked(t, "mesh-gap-shrink")
+	for level := first; level <= last; level++ {
 		band, gap := againstTheSphere(t, level)
-		if band > lastBand/3 || gap > lastGap/2 {
+		if band > lastBand/bandShrink || gap > lastGap/gapShrink {
 			t.Errorf("level %d: the band %v and the gap %v did "+
 				"not shrink from %v and %v", level, band, gap,
 				lastBand, lastGap)
@@ -326,51 +547,70 @@ func TestATessellatedSphereAgreesWithTheSphere(t *testing.T) {
 	}
 }
 
+// meshSphereRay is the ray the place-th draw of the sphere test aims:
+// mostly from outside toward a point near the middle, and every so often
+// from within.
+func meshSphereRay(t *testing.T, rng *rand.Rand, place int) maths.Ray {
+	t.Helper()
+	start := picked(t, "mesh-sphere-start-reach")
+	reach := picked(t, "mesh-sphere-aim-reach")
+	ray := aimed(anyway(rng).Scale(start), inBall(rng, reach))
+	every := pickedCount(t, "mesh-sphere-inside-every")
+	if place%every == pickedCount(t, "mesh-sphere-inside-phase") {
+		ray = maths.Ray{At: inBall(rng, half), Dir: anyway(rng)}
+	}
+	return ray
+}
+
 // againstTheSphere is one level of the icosphere against the sphere: the
 // band at its silhouette, and how far apart the distances were for rays
 // that pass within 0.9 of the middle.
 func againstTheSphere(t *testing.T, level int) (float64, float64) {
-	vs, fs := icosphere(level)
-	m := made(t, vs, fs, nil, false)
-	in, ball := inradius(vs, fs), Sphere{Radius: 1}
-	rng := rand.New(rand.NewPCG(7, uint64(level)))
-	worst, banded := 0.0, 0
-	for i := range 10000 {
-		r := aimed(anyway(rng).Scale(3), inBall(rng, 1.2))
-		if i%5 == 4 {
-			r = maths.Ray{At: inBall(rng, 0.5), Dir: anyway(rng)}
-		}
-		b := passes(r)
-		s, sok := ball.Hit(r, 0, forever)
-		got, ok := m.Hit(r, 0, forever)
+	t.Helper()
+	vs, fs := icosphere(t, level)
+	built := made(t, vs, fs, nil, false)
+	nearest, ball := inradius(vs, fs), Sphere{Radius: unity}
+	high := uint64(pickedCount(t, "mesh-sphere-seed-high"))
+	seed := rand.NewPCG(high, uint64(level))
+	rng := rand.New(seed)
+	var worst float64
+	banded := nought
+	slack := picked(t, "mesh-sphere-gap-slack")
+	nearMiddle := picked(t, "mesh-sphere-near-middle")
+	for place := range pickedCount(t, "mesh-sphere-rays") {
+		ray := meshSphereRay(t, rng, place)
+		closest := passes(ray)
+		sphereAt, hitSphere := ball.Hit(ray, nought, forever)
+		meshAt, hitMesh := built.Hit(ray, nought, forever)
 		switch {
-		case b < in && (!ok || !sok):
+		case closest < nearest && (!hitMesh || !hitSphere):
 			t.Fatalf("level %d: %v met the sphere %v, the mesh %v",
-				level, r, sok, ok)
-		case b < in:
-			gap := math.Sqrt(1-b*b) - math.Sqrt(in*in-b*b)
-			if d := math.Abs(got - s); d > gap+1e-12 {
+				level, ray, hitSphere, hitMesh)
+		case closest < nearest:
+			gap := math.Sqrt(unity-closest*closest) -
+				math.Sqrt(nearest*nearest-closest*closest)
+			if apart := math.Abs(meshAt - sphereAt); apart > gap+slack {
 				t.Fatalf("level %d: %v apart along %v, past %v",
-					level, d, r, gap)
+					level, apart, ray, gap)
 			}
-			if b < 0.9 {
-				worst = math.Max(worst, math.Abs(got-s))
+			if closest < nearMiddle {
+				worst = math.Max(worst, math.Abs(meshAt-sphereAt))
 			}
-		case b > 1 && (ok || sok):
+		case closest > unity && (hitMesh || hitSphere):
 			t.Fatalf("level %d: %v, past both, met the sphere %v, "+
-				"the mesh %v", level, r, sok, ok)
-		case b <= 1:
+				"the mesh %v", level, ray, hitSphere, hitMesh)
+		case closest <= unity:
 			banded++
-			if ok && !sok {
+			if hitMesh && !hitSphere {
 				t.Fatalf("level %d: %v met the mesh and "+
-					"not the sphere around it", level, r)
+					"not the sphere around it", level, ray)
 			}
 		}
 	}
 	t.Logf("level %d, %d faces: band %.2e, %d rays in it; distances "+
-		"within %.2e where b < 0.9", level, len(fs), 1-in, banded,
+		"within %.2e where b < 0.9", level, len(fs), unity-nearest, banded,
 		worst)
-	return 1 - in, worst
+	return unity - nearest, worst
 }
 
 // A closed cube lets no ray through. Rays are aimed at its corners, at
@@ -381,110 +621,227 @@ func againstTheSphere(t *testing.T, level int) (float64, float64) {
 // outside crosses the surface exactly twice, in and out.
 func TestACubeLetsNoRayThrough(t *testing.T) {
 	for _, split := range []bool{false, true} {
-		vs, fs := cube(4, split)
-		m := made(t, vs, fs, nil, false)
-		rng := rand.New(rand.NewPCG(8, 9))
-		for i := range 10000 {
-			aim := cubePoint(rng, i%4)
-			out := outward(rng, aim).Scale(1 + 3*rng.Float64())
-			if i%5 == 4 {
-				throughCube(t, m, within(rng, 0.9), aim, false)
-			} else {
-				throughCube(t, m, aim.Add(out), aim, true)
-			}
+		vs, fs := cube(pickedCount(t, "mesh-through-cuts"), split)
+		built := made(t, vs, fs, nil, false)
+		rng := meshStream(t, "mesh-through-seed")
+		for place := range pickedCount(t, "mesh-through-rays") {
+			meshThroughOne(t, built, rng, place)
 		}
-		for k := range 6 {
-			straightAtASide(t, m, cubeSide(k))
+		for k := range meshCubeSides {
+			straightAtASide(t, built, cubeSide(k))
 		}
 	}
+}
+
+// meshThroughOne aims the place-th ray at a point of the cube: mostly from
+// outside, and every so often from within.
+func meshThroughOne(t *testing.T, built *Mesh, rng *rand.Rand, place int) {
+	t.Helper()
+	aim := cubePoint(t, rng, place%meshKinds)
+	spread := picked(t, "mesh-through-spread")
+	out := outward(t, rng, aim).Scale(unity + spread*rng.Float64())
+	every := pickedCount(t, "mesh-through-inside-every")
+	if place%every == pickedCount(t, "mesh-through-inside-phase") {
+		reach := picked(t, "mesh-through-inside-reach")
+		throughCube(t, built, within(rng, reach), aim, false)
+	} else {
+		throughCube(t, built, aim.Add(out), aim, true)
+	}
+}
+
+// meshGridShare is where the place-th line of a side cut into quarters
+// falls, from the middle of the side: a share of the way to its edge.
+func meshGridShare(t *testing.T, place int) float64 {
+	t.Helper()
+	quarters := pickedCount(t, "mesh-side-grid-quarters")
+	return float64(place-quarters) / float64(quarters)
 }
 
 // straightAtASide aims rays along an axis at the side of the cube facing
 // out, at every corner and line it is cut along and between, where the
 // edges' determinants are exactly zero.
-func straightAtASide(t *testing.T, m *Mesh, out maths.Vec) {
-	u := maths.V(out.Y, out.Z, out.X)
-	v := maths.V(out.Z, out.X, out.Y)
-	for i := 1; i < 8; i++ {
-		for j := 1; j < 8; j++ {
-			aim := out.Add(u.Scale(float64(i-4) / 4)).
-				Add(v.Scale(float64(j-4) / 4))
-			throughCube(t, m, aim.Add(out.Scale(3)), aim, true)
+func straightAtASide(t *testing.T, built *Mesh, out maths.Vec) {
+	t.Helper()
+	across := maths.V(out.Y, out.Z, out.X)
+	along := maths.V(out.Z, out.X, out.Y)
+	limit := pickedCount(t, "mesh-side-grid-limit")
+	standoff := picked(t, "mesh-side-standoff")
+	for row := unity; row < limit; row++ {
+		acrossAt := across.Scale(meshGridShare(t, row))
+		for column := unity; column < limit; column++ {
+			alongAt := along.Scale(meshGridShare(t, column))
+			aim := out.Add(acrossAt).Add(alongAt)
+			from := aim.Add(out.Scale(standoff))
+			throughCube(t, built, from, aim, true)
 		}
 	}
 }
 
 // cubeSide is the cube's kth side, by which way it faces.
 func cubeSide(k int) maths.Vec {
-	s := float64(1 - 2*(k%2))
-	return [3]maths.Vec{maths.V(s, 0, 0), maths.V(0, s, 0),
-		maths.V(0, 0, s)}[k/2]
+	sign := float64(unity - pair*(k%pair))
+	sides := [meshAxes]maths.Vec{maths.V(sign, nought, nought),
+		maths.V(nought, sign, nought), maths.V(nought, nought, sign)}
+	return sides[k/pair]
+}
+
+// meshDraws are the random draws that place a point on the cube, with the
+// counts they are made by.
+type meshDraws struct {
+	rng           *rand.Rand
+	gridLines     int
+	edgeChance    int
+	edgeLines     int
+	diagonalLines int
+	ways          int
+}
+
+// meshDrawsOf is the draws from rng, with the counts from the book.
+func meshDrawsOf(t *testing.T, rng *rand.Rand) meshDraws {
+	t.Helper()
+	return meshDraws{
+		rng:           rng,
+		gridLines:     pickedCount(t, "mesh-grid-lines"),
+		edgeChance:    pickedCount(t, "mesh-edge-grid-chance"),
+		edgeLines:     pickedCount(t, "mesh-edge-grid-lines"),
+		diagonalLines: pickedCount(t, "mesh-diagonal-lines"),
+		ways:          pickedCount(t, "mesh-diagonal-ways"),
+	}
+}
+
+// grid is a place on one of the lines a side is cut along.
+func (draws meshDraws) grid() float64 {
+	return float64(draws.rng.IntN(draws.gridLines)-pair) / pair
+}
+
+// anywhere is a place anywhere across a side.
+func (draws meshDraws) anywhere() float64 {
+	return pair*draws.rng.Float64() - unity
+}
+
+// sign is one or minus one.
+func (draws meshDraws) sign() float64 {
+	return float64(unity - pair*draws.rng.IntN(pair))
+}
+
+// diagonal is a place on a line of the squares' diagonals, share along.
+func (draws meshDraws) diagonal(share float64) float64 {
+	return float64(draws.rng.IntN(draws.diagonalLines)-pair)/pair + share
+}
+
+// corner is the place of a corner of the cube.
+func (draws meshDraws) corner() [meshAxes]float64 {
+	return [meshAxes]float64{draws.sign(), draws.sign(), draws.sign()}
+}
+
+// edge is a place on an edge of the cube, sometimes on a line it is cut
+// along.
+func (draws meshDraws) edge() [meshAxes]float64 {
+	place := [meshAxes]float64{draws.sign(), draws.sign(), draws.anywhere()}
+	if draws.rng.IntN(draws.edgeChance) == nought {
+		cut := float64(draws.rng.IntN(draws.edgeLines) - unity)
+		place[meshThird] = cut / pair
+	}
+	return place
+}
+
+// line is a place on a line a side is cut along, or on a square's
+// diagonal.
+func (draws meshDraws) line() [meshAxes]float64 {
+	place := [meshAxes]float64{draws.sign(), draws.grid(), draws.anywhere()}
+	switch draws.rng.IntN(draws.ways) {
+	case meshFirst:
+		place[meshThird] = draws.grid()
+	case meshSecond:
+		share := draws.rng.Float64() / pair
+		place[meshSecond] = draws.diagonal(share)
+		place[meshThird] = draws.diagonal(share)
+	}
+	return place
+}
+
+// side is a place anywhere on a side.
+func (draws meshDraws) side() [meshAxes]float64 {
+	return [meshAxes]float64{draws.sign(), draws.anywhere(),
+		draws.anywhere()}
 }
 
 // cubePoint is a point on the cube's surface: of kind 0, a corner; 1, on
 // an edge; 2, on a line a side is cut along, or a square's diagonal; 3,
 // anywhere on a side.
-func cubePoint(rng *rand.Rand, kind int) maths.Vec {
-	grid := func() float64 { return float64(rng.IntN(5)-2) / 2 }
-	any := func() float64 { return 2*rng.Float64() - 1 }
-	sign := func() float64 { return float64(1 - 2*rng.IntN(2)) }
-	var p [3]float64
+func cubePoint(t *testing.T, rng *rand.Rand, kind int) maths.Vec {
+	t.Helper()
+	draws := meshDrawsOf(t, rng)
+	var place [meshAxes]float64
 	switch kind {
-	case 0:
-		p = [3]float64{sign(), sign(), sign()}
-	case 1:
-		p = [3]float64{sign(), sign(), any()}
-		if rng.IntN(3) == 0 {
-			p[2] = float64(rng.IntN(3)-1) / 2
-		}
-	case 2:
-		p = [3]float64{sign(), grid(), any()}
-		switch rng.IntN(3) {
-		case 0:
-			p[2] = grid()
-		case 1:
-			s := rng.Float64() / 2
-			p[1] = float64(rng.IntN(4)-2)/2 + s
-			p[2] = float64(rng.IntN(4)-2)/2 + s
-		}
+	case meshKindCorner:
+		place = draws.corner()
+	case meshKindEdge:
+		place = draws.edge()
+	case meshKindLine:
+		place = draws.line()
 	default:
-		p = [3]float64{sign(), any(), any()}
+		place = draws.side()
 	}
-	k := rng.IntN(3) // turn it to any side
-	return maths.V(p[k], p[(k+1)%3], p[(k+2)%3])
+	axis := rng.IntN(meshAxes) // turn it to any side
+	return maths.V(place[axis], place[(axis+unity)%meshAxes],
+		place[(axis+pair)%meshAxes])
 }
 
-// outward is a way out of the cube from p on its surface: out across
-// every side p is on, and any way along the others.
-func outward(rng *rand.Rand, p maths.Vec) maths.Vec {
-	part := func(c float64) float64 {
-		if math.Abs(c) == 1 {
-			return c * (0.05 + rng.Float64())
-		}
-		return 2*rng.Float64() - 1
+// meshPart is one part of a way out of the cube: out across a side the
+// point is on, and any way along the others.
+func meshPart(rng *rand.Rand, margin, coordinate float64) float64 {
+	if math.Abs(coordinate) == unity {
+		return coordinate * (margin + rng.Float64())
 	}
-	return maths.V(part(p.X), part(p.Y), part(p.Z)).Unit()
+	return pair*rng.Float64() - unity
+}
+
+// outward is a way out of the cube from point on its surface: out across
+// every side point is on, and any way along the others.
+func outward(t *testing.T, rng *rand.Rand, point maths.Vec) maths.Vec {
+	t.Helper()
+	margin := picked(t, "mesh-outward-margin")
+	return maths.V(meshPart(rng, margin, point.X),
+		meshPart(rng, margin, point.Y), meshPart(rng, margin, point.Z)).Unit()
 }
 
 // throughCube aims a ray from from at aim on the cube, and fails unless
 // it meets the cube there; from outside it must cross twice, from inside
 // once.
-func throughCube(t *testing.T, m *Mesh, from, aim maths.Vec,
+func throughCube(t *testing.T, built *Mesh, from, aim maths.Vec,
 	outside bool) {
 	t.Helper()
-	r, far := aimed(from, aim), aim.Sub(from).Len()
-	got, ok := m.Hit(r, 0, forever)
-	if !ok || math.Abs(got-far) > 1e-9 {
+	ray, far := aimed(from, aim), aim.Sub(from).Len()
+	got, ok := built.Hit(ray, nought, forever)
+	if !ok || math.Abs(got-far) > picked(t, "mesh-through-tolerance") {
 		t.Fatalf("aimed at %v from %v: met at %v, %v; want %v",
 			aim, from, got, ok, far)
 	}
-	want := 1
+	want := unity
 	if outside {
-		want = 2
+		want = pair
 	}
-	if n := met(m, r, 0); n != want {
+	if crossed := met(built, ray, nought); crossed != want {
 		t.Fatalf("aimed at %v from %v: crossed %d times, not %d",
-			aim, from, n, want)
+			aim, from, crossed, want)
+	}
+}
+
+// meshSmoothDraws are the numbers the smooth-normal test draws its rays
+// by.
+type meshSmoothDraws struct {
+	start, aim, wayOut, slack float64
+}
+
+// meshSmoothDrawsOf reads the numbers the smooth-normal test draws by.
+func meshSmoothDrawsOf(t *testing.T) meshSmoothDraws {
+	t.Helper()
+	return meshSmoothDraws{
+		start:  picked(t, "mesh-smooth-start-reach"),
+		aim:    picked(t, "mesh-smooth-aim-reach"),
+		wayOut: picked(t, "mesh-smooth-way-out-tolerance"),
+		slack:  picked(t, "mesh-smooth-bound-slack"),
 	}
 }
 
@@ -499,37 +856,42 @@ func throughCube(t *testing.T, m *Mesh, from, aim maths.Vec,
 // 5,120 faces and rays that pass within 0.9 of the middle that is under
 // three tenths of a degree, where flat faces are off by degrees.
 func TestSmoothNormalsFollowTheSphere(t *testing.T) {
-	vs, fs := icosphere(4)
+	vs, fs := icosphere(t, pickedCount(t, "mesh-smooth-level"))
 	smooth := made(t, vs, fs, vs, true)
 	flat := made(t, vs, fs, vs, false)
-	in, ball := inradius(vs, fs), Sphere{Radius: 1}
-	rng := rand.New(rand.NewPCG(12, 13))
-	worst, worstFlat, most := 0.0, 0.0, 0.0
-	for range 10000 {
-		r := aimed(anyway(rng).Scale(3), inBall(rng, 0.9))
-		got, ok := smooth.Hit(r, 0, forever)
-		s, _ := ball.Hit(r, 0, forever)
+	nearest, ball := inradius(vs, fs), Sphere{Radius: unity}
+	rng := meshStream(t, "mesh-smooth-seed")
+	draws := meshSmoothDrawsOf(t)
+	var worst, worstFlat, most float64
+	for range pickedCount(t, "mesh-smooth-rays") {
+		ray := aimed(anyway(rng).Scale(draws.start), inBall(rng, draws.aim))
+		got, ok := smooth.Hit(ray, nought, forever)
+		sphereAt, _ := ball.Hit(ray, nought, forever)
 		if !ok {
-			t.Fatalf("%v missed", r)
+			t.Fatalf("%v missed", ray)
 		}
-		p, want := r.Point(got), ball.Normal(r.Point(s))
-		n := smooth.Normal(p)
-		if a := angle(n, p); a > 1e-9 {
-			t.Fatalf("at %v the blend is %v off the way out", p, a)
+		point := ray.Point(got)
+		want := ball.Normal(ray.Point(sphereAt))
+		normal := smooth.Normal(point)
+		if wayOff := angle(normal, point); wayOff > draws.wayOut {
+			t.Fatalf("at %v the blend is %v off the way out", point, wayOff)
 		}
-		apart := (1 - in*in) / math.Sqrt(1-passes(r)*passes(r))
-		bound := 2 * math.Asin(apart/(2*in))
-		if a := angle(n, want); a > bound+1e-9 {
+		closest := passes(ray)
+		apart := (unity - nearest*nearest) / math.Sqrt(unity-closest*closest)
+		bound := pair * math.Asin(apart/(pair*nearest))
+		off := angle(normal, want)
+		if off > bound+draws.slack {
 			t.Fatalf("at %v the blend is %v off the sphere's, "+
-				"past %v", p, a, bound)
+				"past %v", point, off, bound)
 		}
-		worst = math.Max(worst, angle(n, want))
-		worstFlat = math.Max(worstFlat, angle(flat.Normal(p), want))
+		flatNormal := flat.Normal(point)
+		worst = math.Max(worst, off)
+		worstFlat = math.Max(worstFlat, angle(flatNormal, want))
 		most = math.Max(most, bound)
 	}
 	t.Logf("smooth within %.3f°, bound %.3f°; flat within %.3f°",
 		worst/maths.Degree, most/maths.Degree, worstFlat/maths.Degree)
-	if worst > 0.3*maths.Degree || worstFlat < 1*maths.Degree {
+	if worst > 0.3*maths.Degree || worstFlat < unity*maths.Degree {
 		t.Errorf("smooth within %v°, flat %v°", worst/maths.Degree,
 			worstFlat/maths.Degree)
 	}
@@ -538,30 +900,37 @@ func TestSmoothNormalsFollowTheSphere(t *testing.T) {
 // A mesh is a surface: it answers rays and normals exactly, and says
 // nothing of where a ray leaves it, which is for media.
 func TestAMeshIsASurfaceOnly(t *testing.T) {
-	var s any = lone(t)
-	if _, ok := s.(Shape); !ok {
+	var solid any = lone(t)
+	if _, ok := solid.(Shape); !ok {
 		t.Error("a mesh is not a shape")
 	}
-	if _, ok := s.(Hitter); !ok {
+	if _, ok := solid.(Hitter); !ok {
 		t.Error("a mesh is not hit exactly")
 	}
-	if _, ok := s.(Normaler); !ok {
+	if _, ok := solid.(normaler); !ok {
 		t.Error("a mesh does not know its normals")
 	}
-	if _, ok := s.(Spanner); ok {
+	if _, ok := solid.(Spanner); ok {
 		t.Error("a mesh spans, as a medium does")
+	}
+}
+
+// meshExpectPanic fails the test unless a panic is under way, so it is
+// deferred around a call that must panic.
+func meshExpectPanic(t *testing.T) {
+	t.Helper()
+	if recover() == nil {
+		t.Error("a mesh not built answered a ray")
 	}
 }
 
 // A Mesh not made by NewMesh has nothing built, and says so rather than
 // answering wrongly.
 func TestAMeshNotMadeByNewMeshSaysSo(t *testing.T) {
-	defer func() {
-		if recover() == nil {
-			t.Error("a mesh not built answered a ray")
-		}
-	}()
-	m := &Mesh{Vertices: []maths.Vec{{}, maths.XAxis, maths.Up},
-		Faces: [][3]int{{0, 1, 2}}}
-	m.Hit(down(0.1, 0.1), 0, forever)
+	defer meshExpectPanic(t)
+	zero := maths.V(nought, nought, nought)
+	unbuilt := &Mesh{Vertices: []maths.Vec{zero, maths.XAxis, maths.Up},
+		Faces: [][meshCorners]int{{meshFirst, meshSecond, meshThird}}}
+	offset := picked(t, "mesh-unbuilt-offset")
+	unbuilt.Hit(down(offset, offset), nought, forever)
 }

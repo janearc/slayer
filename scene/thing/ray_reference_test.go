@@ -1,10 +1,16 @@
 package thing
 
 import (
-	"math"
 	"testing"
 
 	"github.com/janearc/celestial/measure"
+)
+
+// The tables the ray-reference test reads, each row named in its name
+// column.
+const (
+	rayReferenceAccepted = "testdata/ray-reference-accepted.csv"
+	rayReferenceRefused  = "testdata/ray-reference-refused.csv"
 )
 
 // A ray-origin reference is a length above nought and not endless, kept
@@ -12,19 +18,21 @@ import (
 // and one that is no number are each refused; and the zero reference,
 // the choice made from the geometry, is nought.
 func TestARayOriginReferenceIsAPositiveLength(t *testing.T) {
-	for _, metres := range []float64{1e-9, 1, 6.371e6} {
+	for _, row := range readSheet(t, rayReferenceAccepted) {
+		metres := cell(t, row, "metres")
 		made, err := NewRayOriginReference(measure.Metres(metres))
 		if err != nil || made.Metres() != metres {
 			t.Errorf("%v metres: %v, %v", metres, made.Metres(), err)
 		}
 	}
-	for _, metres := range []float64{0, -1, math.Inf(1), math.Inf(-1), math.NaN()} {
+	for _, row := range readSheet(t, rayReferenceRefused) {
+		metres := cell(t, row, "metres")
 		made, err := NewRayOriginReference(measure.Metres(metres))
-		if err == nil || made.Metres() != 0 {
+		if err == nil || made.Metres() != nought {
 			t.Errorf("%v metres were taken: %v, %v", metres, made.Metres(), err)
 		}
 	}
-	if got := (RayOriginReference{}).Metres(); got != 0 {
+	if got := (RayOriginReference{}).Metres(); got != nought {
 		t.Errorf("the zero reference is %v metres", got)
 	}
 }

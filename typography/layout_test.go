@@ -22,13 +22,14 @@ type glyph = typography.Glyph
 func kerning(t *testing.T, kern float64) *mocks.MockMetrics {
 	control := gomock.NewController(t)
 	font := mocks.NewMockMetrics(control)
+	glyphA, glyphV := glyph(36), glyph(57)
 	gomock.InOrder(
-		font.EXPECT().Index('A').Return(glyph(36), nil),
-		font.EXPECT().Advance(glyph(36)).Return(1366.0, nil),
-		font.EXPECT().Index('V').Return(glyph(57), nil),
-		font.EXPECT().Kern(glyph(36), glyph(57)).
+		font.EXPECT().Index('A').Return(glyphA, nil),
+		font.EXPECT().Advance(glyphA).Return(1366.0, nil),
+		font.EXPECT().Index('V').Return(glyphV, nil),
+		font.EXPECT().Kern(glyphA, glyphV).
 			Return(kern, nil),
-		font.EXPECT().Advance(glyph(57)).Return(1366.0, nil),
+		font.EXPECT().Advance(glyphV).Return(1366.0, nil),
 	)
 	return font
 }
@@ -100,7 +101,8 @@ func TestGosRegularIsSetAtItsAdvances(t *testing.T) {
 	}
 	raw, _ := sfnt.Parse(goregular.TTF)
 	var work sfnt.Buffer
-	em := fixed.I(int(raw.UnitsPerEm()))
+	unitsPerEm := int(raw.UnitsPerEm())
+	em := fixed.I(unitsPerEm)
 	line, err := typography.Layout(face, "carrie")
 	if err != nil {
 		t.Fatal(err)

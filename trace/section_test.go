@@ -2,7 +2,9 @@ package trace
 
 import (
 	_ "embed"
+	"fmt"
 	"image"
+	"strings"
 	"testing"
 	"time"
 
@@ -70,13 +72,46 @@ func sectionEye(data sectionData) (maths.Subspace, film.Sensor) {
 func TestASectionOutsideTheFrameIsRefused(t *testing.T) {
 	data := sectionFixture(t)
 	eye, lens := sectionEye(data)
+	if len(data.Refused) == 0 {
+		t.Fatal("sections.yaml lists no section to refuse")
+	}
+	size := fmt.Sprintf("%d by %d", data.Frame.Width, data.Frame.Height)
 	for _, refused := range data.Refused {
 		box := refused.box()
-		if _, err := sampledIn(smoking(), eye, lens, atStart,
-			data.Frame.Width, data.Frame.Height, data.RefusedRays,
-			box); err == nil {
-			t.Errorf("a section in %v of a %d by %d frame was drawn: %s",
-				box, data.Frame.Width, data.Frame.Height, refused.Name)
+		_, err := sampledIn(smoking(), eye, lens, atStart,
+			data.Frame.Width, data.Frame.Height, data.RefusedRays, box)
+		if err == nil {
+			t.Errorf("a section in %v of a %s frame was drawn: %s", box,
+				size, refused.Name)
+			continue
+		}
+		if said := err.Error(); !strings.Contains(said, box.String()) ||
+			!strings.Contains(said, size) {
+			t.Errorf("the refusal of %s does not say %v or %s: %s",
+				refused.Name, box, size, said)
+		}
+	}
+}
+
+// Anti: a section that is some of the frame is not refused. Each of the
+// tiles is drawn, as wide and as tall as it was asked.
+func TestASectionWithinTheFrameIsDrawn(t *testing.T) {
+	data := sectionFixture(t)
+	eye, lens := sectionEye(data)
+	if len(data.Tiles) == 0 {
+		t.Fatal("sections.yaml lists no section to draw")
+	}
+	for _, tile := range data.Tiles {
+		box := tile.box()
+		drawn, err := sampledIn(smoking(), eye, lens, atStart,
+			data.Frame.Width, data.Frame.Height, data.RefusedRays, box)
+		if err != nil {
+			t.Errorf("the section %s was refused: %v", tile.Name, err)
+			continue
+		}
+		if drawn.W != box.Dx() || drawn.H != box.Dy() {
+			t.Errorf("the section %s is %d by %d, want %d by %d",
+				tile.Name, drawn.W, drawn.H, box.Dx(), box.Dy())
 		}
 	}
 }

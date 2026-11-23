@@ -11,6 +11,16 @@
 # Verification holds bytes and quoted numeric text. Roles, powers and units
 # also need review and the independent model/metadata checks in the tests.
 numbers:
+  - name: prima-primary-diameter-metres
+    value: 1.8
+    unit: m
+    says: PRIMA telescope diameter
+    kind: measured
+    source:
+      key: prima-ipac-observatory
+      where: telescope row
+      text: "1.8"
+      excerpt: "Telescope | 1.8-m"
   - name: spitzer-cells-per-panel
     value: 392
     says: solar cells on each of the two panels
@@ -1243,3 +1253,103 @@ numbers:
       page: 5
       text: '6.3781'
       excerpt: = 6.3781 × 106 m
+  - name: voyager-hga-diameter-metres
+    value: 3.7
+    unit: m
+    says: high-gain antenna diameter of either twin
+    kind: measured
+    source:
+      key: voyager-faq
+      where: FAQ, How big is Voyager? How much does it weigh?, high-gain antenna
+      text: '3.7'
+      excerpt: The high gain antenna is 3.7 meters across (diameter).
+  - name: voyager-magnetometer-boom-metres
+    value: 13
+    unit: m
+    says: deployed magnetometer boom length
+    kind: measured
+    source:
+      key: voyager-faq
+      where: FAQ, How big is Voyager? How much does it weigh?, magnetometer boom
+      text: '13'
+      excerpt: The magnetometer boom is 13 meters long
+  - name: voyager-radio-antennas-metres
+    value: 10
+    unit: m
+    says: length of each shared PRA/PWS antenna
+    kind: measured
+    source:
+      key: voyager-faq
+      where: FAQ, How big is Voyager? How much does it weigh?, PRA/PWS antennas
+      text: '10'
+      excerpt: The two Planetary Radio Astronomy and Plasma Wave antenna are 10 meters long.
+  - name: voyager-rtg-boom-metres
+    value: 3.7
+    unit: m
+    says: deployed radioisotope generator boom length
+    kind: measured
+    source:
+      key: voyager-faq
+      where: FAQ, How big is Voyager? How much does it weigh?, RTG boom
+      text: '3.7'
+      excerpt: The Radioisotope Thermoelectric Generator boom is 3.7 meters long
+  - name: voyager-science-boom-metres
+    value: 3
+    unit: m
+    says: deployed science instrument boom length
+    kind: measured
+    source:
+      key: voyager-faq
+      where: FAQ, How big is Voyager? How much does it weigh?, science instrument boom
+      text: '3'
+      excerpt: The science instrument boom (near top of picture) is 3 meters long.
+  - name: voyager-bus-diameter-metres
+    value: 1.8
+    unit: m
+    says: approximate bus housing electronics diameter
+    kind: measured
+    source:
+      key: voyager-faq
+      where: FAQ, How big is Voyager? How much does it weigh?, bus housing
+      text: '1.8'
+      excerpt: The Bus Housing Electronics is about 1.8 meters in diameter.
+  - name: voyager-height-metres
+    value: 3.8
+    unit: m
+    says: reflector-structure top to triangular bus feet bottom
+    kind: measured
+    source:
+      key: voyager-faq
+      where: FAQ, How big is Voyager? How much does it weigh?, spacecraft height
+      text: '3.8'
+      excerpt: The spacecraft height — from the top of the reflector structure in the middle of the high gain antenna to the bottom of the triangular feet below the bus housing electronics — is about 3.8 meters.
+  - name: roman-primary-diameter-metres
+    value: 2.4
+    unit: m
+    says: primary mirror diameter for the Roman telescope's optical assembly
+    kind: measured
+    source:
+      key: roman-observatory-technical
+      where: Telescope Parameters, Primary Mirror size
+      text: '2.4'
+      excerpt: "Primary Mirror size: 2.4 meters"
+  - name: roman-deployed-length-metres
+    value: 12.7
+    unit: m
+    says: NASA's stated lower-bound overall length for the deployed observatory
+    kind: measured
+    source:
+      key: roman-observatory-faq
+      where: Quick Facts, size
+      text: '12.7'
+      excerpt: over 42 feet (12.7 meters) long
+  - name: roman-deployed-width-metres
+    value: 4.4
+    unit: m
+    says: NASA's stated lower-bound overall width for the deployed observatory
+    kind: measured
+    source:
+      key: roman-observatory-faq
+      where: Quick Facts, size
+      text: '4.4'
+      excerpt: more than 14 feet (4.4 meters) wide

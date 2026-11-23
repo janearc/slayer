@@ -1,0 +1,1 @@
+check-propeller-dispersal . :: go test -p=1 -count=1 ./scene/medium ./set ./stage ./gpu -run Propeller|Vapor -timeout=180s

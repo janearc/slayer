@@ -104,7 +104,7 @@ func TestSwitchesAreTheSchemasAndEachSaysOneLine(t *testing.T) {
 		}
 	}
 	want := []string{FlagVibes, FlagFastlight, ShortcutLampStore,
-		ShortcutSkyLooks}
+		ShortcutRestir, ShortcutSkyLooks}
 	if strings.Join(names, " ") != strings.Join(want, " ") {
 		t.Errorf("the switches are %v, want %v", names, want)
 	}

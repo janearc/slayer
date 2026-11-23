@@ -91,7 +91,7 @@ func Read(path string) (*Edit, error) {
 	edit := &Edit{Plan: plan, Grid: grid}
 	previous := 0.0
 	for index, cue := range []string{plan.Lock, plan.RadioOne, plan.RadioTwo, plan.Reveal} {
-		at, err := edit.Cue(cue)
+		at, err := edit.cue(cue)
 		if err != nil || at <= previous || at >= grid.Score.Duration {
 			return nil, fmt.Errorf("shoot cue %q is invalid or out of order: %v", cue, err)
 		}
@@ -104,7 +104,7 @@ func Read(path string) (*Edit, error) {
 		return nil, fmt.Errorf("coda overlaps reveal")
 	}
 	for _, cue := range plan.BeatTwoAccents {
-		at, err := edit.Cue(cue)
+		at, err := edit.cue(cue)
 		if err != nil {
 			return nil, err
 		}
@@ -146,8 +146,8 @@ func (plan Plan) check() error {
 	return nil
 }
 
-// Cue maps a one-based bar.beat position onto the retained song grid.
-func (edit *Edit) Cue(written string) (float64, error) {
+// cue maps a one-based bar.beat position onto the retained song grid.
+func (edit *Edit) cue(written string) (float64, error) {
 	if written == "end" {
 		return edit.Grid.Score.Duration, nil
 	}

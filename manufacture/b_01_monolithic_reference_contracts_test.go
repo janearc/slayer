@@ -49,7 +49,8 @@ func TestAuthoredMonolithicMirrorAtEveryDetail(t *testing.T) {
 		bounds := made.Bounds()
 		referenceVector(h, bounds.Min)
 		referenceVector(h, bounds.Max)
-		referenceWrite(h, int64(len(things)))
+		thingCount := int64(len(things))
+		referenceWrite(h, thingCount)
 		shared := map[shape.Shape]int{}
 		for _, thing := range things {
 			referenceSpace(h, thing.At(0))
@@ -60,7 +61,8 @@ func TestAuthoredMonolithicMirrorAtEveryDetail(t *testing.T) {
 				continue
 			}
 			referenceWrite(h, byte(1))
-			referenceWrite(h, int64(len(material.Name)))
+			nameLength := int64(len(material.Name))
+			referenceWrite(h, nameLength)
 			if _, err := h.Write([]byte(material.Name)); err != nil {
 				t.Fatal(err)
 			}

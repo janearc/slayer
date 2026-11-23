@@ -11,15 +11,30 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-func TestSmoothFaceLimitIsTheConsecutiveFloatIndexCapacity(t *testing.T) {
-	// Find the first integer whose successor rounds back to itself.
-	// The packed bend lane must name every earlier integer without gaps.
-	firstGap := float32(1)
-	for firstGap+1 != firstGap {
-		firstGap *= 2
+// TestABendsPlaceReadsBackFromItsBits says that every place up to the
+// budget, past the old 2^24, survives the float64 the rows carry and the
+// float32 the kernel reads, as bits that are neither subnormal nor
+// negative, and that a flat face keeps -1.
+func TestABendsPlaceReadsBackFromItsBits(t *testing.T) {
+	for _, place := range []int{0, 1, 1 << 24, 1<<24 + 1, 1 << 30,
+		mostBends - 1} {
+		carried := float32(bendNumber(place))
+		bits := math.Float32bits(carried)
+		if bits < bendBias || carried < 0 || int(bits-bendBias) != place {
+			t.Errorf("place %d carried as bits %#x", place, bits)
+		}
 	}
-	if mostBends != int(firstGap) {
-		t.Fatalf("smooth-face budget %d, consecutive float indices end at %g", mostBends, firstGap)
+	if bendNumber(-1) != -1 {
+		t.Error("a flat face does not keep -1")
+	}
+}
+
+// TestTheBendBudgetStopsBeforeInfinity is the anti-test: one place past
+// the budget would carry infinity's bits.
+func TestTheBendBudgetStopsBeforeInfinity(t *testing.T) {
+	if !math.IsInf(float64(math.Float32frombits(uint32(mostBends)+bendBias)),
+		1) {
+		t.Error("the place past the budget is not infinity's bits")
 	}
 }
 

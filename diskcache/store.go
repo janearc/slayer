@@ -86,7 +86,7 @@ func (store *Store) Get(key Key) (Hit, error) {
 	if err != nil {
 		return Hit{why: "unreadable: " + err.Error()}, nil
 	}
-	read, err := decoded(raw, key.Record())
+	read, err := decoded(raw, key.record())
 	if err != nil {
 		return Hit{why: err.Error()}, nil
 	}
@@ -106,11 +106,23 @@ func (store *Store) Put(key Key, payload []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), folderMode); err != nil {
 		return fmt.Errorf("diskcache: kind %s: %w", store.kind.name, err)
 	}
-	entry := encoded(key.Record(), store.now(), payload)
+	entry := encoded(key.record(), store.now(), payload)
 	if err := written(path, entry); err != nil {
 		return fmt.Errorf("diskcache: kind %s: %w", store.kind.name, err)
 	}
 	return store.trimmed()
+}
+
+// Remove takes a key's entry out, where there is one: a key with no
+// entry is no error. A key of another kind or one with a refusal is.
+func (store *Store) Remove(key Key) error {
+	if err := store.keyed(key); err != nil {
+		return err
+	}
+	if err := os.Remove(store.path(key)); ignoreGone(err) != nil {
+		return fmt.Errorf("diskcache: kind %s: %w", store.kind.name, err)
+	}
+	return nil
 }
 
 // keyed refuses a key the store cannot take.

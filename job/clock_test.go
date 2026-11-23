@@ -90,10 +90,13 @@ func exactTime(start, span time.Duration, rate, frames,
 	offset := big.NewInt(int64(index))
 	if span == nothing {
 		offset.Mul(offset, big.NewInt(nanoseconds))
-		offset.Quo(offset, big.NewInt(int64(rate)))
+		divisor := big.NewInt(int64(rate))
+		offset.Quo(offset, divisor)
 	} else {
-		offset.Mul(offset, big.NewInt(int64(span)))
-		offset.Quo(offset, big.NewInt(int64(frames)))
+		multiplier := big.NewInt(int64(span))
+		offset.Mul(offset, multiplier)
+		divisor := big.NewInt(int64(frames))
+		offset.Quo(offset, divisor)
 	}
 	return start + time.Duration(offset.Int64())
 }

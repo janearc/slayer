@@ -32,9 +32,10 @@ func TestClearCloudPhaseChangesSourceButNotWaterOrTransmission(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	cloudAt := thing.Still(maths.Subspace{Origin: maths.V(0, -2, 0)})
 	volume := world.AddVolume(thing.Volume{Medium: legacy,
 		Material: &thing.Material{Colour: maths.Grey(1)},
-		Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, -2, 0)})})
+		Motion:   cloudAt})
 	seen.inside[0].clearMedium = water
 	seen.ray = maths.Ray{At: maths.V(0, -3, 0), Dir: maths.Up}
 	first := stage(world, 0)

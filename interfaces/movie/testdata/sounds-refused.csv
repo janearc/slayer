@@ -1,0 +1,9 @@
+case,rate,samples,says
+a rate not offered,22050,0;0,not offered
+no rate,0,0;0,not offered
+no samples,44100,,no samples
+half a pair,44100,0;0;0,pairs
+a sample past full scale,44100,0;1.5,sample 1
+a negative sample past full scale,44100,-1.01;0,sample 0
+a sample that is not a number,44100,NaN;0,outside
+an infinite sample,44100,0;Inf,sample 1

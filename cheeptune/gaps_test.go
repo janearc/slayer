@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
 )
 
@@ -14,15 +13,9 @@ import (
 // cannot be written, a file that is not there, a document that is not a
 // document. Each has the near miss beside it.
 
-// dusk is one rendered piece the tests below share, so that a render is
-// paid for once.
-var dusk = sync.OnceValues(func() (*Piece, error) {
-	return Open("@dusk", "@dmg-pad")
-})
-
 func TestAnArpIsWrittenBackAsItWasRead(t *testing.T) {
 	for _, in := range []string{`3`, `"1/8"`} {
-		var a Arp
+		var a arp
 		if err := json.Unmarshal([]byte(in), &a); err != nil {
 			t.Fatalf("%s: %v", in, err)
 		}
@@ -36,7 +29,7 @@ func TestAnArpIsWrittenBackAsItWasRead(t *testing.T) {
 	}
 	for in, want := range map[string]string{
 		`2`: "2 ticks", `"1/4"`: "1/4 beats"} {
-		var a Arp
+		var a arp
 		if err := json.Unmarshal([]byte(in), &a); err != nil {
 			t.Fatal(err)
 		}
@@ -47,7 +40,7 @@ func TestAnArpIsWrittenBackAsItWasRead(t *testing.T) {
 }
 
 func TestAnArpNotSetIsWrittenAsNullAndPrintsItsDefault(t *testing.T) {
-	var a Arp
+	var a arp
 	out, err := json.Marshal(a)
 	if err != nil || string(out) != "null" {
 		t.Errorf("an unset arp is %s, %v", out, err)
@@ -59,7 +52,7 @@ func TestAnArpNotSetIsWrittenAsNullAndPrintsItsDefault(t *testing.T) {
 
 func TestAnArpThatIsNeitherTicksNorBeatsIsRefused(t *testing.T) {
 	for _, in := range []string{`0`, `61`, `2.5`, `true`, `"x"`, `"0"`} {
-		var a Arp
+		var a arp
 		if err := json.Unmarshal([]byte(in), &a); err == nil {
 			t.Errorf("%s was accepted", in)
 		}
@@ -111,7 +104,7 @@ func TestAMissingFileIsNamedNotGuessedAt(t *testing.T) {
 func TestAnythingThatIsNotADocumentIsRefusedByName(t *testing.T) {
 	for _, in := range []string{`[]`, `nope`, `{"name":"x"}`,
 		`{"parts":[],"channels":[]}`} {
-		if k, err := Kind([]byte(in)); err == nil {
+		if k, err := kind([]byte(in)); err == nil {
 			t.Errorf("%s is %q", in, k)
 		}
 	}

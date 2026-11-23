@@ -1,0 +1,39 @@
+# a probe of the light, in air: a grey card of reflectance 0.18 lit by the
+# worked sun and sky, seen from above at the exposure the meter gave the
+# card in air. it is the reference for sets/kelp-probe-water.yaml, which is
+# the same card twelve metres down; the two pictures' linear values, card to
+# card, are the share of the surface's light that reaches that depth.
+# places are metres, x east, y north, z up.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: kelp probe in air
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 60}
+  film:
+    width: 64
+    height: 36
+    rays: 4
+    exposure: 214.7
+    wide: 20
+  world:
+    unit: 1
+    materials:
+      card:
+        colour: {srgb_linear: [0.18, 0.18, 0.18]}
+        source: eye
+    boxes:
+      floor:
+        material: card
+        middle: [0, 0, -0.05]
+        size: [400, 400, 0.1]
+        source: eye
+  cameras:
+    down:
+      title: "down at the card from five metres"
+      location: {at: [0, -1, 5]}
+      orientation: {look_at: [0, 0, 0]}

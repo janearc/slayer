@@ -1,0 +1,9 @@
+name,field,value,other_field,other_value
+zero axis,axis,0,none,0
+too long,length,501,none,0
+no pressure deficit,deficit,0,none,0
+no recovery,recovery,0,none,0
+zero rotation,rpm,0,none,0
+fragment contrast,contrast,2,none,0
+fragment scale,contrast,1,scale,0
+tiny fragment scale,contrast,1,scale,1e-300

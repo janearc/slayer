@@ -183,7 +183,8 @@ func TestABodysEdges(t *testing.T) {
 // to the last zone, and latitudes are degrees.
 func TestLatitudesFindTheirZones(t *testing.T) {
 	gas := mustGas(t, "gas", flat(0), 0.02)
-	dark := layerOf(t, gas.Absorbing(flat(1e-28)), 0, 1e4, Haze{})
+	absorber := gas.Absorbing(flat(1e-28))
+	dark := layerOf(t, absorber, 0, 1e4, Haze{})
 	south, _ := NewZone(-90, 30, nil)
 	north, _ := NewZone(30, 90, []Layer{dark})
 	body, err := NewBody(1, 1, 1, []Zone{south, north})
@@ -197,7 +198,8 @@ func TestLatitudesFindTheirZones(t *testing.T) {
 			face.zoneOf(20))
 	}
 	at := 20 * maths.Degree
-	lit := face.At(maths.V(math.Cos(at), math.Sin(at), 0))
+	point := maths.V(math.Cos(at), math.Sin(at), 0)
+	lit := face.At(point)
 	if !(lit.G > 0) {
 		t.Errorf("20 degrees north fell in the dark zone: %+v", lit)
 	}
@@ -237,9 +239,11 @@ func TestHazeIsBrightAgainstTheStar(t *testing.T) {
 	face := NewFace(body, maths.V(0, 1, 0), behind, eye, even(), 1)
 	got := face.At(up).G
 	stack := []optics{{haze: 0.05, hazeAlbedo: 1, hazeLean: 0.8}}
-	turn := -behind.Dot(eye.Sub(up).Unit())
-	want := seen(even().Scale(reflected(stack, 0, up.Dot(behind),
-		up.Dot(eye.Sub(up).Unit()), turn))).G
+	toEye := eye.Sub(up).Unit()
+	turn := -behind.Dot(toEye)
+	reflection := reflected(stack, 0, up.Dot(behind),
+		up.Dot(toEye), turn)
+	want := seen(even().Scale(reflection)).G
 	if !near(got, want, 1e-6) {
 		t.Errorf("%g, want %g", got, want)
 	}
@@ -257,7 +261,8 @@ func TestLatitudesAreHeldAtThePoles(t *testing.T) {
 		t.Errorf("past the south pole: %g", got)
 	}
 	at := 40 * maths.Degree
-	if got := latitudeOf(maths.V(math.Cos(at), math.Sin(at), 0),
+	point := maths.V(math.Cos(at), math.Sin(at), 0)
+	if got := latitudeOf(point,
 		maths.V(0, 1, 0)); !near(got, 40, 1e-12) {
 		t.Errorf("40 degrees read as %g", got)
 	}

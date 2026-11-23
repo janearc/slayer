@@ -73,7 +73,8 @@ func TestSetReadsItsGroundSkyAndFilmAsWritten(t *testing.T) {
 // TestSetWithoutGroundSkyOrFilmSaysSo checks what each accessor gives for a
 // part the set leaves out, including the white tint of an untinted sun.
 func TestSetWithoutGroundSkyOrFilmSaysSo(t *testing.T) {
-	made, err := set.Read("shoebox.yaml", []byte(shoebox(t)))
+	source := shoebox(t)
+	made, err := set.Read("shoebox.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,13 +162,16 @@ func TestVolumeLightingAndIlluminationAreRead(t *testing.T) {
 // first.
 func TestFlagsAndFuelAndLaserRefusalsNameTheFault(t *testing.T) {
 	plain := withoutSchema(t, fireRecipeFixture(t))
-	_, err := set.Read("flag.yaml", []byte(strings.Replace(plain, "  light: none\n", "  vibes: maybe\n  light: none\n", 1)))
+	flagged := strings.Replace(plain, "  light: none\n", "  vibes: maybe\n  light: none\n", 1)
+	_, err := set.Read("flag.yaml", []byte(flagged))
 	mustHold(t, "flag", err, "vibes takes")
 	bed := withoutSchema(t, bedFixture(t))
 	raw := strings.Replace(bed, "      fuel: 1", heatVelocity+"      fuel: 1", 1)
-	_, err = set.Read("bed.yaml", []byte(strings.Replace(raw, "        south: {value: -0.25, unit: m/s}\n", "", 1)))
+	southless := strings.Replace(raw, "        south: {value: -0.25, unit: m/s}\n", "", 1)
+	_, err = set.Read("bed.yaml", []byte(southless))
 	mustHold(t, "heat transport", err, "south")
-	_, err = set.Read("bed.yaml", []byte(strings.Replace(raw, "value: 0.5, unit: m/s", "value: 0.5, unit: km/s", 1)))
+	kilometres := strings.Replace(raw, "value: 0.5, unit: m/s", "value: 0.5, unit: km/s", 1)
+	_, err = set.Read("bed.yaml", []byte(kilometres))
 	mustHold(t, "heat transport unit", err, "unit")
 	_, err = legacyLaser(t, "      display-strength: 8\n", "")
 	mustHold(t, "laser without strength", err, "display-strength")
@@ -211,7 +215,8 @@ func TestPlanetBlueTintsAreOptionalAndRead(t *testing.T) {
 // gives the planet's weather.
 func TestPlanetWeatherKeepsItsFilmPace(t *testing.T) {
 	extra := "    weather: {cells: 32, day: 1000, drag: 100, relax: 200, storms: {rate: .001, wide: 2, strength: .1}, seed: 7, moment: 300, every: 60, pace: 5, turning: -15}\n"
-	made, err := set.Read("pace.yaml", []byte(strings.Replace(giant, "    from_star:", extra+"    from_star:", 1)))
+	extended := strings.Replace(giant, "    from_star:", extra+"    from_star:", 1)
+	made, err := set.Read("pace.yaml", []byte(extended))
 	if err != nil {
 		t.Fatal(err)
 	}

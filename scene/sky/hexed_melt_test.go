@@ -46,7 +46,8 @@ func TestHexedMeltsByTheSmoothStepOfTheSeam(t *testing.T) {
 			for _, nb := range tl.Neighbours(tile) {
 				seam := middle.Add(tl.Centre(nb)).Unit()
 				for k := 0; k <= 40; k++ {
-					d := middle.Add(seam.Sub(middle).Scale(float64(k) / 40)).Unit()
+					fraction := float64(k) / 40
+					d := middle.Add(seam.Sub(middle).Scale(fraction)).Unit()
 					if tl.Nearest(d) != tile {
 						continue
 					}

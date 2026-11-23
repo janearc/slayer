@@ -43,14 +43,14 @@ func TestThePlateHasTheSizeAndShowsTheParts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if img.Bounds().Dx() != Wide || img.Bounds().Dy() != Tall {
+	if img.Bounds().Dx() != wide || img.Bounds().Dy() != tall {
 		t.Errorf("plate is %v", img.Bounds())
 	}
 	x := tune.xAt(1)
 	if got := img.RGBAAt(x, stripTop+5); got != marker {
 		t.Errorf("no marker where part two starts: %v", got)
 	}
-	if got := img.RGBAAt(Wide-1, Tall-1); got != ground {
+	if got := img.RGBAAt(wide-1, tall-1); got != ground {
 		t.Errorf("the corner is %v, not the ground", got)
 	}
 	frame := tune.frame(img, mustWriter(t), 1.5)
@@ -81,8 +81,8 @@ func TestTheFilmIsAMovieOfTheRightSizeWithSound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if facts.Width() != Wide || facts.Height() != Tall ||
-		facts.Rate() != Rate || facts.AudioChannels() != 2 {
+	if facts.Width() != wide || facts.Height() != tall ||
+		facts.Rate() != rate || facts.AudioChannels() != 2 {
 		t.Errorf("the film is %dx%d at %v with %d channels", facts.Width(),
 			facts.Height(), facts.Rate(), facts.AudioChannels())
 	}
@@ -195,11 +195,11 @@ func TestAPageServedOverRealHTTPTakesAVoiceAndGivesItBack(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer read.Body.Close()
-	var rec Record
+	var rec voteRecord
 	if err := json.NewDecoder(read.Body).Decode(&rec); err != nil {
 		t.Fatal(err)
 	}
-	if rec.Votes["alpha"].Vote != Keep || len(rec.Queue) != 1 {
+	if rec.Votes["alpha"].Vote != keep || len(rec.Queue) != 1 {
 		t.Errorf("the record read back is %+v", rec)
 	}
 }

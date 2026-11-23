@@ -4,6 +4,8 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -35,7 +37,11 @@ chant:
 // gridScore is grid, read.
 func gridScore(t *testing.T) *show.Score {
 	t.Helper()
-	score, err := show.ParseScore([]byte(grid))
+	path := filepath.Join(t.TempDir(), "score.yaml")
+	if err := os.WriteFile(path, []byte(grid), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	score, err := show.ReadScore(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +51,7 @@ func gridScore(t *testing.T) *show.Score {
 // gridScript is script, read against grid.
 func gridScript(t *testing.T) *Script {
 	t.Helper()
-	read, err := ParseScript([]byte(script), gridScore(t))
+	read, err := parseScript([]byte(script), gridScore(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,8 +75,8 @@ func TestTheSentenceStandingIsTheLatest(t *testing.T) {
 	if said, ok := read.Says(1.99); ok {
 		t.Errorf("before the first sentence it says %q", said.Words())
 	}
-	if first, _ := read.Says(2); first.From() != 2.0 {
-		t.Errorf("the first sentence is from %v", first.From())
+	if first, _ := read.Says(2); first.from != 2.0 {
+		t.Errorf("the first sentence is from %v", first.from)
 	}
 	if from, until, ok := read.Short("all"); !ok || from != 2.0 ||
 		until != 9.5 {
@@ -95,13 +101,13 @@ func TestABadScriptIsRefusedByName(t *testing.T) {
 		`chant: [{from_sec: 3, until_sec: 2, words: "no"}]`:        "empty",
 		`says: [`: "the script",
 	} {
-		_, err := ParseScript([]byte(raw), score)
-		if err == nil || !errors.Is(err, ErrExplain) ||
+		_, err := parseScript([]byte(raw), score)
+		if err == nil || !errors.Is(err, errExplain) ||
 			!strings.Contains(err.Error(), says) {
 			t.Errorf("%s\ngave %v, not a refusal naming %s", raw, err, says)
 		}
 	}
-	if _, err := ParseScript([]byte(script), nil); err == nil {
+	if _, err := parseScript([]byte(script), nil); err == nil {
 		t.Error("a script with no placer was read")
 	}
 	if _, err := ReadScript("testdata/none.yaml", score); err == nil {
@@ -132,7 +138,7 @@ func TestTheChantIsDownOutsideItsLine(t *testing.T) {
 // a sentence too long for the time it stands inside a short is named,
 // with what it needs and what it has; one that fits is not.
 func TestASentenceTooLongIsNamed(t *testing.T) {
-	read, err := ParseScript([]byte(`shorts:
+	read, err := parseScript([]byte(`shorts:
   quick: {from: {at: "1.1"}, until: {at: "1.3"}}
   slow: {from: {at: "1.1"}, until: {at: "4.4"}}
 says:
@@ -235,8 +241,8 @@ func TestThePanelHoldsWhatTheShowSays(t *testing.T) {
 		lamps[1].Level() != 0.5 || lamps[1].Ring() != 1 {
 		t.Errorf("lamps: %+v", lamps)
 	}
-	if words, singing := panel.Chant(); !singing || words != "one two three" {
-		t.Errorf("at 3.3 s the chant is %q", words)
+	if !panel.singing || panel.chant != "one two three" {
+		t.Errorf("at 3.3 s the chant is %q", panel.chant)
 	}
 	if said, saying := panel.Says(); !saying || said.Words() != "First." {
 		t.Errorf("the sentence is %q", said.Words())
@@ -244,8 +250,8 @@ func TestThePanelHoldsWhatTheShowSays(t *testing.T) {
 	if beat := panel.Beat(); beat.InBar() != 3 {
 		t.Errorf("at 3.3 s the beat is %d", beat.InBar())
 	}
-	if Legible(panel.Ground()) != nil {
-		t.Errorf("the ground %v is not legible", panel.Ground())
+	if Legible(panel.ground) != nil {
+		t.Errorf("the ground %v is not legible", panel.ground)
 	}
 	if made.Script() == nil {
 		t.Error("the explainer lost its script")
@@ -285,8 +291,8 @@ func TestAnExplainerNeedsItsParts(t *testing.T) {
 		t.Fatal(err)
 	}
 	panel, _ := plain.PanelAt(3)
-	if theme, _ := ThemeColour("ground"); panel.Ground() != theme {
-		t.Errorf("with no ground given the panel's is %v", panel.Ground())
+	if theme, _ := ThemeColour("ground"); panel.ground != theme {
+		t.Errorf("with no ground given the panel's is %v", panel.ground)
 	}
 }
 
@@ -351,7 +357,7 @@ func TestAComposedFrameHoldsTheFilmWhole(t *testing.T) {
 				frame.RGBAAt(1079, 792))
 		}
 		panel, _ := made.PanelAt(seconds)
-		if frame.RGBAAt(5, 800) != panel.Ground() {
+		if frame.RGBAAt(5, 800) != panel.ground {
 			t.Errorf("under the film is %v", frame.RGBAAt(5, 800))
 		}
 	}

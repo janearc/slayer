@@ -16,8 +16,8 @@ import (
 // how far out it crosses the equator; it leaves the star where that
 // distance is the star's radius.
 
-// ErrLines is a field line or hoop that cannot be drawn.
-var ErrLines = errors.New("named: the magnetar's lines")
+// errLines is a field line or hoop that cannot be drawn.
+var errLines = errors.New("named: the magnetar's lines")
 
 // the tubes' make: the sides round a tube and the steps along a line or
 // round a hoop, picked by the author of this scene, 2026-11-12, as the
@@ -48,7 +48,7 @@ type tube struct {
 func (made *tube) add(points []maths.Vec, thick float64, closed bool) error {
 	if len(points) < fewestPoints || !(thick > 0) {
 		return fmt.Errorf("%w: %d points %g thick; a line needs two "+
-			"points and some thickness", ErrLines, len(points), thick)
+			"points and some thickness", errLines, len(points), thick)
 	}
 	first := len(made.vertices)
 	for i, at := range points {
@@ -104,7 +104,7 @@ func fieldLine(radius, apex, azimuth float64) ([]maths.Vec, error) {
 	if !(apex > radius) || !(radius > 0) {
 		return nil, fmt.Errorf("%w: a line crossing the equator %g out "+
 			"from a star of %g never leaves it; ask for one further out",
-			ErrLines, apex, radius)
+			errLines, apex, radius)
 	}
 	leaves := math.Asin(math.Sqrt(radius / apex))
 	span := math.Pi - 2*leaves

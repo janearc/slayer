@@ -1,0 +1,81 @@
+# tower petronas: two eight-pointed star shafts with stepped setbacks,
+# joined by a skybridge, as the Petronas Towers in Kuala Lumpur are. it is
+# not data: it is the tower generator at an irregularity of 0.5 with a star
+# plan, two shafts, setbacks and a skybridge pinned, and no taper or turn.
+# at dusk into night. made by the cities package (manufacture/cities),
+# through the manufactory's kind tower, from
+# manufacture/cities/cultures/tower.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the shafts
+# stand side by side along x. the ground, the sun and the cameras are
+# choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower petronas
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 40
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    far:
+      title: "both towers, from a distance"
+      location:
+        at: [0, -800, 2]
+      orientation:
+        look_at: [0, 0, 150]
+    base:
+      title: "from the foot, looking up between them"
+      location:
+        at: [0, -150, 1.7]
+      orientation:
+        look_at: [0, 0, 160]
+  recipes:
+    twins:
+      kind: tower
+      irregularity: 0.5
+      pins:
+        plan: star
+        shafts: 2
+        span: skybridge
+        setbacks: true
+        taper: false
+        twist: false
+  set:
+    things:
+      towers:
+        recipe: twins
+        seed: 1
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [0.9, 0.4, 0.22]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.08, 0.05, 0.06]}
+      zenith: {srgb_linear: [0.004, 0.008, 0.025]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

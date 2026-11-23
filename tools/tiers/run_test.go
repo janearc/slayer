@@ -60,7 +60,8 @@ func calls(t *testing.T, dir string) []string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return strings.Split(strings.TrimSpace(string(raw)), "\n")
+	trimmed := strings.TrimSpace(string(raw))
+	return strings.Split(trimmed, "\n")
 }
 
 // drawListing is a go test -list answer for two packages, p/one with TestA and
@@ -123,7 +124,8 @@ func TestSnapshotReportsItsFailures(t *testing.T) {
 	}
 	answer(t, dir, "list-draw.code", "1")
 	answer(t, dir, "list-draw.err", "boom\n")
-	if code, _, errOut := execute("snapshot", "-o", filepath.Join(t.TempDir(), "x")); code != exitUsage || !strings.Contains(errOut, "boom") {
+	target := filepath.Join(t.TempDir(), "x")
+	if code, _, errOut := execute("snapshot", "-o", target); code != exitUsage || !strings.Contains(errOut, "boom") {
 		t.Errorf("unlistable tree: %d %q", code, errOut)
 	}
 }
@@ -255,7 +257,8 @@ func TestHotRunsThePackagesOfTheList(t *testing.T) {
 // TestHotReportsItsFailures checks a missing list and a go that cannot run.
 func TestHotReportsItsFailures(t *testing.T) {
 	fakeGo(t)
-	if code, _, errOut := execute("hot", "-list", filepath.Join(t.TempDir(), "none")); code != exitUsage || !strings.Contains(errOut, "tiers:") {
+	absent := filepath.Join(t.TempDir(), "none")
+	if code, _, errOut := execute("hot", "-list", absent); code != exitUsage || !strings.Contains(errOut, "tiers:") {
 		t.Errorf("missing list: %d %q", code, errOut)
 	}
 	list := filepath.Join(t.TempDir(), "hot.txt")

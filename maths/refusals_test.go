@@ -159,8 +159,8 @@ func TestPastAFloatALengthIsEndlessAndADirectionIsNought(test *testing.T) {
 }
 
 // Len at the small end gives the bits recorded in shorts.csv.
-// The wants were measured with Len itself, then checked against the
-// figures in Len's doc. The test holds the code to those bits.
+// The wants are Len's own bits at each size, and agree with the figures in
+// Len's doc. The test holds the code to those bits.
 func TestLenAtTheSmallEndIsAsMeasured(test *testing.T) {
 	for _, row := range read(test, shortsFile) {
 		x, want := float(test, row, "x"), float(test, row, "want")

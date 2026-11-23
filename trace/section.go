@@ -56,11 +56,11 @@ func SampledEach(world *thing.World, eye maths.Subspace, lens film.Sensor,
 				"frame, and %v is not within %d by %d", box, width, height)
 		}
 	}
-	scene := stage(seen.world, seen.at)
-	if err := scene.refusal(); err != nil {
+	fine := seen.fine()
+	scene, err := fine.staging()
+	if err != nil {
 		return nil, err
 	}
-	fine := seen.fine()
 	wide := fine.wide()
 	drawn := make([]*frame.Frame, len(boxes))
 	for at, box := range boxes {

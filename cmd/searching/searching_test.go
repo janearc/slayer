@@ -54,11 +54,13 @@ func (h *harness) run(name string, args []string, fn func(pzm.Call) error) {
 func wavBytes(rate int, seconds int) []byte {
 	data := make([]byte, 0, rate*seconds*2)
 	for i := 0; i < rate*seconds; i++ {
-		data = binary.LittleEndian.AppendUint16(data, uint16(int16((i%100)*100)))
+		sample := int16((i % 100) * 100)
+		data = binary.LittleEndian.AppendUint16(data, uint16(sample))
 	}
 	var out []byte
 	out = append(out, "RIFF"...)
-	out = binary.LittleEndian.AppendUint32(out, uint32(36+len(data)))
+	chunkSize := uint32(36 + len(data))
+	out = binary.LittleEndian.AppendUint32(out, chunkSize)
 	out = append(out, "WAVEfmt "...)
 	out = binary.LittleEndian.AppendUint32(out, 16)
 	out = binary.LittleEndian.AppendUint16(out, 1)
@@ -68,7 +70,8 @@ func wavBytes(rate int, seconds int) []byte {
 	out = binary.LittleEndian.AppendUint16(out, 2)
 	out = binary.LittleEndian.AppendUint16(out, 16)
 	out = append(out, "data"...)
-	out = binary.LittleEndian.AppendUint32(out, uint32(len(data)))
+	dataSize := uint32(len(data))
+	out = binary.LittleEndian.AppendUint32(out, dataSize)
 	return append(out, data...)
 }
 
@@ -82,7 +85,8 @@ func shoot(t *testing.T, song []byte) string {
 	}
 	var times, marks []string
 	for i := 0; i < 40; i++ {
-		times = append(times, fmt.Sprintf("%g", float64(i)*0.5))
+		beat := float64(i) * 0.5
+		times = append(times, fmt.Sprintf("%g", beat))
 		marks = append(marks, "1")
 	}
 	score := fmt.Sprintf("score:\n  audio: song.wav\n  sha256: %x\n  duration: 20\n  meter: 4\n  status: estimated\n  method: test\n  beats:\n    times: [%s]\n    measured: [%s]\n",
@@ -498,7 +502,8 @@ func TestWritePNGRemovesAFailedFile(t *testing.T) {
 // TestResourcesRefusesMissingDisk checks that a path that does not exist
 // is an error from the disk check.
 func TestResourcesRefusesMissingDisk(t *testing.T) {
-	if err := resources(filepath.Join(t.TempDir(), "gone")); err == nil {
+	gone := filepath.Join(t.TempDir(), "gone")
+	if err := resources(gone); err == nil {
 		t.Fatal("missing path was accepted")
 	}
 }

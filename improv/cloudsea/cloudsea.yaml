@@ -43,7 +43,7 @@ scene:
     sequoias:
       kind: giant-sequoia
   # the guide stars, fable-team 2026-11-12, replacing the study's four splayed
-  # beams in this copy only. The exits are doc/golden-hour-site.yaml's
+  # beams in this copy only. The exits are sets/golden-hour-summit.yaml's
   # front-rim pose for the elt at heading 0 (picked there, not an ESO
   # layout), turned with the enclosure to heading 145 so they sit at its
   # open slit. One boresight at the slit's authored 55 degrees, with

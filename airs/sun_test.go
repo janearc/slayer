@@ -22,8 +22,8 @@ const sunShelfFile = SunSource + ".csv" // defined: see above
 // sharedSun reads the spectrum from the shelf once, for the tests that
 // want the real one.
 var sharedSun = sync.OnceValues(func() (Sun, error) {
-	file, err := os.Open(filepath.Join(os.Getenv(sources.Placed),
-		sunShelfFile))
+	shelf := os.Getenv(sources.Placed)
+	file, err := os.Open(filepath.Join(shelf, sunShelfFile))
 	if err != nil {
 		return Sun{}, err
 	}
@@ -162,7 +162,7 @@ func TestAReaderThatFailsStopsTheReading(t *testing.T) {
 
 // Over the whole file, 202 to 2730 nm at one astronomical unit, the sun
 // is within 5 percent of the total solar irradiance, 1361 W/m^2 (Kopp
-// and Lean 2011, as hillside/afloat.go has it). The file stops short of
+// and Lean 2011, as session/afloat.go has it). The file stops short of
 // the far infrared, so it is a little under.
 func TestSpectrumTotalsTheSolarIrradiance(t *testing.T) {
 	const total = 1361.0 // measured: the total solar irradiance, Kopp and Lean 2011, W/m^2

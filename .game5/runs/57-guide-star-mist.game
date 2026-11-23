@@ -1,1 +1,1 @@
-guide-star-mist . :: ./bin/hillside -set doc/guide-star-mist.yaml -out out/guide-star-mist.png
+guide-star-mist . :: ./bin/slayer draw doc/guide-star-mist.yaml --out out/guide-star-mist.png

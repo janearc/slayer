@@ -1,0 +1,218 @@
+# every number the maths/noise tests choose, with what it is and who chose
+# it. the recorded numbers the package is held to are in recorded.csv.
+numbers:
+  - name: noise-bound
+    value: 1.05
+    says: how far past one, either way, the noise may be at any point tried; Gradient is seldom past one and was found at 1.033, and Fractal of several octaves has a tighter bound of its own, fractal-bound
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: coordinate-seed-x
+    value: 1
+    says: the seed the tests draw a point's x from, by Hash of the point's number
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: coordinate-seed-y
+    value: 2
+    says: the seed the tests draw a point's y from
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: coordinate-seed-z
+    value: 3
+    says: the seed the tests draw a point's z from
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: field-seed
+    value: 5
+    says: the seed of the gradient field the smoothness, bound and lattice tests read
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: fractal-seed
+    value: 7
+    says: the seed of the fractal the bound and octave tests read, and the first of the three seeds Fractals is asked
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: rise-error
+    value: 0.001
+    says: how far past the octave rise a deliberately wrong rise is, for the anti-test that shows the recorded Fractal rows are moved by a wrong constant
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: hash-index
+    value: 42
+    says: the index the repeatable-hash test asks
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: spread-seed
+    value: 3
+    says: the seed the spread test hashes neighbouring pairs under
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: spread-points
+    value: 100000
+    says: how many neighbouring pairs the spread test hashes
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: spread-bins
+    value: 10
+    says: how many bins the unit interval is cut into for the spread test
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: spread-slack
+    value: 0.04
+    says: how far a bin's count may be from its even share, as a share of that share
+    kind: picked
+    by: a hundred thousand draws land within a few percent
+  - name: stuck-value
+    value: 0.5
+    says: the one number a stuck hash gives, for the spread anti-test
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: smooth-points
+    value: 2000
+    says: how many points the smoothness test tries
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: span
+    value: 40
+    says: how wide the box the tests throw points in is, along each axis
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: reach
+    value: 20
+    says: how far the box reaches from the middle either way, half the span
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: smooth-step
+    value: 0.001
+    says: how far along x the smoothness test steps
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: smooth-move
+    value: 0.01
+    says: the most the noise may move over one smooth step
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: jump
+    value: 1
+    says: the size of the step a jumpy field makes, for the smoothness anti-test; well past smooth-move
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: fractal-points
+    value: 500
+    says: how many points the fractal bound test tries
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: fractal-reach
+    value: 9
+    says: how far from the origin the fractal bound test's points go
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: fractal-octaves
+    value: 5
+    says: how many octaves the fractal bound test asks
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: fractal-bound
+    value: 0.7
+    says: how far from nought, either way, Fractal of the bound test's octaves may be at any point tried; its octaves seldom line up, so it stays well inside one octave's range
+    kind: picked
+    by: over two million points at five octaves the most was 0.664, and over the test's 500 points it is 0.430
+  - name: doubled
+    value: 2
+    says: what a fractal is scaled by to put it past the bound, for the bound anti-test
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: plane-points
+    value: 500
+    says: how many lattice planes the continuity test crosses
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: plane-step
+    value: 1e-9
+    says: how far either side of a lattice plane the continuity test asks
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: plane-jump
+    value: 1e-8
+    says: the most the noise may differ across a lattice plane, a plane-step either side
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: past-one-seed
+    value: 41885775
+    says: the seed of the one point Gradient was found past one at
+    kind: picked
+    by: a search
+  - name: past-one-x
+    value: 0.35
+    says: the x of the point Gradient was found past one at
+    kind: picked
+    by: a search
+  - name: past-one-y
+    value: 0.5
+    says: the y of the point Gradient was found past one at
+    kind: picked
+    by: a search
+  - name: past-one-z
+    value: 0.475
+    says: the z of the point Gradient was found past one at
+    kind: picked
+    by: a search
+  - name: quarter
+    value: 0.25
+    says: how far off the lattice a point is moved to be sure it is off it
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: lattice-reach
+    value: 1000000
+    says: how far from the origin, in lattice spacings, the property tests draw whole-numbered points
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: point-kinds
+    value: 7
+    says: a sweep makes a point of every seventh kind in turn; the kinds are rounded, halved, a signed zero, and four plain
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: most-octaves
+    value: 8
+    says: the most octaves the fractal sweep asks, cycling from one
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: fractal-seeds
+    value: 3
+    says: how many seeds the shared sweeps ask at once, as a smoke column's eddies ask them
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: past-a-float
+    value: 1100
+    says: octaves enough that every point's octaves overflow a float, so the octaves past that are left out
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: kept
+    value: 42
+    says: a number put in a place of into past the seeds, to see it left alone
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: climb-starts
+    value: 64
+    says: how many random points the search for Gradient's most starts a climb from, beside the found point
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: climb-steps
+    value: 200
+    says: how many steps each climb takes
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: climb-step
+    value: 0.05
+    says: how far a climb's first step is, in lattice spacings
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: climb-shrink
+    value: 0.9
+    says: what a climb's step is scaled by when no step uphill is found
+    kind: picked
+    by: the test author, 2026-11-19
+  - name: bench-octaves
+    value: 4
+    says: the octaves the fractal benchmarks ask, what most callers ask
+    kind: picked
+    by: 4 is the commonest octave count at the call sites

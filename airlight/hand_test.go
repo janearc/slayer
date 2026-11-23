@@ -7,6 +7,7 @@ import (
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/moonlight"
+	"github.com/janearc/slayer/skylight"
 )
 
 // The hand-made fields the reading is checked on.
@@ -32,7 +33,8 @@ func handFields(zeniths, views, azimuths int,
 	light func(zenith, view, round int) float64) *Fields {
 	fields := &Fields{wavelengths: []int{handNanometres}, band: one,
 		sun: []float64{one}, absorbed: []float64{none}, zeniths: zeniths,
-		views: views, azimuths: azimuths}
+		views: views, azimuths: azimuths,
+		suns: skylight.Suns{From: none, To: math.Pi}}
 	radiance := make([]float64, zeniths*views*azimuths)
 	for zenith := range zeniths {
 		for view := range views {
@@ -123,13 +125,15 @@ func TestTheMeterOfAHandMadeField(t *testing.T) {
 // sky brightens by the worked share, and refuses ground nothing lights.
 func TestTheMeterSeesTheSky(t *testing.T) {
 	way := wayAt(sixty*degree, none)
-	dim, err := Meter(handFields(handZeniths, handViews, handAzimuths,
-		even(handSky)), way)
+	dimFields := handFields(handZeniths, handViews, handAzimuths,
+		even(handSky))
+	dim, err := Meter(dimFields, way)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bright, err := Meter(handFields(handZeniths, handViews, handAzimuths,
-		even(two*handSky)), way)
+	brightFields := handFields(handZeniths, handViews, handAzimuths,
+		even(two*handSky))
+	bright, err := Meter(brightFields, way)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +144,7 @@ func TestTheMeterSeesTheSky(t *testing.T) {
 	}
 	dark := handFields(handZeniths, handViews, handAzimuths, even(none))
 	_, err = Meter(dark, wayAt(math.Pi-thirty*degree, none))
-	if !errors.Is(err, ErrUnlit) {
+	if !errors.Is(err, errUnlit) {
 		t.Errorf("unlit ground meters: %v", err)
 	}
 }

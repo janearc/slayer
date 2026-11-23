@@ -32,7 +32,10 @@ func (profile plantProfile) valid() error {
 		profile.Stems < spaceOne || profile.Stems > int(plantValue("maximum-stems")) {
 		return fmt.Errorf("manufacture: excessive plant recursion for %s", profile.Kind)
 	}
-	return profile.validLeaves()
+	if err := profile.validLeaves(); err != nil {
+		return err
+	}
+	return profile.validRoots()
 }
 
 // finite checks every scalar, including optional controls on other forms.

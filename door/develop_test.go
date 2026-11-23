@@ -213,8 +213,8 @@ func TestDevelopNumbersAFrameByItsName(t *testing.T) {
 	}
 	whole := pictureOf(t, filepath.Join(directory, "all",
 		"frame-000042.png"))
-	if !slices.Equal(pictureOf(t, filepath.Join(directory,
-		"alone.png")).Pix, whole.Pix) {
+	picturePath := filepath.Join(directory, "alone.png")
+	if !slices.Equal(pictureOf(t, picturePath).Pix, whole.Pix) {
 		t.Error("frame 42 alone is not frame 42 of the run")
 	}
 	// anti-test of TestDevelopNumbersAFrameByItsName
@@ -223,9 +223,9 @@ func TestDevelopNumbersAFrameByItsName(t *testing.T) {
 	other := rawFile(t, directory, "take.pfm", grainWide)
 	given := developed(t, directory, job, other, "--frame", "42", "--out",
 		"take.png")
+	taken := pictureOf(t, filepath.Join(directory, "take.png"))
 	if !strings.Contains(given.said, "as frame 42\n") ||
-		!slices.Equal(pictureOf(t, filepath.Join(directory,
-			"take.png")).Pix, whole.Pix) {
+		!slices.Equal(taken.Pix, whole.Pix) {
 		t.Errorf("--frame 42 said %q %q", given.said, given.wrongSaid)
 	}
 }
@@ -240,8 +240,8 @@ func numberedAs(t *testing.T, directory, job, raw string) {
 	shop.EXPECT().Developer(gomock.Any(), gomock.Any()).Return(develops,
 		nil)
 	shop.EXPECT().Titler(gomock.Any()).Return(nil, false, nil)
-	develops.EXPECT().Develop(42, gomock.Any()).Return(image.NewRGBA(
-		image.Rect(nothing, nothing, one, one)), nil)
+	blank := image.NewRGBA(image.Rect(nothing, nothing, one, one))
+	develops.EXPECT().Develop(42, gomock.Any()).Return(blank, nil)
 	env := envIn(t, context.Background(), directory)
 	got := running(tool(env, shop, machine{}), "develop", job, raw, "--out",
 		"mocked.png")
@@ -341,8 +341,8 @@ func TestDevelopTitlesEachFrameAtItsTime(t *testing.T) {
 	shop.EXPECT().Titler(gomock.Any()).Return(titles, true, nil)
 	rate := time.Duration(number(t, "fps"))
 	for index := range pair {
-		develops.EXPECT().Develop(index, gomock.Any()).Return(
-			image.NewRGBA(image.Rect(nothing, nothing, one, one)), nil)
+		blank := image.NewRGBA(image.Rect(nothing, nothing, one, one))
+		develops.EXPECT().Develop(index, gomock.Any()).Return(blank, nil)
 		titles.EXPECT().Draw(gomock.Any(),
 			time.Duration(index)*time.Second/rate).Return(nil)
 	}
@@ -374,8 +374,8 @@ func TestDevelopTitlesEachFrameAtItsTime(t *testing.T) {
 			shop.EXPECT().Developer(gomock.Any(), gomock.Any()).Return(
 				develops, nil)
 			shop.EXPECT().Titler(gomock.Any()).Return(titles, true, nil)
-			develops.EXPECT().Develop(nothing, gomock.Any()).Return(
-				image.NewRGBA(image.Rect(nothing, nothing, one, one)), nil)
+			blank := image.NewRGBA(image.Rect(nothing, nothing, one, one))
+			develops.EXPECT().Develop(nothing, gomock.Any()).Return(blank, nil)
 			titles.EXPECT().Draw(gomock.Any(), time.Duration(nothing)).
 				Return(broken)
 		},
@@ -393,8 +393,8 @@ func TestDevelopTitlesEachFrameAtItsTime(t *testing.T) {
 func TestDevelopTitlesAStillAtNought(t *testing.T) {
 	// anti-test of TestDevelopTitlesAStillAtNought
 	room := darkroom{titles: nil}
-	if err := room.title(image.NewRGBA(image.Rect(nothing, nothing, one,
-		one)), one); err != nil {
+	blank := image.NewRGBA(image.Rect(nothing, nothing, one, one))
+	if err := room.title(blank, one); err != nil {
 		t.Error(err)
 	}
 	control := gomock.NewController(t)
@@ -415,6 +415,7 @@ func Example_develop() {
 	var said strings.Builder
 	Tool(env).Run([]string{"develop", "../sets/widow.yaml",
 		"testdata/frame-000042.pfm", "--dry-run"}, &said, &said)
-	fmt.Print(strings.ReplaceAll(said.String(), here, "."))
+	shown := strings.ReplaceAll(said.String(), here, ".")
+	fmt.Print(shown)
 	// Output: would write ./out/frame-000042.png from frame-000042.pfm as frame 42
 }

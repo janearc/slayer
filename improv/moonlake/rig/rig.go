@@ -24,16 +24,16 @@ func (at Point) Scale(times float64) Point {
 	return Point{at[0] * times, at[1] * times, at[2] * times}
 }
 
-// Dot is the dot product of two points.
-func (at Point) Dot(other Point) float64 {
+// dot is the dot product of two points.
+func (at Point) dot(other Point) float64 {
 	return at[0]*other[0] + at[1]*other[1] + at[2]*other[2]
 }
 
-// Unit is the point's way, a metre long.
-func (at Point) Unit() Point { return at.Scale(1 / math.Sqrt(at.Dot(at))) }
+// unit is the point's way, a metre long.
+func (at Point) unit() Point { return at.Scale(1 / math.Sqrt(at.dot(at))) }
 
-// Cross is the cross product of two points.
-func (at Point) Cross(other Point) Point {
+// cross is the cross product of two points.
+func (at Point) cross(other Point) Point {
 	return Point{at[1]*other[2] - at[2]*other[1],
 		at[2]*other[0] - at[0]*other[2], at[0]*other[1] - at[1]*other[0]}
 }
@@ -45,8 +45,8 @@ func Toward(azimuth, altitude float64) Point {
 		math.Cos(round) * math.Cos(up), math.Sin(up)}
 }
 
-// Bearing is the compass azimuth from one point to another, in degrees.
-func Bearing(from, to Point) float64 {
+// bearing is the compass azimuth from one point to another, in degrees.
+func bearing(from, to Point) float64 {
 	return math.Atan2(to[0]-from[0], to[1]-from[1]) * halfTurn / math.Pi
 }
 
@@ -66,9 +66,9 @@ func NewLayout(eyeOverLake, deck float64) Layout {
 // Water is the lake's height from the eye: below it.
 func (show Layout) Water() float64 { return 0 - show.eyeOverLake }
 
-// FarTree is the far tree from the eye: 1727.5 m east, 617.5 m south,
+// farTree is the far tree from the eye: 1727.5 m east, 617.5 m south,
 // and as far up as its ground at 1195.5 m stands over the eye.
-func (show Layout) FarTree() Point {
+func (show Layout) farTree() Point {
 	return Point{farTreeEast, farTreeNorth,
 		farTreeGround - (lakeHeight + show.eyeOverLake)}
 }
@@ -86,18 +86,18 @@ type Head struct {
 // of the far tree, aimed back at the eye; two on the shores, aimed
 // across the lake at each other and lifted 7 degrees.
 func (show Layout) Heads() []Head {
-	far := show.FarTree()
+	far := show.farTree()
 	// the differences from the eye are taken as constants, exactly, as
 	// lightshow always had them, so its picture is unchanged to the bit
 	left := show.shore(shoreLeftEast-eyeEast, shoreLeftNorth-eyeNorth)
 	right := show.shore(shoreRightEast-eyeEast, shoreRightNorth-eyeNorth)
 	return []Head{
-		{show.onDeck(far.Add(Toward(Azimuth-quarter, 0).Scale(rimApart)).
-			Add(Point{0, 0, rimHeadUp}), 0), Azimuth + halfTurn, 0, 1, 0, 0},
-		{show.onDeck(far.Add(Toward(Azimuth+quarter, 0).Scale(rimApart)).
-			Add(Point{0, 0, rimHeadUp}), 1), Azimuth + halfTurn, 0, -1, 1, 1},
-		{show.onDeck(left, 2), Bearing(left, right), shoreLift, 1, 1, 0},
-		{show.onDeck(right, 3), Bearing(right, left), shoreLift, -1, 0, 1},
+		{show.onDeck(far.Add(Toward(azimuth-quarter, 0).Scale(rimApart)).
+			Add(Point{0, 0, rimHeadUp}), 0), azimuth + halfTurn, 0, 1, 0, 0},
+		{show.onDeck(far.Add(Toward(azimuth+quarter, 0).Scale(rimApart)).
+			Add(Point{0, 0, rimHeadUp}), 1), azimuth + halfTurn, 0, -1, 1, 1},
+		{show.onDeck(left, 2), bearing(left, right), shoreLift, 1, 1, 0},
+		{show.onDeck(right, 3), bearing(right, left), shoreLift, -1, 0, 1},
 	}
 }
 
@@ -120,12 +120,12 @@ func (show Layout) onDeck(head Point, tower int) Point {
 // Strobes is the two strobes: 160 m behind the far tree, 20 m up,
 // white; and 220 m behind and 260 m to the left, 30 m up, a magenta gel.
 func (show Layout) Strobes() [2]Point {
-	far := show.FarTree()
+	far := show.farTree()
 	return [2]Point{
-		far.Add(Toward(Azimuth, 0).Scale(whiteBehind)).Add(
+		far.Add(Toward(azimuth, 0).Scale(whiteBehind)).Add(
 			Point{0, 0, whiteUp}),
-		far.Add(Toward(Azimuth, 0).Scale(magentaBehind)).Add(
-			Toward(Azimuth-quarter, 0).Scale(magentaLeft)).Add(
+		far.Add(Toward(azimuth, 0).Scale(magentaBehind)).Add(
+			Toward(azimuth-quarter, 0).Scale(magentaLeft)).Add(
 			Point{0, 0, magentaUp}),
 	}
 }
@@ -134,9 +134,9 @@ func (show Layout) Strobes() [2]Point {
 // far tree, 10 m up, and 140 m apart either side of it, alternating.
 func (show Layout) Searchlight(k int) Point {
 	out, rank := searchSide(k)
-	behind := show.FarTree().Add(Toward(Azimuth, 0).Scale(searchBehind)).
+	behind := show.farTree().Add(Toward(azimuth, 0).Scale(searchBehind)).
 		Add(Point{0, 0, searchUp})
-	return behind.Add(Toward(Azimuth+out*quarter, 0).Scale(
+	return behind.Add(Toward(azimuth+out*quarter, 0).Scale(
 		searchApart * (rank + 1)))
 }
 
@@ -162,14 +162,14 @@ func (show Layout) SearchWay(move string, k, count int, phase,
 	opening := half - half*math.Cos(2*math.Pi*movePhase)
 	switch move {
 	case "fan":
-		return Toward(Azimuth+out*(fanFirst+(rank+1)*fanStep*opening),
+		return Toward(azimuth+out*(fanFirst+(rank+1)*fanStep*opening),
 			fanTop-fanDrop*opening)
 	case "viewer":
-		at := show.Searchlight(k).Scale(-1).Unit()
-		side := at.Cross(Point{0, 0, 1}).Unit()
-		return at.Add(side.Scale(out * (rank + half) * viewerApart)).Unit()
+		at := show.Searchlight(k).Scale(-1).unit()
+		side := at.cross(Point{0, 0, 1}).unit()
+		return at.Add(side.Scale(out * (rank + half) * viewerApart)).unit()
 	}
-	return Toward(Azimuth+out*(sweepOut+sweepRank*rank+sweepSwing*
+	return Toward(azimuth+out*(sweepOut+sweepRank*rank+sweepSwing*
 		math.Sin(turn+offset)), sweepTilt+sweepNod*math.Sin(2*turn+offset))
 }
 
@@ -191,7 +191,7 @@ func (show Layout) Backlights() [2]Point {
 // where it lands, so many metres out along the view, and its radius
 // there.
 func (show Layout) Ship(out, apex float64) (top, foot Point) {
-	axis := Toward(Azimuth, 0).Scale(out)
+	axis := Toward(azimuth, 0).Scale(out)
 	return axis.Add(Point{0, 0, show.Water() + apex}),
 		axis.Add(Point{0, 0, show.Water()})
 }

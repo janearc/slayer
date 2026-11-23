@@ -44,7 +44,7 @@ func fullSun(fields *Fields) maths.Light {
 func TestAVacuumGivesABlackSkyAndTheFullSun(t *testing.T) {
 	fields := solvedThin(t, none, fewPhotons)
 	sun := wayAt(thirty*degree, none)
-	made := NewSky(fields, sun, handExposure)
+	made := newSky(fields, sun, handExposure)
 	for _, look := range lookedAt {
 		if got := made.Light(look); got != (maths.Light{}) {
 			t.Errorf("a vacuum's sky along %v is %v", look, got)
@@ -61,7 +61,7 @@ func TestAVacuumGivesABlackSkyAndTheFullSun(t *testing.T) {
 func TestAScatteringAirLightsTheSkyAndDimsTheSun(t *testing.T) {
 	fields := solvedThin(t, thinDepth/thinTop, scatteredPhotons)
 	sun := wayAt(thirty*degree, none)
-	overhead := NewSky(fields, sun, handExposure).Light(straightUp)
+	overhead := newSky(fields, sun, handExposure).Light(straightUp)
 	if !(overhead.Luminance() > none) {
 		t.Errorf("a scattering air's sky overhead is %v", overhead)
 	}

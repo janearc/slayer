@@ -2,8 +2,8 @@ package manufacture
 
 import (
 	"errors"
-	"fmt"
 	"sort"
+	"time"
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
@@ -19,12 +19,32 @@ import (
 // made only by newGood and grow, dressed by in, lit by lit, and
 // gathered from others by gather.
 type good struct {
-	parts      []part
+	parts []part
+	// native keeps already indexed, locally placed surfaces intact, including
+	// their rest coordinates and material. They are immutable after making.
+	native     []thing.Thing
 	dressed    looks
 	lights     []lit
 	extent     *maths.Box
 	groups     map[slot]*shape.MeshGroup
 	groupParts map[slot]int
+}
+
+// nativeWithin composes a native part's local time-varying placement with
+// its enclosing placement without taking a premature phase-zero snapshot.
+type nativeWithin struct {
+	local thing.Motion
+	place maths.Subspace
+}
+
+// At is the part's placement at a time: its own motion at that time, set
+// inside the enclosing place.
+func (motion nativeWithin) At(at time.Duration) maths.Subspace {
+	local := maths.Local()
+	if motion.local != nil {
+		local = motion.local.At(at)
+	}
+	return local.Within(motion.place)
 }
 
 // lit is a light a thing carries: the light, where on the thing it is, which
@@ -117,6 +137,7 @@ func gather(things ...good) (good, error) {
 			all.groups[renumbered[of]] = group
 			all.groupParts[renumbered[of]] = one.partCounts()[of]
 		}
+		all.native = append(all.native, one.native...)
 		all.lights = append(all.lights, one.lights...)
 	}
 	// Only assemblies with a prescribed physical extent need metadata.
@@ -163,6 +184,13 @@ func (made good) placed(space maths.Subspace) (good, error) {
 		shone[index] = one
 	}
 	made.parts, made.lights = moved, shone
+	if len(made.native) > 0 {
+		moved := append([]thing.Thing(nil), made.native...)
+		for i := range moved {
+			moved[i].Motion = nativeWithin{local: moved[i].Motion, place: space}
+		}
+		made.native = moved
+	}
 	if len(made.groups) > 0 {
 		groups := map[slot]*shape.MeshGroup{}
 		for of, group := range made.groups {
@@ -185,10 +213,14 @@ func (made good) placed(space maths.Subspace) (good, error) {
 	return made, nil
 }
 
-// mostFaces is the most faces a thing may have and still be flattened
-// into meshes. it is tuning from a measurement: ninja-gaiden found
-// flattening costs the cpu about 1 KB a triangle (64 conifers, 1.5
-// million triangles, 1.6 GB), so this many is about 100 MB a thing.
+// mostFaces is the faces a made thing's own budgets are drawn up within: a
+// tree's foliage, a city's chunks, a macro row's faces. it is tuning from
+// a measurement taken before the mesh kept its corners as int32 and the
+// gpu packed each tree's faces: flattening then cost the cpu about 1 KB a
+// triangle (64 conifers, 1.5 million triangles, 1.6 GB).
+//
+// it has not been measured since. no thing is refused for having more:
+// a thing past it costs memory and time, and is drawn.
 const mostFaces = 100_000
 
 var (
@@ -196,8 +228,6 @@ var (
 		"or a growth and a seed that was sown")
 	errLook = errors.New("manufacture: a matter of this thing was " +
 		"given no look")
-	errTooMany = fmt.Errorf("manufacture: a thing of more than %d "+
-		"faces is not flattened into a mesh", mostFaces)
 )
 
 // newGood is a thing of one form, cut so finely, or why there can be
@@ -238,6 +268,16 @@ func (made good) skins() map[slot]surface {
 // faces is stored face cost: each prototype once within its material group.
 func (made good) faces() int {
 	faces := 0
+	for _, one := range made.native {
+		switch solid := one.Shape.(type) {
+		case *shape.Mesh:
+			faces += len(solid.Faces)
+		case *shape.MeshGroup:
+			faces += solid.StoredFaces()
+		case interface{ FaceCount() int }:
+			faces += solid.FaceCount()
+		}
+	}
 	for of, skin := range made.skins() {
 		if made.groups[of] == nil {
 			faces += len(skin)
@@ -258,22 +298,15 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
 	if !shape.ValidPlacement(at) {
 		return nil, errors.New("manufacture: invalid placement")
 	}
-	if len(made.parts) == 0 && len(made.groups) == 0 {
+	if len(made.parts) == 0 && len(made.groups) == 0 && len(made.native) == 0 {
 		return nil, errGood
 	}
 	skins, shadings := made.skins(), made.shadings()
-	// The flattening limit bounds temporary expanded surfaces. Groups
-	// retain their prototypes; the caller budgets their stored geometry.
-	flattened := 0
-	for of, skin := range skins {
-		if made.groups[of] == nil {
-			flattened += len(skin)
-		}
-	}
-	if flattened > mostFaces {
-		return nil, errTooMany
-	}
 	var things []thing.Thing
+	for _, one := range made.native {
+		one.Motion = thing.Still(one.At(0).Within(at))
+		things = append(things, one)
+	}
 	for _, of := range made.slots() {
 		look, known := made.dressed[of]
 		if !known || look == nil {

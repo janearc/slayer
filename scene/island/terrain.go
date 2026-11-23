@@ -183,9 +183,9 @@ func (ground *Terrain) bounds(patch terrain.Patch, indexed bool) (maths.Box, flo
 	east, south := ground.location(float64(patch.MaxColumn), float64(patch.MaxRow))
 	minimum, maximum := ground.detail.MinimumHeight, ground.detail.MaximumHeight
 	if bounded, ok := ground.from.(interface {
-		HeightRange(float64, float64, float64, float64) (float64, float64, bool, error)
+		heightRange(float64, float64, float64, float64) (float64, float64, bool, error)
 	}); indexed && ok {
-		low, high, has, err := bounded.HeightRange(west, south, east, north)
+		low, high, has, err := bounded.heightRange(west, south, east, north)
 		if err != nil {
 			return maths.Box{}, 0, err
 		}

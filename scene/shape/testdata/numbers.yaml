@@ -1,0 +1,1508 @@
+# every number the scene/shape tests choose, with what it is and why it was
+# chosen. a test asks for each by name, through picked.
+numbers:
+  - name: fixtures-probe
+    value: 1.0e8
+    says: a number the fixtures test reads back, to show the book is read
+    kind: picked
+    by: any number does; this is the distance of the far small sphere
+  - name: meshtree-more-leaf-most
+    value: 8
+    says: the most faces a leaf of a mesh's tree may hold
+    kind: picked
+    by: the limit the tree's cutting keeps, worked by hand in the tests that ask for it
+  - name: meshtree-more-walk-places
+    value: 128
+    says: the places a walk down a mesh's tree has to keep its way back
+    kind: picked
+    by: far deeper than any tree of the tests' meshes reaches, so a tree at it is a fault
+  - name: meshtree-more-depth-limit
+    value: 64
+    says: the depth of a mesh's tree from which a node is cut in half by count
+    kind: picked
+    by: the depth the tests that worked the cuts by hand were worked at
+  - name: meshtree-more-overlap-copies
+    value: 8
+    says: how many copies of one triangle lie almost on one another
+    kind: picked
+    by: as many as a leaf may hold, so that all of them stay one leaf
+  - name: meshtree-more-overlap-divisions
+    value: 8
+    says: the parts of a unit that each copy is shifted along x from the last, an eighth
+    kind: picked
+    by: worked by hand in the test's comment, boxes of area 300 and 326.25 together
+  - name: meshtree-more-overlap-half-base
+    value: 5
+    says: half the base of each overlapping triangle, which runs from minus this to this along x
+    kind: picked
+    by: makes the triangle 10 across, worked by hand in the test's comment
+  - name: meshtree-more-overlap-apex
+    value: 10
+    says: how far up the top corner of each overlapping triangle lies
+    kind: picked
+    by: makes the triangle 15 up from its base, worked by hand in the test's comment
+  - name: meshtree-more-ninth-aside
+    value: 1
+    says: how far along x the ninth nested square is from the other eight
+    kind: picked
+    by: a little to the side, so the cut that leaves it alone costs what the test's comment works out
+  - name: meshtree-more-far-size
+    value: 1
+    says: the size of each square in the faces far apart, 2 across
+    kind: picked
+    by: worked by hand in the test's comment, boxes of area 8
+  - name: meshtree-more-far-one-along
+    value: 100
+    says: how far along x the second of the faces far apart lies
+    kind: picked
+    by: far enough that cutting costs less than testing the faces, worked by hand in the test's comment
+  - name: meshtree-more-far-two-along
+    value: 200
+    says: how far along x the third of the faces far apart lies
+    kind: picked
+    by: twice the second's distance, worked by hand in the test's comment
+  - name: meshtree-more-cluster-apart
+    value: 1000
+    says: how far along x the second cluster of faces lies from the first
+    kind: picked
+    by: far enough that the root splits between the clusters, worked by hand in the test's comment
+  - name: meshtree-more-cut-size
+    value: 1
+    says: the size of each square the cut tests place, 2 across
+    kind: picked
+    by: worked by hand in the tests' comments, boxes of area 8
+  - name: meshtree-more-chain-stride
+    value: 37
+    says: the step by which the faces of a chain are numbered out of the order of their rank
+    kind: picked
+    by: shares no factor with the chain's length, so every rank is met once
+  - name: meshtree-more-chain-tenth
+    value: 10
+    says: the divisor that makes the size of each face of a chain a tenth of its distance
+    kind: picked
+    by: each face ten times the size of the last, as the test's comment says
+  - name: meshtree-more-chain-length
+    value: 80
+    says: how many faces a chain has
+    kind: picked
+    by: enough that the tree goes past the depth at which it is cut by count
+  - name: meshtree-more-halved-each
+    value: 8
+    says: the faces in each half when a node of sixteen is cut in half by count
+    kind: picked
+    by: worked by hand in the test's comment, the node at depth 64 holds 16
+  - name: meshtree-more-hair-soup-faces
+    value: 600
+    says: how many faces the soup has whose boxes are checked
+    kind: picked
+    by: enough faces for a tree several cuts deep
+  - name: meshtree-more-hair-cube-cells
+    value: 3
+    says: how many squares each side of the stretched cube is cut into, along each edge
+    kind: picked
+    by: enough that the cube has faces to cut between
+  - name: meshtree-more-hair-stretch-up
+    value: 4
+    says: how many times the cube is stretched up
+    kind: picked
+    by: worked by hand in the test's comment, sides of 2, 8 and 4
+  - name: meshtree-more-hair-stretch-deep
+    value: 2
+    says: how many times the cube is stretched deep
+    kind: picked
+    by: worked by hand in the test's comment, sides of 2, 8 and 4
+  - name: meshtree-more-hair-stretched
+    value: 8.0e-9
+    says: the hair a box is let out by, worked by hand for the stretched cube
+    kind: picked
+    by: a billionth of the longest side, 8, as the test's comment says
+  - name: meshtree-more-hair-share
+    value: 1.0e-9
+    says: the share of the longest side of a mesh that a box is let out by
+    kind: picked
+    by: a billionth, as the test's comment says
+  - name: meshtree-more-miss-at-y
+    value: 2
+    says: the height at which the ray starts, before it is missed by a hair
+    kind: picked
+    by: worked by hand in the test's comment, the slab is entered at one more than the miss
+  - name: meshtree-more-area-width
+    value: 2
+    says: the width of the box whose area is asked for
+    kind: picked
+    by: worked by hand in the test's comment, twice 6+15+10
+  - name: meshtree-more-area-length
+    value: 3
+    says: the length of the box whose area is asked for
+    kind: picked
+    by: worked by hand in the test's comment, twice 6+15+10
+  - name: meshtree-more-area-height
+    value: 5
+    says: the height of the box whose area is asked for
+    kind: picked
+    by: worked by hand in the test's comment, twice 6+15+10
+  - name: meshtree-more-area-surface
+    value: 62
+    says: the whole surface of the box 2 by 3 by 5
+    kind: picked
+    by: twice 6+15+10, worked by hand in the test's comment
+  - name: meshtree-more-unbuilt-aim
+    value: 0.1
+    says: where over a mesh that was not built the questions are put, along x and along y
+    kind: picked
+    by: any point over the face will do; the question is refused before it is read
+  - name: meshtree-more-far-out
+    value: 1.0e200
+    says: how far from a mesh of one face a point is put, so far that a distance squared is endless
+    kind: picked
+    by: worked by hand in the test's comment, its square is past what a double holds
+  - name: meshtree-more-winding-cells
+    value: 1
+    says: how many squares each side of the cube for the winding test is cut into
+    kind: picked
+    by: the cube from -1 to 1 whole, as the test's comment works it
+  - name: meshtree-more-plan-always-leaf
+    value: 2
+    says: the most faces that are always one leaf, wherever they lie
+    kind: picked
+    by: any two faces are a leaf, as the test's comment says
+  - name: meshtree-more-plan-bins
+    value: 16
+    says: the bins the faces of a node fall into along the axis they spread furthest on
+    kind: picked
+    by: sixteen, as the comment of the brute force says
+  - name: meshtree-more-plan-last-bin
+    value: 15
+    says: the number of the last of the sixteen bins, the one a face at the far end falls into
+    kind: picked
+    by: the bins are numbered from nought, so the last is one short of their count
+  - name: meshtree-more-plan-tie-below
+    value: 0.999999999
+    says: one less a billionth, below which a leaf is not worth its cost and above which it is allowed
+    kind: picked
+    by: prices within a billionth of each other are taken as equal
+  - name: meshtree-more-plan-tie-above
+    value: 1.000000001
+    says: one more a billionth, past which a cut is the cheaper and within which a tie is allowed
+    kind: picked
+    by: prices within a billionth of each other are taken as equal
+  - name: meshtree-more-lump-faces
+    value: 30
+    says: how many small triangles each lump has
+    kind: picked
+    by: a lump is more than a leaf's worth of faces and few enough to stay small
+  - name: meshtree-more-lump-spread
+    value: 0.05
+    says: how far from its middle the triangles of a lump are strewn
+    kind: picked
+    by: close, so each lump is a tight cluster
+  - name: meshtree-more-lump-size
+    value: 0.1
+    says: about how big each triangle of a lump is
+    kind: picked
+    by: about as big as the lump is wide
+  - name: meshtree-more-lump-reach
+    value: 3
+    says: how far from the origin the lumps are strewn, in the cube from minus this to this
+    kind: picked
+    by: far apart compared with the lumps
+  - name: meshtree-more-brute-soup-faces
+    value: 3000
+    says: how many faces the soup has whose cuts brute force allows
+    kind: picked
+    by: enough faces for a deep tree
+  - name: meshtree-more-brute-thin-faces
+    value: 1500
+    says: how many faces are strewn thinly
+    kind: picked
+    by: many small faces through a wide cube
+  - name: meshtree-more-brute-thin-spread
+    value: 1
+    says: how far from the origin the thin faces are strewn
+    kind: picked
+    by: the cube from -1 to 1
+  - name: meshtree-more-brute-thin-size
+    value: 0.05
+    says: about how big each thin face is
+    kind: picked
+    by: small beside the cube they are strewn through
+  - name: meshtree-more-brute-thick-faces
+    value: 400
+    says: how many faces are strewn thickly
+    kind: picked
+    by: fewer, larger faces that overlap as they fall
+  - name: meshtree-more-brute-thick-spread
+    value: 0.2
+    says: how far from the origin the thick faces are strewn
+    kind: picked
+    by: a small cube, so the faces overlap
+  - name: meshtree-more-brute-thick-size
+    value: 0.5
+    says: about how big each thick face is
+    kind: picked
+    by: large beside the cube they are strewn through
+  - name: meshtree-more-brute-lumps
+    value: 40
+    says: how many lumps of triangles are strewn
+    kind: picked
+    by: enough lumps for a tree that cuts between them
+  - name: meshtree-more-plate-reach
+    value: 10
+    says: half the side of each plate, which is 20 across and 20 up
+    kind: picked
+    by: big enough that a ray along z through the middle meets every plate
+  - name: closest-leg
+    value: 4
+    says: the length of each leg of the triangle whose nearest point is asked for
+    kind: picked
+    by: worked by hand in the test's comment, with the corner at the origin
+  - name: mesh-fault-missing-vertex
+    value: 7
+    says: the place a face names that no corner of the four-cornered square has
+    kind: picked
+    by: any place past the square's last corner does
+  - name: mesh-fault-twisted-face
+    value: 5
+    says: the face of the once-cut cube that is turned to run against its neighbour
+    kind: picked
+    by: any one face of the twelve does
+  - name: mesh-fault-short-normals
+    value: 3
+    says: how many normals are given for the square's four corners, one too few
+    kind: picked
+    by: one fewer than the four corners
+  - name: mesh-turning-level
+    value: 2
+    says: how many times the icosahedron's faces are split in four for the turning test
+    kind: picked
+    by: enough faces to turn, few enough to test each
+  - name: mesh-turning-outside
+    value: 3
+    says: how many times as far from the middle as a face's middle its ray starts
+    kind: picked
+    by: any start outside the unit ball does
+  - name: mesh-turning-box-cuts
+    value: 2
+    says: how many ways each side of the cube is cut in the turning test
+    kind: picked
+    by: a side cut in two has a corner and an edge on it
+  - name: mesh-turning-across
+    value: 0.3
+    says: the share of a unit across a side, one way, from its middle, where its normal is asked
+    kind: picked
+    by: a place off every edge and diagonal of the side
+  - name: mesh-turning-along
+    value: 0.6
+    says: the share of a unit across a side, the other way, from its middle, where its normal is asked
+    kind: picked
+    by: a place off every edge and diagonal of the side
+  - name: mesh-turning-normal-tolerance
+    value: 1.0e-12
+    says: how near the normal of a flat cube face must be to the way out of its side
+    kind: picked
+    by: the faces are flat, so the normal is exact to rounding
+  - name: mesh-inside-cuts
+    value: 3
+    says: how many ways each side of the cube is cut in the inside and distance test
+    kind: picked
+    by: any cut does
+  - name: mesh-inside-seed-high
+    value: 5
+    says: the first of the two seeds of the stream of points the inside and distance test draws
+    kind: picked
+    by: any seed does
+  - name: mesh-inside-seed-low
+    value: 6
+    says: the second of the two seeds of the stream of points the inside and distance test draws
+    kind: picked
+    by: any seed does
+  - name: mesh-inside-rays
+    value: 5000
+    says: how many points the inside and distance test draws
+    kind: picked
+    by: enough to land in, near and far from the cube
+  - name: mesh-inside-reach
+    value: 2
+    says: half the width of the cube the points of the inside and distance test are drawn from
+    kind: picked
+    by: twice the cube's own half width, so about as many fall outside
+  - name: mesh-inside-tolerance
+    value: 1.0e-12
+    says: how far the mesh's distance may be from the box's own
+    kind: picked
+    by: both are exact to rounding
+  - name: mesh-overlap-shift-z
+    value: 0.25
+    says: how far along z the second cube is moved, as it is moved a unit along x and a half along y
+    kind: picked
+    by: any shift that leaves the cubes overlapping does
+  - name: mesh-open-offset
+    value: 0.25
+    says: how far along x and y the point under the one triangle is
+    kind: picked
+    by: a place inside the triangle's shadow
+  - name: mesh-open-depth
+    value: -0.5
+    says: where along z the point under the one triangle is
+    kind: picked
+    by: half a unit below the triangle
+  - name: mesh-open-tolerance
+    value: 1.0e-15
+    says: how far the distance under the one triangle may be from a half
+    kind: picked
+    by: the distance is exact to rounding
+  - name: mesh-sphere-first-level
+    value: 2
+    says: the first level of the icosphere set against the sphere
+    kind: picked
+    by: the coarsest that is a sphere at all
+  - name: mesh-sphere-last-level
+    value: 5
+    says: the last level of the icosphere set against the sphere
+    kind: picked
+    by: the finest that is quick to test
+  - name: mesh-band-shrink
+    value: 3
+    says: how many times narrower the silhouette band is at each level than at the one before
+    kind: picked
+    by: it quarters, so a third is the least it must do
+  - name: mesh-gap-shrink
+    value: 2
+    says: how many times smaller the gap between the distances is at each level than at the one before
+    kind: picked
+    by: it quarters, so half is the least it must do
+  - name: mesh-sphere-seed-high
+    value: 7
+    says: the first of the two seeds of the rays of the sphere test, the second being the level
+    kind: picked
+    by: any seed does
+  - name: mesh-sphere-rays
+    value: 10000
+    says: how many rays the sphere test draws at each level
+    kind: picked
+    by: enough to land in the band, in the middle and past the sphere
+  - name: mesh-sphere-start-reach
+    value: 3
+    says: how many times as far from the middle as the unit sphere a sphere-test ray starts
+    kind: picked
+    by: any start outside the unit ball does
+  - name: mesh-sphere-aim-reach
+    value: 1.2
+    says: the radius of the ball a sphere-test ray is aimed into
+    kind: picked
+    by: a little past the unit sphere, so some rays miss
+  - name: mesh-sphere-inside-every
+    value: 5
+    says: how often a sphere-test ray starts from within, one in this many
+    kind: picked
+    by: a fifth of the rays
+  - name: mesh-sphere-inside-phase
+    value: 4
+    says: which of each run of sphere-test rays starts from within
+    kind: picked
+    by: the last of each five
+  - name: mesh-sphere-gap-slack
+    value: 1.0e-12
+    says: how far past the gap between the two balls the two distances may be apart
+    kind: picked
+    by: rounding in the square roots
+  - name: mesh-sphere-near-middle
+    value: 0.9
+    says: how near the middle a ray's line passes for its distance to be counted in the worst gap
+    kind: picked
+    by: well inside the silhouette
+  - name: mesh-through-cuts
+    value: 4
+    says: how many ways each side of the cube is cut in the no-ray-through test
+    kind: picked
+    by: cut so that edges, diagonals and corners meet in many places
+  - name: mesh-through-seed-high
+    value: 8
+    says: the first of the two seeds of the stream of the no-ray-through test
+    kind: picked
+    by: any seed does
+  - name: mesh-through-seed-low
+    value: 9
+    says: the second of the two seeds of the stream of the no-ray-through test
+    kind: picked
+    by: any seed does
+  - name: mesh-through-rays
+    value: 10000
+    says: how many rays the no-ray-through test aims, at each cube
+    kind: picked
+    by: enough to land on every kind of place
+  - name: mesh-through-spread
+    value: 3
+    says: how much further than a unit past the point aimed at an outside ray may start, at most
+    kind: picked
+    by: any distance outside the cube does
+  - name: mesh-through-inside-every
+    value: 5
+    says: how often a no-ray-through ray starts from within, one in this many
+    kind: picked
+    by: a fifth of the rays
+  - name: mesh-through-inside-phase
+    value: 4
+    says: which of each run of no-ray-through rays starts from within
+    kind: picked
+    by: the last of each five
+  - name: mesh-through-inside-reach
+    value: 0.9
+    says: the half width of the cube a no-ray-through ray from within starts in
+    kind: picked
+    by: well inside the cube
+  - name: mesh-through-tolerance
+    value: 1.0e-9
+    says: how far from the distance to the point aimed at the first hit may be
+    kind: picked
+    by: rounding along the ray
+  - name: mesh-side-grid-quarters
+    value: 4
+    says: how many quarters of a side's half width the aimed rays are spaced by
+    kind: picked
+    by: the lines the side is cut along are a quarter apart in the test
+  - name: mesh-side-grid-limit
+    value: 8
+    says: the place past the last of the lines a side's rays are aimed along
+    kind: picked
+    by: seven lines, from one to seven, cover the side and its edges
+  - name: mesh-side-standoff
+    value: 3
+    says: how many units out from the side the rays along an axis start
+    kind: picked
+    by: any start outside the cube does
+  - name: mesh-grid-lines
+    value: 5
+    says: how many lines a side is cut along that a point is drawn onto, a half apart
+    kind: picked
+    by: from minus one to one a half apart
+  - name: mesh-edge-grid-chance
+    value: 3
+    says: how often a point on an edge is put on a cut line, one in this many
+    kind: picked
+    by: a third of the edge points
+  - name: mesh-edge-grid-lines
+    value: 3
+    says: how many cut lines an edge point may be put on, from minus a half to a half
+    kind: picked
+    by: three lines a half apart
+  - name: mesh-diagonal-lines
+    value: 4
+    says: how many cut lines a diagonal point may start from, a half apart
+    kind: picked
+    by: four lines from minus one to a half
+  - name: mesh-diagonal-ways
+    value: 3
+    says: how many ways a line point is drawn, two of them special and the third plain
+    kind: picked
+    by: a cut line, a diagonal, or anywhere across
+  - name: mesh-outward-margin
+    value: 0.05
+    says: the least a ray goes out across a side its start is on
+    kind: picked
+    by: far enough out to leave the surface, near enough to graze it
+  - name: mesh-smooth-level
+    value: 4
+    says: how many times the icosahedron's faces are split in four for the smooth normal test
+    kind: picked
+    by: five thousand one hundred and twenty faces, as the test's comment works
+  - name: mesh-smooth-seed-high
+    value: 12
+    says: the first of the two seeds of the rays of the smooth normal test
+    kind: picked
+    by: any seed does
+  - name: mesh-smooth-seed-low
+    value: 13
+    says: the second of the two seeds of the rays of the smooth normal test
+    kind: picked
+    by: any seed does
+  - name: mesh-smooth-rays
+    value: 10000
+    says: how many rays the smooth normal test draws
+    kind: picked
+    by: enough to land all over the sphere
+  - name: mesh-smooth-start-reach
+    value: 3
+    says: how many times as far from the middle as the unit sphere a smooth-normal ray starts
+    kind: picked
+    by: any start outside the unit ball does
+  - name: mesh-smooth-aim-reach
+    value: 0.9
+    says: the radius of the ball a smooth-normal ray is aimed into
+    kind: picked
+    by: the test's comment bounds the rays that pass within this of the middle
+  - name: mesh-smooth-way-out-tolerance
+    value: 1.0e-9
+    says: how far the blended normal may be from the way out through the point, in radians
+    kind: picked
+    by: the blend is exact to rounding on a sphere's corners
+  - name: mesh-smooth-bound-slack
+    value: 1.0e-9
+    says: how far past the worked bound the blended normal may be from the sphere's own, in radians
+    kind: picked
+    by: rounding in the worked bound
+  - name: mesh-unbuilt-offset
+    value: 0.1
+    says: how far along x and y the ray at a mesh not made by NewMesh is from the middle
+    kind: picked
+    by: a place over the one face
+  - name: wind-far-reach
+    value: 100
+    says: how far out along each axis the far corner is put
+    kind: picked
+    by: a hundred out each way, as the test's comment works
+  - name: wind-flat-reach
+    value: 10
+    says: how far from the middle the one open triangle's corners are, along x and y
+    kind: picked
+    by: wide enough that the ray crosses it
+  - name: wind-far-out
+    value: 1.0e6
+    says: how far out along each axis the small piece is put
+    kind: picked
+    by: a million out, as the test's comment works
+  - name: wind-small-scale
+    value: 1.0e-3
+    says: how many times smaller than the unit corner the small piece is
+    kind: picked
+    by: a thousandth across, as the test's comment works
+  - name: sparse-bins-left-low
+    value: 1.9
+    says: where the left cluster's box starts along x
+    kind: picked
+    by: a box about the cluster's middle at two
+  - name: sparse-bins-left-high
+    value: 2.1
+    says: where the left cluster's box ends along x
+    kind: picked
+    by: a box about the cluster's middle at two
+  - name: sparse-bins-right-low
+    value: 2.9
+    says: where the right cluster's box starts along x
+    kind: picked
+    by: a box about the cluster's middle at three
+  - name: sparse-bins-right-high
+    value: 3.1
+    says: where the right cluster's box ends along x
+    kind: picked
+    by: a box about the cluster's middle at three
+  - name: sparse-bins-left-middle
+    value: 2
+    says: where the left cluster's middle is along x
+    kind: picked
+    by: any place inside its box
+  - name: sparse-bins-right-middle
+    value: 3
+    says: where the right cluster's middle is along x
+    kind: picked
+    by: any place inside its box
+  - name: sparse-bins-loose-reach
+    value: 10
+    says: how far along x the loose bound of the middles reaches, far past both clusters
+    kind: picked
+    by: loose enough that most bins are empty
+  - name: sparse-bins-expected-cut
+    value: 1
+    says: where the cut falls between the two clusters, by the count of those before it
+    kind: picked
+    by: worked by hand, one cluster on each side
+  - name: group-axis-ray-offset
+    value: 0.2
+    says: how far along x and y from a layer's corner the ray down onto it starts
+    kind: picked
+    by: a place inside the triangle
+  - name: group-axis-reach
+    value: 20
+    says: how far a ray down onto a layer may go
+    kind: picked
+    by: past the highest of the nine layers
+  - name: group-axis-plane-x
+    value: 10
+    says: where along x the plane's normal is asked
+    kind: picked
+    by: any place does, a plane faces one way everywhere
+  - name: group-axis-plane-z
+    value: 20
+    says: where along z the plane's normal is asked
+    kind: picked
+    by: any place does, a plane faces one way everywhere
+  - name: group-axis-parallel-reach
+    value: 10
+    says: how far the ray along the plane may go
+    kind: picked
+    by: far enough to pass over any part of the test's scene
+  - name: tube-radius
+    value: 2
+    says: the radius of the tube the tests measure, to the middle of its wall
+    kind: picked
+    by: any ring wider than its wall does
+  - name: tube-thick
+    value: 0.2
+    says: how thick the wall of the tube the tests measure is
+    kind: picked
+    by: a wall thin beside the radius
+  - name: tube-height
+    value: 1
+    says: how long the tube the tests measure is along its axis
+    kind: picked
+    by: a length about the radius
+  - name: tube-distance-tolerance
+    value: 1.0e-12
+    says: how far the tube's distance may be from the value worked by hand
+    kind: picked
+    by: the distance is exact to rounding
+  - name: tube-inside-z
+    value: 1.9
+    says: where along z the point on the inside of the tube's wall is
+    kind: picked
+    by: the radius less half the thickness
+  - name: tube-outside-z
+    value: 2.1
+    says: where along z the point on the outside of the tube's wall is
+    kind: picked
+    by: the radius plus half the thickness
+  - name: tube-normal-tolerance
+    value: 1.0e-4
+    says: how near the marched normal must be to the axis direction
+    kind: picked
+    by: the normal is marched, so only to the march's step
+  - name: triangle-inside-point
+    value: 0.25
+    says: the x and y of a point well inside the unit right triangle
+    kind: picked
+    by: its sum is under one, so it is inside, and it is clear of every edge
+  - name: triangle-parallel-across
+    value: 0.25
+    says: the y of rays that run along x, parallel to the triangle
+    kind: picked
+    by: it is inside the triangle's span in y, so only parallelism misses it
+  - name: triangle-hair
+    value: 1.0e-12
+    says: the step either side of an edge that a grazing ray is moved
+    kind: picked
+    by: far under any face's size and over the rounding of the edge
+  - name: triangle-graze-step
+    value: 0.05
+    says: the distance along the long edge between one grazing ray and the next
+    kind: picked
+    by: twenty rays across the edge are enough to find a gap
+  - name: triangle-edge-rays
+    value: 4000
+    says: how many rays are put through the diagonal of the square
+    kind: picked
+    by: enough that every kind of ray comes up many times
+  - name: triangle-edge-random-from
+    value: 2000
+    says: the ray from which the diagonal's points are drawn at random
+    kind: picked
+    by: half the rays are exactly on a grid of points, and half are random
+  - name: triangle-edge-cycle
+    value: 64
+    says: how many grid points the exact rays cycle through on the diagonal
+    kind: picked
+    by: many points, none at a corner
+  - name: triangle-edge-divisor
+    value: 65
+    says: the divisor that puts the grid points inside the diagonal
+    kind: picked
+    by: one more than the cycle, so no grid point is a corner
+  - name: triangle-edge-slants
+    value: 3
+    says: how many rays in turn are slanted, after one that is straight down
+    kind: picked
+    by: the straight ray comes up for a third of the rays
+  - name: triangle-edge-standoff
+    value: 2
+    says: how far from the diagonal each ray starts
+    kind: picked
+    by: far enough to be clear of the square at any slant
+  - name: triangle-fan-faces
+    value: 6
+    says: how many faces, and spokes, the fan about a corner has
+    kind: picked
+    by: six faces make a flat hexagon about the corner
+  - name: triangle-fan-turn-divisor
+    value: 3
+    says: the divisor of a half turn that is the angle between spokes
+    kind: picked
+    by: a half turn over three is a sixth of a turn, as six spokes need
+  - name: triangle-corner-standoff
+    value: 3
+    says: how far from the corner or the spoke each ray starts
+    kind: picked
+    by: far enough to be clear of the fan at any slant
+  - name: triangle-corner-rays
+    value: 4000
+    says: how many rays are put through the fan's corner or its spokes
+    kind: picked
+    by: enough that every kind of ray comes up many times
+  - name: audit-slim-height
+    value: 1.0e-9
+    says: the height of a slim face's apex over its long edge
+    kind: picked
+    by: thin, but over the cutoff, so the face has area
+  - name: audit-far-corner
+    value: 1.0e300
+    says: how far out a corner is that no scene reaches
+    kind: picked
+    by: far past the farthest corner a mesh takes
+  - name: audit-tetrahedron-size
+    value: 1.0e100
+    says: the scale of a tetrahedron wound inside out
+    kind: picked
+    by: large, to show a face is measured at its own size
+  - name: audit-past-corner
+    value: 1.5e150
+    says: the x of a corner just past the farthest a mesh takes
+    kind: picked
+    by: a half over the farthest
+  - name: audit-needle-long
+    value: 1.0e149
+    says: the long leg of a needle face
+    kind: picked
+    by: the longest leg that does not overflow when measured
+  - name: audit-needle-short
+    value: 1.0e-10
+    says: the short leg of a needle face
+    kind: picked
+    by: very short beside the long leg, and still a face
+  - name: audit-thin-height
+    value: 1.0e-12
+    says: the height of a thin face whose long edge is the second
+    kind: picked
+    by: the sine of its angle is over the cutoff, so it is a face
+  - name: meshtree-bump-height
+    value: 0.1
+    says: how high the bumps stand on the lumpy ball, as a share of its radius
+    kind: picked
+    by: lumpy enough to spread the faces, not so much that they cross
+  - name: meshtree-bump-latitude
+    value: 5
+    says: how many bumps a half turn of latitude carries
+    kind: picked
+    by: a count that does not divide the rings
+  - name: meshtree-bump-longitude
+    value: 7
+    says: how many bumps a turn of longitude carries
+    kind: picked
+    by: a count that does not divide the slices
+  - name: meshtree-soup-smallest
+    value: 0.01
+    says: the size of the smallest face in the soup
+    kind: picked
+    by: a hundredth, small beside the cube it is strewn in
+  - name: meshtree-soup-spread
+    value: 40
+    says: the ratio of the largest face in the soup to the smallest
+    kind: picked
+    by: four tenths over a hundredth, faces of every size
+  - name: meshtree-bench-rays
+    value: 4096
+    says: how many rays the benchmarks cycle through
+    kind: picked
+    by: a power of two, enough that the cache does not hold them
+  - name: meshtree-bench-standoff
+    value: 3
+    says: how far from the middle the benchmark rays start
+    kind: picked
+    by: outside the ball
+  - name: meshtree-bench-aim
+    value: 1.1
+    says: the radius of the ball the benchmark rays are aimed into
+    kind: picked
+    by: a little over the lumpy ball, so some rays miss it
+  - name: meshtree-lumpy-slices
+    value: 250
+    says: the slices of a ring of the benchmark ball
+    kind: picked
+    by: with the rings, a hundred thousand faces
+  - name: meshtree-lumpy-rings
+    value: 201
+    says: the rings of the benchmark ball
+    kind: picked
+    by: with the slices, a hundred thousand faces
+  - name: group-hit-room-members
+    value: 32
+    says: how many plates stand in the group's row
+    kind: picked
+    by: enough that the group's tree has branches to walk
+  - name: group-hit-room-walks
+    value: 100
+    says: how many walks an allocation count is averaged over
+    kind: picked
+    by: enough that a rare allocation shows
+  - name: group-hit-room-offset
+    value: 0.2
+    says: the x and z of the point over a plate, from the plate's corner
+    kind: picked
+    by: inside the plate, clear of its edges
+  - name: group-hit-room-tolerance
+    value: 1.0e-9
+    says: how far an answer may be from the metre it should be
+    kind: picked
+    by: far over rounding, far under a face's size
+  - name: a-group-cached-normal-contracts-origin-y-share
+    value: 0.23
+    says: the share of the origin's magnitude that is its y
+    kind: picked
+    by: an origin that is off every axis
+  - name: a-group-cached-normal-contracts-origin-z-share
+    value: 0.37
+    says: the share of the origin's magnitude that is its z, below the plane
+    kind: picked
+    by: an origin that is off every axis
+  - name: a-group-cached-normal-contracts-ray-height
+    value: 3
+    says: how high over the z plane in the member's frame the ray starts
+    kind: picked
+    by: over the solid's top
+  - name: a-group-cached-normal-contracts-near
+    value: 2
+    says: the nearest distance asked of the control ray, in the member's frame
+    kind: picked
+    by: before the z plane, which is three away
+  - name: a-group-cached-normal-contracts-far
+    value: 4
+    says: the farthest distance asked of the control ray, in the member's frame
+    kind: picked
+    by: past the z plane, which is three away
+  - name: a-group-cached-normal-contracts-tolerance
+    value: 1.0e-12
+    says: how far the normal may be from the z plane's
+    kind: picked
+    by: far over rounding of unit directions
+  - name: group-points-tolerance
+    value: 1.0e-9
+    says: how far an answer may be from the metre or the one it should be
+    kind: picked
+    by: far over rounding, far under a face's size
+  - name: group-points-far
+    value: 1.0e200
+    says: the part of a point so far out that squaring it overflows
+    kind: picked
+    by: its square is past the largest number
+  - name: a-group-placement-contracts-rotation-axis-z
+    value: 3
+    says: the z of the axis a valid rotation turns about
+    kind: picked
+    by: an axis off every plane of the frame
+  - name: a-group-placement-contracts-rotation-angle
+    value: 0.7
+    says: the angle of a valid rotation, in radians
+    kind: picked
+    by: a turn that is not a quarter or half turn
+  - name: a-group-placement-contracts-skew-tolerance
+    value: 1.0e-9
+    says: how far from square two axes may be before a placement is refused
+    kind: picked
+    by: the tolerance of the placement check
+  - name: a-group-placement-contracts-skew-twice
+    value: 2.0e-9
+    says: a skew twice the tolerance, which is refused
+    kind: picked
+    by: past the tolerance
+  - name: a-group-placement-contracts-skew-large
+    value: 0.1
+    says: a skew far over the tolerance, which is refused
+    kind: picked
+    by: far past the tolerance
+  - name: a-group-placement-contracts-corner-distance
+    value: 13
+    says: the distance to a box corner from a point 3, 4 and 12 off it
+    kind: picked
+    by: worked by hand, as the root of nine, sixteen and a hundred and forty four
+  - name: a-group-placement-contracts-spacing
+    value: 3
+    says: the gap along x between the triangles of the deep row
+    kind: picked
+    by: more than a triangle's width, so the members do not touch
+  - name: a-group-placement-contracts-members
+    value: 32
+    says: how many triangles stand in the deep row
+    kind: picked
+    by: enough that the group's hierarchy is deep
+  - name: a-group-placement-contracts-ray-offset
+    value: 0.2
+    says: the x and y of the point and the ray over the first triangle
+    kind: picked
+    by: inside the first triangle, clear of its edges
+  - name: a-group-placement-contracts-ray-far
+    value: 2
+    says: the farthest a ray over the first triangle is asked to reach
+    kind: picked
+    by: past the triangle, which is one away
+  - name: a-group-placement-contracts-tolerance
+    value: 1.0e-12
+    says: how far an answer may be from the one it should be
+    kind: picked
+    by: far over rounding of unit directions
+  - name: shape-ball-radius
+    value: 2
+    says: the radius of the sphere a ray is sent at in the hit and span tests
+    kind: picked
+    by: worked by hand, from ten out a unit-direction ray meets it at eight
+  - name: shape-tolerance
+    value: 1e-9
+    says: how far a distance may be from the one worked by hand
+    kind: picked
+    by: rounding room well under any answer the tests expect
+  - name: shape-near-side-distance
+    value: 8
+    says: how far along the ray from ten out the near side of the sphere is
+    kind: picked
+    by: worked by hand, ten out less a radius of two
+  - name: shape-far-side-distance
+    value: 12
+    says: how far along the ray from ten out the far side of the sphere is
+    kind: picked
+    by: worked by hand, ten out and a radius of two more
+  - name: shape-nearest
+    value: 1e-9
+    says: the near end of a range that starts a hair past nought
+    kind: picked
+    by: past a start at the centre and short of any surface
+  - name: shape-plane-hit-distance
+    value: 3
+    says: how far down the ray from three up the plane is met
+    kind: picked
+    by: worked by hand, the ray starts three up and goes straight down
+  - name: shape-marched-tolerance
+    value: 1e-6
+    says: how near the marched normal must be to the exact one
+    kind: picked
+    by: the step of the march leaves error of about this size
+  - name: edges-sphere-radius
+    value: 2
+    says: the radius of the sphere whose box is checked
+    kind: picked
+    by: a size whose cube is easy to see, two either way
+  - name: edges-tube-radius
+    value: 10
+    says: the radius of the ring of the tube the tests of this file measure
+    kind: picked
+    by: large against the wall and the length, so the faces are told apart
+  - name: edges-tube-wall
+    value: 2
+    says: how thick the wall of that tube is
+    kind: picked
+    by: worked by hand, one either side of the ring gives eleven outside
+  - name: edges-tube-length
+    value: 4
+    says: how long that tube is along its axis
+    kind: picked
+    by: worked by hand, two either side of the middle
+  - name: edges-first-meeting
+    value: 4
+    says: where a ray along x from five out first meets a unit sphere
+    kind: picked
+    by: worked by hand, five out less the radius of one
+  - name: edges-range-end
+    value: 100
+    says: a far end of a range that is past every meeting
+    kind: picked
+    by: any number beyond the meetings does
+  - name: edges-leaving
+    value: 6
+    says: where a ray along x from five out leaves a unit sphere
+    kind: picked
+    by: worked by hand, five out and the radius of one more
+  - name: edges-centre-distance
+    value: 5
+    says: how far the sphere's centre is along the ray from five out
+    kind: picked
+    by: worked by hand, the ray starts five out
+  - name: edges-three-quarters
+    value: 0.75
+    says: the square of the half chord of a unit sphere at height one half
+    kind: picked
+    by: worked by hand, one less the square of one half
+  - name: edges-slant-distance
+    value: 5
+    says: how far along the slanting ray the ground is met
+    kind: picked
+    by: worked by hand, four high at four in five
+  - name: edges-slant-tolerance
+    value: 1e-15
+    says: how far the slanting ray's distance may be from the worked one
+    kind: picked
+    by: a few units of rounding in the last place
+  - name: edges-up-distance
+    value: 2
+    says: how far up the ray from two below the ground is met
+    kind: picked
+    by: worked by hand, the ray starts two below
+  - name: edges-marched-tolerance
+    value: 1e-6
+    says: how near the marched normal on the wall must be to straight out
+    kind: picked
+    by: the step of the march is small enough to be well within it
+  - name: tube-share-radius
+    value: 2
+    says: the radius of the ring of the tube meshed at each share
+    kind: picked
+    by: a ring of a few metres, as a pipe is
+  - name: tube-share-wall
+    value: 0.2
+    says: how thick the wall of that tube is
+    kind: picked
+    by: a tenth of the radius
+  - name: tube-share-length
+    value: 1
+    says: how long that tube is along its axis
+    kind: picked
+    by: any length does; one is short and plain
+  - name: tube-share-just-allowed
+    value: 1e-6
+    says: the finest chord share a ring can be meshed at, about two thousand sides
+    kind: picked
+    by: the finest share that needs no more sides than tubeMostSides
+  - name: group-members
+    value: 16
+    says: how many placed copies of the triangle the group is made of
+    kind: picked
+    by: enough for a grid of four by four with every placement different
+  - name: group-grid-columns
+    value: 4
+    says: how many members stand in a row of the grid they are placed on
+    kind: picked
+    by: a square grid of sixteen
+  - name: group-grid-spacing
+    value: 3
+    says: how far apart the members of the grid stand
+    kind: picked
+    by: wider than a member, so none overlaps its neighbour
+  - name: group-height-cycle
+    value: 3
+    says: how many heights the members cycle through
+    kind: picked
+    by: a few, so the members do not lie in one plane
+  - name: group-turn-step
+    value: 0.1
+    says: the turn about the y axis that each member has more than the last
+    kind: picked
+    by: a small step that makes every member turned differently
+  - name: group-scale-step
+    value: 0.5
+    says: how much larger every second member is than the others
+    kind: picked
+    by: a visible difference that is exact in binary
+  - name: group-ray-height
+    value: 10
+    says: how high above the members each ray starts
+    kind: picked
+    by: well above the tallest member
+  - name: group-ray-far
+    value: 20
+    says: how far each ray is followed
+    kind: picked
+    by: past the lowest face from the height the rays start at
+  - name: group-hit-tolerance
+    value: 1e-10
+    says: how far two distances to the same face may differ
+    kind: picked
+    by: rounding room for a rotated ray against rotated vertices
+  - name: group-surface-tolerance
+    value: 1e-9
+    says: how far a hit point may be from the surface of the group
+    kind: picked
+    by: rounding room for a distance measured at a point found by a hit
+  - name: group-dot-floor
+    value: 0.999999999
+    says: the least a dot of two unit normals may be for them to agree
+    kind: picked
+    by: one less the rounding room of a nanounit
+  - name: group-scan-start-x
+    value: -0.983
+    says: where the scan of rays begins along x
+    kind: picked
+    by: off the edges of the faces, so no ray runs along a silhouette
+  - name: group-scan-start-y
+    value: -0.971
+    says: where the scan of rays begins along y
+    kind: picked
+    by: off the edges of the faces, so no ray runs along a silhouette
+  - name: group-scan-stop
+    value: 12
+    says: where the scan of rays ends, along x and along y
+    kind: picked
+    by: past the last member of the grid
+  - name: group-scan-step
+    value: 0.2
+    says: how far apart the rays of the scan are
+    kind: picked
+    by: fine enough to cross every member many times
+  - name: group-least-hits
+    value: 100
+    says: the fewest rays of the scan that must meet a face
+    kind: picked
+    by: enough that the scan exercises the members and not only the gaps
+  - name: corners-ray-height
+    value: 5
+    says: how far in front of the z = 0 plane each ray starts
+    kind: picked
+    by: any height in front of the plane does
+  - name: corners-corner-tolerance
+    value: 1e-12
+    says: how near two corners must be to be the same corner
+    kind: picked
+    by: rounding room for a corner carried out of a place
+  - name: corners-range-end
+    value: 100
+    says: a far end of a range that is past every meeting
+    kind: picked
+    by: any number beyond the meetings does
+  - name: corners-placement-scale
+    value: 2
+    says: the scale of the place the member is put in
+    kind: picked
+    by: worked by hand, the unit corners come out at two
+  - name: corners-placed-distance
+    value: 5
+    says: how far down the ray the placed member is met
+    kind: picked
+    by: worked by hand, the ray starts five in front of the plane
+  - name: group-edges-range-end
+    value: 10
+    says: a far end of a range that is past every meeting
+    kind: picked
+    by: any number beyond the meetings does
+  - name: group-edges-hit-distance
+    value: 2
+    says: how far down the ray the triangle is met
+    kind: picked
+    by: worked by hand, the ray starts two above the triangle
+  - name: group-edges-distance-tolerance
+    value: 1e-14
+    says: how far the distance to a member at scale one may be from the exact one
+    kind: picked
+    by: a few units of rounding in the last place
+  - name: group-edges-bounds-width
+    value: 6
+    says: how far along x the two members reach together
+    kind: picked
+    by: worked by hand, the second stands five along and is one wide
+  - name: group-edges-plane-height
+    value: 2
+    says: the signed height of the plane at the point asked about
+    kind: picked
+    by: the point is two up from the plane
+  - name: geometric-normal-measures
+    value: 6
+    says: how many times the distance is asked to measure a normal
+    kind: picked
+    by: a pair of calls along each of the three axes
+  - name: geometric-normal-tolerance
+    value: 1e-6
+    says: how near the measured normal must be to straight up
+    kind: picked
+    by: the step of the measure leaves error of about this size
+  - name: geometric-normal-unit-tolerance
+    value: 1e-9
+    says: how far the length of the measured normal may be from one
+    kind: picked
+    by: rounding room for a vector made unit
+  - name: a-group-window-contracts-start-height
+    value: 2
+    says: how far above the lower face the ray starts, before any scale
+    kind: picked
+    by: worked by hand, the faces are met two and a hair less along the ray
+  - name: a-group-window-contracts-half-window
+    value: 0.001
+    says: how far either side of a face the window of a ray reaches, before scale
+    kind: picked
+    by: narrow enough to hold one face and not its neighbour a hundredth away
+  - name: a-group-window-contracts-distance-tolerance
+    value: 1e-11
+    says: how far a distance found in a window may be from the one worked out
+    kind: picked
+    by: rounding room for a group that is scaled and turned
+  - name: a-group-window-contracts-normal-tolerance
+    value: 1e-12
+    says: how far a normal found in a window may be from the one worked out
+    kind: picked
+    by: rounding room for a normal that is turned
+  - name: a-group-window-contracts-before-near
+    value: 0.1
+    says: the near end of a window short of both faces, before scale
+    kind: picked
+    by: between the ray's start and the faces
+  - name: a-group-window-contracts-before-far
+    value: 0.2
+    says: the far end of a window short of both faces, before scale
+    kind: picked
+    by: short of the nearer face
+  - name: a-group-window-contracts-after-near
+    value: 2.1
+    says: the near end of a window past both faces, before scale
+    kind: picked
+    by: past the farther face
+  - name: a-group-window-contracts-after-far
+    value: 3
+    says: the far end of a window past both faces, before scale
+    kind: picked
+    by: any number past the near end does
+  - name: a-group-window-contracts-turn
+    value: 0.6
+    says: the angle the group is turned by about the axis in the placement
+    kind: picked
+    by: an angle that is not a right angle, so no axis lines up by chance
+  - name: a-group-window-contracts-nearest-height
+    value: 3
+    says: how high above the triangle the point is whose distance is asked
+    kind: picked
+    by: worked by hand, straight above the triangle the distance is the height
+  - name: a-group-window-contracts-nearest-offset
+    value: 0.2
+    says: how far along x and y, before scale, the point is from the corner
+    kind: picked
+    by: inside the triangle at any scale
+  - name: a-group-window-contracts-nearest-tolerance
+    value: 1e-12
+    says: how far the distance to a scaled triangle may be from the height
+    kind: picked
+    by: rounding room for a scale that is not one
+  - name: a-group-window-contracts-bounds-scale
+    value: 2.5
+    says: the scale the tetrahedron is placed at
+    kind: picked
+    by: a scale that is not one and not a power of two
+  - name: a-group-window-contracts-half-x
+    value: 2
+    says: half the width of the tetrahedron's box along x
+    kind: picked
+    by: worked by hand, the corners are four apart along x
+  - name: a-group-window-contracts-half-y
+    value: 3
+    says: half the width of the tetrahedron's box along y
+    kind: picked
+    by: worked by hand, the corners are six apart along y
+  - name: a-group-window-contracts-half-z
+    value: 5
+    says: half the width of the tetrahedron's box along z
+    kind: picked
+    by: worked by hand, the corners are ten apart along z
+  - name: a-group-window-contracts-bounds-tolerance
+    value: 1e-12
+    says: how far a corner of the group's bounds may be from the worked one
+    kind: picked
+    by: rounding room for a box that is turned and scaled
+  - name: a-group-window-contracts-flat-far
+    value: 2
+    says: how far the ray at the flat reference mesh is followed
+    kind: picked
+    by: past the face a unit above which the ray starts
+  - name: sphere-refusals-radius
+    value: 2
+    says: the radius of the sphere a ray of one length and a ray of two are sent at
+    kind: picked
+    by: worked by hand, from ten out a unit ray meets it at eight
+  - name: sphere-refusals-tolerance
+    value: 1e-12
+    says: how far a distance may be from the one worked by hand
+    kind: picked
+    by: rounding room for a root of a quadratic
+  - name: sphere-refusals-long-dir-hit
+    value: 4
+    says: where the ray whose direction is two long meets the sphere
+    kind: picked
+    by: worked by hand, half of the eight a unit ray meets it at
+  - name: sphere-refusals-long-dir-leave
+    value: 6
+    says: where the ray whose direction is two long leaves the sphere
+    kind: picked
+    by: worked by hand, half of the twelve a unit ray leaves it at
+  - name: sphere-refusals-unit-dir-hit
+    value: 8
+    says: where the ray whose direction is one long meets the sphere
+    kind: picked
+    by: worked by hand, ten out less a radius of two
+  - name: sphere-refusals-far-small-offset
+    value: 0.5
+    says: how far off the line of the ray the far small sphere's centre lies
+    kind: picked
+    by: half a radius, so the ray crosses the sphere
+  - name: sphere-refusals-far-small-range
+    value: 1e8
+    says: how far from the origin the far small sphere is
+    kind: picked
+    by: far enough that the square of the distance swallows the radius
+  - name: sphere-refusals-far-small-tolerance
+    value: 1e-6
+    says: how far the hit on the far small sphere may be from the one worked out
+    kind: picked
+    by: rounding room at a distance of a hundred million
+  - name: sphere-refusals-beside-offset
+    value: 1.5
+    says: how far off the line of the ray a centre lies that the ray misses
+    kind: picked
+    by: a radius and a half, past the edge of a sphere of one
+  - name: sphere-refusals-whisker-radius
+    value: 0.001
+    says: the radius of the ring of a tube of no length
+    kind: picked
+    by: as thin as a whisker
+  - name: sphere-refusals-whisker-wall
+    value: 0.002
+    says: how thick the wall of that tube is
+    kind: picked
+    by: twice the radius, so there is no hole
+  - name: sphere-refusals-whisker-distance
+    value: 0.001
+    says: how far from the outside of the wall the point asked about lies
+    kind: picked
+    by: worked by hand, three thousandths out less the two of the wall
+  - name: sphere-refusals-whisker-tolerance
+    value: 1e-15
+    says: how far the whisker's distance may be from the worked one
+    kind: picked
+    by: a few units of rounding in the last place of thousandths
+  - name: sphere-refusals-plain-radius
+    value: 1.3
+    says: the radius of the sphere met by the rays solved in the plain form
+    kind: picked
+    by: any radius does; this is not a round number
+  - name: sphere-refusals-tube-radius
+    value: 2
+    says: the radius of the ring of the tube that has a wall and a length
+    kind: picked
+    by: a ring of a few metres
+  - name: sphere-refusals-tube-wall
+    value: 0.2
+    says: how thick the wall of that tube is
+    kind: picked
+    by: a tenth of the radius
+  - name: sphere-refusals-tube-length
+    value: 1
+    says: how long that tube is along its axis
+    kind: picked
+    by: any length does; one is short and plain
+  - name: tube-mesh-slack
+    value: 1e-9
+    says: the room left for rounding when a distance is held to the chord share
+    kind: picked
+    by: well under the share of any tube the tests mesh
+  - name: tube-mesh-quarter-share
+    value: 0.25
+    says: a chord share coarse enough that the mesh has too few sides
+    kind: picked
+    by: a quarter of the radius leaves a ring of a few sides
+  - name: tube-mesh-hollow-faces
+    value: 8
+    says: how many faces a hollow tube has for each side of its ring
+    kind: picked
+    by: worked by hand, two walls and two flat rings, two faces to a side each
+  - name: tube-mesh-solid-faces
+    value: 4
+    says: how many faces a tube with no hole has for each side of its ring
+    kind: picked
+    by: worked by hand, a wall and two discs, a face to a side each
+  - name: tube-mesh-normal-tolerance
+    value: 1e-12
+    says: how far the length of a normal of the mesh may be from one
+    kind: picked
+    by: rounding room for a vector made unit
+  - name: shape-property-samples
+    value: 8
+    says: the most samples a side of a drawn field has
+    kind: picked
+    by: enough for a field with several cells and quick to check
+  - name: shape-property-height
+    value: 5.0
+    says: how high or low a drawn height may be
+    kind: picked
+    by: a few metres either side of nought
+  - name: shape-property-extent
+    value: 50.0
+    says: the widest a drawn field is, across
+    kind: picked
+    by: a few tens of metres
+  - name: shape-property-least-extent
+    value: 1
+    says: the narrowest a drawn field is, across
+    kind: picked
+    by: a metre
+  - name: shape-property-rise
+    value: 20.0
+    says: how far above the highest sample a drawn ray starts, at most
+    kind: picked
+    by: a few times the greatest height
+  - name: shape-property-least-step
+    value: 0.01
+    says: the least a drawn ray starts above the field and the least it leans down
+    kind: picked
+    by: above the field and heading to it, but not by a whisker
+  - name: shape-property-far
+    value: 1e6
+    says: how far a drawn ray is followed
+    kind: picked
+    by: past every field the tests draw
+  - name: shape-property-slack
+    value: 1e-9
+    says: the share of the distance a bound may exceed the truth by, for rounding
+    kind: picked
+    by: rounding room well under any distance drawn
+  - name: shape-property-range
+    value: 1e3
+    says: how far a drawn place in a shape's own space is from its zero
+    kind: picked
+    by: a few thousand metres, past any shape the tests draw
+  - name: shape-property-huge
+    value: 1e200
+    says: the size of a coordinate that is huge but not infinite
+    kind: picked
+    by: far past any shape, and its square is past the largest number
+  - name: shape-property-tiny
+    value: 1e-200
+    says: the size of a coordinate that is tiny but not nought
+    kind: picked
+    by: far under any shape, and its square is under the smallest number
+  - name: shape-property-ramp-extent
+    value: 1
+    says: how wide the steep ramp is, across
+    kind: picked
+    by: worked by hand, a rise of ten over one
+  - name: shape-property-flat-samples
+    value: 3
+    says: how many samples a side of the flat field has
+    kind: picked
+    by: the fewest that has a cell with a middle
+  - name: shape-property-flat-extent
+    value: 2
+    says: how wide the flat field is, across
+    kind: picked
+    by: a couple of metres
+  - name: shape-property-tube-radius
+    value: 2
+    says: the radius of the ring of the tube asked about at every point
+    kind: picked
+    by: a ring of a few metres
+  - name: shape-property-tube-wall
+    value: 0.2
+    says: how thick the wall of that tube is
+    kind: picked
+    by: a tenth of the radius
+  - name: shape-property-tube-length
+    value: 1
+    says: how long that tube is along its axis
+    kind: picked
+    by: any length does; one is short and plain
+  - name: heightfield-refusals-samples
+    value: 4
+    says: how many samples a side of the sloped field has
+    kind: picked
+    by: a few, so the field has cells with a slope across them
+  - name: heightfield-refusals-rise
+    value: 0.1
+    says: how much the sloped field rises along x from one sample to the next
+    kind: picked
+    by: a tenth of a metre, a gentle slope over a metre
+  - name: heightfield-refusals-extent
+    value: 1
+    says: how wide the fields that are made, are across
+    kind: picked
+    by: a metre
+  - name: heightfield-refusals-small-samples
+    value: 3
+    says: how many samples a side of the field of no height has
+    kind: picked
+    by: the fewest that has a cell with a middle

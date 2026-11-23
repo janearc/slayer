@@ -1,0 +1,90 @@
+# every number scene/bodies chose that is not true by definition, with what
+# it is and why it was chosen. the code asks for each by name, through pick.
+# a number true by definition is a constant in the code whose comment says
+# it is defined. where the old code gave no reason, the entry says so.
+numbers:
+  - name: most-rungs
+    value: 32
+    says: the most rungs a body may be painted or lit below its own tiles
+    kind: picked
+    by: a rung splits a tiling twice as finely and a tiling stops splitting at 500 million splits, which is 29 doublings from one split, so more rungs than this change nothing
+  - name: moon-detail-divisor
+    value: 2
+    says: the share of its primary's detail that a moon's ground is tiled at, as a divisor
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: moon-detail-least
+    value: 2
+    says: the fewest splits a moon's ground is tiled at
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: jets-seed-offset
+    value: 4
+    says: what is added to a body's seed to seed its jets
+    kind: picked
+    by: any nonzero offset keeps the jets from growing from the same noise as the disc
+  - name: hole-reach
+    value: 20
+    says: how many horizon radii out a hole's field bends rays
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: horizon-ball-margin
+    value: 1.02
+    says: how much wider than the horizon's equator the ball that wears the hex lines is
+    kind: picked
+    by: just outside the horizon, since nothing on the horizon itself can be seen
+  - name: horizon-hex-splits
+    value: 6
+    says: how many times each icosahedron face of the horizon's hex ball is split
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: coma-wisp-divisor
+    value: 3
+    says: how many wisps' widths a coma's radius holds
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: coma-wisp-amount
+    value: 0.5
+    says: how far the wisps thin a coma
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: tail-wisp-widths
+    value: 3
+    says: how many base widths long the wisps of a tail are
+    kind: picked
+    by: a few base widths, so the wisps are several pixels long from any distance the tail is seen at
+  - name: night-glow-default
+    value: 0.004
+    says: the glow, as a share of the sun's light, that lights at night are given when none is said
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: coast-reach
+    value: 0.04
+    says: how far from a point on a wrapped map, in radians of the sphere, water is looked for to call the point a coast
+    kind: picked
+    by: within a few degrees, which is about two and a third
+  - name: radar-rungs
+    value: 3
+    says: how many rungs below the world's own tiles a radar roughness map is painted
+    kind: picked
+    by: a radar map is finer than the paint; the figure is chosen, not from any data
+  - name: radar-vary
+    value: 0.3
+    says: the share by which each fine tile of a radar roughness map varies in brightness
+    kind: picked
+    by: chosen, not from any data
+  - name: radar-mix
+    value: 0.35
+    says: the share by which a neighbouring class is let into a radar roughness map
+    kind: picked
+    by: chosen, not from any data
+  - name: bare-grey
+    value: 0.5
+    says: the grey of a ball that has no ground, as a share of white
+    kind: picked
+    by: the middle of black and white; no other reason was written down
+  - name: orbit-years-limit
+    value: 292
+    says: the years of a period at and past which an orbit is refused
+    kind: picked
+    by: a time.Duration holds 292.27 years, and this is a little on the safe side of it

@@ -5,7 +5,7 @@ go 1.27.3
 require (
 	github.com/creack/pty v1.1.24
 	github.com/janearc/celestial v0.0.10
-	github.com/janearc/celestial-data v0.0.4
+	github.com/janearc/celestial-data v0.0.5
 	github.com/janearc/libtheme-css v0.4.6
 	github.com/janearc/puzzlemouth v0.1.4
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
@@ -21,6 +21,7 @@ require (
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/scigolib/netcdf v0.0.0-20261120113335-5be112aa81c3 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	golang.org/x/sync v0.23.0 // indirect

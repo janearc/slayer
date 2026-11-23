@@ -1,0 +1,37 @@
+# spitzer, a specimen view: the telescope alone in space, lit by the sun.
+# not an orbit. sources and visual choices:
+# doc/model/spacecraft/space-observatories.md.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Spitzer, a specimen
+  # picked: the scene's seed, stirred with the thing's own
+  seed: 11
+  setting: space
+  light: sun
+  # picked: high and off to one side, so the tube shades round
+  sun: {azimuth: 220, altitude: 40}
+  set:
+    things:
+      the telescope:
+        kind: spitzer
+        seed: 5
+        complexity: demo
+        east: 0
+        north: 0
+  film:
+    width: 960
+    height: 720
+    rays: 3
+    # picked: sunlight on white paint, held under the film's white
+    exposure: 0.003
+    wide: 40
+  cameras:
+    specimen:
+      title: the tube, its panel and the bus below
+      location:
+        loc_relative:
+          object: the telescope
+          standoff_x: -5
+          standoff_y: -7
+          standoff_z: 6
+      orientation: {point_to: the telescope, alpha: -25}

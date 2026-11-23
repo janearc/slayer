@@ -29,12 +29,13 @@ type pendingMesh struct {
 type keptPool struct {
 	keys                     []meshKey
 	triangles, bends, nodes  []byte
-	faceNodes                []node
+	runs                     map[int]faceRun
 	triangleCount, nodeCount int
 }
 
 // shapeTree is a shape.Mesh's tree for the pool: kept by its bytes where
-// the scene has a keeper, and grown otherwise.
+// the scene has a keeper, and grown otherwise. It is the one tree the
+// encoder still grows, over float64 faces; see skinTree for the other.
 func (encoded *scene) shapeTree(made *shape.Mesh) pendingMesh {
 	if encoded.keeper != nil {
 		return encoded.keeper.shapeTree(made)
@@ -42,23 +43,26 @@ func (encoded *scene) shapeTree(made *shape.Mesh) pendingMesh {
 	return pendingMesh{tree: grownOver(meshFaces(made))}
 }
 
-// slayersTree is one of slayer's meshes' tree for the pool: kept by its
-// faces where the scene has a keeper, and grown otherwise.
+// slayersTree is one of slayer's meshes' tree for the pool: the mesh's
+// own, kept by its faces where the scene has a keeper.
 func (encoded *scene) slayersTree(skin *mesh.Mesh) pendingMesh {
 	if encoded.keeper != nil {
 		return encoded.keeper.slayersTree(skin)
 	}
-	return pendingMesh{tree: grownOver(slayersFaces(skin))}
+	return pendingMesh{tree: skinTree(skin)}
 }
 
 // pend puts a mesh's tree in line for the pool, and says where it will
 // be there: its root, after the boxes of every tree in line before it,
 // as pooled would place it, and the box round it in its own space.
 func (encoded *scene) pend(waiting pendingMesh) pooled {
+	if encoded.lowRetention {
+		return encoded.pooled(waiting.tree.faced())
+	}
 	at := pooled{root: encoded.pendingNodes,
-		bounds: waiting.tree.nodes[0].bounds}
+		bounds: waiting.tree.rootBounds()}
 	encoded.pending = append(encoded.pending, waiting)
-	encoded.pendingNodes += len(waiting.tree.nodes)
+	encoded.pendingNodes += waiting.tree.nodeCount()
 	return at
 }
 
@@ -66,18 +70,24 @@ func (encoded *scene) pend(waiting pendingMesh) pooled {
 // boxes: taken whole from the keeper's last pool where it has the same
 // meshes in the same order, and packed and kept otherwise.
 func (encoded *scene) packPool() error {
+	memoryStage("pool-before")
+	if encoded.lowRetention {
+		err := encoded.tree(encoded.faces)
+		memoryStage("pool-packed")
+		return err
+	}
 	waiting := encoded.pending
 	encoded.pending = nil
 	if encoded.keeper.serves(encoded, waiting) {
+		memoryStage("pool-reused")
 		return nil
 	}
-	for _, each := range waiting {
-		encoded.pooled(each.tree)
-	}
-	if err := encoded.tree(encoded.faces); err != nil {
+	if err := encoded.packPending(waiting); err != nil {
 		return err
 	}
+	memoryStage("pool-packed")
 	encoded.keeper.keep(encoded, waiting)
+	memoryStage("pool-retained")
 	return nil
 }
 
@@ -109,7 +119,7 @@ func (keeper *keptTrees) serves(encoded *scene, waiting []pendingMesh) bool {
 	encoded.triangles.bytes = last.triangles
 	encoded.bends.bytes = last.bends
 	encoded.nodes.bytes = last.nodes
-	encoded.faces.nodes = last.faceNodes
+	encoded.runs = last.runs
 	encoded.counts.triangles = last.triangleCount
 	encoded.counts.nodes = last.nodeCount
 	keeper.pooling = last
@@ -133,7 +143,7 @@ func (keeper *keptTrees) keep(encoded *scene, waiting []pendingMesh) {
 		triangles:     slices.Clip(encoded.triangles.bytes),
 		bends:         slices.Clip(encoded.bends.bytes),
 		nodes:         slices.Clip(encoded.nodes.bytes),
-		faceNodes:     slices.Clip(encoded.faces.nodes),
+		runs:          encoded.runs,
 		triangleCount: encoded.counts.triangles,
 		nodeCount:     encoded.counts.nodes}
 }

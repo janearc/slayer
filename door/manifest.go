@@ -154,8 +154,8 @@ func (book *ledger) removeAll() error {
 			failed = append(failed, err)
 		}
 	}
-	failed = append(failed, os.Remove(filepath.Join(book.folder,
-		manifestName)))
+	manifestPath := filepath.Join(book.folder, manifestName)
+	failed = append(failed, os.Remove(manifestPath))
 	return errors.Join(failed...)
 }
 

@@ -70,10 +70,12 @@ func TestWakeFoamAddsOpaqueDiffuseShareToClearWaterBoundary(t *testing.T) {
 		}
 		world := thing.NewWorld()
 		world.Add(thing.Thing{Shape: field, Material: &material})
+		groundAt := thing.Still(maths.Subspace{Origin: maths.V(0, -10, 0)})
 		world.Add(thing.Thing{Shape: shape.Plane{},
 			Material: &thing.Material{Colour: maths.Grey(.3)},
-			Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, -10, 0)})})
-		world.Lamp(thing.Sun(maths.Up, maths.Grey(5)))
+			Motion:   groundAt})
+		light := maths.Grey(5)
+		world.Lamp(thing.Sun(maths.Up, light))
 		return world
 	}
 	eye := mediumEye(maths.V(0, 2, 0), maths.Up.Neg())

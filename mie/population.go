@@ -6,10 +6,10 @@ import (
 	"math"
 )
 
-// ErrPopulation is a population that cannot be made or asked: a radius
+// errPopulation is a population that cannot be made or asked: a radius
 // not above nought, a spread not above one, a wavelength not above
 // nought, or any of them not a number.
-var ErrPopulation = errors.New("mie: the population is refused")
+var errPopulation = errors.New("mie: the population is refused")
 
 // The quadrature over a population's radii.
 const (
@@ -41,7 +41,7 @@ func NewPopulation(radius, spread float64) (Population, error) {
 	if !(radius > 0) || !(spread > 1) {
 		return Population{}, fmt.Errorf("%w: a radius of %g and a "+
 			"spread of %g are not above nought and above one",
-			ErrPopulation, radius, spread)
+			errPopulation, radius, spread)
 	}
 	return Population{meanRadius: radius, spread: spread}, nil
 }
@@ -77,7 +77,7 @@ type moments struct {
 // the compiler may fuse a product into the sum it feeds, and the sum of
 // scattering can then come out more than the sum of extinction, an albedo
 // over one by a rounding.
-func (total *moments) add(weight, area float64, each Efficiencies) {
+func (total *moments) add(weight, area float64, each efficiencies) {
 	held := weight * area
 	extinction := float64(held * each.Extinction)
 	scattering := float64(held * each.Scattering)
@@ -101,12 +101,12 @@ func (total moments) averages() Averages {
 // fixed sum over quadraturePoints radii, evenly spaced in the log of
 // the radius over quadratureSpan standard deviations either side, each
 // weighted by the log-normal's density there. It refuses a wavelength
-// not above nought, and what Sphere refuses of any radius in the sum.
+// not above nought, and what sphere refuses of any radius in the sum.
 func (population Population) Average(wavelength float64,
 	index complex128) (Averages, error) {
 	if !(wavelength > 0) {
 		return Averages{}, fmt.Errorf("%w: a wavelength of %g is not "+
-			"above nought", ErrPopulation, wavelength)
+			"above nought", errPopulation, wavelength)
 	}
 	var total moments
 	width := math.Log(population.spread)
@@ -114,7 +114,7 @@ func (population Population) Average(wavelength float64,
 		fraction := float64(point) / (quadraturePoints - 1)
 		offset := quadratureSpan * (2*fraction - 1) // defined: from minus the span to plus it
 		radius := population.meanRadius * math.Exp(offset*width)
-		each, err := Sphere(2*math.Pi*radius/wavelength, index) // defined: x = 2 pi r / lambda
+		each, err := sphere(2*math.Pi*radius/wavelength, index) // defined: x = 2 pi r / lambda
 		if err != nil {
 			return Averages{}, err
 		}

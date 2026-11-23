@@ -1,0 +1,1 @@
+check-cassini-huygens . :: go test -p=1 ./manufacture -run ^TestCassiniAndHuygensAreSeparateDetailedKinds -v -count=1 -timeout=120s

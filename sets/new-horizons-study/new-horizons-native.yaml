@@ -1,0 +1,20 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: New Horizons NASA model manufactory study
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 180, altitude: 35}
+  set:
+    things:
+      probe:
+        kind: new-horizons
+        seed: 5
+        east: 0
+        north: 0
+  film: {width: 1080, height: 960, rays: 4, exposure: 0.003, wide: 32}
+  cameras:
+    concept:
+      title: New Horizons manufacturable NASA printable geometry
+      location: {at: [4, -10, 5]}
+      orientation: {look_at: [0, 0, 1]}

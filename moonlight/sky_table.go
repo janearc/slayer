@@ -22,8 +22,8 @@ const skyNumbers = 3 + skyRises*skyRounds*3
 // float64Bytes is the bytes a float64 takes. Defined.
 const float64Bytes = 8
 
-// SkyBytes is how many bytes Bytes gives and SkyFromBytes takes.
-const SkyBytes = skyNumbers * float64Bytes
+// skyBytes is how many bytes Bytes gives and SkyFromBytes takes.
+const skyBytes = skyNumbers * float64Bytes
 
 // Bytes is the sky's way to its light and its table, as bytes.
 func (sky *Sky) Bytes() []byte {
@@ -35,7 +35,7 @@ func (sky *Sky) Bytes() []byte {
 			numbers = append(numbers, point.R, point.G, point.B)
 		}
 	}
-	made := make([]byte, 0, SkyBytes)
+	made := make([]byte, 0, skyBytes)
 	for _, number := range numbers {
 		made = binary.LittleEndian.AppendUint64(made,
 			math.Float64bits(number))
@@ -46,9 +46,9 @@ func (sky *Sky) Bytes() []byte {
 // SkyFromBytes is the sky Bytes gave, or a refusal of bytes that are not
 // a sky's, by their length.
 func SkyFromBytes(raw []byte) (*Sky, error) {
-	if len(raw) != SkyBytes {
+	if len(raw) != skyBytes {
 		return nil, fmt.Errorf("moonlight: a sky is %d bytes, not %d",
-			SkyBytes, len(raw))
+			skyBytes, len(raw))
 	}
 	next := func() float64 {
 		number := math.Float64frombits(binary.LittleEndian.Uint64(raw))

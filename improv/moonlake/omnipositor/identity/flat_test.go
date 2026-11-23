@@ -162,14 +162,16 @@ func TestOwnershipSurvivesReopenAndMissingGeneration(t *testing.T) {
 	if _, err := store.Publish(k, data, false); err != nil {
 		t.Fatal(err)
 	}
-	target, err := os.Readlink(filepath.Join(dir, fmt.Sprintf("%05d.png", k.frame)))
+	name := fmt.Sprintf("%05d.png", k.frame)
+	target, err := os.Readlink(filepath.Join(dir, name))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := store.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.RemoveAll(filepath.Join(dir, filepath.Dir(target))); err != nil {
+	parent := filepath.Dir(target)
+	if err := os.RemoveAll(filepath.Join(dir, parent)); err != nil {
 		t.Fatal(err)
 	}
 	store, err = Open(dir)

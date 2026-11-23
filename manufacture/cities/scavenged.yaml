@@ -1,0 +1,92 @@
+# The scavenged cluster, 2026-11-19. Whole things the manufactory already
+# makes, joined where they touch. This is its version 1, in orbit, so
+# nothing settles and the parts dock round a common centre of mass. Every
+# value is picked, not measured. Dimensions are metres, shares are from zero
+# to one, colours are shares of light, each channel from zero to one, and
+# gloss is how much of a mirror a surface is. Which kinds the parts are
+# drawn from is the set's to say; a set that says none gets any kind that
+# fits the size range here, and the count and band spacing here are what a
+# set that says none gets.
+numbers:
+- name: scavenged-part-count
+  value: 12
+  says: how many parts a cluster is drawn from, the core and those lashed on
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-size-least
+  value: 3
+  unit: m
+  says: the smallest largest-dimension of a part drawn from any kind
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-size-most
+  value: 120
+  unit: m
+  says: the greatest largest-dimension of a part drawn from any kind
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-draw-tries
+  value: 32
+  says: how many kinds are drawn for one part before it is said that none fits
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-direction-tries
+  value: 64
+  says: how many directions are drawn for one part to dock from before it is said that none meets the cluster
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-band-width
+  value: 0.3
+  unit: m
+  says: how wide a band is, along the axis it wraps about
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-band-thickness
+  value: 0.05
+  unit: m
+  says: how thick a band is, outward from the parts it wraps
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-band-spacing
+  value: 10
+  unit: m
+  says: the distance between bands along the shorter part, unless the set says another
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-usable-share
+  value: 0.5
+  says: the share of a part's enclosed volume that is room people use, the rest being walls, machinery and stores
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-storey-height
+  value: 2.4
+  unit: m
+  says: height of one storey inside a part, which turns usable volume into floor
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: scavenged-floor-per-person
+  value: 10
+  unit: m^2
+  says: floor each person has, a crowded camp's figure
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: lashing-red
+  value: 0.12
+  says: red of a tether, dark rope
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: lashing-green
+  value: 0.1
+  says: green of a tether, dark rope
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: lashing-blue
+  value: 0.07
+  says: blue of a tether, dark rope
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"
+- name: lashing-gloss
+  value: 0.05
+  says: how much of a mirror a tether is
+  kind: picked
+  by: "scavenged orbit, 2026-11-19"

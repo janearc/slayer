@@ -47,7 +47,9 @@ func composeInputs(t *testing.T, p *plan) (*thing.World, *flatHeights, *prototyp
 func TestComposeWithoutSite(t *testing.T) {
 	p := smallPlan()
 	world, heights, store, floors, origin := composeInputs(t, p)
-	record, err := p.compose(t.Context(), world, testSphere(t), heights, lookDown(t, maths.V(0, 40, 0), maths.V(0, 7, 0)), origin, store, floors)
+	globe := testSphere(t)
+	looking := lookDown(t, maths.V(0, 40, 0), maths.V(0, 7, 0))
+	record, err := p.compose(t.Context(), world, globe, heights, looking, origin, store, floors)
 	if record != nil || err != nil {
 		t.Errorf("record %v error %v", record, err)
 	}
@@ -61,7 +63,9 @@ func TestComposeBuildsSite(t *testing.T) {
 	world, heights, store, floors, origin := composeInputs(t, p)
 	paint := paintedWorld(&siteBuilder{world: world})
 	paint.forest = nil
-	record, err := p.compose(t.Context(), world, testSphere(t), heights, lookDown(t, maths.V(0, 40, 0), maths.V(0, 7, 0)), origin, store, floors)
+	globe := testSphere(t)
+	looking := lookDown(t, maths.V(0, 40, 0), maths.V(0, 7, 0))
+	record, err := p.compose(t.Context(), world, globe, heights, looking, origin, store, floors)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +107,9 @@ func TestComposeSortsCrownFits(t *testing.T) {
 		store.values[key] = prototype{fit: fit(side)}
 	}
 	store.values[prototypeKey{kind: "oak", seed: 1, detail: "clumps"}] = prototype{}
-	record, err := p.compose(t.Context(), world, testSphere(t), heights, lookDown(t, maths.V(0, 40, 0), maths.V(0, 7, 0)), origin, store, floors)
+	globe := testSphere(t)
+	looking := lookDown(t, maths.V(0, 40, 0), maths.V(0, 7, 0))
+	record, err := p.compose(t.Context(), world, globe, heights, looking, origin, store, floors)
 	if err != nil {
 		t.Fatal(err)
 	}

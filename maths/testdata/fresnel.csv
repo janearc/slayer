@@ -1,0 +1,6 @@
+name,cosine,index,want,tolerance
+square on from the air,1,1.33,0.0200593,1e-7
+45 degrees from the air,0.707107,1.33,0.027521,2e-6
+the same boundary from the water,0.846958,0.7518796992481203,0.027521,2e-6
+past the critical angle,0.5,0.7518796992481203,1,0
+grazing from the air,0,1.33,1,0

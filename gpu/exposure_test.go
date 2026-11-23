@@ -5,11 +5,13 @@ package gpu
 import (
 	"errors"
 	"math"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 	"github.com/janearc/slayer/metal"
 	thin "github.com/janearc/slayer/ninjafilm/lens"
 	"github.com/janearc/slayer/render/frame"
@@ -36,8 +38,9 @@ const (
 	probeTime  = 6
 )
 
-// probePrimary asks the kernel's own exposed for every sample's ray, and
-// its shutter_time, so the rays are checked apart from any picture.
+// probePrimary asks the kernel's own exposed for every sample's ray, at
+// the place its own placed gives the sample, and its shutter_time, so
+// the rays are checked apart from any picture.
 const probePrimary = `
 kernel void probe_primary(constant Header *header [[buffer(0)]],
                           device float *out [[buffer(1)]],
@@ -45,7 +48,7 @@ kernel void probe_primary(constant Header *header [[buffer(0)]],
                           uint2 at [[thread_position_in_grid]],
                           uint2 grid [[threads_per_grid]]) {
 	uint2 sample = uint2(at.x, at.y + origin.y);
-	Primary made = exposed(header, sample);
+	Primary made = exposed(header, sample, placed(header, sample));
 	device float *ray = out + (at.y * grid.x + at.x) * 7;
 	ray[0] = made.from.x, ray[1] = made.from.y, ray[2] = made.from.z;
 	ray[3] = made.way.x, ray[4] = made.way.y, ray[5] = made.way.z;
@@ -57,15 +60,19 @@ kernel void probe_primary(constant Header *header [[buffer(0)]],
 // the kernel knows a pinhole and a thin lens by their types and no other.
 type rayGiven struct{ film.Sensor }
 
+// the two multipliers SplitMix64 defines, as the kernel's unit_of writes
+// them: it steps its second and third indices by them before it stirs.
+const (
+	unitSecondStep = 0xbf58476d1ce4e5b9
+	unitThirdStep  = 0x94d049bb133111eb
+)
+
 // unitOf is the kernel's unit_of: SplitMix64 over a seed and three
 // indices, cut to a float's twenty-four bits.
 func unitOf(seed uint64, a, b, c int) float64 {
-	stirred := seed + splitGolden*uint64(a+1) + splitOnce*uint64(b+1) +
-		splitTwice*uint64(c+1)
-	stirred = (stirred ^ stirred>>splitFirst) * splitOnce
-	stirred = (stirred ^ stirred>>splitSecond) * splitTwice
-	stirred ^= stirred >> splitThird
-	return float64(stirred>>hashDrop) * hashUnit
+	stirred := seed + noise.Golden*uint64(a+1) +
+		unitSecondStep*uint64(b+1) + unitThirdStep*uint64(c+1)
+	return float64(noise.Mix(stirred)>>hashDrop) * hashUnit
 }
 
 // shutterTime is the kernel's shutter_time, step for step, in a float's
@@ -312,17 +319,29 @@ func TestAShareOfTheSquareIsAWholeNumber(t *testing.T) {
 }
 
 // a closed shutter over a pinhole writes nothing in the header's new
-// rows, so the kernel makes the ray it always made
+// rows but the samples along a pixel's side, which a wrinkle fades by:
+// its exposure row says the shutter and the aperture are shut, so the
+// kernel makes the ray it always made, and carries the side, one where
+// none is given
 func TestAClosedShutterAndNoApertureWriteNoExposure(t *testing.T) {
 	_, eye := hall(t)
 	view := viewValues(eye, shotLens, shutter{}, openWidth, openHeight)
 	for _, name := range []string{"close_origin", "close_right",
-		"close_back", "optics", "exposure"} {
+		"close_back", "optics"} {
 		for index, value := range view[name] {
 			if value != 0 {
 				t.Errorf("%s[%d] is %v with the shutter closed and no "+
 					"aperture", name, index, value)
 			}
+		}
+	}
+	for side, want := range map[int][]float64{0: {0, 0, 1},
+		openSide: {0, 0, openSide}} {
+		view = viewValues(eye, shotLens, shutter{side: side}, openWidth,
+			openHeight)
+		if got := view["exposure"]; !slices.Equal(got, want) {
+			t.Errorf("the closed exposure at a side of %d is %v; want %v",
+				side, got, want)
 		}
 	}
 }

@@ -6,6 +6,11 @@ import yaml "gopkg.in/yaml.v3"
 // Unspecified placements retain their existing seeded turn.
 func (made Thing) Heading() (float64, bool) { return said(made.heading) }
 
+// Heading is the box's turn about its middle, in degrees clockwise seen
+// from above, and whether the set says one. A box that says none keeps its
+// width along east and west.
+func (made Box) Heading() (float64, bool) { return said(made.heading) }
+
 type headingReader struct {
 	reading reader
 	target  **float64

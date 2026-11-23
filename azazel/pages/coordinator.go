@@ -15,7 +15,7 @@ import (
 )
 
 // TickEvery is how often the coordinator publishes while any job is live.
-const TickEvery = 10 * time.Second // defined: agreed with an agent, 2026-11-15
+const TickEvery = 10 * time.Second // picked: the gap between two looks at the render folders
 
 // galleryEvery is the least time between two gallery publications while
 // jobs run.
@@ -115,6 +115,7 @@ type Coordinator struct {
 	ended     map[uint64]time.Time
 	retryEnds map[uint64]bool
 	films     map[Folder]*sync.Mutex
+	swept     map[Folder]bool
 	failures  map[Folder]error
 	encoding  sync.WaitGroup
 
@@ -131,11 +132,24 @@ type Coordinator struct {
 // it has to say to log.
 func New(settings Settings, log io.Writer) *Coordinator {
 	made := publisherOf(settings)
+	made.sweepGallery(log)
 	return &Coordinator{publisher: made, every: settings.Every, log: log,
 		keeper: barkeep{path: filepath.Join(made.root, progressName)},
 		jobs:   map[uint64]*live{}, passed: map[uint64]bool{}, ended: map[uint64]time.Time{}, retryEnds: map[uint64]bool{},
-		films:    map[Folder]*sync.Mutex{},
+		films: map[Folder]*sync.Mutex{}, swept: map[Folder]bool{},
 		failures: map[Folder]error{}, paces: map[Folder]*pace{}}
+}
+
+// sweepGallery removes the temporary files a killed coordinator left in
+// the gallery's own folders, the root and its two shelves.
+func (p publisher) sweepGallery(log io.Writer) {
+	for _, dir := range []string{p.root, filepath.Join(p.root, framesShelf),
+		filepath.Join(p.root, animationsShelf)} {
+		if err := removeLeftovers(dir); err != nil {
+			fmt.Fprintf(log, "%s: leftover temporary files were not all removed: %v\n",
+				p.now().Format(time.RFC3339), err)
+		}
+	}
 }
 
 // Start records a job as live, when it writes into a render folder, as
@@ -147,6 +161,7 @@ func (c *Coordinator) Start(job queue.Job) {
 		c.passOver(job.Sequence, reason)
 		return
 	}
+	c.sweepOnce(folder)
 	record := &live{sequence: job.Sequence, folder: folder,
 		inputs: job.Request.Inputs, started: job.Started,
 		said: map[string]bool{}}
@@ -158,6 +173,22 @@ func (c *Coordinator) Start(job queue.Job) {
 	c.state.Lock()
 	defer c.state.Unlock()
 	c.jobs[job.Sequence] = record
+}
+
+// sweepOnce removes the temporary files a killed coordinator left in a
+// render folder, the first time this one meets the folder: a second
+// sweep would take a temporary a live encode is filling.
+func (c *Coordinator) sweepOnce(folder Folder) {
+	c.state.Lock()
+	again := c.swept[folder]
+	c.swept[folder] = true
+	c.state.Unlock()
+	if again {
+		return
+	}
+	if err := removeLeftovers(folder.path(c.publisher.root)); err != nil {
+		c.note("leftover temporary files were not all removed: " + err.Error())
+	}
 }
 
 // liveJobs is the live jobs, oldest first.
@@ -416,9 +447,9 @@ func (c *Coordinator) finalFilm(ctx context.Context, record *live) error {
 		look)
 }
 
-// endLine writes barkeep's last line for a render that owned it: done
-// equal to the total and nought left when it succeeded, else the count it
-// reached with the time left unknown.
+// endLine writes barkeep's last line for a render that owned it: the
+// count of pictures that exist, and nought left when it succeeded and the
+// count has reached the total, else the time left unknown.
 func (c *Coordinator) endLine(record *live, counts map[Folder]int64,
 	result queue.Result, now time.Time) error {
 	progress := c.paces[record.folder]
@@ -429,8 +460,8 @@ func (c *Coordinator) endLine(record *live, counts map[Folder]int64,
 	total := c.ownerTotal
 	perMinute, _ := progress.add(now.Unix(), done, total)
 	left := int64(unknownLeft)
-	if result.State == queue.Succeeded {
-		done, left = total, 0
+	if result.State == queue.Succeeded && done >= total {
+		left = 0
 	}
 	if c.keeper.free(now.Unix()) {
 		err := c.keeper.write(done, total, perMinute, left, now.Unix())

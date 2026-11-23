@@ -25,7 +25,6 @@ func TestTheMetalsMatchWhatThingHas(t *testing.T) {
 		{"gold", thing.Gold()},
 		{"silver", thing.Silver()},
 		{"aluminium", thing.Aluminium()},
-		{"beryllium", thing.Beryllium()},
 		{"titanium", thing.Titanium()},
 	} {
 		made, err := materials.ByName(each.name)

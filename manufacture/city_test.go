@@ -25,7 +25,8 @@ func TestCityPlacesTenThousandBuildingsWithStreetAndCircleClearance(t *testing.T
 		t.Fatalf("buildings: %d", len(buildings))
 	}
 	if len(layout.Roundabouts()) != 16 {
-		t.Fatalf("roundabouts: %d", len(layout.Roundabouts()))
+		roundabouts := len(layout.Roundabouts())
+		t.Fatalf("roundabouts: %d", roundabouts)
 	}
 	seen := map[uint64]bool{}
 	families := map[string]int{}
@@ -229,7 +230,8 @@ func TestCityRoundaboutsConnectApproachesAndKeepTheCentreRoadFree(t *testing.T) 
 	road, island := made.groups[cityRoad], made.groups[cityIsland]
 	at := layout.Roundabouts()[0].At
 	hit := func(group *shape.MeshGroup, x, z float64) bool {
-		_, found := group.Hit(maths.Ray{At: at.Add(maths.V(x, 10, z)), Dir: maths.V(0, -1,
+		start := at.Add(maths.V(x, 10, z))
+		_, found := group.Hit(maths.Ray{At: start, Dir: maths.V(0, -1,
 			0)}, 0, 20)
 		return found
 	}

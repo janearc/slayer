@@ -41,7 +41,8 @@ func TestExecutionRequiresALiveGameLane(t *testing.T) {
 	if heldLane("gpu") == nil {
 		t.Fatal("accepted unheld lock")
 	}
-	if err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+	descriptor := int(file.Fd())
+	if err = syscall.Flock(descriptor, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
 		t.Fatal(err)
 	}
 	if err = heldLane("gpu"); err != nil {
@@ -66,7 +67,8 @@ func holdFixtureLane(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+	descriptor := int(file.Fd())
+	if err = syscall.Flock(descriptor, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
 		file.Close()
 		t.Fatal(err)
 	}

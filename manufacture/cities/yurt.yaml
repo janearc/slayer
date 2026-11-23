@@ -1,0 +1,856 @@
+# The yurt, 2026-11-19. A typical Mongolian ger, drawn as a lattice wall, a
+# roof of poles under felt, a crown ring and a door. Every value is picked,
+# not measured. Dimensions are metres, except the door's heading, in
+# degrees; sides are counts; colours are shares of light, each channel from
+# zero to one, and gloss is how much of a mirror a surface is.
+numbers:
+- name: circle-sides-hull
+  value: 12
+  says: flat sides a circle is cut into, seen from far off
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: circle-sides-clumps
+  value: 16
+  says: flat sides a circle is cut into, where the thing stands in a clump
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: circle-sides-quick
+  value: 24
+  says: flat sides a circle is cut into, for a quick look
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: circle-sides-demo
+  value: 48
+  says: flat sides a circle is cut into, seen up close
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: wall-radius
+  value: 3
+  unit: m
+  says: radius of the lattice wall, so about six metres across
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: wall-height
+  value: 1.5
+  unit: m
+  says: height of the lattice wall
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: roof-top
+  value: 2.7
+  unit: m
+  says: height above the ground at which the roof meets the crown ring
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-radius
+  value: 0.75
+  unit: m
+  says: radius of the crown ring, so about a metre and a half across
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-lap
+  value: 0.05
+  unit: m
+  says: how far inside the crown ring's radius the roof ends, so the ring laps it
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-seat
+  value: 0.1
+  unit: m
+  says: how far the crown ring sinks below the top of the roof
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-rise
+  value: 0.25
+  unit: m
+  says: how far the crown ring stands above the top of the roof
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-width
+  value: 0.9
+  unit: m
+  says: width of the door
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-height
+  value: 1.3
+  unit: m
+  says: height of the door, a little under the wall's
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-thickness
+  value: 0.08
+  unit: m
+  says: thickness of the door, half of it standing out of the wall
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-heading
+  value: 0
+  unit: deg
+  says: turn of the door about the vertical from the south, the way a ger's door faces
+  kind: picked
+  by: "yurt study, 2026-11-19"
+# Gers are traditionally set with the door to the south, which is the warm
+# side and out of the wind. A habit turns each ger within a spread of it.
+# The bearing is the way the door looks, clockwise from north.
+- name: yurt-facing-heading
+  value: 180
+  unit: deg
+  says: bearing the door of a ger looks along, south, in a camp of gers
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: yurt-facing-spread
+  value: 15
+  unit: deg
+  says: how far either side of south the door of a ger may look
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: cover-red
+  value: 0.52
+  says: red of the felt cover, undyed wool
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: cover-green
+  value: 0.47
+  says: green of the felt cover, undyed wool
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: cover-blue
+  value: 0.37
+  says: blue of the felt cover, undyed wool
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: cover-gloss
+  value: 0
+  says: how much of a mirror the felt is, none
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: frame-red
+  value: 0.3
+  says: red of the lattice wall, wood
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: frame-green
+  value: 0.15
+  says: green of the lattice wall, wood
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: frame-blue
+  value: 0.07
+  says: blue of the lattice wall, wood
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: frame-gloss
+  value: 0.03
+  says: how much of a mirror the lattice wall is
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-red
+  value: 0.42
+  says: red of the door, painted
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-green
+  value: 0.08
+  says: green of the door, painted
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-blue
+  value: 0.04
+  says: blue of the door, painted
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: door-gloss
+  value: 0.08
+  says: how much of a mirror the painted door is
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-red
+  value: 0.2
+  says: red of the crown ring, dark wood
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-green
+  value: 0.1
+  says: green of the crown ring, dark wood
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-blue
+  value: 0.05
+  says: blue of the crown ring, dark wood
+  kind: picked
+  by: "yurt study, 2026-11-19"
+- name: crown-gloss
+  value: 0.03
+  says: how much of a mirror the crown ring is
+  kind: picked
+  by: "yurt study, 2026-11-19"
+# The detail below is drawn at the demo level only. The khana is the lattice
+# wall of crossed slats, the uni are the roof poles from the wall's top to
+# the crown, the toono is the crown ring with its spokes. A share is of the
+# height of the roof, from its foot at nought to the crown at one.
+- name: lattice-slat-width
+  value: 0.035
+  unit: m
+  says: width of one slat of the khana
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: lattice-slat-leaf
+  value: 0.012
+  unit: m
+  says: thickness of one slat of the khana, which is two slats deep
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: lattice-slat-pitch
+  value: 0.22
+  unit: m
+  says: about how far apart the slats of one lean stand round the wall
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: lattice-slat-rise
+  value: 60
+  unit: deg
+  says: how far above the level a slat of the khana climbs, each lean crossing the other
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: lattice-rail-height
+  value: 0.06
+  unit: m
+  says: height of the rail round the top of the khana
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: lattice-rail-proud
+  value: 0.05
+  unit: m
+  says: how far the rail round the khana stands out of the wall's radius
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pole-count
+  value: 48
+  says: number of roof poles, the uni, round the roof
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pole-thickness
+  value: 0.025
+  unit: m
+  says: side of the square section of a roof pole
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: felt-thickness
+  value: 0.02
+  unit: m
+  says: thickness of the felt over the khana and the poles
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-thickness
+  value: 0.006
+  unit: m
+  says: thickness of the canvas cover over the felt
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-skirt
+  value: 0.12
+  unit: m
+  says: how far above the ground the canvas stops, so that the felt shows below it
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: floor-height
+  value: 0.03
+  unit: m
+  says: thickness of the floor inside the wall
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: cover-sectors
+  value: 54
+  says: number of pieces the felt and the canvas are each cut into round the yurt
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: door-gap-sectors
+  value: 1
+  says: number of pieces each side of the door's own that are left out of the wall, so that three pieces' width is the doorway
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: door-open
+  value: 100
+  unit: deg
+  says: how far the door stands open into the yurt, from shut
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-pitch
+  value: 0.012
+  unit: m
+  says: distance between the threads of the canvas
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-depth
+  value: 0.35
+  says: how much darker the canvas is between its threads, from nought to one
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-soil-height
+  value: 0.6
+  unit: m
+  says: height at which the mud on the canvas has fallen to a third of its darkest
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-soiling
+  value: 0.7
+  says: how much of the canvas the mud covers at the ground, from nought to one
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-streaks
+  value: 0.25
+  says: how much the rain has streaked the canvas, from nought to one
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-twist-pitch
+  value: 0.07
+  unit: m
+  says: how far along a rope one twist of its strands goes
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-twist-lay
+  value: 0.02
+  unit: m
+  says: how far up the rope a strand climbs as it winds
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-cell
+  value: 0.1
+  unit: m
+  says: how far along a woven band one chevron runs
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: felt-fibre
+  value: 0.012
+  unit: m
+  says: size of the coarse unevenness of the felt's fibre
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: grain-ring
+  value: 0.012
+  unit: m
+  says: width of a year's ring in the grain of the painted wood
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: paint-cover
+  value: 0.55
+  says: how much of the grain the paint hides, from nought to one
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: ornament-cell
+  value: 0.16
+  unit: m
+  says: width of one lozenge of the ornament painted on the door
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: ornament-ring
+  value: 0.016
+  unit: m
+  says: width of each ring of colour in a lozenge of the ornament
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: crown-ornament-cell
+  value: 0.12
+  unit: m
+  says: width of one lozenge of the ornament painted on the crown ring
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: crown-ornament-ring
+  value: 0.012
+  unit: m
+  says: width of each ring of colour in a lozenge on the crown ring
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rug-cell
+  value: 0.24
+  unit: m
+  says: width of one lozenge of the ornament woven into the rug
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: stove-radius
+  value: 0.25
+  unit: m
+  says: radius of the stove
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: stove-height
+  value: 0.65
+  unit: m
+  says: height of the stove
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pipe-radius
+  value: 0.05
+  unit: m
+  says: radius of the stove's pipe
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pipe-rise
+  value: 0.5
+  unit: m
+  says: how far the stove's pipe rises above the crown ring
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: carpet-radius
+  value: 1.7
+  unit: m
+  says: radius of the round rug on the floor
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: carpet-height
+  value: 0.015
+  unit: m
+  says: thickness of the rug
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: bed-length
+  value: 1.9
+  unit: m
+  says: length of a bed, along the wall
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: bed-width
+  value: 0.9
+  unit: m
+  says: width of a bed, out from the wall
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: bed-height
+  value: 0.35
+  unit: m
+  says: height of a bed's frame above the floor
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: bed-heading
+  value: 90
+  unit: deg
+  says: how far round from the door the two beds stand, one each way
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: mattress-height
+  value: 0.12
+  unit: m
+  says: thickness of a mattress with its blanket
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: mattress-inset
+  value: 0.04
+  unit: m
+  says: how far a mattress is in from its bed's edges
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: chest-width
+  value: 0.8
+  unit: m
+  says: width of the painted chest
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: chest-height
+  value: 0.55
+  unit: m
+  says: height of the painted chest
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: chest-depth
+  value: 0.45
+  unit: m
+  says: depth of the painted chest, out from the wall
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: chest-heading
+  value: 180
+  unit: deg
+  says: how far round from the door the chest stands, at the back
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: yurt-reach-top
+  value: 0.7
+  unit: m
+  says: how far fittings may stand above the crown ring, for the stove's pipe
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-red
+  value: 0.82
+  says: red of the canvas cover, off-white
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-green
+  value: 0.79
+  says: green of the canvas cover, off-white
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-blue
+  value: 0.7
+  says: blue of the canvas cover, off-white
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: canvas-gloss
+  value: 0.02
+  says: how much of a mirror the canvas is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: floor-red
+  value: 0.3
+  says: red of the floor, and of the mud on the canvas
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: floor-green
+  value: 0.2
+  says: green of the floor, and of the mud on the canvas
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: floor-blue
+  value: 0.11
+  says: blue of the floor, and of the mud on the canvas
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: floor-gloss
+  value: 0.05
+  says: how much of a mirror the floor is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: carpet-red
+  value: 0.5
+  says: red of the rug's wool
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: carpet-green
+  value: 0.1
+  says: green of the rug's wool
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: carpet-blue
+  value: 0.08
+  says: blue of the rug's wool
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: carpet-gloss
+  value: 0.03
+  says: how much of a mirror the rug is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: stove-red
+  value: 0.1
+  says: red of the stove, iron
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: stove-green
+  value: 0.1
+  says: green of the stove, iron
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: stove-blue
+  value: 0.11
+  says: blue of the stove, iron
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: stove-gloss
+  value: 0.4
+  says: how much of a mirror the stove is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: hemp-red
+  value: 0.45
+  says: red of the paler strand of a rope, hemp
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: hemp-green
+  value: 0.37
+  says: green of the paler strand of a rope, hemp
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: hemp-blue
+  value: 0.24
+  says: blue of the paler strand of a rope, hemp
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: hemp-gloss
+  value: 0.02
+  says: how much of a mirror hemp is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: vermilion-red
+  value: 0.75
+  says: red of the ornament's red
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: vermilion-green
+  value: 0.08
+  says: green of the ornament's red
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: vermilion-blue
+  value: 0.05
+  says: blue of the ornament's red
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: vermilion-gloss
+  value: 0.12
+  says: how much of a mirror the ornament's red is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: saffron-red
+  value: 0.9
+  says: red of the ornament's orange
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: saffron-green
+  value: 0.45
+  says: green of the ornament's orange
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: saffron-blue
+  value: 0.05
+  says: blue of the ornament's orange
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: saffron-gloss
+  value: 0.12
+  says: how much of a mirror the ornament's orange is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: indigo-red
+  value: 0.05
+  says: red of the ornament's blue
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: indigo-green
+  value: 0.12
+  says: green of the ornament's blue
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: indigo-blue
+  value: 0.55
+  says: blue of the ornament's blue
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: indigo-gloss
+  value: 0.12
+  says: how much of a mirror the ornament's blue is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-count
+  value: 3
+  says: number of ropes round the roof
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-first
+  value: 0.12
+  says: where the lowest rope round the roof lies, as a share of the roof's height
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-gap
+  value: 0.28
+  says: how far apart the ropes round the roof lie, as a share of the roof's height
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-thickness
+  value: 0.04
+  unit: m
+  says: thickness of a rope of hair, and how far it stands out of the felt
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-count
+  value: 2
+  says: number of woven bands round the roof, between the ropes
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-first
+  value: 0.26
+  says: where the lowest band round the roof begins, as a share of the roof's height
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-gap
+  value: 0.28
+  says: how far apart the bands round the roof begin, as a share of the roof's height
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-width
+  value: 0.12
+  unit: m
+  says: width of a woven band, measured up the roof
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-proud
+  value: 0.01
+  unit: m
+  says: how far a woven band stands out of the felt
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: wall-band-at
+  value: 0.45
+  says: where the woven band round the khana begins, as a share of the wall's height
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: toono-segments
+  value: 24
+  says: number of straight bars the crown ring is made of
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: toono-bar
+  value: 0.05
+  unit: m
+  says: how deep the bars of the crown ring are, across the ring
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: toono-spokes
+  value: 12
+  says: number of spokes across the crown ring
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: toono-spoke-width
+  value: 0.035
+  unit: m
+  says: width of a spoke of the crown ring
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: toono-spoke-height
+  value: 0.05
+  unit: m
+  says: height of a spoke of the crown ring
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: toono-hub-radius
+  value: 0.1
+  unit: m
+  says: radius of the hub the spokes of the crown ring meet in
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: door-frame-bar
+  value: 0.08
+  unit: m
+  says: width of the bars of the frame round the door
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: door-frame-depth
+  value: 0.12
+  unit: m
+  says: depth of the frame round the door, through the wall
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: door-panels
+  value: 2
+  says: number of painted panels up the door
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: door-panel-inset
+  value: 0.1
+  unit: m
+  says: how far a painted panel is in from the door's edges, and from the next panel
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: door-panel-proud
+  value: 0.012
+  unit: m
+  says: how far a painted panel stands out of the door
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+# What a yurt at any level stays inside: the wall's circle and a reach more
+# for the poles' ends and the rail, and the height of the crown ring.
+- name: yurt-reach
+  value: 0.3
+  unit: m
+  says: how far fittings may stand outside the circle of the wall
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pole-red
+  value: 0.55
+  says: red of a roof pole, pale peeled wood
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pole-green
+  value: 0.36
+  says: green of a roof pole, pale peeled wood
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pole-blue
+  value: 0.2
+  says: blue of a roof pole, pale peeled wood
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: pole-gloss
+  value: 0.04
+  says: how much of a mirror a roof pole is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-red
+  value: 0.12
+  says: red of a rope, dark horsehair
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-green
+  value: 0.09
+  says: green of a rope, dark horsehair
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-blue
+  value: 0.07
+  says: blue of a rope, dark horsehair
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: rope-gloss
+  value: 0.02
+  says: how much of a mirror a rope is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-red
+  value: 0.62
+  says: red of a woven band, dyed wool
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-green
+  value: 0.16
+  says: green of a woven band, dyed wool
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-blue
+  value: 0.1
+  says: blue of a woven band, dyed wool
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: band-gloss
+  value: 0.05
+  says: how much of a mirror a woven band is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: doorframe-red
+  value: 0.72
+  says: red of the frame round the door, painted
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: doorframe-green
+  value: 0.3
+  says: green of the frame round the door, painted
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: doorframe-blue
+  value: 0.06
+  says: blue of the frame round the door, painted
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: doorframe-gloss
+  value: 0.1
+  says: how much of a mirror the painted frame is
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: paint-red
+  value: 0.8
+  says: red of the painted panels of the door, ochre
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: paint-green
+  value: 0.55
+  says: green of the painted panels of the door, ochre
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: paint-blue
+  value: 0.12
+  says: blue of the painted panels of the door, ochre
+  kind: picked
+  by: "yurt detail, 2026-11-19"
+- name: paint-gloss
+  value: 0.12
+  says: how much of a mirror the painted panels are
+  kind: picked
+  by: "yurt detail, 2026-11-19"

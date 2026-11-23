@@ -10,10 +10,10 @@ import (
 	"github.com/janearc/slayer/interfaces/movie"
 )
 
-// Rate is the frames a second of an audition film. Picked 2026-11-12:
+// rate is the frames a second of an audition film. Picked 2026-11-12:
 // twelve is small and quick, and the picture is a line
 // moving across a still.
-const Rate = 12
+const rate = 12
 
 // cursorWidth is the line's width in pixels. Picked, 2026-11-12.
 const cursorWidth = 3
@@ -37,9 +37,9 @@ func Film(t *Tune, path string) error {
 	if err != nil {
 		return err
 	}
-	frames := int(t.seconds()*Rate) + 1
-	settings, err := movie.NewSettings(movie.Request{Path: path, Width: Wide,
-		Height: Tall, Rate: Rate, Frames: frames, Sound: sound,
+	frames := int(t.seconds()*rate) + 1
+	settings, err := movie.NewSettings(movie.Request{Path: path, Width: wide,
+		Height: tall, Rate: rate, Frames: frames, Sound: sound,
 		Replace: true})
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func Film(t *Tune, path string) error {
 		return err
 	}
 	for index := range frames {
-		picture := t.frame(plate, w, float64(index)/Rate)
+		picture := t.frame(plate, w, float64(index)/rate)
 		if err := out.Frame(index, picture); err != nil {
 			out.Abort()
 			return fmt.Errorf("%s: frame %d: %w", t.Name, index, err)

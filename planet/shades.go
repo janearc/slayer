@@ -43,8 +43,8 @@ func shadesOf(light bands.Light) []shade {
 // observer lists.
 func weighed(band theme.Band) (x, y, z float64) {
 	lo, hi := band.Edges()
-	count := 0
-	for nm := int(math.Ceil(lo)); float64(nm) < hi+1; nm++ {
+	var count int
+	for nm := int(math.Ceil(lo)); float64(nm) < hi+whole; nm++ {
 		if theme.Of(float64(nm)) != band {
 			continue
 		}
@@ -52,8 +52,8 @@ func weighed(band theme.Band) (x, y, z float64) {
 		x, y, z = x+mx, y+my, z+mz
 		count++
 	}
-	if count == 0 {
-		return 0, 0, 0
+	if count == nothing {
+		return nothing, nothing, nothing
 	}
 	return x / float64(count), y / float64(count), z / float64(count)
 }
@@ -66,7 +66,7 @@ var whiteUnit = sync.OnceValue(unitOfWhite)
 // unitOfWhite is whiteUnit's sum.
 func unitOfWhite() float64 {
 	white := swatch.D65()
-	order := make([]int, 0, len(white))
+	order := make([]int, nothing, len(white))
 	for nm := range white {
 		order = append(order, nm)
 	}
@@ -76,7 +76,7 @@ func unitOfWhite() float64 {
 		_, my, _ := swatch.Monochrome(nm).XYZ()
 		sum += white[nm] * my
 	}
-	return 1 / sum
+	return whole / sum
 }
 
 // colourOf is the colour of a light given as its power in each of the
@@ -84,25 +84,25 @@ func unitOfWhite() float64 {
 // and added in order, then the sums scaled.
 func colourOf(shades []shade, unit float64, powers []float64) swatch.Swatch {
 	var x, y, z float64
-	for i, p := range powers {
-		if p == 0 {
+	for i, power := range powers {
+		if power == nothing {
 			continue
 		}
-		x += p * shades[i].wx
-		y += p * shades[i].wy
-		z += p * shades[i].wz
+		x += power * shades[i].wx
+		y += power * shades[i].wy
+		z += power * shades[i].wz
 	}
 	return swatch.FromXYZ(x*unit, y*unit, z*unit)
 }
 
-// leaveOut says which bands the lights agreeing tries leave out: none, every
-// second one, every third; powerStep is how much more each band gets than
-// the last, so no two are alike. all are picked.
-const (
-	leaveOutNone  = 0
-	leaveOutTwo   = 2
-	leaveOutThree = 3
-	powerStep     = 0.37
+// leaveOutTwo and leaveOutThree say which bands the lights agreeing tries
+// leave out beside none: every second one, every third; powerStep is how much
+// more each band gets than the last, so no two are alike. all are in
+// picks.yaml.
+var (
+	leaveOutTwo   = pickCount("agree-leave-out-two")
+	leaveOutThree = pickCount("agree-leave-out-three")
+	powerStep     = pick("agree-power-step")
 )
 
 // agreeing is whether the shades give the same colour, in every bit, as
@@ -119,12 +119,12 @@ func agreeing(light bands.Light, shades []shade, unit float64) bool {
 			return false
 		}
 	}
-	for _, skip := range []int{leaveOutNone, leaveOutTwo, leaveOutThree} {
+	for _, skip := range []int{nothing, leaveOutTwo, leaveOutThree} {
 		powers := make([]float64, len(shades))
 		lines := map[float64]float64{}
 		for i, each := range shades {
-			if skip == leaveOutNone || i%skip != 0 {
-				powers[i] = 1 + float64(i)*powerStep
+			if skip == nothing || i%skip != nothing {
+				powers[i] = whole + float64(i)*powerStep
 			}
 			lines[each.centre] = powers[i]
 		}
@@ -138,10 +138,10 @@ func agreeing(light bands.Light, shades []shade, unit float64) bool {
 }
 
 // sameSwatch is whether two swatches are equal in every bit.
-func sameSwatch(a, b swatch.Swatch) bool {
-	ax, ay, az := a.XYZ()
-	bx, by, bz := b.XYZ()
-	return math.Float64bits(ax) == math.Float64bits(bx) &&
-		math.Float64bits(ay) == math.Float64bits(by) &&
-		math.Float64bits(az) == math.Float64bits(bz)
+func sameSwatch(left, right swatch.Swatch) bool {
+	leftX, leftY, leftZ := left.XYZ()
+	rightX, rightY, rightZ := right.XYZ()
+	return math.Float64bits(leftX) == math.Float64bits(rightX) &&
+		math.Float64bits(leftY) == math.Float64bits(rightY) &&
+		math.Float64bits(leftZ) == math.Float64bits(rightZ)
 }

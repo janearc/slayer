@@ -21,13 +21,13 @@ func sextantOf(p int) rune {
 	case 42:
 		return 0x2590
 	}
-	n := 0
+	count := 0
 	for q := 1; q < p; q++ {
 		if q != 21 && q != 42 {
-			n++
+			count++
 		}
 	}
-	return 0x1FB00 + rune(n)
+	return 0x1FB00 + rune(count)
 }
 
 // each of the 64 patterns draws the character the standard gives it. the
@@ -51,15 +51,15 @@ func TestEveryPatternDrawsTheCharacterUnicodeGivesIt(t *testing.T) {
 //
 // 41 and 43 are the same about the right half.
 func TestTheHalvesLeaveAGapInTheSextants(t *testing.T) {
-	for _, w := range []struct {
+	for _, each := range []struct {
 		p    uint8
 		want rune
 	}{
 		{20, 0x1FB13}, {21, 0x258C}, {22, 0x1FB14},
 		{41, 0x1FB27}, {42, 0x2590}, {43, 0x1FB28},
 	} {
-		if got := Glyph(w.p); got != w.want {
-			t.Errorf("Glyph(%d) = %U, want %U", w.p, got, w.want)
+		if got := Glyph(each.p); got != each.want {
+			t.Errorf("Glyph(%d) = %U, want %U", each.p, got, each.want)
 		}
 	}
 }

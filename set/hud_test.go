@@ -50,7 +50,8 @@ func hudded(t *testing.T) string {
 // a set's hud is what it says: its theme, its rows, and each element in
 // the order written with every part it says.
 func TestASetsHudIsWhatItSays(t *testing.T) {
-	made, err := set.Read("kilauea-iki.yaml", []byte(hudded(t)))
+	source := hudded(t)
+	made, err := set.Read("kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,0 +1,13 @@
+name,x,y,z
+centre,1,2,3
+nested-start,1,0,0
+nested-at-nought,3,0,0
+nested-a-quarter,0,0,-3
+beam-upper,0,1,0
+beam-lower,0,-1,0
+plus-x,1,0,0
+minus-x,-1,0,0
+four-x,4,0,0
+minus-z,0,0,-1
+plus-z,0,0,1
+flow-below,0,-2,0

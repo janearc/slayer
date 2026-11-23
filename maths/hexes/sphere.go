@@ -71,8 +71,8 @@ func (sphere Sphere) Finer() Tiling {
 	return Sphere{Splits: min(finest, 2*sphere.split())}
 }
 
-// Count is how many tiles there are.
-func (sphere Sphere) Count() int {
+// count is how many tiles there are.
+func (sphere Sphere) count() int {
 	split := sphere.split()
 	return 10*split*split + 2
 }
@@ -315,7 +315,7 @@ func (sphere Sphere) Edge(point maths.Vec, tile Tile) float64 {
 // not.
 func (sphere Sphere) Tiles() []Tile {
 	split := sphere.split()
-	kept := make([]Tile, 0, sphere.Count())
+	kept := make([]Tile, 0, sphere.count())
 	for side := range faces {
 		for stepI := 0; stepI <= split; stepI++ {
 			for stepJ := 0; stepI+stepJ <= split; stepJ++ {

@@ -7,9 +7,9 @@ import (
 	"github.com/janearc/puzzlemouth/yamlfile"
 )
 
-// Plan is the values a sequence-v1 plan holds, as hillside reads them,
-// for Lift to make a job of. hillside reads the plan; this package never
-// does. Paths are absolute, or resolved against the working directory.
+// Plan is the values a sequence-v1 plan holds, as the session reads them,
+// for Lift to make a job of. The session reads the plan; this package
+// never does. Paths are absolute, or resolved against the working directory.
 type Plan struct {
 	// File is the plan's file, for messages.
 	File string

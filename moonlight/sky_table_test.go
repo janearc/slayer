@@ -54,7 +54,8 @@ func TestASpectrumsBytesAreItsNumbersInOrder(t *testing.T) {
 		t.Fatal("one spectrum said two ways gave two byte strings")
 	}
 	if len(one.Bytes()) != 2*2*float64Bytes {
-		t.Fatalf("%d bytes for two nanometres", len(one.Bytes()))
+		have := len(one.Bytes())
+		t.Fatalf("%d bytes for two nanometres", have)
 	}
 }
 

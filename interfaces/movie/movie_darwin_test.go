@@ -33,17 +33,20 @@ func monoWav(t *testing.T, rate int, seconds float64) string {
 		header    = 36 // defined: a PCM wav's header after RIFF's size
 	)
 	count := int(seconds * float64(rate))
-	angle := 2 * math.Pi * pickedValue("tone-hertz") / float64(rate)
+	angle := radiansInTurn * pickedValue("tone-hertz") / float64(rate)
 	loud := pickedValue("tone-loudness") * math.MaxInt16
 	var data []byte
 	for i := range count {
-		sample := int16(loud * math.Sin(angle*float64(i)))
+		phase := angle * float64(i)
+		sample := int16(loud * math.Sin(phase))
 		data = binary.LittleEndian.AppendUint16(data, uint16(sample))
 	}
 	bytesPer := depth / bits
+	riffSize := uint32(header + len(data))
+	dataSize := uint32(len(data))
 	var out []byte
 	out = append(out, "RIFF"...)
-	out = binary.LittleEndian.AppendUint32(out, uint32(header+len(data)))
+	out = binary.LittleEndian.AppendUint32(out, riffSize)
 	out = append(out, "WAVEfmt "...)
 	out = binary.LittleEndian.AppendUint32(out, chunkSize)
 	out = binary.LittleEndian.AppendUint16(out, pcm)
@@ -53,7 +56,7 @@ func monoWav(t *testing.T, rate int, seconds float64) string {
 	out = binary.LittleEndian.AppendUint16(out, uint16(bytesPer))
 	out = binary.LittleEndian.AppendUint16(out, depth)
 	out = append(out, "data"...)
-	out = binary.LittleEndian.AppendUint32(out, uint32(len(data)))
+	out = binary.LittleEndian.AppendUint32(out, dataSize)
 	out = append(out, data...)
 	path := filepath.Join(t.TempDir(), "tone.wav")
 	if err := os.WriteFile(path, out, 0o600); err != nil {
@@ -64,7 +67,8 @@ func monoWav(t *testing.T, rate int, seconds float64) string {
 
 // a mono wav at another rate comes back at 44100, on both channels.
 func TestMonoComesBackOnBothChannels(t *testing.T) {
-	read, err := ReadSound(monoWav(t, picked("mono-rate"), 1))
+	rate := picked("mono-rate")
+	read, err := ReadSound(monoWav(t, rate, one))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,14 +77,15 @@ func TestMonoComesBackOnBothChannels(t *testing.T) {
 		t.Errorf("read %v at %d", read.Duration(), read.Rate())
 	}
 	var louder float64
-	for i := 0; i+1 < len(read.samples); i += channels {
-		if read.samples[i] != read.samples[i+1] {
-			t.Fatalf("instant %d: left %v, right %v", i/channels,
-				read.samples[i], read.samples[i+1])
+	for left := zero; left+one < len(read.samples); left += channels {
+		right := left + one
+		if read.samples[left] != read.samples[right] {
+			t.Fatalf("instant %d: left %v, right %v", left/channels,
+				read.samples[left], read.samples[right])
 		}
-		louder = math.Max(louder, float64(read.samples[i]))
+		louder = math.Max(louder, float64(read.samples[left]))
 	}
-	if louder < pickedValue("tone-loudness")/2 {
+	if louder < pickedValue("tone-loudness")*pickedValue("tone-kept") {
 		t.Errorf("the tone came back at %v", louder)
 	}
 }

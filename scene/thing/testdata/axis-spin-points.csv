@@ -1,0 +1,5 @@
+name,x,y,z
+parent-base,10,20,30
+pivot,2,3,4
+twice-z,0,0,2
+reversed-x,0,6,0

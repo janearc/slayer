@@ -32,7 +32,7 @@ func grid() *image.RGBA {
 
 // linear is the light of a pixel value v, in the straight stretch of the
 // srgb curve: v of 255, then divided by 12.92.
-func linear(v float64) float64 { return v / 255 / 12.92 }
+func linear(value float64) float64 { return value / 255 / 12.92 }
 
 // toward is the direction at a longitude and a latitude, as the package
 // reads them: the longitude is the angle from +X toward +Z.

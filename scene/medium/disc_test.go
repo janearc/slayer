@@ -7,41 +7,74 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-var rings = Disc{Inner: 2, Outer: 4, Thick: 0.1,
-	Profile: []float64{1, 1, 0, 1, 1}} // a gap in the middle
+// discDensityFile is the table of points the disc's density is read at, each
+// with the density wanted there.
+const discDensityFile = "testdata/disc-density.csv"
+
+// discPlain is the disc of these tests with no profile, no Dense and no
+// grain, read from the chosen numbers.
+func discPlain(t *testing.T) Disc {
+	t.Helper()
+	return Disc{Inner: picked(t, "disc-inner"),
+		Outer: picked(t, "disc-outer"),
+		Thick: picked(t, "disc-thick")}
+}
+
+// discRings is the plain disc with a profile that has a gap in the middle.
+func discRings(t *testing.T) Disc {
+	t.Helper()
+	rings := discPlain(t)
+	rings.Profile = []float64{unity, unity, nought, unity, unity}
+	return rings
+}
+
+// discDownward is a ray straight down at a distance out along x, from a
+// height.
+func discDownward(out, height float64) maths.Ray {
+	return maths.Ray{At: maths.V(out, height, nought),
+		Dir: maths.V(nought, -unity, nought)}
+}
+
+// discDensityRows holds the disc's density to the table of points: zero
+// inside its hole, above its faces and beyond its edge, its profile's density
+// in the ring and zero in the gap.
+func discDensityRows(t *testing.T, rings Disc) {
+	t.Helper()
+	tolerance := picked(t, "disc-tolerance")
+	for _, row := range readSheet(t, discDensityFile) {
+		at := maths.V(cell(t, row, "x"), cell(t, row, "y"), cell(t, row, "z"))
+		want := cell(t, row, "want")
+		if got := rings.Density(at); !(math.Abs(got-want) <= tolerance) {
+			t.Errorf("at %v: %v, want %v", at, got, want)
+		}
+	}
+}
 
 // A disc is a medium with a span: zero inside its hole, above its faces and
 // beyond its edge; its profile's density in the ring; zero in the gap; and a
 // ray straight down through the ring crosses its slab.
 func TestDisc(t *testing.T) {
 	var _ Spanner = Disc{}
-	for _, c := range []struct {
-		p    maths.Vec
-		want float64
-	}{
-		{maths.V(3, 0, 0), 0},     // the gap, at t of a half
-		{maths.V(2.2, 0, 0), 1},   // the inner ring
-		{maths.V(0, 0, 3.8), 1},   // the outer ring
-		{maths.V(1, 0, 0), 0},     // the hole
-		{maths.V(5, 0, 0), 0},     // beyond the edge
-		{maths.V(2.2, 0.2, 0), 0}, // above the face
-	} {
-		if got := rings.Density(c.p); !(math.Abs(got-c.want) <= 1e-12) {
-			t.Errorf("at %v: %v, want %v", c.p, got, c.want)
-		}
-	}
-	down := maths.Ray{At: maths.V(2.5, 1, 0), Dir: maths.V(0, -1, 0)}
-	enter, leave, ok := rings.Span(down, 0, math.Inf(1))
-	if !ok || !(math.Abs(enter-0.95) <= 1e-12) || !(math.Abs(leave-1.05) <= 1e-12) {
+	rings := discRings(t)
+	tolerance := picked(t, "disc-tolerance")
+	discDensityRows(t, rings)
+	downOut := picked(t, "disc-down-out")
+	downHeight := picked(t, "disc-down-height")
+	down := discDownward(downOut, downHeight)
+	enter, leave, ok := rings.Span(down, nought, math.Inf(unity))
+	if !ok || !(math.Abs(enter-picked(t, "disc-down-enter")) <= tolerance) ||
+		!(math.Abs(leave-picked(t, "disc-down-leave")) <= tolerance) {
 		t.Errorf("down through the ring spans %v to %v, %v", enter, leave, ok)
 	}
-	miss := maths.Ray{At: maths.V(5, 1, 0), Dir: maths.V(0, -1, 0)}
-	if _, _, ok := rings.Span(miss, 0, math.Inf(1)); ok {
+	miss := discDownward(picked(t, "disc-miss-out"), downHeight)
+	if _, _, ok := rings.Span(miss, nought, math.Inf(unity)); ok {
 		t.Error("a ray beyond the edge spans the disc")
 	}
-	along := maths.Ray{At: maths.V(-10, 0, 0), Dir: maths.V(1, 0, 0)}
-	enter, leave, ok = rings.Span(along, 0, math.Inf(1))
-	if !ok || !(math.Abs(enter-6) <= 1e-12) || !(math.Abs(leave-14) <= 1e-12) {
+	alongStart := maths.V(picked(t, "disc-along-start"), nought, nought)
+	along := maths.Ray{At: alongStart, Dir: maths.V(unity, nought, nought)}
+	enter, leave, ok = rings.Span(along, nought, math.Inf(unity))
+	if !ok || !(math.Abs(enter-picked(t, "disc-along-enter")) <= tolerance) ||
+		!(math.Abs(leave-picked(t, "disc-along-leave")) <= tolerance) {
 		t.Errorf("along the disc spans %v to %v, %v", enter, leave, ok)
 	}
 }
@@ -49,26 +82,31 @@ func TestDisc(t *testing.T) {
 // Ringlets thin the disc from place to place and never thicken it, and a
 // disc with no profile is one everywhere.
 func TestRinglets(t *testing.T) {
-	plain := Disc{Inner: 2, Outer: 4, Thick: 0.1}
-	if got := (Disc{Inner: 2, Outer: 4, Thick: 0.1, Dense: 30}).
-		Density(maths.V(3, 0, 0)); got != 30 {
+	plain := discPlain(t)
+	dense := discPlain(t)
+	dense.Dense = picked(t, "disc-dense")
+	middle := maths.V(picked(t, "disc-dense-radius"), nought, nought)
+	if got := dense.Density(middle); got != dense.Dense {
 		t.Fatalf("dense is %v", got)
 	}
 	grainy := plain
-	grainy.Grain, grainy.Seed = 0.8, 5
+	grainy.Grain = picked(t, "disc-grain")
+	grainy.Seed = uint64(pickedCount(t, "disc-grain-seed"))
 	seen := map[float64]bool{}
-	for r := 2.05; r < 3.95; r += 0.01 {
-		p := maths.V(r, 0, 0)
-		if plain.Density(p) != 1 {
-			t.Fatalf("a plain disc is %v at %v", plain.Density(p), r)
+	scale := picked(t, "disc-ringlet-scale")
+	end, step := picked(t, "disc-ringlet-end"), picked(t, "disc-ringlet-step")
+	for radius := picked(t, "disc-ringlet-start"); radius < end; radius += step {
+		point := maths.V(radius, nought, nought)
+		if plain.Density(point) != unity {
+			t.Fatalf("a plain disc is %v at %v", plain.Density(point), radius)
 		}
-		g := grainy.Density(p)
-		if g > 1 || g < 0 {
-			t.Fatalf("ringlets gave %v at %v", g, r)
+		grain := grainy.Density(point)
+		if grain > unity || grain < nought {
+			t.Fatalf("ringlets gave %v at %v", grain, radius)
 		}
-		seen[math.Round(g*100)] = true
+		seen[math.Round(grain*scale)] = true
 	}
-	if len(seen) < 20 {
+	if len(seen) < pickedCount(t, "disc-ringlet-values-least") {
 		t.Errorf("the ringlets hardly vary: %d values", len(seen))
 	}
 }

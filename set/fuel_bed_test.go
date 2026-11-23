@@ -16,7 +16,8 @@ func bedFixture(t *testing.T) string {
 	return string(b)
 }
 func TestFuelBedReadsOnlyExplicitPhysicalInputs(t *testing.T) {
-	s, e := set.Read("bed.yaml", []byte(bedFixture(t)))
+	source := bedFixture(t)
+	s, e := set.Read("bed.yaml", []byte(source))
 	if e != nil {
 		t.Fatal(e)
 	}

@@ -94,7 +94,7 @@ func motifMisses(t *testing.T, s *Score, at motifAt) []string {
 	var out []string
 	for i, midi := range motifForms[at.form] {
 		if _, ok := startsNote(lead, first+beats[i], midi+at.shift); !ok {
-			out = append(out, NoteName(midi+at.shift))
+			out = append(out, noteName(midi+at.shift))
 		}
 	}
 	return out

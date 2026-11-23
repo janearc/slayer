@@ -22,7 +22,9 @@ func TestReplayHazeReportsTheSameBeerLawLightItReturns(t *testing.T) {
 	scene := staged{walked: walked, haze: thing.Haze{Density: .1, Colour: maths.RGB(.2, .3, .4)}}
 	input := maths.RGB(1, 2, 3)
 	got := scene.air(maths.ZAxis, 10, input)
-	want := input.Scale(math.Exp(-1)).Add(scene.haze.Colour.Scale(1 - math.Exp(-1)))
+	dimmed := input.Scale(math.Exp(-1))
+	hazed := scene.haze.Colour.Scale(1 - math.Exp(-1))
+	want := dimmed.Add(hazed)
 	if got != want || len(walked.steps) != 1 || walked.steps[0].What != "the haze" || !strings.Contains(walked.steps[0].Said, "through=10") {
 		t.Fatalf("haze replay: %v %+v", got, walked.steps)
 	}

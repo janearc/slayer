@@ -1,0 +1,6 @@
+name,asymmetry,taken
+one,1,false
+minus-one,-1,false
+past-one,1.5,false
+just-inside,0.99,true
+minus-just-inside,-0.99,true

@@ -31,7 +31,7 @@ func TestHeardContinuousRetreat(t *testing.T) {
 func TestHeardSpacecraftIsolationAndAim(t *testing.T) {
 	var axis maths.Vec
 	for i, name := range []string{"hubble", "webb", "spitzer"} {
-		p := &StagePlan{Kind: "space", Craft: name}
+		p := &stagePlan{Kind: "space", Craft: name}
 		s, err := newHeardStage(p, "")
 		if err != nil {
 			t.Fatal(err)

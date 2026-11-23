@@ -23,13 +23,14 @@ var errLight = errors.New("manufacture: a light needs a heat or a " +
 	"wavelength above nought, a power above nought, each with an end, " +
 	"a spread it can have, and for an opening, a line")
 
-// spectrum is what a light's light is made of: the glow of a heat, or
-// one line.
+// spectrum is what a light's light is made of: the glow of a heat, one
+// line, or a colour of three lines.
 //
-// made only by newThermal and newLine.
+// made only by newThermal, newLine and newTint.
 type spectrum struct {
 	heat measure.Temperature
 	wave measure.Length
+	tint *tinted
 }
 
 // newThermal is the glow of a black body at a heat, as a fire's or a
@@ -50,7 +51,9 @@ func newLine(wave measure.Length) (spectrum, error) {
 }
 
 // made is whether the spectrum came from a door.
-func (of spectrum) made() bool { return of.glows() || of.lined() }
+func (of spectrum) made() bool {
+	return of.glows() || of.lined() || of.tinted()
+}
 
 // glows is whether it is a heat's glow.
 func (of spectrum) glows() bool { return of.heat.InKelvin() > 0 }
@@ -62,8 +65,12 @@ func (of spectrum) lined() bool { return inScene(of.wave) > 0 }
 const nanometres = 1e9
 
 // bands is the spectrum as Celestial carries light: a black body's by
-// planck's law, or all of it in the line's own band.
+// planck's law, all of it in the line's own band, or the three lines of a
+// tint.
 func (of spectrum) bands() bands.Light {
+	if of.tinted() {
+		return of.tint.spectrum
+	}
 	if of.lined() {
 		return bands.Lines(map[float64]float64{
 			inScene(of.wave) * nanometres: 1})
@@ -148,7 +155,10 @@ type light struct {
 	half, soft measure.Angle
 	flicker    seed
 	depth      float64
-	part       signal
+	// luminance, if above nought, is the light's strength in the kit's
+	// relative light, and power only a stand-in.
+	luminance float64
+	part      signal
 }
 
 // signal is a light's part in a programme that a set of lights keeps
@@ -219,6 +229,28 @@ func newLight(colour spectrum, power measure.Power,
 	}
 	return light{colour: colour, power: power, half: half,
 		soft: soft}, nil
+}
+
+// newRelativeLight is a bare light of a heat whose strength is given in
+// the kit's relative light, as a set's lamp is: its luminance at a metre.
+// It shines every way. Its power, which a light of watts has, is the
+// luminance, only so that it has one.
+func newRelativeLight(heat measure.Temperature, luminance float64) (light,
+	error) {
+	colour, err := newThermal(heat)
+	if err != nil {
+		return light{}, err
+	}
+	made, err := newLight(colour, measure.Watts(luminance), everyway{})
+	made.luminance = luminance
+	return made, err
+}
+
+// Relative is the heat of the light in kelvin and its luminance at a
+// metre, if its strength is given in the kit's relative light.
+func (made light) Relative() (kelvin, luminance float64, relative bool) {
+	return made.colour.heat.InKelvin(), made.luminance,
+		made.luminance > 0 && !made.colour.tinted()
 }
 
 // flickering is the light flickering by a seed: down to as little as

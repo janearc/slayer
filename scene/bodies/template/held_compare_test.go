@@ -41,7 +41,9 @@ func (r *reading) walk(path string, got, want reflect.Value) {
 		return
 	}
 	if got.Type() != want.Type() {
-		r.note(path, fmt.Sprintf("is a %v, want a %v", got.Type(), want.Type()))
+		gotType := got.Type()
+		wantType := want.Type()
+		r.note(path, fmt.Sprintf("is a %v, want a %v", gotType, wantType))
 		return
 	}
 	if got.Type() == reflect.TypeOf(maths.Light{}) && !r.lights {
@@ -50,11 +52,15 @@ func (r *reading) walk(path string, got, want reflect.Value) {
 	switch got.Kind() {
 	case reflect.Func:
 		if got.IsNil() != want.IsNil() {
-			r.note(path, fmt.Sprintf("func is nil: %v, want nil: %v", got.IsNil(), want.IsNil()))
+			gotNil := got.IsNil()
+			wantNil := want.IsNil()
+			r.note(path, fmt.Sprintf("func is nil: %v, want nil: %v", gotNil, wantNil))
 		}
 	case reflect.Pointer, reflect.Interface:
 		if got.IsNil() != want.IsNil() {
-			r.note(path, fmt.Sprintf("is nil: %v, want nil: %v", got.IsNil(), want.IsNil()))
+			gotNil := got.IsNil()
+			wantNil := want.IsNil()
+			r.note(path, fmt.Sprintf("is nil: %v, want nil: %v", gotNil, wantNil))
 			return
 		}
 		if !got.IsNil() {
@@ -66,7 +72,9 @@ func (r *reading) walk(path string, got, want reflect.Value) {
 		}
 	case reflect.Slice, reflect.Array:
 		if got.Len() != want.Len() {
-			r.note(path, fmt.Sprintf("has %d, want %d", got.Len(), want.Len()))
+			gotLength := got.Len()
+			wantLength := want.Len()
+			r.note(path, fmt.Sprintf("has %d, want %d", gotLength, wantLength))
 			return
 		}
 		for i := range got.Len() {
@@ -74,7 +82,9 @@ func (r *reading) walk(path string, got, want reflect.Value) {
 		}
 	case reflect.Map:
 		if got.Len() != want.Len() {
-			r.note(path, fmt.Sprintf("has %d, want %d", got.Len(), want.Len()))
+			gotLength := got.Len()
+			wantLength := want.Len()
+			r.note(path, fmt.Sprintf("has %d, want %d", gotLength, wantLength))
 			return
 		}
 		for _, k := range want.MapKeys() {
@@ -94,25 +104,34 @@ func (r *reading) walk(path string, got, want reflect.Value) {
 		g, w := got.Int(), want.Int()
 		if got.Type() == reflect.TypeOf(time.Duration(0)) {
 			if d := time.Duration(g - w); d < -time.Microsecond || d > time.Microsecond {
-				r.note(path, fmt.Sprintf("is %v, want %v", time.Duration(g), time.Duration(w)))
+				gotDuration := time.Duration(g)
+				wantDuration := time.Duration(w)
+				r.note(path, fmt.Sprintf("is %v, want %v", gotDuration, wantDuration))
 			}
 		} else if g != w {
 			r.note(path, fmt.Sprintf("is %d, want %d", g, w))
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		if got.Uint() != want.Uint() {
-			r.note(path, fmt.Sprintf("is %d, want %d", got.Uint(), want.Uint()))
+			gotUint := got.Uint()
+			wantUint := want.Uint()
+			r.note(path, fmt.Sprintf("is %d, want %d", gotUint, wantUint))
 		}
 	case reflect.String:
 		if got.String() != want.String() {
-			r.note(path, fmt.Sprintf("is %q, want %q", got.String(), want.String()))
+			gotString := got.String()
+			wantString := want.String()
+			r.note(path, fmt.Sprintf("is %q, want %q", gotString, wantString))
 		}
 	case reflect.Bool:
 		if got.Bool() != want.Bool() {
-			r.note(path, fmt.Sprintf("is %v, want %v", got.Bool(), want.Bool()))
+			gotBool := got.Bool()
+			wantBool := want.Bool()
+			r.note(path, fmt.Sprintf("is %v, want %v", gotBool, wantBool))
 		}
 	default:
-		r.note(path, fmt.Sprintf("is of a kind, %v, this walk does not read", got.Kind()))
+		gotKind := got.Kind()
+		r.note(path, fmt.Sprintf("is of a kind, %v, this walk does not read", gotKind))
 	}
 }
 
@@ -177,8 +196,8 @@ func (knobs walked) build(t *testing.T) bodies.Body {
 		parts = append(parts, wantAir(t, 8, 0.01))
 	}
 	if knobs.mooned {
-		parts = append(parts,
-			wantMoon(t, want(t, "m", bodies.Rock, 1, 1), 100, 0))
+		moonPart := wantMoon(t, want(t, "m", bodies.Rock, 1, 1), 100, 0)
+		parts = append(parts, moonPart)
 	}
 	return want(t, knobs.name, bodies.Rock, knobs.radiusKm, 1e20,
 		parts...).
@@ -215,7 +234,8 @@ func TestTheWalkSeesAChangeAndNotARounding(t *testing.T) {
 		{"a name", func(k *walked) { k.name += "!" }},
 		{"a map entry", func(k *walked) { k.gives = 2 }},
 	} {
-		if len(apart(bend(c.change), base().build(t))) == 0 {
+		seen := apart(bend(c.change), base().build(t))
+		if len(seen) == 0 {
 			t.Errorf("the walk does not see %s", c.what)
 		}
 	}
@@ -232,7 +252,8 @@ func TestTheWalkSeesAChangeAndNotARounding(t *testing.T) {
 		}
 	}
 	coloured := bend(func(k *walked) { k.glow = maths.Grey(1) })
-	if len(apartWithColours(coloured, base().build(t))) == 0 {
+	seenWithColours := apartWithColours(coloured, base().build(t))
+	if len(seenWithColours) == 0 {
 		t.Error("the walk with colours does not see a colour")
 	}
 }

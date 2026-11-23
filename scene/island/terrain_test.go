@@ -44,8 +44,8 @@ type rangeHeights struct {
 	calls     *int
 }
 
-// HeightRange returns the configured answer.
-func (source rangeHeights) HeightRange(float64, float64, float64, float64) (float64, float64, bool, error) {
+// heightRange returns the configured answer.
+func (source rangeHeights) heightRange(float64, float64, float64, float64) (float64, float64, bool, error) {
 	if source.calls != nil {
 		*source.calls++
 	}
@@ -161,7 +161,9 @@ func TestPrepareFromFarAwayIsOneFlatPatch(t *testing.T) {
 // samples, and a patch budget of sixteen leaves the closer view limited.
 func TestPrepareRefinesAsTheCameraDescends(t *testing.T) {
 	ground := testTerrain(t, flat(0), testDetail())
-	medium, err := ground.Prepare(context.Background(), lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)))
+	mediumLooking := lookDown(t, 1e6)
+	mediumPlaced := originAt(t, maths.V(0, 1e6, 0))
+	medium, err := ground.Prepare(context.Background(), mediumLooking, mediumPlaced)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +175,9 @@ func TestPrepareRefinesAsTheCameraDescends(t *testing.T) {
 			t.Fatalf("patch %+v is not a level-one quarter", patch)
 		}
 	}
-	close, err := ground.Prepare(context.Background(), lookDown(t, 3e5), originAt(t, maths.V(0, 3e5, 0)))
+	closeLooking := lookDown(t, 3e5)
+	closePlaced := originAt(t, maths.V(0, 3e5, 0))
+	close, err := ground.Prepare(context.Background(), closeLooking, closePlaced)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,7 +192,9 @@ func TestPrepareCountsNormalStencils(t *testing.T) {
 	detail := testDetail()
 	detail.NormalLongitude, detail.NormalLatitude = 0.1, 0.1
 	ground := testTerrain(t, flat(0), detail)
-	prepared, err := ground.Prepare(context.Background(), lookDown(t, 2e7), originAt(t, maths.V(0, 2e7, 0)))
+	farLooking := lookDown(t, 2e7)
+	farPlaced := originAt(t, maths.V(0, 2e7, 0))
+	prepared, err := ground.Prepare(context.Background(), farLooking, farPlaced)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +213,8 @@ func TestPrepareOfAViewLookingAwayIsEmpty(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	prepared, err := ground.Prepare(context.Background(), view, originAt(t, maths.V(0, 1e6, 0)))
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	prepared, err := ground.Prepare(context.Background(), view, placed)
 	if err != nil || len(prepared.Patches) != 0 || len(prepared.Surfaces) != 0 || prepared.Samples != 0 {
 		t.Fatalf("prepared %+v, %v", prepared, err)
 	}
@@ -223,6 +230,7 @@ func TestPrepareRefusals(t *testing.T) {
 	var none context.Context
 	small := testDetail()
 	small.Points = 9
+	notANumber := flat(math.NaN())
 	cases := []struct {
 		name   string
 		ground *Terrain
@@ -237,7 +245,7 @@ func TestPrepareRefusals(t *testing.T) {
 		{"absent sample", testTerrain(t, heightFunc(func(float64, float64) (float64, bool, error) { return 0, false, nil }), testDetail()), context.Background(), "no source height at"},
 		{"height above the envelope", testTerrain(t, flat(6000), testDetail()), context.Background(), "outside its declared envelope"},
 		{"height below the envelope", testTerrain(t, flat(-1001), testDetail()), context.Background(), "outside its declared envelope"},
-		{"height not a number", testTerrain(t, flat(math.NaN()), testDetail()), context.Background(), "outside its declared envelope"},
+		{"height not a number", testTerrain(t, notANumber, testDetail()), context.Background(), "outside its declared envelope"},
 		{"point budget", testTerrain(t, flat(0), small), context.Background(), "point budget exhausted"},
 	}
 	for _, each := range cases {
@@ -272,7 +280,9 @@ func TestPrepareStopsWhenTheContextEndsWhileSampling(t *testing.T) {
 		cancel()
 		return 0, true, nil
 	}), testDetail())
-	_, err := ground.Prepare(ctx, lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)))
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	_, err := ground.Prepare(ctx, looking, placed)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("error %v", err)
 	}
@@ -285,7 +295,9 @@ func TestPrepareStopsWhenTheContextEndsWhileSelecting(t *testing.T) {
 	defer cancel()
 	source := rangeHeights{heightFunc: flat(0), low: 0, high: 0}
 	ground := testTerrain(t, cancelingRange{source, cancel}, testDetail())
-	_, err := ground.Prepare(ctx, lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)))
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	_, err := ground.Prepare(ctx, looking, placed)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("error %v", err)
 	}
@@ -297,8 +309,8 @@ type cancelingRange struct {
 	cancel func()
 }
 
-// HeightRange cancels, then answers without a range.
-func (source cancelingRange) HeightRange(float64, float64, float64, float64) (float64, float64, bool, error) {
+// heightRange cancels, then answers without a range.
+func (source cancelingRange) heightRange(float64, float64, float64, float64) (float64, float64, bool, error) {
 	source.cancel()
 	return 0, 0, false, nil
 }
@@ -373,7 +385,8 @@ func TestBoundsRefuseAPositionPastTheRange(t *testing.T) {
 func TestPrepareFailsWhenARangeQueryFails(t *testing.T) {
 	sentinel := errors.New("range failed")
 	ground := testTerrain(t, rangeHeights{heightFunc: flat(0), err: sentinel}, testDetail())
-	_, err := ground.Prepare(context.Background(), lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)))
+	high := maths.V(0, 1e6, 0)
+	_, err := ground.Prepare(context.Background(), lookDown(t, 1e6), originAt(t, high))
 	if !errors.Is(err, sentinel) {
 		t.Fatalf("error %v", err)
 	}

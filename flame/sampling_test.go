@@ -11,7 +11,7 @@ import (
 func TestSamplesDescribeTheTimedFlame(t *testing.T) {
 	made := body(t, campfire).Tick(137 * time.Millisecond).(*Body)
 	fire, at, period, glows := made.Samples()
-	wanted, _ := Period(measure.Metres(2 * campfire.Radius))
+	wanted, _ := puffPeriod(measure.Metres(2 * campfire.Radius))
 	if fire != campfire || at != 137*time.Millisecond || period != wanted {
 		t.Fatalf("wrong field description: %+v, %v, %v", fire, at, period)
 	}

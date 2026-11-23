@@ -109,7 +109,8 @@ func TestReadPFMByteOrderAndRefusals(t *testing.T) {
 	if err != nil || w != 1 || h != 1 || !reflect.DeepEqual(light, []float32{0.5, 0.25, 2}) {
 		t.Fatalf("big-endian read: %d %d %v %v", w, h, light, err)
 	}
-	if _, _, _, err := readPFM(filepath.Join(t.TempDir(), "absent.pfm")); err == nil {
+	absentPicture := filepath.Join(t.TempDir(), "absent.pfm")
+	if _, _, _, err := readPFM(absentPicture); err == nil {
 		t.Error("missing file accepted")
 	}
 	empty := pfmFile(t, "", binary.LittleEndian, nil)
@@ -171,12 +172,14 @@ func TestSkyFromTakesTheMoonFromTheSkyOrFromMOONREF(t *testing.T) {
 	if sky.moon != [3]float64{2, 4, 6} {
 		t.Fatalf("moon=%v, want the plain plate's (2, 4, 6)", sky.moon)
 	}
-	t.Setenv("MOONREF", filepath.Join(t.TempDir(), "absent.pfm"))
+	absentMoon := filepath.Join(t.TempDir(), "absent.pfm")
+	t.Setenv("MOONREF", absentMoon)
 	if _, err := skyFrom(lit); err == nil {
 		t.Error("missing MOONREF accepted")
 	}
 	t.Setenv("MOONREF", "")
-	if _, err := skyFrom(filepath.Join(t.TempDir(), "absent.pfm")); err == nil {
+	absentSky := filepath.Join(t.TempDir(), "absent.pfm")
+	if _, err := skyFrom(absentSky); err == nil {
 		t.Error("missing sky accepted")
 	}
 }

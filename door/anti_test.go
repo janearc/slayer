@@ -48,7 +48,8 @@ func TestAssessWithTitlesThatOpenWillDraw(t *testing.T) {
 // anti-test of TestCacheClearEmptiesOneKind
 func TestCacheClearOneKindLeavesTheOthers(t *testing.T) {
 	env, store := cacheEnv(t)
-	other, err := diskcache.Open(filepath.Dir(store.Folder()), otherKind)
+	parent := filepath.Dir(store.Folder())
+	other, err := diskcache.Open(parent, otherKind)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +159,8 @@ func TestLedgerNamesTheFrameItCannotRemove(t *testing.T) {
 	folder := t.TempDir()
 	stuck := fmt.Sprintf(frameName, nothing)
 	free := fmt.Sprintf(frameName, one)
-	written(t, mkdir(t, filepath.Join(folder, stuck)), "inside.txt", "x")
+	stuckFolder := mkdir(t, filepath.Join(folder, stuck))
+	written(t, stuckFolder, "inside.txt", "x")
 	written(t, folder, free, "a stale frame")
 	written(t, folder, manifestName, `{"key": "theirs", "frames": {"`+
 		stuck+`": "x", "`+free+`": "x"}}`)
@@ -212,8 +214,9 @@ func TestRunnerCancelledBeforeTheFirstFrameDrawsNone(t *testing.T) {
 	if err := made.run.draw(); !errors.Is(err, context.Canceled) {
 		t.Fatalf("a film cancelled before it began gave %v", err)
 	}
+	name := fmt.Sprintf(frameName, nothing)
 	if _, err := os.Stat(filepath.Join(made.run.at.frames,
-		fmt.Sprintf(frameName, nothing))); err == nil {
+		name)); err == nil {
 		t.Error("a cancelled film wrote a frame")
 	}
 }
@@ -243,8 +246,8 @@ func TestRunnerDrawsAgainAWorkingFrameThatChanged(t *testing.T) {
 	if err := second.run.draw(); err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(second.said.String(), fmt.Sprintf(
-		"frame 1 of %d: kept", filmFrames(t))) {
+	kept := fmt.Sprintf("frame 1 of %d: kept", filmFrames(t))
+	if strings.Contains(second.said.String(), kept) {
 		t.Errorf("a changed frame was kept: %q", second.said)
 	}
 }

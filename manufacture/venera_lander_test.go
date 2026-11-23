@@ -666,7 +666,8 @@ func TestAVeneraLanderThatCannotBeBuiltIsRefused(t *testing.T) {
 		if !strings.Contains(whole, each.was) {
 			t.Fatalf("%s: the file has no %q to change", name, each.was)
 		}
-		_, err := readVenera([]byte(strings.Replace(whole, each.was, each.is, 1)))
+		edited := strings.Replace(whole, each.was, each.is, 1)
+		_, err := readVenera([]byte(edited))
 		if err == nil {
 			t.Errorf("%s: read without refusal", name)
 			continue
@@ -704,7 +705,8 @@ func TestAVeneraLanderOneStepInsideItsLimitsIsRead(t *testing.T) {
 		if !strings.Contains(whole, each.was) {
 			t.Fatalf("%s: the file has no %q to change", name, each.was)
 		}
-		if _, err := readVenera([]byte(strings.Replace(whole, each.was, each.is, 1))); err != nil {
+		edited := strings.Replace(whole, each.was, each.is, 1)
+		if _, err := readVenera([]byte(edited)); err != nil {
 			t.Errorf("%s: refused as %v", name, err)
 		}
 	}

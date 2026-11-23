@@ -215,10 +215,11 @@ func TestTheSceneSaysHowFarAThingIsMet(t *testing.T) {
 		scale, near, want float64
 	}{"unsaid": {0, 0, 9}, "twice": {2, 0, 8}, "past near": {2, 9, 12}} {
 		world := thing.NewWorld()
+		motion := thing.Still(maths.Subspace{
+			Origin: maths.V(0, 0, -10),
+			Scale:  each.scale})
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
-			Motion: thing.Still(maths.Subspace{
-				Origin: maths.V(0, 0, -10),
-				Scale:  each.scale})})
+			Motion: motion})
 		t2, hit := Seen(world, 0).Hit(ray, each.near, 100)
 		if !hit || !(math.Abs(t2-each.want) <= 1e-9) {
 			t.Errorf("%s: met at %v, %v; want %v", name, t2, hit,

@@ -12,9 +12,16 @@ import (
 
 //go:generate sh mocks/generate.sh
 
+// refusal is a refusal of this package, held as a constant so that no one
+// can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (r refusal) Error() string { return string(r) }
+
 // ErrType is a font, a glyph or a line of text that cannot be made into
 // letters; the error says which and why.
-var ErrType = errors.New("typography")
+const ErrType refusal = "typography"
 
 // Glyph is a glyph's number in its font.
 type Glyph = sfnt.GlyphIndex

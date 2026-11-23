@@ -345,18 +345,6 @@ func cpuDevelop(width, height int, options develop.Options, rgb []float32) (*ima
 	return develop.Develop([]*frame.Frame{linear}, options)
 }
 
-// gpuDevelop develops rgb on the GPU with a developer made for this one call
-// and closed after it. Nothing in the package calls it.
-func gpuDevelop(width, height int, options develop.Options, rgb []float32) (*image.RGBA, error) {
-	tone := colour.Tone{Exposure: math.Exp2(options.Exposure), Knee: options.Knee, Top: options.Top, Bloom: options.Bloom}
-	stage, err := gpudevelop.New(width, height, tone)
-	if err != nil {
-		return nil, err
-	}
-	defer stage.Close()
-	return stage.Develop(rgb)
-}
-
 // packFrame lays out the red, green and blue of each pixel of input as one
 // flat float32 slice, in the frame's row order, leaving out Cover.
 func packFrame(input *frame.Frame) []float32 {

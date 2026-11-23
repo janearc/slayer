@@ -13,7 +13,8 @@ import (
 	"github.com/janearc/slayer/azazel/internal/queue"
 )
 
-func TestRetiredGameHandoffsCannotRun(t *testing.T) {
+// TestGameHandoffVerbsAlwaysRefuse checks execute and work-gpu run nothing.
+func TestGameHandoffVerbsAlwaysRefuse(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "queue")
 	store := queue.At(root)
 	if err := store.Init(t.Context(), queue.Config{}); err != nil {
@@ -24,7 +25,7 @@ func TestRetiredGameHandoffsCannotRun(t *testing.T) {
 		{"work-gpu", "--queue", root},
 	} {
 		var out, wrong bytes.Buffer
-		if code := queueTool(t.Context()).Run(args, &out, &wrong); code == 0 || !strings.Contains(wrong.String(), "retired") {
+		if code := queueTool(t.Context()).Run(args, &out, &wrong); code == 0 || !strings.Contains(wrong.String(), "always refuses") {
 			t.Fatal(args, code, wrong.String())
 		}
 	}
@@ -129,12 +130,14 @@ func TestQueueCommandsAcceptAndCancel(t *testing.T) {
 		t.Fatal(err)
 	}
 	var job queue.Job
-	if err = json.Unmarshal([]byte(invoke("submit", "--queue", root, file)), &job); err != nil || job.Sequence != 1 {
+	submitted := invoke("submit", "--queue", root, file)
+	if err = json.Unmarshal([]byte(submitted), &job); err != nil || job.Sequence != 1 {
 		t.Fatal(job, err)
 	}
 	invoke("cancel", "--queue", root, "--agent", "studio", "1")
 	var status queue.Snapshot
-	if err = json.Unmarshal([]byte(invoke("status", "--queue", root)), &status); err != nil || status.Jobs[0].State != queue.Cancelled {
+	reported := invoke("status", "--queue", root)
+	if err = json.Unmarshal([]byte(reported), &status); err != nil || status.Jobs[0].State != queue.Cancelled {
 		t.Fatal(status, err)
 	}
 	invoke("pause", "--queue", root, "--reason", "review")

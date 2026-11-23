@@ -18,6 +18,7 @@ func CopySourceManifest(sourceFile, destinationDirectory string) error {
 	if err != nil {
 		return err
 	}
+	top := manifestSearchTop(filepath.Dir(absolute))
 	for directory := filepath.Dir(absolute); ; directory = filepath.Dir(directory) {
 		manifest := filepath.Join(directory, "sources.yaml")
 		info, err := os.Lstat(manifest)
@@ -37,8 +38,23 @@ func CopySourceManifest(sourceFile, destinationDirectory string) error {
 		if !os.IsNotExist(err) {
 			return err
 		}
-		if parent := filepath.Dir(directory); parent == directory {
+		if parent := filepath.Dir(directory); parent == directory || directory == top {
 			return nil
+		}
+	}
+}
+
+// manifestSearchTop is the highest folder whose sources.yaml may belong to a
+// set: the root of the repository that holds it. A set outside any repository
+// has no tree beyond its own folder, so the search never climbs past it to
+// an unrelated manifest.
+func manifestSearchTop(start string) string {
+	for directory := start; ; directory = filepath.Dir(directory) {
+		if _, err := os.Lstat(filepath.Join(directory, ".git")); err == nil {
+			return directory
+		}
+		if parent := filepath.Dir(directory); parent == directory {
+			return start
 		}
 	}
 }

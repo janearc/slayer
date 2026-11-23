@@ -56,8 +56,10 @@ func TestGrained(t *testing.T) {
 		for x := 3; x < 60; x++ {
 			v := g.RGBAAt(x, y).R
 			seen[v] = true
-			near += math.Abs(float64(v) - float64(g.RGBAAt(x-1, y).R))
-			far += math.Abs(float64(v) - float64(g.RGBAAt(x-3, y).R))
+			nearPixel := float64(g.RGBAAt(x-1, y).R)
+			near += math.Abs(float64(v) - nearPixel)
+			farPixel := float64(g.RGBAAt(x-3, y).R)
+			far += math.Abs(float64(v) - farPixel)
 			lin := Decode(v) / Decode(128)
 			if lin < 0.69 || lin > 1.31 {
 				t.Fatalf("grain moved a pixel to %v of what it was", lin)

@@ -19,6 +19,10 @@ import (
 	"time"
 )
 
+// never is the stop of an encoder that does not stop: no context at all,
+// which New refuses.
+var never context.Context
+
 type processRecord struct {
 	Args   []string
 	Pixels []byte
@@ -106,7 +110,8 @@ func readRecord(t *testing.T, path string) processRecord {
 
 func noTemporary(t *testing.T, output string) {
 	t.Helper()
-	matches, err := filepath.Glob(filepath.Join(filepath.Dir(output), "."+filepath.Base(output)+"-*.mp4"))
+	pattern := filepath.Join(filepath.Dir(output), "."+filepath.Base(output)+"-*.mp4")
+	matches, err := filepath.Glob(pattern)
 	if err != nil || len(matches) != 0 {
 		t.Fatalf("temporary outputs: %v, %v", matches, err)
 	}
@@ -157,7 +162,8 @@ func TestFourKSettings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, cfg.Width, cfg.Height))); err != nil {
+	picture := image.NewRGBA(image.Rect(0, 0, cfg.Width, cfg.Height))
+	if _, err := e.WriteFrame(0, picture); err != nil {
 		t.Fatal(err)
 	}
 	if err := e.Close(); err != nil {
@@ -300,7 +306,8 @@ func TestChildFailureAndEmptyOutput(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, writeErr := e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2)))
+			blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+			_, writeErr := e.WriteFrame(0, blank)
 			err = e.Close()
 			if err == nil {
 				t.Fatalf("accepted child failure, write: %v", writeErr)
@@ -324,7 +331,8 @@ func TestCancellationUnblocksBackpressure(t *testing.T) {
 		t.Fatal(err)
 	}
 	done := make(chan error, 1)
-	go func() { _, err := e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, cfg.Width, cfg.Height))); done <- err }()
+	blank := image.NewRGBA(image.Rect(0, 0, cfg.Width, cfg.Height))
+	go func() { _, err := e.WriteFrame(0, blank); done <- err }()
 	time.Sleep(50 * time.Millisecond)
 	cancel()
 	select {
@@ -370,7 +378,8 @@ func TestNoOverwriteAndAtomicPublication(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			if _, err = e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+			blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+			if _, err = e.WriteFrame(0, blank); err != nil {
 				t.Fatal(err)
 			}
 			err = e.Close()
@@ -410,7 +419,8 @@ func TestPackedRGBAAndAlreadyAlignedHeight(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := readRecord(t, record)
-	if !bytes.Equal(got.Pixels, append(append([]byte{}, frame.Pix...), frame.Pix...)) {
+	packed := append(append([]byte{}, frame.Pix...), frame.Pix...)
+	if !bytes.Equal(got.Pixels, packed) {
 		t.Fatal("packed frame ordering changed")
 	}
 	if !strings.Contains(strings.Join(got.Args, " "), "pad=2:16:0:0:black,scale=iw:ih:out_color_matrix=bt709:out_range=tv,format=yuv420p") {
@@ -427,7 +437,8 @@ func TestAbortUnblocksWrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	done := make(chan error, 1)
-	go func() { _, err := e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, cfg.Width, cfg.Height))); done <- err }()
+	blank := image.NewRGBA(image.Rect(0, 0, cfg.Width, cfg.Height))
+	go func() { _, err := e.WriteFrame(0, blank); done <- err }()
 	time.Sleep(50 * time.Millisecond)
 	if err = e.Abort(); err != nil {
 		t.Fatal(err)
@@ -454,7 +465,7 @@ func TestBoundedDiagnosticsAndBinaryValidation(t *testing.T) {
 	if len(log.data) != 16384 {
 		t.Fatalf("unbounded stderr: %d", len(log.data))
 	}
-	if _, err := New(nil, Config{}); err == nil {
+	if _, err := New(never, Config{}); err == nil {
 		t.Fatal("accepted nil context")
 	}
 	path := filepath.Join(t.TempDir(), "not-executable")
@@ -462,7 +473,8 @@ func TestBoundedDiagnosticsAndBinaryValidation(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, binary := range []string{path, filepath.Dir(path)} {
-		if _, err := New(context.Background(), Config{FFmpeg: binary, Output: filepath.Join(t.TempDir(), "out.mp4"), Width: 2, Height: 2, FPS: 24, FrameCount: 1}); err == nil {
+		output := filepath.Join(t.TempDir(), "out.mp4")
+		if _, err := New(context.Background(), Config{FFmpeg: binary, Output: output, Width: 2, Height: 2, FPS: 24, FrameCount: 1}); err == nil {
 			t.Fatalf("accepted non executable binary %s", binary)
 		}
 	}
@@ -473,7 +485,8 @@ func TestFinalizationTimeoutAfterEOF(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, err = e.WriteFrame(0, blank); err != nil {
 		t.Fatal(err)
 	}
 	done := make(chan error, 1)
@@ -514,7 +527,8 @@ func TestAbortIntentPreventsClosePublication(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, err = e.WriteFrame(0, blank); err != nil {
 		t.Fatal(err)
 	}
 	e.mu.Lock()
@@ -554,7 +568,8 @@ func TestAbortAfterSuccessfulChildBeforePublication(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, err := e.WriteFrame(0, blank); err != nil {
 		t.Fatal(err)
 	}
 	paused := make(chan struct{})
@@ -639,7 +654,8 @@ func TestAbortAndStartupFailure(t *testing.T) {
 	if err = e.Abort(); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err == nil {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, err = e.WriteFrame(0, blank); err == nil {
 		t.Fatal("write after abort")
 	}
 	if err = e.Close(); err == nil {
@@ -652,7 +668,8 @@ func TestAbortAndStartupFailure(t *testing.T) {
 	}
 	cfg.FFmpeg = executable
 	_, err = newEncoder(context.Background(), cfg, func(ctx context.Context, _ string, _ ...string) *exec.Cmd {
-		return exec.CommandContext(ctx, filepath.Join(t.TempDir(), "missing"))
+		absent := filepath.Join(t.TempDir(), "missing")
+		return exec.CommandContext(ctx, absent)
 	})
 	if err == nil {
 		t.Fatal("accepted failed start")

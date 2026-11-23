@@ -1,0 +1,1 @@
+check-roman-scene . :: go test -tags=draw -count=1 -v ./session -run=TestASetAfloatBuildsItsSpacecraftRecipe

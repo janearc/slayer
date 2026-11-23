@@ -19,7 +19,7 @@ var sixWays = [6][2]float64{
 }
 
 // middle is the lattice middle of a column and row, spacing s.
-func middle(s float64, c, r int) (u, v float64) {
+func middle(s float64, c, r int) (u, value float64) {
 	return s * (float64(c) + 0.5*float64(r%2)), s * math.Sqrt(3) / 2 * float64(r)
 }
 
@@ -65,8 +65,8 @@ func sameTiles(a, b []Tile) bool {
 // row's (3, 3) has (3,2) and (4,2) below and (3,4) and (4,4) above. the
 // corner (0, 0) has two.
 func TestFlatNeighboursAreTheTilesOneStepAway(t *testing.T) {
-	f := Flat{Step: 2, Across: 7, Down: 5}
-	for _, c := range []struct {
+	flat := Flat{Step: 2, Across: 7, Down: 5}
+	for _, each := range []struct {
 		tile Tile
 		want []Tile
 	}{
@@ -76,8 +76,8 @@ func TestFlatNeighboursAreTheTilesOneStepAway(t *testing.T) {
 			{0, 3, 4}, {0, 4, 4}}},
 		{Tile{0, 0, 0}, []Tile{{0, 1, 0}, {0, 0, 1}}},
 	} {
-		if got := f.Neighbours(c.tile); !sameTiles(got, c.want) {
-			t.Errorf("tile %v: neighbours %v, want %v", c.tile, got, c.want)
+		if got := flat.Neighbours(each.tile); !sameTiles(got, each.want) {
+			t.Errorf("tile %v: neighbours %v, want %v", each.tile, got, each.want)
 		}
 	}
 	for _, g := range []Flat{{Step: 1.5, Across: 6, Down: 5},
@@ -88,8 +88,8 @@ func TestFlatNeighboursAreTheTilesOneStepAway(t *testing.T) {
 			cu, cv := middle(g.Step, tile.Column, tile.Row)
 			for _, other := range tiles {
 				ou, ov := middle(g.Step, other.Column, other.Row)
-				d := math.Hypot(ou-cu, ov-cv)
-				if other != tile && math.Abs(d-g.Step) < 1e-9*g.Step {
+				distance := math.Hypot(ou-cu, ov-cv)
+				if other != tile && math.Abs(distance-g.Step) < 1e-9*g.Step {
 					want = append(want, other)
 				}
 			}
@@ -107,9 +107,9 @@ func TestFlatNeighboursAreTheTilesOneStepAway(t *testing.T) {
 // zero or less is read as one, which tiles the plane at spacing one; a step
 // greater than zero is its own spacing.
 func TestFlatMiddlesAndSpacing(t *testing.T) {
-	f := Flat{Step: 2, Across: 7, Down: 5}
+	flat := Flat{Step: 2, Across: 7, Down: 5}
 	want := maths.V(7, 0, math.Sqrt(3))
-	if got := f.Centre(Tile{0, 3, 1}); !got.Near(want, 1e-12) || got.Y != 0 {
+	if got := flat.Centre(Tile{0, 3, 1}); !got.Near(want, 1e-12) || got.Y != 0 {
 		t.Errorf("tile (3, 1) is at %v, want %v", got, want)
 	}
 	for _, step := range []float64{0, -3} {
@@ -136,19 +136,19 @@ func TestFlatMiddlesAndSpacing(t *testing.T) {
 // for several steps, in even and odd rows, at points all round.
 func TestFlatEdgeIsTheHexagons(t *testing.T) {
 	for _, s := range []float64{1, 2, 3.7} {
-		f := Flat{Step: s, Across: 6, Down: 6}
+		flat := Flat{Step: s, Across: 6, Down: 6}
 		for _, tile := range []Tile{{0, 3, 2}, {0, 3, 3}, {0, 0, 0}, {0, 5, 5}} {
 			cu, cv := middle(s, tile.Column, tile.Row)
-			if e := f.Edge(f.Centre(tile), tile); !(math.Abs(e-s/2) <= 1e-12) {
+			if e := flat.Edge(flat.Centre(tile), tile); !(math.Abs(e-s/2) <= 1e-12) {
 				t.Fatalf("step %v tile %v: the middle is %v from the edge",
 					s, tile, e)
 			}
 			for k := range 40 {
 				du := s * (random(int64(k)).X) * 0.9
 				dv := s * (random(int64(k) + 99).Y) * 0.9
-				p := maths.V(cu+du, 5, cv+dv)
+				point := maths.V(cu+du, 5, cv+dv)
 				want := apothem(s, du, dv)
-				if e := f.Edge(p, tile); !(math.Abs(e-want) <= 1e-12*s) {
+				if e := flat.Edge(point, tile); !(math.Abs(e-want) <= 1e-12*s) {
 					t.Fatalf("step %v tile %v offset (%v, %v): %v, want %v",
 						s, tile, du, dv, e, want)
 				}
@@ -172,8 +172,8 @@ func TestFlatFinerIsHalfTheStepAndTwiceTheExtent(t *testing.T) {
 // points are on: (1, 2) and (4, 6) are 5 apart, and so are (-1, -2) and
 // (2, 2).
 func TestFlatDistanceIsTheStraightLine(t *testing.T) {
-	f := Flat{Step: 1, Across: 3, Down: 3}
-	for _, c := range []struct {
+	flat := Flat{Step: 1, Across: 3, Down: 3}
+	for _, each := range []struct {
 		a, b maths.Vec
 		want float64
 	}{
@@ -181,8 +181,8 @@ func TestFlatDistanceIsTheStraightLine(t *testing.T) {
 		{maths.V(-1, 0, -2), maths.V(2, 0, 2), 5},
 		{maths.V(5, 0, -3), maths.V(5, 0, 1), 4},
 	} {
-		if d := f.Distance(c.a, c.b); !(math.Abs(d-c.want) <= 1e-12) {
-			t.Errorf("%v to %v is %v, want %v", c.a, c.b, d, c.want)
+		if distance := flat.Distance(each.a, each.b); !(math.Abs(distance-each.want) <= 1e-12) {
+			t.Errorf("%v to %v is %v, want %v", each.a, each.b, distance, each.want)
 		}
 	}
 }
@@ -215,22 +215,23 @@ func TestFlatBoxSomewhereAndLatitude(t *testing.T) {
 					}
 				}
 				mid := maths.V(w/2, 0, h/2)
-				for _, p := range []maths.Vec{maths.V(0, 0, 0), maths.V(w, 3, h),
+				for _, point := range []maths.Vec{maths.V(0, 0, 0), maths.V(w, 3, h),
 					maths.V(w/4, 0, 3*h/4), maths.V(w+4, 0, h+9),
 					maths.V(-3, 0, 0.3), mid} {
-					for _, n := range norths {
-						flat := maths.V(n.X, 0, n.Z)
+					for _, normal := range norths {
+						flat := maths.V(normal.X, 0, normal.Z)
 						want := 0.0
 						if flat.Len() >= 1e-12 {
 							flat = flat.Unit()
 							reach := w/2*math.Abs(flat.X) + h/2*math.Abs(flat.Z)
 							if reach > 0 {
-								want = math.Min(1, math.Abs(p.Sub(mid).Dot(flat))/reach)
+								along := point.Sub(mid).Dot(flat)
+								want = math.Min(1, math.Abs(along)/reach)
 							}
 						}
-						if got := f.Latitude(p, n); !(math.Abs(got-want) <= 1e-12) {
+						if got := f.Latitude(point, normal); !(math.Abs(got-want) <= 1e-12) {
 							t.Fatalf("%+v at %v under north %v: %v, want %v",
-								f, p, n, got, want)
+								f, point, normal, got, want)
 						}
 					}
 				}
@@ -242,17 +243,17 @@ func TestFlatBoxSomewhereAndLatitude(t *testing.T) {
 // a north that is only 1e-12 long in the plane is still a direction: the
 // plane's far edge along it is at latitude one, and one shorter is none.
 func TestFlatLatitudeStopsAtATinyNorth(t *testing.T) {
-	f := Flat{Step: 1, Across: 5, Down: 5}
-	edge := f.Somewhere(1, 0, 0.5)
+	flat := Flat{Step: 1, Across: 5, Down: 5}
+	edge := flat.Somewhere(1, 0, 0.5)
 	exact := maths.V(1e-12, 3, 0)
 	if in := maths.V(exact.X, 0, exact.Z); in.Len() != 1e-12 {
 		t.Fatalf("1e-12 is %v long in the plane here", in.Len())
 	}
-	if l := f.Latitude(edge, exact); !(math.Abs(l-1) <= 1e-12) {
-		t.Errorf("a north 1e-12 long gives latitude %v", l)
+	if latitude := flat.Latitude(edge, exact); !(math.Abs(latitude-1) <= 1e-12) {
+		t.Errorf("a north 1e-12 long gives latitude %v", latitude)
 	}
-	if l := f.Latitude(edge, maths.V(1e-13, 3, 0)); l != 0 {
-		t.Errorf("a north 1e-13 long gives latitude %v", l)
+	if latitude := flat.Latitude(edge, maths.V(1e-13, 3, 0)); latitude != 0 {
+		t.Errorf("a north 1e-13 long gives latitude %v", latitude)
 	}
 }
 
@@ -262,7 +263,7 @@ func TestFlatLatitudeStopsAtATinyNorth(t *testing.T) {
 // is read as six.
 func TestBandRowsAndColumnsFit(t *testing.T) {
 	r := 6 / math.Pi
-	for _, c := range []struct {
+	for _, each := range []struct {
 		width      float64
 		around     int
 		spacing    float64
@@ -277,13 +278,14 @@ func TestBandRowsAndColumnsFit(t *testing.T) {
 		{-5, 6, 2, 1, 6},
 		{7, 7, 12.0 / 7, 5, 35},
 	} {
-		b := Band{Radius: r, Width: c.width, Around: c.around}
-		if !(math.Abs(b.Spacing()-c.spacing) <= 1e-12) {
-			t.Errorf("%+v: spacing %v, want %v", b, b.Spacing(), c.spacing)
+		band := Band{Radius: r, Width: each.width, Around: each.around}
+		if !(math.Abs(band.Spacing()-each.spacing) <= 1e-12) {
+			t.Errorf("%+v: spacing %v, want %v", band, band.Spacing(), each.spacing)
 		}
-		if b.rows() != c.rows || len(b.Tiles()) != c.want {
-			t.Errorf("%+v: %d rows, %d tiles, want %d and %d", b, b.rows(),
-				len(b.Tiles()), c.rows, c.want)
+		if band.rows() != each.rows || len(band.Tiles()) != each.want {
+			count := len(band.Tiles())
+			t.Errorf("%+v: %d rows, %d tiles, want %d and %d", band, band.rows(),
+				count, each.rows, each.want)
 		}
 	}
 }
@@ -295,8 +297,8 @@ func TestBandRowsAndColumnsFit(t *testing.T) {
 // the rows are 1.36 apart from the bottom, minus two, so a height of 0.72 is in
 // row two and one of minus two is in row zero.
 func TestBandNearestByAngle(t *testing.T) {
-	b := Band{Radius: 10, Width: 4, Around: 40}
-	for _, c := range []struct {
+	band := Band{Radius: 10, Width: 4, Around: 40}
+	for _, each := range []struct {
 		p    maths.Vec
 		want Tile
 	}{
@@ -308,8 +310,8 @@ func TestBandNearestByAngle(t *testing.T) {
 		{maths.V(-10, -2, 0), Tile{0, 30, 0}},
 		{maths.V(-5, -2, 5), Tile{0, 35, 0}},
 	} {
-		if got := b.Nearest(c.p); got != c.want {
-			t.Errorf("%v is in %v, want %v", c.p, got, c.want)
+		if got := band.Nearest(each.p); got != each.want {
+			t.Errorf("%v is in %v, want %v", each.p, got, each.want)
 		}
 	}
 }
@@ -323,8 +325,8 @@ func TestBandNearestByAngle(t *testing.T) {
 // (39, 1) has (38, 1), (0, 1), (39, 0), (0, 0), (39, 2) and (0, 2); (5, 0)
 // at the bottom rim and (5, 2) at the top have four.
 func TestBandNeighboursAreTheTilesOneStepAway(t *testing.T) {
-	b := Band{Radius: 10, Width: 4, Around: 40}
-	for _, c := range []struct {
+	band := Band{Radius: 10, Width: 4, Around: 40}
+	for _, each := range []struct {
 		tile Tile
 		want []Tile
 	}{
@@ -333,8 +335,8 @@ func TestBandNeighboursAreTheTilesOneStepAway(t *testing.T) {
 		{Tile{0, 5, 0}, []Tile{{0, 4, 0}, {0, 6, 0}, {0, 4, 1}, {0, 5, 1}}},
 		{Tile{0, 5, 2}, []Tile{{0, 4, 1}, {0, 5, 1}, {0, 4, 2}, {0, 6, 2}}},
 	} {
-		if got := b.Neighbours(c.tile); !sameTiles(got, c.want) {
-			t.Errorf("tile %v: neighbours %v, want %v", c.tile, got, c.want)
+		if got := band.Neighbours(each.tile); !sameTiles(got, each.want) {
+			t.Errorf("tile %v: neighbours %v, want %v", each.tile, got, each.want)
 		}
 	}
 	for _, g := range []Band{{Radius: 10, Width: 4, Around: 40},
@@ -348,8 +350,8 @@ func TestBandNeighboursAreTheTilesOneStepAway(t *testing.T) {
 			for _, other := range tiles {
 				bu, bv := middle(s, other.Column, other.Row)
 				turn := math.Abs(math.Remainder((bu-au)/g.Radius, 2*math.Pi))
-				d := math.Hypot(turn*g.Radius, bv-av)
-				if other != tile && math.Abs(d-s) < 1e-9*s {
+				distance := math.Hypot(turn*g.Radius, bv-av)
+				if other != tile && math.Abs(distance-s) < 1e-9*s {
 					want = append(want, other)
 				}
 			}
@@ -367,21 +369,21 @@ func TestBandNeighboursAreTheTilesOneStepAway(t *testing.T) {
 // column is a little past its edge, not a whole turn away, and a point
 // on the far side of the band is as far as half a turn.
 func TestBandEdgeIsTheHexagonsTheShortWayRound(t *testing.T) {
-	b := Band{Radius: 10, Width: 4, Around: 40}
-	s := b.Spacing()
+	band := Band{Radius: 10, Width: 4, Around: 40}
+	spacing := band.Spacing()
 	for _, tile := range []Tile{{0, 0, 1}, {0, 39, 1}, {0, 1, 0}, {0, 38, 2},
 		{0, 20, 1}, {0, 19, 1}, {0, 21, 0}, {0, 10, 2}, {0, 30, 1}} {
-		cu, cv := middle(s, tile.Column, tile.Row)
+		cu, cv := middle(spacing, tile.Column, tile.Row)
 		for k := range 96 {
 			ang := (float64(k) + 0.37) * 2 * math.Pi / 96
 			if k%4 == 0 {
 				ang = float64(k) * 2 * math.Pi / 96 // on the seam and the quarters
 			}
 			y := float64(k%7)*0.4 - 1.2
-			p := maths.V(10*math.Sin(ang), y, 10*math.Cos(ang))
+			point := maths.V(10*math.Sin(ang), y, 10*math.Cos(ang))
 			turn := math.Remainder(ang-cu/10, 2*math.Pi)
-			want := apothem(s, 10*turn, y-(cv-2))
-			if e := b.Edge(p, tile); !(math.Abs(e-want) <= 1e-9) {
+			want := apothem(spacing, 10*turn, y-(cv-2))
+			if e := band.Edge(point, tile); !(math.Abs(e-want) <= 1e-9) {
 				t.Fatalf("tile %v at angle %v: %v from the edge, want %v",
 					tile, ang, e, want)
 			}
@@ -394,11 +396,11 @@ func TestBandEdgeIsTheHexagonsTheShortWayRound(t *testing.T) {
 // zero. at exactly 2^32 columns the number is the same as the pair of
 // thirty-two bits, since every column is below it.
 func TestBandIDsPastThirtyTwoBits(t *testing.T) {
-	b := Band{Radius: 1.5e9, Width: 1e6, Around: 6_000_000_000}
-	if got := b.ID(Tile{0, 7, 2}); got != 12_000_000_007 {
+	band := Band{Radius: 1.5e9, Width: 1e6, Around: 6_000_000_000}
+	if got := band.ID(Tile{0, 7, 2}); got != 12_000_000_007 {
 		t.Errorf("id of (7, 2) is %d", got)
 	}
-	if b.ID(Tile{0, 1 << 32, 3}) == b.ID(Tile{0, 0, 3}) {
+	if band.ID(Tile{0, 1 << 32, 3}) == band.ID(Tile{0, 0, 3}) {
 		t.Error("column 2^32 shares an id with column nought")
 	}
 	exact := Band{Radius: 1.5e9, Width: 1e6, Around: 1 << 32}
@@ -423,18 +425,18 @@ func TestBandFinerHasTwiceTheColumns(t *testing.T) {
 // across the seam, and two heights apart with no turn between them are
 // the difference, not the sum.
 func TestBandDistanceIsAlongTheCylinder(t *testing.T) {
-	b := Band{Radius: 10, Width: 4, Around: 40}
+	band := Band{Radius: 10, Width: 4, Around: 40}
 	at := func(az, y float64) maths.Vec {
 		return maths.V(10*math.Sin(az), y, 10*math.Cos(az))
 	}
-	if d := b.Distance(at(-0.9*math.Pi, 0), at(0.9*math.Pi, 0)); !(math.Abs(d-0.2*math.Pi*10) <= 1e-9) {
-		t.Errorf("across the seam: %v", d)
+	if distance := band.Distance(at(-0.9*math.Pi, 0), at(0.9*math.Pi, 0)); !(math.Abs(distance-0.2*math.Pi*10) <= 1e-9) {
+		t.Errorf("across the seam: %v", distance)
 	}
-	if d := b.Distance(at(1, 3), at(1, 1)); !(math.Abs(d-2) <= 1e-12) {
-		t.Errorf("two apart in height: %v", d)
+	if distance := band.Distance(at(1, 3), at(1, 1)); !(math.Abs(distance-2) <= 1e-12) {
+		t.Errorf("two apart in height: %v", distance)
 	}
-	if d := b.Distance(at(0.5, 1), at(0.9, -1)); !(math.Abs(d-math.Hypot(0.4*10, 2)) <= 1e-12) {
-		t.Errorf("slantwise: %v", d)
+	if distance := band.Distance(at(0.5, 1), at(0.9, -1)); !(math.Abs(distance-math.Hypot(0.4*10, 2)) <= 1e-12) {
+		t.Errorf("slantwise: %v", distance)
 	}
 }
 
@@ -442,26 +444,26 @@ func TestBandDistanceIsAlongTheCylinder(t *testing.T) {
 // is at latitude a half, one at the rim is one, and past it is one; a
 // band of no width has no latitude. Somewhere puts b along the width.
 func TestBandLatitudeAndSomewhere(t *testing.T) {
-	b := Band{Radius: 10, Width: 4, Around: 40}
-	for _, c := range []struct{ y, want float64 }{{1, 0.5}, {-1.5, 0.75},
+	band := Band{Radius: 10, Width: 4, Around: 40}
+	for _, each := range []struct{ y, want float64 }{{1, 0.5}, {-1.5, 0.75},
 		{2, 1}, {3, 1}, {0, 0}} {
-		if l := b.Latitude(maths.V(10, c.y, 0), maths.Up); !(math.Abs(l-c.want) <= 1e-12) {
-			t.Errorf("height %v: latitude %v, want %v", c.y, l, c.want)
+		if latitude := band.Latitude(maths.V(10, each.y, 0), maths.Up); !(math.Abs(latitude-each.want) <= 1e-12) {
+			t.Errorf("height %v: latitude %v, want %v", each.y, latitude, each.want)
 		}
 	}
 	for _, w := range []float64{0, -2} {
-		if l := (Band{Radius: 10, Width: w, Around: 40}).Latitude(maths.V(10, 3, 0), maths.Up); l != 0 {
-			t.Errorf("width %v: latitude %v", w, l)
+		if latitude := (Band{Radius: 10, Width: w, Around: 40}).Latitude(maths.V(10, 3, 0), maths.Up); latitude != 0 {
+			t.Errorf("width %v: latitude %v", w, latitude)
 		}
 	}
-	if l := (Band{Radius: 10, Width: 0.5, Around: 40}).Latitude(maths.V(10, 0.125, 0), maths.Up); !(math.Abs(l-0.5) <= 1e-12) {
-		t.Errorf("a narrow band: latitude %v", l)
+	if latitude := (Band{Radius: 10, Width: 0.5, Around: 40}).Latitude(maths.V(10, 0.125, 0), maths.Up); !(math.Abs(latitude-0.5) <= 1e-12) {
+		t.Errorf("a narrow band: latitude %v", latitude)
 	}
-	if p := b.Somewhere(0.25, 0.75, 0); !p.Near(maths.V(10, 1, 0), 1e-9) {
-		t.Errorf("a quarter round, three quarters up: %v", p)
+	if point := band.Somewhere(0.25, 0.75, 0); !point.Near(maths.V(10, 1, 0), 1e-9) {
+		t.Errorf("a quarter round, three quarters up: %v", point)
 	}
-	if p := b.Somewhere(0.5, 0, 0); !p.Near(maths.V(0, -2, -10), 1e-9) {
-		t.Errorf("half round, at the bottom: %v", p)
+	if point := band.Somewhere(0.5, 0, 0); !point.Near(maths.V(0, -2, -10), 1e-9) {
+		t.Errorf("half round, at the bottom: %v", point)
 	}
 }
 
@@ -472,16 +474,18 @@ func TestBandLatitudeAndSomewhere(t *testing.T) {
 // one toward minus x is three quarters, and one on the seam, at plus z, is
 // zero, not a whole turn.
 func TestBandUnwrapGoesRoundFromNought(t *testing.T) {
-	b := Band{Radius: 10, Width: 4, Around: 40}
-	for _, c := range []struct{ turns float64 }{{0}, {0.1}, {0.25}, {0.5},
+	band := Band{Radius: 10, Width: 4, Around: 40}
+	for _, each := range []struct{ turns float64 }{{0}, {0.1}, {0.25}, {0.5},
 		{0.75}, {1.0 - 1e-9}, {1.0 / 3}, {0.04}} {
-		a := c.turns * 2 * math.Pi
-		u, v := b.unwrap(maths.V(10*math.Sin(a), 1.5, 10*math.Cos(a)))
-		if want := 10 * a; !(math.Abs(u-want) <= 1e-9) || v != 3.5 {
-			t.Errorf("%v of a turn round: u %v v %v, want %v and 3.5", c.turns, u, v, want)
+		angle := each.turns * 2 * math.Pi
+		sine := math.Sin(angle)
+		cosine := math.Cos(angle)
+		u, value := band.unwrap(maths.V(10*sine, 1.5, 10*cosine))
+		if want := 10 * angle; !(math.Abs(u-want) <= 1e-9) || value != 3.5 {
+			t.Errorf("%v of a turn round: u %v v %v, want %v and 3.5", each.turns, u, value, want)
 		}
 	}
-	u, _ := b.unwrap(maths.V(0, 0, 10))
+	u, _ := band.unwrap(maths.V(0, 0, 10))
 	if u != 0 {
 		t.Errorf("on the seam u is %v", u)
 	}

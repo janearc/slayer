@@ -4,7 +4,7 @@
 // crossing where it lands on the disc and the light it brings starts.
 //
 // It is a diagram, drawn to scale in masses, with no words: the short's
-// labels are laid over it by the compositor, at the pixels Place says.
+// labels are laid over it by the compositor, at the pixels place says.
 package diagram
 
 import (
@@ -49,9 +49,9 @@ func NewView(side int, reach float64) (View, error) {
 	return View{side: side, reach: reach}, nil
 }
 
-// Place is where a point in masses falls in the diagram, in pixels from
+// place is where a point in masses falls in the diagram, in pixels from
 // its top left: along runs right, up runs up.
-func (view View) Place(point rings.Point) (x, y float64) {
+func (view View) place(point rings.Point) (x, y float64) {
 	scale := float64(view.side) / (two * view.reach)
 	half := float64(view.side) / two
 	return half + point.Along*scale, half - point.Up*scale

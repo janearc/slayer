@@ -1,0 +1,24 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  set: "./detail-backlight301-set.yaml"
+film:
+  preset: half-portrait
+  width: 1080
+  height: 960
+  rays: 1
+  tall: 50
+renderer: gpu
+quality: exact
+camera:
+  name: underwater-60m
+at:
+  value: 0
+  unit: s
+outputs:
+  picture: "../../out/alfa-underwater-finish-shots/detail-backlight301.png"
+  raw: "../../out/alfa-underwater-finish-shots/detail-backlight301.pfm"
+print:
+  knee: 0.7
+  top: 8
+  stops: 10

@@ -63,8 +63,19 @@ var _ sky.Sky = (*Sky)(nil)
 
 // NewSky is the sky of the fields with the sun along a way in the
 // world's space, x east, y up and north toward minus z, at an exposure:
-// what a watt a square metre a steradian is in the picture.
-func NewSky(fields *Fields, sun maths.Vec, exposure float64) *Sky {
+// what a watt a square metre a steradian is in the picture. It refuses
+// fields walked for suns that are not this one's, in Holds's words: the
+// bins it would read hold only part of their light.
+func NewSky(fields *Fields, sun maths.Vec, exposure float64) (*Sky,
+	error) {
+	if err := fields.Holds(sun); err != nil {
+		return nil, err
+	}
+	return newSky(fields, sun, exposure), nil
+}
+
+// newSky is NewSky of fields that hold the sun.
+func newSky(fields *Fields, sun maths.Vec, exposure float64) *Sky {
 	zenith := zenithOf(sun)
 	looks := make([][]float64, len(fields.wavelengths))
 	for wave := range looks {

@@ -106,7 +106,7 @@ type ballot struct {
 func (s *Server) votes(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		rec, err := s.ledger.Record()
+		rec, err := s.ledger.record()
 		reply(w, rec, err, http.StatusInternalServerError)
 	case http.MethodPost:
 		if !isJSON(r) {
@@ -119,7 +119,7 @@ func (s *Server) votes(w http.ResponseWriter, r *http.Request) {
 		dec.DisallowUnknownFields()
 		var b ballot
 		if err := dec.Decode(&b); err != nil {
-			reply(w, Record{}, fmt.Errorf("a vote is {\"name\": ..., "+
+			reply(w, voteRecord{}, fmt.Errorf("a vote is {\"name\": ..., "+
 				"\"vote\": \"keep\"|\"toss\"|\"clear\"}: %w", err),
 				http.StatusBadRequest)
 			return
@@ -133,7 +133,7 @@ func (s *Server) votes(w http.ResponseWriter, r *http.Request) {
 }
 
 // reply writes a record as JSON, or the error with the status given.
-func reply(w http.ResponseWriter, rec Record, err error, status int) {
+func reply(w http.ResponseWriter, rec voteRecord, err error, status int) {
 	if err != nil {
 		http.Error(w, err.Error(), status)
 		return

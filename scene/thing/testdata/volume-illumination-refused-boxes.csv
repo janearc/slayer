@@ -1,0 +1,8 @@
+name,minx,miny,minz,maxx,maxy,maxz
+flat,-1,1,-1,1,1,1
+inside out,-1,-1,1,1,1,-1
+not a number,NaN,-1,-1,1,1,1
+no number up,-1,-1,-1,1,NaN,1
+endless low,-1,-Inf,-1,1,1,1
+endless high,-1,-1,-1,1,1,Inf
+too wide,-1.7976931348623157e+308,-1,-1,1.7976931348623157e+308,1,1

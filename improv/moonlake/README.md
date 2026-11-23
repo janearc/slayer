@@ -88,9 +88,9 @@ Two GPU renders, once (8 s each), from the slayer root with
 `SLAYER_SHELF` set to the sources shelf:
 
     hillside -set sets/moonlake.yaml -lake 1076 -moon 6 -moonglow 0.042 \
-      -giants 5 -faces 4000000 -gpu -raw g5.pfm -out g5.png
+      -giants 5 -gpu -raw g5.pfm -out g5.png
     hillside -set sets/moonlake.yaml -moon 200 -moonglow 0.042 \
-      -giants 5 -faces 4000000 -gpu -raw mask.pfm -out mask.png
+      -giants 5 -gpu -raw mask.pfm -out mask.png
 
 Then at time t (about 0.8 s a frame on the CPU):
 

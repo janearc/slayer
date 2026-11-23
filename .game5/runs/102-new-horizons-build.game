@@ -1,0 +1,1 @@
+new-horizons-build . :: go build -p=1 -o bin/new-horizons-slayer ./cmd/slayer

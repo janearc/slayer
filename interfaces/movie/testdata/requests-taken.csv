@@ -8,3 +8,4 @@ shorts at 30,1080,1920,30,72,false,1920,4.0
 shorts at 60,1080,1920,60,72,false,1920,4.2
 4K at 30,3840,2160,30,24,true,2160,5.1
 4K at 60,3840,2160,60,24,true,2160,5.2
+most frames a duration counts,320,192,24,9223372036,false,192,3.0

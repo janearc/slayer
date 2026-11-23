@@ -76,7 +76,7 @@ type Smoke struct {
 	Inputs []string
 }
 
-// Group is the one group the smoke is checked with, one of Groups.
+// Group is the one group the smoke is checked with, one InGroup knows.
 func (made Smoke) Group() string { return made.group }
 
 // Heavy is true for a smoke that takes minutes to draw both ways, so a
@@ -1579,7 +1579,6 @@ func twentyEight() (*thing.World, maths.Subspace) {
 var (
 	twentyNineLines = []maths.Band{{Nanometres: 672}, {Nanometres: 656},
 		{Nanometres: 501}}
-	twentyNineNames   = []string{"s ii", "h alpha", "o iii"}
 	twentyNinePalette = []maths.Light{maths.RGB(1, 0.12, 0.08),
 		maths.RGB(0.1, 1, 0.12), maths.RGB(0.15, 0.35, 1)}
 	// a shoulder from a third, so the lit rims keep their colour, and
@@ -1632,7 +1631,7 @@ func twentyNine() (*thing.World, maths.Subspace) {
 				Shape: shape.Sphere{Radius: 0.07},
 				Material: &thing.Material{Name: "a young star",
 					Glow:    maths.RGB(1.6, 1.7, 2),
-					Radiant: thing.Spectrum{Gives: map[radiation.Range]float64{thing.Visible: 1}}},
+					Radiant: thing.Spectrum{Gives: map[radiation.Range]float64{thing.Visible(): 1}}},
 				Motion: thing.Still(maths.Subspace{Origin: at.Out(tip.Add(off))}),
 				// a ball of light casts no shadow
 				Attrs: thing.Attrs{Clear: true},
@@ -1792,20 +1791,6 @@ func thirtyTwo() (*thing.World, maths.Subspace) {
 	north := maths.Up.Add(under.Scale(-under.Dot(maths.Up))).Unit()
 	look := maths.LookAtUp(from, from.Add(north).Add(under.Scale(-0.3)), under)
 	return w, maths.Subspace{Origin: from, Orientation: look}
-}
-
-// thirtyTwoJupiter is jupiter's aurora, for the test's second frame:
-// the giant from over its pole, the sun from the far side so the pole
-// is in night, exposed twenty times.
-//
-// the oval is in blues, standing in for the ultraviolet it shines in.
-func thirtyTwoJupiter() (*thing.World, maths.Subspace) {
-	w := dark()
-	w.Lamp(thing.Sun(maths.V(0.2, -0.3, -1), swatches.Light(swatches.Daylight).Scale(1.2)))
-	j := sure(template.Jupiter()).WithoutMoons()
-	placed(j.Place(w, maths.Vec{}, 1/j.Radius(), 6))
-	from := maths.V(0, 3.2, 2.2)
-	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
 }
 
 // thirtyThreeTone has a shoulder for an aurora brighter than day, and

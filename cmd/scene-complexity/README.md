@@ -10,7 +10,7 @@ requested time builds its actual scene state. Jobs can be supplied together;
 a failed job or sample remains visible as an error row and the command exits
 unsuccessfully.
 
-Set, smoke, named and authored Heard jobs use hillside's existing open and
+Set, smoke, named and authored Heard jobs use the session's existing open and
 construction paths. Heard `listening` and `continuous-field` scenes require
 data-backed adapters that Session does not yet provide, so Open refuses them.
 

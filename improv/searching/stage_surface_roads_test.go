@@ -58,7 +58,8 @@ func TestSummitRoadJunctionHasNoOverlappingPavement(t *testing.T) {
 	area := 0.0
 	for _, f := range road.Faces {
 		a, b, c := road.Vertices[f[0]], road.Vertices[f[1]], road.Vertices[f[2]]
-		area += math.Abs(crossXZ(b.Sub(a), c.Sub(a))) / 2
+		cross := crossXZ(b.Sub(a), c.Sub(a))
+		area += math.Abs(cross) / 2
 	}
 	if math.Abs(area-(2*100*8-8*8)) > 1e-4 {
 		t.Fatalf("junction area %g, expected union area1536", area)
@@ -75,7 +76,9 @@ func TestSummitRoadCentrelineHasContinuousBends(t *testing.T) {
 	maxTurn := 0.0
 	for i := 1; i < len(path)-1; i++ {
 		a, b := path[i].Sub(path[i-1]).Unit(), path[i+1].Sub(path[i]).Unit()
-		angle := math.Acos(math.Max(-1, math.Min(1, a.Dot(b))))
+		cosine := a.Dot(b)
+		clamped := math.Max(-1, math.Min(1, cosine))
+		angle := math.Acos(clamped)
 		maxTurn = math.Max(maxTurn, angle)
 	}
 	if maxTurn > 10*maths.Degree {

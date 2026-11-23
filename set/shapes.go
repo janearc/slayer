@@ -139,6 +139,7 @@ type VaporCavitation struct {
 	coreRadius, density, pressureDeficit, recovery float64
 	visualOnset, clearWater                        bool
 	phaseG                                         *float64
+	wander, wanderScale, spreadStart, spread       float64
 }
 
 // Name is the field's name.
@@ -153,6 +154,11 @@ func (made VaporCavitation) PhaseAsymmetry() (float64, bool) { return said(made.
 // Fragments gives the deterministic advected density breakup controls.
 func (made VaporCavitation) Fragments() (seed uint64, scale, contrast float64) {
 	return uint64(made.fragmentSeed), made.fragmentScale, made.fragmentContrast
+}
+
+// Dispersal returns authored meander amplitude/scale and radial spread start/rate.
+func (made VaporCavitation) Dispersal() (float64, float64, float64, float64) {
+	return made.wander, made.wanderScale, made.spreadStart, made.spread
 }
 
 // Colour is what the field gives back of the light.
@@ -298,6 +304,10 @@ func (reading reader) vaporCavities(_, value *yaml.Node) error {
 			"density-per-m":       reading.number(&made.density, 0, 20),
 			"fragment-scale-m":    reading.number(&made.fragmentScale, .001, 20),
 			"fragment-contrast":   reading.number(&made.fragmentContrast, 0, 1),
+			"wander-m":            reading.number(&made.wander, 0, 10),
+			"wander-scale-m":      reading.number(&made.wanderScale, .01, 100),
+			"spread-start-m":      reading.number(&made.spreadStart, 0, 200),
+			"spread-per-m":        reading.number(&made.spread, 0, .5),
 			"fragment-seed":       reading.whole(&made.fragmentSeed, 0, mostSeed),
 			"pressure-deficit-pa": reading.number(&made.pressureDeficit, 0.001, 1e6),
 			"recovery-pa-per-m":   reading.number(&made.recovery, 0.001, 1e6),
@@ -314,6 +324,9 @@ func (reading reader) vaporCavities(_, value *yaml.Node) error {
 				"visual-onset", "clear-water", "source")
 		}
 		made.source = source
+		if err == nil && made.wander > 0 && made.wanderScale < .01 {
+			err = reading.refuse(block, "wander-m requires wander-scale-m from 0.01 through 100 metres")
+		}
 		if err == nil && made.phaseG != nil && !made.clearWater {
 			err = reading.refuse(valueNode(block, "phase-g"), "phase-g requires clear-water: true")
 		}

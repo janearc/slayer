@@ -47,7 +47,7 @@ func (span Span) holds(seconds float64) bool {
 // Intro is what comes before the short: a full-frame clip (or none, for
 // a black card) and a line of words over it, for so many seconds.
 type Intro struct {
-	Clip    *Loop
+	Clip    *loop
 	Words   string
 	Seconds float64
 }
@@ -74,12 +74,12 @@ func (show Show) introFrames() int {
 	return int(math.Round(show.Intro.Seconds * filmRate))
 }
 
-// Total is how many frames the film is: the intro and the short.
-func (show Show) Total() int { return show.introFrames() + show.Count }
+// total is how many frames the film is: the intro and the short.
+func (show Show) total() int { return show.introFrames() + show.Count }
 
-// Frame is the film's frame i: the intro's, or the short's with the
+// frame is the film's frame i: the intro's, or the short's with the
 // picture lifted on a kick and the host laid in its box.
-func (show Show) Frame(i int) (*image.RGBA, error) {
+func (show Show) frame(i int) (*image.RGBA, error) {
 	seconds := float64(i) / filmRate
 	if i < show.introFrames() {
 		return show.intro(seconds)
@@ -90,8 +90,8 @@ func (show Show) Frame(i int) (*image.RGBA, error) {
 		return nil, err
 	}
 	frame = clone(frame)
-	at := show.Tune.At(seconds, show.speaks(short))
-	lift(frame, show.Picture, Lift(at, show.Lifts))
+	at := show.Tune.at(seconds, show.speaks(short))
+	lift(frame, show.Picture, kickLift(at, show.Lifts))
 	show.lay(frame, at, seconds)
 	return frame, nil
 }
@@ -109,15 +109,15 @@ func (show Show) speaks(seconds float64) bool {
 // lay puts the host in its box: its clip for the moment, flickered, laid
 // on as light on light so its black is no picture; a grey outline where
 // there are no clips yet.
-func (show Show) lay(frame *image.RGBA, at Moment, seconds float64) {
-	place := show.Box.Place(at, seconds, show.Seed)
+func (show Show) lay(frame *image.RGBA, at moment, seconds float64) {
+	place := show.Box.place(at, seconds, show.Seed)
 	area := image.Rectangle{Min: place, Max: place.Add(show.Box.size)}
-	loop, found := show.Clips[Pick(at)]
+	clip, found := show.Clips[pick(at)]
 	if !found {
 		outline(frame, area)
 		return
 	}
-	screen(frame, loop.At(seconds), area, Flicker(seconds, show.Seed))
+	screen(frame, clip.at(seconds), area, Flicker(seconds, show.Seed))
 }
 
 // intro is the intro's frame: its clip whole, or black, and its words.
@@ -125,7 +125,7 @@ func (show Show) intro(seconds float64) (*image.RGBA, error) {
 	frame := image.NewRGBA(image.Rectangle{Max: show.Size})
 	black(frame)
 	if show.Intro.Clip != nil {
-		screen(frame, show.Intro.Clip.At(seconds), frame.Bounds(), one)
+		screen(frame, show.Intro.Clip.at(seconds), frame.Bounds(), one)
 	}
 	return frame, write(frame, show.Intro.Words)
 }
@@ -135,7 +135,7 @@ func (show Show) intro(seconds float64) (*image.RGBA, error) {
 func (show Show) Write(ctx context.Context, path string) (int, error) {
 	settings, err := movie.NewSettings(movie.Request{Path: path,
 		Width: show.Size.X, Height: show.Size.Y, Rate: filmRate,
-		Frames: show.Total(), Sound: show.Tune.Sound(), Replace: true})
+		Frames: show.total(), Sound: show.Tune.sound, Replace: true})
 	if err != nil {
 		return none, fmt.Errorf("host: %w", err)
 	}
@@ -143,8 +143,8 @@ func (show Show) Write(ctx context.Context, path string) (int, error) {
 	if err != nil {
 		return none, fmt.Errorf("host: %w", err)
 	}
-	for i := range show.Total() {
-		frame, err := show.Frame(i)
+	for i := range show.total() {
+		frame, err := show.frame(i)
 		if err == nil {
 			err = writer.Frame(i, frame)
 		}
@@ -153,7 +153,7 @@ func (show Show) Write(ctx context.Context, path string) (int, error) {
 			return i, fmt.Errorf("host: frame %d: %w", i, err)
 		}
 	}
-	return show.Total(), writer.Close()
+	return show.total(), writer.Close()
 }
 
 // clone is a picture's copy, to draw on.

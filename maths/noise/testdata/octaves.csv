@@ -1,0 +1,12 @@
+name,octaves,x,y,z,expect
+minus three octaves,-3,0.3,0.3,0.3,nought
+no octaves,0,0.3,0.3,0.3,nought
+1100 octaves near the middle,1100,0.3,1.7,-2.2,bounded
+1100 octaves with only z,1100,0,0,-1.7,bounded
+1100 octaves with only y,1100,0,1.3,0,bounded
+1100 octaves with only x,1100,-0.9,0,0,bounded
+2000 octaves near the middle,2000,0.3,1.7,-2.2,bounded
+2000 octaves with only z,2000,0,0,-1.7,bounded
+2000 octaves with only y,2000,0,1.3,0,bounded
+2000 octaves with only x,2000,-0.9,0,0,bounded
+a thousand million octaves at the origin,1000000000,0,0,0,nought

@@ -148,7 +148,8 @@ func TestTheEarlyStopCostsUnderTwoThousandths(t *testing.T) {
 	over := slab{density: 5, box: maths.Box{
 		Min: maths.V(-10, 1, -10), Max: maths.V(10, 3, 10)}}
 	world.AddVolume(thing.Volume{Medium: over, Material: unlit})
-	got := float64(lone(world, straightDown(50), 0).R)
+	down := straightDown(50)
+	got := float64(lone(world, down, 0).R)
 	if want := math.Exp(-10); !within(got, want, 2e-3) || !(got > 0) {
 		t.Errorf("behind the slab the glow is %v, want %v", got, want)
 	}
@@ -314,7 +315,8 @@ func TestShoneIsTheLuminanceOfWhatGetsThrough(t *testing.T) {
 	world.AddVolume(thing.Volume{Medium: gas.Of{
 		Shape: plate(2e4, -1, 1), In: air, Unit: 1}})
 	red := maths.RGB(1, 0.1, 0.1)
-	world.Lamp(thing.Sun(maths.V(0, 0, 1), red))
+	along := maths.V(0, 0, 1)
+	world.Lamp(thing.Sun(along, red))
 	scene := stage(world, 0)
 	from := alongZ.At
 	passed := scene.transmit(from, maths.V(0, 0, 1), math.Inf(1))
@@ -388,8 +390,9 @@ func TestStridesSkipNothingAndCountNine(t *testing.T) {
 	}
 	var nine []thing.Volume
 	for i := range 9 {
+		slab := plate(0.1, float64(3*i), float64(3*i+2))
 		nine = append(nine, thing.Volume{
-			Medium: plate(0.1, float64(3*i), float64(3*i+2))})
+			Medium: slab})
 	}
 	if got := stridesAcross(2, nine...); len(got) != 18 {
 		t.Errorf("%d strides of nine crossings cut in two", len(got))

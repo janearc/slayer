@@ -8,7 +8,7 @@ import (
 
 // studioChannel is one channel of a plan, ready to render.
 type studioChannel struct {
-	channel *Channel
+	channel *channel
 	label   string
 	engine  engine
 	strikes []strike
@@ -100,9 +100,9 @@ type studioMix struct {
 }
 
 // add places one channel's samples in the mix and its sends.
-func (m *studioMix) add(c *Channel, x []float64) {
+func (m *studioMix) add(c *channel, x []float64) {
 	left, right := places(c.Place)
-	send := Send{}
+	send := send{}
 	if c.Send != nil {
 		send = *c.Send
 	}
@@ -151,7 +151,7 @@ var centre = math.Sqrt(0.5)
 const delayIntoRoom = 0.25
 
 // render runs the studio over a plan.
-func (studio) render(pl *Plan) (*Piece, error) {
+func (studio) render(pl *plan) (*Piece, error) {
 	s, v := pl.score, pl.voicing
 	length := s.Seconds()
 	channels := make([]*studioChannel, len(pl.voices))

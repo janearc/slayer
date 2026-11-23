@@ -8,8 +8,8 @@ import (
 	"github.com/janearc/slayer/mesh"
 )
 
-// ErrUnsupported identifies a static glTF feature this adapter refuses.
-var ErrUnsupported = errors.New("unsupported static glTF")
+// errUnsupported identifies a static glTF feature this adapter refuses.
+var errUnsupported = errors.New("unsupported static glTF")
 
 // Limits bounds every variable-sized resource accepted from an asset.
 type Limits struct {

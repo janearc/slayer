@@ -53,7 +53,8 @@ func (s Store) startGPUBatch(game, executable string, out io.Writer) (<-chan err
 		return nil, err
 	}
 	defer log.Close()
-	command := exec.Command(game, "lane", "gpu", "--", executable, "work-gpu", "--queue", s.root, "--gpu-jobs", strconv.Itoa(s.gpuLimit()))
+	gpuLaneLimit := s.gpuLimit()
+	command := exec.Command(game, "lane", "gpu", "--", executable, "work-gpu", "--queue", s.root, "--gpu-jobs", strconv.Itoa(gpuLaneLimit))
 	command.Env = slices.DeleteFunc(os.Environ(), func(value string) bool { return strings.HasPrefix(value, "GAME_LANES=") })
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.Stdout, command.Stderr = log, log

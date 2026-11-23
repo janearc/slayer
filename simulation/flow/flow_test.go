@@ -316,7 +316,8 @@ func TestPositiveViscosityDoesNotIncreaseKineticEnergy(test *testing.T) {
 		}
 	}
 	current := makeFlow(test, config, initial)
-	before := kineticEnergy(field(test, current.Velocity()))
+	velocity := field(test, current.Velocity())
+	before := kineticEnergy(velocity)
 	for range 10 {
 		if _, err := current.Step(0.01); err != nil {
 			test.Fatal(err)

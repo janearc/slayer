@@ -28,12 +28,13 @@ func heldLane(kind string) error {
 		if err != nil {
 			return err
 		}
-		err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+		laneDescriptor := int(file.Fd())
+		err = syscall.Flock(laneDescriptor, syscall.LOCK_EX|syscall.LOCK_NB)
 		closeErr := file.Close()
 		if errors.Is(err, syscall.EWOULDBLOCK) {
 			return closeErr
 		}
-		return fmt.Errorf("Game lane is not held: %w", ErrUnsafe)
+		return fmt.Errorf("the Game lane is not held: %w", ErrUnsafe)
 	}
 	return fmt.Errorf("execution requires an inherited Game %s lane", kind)
 }

@@ -1,0 +1,4 @@
+name,radius,wall,length
+no-wall,1,0,1
+no-length,1,0.1,0
+no-radius,-1,0.1,1

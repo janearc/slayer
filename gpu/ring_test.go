@@ -23,7 +23,7 @@ import (
 
 // the planet and ring the tests draw, in metres, as a giant's are: a ball of
 // 60 thousand km, a ring from 80 to 140 thousand km across its equator, a
-// slab 200 km thick as hillside draws one, of an optical depth of 0.8, an
+// slab 200 km thick as the session draws one, of an optical depth of 0.8, an
 // albedo of 0.8 and a lean of minus 0.3; seen from 350 thousand km through
 // a lens 30 degrees wide.
 const (
@@ -357,7 +357,7 @@ func glowSlab(t *testing.T, ring planet.Ring) thing.Volume {
 		Material: &thing.Material{Name: "glow", Shine: shine}}
 }
 
-// a ring's glow beside its slab, as hillside draws one: a slab a trillionth
+// a ring's glow beside its slab, as the session draws one: a slab a trillionth
 // as dense, with a shine that reads the ring's share and the x-rays that
 // fall on it, so its light is its share of the ring's.
 func TestTheGPUDrawsARingsGlowAsSlayerDoes(t *testing.T) {

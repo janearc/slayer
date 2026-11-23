@@ -11,7 +11,7 @@ import (
 // position is never a number, so no test of it ends the march.
 func TestARayThatNeverSettlesIsGivenUpAsCaptured(t *testing.T) {
 	path := smokeLens(t).Follow(math.NaN())
-	if !path.Captured() {
+	if !path.captured {
 		t.Error("the stuck ray was not taken as captured")
 	}
 	if got := len(path.Points()); got != steps+1 {

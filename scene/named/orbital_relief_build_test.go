@@ -48,7 +48,8 @@ func TestOrbitalCityProductionScene(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !view.Timed() || len(view.World().Things) < 25 || len(view.World().Lamps) != 9 {
-		t.Fatalf("production city lost geometry or lights: %d things, %d lamps", len(view.World().Things), len(view.World().Lamps))
+		things, lamps := len(view.World().Things), len(view.World().Lamps)
+		t.Fatalf("production city lost geometry or lights: %d things, %d lamps", things, lamps)
 	}
 	if err := view.Advance(8745454545 * time.Nanosecond); err != nil {
 		t.Fatal(err)

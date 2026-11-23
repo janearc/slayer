@@ -1,7 +1,6 @@
 package show
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"os"
@@ -10,8 +9,14 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-// ErrShow is wrapped by every error the package returns.
-var ErrShow = errors.New("show")
+// refusal is an error that is a constant, so nothing can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (reason refusal) Error() string { return string(reason) }
+
+// errShow is wrapped by every error the package returns.
+const errShow refusal = "show"
 
 // written is score.yaml as it is on disk.
 type written struct {
@@ -37,21 +42,12 @@ type note struct {
 	Vel   int     `yaml:"vel"`
 }
 
-// Note is a transcribed note: when it starts and ends, in the song's
+// scoreNote is a transcribed note: when it starts and ends, in the song's
 // seconds, and how hard it is struck, 0 to 127.
-type Note struct {
+type scoreNote struct {
 	start, length float64
 	vel           int
 }
-
-// Start is when the note starts, in seconds.
-func (of Note) Start() float64 { return of.start }
-
-// End is when the note stops sounding, in seconds.
-func (of Note) End() float64 { return of.start + of.length }
-
-// Vel is how hard the note is struck, 0 to 127.
-func (of Note) Vel() int { return of.vel }
 
 // Score is the song as measured: its length, the beat grid, which beats
 // were measured, and the transcribed tracks.
@@ -61,25 +57,25 @@ type Score struct {
 	duration float64
 	beats    []float64
 	measured []bool
-	tracks   map[string][]Note
+	tracks   map[string][]scoreNote
 }
 
 // ReadScore reads score.yaml.
 func ReadScore(path string) (*Score, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrShow, err)
+		return nil, fmt.Errorf("%w: %w", errShow, err)
 	}
-	return ParseScore(raw)
+	return parseScore(raw)
 }
 
-// ParseScore reads a score from its yaml. A score that names no meter
+// parseScore reads a score from its yaml. A score that names no meter
 // is in four. A meter under one, a grid of under two beats, or one that
 // does not rise, is refused by name.
-func ParseScore(raw []byte) (*Score, error) {
+func parseScore(raw []byte) (*Score, error) {
 	var on written
 	if err := yaml.Unmarshal(raw, &on); err != nil {
-		return nil, fmt.Errorf("%w: the score: %w", ErrShow, err)
+		return nil, fmt.Errorf("%w: the score: %w", errShow, err)
 	}
 	times := on.Score.Beats.Times
 	if on.Score.Meter == 0 {
@@ -87,15 +83,15 @@ func ParseScore(raw []byte) (*Score, error) {
 	}
 	if on.Score.Meter < 1 {
 		return nil, fmt.Errorf("%w: the score's meter is %d; a bar needs "+
-			"one beat or more", ErrShow, on.Score.Meter)
+			"one beat or more", errShow, on.Score.Meter)
 	}
 	if len(times) < 2 {
 		return nil, fmt.Errorf("%w: the score has %d beats; a grid needs "+
-			"two or more", ErrShow, len(times))
+			"two or more", errShow, len(times))
 	}
 	if !sort.Float64sAreSorted(times) {
 		return nil, fmt.Errorf("%w: the score's beat times do not rise; "+
-			"sort score.beats.times", ErrShow)
+			"sort score.beats.times", errShow)
 	}
 	return newScore(on), nil
 }
@@ -105,7 +101,7 @@ func newScore(on written) *Score {
 	made := &Score{status: on.Score.Status, meter: on.Score.Meter,
 		duration: on.Score.Duration,
 		beats:    on.Score.Beats.Times,
-		tracks:   map[string][]Note{}}
+		tracks:   map[string][]scoreNote{}}
 	made.measured = make([]bool, len(made.beats))
 	for i, said := range on.Score.Beats.Measured {
 		if i < len(made.measured) {
@@ -114,7 +110,7 @@ func newScore(on written) *Score {
 	}
 	for name, notes := range on.Score.Tracks {
 		for _, one := range notes {
-			made.tracks[name] = append(made.tracks[name], Note{
+			made.tracks[name] = append(made.tracks[name], scoreNote{
 				start: math.Max(one.Sec, one.AtSec), length: one.Dur,
 				vel: one.Vel})
 		}
@@ -135,12 +131,6 @@ func (of *Score) Meter() int { return of.meter }
 // Beats is every beat's time, in seconds, a copy.
 func (of *Score) Beats() []float64 { return append([]float64(nil), of.beats...) }
 
-// Track is a track's notes in the score's order, a copy; nothing for a
-// track the score lacks.
-func (of *Score) Track(name string) []Note {
-	return append([]Note(nil), of.tracks[name]...)
-}
-
 // BarTime is the time of a bar and beat on the grid, both from one, or
 // an error naming the bar when the score lacks it.
 func (of *Score) BarTime(bar, beat int) (float64, error) {
@@ -148,7 +138,7 @@ func (of *Score) BarTime(bar, beat int) (float64, error) {
 	index := (bar-1)*meter + beat - 1
 	if bar < 1 || beat < 1 || beat > meter || index >= len(of.beats) {
 		return 0, fmt.Errorf("%w: bar %d beat %d is off the grid: the score "+
-			"has bars 1 to %d, beats 1 to %d", ErrShow, bar, beat,
+			"has bars 1 to %d, beats 1 to %d", errShow, bar, beat,
 			(len(of.beats)+meter-1)/meter, meter)
 	}
 	return of.beats[index], nil

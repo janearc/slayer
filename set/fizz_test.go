@@ -30,7 +30,8 @@ func fizzSet(t *testing.T, changes ...string) string {
 // fizzRead is the fizz's world, read as written or changed.
 func fizzRead(t *testing.T, changes ...string) set.World {
 	t.Helper()
-	made, err := set.Read("fizz.yaml", []byte(fizzSet(t, changes...)))
+	source := fizzSet(t, changes...)
+	made, err := set.Read("fizz.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,8 +67,9 @@ func TestAFizzCanExplicitlyOptIntoClearWaterComposition(t *testing.T) {
 func TestAFizzIsNotAWisp(t *testing.T) {
 	world := fizzRead(t)
 	if len(world.Fizzes()) != 1 || len(world.Wisps()) != 0 {
-		t.Errorf("%d fizzes and %d wisps", len(world.Fizzes()),
-			len(world.Wisps()))
+		fizzes := len(world.Fizzes())
+		wisps := len(world.Wisps())
+		t.Errorf("%d fizzes and %d wisps", fizzes, wisps)
 	}
 	order := strings.Join(world.Order(), " ")
 	if order != "materials boxes fizzes suns" {
@@ -113,8 +115,8 @@ func TestAFizzsMistakesAreRefused(t *testing.T) {
 			"scale is not a key here"},
 		{"    fizzes:", "    fizz:", "fizz is not a key here"},
 	} {
-		_, err := set.Read("fizz.yaml", []byte(fizzSet(t, mistake.was,
-			mistake.now)))
+		source := fizzSet(t, mistake.was, mistake.now)
+		_, err := set.Read("fizz.yaml", []byte(source))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%q: refused with %v, wanted %q", mistake.now, err,
 				mistake.said)
@@ -130,8 +132,8 @@ func TestAFizzsEdgesAreTaken(t *testing.T) {
 		{"radius: 0.4", "radius: 5e-324"},
 		{"seed: 43", "seed: 0"},
 	} {
-		if _, err := set.Read("fizz.yaml", []byte(fizzSet(t, edge.was,
-			edge.now))); err != nil {
+		source := fizzSet(t, edge.was, edge.now)
+		if _, err := set.Read("fizz.yaml", []byte(source)); err != nil {
 			t.Errorf("%q: refused with %v", edge.now, err)
 		}
 	}

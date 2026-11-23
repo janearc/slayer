@@ -8,10 +8,15 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// The numbers a stopping material is worked in, each true by definition.
+const (
+	haltNought = 0 // defined: no amount
+)
+
 // sameBand is how near a band must be to a coefficient's photon to be
 // that photon, as a share of the wavelength: the rounding of an energy
 // turned into a wavelength and back, and no nearer than that.
-const sameBand = 1e-9
+var sameBand = pick("stopping-same-band")
 
 // passing is one band a stopping material answers: the photon's
 // wavelength in nanometres and the share of it one unit of the thing
@@ -47,16 +52,16 @@ type stopping struct {
 // It refuses a material with no coefficients, by name, one with no
 // density cited, and a unit that is not a positive number.
 func Stopping(kind materials.Material, unit float64) (Radiant, error) {
-	if !(unit > 0) || math.IsInf(unit, 0) {
+	if !(unit > haltNought) || math.IsInf(unit, haltNought) {
 		return nil, fmt.Errorf("thing: %s stopping a beam by a unit of %v m",
 			kind.Name(), unit)
 	}
 	rows := kind.Attenuations().All()
-	if len(rows) == 0 {
+	if len(rows) == haltNought {
 		return nil, fmt.Errorf("thing: %s has no attenuation coefficients",
 			kind.Name())
 	}
-	made := stopping{bands: make([]passing, 0, len(rows))}
+	made := stopping{bands: make([]passing, haltNought, len(rows))}
 	for _, row := range rows {
 		share, err := kind.Passes(row.Energy(), unit)
 		if err != nil {
@@ -78,12 +83,12 @@ func (made stopping) Through(band maths.Band) float64 {
 			return each.share
 		}
 	}
-	return 0
+	return haltNought
 }
 
 // Emits is nothing: a material that only stops a beam gives none off
-func (made stopping) Emits(maths.Band) float64 { return 0 }
+func (made stopping) Emits(maths.Band) float64 { return haltNought }
 
 // Scatters is nothing: what the material takes from the beam is taken,
 // and none is sent back toward a lamp or a radar
-func (made stopping) Scatters(maths.Band) float64 { return 0 }
+func (made stopping) Scatters(maths.Band) float64 { return haltNought }

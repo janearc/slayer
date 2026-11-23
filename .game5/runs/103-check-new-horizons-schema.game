@@ -1,0 +1,1 @@
+check-new-horizons-schema . :: go test -p=1 ./set -run ^TestNewHorizonsPassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s

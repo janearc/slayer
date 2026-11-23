@@ -14,11 +14,11 @@ import (
 
 	"github.com/janearc/puzzlemouth/pzm"
 	"github.com/janearc/puzzlemouth/verb"
-	"github.com/janearc/slayer/hillside"
 	compositor "github.com/janearc/slayer/improv/moonlake/omnipositor"
 	"github.com/janearc/slayer/interfaces/file"
 	"github.com/janearc/slayer/interfaces/movie"
 	"github.com/janearc/slayer/raw"
+	"github.com/janearc/slayer/session"
 )
 
 // scenePage documents the generic set path separately from Moonlake stretch.
@@ -128,7 +128,7 @@ func sceneCommand(call pzm.Call) error {
 		defer writer.Abort()
 	}
 	started := time.Now()
-	err = compositor.RenderScene(ctx, plan, wanted, hillside.Stamped(build, built, who, sessions), call.On("reference"), func(result compositor.SceneResult) error {
+	err = compositor.RenderScene(ctx, plan, wanted, session.Stamped(build, built, who, sessions), call.On("reference"), func(result compositor.SceneResult) error {
 		if err := ctx.Err(); err != nil {
 			return err
 		}

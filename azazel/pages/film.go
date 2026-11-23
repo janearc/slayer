@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"math"
 	"os"
 	"path/filepath"
@@ -383,11 +384,14 @@ func (look filmView) due(ending bool) bool {
 	return look.count >= last+step
 }
 
-// encode makes the partial film beside partial.mp4 and renames it over,
-// then records what it holds in partial.json.
+// encode makes the partial film beside partial.mp4. The record comes
+// down before the new film is renamed over the old and goes back after,
+// so a reader finds either no record or the record of the film beside it,
+// never a new film with an old count.
 func (p publisher) encode(ctx context.Context, dir string,
 	look filmView) error {
 	output := filepath.Join(dir, partialName)
+	record := filepath.Join(dir, partialRecord)
 	temporary, err := placeBeside(output)
 	if err != nil {
 		return err
@@ -395,16 +399,29 @@ func (p publisher) encode(ctx context.Context, dir string,
 	err = p.encoder.Encode(ctx, Film{Frames: look.frames, Count: look.count,
 		Rate: look.rate, Music: look.music, Output: temporary})
 	if err == nil {
-		err = os.Rename(temporary, output)
+		err = withdraw(record)
+	}
+	if err == nil {
+		err = renameDurably(temporary, output)
 	}
 	if err != nil {
 		return errors.Join(err, os.Remove(temporary))
 	}
-	record := partialFilm{Frames: look.count, Rate: look.rate,
+	held := partialFilm{Frames: look.count, Rate: look.rate,
 		Seconds: float64(look.count) / look.rate}
-	data, err := json.Marshal(record)
-	return errors.Join(err, writeBeside(filepath.Join(dir, partialRecord),
-		data, written))
+	data, err := json.Marshal(held)
+	return errors.Join(err, writeBeside(record, data, written))
+}
+
+// withdraw removes the file at path, and the folder's entry for it from
+// storage; a file that is not there is withdrawn already.
+func withdraw(path string) error {
+	err := os.Remove(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	parentFolder := filepath.Dir(path)
+	return errors.Join(err, syncPath(parentFolder))
 }
 
 // lines is what the folder page says of the film.

@@ -117,7 +117,7 @@ func TestLookAtNoFileMakesNone(t *testing.T) {
 	if err != nil || got.Entries != 0 || got.Disc != 0 {
 		t.Fatalf("looked at %+v, %v", got, err)
 	}
-	_, err = Rewrite(path, testWait, Everything)
+	_, err = rewrite(path, testWait, everything)
 	if err != nil || sizeOf(path) != 0 {
 		t.Fatalf("a rewrite of no file made one: %v", err)
 	}
@@ -213,7 +213,7 @@ func TestClearEmptiesTheFileAndGivesTheDiscBack(t *testing.T) {
 // as it was.
 func TestARewriteThatFailsLeavesTheFileAsItWas(t *testing.T) {
 	path := filled(t, daysAgo)
-	blocker := filepath.Join(path+TempSuffix, "in-the-way")
+	blocker := filepath.Join(path+tempSuffix, "in-the-way")
 	if err := writeFile(blocker); err != nil {
 		t.Fatal(err)
 	}
@@ -235,7 +235,7 @@ func TestAProcessWaitingDuringARewriteOpensTheNewFile(t *testing.T) {
 	holding, release := make(chan bool), make(chan bool)
 	rewritten := make(chan error, 1)
 	go func() {
-		_, err := Rewrite(path, testWait, func(all []Entry) map[string]bool {
+		_, err := rewrite(path, testWait, func(all []treeEntry) map[string]bool {
 			holding <- true
 			<-release
 			return map[string]bool{string(treeKey(0)): true}
@@ -343,8 +343,8 @@ func TestStaleIsNoRecordOrOlderThanTheGrain(t *testing.T) {
 		want bool
 	}{
 		{time.Time{}, true},
-		{noon.Add(-2 * TouchGrain), true},
-		{noon.Add(-TouchGrain / 2), false},
+		{noon.Add(-2 * touchGrain), true},
+		{noon.Add(-touchGrain / 2), false},
 		{noon, false},
 	} {
 		if Stale(each.used, noon) != each.want {

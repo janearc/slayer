@@ -1,0 +1,88 @@
+# one giant kelp plant alone, in the water of sets/kelp-forest.yaml (see its
+# header for the water and the exposure), twelve metres of it over a pale
+# floor, lit by the worked sun refracted through the surface. the plant is
+# the kind giant-kelp-moderate: a current toward the east leans the stipes
+# and streams the blades. (giant-kelp-slack is the same plant in still
+# water: the stipes rise straight and the blades stand out all round.) places are metres, x east, y north, z up,
+# mean sea at z=0; the holdfast is at the origin on the floor, z=-12.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: kelp plant in water
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 60}
+  film:
+    width: 600
+    height: 900
+    rays: 2
+    exposure: 650
+    wide: 70
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0, 0, 0]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.2778, 0.0713, 0.0277]
+          scatter:
+            coefficient-per-metre: [0.01338, 0.01484, 0.01755]
+            phase-g: 0
+            steps: 32
+            max-distance: {value: 40, unit: m}
+        source: "pure water absorption, Pope and Fry 1997; particle scattering, Morel and Maritorena 2001 Case 1 model at a picked 0.5 mg/m3 chlorophyll, counted as loss by its share turned away, one minus the Petzold mean cosine 0.924; see sets/kelp-forest.yaml"
+      sand:
+        colour: {srgb_linear: [0.30, 0.25, 0.17]}
+        source: eye
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 512, unit: m}
+      samples: 257
+      sea:
+        wind: {value: 0.5, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 11
+      time: {value: 0, unit: s}
+      source: "picked: a light breeze, no shelf source"
+      flat-mean:
+        mean-level: {value: 0, unit: m}
+        collar-width: {value: 64, unit: m}
+        extends-to-infinity: true
+      direct-sun: mean-plane
+      diffuse-sky-samples: 8
+    boxes:
+      floor:
+        material: sand
+        middle: [0, 0, -12.05]
+        size: [400, 400, 0.1]
+        source: eye
+  set:
+    things:
+      plant:
+        kind: giant-kelp-moderate
+        seed: 1
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: -12, unit: m}
+  cameras:
+    side:
+      title: "from the side, level with the plant's middle, 9 m off"
+      location: {at: [0, -9, -6]}
+      orientation: {look_at: [0, 0, -6]}
+      initial-media: [seawater]
+    metre:
+      title: "a metre from the blades"
+      location: {at: [0.6, -1.5, -6.2]}
+      orientation: {look_at: [0.6, 0, -6.2]}
+      initial-media: [seawater]

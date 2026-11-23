@@ -1,0 +1,229 @@
+# The American Midwest, 2026-11-19. A street of two-storey houses in vinyl
+# siding, one colour for the whole district, each with its gable to the
+# street and a garage beside it, standing apart or as duplexes of two
+# houses sharing a wall. No number is measured; each says whether it was
+# picked as a figure or set by eye.
+culture: midwest
+says: a suburban street of sided houses, each with a garage, one colour to a district
+elements:
+- element: bays
+  says: houses on one side of a street; a duplex is two of them
+  scope: row
+  draw: range
+  unit: bays
+  whole: true
+  least: 6
+  most: 6
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: bay-width
+  says: width of every house of a row, without its garage
+  scope: row
+  draw: range
+  unit: m
+  least: 7
+  most: 8.5
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: bay-depth
+  says: depth of every house of a row, front to back
+  scope: row
+  draw: range
+  unit: m
+  least: 9
+  most: 11
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: garage-width
+  says: width of the space for a garage beside each house
+  scope: row
+  draw: range
+  unit: m
+  least: 3.2
+  most: 3.2
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: garage
+  says: whether a house has its garage
+  scope: bay
+  draw: share
+  unit: chance
+  share: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: yard
+  says: width of the side yard at the outer side of each house's space
+  scope: row
+  draw: range
+  unit: m
+  least: 2.5
+  most: 2.5
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: handing
+  says: whether the row is duplexes, every other house mirrored so two share a wall, and not detached houses
+  scope: row
+  draw: share
+  unit: chance
+  share: 0.5
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: storeys
+  says: storeys of a house
+  scope: row
+  draw: range
+  unit: storeys
+  whole: true
+  least: 2
+  most: 2
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: storey-height
+  says: height of a storey, floor to floor
+  scope: row
+  draw: range
+  unit: m
+  least: 2.6
+  most: 2.8
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: roof-form
+  says: the form of every roof; the gable faces the street
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: gable-across, weight: 1}
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: roof-colour
+  says: the colour of the roofs, shingle
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: charcoal, weight: 2, colour: [0.055, 0.055, 0.06], gloss: 0.1}
+  - {name: brown, weight: 1, colour: [0.09, 0.06, 0.04], gloss: 0.1}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: roof-pitch
+  says: how steeply a roof rises, as height over half its width
+  scope: row
+  draw: range
+  unit: rise over run
+  least: 0.4
+  most: 0.55
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: eave-depth
+  says: how far the roof overhangs the walls
+  scope: row
+  draw: range
+  unit: m
+  least: 0.4
+  most: 0.6
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: palette
+  says: the siding colours a district may have, of which it has one
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: beige, weight: 1, colour: [0.5, 0.4, 0.27]}
+  - {name: sage, weight: 1, colour: [0.27, 0.34, 0.24]}
+  - {name: grey-blue, weight: 1, colour: [0.25, 0.31, 0.4]}
+  - {name: tan, weight: 1, colour: [0.42, 0.3, 0.2]}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: palette-spread
+  says: how many of the palette's colours the district uses, one
+  scope: district
+  draw: range
+  unit: colours
+  whole: true
+  least: 1
+  most: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: cladding
+  says: vinyl siding; the colour is a tint on the district's colour and the gloss is the vinyl's
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: vinyl-siding, weight: 1, colour: [1, 1, 1], gloss: 0.35}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: window-count
+  says: windows in each storey of a house
+  scope: storey
+  draw: range
+  unit: windows
+  whole: true
+  least: 2
+  most: 2
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: window-width
+  says: width of a window
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.1
+  most: 1.3
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: window-height
+  says: height of a window
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.2
+  most: 1.4
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: window-sill
+  says: height of a window's foot over the floor
+  scope: district
+  draw: range
+  unit: m
+  least: 0.85
+  most: 0.85
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: door-front
+  says: whether a house has its door in its front and not in its side
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.8
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: chimney
+  says: whether a house with a party wall has a chimney on it
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.5
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: lit-share
+  says: share of windows with a light on at dusk
+  scope: opening
+  draw: share
+  unit: chance
+  share: 0.35
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: door-colour
+  says: the paint of doors
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: brown, weight: 1, colour: [0.07, 0.04, 0.025], gloss: 0.35}
+  - {name: red, weight: 1, colour: [0.25, 0.03, 0.025], gloss: 0.35}
+  - {name: green, weight: 1, colour: [0.03, 0.12, 0.06], gloss: 0.35}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"

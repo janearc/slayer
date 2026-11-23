@@ -1,0 +1,6 @@
+name,radius,wall,length
+inside out,-5,1,1
+height below,2,1,-1
+radius no value,NaN,1,1
+wall no value,2,NaN,1
+length infinite,2,1,Inf

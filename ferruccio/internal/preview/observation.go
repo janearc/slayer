@@ -2,10 +2,14 @@ package preview
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
 )
+
+// errNoMatchingJob is a readable ledger that holds no job for this plan.
+var errNoMatchingJob = errors.New("Azazel ledger has no matching preview job")
 
 // decodeReply checks duplicate keys and JSON syntax before consuming owner data.
 func decodeReply(raw []byte, target any) error {
@@ -113,7 +117,7 @@ func readObservation(raw []byte, request queueRequest, sequence uint64) (observe
 		found = &observedJob{job: job, raw: rawJob, paused: snapshot.Paused}
 	}
 	if found == nil {
-		return observedJob{}, fmt.Errorf("Azazel ledger has no matching preview job")
+		return observedJob{}, errNoMatchingJob
 	}
 	return *found, nil
 }

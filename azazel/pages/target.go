@@ -81,8 +81,9 @@ func foldersNamed(root, file string) []Folder {
 		if !isPath || path == "" {
 			continue
 		}
+		recordPath := besideRecord(file, path)
 		folder, under := folderUnder(root,
-			filepath.Clean(besideRecord(file, path)))
+			filepath.Clean(recordPath))
 		if under {
 			found = append(found, folder)
 		}
@@ -95,8 +96,8 @@ func foldersNamed(root, file string) []Folder {
 // land. With none, or two, it says why it publishes nothing.
 func folderOf(root string, request queue.Request) (Folder, string) {
 	if out, given := outOf(request.Args); given {
-		folder, under := folderUnder(root, filepath.Clean(besideRecord(
-			request.Directory+"/", out)))
+		recordPath := besideRecord(request.Directory+"/", out)
+		folder, under := folderUnder(root, filepath.Clean(recordPath))
 		if !under {
 			return Folder{}, "its --out is not in a render folder under " + root
 		}

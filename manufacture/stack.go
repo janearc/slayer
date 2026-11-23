@@ -176,6 +176,11 @@ func stackRows() map[string]maker {
 	for _, row := range stacksRead {
 		rows[row.Name] = stack{row: row}
 	}
+	tank, err := coreTankOf(stacksRead)
+	if err != nil {
+		panic(err)
+	}
+	rows[tank.Name] = stack{row: tank}
 	return rows
 }
 
@@ -196,9 +201,14 @@ func (row stack) standoff(beside stackBeside) float64 {
 	return (row.row.Sections[spaceZero].Bottom + wide) * spaceHalf
 }
 
-// extent is a stack's box: as wide as its widest section and whatever
+// extent is a stack's box, from its recipe and not by making it.
+func (row stack) extent(from seed) (maths.Box, error) {
+	return row.reach(), nil
+}
+
+// reach is a stack's box: as wide as its widest section and whatever
 // stands beside it, and as tall as the tallest of them.
-func (row stack) extent() maths.Box {
+func (row stack) reach() maths.Box {
 	wide, tall := sizeOf(row.row.Sections)
 	out := wide * spaceHalf
 	for _, each := range row.row.Beside {
@@ -260,7 +270,7 @@ func (row stack) madeAt(from seed, detail string) (good, error) {
 		}
 		next = after
 	}
-	object, err := assembly.finish(row.extent())
+	object, err := assembly.finish(row.reach())
 	if err != nil {
 		//ninja:vow feint maker needs a value; Things refuses this one
 		return good{}, err

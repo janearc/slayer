@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/janearc/slayer/cheeptune"
-	"github.com/janearc/slayer/improv/walk"
 )
 
 // barSlack is how near a bar's start must be to its arithmetic. Picked:
@@ -84,24 +83,11 @@ func writeScript(t *testing.T, sound string) string {
 		}
 	}
 	path := filepath.Join(dir, "script.yaml")
-	if err := os.WriteFile(path, []byte(strings.Replace(shortScript, "%s", sound, 1)), 0o600); err != nil {
+	written := strings.Replace(shortScript, "%s", sound, 1)
+	if err := os.WriteFile(path, []byte(written), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	return path
-}
-
-// readShort reads the script and returns its short named where.
-func readShort(t *testing.T, path string) walk.Short {
-	t.Helper()
-	script, err := walk.ReadScript(path, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	short, found := script.Short("where")
-	if !found {
-		t.Fatal("the script has no short where")
-	}
-	return short
 }
 
 // TestSoundOf checks that the two channels of a piece are taken in turn.
@@ -148,7 +134,8 @@ func TestWritePNG(t *testing.T) {
 	if read.Bounds().Dx() != 3 || r>>8 != 10 || g>>8 != 20 || b>>8 != 30 {
 		t.Errorf("read back %v, %v %v %v", read.Bounds(), r>>8, g>>8, b>>8)
 	}
-	if err := writePNG(filepath.Join(t.TempDir(), "gone", "out.png"), frame); err == nil {
+	gone := filepath.Join(t.TempDir(), "gone", "out.png")
+	if err := writePNG(gone, frame); err == nil {
 		t.Error("wrote into a folder that is not there")
 	}
 }
@@ -174,7 +161,8 @@ func TestRunFrameAndRefusals(t *testing.T) {
 	if err := run(asked{script: script, short: "where", frame: 48, png: out}); err == nil {
 		t.Error("a frame past the end was written")
 	}
-	if err := run(asked{script: filepath.Join(t.TempDir(), "gone"), short: "where", frame: -1}); err == nil {
+	goneScript := filepath.Join(t.TempDir(), "gone")
+	if err := run(asked{script: goneScript, short: "where", frame: -1}); err == nil {
 		t.Error("a missing script was read")
 	}
 	err = run(asked{script: script, short: "there", frame: -1})

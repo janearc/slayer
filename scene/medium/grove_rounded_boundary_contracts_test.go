@@ -7,80 +7,117 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// The tables the rounded boundary contracts read: weathers and points by
+// name, the signed coordinates that stay valid, and the cell widths against
+// the coordinates they may index.
+const (
+	groveRoundedWeatherFile = "testdata/grove-rounded-weathers.csv"
+	groveRoundedPointFile   = "testdata/grove-rounded-points.csv"
+	groveRoundedAllowedFile = "testdata/grove-rounded-allowed.csv"
+	groveRoundedBudgetFile  = "testdata/grove-rounded-budgets.csv"
+)
+
+// groveRoundedWeather is the weather of a row of the table of weathers.
+func groveRoundedWeather(t *testing.T, name string) GroveWeather {
+	t.Helper()
+	row := readSheet(t, groveRoundedWeatherFile).row(t,
+		groveRoundedWeatherFile, name)
+	return GroveWeather{Depth: cell(t, row, "depth"),
+		Extinction: cell(t, row, "extinction"),
+		Coverage:   cell(t, row, "coverage")}
+}
+
+// groveRoundedPoint is the point of a row of the table of points.
+func groveRoundedPoint(t *testing.T, name string) maths.Vec {
+	t.Helper()
+	row := readSheet(t, groveRoundedPointFile).row(t, groveRoundedPointFile,
+		name)
+	return maths.V(cell(t, row, "x"), cell(t, row, "y"), cell(t, row, "z"))
+}
+
+// groveRoundedTree is a canopy of a unit radius and a unit height at a point.
+func groveRoundedTree(point maths.Vec) []Canopy {
+	return []Canopy{{At: point, Radius: unity, Height: unity}}
+}
+
+// TestGroveRetainsItsCentreWhenHorizontalBoundsRoundTogether holds that a
+// canopy whose bounds round to one extent still has mist at its centre.
 func TestGroveRetainsItsCentreWhenHorizontalBoundsRoundTogether(t *testing.T) {
 	// Binary64 spacing here is four metres. A one-metre canopy radius
 	// rounds to the same extent on either side, but its centre remains
 	// inside its own physical footprint and must retain its mist.
-	const coordinate = 0x1p54
-	weather := GroveWeather{Depth: 8, Extinction: 0.01, Coverage: 1}
-	grove, err := NewGrove(weather, []Canopy{
-		{At: maths.V(coordinate, 0, coordinate), Radius: 1, Height: 10},
-	}, func(_, _ float64) float64 { return 0 })
+	weather := groveRoundedWeather(t, "rounded")
+	canopy := Canopy{At: groveRoundedPoint(t, "rounded-tree"),
+		Radius: unity,
+		Height: picked(t, "grove-rounded-boundary-contracts-tall-height")}
+	grove, err := NewGrove(weather, []Canopy{canopy}, flatGround)
 	if err != nil {
 		t.Fatal(err)
 	}
-	point := maths.V(coordinate, 4, coordinate)
-	if got := grove.Density(point); got != 0.005 {
-		t.Fatalf("mist at canopy centre: %g, want 0.005", got)
+	point := groveRoundedPoint(t, "rounded-probe")
+	want := picked(t, "grove-rounded-boundary-contracts-centre-density")
+	if got := grove.Density(point); got != want {
+		t.Fatalf("mist at canopy centre: %g, want %g", got, want)
 	}
 }
 
-func TestGroveTopRemainsEmptyWhenUnusedNoiseCoordinatesWouldOverflow(t *testing.T) {
-	weather := GroveWeather{Depth: 1e-300, Extinction: 0.01, Coverage: 0.5}
-	grove, err := NewGrove(weather, []Canopy{
-		{At: maths.V(1e10, 0, 0), Radius: 1, Height: 1},
-	}, func(_, _ float64) float64 { return 0 })
+// TestGroveTopRemainsEmptyWhenUnusedNoiseCoordinatesWouldOverflow holds that
+// the top of a very thin layer is empty.
+func TestGroveTopRemainsEmptyWhenUnusedNoiseCoordinatesWouldOverflow(
+	t *testing.T) {
+	weather := groveRoundedWeather(t, "thin")
+	far := groveRoundedPoint(t, "far-tree")
+	grove, err := NewGrove(weather, groveRoundedTree(far), flatGround)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := grove.Density(maths.V(1e10, weather.Depth, 0)); got != 0 {
+	top := maths.V(far.X, weather.Depth, far.Z)
+	if got := grove.Density(top); got != nought {
 		t.Fatalf("mist exactly at the layer top: %g, want zero", got)
 	}
 }
 
-func TestGroveRefusesBucketCoordinatesOutsideTheHostIntegerRange(t *testing.T) {
-	weather := GroveWeather{Depth: 1, Extinction: 0.01, Coverage: 1}
-	for _, point := range []maths.Vec{
-		maths.V(-1e100, 0, 0), maths.V(0, 0, -1e100),
-		maths.V(1e100, 0, 0), maths.V(0, 0, 1e100),
-		maths.V(0x1p63, 0, 0), maths.V(0, 0, 0x1p63),
-	} {
+// TestGroveRefusesBucketCoordinatesOutsideTheHostIntegerRange holds that a
+// canopy whose bucket index is no integer is refused, and one whose index
+// just fits is not.
+func TestGroveRefusesBucketCoordinatesOutsideTheHostIntegerRange(
+	t *testing.T) {
+	weather := groveRoundedWeather(t, "unit")
+	for _, name := range []string{"refused-west", "refused-south",
+		"refused-east", "refused-north", "refused-overflow-x",
+		"refused-overflow-z"} {
+		point := groveRoundedPoint(t, name)
 		// Check the pure conversion boundary first so a bad upper-limit
 		// mutation fails before attempting an overflowing bucket walk.
-		preflight := Grove{cell: 1}
+		preflight := Grove{cell: unity}
 		if preflight.indexable(point.X) && preflight.indexable(point.Z) {
 			t.Fatalf("unrepresentable bucket passed preflight: %v", point)
 		}
-		_, err := NewGrove(weather, []Canopy{
-			{At: point, Radius: 1, Height: 1},
-		}, func(_, _ float64) float64 { return 0 })
+		_, err := NewGrove(weather, groveRoundedTree(point), flatGround)
 		if err == nil || !strings.Contains(err.Error(), "bucket index range") {
 			t.Fatalf("unrepresentable canopy bucket at %v: %v", point, err)
 		}
 	}
 	// Both large signed coordinates below the conversion limit remain valid.
-	for _, coordinate := range []float64{-0x1p63, -0x1p62, 0x1p62} {
-		_, err := NewGrove(weather, []Canopy{
-			{At: maths.V(coordinate, 0, coordinate), Radius: 1, Height: 1},
-		}, func(_, _ float64) float64 { return 0 })
-		if err != nil {
+	for _, row := range readSheet(t, groveRoundedAllowedFile) {
+		coordinate := cell(t, row, "coordinate")
+		at := maths.V(coordinate, nought, coordinate)
+		if _, err := NewGrove(weather, groveRoundedTree(at),
+			flatGround); err != nil {
 			t.Fatalf("representable canopy bucket at %g: %v", coordinate, err)
 		}
 	}
 }
 
+// TestGroveIndexBudgetUsesTheActualCellWidth holds that a coordinate may be
+// indexed or not by the width of the cell it is divided by.
 func TestGroveIndexBudgetUsesTheActualCellWidth(t *testing.T) {
-	for _, test := range []struct {
-		cell, coordinate float64
-		valid            bool
-	}{
-		{0.5, 0x1p62, false}, {2, 0x1p63, true},
-		{1, -0x1p63, true}, {1, -0x1p64, false},
-	} {
-		preflight := Grove{cell: test.cell}
-		if got := preflight.indexable(test.coordinate); got != test.valid {
-			t.Fatalf("coordinate %g cell %g: valid=%t, want %t",
-				test.coordinate, test.cell, got, test.valid)
+	for _, row := range readSheet(t, groveRoundedBudgetFile) {
+		preflight := Grove{cell: cell(t, row, "cell")}
+		coordinate, valid := cell(t, row, "coordinate"), row["valid"] == "true"
+		if got := preflight.indexable(coordinate); got != valid {
+			t.Fatalf("coordinate %g cell %g: valid=%t, want %t", coordinate,
+				preflight.cell, got, valid)
 		}
 	}
 }

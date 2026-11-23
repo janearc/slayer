@@ -80,6 +80,8 @@ func main() {
 
 // runMain returns before main exits so the optional listeners close cleanly.
 func runMain() int {
+	defer startProfile(os.Stderr)()
+	defer startHeapProfile(os.Stderr)()
 	defer startFrameEvents()()
 	defer startObservability(os.Stderr)()
 	defer observability.StartSummary("slayer", os.Stderr)()

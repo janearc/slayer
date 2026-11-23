@@ -89,9 +89,9 @@ func (key Key) failed(err error) Key {
 // neither read nor written.
 func (key Key) Err() error { return key.err }
 
-// Record is the key as lines a person can read: the kind, then each
+// record is the key as lines a person can read: the kind, then each
 // part as said. It is what the name is the sha256 of.
-func (key Key) Record() string {
+func (key Key) record() string {
 	var lines strings.Builder
 	lines.WriteString("kind " + key.kind.name + "\n")
 	for _, line := range key.lines {
@@ -102,7 +102,8 @@ func (key Key) Record() string {
 
 // Name is the sha256 of the record, in hex: the entry's file name.
 func (key Key) Name() string {
-	sum := sha256.Sum256([]byte(key.Record()))
+	keyRecord := key.record()
+	sum := sha256.Sum256([]byte(keyRecord))
 	return hex.EncodeToString(sum[:])
 }
 

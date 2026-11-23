@@ -1,0 +1,1 @@
+check-roman-geometry . :: go test -count=1 -v ./manufacture -run=Spacecraft|MaturityCountsTheTelescopesGeometry|MaturityGivesEachRowItsOwnMeasuredNumbers

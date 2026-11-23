@@ -20,53 +20,60 @@ type Tail struct {
 	Thick                float64
 }
 
-// wide is the half width at the end, bend included.
-func (t Tail) wide() float64 {
-	return t.Base/2 + t.Length*t.Spread + math.Abs(t.Curve)*t.Length
+// wide is how far from the y axis the tail's gas reaches: the bend at the end,
+// and the cut of the gaussian, chosen.skirtWidths half widths of the widest
+// the tail gets. Past it the density is exactly zero.
+func (tail Tail) wide() float64 {
+	head := tail.Base / double
+	widest := math.Max(head, head+tail.Length*tail.Spread)
+	return math.Abs(tail.Curve)*tail.Length + chosen.skirtWidths*widest
 }
 
-// Bounds is the box the tail fits in.
-func (t Tail) Bounds() maths.Box {
-	w := t.wide()
-	return maths.Box{Min: maths.V(-w, 0, -w), Max: maths.V(w, t.Length, w)}
+// Bounds is the box the tail fits in: all its gas, and nothing else is in
+// reach of the density.
+func (tail Tail) Bounds() maths.Box {
+	across := tail.wide()
+	return corners(maths.V(-across, nought, -across),
+		maths.V(across, tail.Length, across))
 }
 
 // Span is where a ray is in the tail: its slab and cylinder, probed in
 // to the gas.
-func (t Tail) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	shifted := maths.Ray{At: r.At.Add(maths.V(0, -t.Length/2, 0)),
-		Dir: r.Dir}
-	enter, leave, ok := slab(t.Length/2, shifted, near, far)
-	if !ok {
-		return 0, 0, false
+func (tail Tail) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	shifted := maths.Ray{At: ray.At.Add(maths.V(nought,
+		-tail.Length/double, nought)), Dir: ray.Dir}
+	enter, leave, hit := slab(tail.Length/double, shifted, near, far)
+	if !hit {
+		return nought, nought, false
 	}
-	enter, leave, ok = cylinder(t.wide(), r, enter, leave)
-	if !ok {
-		return 0, 0, false
+	enter, leave, hit = cylinder(tail.wide(), ray, enter, leave)
+	if !hit {
+		return nought, nought, false
 	}
-	finest := t.Base / 2
-	if finest <= 0 {
-		finest = t.Length * t.Spread / 8
+	finest := tail.Base / double
+	if finest <= nought {
+		finest = tail.Length * tail.Spread / chosen.streamEighth
 	}
-	return probed(t, r, enter, leave, finest)
+	return probed(tail, ray, enter, leave, finest)
 }
 
 // Density is the stream's, thinning out and soft across.
-func (t Tail) Density(p maths.Vec) float64 {
-	if t.Length <= 0 || p.Y < 0 || p.Y >= t.Length {
-		return 0
+func (tail Tail) Density(point maths.Vec) float64 {
+	if tail.Length <= nought || point.Y < nought || point.Y >= tail.Length {
+		return nought
 	}
-	y := p.Y
-	w := t.Base/2 + y*t.Spread
-	if w <= 0 {
-		return 0
+	along := point.Y
+	width := tail.Base/double + along*tail.Spread
+	if width <= nought {
+		return nought
 	}
-	// the stream's middle bends toward x as it goes; past two and a
-	// half widths there is nothing, so a span can find the edge
-	bend := t.Curve * y * y / t.Length
-	d := math.Hypot(p.X-bend, p.Z) / w
-	if d > 2.5 {
-		return 0
+	// the stream's middle bends toward x as it goes
+	bend := tail.Curve * along * along / tail.Length
+	across := math.Hypot(point.X-bend, point.Z) / width
+	if across > chosen.skirtWidths {
+		return nought
 	}
-	return t.Thick * (1 - y/t.Length) * math.Exp(-2*d*d)
+	return tail.Thick * (unity - along/tail.Length) *
+		math.Exp(-chosen.streamBell*across*across)
 }

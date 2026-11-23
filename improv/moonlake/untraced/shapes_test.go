@@ -185,8 +185,10 @@ func TestPaneTakesItsPartAtASize(t *testing.T) {
 	got := pane.picture(image.Pt(20, 20))
 	// a window 40 wide at 20 across is two still pixels to one
 	for _, c := range []struct{ x, y int }{{0, 0}, {3, 5}, {19, 19}} {
-		want := color.RGBA{uint8(20 + int((float64(c.x)+0.5)*2)),
-			uint8(40 + int((float64(c.y)+0.5)*2)), 8, 255}
+		redOffset := int((float64(c.x) + 0.5) * 2)
+		greenOffset := int((float64(c.y) + 0.5) * 2)
+		want := color.RGBA{uint8(20 + redOffset),
+			uint8(40 + greenOffset), 8, 255}
 		if at := got.RGBAAt(c.x, c.y); at != want {
 			t.Errorf("pixel %d %d is %v, want %v", c.x, c.y, at, want)
 		}

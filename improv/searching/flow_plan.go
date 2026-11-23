@@ -21,7 +21,7 @@ const FlowGeometryMaxBytes = 2 << 20
 // points as a measured galaxy catalogue or a reconstructed velocity field.
 // Points run from the outside toward the opening, in arbitrary scene units.
 type FlowPlan struct {
-	Travel     *FlowTravel            `yaml:"travel,omitempty"`
+	Travel     *flowTravel            `yaml:"travel,omitempty"`
 	Geometry   *FlowGeometryReference `yaml:"geometry,omitempty"`
 	Provenance string                 `yaml:"provenance"`
 	Start      string                 `yaml:"start"`
@@ -29,9 +29,9 @@ type FlowPlan struct {
 	Answer     string                 `yaml:"answer"`
 	Eye        [3]float64             `yaml:"eye"`
 	Wide       float64                `yaml:"wide-degrees"`
-	Paths      []FlowPath             `yaml:"paths,omitempty"`
-	Landmarks  []FlowPoint            `yaml:"landmarks,omitempty"`
-	Clouds     []FlowCloud            `yaml:"clouds,omitempty"`
+	Paths      []flowPath             `yaml:"paths,omitempty"`
+	Landmarks  []flowPoint            `yaml:"landmarks,omitempty"`
+	Clouds     []flowCloud            `yaml:"clouds,omitempty"`
 	ReturnPath int                    `yaml:"return-path"`
 }
 
@@ -42,11 +42,11 @@ type FlowGeometryReference struct {
 	SHA  string `yaml:"sha256"`
 }
 
-// FlowGeometry is the reusable authored content shared by camera/timing plans.
-type FlowGeometry struct {
-	Paths     []FlowPath  `yaml:"paths"`
-	Landmarks []FlowPoint `yaml:"landmarks"`
-	Clouds    []FlowCloud `yaml:"clouds,omitempty"`
+// flowGeometry is the reusable authored content shared by camera/timing plans.
+type flowGeometry struct {
+	Paths     []flowPath  `yaml:"paths"`
+	Landmarks []flowPoint `yaml:"landmarks"`
+	Clouds    []flowCloud `yaml:"clouds,omitempty"`
 }
 
 // resolveFlowGeometry loads a pinned relative geometry asset without changing
@@ -93,7 +93,7 @@ func resolveFlowGeometryBytes(file string, raw []byte, plan *FlowPlan) error {
 	if hex.EncodeToString(sum[:]) != plan.Geometry.SHA {
 		return fmt.Errorf("flow geometry %q SHA256 differs from the plan", file)
 	}
-	var geometry FlowGeometry
+	var geometry flowGeometry
 	if err := yamlfile.Read(file, raw, &geometry); err != nil {
 		return fmt.Errorf("parse flow geometry %q: %w", file, err)
 	}
@@ -131,24 +131,24 @@ func checkFlowGeometryReference(reference *FlowGeometryReference) error {
 	return nil
 }
 
-// FlowPath retains an explicit polyline, its visible width and beat delay.
+// flowPath retains an explicit polyline, its visible width and beat delay.
 // Arc length, not point index, determines the travelling light's position.
-type FlowPath struct {
+type flowPath struct {
 	Points [][3]float64 `yaml:"points"`
 	Width  float64      `yaml:"width"`
 	Delay  float64      `yaml:"delay-beats"`
 }
 
-// FlowPoint is a fixed luminous landmark. Its display size is authored.
-type FlowPoint struct {
+// flowPoint is a fixed luminous landmark. Its display size is authored.
+type flowPoint struct {
 	At     [3]float64 `yaml:"at"`
 	Radius float64    `yaml:"radius"`
 	RGB    [3]float64 `yaml:"rgb"`
 }
 
-// FlowCloud supplies faint authored volume emission behind the filaments.
+// flowCloud supplies faint authored volume emission behind the filaments.
 // Density and radius use scene units, without an astrophysical gas claim.
-type FlowCloud struct {
+type flowCloud struct {
 	At      [3]float64 `yaml:"at"`
 	RGB     [3]float64 `yaml:"rgb"`
 	Radius  float64    `yaml:"radius"`
@@ -174,7 +174,7 @@ func (edit *Edit) checkFlow() error {
 	}
 	previous := -1.0
 	for index, cue := range []string{plan.Start, plan.Fold, plan.Answer} {
-		at, err := edit.Cue(cue)
+		at, err := edit.cue(cue)
 		if err != nil || at <= previous || at >= edit.Grid.Score.Duration {
 			return fmt.Errorf("invalid or unordered flow-study cue %q", cue)
 		}

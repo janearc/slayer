@@ -17,7 +17,8 @@ func decoded(chunks []string, flush bool) []Key {
 	var decoder Decoder
 	var keys []Key
 	for _, chunk := range chunks {
-		keys = append(keys, decoder.Feed([]byte(chunk))...)
+		raw := []byte(chunk)
+		keys = append(keys, decoder.Feed(raw)...)
 	}
 	if flush {
 		keys = append(keys, decoder.Flush()...)

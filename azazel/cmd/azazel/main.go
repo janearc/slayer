@@ -12,7 +12,7 @@ import (
 
 	"github.com/janearc/puzzlemouth/pzm"
 	"github.com/janearc/slayer/azazel/engine"
-	"github.com/janearc/slayer/hillside"
+	"github.com/janearc/slayer/session"
 )
 
 // build, built, who and sessions are set by the linker; they say which build
@@ -60,7 +60,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: azazel render FILE [settings]")
 		os.Exit(exitUsage)
 	}
-	stamp := hillside.Stamped(build, built, who, sessions)
+	stamp := session.Stamped(build, built, who, sessions)
 	os.Exit(engine.Render(os.Args[fileAt], os.Args[settingsAt:], os.Stdout,
 		os.Stderr, stamp))
 }

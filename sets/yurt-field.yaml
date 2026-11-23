@@ -1,0 +1,76 @@
+# a square kilometre of yurts.
+#
+# a thousand gers scattered over a disc of one square kilometre (radius
+# 564 m) around the first, on a dusk steppe, seen from a hill to the
+# south. a thousand to a square kilometre is roughly a ger district's
+# spacing, about a thousand square metres a household; the number is a
+# placeholder until the density plan settles regions by occupants.
+# the scatter is the stand's own, uniform over the disc, and the habit
+# scatter turns each ger with its door to the south, within 15 degrees,
+# as gers are traditionally set (manufacture/cities/yurt.yaml).
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: yurt field
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    hill:
+      title: "from a hill to the south"
+      location:
+        at: [0, -900, 180]
+      orientation:
+        look_at: [0, 0, 0]
+    close:
+      title: "among them, at eye height"
+      location:
+        at: [0, -40, 1.6]
+      orientation:
+        look_at: [0, 0, 1.4]
+  set:
+    things:
+      ger:
+        kind: yurt
+        seed: 1
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+    stands:
+      the district:
+        kind: yurt
+        count: 1000
+        habit: scatter
+        seed: 2
+        within: {of: ger, from: 0, to: 360, near: 8, far: 564}
+  world:
+    unit: 1
+    materials:
+      steppe:
+        colour: {srgb_linear: [0.1, 0.09, 0.05]}
+        source: eye
+    boxes:
+      ground:
+        material: steppe
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-1, -0.3, 0.12]
+        colour: {srgb_linear: [2.2, 1.2, 0.55]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.22, 0.14, 0.12]}
+      zenith: {srgb_linear: [0.02, 0.035, 0.08]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye

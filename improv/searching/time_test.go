@@ -62,13 +62,13 @@ func TestCueUsesIrregularSongPositions(t *testing.T) {
 		Meter: 4, Beats: beats.Pulse{Times: []float64{1, 1.5, 2, 2.5, 3.2, 3.9, 4.6, 5.3}},
 	}}}
 	for cue, wanted := range map[string]float64{"1.1": 1, "1.4": 2.5, "2.1": 3.2, "2.4": 5.3} {
-		got, err := edit.Cue(cue)
+		got, err := edit.cue(cue)
 		if err != nil || math.Abs(got-wanted) > 1e-12 {
 			t.Fatalf("cue %s: %g, %v; wanted %g", cue, got, err, wanted)
 		}
 	}
 	for _, cue := range []string{"0.1", "1.0", "1.5", "2", "2.3.1", "NaN.1"} {
-		if _, err := edit.Cue(cue); err == nil {
+		if _, err := edit.cue(cue); err == nil {
 			t.Fatalf("accepted malformed bar.beat %q", cue)
 		}
 	}

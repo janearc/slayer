@@ -1,0 +1,7 @@
+name,radius
+just-inside,0.97
+on,1
+just-outside,1.03
+outside,1.5
+far,2
+farthest,3

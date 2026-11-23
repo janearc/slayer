@@ -1,0 +1,61 @@
+# one giant kelp plant, the study of the kind giant-kelp-slack, stood in
+# air on a pale floor so its form is seen by the worked sun and sky, with
+# no water in the picture. places are metres, x east, y north, z up; the
+# holdfast stands at the origin and the top is about twelve metres up. the
+# air is the groundless Earth air of sets/alfa-san-onofre.yaml and the sun's
+# azimuth and altitude are picked for looking, from the south-west.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: kelp plant
+  seed: 1
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 220, altitude: 50}
+  film:
+    width: 600
+    height: 900
+    rays: 1
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      pale-floor:
+        colour: {srgb_linear: [0.55, 0.5, 0.4]}
+        source: eye
+    boxes:
+      floor:
+        material: pale-floor
+        middle: [0, 0, -0.05]
+        size: [200, 200, 0.1]
+        source: eye
+  set:
+    things:
+      plant:
+        kind: giant-kelp-moderate
+        seed: 1
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+  cameras:
+    side:
+      title: "from the side, level with the plant's middle"
+      location: {at: [0, -19, 6.2]}
+      orientation: {look_at: [1.2, 0, 6.2]}
+    frond:
+      title: "one stipe's blades and bladders, close"
+      location: {at: [0, -3.2, 6]}
+      orientation: {look_at: [0, 0, 6]}
+    metre:
+      title: "a metre from the blades, for the facets"
+      location: {at: [1.0, -1.4, 6.0]}
+      orientation: {look_at: [1.2, 0, 5.8]}
+    foot:
+      title: "the holdfast and the foot of the stipes, close"
+      location: {at: [0, -3, 1.2]}
+      orientation: {look_at: [0, 0, 1]}

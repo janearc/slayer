@@ -19,9 +19,16 @@ import (
 	"time"
 )
 
-var ErrMissing = errors.New("identity: frame missing")
-var ErrConflict = errors.New("identity: frame identity conflict")
-var ErrCorrupt = errors.New("identity: corrupt frame")
+// refusal is a refusal of this package, held as a constant so that no one
+// can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (reason refusal) Error() string { return string(reason) }
+
+const ErrMissing refusal = "identity: frame missing"
+const ErrConflict refusal = "identity: frame identity conflict"
+const ErrCorrupt refusal = "identity: corrupt frame"
 
 const maxPNGBytes = 128 << 20
 const maxDecodedBytes = 128 << 20

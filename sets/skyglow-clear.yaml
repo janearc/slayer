@@ -1,0 +1,262 @@
+# skyglow, the first picture: a street of lit towers at night, in clear air.
+#
+# eight plain towers either side of a street that runs north, each with
+# signs and bands of lit windows on the faces that look at the street,
+# and a row of street lamps. there is no air in the set, so nothing
+# scatters the city's light: the sky is black. skyglow-air.yaml is this
+# same city with a layer of haze over it; put the two side by side.
+#
+# places are metres: x east, y north, z up. every size, colour and
+# luminance here is chosen for the study, said so by source: eye. the
+# luminances are the kit's own relative light, in whites: a lit sign is
+# twelve whites, a lit window six, a street lamp's intensity six
+# hundred. the windows and the lamps are warm, the signs pink, cyan and
+# amber, and none of it is said of the sky.
+scene:
+  name: skyglow, clear air
+  light: ambient
+  film:
+    rays: 1
+    wide: 60
+    # picked: the print's exposure. a night camera is exposed for the
+    # street and the sky, and lets the brightest signs go to white.
+    exposure: 0.7
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "the street, from the south, looking north"
+      location:
+        at: [0, -200, 30]
+      orientation:
+        look_at: [0, 100, 60]
+  world:
+    materials:
+      concrete:
+        colour: {srgb_linear: [0.06, 0.06, 0.065]}
+        source: eye
+      asphalt:
+        colour: {srgb_linear: [0.03, 0.03, 0.032]}
+        source: eye
+      sign-pink:
+        glow: {srgb_linear: [12, 1, 5]}
+        source: eye
+      sign-cyan:
+        glow: {srgb_linear: [0.6, 5.5, 12]}
+        source: eye
+      sign-amber:
+        glow: {srgb_linear: [12, 5, 0.7]}
+        source: eye
+      windows:
+        glow: {srgb_linear: [6, 3.3, 1.2]}
+        source: eye
+    boxes:
+      ground:
+        material: asphalt
+        middle: [0, 0, -1]
+        size: [4000, 4000, 2]
+        source: eye
+      # the west side, from the camera out: each tower's east face looks
+      # at the street, at x = -5
+      west-1:
+        material: concrete
+        middle: [-20, -65, 45]
+        size: [30, 30, 90]
+        source: eye
+      west-2:
+        material: concrete
+        middle: [-25, -10, 70]
+        size: [40, 40, 140]
+        source: eye
+      west-3:
+        material: concrete
+        middle: [-22.5, 50, 50]
+        size: [35, 40, 100]
+        source: eye
+      west-4:
+        material: concrete
+        middle: [-30, 120, 60]
+        size: [40, 40, 120]
+        source: eye
+      # the east side, whose west faces look at the street, at x = 15
+      east-1:
+        material: concrete
+        middle: [30, -85, 35]
+        size: [30, 30, 70]
+        source: eye
+      east-2:
+        material: concrete
+        middle: [32.5, -20, 60]
+        size: [35, 40, 120]
+        source: eye
+      east-3:
+        material: concrete
+        middle: [30, 40, 42.5]
+        size: [30, 40, 85]
+        source: eye
+      east-4:
+        material: concrete
+        middle: [35, 130, 50]
+        size: [40, 40, 100]
+        source: eye
+      # signs and window bands, each a slab 0.6 m deep set on a face
+      w1-sign:
+        material: sign-pink
+        middle: [-20, -80.3, 70]
+        size: [22, 0.6, 30]
+        source: eye
+      w1-windows:
+        material: windows
+        middle: [-20, -80.3, 35]
+        size: [24, 0.6, 30]
+        source: eye
+      w1-side:
+        material: sign-cyan
+        middle: [-4.7, -65, 55]
+        size: [0.6, 20, 40]
+        source: eye
+      w2-sign:
+        material: sign-pink
+        middle: [-4.7, -10, 100]
+        size: [0.6, 30, 50]
+        source: eye
+      w2-windows:
+        material: windows
+        middle: [-4.7, -10, 45]
+        size: [0.6, 32, 50]
+        source: eye
+      w2-front:
+        material: sign-cyan
+        middle: [-25, -30.3, 110]
+        size: [28, 0.6, 40]
+        source: eye
+      w3-sign:
+        material: sign-amber
+        middle: [-4.7, 50, 70]
+        size: [0.6, 28, 24]
+        source: eye
+      w3-windows:
+        material: windows
+        middle: [-4.7, 50, 30]
+        size: [0.6, 30, 40]
+        source: eye
+      w4-sign:
+        material: sign-cyan
+        middle: [-30, 99.7, 90]
+        size: [30, 0.6, 30]
+        source: eye
+      w4-windows:
+        material: windows
+        middle: [-30, 99.7, 40]
+        size: [34, 0.6, 50]
+        source: eye
+      e1-sign:
+        material: sign-amber
+        middle: [30, -100.3, 50]
+        size: [22, 0.6, 20]
+        source: eye
+      e1-side:
+        material: sign-pink
+        middle: [14.7, -85, 35]
+        size: [0.6, 20, 30]
+        source: eye
+      e2-sign:
+        material: sign-cyan
+        middle: [14.7, -20, 90]
+        size: [0.6, 30, 40]
+        source: eye
+      e2-windows:
+        material: windows
+        middle: [14.7, -20, 40]
+        size: [0.6, 32, 50]
+        source: eye
+      e2-front:
+        material: sign-pink
+        middle: [32.5, -40.3, 100]
+        size: [24, 0.6, 30]
+        source: eye
+      e3-sign:
+        material: sign-pink
+        middle: [14.7, 40, 60]
+        size: [0.6, 30, 28]
+        source: eye
+      e3-windows:
+        material: windows
+        middle: [14.7, 40, 25]
+        size: [0.6, 32, 30]
+        source: eye
+      e4-sign:
+        material: sign-amber
+        middle: [35, 109.7, 70]
+        size: [30, 0.6, 30]
+        source: eye
+      e4-windows:
+        material: windows
+        middle: [35, 109.7, 30]
+        size: [34, 0.6, 40]
+        source: eye
+    # street lamps: a sodium-warm point every forty metres down both
+    # sides, nine metres up. strength is the intensity at one metre.
+    lamps:
+      west-lamp-1:
+        at: [-3, -150, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      west-lamp-2:
+        at: [-3, -110, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      west-lamp-3:
+        at: [-3, -70, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      west-lamp-4:
+        at: [-3, 10, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      west-lamp-5:
+        at: [-3, 90, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      east-lamp-1:
+        at: [13, -130, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      east-lamp-2:
+        at: [13, -90, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      east-lamp-3:
+        at: [13, -50, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      east-lamp-4:
+        at: [13, 30, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye
+      east-lamp-5:
+        at: [13, 110, 9]
+        temperature: 2200
+        strength: 600
+        radius: 0.3
+        source: eye

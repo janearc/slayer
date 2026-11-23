@@ -35,7 +35,7 @@ func paletteOf(theme hud.Theme) (palette, error) {
 	for _, role := range themeRoles {
 		colour, err := theme.Colour(role)
 		if err != nil {
-			return nil, fmt.Errorf("%w: the hud theme: %w", ErrWalk, err)
+			return nil, fmt.Errorf("%w: the hud theme: %w", errWalk, err)
 		}
 		made[role] = colour
 	}
@@ -51,7 +51,7 @@ var regular = sync.OnceValues(func() (*opentype.Font, error) {
 func face(size float64) (font.Face, error) {
 	parsed, err := regular()
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrWalk, err)
+		return nil, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	return opentype.NewFace(parsed, &opentype.FaceOptions{Size: size,
 		DPI: typeDots, Hinting: font.HintingNone})
@@ -145,44 +145,3 @@ func line(frame *image.RGBA, from, to image.Point, width int,
 		disc(frame, at, width/2, colour)
 	}
 }
-
-// Contrast is the ratio of two colours' relative luminances, the
-// lighter's over the darker's, each with a twentieth added, as WCAG 2.1
-// defines it: 1 to 21.
-func Contrast(one, other color.RGBA) float64 {
-	a, b := luminance(one)+contrastFlare, luminance(other)+contrastFlare
-	return math.Max(a, b) / math.Min(a, b)
-}
-
-// contrastFlare is the twentieth WCAG 2.1 adds to each luminance.
-// Defined by WCAG 2.1, contrast ratio.
-const contrastFlare = 0.05
-
-// luminance is an sRGB colour's relative luminance, WCAG 2.1's weights
-// of its linear channels.
-func luminance(colour color.RGBA) float64 {
-	return lumaRed*linear(colour.R) + lumaGreen*linear(colour.G) +
-		lumaBlue*linear(colour.B)
-}
-
-// The channels' weights in luminance. Defined by WCAG 2.1, from
-// ITU-R BT.709.
-const lumaRed, lumaGreen, lumaBlue = 0.2126, 0.7152, 0.0722
-
-// linear is an sRGB channel's linear light, as WCAG 2.1 gives it.
-func linear(channel uint8) float64 {
-	share := float64(channel) / math.MaxUint8
-	if share <= srgbKnee {
-		return share / srgbToe
-	}
-	return math.Pow((share+srgbOffset)/(1+srgbOffset), srgbPower)
-}
-
-// The sRGB curve's knee, toe slope, offset and power. Defined by
-// WCAG 2.1, relative luminance.
-const (
-	srgbKnee   = 0.04045
-	srgbToe    = 12.92
-	srgbOffset = 0.055
-	srgbPower  = 2.4
-)

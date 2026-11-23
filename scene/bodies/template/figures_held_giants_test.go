@@ -38,18 +38,20 @@ func jupiterFigures(t *testing.T) bodies.Body {
 		world.Look{Lines: 0.2})
 	callisto := wantGround(t, world.Terrain{Seed: 10, Ocean: 0, Plates: 6},
 		world.Look{Lines: 0.2})
+	gasPart := wantGas(t, 0.08, 40, jupiterBands())
+	auroraPart := wantAurora(t, 300, 1500, 74*radPerDeg, 2*radPerDeg,
+		10*radPerDeg, 0.02, 0.5, 14)
+	ioPart := wantMoon(t, want(t, "io", bodies.Rock, 1821.6, 8.93e22, io,
+		pele), 421700, 0)
+	europaPart := wantMoon(t, want(t, "europa", bodies.Rock, 1560.8, 4.8e22,
+		europa), 671034, 1.2)
+	ganymedePart := wantMoon(t, want(t, "ganymede", bodies.Rock, 2634.1, 1.48e23,
+		ganymede), 1070412, 2.5)
+	callistoPart := wantMoon(t, want(t, "callisto", bodies.Rock, 2410.3, 1.08e23,
+		callisto), 1882709, 4)
 	return want(t, "jupiter", bodies.Giant, 69911, 1.898e27,
-		wantGas(t, 0.08, 40, jupiterBands()),
-		wantAurora(t, 300, 1500, 74*radPerDeg, 2*radPerDeg,
-			10*radPerDeg, 0.02, 0.5, 14),
-		wantMoon(t, want(t, "io", bodies.Rock, 1821.6, 8.93e22, io,
-			pele), 421700, 0),
-		wantMoon(t, want(t, "europa", bodies.Rock, 1560.8, 4.8e22,
-			europa), 671034, 1.2),
-		wantMoon(t, want(t, "ganymede", bodies.Rock, 2634.1, 1.48e23,
-			ganymede), 1070412, 2.5),
-		wantMoon(t, want(t, "callisto", bodies.Rock, 2410.3, 1.08e23,
-			callisto), 1882709, 4)).
+		gasPart, auroraPart, ioPart, europaPart, ganymedePart,
+		callistoPart).
 		Turning(35748*time.Second, measure.Radians(3.13*radPerDeg))
 }
 
@@ -74,13 +76,15 @@ func TestJupiterFiguresAreHeld(t *testing.T) {
 // 0.25, 0.4 per radius dense, ragged 0.6.
 func TestHotJupiterFiguresAreHeld(t *testing.T) {
 	const radius = 69911
-	holds(t, "a hot jupiter", its(t, HotJupiter),
-		want(t, "a hot jupiter", bodies.Giant, radius, 1.898e27,
-			wantGas(t, 0.08, 40, jupiterBands()),
-			wantTail(t, 30*radius, 2*radius, 0.06, 0.25,
-				0.4/radius, 0.6, 21)).
-			Turning(64800*time.Second,
-				measure.Radians(3.13*radPerDeg)))
+	got := its(t, HotJupiter)
+	gasPart := wantGas(t, 0.08, 40, jupiterBands())
+	tailPart := wantTail(t, 30*radius, 2*radius, 0.06, 0.25,
+		0.4/radius, 0.6, 21)
+	figure := want(t, "a hot jupiter", bodies.Giant, radius, 1.898e27,
+		gasPart, tailPart).
+		Turning(64800*time.Second,
+			measure.Radians(3.13*radPerDeg))
+	holds(t, "a hot jupiter", got, figure)
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -97,24 +101,27 @@ func TestSaturnFiguresAreHeld(t *testing.T) {
 		wantGround(t, world.Terrain{Seed: 11, Ocean: 0, Plates: 5},
 			world.Look{Lines: 0}),
 		wantAir(t, 40, 0.02))
-	holds(t, "saturn", its(t, Saturn),
-		want(t, "saturn", bodies.Giant, 58232, 5.683e26,
-			wantGas(t, 0.08, 40, texture.Banded{
-				Paints: make([]maths.Light, 9),
-				Roil:   0.04, Shear: 7, Grain: 0.08, Fine: 0.03,
-				Jets: 8, Mottle: 0.35, Seed: 15}),
-			wantAurora(t, 800, 2000, 75*radPerDeg, 2*radPerDeg,
-				0, 0.02, 0.5, 15),
-			wantRings(t, 1.24, 2.27, 1, 1.2,
-				[]float64{0.2, 0.25, 0.3, 0.5, 0.95, 1, 1,
-					0.95, 0.08, 0.7, 0.65, 0.5}, 0.6, 60),
-			wantMoon(t, titan, 1221870, 0),
-			wantMoon(t, want(t, "rhea", bodies.Rock, 763.8,
-				2.31e21), 527108, 2),
-			wantMoon(t, want(t, "enceladus", bodies.Rock, 252.1,
-				1.08e20), 237948, 4)).
-			Turning(38520*time.Second,
-				measure.Radians(26.73*radPerDeg)))
+	got := its(t, Saturn)
+	gasPart := wantGas(t, 0.08, 40, texture.Banded{
+		Paints: make([]maths.Light, 9),
+		Roil:   0.04, Shear: 7, Grain: 0.08, Fine: 0.03,
+		Jets: 8, Mottle: 0.35, Seed: 15})
+	auroraPart := wantAurora(t, 800, 2000, 75*radPerDeg, 2*radPerDeg,
+		0, 0.02, 0.5, 15)
+	ringPart := wantRings(t, 1.24, 2.27, 1, 1.2,
+		[]float64{0.2, 0.25, 0.3, 0.5, 0.95, 1, 1,
+			0.95, 0.08, 0.7, 0.65, 0.5}, 0.6, 60)
+	titanPart := wantMoon(t, titan, 1221870, 0)
+	rheaPart := wantMoon(t, want(t, "rhea", bodies.Rock, 763.8,
+		2.31e21), 527108, 2)
+	enceladusPart := wantMoon(t, want(t, "enceladus", bodies.Rock, 252.1,
+		1.08e20), 237948, 4)
+	figure := want(t, "saturn", bodies.Giant, 58232, 5.683e26,
+		gasPart, auroraPart, ringPart, titanPart, rheaPart,
+		enceladusPart).
+		Turning(38520*time.Second,
+			measure.Radians(26.73*radPerDeg))
+	holds(t, "saturn", got, figure)
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -125,23 +132,25 @@ func TestSaturnFiguresAreHeld(t *testing.T) {
 // samples; titania, oberon and miranda on 435,910, 583,520 and 129,390
 // km, started 0, 2 and 1 radians round.
 func TestUranusFiguresAreHeld(t *testing.T) {
-	holds(t, "uranus", its(t, Uranus),
-		want(t, "uranus", bodies.Giant, 25362, 8.681e25,
-			wantGas(t, 0.08, 40, texture.Banded{
-				Paints: make([]maths.Light, 5),
-				Roil:   0.02, Shear: 7, Grain: 0.08, Fine: 0.01,
-				Jets: 6, Mottle: 0.15, Seed: 16}),
-			wantRings(t, 1.65, 2.02, 0.5, 0.5,
-				[]float64{0.2, 0.05, 0.4, 0.05, 0.3, 0.05, 1,
-					0.05, 0.5}, 0.4, 40),
-			wantMoon(t, want(t, "titania", bodies.Rock, 788.4,
-				3.4e21), 435910, 0),
-			wantMoon(t, want(t, "oberon", bodies.Rock, 761.4,
-				3.08e21), 583520, 2),
-			wantMoon(t, want(t, "miranda", bodies.Rock, 235.8,
-				6.6e19), 129390, 1)).
-			Turning(62064*time.Second,
-				measure.Radians(97.77*radPerDeg)))
+	got := its(t, Uranus)
+	gasPart := wantGas(t, 0.08, 40, texture.Banded{
+		Paints: make([]maths.Light, 5),
+		Roil:   0.02, Shear: 7, Grain: 0.08, Fine: 0.01,
+		Jets: 6, Mottle: 0.15, Seed: 16})
+	ringPart := wantRings(t, 1.65, 2.02, 0.5, 0.5,
+		[]float64{0.2, 0.05, 0.4, 0.05, 0.3, 0.05, 1,
+			0.05, 0.5}, 0.4, 40)
+	titaniaPart := wantMoon(t, want(t, "titania", bodies.Rock, 788.4,
+		3.4e21), 435910, 0)
+	oberonPart := wantMoon(t, want(t, "oberon", bodies.Rock, 761.4,
+		3.08e21), 583520, 2)
+	mirandaPart := wantMoon(t, want(t, "miranda", bodies.Rock, 235.8,
+		6.6e19), 129390, 1)
+	figure := want(t, "uranus", bodies.Giant, 25362, 8.681e25,
+		gasPart, ringPart, titaniaPart, oberonPart, mirandaPart).
+		Turning(62064*time.Second,
+			measure.Radians(97.77*radPerDeg))
+	holds(t, "uranus", got, figure)
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -151,19 +160,21 @@ func TestUranusFiguresAreHeld(t *testing.T) {
 // of tilt; seven bands, eight jets, a dark storm and a street of four
 // clouds; and triton on 354,759 km.
 func TestNeptuneFiguresAreHeld(t *testing.T) {
-	holds(t, "neptune", its(t, Neptune),
-		want(t, "neptune", bodies.Giant, 24622, 1.024e26,
-			wantGas(t, 0.08, 40, texture.Banded{
-				Paints: make([]maths.Light, 7),
-				Roil:   0.05, Shear: 7, Grain: 0.08, Fine: 0.03,
-				Jets: 8, Mottle: 0.3,
-				Spots: []texture.Spot{{Lat: -0.35, Lon: -1.2,
-					Size: 0.12, Stretch: 1.5, Turn: 2}},
-				Streets: []texture.Street{{Lat: -0.5, Count: 4,
-					Size: 0.05, Turn: 0.5, Seed: 17}},
-				Seed: 17}),
-			wantMoon(t, want(t, "triton", bodies.Rock, 1353.4,
-				2.14e22), 354759, 0)).
-			Turning(57996*time.Second,
-				measure.Radians(28.32*radPerDeg)))
+	got := its(t, Neptune)
+	gasPart := wantGas(t, 0.08, 40, texture.Banded{
+		Paints: make([]maths.Light, 7),
+		Roil:   0.05, Shear: 7, Grain: 0.08, Fine: 0.03,
+		Jets: 8, Mottle: 0.3,
+		Spots: []texture.Spot{{Lat: -0.35, Lon: -1.2,
+			Size: 0.12, Stretch: 1.5, Turn: 2}},
+		Streets: []texture.Street{{Lat: -0.5, Count: 4,
+			Size: 0.05, Turn: 0.5, Seed: 17}},
+		Seed: 17})
+	tritonPart := wantMoon(t, want(t, "triton", bodies.Rock, 1353.4,
+		2.14e22), 354759, 0)
+	figure := want(t, "neptune", bodies.Giant, 24622, 1.024e26,
+		gasPart, tritonPart).
+		Turning(57996*time.Second,
+			measure.Radians(28.32*radPerDeg))
+	holds(t, "neptune", got, figure)
 }

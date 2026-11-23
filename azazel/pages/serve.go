@@ -40,11 +40,13 @@ func lock(queueRoot string, now time.Time) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+	lockDescriptor := int(file.Fd())
+	err = syscall.Flock(lockDescriptor, syscall.LOCK_EX|syscall.LOCK_NB)
 	if errors.Is(err, syscall.EWOULDBLOCK) {
 		holder, _ := os.ReadFile(path)
+		holderText := strings.TrimSpace(string(holder))
 		return nil, errors.Join(fmt.Errorf("pages is already served for "+
-			"this queue, by %s", strings.TrimSpace(string(holder))), file.Close())
+			"this queue, by %s", holderText), file.Close())
 	}
 	if err == nil {
 		err = file.Truncate(0)

@@ -60,10 +60,10 @@ func stripComments(b []byte) []byte {
 	return out
 }
 
-// Kind says which document a file holds, from its top-level keys and nothing
+// kind says which document a file holds, from its top-level keys and nothing
 // else. Searching the text for a word sends a score whose comment mentions
 // channels to the voicing reader; a key is what the document is.
-func Kind(b []byte) (string, error) {
+func kind(b []byte) (string, error) {
 	var top map[string]json.RawMessage
 	if err := json.Unmarshal(stripComments(b), &top); err != nil {
 		return "", fmt.Errorf("not a json object: %w", err)

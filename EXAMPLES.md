@@ -302,9 +302,8 @@ and seed always draw the same picture.
 - `-above` looks down from high over it, and `-from M -tilt D` looks
   down from M metres at D degrees.
 - `-variety N` makes only N of each kind and reuses them, so a large
-  forest keeps few faces. A command refuses a hillside that keeps more than `-faces`
-  triangles in all. The default is a memory budget of 5 GB at the 1,300
-  bytes a kept face measured, about 3.8 million faces.
+  forest keeps few faces. No hillside is refused for how many faces it
+  keeps; the line printed after staging says how many it kept.
 - `-gpu` draws on the graphics card.
 - `-prove` draws nothing. Given the flags that drew a raw, it draws 64
   of its pixels again from scratch and proves each to the bit.

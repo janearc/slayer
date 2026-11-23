@@ -1,0 +1,94 @@
+# Voyager's single numbers: what each is, its unit, and why it has the value
+# it has. The six published dimensions (bus diameter, dish diameter and the
+# four boom and antenna lengths) are measured and live in the research data;
+# everything here is chosen. Placements that are three numbers together are in
+# voyager-points.csv, and the colours of the parts in voyager-looks.csv.
+numbers:
+  - {name: sides-cap, value: 48, unit: count, says: the most sides any round part of the craft is cut into so that its many capped struts stay inside the face limit of one thing, kind: picked, by: chosen so that the whole assembly stays under the face limit at any detail}
+  - {name: bounds-padding, value: 0, unit: offset, says: the margin added around the box that encloses the craft, kind: picked, by: none is needed because the box is taken from the extreme points of the parts}
+  - {name: bus-sides, value: 10, unit: count, says: the number of equipment bays and so of sides of the electronics bus, kind: picked, by: follows the published description of the bus as a ten-sided box; the quoted text is not pinned here}
+  - {name: bus-height, value: 1.5, unit: metre, says: the height of the electronics bus, kind: picked, by: only the diameter of the bus is published so the height is chosen to look right beside it}
+  - {name: bus-bay-width, value: 0.48, unit: metre, says: the width of one equipment bay panel on the bus, kind: picked, by: chosen so ten panels sit around the bus with a seam between each}
+  - {name: bus-bay-height, value: 0.78, unit: metre, says: the height of one equipment bay panel, kind: picked, by: chosen to leave the top and bottom of the bus shell showing}
+  - {name: bus-bay-depth, value: 0.045, unit: metre, says: the thickness of one equipment bay panel, kind: picked, by: chosen thin enough to read as a panel and thick enough to be a closed solid}
+  - {name: bus-bay-standoff, value: 0.06, unit: metre, says: how far the equipment bay panels stand off the bus shell, kind: picked, by: chosen to leave a visible seam without coplanar struts}
+  - {name: bus-feet, value: 3, unit: count, says: the number of triangular feet below the bus, kind: picked, by: follows the published description of triangular feet}
+  - {name: foot-upper-radius, value: 0.54, unit: metre, says: how far from the axis the upper end of a foot leg sits, kind: picked, by: chosen to meet the underside of the bus}
+  - {name: foot-upper-height, value: -0.56, unit: offset, says: the height of the upper end of a foot leg from the middle of the bus, kind: picked, by: chosen to meet the underside of the bus}
+  - {name: foot-toe-radius, value: 1.12, unit: metre, says: how far from the axis the toe of a foot sits, kind: picked, by: chosen so the feet spread wider than the bus}
+  - {name: foot-toe-height, value: -1.78, unit: offset, says: the height of the toe of a foot from the middle of the bus, kind: picked, by: chosen so the published height of 3.8 metres is reached from the dish structure to the feet}
+  - {name: foot-leg-radius, value: 0.045, unit: metre, says: the radius of the leg of a foot, kind: picked, by: chosen to read as a strut beside the bus}
+  - {name: foot-sole-radius, value: 0.035, unit: metre, says: the radius of the sole of a foot, kind: picked, by: chosen thinner than the leg it ends}
+  - {name: bus-mast-radius, value: 0.1, unit: metre, says: the radius of the short mast under the bus, kind: picked, by: chosen to read as a mast beside the legs of the feet}
+  - {name: dish-depth, value: 0.39, unit: metre, says: the depth of the high-gain reflector from lip to vertex, kind: picked, by: chosen to give a shallow reflector profile beside the published diameter}
+  - {name: dish-thickness, value: 0.035, unit: metre, says: the thickness of the high-gain reflector shell, kind: picked, by: chosen to read as a thin shell}
+  - {name: dish-ribs, value: 12, unit: count, says: the number of ribs behind the reflector, kind: picked, by: chosen so the depth of the dish shows without capped struts meeting edge to edge}
+  - {name: dish-rib-setback, value: 0.1, unit: metre, says: how far in front of the lip the outer end of a rib stops, kind: picked, by: chosen so a rib ends inside the reflector lip}
+  - {name: dish-hub-radius, value: 0.12, unit: metre, says: the radius of the ring of rib inner ends around the feed hub, kind: picked, by: chosen to stagger the inner ends so twelve rods do not meet at one point}
+  - {name: dish-hub-back, value: 0.3, unit: metre, says: how far behind the dish centre the inner ends of the ribs sit, kind: picked, by: chosen to give the ribs a visible slope}
+  - {name: dish-rib-radius, value: 0.025, unit: metre, says: the radius of a rib behind the reflector, kind: picked, by: chosen to read as a rib beside the reflector shell}
+  - {name: dish-arms, value: 3, unit: count, says: the number of arms of the support tower under the dish, kind: picked, by: follows the three-point support of the published craft}
+  - {name: dish-arm-start-radius, value: 0.7, unit: metre, says: how far from the axis the lower end of a support arm sits, kind: picked, by: chosen to meet the top of the bus}
+  - {name: dish-arm-start-height, value: 0.95, unit: offset, says: the height of the lower end of a support arm, kind: picked, by: chosen to meet the top of the bus}
+  - {name: dish-arm-end-radius, value: 0.72, unit: metre, says: how far from the axis the upper end of a support arm sits, kind: picked, by: chosen to lean the arm slightly outward}
+  - {name: dish-arm-end-drop, value: 0.12, unit: metre, says: how far below the dish centre the upper end of a support arm sits, kind: picked, by: chosen so the arms meet the back of the dish}
+  - {name: dish-arm-end-back, value: 0.18, unit: metre, says: how far behind the dish centre the upper end of a support arm sits, kind: picked, by: chosen so the arms meet the back of the dish}
+  - {name: dish-arm-radius, value: 0.045, unit: metre, says: the radius of a support arm, kind: picked, by: chosen to read as a strut beside the bus}
+  - {name: dish-feed-back, value: 0.18, unit: metre, says: how far behind the dish centre the feed rod starts, kind: picked, by: chosen so the feed rod passes through the vertex}
+  - {name: dish-feed-front, value: 0.55, unit: metre, says: how far in front of the dish centre the feed rod ends, kind: picked, by: chosen to carry the subreflector in front of the lip}
+  - {name: dish-feed-radius, value: 0.035, unit: metre, says: the radius of the feed rod, kind: picked, by: chosen thinner than the support arms}
+  - {name: dish-sub-near, value: 0.48, unit: metre, says: how far in front of the dish centre the subreflector begins, kind: picked, by: chosen to sit on the end of the feed rod}
+  - {name: dish-sub-far, value: 0.68, unit: metre, says: how far in front of the dish centre the subreflector ends, kind: picked, by: chosen to give a short thick cap on the feed rod}
+  - {name: dish-sub-radius, value: 0.085, unit: metre, says: the radius of the circular subreflector, kind: picked, by: chosen to read as a circular subreflector}
+  - {name: boom-half-width, value: 0.19, unit: metre, says: half the width of the magnetometer boom lattice, kind: picked, by: chosen to read as a square lattice}
+  - {name: boom-half-height, value: 0.19, unit: metre, says: half the height of the magnetometer boom lattice, kind: picked, by: chosen to read as a square lattice}
+  - {name: boom-rail-radius, value: 0.018, unit: metre, says: the radius of a long rail of the magnetometer boom, kind: picked, by: chosen to read as a thin lattice rail}
+  - {name: boom-bays, value: 10, unit: count, says: the number of bays of diagonals along the magnetometer boom, kind: picked, by: chosen to show a lattice along the published length}
+  - {name: boom-diagonal-inset, value: 0.04, unit: metre, says: how far each diagonal stops short of the end of its bay, kind: picked, by: chosen to leave a small gap so capped struts do not share an edge}
+  - {name: boom-diagonal-radius, value: 0.014, unit: metre, says: the radius of a diagonal of the magnetometer boom, kind: picked, by: chosen thinner than the rails}
+  - {name: boom-head-inboard, value: 0.45, unit: metre, says: how far inboard of the tip the first instrument head sits, kind: picked, by: chosen to place a package near the tip}
+  - {name: boom-head-outboard-share, value: 0.02, unit: share, says: the share of the boom length from the tip at which the second instrument head sits, kind: picked, by: chosen to place a package nearly at the tip}
+  - {name: boom-head-drop, value: -0.12, unit: offset, says: the height of the lower face of an instrument head against the boom axis, kind: picked, by: chosen to centre the package on the lattice}
+  - {name: boom-head-side, value: -0.16, unit: offset, says: the side offset of the near face of an instrument head against the boom axis, kind: picked, by: chosen to centre the package on the lattice}
+  - {name: boom-head-stem-base, value: 0.12, unit: metre, says: the height at which a stem leaves the top of an instrument head, kind: picked, by: chosen to start on the top face of the package}
+  - {name: boom-head-stem-top, value: 0.3, unit: metre, says: the height at which the stem of the first instrument head ends, kind: picked, by: chosen to read as a short sensor stem}
+  - {name: boom-head-stem-step, value: 0.08, unit: metre, says: how much taller each later instrument head stem is than the one before, kind: picked, by: chosen so the two stems differ and read as separate instruments}
+  - {name: boom-head-stem-radius, value: 0.025, unit: metre, says: the radius of an instrument head stem, kind: picked, by: chosen to read as a stem beside the package}
+  - {name: radio-root-x, value: 0.54, unit: offset, says: how far along the bus axis the root of a radio antenna sits, kind: picked, by: chosen to meet the side of the bus}
+  - {name: radio-root-y, value: 0.18, unit: offset, says: the height of the root of a radio antenna, kind: picked, by: chosen to sit above the middle of the bus}
+  - {name: radio-root-side, value: 0.08, unit: offset, says: how far to either side of the axis the root of a radio antenna sits, kind: picked, by: chosen to leave the two roots apart}
+  - {name: radio-rod-radius, value: 0.009, unit: metre, says: the radius of a radio antenna, kind: picked, by: chosen thin because the published antennas are long and slender}
+  - {name: radio-tip-start, value: 0.92, unit: share, says: the share of the antenna length at which its tip fitting starts, kind: picked, by: chosen to give a short fitting at the end}
+  - {name: radio-tip-radius, value: 0.025, unit: metre, says: the radius of the tip fitting of a radio antenna, kind: picked, by: chosen thicker than the antenna it ends}
+  - {name: radio-stay-x, value: 0.5, unit: offset, says: how far along the bus axis the root of a hinge stay sits, kind: picked, by: chosen to sit just inboard of the antenna root}
+  - {name: radio-stay-y, value: 0.18, unit: offset, says: the height of the root of a hinge stay, kind: picked, by: chosen to share the height of the antenna root}
+  - {name: radio-stay-side, value: 0.025, unit: offset, says: how far to either side of the axis the root of a hinge stay sits, kind: picked, by: chosen to sit near the middle between the two antennas}
+  - {name: radio-stay-reach, value: 0.42, unit: metre, says: how far a hinge stay runs up and out at forty-five degrees, kind: picked, by: chosen to make the V root look deployed}
+  - {name: radio-stay-radius, value: 0.025, unit: metre, says: the radius of a hinge stay, kind: picked, by: chosen to read as a stay beside the antenna}
+  - {name: rtg-rod-radius, value: 0.035, unit: metre, says: the radius of the central rod of the generator boom, kind: picked, by: chosen to read as a boom beside the bus}
+  - {name: rtg-outrigger-offset, value: 0.22, unit: metre, says: how far to either side of the generator boom its two outer rods run, kind: picked, by: chosen to leave the three generator cans between them}
+  - {name: rtg-outrigger-radius, value: 0.02, unit: metre, says: the radius of an outer rod of the generator boom, kind: picked, by: chosen thinner than the central rod}
+  - {name: rtg-count, value: 3, unit: count, says: the number of generator cans along the generator boom, kind: picked, by: follows the three generators of the published craft}
+  - {name: rtg-can-inset, value: 0.07, unit: metre, says: how far each generator can stops short of the end of its share of the boom, kind: picked, by: chosen to leave a gap between cans}
+  - {name: rtg-can-radius, value: 0.25, unit: metre, says: the radius of a generator can, kind: picked, by: the sources give no size so it is chosen to read as a can beside the bus}
+  - {name: rtg-ribs, value: 4, unit: count, says: the number of cooling rib rings on a generator can, kind: picked, by: the sources give no sizes so the spacing is chosen}
+  - {name: rtg-rib-spokes, value: 8, unit: count, says: the number of fins in a cooling rib ring, kind: picked, by: the sources give no sizes so the count is chosen}
+  - {name: rtg-ring-radius, value: 0.27, unit: metre, says: the radius at which the fins of a ring stand around the can, kind: picked, by: chosen just outside the can}
+  - {name: rtg-rib-length, value: 0.018, unit: metre, says: the length of a cooling fin along the boom, kind: picked, by: chosen short to read as a fin}
+  - {name: rtg-rib-radius, value: 0.024, unit: metre, says: the radius of a cooling fin, kind: picked, by: chosen to read as a fin beside the can}
+  - {name: rtg-end-spokes, value: 12, unit: count, says: the number of fins in an end ring of a generator can, kind: picked, by: the sources give no sizes so the count is chosen}
+  - {name: rtg-end-length, value: 0.025, unit: metre, says: the length of a fin of an end ring along the boom, kind: picked, by: chosen to read as an end fin}
+  - {name: rtg-end-radius, value: 0.018, unit: metre, says: the radius of a fin of an end ring, kind: picked, by: chosen thinner than a cooling fin}
+  - {name: science-rod-radius, value: 0.055, unit: metre, says: the radius of the science boom, kind: picked, by: chosen to read as a boom beside the bus}
+  - {name: platform-rise, value: 0.12, unit: metre, says: how far above the end of the science boom the scan platform sits, kind: picked, by: chosen so the platform rests on the boom end}
+  - {name: scan-head-length, value: 0.34, unit: metre, says: the length of the barrel of a camera or spectrometer head on the scan platform, kind: picked, by: chosen to read as a barrel}
+  - {name: scan-head-reach, value: 0.43, unit: metre, says: how far from its mount the lens of a scan head ends, kind: picked, by: chosen to extend the barrel by a short lens}
+  - {name: scan-head-radius, value: 0.1, unit: metre, says: the radius of the barrel of a scan head, kind: picked, by: chosen to read as a camera barrel}
+  - {name: scan-lens-radius, value: 0.04, unit: metre, says: the radius of the lens of a scan head, kind: picked, by: chosen narrower than the barrel}
+  - {name: bracket-radius, value: 0.025, unit: metre, says: the radius of the bracket that carries the calibration target, kind: picked, by: chosen to read as a small bracket}
+  - {name: thruster-count, value: 16, unit: count, says: the number of attitude control thrusters, kind: picked, by: follows the sixteen thrusters named in the published flight report; the nozzle placements are chosen}
+  - {name: thruster-ring-radius, value: 0.92, unit: metre, says: how far from the axis a thruster nozzle sits, kind: picked, by: chosen to ring the bus}
+  - {name: thruster-height, value: -0.22, unit: offset, says: the height of a thruster nozzle from the middle of the bus, kind: picked, by: chosen to sit below the bus shell}
+  - {name: thruster-run-radius, value: 0.18, unit: metre, says: how far outward a thruster nozzle runs, kind: picked, by: chosen to read as a nozzle}
+  - {name: thruster-run-drop, value: -0.1, unit: offset, says: how far down a thruster nozzle runs, kind: picked, by: chosen to point the nozzle slightly down}
+  - {name: thruster-radius, value: 0.055, unit: metre, says: the radius of a thruster nozzle, kind: picked, by: chosen to read as a nozzle beside the bus}

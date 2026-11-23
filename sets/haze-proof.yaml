@@ -1,0 +1,96 @@
+# a small proof of the air over a bay: three towers from the futian shore's
+# recipes and seeds, one fishing boat at anchor, one laser, flat water and
+# a low sun, on the same survey tile as sets/futian-shore.yaml. it is a
+# test bench for the airs, drawn small on the processor tracer before the
+# city is.
+#
+# the window is 2000 m across and 1500 m down, its middle 500 m west and
+# 150 m south of the futian shore's window middle, so a thing here is 500 m
+# less east and 600 m less north than it is there. the towers, the boat
+# and the laser stand where they stand in that set. the ground is the
+# tile's surface model smoothed as there; the water is the tile's own
+# flat nought, a sea at nought.
+#
+# the sun is that set's: 247.73 degrees, 2.37 up. the air is the earth's,
+# worked.
+#
+# the air in this file is the futian shore's air as it stood: one grey
+# mist, 0.0039 a metre, 300 m deep over the ground. it is the picture of
+# what the set language had before the airs.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a proof of the air over a bay
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.5186
+    lon: 114.0151
+  timeofday: 1725
+  sun:
+    azimuth: 247.73
+    altitude: 2.37
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.5186
+    lon: 114.0151
+    across: 2000
+    down: 1500
+    step: 10
+    smooth: 60
+    sea: {value: 0, unit: m}
+  weather:
+    shore haze:
+      kind: prescribed-mist
+      extinction: {value: 0.0039, unit: m^-1}
+      depth: {value: 300, unit: m}
+      coverage: 1
+      seed: 1
+      asymmetry: 0.7
+  atmosphere:
+    layers:
+      shore air:
+        weather: shore haze
+        extent: terrain
+        albedo: 0.9
+        base: {value: 0, unit: m}
+  lasers:
+    bay beam middle:
+      origin:
+        object: tower 113
+        east: {value: 0, unit: m}
+        up: {value: 240, unit: m}
+        south: {value: 0, unit: m}
+      launcher: true
+      pointing: {azimuth: 248, altitude: 7}
+      radius: {value: 0.25, unit: m}
+      reach: {value: 2500, unit: m}
+      divergence: {value: 0.03, unit: deg}
+      wavelength: {value: 488, unit: nm}
+      display-strength: 10000000000
+  film:
+    width: 640
+    height: 360
+    rays: 2
+    wide: 70
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    bay:
+      title: "from the water 1.2 km south of the towers, 20 m up, looking north at the roofs the beam leaves"
+      location:
+        at: [1200, -1500, 20]
+      orientation:
+        look_at: [1350, -340, 200]
+  recipes:
+    t033: {kind: tower, irregularity: 0.99, script: simplified-chinese, pins: {plan: rounded, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t100: {kind: tower, irregularity: 0.22, script: simplified-chinese, pins: {plan: y, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t113: {kind: tower, irregularity: 0.36, script: simplified-chinese, pins: {plan: rounded, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+  set:
+    things:
+      tower 033: {recipe: t033, seed: 1561, complexity: quick, east: 1332.5, north: 1264.2, heading: {value: 337.7, unit: deg}}
+      tower 100: {recipe: t100, seed: 2700, complexity: quick, east: 1468.0, north: 1060.4, heading: {value: 337.7, unit: deg}}
+      tower 113: {recipe: t113, seed: 2921, complexity: quick, east: 1369.0, north: 1175.4, heading: {value: 337.7, unit: deg}}
+      the fishing boat at anchor: {kind: fishing-boat-at-anchor, seed: 31, complexity: demo, position: {east: {value: 550, unit: m}, north: {value: 700, unit: m}, up: {value: 0, unit: m}}, heading: {value: 59, unit: deg}}

@@ -1,1 +1,1 @@
-fire-woodland . :: ./bin/hillside -set doc/fire-woodland.yaml -out out/fire-woodland.png
+fire-woodland . :: ./bin/slayer draw doc/fire-woodland.yaml --out out/fire-woodland.png

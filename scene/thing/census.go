@@ -13,14 +13,18 @@ package thing
 import (
 	"errors"
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/shape"
 )
 
-// CensusCounts says what a census counts, in the words its file says.
+// censusNone is defined: no amount, the length a list starts at.
+const censusNone = 0
+
+// CensusCounts says what a census counts: the geometry staged in the
+// world, and not the geometry visible from a camera.
 const CensusCounts = "staged, not visible"
 
 // The kinds a census gives the shapes it knows by name; any other shape
@@ -35,21 +39,21 @@ const (
 // the analytic shapes and the volumes by kind, the height fields' grids,
 // and how many fields and lamps it holds.
 type Census struct {
-	Total    CensusTotal   `json:"total"`
-	Placed   []PlacedCount `json:"placed"`
-	Analytic []KindCount   `json:"analytic"`
-	Grids    []GridCount   `json:"height_fields"`
-	Volumes  []KindCount   `json:"volumes"`
-	Fields   int           `json:"fields"`
-	Lamps    int           `json:"lamps"`
-	Ocean    bool          `json:"ocean_surface"`
+	Total    censusTotal `json:"total"`
+	Placed   []placedRow `json:"placed"`
+	Analytic []kindCount `json:"analytic"`
+	Grids    []gridCount `json:"height_fields"`
+	Volumes  []kindCount `json:"volumes"`
+	Fields   int         `json:"fields"`
+	Lamps    int         `json:"lamps"`
+	Ocean    bool        `json:"ocean_surface"`
 }
 
-// CensusTotal is the world's faces as staged: every placement and every
+// censusTotal is the world's faces as staged: every placement and every
 // group member counted (staged), each distinct mesh once (stored), the
 // group members, and the hidden things and their staged faces, which are
 // staged and neither drawn nor shadowing. Storage is the whole inventory.
-type CensusTotal struct {
+type censusTotal struct {
 	Things      int             `json:"things"`
 	FacesStaged int             `json:"faces_staged"`
 	FacesStored int             `json:"faces_stored"`
@@ -59,11 +63,11 @@ type CensusTotal struct {
 	Storage     GeometryStorage `json:"storage"`
 }
 
-// PlacedCount is one placed thing: its place in the world, its kind and
+// placedRow is one placed thing: its place in the world, its kind and
 // material, and its faces where it has faces. A mesh group's faces are
 // instanced; its stored faces count each distinct mesh once. A height
 // field says its samples a side. An analytic shape has no faces field.
-type PlacedCount struct {
+type placedRow struct {
 	Index       int    `json:"index"`
 	Kind        string `json:"kind"`
 	Material    string `json:"material,omitempty"`
@@ -74,15 +78,15 @@ type PlacedCount struct {
 	Hidden      bool   `json:"hidden,omitempty"`
 }
 
-// KindCount is how many of one kind the world holds.
-type KindCount struct {
+// kindCount is how many of one kind the world holds.
+type kindCount struct {
 	Kind  string `json:"kind"`
 	Count int    `json:"count"`
 }
 
-// GridCount is a height field's place in the world and its samples a
+// gridCount is a height field's place in the world and its samples a
 // side: its grid is that many squared.
-type GridCount struct {
+type gridCount struct {
 	Index   int `json:"index"`
 	Samples int `json:"samples_per_side"`
 }
@@ -94,9 +98,9 @@ func Count(world *World) (Census, error) {
 		return Census{}, errors.New("thing: there is no world to count")
 	}
 	made := Census{Fields: len(world.Fields), Lamps: len(world.Lamps),
-		Ocean: world.OceanSurface != nil, Placed: []PlacedCount{},
-		Grids: []GridCount{}}
-	values := make([]Thing, 0, len(world.Things))
+		Ocean: world.OceanSurface != nil, Placed: []placedRow{},
+		Grids: []gridCount{}}
+	values := make([]Thing, censusNone, len(world.Things))
 	analytic := map[string]int{}
 	for index, placed := range world.Things {
 		if placed == nil {
@@ -120,13 +124,13 @@ func Count(world *World) (Census, error) {
 
 // add takes a row into the census: an analytic one by kind, a height
 // field's grid, and a hidden one's faces.
-func (made *Census) add(row PlacedCount, analytic map[string]int) {
+func (made *Census) add(row placedRow, analytic map[string]int) {
 	made.Placed = append(made.Placed, row)
 	if row.Faces == nil {
 		analytic[row.Kind]++
 	}
 	if row.Kind == kindHeightField {
-		made.Grids = append(made.Grids, GridCount{Index: row.Index,
+		made.Grids = append(made.Grids, gridCount{Index: row.Index,
 			Samples: row.Samples})
 	}
 	if row.Hidden {
@@ -139,8 +143,8 @@ func (made *Census) add(row PlacedCount, analytic map[string]int) {
 
 // placedCount is a thing's row: faces for a mesh and a group, the grid
 // for a height field, and nothing more for an analytic shape.
-func placedCount(index int, placed *Thing) PlacedCount {
-	row := PlacedCount{Index: index, Kind: kindOf(placed.Shape),
+func placedCount(index int, placed *Thing) placedRow {
+	row := placedRow{Index: index, Kind: kindOf(placed.Shape),
 		Hidden: placed.Hidden()}
 	if placed.Material != nil {
 		row.Material = placed.Material.Name
@@ -179,7 +183,7 @@ func kindOf(solid shape.Shape) string {
 
 // volumeKinds is the volumes by the kind of their medium. A nil volume
 // is refused by its place.
-func volumeKinds(volumes []*Volume) ([]KindCount, error) {
+func volumeKinds(volumes []*Volume) ([]kindCount, error) {
 	kinds := map[string]int{}
 	for index, volume := range volumes {
 		if volume == nil {
@@ -192,13 +196,17 @@ func volumeKinds(volumes []*Volume) ([]KindCount, error) {
 }
 
 // sortedKinds is a count by kind as rows, in the kinds' order.
-func sortedKinds(kinds map[string]int) []KindCount {
-	rows := make([]KindCount, 0, len(kinds))
+func sortedKinds(kinds map[string]int) []kindCount {
+	rows := make([]kindCount, censusNone, len(kinds))
 	for kind, count := range kinds {
-		rows = append(rows, KindCount{Kind: kind, Count: count})
+		rows = append(rows, kindCount{Kind: kind, Count: count})
 	}
-	sort.Slice(rows, func(left, right int) bool {
-		return rows[left].Kind < rows[right].Kind
-	})
+	slices.SortFunc(rows, censusByKind)
 	return rows
+}
+
+// censusByKind orders two rows by their kinds, as strings.Compare does.
+// Each kind is in a census once, so no two rows are equal.
+func censusByKind(left, right kindCount) int {
+	return strings.Compare(left.Kind, right.Kind)
 }

@@ -1,6 +1,6 @@
 # Source patches selected by a view
 
-This does not replace the existing Hillside terrain stage or establish
+This does not replace the existing session terrain stage or establish
 whole-world rendering.
 
 ## Identity and bounded reads
@@ -93,7 +93,7 @@ viewer, with progressively coarser levels farther away. The primary
 describes that approach. This selector uses a quadtree rather than clipmap
 rings. Neither organization manufactures terrain beyond source coverage.
 
-The current Hillside scene continues to stage its authored terrain crop.
+The current session continues to stage its authored terrain crop.
 
 ## World mesh boundary
 

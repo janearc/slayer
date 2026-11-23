@@ -1,0 +1,5 @@
+case,channels,decoded,want
+mono is put on both channels,1,0.1;0.2,0.1;0.1;0.2;0.2
+stereo is kept,2,0.1;0.2,0.1;0.2
+past full scale is clipped,2,1.25;-1.25,1;-1
+a half instant at the end is dropped,2,0.1;0.2;0.3,0.1;0.2

@@ -1,0 +1,92 @@
+# The four fish in an open sea, under its surface: a tuna, a yellowtail
+# and a barracuda swimming a metre or so down, and a school of five
+# hundred sardines below and beyond them. Their sources are in
+# manufacture/fish.yaml.
+#
+# the frame. places are metres, x east, y north, z up, mean sea at z=0.
+# the camera stands five metres south-west of the fish and two and a half
+# up, looking down through the surface.
+#
+# the sea is the one the orca's set uses: one static instant of the wave
+# cascades, 513 samples over 256 m, deep water, seed 11, time 0, here a
+# wind of 3 m/s, chosen. its water's colour is that set's stand-in. the
+# sun is typed as azimuth and altitude, chosen.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: four fish at sea
+  seed: 11
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 160, altitude: 55}
+  set:
+    things:
+      tuna:
+        kind: pacific-bluefin-tuna
+        seed: 11
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: -1.2, unit: m}
+        heading: {value: 0, unit: deg}
+      yellowtail:
+        kind: california-yellowtail
+        seed: 12
+        position:
+          east: {value: -1.2, unit: m}
+          north: {value: -1.5, unit: m}
+          up: {value: -0.8, unit: m}
+        heading: {value: 20, unit: deg}
+      barracuda:
+        kind: california-barracuda
+        seed: 13
+        position:
+          east: {value: 1.5, unit: m}
+          north: {value: -1.8, unit: m}
+          up: {value: -0.7, unit: m}
+        heading: {value: 345, unit: deg}
+      sardines:
+        kind: pacific-sardine-school-500
+        seed: 14
+        position:
+          east: {value: 0.5, unit: m}
+          north: {value: 2.5, unit: m}
+          up: {value: -2.6, unit: m}
+        heading: {value: 10, unit: deg}
+  film:
+    width: 800
+    height: 450
+    rays: 2
+    wide: 39
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+        source: "water's refractive index; colour by eye, a stand-in"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 256, unit: m}
+      samples: 513
+      sea:
+        wind: {value: 3, unit: m/s}
+        fetch: {value: 200000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 1.5708, unit: rad}
+      seed: 11
+      time: {value: 0, unit: s}
+      source: "chosen: a 3 m/s wind, no shelf source"
+  cameras:
+    above:
+      title: "five metres off, looking down through the surface"
+      location: {at: [-3.5, -5, 2.5]}
+      orientation: {look_at: [0, 0, -1.2]}

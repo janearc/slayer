@@ -1,0 +1,256 @@
+# the proof of the air over a bay (sets/haze-proof.yaml) with every air of
+# the invented city's at once: its smog under a lid, the thin air over the
+# lid, the fog in its streets, the smoke of a boat, the city's cooking
+# fires, the steam from its vents, and a deck of cloud. the place, the
+# towers, the boat, the sun and the cameras are that file's; see it.
+#
+# this city is a fiction, and so is its weather. how much of each air there
+# is, how high it lies, where it lies, how patchy it is and how many plumes
+# there are, are this fiction's choices, said beside each. what is not
+# chosen is how each air meets light: those numbers are read, and each
+# says from where.
+#
+# what is read:
+# - the smog's particles: albedo 0.89 and asymmetry 0.63 at 550 nm, the
+#   Continental model of Levy, Remer, Mattoo, Vermote and Kaufman 2007,
+#   Table 1 (as airs/earth.yaml reads it); Angstrom exponent 1.4, Rome
+#   2001 to 2005, "mostly local pollution", Kaufman and others, Table 1
+#   (the same file).
+# - nitrogen dioxide's absorption at 550 nm: 0.33 inverse megametres a
+#   part in a thousand million, the revised IMPROVE equation (Pitchford
+#   and others 2007, on the IMPROVE algorithm page of
+#   vista.cira.colostate.edu, which names no wavelength). its blue and red
+#   are slayer's picks, said in session/atmosphere.go.
+# - soot's mass extinction: 10 square metres a gram, the IMPROVE equation's
+#   "10 x [Elemental Carbon]"; the cooking smoke's, 2.8, its "2.8 x [Small
+#   Organic Mass]" (the same page).
+# - fine smoke's Angstrom exponent near two, and fog's near nought (scene/
+#   medium/aerosol.go).
+# - droplets' asymmetry 0.85, the lobe Jendersie and d'Eon 2023 draw cloud
+#   with (improv/cloudsea/cloudsea.yaml).
+# - the plumes' rise and spread: Briggs 1975 and Martin 1976, in scene/
+#   medium/bent.go.
+#
+# the wind is the sea's: 5 m/s from the north-east, off the shore.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a proof of every air over a bay
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.5186
+    lon: 114.0151
+  timeofday: 1725
+  sun:
+    azimuth: 247.73
+    altitude: 2.37
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.5186
+    lon: 114.0151
+    across: 2000
+    down: 1500
+    step: 10
+    smooth: 60
+    sea: {value: 0, unit: m}
+  weather:
+    wind:
+      from: {value: 45, unit: deg}
+      speed: {value: 5, unit: m/s}
+    # the smog: particles 0.0012 a metre at 550 nm where it is thickest, a
+    # visibility of 3.3 km by Koschmieder's 3.912 over it, with 600 parts
+    # in a thousand million of nitrogen dioxide through it. it is held
+    # whole to 170 m and thins to nothing at its lid, 250 m: the tallest
+    # towers stand out of it. every amount and height is chosen.
+    smog:
+      kind: prescribed-mist
+      extinction: {value: 0.0012, unit: m^-1}
+      depth: {value: 250, unit: m}
+      edge: {value: 80, unit: m}
+      coverage: 1
+      seed: 3
+      asymmetry: 0.63
+      angstrom: 1.4
+      nitrogen-dioxide: {value: 600, unit: ppb}
+    # the air over the lid: the same particles, a tenth as thick at the lid
+    # and thinning to nothing by 1000 m. chosen.
+    over the lid:
+      kind: prescribed-mist
+      extinction: {value: 0.00015, unit: m^-1}
+      depth: {value: 1000, unit: m}
+      coverage: 1
+      seed: 4
+      asymmetry: 0.63
+      angstrom: 1.4
+    # the street fog: droplets 0.006 a metre, 40 m deep, in patches 120 m
+    # across over four fifths of the ground, whole to 25 m. chosen.
+    street fog:
+      kind: prescribed-mist
+      extinction: {value: 0.006, unit: m^-1}
+      depth: {value: 40, unit: m}
+      edge: {value: 15, unit: m}
+      coverage: 0.8
+      size: {value: 120, unit: m}
+      seed: 5
+      asymmetry: 0.85
+      angstrom: 0
+    # the clouds: a deck from 1800 to 3400 m, 0.006 a metre in a body, over
+    # more than half the sky over its middle, in bodies 900 m across.
+    # chosen; at 0.04 the single-scattering tracer draws a body black.
+    high cloud:
+      kind: prescribed-cloud
+      extinction: {value: 0.006, unit: m^-1}
+      base: {value: 1800, unit: m}
+      top: {value: 3400, unit: m}
+      coverage: 0.55
+      size: {value: 900, unit: m}
+      seed: 9
+      asymmetry: 0.85
+  atmosphere:
+    layers:
+      # the smog lies level from the datum to its lid, out 4 km past the
+      # window, thickest over the towers and a quarter of that 2.5 km off.
+      smog:
+        weather: smog
+        extent: terrain
+        albedo: 0.89
+        base: {value: 0, unit: m}
+        beyond: {value: 4000, unit: m}
+        toward: {object: tower 100, reach: {value: 2500, unit: m}, least: 0.25}
+      over the lid:
+        weather: over the lid
+        extent: terrain
+        albedo: 0.89
+        base: {value: 0, unit: m}
+        beyond: {value: 4000, unit: m}
+      # the fog follows the ground, thickest in the streets and nearly gone
+      # 900 m out over the water. water droplets scatter all they meet:
+      # albedo one, chosen, since water takes almost nothing of the
+      # visible over a droplet's width.
+      street fog:
+        weather: street fog
+        extent: terrain
+        albedo: 1
+        toward: {object: tower 100, reach: {value: 900, unit: m}, least: 0.05}
+      # the cloud deck is thickest to the north-east, over the marker, and
+      # gone 7 km from it, so the sky toward the low sun is open.
+      cloud deck:
+        weather: high cloud
+        extent: terrain
+        albedo: 1
+        beyond: {value: 8000, unit: m}
+        toward: {object: the cloud marker, reach: {value: 7000, unit: m}, least: 0}
+  plumes:
+    # the fishing boat's stack: 9 m over its deck, 0.25 m across, gas at
+    # 650 K leaving at 10 m/s into air at 293 K, 1.5 g of soot a second.
+    # every amount is chosen; the soot's albedo, 0.2, is chosen, for soot
+    # that takes most of what it meets; its asymmetry is the smog's.
+    boat stack:
+      from: {object: the fishing boat at anchor, east: {value: 0, unit: m}, up: {value: 9, unit: m}, south: {value: 0, unit: m}}
+      mouth: {value: 0.25, unit: m}
+      exit: {value: 10, unit: m/s}
+      temperature: {value: 650, unit: K}
+      air-temperature: {value: 293, unit: K}
+      rate: {value: 1.5, unit: g/s}
+      mass-extinction: {value: 10, unit: m^2/g}
+      albedo: 0.2
+      asymmetry: 0.63
+      angstrom: 1
+      reach: {value: 1500, unit: m}
+      lid: {value: 250, unit: m}
+      source: "IMPROVE's elemental carbon for the mass extinction; the rest chosen"
+    # the cooking fires: 6 big flues in the streets round tower 100, 4 m
+    # up, 0.4 m across, 450 K at 2 m/s, 1.5 g of smoke a second each. the
+    # smoke is mostly organic: albedo 0.9, chosen. few and big, since each
+    # mouth costs every ray of the picture.
+    cooking fires:
+      from: {object: tower 100, east: {value: 0, unit: m}, up: {value: 4, unit: m}, south: {value: 0, unit: m}}
+      count: 6
+      spread: {value: 150, unit: m}
+      seed: 11
+      mouth: {value: 0.4, unit: m}
+      exit: {value: 2, unit: m/s}
+      temperature: {value: 450, unit: K}
+      air-temperature: {value: 293, unit: K}
+      rate: {value: 1.5, unit: g/s}
+      mass-extinction: {value: 2.8, unit: m^2/g}
+      albedo: 0.9
+      asymmetry: 0.63
+      angstrom: 1.8
+      reach: {value: 600, unit: m}
+      lid: {value: 250, unit: m}
+      source: "IMPROVE's small organic mass for the mass extinction; the rest chosen"
+    # the steam: 8 vents in the streets, 0.6 m across, steam at 373 K at
+    # 3 m/s, 80 g of water a second each, gone 60 m down the wind as it
+    # dries. a droplet of 5 um radius, by the extinction of a large sphere,
+    # twice its area, meets 3 x 2 / (4 x 1e6 g m^-3 x 5e-6 m) = 0.3 square
+    # metres a gram (worked; the factor two is not read here). chosen
+    # amounts.
+    street steam:
+      from: {object: tower 113, east: {value: 0, unit: m}, up: {value: 0.5, unit: m}, south: {value: 0, unit: m}}
+      count: 8
+      spread: {value: 180, unit: m}
+      seed: 12
+      mouth: {value: 0.6, unit: m}
+      exit: {value: 3, unit: m/s}
+      temperature: {value: 373, unit: K}
+      air-temperature: {value: 293, unit: K}
+      rate: {value: 80, unit: g/s}
+      mass-extinction: {value: 0.3, unit: m^2/g}
+      albedo: 1
+      asymmetry: 0.85
+      angstrom: 0
+      reach: {value: 60, unit: m}
+      lid: {value: 250, unit: m}
+      source: "worked for 5 um droplets; the amounts chosen"
+  lasers:
+    # a beam from 30 m up tower 113, 8 degrees up toward the sun's side of
+    # the bay: it starts in the street fog, crosses the smog and leaves
+    # through the lid into the thin air over it.
+    bay beam:
+      origin:
+        object: tower 113
+        east: {value: 0, unit: m}
+        up: {value: 30, unit: m}
+        south: {value: 25, unit: m}
+      launcher: true
+      pointing: {azimuth: 248, altitude: 8}
+      radius: {value: 0.25, unit: m}
+      reach: {value: 2500, unit: m}
+      divergence: {value: 0.03, unit: deg}
+      wavelength: {value: 532, unit: nm}
+      display-strength: 10000000000
+  film:
+    width: 640
+    height: 360
+    rays: 2
+    wide: 70
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    bay:
+      title: "from the water 1.2 km south of the towers, 20 m up, looking north at them"
+      location:
+        at: [1200, -1500, 20]
+      orientation:
+        look_at: [1350, -340, 200]
+    sun:
+      title: "from 30 m over the shore by the towers, out over the bay toward the low sun"
+      location:
+        at: [1250, -500, 30]
+      orientation:
+        look_at: [-601, -1258, 0]
+  recipes:
+    t033: {kind: tower, irregularity: 0.99, script: simplified-chinese, pins: {plan: rounded, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t100: {kind: tower, irregularity: 0.22, script: simplified-chinese, pins: {plan: y, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t113: {kind: tower, irregularity: 0.36, script: simplified-chinese, pins: {plan: rounded, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+  set:
+    things:
+      tower 033: {recipe: t033, seed: 1561, complexity: quick, east: 1332.5, north: 1264.2, heading: {value: 337.7, unit: deg}}
+      tower 100: {recipe: t100, seed: 2700, complexity: quick, east: 1468.0, north: 1060.4, heading: {value: 337.7, unit: deg}}
+      tower 113: {recipe: t113, seed: 2921, complexity: quick, east: 1369.0, north: 1175.4, heading: {value: 337.7, unit: deg}}
+      the fishing boat at anchor: {kind: fishing-boat-at-anchor, seed: 31, complexity: demo, position: {east: {value: 550, unit: m}, north: {value: 700, unit: m}, up: {value: 0, unit: m}}, heading: {value: 59, unit: deg}}
+      the cloud marker: {kind: human-scale-2m, seed: 1, east: 1950, north: 1450}

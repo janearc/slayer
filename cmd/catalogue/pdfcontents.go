@@ -46,9 +46,10 @@ func (made *composer) contentsRows() []contentsRow {
 			if each.Entry.Group != group {
 				continue
 			}
+			entryLabel := made.rowLabel(each)
 			rows = append(rows, contentsRow{card: index,
 				lines: wrapText(entryStyle.set, entryStyle.size,
-					made.rowLabel(each), columnWidth-numberRoom)})
+					entryLabel, columnWidth-numberRoom)})
 		}
 	}
 	return rows

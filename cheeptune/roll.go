@@ -59,7 +59,7 @@ const (
 
 // WriteRoll draws the piece to a PNG.
 func (p *Piece) WriteRoll(path string) error {
-	img, err := p.Roll()
+	img, err := p.roll()
 	if err != nil {
 		return err
 	}
@@ -74,8 +74,8 @@ func (p *Piece) WriteRoll(path string) error {
 	return f.Close()
 }
 
-// Roll draws the piece.
-func (p *Piece) Roll() (*image.RGBA, error) {
+// roll draws the piece.
+func (p *Piece) roll() (*image.RGBA, error) {
 	face, err := opentype.Parse(goregular.TTF)
 	if err != nil {
 		return nil, err
@@ -203,7 +203,7 @@ func (p *Piece) Roll() (*image.RGBA, error) {
 				y := rowY(float64(m))
 				line := image.Rect(rollLeft, y, right, y+1)
 				fill(img, line, rollGrid, 1)
-				text(img, fc, 12, y+6, rollInk, NoteName(m))
+				text(img, fc, 12, y+6, rollInk, noteName(m))
 			}
 		}
 		tw := 1 / tickRate

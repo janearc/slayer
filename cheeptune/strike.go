@@ -98,7 +98,7 @@ func strikes(vc *voice, score *Score) []strike {
 // through its notes until the chord's time is up. A step counted in
 // beats follows the tempo; one counted in ticks is the same length at
 // any tempo.
-func arpStrikes(base strike, n sounding, c *Channel,
+func arpStrikes(base strike, n sounding, c *channel,
 	score *Score) []strike {
 	end := base.on + base.gate
 	starts := func(k int) float64 {

@@ -18,7 +18,8 @@ func profileOf(t *testing.T, depths ...float64) occultation.Profile {
 		fmt.Fprintf(&table, "%9.2f, 10.000, 1.000,%7.4f, 0.0000, 1.0000\r\n",
 			float64(k+1), depth)
 	}
-	profile, err := occultation.Read(strings.NewReader(table.String()))
+	text := table.String()
+	profile, err := occultation.Read(strings.NewReader(text))
 	if err != nil {
 		t.Fatal(err)
 	}

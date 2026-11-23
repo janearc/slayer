@@ -8,22 +8,48 @@ import (
 	"github.com/janearc/slayer/scene/medium"
 )
 
+// constructionLooksFile is the table of looks these tests make: a colour
+// of three shares, a gloss and an index, by name.
+const constructionLooksFile = "testdata/construction-looks.csv"
+
+// constructionLook is the colour, gloss and index a row of the looks
+// table names.
+func constructionLook(t *testing.T, name string) (colour maths.Light, gloss, index float64) {
+	t.Helper()
+	row := readSheet(t, constructionLooksFile).row(t, constructionLooksFile, name)
+	colour = maths.RGB(cell(t, row, "red"), cell(t, row, "green"),
+		cell(t, row, "blue"))
+	return colour, cell(t, row, "gloss"), cell(t, row, "index")
+}
+
 // A diffuse look is its name and its colour and nothing else; a polished
 // one is those and its gloss and its index. Neither is a metal, wears a
 // film or glows.
 func TestDiffuseAndPolishedAreWhatTheyAreGiven(t *testing.T) {
-	red := maths.RGB(0.8, 0.1, 0.1)
+	red, gloss, index := constructionLook(t, "brick")
 	if got, want := *Diffuse("brick", red), (Material{Name: "brick",
 		Colour: red}); got != want {
 		t.Errorf("a diffuse look is %+v, want %+v", got, want)
 	}
-	if got, want := *Polished("lacquer", red, 0.9, 1.5), (Material{
-		Name: "lacquer", Colour: red, Gloss: 0.9, Index: 1.5}); got != want {
-		t.Errorf("a polished look is %+v, want %+v", got, want)
+	polished := *Polished("lacquer", red, gloss, index)
+	if want := (Material{Name: "lacquer", Colour: red, Gloss: gloss,
+		Index: index}); polished != want {
+		t.Errorf("a polished look is %+v, want %+v", polished, want)
 	}
-	// the anti-test: the two are not one another
-	if *Diffuse("brick", red) == *Polished("brick", red, 0.9, 1.5) {
+	// the anti-test: a polished look is the diffuse one with a gloss and an
+	// index added, and a diffuse look has neither
+	diffuse := *Diffuse("lacquer", red)
+	if diffuse.Gloss != nought || diffuse.Index != nought {
+		t.Errorf("a diffuse look glosses %v at index %v", diffuse.Gloss,
+			diffuse.Index)
+	}
+	if polished == diffuse {
 		t.Error("a polished look is the diffuse one")
+	}
+	polished.Gloss, polished.Index = nought, nought
+	if polished != diffuse {
+		t.Errorf("a polished look differs from the diffuse one by more than "+
+			"its gloss and index: %+v, %+v", polished, diffuse)
 	}
 }
 
@@ -31,7 +57,8 @@ func TestDiffuseAndPolishedAreWhatTheyAreGiven(t *testing.T) {
 // at the world's zero, with no motion and no beam until a caller gives
 // it one.
 func TestANewVolumeIsStillAndCarriesWhatItIsGiven(t *testing.T) {
-	look := Diffuse("mist", maths.Grey(0.5))
+	grey, _, _ := constructionLook(t, "mist")
+	look := Diffuse("mist", grey)
 	made := NewVolume(medium.Fizz{}, look)
 	if _, fizz := made.Medium.(medium.Fizz); !fizz || made.Material != look {
 		t.Errorf("the volume carries %T in %v", made.Medium, made.Material)
@@ -45,10 +72,13 @@ func TestANewVolumeIsStillAndCarriesWhatItIsGiven(t *testing.T) {
 // A spectrum sends back what it says it returns in a range. The
 // anti-test: in a range it does not name it sends back nothing.
 func TestASpectrumScattersByRange(t *testing.T) {
-	s := Spectrum{Returns: map[radiation.Range]float64{radiation.XRay(): 0.25}}
-	gamma, xray := maths.Band{Nanometres: 2e-4}, maths.Band{Nanometres: 0.5}
-	if s.Scatters(xray) != 0.25 || s.Scatters(gamma) != 0 {
-		t.Errorf("scatters: x-ray %v, gamma %v", s.Scatters(xray),
-			s.Scatters(gamma))
+	share := picked(t, "construction-returned-share")
+	returns := Spectrum{Returns: map[radiation.Range]float64{
+		radiation.XRay(): share}}
+	gamma := maths.NewBand(picked(t, "construction-gamma-nanometres"))
+	xray := maths.NewBand(picked(t, "construction-xray-nanometres"))
+	if returns.Scatters(xray) != share || returns.Scatters(gamma) != nought {
+		t.Errorf("scatters: x-ray %v, gamma %v", returns.Scatters(xray),
+			returns.Scatters(gamma))
 	}
 }

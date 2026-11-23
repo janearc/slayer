@@ -81,7 +81,8 @@ func admissionDirectory(path string) (*os.File, error) {
 // accepted; otherwise the file is closed and the result is
 // errAdmissionUnsafe.
 func admissionOpen(directory *os.File, name string, flags int) (*os.File, error) {
-	fd, err := unix.Openat(int(directory.Fd()), name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
+	directoryDescriptor := int(directory.Fd())
+	fd, err := unix.Openat(directoryDescriptor, name, flags|unix.O_NOFOLLOW|unix.O_CLOEXEC|unix.O_NONBLOCK, 0600)
 	if err != nil {
 		return nil, err
 	}
@@ -120,10 +121,12 @@ func admissionRead(directory *os.File, name string) ([]byte, error) {
 // errAdmissionUnsafe.
 func (tx *admissionTransaction) stableLock() error {
 	var opened, named unix.Stat_t
-	if err := unix.Fstat(int(tx.lock.Fd()), &opened); err != nil {
+	lockDescriptor := int(tx.lock.Fd())
+	if err := unix.Fstat(lockDescriptor, &opened); err != nil {
 		return err
 	}
-	if err := unix.Fstatat(int(tx.directory.Fd()), "lock", &named, unix.AT_SYMLINK_NOFOLLOW); err != nil {
+	directoryDescriptor := int(tx.directory.Fd())
+	if err := unix.Fstatat(directoryDescriptor, "lock", &named, unix.AT_SYMLINK_NOFOLLOW); err != nil {
 		return err
 	}
 	if opened.Dev != named.Dev || opened.Ino != named.Ino || named.Nlink != 1 || named.Mode&unix.S_IFMT != unix.S_IFREG || named.Mode&07777 != 0600 || named.Uid != uint32(os.Geteuid()) || named.Size != 0 {
@@ -159,7 +162,8 @@ func beginAdmissionTransaction(ctx context.Context, directory string, binding ad
 	if err != nil {
 		return nil, err
 	}
-	if err := unix.Flock(int(tx.lock.Fd()), unix.LOCK_EX|unix.LOCK_NB); err != nil {
+	lockDescriptor := int(tx.lock.Fd())
+	if err := unix.Flock(lockDescriptor, unix.LOCK_EX|unix.LOCK_NB); err != nil {
 		if errors.Is(err, unix.EWOULDBLOCK) {
 			return nil, errors.Join(errAdmissionBusy, err)
 		}
@@ -262,7 +266,8 @@ func (tx *admissionTransaction) observe(ctx context.Context, owner reservationOw
 	if err != nil {
 		return err
 	}
-	if err := unix.Fsync(int(tx.directory.Fd())); err != nil {
+	directoryDescriptor := int(tx.directory.Fd())
+	if err := unix.Fsync(directoryDescriptor); err != nil {
 		return err
 	}
 	if err := tx.stableLock(); err != nil {
@@ -290,7 +295,8 @@ func (tx *admissionTransaction) close() error {
 	tx.closed = true
 	var err error
 	if tx.lock != nil {
-		err = errors.Join(unix.Flock(int(tx.lock.Fd()), unix.LOCK_UN), tx.lock.Close())
+		lockDescriptor := int(tx.lock.Fd())
+		err = errors.Join(unix.Flock(lockDescriptor, unix.LOCK_UN), tx.lock.Close())
 	}
 	if tx.directory != nil {
 		err = errors.Join(err, tx.directory.Close())

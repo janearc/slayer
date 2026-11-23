@@ -11,27 +11,43 @@ import (
 // no density there, on any machine, rather than NaN or an index past its
 // profile.
 func TestADiscHasNothingAtNoPoint(t *testing.T) {
-	d := Disc{Inner: 1, Outer: 2, Thick: 1, Profile: []float64{1, 0.5, 1}}
+	edge := picked(t, "audit-disc-profile-edge")
+	middle := picked(t, "audit-disc-profile-middle")
+	disc := Disc{
+		Inner:   picked(t, "audit-disc-inner"),
+		Outer:   picked(t, "audit-disc-outer"),
+		Thick:   picked(t, "audit-disc-thick"),
+		Profile: []float64{edge, middle, edge},
+	}
+	reach := picked(t, "audit-disc-reach")
 	nan := math.NaN()
-	for _, p := range []maths.Vec{maths.V(nan, 0, 1.5), maths.V(1.5, 0, nan),
-		maths.V(nan, nan, nan)} {
-		if got := d.Density(p); got != 0 {
-			t.Errorf("at %v: %v", p, got)
+	for _, point := range []maths.Vec{maths.V(nan, nought, reach),
+		maths.V(reach, nought, nan), maths.V(nan, nan, nan)} {
+		if got := disc.Density(point); got != nought {
+			t.Errorf("at %v: %v", point, got)
 		}
 	}
-	if d.profile(nan) != 0 {
-		t.Errorf("the profile at NaN is %v", d.profile(nan))
+	if disc.profile(nan) != nought {
+		t.Errorf("the profile at NaN is %v", disc.profile(nan))
 	}
 }
 
 // pillars of no count or fewer are none: no tips, no density, no panic.
 func TestPillarsOfNoCountAreNone(t *testing.T) {
-	for _, count := range []int{0, -1, -50} {
-		p := Pillars{Count: count, Height: 10, Width: 20, Thick: 1}
-		if tips := p.Tips(); len(tips) != 0 {
+	counts := []int{nought, pickedCount(t, "audit-pillars-fewer"),
+		pickedCount(t, "audit-pillars-fewest")}
+	probe := maths.V(nought, picked(t, "audit-pillars-probe-height"), nought)
+	for _, count := range counts {
+		pillars := Pillars{
+			Count:  count,
+			Height: picked(t, "audit-pillars-height"),
+			Width:  picked(t, "audit-pillars-width"),
+			Thick:  picked(t, "audit-pillars-thick"),
+		}
+		if tips := pillars.Tips(); len(tips) != nought {
 			t.Errorf("%d pillars have %d tips", count, len(tips))
 		}
-		if got := p.Density(maths.V(0, 5, 0)); got != 0 {
+		if got := pillars.Density(probe); got != nought {
 			t.Errorf("%d pillars' density is %v", count, got)
 		}
 	}

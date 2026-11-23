@@ -80,7 +80,8 @@ func TestWoodWandersAndIsPlacedByItsPith(t *testing.T) {
 	same := true
 	first := wandering.At(maths.V(0, 0.72, 0))
 	for run := 0.5; run < 6; run += 0.5 {
-		if !near(wandering.At(maths.V(run, 0.72, 0)), first) {
+		sample := wandering.At(maths.V(run, 0.72, 0))
+		if !near(sample, first) {
 			same = false
 		}
 	}

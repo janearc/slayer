@@ -46,15 +46,15 @@ func near(got color.RGBA, want color.RGBA) bool {
 
 func TestPlacePutsTheCentreInTheMiddleAndUpUp(t *testing.T) {
 	view := testView(t)
-	x, y := view.Place(rings.Point{})
+	x, y := view.place(rings.Point{})
 	if x != testSide/two || y != testSide/two {
 		t.Fatalf("the centre is at %v, %v", x, y)
 	}
-	_, above := view.Place(rings.Point{Up: one})
+	_, above := view.place(rings.Point{Up: one})
 	if !(above < y) {
 		t.Fatal("up is drawn down")
 	}
-	edge, _ := view.Place(rings.Point{Along: testReach})
+	edge, _ := view.place(rings.Point{Along: testReach})
 	if edge != testSide {
 		t.Fatalf("the reach is at %v, not the edge", edge)
 	}
@@ -86,16 +86,16 @@ func TestDrawPaintsTheHoleTheDiscAndWhereTheRayLands(t *testing.T) {
 		t.Fatal("the test's ray does not land on its first crossing")
 	}
 	picture := view.Draw(disc, []Ray{{Path: path, Colour: testRay}})
-	x, y := view.Place(rings.Point{})
+	x, y := view.place(rings.Point{})
 	if got := picture.RGBAAt(int(x), int(y)); !near(got, black) {
 		t.Errorf("the hole's middle is %v", got)
 	}
-	x, y = view.Place(rings.Point{Along: (testInner + testReach) / two})
+	x, y = view.place(rings.Point{Along: (testInner + testReach) / two})
 	if got := picture.RGBAAt(int(x), int(y)); !near(got, discColour) {
 		t.Errorf("the disc is %v", got)
 	}
 	landed := -path.Crossings()[none].Radius
-	x, y = view.Place(rings.Point{Along: landed})
+	x, y = view.place(rings.Point{Along: landed})
 	if got := picture.RGBAAt(int(x), int(y)); !near(got, testRay) {
 		t.Errorf("where the ray lands, %v masses behind, is %v",
 			-landed, got)
@@ -116,7 +116,7 @@ func TestARayThatDoesNotLandHasNoDot(t *testing.T) {
 	picture := view.Draw(disc, []Ray{{Path: path, Order: two,
 		Colour: testRay}})
 	landed := -path.Crossings()[none].Radius
-	x, y := view.Place(rings.Point{Along: landed, Up: -one})
+	x, y := view.place(rings.Point{Along: landed, Up: -one})
 	if got := picture.RGBAAt(int(x), int(y)); near(got, testRay) {
 		t.Errorf("a ray asked to land at an order it never made has "+
 			"a dot below its first crossing: %v", got)

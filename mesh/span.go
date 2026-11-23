@@ -8,11 +8,11 @@ import (
 
 // span is a box being grown: its low and high on each axis. an empty
 // one is endlessly inside out, so anything joined to it is itself.
-type span struct{ low, high [3]float64 }
+type span struct{ low, high [axes]float64 }
 
 // emptySpan is a box around nothing.
 func emptySpan() span {
-	far := math.Inf(1)
+	far := math.Inf(plusInfinity)
 	return span{low: partsOf(far, far, far),
 		high: partsOf(-far, -far, -far)}
 }
@@ -27,7 +27,7 @@ func spanOf(points []maths.Vec, at face) span {
 }
 
 // with is the box grown to hold a point.
-func (grow span) with(point [3]float64) span {
+func (grow span) with(point [axes]float64) span {
 	for axis := range point {
 		grow.low[axis] = math.Min(grow.low[axis], point[axis])
 		grow.high[axis] = math.Max(grow.high[axis], point[axis])
@@ -45,10 +45,10 @@ func (grow span) joined(other span) span {
 }
 
 // middle is the box's middle.
-func (grow span) middle() [3]float64 {
-	var made [3]float64
+func (grow span) middle() [axes]float64 {
+	var made [axes]float64
 	for axis := range made {
-		made[axis] = (grow.low[axis] + grow.high[axis]) / 2
+		made[axis] = (grow.low[axis] + grow.high[axis]) / pair
 	}
 	return made
 }
@@ -56,24 +56,24 @@ func (grow span) middle() [3]float64 {
 // area is half the box's surface, zero for an empty one: what the surface area
 // heuristic weighs a side by.
 func (grow span) area() float64 {
-	wide := grow.high[0] - grow.low[0]
-	tall := grow.high[1] - grow.low[1]
-	deep := grow.high[2] - grow.low[2]
-	if !(wide >= 0 && tall >= 0 && deep >= 0) {
-		return 0
+	wide := grow.high[alongX] - grow.low[alongX]
+	tall := grow.high[alongY] - grow.low[alongY]
+	deep := grow.high[alongZ] - grow.low[alongZ]
+	if !(wide >= nought && tall >= nought && deep >= nought) {
+		return nought
 	}
 	return wide*tall + tall*deep + deep*wide
 }
 
 // parts is a vector's three parts, to be taken by axis.
-func parts(point maths.Vec) [3]float64 {
+func parts(point maths.Vec) [axes]float64 {
 	return partsOf(point.X, point.Y, point.Z)
 }
 
 // partsOf is three parts, to be taken by axis.
-func partsOf(x, y, z float64) [3]float64 { return [3]float64{x, y, z} }
+func partsOf(x, y, z float64) [axes]float64 { return [axes]float64{x, y, z} }
 
 // vectorOf is three parts as a vector.
-func vectorOf(made [3]float64) maths.Vec {
-	return maths.V(made[0], made[1], made[2])
+func vectorOf(made [axes]float64) maths.Vec {
+	return maths.V(made[alongX], made[alongY], made[alongZ])
 }

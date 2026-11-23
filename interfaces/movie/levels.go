@@ -54,7 +54,7 @@ func newDemand(coded image.Point, rate int) demand {
 
 // macroblocks is how many macroblocks cover a side of that many pixels.
 func macroblocks(pixels int) int64 {
-	return (int64(pixels) + macroblock - 1) / macroblock
+	return (int64(pixels) + macroblock - one) / macroblock
 }
 
 // fits is whether the level allows what the movie asks.
@@ -70,30 +70,31 @@ func (row level) fits(asked demand) bool {
 }
 
 // levelFor is the lowest level the movie fits, refused by name when
-// that is above 5.2 or when no level holds it.
-func levelFor(asked demand) (level, error) {
+// that is above 5.2 or when no level holds it. It is nil on a refusal.
+func levelFor(asked demand) (*level, error) {
 	rows, err := readLevels(levelTable)
 	if err != nil {
-		return level{}, err
+		return nil, err
 	}
 	for _, row := range rows {
 		if !row.fits(asked) {
 			continue
 		}
 		if row.idc > highestLevel {
-			return level{}, fmt.Errorf("movie: this size at this rate "+
+			return nil, fmt.Errorf("movie: this size at this rate "+
 				"needs H.264 level %s, and QuickTime shows above 5.2 "+
 				"as blocks: make the picture smaller or the rate lower",
 				row.name)
 		}
-		return row, nil
+		return &row, nil
 	}
-	return level{}, fmt.Errorf("movie: this size at this rate is "+
+	return nil, fmt.Errorf("movie: this size at this rate is "+
 		"beyond every H.264 level, the last being %s: make the picture "+
-		"smaller or the rate lower", rows[len(rows)-1].name)
+		"smaller or the rate lower", rows[len(rows)-one].name)
 }
 
-// readLevels reads the level table, refusing a malformed one by row.
+// readLevels reads the level table, refusing a malformed one by row, and
+// one whose levels do not rise, since levelFor takes the first that fits.
 func readLevels(text string) ([]level, error) {
 	reader := csv.NewReader(strings.NewReader(text))
 	reader.FieldsPerRecord = anyFields
@@ -101,45 +102,52 @@ func readLevels(text string) ([]level, error) {
 	if err != nil {
 		return nil, fmt.Errorf("movie: the level table: %w", err)
 	}
-	if len(records) == 0 {
+	if len(records) == zero {
 		return nil, fmt.Errorf("movie: the level table has no heading")
 	}
 	var rows []level
-	for place, record := range records[1:] {
+	for place, record := range records[headingRows:] {
 		row, err := readLevel(record)
 		if err != nil {
 			return nil, fmt.Errorf("movie: the level table, row %d: %w",
-				place+1, err)
+				place+one, err)
 		}
-		rows = append(rows, row)
+		if len(rows) > zero && row.idc <= rows[len(rows)-one].idc {
+			return nil, fmt.Errorf("movie: the level table, row %d: "+
+				"level %s is not above the one before it: the levels "+
+				"must be in order", place+one, row.name)
+		}
+		rows = append(rows, *row)
 	}
-	if len(rows) == 0 {
+	if len(rows) == zero {
 		return nil, fmt.Errorf("movie: the level table has no rows")
 	}
 	return rows, nil
 }
 
-// readLevel reads one row: a level written as 4.1, then three counts.
-func readLevel(record []string) (level, error) {
+// readLevel reads one row: a level written as 4.1, then three counts. It
+// is nil on a refusal.
+func readLevel(record []string) (*level, error) {
 	if len(record) != levelColumns {
-		return level{}, fmt.Errorf("%d columns, want %d", len(record),
+		return nil, fmt.Errorf("%d columns, want %d", len(record),
 			levelColumns)
 	}
-	whole, tenth, found := strings.Cut(record[0], ".")
-	major, majorErr := strconv.Atoi(whole)
-	minor, minorErr := strconv.Atoi(tenth)
+	name := record[nameColumn]
+	majorText, minorText, found := strings.Cut(name, ".")
+	major, majorErr := strconv.Atoi(majorText)
+	minor, minorErr := strconv.Atoi(minorText)
 	if !found || majorErr != nil || minorErr != nil {
-		return level{}, fmt.Errorf("%q is not a level such as 4.1",
-			record[0])
+		return nil, fmt.Errorf("%q is not a level such as 4.1", name)
 	}
-	row := level{name: record[0], idc: major*levelTenths + minor}
+	row := level{name: name, idc: major*levelTenths + minor}
 	counts := []*int64{&row.perSecond, &row.perFrame, &row.kbits}
 	for place, count := range counts {
-		read, err := strconv.ParseInt(record[place+1], 10, 64)
+		text := record[place+firstCount]
+		read, err := strconv.ParseInt(text, decimal, 64)
 		if err != nil {
-			return level{}, fmt.Errorf("%q is not a count", record[place+1])
+			return nil, fmt.Errorf("%q is not a count", text)
 		}
 		*count = read
 	}
-	return row, nil
+	return &row, nil
 }

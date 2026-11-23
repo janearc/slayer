@@ -1,0 +1,299 @@
+# portofino: the harbour, and the painted houses on the slopes round it.
+#
+# waves proof (c), the quay: this set with an ocean added, the sea with no
+# edge at the terrain's sea level of 0.5 m, a 4 m/s breeze from the
+# north-east over a 5 km fetch (picked, as in the drawn portofino's own
+# ocean block), and pure seawater.
+#
+# the ground. copernicus glo-30, tile n44 e009 (1 arc-second, posts about
+# 22 m east to west and 31 m north to south here), a surface model: it
+# holds the tops of what stands there, roofs and trees, and not the bare
+# earth, and it holds the sea at nought. the window is 1400 m across and
+# 1200 m down, round 44.3022 north, 9.2118 east, at a 5 m step, bilinear
+# between the posts and not smoothed: a 20 m smoothing takes half the
+# harbour's water away (22000 square metres of water in the harbour's box,
+# 11000 smoothed). the window is placed round the harbour the heights
+# show: where they fall to nought and the water is, which sides of it the
+# ground climbs, and how steeply, were read first (the report that goes
+# with this set prints them).
+#
+# what the heights say. the water of the harbour is a basin about 260 m
+# across, east to west, and 100 m from its head to its mouth, its head at
+# 605 m north in the window and its mouth, between a low tongue of land on
+# the north and the east headland, at about 725 m north, open to the
+# north-east. the ground is 0 to 3 m over a strip along the head, climbs
+# to 10 m within 35 to 55 m of the water on the west, and to 40 m within
+# about 100 m on the east. over the slopes that fall toward the water the
+# rise is 0.4 to 0.5 in a metre on average, and 0.78 at the steepest, on
+# the east side of the head. the sea is nought lifted to 0.5 m so the
+# model's nought water is not drawn in one plane with the sea.
+#
+# the sea is the terrain's own `sea`: still water as the earth's curve,
+# out to the horizon. the model has no depth under the water, so nothing
+# is under it, and the sea has no wave: a harbour is sheltered, but the
+# open sea outside is not, and this one is as flat there.
+#
+# the sun. scene/daylight.Sun, noaa's fractional-year equations, for
+# 44.3022 north, 9.2118 east, at 07:30 local summer time (utc+2) on 21
+# june 2026: azimuth 73.64, altitude 17.09, geometric, without refraction.
+# the sky and the air are the earth's, worked from that. the day and the
+# hour are a choice: the sun, low in the east-north-east, lights the
+# faces that look east and, grazing, those that look north.
+#
+# the houses. the kind terrace-portofino, from
+# manufacture/cities/cultures/portofino.yaml: fourteen bays to a terrace,
+# each bay its own number of storeys, and its colour drawn from that
+# culture's palette of red, ochre, yellow, pink and cream, so that no
+# bay has the colour of the one beside it. no house is coloured here.
+# four stands of the habit `contour` lay rows along the contours of the
+# slopes that face the harbour: the south, which is the head, fronts to
+# the north; the east flank, fronts to the west; the west flank, fronts
+# to the east; and the north ledge, fronts to the south. each stand's
+# first row starts at "the foot" of its stand, which is the back corner
+# of its first terrace, and is a place picked from the heights (the front
+# wall of the first row a few metres from the water's edge). each run is
+# turned to the ground's contour where it stands, and each bay is founded
+# on the ground under it.
+#
+# the quay. one box along the head, set where the model's shore is. a box
+# is straight, upright and has no heading, so a quay of boxes is only as
+# straight as the shore it lies on; the head runs east to west and is the
+# one shore of the harbour that does.
+#
+# the boats. sampan-at-anchor, fishing-boat-at-anchor and ferry-at-anchor
+# are the manufactory's, and are not Ligurian boats. they are at anchor,
+# bows into a wind from the north-north-east, the same heading for all,
+# a choice. a boat stands at the sea's height, 0.5 m.
+#
+# places of things are metres in the terrain window: east from its west
+# edge, north from its south edge. a camera's at and look_at are east from
+# the west edge, north as the window's northing less its 1200 m depth, and
+# up from the lowest ground in the window, the water's nought.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: portofino
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 44.3022
+    lon: 9.2118
+  timeofday: 730
+  sun:
+    azimuth: 73.64
+    altitude: 17.09
+  terrain:
+    from: copernicus-glo30-n44-e009
+    lat: 44.3022
+    lon: 9.2118
+    across: 1400
+    down: 1200
+    step: 5
+    sea: {value: 0.5, unit: m}
+  film:
+    width: 1600
+    height: 900
+    rays: 4
+    wide: 50
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    water:
+      title: "from the water off the harbour's mouth, 6 m up, looking south-west into the harbour at the houses of its head"
+      location:
+        at: [850, -370, 6]
+      orientation:
+        look_at: [650, -590, 12]
+    headland:
+      title: "from the east headland, 15 m over its slope, looking west across the harbour"
+      wide: 55
+      location:
+        at: [880, -550, 58.5]
+      orientation:
+        look_at: [640, -560, 3]
+    quay:
+      title: "on the quay at the east end of the head, at eye height, looking west along the fronts"
+      wide: 60
+      location:
+        at: [745, -594, 3.4]
+      orientation:
+        look_at: [590, -600, 6]
+    sea:
+      title: "2.2 m over the water off the harbour's mouth, level, looking north-north-east to the open sea and its horizon"
+      wide: 60
+      location:
+        at: [760, -440, 2.2]
+      orientation:
+        look_at: [1760, 1292, 2.2]
+    above:
+      title: "450 m over the sea north-east of the harbour, looking down on it and its houses"
+      wide: 45
+      location:
+        at: [800, -200, 450]
+      orientation:
+        look_at: [690, -560, 10]
+    high:
+      title: "1500 m up over the south-west bay, looking north-north-east over the whole window, where the ground ends at its edge"
+      wide: 50
+      location:
+        at: [500, -1100, 1500]
+      orientation:
+        look_at: [700, -500, 0]
+    plan:
+      title: "straight down from 700 m over the harbour, north up"
+      wide: 40
+      location:
+        at: [700, -560, 700]
+      orientation:
+        look_at: [700, -559, 0]
+  set:
+    things:
+      the south foot: {kind: human-scale-2m, seed: 1, east: 745, north: 589}
+      the east foot: {kind: human-scale-2m, seed: 1, east: 826, north: 705}
+      the west foot: {kind: human-scale-2m, seed: 1, east: 584, north: 630}
+      the north foot: {kind: human-scale-2m, seed: 1, east: 545, north: 714}
+      anchored sampan one:
+        kind: sampan-at-anchor
+        seed: 3
+        complexity: demo
+        position:
+          east: {value: 655, unit: m}
+          north: {value: 640, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 20, unit: deg}
+      anchored sampan two:
+        kind: sampan-at-anchor
+        seed: 5
+        complexity: demo
+        position:
+          east: {value: 690, unit: m}
+          north: {value: 652, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 20, unit: deg}
+      anchored sampan three:
+        kind: sampan-at-anchor
+        seed: 7
+        complexity: demo
+        position:
+          east: {value: 625, unit: m}
+          north: {value: 664, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 20, unit: deg}
+      anchored sampan four:
+        kind: sampan-at-anchor
+        seed: 9
+        complexity: demo
+        position:
+          east: {value: 740, unit: m}
+          north: {value: 668, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 20, unit: deg}
+      anchored fishing boat one:
+        kind: fishing-boat-at-anchor
+        seed: 2
+        complexity: demo
+        position:
+          east: {value: 700, unit: m}
+          north: {value: 692, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 20, unit: deg}
+      anchored fishing boat two:
+        kind: fishing-boat-at-anchor
+        seed: 4
+        complexity: demo
+        position:
+          east: {value: 612, unit: m}
+          north: {value: 696, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 20, unit: deg}
+      anchored ferry:
+        kind: ferry-at-anchor
+        seed: 6
+        complexity: demo
+        position:
+          east: {value: 775, unit: m}
+          north: {value: 748, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 20, unit: deg}
+    stands:
+      the head:
+        kind: terrace-portofino
+        habit: contour
+        count: 6
+        seed: 11
+        complexity: demo
+        within: {of: the south foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 3
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+      the east flank:
+        kind: terrace-portofino
+        habit: contour
+        count: 6
+        seed: 12
+        complexity: demo
+        within: {of: the east foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 3
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+      the west flank:
+        kind: terrace-portofino
+        habit: contour
+        count: 6
+        seed: 13
+        complexity: demo
+        within: {of: the west foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 3
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+      the north ledge:
+        kind: terrace-portofino
+        habit: contour
+        count: 4
+        seed: 14
+        complexity: demo
+        within: {of: the north foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 2
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+  world:
+    unit: 1
+    materials:
+      seawater:
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.2656, 0.0584, 0.0141]
+        source: "pure seawater, as honopu.yaml has it: Pope and Fry 1997, Morel 1974, from oceantex"
+      quay stone:
+        colour: {srgb_linear: [0.16, 0.15, 0.13]}
+        source: eye
+    ocean:
+      material: seawater
+      middle: [700, 600, 0.5]
+      sea:
+        wind: {value: 4, unit: m/s}
+        fetch: {value: 5000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 3.927, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "picked: a 4 m/s breeze toward the south-west, 5 km of fetch; no measurement behind it"
+    boxes:
+      the head quay:
+        material: quay stone
+        middle: [662, 607.5, 0]
+        size: [170, 6, 3]
+        source: "a choice: a slab 1.5 m over the nought of the model, 1 m over the sea, along the head's shore, which the heights place within 15 m"

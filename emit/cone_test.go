@@ -165,11 +165,11 @@ func TestADescriptionThatCannotBeAnEmitterIsRefused(t *testing.T) {
 func TestAWayAHairPastAUnitIsStillInTheBeam(t *testing.T) {
 	lit := spot()
 	for _, long := range []float64{1 + 1e-9, 1 + 1e-15} {
-		if got := lit.Along(lit.Toward.Scale(long)); got != 1 {
+		if got := lit.along(lit.Toward.Scale(long)); got != 1 {
 			t.Errorf("a way %v long down the beam is %v of it",
 				long, got)
 		}
-		if got := lit.Along(lit.Toward.Scale(-long)); got != 0 {
+		if got := lit.along(lit.Toward.Scale(-long)); got != 0 {
 			t.Errorf("a way %v long back up the beam is %v of it",
 				long, got)
 		}

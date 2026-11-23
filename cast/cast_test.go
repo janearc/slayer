@@ -67,7 +67,8 @@ func TestTilesThatTouchNothingCastNothing(t *testing.T) {
 	if err == nil || m != nil || n != 0 {
 		t.Fatalf("cast %v with %d triangles: %v", m, n, err)
 	}
-	want := fmt.Sprintf("the tiling's %d tiles close no triangles", len(sphere.Tiles()))
+	tiles := len(sphere.Tiles())
+	want := fmt.Sprintf("the tiling's %d tiles close no triangles", tiles)
 	if !strings.Contains(err.Error(), want) {
 		t.Errorf("error %q lacks %q", err, want)
 	}

@@ -18,8 +18,9 @@ func withinOf(t *testing.T, wedge string) string {
 // a stand's wedge reads as written: the thing it is seen from, its
 // bearings, and how near and far. a stand without one says so.
 func TestAStandGrowsWithinAWedge(t *testing.T) {
-	made, err := set.Read("kilauea-iki.yaml", []byte(withinOf(t,
-		"{of: the first tree, from: 350, to: 20, near: 40, far: 250}")))
+	source := withinOf(t,
+		"{of: the first tree, from: 350, to: 20, near: 40, far: 250}")
+	made, err := set.Read("kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,8 +48,9 @@ func TestAWedgesMistakesAreRefused(t *testing.T) {
 		{"{of: the far hill, from: 80, to: 140, near: 1, far: 90}",
 			`within sight of "the far hill"`},
 	} {
-		_, err := set.Read("kilauea-iki.yaml", []byte(withinOf(t,
-			mistake.wedge)))
+		source := withinOf(t,
+			mistake.wedge)
+		_, err := set.Read("kilauea-iki.yaml", []byte(source))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%s: refused with %v, wanted %q", mistake.wedge, err,
 				mistake.said)

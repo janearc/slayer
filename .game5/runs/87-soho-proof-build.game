@@ -1,0 +1,1 @@
+soho-proof-build . :: go build -p=1 -o bin/soho-slayer ./cmd/slayer

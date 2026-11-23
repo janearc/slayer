@@ -1,0 +1,4 @@
+name,extinctionRed,extinctionGreen,extinctionBlue,unit
+ocean,0.2,0.1,0.05,2
+spread,0.1,0.2,0.3,1
+grey,0.1,0.1,0.1,1

@@ -47,27 +47,27 @@ import (
 // studio is the second machine.
 type studio struct{}
 
-// Send is how much of a channel goes to each shared effect, nought to one.
-type Send struct {
+// send is how much of a channel goes to each shared effect, nought to one.
+type send struct {
 	Reverb float64 `json:"reverb"`
 	Delay  float64 `json:"delay"`
 }
 
-// Reverb is the studio's one room: a feedback delay network of eight
+// reverb is the studio's one room: a feedback delay network of eight
 // lines. Size is how big the room is, nought to one; decay is the seconds
 // a sound takes to fall sixty decibels; damping is how much faster the high
 // end dies, nought to one; level is how loud the room is in the mix.
-type Reverb struct {
+type reverb struct {
 	Size    float64 `json:"size"`
 	Decay   float64 `json:"decay"`
 	Damping float64 `json:"damping"`
 	Level   float64 `json:"level"`
 }
 
-// Repeats is the studio's one delay: what is sent to it comes back every
+// repeats is the studio's one delay: what is sent to it comes back every
 // so many beats, each time quieter by the feedback and duller by the tone
 // (one is bright, nought is dark).
-type Repeats struct {
+type repeats struct {
 	Beats    string  `json:"beats"`
 	Feedback float64 `json:"feedback"`
 	Tone     float64 `json:"tone"`
@@ -161,7 +161,7 @@ func (v *Voicing) checkMix() []error {
 
 // gameboyField names the first Game Boy field a channel carries, or
 // nothing.
-func (c *Channel) gameboyField() string {
+func (c *channel) gameboyField() string {
 	for _, f := range []struct {
 		name string
 		set  bool
@@ -177,7 +177,7 @@ func (c *Channel) gameboyField() string {
 }
 
 // checkStudio is one studio channel's fields against its kind.
-func (c *Channel) checkStudio(at string) []error {
+func (c *channel) checkStudio(at string) []error {
 	q := &quarrel{at: at + ": "}
 	if name := c.gameboyField(); name != "" {
 		q.fail("%s is only for the gameboy machine%s", name,
@@ -220,7 +220,7 @@ type engineField struct {
 }
 
 // engineFields is each engine's object and whether the channel has it.
-func (c *Channel) engineFields() []engineField {
+func (c *channel) engineFields() []engineField {
 	return []engineField{
 		{"fm", "fm", c.FM != nil},
 		{"analog", "analog", c.Analog != nil},
@@ -232,7 +232,7 @@ func (c *Channel) engineFields() []engineField {
 
 // checkShaping is the envelope, vibrato and arp: which kinds may carry
 // each, and their ranges.
-func (c *Channel) checkShaping(q *quarrel, eng engineRow) {
+func (c *channel) checkShaping(q *quarrel, eng engineRow) {
 	if c.Envelope != nil && !eng.envelope {
 		q.fail("envelope is not for a %s channel; %s", c.Kind, eng.shaped)
 	}
@@ -259,7 +259,7 @@ func (c *Channel) checkShaping(q *quarrel, eng engineRow) {
 }
 
 // checkEnvelope is an envelope's ranges, when there is one.
-func checkEnvelope(q *quarrel, name string, e *Envelope) {
+func checkEnvelope(q *quarrel, name string, e *envelope) {
 	if e == nil {
 		return
 	}
@@ -270,7 +270,7 @@ func checkEnvelope(q *quarrel, name string, e *Envelope) {
 }
 
 // fits is whether a studio channel can sound an event.
-func (studio) fits(c *Channel, e event) error {
+func (studio) fits(c *channel, e event) error {
 	if engines[c.Kind].percussive {
 		if e.hit == "" {
 			return fmt.Errorf("a note on a drum channel; it plays hits")
@@ -287,8 +287,8 @@ func (studio) fits(c *Channel, e event) error {
 	for _, m := range e.pitches {
 		if m < studioLowest || m > studioHighest {
 			return fmt.Errorf("%s is outside the studio's range %s to "+
-				"%s", NoteName(m), NoteName(studioLowest),
-				NoteName(studioHighest))
+				"%s", noteName(m), noteName(studioLowest),
+				noteName(studioHighest))
 		}
 	}
 	return nil

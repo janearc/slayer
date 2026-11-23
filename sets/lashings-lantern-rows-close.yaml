@@ -1,0 +1,62 @@
+# lashings in the style of lantern rows, close under a single row: the
+# street of lashings-lantern-rows.yaml, seen from the foot of the west
+# wall, looking up and across at the row 4 m north of the middle, to see
+# a lantern's form, its caps and tassel, the small bulbs between the
+# lanterns, and whether the lamp in each lantern lights the wall behind
+# it. made by the cities package (manufacture/cities, Lashings), through
+# the manufactory's kind lashed-street, from
+# manufacture/cities/cultures/lashings.yaml.
+#
+# places are metres, x east, y north, z up; the street runs north and
+# south, 96 m long, centred on the origin. there is no sun and no sky and
+# no shop light: the light is the windows and the lanterns. the ground,
+# the exposure and the camera are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: lashings-lantern-rows-close
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 4
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # at the foot of the west wall, looking up at the row to the north.
+    under-a-row:
+      title: "close under a single row of lanterns"
+      location:
+        at: [-4.8, -2, 2]
+      orientation:
+        look_at: [2, 4, 8.6]
+  recipes:
+    hung:
+      kind: lashed-street
+      style: lantern-rows
+  set:
+    things:
+      the street:
+        recipe: hung
+        seed: 7
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      road:
+        colour: {srgb_linear: [0.02, 0.02, 0.022]}
+        source: eye
+    boxes:
+      ground:
+        material: road
+        middle: [0, 0, -1]
+        size: [400, 400, 2]
+        source: eye

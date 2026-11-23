@@ -21,7 +21,11 @@ func TestParkEnrichmentKeepsBaselinePlantingAndAddsWalkableDiverseGrove(t *testi
 		t.Fatal(err)
 	}
 	if len(grown.Buildings()) != len(baseline.Buildings()) || len(grown.Trees()) <= len(baseline.Trees()) {
-		t.Fatalf("lost city or failed to add grove: buildings %d/%d trees %d/%d", len(grown.Buildings()), len(baseline.Buildings()), len(grown.Trees()), len(baseline.Trees()))
+		grownBuildings := len(grown.Buildings())
+		baselineBuildings := len(baseline.Buildings())
+		grownTrees := len(grown.Trees())
+		baselineTrees := len(baseline.Trees())
+		t.Fatalf("lost city or failed to add grove: buildings %d/%d trees %d/%d", grownBuildings, baselineBuildings, grownTrees, baselineTrees)
 	}
 	old := make(map[uint64]CityTree, len(baseline.trees))
 	for _, tree := range baseline.trees {

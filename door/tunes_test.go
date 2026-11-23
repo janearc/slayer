@@ -173,7 +173,8 @@ func Example_tunes() {
 	var said strings.Builder
 	Tool(env).Run([]string{"tunes", "testdata/tunes", "--page",
 		"--dry-run"}, &said, &said)
-	fmt.Print(strings.ReplaceAll(said.String(), here, "."))
+	shown := strings.ReplaceAll(said.String(), here, ".")
+	fmt.Print(shown)
 	// Output: would write ./testdata/tunes/index.html
 }
 

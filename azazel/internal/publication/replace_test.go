@@ -12,7 +12,7 @@ import (
 	"pgregory.net/rapid"
 )
 
-// authoredPayloadData keeps the original byte examples in checked local data.
+// authoredPayloadData keeps the byte examples in checked local data.
 //
 //go:embed testdata/payloads.yaml
 var authoredPayloadData []byte
@@ -35,7 +35,7 @@ type nativePayloadData struct {
 	Empty  []byte `yaml:"empty"`
 }
 
-// cases keeps the original binary-then-empty labels and execution order.
+// cases keeps the binary-then-empty labels and execution order.
 func (examples nativePayloadData) cases() []nativePayloadCase {
 	return []nativePayloadCase{
 		{name: "binary", body: examples.Binary},
@@ -51,7 +51,7 @@ func (examples nativePayloadData) requireShapes(t *testing.T) {
 	}
 }
 
-// replacementPayloadData preserves all four original payload roles.
+// replacementPayloadData holds all four payload roles.
 type replacementPayloadData struct {
 	Nil    []byte `yaml:"nil_payload"`
 	Empty  []byte `yaml:"empty_payload"`
@@ -59,7 +59,7 @@ type replacementPayloadData struct {
 	Text   []byte `yaml:"text_payload"`
 }
 
-// bodies returns nil, allocated-empty, binary and text in their original order.
+// bodies returns nil, allocated-empty, binary and text in that order.
 func (examples replacementPayloadData) bodies() [][]byte {
 	return [][]byte{examples.Nil, examples.Empty, examples.Binary, examples.Text}
 }

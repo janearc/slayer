@@ -93,7 +93,8 @@ func TestOffsetCropKeepsEveryOverlappingCandidateValue(test *testing.T) {
 		MaxSouth: regionSide}
 	want := map[biome.ID]biome.Candidate{}
 	for _, root := range whole.Roots {
-		if crop.Contains(root.East, root.South) {
+		if root.East >= crop.MinEast && root.East < crop.MaxEast &&
+			root.South >= crop.MinSouth && root.South < crop.MaxSouth {
 			want[root.ID] = root
 		}
 	}

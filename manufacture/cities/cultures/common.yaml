@@ -1,0 +1,696 @@
+# The elements every culture starts from, 2026-11-19: sizes of the small
+# parts that no culture differs on, and the defaults for an element a
+# culture says nothing of, such as a tower that is not there. A culture's
+# own file says an element again to change it. Nothing here is measured.
+# Each element says its distribution (draw), the scope it is drawn at,
+# and a unit that holds for every number it has. A range whose two ends
+# are the same is a fixed size. Lengths are metres; colours are shares of
+# light, each channel from zero to one; a gloss is how much of a mirror a
+# surface is.
+culture: common
+says: the elements no culture differs on
+elements:
+- element: rows-per-district
+  says: how many seeds make one district, so the rows whose seeds agree but for the last digits draw the same district
+  scope: district
+  draw: range
+  unit: seeds
+  least: 256
+  most: 256
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: recess
+  says: how deep a window or door stands back in the wall
+  scope: district
+  draw: range
+  unit: m
+  least: 0.15
+  most: 0.15
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: glass-thickness
+  says: thickness of a pane, and of a door's panel
+  scope: district
+  draw: range
+  unit: m
+  least: 0.04
+  most: 0.04
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: frame-width
+  says: width of the bars of a window frame
+  scope: district
+  draw: range
+  unit: m
+  least: 0.07
+  most: 0.07
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: shutter-thickness
+  says: thickness of a shutter panel standing on the wall
+  scope: district
+  draw: range
+  unit: m
+  least: 0.04
+  most: 0.04
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: shutter-width
+  says: width of each shutter panel beside a window
+  scope: district
+  draw: range
+  unit: m
+  least: 0.32
+  most: 0.32
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: shutters
+  says: whether the windows of a bay have shutters beside them
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: shutter-colour
+  says: the paint of shutters
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: green, weight: 1, colour: [0.035, 0.17, 0.07], gloss: 0.3}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: slab-thickness
+  says: thickness of a roof's sloped slabs and of a flat roof's slab
+  scope: district
+  draw: range
+  unit: m
+  least: 0.12
+  most: 0.12
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: parapet-height
+  says: height of a flat roof's parapet over its slab
+  scope: district
+  draw: range
+  unit: m
+  least: 0.5
+  most: 0.5
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: parapet-wall
+  says: thickness of a parapet
+  scope: district
+  draw: range
+  unit: m
+  least: 0.2
+  most: 0.2
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: eave-depth
+  says: how far a sloped roof overhangs the wall, where a culture says nothing
+  scope: row
+  draw: range
+  unit: m
+  least: 0.3
+  most: 0.3
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: hip-point
+  says: how far a hip's top outline is drawn in toward a point, as a share of the way from the eave to the middle
+  scope: row
+  draw: range
+  unit: share of the half width
+  least: 0.8
+  most: 0.8
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: min-gap
+  says: the least gap between two openings, and between an opening and the edge of its face
+  scope: district
+  draw: range
+  unit: m
+  least: 0.3
+  most: 0.3
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: door-width
+  says: width of a house door
+  scope: district
+  draw: range
+  unit: m
+  least: 1
+  most: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: door-height
+  says: height of a house door
+  scope: district
+  draw: range
+  unit: m
+  least: 2.1
+  most: 2.1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: light-heat
+  says: colour temperature of the light in a lit window
+  scope: opening
+  draw: range
+  unit: K
+  least: 2200
+  most: 6500
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: light-heat-step
+  says: the steps a window light's temperature is held to, so windows come in a few materials
+  scope: district
+  draw: range
+  unit: K
+  least: 100
+  most: 100
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: window-glow
+  says: how brightly a lit window glows, a scale on the light of its colour temperature
+  scope: district
+  draw: range
+  unit: scale
+  least: 0.9
+  most: 0.9
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye, the shoebox's lit glass is 0.9"
+- element: chimney
+  says: whether a bay with a party wall has a chimney on it
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: chimney-width
+  says: width of a chimney stack
+  scope: district
+  draw: range
+  unit: m
+  least: 0.7
+  most: 0.7
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: chimney-depth
+  says: depth of a chimney stack
+  scope: district
+  draw: range
+  unit: m
+  least: 0.5
+  most: 0.5
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: chimney-proud
+  says: how far a chimney stands above the ridge
+  scope: district
+  draw: range
+  unit: m
+  least: 0.9
+  most: 0.9
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: bay-window
+  says: whether the ground storey of a bay has a bay window in place of its windows
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: bay-window-width
+  says: width of a bay window
+  scope: district
+  draw: range
+  unit: m
+  least: 2.2
+  most: 2.2
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: bay-window-proud
+  says: how far a bay window stands out of the wall
+  scope: district
+  draw: range
+  unit: m
+  least: 0.6
+  most: 0.6
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: handing
+  says: whether every other bay is mirrored, so doors and party walls come in pairs
+  scope: row
+  draw: share
+  unit: chance
+  share: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: tower
+  says: whether the row has a tower at one end
+  scope: row
+  draw: share
+  unit: chance
+  share: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: tower-first
+  says: whether a tower is at the first end of the row and not the last
+  scope: row
+  draw: share
+  unit: chance
+  share: 0.5
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: tower-storeys
+  says: storeys of a tower
+  scope: row
+  draw: range
+  unit: storeys
+  whole: true
+  least: 5
+  most: 5
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: tower-window-count
+  says: windows in each storey of a tower
+  scope: storey
+  draw: range
+  unit: windows
+  whole: true
+  least: 1
+  most: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: tower-point
+  says: how far a tower's roof is drawn in toward a point, as a share of its half width
+  scope: row
+  draw: range
+  unit: share of the half width
+  least: 0.9
+  most: 0.9
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: tower-roof-rise
+  says: how high a tower's roof rises
+  scope: row
+  draw: range
+  unit: m
+  least: 3.5
+  most: 3.5
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: garage
+  says: whether a bay has a garage beside it, where the culture leaves room
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: garage-width
+  says: width of the space left for a garage beside each house, nought for none
+  scope: row
+  draw: range
+  unit: m
+  least: 0
+  most: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: garage-height
+  says: height of a garage
+  scope: district
+  draw: range
+  unit: m
+  least: 2.7
+  most: 2.7
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: garage-door-width
+  says: width of a garage door
+  scope: district
+  draw: range
+  unit: m
+  least: 2.6
+  most: 2.6
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: garage-door-height
+  says: height of a garage door
+  scope: district
+  draw: range
+  unit: m
+  least: 2.1
+  most: 2.1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: yard
+  says: width of the side yard on the outer side of each house's space, nought for none
+  scope: row
+  draw: range
+  unit: m
+  least: 0
+  most: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: door-front
+  says: whether a house has its door in its front and not in its side
+  scope: bay
+  draw: share
+  unit: chance
+  share: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: distinct-neighbours
+  says: whether no two adjacent bays may share a colour; one is always, nought never
+  scope: district
+  draw: share
+  unit: chance
+  share: 0
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: frame-colour
+  says: the paint of window frames
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: white, weight: 1, colour: [0.62, 0.62, 0.6], gloss: 0.4}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: door-colour
+  says: the paint of doors
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: oak, weight: 1, colour: [0.1, 0.05, 0.025], gloss: 0.35}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: lit-share
+  says: share of windows with a light on, where a culture says nothing
+  scope: opening
+  draw: share
+  unit: chance
+  share: 0.3
+  kind: picked
+  by: "terraces study, 2026-11-19, picked, dusk"
+- element: paving-thickness
+  says: thickness of a court's paving
+  scope: district
+  draw: range
+  unit: m
+  least: 0.06
+  most: 0.06
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: core-width
+  says: width of a stair core
+  scope: district
+  draw: range
+  unit: m
+  least: 3
+  most: 3
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: core-proud
+  says: how far a stair core stands out of the front it serves
+  scope: district
+  draw: range
+  unit: m
+  least: 0.9
+  most: 0.9
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: core-sunk
+  says: how far a stair core reaches back into the building
+  scope: district
+  draw: range
+  unit: m
+  least: 1
+  most: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: core-offset
+  says: how far along its front a stair core stands from the left end
+  scope: district
+  draw: range
+  unit: m
+  least: 1.5
+  most: 1.5
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: landing-window-width
+  says: width of the narrow window at each landing of a stair core
+  scope: district
+  draw: range
+  unit: m
+  least: 0.6
+  most: 0.6
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+# The surfaces of walls and timber at the demo detail level.
+- {element: plaster-stain, says: "how much of its light a stained patch of plaster gives back, against clean plaster", scope: district, draw: range, unit: share, least: 0.86, most: 0.86, kind: picked, by: "detail study, 2026-11-19, by eye; from 0.72, which made a city of stucco blotchy"}
+- {element: plaster-share, says: "about how much of a wall is stained", scope: district, draw: range, unit: share, least: 0.35, most: 0.35, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: plaster-patch, says: "about how wide a stain on plaster is", scope: district, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: timber-ring, says: "width of a year's ring in painted timber", scope: district, draw: range, unit: m, least: 0.035, most: 0.035, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: timber-late-share, says: "how much of a ring is the dark late wood", scope: district, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: timber-late-tone, says: "how much of its light late wood gives back, against early wood", scope: district, draw: range, unit: share, least: 0.55, most: 0.55, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: timber-wander, says: "how far a ring wanders along the grain, in ring widths", scope: district, draw: range, unit: rings, least: 1.5, most: 1.5, kind: picked, by: "detail study, 2026-11-19, by eye"}
+# The rooms behind the windows at the demo detail level.
+- {element: room-depth, says: "how deep a room behind a window is", scope: district, draw: range, unit: m, least: 3.2, most: 3.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: room-slab, says: "thickness of a room's floor, ceiling and walls", scope: district, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: back-wall, says: "the wall of a house that is left solid behind its rooms", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lamp-size, says: "the side of a lamp in a room", scope: district, draw: range, unit: m, least: 0.22, most: 0.22, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lamp-drop, says: "how far a lamp hangs below its ceiling", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lamp-strength, says: "luminance at a metre of the light in a room's lamp, in the kit's relative light as a set's lamp is given: a 2700 K bulb is 0.35 to 0.5", scope: district, draw: range, unit: luminance, least: 0.5, most: 0.5, kind: picked, by: "detail study, 2026-11-19, from the shoebox set's lamps"}
+- {element: lamp-glow, says: "how much brighter a lamp glows than the pane of a lit window did", scope: district, draw: range, unit: scale, least: 14, most: 14, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: curtain-thickness, says: "thickness of a curtain", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: glazing-tone, says: "how much of its light clear glazing gives back to what is seen through it", scope: district, draw: range, unit: share, least: 0.95, most: 0.95, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: curtain, says: "share of windows with a curtain", scope: opening, draw: share, unit: chance, share: 0.55, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: curtain-cover, says: "how much of a window's width its curtain covers", scope: opening, draw: range, unit: share, least: 0.3, most: 0.8, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- element: curtain-colour
+  says: the cloth of a curtain
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: linen, weight: 2, colour: [0.55, 0.5, 0.4], gloss: 0}
+  - {name: rose, weight: 1, colour: [0.5, 0.25, 0.25], gloss: 0}
+  - {name: sage, weight: 1, colour: [0.3, 0.38, 0.28], gloss: 0}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: room-wall-colour
+  says: the paint of a room's walls and ceiling
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: cream, weight: 1, colour: [0.6, 0.56, 0.48], gloss: 0}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: room-floor-colour
+  says: the boards of a room's floor
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: boards, weight: 1, colour: [0.22, 0.12, 0.06], gloss: 0.1}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+# Claddings other than render at the demo detail level: boards in courses
+# and brick with mortar.
+- {element: lap-height, says: "how tall a course of timber lap is", scope: district, draw: range, unit: m, least: 0.16, most: 0.16, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lap-shadow, says: "how much of its light the shadow line at the foot of a course of lap gives back", scope: district, draw: range, unit: share, least: 0.45, most: 0.45, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lap-share, says: "how much of a course of lap is its shadow line, as a share of its height", scope: district, draw: range, unit: share, least: 0.14, most: 0.14, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lap-tone, says: "how much one course of lap differs from the next in its light", scope: district, draw: range, unit: share, least: 0.12, most: 0.12, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: vinyl-height, says: "how tall a course of vinyl siding is", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: vinyl-shadow, says: "how much of its light the shadow line of a course of vinyl gives back", scope: district, draw: range, unit: share, least: 0.7, most: 0.7, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: vinyl-share, says: "how much of a course of vinyl is its shadow line, as a share of its height", scope: district, draw: range, unit: share, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: vinyl-tone, says: "how much one course of vinyl differs from the next in its light", scope: district, draw: range, unit: share, least: 0.02, most: 0.02, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: brick-length, says: "the length of a brick", scope: district, draw: range, unit: m, least: 0.215, most: 0.215, kind: picked, by: "detail study, 2026-11-19, a standard brick"}
+- {element: brick-height, says: "the height of a brick", scope: district, draw: range, unit: m, least: 0.065, most: 0.065, kind: picked, by: "detail study, 2026-11-19, a standard brick"}
+- {element: mortar-joint, says: "the thickness of a mortar joint", scope: district, draw: range, unit: m, least: 0.01, most: 0.01, kind: picked, by: "detail study, 2026-11-19, a standard joint"}
+- {element: brick-tone, says: "how much one brick differs from the next in its light", scope: district, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: mortar-tone, says: "how much of its light the mortar gives back, in each channel", scope: district, draw: range, unit: share, least: 0.4, most: 0.4, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: garage-sections, says: "how many sections a garage door is made of, one over another", scope: district, draw: range, unit: count, least: 4, most: 4, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: garage-groove, says: "the groove between two sections of a garage door", scope: district, draw: range, unit: m, least: 0.025, most: 0.025, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: garage-inset, says: "how far a garage door's raised panels are in from the edges of their section and from each other", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "detail study, 2026-11-19, by eye"}
+# The ground floor as its own storey, at the demo detail level.
+- {element: ground-extra, says: "how much taller the ground storey is than the others", scope: district, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: shopfront, says: "share of bays whose ground storey is a shop, one wide window", scope: bay, draw: share, unit: chance, share: 0.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: shop-height, says: "height of a shopfront window", scope: district, draw: range, unit: m, least: 2.3, most: 2.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: shop-sill, says: "height of the foot of a shopfront window over the floor, over the plinth", scope: district, draw: range, unit: m, least: 0.65, most: 0.65, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: shop-least, says: "the least width a shopfront window may have", scope: district, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: arched-door, says: "share of doors with a round arch over them", scope: opening, draw: share, unit: chance, share: 0.4, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: stoop-side, says: "how far a door's lower tread reaches past each side of the door", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: plinth-height, says: "height of the stone plinth along the foot of a face", scope: district, draw: range, unit: m, least: 0.55, most: 0.55, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: plinth-proud, says: "how far the plinth stands out of the wall", scope: district, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- element: plinth-colour
+  says: the stone of a plinth
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: grey-stone, weight: 2, colour: [0.25, 0.24, 0.22], gloss: 0}
+  - {name: warm-stone, weight: 1, colour: [0.3, 0.26, 0.2], gloss: 0}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+# What people add to a facade, at the demo detail level. What stands under
+# a window, and a door's awning and lamp, are drawn at opening scope; a
+# dish, pipes, cables, a laundry line and a shop sign at bay scope.
+- element: under-window
+  says: what a window has under it, if anything
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: nothing, weight: 5}
+  - {name: flower-box, weight: 2}
+  - {name: balcony, weight: 1}
+  - {name: aircon, weight: 1}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- {element: awning, says: "share of doors with an awning over them", scope: opening, draw: share, unit: chance, share: 0.5, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: wall-lamp, says: "share of doors with a lamp beside them", scope: opening, draw: share, unit: chance, share: 0.6, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: wall-lamp-strength, says: "luminance at a metre of a wall lamp, in the kit's relative light", scope: district, draw: range, unit: luminance, least: 0.35, most: 0.35, kind: picked, by: "detail study, 2026-11-19, from the shoebox set's lamps"}
+- {element: dish, says: "share of bays with a satellite dish", scope: bay, draw: share, unit: chance, share: 0.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: pipe, says: "share of bays with a downpipe", scope: bay, draw: share, unit: chance, share: 0.6, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: cable, says: "share of bays with a cable run along the wall", scope: bay, draw: share, unit: chance, share: 0.5, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: laundry, says: "share of bays with a laundry line between two windows", scope: bay, draw: share, unit: chance, share: 0.25, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: shop-sign, says: "share of bays with a shop sign over the ground floor", scope: bay, draw: share, unit: chance, share: 0.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: balcony-depth, says: "how far a balcony stands out of the wall", scope: district, draw: range, unit: m, least: 0.75, most: 0.75, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: balcony-slab, says: "thickness of a balcony's floor", scope: district, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: balcony-side, says: "how far a balcony reaches past each side of its window", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: rail-top, says: "height of a balcony's rail over its floor", scope: district, draw: range, unit: m, least: 1.0, most: 1.0, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: rail-bar, says: "thickness of the top rail of a balcony", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: baluster-pitch, says: "how far apart the uprights of a balcony rail are", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: baluster-bar, says: "thickness of an upright of a balcony rail", scope: district, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: box-height, says: "height of a flower box", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: box-depth, says: "how far a flower box stands out of the wall", scope: district, draw: range, unit: m, least: 0.24, most: 0.24, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: bloom-size, says: "the side of a bloom in a flower box", scope: district, draw: range, unit: m, least: 0.11, most: 0.11, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: bloom-pitch, says: "how far apart the blooms in a flower box are", scope: district, draw: range, unit: m, least: 0.17, most: 0.17, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: unit-width, says: "width of an air-conditioning unit", scope: district, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: unit-height, says: "height of an air-conditioning unit", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: unit-depth, says: "how far an air-conditioning unit stands out of the wall", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: awning-depth, says: "how far an awning reaches out of the wall", scope: district, draw: range, unit: m, least: 1.0, most: 1.0, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: awning-thick, says: "thickness of an awning", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: awning-tilt, says: "how steeply an awning slopes down away from the wall, in degrees", scope: district, draw: range, unit: deg, least: 22, most: 22, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: awning-side, says: "how far an awning reaches past each side of its door", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: awning-rise, says: "how far over a door the top of its awning stands", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lamp-fixture, says: "the side of a wall lamp's box", scope: district, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lamp-beside, says: "how far from a door's edge a wall lamp stands", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: dish-size, says: "the side of a satellite dish", scope: district, draw: range, unit: m, least: 0.55, most: 0.55, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: dish-tilt, says: "how far a dish leans up from the wall, in degrees", scope: district, draw: range, unit: deg, least: 35, most: 35, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: dish-arm, says: "how far a dish stands out of the wall on its arm", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: pipe-size, says: "width of a downpipe", scope: district, draw: range, unit: m, least: 0.09, most: 0.09, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: pipe-edge, says: "how far in from a bay's edge a downpipe runs", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: cable-size, says: "thickness of a cable on a wall", scope: district, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: line-size, says: "thickness of a laundry line", scope: district, draw: range, unit: m, least: 0.012, most: 0.012, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: line-reach, says: "how far from the wall a laundry line is held on its poles", scope: district, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: cloth-width, says: "width of a piece of washing on a line", scope: district, draw: range, unit: m, least: 0.42, most: 0.42, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: cloth-drop, says: "how far a piece of washing hangs below its line", scope: district, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: sign-width, says: "width of a shop sign", scope: district, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: sign-height, says: "height of a shop sign", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: sign-thick, says: "how far a shop sign stands out of the wall", scope: district, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: sign-rise, says: "how far over a door the foot of a shop sign stands", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- element: bloom-colour
+  says: the flowers in a flower box
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: geranium, weight: 3, colour: [0.55, 0.06, 0.05], gloss: 0}
+  - {name: marigold, weight: 2, colour: [0.6, 0.35, 0.03], gloss: 0}
+  - {name: white, weight: 1, colour: [0.6, 0.6, 0.55], gloss: 0}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: planter-colour
+  says: the box the flowers are in
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: terracotta, weight: 2, colour: [0.35, 0.14, 0.07], gloss: 0.1}
+  - {name: painted, weight: 1, colour: [0.15, 0.25, 0.18], gloss: 0.2}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: iron-colour
+  says: wrought iron and metal fittings
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: iron, weight: 1, colour: [0.03, 0.03, 0.035], gloss: 0.3}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: unit-colour
+  says: an air-conditioning unit
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: unit-white, weight: 1, colour: [0.55, 0.55, 0.52], gloss: 0.3}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: awning-colour
+  says: the cloth of an awning
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: red-awning, weight: 2, colour: [0.4, 0.05, 0.05], gloss: 0}
+  - {name: green-awning, weight: 2, colour: [0.06, 0.25, 0.1], gloss: 0}
+  - {name: cream-awning, weight: 1, colour: [0.55, 0.5, 0.38], gloss: 0}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: sign-colour
+  says: the board of a shop sign
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: sign-blue, weight: 2, colour: [0.04, 0.1, 0.3], gloss: 0.3}
+  - {name: sign-black, weight: 1, colour: [0.03, 0.03, 0.03], gloss: 0.3}
+  - {name: sign-red, weight: 1, colour: [0.35, 0.04, 0.03], gloss: 0.3}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+- element: cloth-colour
+  says: the washing on a line
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: sheet, weight: 3, colour: [0.55, 0.55, 0.5], gloss: 0}
+  - {name: towel, weight: 1, colour: [0.15, 0.3, 0.5], gloss: 0}
+  - {name: shirt, weight: 1, colour: [0.5, 0.15, 0.1], gloss: 0}
+  kind: picked
+  by: "detail study, 2026-11-19, by eye"
+# Relief at the demo detail level: the stucco's bump, and the reveal.
+- {element: stucco-size, says: "how wide the fine bumps of stucco are, in metres", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: stucco-slope, says: "how steeply the bumps of stucco tilt the wall's face", scope: district, draw: range, unit: share, least: 0.7, most: 0.7, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: reveal-depth, says: "the wall's thickness round a window, which the frame is set back behind", scope: district, draw: range, unit: m, least: 0.32, most: 0.32, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: frame-depth, says: "how deep the bars of a window's frame are at the demo level", scope: district, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "detail study, 2026-11-19, by eye"}
+# The small parts a facade is drawn with at the demo detail level.
+- {element: muntin-width, says: "width of the bars between a window's lights", scope: district, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lights-across, says: "how many lights a window has across", scope: district, draw: range, unit: count, least: 2, most: 2, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: lights-up, says: "how many lights a window has up its height", scope: district, draw: range, unit: count, least: 3, most: 3, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: sill-depth, says: "how far a sill and a head stand out of the wall", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: sill-thickness, says: "thickness of a window sill", scope: district, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: head-height, says: "height of the head over a window", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: slat-pitch, says: "how far apart the louvre slats of a shutter are, up it; 1.5 m of shutter has about thirty", scope: district, draw: range, unit: m, least: 0.045, most: 0.045, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: slat-chord, says: "how wide a louvre slat is across its tilt", scope: district, draw: range, unit: m, least: 0.055, most: 0.055, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: slat-leaf, says: "how thick a louvre slat is", scope: district, draw: range, unit: m, least: 0.008, most: 0.008, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: slat-tilt, says: "how far a louvre slat leans, top in", scope: district, draw: range, unit: deg, least: 38, most: 38, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: rail-height, says: "height of the top, mid and bottom rails of a shutter", scope: district, draw: range, unit: m, least: 0.09, most: 0.09, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: slat-thickness, says: "how far a slat stands out of its shutter", scope: district, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: stile-width, says: "width of the bars at the edges of a shutter", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: panel-inset, says: "how far a door's raised panels are in from its edges", scope: district, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: handle-size, says: "size of a door handle", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: step-depth, says: "how far the step before a door stands out", scope: district, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: step-height, says: "height of the step before a door", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: cornice-height, says: "height of the cornice at the top of a face", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "detail study, 2026-11-19, by eye"}
+- {element: cornice-proud, says: "how far the cornice stands out of the wall", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "detail study, 2026-11-19, by eye"}

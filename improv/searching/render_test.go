@@ -112,7 +112,7 @@ func TestRendererFrameStopsAtAClosedDrawer(t *testing.T) {
 	edit.Plan.Width, edit.Plan.Height, edit.Plan.Rays, edit.Plan.Exposure = 160, 90, 1, 1.5
 	renderer := NewRenderer(edit)
 	defer renderer.Close()
-	set, err := NewSet(edit.Plan, "blazar")
+	set, err := newSet(edit.Plan, "blazar")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestRendererFrameReportsAScenePoseThatFails(t *testing.T) {
 	edit.Plan.Diameter, edit.Plan.Aperture, edit.Plan.Altitude = 38, 8, 55
 	renderer := NewRenderer(edit)
 	defer renderer.Close()
-	set, err := NewSet(edit.Plan, "hawaii")
+	set, err := newSet(edit.Plan, "hawaii")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -216,7 +216,7 @@ func (c *channelSim) sample() float64 {
 
 // envelopeAt is a note's level at age seconds, gated for gate seconds.
 // With no envelope a note is full while gated and silent after.
-func envelopeAt(e *Envelope, age, gate float64) float64 {
+func envelopeAt(e *envelope, age, gate float64) float64 {
 	if e == nil {
 		if age < gate {
 			return 1

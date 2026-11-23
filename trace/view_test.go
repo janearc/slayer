@@ -49,7 +49,8 @@ func (ask asked) call() (*frame.Frame, error) {
 // and a band that is no wavelength.
 func wrongly() []asked {
 	world := smoking()
-	nowhere := lookingAt(maths.V(math.NaN(), 2, 6), centre)
+	missing := maths.V(math.NaN(), 2, 6)
+	nowhere := lookingAt(missing, centre)
 	unscaled := overTheScene
 	unscaled.Scale = math.Inf(1)
 	notANumber := maths.Band{Nanometres: math.NaN()}

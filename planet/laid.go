@@ -102,18 +102,26 @@ const (
 // positive is whether an amount is more than nothing; not a number is not.
 func positive(amount float64) bool { return amount > nothing }
 
-// rest is what is left of a whole when share of it is gone.
-func rest(share float64) float64 { return whole - share }
-
 // nanometre is a nanometre in metres: defined.
 const nanometre = 1e-9
 
+// gridHolds is whether a grid flow's fields are the size its cells say: at
+// least one cell round and one row, and each of the three fields a number a
+// cell. A grid that is not cannot be laid out.
+func gridHolds(grid GridFlow) bool {
+	across, rows := grid.Cells()
+	origin, spin, age := grid.Fields()
+	cells := across * rows
+	return across > nothing && rows > nothing && len(origin) == cells &&
+		len(spin) == cells && len(age) == cells
+}
+
 // Laid is the face laid out, and whether it can be: a face whose air is
-// read from a grid, and whose colours it sums itself. Any other face is
-// painted by Within alone.
+// read from a grid that holds the numbers its cells say, and whose colours
+// it sums itself. Any other face is painted by Within alone.
 func (face *Face) Laid() (*Laid, bool) {
 	grid, gridded := face.flow.(GridFlow)
-	if !gridded || !face.quick {
+	if !gridded || !face.quick || !gridHolds(grid) {
 		return nil, false
 	}
 	laid := &Laid{numbers: map[string]float64{},
@@ -164,7 +172,7 @@ func (face *Face) layAir(laid *Laid) {
 	set["columns"] = float64(len(face.stacks))
 	set["ladders"] = float64(len(face.ladders))
 	if len(face.ladders) > nothing {
-		set["rungs"] = rungs
+		set["rungs"] = float64(rungs)
 	}
 	if positive(face.airglow) {
 		set["glows"] = whole

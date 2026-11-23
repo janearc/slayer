@@ -28,8 +28,6 @@ const none = 0
 
 // Pace is when each frame of a stream happens in the scene: the time of
 // frame zero, and how many frames a second after it.
-//
-//ninja:vow practice NewPace makes one and New takes it
 type Pace struct {
 	start time.Duration
 	rate  int
@@ -56,8 +54,6 @@ func (pace Pace) At(number int) time.Duration {
 
 // Clock is told the time of each frame before it is drawn. A scene whose
 // lamps keep their own time, as the lantern's beams do, needs this.
-//
-//ninja:vow practice New takes one, and orbital's beams is one
 type Clock interface {
 	// Set is the time the frame about to be drawn happens at.
 	Set(at time.Duration)

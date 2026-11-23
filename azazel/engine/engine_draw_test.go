@@ -7,7 +7,11 @@ import (
 	"testing"
 )
 
-// the adapter draws a set file through hillside's library: the picture it
+// settings are the small size the tests draw at: width, height and the
+// rays along a side of a pixel.
+var settings = []string{"-w", "48", "-h", "27", "-n", "1"}
+
+// the adapter draws a set file through the session package: the picture it
 // writes is the one hillside writes for the same set and settings, and
 // its number is hillside's.
 func TestRenderDrawsAsHillsideDoes(t *testing.T) {

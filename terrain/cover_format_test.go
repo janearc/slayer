@@ -127,7 +127,8 @@ func TestBrokenHeadersAndDirectoriesAreRefused(t *testing.T) {
 	longCount := bytes.Clone(good)
 	binary.LittleEndian.PutUint16(longCount[binary.LittleEndian.Uint32(longCount[4:]):], 5000)
 	farDirectory := bytes.Clone(good)
-	binary.LittleEndian.PutUint32(farDirectory[4:], uint32(len(good)+100))
+	farOffset := uint32(len(good) + 100)
+	binary.LittleEndian.PutUint32(farDirectory[4:], farOffset)
 	bigShort := []byte{'I', 'I', 43, 0, 8, 0, 0, 0}
 	external := newTiffSpec(tiffLittle, false, 5, 4, 4, 4, rampAt)
 	external.tags[tagNoData] = tiffTag{id: tagNoData, kind: 1, count: 100000, raw: []byte{1, 2, 3, 4, 5}}
@@ -235,6 +236,7 @@ func TestLzwTilesMustEndWhereTheGridEnds(t *testing.T) {
 	for i := range values {
 		values[i] = float32(i) + 0.5
 	}
+	overlong := append(floatBytes(values...), 1)
 	cases := []struct {
 		name    string
 		payload []byte
@@ -242,7 +244,7 @@ func TestLzwTilesMustEndWhereTheGridEnds(t *testing.T) {
 	}{
 		{"whole", lzwLiterals(floatBytes(values...), true), ""},
 		{"no end code", lzwLiterals(floatBytes(values...), false), "missing compressed tile end"},
-		{"extra output", lzwLiterals(append(floatBytes(values...), 1), true), "exceeds the declared tile grid"},
+		{"extra output", lzwLiterals(overlong, true), "exceeds the declared tile grid"},
 		{"short output", lzwLiterals(floatBytes(values[:3]...), true), "EOF"},
 	}
 	for _, each := range cases {

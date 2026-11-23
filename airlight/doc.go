@@ -8,8 +8,9 @@
 // tracer's three channels, moonlight.Spectrum's Picture.
 //
 // Nothing in it is painted: the sky's colour and brightness, the sun's
-// strength and the exposure are all the air's. doc/sky-from-the-air.md
-// is the design; this is the fourth step of its order.
+// strength and the exposure are all the air's.
+// doc/model/sky/sky-from-the-air.md is the design; this is the fourth step
+// of its order.
 //
 // An air is named by a set file: Earth's or Venus's. Named gives the air
 // of a name, lit by the sun's spectrum the caller read from the shelf,

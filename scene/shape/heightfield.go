@@ -7,18 +7,31 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// HeightField is a surface given as heights on a square grid: n by n
+// leastSamples is how few samples a side a height field has: a cell has
+// two.
+const leastSamples = pair // defined: a cell is bounded by two samples a side
+
+// lastCellBack is how far back from the last sample the last cell begins:
+// a row of n samples has n-1 cells, and the last starts at n-2.
+const lastCellBack = pair // defined: the last cell starts two from the end
+
+// HeightField is a surface given as heights on a square grid: samples by
 // samples over a square extent across, centred on the shape's own
 // zero in x and z, heights along y, the surface running on straight
 // lines between the samples and ending at the square's edge. Water
 // from a wave field, ground from a survey: anything that is a height
 // wherever you stand.
+//
+// Its heights are the slice it was made from, and are not copied. They
+// must not be written once the field is made: its range and the slant
+// that bounds its Distance were measured from them then, and a later
+// write would leave Distance longer than the true distance.
 type HeightField struct {
 	heights     []float64
 	smoothX     []float64
 	smoothZ     []float64
 	shadingMode string
-	n           int
+	samples     int
 	extent      float64
 	top, bottom float64
 	// slant flattens the vertical gap into a true lower bound on the
@@ -32,58 +45,81 @@ type HeightField struct {
 	slant float64
 }
 
-// NewHeightField checks and measures a field: n at least two, extent
-// above nought, n by n finite heights, row by row.
-func NewHeightField(heights []float64, n int, extent float64) (
+// NewHeightField checks and measures a field: samples at least two, extent
+// above nought, samples by samples finite heights, row by row, and an extent
+// that leaves every cell a width. It keeps heights and does not copy them;
+// the caller must not write them afterward.
+func NewHeightField(heights []float64, samples int, extent float64) (
 	*HeightField, error) {
-	if n < 2 || len(heights) != n*n || !(extent > 0) ||
-		math.IsInf(extent, 0) {
-		return nil, errors.New("shape: a height field is n by n " +
-			"finite heights, n at least two, over a positive extent")
+	if samples < leastSamples || len(heights) != samples*samples ||
+		!(extent > nought) || math.IsInf(extent, unity) {
+		return nil, errors.New("shape: a height field is samples by " +
+			"samples finite heights, samples at least two, over a positive " +
+			"extent")
 	}
-	field := &HeightField{heights: heights, n: n, extent: extent,
-		top: math.Inf(-1), bottom: math.Inf(1)}
-	for _, height := range heights {
-		if math.IsNaN(height) || math.IsInf(height, 0) {
-			return nil, errors.New("shape: a height field is finite")
+	step := extent / float64(samples-unity)
+	if !(step > nought) {
+		return nil, errors.New("shape: a height field's extent is too " +
+			"small for its samples: a cell has no width")
+	}
+	field := &HeightField{heights: heights, samples: samples, extent: extent,
+		top: math.Inf(-unity), bottom: math.Inf(unity)}
+	if !field.measureRange() {
+		return nil, errors.New("shape: a height field is finite")
+	}
+	steepestX, steepestZ := steepestSlopes(heights, samples, step)
+	field.slant = unity / math.Sqrt(unity+steepestX*steepestX+steepestZ*steepestZ)
+	return field, nil
+}
+
+// measureRange finds the lowest and highest height, and says whether every
+// height is a finite number.
+func (field *HeightField) measureRange() bool {
+	for _, height := range field.heights {
+		if !finiteNumber(height) {
+			return false
 		}
 		field.top = math.Max(field.top, height)
 		field.bottom = math.Min(field.bottom, height)
 	}
-	step := extent / float64(n-1)
-	steepestX, steepestZ := 0.0, 0.0
-	for row := 0; row < n; row++ {
-		for column := 0; column < n; column++ {
-			at := heights[row*n+column]
-			if column+1 < n {
-				rise := math.Abs(heights[row*n+column+1]-at) / step
+	return true
+}
+
+// steepestSlopes are the largest slope along x and the largest along z
+// between neighbouring samples, taken separately: the two need not be in
+// the same cell.
+func steepestSlopes(heights []float64, samples int,
+	step float64) (steepestX, steepestZ float64) {
+	for row := range samples {
+		for column := range samples {
+			at := heights[row*samples+column]
+			if column+unity < samples {
+				rise := math.Abs(heights[row*samples+column+unity]-at) / step
 				steepestX = math.Max(steepestX, rise)
 			}
-			if row+1 < n {
-				rise := math.Abs(heights[(row+1)*n+column]-at) / step
+			if row+unity < samples {
+				rise := math.Abs(heights[(row+unity)*samples+column]-at) / step
 				steepestZ = math.Max(steepestZ, rise)
 			}
 		}
 	}
-	field.slant = 1 / math.Sqrt(1+steepestX*steepestX+steepestZ*steepestZ)
-	return field, nil
+	return steepestX, steepestZ
 }
 
 // Pack is the field as flat numbers, for a renderer that keeps it on
 // a device: the samples row by row, how many a side, the extent, the
 // lowest and highest sample, and the slant that flattens a vertical
-// gap into a true distance bound.
-func (field *HeightField) Pack() (heights []float64, n int,
+// gap into a true distance bound. The slice is the field's own, and must
+// not be written.
+func (field *HeightField) Pack() (heights []float64, samples int,
 	extent, bottom, top, slant float64) {
-	return field.heights, field.n, field.extent, field.bottom,
+	return field.heights, field.samples, field.extent, field.bottom,
 		field.top, field.slant
 }
 
-// HasApproximateSmoothNormals reports whether shading uses interpolated
-// finite-difference vertex slopes instead of each bilinear cell's exact slope.
-func (field *HeightField) HasApproximateSmoothNormals() bool {
-	return field != nil && field.shadingMode == "bilinear-vertex-slopes" &&
-		len(field.heights) > 0 &&
+// hasSlopes is whether the field carries shading slopes for every sample.
+func (field *HeightField) hasSlopes() bool {
+	return field != nil && len(field.heights) > nought &&
 		len(field.smoothX) == len(field.heights) &&
 		len(field.smoothZ) == len(field.heights)
 }
@@ -91,102 +127,127 @@ func (field *HeightField) HasApproximateSmoothNormals() bool {
 // ApproximateShadingNormalMode names a shading-only normal approximation,
 // or is empty when the exact bilinear cell normal is in use.
 func (field *HeightField) ApproximateShadingNormalMode() string {
-	if field == nil || len(field.heights) == 0 ||
-		len(field.smoothX) != len(field.heights) ||
-		len(field.smoothZ) != len(field.heights) {
+	if !field.hasSlopes() {
 		return ""
 	}
 	return field.shadingMode
 }
 
-// ApproximateShadingSlopes returns copies of the optional shading-only
-// vertex slopes in local x and z axes. The returned slices are empty when
-// this field uses its exact bilinear-cell normal. Copies keep a renderer
-// from mutating the field's geometry or its shading record.
+// ApproximateShadingSlopes returns the optional shading-only vertex slopes
+// in local x and z axes. They are empty, and ok is false, when this field
+// uses its exact bilinear-cell normal. The slices are the field's own, not
+// copies, so a scene's fields do not each hold a second set; they must not
+// be written.
 func (field *HeightField) ApproximateShadingSlopes() (x, z []float64, ok bool) {
-	if field == nil || len(field.heights) == 0 ||
-		len(field.smoothX) != len(field.heights) ||
-		len(field.smoothZ) != len(field.heights) {
+	if !field.hasSlopes() {
 		return nil, nil, false
 	}
-	return append([]float64(nil), field.smoothX...),
-		append([]float64(nil), field.smoothZ...), true
+	return field.smoothX, field.smoothZ, true
 }
 
 // Bounds is the box round the square at its highest and lowest.
 func (field *HeightField) Bounds() maths.Box {
-	half := field.extent / 2
-	return maths.Box{Min: maths.V(-half, field.bottom, -half),
-		Max: maths.V(half, field.top, half)}
+	reach := field.extent * half
+	return maths.Box{Min: maths.V(-reach, field.bottom, -reach),
+		Max: maths.V(reach, field.top, reach)}
+}
+
+// cellBelow is the index of the cell a grid position falls in, held to the
+// last cell. A position that is not a number is the first cell, and the
+// fraction measured from it is still not a number, so the answer stays one.
+func cellBelow(grid float64, samples int) int {
+	if math.IsNaN(grid) {
+		return nought
+	}
+	return min(int(grid), samples-lastCellBack)
 }
 
 // place is the grid cell under x and z and how far across it the
-// point is, held to the square.
+// point is, held to the square. A coordinate that is not a number gives a
+// fraction that is not a number. A field that was not made by
+// NewHeightField is refused, as a Mesh that was not made by NewMesh is.
 func (field *HeightField) place(x, z float64) (column, row int,
-	tx, tz float64) {
-	step := field.extent / float64(field.n-1)
-	gx := (x + field.extent/2) / step
-	gz := (z + field.extent/2) / step
-	last := float64(field.n - 1)
-	gx = math.Min(math.Max(gx, 0), last)
-	gz = math.Min(math.Max(gz, 0), last)
-	column = min(int(gx), field.n-2)
-	row = min(int(gz), field.n-2)
+	across, down float64) {
+	if len(field.heights) == nought {
+		panic("shape: a HeightField is made by NewHeightField, which " +
+			"measures it")
+	}
+	step := field.extent / float64(field.samples-unity)
+	gx := (x + field.extent*half) / step
+	gz := (z + field.extent*half) / step
+	last := float64(field.samples - unity)
+	gx = math.Min(math.Max(gx, nought), last)
+	gz = math.Min(math.Max(gz, nought), last)
+	column = cellBelow(gx, field.samples)
+	row = cellBelow(gz, field.samples)
 	return column, row, gx - float64(column), gz - float64(row)
 }
 
 // height is the surface's height over x and z, on the straight lines
 // between the four nearest samples, held to the square.
 func (field *HeightField) height(x, z float64) float64 {
-	column, row, tx, tz := field.place(x, z)
-	at := row*field.n + column
-	low := field.heights[at]*(1-tx) + field.heights[at+1]*tx
-	upper := field.heights[at+field.n]*(1-tx) +
-		field.heights[at+field.n+1]*tx
-	return low*(1-tz) + upper*tz
+	column, row, across, down := field.place(x, z)
+	at := row*field.samples + column
+	low := field.heights[at]*(unity-across) + field.heights[at+unity]*across
+	upper := field.heights[at+field.samples]*(unity-across) +
+		field.heights[at+field.samples+unity]*across
+	return low*(unity-down) + upper*down
 }
 
-// Distance is a lower bound on how far p is from the surface, and
+// Distance is a lower bound on how far point is from the surface, and
 // negative below it: the vertical gap flattened by the steepest
 // gradient, and never less than the sideways gap to the square, since
 // the surface ends there.
-func (field *HeightField) Distance(p maths.Vec) float64 {
-	vertical := (p.Y - field.height(p.X, p.Z)) * field.slant
-	half := field.extent / 2
-	outX := math.Max(math.Abs(p.X)-half, 0)
-	outZ := math.Max(math.Abs(p.Z)-half, 0)
+//
+// It is a bound and no more, and a ray is not met by marching it. The slant
+// is one number for the whole field, made from its steepest slope in x and
+// its steepest in z wherever they are, so over level water beside one steep
+// cell every step is shorter than it need be.
+//
+// A ray that comes to the
+// surface at a shallow angle closes the gap by only about the slant times
+// the sine of that angle each step, so it can use all the steps a marcher
+// allows before it arrives. Hit answers every ray exactly, and is what
+// tracing asks.
+func (field *HeightField) Distance(point maths.Vec) float64 {
+	vertical := (point.Y - field.height(point.X, point.Z)) * field.slant
+	reach := field.extent * half
+	outX := math.Max(math.Abs(point.X)-reach, nought)
+	outZ := math.Max(math.Abs(point.Z)-reach, nought)
 	sideways := math.Hypot(outX, outZ)
-	if sideways > 0 {
+	if sideways > nought {
 		return math.Max(vertical, sideways)
 	}
 	return vertical
 }
 
-// Normal is which way the surface faces over p: square to the cell's
+// Normal is which way the surface faces over point: square to the cell's
 // own slopes, exactly.
-func (field *HeightField) Normal(p maths.Vec) maths.Vec {
-	if len(field.smoothX) != 0 {
-		return field.smoothNormal(p)
+func (field *HeightField) Normal(point maths.Vec) maths.Vec {
+	if len(field.smoothX) != nought {
+		return field.smoothNormal(point)
 	}
-	return field.GeometricNormal(p)
+	return field.GeometricNormal(point)
 }
 
-// GeometricNormal is the exact normal of the bilinear cell under p. Optional
+// GeometricNormal is the exact normal of the bilinear cell under point. Optional
 // interpolated slopes change Normal for shading only; refraction and TIR keep
 // using this geometry normal.
-func (field *HeightField) GeometricNormal(p maths.Vec) maths.Vec {
-	column, row, tx, tz := field.place(p.X, p.Z)
-	at := row*field.n + column
-	step := field.extent / float64(field.n-1)
+func (field *HeightField) GeometricNormal(point maths.Vec) maths.Vec {
+	column, row, across, down := field.place(point.X, point.Z)
+	at := row*field.samples + column
+	step := field.extent / float64(field.samples-unity)
 	// the bilinear patch's slopes at the point, blended as its
 	// heights are
-	lowX := (field.heights[at+1] - field.heights[at]) / step
-	highX := (field.heights[at+field.n+1] - field.heights[at+field.n]) / step
-	lowZ := (field.heights[at+field.n] - field.heights[at]) / step
-	highZ := (field.heights[at+field.n+1] - field.heights[at+1]) / step
-	dx := lowX*(1-tz) + highX*tz
-	dz := lowZ*(1-tx) + highZ*tx
-	return maths.V(-dx, 1, -dz).Unit()
+	lowX := (field.heights[at+unity] - field.heights[at]) / step
+	highX := (field.heights[at+field.samples+unity] -
+		field.heights[at+field.samples]) / step
+	lowZ := (field.heights[at+field.samples] - field.heights[at]) / step
+	highZ := (field.heights[at+field.samples+unity] -
+		field.heights[at+unity]) / step
+	slopeX := lowX*(unity-down) + highX*down
+	slopeZ := lowZ*(unity-across) + highZ*across
+	return maths.V(-slopeX, unity, -slopeZ).Unit()
 }
 
 // WithApproximateSmoothNormals copies a field and changes only its shading
@@ -194,34 +255,41 @@ func (field *HeightField) GeometricNormal(p maths.Vec) maths.Vec {
 // at the outer edges and centered differences inside, then bilinearly blends
 // those slopes. This normal is intentionally not the exact normal of the
 // piecewise bilinear surface, and is not a measured or exact surface normal.
-// Bounds, packed heights, and Distance remain those of the original field.
+//
+// Bounds, packed heights, and Distance remain those of the original field;
+// the heights are shared with it, not copied.
 func (field *HeightField) WithApproximateSmoothNormals() (*HeightField, error) {
-	if field == nil || field.n < 2 || len(field.heights) != field.n*field.n {
+	if field == nil || len(field.heights) == nought {
 		return nil, errors.New("shape: approximate smooth normals need a valid height field")
 	}
-	step := field.extent / float64(field.n-1)
-	if !(step > 0) || math.IsInf(step, 0) || math.IsNaN(step) {
-		return nil, errors.New("shape: approximate smooth normals need finite sample spacing")
-	}
 	made := *field
-	made.heights = append([]float64(nil), field.heights...)
 	made.smoothX = make([]float64, len(field.heights))
 	made.smoothZ = make([]float64, len(field.heights))
 	made.shadingMode = "bilinear-vertex-slopes"
-	for row := range field.n {
-		for column := range field.n {
-			at := row*field.n + column
-			made.smoothX[at] = finiteDifference(field.heights, field.n,
-				at, column, 1, step)
-			made.smoothZ[at] = finiteDifference(field.heights, field.n,
-				at, row, field.n, step)
-			if math.IsNaN(made.smoothX[at]) || math.IsInf(made.smoothX[at], 0) ||
-				math.IsNaN(made.smoothZ[at]) || math.IsInf(made.smoothZ[at], 0) {
-				return nil, errors.New("shape: approximate smooth normals need finite vertex slopes")
-			}
-		}
+	if !made.fillVertexSlopes() {
+		return nil, errors.New("shape: approximate smooth normals need finite vertex slopes")
 	}
 	return &made, nil
+}
+
+// fillVertexSlopes estimates the slopes at every grid vertex from the
+// heights, and says whether every one is a finite number.
+func (field *HeightField) fillVertexSlopes() bool {
+	step := field.extent / float64(field.samples-unity)
+	for row := range field.samples {
+		for column := range field.samples {
+			at := row*field.samples + column
+			slopeX := finiteDifference(field.heights, field.samples,
+				at, column, unity, step)
+			slopeZ := finiteDifference(field.heights, field.samples,
+				at, row, field.samples, step)
+			if !finiteNumber(slopeX) || !finiteNumber(slopeZ) {
+				return false
+			}
+			field.smoothX[at], field.smoothZ[at] = slopeX, slopeZ
+		}
+	}
+	return true
 }
 
 // WithApproximateSpectralNormals copies a height field and uses the supplied
@@ -229,24 +297,24 @@ func (field *HeightField) WithApproximateSmoothNormals() (*HeightField, error) {
 // derivatives in the field's local x and z axes, row by row. The resulting
 // bilinearly interpolated normal is intentionally not the exact normal of
 // the piecewise-bilinear geometry, and is not a measured surface normal.
-// Heights, bounds, packed samples, and Distance remain unchanged.
+//
+// Heights, bounds, packed samples, and Distance remain unchanged; the
+// heights are shared with the field, not copied.
 func (field *HeightField) WithApproximateSpectralNormals(
 	xSlopes, zSlopes []float64,
 ) (*HeightField, error) {
-	if field == nil || field.n < 2 || len(field.heights) != field.n*field.n {
+	if field == nil || len(field.heights) == nought {
 		return nil, errors.New("shape: spectral shading normals need a valid height field")
 	}
 	if len(xSlopes) != len(field.heights) || len(zSlopes) != len(field.heights) {
 		return nil, errors.New("shape: spectral shading slopes must match the height field")
 	}
-	for i := range xSlopes {
-		if math.IsNaN(xSlopes[i]) || math.IsInf(xSlopes[i], 0) ||
-			math.IsNaN(zSlopes[i]) || math.IsInf(zSlopes[i], 0) {
+	for index := range xSlopes {
+		if !finiteNumber(xSlopes[index]) || !finiteNumber(zSlopes[index]) {
 			return nil, errors.New("shape: spectral shading slopes must be finite")
 		}
 	}
 	made := *field
-	made.heights = append([]float64(nil), field.heights...)
 	made.smoothX = append([]float64(nil), xSlopes...)
 	made.smoothZ = append([]float64(nil), zSlopes...)
 	made.shadingMode = "spectral-slopes"
@@ -257,27 +325,27 @@ func (field *HeightField) WithApproximateSpectralNormals(
 // adjacent one-sided samples; interior vertices use their two-sided span.
 func finiteDifference(heights []float64, samples, at, coordinate, stride int,
 	step float64) float64 {
-	if coordinate == 0 {
+	if coordinate == nought {
 		return (heights[at+stride] - heights[at]) / step
 	}
-	if coordinate == samples-1 {
+	if coordinate == samples-unity {
 		return (heights[at] - heights[at-stride]) / step
 	}
-	return (heights[at+stride] - heights[at-stride]) / (2 * step)
+	return (heights[at+stride] - heights[at-stride]) / (pair * step)
 }
 
-// smoothNormal interpolates the precomputed vertex slopes at p, then
+// smoothNormal interpolates the precomputed vertex slopes at point, then
 // normalizes the shading direction.
-func (field *HeightField) smoothNormal(p maths.Vec) maths.Vec {
-	column, row, tx, tz := field.place(p.X, p.Z)
-	at := row*field.n + column
-	lowX := field.smoothX[at]*(1-tx) + field.smoothX[at+1]*tx
-	highX := field.smoothX[at+field.n]*(1-tx) +
-		field.smoothX[at+field.n+1]*tx
-	lowZ := field.smoothZ[at]*(1-tx) + field.smoothZ[at+1]*tx
-	highZ := field.smoothZ[at+field.n]*(1-tx) +
-		field.smoothZ[at+field.n+1]*tx
-	dx := lowX*(1-tz) + highX*tz
-	dz := lowZ*(1-tz) + highZ*tz
-	return maths.V(-dx, 1, -dz).Unit()
+func (field *HeightField) smoothNormal(point maths.Vec) maths.Vec {
+	column, row, across, down := field.place(point.X, point.Z)
+	at := row*field.samples + column
+	lowX := field.smoothX[at]*(unity-across) + field.smoothX[at+unity]*across
+	highX := field.smoothX[at+field.samples]*(unity-across) +
+		field.smoothX[at+field.samples+unity]*across
+	lowZ := field.smoothZ[at]*(unity-across) + field.smoothZ[at+unity]*across
+	highZ := field.smoothZ[at+field.samples]*(unity-across) +
+		field.smoothZ[at+field.samples+unity]*across
+	slopeX := lowX*(unity-down) + highX*down
+	slopeZ := lowZ*(unity-down) + highZ*down
+	return maths.V(-slopeX, unity, -slopeZ).Unit()
 }

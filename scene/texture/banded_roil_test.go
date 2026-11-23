@@ -76,8 +76,9 @@ func holdsRoil(t *testing.T, why string, b, plain Banded) {
 		if !near(got, want) {
 			t.Errorf("%s at %v: %v, want %v", why, p, got, want)
 		}
-		moved = math.Max(moved, math.Abs(want.R-plain.At(bandPoint(p.lat, p.lon)).R))
-		moved = math.Max(moved, math.Abs(want.G-plain.At(bandPoint(p.lat, p.lon)).G))
+		seen := plain.At(bandPoint(p.lat, p.lon))
+		moved = math.Max(moved, math.Abs(want.R-seen.R))
+		moved = math.Max(moved, math.Abs(want.G-seen.G))
 	}
 	if moved < 1e-3 {
 		t.Errorf("%s: the feature moved the colour by only %v", why, moved)

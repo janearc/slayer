@@ -1,0 +1,40 @@
+# every number scene/shape chose that is not true by definition, with what
+# it is and why it was chosen. the code asks for each by name, through pick.
+# a number true by definition is a constant in the code whose comment says
+# it is defined.
+numbers:
+  - name: normal-step
+    value: 1.0e-5
+    says: how far either side of a point the marched normal measures a shape's distance, in the shape's own units
+    kind: picked
+    by: small enough to follow a curved surface, large enough to stay clear of rounding for points within a few thousand units of the origin
+  - name: orthonormal-tolerance
+    value: 1.0e-9
+    says: how far a placement's axes may be from unit length and from square to each other
+    kind: picked
+    by: a rounding allowance, far above the error of a rotation built from float64 and far below any turn a scene makes
+  - name: leaf-members
+    value: 4
+    says: how many members a group node holds before it is cut in two
+    kind: picked
+    by: few enough that a leaf is cheap to walk, many enough that the tree stays shallow
+  - name: tube-most-sides
+    value: 4096
+    says: the most sides a ring of a tube's mesh may have
+    kind: picked
+    by: at this many the sides sag by under a three-millionth of the radius, finer than any picture slayer makes can show
+  - name: tube-chord-share
+    value: 0.0009765625
+    says: how far a flat side of a tube's mesh may lie inside the true circle, as a share of the circle's radius, one part in 1024
+    kind: picked
+    by: the sag is a step of one pixel when the radius spans 1024 pixels, a tube that fills a frame two thousand pixels wide
+  - name: sphere-unit-slack
+    value: 1.0e-12
+    says: how far the squared length of a ray's direction may be from one for the ray to count as a unit ray
+    kind: picked
+    by: far above the rounding of a unit vector and far below any length a caller means
+  - name: sphere-cancellation-limit
+    value: 1.0e8
+    says: how many times the sphere's squared radius the squared distance of a ray's start from the centre may be before the plain form of the crossing is replaced by the careful one
+    kind: picked
+    by: at this ratio the plain form still keeps eight of its sixteen digits of the width

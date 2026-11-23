@@ -1,0 +1,9 @@
+name,height,want
+shell-weather-parabola-middle,20,2
+shell-weather-parabola-quarter-in,15,1.5
+shell-weather-parabola-quarter-from-the-top,25,1.5
+shell-weather-parabola-low-edge,10,0
+shell-weather-parabola-high-edge,30,0
+shell-weather-parabola-below,5,0
+shell-weather-parabola-above,40,0
+shell-weather-parabola-at-the-ground,0,0

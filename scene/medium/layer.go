@@ -2,6 +2,7 @@ package medium
 
 import (
 	"errors"
+	"math"
 	"time"
 
 	"github.com/janearc/slayer/maths"
@@ -16,6 +17,50 @@ type Layer struct {
 	seconds float64
 	base    float64
 	level   bool
+	thin    thinning
+}
+
+// thinning is where a field is thickest, its x and z, how far from it the
+// field has thinned to its least, and that least as a share; a thinning
+// with no reach holds the whole field everywhere.
+type thinning struct {
+	near         maths.Vec
+	reach, least float64
+}
+
+// newThinning is a thinning toward a point over a reach above nought, to
+// a least from nought to one.
+func newThinning(point maths.Vec, reach, least float64) (thinning, error) {
+	if !weatherFinite(point.X+point.Z) || !weatherFinite(reach) ||
+		reach <= weatherZero || !(least >= weatherZero && least <= weatherOne) {
+		return thinning{}, errors.New("medium: a field thins toward a " +
+			"finite point over a reach above nought, to a share from " +
+			"nought to one")
+	}
+	return thinning{near: point, reach: reach, least: least}, nil
+}
+
+// share is the share of itself the field holds over a point: one with no
+// reach, else one at the near point thinning by a smooth step to the least.
+func (thin thinning) share(at maths.Vec) float64 {
+	if thin.reach <= weatherZero {
+		return weatherOne
+	}
+	away := math.Hypot(at.X-thin.near.X, at.Z-thin.near.Z)
+	fall := maths.Smooth(weatherZero, thin.reach, away)
+	return weatherOne - (weatherOne-thin.least)*fall
+}
+
+// Toward makes the layer thickest over a point, by its x and z, thinning
+// by a smooth step away from it to least of itself at reach and beyond.
+// Reach MUST be above nought and least from nought to one.
+func (layer *Layer) Toward(point maths.Vec, reach, least float64) error {
+	thin, err := newThinning(point, reach, least)
+	if err != nil {
+		return err
+	}
+	layer.thin = thin
+	return nil
 }
 
 // NewLayer binds weather to explicit world-space bounds and a terrain height.
@@ -67,9 +112,9 @@ func (layer *Layer) Finest() float64 {
 
 // Tick shares terrain and bounds while changing only the noise phase.
 func (layer *Layer) Tick(at time.Duration) Medium {
-	copy := *layer
-	copy.seconds = at.Seconds()
-	return &copy
+	ticked := *layer
+	ticked.seconds = at.Seconds()
+	return &ticked
 }
 
 // Density extends the prescribed height profile across the entire region.
@@ -93,5 +138,6 @@ func (layer *Layer) Density(at maths.Vec) float64 {
 		below >= layer.weather.Depth {
 		return weatherZero
 	}
-	return layer.weather.mistDensity(at, below, layer.seconds, weatherOne)
+	return layer.weather.mistDensity(at, below, layer.seconds,
+		layer.thin.share(at))
 }

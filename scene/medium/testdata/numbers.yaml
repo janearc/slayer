@@ -1,0 +1,3044 @@
+# The numbers the package's tests choose, read by name: inputs, tolerances and
+# values worked by hand. Each row's name starts with the stem of the test file
+# that asks for it.
+numbers:
+  - name: fixtures-loader-probe
+    value: 1
+    says: a number the fixture loader's own check reads, so the file is never empty
+    kind: picked
+    by: chosen for the loader's check
+  - name: mutants-span-tolerance
+    value: 1e-9
+    says: how close a span's ends are held to the ends worked by hand
+    kind: picked
+    by: a billionth, far below any span the cases work out
+  - name: mutants-span-hair-side
+    value: 1e-6
+    says: the sideways part of a direction a hair off the cylinder's axis
+    kind: picked
+    by: chosen so its square, 1e-12, is the bound a ray along the axis is taken under
+  - name: mutants-span-hair-radius
+    value: 1e-4
+    says: the radius of the cylinder the hair-off ray crosses
+    kind: picked
+    by: worked by hand with the hair, so the ray leaves at 100
+  - name: mutants-span-hair-far
+    value: 1000
+    says: where the range of the hair-off ray ends
+    kind: picked
+    by: well past the 100 where the ray leaves
+  - name: mutants-span-hair-leave
+    value: 100
+    says: where the hair-off ray leaves the cylinder
+    kind: picked
+    by: worked by hand as the radius over the sideways part
+  - name: mutants-span-disc-inner
+    value: 2
+    says: the inner radius of the disc the span cases cut
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-span-disc-outer
+    value: 6
+    says: the outer radius of the disc the span cases cut
+    kind: picked
+    by: chosen so a ray at 6 is on the wall and one at 8 is outside
+  - name: mutants-span-disc-thick
+    value: 0.4
+    says: the thickness of the disc the span cases cut
+    kind: picked
+    by: chosen so the planes are at 0.2 above and below
+  - name: shell-weather-tolerance-density
+    value: 1e-12
+    says: how close the density across a shell is held to the parabola
+    kind: picked
+    by: far below the quarter-step the cases work out
+  - name: shell-weather-tolerance-spans
+    value: 1e-9
+    says: how close the ends of a shell's spans are held to those worked by hand
+    kind: picked
+    by: a billionth, far below any span the cases work out
+  - name: shell-weather-mid-shell
+    value: 120
+    says: the height above the centre of the middle of the shell
+    kind: picked
+    by: the radius, 100, and half of the 10 to 30 the weather fills
+  - name: shell-weather-tick-milliseconds
+    value: 1500
+    says: the time a shell is ticked by, in milliseconds
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-tick-seconds
+    value: 1.5
+    says: the seconds the shell reads after the tick
+    kind: picked
+    by: worked by hand from the 1500 milliseconds
+  - name: shell-weather-patches-tick-seconds
+    value: 2
+    says: the seconds the patchy shell is ticked by to see its patches move
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-patches-sweep-start
+    value: -40.0
+    says: where the line of points the patches are read along begins in x
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-patches-sweep-end
+    value: 40
+    says: where the line of points the patches are read along ends in x
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-patches-sweep-step
+    value: 2.5
+    says: the gap between points on the line the patches are read along
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-spans-far
+    value: 1000
+    says: where the range the shell's spans are cut to ends
+    kind: picked
+    by: past every end the cases work out
+  - name: shell-weather-fizz-radius
+    value: 0.2
+    says: the radius of the whole fizz
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-fizz-height
+    value: 1
+    says: the height of the whole fizz
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-fizz-thick
+    value: 2
+    says: the thickness of the whole fizz
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: shell-weather-fizz-reach
+    value: 0.4
+    says: how far the fizz's box reaches either side in x and z
+    kind: picked
+    by: worked by hand as twice the radius
+  - name: shell-weather-fizz-middle
+    value: 0.1
+    says: the height of the point at the fizz's own middle
+    kind: picked
+    by: chosen to be inside the whole fizz
+  - name: pillars-bench-count
+    value: 3
+    says: how many columns the benchmarks measure
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-height
+    value: 7
+    says: the height of the columns
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-width
+    value: 10
+    says: the width of the columns
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-thick
+    value: 1.6
+    says: the thickness of the columns
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-seed
+    value: 9
+    says: the seed of the columns
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-filaments
+    value: 0.5
+    says: how much of the columns is filaments
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-cycle
+    value: 97
+    says: how many steps the walk of the probe point takes before it repeats
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-across-divisor
+    value: 10
+    says: what the step is divided by to walk across the columns
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-across-offset
+    value: 4.8
+    says: what the walk across the columns is moved back by
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-up-divisor
+    value: 14
+    says: what the step is divided by to walk up the columns
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-along-divisor
+    value: 12
+    says: what the step is divided by to walk along the columns
+    kind: picked
+    by: chosen for the benchmarks
+  - name: pillars-bench-along-offset
+    value: 4
+    says: what the walk along the columns is moved back by
+    kind: picked
+    by: chosen for the benchmarks
+  - name: audit-disc-inner
+    value: 1
+    says: the inner radius of the disc that is asked about points that are no number
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: audit-disc-outer
+    value: 2
+    says: the outer radius of that disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: audit-disc-thick
+    value: 1
+    says: the thickness of that disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: audit-disc-profile-edge
+    value: 1
+    says: the profile of that disc at its first and last rings
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: audit-disc-profile-middle
+    value: 0.5
+    says: the profile of that disc at its middle ring
+    kind: picked
+    by: chosen to differ from the edge rings
+  - name: audit-disc-reach
+    value: 1.5
+    says: how far from the axis the points with one coordinate that is no number are
+    kind: picked
+    by: chosen to be between the disc's inner and outer radius
+  - name: audit-pillars-fewer
+    value: -1
+    says: a count of pillars fewer than none
+    kind: picked
+    by: the nearest count below none
+  - name: audit-pillars-fewest
+    value: -50
+    says: a count of pillars far fewer than none
+    kind: picked
+    by: chosen to be far below none
+  - name: audit-pillars-height
+    value: 10
+    says: the height of the pillars that are none
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: audit-pillars-width
+    value: 20
+    says: the width of the pillars that are none
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: audit-pillars-thick
+    value: 1
+    says: the thickness of the pillars that are none
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: audit-pillars-probe-height
+    value: 5
+    says: the height of the point the pillars that are none are asked about
+    kind: picked
+    by: chosen to be inside the pillars if there were any
+  - name: a-sphere-interval-contracts-radius
+    value: 1
+    says: the radius of the puff the spans are cut from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-sphere-interval-contracts-thick
+    value: 1
+    says: the thickness of the puff the spans are cut from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-grove-10-appearance-contracts-level
+    value: -.5
+    says: the height of the ground at x and z of nought
+    kind: picked
+    by: chosen for the record the grove is held to
+  - name: a-grove-10-appearance-contracts-across-x
+    value: .01
+    says: how much the ground rises for each metre in x
+    kind: picked
+    by: chosen for the record the grove is held to
+  - name: a-grove-10-appearance-contracts-across-z
+    value: .02
+    says: how much the ground falls for each metre in z
+    kind: picked
+    by: chosen for the record the grove is held to
+  - name: a-grove-10-appearance-contracts-tolerance
+    value: 1e-13
+    says: how close the grove's density is held to the authored density
+    kind: picked
+    by: far below the densities the record holds
+  - name: a-grove-10-appearance-contracts-samples
+    value: 486
+    says: how many samples the authored record holds
+    kind: picked
+    by: counted in the record
+  - name: a-grove-20-coverage-contracts-extinction
+    value: .01
+    says: the extinction of the grove's mist, per metre
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-grove-20-coverage-contracts-depth
+    value: 8
+    says: the depth of the grove's mist, in metres above the ground
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-grove-20-coverage-contracts-coordinate
+    value: 40132.0
+    says: the coordinate in x, y and z of the point the density is read at
+    kind: picked
+    by: chosen where the seeds in the file give strong noise peaks
+  - name: a-grove-20-coverage-contracts-ground
+    value: 40128.0
+    says: the height of the level ground, four metres below the point
+    kind: picked
+    by: chosen with the coordinate the seeds are found at
+  - name: a-grove-20-coverage-contracts-radius
+    value: 16
+    says: the radius of the one canopy
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-grove-20-coverage-contracts-tall
+    value: 16
+    says: the height of the one canopy
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-grove-20-coverage-contracts-tolerance
+    value: 1e-15
+    says: how close the grove's density is held to the exact appearance choice
+    kind: picked
+    by: far below the density the filled grove gives
+  - name: a-grove-30-bounds-contracts-extinction
+    value: .008
+    says: the extinction of the grove's mist, per metre
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-grove-30-bounds-contracts-depth
+    value: 8
+    says: the depth of the grove's mist, in metres above the ground
+    kind: picked
+    by: chosen so one metre is an eighth of it
+  - name: a-grove-30-bounds-contracts-radius
+    value: 2
+    says: the radius of the one canopy
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: a-grove-30-bounds-contracts-numerator
+    value: 245.0
+    says: the top of the share of the extinction found one metre above terrain
+    kind: picked
+    by: worked by hand, 256 less the 11 of smoothstep at an eighth
+  - name: a-grove-30-bounds-contracts-denominator
+    value: 256
+    says: the bottom of the share of the extinction found one metre above terrain
+    kind: picked
+    by: worked by hand, the 256 smoothstep at an eighth is over
+  - name: a-grove-30-bounds-contracts-tolerance
+    value: 1e-15
+    says: how close the grove's density is held to the one worked by hand
+    kind: picked
+    by: far below the density the cases give
+  - name: mutants-air-radius
+    value: 10
+    says: the radius of the planet the air test stands round
+    kind: picked
+    by: chosen so the air's top falls on a whole number of heights
+  - name: mutants-air-thick
+    value: 2
+    says: the density of the air at the surface in the air tests
+    kind: picked
+    by: chosen so the density at the top is easy to work by hand
+  - name: mutants-air-past-surface
+    value: 10.5
+    says: a distance from the centre a half past the surface of the air test
+    kind: picked
+    by: chosen as a point just above the surface
+  - name: mutants-air-inside
+    value: 9
+    says: a distance from the centre inside the surface of the air test
+    kind: picked
+    by: chosen as a point just below the surface
+  - name: mutants-air-top
+    value: 13
+    says: the distance from the centre of the top of the air, the radius plus 3
+    kind: picked
+    by: worked by hand from the radius and six heights of a half
+  - name: mutants-air-top-heights
+    value: 6
+    says: the heights of air counted at its top, 3 up over a height of a half
+    kind: picked
+    by: worked by hand from the comment of the test
+  - name: mutants-puff-thick
+    value: 3
+    says: the density at the middle of the puffs in the puff tests
+    kind: picked
+    by: chosen so half of it, 1.5, is exact in binary
+  - name: mutants-puff-wide-radius
+    value: 2
+    says: the radius of the wider puffs in the puff and wispy tests
+    kind: picked
+    by: chosen so one is half way out
+  - name: mutants-wispy-thick-between
+    value: 1.5
+    says: a wispy puff's Thick that is neither one nor a whole number
+    kind: picked
+    by: chosen as a second Thick beside one
+  - name: mutants-wispy-scale
+    value: 3
+    says: a noise scale of a wispy puff beside nought and a half
+    kind: picked
+    by: chosen as a scale above one
+  - name: mutants-wispy-seeds
+    value: 10
+    says: how many seeds the wispy test counts through from nought
+    kind: picked
+    by: chosen as a handful of seeds
+  - name: mutants-wispy-amount
+    value: 0.6
+    says: the share of a wispy puff's half that the noise takes away
+    kind: picked
+    by: chosen so the thinned density is clear of the plain one
+  - name: mutants-giant-radius
+    value: 10
+    says: the radius of the giant of no depth
+    kind: picked
+    by: chosen so a point at nine is just inside the rim
+  - name: mutants-giant-thick
+    value: 4
+    says: the density of the giants in the giant test
+    kind: picked
+    by: chosen as a whole number other than one
+  - name: mutants-giant-near-rim
+    value: 9
+    says: a height up the axis of the giant, inside its radius
+    kind: picked
+    by: chosen as a point toward the rim of the giant
+  - name: mutants-giant-nearer-rim
+    value: 9.99
+    says: a height up the axis of the giant, a hair inside its radius
+    kind: picked
+    by: chosen as a point nearer the rim than the other
+  - name: mutants-plume-height
+    value: 10
+    says: the height of the plumes that are tall in the plume tests
+    kind: picked
+    by: chosen as a height above one
+  - name: mutants-plume-width
+    value: 20
+    says: the width of the plumes that are wide in the plume tests
+    kind: picked
+    by: chosen as a width above one
+  - name: mutants-plume-foot-rise
+    value: 0.001
+    says: the share of a plume's height at which the test reads its axis
+    kind: picked
+    by: chosen as a thousandth, close to the foot
+  - name: mutants-stream-length
+    value: 10
+    says: the length of the jets and tails that are long in the stream tests
+    kind: picked
+    by: chosen as a length above one
+  - name: mutants-stream-base
+    value: 2
+    says: the base width of the jets and tails in the stream tests
+    kind: picked
+    by: chosen so a point at two and a half is a width and a quarter out
+  - name: mutants-stream-thick
+    value: 3
+    says: the density of the jets and tails in the stream tests
+    kind: picked
+    by: chosen so three quarters of it, 2.25, is exact in binary
+  - name: mutants-stream-quarter
+    value: 0.25
+    says: how far up a jet or tail of length one the test reads, a quarter
+    kind: picked
+    by: chosen so the share left, three quarters, is exact in binary
+  - name: mutants-stream-quarter-density
+    value: 2.25
+    says: the density a quarter up a stream of length one, three quarters of 3
+    kind: picked
+    by: worked by hand from the comment of the test
+  - name: mutants-stream-spread
+    value: 0.1
+    says: the spread of the jet and the tail that have no base
+    kind: picked
+    by: chosen as a spread that would widen a base if there were one
+  - name: mutants-jet-from
+    value: 1.5
+    says: where a jet that starts partway along begins
+    kind: picked
+    by: chosen as a start inside the jet's length
+  - name: mutants-jet-from-density
+    value: 2.55
+    says: the density of the jet at its From, 3 times 0.85
+    kind: picked
+    by: worked by hand from the comment of the test
+  - name: mutants-gaussian-exponent
+    value: 12.5
+    says: the exponent of the gaussian at two and a half widths, 2 times 6.25
+    kind: picked
+    by: worked by hand from exp(-2 * 2.5^2)
+  - name: mutants-gaussian-reach
+    value: 2.5
+    says: how many widths out the gaussian still has density
+    kind: picked
+    by: chosen as the reach the test is written to hold
+  - name: mutants-knotted-seeds
+    value: 16
+    says: how many seeds the knotted jet test counts through from nought
+    kind: picked
+    by: chosen as a handful of seeds
+  - name: mutants-knotted-thick
+    value: 2
+    says: the density of the knotted jets at their origin
+    kind: picked
+    by: chosen as a whole number other than one
+  - name: mutants-tolerance-fine
+    value: 1e-15
+    says: the tolerance for a density worked in a handful of steps
+    kind: picked
+    by: chosen a few units in the last place above the working error
+  - name: mutants-tolerance-looser
+    value: 1e-12
+    says: the tolerance for the density of a jet at its start
+    kind: picked
+    by: chosen above the working error of a longer chain of steps
+  - name: mutants-tolerance-finest
+    value: 1e-18
+    says: the tolerance for a gaussian density that is itself near 1e-6 of one
+    kind: picked
+    by: chosen as a share of the gaussian's tiny value
+  - name: mutants-tolerance-coarse
+    value: 1e-3
+    says: the tolerance for a plume's density a thousandth up its axis
+    kind: picked
+    by: chosen to hold the thinning the test's comment names
+  - name: mutants-pillars-count
+    value: 3
+    says: how many columns the standing pillars have
+    kind: picked
+    by: chosen as a few columns, above one
+  - name: mutants-pillars-height
+    value: 10
+    says: the height of the standing pillars
+    kind: picked
+    by: chosen as a height above one
+  - name: mutants-pillars-width
+    value: 20
+    says: the width of the standing pillars
+    kind: picked
+    by: chosen as a width above one
+  - name: mutants-pillars-thick
+    value: 2
+    says: the density of the standing pillars
+    kind: picked
+    by: chosen as a whole number other than one
+  - name: mutants-pillars-seed
+    value: 4
+    says: the seed of the standing pillars
+    kind: picked
+    by: chosen as a seed other than nought
+  - name: mutants-pillars-wall-share
+    value: 0.1
+    says: the share of the height at which the wall is still whole
+    kind: picked
+    by: chosen under the 0.12 the comment of the test names
+  - name: mutants-pillars-fog
+    value: 0.003
+    says: the share of Thick that the fog fills the box with
+    kind: picked
+    by: chosen as the three-thousandth the comment of the test names
+  - name: mutants-pillars-tolerance-fog
+    value: 1e-15
+    says: the tolerance for the fog density in the box test
+    kind: picked
+    by: chosen a few units in the last place above the working error
+  - name: mutants-pillars-base-divisor
+    value: 3.2
+    says: the divisor of the width over the count that gives a column's base
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-tip-scale
+    value: 1.5
+    says: the scale over the base at which the noise at a tip is read
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-noise-seed-offset
+    value: 10
+    says: what is added to the seed for the noise that shifts a column's edge
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-octaves
+    value: 4
+    says: the octaves of noise read at a tip and in the streaks
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-build
+    value: 0.9
+    says: how far, in bases, the noise moves a column's edge
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-edge
+    value: 0.3
+    says: how soft a column's edge is, in bases
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-above-fog
+    value: 0.01
+    says: a tip density above this is counted as standing clear of the fog
+    kind: picked
+    by: chosen a little above the fog of three thousandths
+  - name: mutants-pillars-tolerance-tip
+    value: 1e-6
+    says: the tolerance for the density at a column's tip
+    kind: picked
+    by: chosen above the error of the longer working of the tip
+  - name: mutants-pillars-tip-seeds
+    value: 50
+    says: how many seeds the tip test counts through from nought
+    kind: picked
+    by: chosen to hold the fifty the comment of the test names
+  - name: mutants-pillars-tips-least
+    value: 10
+    says: the fewest tips of the seeds that must stand above the fog
+    kind: picked
+    by: chosen as a fifth of the seeds
+  - name: mutants-pillars-filaments-seed
+    value: 6
+    says: the seed of the pillars in the filaments tests
+    kind: picked
+    by: chosen as the seed under which the streak points were found
+  - name: mutants-pillars-stream-x
+    value: 1
+    says: the hash stream that places a sample along x
+    kind: picked
+    by: chosen as the first of three streams
+  - name: mutants-pillars-stream-y
+    value: 2
+    says: the hash stream that places a sample along y
+    kind: picked
+    by: chosen as the second of three streams
+  - name: mutants-pillars-stream-z
+    value: 3
+    says: the hash stream that places a sample along z
+    kind: picked
+    by: chosen as the third of three streams
+  - name: mutants-pillars-samples
+    value: 4000
+    says: how many points the negative filaments test tries through each column
+    kind: picked
+    by: chosen as a spread through the columns that holds in a moment
+  - name: mutants-pillars-streak-scale
+    value: 3
+    says: the scale over the base at which the streak noise is read
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-streak-stretch
+    value: 3
+    says: how many times the streak noise is stretched along y
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-streak-seed-offset
+    value: 50
+    says: what is added to the noise seed for the streak noise
+    kind: picked
+    by: chosen to match the arithmetic the tests work out
+  - name: mutants-pillars-tolerance-share
+    value: 1e-12
+    says: the tolerance for the density a half of the filaments leave
+    kind: picked
+    by: chosen above the working error of the column's longer chain of steps
+  - name: pillars-exact-base-divisor
+    value: 3.2
+    says: the divisor of the width over the count that gives a column's base
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-seed-x
+    value: 1
+    says: what is added to the seed for the hash that places a column along x
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-seed-z
+    value: 2
+    says: what is added to the seed for the hash that places a column along z
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-seed-height
+    value: 3
+    says: what is added to the seed for the hash of a column's height
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-height-least
+    value: 0.55
+    says: the least share of Height that a column stands
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-height-range
+    value: 0.45
+    says: the share of Height a column's hash may add to the least
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-wall
+    value: 0.2
+    says: the share of Height that the wall along the bottom stands
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-wall-rag
+    value: 0.06
+    says: the share of Height by which noise rags the top of the wall
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-wall-scale
+    value: 3
+    says: the scale over Height at which the wall's noise is read
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-wall-octaves
+    value: 3
+    says: the octaves of noise that rag the wall
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-wall-edge
+    value: 0.08
+    says: the share of Height over which the top of the wall eases
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-taper
+    value: 0.35
+    says: how much of its base a column loses as it rises
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-noise-scale
+    value: 1.5
+    says: the scale over the base at which a column's edge noise is read
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-seed-noise
+    value: 10
+    says: what is added to the seed for a column's edge noise
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-noise-octaves
+    value: 4
+    says: the octaves of noise that rag a column's edge
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-build
+    value: 0.9
+    says: how far, in bases, the noise moves a column's edge
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-edge
+    value: 0.3
+    says: how soft a column's edge is, in bases
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-streak-scale
+    value: 3
+    says: the scale over the base at which the filaments' noise is read
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-streak-stretch
+    value: 3
+    says: how many times the filaments' noise is stretched along y
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-seed-streak
+    value: 50
+    says: what is added to a column's noise seed for the filaments' noise
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-streak-octaves
+    value: 4
+    says: the octaves of noise that draw the filaments
+    kind: picked
+    by: written out a second way beside the library's, to be compared with it
+  - name: pillars-exact-source-seed
+    value: 20260910
+    says: the seed of the random source that seeds each probe
+    kind: picked
+    by: chosen so the points the probes draw are the same on every run
+  - name: pillars-exact-points
+    value: 2000
+    says: how many points each probe draws
+    kind: picked
+    by: chosen as a spread through the box that holds in a moment
+  - name: pillars-exact-goroutines
+    value: 3
+    says: how many probes run at once on each pillars
+    kind: picked
+    by: chosen as more than one, to meet a shared value from many goroutines
+  - name: pillars-exact-across
+    value: 1.2
+    says: how far past its width a probe may draw a point across, as a share
+    kind: picked
+    by: chosen so some points fall outside the box
+  - name: pillars-exact-upward
+    value: 1.1
+    says: how far past its height a probe may draw a point up, as a share
+    kind: picked
+    by: chosen so some points fall above the box
+  - name: pillars-exact-probe-x
+    value: 0.3
+    says: the x of the point where a prepared value's density is checked
+    kind: picked
+    by: chosen as a point inside the box
+  - name: pillars-exact-probe-y
+    value: 1.2
+    says: the y of the point where a prepared value's density is checked
+    kind: picked
+    by: chosen as a point inside the box
+  - name: pillars-exact-probe-z
+    value: -0.4
+    says: the z of the point where a prepared value's density is checked
+    kind: picked
+    by: chosen as a point inside the box
+  - name: pillars-exact-thick-small
+    value: 0.1
+    says: a Thick tried beside nought and a large one
+    kind: picked
+    by: chosen as a small density
+  - name: pillars-exact-thick-large
+    value: 5
+    says: a Thick tried beside nought and a small one
+    kind: picked
+    by: chosen as a large density
+  - name: pillars-exact-filaments-some
+    value: 0.3
+    says: a Filaments tried between nought and one
+    kind: picked
+    by: chosen as part of the streaks
+  - name: a-grove-00-domain-contracts-buckets-per-tree
+    value: 9
+    says: the most canopy buckets a tree may be indexed into, a three by three
+    kind: picked
+    by: chosen as the bound a canopy of the grove's cell size may reach
+  - name: a-grove-00-domain-contracts-thin-depth
+    value: .1
+    says: the depth of the thin layer that a broad canopy is tried under
+    kind: picked
+    by: chosen as a layer thin beside the canopy
+  - name: a-grove-00-domain-contracts-finest
+    value: 2
+    says: the finest cell of the grove of the short and the tall canopy
+    kind: picked
+    by: worked by hand from the short canopy's radius
+  - name: a-grove-00-domain-contracts-smooth-numerator
+    value: 5.0
+    says: the numerator of the smoothstep at a quarter, 5 over 32
+    kind: picked
+    by: worked by hand from the comment of the test
+  - name: a-grove-00-domain-contracts-smooth-denominator
+    value: 32
+    says: the denominator of the smoothstep at a quarter, 5 over 32
+    kind: picked
+    by: worked by hand from the comment of the test
+  - name: a-grove-00-domain-contracts-tolerance
+    value: 1e-15
+    says: the tolerance for a density worked in a handful of steps
+    kind: picked
+    by: chosen a few units in the last place above the working error
+  - name: a-grove-00-domain-contracts-taper-height
+    value: 4
+    says: the height at which the taper is read, half way up the mist
+    kind: picked
+    by: worked by hand as half of the grove's depth
+  - name: grove-rounded-boundary-contracts-tall-height
+    value: 10
+    says: the height of the canopy at the rounded coordinate
+    kind: picked
+    by: chosen so the mist at four metres is half of the extinction
+  - name: grove-rounded-boundary-contracts-centre-density
+    value: 0.005
+    says: the density at the canopy's centre, half of the weather's 0.01
+    kind: picked
+    by: worked by hand from the comment of the test
+  - name: grove-contract-across
+    value: 20
+    says: how many trees the grid has along each side, for four hundred in all
+    kind: picked
+    by: chosen as the four hundred trees the comment of the test names
+  - name: grove-contract-spacing
+    value: 10.0
+    says: the distance between neighbouring trees of the grid
+    kind: picked
+    by: chosen wider than a canopy so there is clear air between them
+  - name: grove-contract-canopy-radius
+    value: 2.0
+    says: the radius of each canopy of the grid
+    kind: picked
+    by: chosen narrower than half the spacing
+  - name: grove-contract-canopy-height
+    value: 8.0
+    says: the height of each canopy of the grid
+    kind: picked
+    by: chosen above the height at which the tests read the mist
+  - name: grove-contract-extinction
+    value: 0.1
+    says: the extinction of the mist of the grid
+    kind: picked
+    by: chosen as an ordinary mist
+  - name: grove-contract-shallow-mist
+    value: 5.0
+    says: the depth of the shallow mist
+    kind: picked
+    by: chosen as a depth shallower than a canopy is high
+  - name: grove-contract-deep-mist
+    value: 1000.0
+    says: the depth of the deep mist
+    kind: picked
+    by: chosen as a depth far above the canopies
+  - name: grove-contract-lobe-sample
+    value: 0.7
+    says: an asymmetry of the scattering lobe the grove is asked to say
+    kind: picked
+    by: chosen as a forward lobe inside the range of minus one to one
+  - name: grove-contract-nearby-limit
+    value: 4
+    says: the most trees a query may visit, a handful
+    kind: picked
+    by: chosen as the trees of the cells that touch a point
+  - name: grove-contract-height-in-mist
+    value: 1.0
+    says: a height inside the mist and the canopies at which the tests read
+    kind: picked
+    by: chosen as a height above the ground and below the canopy tops
+  - name: grove-contract-query-row
+    value: 5
+    says: the row of the grid at which the visit count is read
+    kind: picked
+    by: chosen as a row inside the grid
+  - name: grove-contract-query-column
+    value: 7
+    says: the column of the grid at which the visit count is read
+    kind: picked
+    by: chosen as a column inside the grid
+  - name: grove-contract-under-row
+    value: 3
+    says: the row of the grid whose tree the mist is read under
+    kind: picked
+    by: chosen as a row inside the grid
+  - name: grove-contract-under-column
+    value: 4
+    says: the column of the grid whose tree the mist is read under
+    kind: picked
+    by: chosen as a column inside the grid
+  - name: clear-cloud-field-radius
+    value: 2
+    says: the radius of the field a clear cloud wraps in the wrapping test
+    kind: picked
+    by: chosen so a point at four is outside it
+  - name: clear-cloud-field-thick
+    value: 3
+    says: the density at the middle of the field a clear cloud wraps
+    kind: picked
+    by: chosen as a whole number other than one
+  - name: clear-cloud-outside-reach
+    value: 4
+    says: the distance from the middle at which the wrapped field has no density
+    kind: picked
+    by: chosen as twice the radius of the field
+  - name: clear-cloud-phase-field-radius
+    value: 2
+    says: the radius of the field a clear cloud takes a phase asymmetry in
+    kind: picked
+    by: chosen as an ordinary radius
+  - name: clear-cloud-phase-field-thick
+    value: 3
+    says: the density at the middle of the field the phase is tried on
+    kind: picked
+    by: chosen as a whole number other than one
+  - name: clear-cloud-phase-retreating
+    value: -.9
+    says: a phase asymmetry that scatters mostly back, inside minus one
+    kind: picked
+    by: chosen as a back lobe a little short of the limit
+  - name: clear-cloud-phase-forward
+    value: .8
+    says: a phase asymmetry that scatters mostly forward, inside one
+    kind: picked
+    by: chosen as a forward lobe a little short of the limit
+  - name: clear-cloud-phase-tick-seconds
+    value: 2
+    says: the whole seconds the cloud is ticked to
+    kind: picked
+    by: chosen as a time after the start
+  - name: clear-cloud-phase-ticked-density
+    value: 3
+    says: the density of the field ticked to two seconds, one more than them
+    kind: picked
+    by: worked by hand from the field's one more than the seconds
+  - name: layer-asymmetry-box-edge
+    value: 5
+    says: the distance from the middle of each face of the box the layers fill
+    kind: picked
+    by: chosen as a box of ten across
+  - name: layer-asymmetry-extinction
+    value: .05
+    says: the extinction of the mist of the layers
+    kind: picked
+    by: chosen as an ordinary mist
+  - name: layer-asymmetry-depth
+    value: 10
+    says: the depth of the mist of the layers
+    kind: picked
+    by: chosen as the height of the box
+  - name: layer-asymmetry-ground
+    value: -10
+    says: the height of the ground below the box of the layers
+    kind: picked
+    by: chosen as ground clear below the box
+  - name: layer-asymmetry-deck-level
+    value: -5
+    says: the height of the deck, at the foot of the box
+    kind: picked
+    by: chosen as the lower face of the box
+  - name: layer-asymmetry-forward
+    value: 0.85
+    says: an asymmetry that scatters mostly forward, inside one
+    kind: picked
+    by: chosen as a forward lobe inside the range of minus one to one
+  - name: layer-asymmetry-backward
+    value: -0.4
+    says: an asymmetry that scatters somewhat back, inside minus one
+    kind: picked
+    by: chosen as a back lobe inside the range of minus one to one
+  - name: density-property-least
+    value: 0.05
+    says: the least size the properties draw for a field
+    kind: picked
+    by: chosen as a size above nought
+  - name: density-property-most
+    value: 20.0
+    says: the greatest size the properties draw for a field
+    kind: picked
+    by: chosen as a size larger than the least by far
+  - name: density-property-reach
+    value: 60.0
+    says: the furthest from the origin the properties draw a point
+    kind: picked
+    by: chosen as a few times the greatest size
+  - name: density-property-ratio
+    value: 1.0
+    says: the share of a whole the properties draw a dressing up to
+    kind: picked
+    by: chosen as the whole of a dressing
+  - name: density-property-seconds
+    value: 30
+    says: the most seconds the properties tick a medium to
+    kind: picked
+    by: chosen as a time long enough to move a field
+  - name: density-property-counts
+    value: 12
+    says: the most columns or entries the properties draw for a count
+    kind: picked
+    by: chosen as a few more than the stack buffer of eight
+  - name: box-span-edge
+    value: 1
+    says: how far the box-only medium's box reaches from the origin on each axis
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: box-span-density
+    value: 1
+    says: the density the box-only medium has everywhere
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: box-span-ray-start
+    value: 2
+    says: how far up the axis the ray starts, outside the box
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: box-span-far
+    value: 10
+    says: the far end of the span asked for, beyond the box
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: box-span-enter
+    value: 1
+    says: how far along the ray the box is entered, worked by hand from the start and the edge
+    kind: picked
+    by: worked by hand from the ray's start and the box's edge
+  - name: box-span-leave
+    value: 3
+    says: how far along the ray the box is left, worked by hand from the start and the edge
+    kind: picked
+    by: worked by hand from the ray's start and the box's edge
+  - name: clouds-radius
+    value: 10
+    says: the radius of the body the layer of cloud sits over
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-low
+    value: 0.5
+    says: how far above the body the layer begins
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-high
+    value: 1.5
+    says: how far above the body the layer ends
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-cover
+    value: 0.5
+    says: the share of the sky the clouds are asked to cover, a half
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-thick
+    value: 1
+    says: the density of the cloud at its thickest
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-seed
+    value: 3
+    says: the seed of the cloud's noise
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-below-layer
+    value: 10.2
+    says: a distance from the middle that is under the layer's bottom
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-above-layer
+    value: 11.6
+    says: a distance from the middle that is over the layer's top
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-samples
+    value: 400
+    says: how many directions over the sphere are sampled
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-body-height
+    value: 10.8
+    says: a distance from the middle that is low in the layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-top-height
+    value: 11.45
+    says: a distance from the middle that is near the top of the layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-share-least
+    value: 0.55
+    says: the least share of the sphere a cover of a half may cloud
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-share-most
+    value: 0.8
+    says: the most share of the sphere a cover of a half may cloud
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-scatter-seed-x
+    value: 1
+    says: the seed of the hash the scattered direction's x is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-scatter-seed-y
+    value: 2
+    says: the seed of the hash the scattered direction's y is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clouds-scatter-seed-z
+    value: 3
+    says: the seed of the hash the scattered direction's z is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-radius
+    value: 10
+    says: the radius of the body the layer of cloud sits over
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-thick
+    value: 1
+    says: the density of the cloud at its thickest
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-low
+    value: 0.5
+    says: how far above the body the layer begins
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-high
+    value: 1.5
+    says: how far above the body the layer ends
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-full-cover
+    value: 1
+    says: a cover of the whole sky, so most of it is patch
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-whole-height
+    value: 10.7
+    says: a distance from the middle at which a patch is looked for
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-bottom-height
+    value: 10.5
+    says: the distance from the middle of the very bottom of the layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-top-height
+    value: 11.5
+    says: the distance from the middle of the very top of the layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-thin-share
+    value: 0.15
+    says: the share of a patch that is left at the very top of the layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-tolerance
+    value: 1e-12
+    says: how far apart two densities may be and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-seeds
+    value: 60
+    says: how many seeds the layer is tried with
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-patches-least
+    value: 50
+    says: the fewest patches the seeds and axes together must show
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-bare-seed
+    value: 10
+    says: the seed of the layer whose cover is nought
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-samples
+    value: 400
+    says: how many directions over the sphere are sampled
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-bare-height
+    value: 10.8
+    says: a distance from the middle that is inside the layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-thin-edge
+    value: 1
+    says: the one distance above the body at which a layer of no thickness begins and ends
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-clouds-thin-height
+    value: 11
+    says: the distance from the middle of a layer of no thickness
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: sediment-peak-extinction
+    value: .2
+    says: the extinction a plume has at its peak, the one it was made with
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: sediment-tolerance
+    value: 1e-12
+    says: how far apart two extinctions may be and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: sediment-henyey-greenstein-asymmetry
+    value: .6
+    says: the asymmetry of the phase function the plume is wrapped in
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: sediment-joined-extinction
+    value: .3
+    says: the extinction a wrapped plume has at its midpoint, the one it was made with
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-fade
+    value: 0.45
+    says: where the fade of a wake's gas starts, as a share of its reach
+    kind: picked
+    by: the number the library's constant is written as
+  - name: wake-swept
+    value: 0.55
+    says: where a wake's swept channel starts, as a share of its clear
+    kind: picked
+    by: the number the library's constant is written as
+  - name: wake-ridge-width
+    value: 0.3
+    says: the width of the ridge at the channel's edge, as a share of the clear
+    kind: picked
+    by: the number the library's constant is written as
+  - name: wake-ridge-bank
+    value: 2.2
+    says: how high the ridge at the channel's edge stands over the swept gas
+    kind: picked
+    by: the number the library's constant is written as
+  - name: wake-lift
+    value: 3
+    says: the lift of the cube of the raggedness
+    kind: picked
+    by: the number the library's constant is written as
+  - name: wake-points-seed-reach
+    value: 1
+    says: the seed of the hash a seeded point's distance is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-points-seed-cos
+    value: 2
+    says: the seed of the hash a seeded point's cosine is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-points-seed-turn
+    value: 3
+    says: the seed of the hash a seeded point's turn is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-points-beyond
+    value: 1.3
+    says: how far past a wake's reach a seeded point may be
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-points-around
+    value: 40
+    says: how many points are taken around each path of a wake
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-identity-points
+    value: 20000
+    says: how many seeded points a wake and its longhand are compared at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-identity-gas-least
+    value: 1000
+    says: the fewest of those points that must have gas
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-identity-rays
+    value: 5000
+    says: how many rays a wake and its longhand are compared on
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-seed-start-x
+    value: 11
+    says: the seed of the hash a ray's start x is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-seed-start-y
+    value: 12
+    says: the seed of the hash a ray's start y is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-seed-start-z
+    value: 13
+    says: the seed of the hash a ray's start z is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-seed-dir-x
+    value: 14
+    says: the seed of the hash a ray's direction x is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-seed-dir-y
+    value: 15
+    says: the seed of the hash a ray's direction y is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-seed-dir-z
+    value: 16
+    says: the seed of the hash a ray's direction z is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-seed-near
+    value: 17
+    says: the seed of the hash a ray's near end is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-spread
+    value: 3
+    says: how many reaches wide the rays' starts are spread
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-ray-far
+    value: 4
+    says: the far end of each ray's span, in reaches
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-refusal-grain-seed
+    value: 1
+    says: the seed of the grain a refused wake is given
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-refusal-grain-scale
+    value: 10
+    says: the scale of the grain a refused wake is given
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-refusal-grain-octaves
+    value: 2
+    says: the octaves of the grain a refused wake is given
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-refusal-path-radius
+    value: 5
+    says: the radius of the path a refused wake is given
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-reach
+    value: 30.0
+    says: the reach of the wake the properties are drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-clear
+    value: 4.0
+    says: the clear of the wake the properties are drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-path
+    value: 12.0
+    says: the radius of the one path of the wake the properties are drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-scale
+    value: 50.0
+    says: the most a grain's scale is drawn to
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-least
+    value: 0.5
+    says: the least a grain's scale is drawn from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-thick
+    value: 10.0
+    says: the most the gas's thick is drawn to
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-beyond
+    value: 1.5
+    says: how many reaches from the middle a point is drawn within
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-octaves
+    value: 1
+    says: the octaves of the grain, the noise that can pass one
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-points
+    value: 2000
+    says: how many points are searched for gas inside the wake
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-behind
+    value: 2
+    says: how many reaches behind the middle a ray starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-third
+    value: 3
+    says: the part of a reach a slanting ray's start is along x
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-fifth
+    value: 5
+    says: the part of a reach a slanting ray's start is along y
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-far
+    value: 4
+    says: the far end of each ray's span, in reaches
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-miss-height
+    value: 2
+    says: how many reaches above the middle the ray that misses passes
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: wake-contract-ball-thick
+    value: 1
+    says: the thick of the puff a wake's span is held to
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-puff-walk-start
+    value: 0.1
+    says: the first radius the density is walked at, going out from the middle
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-puff-walk-step
+    value: 0.1
+    says: how far each step of the walk out from the middle goes
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-puff-walk-fall
+    value: 0.4
+    says: the most the density may fall in one step of the walk
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-puff-ray-start
+    value: 5
+    says: how far up the axis the ray through the middle starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-stride
+    value: 0.03
+    says: how far apart along x the wispy medium is sampled
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-height
+    value: 0.2
+    says: the y at which the wispy medium is sampled
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-depth
+    value: -0.1
+    says: the z at which the wispy medium is sampled
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-tolerance
+    value: 1e-12
+    says: how far over the puff's density a wisp may be
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-resolution
+    value: 1000
+    says: how finely the wisps' share of the puff is told apart
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-samples
+    value: 50
+    says: how many places the wispy medium is sampled
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-varied-least
+    value: 10
+    says: the fewest different shares the wisps must show
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-wispy-outside
+    value: 5
+    says: a distance out along x that is outside the puff
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-giant-above
+    value: 10.5
+    says: a distance out along x that is above the giant's top
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-giant-below
+    value: 8
+    says: a distance along y that is well below the giant's top
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-giant-rise
+    value: 9.5
+    says: a distance along z that is halfway down the giant's rise
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-span-height
+    value: 5
+    says: how high above the middle the ray down the axis starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-span-tolerance
+    value: 1e-12
+    says: how far apart two ends of a span may be and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-span-enter
+    value: 3
+    says: how far along the ray the ball is entered, worked by hand from the height and the radius
+    kind: picked
+    by: worked by hand from the ray's height and the ball's radius
+  - name: medium-span-leave
+    value: 7
+    says: how far along the ray the ball is left, worked by hand from the height and the radius
+    kind: picked
+    by: worked by hand from the ray's height and the ball's radius
+  - name: medium-span-corner
+    value: 1.9
+    says: the x and z of the ray that passes through the box's corner and misses the ball
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-jet-seconds
+    value: 3
+    says: how many seconds the jet is ticked
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-jet-station
+    value: 20
+    says: how far up the jet its density is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: medium-jet-widths-back
+    value: 3
+    says: how many base widths back the knot was, at the flow of one a second
+    kind: picked
+    by: worked by hand from the flow and the seconds
+  - name: medium-jet-station-back
+    value: 14
+    says: how far up the jet the knot was before, worked by hand from the station and the widths back
+    kind: picked
+    by: worked by hand from the station and the widths back
+  - name: medium-jet-tolerance
+    value: 1e-9
+    says: how far apart two knot patterns may be and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-shaft-rate
+    value: 5
+    says: the shaft's turns each second at three hundred revolutions a minute
+    kind: picked
+    by: worked by hand from the configuration's revolutions a minute
+  - name: propeller-cavitation-passage-blades
+    value: 5
+    says: the blades whose passages make the blade-passage period
+    kind: picked
+    by: the standard configuration's blade count
+  - name: propeller-cavitation-two-turns
+    value: 8
+    says: a distance downstream, in metres, of two full turns of the helix
+    kind: picked
+    by: worked by hand from the slipstream and the shaft rate
+  - name: propeller-cavitation-lower-share
+    value: 0.999
+    says: the share of a density below which two densities differ
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-upper-share
+    value: 1.001
+    says: the share of a density above which two densities differ
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-later-divisor
+    value: 20
+    says: the part of a second the field is ticked by, to see it move
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-near-station
+    value: 0.5
+    says: a distance downstream, in metres, near the rotor
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-far-station
+    value: 8.5
+    says: a distance downstream, in metres, at the same rotor phase as the near one
+    kind: picked
+    by: worked by hand from the slipstream and the shaft rate
+  - name: propeller-cavitation-past-end
+    value: 0.01
+    says: how far past the end of the active length a point is taken
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-recovered-length
+    value: 10
+    says: the active length that the deficit and recovery of the recovery configuration give
+    kind: picked
+    by: worked by hand from the deficit and the recovery
+  - name: propeller-cavitation-filament-blade
+    value: 2
+    says: the blade whose filament is followed
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-filament-from
+    value: 10
+    says: the distance downstream at which the filament is first found
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-filament-to
+    value: 15
+    says: the distance downstream at which the filament is found after the time
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-travel-seconds
+    value: 0.25
+    says: the time the filament is followed for
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-travel-tolerance
+    value: 1e-12
+    says: how far apart two filament centres may be and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-probe-x
+    value: 2
+    says: the x of the point the silent field is asked its density at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-probe-z
+    value: 5
+    says: the z of the point the silent field is asked its density at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-support-widths
+    value: 3
+    says: how many core widths a filament's compact support reaches
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-support-margin
+    value: 0.001
+    says: how far beyond the support the point is taken
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-fragment-start
+    value: 10
+    says: the distance downstream the samples down a filament begin at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-fragment-divisor
+    value: 10
+    says: how many samples make a metre down a filament
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-fragment-samples
+    value: 80
+    says: how many samples are taken down a filament
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-fragment-distance
+    value: 11
+    says: the distance downstream of the packet whose advection is followed
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-fragment-seconds
+    value: .25
+    says: the time the packet is followed for
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-cavitation-fragment-tolerance
+    value: 1e-10
+    says: how far apart two faded densities may be and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-wander
+    value: 1.2
+    says: the amplitude of the centreline meander, in metres
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-wander-scale
+    value: 3
+    says: the length scale of the centreline meander, in metres
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-spread-start
+    value: 4
+    says: how far downstream the radial spread starts, in metres
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-spread-per
+    value: .08
+    says: how much the radius widens each metre past the start of the spread
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-station
+    value: 10
+    says: the distance downstream a filament's centre is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-displacement-least
+    value: 1e-5
+    says: the least a wandered centre may be displaced for it not to be symmetric
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-convected-blade
+    value: 2
+    says: the blade whose meander is followed with the slipstream
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-later-station
+    value: 30
+    says: the distance downstream the meander is found at after one second
+    kind: picked
+    by: worked by hand from the station and the slipstream speed
+  - name: propeller-dispersal-convection-tolerance
+    value: 1e-9
+    says: how far apart two meander offsets may be and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-axis-x
+    value: .31
+    says: the x of the tilted axis the support is held to the bounds on
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-axis-y
+    value: .56
+    says: the y of the tilted axis the support is held to the bounds on
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-axis-z
+    value: .77
+    says: the z of the tilted axis the support is held to the bounds on
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-support-steps
+    value: 200
+    says: how many steps down the active length the support is checked at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-support-widths
+    value: 3
+    says: how many widths a filament's compact support reaches
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-bound-slack
+    value: 1e-9
+    says: how far past the bounds a point may be and still be within them
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-single-blade
+    value: 1
+    says: the blades of the field the spread is compared on
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-quadrature-half
+    value: 6
+    says: half the side of the square the density is summed over, in metres
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-quadrature-step
+    value: .02
+    says: the side of each cell of the sum, in metres
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-section-station
+    value: 8
+    says: the distance downstream of the cross section that is summed
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-dilution-tolerance
+    value: .005
+    says: the share by which the two sums may differ and still be the same
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-outside-offset
+    value: .8
+    says: how far from a filament's centre a point is outside the unspread support
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-omitted-wander-scale
+    value: 3
+    says: a wander scale given with no wander to use it
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-omitted-spread-start
+    value: 5
+    says: a spread start given with no spread to use it
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-ring-radius
+    value: 3
+    says: the radius of the ring the density is compared around
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-rise-period
+    value: 200
+    says: how many samples the rise along the axis takes to start again
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-rise-divisor
+    value: 10
+    says: how many steps of the rise make a metre along the axis
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: propeller-dispersal-samples
+    value: 1000
+    says: how many points the density is compared at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-radius
+    value: 10
+    says: the radius of the air's surface in the air test
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-scale-height
+    value: 0.5
+    says: how far up the test's air thins by a factor of e
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-surface-density
+    value: 2
+    says: the density of the test's air at its surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-tolerance
+    value: 1e-12
+    says: how close the air's density and span must be to the worked value
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-scale-height-up-x
+    value: 10.5
+    says: the x of a point one scale height above the surface
+    kind: picked
+    by: worked by hand from the radius and the scale height
+  - name: air-underground-x
+    value: 9
+    says: the x of a point below the surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-past-top-margin
+    value: 0.01
+    says: how far past the air's top the point for no air lies
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-ray-start
+    value: 20
+    says: the height a ray straight down starts at, above the air's top
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: air-top-radius
+    value: 13
+    says: the radius of the air's top, the radius plus six scale heights
+    kind: picked
+    by: worked by hand from the radius, the scale height and the reach
+  - name: tail-length
+    value: 10
+    says: the length of the test's straight tail
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-spread
+    value: 0.1
+    says: how far the test's tail spreads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-head-height
+    value: 0.1
+    says: the height of a point just above the tail's head
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-head-density-least
+    value: 0.98
+    says: the least density the tail has at its head
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-end-height
+    value: 9.9
+    says: the height of a point just before the tail's end
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-end-density-most
+    value: 0.02
+    says: the most density the tail has at its end
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-beyond-height
+    value: 11
+    says: the height of a point past the tail's end
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-curve
+    value: 0.3
+    says: how far the bent tail curves toward x
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-bend-height
+    value: 9.8
+    says: the height near the end of the tail where the bend is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-bend-shift
+    value: 3
+    says: how far the bent tail's middle has moved toward x at its end
+    kind: picked
+    by: worked by hand from the curve and the length
+  - name: tail-bend-share
+    value: 0.98
+    says: the share of the bend's shift reached at the height read
+    kind: picked
+    by: worked by hand from the height read and the length
+  - name: tail-ray-middle
+    value: 20
+    says: how far along the test's ray the tail's middle lies
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-ray-height
+    value: 5
+    says: the height a ray across the tail's middle runs at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-ray-far
+    value: 40
+    says: how far along the ray across the tail it is followed
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: tail-span-widest
+    value: 8
+    says: the widest span a ray across the bent tail may have
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-height
+    value: 10
+    says: the height of the test's plume
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-width
+    value: 20
+    says: the width of the test's plume umbrella
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-foot-height
+    value: 1
+    says: the height of a point in the column's foot
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-foot-density-least
+    value: 0.9
+    says: the least density the plume has in its foot
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-dome-out
+    value: 8.66
+    says: how far out from the axis the dome is read, halfway up
+    kind: picked
+    by: worked by hand from the plume's width and height
+  - name: plume-dome-density-least
+    value: 0.3
+    says: the least density the plume has at its dome
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-under-out
+    value: 3
+    says: how far out from the axis a point under the dome is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-under-density-most
+    value: 0.01
+    says: the most density the plume has under its dome
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-over-height
+    value: 11
+    says: the height of a point above the plume's top
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-below-depth
+    value: 1
+    says: how far below the plume's foot a point is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: plume-bounds-edge
+    value: 14.5
+    says: how far out the plume's box reaches along x and z
+    kind: picked
+    by: worked by hand from the shell, three skins of one and a half
+  - name: plume-tolerance
+    value: 1e-12
+    says: how close the plume's box must be to the worked edge
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-radius
+    value: 0.2
+    says: the radius of the test's fizz at its foot
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-height
+    value: 1
+    says: the height of the test's fizz column
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-thick
+    value: 2
+    says: the density of the test's fizz at its foot
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-rise
+    value: 0.1
+    says: how fast the bubbles of the churned fizz rise
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-churn
+    value: 0.8
+    says: how much the churned fizz churns
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-seed
+    value: 7
+    says: the seed of the churned fizz
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-foot-height
+    value: 0.01
+    says: the height of a point in the fizz's foot
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-high-height
+    value: 0.8
+    says: the height of a point high in the fizz's column
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-below-depth
+    value: 0.01
+    says: how far below the fizz's foot a point is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-above-height
+    value: 1.01
+    says: the height of a point above the fizz's top
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-outside-out
+    value: 0.5
+    says: how far out from the axis a point outside the column is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-outside-height
+    value: 0.1
+    says: the height of the point outside the column
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-flank-out
+    value: 0.25
+    says: how far out, beyond the foot's radius, the column's flank is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-flank-low
+    value: 0.05
+    says: the low height at which the flank holds no bubbles
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-flank-high
+    value: 0.5
+    says: the high height at which the flank holds bubbles
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-point-x
+    value: 0.05
+    says: the x of the point the churn is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-point-y
+    value: 0.3
+    says: the y of the point the churn is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-point-z
+    value: 0.02
+    says: the z of the point the churn is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: fizz-churn-seconds
+    value: 3
+    says: how many seconds the churn is given
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-radius
+    value: 10
+    says: the radius of the base of the test aurora's shell
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-low
+    value: 0.2
+    says: how far up from the radius the aurora's shell begins
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-high
+    value: 0.6
+    says: how far up from the radius the aurora's shell ends
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-latitude-degrees
+    value: 67
+    says: the latitude of the aurora's oval, in degrees
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-width-degrees
+    value: 4
+    says: the width of the aurora's oval, in degrees
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-seed
+    value: 3
+    says: the seed of the test aurora's curtains
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-longitude
+    value: 0.5
+    says: the longitude, in radians, the oval is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-bottom-up
+    value: 0.26
+    says: how far above the radius the bottom of the glow is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-north-least
+    value: 0.6
+    says: the least density the oval has at its bottom
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-tolerance
+    value: 1e-9
+    says: how close the north and south ovals must be
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-equator-up
+    value: 0.25
+    says: how far above the radius the equator is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-under-up
+    value: 0.1
+    says: how far above the radius a point below the shell is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-top-up
+    value: 0.55
+    says: how far above the radius the top of the glow is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-top-share
+    value: 0.3
+    says: the most the top's density may be of the bottom's
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-curtains
+    value: 0.8
+    says: how strongly curtains vary the oval
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-low-start
+    value: 10
+    says: a density above any the oval has, to start a search for its least
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-turn
+    value: 6.28
+    says: how far round the oval, in radians, the curtains are walked
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: aurora-step
+    value: 0.05
+    says: the step, in radians, of the walk round the oval
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-length
+    value: 4
+    says: the length of the test's jet
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-base
+    value: .2
+    says: the base width of the test's jet
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-spread
+    value: .25
+    says: how far the test's jet spreads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-witness-x
+    value: 1.4
+    says: how far out from the axis a point in the jet's skirt is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-witness-y
+    value: 3
+    says: how far along the jet the skirt point is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-ray-back
+    value: 4
+    says: how far before the skirt point a ray across it starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-ray-far
+    value: 8
+    says: how far along the ray across the skirt point is followed
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-height-share
+    value: .75
+    says: the share of the jet's length at which the recorded jets are read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-skirt-reach
+    value: 2.5
+    says: how many widths out the second radius in the skirt lies
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-tolerance
+    value: 1e-14
+    says: how close the jet's density must be to the Gaussian
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-back-widths
+    value: 4
+    says: how many outer widths before the skirt a ray across it starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-bounds-regression-far-widths
+    value: 8
+    says: how many outer widths along the ray across the skirt is followed
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-length
+    value: 10
+    says: the length of the test's jet
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-spread
+    value: 0.1
+    says: how far the test's jet spreads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-base-height
+    value: 0.1
+    says: the height of a point just above the jet's base
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-base-density-least
+    value: 0.98
+    says: the least density the jet has at its base
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-middle-height
+    value: 5
+    says: the height halfway along the jet, up and down
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-middle-density-least
+    value: 0.45
+    says: the least density the jet has halfway along
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-middle-density-most
+    value: 0.55
+    says: the most density the jet has halfway along
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-end-height
+    value: 9.9
+    says: the height of a point just before the jet's end
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-end-density-most
+    value: 0.02
+    says: the most density the jet has at its end
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-beyond-height
+    value: 11
+    says: the height of a point past the jet's end
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-side-out
+    value: 5
+    says: how far out from the axis a point well outside the jet is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-side-most
+    value: 1e-6
+    says: the most density the jet has well outside its cone
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-ray-middle
+    value: 20
+    says: how far along the side-on ray the jet's axis lies
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-ray-far
+    value: 40
+    says: how far along the side-on ray is followed
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-span-widest
+    value: 6
+    says: the widest span a side-on ray through the upper cone may have
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-over-height
+    value: 12
+    says: the height of a ray passing over the jet
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-from
+    value: 2
+    says: how far from the origin the test's jet starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-before-height
+    value: 1
+    says: how far from the origin a point before the jet's start is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-after-height
+    value: 2.5
+    says: the height of a point after the jet's start
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-knots
+    value: 0.8
+    says: how strongly knots bunch the test's jet
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-knots-first
+    value: 1.0
+    says: the height the walk up the knotted jet starts at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-knots-top
+    value: 9.0
+    says: the height the walk up the knotted jet stops short of
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-knots-step
+    value: 0.25
+    says: the step of the walk up the knotted jet
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: jet-knots-wander-least
+    value: 1.5
+    says: the least the knots' factor must wander in total up the jet
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-count
+    value: 3
+    says: how many pillars the test's pillars have
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-height
+    value: 10
+    says: the height of the test's pillars
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-width
+    value: 10
+    says: the width of the test's pillars
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-seed
+    value: 4
+    says: the seed of the test's pillars
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-dense
+    value: 0.9
+    says: the density above which gas counts as dense
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-thin
+    value: 0.02
+    says: the density below which gas counts as thin
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-wall-x
+    value: 2
+    says: the x of a point in the wall along the bottom
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-wall-y
+    value: 0.5
+    says: the height of a point in the wall along the bottom
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-wall-z
+    value: 2
+    says: the z of a point in the wall along the bottom
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-half-height
+    value: 5
+    says: half the height of the pillars, where the row of columns is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-columns-least
+    value: 5
+    says: the fewest dense points along the row at half height
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-fog-least
+    value: 40
+    says: the fewest thin points along the row at half height
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-top-height
+    value: 9.95
+    says: the height of a point just below the pillars' top
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-below-depth
+    value: 1
+    says: how far below the pillars' base a point is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-outside-out
+    value: 6
+    says: how far out from the axis a point beyond the box is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-box-half-width
+    value: 5
+    says: half the width of the box the pillars fill
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-row-start
+    value: -4.9
+    says: where the walk along the row at half height starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-row-step
+    value: 0.1
+    says: the step of the walk along the row at half height
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-under-tip
+    value: 1.5
+    says: how far under a tip the gas is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-tip-gas-least
+    value: 0.3
+    says: the least density the pillars have under a tip
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-filaments
+    value: 0.8
+    says: how strongly filaments streak the streaked pillars
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-column-start
+    value: 1.0
+    says: the height the walk up a column starts at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-column-step
+    value: 0.2
+    says: the step of the walk up a column
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-dense-points-least
+    value: 10
+    says: the fewest dense points up a column
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-filaments-high-least
+    value: 0.8
+    says: the least the streaked column's highest density must reach
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: pillars-filaments-low-share
+    value: 0.7
+    says: the most the streaked column's lowest density may be of its highest
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-extinction
+    value: 0.006
+    says: the extinction per metre of the mist in the first two grove tests
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-depth
+    value: 20
+    says: the depth of the mist, in metres above the ground
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-tree-radius
+    value: 40
+    says: the radius of the canopy in the optical depth test
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-tree-height
+    value: 30
+    says: the height of the canopy in the first two grove tests
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-below-depth
+    value: 1
+    says: how far below the ground a point outside the field is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-beyond-out
+    value: 41
+    says: how far out from the axis, past the canopy's radius, a point is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-beyond-height
+    value: 1
+    says: the height of the point beyond the canopy's radius
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-optical-step
+    value: 0.01
+    says: the height of each sample in the vertical walk through the mist
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-optical-samples
+    value: 2000
+    says: how many samples the vertical walk through the mist takes
+    kind: picked
+    by: worked by hand from the mist's depth and the step
+  - name: grove-optical-depth
+    value: 0.06
+    says: the optical depth of a vertical ray through the mist
+    kind: picked
+    by: worked by hand from extinction times depth over two
+  - name: grove-optical-tolerance
+    value: 1e-9
+    says: how close the summed optical depth must be to the worked value
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-ground-floor
+    value: 10
+    says: the height of the raised ground, the canopy and the mist's floor
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-wide-radius
+    value: 100
+    says: the radius of the canopy in the moving mist test
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-patchy-coverage
+    value: 0.6
+    says: the coverage of the patchy mist
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-wind-x
+    value: 2
+    says: the wind's speed along x, in metres a second
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-seed
+    value: 23
+    says: the seed of the patchy mist
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-advect-x
+    value: 4
+    says: how far the wind carries the patches along x in the seconds given
+    kind: picked
+    by: worked by hand from the wind's speed and the seconds
+  - name: grove-tick-seconds
+    value: 2
+    says: how many seconds the mist is moved by the wind
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-walk-start
+    value: -20
+    says: where the walk along x through the mist starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-walk-end
+    value: 20
+    says: where the walk along x through the mist stops short of
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-moving-height
+    value: 15
+    says: the height the moving mist is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-advect-tolerance
+    value: 1e-14
+    says: how close the advected density must be to the density it came from
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-ground-below-height
+    value: 9
+    says: the height of a point below the raised ground
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-invalid-height
+    value: 10
+    says: the height of a canopy whose other number is refused
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-invalid-radius
+    value: 1
+    says: the radius of a canopy whose other number is refused
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-refused-extinction
+    value: 0.01
+    says: the extinction per metre of the mist in the last two grove tests
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-thin-depth
+    value: 0.1
+    says: the depth of the thin mist under a wide canopy
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-thin-radius
+    value: 1000
+    says: the radius of the wide canopy over the thin mist
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-thin-height
+    value: 20
+    says: the height of the wide canopy over the thin mist
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-buckets-most
+    value: 9
+    says: the most buckets the wide canopy may occupy
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-thin-point-height
+    value: 0.05
+    says: the height in the thin mist the density is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: grove-thin-density
+    value: 0.005
+    says: the density of the thin mist at the height read
+    kind: picked
+    by: worked by hand from the extinction and the smoothstep at that height
+  - name: mutants-aurora-radius
+    value: 10
+    says: the radius of the body the aurora's shell stands above
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-low
+    value: 1
+    says: how far above the body the aurora's shell begins
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-high
+    value: 2
+    says: how far above the body the aurora's shell ends
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-width
+    value: 0.5
+    says: the width of the aurora's oval, in radians
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-top-height
+    value: 12
+    says: the height on the axis of the top of the shell
+    kind: picked
+    by: worked by hand from the radius and the shell's top
+  - name: mutants-aurora-top-exponent
+    value: 3
+    says: the exponent of e at the top of the shell, its density's fall
+    kind: picked
+    by: worked by hand from the shell's depth
+  - name: mutants-aurora-top-tolerance
+    value: 1e-15
+    says: how close the density at the top must be to e to the minus three
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-flat-height
+    value: 11
+    says: the height on the axis the shell of no thickness is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-thin-height
+    value: 11.5
+    says: the height on the axis the oval of no width is read at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-axis-exponent
+    value: 1.5
+    says: the exponent of e halfway up the shell, its density's fall
+    kind: picked
+    by: worked by hand from the shell's depth
+  - name: mutants-aurora-axis-samples
+    value: 20000
+    says: how many axes are searched for ones that round past one
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-axis-seed-x
+    value: 1
+    says: the seed of the hash that gives an axis its x
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-axis-seed-y
+    value: 2
+    says: the seed of the hash that gives an axis its y
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-axis-seed-z
+    value: 3
+    says: the seed of the hash that gives an axis its z
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-axis-distance
+    value: 11.5
+    says: how far out along the axis the point is, halfway up the shell
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-axis-tolerance
+    value: 1e-9
+    says: how close the density on the axis must be to the worked value
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-thousand
+    value: 1000
+    says: the number whose natural log the search for an exact thousandth starts at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-thousand-back
+    value: 2000
+    says: how many steps below the log of a thousand the search starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-thousand-forward
+    value: 4000
+    says: how many steps up from the start the search looks
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-thousandth
+    value: 1e-3
+    says: the density the oval is cut off below
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-aurora-thousand-toward
+    value: 100
+    says: a number well above the log of a thousand, to step toward
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-outside-points
+    value: 4000
+    says: how many points are drawn outside each medium's box
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-outside-reach
+    value: 3.0
+    says: how many times its box a point may be from the middle
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-outside-face-step
+    value: 1e-6
+    says: how far past a face, as a share of the box's size, a face point is put
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-face-divisor
+    value: 8
+    says: the points drawn at faces are an eighth of the points drawn outside
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-puff-radius
+    value: 2
+    says: the radius of the puff that must not leak
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-plume-height
+    value: 10
+    says: the height of the plume whose box is held to its skirt
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-plume-width
+    value: 20
+    says: the width of the plume whose box is held to its skirt
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-skirt-margin
+    value: 1e-3
+    says: how far, as a share of the reach, a point is put either side of an edge
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-plume-skirt-height
+    value: 1
+    says: the height at which the plume's skirt is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-tail-length
+    value: 12
+    says: the length of the tails of the bounds tests
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-tail-spread
+    value: 0.1
+    says: how far the bounds test's tail spreads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-tail-curve
+    value: 0.3
+    says: how far the bounds test's tail bends
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-tail-edge
+    value: 7.85
+    says: how far out the tail's box reaches either side
+    kind: picked
+    by: worked by hand, the bend at the end and the gaussian's cut at its widest
+  - name: bounds-contract-tail-tolerance
+    value: 1e-12
+    says: how close the tail's box must be to the worked edge
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-narrow-base
+    value: 4
+    says: the base width of the tail that narrows
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-narrow-spread
+    value: -0.1
+    says: the negative spread of the tail that narrows
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: bounds-contract-narrow-curve
+    value: 0.2
+    says: how far the tail that narrows bends
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-inner
+    value: 2
+    says: the inner radius of the disc of the mutants tests
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-outer
+    value: 6
+    says: the outer radius of the disc of the mutants tests
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-thick
+    value: 0.4
+    says: the thickness of the disc of the mutants tests
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-middle
+    value: 4
+    says: the radius halfway between the disc's inner and outer
+    kind: picked
+    by: worked by hand from the inner and outer radii
+  - name: mutants-disc-profile-last
+    value: 0.25
+    says: the last entry of the three-entry profile
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-ringlets-seed
+    value: 3
+    says: the seed of the ringlets of the one-ringlet and sixty-ringlet discs
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-ringlet-one-radius
+    value: 4.4
+    says: the radius where one ringlet is read, at six tenths across the disc
+    kind: picked
+    by: worked by hand from the inner radius and the width
+  - name: mutants-disc-ringlet-sixty-radius
+    value: 2.04
+    says: the radius where sixty ringlets are read, at a hundredth across
+    kind: picked
+    by: worked by hand from the inner radius and the width
+  - name: mutants-disc-tolerance
+    value: 1e-12
+    says: how close the one-ringlet and sixty-ringlet densities must be
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-grain-seed
+    value: 5
+    says: the seed of the grained disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-grain-over
+    value: 3
+    says: a grain past one, which must act as one
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-sweep-span
+    value: 4
+    says: how far across the disc the sweep of radii runs
+    kind: picked
+    by: worked by hand from the inner and outer radii
+  - name: mutants-disc-sweep-samples
+    value: 300
+    says: how many radii the sweep across the disc reads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: mutants-disc-grain-tolerance
+    value: 1e-15
+    says: how close a grain of three must be to a grain of one
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-inner
+    value: 2
+    says: the inner radius of the disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-outer
+    value: 4
+    says: the outer radius of the disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-thick
+    value: 0.1
+    says: the thickness of the disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-tolerance
+    value: 1e-12
+    says: how close the disc's density and spans must be to the worked values
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-down-out
+    value: 2.5
+    says: how far out along x the ray straight down through the ring is
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-down-height
+    value: 1
+    says: the height the rays straight down start at
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-down-enter
+    value: 0.95
+    says: how far down the ray meets the slab's top face
+    kind: picked
+    by: worked by hand from the start height and half the thickness
+  - name: disc-down-leave
+    value: 1.05
+    says: how far down the ray leaves the slab's bottom face
+    kind: picked
+    by: worked by hand from the start height and half the thickness
+  - name: disc-miss-out
+    value: 5
+    says: how far out along x the ray that misses the disc is
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-along-start
+    value: -10
+    says: where along x the ray through the disc's middle starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-along-enter
+    value: 6
+    says: how far along the ray meets the disc's outer edge
+    kind: picked
+    by: worked by hand from the start and the outer radius
+  - name: disc-along-leave
+    value: 14
+    says: how far along the ray leaves the disc's outer edge
+    kind: picked
+    by: worked by hand from the start and the outer radius
+  - name: disc-dense
+    value: 30
+    says: the Dense of the disc whose density is read in its ring
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-dense-radius
+    value: 3
+    says: the radius in the ring where the Dense disc is read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-grain
+    value: 0.8
+    says: how strongly ringlets thin the grainy disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-grain-seed
+    value: 5
+    says: the seed of the grainy disc
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-ringlet-scale
+    value: 100
+    says: the factor a density is scaled by before it is rounded to count values
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-ringlet-start
+    value: 2.05
+    says: where the walk across the ring starts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-ringlet-end
+    value: 3.95
+    says: where the walk across the ring stops short of
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-ringlet-step
+    value: 0.01
+    says: the step of the walk across the ring
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: disc-ringlet-values-least
+    value: 20
+    says: the fewest distinct values the ringlets must give
+    kind: picked
+    by: chosen for the test that asks for it

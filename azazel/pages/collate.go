@@ -6,9 +6,9 @@ import (
 )
 
 // collation is the order the Mac's sort puts printable characters in
-// under en_US.UTF-8, which the scripts run in. It was measured on
-// 2026-11-15 by sorting "x" + c + "y" for each one: punctuation, then
-// digits, then letters with case set aside.
+// under en_US.UTF-8, which the scripts run in. It was measured by sorting
+// "x" + c + "y" for each one: punctuation, then digits, then letters with
+// case set aside.
 const collation = " _-,;:!?.'\"()[]{}@*/\\&#%`^+<=>|~$" +
 	"0123456789abcdefghijklmnopqrstuvwxyz"
 

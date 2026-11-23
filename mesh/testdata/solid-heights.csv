@@ -1,0 +1,7 @@
+name,height,sign
+behind-near,2,-1
+behind-close,0.5,-1
+behind-far,7,-1
+front-near,-2,1
+front-close,-0.5,1
+front-far,-7,1

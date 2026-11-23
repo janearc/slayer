@@ -24,14 +24,14 @@ func TestAVolcanoRisesFromTheLand(t *testing.T) {
 	if w.Biome(heart) != Lava {
 		t.Errorf("the heart is %d, not lava", w.Biome(heart))
 	}
-	if !(w.Height(heart) > plain.Height(heart)) {
-		t.Errorf("the heart is %v, was %v", w.Height(heart), plain.Height(heart))
+	if !(w.height[w.index(heart)] > plain.height[plain.index(heart)]) {
+		t.Errorf("the heart is %v, was %v", w.height[w.index(heart)], plain.height[plain.index(heart)])
 	}
 	rim, ash := false, 0
 	for _, nb := range w.Tiling.Neighbours(heart) {
-		rim = rim || w.Height(nb) > w.Height(heart)
+		rim = rim || w.height[w.index(nb)] > w.height[w.index(heart)]
 	}
-	for _, tile := range w.Tiles() {
+	for _, tile := range w.tiles {
 		if w.Biome(tile) == Ash {
 			ash++
 		}
@@ -40,7 +40,7 @@ func TestAVolcanoRisesFromTheLand(t *testing.T) {
 		t.Errorf("rim higher than the heart: %v; ash tiles: %d", rim, ash)
 	}
 	far, _ := plain.Find(at.Neg(), Land)
-	if w.Height(far) != plain.Height(far) || w.Biome(far) != plain.Biome(far) {
+	if w.height[w.index(far)] != plain.height[plain.index(far)] || w.Biome(far) != plain.Biome(far) {
 		t.Error("the far side of the world changed")
 	}
 }
@@ -59,10 +59,10 @@ func TestACanyonCutsALine(t *testing.T) {
 		Width: 1.2 * plain.Tiling.Spacing(), Depth: 0.4}}
 	w := New(with)
 	rock, lower := 0, 0
-	for _, tile := range w.Tiles() {
+	for _, tile := range w.tiles {
 		if w.Biome(tile) == Rock && plain.Biome(tile) != Rock {
 			rock++
-			if w.Height(tile) < plain.Height(tile) {
+			if w.height[w.index(tile)] < plain.height[plain.index(tile)] {
 				lower++
 			}
 		}
@@ -88,13 +88,13 @@ func TestAShelfFreezesTheSea(t *testing.T) {
 	for _, i := range w.within(at, 3*plain.Tiling.Spacing()) {
 		tile := w.tiles[i]
 		// below the water line is sea, whether open or already iced
-		if plain.Height(tile) < 0 {
-			if w.Biome(tile) != Ice || w.Height(tile) < 0 {
+		if plain.height[plain.index(tile)] < 0 {
+			if w.Biome(tile) != Ice || w.height[w.index(tile)] < 0 {
 				t.Fatalf("sea at %v became %d at %v", tile, w.Biome(tile),
-					w.Height(tile))
+					w.height[w.index(tile)])
 			}
 			ice++
-		} else if w.Height(tile) != plain.Height(tile) {
+		} else if w.height[w.index(tile)] != plain.height[plain.index(tile)] {
 			t.Fatalf("land at %v moved", tile)
 		}
 	}
@@ -111,14 +111,14 @@ func TestAPlateauOnAPlane(t *testing.T) {
 	plain := New(tr)
 	at := maths.V(15, 0, 15)
 	tr.Features = []Feature{Plateau{At: at, Reach: 5, Top: 0.7}}
-	w := New(tr)
+	world := New(tr)
 	flat, rock := 0, 0
-	for _, i := range w.within(at, 5) {
-		tile := w.tiles[i]
-		if w.Height(tile) >= 0.7-1e-12 {
+	for _, i := range world.within(at, 5) {
+		tile := world.tiles[i]
+		if world.height[world.index(tile)] >= 0.7-1e-12 {
 			flat++
 		}
-		if w.Biome(tile) == Rock && plain.Biome(tile) != Rock {
+		if world.Biome(tile) == Rock && plain.Biome(tile) != Rock {
 			rock++
 		}
 	}

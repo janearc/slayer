@@ -46,10 +46,11 @@ func TestAnUnsignedNoteIsSeenByTheTable(t *testing.T) {
 	ignoringVerdict := func(records []byte) bool {
 		return strings.Contains(string(records), "harness-read: "+readHash)
 	}
-	if !ignoringVerdict([]byte(record("N", "", "harness-read: "+readHash))) {
+	note := []byte(record("N", "", "harness-read: "+readHash))
+	if !ignoringVerdict(note) {
 		t.Fatal("the anti-test's careless reader should clear the unsigned note")
 	}
-	if _, cleared := notesSignedBy([]byte(record("N", "", "harness-read: "+readHash)), signer)[readHash]; cleared {
+	if _, cleared := notesSignedBy(note, signer)[readHash]; cleared {
 		t.Fatal("notesSignedBy clears an unsigned note, as the careless reader does")
 	}
 }

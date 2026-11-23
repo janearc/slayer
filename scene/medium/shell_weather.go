@@ -25,9 +25,10 @@ type ShellWeather struct{ parameters ShellParameters }
 // The vertical profile uses the shell depth, independently of patch size.
 func NewShellWeather(radius, low, high float64, weather GroveWeather) (*ShellWeather, error) {
 	weather.Depth = high - low
-	if !weatherFinite(radius) || radius <= 0 || !weatherFinite(low) || low < 0 ||
-		!weatherFinite(high) || high <= low || !weatherFinite(radius+high) ||
-		weather.PatchScale <= 0 || !weather.validMist() {
+	if !weatherFinite(radius) || radius <= weatherZero || !weatherFinite(low) ||
+		low < weatherZero || !weatherFinite(high) || high <= low ||
+		!weatherFinite(radius+high) || weather.PatchScale <= weatherZero ||
+		!weather.validMist() {
 		return nil, fmt.Errorf("medium: invalid spherical weather shell")
 	}
 	return &ShellWeather{parameters: ShellParameters{Radius: radius, Low: low, High: high,
@@ -40,39 +41,52 @@ func (shell *ShellWeather) Parameters() ShellParameters { return shell.parameter
 // Bounds encloses the entire outer sphere without a geographic crop boundary.
 func (shell *ShellWeather) Bounds() maths.Box {
 	radius := shell.parameters.Radius + shell.parameters.High
-	return maths.Box{Min: maths.V(-radius, -radius, -radius), Max: maths.V(radius, radius, radius)}
+	return cube(radius)
 }
 
 // Tick shares checked controls and samples an absolute scene time.
 func (shell *ShellWeather) Tick(at time.Duration) Medium {
-	copy := *shell
-	copy.parameters.Seconds = at.Seconds()
-	return &copy
+	ticked := *shell
+	ticked.parameters.Seconds = at.Seconds()
+	return &ticked
 }
+
+// shellLegs is the most legs a shell crossing has: the outer ball's crossing
+// less the inner ball's leaves a leg either side of the clear interior.
+const shellLegs = 2 // defined: a shell has a near leg and a far leg
+
+// shellParabola is the four of the parabola 4*h*(1-h), which is one at its
+// peak halfway through the shell.
+const shellParabola = 4 // defined: the parabola's peak is one
 
 // Density combines advected patches with 4*h*(1-h), a parabola whose peak is
 // one halfway through the shell and whose two radial boundaries are clear.
-func (shell *ShellWeather) Density(at maths.Vec) float64 {
+func (shell *ShellWeather) Density(point maths.Vec) float64 {
 	parameters := shell.parameters
-	height := at.Len() - parameters.Radius
-	if !weatherFinite(height) || height <= parameters.Low || height >= parameters.High {
-		return 0
+	height := point.Len() - parameters.Radius
+	if !weatherFinite(height) || height <= parameters.Low ||
+		height >= parameters.High {
+		return weatherZero
 	}
-	h := (height - parameters.Low) / (parameters.High - parameters.Low)
-	return parameters.Weather.mistDensity(at, 0, parameters.Seconds, 4*h*(1-h))
+	share := (height - parameters.Low) / (parameters.High - parameters.Low)
+	return parameters.Weather.mistDensity(point, weatherZero,
+		parameters.Seconds, shellParabola*share*(weatherOne-share))
 }
 
 // Spans subtracts the inner ball from the outer crossing, retaining either
 // shell leg when a camera or lamp lies in the intervening clear interior.
-func (shell *ShellWeather) Spans(ray maths.Ray, near, far float64) [2]Interval {
+func (shell *ShellWeather) Spans(ray maths.Ray, near,
+	far float64) [shellLegs]Interval {
 	parameters := shell.parameters
 	enter, leave, hit := sphere(parameters.Radius+parameters.High, ray, near, far)
 	if !hit {
-		return [2]Interval{}
+		return [shellLegs]Interval{}
 	}
-	a, b, inside := sphere(parameters.Radius+parameters.Low, ray, enter, leave)
+	into, out, inside := sphere(parameters.Radius+parameters.Low, ray, enter,
+		leave)
 	if !inside {
-		return [2]Interval{{Enter: enter, Leave: leave}}
+		return [shellLegs]Interval{{Enter: enter, Leave: leave}}
 	}
-	return [2]Interval{{Enter: enter, Leave: a}, {Enter: b, Leave: leave}}
+	return [shellLegs]Interval{{Enter: enter, Leave: into},
+		{Enter: out, Leave: leave}}
 }

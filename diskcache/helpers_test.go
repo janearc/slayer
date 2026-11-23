@@ -24,7 +24,7 @@ var started = time.Date(2026, 11, 12, 14, 2, 0, 0, time.UTC)
 // testKind is a kind of a name with the test cap, declared once.
 func testKind(t *testing.T, name string) Kind {
 	t.Helper()
-	made, err := NewKind(name, testCap, "a test's")
+	made, err := newKind(name, testCap, "a test's")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -28,9 +28,11 @@ func mustMake(t *testing.T, name string, number uint64) good {
 var solids = []string{"spruce", "norway", "fern", "pebble", "cobble",
 	"boulder", "slab", "chip", "log", "can", "bonfire", "home", "coast-redwood",
 	"giant-sequoia", "optical-observatory", "coast-redwood-shoot",
-	"giant-sequoia-shoot", "spitzer", "hubble", "webb",
+	"giant-sequoia-shoot", "spitzer", "hubble", "webb", "prima",
 	"space-observatory", "palomar", "keck-i", "keck-ii", "subaru", "rubin", "elt", "griffith", "dobsonian-36", "apo-refractor-5", "sct-24", "mobile-crane", "mirror-gantry", "scaffold-tower", "service-truck", "utility-pickup", "equipment-trailer", "shipping-crate", "equipment-cabinet", "generator", "cooling-unit", "access-stairs", "work-platform", "handrail", "cable-tray", "weather-mast", "cfht", "gemini-north", "irtf", "uh-88", "ukirt", "jcmt", "sma-antenna", "sma-array", "vlba-maunakea", "panstarrs-1", "panstarrs-2", "faulkes-north", "dkist", "atlas-haleakala", "tlrs-4", "solarc", "mees-solar", "aeos", "mssc-1-6m", "mssc-twin-1-2m", "geodss", "geodss-site", "guide-star-launcher", "mcrn-larson", "mcrn-larson-landed", "apollo-csm", "soyuz-ms", "mercury-capsule", "gemini", "saturn-v", "sls-block-1", "saturn-v-apollo", "apollo-lunar-module", "saturn-ib", "venera-lander",
-	"j58", "j58-test-stand", "alfa", "alfa-hero"}
+	"j58", "j58-test-stand", "alfa", "alfa-hero", "voyager-1", "voyager-2",
+	"sampan", "sampan-at-anchor", "fishing-boat", "fishing-boat-at-anchor",
+	"ferry", "ferry-at-anchor"}
 
 // a surface gives back no more light than reaches it: every colour a kind is
 // dressed in is a share of each colour of light, from zero to one, and so is
@@ -65,7 +67,7 @@ func TestTheSameSeedIsTheSameThingAndAnotherIsNot(t *testing.T) {
 		}
 		// Telescope templates have fixed components at a declared aperture.
 		switch name {
-		case "optical-observatory", "spitzer", "hubble", "webb",
+		case "optical-observatory", "spitzer", "hubble", "webb", "prima", "voyager-1", "voyager-2",
 			"space-observatory", "palomar", "keck-i", "keck-ii", "subaru", "rubin", "elt", "griffith", "dobsonian-36", "apo-refractor-5", "sct-24", "mobile-crane", "mirror-gantry", "scaffold-tower", "service-truck", "utility-pickup", "equipment-trailer", "shipping-crate", "equipment-cabinet", "generator", "cooling-unit", "access-stairs", "work-platform", "handrail", "cable-tray", "weather-mast", "cfht", "gemini-north", "irtf", "uh-88", "ukirt", "jcmt", "sma-antenna", "sma-array", "vlba-maunakea", "panstarrs-1", "panstarrs-2", "faulkes-north", "dkist", "atlas-haleakala", "tlrs-4", "solarc", "mees-solar", "aeos", "mssc-1-6m", "mssc-twin-1-2m", "geodss", "geodss-site",
 			"guide-star-launcher", "mcrn-larson", "mcrn-larson-landed",
 			"apollo-csm", "soyuz-ms", "mercury-capsule", "gemini",

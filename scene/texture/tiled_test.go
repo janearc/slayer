@@ -11,7 +11,8 @@ import (
 type byID struct{ tl hexes.Tiling }
 
 func (b byID) Paint(tile hexes.Tile) maths.Light {
-	return maths.Grey(float64(b.tl.ID(tile)%7) / 7)
+	identity := b.tl.ID(tile)
+	return maths.Grey(float64(identity%7) / 7)
 }
 
 // A tiled surface asks its painter for every tile and darkens the edges.

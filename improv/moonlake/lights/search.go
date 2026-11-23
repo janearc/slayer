@@ -17,12 +17,12 @@ type SearchInput struct {
 	Move                          string
 }
 
-// AddSearchlights draws config.Count searchlight beams from behind the far
+// addSearchlights draws config.Count searchlight beams from behind the far
 // tree into sky. It does nothing when Level times Gate is under 0.01. Move
 // picks the pattern: fan, viewer, chase (one beam bright, the rest at 12
 // percent) or, by default, a sweep. Only viewer also draws into front and
 // respects CloseTrees; the others paint open sky only.
-func AddSearchlights(sky, front Image, config SearchConfig, input SearchInput) {
+func addSearchlights(sky, front Image, config SearchConfig, input SearchInput) {
 	level := input.Level * input.Gate
 	if level < 0.01 {
 		return

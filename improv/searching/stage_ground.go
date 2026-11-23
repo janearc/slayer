@@ -30,7 +30,7 @@ type stageBeam struct {
 
 // makeGround uses the Cloudsea source terrain for Hawaii, with the new
 // instruments. Chile and Los Angeles have explicitly authored ground.
-func (s *heardStage) makeGround(p *StagePlan) error {
+func (s *heardStage) makeGround(p *stagePlan) error {
 	s.ground = groundHeight
 	summit := false
 	if p.Terrain != "" {
@@ -146,7 +146,7 @@ func (s *heardStage) makeGround(p *StagePlan) error {
 		}
 	}
 	if !p.Interior && !summit && p.Kind != "griffith" {
-		temp := &Set{World: s.world, prototypes: map[string][]thing.Thing{}}
+		temp := &set{World: s.world, prototypes: map[string][]thing.Thing{}}
 		for i, name := range []string{"service-truck", "mobile-crane", "scaffold-tower"} {
 			x, z := -45+float64(i)*43, 33.0
 			if err := temp.scenery(name, uint64(i+5), maths.V(x, s.ground(x, z), z), 1); err != nil {
@@ -213,7 +213,7 @@ func (s *heardStage) makeGround(p *StagePlan) error {
 }
 
 // groundRig adds the named ground rig at at, with its beams and lamps.
-func (s *heardStage) groundRig(name string, at maths.Vec, p *StagePlan) error {
+func (s *heardStage) groundRig(name string, at maths.Vec, p *stagePlan) error {
 	rig, err := manufacture.MakeGroundRigWithLaunchers(name, "demo")
 	if err != nil {
 		return err
@@ -287,7 +287,7 @@ func (s *heardStage) factory(name string, at maths.Vec, scale float64, role int)
 }
 
 // updateGround sets the poses, beams, layers, sun and sky for progress u.
-func (s *heardStage) updateGround(p *StagePlan, state State, u float64) error {
+func (s *heardStage) updateGround(p *stagePlan, state State, u float64) error {
 	// One bounded correction in each shot, then a visible settled hold.
 	progress := smooth(math.Min(1, u/.62))
 	yaw := maths.About(maths.YAxis, mix(p.Aim, progress)*maths.Degree)
@@ -368,7 +368,7 @@ func (s *heardStage) updateGround(p *StagePlan, state State, u float64) error {
 }
 
 // beamPose composes the same optical pivot and azimuth used by the hardware.
-func (s *heardStage) beamPose(beam stageBeam, p *StagePlan, u float64) maths.Subspace {
+func (s *heardStage) beamPose(beam stageBeam, p *stagePlan, u float64) maths.Subspace {
 	progress := smooth(math.Min(1, u/.62))
 	yaw := maths.About(maths.YAxis, mix(p.Aim, progress)*maths.Degree)
 	tilt := maths.About(maths.XAxis, mix(p.Elevation, progress)*maths.Degree)

@@ -184,9 +184,9 @@ func facesOut(t *testing.T, letter rune, solid *mesh.Mesh, i int) {
 	a, b, c := solid.Corners(i)
 	turn := b.Sub(a).Cross(c.Sub(a)).Unit()
 	normals, _ := solid.CornerNormals(i)
-	for _, n := range normals {
-		if !(n.Dot(turn) > 0.5) {
-			t.Errorf("%q face %d: normal %v, turn %v", letter, i, n,
+	for _, normal := range normals {
+		if !(normal.Dot(turn) > 0.5) {
+			t.Errorf("%q face %d: normal %v, turn %v", letter, i, normal,
 				turn)
 		}
 	}
@@ -279,12 +279,12 @@ func normalsAt(solid *mesh.Mesh) int {
 	for i := range solid.FaceCount() {
 		a, b, c := solid.Corners(i)
 		normals, _ := solid.CornerNormals(i)
-		for k, p := range [3]maths.Vec{a, b, c} {
-			if n := normals[k]; n.Z == 0 {
-				if at[p] == nil {
-					at[p] = map[maths.Vec]bool{}
+		for k, place := range [3]maths.Vec{a, b, c} {
+			if normal := normals[k]; normal.Z == 0 {
+				if at[place] == nil {
+					at[place] = map[maths.Vec]bool{}
 				}
-				at[p][n] = true
+				at[place][normal] = true
 			}
 		}
 	}

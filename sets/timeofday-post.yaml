@@ -1,0 +1,72 @@
+# a post on flat ground, lit by a sun that is worked from a place, a date
+# and a clock time, to prove that a set may say where and when and slayer
+# works where the sun is.
+#
+# the sun: the Royal Observatory at Greenwich, 51.4779 north, on the prime
+# meridian, on 21 june 2026 at 16:00 on a clock one hour ahead of utc
+# (british summer time), which is 15:00 utc. the sun is not typed. by the
+# NOAA equations (scene/daylight) it stands at azimuth 247.8 and altitude
+# 45.9 degrees; worked by hand, 15:00 utc is 2 h 58 min after the
+# transit at 12:01.7 (the equation of time on that day is -1.7 min), an
+# hour angle of 44.6 degrees, the sun's declination 23.44 degrees, which
+# puts the sun at 45.9 degrees up and 247.8 degrees from north. the
+# shadow of the post therefore lies toward 67.8 degrees, north-east by
+# east, and is 8 / tan(45.9) = 7.8 m long.
+#
+# the ground is flat: one box, its upper face at z = 0. the post is a box
+# 0.5 m square and 8 m high standing on it at the origin. the sizes and
+# colours are choices, said beside each. the air is the earth's
+# (airs/earth.yaml), which supplies the sky and the sun's light.
+#
+# the camera is 40 m over the post, 0.5 m south of it, looking at its
+# foot: 0.7 degrees from straight down, so the picture's top is north and
+# its right is east, to the accuracy of that tilt.
+scene:
+  name: a post and its shadow
+  seed: 1
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  location:
+    lat: 51.4779
+    lon: 0
+  date: "2026-06-21"
+  timeofday: 1600
+  utc-offset: {value: 1, unit: h}
+  film:
+    width: 1600
+    height: 900
+    rays: 1
+    wide: 60
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    above:
+      title: "40 m over the post, looking down: north is the picture's top"
+      location: {at: [0, -0.5, 40]}
+      orientation: {look_at: [0, 0, 0]}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.18, 0.18, 0.18]}
+        source: "chosen: a mid grey, so a shadow on it can be told"
+      post:
+        colour: {srgb_linear: [0.5, 0.12, 0.1]}
+        source: "chosen: a red that is not the ground's grey"
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -0.5]
+        size: [400, 400, 1]
+        source: "chosen: flat ground, 400 m a side, its upper face at z = 0"
+      post:
+        material: post
+        middle: [0, 0, 4]
+        size: [0.5, 0.5, 8]
+        source: "chosen: a post 0.5 m square and 8 m high"

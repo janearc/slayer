@@ -80,7 +80,8 @@ func TestUFOCapturedOutputs(t *testing.T) {
 			beforeSky, beforeFront := slices.Clone(sky.Light), slices.Clone(front.Light)
 			trees, water := slices.Clone(input.Trees.Light), slices.Clone(input.Water.Light)
 			AddUFOBeam(sky, front, config, input)
-			got := [3]string{effectDigest(append(slices.Clone(sky.Light), front.Light...)), effectDigest(sky.Light), effectDigest(front.Light)}
+			both := append(slices.Clone(sky.Light), front.Light...)
+			got := [3]string{effectDigest(both), effectDigest(sky.Light), effectDigest(front.Light)}
 			if got != want {
 				t.Fatalf("hashes=%q want %q", got, want)
 			}
@@ -103,11 +104,13 @@ func TestUFOBelowFootHalo(t *testing.T) {
 	AddUFOBeam(sky, front, config, input)
 	axis := Toward(config.Azimuth, 0).Scale(config.Out)
 	fx, fy, _ := input.Camera.Project(axis.Add(Vec{0, 0, config.WaterZ}))
-	edge, _, _ := input.Camera.Project(axis.Add(Vec{0, 0, config.WaterZ}).Add(Toward(config.Azimuth+90, 0).Scale(config.Radius)))
+	side := Toward(config.Azimuth+90, 0).Scale(config.Radius)
+	edge, _, _ := input.Camera.Project(axis.Add(Vec{0, 0, config.WaterZ}).Add(side))
 	x, y := int(fx), int(fy)+1
 	i := sky.At(x, y)
 	half := math.Max(1, math.Abs(edge-fx))
-	wisps := 0.4 + 0.6*Smooth(0.3, 0.75, Curled(float64(x)/(60*float64(sky.Width)/1280)+0.2*input.Seconds, float64(y)/(25*float64(sky.Width)/1280)-0.1*input.Seconds, input.Seconds, 29))
+	curl := Curled(float64(x)/(60*float64(sky.Width)/1280)+0.2*input.Seconds, float64(y)/(25*float64(sky.Width)/1280)-0.1*input.Seconds, input.Seconds, 29)
+	wisps := 0.4 + 0.6*Smooth(0.3, 0.75, curl)
 	lum := (input.Moon[0] + input.Moon[1] + input.Moon[2]) / 3
 	want := config.Halo * config.Gain * input.Cues.Overhead * lum * 2 * config.Radius * wisps * math.Exp(-(float64(y)-fy)/(0.5*half)) * 0.7
 	if got := sky.Light[i] - base[i]; math.Abs(got-want) > 1e-9*want {

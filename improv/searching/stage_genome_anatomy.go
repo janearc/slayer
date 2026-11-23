@@ -10,26 +10,26 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
-// AnatomyPlan composes independently placed bodies, closed bands, and open
+// anatomyPlan composes independently placed bodies, closed bands, and open
 // sails for an authored individual stage. An omitted plan keeps the seeded
 // historical individual constructor.
-type AnatomyPlan struct {
-	Cores []CorePlan `yaml:"cores,omitempty" json:"cores,omitempty"`
-	Bands []BandPlan `yaml:"bands,omitempty" json:"bands,omitempty"`
-	Sails []SailPlan `yaml:"sails,omitempty" json:"sails,omitempty"`
+type anatomyPlan struct {
+	Cores []corePlan `yaml:"cores,omitempty" json:"cores,omitempty"`
+	Bands []bandPlan `yaml:"bands,omitempty" json:"bands,omitempty"`
+	Sails []sailPlan `yaml:"sails,omitempty" json:"sails,omitempty"`
 }
 
-// AuthoredBeingPlan places one independently constructed member in an
+// authoredBeingPlan places one independently constructed member in an
 // authored-multitude stage. Identity supplies its repeatable motion only.
-type AuthoredBeingPlan struct {
+type authoredBeingPlan struct {
 	Identity int          `yaml:"identity" json:"identity"`
 	At       [3]float64   `yaml:"at" json:"at"`
 	Scale    float64      `yaml:"scale" json:"scale"`
-	Anatomy  *AnatomyPlan `yaml:"anatomy" json:"anatomy"`
+	Anatomy  *anatomyPlan `yaml:"anatomy" json:"anatomy"`
 }
 
-// CorePlan describes one solid body. Rotation uses x, y, z Euler degrees.
-type CorePlan struct {
+// corePlan describes one solid body. Rotation uses x, y, z Euler degrees.
+type corePlan struct {
 	Form     string     `yaml:"form" json:"form"`
 	At       [3]float64 `yaml:"at,omitempty" json:"at,omitempty"`
 	Rotation [3]float64 `yaml:"rotation-degrees,omitempty" json:"rotation-degrees,omitempty"`
@@ -39,9 +39,9 @@ type CorePlan struct {
 	Glow     [3]float64 `yaml:"glow,omitempty" json:"glow,omitempty"`
 }
 
-// BandPlan describes concentric, closed geometry. Radius is the first band's
+// bandPlan describes concentric, closed geometry. Radius is the first band's
 // centreline; spacing locates later bands. Undulating bands wave along turns.
-type BandPlan struct {
+type bandPlan struct {
 	Form         string     `yaml:"form" json:"form"`
 	At           [3]float64 `yaml:"at,omitempty" json:"at,omitempty"`
 	Rotation     [3]float64 `yaml:"rotation-degrees,omitempty" json:"rotation-degrees,omitempty"`
@@ -60,9 +60,9 @@ type BandPlan struct {
 	Glow         [3]float64 `yaml:"glow,omitempty" json:"glow,omitempty"`
 }
 
-// SailPlan describes repeated open sheets. Sweep and camber are shares of
+// sailPlan describes repeated open sheets. Sweep and camber are shares of
 // length and width; twist rotates the sheet through its length.
-type SailPlan struct {
+type sailPlan struct {
 	At           [3]float64 `yaml:"at,omitempty" json:"at,omitempty"`
 	Rotation     [3]float64 `yaml:"rotation-degrees,omitempty" json:"rotation-degrees,omitempty"`
 	SpinRate     float64    `yaml:"spin-radians-per-second,omitempty" json:"spin-radians-per-second,omitempty"`
@@ -96,7 +96,7 @@ const (
 )
 
 // check rejects empty, unbounded, or contradictory geometry before creation.
-func (plan *AnatomyPlan) check() error {
+func (plan *anatomyPlan) check() error {
 	if plan == nil {
 		return fmt.Errorf("anatomy: plan is nil")
 	}
@@ -128,7 +128,7 @@ func (plan *AnatomyPlan) check() error {
 }
 
 // componentCount returns the number of solid parts the plan creates.
-func (plan *AnatomyPlan) componentCount() int {
+func (plan *anatomyPlan) componentCount() int {
 	if plan == nil {
 		return 0
 	}
@@ -143,7 +143,7 @@ func (plan *AnatomyPlan) componentCount() int {
 }
 
 // faceCountEstimate returns an upper bound on the faces the plan creates.
-func (plan *AnatomyPlan) faceCountEstimate() int {
+func (plan *anatomyPlan) faceCountEstimate() int {
 	if plan == nil {
 		return 0
 	}
@@ -163,7 +163,7 @@ func (plan *AnatomyPlan) faceCountEstimate() int {
 }
 
 // check rejects a population member with bad identity, placement, scale or anatomy.
-func (being AuthoredBeingPlan) check(index int) error {
+func (being authoredBeingPlan) check(index int) error {
 	if being.Identity < 0 || being.Identity > 1000000 || !pointOK(being.At) ||
 		!bounded(being.Scale, .01, maxAuthoredBeingScale) {
 		return fmt.Errorf("anatomy: population member %d has invalid identity, position, or scale", index)
@@ -175,7 +175,7 @@ func (being AuthoredBeingPlan) check(index int) error {
 }
 
 // checkAuthoredPopulation bounds the population size, parts and faces.
-func checkAuthoredPopulation(population []AuthoredBeingPlan) error {
+func checkAuthoredPopulation(population []authoredBeingPlan) error {
 	if len(population) < 2 || len(population) > maxAuthoredPopulation {
 		return fmt.Errorf("anatomy: population size %d outside 2..%d", len(population), maxAuthoredPopulation)
 	}
@@ -198,7 +198,7 @@ func checkAuthoredPopulation(population []AuthoredBeingPlan) error {
 }
 
 // check rejects a core with an unknown form or out-of-range values.
-func (core CorePlan) check(index int) error {
+func (core corePlan) check(index int) error {
 	if core.Form != "sphere" && core.Form != "octahedron" {
 		return fmt.Errorf("anatomy: core %d has unknown form %q", index, core.Form)
 	}
@@ -211,7 +211,7 @@ func (core CorePlan) check(index int) error {
 }
 
 // check rejects a band with an unknown form or out-of-range values.
-func (band BandPlan) check(index int) error {
+func (band bandPlan) check(index int) error {
 	if band.Form != "annular" && band.Form != "undulating" {
 		return fmt.Errorf("anatomy: band %d has unknown form %q", index, band.Form)
 	}
@@ -236,7 +236,7 @@ func (band BandPlan) check(index int) error {
 }
 
 // check rejects a sail with out-of-range geometry or material values.
-func (sail SailPlan) check(index int) error {
+func (sail sailPlan) check(index int) error {
 	if sail.Count < 1 || sail.Count > maxAnatomySailCount || sail.Segments < 8 || sail.Segments > maxAnatomySegments ||
 		sail.SpanSegments < 1 || sail.SpanSegments > maxAnatomySpanSegments ||
 		!bounded(sail.Length, .01, maxAnatomyRadius) || !bounded(sail.Width, .01, maxAnatomyRadius) ||
@@ -281,7 +281,7 @@ func anatomyPose(at, rotation [3]float64) maths.Subspace {
 }
 
 // buildAuthoredIndividual adds the plan's cores, bands and sails to a being.
-func (s *heardStage) buildAuthoredIndividual(b *crowdBeing, plan *AnatomyPlan,
+func (s *heardStage) buildAuthoredIndividual(b *crowdBeing, plan *anatomyPlan,
 	cache *anatomyMeshCache,
 ) error {
 	if err := plan.check(); err != nil {
@@ -361,7 +361,7 @@ func newAnatomyMeshCache() *anatomyMeshCache {
 
 // anatomyCacheFor preserves prototype sharing unless an authored stage
 // explicitly requests separate geometry objects.
-func anatomyCacheFor(plan *StagePlan) *anatomyMeshCache {
+func anatomyCacheFor(plan *stagePlan) *anatomyMeshCache {
 	if plan != nil && plan.ShareAnatomyPrototypes != nil && !*plan.ShareAnatomyPrototypes {
 		return nil
 	}
@@ -385,7 +385,7 @@ func (cache *anatomyMeshCache) octahedron() (*mesh.Mesh, error) {
 
 // sail returns the cached sail mesh for key, making it on a miss.
 func (cache *anatomyMeshCache) sail(key sailGeometryKey,
-	plan SailPlan,
+	plan sailPlan,
 ) (*mesh.Mesh, error) {
 	if cache == nil {
 		return anatomySail(plan)
@@ -402,7 +402,7 @@ func (cache *anatomyMeshCache) sail(key sailGeometryKey,
 }
 
 // sailGeometryKeyOf returns the fields that decide a sail's geometry.
-func sailGeometryKeyOf(sail SailPlan) sailGeometryKey {
+func sailGeometryKeyOf(sail sailPlan) sailGeometryKey {
 	return sailGeometryKey{segments: sail.Segments,
 		spanSegments: sail.SpanSegments, length: sail.Length, width: sail.Width,
 		sweep: sail.Sweep, camber: sail.Camber, twist: sail.TwistDegrees}
@@ -431,7 +431,7 @@ func anatomyOctahedron() (*mesh.Mesh, error) {
 }
 
 // anatomyBand builds one closed band ring around the vertical axis.
-func anatomyBand(plan BandPlan, radius float64) (*mesh.Mesh, error) {
+func anatomyBand(plan bandPlan, radius float64) (*mesh.Mesh, error) {
 	vertices := make([]maths.Vec, 0, plan.Segments*4)
 	faces := make([][3]int, 0, plan.Segments*8)
 	phase := plan.PhaseDegrees * maths.Degree
@@ -465,7 +465,7 @@ func anatomyBand(plan BandPlan, radius float64) (*mesh.Mesh, error) {
 }
 
 // anatomySail builds one open sheet from its segment and span grid.
-func anatomySail(plan SailPlan) (*mesh.Mesh, error) {
+func anatomySail(plan sailPlan) (*mesh.Mesh, error) {
 	columns := plan.Segments + 1
 	rows := plan.SpanSegments + 1
 	vertices := make([]maths.Vec, 0, columns*rows)

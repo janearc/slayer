@@ -1,0 +1,5 @@
+name,milliseconds,scale
+before-birth,0,1e-12
+at-birth,1000,1e-12
+a-quarter-second-on,1250,0.75
+three-seconds-on,3000,6

@@ -38,12 +38,12 @@ clouds:
 	if err := resolveFlowGeometry(filepath.Join(directory, "shoot.yaml"), plan); err != nil {
 		t.Fatal(err)
 	}
-	want := FlowGeometry{
-		Paths:     []FlowPath{{Points: [][3]float64{{10, 0, 0}, {9, 0, 0}, {6, 0, 0}}, Width: 0.02, Delay: 0.25}},
-		Landmarks: []FlowPoint{{At: [3]float64{8, 2, -4}, Radius: 0.1, RGB: [3]float64{1, 0.5, 2}}},
-		Clouds:    []FlowCloud{{At: [3]float64{4, 5, 6}, RGB: [3]float64{0.1, 0.2, 0.3}, Radius: 2, Density: 0.04, Seed: 71}},
+	want := flowGeometry{
+		Paths:     []flowPath{{Points: [][3]float64{{10, 0, 0}, {9, 0, 0}, {6, 0, 0}}, Width: 0.02, Delay: 0.25}},
+		Landmarks: []flowPoint{{At: [3]float64{8, 2, -4}, Radius: 0.1, RGB: [3]float64{1, 0.5, 2}}},
+		Clouds:    []flowCloud{{At: [3]float64{4, 5, 6}, RGB: [3]float64{0.1, 0.2, 0.3}, Radius: 2, Density: 0.04, Seed: 71}},
 	}
-	got := FlowGeometry{Paths: plan.Paths, Landmarks: plan.Landmarks, Clouds: plan.Clouds}
+	got := flowGeometry{Paths: plan.Paths, Landmarks: plan.Landmarks, Clouds: plan.Clouds}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("loaded geometry differs:\n got: %#v\nwant: %#v", got, want)
 	}
@@ -62,6 +62,8 @@ func TestFlowGeometryReferenceRefusesMalformedInputs(t *testing.T) {
 		t.Fatal(err)
 	}
 	validSHA := fmt.Sprintf("%x", sha256.Sum256(geometry))
+	different := []byte("different")
+	unfinished := []byte("paths: [")
 	for _, test := range []struct {
 		name   string
 		file   string
@@ -70,8 +72,8 @@ func TestFlowGeometryReferenceRefusesMalformedInputs(t *testing.T) {
 		inline bool
 	}{
 		{name: "missing file", file: "missing.yaml", sha: validSHA},
-		{name: "changed bytes", file: "geometry.yaml", sha: fmt.Sprintf("%x", sha256.Sum256([]byte("different"))), bytes: []byte("different")},
-		{name: "malformed YAML", file: "geometry.yaml", sha: fmt.Sprintf("%x", sha256.Sum256([]byte("paths: ["))), bytes: []byte("paths: [")},
+		{name: "changed bytes", file: "geometry.yaml", sha: fmt.Sprintf("%x", sha256.Sum256(different)), bytes: different},
+		{name: "malformed YAML", file: "geometry.yaml", sha: fmt.Sprintf("%x", sha256.Sum256(unfinished)), bytes: unfinished},
 		{name: "oversize", file: "geometry.yaml", sha: validSHA, bytes: make([]byte, FlowGeometryMaxBytes+1)},
 		{name: "bad digest", file: "geometry.yaml", sha: "ABC"},
 		{name: "absolute path", file: filepath.Join(directory, "geometry.yaml"), sha: validSHA},
@@ -89,7 +91,7 @@ func TestFlowGeometryReferenceRefusesMalformedInputs(t *testing.T) {
 			}
 			plan := &FlowPlan{Geometry: &FlowGeometryReference{File: test.file, SHA: test.sha}}
 			if test.inline {
-				plan.Paths = []FlowPath{{Points: [][3]float64{{1, 0, 0}, {0, 0, 0}}}}
+				plan.Paths = []flowPath{{Points: [][3]float64{{1, 0, 0}, {0, 0, 0}}}}
 			}
 			if err := resolveFlowGeometry(filepath.Join(directory, "shoot.yaml"), plan); err == nil {
 				t.Fatal("malformed or changed geometry reference was accepted")
@@ -102,9 +104,10 @@ func TestFlowGeometryReferenceRefusesMalformedInputs(t *testing.T) {
 }
 
 func TestInlineFlowGeometryRemainsCompatible(t *testing.T) {
-	want := []FlowPath{{Points: [][3]float64{{2, 0, 0}, {1, 0, 0}}}}
+	want := []flowPath{{Points: [][3]float64{{2, 0, 0}, {1, 0, 0}}}}
 	plan := &FlowPlan{Paths: want}
-	if err := resolveFlowGeometry(filepath.Join(t.TempDir(), "shoot.yaml"), plan); err != nil {
+	shoot := filepath.Join(t.TempDir(), "shoot.yaml")
+	if err := resolveFlowGeometry(shoot, plan); err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(plan.Paths, want) {
@@ -133,7 +136,8 @@ func TestYAMLFlowGeometryDistinguishesAbsentAndEmptySequences(t *testing.T) {
 	}
 	for _, inline := range []string{"paths: []", "landmarks: []", "clouds: []",
 		"paths:\n- points: [[1, 0, 0], [0, 0, 0]]\n  width: 0.02\n  delay-beats: 0"} {
-		raw := []byte(fmt.Sprintf("geometry:\n  file: geometry.yaml\n  sha256: %x\n%s\n", sha256.Sum256(geometry), inline))
+		sum := sha256.Sum256(geometry)
+		raw := []byte(fmt.Sprintf("geometry:\n  file: geometry.yaml\n  sha256: %x\n%s\n", sum, inline))
 		var ambiguous FlowPlan
 		if err := yamlfile.Read("ambiguous.yaml", raw, &ambiguous); err != nil {
 			t.Fatal(err)
@@ -144,7 +148,7 @@ func TestYAMLFlowGeometryDistinguishesAbsentAndEmptySequences(t *testing.T) {
 	}
 }
 
-// Hashes below were computed independently from typed FlowGeometry values
+// Hashes below were computed independently from typed flowGeometry values
 // parsed from the original study files at the pre-migration HEAD, then checked
 // against the referenced assets and the untouched embedded reveal source.
 func TestPinnedStudyGeometryMatchesPreMigrationSnapshots(t *testing.T) {
@@ -172,17 +176,17 @@ func TestPinnedStudyGeometryMatchesPreMigrationSnapshots(t *testing.T) {
 	}
 	paths := []struct {
 		name     string
-		geometry FlowGeometry
+		geometry flowGeometry
 		plan     FlowPlan
 	}{
-		{"flow", FlowGeometry{}, read("studies/heard-flow-720.yaml", false)},
-		{"full", FlowGeometry{}, read("studies/heard-full-720.yaml", false)},
-		{"depth", FlowGeometry{}, read("studies/heard-depth-refined-720.yaml", false)},
-		{"glass-hour", FlowGeometry{}, read("studies/heard-glass-hour-full-320.yaml", false)},
-		{"embedded-reveal", FlowGeometry{}, read("reveal-reference.yaml", true)},
+		{"flow", flowGeometry{}, read("studies/heard-flow-720.yaml", false)},
+		{"full", flowGeometry{}, read("studies/heard-full-720.yaml", false)},
+		{"depth", flowGeometry{}, read("studies/heard-depth-refined-720.yaml", false)},
+		{"glass-hour", flowGeometry{}, read("studies/heard-glass-hour-full-320.yaml", false)},
+		{"embedded-reveal", flowGeometry{}, read("reveal-reference.yaml", true)},
 	}
 	for index := range paths {
-		paths[index].geometry = FlowGeometry{Paths: paths[index].plan.Paths,
+		paths[index].geometry = flowGeometry{Paths: paths[index].plan.Paths,
 			Landmarks: paths[index].plan.Landmarks, Clouds: paths[index].plan.Clouds}
 	}
 	a, b := paths[0].geometry, paths[2].geometry
@@ -199,7 +203,7 @@ func TestPinnedStudyGeometryMatchesPreMigrationSnapshots(t *testing.T) {
 	}
 	for _, check := range []struct {
 		name string
-		data FlowGeometry
+		data flowGeometry
 		want string
 	}{
 		{"set A", a, "5414754239aca642be7e00245c48c0679149e13eae9b28f170fb86eb35d92683"},

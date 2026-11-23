@@ -1,7 +1,6 @@
 package lights
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -60,7 +59,14 @@ type Result struct {
 	FireWorkingSet FireWorkingSet
 }
 
-var ErrFireResources = errors.New("fire resources refused")
+// refusal is an error that is a constant, so no other package can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (reason refusal) Error() string { return string(reason) }
+
+// ErrFireResources is wrapped by every refusal of the fire's resources.
+const ErrFireResources refusal = "fire resources refused"
 
 const DefaultMaxFireBytes int64 = 1 << 30
 
@@ -249,7 +255,7 @@ func newRenderer(config Config, assets Assets, immutable bool) (*Renderer, error
 				return nil, fmt.Errorf("%w: loaded frames exceed maximum %d", ErrFireResources, config.MaxFireFrames)
 			}
 			for index := range source.Images {
-				layers = append(layers, FireLayer{Sequence: FireSequence(sequence), Index: index})
+				layers = append(layers, FireLayer{Sequence: fireSequence(sequence), Index: index})
 			}
 		}
 		workingSet, err := MeasureFireWorkingSet(layers, assets.Plate.Width, assets.Plate.Height, config.MaxFireFrames)
@@ -302,7 +308,7 @@ func newRenderer(config Config, assets Assets, immutable bool) (*Renderer, error
 		loaded := 0
 		for sequence, source := range assets.Fire {
 			if source.Count < 0 {
-				return nil, fmt.Errorf("fire %s: negative frame count", fireSequenceName(FireSequence(sequence)))
+				return nil, fmt.Errorf("fire %s: negative frame count", fireSequenceName(fireSequence(sequence)))
 			}
 			loaded += len(source.Images)
 			if loaded > config.MaxFireFrames {
@@ -311,18 +317,18 @@ func newRenderer(config Config, assets Assets, immutable bool) (*Renderer, error
 			frames[sequence] = FireFrames{Count: source.Count, Images: make(map[int]Image, len(source.Images))}
 			for index, image := range source.Images {
 				if index < 0 || index >= source.Count {
-					return nil, fmt.Errorf("fire %s frame %d: outside count %d", fireSequenceName(FireSequence(sequence)), index, source.Count)
+					return nil, fmt.Errorf("fire %s frame %d: outside count %d", fireSequenceName(fireSequence(sequence)), index, source.Count)
 				}
 				frames[sequence].Images[index] = cloneRendererImage(image)
 			}
 		}
 		r.assets.Fire = frames
 	}
-	r.open, err = SkyOf(mask)
+	r.open, err = skyOf(mask)
 	if err != nil {
 		return nil, fmt.Errorf("sky mask: %w", err)
 	}
-	rim, err := RimOf(r.open, plate.Width, plate.Height)
+	rim, err := rimOf(r.open, plate.Width, plate.Height)
 	if err != nil {
 		return nil, fmt.Errorf("rim: %w", err)
 	}
@@ -330,7 +336,7 @@ func newRenderer(config Config, assets Assets, immutable bool) (*Renderer, error
 	for x := range r.rim {
 		r.rim[x] = rim(x)
 	}
-	r.near, err = NearOf(r.open, rim, plate.Width, plate.Height)
+	r.near, err = nearOf(r.open, rim, plate.Width, plate.Height)
 	if err != nil {
 		return nil, fmt.Errorf("near trees: %w", err)
 	}
@@ -345,7 +351,7 @@ func newRenderer(config Config, assets Assets, immutable bool) (*Renderer, error
 				break
 			}
 		}
-		r.closeTrees, err = CoveredBy(*r.assets.Trees)
+		r.closeTrees, err = coveredBy(*r.assets.Trees)
 		if err != nil {
 			return nil, fmt.Errorf("close trees: %w", err)
 		}
@@ -354,7 +360,7 @@ func newRenderer(config Config, assets Assets, immutable bool) (*Renderer, error
 	if r.assets.Disc != nil {
 		reference = *r.assets.Disc
 	}
-	r.moon, err = Brightest(reference)
+	r.moon, err = brightest(reference)
 	if err != nil {
 		return nil, fmt.Errorf("moon reference: %w", err)
 	}
@@ -482,7 +488,7 @@ func (r *Renderer) Render(request Request) (Result, error) {
 		if request.Accelerator != nil {
 			sky, err = request.Accelerator.Fixtures(sky, []FixtureLayer{{Name: "overhead", Amount: r.config.Overhead.Gain * show.Overhead, Colour: r.config.Overhead.Colour}}, map[string]Image{"overhead": pass})
 		} else {
-			err = AddOverhead(sky, pass, r.config.Overhead, show.Overhead)
+			err = addOverhead(sky, pass, r.config.Overhead, show.Overhead)
 		}
 		if err != nil {
 			return Result{}, fmt.Errorf("overhead: %w", err)
@@ -493,7 +499,7 @@ func (r *Renderer) Render(request Request) (Result, error) {
 	}
 	front := Image{Width: sky.Width, Height: sky.Height, Light: make([]float64, len(sky.Light))}
 	if r.assets.Passes != nil {
-		layers, err := PlanFixtures(r.config.Fixtures, FixtureCues{FloodLeft: show.FloodLeft, FloodRight: show.FloodRight, Spots: show.Spots, SpotAim: show.SpotAim, HasColour: hasColour, Colour: show.Colour})
+		layers, err := planFixtures(r.config.Fixtures, fixtureCues{FloodLeft: show.FloodLeft, FloodRight: show.FloodRight, Spots: show.Spots, SpotAim: show.SpotAim, HasColour: hasColour, Colour: show.Colour})
 		if err != nil {
 			return Result{}, fmt.Errorf("fixtures: %w", err)
 		}
@@ -571,11 +577,11 @@ func (r *Renderer) Render(request Request) (Result, error) {
 			return Result{}, fmt.Errorf("searchlights: invalid output")
 		}
 	} else {
-		AddSearchlights(sky, front, r.config.Search, searchInput)
+		addSearchlights(sky, front, r.config.Search, searchInput)
 	}
 	laserInput := LaserInput{Open: r.open, CloseTrees: r.closeTrees, Rim: r.rim,
 		Camera: r.camera, Moon: r.moon, Seconds: request.Seconds, ShoreRow: r.shoreRow,
-		Cues: LaserCues{Rig: show.Rig, Sweep: show.Sweep, Gate: show.Gate, GateLeft: show.GateLeft,
+		Cues: laserCues{Rig: show.Rig, Sweep: show.Sweep, Gate: show.Gate, GateLeft: show.GateLeft,
 			GateRight: show.GateRight, FigurePhase: show.FigurePhase, Beams: show.Beams, Parity: show.Parity,
 			Colour: show.Colour, HasColour: hasColour, Figure: show.Figure}}
 	if request.Accelerator != nil {
@@ -588,14 +594,14 @@ func (r *Renderer) Render(request Request) (Result, error) {
 			return Result{}, fmt.Errorf("lasers: invalid output")
 		}
 	} else {
-		AddLasers(sky, front, r.laser, laserInput)
+		addLasers(sky, front, r.laser, laserInput)
 	}
 	trees := Image{}
 	if r.assets.Trees != nil {
 		trees = *r.assets.Trees
 		if r.hazeEnabled {
 			input := BackHazeInput{Camera: r.camera, Moon: r.moon,
-				Positions: Backlights(r.config.EyeOverLake), Levels: [2]float64{show.FloodLeft, show.FloodRight},
+				Positions: backlights(r.config.EyeOverLake), Levels: [2]float64{show.FloodLeft, show.FloodRight},
 				Gain: r.config.HazeGain, Seconds: request.Seconds}
 			if request.Accelerator != nil {
 				var err error
@@ -729,7 +735,7 @@ func (r *Renderer) renderFireAccelerated(config FireConfig, cue FireCues, accele
 }
 
 // fireSequenceName is the name of a fire sequence: steady, swell or burst.
-func fireSequenceName(sequence FireSequence) string {
+func fireSequenceName(sequence fireSequence) string {
 	return [3]string{"steady", "swell", "burst"}[sequence]
 }
 

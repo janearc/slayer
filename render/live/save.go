@@ -46,7 +46,8 @@ func withEdits(raw []byte, change edits) ([]byte, error) {
 	}
 	top := document.Content[none]
 	if change.said {
-		set(top, "at", quantity(change.moment.Seconds(), "s"))
+		momentSeconds := change.moment.Seconds()
+		set(top, "at", quantity(momentSeconds, "s"))
 	}
 	if change.camera != "" {
 		set(top, "camera", cameraNamed(top, change.camera))

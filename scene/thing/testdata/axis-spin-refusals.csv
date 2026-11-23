@@ -1,0 +1,7 @@
+name,parent,pivot_x,pivot_y,pivot_z,axis_x,axis_y,axis_z,rpm,phase
+no-parent,none,0,0,0,0,0,1,1,0
+pivot-not-a-number,still,NaN,0,0,0,0,1,1,0
+no-axis,still,0,0,0,0,0,0,1,0
+axis-not-finite,still,0,0,0,0,Inf,0,1,0
+rpm-not-a-number,still,0,0,0,0,0,1,NaN,0
+phase-not-finite,still,0,0,0,0,0,1,1,Inf

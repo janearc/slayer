@@ -43,7 +43,8 @@ func TestGenomeStorageKeepsAuthoredGeometry(t *testing.T) {
 			}
 			hash.Write(raw)
 		}
-		got = append(got, hex.EncodeToString(hash.Sum(nil)))
+		digest := hash.Sum(nil)
+		got = append(got, hex.EncodeToString(digest))
 	}
 	if path := os.Getenv("GENOME_STORAGE_REFERENCE_OUT"); path != "" {
 		raw, err := json.MarshalIndent(got, "", "  ")

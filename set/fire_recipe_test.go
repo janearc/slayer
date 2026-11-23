@@ -20,7 +20,8 @@ func fireRecipeFixture(t *testing.T) string {
 }
 
 func TestFireRecipeResolvesPhysicalUnitsAndDoesNotAliasSmoke(t *testing.T) {
-	made, err := set.Read("fire.yaml", []byte(fireRecipeFixture(t)))
+	source := fireRecipeFixture(t)
+	made, err := set.Read("fire.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +80,8 @@ func TestFireRecipeCanOmitSmokeAndUsesOnlyItsOwnConstructor(t *testing.T) {
 	if !ok || spec.Smoke != nil {
 		t.Fatal("absent smoke gained a default column")
 	}
-	other, err := set.Read("other.yaml", []byte(ecosystemFixture(t)))
+	source := ecosystemFixture(t)
+	other, err := set.Read("other.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

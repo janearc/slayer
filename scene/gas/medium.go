@@ -55,11 +55,11 @@ func (o Of) Gas() Gas {
 	if unit <= 0 {
 		unit = 1
 	}
-	return o.In.Per(unit)
+	return o.In.per(unit)
 }
 
-// Per is the gas with its numbers per a unit of so many metres.
-func (g Gas) Per(metres float64) Gas {
+// per is the gas with its numbers per a unit of so many metres.
+func (g Gas) per(metres float64) Gas {
 	out := g
 	out.Ranges = map[radiation.Range]Optics{}
 	for r, o := range g.Ranges {

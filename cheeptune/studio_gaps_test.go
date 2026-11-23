@@ -10,8 +10,9 @@ func TestASpectrumFindsAToneWhereItIsAndIsHonestAtItsEdges(t *testing.T) {
 	// here is five hertz.
 	x := make([]float32, 8192)
 	for i := range x {
-		x[i] = float32(math.Sin(2 * math.Pi * 1000.3 * float64(i) /
-			studioRate))
+		phase := 2 * math.Pi * 1000.3 * float64(i) /
+			studioRate
+		x[i] = float32(math.Sin(phase))
 	}
 	s := newSpectrum(x, studioRate)
 	strength, at := s.near(1000, 20)

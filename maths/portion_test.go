@@ -8,31 +8,72 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-func TestPercentSaysPercents(test *testing.T) {
-	for _, said := range []struct {
-		amount, share float64
-	}{{50, 0.5}, {1, 0.01}, {0, 0}, {100, 1}} {
-		got, err := maths.Percent(said.amount).Share()
-		if err != nil || got != said.share {
-			test.Fatalf("Percent(%v) said %v, %v; want %v",
-				said.amount, got, err, said.share)
+// portionRows are the rows of portions.csv for a call and an outcome. It
+// stops if there are none, so that a test over them does not pass for want of
+// rows.
+func portionRows(test reporter, call, outcome string) table {
+	test.Helper()
+	var rows table
+	for _, row := range read(test, portionsFile) {
+		if row["call"] == call && row["outcome"] == outcome {
+			rows = append(rows, row)
+		}
+	}
+	if len(rows) == nought {
+		test.Fatalf("%s: no %s rows that are %s", portionsFile, call, outcome)
+	}
+	return rows
+}
+
+// madePortion is the portion a row's call makes of the row's amount.
+func madePortion(test reporter, row map[string]string) maths.Portion {
+	test.Helper()
+	amount := float(test, row, "amount")
+	switch row["call"] {
+	case "Percent":
+		return maths.Percent(amount)
+	case "Share":
+		return maths.Share(amount)
+	}
+	test.Fatalf("%s: no call named %q", row["name"], row["call"])
+	return maths.Portion{}
+}
+
+// saidPortions holds each said row of a call to its share, within the row's
+// tolerance: nought is exact.
+func saidPortions(test reporter, call string) {
+	test.Helper()
+	for _, row := range portionRows(test, call, "said") {
+		got, err := madePortion(test, row).Share()
+		want, tolerance := float(test, row, "share"), float(test, row, "tolerance")
+		if err != nil || !(math.Abs(got-want) <= tolerance) {
+			test.Fatalf("%s(%v) said %v, %v; want %v", call, row["amount"], got,
+				err, want)
 		}
 	}
 }
 
-func TestPercentTakesFractionsOfAPercentFromOneUp(test *testing.T) {
-	got, err := maths.Percent(99.9).Share()
-	if err != nil || !(math.Abs(got-0.999) <= 1e-12) {
-		test.Fatalf("Percent(99.9) said %v, %v; want 0.999", got, err)
+// refusedPortions holds each row of a call with an outcome to a complaint.
+func refusedPortions(test reporter, call, outcome string) {
+	test.Helper()
+	for _, row := range portionRows(test, call, outcome) {
+		if _, err := madePortion(test, row).Share(); err == nil {
+			test.Fatalf("%s(%v) passed; %s", call, row["amount"], row["name"])
+		}
 	}
 }
 
+func TestPercentSaysPercents(test *testing.T) {
+	saidPortions(test, "Percent")
+}
+
 func TestPercentNamesTheFixForAFraction(test *testing.T) {
-	_, err := maths.Percent(0.5).Share()
+	row := read(test, portionsFile).by(test, portionsFile, "half read as a fraction")
+	_, err := madePortion(test, row).Share()
 	if err == nil {
-		test.Fatal("Percent(0.5) passed")
+		test.Fatalf("%s(%v) passed", row["call"], row["amount"])
 	}
-	for _, fix := range []string{"Percent(50)", "Share(0.5)"} {
+	for _, fix := range strings.Split(row["says"], "|") {
 		if !strings.Contains(err.Error(), fix) {
 			test.Errorf("the complaint %q does not name %s", err, fix)
 		}
@@ -40,39 +81,17 @@ func TestPercentNamesTheFixForAFraction(test *testing.T) {
 }
 
 func TestPercentRefusesWhatReadsAsAFraction(test *testing.T) {
-	for _, amount := range []float64{0.5, 0.006, 0.999} {
-		if _, err := maths.Percent(amount).Share(); err == nil {
-			test.Fatalf("Percent(%v) passed; it reads as a "+
-				"fraction, not a percent", amount)
-		}
-	}
+	refusedPortions(test, "Percent", "fraction")
 }
 
 func TestPercentRefusesWhatNoPortionIs(test *testing.T) {
-	for _, amount := range []float64{-1, 101, math.NaN(),
-		math.Inf(1), math.Inf(-1)} {
-		if _, err := maths.Percent(amount).Share(); err == nil {
-			test.Fatalf("Percent(%v) passed; no portion is", amount)
-		}
-	}
+	refusedPortions(test, "Percent", "refused")
 }
 
 func TestShareSaysFractions(test *testing.T) {
-	for _, said := range []float64{0.5, 0.006, 0, 1} {
-		got, err := maths.Share(said).Share()
-		if err != nil || got != said {
-			test.Fatalf("Share(%v) said %v, %v; want itself",
-				said, got, err)
-		}
-	}
+	saidPortions(test, "Share")
 }
 
 func TestShareRefusesOutsideTheWhole(test *testing.T) {
-	for _, amount := range []float64{-0.1, 1.1, math.NaN(),
-		math.Inf(1)} {
-		if _, err := maths.Share(amount).Share(); err == nil {
-			test.Fatalf("Share(%v) passed; a share is of [0, 1]",
-				amount)
-		}
-	}
+	refusedPortions(test, "Share", "refused")
 }

@@ -55,7 +55,7 @@ func TestLongCookedAirIsFull(t *testing.T) {
 // air of one cooking's age has cooked 1 - 1/e of the way up the ladder.
 func TestOneCookingIsOneMinusOneOverE(t *testing.T) {
 	rung, toward := cookingFor(1e6).cookedBy(1e6)
-	along := (float64(rung) + toward) / (rungs - 1)
+	along := (float64(rung) + toward) / float64(rungs-1)
 	if want := 1 - math.Exp(-1); !(math.Abs(along-want) <= 1e-12) {
 		t.Errorf("%g of the way, want %g", along, want)
 	}
@@ -81,7 +81,7 @@ func TestTheLadderRunsFromNoneToAll(t *testing.T) {
 		t.Fatalf("%d rungs, want %d", len(ladder), rungs)
 	}
 	for k, made := range ladder {
-		want := cooked.depth * float64(k) / (rungs - 1)
+		want := cooked.depth * float64(k) / float64(rungs-1)
 		if got := made[0].haze.depth; !(math.Abs(got-want) <= 1e-12) {
 			t.Errorf("rung %d: top haze depth %g, want %g", k, got, want)
 		}

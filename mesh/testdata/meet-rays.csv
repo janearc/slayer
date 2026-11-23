@@ -1,0 +1,6 @@
+name,atx,aty,atz,dirx,diry,dirz,near,far
+hit,0,0,4,0,0,-1,0,+Inf
+beside,2,2,4,0,0,-1,0,+Inf
+behind,0,0,4,0,0,1,0,+Inf
+short,0,0,4,0,0,-1,0,2.5
+after,0,0,4,0,0,-1,6,+Inf

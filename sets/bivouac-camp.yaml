@@ -1,0 +1,76 @@
+# the bivouac camp: a stand of bivouacs scattered over flat ground at dusk,
+# each turned to look within 45 degrees of east, seen from 30 m off at
+# eye height from the south-west. the stand is laid by the scatter habit
+# (manufacture/cities/habit.go) from the bivouac's own facing in
+# manufacture/cities/bivouac.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. how many, how
+# near and how far, the sun's place, the ground's colour and the camera are
+# choices of this study, picked by eye, and say so.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: bivouac camp
+  # the scene stands things on a world's own ground, not a terrain's,
+  # which is how a set says it has none
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 40
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # 30 m off to the south-west at 1.6 m up, looking over the camp
+    camp:
+      title: "from the south-west, over the camp, at dusk"
+      location:
+        at: [-20, -26, 1.6]
+      orientation:
+        look_at: [4, 6, 0.2]
+  set:
+    things:
+      bivy:
+        kind: bivouac
+        seed: 1
+        complexity: demo
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+    stands:
+      the camp:
+        kind: bivouac
+        count: 16
+        habit: scatter
+        seed: 5
+        complexity: demo
+        within: {of: bivy, from: 0, to: 360, near: 5, far: 22}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.1, 0.09, 0.05]}
+        source: eye
+    boxes:
+      # the ground, its upper face at nought
+      ground:
+        material: ground
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    # dusk, by eye: a low warm sun in the west, a dim sky that is
+    # lightest at the horizon.
+    suns:
+      west:
+        toward: [-1, -0.3, 0.12]
+        colour: {srgb_linear: [2.2, 1.2, 0.55]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.22, 0.14, 0.12]}
+      zenith: {srgb_linear: [0.02, 0.035, 0.08]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye

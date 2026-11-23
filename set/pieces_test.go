@@ -24,7 +24,8 @@ func built(t *testing.T) string {
 // builtRead is the small built world, read.
 func builtRead(t *testing.T) set.World {
 	t.Helper()
-	made, err := set.Read("built.yaml", []byte(built(t)))
+	source := built(t)
+	made, err := set.Read("built.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -409,7 +410,8 @@ func TestAWorldsListsAreCopies(t *testing.T) {
 // a set that says no world has none, a world with no sky says so, and a
 // film with no print says that.
 func TestWhatIsNotSaidIsNotThere(t *testing.T) {
-	made, err := set.Read("shoebox.yaml", []byte(shoebox(t)))
+	source := shoebox(t)
+	made, err := set.Read("shoebox.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -436,7 +438,8 @@ func TestWhatIsNotSaidIsNotThere(t *testing.T) {
 
 // a film's print is its knee and its top, as written.
 func TestAFilmsPrintIsWhatItSays(t *testing.T) {
-	made, err := set.Read("built.yaml", []byte(built(t)))
+	source := built(t)
+	made, err := set.Read("built.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -451,7 +454,8 @@ func TestAFilmsPrintIsWhatItSays(t *testing.T) {
 // a camera that stands at a place stands there, in the world's space,
 // facing the place it looks at with the world's up for its up.
 func TestAStandingCameraLooksWhereItSays(t *testing.T) {
-	made, err := set.Read("built.yaml", []byte(built(t)))
+	source := built(t)
+	made, err := set.Read("built.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -517,7 +521,8 @@ func TestACameraLookingNearlyDownTakesItsHeadingForUp(t *testing.T) {
 // a camera is found by its name, and one the set has not is refused; a
 // camera that cannot be made says which.
 func TestAShotIsFoundByItsName(t *testing.T) {
-	made, err := set.Read("shoebox.yaml", []byte(shoebox(t)))
+	source := shoebox(t)
+	made, err := set.Read("shoebox.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -652,8 +657,10 @@ func TestABuiltWorldsMistakesAreRefused(t *testing.T) {
 			"a sun says [toward colour source], all of them"},
 		{"    floods:", "    flood:",
 			"flood is not a key here; this block takes [beams bodies boxes " +
-				"fizzes floods griffith-basin imports lamps materials " +
-				"motions ocean sky spheres spots suns unit vapor-cavities wisps]"},
+				"channels fizzes floods griffith-basin imports lamp-fields lamps " +
+				"materials motions ocean sky spheres spots suns unit " +
+				"vapor-cavities " +
+				"weathering wisps]"},
 		{"      top: 8", "      top: 0.5",
 			"a top of 0.5 at or under a knee of 0.7"},
 		{"      knee: 0.7", "      knee: -0.7", "knee takes a number from 0"},

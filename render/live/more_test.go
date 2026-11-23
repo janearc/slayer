@@ -64,7 +64,8 @@ func TestSaveWritesNothingUnasked(t *testing.T) {
 	if string(before) != string(after) {
 		t.Errorf("s wrote %s", after)
 	}
-	if !strings.Contains(strings.Join(watching.foot.lines(), " "),
+	footing := strings.Join(watching.foot.lines(), " ")
+	if !strings.Contains(footing,
 		"film.exposure") {
 		t.Errorf("the foot says %q", watching.foot.lines())
 	}
@@ -198,7 +199,8 @@ func TestPublishSaysOnceWhenItCannot(t *testing.T) {
 	watching.given.Folder = blocked
 	watching.publish(nil, nil, testPixel, false)
 	watching.publish(nil, nil, testPixel, false)
-	said := strings.Count(strings.Join(watching.foot.lines(), "\n"),
+	footing := strings.Join(watching.foot.lines(), "\n")
+	said := strings.Count(footing,
 		"not written")
 	if said != one {
 		t.Errorf("the foot said it %d times: %q", said,
@@ -223,8 +225,8 @@ func TestDevelopmentRefusedIsSaid(t *testing.T) {
 	}
 	watching.wanted = broken
 	watching.developer()
-	if watching.version != version || !strings.Contains(
-		strings.Join(watching.foot.lines(), " "), "nowhere") {
+	footing := strings.Join(watching.foot.lines(), " ")
+	if watching.version != version || !strings.Contains(footing, "nowhere") {
 		t.Errorf("a theme that is not there gave version %d, %q",
 			watching.version, watching.foot.lines())
 	}

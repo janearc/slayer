@@ -17,7 +17,8 @@ func TestNativeShadowsAreAnExplicitRendererSelection(t *testing.T) {
 	if made.Renderer() != "gpu-native-shadows" {
 		t.Fatal("native selection lost")
 	}
-	plain, err := set.Read("software.yaml", []byte(ecosystemFixture(t)))
+	source := ecosystemFixture(t)
+	plain, err := set.Read("software.yaml", []byte(source))
 	if err != nil || plain.Renderer() != "gpu" {
 		t.Fatalf("software selection changed: %s, %v", plain.Renderer(), err)
 	}

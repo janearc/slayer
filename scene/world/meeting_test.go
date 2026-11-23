@@ -11,7 +11,7 @@ import "testing"
 // any other pair is a small ridge at minus 0.12 of it. the rates are on
 // both sides of one, and the table is every pair at each.
 func TestMeetingIsWhatThePlatesAreMadeOf(t *testing.T) {
-	for _, c := range []struct {
+	for _, each := range []struct {
 		closing float64
 		// the effect for continent and continent, continent and ocean,
 		// ocean and continent, ocean and ocean
@@ -24,10 +24,10 @@ func TestMeetingIsWhatThePlatesAreMadeOf(t *testing.T) {
 	} {
 		for k, pair := range [4][2]bool{{true, true}, {true, false},
 			{false, true}, {false, false}} {
-			got := meeting(c.closing, pair[0], pair[1])
-			if !close12(got, c.want[k]) {
+			got := meeting(each.closing, pair[0], pair[1])
+			if !close12(got, each.want[k]) {
 				t.Errorf("plates closing at %v, continent %v and %v: %v, want %v",
-					c.closing, pair[0], pair[1], got, c.want[k])
+					each.closing, pair[0], pair[1], got, each.want[k])
 			}
 		}
 	}

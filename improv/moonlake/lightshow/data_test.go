@@ -58,7 +58,8 @@ func TestReadCuesTakesEveryKey(t *testing.T) {
 // error that says what was wrong.
 func TestReadCuesRefusals(t *testing.T) {
 	guard(t)
-	if err := readCues(filepath.Join(t.TempDir(), "none")); err == nil {
+	missingCues := filepath.Join(t.TempDir(), "none")
+	if err := readCues(missingCues); err == nil {
 		t.Error("a missing cue file was read")
 	}
 	for _, c := range []struct{ line, mention string }{
@@ -87,12 +88,14 @@ func TestCameraProjectsTheViewCentreToTheMiddle(t *testing.T) {
 	if !ok || !within(x, 2.5, 1e-9) || !within(y, 2.5, 1e-9) {
 		t.Errorf("the view's centre is at %v %v, ahead %v", x, y, ok)
 	}
-	x, _, _ = cam.project(ahead.add(cam.right.scale(10)))
+	rightOffset := cam.right.scale(10)
+	x, _, _ = cam.project(ahead.add(rightOffset))
 	if want := 2.5 + 0.1*cam.focal; !within(x, want, 1e-9) {
 		t.Errorf("a point 10 m right of 100 m ahead is at x %v, want %v", x,
 			want)
 	}
-	_, y, _ = cam.project(ahead.add(cam.up.scale(10)))
+	upOffset := cam.up.scale(10)
+	_, y, _ = cam.project(ahead.add(upOffset))
 	if want := 2.5 - 0.1*cam.focal; !within(y, want, 1e-9) {
 		t.Errorf("a point 10 m up is at y %v, want %v", y, want)
 	}
@@ -402,7 +405,8 @@ func TestFireLightLaysBurstsStillShowing(t *testing.T) {
 func TestFireLightRefusals(t *testing.T) {
 	guard(t)
 	show = cues{fire: 1, fireSince: []float64{0}}
-	if err := fireLight(flat(2, 1, 0), filepath.Join(t.TempDir(), "none")); err == nil {
+	missingDirectory := filepath.Join(t.TempDir(), "none")
+	if err := fireLight(flat(2, 1, 0), missingDirectory); err == nil {
 		t.Error("a missing directory was read")
 	}
 	hole := t.TempDir()

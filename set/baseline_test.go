@@ -30,7 +30,7 @@ const baselineFile = "testdata/baseline-v1.digests"
 // YAML files the baseline reads, each with a pattern's depth: a folder
 // alone is read one level deep, a folder ending in "/..." all the way down.
 var baselineFolders = []string{"sets", "doc", "set/testdata",
-	"hillside/testdata", "stage/testdata", "improv/..."}
+	"session/testdata", "stage/testdata", "improv/..."}
 
 // versionTwo matches the line a file says its schema on when the schema is
 // version 2; such a file is no version 1 set and is not in the baseline.
@@ -95,18 +95,22 @@ func (dump dumper) write(value reflect.Value, depth int) {
 	}
 	switch value.Kind() {
 	case reflect.Bool:
-		dump.text(strconv.FormatBool(value.Bool()))
+		flag := strconv.FormatBool(value.Bool())
+		dump.text(flag)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32,
 		reflect.Int64:
-		dump.text(strconv.FormatInt(value.Int(), dumpDecimal))
+		whole := strconv.FormatInt(value.Int(), dumpDecimal)
+		dump.text(whole)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32,
 		reflect.Uint64, reflect.Uintptr:
-		dump.text(strconv.FormatUint(value.Uint(), dumpDecimal))
+		counted := strconv.FormatUint(value.Uint(), dumpDecimal)
+		dump.text(counted)
 	case reflect.Float32, reflect.Float64:
 		float := value.Float()
 		dump.text(strconv.FormatFloat(float, 'g', -1, dumpFloatBits))
 	case reflect.String:
-		dump.text(strconv.Quote(value.String()))
+		quoted := strconv.Quote(value.String())
+		dump.text(quoted)
 	case reflect.Pointer, reflect.Interface:
 		dump.indirect(value, depth)
 	case reflect.Func:

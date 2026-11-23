@@ -241,7 +241,8 @@ func TestFrondsOfOneFernDiffer(t *testing.T) {
 // to the whole number it came from.
 func TestASproutIsDrawnFromItsRowAndIndex(t *testing.T) {
 	const number, row, index = 6, 2, 5
-	want := sow(uint64(unit(number, row, index, 3) * (1 << 53)))
+	scaled := uint64(unit(number, row, index, 3) * (1 << 53))
+	want := sow(scaled)
 	if got := sow(number).sprout(row, index); got != want {
 		t.Errorf("sprout(%d, %d) is %v, not %v", row, index, got, want)
 	}

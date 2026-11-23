@@ -1,1 +1,1 @@
-guide-star-deck . :: ./bin/hillside -set doc/guide-star-deck.yaml -out out/guide-star-deck.png
+guide-star-deck . :: ./bin/slayer draw doc/guide-star-deck.yaml --out out/guide-star-deck.png

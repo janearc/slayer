@@ -11,11 +11,13 @@ import (
 	"testing"
 
 	"github.com/janearc/slayer/cheeptune"
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/ninjafilm"
 	namedscene "github.com/janearc/slayer/scene/named"
 	"github.com/janearc/slayer/scene/smoke"
+	"go.uber.org/mock/gomock"
 )
 
 // registered is every name each heading's registry holds, read from the
@@ -194,7 +196,9 @@ func TestListSaysARegistryThatFails(t *testing.T) {
 		t.Errorf("a broken registry in JSON said %q", got.wrongSaid)
 	}
 	topics = kept
-	full := failingWriter{}
+	full := mocks.NewMockWriter(gomock.NewController(t))
+	full.EXPECT().Write(gomock.Any()).Return(nothing, errors.New("full")).
+		AnyTimes()
 	if err := sayHeadings(full, false); err == nil {
 		t.Error("the headings were said to a writer that took nothing")
 	}
@@ -204,14 +208,6 @@ func TestListSaysARegistryThatFails(t *testing.T) {
 	if err := writeJSON(full, func() {}); err == nil {
 		t.Error("a function was written as JSON")
 	}
-}
-
-// failingWriter takes nothing.
-type failingWriter struct{}
-
-// Write refuses every byte.
-func (failingWriter) Write([]byte) (int, error) {
-	return nothing, errors.New("full")
 }
 
 // list's example: the headings there are.

@@ -29,8 +29,9 @@ type Ring struct {
 // NewRing is a grey ring of even depth, refused outside what a ring can
 // be.
 func NewRing(inner, outer, depth, albedo, lean float64) (Ring, error) {
-	if !(inner > 0) || !(outer > inner) || !(depth >= 0) ||
-		!(albedo >= 0 && albedo <= 1) || !(lean > -1 && lean < 1) {
+	if !(inner > nothing) || !(outer > inner) || !(depth >= nothing) ||
+		!(albedo >= nothing && albedo <= whole) ||
+		!(lean > -whole && lean < whole) {
 		return Ring{}, fmt.Errorf("a ring from %g to %g m, depth %g, "+
 			"albedo %g, lean %g", inner, outer, depth, albedo, lean)
 	}
@@ -59,7 +60,7 @@ type ringlets struct {
 // coarsest ringlets so many metres across. modelled.
 func (ring Ring) Ringleted(seed uint64, strength, width float64) (Ring,
 	error) {
-	if !(strength >= 0) || !(width > 0) {
+	if !(strength >= nothing) || !(width > nothing) {
 		return ring, fmt.Errorf("ringlets of strength %g, %g m across",
 			strength, width)
 	}
@@ -67,31 +68,33 @@ func (ring Ring) Ringleted(seed uint64, strength, width float64) (Ring,
 	return ring, nil
 }
 
-// ringletOctaves is how many layers of ringlets, each 2.3 times finer
-// and 0.6 times as strong as the one before: picked.
-const ringletOctaves = 5
+// ringletOctaves is how many layers of ringlets there are, each finer and
+// weaker than the one before; its value is in picks.yaml.
+var ringletOctaves = pickCount("ringlet-octaves")
 
 // ringletFiner is how many times finer each layer of ringlets is than the one
 // before, ringletWeaker how strong it is against that one's, and ringletAcross
-// where across the ring's other two axes the noise is read: picked.
-const (
-	ringletFiner  = 2.3
-	ringletWeaker = 0.6
-	ringletAcross = 0.5
+// where across the ring's other two axes the noise is read; all three are in
+// picks.yaml.
+var (
+	ringletFiner  = pick("ringlet-finer")
+	ringletWeaker = pick("ringlet-weaker")
+	ringletAcross = pick("ringlet-across")
 )
 
 // share is how much of the ring's mean depth stands at a reach.
 func (made ringlets) share(reach float64) float64 {
-	if made.strength == 0 {
-		return 1
+	if made.strength == nothing {
+		return whole
 	}
-	sum, size, strength := 0.0, 1/made.width, 1.0
-	for i := 0; i < ringletOctaves; i++ {
+	var sum float64
+	size, strength := whole/made.width, float64(whole)
+	for i := nothing; i < ringletOctaves; i++ {
 		sum += strength * noise.Gradient(made.seed+uint64(i), size*reach,
 			ringletAcross, ringletAcross)
 		size, strength = size*ringletFiner, strength*ringletWeaker
 	}
-	return math.Max(0, 1+made.strength*sum)
+	return math.Max(nothing, whole+made.strength*sum)
 }
 
 // measured is a stretch of a ring's depth measured through another
@@ -111,9 +114,8 @@ type measured struct {
 // its depth is the stretch's as light sees it from far off, and its
 // ringlets are the stretch's own, in place of any made up.
 //
-// measured, and as true as laying it across is. a ray reads the profile
-// as wide as it is, as the mean light kept straight through; at a slant
-// that keeps a little less than the stretch's own would.
+// a ray reads the profile as wide as it is, as the mean light kept straight
+// through; at a slant that keeps a little less than the stretch's own would.
 func (ring Ring) Measured(profile occultation.Profile, from,
 	to float64) (Ring, error) {
 	if !(from >= profile.Inner()) || !(to <= profile.Outer()) ||
@@ -121,8 +123,8 @@ func (ring Ring) Measured(profile occultation.Profile, from,
 		return ring, fmt.Errorf("a stretch from %g to %g m of a profile "+
 			"from %g to %g m", from, to, profile.Inner(), profile.Outer())
 	}
-	depth := profile.Seen((from+to)/2, to-from)
-	if !(depth > 0) {
+	depth := profile.Seen((from+to)/double, to-from)
+	if !(depth > nothing) {
 		return ring, fmt.Errorf("the stretch from %g to %g m is empty", from,
 			to)
 	}
@@ -136,8 +138,8 @@ func (ring Ring) Measured(profile occultation.Profile, from,
 // so many metres wide there: the profile's depth at the place laid
 // there, over the ring's. a ring not measured is even.
 func (made measured) share(ring Ring, reach, finest float64) float64 {
-	if made.wide == 0 {
-		return 1
+	if made.wide == nothing {
+		return whole
 	}
 	there := made.from + (reach-ring.inner)*made.wide
 	seen := made.baked.Seen(float32(there), float32(finest*made.wide))
@@ -172,16 +174,16 @@ func (ring Ring) kept(slant float64) float64 {
 // through its rings, from a star one way, with the pole another, both
 // unit ways: the ring the star's ray crosses the equator's plane in, if
 // any, kept as its depth along the slant says.
-func shadowed(rings []Ring, p, star, pole maths.Vec) float64 {
+func shadowed(rings []Ring, point, star, pole maths.Vec) float64 {
 	slant := star.Dot(pole)
-	if slant == 0 {
-		return 1
+	if slant == nothing {
+		return whole
 	}
-	along := -p.Dot(pole) / slant
-	if !(along > 0) {
-		return 1
+	along := -point.Dot(pole) / slant
+	if !(along > nothing) {
+		return whole
 	}
-	crossed := p.Add(star.Scale(along))
+	crossed := point.Add(star.Scale(along))
 	reach := crossed.Len()
 	plane := maths.Upright(pole)
 	x, z := crossed.Dot(plane.X), crossed.Dot(plane.Z)
@@ -191,7 +193,7 @@ func shadowed(rings []Ring, p, star, pole maths.Vec) float64 {
 				math.Abs(slant))
 		}
 	}
-	return 1
+	return whole
 }
 
 // A RingSlab is a ring as the tracer marches it: a slab in the ring's
@@ -200,41 +202,55 @@ func shadowed(rings []Ring, p, star, pole maths.Vec) float64 {
 //
 // real rings are tens of metres thick; the slab is thicker so a march
 // finds it, and thinner per metre to match, so its depth through is the
-// ring's: picked, and seen only edge on.
+// ring's. it is seen only edge on.
 type RingSlab struct {
 	ring  Ring
 	half  float64
 	light gas.Gas
 }
 
+// greyRing is a ring's optics a metre: its albedo's share scattered and the
+// rest absorbed, at a depth through the slab.
+type greyRing struct {
+	albedo  tint
+	through float64
+}
+
+// at is the absorption and scattering a metre of the slab gives a
+// wavelength in nanometres.
+func (grey greyRing) at(nm float64) (absorb, scatter float64) {
+	albedo := grey.albedo.at(nm)
+	return (whole - albedo) * grey.through, albedo * grey.through
+}
+
 // NewRingSlab is a ring as a slab of a thickness in metres.
 func NewRingSlab(ring Ring, thickness float64) (RingSlab, error) {
-	if !(thickness > 0) {
+	if !(thickness > nothing) {
 		return RingSlab{}, fmt.Errorf("a slab %g m thick", thickness)
 	}
-	through := ring.depth / thickness
-	light := gas.Gas{Name: "ring", Phase: ring.lean,
-		Visible: func(nm float64) (absorb, scatter float64) {
-			albedo := ring.albedo.at(nm)
-			return (1 - albedo) * through, albedo * through
-		}}
-	return RingSlab{ring: ring, half: thickness / 2, light: light}, nil
+	grey := greyRing{albedo: ring.albedo, through: ring.depth / thickness}
+	var light gas.Gas
+	light.Name = "ring"
+	light.Phase = ring.lean
+	light.Visible = grey.at
+	return RingSlab{ring: ring, half: thickness / double, light: light}, nil
 }
 
 // Density is the ring's share of its mean depth there, its ringlets', inside
 // the slab, and zero outside it.
-func (slab RingSlab) Density(p maths.Vec) float64 {
-	return slab.ring.at(p, slab.half)
+func (slab RingSlab) Density(point maths.Vec) float64 {
+	return slab.ring.at(point, slab.half)
 }
 
 // at is the ring's share of its mean depth at a point of its own space, in a
 // slab so many metres from its plane: its ringlets' inside it, zero outside.
-func (ring Ring) at(p maths.Vec, half float64) float64 {
-	reach := math.Hypot(p.X, p.Z)
-	if math.Abs(p.Y) > half || reach < ring.inner || reach >= ring.outer {
-		return 0
+func (ring Ring) at(point maths.Vec, half float64) float64 {
+	reach := math.Hypot(point.X, point.Z)
+	if math.Abs(point.Y) > half || reach < ring.inner ||
+		reach >= ring.outer {
+		return nothing
 	}
-	return ring.share(p.X, p.Z)
+	return ring.share(point.X, point.Z)
 }
 
 // share is how much of the ring's mean depth stands at a point of its
@@ -250,9 +266,7 @@ func (ring Ring) share(x, z float64) float64 {
 
 // Bounds is the slab's box.
 func (slab RingSlab) Bounds() maths.Box {
-	far := slab.ring.outer
-	return maths.Box{Min: maths.V(-far, -slab.half, -far),
-		Max: maths.V(far, slab.half, far)}
+	return slabBox(slab.ring.outer, slab.half)
 }
 
 // Gas is the ring's optics a metre at unit density: grey, scattering its

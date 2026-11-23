@@ -25,27 +25,6 @@ var fireGridStruct = structure{"FireGrid", []field{
 	floatField("offset", "source position"),
 }}
 
-// bakeFlame prepares a paired density/emission grid on Metal.
-func bakeFlame(grid boxed) ([]float32, []float32, time.Duration, error) {
-	kernel, inputs, err := prepareFlameBake(grid)
-	if err != nil {
-		return nil, nil, 0, err
-	}
-	defer kernel.Close()
-	samples, err := kernel.Grid(grid.cells[0]*grid.cells[1],
-		grid.cells[2], rows, 4, inputs)
-	if err != nil {
-		return nil, nil, kernel.GPUTime(), err
-	}
-	density := make([]float32, grid.count())
-	shine := make([]float32, grid.count()*3)
-	for i := range density {
-		density[i] = samples[4*i]
-		copy(shine[3*i:3*i+3], samples[4*i+1:4*i+4])
-	}
-	return density, shine, kernel.GPUTime(), nil
-}
-
 // prepareFlameBake shares validation, parameters and source between full-grid
 // reference callers and production's streamed writes into reserved storage.
 func prepareFlameBake(grid boxed) (*metal.Kernel, [][]byte, error) {

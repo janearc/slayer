@@ -8,7 +8,7 @@ import (
 
 	"github.com/gogpu/gg"
 	"github.com/gogpu/ui/render"
-	"github.com/janearc/slayer/hillside/placement"
+	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 )
 

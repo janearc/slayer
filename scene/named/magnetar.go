@@ -157,7 +157,7 @@ func buildMagnetar(held values, _ io.Writer) (*Built, error) {
 		}
 		quiet := glow.Glow
 		built.tick = func(at time.Duration) {
-			glow.Glow = quiet.Scale(lit.Brightness(at))
+			glow.Glow = quiet.Scale(lit.brightness(at))
 		}
 	}
 	built.eye = magnetarEye(held)

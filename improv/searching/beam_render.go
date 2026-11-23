@@ -12,7 +12,7 @@ import (
 
 // drawBeams retains a separate full-resolution primary beam drawer.
 // Its scene, camera, time and sample grid match the complementary base.
-func (renderer *Renderer) drawBeams(set *Set, state State,
+func (renderer *Renderer) drawBeams(set *set, state State,
 	eye maths.Subspace, lens film.Sensor) (*frame.Frame, error) {
 	key := state.Site + "-primary-beams"
 	drawer := renderer.drawers[key]

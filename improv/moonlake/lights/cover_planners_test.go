@@ -52,7 +52,7 @@ func (f plannerFrame) laserInput() (LaserConfig, LaserInput) {
 		ShoreRight: Vec{473.6, -294.5, -45.6}}
 	return config, LaserInput{Open: f.open, CloseTrees: f.close, Rim: f.rim, Camera: f.camera,
 		Moon: [3]float64{1, 1, 1}, Seconds: 0.7, ShoreRow: float64(f.height / 2),
-		Cues: LaserCues{Rig: 1, Gate: 1, GateLeft: -1, GateRight: -1, Sweep: -1, Beams: 4, Parity: -1, Figure: "fan"}}
+		Cues: laserCues{Rig: 1, Gate: 1, GateLeft: -1, GateRight: -1, Sweep: -1, Beams: 4, Parity: -1, Figure: "fan"}}
 }
 
 // sameLight reports whether two images hold the same values to within 1e-9.
@@ -68,14 +68,14 @@ func sameLight(a, b Image) bool {
 	return true
 }
 
-// TestPlanSearchlightsMatchesDrawingForEveryMove checks that splatting a plan gives the image AddSearchlights draws.
+// TestPlanSearchlightsMatchesDrawingForEveryMove checks that splatting a plan gives the image addSearchlights draws.
 func TestPlanSearchlightsMatchesDrawingForEveryMove(t *testing.T) {
 	f := newPlannerFrame(32, 18)
 	config := SearchConfig{Gain: 0.1, Count: 4}
 	for _, move := range []string{"fan", "viewer", "chase", "sweep"} {
 		input := f.searchInput(move)
 		wantSky, wantFront := f.blank(), f.blank()
-		AddSearchlights(wantSky, wantFront, config, input)
+		addSearchlights(wantSky, wantFront, config, input)
 		plan, err := PlanSearchlights(f.width, f.height, config, input)
 		if err != nil {
 			t.Fatalf("%s: %v", move, err)
@@ -147,27 +147,27 @@ func TestPlanSearchlightsRefusesBadInput(t *testing.T) {
 	}
 }
 
-// TestPlanLasersMatchesDrawing checks the plan and AddLasers agree over several cue sets.
+// TestPlanLasersMatchesDrawing checks the plan and addLasers agree over several cue sets.
 func TestPlanLasersMatchesDrawing(t *testing.T) {
 	f := newPlannerFrame(32, 18)
-	cases := map[string]func(*LaserCues){
-		"default":      func(c *LaserCues) {},
-		"sweep":        func(c *LaserCues) { c.Sweep = 0.3 },
-		"half rig":     func(c *LaserCues) { c.Rig = 0.5 },
-		"own colour":   func(c *LaserCues) { c.HasColour, c.Colour = true, [3]float64{1, 0.2, 0.4} },
-		"left only":    func(c *LaserCues) { c.GateLeft, c.GateRight = 1, 0 },
-		"right only":   func(c *LaserCues) { c.GateLeft, c.GateRight = 0, 1 },
-		"parity even":  func(c *LaserCues) { c.Parity, c.Figure, c.Beams = 0, "fan64", 64 },
-		"parity odd":   func(c *LaserCues) { c.Parity, c.Figure, c.Beams = 1, "fan64", 64 },
-		"wide fan":     func(c *LaserCues) { c.Beams, c.Figure = 9, "fan" },
-		"unset rig":    func(c *LaserCues) { c.Rig = -1 },
-		"phase figure": func(c *LaserCues) { c.FigurePhase = 0.37 },
+	cases := map[string]func(*laserCues){
+		"default":      func(c *laserCues) {},
+		"sweep":        func(c *laserCues) { c.Sweep = 0.3 },
+		"half rig":     func(c *laserCues) { c.Rig = 0.5 },
+		"own colour":   func(c *laserCues) { c.HasColour, c.Colour = true, [3]float64{1, 0.2, 0.4} },
+		"left only":    func(c *laserCues) { c.GateLeft, c.GateRight = 1, 0 },
+		"right only":   func(c *laserCues) { c.GateLeft, c.GateRight = 0, 1 },
+		"parity even":  func(c *laserCues) { c.Parity, c.Figure, c.Beams = 0, "fan64", 64 },
+		"parity odd":   func(c *laserCues) { c.Parity, c.Figure, c.Beams = 1, "fan64", 64 },
+		"wide fan":     func(c *laserCues) { c.Beams, c.Figure = 9, "fan" },
+		"unset rig":    func(c *laserCues) { c.Rig = -1 },
+		"phase figure": func(c *laserCues) { c.FigurePhase = 0.37 },
 	}
 	for name, mutate := range cases {
 		config, input := f.laserInput()
 		mutate(&input.Cues)
 		wantSky, wantFront := f.blank(), f.blank()
-		AddLasers(wantSky, wantFront, config, input)
+		addLasers(wantSky, wantFront, config, input)
 		plan, err := PlanLasers(f.width, f.height, config, input)
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
@@ -266,7 +266,7 @@ func TestPlanLasersRefusesBadInput(t *testing.T) {
 	}
 }
 
-// TestPlanSearchlightsBehindAndBesideTheCamera checks beams that never reach the frame plan nothing, as AddSearchlights draws nothing.
+// TestPlanSearchlightsBehindAndBesideTheCamera checks beams that never reach the frame plan nothing, as addSearchlights draws nothing.
 func TestPlanSearchlightsBehindAndBesideTheCamera(t *testing.T) {
 	f := newPlannerFrame(32, 18)
 	config := SearchConfig{Gain: 0.1, Count: 4}
@@ -276,7 +276,7 @@ func TestPlanSearchlightsBehindAndBesideTheCamera(t *testing.T) {
 	beside.Camera = NewCamera(f.width, f.height, CameraSettings{Azimuth: 109.65 + 40, LookDown: -0.5, GaugeWidth: 70.41, Focal: 150})
 	for name, input := range map[string]SearchInput{"behind": behind, "beside": beside} {
 		sky, front := f.blank(), f.blank()
-		AddSearchlights(sky, front, config, input)
+		addSearchlights(sky, front, config, input)
 		for i := range sky.Light {
 			if sky.Light[i] != 0 || front.Light[i] != 0 {
 				t.Fatalf("%s: drawing lit channel %d", name, i)
@@ -316,7 +316,7 @@ func TestPlanLasersHidesBeamsBehindTheRim(t *testing.T) {
 		input.Rim[x] = f.height
 	}
 	wantSky, wantFront := f.blank(), f.blank()
-	AddLasers(wantSky, wantFront, config, input)
+	addLasers(wantSky, wantFront, config, input)
 	plan, err := PlanLasers(f.width, f.height, config, input)
 	if err != nil {
 		t.Fatal(err)

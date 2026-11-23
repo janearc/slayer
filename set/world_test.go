@@ -21,7 +21,8 @@ func kilaueaIki(t *testing.T) string {
 // a set says its ground, its film, its things by name and its stands,
 // each as written, and a camera finds a thing by its name.
 func TestASetSaysItsWorld(t *testing.T) {
-	made, err := set.Read("kilauea-iki.yaml", []byte(kilaueaIki(t)))
+	source := kilaueaIki(t)
+	made, err := set.Read("kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +102,8 @@ func TestASetsSunIsWhereItSays(t *testing.T) {
 // kilaueaIkiRead is the kilauea iki set file, read.
 func kilaueaIkiRead(t *testing.T) set.Set {
 	t.Helper()
-	made, err := set.Read("kilauea-iki.yaml", []byte(kilaueaIki(t)))
+	source := kilaueaIki(t)
+	made, err := set.Read("kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +123,8 @@ func rigged(t *testing.T) string {
 
 // a set's rig is what it says: its frame, its lens and its shutter.
 func TestASetsRigIsWhatItSays(t *testing.T) {
-	made, err := set.Read("kilauea-iki.yaml", []byte(rigged(t)))
+	source := rigged(t)
+	made, err := set.Read("kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

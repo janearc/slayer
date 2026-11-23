@@ -99,7 +99,8 @@ type Session struct {
 // Check says whether Open would take in and out. It touches neither.
 // Ask it before a long job. Open the terminal when the job is done.
 func Check(in, out *os.File) error {
-	if !term.IsTerminal(int(in.Fd())) || !term.IsTerminal(int(out.Fd())) {
+	inputDescriptor := int(in.Fd())
+	if !term.IsTerminal(inputDescriptor) || !term.IsTerminal(int(out.Fd())) {
 		return fmt.Errorf("needs a terminal on both input and output")
 	}
 	return nil
@@ -110,13 +111,15 @@ func Open(in, out *os.File) (*Session, error) {
 	if err := Check(in, out); err != nil {
 		return nil, err
 	}
-	old, err := term.MakeRaw(int(in.Fd()))
+	inputDescriptor := int(in.Fd())
+	old, err := term.MakeRaw(inputDescriptor)
 	if err != nil {
 		return nil, err
 	}
 	if _, err := io.WriteString(out, "\x1b[?1049h\x1b[?25l"); err != nil {
 		// a terminal left raw, with nothing on it, is worse than none
-		term.Restore(int(in.Fd()), old)
+		restoreDescriptor := int(in.Fd())
+		term.Restore(restoreDescriptor, old)
 		return nil, fmt.Errorf("could not take over the screen: %w",
 			err)
 	}
@@ -159,6 +162,7 @@ func (s *Session) End() {
 		return
 	}
 	io.WriteString(s.out, "\x1b[0m\x1b[?25h\x1b[?1049l")
-	term.Restore(int(s.in.Fd()), s.old)
+	inputDescriptor := int(s.in.Fd())
+	term.Restore(inputDescriptor, s.old)
 	s.old = nil
 }

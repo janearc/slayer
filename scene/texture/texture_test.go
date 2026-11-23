@@ -13,9 +13,9 @@ var a, b = maths.Grey(0.8), maths.Grey(0.25)
 
 // Neighbouring cells alternate, across the floor in both directions.
 func TestCheckerAlternates(t *testing.T) {
-	c := Checker(1, a, b)
-	if c.At(maths.V(0, 0, 0)) != a || c.At(maths.V(1, 0, 0)) != b ||
-		c.At(maths.V(0, 0, 1)) != b || c.At(maths.V(1, 0, 1)) != a {
+	texture := Checker(1, a, b)
+	if texture.At(maths.V(0, 0, 0)) != a || texture.At(maths.V(1, 0, 0)) != b ||
+		texture.At(maths.V(0, 0, 1)) != b || texture.At(maths.V(1, 0, 1)) != a {
 		t.Error("a checker's neighbours do not alternate")
 	}
 }
@@ -34,8 +34,8 @@ func TestTheFloorIsNotOnABoundary(t *testing.T) {
 // It is three dimensional: going up a whole cell changes the colour, so a
 // ball in a checker is checkered all the way round.
 func TestCheckerIsSolid(t *testing.T) {
-	c := Checker(1, a, b)
-	if c.At(maths.V(0, 0, 0)) == c.At(maths.V(0, 1, 0)) {
+	texture := Checker(1, a, b)
+	if texture.At(maths.V(0, 0, 0)) == texture.At(maths.V(0, 1, 0)) {
 		t.Error("a cell up is the same colour")
 	}
 }
@@ -79,7 +79,8 @@ func TestAThinDiscWindsWithTime(t *testing.T) {
 	// at radius four the rate is one over eight: a quarter turn in
 	// four pi seconds
 	quarter := math.Pi / 2 * math.Pow(r, 1.5)
-	later := d.Tick(time.Duration(quarter * float64(time.Second))).(Thin)
+	elapsed := time.Duration(quarter * float64(time.Second))
+	later := d.Tick(elapsed).(Thin)
 	now := d.At(maths.V(r, 0, 0))
 	arrived := later.At(maths.V(0, 0, -r))
 	if moved := later.At(maths.V(r, 0, 0)); now == moved {

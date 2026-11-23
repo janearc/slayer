@@ -105,8 +105,8 @@ func drawBoth(staged judgedSet, asked judging) (both, error) {
 	if err != nil {
 		return both{}, err
 	}
-	text := learn.Chopped(terminal.Chop(colour.Develop(cells,
-		unitExposure)))
+	developedCells := colour.Develop(cells, unitExposure)
+	text := learn.Chopped(terminal.Chop(developedCells))
 	big, err := trace.Render(staged.world, staged.eye,
 		film.Pinhole{Wide: staged.wide}, asked.at,
 		textWide*sextantAcross*asked.k, textHigh*sextantDown*asked.k)

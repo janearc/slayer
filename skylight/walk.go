@@ -40,24 +40,38 @@ const (
 	escaped               // defined: above the top
 )
 
-// a walker is one worker's walk: the air, its own generator, the cap on
-// events, its tally, and its budget and census, in weights of a
-// photon's power.
+// a walker is one worker's walk: the air, its generator, the seed and
+// the number of its first photon, the cap on events, its tally, and its
+// budget and census, in weights of a photon's power.
 type walker struct {
 	air     *air
 	random  *rand.PCG
+	seed    uint64
+	first   uint64
 	most    int
 	tally   tally
 	spent   Budget
 	counted census
 }
 
-// newWalker is the walker at index, drawing from a generator seeded by
-// the seed and that index, with a tally of the grid's shape.
-func newWalker(made *air, grid Grid, seed uint64, index,
+// newWalker is the walker whose photons are numbered from first, each
+// drawing from the generator seeded by the seed and its own number,
+// with a tally of the grid's shape.
+func newWalker(made *air, grid Grid, seed, first uint64,
 	most int) *walker {
-	return &walker{air: made, random: rand.NewPCG(seed, uint64(index)),
-		most: most, tally: newTally(grid)}
+	return &walker{air: made, random: rand.NewPCG(seed, first), seed: seed,
+		first: first, most: most, tally: newTally(grid)}
+}
+
+// begin seeds the generator for the photon of a number: from the seed
+// and that number alone, so the photon draws the same numbers whatever
+// the photons before it drew.
+//
+// A column walked at two wavelengths from one seed so walks each photon
+// from the same numbers at both, and their noise moves together: the
+// sky's colour, a ratio of wavelengths, keeps less of it than either.
+func (w *walker) begin(number uint64) {
+	w.random.Seed(w.seed, number)
 }
 
 // uniform draws a number from nought up to, not including, one.
@@ -69,10 +83,12 @@ func (w *walker) uniform() float64 {
 // uniform draw from above nought to one.
 func (w *walker) depth() float64 { return -math.Log1p(-w.uniform()) }
 
-// run walks photons one after another, each to its end.
+// run walks photons one after another, each to its end, each from its
+// own number's draws.
 func (w *walker) run(photons int) {
 	var light photon
-	for range photons {
+	for number := range uint64(photons) {
+		w.begin(w.first + number)
 		w.launch(&light)
 		w.walk(&light)
 		w.counted.events += int64(light.events)
@@ -83,12 +99,13 @@ func (w *walker) run(photons int) {
 }
 
 // launch starts a photon on the top sphere, at a place drawn evenly
-// over the disc the sphere shows the sun, going away from the sun.
+// over the band of the disc the sphere shows the sun, going away from
+// the sun.
 func (w *walker) launch(light *photon) {
 	top := w.air.top
-	reach := top * math.Sqrt(w.uniform())
+	reach := w.air.band.reach(w.uniform())
 	across, along := math.Sincos(fullTurn * w.uniform())
-	height := math.Sqrt((top - reach) * (top + reach))
+	height := math.Sqrt(max(none, (top-reach)*(top+reach)))
 	*light = photon{position: vector{reach * along, reach * across, height},
 		heading: vector{none, none, -one},
 		layer:   len(w.air.layers) - one, weight: one}

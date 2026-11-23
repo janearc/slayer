@@ -1,0 +1,35 @@
+# The alley's lashings, 2026-11-20: the lashings strung across the narrow
+# gaps of an urban village, a few metres wide, where the lanes' lashings
+# would not reach. It starts from the lashings and says only what differs:
+# gaps of a metre to five, hung lower, mostly with bundles of thin wire.
+# Nothing is measured and nothing was looked up; each number says whether
+# it was recalled or picked.
+culture: alley
+says: cable across the alleys of an urban village, mostly bundles of wire
+from: lashings
+elements:
+- {element: span-least, says: "the nearest two walls may be and still be strung across", scope: district, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: span-most, says: "the farthest two walls may be and still be an alley, short of a lane", scope: district, draw: range, unit: m, least: 4.9, most: 4.9, kind: picked, by: "village study, 2026-11-20, picked, under the lanes' least"}
+- {element: run-least, says: "the least stretch two walls must face each other to be strung", scope: district, draw: range, unit: m, least: 2, most: 2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: clear-floor, says: "the lowest a cable hangs in an alley, over a person's head", scope: district, draw: range, unit: m, least: 2.8, most: 2.8, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: top-margin, says: "how far under the lower roof an anchor stands", scope: district, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: hang-least, says: "the least height between the lowest cable and the highest", scope: district, draw: range, unit: m, least: 2, most: 2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: cable-rate-most, says: "cables in a metre of alley at density one", scope: district, draw: range, unit: per m, least: 1.2, most: 1.2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: cable-radius, says: "half the side of a wire's square section", scope: district, draw: range, unit: m, least: 0.012, most: 0.012, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: sag-share, says: "how far a wire hangs at its middle, as a share of its span", scope: bay, draw: range, unit: share, least: 0.04, most: 0.12, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: end-offset, says: "how much higher one end of a wire is fixed than the other", scope: bay, draw: range, unit: m, least: -0.8, most: 0.8, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: plate-width, says: "width of the bracket a wire is fixed to", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: plate-height, says: "height of the bracket a wire is fixed to", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: plate-thick, says: "thickness of the bracket a wire is fixed to", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: dress
+  says: what a wire that carries something carries
+  scope: bay
+  draw: options
+  unit: share
+  options:
+  - {name: bundle, weight: 8}
+  - {name: lanterns, weight: 1}
+  - {name: tarpaulin, weight: 1}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, bundles of cable across and along the alleys; the weights picked"
+- {element: bundle-radius, says: "half the side of a bundle of wires", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "village study, 2026-11-20, picked"}

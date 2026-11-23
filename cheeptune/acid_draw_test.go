@@ -9,11 +9,11 @@ import (
 )
 
 func TestAnAccentOpensTheFilterAndShortensItsDecay(t *testing.T) {
-	f := &Filter{Cutoff: 500, Amount: 3, Accent: 1.5, Snap: 0.5,
-		Envelope: &Envelope{Decay: 0.2}}
+	f := &filter{Cutoff: 500, Amount: 3, Accent: 1.5, Snap: 0.5,
+		Envelope: &envelope{Decay: 0.2}}
 	_, plain := f.opening(strike{loud: 1, gate: 1})
-	run, loud := f.opening(strike{loud: Marks["ff"], gate: 1})
-	_, soft := f.opening(strike{loud: Marks["pp"], gate: 1})
+	run, loud := f.opening(strike{loud: marks["ff"], gate: 1})
+	_, soft := f.opening(strike{loud: marks["pp"], gate: 1})
 	if plain != 3 || math.Abs(loud-4.5) > 1e-9 || soft != 1.5 {
 		t.Errorf("amounts: plain %v, ff %v, pp %v", plain, loud, soft)
 	}

@@ -1,0 +1,26 @@
+# levels: how many pixels across the film a thing must span before it is
+# drawn at each level. A ladder is read coarsest first; a thing takes the
+# finest rung whose pixels it reaches, and a thing out of view the first.
+# The numbers are choices, picked by eye on the forest and the street, not
+# measured: a needle is about a pixel wide when a tree spans a thousand.
+ladders:
+  # trees: the manufactory's representations of a tree.
+  trees:
+    - {level: hull, pixels: 0}
+    - {level: clumps, pixels: 24}
+    - {level: demo, pixels: 300}
+  # buildings: a city's levels, for a building, a face, a storey, a window
+  # and a band of a tower's storeys alike.
+  buildings:
+    - {level: hull, pixels: 0}
+    - {level: quick, pixels: 24}
+    - {level: demo, pixels: 320}
+  # manufactory: any other kind, by the representations every kind has.
+  manufactory:
+    - {level: hull, pixels: 0}
+    - {level: quick, pixels: 24}
+    - {level: demo, pixels: 600}
+# bands: how many storeys of a tower's face are levelled together, when
+# the storeys of one segment of it would be drawn at different levels.
+bands:
+  tower-storeys: 4

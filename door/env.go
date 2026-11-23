@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/janearc/slayer/hillside"
+	"github.com/janearc/slayer/session"
 )
 
 // Given is what the edge hands the door: everything a verb reads from
@@ -29,6 +29,9 @@ type Given struct {
 	Now func() time.Time
 	// Directory is the working directory, absolute: out/ is under it.
 	Directory string
+	// Progress is where a still's draw says how far it is, a line at a
+	// time; nil is the process's standard error.
+	Progress io.Writer
 }
 
 // Env is the door's surroundings, checked: made by NewEnv, read by the
@@ -39,6 +42,7 @@ type Env struct {
 	environment func(string) (string, bool)
 	now         func() time.Time
 	directory   string
+	progress    io.Writer
 }
 
 // stamp is the four words that say which build is running.
@@ -66,15 +70,19 @@ func NewEnv(given Given) (Env, error) {
 	if err := errors.Join(missing...); err != nil {
 		return Env{}, err
 	}
+	progress := given.Progress
+	if progress == nil {
+		progress = os.Stderr
+	}
 	return Env{ctx: given.Context, environment: given.Environment,
-		now: given.Now, directory: given.Directory,
+		now: given.Now, directory: given.Directory, progress: progress,
 		build: stamp{given.Build, given.Built, given.Who,
 			given.Sessions}}, nil
 }
 
 // hillside is the stamp as hillside takes it.
-func (made stamp) hillside() hillside.Stamp {
-	return hillside.Stamped(made.build, made.built, made.who,
+func (made stamp) hillside() session.Stamp {
+	return session.Stamped(made.build, made.built, made.who,
 		made.sessions)
 }
 

@@ -11,3 +11,7 @@ func NewReadOnly(text string) *Widget {
 // SetEscapeHandler installs a disclosure return action for a focused editor.
 // A nil handler restores the ordinary unhandled Escape behavior.
 func (w *Widget) SetEscapeHandler(handler func()) { w.onEscape = handler }
+
+// SetSettingsHandler installs the action for command and comma in a focused
+// editor. A nil handler leaves the key unhandled.
+func (w *Widget) SetSettingsHandler(handler func()) { w.onSettings = handler }

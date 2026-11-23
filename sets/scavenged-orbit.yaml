@@ -1,0 +1,67 @@
+# a scavenged cluster in orbit: a dozen whole things the manufactory makes,
+# mostly the Space Launch System's core stage tanks, with a few boats and
+# motorhomes, each turned to an orientation its seed draws, docked round a
+# common centre of mass, touching, and strapped with bands where they touch,
+# in the sun with no ground and nothing to rest on. made by the cities
+# package (manufacture/cities/scavenged.go) through the manufactory's kind
+# scavenged-cluster. the mix of parts is this set's, below; the bands, the
+# interior and the size range are in manufacture/cities/scavenged.yaml, each
+# picked.
+#
+# what it holds: twelve parts, eight tanks, two boats and two motorhomes,
+# enclosing 36811 cubic metres, of which half is room people use, over a
+# storey of 2.4 m and 10 square metres each: 7669 square metres of floor,
+# 767 people, 0.021 people a cubic metre of enclosed volume. the figures are
+# the manufactory's own, at this set's detail, logged by the test
+# TestTheClusterOfTheOrbitSetSaysWhoLivesInIt.
+#
+# the picture is lit by the sun alone, so what the tanks and boats shade is
+# dark. the tanks are the paint of the SLS's own core stage, a rust orange;
+# the first picture drew them pale at an exposure of 0.02, which was too
+# much light, so this set's exposure is lower.
+#
+# version 1: no wear, dents, bending or water. parts are boxes to one
+# another, so two curved parts may stand a little apart where their boxes'
+# corners are empty, and the bands wrap across the gap.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: scavenged orbit
+  setting: space
+  light: sun
+  # the sun high on the camera's side, south-west, by eye
+  sun: {azimuth: 215, altitude: 35}
+  set:
+    things:
+      cluster:
+        kind: scavenged-cluster
+        seed: 12
+        # hull, since eight tanks and two boats at quick are more faces
+        # than a thing may be flattened into
+        complexity: hull
+        # the mix, by weight: six parts in ten tanks, two boats, two
+        # motorhomes
+        parts:
+          sls-core-tank: 6
+          alfa-hero: 2
+          winnebago: 2
+        count: 12
+        band_spacing: {value: 10, unit: m}
+        east: 0
+        north: 0
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    exposure: 0.002
+    wide: 40
+  cameras:
+    whole:
+      title: "the whole cluster, from the south-west and above"
+      location: {at: [-150, -300, 150]}
+      orientation: {look_at: [4, 0, 10]}
+    # the middle of the cluster, from the same side as the whole, a quarter
+    # of the way in, near enough to see the bands wrap the parts
+    closeup:
+      title: "the middle of the cluster, bands in view"
+      location: {at: [-40, -80, 40]}
+      orientation: {look_at: [4, -5, 5]}

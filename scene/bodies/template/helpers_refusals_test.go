@@ -74,10 +74,14 @@ func TestCometNamesTheRefusedPart(t *testing.T) {
 		_, err := comet("snowball", radius, kg(1e13), loss, coma, colours, dust, ion, 1)
 		return err
 	}
-	wantError(t, "no coma", build(km(5), km(0), goodTail(), goodTail()), "snowball:", "coma")
-	wantError(t, "flat dust tail", build(km(5), km(100), flat, goodTail()), "snowball:", "tail")
-	wantError(t, "flat ion tail", build(km(5), km(100), goodTail(), flat), "snowball:", "tail")
-	wantError(t, "no nucleus", build(km(0), km(100), goodTail(), goodTail()), "snowball", "radius")
+	noComa := build(km(5), km(0), goodTail(), goodTail())
+	wantError(t, "no coma", noComa, "snowball:", "coma")
+	flatDust := build(km(5), km(100), flat, goodTail())
+	wantError(t, "flat dust tail", flatDust, "snowball:", "tail")
+	flatIon := build(km(5), km(100), goodTail(), flat)
+	wantError(t, "flat ion tail", flatIon, "snowball:", "tail")
+	noNucleus := build(km(0), km(100), goodTail(), goodTail())
+	wantError(t, "no nucleus", noNucleus, "snowball", "radius")
 	if err := build(km(5), km(100), goodTail(), goodTail()); err != nil {
 		t.Errorf("a good comet: %v", err)
 	}

@@ -2,10 +2,10 @@ package typography
 
 import "fmt"
 
-// Placed is one letter set on a line: the letter, the glyph that draws
+// placed is one letter set on a line: the letter, the glyph that draws
 // it, and where the pen stands when it is drawn, in the font's units
 // from the start of the line.
-type Placed struct {
+type placed struct {
 	Letter rune
 	Glyph  Glyph
 	Pen    float64
@@ -14,7 +14,7 @@ type Placed struct {
 // Line is a line of letters laid out, and how far the pen went: its
 // advance, the width the line takes on the page, in the font's units.
 type Line struct {
-	Letters []Placed
+	Letters []placed
 	Width   float64
 }
 
@@ -31,7 +31,7 @@ func Layout(font Metrics, words string) (Line, error) {
 		}
 		line.Width += kern
 		line.Letters = append(line.Letters,
-			Placed{Letter: letter, Glyph: glyph, Pen: line.Width})
+			placed{Letter: letter, Glyph: glyph, Pen: line.Width})
 		line.Width += advance
 		before = glyph
 	}

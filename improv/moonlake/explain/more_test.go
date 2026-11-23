@@ -31,7 +31,7 @@ func TestReadScriptReadsAFile(t *testing.T) {
 	if err := os.WriteFile(path, []byte("says: ["), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := ReadScript(path, gridScore(t)); !errors.Is(err, ErrExplain) {
+	if _, err := ReadScript(path, gridScore(t)); !errors.Is(err, errExplain) {
 		t.Errorf("a broken file gave %v", err)
 	}
 }
@@ -85,7 +85,8 @@ func TestClampHoldsLevelsToZeroAndOne(t *testing.T) {
 // TestPanelClampsAReadingThatIsNotANumber checks a lamp whose level is
 // not a number is dark rather than propagating the value.
 func TestPanelClampsAReadingThatIsNotANumber(t *testing.T) {
-	light, err := NewLight("One", color.RGBA{}, steady(math.NaN()), steady(5))
+	unreadable := steady(math.NaN())
+	light, err := NewLight("One", color.RGBA{}, unreadable, steady(5))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +137,7 @@ func TestSaturationIsTheSpreadOverTheBrightest(t *testing.T) {
 // sentence is too long for the panel is refused by Compose itself.
 func TestComposeNamesASentenceThatDoesNotFit(t *testing.T) {
 	long := strings.Repeat("a long sentence that runs on ", 12)
-	read, err := ParseScript([]byte(`says: [{at_sec: 2, says: "`+long+`"}]`), gridScore(t))
+	read, err := parseScript([]byte(`says: [{at_sec: 2, says: "`+long+`"}]`), gridScore(t))
 	if err != nil {
 		t.Fatal(err)
 	}

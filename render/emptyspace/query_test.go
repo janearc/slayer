@@ -62,7 +62,8 @@ func TestExteriorIsUnknownEvenForZeroStoredSamples(test *testing.T) {
 			expectBox(test, mask, box, false)
 		}
 	}
-	expectBox(test, prepared(test, 0, 0, options()), cube, true)
+	space := prepared(test, 0, 0, options())
+	expectBox(test, space, cube, true)
 }
 
 func TestTinySamplesAndIndependentEmissionKeepInterpolationSupport(test *testing.T) {
@@ -72,7 +73,8 @@ func TestTinySamplesAndIndependentEmissionKeepInterpolationSupport(test *testing
 	for _, fields := range [][2]float32{
 		{math.SmallestNonzeroFloat32, 0}, {0, math.SmallestNonzeroFloat32},
 	} {
-		expectBox(test, prepared(test, fields[0], fields[1], options()), point, false)
+		space := prepared(test, fields[0], fields[1], options())
+		expectBox(test, space, point, false)
 	}
 }
 
@@ -81,8 +83,9 @@ func TestProofBudgetExhaustionKeepsMarching(test *testing.T) {
 	policy.QueryBricks = 1
 	mask := prepared(test, 1, 0, policy)
 	expectBox(test, mask, maths.Box{}, false)
+	space := prepared(test, 1, 0, options())
 	// The same origin is certifiably empty when its halo can be inspected.
-	expectBox(test, prepared(test, 1, 0, options()), maths.Box{}, true)
+	expectBox(test, space, maths.Box{}, true)
 }
 
 func TestPacketProofIncludesTheRayThatEntersOccupiedSupport(test *testing.T) {

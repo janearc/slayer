@@ -20,6 +20,9 @@ import (
 type places struct {
 	picture, raw  string
 	frames, movie string
+	// stood is where the table of places goes, where each thing of the
+	// scene was stood, or nothing where none is asked for.
+	stood string
 	// folder is the output's folder under the renders home, relative
 	// to it, or nothing where the output is not under one.
 	folder string
@@ -112,8 +115,9 @@ func (from placing) earlierFolder(home string) string {
 		return ""
 	}
 	today := from.datedFolder(home)
+	filmName := from.name()
 	pattern := filepath.Join(home, filmsFolder, datePattern+"-"+
-		globbed(from.name()))
+		globbed(filmName))
 	found, _ := filepath.Glob(pattern)
 	slices.Sort(found)
 	slices.Reverse(found)
@@ -341,6 +345,7 @@ func (made places) written() []string {
 		add(made.frames, "frames in %s, with its "+manifestName)
 	}
 	add(made.movie, "movie %s")
+	add(made.stood, "places table %s")
 	add(made.copied, "the job, copied to %s")
 	add(made.notes, "a note line in %s")
 	return lines

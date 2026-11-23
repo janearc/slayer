@@ -11,30 +11,42 @@ import (
 // the unit corner of a cube, A at the middle and B, C, D a unit along x,
 // y and z, wound to turn counterclockwise seen from outside: worked by
 // hand, (C-A)x(B-A) is -z for the floor, and so on round.
-var corner = []maths.Vec{maths.V(0, 0, 0), maths.V(1, 0, 0), maths.V(0, 1, 0),
-	maths.V(0, 0, 1)}
+var corner = []maths.Vec{maths.V(nought, nought, nought),
+	maths.V(unity, nought, nought), maths.V(nought, unity, nought),
+	maths.V(nought, nought, unity)}
 
-var cornerFaces = [][3]int{{0, 2, 1}, {0, 1, 3}, {0, 3, 2}, {1, 2, 3}}
+// cornerFaces are the four faces of the unit corner, each turning
+// counterclockwise seen from outside.
+var cornerFaces = []meshFace{
+	{meshFirst, meshThird, meshSecond}, {meshFirst, meshSecond, meshFourth},
+	{meshFirst, meshFourth, meshThird}, {meshSecond, meshThird, meshFourth},
+}
+
+// windFloor is the one face of the corner that lies on the floor.
+func windFloor() []meshFace {
+	return []meshFace{{meshFirst, meshSecond, meshThird}}
+}
 
 // a normal given at any length is kept one unit long, as Normals says.
 func TestGivenNormalsAreMadeOneUnitLong(t *testing.T) {
-	up := maths.V(0, 0, 2)
-	m, err := NewMesh([]maths.Vec{maths.V(0, 0, 0), maths.V(1, 0, 0),
-		maths.V(0, 1, 0)}, [][3]int{{0, 1, 2}}, []maths.Vec{up, up, up}, true)
+	up := maths.V(nought, nought, pair)
+	built, err := NewMesh(corner[:meshCorners], windFloor(),
+		[]maths.Vec{up, up, up}, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i, n := range m.Normals {
-		if n != maths.V(0, 0, 1) {
-			t.Errorf("normal %d is %v", i, n)
+	for place, normal := range built.Normals {
+		if normal != maths.V(nought, nought, unity) {
+			t.Errorf("normal %d is %v", place, normal)
 		}
 	}
 }
 
 // a corner at minus infinity is not a point, and is told so.
 func TestACornerAtMinusInfinityIsNoPoint(t *testing.T) {
-	_, err := NewMesh([]maths.Vec{maths.V(math.Inf(-1), 0, 0), maths.V(1, 0, 0),
-		maths.V(0, 1, 0)}, [][3]int{{0, 1, 2}}, nil, false)
+	vertices := []maths.Vec{maths.V(math.Inf(-unity), nought, nought),
+		corner[meshSecond], corner[meshThird]}
+	_, err := NewMesh(vertices, windFloor(), nil, false)
 	if err == nil || !strings.Contains(err.Error(), "not a finite point") {
 		t.Errorf("a corner at minus infinity: %v", err)
 	}
@@ -44,8 +56,10 @@ func TestACornerAtMinusInfinityIsNoPoint(t *testing.T) {
 // nothing: its volume is exactly zero, and zero is not inside out. every
 // product here is exact, so the zero is too.
 func TestATwoSidedTriangleIsClosedAndNotInsideOut(t *testing.T) {
-	m, err := NewMesh(corner[:3], [][3]int{{0, 1, 2}, {0, 2, 1}}, nil, false)
-	if err != nil || !m.Closed() {
+	faces := []meshFace{{meshFirst, meshSecond, meshThird},
+		{meshFirst, meshThird, meshSecond}}
+	built, err := NewMesh(corner[:meshCorners], faces, nil, false)
+	if err != nil || !built.Closed() {
 		t.Fatalf("a two-sided triangle: %v", err)
 	}
 }
@@ -54,8 +68,8 @@ func TestATwoSidedTriangleIsClosedAndNotInsideOut(t *testing.T) {
 // volumes come to an eighth: any volume greater than zero is outward.
 func TestASmallClosedPieceIsOutward(t *testing.T) {
 	small := make([]maths.Vec, len(corner))
-	for i, v := range corner {
-		small[i] = v.Scale(0.5)
+	for place, vertex := range corner {
+		small[place] = vertex.Scale(half)
 	}
 	if _, err := NewMesh(small, cornerFaces, nil, false); err != nil {
 		t.Error(err)
@@ -69,17 +83,23 @@ func TestASmallClosedPieceIsOutward(t *testing.T) {
 // and D alone come to minus a hundred, by hand: but the piece is whole,
 // and outward, and so is the far one.
 func TestAPieceIsWeighedWhole(t *testing.T) {
-	far := maths.V(100, 100, 100)
+	reach := picked(t, "wind-far-reach")
+	far := maths.V(reach, reach, reach)
 	vertices := append([]maths.Vec(nil), corner...)
-	for _, v := range corner {
-		vertices = append(vertices, v.Add(far))
+	for _, vertex := range corner {
+		vertices = append(vertices, vertex.Add(far))
 	}
-	faces := [][3]int{{0, 2, 1}, {1, 3, 0}, {2, 0, 3}, {3, 1, 2}}
-	for _, f := range cornerFaces {
-		faces = append(faces, [3]int{f[0] + 4, f[1] + 4, f[2] + 4})
+	faces := []meshFace{{meshFirst, meshThird, meshSecond},
+		{meshSecond, meshFourth, meshFirst},
+		{meshThird, meshFirst, meshFourth},
+		{meshFourth, meshSecond, meshThird}}
+	near := len(corner)
+	for _, face := range cornerFaces {
+		faces = append(faces, meshFace{face[meshFirst] + near,
+			face[meshSecond] + near, face[meshThird] + near})
 	}
-	m, err := NewMesh(vertices, faces, nil, false)
-	if err != nil || !m.Closed() {
+	built, err := NewMesh(vertices, faces, nil, false)
+	if err != nil || !built.Closed() {
 		t.Fatalf("two outward corners: %v", err)
 	}
 }
@@ -88,13 +108,16 @@ func TestAPieceIsWeighedWhole(t *testing.T) {
 // face's own way is the answer: the middle of an edge whose two ends
 // face opposite ways.
 func TestWhereTheNormalsCancelTheFaceIsFlat(t *testing.T) {
-	up, down := maths.V(0, 0, 1), maths.V(0, 0, -1)
-	m, err := NewMesh([]maths.Vec{maths.V(0, 0, 0), maths.V(2, 0, 0),
-		maths.V(0, 2, 0)}, [][3]int{{0, 1, 2}}, []maths.Vec{up, down, up}, true)
+	up := maths.V(nought, nought, unity)
+	down := maths.V(nought, nought, -unity)
+	vertices := []maths.Vec{corner[meshFirst], maths.V(pair, nought, nought),
+		maths.V(nought, pair, nought)}
+	built, err := NewMesh(vertices, windFloor(), []maths.Vec{up, down, up},
+		true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := m.Normal(maths.V(1, 0, 0)); got != up {
+	if got := built.Normal(maths.V(unity, nought, nought)); got != up {
 		t.Errorf("at the edge's middle the normal is %v", got)
 	}
 }
@@ -102,15 +125,17 @@ func TestWhereTheNormalsCancelTheFaceIsFlat(t *testing.T) {
 // an open mesh has no inside, whichever way it is wound, from below it,
 // where Inside's ray passes up through it.
 func TestAnOpenMeshHasNoInsideWhereItsRayCrosses(t *testing.T) {
-	flat := []maths.Vec{maths.V(-10, -10, 0), maths.V(10, -10, 0),
-		maths.V(0, 10, 0)}
-	for _, f := range [][3]int{{0, 1, 2}, {0, 2, 1}} {
-		m, err := NewMesh(flat, [][3]int{f}, nil, false)
+	reach := picked(t, "wind-flat-reach")
+	flat := []maths.Vec{maths.V(-reach, -reach, nought),
+		maths.V(reach, -reach, nought), maths.V(nought, reach, nought)}
+	for _, face := range []meshFace{{meshFirst, meshSecond, meshThird},
+		{meshFirst, meshThird, meshSecond}} {
+		built, err := NewMesh(flat, []meshFace{face}, nil, false)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if m.Inside(maths.V(0, 0, -1)) {
-			t.Errorf("wound %v, a point below it is inside", f)
+		if built.Inside(maths.V(nought, nought, -unity)) {
+			t.Errorf("wound %v, a point below it is inside", face)
 		}
 	}
 }
@@ -120,10 +145,12 @@ func TestAnOpenMeshHasNoInsideWhereItsRayCrosses(t *testing.T) {
 // from a point as far again, each face's cone is near 1e18 and the piece
 // near 1e-9, past what a float carries.
 func TestASmallPieceFarOutIsWeighedFromItsMiddle(t *testing.T) {
-	out := maths.V(1e6, 1e6, 1e6)
+	reach := picked(t, "wind-far-out")
+	out := maths.V(reach, reach, reach)
+	scale := picked(t, "wind-small-scale")
 	small := make([]maths.Vec, len(corner))
-	for i, v := range corner {
-		small[i] = v.Scale(1e-3).Add(out)
+	for place, vertex := range corner {
+		small[place] = vertex.Scale(scale).Add(out)
 	}
 	if _, err := NewMesh(small, cornerFaces, nil, false); err != nil {
 		t.Error(err)

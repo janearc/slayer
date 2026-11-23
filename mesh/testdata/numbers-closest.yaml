@@ -1,0 +1,32 @@
+# every number closest_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: closest-agreement
+    value: 1e-12
+    says: how close two weights, two squared distances or two points must be to count as one
+    kind: picked
+    by: a part in a million million, far above the rounding of a few operations on numbers near ten and far below the gap between two regions
+  - name: closest-small-scale
+    value: 0.125
+    says: the size of the shrunken triangles, as a share of the first
+    kind: picked
+    by: a power of two, so shrinking is exact, small enough that the dots of the triangles' sides are all under one
+  - name: closest-grid-start
+    value: -6
+    says: where the grid of points begins, on each of the plane's two axes, in the triangle's own size
+    kind: picked
+    by: a whole number of steps past the lowest corner of any triangle, so the grid reaches every region round it
+  - name: closest-grid-end
+    value: 10
+    says: where the grid of points ends, on each of the plane's two axes, in the triangle's own size
+    kind: picked
+    by: a whole number of steps past the highest corner of any triangle, so the grid reaches every region round it
+  - name: closest-grid-step
+    value: 0.5
+    says: the gap between one point of the grid and the next, in the triangle's own size
+    kind: picked
+    by: a binary fraction, so each point of the grid is exact, and fine enough to put points in every region
+  - name: closest-grid-below
+    value: -2.5
+    says: how far under the plane the lowest points of the grid are, in the triangle's own size
+    kind: picked
+    by: a height that is neither the height of the plane nor the height above it, so a point under the face is asked for as well

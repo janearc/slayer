@@ -76,7 +76,8 @@ func TestTheKeyCoversTheFilesTheJobReads(t *testing.T) {
 		}
 		writtenIn(t, directory, each.file, each.file)
 	}
-	if !strings.Contains(string(made.Canonical()), `"inputs"`) {
+	canonical := string(made.Canonical())
+	if !strings.Contains(canonical, `"inputs"`) {
 		t.Error("the canonical form names no inputs")
 	}
 }
@@ -158,8 +159,9 @@ func sideBySide(t *testing.T, texts ...string) []Job {
 	directory := t.TempDir()
 	var made []Job
 	for i, text := range texts {
-		job, err := Read(writtenIn(t, directory, fmt.Sprintf("job%d.yaml",
-			i), text))
+		fileName := fmt.Sprintf("job%d.yaml",
+			i)
+		job, err := Read(writtenIn(t, directory, fileName, text))
 		if err != nil {
 			t.Fatal(err)
 		}

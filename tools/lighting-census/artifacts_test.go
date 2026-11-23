@@ -52,7 +52,8 @@ func TestReadFrameRefusesMissingTruncatedAndNonfiniteArtifacts(t *testing.T) {
 		t.Fatal("truncated coverage/depth was accepted")
 	}
 	data := make([]byte, 8)
-	binary.LittleEndian.PutUint32(data, math.Float32bits(float32(math.NaN())))
+	notANumber := float32(math.NaN())
+	binary.LittleEndian.PutUint32(data, math.Float32bits(notANumber))
 	if err := os.WriteFile(detail, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,8 @@ func TestReadFrameRefusesMissingTruncatedAndNonfiniteArtifacts(t *testing.T) {
 	if err := os.WriteFile(detail, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	binary.LittleEndian.PutUint32(imageBytes[len(imageBytes)-4:], math.Float32bits(float32(math.Inf(1))))
+	infinite := float32(math.Inf(1))
+	binary.LittleEndian.PutUint32(imageBytes[len(imageBytes)-4:], math.Float32bits(infinite))
 	if err := os.WriteFile(image, imageBytes, 0o600); err != nil {
 		t.Fatal(err)
 	}

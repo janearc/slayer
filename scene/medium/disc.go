@@ -7,10 +7,29 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
+// firstEntry is the place of a profile's first entry.
+const firstEntry = 0 // defined: the first place of a slice
+
+// The numbers of a disc's ringlets and faces are chosen for the picture, in
+// choices.yaml. discRinglets is how many ringlets there are when Ringlets
+// says none; discRingY and discRingZ are where the ringlet noise is read on
+// its other two axes; discOctaves is its octaves; and discFace is how much of
+// the disc's half thickness each face is soft over.
+var (
+	discRinglets = choice("disc-ringlets")
+	discRingY    = choice("disc-ring-y")
+	discRingZ    = choice("disc-ring-z")
+	discOctaves  = choiceCount("disc-octaves")
+	discFace     = choice("disc-face")
+)
+
 // Disc is a flat ring of something round its own y axis: the rings of a
 // giant, or, glowing, the disc round a hole. It runs from Inner to Outer
 // and is Thick across, and how dense it is varies with the radius by a
 // Profile, which is where the gaps are, and by ringlets of noise.
+//
+// Its radial edges are not soft: at Inner and at Outer the density is the
+// profile's value there.
 type Disc struct {
 	Inner, Outer, Thick float64
 	// Dense is the density where the profile is one. Zero means one. A
@@ -32,44 +51,46 @@ type Disc struct {
 }
 
 // Bounds is the box the disc just fits in.
-func (d Disc) Bounds() maths.Box {
-	r, h := d.Outer, d.Thick/2
-	return maths.Box{Min: maths.V(-r, -h, -r), Max: maths.V(r, h, r)}
+func (disc Disc) Bounds() maths.Box {
+	outer, half := disc.Outer, disc.Thick/double
+	return corners(maths.V(-outer, -half, -outer), maths.V(outer, half, outer))
 }
 
 // Span is where a ray crosses the slab the disc lies in, clipped to the
 // cylinder of its outer radius.
-func (d Disc) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	h := d.Thick / 2
+func (disc Disc) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	half := disc.Thick / double
 	enter, leave := near, far
-	if r.Dir.Y == 0 {
-		if math.Abs(r.At.Y) > h {
-			return 0, 0, false
+	if ray.Dir.Y == nought {
+		if math.Abs(ray.At.Y) > half {
+			return nought, nought, false
 		}
 	} else {
-		t0, t1 := (-h-r.At.Y)/r.Dir.Y, (h-r.At.Y)/r.Dir.Y
-		if t0 > t1 {
-			t0, t1 = t1, t0
+		lower := (-half - ray.At.Y) / ray.Dir.Y
+		upper := (half - ray.At.Y) / ray.Dir.Y
+		if lower > upper {
+			lower, upper = upper, lower
 		}
-		enter, leave = math.Max(enter, t0), math.Min(leave, t1)
+		enter, leave = math.Max(enter, lower), math.Min(leave, upper)
 	}
 	// the cylinder: the ray's x and z against the outer radius
 	// Keep the recorded arm64 rounding order explicit, including when
 	// coverage counters change the compiler's product selection.
-	a := math.FMA(r.Dir.X, r.Dir.X, r.Dir.Z*r.Dir.Z)
-	if a > 0 {
-		b := math.FMA(r.At.X, r.Dir.X, r.At.Z*r.Dir.Z) / a
-		squared := math.FMA(r.At.Z, r.At.Z, r.At.X*r.At.X)
-		c := math.FMA(-d.Outer, d.Outer, squared) / a
-		disc := math.FMA(b, b, -c)
-		if disc < 0 {
-			return 0, 0, false
+	sideways := math.FMA(ray.Dir.X, ray.Dir.X, ray.Dir.Z*ray.Dir.Z)
+	if sideways > nought {
+		along := math.FMA(ray.At.X, ray.Dir.X, ray.At.Z*ray.Dir.Z) / sideways
+		squared := math.FMA(ray.At.Z, ray.At.Z, ray.At.X*ray.At.X)
+		offset := math.FMA(-disc.Outer, disc.Outer, squared) / sideways
+		discriminant := math.FMA(along, along, -offset)
+		if discriminant < nought {
+			return nought, nought, false
 		}
-		root := math.Sqrt(disc)
-		enter = math.Max(enter, -b-root)
-		leave = math.Min(leave, -b+root)
-	} else if r.At.X*r.At.X+r.At.Z*r.At.Z > d.Outer*d.Outer {
-		return 0, 0, false
+		root := math.Sqrt(discriminant)
+		enter = math.Max(enter, -along-root)
+		leave = math.Min(leave, -along+root)
+	} else if ray.At.X*ray.At.X+ray.At.Z*ray.At.Z > disc.Outer*disc.Outer {
+		return nought, nought, false
 	}
 	return enter, leave, leave > enter
 }
@@ -77,50 +98,57 @@ func (d Disc) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
 // Density is the profile's density at the point's radius, thinned by the
 // ringlets, soft at the disc's two faces, and zero outside it, and at a point
 // that is not a number.
-func (d Disc) Density(p maths.Vec) float64 {
-	h := d.Thick / 2
-	if h <= 0 || d.Outer <= d.Inner || math.IsNaN(p.X+p.Y+p.Z) {
-		return 0
+func (disc Disc) Density(point maths.Vec) float64 {
+	half := disc.Thick / double
+	if half <= nought || disc.Outer <= disc.Inner ||
+		math.IsNaN(point.X+point.Y+point.Z) {
+		return nought
 	}
-	r := math.Hypot(p.X, p.Z)
-	if r < d.Inner || r > d.Outer || math.Abs(p.Y) > h {
-		return 0
+	radius := math.Hypot(point.X, point.Z)
+	if radius < disc.Inner || radius > disc.Outer ||
+		math.Abs(point.Y) > half {
+		return nought
 	}
-	t := (r - d.Inner) / (d.Outer - d.Inner)
-	dens := d.profile(t)
-	if d.Dense > 0 {
-		dens *= d.Dense
+	across := (radius - disc.Inner) / (disc.Outer - disc.Inner)
+	density := disc.profile(across)
+	if disc.Dense > nought {
+		density *= disc.Dense
 	}
-	if d.Grain > 0 {
-		n := d.Ringlets
-		if n <= 0 {
-			n = 60
+	if disc.Grain > nought {
+		ringlets := disc.Ringlets
+		if ringlets <= nought {
+			ringlets = discRinglets
 		}
-		ring := noise.Fractal(d.Seed, t*n, 0.37, 0.61, 3)
-		dens *= 1 - math.Max(0, math.Min(1, d.Grain))*(0.5+0.5*ring)
+		ring := noise.Fractal(disc.Seed, across*ringlets, discRingY,
+			discRingZ, discOctaves)
+		thin := math.Max(nought, math.Min(unity, disc.Grain))
+		density *= unity - thin*(halfway+halfway*ring)
 	}
 	// soft at each face, over the outer twentieth of the thickness
-	return dens * maths.Smooth(0, 0.1*h, h-math.Abs(p.Y))
+	return density * maths.Smooth(nought, discFace*half,
+		half-math.Abs(point.Y))
 }
 
-// profile is the density at t from zero at Inner to one at Outer. a t that is
-// not a number, from a point that is none, is no density.
-func (d Disc) profile(t float64) float64 {
-	if math.IsNaN(t) {
-		return 0
+// profile is the density at a share from zero at Inner to one at Outer. a
+// share that is not a number, from a point that is none, is no density.
+func (disc Disc) profile(share float64) float64 {
+	if math.IsNaN(share) {
+		return nought
 	}
-	n := len(d.Profile)
-	switch n {
-	case 0:
-		return 1
-	case 1:
-		return d.Profile[0]
+	entries := len(disc.Profile)
+	switch entries {
+	case nought:
+		return unity
+	case unity:
+		return disc.Profile[firstEntry]
 	}
-	x := math.Max(0, math.Min(1, t)) * float64(n-1)
-	i := int(math.Floor(x))
-	if i >= n-1 {
-		return d.Profile[n-1]
+	last := entries - unity
+	place := math.Max(nought, math.Min(unity, share)) * float64(last)
+	index := int(math.Floor(place))
+	if index >= last {
+		return disc.Profile[last]
 	}
-	f := x - float64(i)
-	return d.Profile[i]*(1-f) + d.Profile[i+1]*f
+	fraction := place - float64(index)
+	return disc.Profile[index]*(unity-fraction) +
+		disc.Profile[index+unity]*fraction
 }

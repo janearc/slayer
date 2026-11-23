@@ -1,0 +1,66 @@
+# the bare ground of the futian shore, drawn to prove where places land:
+# the copernicus surface model about 22.5200 north, 114.0200 east, a window
+# 4000 m across and 3000 m down at a 10 m step, smoothed 60 m, the sea at
+# half a metre. four plain towers stand at the corner lots of the city that
+# sets/futian-shore.yaml lays, so the plan shows where the city's corners
+# fall against the shore; the alley camera stands off a marker in the
+# alley the street camera of that set uses.
+#
+# places of things are metres in the window, east from its west edge and
+# north from its south edge. a camera's at and look_at are east from the
+# west edge, north as the window's northing less its 3000 m depth, and up
+# from the lowest ground in the window.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: futian shore, bare ground
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.5238
+    lon: 114.0209
+  sun:
+    azimuth: 247.73
+    altitude: 2.37
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.52
+    lon: 114.02
+    across: 4000
+    down: 3000
+    step: 10
+    smooth: 60
+    sea: {value: 0.5, unit: m}
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 70
+  cameras:
+    plan:
+      title: "straight down from 1500 m over the middle of the city"
+      location:
+        at: [2095, -1081, 1500]
+      orientation:
+        look_at: [2095, -1080, 0]
+    alley:
+      title: "at eye height in the alley, looking down it to the bay"
+      orientation:
+        point_to: the bay
+        alpha: 0
+      location:
+        loc_relative:
+          object: the alley eye
+          standoff_x: -5.55
+          standoff_y: -2.28
+          standoff_z: 1.7
+  recipes:
+    corner: {kind: tower, irregularity: 0.20, pins: {plan: rectangle, skin: curtain, style: punched, shafts: 1, storeys: 14, width: {value: 36, unit: m}}}
+  set:
+    things:
+      the alley eye: {kind: human-scale-2m, seed: 1, east: 2131.9, north: 1909.2}
+      the bay: {kind: human-scale-2m, seed: 1, east: 253.7, north: 1138.9}
+      south-west lot: {recipe: corner, seed: 1, complexity: quick, east: 1834.8, north: 1605.8, heading: {value: 337.7, unit: deg}}
+      north-west lot: {recipe: corner, seed: 2, complexity: quick, east: 1689.1, north: 1961.0, heading: {value: 337.7, unit: deg}}
+      north-east lot: {recipe: corner, seed: 3, complexity: quick, east: 2355.2, north: 2234.2, heading: {value: 337.7, unit: deg}}
+      south-east lot: {recipe: corner, seed: 4, complexity: quick, east: 2500.9, north: 1879.0, heading: {value: 337.7, unit: deg}}

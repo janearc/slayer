@@ -136,12 +136,12 @@ func Write(path string, image Image, scale float64) (err error) {
 		return err
 	}
 	defer func() { err = errors.Join(err, file.Close()) }()
-	return EncodePFM(file, image, scale)
+	return encodePFM(file, image, scale)
 }
 
-// EncodePFM writes image to writer as a colour PFM, bottom row first, as
+// encodePFM writes image to writer as a colour PFM, bottom row first, as
 // float32. The byte order follows the sign of scale, as byteOrder says.
-func EncodePFM(writer io.Writer, image Image, scale float64) error {
+func encodePFM(writer io.Writer, image Image, scale float64) error {
 	if err := validatePFM(image, scale); err != nil {
 		return err
 	}

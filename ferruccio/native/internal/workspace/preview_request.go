@@ -14,7 +14,7 @@ func (work *Workspace) previewRequest(now time.Time) preview.Request {
 		OutputRoot: work.options.Evidence, DirectoryPrefix: previewDirectoryPrefix(now, work.options.Tools.Agent),
 	}
 	if work.composition == "play" {
-		request.Profile = preview.Profile{Width: 640, Height: 400, CPURenderer: true}
+		request.Profile = work.ownRender(preview.Profile{Width: 640, Height: 400})
 	}
 	return request
 }

@@ -317,7 +317,8 @@ func TestEquirectangularHeightAtACentreIsThatSample(t *testing.T) {
 			for column := range 8 {
 				longitude, latitude := centreOf(column, row)
 				got, has, err := raster.EquirectangularElevation(longitude, latitude)
-				if err != nil || !has || !closeTo(got, float64(signedRamp(column, row))) {
+				expected := float64(signedRamp(column, row))
+				if err != nil || !has || !closeTo(got, expected) {
 					t.Fatalf("%d,%d: %v %v %v", column, row, got, has, err)
 				}
 			}

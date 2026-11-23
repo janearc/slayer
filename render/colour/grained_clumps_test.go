@@ -33,8 +33,11 @@ func grained(img *image.RGBA, size, amount float64, seed uint64) *image.RGBA {
 		for x := 0; x < b.Dx(); x++ {
 			k := 1 + amount*noise.Gradient(seed, (float64(x)+0.5)/size, (float64(y)+0.5)/size, 0.5)
 			c := img.RGBAAt(b.Min.X+x, b.Min.Y+y)
+			red := Encode(Decode(c.R) * k)
+			green := Encode(Decode(c.G) * k)
+			blue := Encode(Decode(c.B) * k)
 			out.SetRGBA(b.Min.X+x, b.Min.Y+y, color.RGBA{
-				Encode(Decode(c.R) * k), Encode(Decode(c.G) * k), Encode(Decode(c.B) * k), 255})
+				red, green, blue, 255})
 		}
 	}
 	return out

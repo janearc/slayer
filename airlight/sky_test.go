@@ -37,7 +37,7 @@ func pointWay(fields *Fields, view, round int, sunRound float64) maths.Vec {
 // spectrum's route, and the sky read along each point's way is it.
 func TestTheSkysTableAtItsPointsIsTheFields(t *testing.T) {
 	fields := countedFields()
-	made := NewSky(fields, wayAt(thirty*degree, none), handExposure)
+	made := newSky(fields, wayAt(thirty*degree, none), handExposure)
 	for view := range fields.views {
 		for round := range fields.azimuths {
 			want := pictured(fields.radiance[none][fields.index(none, view,
@@ -59,8 +59,8 @@ func TestTheSkysTableAtItsPointsIsTheFields(t *testing.T) {
 func TestTheSkyTurnsWithTheSun(t *testing.T) {
 	fields := countedFields()
 	look := pointWay(fields, handViews-one, none, none)
-	facing := NewSky(fields, wayAt(thirty*degree, none), handExposure)
-	turned := NewSky(fields, wayAt(thirty*degree, math.Pi), handExposure)
+	facing := newSky(fields, wayAt(thirty*degree, none), handExposure)
+	turned := newSky(fields, wayAt(thirty*degree, math.Pi), handExposure)
 	if near(turned.Light(look), facing.Light(look)) {
 		t.Error("the sky does not turn with the sun")
 	}
@@ -85,7 +85,7 @@ var straightDown, straightUp = maths.V(none, -one, none),
 func TestBelowTheHorizonIsTheUpwardLight(t *testing.T) {
 	fields := handFields(handZeniths, handViews, handAzimuths,
 		belowAndAbove(handUpward, handSky))
-	made := NewSky(fields, wayAt(thirty*degree, none), handExposure)
+	made := newSky(fields, wayAt(thirty*degree, none), handExposure)
 	if got, want := made.Light(straightDown),
 		pictured(handUpward, handExposure); !near(got, want) {
 		t.Errorf("below the horizon %v, want %v", got, want)
@@ -97,10 +97,12 @@ func TestBelowTheHorizonIsTheUpwardLight(t *testing.T) {
 // above as it was.
 func TestTheUpwardLightIsNotTheHorizonsHeldDown(t *testing.T) {
 	way := wayAt(thirty*degree, none)
-	plain := NewSky(handFields(handZeniths, handViews, handAzimuths,
-		belowAndAbove(handUpward, handSky)), way, handExposure)
-	brighter := NewSky(handFields(handZeniths, handViews, handAzimuths,
-		belowAndAbove(two*handUpward, handSky)), way, handExposure)
+	plainFields := handFields(handZeniths, handViews, handAzimuths,
+		belowAndAbove(handUpward, handSky))
+	plain := newSky(plainFields, way, handExposure)
+	brighterFields := handFields(handZeniths, handViews, handAzimuths,
+		belowAndAbove(two*handUpward, handSky))
+	brighter := newSky(brighterFields, way, handExposure)
 	if near(brighter.Light(straightDown), plain.Light(straightDown)) {
 		t.Error("the sky below does not follow the light coming up")
 	}
@@ -193,7 +195,7 @@ func creases(fields *Fields, read func(maths.Vec) maths.Light) []float64 {
 // cosine and by the azimuth: no crease for the eye to see as a seam.
 func TestTheSkysSlopeRunsOnAcrossABinCentre(t *testing.T) {
 	fields := smoothFields()
-	made := NewSky(fields, wayAt(thirty*degree, none), one)
+	made := newSky(fields, wayAt(thirty*degree, none), one)
 	for index, found := range creases(fields, made.Light) {
 		if found > creaseShare {
 			t.Errorf("crease %d: the slope changes by %.3g of itself",
@@ -208,7 +210,8 @@ func linearly(made *Sky) func(maths.Vec) maths.Light {
 	return func(toward maths.Vec) maths.Light {
 		toward = toward.Unit()
 		view := axisOf((toward.Y+one)/two, made.views)
-		round := axisOf(folded(roundOf(toward)-made.round)/math.Pi,
+		foldedRound := folded(roundOf(toward) - made.round)
+		round := axisOf(foldedRound/math.Pi,
 			made.azimuths)
 		at := func(row, column int) maths.Light {
 			return made.table[row*made.azimuths+column]
@@ -230,7 +233,7 @@ func blend(from, to maths.Light, share float64) maths.Light {
 // both ways, the seam the sunward picture showed, and the check sees it.
 func TestALinearReadingCreasesAtABinCentre(t *testing.T) {
 	fields := smoothFields()
-	made := NewSky(fields, wayAt(thirty*degree, none), one)
+	made := newSky(fields, wayAt(thirty*degree, none), one)
 	found := creases(fields, linearly(made))
 	for _, index := range []int{none, two} {
 		if !(found[index] > creaseShare) {
@@ -245,7 +248,7 @@ func TestALinearReadingCreasesAtABinCentre(t *testing.T) {
 func TestTheSkyIsHeldToTheHorizon(t *testing.T) {
 	fields := handFields(handZeniths, handViews, handAzimuths,
 		belowAndAbove(handUpward, handSky))
-	made := NewSky(fields, wayAt(thirty*degree, none), handExposure)
+	made := newSky(fields, wayAt(thirty*degree, none), handExposure)
 	look := lookAt(horizonCosine, none)
 	if got, want := made.Light(look),
 		pictured(handSky, handExposure); !near(got, want) {
@@ -258,7 +261,7 @@ func TestTheSkyIsHeldToTheHorizon(t *testing.T) {
 func TestTheLightFromBelowIsHeldToTheHorizon(t *testing.T) {
 	fields := handFields(handZeniths, handViews, handAzimuths,
 		belowAndAbove(handUpward, handSky))
-	made := NewSky(fields, wayAt(thirty*degree, none), handExposure)
+	made := newSky(fields, wayAt(thirty*degree, none), handExposure)
 	look := lookAt(-horizonCosine, none)
 	if got, want := made.Light(look),
 		pictured(handUpward, handExposure); !near(got, want) {

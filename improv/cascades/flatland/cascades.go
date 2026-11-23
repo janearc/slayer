@@ -44,15 +44,15 @@ func (level Level) Rays() int {
 	return level.ProbesPerSide * level.ProbesPerSide * level.Directions
 }
 
-// Position is where probe number n along an axis sits, in cells.
-func (level Level) Position(probe int) float64 {
+// position is where probe number n along an axis sits, in cells.
+func (level Level) position(probe int) float64 {
 	return (float64(probe) + 0.5) * float64(level.Spacing)
 }
 
-// Direction is the unit vector of direction number k. Directions are
+// direction is the unit vector of direction number k. Directions are
 // evenly spaced and offset by half a step, so the four children of a
 // direction are centred on it (paper figure 5).
-func (level Level) Direction(direction int) (float64, float64) {
+func (level Level) direction(direction int) (float64, float64) {
 	angle := (float64(direction) + 0.5) * 2 * math.Pi / float64(level.Directions)
 	sine, cosine := math.Sincos(angle)
 	return cosine, sine
@@ -156,7 +156,7 @@ func (cascade *merged) children(positionX, positionY float64, direction int) [Ba
 
 // extend is paper equation 11: the near interval, then whatever lies
 // beyond it, dimmed by the near interval's optical depth.
-func extend(near Interval, beyond [Bands]float64) [Bands]float64 {
+func extend(near interval, beyond [Bands]float64) [Bands]float64 {
 	var result [Bands]float64
 	for band := 0; band < Bands; band++ {
 		result[band] = near.Intensity[band] + math.Exp(-near.Tau[band])*beyond[band]
@@ -174,8 +174,8 @@ type tracer func(positionX, positionY float64, direction int) ([Bands]float64, i
 // interpolated around the same point. It counts one ray and its steps.
 func basicTracer(grid *Grid, level Level, above *merged) tracer {
 	return func(positionX, positionY float64, direction int) ([Bands]float64, int64, int64) {
-		directionX, directionY := level.Direction(direction)
-		near, steps := grid.March(positionX, positionY, directionX, directionY,
+		directionX, directionY := level.direction(direction)
+		near, steps := grid.march(positionX, positionY, directionX, directionY,
 			level.Start, level.End)
 		if above == nil {
 			return near.Intensity, 1, steps
@@ -192,7 +192,7 @@ func basicTracer(grid *Grid, level Level, above *merged) tracer {
 // blended with the bilinear weights. Sixteen rays per ray.
 func fixedTracer(grid *Grid, level Level, above *merged) tracer {
 	return func(positionX, positionY float64, direction int) ([Bands]float64, int64, int64) {
-		directionX, directionY := level.Direction(direction)
+		directionX, directionY := level.direction(direction)
 		startX := positionX + level.Start*directionX
 		startY := positionY + level.Start*directionY
 		var total [Bands]float64
@@ -212,14 +212,14 @@ func fixedTracer(grid *Grid, level Level, above *merged) tracer {
 // fixedChild adds one weighted contribution of the bilinear fix to total.
 func fixedChild(grid *Grid, above *merged, probe corner, child int,
 	startX, startY float64, total *[Bands]float64) int64 {
-	childX, childY := above.level.Direction(child)
-	endX := above.level.Position(probe.column) + above.level.Start*childX
-	endY := above.level.Position(probe.row) + above.level.Start*childY
+	childX, childY := above.level.direction(child)
+	endX := above.level.position(probe.column) + above.level.Start*childX
+	endY := above.level.position(probe.row) + above.level.Start*childY
 	length := math.Hypot(endX-startX, endY-startY)
-	var near Interval
+	var near interval
 	var steps int64
 	if length > minimumSegment {
-		near, steps = grid.March(startX, startY, (endX-startX)/length,
+		near, steps = grid.march(startX, startY, (endX-startX)/length,
 			(endY-startY)/length, 0, length)
 	}
 	at := above.slot(probe.column, probe.row, child)
@@ -240,8 +240,8 @@ func runLevel(level Level, workers int, trace tracer, rays, steps *atomic.Int64)
 		var rowRays, rowSteps int64
 		for column := 0; column < count; column++ {
 			for direction := 0; direction < level.Directions; direction++ {
-				value, usedRays, usedSteps := trace(level.Position(column),
-					level.Position(row), direction)
+				value, usedRays, usedSteps := trace(level.position(column),
+					level.position(row), direction)
 				copy(result.values[result.slot(column, row, direction):], value[:])
 				rowRays += usedRays
 				rowSteps += usedSteps

@@ -12,7 +12,8 @@ import (
 func paintAt(t *testing.T, site *siteBuilder, east, south, height float64) maths.Vec {
 	t.Helper()
 	up := site.chartUp(east, south)
-	return site.frame.Centre().Add(up.Scale(site.frame.Radius().InMetres() + height))
+	radius := site.frame.Radius().InMetres()
+	return site.frame.Centre().Add(up.Scale(radius + height))
 }
 
 // forestedPaint is a palette over the test sphere with a forest of one
@@ -154,7 +155,8 @@ func TestAltitudePaintForestEdges(t *testing.T) {
 func TestForestPaintChartAtPole(t *testing.T) {
 	_, site := forestedPaint(t)
 	forest := forestPaint{space: site.space, sphere: site.frame}
-	if got := forest.chart(site.frame.Centre().Add(site.space.Orientation.Y.Scale(1e6))); got != (maths.Vec{}) {
+	above := site.frame.Centre().Add(site.space.Orientation.Y.Scale(1e6))
+	if got := forest.chart(above); got != (maths.Vec{}) {
 		t.Errorf("chart of straight up = %v, want the origin", got)
 	}
 }

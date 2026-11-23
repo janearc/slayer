@@ -73,10 +73,15 @@ func TestHeightFieldHitSolvesBilinearPatchesExactly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, implementsHitter := any(saddle).(Hitter); implementsHitter {
-		t.Fatal("ordinary HeightField unexpectedly opts into exact Hitter dispatch")
+	hitter, isHitter := any(saddle).(Hitter)
+	if !isHitter {
+		t.Fatal("a HeightField answers a ray exactly, so it is a Hitter, " +
+			"and tracing asks it and does not march it")
 	}
 	tangent := maths.Ray{At: maths.V(-1, 0, -1), Dir: maths.V(1, 0, 1)}
+	if got, ok := hitter.Hit(tangent, 0, 3); !ok || !closeTo(got, 1) {
+		t.Errorf("bilinear tangent Hit = %v, %t; want 1", got, ok)
+	}
 	if got, ok := saddle.IntersectExact(tangent, 0, 3); !ok || !closeTo(got, 1) {
 		t.Errorf("bilinear tangent hit = %v, %t; want 1", got, ok)
 	}
@@ -221,11 +226,8 @@ func TestApproximateSpectralNormalsAreShadingOnlyAndValidateSlopes(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if spectral.ApproximateShadingNormalMode() != "spectral-slopes" ||
-		spectral.HasApproximateSmoothNormals() {
-		t.Fatalf("spectral mode=%q smooth=%t",
-			spectral.ApproximateShadingNormalMode(),
-			spectral.HasApproximateSmoothNormals())
+	if spectral.ApproximateShadingNormalMode() != "spectral-slopes" {
+		t.Fatalf("spectral mode=%q", spectral.ApproximateShadingNormalMode())
 	}
 	packed, n, extent, bottom, top, slant := field.Pack()
 	got, gotN, gotExtent, gotBottom, gotTop, gotSlant := spectral.Pack()

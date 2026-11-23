@@ -21,11 +21,25 @@ import (
 // band. Inputs remain on Metal for the call. A callback must consume or copy
 // its slice before returning; later bands overwrite that storage.
 //
-// rows must be positive: it is the most rows a band holds. Calls and
+// rows must be positive: it is the most rows a band holds, and so the
+// readback's size; how many a band does hold its time decides
+// (band_heights.go). Calls and
 // callbacks must not reenter this Kernel. Callback errors stop dispatch,
 // release the buffers and propagate unchanged.
 func (kernel *Kernel) GridBands(width, height, rows, per int,
 	inputs [][]byte, consume func(first, down int, samples []float32) error,
+) error {
+	return kernel.GridBandsSent(width, height, rows, per, inputs, nil,
+		consume)
+}
+
+// GridBandsSent is GridBands that calls sent, if it is not nil, once,
+// when every input has been copied to Metal and before the first band is
+// drawn. The inputs are not read again after it: a caller that holds the
+// only other copy of one may let it go there.
+func (kernel *Kernel) GridBandsSent(width, height, rows, per int,
+	inputs [][]byte, sent func(),
+	consume func(first, down int, samples []float32) error,
 ) error {
 	if err := kernel.validBands(width, height, rows, per, inputs, consume); err != nil {
 		return err
@@ -38,37 +52,37 @@ func (kernel *Kernel) GridBands(width, height, rows, per int,
 	if err != nil {
 		return err
 	}
+	if sent != nil {
+		sent()
+	}
 	defer C.slayer_metal_grid_close(stream)
 	defer runtime.KeepAlive(kernel)
 	samples := make([]float32, width*rows*per)
 	place := func(_, down int) []float32 { return samples[:width*down*per] }
-	drawing := bandDrawing{kernel: kernel, stream: stream, height: height,
-		rows: kernel.bandRows(rows)}
+	drawing := kernel.drawingOf(stream, height, rows)
 	return drawing.draw(place, consume)
 }
 
-// bandRows is the height of a grid's bands whose buffers hold most rows:
-// the kernel's fixed height, as far as the buffers hold, or the most.
-func (kernel *Kernel) bandRows(most int) int {
-	if kernel.fixed > 0 {
-		return min(kernel.fixed, most)
-	}
-	return most
-}
-
-// span is a band of a picture: down rows from first. No rows is no band.
-type span struct{ first, down int }
-
 // bandDrawing is one picture height rows tall drawn through a stream of
-// the kernel in bands rows tall. ahead is the band committed behind the
-// one being waited out, so the device draws one band while the caller
-// reads the last; it is no band at the picture's foot.
+// the kernel in bands of at most rows rows, the next down rows tall
+// (band_heights.go). ahead is the band committed behind the one being
+// waited out, so the device draws one band while the caller reads the
+// last; it is no band at the picture's foot.
 type bandDrawing struct {
 	kernel *Kernel
 	stream unsafe.Pointer
 	height int
 	rows   int
+	down   int
+	// fixed is whether every band keeps its height whatever its time
+	fixed bool
+	// least is the least time any band of the picture took on the device,
+	// taken as what a command costs before its rows; nought before any
+	least time.Duration
+	// said is whether the drawing has said a row is over the aim
+	said   bool
 	ahead  span
+	memory *firstBandMemory
 }
 
 // draw draws the picture. Each band is waited out, the band after it
@@ -76,6 +90,9 @@ type bandDrawing struct {
 // the slice place gives it and handed to consume while the next draws.
 func (drawing *bandDrawing) draw(place func(first, down int) []float32,
 	consume func(first, down int, samples []float32) error) (err error) {
+	marks := newFirstBandMemory()
+	drawing.memory = &marks
+	defer func() { drawing.memory = nil }()
 	defer func() {
 		// a drawing that stops early, by its consumer or a failure,
 		// leaves no band in flight for the stream's next drawing, and
@@ -88,11 +105,13 @@ func (drawing *bandDrawing) draw(place func(first, down int) []float32,
 	if err := drawing.commit(band); err != nil {
 		return err
 	}
+	marks.mark(bandMemoryCommit)
 	for band.down > 0 {
 		drawn, spent, err := drawing.await(band)
 		if err != nil {
 			return err
 		}
+		marks.mark(bandMemoryWait)
 		samples := place(drawn.first, drawn.down)
 		if band, err = drawing.next(samples, drawn, spent); err != nil {
 			return err
@@ -100,6 +119,7 @@ func (drawing *bandDrawing) draw(place func(first, down int) []float32,
 		if err := consume(drawn.first, drawn.down, samples); err != nil {
 			return err
 		}
+		marks.mark(bandMemoryConsume)
 	}
 	return nil
 }
@@ -118,16 +138,6 @@ func (drawing *bandDrawing) settle() error {
 	return nil
 }
 
-// after is the band that follows one in the picture, or no band at the
-// picture's foot.
-func (drawing *bandDrawing) after(band span) span {
-	from := band.first + band.down
-	if from >= drawing.height {
-		return span{}
-	}
-	return span{from, min(drawing.rows, drawing.height-from)}
-}
-
 // commit commits a band, and nothing for no band.
 func (drawing *bandDrawing) commit(band span) error {
 	if band.down == 0 {
@@ -136,11 +146,13 @@ func (drawing *bandDrawing) commit(band span) error {
 	return drawing.kernel.commitBand(drawing.stream, band.first, band.down)
 }
 
-// next has the band after drawn committed, if it was not already, copies
-// drawn into samples while that one draws, and commits the band after
-// that into drawn's buffer. It gives back the band to wait out next.
+// next sizes the bands after drawn by its time, has the band after it
+// committed, if it was not already, copies drawn into samples while that
+// one draws, and commits the band after that into drawn's buffer. It
+// gives back the band to wait out next.
 func (drawing *bandDrawing) next(samples []float32, drawn span,
 	spent time.Duration) (span, error) {
+	drawing.timed(drawn, spent)
 	following := drawing.ahead
 	drawing.ahead = span{}
 	if following.down == 0 {
@@ -151,6 +163,9 @@ func (drawing *bandDrawing) next(samples []float32, drawn span,
 	}
 	receipt(drawn.first, drawn.down, spent)
 	err := drawing.kernel.copyBand(drawing.stream, drawn.down, samples)
+	if err == nil && drawing.memory != nil {
+		drawing.memory.mark(bandMemoryCopy)
+	}
 	if err == nil && following.down > 0 {
 		drawing.ahead = drawing.after(following)
 		err = drawing.commit(drawing.ahead)
@@ -176,8 +191,7 @@ func (drawing *bandDrawing) await(band span) (span, time.Duration, error) {
 		if err := drawing.drop(); err != nil {
 			return span{}, 0, err
 		}
-		band.down = max(1, band.down/2)
-		drawing.rows = min(drawing.rows, band.down)
+		band = drawing.halved(band)
 		stopReceipt(band.first, band.down, err)
 		time.Sleep(stopTurn)
 		if err := drawing.commit(band); err != nil {
@@ -289,8 +303,13 @@ func (kernel *Kernel) commitBand(stream unsafe.Pointer, first,
 var errPretendStop = errors.New(
 	"metal: stopped for the display, as the test asked")
 
+// waitStopped is what slayer_metal_grid_wait returns when StopOn ended
+// the wait, and not a failure of the band.
+const waitStopped = 2
+
 // waitBand waits out the oldest band in flight, and says whether a
-// failure was the system stopping it for the display.
+// failure was the system stopping it for the display. A wait StopOn
+// ended gives the context's error, and is never that.
 func (kernel *Kernel) waitBand(stream unsafe.Pointer) (bool, error) {
 	if kernel.ctx == nil {
 		return false, errClosedDuring
@@ -300,6 +319,9 @@ func (kernel *Kernel) waitBand(stream unsafe.Pointer) (bool, error) {
 	failed := C.slayer_metal_grid_wait(stream, &stopped, &why[0],
 		C.int(len(why)))
 	runtime.KeepAlive(kernel)
+	if failed == waitStopped {
+		return false, stoppedError(C.GoString(&why[0]))
+	}
 	if failed != 0 {
 		return stopped != 0, errors.New("metal: " + C.GoString(&why[0]))
 	}

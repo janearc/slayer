@@ -7,7 +7,7 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-// planned is a sequence plan's values as hillside would fill them: a
+// planned is a sequence plan's values as the session would fill them: a
 // smoke, its film, a stretched span and a print.
 const planned = "smoke: 3\nwidth: 64\nheight: 48\nrays: 2\nfps: 6\n" +
 	"start: 45\nduration: 30\nsceneduration: 3600\n" +

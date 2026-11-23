@@ -2,8 +2,8 @@
 // Maxwell's equations as Mie did in 1908, and the averages of that
 // scattering over a population of spheres of different sizes.
 //
-// Sphere gives, for one sphere of one size and one refractive index,
-// the efficiencies of extinction and scattering and the asymmetry
+// For one sphere of one size and one refractive index, the package
+// finds the efficiencies of extinction and scattering and the asymmetry
 // parameter: the share of the light the sphere takes out of the beam,
 // the share it scatters rather than absorbs, and how far forward it
 // scatters.

@@ -114,8 +114,9 @@ func wrongFolder(key Key) string {
 func TestAStrangerInTheWrongFanFolderSurvives(t *testing.T) {
 	survives(t, "stranger-fan", func(store *Store, keys []Key) string {
 		key := NewKey(store.kind).Text("i", "elsewhere")
-		return stranger(t, filepath.Join(store.folder, wrongFolder(key),
-			key.Name()))
+		elsewhere := filepath.Join(store.folder, wrongFolder(key),
+			key.Name())
+		return stranger(t, elsewhere)
 	})
 }
 
@@ -134,7 +135,8 @@ func TestAStrangerBelowAFanFolderSurvives(t *testing.T) {
 // pointing at a file outside the store, is never listed, counted or
 // removed, and its target is untouched.
 func TestAStrangerLinkSurvivesAndSoDoesItsTarget(t *testing.T) {
-	target := stranger(t, filepath.Join(t.TempDir(), "photograph.jpg"))
+	photograph := filepath.Join(t.TempDir(), "photograph.jpg")
+	target := stranger(t, photograph)
 	survives(t, "stranger-link", func(store *Store, _ []Key) string {
 		key := NewKey(store.kind).Text("i", "linked")
 		link := filepath.Join(store.folder, key.Name()[:fanDigits],
@@ -154,8 +156,9 @@ func TestAStrangerLinkSurvivesAndSoDoesItsTarget(t *testing.T) {
 func TestAStrangerPartIsNotRemoved(t *testing.T) {
 	store, ticking, keys := filled(t, "stranger-part", 1)
 	root := stranger(t, filepath.Join(store.folder, "movie.part"))
-	fanned := stranger(t, filepath.Join(store.folder,
-		keys[0].Name()[:fanDigits], "movie.part"))
+	fannedPath := filepath.Join(store.folder,
+		keys[0].Name()[:fanDigits], "movie.part")
+	fanned := stranger(t, fannedPath)
 	ticking.at = started.Add(staleParts + minuteLater)
 	if err := store.Put(NewKey(store.kind), nil); err != nil {
 		t.Fatal(err)

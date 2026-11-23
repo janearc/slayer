@@ -1,0 +1,9 @@
+name,absorptionRed,absorptionGreen,absorptionBlue,scatteringRed,scatteringGreen,scatteringBlue,phase,unit,steps,overLimit,limit
+negative scattering,0,0,0,-1,0,0,0.5,1,4,0,10
+overflow extinction,1.7976931348623157e+308,1.7976931348623157e+308,1.7976931348623157e+308,1.7976931348623157e+308,1.7976931348623157e+308,1.7976931348623157e+308,0.5,1,4,0,10
+phase outside lobe,0,0,0,1,1,1,1,1,4,0,10
+nan phase,0,0,0,1,1,1,NaN,1,4,0,10
+zero steps,0,0,0,1,1,1,0.5,1,0,0,10
+too many steps,0,0,0,1,1,1,0.5,1,0,1,10
+zero distance limit,0,0,0,1,1,1,0.5,1,4,0,0
+infinite distance limit,0,0,0,1,1,1,0.5,1,4,0,+Inf

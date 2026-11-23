@@ -1,7 +1,8 @@
 # Fictional summit site on NOAA terrain. The site, introduced redwoods,
 # palette, equipment, weather and light are authored; this is not a survey
 # of Maunakea vegetation or an engineering layout. See island-scene.md,
-# guide-stars.md and redwood-atmosphere.md for sources and model limits.
+# model/observatory/guide-stars.md and model/vegetation/redwood-atmosphere.md
+# for sources and model limits.
 ---
 height-model: authored-radial-offsets
 radius-metres: 6371000

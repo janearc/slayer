@@ -22,8 +22,6 @@ import "fmt"
 
 // Band is rows [First, First+Count) of a picture Width by Height that are
 // finished and will not be written again.
-//
-//ninja:vow practice NewBand makes one and a Sink takes it
 type Band struct {
 	width, height int
 	first, count  int
@@ -64,6 +62,4 @@ func (band Band) Count() int { return band.count }
 
 // Sink is where a renderer sends each band as it finishes. It is called
 // from the renderer's goroutine and must return quickly.
-//
-//ninja:vow practice the tracers will take one
 type Sink func(Band)

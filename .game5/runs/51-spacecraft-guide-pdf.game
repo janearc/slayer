@@ -1,6 +1,6 @@
 # The spacecraft guide as a PDF, made as the visual guide's is: pandoc makes one HTML
-# page with doc/spacecraft-guide/print.css embedded, Prince sets it on Letter pages.
+# page with doc/model/spacecraft/guide/print.css embedded, Prince sets it on Letter pages.
 # Writes out/spacecraft-guide.pdf. The font sheet is the visual guide's.
 spacecraft-guide-pdf . :: mkdir -p out
-spacecraft-guide-pdf . :: pandoc doc/spacecraft-guide/README.md --from gfm --to html5 --standalone --embed-resources --resource-path doc/spacecraft-guide --css doc/spacecraft-guide/print.css --syntax-highlighting none --toc --toc-depth 2 --metadata-file doc/spacecraft-guide/print.yaml --output out/spacecraft-guide.html
+spacecraft-guide-pdf . :: pandoc doc/model/spacecraft/guide/README.md --from gfm --to html5 --standalone --embed-resources --resource-path doc/model/spacecraft/guide --css doc/model/spacecraft/guide/print.css --syntax-highlighting none --toc --toc-depth 2 --metadata-file doc/model/spacecraft/guide/print.yaml --output out/spacecraft-guide.html
 spacecraft-guide-pdf . :: prince --style doc/visualguide/print-fonts.css out/spacecraft-guide.html --output out/spacecraft-guide.pdf

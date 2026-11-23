@@ -19,26 +19,26 @@ var (
 // inside and fewer at the edge, every id its own, and the middles are
 // Spacing apart.
 func TestFlatHoldsItsExtent(t *testing.T) {
-	f := Flat{Step: 2, Across: 7, Down: 5}
-	tiles := f.Tiles()
+	flat := Flat{Step: 2, Across: 7, Down: 5}
+	tiles := flat.Tiles()
 	if len(tiles) != 35 {
 		t.Fatalf("%d tiles", len(tiles))
 	}
 	ids := map[int64]bool{}
 	for _, tile := range tiles {
-		if ids[f.ID(tile)] {
-			t.Fatalf("two tiles share id %d", f.ID(tile))
+		if ids[flat.ID(tile)] {
+			t.Fatalf("two tiles share id %d", flat.ID(tile))
 		}
-		ids[f.ID(tile)] = true
-		ns := f.Neighbours(tile)
+		ids[flat.ID(tile)] = true
+		ns := flat.Neighbours(tile)
 		inside := tile.Column > 0 && tile.Row > 0 && tile.Column < 6 && tile.Row < 4
 		if inside && len(ns) != 6 || !inside && len(ns) >= 6 {
 			t.Fatalf("tile %v has %d neighbours", tile, len(ns))
 		}
 		for _, n := range ns {
-			d := f.Centre(tile).Sub(f.Centre(n)).Len()
-			if !(math.Abs(d-2) <= 1e-12) {
-				t.Fatalf("tile %v and %v are %v apart", tile, n, d)
+			distance := flat.Centre(tile).Sub(flat.Centre(n)).Len()
+			if !(math.Abs(distance-2) <= 1e-12) {
+				t.Fatalf("tile %v and %v are %v apart", tile, n, distance)
 			}
 		}
 	}
@@ -47,26 +47,26 @@ func TestFlatHoldsItsExtent(t *testing.T) {
 // Nearest on a plane finds the same tile as asking every tile, for points
 // all over the extent, and the middle of a tile is in that tile.
 func TestFlatNearestIsTheTrueNearest(t *testing.T) {
-	f := Flat{Step: 1.5, Across: 12, Down: 9}
-	tiles := f.Tiles()
+	flat := Flat{Step: 1.5, Across: 12, Down: 9}
+	tiles := flat.Tiles()
 	for k := range int64(5000) {
-		p := maths.V(noise.Hash(1, k)*16-1, 0, noise.Hash(2, k)*12-1)
-		got := f.Nearest(p)
+		point := maths.V(noise.Hash(1, k)*16-1, 0, noise.Hash(2, k)*12-1)
+		got := flat.Nearest(point)
 		best, want := math.Inf(1), Tile{}
 		for _, tile := range tiles {
-			if d := p.Sub(f.Centre(tile)).Len(); d < best {
-				best, want = d, tile
+			if distance := point.Sub(flat.Centre(tile)).Len(); distance < best {
+				best, want = distance, tile
 			}
 		}
 		// outside the extent the true nearest may be a tile Tiles
 		// does not list, so only points inside are held to it
-		if f.holds(got.Column, got.Row) && got != want &&
-			math.Abs(p.Sub(f.Centre(got)).Len()-best) > 1e-12 {
-			t.Fatalf("point %d at %v: tile %v, want %v", k, p, got, want)
+		if flat.holds(got.Column, got.Row) && got != want &&
+			math.Abs(point.Sub(flat.Centre(got)).Len()-best) > 1e-12 {
+			t.Fatalf("point %d at %v: tile %v, want %v", k, point, got, want)
 		}
 	}
 	for _, tile := range tiles {
-		if f.Nearest(f.Centre(tile)) != tile {
+		if flat.Nearest(flat.Centre(tile)) != tile {
 			t.Fatalf("tile %v's middle is not in it", tile)
 		}
 	}
@@ -76,18 +76,18 @@ func TestFlatNearestIsTheTrueNearest(t *testing.T) {
 // neighbours, inside its tile by Spacing/2 at the middle, and outside a
 // neighbour's tile.
 func TestFlatEdge(t *testing.T) {
-	f := Flat{Step: 1, Across: 6, Down: 6}
+	flat := Flat{Step: 1, Across: 6, Down: 6}
 	tile := Tile{0, 3, 3}
-	for _, n := range f.Neighbours(tile) {
-		mid := f.Centre(tile).Add(f.Centre(n)).Scale(0.5)
-		if e := f.Edge(mid, tile); !(math.Abs(e) <= 1e-12) {
+	for _, n := range flat.Neighbours(tile) {
+		mid := flat.Centre(tile).Add(flat.Centre(n)).Scale(0.5)
+		if e := flat.Edge(mid, tile); !(math.Abs(e) <= 1e-12) {
 			t.Fatalf("midpoint with %v is %v from the edge", n, e)
 		}
-		if e := f.Edge(f.Centre(tile), n); e >= 0 {
+		if e := flat.Edge(flat.Centre(tile), n); e >= 0 {
 			t.Fatalf("the middle of %v is inside %v", tile, n)
 		}
 	}
-	if e := f.Edge(f.Centre(tile), tile); !(math.Abs(e-0.5) <= 1e-12) {
+	if e := flat.Edge(flat.Centre(tile), tile); !(math.Abs(e-0.5) <= 1e-12) {
 		t.Fatalf("the middle is %v from the edge", e)
 	}
 }
@@ -96,26 +96,26 @@ func TestFlatEdge(t *testing.T) {
 // past the seam is in column zero, and the middles are Spacing apart across the
 // seam too.
 func TestBandWraps(t *testing.T) {
-	b := Band{Radius: 10, Width: 4, Around: 40}
+	band := Band{Radius: 10, Width: 4, Around: 40}
 	last := Tile{0, 39, 2}
 	wrapped := false
-	for _, n := range b.Neighbours(last) {
+	for _, n := range band.Neighbours(last) {
 		wrapped = wrapped || n.Column == 0
-		d := b.Centre(last).Sub(b.Centre(n)).Len()
-		if d > 1.01*b.Spacing() {
-			t.Fatalf("%v and %v are %v apart, spacing %v", last, n, d,
-				b.Spacing())
+		distance := band.Centre(last).Sub(band.Centre(n)).Len()
+		if distance > 1.01*band.Spacing() {
+			t.Fatalf("%v and %v are %v apart, spacing %v", last, n, distance,
+				band.Spacing())
 		}
 	}
 	if !wrapped {
 		t.Fatal("the last column does not reach the first")
 	}
 	just := maths.V(1e-6, 0, 10)
-	if got := b.Nearest(just); got.Column != 0 {
+	if got := band.Nearest(just); got.Column != 0 {
 		t.Fatalf("just past the seam is column %d", got.Column)
 	}
-	seam := b.Centre(last).Add(b.Centre(Tile{0, 0, 2})).Scale(0.5)
-	if e := b.Edge(seam, last); !(math.Abs(e) <= 1e-9) {
+	seam := band.Centre(last).Add(band.Centre(Tile{0, 0, 2})).Scale(0.5)
+	if e := band.Edge(seam, last); !(math.Abs(e) <= 1e-9) {
 		t.Fatalf("the seam midpoint is %v from the edge", e)
 	}
 }
@@ -124,18 +124,18 @@ func TestBandWraps(t *testing.T) {
 // cylinder, and a point at any distance from the axis is in the tile its
 // angle and height say.
 func TestBandTilesLieOnTheCylinder(t *testing.T) {
-	b := Band{Radius: 3, Width: 2, Around: 24}
-	tiles := b.Tiles()
-	if len(tiles) != 24*b.rows() || b.rows() < 2 {
-		t.Fatalf("%d tiles in %d rows", len(tiles), b.rows())
+	band := Band{Radius: 3, Width: 2, Around: 24}
+	tiles := band.Tiles()
+	if len(tiles) != 24*band.rows() || band.rows() < 2 {
+		t.Fatalf("%d tiles in %d rows", len(tiles), band.rows())
 	}
 	for _, tile := range tiles {
-		c := b.Centre(tile)
-		if r := math.Hypot(c.X, c.Z); !(math.Abs(r-3) <= 1e-12) {
-			t.Fatalf("tile %v's middle is %v from the axis", tile, r)
+		centre := band.Centre(tile)
+		if radius := math.Hypot(centre.X, centre.Z); !(math.Abs(radius-3) <= 1e-12) {
+			t.Fatalf("tile %v's middle is %v from the axis", tile, radius)
 		}
-		far := maths.V(c.X*5, c.Y, c.Z*5) // further from the axis
-		if b.Nearest(c) != tile || b.Nearest(far) != tile {
+		far := maths.V(centre.X*5, centre.Y, centre.Z*5) // further from the axis
+		if band.Nearest(centre) != tile || band.Nearest(far) != tile {
 			t.Fatalf("tile %v's middle is not in it", tile)
 		}
 	}
@@ -148,8 +148,8 @@ func TestLatticeRungsNest(t *testing.T) {
 		Band{Radius: 2, Width: 1.5, Around: 12}} {
 		fine := tl.Finer()
 		for _, tile := range tl.Tiles() {
-			c := tl.Centre(tile)
-			if got := fine.Centre(fine.Nearest(c)); !got.Near(c, 1e-9) {
+			centre := tl.Centre(tile)
+			if got := fine.Centre(fine.Nearest(centre)); !got.Near(centre, 1e-9) {
 				t.Fatalf("%T tile %v's middle moved to %v one rung down",
 					tl, tile, got)
 			}
@@ -162,15 +162,15 @@ func TestLatticeRungsNest(t *testing.T) {
 // Nearest still answers with a tile whose middle is within a spacing.
 func TestAManholeOnAnOrbital(t *testing.T) {
 	circumference := 2 * math.Pi * 1.5e9
-	b := Band{Radius: 1.5e9, Width: 1e6, Around: int(circumference / 0.6)}
+	band := Band{Radius: 1.5e9, Width: 1e6, Around: int(circumference / 0.6)}
 	for k := range int64(100) {
-		a := noise.Hash(4, k) * 2 * math.Pi
-		p := maths.V(1.5e9*math.Sin(a), noise.Hash(5, k)*1e6-5e5,
-			1.5e9*math.Cos(a))
-		tile := b.Nearest(p)
-		if d := p.Sub(b.Centre(tile)).Len(); d > b.Spacing() {
-			t.Fatalf("point %d: middle %v away, spacing %v", k, d,
-				b.Spacing())
+		angle := noise.Hash(4, k) * 2 * math.Pi
+		point := maths.V(1.5e9*math.Sin(angle), noise.Hash(5, k)*1e6-5e5,
+			1.5e9*math.Cos(angle))
+		tile := band.Nearest(point)
+		if distance := point.Sub(band.Centre(tile)).Len(); distance > band.Spacing() {
+			t.Fatalf("point %d: middle %v away, spacing %v", k, distance,
+				band.Spacing())
 		}
 	}
 }
@@ -184,44 +184,44 @@ func TestAManholeOnAnOrbital(t *testing.T) {
 // its extent along north, none at all for a north straight up.
 func TestEverySurfaceHasDistanceLatitudeAndSomewhere(t *testing.T) {
 	near := func(a, b float64) bool { return math.Abs(a-b) < 1e-9 }
-	s := Sphere{Splits: 4}
-	if d := s.Distance(maths.V(1, 0, 0), maths.V(0, 1, 0)); !near(d, math.Pi/2) {
-		t.Errorf("a quarter turn on the sphere is %v", d)
+	sphere := Sphere{Splits: 4}
+	if distance := sphere.Distance(maths.V(1, 0, 0), maths.V(0, 1, 0)); !near(distance, math.Pi/2) {
+		t.Errorf("a quarter turn on the sphere is %v", distance)
 	}
-	if l := s.Latitude(maths.V(0, 1, 0), maths.Up); !near(l, 1) {
-		t.Errorf("the pole's latitude is %v", l)
+	if latitude := sphere.Latitude(maths.V(0, 1, 0), maths.Up); !near(latitude, 1) {
+		t.Errorf("the pole's latitude is %v", latitude)
 	}
-	if p := s.Somewhere(0.3, 0.6, 0.9); !near(p.Len(), 1) {
-		t.Errorf("somewhere on the sphere is %v long", p.Len())
+	if point := sphere.Somewhere(0.3, 0.6, 0.9); !near(point.Len(), 1) {
+		t.Errorf("somewhere on the sphere is %v long", point.Len())
 	}
-	b := Band{Radius: 10, Width: 4, Around: 40}
-	p, q := b.Somewhere(0.05, 0.5, 0), b.Somewhere(0.95, 0.5, 0)
-	if d := b.Distance(p, q); !near(d, 0.1*2*math.Pi*10) {
-		t.Errorf("round the band the short way is %v", d)
+	band := Band{Radius: 10, Width: 4, Around: 40}
+	point, q := band.Somewhere(0.05, 0.5, 0), band.Somewhere(0.95, 0.5, 0)
+	if distance := band.Distance(point, q); !near(distance, 0.1*2*math.Pi*10) {
+		t.Errorf("round the band the short way is %v", distance)
 	}
-	if l := b.Latitude(b.Somewhere(0, 0.5, 0), maths.Up); !near(l, 0) {
-		t.Errorf("the band's middle has latitude %v", l)
+	if latitude := band.Latitude(band.Somewhere(0, 0.5, 0), maths.Up); !near(latitude, 0) {
+		t.Errorf("the band's middle has latitude %v", latitude)
 	}
-	if l := b.Latitude(b.Somewhere(0, 1, 0), maths.Up); !near(l, 1) {
-		t.Errorf("the band's rim has latitude %v", l)
+	if latitude := band.Latitude(band.Somewhere(0, 1, 0), maths.Up); !near(latitude, 1) {
+		t.Errorf("the band's rim has latitude %v", latitude)
 	}
-	if r := math.Hypot(p.X, p.Z); !near(r, 10) {
-		t.Errorf("somewhere on the band is %v from the axis", r)
+	if radius := math.Hypot(point.X, point.Z); !near(radius, 10) {
+		t.Errorf("somewhere on the band is %v from the axis", radius)
 	}
-	f := Flat{Step: 1, Across: 20, Down: 20}
-	if d := f.Distance(maths.V(0, 0, 0), maths.V(3, 7, 4)); !near(d, 5) {
-		t.Errorf("across the plane is %v", d)
+	flat := Flat{Step: 1, Across: 20, Down: 20}
+	if distance := flat.Distance(maths.V(0, 0, 0), maths.V(3, 7, 4)); !near(distance, 5) {
+		t.Errorf("across the plane is %v", distance)
 	}
-	if l := f.Latitude(f.Somewhere(0.5, 0, 1), maths.Up); l != 0 {
-		t.Errorf("a plane under a north straight up has latitude %v", l)
+	if latitude := flat.Latitude(flat.Somewhere(0.5, 0, 1), maths.Up); latitude != 0 {
+		t.Errorf("a plane under a north straight up has latitude %v", latitude)
 	}
-	if l := f.Latitude(f.Somewhere(0.5, 0, 1), maths.V(0, 0, 1)); !near(l, 1) {
-		t.Errorf("the plane's far edge along its north has latitude %v", l)
+	if latitude := flat.Latitude(flat.Somewhere(0.5, 0, 1), maths.V(0, 0, 1)); !near(latitude, 1) {
+		t.Errorf("the plane's far edge along its north has latitude %v", latitude)
 	}
-	if l := f.Latitude(f.Somewhere(0.5, 0, 0.5), maths.V(0, 0, 1)); !near(l, 0) {
-		t.Errorf("the plane's middle has latitude %v", l)
+	if latitude := flat.Latitude(flat.Somewhere(0.5, 0, 0.5), maths.V(0, 0, 1)); !near(latitude, 0) {
+		t.Errorf("the plane's middle has latitude %v", latitude)
 	}
-	if f.Nearest(f.Somewhere(0.2, 0, 0.8)) == f.Nearest(f.Somewhere(0.8, 0, 0.2)) {
+	if flat.Nearest(flat.Somewhere(0.2, 0, 0.8)) == flat.Nearest(flat.Somewhere(0.8, 0, 0.2)) {
 		t.Error("two corners of the plane land on one tile")
 	}
 }

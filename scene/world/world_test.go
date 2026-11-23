@@ -14,16 +14,16 @@ var terran = Terrain{Tiling: hexes.Sphere{Splits: 14}, Seed: 5, Ocean: 0.6,
 // A world asked for sixty percent sea gets sixty percent, and its land
 // tops out at one and its sea floor at minus one.
 func TestTheSeaIsPouredToTheShareAsked(t *testing.T) {
-	w := New(terran)
+	world := New(terran)
 	under, top, bottom := 0, 0.0, 0.0
-	for _, tile := range w.Tiles() {
-		h := w.Height(tile)
-		if h < 0 {
+	for _, tile := range world.tiles {
+		height := world.height[world.index(tile)]
+		if height < 0 {
 			under++
 		}
-		top, bottom = math.Max(top, h), math.Min(bottom, h)
+		top, bottom = math.Max(top, height), math.Min(bottom, height)
 	}
-	share := float64(under) / float64(len(w.Tiles()))
+	share := float64(under) / float64(len(world.tiles))
 	if !(math.Abs(share-0.6) <= 0.02) {
 		t.Errorf("%.3f of the tiles are under the sea", share)
 	}
@@ -38,12 +38,12 @@ func TestLandClustersAndBiomesVary(t *testing.T) {
 	w := New(terran)
 	same, all := 0, 0
 	seen := map[Biome]bool{}
-	for _, tile := range w.Tiles() {
+	for _, tile := range w.tiles {
 		seen[w.Biome(tile)] = true
-		land := w.Height(tile) >= 0
+		land := w.height[w.index(tile)] >= 0
 		for _, nb := range w.Tiling.Neighbours(tile) {
 			all++
-			if (w.Height(nb) >= 0) == land {
+			if (w.height[w.index(nb)] >= 0) == land {
 				same++
 			}
 		}
@@ -64,7 +64,7 @@ func TestAWorldIsRepeatable(t *testing.T) {
 	other.Seed = 6
 	c := New(other)
 	differ := 0
-	for _, tile := range a.Tiles() {
+	for _, tile := range a.tiles {
 		if a.Biome(tile) != b.Biome(tile) {
 			t.Fatalf("tile %v changed between two makings", tile)
 		}
@@ -79,17 +79,17 @@ func TestAWorldIsRepeatable(t *testing.T) {
 
 // Painted is each tile's biome's paint.
 func TestPaintedIsTheBiomesPaint(t *testing.T) {
-	w := New(terran)
+	world := New(terran)
 	var look Look
-	for b := range Biomes {
-		look.Paints[b] = maths.Grey(float64(b) / float64(Biomes))
+	for biome := range Biomes {
+		look.Paints[biome] = maths.Grey(float64(biome) / float64(Biomes))
 	}
-	tx := w.Painted(look)
-	for _, tile := range w.Tiles() {
-		c := w.Tiling.Centre(tile)
-		if got, want := tx.At(c), look.Paints[w.Biome(tile)]; got != want {
+	tx := world.Painted(look)
+	for _, tile := range world.tiles {
+		centre := world.Tiling.Centre(tile)
+		if got, want := tx.At(centre), look.Paints[world.Biome(tile)]; got != want {
 			t.Fatalf("tile %v: %v, want %v for %d", tile, got, want,
-				w.Biome(tile))
+				world.Biome(tile))
 		}
 	}
 }
@@ -99,21 +99,21 @@ func TestPaintedIsTheBiomesPaint(t *testing.T) {
 func TestColdAndDry(t *testing.T) {
 	cold := terran
 	cold.Cold = 0.55
-	w := New(cold)
+	world := New(cold)
 	icy := 0
-	for _, tile := range w.Tiles() {
-		if b := w.Biome(tile); b == Ice || b == Snow || b == Tundra {
+	for _, tile := range world.tiles {
+		if biome := world.Biome(tile); biome == Ice || biome == Snow || biome == Tundra {
 			icy++
 		}
 	}
-	if share := float64(icy) / float64(len(w.Tiles())); share < 0.5 {
+	if share := float64(icy) / float64(len(world.tiles)); share < 0.5 {
 		t.Errorf("a frozen world is only %.2f ice, snow and tundra", share)
 	}
 	dry := terran
 	dry.Ocean = 0
 	d := New(dry)
-	for _, tile := range d.Tiles() {
-		if d.Height(tile) < 0 {
+	for _, tile := range d.tiles {
+		if d.height[d.index(tile)] < 0 {
 			t.Fatal("a world with no sea has sea")
 		}
 	}
@@ -123,7 +123,7 @@ func TestColdAndDry(t *testing.T) {
 // few wedges, and its latitude runs from the middle to the rims, or along
 // the plane's north, so the cold biomes gather there.
 func TestAWorldOnABandOrAPlaneHasPlates(t *testing.T) {
-	for _, c := range []struct {
+	for _, each := range []struct {
 		name string
 		t    Terrain
 	}{
@@ -132,22 +132,22 @@ func TestAWorldOnABandOrAPlaneHasPlates(t *testing.T) {
 		{"plane", Terrain{Tiling: hexes.Flat{Step: 1, Across: 40, Down: 40},
 			Seed: 3, Ocean: 0.5, Plates: 8, Axis: maths.V(0, 0, 1)}},
 	} {
-		w := &World{Terrain: c.t}
-		w.lay()
-		plate, _, _ := w.plates()
+		world := &World{Terrain: each.t}
+		world.lay()
+		plate, _, _ := world.plates()
 		have := map[int]bool{}
 		for _, p := range plate {
 			have[p] = true
 		}
 		if len(have) < 6 {
-			t.Errorf("the %s has %d plates of %d", c.name, len(have), c.t.Plates)
+			t.Errorf("the %s has %d plates of %d", each.name, len(have), each.t.Plates)
 		}
-		w = New(c.t)
+		world = New(each.t)
 		var mid, rim float64
-		for _, tile := range w.tiles {
-			l := w.Tiling.Latitude(w.Tiling.Centre(tile), w.north())
-			if w.Biome(tile) == Snow || w.Biome(tile) == Tundra || w.Biome(tile) == Ice {
-				if l > 0.5 {
+		for _, tile := range world.tiles {
+			latitude := world.Tiling.Latitude(world.Tiling.Centre(tile), world.north())
+			if world.Biome(tile) == Snow || world.Biome(tile) == Tundra || world.Biome(tile) == Ice {
+				if latitude > 0.5 {
 					rim++
 				} else {
 					mid++
@@ -156,7 +156,7 @@ func TestAWorldOnABandOrAPlaneHasPlates(t *testing.T) {
 		}
 		if rim <= mid {
 			t.Errorf("the %s is cold in the middle (%v) more than at its poles (%v)",
-				c.name, mid, rim)
+				each.name, mid, rim)
 		}
 	}
 }

@@ -43,7 +43,8 @@ func TestWriteStageReference(t *testing.T) {
 			}
 		}
 	}
-	if err := os.WriteFile(path, []byte(out.String()), 0o644); err != nil {
+	text := out.String()
+	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }

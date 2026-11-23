@@ -7,7 +7,7 @@ type LaserConfig struct {
 	FarTree, ShoreLeft, ShoreRight               Vec
 }
 
-type LaserCues struct {
+type laserCues struct {
 	Rig, Sweep, Gate, GateLeft, GateRight, FigurePhase float64
 	Beams, Parity                                      int
 	Colour                                             [3]float64
@@ -21,19 +21,19 @@ type LaserInput struct {
 	Camera            Camera
 	Moon              [3]float64
 	Seconds, ShoreRow float64
-	Cues              LaserCues
+	Cues              laserCues
 }
 
-type LaserHead struct {
+type laserHead struct {
 	Origin            Vec
 	Aim, Lift, Mirror float64
 	Flip, Bank        int
 }
 
-// LaserOnDeck moves head to the rig deck. When config.RigDeck is positive it
+// laserOnDeck moves head to the rig deck. When config.RigDeck is positive it
 // sets the height to the ground height of tower, 0 to 3, relative to the eye,
 // plus RigDeck. Otherwise it returns head as given.
-func LaserOnDeck(head Vec, tower int, config LaserConfig) Vec {
+func laserOnDeck(head Vec, tower int, config LaserConfig) Vec {
 	if config.RigDeck <= 0 {
 		return head
 	}
@@ -42,27 +42,27 @@ func LaserOnDeck(head Vec, tower int, config LaserConfig) Vec {
 	return head
 }
 
-// LaserHeads returns the four laser heads: two beside the far tree, 120 out to
+// laserHeads returns the four laser heads: two beside the far tree, 120 out to
 // each side of the view and 6 up, aiming back at the viewer, and two at the
 // shore points aiming at each other, tilted up 7 degrees. Heads 0 and 2 belong
 // to bank 0 and heads 1 and 3 to bank 1. Mirror makes a pair swing opposite
 // ways.
-func LaserHeads(config LaserConfig) [4]LaserHead {
-	return [4]LaserHead{
-		{LaserOnDeck(config.FarTree.Add(Toward(config.Azimuth-90, 0).Scale(120)).Add(Vec{0, 0, 6}), 0, config), config.Azimuth + 180, 0, 1, 0, 0},
-		{LaserOnDeck(config.FarTree.Add(Toward(config.Azimuth+90, 0).Scale(120)).Add(Vec{0, 0, 6}), 1, config), config.Azimuth + 180, 0, -1, 1, 1},
-		{LaserOnDeck(config.ShoreLeft, 2, config), Bearing(config.ShoreLeft, config.ShoreRight), 7, 1, 1, 0},
-		{LaserOnDeck(config.ShoreRight, 3, config), Bearing(config.ShoreRight, config.ShoreLeft), 7, -1, 0, 1},
+func laserHeads(config LaserConfig) [4]laserHead {
+	return [4]laserHead{
+		{laserOnDeck(config.FarTree.Add(Toward(config.Azimuth-90, 0).Scale(120)).Add(Vec{0, 0, 6}), 0, config), config.Azimuth + 180, 0, 1, 0, 0},
+		{laserOnDeck(config.FarTree.Add(Toward(config.Azimuth+90, 0).Scale(120)).Add(Vec{0, 0, 6}), 1, config), config.Azimuth + 180, 0, -1, 1, 1},
+		{laserOnDeck(config.ShoreLeft, 2, config), Bearing(config.ShoreLeft, config.ShoreRight), 7, 1, 1, 0},
+		{laserOnDeck(config.ShoreRight, 3, config), Bearing(config.ShoreRight, config.ShoreLeft), 7, -1, 0, 1},
 	}
 }
 
-// AddLasers draws every lit laser head's beams and opening into sky and front.
+// addLasers draws every lit laser head's beams and opening into sky and front.
 // It does nothing when Rig is 0 or both gates are under 0.01. The colour is
 // green unless HasColour, scaled by Rig when Rig is positive; GateLeft and
 // GateRight, when not negative, replace Gate for their bank. Swing, tilt and
 // spread follow Seconds, or Sweep, a phase, when that is not negative.
-func AddLasers(sky, front Image, config LaserConfig, input LaserInput) {
-	heads := LaserHeads(config)
+func addLasers(sky, front Image, config LaserConfig, input LaserInput) {
+	heads := laserHeads(config)
 	cue := input.Cues
 	colour := [3]float64{0.08, 1, 0.12}
 	if cue.Rig == 0 {
@@ -105,7 +105,7 @@ func AddLasers(sky, front Image, config LaserConfig, input LaserInput) {
 			lit[c] *= gate
 		}
 		heading := head.Aim + head.Mirror*swing
-		ways, weight, split := FigureWays(cue.Figure, heading, tilt+head.Lift, spread, cue.Beams, cue.FigurePhase)
+		ways, weight, split := figureWays(cue.Figure, heading, tilt+head.Lift, spread, cue.Beams, cue.FigurePhase)
 		for b, way := range ways {
 			if split && cue.Parity >= 0 && (b+head.Flip)%2 != cue.Parity {
 				continue
@@ -114,18 +114,18 @@ func AddLasers(sky, front Image, config LaserConfig, input LaserInput) {
 			for c := range each {
 				each[c] = lit[c] * weight
 			}
-			AddLaserBeam(sky, front, config, input, head.Origin, way, each)
+			addLaserBeam(sky, front, config, input, head.Origin, way, each)
 		}
-		AddLaserAperture(sky, front, input, head.Origin, lit)
+		addLaserAperture(sky, front, input, head.Origin, lit)
 	}
 }
 
-// FigureWays returns the beam directions for the named figure, the brightness
-// weight for each, and whether AddLasers may thin them by Parity. Figures are
+// figureWays returns the beam directions for the named figure, the brightness
+// weight for each, and whether addLasers may thin them by Parity. Figures are
 // beam, pair, fan64, scan, cone and wave; any other name gives beams beams
 // spread across spread degrees. Angles are in degrees; phase turns cone and
 // wave.
-func FigureWays(figure string, heading, tilt, spread float64, beams int, phase float64) ([]Vec, float64, bool) {
+func figureWays(figure string, heading, tilt, spread float64, beams int, phase float64) ([]Vec, float64, bool) {
 	across := func(n int, wide float64, lift func(f float64) float64) []Vec {
 		ways := make([]Vec, n)
 		for b := range ways {
@@ -171,10 +171,10 @@ func FigureWays(figure string, heading, tilt, spread float64, beams int, phase f
 	return across(beams, spread, level), 1, true
 }
 
-// AddLaserAperture draws the bright spot where a laser leaves its head at at:
+// addLaserAperture draws the bright spot where a laser leaves its head at at:
 // a tight core and a wider glow in colour. Nothing is drawn when the head is
 // behind the camera, off the picture or under CloseTrees.
-func AddLaserAperture(sky, front Image, input LaserInput, at Vec, colour [3]float64) {
+func addLaserAperture(sky, front Image, input LaserInput, at Vec, colour [3]float64) {
 	cam := input.Camera
 	x, y, ahead := cam.Project(at)
 	if !ahead || x < 0 || y < 0 || x >= cam.Width || y >= cam.Height {
@@ -194,34 +194,34 @@ func AddLaserAperture(sky, front Image, input LaserInput, at Vec, colour [3]floa
 	Splat(sky, front, x, y, 5*k, lum*25*k, colour, input.ShoreRow)
 }
 
-// LaserFog is how thick the fog is at p, from 0 to 1. It is 0 below waterZ and
+// laserFog is how thick the fog is at p, from 0 to 1. It is 0 below waterZ and
 // above that thins with height, broken into blobs by noise that drifts with
 // seconds.
-func LaserFog(p Vec, seconds, waterZ float64) float64 {
+func laserFog(p Vec, seconds, waterZ float64) float64 {
 	above := p.Z - waterZ
 	if above < 0 {
 		return 0
 	}
 	layer := math.Exp(-above / 90)
-	blobs := FBM3(p.X/45+0.6*seconds, p.Y/45-0.2*seconds, p.Z/18+0.1*seconds, 17)
+	blobs := fbm3(p.X/45+0.6*seconds, p.Y/45-0.2*seconds, p.Z/18+0.1*seconds, 17)
 	return layer * (0.03 + 0.97*Smooth(0.45, 0.7, blobs))
 }
 
-// FBM3 is the three-dimensional form of FBM: four octaves of Noise3, scaled
+// fbm3 is the three-dimensional form of FBM: four octaves of noise3, scaled
 // back to the range 0 to 1.
-func FBM3(u, v, w float64, seed uint64) float64 {
+func fbm3(u, v, w float64, seed uint64) float64 {
 	sum, amp, norm := 0.0, 0.5, 0.0
 	for octave := range 4 {
-		sum += amp * Noise3(u, v, w, seed+uint64(octave)*7919)
+		sum += amp * noise3(u, v, w, seed+uint64(octave)*7919)
 		norm += amp
 		u, v, w, amp = u*2.03, v*2.03, w*2.03, amp*0.5
 	}
 	return sum / norm
 }
 
-// Noise3 is smooth noise from 0 to 1 at u, v, w: the eight lattice values
+// noise3 is smooth noise from 0 to 1 at u, v, w: the eight lattice values
 // around the point, blended with smoothstep weights.
-func Noise3(u, v, w float64, seed uint64) float64 {
+func noise3(u, v, w float64, seed uint64) float64 {
 	x0, y0, z0 := math.Floor(u), math.Floor(v), math.Floor(w)
 	fx, fy, fz := u-x0, v-y0, w-z0
 	sx, sy, sz := fx*fx*(3-2*fx), fy*fy*(3-2*fy), fz*fz*(3-2*fz)
@@ -233,12 +233,12 @@ func Noise3(u, v, w float64, seed uint64) float64 {
 	return lerp(bottom, top, sz)
 }
 
-// AddLaserBeam draws one beam from origin along dir, stepping out to
+// addLaserBeam draws one beam from origin along dir, stepping out to
 // config.Reach in steps of half a pixel's width. Each step adds two blurred
 // spots lit by the fog there. Steps that are off the picture or hidden by the
 // rim (beyond 80) or by CloseTrees are skipped. At the water it adds one last
 // spot and stops.
-func AddLaserBeam(sky, front Image, config LaserConfig, input LaserInput, origin, dir Vec, colour [3]float64) {
+func addLaserBeam(sky, front Image, config LaserConfig, input LaserInput, origin, dir Vec, colour [3]float64) {
 	s := 0.0
 	lum := (input.Moon[0] + input.Moon[1] + input.Moon[2]) / 3
 	cam := input.Camera
@@ -246,7 +246,7 @@ func AddLaserBeam(sky, front Image, config LaserConfig, input LaserInput, origin
 		p := origin.Add(dir.Scale(s))
 		if p.Z < config.WaterZ {
 			if x, y, ahead := cam.Project(p); ahead {
-				Splat(sky, front, x, y, 1.2, lum*60*LaserFog(p, input.Seconds, config.WaterZ), colour, input.ShoreRow)
+				Splat(sky, front, x, y, 1.2, lum*60*laserFog(p, input.Seconds, config.WaterZ), colour, input.ShoreRow)
 			}
 			return
 		}
@@ -264,7 +264,7 @@ func AddLaserBeam(sky, front Image, config LaserConfig, input LaserInput, origin
 		if input.CloseTrees != nil && xi >= 0 && yi >= 0 && xi < sky.Width && yi < sky.Height && input.CloseTrees[yi*sky.Width+xi] {
 			continue
 		}
-		bright := lum * (0.12 + 24*LaserFog(p, input.Seconds, config.WaterZ)) * 2.2 * math.Min(1, float64(sky.Width)/1280)
+		bright := lum * (0.12 + 24*laserFog(p, input.Seconds, config.WaterZ)) * 2.2 * math.Min(1, float64(sky.Width)/1280)
 		pixels := step / dist * cam.Focal
 		Splat(sky, front, x, y, 0.5, bright*pixels*0.88, colour, input.ShoreRow)
 		Splat(sky, front, x, y, 1.6, bright*pixels*0.12, colour, input.ShoreRow)

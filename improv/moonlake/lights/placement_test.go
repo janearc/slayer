@@ -22,7 +22,7 @@ func TestOverheadExplicitInputsAndOriginalMath(t *testing.T) {
 				want[i+c] += amount * config.Colour[c] * pass.Light[i+c]
 			}
 		}
-		if err := AddOverhead(sky, pass, config, 0.37); err != nil {
+		if err := addOverhead(sky, pass, config, 0.37); err != nil {
 			t.Fatal(err)
 		}
 		if !slices.Equal(sky.Light, want) {
@@ -37,14 +37,14 @@ func TestOverheadExplicitInputsAndOriginalMath(t *testing.T) {
 func TestOverheadRejectsInvalidImagesEvenAtZeroLevel(t *testing.T) {
 	sky := Image{1, 1, []float64{1, 2, 3}}
 	for _, pass := range []Image{{}, {2, 1, make([]float64, 6)}, {1, 1, []float64{1}}} {
-		if err := AddOverhead(sky, pass, OverheadConfig{}, 0); err == nil {
+		if err := addOverhead(sky, pass, OverheadConfig{}, 0); err == nil {
 			t.Fatalf("accepted %v", pass)
 		}
 		if !slices.Equal(sky.Light, []float64{1, 2, 3}) {
 			t.Fatal("changed sky on error")
 		}
 	}
-	if err := AddOverhead(Image{}, sky, OverheadConfig{}, 1); err == nil {
+	if err := addOverhead(Image{}, sky, OverheadConfig{}, 1); err == nil {
 		t.Fatal("accepted invalid output")
 	}
 }
@@ -126,7 +126,7 @@ func TestOverheadMoonConcurrentInstances(t *testing.T) {
 			t.Parallel()
 			for range 8 {
 				sky := Image{1, 3, make([]float64, 9)}
-				if err := AddOverhead(sky, pass, OverheadConfig{Gain: 2, Colour: [3]float64{1, 1, 1}}, level); err != nil {
+				if err := addOverhead(sky, pass, OverheadConfig{Gain: 2, Colour: [3]float64{1, 1, 1}}, level); err != nil {
 					t.Fatal(err)
 				}
 				if err := AddMoonDisc(sky, pass, []bool{true, true, true}, MoonDiscConfig{Level: level}); err != nil {

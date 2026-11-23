@@ -6,6 +6,7 @@ import (
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
+	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -19,15 +20,40 @@ func (contract meshContract) assertMeshes(test *testing.T,
 ) {
 	test.Helper()
 	for _, object := range things {
-		polygon, ok := object.Shape.(*mesh.Mesh)
-		if !ok || !polygon.Closed() ||
-			polygon.FaceCount() > contract.MaximumFaces {
-			test.Fatal("unbounded, open or unexpected instrument mesh",
-				object.Material, object.Shape)
+		group, grouped := object.Shape.(*shape.MeshGroup)
+		if !grouped {
+			contract.assertMesh(test, object, maths.Local(), bounds)
+			continue
 		}
-		for _, point := range polygon.Points() {
-			contract.assertPoint(test, point, bounds)
+		if group.MemberCount() == 0 {
+			test.Fatal("an instrument group holds no member", object.Material.Name)
 		}
+		for _, member := range group.Members() {
+			contract.assertMesh(test, thing.Thing{Shape: member.Mesh,
+				Material: object.Material}, member.Space, bounds)
+		}
+	}
+}
+
+// assertMesh holds one mesh to the contract: a closed mesh of no more faces
+// than the limit, every point of which, placed by the space it sits in, is
+// inside the bounds. A mesh that is a member of a group is placed by the
+// member's space, and a mesh of its own is placed by the local one.
+func (contract meshContract) assertMesh(test *testing.T, object thing.Thing,
+	space maths.Subspace, bounds maths.Box,
+) {
+	test.Helper()
+	polygon, ok := object.Shape.(*mesh.Mesh)
+	if !ok {
+		test.Fatal("unexpected instrument mesh type", object.Material.Name)
+	}
+	if !polygon.Closed() || polygon.FaceCount() > contract.MaximumFaces {
+		test.Fatalf("unbounded or open instrument mesh: material %q faces %d closed %t (limit %d)",
+			object.Material.Name, polygon.FaceCount(), polygon.Closed(),
+			contract.MaximumFaces)
+	}
+	for _, point := range polygon.Points() {
+		contract.assertPoint(test, space.Out(point), bounds)
 	}
 }
 

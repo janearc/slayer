@@ -201,6 +201,7 @@ func (s Store) executeUnderLockWithObservers(ctx context.Context, j Job, out io.
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 	nextRenewal := time.Now().Add(5 * time.Second)
+	var failures readFailures
 	for {
 		select {
 		case err := <-done:
@@ -214,32 +215,27 @@ func (s Store) executeUnderLockWithObservers(ctx context.Context, j Job, out io.
 		case <-ticker.C:
 			if !j.LeaseUntil.IsZero() && !time.Now().Before(nextRenewal) {
 				now := time.Now()
-				if err := s.renewRenderLease(runCtx, j, now); err != nil {
+				if err := s.renewHeldRenderLease(runCtx, j, now); err != nil {
 					fmt.Fprintf(out, "render lease renewal: %v\n", err)
 				}
 				nextRenewal = now.Add(5 * time.Second)
 			}
-			cancelled, paused, err := s.requested(runCtx, j)
+			verdict, stop, err := s.supervisionTick(runCtx, j, monitor, command.Process.Pid)
 			if err != nil {
-				return stopGroup(command.Process.Pid, done, failure(err))
+				if !readMayRetry(runCtx, err) {
+					return stopGroup(command.Process.Pid, done, failure(err))
+				}
+				now := time.Now()
+				if failures.spent(now, s.readAllowance()) {
+					explained := failures.explain(err, now)
+					return stopGroup(command.Process.Pid, done, failure(explained))
+				}
+				continue
 			}
-			if cancelled || paused != "" {
-				return stopGroup(command.Process.Pid, done, Result{State: Cancelled, ExitCode: -1, Reason: "cancellation or queue pause requested"})
+			failures.clear()
+			if stop {
+				return stopGroup(command.Process.Pid, done, verdict)
 			}
-			vitals, err := monitor.Read(runCtx, j.Request.Directory, command.Process.Pid)
-			if err == nil {
-				vitals, err = s.runtimeVitals(runCtx, vitals)
-			}
-			if err != nil {
-				return stopGroup(command.Process.Pid, done, failure(err))
-			}
-			if err := s.observe(runCtx, j, vitals); err != nil {
-				return stopGroup(command.Process.Pid, done, failure(err))
-			}
-			if vitals.Stop {
-				return stopGroup(command.Process.Pid, done, Result{State: Failed, ExitCode: -1, Stop: true, Reason: vitals.Reason})
-			}
-
 		}
 	}
 }
@@ -504,7 +500,7 @@ func (r RenderExecutor) Run(ctx context.Context, job Job, out io.Writer) Result 
 	return (jobExecutor{Store: r.Store, Executable: r.Executable, direct: true}).Run(ctx, job, out)
 }
 
-// Run retains the legacy Game handoff for existing library callers.
+// Run starts the supervisor inside a Game lane, for library callers.
 func (g GameExecutor) Run(ctx context.Context, j Job, out io.Writer) Result {
 	return (jobExecutor{Store: g.Store, Executable: g.Executable, monitor: g.monitor}).Run(ctx, j, out)
 }

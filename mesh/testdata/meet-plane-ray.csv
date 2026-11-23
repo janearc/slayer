@@ -1,0 +1,2 @@
+name,atx,aty,atz,dirx,diry,dirz,near,far
+along-the-plane,0,0.5,1,0,0,-1,0,+Inf

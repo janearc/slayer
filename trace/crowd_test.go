@@ -83,7 +83,8 @@ func TestTheCrowdFindsWhatAskingEveryThingFinds(t *testing.T) {
 	for _, many := range []int{0, 1, 3, 17, 300} {
 		things := strewn(uint64(many), many)
 		seen := gathered(things)
-		random := rand.New(rand.NewPCG(uint64(many), 5))
+		source := rand.NewPCG(uint64(many), 5)
+		random := rand.New(source)
 		for range 2000 {
 			ray, near := aimed(random), between(random, 0, 2)
 			far := between(random, 0, 30)
@@ -109,8 +110,9 @@ func TestTheCrowdFindsWhatAskingEveryThingFinds(t *testing.T) {
 func TestATieGoesToTheEarlierThing(t *testing.T) {
 	world := thing.NewWorld()
 	for _, x := range []float64{1, -1, 10, 11, 12, 13} {
+		at := maths.V(x, 0, 0)
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 2},
-			Motion: resting(maths.V(x, 0, 0))})
+			Motion: resting(at)})
 	}
 	things := place(world, 0)
 	want, _ := everyFirst(things, alongZ, 0)
@@ -132,11 +134,14 @@ func starsOverAField(random *rand.Rand) []placedThing {
 		if star {
 			height = between(random, 20, 25)
 		}
+		radius := between(random, 0.1, 0.5)
+		across := between(random, -10, 10)
+		depth := between(random, -10, 10)
+		at := maths.V(across, height, depth)
 		world.Add(thing.Thing{
-			Shape: shape.Sphere{Radius: between(random, 0.1, 0.5)},
-			Motion: resting(maths.V(between(random, -10, 10), height,
-				between(random, -10, 10))),
-			Attrs: thing.Attrs{Clear: star}})
+			Shape:  shape.Sphere{Radius: radius},
+			Motion: resting(at),
+			Attrs:  thing.Attrs{Clear: star}})
 	}
 	return place(world, 0)
 }
@@ -206,9 +211,9 @@ func depthBelow(nodes []branch, at int) int {
 func TestAManyThingedTreeFitsTheWalksStack(t *testing.T) {
 	world := thing.NewWorld()
 	for i := range 4000 {
+		at := maths.V(float64(i%20), float64(i/20%20), float64(i/400))
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.4},
-			Motion: resting(maths.V(float64(i%20), float64(i/20%20),
-				float64(i/400)))})
+			Motion: resting(at)})
 	}
 	grown := gathered(place(world, 0))
 	if got, most := depthBelow(grown.nodes, 0), 11; got != most {
@@ -222,8 +227,9 @@ func TestAManyThingedTreeFitsTheWalksStack(t *testing.T) {
 func TestATreeTooDeepForTheStackIsRefused(t *testing.T) {
 	world := thing.NewWorld()
 	for i := range 8 {
+		at := maths.V(float64(i), 0, 0)
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.4},
-			Motion: resting(maths.V(float64(i), 0, 0))})
+			Motion: resting(at)})
 	}
 	made := crowd{things: place(world, 0)}
 	made.boxes = make([]maths.Box, len(made.things))

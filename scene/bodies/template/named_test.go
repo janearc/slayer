@@ -86,7 +86,8 @@ func TestNamedHandsBackItsOwnCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 	mine = mine.Aimed(maths.V(9, 9, 9), maths.V(1, 0, 0))
-	if len(apartWithColours(mine, its(t, HaleBopp))) == 0 {
+	reference := its(t, HaleBopp)
+	if len(apartWithColours(mine, reference)) == 0 {
 		t.Fatal("aiming changed nothing, so the check below proves " +
 			"nothing")
 	}

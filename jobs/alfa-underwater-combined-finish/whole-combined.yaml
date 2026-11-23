@@ -1,0 +1,24 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene:
+  set: "./whole-combined-set.yaml"
+film:
+  preset: half-portrait
+  width: 1080
+  height: 960
+  rays: 1
+  tall: 70
+renderer: gpu
+quality: exact
+camera:
+  name: underwater-60m
+at:
+  value: 0
+  unit: s
+outputs:
+  picture: "../../out/alfa-underwater-combined-finish/whole-combined.png"
+  raw: "../../out/alfa-underwater-combined-finish/whole-combined.pfm"
+print:
+  knee: 0.7
+  top: 8
+  stops: 10

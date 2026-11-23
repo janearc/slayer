@@ -34,6 +34,7 @@ func (reading reader) scene(_, value *yaml.Node) error {
 		"fuel-beds":       reading.fuelBeds,
 		"weather":         reading.weather,
 		"lasers":          reading.lasers,
+		"plumes":          reading.plumes,
 		"laser-pointings": reading.laserPointings,
 		"atmosphere":      reading.atmosphere,
 		"name":            reading.text(&made.name),
@@ -51,8 +52,10 @@ func (reading reader) scene(_, value *yaml.Node) error {
 		"location": reading.block(map[string]step{
 			"lat": reading.number(&made.latitude, -90, 90),
 			"lon": reading.number(&made.longitude, -180, 180)}),
-		"timeofday": reading.clock,
-		"cameras":   reading.cameras,
+		"timeofday":  reading.clock,
+		"date":       reading.dateStep,
+		"utc-offset": reading.quantity(&made.offset, "h", leastOffsetHours, mostOffsetHours),
+		"cameras":    reading.cameras,
 		"set": reading.block(map[string]step{
 			"bounded_box": reading.block(map[string]step{
 				"size_x": reading.number(&made.bounds[0], 0, math.Inf(1)),
@@ -65,6 +68,9 @@ func (reading reader) scene(_, value *yaml.Node) error {
 			"texts":  reading.texts}),
 	}, reading.spaceScene())
 	if err := reading.keys(value, steps, nil); err != nil {
+		return err
+	}
+	if err := reading.sunned(value); err != nil {
 		return err
 	}
 	return reading.aired(value)

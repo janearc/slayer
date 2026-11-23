@@ -60,10 +60,11 @@ func TestPlanckIsCelestialsLawTyped(t *testing.T) {
 func TestPlanckOfNothingIsNone(t *testing.T) {
 	green := measure.Metres(greenNanometres * metresANanometre)
 	sun := measure.Kelvin(sunKelvin)
+	notANumber := measure.Kelvin(math.NaN())
 	for name, glow := range map[string]radiance.Radiance{
 		"no heat":         radiance.Planck(measure.Kelvin(0), green),
 		"less than none":  radiance.Planck(measure.Kelvin(-sunKelvin), green),
-		"heat no number":  radiance.Planck(measure.Kelvin(math.NaN()), green),
+		"heat no number":  radiance.Planck(notANumber, green),
 		"no wavelength":   radiance.Planck(sun, measure.Metres(0)),
 		"wavelength less": radiance.Planck(sun, measure.Metres(-1)),
 	} {

@@ -34,7 +34,8 @@ func TestExcitedGasGlowsWhereTheLampReaches(t *testing.T) {
 			Radiant: thing.Excited{
 				Lines: map[float64]float64{656: 1}, Width: 2,
 				Passes: 0.5}}})
-	world.Lamp(thing.Sun(maths.XAxis, maths.Grey(1)))
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(maths.XAxis, light))
 	eye := tenBack()
 	lens := film.Pinhole{Wide: 30 * maths.Degree}
 	picture := drawIn(world, eye, lens, 0, 41, 41, halpha)
@@ -63,7 +64,8 @@ func lineGlow(sun, excitation float64) float64 {
 	world.AddVolume(thing.Volume{Medium: medium.Puff{Radius: 2, Thick: 3},
 		Material: &thing.Material{Name: "gas", Colour: maths.Grey(0.5),
 			Radiant: glows}})
-	world.Lamp(thing.Sun(maths.XAxis, maths.Grey(sun)))
+	light := maths.Grey(sun)
+	world.Lamp(thing.Sun(maths.XAxis, light))
 	eye := tenBack()
 	lens := film.Pinhole{Wide: 30 * maths.Degree}
 	line := maths.Band{Nanometres: 656}

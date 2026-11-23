@@ -59,43 +59,61 @@ func (row spacecraft) enclosed(assembly *instrumentAssembly,
 	row.enclosedDetail(assembly, size)
 }
 
-// hubblePanels uses bilateral wings and a continuous support bar.
+// The cells of a Hubble wing are chosen: no source in the tree counts
+// them. A wing has this many columns along it and rows across it.
+const hubbleCellColumns, hubbleCellRows = 24, 12
+
+const (
+	// hubbleCellGap is the gap between cells per aperture diameter. Chosen.
+	hubbleCellGap = 0.004
+	// hubbleCellRise is a cell's height as a share of the blanket's
+	// thickness. Chosen.
+	hubbleCellRise = 0.4
+	// hubbleBarShare is the share of the gap between two columns that a
+	// bus bar fills. Chosen.
+	hubbleBarShare = 0.5
+	// hubbleInset is how many rail widths the cells stand in from the
+	// blanket's edge, to leave room for the bars and booms. Chosen.
+	hubbleInset = 1.5
+)
+
+// hubblePanels puts a rolled wing on each side of the body, each on a
+// yoke from the body's wall to the wing's tip. The craft's span is to the
+// outer face of a wing's end bar, so each wing is laid pulled in.
 func (row spacecraft) hubblePanels(assembly *instrumentAssembly,
 	size spacecraftSize,
 ) {
-	width := size.span*spaceHalf - size.radius
-	height := size.aperture * spacecraftValue("hubble-panel-height")
-	lift := size.aperture * spacecraftValue("hubble-panel-lift")
-	for _, sign := range []float64{-spaceOne, spaceOne} {
-		middle := sign * (size.span*spaceHalf + size.radius) * spaceHalf
-		at := maths.V(middle-width*spaceHalf,
-			lift-height*spaceHalf, spaceZero)
-		assembly.solarPanel(width, height, size.aperture, at)
+	for _, side := range []float64{-spaceOne, spaceOne} {
+		hubbleWing(size, side).pulledIn().lay(assembly)
 	}
-	assembly.rod(maths.V(-size.span*spaceHalf, lift, spaceZero),
-		maths.V(size.span*spaceHalf, lift, spaceZero),
-		size.aperture*spacecraftValue("strut-radius"), spaceStructure)
 }
 
-// solarPanel uses closed boxes for both the panel and its readable grid.
-func (assembly *instrumentAssembly) solarPanel(width, height, aperture float64,
-	at maths.Vec,
-) {
+// hubbleWing is one wing of Hubble as an array. The blanket's width is
+// the span between the body and the wing tip, its height and thickness
+// the picked ones, the cells on the face towards +z, and the yoke the
+// picked support tube.
+func hubbleWing(size spacecraftSize, side float64) solarArray {
+	aperture := size.aperture
 	thickness := aperture * spacecraftValue("panel-thickness")
-	assembly.box(width, height, thickness, at, leaf)
-	bar := aperture * spacecraftValue("solar-grid-width")
-	columns := int(spacecraftValue("solar-columns"))
-	rows := int(spacecraftValue("solar-rows"))
-	for index := range columns - spaceOne {
-		column := index + spaceOne
-		x := (width - bar) * float64(column) / float64(columns)
-		start := at.Add(maths.V(x, spaceZero, -bar*spaceHalf))
-		assembly.box(bar, height, thickness+bar, start, spaceStructure)
-	}
-	for index := range rows - spaceOne {
-		line := index + spaceOne
-		y := (height - bar) * float64(line) / float64(rows)
-		start := at.Add(maths.V(spaceZero, y, -bar*spaceHalf))
-		assembly.box(width, bar, thickness+bar, start, spaceStructure)
+	panels := solarPanels{along: spaceOne, across: spaceOne,
+		width:     size.span*spaceHalf - size.radius,
+		depth:     aperture * spacecraftValue("hubble-panel-height"),
+		thickness: thickness}
+	cells := solarCellsFilling(panels, panels.wanted()*hubbleInset,
+		hubbleCellColumns, hubbleCellRows, aperture*hubbleCellGap)
+	cells.height = thickness * hubbleCellRise
+	cells.barShare = hubbleBarShare
+	middle := maths.V(side*size.radius,
+		aperture*spacecraftValue("hubble-panel-lift"), thickness*spaceHalf)
+	return solarArray{
+		frame: solarFrame(middle, maths.V(side, spaceZero, spaceZero),
+			maths.V(spaceZero, spaceZero, spaceOne)),
+		panels: panels, cells: cells, rolled: true,
+		yoke: solarYoke{length: panels.width,
+			radius: aperture * spacecraftValue("strut-radius"),
+			across: []float64{spaceZero}},
+		looks: solarLooks{cell: leaf, bar: spaceFoil,
+			substrate: spaceStructure, frame: spacePanel,
+			hardware: spaceStructure},
 	}
 }

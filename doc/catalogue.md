@@ -22,13 +22,17 @@ models.
 - `coast-redwood-shoot` and `giant-sequoia-shoot`: the actual reusable
   foliage specimens, exposed for close views. Their recursive rules,
   published leaf lengths and authored choices are recorded in
-  [conifer foliage](conifer-foliage.md).
+  [conifer foliage](model/vegetation/conifer-foliage.md).
 - [fern](#fern): fronds carrying paired leaflets.
 - [log](#log): fallen wood with broken branch stubs.
 - `valley-oak`, `alder` and `poplar`: draft deciduous trees with separate
   seasonal foliage. `manzanita` and `chaparral-brush` use several stems;
   `joshua-tree` has terminal rosettes and old-leaf skirts. See
-  [vegetation construction and sources](vegetation-families.md).
+  [vegetation construction and sources](model/vegetation/vegetation-families.md).
+- `kandelia-obovata`, `aegiceras-corniculatum`, `avicennia-marina`,
+  `bruguiera-gymnorhiza` and `sonneratia-apetala`: draft mangroves with
+  roots that show above the ground, pencils, cones or props, differing by
+  seed. See [mangroves](model/vegetation/vegetation-families.md#mangroves).
 - `saguaro`: draft ribbed columns, curved arms, rounded tips and physical
   spine cones. All dimensions and pleat counts are authored.
 
@@ -40,7 +44,7 @@ materials. The draft named-factory wrapper replaces foliage sleeves with
 shared recursive shoots and physical needles around each twig.
 
 The seed varies dimensions and branch placement. The original whorled
-row remains as a legacy reference. [Draft foliage and its sources](spruce-foliage.md).
+row remains as a legacy reference. [Draft foliage and its sources](model/vegetation/spruce-foliage.md).
 
 ### norway
 
@@ -51,7 +55,7 @@ paired rows of drooping branchlets, each wearing foliage sleeves.
 It shares the spruce's architecture, with a different row and added
 branchlets. The draft named-factory wrapper carries recursive physical
 shoots at all four detail levels. The legacy reference row is retained.
-[Draft foliage and its sources](spruce-foliage.md).
+[Draft foliage and its sources](model/vegetation/spruce-foliage.md).
 
 ### fern
 
@@ -100,7 +104,7 @@ a named YAML recipe can also make fire independently of fuel geometry:
 a single source, a seeded cluster, or a line, with optional smoke.
 these are recipe kinds, separate from the static names above.
 
-[fire recipes](fire-recipes.md) gives the schema, working sets, sources
+[fire recipes](model/fire/fire-recipes.md) gives the schema, working sets, sources
 and current GPU support. place logs or other fuel geometry separately.
 
 ### campfire
@@ -155,7 +159,7 @@ projectors do.
 
 A beam this narrow lights what it hits; the shaft itself appears only
 where a scattering medium stands in it, as [guide-star
-beams](guide-stars.md) explains for the scene-level kind.
+beams](model/observatory/guide-stars.md) explains for the scene-level kind.
 [Construction row](../manufacture/stagelights.go).
 
 ### strobe
@@ -188,7 +192,7 @@ from `Lights`. [Construction row](../manufacture/home.go).
   fork, pier and rear focuser.
 
 All four details preserve the requested apertures and physical envelope.
-[Construction and limits](personal-telescopes.md) distinguish scenery from
+[Construction and limits](model/observatory/personal-telescopes.md) distinguish scenery from
 a functioning optical prescription.
 
 ## Ground observatories
@@ -202,15 +206,15 @@ a functioning optical prescription.
   one backing, a larger annular secondary and a camera housing.
 - `griffith`: a civic observatory with wings, a domed rotunda and rooftop
   instrument domes. Its east refractor has a nominal 12-inch objective;
-  [building dimensions and materials](civic-observatory.md) are authored.
+  [building dimensions and materials](model/observatory/civic-observatory.md) are authored.
 - `elt`: a five-mirror assembly around a 798-panel primary with a central
-  opening. See [large observatory](large-observatory.md).
+  opening. See [large observatory](model/observatory/large-observatory.md).
 
 The new named templates have fixed pointing and dimensions, with four surface
 details. Their ordinary closed meshes use the existing CPU and GPU routes.
 
 Source dimensions and authored support proportions remain separate; the Keck
-enclosure dimensions are authored. [Family design](observatory-family-design.md)
+enclosure dimensions are authored. [Family design](model/observatory/observatory-family-design.md)
 records the sources for the remaining instruments.
 
 ## Space observatories
@@ -225,7 +229,7 @@ records the sources for the remaining instruments.
 These are visual templates, with fixed structural dimensions for each
 aperture. Seeds retain the scene's placement-yaw rule. Circular tessellation
 changes with complexity; the physical envelope stays fixed.
-[Recipes, sources and limits](space-observatories.md).
+[Recipes, sources and limits](model/spacecraft/space-observatories.md).
 
 ## Visitors
 
@@ -308,7 +312,7 @@ number of it is picked by eye, in metres; none is engineering.
   2023, pp. 22–23; dimensions and placements are not measured.
 
   See
-  [the detail-model notes](alfa-model.md).
+  [the detail-model notes](model/boat/alfa-model.md).
 
 For the water, the boat's own space is in metres with y up, the keel at
 y nought, the centreline on x nought, the bow toward minus z and
@@ -409,7 +413,7 @@ The older export `ConiferProper` is a reference constructor, not another
 named kind.
 [manufactory.md](manufactory.md) records the original design and history.
 
-[Redwood groves and their atmosphere](redwood-atmosphere.md) records
+[Redwood groves and their atmosphere](model/vegetation/redwood-atmosphere.md) records
 the transpiration and fog references for future ecosystem recipes,
 including what they do and do not justify as model parameters.
 
@@ -417,23 +421,23 @@ including what they do and do not justify as model parameters.
 working YAML recipe joining observatory construction, vegetation,
 complexity, terrain placement, and a shared grove atmosphere.
 
-[The night-fire scene](fire-night-design.md) adds a reusable volumetric fire
+[The night-fire scene](model/fire/fire-night-design.md) adds a reusable volumetric fire
 recipe, firebrands and a prescribed front over placed fuel. These use
 bounded GPU fields and shared instances; they are scene recipes, rather
 than additional names in KindNamed.
 
 ## Summit yard
 
-See [the yard equipment](yard-equipment.md) for cranes, vehicles, scaffold,
+See [the yard equipment](model/observatory/yard-equipment.md) for cranes, vehicles, scaffold,
 utility equipment and access structures. These are authored scenery kinds
 with four details and closed ordinary meshes.
 
 The `guide-star-launcher` adds an open launch tube, collars and attachment
-shoe. The [launcher notes](guide-launchers.md) describe the shared beam
+shoe. The [launcher notes](model/observatory/guide-launchers.md) describe the shared beam
 direction, optional visible housing and explicit placement heading.
 
 ## Hawaiian summit families
 
-The [Hawaiian observatories](hawaiian-observatories.md) add optical, solar,
+The [Hawaiian observatories](model/observatory/hawaiian-observatories.md) add optical, solar,
 radio and tracking families, including shared antenna and dome layouts.
 Source apertures and nominal classes stay separate from picked buildings.

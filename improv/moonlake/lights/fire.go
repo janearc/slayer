@@ -17,16 +17,16 @@ type FireCues struct {
 	Since      []float64
 }
 
-type FireSequence int
+type fireSequence int
 
 const (
-	FireSteady FireSequence = iota
-	FireSwell
+	FireSteady fireSequence = iota
+	fireSwell
 	FireBurst
 )
 
 type FireLayer struct {
-	Sequence FireSequence
+	Sequence fireSequence
 	Index    int
 	Amount   float64
 }
@@ -67,13 +67,13 @@ func FireStrike(config FireConfig, cue FireCues) float64 {
 	return 1 + spike*math.Exp(-beat/config.Snap)
 }
 
-// FireContributions lists the fire frames to blend and how much of each. A
+// fireContributions lists the fire frames to blend and how much of each. A
 // steady config gives one layer for each age in cue.Since. A percussive one
 // gives a steady and a swell layer from the latest beat, and a burst layer for
 // each age when Burst is set. It gives nothing for a percussive config with no
 // lit beat, and an error for bad frame timing or ages. Frame indexes are not
 // yet limited to the frames that exist.
-func FireContributions(config FireConfig, cue FireCues) ([]FireLayer, error) {
+func fireContributions(config FireConfig, cue FireCues) ([]FireLayer, error) {
 	limit := float64(int(^uint(0)>>1) / 2)
 	if config.Percussive && (cue.Lit < 0 || len(cue.Since) == 0) {
 		return nil, nil
@@ -107,7 +107,7 @@ func FireContributions(config FireConfig, cue FireCues) ([]FireLayer, error) {
 		layers = append(layers, FireLayer{FireSteady, int(config.SteadyFrom) + int(beat*config.FPS), amount})
 	}
 	if amount := level * swell; !(amount <= 0) {
-		layers = append(layers, FireLayer{FireSwell, int(beat * config.FPS), amount})
+		layers = append(layers, FireLayer{fireSwell, int(beat * config.FPS), amount})
 	}
 	if config.Burst {
 		for _, ago := range cue.Since {
@@ -121,7 +121,7 @@ func FireContributions(config FireConfig, cue FireCues) ([]FireLayer, error) {
 	return layers, nil
 }
 
-// PlanFire turns FireContributions into the layers to draw, given how many
+// PlanFire turns fireContributions into the layers to draw, given how many
 // frames each of the three sequences holds in counts. Steady and burst layers
 // past the end are dropped, as are percussive ones with no amount. Other
 // indexes are held to the last frame. It refuses a negative count, and a
@@ -132,7 +132,7 @@ func PlanFire(config FireConfig, cue FireCues, counts [3]int) ([]FireLayer, erro
 			return nil, fmt.Errorf("negative fire frame count")
 		}
 	}
-	contributions, err := FireContributions(config, cue)
+	contributions, err := fireContributions(config, cue)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func PlanFire(config FireConfig, cue FireCues, counts [3]int) ([]FireLayer, erro
 
 // RenderFire adds up the planned fire frames, each times its layer amount,
 // into a new image, leaving out pixels covered by CloseTrees, then runs
-// FireShoulder on it. It refuses bad sizes, a wrong-sized mask or frame, and
+// fireShoulder on it. It refuses bad sizes, a wrong-sized mask or frame, and
 // a frame that is missing.
 func RenderFire(config FireConfig, input FireInput) (Image, error) {
 	if !dimensions(input.Width, input.Height) {
@@ -194,16 +194,16 @@ func RenderFire(config FireConfig, input FireInput) (Image, error) {
 			fire.Light[i] += layer.Amount * pass.Light[i]
 		}
 	}
-	FireShoulder(fire, config.Top*FireStrike(config, input.Cues), math.Exp2(config.Stops))
+	fireShoulder(fire, config.Top*FireStrike(config, input.Cues), math.Exp2(config.Stops))
 	return fire, nil
 }
 
-// FireShoulder softens bright pixels of fire in place. A pixel's luminance
+// fireShoulder softens bright pixels of fire in place. A pixel's luminance
 // times gain is passed through a curve that tops out at top, and the colour is
 // scaled to match, so nothing ends above top/gain and dim pixels barely move.
 // An infinite luminance becomes top/gain in every channel. Pixels with
 // luminance zero or less, or not a number, are left alone.
-func FireShoulder(fire Image, top, gain float64) {
+func fireShoulder(fire Image, top, gain float64) {
 	for i := 0; i+2 < len(fire.Light); i += 3 {
 		r, g, b := fire.Light[i], fire.Light[i+1], fire.Light[i+2]
 		y := (0.2126*r + 0.7152*g + 0.0722*b) * gain

@@ -2,8 +2,8 @@ package picking
 
 import (
 	"github.com/janearc/slayer/ferruccio/internal/draft"
-	"github.com/janearc/slayer/hillside/placement"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 	"math"
 	"os"

@@ -34,7 +34,7 @@ func TestShoreIsTitansGround(t *testing.T) {
 	near(t, "the land", shore.Height(50, 0), 20, 0.5)
 	near(t, "the deep floor", shore.Height(-280, 0), -20, 0.5)
 	near(t, "the shelf", shore.Height(-100, 10), -10, 0.6)
-	if !shore.Holds(0, 0) || shore.Holds(400, 0) {
+	if !shore.holds(0, 0) || shore.holds(400, 0) {
 		t.Errorf("the shore does not know its own square")
 	}
 	// the map's samples are two metres apart and the shore's one, so
@@ -55,7 +55,7 @@ func TestShoreIsTitansGround(t *testing.T) {
 // cut down to what the depth allows; and on land there are none.
 func TestWavesShoalAndBreak(t *testing.T) {
 	shore := rampShore(t)
-	sea, err := SeaState(4).Raise(300e3, 0, 0)
+	sea, err := seaState(4).Raise(300e3, 0, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestViewOfAShore(t *testing.T) {
 	if err := shore.Wall(Vec{}, Vec{X: -1}, 0.5); err != nil {
 		t.Fatal(err)
 	}
-	sea, _ := SeaState(4).Raise(300e3, 0, 0)
+	sea, _ := seaState(4).Raise(300e3, 0, 0)
 	scene := Scene{Sea: sea, Salinity: 35, Celsius: 15, Shore: shore,
 		Sun: Vec{-0.5, -0.3, 0.6}}
 	down := func(x float64) [3]float64 {

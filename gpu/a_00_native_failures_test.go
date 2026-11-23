@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
@@ -17,6 +18,16 @@ import (
 	"github.com/janearc/slayer/scene/medium"
 	"github.com/janearc/slayer/scene/thing"
 )
+
+// bakeLighting shares the trace kernel's native hierarchy and scene buffers.
+// Every frame recomputes lighting; this cache does not lag moving lamps.
+func (encoded *scene) bakeLighting(kernel *metal.Kernel, inputs [][]byte) (time.Duration, error) {
+	return encoded.bakeLightingOn(kernel, copied(kernel, inputs))
+}
+
+// source combines noise, generated buffer layouts, and tracing kernels for a
+// scene requiring no CPU texture records.
+func source() string { return sourceWith(0, probeVolumes) }
 
 func TestGPUPropagatesPlatformFailuresThroughBakesAndDrawing(t *testing.T) {
 	if mode := os.Getenv("SLAYER_METAL_BOUNDARY_FAULT"); mode != "" {

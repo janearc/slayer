@@ -18,6 +18,7 @@ type Set struct {
 	latitude   float64 // degrees north
 	longitude  float64 // degrees east
 	clock      int     // minutes after local midnight
+	offset     float64 // hours the clock is ahead of UTC
 	cameras    []camera
 	bounds     [3]float64 // metres a side; none means the bodies' scale
 	assets     []asset
@@ -42,6 +43,7 @@ type Set struct {
 	weather              map[string]Mist
 	laserPointings       map[string]laserDirection
 	lasers               []Laser
+	plumes               []Plume
 	atmosphere           string
 	atmosphereAlbedo     float64
 	atmosphereLayers     []AtmosphereLayer
@@ -204,6 +206,9 @@ func Read(file string, source []byte) (Set, error) {
 		err = reading.foundAtmosphere()
 	}
 	if err == nil {
+		err = reading.foundPlumes()
+	}
+	if err == nil {
 		err = reading.foundVersionTwo()
 	}
 	if err == nil {
@@ -282,6 +287,9 @@ func (reading reader) found() error {
 	if err := reading.foundInitialMedia(); err != nil {
 		return err
 	}
+	if err := reading.foundCover(); err != nil {
+		return err
+	}
 	if world := reading.set.world; world != nil {
 		if surface := world.ocean; surface != nil {
 			var clear bool
@@ -305,6 +313,9 @@ func (reading reader) found() error {
 					"world holds no material by that name",
 					reading.file, each.name, each.material)
 			}
+		}
+		if err := reading.foundChannels(world); err != nil {
+			return err
 		}
 		if err := reading.carried(world); err != nil {
 			return err

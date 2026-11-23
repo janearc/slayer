@@ -7,9 +7,9 @@ import (
 
 // poured is the heights after the sea is poured at a share.
 func poured(h []float64, ocean float64) []float64 {
-	w := &World{Terrain: Terrain{Ocean: ocean}, height: append([]float64(nil), h...)}
-	w.pourSea()
-	return w.height
+	world := &World{Terrain: Terrain{Ocean: ocean}, height: append([]float64(nil), h...)}
+	world.pourSea()
+	return world.height
 }
 
 // a hundred and one heights, the whole numbers 0 to 100 in a scrambled
@@ -28,32 +28,32 @@ func TestTheSeaIsPouredToTheShareAndScaledToOne(t *testing.T) {
 	for i := range h {
 		h[i] = float64(i * 37 % 101)
 	}
-	for _, c := range []struct {
+	for _, each := range []struct {
 		ocean float64
 		m     int
 	}{{0.6, 60}, {0.25, 25}, {0.5, 50}, {0.98, 98}, {0.01, 1}, {1, 100},
 		{0, 0}, {1.5, 100}, {-0.3, 0}} {
-		got := poured(h, c.ocean)
+		got := poured(h, each.ocean)
 		under := 0
 		for i, e := range got {
 			k := h[i]
-			want := k - float64(c.m)
-			if top := 98 - float64(c.m); want > 0 && top > 0 {
+			want := k - float64(each.m)
+			if top := 98 - float64(each.m); want > 0 && top > 0 {
 				want /= top
 			}
-			if bottom := float64(c.m) - 1; want < 0 && bottom > 0 {
+			if bottom := float64(each.m) - 1; want < 0 && bottom > 0 {
 				want /= bottom
 			}
 			if !close12(e, want) {
 				t.Fatalf("ocean %v: the tile of height %v is %v, want %v",
-					c.ocean, k, e, want)
+					each.ocean, k, e, want)
 			}
 			if e < 0 {
 				under++
 			}
 		}
-		if under != c.m {
-			t.Errorf("ocean %v: %d tiles under water, want %d", c.ocean, under, c.m)
+		if under != each.m {
+			t.Errorf("ocean %v: %d tiles under water, want %d", each.ocean, under, each.m)
 		}
 	}
 }

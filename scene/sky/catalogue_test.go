@@ -109,9 +109,10 @@ func TestACatalogueIsTheSumOfItsStars(t *testing.T) {
 		// look near a star, as far off as its disc is wide and a little
 		// further, where a miss would show
 		near := stars[rapid.IntRange(0, manyStars-1).Draw(draw, "which")].Toward
-		toward := near.Add(maths.V(rapid.Float64Range(-0.02, 0.02).Draw(draw, "dx"),
-			rapid.Float64Range(-0.02, 0.02).Draw(draw, "dy"),
-			rapid.Float64Range(-0.02, 0.02).Draw(draw, "dz"))).Unit()
+		driftX := rapid.Float64Range(-0.02, 0.02).Draw(draw, "dx")
+		driftY := rapid.Float64Range(-0.02, 0.02).Draw(draw, "dy")
+		driftZ := rapid.Float64Range(-0.02, 0.02).Draw(draw, "dz")
+		toward := near.Add(maths.V(driftX, driftY, driftZ)).Unit()
 		// every star well inside its disc is seen and none well outside
 		// is; one within rounding of its disc's edge may be either, the
 		// catalogue having made its way a unit long and this sum not

@@ -68,9 +68,13 @@ func around(at maths.Vec, phi, chord float64) maths.Vec {
 	}
 	u := at.Cross(k).Unit()
 	w := at.Cross(u)
-	e := u.Scale(math.Cos(phi)).Add(w.Scale(math.Sin(phi)))
+	phiCosine := math.Cos(phi)
+	phiSine := math.Sin(phi)
+	e := u.Scale(phiCosine).Add(w.Scale(phiSine))
 	theta := 2 * math.Asin(chord/2)
-	return at.Scale(math.Cos(theta)).Add(e.Scale(math.Sin(theta)))
+	thetaCosine := math.Cos(theta)
+	thetaSine := math.Sin(theta)
+	return at.Scale(thetaCosine).Add(e.Scale(thetaSine))
 }
 
 // fall is how much of a star's light is left at a share t of its radius
@@ -138,7 +142,8 @@ func TestALoneStarFallsOffAndIsCutByItsTiles(t *testing.T) {
 				shown := in == lone.tile || (c.ring && allowed[in])
 				want := dusk
 				if shown {
-					want = dusk.Add(top.Scale(fall(out)))
+					remaining := fall(out)
+					want = dusk.Add(top.Scale(remaining))
 				}
 				if got := st.Light(d); !within(got, want) {
 					t.Errorf("%s: %.2f of the radius out at %d/24: %v, want %v",

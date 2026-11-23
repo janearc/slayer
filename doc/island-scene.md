@@ -80,7 +80,7 @@ The source samples stay unchanged; the view's representation changes.
 
 Terrain vertices, the camera and ocean centre all subtract the same render
 origin before GPU encoding. The directional lamp is unchanged by translation.
-This command does not yet rebase existing Hillside weather or spacecraft.
+This command does not yet rebase the session's weather or spacecraft.
 
 Source cache payloads share one declared total allowance; tile and metadata
 limits are separate. Selected patch counts, selection work, lattice depth

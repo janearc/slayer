@@ -69,8 +69,8 @@ func TestPortedAFloorUnderASunIsLitByTheCosine(t *testing.T) {
 	for _, degrees := range []float64{0, 30, 60, 85} {
 		angle := degrees * maths.Degree
 		world := floorOf(chalk)
-		world.Lamp(thing.Sun(maths.V(math.Sin(angle), math.Cos(angle), 0),
-			sun))
+		along := maths.V(math.Sin(angle), math.Cos(angle), 0)
+		world.Lamp(thing.Sun(along, sun))
 		got := lone(world, down(0), 0).Light()
 		scale := math.Cos(angle) / math.Pi
 		want := maths.RGB(full.R*scale, full.G*scale, full.B*scale)
@@ -78,7 +78,8 @@ func TestPortedAFloorUnderASunIsLitByTheCosine(t *testing.T) {
 			0.01*want.R+1e-6)
 	}
 	world := floorOf(chalk)
-	world.Lamp(thing.Sun(maths.V(0, -1, 0), sun))
+	along := maths.V(0, -1, 0)
+	world.Lamp(thing.Sun(along, sun))
 	if got := lone(world, down(0), 0).Light(); got != (maths.Light{}) {
 		t.Errorf("a sun under the floor lit its top with %v", got)
 	}
@@ -100,8 +101,11 @@ func TestPortedWhatStandsBetweenTheFloorAndALampStopsIt(t *testing.T) {
 	under := maths.Ray{At: maths.V(4, 2, 0), Dir: maths.V(-4, -2, 0).Unit()}
 	beside := maths.Ray{At: maths.V(7, 2, 0), Dir: maths.V(-4, -2, 0).Unit()}
 	world := floorOf(maths.Grey(1))
-	world.Add(ball(0.2, 0, maths.V(0, 0.25, 0)))
-	world.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(1)))
+	lowBall := ball(0.2, 0, maths.V(0, 0.25, 0))
+	world.Add(lowBall)
+	along := maths.V(0, 1, 0)
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(along, light))
 	if got := lone(world, under, 0).Light(); !within(got.R, 0, 1e-6) {
 		t.Errorf("under a ball the floor reads %v, want black", got)
 	}
@@ -112,7 +116,8 @@ func TestPortedWhatStandsBetweenTheFloorAndALampStopsIt(t *testing.T) {
 	spotted := floorOf(maths.Grey(1))
 	spotted.Lamp(film.Spot{At: maths.V(0, 2, 0), Aim: maths.V(0, -1, 0),
 		Strength: maths.Grey(1), Cone: 1.5})
-	spotted.Add(ball(1, 1, maths.V(0, 5, 0)))
+	highBall := ball(1, 1, maths.V(0, 5, 0))
+	spotted.Add(highBall)
 	eye := maths.Ray{At: maths.V(0, 1, -6), Dir: maths.V(0, -1, 6).Unit()}
 	got = lone(spotted, eye, 0).Light()
 	lightIs(t, "a floor under a spot with a ball behind the spot", got,
@@ -121,7 +126,8 @@ func TestPortedWhatStandsBetweenTheFloorAndALampStopsIt(t *testing.T) {
 	shaded := floorOf(maths.Grey(1))
 	shaded.Lamp(film.Spot{At: maths.V(0, 2, 0), Aim: maths.V(0, -1, 0),
 		Strength: maths.Grey(1), Cone: 1.5})
-	shaded.Add(ball(0.4, 2, maths.V(0, 1, 0)))
+	sideBall := ball(0.4, 2, maths.V(0, 1, 0))
+	shaded.Add(sideBall)
 	side := maths.Ray{At: maths.V(5, 0.5, 0), Dir: maths.V(-5, -0.5, 0).Unit()}
 	got = lone(shaded, side, 0).Light()
 	if !within(got.R, 0, 1e-6) {

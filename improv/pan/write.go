@@ -9,9 +9,9 @@ import (
 	"github.com/janearc/slayer/interfaces/movie"
 )
 
-// Sound is the tune under the film: the piece from the first bar's
+// sound is the tune under the film: the piece from the first bar's
 // start to the last bar's end, faded over its last moment.
-func (made Cut) Sound() (movie.Sound, error) {
+func (made Cut) sound() (movie.Sound, error) {
 	rate := made.piece.Rate
 	first := sampleAt(rate, made.barStart(made.first)-
 		made.barStart(one))
@@ -36,7 +36,7 @@ func (made Cut) Sound() (movie.Sound, error) {
 // context or a failed frame throws the movie away.
 func (made Cut) Write(ctx context.Context, path string,
 	said io.Writer) error {
-	sound, err := made.Sound()
+	sound, err := made.sound()
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (made Cut) frameInto(ctx context.Context, writer *movie.Writer,
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	picture, err := made.Picture(index)
+	picture, err := made.picture(index)
 	if err != nil {
 		return err
 	}

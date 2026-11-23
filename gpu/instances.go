@@ -115,13 +115,21 @@ func (encoded *scene) stand(key any, grown func() pendingMesh,
 
 // pooled adds a grown tree's faces and boxes to the scene's, each tree's
 // indices moved past the ones already there. It reads the tree and
-// never changes it, so a kept tree serves frame after frame. packPool
-// pools the trees in line, in the order pend placed them.
+// never changes it, so a kept tree serves frame after frame. Only the
+// low-retention trial pools faces this way; packPool pools the boxes
+// alone and packs each tree's faces from the tree.
 func (encoded *scene) pooled(grown tree) pooled {
 	firstFace := len(encoded.faces.triangles)
-	firstNode := len(encoded.faces.nodes)
 	encoded.faces.triangles = append(encoded.faces.triangles,
 		grown.triangles...)
+	return encoded.pooledNodes(grown, firstFace)
+}
+
+// pooledNodes adds a grown tree's boxes to the scene's, a branch's
+// children moved past the boxes already there and a leaf's faces past
+// firstFace, the faces pooled before the tree's.
+func (encoded *scene) pooledNodes(grown tree, firstFace int) pooled {
+	firstNode := len(encoded.faces.nodes)
 	for _, each := range grown.nodes {
 		if each.count == 0 {
 			each.first += firstNode

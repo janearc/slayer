@@ -43,6 +43,25 @@ shapes and volumes by kind with no faces, and the receipt (the job's
 sha256, its scene and camera, the time, the build). The faces are the
 ones staged in the scene, not the ones visible or hit from the camera.
 
+slayer assess FILE --places PATH stages FILE as draw stages it and
+writes to PATH, as a table of commas, where each thing of the set was
+stood: what it is of, its kind, east and north on the terrain's grid
+and the ground's height there, in metres. It draws nothing. A set of a
+world and no ground stands nothing, and is refused.
+
+slayer assess FILE --check-terrain compares the shelf (SLAYER_SHELF)
+with the sources.yaml nearest the set FILE is or names, for the terrain
+and the moon's face the set reads, downloading nothing and drawing
+nothing. It exits non-zero where a dataset differs or is not there. It
+takes no other flag; slayer draw --fetch-terrain brings the shelf right.
+
+slayer assess FILE --refusals stages FILE as draw stages it and asks the
+GPU path what it would refuse in the first frame's world: every thing,
+volume and lamp, and the world itself, grouped by reason with a count
+and an example, then each part by its place, shape kind and material. It
+does not stop at the first, and draws nothing. A thing has no name once
+the world is made, so it is found by its place in the world's list.
+
 slayer assess FILE --judge draws a set file as the terminal shows it
 and as a real picture, judges the one against the other, and writes
 both, the real one again through the set's print, and the verdict, to
@@ -82,7 +101,9 @@ var (
 	judgeTakes  = []string{judgeFlag, "out", "at", "camera", kFlag, samplesFlag}
 	smokesTakes = []string{smokesFlag, "out", kFlag, smallFlag, freshFlag}
 	checkTakes  = append([]string{"out", "width", "height", "rays", "at",
-		"camera", "renderer", "quality", censusFlag}, switchNames()...)
+		"camera", "renderer", "quality", censusFlag, placesFlag},
+		switchNames()...)
+	terrainTakes = []string{checkTerrainFlag}
 )
 
 // The judges assess hands a judgement to: a set's here, the smokes'
@@ -122,6 +143,21 @@ func (held assessing) assess(call pzm.Call) error {
 		}
 		return held.judge(call, given)
 	}
+	if call.On(planFlag) {
+		if err := strays(call, planTakes, planFlag); err != nil {
+			return err
+		}
+		return held.plan(call, given)
+	}
+	if call.On(refusalsFlag) {
+		if err := strays(call, refusalsTakes, refusalsFlag); err != nil {
+			return err
+		}
+		return held.refusals(call, given)
+	}
+	if call.On(checkTerrainFlag) {
+		return held.terrain(call, given)
+	}
 	if err := strays(call, checkTakes, "assess FILE"); err != nil {
 		return err
 	}
@@ -131,7 +167,8 @@ func (held assessing) assess(call pzm.Call) error {
 // strays refuses a flag given that the way of assessing does not take,
 // by its name and the way's.
 func strays(call pzm.Call, takes []string, way string) error {
-	all := slices.Concat(judgeTakes, smokesTakes, checkTakes)
+	all := slices.Concat(judgeTakes, smokesTakes, checkTakes, refusalsTakes,
+		planTakes, terrainTakes)
 	for _, name := range all {
 		if call.Given(name) && !slices.Contains(takes, name) {
 			return fmt.Errorf("--%s does nothing with %s", name, way)
@@ -143,9 +180,12 @@ func strays(call pzm.Call, takes []string, way string) error {
 // check is whether the file will draw: everything draw does before its
 // first frame, and no frame.
 func (held assessing) check(call pzm.Call, given string) error {
-	drawer := drawing{env: held.env, shop: held.shop}
+	drawer := drawing(held)
 	name := filepath.Base(given)
 	run, err := drawer.planned(call, given)
+	if err == nil {
+		run, err = run.withPlaces(call, held.env.directory)
+	}
 	if err != nil {
 		return fmt.Errorf("%s will not draw: %w", name, err)
 	}
@@ -328,7 +368,8 @@ func (held assessing) smokeWords(call pzm.Call) []string {
 		words = append(words, "-"+kFlag, call.Value(kFlag))
 	}
 	if call.Given("out") {
-		words = append(words, "-out", resolved(call.Value("out"),
+		outValue := call.Value("out")
+		words = append(words, "-out", resolved(outValue,
 			held.env.directory))
 	}
 	if call.On(freshFlag) {
@@ -342,8 +383,8 @@ func (held assessing) smokeWords(call pzm.Call) []string {
 func declareAssess(made *pzm.Tool, env Env, shop workshop) {
 	writes := verb.WritesTo("with --judge or --smokes, the pictures " +
 		"and verdicts, in --out and the smoke cache, and with --census " +
-		"the census")
-	judges := verb.NewFacts(writes, verb.Changes, verb.ThisMachine,
+		"the census, and with --places the places table")
+	judges := verb.NewFacts(writes, verb.Changes, verb.Outside,
 		verb.NoOne, verb.FullCPU)
 	held := assessing{env: env, shop: shop}
 	flags := append(jobFlags(),
@@ -360,7 +401,15 @@ func declareAssess(made *pzm.Tool, env Env, shop workshop) {
 		pzm.Switch(freshFlag, verb.NoShort, "draw again what the smoke "+
 			"cache holds"),
 		pzm.Value(censusFlag, verb.NoShort, "write the geometry staged "+
-			"for the first frame to this file, as JSON"))
+			"for the first frame to this file, as JSON"),
+		pzm.Value(placesFlag, verb.NoShort, "write where each thing "+
+			"was stood to this file, as commas"),
+		pzm.Switch(checkTerrainFlag, verb.NoShort, "say whether the "+
+			"shelf is the source's, downloading nothing"),
+		pzm.Switch(refusalsFlag, verb.NoShort, "say all the GPU path "+
+			"would refuse in the first frame"),
+		pzm.Switch(planFlag, verb.NoShort, "say what the first frame "+
+			"needs of the set, making nothing"))
 	made.Verb("assess", verb.NoShort, "say whether a file will draw, "+
 		"or judge a set or the smokes", assessHelp, "Example_assess",
 		judges, held.assess, flags...)

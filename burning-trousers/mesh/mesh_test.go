@@ -65,8 +65,9 @@ func inRefMesh(t *testing.T, things []thing.Thing) []thing.Thing {
 				}
 				copy := each
 				copy.Shape = converted(member.Mesh)
+				placed := member.Space.Within(each.At(0))
 				// These pictures are taken at time zero, for both renderers.
-				copy.Motion = thing.Still(member.Space.Within(each.At(0)))
+				copy.Motion = thing.Still(placed)
 				copied = append(copied, copy)
 			}
 			continue

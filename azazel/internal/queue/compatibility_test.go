@@ -31,7 +31,7 @@ func TestStatusNeverWritesLedger(t *testing.T) {
 		t.Fatal("status wrote ledger", err)
 	}
 	if state.Version <= 1 {
-		t.Fatal("new records still accepted by legacy writers", state.Version)
+		t.Fatal("the ledger record version was not raised above 1", state.Version)
 	}
 }
 

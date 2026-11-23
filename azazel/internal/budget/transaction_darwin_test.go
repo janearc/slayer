@@ -155,7 +155,8 @@ func TestTransactionConcurrentObservation(t *testing.T) {
 			defer wg.Done()
 			tx, err := beginAdmissionTransaction(context.Background(), dir, binding)
 			if err == nil {
-				err = errors.Join(tx.observe(context.Background(), recordExample().owners[0]), tx.close())
+				observed := tx.observe(context.Background(), recordExample().owners[0])
+				err = errors.Join(observed, tx.close())
 			}
 			results <- err
 		}()
@@ -193,7 +194,8 @@ func TestTransactionRefusesUnsafeEntry(t *testing.T) {
 					t.Fatal(err)
 				}
 			case "state-missing", "lock-missing":
-				if err := os.Remove(filepath.Join(dir, strings.TrimSuffix(name, "-missing"))); err != nil {
+				target := filepath.Join(dir, strings.TrimSuffix(name, "-missing"))
+				if err := os.Remove(target); err != nil {
 					t.Fatal(err)
 				}
 			case "intent-corrupt":

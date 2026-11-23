@@ -52,7 +52,7 @@ func libraryVoicing(name string) bool {
 	if err != nil {
 		return false
 	}
-	kind, _ := Kind(b)
+	kind, _ := kind(b)
 	return kind == "voicing"
 }
 
@@ -104,7 +104,7 @@ func openTune(name string, read func(string) ([]byte, error)) (*Piece,
 	if err != nil {
 		return nil, nil, fmt.Errorf("library tune %q has no cut sheet", name)
 	}
-	sheet, err := ParseCuts(cb, s)
+	sheet, err := parseCuts(cb, s)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s: %w", name+cutsSuffix, err)
 	}

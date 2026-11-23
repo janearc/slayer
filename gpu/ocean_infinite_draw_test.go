@@ -3,10 +3,10 @@
 package gpu
 
 import (
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
@@ -24,7 +24,7 @@ func TestMetalExactCalmInfinitePlaneMatchesCPUAboveBelowAndGrazing(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	field, err := seaocean.NewInfiniteMeanContinuation(core, 2.5, 4)
+	field, err := arid.NewInfiniteMeanContinuation(core, 2.5, 4)
 	if err != nil {
 		t.Fatal(err)
 	}

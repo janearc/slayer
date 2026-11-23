@@ -1,0 +1,6 @@
+name,radius
+zero,0
+below-zero,-1
+not-a-number,NaN
+infinite,Inf
+minus-infinite,-Inf

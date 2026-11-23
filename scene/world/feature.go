@@ -31,8 +31,8 @@ type Feature interface {
 	Class(share float64) Biome
 }
 
-// Unfixed is a class a feature leaves to the rules.
-const Unfixed Biome = Biomes
+// unfixed is a class a feature leaves to the rules.
+const unfixed Biome = Biomes
 
 // round is the plain share: how far p is from the heart as a share of
 // the reach.
@@ -83,7 +83,7 @@ func (v Volcano) Shape(height, share float64) float64 {
 func (v Volcano) Class(share float64) Biome {
 	switch {
 	case share > 0.55:
-		return Unfixed
+		return unfixed
 	case v.Dead:
 		return Rock
 	case share <= 0.2:
@@ -128,7 +128,7 @@ func (c Canyon) Class(share float64) Biome {
 	if share < 0.85 {
 		return Rock
 	}
-	return Unfixed
+	return unfixed
 }
 
 // Shelf is an ice shelf: the sea near a coast frozen over, flat ice just
@@ -187,7 +187,7 @@ func (p Plateau) Class(share float64) Biome {
 	if share > 0.8 {
 		return Rock
 	}
-	return Unfixed
+	return unfixed
 }
 
 // toSegment is how far p is from the line from a to b, between its ends.
@@ -206,7 +206,7 @@ func toSegment(p, a, b maths.Vec) float64 {
 func (w *World) carve() {
 	w.fixed = make([]Biome, len(w.tiles))
 	for i := range w.fixed {
-		w.fixed[i] = Unfixed
+		w.fixed[i] = unfixed
 	}
 	for n, f := range w.Features {
 		at, reach := f.Footprint()
@@ -223,8 +223,8 @@ func (w *World) carve() {
 				continue
 			}
 			w.height[i] = f.Shape(w.height[i], share)
-			if b := f.Class(share); b != Unfixed {
-				if b > Unfixed {
+			if b := f.Class(share); b != unfixed {
+				if b > unfixed {
 					panic(fmt.Sprintf("world: feature %d fixes biome %d, "+
 						"and there are %d", n, b, Biomes))
 				}

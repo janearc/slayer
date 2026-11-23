@@ -1,0 +1,11 @@
+name,group,place-x,place-y,place-z
+first-alone-a,first-alone,0,50,0
+first-alone-b,first-alone,7,0,0
+first-alone-c,first-alone,100,0,0
+last-alone-a,last-alone,0,0,0
+last-alone-b,last-alone,93,0,0
+last-alone-c,last-alone,100,50,0
+row-a,four-in-a-row,0,0,0
+row-b,four-in-a-row,10,0,0
+row-c,four-in-a-row,20,0,0
+row-d,four-in-a-row,100,0,0

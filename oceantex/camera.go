@@ -78,9 +78,9 @@ func (gauge Gauge) Aspect() float64 {
 // Gauges are the names of the gauges that ship: slayer's table.
 func Gauges() []string { return append([]string(nil), gaugeNames...) }
 
-// GaugeNamed is the gauge of a name in the table. Names not in it are
+// gaugeNamed is the gauge of a name in the table. Names not in it are
 // refused, and the refusal lists the names that are.
-func GaugeNamed(name string) (Gauge, error) {
+func gaugeNamed(name string) (Gauge, error) {
 	for i, each := range gaugeNames {
 		if each == name {
 			return NewGauge(name, gaugeWidths[i], gaugeHeights[i])
@@ -93,7 +93,7 @@ func GaugeNamed(name string) (Gauge, error) {
 // standard is the gauge Lens leans on. A table without it is a mistake in
 // sources.yaml, and stops the program.
 var standard = func() Gauge {
-	gauge, err := GaugeNamed(plain)
+	gauge, err := gaugeNamed(plain)
 	if err != nil {
 		panic(err)
 	}
@@ -103,42 +103,42 @@ var standard = func() Gauge {
 // Ray is a place and a direction from it.
 type Ray struct{ At, Dir Vec }
 
-// Projection is the geometry of a picture. Each pixel of a picture has a
+// projection is the geometry of a picture. Each pixel of a picture has a
 // ray it looks along. The projection gives it down its minus z, in its
 // own space, with its x to the right and its y up the picture. The
 // picture is so many pixels wide and high, and row zero is its top.
 //
-// Slayer's Projection is also told which band of the spectrum is asking,
+// Slayer's projection is also told which band of the spectrum is asking,
 // so that glass can bend red and blue differently. This one is not.
-type Projection interface {
+type projection interface {
 	Ray(x, y, width, height int) Ray
 }
 
-// Pinhole is the first projection. It is light through one point onto a
+// pinhole is the first projection. It is light through one point onto a
 // flat picture. Straight lines stay straight and far things are smaller.
 //
 // Its wide is how much it sees from its left edge to its right, in
 // radians. Nought means 60 degrees. Its pixel is one pixel's width over
 // its height. Nought means square.
-type Pinhole struct {
+type pinhole struct {
 	wide, pixel float64
 }
 
-// NewPinhole is a pinhole that sees so many radians across, through
+// newPinhole is a pinhole that sees so many radians across, through
 // pixels of a shape. Wides outside zero to a half turn are the default
 // of 60 degrees. Pixels without a width greater than zero are square.
-func NewPinhole(wide, pixel float64) Pinhole {
+func newPinhole(wide, pixel float64) pinhole {
 	if !(wide >= 0 && wide < math.Pi) {
 		wide = 0
 	}
 	if !(pixel >= 0) {
 		pixel = 0
 	}
-	return Pinhole{wide, pixel}
+	return pinhole{wide, pixel}
 }
 
 // Wide is how wide the pinhole sees, in radians.
-func (pinhole Pinhole) Wide() float64 {
+func (pinhole pinhole) Wide() float64 {
 	if pinhole.wide == 0 {
 		return pinholeWide
 	}
@@ -148,7 +148,7 @@ func (pinhole Pinhole) Wide() float64 {
 // Ray is the ray through the middle of pixel x, y of a picture so many
 // pixels wide and high. Row zero is the top of the picture. Pictures of
 // no pixels look straight ahead.
-func (pinhole Pinhole) Ray(x, y, width, height int) Ray {
+func (pinhole pinhole) Ray(x, y, width, height int) Ray {
 	if width <= 0 || height <= 0 {
 		return Ray{Dir: Vec{Z: -1}}
 	}
@@ -198,7 +198,7 @@ func (lens Lens) Wide() float64 {
 
 // Ray is the pinhole's ray for the lens's angle.
 func (lens Lens) Ray(x, y, width, height int) Ray {
-	return NewPinhole(lens.Wide(), lens.pixel).Ray(x, y, width, height)
+	return newPinhole(lens.Wide(), lens.pixel).Ray(x, y, width, height)
 }
 
 // Swath is the lens on Super 35 that sees a strip of sea so many
@@ -210,12 +210,12 @@ func Swath(across, above float64) Lens {
 		return Lens{gauge: standard}
 	}
 	wide := 2 * math.Atan(across/(2*above))
-	return Lens{focal: Focal(wide, standard), gauge: standard}
+	return Lens{focal: focal(wide, standard), gauge: standard}
 }
 
-// Focal is the focal length on a gauge that sees so many radians across.
+// focal is the focal length on a gauge that sees so many radians across.
 // It is Wide undone. The wide is greater than zero and below a half turn.
-func Focal(wide float64, gauge Gauge) float64 {
+func focal(wide float64, gauge Gauge) float64 {
 	if gauge.Width() <= 0 {
 		gauge = standard
 	}
@@ -241,28 +241,28 @@ func (turn Orientation) Out(direction Vec) Vec {
 		plus(turn.Z.times(direction.Z))
 }
 
-// Up is the world's up. Slayer's is y; this world's is z, with x east
+// worldUp is the world's up. Slayer's is y; this world's is z, with x east
 // and y north.
-var Up = Vec{Z: 1}
+var worldUp = Vec{Z: 1}
 
 // LookAt is the orientation of something at from, facing to. Its up is
 // kept as near the world's up as it can be. Forward is minus z.
-func LookAt(from, to Vec) Orientation { return LookAtUp(from, to, Up) }
+func LookAt(from, to Vec) Orientation { return lookAtUp(from, to, worldUp) }
 
-// LookAtUp is LookAt with an up of its own. Give it an up of nothing and
+// lookAtUp is LookAt with an up of its own. Give it an up of nothing and
 // it uses the world's. Looking at where you stand is no turn.
 //
 // Within about 2.56 degrees of looking straight along up, the top of the
 // view is taken as north instead, and if the view is along north too, as
 // east. Slayer does the same with its own axes, and so a camera sweeping
 // past straight down rolls there, as its does.
-func LookAtUp(from, to, up Vec) Orientation {
+func lookAtUp(from, to, up Vec) Orientation {
 	back := Vec{from.X - to.X, from.Y - to.Y, from.Z - to.Z}
 	if back == (Vec{}) {
 		return Identity
 	}
 	if up == (Vec{}) {
-		up = Up
+		up = worldUp
 	}
 	back, up = back.unit(), up.unit()
 	if math.Abs(back.dot(up)) > nearlyAlong {
@@ -288,9 +288,9 @@ type Subspace struct {
 // Look is the ray a projection makes for a pixel, seen from an eye. It
 // is taken out of the eye's space into the world. Nil projections are
 // pinholes of 60 degrees.
-func Look(eye Subspace, projection Projection, x, y, width, height int) Ray {
+func Look(eye Subspace, projection projection, x, y, width, height int) Ray {
 	if projection == nil {
-		projection = Pinhole{}
+		projection = pinhole{}
 	}
 	made := projection.Ray(x, y, width, height)
 	return Ray{At: eye.Origin.plus(eye.Orientation.Out(made.At)),
@@ -305,7 +305,7 @@ type Camera struct {
 	Eye Subspace
 	// Lens is the projection: a Lens, a Pinhole, or one of your own. Nil
 	// is a pinhole of 60 degrees.
-	Lens Projection
+	Lens projection
 	// Width and Height are the picture's size in pixels.
 	Width, Height int
 	// Seconds is the time, for the waves' motion.

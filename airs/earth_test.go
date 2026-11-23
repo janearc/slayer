@@ -99,7 +99,7 @@ func TestEarthStackWithAGapOrAnOverlapIsFound(t *testing.T) {
 // every wavelength.
 func TestEarthRayleighDepthIsCelestials(t *testing.T) {
 	for _, nanometres := range earthWavelengths {
-		got := earthColumnAt(t, earthRead, nanometres).GasDepth()
+		got := earthColumnAt(t, earthRead, nanometres).gasDepth()
 		want := celestialDepth(t, nanometres)
 		if miss := relative(got, want); miss > 0.01 { // picked: the brief's 1 percent
 			t.Errorf("%g nm: column depth %g, celestial's %g", nanometres, got, want)
@@ -116,12 +116,12 @@ func TestEarthRayleighDepthIsLevysAtThreeChannels(t *testing.T) {
 		553: 0.0963, // read: Levy Table 2, band 4, 0.553 um
 		646: 0.0520, // read: Levy Table 2, band 1, 0.646 um
 	} {
-		got := earthColumnAt(t, earthRead, nanometres).GasDepth()
+		got := earthColumnAt(t, earthRead, nanometres).gasDepth()
 		if miss := relative(got, want); miss > 0.04 { // picked: four percent: the table does not say if its depth is the centre's or the band's, and at 646 nm it is 3 percent over this column's
 			t.Errorf("%g nm: depth %g, Levy's %g", nanometres, got, want)
 		}
 	}
-	if got := earthColumnAt(t, earthRead, 553).GasDepth(); relative(got, 0.0520) < 0.5 { // picked: the red channel's depth, far from it
+	if got := earthColumnAt(t, earthRead, 553).gasDepth(); relative(got, 0.0520) < 0.5 { // picked: the red channel's depth, far from it
 		t.Errorf("depth at 553 nm %g is the red channel's", got)
 	}
 }
@@ -132,7 +132,7 @@ func TestEarthColumnCutShortIsNotCelestials(t *testing.T) {
 	short := copiedEarth(t)
 	short.Shells.Runs = short.Shells.Runs[:2]
 	short.Gas.Top.Value = 20000                       // picked: the end of the second run
-	got := earthColumnAt(t, short, 550).GasDepth()    // picked: the middle of the visible
+	got := earthColumnAt(t, short, 550).gasDepth()    // picked: the middle of the visible
 	if relative(got, celestialDepth(t, 550)) < 0.01 { // picked: the brief's 1 percent
 		t.Errorf("a column cut at 20 km has depth %g, near celestial's", got)
 	}
@@ -189,11 +189,11 @@ func TestProfileAboveTheStandardAtmosphereIsRefused(t *testing.T) {
 // The aerosol's depth at 550 nm is the pick, whatever the shells are,
 // and at other colours it is Angstrom's law's.
 func TestEarthAerosolDepthAt550IsThePick(t *testing.T) {
-	got := earthColumnAt(t, earthRead, 550).ParticleDepth() // picked: the reference wavelength
+	got := earthColumnAt(t, earthRead, 550).particleDepth() // picked: the reference wavelength
 	if math.Abs(got-earthRead.Aerosol.Depth.Value) > 1e-9 { // picked: rounding only
 		t.Errorf("depth %g, the pick %g", got, earthRead.Aerosol.Depth.Value)
 	}
-	blue := earthColumnAt(t, earthRead, 450).ParticleDepth() // picked: the blue
+	blue := earthColumnAt(t, earthRead, 450).particleDepth() // picked: the blue
 	want := earthRead.Aerosol.Depth.Value * math.Pow(550.0/450.0,
 		earthRead.Aerosol.Angstrom.Value) // defined: Angstrom's law between 550 and 450 nm
 	if math.Abs(blue-want) > 1e-9 { // picked: rounding only
@@ -216,7 +216,7 @@ func TestEarthAerosolFallsByTheScaleHeight(t *testing.T) {
 				held += layer.ParticleExtinction * (layer.Top - layer.Bottom)
 			}
 		}
-		return held / column.ParticleDepth()
+		return held / column.particleDepth()
 	}
 	height := earthRead.Aerosol.ScaleHeight.Value
 	want := (1 - math.Exp(-4000/height)) / (1 - math.Exp(-earthRead.Gas.Top.Value/height)) // defined: an exponential to 4 km
@@ -341,10 +341,10 @@ func TestAbsorptionDepthOfAColumnMadeByHand(t *testing.T) {
 		{Bottom: 0, Top: 1, GasAbsorption: 0.5},
 		{Bottom: 1, Top: 3, GasAbsorption: 0.25},
 	}}
-	if got := column.AbsorptionDepth(); math.Abs(got-1) > 1e-12 { // defined: 0.5 x 1 + 0.25 x 2
+	if got := column.absorptionDepth(); math.Abs(got-1) > 1e-12 { // defined: 0.5 x 1 + 0.25 x 2
 		t.Errorf("absorption depth %g", got)
 	}
-	if got := (Column{}).AbsorptionDepth(); got != 0 {
+	if got := (Column{}).absorptionDepth(); got != 0 {
 		t.Errorf("an empty column's absorption depth %g", got)
 	}
 }
@@ -385,8 +385,8 @@ func TestEarthTableOfTheColumn(t *testing.T) {
 			}
 		}
 		fmt.Fprintf(&table, "%6.0f %10.4f %10.4f %10.4f %8.4f %8.4f %8.4f %12.4f\n",
-			nanometres, column.GasDepth(), column.AbsorptionDepth(),
-			column.ParticleDepth(), column.MeanAlbedo(), column.MeanAsymmetry(),
+			nanometres, column.gasDepth(), column.absorptionDepth(),
+			column.particleDepth(), column.meanAlbedo(), column.meanAsymmetry(),
 			column.GroundAlbedo, irradiance)
 	}
 	t.Log("\n" + table.String())

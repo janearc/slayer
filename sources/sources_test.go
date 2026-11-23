@@ -144,7 +144,8 @@ func TestBytesThatDoNotMatchThePinAreRefused(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "the list pins") {
 		t.Fatalf("fetched against a wrong pin: %v", err)
 	}
-	left, _ := os.ReadDir(filepath.Dir(shelf.Path(source)))
+	folder := filepath.Dir(shelf.Path(source))
+	left, _ := os.ReadDir(folder)
 	if len(left) != 0 {
 		t.Errorf("left on the shelf: %v", left)
 	}

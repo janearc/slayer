@@ -11,7 +11,8 @@ func emitterScaleFixture() (*thing.World, *thing.Material) {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 2}, Material: &thing.Material{Colour: maths.Grey(.3)}})
 	far := &thing.Material{Glow: maths.Grey(1)}
-	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1.7e6}, Material: far, Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 0, -3.8e8)})})
+	farAt := thing.Still(maths.Subspace{Origin: maths.V(0, 0, -3.8e8)})
+	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1.7e6}, Material: far, Motion: farAt})
 	return world, far
 }
 func TestDistantEmissionDoesNotLiftLocalShadowRays(t *testing.T) {
@@ -47,8 +48,9 @@ func TestAllEmittingSceneStillOffsetsAtDistantPoints(t *testing.T) {
 	if scene.spread != 0 {
 		t.Fatal("emitter-only scene has diffuse scale", scene.spread)
 	}
+	// a millionth of the point's distance from the origin, 3.8e8: 380
 	point := maths.V(0, 0, -3.8e8)
-	if got := scene.lifting(point); got != lift*point.Len() || got <= 0 {
+	if got := scene.lifting(point); !within(got, 380, 1e-9) {
 		t.Fatal("lost far-coordinate offset", got)
 	}
 }

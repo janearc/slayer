@@ -10,7 +10,7 @@ import (
 	"github.com/gogpu/gpucontext"
 	"github.com/gogpu/gputypes"
 	"github.com/gogpu/wgpu"
-	"github.com/janearc/slayer/hillside/placement"
+	"github.com/janearc/slayer/session/placement"
 	"image"
 	"math"
 	"time"

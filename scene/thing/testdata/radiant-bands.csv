@@ -1,0 +1,16 @@
+name,nm
+gamma,1e-4
+xray,1
+extreme-ultraviolet,50
+infrared,5000
+radio,1e9
+zero,0
+green,550
+inside-gamma,2e-4
+inside-xray,0.5
+h-alpha,656
+o-iii,501
+between-lines,600
+beside-o-iii,502
+overlap,110
+microwave,5e6

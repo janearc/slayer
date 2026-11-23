@@ -12,7 +12,7 @@ import (
 // different paint, so a test that sees one paint can say which rung it
 // was painted at. tiles vary by a hash of their own, so a different
 // tile is a different paint.
-func apart(t *testing.T, w *World, look Look, rungs []int) maths.Vec {
+func apart(t *testing.T, world *World, look Look, rungs []int) maths.Vec {
 	t.Helper()
 	state := uint64(11)
 	for try := 0; try < 400; try++ {
@@ -21,13 +21,13 @@ func apart(t *testing.T, w *World, look Look, rungs []int) maths.Vec {
 			state = state*6364136223846793005 + 1442695040888963407
 			v[k] = float64(state>>11)/(1<<53)*2 - 1
 		}
-		p := maths.V(v[0], v[1], v[2]).Unit()
+		point := maths.V(v[0], v[1], v[2]).Unit()
 		seen := map[maths.Light]bool{}
 		for _, r := range rungs {
-			seen[w.Fine(look, r, 0.4, 0).At(p)] = true
+			seen[world.Fine(look, r, 0.4, 0).At(point)] = true
 		}
 		if len(seen) == len(rungs) {
-			return p
+			return point
 		}
 	}
 	t.Fatalf("no point is painted differently at each of rungs %v", rungs)
@@ -36,8 +36,8 @@ func apart(t *testing.T, w *World, look Look, rungs []int) maths.Vec {
 
 func paints() Look {
 	var look Look
-	for b := range Biomes {
-		look.Paints[b] = maths.Grey(0.1 + 0.06*float64(b))
+	for biome := range Biomes {
+		look.Paints[biome] = maths.Grey(0.1 + 0.06*float64(biome))
 	}
 	return look
 }
@@ -53,10 +53,10 @@ func paints() Look {
 // are over it, S / 4 is under, two. S / 20, 0.3 S: the same, two. S / 100, 0.06
 // S: S / 16 is over it, S / 32 under, five, where thirds would say three.
 func TestAFineTextureChoosesItsRungByTheFootprint(t *testing.T) {
-	w := New(Terrain{Tiling: hexes.Sphere{Splits: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
+	world := New(Terrain{Tiling: hexes.Sphere{Splits: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
 	look := paints()
-	s := w.Tiling.Spacing()
-	if 6*(s/6) != s {
+	spacing := world.Tiling.Spacing()
+	if 6*(spacing/6) != spacing {
 		t.Fatal("6 * (S / 6) is not S on this machine")
 	}
 	cases := []struct {
@@ -64,17 +64,17 @@ func TestAFineTextureChoosesItsRungByTheFootprint(t *testing.T) {
 		footprint float64
 		rungs     int
 	}{
-		{"six wide", s / 6, 0},
-		{"just under six wide", s / 13, 2},
-		{"a fifth", s / 20, 2},
-		{"a hundredth", s / 100, 5},
+		{"six wide", spacing / 6, 0},
+		{"just under six wide", spacing / 13, 2},
+		{"a fifth", spacing / 20, 2},
+		{"a hundredth", spacing / 100, 5},
 	}
-	p := apart(t, w, look, []int{0, 1, 2, 3, 5})
-	auto := w.Fine(look, 0, 0.4, 0).(texture.Footprinted)
-	for _, c := range cases {
-		want := w.Fine(look, c.rungs, 0.4, 0).At(p)
-		if got := auto.Within(p, c.footprint); got != want {
-			t.Errorf("%s: painted %v, want the rung %d's %v", c.name, got, c.rungs, want)
+	point := apart(t, world, look, []int{0, 1, 2, 3, 5})
+	auto := world.Fine(look, 0, 0.4, 0).(texture.Footprinted)
+	for _, each := range cases {
+		want := world.Fine(look, each.rungs, 0.4, 0).At(point)
+		if got := auto.Within(point, each.footprint); got != want {
+			t.Errorf("%s: painted %v, want the rung %d's %v", each.name, got, each.rungs, want)
 		}
 	}
 }
@@ -84,23 +84,23 @@ func TestAFineTextureChoosesItsRungByTheFootprint(t *testing.T) {
 // it for any footprint at all: with a rung of 1 or 2, a footprint small enough
 // to want rung 5 or none at all.
 func TestAFineTextureWithARungKeepsItAndAFootprintOfNoneIsCoarse(t *testing.T) {
-	w := New(Terrain{Tiling: hexes.Sphere{Splits: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
+	world := New(Terrain{Tiling: hexes.Sphere{Splits: 3}, Seed: 5, Ocean: 0.5, Plates: 5})
 	look := paints()
-	s := w.Tiling.Spacing()
-	p := apart(t, w, look, []int{0, 1, 2, 3, 5})
-	coarse := w.Fine(look, 0, 0.4, 0).At(p)
-	auto := w.Fine(look, 0, 0.4, 0).(texture.Footprinted)
+	spacing := world.Tiling.Spacing()
+	point := apart(t, world, look, []int{0, 1, 2, 3, 5})
+	coarse := world.Fine(look, 0, 0.4, 0).At(point)
+	auto := world.Fine(look, 0, 0.4, 0).(texture.Footprinted)
 	for _, footprint := range []float64{0, -1} {
-		if got := auto.Within(p, footprint); got != coarse {
+		if got := auto.Within(point, footprint); got != coarse {
 			t.Errorf("a footprint of %v is %v, want the world's own %v", footprint,
 				got, coarse)
 		}
 	}
 	for _, rungs := range []int{1, 2} {
-		fixed := w.Fine(look, rungs, 0.4, 0)
-		want := fixed.At(p)
-		for _, footprint := range []float64{s / 100, 0, -1, s * 2} {
-			got := fixed.(texture.Footprinted).Within(p, footprint)
+		fixed := world.Fine(look, rungs, 0.4, 0)
+		want := fixed.At(point)
+		for _, footprint := range []float64{spacing / 100, 0, -1, spacing * 2} {
+			got := fixed.(texture.Footprinted).Within(point, footprint)
 			if got != want {
 				t.Errorf("rung %d with a footprint of %v is %v, want %v", rungs,
 					footprint, got, want)

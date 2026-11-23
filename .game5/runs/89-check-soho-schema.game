@@ -1,0 +1,1 @@
+check-soho-schema . :: go test -p=1 ./set -run ^TestSOHOPassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s

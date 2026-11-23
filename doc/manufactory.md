@@ -185,7 +185,7 @@ Rows live in Go tables: `kinds.go` for solids and `lamps.go` for light-bearing
 kinds. A runtime table loader was not needed by the original callers.
 
 For a count of what each kind is made of and how many of its numbers are
-measured or picked, see [object maturity](object-maturity.md).
+measured or picked, see [object maturity](model/spacecraft/object-maturity.md).
 
 ## CPU and GPU paths
 

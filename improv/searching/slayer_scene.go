@@ -16,7 +16,7 @@ import (
 // stageJob is scene content only. Slayer owns tracing, tone, files, caching
 // and the film clock. All scene inputs are inline in the job's with block.
 type stageJob struct {
-	Stage StagePlan `yaml:"stage"`
+	Stage stagePlan `yaml:"stage"`
 	From  float64   `yaml:"from"`
 	Until float64   `yaml:"until"`
 	BPM   float64   `yaml:"bpm"`

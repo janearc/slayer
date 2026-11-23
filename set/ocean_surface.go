@@ -4,16 +4,20 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/maths"
-	"github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/thing"
 	yaml "gopkg.in/yaml.v3"
 )
 
-// WaveSurface is a finite sample of an explicitly authored procedural sea.
-// Its extent and wave inputs are SI values; Middle is in the world's units.
+// WaveSurface is an explicitly authored procedural sea. An ocean that says
+// no extent and no samples is the sea with no edge, the sea a picture
+// asks for; one that says both is a finite square sample of it, a study
+// road for the optical-study keys. Its extent and wave inputs are SI
+// values; Middle is in the world's units.
 type WaveSurface struct {
 	material                   string
+	unbounded                  bool
 	directSun                  string
 	directMoon                 string
 	interfaceEvents            float64
@@ -31,7 +35,26 @@ type WaveSurface struct {
 	flatMean                   *FlatMeanOceanContinuation
 	surfaceWake                *SurfaceWake
 	glint                      OceanGlint
+	swell                      *OceanSwell
 }
+
+// OceanSwell is an authored swell: long waves that a distant wind raised,
+// riding on the sea. Height is the significant height in metres, period the
+// peak period in seconds, and toward the direction they travel toward, in
+// radians from east.
+type OceanSwell struct {
+	height, period, toward float64
+}
+
+// HeightMetres is the swell's significant height.
+func (swell OceanSwell) HeightMetres() float64 { return swell.height }
+
+// PeriodSeconds is the swell's peak period.
+func (swell OceanSwell) PeriodSeconds() float64 { return swell.period }
+
+// TowardRadians is the direction the swell travels toward, in radians from
+// east, counterclockwise.
+func (swell OceanSwell) TowardRadians() float64 { return swell.toward }
 
 // SurfaceWake is a chosen moving surface-height envelope attached to an
 // authored craft trajectory. Origin is map east/north/up at time zero;
@@ -246,15 +269,93 @@ func (made WaveSurface) SurfaceWake() (SurfaceWake, bool) {
 	return *made.surfaceWake, true
 }
 
-// waveSurface reads the world's one finite procedural wave sheet.
+// Unbounded reports whether the sea has no edge: its wave bands are summed
+// at every point, so it says no extent and no samples, and Extent and
+// Samples are nought. An ocean that says neither is unbounded; the
+// `unbounded: true` key may still be said, and is no longer needed.
+func (made WaveSurface) Unbounded() bool { return made.unbounded }
+
+// Swell returns the authored swell, and whether the ocean has one.
+func (made WaveSurface) Swell() (OceanSwell, bool) {
+	if made.swell == nil {
+		return OceanSwell{}, false
+	}
+	return *made.swell, true
+}
+
+// finiteOnly are the keys of a sheet that is a finite square, or built on
+// one, which a sea with no edge has no square for and refuses.
+var finiteOnly = []string{"extent", "samples", "flat-mean", "shading-normal",
+	"surface-wake", "interface-events", "diffuse-sky-samples",
+	"clear-cloud-sky-samples", "clear-cloud-water-step-mode", "in-scatter",
+	"direct-moon", "motion"}
+
+// edgeless is whether an ocean is the sea with no edge: one that says
+// neither extent nor samples, or says `unbounded: true`. One of extent and
+// samples without the other is refused, and so is `unbounded: false` with
+// neither, which says no square and asks for one.
+func (reading reader) edgeless(value *yaml.Node, said bool) (bool, error) {
+	extent, samples := says(value, "extent"), says(value, "samples")
+	switch {
+	case extent && !samples:
+		return false, reading.refuse(valueNode(value, "extent"),
+			"an ocean says its extent and its samples, both or neither, "+
+				"and this has no samples")
+	case samples && !extent:
+		return false, reading.refuse(valueNode(value, "samples"),
+			"an ocean says its extent and its samples, both or neither, "+
+				"and this has no extent")
+	case says(value, "unbounded") && !said && !extent:
+		return false, reading.refuse(valueNode(value, "unbounded"),
+			"an ocean that says unbounded: false says its extent and samples")
+	}
+	return said || !extent, nil
+}
+
+// waveKeys checks that an ocean says the keys it is made from: of a sheet
+// that is a square, its extent and samples as well, and of a sea with no
+// edge, none of the keys that belong to a square.
+func (reading reader) waveKeys(value *yaml.Node, unbounded bool) error {
+	if !unbounded {
+		return reading.all(value, "an ocean wave surface", "material", "middle",
+			"extent", "samples", "sea", "seed", "time", "source")
+	}
+	for _, key := range finiteOnly {
+		if says(value, key) {
+			return reading.refuse(valueNode(value, key), "an ocean with no "+
+				"extent and no samples is a sea with no edge, which is no "+
+				"square, and says no %s", key)
+		}
+	}
+	return reading.all(value, "an ocean wave surface with no edge",
+		"material", "middle", "sea", "seed", "time", "source")
+}
+
+// swelled checks that a swell says its height, period and direction, all of
+// them, and that the sea it rides on is not one the scene clock moves,
+// whose waves it would not carry.
+func (reading reader) swelled(value *yaml.Node, moving bool) error {
+	block := valueNode(value, "swell")
+	err := reading.all(block, "a swell", "height", "period", "toward")
+	if err == nil && moving {
+		err = reading.refuse(block, "a swell is not carried by the scene "+
+			"clock; an ocean with a swell says no motion")
+	}
+	return err
+}
+
+// waveSurface reads the world's one procedural wave surface: a finite
+// sheet, or a sea that has no edge.
 func (reading reader) waveSurface(_, value *yaml.Node) error {
 	var made WaveSurface
 	var flatMean FlatMeanOceanContinuation
 	var wake SurfaceWake
 	var wakeFoam SurfaceWakeFoam
+	var swell OceanSwell
 	const fullTurn = 2 * math.Pi
 	steps := map[string]step{
 		"material":                    reading.text(&made.material),
+		"unbounded":                   reading.yes(&made.unbounded),
 		"direct-sun":                  reading.word(&made.directSun, "mean-plane"),
 		"direct-moon":                 reading.word(&made.directMoon, "mean-plane"),
 		"interface-events":            reading.number(&made.interfaceEvents, 0, thing.MaxOceanInterfaceEvents),
@@ -263,18 +364,25 @@ func (reading reader) waveSurface(_, value *yaml.Node) error {
 		"clear-cloud-sky-samples":     reading.whole(&made.clearCloudSkySamples, 1, 256),
 		"clear-cloud-water-step-mode": reading.word(&made.clearCloudWaterStepMode, "per-gap", "ray-spacing"),
 		"shading-normal": reading.word(&made.shadingNormal,
-			ocean.SmoothNormalBilinearVertexSlopes,
-			ocean.SpectralSlopeNormals),
+			arid.SmoothNormalBilinearVertexSlopes,
+			arid.SpectralSlopeNormals),
 		"middle": reading.three(&made.middle, -farthest, farthest),
 		"extent": reading.quantity(&made.extent, "m",
 			math.SmallestNonzeroFloat64, farthest),
 		"samples": reading.whole(&made.samples, 2,
-			float64(ocean.MaxHeightFieldSamples)),
+			float64(arid.MaxHeightFieldSamples)),
 		"sea": reading.block(map[string]step{
 			"wind":   reading.quantity(&made.wind, "m/s", 0, farthest),
 			"fetch":  reading.quantity(&made.fetch, "m", 0, farthest),
 			"depth":  reading.quantity(&made.depth, "m", 0, farthest),
 			"toward": reading.quantity(&made.toward, "rad", 0, fullTurn),
+		}),
+		"swell": reading.block(map[string]step{
+			"height": reading.quantity(&swell.height, "m",
+				math.SmallestNonzeroFloat64, farthest),
+			"period": reading.quantity(&swell.period, "s",
+				math.SmallestNonzeroFloat64, farthest),
+			"toward": reading.quantity(&swell.toward, "rad", 0, fullTurn),
 		}),
 		"seed":   reading.whole(&made.seed, 0, mostSeed),
 		"time":   reading.quantity(&made.seconds, "s", 0, farthest),
@@ -330,8 +438,14 @@ func (reading reader) waveSurface(_, value *yaml.Node) error {
 		err = reading.glinted(valueNode(value, "glint"), made.glint)
 	}
 	if err == nil {
-		err = reading.all(value, "an ocean wave surface", "material", "middle",
-			"extent", "samples", "sea", "seed", "time", "source")
+		made.unbounded, err = reading.edgeless(value, made.unbounded)
+	}
+	if err == nil {
+		err = reading.waveKeys(value, made.unbounded)
+	}
+	if err == nil && says(value, "swell") {
+		err = reading.swelled(value, says(value, "motion"))
+		made.swell = &swell
 	}
 	if err == nil {
 		err = reading.all(valueNode(value, "sea"), "a sea state", "wind",
@@ -358,10 +472,10 @@ func (reading reader) waveSurface(_, value *yaml.Node) error {
 		if err == nil && wake.wavelength > wake.length {
 			err = reading.refuse(valueNode(value, "surface-wake"), "surface-wake wavelength %g m exceeds its length %g m", wake.wavelength, wake.length)
 		}
-		if err == nil && made.shadingNormal == ocean.SpectralSlopeNormals && !wake.addToSpectralShading {
+		if err == nil && made.shadingNormal == arid.SpectralSlopeNormals && !wake.addToSpectralShading {
 			err = reading.refuse(valueNode(value, "surface-wake"), "spectral-slopes requires surface-wake add-to-spectral-shading: true")
 		}
-		if err == nil && made.shadingNormal != ocean.SpectralSlopeNormals && wake.addToSpectralShading {
+		if err == nil && made.shadingNormal != arid.SpectralSlopeNormals && wake.addToSpectralShading {
 			err = reading.refuse(valueNode(value, "surface-wake"), "surface-wake add-to-spectral-shading: true requires shading-normal: spectral-slopes")
 		}
 		if err == nil {

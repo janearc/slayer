@@ -58,7 +58,7 @@ func TestSpreadSumsToOne(t *testing.T) {
 		var sum float64
 		for i := 0; i < steps; i++ {
 			theta := -math.Pi + (float64(i)+0.5)*2*math.Pi/steps
-			sum += Spread(ratio, 1, theta) * 2 * math.Pi / steps
+			sum += spread(ratio, 1, theta) * 2 * math.Pi / steps
 		}
 		near(t, "the spread's sum", sum, 1, 1e-6)
 	}
@@ -69,7 +69,7 @@ func TestSpectrumPeaksAtItsPeak(t *testing.T) {
 	peak := north.Peak()
 	best, at := 0.0, 0.0
 	for omega := 0.2 * peak; omega < 4*peak; omega += peak / 2000 {
-		if s := north.Frequency(omega); s > best {
+		if s := north.frequency(omega); s > best {
 			best, at = s, omega
 		}
 	}
@@ -84,19 +84,21 @@ func TestWavenumberKeepsTheEnergy(t *testing.T) {
 	var grid float64
 	for iy := 0; iy < n; iy++ {
 		for ix := 0; ix < n; ix++ {
-			grid += north.Wavenumber(float64(wave(ix, n))*cell,
-				float64(wave(iy, n))*cell) * cell * cell
+			across := float64(wave(ix, n)) * cell
+			down := float64(wave(iy, n)) * cell
+			grid += north.wavenumber(across,
+				down) * cell * cell
 		}
 	}
 	// the grid holds a square of wave vectors; a disc that fits inside
 	// it and one that holds it bracket the answer
 	band := func(top float64) float64 {
-		lo, hi := math.Sqrt(Gravity*cell/2), math.Sqrt(Gravity*top)
+		lo, hi := math.Sqrt(gravity*cell/2), math.Sqrt(gravity*top)
 		const steps = 200000
 		var sum float64
 		for i := 0; i < steps; i++ {
 			omega := lo + (float64(i)+0.5)*(hi-lo)/steps
-			sum += north.Frequency(omega) * (hi - lo) / steps
+			sum += north.frequency(omega) * (hi - lo) / steps
 		}
 		return sum
 	}
@@ -110,7 +112,7 @@ func TestWavenumberKeepsTheEnergy(t *testing.T) {
 // promises, and its slopes are the slopes of its heights.
 func TestPatchIsItsSpectrum(t *testing.T) {
 	const n, extent = 256, 1000.0
-	patch, err := NewPatch(north, n, extent, 7)
+	patch, err := newPatch(north, n, extent, 7)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,15 +123,17 @@ func TestPatchIsItsSpectrum(t *testing.T) {
 			if wave(ix, n) == -n/2 || wave(iy, n) == -n/2 {
 				continue
 			}
-			promised += north.Wavenumber(float64(wave(ix, n))*cell,
-				float64(wave(iy, n))*cell) * cell * cell
+			across := float64(wave(ix, n)) * cell
+			down := float64(wave(iy, n)) * cell
+			promised += north.wavenumber(across,
+				down) * cell * cell
 		}
 	}
-	along, across := patch.Resolved()
+	along, across := patch.resolved()
 	var height, slope float64
 	const seas = 12
 	for seed := uint64(0); seed < seas; seed++ {
-		p, _ := NewPatch(north, n, extent, seed)
+		p, _ := newPatch(north, n, extent, seed)
 		f := p.At(3.5)
 		for i := range f.Height {
 			height += f.Height[i] * f.Height[i]
@@ -162,7 +166,7 @@ func TestPatchIsItsSpectrum(t *testing.T) {
 func TestWavesTravelDownwind(t *testing.T) {
 	sea := Sea{Wind: 10, Fetch: 100e3, Toward: 0}
 	const n, extent = 128, 1000.0
-	p, _ := NewPatch(sea, n, extent, 3)
+	p, _ := newPatch(sea, n, extent, 3)
 	now, later := p.At(0), p.At(1.5)
 	match := func(shift int) float64 {
 		var sum float64
@@ -188,7 +192,8 @@ func TestFresnel(t *testing.T) {
 	// the pair reflects half of what the other one does
 	brewster := math.Atan(index)
 	other := math.Cos(2 * brewster)
-	near(t, "at Brewster's angle", Fresnel(math.Cos(brewster), index),
+	cosine := math.Cos(brewster)
+	near(t, "at Brewster's angle", Fresnel(cosine, index),
 		other*other/2, 1e-12)
 }
 
@@ -207,22 +212,22 @@ func TestIndexIsSeawater(t *testing.T) {
 
 // The published numbers come back out as published.
 func TestPublishedValues(t *testing.T) {
-	along, across := Roughness(10)
+	along, across := roughness(10)
 	near(t, "slope variance along the wind", along, 0.0316, 1e-12)
 	near(t, "slope variance across it", across, 0.0222, 1e-12)
 	// [CM54] fitted the total separately, as 0.003 + 0.00512 U; the two
 	// parts were fitted on their own and sum to within a percent of it
 	near(t, "total slope variance", along+across, 0.003+0.00512*10, 1e-3)
-	near(t, "whitecaps at 10 m/s", Whitecaps(10), 0.00987, 1e-5)
-	near(t, "absorption at 440", Absorption(440), 0.00635, 1e-12)
-	near(t, "absorption at 700", Absorption(700), 0.624, 1e-12)
-	near(t, "absorption at 445", Absorption(445), (0.00635+0.00922)/2, 1e-12)
-	near(t, "scattering at 500", Scattering(500), 0.00288, 1e-12)
+	near(t, "whitecaps at 10 m/s", whitecaps(10), 0.00987, 1e-5)
+	near(t, "absorption at 440", absorption(440), 0.00635, 1e-12)
+	near(t, "absorption at 700", absorption(700), 0.624, 1e-12)
+	near(t, "absorption at 445", absorption(445), (0.00635+0.00922)/2, 1e-12)
+	near(t, "scattering at 500", scattering(500), 0.00288, 1e-12)
 }
 
 // The slope density is a density.
 func TestDensitySumsToOne(t *testing.T) {
-	a, c := Roughness(8)
+	a, c := roughness(8)
 	const reach, steps = 2.0, 800
 	var sum float64
 	for i := 0; i < steps; i++ {
@@ -240,15 +245,16 @@ func TestDensitySumsToOne(t *testing.T) {
 // climbs all the way down to 400 nm, so a screen needs a trace more red
 // than green to show it.
 func TestWaterIsBlue(t *testing.T) {
-	if !(Reflectance(450, 0) > Reflectance(550, 0) &&
-		Reflectance(550, 0) > Reflectance(650, 0)) {
+	if !(reflectance(450, 0) > reflectance(550, 0) &&
+		reflectance(550, 0) > reflectance(650, 0)) {
 		t.Errorf("reflectance does not fall toward red")
 	}
-	r, g, b := srgb.Light(Water(swatch.D65(), 0))
+	daylight := swatch.D65()
+	r, g, b := srgb.Light(water(daylight, 0))
 	if !(b > 10*g && b > 10*r && g > 0 && r > 0) {
 		t.Errorf("water is r %v g %v b %v", r, g, b)
 	}
-	_, y, _ := Water(swatch.D65(), 0).XYZ()
+	_, y, _ := water(swatch.D65(), 0).XYZ()
 	if y <= 0 || y > 0.05 {
 		t.Errorf("water's luminance is %v", y)
 	}
@@ -269,7 +275,7 @@ func TestLampIsLibthemesWhite(t *testing.T) {
 // share is Fresnel's.
 func TestGlintConservesEnergy(t *testing.T) {
 	const index = 1.34
-	varA, varC := Roughness(5)
+	varA, varC := roughness(5)
 	zenith := 30 * math.Pi / 180
 	sun := Vec{math.Sin(zenith), 0, math.Cos(zenith)}
 	var sent float64
@@ -301,10 +307,10 @@ func TestGlintConservesEnergy(t *testing.T) {
 // it carries a large part. That is the whole level-of-detail scheme.
 func TestGridCarriesLessFromHigher(t *testing.T) {
 	sea := Sea{Wind: 10, Fetch: 100e3}
-	total := func() float64 { a, c := Roughness(sea.Wind); return a + c }()
+	total := func() float64 { a, c := roughness(sea.Wind); return a + c }()
 	carried := func(extent float64) float64 {
-		p, _ := NewPatch(sea, 256, extent, 1)
-		a, c := p.Resolved()
+		p, _ := newPatch(sea, 256, extent, 1)
+		a, c := p.resolved()
 		return (a + c) / total
 	}
 	low, high := carried(60), carried(300e3)
@@ -402,7 +408,7 @@ func TestSourcesRefuseBadFiles(t *testing.T) {
 // More chlorophyll makes the sea greener and none leaves it as it was.
 func TestChlorophyllGreensTheSea(t *testing.T) {
 	green := func(chl float64) float64 {
-		return Reflectance(550, chl) / Reflectance(450, chl)
+		return reflectance(550, chl) / reflectance(450, chl)
 	}
 	last := green(0)
 	for _, chl := range []float64{0.03, 0.1, 0.3, 1, 3, 10} {
@@ -441,7 +447,7 @@ func TestGridAndColourAt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := Water(swatch.D65(), 0.2)
+	want := water(swatch.D65(), 0.2)
 	if colour != want {
 		t.Errorf("colour is %v, not %v", colour, want)
 	}
@@ -457,28 +463,32 @@ func TestGridAndColourAt(t *testing.T) {
 // solstice, on the equator at the equinoxes, due south at noon.
 func TestSunFollowsTheCalendar(t *testing.T) {
 	declination := func(when time.Time) float64 {
-		toward, _ := Sun(90, 0, when) // at the pole, height is declination
+		toward, _ := sun(90, 0, when) // at the pole, height is declination
 		return math.Asin(toward.Z) / degrees
 	}
 	at := func(month time.Month, day int) time.Time {
 		return time.Date(2026, month, day, 12, 0, 0, 0, time.UTC)
 	}
-	near(t, "June solstice", declination(at(time.June, 21)), 23.44, 0.05)
-	near(t, "December solstice", declination(at(time.December, 21)), -23.44, 0.05)
-	near(t, "March equinox", declination(at(time.March, 20)), 0, 0.3)
-	near(t, "September equinox", declination(at(time.September, 23)), 0, 0.3)
+	june := at(time.June, 21)
+	near(t, "June solstice", declination(june), 23.44, 0.05)
+	december := at(time.December, 21)
+	near(t, "December solstice", declination(december), -23.44, 0.05)
+	march := at(time.March, 20)
+	near(t, "March equinox", declination(march), 0, 0.3)
+	september := at(time.September, 23)
+	near(t, "September equinox", declination(september), 0, 0.3)
 
-	noon, _ := Sun(50, 0, at(time.March, 20))
+	noon, _ := sun(50, 0, at(time.March, 20))
 	if !(math.Abs(noon.X) <= 0.05) || noon.Y >= 0 {
 		t.Errorf("at Greenwich noon the sun is at %v, not due south", noon)
 	}
 	near(t, "noon height at 50 north", math.Asin(noon.Z)/degrees, 40, 0.5)
-	night, _ := Sun(50, 0, time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC))
+	night, _ := sun(50, 0, time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC))
 	if night.Z > 0 {
 		t.Errorf("the sun is up at midnight")
 	}
-	_, january := Sun(0, 0, at(time.January, 3))
-	_, july := Sun(0, 0, at(time.July, 4))
+	_, january := sun(0, 0, at(time.January, 3))
+	_, july := sun(0, 0, at(time.July, 4))
 	if !(january < 0.984 && july > 1.016) {
 		t.Errorf("the sun is %v au off in January and %v in July",
 			january, july)
@@ -487,16 +497,16 @@ func TestSunFollowsTheCalendar(t *testing.T) {
 
 // A low sun crosses more air, and comes out dimmer and redder.
 func TestLowSunIsDimAndRed(t *testing.T) {
-	near(t, "air overhead", AirMass(1), 1, 0.001)
-	near(t, "air at 60 degrees", AirMass(0.5), 2, 0.01)
-	if horizon := AirMass(0); horizon < 30 || horizon > 45 {
+	near(t, "air overhead", airMass(1), 1, 0.001)
+	near(t, "air at 60 degrees", airMass(0.5), 2, 0.01)
+	if horizon := airMass(0); horizon < 30 || horizon > 45 {
 		t.Errorf("air mass at the horizon is %v", horizon)
 	}
-	if haze := Haze(550); haze < 0.09 || haze > 0.105 {
+	if haze := haze(550); haze < 0.09 || haze > 0.105 {
 		t.Errorf("clean air at 550 nm has optical depth %v", haze)
 	}
-	above, high := Sunlight(1, 1)
-	_, low := Sunlight(0.05, 1)
+	above, high := sunlight(1, 1)
+	_, low := sunlight(0.05, 1)
 	_, highY, _ := lit(high, above, func(int) float64 { return 1 }).XYZ()
 	_, lowY, _ := lit(low, above, func(int) float64 { return 1 }).XYZ()
 	if !(lowY < highY && highY < 1 && highY > 0.8) {
@@ -512,7 +522,7 @@ func TestLowSunIsDimAndRed(t *testing.T) {
 func TestSeaStates(t *testing.T) {
 	// a height exactly on a bound belongs to the lower code: the table's
 	// own example is that four metres is coded 5
-	for height, want := range map[float64]SeaState{
+	for height, want := range map[float64]seaState{
 		0: 0, 0.05: 1, 0.1: 1, 0.3: 2, 1: 3, 2: 4, 2.5: 4, 4: 5, 4.1: 6,
 		8: 7, 9: 7, 14: 8, 14.1: 9, 30: 9,
 	} {
@@ -520,10 +530,10 @@ func TestSeaStates(t *testing.T) {
 			t.Errorf("%v m is state %d, not %d", height, got, want)
 		}
 	}
-	if SeaState(5).String() != "rough" {
-		t.Errorf("state 5 is %q", SeaState(5))
+	if seaState(5).String() != "rough" {
+		t.Errorf("state 5 is %q", seaState(5))
 	}
-	for code := SeaState(1); code <= 7; code++ {
+	for code := seaState(1); code <= 7; code++ {
 		sea, err := code.Raise(500e3, 0, 0)
 		if err != nil {
 			t.Fatal(err)
@@ -533,10 +543,10 @@ func TestSeaStates(t *testing.T) {
 				"%v m/s wind", code, sea.Height(), got, sea.Wind)
 		}
 	}
-	if _, err := SeaState(8).Raise(1000, 0, 0); err == nil {
+	if _, err := seaState(8).Raise(1000, 0, 0); err == nil {
 		t.Errorf("a very high sea was raised over one kilometre of fetch")
 	}
-	if _, err := SeaState(10).Raise(1e6, 0, 0); err == nil {
+	if _, err := seaState(10).Raise(1e6, 0, 0); err == nil {
 		t.Errorf("state 10 was accepted")
 	}
 	// the Icelandic Met Office's worked example: 9.5 is 24.5 m/s
@@ -554,10 +564,10 @@ func TestShallowWater(t *testing.T) {
 	}
 	k := 0.001 // a wave six kilometres long
 	omega, _ := shoal.turning(k)
-	near(t, "long-wave speed", omega/k, math.Sqrt(Gravity*5), 0.01)
+	near(t, "long-wave speed", omega/k, math.Sqrt(gravity*5), 0.01)
 	k = 10 // a wave too short to feel the bottom
 	omega, _ = shoal.turning(k)
-	near(t, "short-wave frequency", omega, math.Sqrt(Gravity*k), 1e-9)
+	near(t, "short-wave frequency", omega, math.Sqrt(gravity*k), 1e-9)
 	// the group speed is the slope of the dispersion curve
 	for _, k := range []float64{0.01, 0.1, 0.5} {
 		lo, _ := shoal.turning(k * 0.999)
@@ -595,7 +605,7 @@ func TestTide(t *testing.T) {
 // Choppy waves gather water at the crests: where the sea is high the
 // push squeezes it, and where it is low the push stretches it.
 func TestChopSharpensCrests(t *testing.T) {
-	p, _ := NewPatch(north, 128, 500, 4)
+	p, _ := newPatch(north, 128, 500, 4)
 	f := p.At(1)
 	var both float64
 	for i, h := range f.Height {
@@ -702,12 +712,12 @@ func TestSeaStopsGrowing(t *testing.T) {
 	if !(short.Height() < near2.Height()) {
 		t.Errorf("a short fetch raised as much sea as a long one")
 	}
-	near(t, "fully developed peak", far.Peak(), 0.877*Gravity/10, 1e-9)
+	near(t, "fully developed peak", far.Peak(), 0.877*gravity/10, 1e-9)
 	// (from memory, not sources.yaml: a loose check only) Pierson and
 	// Moskowitz's own sea, with no peak enhancement, is
 	// 0.21 U^2/g high; JONSWAP's sharper peak makes this one somewhat
 	// higher, and it should not be wildly so
-	own := 0.21 * 100 / Gravity
+	own := 0.21 * 100 / gravity
 	if got := far.Height(); got < own || got > 1.6*own {
 		t.Errorf("a fully developed sea in 10 m/s is %v m; "+
 			"Pierson-Moskowitz gives %v", got, own)
@@ -745,21 +755,22 @@ func TestSamplePointsLoad(t *testing.T) {
 func TestCameraIsPatternedOnSlayers(t *testing.T) {
 	// a 50 on Super 35 is the zero lens, and sees 2 atan(24.89/100)
 	near(t, "the zero lens", Lens{}.Wide(), 2*math.Atan(24.89/100), 1e-12)
-	full, err := GaugeNamed("full frame")
+	full, err := gaugeNamed("full frame")
 	if err != nil {
 		t.Fatal(err)
 	}
 	near(t, "full frame's aspect", full.Aspect(), 1.5, 1e-12)
 	near(t, "a 50 on full frame", NewLens(50, full, 0).Wide(),
 		2*math.Atan(36.0/100), 1e-12)
-	near(t, "Focal undoes Wide", Focal(NewLens(85, full, 0).Wide(), full),
+	lensWide := NewLens(85, full, 0).Wide()
+	near(t, "Focal undoes Wide", focal(lensWide, full),
 		85, 1e-9)
 	// slayer's own test of Swath frames forty kilometres from four hundred
 	near(t, "a swath", Swath(40, 400).Wide(), 2*math.Atan(40.0/800), 1e-12)
 	near(t, "no swath", Swath(0, 400).Wide(), Lens{}.Wide(), 1e-12)
-	near(t, "a pinhole of no width", Pinhole{}.Wide(), math.Pi/3, 1e-12)
-	near(t, "a pinhole too wide", NewPinhole(4, 0).Wide(), math.Pi/3, 1e-12)
-	if _, err := GaugeNamed("vistavision"); err == nil {
+	near(t, "a pinhole of no width", pinhole{}.Wide(), math.Pi/3, 1e-12)
+	near(t, "a pinhole too wide", newPinhole(4, 0).Wide(), math.Pi/3, 1e-12)
+	if _, err := gaugeNamed("vistavision"); err == nil {
 		t.Errorf("a gauge not in the table was found")
 	}
 	if _, err := NewGauge("", 1, 1); err == nil {
@@ -771,7 +782,7 @@ func TestCameraIsPatternedOnSlayers(t *testing.T) {
 
 	// the middle of the picture is straight ahead, down minus z; the top
 	// row looks up, the right column right, and the edges are Wide apart
-	pin := NewPinhole(1, 0)
+	pin := newPinhole(1, 0)
 	middle := pin.Ray(0, 0, 1, 1).Dir
 	if middle != (Vec{Z: -1}) {
 		t.Errorf("the middle of a picture looks along %v", middle)
@@ -784,7 +795,8 @@ func TestCameraIsPatternedOnSlayers(t *testing.T) {
 	}
 	left := pin.Ray(0, 50, 101, 101).Dir
 	edge := math.Acos(left.dot(right)) // between the outer pixels' middles
-	near(t, "edge to edge", 2*math.Atan(math.Tan(edge/2)*101/100), 1, 1e-9)
+	tangent := math.Tan(edge / 2)
+	near(t, "edge to edge", 2*math.Atan(tangent*101/100), 1, 1e-9)
 	if got := pin.Ray(3, 3, 0, 0).Dir; got != (Vec{Z: -1}) {
 		t.Errorf("a picture of no pixels looks along %v", got)
 	}

@@ -41,13 +41,6 @@ func (path Path) Crossings() []Crossing {
 	return append([]Crossing(nil), path.crossings...)
 }
 
-// Captured is whether the ray came from the hole: black.
-func (path Path) Captured() bool { return path.captured }
-
-// Turns is how many times the ray went round the hole's centre, as a
-// share of a whole turn.
-func (path Path) Turns() float64 { return math.Abs(path.swept) / turn }
-
 // Lands is whether the ray's crossing of the disc's plane of an order
 // lands on a disc of no thickness from inner to outer masses: order
 // zero is its first crossing, the direct image; order one its second,

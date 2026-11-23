@@ -6,14 +6,28 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// the numbers of the slab test's loosening.
+const (
+	// defined by IEEE 754 binary64: the most one rounding is out, half
+	// a unit in the last place of one.
+	roundoff = 0x1p-53
+	// defined by ize: the roundings a slab's distance takes, the number
+	// his gamma is of.
+	slabRoundings = 3
+	// defined by ize: the gammas of that number a ray is let in past a
+	// box by.
+	slabGammas = 2
+)
+
 // loosened is how far past a box's far side a ray is still let in: one
 // and two gammas of three, ize's "robust bvh ray traversal" (2013), so
 // the rounding of a slab never turns a ray away from a face at the
 // box's edge.
-const loosened = 1 + 2*(3*0x1p-53/(1-3*0x1p-53))
+const loosened = unity + slabGammas*(slabRoundings*roundoff/
+	(unity-slabRoundings*roundoff))
 
 // weights is how much of a point on a face is each of its corners.
-type weights [3]float64
+type weights [triangleCorners]float64
 
 // Met is where a ray meets a mesh: how far along it, which face, and
 // where on the face.
@@ -33,8 +47,8 @@ func (met Met) Face() int { return met.face }
 // from, one over each part of its way, and the watertight test's own
 // frame, its largest part last, with the shear that makes it straight.
 type sight struct {
-	from, inverse          [3]float64
-	entry                  [3]int
+	from, inverse          [axes]float64
+	entry                  [axes]int
 	kx, ky, kz             int
 	shearX, shearY, shearZ float64
 }
@@ -47,22 +61,22 @@ func aimed(ray maths.Ray) sight {
 	way := parts(ray.Dir)
 	look := sight{from: parts(ray.At)}
 	for axis, part := range way {
-		look.inverse[axis] = math.Inf(1)
-		if part != 0 {
-			look.inverse[axis] = 1 / part
+		look.inverse[axis] = math.Inf(plusInfinity)
+		if part != nought {
+			look.inverse[axis] = unity / part
 		}
-		if look.inverse[axis] < 0 {
-			look.entry[axis] = 1
+		if look.inverse[axis] < nought {
+			look.entry[axis] = high
 		}
 	}
-	look.kz = 0
-	for axis := 1; axis < 3; axis++ {
+	look.kz = alongX
+	for axis := alongY; axis < axes; axis++ {
 		if math.Abs(way[axis]) > math.Abs(way[look.kz]) {
 			look.kz = axis
 		}
 	}
-	look.kx, look.ky = (look.kz+1)%3, (look.kz+2)%3
-	if way[look.kz] < 0 {
+	look.kx, look.ky = (look.kz+unity)%axes, (look.kz+pair)%axes
+	if way[look.kz] < nought {
 		look.kx, look.ky = look.ky, look.kx
 	}
 	look.shearZ = look.inverse[look.kz]
@@ -76,27 +90,34 @@ func aimed(ray maths.Ray) sight {
 // the bound crossed first by entry, written out an axis at a time.
 func (look *sight) enters(at *node, near, far float64) (float64, bool) {
 	box, from, inverse := &at.bounds, &look.from, &look.inverse
-	ex, ey, ez := look.entry[0], look.entry[1], look.entry[2]
+	ex, ey, ez := look.entry[alongX], look.entry[alongY], look.entry[alongZ]
 	enter, leave := near, far
-	if slab := (box[ex][0] - from[0]) * inverse[0]; slab > enter {
+	if slab := (box[ex][alongX] - from[alongX]) *
+		inverse[alongX]; slab > enter {
 		enter = slab
 	}
-	if slab := (box[1-ex][0] - from[0]) * inverse[0]; slab < leave {
+	if slab := (box[high-ex][alongX] - from[alongX]) *
+		inverse[alongX]; slab < leave {
 		leave = slab
 	}
-	if slab := (box[ey][1] - from[1]) * inverse[1]; slab > enter {
+	if slab := (box[ey][alongY] - from[alongY]) *
+		inverse[alongY]; slab > enter {
 		enter = slab
 	}
-	if slab := (box[1-ey][1] - from[1]) * inverse[1]; slab < leave {
+	if slab := (box[high-ey][alongY] - from[alongY]) *
+		inverse[alongY]; slab < leave {
 		leave = slab
 	}
-	if slab := (box[ez][2] - from[2]) * inverse[2]; slab > enter {
+	if slab := (box[ez][alongZ] - from[alongZ]) *
+		inverse[alongZ]; slab > enter {
 		enter = slab
 	}
-	if slab := (box[1-ez][2] - from[2]) * inverse[2]; slab < leave {
+	if slab := (box[high-ez][alongZ] - from[alongZ]) *
+		inverse[alongZ]; slab < leave {
 		leave = slab
 	}
-	return enter, enter <= leave*loosened && !math.IsInf(enter, 1)
+	return enter, enter <= leave*loosened &&
+		!math.IsInf(enter, plusInfinity)
 }
 
 // meets is how far along the sight a face is met, strictly between
@@ -117,17 +138,17 @@ func (look *sight) meets(made *Mesh, i int, near, far float64) (float64,
 	forOne := determinant(cx, cy, bx, by)
 	forTwo := determinant(ax, ay, cx, cy)
 	forThree := determinant(bx, by, ax, ay)
-	if (forOne < 0 || forTwo < 0 || forThree < 0) &&
-		(forOne > 0 || forTwo > 0 || forThree > 0) {
-		return 0, weights{}, false
+	if (forOne < nought || forTwo < nought || forThree < nought) &&
+		(forOne > nought || forTwo > nought || forThree > nought) {
+		return nought, weights{}, false
 	}
 	whole := forOne + forTwo + forThree
-	if whole == 0 {
-		return 0, weights{}, false
+	if whole == nought {
+		return nought, weights{}, false
 	}
 	along := (forOne*az + forTwo*bz + forThree*cz) / whole
 	if !(along > near && along < far) {
-		return 0, weights{}, false
+		return nought, weights{}, false
 	}
 	return along, weights{forOne / whole, forTwo / whole,
 		forThree / whole}, true
@@ -174,15 +195,16 @@ type waiting struct {
 // by the tree, nearer boxes first; of two met at the same distance, the
 // first face.
 func (made *Mesh) Meet(ray maths.Ray, near, far float64) (Met, bool) {
+	made.ensureTree()
 	look := aimed(ray)
-	best := Met{along: far, face: -1}
-	enter, in := look.enters(&made.tree.nodes[0], near, far)
+	best := Met{along: far, face: noFace}
+	enter, in := look.enters(&made.tree.nodes[nought], near, far)
 	if !in {
 		return best, false
 	}
-	var stack [deepest + 2]waiting
-	stack[0] = waiting{node: 0, enter: enter}
-	for top := 1; top > 0; {
+	var stack [deepest + pushed]waiting
+	stack[nought] = waiting{node: nought, enter: enter}
+	for top := unity; top > nought; {
 		top--
 		next := stack[top]
 		// passed over only past the best as loosely as a box is let
@@ -193,14 +215,14 @@ func (made *Mesh) Meet(ray maths.Ray, near, far float64) (Met, bool) {
 		}
 		count(entered)
 		at := &made.tree.nodes[next.node]
-		if at.count > 0 {
+		if at.count > nought {
 			best = made.leaf(&look, at, near, far, best)
 			continue
 		}
 		top = look.descend(made.tree.nodes, at.first, near, best.along,
 			&stack, top)
 	}
-	return best, best.face >= 0
+	return best, best.face >= nought
 }
 
 // leaf is the best of a leaf's faces and the best so far.
@@ -223,22 +245,23 @@ func (best Met) beaten(along float64, i int) bool {
 }
 
 // descend puts a node's children the ray enters on the stack, the
-// nearer on top, and is the stack's new height.
-func (look *sight) descend(nodes []node, first int, near, far float64,
-	stack *[deepest + 2]waiting, top int) int {
-	left, inLeft := look.enters(&nodes[first], near, far)
-	right, inRight := look.enters(&nodes[first+1], near, far)
+// nearer on top, and is the stack's new height. The children are at
+// child and the node after it.
+func (look *sight) descend(nodes []node, child int, near, far float64,
+	stack *[deepest + pushed]waiting, top int) int {
+	left, inLeft := look.enters(&nodes[child], near, far)
+	right, inRight := look.enters(&nodes[child+unity], near, far)
 	if inLeft && inRight && right < left {
-		stack[top] = waiting{node: first, enter: left}
-		stack[top+1] = waiting{node: first + 1, enter: right}
-		return top + 2
+		stack[top] = waiting{node: child, enter: left}
+		stack[top+unity] = waiting{node: child + unity, enter: right}
+		return top + pushed
 	}
 	if inRight {
-		stack[top] = waiting{node: first + 1, enter: right}
+		stack[top] = waiting{node: child + unity, enter: right}
 		top++
 	}
 	if inLeft {
-		stack[top] = waiting{node: first, enter: left}
+		stack[top] = waiting{node: child, enter: left}
 		top++
 	}
 	return top
@@ -255,6 +278,20 @@ func (made *Mesh) Hit(ray maths.Ray, near, far float64) (float64, bool) {
 // way, or with smooth normals, its corners' blended by where on it.
 func (made *Mesh) NormalAt(met Met) maths.Vec {
 	return made.facing(met.face, met.weights)
+}
+
+// RestPointAt is the corresponding point on the undeformed surface,
+// using the same triangle and barycentric weights as the ray hit.
+func (made *Mesh) RestPointAt(met Met) (maths.Vec, bool) {
+	if len(made.rest) == nought {
+		return maths.V(nought, nought, nought), false
+	}
+	corners := made.faces[met.face]
+	atFirst, atSecond, atThird := made.rest[corners[first]],
+		made.rest[corners[second]], made.rest[corners[third]]
+	return atFirst.Scale(met.weights[first]).
+		Add(atSecond.Scale(met.weights[second])).
+		Add(atThird.Scale(met.weights[third])), true
 }
 
 // Lifted is a point where a ray met the mesh, raised to where the curved
@@ -275,7 +312,7 @@ func (made *Mesh) Lifted(met Met, point maths.Vec) maths.Vec {
 	lifted := point
 	for k, corner := range made.faces[met.face] {
 		normal := made.normals[corner]
-		under := math.Min(0, point.Sub(made.points[corner]).Dot(normal))
+		under := math.Min(nought, point.Sub(made.points[corner]).Dot(normal))
 		lifted = lifted.Sub(normal.Scale(met.weights[k] * under))
 	}
 	return lifted
@@ -286,9 +323,9 @@ func (made *Mesh) Lifted(met Met, point maths.Vec) maths.Vec {
 func (made *Mesh) facing(i int, at weights) maths.Vec {
 	if made.smooth {
 		corners := made.faces[i]
-		blend := made.normals[corners[0]].Scale(at[0]).
-			Add(made.normals[corners[1]].Scale(at[1])).
-			Add(made.normals[corners[2]].Scale(at[2]))
+		blend := made.normals[corners[first]].Scale(at[first]).
+			Add(made.normals[corners[second]].Scale(at[second])).
+			Add(made.normals[corners[third]].Scale(at[third]))
 		if somewhere(blend) {
 			return blend.Unit()
 		}

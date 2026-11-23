@@ -77,7 +77,7 @@ func (source Volume) Lands(at maths.Vec, band maths.Band) float64 {
 
 // volumeFalloff is the volume average of inverse squared distance over a
 // ball. Its centre and surface limits are 3/R^2 and 3/(2R^2). Near/far series
-// avoid cancellation in the closed form; see doc/fire-recipes.md.
+// avoid cancellation in the closed form; see doc/model/fire/fire-recipes.md.
 func volumeFalloff(distance, radius float64) float64 {
 	q := distance / radius
 	if q <= 0.25 {

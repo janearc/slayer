@@ -82,9 +82,11 @@ func TestForwardMatchesDirectDFTForRectangles(test *testing.T) {
 			func(test *testing.T) {
 				values := make([]complex128, grid.Width*grid.Height)
 				for index := range values {
+					sine := math.Sin(float64(index*3) + 0.25)
+					cosine := math.Cos(float64(index*index) + 0.75)
 					values[index] = complex(
-						math.Sin(float64(index*3)+0.25),
-						math.Cos(float64(index*index)+0.75))
+						sine,
+						cosine)
 				}
 				before := append([]complex128(nil), values...)
 				got, err := Forward(grid, values)
@@ -103,9 +105,11 @@ func TestInverseMatchesDirectDFTForRectangles(test *testing.T) {
 			func(test *testing.T) {
 				values := make([]complex128, grid.Width*grid.Height)
 				for index := range values {
+					cosine := math.Cos(float64(index) + 0.4)
+					sine := math.Sin(float64(index*index) + 0.2)
 					values[index] = complex(
-						math.Cos(float64(index)+0.4),
-						math.Sin(float64(index*index)+0.2))
+						cosine,
+						sine)
 				}
 				before := append([]complex128(nil), values...)
 				got, err := Inverse(grid, values)
@@ -141,8 +145,9 @@ func TestImpulseAndConstantHaveExpectedForwardTerms(test *testing.T) {
 		test.Fatal(err)
 	}
 	wantConstant := make([]complex128, len(constant))
-	wantConstant[0] = complex(float64(len(constant))*2,
-		-float64(len(constant))*3)
+	length := float64(len(constant))
+	wantConstant[0] = complex(length*2,
+		-length*3)
 	checkComplexes(test, got, wantConstant, 1e-11)
 }
 
@@ -162,7 +167,8 @@ func TestForwardFindsSingleFourierModeWithNegativeExponent(test *testing.T) {
 		test.Fatal(err)
 	}
 	want := make([]complex128, len(values))
-	want[modeY*grid.Width+modeX] = complex(float64(len(values)), 0)
+	length := float64(len(values))
+	want[modeY*grid.Width+modeX] = complex(length, 0)
 	checkComplexes(test, got, want, 1e-11)
 }
 
@@ -170,8 +176,10 @@ func TestForwardInverseRoundTripAndParseval(test *testing.T) {
 	grid := shape(8, 4)
 	values := make([]complex128, grid.Width*grid.Height)
 	for index := range values {
-		values[index] = complex(math.Sin(float64(index)*0.7),
-			math.Cos(float64(index)*0.31))
+		sine := math.Sin(float64(index) * 0.7)
+		cosine := math.Cos(float64(index) * 0.31)
+		values[index] = complex(sine,
+			cosine)
 	}
 	forward, err := Forward(grid, values)
 	if err != nil {
@@ -337,8 +345,9 @@ func TestForwardPutsTheOppositeModeAtTheWrappedBin(test *testing.T) {
 		test.Fatal(err)
 	}
 	want := make([]complex128, len(values))
+	length := float64(len(values))
 	want[(grid.Height-modeY)*grid.Width+(grid.Width-modeX)] =
-		complex(float64(len(values)), 0)
+		complex(length, 0)
 	checkComplexes(test, got, want, 1e-11)
 }
 

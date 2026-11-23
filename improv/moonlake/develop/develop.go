@@ -42,7 +42,7 @@ func Develop(frames []*frame.Frame, options Options) (*image.RGBA, error) {
 		return nil, err
 	}
 	if options.White != 0 {
-		if err := Balance(total, options.White); err != nil {
+		if err := balance(total, options.White); err != nil {
 			return nil, err
 		}
 	}
@@ -50,10 +50,10 @@ func Develop(frames []*frame.Frame, options Options) (*image.RGBA, error) {
 	return tone.Develop(total), nil
 }
 
-// Balance scales the red and blue of total, in place, so that a blackbody at
+// balance scales the red and blue of total, in place, so that a blackbody at
 // kelvin comes out with equal red, green, and blue. It refuses a nil frame,
 // a temperature that is not positive and finite, and one with no red or blue.
-func Balance(total *frame.Frame, kelvin float64) error {
+func balance(total *frame.Frame, kelvin float64) error {
 	if total == nil {
 		return fmt.Errorf("develop: frame is nil")
 	}

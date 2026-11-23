@@ -121,9 +121,10 @@ func wantAir(t *testing.T, heightKm, dense float64) bodies.Air {
 func wantAurora(t *testing.T, lowKm, highKm, latRad, widthRad, tiltRad,
 	strength, curtains float64, seed uint64) bodies.Aurora {
 	t.Helper()
+	shell := bodies.NewShell(bodies.Kilometres(lowKm),
+		bodies.Kilometres(highKm))
 	aurora, err := bodies.NewAurora(
-		bodies.NewShell(bodies.Kilometres(lowKm),
-			bodies.Kilometres(highKm)),
+		shell,
 		measure.Radians(latRad), measure.Radians(widthRad),
 		measure.Radians(tiltRad), maths.Share(strength),
 		maths.Share(curtains), seed,

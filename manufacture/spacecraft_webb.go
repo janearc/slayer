@@ -93,6 +93,64 @@ func flat(wide, long, thick float64) instrumentPlate {
 		thickness: thick}
 }
 
+// The cells on Webb's panels are chosen: no source in the tree counts
+// them. A panel has this many columns along the row and rows across it.
+const webbCellColumns, webbCellRows = 12, 16
+
+const (
+	// webbCellGap is the gap between cells per aperture diameter. Chosen.
+	webbCellGap = 0.003
+	// webbCellRise is a cell's height as a share of the panel's
+	// thickness. Chosen.
+	webbCellRise = 0.35
+	// webbCoverRise is a cover glass's thickness as a share of a cell's
+	// height. Chosen.
+	webbCoverRise = 0.3
+	// webbBarShare is the share of the gap between two columns that a
+	// bus bar fills. Chosen.
+	webbBarShare = 0.5
+	// webbInset is how many rail widths the cells stand in from the
+	// panel's edge. Chosen.
+	webbInset = 1.5
+	// webbYokeRadius is the yoke's radius in panel thicknesses. Chosen.
+	webbYokeRadius = 1.5
+)
+
+// webbArray is Webb's row of panels as an array, running aft from the
+// bus's aft face and a gap from it, each hinged to the next, with the
+// cells on the sun's face, down, and a yoke along the back of the row.
+// The panel count, size and gap are the picked ones; the cells and the
+// yoke are chosen.
+func webbArray(size spacecraftSize, base, aside, thickness float64,
+) solarArray {
+	aperture := size.aperture
+	gap := aperture * spacecraftValue("webb-panel-gap")
+	count := int(spacecraftValue("webb-panels"))
+	panels := solarPanels{along: count, across: spaceOne,
+		width:     aperture * spacecraftValue("webb-panel-length"),
+		depth:     aperture * spacecraftValue("webb-panel-width"),
+		thickness: thickness, gap: gap, reach: gap}
+	cells := solarCellsFilling(panels, panels.wanted()*webbInset,
+		webbCellColumns, webbCellRows, aperture*webbCellGap)
+	cells.height = thickness * webbCellRise
+	cells.cover = cells.height * webbCoverRise
+	cells.barShare = webbBarShare
+	radius := thickness * webbYokeRadius
+	behind := thickness*spaceHalf + radius
+	run := gap + float64(count)*panels.width + float64(count-spaceOne)*gap
+	return solarArray{
+		frame: solarFrame(maths.V(aside+panels.depth*spaceHalf, base,
+			size.radius), maths.V(spaceZero, spaceZero, spaceOne),
+			maths.V(spaceZero, -spaceOne, spaceZero)),
+		panels: panels, cells: cells,
+		yoke: solarYoke{length: run, radius: radius, rootOffset: behind,
+			tipOffset: behind, across: []float64{spaceZero}},
+		looks: solarLooks{cell: leaf, cover: solarCover, bar: solarBar,
+			substrate: spaceStructure, frame: spacePanel,
+			hardware: spaceStructure},
+	}
+}
+
 // sunSide is what hangs under the shield beside the bus, laid out by eye
 // from NASA's picture of Webb's sun-facing side, and no dimension of it
 // from any paper.
@@ -130,16 +188,8 @@ func (row spacecraft) sunSide(assembly *instrumentAssembly,
 			maths.V(side*corner, under-boom, spaceZero), boom, body)
 	}
 	// the solar panels, a row running aft
-	panelWide := aperture * spacecraftValue("webb-panel-width")
-	panelLong := aperture * spacecraftValue("webb-panel-length")
 	gap := aperture * spacecraftValue("webb-panel-gap")
-	aside := wide*spaceHalf + gap
-	for panel := range int(spacecraftValue("webb-panels")) {
-		from := size.radius + gap + float64(panel)*(panelLong+gap)
-		assembly.add(flat(panelWide, panelLong, thin), maths.NewSubspace(
-			maths.V(aside+panelWide*spaceHalf, base,
-				from+panelLong*spaceHalf), maths.Identity, spaceOne), leaf)
-	}
+	webbArray(size, base, wide*spaceHalf+gap, thin).lay(assembly)
 	// the radiators on the bus's two sides
 	height := aperture * spacecraftValue("webb-bus-height")
 	diameter := size.radius / spaceHalf

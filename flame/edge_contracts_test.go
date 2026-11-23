@@ -36,19 +36,9 @@ func TestSpectralReferenceMustHaveRepresentablePlanckRadiance(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, heat := range []float64{0, -1, math.NaN(), math.Inf(1)} {
-		if got := spectralPower(profile.Spectrum(measure.Kelvin(heat))); got != 0 {
+		temperature := measure.Kelvin(heat)
+		if got := spectralPower(profile.spectrum(temperature)); got != 0 {
 			t.Fatalf("invalid temperature %g emitted %g", heat, got)
 		}
-	}
-}
-
-func TestSootRetainsTheTemperatureUsedByItsRadiance(t *testing.T) {
-	heat := measure.Kelvin(1735)
-	soot, err := NewSoot(heat, .4, measure.Metres(550e-9), Visible)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if soot.Heat() != heat {
-		t.Fatal("soot lost its thermal reference")
 	}
 }

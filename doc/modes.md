@@ -60,7 +60,11 @@ vibes: on
 `quality: exact` can coexist with `vibes`: quality controls how much of
 the frame is drawn, while vibes chooses approximations in its light.
 Today vibes enables `lamp-store` and `sky-looks`, using their native
-traversal kernels. It does not simplify geometry or lower transport resolution.
+traversal kernels.
+
+With `restir` (a third light shortcut, [restir.md](restir.md)) it also
+lights a crowd of lamps from a light tree and reservoirs, where the exact
+path scans every lamp at every point. It does not simplify geometry or lower transport resolution.
 The shortcuts refuse CPU, named scenes, rig lenses, proofs and certain
 other combinations. More than sixteen lamps is refused by the lamp store.
 

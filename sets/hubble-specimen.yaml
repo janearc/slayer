@@ -1,0 +1,37 @@
+# hubble, a specimen view: the telescope alone in space, lit by the sun.
+# not an orbit. sources and visual choices:
+# doc/model/spacecraft/space-observatories.md.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Hubble, a specimen
+  # picked: the scene's seed, stirred with the thing's own
+  seed: 11
+  setting: space
+  light: sun
+  # picked: high and off to one side, so the tube shades round
+  sun: {azimuth: 70, altitude: 40}
+  set:
+    things:
+      the telescope:
+        kind: hubble
+        seed: 5
+        complexity: demo
+        east: 0
+        north: 0
+  film:
+    width: 960
+    height: 720
+    rays: 3
+    # picked: sunlight on the tube's foil, held under the film's white
+    exposure: 0.003
+    wide: 50
+  cameras:
+    specimen:
+      title: the tube and its two solar wings
+      location:
+        loc_relative:
+          object: the telescope
+          standoff_x: 18
+          standoff_y: 9
+          standoff_z: 15
+      orientation: {point_to: the telescope, alpha: -23}

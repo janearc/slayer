@@ -74,7 +74,8 @@ func TestPagesRefusesASecondCoordinator(t *testing.T) {
 	held, err := os.OpenFile(filepath.Join(queueRoot, "pages.lock"),
 		os.O_RDWR|os.O_CREATE, 0o600) // defined: private, as the queue's
 	if err == nil {
-		err = syscall.Flock(int(held.Fd()), syscall.LOCK_EX)
+		descriptor := int(held.Fd())
+		err = syscall.Flock(descriptor, syscall.LOCK_EX)
 	}
 	if err != nil {
 		t.Fatal(err)

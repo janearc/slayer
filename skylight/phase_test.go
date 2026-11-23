@@ -72,7 +72,8 @@ func turnedBy(lean float64) float64 {
 	axis := axes[len(axes)-one]
 	return drawn(func(w *walker) float64 {
 		cosine := henyeyCosine(lean, w.uniform())
-		return axis.dot(turned(axis, cosine, w.uniform()))
+		draw := w.uniform()
+		return axis.dot(turned(axis, cosine, draw))
 	})
 }
 

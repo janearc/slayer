@@ -1,0 +1,80 @@
+# tower transamerica: one tall tapering square segment to a spire, as the
+# Transamerica Pyramid in San Francisco is. it is not data: it is the
+# tower generator at a low irregularity, 0.15, which gives it a few dozen
+# storeys, with a rectangle for its plan, a taper and a spire pinned, and
+# no setbacks, turns or second shaft. at dusk into night. made by the cities
+# package (manufacture/cities), through the manufactory's kind tower, from
+# manufacture/cities/cultures/tower.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the ground, the
+# sun and the cameras are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower transamerica
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 40
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    far:
+      title: "the whole tower, from a distance"
+      location:
+        at: [0, -430, 2]
+      orientation:
+        look_at: [0, 0, 110]
+    base:
+      title: "from the foot, looking up"
+      location:
+        at: [40, -80, 1.7]
+      orientation:
+        look_at: [0, 0, 130]
+  recipes:
+    pyramid:
+      kind: tower
+      irregularity: 0.15
+      pins:
+        plan: rectangle
+        shafts: 1
+        taper: true
+        setbacks: false
+        twist: false
+        spire: true
+  set:
+    things:
+      tower:
+        recipe: pyramid
+        seed: 1
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [0.9, 0.4, 0.22]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.08, 0.05, 0.06]}
+      zenith: {srgb_linear: [0.004, 0.008, 0.025]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

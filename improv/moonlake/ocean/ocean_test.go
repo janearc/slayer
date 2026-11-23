@@ -45,7 +45,7 @@ func TestSkyProjection(t *testing.T) {
 		{"past bottom", oceantex.Vec{Y: 1, Z: -1}, [3]float64{}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			r, g, b := srgb.Light(sky.At(test.direction))
+			r, g, b := srgb.Light(sky.at(test.direction))
 			wr, wg, wb := srgb.Light(srgb.FromLight(test.want[0], test.want[1], test.want[2]))
 			if got, want := ([3]float64{r, g, b}), ([3]float64{wr, wg, wb}); got != want {
 				t.Fatalf("light: %v, want %v", got, want)
@@ -99,7 +99,8 @@ func TestPFM(t *testing.T) {
 	want.WriteString("PF\n1 2\n-1\n")
 	for _, pixel := range picture.Light {
 		for _, channel := range pixel {
-			if err := binary.Write(&want, binary.LittleEndian, math.Float32bits(float32(channel))); err != nil {
+			bits := math.Float32bits(float32(channel))
+			if err := binary.Write(&want, binary.LittleEndian, bits); err != nil {
 				t.Fatal(err)
 			}
 		}

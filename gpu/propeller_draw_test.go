@@ -82,3 +82,80 @@ func TestPropellerMetalVolumeImageMatchesCPU(t *testing.T) {
 		againstAt(t, world, eye, 97, 65, 1)
 	}
 }
+
+func TestPropellerMetalDispersalVolumeImageMatchesCPU(t *testing.T) {
+	p := propellerFixture(t, 5).Parameters()
+	// Isolate the new placement/width transport; coupled fragment masks are
+	// covered by the multi-blade point probes below.
+	p.FragmentContrast = 0
+	p.WanderM, p.WanderScaleM, p.SpreadStartM, p.SpreadPerM = .8, 1.5, 1, .12
+	field, err := medium.NewPropellerCavitation(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	world := thing.NewWorld()
+	world.AddVolume(thing.Volume{Medium: field, Material: &thing.Material{Glow: maths.RGB(.5, .7, 1)}})
+	origin := maths.V(4, 3, 9)
+	eye := maths.Subspace{Origin: origin, Orientation: maths.LookAt(origin, maths.V(0, 0, 2.5))}
+	againstAt(t, world, eye, 97, 65, 1)
+}
+
+func TestPropellerMetalDispersalDensityMatchesCPU(t *testing.T) {
+	kernel, err := metal.Open(sourceWithPropellerDispersal(0, probeVolumes)+probePropeller, "probe_propeller")
+	if errors.Is(err, metal.ErrNoDevice) {
+		t.Skip("no GPU")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer kernel.Close()
+	for _, blades := range []int{2, 5, 16} {
+		for _, seconds := range []float64{0, .37} {
+			p := propellerFixture(t, blades).Parameters()
+			p.WanderM, p.WanderScaleM, p.SpreadStartM, p.SpreadPerM = .8, 1.5, 1, .12
+			dispersed, err := medium.NewPropellerCavitation(p)
+			if err != nil {
+				t.Fatal(err)
+			}
+			field := dispersed.Tick(time.Duration(seconds * float64(time.Second))).(medium.PropellerCavitation)
+			words, err := propellerCardOf(field)
+			if err != nil {
+				t.Fatal(err)
+			}
+			bytes := make([]byte, len(words)*4)
+			for i, w := range words {
+				binary.LittleEndian.PutUint32(bytes[i*4:], w)
+			}
+			points := make([][3]float32, 0, 12000)
+			for z := 0; z < 60; z++ {
+				for a := 0; a < 100; a++ {
+					theta := 2 * math.Pi * float64(a) / 100
+					s := float64(z) * .1
+					for _, r := range []float64{0, .5, 1, 1.5, 2, 2.5} {
+						points = append(points, [3]float32{float32(r * math.Cos(theta)), float32(r * math.Sin(theta)), float32(s)})
+					}
+				}
+			}
+			got, err := kernel.Points(points, bytes)
+			if err != nil {
+				t.Fatal(err)
+			}
+			worst, lit, zeros := 0.0, 0, 0
+			for i, p := range points {
+				want := field.Density(maths.V(float64(p[0]), float64(p[1]), float64(p[2])))
+				difference := math.Abs(float64(got[i]) - want)
+				worst = math.Max(worst, difference)
+				if want > .01 {
+					lit++
+				}
+				if want == 0 {
+					zeros++
+				}
+			}
+			t.Logf("blades%d time%g worst absolute density%g lit%d zero%d", blades, seconds, worst, lit, zeros)
+			if worst > 2e-4 || lit < 100 || zeros < 100 {
+				t.Fatalf("density mismatch/vacuous probe: %g lit%d zero%d", worst, lit, zeros)
+			}
+		}
+	}
+}

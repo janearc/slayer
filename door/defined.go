@@ -14,7 +14,7 @@ const (
 // whole frames, so a frame is one row to it. Defined.
 const rowsPerFrame = 1
 
-// square is a picture's pixel as one pixel of its png, as hillside's
+// square is a picture's pixel as one pixel of its png, as the session's
 // save writes a still. Defined.
 const square = 1
 

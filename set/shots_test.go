@@ -38,7 +38,8 @@ func TestShoeboxCameraFacesTheBox(t *testing.T) {
 	}
 	tip := 25 * math.Pi / 180
 	toward := maths.V(-1, 0, 1).Unit().Scale(math.Cos(tip))
-	want := toward.Add(maths.V(0, math.Sin(tip), 0))
+	lift := maths.V(0, math.Sin(tip), 0)
+	want := toward.Add(lift)
 	if got := eye.Forward(); !got.Near(want, 1e-9) {
 		t.Errorf("eye faces %v, want %v", got, want)
 	}

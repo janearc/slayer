@@ -41,9 +41,9 @@ func readMemoryPolicy() (numbers.Numbers, error) {
 	return numbers.Read("memory-policy.yaml", memoryPolicyRaw)
 }
 
-// DefaultRasterBudget returns the authored default limits, without opening
+// defaultRasterBudget returns the authored default limits, without opening
 // data.
-func DefaultRasterBudget() (RasterBudget, error) {
+func defaultRasterBudget() (RasterBudget, error) {
 	book, err := memoryPolicy()
 	if err != nil {
 		return RasterBudget{}, err
@@ -69,8 +69,8 @@ func DefaultRasterBudget() (RasterBudget, error) {
 
 }
 
-// DefaultWindowBytes returns the picked strict-window payload limit.
-func DefaultWindowBytes() (int64, error) {
+// defaultWindowBytes returns the picked strict-window payload limit.
+func defaultWindowBytes() (int64, error) {
 	book, err := memoryPolicy()
 	if err != nil {
 		return 0, err

@@ -1,0 +1,11 @@
+name,share
+not-a-number,NaN
+nought,0
+below-nought,-1
+one,1
+two,2
+infinite,Inf
+too-fine,1e-7
+far-too-fine,1e-14
+farther-too-fine,1e-16
+finest,1e-300

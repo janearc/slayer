@@ -1,0 +1,1 @@
+format-mariner . :: gofmt -w manufacture/mariner.go manufacture/kinds.go manufacture/mariner_test.go

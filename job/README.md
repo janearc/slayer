@@ -28,6 +28,7 @@ Paths are relative to the job file.
 |---|---|
 | `$schema` | the schema's name; required |
 | `scene` | which scene; required; exactly one form, below |
+| `sources` | source names, identifiers and optional notes for attribution |
 | `film` | the picture's size, rays and lens |
 | `renderer` | `cpu`, `gpu`, `gpu-native-shadows` or `gpu-native` |
 | `quality` | `exact` (the default) or `preview` |
@@ -43,6 +44,13 @@ Paths are relative to the job file.
 | `sound` | the soundtrack |
 | `outputs` | what is written, by role |
 | `limits` | memory and time ceilings, for the queue only |
+
+### sources
+
+An optional list records what informed the job. Each entry has a `name`,
+a `uri`, and an optional `note`. Records are kept in the canonical job
+and are returned by `Job.Sources()`. They are attribution metadata and
+do not fetch, import or verify the source.
 
 ### scene
 
@@ -391,7 +399,7 @@ The note above left these open; each was chosen here.
   `CameraName` takes the place of the job's camera and keeps its zoom. An
   empty override is refused.
 - `Lift` takes a `Plan`, a struct of the plain values a sequence plan
-  holds, which hillside fills; the camera goes as the plan's YAML. It was
+  holds, which the session fills; the camera goes as the plan's YAML. It was
   chosen over exported options because it is the smaller door, and the
   job it makes is checked through the same schema as a file.
 

@@ -17,7 +17,7 @@ import (
 // gives an error, and the error is the caller's own.
 func BuildWindow(west, north float64, across, down int, step float64,
 	height func(column, row int) (float64, error)) (Window, error) {
-	limit, err := DefaultWindowBytes()
+	limit, err := defaultWindowBytes()
 	if err != nil {
 		return Window{}, err
 	}
@@ -25,7 +25,7 @@ func BuildWindow(west, north float64, across, down int, step float64,
 		return Window{}, fmt.Errorf("terrain: a window of %d by %d, %g "+
 			"apart, and a way to find its heights", across, down, step)
 	}
-	request := GridRequest{West: west, North: north, Across: across,
+	request := gridRequest{West: west, North: north, Across: across,
 		Down: down, Step: step}
 	count, err := request.capacity(limit, gridHeightBytes)
 	if err != nil {

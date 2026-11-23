@@ -18,8 +18,8 @@ type engineRow struct {
 	envelope   bool   // whether the channel's envelope shapes it
 	vibrato    bool   // whether its pitch can move: vibrato and slides
 	shaped     string // what to say when an envelope is refused
-	check      func(c *Channel, q *quarrel)
-	build      func(c *Channel) engine
+	check      func(c *channel, q *quarrel)
+	build      func(c *channel) engine
 }
 
 // engines is every engine the studio has, by channel kind. A new engine is

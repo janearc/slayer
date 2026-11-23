@@ -28,7 +28,8 @@ func isNaN(l maths.Light) bool {
 // bleaches it to white. Nothing is no number, and what is past the reach
 // is as it was.
 func TestABloomOfOneInfinitePixelHasNoNaN(t *testing.T) {
-	out := bloomed(dim9(maths.Grey(math.Inf(1))), 9, 9, 1, 1)
+	endless := maths.Grey(math.Inf(1))
+	out := bloomed(dim9(endless), 9, 9, 1, 1)
 	nan := 0
 	for y := 0; y < 9; y++ {
 		for x := 0; x < 9; x++ {
@@ -55,7 +56,8 @@ func TestABloomOfOneInfinitePixelHasNoNaN(t *testing.T) {
 // An infinite red part holds no light in green or blue. The glow gives
 // the neighbours infinite red and leaves their other parts as they were.
 func TestABloomOfAnInfiniteColourKeepsItsHue(t *testing.T) {
-	out := bloomed(dim9(maths.RGB(math.Inf(1), 0, 0)), 9, 9, 1, 1)
+	endlessRed := maths.RGB(math.Inf(1), 0, 0)
+	out := bloomed(dim9(endlessRed), 9, 9, 1, 1)
 	for i, l := range out {
 		if isNaN(l) {
 			t.Fatalf("pixel %d is %v", i, l)
@@ -69,7 +71,8 @@ func TestABloomOfAnInfiniteColourKeepsItsHue(t *testing.T) {
 // A radius so small that its weights underflow to zero leaves nothing to
 // carry the glow, and infinity times zero is not met.
 func TestABloomWithZeroWeightsHasNoNaN(t *testing.T) {
-	out := bloomed(dim9(maths.Grey(math.Inf(1))), 9, 9, 1, 1e-300)
+	endless := maths.Grey(math.Inf(1))
+	out := bloomed(dim9(endless), 9, 9, 1, 1e-300)
 	for i, l := range out {
 		if isNaN(l) {
 			t.Fatalf("pixel %d is %v", i, l)
@@ -83,7 +86,8 @@ func TestABloomWithZeroWeightsHasNoNaN(t *testing.T) {
 // An exposure so small that its reciprocal is infinite does not make a
 // zero glow into NaN.
 func TestABloomAtAnExposureWithAnInfiniteReciprocalHasNoNaN(t *testing.T) {
-	out := bloomed(dim9(maths.Grey(math.Inf(1))), 9, 9, 1e-310, 1)
+	endless := maths.Grey(math.Inf(1))
+	out := bloomed(dim9(endless), 9, 9, 1e-310, 1)
 	for i, l := range out {
 		if isNaN(l) {
 			t.Fatalf("pixel %d is %v", i, l)
@@ -95,7 +99,8 @@ func TestABloomAtAnExposureWithAnInfiniteReciprocalHasNoNaN(t *testing.T) {
 // told, so it spills nothing: its neighbours are as they were. It stays
 // no number itself, which Encode draws as black.
 func TestANaNPixelDoesNotSpreadInABloom(t *testing.T) {
-	lights := dim9(maths.Grey(math.NaN()))
+	notANumber := maths.Grey(math.NaN())
+	lights := dim9(notANumber)
 	lights[1*9+1] = maths.Grey(5) // something real to bloom
 	out := bloomed(lights, 9, 9, 1, 1)
 	for i, l := range out {

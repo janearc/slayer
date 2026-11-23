@@ -29,7 +29,7 @@ const noLockAttempts = 0
 // noAttemptWaitNanos is defined as zero nanoseconds before any wait elapses.
 const noAttemptWaitNanos int64 = 0
 
-// lockTestInputs preserves the original timeout and repetition domains.
+// lockTestInputs holds the timeout and repetition domains.
 type lockTestInputs struct {
 	AttemptTimeoutNanos int64 `yaml:"attempt_timeout_ns"`
 	MinimumAttempts     int   `yaml:"minimum_attempts"`
@@ -77,7 +77,7 @@ func keepLockHandle(t *testing.T, file *os.File) {
 	t.Cleanup(owner.close)
 }
 
-// lockHandleOwner retains the original unit reporter and owned descriptor.
+// lockHandleOwner retains the unit reporter and owned descriptor.
 type lockHandleOwner struct {
 	reporter *testing.T
 	file     *os.File

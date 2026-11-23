@@ -68,7 +68,7 @@ func Open(score, voicing string) (*Piece, error) {
 
 // isKind refuses a document that is not the kind the caller asked for.
 func isKind(name string, b []byte, want string) error {
-	got, err := Kind(b)
+	got, err := kind(b)
 	if err != nil {
 		return fmt.Errorf("%s: %w", name, err)
 	}

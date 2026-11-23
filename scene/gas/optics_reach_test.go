@@ -18,7 +18,7 @@ func marked() Gas {
 		Name: "marked",
 		Ranges: map[radiation.Range]Optics{
 			radiation.Ultraviolet(): {Absorb: 1, Scatter: 2},
-			thing.Visible:           {Absorb: 3, Scatter: 4},
+			thing.Visible():         {Absorb: 3, Scatter: 4},
 			radiation.Infrared():    {Absorb: 5, Scatter: 6},
 			radiation.Radio():       {Absorb: 7, Scatter: 8},
 		},
@@ -53,9 +53,10 @@ func TestTheRuleAnswersTheVisibleAndTheNearEdges(t *testing.T) {
 		{0, rule(550), "the rule at 550, for the zero band"},
 	} {
 		b := maths.Band{Nanometres: c.nm}
-		if g.Absorb(b) != c.want.Absorb || g.Scatter(b) != c.want.Scatter {
+		absorbs, scatters := g.optics(b)
+		if absorbs != c.want.Absorb || scatters != c.want.Scatter {
 			t.Errorf("%v nm: absorbs %v, scatters %v; %s is %v", c.nm,
-				g.Absorb(b), g.Scatter(b), c.from, c.want)
+				absorbs, scatters, c.from, c.want)
 		}
 	}
 }
@@ -65,17 +66,17 @@ func TestTheRuleAnswersTheVisibleAndTheNearEdges(t *testing.T) {
 // zero, where a fourth power over zero is endless.
 func TestTheZeroBandIsTheEyes(t *testing.T) {
 	plain := Gas{Ranges: map[radiation.Range]Optics{
-		thing.Visible: {Absorb: 3, Scatter: 4}}}
+		thing.Visible(): {Absorb: 3, Scatter: 4}}}
 	zero := maths.Band{}
-	if plain.Absorb(zero) != 3 || plain.Scatter(zero) != 4 {
-		t.Errorf("the zero band in the table is %v and %v", plain.Absorb(zero),
-			plain.Scatter(zero))
+	if absorbs, scatters := plain.optics(zero); absorbs != 3 || scatters != 4 {
+		t.Errorf("the zero band in the table is %v and %v", absorbs, scatters)
 	}
 	// the rule at 550 nm, worked: the rayleigh coefficient itself, since
 	// 550 over 550 is one, and the hump 50 nm off its middle
 	air := Air()
 	wantClose(t, "air's zero band scatter", air.Scatter(zero), 1.16e-5)
-	wantClose(t, "air's zero band absorb", air.Absorb(zero),
+	absorbs, _ := air.optics(zero)
+	wantClose(t, "air's zero band absorb", absorbs,
 		3e-7*math.Exp(-50.0*50/7200))
 }
 
@@ -84,10 +85,10 @@ func TestTheZeroBandIsTheEyes(t *testing.T) {
 // scattered from it.
 func TestABandNoRangeHoldsIsOpaque(t *testing.T) {
 	g := Gas{Ranges: map[radiation.Range]Optics{
-		thing.Visible: {Absorb: 3, Scatter: 4}}}
+		thing.Visible(): {Absorb: 3, Scatter: 4}}}
 	for _, nm := range []float64{1000, 1e20} {
 		b := maths.Band{Nanometres: nm}
-		if a := g.Absorb(b); !math.IsInf(a, 1) {
+		if a, _ := g.optics(b); !math.IsInf(a, 1) {
 			t.Errorf("%v nm absorbs %v, want endless", nm, a)
 		}
 		if s := g.Scatter(b); s != 0 {

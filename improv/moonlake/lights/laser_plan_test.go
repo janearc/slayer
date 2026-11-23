@@ -13,10 +13,10 @@ func TestPlannedLasersMatchCPU(t *testing.T) {
 	}
 	camera := NewCamera(width, height, CameraSettings{Azimuth: 109.65, LookDown: -0.5, GaugeWidth: 70.41, Focal: 150})
 	config := LaserConfig{Azimuth: 109.65, EyeOverLake: 53.6, WaterZ: -53.6, Reach: 20, FarTree: Toward(109.65, 0).Scale(1000), ShoreLeft: Vec{X: 100, Y: 100, Z: 10}, ShoreRight: Vec{X: 120, Y: 100, Z: 10}}
-	input := LaserInput{Open: open, Rim: []int{3, 3, 3, 3, 3, 3, 3, 3}, Camera: camera, Moon: [3]float64{1, 1, 1}, ShoreRow: 3, Cues: LaserCues{Rig: 1, Gate: 1, GateLeft: 1, GateRight: 1, Beams: 1, Parity: -1, Figure: "beam"}}
+	input := LaserInput{Open: open, Rim: []int{3, 3, 3, 3, 3, 3, 3, 3}, Camera: camera, Moon: [3]float64{1, 1, 1}, ShoreRow: 3, Cues: laserCues{Rig: 1, Gate: 1, GateLeft: 1, GateRight: 1, Beams: 1, Parity: -1, Figure: "beam"}}
 	cpuSky := Image{Width: width, Height: height, Light: make([]float64, width*height*3)}
 	cpuFront := Image{Width: width, Height: height, Light: make([]float64, width*height*3)}
-	AddLasers(cpuSky, cpuFront, config, input)
+	addLasers(cpuSky, cpuFront, config, input)
 	planned, err := PlanLasers(width, height, config, input)
 	if err != nil {
 		t.Fatal(err)

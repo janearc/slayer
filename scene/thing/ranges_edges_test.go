@@ -1,31 +1,37 @@
 package thing
 
 import (
+	"math"
 	"testing"
 
 	"github.com/janearc/celestial/radiation"
 	"github.com/janearc/slayer/maths"
 )
 
-// the ranges are tried narrowest first. the widths are worked by hand
-// from celestial's iso 21348 limits (tobiska and nusinov 2004) and the
-// observer's rows, which run from 360 nm to 830 nm (the cie 1931 table):
-//
-//	gamma 0.00099, x-ray 9.999, extreme ultraviolet 110, ultraviolet 300,
-//	visible 470, infrared 999,240, microwave 14,000,000, radio about 1e11.
+// The signs math.Inf takes for plus and minus infinity.
+const (
+	rangesPlusSign  = 1  // defined by math.Inf: a sign above nought is plus infinity
+	rangesMinusSign = -1 // defined by math.Inf: a sign below nought is minus infinity
+)
+
+// the ranges are tried narrowest first. The visible runs from the first
+// row of the observer's table to its last, and every other range is
+// celestial's, whose edges are asked of the ranges and not written here.
 func TestRangesRunNarrowestFirst(t *testing.T) {
-	if short, long := Visible.Edges(); short != 360 || long != 830 {
-		t.Fatalf("the visible runs %v to %v nm, not 360 to 830", short, long)
+	short, long := Visible().Edges()
+	if short != picked(t, "ranges-visible-short") ||
+		long != picked(t, "ranges-visible-long") {
+		t.Fatalf("the visible runs %v to %v nm", short, long)
 	}
 	want := []radiation.Range{radiation.Gamma(), radiation.XRay(),
-		radiation.ExtremeUltraviolet(), radiation.Ultraviolet(), Visible,
+		radiation.ExtremeUltraviolet(), radiation.Ultraviolet(), Visible(),
 		radiation.Infrared(), radiation.Microwave(), radiation.Radio()}
 	if len(ranges) != len(want) {
 		t.Fatalf("there are %d ranges, want %d", len(ranges), len(want))
 	}
-	for i, span := range want {
-		if ranges[i] != span {
-			t.Errorf("range %d is %v, want %v", i, ranges[i], span)
+	for place, span := range want {
+		if ranges[place] != span {
+			t.Errorf("range %d is %v, want %v", place, ranges[place], span)
 		}
 	}
 }
@@ -34,68 +40,164 @@ func TestRangesRunNarrowestFirst(t *testing.T) {
 // no ties to break: which of two equals came first would otherwise
 // decide which answers where they overlap.
 func TestNoTwoRangesAreTheSameWidth(t *testing.T) {
-	for i, a := range ranges {
-		for _, b := range ranges[i+1:] {
-			if width(a) == width(b) {
-				t.Errorf("%v and %v are the same width", a, b)
+	for place, first := range ranges {
+		for _, second := range ranges[place+unity:] {
+			if width(first) == width(second) {
+				t.Errorf("%v and %v are the same width", first, second)
 			}
 		}
 	}
 }
 
+// rangesLow is where a range starts, in nanometres.
+func rangesLow(span radiation.Range) float64 {
+	short, _ := span.Edges()
+	return short
+}
+
+// rangesHigh is where a range ends, in nanometres, and what it does not hold.
+func rangesHigh(span radiation.Range) float64 {
+	_, long := span.Edges()
+	return long
+}
+
+// below is the wavelength just under another.
+func rangesBelow(nanometres float64) float64 {
+	return math.Nextafter(nanometres, math.Inf(rangesMinusSign))
+}
+
+// rangesHold is whether a wavelength is from a range's low edge up to
+// but not including its high one.
+func rangesHold(span radiation.Range, nanometres float64) bool {
+	return nanometres >= rangesLow(span) && nanometres < rangesHigh(span)
+}
+
+// rangesNarrowestAt is the narrowest of the ranges whose edges hold a
+// wavelength, or the zero range for none. It is worked from the edges and
+// the widths alone, and not from the order Range tries the ranges in.
+func rangesNarrowestAt(nanometres float64) radiation.Range {
+	var found radiation.Range
+	narrowest := math.Inf(rangesPlusSign)
+	for _, span := range ranges {
+		if rangesHold(span, nanometres) && width(span) < narrowest {
+			found, narrowest = span, width(span)
+		}
+	}
+	return found
+}
+
 // a range holds its low end and not its high one, and where ranges
-// overlap the narrowest answers. worked by hand from the limits; the
-// 121 is iso 21348:2007's (clause 6.5.3), as celestial's ledger cites it:
-//
-//	1e-5 gamma's low end; 1e-3 gamma's high end, x-ray's low end
-//	10 x-ray's high end, extreme ultraviolet's low end
-//	100, 120 in extreme ultraviolet (111 wide) and ultraviolet (300): the first
-//	121 extreme ultraviolet's high end: ultraviolet
-//	360 in ultraviolet (300 wide) and visible (470): ultraviolet
-//	400 ultraviolet's high end: visible
-//	760, 829 in visible (470) and infrared (999,240): visible
-//	830 visible's high end: infrared
-//	1e5 in infrared and radio: infrared
-//	1e6 infrared's high end, microwave's low end: microwave
-//	1.5e7 microwave's high end: radio
-//	1e11 radio's high end, and 1e-6 under gamma: none
+// overlap the narrowest answers. Each range's two edges, and the
+// wavelength just under each, are put to Range and the answer is the one
+// the edges and widths give.
 func TestRangeEdgesAndOverlaps(t *testing.T) {
-	// Disabled for the release of 2026-11-14, to be armed again after
-	// it. celestial v0.0.9 ends the extreme ultraviolet at 121 nm
-	// where the pinned review build ended it at 120, so the row at 120
-	// now falls in the narrower range and fails. Every other row holds.
-	t.Skip("disabled for the release: the 120 nm row was written " +
-		"for an extreme ultraviolet that ended at 120 nm; celestial " +
-		"v0.0.9 ends it at 121")
-	for _, c := range []struct {
-		nm   float64
-		want radiation.Range
-	}{
-		{1e-6, radiation.Range{}}, {1e-5, radiation.Gamma()}, {1e-3, radiation.XRay()},
-		{10, radiation.ExtremeUltraviolet()}, {100, radiation.ExtremeUltraviolet()},
-		{120, radiation.ExtremeUltraviolet()}, {121, radiation.Ultraviolet()},
-		{360, radiation.Ultraviolet()},
-		{400, Visible}, {760, Visible}, {829, Visible}, {830, radiation.Infrared()},
-		{1e5, radiation.Infrared()}, {1e6, radiation.Microwave()},
-		{1.5e7, radiation.Radio()}, {1e11, radiation.Range{}},
-	} {
-		if got := Range(maths.Band{Nanometres: c.nm}); got != c.want {
-			t.Errorf("%v nm is %v, want %v", c.nm, got, c.want)
+	for _, span := range ranges {
+		for _, nanometres := range []float64{rangesLow(span),
+			rangesBelow(rangesLow(span)), rangesHigh(span), rangesBelow(rangesHigh(span))} {
+			got := Range(maths.NewBand(nanometres))
+			if want := rangesNarrowestAt(nanometres); got != want {
+				t.Errorf("%v nm is %v, want %v", nanometres, got, want)
+			}
 		}
 	}
 }
 
-// visible is from 360 nm up to but not including 830, and the zero band.
-func TestSeenHoldsItsLowEndAndNotItsHigh(t *testing.T) {
-	for _, c := range []struct {
-		nm   float64
-		want bool
+// the anti-test of the edges: a wavelength just below the lowest edge of
+// every range, or at the highest high edge, is in none, and every range
+// does answer at its own low edge.
+func TestNoRangeHoldsWhatIsPastEveryEdge(t *testing.T) {
+	lowest, highest := math.Inf(rangesPlusSign), math.Inf(rangesMinusSign)
+	for _, span := range ranges {
+		lowest = math.Min(lowest, rangesLow(span))
+		highest = math.Max(highest, rangesHigh(span))
+		edge := maths.NewBand(rangesLow(span))
+		got := Range(edge)
+		if got == (radiation.Range{}) {
+			t.Errorf("%v nm, the low edge of %v, is in no range",
+				rangesLow(span), span)
+		}
+	}
+	for _, nanometres := range []float64{rangesBelow(lowest), highest} {
+		got := Range(maths.NewBand(nanometres))
+		if got != (radiation.Range{}) {
+			t.Errorf("%v nm is in %v, past every range's edges", nanometres, got)
+		}
+	}
+}
+
+// the overlaps radiant.go names are there: the extreme ultraviolet's last
+// wavelength inside the ultraviolet, the microwave's first and last inside
+// the radio, the visible's first inside the ultraviolet and its last inside
+// the infrared, and the infrared's last inside the radio. At each, both
+// ranges hold the wavelength and the narrower one answers.
+func TestTheNamedOverlapsAreOverlapsAndTheNarrowerAnswers(t *testing.T) {
+	euv, uv := radiation.ExtremeUltraviolet(), radiation.Ultraviolet()
+	micro, radio := radiation.Microwave(), radiation.Radio()
+	infrared := radiation.Infrared()
+	visibleHigh := rangesHigh(Visible())
+	for _, each := range []struct {
+		what         string
+		at           float64
+		inner, outer radiation.Range
 	}{
-		{0, true}, {359.9, false}, {360, true}, {550, true}, {829.9, true},
-		{830, false}, {1e6, false},
+		{"extreme ultraviolet's last", rangesBelow(rangesHigh(euv)), euv, uv},
+		{"microwave's first", rangesLow(micro), micro, radio},
+		{"microwave's last", rangesBelow(rangesHigh(micro)), micro, radio},
+		{"visible's first", rangesLow(Visible()), Visible(), uv},
+		{"visible's last", rangesBelow(visibleHigh), Visible(), infrared},
+		{"infrared's last", rangesBelow(rangesHigh(infrared)), infrared, radio},
 	} {
-		if got := Seen(maths.Band{Nanometres: c.nm}); got != c.want {
-			t.Errorf("%v nm seen is %v, want %v", c.nm, got, c.want)
+		if !rangesHold(each.inner, each.at) ||
+			!rangesHold(each.outer, each.at) {
+			t.Errorf("%s, at %v nm, is not in both ranges", each.what, each.at)
+			continue
+		}
+		want := each.inner
+		if width(each.outer) < width(each.inner) {
+			want = each.outer
+		}
+		if got := Range(maths.NewBand(each.at)); got != want {
+			t.Errorf("%s, at %v nm, is %v, want the narrower, %v", each.what,
+				each.at, got, want)
+		}
+	}
+}
+
+// visible is from its low edge up to but not including its high edge, and
+// the zero band. The anti-test is the wavelength just under the low edge,
+// the high edge itself, and a wavelength well past it. The ultraviolet
+// runs up to 400 nm, over the visible's first stretch, and is the narrower
+// of the two there (300 nm to 470), so a band is the visible's by Range
+// only from the ultraviolet's high edge up; the edges themselves are the
+// range's own.
+func TestVisibleHoldsItsLowEndAndNotItsHigh(t *testing.T) {
+	short, long := Visible().Edges()
+	_, ultravioletHigh := radiation.Ultraviolet().Edges()
+	for _, each := range []struct {
+		nanometres float64
+		want       bool
+	}{
+		{rangesBelow(short), false}, {short, true},
+		{(short + long) / pair, true}, {rangesBelow(long), true},
+		{long, false}, {long * pair, false},
+	} {
+		if got := Visible().Holds(each.nanometres); got != each.want {
+			t.Errorf("%v nm held by the visible is %v, want %v",
+				each.nanometres, got, each.want)
+		}
+	}
+	for _, each := range []struct {
+		nanometres float64
+		want       bool
+	}{
+		{nought, true}, {short, false}, {rangesBelow(ultravioletHigh), false},
+		{ultravioletHigh, true}, {(short + long) / pair, true},
+		{rangesBelow(long), true}, {long, false}, {long * pair, false},
+	} {
+		got := Range(maths.NewBand(each.nanometres)) == Visible()
+		if got != each.want {
+			t.Errorf("%v nm seen is %v, want %v", each.nanometres, got,
+				each.want)
 		}
 	}
 }
@@ -104,19 +206,30 @@ func TestSeenHoldsItsLowEndAndNotItsHigh(t *testing.T) {
 // entry for it there is none, and a nanometre, which is an x-ray, is
 // not the visible.
 func TestLookupOfTheZeroBandIsTheVisible(t *testing.T) {
-	table := map[radiation.Range]float64{Visible: 7}
-	if v, ok := Lookup(table, maths.Band{}); v != 7 || !ok {
-		t.Errorf("the zero band found %v, %v, want 7, true", v, ok)
+	marked := picked(t, "ranges-mark-visible")
+	xrayNanometre := maths.NewBand(picked(t, "ranges-xray-nanometre"))
+	table := map[radiation.Range]float64{Visible(): marked}
+	if found, ok := Lookup(table, maths.NewBand(nought)); found != marked || !ok {
+		t.Errorf("the zero band found %v, %v, want %v, true", found, ok,
+			marked)
 	}
-	if v, ok := Lookup(table, maths.Band{Nanometres: 1}); v != 0 || ok {
-		t.Errorf("a nanometre found %v, %v in a table of the visible", v, ok)
+	if found, ok := Lookup(table, xrayNanometre); found != nought || ok {
+		t.Errorf("a nanometre found %v, %v in a table of the visible", found,
+			ok)
 	}
-	others := map[radiation.Range]float64{radiation.XRay(): 3, radiation.Gamma(): 4,
-		radiation.Radio(): 5, radiation.Ultraviolet(): 6}
-	if v, ok := Lookup(others, maths.Band{}); v != 0 || ok {
-		t.Errorf("the zero band found %v, %v in a table without the visible", v, ok)
+	xray := picked(t, "ranges-mark-xray")
+	others := map[radiation.Range]float64{
+		radiation.XRay():        xray,
+		radiation.Gamma():       picked(t, "ranges-mark-gamma"),
+		radiation.Radio():       picked(t, "ranges-mark-radio"),
+		radiation.Ultraviolet(): picked(t, "ranges-mark-ultraviolet"),
 	}
-	if v, ok := Lookup(others, maths.Band{Nanometres: 1}); v != 3 || !ok {
-		t.Errorf("a nanometre found %v, %v, want the x-ray's 3, true", v, ok)
+	if found, ok := Lookup(others, maths.NewBand(nought)); found != nought || ok {
+		t.Errorf("the zero band found %v, %v in a table without the visible",
+			found, ok)
+	}
+	if found, ok := Lookup(others, xrayNanometre); found != xray || !ok {
+		t.Errorf("a nanometre found %v, %v, want the x-ray's %v, true", found,
+			ok, xray)
 	}
 }

@@ -1,97 +1,222 @@
-# every number the maths tests choose, with what it is and who chose it.
+# every number the maths tests choose, with what it is and what it is for.
 numbers:
   - name: within
     value: 1e-9
     says: how far a rounded answer may be from the worked one, in the same units as the answer
     kind: picked
-    by: the test author, 2026-10-23; the audited tests used this tolerance
+    by: the test author, 2026-11-01
   - name: tight
     value: 1e-12
     says: how far the length of a worked direction may be from one, and a right angle from nought
     kind: picked
-    by: the test author, 2026-10-23; the audited tests used this tolerance
+    by: the test author, 2026-11-01
   - name: doubling
     value: 2
     says: the factor a vector is scaled by where a test scales one
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: near-just-enough
     value: 0.1
     says: how far apart two points are that a test says are near, the distance between them exactly
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: near-not-enough
     value: 0.09
     says: a distance a little under the one that two points are apart, so they are not near
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: turn-radians
     value: 0.3
     says: an angle in radians that About and Rotation are held to give the same turn for
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: one-part-in
     value: 1e-12
     says: how far a length measured at any everyday size may be from the worked one, as a share of it
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: weight-red
     value: 0.2126
     says: what one unit of red adds to a luminance, as ITU-R BT.709 weighs it
     kind: picked
-    by: the test author, 2026-10-23, from the standard's table of luma coefficients
+    by: the standard's table of luma coefficients
   - name: weight-green
     value: 0.7152
     says: what one unit of green adds to a luminance, as ITU-R BT.709 weighs it
     kind: picked
-    by: the test author, 2026-10-23, from the standard's table of luma coefficients
+    by: the standard's table of luma coefficients
   - name: weight-blue
     value: 0.0722
     says: what one unit of blue adds to a luminance, as ITU-R BT.709 weighs it
     kind: picked
-    by: the test author, 2026-10-23, from the standard's table of luma coefficients
+    by: the standard's table of luma coefficients
   - name: half
     value: 0.5
     says: the scale of a child space that is half the size of its parent, and the grey that is half of white
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: dot-of-a-and-b
     value: 32
     says: the dot product of the vectors a and b, worked by hand as 1 times 4, 2 times 5 and 3 times 6
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: length-of-three-four-nought
     value: 5
     says: the length of the vector 3, 4, 0, worked by hand as the root of 9 and 16
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: coordinate-most
     value: 1000
     says: the furthest from nought a coordinate a property test draws may be, either way; far enough to mix scales, near enough that rounding stays small
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: length-least
     value: 0.01
     says: the shortest a vector may be where a property test needs a direction from it, far above the sizes at which lengths lose digits
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: scale-most
     value: 100
     says: the largest scale a property test gives a subspace or a vector; the least is its reciprocal
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: angle-most
     value: 7
     says: the largest angle in radians a property test turns by, either way; a little over a whole turn
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: relative
     value: 1e-9
     says: how far a computed answer may be from the exact one, as a share of the sizes that went into it
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
   - name: distance-most
     value: 100
     says: the furthest a property test walks along a ray
     kind: picked
-    by: the test author, 2026-10-23
+    by: the test author, 2026-11-01
+  - name: subspace-scale
+    value: 2.5
+    says: a scale a subspace is made with, to see it kept as given
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: far-reach
+    value: 1e9
+    says: a far distance past every box the tests draw or time, for a ray that goes on
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: water-index
+    value: 1.33
+    says: the index of water over air, for the Fresnel cases that need a medium
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: cosine-past-one
+    value: 1.5
+    says: a cosine past one, which Fresnel holds at one
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: cosine-below-zero
+    value: -0.5
+    says: a cosine below zero, which Fresnel holds at zero, where the light grazes and the share is one
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: face-ray-start
+    value: -2
+    says: how far behind the unit box on z the rays that graze its faces start
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: meets-seed
+    value: 20260910
+    says: the seed of the draw that holds Meets to Hit for every box, ray, near and far
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: meets-cases
+    value: 3000000
+    says: how many boxes and rays the Meets and Hit draw makes
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: answer-share-least
+    value: 0.05
+    says: the least share of the Meets and Hit draws that must be a hit, and the least that must be a miss, so both answers are tried
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: corner-seed
+    value: 7
+    says: the seed of the draw of rays that reach a corner of a box at a distance
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: corner-cases
+    value: 400000
+    says: how many rays and corners the corner draw makes
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: corner-along-span
+    value: 4
+    says: how far apart the least and the greatest distance to a corner are, in the corner draw
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: corner-along-least
+    value: 0.1
+    says: the least distance from a ray's start to the corner it reaches, in the corner draw
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: draw-kinds
+    value: 9
+    says: how many kinds of number the wild draw chooses among; six name a kind and the other three give an ordinary number
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: grid-reach
+    value: 3
+    says: how far from nought either way the wild draw's whole numbers go, so faces and origins meet exactly
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: grid-divisor
+    value: 4
+    says: what the wild draw's whole numbers are divided by to make quarters
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: tiny-scale
+    value: 1e-9
+    says: the scale of the wild draw's numbers near nought
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: huge-scale
+    value: 1e9
+    says: the scale of the wild draw's numbers far out
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: ordinary-scale
+    value: 3
+    says: the scale of the wild draw's ordinary numbers
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: tame-reach
+    value: 4
+    says: how far from nought either way the tame draw's whole numbers go
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: tame-divisor
+    value: 2
+    says: what the tame draw's whole numbers are divided by to make halves
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: tame-scale
+    value: 2
+    says: the scale of the tame draw's normal numbers
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: tame-odds
+    value: 4
+    says: one draw in this many is wild and the rest are tame, so the answers that need sane numbers, a hit and a graze, are many
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: box-odds
+    value: 8
+    says: one box in this many is not made the right way round, so a box turned inside out is tried
+    kind: picked
+    by: the test author, 2026-11-20
+  - name: zero-odds
+    value: 3
+    says: one axis of a ray's way in this many is made nought, so a ray that runs along a face is tried
+    kind: picked
+    by: the test author, 2026-11-20

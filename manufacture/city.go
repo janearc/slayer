@@ -7,6 +7,7 @@ import (
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 )
 
 // CityGrid describes authored, flat, metre-scale scenery, not a traffic or
@@ -259,10 +260,7 @@ func (grid CityGrid) building(x, z, lot int, startX, startZ float64, from seed) 
 
 // citySeed is a bijection of the complete 64-bit lot seed space.
 func citySeed(number uint64) uint64 {
-	number += 0x9e3779b97f4a7c15
-	number = (number ^ (number >> 30)) * 0xbf58476d1ce4e5b9
-	number = (number ^ (number >> 27)) * 0x94d049bb133111eb
-	return number ^ (number >> 31)
+	return noise.Mix(number + noise.Golden)
 }
 
 // cityRows exposes standalone architectural families and the full city.

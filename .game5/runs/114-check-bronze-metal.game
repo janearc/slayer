@@ -1,0 +1,1 @@
+check-bronze-metal . :: go test -tags=draw -p=1 -count=1 -v ./gpu -run ^TestMetalNickelAluminiumBronzeEstimateMatchesCPU$ -timeout=180s

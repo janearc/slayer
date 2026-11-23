@@ -13,6 +13,8 @@ import (
 	"github.com/janearc/puzzlemouth/pzm"
 	"github.com/janearc/puzzlemouth/verb"
 	"github.com/janearc/slayer/improv/moonlake/show"
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
+	"go.uber.org/mock/gomock"
 )
 
 // scoreText is a score with beats a second apart from one second, the
@@ -132,6 +134,7 @@ func TestDrawRefusals(t *testing.T) {
 	badScore, _ := writeFiles(t, "score: [", cuesText)
 	_, badCues := writeFiles(t, scoreText, "cues: [")
 	size := []string{"--fps", "2", "--width", "320", "--height", "180"}
+	absent := filepath.Join(t.TempDir(), "none.yaml")
 	cases := []struct {
 		name string
 		args []string
@@ -140,7 +143,7 @@ func TestDrawRefusals(t *testing.T) {
 		{"no score", append([]string{"--cues", cuesPath}, size...), "draw needs score and cues"},
 		{"no cues", append([]string{"--score", scorePath}, size...), "draw needs score and cues"},
 		{"stray argument", append([]string{"--score", scorePath, "--cues", cuesPath, "extra"}, size...), "no arguments"},
-		{"missing score file", append([]string{"--score", filepath.Join(t.TempDir(), "none.yaml"), "--cues", cuesPath}, size...), "show"},
+		{"missing score file", append([]string{"--score", absent, "--cues", cuesPath}, size...), "show"},
 		{"unreadable score", append([]string{"--score", badScore, "--cues", cuesPath}, size...), "the score"},
 		{"unreadable cues", append([]string{"--score", scorePath, "--cues", badCues}, size...), "show"},
 		{"fps not a number", []string{"--score", scorePath, "--cues", cuesPath, "--fps", "x", "--width", "320", "--height", "180"}, "positive fps"},
@@ -158,14 +161,16 @@ func TestDrawRefusals(t *testing.T) {
 }
 
 // failingWriter fails every write.
-type failingWriter struct{}
-
-// Write always fails.
-func (failingWriter) Write([]byte) (int, error) { return 0, errors.New("disk full") }
+func failingWriter(t *testing.T) *mocks.MockWriter {
+	writer := mocks.NewMockWriter(gomock.NewController(t))
+	writer.EXPECT().Write(gomock.Any()).Return(0, errors.New("disk full")).
+		AnyTimes()
+	return writer
+}
 
 // callWith builds the call for render by running a verb that hands its
 // call to the test, with the output writer given.
-func callWith(t *testing.T, out *failingWriter, args []string) error {
+func callWith(t *testing.T, out *mocks.MockWriter, args []string) error {
 	t.Helper()
 	var got error
 	tool := pzm.New("metronome", "check the score against its audio",
@@ -194,7 +199,7 @@ func TestDrawWriteErrors(t *testing.T) {
 		{"buffer full mid-stream", "4"},
 	}
 	for _, c := range cases {
-		err := callWith(t, &failingWriter{}, []string{"--score", scorePath,
+		err := callWith(t, failingWriter(t), []string{"--score", scorePath,
 			"--cues", cuesPath, "--fps", c.fps, "--width", "320", "--height", "180"})
 		if err == nil || !strings.Contains(err.Error(), "disk full") {
 			t.Errorf("%s: err = %v, want disk full", c.name, err)
@@ -213,7 +218,11 @@ func newFrame() *image.RGBA {
 func parsedScore(t *testing.T, extra string) *show.Score {
 	t.Helper()
 	text := strings.Replace(scoreText, "score:\n", "score:\n"+extra, 1)
-	score, err := show.ParseScore([]byte(text))
+	path := filepath.Join(t.TempDir(), "score.yaml")
+	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	score, err := show.ReadScore(path)
 	if err != nil {
 		t.Fatal(err)
 	}

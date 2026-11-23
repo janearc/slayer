@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
-	"github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/trace"
@@ -19,7 +19,7 @@ func TestOceanInterfaceEventsAreRefusedBeforeGPUDeviceUse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	continued, err := ocean.NewInfiniteMeanContinuation(core, 0, 1)
+	continued, err := arid.NewInfiniteMeanContinuation(core, 0, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +52,7 @@ func TestPublicGPUAPIsRefuseMeanPlaneDirectSunBeforeMetal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	continuation, err := ocean.NewFlatMeanContinuation(core, 0, 1)
+	continuation, err := arid.NewFlatMeanContinuation(core, 0, 1)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -56,7 +56,7 @@ func TestTrimLeavesAFileUnderItsCap(t *testing.T) {
 	faces := someFaces(cachedFaces, 13)
 	kept := shelfIn(t, 1)
 	kept.grown(slices.Clone(faces))
-	said, err := kept.trimmed(treebolt.Standard, time.Now())
+	said, err := kept.trimmed(treebolt.Standard(), time.Now())
 	if err != nil || said != "" || !keptValue(t, kept, kept.key(faces)) {
 		t.Fatalf("trimmed %q, %v", said, err)
 	}
@@ -83,7 +83,7 @@ func TestATreeTakenWithNoRecordedUseIsStampedAtTheEnd(t *testing.T) {
 		grownFresh(faces)) || kept.tally.kept != 1 {
 		t.Fatalf("the tree was not taken: %+v", kept.tally)
 	}
-	if _, err := kept.trimmed(treebolt.Standard, time.Now()); err != nil {
+	if _, err := kept.trimmed(treebolt.Standard(), time.Now()); err != nil {
 		t.Fatal(err)
 	}
 	if got, err := treebolt.Look(kept.path, kept.wait); err != nil ||

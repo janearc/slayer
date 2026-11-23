@@ -32,6 +32,7 @@ type scene struct {
 	// Clear-medium data is an opt-in ABI extension. With no named optical
 	// medium and no explicit initial stack, these buffers remain absent.
 	clearMedia, initialState packer
+	propellerDispersal       bool
 	opticalState             bool
 	oceanSpotScattering      bool
 	oceanMoon                *trace.OceanMoonPlan
@@ -49,7 +50,11 @@ type scene struct {
 	// the picture's would not fit in one input (see rays.go)
 	rays    packer
 	through *through
-	counts  struct {
+	// analytic is every sphere and conifer as the analytic tree is to hold
+	// it, and analyticAt where its nodes went in tops (analytic.go)
+	analytic   []analyticItem
+	analyticAt analyticPlace
+	counts     struct {
 		spheres, triangles, nodes, lamps, volumes, trees int
 		instances, tops, beams, shells, fields           int
 	}
@@ -57,7 +62,10 @@ type scene struct {
 	// faces is every mesh's faces in its own space and their trees,
 	// each mesh once; meshes is where each went, by the mesh; and
 	// standings is every place a mesh stands
-	faces     tree
+	faces tree
+	// runs is where each pooled mesh's faces lie in the packed pool, by
+	// its root, where packPool pooled them; see faceRun
+	runs      map[int]faceRun
 	meshes    map[any]pooled
 	standings []standing
 	groups    []meshGroup
@@ -68,6 +76,9 @@ type scene struct {
 	// keeper is a retained drawer's kept face trees, or none for the
 	// per-call path, which grows every tree
 	keeper *keptTrees
+	// lowRetention pools each mesh immediately and does not retain trees.
+	// It is an opt-in experiment, not a bound on the scene or GPU memory.
+	lowRetention bool
 	// pending is the meshes' trees in line for the pool, in the order
 	// they were first seen, and pendingNodes how many boxes they hold
 	pending      []pendingMesh
@@ -96,11 +107,22 @@ type scene struct {
 	// volumeSky is zero for legacy media, otherwise an even full-sphere count.
 	volumeSky int
 	incident  *incidentGrid
+	// glowing is the world's glow, where it has one the kernel can
+	// read, and glow where its cells went in the boxes (see glow.go)
+	glowing glowLattice
+	glow    *glowGrid
 	// reached is every boxed medium fast light keeps lamps' grids over,
 	// noted as it is encoded; reach is the store made of them when the
 	// mode asks for it, and nil otherwise (see reach.go)
 	reached []reachGrid
 	reach   *reachStore
+	// crowd is the lamp tree of a world with more lamps than lampsEvery,
+	// kept after the lamps' rows in their buffer (lamp_tree.go); empty for
+	// a world drawn lamp by lamp
+	crowd lampCrowd
+	// lists are the floods, cones and beams among the lamps, kept after
+	// the crowd in the lamps' buffer (lamp_lists.go)
+	lists lampLists
 }
 
 // records is how many places a sample hands back for the cpu to paint:
@@ -143,6 +165,7 @@ func (encoded *scene) discardFaceValues() { encoded.faces.triangles = nil }
 // Rendering and lighting use the packed buffers retained by this scene.
 func (encoded *scene) discardBuildHierarchy() {
 	encoded.faces.nodes = nil
+	encoded.runs = nil
 	encoded.standings = nil
 	encoded.groups = nil
 	encoded.meshes = nil
@@ -153,9 +176,9 @@ func (encoded *scene) discardBuildHierarchy() {
 // unsupported is a world the kernel cannot draw, and what in it.
 type unsupported struct{ what string }
 
-// MaxGravityFields is the number of independently placed fields the Metal
+// maxGravityFields is the number of independently placed fields the Metal
 // transport currently supports. Larger scenes need the CPU reference path.
-const MaxGravityFields = 1
+const maxGravityFields = 1
 
 // fieldSeedWords is one camera ray, its observer state, entry and energy.
 const fieldSeedWords = 16
@@ -169,7 +192,7 @@ func (refused unsupported) Error() string {
 func (encoded *scene) inputs() [][]byte {
 	inputs := [][]byte{encoded.header.bytes, encoded.spheres.bytes,
 		encoded.triangles.bytes, encoded.nodes.bytes,
-		encoded.materials.bytes, encoded.lamps.bytes,
+		encoded.materials.bytes, encoded.lampsRead(),
 		encoded.volumes.bytes, encoded.baked.bytes, encoded.trees.bytes,
 		encoded.instances.bytes, encoded.tops.bytes, encoded.sky.bytes,
 		encoded.bends.bytes, encoded.rays.bytes, encoded.boxes.bytes,
@@ -315,28 +338,8 @@ func fitsInt32(value int) bool {
 // the world as a whole. the rest is refused where it is encoded, the
 // shapes in parts.go and the volumes in volumes.go.
 func refuse(world *thing.World) error {
-	if world.OceanSurface != nil && world.OceanSurface.InterfaceEvents > 0 {
-		return unsupported{"CPU-only ocean interface-event transport"}
-	}
-	if world.OceanSurface != nil && world.OceanSurface.InfiniteMeanPlane {
-		if !world.OceanSurface.DirectMoonMeanPlane {
-			return unsupported{"CPU-only infinite mean-plane ocean continuation"}
-		}
-	}
-	if world.OceanSurface != nil && world.OceanSurface.DirectSunMeanPlane {
-		return unsupported{"CPU-only ocean mean-plane direct-sun transport"}
-	}
-	for index := range world.Things {
-		made := world.Things[index]
-		if made.Material == nil || made.Material.Through <= 0 {
-			continue
-		}
-	}
-	switch {
-	case len(world.Fields) > MaxGravityFields:
-		return unsupported{"multiple fields"}
-	case world.Haze.Density > 0:
-		return unsupported{"the world's haze"}
+	if refused := worldRefusals(world); len(refused) > 0 {
+		return refused[0]
 	}
 	for _, lamp := range world.Lamps {
 		if err := refuseLamp(lamp, len(world.Lamps)); err != nil {
@@ -344,6 +347,36 @@ func refuse(world *thing.World) error {
 		}
 	}
 	return nil
+}
+
+// worldRefusals is every reason, in the order refuse looks for them,
+// that the world as a whole cannot be drawn here: its ocean, its
+// fields, its haze and its glow. refuse stops at the first; Refusals keeps all.
+func worldRefusals(world *thing.World) []unsupported {
+	var refused []unsupported
+	ocean := world.OceanSurface
+	if ocean != nil && ocean.InterfaceEvents > 0 {
+		refused = append(refused,
+			unsupported{"CPU-only ocean interface-event transport"})
+	}
+	if ocean != nil && ocean.InfiniteMeanPlane && !ocean.DirectMoonMeanPlane {
+		refused = append(refused,
+			unsupported{"CPU-only infinite mean-plane ocean continuation"})
+	}
+	if ocean != nil && ocean.DirectSunMeanPlane {
+		refused = append(refused,
+			unsupported{"CPU-only ocean mean-plane direct-sun transport"})
+	}
+	if len(world.Fields) > maxGravityFields {
+		refused = append(refused, unsupported{"multiple fields"})
+	}
+	if world.Haze.Density > 0 {
+		refused = append(refused, unsupported{"the world's haze"})
+	}
+	if glow, is := glowRefused(world.Glow); is {
+		refused = append(refused, glow)
+	}
+	return refused
 }
 
 // refuseLamp says why a lamp, one of lamps in its world, cannot be drawn
@@ -429,6 +462,11 @@ func encodeKeptWithInitialMedia(world *thing.World, trees []grown,
 		return nil, err
 	}
 	encoded := newScene()
+	encoded.lowRetention = lowRetentionEnabled()
+	if encoded.lowRetention {
+		memoryStage("low-retention-active")
+		keeper = nil
+	}
 	encoded.oceanMoon = moon
 	encoded.opticalState = len(media) > 0 || hasNamedOptics
 	encoded.oceanSpotScattering = world.OceanSurface != nil &&
@@ -439,23 +477,37 @@ func encodeKeptWithInitialMedia(world *thing.World, trees []grown,
 		}
 	}
 	encoded.keeper = keeper
-	encoded.gravity = len(world.Fields) == MaxGravityFields
+	encoded.gravity = len(world.Fields) == maxGravityFields
 	if len(volumeCells) > 0 {
 		encoded.volumeCells = volumeCells[0]
 	}
 	encoded.at = at
 	encoded.volumeSky = world.VolumeIllumination.Samples()
 	encoded.spread = trace.Spread(world, at)
+	// refuse has passed over a glow the kernel cannot read, so a glow
+	// here is one it can, or none
+	encoded.glowing, _ = world.Glow.(glowLattice)
+	memoryStage("things-before")
 	if err := encoded.things(world, at); err != nil {
 		return nil, err
 	}
+	memoryStage("things-after")
 	if err := encoded.volumesOf(world, at); err != nil {
 		return nil, err
 	}
 	encoded.conifers(trees)
+	if err := encoded.analyticTree(); err != nil {
+		return nil, err
+	}
 	encoded.lampsOf(world)
+	if err := encoded.crowd.refuse(world.Lamps); err != nil {
+		return nil, err
+	}
 	encoded.skyOf(world)
 	if err := encoded.reserveIncidentGrid(world.VolumeIllumination); err != nil {
+		return nil, err
+	}
+	if err := encoded.glowOf(); err != nil {
 		return nil, err
 	}
 	if !kernelMade(lens) {

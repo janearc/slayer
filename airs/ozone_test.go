@@ -104,7 +104,7 @@ func TestOzoneSitsAtTheHeightsOfTheStratosphere(t *testing.T) {
 func TestOzoneAbsorptionDepthIsCrossSectionTimesColumn(t *testing.T) {
 	const loschmidtDobson = 2.687e20                          // defined: molecules in a square metre of a Dobson unit, 2.687e20, Loschmidt's number a hundredth of a millimetre thick
 	want := 5.035e-21 * 1e-4 * 300 * loschmidtDobson          // read: the cross section at 600 nm, 5.035e-21 cm2, the table; defined: square metres in a square centimetre; picked: 300 Dobson units
-	got := earthColumnAt(t, earthRead, 600).AbsorptionDepth() // picked: the Chappuis band's peak
+	got := earthColumnAt(t, earthRead, 600).absorptionDepth() // picked: the Chappuis band's peak
 	if miss := relative(got, want); miss > 0.01 {             // picked: a percent, the constants' digits
 		t.Errorf("ozone depth %g, working %g", got, want)
 	}
@@ -117,9 +117,9 @@ func TestOzoneAbsorptionDepthIsCrossSectionTimesColumn(t *testing.T) {
 // the minimum near 380 nm and in the blue: the twilight zenith is blue
 // because the red and green are the ozone's.
 func TestOzoneAbsorbsInTheChappuisBandAndNotInTheBlue(t *testing.T) {
-	red := earthColumnAt(t, earthRead, 600).AbsorptionDepth()  // picked: the peak
-	blue := earthColumnAt(t, earthRead, 450).AbsorptionDepth() // picked: the blue
-	dip := earthColumnAt(t, earthRead, 380).AbsorptionDepth()  // picked: the minimum between Huggins and Chappuis
+	red := earthColumnAt(t, earthRead, 600).absorptionDepth()  // picked: the peak
+	blue := earthColumnAt(t, earthRead, 450).absorptionDepth() // picked: the blue
+	dip := earthColumnAt(t, earthRead, 380).absorptionDepth()  // picked: the minimum between Huggins and Chappuis
 	if red < 20*blue {                                         // picked: the cross sections are 30 times apart
 		t.Errorf("depth %g at 600 nm, %g at 450", red, blue)
 	}

@@ -1,0 +1,21 @@
+name,run,microseconds,x,y,z
+the start is the first frame,along,0,0,0,0
+a quarter is half way to the middle frame,along,2500000,5,0,0
+half is the middle frame,along,5000000,10,0,0
+three quarters is half way to the last,along,7500000,10,10,0
+the end is the last frame,along,10000000,10,20,0
+a tenth is a fifth of the way to the middle,along,1000000,2,0,0
+nine tenths is four fifths of the way on,along,9000000,10,16,0
+before the start is the first frame,along,-1000000,0,0,0
+the middle of the run,push,50000000,4,0,0
+a share of 0.274375,push,27437500,1.25,0,0
+before the first frame its place is held,late,0,1,0,0
+a tenth in; still held,late,1000000,1,0,0
+at the first frame's own share it is that place,late,2000000,1,0,0
+0.6 is half way from 0.2 to the end,late,6000000,1.5,0,0
+the end,late,10000000,2,0,0
+the first of two frames at nought; at nought,same,0,1,0,0
+a quarter on; from the later of the two,same,2500000,2.25,0,0
+before the shared share,mid,4000000,0.8,0,0
+at the shared share; the later frame,mid,5000000,2,0,0
+after the shared share,mid,6000000,2.2,0,0

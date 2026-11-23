@@ -132,27 +132,22 @@ func (ball *Fireball) age() time.Duration {
 	return ball.at - ball.thermal.Start
 }
 
-// Radius is the fireball's radius at its time, in metres: its radius
+// radius is the fireball's radius at its time, in metres: its radius
 // when let go until then.
-func (ball *Fireball) Radius() float64 {
+func (ball *Fireball) radius() float64 {
 	t := math.Max(0, ball.age().Seconds())
 	r0 := ball.thermal.Radius
 	return math.Sqrt(r0*r0 + ball.rate*t)
 }
 
-// Centre is its centre's height at its time, in metres.
-func (ball *Fireball) Centre() float64 {
-	return ball.origin + ball.n*ball.Radius()
+// centre is its centre's height at its time, in metres.
+func (ball *Fireball) centre() float64 {
+	return ball.origin + ball.n*ball.radius()
 }
 
-// Rise is how fast it climbs at its time, in metres a second.
-func (ball *Fireball) Rise() float64 {
-	return ball.n * ball.rate / (2 * ball.Radius())
-}
-
-// Excess is how much hotter than the air its heart is at its time.
-func (ball *Fireball) Excess() float64 {
-	shrink := ball.thermal.Radius / ball.Radius()
+// excess is how much hotter than the air its heart is at its time.
+func (ball *Fireball) excess() float64 {
+	shrink := ball.thermal.Radius / ball.radius()
 	return (ball.thermal.Hottest.InKelvin() - ball.thermal.Air.InKelvin()) *
 		shrink * shrink * shrink
 }
@@ -160,7 +155,7 @@ func (ball *Fireball) Excess() float64 {
 // turned is how far it has turned about its ring by its time, in
 // radians: (3n/sqrt2) ln(r/r0).
 func (ball *Fireball) turned() float64 {
-	return 3 * ball.n / math.Sqrt2 * math.Log(ball.Radius()/ball.thermal.Radius)
+	return 3 * ball.n / math.Sqrt2 * math.Log(ball.radius()/ball.thermal.Radius)
 }
 
 // Tick is the fireball at a time on the picture's clock: before its
@@ -173,20 +168,20 @@ func (ball *Fireball) Tick(at time.Duration) medium.Medium {
 
 // Bounds is the box the fireball and its stem keep inside at its time.
 func (ball *Fireball) Bounds() maths.Box {
-	r := ball.Radius()
+	r := ball.radius()
 	wide := thermalReach * r
-	bottom := ball.Centre() - wide
+	bottom := ball.centre() - wide
 	if ball.thermal.Stem > 0 {
 		bottom = 0
 	}
 	return maths.Box{Min: maths.V(-wide, math.Max(0, bottom), -wide),
-		Max: maths.V(wide, ball.Centre()+wide, wide)}
+		Max: maths.V(wide, ball.centre()+wide, wide)}
 }
 
 // Finest is the smallest eddy it draws at its time, in metres, as a
 // Body's is: a grid that holds it wants cells no wider than half this.
 func (ball *Fireball) Finest() float64 {
-	return ball.Radius() / thermalEddies / math.Pow(2, thermalOctaves-1)
+	return ball.radius() / thermalEddies / math.Pow(2, thermalOctaves-1)
 }
 
 // Density is its soot at p: the cap, a ball gathering into its ring,
@@ -199,10 +194,11 @@ func (ball *Fireball) Density(p maths.Vec) float64 {
 		p.Y > box.Max.Y || p.Z < box.Min.Z || p.Z > box.Max.Z {
 		return 0
 	}
-	r := ball.Radius()
+	r := ball.radius()
 	shrink := ball.thermal.Radius / r
 	soot := ball.thermal.Soot * shrink * shrink * shrink
-	q := p.Sub(maths.V(0, ball.Centre(), 0)).Scale(1 / r)
+	centre := maths.V(0, ball.centre(), 0)
+	q := p.Sub(centre).Scale(1 / r)
 	return soot * (ball.cap(q) + ball.stem(p, r)) * ball.clumps(q)
 }
 
@@ -211,7 +207,8 @@ func (ball *Fireball) Density(p maths.Vec) float64 {
 // turns about as it grows, all of it by the time it is three times its
 // first size.
 func (ball *Fireball) cap(q maths.Vec) float64 {
-	gathered := math.Min(1, math.Log(ball.Radius()/ball.thermal.Radius)/math.Log(3))
+	grown := math.Log(ball.radius() / ball.thermal.Radius)
+	gathered := math.Min(1, grown/math.Log(3))
 	whole := math.Max(0, 1-q.Dot(q))
 	across := math.Hypot(q.X, q.Z) - 1/math.Sqrt2
 	ring := math.Exp(-(across*across + q.Y*q.Y) / (2 * ringWidth * ringWidth))
@@ -222,7 +219,7 @@ func (ball *Fireball) cap(q maths.Vec) float64 {
 // share of its soot, from the ground to its centre, a fifth of its
 // radius wide at its foot and a third at its top.
 func (ball *Fireball) stem(p maths.Vec, r float64) float64 {
-	top := ball.Centre()
+	top := ball.centre()
 	if ball.thermal.Stem <= 0 || p.Y < 0 || p.Y > top {
 		return 0
 	}
@@ -261,8 +258,11 @@ func (ball *Fireball) Heat(p maths.Vec) measure.Temperature {
 	if ball.age() < 0 {
 		return measure.Kelvin(air)
 	}
-	q := p.Sub(maths.V(0, ball.Centre(), 0)).Scale(1 / ball.Radius())
-	return measure.Kelvin(air + ball.Excess()*math.Max(0, 1-q.Dot(q)))
+	centre := maths.V(0, ball.centre(), 0)
+	q := p.Sub(centre).Scale(1 / ball.radius())
+	excess := ball.excess()
+	whole := math.Max(0, 1-q.Dot(q))
+	return measure.Kelvin(air + excess*whole)
 }
 
 // Tint is soot's tilt, as a flame's Body's is: the fireball's soot is

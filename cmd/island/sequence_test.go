@@ -80,16 +80,19 @@ func TestReadSequenceRefusals(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := readSequence(writeFile(t, t.TempDir(), "track.yaml", tc.text))
+			trackPath := writeFile(t, t.TempDir(), "track.yaml", tc.text)
+			_, err := readSequence(trackPath)
 			if err == nil || !strings.Contains(err.Error(), tc.want) {
 				t.Errorf("error = %v, want one containing %q", err, tc.want)
 			}
 		})
 	}
-	if _, err := readSequence(filepath.Join(t.TempDir(), "absent.yaml")); err == nil {
+	absent := filepath.Join(t.TempDir(), "absent.yaml")
+	if _, err := readSequence(absent); err == nil {
 		t.Error("a missing track was accepted")
 	}
-	if _, err := readSequence(writeFile(t, t.TempDir(), "track.yaml", "{")); err == nil {
+	unparsable := writeFile(t, t.TempDir(), "track.yaml", "{")
+	if _, err := readSequence(unparsable); err == nil {
 		t.Error("unparsable YAML was accepted")
 	}
 }

@@ -1,0 +1,150 @@
+# every number scene/thing chose that is not true by definition, with what
+# it is and why it was chosen. the code asks for each by name, through pick.
+# a number true by definition is a constant in the code whose comment says
+# it is defined.
+numbers:
+  - name: glass-index
+    value: 1.5
+    says: the refractive index a surface or a film that gives none, or one at or below zero, is read as having
+    kind: picked
+    by: the index of common glass
+  - name: beam-speed-cap
+    value: 0.99
+    says: the largest share of light speed a rotating beam's flow may reach, which keeps its Doppler factor finite
+    kind: picked
+    by: close enough to light speed to show strong boosting while the Lorentz factor stays bounded
+  - name: orbit-along-limit
+    value: 0.9
+    says: how near along an orbit's north the first axis of its plane may lie, as a dot product, before z is used for it
+    kind: picked
+    by: far enough from along to keep the cross product well conditioned, near enough to leave x as the first axis for most orbits
+  - name: orbit-unseen-scale
+    value: 1.0e-12
+    says: the scale of a growing thing before it is born, too small to see
+    kind: picked
+    by: far below any scale a scene draws, and above zero, which a subspace reads as one
+  - name: keyed-ease-near
+    value: 0.25
+    says: the x of both control points of the ease curve, and the y of its first, in the css easing curves
+    kind: picked
+    by: the control point the css easing specification gives for ease; its source is to be pinned
+  - name: keyed-ease-lift
+    value: 0.1
+    says: the y of the first control point of the ease curve
+    kind: picked
+    by: the control point the css easing specification gives for ease; its source is to be pinned
+  - name: keyed-ease-in-start
+    value: 0.42
+    says: the x of the first control point of the ease-in and ease-in-out curves
+    kind: picked
+    by: the control point the css easing specification gives for ease-in; its source is to be pinned
+  - name: keyed-ease-out-end
+    value: 0.58
+    says: the x of the second control point of the ease-out and ease-in-out curves
+    kind: picked
+    by: the control point the css easing specification gives for ease-out; its source is to be pinned
+  - name: keyed-halvings
+    value: 40
+    says: how many times the span of a curve's time axis is halved to find a share on it
+    kind: picked
+    by: forty halvings leave a span far below a float's precision at one
+  - name: stopping-same-band
+    value: 1.0e-9
+    says: how near a band must be to a coefficient's photon, as a share of the wavelength, to be that photon
+    kind: picked
+    by: the rounding of an energy turned into a wavelength and back is far smaller, and no other photon is this near
+  - name: clear-inscatter-steps-most
+    value: 64
+    says: the most camera-path source samples a participating clear medium may ask for along one ray
+    kind: picked
+    by: a bound on the work done per ray, which grows with every sample
+  - name: clear-sky-inscatter-samples-most
+    value: 256
+    says: the most sky-source rays a participating clear medium may ask for at each camera-path sample
+    kind: picked
+    by: a bound on the work done per camera-path sample, which grows with every ray
+  - name: crinkle-octaves
+    value: 3
+    says: how many sizes of wrinkle lie one on another in a crinkled surface, each half the last
+    kind: picked
+    by: enough sizes to read as a crumpled sheet, and few enough to stay cheap
+  - name: crinkle-step
+    value: 0.1
+    says: how far apart, in widths of a wrinkle, the noise is read to find its slope
+    kind: picked
+    by: small beside a wrinkle, so the difference is a slope, and large beside rounding
+  - name: crinkle-facing-least
+    value: 0.05
+    says: the least cosine between a tilted normal and the look that a crinkled surface keeps
+    kind: picked
+    by: a tilt past this would turn the face away from the eye, so the untilted normal is kept
+  - name: facet-wander
+    value: 0.9
+    says: how far, in widths of a facet, the lattice the facets lie on is pushed about by noise
+    kind: picked
+    by: facets that are irregular, as tool marks are, and no grid
+  - name: facet-octaves
+    value: 2
+    says: how many sizes of noise push the lattice of facets about
+    kind: picked
+    by: two sizes break the rows of a lattice without making it noise
+  - name: facet-salt
+    value: 4294967296
+    says: the step between the seeds of one axis's noise and the next, so their fields lie far apart
+    kind: picked
+    by: the noise's seeds share fields a small step apart, so the step is larger than any seed
+  - name: facet-key-x
+    value: 73856093
+    says: the large prime that keeps a cell's x count apart from its other counts in one key
+    kind: picked
+    by: a large prime so that two cells differ in the key
+  - name: facet-key-y
+    value: 19349663
+    says: the large prime that keeps a cell's y count apart from its other counts in one key
+    kind: picked
+    by: a large prime so that two cells differ in the key
+  - name: facet-key-z
+    value: 83492791
+    says: the large prime that keeps a cell's z count apart from its other counts in one key
+    kind: picked
+    by: a large prime so that two cells differ in the key
+  - name: incident-grid-nodes-most
+    value: 128
+    says: the most nodes an incident grid may have along one axis
+    kind: picked
+    by: a bound on the size of the lattice a frame recomputes
+  - name: incident-grid-nodes-total-most
+    value: 262144
+    says: the most nodes an incident grid may have in all, which holds its payload to three MiB
+    kind: picked
+    by: a work limit on the lattice, three RGB float32 values to a node
+  - name: volume-samples-most
+    value: 64
+    says: the most sphere samples a volume illumination may take at each scattering location
+    kind: picked
+    by: a bound on the angular work at each location, which grows with every sample
+  - name: rutile-index
+    value: 2.65
+    says: the ordinary refractive index of rutile at 549 nm, as one index for the whole film
+    kind: picked
+    by: Devore's reading at the green band, which the source for it is yet to pin
+  - name: kapton-index
+    value: 1.7
+    says: the refractive index of a polyimide film
+    kind: picked
+    by: read in summary from secondary sources, and the source for it is yet to be pinned
+  - name: kapton-absorbs-red
+    value: 5600
+    says: how much of red a polyimide film absorbs, per metre
+    kind: picked
+    by: minus the log of 0.8 over 40 microns, from a film passing about 80 percent above 600 nm
+  - name: kapton-absorbs-green
+    value: 30000
+    says: how much of green a polyimide film absorbs, per metre
+    kind: picked
+    by: about 30 percent passing over 40 microns, from the film's edge near 550 nm
+  - name: kapton-absorbs-blue
+    value: 170000
+    says: how much of blue a polyimide film absorbs, per metre
+    kind: picked
+    by: about a thousandth passing over 40 microns, next to nothing below 500 nm

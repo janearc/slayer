@@ -140,7 +140,7 @@ func panels(name string) ([]panel, error) {
 
 // alone is one channel playing its role's note, or its hits one a
 // second, with no room, no repeats and nothing beside it.
-func alone(c Channel) ([]float32, error) {
+func alone(c channel) ([]float32, error) {
 	c.Send, c.Place, c.Volume = nil, nil, nil
 	bar := sheetNotes[c.Role] + ":1 -:3"
 	if engines[c.Kind].percussive {
@@ -154,7 +154,7 @@ func alone(c Channel) ([]float32, error) {
 	}
 	quiet := masterLeast * 10
 	v := &Voicing{Name: "alone", Machine: "studio", Master: &quiet,
-		Channels: []Channel{c}}
+		Channels: []channel{c}}
 	s := &Score{Name: "one note", Tempo: 60, Meter: sheetSeconds,
 		Parts: []Part{{Role: c.Role, Bars: []string{bar}}}}
 	if err := s.check(); err != nil {

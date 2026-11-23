@@ -1,0 +1,311 @@
+# The urban village, 2026-11-20: walk-ups of six to ten storeys, each on
+# its own small plot, faced in small tiles, an alley apart, with a lane
+# every few plots. Nothing here is measured, and nothing was looked up.
+# A number marked recalled is the study's memory of such places, to be
+# checked against a source before it is cited; one marked picked was
+# chosen, by eye or to make the parts fit. Lengths are metres; colours
+# are shares of light. Scopes: a row is one house, a bay one wall of it.
+culture: village
+says: the walk-ups of an urban village, packed on a parcel with alleys between and lanes every few plots
+elements:
+# the parcel
+- {element: default-width, says: "the parcel's width along x when a set does not say", scope: district, draw: range, unit: m, least: 80, most: 80, kind: picked, by: "village study, 2026-11-20, picked, five or six plots across"}
+- {element: default-depth, says: "the parcel's depth along z when a set does not say", scope: district, draw: range, unit: m, least: 60, most: 60, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: plot-size, says: "how wide a plot is along one axis of the parcel", scope: bay, draw: range, unit: m, least: 10, most: 14, kind: recalled, by: "village study, 2026-11-20, recalled, plots of ten to fifteen metres square"}
+- {element: alley-width, says: "how wide the alley after a plot is", scope: bay, draw: range, unit: m, least: 1.2, most: 2.8, kind: recalled, by: "village study, 2026-11-20, recalled, one to three metres, close enough to shake hands across"}
+- {element: lane-width, says: "how wide a lane is, wide enough for shops", scope: bay, draw: range, unit: m, least: 5, most: 7.5, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: lane-every, says: "how many plots stand between one lane and the next along an axis", scope: row, draw: range, unit: plots, whole: true, least: 2, most: 4, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: setback, says: "how far a house stands in from one edge of its plot, so no two alleys are quite the same", scope: bay, draw: range, unit: m, least: 0, most: 0.35, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: open-plot, says: "share of plots left open, a yard or a gap", scope: row, draw: share, unit: chance, share: 0.04, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: paving-colour
+  says: the concrete of the lanes and alleys, wet
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: wet concrete, weight: 1, colour: [0.09, 0.09, 0.09], gloss: 0.55}
+  kind: picked
+  by: "village study, 2026-11-20, by eye"
+- {element: lane-density, says: "how thickly the lanes are hung with the lashings, from nought to one", scope: district, draw: range, unit: share, least: 0.35, most: 0.35, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: alley-density, says: "how thickly the alleys are hung with cable, from nought to one", scope: district, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "village study, 2026-11-20, picked"}
+# the house
+- {element: storeys, says: "storeys of a house, the ground storey among them", scope: row, draw: range, unit: storeys, whole: true, least: 6, most: 10, kind: recalled, by: "village study, 2026-11-20, recalled, six to ten storeys"}
+- {element: storey-height, says: "floor to floor height of a storey over the ground one", scope: row, draw: range, unit: m, least: 2.8, most: 3.1, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: ground-rise, says: "how much taller the ground storey is than the others", scope: row, draw: range, unit: m, least: 0.5, most: 1.2, kind: picked, by: "village study, 2026-11-20, picked, for the shops"}
+- {element: door-side, says: "the wall the stair door is in when no wall faces a lane: front, east, back, west", scope: row, draw: range, unit: wall, whole: true, least: 0, most: 3, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: tile-colour
+  says: the small ceramic tile a house is faced in
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: white, weight: 4, colour: [0.72, 0.72, 0.69], gloss: 0.35}
+  - {name: cream, weight: 3, colour: [0.74, 0.66, 0.52], gloss: 0.35}
+  - {name: pink, weight: 2, colour: [0.74, 0.55, 0.52], gloss: 0.35}
+  - {name: pale green, weight: 2, colour: [0.55, 0.66, 0.56], gloss: 0.35}
+  - {name: pale blue, weight: 1, colour: [0.55, 0.62, 0.7], gloss: 0.35}
+  - {name: grey, weight: 1, colour: [0.5, 0.5, 0.49], gloss: 0.3}
+  kind: recalled
+  by: "village study, 2026-11-20, the colours recalled (white, cream, pink, pale green), their shares of light picked by eye"
+- {element: tile-grime, says: "how much of its colour a house's tile still gives back after its years, a scale", scope: row, draw: range, unit: scale, least: 0.6, most: 1, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: grime-step, says: "the steps grime is held to, so a village has a few tiles", scope: district, draw: range, unit: scale, least: 0.1, most: 0.1, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shutters, says: "share of windows with shutters: none here", scope: opening, draw: share, unit: chance, share: 0, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: window-width, says: "width of a window, the same on all of a house", scope: row, draw: range, unit: m, least: 1.2, most: 1.8, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: window-height, says: "height of a window, the same on all of a house", scope: row, draw: range, unit: m, least: 1.3, most: 1.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: window-sill, says: "how high a window's foot is over its floor", scope: district, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: window-pitch, says: "how far apart windows stand along a wall, a house's own rhythm", scope: row, draw: range, unit: m, least: 2.6, most: 3.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: window-edge, says: "how far the first and last opening keep from a wall's corner", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: lit-share, says: "share of windows with a light on at night", scope: opening, draw: share, unit: chance, share: 0.45, kind: picked, by: "village study, 2026-11-20, picked, evening"}
+- {element: light-heat, says: "colour temperature of the light in a lit window: tubes and bulbs", scope: opening, draw: range, unit: K, least: 2700, most: 6500, kind: recalled, by: "village study, 2026-11-20, recalled, cool tubes beside warm bulbs; the ends picked"}
+- element: frame-colour
+  says: the aluminium of window frames
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: aluminium, weight: 4, colour: [0.55, 0.56, 0.57], gloss: 0.6}
+  - {name: champagne, weight: 2, colour: [0.55, 0.48, 0.36], gloss: 0.6}
+  - {name: dark, weight: 1, colour: [0.12, 0.12, 0.13], gloss: 0.5}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, aluminium sliding windows; the shares of light picked"
+- element: door-colour
+  says: the steel of a stair door
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: green steel, weight: 2, colour: [0.06, 0.16, 0.1], gloss: 0.4}
+  - {name: red steel, weight: 2, colour: [0.25, 0.04, 0.03], gloss: 0.4}
+  - {name: grey steel, weight: 2, colour: [0.2, 0.2, 0.21], gloss: 0.4}
+  kind: picked
+  by: "village study, 2026-11-20, picked"
+- {element: arched-door, says: "share of doors with a round arch: none here", scope: opening, draw: share, unit: chance, share: 0, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: awning, says: "share of stair doors with a cloth awning: none, the signs bring theirs", scope: opening, draw: share, unit: chance, share: 0, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: wall-lamp, says: "share of doors with the facade's own lamp: none, the house hangs its door lamp", scope: opening, draw: share, unit: chance, share: 0, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: under-window
+  says: "what the facade hangs under a window: nothing, the house fits its own"
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: nothing, weight: 1}
+  kind: picked
+  by: "village study, 2026-11-20, picked"
+- {element: laundry, says: "share of walls with the facade's laundry line: none, the house has its poles", scope: bay, draw: share, unit: chance, share: 0, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shop-sign, says: "share of walls with the facade's board sign: none, the signs hang on the lanes", scope: bay, draw: share, unit: chance, share: 0, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: dish, says: "share of walls with a satellite dish", scope: bay, draw: share, unit: chance, share: 0.15, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: pipe, says: "share of walls with a downpipe", scope: bay, draw: share, unit: chance, share: 0.7, kind: recalled, by: "village study, 2026-11-20, recalled, downpipes; the share picked"}
+- {element: cable, says: "share of walls with cable run along them", scope: bay, draw: share, unit: chance, share: 0.8, kind: recalled, by: "village study, 2026-11-20, recalled, cables along the walls; the share picked"}
+# the shops on a lane
+- {element: shop, says: "share of walls on a lane whose ground storey is a shop", scope: bay, draw: share, unit: chance, share: 0.85, kind: recalled, by: "village study, 2026-11-20, recalled, a shop on the wider lanes; the share picked"}
+- {element: shop-open, says: "share of shops open and lit at night", scope: bay, draw: share, unit: chance, share: 0.7, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shop-height, says: "height of a shop's opening", scope: district, draw: range, unit: m, least: 2.7, most: 2.7, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shop-sill, says: "height of a shop opening's foot, over the plinth", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: roller-colour
+  says: the roller shutter of a shop that is shut
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 3, colour: [0.32, 0.33, 0.34], gloss: 0.45}
+  - {name: blue, weight: 1, colour: [0.08, 0.16, 0.3], gloss: 0.35}
+  - {name: green, weight: 1, colour: [0.07, 0.2, 0.12], gloss: 0.35}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, roller shutters; the colours picked"
+- {element: shop-lamp-width, says: "length of the strip of light over an open shop", scope: district, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shop-lamp-strength, says: "luminance at a metre of the light over an open shop, in the kit's relative light", scope: district, draw: range, unit: luminance, least: 1.5, most: 1.5, kind: picked, by: "village study, 2026-11-20, picked"}
+# the stair door's lamp
+- {element: door-lamp-size, says: "the side of the lamp over a stair door", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: door-lamp-rise, says: "how far over a door's head its lamp hangs", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: door-lamp-heat, says: "colour temperature of a door lamp's light", scope: district, draw: range, unit: K, least: 4000, most: 4000, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: door-lamp-glow, says: "how brightly a door or shop lamp glows, a scale on its colour", scope: district, draw: range, unit: scale, least: 6, most: 6, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: door-lamp-strength, says: "luminance at a metre of a door lamp's light, in the kit's relative light", scope: district, draw: range, unit: luminance, least: 0.6, most: 0.6, kind: picked, by: "village study, 2026-11-20, picked, a little brighter than a room's bulb"}
+# cages over windows
+- {element: cage, says: "share of windows behind a steel cage", scope: opening, draw: share, unit: chance, share: 0.6, kind: recalled, by: "village study, 2026-11-20, recalled, most windows caged; the share picked"}
+- {element: cage-depth, says: "how far a cage stands out of the wall", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: cage-side, says: "how far a cage reaches past each side of its window", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: cage-rise, says: "how far a cage reaches past the head and the foot of its window", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: cage-bar, says: "the side of a cage's square bar", scope: district, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: cage-pitch, says: "the most a cage's bars stand apart", scope: district, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: cage-colour
+  says: the steel of a house's cages, poles and brackets
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: white steel, weight: 3, colour: [0.55, 0.55, 0.53], gloss: 0.3}
+  - {name: grey steel, weight: 2, colour: [0.25, 0.25, 0.26], gloss: 0.35}
+  - {name: rusted steel, weight: 2, colour: [0.2, 0.09, 0.05], gloss: 0.15}
+  - {name: green steel, weight: 1, colour: [0.08, 0.2, 0.13], gloss: 0.3}
+  kind: picked
+  by: "village study, 2026-11-20, picked"
+# air conditioners
+- {element: aircon, says: "share of windows with an air conditioner's outdoor box", scope: opening, draw: share, unit: chance, share: 0.6, kind: recalled, by: "village study, 2026-11-20, recalled, one by most windows; the share picked"}
+- element: aircon-place
+  says: where an air conditioner hangs by its window
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: under, weight: 3}
+  - {name: beside, weight: 2}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, under or beside; the weights picked"
+- {element: unit-width, says: "width of an air conditioner's outdoor box", scope: district, draw: range, unit: m, least: 0.8, most: 0.8, kind: recalled, by: "village study, 2026-11-20, recalled, a split unit's outdoor box"}
+- {element: unit-height, says: "height of an air conditioner's outdoor box", scope: district, draw: range, unit: m, least: 0.55, most: 0.55, kind: recalled, by: "village study, 2026-11-20, recalled"}
+- {element: unit-depth, says: "how far an air conditioner's box stands out of the wall", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: recalled, by: "village study, 2026-11-20, recalled"}
+- {element: aircon-drop, says: "how far under a window's sill an air conditioner's top hangs", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: aircon-beside, says: "the gap between a window's cage and an air conditioner beside it", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: aircon-lowest, says: "the lowest an air conditioner's foot hangs over the ground", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: unit-colour
+  says: an air conditioner's box
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: unit-white, weight: 4, colour: [0.6, 0.6, 0.57], gloss: 0.3}
+  - {name: unit-cream, weight: 2, colour: [0.58, 0.54, 0.45], gloss: 0.3}
+  - {name: unit-grey, weight: 1, colour: [0.35, 0.35, 0.35], gloss: 0.3}
+  kind: picked
+  by: "village study, 2026-11-20, picked"
+- {element: grille-radius, says: "radius of the grille over an air conditioner's fan", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: grille-colour
+  says: the grille over an air conditioner's fan
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: grille, weight: 1, colour: [0.06, 0.06, 0.06], gloss: 0.2}
+  kind: picked
+  by: "village study, 2026-11-20, by eye"
+- {element: bracket-size, says: "the side of an air conditioner's bracket, and the grille's depth", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: drip-size, says: "the side of an air conditioner's drip pipe", scope: district, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: drip-length, says: "how far an air conditioner's drip pipe hangs under it", scope: opening, draw: range, unit: m, least: 0.25, most: 1.5, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: drip-step, says: "the steps a drip pipe's length is held to", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "village study, 2026-11-20, picked"}
+# clothes poles and washing
+- {element: poles, says: "share of windows over a storey's floor with clothes poles out over the alley", scope: opening, draw: share, unit: chance, share: 0.3, kind: recalled, by: "village study, 2026-11-20, recalled, clothes poles and washing; the share picked"}
+- {element: pole-reach, says: "how far a clothes pole reaches out of the wall", scope: district, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: pole-size, says: "the side of a clothes pole", scope: district, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: pole-inset, says: "how far in from a window's side its pole stands", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: pole-rise, says: "how far over a window's head its poles stand", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: washing, says: "pieces of washing on one pole", scope: dwelling, draw: range, unit: pieces, whole: true, least: 0, most: 3, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: cloth-thick, says: "thickness of a piece of washing", scope: district, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: cloth-colour
+  says: the washing on a pole
+  scope: dwelling
+  draw: options
+  unit: share of light
+  options:
+  - {name: sheet, weight: 3, colour: [0.55, 0.55, 0.5], gloss: 0}
+  - {name: towel, weight: 2, colour: [0.15, 0.3, 0.5], gloss: 0}
+  - {name: shirt, weight: 2, colour: [0.5, 0.15, 0.1], gloss: 0}
+  - {name: dark, weight: 2, colour: [0.06, 0.06, 0.07], gloss: 0}
+  - {name: pink, weight: 1, colour: [0.6, 0.3, 0.35], gloss: 0}
+  kind: picked
+  by: "village study, 2026-11-20, picked"
+# the roof
+- element: roof-form
+  says: the form of every roof
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: flat, weight: 1}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, flat roofs"
+- element: roof-colour
+  says: the concrete of a roof and its parapet
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: concrete, weight: 3, colour: [0.3, 0.3, 0.29], gloss: 0.1}
+  - {name: tarred, weight: 1, colour: [0.08, 0.08, 0.08], gloss: 0.2}
+  kind: picked
+  by: "village study, 2026-11-20, by eye"
+- {element: roof-margin, says: "how far in from the parapet what stands on a roof keeps", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: roof-items, says: "how many things stand along a roof's middle", scope: row, draw: range, unit: things, whole: true, least: 1, most: 3, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: roof-item
+  says: a thing along a roof's middle; the plant room is the stair head
+  scope: bay
+  draw: options
+  unit: weight
+  options:
+  - {name: tank, weight: 5}
+  - {name: plant-room, weight: 3}
+  - {name: antenna, weight: 1}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, water tanks and a stair head on every roof; the weights picked"
+- element: roof-steel-colour
+  says: the steel of what stands on a roof
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: steel, weight: 1, colour: [0.2, 0.2, 0.21], gloss: 0.35}
+  kind: picked
+  by: "village study, 2026-11-20, by eye"
+- element: roof-housing-colour
+  says: the walls of a stair head
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: render, weight: 2, colour: [0.45, 0.45, 0.43], gloss: 0.1}
+  - {name: white tile, weight: 1, colour: [0.65, 0.65, 0.62], gloss: 0.3}
+  kind: picked
+  by: "village study, 2026-11-20, by eye"
+- element: roof-tank-colour
+  says: a water tank
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: stainless, weight: 3, colour: [0.6, 0.61, 0.62], gloss: 0.7}
+  - {name: blue plastic, weight: 1, colour: [0.06, 0.2, 0.45], gloss: 0.3}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, stainless and blue tanks; the shares of light picked"
+- {element: tank-width, says: "width of a water tank", scope: district, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: tank-height, says: "height of a water tank", scope: district, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: tank-stand, says: "height of a tank's stand", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: tank-leg, says: "the side of a tank stand's leg", scope: district, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: roof-plant-width, says: "width of a stair head", scope: district, draw: range, unit: m, least: 2.6, most: 2.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: roof-plant-height, says: "height of a stair head", scope: district, draw: range, unit: m, least: 2.6, most: 2.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: roof-plant-depth, says: "depth of a stair head", scope: district, draw: range, unit: m, least: 2.8, most: 2.8, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: vent-stack, says: "the side of the vent on a stair head", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: antenna-span, says: "width of an antenna's cross bar", scope: district, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: mast-width, says: "the side of an antenna's mast", scope: district, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: mast-height, says: "height of an antenna's mast", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: antenna-bar, says: "the side of an antenna's bars", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shack, says: "share of roofs with a shack built on them", scope: row, draw: share, unit: chance, share: 0.3, kind: recalled, by: "village study, 2026-11-20, recalled, rooftop shacks; the share picked"}
+- {element: shack-width, says: "width of a rooftop shack", scope: row, draw: range, unit: m, least: 2.5, most: 4.5, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shack-depth, says: "depth of a rooftop shack", scope: row, draw: range, unit: m, least: 2, most: 3, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: shack-height, says: "height of a rooftop shack", scope: row, draw: range, unit: m, least: 2.2, most: 2.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: shack-colour
+  says: the sheet of a rooftop shack
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: blue sheet, weight: 2, colour: [0.1, 0.22, 0.42], gloss: 0.4}
+  - {name: rusted sheet, weight: 2, colour: [0.22, 0.1, 0.05], gloss: 0.2}
+  - {name: white sheet, weight: 1, colour: [0.6, 0.6, 0.58], gloss: 0.4}
+  kind: recalled
+  by: "village study, 2026-11-20, recalled, sheet shacks in blue; the shares of light picked"
+- {element: roof-garden, says: "share of roofs with planters along their back", scope: row, draw: share, unit: chance, share: 0.25, kind: recalled, by: "village study, 2026-11-20, recalled, planted roofs; the share picked"}
+- {element: planters, says: "how many planters a planted roof has", scope: row, draw: range, unit: planters, whole: true, least: 2, most: 5, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: planter-length, says: "length of a rooftop planter", scope: district, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: planter-height, says: "height of a rooftop planter", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: planter-depth, says: "depth of a rooftop planter", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: leaf-inset, says: "how far in from a planter's sides its leaves stand", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "village study, 2026-11-20, picked"}
+- {element: leaf-height, says: "how far a planter's leaves stand over it", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "village study, 2026-11-20, picked"}
+- element: planter-colour
+  says: a rooftop planter
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: terracotta, weight: 1, colour: [0.35, 0.14, 0.07], gloss: 0.1}
+  - {name: polystyrene, weight: 1, colour: [0.6, 0.6, 0.58], gloss: 0.1}
+  kind: picked
+  by: "village study, 2026-11-20, picked"

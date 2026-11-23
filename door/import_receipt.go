@@ -176,19 +176,21 @@ func makeImportReceipt(wanted job.Job, build stamp, world set.World) (receipt, e
 	if err != nil {
 		return receipt{}, err
 	}
-	imports := make([]importReceipt, 0, len(world.Imports()))
+	importCount := len(world.Imports())
+	imports := make([]importReceipt, 0, importCount)
 	for _, part := range world.Imports() {
 		asset := part.Asset()
 		if asset == nil {
 			return receipt{}, fmt.Errorf("import receipt: %s has no checked asset", part.Name())
 		}
 		optionsKey := asset.OptionsKey()
+		worldUnit := world.Unit()
 		made := importReceipt{Name: part.Name(), File: part.File(),
 			Source: part.Source(), License: part.License(),
 			RequestedHeightMetres: part.RequestedHeightMetres(),
 			DecoderOptionsKey:     hex.EncodeToString(optionsKey[:]),
 			SourceClosure:         sourceRecords(part),
-			NativePlacement:       transformRecord(part.Placement(world.Unit())),
+			NativePlacement:       transformRecord(part.Placement(worldUnit)),
 			AssetInstances:        instanceRecords(asset.Instances())}
 		made.Normalization = normalizationRecord(asset)
 		if selected, has := part.SelectedScene(); has {
@@ -245,8 +247,9 @@ func sourceRecords(part set.Import) []sourceReceipt {
 	made := make([]sourceReceipt, 0, len(sources))
 	for _, source := range sources {
 		digest := source.SHA256()
+		sourceRelative := filepath.FromSlash(source.Path())
 		made = append(made, sourceReceipt{Path: source.Path(),
-			File:  filepath.Join(root, filepath.FromSlash(source.Path())),
+			File:  filepath.Join(root, sourceRelative),
 			Bytes: source.Size(), SHA256: hex.EncodeToString(digest[:])})
 	}
 	return made
@@ -309,9 +312,10 @@ func colourRecord(colour set.Colour) colourReceipt {
 func instanceRecords(instances []oakland.Instance) []instanceReceipt {
 	made := make([]instanceReceipt, 0, len(instances))
 	for _, instance := range instances {
+		instancePlace := instance.Placement()
 		made = append(made, instanceReceipt{MaterialSlot: instance.MaterialSlot(),
 			FaceCount: instance.Geometry().FaceCount(),
-			Placement: transformRecord(instance.Placement())})
+			Placement: transformRecord(instancePlace)})
 	}
 	return made
 }

@@ -4,10 +4,10 @@ import (
 	"math"
 	"testing"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
@@ -179,26 +179,48 @@ func TestOceanMeanPlaneSunSkipsOnlyItsBoundary(t *testing.T) {
 	if scene.crowd.blockedExcept(ray, math.Inf(1), boundary) {
 		t.Fatal("direct-sun shadow query did not skip the exact ocean boundary")
 	}
+	blockerAt := thing.Still(maths.Subspace{Origin: maths.V(0, .5, 0)})
 	blocker := world.Add(thing.Thing{Shape: shape.Sphere{Radius: .1},
-		Material: &thing.Material{}, Motion: thing.Still(
-			maths.Subspace{Origin: maths.V(0, .5, 0)})})
+		Material: &thing.Material{}, Motion: blockerAt})
 	scene = stage(world, 0)
 	if !scene.crowd.blockedExcept(ray, math.Inf(1), boundary) {
 		t.Fatalf("direct-sun shadow query skipped another opaque object %p", blocker)
 	}
 }
 
+// With the mean-plane sun not opted into, a point is lit by the lamps'
+// straight ways as any surface is. Over the sea that is a matte
+// surface's colour over pi times each lamp by its cosine: a sun of ten
+// at 0.2 of a radian from straight up and a fill of one from straight
+// up, on a level surface, (10 cos 0.2 + 1) / pi of its colour. Under the
+// sea the straight ways are hidden by the sea's own surface, which casts
+// a whole shadow, and the point is dark.
 func TestOceanSunNoOptInKeepsLegacyLampEvaluation(t *testing.T) {
 	world, _, _, seen, _ := oceanSunFixture(t, .2)
 	world.OceanSurface.DirectSunMeanPlane = false
 	scene := stage(world, 0)
-	point, normal, colour := maths.V(0, -2, 0), maths.Up,
-		maths.RGB(.3, .4, .5)
-	got := scene.oceanLamplight(point, normal, colour, seen,
+	normal, colour := maths.Up, maths.RGB(.3, .4, .5)
+	over := scene.oceanLamplight(maths.V(0, 1, 0), normal, colour, seen,
 		world.Things[0])
-	want := scene.lamplight(point, normal, colour)
-	if got != want {
-		t.Fatalf("no-opt-in lamp path changed: got %v, want %v", got, want)
+	wantOver := colour.Scale((10*math.Cos(.2) + 1) / math.Pi)
+	lightIs(t, "over the sea with no opt-in", over, wantOver, 1e-12)
+	under := scene.oceanLamplight(maths.V(0, -2, 0), normal, colour, seen,
+		world.Things[0])
+	if under != (maths.Light{}) {
+		t.Fatalf("under the sea with no opt-in the lamps light %v", under)
+	}
+}
+
+// Anti: opted in, the same point under the sea is lit, by the sun
+// brought through the mean plane; the dark above is the straight way's
+// and not the point's.
+func TestOceanSunOptedInLightsThePointTheStraightWayLeavesDark(t *testing.T) {
+	world, _, _, seen, _ := oceanSunFixture(t, .2)
+	scene := stage(world, 0)
+	under := scene.oceanLamplight(maths.V(0, -2, 0), maths.Up,
+		maths.RGB(.3, .4, .5), seen, &thing.Thing{})
+	if !(under.B > under.R && under.R > 0.1) {
+		t.Fatalf("opted in, the point under the sea is lit %v", under)
 	}
 }
 
@@ -319,7 +341,8 @@ func TestOceanMeanPlaneSunUsesActualCrestAboveMeanPlane(t *testing.T) {
 	from := scene.lifted(point, maths.Up)
 	distance, hit := scene.oceanSun.placedBoundary.meet(
 		maths.Ray{At: from, Dir: toward}, 0, math.Inf(1))
-	if !hit || math.Abs(from.Add(toward.Scale(distance)).Y-2) > 1e-12 {
+	landed := from.Add(toward.Scale(distance))
+	if !hit || math.Abs(landed.Y-2) > 1e-12 {
 		t.Fatalf("water path did not end on the actual crest: distance %g hit %t", distance, hit)
 	}
 }
@@ -330,7 +353,7 @@ func TestOceanMeanPlaneSunCrossesAuthoredFlatMeanCollarOnce(t *testing.T) {
 	if !ok {
 		t.Fatalf("fixture boundary shape is %T", boundary.Shape)
 	}
-	continuation, err := seaocean.NewFlatMeanContinuation(field, 0, 2)
+	continuation, err := arid.NewFlatMeanContinuation(field, 0, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -365,7 +388,7 @@ func TestOceanMeanPlaneSunReachesInfiniteFarFieldOutsideCore(t *testing.T) {
 	if !ok {
 		t.Fatalf("fixture boundary shape is %T", boundary.Shape)
 	}
-	continuation, err := seaocean.NewInfiniteMeanContinuation(field, 0, 2)
+	continuation, err := arid.NewInfiniteMeanContinuation(field, 0, 2)
 	if err != nil {
 		t.Fatal(err)
 	}

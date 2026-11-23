@@ -10,8 +10,10 @@ import (
 // Coast redwoods have flat sprays; giant sequoias have scale-like foliage.
 //
 // Pinned OSU descriptions: osu-coast-redwood-foliage and
-// osu-giant-sequoia-foliage in sources.yaml; see doc/conifer-foliage.md.
-// No transpiration rate is inferred here; see doc/redwood-atmosphere.md.
+// osu-giant-sequoia-foliage in sources.yaml; see
+// doc/model/vegetation/conifer-foliage.md.
+// No transpiration rate is inferred here; see
+// doc/model/vegetation/redwood-atmosphere.md.
 func redwoodRow() conifer {
 	row := norwayRow()
 	row.tall, row.slender = span{18, 42}, span{0.018, 0.026}

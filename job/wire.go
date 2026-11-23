@@ -15,6 +15,7 @@ import (
 type document struct {
 	Schema   string    `yaml:"$schema" json:"$schema"`
 	Scene    sceneWire `yaml:"scene" json:"scene"`
+	Sources  []Source  `yaml:"sources,omitempty" json:"sources,omitempty"`
 	Film     *filmWire `yaml:"film" json:"film,omitempty"`
 	Renderer string    `yaml:"renderer" json:"renderer,omitempty"`
 	Quality  string    `yaml:"quality" json:"quality,omitempty"`
@@ -177,8 +178,6 @@ type titleWire struct {
 }
 
 // UnmarshalYAML reads the elements in the order the mapping writes them.
-//
-//ninja:vow waste yaml.v3 resolves this exported method by name
 func (list *titleList) UnmarshalYAML(node *yaml.Node) error {
 	for i := 0; i+1 < len(node.Content); i += halves {
 		var title titleWire
@@ -192,8 +191,6 @@ func (list *titleList) UnmarshalYAML(node *yaml.Node) error {
 
 // MarshalJSON writes the elements as one object, in the order written.
 // It cannot fail: an element is strings and finite numbers.
-//
-//ninja:vow waste encoding/json resolves this exported method by name
 func (list titleList) MarshalJSON() ([]byte, error) {
 	var out bytes.Buffer
 	out.WriteByte('{')
@@ -228,8 +225,6 @@ type rampWire struct {
 
 // UnmarshalYAML reads a number alone or a block of from, to, start and
 // over.
-//
-//ninja:vow waste yaml.v3 resolves this exported method by name
 func (value *ramp) UnmarshalYAML(node *yaml.Node) error {
 	if node.Kind == yaml.ScalarNode {
 		var number float64
@@ -245,8 +240,6 @@ func (value *ramp) UnmarshalYAML(node *yaml.Node) error {
 }
 
 // MarshalJSON writes the ramp as it was read: alone, or as a block.
-//
-//ninja:vow waste encoding/json resolves this exported method by name
 func (value ramp) MarshalJSON() ([]byte, error) {
 	if value.alone {
 		return json.Marshal(value.From)

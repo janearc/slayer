@@ -31,10 +31,15 @@ func TestASunsDiscLightsAsItsStrengthSays(t *testing.T) {
 		out := (float64(i) + 0.5) / rings * limit
 		for j := range turns {
 			turn := (float64(j) + 0.5) / turns * 2 * math.Pi
-			aside := across.Scale(math.Cos(turn)).Add(other.Scale(math.Sin(turn)))
-			way := middle.Scale(math.Cos(out)).Add(aside.Scale(math.Sin(out)))
-			area := math.Sin(out) * (limit / rings) * (2 * math.Pi / turns)
-			sum = sum.Add(sun.Shown(way).Scale(area * way.Dot(middle)))
+			turnCosine := math.Cos(turn)
+			turnSine := math.Sin(turn)
+			aside := across.Scale(turnCosine).Add(other.Scale(turnSine))
+			outCosine := math.Cos(out)
+			outSine := math.Sin(out)
+			way := middle.Scale(outCosine).Add(aside.Scale(outSine))
+			area := outSine * (limit / rings) * (2 * math.Pi / turns)
+			alignment := way.Dot(middle)
+			sum = sum.Add(sun.Shown(way).Scale(area * alignment))
 		}
 	}
 	want := sun.Strength
@@ -57,14 +62,16 @@ func TestTheWaysAcrossADiscLieWithinIt(t *testing.T) {
 	middle := sun.Toward.Unit()
 	var mean maths.Vec
 	for i, way := range ways {
-		apart := math.Acos(math.Min(1, way.Dot(middle)))
+		alignment := way.Dot(middle)
+		apart := math.Acos(math.Min(1, alignment))
 		if !(apart <= sun.Size/2) {
 			t.Errorf("way %d is %v from the middle, past the edge %v", i,
 				apart, sun.Size/2)
 		}
 		mean = mean.Add(way)
 	}
-	if off := math.Acos(math.Min(1, mean.Unit().Dot(middle))); !(off <= sun.Size/8) {
+	meanAlignment := mean.Unit().Dot(middle)
+	if off := math.Acos(math.Min(1, meanAlignment)); !(off <= sun.Size/8) {
 		t.Errorf("the ways gather %v from the middle", off)
 	}
 	point := sun

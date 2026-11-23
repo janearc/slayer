@@ -1,15 +1,21 @@
 package movie
 
 import (
-	"errors"
 	"fmt"
 	"image"
 	"time"
 )
 
+// refusal is a refusal of this package, held as a constant so that no one
+// can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (reason refusal) Error() string { return string(reason) }
+
 // ErrPastEnd is a film read past its last picture, or opened at a moment
 // after it.
-var ErrPastEnd = errors.New("movie: past the film's end")
+const ErrPastEnd refusal = "movie: past the film's end"
 
 // pictures is a film's pictures as the platform decodes them, in order.
 type pictures interface {
@@ -46,11 +52,12 @@ func OpenFilm(path string, from time.Duration, size image.Point) (*Film,
 	if err := readable(path); err != nil {
 		return nil, err
 	}
-	if size.X < 1 || size.Y < 1 || size.X > mostSide || size.Y > mostSide {
+	if !positive(size.X) || !positive(size.Y) ||
+		size.X > mostSide || size.Y > mostSide {
 		return nil, fmt.Errorf("movie: pictures of %dx%d; each side is 1 "+
 			"to %d", size.X, size.Y, mostSide)
 	}
-	if from < 0 {
+	if from < zero {
 		return nil, fmt.Errorf("movie: a film read from %v; start at "+
 			"nought or after", from)
 	}
@@ -90,7 +97,9 @@ func (film *Film) Next() (*image.RGBA, error) {
 		// the one showing at the moment asked: pass it over. A moment
 		// asked as whole nanoseconds may fall a hair before the picture
 		// it names; seekSlack keeps that from showing the one before.
-		if film.facts.rate > 0 && at+1/film.facts.rate <= film.from+seekSlack {
+		successor := at + one/film.facts.rate
+		if positive(film.facts.rate) &&
+			successor <= film.from+seekSlack {
 			continue
 		}
 		film.shown = at

@@ -64,8 +64,9 @@ func TestEveryPlaceStaysNearItsGridPoint(t *testing.T) {
 	placed, _ := Placements(3, 12, spacing, jitter)
 	for index, one := range placed {
 		column, row := float64(index%12), float64(index/12)
-		off := math.Max(math.Abs(one.At().X-column*spacing),
-			math.Abs(one.At().Z-row*spacing))
+		dx := math.Abs(one.At().X - column*spacing)
+		dz := math.Abs(one.At().Z - row*spacing)
+		off := math.Max(dx, dz)
 		if off > jitter*spacing/2+1e-9 || one.At().Y != 0 {
 			t.Errorf("place %d is %v off, at %v", index, off,
 				one.At())

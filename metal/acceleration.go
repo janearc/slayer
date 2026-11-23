@@ -175,7 +175,54 @@ func (place Placement) same(other Placement) bool {
 // origin, at buffer index len(inputs)+2. Close releases every structure.
 // A second build is refused without changing the first; calls are serial.
 func (kernel *Kernel) Accelerate(plan *Acceleration, root int) error {
-	return kernel.accelerate(plan, root, keepFirst)
+	return kernel.accelerate(plan, root, keepFirst, nil)
+}
+
+// AccelerateOver is Accelerate that reads the plan's vertices from input
+// index of a grid stream of this kernel, in place, so the device holds
+// them once and not twice. The input is first made to hold exactly the
+// vertices, as Refresh does, and the bytes that took are given back.
+// The kernel keeps no reference to the input: a later Update of it may
+// replace its buffer, and the hierarchy is not affected.
+func (kernel *Kernel) AccelerateOver(plan *Acceleration, root int,
+	stream *GridStream, index int) (int64, error) {
+	return kernel.accelerateOver(plan, root, keepFirst, stream, index)
+}
+
+// RebuildOver is Rebuild that reads the plan's vertices from input index
+// of a grid stream, as AccelerateOver does.
+func (kernel *Kernel) RebuildOver(plan *Acceleration, root int,
+	stream *GridStream, index int) (int64, error) {
+	return kernel.accelerateOver(plan, root, replaceFirst, stream, index)
+}
+
+// overInput is the grid stream input a build reads its vertices from.
+type overInput struct {
+	stream *GridStream
+	index  int
+}
+
+// accelerateOver makes the stream's input hold the plan's vertices and
+// builds over it. A stream of another kernel, a closed one, or an input
+// that does not exist is refused before anything is sent.
+func (kernel *Kernel) accelerateOver(plan *Acceleration, root int,
+	replace bool, stream *GridStream, index int) (int64, error) {
+	if kernel.ctx == nil {
+		return 0, errors.New("metal: the kernel is closed")
+	}
+	if plan == nil || stream == nil || stream.kernel != kernel ||
+		stream.stream == nil {
+		return 0, errors.New("metal: build over an open stream of this kernel")
+	}
+	if index < 0 || index >= len(stream.lengths) {
+		return 0, errors.New("metal: no such input to build over")
+	}
+	sent, err := stream.Refresh(index, plan.vertices)
+	if err != nil {
+		return sent, err
+	}
+	return sent, kernel.accelerate(plan, root, replace,
+		&overInput{stream: stream, index: index})
 }
 
 // Rebuild builds an instance root as Accelerate does and puts it in the
@@ -183,7 +230,7 @@ func (kernel *Kernel) Accelerate(plan *Acceleration, root int) error {
 // old one serves until the new one is built; a build that fails leaves
 // it. A frame whose meshes moved rebuilds its hierarchy on its kernel.
 func (kernel *Kernel) Rebuild(plan *Acceleration, root int) error {
-	return kernel.accelerate(plan, root, replaceFirst)
+	return kernel.accelerate(plan, root, replaceFirst, nil)
 }
 
 // keepFirst and replaceFirst are whether a build may take the place of a
@@ -193,9 +240,10 @@ const (
 	replaceFirst = true
 )
 
-// accelerate checks a plan, stages it for the bridge and builds it.
+// accelerate checks a plan, stages it for the bridge and builds it, over
+// an input of a grid stream when it is given one.
 func (kernel *Kernel) accelerate(plan *Acceleration, root int,
-	replace bool) error {
+	replace bool, over *overInput) error {
 	if kernel.ctx == nil {
 		return errors.New("metal: the kernel is closed")
 	}
@@ -230,7 +278,14 @@ func (kernel *Kernel) accelerate(plan *Acceleration, root int,
 	referenceWords := (*C.uint32_t)(unsafe.Pointer(
 		unsafe.SliceData(references)))
 	var failed C.int
-	if replace {
+	if over != nil {
+		failed = C.slayer_metal_accelerate_over(kernel.ctx, over.stream.stream,
+			C.int(over.index), boolInt(replace), vertices,
+			C.long(len(plan.vertices)), C.int(plan.stride), nodeWords,
+			C.int(len(plan.nodes)), matrixWords, referenceWords, C.int(root),
+			&unavailable, &why[0], C.int(len(why)))
+		runtime.KeepAlive(over.stream)
+	} else if replace {
 		failed = C.slayer_metal_reaccelerate(kernel.ctx, vertices,
 			C.long(len(plan.vertices)), C.int(plan.stride), nodeWords,
 			C.int(len(plan.nodes)), matrixWords, referenceWords, C.int(root),
@@ -250,6 +305,14 @@ func (kernel *Kernel) accelerate(plan *Acceleration, root int,
 		return errors.New("metal: " + C.GoString(&why[0]))
 	}
 	return nil
+}
+
+// boolInt is a flag as the C int the bridge takes.
+func boolInt(flag bool) C.int {
+	if flag {
+		return 1
+	}
+	return 0
 }
 
 // accelerationWork is how many nodes the kernel's last hierarchy build

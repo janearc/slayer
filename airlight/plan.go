@@ -8,13 +8,16 @@ import (
 	"strings"
 
 	"github.com/janearc/slayer/diskcache"
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/skylight"
 )
 
 // Plan is everything that decides an air's fields: the air's name, its
 // column at each wavelength cut at the set's ground, the sun at its top
 // there, the wavelengths and the band each stands for, the grid, the
-// photons, the seed, the workers and the solver's version.
+// span of the sun's zenith walked for, the photons, the crossings
+// wanted in the bins read and the most photons walked to have them,
+// the seed, the workers and the solver's version.
 type Plan struct {
 	name        string
 	ground      float64
@@ -23,10 +26,69 @@ type Plan struct {
 	columns     []skylight.Column
 	sun         []float64
 	grid        skylight.Grid
+	suns        skylight.Suns
 	photons     int
+	wanted      float64
+	most        int
 	seed        uint64
 	workers     int
 	version     string
+}
+
+// For is the plan walked for a sun along a way alone: for the span of
+// the two zenith bins a reading of that sun is drawn between, so its
+// photons start only where their light reaches the ground under it.
+//
+// At the same photons the bins it reads hold so many times the
+// crossings as the planet's disc is to the band they start on: about
+// ten for a sun two degrees up, four at seventeen, two at forty-seven.
+//
+// It walks as many photons as bring those bins to the crossings that
+// leave the colour noise of one 8-bit step, from a first walk of its
+// middle wavelength; never fewer than the air's, nor more than
+// mostPhotons.
+func (plan Plan) For(way maths.Vec) Plan {
+	plan.suns = readSpan(zenithOf(way), plan.grid.Zeniths)
+	step := colourNoiseAtOne / colourStep
+	plan.wanted, plan.most = step*step, mostPhotons
+	return plan
+}
+
+// enough is the photons each wavelength is walked with: the plan's,
+// where it wants no crossings; and otherwise the plan's scaled by the
+// crossings it wants over those a walk of its middle wavelength with
+// its photons held, from the plan's photons to its most. That first
+// walk is from a seed of its own and is not kept: the count is chosen
+// from it, so counting it too would let the count lean on its sample.
+func (plan Plan) enough() (int, error) {
+	if !(plan.wanted > none) {
+		return plan.photons, nil
+	}
+	middle := len(plan.columns) / two
+	first, spent, err := skylight.SolveFor(plan.columns[middle], plan.grid,
+		plan.suns, plan.photons, plan.seed+pilotSeedStep, plan.workers)
+	if err != nil {
+		return none, fmt.Errorf("airlight: %s at %d nm: %w", plan.name,
+			plan.wavelengths[middle], err)
+	}
+	pilot := newFields(plan)
+	pilot.keep(middle, first, spent)
+	held := pilot.held(plan.suns)
+	if !(held > none) {
+		return plan.most, nil
+	}
+	scaled := math.Ceil(float64(plan.photons) * plan.wanted / held)
+	return int(min(max(scaled, float64(plan.photons)),
+		float64(plan.most))), nil
+}
+
+// readSpan is the span of the sun's zenith, in radians, of the two bins
+// of zeniths equal bins that a sun at a zenith is read between.
+func readSpan(sunZenith float64, zeniths int) skylight.Suns {
+	at := axisOf(sunZenith/math.Pi, zeniths)
+	width := math.Pi / float64(zeniths)
+	return skylight.Suns{From: float64(at.low) * width,
+		To: float64(at.high+one) * width}
 }
 
 // NewPlan is the plan for a known air seen from a ground so many metres
@@ -44,6 +106,7 @@ func NewPlan(known Known, ground float64) (Plan, error) {
 		wavelengths: wavelengths(), band: everyNanometres,
 		grid: skylight.Grid{Heights: []float64{none}, Zeniths: zenithBins,
 			Views: known.Views, Azimuths: known.Azimuths},
+		suns:    skylight.Suns{From: none, To: math.Pi},
 		photons: known.Photons, seed: seed, workers: workers,
 		version: solverVersion}
 	for _, nanometres := range plan.wavelengths {
@@ -69,7 +132,7 @@ func wavelengths() []int {
 
 // worked is an air's column at a wavelength, cut at the ground, and the
 // sun at its top there.
-func worked(air Air, nanometres, ground float64) (skylight.Column,
+func worked(air air, nanometres, ground float64) (skylight.Column,
 	float64, error) {
 	column, err := air.Column(nanometres)
 	if err == nil {
@@ -84,11 +147,18 @@ func worked(air Air, nanometres, ground float64) (skylight.Column,
 }
 
 // Said is the plan in words, for a run to say what it worked out: the
-// air, its wavelengths and the photons each.
+// air, its wavelengths, the photons each and the suns they are for.
 func (plan Plan) Said() string {
-	return fmt.Sprintf("%s's air at %d wavelengths from %d to %d nm, %d "+
-		"photons each", plan.name, len(plan.wavelengths), firstNanometre,
-		lastNanometre, plan.photons)
+	photons := fmt.Sprintf("%d photons each", plan.photons)
+	if plan.wanted > none {
+		photons = fmt.Sprintf("%d to %d photons each, as many as bring the "+
+			"bins read to %.0f crossings", plan.photons, plan.most,
+			plan.wanted)
+	}
+	return fmt.Sprintf("%s's air at %d wavelengths from %d to %d nm, %s, "+
+		"for a sun %.0f to %.0f degrees from up", plan.name,
+		len(plan.wavelengths), firstNanometre, lastNanometre, photons,
+		plan.suns.From/maths.Degree, plan.suns.To/maths.Degree)
 }
 
 // Keyed is a key with every part of the plan said: what a cache keeps
@@ -108,7 +178,11 @@ func (plan Plan) Keyed(key diskcache.Key) diskcache.Key {
 		Text("wavelengths", wholes(plan.wavelengths)+" every "+
 			exactly(plan.band)).
 		Text("grid", wholes(grid)+" at "+strings.Join(heights, " ")).
+		Text("suns", exactly(plan.suns.From)+" to "+
+			exactly(plan.suns.To)).
 		Text("photons", strconv.Itoa(plan.photons)).
+		Text("crossings", exactly(plan.wanted)+" to at most "+
+			strconv.Itoa(plan.most)).
 		Text("seed", strconv.FormatUint(plan.seed, decimal)).
 		Text("workers", strconv.Itoa(plan.workers)).
 		Text("solver", plan.version)
@@ -117,12 +191,16 @@ func (plan Plan) Keyed(key diskcache.Key) diskcache.Key {
 // Solve walks each wavelength's column and keeps its field: the
 // radiance in every bin, the counts behind them, the direct sun's share
 // at each step of the sun's zenith, and the share of the sunlight on
-// the planet that its ground absorbed.
+// the part of the planet walked that its ground absorbed.
 func (plan Plan) Solve() (*Fields, error) {
+	photons, err := plan.enough()
+	if err != nil {
+		return nil, err
+	}
 	fields := newFields(plan)
 	for wave, column := range plan.columns {
-		field, spent, err := skylight.Solve(column, plan.grid, plan.photons,
-			plan.seed, plan.workers)
+		field, spent, err := skylight.SolveFor(column, plan.grid, plan.suns,
+			photons, plan.seed, plan.workers)
 		if err != nil {
 			return nil, fmt.Errorf("airlight: %s at %d nm: %w", plan.name,
 				plan.wavelengths[wave], err)

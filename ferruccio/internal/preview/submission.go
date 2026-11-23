@@ -29,6 +29,23 @@ type planState struct {
 const requestName = "azazel-request.json"
 const terminalName = "azazel-terminal.json"
 
+// previewTimeoutSeconds limits a preview sent through the queue. The value
+// was chosen: a preview that takes longer is not a preview.
+const previewTimeoutSeconds = 300
+
+// fullTimeoutSeconds is the limit sent with a full render. The request schema
+// requires a limit, so this is the longest it accepts, seven days. It was
+// chosen as the ceiling, not as a time a full render is expected to take.
+const fullTimeoutSeconds = 604800
+
+// timeoutSeconds is the queue limit for this plan.
+func (plan *Plan) timeoutSeconds() int64 {
+	if plan.Profile.Full {
+		return fullTimeoutSeconds
+	}
+	return previewTimeoutSeconds
+}
+
 // freezeRequest persists exactly one immutable submission per prepared plan.
 func (plan *Plan) freezeRequest(tools Tools) (queueRequest, error) {
 	var request queueRequest
@@ -48,7 +65,7 @@ func (plan *Plan) freezeRequest(tools Tools) (queueRequest, error) {
 	}
 	identity := sha256.Sum256([]byte(filepath.Clean(plan.Directory)))
 	request = queueRequest{Agent: tools.Agent, Key: "ferruccio-" + hex.EncodeToString(identity[:]), Command: argv[0], Args: argv[1:],
-		Directory: filepath.Dir(plan.Input), Lane: plan.lane(), TimeoutSeconds: 300,
+		Directory: filepath.Dir(plan.Input), Lane: plan.lane(), TimeoutSeconds: plan.timeoutSeconds(),
 		Inputs: inputs, Environment: queueEnvironment(tools)}
 	raw, err := json.MarshalIndent(request, "", "  ")
 	if err != nil {

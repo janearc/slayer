@@ -19,14 +19,15 @@ type Spot struct {
 }
 
 // ovalness is how many times wider east to west than north to south a
-// spot is drawn: picked, near the great red spot's of recent decades,
-// not pinned.
-const ovalness = 1.7
+// spot is drawn; its value is in picks.yaml.
+var ovalness = pick("spot-ovalness")
 
 // NewSpot is a spot, refused off the planet or with no size.
 func NewSpot(latitude, longitude, radius, turn float64) (Spot, error) {
-	if !(latitude >= -90 && latitude <= 90) || !(radius > 0 &&
-		radius <= 90) || math.IsNaN(longitude) || math.IsNaN(turn) {
+	if !(latitude >= -poleLatitude && latitude <= poleLatitude) ||
+		!(radius > nothing && radius <= poleLatitude) ||
+		math.IsNaN(longitude) || math.IsNaN(turn) ||
+		endless(longitude) || endless(turn) {
 		return Spot{}, fmt.Errorf("a spot at %g, %g of radius %g",
 			latitude, longitude, radius)
 	}
@@ -37,22 +38,47 @@ func NewSpot(latitude, longitude, radius, turn float64) (Spot, error) {
 // anticyclone is whether a spot turns against the planet's turning:
 // clockwise seen from above in the north, the other way in the south.
 //
-// on jupiter these are the white ovals and the great red spot, high
-// haze lifted in their middles; the cyclones are the brown barges,
-// cleared down to deeper cloud.
-func (spot Spot) anticyclone() bool { return spot.turn*spot.latitude < 0 }
+// these are the white ovals and the great spots of a gas giant, high haze
+// lifted in their middles; the cyclones are its barges, cleared down to
+// deeper cloud.
+func (spot Spot) anticyclone() bool {
+	return spot.turn*spot.latitude < nothing
+}
 
-// mostSpots is the most spots a swarm may hold: picked, so a set cannot
-// ask a cost without end.
-const mostSpots = 2000
+// mostSpots is the most spots a swarm may hold, so a set cannot ask a cost
+// without end; its value is in picks.yaml.
+var mostSpots = pickCount("swarm-most-spots")
 
 // swarmTurn is how far a swarm's spots turn at their middles, in half
-// turns, and highest how near the poles they are placed, in degrees:
-// picked.
-const (
-	swarmTurn    = 2.5
-	swarmHighest = 75.0
+// turns, and swarmHighest how near the poles they are placed, in degrees;
+// swarmLargest is the largest radius, in degrees, a swarm's spots may be
+// given. all three are in picks.yaml.
+var (
+	swarmTurn    = pick("swarm-turn")
+	swarmHighest = pick("swarm-highest")
+	swarmLargest = pick("swarm-largest")
 )
+
+// drawsPerSpot is defined as how many draws of a seeded hash a swarm's spot
+// takes, and the four places they hold: latitude, longitude, radius and way.
+const (
+	// drawsPerSpot is defined as how many draws a swarm's spot takes: four.
+	drawsPerSpot = 4
+	// latitudeDraw is defined as the place of the draw for a spot's latitude.
+	latitudeDraw = 0
+	// longitudeDraw is defined as the place of the draw for its longitude.
+	longitudeDraw = 1
+	// radiusDraw is defined as the place of the draw for its radius.
+	radiusDraw = 2
+	// wayDraw is defined as the place of the draw for which way it turns.
+	wayDraw = 3
+)
+
+// spotDraw is a draw from zero to one for one of a swarm's spots, by its
+// place in the swarm and which of its draws it is.
+func spotDraw(seed uint64, spot int, which int64) float64 {
+	return noise.Hash(seed, int64(drawsPerSpot*spot)+which)
+}
 
 // Swarmed is the storms with a swarm of spots more: so many, from a
 // seed, their radii from smallest to largest in degrees, so many more
@@ -64,23 +90,26 @@ const (
 // the jets are set first.
 func (storms Storms) Swarmed(seed uint64, count int, smallest, largest,
 	slope float64) (Storms, error) {
-	if count < 0 || count > mostSpots || !(smallest > 0) ||
-		!(largest >= smallest && largest <= 30) || !(slope > 1) {
+	if count < nothing || count > mostSpots || !(smallest > nothing) ||
+		!(largest >= smallest && largest <= swarmLargest) ||
+		!(slope > whole) || endless(slope) {
 		return storms, fmt.Errorf("a swarm of %d spots from %g to %g "+
 			"degrees, slope %g", count, smallest, largest, slope)
 	}
 	spots := append([]Spot(nil), storms.spots...)
+	high := math.Sin(swarmHighest * maths.Degree)
 	for i := range count {
-		drawn := func(k int64) float64 { return noise.Hash(seed, int64(4*i)+k) }
-		high := math.Sin(swarmHighest * maths.Degree)
-		latitude := math.Asin((2*drawn(0)-1)*high) / maths.Degree
-		longitude := 360*drawn(1) - 180
-		radius := powerLaw(drawn(2), smallest, largest, slope)
+		latitude := math.Asin((double*spotDraw(seed, i, latitudeDraw)-
+			whole)*high) / maths.Degree
+		longitude := fullTurnDegrees*spotDraw(seed, i, longitudeDraw) -
+			halfTurnDegrees
+		radius := sized(spotDraw(seed, i, radiusDraw), smallest, largest,
+			slope)
 		way := storms.turning(latitude)
-		if way == 0 {
-			way = 1
-			if drawn(3) < 0.5 {
-				way = -1
+		if way == nothing {
+			way = whole
+			if spotDraw(seed, i, wayDraw) < half {
+				way = -whole
 			}
 		}
 		spots = append(spots, Spot{latitude: latitude, longitude: longitude,
@@ -90,26 +119,19 @@ func (storms Storms) Swarmed(seed uint64, count int, smallest, largest,
 	return storms, nil
 }
 
-// powerLaw is a size from smallest to largest drawn by a share from zero to
-// one, so many more of the small as a slope says.
-func powerLaw(share, smallest, largest, slope float64) float64 {
-	low, high := math.Pow(smallest, 1-slope), math.Pow(largest, 1-slope)
-	return math.Pow(low+share*(high-low), 1/(1-slope))
-}
-
 // turning is which way the jets' shear turns the air at a latitude in degrees,
 // one the planet's way and minus one against it; zero with no jets.
 //
 // the jet runs as the sine of the latitude, so the air's turning, against the
 // jet's slope across the latitudes, is minus its cosine.
 func (storms Storms) turning(latitude float64) float64 {
-	if storms.shear == 0 {
-		return 0
+	if storms.shear == nothing {
+		return nothing
 	}
-	if math.Cos(2*math.Pi*latitude/storms.every) > 0 {
-		return -1
+	if math.Cos(circle*latitude/storms.every) > nothing {
+		return -whole
 	}
-	return 1
+	return whole
 }
 
 // a vortex is a spot placed on the face: its middle, the ways east and
@@ -122,11 +144,11 @@ type vortex struct {
 
 // vortices is the storms' spots placed in a frame, once a picture.
 func (storms Storms) vortices(ways frame) []vortex {
-	placed := make([]vortex, 0, len(storms.spots))
+	placed := make([]vortex, nothing, len(storms.spots))
 	for _, spot := range storms.spots {
 		middle := ways.toward(spot.latitude, spot.longitude)
 		east := ways.pole.Cross(middle)
-		if east.Len() == 0 {
+		if east.Len() == nothing {
 			east = ways.east
 		}
 		east = east.Unit()
@@ -140,8 +162,8 @@ func (storms Storms) vortices(ways frame) []vortex {
 // within is how far into a vortex a way is, on its oval: zero at its middle,
 // one at its edge, and more outside it.
 func (whirl vortex) within(up maths.Vec) float64 {
-	if up.Dot(whirl.middle) <= 0 {
-		return math.Inf(1)
+	if up.Dot(whirl.middle) <= nothing {
+		return math.Inf(whole)
 	}
 	across := up.Dot(whirl.east) / ovalness
 	return math.Hypot(across, up.Dot(whirl.north)) / whirl.radius
@@ -160,12 +182,14 @@ type marks struct {
 // holding is how far in from a vortex's edge, as a share of its radius,
 // it holds its air whole against the jets; core, where its cap or
 // clearing is full; and collar, how far out a white oval's dark ring
-// lies, and how wide it is: picked, after juno's pictures.
-const (
-	holding = 0.3
-	core    = 0.6
-	collar  = 0.92
-	ring    = 0.08
+// lies, and collarWidth how wide it is. collarClearing is how much of a
+// clearing the ring shows. all are in picks.yaml.
+var (
+	holding        = pick("vortex-holding")
+	core           = pick("vortex-core")
+	collar         = pick("vortex-collar")
+	collarWidth    = pick("vortex-collar-width")
+	collarClearing = pick("vortex-collar-clearing")
 )
 
 // swirled is a way turned about each vortex it falls in, by the spot's
@@ -175,18 +199,20 @@ func swirled(up maths.Vec, whirls []vortex) (maths.Vec, marks) {
 	var made marks
 	for _, whirl := range whirls {
 		in := whirl.within(up)
-		if in >= 1 {
+		if in >= whole {
 			continue
 		}
-		share := 1 - in
-		if held := math.Min(1, share/holding); held > made.held {
+		share := whole - in
+		if held := math.Min(whole, share/holding); held > made.held {
 			made.held, made.ridden = held, whirl.spot.latitude
 		}
-		middle := math.Max(0, math.Min(1, (1-in)/(1-core)))
-		rung := math.Exp(-(in - collar) * (in - collar) / (ring * ring))
+		middle := math.Max(nothing, math.Min(whole,
+			(whole-in)/(whole-core)))
+		rung := math.Exp(-(in - collar) * (in - collar) /
+			(collarWidth * collarWidth))
 		if whirl.spot.anticyclone() {
 			made.capped = math.Max(made.capped, middle)
-			made.cleared = math.Max(made.cleared, 0.6*rung)
+			made.cleared = math.Max(made.cleared, collarClearing*rung)
 		} else {
 			made.cleared = math.Max(made.cleared, middle)
 		}

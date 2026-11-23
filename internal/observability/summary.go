@@ -251,7 +251,7 @@ func (b summaryBarkeep) request(ctx context.Context, path string, payload any) (
 		return 0, err
 	}
 	if len(body) > 8192 || res.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("Barkeep %s returned %s", path, res.Status)
+		return 0, fmt.Errorf("the Barkeep %s returned %s", path, res.Status)
 	}
 	var status struct {
 		Queued *int `json:"queued"`
@@ -308,7 +308,7 @@ func RunVendettaSummary(ctx context.Context, client, sender, room, message strin
 		return err
 	}
 	if strings.Contains(output.String(), "cut to the longest a line may be") {
-		return fmt.Errorf("Vendetta accepted a truncated summary")
+		return fmt.Errorf("the Vendetta accepted a truncated summary")
 	}
 	return nil
 }
@@ -321,7 +321,8 @@ type limitedSummaryOutput struct{ bytes.Buffer }
 func (b *limitedSummaryOutput) Write(p []byte) (int, error) {
 	remaining := 1024 - b.Len()
 	if remaining > 0 {
-		_, _ = b.Buffer.Write(p[:min(remaining, len(p))])
+		keptBytes := min(remaining, len(p))
+		_, _ = b.Buffer.Write(p[:keptBytes])
 	}
 	return len(p), nil
 }

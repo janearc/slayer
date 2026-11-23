@@ -249,7 +249,8 @@ func ringed() string {
 // a planet's pole and rings are read as written, and a pole unsaid is
 // straight up.
 func TestAPlanetsPoleAndRingsAreRead(t *testing.T) {
-	made, err := set.Read("giant.yaml", []byte(ringed()))
+	source := ringed()
+	made, err := set.Read("giant.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

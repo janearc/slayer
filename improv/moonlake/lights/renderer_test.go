@@ -57,7 +57,9 @@ func TestRendererBaseRoundTripAndIndependentResults(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, value := range rendererAssets().Plate.Light {
-		want := float64(float32(float64(float32(value)) * 0.3333))
+		narrow := float32(value)
+		scaled := float64(narrow) * 0.3333
+		want := float64(float32(scaled))
 		if got.Sky.Light[i] != want || got.Front.Light[i] != 0 {
 			t.Fatalf("channel %d: sky=%v want=%v front=%v", i, got.Sky.Light[i], want, got.Front.Light[i])
 		}
@@ -119,7 +121,7 @@ func TestRendererFireNeedsOnlySelectedFramesAndUsesFloatBoundary(t *testing.T) {
 	for i := range want.Light {
 		want.Light[i] = amount * pass.Light[i]
 	}
-	FireShoulder(want, config.Top, math.Exp2(config.Stops))
+	fireShoulder(want, config.Top, math.Exp2(config.Stops))
 	if !slices.Equal(got.Light, want.Light) {
 		t.Fatalf("fire=%v want=%v", got.Light, want.Light)
 	}
@@ -198,16 +200,16 @@ func TestRendererLaserApertureSurvivesZeroBeamsAndBlackColour(t *testing.T) {
 	camera := NewCamera(8, 8, CameraSettings{109.65, -0.5, 70.41, 150})
 	origin := camera.Forward.Scale(1000)
 	input := LaserInput{Camera: camera, Moon: [3]float64{1, 1, 1}, ShoreRow: 8}
-	AddLaserAperture(sky, front, input, origin, [3]float64{1, 1, 1})
+	addLaserAperture(sky, front, input, origin, [3]float64{1, 1, 1})
 	if !slices.ContainsFunc(sky.Light, func(v float64) bool { return v > 0 }) {
 		t.Fatal("aperture did not light")
 	}
 	clear(sky.Light)
-	AddLaserAperture(sky, front, input, origin, [3]float64{})
+	addLaserAperture(sky, front, input, origin, [3]float64{})
 	if slices.ContainsFunc(sky.Light, func(v float64) bool { return v != 0 }) {
 		t.Fatal("black aperture emitted light")
 	}
-	ways, _, _ := FigureWays("fan", 0, 0, 10, 0, 0)
+	ways, _, _ := figureWays("fan", 0, 0, 10, 0, 0)
 	if len(ways) != 0 {
 		t.Fatal("zero fan unexpectedly has beams")
 	}
@@ -227,7 +229,7 @@ func TestRendererCachedMasksPreserveDistinctThresholds(t *testing.T) {
 	front, trees, input := hazeFixture()
 	want := cloneRendererImage(front)
 	AddBackHaze(want, trees, input)
-	classified, err := CoveredBy(trees)
+	classified, err := coveredBy(trees)
 	if err != nil {
 		t.Fatal(err)
 	}

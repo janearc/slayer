@@ -155,7 +155,8 @@ func TestSampleNativeAdapter(t *testing.T) {
 				}
 				return data, nil
 			}).AnyTimes()
-			adapter.EXPECT().Statfs(int(output.Fd())).DoAndReturn(func(int) (unix.Statfs_t, error) {
+			descriptor := int(output.Fd())
+			adapter.EXPECT().Statfs(descriptor).DoAndReturn(func(int) (unix.Statfs_t, error) {
 				stat := unix.Statfs_t{Bsize: 4096, Blocks: 100, Bfree: 30, Bavail: 20}
 				if scenario == "disk-error" {
 					return stat, unix.EIO

@@ -107,9 +107,9 @@ func TestAChangedPixelFailsTheProofThere(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var failed []Pixel
+	var failed []checkedPixel
 	for _, pixel := range proof.Pixels {
-		if !pixel.Holds() {
+		if !pixel.holds() {
 			failed = append(failed, pixel)
 		}
 	}

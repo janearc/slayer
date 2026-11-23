@@ -1,0 +1,61 @@
+# grazing sea: a height-field sea seen from two metres up, level, so the
+# horizon runs through the middle of the picture and everything below it
+# is water seen at a low angle. It is the shot that shows whether a ray
+# that skims the surface arrives: a ray that does not arrive is drawn as
+# what lies past the water, and below the horizon that is black.
+#
+# the frame. places are metres, x east, y north, z up, mean sea at z=0.
+# the camera stands 230 m south of the sea's middle, 2 m up, and looks due
+# north along level. the sea has no edge, so most of the picture's lower
+# half is rays at a few degrees below level, and the horizon is the level
+# line.
+#
+# the sea. the wave bands of the wind, summed at every point (the ocean
+# says no extent and no samples), a wind of 7 m/s, a fetch of 500 km, deep
+# water, waves running toward the north, seed 7, time 0. every input is
+# chosen.
+#
+# the water. a clear dielectric at water's index with no extinction,
+# its colour a dark stand-in for what the water sends back up.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: grazing sea
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 0, altitude: 17.5}
+  film:
+    width: 1600
+    height: 400
+    rays: 1
+    wide: 60
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+        source: "water's refractive index; colour by eye, a stand-in"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 500000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 1.5708, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a 7 m/s wind, fully developed, no shelf source"
+  cameras:
+    level:
+      title: "two metres up, level, toward the far edge of the sea"
+      location: {at: [0, -230, 2]}
+      orientation: {look_at: [0, -100, 2]}

@@ -10,8 +10,8 @@ import (
 
 // TestKindsSayWhatTheyAre checks the word for each kind of ground.
 func TestKindsSayWhatTheyAre(t *testing.T) {
-	if Measured.String() != "measured" || Generated.String() != "generated" {
-		t.Errorf("kinds are %q and %q", Measured.String(), Generated.String())
+	if measured.String() != "measured" || Generated.String() != "generated" {
+		t.Errorf("kinds are %q and %q", measured.String(), Generated.String())
 	}
 }
 
@@ -229,13 +229,14 @@ func TestTheKeptCornersAreClearedWhenTheyReachTheirLimit(t *testing.T) {
 	for name := range uint64(most) {
 		world.kept[name+1<<40] = read{}
 	}
-	if world.Kept() != most {
-		t.Fatalf("the cache holds %d corners", world.Kept())
+	if world.cornersHeld() != most {
+		t.Fatalf("the cache holds %d corners", world.cornersHeld())
 	}
-	if _, err := world.read(vectorOf(*spot(t, 12.3, 4.5)), 7); err != nil {
+	place := vectorOf(*spot(t, 12.3, 4.5))
+	if _, err := world.read(place, 7); err != nil {
 		t.Fatal(err)
 	}
-	if world.Kept() != 1 {
-		t.Errorf("the cache holds %d corners after a full cache was read", world.Kept())
+	if world.cornersHeld() != 1 {
+		t.Errorf("the cache holds %d corners after a full cache was read", world.cornersHeld())
 	}
 }

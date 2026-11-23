@@ -29,7 +29,8 @@ func run(args []string, out, errout io.Writer) int {
 		if mode == "prepare" {
 			load = verb.Light
 		}
-		tool.Verb(verb.Name(mode), verb.NoShort, "prepare or draw the native Alfa clip", "Takes OUTPUT TEMPLATE. Uses OUTPUT/inputs/slayer. Existing inputs must match exactly; existing pictures require the matching input pin. Render writes120nativeframes at12fps and encodes10seconds.", verb.Example("Example_"+mode), verb.NewFacts(verb.WritesTo("the named output directory"), verb.Changes, verb.ThisMachine, verb.NoOne, load), func(call pzm.Call) error { return invoke(call, mode) }, pzm.Value("camera-east", verb.NoShort, "camera easting in metres; default -1650, range +/-1000000"), pzm.Value("aim-east", verb.NoShort, "target easting in metres; default -1535, range +/-1000000"))
+		outputWrites := verb.WritesTo("the named output directory")
+		tool.Verb(verb.Name(mode), verb.NoShort, "prepare or draw the native Alfa clip", "Takes OUTPUT TEMPLATE. Uses OUTPUT/inputs/slayer. Existing inputs must match exactly; existing pictures require the matching input pin. Render writes120nativeframes at12fps and encodes10seconds.", verb.Example("Example_"+mode), verb.NewFacts(outputWrites, verb.Changes, verb.ThisMachine, verb.NoOne, load), func(call pzm.Call) error { return invoke(call, mode) }, pzm.Value("camera-east", verb.NoShort, "camera easting in metres; default -1650, range +/-1000000"), pzm.Value("aim-east", verb.NoShort, "target easting in metres; default -1535, range +/-1000000"))
 	}
 	return tool.Run(args, out, errout)
 }
@@ -130,7 +131,9 @@ func execute(c config, output io.Writer) error {
 	if err != nil {
 		return err
 	}
-	pin, err := json.Marshal(pinned{fmt.Sprintf("%x", sha256.Sum256(base)), fmt.Sprintf("%x", sha256.Sum256(renderer)), c.camera, c.aim})
+	baseDigest := sha256.Sum256(base)
+	rendererDigest := sha256.Sum256(renderer)
+	pin, err := json.Marshal(pinned{fmt.Sprintf("%x", baseDigest), fmt.Sprintf("%x", rendererDigest), c.camera, c.aim})
 	if err != nil {
 		return err
 	}

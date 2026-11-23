@@ -5,10 +5,12 @@ import (
 	"image"
 	"time"
 
+	"github.com/janearc/slayer/fermat"
 	"github.com/janearc/slayer/interfaces/movie"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/render/colour"
 	"github.com/janearc/slayer/render/frame"
+	"github.com/janearc/slayer/session"
 )
 
 // The seams the runner draws through. Each is the least a caller needs
@@ -16,7 +18,7 @@ import (
 // tested with mocks (seams_mock_test.go, made by mockgen) and its
 // pixels with the real pieces.
 
-// drawn is one frame's light and its own hud, as hillside.Drawn gives
+// drawn is one frame's light and its own hud, as session.Drawn gives
 // them; a plate has no hud.
 type drawn interface {
 	Light() *frame.Frame
@@ -27,6 +29,12 @@ type drawn interface {
 // tone that develops them where the job says no print and no stock.
 type source interface {
 	Frame(ctx context.Context, index int) (drawn, error)
+	// Prove replays pixels of a raw of frame index on the exact tracer
+	// and holds each to the raw bit for bit, as session.Prove does.
+	Prove(index int, proving session.Proving) (fermat.Proof, error)
+	// Sheet writes a proof's sheet in dir, or beside its raw where dir
+	// is empty, and says where.
+	Sheet(proof fermat.Proof, dir string) (string, error)
 	Tone() colour.Tone
 	Close() error
 }

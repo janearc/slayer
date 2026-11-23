@@ -89,7 +89,8 @@ func writeWav(t *testing.T, seconds int) string {
 	copy(data[36:], "data")
 	binary.LittleEndian.PutUint32(data[40:], uint32(2*count))
 	for i := 0; i < count; i++ {
-		sample := int16(8000 * math.Sin(2*math.Pi*440*float64(i)/rate))
+		tick := float64(i)
+		sample := int16(8000 * math.Sin(2*math.Pi*440*tick/rate))
 		binary.LittleEndian.PutUint16(data[44+2*i:], uint16(sample))
 	}
 	path := filepath.Join(t.TempDir(), "song.wav")
@@ -167,7 +168,8 @@ func TestWritePNG(t *testing.T) {
 	if read.Bounds().Dx() != 2 || r>>8 != 200 || g>>8 != 100 || b>>8 != 50 {
 		t.Errorf("read back %v, %v %v %v", read.Bounds(), r>>8, g>>8, b>>8)
 	}
-	if err := writePNG(filepath.Join(t.TempDir(), "gone", "out.png"), picture); err == nil {
+	gone := filepath.Join(t.TempDir(), "gone", "out.png")
+	if err := writePNG(gone, picture); err == nil {
 		t.Error("wrote into a folder that is not there")
 	}
 }

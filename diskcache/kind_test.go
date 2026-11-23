@@ -18,7 +18,7 @@ func TestNewKindDeclaresAKind(t *testing.T) {
 func TestNewKindRefusesNamesThatAreNotWords(t *testing.T) {
 	for _, name := range []string{"", "Upper", "a/b", "-lead", "trail-",
 		"two words", "dot.ted"} {
-		if _, err := NewKind(name, testCap, "why"); err == nil {
+		if _, err := newKind(name, testCap, "why"); err == nil {
 			t.Errorf("kind %q was declared", name)
 		}
 	}
@@ -30,7 +30,7 @@ func TestNewKindRefusesNoCapAndNoReason(t *testing.T) {
 		cap int64
 		why string
 	}{{0, "why"}, {-1, "why"}, {testCap, " "}} {
-		if _, err := NewKind("kind-uncapped", each.cap, each.why); err == nil {
+		if _, err := newKind("kind-uncapped", each.cap, each.why); err == nil {
 			t.Errorf("cap %d, reason %q was declared", each.cap, each.why)
 		}
 	}
@@ -38,7 +38,7 @@ func TestNewKindRefusesNoCapAndNoReason(t *testing.T) {
 
 func TestNewKindTakesTheSameDeclarationTwice(t *testing.T) {
 	testKind(t, "kind-twice")
-	if _, err := NewKind("kind-twice", testCap, "a test's"); err != nil {
+	if _, err := newKind("kind-twice", testCap, "a test's"); err != nil {
 		t.Fatalf("the same declaration twice was refused: %v", err)
 	}
 }
@@ -46,7 +46,7 @@ func TestNewKindTakesTheSameDeclarationTwice(t *testing.T) {
 // anti-test of TestNewKindTakesTheSameDeclarationTwice
 func TestNewKindRefusesOneNameWithTwoCaps(t *testing.T) {
 	testKind(t, "kind-two-caps")
-	if _, err := NewKind("kind-two-caps", testCap+1, "a test's"); err == nil {
+	if _, err := newKind("kind-two-caps", testCap+1, "a test's"); err == nil {
 		t.Fatal("one name was declared with two caps")
 	}
 }
@@ -92,7 +92,7 @@ func TestKindNamedRefusesAnUndeclaredName(t *testing.T) {
 
 // anti-test of TestKindsAreInNameOrder
 func TestKindsDoNotListARefusedDeclaration(t *testing.T) {
-	if _, err := NewKind("kind-refused", 0, "why"); err == nil {
+	if _, err := newKind("kind-refused", 0, "why"); err == nil {
 		t.Fatal("a kind of no cap was declared")
 	}
 	for _, each := range Kinds() {

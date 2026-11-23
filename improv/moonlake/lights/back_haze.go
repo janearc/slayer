@@ -10,10 +10,10 @@ type BackHazeInput struct {
 	Gain, Seconds float64
 }
 
-// Backlights returns the positions of the two lights behind the trees, as
+// backlights returns the positions of the two lights behind the trees, as
 // offsets from the eye. Only their height depends on eyeOverLake, the eye's
 // height over the lake. The first goes with white, the second with magenta.
-func Backlights(eyeOverLake float64) [2]Vec {
+func backlights(eyeOverLake float64) [2]Vec {
 	z := 1126.5 - (1076 + eyeOverLake)
 	return [2]Vec{{46.4, -3.8, z}, {38.3, -26.4, z}}
 }
@@ -29,7 +29,7 @@ func AddBackHaze(front, trees Image, input BackHazeInput) {
 	if most == 0 {
 		return
 	}
-	mask, _ := CoveredBy(trees)
+	mask, _ := coveredBy(trees)
 	addBackHaze(front, mask, input)
 }
 

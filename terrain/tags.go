@@ -89,9 +89,11 @@ func (raster *Raster) numbers(value entry) []uint64 {
 	for i := range value.count {
 		switch value.kind {
 		case 3:
-			out = append(out, uint64(raster.order.Uint16(value.raw[2*i:])))
+			short := raster.order.Uint16(value.raw[2*i:])
+			out = append(out, uint64(short))
 		case 4:
-			out = append(out, uint64(raster.order.Uint32(value.raw[4*i:])))
+			long := raster.order.Uint32(value.raw[4*i:])
+			out = append(out, uint64(long))
 		case 16:
 			out = append(out, raster.order.Uint64(value.raw[8*i:]))
 		case 1:
@@ -126,9 +128,20 @@ func (raster *Raster) one(tags map[int]entry, tag int) int {
 	return int(all[0])
 }
 
+// compressed is whether the raster's compression is one this reads:
+// none, lzw, or deflate, which TIFF numbers 8 and, as Adobe first did,
+// 32946. Each is a zlib stream.
+func (raster *Raster) compressed() bool {
+	switch raster.compression {
+	case uncompressed, lzwed, deflated, oldDeflated:
+		return true
+	}
+	return false
+}
+
 // take keeps what the tags say, refusing a raster that is not one band
 // of float32 or signed 16-bit heights in tiles or explicitly sized strips,
-// uncompressed or lzw, placed by positive pixel scales and a tiepoint at its
+// uncompressed, lzw or deflate, placed by positive pixel scales and a tiepoint at its
 // first sample. The tiepoint's own east and north may be negative.
 // Projected legacy grids retain square scales; geographic grids retain both.
 func (raster *Raster) take(tags map[int]entry) error {
@@ -170,7 +183,7 @@ func (raster *Raster) take(tags map[int]entry) error {
 	switch {
 	case raster.one(tags, tagSamples) > 1:
 		return fmt.Errorf("%w: more than one band", errRaster)
-	case raster.compression != uncompressed && raster.compression != lzwed:
+	case !raster.compressed():
 		return fmt.Errorf("%w: compression %d", errRaster,
 			raster.compression)
 	}
@@ -265,7 +278,8 @@ func (raster *Raster) place(tags map[int]entry) error {
 func (raster *Raster) tiles() (int, error) {
 	rows := (raster.height-1)/raster.tileH + 1
 	limit := raster.budget.MetadataBytes / tileReferenceBytes
-	count, err := allocation(uint64(raster.across()), uint64(rows), limit)
+	tilesAcross := uint64(raster.across())
+	count, err := allocation(tilesAcross, uint64(rows), limit)
 	if err != nil {
 		return 0, fmt.Errorf("terrain: tile directory capacity: %w", err)
 	}

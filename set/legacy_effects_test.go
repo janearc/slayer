@@ -82,7 +82,8 @@ func TestLegacyEffectsReaderRefusesMissingAndMalformedContracts(t *testing.T) {
 			if raw == test.raw {
 				t.Fatal("ineffective fixture change")
 			}
-			_, err := set.Read("legacy-effects.yaml", []byte(legacyScene(raw)))
+			source := legacyScene(raw)
+			_, err := set.Read("legacy-effects.yaml", []byte(source))
 			var schemaError *jsonschema.ValidationError
 			if err == nil || errors.As(err, &schemaError) ||
 				!strings.Contains(err.Error(), test.want) {
@@ -95,7 +96,8 @@ func TestLegacyEffectsReaderRefusesMissingAndMalformedContracts(t *testing.T) {
 		{bed, "  terrain:", "fuel bed needs ground scenery"},
 	} {
 		raw := omitSceneBlock(t, test.raw, test.key)
-		_, err := set.Read("missing-effects.yaml", []byte(legacyScene(raw)))
+		source := legacyScene(raw)
+		_, err := set.Read("missing-effects.yaml", []byte(source))
 		if err == nil || !strings.Contains(err.Error(), test.want) {
 			t.Fatalf("missing %s: want %q, got %v", test.key, test.want, err)
 		}

@@ -53,10 +53,12 @@ const (
 const (
 	ShortcutLampStore = "lamp-store"
 	ShortcutSkyLooks  = "sky-looks"
+	ShortcutRestir    = "restir"
 )
 
 // lightShortcuts is the shortcuts fastlight speaks for.
-var lightShortcuts = []string{ShortcutLampStore, ShortcutSkyLooks}
+var lightShortcuts = []string{ShortcutLampStore, ShortcutSkyLooks,
+	ShortcutRestir}
 
 // Switch is one flag or shortcut as the schema declares it: its name,
 // the line it says of itself, and whether it is a shortcut.

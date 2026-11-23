@@ -52,7 +52,7 @@ const (
 	lightShare = 1e-9 // picked: a few roundings of a chain of steps
 )
 
-// shoulderTones are the tones the shoulder is checked at: hillside's knee
+// shoulderTones are the tones the shoulder is checked at: the session's knee
 // and top, the same knee with the top read as a hundred, and two others.
 var shoulderTones = []Tone{
 	NewTone(none, 0.7, 8, none),    // defined: hillside/run.go's tone
@@ -156,10 +156,12 @@ func TestNoKneeOrOneOutOfRangeIsTheClamp(t *testing.T) {
 	}
 }
 
-// light at or under the knee is as it is, even a colour already past
-// white. two of red has a luminance of 2 * 0.2126 = 0.4252, so a knee
-// of exactly that has the light on it, and the shoulder would otherwise
-// draw it toward white.
+// a grey at or under the knee is as it is. a colour past white is not
+// clipped there: its luminance is as it is and it is drawn toward white
+// along its hue, as it is above the knee. two of red has a luminance of
+// 2 * 0.2126 = 0.4252, so a knee of exactly that has the light on it.
+// the red part is then one, and the green and blue, which were equal
+// and zero, share the rest: y/(2 - y), y the luminance.
 func TestLightOnTheKneeIsAsItIs(t *testing.T) {
 	grey := maths.Grey(0.4) // picked: under the knee of a half
 	if got := NewTone(none, half, none, none).Squeeze(grey); got != grey {
@@ -167,8 +169,10 @@ func TestLightOnTheKneeIsAsItIs(t *testing.T) {
 	}
 	red := maths.RGB(2, 0, 0) // picked: past white, on its own knee
 	onKnee := NewTone(none, red.Luminance(), none, none)
-	if got := onKnee.Squeeze(red); got != red {
-		t.Errorf("red on the knee became %v", got)
+	rest := red.Luminance() / (red.R - red.Luminance())
+	want := maths.RGB(1, rest, rest)
+	if got := onKnee.Squeeze(red); !lightsAgree(got, want) {
+		t.Errorf("red on the knee became %v, want %v", got, want)
 	}
 }
 
@@ -271,7 +275,8 @@ func TestTheShoulderRises(t *testing.T) {
 		for name, curve := range map[string]func(float64) float64{
 			"grey": func(y float64) float64 { return shoulderOf(tone, y) },
 			"red": func(y float64) float64 {
-				return tone.Squeeze(red.Scale(y / red.Luminance())).Luminance()
+				share := y / red.Luminance()
+				return tone.Squeeze(red.Scale(share)).Luminance()
 			},
 		} {
 			if ok, at := rises(curve, tone.knee, pastTop*tone.topped()); !ok {
@@ -312,7 +317,8 @@ func TestAnUnsolvedScaleIsWhiteBeforeTheTop(t *testing.T) {
 	for _, tone := range shoulderTones {
 		unsolved := tone
 		unsolved.scale = 1 - tone.knee
-		got := unsolved.Squeeze(maths.Grey(tone.topped() * belowTop)).R
+		level := tone.topped() * belowTop
+		got := unsolved.Squeeze(maths.Grey(level)).R
 		if got < 1 {
 			t.Errorf("knee %v: an unsolved scale is %v under the top",
 				tone.knee, got)
@@ -321,13 +327,18 @@ func TestAnUnsolvedScaleIsWhiteBeforeTheTop(t *testing.T) {
 }
 
 // below the knee nothing changes, bit for bit: a light of any hue whose
-// luminance is at or under the knee comes back as it went in, and its
-// bytes are Encode's of its parts, as before the shoulder was changed.
+// luminance is at or under the knee and whose parts are all at or under
+// white comes back as it went in, and its bytes are Encode's of its
+// parts, as before the shoulder was changed. a light with a part past
+// white is drawn toward white, which the tests below the table hold.
 func TestBelowTheKneeNothingChanges(t *testing.T) {
 	for _, tone := range shoulderTones {
 		for _, light := range belowKnee {
 			for _, share := range kneeShares {
 				l := light.Scale(share * tone.knee / light.Luminance())
+				if max(l.R, l.G, l.B) > whole {
+					continue
+				}
 				if got := tone.Squeeze(l); got != l {
 					t.Errorf("knee %v: %v became %v", tone.knee, l, got)
 				}
@@ -353,6 +364,96 @@ func TestAboveTheKneeTheShoulderIsNew(t *testing.T) {
 				tone.knee, y, got, old)
 		}
 	}
+}
+
+// continuityShare is how far apart the prints of a light a part in a
+// million either side of the knee may be: a few parts in a hundred
+// thousand, which the slope of the shoulder there, one, and the bleach
+// together move a part by.
+const continuityShare = 1e-5 // picked: see above
+
+// kneeSide is how far either side of the knee the continuity is checked,
+// as a share of the knee.
+const kneeSide = 1e-6 // picked: a part in a million
+
+// saturatedLights are colours whose parts go past white at a luminance
+// near a knee, each scaled in the tests to sit on either side of it.
+var saturatedLights = []maths.Light{
+	maths.RGB(1.3, 0.58, 0.13), // picked: a saturated orange
+	maths.RGB(4, 0.5, 0),       // picked: a deep red
+	maths.RGB(0.05, 0.1, 2),    // picked: a deep blue
+}
+
+// the print is continuous at the knee: a saturated colour a part in a
+// million under it and the same colour a part in a million over it print
+// to lights that agree, whichever part is past white.
+func TestThePrintIsContinuousAtTheKnee(t *testing.T) {
+	for _, tone := range shoulderTones {
+		for _, light := range saturatedLights {
+			unit := tone.knee / light.Luminance()
+			under := light.Scale(unit * (1 - kneeSide))
+			over := light.Scale(unit * (1 + kneeSide))
+			below, above := tone.Squeeze(under), tone.Squeeze(over)
+			if math.Abs(below.R-above.R) > continuityShare ||
+				math.Abs(below.G-above.G) > continuityShare ||
+				math.Abs(below.B-above.B) > continuityShare {
+				t.Errorf("knee %v: %v prints %v under it and %v over it",
+					tone.knee, light, below, above)
+			}
+		}
+	}
+}
+
+// parting is how a part stands to another: above, level or below, as
+// one, nought and minus one.
+func parting(part, other float64) int {
+	switch {
+	case part > other:
+		return whole
+	case part < other:
+		return -whole
+	}
+	return none
+}
+
+// a colour under the knee with a part past white comes back with its
+// brightest part exactly white, its luminance as it was, and its hue: the
+// parts in the same order, and the grey of its luminance between them.
+func TestAColourPastWhiteUnderTheKneeBleaches(t *testing.T) {
+	for _, tone := range shoulderTones {
+		for _, light := range saturatedLights {
+			under := light.Scale(tone.knee * (1 - kneeSide) /
+				light.Luminance())
+			if max(under.R, under.G, under.B) <= whole {
+				continue
+			}
+			got := tone.Squeeze(under)
+			grey := under.Luminance()
+			brightest := max(got.R, got.G, got.B)
+			if math.Abs(brightest-whole) > lightShare {
+				t.Errorf("knee %v: %v came out %v, brightest %v", tone.knee,
+					under, got, brightest)
+			}
+			if math.Abs(got.Luminance()-grey) > lightShare {
+				t.Errorf("knee %v: %v lost its luminance, %v", tone.knee,
+					under, got)
+			}
+			if !hueKept(got, under) {
+				t.Errorf("knee %v: %v turned to %v", tone.knee, under, got)
+			}
+		}
+	}
+}
+
+// hueKept is whether the drawn light has the parts of the light in the
+// same order, with the grey of the light's luminance between them.
+func hueKept(drawn, light maths.Light) bool {
+	grey := light.Luminance()
+	return parting(drawn.R, drawn.G) == parting(light.R, light.G) &&
+		parting(drawn.G, drawn.B) == parting(light.G, light.B) &&
+		parting(drawn.R, drawn.B) == parting(light.R, light.B) &&
+		min(drawn.R, drawn.G, drawn.B) <= grey &&
+		grey <= max(drawn.R, drawn.G, drawn.B)
 }
 
 // light past the top, and endless light, are white and not more. endless light

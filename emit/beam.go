@@ -13,7 +13,8 @@ import (
 // approximation omits diffraction, interference and atmospheric refraction.
 // A beam has no visible skin: surfaces and participating media scatter it.
 //
-// See doc/guide-stars.md for the model, source and display conventions.
+// See doc/model/observatory/guide-stars.md for the model, source and display
+// conventions.
 type Beam struct {
 	point                Lit
 	radius, reach, slope float64

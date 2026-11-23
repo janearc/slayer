@@ -404,6 +404,6 @@ an existing output or verify a complete film before marking process success.
 The job ledger does not guarantee either.
 
 See [the design](../azazel/DESIGN.md) for the component boundaries.
-`azazel render` remains the older direct Hillside adapter and bypasses the
+`azazel render` remains the older direct session adapter and bypasses the
 queue. `azazel composite` still refuses direct admission. Submit the actual
 supported Slayer command through `submit` for queue evaluation.

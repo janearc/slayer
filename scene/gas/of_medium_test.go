@@ -105,13 +105,13 @@ func TestOfTicksItsShapeAndKeepsItsGas(t *testing.T) {
 // and is taken as one metre, so the gas as it is.
 func TestOfGasIsPerItsUnit(t *testing.T) {
 	g := Gas{Ranges: map[radiation.Range]Optics{
-		thing.Visible: {Absorb: 0.5, Scatter: 0.25}}}
+		thing.Visible(): {Absorb: 0.5, Scatter: 0.25}}}
 	band := maths.Band{Nanometres: 550}
 	for _, c := range []struct{ unit, per float64 }{
 		{1000, 1000}, {2, 2}, {1, 1}, {0.5, 0.5}, {0, 1}, {-3, 1},
 	} {
 		got := Of{In: g, Unit: c.unit}.Gas()
-		if a, s := got.Absorb(band), got.Scatter(band); a != 0.5*c.per || s != 0.25*c.per {
+		if a, s := got.optics(band); a != 0.5*c.per || s != 0.25*c.per {
 			t.Errorf("a unit of %v gives %v and %v, want %v and %v", c.unit, a, s,
 				0.5*c.per, 0.25*c.per)
 		}

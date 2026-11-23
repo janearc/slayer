@@ -66,14 +66,8 @@ func NewTune(score *cheeptune.Score, sheet *cheeptune.CutSheet,
 	return tune, nil
 }
 
-// Sound is the tune's own sound.
-func (tune Tune) Sound() movie.Sound { return tune.sound }
-
-// Seconds is how long the tune is.
-func (tune Tune) Seconds() float64 { return tune.sound.Duration().Seconds() }
-
-// Part is the part playing at seconds in: the last that has started.
-func (tune Tune) Part(seconds float64) string {
+// part is the part playing at seconds in: the last that has started.
+func (tune Tune) part(seconds float64) string {
 	playing := tune.parts[none].Name
 	for _, part := range tune.parts {
 		if part.Second <= seconds {
@@ -83,9 +77,9 @@ func (tune Tune) Part(seconds float64) string {
 	return playing
 }
 
-// At is the moment seconds in, the host speaking or not.
-func (tune Tune) At(seconds float64, speaking bool) Moment {
-	part := tune.Part(seconds)
+// at is the moment seconds in, the host speaking or not.
+func (tune Tune) at(seconds float64, speaking bool) moment {
+	part := tune.part(seconds)
 	kick := float64(none)
 	if tune.kicking[part] {
 		// a moment on a beat may come back a hair short of it
@@ -93,7 +87,7 @@ func (tune Tune) At(seconds float64, speaking bool) Moment {
 		since := (beats - math.Floor(beats)) * tune.beatSeconds(seconds)
 		kick = math.Exp(-since / kickFall)
 	}
-	return Moment{Part: part, Kick: kick, Loudness: tune.loudAt(seconds),
+	return moment{Part: part, Kick: kick, Loudness: tune.loudAt(seconds),
 		Speaking: speaking}
 }
 

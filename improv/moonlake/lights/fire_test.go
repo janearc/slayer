@@ -35,7 +35,7 @@ func TestContextFirePlanPreservesLayerOrderAndFrameSelection(t *testing.T) {
 	swell := math.Exp(-0.1 / config.SwellFall)
 	want := []FireLayer{
 		{FireSteady, 42, level * (1 - swell)},
-		{FireSwell, 1, level * swell},
+		{fireSwell, 1, level * swell},
 		{FireBurst, 2, config.Gain * cue.Level * config.BurstGain},
 		{FireBurst, 5, config.Gain * cue.Level * config.BurstGain * 2},
 	}
@@ -74,7 +74,7 @@ func TestContextFireRenderUsesOnlyExplicitInputs(t *testing.T) {
 			want.Light[i] += layer.Amount * pass.Light[i]
 		}
 	}
-	FireShoulder(want, config.Top*FireStrike(config, cue), math.Exp2(config.Stops))
+	fireShoulder(want, config.Top*FireStrike(config, cue), math.Exp2(config.Stops))
 	t.Setenv("FIRE_GAIN", "invalid")
 	t.Setenv("FIRE_FRAMES", "/nonexistent")
 	t.Setenv("FIRE_SWELL", "invalid")

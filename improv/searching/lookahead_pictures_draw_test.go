@@ -73,7 +73,7 @@ func TestLookAheadPictures(t *testing.T) {
 	}
 	cue, start := picturesSetting("HEARD_BENCH_CUE", picturesCue),
 		picturesStart(t)
-	var plan *StagePlan
+	var plan *stagePlan
 	for _, shot := range edit.Plan.Shots {
 		if shot.From == cue && shot.Stage != nil {
 			plan = shot.Stage

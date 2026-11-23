@@ -128,7 +128,7 @@ func (s *heardStage) maunaKeaPrecinct() error {
 			}
 		}
 	}
-	temp := &Set{World: s.world, prototypes: map[string][]thing.Thing{}}
+	temp := &set{World: s.world, prototypes: map[string][]thing.Thing{}}
 	for i, name := range []string{"service-truck", "service-truck", "mobile-crane"} {
 		x, z := -35+float64(i)*11, -28.0
 		if err := temp.scenery(name, uint64(1400+i), maths.V(x, s.ground(x, z)+.4, z), 1); err != nil {

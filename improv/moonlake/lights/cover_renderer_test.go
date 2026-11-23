@@ -425,7 +425,7 @@ func TestRendererRefusesBadSettingsAndImages(t *testing.T) {
 func pfmOf(t *testing.T, image Image) *bytes.Reader {
 	t.Helper()
 	var buf bytes.Buffer
-	if err := EncodePFM(&buf, image, -1); err != nil {
+	if err := encodePFM(&buf, image, -1); err != nil {
 		t.Fatal(err)
 	}
 	return bytes.NewReader(buf.Bytes())
@@ -486,7 +486,8 @@ func TestNewStaticRendererRefusals(t *testing.T) {
 	if _, err := NewStaticRenderer(DefaultConfig(), &stored, StaticAssetNames{Plate: "plate", Mask: "none"}); err == nil || !strings.Contains(err.Error(), "mask:") {
 		t.Fatalf("missing mask: %v", err)
 	}
-	if err := stored.Decode("tall", pfmOf(t, Image{Width: 1, Height: 2, Light: make([]float64, 6)}), 1, 2); err != nil {
+	tallPFM := pfmOf(t, Image{Width: 1, Height: 2, Light: make([]float64, 6)})
+	if err := stored.Decode("tall", tallPFM, 1, 2); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := NewStaticRenderer(DefaultConfig(), &stored, StaticAssetNames{Plate: "plate", Mask: "tall"}); err == nil || !strings.Contains(err.Error(), "mask: is 1x2, the frame 1x3") {

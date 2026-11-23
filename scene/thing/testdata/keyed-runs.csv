@@ -1,0 +1,7 @@
+name,seconds,ease,base-x,base-y,base-z
+along,10,linear,1,2,3
+push,100,ease-in-out,0,0,0
+short,1,,9,9,9
+late,10,linear,0,0,0
+same,10,linear,0,0,0
+mid,10,linear,0,0,0

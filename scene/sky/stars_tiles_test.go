@@ -25,7 +25,8 @@ func placed(tl hexes.Sphere, tile hexes.Tile, seed uint64) maths.Vec {
 	id := tl.ID(tile)
 	off := maths.V(noise.Hash(seed+1, id)-0.5, noise.Hash(seed+2, id)-0.5,
 		noise.Hash(seed+3, id)-0.5)
-	return tl.Centre(tile).Add(off.Scale(0.6 * tl.Spacing())).Unit()
+	reach := 0.6 * tl.Spacing()
+	return tl.Centre(tile).Add(off.Scale(reach)).Unit()
 }
 
 // peak is the light of a tile's star at its middle, from the hashes as the

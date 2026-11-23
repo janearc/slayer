@@ -4,12 +4,11 @@
 // yardstick for anything that draws a scene another way.
 //
 // A shortcut, a cache or a kernel, is near enough while no more than
-// Allowed of the pixels move past one JND. Each light is linear srgb at
+// a fiftieth of the pixels move past one JND. Each light is linear srgb at
 // its own level, with no exposure and no grade.
 package divergence
 
 import (
-	"errors"
 	"fmt"
 	"math"
 
@@ -23,16 +22,23 @@ import (
 // their distance in OKLab over libtheme's ok.Eye.
 type JNDs float64
 
-// Share is a part of a picture's pixels, from zero to one.
-type Share float64
+// share is a part of a picture's pixels, from zero to one.
+type share float64
 
-// Allowed is the most of a picture another way of drawing it may move
+// allowed is the most of a picture another way of drawing it may move
 // past one JND.
-const Allowed Share = 0.02
+const allowed share = 0.02
+
+// refusal is a refusal of this package, held as a constant so that no one
+// can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (r refusal) Error() string { return string(r) }
 
 // ErrSizes is two pictures of different sizes, which have no pixels to
 // compare.
-var ErrSizes = errors.New("divergence: the pictures are not one size")
+const ErrSizes refusal = "divergence: the pictures are not one size"
 
 // Apart is how far two lights are, in JNDs. A part of either that is
 // not a number puts them infinitely far apart.
@@ -67,7 +73,7 @@ func Compare(one, other *frame.Frame) (Divergence, error) {
 
 // Past is the share of the pixels more than limit apart; zero for pictures with
 // no pixels.
-func (seen Divergence) Past(limit JNDs) Share {
+func (seen Divergence) Past(limit JNDs) share {
 	if len(seen.apart) == 0 {
 		return 0
 	}
@@ -77,7 +83,7 @@ func (seen Divergence) Past(limit JNDs) Share {
 			past++
 		}
 	}
-	return Share(float64(past) / float64(len(seen.apart)))
+	return share(float64(past) / float64(len(seen.apart)))
 }
 
 // Worst is how far apart the farthest pixel is.
@@ -91,4 +97,4 @@ func (seen Divergence) Worst() JNDs {
 
 // Within is whether the pictures are near enough: no more than Allowed
 // of the pixels past one JND.
-func (seen Divergence) Within() bool { return seen.Past(1) <= Allowed }
+func (seen Divergence) Within() bool { return seen.Past(1) <= allowed }

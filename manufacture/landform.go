@@ -143,9 +143,6 @@ func (row landformMaker) madeAt(from seed, detail string) (good, error) {
 				space: maths.Local(), of: material})
 		}
 	}
-	if made.faces() > int(macroValue("face-budget")) {
-		return good{}, errTooMany
-	}
 	radius, height := row.spec.Radius.InMetres(), row.spec.Height.InMetres()
 	extent := maths.Box{Min: maths.V(-radius, 0, -radius), Max: maths.V(radius, height, radius)}
 	made.extent = &extent

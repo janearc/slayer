@@ -782,6 +782,66 @@
         }
       ],
       "notes": "Studied but not pursued; fleet topology changed across studies, so one revision must be selected."
+    },
+    {
+      "kind": "goes-16",
+      "name": "GOES-16 (GOES-R series)",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "NOAA GOES-R Series Data Book",
+          "url": "https://ospo.noaa.gov/resources/documents/GOES-RSeriesDataBook.pdf"
+        },
+        {
+          "title": "NOAA spacecraft renderings",
+          "url": "https://www.nesdis.noaa.gov/imagery/media-stills-animation/geostationary-satellites-media-gallery/goes-r-series-spacecraft-renderings"
+        }
+      ],
+      "notes": "Use the deployed GOES-16 configuration with its solar wing, magnetometer boom, and Earth-pointing instrument platform."
+    },
+    {
+      "kind": "noaa-19",
+      "name": "NOAA-19 (POES)",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "NOAA-N Prime spacecraft and instrument booklet",
+          "url": "https://www.ospo.noaa.gov/assets/pdf/NOAA_NP_Booklet.pdf"
+        }
+      ],
+      "notes": "Use the deployed NOAA-N Prime configuration. Match the instrument mounting platform and deployed sun shield to the on-orbit diagram."
+    },
+    {
+      "kind": "suomi-npp",
+      "name": "Suomi NPP",
+      "priority": 3,
+      "flight": "launched",
+      "references": [
+        {
+          "title": "NASA NPP launch press kit",
+          "url": "https://www.nasa.gov/wp-content/uploads/2015/02/596877main_npp_presskit_color.pdf"
+        },
+        {
+          "title": "NASA JPL mission history",
+          "url": "https://podaac.jpl.nasa.gov/S-NPP"
+        }
+      ],
+      "notes": "Model the flown NPOESS Preparatory Project spacecraft in its deployed configuration. Match the five instrument housings to the flight hardware."
+    },
+    {
+      "kind": "npoess",
+      "name": "NPOESS operational spacecraft concept",
+      "priority": 3,
+      "flight": "unlaunched",
+      "references": [
+        {
+          "title": "GAO acquisition history",
+          "url": "https://www.gao.gov/products/gao-12-604"
+        }
+      ],
+      "notes": "The operational program was canceled in 2010. Select and cite a dated spacecraft configuration before modeling."
     }
   ]
 }

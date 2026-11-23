@@ -138,10 +138,10 @@ func post(s *Server, body string) *httptest.ResponseRecorder {
 	return send(s, http.MethodPost, "/votes", body)
 }
 
-func record(t *testing.T, s *Server) Record {
+func record(t *testing.T, s *Server) voteRecord {
 	t.Helper()
 	rec := get(s, "/votes")
-	var out Record
+	var out voteRecord
 	if err := json.NewDecoder(rec.Body).Decode(&out); err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func TestAVoteIsWrittenAndReadBack(t *testing.T) {
 	if strings.Join(got.Queue, " ") != "beta alpha" {
 		t.Errorf("the queue is %v, want the order picked", got.Queue)
 	}
-	if got.Votes["alpha"] != (Vote{Vote: Keep, At: "2026-11-12T15:00:00Z"}) {
+	if got.Votes["alpha"] != (castVote{Vote: keep, At: "2026-11-12T15:00:00Z"}) {
 		t.Errorf("alpha's vote is %+v", got.Votes["alpha"])
 	}
 	if _, err := os.Stat(filepath.Join(dir, votesFile)); err != nil {
@@ -186,7 +186,7 @@ func TestTossAndClearTakeATuneOutOfTheQueue(t *testing.T) {
 	post(s, `{"name":"alpha","vote":"toss"}`)
 	got := record(t, s)
 	if strings.Join(got.Queue, " ") != "beta" ||
-		got.Votes["alpha"].Vote != Toss {
+		got.Votes["alpha"].Vote != toss {
 		t.Errorf("after a toss: %+v", got)
 	}
 	post(s, `{"name":"alpha","vote":"clear"}`)
@@ -234,7 +234,8 @@ func TestTheServerServesTheFolderAndNothingOutsideIt(t *testing.T) {
 	s, dir := serve(t, "alpha")
 	write(t, filepath.Dir(dir), "secret-"+filepath.Base(dir)+".txt", "no")
 	secret := "secret-" + filepath.Base(dir) + ".txt"
-	if err := os.Symlink(filepath.Join(filepath.Dir(dir), secret),
+	outside := filepath.Join(filepath.Dir(dir), secret)
+	if err := os.Symlink(outside,
 		filepath.Join(dir, "link.txt")); err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +265,8 @@ func TestAFolderWithNoTunesOrNoFolderIsRefused(t *testing.T) {
 		!strings.Contains(err.Error(), "no tunes") {
 		t.Errorf("an empty folder gave %v", err)
 	}
-	if _, err := NewServer(filepath.Join(t.TempDir(), "none"), testPort); err == nil {
+	missing := filepath.Join(t.TempDir(), "none")
+	if _, err := NewServer(missing, testPort); err == nil {
 		t.Error("a missing folder was accepted")
 	}
 }
@@ -304,7 +306,7 @@ func TestATuneAddedWhileTheServerRunsCanBeVotedOn(t *testing.T) {
 	write(t, dir, "x.json", smallScore)
 	for _, name := range []string{"../x", "./x", "x/../x", "x.json", ".",
 		"..", "", "sub/x"} {
-		body, _ := json.Marshal(ballot{Name: name, Vote: Keep})
+		body, _ := json.Marshal(ballot{Name: name, Vote: keep})
 		if rec := post(s, string(body)); rec.Code != 400 {
 			t.Errorf("name %q gave %d, want 400", name, rec.Code)
 		}

@@ -36,7 +36,7 @@ func New(world *thing.World, ground func(float64, float64) float64, haze bool) *
 // valid reports whether the builder has a world to build into.
 func (s *Builder) valid() error {
 	if s == nil || s.world == nil {
-		return fmt.Errorf("Griffith builder needs a world")
+		return fmt.Errorf("the Griffith builder needs a world")
 	}
 	return nil
 }
@@ -47,14 +47,6 @@ func (s *Builder) urbanGround(x, z float64) float64 {
 		return s.cityGround(x, z)
 	}
 	return s.ground(x, z)
-}
-
-// AddGriffithBasin places the existing authored Griffith ridge and Los
-// Angeles basin meshes into another Slayer world. The placement is a local
-// map position and a clockwise-from-north heading; it remains an authored
-// geographical approximation, not survey geometry.
-func AddGriffithBasin(world *thing.World, at maths.Vec, heading, scale, reliefScale float64) error {
-	return AddGriffithBasinWithOptions(world, at, heading, scale, reliefScale, ShotOptions{})
 }
 
 // ShotOptions controls the offshore view without changing the historic
@@ -85,7 +77,7 @@ func AddGriffithBasinWithOptions(world *thing.World, at maths.Vec, heading, scal
 		(options.TerrainSamples != 0 && (options.TerrainSamples < 129 || options.TerrainSamples > 513 || (options.TerrainSamples-1)&(options.TerrainSamples-2) != 0)) ||
 		(options.LightScale != 0 && (options.LightScale < 1e-9 || options.LightScale > 20)) ||
 		(options.LightFootprint != 0 && (options.LightFootprint < .5 || options.LightFootprint > 6)) {
-		return fmt.Errorf("Griffith basin needs finite metre coordinates, heading 0–360 degrees, scale 0.01–10, relief-scale 0.01–2, city-forward ±2000m, ridge-forward 0–10000m, city-detail 0.1–1, terrain-samples 129/257/513, light-scale 1e-9–20, and light-footprint 0.5–6")
+		return fmt.Errorf("the Griffith basin needs finite metre coordinates, heading 0–360 degrees, scale 0.01–10, relief-scale 0.01–2, city-forward ±2000m, ridge-forward 0–10000m, city-detail 0.1–1, terrain-samples 129/257/513, light-scale 1e-9–20, and light-footprint 0.5–6")
 	}
 	if options.CityDetail == 0 {
 		options.CityDetail = 1
@@ -115,7 +107,7 @@ func AddGriffithBasinWithOptions(world *thing.World, at maths.Vec, heading, scal
 	stage.cityGround = cityGround
 	stage.cityForward, stage.cityDetail = options.CityForward, options.CityDetail
 	stage.terrainSamples, stage.lightScale, stage.lightFootprint = options.TerrainSamples, options.LightScale, options.LightFootprint
-	if err := stage.OffshoreLand(); err != nil {
+	if err := stage.offshoreLand(); err != nil {
 		return err
 	}
 	if err := stage.LosAngelesBasin(); err != nil {
@@ -184,10 +176,10 @@ func (s *Builder) GriffithHill() error {
 	return nil
 }
 
-// OffshoreLand builds a finite coastal patch for a set over the ocean. The
+// offshoreLand builds a finite coastal patch for a set over the ocean. The
 // x/z bounds intentionally leave open water on the seaward side; there is no
 // infinite basin floor and no mesh under the submarine.
-func (s *Builder) OffshoreLand() error {
+func (s *Builder) offshoreLand() error {
 	if err := s.valid(); err != nil {
 		return err
 	}

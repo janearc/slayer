@@ -155,7 +155,7 @@ The contract and counters live in `gpu/frames.go` and `gpu/profile.go`.
 
 ## Reuse sections whose scene did not change
 
-Hillside films can split a fixed view into sections and reuse those
+Films from the session can split a fixed view into sections and reuse those
 unaffected by scene changes. CPU drawing redraws only the remaining
 rectangles. Metal currently reuses the whole frame only if every section
 is reusable; otherwise it draws the whole frame. This is separate from
@@ -174,7 +174,7 @@ light. Unknown or unbounded contributions force redrawing.
 Set
 `sections: {keep: false}` for an unconditional fresh-frame control or
 profiling, and compare actual draw counters before calling a repeat fast.
-See `section/kept.go`, `section/drift.go` and `hillside/sections.go`.
+See `section/kept.go`, `section/drift.go` and `session/sections.go`.
 
 ## Make visibility queries cheaper
 
@@ -250,7 +250,7 @@ integration effort rather than a pilot ray's guess about its neighbours.
 These store different quantities and have different domains. The optional
 incident-sky grid is bounded to 262144 RGB nodes, with direct evaluation
 outside and a boundary blend. Its CPU reference remains direct. It does
-not cache explicit lamps. [Volume environment lighting](volume-environment-lighting.md)
+not cache explicit lamps. [Volume environment lighting](model/sky/volume-environment-lighting.md)
 records its controlled comparisons.
 
 `lamp-store` is GPU-only, supports up to sixteen lamps and applies to boxed

@@ -32,11 +32,12 @@ func TestAWindowOneBitApartIsOtherBytes(t *testing.T) {
 
 func TestWindowFromBytesRefusesWhatIsNotAWindow(t *testing.T) {
 	raw := testWindow().Bytes()
+	copied := append([]byte(nil), raw...)
 	for name, cut := range map[string][]byte{
 		"nothing":        nil,
 		"a head cut":     raw[:windowHead*numberBytes-1],
 		"a height short": raw[:len(raw)-numberBytes],
-		"a byte over":    append(append([]byte(nil), raw...), 0),
+		"a byte over":    append(copied, 0),
 		"no heights":     raw[:windowHead*numberBytes],
 	} {
 		if _, err := WindowFromBytes(cut); err == nil {

@@ -84,7 +84,8 @@ func (plan plan) compose(entry entry,
 		heading := maths.About(maths.YAxis, entry.Yaw*maths.Degree)
 		var count int
 		var err error
-		bounds, count, err = addCove(world, bounds, heading.Out(entry.camera(plan.Camera)), "quick")
+		cameraPoint := entry.camera(plan.Camera)
+		bounds, count, err = addCove(world, bounds, heading.Out(cameraPoint), "quick")
 		if err != nil {
 			return nil, err
 		}

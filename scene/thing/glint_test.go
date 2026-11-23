@@ -5,26 +5,81 @@ import (
 	"testing"
 )
 
+// The numbers the glint tests count in, each true by definition.
+const (
+	glintX          = nought // defined: the place of the x axis in a direction
+	glintY          = unity  // defined: the place of the y axis, the way up
+	glintZ          = pair   // defined: the place of the z axis in a direction
+	glintHalf       = 0.5    // defined: half, the middle of a cell
+	glintDimensions = 3      // defined: the axes of space, a direction's length
+)
+
+// glintWidths names the GGX widths the bound test tries, the narrowest
+// first, and glintViews the cosines of the looks it tries them from.
+var (
+	glintWidths = []string{"glint-width-polished", "glint-width-fine",
+		"glint-width-medium", "glint-width-whole"}
+	glintViews = []string{"glint-view-face", "glint-view-slanted",
+		"glint-view-grazing"}
+)
+
+// glintView is one eye and one surface whose lobe is summed: the way to
+// the eye, its cosine, the GGX width, and how many rings and turns the
+// hemisphere is cut into.
+type glintView struct {
+	eye          [glintDimensions]float64
+	viewed       float64
+	alpha        float64
+	rings, turns float64
+}
+
+// cell is the lobe of the lamp at tilt from straight up and turn around
+// it, times the solid angle of its cell.
+func (view glintView) cell(tilt, turn float64) float64 {
+	lamp := [glintDimensions]float64{
+		glintX: math.Sin(tilt) * math.Cos(turn),
+		glintY: math.Cos(tilt),
+		glintZ: math.Sin(tilt) * math.Sin(turn),
+	}
+	half := [glintDimensions]float64{
+		glintX: lamp[glintX] + view.eye[glintX],
+		glintY: lamp[glintY] + view.eye[glintY],
+		glintZ: lamp[glintZ] + view.eye[glintZ],
+	}
+	length := math.Sqrt(half[glintX]*half[glintX] +
+		half[glintY]*half[glintY] + half[glintZ]*half[glintZ])
+	facing := half[glintY] / length
+	area := math.Sin(tilt) * (math.Pi / pair / view.rings) *
+		(pair * math.Pi / view.turns)
+	return Microfacet(facing, lamp[glintY], view.viewed, view.alpha) * area
+}
+
 // returned is how much of the light landing on a surface from every
 // way its highlights send toward an eye looking at it from cosine
 // viewed, for a GGX width alpha, before Fresnel's share: the lobe,
 // which holds each lamp's cosine already, summed over the hemisphere by
 // the midpoint rule.
-func returned(viewed, alpha float64) float64 {
-	eye := [3]float64{math.Sqrt(1 - viewed*viewed), viewed, 0}
-	const rings, turns = 1200, 600
-	sum := 0.0
+func returned(t *testing.T, viewed, alpha float64) float64 {
+	t.Helper()
+	rings := pickedCount(t, "glint-rings")
+	turns := pickedCount(t, "glint-turns")
+	view := glintView{
+		eye: [glintDimensions]float64{
+			glintX: math.Sqrt(unity - viewed*viewed),
+			glintY: viewed,
+			glintZ: nought,
+		},
+		viewed: viewed,
+		alpha:  alpha,
+		rings:  float64(rings),
+		turns:  float64(turns),
+	}
+	var sum float64
 	for i := range rings {
-		tilt := (float64(i) + 0.5) / rings * math.Pi / 2
-		for j := range turns {
-			turn := (float64(j) + 0.5) / turns * 2 * math.Pi
-			lamp := [3]float64{math.Sin(tilt) * math.Cos(turn), math.Cos(tilt),
-				math.Sin(tilt) * math.Sin(turn)}
-			half := [3]float64{lamp[0] + eye[0], lamp[1] + eye[1], lamp[2] + eye[2]}
-			length := math.Sqrt(half[0]*half[0] + half[1]*half[1] + half[2]*half[2])
-			facing := half[1] / length
-			area := math.Sin(tilt) * (math.Pi / 2 / rings) * (2 * math.Pi / turns)
-			sum += Microfacet(facing, lamp[1], viewed, alpha) * area
+		tilt := (float64(i) + glintHalf) / view.rings * math.Pi / pair
+		for step := range turns {
+			turn := (float64(step) + glintHalf) / view.turns * pair * math.Pi
+			sum += view.cell(tilt, turn)
 		}
 	}
 	return sum
@@ -35,15 +90,21 @@ func returned(viewed, alpha float64) float64 {
 // shadowing takes more the rougher it is and the more slant the look,
 // so a near-polished surface seen face on keeps nearly all of it.
 func TestAHighlightNeverSendsBackMoreThanLands(t *testing.T) {
-	for _, alpha := range []float64{0.1, 0.3, 0.6, 1} {
-		for _, viewed := range []float64{1, 0.7, 0.3} {
-			if got := returned(viewed, alpha); !(got <= 1.0005) {
+	bound := picked(t, "glint-return-bound")
+	for _, widthName := range glintWidths {
+		alpha := picked(t, widthName)
+		for _, viewName := range glintViews {
+			viewed := picked(t, viewName)
+			if got := returned(t, viewed, alpha); !(got <= bound) {
 				t.Errorf("width %v seen from cosine %v sends back %v", alpha,
 					viewed, got)
 			}
 		}
 	}
-	if got := returned(1, 0.1); !(got >= 0.98) {
+	face := picked(t, "glint-view-face")
+	polished := picked(t, "glint-width-polished")
+	floor := picked(t, "glint-polished-return-floor")
+	if got := returned(t, face, polished); !(got >= floor) {
 		t.Errorf("a near-polished surface seen face on sends back only %v", got)
 	}
 }
@@ -51,19 +112,23 @@ func TestAHighlightNeverSendsBackMoreThanLands(t *testing.T) {
 // The lobe is brightest where the lamp stands at the mirror way, and
 // the smoother the surface the narrower and taller it is there.
 func TestAHighlightPeaksAtTheMirrorWay(t *testing.T) {
-	smooth, rough := 0.05, 0.5
-	at := Microfacet(1, 0.8, 0.8, smooth)
-	off := Microfacet(0.95, 0.8, 0.8, smooth)
+	smooth := picked(t, "glint-smooth-width")
+	rough := picked(t, "glint-rough-width")
+	slant := picked(t, "glint-slant-cosine")
+	offMirror := picked(t, "glint-off-mirror-facing")
+	at := Microfacet(unity, slant, slant, smooth)
+	off := Microfacet(offMirror, slant, slant, smooth)
 	if !(at > off) {
 		t.Errorf("at the mirror way %v, just off it %v", at, off)
 	}
-	if !(Microfacet(1, 0.8, 0.8, smooth) > Microfacet(1, 0.8, 0.8, rough)) {
+	if !(Microfacet(unity, slant, slant, smooth) >
+		Microfacet(unity, slant, slant, rough)) {
 		t.Error("the smooth peak is no taller than the rough")
 	}
-	if got := Microfacet(0, 0.8, 0.8, rough); got != 0 {
+	if got := Microfacet(nought, slant, slant, rough); got != nought {
 		t.Errorf("a half way edge on gives %v", got)
 	}
-	if got := Microfacet(1, 0.8, 0.8, 0); got != 0 {
+	if got := Microfacet(unity, slant, slant, nought); got != nought {
 		t.Errorf("a polished surface gives %v, a point no picture holds", got)
 	}
 }

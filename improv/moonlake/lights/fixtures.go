@@ -10,7 +10,7 @@ type FixtureConfig struct {
 	FloodGain, SpotGain float64
 }
 
-type FixtureCues struct {
+type fixtureCues struct {
 	FloodLeft, FloodRight, Spots, SpotAim float64
 	HasColour                             bool
 	Colour                                [3]float64
@@ -22,12 +22,12 @@ type FixtureLayer struct {
 	Colour [3]float64
 }
 
-// PlanFixtures lists the fixture layers to draw: a white left flood and a
+// planFixtures lists the fixture layers to draw: a white left flood and a
 // magenta right flood, named by FloodPasses, and two spot layers for each side
 // that share the spots by SpotAim, held between 0 and 2. Spots take a tint
 // halfway to Colour when HasColour is set. Layers under 0.001 are left out.
 // It refuses a SpotAim, amount or colour that is not finite.
-func PlanFixtures(config FixtureConfig, cue FixtureCues) ([]FixtureLayer, error) {
+func planFixtures(config FixtureConfig, cue fixtureCues) ([]FixtureLayer, error) {
 	if !finite(cue.SpotAim) {
 		return nil, fmt.Errorf("invalid fixture spot aim")
 	}

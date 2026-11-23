@@ -1,0 +1,597 @@
+# graffiti sheet: twenty-four plain walls hung in a grid, six across and
+# four down, seen square-on like a contact sheet, each with its own writer
+# or writers so that one wall is one example. Every wall has a material
+# of its own, sheet-wall-NN-kind, and a writer's `on` is that name's
+# number alone, so it writes on that wall and no other (a name holds a
+# number once, and the numbers are two digits). Row one is tags, half a
+# metre to a metre and a half; row two throw-ups, a metre and a half to
+# three and a half; row three pieces, three and a half to six; row four
+# walls with older, faded marks under newer ones.
+#
+# a writer's cells are laid along the world, one grain long and a
+# squash of that tall, so each wall is cut to whole cells of its writer:
+# its left edge stands on a multiple of the grain and its bottom on a
+# multiple of the cell's height. The walls hang in the air; each
+# writer's low and high are the wall's own heights above the ground at
+# nought. Light is one even white sun from behind the camera and a
+# plain sky, so the paint is what is seen. Walls are colours only: the
+# stock has no brick or shutter texture, so a shutter is a dark metal
+# colour. Places are metres, x east, y north, z up. Every number is a
+# choice of this study, picked by eye. The first camera is the one
+# drawn; row-one to row-four sets draw one row each, closer.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: graffiti sheet
+  setting: space
+  light: none
+  film:
+    width: 2400
+    height: 1600
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    sheet:
+      title: "all twenty-four walls, square-on, from seventy metres"
+      wide: 40
+      location:
+        at: [0, -71.4, 15]
+      orientation:
+        look_at: [0, 0, 15]
+  set:
+    things:
+      scale:
+        kind: human-scale-2m
+        seed: 5
+        complexity: demo
+        east: -9
+        north: -1.5
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      floor: {colour: {srgb_linear: [0.04, 0.04, 0.045]}, source: eye}
+      backdrop: {colour: {srgb_linear: [0.02, 0.02, 0.025]}, source: eye}
+      sheet-wall-01-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-02-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-03-shutter: {colour: {srgb_linear: [0.09, 0.10, 0.11]}, source: eye}
+      sheet-wall-04-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+      sheet-wall-05-grey: {colour: {srgb_linear: [0.2, 0.2, 0.2]}, source: eye}
+      sheet-wall-06-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-07-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-08-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+      sheet-wall-09-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-10-shutter: {colour: {srgb_linear: [0.09, 0.10, 0.11]}, source: eye}
+      sheet-wall-11-grey: {colour: {srgb_linear: [0.2, 0.2, 0.2]}, source: eye}
+      sheet-wall-12-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-13-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-14-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+      sheet-wall-15-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-16-grey: {colour: {srgb_linear: [0.2, 0.2, 0.2]}, source: eye}
+      sheet-wall-17-shutter: {colour: {srgb_linear: [0.09, 0.10, 0.11]}, source: eye}
+      sheet-wall-18-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-19-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+      sheet-wall-20-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-21-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-22-shutter: {colour: {srgb_linear: [0.09, 0.10, 0.11]}, source: eye}
+      sheet-wall-23-grey: {colour: {srgb_linear: [0.2, 0.2, 0.2]}, source: eye}
+      sheet-wall-24-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+    boxes:
+      floor: {material: floor, middle: [0, -3, -0.1], size: [200, 12, 0.2], source: eye}
+      backdrop: {material: backdrop, middle: [0, 0.6, 15], size: [200, 0.6, 60], source: eye}
+      # row one, tags
+      wall-01: {material: sheet-wall-01-concrete, middle: [-18.0, 0, 26.5909], size: [3.0, 0.3, 2.2727], source: eye}
+      wall-02: {material: sheet-wall-02-brick, middle: [-11.1, 0, 26.7273], size: [1.8, 0.3, 2.7273], source: eye}
+      wall-03: {material: sheet-wall-03-shutter, middle: [-4.0, 0, 26.5455], size: [3.2, 0.3, 2.1818], source: eye}
+      wall-04: {material: sheet-wall-04-wet, middle: [3.5, 0, 26.5909], size: [3.0, 0.3, 2.2727], source: eye}
+      wall-05: {material: sheet-wall-05-grey, middle: [10.8, 0, 26.7273], size: [2.4, 0.3, 3.2727], source: eye}
+      wall-06: {material: sheet-wall-06-concrete, middle: [18.0, 0, 26.9318], size: [3.0, 0.3, 2.0455], source: eye}
+      # row two, throw-ups
+      wall-07: {material: sheet-wall-07-brick, middle: [-17.25, 0, 19.4318], size: [4.5, 0.3, 2.0455], source: eye}
+      wall-08: {material: sheet-wall-08-wet, middle: [-10.8, 0, 19.2273], size: [3.6, 0.3, 2.4545], source: eye}
+      wall-09: {material: sheet-wall-09-concrete, middle: [-4.4, 0, 19.0], size: [4.4, 0.3, 2.0], source: eye}
+      wall-10: {material: sheet-wall-10-shutter, middle: [2.5, 0, 19.3182], size: [5.0, 0.3, 2.2727], source: eye}
+      wall-11: {material: sheet-wall-11-grey, middle: [10.5, 0, 19.0909], size: [3.0, 0.3, 2.7273], source: eye}
+      wall-12: {material: sheet-wall-12-brick, middle: [19.25, 0, 19.0909], size: [3.5, 0.3, 3.1818], source: eye}
+      # row three, pieces
+      wall-13: {material: sheet-wall-13-concrete, middle: [-22.75, 0, 12.7273], size: [3.5, 0.3, 3.1818], source: eye}
+      wall-14: {material: sheet-wall-14-wet, middle: [-14.0, 0, 11.8182], size: [4.0, 0.3, 1.8182], source: eye}
+      wall-15: {material: sheet-wall-15-brick, middle: [-6.75, 0, 11.25], size: [4.5, 0.3, 2.0455], source: eye}
+      wall-16: {material: sheet-wall-16-grey, middle: [2.75, 0, 11.25], size: [5.5, 0.3, 2.5], source: eye}
+      wall-17: {material: sheet-wall-17-shutter, middle: [12.5, 0, 12.5], size: [5.0, 0.3, 2.2727], source: eye}
+      wall-18: {material: sheet-wall-18-concrete, middle: [21.0, 0, 12.2727], size: [6.0, 0.3, 2.7273], source: eye}
+      # row four, older marks under newer
+      wall-19: {material: sheet-wall-19-wet, middle: [-22.8, 0, 5.4545], size: [2.4, 0.3, 2.1818], source: eye}
+      wall-20: {material: sheet-wall-20-concrete, middle: [-14.0, 0, 5.4545], size: [4.0, 0.3, 3.6364], source: eye}
+      wall-21: {material: sheet-wall-21-brick, middle: [-3.0, 0, 4.0909], size: [6.0, 0.3, 2.7273], source: eye}
+      wall-22: {material: sheet-wall-22-shutter, middle: [7.5, 0, 5.6818], size: [5.0, 0.3, 2.2727], source: eye}
+      wall-23: {material: sheet-wall-23-grey, middle: [15.75, 0, 5.1136], size: [4.5, 0.3, 2.0455], source: eye}
+      wall-24: {material: sheet-wall-24-wet, middle: [22.5, 0, 5.4545], size: [3.0, 0.3, 2.7273], source: eye}
+    suns:
+      even:
+        toward: [0.15, -1, 0.25]
+        colour: {srgb_linear: [3.0, 3.0, 3.0]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.5, 0.5, 0.5]}
+      zenith: {srgb_linear: [0.5, 0.5, 0.5]}
+      ground: {srgb_linear: [0.5, 0.5, 0.5]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        # row one: tags, one writer to a wall
+        # 01 hazard: yellow and orange, black ink
+        w01-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-01]
+          colour: {srgb_linear: [0.9, 0.7, 0.05]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.5
+          low: 25.44
+          high: 27.74
+          share: 0.5
+        # 02 mint and cobalt, white ink
+        w02-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-02]
+          colour: {srgb_linear: [0.1, 0.8, 0.45]}
+          other: {srgb_linear: [0.03, 0.2, 0.85]}
+          line: {srgb_linear: [0.8, 0.8, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.6
+          low: 25.35
+          high: 28.1
+          share: 0.5
+        # 03 hot pink and violet, silver ink
+        w03-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-03]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.35, 0.05, 0.8]}
+          line: {srgb_linear: [0.75, 0.75, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.8
+          low: 25.44
+          high: 27.65
+          share: 0.55
+        # 04 cyan and white, black ink
+        w04-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-04]
+          colour: {srgb_linear: [0.03, 0.75, 0.9]}
+          other: {srgb_linear: [0.9, 0.9, 0.95]}
+          line: {srgb_linear: [0.02, 0.02, 0.04]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.0
+          low: 25.44
+          high: 27.74
+          share: 0.6
+        # 05 red and black, white ink
+        w05-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-05]
+          colour: {srgb_linear: [0.8, 0.03, 0.02]}
+          other: {srgb_linear: [0.05, 0.02, 0.02]}
+          line: {srgb_linear: [0.9, 0.9, 0.9]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.2
+          low: 25.08
+          high: 28.37
+          share: 0.7
+        # 06 lime and teal, black ink
+        w06-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-06]
+          colour: {srgb_linear: [0.5, 0.9, 0.05]}
+          other: {srgb_linear: [0.02, 0.5, 0.45]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.5
+          low: 25.9
+          high: 27.97
+          share: 0.8
+        # row two: throw-ups
+        # 07 orange and blue, cream outline
+        w07-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-07]
+          colour: {srgb_linear: [0.9, 0.35, 0.03]}
+          other: {srgb_linear: [0.05, 0.25, 0.85]}
+          line: {srgb_linear: [0.95, 0.95, 0.9]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.5
+          low: 18.4
+          high: 20.46
+          share: 0.6
+        # 08 gold and crimson, black outline
+        w08-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-08]
+          colour: {srgb_linear: [0.9, 0.65, 0.1]}
+          other: {srgb_linear: [0.7, 0.03, 0.1]}
+          line: {srgb_linear: [0.03, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.8
+          low: 17.99
+          high: 20.46
+          share: 0.7
+        # 09 purple and pink, white outline
+        w09-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-09]
+          colour: {srgb_linear: [0.4, 0.05, 0.7]}
+          other: {srgb_linear: [0.9, 0.3, 0.6]}
+          line: {srgb_linear: [0.9, 0.9, 0.95]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 2.2
+          low: 17.99
+          high: 20.01
+          share: 0.75
+        # 10 silver and sky blue, black outline
+        w10-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-10]
+          colour: {srgb_linear: [0.6, 0.62, 0.65]}
+          other: {srgb_linear: [0.1, 0.5, 0.9]}
+          line: {srgb_linear: [0.02, 0.03, 0.05]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 2.5
+          low: 18.17
+          high: 20.46
+          share: 0.75
+        # 11 bubblegum and aqua, dark outline
+        w11-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-11]
+          colour: {srgb_linear: [0.9, 0.3, 0.55]}
+          other: {srgb_linear: [0.1, 0.8, 0.7]}
+          line: {srgb_linear: [0.05, 0.05, 0.08]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3.0
+          low: 17.72
+          high: 20.46
+          share: 1
+        # 12 forest and cream, black outline
+        w12-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-12]
+          colour: {srgb_linear: [0.03, 0.4, 0.1]}
+          other: {srgb_linear: [0.85, 0.8, 0.5]}
+          line: {srgb_linear: [0.02, 0.03, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3.5
+          low: 17.49
+          high: 20.69
+          share: 1
+        # row three: pieces
+        # 13 magenta and yellow, black outline
+        w13-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-13]
+          colour: {srgb_linear: [0.85, 0.02, 0.6]}
+          other: {srgb_linear: [0.95, 0.85, 0.05]}
+          line: {srgb_linear: [0.02, 0.02, 0.03]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3.5
+          low: 11.13
+          high: 14.33
+          share: 1
+        # 14 ice and navy, white outline
+        w14-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-14]
+          colour: {srgb_linear: [0.5, 0.8, 0.95]}
+          other: {srgb_linear: [0.02, 0.05, 0.35]}
+          line: {srgb_linear: [0.9, 0.95, 1.0]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 4.0
+          low: 10.9
+          high: 12.74
+          share: 1
+        # 15 coral and turquoise, black outline
+        w15-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-15]
+          colour: {srgb_linear: [0.95, 0.25, 0.2]}
+          other: {srgb_linear: [0.05, 0.7, 0.65]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 4.5
+          low: 10.22
+          high: 12.28
+          share: 1
+        # 16 electric blue and orange, white outline
+        w16-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-16]
+          colour: {srgb_linear: [0.02, 0.2, 0.95]}
+          other: {srgb_linear: [0.95, 0.45, 0.02]}
+          line: {srgb_linear: [0.95, 0.95, 0.95]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 5.5
+          low: 9.99
+          high: 12.51
+          share: 1
+        # 17 acid green and black, pale outline
+        w17-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-17]
+          colour: {srgb_linear: [0.35, 0.95, 0.03]}
+          other: {srgb_linear: [0.03, 0.04, 0.03]}
+          line: {srgb_linear: [0.85, 0.9, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 5.0
+          low: 11.35
+          high: 13.65
+          share: 1
+        # 18 plum and gold, cream outline
+        w18-pieces:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-18]
+          colour: {srgb_linear: [0.3, 0.03, 0.25]}
+          other: {srgb_linear: [0.85, 0.6, 0.08]}
+          line: {srgb_linear: [0.9, 0.85, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 6.0
+          low: 10.9
+          high: 13.65
+          share: 1
+        # row four: faded marks under new ones; the oldest agent of a wall
+        # comes first so that the newer is laid over it
+        # 19 old: faded rose and slate throw-up; new: white and red tags
+        w19-old-throw-up:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-19]
+          colour: {srgb_linear: [0.3, 0.1, 0.12]}
+          other: {srgb_linear: [0.12, 0.2, 0.3]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 2.4
+          low: 4.35
+          high: 6.56
+          share: 1
+        w19-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-19]
+          colour: {srgb_linear: [0.9, 0.9, 0.9]}
+          other: {srgb_linear: [0.85, 0.05, 0.05]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.8
+          low: 4.35
+          high: 6.56
+          share: 0.6
+        # 20 old: faded dust and brown piece; new: tangerine and teal throw-ups
+        w20-old-piece:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-20]
+          colour: {srgb_linear: [0.3, 0.25, 0.05]}
+          other: {srgb_linear: [0.3, 0.1, 0.05]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 4.0
+          low: 3.63
+          high: 7.28
+          share: 1
+        w20-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-20]
+          colour: {srgb_linear: [0.95, 0.4, 0.1]}
+          other: {srgb_linear: [0.05, 0.6, 0.55]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 2.0
+          low: 3.63
+          high: 7.28
+          share: 0.7
+        # 21 old: faded gold tags; new: lilac and mustard piece
+        w21-old-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-21]
+          colour: {srgb_linear: [0.3, 0.25, 0.05]}
+          other: {srgb_linear: [0.3, 0.1, 0.05]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 1.2
+          low: 2.72
+          high: 5.46
+          share: 0.6
+        w21-piece:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-21]
+          colour: {srgb_linear: [0.6, 0.4, 0.9]}
+          other: {srgb_linear: [0.9, 0.7, 0.1]}
+          line: {srgb_linear: [0.95, 0.95, 0.95]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 6.0
+          low: 2.72
+          high: 5.46
+          share: 1
+        # 22 old: faded rose and blue piece; new: olive and pink tags
+        w22-old-piece:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-22]
+          colour: {srgb_linear: [0.3, 0.1, 0.12]}
+          other: {srgb_linear: [0.12, 0.2, 0.3]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 5.0
+          low: 4.54
+          high: 6.83
+          share: 1
+        w22-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-22]
+          colour: {srgb_linear: [0.45, 0.5, 0.05]}
+          other: {srgb_linear: [0.9, 0.3, 0.5]}
+          line: {srgb_linear: [0.8, 0.8, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.0
+          low: 4.54
+          high: 6.83
+          share: 0.5
+        # 23 three layers: faded piece, then mid throw-ups, then sea green
+        # and scarlet tags on top
+        w23-old-piece:
+          kind: graffiti
+          mark: piece
+          on: [sheet-wall-23]
+          colour: {srgb_linear: [0.12, 0.2, 0.3]}
+          other: {srgb_linear: [0.3, 0.1, 0.12]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 4.5
+          low: 4.08
+          high: 6.15
+          share: 1
+        w23-mid-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-23]
+          colour: {srgb_linear: [0.25, 0.4, 0.15]}
+          other: {srgb_linear: [0.4, 0.3, 0.1]}
+          line: {srgb_linear: [0.05, 0.05, 0.05]}
+          strength: 0.6
+          settle: 6
+          level: 0.2
+          grain: 1.5
+          low: 4.08
+          high: 6.15
+          share: 0.7
+        w23-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-23]
+          colour: {srgb_linear: [0.05, 0.7, 0.4]}
+          other: {srgb_linear: [0.85, 0.1, 0.05]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.5
+          low: 4.08
+          high: 6.15
+          share: 0.35
+        # 24 old: faded tags; new: peach and indigo throw-ups
+        w24-old-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-24]
+          colour: {srgb_linear: [0.3, 0.1, 0.12]}
+          other: {srgb_linear: [0.3, 0.25, 0.05]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 0.6
+          low: 4.08
+          high: 6.83
+          share: 0.5
+        w24-throw-ups:
+          kind: graffiti
+          mark: throw-up
+          on: [sheet-wall-24]
+          colour: {srgb_linear: [0.95, 0.6, 0.4]}
+          other: {srgb_linear: [0.15, 0.1, 0.5]}
+          line: {srgb_linear: [0.95, 0.9, 0.85]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3.0
+          low: 4.08
+          high: 6.83
+          share: 1

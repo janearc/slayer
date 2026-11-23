@@ -1,0 +1,32 @@
+# every number box_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: box-area-wide
+    value: 2
+    says: how wide the box is whose area is asked for, along x
+    kind: picked
+    by: the least whole width that is not one, so no product of sides is a side alone
+  - name: box-area-tall
+    value: 5
+    says: how tall the box is whose area is asked for, along y
+    kind: picked
+    by: a whole height that is neither the width nor the depth, so each pair of sides gives its own product
+  - name: box-area-deep
+    value: 9
+    says: how deep the box is whose area is asked for, along z
+    kind: picked
+    by: a whole depth that is neither the width nor the height, so each pair of sides gives its own product
+  - name: box-stack-bottom
+    value: 7
+    says: the node a stack already holds at its bottom place before a walk adds to it
+    kind: picked
+    by: a node number no box in the tests has, so a place overwritten shows
+  - name: box-stack-second
+    value: 8
+    says: the node a stack already holds at its second place before a walk adds to it
+    kind: picked
+    by: a node number no box in the tests has and that is not the bottom one, so a swapped pair shows
+  - name: box-slack-steps
+    value: 3
+    says: how many steps in the last place the slack past a box's far side is
+    kind: picked
+    by: the count that one and two gammas of three come to when rounded to a float64

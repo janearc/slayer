@@ -22,6 +22,9 @@ func (plan *Plan) writeRecipe(tools Tools, request queueRequest) error {
 	if profile.CPURenderer && plan.Kind != "catalogue" {
 		renderer = "cpu (explicit request override)"
 	}
+	if profile.GPU && plan.Kind != "catalogue" {
+		renderer = "gpu (explicit request override)"
+	}
 	quality := profile.quality() + " (explicit request flag)"
 	if plan.Kind == "catalogue" {
 		quality = "producer-authored quality (catalogue settings)"

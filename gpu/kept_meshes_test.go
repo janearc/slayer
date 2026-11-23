@@ -34,8 +34,9 @@ func fanCorners(lift float64, faces int) ([]maths.Vec, [][3]int,
 	var made [][3]int
 	for index := range faces + 1 {
 		turn := 2 * math.Pi * float64(index) / float64(faces+1)
-		corners = append(corners, maths.V(math.Cos(turn), math.Sin(turn),
-			lift+fanRise*float64(index)))
+		corner := maths.V(math.Cos(turn), math.Sin(turn),
+			lift+fanRise*float64(index))
+		corners = append(corners, corner)
 		if index > 0 {
 			made = append(made, [3]int{0, index, index + 1})
 		}

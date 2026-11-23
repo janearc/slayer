@@ -1,0 +1,30 @@
+# The footprint a lattice habit lays towers out by, 2026-11-19: a block of
+# a city each tower stands in, and a street between every pair of rows. A
+# tower's own plan is drawn from its seed and is none of this; these are the
+# room it is given. Metres, and degrees for the heading. The lanes run east
+# and west. Towers have no preferred way to face, so no facing is given.
+numbers:
+- name: tower-pitch-width
+  value: 130
+  unit: m
+  says: width of the block a tower stands in, across its street
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- name: tower-pitch-depth
+  value: 130
+  unit: m
+  says: length of the block a tower stands in, along its street
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- name: tower-lane-width
+  value: 30
+  unit: m
+  says: width of the street between two rows of blocks
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- name: tower-lane-heading
+  value: 90
+  unit: deg
+  says: bearing the streets run along, clockwise from north, so east and west
+  kind: picked
+  by: "tower study, 2026-11-19, picked"

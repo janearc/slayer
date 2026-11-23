@@ -1,0 +1,143 @@
+# balcony view: the view from a residential balcony about two thirds of
+# the way up a tower, standing at the planter wall at eye height, looking
+# out over a generated city at dusk going into night. In the foreground
+# the balcony: the planter wall, shrubs and a tree to the right, a chair,
+# the next balcony along. In the middle three neighbouring towers whose
+# skins show (mirror glass, granite, a planted one), and two condominiums
+# below. Beyond, a lattice of towers drawn by irregularity, and past them a
+# farther one at the hull, thinning to the horizon.
+#
+# the tower the camera stands on is the seed 5, forty storeys, concrete,
+# planted, homes: its storeys are 3.8825 m, so the balcony of the
+# twenty fifth storey has its floor at 93.58 m and the eye is 1.7 m over.
+#
+# places are metres, as a map's run: x east, y north, z up. the tower's
+# south face is at y = -18.76. the neighbours' places, the sun, the sky,
+# the ground and the camera are choices of this study, picked by eye. the
+# levels by distance are the rings of stands: no leveller yet, so the
+# near ring is quick and the far one hull, which has no windows.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: balcony view
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 90
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    balcony:
+      title: "on the balcony, at the planter wall, looking out"
+      location:
+        at: [0.9, -14.9, 100.2]
+      orientation:
+        look_at: [18, -200, 71]
+    outside:
+      title: "the balcony from outside, to place the eye"
+      location:
+        at: [60, -75, 100]
+      orientation:
+        look_at: [0, -19, 94]
+    just-outside:
+      title: "the balcony from just outside, at the eye's height"
+      location:
+        at: [-8, -42, 101.2]
+      orientation:
+        look_at: [0, -19, 100]
+    profile:
+      title: "the tower's south edge from the east, to find the face"
+      location:
+        at: [90, -17, 101]
+      orientation:
+        look_at: [0, -17, 101]
+    behind:
+      title: "from the balcony's eye, looking back at the tower"
+      location:
+        at: [-0.6, -15.6, 101.9]
+      orientation:
+        look_at: [-0.6, 100, 101]
+    peek:
+      title: "the balcony from the street side, at the eye's height"
+      location:
+        at: [0.9, -26, 101.9]
+      orientation:
+        look_at: [0.9, -14.9, 101.9]
+  recipes:
+    home: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, colour: warm, use: home, planted: true, storeys: 40, width: {value: 40, unit: m}, setbacks: false, taper: false, twist: false, spire: false}}
+    glass: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: mirror, colour: blue, use: office, storeys: 44, width: {value: 44, unit: m}, setbacks: false, taper: false, twist: false, spire: false}}
+    stone: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: granite, colour: pink, style: punched, use: home, storeys: 40, width: {value: 40, unit: m}, setbacks: false, taper: false, twist: false, spire: false}}
+    green: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: curtain, use: home, planted: true, storeys: 42, width: {value: 38, unit: m}, setbacks: true, segments: 3, taper: false, twist: false, spire: false}}
+    skyline:
+      kind: tower
+      irregularity: drawn
+      pins:
+        room: {value: 130, unit: m}
+  set:
+    things:
+      home: {recipe: home, seed: 5, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+      glass: {recipe: glass, seed: 3, complexity: quick, east: -70, north: -140, height: {value: 0, unit: m}}
+      stone: {recipe: stone, seed: 4, complexity: quick, east: 80, north: -170, height: {value: 0, unit: m}}
+      green: {recipe: green, seed: 6, complexity: quick, east: -190, north: -210, height: {value: 0, unit: m}}
+      condo-near: {kind: condominium, seed: 256, complexity: quick, east: 40, north: -110, height: {value: 0, unit: m}, heading: {value: 0, unit: deg}}
+      condo-left: {kind: condominium, seed: 301, complexity: quick, east: -115, north: -70, height: {value: 0, unit: m}, heading: {value: 0, unit: deg}}
+      city-heart:
+        recipe: skyline
+        seed: 7
+        complexity: quick
+        east: 0
+        north: -520
+        height: {value: 0, unit: m}
+      far-heart:
+        recipe: skyline
+        seed: 17
+        complexity: hull
+        east: 0
+        north: -1350
+        height: {value: 0, unit: m}
+    stands:
+      the city:
+        recipe: skyline
+        habit: lattice
+        count: 45
+        seed: 11
+        complexity: quick
+        within: {of: city-heart, from: 0, to: 360, near: 60, far: 450}
+      the far city:
+        recipe: skyline
+        habit: lattice
+        count: 60
+        seed: 23
+        complexity: hull
+        within: {of: far-heart, from: 0, to: 360, near: 60, far: 450}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.03, 0.03, 0.035]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, -500, -1.06]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.8, -0.5, 0.03]
+        colour: {srgb_linear: [0.9, 0.38, 0.22]}
+        source: eye
+      moon:
+        toward: [0.2, 0.7, 0.45]
+        colour: {srgb_linear: [0.2, 0.25, 0.4]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.2, 0.09, 0.1]}
+      zenith: {srgb_linear: [0.006, 0.014, 0.06]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

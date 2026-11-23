@@ -22,8 +22,9 @@ func water() *thing.Material {
 func pooled(floor *thing.Material) *thing.World {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: water()})
+	floorAt := resting(maths.V(0, -2, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: floor,
-		Motion: resting(maths.V(0, -2, 0))})
+		Motion: floorAt})
 	return world
 }
 
@@ -40,7 +41,8 @@ func TestAPoolFloorShowsThroughStillWater(t *testing.T) {
 	glow := &thing.Material{Glow: maths.Grey(1)}
 	down := maths.Ray{At: maths.V(0, 1, 0), Dir: maths.V(0, -1, 0)}
 	want := 1 - waterHead
-	if got := bright(lone(pooled(glow), down, 0)); !within(got, want, 1e-6) {
+	pool := pooled(glow)
+	if got := bright(lone(pool, down, 0)); !within(got, want, 1e-6) {
 		t.Fatalf("the floor shows %v through the surface, want %v",
 			got, want)
 	}
@@ -87,11 +89,13 @@ func TestTwoClearPanesEachTakeFresnelsShare(t *testing.T) {
 	glass := &thing.Material{Gloss: 1, Through: 1} // index 1.5, the default
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: glass})
+	glassAt := resting(maths.V(0, -1, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: glass,
-		Motion: resting(maths.V(0, -1, 0))})
+		Motion: glassAt})
+	floorAt := resting(maths.V(0, -3, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, -3, 0))})
+		Motion:   floorAt})
 	down := maths.Ray{At: maths.V(0, 1, 0), Dir: maths.V(0, -1, 0)}
 	want := 0.9216
 	if got := bright(lone(world, down, 0)); !within(got, want, 1e-6) {
@@ -123,9 +127,10 @@ func TestAHeightFieldPoolReadsAsThePlanePool(t *testing.T) {
 	}
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: field, Material: water()})
+	floorAt := resting(maths.V(0, -2, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, -2, 0))})
+		Motion:   floorAt})
 	down := maths.Ray{At: maths.V(0.4, 1, 0.3), Dir: maths.V(0, -1, 0)}
 	want := 1 - waterHead
 	if got := bright(lone(world, down, 0)); !within(got, want, 1e-4) {
@@ -190,7 +195,8 @@ func TestASpectralHeightFieldBoundaryRefractionUsesItsGeometricSide(t *testing.T
 	if !total {
 		t.Fatal("a ray past the geometric critical angle did not TIR")
 	}
-	reflected = shallow.Sub(optical.Scale(2 * shallow.Dot(optical))).Unit()
+	normalPart := optical.Scale(2 * shallow.Dot(optical))
+	reflected = shallow.Sub(normalPart).Unit()
 	waterOrigin := point.Add(optical.Scale(lift))
 	if gap := field.Distance(waterOrigin); !(gap < 0) || !(reflected.Y < 0) {
 		t.Errorf("TIR left the water side: gap=%g reflected=%v", gap, reflected)
@@ -235,11 +241,13 @@ func TestRefractedKnowsTheCriticalAngle(t *testing.T) {
 func layer() *thing.World {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: water()})
+	waterAt := resting(maths.V(0, -1, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: water(),
-		Motion: resting(maths.V(0, -1, 0))})
+		Motion: waterAt})
+	floorAt := resting(maths.V(0, -3, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, -3, 0))})
+		Motion:   floorAt})
 	return world
 }
 
@@ -268,7 +276,8 @@ func TestAWaterLayerPassesFresnelsShareAtEachFace(t *testing.T) {
 	slant := maths.Ray{At: maths.V(-1, 1, 0),
 		Dir: maths.V(1, -1, 0).Unit()}
 	const want = 0.945714
-	if got := bright(lone(layer(), slant, 0)); !within(got, want, 2e-6) {
+	stack := layer()
+	if got := bright(lone(stack, slant, 0)); !within(got, want, 2e-6) {
 		t.Fatalf("the floor shows %v through the layer, want %v", got, want)
 	}
 }
@@ -281,13 +290,15 @@ func TestAWaterLayerPassesFresnelsShareAtEachFace(t *testing.T) {
 func TestTotalInternalReflectionCarriesAllTheLight(t *testing.T) {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: water()})
+	floorAt := resting(maths.V(0, -3, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, -3, 0))})
+		Motion:   floorAt})
 	up := maths.Ray{At: maths.V(0, -1, 0),
 		Dir: maths.V(math.Sin(maths.Degree*60), math.Cos(maths.Degree*60), 0)}
 	inside := submerged(look{ray: up}, world.Things[0])
-	if got := bright(shade(stage(world, 0), inside)); !within(got, 1, 1e-6) {
+	scene := stage(world, 0)
+	if got := bright(shade(scene, inside)); !within(got, 1, 1e-6) {
 		t.Fatalf("the floor shows %v after total internal reflection, want 1",
 			got)
 	}
@@ -310,14 +321,16 @@ func TestTotalInternalReflectionCarriesAllTheLight(t *testing.T) {
 func TestWaterLetsLightOutBelowTheCriticalAngle(t *testing.T) {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: water()})
+	planeAt := resting(maths.V(0, 3, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, 3, 0))})
+		Motion:   planeAt})
 	up := maths.Ray{At: maths.V(0, -1, 0),
 		Dir: maths.V(math.Sin(maths.Degree*30), math.Cos(maths.Degree*30), 0)}
 	inside := submerged(look{ray: up}, world.Things[0])
 	const want = 0.974910
-	if got := bright(shade(stage(world, 0), inside)); !within(got, want, 2e-6) {
+	scene := stage(world, 0)
+	if got := bright(shade(scene, inside)); !within(got, want, 2e-6) {
 		t.Fatalf("the plane shows %v out of the water, want %v", got, want)
 	}
 }
@@ -332,7 +345,8 @@ func TestAPoolFloorShowsObliquelyByFresnelsShare(t *testing.T) {
 	slant := maths.Ray{At: maths.V(-1, 1, 0),
 		Dir: maths.V(1, -1, 0).Unit()}
 	const want = 0.972479
-	if got := bright(lone(pooled(glow), slant, 0)); !within(got, want, 2e-6) {
+	pool := pooled(glow)
+	if got := bright(lone(pool, slant, 0)); !within(got, want, 2e-6) {
 		t.Fatalf("the floor shows %v through the surface, want %v", got, want)
 	}
 }
@@ -351,7 +365,8 @@ func TestATotalReflectorPastTheBudgetShadesAsItself(t *testing.T) {
 		Dir: maths.V(math.Sin(maths.Degree*60), math.Cos(maths.Degree*60), 0)}
 	spent := submerged(look{ray: up}, world.Things[0])
 	spent.crossed = refractions
-	if got := bright(shade(stage(world, 0), spent)); !within(got, 0.25, 1e-6) {
+	scene := stage(world, 0)
+	if got := bright(shade(scene, spent)); !within(got, 0.25, 1e-6) {
 		t.Fatalf("the spent look shows %v, want 0.25", got)
 	}
 }
@@ -367,9 +382,10 @@ func TestAFirstSurfaceThatReflectsWholeFromTheAirIsFollowedOnce(t *testing.T) {
 		Through: 1}
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: bubble})
+	planeAt := resting(maths.V(0, 3, 0))
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, 3, 0))})
+		Motion:   planeAt})
 	down := maths.Ray{At: maths.V(0, 1, 0),
 		Dir: maths.V(math.Sin(maths.Degree*60), -math.Cos(maths.Degree*60), 0)}
 	if got := bright(lone(world, down, 0)); !within(got, 1, 1e-6) {

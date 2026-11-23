@@ -13,7 +13,8 @@ func nightRecipeFixture(t *testing.T) string {
 }
 
 func TestEcosystemSupportsItsMoonlightModel(t *testing.T) {
-	made, err := set.Read("night.yaml", []byte(nightRecipeFixture(t)))
+	source := nightRecipeFixture(t)
+	made, err := set.Read("night.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

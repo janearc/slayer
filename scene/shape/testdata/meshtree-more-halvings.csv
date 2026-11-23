@@ -1,0 +1,11 @@
+name,count,want
+faces-1,1,1
+faces-2,2,2
+faces-3,3,3
+faces-5,5,5
+faces-8,8,8
+faces-9,9,(4 5)
+faces-10,10,(5 5)
+faces-16,16,(8 8)
+faces-17,17,(8 (4 5))
+faces-18,18,((4 5) (4 5))

@@ -72,8 +72,9 @@ func TestCloudsHideTheAirBelowThem(t *testing.T) {
 		made.Add(thing.Thing{Shape: shape.Sphere{Radius: ground},
 			Material: unlit})
 		air := medium.Air{Radius: 1, Height: 0.3, Thick: 0.5}
+		glow := glows(maths.Grey(1))
 		made.AddVolume(thing.Volume{Medium: air,
-			Material: glows(maths.Grey(1))})
+			Material: glow})
 		deck := medium.Clouds{Radius: 1, Low: 0.2, High: 0.4, Cover: 1,
 			Thick: 400, Seed: 1}
 		made.AddVolume(thing.Volume{Medium: deck, Material: unlit})
@@ -100,15 +101,17 @@ func TestADiscHidesTheCounterJet(t *testing.T) {
 		made := thing.NewWorld()
 		jet := medium.Jet{Length: 5, Base: 0.5, Spread: 0.05,
 			Thick: 5, From: 0.5}
+		glow := glows(maths.Grey(1))
 		made.AddVolume(thing.Volume{Medium: jet,
-			Material: glows(maths.Grey(1))})
+			Material: glow})
 		made.AddVolume(thing.Volume{Medium: medium.Disc{Inner: 0.05,
 			Outer: 3,
 			Thick: 0.1, Dense: 400}, Material: unlit})
 		if floor {
+			groundAt := resting(maths.V(0, -100.06, 0))
 			made.Add(thing.Thing{Shape: shape.Sphere{Radius: 100},
 				Material: unlit,
-				Motion:   resting(maths.V(0, -100.06, 0))})
+				Motion:   groundAt})
 		}
 		return made
 	}

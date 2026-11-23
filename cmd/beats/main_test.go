@@ -33,6 +33,7 @@ func Example_analyse() {
 	var out, errs bytes.Buffer
 	code := run([]string{"analyse", "song.opus", "--out", "score.yaml",
 		"--dry-run"}, strings.NewReader(""), &out, &errs)
-	fmt.Println(code, strings.TrimSpace(out.String()))
+	trimmed := strings.TrimSpace(out.String())
+	fmt.Println(code, trimmed)
 	// Output: 0 would analyse song.opus
 }

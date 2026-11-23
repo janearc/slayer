@@ -94,7 +94,7 @@ The GPU supports a subset of scene features. Unsupported features return an
 error identifying them. CPU renders provide the reference for GPU checks;
 approximations such as baked haze have explicit test tolerances.
 
-Several commands expose `-gpu`. A hillside set chooses `gpu` or
+Several commands expose `-gpu`. A set chooses `gpu` or
 `gpu-native` with its `renderer` field; unsupported combinations are
 refused before drawing. The [ecosystem guide](doc/observatory-ecosystem.md)
 describes that path.
@@ -232,9 +232,10 @@ says so in the picture's record. Detail is in
   Measurements are in [doc/fast-light.md](doc/fast-light.md).
 - `fantasy` is a block in a set that states what the scene says and the
   physics does not (its keys are `lake`, `lakeglow`, `moon`, `moonglow`,
-  `giants`, `close` and `closeglow`; see `hillside/fantasy.go`). Hillside prints a line for each key, saying
-  it departs from the measured or derived value. It is a statement about
-  the scene, where `vibes` is about how it is drawn.
+  `giants`, `close` and `closeglow`; see `session/fantasy.go`). Hillside
+  prints a line for each key, saying it departs from the measured or
+  derived value. It is a statement about the scene, where `vibes` is about
+  how it is drawn.
 - Caches are meant to be exact: a hit is what a fresh run computes, byte
   for byte. Two known gaps: no key covers the files a set reads in turn
   (so a kept still is served only with `SLAYER_KEPT_STILLS=on`), and a

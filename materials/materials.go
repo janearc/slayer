@@ -24,41 +24,43 @@ var weights = map[string]float64{
 	// CIAAW standard atomic weights, read 2026-11-15:
 	// https://www.ciaaw.org/gallium.htm and /arsenic.htm.
 	"Ga": 69.723, "As": 74.921595,
+	// CIAAW copper.htm and manganese.htm, read 2026-11-17.
+	"Cu": 63.546, "Mn": 54.938043,
 }
 
 // within is how far from one a set of shares may sum, for the rounding
 // of numbers written by hand
 const within = 1e-9
 
-// Formula is elements in proportion: water ice is two of H to one of O
-type Formula struct {
+// formula is elements in proportion: water ice is two of H to one of O
+type formula struct {
 	parts map[string]float64
 }
 
 // NewFormula is a formula from element symbols and how many of each. It
 // refuses no elements, a symbol it does not know, and a count that is
 // not a positive number.
-func NewFormula(parts map[string]float64) (Formula, error) {
+func NewFormula(parts map[string]float64) (formula, error) {
 	if len(parts) == 0 {
-		return Formula{}, refuse("a formula of no elements")
+		return formula{}, refuse("a formula of no elements")
 	}
 	kept := make(map[string]float64, len(parts))
 	for symbol, count := range parts {
 		if _, known := weights[symbol]; !known {
-			return Formula{}, refuse("no element %q", symbol)
+			return formula{}, refuse("no element %q", symbol)
 		}
 		if !positive(count) {
-			return Formula{}, refuse("%s counted %v times",
+			return formula{}, refuse("%s counted %v times",
 				symbol, count)
 		}
 		kept[symbol] = count
 	}
-	return Formula{parts: kept}, nil
+	return formula{parts: kept}, nil
 }
 
 // Mass is the formula's mass in atomic mass units, added up in the
 // symbols' order so it is the same sum every time
-func (made Formula) Mass() float64 {
+func (made formula) Mass() float64 {
 	symbols := make([]string, 0, len(made.parts))
 	for symbol := range made.parts {
 		symbols = append(symbols, symbol)
@@ -71,9 +73,9 @@ func (made Formula) Mass() float64 {
 	return sum
 }
 
-// Material is a formula and what is measured of it in bulk: its
-// density in grams a cubic centimetre and its refractive index by band,
-// each where a source cites it.
+// Material is a formula with cited bulk properties: density in grams a
+// cubic centimetre and optical readings by band. Derived appearance optics
+// are distinguished by their source's Estimated method.
 //
 // A material made of a formula and a
 // density has no optics yet, and Optics answers optics never made; a
@@ -87,7 +89,7 @@ func (made Formula) Mass() float64 {
 // coefficients, for x-rays and gamma rays.
 type Material struct {
 	name    string
-	made    Formula
+	made    formula
 	density float64
 	weighed Source
 	optics  Optics
@@ -97,7 +99,7 @@ type Material struct {
 // NewMaterial is a named material of a formula at a bulk density. It
 // refuses no name, a formula never made, and a density that is not a
 // positive number.
-func NewMaterial(name string, made Formula,
+func NewMaterial(name string, made formula,
 	density float64) (Material, error) {
 	if name == "" {
 		return Material{}, refuse("a material with no name")
@@ -116,7 +118,7 @@ func NewMaterial(name string, made Formula,
 // nothing more; its density and optics are not yet cited, so Density
 // answers nought and Optics answers optics never made. It refuses no
 // name and a formula never made.
-func NewSubstance(name string, made Formula) (Material, error) {
+func NewSubstance(name string, made formula) (Material, error) {
 	if name == "" {
 		return Material{}, refuse("a material with no name")
 	}
@@ -126,11 +128,11 @@ func NewSubstance(name string, made Formula) (Material, error) {
 	return Material{name: name, made: made}, nil
 }
 
-// NewOpticalMaterial is a named material of a formula with its optics,
+// newOpticalMaterial is a named material of a formula with its optics,
 // and no bulk density cited for it: Density answers nought until a
 // source for one is found. It refuses no name, a formula never made, and
 // optics never made.
-func NewOpticalMaterial(name string, made Formula,
+func newOpticalMaterial(name string, made formula,
 	sight Optics) (Material, error) {
 	if name == "" {
 		return Material{}, refuse("a material with no name")
@@ -155,9 +157,9 @@ func (kind Material) Density() float64 { return kind.density }
 // when it has none
 func (kind Material) Optics() Optics { return kind.optics }
 
-// Fractions are shares of materials that sum to one. Only NewFractions
+// fractions are shares of materials that sum to one. Only NewFractions
 // makes them, so a mix that does not sum cannot exist.
-type Fractions struct {
+type fractions struct {
 	kinds  []Material
 	shares []float64
 }
@@ -166,33 +168,33 @@ type Fractions struct {
 // materials, a count of shares unlike the count of materials, a share less than
 // zero or not a number, a material never made, and shares that do not sum to
 // one.
-func NewFractions(kinds []Material, shares []float64) (Fractions, error) {
+func NewFractions(kinds []Material, shares []float64) (fractions, error) {
 	if len(kinds) == 0 {
-		return Fractions{}, refuse("fractions of nothing")
+		return fractions{}, refuse("fractions of nothing")
 	}
 	if len(kinds) != len(shares) {
-		return Fractions{}, refuse("%d materials, %d shares",
+		return fractions{}, refuse("%d materials, %d shares",
 			len(kinds), len(shares))
 	}
 	sum := 0.0
 	for i, share := range shares {
 		if !(share >= 0) || math.IsInf(share, 0) {
-			return Fractions{}, refuse("a share of %v", share)
+			return fractions{}, refuse("a share of %v", share)
 		}
 		if kinds[i].name == "" {
-			return Fractions{}, refuse("a material never made")
+			return fractions{}, refuse("a material never made")
 		}
 		sum += share
 	}
 	if math.Abs(sum-1) > within {
-		return Fractions{}, refuse("shares sum to %v", sum)
+		return fractions{}, refuse("shares sum to %v", sum)
 	}
-	return Fractions{kinds: append([]Material(nil), kinds...),
+	return fractions{kinds: append([]Material(nil), kinds...),
 		shares: append([]float64(nil), shares...)}, nil
 }
 
 // Of is the share of the named material in the mix, zero when it is not there
-func (mix Fractions) Of(name string) float64 {
+func (mix fractions) Of(name string) float64 {
 	total := 0.0
 	for i, kind := range mix.kinds {
 		if kind.name == name {
@@ -202,29 +204,29 @@ func (mix Fractions) Of(name string) float64 {
 	return total
 }
 
-// Particle is a grain: a size and what it is made of
-type Particle struct {
+// particle is a grain: a size and what it is made of
+type particle struct {
 	size float64
-	made Fractions
+	made fractions
 }
 
 // NewParticle is a grain of a size, in micrometres, made of a mix. It
 // refuses a size that is not a positive number and a mix never made.
-func NewParticle(size float64, made Fractions) (Particle, error) {
+func NewParticle(size float64, made fractions) (particle, error) {
 	if !positive(size) {
-		return Particle{}, refuse("a grain of size %v", size)
+		return particle{}, refuse("a grain of size %v", size)
 	}
 	if len(made.kinds) == 0 {
-		return Particle{}, refuse("a grain made of nothing")
+		return particle{}, refuse("a grain made of nothing")
 	}
-	return Particle{size: size, made: made}, nil
+	return particle{size: size, made: made}, nil
 }
 
 // Size is the grain's size in micrometres
-func (grain Particle) Size() float64 { return grain.size }
+func (grain particle) Size() float64 { return grain.size }
 
 // Made is what the grain is made of
-func (grain Particle) Made() Fractions { return grain.made }
+func (grain particle) Made() fractions { return grain.made }
 
 // refuse is a constructor's error, saying what it would not make
 func refuse(format string, about ...any) error {

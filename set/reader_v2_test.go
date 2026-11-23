@@ -97,7 +97,8 @@ func TestVersionOneRelabelledVersionTwoReadsTheSame(t *testing.T) {
 		if strings.HasPrefix(was, "refused") {
 			continue
 		}
-		now := readDump(path, []byte(strings.Replace(text, v1Label, v2Label, 1)))
+		retitled := strings.Replace(text, v1Label, v2Label, 1)
+		now := readDump(path, []byte(retitled))
 		if now != was {
 			t.Errorf("%s: relabelled version 2, it reads differently", path)
 		}

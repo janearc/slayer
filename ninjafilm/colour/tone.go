@@ -72,10 +72,11 @@ func Develop(grid *frame.Frame, exposure float64) *image.RGBA {
 // light. Nought is read as one. Its knee is where the shoulder of a film
 // starts, when there is one.
 //
-// Below the knee light is as it is. Above it the light rolls off by the
-// logarithm. Its top is the brightest light the picture holds. That
-// lands on white. Everything between keeps its detail. Tops of one or
-// less are read as a hundred times white. Nought is among them.
+// Below the knee the luminance is as it is. Above it the light rolls
+// off by the logarithm. Its top is the brightest light the picture
+// holds. That lands on white. Everything between keeps its detail. Tops
+// of one or less are read as a hundred times white. Nought is among
+// them.
 //
 // The roll-off is knee + a ln(1 + (y - knee)/a), a the scale solved once
 // when the tone is made. It leaves the knee at the slope it had below
@@ -83,7 +84,9 @@ func Develop(grid *frame.Frame, exposure float64) *image.RGBA {
 // corner there drew a contour across it.
 //
 // The roll-off is by luminance. So a colour keeps its hue as it
-// brightens. No knee is the clamp.
+// brightens. A colour too saturated to fit under white at its luminance
+// is drawn toward white, under the knee as above it, so nothing changes
+// at the knee. No knee is the clamp.
 //
 // Its bloom is a glow like the glow of a lens or the halation of a film.
 // The light a pixel holds beyond white spills into its neighbours.
@@ -91,8 +94,6 @@ func Develop(grid *frame.Frame, exposure float64) *image.RGBA {
 // The spill is by a gaussian of this many pixels of sigma. The gaussian
 // reaches three times as far. So a star brighter than the picture holds
 // is a glow. Nought is none.
-//
-//ninja:vow practice slayer's pictures hold their tone
 type Tone struct {
 	exposure, knee, top, bloom float64
 	// scale is the shoulder's, solved by NewTone; see Scale
@@ -101,8 +102,6 @@ type Tone struct {
 
 // NewTone is a tone of an exposure with a knee, a top and a bloom. The
 // scale of its shoulder is solved here, once a tone and not once a pixel.
-//
-//ninja:vow practice slayer's pictures make their tone here
 func NewTone(exposure, knee, top, bloom float64) Tone {
 	made := Tone{exposure: exposure, knee: knee, top: top, bloom: bloom}
 	if made.shouldered() {
@@ -135,8 +134,6 @@ func (tone Tone) exposed() float64 {
 }
 
 // Develop is the frame as a picture through the tone.
-//
-//ninja:vow practice slayer's pictures develop their frames here
 func (tone Tone) Develop(grid *frame.Frame) *image.RGBA {
 	lights := make([]maths.Light, grid.W*grid.H)
 	for y := range grid.H {
@@ -150,8 +147,6 @@ func (tone Tone) Develop(grid *frame.Frame) *image.RGBA {
 // Picture is the lights as the bytes of the screen through the tone.
 // They are across by down, a row at a time. They are bloomed first if
 // the tone blooms. render/colour develops its frames through it.
-//
-//ninja:vow practice slayer's pictures develop their lights here
 func (tone Tone) Picture(lights []maths.Light, across, down int) *image.RGBA {
 	if tone.bloom > none {
 		lights = Bloom(lights, across, down, tone.exposed(), tone.bloom)
@@ -192,8 +187,6 @@ func beyondWhite(lights []maths.Light, exposure float64) (over []maths.Light,
 //
 // The Metal developer of improv/moonlake/omnipositor/gpudevelop blooms by
 // these weights, as float32s.
-//
-//ninja:vow practice slayer's gpu pictures weigh their bloom here
 func BloomWeights(radius float64) (weights []float64, reach int) {
 	reach = int(math.Ceil(reachSigmas * radius))
 	weights = make([]float64, pair*reach+whole)
@@ -312,11 +305,13 @@ func (tone Tone) pixel(light maths.Light) color.RGBA {
 
 // Squeeze is the shoulder. Light above the knee is rolled off toward
 // white by its luminance, as knee + a ln(1 + (y - knee)/a), a the
-// tone's Scale. Its hue is kept.
+// tone's Scale. Under the knee the luminance is as it is. Its hue is
+// kept.
 //
 // Colours too saturated to fit at that luminance are drawn toward white
-// along their own hue until they do. That is how a bright thing
-// bleaches. They are not clipped a part at a time, which turns them.
+// along their own hue until they do, under the knee as above it, so
+// nothing changes at the knee. That is how a bright thing bleaches.
+// They are not clipped a part at a time, which turns them.
 //
 //ninja:vow practice slayer's gpu pictures squeeze their light here
 func (tone Tone) Squeeze(light maths.Light) maths.Light {
@@ -324,17 +319,17 @@ func (tone Tone) Squeeze(light maths.Light) maths.Light {
 		return light
 	}
 	luminance := light.Luminance()
-	if luminance <= tone.knee {
-		return light
-	}
 	if math.IsInf(luminance, whole) {
 		// the end of the shoulder: as light grows without bound it
 		// bleaches to white, whatever its hue
 		return maths.Grey(whole)
 	}
-	rolled := math.Log1p((luminance - tone.knee) / tone.scale)
-	squeezed := math.Min(whole, tone.knee+tone.scale*rolled)
-	light = light.Scale(squeezed / luminance)
+	squeezed := luminance
+	if luminance > tone.knee {
+		rolled := math.Log1p((luminance - tone.knee) / tone.scale)
+		squeezed = math.Min(whole, tone.knee+tone.scale*rolled)
+		light = light.Scale(squeezed / luminance)
+	}
 	if brightest := max(light.R, light.G, light.B); brightest > whole {
 		// the part above the grey of the same luminance, shrunk
 		// until the brightest part is white
@@ -357,8 +352,6 @@ func (tone Tone) Squeeze(light maths.Light) maths.Light {
 // where libtheme's curve steps. A table says how many are at or below
 // the start of the amount's slot, and the few inside it are counted from
 // there. The amount times a power of two is exact, so the slot is too.
-//
-//ninja:vow practice slayer encodes its colours here
 func Encode(amount float64) uint8 {
 	if math.IsNaN(amount) {
 		return none
@@ -415,8 +408,6 @@ var steps = func() (table [byteMost]float64) {
 }()
 
 // Decode is an srgb byte as linear light. It is Encode undone.
-//
-//ninja:vow practice slayer decodes the bytes it reads here
 func Decode(code uint8) float64 { return decoded[code] }
 
 // decoded is the linear light of each byte.

@@ -8,14 +8,14 @@ import (
 // pipeOf is a file that reads back keys once, as a keyboard's would.
 func pipeOf(t *testing.T, keys string) *os.File {
 	t.Helper()
-	r, w, err := os.Pipe()
+	reader, writer, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := w.WriteString(keys); err != nil {
+	if _, err := writer.WriteString(keys); err != nil {
 		t.Fatal(err)
 	}
-	w.Close()
-	t.Cleanup(func() { r.Close() })
-	return r
+	writer.Close()
+	t.Cleanup(func() { reader.Close() })
+	return reader
 }

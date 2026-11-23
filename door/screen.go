@@ -111,6 +111,7 @@ func (going *filming) open(size image.Point) error {
 	if going.settings.Padding() == nothing {
 		return nil
 	}
+	codedSize := going.settings.Coded()
 	return going.said(fmt.Sprintf("padded %d rows to %d for the film",
-		size.Y, going.settings.Coded().Y))
+		size.Y, codedSize.Y))
 }

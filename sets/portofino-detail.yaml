@@ -1,0 +1,84 @@
+# portofino, up close, at the demo detail level: the row of fourteen tall
+# bays along a quay, seen from 25 m with a narrow lens, to show what a
+# window and a wall carry when they are drawn part by part. made by the
+# cities package, through the manufactory's kind terrace-portofino.
+#
+# places are metres, as a map's run: x east, y north, z up. the row runs
+# east from the origin with its front to the south, onto the quay. the
+# water has no gloss, since a set's material has none that is not a clear
+# one. the sun, the colours and the cameras are choices of this study,
+# picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: portofino detail
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    close:
+      title: "four windows, up close"
+      location:
+        at: [40, -25, 7.6]
+      orientation:
+        look_at: [40, 0, 7.6]
+    street:
+      title: "along the quay, at eye height"
+      location:
+        at: [-8, -22, 2]
+      orientation:
+        look_at: [40, 0, 7]
+    door:
+      title: "a door, up close"
+      location:
+        at: [40, -12, 2.5]
+      orientation:
+        look_at: [40, 0, 2]
+  set:
+    things:
+      row:
+        kind: terrace-portofino
+        seed: 3
+        complexity: demo
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      quay:
+        colour: {srgb_linear: [0.14, 0.125, 0.1]}
+        source: eye
+      water:
+        colour: {srgb_linear: [0.05, 0.09, 0.12]}
+        source: eye
+    boxes:
+      land:
+        material: quay
+        middle: [0, 236, -1]
+        size: [3000, 500, 2]
+        source: eye
+      harbour:
+        material: water
+        middle: [0, -514, -1.3]
+        size: [3000, 1000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.7, -0.6, 0.22]
+        colour: {srgb_linear: [2.2, 1.3, 0.65]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.22, 0.14, 0.12]}
+      zenith: {srgb_linear: [0.02, 0.035, 0.08]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye

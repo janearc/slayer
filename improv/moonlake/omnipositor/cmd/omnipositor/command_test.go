@@ -72,11 +72,13 @@ func TestStretchOptionRefusals(t *testing.T) {
 	if code != 0 || !strings.Contains(out, `movie: "m.mp4"`) || !strings.Contains(out, "[0,72)") {
 		t.Errorf("default range dry run: %d %q", code, out)
 	}
-	code, errs := runInto(&failAfter{}, append(with("--png"), "--dry-run")...)
+	cpuArgs := append(with("--png"), "--dry-run")
+	code, errs := runInto(failAfter(t, nothingAccepted), cpuArgs...)
 	if code == 0 || !strings.Contains(errs, "write refused") {
 		t.Errorf("CPU dry run write: %d %q", code, errs)
 	}
-	code, errs = runInto(&failAfter{}, append(with("--experimental-gpu", "--encode", "m.mp4", "--ffmpeg", "/x/ffmpeg"), "--dry-run")...)
+	gpuArguments := append(with("--experimental-gpu", "--encode", "m.mp4", "--ffmpeg", "/x/ffmpeg"), "--dry-run")
+	code, errs = runInto(failAfter(t, nothingAccepted), gpuArguments...)
 	if code == 0 || !strings.Contains(errs, "write refused") {
 		t.Errorf("GPU dry run write: %d %q", code, errs)
 	}
@@ -280,7 +282,7 @@ func TestSceneRefusals(t *testing.T) {
 	if code, out := run("scene", filepath.Join(dir, "none.yaml"), "--out", filepath.Join(dir, "o")); code == 0 || !strings.Contains(out, "none.yaml") {
 		t.Errorf("missing plan: %d %q", code, out)
 	}
-	if code, errs := runInto(&failAfter{}, "scene", plan, "--out", filepath.Join(dir, "o"), "--dry-run"); code == 0 || !strings.Contains(errs, "write refused") {
+	if code, errs := runInto(failAfter(t, nothingAccepted), "scene", plan, "--out", filepath.Join(dir, "o"), "--dry-run"); code == 0 || !strings.Contains(errs, "write refused") {
 		t.Errorf("dry run write: %d %q", code, errs)
 	}
 	existing := filepath.Join(dir, "existing")
@@ -305,7 +307,8 @@ func TestSceneRefusals(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(fresh, "render.json")); !os.IsNotExist(err) {
 		t.Errorf("a refused run wrote a receipt: %v", err)
 	}
-	writeFile(t, dir, "job.yaml", strings.Replace(strings.Replace(job, "width: 320, height: 180", "width: 4096, height: 4096", 1), "outputs: {picture: unused.png}", "outputs: {frames: unused}", 1)+"fps: 120\nduration: {value: 1, unit: s}\n")
+	wide := strings.Replace(job, "width: 320, height: 180", "width: 4096, height: 4096", 1)
+	writeFile(t, dir, "job.yaml", strings.Replace(wide, "outputs: {picture: unused.png}", "outputs: {frames: unused}", 1)+"fps: 120\nduration: {value: 1, unit: s}\n")
 	code, out = run("scene", plan, "--out", filepath.Join(dir, "fast"), "--movie")
 	if code == 0 || !strings.Contains(out, "movie:") {
 		t.Errorf("movie with a size no level can carry: %d %q", code, out)

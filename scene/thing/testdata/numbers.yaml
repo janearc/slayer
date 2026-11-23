@@ -1,0 +1,1687 @@
+# every number the scene/thing tests choose, with what it is and why it was
+# chosen. a test asks for a number by its name. a name starts with the test
+# file's stem, so that two files never share one.
+numbers:
+  - name: ranges-visible-short
+    value: 360
+    says: the first wavelength of the 1931 observer's table, in nanometres, where the visible starts
+    kind: picked
+    by: the first row of the observer's table
+  - name: ranges-visible-long
+    value: 830
+    says: the last wavelength of the 1931 observer's table, in nanometres, where the visible ends and is no longer held
+    kind: picked
+    by: the last row of the observer's table
+  - name: ranges-xray-nanometre
+    value: 1
+    says: a wavelength of one nanometre, which falls in the x-ray range and in no other
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ranges-mark-visible
+    value: 7
+    says: a marker stored in a table under the visible, to tell it from the others
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ranges-mark-xray
+    value: 3
+    says: a marker stored in a table under the x-ray, to tell it from the others
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ranges-mark-gamma
+    value: 4
+    says: a marker stored in a table under gamma, to tell it from the others
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ranges-mark-radio
+    value: 5
+    says: a marker stored in a table under radio, to tell it from the others
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ranges-mark-ultraviolet
+    value: 6
+    says: a marker stored in a table under the ultraviolet, to tell it from the others
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-awk-tolerance
+    value: 1e-9
+    says: how near a reflectance may be to a figure worked to nine places by hand
+    kind: picked
+    by: nine places is how far the figures were worked
+  - name: metal-grazing-tolerance
+    value: 1e-12
+    says: how near to all a conductor's share may be at grazing, where the equations give all to rounding
+    kind: picked
+    by: a few ulps of the arithmetic
+  - name: metal-doc-tolerance
+    value: 0.01
+    says: how near a metal's face-on reflectance may be to the two-place figure its doc gives
+    kind: picked
+    by: the doc rounds to hundredths
+  - name: metal-white-spread
+    value: 0.01
+    says: the widest gap between a white mirror's reddest and bluest share, or the least gap by which a colour exceeds it
+    kind: picked
+    by: a hundredth is what the eye sees as white for a mirror
+  - name: metal-sweep-steps
+    value: 100
+    says: how many even steps a sweep of looks from face on to grazing is cut into
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-dielectric-steps
+    value: 20
+    says: how many even steps the sweep that compares a conductor of no k with a dielectric is cut into
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-dielectric-tolerance
+    value: 1e-12
+    says: how near the two forms of Fresnel's equations must agree for a clear surface
+    kind: picked
+    by: a few ulps of the arithmetic
+  - name: metal-glass-index
+    value: 1.5
+    says: the refractive index of glass the package reads where none is given
+    kind: picked
+    by: the index a surface or film with none is read as having
+  - name: metal-absorbing-k
+    value: 2
+    says: the k of a conductor that absorbs, well above nought
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-absorbing-margin
+    value: 0.3
+    says: how much more than glass a conductor of k 2 and glass's n reflects face on
+    kind: picked
+    by: worked by hand, the difference is about 0.37
+  - name: metal-glass-face-on
+    value: 0.04
+    says: the share glass of index 1.5 reflects face on, ((1.5-1)/(1.5+1)) squared
+    kind: picked
+    by: worked by hand from the formula
+  - name: metal-glass-face-on-tolerance
+    value: 1e-15
+    says: how near glass's reflectance face on must be to its worked figure
+    kind: picked
+    by: the arithmetic is one division and a square
+  - name: metal-water-index
+    value: 1.333
+    says: the refractive index of water, from which light is looked at from inside
+    kind: picked
+    by: the index of water to three places
+  - name: metal-critical-cosine
+    value: 0.3
+    says: a look from inside water that is past its critical angle, whose reflection is all
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-dark-index
+    value: 1.7
+    says: the index of a film that lets nothing through, and of one that is not glass
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-opaque-absorption
+    value: 1e9
+    says: the absorption per metre of a film that lets nothing through, in every colour
+    kind: picked
+    by: far past what any thickness can pass
+  - name: metal-dark-thickness
+    value: 25e-6
+    says: the thickness in metres of the test films, a blanket's layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-film-tolerance
+    value: 1e-12
+    says: how near a film's reflectance must be to the figure it should give
+    kind: picked
+    by: a few ulps of the arithmetic
+  - name: metal-grey-spread
+    value: 0.06
+    says: the widest gap between a grey metal's reddest and bluest share
+    kind: picked
+    by: titanium's gap is about 0.059
+  - name: metal-colour-spread
+    value: 0.5
+    says: the least gap between a coloured metal's reddest and bluest share
+    kind: picked
+    by: gold's gap is about 0.53
+  - name: metal-kapton-thickness
+    value: 40e-6
+    says: the thickness in metres of the Kapton film whose passes are worked by hand
+    kind: picked
+    by: the thickness the film's absorptions are quoted for
+  - name: metal-kapton-index
+    value: 1.7
+    says: the refractive index of Kapton and of the amber film that is made like it
+    kind: picked
+    by: the index Kapton is given
+  - name: metal-kapton-tolerance
+    value: 1e-6
+    says: how near a film's passes must be to the figures worked to six places by hand
+    kind: picked
+    by: six places is how far the figures were worked
+  - name: metal-blanket-thickness
+    value: 25e-6
+    says: the thickness in metres of a spacecraft blanket's Kapton layer
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-rutile-thickness
+    value: 5e-9
+    says: the thickness in metres of the oxide the test asks Rutile for
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-rutile-index
+    value: 2.65
+    says: Devore's ordinary index for rutile at 549 nm
+    kind: picked
+    by: the index Rutile is given
+  - name: metal-plain-grey
+    value: 0.5
+    says: the diffuse colour of a metal with no gloss, which it does not mirror
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: metal-negative-index
+    value: -1
+    says: an index below nought, which a film reads as glass's
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: keyed-bezier-tolerance
+    value: 1e-9
+    says: how near an eased share may be to the value worked by hand, for the forty halvings settle to about 1e-12
+    kind: picked
+    by: three places looser than the halvings settle
+  - name: keyed-inside-share
+    value: 0.3
+    says: a share well inside a run, which no ease takes to either end
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: keyed-halving-step-exponent
+    value: -41
+    says: the power of two a half of the last halving's width is, where forty halvings of one leave 2 to the -40
+    kind: picked
+    by: worked from the forty halvings
+  - name: keyed-halving-tolerance
+    value: 1e-15
+    says: how near the share at an exact meet may be to the first order step from the curve at a half
+    kind: picked
+    by: the next term is of the order of 2 to the -82
+  - name: made-tolerance
+    value: 1e-12
+    says: how near a made look's reflectance must be to the standing constructor's
+    kind: picked
+    by: a few ulps of the arithmetic
+  - name: construction-returned-share
+    value: 0.25
+    says: the share of x-rays a spectrum under test sends back
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: construction-gamma-nanometres
+    value: 2e-4
+    says: a wavelength in nanometres that falls in the gamma range
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: construction-xray-nanometres
+    value: 0.5
+    says: a wavelength in nanometres that falls in the x-ray range
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ocean-wave-wind
+    value: 8
+    says: the wind in metres a second of the wave recipe under test
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ocean-wave-samples
+    value: 64
+    says: the samples a side of the wave recipe under test
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ocean-wave-amplitude
+    value: 0.4
+    says: the amplitude in metres of the wake under test
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ocean-wave-length
+    value: 30
+    says: the length in metres of the wake under test
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: ocean-wave-changed
+    value: 0
+    says: the value a caller writes over a wake's numbers, which must differ from the recipe's
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: made-iron-density
+    value: 7.87
+    says: the density of iron in grams a cubic centimetre, for a material that has a formula and no optics
+    kind: picked
+    by: the density of iron to three places
+  - name: orbit-worked-tolerance
+    value: 1e-9
+    says: how near two points or directions must be to count as the same, in the worked orbit tests
+    kind: picked
+    by: far finer than any value the worked orbit arithmetic is asked for, and far coarser than its rounding
+  - name: orbit-worked-angle-tolerance
+    value: 1e-12
+    says: how near an orbit's angle must be to the angle worked by hand
+    kind: picked
+    by: angles are compared directly, with no steps between them to widen the rounding
+  - name: orbit-worked-phase
+    value: 0.5
+    says: the phase in radians the angle tests start an orbit at
+    kind: picked
+    by: not zero and not a turn, so it shows up in the angle
+  - name: orbit-worked-short-period
+    value: 4
+    says: the period in seconds of the orbits worked a quarter turn a second
+    kind: picked
+    by: a quarter of it is a whole second
+  - name: orbit-worked-long-period
+    value: 8
+    says: the period in seconds of the orbits worked an eighth of a turn a second
+    kind: picked
+    by: an eighth of it is a whole second
+  - name: orbit-worked-wide-radius
+    value: 3
+    says: the radius of the orbits worked at a radius of three
+    kind: picked
+    by: worked by hand, a radius no axis length or square root is mistaken for
+  - name: orbit-worked-small-radius
+    value: 2
+    says: the radius of the tilted and locked orbits worked at a radius of two
+    kind: picked
+    by: worked by hand, so that the start of the tilted orbit is the square root of two
+  - name: orbit-worked-tilt-steps
+    value: 8
+    says: how many whole seconds round the tilted orbit are checked to stay in its plane
+    kind: picked
+    by: the tilted orbit takes eight seconds to go round
+  - name: orbit-worked-axis-along-x
+    value: 0.9
+    says: how far along x the axis is that is just under the point at which the first axis changes
+    kind: picked
+    by: worked by hand from the rule that the first axis changes past this
+  - name: orbit-worked-axis-y
+    value: 0.43588989435406733
+    says: the y part of an axis of unit length that is 0.9 along x, the square root of 0.19
+    kind: picked
+    by: worked by hand, the float64 nearest the square root of 0.19
+  - name: orbit-worked-parent-scale
+    value: 2
+    says: the scale of the parent in the nested and growing tests
+    kind: picked
+    by: worked by hand with a child scale of three
+  - name: orbit-worked-child-scale
+    value: 3
+    says: the scale of the child in the nested tests
+    kind: picked
+    by: worked by hand with a parent scale of two
+  - name: orbit-worked-nested-scale
+    value: 6
+    says: the scale of the child in the world, the parent's scale times the child's
+    kind: picked
+    by: worked by hand from the parent and child scales
+  - name: orbit-worked-growth-rate
+    value: 3
+    says: how much a growing subspace's scale grows each second
+    kind: picked
+    by: worked by hand, so a quarter second is 0.75
+  - name: orbit-worked-carried-seconds
+    value: 3
+    says: the whole seconds the carried growing subspace is asked at
+    kind: picked
+    by: the growth rate times two seconds of age is the scale worked by hand
+  - name: orbit-worked-carried-scale
+    value: 12
+    says: the scale of a growing subspace carried by the parent, the parent's scale times the growth
+    kind: picked
+    by: worked by hand from the parent scale and the growth
+  - name: axis-spin-tolerance
+    value: 1e-12
+    says: how near two points must be to count as the same in the axis spin tests
+    kind: picked
+    by: the points are one rotation from exact, so rounding is far finer
+  - name: axis-spin-rpm
+    value: 60
+    says: the spin rate in revolutions a minute of the pivot test
+    kind: picked
+    by: sixty a minute is one a second, so a quarter second is a quarter turn
+  - name: axis-spin-reverse-rpm
+    value: -60
+    says: the negative spin rate in revolutions a minute of the rest test
+    kind: picked
+    by: a negative rate on a quarter second cancels a phase of a quarter turn
+  - name: axis-spin-parent-angle
+    value: 0.4
+    says: the angle in radians the test parent is turned about y
+    kind: picked
+    by: not a multiple of a quarter turn, so a wrong order of composing shows
+  - name: axis-spin-parent-scale
+    value: 2
+    says: the scale of the test parent
+    kind: picked
+    by: not one, so a parent scale that is lost or doubled shows
+  - name: axis-spin-rest-height
+    value: 5
+    says: the height of the parent of the rest test
+    kind: picked
+    by: worked by hand, the first axis then lands at six
+  - name: axis-spin-moving-milliseconds
+    value: 250
+    says: the milliseconds into the motion at which the spins are asked
+    kind: picked
+    by: a quarter of a second, a quarter turn at sixty a minute
+  - name: axis-spin-long-seconds
+    value: 123
+    says: the seconds into the motion at which the stopped spin is asked
+    kind: picked
+    by: far from zero and not a whole minute
+  - name: attrs-motion-tolerance
+    value: 1e-9
+    says: how near a point in orbit must be to the point worked by hand
+    kind: picked
+    by: far finer than the orbit arithmetic is worked to
+  - name: attrs-motion-still-scale
+    value: 4
+    says: the scale of the still subspace
+    kind: picked
+    by: not one, so a scale that is lost shows
+  - name: attrs-motion-long-hours
+    value: 1000
+    says: the whole hours into the motion at which the still subspace is asked
+    kind: picked
+    by: far past any time the other tests ask
+  - name: attrs-motion-orbit-radius
+    value: 2
+    says: the radius of the orbit that carries a thing, a volume and a field
+    kind: picked
+    by: worked by hand, so that one second on it is two out
+  - name: attrs-motion-orbit-seconds
+    value: 4
+    says: the period in seconds of the orbit that carries a thing, a volume and a field
+    kind: picked
+    by: a quarter of it is a whole second
+  - name: beam-doppler-jet-speed
+    value: 0.6
+    says: the speed, as a share of light's, of the jet the boost and flow tests ask about
+    kind: picked
+    by: worked by hand in the test's comment, where gamma is exactly 1.25
+  - name: beam-doppler-tolerance
+    value: 1e-12
+    says: how close a boost or a flow speed must be to the worked value, as a share of it for a boost and in whole for a speed
+    kind: picked
+    by: far below any rounding in the few operations the worked values pass through
+  - name: beam-doppler-huge-radius
+    value: 1e300
+    says: a slowing radius so large that the radius over a point a ten-billionth out is endless
+    kind: picked
+    by: chosen so that the slowing outside it has no number
+  - name: beam-doppler-near-axis-offset
+    value: 1e-10
+    says: how far off the axis the point is that the no-speed test asks about, a ten-billionth
+    kind: picked
+    by: chosen to make the radius over it overflow
+  - name: beam-doppler-unit-radius
+    value: 1
+    says: a slowing radius of one, outside which a round beam slows
+    kind: picked
+    by: chosen as the plain case in the tests that need a radius and not its value
+  - name: beam-doppler-axis-point-up
+    value: 5
+    says: how far up the axis the still-gas tests ask, in metres of scene
+    kind: picked
+    by: chosen as a point well off the origin on the axis
+  - name: beam-doppler-axis-point-down
+    value: -2
+    says: how far down the axis the still-gas tests ask, a negative height
+    kind: picked
+    by: chosen as a point below the origin on the axis
+  - name: beam-doppler-round-beam-speed
+    value: 0.8
+    says: the speed of the round beam whose flow at sixteen out is 0.6 of light's
+    kind: picked
+    by: worked by hand in the test's comment, 0.8 times the square root of 9 over 16
+  - name: beam-doppler-round-beam-radius
+    value: 9
+    says: the radius at which the round beam of the flow test begins to slow
+    kind: picked
+    by: worked by hand in the test's comment
+  - name: beam-doppler-round-point-east
+    value: 16
+    says: how far east of the axis the round beam's boost is asked
+    kind: picked
+    by: worked by hand in the test's comment
+  - name: beam-doppler-round-point-north
+    value: 3
+    says: how far up the axis the round beam's boost is asked, which does not change the flow
+    kind: picked
+    by: chosen to show that the height along the axis does not matter
+  - name: beam-doppler-tipped-axis-length
+    value: 3
+    says: the length of the tipped axis, three units of x, longer than one unit
+    kind: picked
+    by: chosen to show that an axis is made one unit long
+  - name: beam-doppler-tipped-point
+    value: 2
+    says: how far along the tipped axis, either way, the flow is asked
+    kind: picked
+    by: chosen as a point off the origin on the axis
+  - name: beam-doppler-round-flow-speed
+    value: 0.4
+    says: the speed of the round beams whose flow goes round the axis or is still on it
+    kind: picked
+    by: chosen as a speed well below light's
+  - name: audit-width
+    value: 2
+    says: the width in nanometres of the excited gas whose lines overlap at a band
+    kind: picked
+    by: chosen to take in the lines near the band
+  - name: audit-band
+    value: 502.5
+    says: the wavelength in nanometres at which the overlapping lines are asked
+    kind: picked
+    by: chosen between two lines
+  - name: audit-repeats
+    value: 200
+    says: how many times the gas is asked for one answer
+    kind: picked
+    by: chosen as enough asks to catch a map's changing order
+  - name: audit-midway
+    value: 501
+    says: a wavelength in nanometres midway between the two lines of the tie
+    kind: picked
+    by: chosen as the midpoint of 500 and 502
+  - name: audit-sun-mass
+    value: 1.98847e30
+    says: the mass of the sun in kilograms, for the orbit that is refused
+    kind: picked
+    by: a figure of the sun's mass to five places, for the thing to pin to a source
+  - name: audit-astronomical-unit
+    value: 1.495978707e11
+    says: the astronomical unit in metres
+    kind: picked
+    by: the exact value of the astronomical unit, for the thing to pin to a source
+  - name: audit-sedna-aphelion-au
+    value: 506
+    says: how far in astronomical units Sedna is round the sun, whose orbit is some 11,400 years
+    kind: picked
+    by: worked by hand in the test's comment
+  - name: audit-over-gloss
+    value: 2
+    says: a gloss past one, which mirrors no more than a gloss of one
+    kind: picked
+    by: chosen as a whole number past one
+  - name: audit-index
+    value: 1.5
+    says: the refractive index of the two surfaces compared
+    kind: picked
+    by: chosen as the index of ordinary glass
+  - name: wake-foam-origin-east
+    value: 12
+    says: how far east the foam's origin is
+    kind: picked
+    by: chosen as a point inside the patch the tests scan
+  - name: wake-foam-half-width
+    value: 5
+    says: the half width of the foam's wake
+    kind: picked
+    by: chosen as a width a few cells across
+  - name: wake-foam-length
+    value: 24
+    says: the length of the foam's wake
+    kind: picked
+    by: chosen as a length of several wavelengths
+  - name: wake-foam-wavelength
+    value: 9.6
+    says: the wavelength of the foam's pattern, shorter than its length
+    kind: picked
+    by: chosen as 0.4 of the length
+  - name: wake-foam-reflectance
+    value: 0.9
+    says: the grey reflectance of the foam
+    kind: picked
+    by: chosen as a bright foam
+  - name: wake-foam-satin
+    value: 0.8
+    says: the satin of the foam
+    kind: picked
+    by: chosen as a satin between none and one
+  - name: wake-foam-coverage
+    value: 0.5
+    says: the coverage the foam is authored at, and the bound the coverage test holds it to
+    kind: picked
+    by: chosen as half
+  - name: wake-foam-band
+    value: 0.2
+    says: the band of the authored foam
+    kind: picked
+    by: chosen as a narrow band
+  - name: wake-foam-west-edge
+    value: -20
+    says: the west edge of the patch the coverage test scans
+    kind: picked
+    by: chosen as a patch with the whole wake in it
+  - name: wake-foam-east-edge
+    value: 30
+    says: the east edge of the patch the coverage test scans
+    kind: picked
+    by: chosen as a patch with the whole wake in it
+  - name: wake-foam-south-edge
+    value: -12
+    says: the south edge of the patch the coverage test scans
+    kind: picked
+    by: chosen as a patch with the whole wake in it
+  - name: wake-foam-north-edge
+    value: 12
+    says: the north edge of the patch the coverage test scans
+    kind: picked
+    by: chosen as a patch with the whole wake in it
+  - name: wake-foam-speed
+    value: 6
+    says: the speed of the foam in the snapshot test, which moves it with the scene clock
+    kind: picked
+    by: chosen as a speed that moves the pattern in three seconds
+  - name: wake-foam-full
+    value: 1
+    says: the coverage and the band of the snapshot foam, the whole of each
+    kind: picked
+    by: chosen so that the origin is covered
+  - name: wake-foam-later
+    value: 3
+    says: the later render time, in seconds, the snapshot test asks
+    kind: picked
+    by: chosen as a time after the first
+  - name: splits-between-glass-index
+    value: 1.5
+    says: the index of the glass the light leaves
+    kind: picked
+    by: the indices the tracer's own tests use
+  - name: splits-between-water-index
+    value: 1.33
+    says: the index of the water the light enters
+    kind: picked
+    by: the indices the tracer's own tests use
+  - name: splits-between-over-gloss
+    value: 1.7
+    says: a gloss above one, which must split as a gloss of one does
+    kind: picked
+    by: any gloss above one would do; this one is clear of it
+  - name: splits-between-half-gloss
+    value: 0.5
+    says: a gloss of a half, which must split off less than a full gloss
+    kind: picked
+    by: chosen as the plainest gloss below one
+  - name: mirrors-schlick-tolerance
+    value: 1e-12
+    says: how close a share worked by hand must be to the one computed
+    kind: picked
+    by: far above rounding in a few float64 operations and far below any share asked about
+  - name: mirrors-schlick-loose-tolerance
+    value: 2e-6
+    says: the tolerance for a share worked by hand to six places
+    kind: picked
+    by: the hand working keeps six places, so half a unit of the last is five in the seventh
+  - name: mirrors-schlick-glass-index
+    value: 1.5
+    says: the index of glass
+    kind: picked
+    by: the usual round index of glass, which makes f0 come to 0.04
+  - name: mirrors-schlick-glass-face-on
+    value: 0.04
+    says: the share glass mirrors face on, f0 at an index of 1.5
+    kind: picked
+    by: worked by hand as (0.5 / 2.5) squared
+  - name: mirrors-schlick-half
+    value: 0.5
+    says: one half, as a gloss and as the cosine of a look at sixty degrees
+    kind: picked
+    by: chosen as the plainest value between none and one
+  - name: mirrors-schlick-half-gloss-mirror
+    value: 0.035
+    says: what a gloss of a half mirrors at a cosine of a half, which is half of glass's 0.07
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: mirrors-schlick-cosine-past-one
+    value: 1.5
+    says: a cosine past one, which is held to face on
+    kind: picked
+    by: any cosine past one would do
+  - name: mirrors-schlick-cosine-below-zero
+    value: -0.5
+    says: a cosine below zero, which is held to grazing
+    kind: picked
+    by: any cosine below zero would do
+  - name: mirrors-schlick-anywhere-x
+    value: 3
+    says: the x of a point at which a surface with no texture is asked its roughness
+    kind: picked
+    by: any point would do, and this one is away from the world's zero
+  - name: mirrors-schlick-anywhere-y
+    value: 4
+    says: the y of a point at which a surface with no texture is asked its roughness
+    kind: picked
+    by: any point would do, and this one is away from the world's zero
+  - name: mirrors-schlick-anywhere-z
+    value: 5
+    says: the z of a point at which a surface with no texture is asked its roughness
+    kind: picked
+    by: any point would do, and this one is away from the world's zero
+  - name: mirrors-schlick-red-luminance
+    value: 0.2126
+    says: the luminance of red alone, which is red's weight in luminance
+    kind: picked
+    by: red's weight in the luminance the material code uses; the source of that weight is the code's to pin
+  - name: mirrors-schlick-under-critical-cosine
+    value: 0.8
+    says: a cosine inside the glass whose sine is 0.6, under the critical angle
+    kind: picked
+    by: worked by hand in the test's comment
+  - name: mirrors-schlick-under-critical-share
+    value: 0.114140
+    says: the share Splits gives from inside glass at that cosine, to six places
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: mirrors-schlick-half-gloss-square-on-share
+    value: 0.02
+    says: the share a gloss of a half splits off square on, half of glass's 0.04
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: volume-illumination-tolerance
+    value: 1e-12
+    says: how close a direction's length, sum and height must be to the value worked by hand
+    kind: picked
+    by: far above rounding in a few float64 operations and far below any error asked about
+  - name: volume-illumination-phase-tolerance
+    value: 1e-15
+    says: how close the isotropic phase over a solid angle must be to the share worked by hand
+    kind: picked
+    by: a product of three float64 values is within a few units of the last place
+  - name: volume-illumination-half
+    value: 0.5
+    says: one half, the offset of a direction's height in its band and the share of a hemisphere
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: volume-illumination-direction-samples
+    value: 16
+    says: the sky samples the direction test asks for, an even count between 2 and 64
+    kind: picked
+    by: a count with eight pairs, enough to tell the bands apart
+  - name: volume-illumination-sphere-pi-multiple
+    value: 4
+    says: the sphere's solid angle in pi steradians, four pi
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: volume-illumination-hemisphere-pi-multiple
+    value: 2
+    says: the hemisphere's solid angle in pi steradians, two pi
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: volume-illumination-held-samples
+    value: 8
+    says: the sky samples of the illumination the grid tests hold a grid in
+    kind: picked
+    by: any even count between 2 and 64 would do
+  - name: volume-illumination-small-nodes
+    value: 4
+    says: the nodes each way of the small grid the tests make
+    kind: picked
+    by: any count between 2 and 128 would do, and four is a small cube
+  - name: stopping-soft-xray-nanometres
+    value: 1
+    says: the wavelength of a soft x-ray, a band no row of water was read at
+    kind: picked
+    by: chosen for the test that asks for it, far from the film's own band
+  - name: stopping-gamma-nanometres
+    value: 1e-4
+    says: the wavelength of a gamma ray, a band no row of water was read at
+    kind: picked
+    by: chosen for the test that asks for it, far from the film's own band
+  - name: stopping-radio-nanometres
+    value: 1.26e8
+    says: the wavelength of a radio wave, a band no row of water was read at
+    kind: picked
+    by: chosen for the test that asks for it, far from the film's own band
+  - name: stopping-little-off-factor
+    value: 1.001
+    says: the factor that puts a photon a thousandth off the film's own
+    kind: picked
+    by: chosen for the test that asks for it, to be well outside rounding
+  - name: stopping-hair-off-offset
+    value: 1e-6
+    says: how far a photon is put off the film's own, as a part of one
+    kind: picked
+    by: chosen for the test that asks for it, to be outside rounding
+  - name: stopping-rounding-offset
+    value: 1e-12
+    says: how far a photon is put off the film's own, as a part of one, so
+      little that it is rounding
+    kind: picked
+    by: chosen for the test that asks for it, to be within rounding
+  - name: stopping-thousandth-offset
+    value: 1e-3
+    says: how far a photon is put off the film's own, as a part of one, so
+      much that it is another photon
+    kind: picked
+    by: chosen for the test that asks for it, to be outside rounding
+  - name: stopping-unit-shortest
+    value: 1e-4
+    says: the shortest unit, in metres, that the scaling test draws
+    kind: picked
+    by: chosen for the test that asks for it, a unit of a tenth of a millimetre
+  - name: stopping-unit-longest
+    value: 0.05
+    says: the longest unit, in metres, that the scaling test draws
+    kind: picked
+    by: chosen for the test that asks for it, a unit of five centimetres
+  - name: stopping-way-longest
+    value: 0.1
+    says: the longest way through, in metres, that the scaling test draws
+    kind: picked
+    by: chosen for the test that asks for it, a way of ten centimetres
+  - name: stopping-square-tolerance
+    value: 1e-12
+    says: how far twice the unit may pass from the square of one unit's share
+    kind: picked
+    by: chosen for the test that asks for it, a few units of rounding
+  - name: stopping-way-tolerance
+    value: 1e-9
+    says: how far the shares a way through passes may differ, counted in
+      either unit or by the material's rows
+    kind: picked
+    by: chosen for the test that asks for it, the rounding of a power
+  - name: world_adds-field-mass
+    value: 1
+    says: the mass of the first field the world is given, in the field's units
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: world_adds-field-reach
+    value: 5
+    says: the reach of the first field the world is given, in the field's units
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: world_adds-second-field-mass
+    value: 2
+    says: the mass of the second field the world is given
+    kind: picked
+    by: chosen for the test that asks for it, unlike the first
+  - name: world_adds-field-mass-changed
+    value: 9
+    says: the mass the field handed back is changed to
+    kind: picked
+    by: chosen for the test that asks for it, unlike the two masses given
+  - name: world_adds-lamp-strength-one
+    value: 1
+    says: the grey strength of the first lamp the world is given
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: world_adds-lamp-strength-two
+    value: 2
+    says: the grey strength of the second lamp the world is given
+    kind: picked
+    by: chosen for the test that asks for it, unlike the first
+  - name: world_adds-sun-radius-km
+    value: 695700
+    says: the sun's nominal radius in kilometres, from the IAU's resolution B3 of 2015
+    kind: picked
+    by: the source is the thing's to be pinned in sources.yaml
+  - name: world_adds-astronomical-unit-km
+    value: 149597870.7
+    says: an astronomical unit in kilometres, from the IAU's resolution B2 of 2012
+    kind: picked
+    by: the source is the thing's to be pinned in sources.yaml
+  - name: world_adds-sun-width-tolerance-degrees
+    value: 0.01
+    says: how far, in degrees, the sun's width may be from the arctangent's
+    kind: picked
+    by: chosen for the test that asks for it, a hundredth of a degree
+  - name: orbit-jupiter-mass
+    value: 1.898e27
+    says: the mass of the planet the moon Io goes round, in kilograms
+    kind: picked
+    by: a round figure for the planet, enough for a period good to a percent
+  - name: orbit-sun-mass
+    value: 1.989e30
+    says: the mass of the star the earth goes round, in kilograms
+    kind: picked
+    by: a round figure for the star, enough for a period good to a day
+  - name: orbit-io-radius
+    value: 421.7e6
+    says: the radius of the orbit of Io round its planet, in metres
+    kind: picked
+    by: a round figure for the orbit, enough for a period good to a percent
+  - name: orbit-io-days
+    value: 1.77
+    says: the days Io takes to go round its planet
+    kind: picked
+    by: the period the law gives for the mass and radius, to three figures
+  - name: orbit-io-days-tolerance
+    value: 0.02
+    says: how far from orbit-io-days the period of Io may be, in days
+    kind: picked
+    by: a part in ninety of the period, wider than the rounding of the inputs
+  - name: orbit-earth-radius
+    value: 1.496e11
+    says: the radius of the orbit of the earth round its star, in metres
+    kind: picked
+    by: a round figure for the orbit, enough for a period good to a day
+  - name: orbit-year-days
+    value: 365.25
+    says: the days the earth takes to go round its star
+    kind: picked
+    by: the length of a year the law gives for the mass and radius
+  - name: orbit-year-days-tolerance
+    value: 1
+    says: how far from orbit-year-days the period of the earth may be, in days
+    kind: picked
+    by: wider than the rounding of the inputs
+  - name: orbit-inner-radius
+    value: 1e8
+    says: the radius of the smaller of two orbits round one mass, in metres
+    kind: picked
+    by: a round radius, a quarter of the other
+  - name: orbit-outer-radius
+    value: 4e8
+    says: the radius of the larger of two orbits round one mass, in metres
+    kind: picked
+    by: four times the smaller radius
+  - name: orbit-radius-ratio
+    value: 8
+    says: how many times longer the larger orbit takes than the smaller
+    kind: picked
+    by: worked by hand, four to the power of three halves is eight
+  - name: orbit-radius-ratio-tolerance
+    value: 1e-6
+    says: how far from orbit-radius-ratio the ratio of two periods may be
+    kind: picked
+    by: far below the rounding of a period to a nanosecond
+  - name: orbit-tolerance
+    value: 1e-9
+    says: how far a point or a length may be from its worked value
+    kind: picked
+    by: far above the rounding of the sums and far below any visible error
+  - name: orbit-tight-tolerance
+    value: 1e-12
+    says: how far from its worked value a point that was never moved may be
+    kind: picked
+    by: a turn of nothing adds no more than the rounding of one sum
+  - name: orbit-round-radius
+    value: 5
+    says: the radius of the orbit the going-round test places a thing on
+    kind: picked
+    by: a whole number of units, so the worked points are whole numbers
+  - name: orbit-round-period-seconds
+    value: 10
+    says: the seconds a thing takes to go once round that orbit
+    kind: picked
+    by: a whole number of seconds, so the worked points are whole numbers
+  - name: orbit-round-scale
+    value: 0.5
+    says: the scale of the thing on that orbit, which the orbit must keep
+    kind: picked
+    by: a scale that is neither one nor zero, so a lost scale shows
+  - name: orbit-still-radius
+    value: 2
+    says: the radius of an orbit with no period
+    kind: picked
+    by: a whole number of units, so the point is easy to read
+  - name: orbit-moon-radius
+    value: 2
+    says: the radius of the moon orbit the locked, nested and growing tests use
+    kind: picked
+    by: a whole number of units, so the worked points are whole numbers
+  - name: orbit-moon-period-seconds
+    value: 4
+    says: the seconds that moon takes to go once round
+    kind: picked
+    by: a whole number of seconds that a quarter of is a whole second
+  - name: orbit-moon-quarters
+    value: 4
+    says: how many whole seconds of the moon's period are tried, one a quarter
+    kind: picked
+    by: one for each quarter of the period of orbit-moon-period-seconds
+  - name: orbit-spin-period-seconds
+    value: 4
+    says: the seconds a spin takes to turn once about its axis
+    kind: picked
+    by: a whole number of seconds that a quarter of is a whole second
+  - name: orbit-growing-rate
+    value: 3
+    says: how much the scale of a growing subspace gains each second
+    kind: picked
+    by: a whole number, so the worked scale is a whole number
+  - name: orbit-growing-seconds
+    value: 3
+    says: the seconds into the film at which the growing scale is read
+    kind: picked
+    by: two seconds after the birth of one second, worked by hand
+  - name: orbit-growing-scale
+    value: 6
+    says: the scale expected at orbit-growing-seconds
+    kind: picked
+    by: worked by hand, two seconds of growth at a rate of three
+  - name: orbit-birth-tolerance
+    value: 1e-6
+    says: how small the scale of a growing subspace is before its birth
+    kind: picked
+    by: far below any visible size
+  - name: orbit-beam-speed
+    value: 0.9
+    says: the speed of a jet, as a share of the speed of light
+    kind: picked
+    by: fast enough that the boost toward the eye is plain
+  - name: orbit-beam-coming-least
+    value: 50
+    says: the least a jet at that speed boosts what comes toward the eye
+    kind: picked
+    by: well below the boost the law gives, well above one
+  - name: orbit-beam-going-most
+    value: 0.05
+    says: the most a jet at that speed lets through of what goes away
+    kind: picked
+    by: well above the dimming the law gives, well below one
+  - name: orbit-round-beam-speed
+    value: 0.5
+    says: the speed of a round beam at its reference radius, as a share of c
+    kind: picked
+    by: fast enough that the side coming is boosted and the side going dimmed
+  - name: orbit-beam-at
+    value: 1
+    says: the radius at which a round beam flows at its full speed
+    kind: picked
+    by: a radius of one, so a point four out is four radii out
+  - name: orbit-round-coming-least
+    value: 2
+    says: the least a round beam boosts the side of a disc coming toward the eye
+    kind: picked
+    by: well below the boost the law gives, well above one
+  - name: orbit-round-going-most
+    value: 0.5
+    says: the most a round beam lets through of the side going away
+    kind: picked
+    by: well above the dimming the law gives, well below one
+  - name: orbit-flow-speed
+    value: 0.4
+    says: the speed of a round beam, as a share of the speed of light
+    kind: picked
+    by: a speed the flow test can halve and read
+  - name: orbit-flow-outer-speed
+    value: 0.2
+    says: the speed expected four times as far out as the reference radius
+    kind: picked
+    by: worked by hand, the flow slows by the square root of four
+  - name: orbit-flow-jet-speed
+    value: 0.6
+    says: the speed of a jet along its axis, as a share of the speed of light
+    kind: picked
+    by: a speed other than that of the round beam, so they cannot be mixed up
+  - name: spin-turns-period-seconds
+    value: 4
+    says: the seconds a spin takes to turn once about its axis
+    kind: picked
+    by: a whole number of seconds that a quarter of is a whole second
+  - name: period-kepler-codata-g
+    value: 6.67430e-11
+    says: the constant of gravity the worked period is made with
+    kind: picked
+    by: the value codata recommends, which the thing's source is to pin
+  - name: period-kepler-relative-tolerance
+    value: 1e-9
+    says: how far, as a share of the worked value, a period may be from it
+    kind: picked
+    by: far above the rounding of a few products and far below any visible error
+  - name: period-kepler-one-kilogram-least
+    value: 769000
+    says: the fewest seconds one kilogram at one metre takes to go round
+    kind: picked
+    by: worked by hand from the law, rounded down
+  - name: period-kepler-one-kilogram-most
+    value: 769200
+    says: the most seconds one kilogram at one metre takes to go round
+    kind: picked
+    by: worked by hand from the law, rounded up
+  - name: period-kepler-most-seconds
+    value: 9223372035
+    says: the longest period in seconds that Period gives, a little under a Duration
+    kind: picked
+    by: the nearest whole second under what a Duration holds
+  - name: period-kepler-half-second
+    value: 0.5
+    says: how far either side of the longest period the refusal test goes
+    kind: picked
+    by: far above the rounding of the law and far below a second
+  - name: period-kepler-second-tolerance
+    value: 1e-3
+    says: how far a period may be from its worked value, in seconds
+    kind: picked
+    by: far above the rounding of the law and far below the half second tried
+  - name: period-kepler-years
+    value: 1000
+    says: the years of the orbit the refusal is asked to name
+    kind: picked
+    by: a round number of years far past the longest a Duration holds
+  - name: glint-rings
+    value: 1200
+    says: how many rings the tilt from straight up to flat is cut into when the lobe is summed over the hemisphere
+    kind: picked
+    by: fine enough that the midpoint sum is within the bounds the tests ask
+  - name: glint-turns
+    value: 600
+    says: how many cells each ring is cut into around the way up
+    kind: picked
+    by: fine enough that the midpoint sum is within the bounds the tests ask
+  - name: glint-return-bound
+    value: 1.0005
+    says: the most a surface may send back for the light that lands on it, one with a little allowed for the midpoint sum
+    kind: picked
+    by: the sum's own error is far under it
+  - name: glint-polished-return-floor
+    value: 0.98
+    says: the least a near-polished surface seen face on keeps of the light that lands on it
+    kind: picked
+    by: Smith's shadowing takes under two parts in a hundred of so narrow a lobe
+  - name: glint-width-polished
+    value: 0.1
+    says: a GGX width of a near-polished surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-width-fine
+    value: 0.3
+    says: a GGX width of a fine surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-width-medium
+    value: 0.6
+    says: a GGX width of a middling rough surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-width-whole
+    value: 1
+    says: a GGX width of a very rough surface, a whole one
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-view-face
+    value: 1
+    says: the cosine of a look straight at a surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-view-slanted
+    value: 0.7
+    says: the cosine of a look slanted to a surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-view-grazing
+    value: 0.3
+    says: the cosine of a look that grazes a surface
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-smooth-width
+    value: 0.05
+    says: a GGX width of a smooth surface, its lobe narrow and tall
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-rough-width
+    value: 0.5
+    says: a GGX width of a rough surface, its lobe broad and low
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-slant-cosine
+    value: 0.8
+    says: the cosine of both the lamp's way and the eye's way in the tests of the lobe's peak
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: glint-off-mirror-facing
+    value: 0.95
+    says: the cosine of a half way just off the mirror way
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: beckmann-rings
+    value: 200000
+    says: how many rings the tilt from straight up to flat is cut into when a density of faces is summed over the hemisphere
+    kind: picked
+    by: fine enough that the midpoint sum is within the tolerance the tests ask
+  - name: beckmann-tolerance
+    value: 1e-6
+    says: how far a sum or a share may be from the value it is worked to
+    kind: picked
+    by: the midpoint sum's own error is far under it
+  - name: beckmann-sea-slopes
+    value: 0.03884
+    says: Cox and Munk's clean-surface mean-square slope of the sea at 7 m per second, 0.003 + 0.00512 * 7; its source key is for the owner of the thing to pin
+    kind: picked
+    by: worked from the published fit
+  - name: beckmann-narrow-slopes
+    value: 0.0016
+    says: a mean-square slope of a narrow lobe, a width of 0.04
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: beckmann-broad-slopes
+    value: 0.2
+    says: a mean-square slope of a broad lobe
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: beckmann-smith-denominator
+    value: 1.0251273
+    says: one more than Smith's Lambda for Beckmann at a = 1, which is (exp(-1) / sqrt(pi) - erfc(1)) / 2 = 0.0251273
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: beckmann-grazing-cosine
+    value: 0.1
+    says: the cosine of a way that grazes the surface, the more slant of two
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: beckmann-oblique-cosine
+    value: 0.5
+    says: the cosine of a way less slant than the grazing one
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: beckmann-glancing-cosine
+    value: 0.3
+    says: the cosine of both the lamp's way and the eye's way when a glint is asked for at several facings
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: beckmann-tail-tolerance
+    value: 1e-9
+    says: how far, as a share of the worked ratio, GGX over Beckmann may be from it
+    kind: picked
+    by: both are closed forms, so only rounding is between them
+  - name: crinkle-look-x
+    value: 0.3
+    says: the x of the way the eye looks along in the crinkle tests, before it is made a unit long
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-look-y
+    value: 0.9
+    says: the y of the way the eye looks along, before it is made a unit long
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-look-z
+    value: 0.1
+    says: the z of the way the eye looks along, before it is made a unit long
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-size
+    value: 0.05
+    says: how far across a wrinkle is, in metres
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-slope
+    value: 0.4
+    says: how steep the wrinkles tilt a face
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-seed
+    value: 7
+    says: the seed of the wrinkles the crinkle tests read
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-other-seed
+    value: 8
+    says: a seed other than crinkle-seed, whose wrinkles tilt another way
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-step-x
+    value: 0.013
+    says: how far apart, in metres, the places tried lie along x
+    kind: picked
+    by: under the size of a wrinkle, so that places differ
+  - name: crinkle-step-z
+    value: 0.017
+    says: how far apart, in metres, the places tried lie along z
+    kind: picked
+    by: under the size of a wrinkle, so that places differ
+  - name: crinkle-columns
+    value: 20
+    says: how many places of the grid tried lie along x before the next row
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-places
+    value: 400
+    says: how many places the first crinkle test tries
+    kind: picked
+    by: enough places for most of them to tilt
+  - name: crinkle-few-columns
+    value: 10
+    says: how many places of the smaller grid lie along x before the next row
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-few-places
+    value: 100
+    says: how many places the test of the turned-away face tries
+    kind: picked
+    by: enough places for most of them to tilt
+  - name: crinkle-unit-tolerance
+    value: 1e-12
+    says: how far a normal's length may be from one
+    kind: picked
+    by: a few roundings of a unit vector
+  - name: crinkle-facing-floor
+    value: 0.05
+    says: the least a crinkled normal's cosine with the way of the eye may be
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-moved-tilt
+    value: 1e-3
+    says: the tilt, in radians, past which a normal counts as moved
+    kind: picked
+    by: far above rounding and far below a wrinkle's tilt
+  - name: crinkle-least-moved
+    value: 300
+    says: the fewest of the places tried whose normal must be moved
+    kind: picked
+    by: three of every four of the four hundred places
+  - name: crinkle-most-tilt
+    value: 1.2
+    says: the radians that no tilt of a normal may reach
+    kind: picked
+    by: a tilt that large would turn a face toward the side
+  - name: crinkle-probe-x
+    value: 1
+    says: the x of a place tried with a crinkle that does nothing
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-probe-y
+    value: 2
+    says: the y of a place tried with a crinkle that does nothing
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-probe-z
+    value: 3
+    says: the z of a place tried with a crinkle that does nothing
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-least-tilted-in-front
+    value: 75
+    says: the fewest of the hundred places seen from in front whose normal must be tilted
+    kind: picked
+    by: three of every four places
+  - name: crinkle-sample-x
+    value: 0.21
+    says: the x of the place the same-every-time test reads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-sample-z
+    value: 0.34
+    says: the z of the place the same-every-time test reads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-within-far-pixel
+    value: 1
+    says: a pixel a metre across, far wider than a wrinkle
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-within-near-pixel
+    value: 0.001
+    says: a pixel a millimetre across, far narrower than a wrinkle
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-within-near-tilt
+    value: 0.05
+    says: the least tilt in radians that a near pixel must show somewhere
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-within-point-x
+    value: 0.07
+    says: the x of the place the fading test reads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-within-point-z
+    value: 0.11
+    says: the z of the place the fading test reads
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: crinkle-within-fade-tolerance
+    value: 1e-12
+    says: how far a wider pixel's tilt may be above a narrower one's, for rounding
+    kind: picked
+    by: a few roundings of an angle
+  - name: excited_gauss-line
+    value: 500
+    says: the wavelength in nanometres of the line the gas tests put first
+    kind: picked
+    by: chosen so the worked values in the tests' comments come out round
+  - name: excited_gauss-next-line
+    value: 502
+    says: the wavelength in nanometres of a second line, two nanometres past the first
+    kind: picked
+    by: a width away from the first line, so d is one
+  - name: excited_gauss-farther-line
+    value: 504
+    says: the wavelength in nanometres of a third line, four nanometres past the first
+    kind: picked
+    by: two widths from the second line, so d is two
+  - name: excited_gauss-unit-strength
+    value: 1
+    says: the strength of a line that is given one unit
+    kind: picked
+    by: chosen so the line's value is the gaussian alone
+  - name: excited_gauss-strength
+    value: 2
+    says: the strength of the line the gaussian test worked by hand
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: excited_gauss-width
+    value: 2
+    says: the width in nanometres of the lines in the gas tests
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: excited_gauss-tolerance
+    value: 1e-10
+    says: how far a line's value may be from the one worked by hand, which is given to eleven places
+    kind: picked
+    by: finer than the last place of the values worked by hand
+  - name: excited_gauss-sum-band
+    value: 502
+    says: the band at which two lines are each a width away
+    kind: picked
+    by: halfway between the lines at 500 and 504, worked by hand in the test's comment
+  - name: excited_gauss-sum-want
+    value: 1.10363832351
+    says: what two lines of strength two and one give at the band between them, three times exp(-1)
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: excited_gauss-width-nothing
+    value: 0
+    says: a width of nothing, which the gas reads as one nanometre
+    kind: picked
+    by: the edge of the widths the gas reads as one nanometre
+  - name: excited_gauss-width-below
+    value: -2
+    says: a width below nothing, which the gas reads as one nanometre
+    kind: picked
+    by: a width on the far side of nothing
+  - name: excited_gauss-half-width
+    value: 0.5
+    says: a width of half a nanometre, which is read as it is
+    kind: picked
+    by: a width above nothing and below one, worked by hand in the test's comment
+  - name: excited_gauss-half-offset
+    value: 500.5
+    says: the band half a nanometre from the first line
+    kind: picked
+    by: one width from a line of half a nanometre's width, worked by hand
+  - name: excited_gauss-half-want
+    value: 0.36787944117
+    says: exp(-1), what a line gives one width away
+    kind: picked
+    by: worked by hand from the formula in the test's comment
+  - name: excited_gauss-passes
+    value: 0.5
+    says: how much of the rest of the spectrum the gas lets through
+    kind: picked
+    by: a share between nothing and one
+  - name: excited_gauss-far-line
+    value: 1e8
+    says: the wavelength in nanometres of a line far out in the radio
+    kind: picked
+    by: a line a long way from every band the test tries but one
+  - name: excited_gauss-low-band
+    value: 1
+    says: a band at one nanometre, nearer the first line than any line at zero
+    kind: picked
+    by: worked by hand in the test's comment
+  - name: excited_gauss-nearest-excitation
+    value: 2
+    says: the excitation given to the nearest line
+    kind: picked
+    by: chosen as a value other than the default of one
+  - name: excited_gauss-other-excitation
+    value: 3
+    says: the excitation given to a line that is not the nearest
+    kind: picked
+    by: chosen as a value other than the default of one and the nearest line's
+  - name: excited_gauss-default-excitation
+    value: 1
+    says: the excitation of a line that is given none
+    kind: picked
+    by: the value the gas reads where a line has no excitation above nothing
+  - name: excited_gauss-tie-lower-band
+    value: 501
+    says: a band as far from the first line as from the second
+    kind: picked
+    by: halfway between 500 and 502
+  - name: excited_gauss-tie-upper-band
+    value: 503
+    says: a band as far from the second line as from the third
+    kind: picked
+    by: halfway between 502 and 504
+  - name: excited_gauss-tie-second-excitation
+    value: 3
+    says: the excitation given to the second line in the tie test
+    kind: picked
+    by: chosen as a value other than the default and the third line's
+  - name: excited_gauss-tie-third-excitation
+    value: 4
+    says: the excitation given to the third line in the tie test
+    kind: picked
+    by: chosen as a value other than the default and the second line's
+  - name: excited_exact-seed
+    value: 20260910
+    says: the seed of the random source the gases and bands are drawn from
+    kind: picked
+    by: any fixed seed gives the same gases at every run
+  - name: excited_exact-gases
+    value: 3000
+    says: how many random gases are tried
+    kind: picked
+    by: enough to reach gases with no lines, lone lines and ties
+  - name: excited_exact-bands-each
+    value: 40
+    says: how many random bands are tried against each gas
+    kind: picked
+    by: enough to land between and beside lines
+  - name: excited_exact-band-span
+    value: 1100
+    says: the widest wavelength in nanometres of the random bands
+    kind: picked
+    by: past the longest line a gas is drawn with
+  - name: excited_exact-line-offset
+    value: 0.125
+    says: how far in nanometres beside a line a band is tried
+    kind: picked
+    by: a power of two, so the sum with a line is exact
+  - name: excited_exact-below-band
+    value: -1
+    says: a band at a wavelength below nothing
+    kind: picked
+    by: a value no line is at
+  - name: excited_exact-huge-band
+    value: 1e300
+    says: a band at a wavelength near the top of the floats
+    kind: picked
+    by: a value whose square in the gaussian is infinite
+  - name: excited_exact-shared-band
+    value: 600
+    says: the band that the goroutines sharing a gas all ask for
+    kind: picked
+    by: a band between the lines the benchmark gas has
+  - name: excited_exact-workers
+    value: 8
+    says: how many goroutines read one gas at once
+    kind: picked
+    by: enough to contend for the gas
+  - name: excited_exact-reads
+    value: 2000
+    says: how many times each goroutine reads the gas
+    kind: picked
+    by: enough reads for a write to show
+  - name: excited_exact-width-scale
+    value: 6
+    says: the range a random width is drawn over, in nanometres
+    kind: picked
+    by: wide enough to take widths of several lines' spacing
+  - name: excited_exact-width-shift
+    value: 1
+    says: how far below nothing the random widths reach
+    kind: picked
+    by: so that about a sixth of the widths are not above nothing
+  - name: excited_exact-most-lines
+    value: 13
+    says: one more than the most lines a random gas has
+    kind: picked
+    by: a dozen lines and the gas with none
+  - name: excited_exact-line-span
+    value: 4000
+    says: the range a random line's wavelength is drawn over, in steps of a quarter nanometre
+    kind: picked
+    by: reaches past the bands drawn
+  - name: excited_exact-line-quantum
+    value: 4
+    says: how many steps in a nanometre a random line is rounded to
+    kind: picked
+    by: quarter nanometres are exact floats, so bands can fall on a line
+  - name: excited_exact-strength-scale
+    value: 3
+    says: the strongest a random line is, in units
+    kind: picked
+    by: a few units, as the lines of a gas are
+  - name: excited_exact-excitation-kinds
+    value: 4
+    says: how many ways a random line's excitation is drawn
+    kind: picked
+    by: two ways to give one, and two ways to leave it out
+  - name: excited_exact-empty-odds
+    value: 5
+    says: one in this many random gases has an excitation at nanometre nothing
+    kind: picked
+    by: often enough to reach the entry an empty gas is read by
+  - name: excited_exact-excitation-scale
+    value: 4
+    says: the range a random excitation is drawn over
+    kind: picked
+    by: reaches past the default of one
+  - name: excited_exact-excitation-shift
+    value: 1
+    says: how far below nothing one of the random excitations reaches
+    kind: picked
+    by: so that some excitations are not above nothing
+  - name: excited_exact-empty-gas-excitation
+    value: 3
+    says: the excitation at nanometre nothing that some random gases carry
+    kind: picked
+    by: a value other than the default of one
+  - name: excited_bench-sweep-base
+    value: 500
+    says: the first wavelength in nanometres the benchmarks ask the gas for
+    kind: picked
+    by: close to the lines of the gas, so the sums are not all nothing
+  - name: excited_bench-sweep-cycle
+    value: 200
+    says: how many whole nanometres the benchmarks' bands run before they begin again
+    kind: picked
+    by: reaches from the oxygen line to past the hydrogen lines
+  - name: excited_bench-width
+    value: 2
+    says: the width in nanometres of the lines of the benchmark gas
+    kind: picked
+    by: the width of the lines in the tests of the gas
+  - name: excited_bench-passes
+    value: 0.3
+    says: how much of the rest of the spectrum the benchmark gas lets through
+    kind: picked
+    by: a share between nothing and one
+  - name: radiant-gas-width
+    value: 2
+    says: the width in nanometres of the lines of the gas in the glow test
+    kind: picked
+    by: narrow enough that the lines are apart from each other
+  - name: radiant-gas-passes
+    value: 0.3
+    says: how much of the rest of the spectrum the glow test's gas lets through
+    kind: picked
+    by: a share between nothing and one
+  - name: radiant-glow-floor
+    value: 0.99
+    says: the least the gas gives at its strongest line
+    kind: picked
+    by: the line's strength is one and its centre is exact
+  - name: radiant-oxygen-floor
+    value: 0.49
+    says: the least the gas gives at its oxygen line
+    kind: picked
+    by: just under the line's strength of a half
+  - name: radiant-oxygen-ceiling
+    value: 0.51
+    says: the most the gas gives at its oxygen line
+    kind: picked
+    by: just over the line's strength of a half
+  - name: radiant-between-ceiling
+    value: 1e-6
+    says: the most the gas gives between its lines
+    kind: picked
+    by: far below the lines' strengths
+  - name: radiant-oxygen-excitation
+    value: 2
+    says: the excitation given to the oxygen line
+    kind: picked
+    by: chosen as a value other than the default
+  - name: radiant-default-excitation
+    value: 1
+    says: the excitation of a band whose nearest line has none
+    kind: picked
+    by: the value the gas reads where a line has no excitation above nothing
+  - name: radiant-gamma-passes
+    value: 0.6
+    says: how much a spectrum that declares the gamma range lets through in it
+    kind: picked
+    by: a share between nothing and one
+  - name: radiant-xray-gives
+    value: 3
+    says: how much a spectrum that declares the x-ray range gives off in it
+    kind: picked
+    by: chosen as a value other than the passes
+  - name: radiant-sweep-first
+    value: 1e-6
+    says: the first wavelength in nanometres tried against fermi's range
+    kind: picked
+    by: below the gamma range
+  - name: radiant-sweep-limit
+    value: 1e11
+    says: the wavelength in nanometres at which the sweep stops
+    kind: picked
+    by: past the radio range
+  - name: radiant-sweep-step
+    value: 10
+    says: the factor by which each wavelength of the sweep is the last's
+    kind: picked
+    by: a decade at a time reaches every range
+  - name: radiant-ultraviolet-pass
+    value: 0.5
+    says: how much a spectrum that declares the ultraviolet range lets through
+    kind: picked
+    by: a share between nothing and one
+  - name: radiant-extreme-pass
+    value: 0.1
+    says: how much a spectrum that declares the extreme ultraviolet range lets through
+    kind: picked
+    by: a share other than the ultraviolet's
+  - name: radiant-radio-pass
+    value: 0.9
+    says: how much a spectrum that declares the radio range lets through
+    kind: picked
+    by: a share between nothing and one
+  - name: census-grid-side
+    value: 3
+    says: the samples a side of the flat height field the census tests count
+    kind: picked
+    by: the smallest grid that has a centre sample
+  - name: census-grid-spacing
+    value: 1
+    says: the distance between neighbouring samples of that height field
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: census-sphere-radius
+    value: 1
+    says: the radius of the sphere the census tests count
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clear_medium-sky-samples
+    value: 32
+    says: a diffuse-sky sample count a scattering clear medium accepts
+    kind: picked
+    by: chosen for the test that asks for it
+  - name: clear_medium-sky-negative-samples
+    value: -1
+    says: a diffuse-sky sample count below zero, which is refused
+    kind: picked
+    by: the first whole number below the lowest count
+  - name: clear_medium-sky-unscattered-samples
+    value: 8
+    says: a diffuse-sky sample count asked of a medium that does not scatter
+    kind: picked
+    by: chosen for the test that asks for it

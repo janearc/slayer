@@ -8,12 +8,12 @@ import (
 // a world is about as many tiles across as the square root of a tenth of
 // its tiles: 1000 tiles are 10 across and 40 are 2.
 func TestAWorldIsAboutASplitAcross(t *testing.T) {
-	for _, c := range []struct {
+	for _, each := range []struct {
 		tiles int
 		want  float64
 	}{{1000, 10}, {40, 2}, {250, 5}} {
-		if got := on(chained(c.tiles), 1).across(); got != c.want {
-			t.Errorf("%d tiles are %v across, want %v", c.tiles, got, c.want)
+		if got := on(chained(each.tiles), 1).across(); got != each.want {
+			t.Errorf("%d tiles are %v across, want %v", each.tiles, got, each.want)
 		}
 	}
 }
@@ -23,7 +23,8 @@ func TestAWorldIsAboutASplitAcross(t *testing.T) {
 // tiles. tile k has the push times e to the -k / 1.5, and a tile no boundary
 // reaches has zero.
 func TestASpreadFadesWithTilesFromTheBoundary(t *testing.T) {
-	w := on(chained(10, along(5)...), 1)
+	pairs := along(5)
+	w := on(chained(10, pairs...), 1)
 	push := make([]float64, 10)
 	push[0] = 2
 	var got []float64
@@ -46,7 +47,8 @@ func TestASpreadFadesWithTilesFromTheBoundary(t *testing.T) {
 //
 // tiles on a boundary keep their own push even beside another.
 func TestASpreadTakesTheNearerBoundary(t *testing.T) {
-	w := on(chained(10, along(5)...), 1)
+	pairs := along(5)
+	w := on(chained(10, pairs...), 1)
 	push := make([]float64, 10)
 	push[0], push[4] = 1, -3
 	var got []float64
@@ -71,7 +73,8 @@ func TestASpreadTakesTheNearerBoundary(t *testing.T) {
 // is over a tile and a half. 900 tiles are sqrt(90) across, 9.4868, so
 // the fall is sqrt(90) / 6 = 1.5811.
 func TestTheFallOfABigWorldIsASixthOfItsWidth(t *testing.T) {
-	w := on(chained(900, along(3)...), 1)
+	pairs := along(3)
+	w := on(chained(900, pairs...), 1)
 	push := make([]float64, 900)
 	push[0] = 2
 	var got []float64

@@ -29,8 +29,10 @@ func scoreMusic(t *testing.T, dir string, music []byte, digest string) string {
 	audio := filepath.Join(dir, musicName)
 	score := fmt.Sprintf(`{"score": {"audio": %q, "sha256": %q}}`, audio,
 		digest)
+	scorePath := filepath.Join(dir, "score.json")
+	scoreBytes := []byte(score)
 	err := errors.Join(os.WriteFile(audio, music, listing),
-		os.WriteFile(filepath.Join(dir, "score.json"), []byte(score), listing))
+		os.WriteFile(scorePath, scoreBytes, listing))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +136,8 @@ func TestPartialFilmIsTheContiguousFrames(t *testing.T) {
 		!strings.Contains(lines, "the first 3 frames") {
 		t.Fatal("the partial film was not recorded", look, lines)
 	}
-	if read(t, filepath.Join(folder.path(root), partialName)) != "film" {
+	partialPath := filepath.Join(folder.path(root), partialName)
+	if read(t, partialPath) != "film" {
 		t.Fatal("the partial film is not in place")
 	}
 }

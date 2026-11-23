@@ -61,9 +61,14 @@ func TestRunningStopsOnCancellationPauseAndUnknownMetrics(t *testing.T) {
 	for _, kind := range []string{"cancel", "pause", "unknown", "disk", "state"} {
 		t.Run(kind, func(t *testing.T) {
 			s, j := executableFixture(t, "exec /bin/sleep 5")
+			s.readLimit = 300 * time.Millisecond
 			monitor := unreadHost(t)
 			first := monitor.EXPECT().Read(gomock.Any(), j.Request.Directory, 0).Return(Vitals{Ready: true}, nil)
-			monitor.EXPECT().Read(gomock.Any(), j.Request.Directory, gomock.Cond(func(group int) bool { return group > 1 })).DoAndReturn(func(ctx context.Context, _ string, _ int) (Vitals, error) {
+			// A failed read is tried again until the read allowance is spent
+			// (00e97804), so an unreadable sample is read more than once:
+			// the second expectation of that kind is met at least once; every
+			// other kind stops the render at that read, which is the only one.
+			second := monitor.EXPECT().Read(gomock.Any(), j.Request.Directory, gomock.Cond(func(group int) bool { return group > 1 })).DoAndReturn(func(ctx context.Context, _ string, _ int) (Vitals, error) {
 				switch kind {
 				case "cancel":
 					return Vitals{Ready: true}, s.Cancel(ctx, j.Sequence, j.Request.Agent)
@@ -81,6 +86,11 @@ func TestRunningStopsOnCancellationPauseAndUnknownMetrics(t *testing.T) {
 				}
 				panic("unrecognized fixture")
 			}).After(first)
+			if kind == "unknown" {
+				second.MinTimes(1)
+			} else {
+				second.Times(1)
+			}
 			result := s.execute(t.Context(), j, io.Discard, monitor)
 			if result.State == Succeeded || result.Uncertain {
 				t.Fatal(kind, result)

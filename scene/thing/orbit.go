@@ -12,6 +12,23 @@ import (
 // squared: the one number gravity needs.
 const G = 6.67430e-11
 
+// The numbers an orbit is worked in, each true by definition.
+const (
+	circuitNought = 0                   // defined: no amount
+	circuitUnity  = 1                   // defined: one whole
+	circuitTurn   = 2 * math.Pi         // defined: radians in one full turn
+	circuitDay    = 86400               // defined: seconds in a day
+	circuitYear   = 365.25 * circuitDay // defined: seconds in a julian year
+)
+
+// circuitAlong is how near along the orbit's north the first axis of the
+// plane may lie before the plane takes z for it instead: the dot product
+// of the two.
+var circuitAlong = pick("orbit-along-limit")
+
+// circuitUnseen is the scale of a growing thing before it is born.
+var circuitUnseen = pick("orbit-unseen-scale")
+
 // Period is how long a circular orbit takes round a mass, by Kepler's
 // third law: the mass in kilograms and the orbit's radius in metres, the
 // time it takes to go round once. A moon's clock is its parent's mass;
@@ -20,23 +37,24 @@ const G = 6.67430e-11
 // an orbit longer than a Duration holds, 292 years, or of no number, is
 // refused by name: Sedna's 11,400 years would otherwise be 292.
 func Period(mass, radius float64) time.Duration {
-	if mass <= 0 || radius <= 0 {
-		return 0
+	if mass <= circuitNought || radius <= circuitNought {
+		return circuitNought
 	}
-	seconds := 2 * math.Pi * math.Sqrt(radius*radius*radius/(G*mass))
+	seconds := circuitTurn * math.Sqrt(radius*radius*radius/(G*mass))
 	if !(seconds < longest) {
 		tooLong(seconds)
 	}
 	return time.Duration(seconds * float64(time.Second))
 }
 
-// longest is the most seconds a Duration holds, a little under.
-const longest = float64(math.MaxInt64/int64(time.Second)) - 1
+// longest is the most seconds a Duration holds, a little under; defined by
+// the largest count of nanoseconds a Duration is.
+const longest = float64(math.MaxInt64/int64(time.Second)) - circuitUnity
 
 // tooLong refuses an orbit by name.
 func tooLong(seconds float64) {
 	panic(fmt.Sprintf("thing: an orbit of %v years is past the 292 a "+
-		"Duration holds, or is no number", seconds/(365.25*86400)))
+		"Duration holds, or is no number", seconds/circuitYear))
 }
 
 // Orbit is a motion round a centre: a circle of Radius, in the plane
@@ -65,45 +83,60 @@ type Orbit struct {
 	Scale float64
 }
 
-// north is the orbit's axis, one unit long, up when none was given.
-func (o Orbit) north() maths.Vec {
-	n := o.Axis
-	if n == (maths.Vec{}) {
-		n = maths.Up
+// circuitUpward is the axis, or up when none was given: the zero vector.
+func circuitUpward(axis maths.Vec) maths.Vec {
+	var none maths.Vec
+	if axis == none {
+		return maths.Up
 	}
-	return n.Unit()
+	return axis
+}
+
+// circuitSized is a subspace at the origin, unturned, of a scale.
+func circuitSized(scale float64) maths.Subspace {
+	var origin maths.Vec
+	var orientation maths.Orientation
+	return maths.NewSubspace(origin, orientation, scale)
+}
+
+// north is the orbit's axis, one unit long, up when none was given.
+func (orbit Orbit) north() maths.Vec {
+	return circuitUpward(orbit.Axis).Unit()
 }
 
 // axes is the orbit's plane: two axes square to its north.
-func (o Orbit) axes() (maths.Vec, maths.Vec) {
-	n := o.north()
-	e := maths.XAxis
-	if math.Abs(n.Dot(e)) > 0.9 {
-		e = maths.ZAxis
+func (orbit Orbit) axes() (maths.Vec, maths.Vec) {
+	north := orbit.north()
+	first := maths.XAxis
+	if math.Abs(north.Dot(first)) > circuitAlong {
+		first = maths.ZAxis
 	}
-	e = e.Sub(n.Scale(n.Dot(e))).Unit()
-	return e, n.Cross(e)
+	shift := north.Scale(north.Dot(first))
+	first = first.Sub(shift).Unit()
+	return first, north.Cross(first)
 }
 
-// Angle is how far round the orbit is at t, in radians.
-func (o Orbit) Angle(t time.Duration) float64 {
-	if o.Period <= 0 {
-		return o.Phase
+// Angle is how far round the orbit is at elapsed, in radians.
+func (orbit Orbit) Angle(elapsed time.Duration) float64 {
+	if orbit.Period <= circuitNought {
+		return orbit.Phase
 	}
-	return o.Phase + 2*math.Pi*float64(t)/float64(o.Period)
+	return orbit.Phase + circuitTurn*float64(elapsed)/float64(orbit.Period)
 }
 
-// At is where the orbiting thing's subspace is at t.
-func (o Orbit) At(t time.Duration) maths.Subspace {
-	e, f := o.axes()
-	a := o.Angle(t)
-	at := o.Centre.Add(e.Scale(o.Radius * math.Cos(a))).
-		Add(f.Scale(o.Radius * math.Sin(a)))
-	facing := o.Facing
-	if o.Locked {
-		facing = maths.Rotation(o.north(), a-o.Phase).Then(o.Facing)
+// At is where the orbiting thing's subspace is at elapsed.
+func (orbit Orbit) At(elapsed time.Duration) maths.Subspace {
+	first, second := orbit.axes()
+	angle := orbit.Angle(elapsed)
+	across := first.Scale(orbit.Radius * math.Cos(angle))
+	along := second.Scale(orbit.Radius * math.Sin(angle))
+	at := orbit.Centre.Add(across).Add(along)
+	facing := orbit.Facing
+	if orbit.Locked {
+		turn := maths.Rotation(orbit.north(), angle-orbit.Phase)
+		facing = turn.Then(orbit.Facing)
 	}
-	return maths.Subspace{Origin: at, Orientation: facing, Scale: o.Scale}
+	return maths.NewSubspace(at, facing, orbit.Scale)
 }
 
 // Nested is a motion inside another: a subspace carried along by its
@@ -114,12 +147,12 @@ type Nested struct {
 	In maths.Subspace
 }
 
-// At is the child's subspace in the world at t: inside its parent's.
-func (n Nested) At(t time.Duration) maths.Subspace {
-	if n.Of == nil {
-		return n.In
+// At is the child's subspace in the world at elapsed: inside its parent's.
+func (nested Nested) At(elapsed time.Duration) maths.Subspace {
+	if nested.Of == nil {
+		return nested.In
 	}
-	return n.In.Within(n.Of.At(t))
+	return nested.In.Within(nested.Of.At(elapsed))
 }
 
 // Spin is a thing turning in place: its subspace, the axis it turns
@@ -133,19 +166,15 @@ type Spin struct {
 	Phase  float64
 }
 
-// At is the subspace turned as far as t takes it.
-func (s Spin) At(t time.Duration) maths.Subspace {
-	a := s.Phase
-	if s.Period != 0 {
-		a += 2 * math.Pi * float64(t) / float64(s.Period)
+// At is the subspace turned as far as elapsed takes it.
+func (spin Spin) At(elapsed time.Duration) maths.Subspace {
+	angle := spin.Phase
+	if spin.Period != circuitNought {
+		angle += circuitTurn * float64(elapsed) / float64(spin.Period)
 	}
-	axis := s.Axis
-	if axis == (maths.Vec{}) {
-		axis = maths.Up
-	}
-	return maths.Subspace{Origin: s.In.Origin,
-		Orientation: maths.Rotation(axis, a).Then(s.In.Orientation),
-		Scale:       s.In.Scale}
+	axis := circuitUpward(spin.Axis)
+	turned := maths.Rotation(axis, angle).Then(spin.In.Orientation)
+	return maths.NewSubspace(spin.In.Origin, turned, spin.In.Scale)
 }
 
 // Growing is a subspace that grows with time, carried by a motion: a
@@ -158,15 +187,16 @@ type Growing struct {
 	Rate float64
 }
 
-// At is the subspace at t, grown as far as t takes it, in its parent's.
-func (g Growing) At(t time.Duration) maths.Subspace {
-	scale := g.Rate * (t - g.From).Seconds()
-	if scale <= 0 {
-		scale = 1e-12
+// At is the subspace at elapsed, grown as far as it takes it, in its
+// parent's.
+func (growing Growing) At(elapsed time.Duration) maths.Subspace {
+	scale := growing.Rate * (elapsed - growing.From).Seconds()
+	if scale <= circuitNought {
+		scale = circuitUnseen
 	}
-	s := maths.Subspace{Scale: scale}
-	if g.Of == nil {
-		return s
+	sized := circuitSized(scale)
+	if growing.Of == nil {
+		return sized
 	}
-	return s.Within(g.Of.At(t))
+	return sized.Within(growing.Of.At(elapsed))
 }

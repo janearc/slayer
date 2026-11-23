@@ -7,7 +7,7 @@ import (
 )
 
 func TestGlyphsRunInPatternOrder(t *testing.T) {
-	for _, c := range []struct {
+	for _, each := range []struct {
 		p    uint8
 		want rune
 	}{
@@ -15,8 +15,8 @@ func TestGlyphsRunInPatternOrder(t *testing.T) {
 		{1, 0x1FB00}, {20, 0x1FB13}, {22, 0x1FB14},
 		{41, 0x1FB27}, {43, 0x1FB28}, {62, 0x1FB3B},
 	} {
-		if got := Glyph(c.p); got != c.want {
-			t.Errorf("Glyph(%d) = %U, want %U", c.p, got, c.want)
+		if got := Glyph(each.p); got != each.want {
+			t.Errorf("Glyph(%d) = %U, want %U", each.p, got, each.want)
 		}
 	}
 }
@@ -38,11 +38,11 @@ func TestTwoColoursComeBackExactly(t *testing.T) {
 	img := image.NewRGBA(image.Rect(0, 0, 2, 3))
 	// the right column and the bottom left
 	for i := 0; i < 6; i++ {
-		c := blue
+		colour := blue
 		if i%2 == 1 || i == 4 {
-			c = red
+			colour = red
 		}
-		img.SetRGBA(i%2, i/2, c)
+		img.SetRGBA(i%2, i/2, colour)
 	}
 	cell := Chop(img).At(0, 0)
 	want := uint8(1<<1 | 1<<3 | 1<<4 | 1<<5)

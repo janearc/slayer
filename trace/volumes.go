@@ -426,6 +426,9 @@ func scattered(scene *staged, crossed *crossing, step stride, ray maths.Ray,
 	if colour == (maths.Light{}) {
 		return sum
 	}
+	if scene.glow != nil && scene.glow.Lights(crossed.volume.source.Medium) {
+		sum = sum.Add(colour.Times(scene.glow.Mean(point)))
+	}
 	// Colour is the painted medium's single-scattering albedo in the new
 	// opt-in model. Emission remains separate and is not phase-normalized.
 	phase := evenly
@@ -436,7 +439,7 @@ func scattered(scene *staged, crossed *crossing, step stride, ray maths.Ray,
 	facing := dir.Neg()
 	lobe := asymmetryOf(crossed.volume.source.Medium)
 	var room [lampsEvery]lit
-	for _, one := range scene.asked(room[:], point, facing, byLight) {
+	for _, one := range scene.marched(room[:], point, facing, byLight) {
 		got := scene.shadowed(one, point)
 		if lobe != 0 && !one.ambient() {
 			got = got.Scale(lobed(lobe, one.toward, dir))

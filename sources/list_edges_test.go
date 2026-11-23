@@ -19,7 +19,8 @@ func TestListFindsOnlyItsNamedSource(t *testing.T) {
 	if got, found := list.Find("other"); found || got.Key() != "" {
 		t.Fatalf("absent source: %+v %v", got, found)
 	}
-	_, err = Read(filepath.Join(t.TempDir(), "missing.yaml"))
+	missing := filepath.Join(t.TempDir(), "missing.yaml")
+	_, err = Read(missing)
 	if !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("missing list cause: %v", err)
 	}

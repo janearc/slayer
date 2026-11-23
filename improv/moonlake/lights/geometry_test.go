@@ -39,7 +39,7 @@ func TestBeamGeometryConeChord(t *testing.T) {
 		{"below", Vec{1, 0, 0}, Vec{10, 0, 10}, 0.5, 1, 0, 0, false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			in, out, crosses := ConeChord(test.d, test.apex, test.slope, test.low)
+			in, out, crosses := coneChord(test.d, test.apex, test.slope, test.low)
 			if in != test.in || out != test.out || crosses != test.crosses {
 				t.Fatalf("chord=%v %v %v", in, out, crosses)
 			}

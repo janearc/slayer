@@ -67,7 +67,9 @@ const (
 // How the photons are walked.
 const (
 	// seed is the walk's seed, fixed so the same plan gives the same
-	// fields; it is in the key.
+	// fields; it is in the key. Every wavelength is walked from it, so
+	// each photon draws the same numbers at each, and the noise of
+	// neighbouring wavelengths moves together instead of making colour.
 	seed = 1 // picked: any fixed seed does
 	// workers is how many walk at once. The same seed and workers give
 	// the same fields, so it is in the key too.
@@ -84,11 +86,40 @@ const (
 	earthPhotons = 4_000_000 // picked: see above
 )
 
+// What a plan for one sun walks to: the colour noise it wants between
+// neighbouring points of the sky's table, and the most photons it will
+// walk for it.
+const (
+	// colourNoiseAtOne is the colour noise of neighbouring points of the
+	// table, the median over the rows above ten degrees of log R/G's
+	// second difference round the azimuths, times the root of the median
+	// crossings a bin at the middle wavelength, 580 nm.
+	//
+	// From one sky of earth's air over open sea, sun 17 degrees up,
+	// counted at 540 nm: 1.39 at 240 crossings and 1.32 at 1090. Venus and
+	// a sun under ten degrees are not measured. The measurement is in the
+	// doc.
+	colourNoiseAtOne = 1.32 // picked: doc/model/sky/sky-from-the-air.md
+	// colourStep is the colour noise wanted: one 8-bit step at sRGB code
+	// 200, where linear light is 0.58 and a step of the code is 2.4
+	// times 1/255 over 0.78 of it.
+	colourStep = 0.012 // worked: see above
+	// mostPhotons is the most photons a wavelength is walked with for
+	// one sun: eight times earthPhotons, about seven minutes of four
+	// workers at the 54 s that 4,000,000 took for 21 wavelengths here.
+	// A sun that needs more, near the horizon, says the noise it keeps.
+	mostPhotons = 32_000_000 // picked: see above
+	// pilotSeedStep is how far the seed of the first walk, which
+	// measures the crossings, is from the walk's: so the photons the
+	// count is chosen from are none of those it then counts.
+	pilotSeedStep = 1 // picked: the next seed
+)
+
 // solverVersion names the code that turns an air into fields: skylight's
 // walk and this package's reading of it. Bump it when either changes
 // what a field holds. The air's own changes need no bump: its columns
 // at every wavelength are in the key, number for number.
-const solverVersion = "skylight 1, airlight 1" // defined: the first of each
+const solverVersion = "skylight 2, airlight 2" // defined: own pilot seed
 
 // transmittanceSteps is how many steps of the sun's zenith, from the
 // zenith to the nadir, the direct sun's share is kept at, and read

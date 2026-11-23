@@ -1,0 +1,1 @@
+format-jimo . :: gofmt -w manufacture/jimo.go manufacture/jimo_test.go manufacture/kinds.go

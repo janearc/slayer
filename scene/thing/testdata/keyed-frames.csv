@@ -1,0 +1,17 @@
+name,run,share,x,y,z
+along-first,along,0,0,0,0
+along-middle,along,0.5,10,0,0
+along-last,along,1,10,20,0
+push-first,push,0,0,0,0
+push-last,push,1,8,0,0
+short-first,short,0,1,0,0
+short-last,short,1,2,0,0
+late-first,late,0.2,1,0,0
+late-last,late,1,2,0,0
+same-first,same,0,1,0,0
+same-second,same,0,2,0,0
+same-last,same,1,3,0,0
+mid-first,mid,0,0,0,0
+mid-second,mid,0.5,1,0,0
+mid-third,mid,0.5,2,0,0
+mid-last,mid,1,3,0,0

@@ -15,10 +15,11 @@ import (
 // smoke that gives off nothing of its own.
 func puffed(thick float64) *thing.World {
 	world := glowing()
+	smokeAt := thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0)})
 	world.AddVolume(thing.Volume{
 		Medium:   medium.Puff{Radius: 0.5, Thick: thick},
 		Material: &thing.Material{Name: "smoke", Colour: maths.Grey(1)},
-		Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0)}),
+		Motion:   smokeAt,
 	})
 	return world
 }
@@ -58,7 +59,9 @@ func TestSmokeIsLitAndCoversBySoMuch(t *testing.T) {
 		!math.IsInf(float64(dark.Depth), 1) {
 		t.Fatalf("unlit smoke against an empty sky: %+v", dark)
 	}
-	world.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(1)))
+	along := maths.V(0, 1, 0)
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(along, light))
 	lit := lone(world, ray, 0)
 	if !(lit.R > 0 && lit.G > 0 && lit.B > 0) || lit.Cover != dark.Cover {
 		t.Fatalf("lit smoke: %+v", lit)
@@ -76,15 +79,19 @@ func blueGlow(lampAndBall bool) frame.Pixel {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Colour: maths.Grey(0.5)}})
+	smokeAt := resting(maths.V(0, 2, 0))
 	world.AddVolume(thing.Volume{
 		Medium:   medium.Puff{Radius: 1, Thick: 3},
 		Material: &thing.Material{Glow: maths.RGB(0, 0, 1)},
-		Motion:   resting(maths.V(0, 2, 0)),
+		Motion:   smokeAt,
 	})
 	if lampAndBall {
-		world.Lamp(thing.Sun(maths.V(1, 2, 1), maths.Grey(1)))
+		along := maths.V(1, 2, 1)
+		light := maths.Grey(1)
+		world.Lamp(thing.Sun(along, light))
+		ballAt := resting(maths.V(0, 0.5, 0))
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.5},
-			Material: unlit, Motion: resting(maths.V(0, 0.5, 0))})
+			Material: unlit, Motion: ballAt})
 	}
 	return lone(world, straightDown(5), 0)
 }
@@ -110,11 +117,12 @@ func TestAGlowingVolumeNeedsNoLamp(t *testing.T) {
 // density is per unit of the medium's own space and the look is kept.
 func TestAVolumeLivesInItsSubspace(t *testing.T) {
 	small, big := puffed(2), glowing()
+	bigAt := thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0),
+		Scale: 3})
 	big.AddVolume(thing.Volume{
 		Medium:   medium.Puff{Radius: 0.5, Thick: 2},
 		Material: &thing.Material{Colour: maths.Grey(1)},
-		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0),
-			Scale: 3}),
+		Motion:   bigAt,
 	})
 	beside := maths.Ray{At: maths.V(1, 3, 0), Dir: maths.V(0, -1, 0)}
 	bare := lone(glowing(), beside, 0)
@@ -138,7 +146,9 @@ func litFloor() *thing.World {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Colour: maths.Grey(1)}})
-	world.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(1)))
+	along := maths.V(0, 1, 0)
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(along, light))
 	return world
 }
 
@@ -146,10 +156,11 @@ func litFloor() *thing.World {
 // floor beside it, seen from the side so the puff is not in the way.
 func TestAVolumeShadowsASurface(t *testing.T) {
 	world := litFloor()
+	puffAt := thing.Still(maths.Subspace{Origin: maths.V(0, 3, 0)})
 	world.AddVolume(thing.Volume{
 		Medium:   medium.Puff{Radius: 1, Thick: 4},
 		Material: &thing.Material{Colour: maths.Grey(1)},
-		Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, 3, 0)}),
+		Motion:   puffAt,
 	})
 	// a ray that comes in low, under the puff, to the floor at the origin
 	// and at a point four units aside
@@ -172,10 +183,13 @@ func TestASurfaceShadowsAVolume(t *testing.T) {
 			Medium:   medium.Puff{Radius: 1, Thick: 2},
 			Material: &thing.Material{Colour: maths.Grey(1)},
 		})
-		each.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(1)))
+		along := maths.V(0, 1, 0)
+		light := maths.Grey(1)
+		each.Lamp(thing.Sun(along, light))
 	}
+	ballAt := thing.Still(maths.Subspace{Origin: maths.V(0, 4, 0)})
 	shaded.Add(thing.Thing{Shape: shape.Sphere{Radius: 1.5},
-		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 4, 0)})})
+		Motion: ballAt})
 	ray := maths.Ray{At: maths.V(5, 0, 0), Dir: maths.V(-1, 0, 0)}
 	inOpen, inShade := lone(open, ray, 0), lone(shaded, ray, 0)
 	if !(inShade.R < 0.2*inOpen.R) {
@@ -193,12 +207,15 @@ func TestAVolumeShadowsAVolume(t *testing.T) {
 			Medium:   medium.Puff{Radius: 1, Thick: 2},
 			Material: &thing.Material{Colour: maths.Grey(1)},
 		})
-		each.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(1)))
+		along := maths.V(0, 1, 0)
+		light := maths.Grey(1)
+		each.Lamp(thing.Sun(along, light))
 	}
+	puffAt := thing.Still(maths.Subspace{Origin: maths.V(0, 4, 0)})
 	under.AddVolume(thing.Volume{
 		Medium:   medium.Puff{Radius: 1.5, Thick: 6},
 		Material: &thing.Material{Colour: maths.Grey(1)},
-		Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, 4, 0)}),
+		Motion:   puffAt,
 	})
 	ray := maths.Ray{At: maths.V(5, 0, 0), Dir: maths.V(-1, 0, 0)}
 	one, other := lone(alone, ray, 0), lone(under, ray, 0)

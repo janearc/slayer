@@ -44,11 +44,10 @@ func newKeptTrees() *keptTrees {
 		named: map[*mesh.Mesh]meshKey{}, naming: map[*mesh.Mesh]meshKey{}}
 }
 
-// grownFor is the tree over the faces a key names: the one this frame or
-// the last used, or grown now from its faces as an encode without a
-// keeper grows it. Either way this frame used it.
-func (keeper *keptTrees) grownFor(key meshKey,
-	faces func() []triangle) tree {
+// grownFor is the tree a key names: the one this frame or the last used,
+// or else made now by build, as an encode without a keeper makes it.
+// Either way this frame used it.
+func (keeper *keptTrees) grownFor(key meshKey, build func() tree) tree {
 	grown, known := keeper.used[key]
 	if !known {
 		if grown, known = keeper.kept[key]; known {
@@ -56,7 +55,7 @@ func (keeper *keptTrees) grownFor(key meshKey,
 		}
 	}
 	if !known {
-		grown = grownOver(faces())
+		grown = build()
 	}
 	keeper.used[key] = grown
 	return grown
@@ -66,28 +65,26 @@ func (keeper *keptTrees) grownFor(key meshKey,
 // every frame, since its fields may have been changed since the last.
 func (keeper *keptTrees) shapeTree(made *shape.Mesh) pendingMesh {
 	key := shapeMeshKey(made)
-	local := func() []triangle { return meshFaces(made) }
+	local := func() tree { return grownOver(meshFaces(made)) }
 	return pendingMesh{key: key, keyed: true,
 		tree: keeper.grownFor(key, local)}
 }
 
 // slayersTree is one of slayer's meshes' tree and key: the key by the
 // mesh where it was drawn this frame or the last, and otherwise taken of
-// its faces, which then grow its tree where no other mesh's has them.
+// its faces. The tree is the mesh's own, which no other mesh with the
+// same faces has made yet; two with one key share the first's.
 func (keeper *keptTrees) slayersTree(skin *mesh.Mesh) pendingMesh {
-	local := func() []triangle { return slayersFaces(skin) }
 	key, known := keeper.naming[skin]
 	if !known {
 		key, known = keeper.named[skin]
 	}
 	if !known {
-		faces := local()
-		key = slayersMeshKey(faces)
-		local = func() []triangle { return faces }
+		key = slayersMeshKey(skin)
 	}
 	keeper.naming[skin] = key
 	return pendingMesh{key: key, keyed: true,
-		tree: keeper.grownFor(key, local)}
+		tree: keeper.grownFor(key, func() tree { return skinTree(skin) })}
 }
 
 // turn ends a frame: the trees, keys and pool it used are kept for the

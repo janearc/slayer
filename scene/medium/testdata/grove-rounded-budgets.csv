@@ -1,0 +1,5 @@
+name,cell,coordinate,valid
+half-cell-high,0.5,0x1p62,false
+wide-cell-limit,2,0x1p63,true
+unit-cell-lowest,1,-0x1p63,true
+unit-cell-beyond-lowest,1,-0x1p64,false

@@ -14,8 +14,8 @@ import (
 	"github.com/janearc/slayer/scene/shape"
 )
 
-// ErrGlobe is a globe with no size.
-var ErrGlobe = errors.New("globe: a globe needs a radius above nought")
+// errGlobe is a globe with no size.
+var errGlobe = errors.New("globe: a globe needs a radius above nought")
 
 // Globe is a ball of a radius about its own zero.
 type Globe struct{ radius float64 }
@@ -23,7 +23,7 @@ type Globe struct{ radius float64 }
 // New is a globe of a radius, or why there is none.
 func New(radius float64) (Globe, error) {
 	if !(radius > 0) || math.IsInf(radius, 0) {
-		return Globe{}, ErrGlobe
+		return Globe{}, errGlobe
 	}
 	return Globe{radius: radius}, nil
 }

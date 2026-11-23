@@ -29,19 +29,19 @@ func (band Band) String() string {
 	return fmt.Sprintf("band %d", int(band))
 }
 
-// Source is where a reading was read: the database release it is in, the
-// material and its file within that release, the paper the row comes
-// from, and the row itself as the file writes it
+// Source records a reading's provenance: dataset or study, material/sample,
+// paper and source record. Estimated marks a derived appearance reading.
 type Source struct {
-	release  string
-	material string
-	paper    string
-	row      string
+	release   string
+	material  string
+	paper     string
+	row       string
+	estimated bool
 }
 
-// NewSource is where a reading was read. It refuses a release, a
+// newSource is where a reading was read. It refuses a release, a
 // material, a paper or a row that is not named.
-func NewSource(release, material, paper, row string) (Source, error) {
+func newSource(release, material, paper, row string) (Source, error) {
 	if release == "" {
 		return Source{}, refuse("a source with no release")
 	}
@@ -67,7 +67,8 @@ func (where Source) Material() string { return where.material }
 // Paper is the paper the row comes from
 func (where Source) Paper() string { return where.paper }
 
-// Row is the row as its file writes it: wavelength, n and k
+// Row is the source record: a measured table row, or the reflectance record
+// underlying an estimate. Estimated distinguishes derived optical readings.
 func (where Source) Row() string { return where.row }
 
 // Reading is a complex refractive index, n + ik, at one wavelength, with
@@ -79,10 +80,10 @@ type Reading struct {
 	where      Source
 }
 
-// NewReading is n + ik at a wavelength in nanometres, read somewhere. It
+// newReading is n + ik at a wavelength in nanometres, read somewhere. It
 // refuses a wavelength that is not a positive number, an n or a k that
 // is negative or not a number, and a source never made.
-func NewReading(wavelength, n, k float64, where Source) (Reading, error) {
+func newReading(wavelength, n, k float64, where Source) (Reading, error) {
 	if !positive(wavelength) {
 		return Reading{}, refuse("a reading at wavelength %v nm",
 			wavelength)
@@ -119,17 +120,16 @@ func (read Reading) Absorption() float64 {
 	return 4 * math.Pi * read.k / (read.wavelength * 1e-9)
 }
 
-// Optics is a complex refractive index by band, each band at the
-// wavelength its row was measured at, with every reading's source
-// attached. Only NewOptics makes them, so optics of a band that is not
-// there cannot be mistaken for optics that were measured.
+// Optics holds complex-index readings by band at their cited wavelengths.
+// Sources identify measured rows or derived estimates. Only NewOptics
+// constructs one; missing bands do not become supplied readings.
 type Optics struct {
 	bands map[Band]Reading
 }
 
-// NewOptics is readings by band. It refuses no bands and a reading never
+// newOptics is readings by band. It refuses no bands and a reading never
 // made.
-func NewOptics(bands map[Band]Reading) (Optics, error) {
+func newOptics(bands map[Band]Reading) (Optics, error) {
 	if len(bands) == 0 {
 		return Optics{}, refuse("optics of no bands")
 	}

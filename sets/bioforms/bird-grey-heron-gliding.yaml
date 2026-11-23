@@ -1,0 +1,34 @@
+# A grey heron from the bird maker gliding, its wings spread, its neck
+# drawn back and its legs trailed, from below and to the front quarter.
+# Lit by the worked sun and sky; the sun's place is picked.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: grey heron gliding, quarter
+  seed: 7
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 35}
+  set:
+    things:
+      bird:
+        kind: bird-grey-heron-gliding
+        seed: 7
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 2, unit: m}
+  film:
+    width: 480
+    height: 300
+    rays: 4
+    wide: 39
+  cameras:
+    quarter:
+      title: "south-east, a little above the wing"
+      location: {at: [1.5, -1.7, 2.9]}
+      orientation: {look_at: [0.1, 0, 2.0]}

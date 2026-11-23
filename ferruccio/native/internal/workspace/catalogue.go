@@ -25,7 +25,7 @@ func (work *Workspace) selectSpecimen() {
 // rendererConfigured checks the executable that owns the active format.
 func (work *Workspace) rendererConfigured() bool {
 	if work.options.Tools.Transport == "slayer" {
-		return work.options.Evidence != "" && work.options.Tools.Game != "" && work.options.Tools.Slayer != "" && work.state.document.Kind() != "catalogue"
+		return work.options.Evidence != "" && work.renderTools().Slayer != "" && work.state.document.Kind() != "catalogue"
 	}
 	if work.options.Tools.Azazel == "" || work.options.Tools.Queue == "" || work.options.Evidence == "" {
 		return false
@@ -46,6 +46,9 @@ func (work *Workspace) catalogueControl() widget.Widget {
 		return work.text("Cannot read the catalogue menu")
 	}
 	choice := dropdown.New(dropdown.Items(names...), dropdown.Selected(slices.Index(names, work.specimen)), dropdown.Placeholder("Choose a specimen…"), dropdown.PainterOpt(appearance.DropdownPainter{Theme: work.theme, Size: work.size}), dropdown.OnChange(func(_ int, name string) {
+		if work.refuseWhileFull("choosing another specimen") {
+			return
+		}
 		work.stopPreview()
 		work.viewer.SetNavigable(false)
 		work.specimen = name

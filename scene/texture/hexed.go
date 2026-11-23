@@ -6,9 +6,12 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
+// noTile is the tile of a surface that has no tiles.
+var noTile hexes.Tile
+
 // Hexed is a surface in tiles painted from a palette by a hash of the
 // tile, with a dark line where a point is near the tile's edge: a Tiled
-// whose Painter is the hash. It is the simplest hex world, one colour a
+// whose painter is the hash. It is the simplest hex world, one colour a
 // tile and nothing decided about why; a world with reasons is scene/world.
 type Hexed struct {
 	// Tiling is the tiles: a sphere, a band or a plane. Nil is no tiles,
@@ -28,25 +31,27 @@ type Hexed struct {
 }
 
 // Paint is the paint a tile has: one of the palette, by hash.
-func (h Hexed) Paint(tile hexes.Tile) maths.Light {
-	if len(h.Palette) == 0 || h.Tiling == nil {
-		return maths.Light{}
+func (hexed Hexed) Paint(tile hexes.Tile) maths.Light {
+	if len(hexed.Palette) == nought || hexed.Tiling == nil {
+		return noPaint
 	}
-	k := noise.Hash(h.Seed, h.Tiling.ID(tile)) * float64(len(h.Palette))
-	return h.Palette[min(int(k), len(h.Palette)-1)]
+	hash := noise.Hash(hexed.Seed, hexed.Tiling.ID(tile))
+	place := hash * float64(len(hexed.Palette))
+	return hexed.Palette[min(int(place), len(hexed.Palette)-unity)]
 }
 
 // Tile is the tile a point is on, and the paint it has, before any line.
-func (h Hexed) Tile(p maths.Vec) (hexes.Tile, maths.Light) {
-	if h.Tiling == nil {
-		return hexes.Tile{}, maths.Light{}
+func (hexed Hexed) Tile(point maths.Vec) (hexes.Tile, maths.Light) {
+	if hexed.Tiling == nil {
+		return noTile, noPaint
 	}
-	tile := h.Tiling.Nearest(p)
-	return tile, h.Paint(tile)
+	tile := hexed.Tiling.Nearest(point)
+	return tile, hexed.Paint(tile)
 }
 
-// At is the paint at p, darkened by the line if p is near an edge.
-func (h Hexed) At(p maths.Vec) maths.Light {
-	return Tiled{Tiling: h.Tiling, Paints: h, Lines: h.Lines,
-		Width: h.Width}.At(p)
+// At is the paint at the point, darkened by the line if the point is
+// near an edge.
+func (hexed Hexed) At(point maths.Vec) maths.Light {
+	return Tiled{Tiling: hexed.Tiling, Paints: hexed, Lines: hexed.Lines,
+		Width: hexed.Width}.At(point)
 }

@@ -39,14 +39,14 @@ func (v Vec3) Cross(w Vec3) Vec3 {
 	}
 }
 
-// Length is the distance from the origin to v.
-func (v Vec3) Length() float64 {
+// length is the distance from the origin to v.
+func (v Vec3) length() float64 {
 	return math.Sqrt(v.Dot(v))
 }
 
 // Normalize is v scaled to length one; the zero vector stays zero.
 func (v Vec3) Normalize() Vec3 {
-	len := v.Length()
+	len := v.length()
 	if len == 0 {
 		return Vec3{}
 	}
@@ -97,11 +97,4 @@ func BoundsOfTriangles(triangles []Triangle) Box {
 		}
 	}
 	return bounds
-}
-
-// Normal is the unit normal of the triangle v0, v1, v2, by the right-hand rule.
-func Normal(v0, v1, v2 Vec3) Vec3 {
-	edge1 := v1.Sub(v0)
-	edge2 := v2.Sub(v0)
-	return edge1.Cross(edge2).Normalize()
 }

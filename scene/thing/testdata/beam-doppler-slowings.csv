@@ -1,0 +1,6 @@
+name,speed,at,east,want
+slowed by the square root,0.8,9,16,0.6
+held to 0.99 outside At,0.9,4,1,0.99
+held to 0.99 inside At,0.5,1,0.25,0.99
+no At does not slow far out,0.4,0,4,0.4
+no At does not slow near in,0.4,0,0.01,0.4

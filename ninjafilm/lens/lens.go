@@ -63,15 +63,11 @@ var (
 )
 
 // Frame is the piece of film one picture is made on.
-//
-//ninja:vow practice clients name the type between FrameOf and NewThin
 type Frame struct {
 	width, height float64 // metres
 }
 
 // FrameOf is a frame so many millimetres wide and high.
-//
-//ninja:vow practice slayer's camera sizes its film here; tests only so far
 func FrameOf(width, height float64) (made Frame, err error) {
 	if !number.Positive(width) || !number.Positive(height) {
 		return made, errFrame
@@ -81,16 +77,12 @@ func FrameOf(width, height float64) (made Frame, err error) {
 
 // Rows is how many rows of pixels a picture so many pixels across the
 // frame has, for its pixels to be square.
-//
-//ninja:vow practice slayer's camera sizes pictures here; tests only so far
 func (made Frame) Rows(across int) int {
 	rows := float64(across) * made.height / made.width
 	return int(math.Round(rows))
 }
 
 // Thin is a thin lens in front of a frame.
-//
-//ninja:vow practice slayer's camera holds one; tests only so far
 type Thin struct {
 	frame Frame
 	// focal and focus are in metres. stop is the f-number. image is the
@@ -106,8 +98,6 @@ type Thin struct {
 // The film stands where the lens law puts the image of the focus. One
 // over the focal length is one over the focus plus one over the
 // distance of the image.
-//
-//ninja:vow practice slayer's camera makes its lens here; tests only so far
 func NewThin(frame Frame, focal, stop, focus float64) (made Thin,
 	err error) {
 	focal *= millimetre
@@ -123,8 +113,6 @@ func NewThin(frame Frame, focal, stop, focus float64) (made Thin,
 // Wide is how much the lens sees across the frame, in radians: twice
 // the angle whose tangent is half the frame's width over the image's
 // distance.
-//
-//ninja:vow practice slayer's camera asks its view here; tests only so far
 func (glass Thin) Wide() float64 {
 	return pair * math.Atan(glass.frame.width/pair/glass.image)
 }
@@ -132,8 +120,6 @@ func (glass Thin) Wide() float64 {
 // Pixel is the angle one pixel of a picture so many pixels across the
 // frame sees: its width on the film over the image's distance, as the
 // lens's middle sees it.
-//
-//ninja:vow practice slayer's camera asks a pixel's view; tests only so far
 func (glass Thin) Pixel(across int) float64 {
 	return glass.frame.width / float64(across) / glass.image
 }
@@ -151,8 +137,6 @@ func (glass Thin) aperture() float64 {
 //
 // A ray of Ray starts on the aperture and goes toward a point of that
 // width and height, the focus distance down minus z.
-//
-//ninja:vow practice slayer's gpu makes the lens's rays in its kernel
 func (glass Thin) Opening() (reach, focus, across, up float64) {
 	scale := glass.focus / glass.image
 	return glass.aperture(), glass.focus, glass.frame.width * scale,
@@ -188,6 +172,21 @@ func (glass Thin) Ray(x, y, width, height int, _ maths.Band) maths.Ray {
 	up := upFilm(y, height) * glass.frame.height
 	scale := glass.focus / glass.image
 	sharp := maths.V(across*scale, up*scale, -glass.focus)
+	from := glass.through(y*width + x)
+	return maths.Ray{At: from, Dir: sharp.Sub(from).Unit()}
+}
+
+// RayThrough is Ray toward the point at the focus that a place of the
+// pixel sees sharp, and not its middle: across and down are how far
+// from the middle, in pixels, to the right and down the picture. The
+// point of the aperture is the pixel's own, as Ray takes it.
+func (glass Thin) RayThrough(x, y int, across, down float64, width,
+	height int, _ maths.Band) maths.Ray {
+	over := acrossFilm(x, width) + across/float64(width)
+	up := upFilm(y, height) - down/float64(height)
+	scale := glass.focus / glass.image
+	sharp := maths.V(over*glass.frame.width*scale,
+		up*glass.frame.height*scale, -glass.focus)
 	from := glass.through(y*width + x)
 	return maths.Ray{At: from, Dir: sharp.Sub(from).Unit()}
 }

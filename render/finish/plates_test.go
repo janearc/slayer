@@ -219,7 +219,8 @@ func TestAPngRoundTripIsWithinOneCodeValue(t *testing.T) {
 	again := colour.Develop(light, 1)
 	worst := 0
 	for i := range first.Pix {
-		worst = max(worst, abs(int(first.Pix[i])-int(again.Pix[i])))
+		moved := abs(int(first.Pix[i]) - int(again.Pix[i]))
+		worst = max(worst, moved)
 	}
 	if worst > 1 {
 		t.Errorf("a code value moved by %d on the round trip", worst)

@@ -44,7 +44,8 @@ func TestWithKeepsImportedSnapshotAfterItsFilesGoAway(t *testing.T) {
 	if output.Key() != originalKey || output.PictureKey() != originalPicture {
 		t.Fatal("changing only output changed picture identity")
 	}
-	if !reflect.DeepEqual(inputDigests(t, output.Canonical()), originalInputs) {
+	outputDigests := inputDigests(t, output.Canonical())
+	if !reflect.DeepEqual(outputDigests, originalInputs) {
 		t.Fatal("changing output changed the fixed input digests")
 	}
 
@@ -55,7 +56,8 @@ func TestWithKeepsImportedSnapshotAfterItsFilesGoAway(t *testing.T) {
 	if width.PictureKey() == originalPicture {
 		t.Fatal("changing width retained the picture identity")
 	}
-	if !reflect.DeepEqual(inputDigests(t, width.Canonical()), originalInputs) {
+	widthDigests := inputDigests(t, width.Canonical())
+	if !reflect.DeepEqual(widthDigests, originalInputs) {
 		t.Fatal("changing width changed the fixed input digests")
 	}
 }

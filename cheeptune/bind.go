@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-// Plan is a score bound to a voicing: for each channel, what it sounds and
+// plan is a score bound to a voicing: for each channel, what it sounds and
 // when, in seconds. It is everything the machine needs and nothing it does
 // not, so the render never looks back at either document.
-type Plan struct {
+type plan struct {
 	score   *Score
 	voicing *Voicing
 	voices  []voice
 }
 
 type voice struct {
-	ch    *Channel
+	ch    *channel
 	label string // "lead" or "echo of lead", for errors and the roll
 	notes []sounding
 }
@@ -26,7 +26,7 @@ type voice struct {
 type sounding struct {
 	on, off float64 // seconds; off is where the release starts
 	pitches []int
-	hit     *Hit
+	hit     *hit
 	hitName string
 	gain    float64
 	loud    float64 // the gain the note's loudness mark gives
@@ -35,10 +35,10 @@ type sounding struct {
 	slide   bool    // it slides into the next note
 }
 
-// Bind checks that a score and a voicing fit each other and puts them
+// bindVoicing checks that a score and a voicing fit each other and puts them
 // together. Every role is played or dropped, every echo has something to
 // echo, and every note is one the channel can make.
-func Bind(s *Score, v *Voicing) (*Plan, error) {
+func bindVoicing(s *Score, v *Voicing) (*plan, error) {
 	var errs []error
 	fail := func(f string, a ...any) {
 		errs = append(errs, fmt.Errorf(f, a...))
@@ -68,7 +68,7 @@ func Bind(s *Score, v *Voicing) (*Plan, error) {
 	}
 
 	m := machines[v.Machine]
-	pl := &Plan{score: s, voicing: v}
+	pl := &plan{score: s, voicing: v}
 	for i := range v.Channels {
 		c := &v.Channels[i]
 		src, label := c.Role, c.Role
@@ -123,7 +123,7 @@ func Bind(s *Score, v *Voicing) (*Plan, error) {
 }
 
 // fits is whether a Game Boy channel can sound an event at all.
-func (gameboy) fits(c *Channel, e event) error {
+func (gameboy) fits(c *channel, e event) error {
 	if c.Kind == "noise" {
 		if e.hit == "" {
 			return fmt.Errorf(
@@ -147,7 +147,7 @@ func (gameboy) fits(c *Channel, e event) error {
 	for _, m := range e.pitches {
 		if m < lo || m > hi {
 			return fmt.Errorf("%s is outside the %s range %s to %s",
-				NoteName(m), c.Kind, NoteName(lo), NoteName(hi))
+				noteName(m), c.Kind, noteName(lo), noteName(hi))
 		}
 	}
 	return nil

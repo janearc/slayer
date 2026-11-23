@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -29,6 +30,9 @@ var ringSource string
 //go:embed wake.metal
 var wakeSource string
 
+//go:embed propeller_legacy.metal
+var propellerLegacySource string
+
 //go:embed propeller.metal
 var propellerSource string
 
@@ -39,10 +43,6 @@ var fizzSource string
 // probes and the wisp bake read volumes by index and never walk
 // most_volumes, so any roomy size serves them alike.
 const probeVolumes = 32
-
-// source combines noise, generated buffer layouts, and tracing kernels for a
-// scene requiring no CPU texture records.
-func source() string { return sourceWith(0, probeVolumes) }
 
 // sourceWith builds kernel source sized for the requested number of CPU
 // texture records per sample and the scene's own count of volumes.
@@ -60,17 +60,24 @@ func sourceWithOpticalState(records, volumes int) string {
 // sourceWithState builds the Metal source for the given record and volume
 // counts. optical selects the optical variant of the source.
 func sourceWithState(records, volumes int, optical bool) string {
-	text := diagnosticDefines() + metal.GeodesicLibrary + metal.NoiseLibrary +
-		prelude(records, volumes)
+	text := diagnosticDefines() + metal.GeodesicLibrary() +
+		metal.NoiseLibrary + prelude(records, volumes)
 	if optical {
 		text += clearMediumStruct.msl() + opticalStateDeclarations +
 			ringSource + wakeSource + propellerSource + fizzSource + traceSource
 		return "#define SLAYER_OPTICAL_MEDIA 1\n" + text
 	}
-	return stripOpticalMedia(text + ringSource + wakeSource + propellerSource + traceSource)
+	return stripOpticalMedia(text + ringSource + wakeSource + propellerLegacySource + traceSource)
 }
 
-// stripOpticalMedia removes opt-in shader alternatives while preserving the
+// sourceWithPropellerDispersal admits standalone advanced density fields
+// without changing the named-medium ABI or ordinary legacy source bytes.
+func sourceWithPropellerDispersal(records, volumes int) string {
+	return propellerDispersalNumbers() + strings.Replace(sourceWith(records, volumes), propellerLegacySource, propellerSource, 1)
+}
+
+// stripOpticalMedia removes
+// opt-in shader alternatives while preserving the
 // source bytes of each #else branch. This keeps optical-state bindings out
 // of kernels for scenes without optical media.
 func stripOpticalMedia(source string) string {
@@ -127,8 +134,9 @@ struct OpticalInitialState {
 };
 `
 
-// rows limits each GPU submission to a small batch of image rows to avoid the
-// system's long-running-command limit.
+// rows is the most rows of samples one GPU submission holds, which sizes its
+// readback; how many it does hold the time of the one before decides (metal's
+// band_heights.go).
 const rows = 64
 
 // bandRows is, when not nought, the one height every band of a trace is
@@ -187,6 +195,9 @@ const (
 	// fasterTraversal is fastTraversal with the sky's looks shared
 	// among a pixel's samples (sky_share.go)
 	fasterTraversal
+	// restirTraversal is nativeTraversal with restir direct light
+	// (restir.go), for a crowd of lamps
+	restirTraversal
 )
 
 // stored is whether a mode lights boxed media from the lamp store.
@@ -198,7 +209,7 @@ func (mode traversal) stored() bool {
 // on the ordering of the traversal constants.
 func (mode traversal) primary() bool {
 	return mode == nativeTraversal || mode == cachedTraversal ||
-		mode.stored()
+		mode == restirTraversal || mode.stored()
 }
 
 // measuredBackend records disjoint stage costs for the chosen traversal.
@@ -265,6 +276,9 @@ func (spent timing) profile(total time.Duration) Profile {
 		AccelerationWall: spent.acceleration, AccelerationGPU: spent.accelerationGPU,
 		Retained: spent.retained, LampStoreBytes: spent.storeBytes,
 		SkyShared: spent.skyShared,
+		Restir:    spent.restir, RestirLamps: spent.restirLamps,
+		RestirNodes: spent.restirNodes, RestirWall: spent.restirWall,
+		RestirGPU: spent.restirGPU, RestirTreeWall: spent.restirTree,
 	}
 }
 
@@ -299,7 +313,12 @@ type timing struct {
 	// storeBytes is the lamp store's size, nought without fast light
 	storeBytes int64
 	// skyShared is whether fast light shared the sky's looks
-	skyShared bool
+	skyShared             bool
+	restir                bool
+	restirLamps           int
+	restirNodes           int
+	restirWall, restirGPU time.Duration
+	restirTree            time.Duration
 }
 
 // sampledTimed renders analytic conifers and returns stage timings.
@@ -340,15 +359,6 @@ func sampledBackendWithInitialMedia(world *thing.World, trees []grown,
 		width, height, side, mode, cellsFor(mode), media, volumeCells...)
 }
 
-// sampledLightingGrid keeps the approximation resolution explicit for its
-// accuracy study. Public renderers use the fixed production lightCells.
-func sampledLightingGrid(world *thing.World, trees []grown, eye maths.Subspace,
-	lens film.Sensor, at time.Duration, width, height, side int,
-	mode traversal, lightingCells int, volumeCells ...int) (*frame.Frame, timing, error) {
-	return sampledLightingGridWithInitialMedia(world, trees, eye, lens, at,
-		width, height, side, mode, lightingCells, nil, volumeCells...)
-}
-
 // sampledLightingGridWithInitialMedia is the sampled lighting-grid variant
 // of the backend call that also takes the initial clear media.
 func sampledLightingGridWithInitialMedia(world *thing.World, trees []grown,
@@ -370,7 +380,9 @@ func sampledLightingGridWithInitialMedia(world *thing.World, trees []grown,
 	if err != nil {
 		return nil, spent, err
 	}
+	encoded.spreadOver(world, side)
 	encoded.shareSkyFor(mode, side)
+	encoded.sideFor(lens, side)
 	start = time.Now()
 	kernel, err := metal.Open(encoded.source(mode), "trace")
 	spent.compile = time.Since(start)
@@ -380,11 +392,15 @@ func sampledLightingGridWithInitialMedia(world *thing.World, trees []grown,
 	defer kernel.Close()
 	kernel.FixBands(bandRows)
 	if mode != softwareTraversal {
+		memoryStage("per-call-native-plan-before")
 		start = time.Now()
 		plan, root, makeError := encoded.accelerationPlan()
+		memoryStage("per-call-native-plan-after")
 		if makeError == nil {
 			encoded.discardBuildHierarchy()
+			memoryStage("per-call-native-build-before")
 			makeError = kernel.Accelerate(plan, root)
+			memoryStage("per-call-native-build-after")
 		}
 		spent.acceleration = time.Since(start)
 		spent.accelerationGPU = kernel.GPUTime()
@@ -447,8 +463,10 @@ func preparedWithInitialMedia(world *thing.World, trees []grown,
 	}
 	start := time.Now()
 	sceneReceipt(eye)
+	memoryStage("encode-before")
 	encoded, err := encodeKeptWithInitialMedia(world, trees, eye, lens, at,
 		fine[0], fine[1], keeper, media, volumeCells...)
+	memoryStage("encode-after")
 	if encoded != nil {
 		spent.counted(encoded)
 	}
@@ -468,12 +486,20 @@ func preparedWithInitialMedia(world *thing.World, trees []grown,
 			encoded.discardBuildHierarchy()
 		}
 	}
+	memoryStage("encode-after-discard")
+	// the encode's working arrays are garbage now, and the collector
+	// keeps freed pages resident: on the neon street's nine blocks, 2.8
+	// GiB freed and held through the whole draw. Handing them back took
+	// 31 ms there (measured 2026-11-20), once an encode.
+	debug.FreeOSMemory()
+	memoryStage("encode-after-release")
 	spent.encode = time.Since(start)
 	if err != nil {
 		return nil, nil, err
 	}
 	start = time.Now()
 	spent.bake, err = encoded.bakeAll()
+	memoryStage("bake-after")
 	spent.bakeWall = time.Since(start)
 	return encoded, firsts, err
 }
@@ -492,6 +518,9 @@ func (spent *timing) counted(encoded *scene) {
 // for its records and volumes, with the native queries the mode asks.
 func (encoded *scene) source(mode traversal) string {
 	text := sourceWith(encoded.records(), encoded.counts.volumes)
+	if encoded.propellerDispersal {
+		text = sourceWithPropellerDispersal(encoded.records(), encoded.counts.volumes)
+	}
 	if encoded.opticalState {
 		text = sourceWithOpticalState(encoded.records(),
 			encoded.counts.volumes)

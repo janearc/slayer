@@ -16,7 +16,8 @@ import (
 func overhead(t *testing.T) view {
 	t.Helper()
 	eyeAt := maths.V(eye[0], eye[2]+3000, 0-eye[1])
-	seen, err := walk.NewEye(eyeAt, eyeAt.Add(maths.V(0, -1, 0)),
+	down := maths.V(0, -1, 0)
+	seen, err := walk.NewEye(eyeAt, eyeAt.Add(down),
 		maths.V(0, 0, -1))
 	if err != nil {
 		t.Fatal(err)
@@ -50,10 +51,12 @@ func TestBeamFromItsHead(t *testing.T) {
 	picture := image.NewRGBA(image.Rect(0, 0, 200, 200))
 	head := layout.Heads()[0]
 	way := rig.Toward(head.Aim, 0)
-	pane.ray(picture, head.Origin, head.Origin.Add(way.Scale(1000)),
+	far := way.Scale(1000)
+	pane.ray(picture, head.Origin, head.Origin.Add(far),
 		[3]float64{0, 1, 0}, 1)
 	for _, along := range []float64{0, 500} {
-		x, y, ahead := pane.onPane(head.Origin.Add(way.Scale(along)),
+		step := way.Scale(along)
+		x, y, ahead := pane.onPane(head.Origin.Add(step),
 			picture.Rect.Size())
 		if !ahead || picture.RGBAAt(int(x), int(y)).G == 0 {
 			t.Errorf("%v m along the beam, pixel %v %v is dark", along, x, y)

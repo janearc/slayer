@@ -1,0 +1,13 @@
+name,reach,clear,thick,grain,paths
+zero reach,0,1,1,grain,paths
+negative reach,-1,1,1,grain,paths
+nan reach,nan,1,1,grain,paths
+infinite reach,inf,1,1,grain,paths
+zero clear,10,0,1,grain,paths
+nan clear,10,nan,1,grain,paths
+infinite clear,10,inf,1,grain,paths
+negative thick,10,1,-1,grain,paths
+nan thick,10,1,nan,grain,paths
+no grain,10,1,1,none,paths
+no paths,10,1,1,grain,none
+a nil path,10,1,1,grain,nil-path

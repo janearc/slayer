@@ -9,6 +9,11 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
+// leaf is the triangles a leaf holds.
+func (grown tree) leaf(branch node) []triangle {
+	return grown.triangles[branch.first : branch.first+branch.count]
+}
+
 // scattered is count small triangles thrown about a box ten wide
 func scattered(count int) []triangle {
 	faces := make([]triangle, count)

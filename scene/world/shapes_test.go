@@ -12,7 +12,7 @@ import (
 // heart over a reach of 2 is 1.5.
 func TestTheRoundShareIsDistanceOverReach(t *testing.T) {
 	at := maths.V(1, 1, 1)
-	for _, c := range []struct {
+	for _, each := range []struct {
 		p     maths.Vec
 		reach float64
 		want  float64
@@ -23,8 +23,8 @@ func TestTheRoundShareIsDistanceOverReach(t *testing.T) {
 		{at, 0, 2},
 		{maths.V(2, 1, 1), -1, 2},
 	} {
-		if got := round(c.p, at, c.reach); got != c.want {
-			t.Errorf("round(%v, %v) is %v, want %v", c.p, c.reach, got, c.want)
+		if got := round(each.p, at, each.reach); got != each.want {
+			t.Errorf("round(%v, %v) is %v, want %v", each.p, each.reach, got, each.want)
 		}
 	}
 }
@@ -37,8 +37,8 @@ func TestTheRoundShareIsDistanceOverReach(t *testing.T) {
 // at a share of 0.975 that is (1/32) to the 1.6th = 2^-8, at a hair over
 // 0.2 the full rise, and at the edge, 1, the ground.
 func TestAVolcanoRisesAsAConeWithACrater(t *testing.T) {
-	v := Volcano{Rise: 2}
-	for _, c := range []struct{ share, want float64 }{
+	volcano := Volcano{Rise: 2}
+	for _, each := range []struct{ share, want float64 }{
 		{0, 0.25 + 1.3},
 		{0.1, 0.25 + 1.5},
 		{0.2, 0.25 + 1.7},
@@ -46,8 +46,8 @@ func TestAVolcanoRisesAsAConeWithACrater(t *testing.T) {
 		{0.975, 0.25 + 2.0/256},
 		{1, 0.25},
 	} {
-		if got := v.Shape(0.25, c.share); !(math.Abs(got-c.want) <= 1e-6) {
-			t.Errorf("a volcano at a share of %v is %v, want %v", c.share, got, c.want)
+		if got := volcano.Shape(0.25, each.share); !(math.Abs(got-each.want) <= 1e-6) {
+			t.Errorf("a volcano at a share of %v is %v, want %v", each.share, got, each.want)
 		}
 	}
 }
@@ -56,7 +56,7 @@ func TestAVolcanoRisesAsAConeWithACrater(t *testing.T) {
 // rules beyond. a dead one is rock instead of both, and the rules beyond
 // as well.
 func TestAVolcanoFixesLavaAndAsh(t *testing.T) {
-	for _, c := range []struct {
+	for _, each := range []struct {
 		share      float64
 		live, dead Biome
 	}{
@@ -64,15 +64,15 @@ func TestAVolcanoFixesLavaAndAsh(t *testing.T) {
 		{0.2, Lava, Rock},
 		{0.2000001, Ash, Rock},
 		{0.55, Ash, Rock},
-		{0.5500001, Unfixed, Unfixed},
-		{0.6, Unfixed, Unfixed},
-		{1, Unfixed, Unfixed},
+		{0.5500001, unfixed, unfixed},
+		{0.6, unfixed, unfixed},
+		{1, unfixed, unfixed},
 	} {
-		if got := (Volcano{}).Class(c.share); got != c.live {
-			t.Errorf("a share of %v is %d, want %d", c.share, got, c.live)
+		if got := (Volcano{}).Class(each.share); got != each.live {
+			t.Errorf("a share of %v is %d, want %d", each.share, got, each.live)
 		}
-		if got := (Volcano{Dead: true}).Class(c.share); got != c.dead {
-			t.Errorf("a dead one at %v is %d, want %d", c.share, got, c.dead)
+		if got := (Volcano{Dead: true}).Class(each.share); got != each.dead {
+			t.Errorf("a dead one at %v is %d, want %d", each.share, got, each.dead)
 		}
 	}
 }
@@ -102,14 +102,14 @@ func TestACanyonIsAPathAndAWidth(t *testing.T) {
 // step is t * t * (3 - 2 t) for t = 1/4, 1/16 * 5/2 = 5/32, so the floor is
 // 1 - 5/32 = 27/32 of the depth down, 3.375 for a depth of 4.
 func TestACanyonFallsAwayAlongASmoothStep(t *testing.T) {
-	c := Canyon{Depth: 4}
+	canyon := Canyon{Depth: 4}
 	for _, k := range []struct{ share, want float64 }{
 		{0, 10 - 4},
 		{0.25, 10 - 3.375},
 		{0.5, 10 - 2},
 		{1, 10},
 	} {
-		if got := c.Shape(10, k.share); !close12(got, k.want) {
+		if got := canyon.Shape(10, k.share); !close12(got, k.want) {
 			t.Errorf("at a share of %v the ground is %v, want %v", k.share, got, k.want)
 		}
 	}
@@ -117,12 +117,12 @@ func TestACanyonFallsAwayAlongASmoothStep(t *testing.T) {
 
 // rock down the walls and the floor, to a share of 0.85 and not at it.
 func TestACanyonIsRockToItsWalls(t *testing.T) {
-	for _, c := range []struct {
+	for _, each := range []struct {
 		share float64
 		want  Biome
-	}{{0, Rock}, {0.5, Rock}, {0.8499, Rock}, {0.85, Unfixed}, {0.9, Unfixed}} {
-		if got := (Canyon{}).Class(c.share); got != c.want {
-			t.Errorf("a canyon at a share of %v is %d, want %d", c.share, got, c.want)
+	}{{0, Rock}, {0.5, Rock}, {0.8499, Rock}, {0.85, unfixed}, {0.9, unfixed}} {
+		if got := (Canyon{}).Class(each.share); got != each.want {
+			t.Errorf("a canyon at a share of %v is %d, want %d", each.share, got, each.want)
 		}
 	}
 }
@@ -133,7 +133,7 @@ func TestACanyonIsRockToItsWalls(t *testing.T) {
 // point, and a segment of no length is the point: 5 from a (3,4,0).
 func TestADistanceToASegmentStopsAtItsEnds(t *testing.T) {
 	a, b := maths.V(0, 0, 0), maths.V(2, 0, 0)
-	for _, c := range []struct {
+	for _, each := range []struct {
 		p, a, b maths.Vec
 		want    float64
 	}{
@@ -143,8 +143,8 @@ func TestADistanceToASegmentStopsAtItsEnds(t *testing.T) {
 		{maths.V(1, 2, 0), a, maths.V(1, 0, 0), 2},
 		{maths.V(3, 4, 0), a, a, 5},
 	} {
-		if got := toSegment(c.p, c.a, c.b); !close12(got, c.want) {
-			t.Errorf("%v to the segment %v %v is %v, want %v", c.p, c.a, c.b, got, c.want)
+		if got := toSegment(each.p, each.a, each.b); !close12(got, each.want) {
+			t.Errorf("%v to the segment %v %v is %v, want %v", each.p, each.a, each.b, got, each.want)
 		}
 	}
 }
@@ -152,15 +152,15 @@ func TestADistanceToASegmentStopsAtItsEnds(t *testing.T) {
 // a shelf lifts the sea to 0.01 and leaves land as it is, at the water
 // line too, and is ice everywhere.
 func TestAShelfLiftsOnlyTheSea(t *testing.T) {
-	s := Shelf{}
-	for _, c := range []struct{ height, want float64 }{
+	shelf := Shelf{}
+	for _, each := range []struct{ height, want float64 }{
 		{-0.3, 0.01}, {-0.001, 0.01}, {0, 0}, {0.4, 0.4},
 	} {
-		if got := s.Shape(c.height, 0.5); got != c.want {
-			t.Errorf("a shelf on %v is %v, want %v", c.height, got, c.want)
+		if got := shelf.Shape(each.height, 0.5); got != each.want {
+			t.Errorf("a shelf on %v is %v, want %v", each.height, got, each.want)
 		}
 	}
-	if s.Class(0) != Ice || s.Class(1) != Ice {
+	if shelf.Class(0) != Ice || shelf.Class(1) != Ice {
 		t.Error("a shelf is not ice")
 	}
 }
@@ -170,24 +170,24 @@ func TestAShelfLiftsOnlyTheSea(t *testing.T) {
 // is rock past 0.8 of the reach, 0.8 itself not.
 func TestAPlateauIsFlatInsideAndRockAtItsEdge(t *testing.T) {
 	p := Plateau{Top: 0.7}
-	for _, c := range []struct{ height, share, want float64 }{
+	for _, each := range []struct{ height, share, want float64 }{
 		{0.1, 0.5, 0.7},
 		{0.9, 0.5, 0.9},
 		{0.1, 1, 0.7},
 		{0.1, 1.5, 0.1},
 		{0.1, 3, 0.1},
 	} {
-		if got := p.Shape(c.height, c.share); got != c.want {
-			t.Errorf("a plateau at a share of %v on %v is %v, want %v", c.share,
-				c.height, got, c.want)
+		if got := p.Shape(each.height, each.share); got != each.want {
+			t.Errorf("a plateau at a share of %v on %v is %v, want %v", each.share,
+				each.height, got, each.want)
 		}
 	}
-	for _, c := range []struct {
+	for _, each := range []struct {
 		share float64
 		want  Biome
-	}{{0, Unfixed}, {0.5, Unfixed}, {0.8, Unfixed}, {0.81, Rock}, {1, Rock}} {
-		if got := p.Class(c.share); got != c.want {
-			t.Errorf("a plateau at a share of %v is %d, want %d", c.share, got, c.want)
+	}{{0, unfixed}, {0.5, unfixed}, {0.8, unfixed}, {0.81, Rock}, {1, Rock}} {
+		if got := p.Class(each.share); got != each.want {
+			t.Errorf("a plateau at a share of %v is %d, want %d", each.share, got, each.want)
 		}
 	}
 }
@@ -220,12 +220,12 @@ func TestWhatIsLandAndWhatIsWater(t *testing.T) {
 	land := map[Biome]bool{Beach: true, Desert: true, Grass: true, Forest: true,
 		Jungle: true, Tundra: true, Rock: true, Snow: true, Lava: true, Ash: true}
 	water := map[Biome]bool{Deep: true, Sea: true}
-	for b := Deep; b < Biomes; b++ {
-		if Land(b) != land[b] {
-			t.Errorf("Land(%d) is %v", b, Land(b))
+	for biome := Deep; biome < Biomes; biome++ {
+		if Land(biome) != land[biome] {
+			t.Errorf("Land(%d) is %v", biome, Land(biome))
 		}
-		if Water(b) != water[b] {
-			t.Errorf("Water(%d) is %v", b, Water(b))
+		if Water(biome) != water[biome] {
+			t.Errorf("Water(%d) is %v", biome, Water(biome))
 		}
 	}
 }

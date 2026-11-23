@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/mesh"
 )
 
 // triangle is one face in its mesh's own space, as the kernel reads it.
@@ -47,12 +48,6 @@ func higher(one, other maths.Vec) maths.Vec {
 		math.Max(one.Z, other.Z))
 }
 
-// holds is whether another box lies wholly within this one.
-func (bounds box) holds(inner box) bool {
-	return lower(bounds.low, inner.low) == bounds.low &&
-		higher(bounds.high, inner.high) == bounds.high
-}
-
 // node is one box of the tree. A leaf holds count triangles from first; a
 // branch has count zero, and its two children are at first and first+1.
 type node struct {
@@ -77,14 +72,15 @@ const leafSize = 4
 // its high one on every axis, so no ray can enter it. the kernel walks
 // a mesh's tree only from a standing of it, and with no standings walks
 // none.
+//
+// A tree over one of slayer's meshes holds none of its own: its skin is
+// the mesh, whose tree and faces are read where they are and packed
+// straight into the kernel's bytes (see skin_tree.go). Its triangles and
+// nodes are nil.
 type tree struct {
 	triangles []triangle
 	nodes     []node
-}
-
-// leaf is the triangles a leaf holds.
-func (grown tree) leaf(branch node) []triangle {
-	return grown.triangles[branch.first : branch.first+branch.count]
+	skin      *mesh.Mesh
 }
 
 // grow builds the tree, splitting each box across its longest side at

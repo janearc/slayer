@@ -275,7 +275,7 @@ func TestOwnerAndQuiescenceCancellation(t *testing.T) {
 	if got := observeQuiescence(context.Background(), m, ownerExpected()); got.Err == nil {
 		t.Fatal("unbounded context accepted")
 	}
-	if got := observeOwner(nil, m, ownerExpected()); got.Err == nil {
+	if got := observeOwner(never, m, ownerExpected()); got.Err == nil {
 		t.Fatal("nil context accepted")
 	}
 	if got := observeOwner(context.Background(), m, OwnerIdentity{}); got.Err == nil {
@@ -284,7 +284,8 @@ func TestOwnerAndQuiescenceCancellation(t *testing.T) {
 }
 
 func TestOwnerNativeIdentityAndReapedChild(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(usageExamples(t).ChildDeadlineNS))
+	deadline := time.Duration(usageExamples(t).ChildDeadlineNS)
+	ctx, cancel := context.WithTimeout(context.Background(), deadline)
 	defer cancel()
 	own, err := CaptureOwner(ctx, os.Getpid())
 	if err != nil {
@@ -313,7 +314,8 @@ func TestOwnerNativeIdentityAndReapedChild(t *testing.T) {
 
 func TestQuiescenceNativeEnumeratesOwnedChild(t *testing.T) {
 	child := startUsageChild(t)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(usageExamples(t).ChildDeadlineNS))
+	deadline := time.Duration(usageExamples(t).ChildDeadlineNS)
+	ctx, cancel := context.WithTimeout(context.Background(), deadline)
 	defer cancel()
 	id, err := CaptureOwner(ctx, os.Getpid())
 	if err != nil {

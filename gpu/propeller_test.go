@@ -86,3 +86,29 @@ func TestPropellerRefusesCoreWhoseSquareUnderflowsMetal(t *testing.T) {
 		t.Fatal("accepted a core that would create0/0 density inMetal")
 	}
 }
+
+func TestPropellerDispersalSelectsStandaloneSourceWithoutOpticalABI(t *testing.T) {
+	for _, advanced := range []bool{false, true} {
+		p := propellerFixture(t, 5).Parameters()
+		if advanced {
+			p.WanderM, p.WanderScaleM, p.SpreadPerM = .8, 1.5, .12
+		}
+		field, err := medium.NewPropellerCavitation(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		world := thing.NewWorld()
+		world.AddVolume(thing.Volume{Medium: field, Material: &thing.Material{Glow: maths.Grey(1)}})
+		encoded, err := encode(world, maths.Subspace{}, film.Pinhole{Wide: 1}, 0, 2, 2)
+		if err != nil {
+			t.Fatal(err)
+		}
+		text := encoded.source(softwareTraversal)
+		if encoded.opticalState || encoded.propellerDispersal != advanced || strings.Contains(text, "OpticalInitialState") {
+			t.Fatal("standalone density changed optical ABI or lost source flag")
+		}
+		if strings.Contains(text, "propeller_wander") != advanced {
+			t.Fatal("wrong density implementation selected")
+		}
+	}
+}

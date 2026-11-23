@@ -29,14 +29,15 @@ func TestAPartThatCannotBeIsRefusedAtItsDoor(t *testing.T) {
 		!strings.Contains(err.Error(), "depth") {
 		t.Errorf("a gas of no depth: %v", err)
 	}
-	_, err := NewClouds(NewShell(Kilometres(5), Kilometres(5)),
+	upsideDown := NewShell(Kilometres(5), Kilometres(5))
+	_, err := NewClouds(upsideDown,
 		maths.Share(0.5), PerKilometre(1), 1)
 	if err == nil || !strings.Contains(err.Error(), "shell") {
 		t.Errorf("an upside-down shell: %v", err)
 	}
 	// the aurora's own door refuses a shell upside down, by the aurora's
 	// name: its high edge is no higher than its low one
-	_, err = NewAurora(NewShell(Kilometres(5), Kilometres(5)),
+	_, err = NewAurora(upsideDown,
 		measure.Radians(0), measure.Radians(0), measure.Radians(0),
 		maths.Share(0.5), maths.Share(0.5), 1, AuroraColours{})
 	if err == nil || !strings.Contains(err.Error(), "an aurora") ||

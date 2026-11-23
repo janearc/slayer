@@ -7,53 +7,100 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// fizzTested is the fizz the tests below hold, read from the chosen numbers.
+func fizzTested(t *testing.T) Fizz {
+	t.Helper()
+	return Fizz{Radius: picked(t, "fizz-radius"),
+		Height: picked(t, "fizz-height"),
+		Thick:  picked(t, "fizz-thick")}
+}
+
+// fizzChurned is the tested fizz with its rise, and with its churn and seed
+// when churning is true.
+func fizzChurned(t *testing.T, churning bool) Fizz {
+	t.Helper()
+	fizz := fizzTested(t)
+	fizz.Rise = picked(t, "fizz-rise")
+	if churning {
+		fizz.Churn = picked(t, "fizz-churn")
+		fizz.Seed = uint64(pickedCount(t, "fizz-seed"))
+	}
+	return fizz
+}
+
+// fizzAt is the point at a distance out along x and a height up.
+func fizzAt(out, height float64) maths.Vec {
+	return maths.V(out, height, nought)
+}
+
 // A fizz is thick at the middle of its foot, thinner further up, and
 // nothing outside its column.
 func TestAFizzThinsAsItClimbsAndEndsAtItsEdges(t *testing.T) {
-	fizz := Fizz{Radius: 0.2, Height: 1, Thick: 2}
-	foot := fizz.Density(maths.V(0, 0.01, 0))
-	if foot <= 0 {
+	fizz := fizzTested(t)
+	footHeight := picked(t, "fizz-foot-height")
+	foot := fizz.Density(fizzAt(nought, footHeight))
+	if foot <= nought {
 		t.Fatal("the foot of the fizz has no bubbles")
 	}
-	if up := fizz.Density(maths.V(0, 0.8, 0)); up <= 0 || up >= foot {
+	high := picked(t, "fizz-high-height")
+	if up := fizz.Density(fizzAt(nought, high)); up <= nought || up >= foot {
 		t.Fatalf("high in the column the fizz is %v against %v at the "+
 			"foot", up, foot)
 	}
-	for _, outside := range []maths.Vec{maths.V(0, -0.01, 0),
-		maths.V(0, 1.01, 0), maths.V(0.5, 0.1, 0)} {
-		if d := fizz.Density(outside); d != 0 {
-			t.Errorf("outside the column at %v the fizz is %v", outside, d)
+	for _, outside := range []maths.Vec{
+		fizzAt(nought, -picked(t, "fizz-below-depth")),
+		fizzAt(nought, picked(t, "fizz-above-height")),
+		fizzAt(picked(t, "fizz-outside-out"), picked(t, "fizz-outside-height"))} {
+		if density := fizz.Density(outside); density != nought {
+			t.Errorf("outside the column at %v the fizz is %v", outside,
+				density)
 		}
 	}
-	// the column widens: a point outside the foot's radius holds
-	// bubbles further up
-	flank := maths.V(0.25, 0, 0.0)
-	low := fizz.Density(maths.V(flank.X, 0.05, 0))
-	high := fizz.Density(maths.V(flank.X, 0.5, 0))
-	if low != 0 || high <= 0 {
+	fizzWidens(t, fizz)
+}
+
+// fizzWidens checks the column widens: a point outside the foot's radius
+// holds bubbles further up.
+func fizzWidens(t *testing.T, fizz Fizz) {
+	t.Helper()
+	flank := maths.V(picked(t, "fizz-flank-out"), nought, nought)
+	lowHeight := picked(t, "fizz-flank-low")
+	highHeight := picked(t, "fizz-flank-high")
+	low := fizz.Density(fizzAt(flank.X, lowHeight))
+	high := fizz.Density(fizzAt(flank.X, highHeight))
+	if low != nought || high <= nought {
 		t.Errorf("the column does not widen: %v low, %v high", low, high)
 	}
+}
+
+// fizzMoment is the span of time the churn is given, in whole seconds read
+// from the chosen numbers.
+func fizzMoment(t *testing.T) time.Duration {
+	t.Helper()
+	return time.Duration(pickedCount(t, "fizz-churn-seconds")) * time.Second
 }
 
 // The churn rises with the bubbles: the same point thins and thickens
 // as time passes, and without churn it never changes.
 func TestAFizzsChurnRisesWithTime(t *testing.T) {
-	churned := Fizz{Radius: 0.2, Height: 1, Thick: 2, Rise: 0.1,
-		Churn: 0.8, Seed: 7}
-	at := maths.V(0.05, 0.3, 0.02)
-	first := churned.Tick(0).Density(at)
-	later := churned.Tick(3 * time.Second).Density(at)
+	churned := fizzChurned(t, true)
+	at := maths.V(picked(t, "fizz-point-x"), picked(t, "fizz-point-y"),
+		picked(t, "fizz-point-z"))
+	moment := fizzMoment(t)
+	first := churned.Tick(nought).Density(at)
+	later := churned.Tick(moment).Density(at)
 	if first == later {
 		t.Errorf("three seconds of churn left %v unchanged", first)
 	}
-	still := Fizz{Radius: 0.2, Height: 1, Thick: 2, Rise: 0.1}
-	if a, b := still.Tick(0).Density(at), still.Tick(3*time.Second).Density(at); a != b {
-		t.Errorf("a churnless fizz moved: %v then %v", a, b)
+	still := fizzChurned(t, false)
+	before := still.Tick(nought).Density(at)
+	after := still.Tick(moment).Density(at)
+	if before != after {
+		t.Errorf("a churnless fizz moved: %v then %v", before, after)
 	}
 	// the same seed is the same fizz for ever
-	again := Fizz{Radius: 0.2, Height: 1, Thick: 2, Rise: 0.1,
-		Churn: 0.8, Seed: 7}
-	if again.Tick(3*time.Second).Density(at) != later {
+	again := fizzChurned(t, true)
+	if again.Tick(moment).Density(at) != later {
 		t.Error("the same seed and moment differ")
 	}
 }

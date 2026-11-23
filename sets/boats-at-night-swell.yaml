@@ -1,0 +1,205 @@
+# the bay at night of sets/boats-at-night.yaml, with a swell on the water so
+# that the boats' lamps lay streaks on it. in that set the bay is the ground's
+# own `sea`, a flat mirror at nought: it shows a lamp as a point where its
+# reflection falls and as nothing else, and the bay reads black. here the
+# ground has no `sea`, and the water over the boats is `world.ocean`, which
+# says no extent and no samples and so is the sea with no edge, meeting the
+# ground wherever the ground is under it. the ocean's
+# middle is at up 0, which is the sea's height for the stands too: a stand
+# of a floating kind takes its sea from the ground's `sea` or, where it has
+# none, from the middle of `world.ocean`, and puts a boat where the ground is
+# under it by three metres or more.
+#
+# the sea: every input is chosen, none from a shelf source: a wind of 7 m/s,
+# a fetch of 50 km, deep water (depth 0), waves going toward the east, seed 7,
+# time 0. there is no `direct-sun`: that mode wants the one aired sun lamp,
+# and this set has `light: none` and the boats' own lamps.
+#
+# the ocean draws on the CPU only.
+#
+# places are metres in the terrain's window, east 0 to 3900 from its west
+# edge and north 0 to 2900 from its south edge, as in the other night set.
+# every figure of the lamps and the boats is in manufacture/boats.yaml,
+# recalled or picked.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a bay at night with a swell, a dozen boats and an alfa
+  light: none
+  location:
+    lat: 37.8025
+    lon: -122.4255
+  terrain:
+    from: noaa-cudem-sf-ncei19-n38x00-w122x50-2022
+    lat: 37.8025
+    lon: -122.4255
+    across: 3900
+    down: 2900
+    step: 6
+  film:
+    width: 1280
+    height: 720
+    rays: 2
+    exposure: 16
+    wide: 30
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.5, 0.1, 0.06]
+        source: "synthetic extinction, not measured water; colour by eye"
+    ocean:
+      material: seawater
+      middle: [3050, 2620, 0]
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a moderate breeze, no shelf source"
+  cameras:
+    shore:
+      title: "from 30 m over the shore, north over the bay to the boats"
+      orientation:
+        point_to: the view
+        alpha: 0
+      location:
+        loc_relative:
+          object: the shore
+          standoff_x: 3
+          standoff_y: 3
+          standoff_z: 30
+    close:
+      title: "from the water 60 m south-west of the Alfa, 8 m up"
+      orientation:
+        point_to: the water
+        alpha: 0
+      location:
+        loc_relative:
+          object: the water
+          standoff_x: -45
+          standoff_y: -55
+          standoff_z: 8
+    bows:
+      title: "from the water 35 m ahead of the fishing boat by the Alfa, 5 m up, at its bow"
+      orientation:
+        point_to: the trawler
+        alpha: 0
+      location:
+        loc_relative:
+          object: the trawler
+          standoff_x: -22
+          standoff_y: -26
+          standoff_z: 5
+  set:
+    things:
+      the trawler:
+        kind: human-scale-2m
+        seed: 1
+        position:
+          east: {value: 3088, unit: m}
+          north: {value: 2660, unit: m}
+          up: {value: 2, unit: m}
+      the shore:
+        kind: human-scale-2m
+        seed: 1
+        east: 3100
+        north: 2180
+      the view:
+        kind: human-scale-2m
+        seed: 1
+        east: 3050
+        north: 2650
+      the water:
+        kind: human-scale-2m
+        seed: 1
+        position:
+          east: {value: 3050, unit: m}
+          north: {value: 2650, unit: m}
+          up: {value: 0, unit: m}
+      alfa:
+        kind: alfa
+        seed: 1
+        position:
+          east: {value: 3050, unit: m}
+          north: {value: 2650, unit: m}
+          up: {value: -6.24, unit: m}
+        heading: {value: 300, unit: deg}
+      fishing boat by the alfa:
+        kind: fishing-boat
+        seed: 31
+        complexity: demo
+        position:
+          east: {value: 3088, unit: m}
+          north: {value: 2660, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 215, unit: deg}
+      sampan by the alfa:
+        kind: sampan
+        seed: 32
+        complexity: demo
+        position:
+          east: {value: 3032, unit: m}
+          north: {value: 2630, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 200, unit: deg}
+    stands:
+      sampans at anchor:
+        kind: sampan-at-anchor
+        habit: scatter
+        count: 3
+        seed: 21
+        complexity: demo
+        area: {west: 2900, south: 2540, east: 3200, north: 2800}
+        exclude: {around: alfa, clearance: {value: 30, unit: m}}
+      sampans under way:
+        kind: sampan
+        habit: scatter
+        count: 2
+        seed: 22
+        complexity: demo
+        area: {west: 2900, south: 2540, east: 3200, north: 2800}
+        exclude: {around: alfa, clearance: {value: 30, unit: m}}
+      fishing boat at anchor:
+        kind: fishing-boat-at-anchor
+        habit: scatter
+        count: 1
+        seed: 23
+        complexity: demo
+        area: {west: 2900, south: 2540, east: 3200, north: 2800}
+        exclude: {around: alfa, clearance: {value: 30, unit: m}}
+      fishing boats under way:
+        kind: fishing-boat
+        habit: scatter
+        count: 2
+        seed: 24
+        complexity: demo
+        area: {west: 2900, south: 2540, east: 3200, north: 2800}
+        exclude: {around: alfa, clearance: {value: 30, unit: m}}
+      ferry under way:
+        kind: ferry
+        habit: scatter
+        count: 1
+        seed: 25
+        complexity: demo
+        area: {west: 2900, south: 2540, east: 3200, north: 2800}
+        exclude: {around: alfa, clearance: {value: 30, unit: m}}
+      ferry at anchor:
+        kind: ferry-at-anchor
+        habit: scatter
+        count: 1
+        seed: 26
+        complexity: demo
+        area: {west: 2900, south: 2540, east: 3200, north: 2800}
+        exclude: {around: alfa, clearance: {value: 30, unit: m}}

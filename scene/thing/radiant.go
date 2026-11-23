@@ -9,6 +9,14 @@ import (
 	"github.com/janearc/slayer/observer"
 )
 
+// The numbers radiation is worked in, each true by definition.
+const (
+	radianceNought = 0  // defined: no amount, and the first place in a list
+	radianceUnity  = 1  // defined: one whole, and the sign of a plus
+	radianceNone   = -1 // defined: no place in a list
+	radianceHeld   = 8  // defined: the lines a gas holds on the stack
+)
+
 // Radiant is what a material does with radiation outside the visible: how much
 // of a band passes one unit of the thing, from zero for opaque to one for
 // clear, and how much of a band the thing gives off.
@@ -48,21 +56,39 @@ type Spectrum struct {
 
 // Visible is the eye's range, the 1931 observer's; a thing says what it
 // does with the visible under it.
-var Visible = observer.Visible()
+func Visible() radiation.Range { return observer.Visible() }
 
 // ranges is every range a band may fall in, narrowest first: celestial's
 // named ranges and the visible. Fermi is left out. It is an
 // instrument's sensitivity, the sensor's side of film, and not a range
 // of the spectrum, so a thing cannot pass or give off "fermi".
-var ranges = func() []radiation.Range {
-	rs := []radiation.Range{Visible, radiation.Gamma(), radiation.XRay(),
+var ranges = narrowestFirst()
+
+// byWidth is ranges that sort by how far each runs, narrowest first.
+type byWidth []radiation.Range
+
+// Len is how many ranges there are.
+func (spans byWidth) Len() int { return len(spans) }
+
+// Swap exchanges two ranges.
+func (spans byWidth) Swap(first, second int) {
+	spans[first], spans[second] = spans[second], spans[first]
+}
+
+// Less is whether the range at first is narrower than the one at second.
+func (spans byWidth) Less(first, second int) bool {
+	return width(spans[first]) < width(spans[second])
+}
+
+// narrowestFirst is every range a band may fall in, narrowest first, the
+// order of a tie kept.
+func narrowestFirst() []radiation.Range {
+	spans := []radiation.Range{Visible(), radiation.Gamma(), radiation.XRay(),
 		radiation.ExtremeUltraviolet(), radiation.Ultraviolet(),
 		radiation.Infrared(), radiation.Radio(), radiation.Microwave()}
-	sort.SliceStable(rs, func(i, j int) bool {
-		return width(rs[i]) < width(rs[j])
-	})
-	return rs
-}()
+	sort.Stable(byWidth(spans))
+	return spans
+}
 
 // width is how far a range runs, in nanometres.
 func width(span radiation.Range) float64 {
@@ -78,8 +104,8 @@ func holds(span radiation.Range, band maths.Band) bool {
 // Range is the narrowest of the ranges a band falls in, or the zero
 // range for none. The zero band, every band at once, is Visible.
 func Range(band maths.Band) radiation.Range {
-	if band.Nanometres == 0 {
-		return Visible
+	if band.Nanometres == radianceNought {
+		return Visible()
 	}
 	for _, span := range ranges {
 		if holds(span, band) {
@@ -89,45 +115,40 @@ func Range(band maths.Band) radiation.Range {
 	return radiation.Range{}
 }
 
-// Seen is whether a band is visible light, or the zero band, which is
-// all of it at once.
-func Seen(band maths.Band) bool {
-	return band.Nanometres == 0 || holds(Visible, band)
-}
-
 // Lookup is what a table by range says for a band: the entry for the
 // narrowest range the table declares that holds the band, and whether
 // there is one. The zero band looks up the visible.
-func Lookup[V any](table map[radiation.Range]V, band maths.Band) (V, bool) {
-	if band.Nanometres == 0 {
-		v, ok := table[Visible]
-		return v, ok
+func Lookup[Value any](table map[radiation.Range]Value,
+	band maths.Band) (Value, bool) {
+	if band.Nanometres == radianceNought {
+		value, found := table[Visible()]
+		return value, found
 	}
-	for _, p := range ranges {
-		if v, ok := table[p]; ok && holds(p, band) {
-			return v, true
+	for _, span := range ranges {
+		if value, found := table[span]; found && holds(span, band) {
+			return value, true
 		}
 	}
-	var none V
+	var none Value
 	return none, false
 }
 
 // Through is how much of the band passes one unit.
-func (s Spectrum) Through(band maths.Band) float64 {
-	v, _ := Lookup(s.Passes, band)
-	return v
+func (spectrum Spectrum) Through(band maths.Band) float64 {
+	value, _ := Lookup(spectrum.Passes, band)
+	return value
 }
 
 // Emits is how much of the band the thing gives off.
-func (s Spectrum) Emits(band maths.Band) float64 {
-	v, _ := Lookup(s.Gives, band)
-	return v
+func (spectrum Spectrum) Emits(band maths.Band) float64 {
+	value, _ := Lookup(spectrum.Gives, band)
+	return value
 }
 
 // Scatters is how much of the band that lands is sent back.
-func (s Spectrum) Scatters(band maths.Band) float64 {
-	v, _ := Lookup(s.Returns, band)
-	return v
+func (spectrum Spectrum) Scatters(band maths.Band) float64 {
+	value, _ := Lookup(spectrum.Returns, band)
+	return value
 }
 
 // Lit is a Radiant that gives off only where the lamps reach it: an
@@ -186,42 +207,45 @@ type heldLines struct {
 // Excited built by a literal gives the same answers without it, only slower.
 // The prepared value does not see a change made to Lines or Excitations after
 // this call.
-func (e Excited) Prepared() Excited {
-	e.held = nil
-	held := &heldLines{none: e.excitationOf(0)}
-	for _, nm := range e.sortedLines(nil) {
-		held.lines = append(held.lines, line{nm, e.Lines[nm], e.excitationOf(nm)})
+func (excited Excited) Prepared() Excited {
+	excited.held = nil
+	held := &heldLines{none: excited.excitationOf(radianceNought)}
+	for _, nm := range excited.sortedLines(nil) {
+		strength := excited.Lines[nm]
+		held.lines = append(held.lines,
+			line{nm, strength, excited.excitationOf(nm)})
 	}
-	e.held = held
-	return e
+	excited.held = held
+	return excited
 }
 
 // excitationOf is what Excitations says of a line: its entry where it has
 // one above zero, else one.
-func (e Excited) excitationOf(nm float64) float64 {
-	if x, is := e.Excitations[nm]; is && x > 0 {
-		return x
+func (excited Excited) excitationOf(nm float64) float64 {
+	if excitation, is := excited.Excitations[nm]; is &&
+		excitation > radianceNought {
+		return excitation
 	}
-	return 1
+	return radianceUnity
 }
 
 // Through is Passes, for any band.
-func (e Excited) Through(maths.Band) float64 { return e.Passes }
+func (excited Excited) Through(maths.Band) float64 { return excited.Passes }
 
 // Emits is the lines' strength at the band, each a gaussian Width wide.
-func (e Excited) Emits(band maths.Band) float64 {
-	width := e.Width
-	if width <= 0 {
-		width = 1
+func (excited Excited) Emits(band maths.Band) float64 {
+	width := excited.Width
+	if width <= radianceNought {
+		width = radianceUnity
 	}
-	if e.held != nil {
-		return emitted(e.held.lines, band.Nanometres, width)
+	if excited.held != nil {
+		return emitted(excited.held.lines, band.Nanometres, width)
 	}
-	var buf [8]line
-	lines := buf[:0]
-	var nms [8]float64
-	for _, nm := range e.sortedLines(nms[:0]) {
-		lines = append(lines, line{nm: nm, strength: e.Lines[nm]})
+	var buffer [radianceHeld]line
+	lines := buffer[:radianceNought]
+	var wavelengths [radianceHeld]float64
+	for _, nm := range excited.sortedLines(wavelengths[:radianceNought]) {
+		lines = append(lines, line{nm: nm, strength: excited.Lines[nm]})
 	}
 	return emitted(lines, band.Nanometres, width)
 }
@@ -229,18 +253,18 @@ func (e Excited) Emits(band maths.Band) float64 {
 // emitted is the sum of the lines' gaussians at a wavelength, in the order
 // the lines are given.
 func emitted(lines []line, nm, width float64) float64 {
-	sum := 0.0
-	for _, l := range lines {
-		strength := l.strength
-		d := (nm - l.nm) / width
-		sum += strength * math.Exp(-d*d)
+	var sum float64
+	for _, each := range lines {
+		strength := each.strength
+		distance := (nm - each.nm) / width
+		sum += strength * math.Exp(-distance*distance)
 	}
 	return sum
 }
 
 // sortedLines is the lines' wavelengths, shortest first, appended to out.
-func (e Excited) sortedLines(out []float64) []float64 {
-	for nm := range e.Lines {
+func (excited Excited) sortedLines(out []float64) []float64 {
+	for nm := range excited.Lines {
 		out = append(out, nm)
 	}
 	sort.Float64s(out)
@@ -248,28 +272,35 @@ func (e Excited) sortedLines(out []float64) []float64 {
 }
 
 // Scatters is zero: excited gas returns no radar.
-func (Excited) Scatters(maths.Band) float64 { return 0 }
+func (Excited) Scatters(maths.Band) float64 { return radianceNought }
 
 // Excitation is the nearest line's, or one.
-func (e Excited) Excitation(band maths.Band) float64 {
-	if e.held != nil {
-		nearest, apart := -1, math.Inf(1)
-		for i, l := range e.held.lines {
-			if d := math.Abs(band.Nanometres - l.nm); d < apart {
-				nearest, apart = i, d
-			}
-		}
-		if nearest < 0 {
-			return e.held.none
-		}
-		return e.held.lines[nearest].excitation
+func (excited Excited) Excitation(band maths.Band) float64 {
+	if excited.held != nil {
+		return excited.held.excitationAt(band.Nanometres)
 	}
-	nearest, apart := 0.0, math.Inf(1)
-	var nms [8]float64
-	for _, nm := range e.sortedLines(nms[:0]) {
-		if d := math.Abs(band.Nanometres - nm); d < apart {
-			nearest, apart = nm, d
+	var nearest float64
+	apart := math.Inf(radianceUnity)
+	var wavelengths [radianceHeld]float64
+	for _, nm := range excited.sortedLines(wavelengths[:radianceNought]) {
+		if distance := math.Abs(band.Nanometres - nm); distance < apart {
+			nearest, apart = nm, distance
 		}
 	}
-	return e.excitationOf(nearest)
+	return excited.excitationOf(nearest)
+}
+
+// excitationAt is the excitation of the line nearest a wavelength, or what
+// is answered where there is no line.
+func (held *heldLines) excitationAt(nm float64) float64 {
+	nearest, apart := radianceNone, math.Inf(radianceUnity)
+	for place, each := range held.lines {
+		if distance := math.Abs(nm - each.nm); distance < apart {
+			nearest, apart = place, distance
+		}
+	}
+	if nearest < radianceNought {
+		return held.none
+	}
+	return held.lines[nearest].excitation
 }

@@ -67,24 +67,24 @@ type Sheet struct {
 func ReadSheet(path string, score *Score) (*Sheet, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrShow, err)
+		return nil, fmt.Errorf("%w: %w", errShow, err)
 	}
-	return ParseSheet(raw, score)
+	return parseSheet(raw, score)
 }
 
-// ParseSheet reads a cue sheet from its yaml against a score. A cue at a
+// parseSheet reads a cue sheet from its yaml against a score. A cue at a
 // bar the score lacks, or naming a figure, bank or move lightshow does
 // not play, is refused by name.
-func ParseSheet(raw []byte, score *Score) (*Sheet, error) {
+func parseSheet(raw []byte, score *Score) (*Sheet, error) {
 	if score == nil {
 		return nil, fmt.Errorf("%w: a sheet is read against a score; "+
-			"read the score first", ErrShow)
+			"read the score first", errShow)
 	}
 	var on struct {
 		Cues []cue `yaml:"cues"`
 	}
 	if err := yaml.Unmarshal(raw, &on); err != nil {
-		return nil, fmt.Errorf("%w: the cue sheet: %w", ErrShow, err)
+		return nil, fmt.Errorf("%w: the cue sheet: %w", errShow, err)
 	}
 	made := &Sheet{score: score}
 	for _, line := range on.Cues {
@@ -110,12 +110,12 @@ func (of *Score) Moment(at string, atSec *float64) (float64, error) {
 	fields := strings.SplitN(at, ".", 2)
 	bar, err := strconv.Atoi(fields[0])
 	if err != nil {
-		return 0, fmt.Errorf("%w: at %q is not bar.beat: %w", ErrShow, at, err)
+		return 0, fmt.Errorf("%w: at %q is not bar.beat: %w", errShow, at, err)
 	}
 	beat := 1
 	if len(fields) == 2 {
 		if beat, err = strconv.Atoi(fields[1]); err != nil {
-			return 0, fmt.Errorf("%w: at %q is not bar.beat: %w", ErrShow,
+			return 0, fmt.Errorf("%w: at %q is not bar.beat: %w", errShow,
 				at, err)
 		}
 	}
@@ -140,12 +140,9 @@ func (of cue) playable(at float64) error {
 		for _, name := range each.list {
 			if !slices.Contains(each.choose, name) {
 				return fmt.Errorf("%w: cue at %v s: no %s %q; choose %v",
-					ErrShow, at, each.what, name, each.choose)
+					errShow, at, each.what, name, each.choose)
 			}
 		}
 	}
 	return nil
 }
-
-// Score is the score the sheet was read against.
-func (of *Sheet) Score() *Score { return of.score }

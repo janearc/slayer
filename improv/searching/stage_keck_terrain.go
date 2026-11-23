@@ -85,14 +85,14 @@ func (h summitHeights) HeightRange(west, south, east, north float64) (float64, f
 // maunaKeaGround uses Slayer's spherical, view-selected terrain builder.
 // It replaces the coarse local grid and infinite flat horizon. Site anchor,
 // CRS, MSL approximation and DEM identity are recorded in the source study.
-func (s *heardStage) maunaKeaGround(p *StagePlan, raster *terrain.Raster) error {
+func (s *heardStage) maunaKeaGround(p *stagePlan, raster *terrain.Raster) error {
 	s.summit = true
 	zero, has, err := raster.GeographicElevation(keckLongitude, keckLatitude)
 	if err != nil {
 		return err
 	}
 	if !has {
-		return fmt.Errorf("Keck anchor is outside the DEM")
+		return fmt.Errorf("the Keck anchor is outside the DEM")
 	}
 	sphere, err := frame.NewSphere(measure.Metres(keckEarthRadius), frame.Location{Latitude: measure.Degrees(keckLatitude), Longitude: measure.Degrees(keckLongitude), Height: measure.Metres(zero)})
 	if err != nil {
@@ -135,7 +135,7 @@ func (s *heardStage) maunaKeaGround(p *StagePlan, raster *terrain.Raster) error 
 				return err
 			}
 			if !has {
-				return fmt.Errorf("Keck platform lacks source coverage")
+				return fmt.Errorf("the Keck platform lacks source coverage")
 			}
 			location.Height = measure.Metres(height)
 			point, err := sphere.Position(location)
@@ -156,7 +156,7 @@ func (s *heardStage) maunaKeaGround(p *StagePlan, raster *terrain.Raster) error 
 	}
 	coverage, ok := raster.Coverage()
 	if !ok {
-		return fmt.Errorf("Keck DEM has no declared coverage")
+		return fmt.Errorf("the Keck DEM has no declared coverage")
 	}
 	region := island.Region{West: math.Max(coverage.West+.001, keckLongitude-.5), East: math.Min(coverage.East-.001, keckLongitude+.5), South: math.Max(coverage.South+.001, keckLatitude-.45), North: math.Min(coverage.North-.001, keckLatitude+.45)}
 	ground, err := island.New(sphere, heights, region, island.Detail{Patches: 4096, Evaluations: 65536, Depth: 14, Side: 17, Points: 2097152, CellPixels: .75, MinimumHeight: -6000, MaximumHeight: 4500, NormalLongitude: 1.0 / 3600, NormalLatitude: 1.0 / 3600})

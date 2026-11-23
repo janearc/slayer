@@ -1,0 +1,3 @@
+name,height,accepted
+under-half-the-cutoff,5e-13,false
+over-the-cutoff,2e-12,true

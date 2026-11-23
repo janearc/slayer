@@ -1,0 +1,5 @@
+name,x,y,z,dirx,diry,dirz
+triangle-first,0,0,0,,,
+triangle-second,1,0,0,,,
+triangle-third,0,1,0,,,
+downward,0,0,-1,,,

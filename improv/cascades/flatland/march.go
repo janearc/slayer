@@ -6,10 +6,10 @@ import (
 	"time"
 )
 
-// Interval is a radiance interval (paper equation 9): the intensity
+// interval is a radiance interval (paper equation 9): the intensity
 // gathered along a stretch of ray, seen from its near end as if nothing
 // lay beyond, and the optical depth of that stretch.
-type Interval struct {
+type interval struct {
 	Intensity [Bands]float64
 	Tau       [Bands]float64
 }
@@ -21,7 +21,7 @@ type Stats struct {
 	Elapsed time.Duration
 }
 
-// March integrates the ray origin + distance*direction for distances in
+// march integrates the ray origin + distance*direction for distances in
 // [from, to]. It also returns how many cells it read.
 //
 // The order matters. Equation 16 runs from the far end to the near end:
@@ -30,19 +30,19 @@ type Stats struct {
 // I = emit_N + att_N*emit_F is the same number, and it is equation 11
 // with I(a,b) = emit_N, tau(a,b) = -ln(att_N) and I(b,c) = emit_F. So this
 // marches near to far, adding each cell scaled by what survives before it.
-func (grid *Grid) March(originX, originY, directionX, directionY,
-	from, to float64) (Interval, int64) {
-	var result Interval
+func (grid *Grid) march(originX, originY, directionX, directionY,
+	from, to float64) (interval, int64) {
+	var result interval
 	survive := [Bands]float64{1, 1, 1}
 	to = math.Min(to, grid.diagonal)
 	var steps int64
 	entered := false
 	for count := 0; ; count++ {
-		start := from + float64(count)*StepLength
+		start := from + float64(count)*stepLength
 		if start >= to {
 			break
 		}
-		length := math.Min(StepLength, to-start)
+		length := math.Min(stepLength, to-start)
 		middle := start + length/2
 		cell, inside := grid.cellAt(originX+directionX*middle,
 			originY+directionY*middle)
@@ -73,13 +73,13 @@ func (grid *Grid) cellAt(positionX, positionY float64) (int, bool) {
 // cross adds the light of one cell to the interval. Full steps use the
 // tables made in Set; a shortened step at the end of an interval is worked
 // out directly.
-func (grid *Grid) cross(base int, length float64, result *Interval,
+func (grid *Grid) cross(base int, length float64, result *interval,
 	survive *[Bands]float64) {
 	for band := 0; band < Bands; band++ {
 		slot := base + band
 		attenuation, emission := grid.attenuation[slot], grid.emission[slot]
 		depth := grid.opticalStep[slot]
-		if length != StepLength {
+		if length != stepLength {
 			attenuation, emission = stepTerms(grid.opacity[slot],
 				grid.emissivity[slot], length)
 			depth = grid.opacity[slot] * length

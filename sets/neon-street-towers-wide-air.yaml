@@ -1,0 +1,735 @@
+# the neon street as one hundred and forty-four towers under the damp night
+# air of sets/neon-street-nine-air.yaml. the rest is
+# sets/neon-street-towers-wide.yaml: nine rows of sixteen, no two the same,
+# from above. each tower stands on a lot of 36 m with a wet street of 12 m
+# on every side, so the alleys run 756 m east to west and 420 m north to
+# south. each tower has a plan, skin and window style no other has, a
+# height of its own from 14 to 60 storeys, an irregularity of its own from
+# 0.2 to 1, and a seed of its own; taper, twist, setbacks, spire, crown,
+# gargoyles, planting and the cyber roof are left to the tower's own draw.
+# every tower keeps shops in its foot and signs. which lot a tower stands
+# on, the heights, the irregularities and the seeds are picked. the
+# overhead camera is low enough that the edge towers run out of the frame.
+#
+# places are metres, as a map's run: x east, y north, z up. the first
+# camera is the one drawn; to draw another, name it.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  volume-illumination: {model: isotropic-single, sky-samples: 2}
+  weather:
+    night haze:
+      kind: prescribed-mist
+      extinction: {value: 0.0039, unit: m^-1}
+      depth: {value: 300, unit: m}
+      coverage: 1
+      seed: 1
+      asymmetry: 0.7
+  atmosphere:
+    layers:
+      night air:
+        weather: night haze
+        extent: world
+        albedo: 0.9
+  name: neon street, one hundred and forty-four towers, night air
+  seed: 1
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 70
+    exposure: 4
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    down-the-alley:
+      title: "at eye height at the south end of the middle street, looking north down it"
+      location:
+        at: [1.2, -202, 1.7]
+      orientation:
+        look_at: [0, 60, 22]
+    overhead:
+      title: "from straight above the middle of the set, the frame full"
+      wide: 60
+      location:
+        at: [0, -1, 600]
+      orientation:
+        look_at: [0, 0, 0]
+    above:
+      title: "from above and south of the whole set"
+      wide: 70
+      location:
+        at: [0, -520, 300]
+      orientation:
+        look_at: [0, 0, 40]
+  recipes:
+    wet: {kind: street, wetness: 0.7, length: {value: 84, unit: m}}
+    wet-across: {kind: street, wetness: 0.7, length: {value: 36, unit: m}}
+    t000: {kind: tower, irregularity: 0.20, pins: {plan: rectangle, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 14, width: {value: 36, unit: m}}}
+    t001: {kind: tower, irregularity: 0.27, pins: {plan: rounded, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 21, width: {value: 36, unit: m}}}
+    t002: {kind: tower, irregularity: 0.35, pins: {plan: polygon, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 28, width: {value: 36, unit: m}}}
+    t003: {kind: tower, irregularity: 0.42, pins: {plan: star, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 35, width: {value: 36, unit: m}}}
+    t004: {kind: tower, irregularity: 0.49, pins: {plan: y, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 42, width: {value: 36, unit: m}}}
+    t005: {kind: tower, irregularity: 0.56, pins: {plan: sail, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 49, width: {value: 36, unit: m}}}
+    t006: {kind: tower, irregularity: 0.64, pins: {plan: lobed, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t007: {kind: tower, irregularity: 0.71, pins: {plan: ellipse, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 16, width: {value: 36, unit: m}}}
+    t008: {kind: tower, irregularity: 0.78, pins: {plan: rectangle, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 23, width: {value: 36, unit: m}}}
+    t009: {kind: tower, irregularity: 0.85, pins: {plan: rounded, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 30, width: {value: 36, unit: m}}}
+    t010: {kind: tower, irregularity: 0.93, pins: {plan: polygon, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 37, width: {value: 36, unit: m}}}
+    t011: {kind: tower, irregularity: 1.00, pins: {plan: star, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 44, width: {value: 36, unit: m}}}
+    t012: {kind: tower, irregularity: 0.27, pins: {plan: y, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 51, width: {value: 36, unit: m}}}
+    t013: {kind: tower, irregularity: 0.34, pins: {plan: sail, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 58, width: {value: 36, unit: m}}}
+    t014: {kind: tower, irregularity: 0.41, pins: {plan: lobed, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 18, width: {value: 36, unit: m}}}
+    t015: {kind: tower, irregularity: 0.49, pins: {plan: ellipse, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 25, width: {value: 36, unit: m}}}
+    t016: {kind: tower, irregularity: 0.56, pins: {plan: rectangle, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 32, width: {value: 36, unit: m}}}
+    t017: {kind: tower, irregularity: 0.63, pins: {plan: rounded, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 39, width: {value: 36, unit: m}}}
+    t018: {kind: tower, irregularity: 0.70, pins: {plan: polygon, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 46, width: {value: 36, unit: m}}}
+    t019: {kind: tower, irregularity: 0.78, pins: {plan: star, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+    t020: {kind: tower, irregularity: 0.85, pins: {plan: y, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 60, width: {value: 36, unit: m}}}
+    t021: {kind: tower, irregularity: 0.92, pins: {plan: sail, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 20, width: {value: 36, unit: m}}}
+    t022: {kind: tower, irregularity: 0.99, pins: {plan: lobed, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 27, width: {value: 36, unit: m}}}
+    t023: {kind: tower, irregularity: 0.26, pins: {plan: ellipse, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 34, width: {value: 36, unit: m}}}
+    t024: {kind: tower, irregularity: 0.33, pins: {plan: rectangle, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 41, width: {value: 36, unit: m}}}
+    t025: {kind: tower, irregularity: 0.41, pins: {plan: rounded, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 48, width: {value: 36, unit: m}}}
+    t026: {kind: tower, irregularity: 0.48, pins: {plan: polygon, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 55, width: {value: 36, unit: m}}}
+    t027: {kind: tower, irregularity: 0.55, pins: {plan: star, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 15, width: {value: 36, unit: m}}}
+    t028: {kind: tower, irregularity: 0.63, pins: {plan: y, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 22, width: {value: 36, unit: m}}}
+    t029: {kind: tower, irregularity: 0.70, pins: {plan: sail, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 29, width: {value: 36, unit: m}}}
+    t030: {kind: tower, irregularity: 0.77, pins: {plan: lobed, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 36, width: {value: 36, unit: m}}}
+    t031: {kind: tower, irregularity: 0.84, pins: {plan: ellipse, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 43, width: {value: 36, unit: m}}}
+    t032: {kind: tower, irregularity: 0.92, pins: {plan: rectangle, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 50, width: {value: 36, unit: m}}}
+    t033: {kind: tower, irregularity: 0.99, pins: {plan: rounded, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t034: {kind: tower, irregularity: 0.26, pins: {plan: polygon, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 17, width: {value: 36, unit: m}}}
+    t035: {kind: tower, irregularity: 0.33, pins: {plan: star, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 24, width: {value: 36, unit: m}}}
+    t036: {kind: tower, irregularity: 0.40, pins: {plan: y, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 31, width: {value: 36, unit: m}}}
+    t037: {kind: tower, irregularity: 0.47, pins: {plan: sail, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 38, width: {value: 36, unit: m}}}
+    t038: {kind: tower, irregularity: 0.55, pins: {plan: lobed, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 45, width: {value: 36, unit: m}}}
+    t039: {kind: tower, irregularity: 0.62, pins: {plan: ellipse, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 52, width: {value: 36, unit: m}}}
+    t040: {kind: tower, irregularity: 0.69, pins: {plan: rectangle, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 59, width: {value: 36, unit: m}}}
+    t041: {kind: tower, irregularity: 0.77, pins: {plan: rounded, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 19, width: {value: 36, unit: m}}}
+    t042: {kind: tower, irregularity: 0.84, pins: {plan: polygon, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 26, width: {value: 36, unit: m}}}
+    t043: {kind: tower, irregularity: 0.91, pins: {plan: star, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 33, width: {value: 36, unit: m}}}
+    t044: {kind: tower, irregularity: 0.98, pins: {plan: y, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 40, width: {value: 36, unit: m}}}
+    t045: {kind: tower, irregularity: 0.25, pins: {plan: sail, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 47, width: {value: 36, unit: m}}}
+    t046: {kind: tower, irregularity: 0.32, pins: {plan: lobed, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 54, width: {value: 36, unit: m}}}
+    t047: {kind: tower, irregularity: 0.40, pins: {plan: ellipse, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 14, width: {value: 36, unit: m}}}
+    t048: {kind: tower, irregularity: 0.47, pins: {plan: rectangle, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 21, width: {value: 36, unit: m}}}
+    t049: {kind: tower, irregularity: 0.54, pins: {plan: rounded, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 28, width: {value: 36, unit: m}}}
+    t050: {kind: tower, irregularity: 0.61, pins: {plan: polygon, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 35, width: {value: 36, unit: m}}}
+    t051: {kind: tower, irregularity: 0.69, pins: {plan: star, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 42, width: {value: 36, unit: m}}}
+    t052: {kind: tower, irregularity: 0.76, pins: {plan: y, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 49, width: {value: 36, unit: m}}}
+    t053: {kind: tower, irregularity: 0.83, pins: {plan: sail, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t054: {kind: tower, irregularity: 0.90, pins: {plan: lobed, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 16, width: {value: 36, unit: m}}}
+    t055: {kind: tower, irregularity: 0.98, pins: {plan: ellipse, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 23, width: {value: 36, unit: m}}}
+    t056: {kind: tower, irregularity: 0.24, pins: {plan: rectangle, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 30, width: {value: 36, unit: m}}}
+    t057: {kind: tower, irregularity: 0.32, pins: {plan: rounded, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 37, width: {value: 36, unit: m}}}
+    t058: {kind: tower, irregularity: 0.39, pins: {plan: polygon, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 44, width: {value: 36, unit: m}}}
+    t059: {kind: tower, irregularity: 0.46, pins: {plan: star, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 51, width: {value: 36, unit: m}}}
+    t060: {kind: tower, irregularity: 0.54, pins: {plan: y, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 58, width: {value: 36, unit: m}}}
+    t061: {kind: tower, irregularity: 0.61, pins: {plan: sail, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 18, width: {value: 36, unit: m}}}
+    t062: {kind: tower, irregularity: 0.68, pins: {plan: lobed, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 25, width: {value: 36, unit: m}}}
+    t063: {kind: tower, irregularity: 0.75, pins: {plan: ellipse, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 32, width: {value: 36, unit: m}}}
+    t064: {kind: tower, irregularity: 0.83, pins: {plan: rectangle, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 39, width: {value: 36, unit: m}}}
+    t065: {kind: tower, irregularity: 0.90, pins: {plan: rounded, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 46, width: {value: 36, unit: m}}}
+    t066: {kind: tower, irregularity: 0.97, pins: {plan: polygon, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+    t067: {kind: tower, irregularity: 0.24, pins: {plan: star, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 60, width: {value: 36, unit: m}}}
+    t068: {kind: tower, irregularity: 0.31, pins: {plan: y, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 20, width: {value: 36, unit: m}}}
+    t069: {kind: tower, irregularity: 0.38, pins: {plan: sail, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 27, width: {value: 36, unit: m}}}
+    t070: {kind: tower, irregularity: 0.46, pins: {plan: lobed, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 34, width: {value: 36, unit: m}}}
+    t071: {kind: tower, irregularity: 0.53, pins: {plan: ellipse, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 41, width: {value: 36, unit: m}}}
+    t072: {kind: tower, irregularity: 0.60, pins: {plan: rectangle, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 48, width: {value: 36, unit: m}}}
+    t073: {kind: tower, irregularity: 0.68, pins: {plan: rounded, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 55, width: {value: 36, unit: m}}}
+    t074: {kind: tower, irregularity: 0.75, pins: {plan: polygon, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 15, width: {value: 36, unit: m}}}
+    t075: {kind: tower, irregularity: 0.82, pins: {plan: star, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 22, width: {value: 36, unit: m}}}
+    t076: {kind: tower, irregularity: 0.89, pins: {plan: y, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 29, width: {value: 36, unit: m}}}
+    t077: {kind: tower, irregularity: 0.97, pins: {plan: sail, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 36, width: {value: 36, unit: m}}}
+    t078: {kind: tower, irregularity: 0.23, pins: {plan: lobed, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 43, width: {value: 36, unit: m}}}
+    t079: {kind: tower, irregularity: 0.31, pins: {plan: ellipse, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 50, width: {value: 36, unit: m}}}
+    t080: {kind: tower, irregularity: 0.38, pins: {plan: rectangle, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t081: {kind: tower, irregularity: 0.45, pins: {plan: rounded, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 17, width: {value: 36, unit: m}}}
+    t082: {kind: tower, irregularity: 0.52, pins: {plan: polygon, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 24, width: {value: 36, unit: m}}}
+    t083: {kind: tower, irregularity: 0.60, pins: {plan: star, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 31, width: {value: 36, unit: m}}}
+    t084: {kind: tower, irregularity: 0.67, pins: {plan: y, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 38, width: {value: 36, unit: m}}}
+    t085: {kind: tower, irregularity: 0.74, pins: {plan: sail, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 45, width: {value: 36, unit: m}}}
+    t086: {kind: tower, irregularity: 0.82, pins: {plan: lobed, skin: granite, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 52, width: {value: 36, unit: m}}}
+    t087: {kind: tower, irregularity: 0.89, pins: {plan: ellipse, skin: granite, style: punched, shafts: 1, retail: true, signs: true, storeys: 59, width: {value: 36, unit: m}}}
+    t088: {kind: tower, irregularity: 0.96, pins: {plan: rectangle, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 19, width: {value: 36, unit: m}}}
+    t089: {kind: tower, irregularity: 0.23, pins: {plan: rounded, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 26, width: {value: 36, unit: m}}}
+    t090: {kind: tower, irregularity: 0.30, pins: {plan: polygon, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 33, width: {value: 36, unit: m}}}
+    t091: {kind: tower, irregularity: 0.37, pins: {plan: star, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 40, width: {value: 36, unit: m}}}
+    t092: {kind: tower, irregularity: 0.45, pins: {plan: y, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 47, width: {value: 36, unit: m}}}
+    t093: {kind: tower, irregularity: 0.52, pins: {plan: sail, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 54, width: {value: 36, unit: m}}}
+    t094: {kind: tower, irregularity: 0.59, pins: {plan: lobed, skin: concrete, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 14, width: {value: 36, unit: m}}}
+    t095: {kind: tower, irregularity: 0.66, pins: {plan: ellipse, skin: concrete, style: punched, shafts: 1, retail: true, signs: true, storeys: 21, width: {value: 36, unit: m}}}
+    t096: {kind: tower, irregularity: 0.74, pins: {plan: rectangle, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 28, width: {value: 36, unit: m}}}
+    t097: {kind: tower, irregularity: 0.81, pins: {plan: rounded, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 35, width: {value: 36, unit: m}}}
+    t098: {kind: tower, irregularity: 0.88, pins: {plan: polygon, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 42, width: {value: 36, unit: m}}}
+    t099: {kind: tower, irregularity: 0.96, pins: {plan: star, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 49, width: {value: 36, unit: m}}}
+    t100: {kind: tower, irregularity: 0.22, pins: {plan: y, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t101: {kind: tower, irregularity: 0.30, pins: {plan: sail, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 16, width: {value: 36, unit: m}}}
+    t102: {kind: tower, irregularity: 0.37, pins: {plan: lobed, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 23, width: {value: 36, unit: m}}}
+    t103: {kind: tower, irregularity: 0.44, pins: {plan: ellipse, skin: gothic, style: punched, shafts: 1, retail: true, signs: true, storeys: 30, width: {value: 36, unit: m}}}
+    t104: {kind: tower, irregularity: 0.51, pins: {plan: rectangle, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 37, width: {value: 36, unit: m}}}
+    t105: {kind: tower, irregularity: 0.59, pins: {plan: rounded, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 44, width: {value: 36, unit: m}}}
+    t106: {kind: tower, irregularity: 0.66, pins: {plan: polygon, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 51, width: {value: 36, unit: m}}}
+    t107: {kind: tower, irregularity: 0.73, pins: {plan: star, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 58, width: {value: 36, unit: m}}}
+    t108: {kind: tower, irregularity: 0.80, pins: {plan: y, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 18, width: {value: 36, unit: m}}}
+    t109: {kind: tower, irregularity: 0.88, pins: {plan: sail, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 25, width: {value: 36, unit: m}}}
+    t110: {kind: tower, irregularity: 0.95, pins: {plan: lobed, skin: cantilever, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 32, width: {value: 36, unit: m}}}
+    t111: {kind: tower, irregularity: 0.22, pins: {plan: ellipse, skin: cantilever, style: punched, shafts: 1, retail: true, signs: true, storeys: 39, width: {value: 36, unit: m}}}
+    t112: {kind: tower, irregularity: 0.29, pins: {plan: rectangle, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 46, width: {value: 36, unit: m}}}
+    t113: {kind: tower, irregularity: 0.36, pins: {plan: rounded, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+    t114: {kind: tower, irregularity: 0.43, pins: {plan: polygon, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 60, width: {value: 36, unit: m}}}
+    t115: {kind: tower, irregularity: 0.51, pins: {plan: star, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 20, width: {value: 36, unit: m}}}
+    t116: {kind: tower, irregularity: 0.58, pins: {plan: y, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 27, width: {value: 36, unit: m}}}
+    t117: {kind: tower, irregularity: 0.65, pins: {plan: sail, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 34, width: {value: 36, unit: m}}}
+    t118: {kind: tower, irregularity: 0.73, pins: {plan: lobed, skin: vaporwave, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 41, width: {value: 36, unit: m}}}
+    t119: {kind: tower, irregularity: 0.80, pins: {plan: ellipse, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 48, width: {value: 36, unit: m}}}
+    t120: {kind: tower, irregularity: 0.87, pins: {plan: rectangle, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 55, width: {value: 36, unit: m}}}
+    t121: {kind: tower, irregularity: 0.94, pins: {plan: rounded, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 15, width: {value: 36, unit: m}}}
+    t122: {kind: tower, irregularity: 0.21, pins: {plan: polygon, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 22, width: {value: 36, unit: m}}}
+    t123: {kind: tower, irregularity: 0.28, pins: {plan: star, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 29, width: {value: 36, unit: m}}}
+    t124: {kind: tower, irregularity: 0.36, pins: {plan: y, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 36, width: {value: 36, unit: m}}}
+    t125: {kind: tower, irregularity: 0.43, pins: {plan: sail, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 43, width: {value: 36, unit: m}}}
+    t126: {kind: tower, irregularity: 0.50, pins: {plan: lobed, skin: stainless, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 50, width: {value: 36, unit: m}}}
+    t127: {kind: tower, irregularity: 0.57, pins: {plan: ellipse, skin: stainless, style: punched, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t128: {kind: tower, irregularity: 0.65, pins: {plan: rectangle, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 17, width: {value: 36, unit: m}}}
+    t129: {kind: tower, irregularity: 0.72, pins: {plan: rounded, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 24, width: {value: 36, unit: m}}}
+    t130: {kind: tower, irregularity: 0.79, pins: {plan: polygon, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 31, width: {value: 36, unit: m}}}
+    t131: {kind: tower, irregularity: 0.87, pins: {plan: star, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 38, width: {value: 36, unit: m}}}
+    t132: {kind: tower, irregularity: 0.94, pins: {plan: y, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 45, width: {value: 36, unit: m}}}
+    t133: {kind: tower, irregularity: 0.21, pins: {plan: sail, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 52, width: {value: 36, unit: m}}}
+    t134: {kind: tower, irregularity: 0.28, pins: {plan: lobed, skin: curtain, style: punched, shafts: 1, retail: true, signs: true, storeys: 59, width: {value: 36, unit: m}}}
+    t135: {kind: tower, irregularity: 0.35, pins: {plan: ellipse, skin: curtain, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 19, width: {value: 36, unit: m}}}
+    t136: {kind: tower, irregularity: 0.42, pins: {plan: rectangle, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 26, width: {value: 36, unit: m}}}
+    t137: {kind: tower, irregularity: 0.50, pins: {plan: rounded, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 33, width: {value: 36, unit: m}}}
+    t138: {kind: tower, irregularity: 0.57, pins: {plan: polygon, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 40, width: {value: 36, unit: m}}}
+    t139: {kind: tower, irregularity: 0.64, pins: {plan: star, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 47, width: {value: 36, unit: m}}}
+    t140: {kind: tower, irregularity: 0.71, pins: {plan: y, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 54, width: {value: 36, unit: m}}}
+    t141: {kind: tower, irregularity: 0.79, pins: {plan: sail, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 14, width: {value: 36, unit: m}}}
+    t142: {kind: tower, irregularity: 0.86, pins: {plan: lobed, skin: mirror, style: punched, shafts: 1, retail: true, signs: true, storeys: 21, width: {value: 36, unit: m}}}
+    t143: {kind: tower, irregularity: 0.93, pins: {plan: ellipse, skin: mirror, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 28, width: {value: 36, unit: m}}}
+  set:
+    things:
+      tower 000: {recipe: t000, seed: 1000, complexity: quick, east: -24, north: -192, height: {value: 0, unit: m}}
+      tower 001: {recipe: t001, seed: 1017, complexity: quick, east: -264, north: 0, height: {value: 0, unit: m}}
+      tower 002: {recipe: t002, seed: 1034, complexity: quick, east: 264, north: 144, height: {value: 0, unit: m}}
+      tower 003: {recipe: t003, seed: 1051, complexity: quick, east: 24, north: -96, height: {value: 0, unit: m}}
+      tower 004: {recipe: t004, seed: 1068, complexity: quick, east: -216, north: 96, height: {value: 0, unit: m}}
+      tower 005: {recipe: t005, seed: 1085, complexity: quick, east: 312, north: -192, height: {value: 0, unit: m}}
+      tower 006: {recipe: t006, seed: 1103, complexity: quick, east: 72, north: 0, height: {value: 0, unit: m}}
+      tower 007: {recipe: t007, seed: 1119, complexity: quick, east: -168, north: 192, height: {value: 0, unit: m}}
+      tower 008: {recipe: t008, seed: 1136, complexity: quick, east: 360, north: -96, height: {value: 0, unit: m}}
+      tower 009: {recipe: t009, seed: 1153, complexity: quick, east: 120, north: 96, height: {value: 0, unit: m}}
+      tower 010: {recipe: t010, seed: 1170, complexity: quick, east: -120, north: -144, height: {value: 0, unit: m}}
+      tower 011: {recipe: t011, seed: 1187, complexity: quick, east: -360, north: 48, height: {value: 0, unit: m}}
+      tower 012: {recipe: t012, seed: 1204, complexity: quick, east: 168, north: 192, height: {value: 0, unit: m}}
+      tower 013: {recipe: t013, seed: 1221, complexity: quick, east: -72, north: -48, height: {value: 0, unit: m}}
+      tower 014: {recipe: t014, seed: 1238, complexity: quick, east: -312, north: 144, height: {value: 0, unit: m}}
+      tower 015: {recipe: t015, seed: 1255, complexity: quick, east: 216, north: -144, height: {value: 0, unit: m}}
+      tower 016: {recipe: t016, seed: 1272, complexity: quick, east: -24, north: 48, height: {value: 0, unit: m}}
+      tower 017: {recipe: t017, seed: 1289, complexity: quick, east: -264, north: -192, height: {value: 0, unit: m}}
+      tower 018: {recipe: t018, seed: 1306, complexity: quick, east: 264, north: -48, height: {value: 0, unit: m}}
+      tower 019: {recipe: t019, seed: 1323, complexity: quick, east: 24, north: 144, height: {value: 0, unit: m}}
+      tower 020: {recipe: t020, seed: 1340, complexity: quick, east: -216, north: -96, height: {value: 0, unit: m}}
+      tower 021: {recipe: t021, seed: 1357, complexity: quick, east: 312, north: 48, height: {value: 0, unit: m}}
+      tower 022: {recipe: t022, seed: 1374, complexity: quick, east: 72, north: -192, height: {value: 0, unit: m}}
+      tower 023: {recipe: t023, seed: 1391, complexity: quick, east: -168, north: 0, height: {value: 0, unit: m}}
+      tower 024: {recipe: t024, seed: 1408, complexity: quick, east: 360, north: 144, height: {value: 0, unit: m}}
+      tower 025: {recipe: t025, seed: 1425, complexity: quick, east: 120, north: -96, height: {value: 0, unit: m}}
+      tower 026: {recipe: t026, seed: 1442, complexity: quick, east: -120, north: 96, height: {value: 0, unit: m}}
+      tower 027: {recipe: t027, seed: 1459, complexity: quick, east: -360, north: -144, height: {value: 0, unit: m}}
+      tower 028: {recipe: t028, seed: 1476, complexity: quick, east: 168, north: 0, height: {value: 0, unit: m}}
+      tower 029: {recipe: t029, seed: 1493, complexity: quick, east: -72, north: 192, height: {value: 0, unit: m}}
+      tower 030: {recipe: t030, seed: 1510, complexity: quick, east: -312, north: -48, height: {value: 0, unit: m}}
+      tower 031: {recipe: t031, seed: 1527, complexity: quick, east: 216, north: 96, height: {value: 0, unit: m}}
+      tower 032: {recipe: t032, seed: 1544, complexity: quick, east: -24, north: -144, height: {value: 0, unit: m}}
+      tower 033: {recipe: t033, seed: 1561, complexity: quick, east: -264, north: 48, height: {value: 0, unit: m}}
+      tower 034: {recipe: t034, seed: 1578, complexity: quick, east: 264, north: 192, height: {value: 0, unit: m}}
+      tower 035: {recipe: t035, seed: 1595, complexity: quick, east: 24, north: -48, height: {value: 0, unit: m}}
+      tower 036: {recipe: t036, seed: 1612, complexity: quick, east: -216, north: 144, height: {value: 0, unit: m}}
+      tower 037: {recipe: t037, seed: 1629, complexity: quick, east: 312, north: -144, height: {value: 0, unit: m}}
+      tower 038: {recipe: t038, seed: 1647, complexity: quick, east: 72, north: 48, height: {value: 0, unit: m}}
+      tower 039: {recipe: t039, seed: 1663, complexity: quick, east: -168, north: -192, height: {value: 0, unit: m}}
+      tower 040: {recipe: t040, seed: 1680, complexity: quick, east: 360, north: -48, height: {value: 0, unit: m}}
+      tower 041: {recipe: t041, seed: 1697, complexity: quick, east: 120, north: 144, height: {value: 0, unit: m}}
+      tower 042: {recipe: t042, seed: 1714, complexity: quick, east: -120, north: -96, height: {value: 0, unit: m}}
+      tower 043: {recipe: t043, seed: 1731, complexity: quick, east: -360, north: 96, height: {value: 0, unit: m}}
+      tower 044: {recipe: t044, seed: 1748, complexity: quick, east: 168, north: -192, height: {value: 0, unit: m}}
+      tower 045: {recipe: t045, seed: 1765, complexity: quick, east: -72, north: 0, height: {value: 0, unit: m}}
+      tower 046: {recipe: t046, seed: 1782, complexity: quick, east: -312, north: 192, height: {value: 0, unit: m}}
+      tower 047: {recipe: t047, seed: 1799, complexity: quick, east: 216, north: -96, height: {value: 0, unit: m}}
+      tower 048: {recipe: t048, seed: 1816, complexity: quick, east: -24, north: 96, height: {value: 0, unit: m}}
+      tower 049: {recipe: t049, seed: 1833, complexity: quick, east: -264, north: -144, height: {value: 0, unit: m}}
+      tower 050: {recipe: t050, seed: 1850, complexity: quick, east: 264, north: 0, height: {value: 0, unit: m}}
+      tower 051: {recipe: t051, seed: 1867, complexity: quick, east: 24, north: 192, height: {value: 0, unit: m}}
+      tower 052: {recipe: t052, seed: 1884, complexity: quick, east: -216, north: -48, height: {value: 0, unit: m}}
+      tower 053: {recipe: t053, seed: 1901, complexity: quick, east: 312, north: 96, height: {value: 0, unit: m}}
+      tower 054: {recipe: t054, seed: 1918, complexity: quick, east: 72, north: -144, height: {value: 0, unit: m}}
+      tower 055: {recipe: t055, seed: 1935, complexity: quick, east: -168, north: 48, height: {value: 0, unit: m}}
+      tower 056: {recipe: t056, seed: 1952, complexity: quick, east: 360, north: 192, height: {value: 0, unit: m}}
+      tower 057: {recipe: t057, seed: 1969, complexity: quick, east: 120, north: -48, height: {value: 0, unit: m}}
+      tower 058: {recipe: t058, seed: 1986, complexity: quick, east: -120, north: 144, height: {value: 0, unit: m}}
+      tower 059: {recipe: t059, seed: 2003, complexity: quick, east: -360, north: -96, height: {value: 0, unit: m}}
+      tower 060: {recipe: t060, seed: 2020, complexity: quick, east: 168, north: 48, height: {value: 0, unit: m}}
+      tower 061: {recipe: t061, seed: 2037, complexity: quick, east: -72, north: -192, height: {value: 0, unit: m}}
+      tower 062: {recipe: t062, seed: 2054, complexity: quick, east: -312, north: 0, height: {value: 0, unit: m}}
+      tower 063: {recipe: t063, seed: 2071, complexity: quick, east: 216, north: 144, height: {value: 0, unit: m}}
+      tower 064: {recipe: t064, seed: 2088, complexity: quick, east: -24, north: -96, height: {value: 0, unit: m}}
+      tower 065: {recipe: t065, seed: 2105, complexity: quick, east: -264, north: 96, height: {value: 0, unit: m}}
+      tower 066: {recipe: t066, seed: 2122, complexity: quick, east: 264, north: -192, height: {value: 0, unit: m}}
+      tower 067: {recipe: t067, seed: 2139, complexity: quick, east: 24, north: 0, height: {value: 0, unit: m}}
+      tower 068: {recipe: t068, seed: 2156, complexity: quick, east: -216, north: 192, height: {value: 0, unit: m}}
+      tower 069: {recipe: t069, seed: 2173, complexity: quick, east: 312, north: -96, height: {value: 0, unit: m}}
+      tower 070: {recipe: t070, seed: 2190, complexity: quick, east: 72, north: 96, height: {value: 0, unit: m}}
+      tower 071: {recipe: t071, seed: 2207, complexity: quick, east: -168, north: -144, height: {value: 0, unit: m}}
+      tower 072: {recipe: t072, seed: 2224, complexity: quick, east: 360, north: 0, height: {value: 0, unit: m}}
+      tower 073: {recipe: t073, seed: 2241, complexity: quick, east: 120, north: 192, height: {value: 0, unit: m}}
+      tower 074: {recipe: t074, seed: 2258, complexity: quick, east: -120, north: -48, height: {value: 0, unit: m}}
+      tower 075: {recipe: t075, seed: 2275, complexity: quick, east: -360, north: 144, height: {value: 0, unit: m}}
+      tower 076: {recipe: t076, seed: 2292, complexity: quick, east: 168, north: -144, height: {value: 0, unit: m}}
+      tower 077: {recipe: t077, seed: 2309, complexity: quick, east: -72, north: 48, height: {value: 0, unit: m}}
+      tower 078: {recipe: t078, seed: 2326, complexity: quick, east: -312, north: -192, height: {value: 0, unit: m}}
+      tower 079: {recipe: t079, seed: 2343, complexity: quick, east: 216, north: -48, height: {value: 0, unit: m}}
+      tower 080: {recipe: t080, seed: 2360, complexity: quick, east: -24, north: 144, height: {value: 0, unit: m}}
+      tower 081: {recipe: t081, seed: 2377, complexity: quick, east: -264, north: -96, height: {value: 0, unit: m}}
+      tower 082: {recipe: t082, seed: 2394, complexity: quick, east: 264, north: 48, height: {value: 0, unit: m}}
+      tower 083: {recipe: t083, seed: 2411, complexity: quick, east: 24, north: -192, height: {value: 0, unit: m}}
+      tower 084: {recipe: t084, seed: 2428, complexity: quick, east: -216, north: 0, height: {value: 0, unit: m}}
+      tower 085: {recipe: t085, seed: 2445, complexity: quick, east: 312, north: 144, height: {value: 0, unit: m}}
+      tower 086: {recipe: t086, seed: 2463, complexity: quick, east: 72, north: -96, height: {value: 0, unit: m}}
+      tower 087: {recipe: t087, seed: 2479, complexity: quick, east: -168, north: 96, height: {value: 0, unit: m}}
+      tower 088: {recipe: t088, seed: 2496, complexity: quick, east: 360, north: -192, height: {value: 0, unit: m}}
+      tower 089: {recipe: t089, seed: 2513, complexity: quick, east: 120, north: 0, height: {value: 0, unit: m}}
+      tower 090: {recipe: t090, seed: 2530, complexity: quick, east: -120, north: 192, height: {value: 0, unit: m}}
+      tower 091: {recipe: t091, seed: 2547, complexity: quick, east: -360, north: -48, height: {value: 0, unit: m}}
+      tower 092: {recipe: t092, seed: 2564, complexity: quick, east: 168, north: 96, height: {value: 0, unit: m}}
+      tower 093: {recipe: t093, seed: 2581, complexity: quick, east: -72, north: -144, height: {value: 0, unit: m}}
+      tower 094: {recipe: t094, seed: 2601, complexity: quick, east: -312, north: 48, height: {value: 0, unit: m}}
+      tower 095: {recipe: t095, seed: 2615, complexity: quick, east: 216, north: 192, height: {value: 0, unit: m}}
+      tower 096: {recipe: t096, seed: 2632, complexity: quick, east: -24, north: -48, height: {value: 0, unit: m}}
+      tower 097: {recipe: t097, seed: 2649, complexity: quick, east: -264, north: 144, height: {value: 0, unit: m}}
+      tower 098: {recipe: t098, seed: 2666, complexity: quick, east: 264, north: -144, height: {value: 0, unit: m}}
+      tower 099: {recipe: t099, seed: 2683, complexity: quick, east: 24, north: 48, height: {value: 0, unit: m}}
+      tower 100: {recipe: t100, seed: 2700, complexity: quick, east: -216, north: -192, height: {value: 0, unit: m}}
+      tower 101: {recipe: t101, seed: 2717, complexity: quick, east: 312, north: -48, height: {value: 0, unit: m}}
+      tower 102: {recipe: t102, seed: 2734, complexity: quick, east: 72, north: 144, height: {value: 0, unit: m}}
+      tower 103: {recipe: t103, seed: 2751, complexity: quick, east: -168, north: -96, height: {value: 0, unit: m}}
+      tower 104: {recipe: t104, seed: 2768, complexity: quick, east: 360, north: 48, height: {value: 0, unit: m}}
+      tower 105: {recipe: t105, seed: 2785, complexity: quick, east: 120, north: -192, height: {value: 0, unit: m}}
+      tower 106: {recipe: t106, seed: 2802, complexity: quick, east: -120, north: 0, height: {value: 0, unit: m}}
+      tower 107: {recipe: t107, seed: 2819, complexity: quick, east: -360, north: 192, height: {value: 0, unit: m}}
+      tower 108: {recipe: t108, seed: 2836, complexity: quick, east: 168, north: -96, height: {value: 0, unit: m}}
+      tower 109: {recipe: t109, seed: 2853, complexity: quick, east: -72, north: 96, height: {value: 0, unit: m}}
+      tower 110: {recipe: t110, seed: 2870, complexity: quick, east: -312, north: -144, height: {value: 0, unit: m}}
+      tower 111: {recipe: t111, seed: 2887, complexity: quick, east: 216, north: 0, height: {value: 0, unit: m}}
+      tower 112: {recipe: t112, seed: 2904, complexity: quick, east: -24, north: 192, height: {value: 0, unit: m}}
+      tower 113: {recipe: t113, seed: 2921, complexity: quick, east: -264, north: -48, height: {value: 0, unit: m}}
+      tower 114: {recipe: t114, seed: 2938, complexity: quick, east: 264, north: 96, height: {value: 0, unit: m}}
+      tower 115: {recipe: t115, seed: 2955, complexity: quick, east: 24, north: -144, height: {value: 0, unit: m}}
+      tower 116: {recipe: t116, seed: 2972, complexity: quick, east: -216, north: 48, height: {value: 0, unit: m}}
+      tower 117: {recipe: t117, seed: 2989, complexity: quick, east: 312, north: 192, height: {value: 0, unit: m}}
+      tower 118: {recipe: t118, seed: 3007, complexity: quick, east: 72, north: -48, height: {value: 0, unit: m}}
+      tower 119: {recipe: t119, seed: 3023, complexity: quick, east: -168, north: 144, height: {value: 0, unit: m}}
+      tower 120: {recipe: t120, seed: 3041, complexity: quick, east: 360, north: -144, height: {value: 0, unit: m}}
+      tower 121: {recipe: t121, seed: 3057, complexity: quick, east: 120, north: 48, height: {value: 0, unit: m}}
+      tower 122: {recipe: t122, seed: 3074, complexity: quick, east: -120, north: -192, height: {value: 0, unit: m}}
+      tower 123: {recipe: t123, seed: 3091, complexity: quick, east: -360, north: 0, height: {value: 0, unit: m}}
+      tower 124: {recipe: t124, seed: 3108, complexity: quick, east: 168, north: 144, height: {value: 0, unit: m}}
+      tower 125: {recipe: t125, seed: 3125, complexity: quick, east: -72, north: -96, height: {value: 0, unit: m}}
+      tower 126: {recipe: t126, seed: 3149, complexity: quick, east: -312, north: 96, height: {value: 0, unit: m}}
+      tower 127: {recipe: t127, seed: 3159, complexity: quick, east: 216, north: -192, height: {value: 0, unit: m}}
+      tower 128: {recipe: t128, seed: 3176, complexity: quick, east: -24, north: 0, height: {value: 0, unit: m}}
+      tower 129: {recipe: t129, seed: 3193, complexity: quick, east: -264, north: 192, height: {value: 0, unit: m}}
+      tower 130: {recipe: t130, seed: 3210, complexity: quick, east: 264, north: -96, height: {value: 0, unit: m}}
+      tower 131: {recipe: t131, seed: 3227, complexity: quick, east: 24, north: 96, height: {value: 0, unit: m}}
+      tower 132: {recipe: t132, seed: 3244, complexity: quick, east: -216, north: -144, height: {value: 0, unit: m}}
+      tower 133: {recipe: t133, seed: 3261, complexity: quick, east: 312, north: 0, height: {value: 0, unit: m}}
+      tower 134: {recipe: t134, seed: 3278, complexity: quick, east: 72, north: 192, height: {value: 0, unit: m}}
+      tower 135: {recipe: t135, seed: 3295, complexity: quick, east: -168, north: -48, height: {value: 0, unit: m}}
+      tower 136: {recipe: t136, seed: 3312, complexity: quick, east: 360, north: 96, height: {value: 0, unit: m}}
+      tower 137: {recipe: t137, seed: 3329, complexity: quick, east: 120, north: -144, height: {value: 0, unit: m}}
+      tower 138: {recipe: t138, seed: 3346, complexity: quick, east: -120, north: 48, height: {value: 0, unit: m}}
+      tower 139: {recipe: t139, seed: 3363, complexity: quick, east: -360, north: -192, height: {value: 0, unit: m}}
+      tower 140: {recipe: t140, seed: 3380, complexity: quick, east: 168, north: -48, height: {value: 0, unit: m}}
+      tower 141: {recipe: t141, seed: 3397, complexity: quick, east: -72, north: 144, height: {value: 0, unit: m}}
+      tower 142: {recipe: t142, seed: 3415, complexity: quick, east: -312, north: -96, height: {value: 0, unit: m}}
+      tower 143: {recipe: t143, seed: 3431, complexity: quick, east: 216, north: 48, height: {value: 0, unit: m}}
+      road north 00-0: {recipe: wet, seed: 5000, complexity: quick, east: -336, north: -168, height: {value: 0, unit: m}}
+      road north 00-1: {recipe: wet, seed: 5001, complexity: quick, east: -336, north: -84, height: {value: 0, unit: m}}
+      road north 00-2: {recipe: wet, seed: 5002, complexity: quick, east: -336, north: 0, height: {value: 0, unit: m}}
+      road north 00-3: {recipe: wet, seed: 5003, complexity: quick, east: -336, north: 84, height: {value: 0, unit: m}}
+      road north 00-4: {recipe: wet, seed: 5004, complexity: quick, east: -336, north: 168, height: {value: 0, unit: m}}
+      road north 01-0: {recipe: wet, seed: 5005, complexity: quick, east: -288, north: -168, height: {value: 0, unit: m}}
+      road north 01-1: {recipe: wet, seed: 5006, complexity: quick, east: -288, north: -84, height: {value: 0, unit: m}}
+      road north 01-2: {recipe: wet, seed: 5007, complexity: quick, east: -288, north: 0, height: {value: 0, unit: m}}
+      road north 01-3: {recipe: wet, seed: 5008, complexity: quick, east: -288, north: 84, height: {value: 0, unit: m}}
+      road north 01-4: {recipe: wet, seed: 5009, complexity: quick, east: -288, north: 168, height: {value: 0, unit: m}}
+      road north 02-0: {recipe: wet, seed: 5010, complexity: quick, east: -240, north: -168, height: {value: 0, unit: m}}
+      road north 02-1: {recipe: wet, seed: 5011, complexity: quick, east: -240, north: -84, height: {value: 0, unit: m}}
+      road north 02-2: {recipe: wet, seed: 5012, complexity: quick, east: -240, north: 0, height: {value: 0, unit: m}}
+      road north 02-3: {recipe: wet, seed: 5013, complexity: quick, east: -240, north: 84, height: {value: 0, unit: m}}
+      road north 02-4: {recipe: wet, seed: 5014, complexity: quick, east: -240, north: 168, height: {value: 0, unit: m}}
+      road north 03-0: {recipe: wet, seed: 5015, complexity: quick, east: -192, north: -168, height: {value: 0, unit: m}}
+      road north 03-1: {recipe: wet, seed: 5016, complexity: quick, east: -192, north: -84, height: {value: 0, unit: m}}
+      road north 03-2: {recipe: wet, seed: 5017, complexity: quick, east: -192, north: 0, height: {value: 0, unit: m}}
+      road north 03-3: {recipe: wet, seed: 5018, complexity: quick, east: -192, north: 84, height: {value: 0, unit: m}}
+      road north 03-4: {recipe: wet, seed: 5019, complexity: quick, east: -192, north: 168, height: {value: 0, unit: m}}
+      road north 04-0: {recipe: wet, seed: 5020, complexity: quick, east: -144, north: -168, height: {value: 0, unit: m}}
+      road north 04-1: {recipe: wet, seed: 5021, complexity: quick, east: -144, north: -84, height: {value: 0, unit: m}}
+      road north 04-2: {recipe: wet, seed: 5022, complexity: quick, east: -144, north: 0, height: {value: 0, unit: m}}
+      road north 04-3: {recipe: wet, seed: 5023, complexity: quick, east: -144, north: 84, height: {value: 0, unit: m}}
+      road north 04-4: {recipe: wet, seed: 5024, complexity: quick, east: -144, north: 168, height: {value: 0, unit: m}}
+      road north 05-0: {recipe: wet, seed: 5025, complexity: quick, east: -96, north: -168, height: {value: 0, unit: m}}
+      road north 05-1: {recipe: wet, seed: 5026, complexity: quick, east: -96, north: -84, height: {value: 0, unit: m}}
+      road north 05-2: {recipe: wet, seed: 5027, complexity: quick, east: -96, north: 0, height: {value: 0, unit: m}}
+      road north 05-3: {recipe: wet, seed: 5028, complexity: quick, east: -96, north: 84, height: {value: 0, unit: m}}
+      road north 05-4: {recipe: wet, seed: 5029, complexity: quick, east: -96, north: 168, height: {value: 0, unit: m}}
+      road north 06-0: {recipe: wet, seed: 5030, complexity: quick, east: -48, north: -168, height: {value: 0, unit: m}}
+      road north 06-1: {recipe: wet, seed: 5031, complexity: quick, east: -48, north: -84, height: {value: 0, unit: m}}
+      road north 06-2: {recipe: wet, seed: 5032, complexity: quick, east: -48, north: 0, height: {value: 0, unit: m}}
+      road north 06-3: {recipe: wet, seed: 5033, complexity: quick, east: -48, north: 84, height: {value: 0, unit: m}}
+      road north 06-4: {recipe: wet, seed: 5034, complexity: quick, east: -48, north: 168, height: {value: 0, unit: m}}
+      road north 07-0: {recipe: wet, seed: 5035, complexity: quick, east: 0, north: -168, height: {value: 0, unit: m}}
+      road north 07-1: {recipe: wet, seed: 5036, complexity: quick, east: 0, north: -84, height: {value: 0, unit: m}}
+      road north 07-2: {recipe: wet, seed: 5037, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+      road north 07-3: {recipe: wet, seed: 5038, complexity: quick, east: 0, north: 84, height: {value: 0, unit: m}}
+      road north 07-4: {recipe: wet, seed: 5039, complexity: quick, east: 0, north: 168, height: {value: 0, unit: m}}
+      road north 08-0: {recipe: wet, seed: 5040, complexity: quick, east: 48, north: -168, height: {value: 0, unit: m}}
+      road north 08-1: {recipe: wet, seed: 5041, complexity: quick, east: 48, north: -84, height: {value: 0, unit: m}}
+      road north 08-2: {recipe: wet, seed: 5042, complexity: quick, east: 48, north: 0, height: {value: 0, unit: m}}
+      road north 08-3: {recipe: wet, seed: 5043, complexity: quick, east: 48, north: 84, height: {value: 0, unit: m}}
+      road north 08-4: {recipe: wet, seed: 5044, complexity: quick, east: 48, north: 168, height: {value: 0, unit: m}}
+      road north 09-0: {recipe: wet, seed: 5045, complexity: quick, east: 96, north: -168, height: {value: 0, unit: m}}
+      road north 09-1: {recipe: wet, seed: 5046, complexity: quick, east: 96, north: -84, height: {value: 0, unit: m}}
+      road north 09-2: {recipe: wet, seed: 5047, complexity: quick, east: 96, north: 0, height: {value: 0, unit: m}}
+      road north 09-3: {recipe: wet, seed: 5048, complexity: quick, east: 96, north: 84, height: {value: 0, unit: m}}
+      road north 09-4: {recipe: wet, seed: 5049, complexity: quick, east: 96, north: 168, height: {value: 0, unit: m}}
+      road north 10-0: {recipe: wet, seed: 5050, complexity: quick, east: 144, north: -168, height: {value: 0, unit: m}}
+      road north 10-1: {recipe: wet, seed: 5051, complexity: quick, east: 144, north: -84, height: {value: 0, unit: m}}
+      road north 10-2: {recipe: wet, seed: 5052, complexity: quick, east: 144, north: 0, height: {value: 0, unit: m}}
+      road north 10-3: {recipe: wet, seed: 5053, complexity: quick, east: 144, north: 84, height: {value: 0, unit: m}}
+      road north 10-4: {recipe: wet, seed: 5054, complexity: quick, east: 144, north: 168, height: {value: 0, unit: m}}
+      road north 11-0: {recipe: wet, seed: 5055, complexity: quick, east: 192, north: -168, height: {value: 0, unit: m}}
+      road north 11-1: {recipe: wet, seed: 5056, complexity: quick, east: 192, north: -84, height: {value: 0, unit: m}}
+      road north 11-2: {recipe: wet, seed: 5057, complexity: quick, east: 192, north: 0, height: {value: 0, unit: m}}
+      road north 11-3: {recipe: wet, seed: 5058, complexity: quick, east: 192, north: 84, height: {value: 0, unit: m}}
+      road north 11-4: {recipe: wet, seed: 5059, complexity: quick, east: 192, north: 168, height: {value: 0, unit: m}}
+      road north 12-0: {recipe: wet, seed: 5060, complexity: quick, east: 240, north: -168, height: {value: 0, unit: m}}
+      road north 12-1: {recipe: wet, seed: 5061, complexity: quick, east: 240, north: -84, height: {value: 0, unit: m}}
+      road north 12-2: {recipe: wet, seed: 5062, complexity: quick, east: 240, north: 0, height: {value: 0, unit: m}}
+      road north 12-3: {recipe: wet, seed: 5063, complexity: quick, east: 240, north: 84, height: {value: 0, unit: m}}
+      road north 12-4: {recipe: wet, seed: 5064, complexity: quick, east: 240, north: 168, height: {value: 0, unit: m}}
+      road north 13-0: {recipe: wet, seed: 5065, complexity: quick, east: 288, north: -168, height: {value: 0, unit: m}}
+      road north 13-1: {recipe: wet, seed: 5066, complexity: quick, east: 288, north: -84, height: {value: 0, unit: m}}
+      road north 13-2: {recipe: wet, seed: 5067, complexity: quick, east: 288, north: 0, height: {value: 0, unit: m}}
+      road north 13-3: {recipe: wet, seed: 5068, complexity: quick, east: 288, north: 84, height: {value: 0, unit: m}}
+      road north 13-4: {recipe: wet, seed: 5069, complexity: quick, east: 288, north: 168, height: {value: 0, unit: m}}
+      road north 14-0: {recipe: wet, seed: 5070, complexity: quick, east: 336, north: -168, height: {value: 0, unit: m}}
+      road north 14-1: {recipe: wet, seed: 5071, complexity: quick, east: 336, north: -84, height: {value: 0, unit: m}}
+      road north 14-2: {recipe: wet, seed: 5072, complexity: quick, east: 336, north: 0, height: {value: 0, unit: m}}
+      road north 14-3: {recipe: wet, seed: 5073, complexity: quick, east: 336, north: 84, height: {value: 0, unit: m}}
+      road north 14-4: {recipe: wet, seed: 5074, complexity: quick, east: 336, north: 168, height: {value: 0, unit: m}}
+      road across 0-00: {recipe: wet-across, seed: 5075, complexity: quick, east: -360, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-01: {recipe: wet-across, seed: 5076, complexity: quick, east: -312, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-02: {recipe: wet-across, seed: 5077, complexity: quick, east: -264, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-03: {recipe: wet-across, seed: 5078, complexity: quick, east: -216, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-04: {recipe: wet-across, seed: 5079, complexity: quick, east: -168, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-05: {recipe: wet-across, seed: 5080, complexity: quick, east: -120, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-06: {recipe: wet-across, seed: 5081, complexity: quick, east: -72, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-07: {recipe: wet-across, seed: 5082, complexity: quick, east: -24, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-08: {recipe: wet-across, seed: 5083, complexity: quick, east: 24, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-09: {recipe: wet-across, seed: 5084, complexity: quick, east: 72, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-10: {recipe: wet-across, seed: 5085, complexity: quick, east: 120, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-11: {recipe: wet-across, seed: 5086, complexity: quick, east: 168, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-12: {recipe: wet-across, seed: 5087, complexity: quick, east: 216, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-13: {recipe: wet-across, seed: 5088, complexity: quick, east: 264, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-14: {recipe: wet-across, seed: 5089, complexity: quick, east: 312, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 0-15: {recipe: wet-across, seed: 5090, complexity: quick, east: 360, north: -168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-00: {recipe: wet-across, seed: 5091, complexity: quick, east: -360, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-01: {recipe: wet-across, seed: 5092, complexity: quick, east: -312, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-02: {recipe: wet-across, seed: 5093, complexity: quick, east: -264, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-03: {recipe: wet-across, seed: 5094, complexity: quick, east: -216, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-04: {recipe: wet-across, seed: 5095, complexity: quick, east: -168, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-05: {recipe: wet-across, seed: 5096, complexity: quick, east: -120, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-06: {recipe: wet-across, seed: 5097, complexity: quick, east: -72, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-07: {recipe: wet-across, seed: 5098, complexity: quick, east: -24, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-08: {recipe: wet-across, seed: 5099, complexity: quick, east: 24, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-09: {recipe: wet-across, seed: 5100, complexity: quick, east: 72, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-10: {recipe: wet-across, seed: 5101, complexity: quick, east: 120, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-11: {recipe: wet-across, seed: 5102, complexity: quick, east: 168, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-12: {recipe: wet-across, seed: 5103, complexity: quick, east: 216, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-13: {recipe: wet-across, seed: 5104, complexity: quick, east: 264, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-14: {recipe: wet-across, seed: 5105, complexity: quick, east: 312, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 1-15: {recipe: wet-across, seed: 5106, complexity: quick, east: 360, north: -120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-00: {recipe: wet-across, seed: 5107, complexity: quick, east: -360, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-01: {recipe: wet-across, seed: 5108, complexity: quick, east: -312, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-02: {recipe: wet-across, seed: 5109, complexity: quick, east: -264, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-03: {recipe: wet-across, seed: 5110, complexity: quick, east: -216, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-04: {recipe: wet-across, seed: 5111, complexity: quick, east: -168, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-05: {recipe: wet-across, seed: 5112, complexity: quick, east: -120, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-06: {recipe: wet-across, seed: 5113, complexity: quick, east: -72, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-07: {recipe: wet-across, seed: 5114, complexity: quick, east: -24, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-08: {recipe: wet-across, seed: 5115, complexity: quick, east: 24, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-09: {recipe: wet-across, seed: 5116, complexity: quick, east: 72, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-10: {recipe: wet-across, seed: 5117, complexity: quick, east: 120, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-11: {recipe: wet-across, seed: 5118, complexity: quick, east: 168, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-12: {recipe: wet-across, seed: 5119, complexity: quick, east: 216, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-13: {recipe: wet-across, seed: 5120, complexity: quick, east: 264, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-14: {recipe: wet-across, seed: 5121, complexity: quick, east: 312, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 2-15: {recipe: wet-across, seed: 5122, complexity: quick, east: 360, north: -72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-00: {recipe: wet-across, seed: 5123, complexity: quick, east: -360, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-01: {recipe: wet-across, seed: 5124, complexity: quick, east: -312, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-02: {recipe: wet-across, seed: 5125, complexity: quick, east: -264, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-03: {recipe: wet-across, seed: 5126, complexity: quick, east: -216, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-04: {recipe: wet-across, seed: 5127, complexity: quick, east: -168, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-05: {recipe: wet-across, seed: 5128, complexity: quick, east: -120, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-06: {recipe: wet-across, seed: 5129, complexity: quick, east: -72, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-07: {recipe: wet-across, seed: 5130, complexity: quick, east: -24, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-08: {recipe: wet-across, seed: 5131, complexity: quick, east: 24, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-09: {recipe: wet-across, seed: 5132, complexity: quick, east: 72, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-10: {recipe: wet-across, seed: 5133, complexity: quick, east: 120, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-11: {recipe: wet-across, seed: 5134, complexity: quick, east: 168, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-12: {recipe: wet-across, seed: 5135, complexity: quick, east: 216, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-13: {recipe: wet-across, seed: 5136, complexity: quick, east: 264, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-14: {recipe: wet-across, seed: 5137, complexity: quick, east: 312, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 3-15: {recipe: wet-across, seed: 5138, complexity: quick, east: 360, north: -24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-00: {recipe: wet-across, seed: 5139, complexity: quick, east: -360, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-01: {recipe: wet-across, seed: 5140, complexity: quick, east: -312, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-02: {recipe: wet-across, seed: 5141, complexity: quick, east: -264, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-03: {recipe: wet-across, seed: 5142, complexity: quick, east: -216, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-04: {recipe: wet-across, seed: 5143, complexity: quick, east: -168, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-05: {recipe: wet-across, seed: 5144, complexity: quick, east: -120, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-06: {recipe: wet-across, seed: 5145, complexity: quick, east: -72, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-07: {recipe: wet-across, seed: 5146, complexity: quick, east: -24, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-08: {recipe: wet-across, seed: 5147, complexity: quick, east: 24, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-09: {recipe: wet-across, seed: 5148, complexity: quick, east: 72, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-10: {recipe: wet-across, seed: 5149, complexity: quick, east: 120, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-11: {recipe: wet-across, seed: 5150, complexity: quick, east: 168, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-12: {recipe: wet-across, seed: 5151, complexity: quick, east: 216, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-13: {recipe: wet-across, seed: 5152, complexity: quick, east: 264, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-14: {recipe: wet-across, seed: 5153, complexity: quick, east: 312, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 4-15: {recipe: wet-across, seed: 5154, complexity: quick, east: 360, north: 24, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-00: {recipe: wet-across, seed: 5155, complexity: quick, east: -360, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-01: {recipe: wet-across, seed: 5156, complexity: quick, east: -312, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-02: {recipe: wet-across, seed: 5157, complexity: quick, east: -264, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-03: {recipe: wet-across, seed: 5158, complexity: quick, east: -216, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-04: {recipe: wet-across, seed: 5159, complexity: quick, east: -168, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-05: {recipe: wet-across, seed: 5160, complexity: quick, east: -120, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-06: {recipe: wet-across, seed: 5161, complexity: quick, east: -72, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-07: {recipe: wet-across, seed: 5162, complexity: quick, east: -24, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-08: {recipe: wet-across, seed: 5163, complexity: quick, east: 24, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-09: {recipe: wet-across, seed: 5164, complexity: quick, east: 72, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-10: {recipe: wet-across, seed: 5165, complexity: quick, east: 120, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-11: {recipe: wet-across, seed: 5166, complexity: quick, east: 168, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-12: {recipe: wet-across, seed: 5167, complexity: quick, east: 216, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-13: {recipe: wet-across, seed: 5168, complexity: quick, east: 264, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-14: {recipe: wet-across, seed: 5169, complexity: quick, east: 312, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 5-15: {recipe: wet-across, seed: 5170, complexity: quick, east: 360, north: 72, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-00: {recipe: wet-across, seed: 5171, complexity: quick, east: -360, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-01: {recipe: wet-across, seed: 5172, complexity: quick, east: -312, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-02: {recipe: wet-across, seed: 5173, complexity: quick, east: -264, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-03: {recipe: wet-across, seed: 5174, complexity: quick, east: -216, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-04: {recipe: wet-across, seed: 5175, complexity: quick, east: -168, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-05: {recipe: wet-across, seed: 5176, complexity: quick, east: -120, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-06: {recipe: wet-across, seed: 5177, complexity: quick, east: -72, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-07: {recipe: wet-across, seed: 5178, complexity: quick, east: -24, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-08: {recipe: wet-across, seed: 5179, complexity: quick, east: 24, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-09: {recipe: wet-across, seed: 5180, complexity: quick, east: 72, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-10: {recipe: wet-across, seed: 5181, complexity: quick, east: 120, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-11: {recipe: wet-across, seed: 5182, complexity: quick, east: 168, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-12: {recipe: wet-across, seed: 5183, complexity: quick, east: 216, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-13: {recipe: wet-across, seed: 5184, complexity: quick, east: 264, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-14: {recipe: wet-across, seed: 5185, complexity: quick, east: 312, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 6-15: {recipe: wet-across, seed: 5186, complexity: quick, east: 360, north: 120, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-00: {recipe: wet-across, seed: 5187, complexity: quick, east: -360, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-01: {recipe: wet-across, seed: 5188, complexity: quick, east: -312, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-02: {recipe: wet-across, seed: 5189, complexity: quick, east: -264, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-03: {recipe: wet-across, seed: 5190, complexity: quick, east: -216, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-04: {recipe: wet-across, seed: 5191, complexity: quick, east: -168, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-05: {recipe: wet-across, seed: 5192, complexity: quick, east: -120, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-06: {recipe: wet-across, seed: 5193, complexity: quick, east: -72, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-07: {recipe: wet-across, seed: 5194, complexity: quick, east: -24, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-08: {recipe: wet-across, seed: 5195, complexity: quick, east: 24, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-09: {recipe: wet-across, seed: 5196, complexity: quick, east: 72, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-10: {recipe: wet-across, seed: 5197, complexity: quick, east: 120, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-11: {recipe: wet-across, seed: 5198, complexity: quick, east: 168, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-12: {recipe: wet-across, seed: 5199, complexity: quick, east: 216, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-13: {recipe: wet-across, seed: 5200, complexity: quick, east: 264, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-14: {recipe: wet-across, seed: 5201, complexity: quick, east: 312, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      road across 7-15: {recipe: wet-across, seed: 5202, complexity: quick, east: 360, north: 168, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.02, 0.02, 0.022]}
+        source: eye
+      storeys:
+        colour: {srgb_linear: [0.05, 0.05, 0.06]}
+        source: eye
+    boxes:
+      ground:
+        material: ground
+        middle: [0, 0, -1.02]
+        size: [1600, 1600, 2]
+        source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        grime:
+          kind: rain
+          on: [wet]
+          colour: {srgb_linear: [0.008, 0.008, 0.007]}
+          strength: 0.85
+          settle: 6
+          level: 0.2
+          length: 6
+          spacing: 0.35
+          share: 0.85
+        soot:
+          kind: soot
+          colour: {srgb_linear: [0.01, 0.009, 0.008]}
+          strength: 0.6
+          settle: 15
+          reach: 14
+          share: 0.4
+          grain: 1.2
+          shelter: 3
+          catch: 0.5
+        rust:
+          kind: rust
+          on: [steel]
+          colour: {srgb_linear: [0.14, 0.06, 0.03]}
+          strength: 0.4
+          settle: 10
+          level: 0.2
+          length: 3
+          spacing: 0.25
+          share: 0.3
+          grain: 0.3
+        # the oldest marks, faded, under everything after them
+        old-pieces:
+          kind: graffiti
+          mark: piece
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.3, 0.1, 0.12]}
+          other: {srgb_linear: [0.12, 0.2, 0.3]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.45
+          settle: 6
+          level: 0.2
+          grain: 6
+          low: 0.2
+          high: 2.6
+          share: 0.15
+          sought: 1
+          shunned: 0.03
+          catch: 2
+        old-tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.3, 0.25, 0.05]}
+          other: {srgb_linear: [0.3, 0.1, 0.05]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 1.1
+          low: 0.2
+          high: 2.4
+          share: 0.2
+          sought: 2
+          shunned: 0.03
+          catch: 2
+        # pieces over a blank wall or a loading door, and where writers climb
+        pieces:
+          kind: graffiti
+          mark: piece
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.03, 0.55, 0.8]}
+          other: {srgb_linear: [0.1, 0.75, 0.2]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 5
+          low: 0.2
+          high: 2.6
+          share: 0.12
+          heaven: 0.3
+          behind: 0.6
+          shelter: 8
+          sought: 2
+          shunned: 0.03
+          catch: 2
+        throw-ups:
+          kind: graffiti
+          mark: throw-up
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3
+          low: 0.2
+          high: 2.8
+          share: 0.2
+          heaven: 0.3
+          behind: 0.6
+          shelter: 8
+          sought: 3
+          shunned: 0.03
+          catch: 2
+        # tags on top, most of all on a shutter, and a few high ones
+        tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.9, 0.7, 0.05]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.1
+          low: 0.2
+          high: 2.4
+          share: 0.2
+          sought: 5
+          shunned: 0.03
+          catch: 2
+        high-tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.03, 0.55, 0.8]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.4
+          low: 2.4
+          high: 3.5
+          share: 0.05
+          sought: 2
+          shunned: 0.03
+          catch: 2

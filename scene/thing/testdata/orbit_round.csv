@@ -1,0 +1,5 @@
+name,millis,x,y,z
+start,0,6,2,3
+quarter,2500,1,2,-2
+half,5000,-4,2,3
+whole,10000,6,2,3

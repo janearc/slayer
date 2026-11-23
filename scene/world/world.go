@@ -136,20 +136,6 @@ func (w *World) Biome(tile hexes.Tile) Biome {
 	return Deep
 }
 
-// Height is how high a tile is: the sea level is zero, the highest few percent
-// of land at one and the deepest few of sea at minus one, the very top past
-// them, to 1.5 on a sphere and further on a plane. Beyond the edge of the world
-// it is minus one.
-func (w *World) Height(tile hexes.Tile) float64 {
-	if i := w.index(tile); i >= 0 {
-		return w.height[i]
-	}
-	return -1
-}
-
-// Tiles is every tile of the world, in the order the world holds them.
-func (w *World) Tiles() []hexes.Tile { return w.tiles }
-
 // across is about how many tiles the world is across: for a sphere the
 // split, which is what the fall-off of a boundary and the reach of rain
 // were tuned in, and the same number for any other surface.
@@ -333,7 +319,7 @@ func (w *World) classify() {
 		rain := math.Exp(-float64(wet[i])/reach) +
 			0.3*noise.Fractal(w.Seed+61, c.X*3, c.Y*3, c.Z*3, 3)
 		w.biome[i] = pick(e, cold, rain, wet[i])
-		if w.fixed[i] != Unfixed {
+		if w.fixed[i] != unfixed {
 			w.biome[i] = w.fixed[i]
 		}
 	}

@@ -1,0 +1,17 @@
+name,size,x,y,z,direction,near,far,enter,leave
+mutants-span-slab-along-inside,2,0,1,0,x,0,10,0,10
+mutants-span-slab-along-outside,2,0,3,0,x,0,10,0,0
+mutants-span-slab-along-on-the-plane,2,0,2,0,x,0,10,0,10
+mutants-span-slab-along-on-the-lower-plane,2,0,-2,0,x,0,10,0,10
+mutants-span-slab-along-no-length,2,0,1,0,x,3,3,0,0
+mutants-span-slab-up,2,0,-5,0,y,0,+Inf,3,7
+mutants-span-slab-down,2,0,5,0,down,0,+Inf,3,7
+mutants-span-slab-touching,1,0,0,0,y,1,5,0,0
+mutants-span-cylinder-along-inside,2,1,0,0,y,0,10,0,10
+mutants-span-cylinder-along-outside,2,3,0,0,y,0,10,0,0
+mutants-span-cylinder-along-just-outside,2,2.1,0,0,y,0,10,0,0
+mutants-span-cylinder-along-on-the-wall,2,2,0,0,y,0,10,0,10
+mutants-span-cylinder-along-a-unit,2,1,0,0,y,3,4,3,4
+mutants-span-cylinder-along-no-length,2,1,0,0,y,3,3,0,0
+mutants-span-cylinder-across,6,-10,0,0,x,0,+Inf,4,16
+mutants-span-cylinder-touching,6,-10,0,6,x,0,+Inf,0,0

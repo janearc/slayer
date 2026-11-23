@@ -19,13 +19,15 @@ func TestParkTerrainHeightBoundsEdgesAndRelief(t *testing.T) {
 			t.Fatalf("boundary height %g", got)
 		}
 	}
-	if got := CityParkTerrainHeight(p, maths.V(p.At.X+p.Width.InMetres(), 0, p.At.Z)); got != 0 {
+	outside := maths.V(p.At.X+p.Width.InMetres(), 0, p.At.Z)
+	if got := CityParkTerrainHeight(p, outside); got != 0 {
 		t.Fatalf("outside park height %g", got)
 	}
 	maxHeight := 0.0
 	for i := -15; i <= 15; i++ {
 		for j := -40; j <= 40; j++ {
-			at := p.At.Add(maths.V(float64(i)*18+.37, 0, float64(j)*24+.63))
+			offset := maths.V(float64(i)*18+.37, 0, float64(j)*24+.63)
+			at := p.At.Add(offset)
 			h := CityParkTerrainHeight(p, at)
 			if h < parkTerrainBase || h > parkTerrainBase+parkTerrainMaxHeight {
 				t.Fatalf("height %g out of bounds", h)
@@ -89,7 +91,8 @@ func TestParkTerrainKeepsPathGeometryAtConfiguredPedestrianScale(t *testing.T) {
 		t.Fatal("park paths disappeared")
 	}
 	first := paths[0]
-	width := math.Min(first[1].Sub(first[0]).Len(), math.Min(first[2].Sub(first[1]).Len(), first[0].Sub(first[2]).Len()))
+	shorter := math.Min(first[2].Sub(first[1]).Len(), first[0].Sub(first[2]).Len())
+	width := math.Min(first[1].Sub(first[0]).Len(), shorter)
 	if math.Abs(width-.016) > 1e-9 {
 		t.Fatalf("path width %g, want 0.016 factory m", width)
 	}

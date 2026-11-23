@@ -21,6 +21,7 @@ func TestAboveNamesTheSwitchesThatDecideAShortcut(t *testing.T) {
 	}{
 		{ShortcutLampStore, []string{"lamp-store", "fastlight", "vibes"}},
 		{ShortcutSkyLooks, []string{"sky-looks", "fastlight", "vibes"}},
+		{ShortcutRestir, []string{"restir", "fastlight", "vibes"}},
 		{"cascades", []string{"cascades", "vibes"}},
 		{FlagFastlight, []string{"fastlight", "vibes"}},
 	} {

@@ -1,0 +1,763 @@
+# The superblock, 2026-11-19. Many buildings grown one plot at a time on
+# one parcel, with no setbacks, fused into one mass: stacked flats with
+# many small windows, narrow alleys left between, bridges across the
+# alleys, cages and boxes hung on the walls, signs, and clutter on the
+# roofs. Nothing here is measured; each number says it was picked, and
+# by what. Lengths are metres, colours are shares of light.
+culture: superblock
+says: a parcel built over plot by plot until it is one mass
+elements:
+- element: default-width
+  says: the width of the parcel when a set does not say, small enough to draw whole in a test
+  scope: district
+  draw: range
+  unit: m
+  least: 60
+  most: 60
+  kind: picked
+  by: "superblock study, 2026-11-19, picked; 60 so a podium, slabs and a court fit"
+- element: default-depth
+  says: the depth of the parcel when a set does not say
+  scope: district
+  draw: range
+  unit: m
+  least: 40
+  most: 40
+  kind: picked
+  by: "superblock study, 2026-11-19, picked; 40 so a podium, slabs and a court fit"
+- element: default-ceiling
+  says: the ceiling in storeys when a set does not say
+  scope: district
+  draw: range
+  unit: storeys
+  whole: true
+  least: 6
+  most: 6
+  kind: picked
+  by: "superblock study, 2026-11-19, picked"
+- element: plot-most
+  says: the longest side a plot may have before it must be cut again
+  scope: district
+  draw: range
+  unit: m
+  least: 24
+  most: 24
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, tens of metres a side"
+- element: plot-least
+  says: the shortest side a plot may be cut to
+  scope: district
+  draw: range
+  unit: m
+  least: 4
+  most: 4
+  kind: picked
+  by: "superblock study, 2026-11-19, picked from the brief, a few metres"
+- element: plot-stop-reach
+  says: a plot whose longer side is no more than this may stop being cut early
+  scope: district
+  draw: range
+  unit: m
+  least: 14
+  most: 14
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: plot-stop
+  says: the chance that a plot within reach to stop is left as it is and not cut again
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.45
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: split-at
+  says: how far along the longer side a cut falls, as a share of that side
+  scope: bay
+  draw: range
+  unit: share of the side
+  least: 0.3
+  most: 0.7
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: alley-chance
+  says: the chance that a cut leaves a gap, an alley, and not a shared wall
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.5
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, so that most alleys join"
+- element: alley-opening
+  says: the least length of edge two alleys must share to be one alley, the width of a doorway
+  scope: district
+  draw: range
+  unit: m
+  least: 1
+  most: 1
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: alley-width
+  says: width of an alley
+  scope: bay
+  draw: range
+  unit: m
+  least: 2
+  most: 3
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, narrow"
+- element: alley-reach
+  says: a cut across a side longer than this never leaves an alley, so no alley is longer
+  scope: district
+  draw: range
+  unit: m
+  least: 125
+  most: 125
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: alley-share-most
+  says: the most of the parcel that alleys may be, a minority of it
+  scope: district
+  draw: range
+  unit: share of the parcel
+  least: 0.16
+  most: 0.16
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: storey-height
+  says: height of a storey of a building, floor to floor
+  scope: bay
+  draw: range
+  unit: m
+  least: 2.7
+  most: 3
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: least-storeys
+  says: the fewest storeys a building has
+  scope: district
+  draw: range
+  unit: storeys
+  whole: true
+  least: 3
+  most: 3
+  kind: picked
+  by: "superblock study, 2026-11-19, picked"
+- element: near-ceiling
+  says: the chance that a building is built to or just under the ceiling
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.75
+  kind: picked
+  by: "superblock study, 2026-11-19, picked from the brief, most near it"
+- element: near-drop
+  says: how many storeys under the ceiling a building near it stops
+  scope: bay
+  draw: range
+  unit: storeys
+  whole: true
+  least: 0
+  most: 1
+  kind: picked
+  by: "superblock study, 2026-11-19, picked"
+- element: short-fraction
+  says: how much of the ceiling a building not near it is built to
+  scope: bay
+  draw: range
+  unit: share of the ceiling
+  least: 0.4
+  most: 0.85
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: palette
+  says: the colours of the buildings, weathered
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: concrete, weight: 4, colour: [0.28, 0.28, 0.27]}
+  - {name: stained, weight: 3, colour: [0.2, 0.21, 0.2]}
+  - {name: green, weight: 1, colour: [0.2, 0.27, 0.22]}
+  - {name: pink, weight: 1, colour: [0.4, 0.26, 0.25]}
+  - {name: blue, weight: 1, colour: [0.2, 0.26, 0.34]}
+  - {name: ochre, weight: 1, colour: [0.38, 0.3, 0.17]}
+  - {name: rust, weight: 1, colour: [0.3, 0.15, 0.1]}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: cladding
+  says: render and tile; the colour is a tint on the building's colour and the gloss is the surface's
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: render, weight: 4, colour: [1, 1, 1], gloss: 0.05}
+  - {name: tile, weight: 1, colour: [0.9, 0.95, 1], gloss: 0.25}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: roof-form
+  says: the form of every roof
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: flat, weight: 1}
+  kind: picked
+  by: "superblock study, 2026-11-19, picked"
+- element: roof-colour
+  says: the colour of the roofs and parapets
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: tar, weight: 1, colour: [0.07, 0.07, 0.075], gloss: 0.1}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: window-width
+  says: width of a window, every one the same so that they are one shape
+  scope: district
+  draw: range
+  unit: m
+  least: 0.9
+  most: 0.9
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, small"
+- element: window-height
+  says: height of a window
+  scope: district
+  draw: range
+  unit: m
+  least: 1.2
+  most: 1.2
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, small"
+- element: window-sill
+  says: height of a window's foot over the floor
+  scope: district
+  draw: range
+  unit: m
+  least: 0.9
+  most: 0.9
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: window-pitch
+  says: the width of wall each window takes along a face, so a wide face has more
+  scope: district
+  draw: range
+  unit: m
+  least: 2.4
+  most: 2.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, many windows"
+- element: window-edge
+  says: wall left clear at each end of a row of windows
+  scope: district
+  draw: range
+  unit: m
+  least: 0.6
+  most: 0.6
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: lit-share
+  says: share of windows with a light on, at dusk going into night
+  scope: opening
+  draw: share
+  unit: chance
+  share: 0.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: jetty-chance
+  says: the chance that a building carries its upper storeys out over the air beside it
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.3
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: jetty-storeys
+  says: how many of the top storeys a jetty carries out
+  scope: bay
+  draw: range
+  unit: storeys
+  whole: true
+  least: 1
+  most: 4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: jetty-proud
+  says: how far a jetty reaches out of the wall
+  scope: bay
+  draw: range
+  unit: m
+  least: 0.6
+  most: 1
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: bridge-chance
+  says: the chance that two buildings facing each other across an alley are joined by a walkway
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.35
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: bridge-least-storey
+  says: the lowest storey a walkway may stand at, counting the ground storey as nought
+  scope: district
+  draw: range
+  unit: storeys
+  whole: true
+  least: 2
+  most: 2
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, over the street"
+- element: bridge-height
+  says: height of an enclosed walkway
+  scope: district
+  draw: range
+  unit: m
+  least: 2.4
+  most: 2.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: bridge-width
+  says: width of an enclosed walkway along the alley
+  scope: district
+  draw: range
+  unit: m
+  least: 1.6
+  most: 1.6
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: bridge-overlap
+  says: the least length of wall two buildings must face each other along for a walkway
+  scope: district
+  draw: range
+  unit: m
+  least: 3
+  most: 3
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: bridge-high
+  says: how high up the storeys a walkway stands, as a share of those it may stand at
+  scope: bay
+  draw: range
+  unit: share of the storeys
+  least: 0
+  most: 0.999
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: bridge-along
+  says: how far along the walls that face each other a walkway stands, as a share of the room
+  scope: bay
+  draw: range
+  unit: share of the wall
+  least: 0
+  most: 1
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: sign-place
+  says: how far along its wall a sign stands, as a share of the room it has
+  scope: storey
+  draw: range
+  unit: share of the wall
+  least: 0.05
+  most: 0.95
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: bar-height
+  says: where up an antenna mast its cross bar stands, as a share of its height
+  scope: district
+  draw: range
+  unit: share of the height
+  least: 0.85
+  most: 0.85
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: addition-share
+  says: the chance, for each storey of each wall, of a cage or a box hung on it
+  scope: storey
+  draw: share
+  unit: chance
+  share: 0.045
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: addition-kind
+  says: what is hung on a wall, a cage or a box, by weight
+  scope: storey
+  draw: options
+  unit: weight
+  options:
+  - {name: cage, weight: 3}
+  - {name: box, weight: 2}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: addition-place
+  says: how far along its wall an addition stands, as a share of the room it has
+  scope: storey
+  draw: range
+  unit: share of the wall
+  least: 0.05
+  most: 0.95
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: cage-width
+  says: width of a cage along its wall
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.4
+  most: 2.2
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: cage-height
+  says: height of a cage
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.3
+  most: 1.9
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: cage-proud
+  says: how far a cage stands out of its wall
+  scope: storey
+  draw: range
+  unit: m
+  least: 0.7
+  most: 1.1
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: cage-colour
+  says: the steel of a cage
+  scope: storey
+  draw: options
+  unit: share of light
+  options:
+  - {name: steel, weight: 3, colour: [0.06, 0.06, 0.065], gloss: 0.5}
+  - {name: galvanised, weight: 1, colour: [0.35, 0.37, 0.38], gloss: 0.45}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: box-width
+  says: width of a box addition along its wall
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.2
+  most: 3
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: box-height
+  says: height of a box addition
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.4
+  most: 2.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: box-proud
+  says: how far a box addition stands out of its wall
+  scope: storey
+  draw: range
+  unit: m
+  least: 0.8
+  most: 1.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: box-colour
+  says: the sheet a box addition is made of, scavenged
+  scope: storey
+  draw: options
+  unit: share of light
+  options:
+  - {name: rust, weight: 3, colour: [0.28, 0.13, 0.08], gloss: 0.2}
+  - {name: galvanised, weight: 2, colour: [0.35, 0.37, 0.38], gloss: 0.45}
+  - {name: tarp, weight: 1, colour: [0.07, 0.14, 0.3], gloss: 0.3}
+  - {name: plywood, weight: 2, colour: [0.3, 0.2, 0.1], gloss: 0.1}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: sign-share
+  says: the chance, for each storey of each wall, of a sign on it
+  scope: storey
+  draw: share
+  unit: chance
+  share: 0.012
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, a few"
+- element: sign-width
+  says: width of a sign along its wall
+  scope: storey
+  draw: range
+  unit: m
+  least: 0.9
+  most: 1.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: sign-height
+  says: height of a sign, which hangs tall
+  scope: storey
+  draw: range
+  unit: m
+  least: 2
+  most: 4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: sign-proud
+  says: how far a sign stands out of its wall
+  scope: district
+  draw: range
+  unit: m
+  least: 0.25
+  most: 0.25
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: sign-glow
+  says: how brightly a sign glows, a scale on the light of its colour
+  scope: district
+  draw: range
+  unit: scale
+  least: 3
+  most: 3
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, brighter than a window"
+- element: sign-colour
+  says: the colour a sign is lit in
+  scope: storey
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 3, colour: [1, 0.08, 0.05], gloss: 0.3}
+  - {name: green, weight: 2, colour: [0.1, 1, 0.3], gloss: 0.3}
+  - {name: white, weight: 2, colour: [0.9, 0.95, 1], gloss: 0.3}
+  - {name: blue, weight: 1, colour: [0.15, 0.3, 1], gloss: 0.3}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: clutter-count
+  says: how many pieces of clutter stand on a roof
+  scope: bay
+  draw: range
+  unit: pieces
+  whole: true
+  least: 1
+  most: 5
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: clutter-tries
+  says: how many places are tried for a piece of clutter before it is left off
+  scope: district
+  draw: range
+  unit: tries
+  whole: true
+  least: 6
+  most: 6
+  kind: picked
+  by: "superblock study, 2026-11-19, picked"
+- element: clutter-kind
+  says: what stands on a roof, by weight
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: tank, weight: 3}
+  - {name: antenna, weight: 3}
+  - {name: shack, weight: 2}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: clutter-place
+  says: where on a roof a piece of clutter is tried, as a share of the roof along each side
+  scope: opening
+  draw: range
+  unit: share of the roof
+  least: 0.1
+  most: 0.9
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: clutter-allowance
+  says: the most that anything standing on a roof rises over the roof's own top storey, parapet and all
+  scope: district
+  draw: range
+  unit: m
+  least: 7
+  most: 7
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: tank-radius
+  says: radius of a water tank
+  scope: opening
+  draw: range
+  unit: m
+  least: 0.8
+  most: 1.3
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: tank-height
+  says: height of a water tank
+  scope: opening
+  draw: range
+  unit: m
+  least: 1.4
+  most: 2.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: tank-colour
+  says: the steel or plastic of a water tank
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 2, colour: [0.35, 0.37, 0.38], gloss: 0.45}
+  - {name: blue, weight: 2, colour: [0.06, 0.16, 0.32], gloss: 0.4}
+  - {name: white, weight: 1, colour: [0.6, 0.6, 0.58], gloss: 0.3}
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: mast-height
+  says: height of an antenna mast
+  scope: opening
+  draw: range
+  unit: m
+  least: 3
+  most: 6.2
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: mast-width
+  says: width of an antenna mast, and of its cross bars
+  scope: district
+  draw: range
+  unit: m
+  least: 0.12
+  most: 0.12
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: mast-bar
+  says: length of the cross bar near the top of an antenna mast
+  scope: opening
+  draw: range
+  unit: m
+  least: 1
+  most: 2
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: shack-width
+  says: width of a shack on a roof, both ways
+  scope: opening
+  draw: range
+  unit: m
+  least: 2
+  most: 3.2
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: shack-height
+  says: height of a shack on a roof
+  scope: opening
+  draw: range
+  unit: m
+  least: 2.1
+  most: 2.5
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: band-height
+  says: where up a tank or shack its second band stands, as a share of its height
+  scope: district
+  draw: range
+  unit: share of the height
+  least: 0.75
+  most: 0.75
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: berth-share
+  says: the chance, at an accretion of one, that a roof keeps a berth for a part from the set's own mix, where the set gives one; a planned block keeps none
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.2
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: berth-length
+  says: length of a roof berth
+  scope: district
+  draw: range
+  unit: m
+  least: 12
+  most: 12
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye, a motorhome and its cab"
+- element: berth-width
+  says: width of a roof berth
+  scope: district
+  draw: range
+  unit: m
+  least: 3.4
+  most: 3.4
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+- element: berth-height
+  says: height of a roof berth, the tallest part it takes
+  scope: district
+  draw: range
+  unit: m
+  least: 4.5
+  most: 4.5
+  kind: picked
+  by: "superblock study, 2026-11-19, by eye"
+# The planned block and its accretion: one
+# kind, planned at nought and grown over at one. The planned block is a
+# podium of shops and parking with slabs of flats round a court; the
+# accretion grows the court full and the roofs and walls over.
+- {element: gate-power, says: "the power the accretion is raised to when it gates a feature, so that features come late and then fast", scope: district, draw: range, unit: power, least: 1, most: 1, kind: picked, by: "superblock planned study, 2026-11-19, picked so that a share at one is the share of the accreted study"}
+- {element: accretion-draw, says: "the accretion of a block that draws its own, from planned to grown over", scope: district, draw: range, unit: accretion, least: 0, most: 1, kind: picked, by: "superblock planned study, 2026-11-19, picked, every degree as likely"}
+- {element: default-occupants, says: "the people a block is planned for when a set does not say, which with the default parcel needs the default ceiling", scope: district, draw: range, unit: people, whole: true, least: 800, most: 800, kind: picked, by: "superblock planned study, 2026-11-19, picked: 960 square metres of slab at 7 a person, 6 storeys"}
+- {element: default-crowding, says: "the crowding a block's people tolerate when a set does not say: occupancy over design", scope: district, draw: range, unit: crowding, least: 1, most: 1, kind: picked, by: "superblock planned study, 2026-11-19, picked, as designed"}
+- {element: floor-per-person, says: "the floor of a flat a person is given at the design occupancy", scope: district, draw: range, unit: square metres a person, least: 7, most: 7, kind: picked, by: "superblock planned study, 2026-11-19, picked after the allocation standard Hong Kong public housing is said to use, 7 square metres a person; not checked against its source here"}
+- {element: crush-limit, says: "the most people a square metre of floor holds, standing, which no floor's crowding passes", scope: district, draw: range, unit: people a square metre, least: 6, most: 6, kind: picked, by: "superblock planned study, 2026-11-19, from the city density plan, about six standing; a source is owed"}
+- {element: apron-width, says: "the pavement between the parcel's edge and the podium, where the shops' canopies and the ramp stand", scope: district, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: podium-storey, says: "height of a storey of the podium, the shops and the parking over them", scope: district, draw: range, unit: m, least: 3.6, most: 3.6, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: podium-colour, says: "the concrete of the podium and the decks", scope: district, draw: options, unit: share of light, options: [{name: concrete, weight: 1, colour: [0.3, 0.3, 0.29], gloss: 0.05}], kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: court-paving, says: "the paving of the court on the podium's top", scope: district, draw: options, unit: share of light, options: [{name: tile, weight: 1, colour: [0.22, 0.2, 0.18], gloss: 0.1}], kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: paving-thickness, says: "thickness of the court's paving", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: slab-depth, says: "depth of a slab of flats, street face to court face", scope: district, draw: range, unit: m, least: 10, most: 10, kind: picked, by: "superblock planned study, 2026-11-19, by eye, a flat each side of a spine wall"}
+- {element: slab-run-most, says: "the longest run of flats between two cores; a longer side gets cores between its runs", scope: district, draw: range, unit: m, least: 48, most: 48, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: core-length, says: "length along its slab of a stair and lift core that stands between two runs", scope: district, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: core-slit-width, says: "width of the narrow window at each landing of a core", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: lane-width, says: "width of the lane round the court inside the slabs, under the decks", scope: district, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "superblock planned study, 2026-11-19, by eye, wider than a deck"}
+- {element: slab-window-pitch, says: "the width of wall each window of a flat takes along a slab", scope: district, draw: range, unit: m, least: 3.2, most: 3.2, kind: picked, by: "superblock planned study, 2026-11-19, by eye, room for a window and its shutters"}
+- {element: deck-every, says: "how many storeys apart the access decks along the court face stand", scope: district, draw: range, unit: storeys, whole: true, least: 3, most: 3, kind: picked, by: "superblock planned study, 2026-11-19, from the brief, every third floor"}
+- {element: deck-depth, says: "how far an access deck stands out of the court face", scope: district, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: deck-thickness, says: "thickness of an access deck's slab", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: rail-height, says: "height of the rail along a deck's edge or a roof's", scope: district, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: rail-bar, says: "thickness of a rail", scope: district, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: shop-pitch, says: "the length of podium front each shop takes", scope: district, draw: range, unit: m, least: 7.5, most: 7.5, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: shop-window-width, says: "width of a shop's window", scope: district, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: shop-window-height, says: "height of a shop's window", scope: district, draw: range, unit: m, least: 2.6, most: 2.6, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: shop-sill, says: "height of a shop window's foot over the pavement", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: fascia-height, says: "height of a shop's fascia sign over its canopy", scope: district, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: fascia-proud, says: "how far a fascia sign stands out of the podium", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: shop-canopy-depth, says: "how far a shop's canopy reaches over the pavement", scope: district, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "superblock planned study, 2026-11-19, by eye, inside the apron"}
+- {element: shop-canopy-thickness, says: "thickness of a shop's canopy", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: carpark-slot-width, says: "width of an opening in the parking storey's wall", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: carpark-slot-height, says: "height of an opening in the parking storey's wall", scope: district, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: carpark-slot-sill, says: "height of a parking opening's foot over the parking floor", scope: district, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: carpark-dark, says: "the dark of the parking seen through its openings", scope: district, draw: options, unit: share of light, options: [{name: dark, weight: 1, colour: [0.02, 0.02, 0.02]}], kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: ramp-length, says: "length of the car ramp up the podium's back to the parking", scope: district, draw: range, unit: m, least: 24, most: 24, kind: picked, by: "superblock planned study, 2026-11-19, by eye, about one in seven"}
+- {element: ramp-width, says: "width of the car ramp, inside the apron", scope: district, draw: range, unit: m, least: 2.6, most: 2.6, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: ramp-thickness, says: "thickness of the car ramp's slab", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: ramp-from, says: "how far along the podium's back the car ramp starts, from its west corner", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: infill-share, says: "the chance, at an accretion of one, that a plot of the court is built over", scope: bay, draw: share, unit: chance, share: 0.9, kind: picked, by: "superblock planned study, 2026-11-19, by eye, a few yards left as light wells"}
+- {element: topping-share, says: "the chance, at an accretion of one, that a stretch of a slab's roof has floors added on it", scope: bay, draw: share, unit: chance, share: 0.55, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: topping-length, says: "length along its slab of a stretch of floors added on the roof", scope: bay, draw: range, unit: m, least: 5, most: 14, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: topping-storeys, says: "how many floors are added on a stretch of roof, the most reached only at an accretion of one", scope: bay, draw: range, unit: storeys, whole: true, least: 1, most: 4, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: topping-storey-height, says: "height of an added floor, which matches nothing below it", scope: bay, draw: range, unit: m, least: 2.3, most: 3.4, kind: picked, by: "superblock planned study, 2026-11-19, by eye, mismatched"}
+- {element: yard-share, says: "the chance, at an accretion of one, that a roof is used as a yard, railed with a line of washing", scope: bay, draw: share, unit: chance, share: 0.5, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: line-length, says: "length of a washing line on a roof", scope: bay, draw: range, unit: m, least: 2.5, most: 5, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: line-height, says: "height of a washing line over the roof", scope: district, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cloth-pitch, says: "the length of line each thing hung on it takes", scope: district, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cloth-drop, says: "how far a thing hung on a line hangs down from it", scope: opening, draw: range, unit: m, least: 0.5, most: 1, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cloth-colour, says: "the colour of a thing hung on a line", scope: opening, draw: options, unit: share of light, options: [{name: white, weight: 3, colour: [0.7, 0.7, 0.68]}, {name: blue, weight: 2, colour: [0.15, 0.22, 0.45]}, {name: red, weight: 1, colour: [0.5, 0.1, 0.08]}, {name: yellow, weight: 1, colour: [0.6, 0.5, 0.12]}], kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cable-count, says: "how many cables cross a lane, the most reached only at an accretion of one", scope: bay, draw: range, unit: cables, whole: true, least: 0, most: 9, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cable-high, says: "how high over the lane's floor a cable crosses it", scope: opening, draw: range, unit: m, least: 3, most: 24, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cable-along, says: "how far along its lane a cable crosses, as a share of the lane", scope: opening, draw: range, unit: share of the lane, least: 0.03, most: 0.97, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cable-thickness, says: "thickness of a cable", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: cable-colour, says: "the colour of a cable", scope: district, draw: options, unit: share of light, options: [{name: black, weight: 1, colour: [0.02, 0.02, 0.02], gloss: 0.2}], kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: pipe-share, says: "the chance, at an accretion of one, that a pipe runs along a lane", scope: bay, draw: share, unit: chance, share: 0.6, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: pipe-size, says: "width and height of a pipe run along a lane", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "superblock planned study, 2026-11-19, by eye"}
+- {element: pipe-high, says: "how high over the lane's floor a pipe runs", scope: bay, draw: range, unit: m, least: 2.4, most: 3.2, kind: picked, by: "superblock planned study, 2026-11-19, by eye, over a head"}
+- {element: pipe-colour, says: "the colour of a pipe", scope: bay, draw: options, unit: share of light, options: [{name: grey, weight: 2, colour: [0.25, 0.25, 0.24], gloss: 0.2}, {name: rust, weight: 1, colour: [0.28, 0.13, 0.07], gloss: 0.1}], kind: picked, by: "superblock planned study, 2026-11-19, by eye"}

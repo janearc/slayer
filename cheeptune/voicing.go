@@ -9,32 +9,32 @@ import (
 	"strings"
 )
 
-// Kinds are the channels the Game Boy has, and how many of each.
-var Kinds = []string{"pulse", "wave", "noise"}
+// kinds are the channels the Game Boy has, and how many of each.
+var kinds = []string{"pulse", "wave", "noise"}
 
 var kindLimit = map[string]int{"pulse": 2, "wave": 1, "noise": 1}
 
-// Duties are the only pulse widths the hardware has.
-var Duties = []float64{0.125, 0.25, 0.5, 0.75}
+// duties are the only pulse widths the hardware has.
+var duties = []float64{0.125, 0.25, 0.5, 0.75}
 
 // Voicing is what plays a score: each role bound to a channel on one machine,
 // and what that channel sounds like.
 type Voicing struct {
 	Name     string    `json:"name"`
 	Machine  string    `json:"machine"`
-	Channels []Channel `json:"channels"`
+	Channels []channel `json:"channels"`
 	Drop     []string  `json:"drop"`
 
 	// the studio's mix; the Game Boy has none of these.
 	Master *float64 `json:"master"`
-	Reverb *Reverb  `json:"reverb"`
-	Delay  *Repeats `json:"delay"`
+	Reverb *reverb  `json:"reverb"`
+	Delay  *repeats `json:"delay"`
 }
 
-// Channel is one of the machine's voices. It plays a role or echoes one.
+// channel is one of the machine's voices. It plays a role or echoes one.
 // Which fields it may carry depends on its kind, and a field on the wrong
 // kind is refused rather than ignored.
-type Channel struct {
+type channel struct {
 	Kind   string   `json:"kind"`
 	Role   string   `json:"role"`
 	Echo   string   `json:"echo"`
@@ -45,49 +45,49 @@ type Channel struct {
 	Pan    string   `json:"pan"`
 
 	Duty     *float64  `json:"duty"`
-	Envelope *Envelope `json:"envelope"`
-	Vibrato  *Vibrato  `json:"vibrato"`
-	Arp      Arp       `json:"arp"`
+	Envelope *envelope `json:"envelope"`
+	Vibrato  *vibrato  `json:"vibrato"`
+	Arp      arp       `json:"arp"`
 	Table    string    `json:"table"`
 
-	Hits map[string]Hit `json:"hits"`
+	Hits map[string]hit `json:"hits"`
 
 	// the studio's fields; studio.go says what each is.
 	Place  *float64        `json:"place"`
-	Send   *Send           `json:"send"`
+	Send   *send           `json:"send"`
 	Voices int             `json:"voices"`
 	Glide  *float64        `json:"glide"`
-	FM     *FM             `json:"fm"`
-	Analog *Analog         `json:"analog"`
-	Pluck  *Pluck          `json:"pluck"`
-	Modal  *Modal          `json:"modal"`
-	Drums  map[string]Drum `json:"drums"`
+	FM     *fmSound        `json:"fm"`
+	Analog *analog         `json:"analog"`
+	Pluck  *pluck          `json:"pluck"`
+	Modal  *modal          `json:"modal"`
+	Drums  map[string]drum `json:"drums"`
 
 	delay frac
 	table [32]uint8
 }
 
-// Envelope is attack, decay and release in seconds, and sustain from nought
+// envelope is attack, decay and release in seconds, and sustain from nought
 // to one. It is the one envelope shape; a general curve is not offered.
-type Envelope struct {
+type envelope struct {
 	Attack  float64 `json:"attack"`
 	Decay   float64 `json:"decay"`
 	Sustain float64 `json:"sustain"`
 	Release float64 `json:"release"`
 }
 
-// Vibrato is rate in hertz, depth in cents, and how long a note holds still
+// vibrato is rate in hertz, depth in cents, and how long a note holds still
 // before it starts to move.
-type Vibrato struct {
+type vibrato struct {
 	Rate  float64 `json:"rate"`
 	Depth float64 `json:"depth"`
 	Delay float64 `json:"delay"`
 }
 
-// Hit is a sound on the noise channel, named by the score. Shift and divisor
+// hit is a sound on the noise channel, named by the score. Shift and divisor
 // are the two numbers the hardware takes; short selects the seven-bit
 // register, which is tonal where the fifteen-bit one is hiss.
-type Hit struct {
+type hit struct {
 	Shift   int      `json:"shift"`
 	Divisor int      `json:"divisor"`
 	Short   bool     `json:"short"`
@@ -95,17 +95,17 @@ type Hit struct {
 	Decay   float64  `json:"decay"`
 }
 
-// Arp is how fast a chord cycles through its notes. A number is driver ticks
+// arp is how fast a chord cycles through its notes. A number is driver ticks
 // a step, the chip idiom where a chord shimmers. A string is beats a step,
 // n or n/d, where a chord is heard as broken.
-type Arp struct {
+type arp struct {
 	ticks int
 	beats frac
 	set   bool
 }
 
 // UnmarshalJSON reads an arp as ticks (a number) or beats (a string).
-func (a *Arp) UnmarshalJSON(b []byte) error {
+func (a *arp) UnmarshalJSON(b []byte) error {
 	var n float64
 	if json.Unmarshal(b, &n) == nil {
 		if n != float64(int(n)) || n < 1 || n > 60 {
@@ -128,7 +128,7 @@ func (a *Arp) UnmarshalJSON(b []byte) error {
 }
 
 // MarshalJSON writes an arp back the way it was read.
-func (a Arp) MarshalJSON() ([]byte, error) {
+func (a arp) MarshalJSON() ([]byte, error) {
 	switch {
 	case !a.set:
 		return []byte("null"), nil
@@ -139,7 +139,7 @@ func (a Arp) MarshalJSON() ([]byte, error) {
 }
 
 // String is the arp as check prints it.
-func (a Arp) String() string {
+func (a arp) String() string {
 	switch {
 	case !a.set:
 		return "3 ticks (default)"
@@ -149,8 +149,8 @@ func (a Arp) String() string {
 	return a.beats.String() + " beats"
 }
 
-// Tables are the built-in wave tables, by name.
-var Tables = map[string][32]uint8{
+// tables are the built-in wave tables, by name.
+var tables = map[string][32]uint8{
 	"triangle": func() (t [32]uint8) {
 		for i := range t {
 			if i < 16 {
@@ -206,9 +206,9 @@ func (v *Voicing) check() error {
 	if v.Name == "" {
 		fail("voicing has no name")
 	}
-	if !known(v.Machine, Machines) {
+	if !known(v.Machine, machineNameList) {
 		fail("unknown machine %q; machines are %s",
-			v.Machine, strings.Join(Machines, ", "))
+			v.Machine, strings.Join(machineNameList, ", "))
 	}
 	if len(v.Channels) == 0 {
 		fail("voicing has no channels")
@@ -220,7 +220,7 @@ func (v *Voicing) check() error {
 		errs = append(errs, merrs...)
 	}
 	for _, d := range v.Drop {
-		if !known(d, Roles) {
+		if !known(d, roles) {
 			fail("drop: unknown role %q", d)
 		}
 		if plays[d] > 0 {
@@ -232,7 +232,7 @@ func (v *Voicing) check() error {
 
 // does is what a channel does, on any machine: exactly one of play and
 // echo, and an echo's delay and gain.
-func (c *Channel) does(at string) []error {
+func (c *channel) does(at string) []error {
 	var errs []error
 	fail := func(f string, a ...any) {
 		errs = append(errs, fmt.Errorf(at+": "+f, a...))
@@ -244,10 +244,10 @@ func (c *Channel) does(at string) []error {
 			c.Role, c.Echo)
 	case c.Role == "" && c.Echo == "":
 		fail("neither plays a role nor echoes one")
-	case c.Role != "" && !known(c.Role, Roles):
+	case c.Role != "" && !known(c.Role, roles):
 		fail("unknown role %q; roles are %s", c.Role,
-			strings.Join(Roles, ", "))
-	case c.Echo != "" && !known(c.Echo, Roles):
+			strings.Join(roles, ", "))
+	case c.Echo != "" && !known(c.Echo, roles):
 		fail("echoes unknown role %q", c.Echo)
 	}
 	if c.Echo != "" {
@@ -281,12 +281,12 @@ func (c *Channel) does(at string) []error {
 }
 
 // readTable is a named table or thirty-two hex digits, one a step.
-func (c *Channel) readTable(at string) []error {
+func (c *channel) readTable(at string) []error {
 	if c.Table == "" {
 		return []error{fmt.Errorf("%s: a wave needs a table: %s, "+
 			"or 32 hex digits", at, tableNames())}
 	}
-	if t, ok := Tables[c.Table]; ok {
+	if t, ok := tables[c.Table]; ok {
 		c.table = t
 		return nil
 	}

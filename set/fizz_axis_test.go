@@ -25,7 +25,8 @@ func TestFizzZeroPopulationIsExplicitlyClearWaterOnly(t *testing.T) {
 	if _, err := set.Read("zero-population.yaml", []byte(raw)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := set.Read("legacy-zero.yaml", []byte(strings.Replace(raw, "clear-water: true", "clear-water: false", 1))); err == nil {
+	opaque := strings.Replace(raw, "clear-water: true", "clear-water: false", 1)
+	if _, err := set.Read("legacy-zero.yaml", []byte(opaque)); err == nil {
 		t.Fatal("legacy standalone zero thickness silently became valid")
 	}
 }

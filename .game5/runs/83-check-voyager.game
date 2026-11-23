@@ -1,0 +1,1 @@
+check-voyager . :: go test -p=1 ./manufacture -run ^TestVoyagerTwinsShareACompleteDetailedAssembly$ -count=1 -timeout=120s

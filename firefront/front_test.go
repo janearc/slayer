@@ -55,7 +55,8 @@ func TestFrontGroupingIsDeterministicAndLimitsSimultaneousVolumes(t *testing.T) 
 	spec.Direction = maths.V(3, 0, 4)
 	var targets []Target
 	for i := range 400 {
-		targets = append(targets, Target{At: maths.V(float64(i%20), 0, float64(i/20)), Seed: uint64(i)})
+		place := maths.V(float64(i%20), 0, float64(i/20))
+		targets = append(targets, Target{At: place, Seed: uint64(i)})
 	}
 	a, err := New(spec, targets)
 	if err != nil {
@@ -95,7 +96,8 @@ func TestFrontRejectsUnboundedOrNonphysicalPlans(t *testing.T) {
 			t.Fatal("invalid front accepted")
 		}
 	}
-	if _, err := New(frontSpec(), []Target{{At: maths.V(math.Inf(1), 0, 0)}}); err == nil {
+	infinite := maths.V(math.Inf(1), 0, 0)
+	if _, err := New(frontSpec(), []Target{{At: infinite}}); err == nil {
 		t.Fatal("infinite target accepted")
 	}
 }

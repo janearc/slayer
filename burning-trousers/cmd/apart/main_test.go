@@ -104,8 +104,9 @@ func TestApartCountsAPixelBetweenOneAndTwoJNDsAsPastOne(t *testing.T) {
 		t.Fatalf("a grey of %v is %v jnd from 0.2, not between one and two",
 			level, float64(between))
 	}
-	said, wrong, code := ran(t, kept(t, "a.pfm", grey(0.2)),
-		kept(t, "b.pfm", marked(7, 2, level)))
+	first := kept(t, "a.pfm", grey(0.2))
+	second := kept(t, "b.pfm", marked(7, 2, level))
+	said, wrong, code := ran(t, first, second)
 	if code != 0 {
 		t.Fatalf("it gave back %d: %s", code, wrong)
 	}
@@ -122,8 +123,9 @@ func TestApartSaysOutsideWhenTooManyPixelsAreFarApart(t *testing.T) {
 	for x := range 3 {
 		over.Set(x, 0, frame.Pixel{R: 1, G: 1, B: 1, Cover: 1, Depth: 1})
 	}
-	said, _, code := ran(t, kept(t, "a.pfm", grey(0.2)),
-		kept(t, "b.pfm", over))
+	first := kept(t, "a.pfm", grey(0.2))
+	second := kept(t, "b.pfm", over)
+	said, _, code := ran(t, first, second)
 	if code != 0 || !strings.Contains(said, "3.0000% of 100 pixels past "+
 		"one jnd") || !strings.Contains(said, "; outside the still budget") {
 		t.Errorf("three in a hundred past one gave %d: %q", code, said)
@@ -132,7 +134,9 @@ func TestApartSaysOutsideWhenTooManyPixelsAreFarApart(t *testing.T) {
 	for x := range 2 {
 		edge.Set(x, 0, frame.Pixel{R: 1, G: 1, B: 1, Cover: 1, Depth: 1})
 	}
-	said, _, code = ran(t, kept(t, "c.pfm", grey(0.2)), kept(t, "d.pfm", edge))
+	third := kept(t, "c.pfm", grey(0.2))
+	fourth := kept(t, "d.pfm", edge)
+	said, _, code = ran(t, third, fourth)
 	if code != 0 || !strings.Contains(said, "; within the still budget") {
 		t.Errorf("two in a hundred past one gave %d: %q", code, said)
 	}
@@ -141,8 +145,9 @@ func TestApartSaysOutsideWhenTooManyPixelsAreFarApart(t *testing.T) {
 // It says what is at the worst pixel in each picture, on a line of its
 // own.
 func TestApartSaysWhatIsAtTheWorstPixel(t *testing.T) {
-	said, _, code := ran(t, kept(t, "a.pfm", grey(0.2)),
-		kept(t, "b.pfm", marked(3, 4, 1)))
+	first := kept(t, "a.pfm", grey(0.2))
+	second := kept(t, "b.pfm", marked(3, 4, 1))
+	said, _, code := ran(t, first, second)
 	if code != 0 || strings.Count(said, "\n") != 2 ||
 		!strings.Contains(said, "\nthere, the first is ") ||
 		!strings.Contains(said, " and the second ") {
@@ -222,8 +227,8 @@ func TestWorstAtIsTheFirstPixelFurthestApart(t *testing.T) {
 // command, two raws that are the same are compared and give back zero.
 func TestMainComparesTheTwoRawsItIsGiven(t *testing.T) {
 	if os.Getenv("APART_RUNS_MAIN") == "1" {
-		os.Args = append([]string{"apart"}, strings.Fields(
-			os.Getenv("APART_ARGUMENTS"))...)
+		arguments := os.Getenv("APART_ARGUMENTS")
+		os.Args = append([]string{"apart"}, strings.Fields(arguments)...)
 		main()
 		return
 	}

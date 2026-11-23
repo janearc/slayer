@@ -1,0 +1,5 @@
+name,x,y,z
+along x,1,0,0
+along y,0,1,0
+along z,0,0,1
+along z again,0,0,1

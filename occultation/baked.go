@@ -48,8 +48,8 @@ func (baked Baked) Inner() float32 { return baked.inner }
 // Step is the width in metres of the finest level's bins.
 func (baked Baked) Step() float32 { return baked.step }
 
-// Outer is the radius in metres the table ends at.
-func (baked Baked) Outer() float32 {
+// outer is the radius in metres the table ends at.
+func (baked Baked) outer() float32 {
 	return baked.inner + baked.step*float32(len(baked.levels[0]))
 }
 
@@ -60,7 +60,7 @@ func (baked Baked) Outer() float32 {
 //
 // outside the table, it is zero.
 func (baked Baked) Seen(radius, across float32) float32 {
-	if radius < baked.inner || radius >= baked.Outer() {
+	if radius < baked.inner || radius >= baked.outer() {
 		return 0
 	}
 	level := float32(0)

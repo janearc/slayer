@@ -78,8 +78,9 @@ func TestMergeBeamLightPreservesSignedColour(t *testing.T) {
 	if err != nil || got == nil {
 		t.Fatalf("signed colour refused: %v", err)
 	}
+	unbounded := float32(math.Inf(1))
 	if got.Pix[0].R != -0.25 || !reflect.DeepEqual(base.Pix, []frame.Pixel{
-		{R: -0.5, Depth: float32(math.Inf(1))}}) {
+		{R: -0.5, Depth: unbounded}}) {
 		t.Fatal("linear signed colour was clipped or input changed")
 	}
 }

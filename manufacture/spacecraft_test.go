@@ -11,6 +11,7 @@ import (
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
+	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -117,17 +118,31 @@ func (profile spacecraftProfile) assertPrimaryAndProbes(test *testing.T,
 				continue
 			}
 			present = true
-			polygon, ok := object.Shape.(*mesh.Mesh)
-			if !ok {
-				test.Fatal("expected a spacecraft mesh")
-			}
-			_, hit := polygon.Hit(probe.Ray, spacecraftNear, math.Inf(spacecraftPositiveSign))
-			found = found || hit
+			found = found || probed(test, object, probe.Ray)
 		}
 		if !present || found != probe.Hit {
 			test.Fatal("wrong spacecraft silhouette", profile.Design, probe, found, present)
 		}
 	}
+}
+
+// probed says whether a ray meets a part of a spacecraft. A part is a mesh
+// of its own, or a group of meshes where the maker shares one mesh among
+// many places, as an array's cells are; anything else is refused.
+func probed(test *testing.T, object thing.Thing, ray maths.Ray) bool {
+	test.Helper()
+	far := math.Inf(spacecraftPositiveSign)
+	switch made := object.Shape.(type) {
+	case *mesh.Mesh:
+		_, hit := made.Hit(ray, spacecraftNear, far)
+		return hit
+	case *shape.MeshGroup:
+		_, hit := made.Hit(ray, spacecraftNear, far)
+		return hit
+	}
+	test.Fatal("expected a spacecraft mesh or a group of them",
+		object.Material.Name)
+	return false
 }
 
 func TestSpacecraftConstructorRefusesInvalidSizesAndUnknownDesigns(test *testing.T) {

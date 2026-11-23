@@ -92,10 +92,10 @@ func (point Point) When(at time.Duration) Lit {
 		Soft: point.Soft}
 }
 
-// Along is how much of the emitter's light goes out a way, a unit
+// along is how much of the emitter's light goes out a way, a unit
 // long: all of it with no Width, and with one, all of it within Width
 // of Toward, fading to none by Width and Soft further.
-func (lit Lit) Along(out maths.Vec) float64 {
+func (lit Lit) along(out maths.Vec) float64 {
 	if lit.Width <= 0 {
 		return 1
 	}
@@ -134,7 +134,7 @@ func (lit Lit) Lands(at maths.Vec, band maths.Band) float64 {
 // that arrives a distance away along in, the way toward the emitter:
 // the cone's share by the inverse square.
 func (lit Lit) falling(in maths.Vec, distance float64) float64 {
-	return lit.Along(in.Neg()) / (distance * distance)
+	return lit.along(in.Neg()) / (distance * distance)
 }
 
 // a Lit is a lamp slayer's tracer can use as it is, and lights in a band

@@ -8,28 +8,89 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// The csv files the tests of the media read their shapes from.
+const (
+	mediumPuffsFile    = "testdata/medium-puffs.csv"
+	mediumPuffOutsFile = "testdata/medium-puff-outs.csv"
+	mediumWispiesFile  = "testdata/medium-wispies.csv"
+	mediumGiantsFile   = "testdata/medium-giants.csv"
+	mediumJetsFile     = "testdata/medium-jets.csv"
+)
+
+// mediumOrigin is the point at the middle of space.
+func mediumOrigin() maths.Vec { return maths.V(nought, nought, nought) }
+
+// mediumPuff is the puff called name in the puffs file.
+func mediumPuff(t *testing.T, name string) Puff {
+	t.Helper()
+	row := readSheet(t, mediumPuffsFile).row(t, mediumPuffsFile, name)
+	return Puff{Radius: cell(t, row, "radius"), Thick: cell(t, row, "thick")}
+}
+
+// mediumWispy is a wispy medium of what it is given, with the noise called
+// name in the wispies file.
+func mediumWispy(t *testing.T, of Medium, name string) Wispy {
+	t.Helper()
+	row := readSheet(t, mediumWispiesFile).row(t, mediumWispiesFile, name)
+	return Wispy{Of: of, Seed: uint64(cellCount(t, row, "seed")),
+		Scale: cell(t, row, "scale"), Amount: cell(t, row, "amount")}
+}
+
+// mediumGiant is the giant called name in the giants file.
+func mediumGiant(t *testing.T, name string) Giant {
+	t.Helper()
+	row := readSheet(t, mediumGiantsFile).row(t, mediumGiantsFile, name)
+	return Giant{Radius: cell(t, row, "radius"), Depth: cell(t, row, "depth"),
+		Thick: cell(t, row, "thick")}
+}
+
+// mediumJet is the jet called name in the jets file.
+func mediumJet(t *testing.T, name string) Jet {
+	t.Helper()
+	row := readSheet(t, mediumJetsFile).row(t, mediumJetsFile, name)
+	return Jet{Length: cell(t, row, "length"), Base: cell(t, row, "base"),
+		Spread: cell(t, row, "spread"), Thick: cell(t, row, "thick"),
+		Knots: cell(t, row, "knots"), Seed: uint64(cellCount(t, row, "seed")),
+		Flow: cell(t, row, "flow")}
+}
+
+// mediumPuffFalls holds that a puff's density falls from the middle to the
+// edge in steps no larger than the fall the test allows.
+func mediumPuffFalls(t *testing.T, puff Puff) {
+	t.Helper()
+	start := picked(t, "medium-puff-walk-start")
+	step := picked(t, "medium-puff-walk-step")
+	fall := picked(t, "medium-puff-walk-fall")
+	last := puff.Thick
+	for radius := start; radius < puff.Radius; radius += step {
+		density := puff.Density(maths.V(nought, radius, nought))
+		if density > last || last-density > fall {
+			t.Fatalf("at %v the density went %v then %v", radius, last,
+				density)
+		}
+		last = density
+	}
+}
+
 // A puff is thickest in the middle, zero at and beyond its edge, and falls
 // between without a step.
 func TestPuff(t *testing.T) {
-	p := Puff{Radius: 2, Thick: 3}
-	if d := p.Density(maths.Vec{}); d != 3 {
-		t.Errorf("the middle is %v", d)
+	puff := mediumPuff(t, "walk")
+	if density := puff.Density(mediumOrigin()); density != puff.Thick {
+		t.Errorf("the middle is %v", density)
 	}
-	for _, r := range []float64{2, 2.5, 10} {
-		if d := p.Density(maths.V(r, 0, 0)); d != 0 {
-			t.Errorf("%v out is %v", r, d)
+	for _, out := range readSheet(t, mediumPuffOutsFile) {
+		radius := cell(t, out, "radius")
+		density := puff.Density(maths.V(radius, nought, nought))
+		if density != nought {
+			t.Errorf("%v out is %v", radius, density)
 		}
 	}
-	last := 3.0
-	for r := 0.1; r < 2; r += 0.1 {
-		d := p.Density(maths.V(0, r, 0))
-		if d > last || last-d > 0.4 {
-			t.Fatalf("at %v the density went %v then %v", r, last, d)
-		}
-		last = d
-	}
-	if _, _, ok := p.Bounds().Hit(maths.Ray{At: maths.V(0, 0, 5),
-		Dir: maths.V(0, 0, -1)}, 0, math.Inf(1)); !ok {
+	mediumPuffFalls(t, puff)
+	start := maths.V(nought, nought, picked(t, "medium-puff-ray-start"))
+	through := maths.Ray{At: start, Dir: maths.V(nought, nought, -unity)}
+	if _, _, ok := puff.Bounds().Hit(through, nought,
+		math.Inf(unity)); !ok {
 		t.Error("a ray through the middle misses the bounds")
 	}
 }
@@ -37,24 +98,30 @@ func TestPuff(t *testing.T) {
 // A wispy medium is never thicker than the one it wraps, is zero where that one
 // is, and differs from place to place.
 func TestWispy(t *testing.T) {
-	p := Puff{Radius: 2, Thick: 1}
-	w := Wispy{Of: p, Seed: 3, Scale: 0.5, Amount: 0.8}
+	puff := mediumPuff(t, "wisp")
+	wispy := mediumWispy(t, puff, "wisp")
 	seen := map[float64]bool{}
-	for i := range 50 {
-		at := maths.V(float64(i)*0.03, 0.2, -0.1)
-		d, full := w.Density(at), p.Density(at)
-		if d > full+1e-12 || d < 0 {
-			t.Fatalf("at %v wispy is %v, the puff %v", at, d, full)
+	stride := picked(t, "medium-wispy-stride")
+	height := picked(t, "medium-wispy-height")
+	depth := picked(t, "medium-wispy-depth")
+	tolerance := picked(t, "medium-wispy-tolerance")
+	resolution := picked(t, "medium-wispy-resolution")
+	for place := range pickedCount(t, "medium-wispy-samples") {
+		at := maths.V(float64(place)*stride, height, depth)
+		density, full := wispy.Density(at), puff.Density(at)
+		if density > full+tolerance || density < nought {
+			t.Fatalf("at %v wispy is %v, the puff %v", at, density, full)
 		}
-		seen[math.Round(d/full*1000)] = true
+		seen[math.Round(density/full*resolution)] = true
 	}
-	if len(seen) < 10 {
+	if len(seen) < pickedCount(t, "medium-wispy-varied-least") {
 		t.Errorf("the wisps hardly vary: %d values", len(seen))
 	}
-	if w.Density(maths.V(5, 0, 0)) != 0 {
+	outside := maths.V(picked(t, "medium-wispy-outside"), nought, nought)
+	if wispy.Density(outside) != nought {
 		t.Error("wisps outside the puff")
 	}
-	if (Wispy{}).Density(maths.Vec{}) != 0 {
+	if (Wispy{}).Density(mediumOrigin()) != nought {
 		t.Error("a wispy nothing has density")
 	}
 }
@@ -62,19 +129,32 @@ func TestWispy(t *testing.T) {
 // A giant is clear above its radius and thick a depth below it, with
 // nothing in between but a smooth rise.
 func TestGiant(t *testing.T) {
-	g := Giant{Radius: 10, Depth: 1, Thick: 4}
-	if d := g.Density(maths.V(10.5, 0, 0)); d != 0 {
-		t.Errorf("above the top, %v", d)
+	giant := mediumGiant(t, "rise")
+	above := maths.V(picked(t, "medium-giant-above"), nought, nought)
+	if density := giant.Density(above); density != nought {
+		t.Errorf("above the top, %v", density)
 	}
-	if d := g.Density(maths.V(0, 8, 0)); d != 4 {
-		t.Errorf("well below, %v", d)
+	well := maths.V(nought, picked(t, "medium-giant-below"), nought)
+	if density := giant.Density(well); density != giant.Thick {
+		t.Errorf("well below, %v", density)
 	}
-	if d := g.Density(maths.V(0, 0, 9.5)); !(d > 0 && d < 4) {
-		t.Errorf("halfway down the rise, %v", d)
+	rise := maths.V(nought, nought, picked(t, "medium-giant-rise"))
+	if density := giant.Density(rise); !(density > nought &&
+		density < giant.Thick) {
+		t.Errorf("halfway down the rise, %v", density)
 	}
-	if d := g.Density(maths.Vec{}); d != 4 {
-		t.Errorf("at the centre, %v", d)
+	if density := giant.Density(mediumOrigin()); density != giant.Thick {
+		t.Errorf("at the centre, %v", density)
 	}
+}
+
+// mediumSpanners are a puff, a giant and a wispy puff of one radius, the
+// media whose spans are their ball's.
+func mediumSpanners(t *testing.T) []Spanner {
+	t.Helper()
+	puff := mediumPuff(t, "span")
+	return []Spanner{puff, mediumGiant(t, "span"),
+		mediumWispy(t, puff, "span")}
 }
 
 // A puff and a giant span a ray by their ball, not their box: a ray
@@ -84,16 +164,23 @@ func TestSpanIsTheBall(t *testing.T) {
 	var _ Spanner = Puff{}
 	var _ Spanner = Giant{}
 	var _ Spanner = Wispy{}
-	down := maths.Ray{At: maths.V(0, 5, 0), Dir: maths.V(0, -1, 0)}
-	for _, m := range []Spanner{Puff{Radius: 2}, Giant{Radius: 2, Depth: 1},
-		Wispy{Of: Puff{Radius: 2}}} {
-		enter, leave, ok := m.Span(down, 0, math.Inf(1))
-		if !ok || !(math.Abs(enter-3) <= 1e-12) || !(math.Abs(leave-7) <= 1e-12) {
-			t.Errorf("%T spans %v to %v, %v", m, enter, leave, ok)
+	height := picked(t, "medium-span-height")
+	down := maths.Ray{At: maths.V(nought, height, nought),
+		Dir: maths.V(nought, -unity, nought)}
+	tolerance := picked(t, "medium-span-tolerance")
+	wantEnter := picked(t, "medium-span-enter")
+	wantLeave := picked(t, "medium-span-leave")
+	skew := picked(t, "medium-span-corner")
+	corner := maths.Ray{At: maths.V(skew, height, skew),
+		Dir: maths.V(nought, -unity, nought)}
+	for _, spanner := range mediumSpanners(t) {
+		enter, leave, ok := spanner.Span(down, nought, math.Inf(unity))
+		if !ok || !(math.Abs(enter-wantEnter) <= tolerance) ||
+			!(math.Abs(leave-wantLeave) <= tolerance) {
+			t.Errorf("%T spans %v to %v, %v", spanner, enter, leave, ok)
 		}
-		corner := maths.Ray{At: maths.V(1.9, 5, 1.9), Dir: maths.V(0, -1, 0)}
-		if _, _, ok := m.Span(corner, 0, math.Inf(1)); ok {
-			t.Errorf("%T spans a ray through its box's corner", m)
+		if _, _, ok := spanner.Span(corner, nought, math.Inf(unity)); ok {
+			t.Errorf("%T spans a ray through its box's corner", spanner)
 		}
 	}
 }
@@ -102,20 +189,29 @@ func TestSpanIsTheBall(t *testing.T) {
 // jet after a time is the density that far back before, and a jet
 // without a flow is the same at every time.
 func TestAJetsKnotsFlow(t *testing.T) {
-	j := Jet{Length: 100, Base: 2, Spread: 0.05, Thick: 1, Knots: 1, Seed: 5, Flow: 1}
-	later := j.Tick(3 * time.Second).(Jet)
-	at := maths.V(0, 20, 0)
-	if j.Density(at) == later.Density(at) {
+	jet := mediumJet(t, "flowing")
+	seconds := time.Duration(picked(t, "medium-jet-seconds"))
+	later := jet.Tick(seconds * time.Second).(Jet)
+	station := picked(t, "medium-jet-station")
+	at := maths.V(nought, station, nought)
+	if jet.Density(at) == later.Density(at) {
 		t.Errorf("the knots did not move")
 	}
 	// on the axis the density is the knot pattern times the fall off
 	// along the jet; the pattern three base widths back before is the
 	// pattern here now
-	here, there := later.Density(at), j.Density(maths.V(0, 20-3*j.Base, 0))
-	if !(math.Abs(here/(1-20/j.Length)-there/(1-14/j.Length)) <= 1e-9) {
-		t.Errorf("after three seconds the knot at 20 is %v; at 14 before it was %v", here, there)
+	back := picked(t, "medium-jet-widths-back") * jet.Base
+	earlier := maths.V(nought, station-back, nought)
+	here, there := later.Density(at), jet.Density(earlier)
+	stationBack := picked(t, "medium-jet-station-back")
+	tolerance := picked(t, "medium-jet-tolerance")
+	fadeHere := unity - station/jet.Length
+	fadeThere := unity - stationBack/jet.Length
+	if !(math.Abs(here/fadeHere-there/fadeThere) <= tolerance) {
+		t.Errorf("after three seconds the knot at 20 is %v; "+
+			"at 14 before it was %v", here, there)
 	}
-	still := Jet{Length: 100, Base: 2, Spread: 0.05, Thick: 1, Knots: 1, Seed: 5}
+	still := mediumJet(t, "still")
 	if still.Density(at) != still.Tick(time.Hour).(Jet).Density(at) {
 		t.Errorf("a jet without a flow moved")
 	}

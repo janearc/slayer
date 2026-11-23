@@ -61,7 +61,9 @@ func TestEachBodyTurnsTheWayItsTiltSays(t *testing.T) {
 			continue
 		}
 		got := quarterDayOn(t, b.Day().Seconds(), b.Tilt())
-		want := maths.V(0, math.Sin(b.Tilt()), -math.Cos(b.Tilt()))
+		sine := math.Sin(b.Tilt())
+		cosine := math.Cos(b.Tilt())
+		want := maths.V(0, sine, -cosine)
 		if d := got.Sub(want).Len(); !(d < 1e-6) {
 			t.Errorf("%s: +x a quarter day on is %v, want %v", b.Name(), got, want)
 		}
@@ -94,8 +96,9 @@ func TestBodiesWithNoDayDoNotTurn(t *testing.T) {
 		Quasar} {
 		b := its(t, make)
 		w := thing.NewWorld()
+		tilt := measure.Radians(b.Tilt())
 		still := want(t, b.Name(), bodies.Star, 1, 1).
-			Turning(b.Day(), measure.Radians(b.Tilt()))
+			Turning(b.Day(), tilt)
 		if err := still.Place(w, maths.Vec{}, 1, 2); err != nil {
 			t.Fatal(err)
 		}

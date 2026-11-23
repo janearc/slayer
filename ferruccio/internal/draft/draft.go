@@ -154,6 +154,50 @@ func (document *Document) CanNavigate() bool {
 	return err == nil
 }
 
+const (
+	// minimumWide is the narrowest field of view, in degrees, that zoom works in.
+	minimumWide = 5
+	// maximumWide is the widest field of view, in degrees, that zoom works in.
+	maximumWide = 120
+	// wideGrains is how many parts of a degree a zoomed angle is written
+	// to: a millionth, far finer than a picture shows.
+	wideGrains = 1e6
+)
+
+// zoomed is the field of view after a zoom, held to the range zoom works in
+// and to a millionth of a degree, so the angle written is the one meant: 50
+// by 1.1 is written 55, where the multiplication gives 55.00000000000001.
+func zoomed(wide, factor float64) float64 {
+	held := math.Max(minimumWide, math.Min(maximumWide, wide*factor))
+	return math.Round(held*wideGrains) / wideGrains
+}
+
+// writtenWide is a catalogue's wide angle as written, read without its
+// schema, so an angle the schema refuses can be named in the zoom's own
+// words. it is false where none is written or what is written is no number.
+func (document *Document) writtenWide() (float64, bool) {
+	var plain map[string]any
+	if err := yamlfile.Read(document.name, document.source, &plain); err != nil {
+		return 0, false
+	}
+	switch wide := plain["wide"].(type) {
+	case float64:
+		return wide, true
+	case int:
+		return float64(wide), true
+	}
+	return 0, false
+}
+
+// checkZoomRange refuses to zoom an authored field of view outside the range
+// zoom works in, so that value is left as written and never rewritten.
+func checkZoomRange(wide float64, name string) error {
+	if wide < minimumWide || wide > maximumWide {
+		return fmt.Errorf("%s is %g degrees; zoom works only from %d to %d degrees, so it is left as written", name, wide, minimumWide, maximumWide)
+	}
+	return nil
+}
+
 // Navigate applies a supported camera orbit and zoom as one valid YAML edit.
 func (document *Document) Navigate(yawDelta, pitchDelta, zoomFactor float64) error {
 	if math.IsNaN(yawDelta) || math.IsInf(yawDelta, 0) ||
@@ -171,9 +215,17 @@ func (document *Document) Navigate(yawDelta, pitchDelta, zoomFactor float64) err
 }
 
 // navigateCatalogue edits the catalogue's named orbit fields and wide angle.
+// the catalogue's schema holds wide to the range zoom works in, so a
+// catalogue that reads has an angle zoom can change; one that does not read
+// for its angle is refused in the zoom's words, not the schema's.
 func (document *Document) navigateCatalogue(yawDelta, pitchDelta, zoomFactor float64) error {
 	tree, err := document.Tree()
 	if err != nil {
+		if wide, written := document.writtenWide(); written && zoomFactor > 0 {
+			if refusal := checkZoomRange(wide, "wide"); refusal != nil {
+				return refusal
+			}
+		}
 		return err
 	}
 	root := tree.Content[0]
@@ -233,7 +285,7 @@ func (document *Document) navigateCatalogue(yawDelta, pitchDelta, zoomFactor flo
 		}
 	}
 	if zoomFactor > 0 {
-		newWide := math.Max(5, math.Min(120, wide*zoomFactor))
+		newWide := zoomed(wide, zoomFactor)
 		if newWide != wide || wideNode == nil {
 			if wideNode == nil {
 				wideNode = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!float"}
@@ -328,6 +380,16 @@ func (document *Document) navigateSet(yawDelta, pitchDelta, zoomFactor float64) 
 	if err != nil {
 		return err
 	}
+	var wide float64
+	if zoomFactor > 0 {
+		wide, err = readNumber(nodes.wide, "scene.film.wide")
+		if err != nil {
+			return err
+		}
+		if err := checkZoomRange(wide, "scene.film.wide"); err != nil {
+			return err
+		}
+	}
 	if yawDelta != 0 || pitchDelta != 0 {
 		at, err = rotateCamera(at, target, yawDelta, pitchDelta)
 		if err != nil {
@@ -336,11 +398,7 @@ func (document *Document) navigateSet(yawDelta, pitchDelta, zoomFactor float64) 
 		writeVector(nodes.at, at)
 	}
 	if zoomFactor > 0 {
-		wide, err := readNumber(nodes.wide, "scene.film.wide")
-		if err != nil {
-			return err
-		}
-		setNumber(nodes.wide, math.Max(5, math.Min(120, wide*zoomFactor)))
+		setNumber(nodes.wide, zoomed(wide, zoomFactor))
 	}
 	if yawDelta == 0 && pitchDelta == 0 && zoomFactor == 0 {
 		return nil

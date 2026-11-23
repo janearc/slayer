@@ -110,9 +110,9 @@ func (rect Rect) valid() bool {
 		rect.MinEast < rect.MaxEast && rect.MinSouth < rect.MaxSouth
 }
 
-// Contains uses half-open ownership so adjoining queries do not duplicate
+// contains uses half-open ownership so adjoining queries do not duplicate
 // roots.
-func (rect Rect) Contains(east, south float64) bool {
+func (rect Rect) contains(east, south float64) bool {
 	return east >= rect.MinEast && east < rect.MaxEast &&
 		south >= rect.MinSouth && south < rect.MaxSouth
 }

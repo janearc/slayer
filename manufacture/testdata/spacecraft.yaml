@@ -74,6 +74,55 @@ profiles:
       - material: secondary mirror
         ray: {at: {x: -3, y: 6.5, z: -7.59}, dir: {x: 1, y: 0, z: 0}}
         hit: false
+  - design: prima
+    aperture: 1.8
+    primary-axis: x
+    probes:
+      - material: primary mirror
+        ray: {at: {x: 0, y: 0, z: 5}, dir: {x: 0, y: 0, z: -1}}
+        hit: true
+      - material: thermal shield
+        ray: {at: {x: 1.5, y: 2.14, z: 5}, dir: {x: 0, y: 0, z: -1}}
+        hit: true
+  - design: roman
+    aperture: 2.4
+    primary-axis: x
+    probes:
+      - material: black aperture shade fabric
+        ray: {at: {x: 0.2, y: 5, z: -5.5}, dir: {x: 0, y: -1, z: 0}}
+        hit: true
+      - material: black aperture shade fabric
+        ray: {at: {x: 0, y: 0, z: -7}, dir: {x: 0, y: 0, z: 1}}
+        hit: false
+      - material: gold thermal blanket
+        ray: {at: {x: 2.5, y: 0, z: 5.5}, dir: {x: -1, y: 0, z: 0}}
+        hit: true
+      - material: primary mirror
+        ray: {at: {x: 0, y: 0, z: -2}, dir: {x: 0, y: 0, z: 1}}
+        hit: true
+      - material: secondary mirror
+        ray: {at: {x: 0, y: 0, z: -5}, dir: {x: 0, y: 0, z: 1}}
+        hit: true
+      # Two panels lie across the craft, each 1.728 m wide with 0.084 m
+      # between them, so the +x panel is from 0.042 to 1.770 m. Its sixteen
+      # rows of cells, 0.108 m apart, run from the outer edge in: the first
+      # eight, 0.910 to 1.766 m, are the first string, and the last eight,
+      # 0.046 to 0.902 m, the second.
+      - material: solar array
+        ray: {at: {x: 1.3, y: 5, z: 0}, dir: {x: 0, y: -1, z: 0}}
+        hit: true
+      - material: second solar cell string
+        ray: {at: {x: 0.4, y: 5, z: 0}, dir: {x: 0, y: -1, z: 0}}
+        hit: true
+      - material: solar array
+        ray: {at: {x: 0.4, y: 5, z: 0}, dir: {x: 0, y: -1, z: 0}}
+        hit: false
+      - material: solar array
+        ray: {at: {x: 0, y: 5, z: 0}, dir: {x: 0, y: -1, z: 0}}
+        hit: false
+      - material: thermal shield
+        ray: {at: {x: 2.4, y: 0, z: 0}, dir: {x: -1, y: 0, z: 0}}
+        hit: true
 invalid-apertures:
   - {value: 0, message: "invalid spacecraft"}
   - {value: -1, message: "invalid spacecraft"}

@@ -12,11 +12,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
+	"go.uber.org/mock/gomock"
 )
 
 // altered is the default plan with one line changed, written beside the
@@ -95,11 +97,11 @@ func TestSelectingEntriesOffersAllOrRefusesTheUnknown(test *testing.T) {
 }
 
 // refusing is somewhere nothing can be written.
-type refusing struct{}
-
-// Write refuses every byte.
-func (refusing) Write([]byte) (int, error) {
-	return 0, errors.New("nothing can be written here")
+func refusing(test *testing.T) *mocks.MockWriter {
+	writer := mocks.NewMockWriter(gomock.NewController(test))
+	writer.EXPECT().Write(gomock.Any()).
+		Return(0, errors.New("nothing can be written here")).AnyTimes()
+	return writer
 }
 
 // list says every entry on a line of its own. The anti-tests: a name
@@ -126,7 +128,7 @@ func TestListSaysEveryEntryOrStops(test *testing.T) {
 	}
 	wrong.Reset()
 	if status := tool(context.Background()).Run([]string{"list", "webb"},
-		refusing{}, &wrong); status == successfulExit {
+		refusing(test), &wrong); status == successfulExit {
 		test.Errorf("list wrote where nothing can be written: %q", wrong.String())
 	}
 }
@@ -235,7 +237,7 @@ func TestRenderRefusesBeforeItMakesAnything(test *testing.T) {
 	}
 	wrong.Reset()
 	if status := tool(context.Background()).Run([]string{"render", "webb",
-		"--dry-run", "--out", output}, refusing{}, &wrong); status == successfulExit {
+		"--dry-run", "--out", output}, refusing(test), &wrong); status == successfulExit {
 		test.Error("a dry run said its count where nothing can be written")
 	}
 	if _, err := os.Stat(output); !os.IsNotExist(err) {

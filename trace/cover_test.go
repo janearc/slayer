@@ -66,10 +66,13 @@ func TestCoverIsByTheChannelThatGetsThroughMost(t *testing.T) {
 func TestABallBeforeAFieldIsDrawnAsItIs(t *testing.T) {
 	build := func(field bool) *thing.World {
 		world := thing.NewWorld()
+		sphereAt := resting(maths.V(0, 0, 5))
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
 			Material: &thing.Material{Colour: maths.Grey(0.8)},
-			Motion:   resting(maths.V(0, 0, 5))})
-		world.Lamp(thing.Sun(maths.V(0, 0, 1), maths.Grey(1)))
+			Motion:   sphereAt})
+		along := maths.V(0, 0, 1)
+		light := maths.Grey(1)
+		world.Lamp(thing.Sun(along, light))
 		if field {
 			world.AddField(thing.Field{Mass: 0.1, Reach: 2})
 		}

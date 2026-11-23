@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/janearc/puzzlemouth/numbers"
@@ -16,12 +17,29 @@ import (
 
 // the files the tests read: the numbers they pick, and tables of cases
 const (
-	numbersFile  = "testdata/numbers.yaml"
-	refusedFile  = "testdata/requests-refused.csv"
-	takenFile    = "testdata/requests-taken.csv"
-	movieName    = "movie.mp4"
-	notMovieName = "notes.txt"
+	numbersFile        = "testdata/numbers.yaml"
+	refusedFile        = "testdata/requests-refused.csv"
+	takenFile          = "testdata/requests-taken.csv"
+	slicesTakenFile    = "testdata/slices-taken.csv"
+	slicesRefusedFile  = "testdata/slices-refused.csv"
+	soundsRefusedFile  = "testdata/sounds-refused.csv"
+	soundsTakenFile    = "testdata/sounds-taken.csv"
+	decodedTakenFile   = "testdata/decoded-taken.csv"
+	decodedRefusedFile = "testdata/decoded-refused.csv"
+	movieName          = "movie.mp4"
+	notMovieName       = "notes.txt"
 )
+
+// radiansInTurn is the angle of a whole turn. Defined: twice pi.
+const radiansInTurn = 2 * math.Pi
+
+// sampleSeparator is what divides the samples in one field of a table of
+// cases. Defined by the tables.
+const sampleSeparator = ";"
+
+// float32Bits is the size a sample is read at. Defined: a float32 is 32
+// bits.
+const float32Bits = 32
 
 // chosen is the picked numbers as the file holds them, and why the file
 // could not be read if it could not.
@@ -41,7 +59,8 @@ func readChosen() (numbers.Numbers, error) {
 func pickedValue(name string) float64 {
 	number, err := chosen.Get(name)
 	if err != nil {
-		panic(errors.Join(unread, fmt.Errorf("movie: %w", err)))
+		missing := fmt.Errorf("movie: %w", err)
+		panic(errors.Join(unread, missing))
 	}
 	return number.Value
 }
@@ -66,18 +85,50 @@ func casesOf(t *testing.T, name string) []tableRow {
 		t.Fatal(err)
 	}
 	all, err := csv.NewReader(bytes.NewReader(text)).ReadAll()
-	if err != nil || len(all) < 2 {
+	if err != nil || len(all) <= headingRows {
 		t.Fatalf("%s: %v, %d rows", name, err, len(all))
 	}
+	heading, body := all[headingRows-one], all[headingRows:]
 	var rows []tableRow
-	for _, fields := range all[1:] {
+	for _, fields := range body {
 		row := tableRow{}
-		for place, column := range all[0] {
+		for place, column := range heading {
 			row[column] = fields[place]
 		}
 		rows = append(rows, row)
 	}
 	return rows
+}
+
+// samplesIn is the samples in a column, written apart by semicolons, or
+// none when the column is empty; or the test stops.
+func samplesIn(t *testing.T, row tableRow, column string) []float32 {
+	t.Helper()
+	text := textIn(t, row, column)
+	if text == "" {
+		return nil
+	}
+	var samples []float32
+	for _, part := range strings.Split(text, sampleSeparator) {
+		value, err := strconv.ParseFloat(part, float32Bits)
+		if err != nil {
+			t.Fatal(err)
+		}
+		samples = append(samples, float32(value))
+	}
+	return samples
+}
+
+// soundIn is the sound a row of a table of cases describes, by its rate
+// and samples columns, or the test stops.
+func soundIn(t *testing.T, row tableRow) Sound {
+	t.Helper()
+	sound, err := NewSound(wholeIn(t, row, "rate"),
+		samplesIn(t, row, "samples"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return sound
 }
 
 // textIn is the text in a column, or the test stops.
@@ -145,11 +196,11 @@ func tone(t *testing.T, rate int, seconds float64) Sound {
 	loud := pickedValue("tone-loudness")
 	share := pickedValue("right-share")
 	start := pickedValue("tone-hertz")
-	samples := make([]float32, 0, count*channels)
+	samples := make([]float32, zero, count*channels)
 	for i := range count {
 		at := float64(i) / float64(rate)
 		turns := start*at + start*at*at/pair
-		left := loud * math.Sin(2*math.Pi*turns)
+		left := loud * math.Sin(radiansInTurn*turns)
 		samples = append(samples, float32(left), float32(left*share))
 	}
 	sound, err := NewSound(rate, samples)
@@ -167,26 +218,4 @@ func mustSettings(t *testing.T, request Request) Settings {
 		t.Fatal(err)
 	}
 	return settings
-}
-
-// leftIn is the names left in the directory a path is in.
-func leftIn(t *testing.T, path string) []string {
-	t.Helper()
-	entries, err := os.ReadDir(filepath.Dir(path))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var names []string
-	for _, entry := range entries {
-		names = append(names, entry.Name())
-	}
-	return names
-}
-
-// nothingLeft stops the test when anything is left beside the path.
-func nothingLeft(t *testing.T, path string) {
-	t.Helper()
-	if names := leftIn(t, path); len(names) != 0 {
-		t.Fatalf("left behind: %v", names)
-	}
 }

@@ -58,14 +58,6 @@ const (
 	sideFew    = 5
 	sideDouble = trialSide * two
 	sideFrame  = trialWide
-	// missX, missY, missFar and missRadius are the pixel, the distance
-	// along its ray and the radius of the first ball the close lens's
-	// sight refuses at a side of sixteen, found by the sight test with
-	// the seeds of numbers.yaml.
-	missX      = 95
-	missY      = 21
-	missFar    = 0.0354
-	missRadius = 0.0003
 	// oddWide and oddHigh are a frame of 100 by 37 pixels, whose last
 	// column and row of sections are narrower than the others, and
 	// oddSide a section of 33 pixels on it.
@@ -77,13 +69,6 @@ const (
 	halfTurn = 179.9
 	// squashed is a pixel three times as wide as it is tall.
 	squashed = 3.0
-	// oddX, oddY, oddFar and oddRadius are the pixel, the distance along
-	// its ray and the radius of the ball that the sight of the odd frame
-	// refuses, found by the sight test with the seeds of numbers.yaml.
-	oddX      = 53
-	oddY      = 32
-	oddFar    = 1.837
-	oddRadius = 0.0269
 )
 
 // sidesTried are the sides of a section the lens trials try.
@@ -110,8 +95,10 @@ func thinLens(t *testing.T, focal, stop, focus float64) thin.Thin {
 func aim(t *testing.T, view eye, k int64, nearest, spread float64) (ball,
 	image.Point) {
 	t.Helper()
-	x := int(noise.Hash(stream(t, "seed-pixel-x"), k) * float64(view.wide))
-	y := int(noise.Hash(stream(t, "seed-pixel-y"), k) * float64(view.high))
+	pixelColumn := stream(t, "seed-pixel-x")
+	pixelRow := stream(t, "seed-pixel-y")
+	x := int(noise.Hash(pixelColumn, k) * float64(view.wide))
+	y := int(noise.Hash(pixelRow, k) * float64(view.high))
 	ray := view.look(x, y)
 	far := nearest + spread*noise.Hash(stream(t, "seed-far"), k)
 	first := noise.Hash(stream(t, "seed-size-first"), k)

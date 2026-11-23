@@ -99,7 +99,8 @@ func (tx *admissionTransaction) restoreIntent(data []byte) error {
 		writeErr = file.Sync()
 	}
 	err = errors.Join(writeErr, file.Close())
-	return errors.Join(err, unix.Fsync(int(tx.directory.Fd())))
+	directoryDescriptor := int(tx.directory.Fd())
+	return errors.Join(err, unix.Fsync(directoryDescriptor))
 }
 
 // admit decides one admission request and publishes the result. It runs once

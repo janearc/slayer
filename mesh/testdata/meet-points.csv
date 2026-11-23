@@ -1,0 +1,15 @@
+name,x,y,met
+over-middle,0.5,0.5,1
+over-wide,0.25,1.5,1
+side-bottom,1,0,1
+side-left,0,1,1
+side-long,1,1,1
+corner-first,0,0,1
+corner-second,2,0,1
+corner-third,0,2,1
+beside-left,-0.5,0.5,0
+beside-long-side,1.5,1.5,0
+beside-right,3,0,0
+beside-below,1,-0.25,0
+beside-long-side-by-a-hair,1.0000001,1.0000001,0
+beside-above,0.5,2.5,0

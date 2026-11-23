@@ -26,8 +26,8 @@ import (
 //
 // Streaks is a dressing, not physics: a real disc is turbulent but
 // smooth at this scale, and a film wants streaks that follow the
-// rotation. Nought is honest; one is miami's. Shear winds them as the
-// orbit does, and Seed makes them a disc's own.
+// rotation. Nought is honest; one is the streaks at their full strength.
+// Shear winds them as the orbit does, and Seed makes them a disc's own.
 type Thin struct {
 	Inner, Outer float64
 	Hot, Bright  float64
@@ -41,56 +41,98 @@ type Thin struct {
 	Omega, Time float64
 }
 
+// peakRadius is defined by the profile: the radius, in inner radii, where
+// its derivative is nought and it is largest, 49 over 36.
+const peakRadius = 49.0 / 36
+
+// coolingPower is defined by Shakura and Sunyaev's disc: the temperature
+// falls as the radius to minus this power, three quarters.
+const coolingPower = 0.75
+
+// edgePower is defined by Shakura and Sunyaev's disc: the power of the
+// factor that takes the temperature to nought at the inner edge, a quarter.
+const edgePower = 0.25
+
 // peak is the profile's largest value, at one and a third of the inner
 // radius and a bit.
-var peak = profile(49.0 / 36)
+var peak = profile(peakRadius)
+
+// the numbers the disc is drawn with, each picked and held in
+// picked-numbers.yaml
+var (
+	// thinDarkBelow is the temperature, in kelvin, below which the disc is
+	// dark.
+	thinDarkBelow = pickedNumber("thin-dark-below")
+	// streakBands is how many streaks lie across the disc from its inner
+	// edge to its outer.
+	streakBands = pickedNumber("thin-streak-bands")
+	// streakRadius is the radius of the circle in the noise that a streak's
+	// angle is read round.
+	streakRadius = pickedNumber("thin-streak-radius")
+	// streakOctaves is how many scales of noise the streaks have.
+	streakOctaves = int(pickedNumber("thin-streak-octaves"))
+	// streakGain is how far the noise moves a streak's brightness, for
+	// each unit of Streaks.
+	streakGain = pickedNumber("thin-streak-gain")
+	// thermalStep is the table's step in kelvin.
+	thermalStep = pickedNumber("thermal-step")
+	// thermalTop is the table's last temperature, in kelvin; above it the
+	// colour is the top's.
+	thermalTop = pickedNumber("thermal-top")
+)
 
 // profile is the temperature at a radius in inner radii, as a share of a scale:
 // the three quarter power with the inner edge's factor, zero at the edge
 // itself.
-func profile(r float64) float64 {
-	if r <= 1 {
-		return 0
+func profile(radius float64) float64 {
+	if radius <= unity {
+		return nought
 	}
-	return math.Pow(1/r, 0.75) * math.Pow(1-math.Sqrt(1/r), 0.25)
+	return math.Pow(unity/radius, coolingPower) *
+		math.Pow(unity-math.Sqrt(unity/radius), edgePower)
 }
 
-// Temperature is the disc's temperature at a radius, in kelvin.
-func (t Thin) Temperature(r float64) float64 {
-	if t.Inner <= 0 || r < t.Inner || r > t.Outer {
-		return 0
+// temperature is the disc's temperature at a radius, in kelvin.
+func (disc Thin) temperature(radius float64) float64 {
+	if disc.Inner <= nought || radius < disc.Inner || radius > disc.Outer {
+		return nought
 	}
-	return t.Hot * profile(r/t.Inner) / peak
+	return disc.Hot * profile(radius/disc.Inner) / peak
 }
 
-// At is the light at p: the black body's colour at the temperature
-// there, as bright as the fourth power says, streaked if asked.
-func (t Thin) At(p maths.Vec) maths.Light {
-	r := math.Hypot(p.X, p.Z)
-	k := t.Temperature(r)
-	if math.IsNaN(k) {
-		// a radius that is no number, the same on every machine
-		return maths.Grey(math.NaN())
+// At is the light at the point: the black body's colour at the
+// temperature there, as bright as the fourth power says, streaked if
+// asked.
+func (disc Thin) At(point maths.Vec) maths.Light {
+	radius := math.Hypot(point.X, point.Z)
+	kelvin := disc.temperature(radius)
+	if math.IsNaN(kelvin) {
+		return noNumberLight()
 	}
-	if k < 500 {
-		return maths.Light{}
+	if kelvin < thinDarkBelow {
+		return noPaint
 	}
-	l := thermal(k)
-	share := k / t.Hot
-	bright := t.Bright * share * share * share * share
-	if t.Streaks > 0 {
-		// streaks along the orbit, wound by the shear as the inner
-		// disc runs ahead of the outer, continuous round the circle,
-		// and carried round with time at the orbit's own rate, from
-		// +X toward -Z as the orbit goes
-		phi := math.Atan2(p.Z, p.X) + t.Shear*math.Log(r/t.Inner) +
-			t.Omega*math.Pow(r, -1.5)*t.Time
-		across := 6 * (r - t.Inner) / (t.Outer - t.Inner)
-		cos, sin := math.Cos(phi), math.Sin(phi)
-		n := noise.Fractal(t.Seed, across, 2*cos, 2*sin, 3)
-		bright *= math.Max(0, 1+t.Streaks*2*n)
+	share := kelvin / disc.Hot
+	bright := disc.Bright * share * share * share * share
+	if disc.Streaks > nought {
+		bright *= disc.streaked(point, radius)
 	}
-	return l.Scale(bright)
+	return thermal(kelvin).Scale(bright)
+}
+
+// streaked is how much a streak brightens the disc at the point, at a
+// radius: streaks along the orbit, wound by the shear as the inner disc
+// runs ahead of the outer, continuous round the circle, and carried round
+// with time at the orbit's own rate, from +X toward -Z as the orbit goes.
+func (disc Thin) streaked(point maths.Vec, radius float64) float64 {
+	phi := math.Atan2(point.Z, point.X) +
+		disc.Shear*math.Log(radius/disc.Inner) +
+		disc.Omega*math.Pow(radius, orbitPower)*disc.Time
+	across := streakBands * (radius - disc.Inner) / (disc.Outer - disc.Inner)
+	cos, sin := math.Cos(phi), math.Sin(phi)
+	noisy := noise.Fractal(disc.Seed, across, streakRadius*cos,
+		streakRadius*sin, streakOctaves)
+	return math.Max(nought, unity+disc.Streaks*streakGain*noisy)
 }
 
 // thermals is the black body's colour by temperature, worked out once
@@ -101,45 +143,42 @@ var (
 	thermals     []maths.Light
 )
 
-// thermalStep is the table's step in kelvin, and thermalTop its last
-// temperature; above it the colour is the top's.
-const (
-	thermalStep = 50.0
-	thermalTop  = 60000.0
-)
+// fillThermals works out the table of black body colours.
+func fillThermals() {
+	count := int(thermalTop/thermalStep) + unity
+	thermals = make([]maths.Light, count)
+	for step := range thermals {
+		kelvin := float64(step) * thermalStep
+		red, green, blue := srgb.Light(swatch.Planckian(kelvin))
+		light := maths.RGB(math.Max(red, nought), math.Max(green, nought),
+			math.Max(blue, nought))
+		if luminance := light.Luminance(); luminance > nought {
+			light = light.Scale(unity / luminance)
+		}
+		thermals[step] = light
+	}
+}
 
 // thermal is a black body's colour at a temperature, at unit
 // luminance, from the table, blended between its steps.
-func thermal(k float64) maths.Light {
-	thermalsOnce.Do(func() {
-		n := int(thermalTop/thermalStep) + 1
-		thermals = make([]maths.Light, n)
-		for i := range thermals {
-			kelvin := float64(i) * thermalStep
-			cr, cg, cb := srgb.Light(swatch.Planckian(kelvin))
-			l := maths.RGB(math.Max(cr, 0), math.Max(cg, 0),
-				math.Max(cb, 0))
-			if y := l.Luminance(); y > 0 {
-				l = l.Scale(1 / y)
-			}
-			thermals[i] = l
-		}
-	})
-	if k >= thermalTop {
-		return thermals[len(thermals)-1]
+func thermal(kelvin float64) maths.Light {
+	thermalsOnce.Do(fillThermals)
+	if kelvin >= thermalTop {
+		return thermals[len(thermals)-unity]
 	}
-	if k <= 0 {
-		return thermals[0]
+	if kelvin <= nought {
+		return thermals[firstPlace]
 	}
-	at := k / thermalStep
-	i := int(at)
-	f := at - float64(i)
-	return thermals[i].Scale(1 - f).Add(thermals[i+1].Scale(f))
+	at := kelvin / thermalStep
+	step := int(at)
+	fraction := at - float64(step)
+	return thermals[step].Scale(unity - fraction).
+		Add(thermals[step+unity].Scale(fraction))
 }
 
 // Tick is the disc as it is at a time: the same disc, its streaks
 // carried round.
-func (t Thin) Tick(at time.Duration) Texture {
-	t.Time = at.Seconds()
-	return t
+func (disc Thin) Tick(elapsed time.Duration) Texture {
+	disc.Time = elapsed.Seconds()
+	return disc
 }

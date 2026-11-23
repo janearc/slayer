@@ -19,9 +19,9 @@ import (
 
 	"github.com/janearc/puzzlemouth/pzm"
 	"github.com/janearc/puzzlemouth/verb"
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/improv/searching"
 	"github.com/janearc/slayer/job"
+	"github.com/janearc/slayer/session"
 )
 
 var build, built, who, sessions string
@@ -43,21 +43,21 @@ func main() {
 }
 
 type row struct {
-	Job                  string                   `json:"job"`
-	Scene                string                   `json:"scene"`
-	JobSHA256            string                   `json:"job_sha256,omitempty"`
-	JobKey               string                   `json:"job_key,omitempty"`
-	InputPaths           map[string]string        `json:"input_paths,omitempty"`
-	Build                buildInfo                `json:"build"`
-	Frame                int                      `json:"frame"`
-	FrameCount           int                      `json:"frame_count"`
-	AtNanoseconds        int64                    `json:"scene_time_nanoseconds"`
-	OpenNanoseconds      int64                    `json:"open_nanoseconds"`
-	SampleNanoseconds    int64                    `json:"sample_nanoseconds"`
-	OpenAllocatedBytes   uint64                   `json:"open_allocated_bytes"`
-	SampleAllocatedBytes uint64                   `json:"sample_allocated_bytes"`
-	Geometry             hillside.SceneComplexity `json:"complexity"`
-	Error                string                   `json:"error,omitempty"`
+	Job                  string                  `json:"job"`
+	Scene                string                  `json:"scene"`
+	JobSHA256            string                  `json:"job_sha256,omitempty"`
+	JobKey               string                  `json:"job_key,omitempty"`
+	InputPaths           map[string]string       `json:"input_paths,omitempty"`
+	Build                buildInfo               `json:"build"`
+	Frame                int                     `json:"frame"`
+	FrameCount           int                     `json:"frame_count"`
+	AtNanoseconds        int64                   `json:"scene_time_nanoseconds"`
+	OpenNanoseconds      int64                   `json:"open_nanoseconds"`
+	SampleNanoseconds    int64                   `json:"sample_nanoseconds"`
+	OpenAllocatedBytes   uint64                  `json:"open_allocated_bytes"`
+	SampleAllocatedBytes uint64                  `json:"sample_allocated_bytes"`
+	Geometry             session.SceneComplexity `json:"complexity"`
+	Error                string                  `json:"error,omitempty"`
 }
 
 type buildInfo struct {
@@ -155,7 +155,7 @@ func writeReports(ctx context.Context, paths []string, frameSpec string, all boo
 		var before, after runtime.MemStats
 		runtime.ReadMemStats(&before)
 		started := time.Now()
-		session, err := hillside.Open(ctx, wanted, hillside.Stamped(build, built, who, sessions))
+		session, err := session.Open(ctx, wanted, session.Stamped(build, built, who, sessions))
 		opened := time.Since(started)
 		runtime.ReadMemStats(&after)
 		openAllocated := after.TotalAlloc - before.TotalAlloc

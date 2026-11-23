@@ -37,8 +37,9 @@ limits: {memory: {value: 8, unit: GiB}, time: {value: 60, unit: s}}
 // of a test's jobs are, so their relative paths are the same files.
 func keyOf(t *testing.T, text string) string {
 	t.Helper()
+	safeName := strings.ReplaceAll(t.Name(), "/", "-")
 	directory := filepath.Join(os.TempDir(), "job-keys-"+
-		strings.ReplaceAll(t.Name(), "/", "-"))
+		safeName)
 	if err := os.MkdirAll(directory, private|executable); err != nil {
 		t.Fatal(err)
 	}

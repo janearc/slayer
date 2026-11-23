@@ -108,7 +108,8 @@ func TestMissingJobsAndWrongAttemptsNeverReleaseWork(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
-	if err := s.Work(ctx, NewMockExecutor(gomock.NewController(t)), false); !errors.Is(err, context.Canceled) {
+	executor := NewMockExecutor(gomock.NewController(t))
+	if err := s.Work(ctx, executor, false); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
 	}
 	if err := s.Init(ctx, Config{}); !errors.Is(err, context.Canceled) {
@@ -190,7 +191,8 @@ func TestWorkerLockRefusals(t *testing.T) {
 	if _, err := s.workerLock(); err == nil {
 		t.Fatal("accepted linked lock")
 	}
-	if err := At("/nonexistent-queue").Work(t.Context(), NewMockExecutor(gomock.NewController(t)), false); err == nil {
+	executor := NewMockExecutor(gomock.NewController(t))
+	if err := At("/nonexistent-queue").Work(t.Context(), executor, false); err == nil {
 		t.Fatal("accepted missing queue")
 	}
 }
@@ -200,7 +202,8 @@ func TestServeStopsOnCancellation(t *testing.T) {
 	s, _ := fixture(t)
 	ctx, cancel := context.WithTimeout(t.Context(), 350*time.Millisecond)
 	defer cancel()
-	if err := s.Work(ctx, NewMockExecutor(gomock.NewController(t)), true); !errors.Is(err, context.DeadlineExceeded) {
+	executor := NewMockExecutor(gomock.NewController(t))
+	if err := s.Work(ctx, executor, true); !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
 }

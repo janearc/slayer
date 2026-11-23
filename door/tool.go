@@ -8,7 +8,7 @@ import (
 )
 
 // Tool is the slayer tool: its verbs, each declared through Puzzlemouth,
-// drawing with hillside, finish and movie.
+// drawing with the session, finish and movie.
 func Tool(env Env) *pzm.Tool {
 	return tool(env, pieces{stamp: env.build.hillside()}, machine{})
 }
@@ -21,23 +21,12 @@ func tool(env Env, shop workshop, programs programs) *pzm.Tool {
 		"a file, see what there is, develop raws, hear tunes",
 		pzm.Build(env.build.build), pzm.Built(env.build.built),
 		pzm.Who(env.build.who), pzm.Sessions(env.build.sessions))
-	writes := verb.WritesTo("the job's outputs, and its folder and " +
-		"note under the renders home")
-	draws := verb.NewFacts(writes, verb.Changes, verb.ThisMachine,
-		verb.NoOne, verb.FullGPU)
-	drawer := drawing{env: env, shop: shop}
-	made.Verb("draw", verb.NoShort, "carry out a job here and write "+
-		"what it asks", drawHelp, "Example_draw", draws, drawer.draw,
-		append(jobFlags(), pzm.Switch(replaceFlag, verb.NoShort,
-			"draw a still over one another job drew"),
-			pzm.Switch(keepFlag, verb.NoShort,
-				"keep a movie's working frames once it is written"),
-			pzm.Switch(freshFlag, verb.NoShort,
-				"draw a still even where the cache holds its picture"))...)
+	declareDraw(made, drawing{env: env, shop: shop})
 	declareList(made)
 	declareTunes(made, env)
 	declareAssess(made, env, shop)
 	declareDevelop(made, env, shop)
+	declareProve(made, env, shop)
 	declareCache(made, env)
 	live := watching{env: env, stager: sessions{stamp: env.build.hillside()}}
 	interactive(made, editing{env: env, machine: programs, watcher: live})

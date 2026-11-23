@@ -65,10 +65,11 @@ func exact(radius, height, radians float64) float64 {
 		return new(big.Float).SetPrec(200).SetFloat64(value)
 	}
 	start := precise(radius + height)
-	along := new(big.Float).Mul(start, precise(-math.Sin(radians)))
+	drop := precise(-math.Sin(radians))
+	along := new(big.Float).Mul(start, drop)
 	squared := new(big.Float).Mul(start, start)
-	gap := new(big.Float).Sub(squared, new(big.Float).Mul(precise(radius),
-		precise(radius)))
+	bare := precise(radius)
+	gap := new(big.Float).Sub(squared, new(big.Float).Mul(bare, bare))
 	inside := new(big.Float).Sub(new(big.Float).Mul(along, along), gap)
 	root := new(big.Float).Sqrt(inside)
 	near := new(big.Float).Sub(new(big.Float).Neg(along), root)
@@ -108,7 +109,7 @@ func TestTheGlobeFacesOutAndMeasuresHeight(t *testing.T) {
 // a globe with no size, or one that is no number, is none.
 func TestAGlobeWithNoSizeIsRefused(t *testing.T) {
 	for _, radius := range []float64{0, -1, math.NaN(), math.Inf(1)} {
-		if _, err := New(radius); !errors.Is(err, ErrGlobe) {
+		if _, err := New(radius); !errors.Is(err, errGlobe) {
 			t.Errorf("a globe of %g is made: %v", radius, err)
 		}
 	}

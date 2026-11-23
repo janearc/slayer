@@ -6,9 +6,21 @@ import (
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/render/frame"
+	"github.com/janearc/slayer/scene/thing"
 	"math"
 	"testing"
+	"time"
 )
+
+// sampledLightingGrid keeps the approximation resolution explicit for its
+// accuracy study. Public renderers use the fixed production lightCells.
+func sampledLightingGrid(world *thing.World, trees []grown, eye maths.Subspace,
+	lens film.Sensor, at time.Duration, width, height, side int,
+	mode traversal, lightingCells int, volumeCells ...int) (*frame.Frame, timing, error) {
+	return sampledLightingGridWithInitialMedia(world, trees, eye, lens, at,
+		width, height, side, mode, lightingCells, nil, volumeCells...)
+}
 
 func TestSmokeLightingGridResolutionStudy(t *testing.T) {
 	world, eye := fire(t)

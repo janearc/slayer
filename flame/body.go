@@ -72,10 +72,10 @@ func bodyWithPalette(fire Fire, exposure float64, palettes map[paletteKey]glowin
 		!(fire.Intermittency >= 0 && fire.Intermittency < 1) {
 		return nil, errFlame
 	}
-	if fire.Composition != nil && fire.Composition.Reference() != fire.Hottest {
+	if fire.Composition != nil && fire.Composition.spec.Reference != fire.Hottest {
 		return nil, errFlame
 	}
-	period, err := Period(measure.Metres(2 * fire.Radius))
+	period, err := puffPeriod(measure.Metres(2 * fire.Radius))
 	if err != nil {
 		return nil, err
 	}
@@ -401,10 +401,11 @@ func workedGlowing(coolest, hottest, exposure float64) glowing {
 	table := glowing{coolest: coolest, apart: apart}
 	for i := range glowSteps {
 		heat := measure.Kelvin(coolest + float64(i)*apart)
-		glowing := Glowing(heat).Scale(exposure)
-		red, green, blue := srgb.Light(observer.Swatch(glowing))
-		table.glows = append(table.glows, maths.RGB(math.Max(0, red),
-			math.Max(0, green), math.Max(0, blue)))
+		light := blackBody(heat).Scale(exposure)
+		red, green, blue := srgb.Light(observer.Swatch(light))
+		glow := maths.RGB(math.Max(0, red), math.Max(0, green),
+			math.Max(0, blue))
+		table.glows = append(table.glows, glow)
 	}
 	return table
 }
@@ -437,9 +438,11 @@ func compositionGlowing(profile *composition, cold, hot, exposure float64) glowi
 	apart := (hot - cold) / (glowSteps - 1)
 	table := glowing{coolest: cold, apart: apart}
 	for i := range glowSteps {
-		spectrum := profile.Spectrum(measure.Kelvin(cold + float64(i)*apart)).Scale(exposure)
+		heat := measure.Kelvin(cold + float64(i)*apart)
+		spectrum := profile.spectrum(heat).Scale(exposure)
 		red, green, blue := srgb.Light(observer.Swatch(spectrum))
-		table.glows = append(table.glows, maths.RGB(math.Max(0, red), math.Max(0, green), math.Max(0, blue)))
+		glow := maths.RGB(math.Max(0, red), math.Max(0, green), math.Max(0, blue))
+		table.glows = append(table.glows, glow)
 	}
 	return table
 }

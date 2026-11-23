@@ -74,7 +74,8 @@ func TestAddGriffithBasinAllowsDimNightLights(t *testing.T) {
 
 func TestLegacyGriffithLandscapeKeepsFullDetailDefaults(t *testing.T) {
 	world := thing.NewWorld()
-	if err := AddGriffithBasin(world, maths.V(0, 0, 0), 0, 0.5, 0.25); err != nil {
+	if err := AddGriffithBasinWithOptions(world, maths.V(0, 0, 0), 0, 0.5,
+		0.25, ShotOptions{}); err != nil {
 		t.Fatal(err)
 	}
 	var faces int

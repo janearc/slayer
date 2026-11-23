@@ -5,7 +5,6 @@
 package explain
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -14,8 +13,14 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-// ErrExplain is wrapped by every error the package returns.
-var ErrExplain = errors.New("explain")
+// refusal is an error that is a constant, so nothing can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (reason refusal) Error() string { return string(reason) }
+
+// errExplain is wrapped by every error the package returns.
+const errExplain refusal = "explain"
 
 // Placer places a moment written in a show's own terms, "bar.beat" or
 // seconds, on its clock, in seconds; a place it lacks is refused by name.
@@ -62,9 +67,6 @@ type Sentence struct {
 // Words is what the sentence says.
 func (of Sentence) Words() string { return of.words }
 
-// From is when the sentence comes up, in seconds.
-func (of Sentence) From() float64 { return of.from }
-
 // Script is an explainer's script placed on a show's clock: its shorts
 // by name, its sentences in order, and the chant's lines.
 type Script struct {
@@ -77,22 +79,22 @@ type Script struct {
 func ReadScript(path string, places Placer) (*Script, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrExplain, err)
+		return nil, fmt.Errorf("%w: %w", errExplain, err)
 	}
-	return ParseScript(raw, places)
+	return parseScript(raw, places)
 }
 
-// ParseScript reads a script from its yaml. A sentence or a short at a
+// parseScript reads a script from its yaml. A sentence or a short at a
 // place the show lacks is refused by name, and so are sentences out of
 // order, a short that is empty and a chant line that ends before it
 // starts.
-func ParseScript(raw []byte, places Placer) (*Script, error) {
+func parseScript(raw []byte, places Placer) (*Script, error) {
 	if places == nil {
-		return nil, fmt.Errorf("%w: a script needs a placer", ErrExplain)
+		return nil, fmt.Errorf("%w: a script needs a placer", errExplain)
 	}
 	var on written
 	if err := yaml.Unmarshal(raw, &on); err != nil {
-		return nil, fmt.Errorf("%w: the script: %w", ErrExplain, err)
+		return nil, fmt.Errorf("%w: the script: %w", errExplain, err)
 	}
 	made := &Script{shorts: map[string][2]float64{}}
 	if err := made.readShorts(on, places); err != nil {
@@ -104,7 +106,7 @@ func ParseScript(raw []byte, places Placer) (*Script, error) {
 	for _, each := range on.Chant {
 		if each.UntilSec <= each.FromSec {
 			return nil, fmt.Errorf("%w: the chant line %q, %v s to %v s, "+
-				"is empty", ErrExplain, each.Words, each.FromSec,
+				"is empty", errExplain, each.Words, each.FromSec,
 				each.UntilSec)
 		}
 		made.chant = append(made.chant, line{words: each.Words,
@@ -118,17 +120,17 @@ func (made *Script) readShorts(on written, places Placer) error {
 	for name, each := range on.Shorts {
 		from, err := places.Moment(each.From.At, each.From.AtSec)
 		if err != nil {
-			return fmt.Errorf("%w: the short %s's start: %w", ErrExplain,
+			return fmt.Errorf("%w: the short %s's start: %w", errExplain,
 				name, err)
 		}
 		until, err := places.Moment(each.Until.At, each.Until.AtSec)
 		if err != nil {
-			return fmt.Errorf("%w: the short %s's end: %w", ErrExplain,
+			return fmt.Errorf("%w: the short %s's end: %w", errExplain,
 				name, err)
 		}
 		if until <= from {
 			return fmt.Errorf("%w: the short %s, %v s to %v s, is empty",
-				ErrExplain, name, from, until)
+				errExplain, name, from, until)
 		}
 		made.shorts[name] = [2]float64{from, until}
 	}
@@ -140,12 +142,12 @@ func (made *Script) readSentences(on written, places Placer) error {
 	for _, each := range on.Says {
 		at, err := places.Moment(each.At, each.AtSec)
 		if err != nil {
-			return fmt.Errorf("%w: the sentence %q: %w", ErrExplain,
+			return fmt.Errorf("%w: the sentence %q: %w", errExplain,
 				each.Says, err)
 		}
 		if n := len(made.sentences); n > 0 && at <= made.sentences[n-1].from {
 			return fmt.Errorf("%w: the sentence %q at %v s comes before "+
-				"the one above it; keep the script in order", ErrExplain,
+				"the one above it; keep the script in order", errExplain,
 				each.Says, at)
 		}
 		made.sentences = append(made.sentences, Sentence{from: at,
@@ -191,7 +193,7 @@ func (of *Script) TooFast(short string) ([]error, error) {
 	from, until, ok := of.Short(short)
 	if !ok {
 		return nil, fmt.Errorf("%w: no short %q; the script has %v",
-			ErrExplain, short, of.Shorts())
+			errExplain, short, of.Shorts())
 	}
 	var slow []error
 	for i, each := range of.sentences {
@@ -206,7 +208,7 @@ func (of *Script) TooFast(short string) ([]error, error) {
 		if needs > ends-each.from {
 			slow = append(slow, fmt.Errorf("%w: in %s, %q needs %.1f s to "+
 				"read and stands %.1f s; shorten it or give it more bars",
-				ErrExplain, short, each.words, needs, ends-each.from))
+				errExplain, short, each.words, needs, ends-each.from))
 		}
 	}
 	return slow, nil

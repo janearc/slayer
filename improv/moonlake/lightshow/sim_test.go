@@ -518,7 +518,8 @@ func TestFigureWaysIsTheRigsFigureAsVectors(t *testing.T) {
 			weight, split)
 	}
 	for i, w := range ways {
-		if !within(math.Sqrt(w.dot(w)), 1, 1e-9) {
+		length := math.Sqrt(w.dot(w))
+		if !within(length, 1, 1e-9) {
 			t.Errorf("way %d is not a unit", i)
 		}
 	}

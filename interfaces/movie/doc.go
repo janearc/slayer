@@ -41,8 +41,10 @@
 // call aborts. Every wait sleeps between looks, and gives up after a
 // minute with the reason.
 //
-// The rate is a whole number of frames a second, so frame i is shown
-// at exactly i/rate seconds. 24 and 30 are offered; 29.97 is not.
+// The rate is a whole number of frames a second, from 1 to 240, so frame
+// i is shown at exactly i/rate seconds. 24 and 30 are usual; 29.97 is not
+// a whole number and is refused. A picture side over 65536 pixels, or
+// more frames than a time.Duration counts in nanoseconds, is refused too.
 //
 // # Sound
 //

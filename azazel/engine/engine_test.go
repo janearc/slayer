@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/janearc/slayer/azazel/engine"
-	"github.com/janearc/slayer/hillside"
+	"github.com/janearc/slayer/session"
 )
 
 // TestMain gives the tests a cache home of their own, so nothing a draw
@@ -30,10 +30,6 @@ func TestMain(m *testing.M) {
 // no shelf of sources.
 const widow = "../../sets/widow.yaml"
 
-// settings are the small size the tests draw at: width, height and the
-// rays along a side of a pixel.
-var settings = []string{"-w", "48", "-h", "27", "-n", "1"}
-
 // the numbers hillside gives back, and a count of none.
 const (
 	nothing    = 0 // defined: no amount at all, and a picture written
@@ -45,7 +41,7 @@ const (
 const readable = 0o644 // defined: the owner writes, everyone reads
 
 // stamp is a build that says nothing of itself.
-func stamp() hillside.Stamp { return hillside.Stamped("", "", "", "") }
+func stamp() session.Stamp { return session.Stamped("", "", "", "") }
 
 // engineDraws is what the adapter gives back for a set and settings: the
 // picture's bytes, what it said, what it complained of, and its number.
@@ -68,7 +64,7 @@ func hillsideDraws(t *testing.T, path string, given ...string) ([]byte,
 	var wrong bytes.Buffer
 	settings := append([]string{"-set", path}, given...)
 	settings = append(settings, "-out", out)
-	code := hillside.Run(settings, io.Discard, &wrong, stamp())
+	code := session.Run(settings, io.Discard, &wrong, stamp())
 	picture, _ := os.ReadFile(out)
 	return picture, wrong.String(), code
 }

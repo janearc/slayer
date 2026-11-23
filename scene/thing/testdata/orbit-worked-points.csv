@@ -1,0 +1,6 @@
+name,x,y,z
+place,1,2,3
+child-origin,1,2,1
+child-x,0,0,-1
+child-x-out,1,2,-5
+child-y-out,1,8,1

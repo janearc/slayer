@@ -6,9 +6,11 @@ package maths
 //
 // The zero Band means every band at once: one ray for the whole spectrum,
 // which is all a sensor without glass ever needs.
-//
-//ninja:vow practice a library: its callers are in other modules
 type Band struct {
 	//ninja:vow gate a value, whose fields are what it is
 	Nanometres float64
 }
+
+// NewBand is the band at the wavelength nanometres. It keeps the number
+// as given; zero is every band at once.
+func NewBand(nanometres float64) Band { return Band{Nanometres: nanometres} }

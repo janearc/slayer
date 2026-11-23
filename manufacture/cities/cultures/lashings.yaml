@@ -1,0 +1,220 @@
+# Lashings, 2026-11-19. Cables strung across a street between two walls
+# that face each other, holding the buildings of the street together, and
+# hung with lanterns, signs, bundles of utility cable and tarpaulins. The
+# more there is, the harder it is to see down the street. Also here: the
+# plain street of plain blocks the lashings are drawn on when a set asks
+# for the kind lashed-street and brings no buildings of its own. Nothing is
+# measured; each number says it was picked, and by what. Lengths are
+# metres, colours are shares of light.
+culture: lashings
+says: cables across a street, hung with lanterns and signs, over a group of buildings
+elements:
+# the plain street
+- {element: default-street-width, says: "the width of the street when a set does not say", scope: district, draw: range, unit: m, least: 12, most: 12, kind: picked, by: "lashings study, 2026-11-19, from the brief"}
+- {element: default-street-length, says: "the length of the street when a set does not say", scope: district, draw: range, unit: m, least: 96, most: 96, kind: picked, by: "lashings study, 2026-11-19, by eye, eight blocks"}
+- {element: default-density, says: "how thickly the street is hung when a set does not say, from nought to one", scope: district, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: block-storeys, says: "storeys of every block of the plain street", scope: district, draw: range, unit: storeys, whole: true, least: 6, most: 6, kind: picked, by: "lashings study, 2026-11-19, from the brief"}
+- {element: block-ground, says: "height of the ground storey, the retail one", scope: district, draw: range, unit: m, least: 4.4, most: 4.4, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: block-storey, says: "height of each storey over the ground one", scope: district, draw: range, unit: m, least: 3.2, most: 3.2, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: block-width, says: "how wide a block is along the street", scope: bay, draw: range, unit: m, least: 10, most: 16, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: block-depth, says: "how deep a block is, back from the street", scope: district, draw: range, unit: m, least: 14, most: 14, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: window-width, says: "width of a window pane", scope: district, draw: range, unit: m, least: 1.3, most: 1.3, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: window-height, says: "height of a window pane", scope: district, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: window-pitch, says: "how far one window stands from the next along a block", scope: district, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: window-sill, says: "how high a pane's foot is over its storey's floor", scope: district, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: window-proud, says: "how far a pane stands out of the wall", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: lit-share, says: "share of windows with a light on at night", scope: opening, draw: share, unit: chance, share: 0.45, kind: picked, by: "lashings study, 2026-11-19, by eye, a street at night"}
+- element: block-wall
+  says: the colour of a plain block's wall
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: grey, weight: 3, colour: [0.1, 0.1, 0.11], gloss: 0.15}
+  - {name: warm grey, weight: 2, colour: [0.14, 0.12, 0.11], gloss: 0.15}
+  - {name: slate, weight: 2, colour: [0.07, 0.08, 0.1], gloss: 0.2}
+  kind: picked
+  by: "lashings study, 2026-11-19, by eye"
+# which walls face
+- {element: span-least, says: "the nearest two walls may be and still be a street cables cross", scope: district, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: span-most, says: "the farthest two walls may be and still be strung across", scope: district, draw: range, unit: m, least: 40, most: 40, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: run-least, says: "the least stretch two walls must face each other along the street to be strung", scope: district, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: edge-margin, says: "how far a cable keeps from the end of the stretch two walls face", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: clear-floor, says: "the lowest a cable hangs, which clears the retail level and a lorry", scope: district, draw: range, unit: m, least: 4.6, most: 4.6, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: top-margin, says: "how far under the lower roof an anchor stands", scope: district, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: hang-least, says: "the least height between the lowest cable and the highest for a street to be strung", scope: district, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+# how many cables
+- {element: cable-rate-least, says: "cables in a metre of street at density nought", scope: district, draw: range, unit: per m, least: 0, most: 0, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: cable-rate-most, says: "cables in a metre of street at density one, so many that it is hard to see down the street", scope: district, draw: range, unit: per m, least: 0.7, most: 0.7, kind: picked, by: "lashings study, 2026-11-19, by eye, from the brief"}
+- {element: density-power, says: "the power density is raised to before it sets the rate, so that a low density is a few wires", scope: district, draw: range, unit: power, least: 1.6, most: 1.6, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: cable-round, says: "the draw that rounds the number of cables in a stretch up or down", scope: row, draw: range, unit: share, least: 0, most: 1, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: cable-jitter, says: "how far along its slot a cable stands, as a share of the slot", scope: bay, draw: range, unit: share, least: 0.1, most: 0.9, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: height-draw, says: "the draw for how high a cable's anchors stand, before it is bent to favour the upper storeys", scope: bay, draw: range, unit: share, least: 0, most: 1, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: height-bias, says: "the power that favours the upper storeys: above one, there are more cables high up than at the retail level", scope: district, draw: range, unit: power, least: 1.8, most: 1.8, kind: picked, by: "lashings study, 2026-11-19, from the brief"}
+- {element: end-offset, says: "how much higher one anchor of a cable stands than the other", scope: bay, draw: range, unit: m, least: -1.4, most: 1.4, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: sag-share, says: "how far a cable hangs at its middle, as a share of its span", scope: bay, draw: range, unit: share, least: 0.03, most: 0.07, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: cable-radius, says: "half the side of a cable's square section", scope: district, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "lashings study, 2026-11-19, by eye, a steel lashing cable thick enough to show"}
+- {element: cable-links, says: "straight links a cable is drawn in", scope: district, draw: range, unit: links, whole: true, least: 14, most: 14, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: plate-width, says: "width of the plate a cable is anchored to", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: plate-height, says: "height of the anchor plate", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: plate-thick, says: "thickness of the anchor plate", scope: district, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- element: steel-colour
+  says: the colour of cables and anchor plates
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: steel, weight: 1, colour: [0.04, 0.04, 0.045], gloss: 0.5}
+  kind: picked
+  by: "lashings study, 2026-11-19, by eye"
+# what is hung on a cable
+- {element: dress-share-least, says: "share of cables that carry something at density nought", scope: district, draw: range, unit: share, least: 0.15, most: 0.15, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: dress-share-most, says: "share of cables that carry something at density one", scope: district, draw: range, unit: share, least: 1, most: 1, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: dress-draw, says: "the draw for whether a cable carries something", scope: bay, draw: range, unit: share, least: 0, most: 1, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- element: dress
+  says: what a cable that carries something carries, by weight
+  scope: bay
+  draw: options
+  unit: share
+  options:
+  - {name: lanterns, weight: 7}
+  - {name: banner, weight: 3}
+  - {name: bundle, weight: 2}
+  - {name: tarpaulin, weight: 1}
+  kind: picked
+  by: "lashings study, 2026-11-19, by eye, from the brief: dozens of rows of lanterns, signs across the middle"
+# lanterns
+- {element: lantern-radius, says: "the radius of the smallest lantern", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "lashings study, 2026-11-19, by eye, a paper lantern half a metre across"}
+- {element: lantern-step, says: "how much a size of lantern is bigger than the one under it", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: lantern-size, says: "which of the three sizes of lantern, from nought", scope: storey, draw: range, unit: size, whole: true, least: 0, most: 2, kind: picked, by: "lashings study, 2026-11-19, picked"}
+- {element: lantern-stretch, says: "how much taller a lantern is than it is wide, a scale", scope: district, draw: range, unit: scale, least: 1.25, most: 1.25, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: lantern-drop, says: "how far under the cable a lantern's cord lets it hang, to its top", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: cord-radius, says: "half the side of the cord a lantern or a sign hangs by", scope: district, draw: range, unit: m, least: 0.01, most: 0.01, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: spacing-least, says: "the nearest lanterns hang along a cable, at density one", scope: district, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: spacing-most, says: "the farthest apart lanterns hang along a cable, at density nought", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: lantern-glow, says: "how brightly a lantern glows, a scale on its colour", scope: district, draw: range, unit: scale, least: 0.5, most: 0.5, kind: picked, by: "lashings study, 2026-11-19, by eye, from the first draw, which washed the colours to white at 2.4"}
+- {element: lamp-every, says: "every how many lanterns of a cable is also a light, for the tracer lights by lamps and not by what glows", scope: district, draw: range, unit: lanterns, whole: true, least: 6, most: 6, kind: picked, by: "lashings study, 2026-11-19, picked, so that a thousand lanterns are not a thousand lamps"}
+- {element: lantern-heat, says: "colour temperature of a lantern lamp's light, in kelvin", scope: district, draw: range, unit: K, least: 2300, most: 2300, kind: picked, by: "lashings study, 2026-11-19, by eye, candle and oil"}
+- {element: lantern-luminance, says: "luminance at a metre of a lantern lamp's light, in the kit's relative light", scope: district, draw: range, unit: luminance, least: 6, most: 6, kind: picked, by: "lashings study, 2026-11-19, by eye, from the first draw, whose walls took almost none of it at 1.5"}
+- element: lantern-colour
+  says: the colours of paper lanterns
+  scope: storey
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 5, colour: [1, 0.12, 0.05]}
+  - {name: amber, weight: 4, colour: [1, 0.55, 0.12]}
+  - {name: cream, weight: 3, colour: [1, 0.75, 0.45]}
+  - {name: rose, weight: 2, colour: [1, 0.25, 0.4]}
+  - {name: teal, weight: 1, colour: [0.1, 0.8, 0.7]}
+  kind: picked
+  by: "lashings study, 2026-11-19, by eye, ramen-shop red and amber with a little teal"
+# banners across the middle
+- {element: banner-width, says: "width of a banner hung across the street", scope: bay, draw: range, unit: m, least: 2, most: 4.5, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: banner-height, says: "height of a banner", scope: bay, draw: range, unit: m, least: 0.8, most: 2, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: banner-drop, says: "how far under the cable a banner's top hangs", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: banner-depth, says: "thickness of a banner", scope: district, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: banner-place, says: "how far along its cable a banner hangs, as a share of the span", scope: bay, draw: range, unit: share, least: 0.3, most: 0.7, kind: picked, by: "lashings study, 2026-11-19, by eye, across the middle"}
+- {element: banner-glow, says: "how brightly a banner glows, a scale on its colour", scope: district, draw: range, unit: scale, least: 0.6, most: 0.6, kind: picked, by: "lashings study, 2026-11-19, by eye, from the first draw, whose banners were blown to cream at 1.6"}
+- {element: banner-heat, says: "colour temperature of a banner lamp's light, in kelvin", scope: district, draw: range, unit: K, least: 4500, most: 4500, kind: picked, by: "lashings study, 2026-11-19, by eye, from the tower signs"}
+- {element: banner-luminance, says: "luminance at a metre of a banner lamp's light, in the kit's relative light", scope: district, draw: range, unit: luminance, least: 8, most: 8, kind: picked, by: "lashings study, 2026-11-19, by eye, from the first draw"}
+- element: banner-colour
+  says: the colours of glowing banners
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: magenta, weight: 3, colour: [1, 0.1, 0.55]}
+  - {name: cyan, weight: 3, colour: [0.1, 0.9, 1]}
+  - {name: amber, weight: 2, colour: [1, 0.6, 0.1]}
+  - {name: green, weight: 1, colour: [0.2, 1, 0.35]}
+  - {name: red, weight: 1, colour: [1, 0.12, 0.1]}
+  kind: picked
+  by: "lashings study, 2026-11-19, by eye, from the tower signs"
+# bundles of utility cable and tarpaulins
+- {element: bundle-radius, says: "half the side of a bundle of utility cables", scope: district, draw: range, unit: m, least: 0.09, most: 0.09, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- element: bundle-colour
+  says: the colour of a bundle of utility cables
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: rubber, weight: 1, colour: [0.015, 0.015, 0.017], gloss: 0.3}
+  kind: picked
+  by: "lashings study, 2026-11-19, by eye"
+- {element: tarp-width, says: "width of a tarpaulin hung over a cable", scope: bay, draw: range, unit: m, least: 2.5, most: 4, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: tarp-height, says: "height of a tarpaulin", scope: bay, draw: range, unit: m, least: 1.4, most: 2.4, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- {element: tarp-depth, says: "thickness of a tarpaulin", scope: district, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "lashings study, 2026-11-19, by eye"}
+- element: tarp-colour
+  says: the colours of tarpaulins
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: blue, weight: 3, colour: [0.03, 0.08, 0.2], gloss: 0.3}
+  - {name: olive, weight: 2, colour: [0.07, 0.08, 0.03], gloss: 0.2}
+  - {name: orange, weight: 1, colour: [0.35, 0.1, 0.02], gloss: 0.3}
+  kind: picked
+  by: "lashings study, 2026-11-19, by eye"
+# lantern rows, 2026-11-20: tidy rows of one kind of lantern, as in a
+# photograph of a street of shops. Every number below is picked by eye
+# from that photograph, and says so; none is measured.
+- {element: row-pitch, says: "metres between one row and the next along the street", scope: district, draw: range, unit: m, least: 8, most: 8, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph: rows stack into a band down the street"}
+- {element: row-height, says: "the height of every row's anchors, between the second and third storey", scope: district, draw: range, unit: m, least: 9.2, most: 9.2, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph: all rows at about one height"}
+- {element: row-sag, says: "how far a row hangs at its middle, slight", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-lantern-radius, says: "half the width of a lantern of a row", scope: district, draw: range, unit: m, least: 0.38, most: 0.38, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph: about three quarters of a metre across"}
+- {element: row-lantern-stretch, says: "how tall a lantern is against how wide, a scale under one for a squat globe", scope: district, draw: range, unit: scale, least: 0.8, most: 0.8, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-lantern-drop, says: "how far under the cable a lantern's cord lets it hang, to its top", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-lantern-pitch, says: "how far apart the lanterns of a row hang, evenly", scope: district, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph: a lantern is a little over a third of the way to the next"}
+- {element: row-ribs, says: "ribs round a lantern, each a ridge with a groove under it", scope: district, draw: range, unit: ribs, whole: true, least: 5, most: 5, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-rib-depth, says: "how far a groove is drawn in from a ridge, as a share of the lantern's radius", scope: district, draw: range, unit: share, least: 0.05, most: 0.05, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-lantern-glow, says: "how brightly the paper of a lantern of a row glows, a scale on its colour; the same all over, as a material's glow is", scope: district, draw: range, unit: scale, least: 0.8, most: 0.8, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-lamp-every, says: "every how many lanterns of a row holds a lamp inside it", scope: district, draw: range, unit: lanterns, whole: true, least: 1, most: 1, kind: picked, by: "lashings study, 2026-11-20, picked: one lamp in each lantern, to see whether its light passes the paper"}
+- {element: row-lantern-heat, says: "colour temperature of the lamp in a lantern of a row, in kelvin", scope: district, draw: range, unit: K, least: 1900, most: 1900, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph: a red-orange glow"}
+- {element: row-lantern-luminance, says: "luminance at a metre of the lamp in a lantern of a row, in the kit's relative light", scope: district, draw: range, unit: luminance, least: 3, most: 3, kind: picked, by: "lashings study, 2026-11-20, by eye"}
+- {element: row-lantern-beyond, says: "how far from the middle of a lantern its lamp's light starts, past the paper, so that the paper does not shade what the lamp lights", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "lashings study, 2026-11-20, picked: more than the half width of a lantern and its cap, which a first draw showed shading its own lamp at the manufactory's 0.3"}
+- {element: row-cap-share, says: "the radius of a lantern's cap, as a share of the lantern's radius", scope: district, draw: range, unit: share, least: 0.4, most: 0.4, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-cap-narrow, says: "the outer end of a cap, as a share of its end at the globe", scope: district, draw: range, unit: share, least: 0.75, most: 0.75, kind: picked, by: "lashings study, 2026-11-20, by eye"}
+- {element: row-cap-height, says: "height of a lantern's cap", scope: district, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-tassel-length, says: "how far a tassel hangs under the bottom cap", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-tassel-radius, says: "half the width of a tassel at its top, where it leaves the cap", scope: district, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "lashings study, 2026-11-20, by eye"}
+- {element: row-tassel-spread, says: "how many times wider a tassel is at its foot than at its top", scope: district, draw: range, unit: scale, least: 2.5, most: 2.5, kind: picked, by: "lashings study, 2026-11-20, by eye"}
+- {element: row-bulbs, says: "small bulbs on the cable between each pair of lanterns", scope: district, draw: range, unit: bulbs, whole: true, least: 1, most: 1, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph: one, now and then two"}
+- {element: row-bulb-radius, says: "the radius of a small bulb", scope: district, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "lashings study, 2026-11-20, by eye, from the reference photograph"}
+- {element: row-bulb-glow, says: "how brightly a small bulb glows, a scale on its colour", scope: district, draw: range, unit: scale, least: 1.2, most: 1.2, kind: picked, by: "lashings study, 2026-11-20, by eye"}
+- element: row-lantern-colour
+  says: the colour of the paper of a lantern of a row, one colour for the whole row
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 1, colour: [1, 0.08, 0.03]}
+  kind: picked
+  by: "lashings study, 2026-11-20, by eye, from the reference photograph: all red"
+- element: row-cap-colour
+  says: the colour of a lantern's caps
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: dark, weight: 1, colour: [0.03, 0.02, 0.015], gloss: 0.3}
+  kind: picked
+  by: "lashings study, 2026-11-20, by eye, from the reference photograph"
+- element: row-tassel-colour
+  says: the colour of a lantern's tassel
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: gold, weight: 1, colour: [0.9, 0.6, 0.1], gloss: 0.3}
+  kind: picked
+  by: "lashings study, 2026-11-20, by eye, from the reference photograph"
+- element: row-bulb-colour
+  says: the colour of a small bulb on a row
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: warm white, weight: 1, colour: [1, 0.92, 0.75]}
+  kind: picked
+  by: "lashings study, 2026-11-20, by eye, from the reference photograph"

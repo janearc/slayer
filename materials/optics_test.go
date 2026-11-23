@@ -8,7 +8,7 @@ import (
 // somewhere is a source read from somewhere, for the tests
 func somewhere(t *testing.T) Source {
 	t.Helper()
-	where, err := NewSource("a release", "a material", "a paper", "a row")
+	where, err := newSource("a release", "a material", "a paper", "a row")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +23,7 @@ func TestASourceRefusesANamelessPart(t *testing.T) {
 		"no row":      {"a release", "gold", "a paper", ""},
 	}
 	for name, parts := range refused {
-		if _, err := NewSource(parts[0], parts[1], parts[2], parts[3]); err == nil {
+		if _, err := newSource(parts[0], parts[1], parts[2], parts[3]); err == nil {
 			t.Errorf("%s: a source was made", name)
 		}
 	}
@@ -43,32 +43,32 @@ func TestAReadingRefusesNonsenseOptics(t *testing.T) {
 		"a k past numbers":          {617, 1, math.Inf(1)},
 	}
 	for name, bad := range refused {
-		if _, err := NewReading(bad[0], bad[1], bad[2], where); err == nil {
+		if _, err := newReading(bad[0], bad[1], bad[2], where); err == nil {
 			t.Errorf("%s: a reading was made", name)
 		}
 	}
-	if _, err := NewReading(617, 1, 1, Source{}); err == nil {
+	if _, err := newReading(617, 1, 1, Source{}); err == nil {
 		t.Error("a reading read nowhere was made")
 	}
 	// a k of nought is a clear material, and is not refused
-	if _, err := NewReading(617, 1, 0, where); err != nil {
+	if _, err := newReading(617, 1, 0, where); err != nil {
 		t.Errorf("a reading of k nought was refused: %v", err)
 	}
 }
 
 func TestOpticsRefuseNoBandsAndAReadingNeverMade(t *testing.T) {
-	if _, err := NewOptics(nil); err == nil {
+	if _, err := newOptics(nil); err == nil {
 		t.Error("optics of no bands were made")
 	}
-	if _, err := NewOptics(map[Band]Reading{Red: {}}); err == nil {
+	if _, err := newOptics(map[Band]Reading{Red: {}}); err == nil {
 		t.Error("optics of a reading never made were made")
 	}
 	// and optics answer a reading never made for a band they lack
-	read, err := NewReading(616.8, 0.21, 3.272, somewhere(t))
+	read, err := newReading(616.8, 0.21, 3.272, somewhere(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	sight, err := NewOptics(map[Band]Reading{Red: read})
+	sight, err := newOptics(map[Band]Reading{Red: read})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,21 +85,21 @@ func TestAnOpticalMaterialRefusesNoNameNoFormulaNoOptics(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	read, err := NewReading(617, 2.67, 3.72, somewhere(t))
+	read, err := newReading(617, 2.67, 3.72, somewhere(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	sight, err := NewOptics(map[Band]Reading{Red: read})
+	sight, err := newOptics(map[Band]Reading{Red: read})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := NewOpticalMaterial("", fe, sight); err == nil {
+	if _, err := newOpticalMaterial("", fe, sight); err == nil {
 		t.Error("an optical material with no name was made")
 	}
-	if _, err := NewOpticalMaterial("iron", Formula{}, sight); err == nil {
+	if _, err := newOpticalMaterial("iron", formula{}, sight); err == nil {
 		t.Error("an optical material of no formula was made")
 	}
-	if _, err := NewOpticalMaterial("iron", fe, Optics{}); err == nil {
+	if _, err := newOpticalMaterial("iron", fe, Optics{}); err == nil {
 		t.Error("an optical material of no optics was made")
 	}
 }
@@ -119,7 +119,7 @@ func TestAMaterialMadeOfADensityHasNoOptics(t *testing.T) {
 
 func TestAbsorptionIsFourPiKOverTheWavelength(t *testing.T) {
 	// k 1 at a thousand nanometres takes four pi of it a metre
-	read, err := NewReading(1000, 1.5, 1, somewhere(t))
+	read, err := newReading(1000, 1.5, 1, somewhere(t))
 	if err != nil {
 		t.Fatal(err)
 	}

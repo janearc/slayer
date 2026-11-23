@@ -8,7 +8,7 @@ import (
 )
 
 // highwayRamps connects both carriageways to two actual local grid streets.
-func (city ClusteredCityLayout) highwayRamps(road CityHighway) []CityRamp {
+func (city ClusteredCityLayout) highwayRamps(road cityHighway) []cityRamp {
 	run := road.To.Sub(road.From)
 	direction := run.Unit()
 	normal := maths.V(-direction.Z, 0, direction.X)
@@ -16,7 +16,7 @@ func (city ClusteredCityLayout) highwayRamps(road CityHighway) []CityRamp {
 	offset := road.Median.InMetres()/2 + width/2
 	pitch := city.base.grid.BlockLength.InMetres()
 	origin := maths.V(-float64(city.base.grid.BlocksX)*pitch/2, 0, -float64(city.base.grid.BlocksZ)*pitch/2)
-	var ramps []CityRamp
+	var ramps []cityRamp
 	for _, share := range []float64{.32, .66} {
 		cross := road.From.Add(run.Scale(share))
 		street := maths.ZAxis
@@ -35,14 +35,14 @@ func (city ClusteredCityLayout) highwayRamps(road CityHighway) []CityRamp {
 			end.Y = .04
 			first := start.Add(direction.Scale(side * 75))
 			last := end.Sub(street.Scale(side * 70))
-			ramps = append(ramps, CityRamp{Points: [4]maths.Vec{start, first, last, end}, Width: measure.Metres(6)})
+			ramps = append(ramps, cityRamp{Points: [4]maths.Vec{start, first, last, end}, Width: measure.Metres(6)})
 		}
 	}
 	return ramps
 }
 
 // at evaluates the actual ramp centreline, including a smooth descent.
-func (ramp CityRamp) at(t float64) maths.Vec {
+func (ramp cityRamp) at(t float64) maths.Vec {
 	u := 1 - t
 	return ramp.Points[0].Scale(u * u * u).Add(ramp.Points[1].Scale(3 * u * u * t)).Add(ramp.Points[2].Scale(3 * u * t * t)).Add(ramp.Points[3].Scale(t * t * t))
 }
@@ -119,7 +119,7 @@ func districtBox(a *instrumentAssembly, w, h, d float64, at maths.Vec, material 
 }
 
 // cityRampDeck is one closed swept deck with no coincident segment caps.
-type cityRampDeck struct{ ramp CityRamp }
+type cityRampDeck struct{ ramp cityRamp }
 
 // skin joins shared ramp sections and closes only the two connection ends.
 func (deck cityRampDeck) skin(cut) surface {

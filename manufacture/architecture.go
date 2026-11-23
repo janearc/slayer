@@ -16,7 +16,7 @@ package manufacture
 //
 // This internal quality describes the legacy sleeve
 // scaffold. Complexities names the public representations, including the
-// recursive foliage described in doc/conifer-foliage.md.
+// recursive foliage described in doc/model/vegetation/conifer-foliage.md.
 type quality struct{ rung rung }
 
 // rung is one of the qualities a tree is made at.

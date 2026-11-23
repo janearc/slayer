@@ -40,7 +40,8 @@ func observeQueueHost(ctx context.Context, directory string, adapter admissionHo
 	}
 	defer file.Close()
 	policy := hostPolicy{loadLimit: 8, swapLimit: 8 << 30, diskFloor: byteCount(QueueDiskFloorBytes)}
-	disk, err := adapter.Statfs(int(file.Fd()))
+	queueDescriptor := int(file.Fd())
+	disk, err := adapter.Statfs(queueDescriptor)
 	if err != nil {
 		return HostObservation{}, err
 	}

@@ -1,0 +1,8 @@
+name,x,y,z
+one in x,1,4,4
+none in y,4,0,4
+negative in z,4,4,-3
+one past the most in x,129,4,4
+one past the most in z,4,4,129
+one past the most in all,128,128,17
+too many in all,65,65,65

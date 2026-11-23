@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/job"
+	"github.com/janearc/slayer/session"
 )
 
 // a still job writes its picture, equal to the session's frame developed
@@ -33,18 +33,18 @@ func TestDrawStillIsTheSessionsPicture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, err := hillside.Open(context.Background(), wanted,
-		hillside.Stamp{})
+	opened, err := session.Open(context.Background(), wanted,
+		session.Stamp{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
-	frame, err := session.Frame(context.Background(), nothing,
-		hillside.Ask{})
+	defer opened.Close()
+	frame, err := opened.Frame(context.Background(), nothing,
+		session.Ask{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := session.Tone().Develop(frame.Light())
+	want := opened.Tone().Develop(frame.Light())
 	if err := frame.Overlay(want); err != nil {
 		t.Fatal(err)
 	}

@@ -358,14 +358,16 @@ func TestPublishSlotTakenDuringTheWriteIsRefused(t *testing.T) {
 	key := build(t, fixture(t))
 	store, dir := openStore(t)
 	taking := doAt(5, func() {
-		if err := os.WriteFile(filepath.Join(dir, slot(key)), []byte("not a frame"), 0o600); err != nil {
+		slotPath := filepath.Join(dir, slot(key))
+		if err := os.WriteFile(slotPath, []byte("not a frame"), 0o600); err != nil {
 			t.Error(err)
 		}
 	})
 	if _, err := store.PublishContext(taking, key, tiny(t, 1), false); !errors.Is(err, os.ErrExist) {
 		t.Errorf("a slot taken during the publish: %v", err)
 	}
-	if raw, err := os.ReadFile(filepath.Join(dir, slot(key))); err != nil || string(raw) != "not a frame" {
+	slotPath := filepath.Join(dir, slot(key))
+	if raw, err := os.ReadFile(slotPath); err != nil || string(raw) != "not a frame" {
 		t.Errorf("the slot was changed: %q, %v", raw, err)
 	}
 	if names := entries(t, dir); len(names) != 1 {
@@ -410,7 +412,8 @@ func TestRedrawKeepsTheOldFrameWhenItFails(t *testing.T) {
 	t.Run("slot lost before the rename", func(t *testing.T) {
 		store, dir := setup(t)
 		losing := doAt(5, func() {
-			if err := os.Remove(filepath.Join(dir, slot(key))); err != nil {
+			slotPath := filepath.Join(dir, slot(key))
+			if err := os.Remove(slotPath); err != nil {
 				t.Error(err)
 			}
 		})
@@ -448,7 +451,8 @@ func TestVerifyRefusesAMalformedSlotAndManifestFile(t *testing.T) {
 	if _, err := store.Publish(key, tiny(t, 1), false); err != nil {
 		t.Fatal(err)
 	}
-	target, err := os.Readlink(filepath.Join(dir, slot(key)))
+	slotPath := filepath.Join(dir, slot(key))
+	target, err := os.Readlink(slotPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -490,7 +494,8 @@ func TestWriteRefusesAnExistingFile(t *testing.T) {
 // pngChunk is one PNG chunk of the kind and payload, with its checksum.
 func pngChunk(kind string, payload []byte) []byte {
 	body := append([]byte(kind), payload...)
-	out := binary.BigEndian.AppendUint32(nil, uint32(len(payload)))
+	size := uint32(len(payload))
+	out := binary.BigEndian.AppendUint32(nil, size)
 	out = append(out, body...)
 	return binary.BigEndian.AppendUint32(out, crc32.ChecksumIEEE(body))
 }
@@ -523,7 +528,8 @@ func pngOf(chunks ...[]byte) []byte {
 // of gray, RGB and gray with alpha are stored and read back byte for byte.
 func TestPublishTakesEveryColourTypeItCanCount(t *testing.T) {
 	var gray, rgb bytes.Buffer
-	if err := png.Encode(&gray, image.NewGray(image.Rect(0, 0, 2, 3))); err != nil {
+	blank := image.NewGray(image.Rect(0, 0, 2, 3))
+	if err := png.Encode(&gray, blank); err != nil {
 		t.Fatal(err)
 	}
 	opaque := image.NewRGBA(image.Rect(0, 0, 2, 3))
@@ -534,7 +540,10 @@ func TestPublishTakesEveryColourTypeItCanCount(t *testing.T) {
 		t.Fatal(err)
 	}
 	rows := bytes.Repeat([]byte{0, 1, 2, 3, 4}, 3)
-	grayAlpha := pngOf(pngChunk("IHDR", pngHeader(2, 3, 8, 4)), pngChunk("IDAT", zlibOf(rows)), pngChunk("IEND", nil))
+	alphaHeader := pngChunk("IHDR", pngHeader(2, 3, 8, 4))
+	alphaData := pngChunk("IDAT", zlibOf(rows))
+	alphaEnd := pngChunk("IEND", nil)
+	grayAlpha := pngOf(alphaHeader, alphaData, alphaEnd)
 	for name, data := range map[string][]byte{"gray": gray.Bytes(), "rgb": rgb.Bytes(), "gray with alpha": grayAlpha} {
 		store, _ := openStore(t)
 		key := build(t, fixture(t))
@@ -558,18 +567,24 @@ func TestPublishRefusesMalformedPNGs(t *testing.T) {
 	flipped := pngOf(header, idat, end)
 	flipped[8+4+4+13] ^= 1
 	badFilter := zlibOf([]byte{5, 1, 2, 0, 1, 2, 0, 1, 2})
+	colourFive := pngChunk("IHDR", pngHeader(2, 3, 8, 5))
+	badZlib := pngChunk("IDAT", []byte("xx"))
+	unknown := pngChunk("tEXt", []byte("a"))
+	interlacedBody := append(pngHeader(2, 3, 8, 0)[:12], 1)
+	interlaced := pngChunk("IHDR", interlacedBody)
+	endWithData := pngChunk("IEND", []byte("x"))
 	cases := map[string][]byte{
 		"idat before the header": pngOf(idat, header, end),
 		"bad checksum":           flipped,
 		"no end chunk":           pngOf(header, idat),
-		"colour type five":       pngOf(pngChunk("IHDR", pngHeader(2, 3, 8, 5)), idat, end),
-		"bad zlib header":        pngOf(header, pngChunk("IDAT", []byte("xx")), end),
+		"colour type five":       pngOf(colourFive, idat, end),
+		"bad zlib header":        pngOf(header, badZlib, end),
 		"filter byte of five":    pngOf(header, pngChunk("IDAT", badFilter), end),
 		"row too short":          pngOf(header, pngChunk("IDAT", zlibOf([]byte{0, 1})), end),
-		"unknown chunk":          pngOf(header, pngChunk("tEXt", []byte("a")), idat, end),
+		"unknown chunk":          pngOf(header, unknown, idat, end),
 		"second header":          pngOf(header, header, idat, end),
-		"interlaced header":      pngOf(pngChunk("IHDR", append(pngHeader(2, 3, 8, 0)[:12], 1)), idat, end),
-		"end with data":          pngOf(header, idat, pngChunk("IEND", []byte("x"))),
+		"interlaced header":      pngOf(interlaced, idat, end),
+		"end with data":          pngOf(header, idat, endWithData),
 		"end before data":        pngOf(header, end),
 		"trailing bytes":         append(pngOf(header, idat, end), 0),
 		"too short":              {137, 80},

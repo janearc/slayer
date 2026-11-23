@@ -1,0 +1,26 @@
+name,x,y,z,unit,from,says
+bounds-low,-14.1,-1.9,-7.4,offset,chosen,the low corner of the box that encloses the craft with its booms out
+bounds-high,7.5,4.0,7.4,offset,chosen,the high corner of the box that encloses the craft with its booms out
+bus-profile,0,-1,0,span,chosen,the bus profile: the axis at the bottom as shares of the radius and of half the height (z unused)
+bus-profile,1,-1,0,span,chosen,the bus profile: the rim at the bottom (z unused)
+bus-profile,1,1,0,span,chosen,the bus profile: the rim at the top (z unused)
+bus-profile,0,1,0,span,chosen,the bus profile: the axis at the top (z unused)
+foot-sole,0.28,0,0.12,offset,chosen,the run from the toe of a foot to the end of its sole
+bus-mast-top,0,-0.73,0,offset,chosen,the top of the short mast under the bus
+bus-mast-bottom,0,-1.32,0,offset,chosen,the bottom of the short mast under the bus
+dish-centre,0,2,1.12,offset,chosen,the centre of the high-gain reflector against the bus
+boom-head-size,0.34,0.24,0.32,metre,chosen,the width height and depth of an instrument head on the magnetometer boom
+rtg-base,0.82,-0.42,0.1,offset,chosen,where the generator boom leaves the bus
+science-base,0.08,0.14,-0.68,offset,chosen,where the science boom leaves the bus
+platform-size,0.92,0.18,0.58,metre,chosen,the width height and depth of the scan platform
+platform-corner,-0.46,-0.09,-0.29,offset,chosen,the minimum corner of the scan platform against its mount
+scan-heads,-0.29,0.2,-0.12,offset,chosen,the mount of the first camera or spectrometer head against the platform
+scan-heads,0.02,0.2,-0.12,offset,chosen,the mount of the second camera or spectrometer head against the platform
+scan-camera-size,0.34,0.31,0.28,metre,chosen,the width height and depth of the box beside the scan heads
+scan-camera-corner,0.18,0.18,0.12,offset,chosen,the minimum corner of that box against the platform
+scan-plate-size,0.46,0.08,0.36,metre,chosen,the width height and depth of the plate behind the scan heads
+scan-plate-corner,-0.23,-0.18,0.3,offset,chosen,the minimum corner of that plate against the platform
+bracket-start,0.4,0.05,0.22,offset,chosen,where the calibration bracket leaves the platform
+bracket-end,0.7,0.42,0.32,offset,chosen,where the calibration bracket ends beside its target
+target-size,0.34,0.34,0.035,metre,chosen,the width height and depth of the calibration target
+target-corner,0.53,0.42,0.3,offset,chosen,the minimum corner of the calibration target against the platform

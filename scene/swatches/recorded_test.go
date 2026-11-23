@@ -171,8 +171,9 @@ func record(t *testing.T, ours map[string]swatch.Swatch) {
 		fmt.Fprintf(&written, "%s %x %x %x\n", name, math.Float64bits(l.R),
 			math.Float64bits(l.G), math.Float64bits(l.B))
 	}
+	contents := []byte(written.String())
 	if err := os.WriteFile("testdata/recorded.txt",
-		[]byte(written.String()), 0o644); err != nil {
+		contents, 0o644); err != nil {
 		t.Fatal(err)
 	}
 }

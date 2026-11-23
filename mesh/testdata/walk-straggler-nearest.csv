@@ -1,0 +1,6 @@
+name,x,y,z,face
+before-straggler,99,0.25,3,4
+over-straggler,100.5,0.5,0.25,4
+between-leaves,2,0.25,1,1
+past-pair,4.5,0.1,1,3
+below-first,0.5,0.25,-1,0

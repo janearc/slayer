@@ -146,8 +146,17 @@ func TestAStreamRedrawsAfterAConsumerFails(t *testing.T) {
 	}
 	defer stream.Close()
 	stop := errors.New("stop at this band")
-	// a picture 203 rows tall is four bands, of 64 rows at most
-	for _, failing := range []int{0, 2, 3} {
+	// the bands are sized by their time, so how many a picture is drawn
+	// in is counted from a drawing; the last has no band ahead of it
+	bands := 0
+	counted := func(int, int, []float32) error {
+		bands++
+		return nil
+	}
+	if err := stream.DrawBands(counted); err != nil {
+		t.Fatal(err)
+	}
+	for _, failing := range []int{0, bands / 2, bands - 1} {
 		seen := 0
 		consume := func(int, int, []float32) error {
 			seen++

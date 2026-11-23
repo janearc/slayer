@@ -10,9 +10,9 @@ import (
 // sharingBenchmarkPlan gives both cases the same small authored population.
 // Its repeated sail geometry makes the storage tradeoff visible without
 // pretending to represent the historical, independently shaped finale.
-func sharingBenchmarkPlan(shared bool) *StagePlan {
+func sharingBenchmarkPlan(shared bool) *stagePlan {
 	original := examplePopulation()
-	population := make([]AuthoredBeingPlan, 16)
+	population := make([]authoredBeingPlan, 16)
 	for i := range population {
 		population[i] = original[i%len(original)]
 		population[i].Identity = i + 1
@@ -25,7 +25,7 @@ func sharingBenchmarkPlan(shared bool) *StagePlan {
 
 func TestAnatomySharingBenchmarkUsesTheSameValidPopulation(t *testing.T) {
 	shared, separate := sharingBenchmarkPlan(true), sharingBenchmarkPlan(false)
-	for _, plan := range []*StagePlan{shared, separate} {
+	for _, plan := range []*stagePlan{shared, separate} {
 		if err := plan.check(); err != nil {
 			t.Fatal(err)
 		}

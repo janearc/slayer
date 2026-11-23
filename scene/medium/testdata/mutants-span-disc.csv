@@ -1,0 +1,9 @@
+name,x,y,z,direction,enter,leave
+mutants-span-disc-up,3,-5,0,y,4.8,5.2
+mutants-span-disc-down,3,5,0,down,4.8,5.2
+mutants-span-disc-up-the-wall,0,-5,6,y,4.8,5.2
+mutants-span-disc-up-outside-in-z,0,-5,8,y,0,0
+mutants-span-disc-up-outside-in-x,8,-5,0,y,0,0
+mutants-span-disc-along-above,-10,5,0,x,0,0
+mutants-span-disc-along-on-the-face,-10,0.2,0,x,4,16
+mutants-span-disc-along-touching,-10,0,6,x,0,0

@@ -46,10 +46,11 @@ func accessStairs() stairFlight {
 func TestTheStairsConstructorRebuildsAccessStairsPartForPart(t *testing.T) {
 	expect := []yardPart{}
 	for step := range 8 {
+		at := maths.V(-0.65, 0.02+float64(step)*0.22,
+			-float64(step)*0.3)
 		expect = append(expect, yardPart{Material: "steel",
 			Box: &yardBox{
-				At: maths.V(-0.65, 0.02+float64(step)*0.22,
-					-float64(step)*0.3),
+				At:   at,
 				Size: maths.V(1.3, 0.1, 0.28)}})
 	}
 	for _, side := range [2]float64{-1, 1} {

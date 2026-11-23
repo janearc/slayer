@@ -119,7 +119,8 @@ func TestTiltingLeansTheAxisAndKeepsTheDay(t *testing.T) {
 	if !(math.Abs(b.Tilt()-0.5) <= 1e-12) {
 		t.Errorf("Tilting(0.5 rad) leaves the tilt at %v radians", b.Tilt())
 	}
-	bad := b.Tilting(measure.Radians(math.NaN()))
+	notANumber := measure.Radians(math.NaN())
+	bad := b.Tilting(notANumber)
 	if err := bad.Place(thing.NewWorld(), maths.Vec{}, 0.5, 2); err == nil {
 		t.Errorf("Place accepted a body Tilting held a NaN tilt for")
 	}

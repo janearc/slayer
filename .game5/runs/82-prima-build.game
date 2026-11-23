@@ -1,0 +1,1 @@
+prima-build . :: go build -p=1 -o bin/slayer ./cmd/slayer

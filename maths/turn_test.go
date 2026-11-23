@@ -107,7 +107,6 @@ func TestLookAtFacesTheTargetAndStaysLevel(test *testing.T) {
 // to. It has the up given or the world's.
 // The first three are worked by hand.
 // The rest are recorded from the code at the limits.
-// Each one's branch was checked by hand.
 func TestEachLookIsWorkedOrRecorded(test *testing.T) {
 	for _, row := range read(test, looksFile) {
 		from, to := vector(test, row["from"]), vector(test, row["to"])

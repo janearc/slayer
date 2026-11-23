@@ -21,11 +21,33 @@ const bt709Name = "ITU_R_709_2"
 // annex A.2.4.
 const highProfile = 100
 
+// leftIn is the names left in the directory a path is in.
+func leftIn(t *testing.T, path string) []string {
+	t.Helper()
+	entries, err := os.ReadDir(filepath.Dir(path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, entry := range entries {
+		names = append(names, entry.Name())
+	}
+	return names
+}
+
+// nothingLeft stops the test when anything is left beside the path.
+func nothingLeft(t *testing.T, path string) {
+	t.Helper()
+	if names := leftIn(t, path); len(names) != zero {
+		t.Fatalf("left behind: %v", names)
+	}
+}
+
 // quarters is how the tests cut a sound to look at its parts. Defined.
 const quarters = 4
 
-// blueStep is how far blue moves from one frame to the next. Picked by
-// the test author, 2026-11-12, so the frames differ plainly.
+// blueStep is how far blue moves from one frame to the next, so the
+// frames differ plainly. Defined by the test: any step but nought will do.
 const blueStep = 8
 
 // gradient is a frame that moves with its index, so no two are alike.
@@ -511,8 +533,8 @@ func TestAStoppedEncoderFailsClose(t *testing.T) {
 }
 
 // a short, full size and with sound, finishes and probes back whole.
-// Handed over in step from one thread, sound and pictures stalled here
-// at frame 57; the small movies never showed it.
+// Handed over in step from one thread, sound and pictures stall here
+// at frame 57; the small movies do not show it.
 func TestAShortWithSoundFinishes(t *testing.T) {
 	request := smallRequest(t)
 	request.Width = picked("shorts-width")

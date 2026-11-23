@@ -19,8 +19,8 @@ func TestMeasuringNoFileSaysSo(t *testing.T) {
 func TestAnArrowIsTheNextPictureAndEscapeAloneStops(t *testing.T) {
 	for keys, stop := range map[string]bool{"\x1b[A": false, "\x1bOP": false,
 		"\x1b": true, "q": true, "\x03": true, "\r": false, " ": false} {
-		s := &Session{in: pipeOf(t, keys)}
-		got, err := s.Next()
+		session := &Session{in: pipeOf(t, keys)}
+		got, err := session.Next()
 		if err != nil || got != stop {
 			t.Errorf("keys %q: stop %v, %v; want stop %v", keys, got, err, stop)
 		}

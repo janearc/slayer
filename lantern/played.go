@@ -2,7 +2,6 @@ package lantern
 
 import (
 	_ "embed"
-	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -31,9 +30,16 @@ import (
 //go:embed zappy-channels.yaml
 var channelsRaw []byte
 
+// refusal is a refusal of this package, held as a constant so that no one
+// can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (r refusal) Error() string { return string(r) }
+
 // ErrChannel is a channel a played lantern has not, or a value outside
 // one's range.
-var ErrChannel = errors.New("lantern: no such channel value")
+const ErrChannel refusal = "lantern: no such channel value"
 
 // Channel is one thing music can move in a played lantern: its name, what
 // it does, its unit, the least and most it may be, and its rest, the

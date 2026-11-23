@@ -1,0 +1,5 @@
+name,set,want
+above-one,2,2
+below-one,0.5,0.5
+nothing,0,1
+below-nothing,-2,1

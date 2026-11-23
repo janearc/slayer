@@ -23,17 +23,17 @@ func TestTheIcosahedronIsTheIcosahedron(t *testing.T) {
 		}
 		one, two, opposite := 0, 0, 0
 		for b, vb := range verts {
-			d := va.Sub(vb).Len()
+			distance := va.Sub(vb).Len()
 			switch {
 			case a == b:
-			case near(d, edgeLen):
+			case near(distance, edgeLen):
 				one++
-			case near(d, twoEdges):
+			case near(distance, twoEdges):
 				two++
-			case near(d, 2):
+			case near(distance, 2):
 				opposite++
 			default:
-				t.Fatalf("corners %d and %d are %v apart", a, b, d)
+				t.Fatalf("corners %d and %d are %v apart", a, b, distance)
 			}
 		}
 		if one != 5 || two != 5 || opposite != 1 {
@@ -60,9 +60,9 @@ func TestTheIcosahedronIsTheIcosahedron(t *testing.T) {
 // corners, which name it forever: the corner (i, j) of face f is n-i-j parts of
 // the face's first corner, i of its second and j of its third, and a part of
 // zero is not there.
-func weights(n, f, i, j int) map[int]int {
+func weights(count, f, i, j int) map[int]int {
 	w := map[int]int{}
-	for k, c := range []int{n - i - j, i, j} {
+	for k, c := range []int{count - i - j, i, j} {
 		if c > 0 {
 			w[faces[f][k]] = c
 		}
@@ -73,8 +73,8 @@ func weights(n, f, i, j int) map[int]int {
 // lowest is the one name of a corner: the lowest numbered face that holds
 // every corner it is made of, and the shares on that face's second and
 // third corners.
-func lowest(n, f, i, j int) Tile {
-	w := weights(n, f, i, j)
+func lowest(count, f, i, j int) Tile {
+	w := weights(count, f, i, j)
 	for g := range faces {
 		all := true
 		for v := range w {
@@ -169,33 +169,33 @@ func TestTheFinestAndTheRungsToIt(t *testing.T) {
 	if SphereFor(0).Splits != 500_000_000 {
 		t.Errorf("the finest is %d splits", SphereFor(0).Splits)
 	}
-	if got := (Sphere{Splits: 500_000_000}).Count(); got != 2_500_000_000_000_000_002 {
+	if got := (Sphere{Splits: 500_000_000}).count(); got != 2_500_000_000_000_000_002 {
 		t.Errorf("the finest counts %d tiles", got)
 	}
-	for _, c := range []struct{ from, to int }{{7, 14}, {0, 2}, {1, 2},
+	for _, each := range []struct{ from, to int }{{7, 14}, {0, 2}, {1, 2},
 		{249_999_999, 499_999_998}, {250_000_000, 500_000_000},
 		{250_000_001, 500_000_000}, {300_000_000, 500_000_000},
 		{500_000_000, 500_000_000}} {
-		if got := (Sphere{Splits: c.from}).Finer(); got != (Sphere{Splits: c.to}) {
-			t.Errorf("below %d is %v, want %d", c.from, got, c.to)
+		if got := (Sphere{Splits: each.from}).Finer(); got != (Sphere{Splits: each.to}) {
+			t.Errorf("below %d is %v, want %d", each.from, got, each.to)
 		}
 	}
-	for _, c := range []struct {
+	for _, each := range []struct {
 		radians float64
 		want    int
 	}{{edge, 1}, {10, 1}, {edge / 2, 2}, {edge / 3.4, 3}, {edge / 3.6, 4},
 		{edge / 500_000_000 * 1.0000001, 499_999_950}} {
-		if got := SphereFor(c.radians).Splits; got != c.want {
-			t.Errorf("for %v radians, %d splits, want %d", c.radians, got, c.want)
+		if got := SphereFor(each.radians).Splits; got != each.want {
+			t.Errorf("for %v radians, %d splits, want %d", each.radians, got, each.want)
 		}
 	}
-	for _, n := range []int{-5, 0, 1} {
-		if (Sphere{Splits: n}).Count() != 12 {
-			t.Errorf("%d splits count %d tiles", n, (Sphere{Splits: n}).Count())
+	for _, count := range []int{-5, 0, 1} {
+		if (Sphere{Splits: count}).count() != 12 {
+			t.Errorf("%d splits count %d tiles", count, (Sphere{Splits: count}).count())
 		}
 	}
-	if (Sphere{Splits: 2}).Count() != 42 {
-		t.Errorf("two splits count %d tiles", (Sphere{Splits: 2}).Count())
+	if (Sphere{Splits: 2}).count() != 42 {
+		t.Errorf("two splits count %d tiles", (Sphere{Splits: 2}).count())
 	}
 }
 
@@ -206,15 +206,15 @@ func TestTheFinestAndTheRungsToIt(t *testing.T) {
 // corner (4, 0); (3, 3) is over the long edge and comes to (3, 1); (5, 5) to
 // (4, 0); (0, 5) to (0, 4); a corner already on the face, edge and all, stays.
 func TestClampKeepsACornerOnItsFace(t *testing.T) {
-	for _, c := range []struct{ i, j, n, ci, cj int }{
+	for _, each := range []struct{ i, j, n, ci, cj int }{
 		{-1, 2, 4, 0, 2}, {2, -3, 4, 2, 0}, {-1, -1, 4, 0, 0},
 		{6, 0, 4, 4, 0}, {3, 3, 4, 3, 1}, {5, 5, 4, 4, 0}, {0, 5, 4, 0, 4},
 		{0, 2, 4, 0, 2}, {2, 0, 4, 2, 0}, {1, 3, 4, 1, 3}, {4, 0, 4, 4, 0},
 		{0, 0, 4, 0, 0}, {2, 2, 4, 2, 2}, {2, 3, 4, 2, 2},
 	} {
-		if i, j := clamp(c.i, c.j, c.n); i != c.ci || j != c.cj {
+		if i, j := clamp(each.i, each.j, each.n); i != each.ci || j != each.cj {
 			t.Errorf("clamp(%d, %d, %d) = (%d, %d), want (%d, %d)",
-				c.i, c.j, c.n, i, j, c.ci, c.cj)
+				each.i, each.j, each.n, i, j, each.ci, each.cj)
 		}
 	}
 }
@@ -230,8 +230,9 @@ func TestWalkTakesEightStepsAndNoMore(t *testing.T) {
 	tl := Sphere{Splits: 40}
 	for _, d := range [][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, -1}, {-1, 1}} {
 		for _, away := range []int{8, 9} {
-			p := tl.corner(0, 20+away*d[0], 10+away*d[1])
-			got := tl.walk(p, 0, 20, 10, apart(p, tl.corner(0, 20, 10)))
+			point := tl.corner(0, 20+away*d[0], 10+away*d[1])
+			startCorner := tl.corner(0, 20, 10)
+			got := tl.walk(point, 0, 20, 10, apart(point, startCorner))
 			want := lowest(40, 0, 20+8*d[0], 10+8*d[1])
 			if got != want {
 				t.Errorf("direction %v, %d away: stopped at %v, want %v", d, away, got, want)
@@ -251,7 +252,7 @@ func TestWalkStaysOnItsFace(t *testing.T) {
 		return tile.Column >= 0 && tile.Row >= 0 && tile.Column+tile.Row <= n
 	}
 	for _, f := range []int{0, 13} {
-		for _, c := range []struct {
+		for _, each := range []struct {
 			start, beyond [2]int
 		}{
 			{[2]int{0, 10}, [2]int{-1, 10}},
@@ -261,24 +262,26 @@ func TestWalkStaysOnItsFace(t *testing.T) {
 			{[2]int{10, 0}, [2]int{12, -3}},
 			{[2]int{10, 30}, [2]int{14, 30}},
 		} {
-			p := tl.corner(f, c.beyond[0], c.beyond[1])
-			got := tl.walk(p, f, c.start[0], c.start[1],
-				apart(p, tl.corner(f, c.start[0], c.start[1])))
+			point := tl.corner(f, each.beyond[0], each.beyond[1])
+			startCorner := tl.corner(f, each.start[0], each.start[1])
+			got := tl.walk(point, f, each.start[0], each.start[1],
+				apart(point, startCorner))
 			if !onFace(got) {
 				t.Errorf("face %d: walked from %v toward %v to %v, off the face",
-					f, c.start, c.beyond, got)
+					f, each.start, each.beyond, got)
 			}
 		}
-		for _, c := range []struct{ start, onto [2]int }{
+		for _, each := range []struct{ start, onto [2]int }{
 			{[2]int{1, 10}, [2]int{0, 10}},
 			{[2]int{10, 1}, [2]int{10, 0}},
 			{[2]int{10, 29}, [2]int{10, 30}},
 		} {
-			p := tl.corner(f, c.onto[0], c.onto[1])
-			got := tl.walk(p, f, c.start[0], c.start[1],
-				apart(p, tl.corner(f, c.start[0], c.start[1])))
-			if want := lowest(n, f, c.onto[0], c.onto[1]); got != want {
-				t.Errorf("face %d: walked from %v to %v, want %v", f, c.start, got, want)
+			point := tl.corner(f, each.onto[0], each.onto[1])
+			startCorner := tl.corner(f, each.start[0], each.start[1])
+			got := tl.walk(point, f, each.start[0], each.start[1],
+				apart(point, startCorner))
+			if want := lowest(n, f, each.onto[0], each.onto[1]); got != want {
+				t.Errorf("face %d: walked from %v to %v, want %v", f, each.start, got, want)
 			}
 		}
 	}
@@ -297,7 +300,8 @@ func TestWalkFindsTheNearestFromAFewStepsAway(t *testing.T) {
 		for k := range int64(300) {
 			p := random(k + 77)
 			if k%3 == 0 {
-				p = verts[int(k/3)%12].Add(p.Scale(0.4 / float64(n))).Unit()
+				nudge := 0.4 / float64(n)
+				p = verts[int(k/3)%12].Add(p.Scale(nudge)).Unit()
 			}
 			f := face(p)
 			best, ti, tj := math.Inf(1), 0, 0
@@ -318,7 +322,8 @@ func TestWalkFindsTheNearestFromAFewStepsAway(t *testing.T) {
 					if si < 0 || sj < 0 || si+sj > n {
 						continue
 					}
-					got := tl.walk(p, f, si, sj, apart(p, tl.corner(f, si, sj)))
+					startCorner := tl.corner(f, si, sj)
+					got := tl.walk(p, f, si, sj, apart(p, startCorner))
 					if got != want {
 						t.Fatalf("n=%d point %d: from (%d, %d) to %v, want %v",
 							n, k, si, sj, got, want)
@@ -341,15 +346,15 @@ func abs(x int) int {
 // that is the middle of any of its neighbours, across the edge or not, is in
 // that neighbour, which is zero away.
 func TestSettleMovesAnEdgeTileToANearerNeighbour(t *testing.T) {
-	for _, n := range []int{1, 2, 4} {
-		tl := Sphere{Splits: n}
+	for _, count := range []int{1, 2, 4} {
+		tl := Sphere{Splits: count}
 		for _, tile := range tl.Tiles() {
 			if tl.inside(tile) {
 				continue
 			}
 			for _, nb := range tl.Neighbours(tile) {
 				if got := tl.settle(tl.Centre(nb), tile); got != nb {
-					t.Fatalf("n=%d: from %v to the middle of %v: %v", n, tile, nb, got)
+					t.Fatalf("n=%d: from %v to the middle of %v: %v", count, tile, nb, got)
 				}
 			}
 		}
@@ -428,14 +433,14 @@ func TestSphereEdgeIsHalfTheChord(t *testing.T) {
 func TestSphereDistanceHoldsADotToOne(t *testing.T) {
 	tl := Sphere{Splits: 4}
 	x := maths.V(1, 0, 0)
-	if d := tl.Distance(x.Scale(2), x); !(d == 0) {
-		t.Errorf("a direction past one is %v from itself", d)
+	if distance := tl.Distance(x.Scale(2), x); !(distance == 0) {
+		t.Errorf("a direction past one is %v from itself", distance)
 	}
-	if d := tl.Distance(x.Scale(2), x.Scale(-1)); !(math.Abs(d-math.Pi) <= 1e-12) {
-		t.Errorf("a direction past minus one is %v from its opposite", d)
+	if distance := tl.Distance(x.Scale(2), x.Scale(-1)); !(math.Abs(distance-math.Pi) <= 1e-12) {
+		t.Errorf("a direction past minus one is %v from its opposite", distance)
 	}
-	if d := tl.Distance(x.Scale(-3), x); !(math.Abs(d-math.Pi) <= 1e-12) {
-		t.Errorf("a dot of minus three is %v", d)
+	if distance := tl.Distance(x.Scale(-3), x); !(math.Abs(distance-math.Pi) <= 1e-12) {
+		t.Errorf("a dot of minus three is %v", distance)
 	}
 }
 
@@ -446,15 +451,15 @@ func TestSphereDistanceHoldsADotToOne(t *testing.T) {
 func TestSphereSomewhereIsTheCubesDirection(t *testing.T) {
 	tl := Sphere{Splits: 4}
 	l := math.Sqrt(1.14)
-	if p := tl.Somewhere(0.9, 0.25, 0.75); !p.Near(maths.V(0.8/l, -0.5/l, 0.5/l), 1e-12) {
-		t.Errorf("somewhere (0.9, 0.25, 0.75) is %v", p)
+	if point := tl.Somewhere(0.9, 0.25, 0.75); !point.Near(maths.V(0.8/l, -0.5/l, 0.5/l), 1e-12) {
+		t.Errorf("somewhere (0.9, 0.25, 0.75) is %v", point)
 	}
 	r3 := math.Sqrt(3)
-	if p := tl.Somewhere(1, 0, 1); !p.Near(maths.V(1/r3, -1/r3, 1/r3), 1e-12) {
-		t.Errorf("somewhere (1, 0, 1) is %v", p)
+	if point := tl.Somewhere(1, 0, 1); !point.Near(maths.V(1/r3, -1/r3, 1/r3), 1e-12) {
+		t.Errorf("somewhere (1, 0, 1) is %v", point)
 	}
-	if p := tl.Somewhere(0.5, 0.5, 0.5); p != maths.Up {
-		t.Errorf("the middle of the cube is %v, not up", p)
+	if point := tl.Somewhere(0.5, 0.5, 0.5); point != maths.Up {
+		t.Errorf("the middle of the cube is %v, not up", point)
 	}
 }
 
@@ -472,11 +477,14 @@ func TestNearestIsTheTrueNearestAtTheFacesEdges(t *testing.T) {
 			x, y := random(k+1).X*0.5+0.5, random(k+2).Y*0.5+0.5
 			switch k % 4 {
 			case 0:
-				p = verts[int(k/4)%12].Add(p.Scale(0.5 / float64(n))).Unit()
+				nudge := 0.5 / float64(n)
+				p = verts[int(k/4)%12].Add(p.Scale(nudge)).Unit()
 			case 1:
-				p = a.Scale(x).Add(b.Scale(1 - x)).Add(c.Scale(0.01 / float64(n))).Unit()
+				nudge := 0.01 / float64(n)
+				p = a.Scale(x).Add(b.Scale(1 - x)).Add(c.Scale(nudge)).Unit()
 			case 2:
-				p = b.Scale(y).Add(c.Scale(1 - y)).Add(a.Scale(0.01 / float64(n))).Unit()
+				nudge := 0.01 / float64(n)
+				p = b.Scale(y).Add(c.Scale(1 - y)).Add(a.Scale(nudge)).Unit()
 			}
 			got := tl.Nearest(p)
 			best, want := math.Inf(1), Tile{}

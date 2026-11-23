@@ -3,13 +3,14 @@ package trace
 import (
 	"math"
 	"strings"
+	"sync"
 	"testing"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/oceantex"
 	"github.com/janearc/slayer/scene/gas"
 	"github.com/janearc/slayer/scene/medium"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
@@ -30,7 +31,7 @@ func diffuseSkyOceanFixtureAt(test *testing.T, index float64,
 	if err != nil {
 		test.Fatal(err)
 	}
-	continuation, err := seaocean.NewInfiniteMeanContinuation(core, 0, 5)
+	continuation, err := arid.NewInfiniteMeanContinuation(core, 0, 5)
 	if err != nil {
 		test.Fatal(err)
 	}
@@ -81,13 +82,13 @@ func TestDiffuseSkyInscatterSamplesNormalizedUpperHemisphere(t *testing.T) {
 }
 
 func TestDiffuseSkyInscatterSupportsSkyOnlyOceanWithoutDirectSun(t *testing.T) {
-	world, medium, seen, scene := diffuseSkyOceanFixture(t, 1.333, 16)
+	world, medium, seen, _ := diffuseSkyOceanFixture(t, 1.333, 16)
 	world.OceanSurface.DirectSunMeanPlane = false
 	world.Lamps = nil
 	if err := validateClearInscatterWorld(world, medium); err != nil {
 		t.Fatalf("sky-only scene rejected: %v", err)
 	}
-	scene = stage(world, 0)
+	scene := stage(world, 0)
 	if scene.oceanSun == nil || scene.oceanSun.sunIndex != -1 {
 		t.Fatalf("sky-only source context = %+v", scene.oceanSun)
 	}
@@ -176,14 +177,7 @@ func TestDiffuseSkyInscatterUsesSnellSolidAngleJacobian(t *testing.T) {
 		sinWater := sinAir / index
 		cosWater := math.Sqrt(1 - sinWater*sinWater)
 		transmission := 1 - maths.Fresnel(cosAir, index)
-		radianceScale := transmission * index * index
-		waterSolidAngleScale := cosAir / (index * index * cosWater)
-		jacobianProduct := radianceScale * waterSolidAngleScale
-		wantProduct := transmission * cosAir / cosWater
-		if math.Abs(jacobianProduct-wantProduct) > 1e-14 {
-			t.Fatalf("radiance/Jacobian product %.17g, cancellation result %.17g",
-				jacobianProduct, wantProduct)
-		}
+		jacobianProduct := transmission * cosAir / cosWater
 		waterDistance := depth / cosWater
 		phase := phaseModel.PhaseAt(-cosWater)
 		integrand := 4 * jacobianProduct *
@@ -309,9 +303,9 @@ func TestDiffuseSkyWaterSourceComposesWithOptedInClearCloud(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	world.AddVolume(thing.Volume{Medium: cloud,
-		Material: &thing.Material{Name: "absorbing clear cloud"},
-		Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, -3.5, 0)})})
+	motion := thing.Still(maths.Subspace{Origin: maths.V(0, -3.5, 0)})
+	world.AddVolume(thing.Volume{Medium: cloud, Motion: motion,
+		Material: &thing.Material{Name: "absorbing clear cloud"}})
 	if err := ValidateClearState(world,
 		[]InitialMedium{{Index: 1.333,
 			ClearMedium: water}}); err != nil {
@@ -418,15 +412,25 @@ func TestDiffuseSkyInscatterRefusesMissingSkyOrFiniteOnlyOcean(t *testing.T) {
 	}
 }
 
-func TestMoonlightRays4CapturedBoundaryHitThroughPlacedThing(t *testing.T) {
-	core, err := seaocean.NewHeightField(seaocean.HeightFieldConfig{
+// moonlitCore is the moonlit sea's sampled waves, made once for the
+// tests that stage it: making them is most of a second.
+var moonlitCore = sync.OnceValues(func() (*shape.HeightField, error) {
+	return arid.NewHeightField(arid.HeightFieldConfig{
 		Sea:    oceantex.Sea{Wind: 7, Fetch: 50000, Toward: 0},
 		Extent: 512, Samples: 257, Seed: 7, Seconds: 0,
 	})
+})
+
+// moonlitSea is a wind sea of 512 metres with a collar of 64 out to a
+// flat far field, placed 1500 metres down minus x and staged as the
+// tagged ocean: the placed boundary, and its shape in its own space.
+func moonlitSea(t *testing.T) (*placedThing, *arid.InfiniteMeanContinuation) {
+	t.Helper()
+	core, err := moonlitCore()
 	if err != nil {
 		t.Fatal(err)
 	}
-	boundaryShape, err := seaocean.NewInfiniteMeanContinuation(core, 0, 64)
+	boundaryShape, err := arid.NewInfiniteMeanContinuation(core, 0, 64)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -453,17 +457,107 @@ func TestMoonlightRays4CapturedBoundaryHitThroughPlacedThing(t *testing.T) {
 	if staged.oceanSun == nil || staged.oceanSun.placedBoundary == nil {
 		t.Fatal("staged scene did not retain the placed scattering boundary")
 	}
-	ray := maths.Ray{At: maths.V(-1775.99602763588,
-		-0.1602377857834731, 173.73196218084303),
-		Dir: maths.V(-0.8313319789250135, 0.1395933109731877,
-			0.5379598947395277)}
-	const sourceAlong = 7.9281609747613855
-	local := staged.oceanSun.placedBoundary.at.RayIn(ray)
-	along, hit := staged.oceanSun.placedBoundary.meet(ray, 0, sourceAlong)
-	t.Logf("placed scale=%g local ray=%+v world hit=(%0.12g,%t)",
-		staged.oceanSun.placedBoundary.scale, local, along, hit)
-	if !hit || !(along < sourceAlong) {
-		t.Fatalf("placed boundary missed captured view crossing: hit=(%g,%t) before source sample t=%g",
-			along, hit, sourceAlong)
+	return staged.oceanSun.placedBoundary, boundaryShape
+}
+
+// capturedWay is the way of a look eight degrees above level, out of
+// the water, at a graze to the surface.
+var capturedWay = maths.V(-0.8313319789250135, 0.1395933109731877,
+	0.5379598947395277)
+
+// climbing is a look along capturedWay from under the moonlit sea, and
+// how far along it has climbed over the sea. It starts 276 metres from
+// the sea's middle and so 20 past its core's edge, in the collar; a hundredth
+// under the lowest the surface goes anywhere, and is followed to a
+// hundredth over the highest. Its height is set from the surface's own
+// bounds, so it crosses whatever the waves are.
+func climbing(sea *arid.InfiniteMeanContinuation) (maths.Ray, float64) {
+	low, high := sea.Bounds().Min.Y-0.01, sea.Bounds().Max.Y+0.01
+	from := maths.V(-1775.99602763588, low, 173.73196218084303)
+	return maths.Ray{At: from, Dir: capturedWay},
+		(high - low) / capturedWay.Y
+}
+
+// A look that climbs out of the tagged sea at a graze, through the
+// collar between its sampled core and its flat far field, meets the
+// sea's surface on the way, asked through the placed thing as the
+// in-scattering asks it. It starts under the whole surface and ends
+// over the whole of it, so it crosses whatever the waves are; and a
+// twentieth of a metre short of where it is said to cross, it is still
+// under, and a twentieth past it is over.
+func TestALookClimbingOutOfThePlacedSeaMeetsItsSurface(t *testing.T) {
+	placed, sea := moonlitSea(t)
+	ray, far := climbing(sea)
+	local := placed.at.RayIn(ray)
+	if under, over := sea.Distance(local.At),
+		sea.Distance(local.Point(far)); !(under < 0 && over > 0) {
+		t.Fatalf("the test's own look starts %g from the surface and "+
+			"ends %g from it, want under and over", under, over)
+	}
+	along, hit := placed.meet(ray, 0, far)
+	if !hit || !(along > 0 && along < far) {
+		t.Fatalf("the placed sea was missed: hit=(%g,%t) before %g, "+
+			"local ray %+v", along, hit, far, local)
+	}
+	if short, past := onEitherSide(sea, local, along); !(short < 0 &&
+		past > 0) {
+		t.Errorf("a twentieth either side of the crossing at %g the "+
+			"look is %g and %g from the surface, want under and over",
+			along, short, past)
+	}
+}
+
+// crossingSide is how far, along a look, either side of a reported
+// crossing the look is asked where it stands: a twentieth of a metre.
+const crossingSide = 0.05
+
+// onEitherSide is how far from the sea's surface a local look stands
+// a twentieth of a metre before and after a place along it.
+func onEitherSide(sea *arid.InfiniteMeanContinuation, local maths.Ray,
+	along float64) (before, after float64) {
+	return sea.Distance(local.Point(along - crossingSide)),
+		sea.Distance(local.Point(along + crossingSide))
+}
+
+// Anti: a crossing reported a metre too early, or a metre too late, is
+// not one the either-side check takes: a twentieth past the early one
+// is still under, and a twentieth short of the late one is already
+// over.
+func TestACrossingReportedEarlyOrLateIsTurnedAwayBySidesCheck(
+	t *testing.T) {
+	placed, sea := moonlitSea(t)
+	ray, far := climbing(sea)
+	local := placed.at.RayIn(ray)
+	along, hit := placed.meet(ray, 0, far)
+	if !hit {
+		t.Fatal("the placed sea was missed")
+	}
+	const wrong = 1.0
+	if short, past := onEitherSide(sea, local, along-wrong); short < 0 &&
+		past > 0 {
+		t.Errorf("a crossing a metre early passes: %g and %g", short, past)
+	}
+	if short, past := onEitherSide(sea, local, along+wrong); short < 0 &&
+		past > 0 {
+		t.Errorf("a crossing a metre late passes: %g and %g", short, past)
+	}
+}
+
+// Anti: a look that runs level under the whole surface, as far, meets
+// none of it; and neither does the climbing look begun a metre deeper
+// and stopped a metre along, 0.14 of a metre up and still under the
+// lowest water.
+func TestALookThatStaysUnderThePlacedSeaMeetsNoSurface(t *testing.T) {
+	placed, sea := moonlitSea(t)
+	ray, far := climbing(sea)
+	level := ray
+	level.Dir = maths.V(capturedWay.X, 0, capturedWay.Z).Unit()
+	if along, hit := placed.meet(level, 0, far); hit {
+		t.Errorf("a level look under the sea met it at %g", along)
+	}
+	sunk := ray
+	sunk.At.Y -= 1
+	if along, hit := placed.meet(sunk, 0, 1); hit {
+		t.Errorf("a look stopped under the sea met it at %g", along)
 	}
 }

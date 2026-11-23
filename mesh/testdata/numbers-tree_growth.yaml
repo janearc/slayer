@@ -1,0 +1,22 @@
+# every number mesh/tree_growth_test.go chooses, with what it is and why.
+numbers:
+  - name: tree-growth-rayers
+    value: 10
+    says: how many goroutines meet one mesh's first ray at once
+    kind: picked
+    by: more than one, so the tree's growing is raced, and few enough to run at once on any machine
+  - name: tree-growth-storage-looks
+    value: 100
+    says: how many times a goroutine counts the mesh's storage while the rays race
+    kind: picked
+    by: enough that the counting is still going when the first ray grows the tree
+  - name: tree-growth-height
+    value: 2
+    says: how far above the cube's middle, along z, the control ray starts, looking down at it
+    kind: picked
+    by: past the cube's top side, a half above its middle, with room to spare
+  - name: tree-growth-away
+    value: 2
+    says: how far along x from the cube's middle the point is that both meshes are asked their distance to
+    kind: picked
+    by: well outside the cube, whose side is at a half

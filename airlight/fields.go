@@ -6,6 +6,7 @@ import (
 	"math"
 	"slices"
 
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/moonlight"
 	"github.com/janearc/slayer/skylight"
 )
@@ -17,8 +18,10 @@ import (
 //
 // With it, at each step of the sun's zenith, the share of the direct
 // sun that reaches the ground; the sun's irradiance at the top; the
-// band each wavelength stands for; and the share of the sunlight on the
-// whole planet that its ground absorbed.
+// band each wavelength stands for; the share of the sunlight on the
+// part of the planet walked that its ground absorbed; and the span of
+// the sun's zenith walked for, outside which the bins hold only part of
+// their light.
 type Fields struct {
 	wavelengths              []int
 	band                     float64
@@ -26,14 +29,15 @@ type Fields struct {
 	zeniths, views, azimuths int
 	radiance, counts         [][]float64
 	transmittance            [][]float64
+	suns                     skylight.Suns
 }
 
-// newFields is fields of a plan's wavelengths and grid, holding no light
-// yet.
+// newFields is fields of a plan's wavelengths, grid and suns, holding no
+// light yet.
 func newFields(plan Plan) *Fields {
 	waves := len(plan.wavelengths)
 	return &Fields{wavelengths: slices.Clone(plan.wavelengths),
-		band: plan.band, sun: slices.Clone(plan.sun),
+		suns: plan.suns, band: plan.band, sun: slices.Clone(plan.sun),
 		absorbed: make([]float64, waves), zeniths: plan.grid.Zeniths,
 		views: plan.grid.Views, azimuths: plan.grid.Azimuths,
 		radiance: make([][]float64, waves), counts: make([][]float64, waves),
@@ -163,7 +167,7 @@ func folded(azimuth float64) float64 {
 
 // The places of the numbers that begin the fields' bytes: the counts of
 // wavelengths, of zenith, view and azimuth bins and of the direct sun's
-// steps, which are its header's counts; and the band.
+// steps, which are its header's counts; the band; and the span of suns.
 const (
 	wavesAt = iota
 	zenithsAt
@@ -173,10 +177,60 @@ const (
 	// headerCounts is how many of the header's numbers are counts, and
 	// the place of the band after them.
 	headerCounts
-	// headerNumbers is how many numbers the header holds: its counts
-	// and the band.
+	// fromAt and toAt are the places of the span of suns walked for.
+	fromAt
+	toAt
+	// headerNumbers is how many numbers the header holds: its counts,
+	// the band and the span.
 	headerNumbers
 )
+
+// Noise is what is behind the bins above the horizon that a sun along
+// a way is read from: the median crossings a bin at the middle
+// wavelength, and the colour noise they leave between neighbouring
+// points of the sky's table, colourNoiseAtOne over their root.
+func (fields *Fields) Noise(way maths.Vec) (float64, float64) {
+	held := fields.held(readSpan(zenithOf(way), fields.zeniths))
+	if !(held > none) {
+		return none, math.Inf(one)
+	}
+	return held, colourNoiseAtOne / math.Sqrt(held)
+}
+
+// held is the median crossings a bin above the horizon, at the middle
+// wavelength, over the zenith bins of a span; nought where none is
+// in it.
+func (fields *Fields) held(span skylight.Suns) float64 {
+	counts := fields.counts[len(fields.counts)/two]
+	var above []float64
+	for zenith := range fields.zeniths {
+		middle := centre(zenith, fields.zeniths) * math.Pi
+		if middle >= span.From && middle <= span.To {
+			above = append(above, counts[fields.index(zenith,
+				fields.views/two, none):fields.index(zenith+one, none,
+				none)]...)
+		}
+	}
+	if len(above) == none {
+		return none
+	}
+	slices.Sort(above)
+	return above[len(above)/two]
+}
+
+// Holds is nil when the fields were walked for a sun along a way, and
+// otherwise refuses it: the bins it is read between hold only part of
+// their light.
+func (fields *Fields) Holds(way maths.Vec) error {
+	read := readSpan(zenithOf(way), fields.zeniths)
+	if read.From >= fields.suns.From && read.To <= fields.suns.To {
+		return nil
+	}
+	return fmt.Errorf("airlight: fields walked for a sun %.1f to %.1f "+
+		"degrees from up are read for one %.1f degrees from up",
+		fields.suns.From/maths.Degree, fields.suns.To/maths.Degree,
+		zenithOf(way)/maths.Degree)
+}
 
 // perWavelength is how many single numbers each wavelength has besides
 // its bins and steps: its nanometres, its sun and its ground's share.
@@ -194,6 +248,7 @@ func (fields *Fields) Bytes() []byte {
 	numbers[azimuthsAt] = float64(fields.azimuths)
 	numbers[stepsAt] = float64(transmittanceSteps + one)
 	numbers[headerCounts] = fields.band
+	numbers[fromAt], numbers[toAt] = fields.suns.From, fields.suns.To
 	for _, nanometres := range fields.wavelengths {
 		numbers = append(numbers, float64(nanometres))
 	}
@@ -208,8 +263,9 @@ func (fields *Fields) Bytes() []byte {
 }
 
 // FieldsFromBytes is the fields Bytes gave, or a refusal of bytes that
-// are not fields': by their length, and by a header whose counts are not
-// whole numbers from one to mostBins.
+// are not fields': by their length, by a header whose counts are not
+// whole numbers from one to mostBins, and by a span of suns that does
+// not run up from nought to pi.
 func FieldsFromBytes(raw []byte) (*Fields, error) {
 	if len(raw)%float64Bytes != none || len(raw) < headerNumbers*float64Bytes {
 		return nil, fmt.Errorf("airlight: %d bytes are not fields", len(raw))
@@ -231,7 +287,13 @@ func FieldsFromBytes(raw []byte) (*Fields, error) {
 		return nil, fmt.Errorf("airlight: fields of these counts are %d "+
 			"bytes, not %d", want*float64Bytes, len(raw))
 	}
-	return read.fields(sizes, bins), nil
+	made := read.fields(sizes, bins)
+	if !(made.suns.From >= none && made.suns.From <= made.suns.To &&
+		made.suns.To <= math.Pi) {
+		return nil, fmt.Errorf("airlight: a span of suns from %g to %g "+
+			"in fields' header", made.suns.From, made.suns.To)
+	}
+	return made, nil
 }
 
 // numbers is bytes read as float64s, one after another.
@@ -260,6 +322,7 @@ func (read *numbers) fields(sizes []int, bins int) *Fields {
 	waves, steps := sizes[wavesAt], sizes[stepsAt]
 	made := &Fields{band: read.next(), zeniths: sizes[zenithsAt],
 		views: sizes[viewsAt], azimuths: sizes[azimuthsAt]}
+	made.suns = skylight.Suns{From: read.next(), To: read.next()}
 	for _, nanometres := range read.take(waves) {
 		made.wavelengths = append(made.wavelengths, int(nanometres))
 	}

@@ -28,10 +28,12 @@ func TestInvalidUTF8(t *testing.T) {
 
 func chunk(kind string, data []byte) []byte {
 	out := make([]byte, len(data)+12)
-	binary.BigEndian.PutUint32(out, uint32(len(data)))
+	size := uint32(len(data))
+	binary.BigEndian.PutUint32(out, size)
 	copy(out[4:], kind)
 	copy(out[8:], data)
-	binary.BigEndian.PutUint32(out[len(out)-4:], crc32.ChecksumIEEE(out[4:len(out)-4]))
+	checksum := crc32.ChecksumIEEE(out[4 : len(out)-4])
+	binary.BigEndian.PutUint32(out[len(out)-4:], checksum)
 	return out
 }
 
@@ -58,15 +60,20 @@ func TestStrictPNGStream(t *testing.T) {
 		}
 		return append(out, chunk("IEND", nil)...)
 	}
+	textChunk := chunk("tEXt", []byte("x\x00y"))
+	trailing := append(bytes.Clone(idat), 1, 2, 3)
+	doubled := append(bytes.Clone(idat), idat...)
+	half := len(idat) / 2
+	ihdrBody := ihdr[8 : len(ihdr)-4]
 	cases := [][]byte{
 		wrap(chunk("ABCD", nil), chunk("IDAT", idat)),
 		wrap(chunk("PLTE", []byte{0, 0, 0}), chunk("IDAT", idat)),
 		wrap(chunk("tRNS", []byte{0, 0}), chunk("IDAT", idat)),
-		wrap(chunk("tEXt", []byte("x\x00y")), chunk("IDAT", idat)),
-		wrap(chunk("IDAT", append(bytes.Clone(idat), 1, 2, 3))),
-		wrap(chunk("IDAT", append(bytes.Clone(idat), idat...))),
-		wrap(chunk("IDAT", idat[:len(idat)/2]), chunk("tEXt", []byte("x\x00y")), chunk("IDAT", idat[len(idat)/2:])),
-		wrap(chunk("IDAT", idat), chunk("IHDR", ihdr[8:len(ihdr)-4])),
+		wrap(textChunk, chunk("IDAT", idat)),
+		wrap(chunk("IDAT", trailing)),
+		wrap(chunk("IDAT", doubled)),
+		wrap(chunk("IDAT", idat[:half]), textChunk, chunk("IDAT", idat[half:])),
+		wrap(chunk("IDAT", idat), chunk("IHDR", ihdrBody)),
 	}
 	for i, b := range cases {
 		if err := validatePNG(b, k); err == nil {
@@ -81,7 +88,8 @@ func TestDecodedBudgetAnd16Bit(t *testing.T) {
 	s.Height = 2160
 	k := build(t, s)
 	var encoded bytes.Buffer
-	if err := png.Encode(&encoded, image.NewNRGBA64(image.Rect(0, 0, s.Width, s.Height))); err != nil {
+	blank := image.NewNRGBA64(image.Rect(0, 0, s.Width, s.Height))
+	if err := png.Encode(&encoded, blank); err != nil {
 		t.Fatal(err)
 	}
 	if err := validatePNG(encoded.Bytes(), k); err != nil {
@@ -144,10 +152,12 @@ func TestPublicationCancellation(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer lock.Close()
-	if err := syscall.Flock(int(lock.Fd()), syscall.LOCK_EX); err != nil {
+	descriptor := int(lock.Fd())
+	if err := syscall.Flock(descriptor, syscall.LOCK_EX); err != nil {
 		t.Fatal(err)
 	}
-	defer syscall.Flock(int(lock.Fd()), syscall.LOCK_UN)
+	lockDescriptor := int(lock.Fd())
+	defer syscall.Flock(lockDescriptor, syscall.LOCK_UN)
 	ctx, cancel = context.WithTimeout(context.Background(), 30*time.Millisecond)
 	defer cancel()
 	done := make(chan error, 1)
@@ -160,7 +170,8 @@ func TestPublicationCancellation(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("lock wait ignored context")
 	}
-	if _, err := os.Lstat(filepath.Join(dir, slot(k))); !os.IsNotExist(err) {
+	slotPath := filepath.Join(dir, slot(k))
+	if _, err := os.Lstat(slotPath); !os.IsNotExist(err) {
 		t.Fatalf("cancelled slot exists: %v", err)
 	}
 }
@@ -198,10 +209,12 @@ func TestAnchoredDirectoryAfterParentReplacement(t *testing.T) {
 	if _, err := store.Verify(k); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Lstat(filepath.Join(outside, "output", slot(k))); !os.IsNotExist(err) {
+	escapedPath := filepath.Join(outside, "output", slot(k))
+	if _, err := os.Lstat(escapedPath); !os.IsNotExist(err) {
 		t.Fatalf("escaped anchored directory: %v", err)
 	}
-	if _, err := os.Lstat(filepath.Join(moved, "output", slot(k))); err != nil {
+	movedPath := filepath.Join(moved, "output", slot(k))
+	if _, err := os.Lstat(movedPath); err != nil {
 		t.Fatal(err)
 	}
 	readFlat(t, filepath.Join(moved, "output"), k, tiny(t, 1))
@@ -209,7 +222,7 @@ func TestAnchoredDirectoryAfterParentReplacement(t *testing.T) {
 		t.Fatal(err)
 	}
 	readFlat(t, filepath.Join(moved, "output"), k, tiny(t, 2))
-	if _, err := os.Lstat(filepath.Join(outside, "output", slot(k))); !os.IsNotExist(err) {
+	if _, err := os.Lstat(escapedPath); !os.IsNotExist(err) {
 		t.Fatalf("redraw escaped anchored directory: %v", err)
 	}
 }

@@ -334,7 +334,7 @@ func TestLivePresentRefusesNoCells(t *testing.T) {
 func slaveWrites(t *testing.T, master *os.File) {
 	t.Helper()
 	fds := []unix.PollFd{{Fd: int32(master.Fd()), Events: unix.POLLIN}}
-	if n, _ := unix.Poll(fds, 50); n != 0 {
+	if count, _ := unix.Poll(fds, 50); count != 0 {
 		t.Error("something was written")
 	}
 }
@@ -409,7 +409,8 @@ func TestLiveGivesTheTerminalBackOnASignal(t *testing.T) {
 // goroutinesIn is how many goroutines have name in their stacks.
 func goroutinesIn(name string) int {
 	buf := make([]byte, 1<<20)
-	return strings.Count(string(buf[:runtime.Stack(buf, true)]), name)
+	used := runtime.Stack(buf, true)
+	return strings.Count(string(buf[:used]), name)
 }
 
 // after Close the reader and the follower have ended and the events are
@@ -436,8 +437,8 @@ func TestLiveLeavesNothingRunningAfterClose(t *testing.T) {
 		time.Now().Before(end) {
 		time.Sleep(time.Millisecond)
 	}
-	if n := goroutinesIn("(*Live).read") + goroutinesIn("(*Live).follow"); n != 0 {
-		t.Errorf("%d goroutines after Close", n)
+	if count := goroutinesIn("(*Live).read") + goroutinesIn("(*Live).follow"); count != 0 {
+		t.Errorf("%d goroutines after Close", count)
 	}
 	for range live.Events() {
 	}

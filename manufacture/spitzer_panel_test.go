@@ -7,6 +7,7 @@ import (
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
+	"github.com/janearc/slayer/scene/shape"
 )
 
 func TestSpitzerHasThePublishedSolarCellInventory(t *testing.T) {
@@ -31,7 +32,11 @@ func TestSpitzerHasThePublishedSolarCellInventory(t *testing.T) {
 			if part.Material.Name != "solar array" {
 				continue
 			}
-			cells += connectedPanels(part.Shape.(*mesh.Mesh))
+			if group, shared := part.Shape.(*shape.MeshGroup); shared {
+				cells += group.MemberCount()
+			} else {
+				cells += connectedPanels(part.Shape.(*mesh.Mesh))
+			}
 			if part.Material.Metal == nil || math.Abs(part.Material.Metal.N[0]-3.878) > 1e-12 {
 				t.Fatal("solar cells are not using the published GaAs optics")
 			}

@@ -24,10 +24,11 @@ type Field struct {
 
 // gather adds the walkers' tallies and budgets in their order, turns
 // the tallies into radiance, and the budget's weights into power: the
-// top sphere's disc, pi times its radius squared, over the photons.
+// area of the band of the top sphere's disc they started on, over the
+// photons.
 func gather(made *air, grid Grid, walkers []*walker,
 	photons int) (*Field, Budget, census) {
-	disc := math.Pi * made.top * made.top
+	disc := made.band.area()
 	power := disc / float64(photons)
 	field := &Field{shape: shape{grid.Zeniths, grid.Views, grid.Azimuths},
 		air: *made, heights: slices.Clone(grid.Heights)}

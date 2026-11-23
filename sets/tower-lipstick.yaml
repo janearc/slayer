@@ -1,0 +1,73 @@
+# tower lipstick: an elliptical tower in three telescoping tiers, banded
+# red granite and ribbon windows, as the Lipstick Building in New York is.
+# it is not data: it is the tower generator with an ellipse plan, three
+# segments with setbacks, red granite in ribbon windows and thirty four
+# storeys pinned, no taper or turn. at dusk into night. made by the cities
+# package (manufacture/cities) from manufacture/cities/cultures/tower.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the plaza, the
+# sun, the sky and the cameras are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower lipstick
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "from the plaza, the three tiers"
+      location:
+        at: [150, -330, 4]
+      orientation:
+        look_at: [0, 0, 62]
+  recipes:
+    lipstick:
+      kind: tower
+      irregularity: 0
+      pins: {plan: ellipse, skin: granite, style: ribbon, colour: red, use: office, segments: 3, storeys: 34, width: {value: 44, unit: m}, setbacks: true, taper: false, twist: false, spire: false}
+  set:
+    things:
+      lipstick: {recipe: lipstick, seed: 1, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+      plaza:
+        colour: {srgb_linear: [0.1, 0.1, 0.11]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+      plaza:
+        material: plaza
+        middle: [0, -150, -0.9]
+        size: [700, 700, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.6, 0.7, 0.4]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.58, 0.8]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.14]}
+      zenith: {srgb_linear: [0.01, 0.025, 0.1]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

@@ -1,0 +1,6 @@
+name,at-x,at-y,at-z,want-x,want-y,want-z
+half a unit up,0,0.5,0,0,1,0
+on the equator,1,0,0,0,1,0
+two units up,0,2,0,0,1,0
+half a unit down,0,-0.5,0,0,-1,0
+at the origin,0,0,0,0,1,0

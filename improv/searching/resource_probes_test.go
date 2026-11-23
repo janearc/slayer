@@ -12,7 +12,7 @@ import (
 )
 
 func TestResourceProbesUseActualCutAndJobTimes(t *testing.T) {
-	edit := &Edit{Plan: Plan{Shots: []ShotPlan{{Scene: "heard", Stage: &StagePlan{Kind: "kecks"}}, {Scene: "orbital"}, {Scene: "heard", Stage: &StagePlan{Kind: "multitude"}}}}, ShotSpans: [][2]float64{{0, 2}, {2, 4}, {4, 5}}}
+	edit := &Edit{Plan: Plan{Shots: []ShotPlan{{Scene: "heard", Stage: &stagePlan{Kind: "kecks"}}, {Scene: "orbital"}, {Scene: "heard", Stage: &stagePlan{Kind: "multitude"}}}}, ShotSpans: [][2]float64{{0, 2}, {2, 4}, {4, 5}}}
 	times := []time.Duration{1900 * time.Millisecond, 2 * time.Second, 2250 * time.Millisecond, 2500 * time.Millisecond, 3 * time.Second, 3999 * time.Millisecond, 4 * time.Second}
 	probes, err := edit.ResourceProbePlan(times)
 	if err != nil {
@@ -90,7 +90,7 @@ func TestResourceProbesKeepFrozenClocksAndRefuseUncoveredFrames(t *testing.T) {
 }
 
 func TestResourceProbesWorkloadAdapterRetainsAllRoles(t *testing.T) {
-	edit := &Edit{Plan: Plan{Shots: []ShotPlan{{Scene: "heard", Stage: &StagePlan{Kind: "kecks"}}, {Scene: "orbital"}}}, ShotSpans: [][2]float64{{0, 2}, {2, 4}}}
+	edit := &Edit{Plan: Plan{Shots: []ShotPlan{{Scene: "heard", Stage: &stagePlan{Kind: "kecks"}}, {Scene: "orbital"}}}, ShotSpans: [][2]float64{{0, 2}, {2, 4}}}
 	times := []time.Duration{1900000001, 2000000003, 2250000007, 2500000011, 3000000013, 3999000017}
 	probes, err := edit.WorkloadProbePlan(times)
 	if err != nil || len(probes) != 2 {

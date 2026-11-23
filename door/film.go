@@ -275,8 +275,9 @@ func (going *filming) picture(tools kit, index int, name string) (
 		picture, err := going.book.picture(name)
 		return picture, spent{write: run.now().Sub(reading)}, true, err
 	}
+	frameRate := going.rate()
 	finished, err := run.frame(tools, index, filmTime(index,
-		going.rate()))
+		frameRate))
 	if err != nil || going.book == nil {
 		return finished.picture, finished.spent, false, err
 	}
@@ -385,8 +386,9 @@ func (going *filming) finish() error {
 		}
 	}
 	drawn := going.frames - going.kept
+	drawTime := going.meter.Elapsed()
 	lines := []string{fmt.Sprintf("drew %d frames and kept %d in %s: %s",
-		drawn, going.kept, hundredths(going.meter.Elapsed()),
+		drawn, going.kept, hundredths(drawTime),
 		going.total)}
 	framed, err := going.framesLine()
 	if err != nil {

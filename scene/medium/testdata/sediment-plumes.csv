@@ -1,0 +1,4 @@
+name,mouth_x,mouth_y,mouth_z,direction_x,direction_z,length,depth,mouth_width,offshore_width,extinction
+fade,3,0,4,1,0,100,10,10,30,.2
+valid,0,0,0,1,0,10,2,1,2,.1
+join,10,2,-20,0,5,50,8,4,16,.3

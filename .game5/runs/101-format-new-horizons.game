@@ -1,0 +1,1 @@
+format-new-horizons . :: gofmt -w manufacture/new_horizons.go manufacture/new_horizons_test.go manufacture/kinds.go

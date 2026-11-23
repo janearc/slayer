@@ -1,0 +1,164 @@
+# graffiti sheet, row one: the six walls of tags from graffiti-sheet.yaml,
+# the same walls, writers, colourways and light, seen closer in a picture
+# of their own (draw it at 4800 by 800). see graffiti-sheet.yaml for how
+# a wall is cut to its writer's cells.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: graffiti sheet row one
+  setting: space
+  light: none
+  film:
+    width: 4800
+    height: 800
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    row:
+      title: "row one, six walls of tags, square-on from seventy metres"
+      wide: 40
+      location:
+        at: [0, -71.4, 26.6]
+      orientation:
+        look_at: [0, 0, 26.6]
+  set:
+    things:
+      scale:
+        kind: human-scale-2m
+        seed: 5
+        complexity: demo
+        east: -9
+        north: -1.5
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      backdrop: {colour: {srgb_linear: [0.02, 0.02, 0.025]}, source: eye}
+      sheet-wall-01-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+      sheet-wall-02-brick: {colour: {srgb_linear: [0.25, 0.08, 0.05]}, source: eye}
+      sheet-wall-03-shutter: {colour: {srgb_linear: [0.09, 0.10, 0.11]}, source: eye}
+      sheet-wall-04-wet: {colour: {srgb_linear: [0.015, 0.016, 0.018]}, source: eye}
+      sheet-wall-05-grey: {colour: {srgb_linear: [0.2, 0.2, 0.2]}, source: eye}
+      sheet-wall-06-concrete: {colour: {srgb_linear: [0.18, 0.18, 0.17]}, source: eye}
+    boxes:
+      backdrop: {material: backdrop, middle: [0, 0.6, 15], size: [200, 0.6, 60], source: eye}
+      wall-01: {material: sheet-wall-01-concrete, middle: [-18.0, 0, 26.5909], size: [3.0, 0.3, 2.2727], source: eye}
+      wall-02: {material: sheet-wall-02-brick, middle: [-11.1, 0, 26.7273], size: [1.8, 0.3, 2.7273], source: eye}
+      wall-03: {material: sheet-wall-03-shutter, middle: [-4.0, 0, 26.5455], size: [3.2, 0.3, 2.1818], source: eye}
+      wall-04: {material: sheet-wall-04-wet, middle: [3.5, 0, 26.5909], size: [3.0, 0.3, 2.2727], source: eye}
+      wall-05: {material: sheet-wall-05-grey, middle: [10.8, 0, 26.7273], size: [2.4, 0.3, 3.2727], source: eye}
+      wall-06: {material: sheet-wall-06-concrete, middle: [18.0, 0, 26.9318], size: [3.0, 0.3, 2.0455], source: eye}
+    suns:
+      even:
+        toward: [0.15, -1, 0.25]
+        colour: {srgb_linear: [3.0, 3.0, 3.0]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.5, 0.5, 0.5]}
+      zenith: {srgb_linear: [0.5, 0.5, 0.5]}
+      ground: {srgb_linear: [0.5, 0.5, 0.5]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        # 01 hazard: yellow and orange, black ink
+        w01-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-01]
+          colour: {srgb_linear: [0.9, 0.7, 0.05]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.5
+          low: 25.44
+          high: 27.74
+          share: 0.5
+        # 02 mint and cobalt, white ink
+        w02-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-02]
+          colour: {srgb_linear: [0.1, 0.8, 0.45]}
+          other: {srgb_linear: [0.03, 0.2, 0.85]}
+          line: {srgb_linear: [0.8, 0.8, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.6
+          low: 25.35
+          high: 28.1
+          share: 0.5
+        # 03 hot pink and violet, silver ink
+        w03-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-03]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.35, 0.05, 0.8]}
+          line: {srgb_linear: [0.75, 0.75, 0.8]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 0.8
+          low: 25.44
+          high: 27.65
+          share: 0.55
+        # 04 cyan and white, black ink
+        w04-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-04]
+          colour: {srgb_linear: [0.03, 0.75, 0.9]}
+          other: {srgb_linear: [0.9, 0.9, 0.95]}
+          line: {srgb_linear: [0.02, 0.02, 0.04]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.0
+          low: 25.44
+          high: 27.74
+          share: 0.6
+        # 05 red and black, white ink
+        w05-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-05]
+          colour: {srgb_linear: [0.8, 0.03, 0.02]}
+          other: {srgb_linear: [0.05, 0.02, 0.02]}
+          line: {srgb_linear: [0.9, 0.9, 0.9]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.2
+          low: 25.08
+          high: 28.37
+          share: 0.7
+        # 06 lime and teal, black ink
+        w06-tags:
+          kind: graffiti
+          mark: tag
+          on: [sheet-wall-06]
+          colour: {srgb_linear: [0.5, 0.9, 0.05]}
+          other: {srgb_linear: [0.02, 0.5, 0.45]}
+          line: {srgb_linear: [0.02, 0.02, 0.02]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.5
+          low: 25.9
+          high: 27.97
+          share: 0.8

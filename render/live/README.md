@@ -6,7 +6,7 @@ changes or a key asks.
 
 The package is pure: it is handed a screen, a stager, a clock and a
 reader of the job, each an interface or a function, and `door` hands it
-the real ones (terminal.Live, a hillside session, time.Now, the door's
+the real ones (terminal.Live, a session, time.Now, the door's
 own intake). Its tests hand it mocks made by mockgen.
 
 ## The parts
@@ -87,7 +87,7 @@ change there shows at the next save of the job or the set.
 
 ## What reopens the session
 
-The session (`hillside.Open`) stages the scene with the job's camera,
+The session (`session.Open`) stages the scene with the job's camera,
 times, exposure, renderer, quality and shutter, and draws a frame at any
 size and rays it is asked. So:
 

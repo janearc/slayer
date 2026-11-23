@@ -34,7 +34,8 @@ func Example_watch() {
 	var said bytes.Buffer
 	Tool(env).Run([]string{"watch", "../doc/examples/jobs/smoke-still.yaml",
 		"--dry-run"}, &said, &said)
-	fmt.Print(strings.ReplaceAll(said.String(), top, ".."))
+	shown := strings.ReplaceAll(said.String(), top, "..")
+	fmt.Print(shown)
 	// Output:
 	// would watch ../doc/examples/jobs/smoke-still.yaml at preview quality
 	// would write ../doc/examples/jobs/.smoke-still.watch
@@ -58,12 +59,14 @@ func Example_schema() {
 	env, _ := exampleEnv()
 	var said bytes.Buffer
 	Tool(env).Run([]string{"schema"}, &said, &said)
-	fmt.Println(strings.Contains(said.String(), jobSchema))
+	holds := strings.Contains(said.String(), jobSchema)
+	fmt.Println(holds)
 	said.Reset()
 	Tool(env).Run([]string{"schema", "--where", "--dry-run"}, &said,
 		&said)
-	fmt.Println(strings.HasSuffix(strings.TrimSpace(said.String()),
-		filepath.Join(schemaFolder, schemaName)))
+	trimmed := strings.TrimSpace(said.String())
+	schemaPath := filepath.Join(schemaFolder, schemaName)
+	fmt.Println(strings.HasSuffix(trimmed, schemaPath))
 	// Output:
 	// true
 	// true
@@ -165,8 +168,9 @@ func TestSessionsRefuseWhatTheyCannotWatch(t *testing.T) {
 		wanted); err == nil || !strings.Contains(err.Error(), "frames") {
 		t.Errorf("frames were staged: %v", err)
 	}
-	smoke, err := job.Read(written(t, directory, "b.yaml",
-		filmJob(t, "")))
+	file := written(t, directory, "b.yaml",
+		filmJob(t, ""))
+	smoke, err := job.Read(file)
 	if err != nil {
 		t.Fatal(err)
 	}

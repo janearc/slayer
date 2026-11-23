@@ -19,3 +19,6 @@ bin/
 
 # Rendered proof frames are retained in the shared gallery, not this source tree.
 /renders/
+
+# if rapid breaks it leaves this behind
+**/testdata/rapid/*

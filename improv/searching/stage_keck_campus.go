@@ -11,7 +11,7 @@ import (
 // keckCampus adds the connecting service building, access and scale cues
 // visible in the supplied references. These are authored architectural
 // approximations; only site coordinates and regional terrain are sourced.
-func (s *heardStage) keckCampus(plan *StagePlan) error {
+func (s *heardStage) keckCampus(plan *stagePlan) error {
 	var walls, roofs, trim, vents, glass, lights siteBlocks
 	a, b := maths.V(-28.669, 0, 18.299), maths.V(22.005, 0, -49.972)
 	centre := a.Add(b).Scale(.5)

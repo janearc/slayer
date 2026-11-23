@@ -1,0 +1,81 @@
+# a superblock in the manner of Kowloon Walled City: one parcel, 210 by 120
+# metres, built over plot by plot until the buildings are one mass.
+#
+# the set says only the size of the parcel, a ceiling of fourteen storeys,
+# the nine thousand people the plan under it was for, an accretion of one,
+# the seed and the habit, accreted. the rest is grown by the superblock kind
+# (manufacture/cities/superblock*.go) from the numbers in
+# manufacture/cities/cultures/superblock.yaml, each picked: the plots, the
+# alleys left between them, the stacked flats and their many small windows,
+# the walkways across the alleys, the cages and boxes on the walls, the signs,
+# the clutter on the roofs and the bands that strap it down. nothing in the
+# picture is placed by hand.
+#
+# dusk going into night, on flat ground: the sun is on the western horizon
+# and the light is what is left of it, and the windows.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: superblock kowloon
+  setting: space
+  light: none
+  set:
+    things:
+      block:
+        kind: superblock
+        habit: accreted
+        seed: 7
+        complexity: quick
+        parcel:
+          width: {value: 210, unit: m}
+          depth: {value: 120, unit: m}
+        ceiling: 14
+        occupants: 9000
+        accretion: 1
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    whole:
+      title: "the whole, from the south-east and above"
+      location: {at: [110, -250, 140]}
+      orientation: {look_at: [0, 0, 14]}
+    edge:
+      title: "along the south edge, at street height"
+      location: {at: [-112, -64, 1.7]}
+      orientation: {look_at: [60, -60, 14]}
+    alley:
+      title: "up an alley, from its southern mouth"
+      location: {at: [-33.4, -64, 1.7]}
+      orientation: {look_at: [-33.4, 40, 12]}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.05, 0.05, 0.055]}
+        source: eye
+    boxes:
+      flat:
+        material: ground
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-1, 0.2, 0.03]
+        colour: {srgb_linear: [1.4, 0.55, 0.3]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.15, 0.14]}
+      zenith: {srgb_linear: [0.02, 0.04, 0.1]}
+      ground: {srgb_linear: [0.02, 0.02, 0.022]}
+      source: eye

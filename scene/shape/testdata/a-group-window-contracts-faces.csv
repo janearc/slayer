@@ -1,0 +1,7 @@
+name,first,second,third
+pair-lower,0,1,2
+pair-upper,3,4,5
+tetrahedron-first,0,2,1
+tetrahedron-second,0,1,3
+tetrahedron-third,0,3,2
+tetrahedron-fourth,1,2,3

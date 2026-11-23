@@ -15,6 +15,8 @@ var (
 	ErrMissing      = errors.New("job does not exist")
 	ErrUnsafe       = errors.New("unsafe queue location or record")
 	ErrExpiredLease = errors.New("render lease expired")
+	// ErrWorkerServing says recovery needs the lock a serving worker holds.
+	ErrWorkerServing = errors.New("a worker is serving this queue and holds its lock; stop the worker, then recover")
 )
 
 type State string
@@ -104,6 +106,9 @@ type Snapshot struct {
 type Store struct {
 	root    string
 	gpuJobs int
+	// readLimit is how long supervision reads may keep failing before the
+	// render is stopped; zero means defaultReadAllowance.
+	readLimit time.Duration
 }
 
 // At selects the same absolute queue directory for every participating agent.

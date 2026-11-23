@@ -1,1 +1,1 @@
-sample-fuel-ignition . :: go run ./hillside/testdata/fuel_ignition_reference.go
+sample-fuel-ignition . :: go run ./session/testdata/fuel_ignition_reference.go

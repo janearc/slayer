@@ -23,7 +23,8 @@ func TestOrbitRealSnapshotsFirstMiddleLast(t *testing.T) {
 	}
 	orbit := cameraOrbit{Centre: [3]float64{-1500, 0, -55.25}, Radius: 85, Azimuth: 160, Turns: 1, Elevation: -10, Amplitude: 25, Cycles: 1}
 	for _, i := range []int{0, 2, 3} {
-		raw, err := os.ReadFile(filepath.Join(root, "output/scenes", fmt.Sprintf("frame-%06d.yaml", i)))
+		sceneName := fmt.Sprintf("frame-%06d.yaml", i)
+		raw, err := os.ReadFile(filepath.Join(root, "output/scenes", sceneName))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -50,7 +51,8 @@ func TestOrbitRealSnapshotsFirstMiddleLast(t *testing.T) {
 				}
 			}
 		}
-		job, _ := os.ReadFile(filepath.Join(root, "output/jobs", fmt.Sprintf("frame-%06d.yaml", i)))
+		jobName := fmt.Sprintf("frame-%06d.yaml", i)
+		job, _ := os.ReadFile(filepath.Join(root, "output/jobs", jobName))
 		if !bytes.Contains(job, []byte("rays: 4, tall: 55")) {
 			t.Fatal("quality controls not authored")
 		}
@@ -102,7 +104,8 @@ func TestOrbitRefusalsBeforeAnyWrite(t *testing.T) {
 	root := t.TempDir()
 	p := attachedFixture(t, root, orbitFixture)
 	raw, _ := os.ReadFile(p)
-	os.WriteFile(p, bytes.Replace(raw, []byte("camera-tracking-fraction: 1"), []byte("camera-tracking-fraction: 0.5"), 1), 0644)
+	halved := bytes.Replace(raw, []byte("camera-tracking-fraction: 1"), []byte("camera-tracking-fraction: 0.5"), 1)
+	os.WriteFile(p, halved, 0644)
 	if err := generate(p, &bytes.Buffer{}); err == nil {
 		t.Fatal("orbit drift accepted")
 	}

@@ -24,7 +24,7 @@ const unknownLeft = -1 // defined: barkeep reads -1 as not yet known
 const epochField = 4 // defined: done total frames_per_minute eta epoch
 
 // lineFields is how many numbers barkeep's line holds.
-const lineFields = 5 // defined: barkeep's contract with the team, 2026-11-14
+const lineFields = 5 // defined: the five numbers barkeep reads from its line
 
 // pace is one render's counts over the last ten minutes, oldest first:
 // when each was taken and how many pictures were done by then.

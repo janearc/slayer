@@ -1,0 +1,75 @@
+# tower planted: a tower of two shafts whose terraces and balconies hold
+# trees and shrubs, with plants climbing the walls and hanging from the
+# edges, as the Bosco Verticale in Milan does. the trees are the
+# catalogue's own kinds (alder, poplar, valley oak), grown by the
+# manufactory and stood on the soil of the planters; the climbing and
+# hanging plants and the shrubs are parts of the tower. at dusk into night.
+# made by the cities package (manufacture/cities) from
+# manufacture/cities/cultures/tower.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the plaza, the
+# sun, the sky and the camera are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower planted
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "from the plaza, up at the balconies"
+      location:
+        at: [40, -340, 3]
+      orientation:
+        look_at: [0, 0, 62]
+  recipes:
+    wood:
+      kind: tower
+      irregularity: 0
+      pins: {plan: rectangle, shafts: 2, span: none, skin: concrete, colour: warm, planted: true, storeys: 36, segments: 3, width: {value: 34, unit: m}, setbacks: true, taper: false, twist: false, spire: false, stack: false, nest: false}
+  set:
+    things:
+      wood: {recipe: wood, seed: 5, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+      plaza:
+        colour: {srgb_linear: [0.1, 0.1, 0.11]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+      plaza:
+        material: plaza
+        middle: [0, -150, -0.9]
+        size: [700, 700, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.6, 0.7, 0.4]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.58, 0.8]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.14]}
+      zenith: {srgb_linear: [0.01, 0.025, 0.1]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

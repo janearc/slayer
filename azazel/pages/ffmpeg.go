@@ -28,8 +28,8 @@ const firstFrame = "0" // defined: a film begins at frame-000000.png
 
 // padding makes the width even and the height a multiple of 16, padded
 // with black, in BT.709 at television range, as QuickTime plays it. The
-// frames are tagged with BT.709's primaries and transfer too: the output
-// flags alone left both untagged, as ffprobe showed on 2026-11-15.
+// frames are tagged with BT.709's primaries and transfer too, because the
+// output flags alone leave both untagged, which ffprobe shows.
 const padding = "pad=ceil(iw/2)*2:ceil(ih/16)*16:0:(oh-ih)/2:black," +
 	"scale=iw:ih:out_color_matrix=bt709:out_range=tv,format=yuv420p," +
 	"setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:" +
@@ -80,8 +80,9 @@ func (encoder Ffmpeg) Encode(ctx context.Context, film Film) error {
 	told, err := exec.CommandContext(ctx, encoder.Path,
 		ffmpegArguments(film)...).CombinedOutput()
 	if err != nil {
+		toldText := strings.TrimSpace(string(told))
 		return fmt.Errorf("ffmpeg: %w: %s", err,
-			strings.TrimSpace(string(told)))
+			toldText)
 	}
 	return checkSound(ctx, encoder.Probe, film)
 }

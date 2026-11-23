@@ -25,17 +25,19 @@ func Develop(f *frame.Frame, exposure float64) *image.RGBA {
 // Tone is how light becomes a picture: Exposure multiplies it, zero read as
 // one, and Knee, when there is one, is where a film's shoulder starts.
 //
-// Below the knee light is as it is; above it, it rolls off by the logarithm, so
-// that Top, the brightest light the picture holds, lands on white and
-// everything between keeps its detail. a Top of one or less, zero among them,
-// is read as a hundred times white.
+// Below the knee the luminance is as it is; above it, light rolls off by the
+// logarithm, so that Top, the brightest light the picture holds, lands on
+// white and everything between keeps its detail. a Top of one or less, zero
+// among them, is read as a hundred times white.
 //
 // The roll-off leaves the knee at the slope it had below it, one, so a
 // smooth gradient that crosses the knee stays smooth: a corner there drew
 // a contour across it.
 //
-// The roll-off is by luminance, so a colour keeps its hue as it brightens. No
-// knee is the clamp. The tone is printed by ninjafilm's; see Print.
+// The roll-off is by luminance, so a colour keeps its hue as it brightens. A
+// colour too saturated to fit under white at its luminance is drawn toward
+// white, under the knee as above it, so nothing changes at the knee. No knee is
+// the clamp. The tone is printed by ninjafilm's; see Print.
 type Tone struct {
 	Exposure float64
 	Knee     float64

@@ -23,7 +23,8 @@ func TestDrawRefusesAnOddWidthForAMovie(t *testing.T) {
 		path := written(t, directory, "film.yaml",
 			filmJob(t, "outputs: "+outputs+"\n"))
 		odd := fmt.Sprint(number(t, "width") - one)
-		got := running(Tool(envIn(t, context.Background(), directory)),
+		env := envIn(t, context.Background(), directory)
+		got := running(Tool(env),
 			"draw", path, "--width", odd)
 		if got.code == nothing || !strings.Contains(got.wrongSaid, "odd") ||
 			strings.Contains(got.said, "frame 1") {

@@ -1,0 +1,766 @@
+# The fish: four species of a kelp coast, each a row. One maker,
+# fish.go, reads every row; a species more is a row more.
+#
+# A fish's own space: metres, y up, x along the body, the snout toward
+# plus x, the fork of the tail toward minus x, the middle of the length
+# at x nought and the body's axis at y nought, the left side toward
+# plus z. Shares are of the fork length, from the snout, unless a name
+# says otherwise.
+#
+# Every figure has a basis. read is a figure taken from the page its
+# source names, as written there. derived is worked from figures read,
+# and its source gives the working. picked is chosen to look right; its
+# source, where it has one, says what was read that the choice keeps
+# within. A figure is a range a seed picks from, so no two fish of a
+# species are alike; a count is picked as a whole number.
+#
+# The pages read:
+#   FishBase species summaries, fishbase.se/summary/<Genus-species>.html,
+#     for Thunnus orientalis, Seriola dorsalis, Sphyraena argentea and
+#     Sardinops sagax.
+#   FishBase morphology summaries, nrm-fishbaselinux01.nrm.se/physiology/
+#     <Genus_species>, for Thunnus thynnus (main reference Collette and
+#     Nauen 1983) and Sphyraena argentea (main reference Hart 1973).
+#     The Pacific bluefin's own morphology page gives no fin counts, so
+#     its counts are its Atlantic congener's, and say so.
+#   Wikipedia, "Seriola dorsalis" (its body text cites Feder, Turner and
+#     Limbaugh 1974, Fish Bulletin 160; its lengths the California
+#     Department of Fish and Wildlife 2022 status report).
+#   Wikipedia, "Pacific barracuda" (its body text cites MarineBio and the
+#     Encyclopedia of Life).
+#   Wikipedia, "Shoaling and schooling", for how closely a school packs.
+read: >-
+  FishBase species and morphology summaries; Wikipedia's Seriola
+  dorsalis, Pacific barracuda, and Shoaling and schooling pages. Each
+  figure names its own.
+
+species:
+  pacific-bluefin-tuna:
+    figures:
+      length: {least: 1.5, most: 2.4, basis: picked, source: "about FishBase's common length, 200 cm FL; max 300 cm FL (Collette 1995, FishBase ref. 9340)"}
+      depth: {least: .25, most: .28, basis: picked, source: "FishBase: fusiform; no proportion reached"}
+      deepest: {least: .37, most: .38, basis: derived, source: "deepest near the middle of the first dorsal base (FishBase T. thynnus, Collette and Nauen 1983): (.30 + .45) / 2"}
+      width: {least: .74, most: .80, basis: picked}
+      head: {least: .26, most: .28, basis: picked}
+      snout: {least: .62, most: .66, basis: picked}
+      stalk: {least: .035, most: .042, basis: picked}
+      stalk-width: {least: 1.6, most: 1.9, basis: picked, source: "wide across its keels"}
+      stalk-at: {least: .86, most: .87, basis: picked}
+      tail-base: {least: .90, most: .91, basis: picked}
+      eye: {least: .12, most: .14, basis: picked}
+      eye-at: {least: .36, most: .38, basis: picked}
+      eye-height: {least: .28, most: .32, basis: picked}
+      back-line: {least: .05, most: .15, basis: picked}
+      gape: {least: .34, most: .38, basis: picked}
+      tail-span: {least: .30, most: .34, basis: picked}
+      tail-sweep: {least: .11, most: .13, basis: picked}
+      pectoral: {least: .62, most: .76, basis: picked, source: "under the read bound: pectoral fins less than 80% of head length (FishBase T. thynnus, Collette and Nauen 1983)"}
+      pectoral-at: {least: .28, most: .29, basis: picked}
+      pectoral-height: {least: .05, most: .12, basis: picked}
+      pelvic: {least: .055, most: .065, basis: picked}
+      pelvic-at: {least: .31, most: .32, basis: picked}
+      first-dorsal-start: {least: .30, most: .30, basis: picked}
+      first-dorsal-end: {least: .45, most: .45, basis: picked}
+      first-dorsal-front: {least: .085, most: .10, basis: picked}
+      first-dorsal-back: {least: .015, most: .02, basis: picked}
+      first-dorsal-spines: {least: 12, most: 14, basis: read, source: "FishBase T. thynnus morphology: dorsal spines (total) 12 - 14 (Collette and Nauen 1983); congener"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same: the spines are the first dorsal's"}
+      second-dorsal-start: {least: .47, most: .47, basis: picked}
+      second-dorsal-end: {least: .57, most: .57, basis: picked}
+      second-dorsal-front: {least: .085, most: .10, basis: picked}
+      second-dorsal-back: {least: .025, most: .03, basis: picked}
+      second-dorsal-spines: {least: 0, most: 0, basis: read, source: "FishBase T. thynnus morphology (Collette and Nauen 1983)"}
+      second-dorsal-rays: {least: 13, most: 15, basis: read, source: "FishBase T. thynnus morphology: dorsal soft rays (total) 13 - 15 (Collette and Nauen 1983); congener"}
+      anal-start: {least: .53, most: .53, basis: picked}
+      anal-end: {least: .62, most: .62, basis: picked}
+      anal-front: {least: .075, most: .09, basis: picked}
+      anal-back: {least: .025, most: .03, basis: picked}
+      anal-spines: {least: 0, most: 0, basis: read, source: "FishBase T. thynnus morphology: anal spines 0 - 0"}
+      anal-rays: {least: 13, most: 16, basis: read, source: "FishBase T. thynnus morphology: anal soft rays 13 - 16; congener"}
+      dorsal-finlets: {least: 8, most: 10, basis: read, source: "FishBase T. thynnus morphology: dorsal finlets 8 - 10; congener"}
+      anal-finlets: {least: 7, most: 9, basis: read, source: "FishBase T. thynnus morphology: ventral finlets 7 - 9; congener"}
+      caudal-rays: {least: 17, most: 17, basis: picked, source: "the principal rays of a spiny-rayed fish's tail, nine above and eight below; not looked up"}
+      pectoral-rays: {least: 30, most: 34, basis: picked}
+      pelvic-rays: {least: 6, most: 6, basis: picked, source: "one spine and five rays, a spiny-rayed fish's pelvic fin; not looked up"}
+      vertebrae: {least: 39, most: 39, basis: read, source: "FishBase T. thynnus morphology: vertebrae 39 total (Collette and Nauen 1983); congener"}
+      precaudal: {least: 18, most: 18, basis: read, source: "the same: 18 preanal"}
+      keels: {least: 3, most: 3, basis: picked, source: "FishBase T. orientalis: caudal keels dark (plural); a median keel and two small ones, the count not read"}
+      bend-from: {least: .62, most: .66, basis: picked, source: "a tuna bends almost only behind its second dorsal"}
+      amplitude: {least: .09, most: .10, basis: picked, source: "a tail beat's half swing, about a tenth of the length; not looked up"}
+      wavelength: {least: 1.2, most: 1.4, basis: picked}
+      glide: {least: .006, most: .012, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: picked}
+      stripe-width: {least: 0, most: 0, basis: picked}
+      spot-rows: {least: 0, most: 0, basis: picked}
+      spot-pitch: {least: 0, most: 0, basis: picked}
+      spot-size: {least: 0, most: 0, basis: picked}
+      spot-height: {least: 0, most: 0, basis: picked}
+      ribs-from: {least: 3, most: 3, basis: picked}
+      fin-thickness: {least: .0035, most: .0045, basis: picked}
+      bar-count: {least: 0, most: 0, basis: picked}
+      bar-width: {least: 0, most: 0, basis: picked}
+      bar-from: {least: 0, most: 0, basis: picked}
+    looks:
+      back: {colour: [.010, .016, .050], gloss: .45, basis: picked, source: "a dark blue back"}
+      belly: {colour: [.52, .55, .58], gloss: .55, basis: picked, source: "silver below; the silver is picked, no reflectance reached"}
+      fin: {colour: [.018, .022, .035], gloss: .3, basis: picked}
+      low-fin: {colour: [.018, .022, .035], gloss: .3, basis: picked}
+      tail: {colour: [.015, .018, .030], gloss: .3, basis: picked}
+      finlet: {colour: [.42, .33, .03], gloss: .3, basis: picked, source: "yellow finlets; not looked up"}
+      stripe: {colour: [.30, .30, .32], gloss: .4, basis: picked}
+      spot: {colour: [.30, .30, .32], gloss: .4, basis: picked}
+      iris: {colour: [.20, .18, .12], gloss: .8, basis: picked}
+      pupil: &pupil {colour: [.004, .004, .005], gloss: .9, basis: picked}
+      bone: &bone {colour: [.70, .66, .56], gloss: .15, basis: picked}
+
+  california-yellowtail:
+    figures:
+      length: {least: .5, most: 1.2, basis: read, source: "Wikipedia, Seriola dorsalis: 50 to 120 cm, citing the California Department of Fish and Wildlife 2022 status report"}
+      depth: {least: .22, most: .25, basis: picked, source: "FishBase: fusiform"}
+      deepest: {least: .37, most: .40, basis: picked}
+      width: {least: .48, most: .54, basis: picked, source: "FishBase: cross section compressed"}
+      head: {least: .23, most: .25, basis: picked}
+      snout: {least: .66, most: .70, basis: picked}
+      stalk: {least: .038, most: .044, basis: picked}
+      stalk-width: {least: .8, most: .9, basis: picked}
+      stalk-at: {least: .87, most: .88, basis: picked}
+      tail-base: {least: .89, most: .90, basis: picked}
+      eye: {least: .12, most: .14, basis: picked}
+      eye-at: {least: .30, most: .33, basis: picked}
+      eye-height: {least: .30, most: .36, basis: picked}
+      back-line: {least: .08, most: .14, basis: picked, source: "a clear line where the dark back meets the silver (FishBase S. dorsalis)"}
+      gape: {least: .36, most: .40, basis: picked}
+      tail-span: {least: .25, most: .28, basis: picked}
+      tail-sweep: {least: .09, most: .11, basis: picked, source: "deep forked, lobes of equal size (Wikipedia, Seriola dorsalis, uncited sentence)"}
+      pectoral: {least: .55, most: .65, basis: picked, source: "pointed and narrow (Wikipedia, citing Feder and others 1974)"}
+      pectoral-at: {least: .25, most: .26, basis: picked}
+      pectoral-height: {least: -.25, most: -.15, basis: picked}
+      pelvic: {least: .05, most: .06, basis: picked, source: "relatively small (Wikipedia, citing Feder and others 1974)"}
+      pelvic-at: {least: .28, most: .29, basis: picked}
+      first-dorsal-start: {least: .33, most: .33, basis: picked}
+      first-dorsal-end: {least: .40, most: .40, basis: picked}
+      first-dorsal-front: {least: .04, most: .05, basis: picked, source: "the first dorsal shorter and smaller than the second (Wikipedia, uncited)"}
+      first-dorsal-back: {least: .018, most: .022, basis: picked}
+      first-dorsal-spines: {least: 4, most: 5, basis: derived, source: "FishBase S. dorsalis: dorsal spines (total) 5 - 6, less the one spine that leads the second dorsal"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same: no soft rays in the first dorsal"}
+      second-dorsal-start: {least: .42, most: .42, basis: picked}
+      second-dorsal-end: {least: .79, most: .79, basis: picked}
+      second-dorsal-front: {least: .085, most: .10, basis: picked}
+      second-dorsal-back: {least: .025, most: .03, basis: picked}
+      second-dorsal-spines: {least: 1, most: 1, basis: picked, source: "one spine leads a jack's second dorsal; not looked up"}
+      second-dorsal-rays: {least: 33, most: 35, basis: read, source: "FishBase S. dorsalis: dorsal soft rays (total) 33 - 35"}
+      anal-start: {least: .60, most: .60, basis: picked}
+      anal-end: {least: .79, most: .79, basis: picked}
+      anal-front: {least: .06, most: .07, basis: picked}
+      anal-back: {least: .022, most: .026, basis: picked}
+      anal-spines: {least: 2, most: 3, basis: read, source: "FishBase S. dorsalis: anal spines 2 - 3"}
+      anal-rays: {least: 20, most: 21, basis: read, source: "FishBase S. dorsalis: anal soft rays 20 - 21"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 17, most: 17, basis: picked, source: "nine above and eight below; not looked up"}
+      pectoral-rays: {least: 20, most: 21, basis: picked}
+      pelvic-rays: {least: 6, most: 6, basis: picked, source: "one spine and five rays; not looked up"}
+      vertebrae: {least: 24, most: 24, basis: picked, source: "no count reached for the species; to ask for"}
+      precaudal: {least: 10, most: 10, basis: picked, source: "no count reached; to ask for"}
+      keels: {least: 0, most: 0, basis: read, source: "FishBase S. dorsalis: the only jack without scutella on the caudal peduncle"}
+      bend-from: {least: .44, most: .50, basis: picked}
+      amplitude: {least: .09, most: .10, basis: picked, source: "about a tenth of the length; not looked up"}
+      wavelength: {least: 1.0, most: 1.1, basis: picked}
+      glide: {least: .008, most: .014, basis: picked}
+      stripe-height: {least: .02, most: .08, basis: picked, source: "a bronze to yellow band along the lateral line, between the dark and the light (Wikipedia, citing Feder and others 1974)"}
+      stripe-width: {least: .10, most: .14, basis: picked}
+      spot-rows: {least: 0, most: 0, basis: picked}
+      spot-pitch: {least: 0, most: 0, basis: picked}
+      spot-size: {least: 0, most: 0, basis: picked}
+      spot-height: {least: 0, most: 0, basis: picked}
+      ribs-from: {least: 3, most: 3, basis: picked}
+      fin-thickness: {least: .0035, most: .0045, basis: picked}
+      bar-count: {least: 0, most: 0, basis: picked}
+      bar-width: {least: 0, most: 0, basis: picked}
+      bar-from: {least: 0, most: 0, basis: picked}
+    looks:
+      back: {colour: [.015, .055, .065], gloss: .45, basis: picked, source: "blue-green back (Wikipedia, citing Feder and others 1974)"}
+      belly: {colour: [.55, .56, .57], gloss: .55, basis: picked, source: "silver side and belly (the same)"}
+      fin: {colour: [.20, .17, .06], gloss: .3, basis: picked}
+      low-fin: {colour: [.20, .17, .06], gloss: .3, basis: picked}
+      tail: {colour: [.48, .36, .03], gloss: .3, basis: picked, source: "a yellow caudal fin (the same)"}
+      finlet: {colour: [.20, .17, .06], gloss: .3, basis: picked}
+      stripe: {colour: [.42, .30, .05], gloss: .45, basis: picked, source: "bronze to yellow (the same)"}
+      spot: {colour: [.42, .30, .05], gloss: .45, basis: picked}
+      iris: {colour: [.30, .24, .10], gloss: .8, basis: picked}
+      pupil: *pupil
+      bone: *bone
+
+  california-barracuda:
+    figures:
+      length: {least: .6, most: 1.1, basis: picked, source: "under Wikipedia's about 1.2 m and FishBase's max 145 cm FL (Eschmeyer, Herald and Hammann 1983)"}
+      depth: {least: .12, most: .14, basis: picked, source: "elongated (FishBase); very slender (Wikipedia, citing MarineBio)"}
+      deepest: {least: .44, most: .48, basis: picked}
+      width: {least: .72, most: .80, basis: picked, source: "cylindrical (Wikipedia, citing MarineBio)"}
+      head: {least: .29, most: .31, basis: picked}
+      snout: {least: 1.0, most: 1.1, basis: picked, source: "a long, pointy snout (Wikipedia, citing MarineBio)"}
+      stalk: {least: .042, most: .048, basis: picked}
+      stalk-width: {least: .7, most: .8, basis: picked}
+      stalk-at: {least: .87, most: .88, basis: picked}
+      tail-base: {least: .90, most: .91, basis: picked}
+      eye: {least: .13, most: .15, basis: picked}
+      eye-at: {least: .52, most: .56, basis: picked}
+      eye-height: {least: .30, most: .38, basis: picked}
+      back-line: {least: .10, most: .20, basis: picked}
+      gape: {least: .52, most: .58, basis: picked, source: "the lower jaw protrudes (Wikipedia, uncited)"}
+      tail-span: {least: .19, most: .21, basis: picked, source: "a distinctly forked tail (Wikipedia, citing the Encyclopedia of Life)"}
+      tail-sweep: {least: .06, most: .075, basis: picked}
+      pectoral: {least: .32, most: .38, basis: picked}
+      pectoral-at: {least: .30, most: .31, basis: picked}
+      pectoral-height: {least: -.15, most: -.05, basis: picked}
+      pelvic: {least: .035, most: .045, basis: picked}
+      pelvic-at: {least: .40, most: .41, basis: picked}
+      first-dorsal-start: {least: .41, most: .41, basis: picked, source: "widely separated dorsal fins (Wikipedia, citing the Encyclopedia of Life)"}
+      first-dorsal-end: {least: .47, most: .47, basis: picked}
+      first-dorsal-front: {least: .055, most: .065, basis: picked}
+      first-dorsal-back: {least: .015, most: .02, basis: picked}
+      first-dorsal-spines: {least: 5, most: 5, basis: derived, source: "FishBase S. argentea morphology: dorsal spines (total) 6 (Hart 1973), less the one that leads the second dorsal"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-start: {least: .65, most: .65, basis: picked}
+      second-dorsal-end: {least: .71, most: .71, basis: picked}
+      second-dorsal-front: {least: .05, most: .06, basis: picked}
+      second-dorsal-back: {least: .02, most: .025, basis: picked}
+      second-dorsal-spines: {least: 1, most: 1, basis: derived, source: "the sixth spine of FishBase's total"}
+      second-dorsal-rays: {least: 9, most: 10, basis: read, source: "FishBase S. argentea morphology: dorsal soft rays (total) 9 - 10 (Hart 1973)"}
+      anal-start: {least: .69, most: .69, basis: picked}
+      anal-end: {least: .75, most: .75, basis: picked}
+      anal-front: {least: .045, most: .055, basis: picked}
+      anal-back: {least: .018, most: .022, basis: picked}
+      anal-spines: {least: 1, most: 1, basis: read, source: "FishBase S. argentea morphology: anal fin spines 1 - 1 (Hart 1973)"}
+      anal-rays: {least: 8, most: 9, basis: read, source: "FishBase S. argentea morphology: anal fin soft rays 8 - 9 (Hart 1973)"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 17, most: 17, basis: picked, source: "nine above and eight below; not looked up"}
+      pectoral-rays: {least: 16, most: 16, basis: read, source: "FishBase S. argentea morphology: pectoral soft-rays 16 (Hart 1973)"}
+      pelvic-rays: {least: 6, most: 6, basis: read, source: "FishBase S. argentea morphology: pelvic spines 1, soft-rays 5 (Hart 1973)"}
+      vertebrae: {least: 24, most: 24, basis: picked, source: "the genus's 24, from a search summary of an FAO account of S. barracuda (12 + 12); the page was not read; to ask for"}
+      precaudal: {least: 12, most: 12, basis: picked, source: "the same"}
+      keels: {least: 0, most: 0, basis: picked}
+      bend-from: {least: .34, most: .40, basis: picked}
+      amplitude: {least: .09, most: .10, basis: picked, source: "about a tenth of the length; not looked up"}
+      wavelength: {least: .9, most: 1.0, basis: picked}
+      glide: {least: .008, most: .014, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: read, source: "no bars or spots on the body (Wikipedia, Pacific barracuda, citing MarineBio)"}
+      stripe-width: {least: 0, most: 0, basis: read, source: "the same"}
+      spot-rows: {least: 0, most: 0, basis: read, source: "the same"}
+      spot-pitch: {least: 0, most: 0, basis: picked}
+      spot-size: {least: 0, most: 0, basis: picked}
+      spot-height: {least: 0, most: 0, basis: picked}
+      ribs-from: {least: 3, most: 3, basis: picked}
+      fin-thickness: {least: .003, most: .004, basis: picked}
+      bar-count: {least: 0, most: 0, basis: read, source: "no bars or spots on the body (Wikipedia, Pacific barracuda, citing MarineBio)"}
+      bar-width: {least: 0, most: 0, basis: picked}
+      bar-from: {least: 0, most: 0, basis: picked}
+    looks:
+      back: {colour: [.040, .050, .070], gloss: .45, basis: picked, source: "bluish or brownish dorsally (FishBase, ref. 6885)"}
+      belly: {colour: [.55, .56, .58], gloss: .55, basis: picked, source: "silvery ventrally (the same)"}
+      fin: {colour: [.07, .07, .065], gloss: .3, basis: picked}
+      low-fin: {colour: [.07, .07, .065], gloss: .3, basis: picked}
+      tail: {colour: [.06, .06, .055], gloss: .3, basis: picked}
+      finlet: {colour: [.07, .07, .065], gloss: .3, basis: picked}
+      stripe: {colour: [.55, .56, .58], gloss: .5, basis: picked}
+      spot: {colour: [.55, .56, .58], gloss: .5, basis: picked}
+      iris: {colour: [.35, .33, .26], gloss: .8, basis: picked}
+      pupil: *pupil
+      bone: *bone
+
+  pacific-sardine:
+    figures:
+      length: {least: .17, most: .27, basis: picked, source: "about FishBase's common length, 20 cm SL; max 39.5 cm SL; taken here to the fork"}
+      depth: {least: .17, most: .20, basis: picked, source: "body cylindrical and elongate (FishBase, ref. 55763)"}
+      deepest: {least: .40, most: .43, basis: picked}
+      width: {least: .52, most: .58, basis: picked, source: "cross section compressed (FishBase)"}
+      head: {least: .21, most: .23, basis: picked}
+      snout: {least: .66, most: .72, basis: picked}
+      stalk: {least: .055, most: .065, basis: picked}
+      stalk-width: {least: .42, most: .50, basis: picked}
+      stalk-at: {least: .84, most: .85, basis: picked}
+      tail-base: {least: .87, most: .88, basis: picked}
+      eye: {least: .24, most: .27, basis: picked}
+      eye-at: {least: .28, most: .31, basis: picked}
+      eye-height: {least: .25, most: .30, basis: picked}
+      back-line: {least: .25, most: .35, basis: picked}
+      gape: {least: .28, most: .32, basis: picked}
+      tail-span: {least: .23, most: .25, basis: picked}
+      tail-sweep: {least: .08, most: .10, basis: picked}
+      pectoral: {least: .55, most: .65, basis: picked}
+      pectoral-at: {least: .23, most: .24, basis: picked}
+      pectoral-height: {least: -.62, most: -.52, basis: picked}
+      pelvic: {least: .045, most: .055, basis: picked}
+      pelvic-at: {least: .50, most: .52, basis: picked}
+      first-dorsal-start: {least: .40, most: .40, basis: picked}
+      first-dorsal-end: {least: .52, most: .52, basis: picked}
+      first-dorsal-front: {least: .065, most: .075, basis: picked}
+      first-dorsal-back: {least: .022, most: .028, basis: picked}
+      first-dorsal-spines: {least: 0, most: 0, basis: read, source: "FishBase S. sagax: dorsal spines 0"}
+      first-dorsal-rays: {least: 13, most: 21, basis: read, source: "FishBase S. sagax: dorsal soft rays (total) 13 - 21 (ref. 55763)"}
+      second-dorsal-start: {least: 0, most: 0, basis: read, source: "one dorsal fin"}
+      second-dorsal-end: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-front: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-back: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-spines: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same"}
+      anal-start: {least: .74, most: .74, basis: picked}
+      anal-end: {least: .83, most: .83, basis: picked}
+      anal-front: {least: .028, most: .034, basis: picked}
+      anal-back: {least: .016, most: .02, basis: picked}
+      anal-spines: {least: 0, most: 0, basis: read, source: "FishBase S. sagax: anal spines 0"}
+      anal-rays: {least: 12, most: 23, basis: read, source: "FishBase S. sagax: anal soft rays 12 - 23 (ref. 55763)"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 19, most: 19, basis: picked, source: "ten above and nine below, a soft-rayed fish's; not looked up"}
+      pectoral-rays: {least: 16, most: 18, basis: picked}
+      pelvic-rays: {least: 8, most: 8, basis: picked, source: "a herring's eight; not looked up"}
+      vertebrae: {least: 48, most: 54, basis: read, source: "FishBase S. sagax: vertebrae 48 - 54 (ref. 55763)"}
+      precaudal: {least: 30, most: 32, basis: picked, source: "no split reached; to ask for"}
+      keels: {least: 0, most: 0, basis: picked}
+      bend-from: {least: .22, most: .28, basis: picked, source: "a sardine bends more of its length than a tuna"}
+      amplitude: {least: .09, most: .11, basis: picked, source: "about a tenth of the length; not looked up"}
+      wavelength: {least: .8, most: .9, basis: picked}
+      glide: {least: .01, most: .02, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: picked}
+      stripe-width: {least: 0, most: 0, basis: picked}
+      spot-rows: {least: 1, most: 3, basis: read, source: "FishBase S. sagax: flanks white, with 1 to 3 series of dark spots along the middle (ref. 55763)"}
+      spot-pitch: {least: .045, most: .06, basis: picked}
+      spot-size: {least: .010, most: .014, basis: picked}
+      spot-height: {least: .05, most: .15, basis: picked, source: "along the middle (the same)"}
+      ribs-from: {least: 2, most: 2, basis: picked}
+      fin-thickness: {least: .004, most: .005, basis: picked}
+      bar-count: {least: 0, most: 0, basis: picked}
+      bar-width: {least: 0, most: 0, basis: picked}
+      bar-from: {least: 0, most: 0, basis: picked}
+      school-spacing: {least: 1, most: 1, basis: read, source: "Wikipedia, Shoaling and schooling: about one fish per cube of body length (its note 63); the side of each fish's cube, in lengths"}
+      school-scatter: {least: .25, most: .25, basis: picked, source: "nearest neighbours half to one length apart (the same page, uncited); a share of the spacing each fish strays"}
+      school-heading: {least: 8, most: 8, basis: picked, source: "degrees from the school's heading; no figure on the page"}
+      school-variants: {least: 8, most: 8, basis: picked, source: "how many fish are made; the rest repeat them"}
+      school-long: {least: 3, most: 3, basis: picked, source: "a school's length, width and height as 3 to 2 to 1; the page's sardine shoal is long and flat"}
+      school-wide: {least: 2, most: 2, basis: picked}
+      school-high: {least: 1, most: 1, basis: picked}
+    schools: [500, 5000]
+    looks:
+      back: {colour: [.012, .045, .050], gloss: .45, basis: picked, source: "back blue green (FishBase S. sagax)"}
+      belly: {colour: [.60, .61, .62], gloss: .55, basis: picked, source: "flanks white (the same)"}
+      fin: {colour: [.25, .26, .26], gloss: .3, basis: picked}
+      low-fin: {colour: [.25, .26, .26], gloss: .3, basis: picked}
+      tail: {colour: [.20, .21, .21], gloss: .3, basis: picked}
+      finlet: {colour: [.25, .26, .26], gloss: .3, basis: picked}
+      stripe: {colour: [.60, .61, .62], gloss: .5, basis: picked}
+      spot: {colour: [.008, .010, .014], gloss: .4, basis: picked, source: "dark spots (the same)"}
+      iris: {colour: [.45, .45, .42], gloss: .8, basis: picked}
+      pupil: *pupil
+      bone: *bone
+
+  # The rows below are native fish of the waters of other sets. Pages read:
+  # FishBase species summaries (fishbase.se/summary/<Genus-species>.html)
+  # for each, and Wikipedia's Convict surgeonfish and Flathead grey mullet.
+
+  convict-tang:
+    figures:
+      length: {least: .12, most: .22, basis: picked, source: "about FishBase's common length, 17 cm TL; max 27 cm TL"}
+      depth: {least: .48, most: .54, basis: picked, source: "short and/or deep (FishBase, Randall 1956)"}
+      deepest: {least: .40, most: .42, basis: picked}
+      width: {least: .28, most: .32, basis: picked, source: "cross section compressed (FishBase); laterally compressed oval (Wikipedia, citing DORIS)"}
+      head: {least: .25, most: .27, basis: picked}
+      snout: {least: .52, most: .58, basis: picked}
+      stalk: {least: .065, most: .075, basis: picked}
+      stalk-width: {least: .45, most: .55, basis: picked}
+      stalk-at: {least: .86, most: .86, basis: picked}
+      tail-base: {least: .88, most: .88, basis: picked}
+      eye: {least: .18, most: .21, basis: picked}
+      eye-at: {least: .54, most: .56, basis: picked}
+      eye-height: {least: .38, most: .42, basis: picked}
+      back-line: {least: -.35, most: -.25, basis: picked, source: "olivaceous grey shading to white ventrally (FishBase)"}
+      gape: {least: .14, most: .16, basis: picked}
+      tail-span: {least: .28, most: .31, basis: picked}
+      tail-sweep: {least: .02, most: .04, basis: picked}
+      pectoral: {least: .65, most: .75, basis: picked}
+      pectoral-at: {least: .30, most: .30, basis: picked}
+      pectoral-height: {least: -.18, most: -.12, basis: picked}
+      pelvic: {least: .09, most: .11, basis: picked}
+      pelvic-at: {least: .33, most: .33, basis: picked}
+      first-dorsal-start: {least: .32, most: .32, basis: picked}
+      first-dorsal-end: {least: .48, most: .48, basis: picked}
+      first-dorsal-front: {least: .06, most: .07, basis: picked}
+      first-dorsal-back: {least: .075, most: .085, basis: picked}
+      first-dorsal-spines: {least: 9, most: 9, basis: read, source: "FishBase A. triostegus: dorsal spines (total) 9 (Randall 1956)"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same: the soft rays follow, as the second part here"}
+      second-dorsal-start: {least: .50, most: .50, basis: picked}
+      second-dorsal-end: {least: .84, most: .84, basis: picked}
+      second-dorsal-front: {least: .085, most: .095, basis: picked}
+      second-dorsal-back: {least: .065, most: .075, basis: picked}
+      second-dorsal-spines: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-rays: {least: 22, most: 26, basis: read, source: "FishBase A. triostegus: dorsal soft rays (total) 22 - 26"}
+      anal-start: {least: .48, most: .48, basis: picked}
+      anal-end: {least: .84, most: .84, basis: picked}
+      anal-front: {least: .06, most: .07, basis: picked}
+      anal-back: {least: .065, most: .075, basis: picked}
+      anal-spines: {least: 3, most: 3, basis: read, source: "FishBase A. triostegus: anal spines 3"}
+      anal-rays: {least: 19, most: 22, basis: read, source: "FishBase A. triostegus: anal soft rays 19 - 22"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 16, most: 16, basis: picked, source: "not looked up"}
+      pectoral-rays: {least: 15, most: 16, basis: picked}
+      pelvic-rays: {least: 4, most: 4, basis: picked, source: "one spine and three rays, a surgeonfish's; not looked up"}
+      vertebrae: {least: 22, most: 22, basis: picked, source: "not looked up; to ask for"}
+      precaudal: {least: 9, most: 9, basis: picked, source: "not looked up; to ask for"}
+      keels: {least: 0, most: 0, basis: picked}
+      bend-from: {least: .40, most: .45, basis: picked}
+      amplitude: {least: .07, most: .09, basis: picked}
+      wavelength: {least: 1.0, most: 1.1, basis: picked}
+      glide: {least: .008, most: .012, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: picked}
+      stripe-width: {least: 0, most: 0, basis: picked}
+      spot-rows: {least: 0, most: 0, basis: picked}
+      spot-pitch: {least: 0, most: 0, basis: picked}
+      spot-size: {least: 0, most: 0, basis: picked}
+      spot-height: {least: 0, most: 0, basis: picked}
+      ribs-from: {least: 2, most: 2, basis: picked}
+      fin-thickness: {least: .005, most: .006, basis: picked}
+      bar-count: {least: 4, most: 4, basis: read, source: "FishBase A. triostegus: 4 vertical stripes, 1 on head across the yellow eye, 1 on caudal peduncle; Wikipedia says six, uncited"}
+      bar-width: {least: .03, most: .04, basis: picked}
+      bar-from: {least: .14, most: .14, basis: derived, source: "across the eye: eye-at .55 of a head of .26"}
+    looks:
+      back: {colour: [.16, .17, .13], gloss: .4, basis: picked, source: "olivaceous grey (FishBase)"}
+      belly: {colour: [.58, .58, .56], gloss: .45, basis: picked, source: "white ventrally (FishBase)"}
+      fin: {colour: [.18, .18, .15], gloss: .3, basis: picked}
+      low-fin: {colour: [.18, .18, .15], gloss: .3, basis: picked}
+      tail: {colour: [.18, .18, .15], gloss: .3, basis: picked}
+      finlet: {colour: [.18, .18, .15], gloss: .3, basis: picked}
+      stripe: {colour: [.16, .17, .13], gloss: .4, basis: picked}
+      spot: {colour: [.010, .010, .012], gloss: .4, basis: picked, source: "black bars"}
+      iris: {colour: [.45, .36, .05], gloss: .8, basis: picked, source: "the yellow eye (FishBase)"}
+      pupil: *pupil
+      bone: *bone
+
+  dusky-grouper:
+    figures:
+      length: {least: .5, most: 1.0, basis: picked, source: "above FishBase's length at first maturity, 49.2 cm; max 150 cm TL (Heemstra and Randall 1993)"}
+      depth: {least: .30, most: .34, basis: picked, source: "fusiform, compressed (FishBase)"}
+      deepest: {least: .38, most: .40, basis: picked}
+      width: {least: .52, most: .58, basis: picked}
+      head: {least: .35, most: .37, basis: picked}
+      snout: {least: .66, most: .72, basis: picked}
+      stalk: {least: .10, most: .12, basis: picked}
+      stalk-width: {least: .42, most: .48, basis: picked}
+      stalk-at: {least: .82, most: .82, basis: picked}
+      tail-base: {least: .84, most: .84, basis: picked}
+      eye: {least: .11, most: .13, basis: picked}
+      eye-at: {least: .28, most: .32, basis: picked}
+      eye-height: {least: .42, most: .48, basis: picked}
+      back-line: {least: -.25, most: -.15, basis: picked, source: "dark reddish brown or greyish dorsally, yellowish gold ventrally (FishBase)"}
+      gape: {least: .42, most: .48, basis: picked}
+      tail-span: {least: .21, most: .23, basis: picked}
+      tail-sweep: {least: -.06, most: -.04, basis: picked, source: "a rounded tail, the middle rays longest; the shape is not on the page"}
+      pectoral: {least: .5, most: .6, basis: picked}
+      pectoral-at: {least: .37, most: .37, basis: picked}
+      pectoral-height: {least: -.25, most: -.15, basis: picked}
+      pelvic: {least: .13, most: .15, basis: picked}
+      pelvic-at: {least: .39, most: .39, basis: picked}
+      first-dorsal-start: {least: .38, most: .38, basis: picked}
+      first-dorsal-end: {least: .60, most: .60, basis: picked}
+      first-dorsal-front: {least: .08, most: .09, basis: picked}
+      first-dorsal-back: {least: .08, most: .09, basis: picked}
+      first-dorsal-spines: {least: 11, most: 11, basis: read, source: "FishBase E. marginatus: dorsal spines (total) 11 (Heemstra and Randall 1993)"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same: the soft rays follow, as the second part here"}
+      second-dorsal-start: {least: .62, most: .62, basis: picked}
+      second-dorsal-end: {least: .80, most: .80, basis: picked}
+      second-dorsal-front: {least: .10, most: .11, basis: picked}
+      second-dorsal-back: {least: .08, most: .09, basis: picked}
+      second-dorsal-spines: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-rays: {least: 14, most: 16, basis: read, source: "FishBase E. marginatus: dorsal soft rays (total) 14 - 16"}
+      anal-start: {least: .62, most: .62, basis: picked}
+      anal-end: {least: .78, most: .78, basis: picked}
+      anal-front: {least: .09, most: .10, basis: picked}
+      anal-back: {least: .08, most: .09, basis: picked}
+      anal-spines: {least: 3, most: 3, basis: read, source: "FishBase E. marginatus: anal spines 3"}
+      anal-rays: {least: 8, most: 9, basis: read, source: "FishBase E. marginatus: anal soft rays 8 - 9"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 17, most: 17, basis: picked, source: "nine above and eight below; not looked up"}
+      pectoral-rays: {least: 18, most: 19, basis: picked}
+      pelvic-rays: {least: 6, most: 6, basis: picked, source: "one spine and five rays; not looked up"}
+      vertebrae: {least: 24, most: 24, basis: picked, source: "not looked up; to ask for"}
+      precaudal: {least: 10, most: 10, basis: picked, source: "not looked up; to ask for"}
+      keels: {least: 0, most: 0, basis: picked}
+      bend-from: {least: .32, most: .38, basis: picked}
+      amplitude: {least: .07, most: .09, basis: picked}
+      wavelength: {least: .9, most: 1.0, basis: picked}
+      glide: {least: .008, most: .012, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: picked}
+      stripe-width: {least: 0, most: 0, basis: picked}
+      spot-rows: {least: 2, most: 3, basis: picked, source: "irregular white, pale greenish yellow or silvery grey blotches (FishBase); drawn as rows of round pale spots, which they are not"}
+      spot-pitch: {least: .07, most: .09, basis: picked}
+      spot-size: {least: .035, most: .045, basis: picked}
+      spot-height: {least: .35, most: .45, basis: picked}
+      ribs-from: {least: 2, most: 2, basis: picked}
+      fin-thickness: {least: .005, most: .006, basis: picked}
+      bar-count: {least: 0, most: 0, basis: picked}
+      bar-width: {least: 0, most: 0, basis: picked}
+      bar-from: {least: 0, most: 0, basis: picked}
+    looks:
+      back: {colour: [.09, .045, .030], gloss: .35, basis: picked, source: "dark reddish brown (FishBase)"}
+      belly: {colour: [.30, .22, .07], gloss: .35, basis: picked, source: "yellowish gold ventrally (FishBase)"}
+      fin: {colour: [.07, .04, .028], gloss: .3, basis: picked}
+      low-fin: {colour: [.07, .04, .028], gloss: .3, basis: picked}
+      tail: {colour: [.07, .04, .028], gloss: .3, basis: picked}
+      finlet: {colour: [.07, .04, .028], gloss: .3, basis: picked}
+      stripe: {colour: [.09, .045, .030], gloss: .35, basis: picked}
+      spot: {colour: [.32, .31, .24], gloss: .35, basis: picked, source: "pale blotches (FishBase)"}
+      iris: {colour: [.30, .20, .10], gloss: .8, basis: picked}
+      pupil: *pupil
+      bone: *bone
+
+  mediterranean-chromis:
+    figures:
+      length: {least: .08, most: .14, basis: picked, source: "about FishBase's common length, 13 cm TL; max 25 cm TL (C. chromis)"}
+      depth: {least: .38, most: .42, basis: picked, source: "compressed (FishBase)"}
+      deepest: {least: .40, most: .42, basis: picked}
+      width: {least: .42, most: .48, basis: picked}
+      head: {least: .26, most: .28, basis: picked}
+      snout: {least: .58, most: .64, basis: picked}
+      stalk: {least: .085, most: .095, basis: picked}
+      stalk-width: {least: .38, most: .44, basis: picked}
+      stalk-at: {least: .83, most: .83, basis: picked}
+      tail-base: {least: .86, most: .86, basis: picked}
+      eye: {least: .28, most: .32, basis: picked}
+      eye-at: {least: .33, most: .37, basis: picked}
+      eye-height: {least: .32, most: .38, basis: picked}
+      back-line: {least: -.5, most: -.4, basis: picked, source: "no colour on the FishBase page; dark nearly all over, not looked up"}
+      gape: {least: .22, most: .26, basis: picked}
+      tail-span: {least: .33, most: .36, basis: picked}
+      tail-sweep: {least: .13, most: .16, basis: picked, source: "a deeply forked tail; not on the page"}
+      pectoral: {least: .8, most: .9, basis: picked}
+      pectoral-at: {least: .30, most: .30, basis: picked}
+      pectoral-height: {least: -.12, most: -.08, basis: picked}
+      pelvic: {least: .15, most: .17, basis: picked}
+      pelvic-at: {least: .34, most: .34, basis: picked}
+      first-dorsal-start: {least: .33, most: .33, basis: picked}
+      first-dorsal-end: {least: .62, most: .62, basis: picked}
+      first-dorsal-front: {least: .09, most: .10, basis: picked}
+      first-dorsal-back: {least: .065, most: .075, basis: picked}
+      first-dorsal-spines: {least: 14, most: 14, basis: read, source: "FishBase C. chromis: dorsal spines (total) 14 (Loris and Rucabado 1990)"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-start: {least: .64, most: .64, basis: picked}
+      second-dorsal-end: {least: .80, most: .80, basis: picked}
+      second-dorsal-front: {least: .12, most: .13, basis: picked}
+      second-dorsal-back: {least: .075, most: .085, basis: picked}
+      second-dorsal-spines: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-rays: {least: 9, most: 11, basis: read, source: "FishBase C. chromis: dorsal soft rays (total) 9 - 11"}
+      anal-start: {least: .62, most: .62, basis: picked}
+      anal-end: {least: .80, most: .80, basis: picked}
+      anal-front: {least: .11, most: .12, basis: picked}
+      anal-back: {least: .075, most: .085, basis: picked}
+      anal-spines: {least: 2, most: 2, basis: read, source: "FishBase C. chromis: anal spines 2"}
+      anal-rays: {least: 9, most: 11, basis: read, source: "FishBase C. chromis: anal soft rays 9 - 11"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 15, most: 15, basis: picked, source: "not looked up"}
+      pectoral-rays: {least: 17, most: 19, basis: picked}
+      pelvic-rays: {least: 6, most: 6, basis: picked, source: "one spine and five rays; not looked up"}
+      vertebrae: {least: 26, most: 26, basis: picked, source: "not looked up; to ask for"}
+      precaudal: {least: 11, most: 11, basis: picked, source: "not looked up; to ask for"}
+      keels: {least: 0, most: 0, basis: picked}
+      bend-from: {least: .32, most: .38, basis: picked}
+      amplitude: {least: .07, most: .09, basis: picked}
+      wavelength: {least: .9, most: 1.0, basis: picked}
+      glide: {least: .008, most: .012, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: picked}
+      stripe-width: {least: 0, most: 0, basis: picked}
+      spot-rows: {least: 0, most: 0, basis: picked}
+      spot-pitch: {least: 0, most: 0, basis: picked}
+      spot-size: {least: 0, most: 0, basis: picked}
+      spot-height: {least: 0, most: 0, basis: picked}
+      ribs-from: {least: 2, most: 2, basis: picked}
+      fin-thickness: {least: .005, most: .006, basis: picked}
+      bar-count: {least: 0, most: 0, basis: picked}
+      bar-width: {least: 0, most: 0, basis: picked}
+      bar-from: {least: 0, most: 0, basis: picked}
+      school-spacing: {least: 1, most: 1, basis: read, source: "Wikipedia, Shoaling and schooling: about one fish per cube of body length (its note 63)"}
+      school-scatter: {least: .3, most: .3, basis: picked}
+      school-heading: {least: 15, most: 15, basis: picked, source: "small shoals in midwater above rocky reefs (FishBase); looser than a sardine school, picked"}
+      school-variants: {least: 6, most: 6, basis: picked}
+      school-long: {least: 2, most: 2, basis: picked}
+      school-wide: {least: 2, most: 2, basis: picked}
+      school-high: {least: 1, most: 1, basis: picked}
+    schools: [60]
+    looks:
+      back: {colour: [.035, .028, .022], gloss: .4, basis: picked, source: "dark brown; not looked up"}
+      belly: {colour: [.07, .055, .04], gloss: .4, basis: picked}
+      fin: {colour: [.03, .025, .02], gloss: .3, basis: picked}
+      low-fin: {colour: [.03, .025, .02], gloss: .3, basis: picked}
+      tail: {colour: [.03, .025, .02], gloss: .3, basis: picked}
+      finlet: {colour: [.03, .025, .02], gloss: .3, basis: picked}
+      stripe: {colour: [.035, .028, .022], gloss: .4, basis: picked}
+      spot: {colour: [.035, .028, .022], gloss: .4, basis: picked}
+      iris: {colour: [.20, .18, .14], gloss: .8, basis: picked}
+      pupil: *pupil
+      bone: *bone
+
+  european-perch:
+    figures:
+      length: {least: .15, most: .35, basis: picked, source: "about FishBase's common length, 25 cm TL; max 60 cm SL (Kottelat and Freyhof 2007)"}
+      depth: {least: .26, most: .30, basis: picked, source: "fusiform, compressed (FishBase)"}
+      deepest: {least: .35, most: .38, basis: picked}
+      width: {least: .48, most: .54, basis: picked}
+      head: {least: .27, most: .29, basis: picked}
+      snout: {least: .68, most: .74, basis: picked}
+      stalk: {least: .075, most: .085, basis: picked}
+      stalk-width: {least: .42, most: .48, basis: picked}
+      stalk-at: {least: .85, most: .85, basis: picked}
+      tail-base: {least: .87, most: .87, basis: picked}
+      eye: {least: .19, most: .22, basis: picked}
+      eye-at: {least: .33, most: .37, basis: picked}
+      eye-height: {least: .38, most: .42, basis: picked}
+      back-line: {least: -.1, most: .1, basis: picked, source: "body greenish-yellow (FishBase)"}
+      gape: {least: .33, most: .37, basis: picked}
+      tail-span: {least: .23, most: .25, basis: picked}
+      tail-sweep: {least: .03, most: .05, basis: picked}
+      pectoral: {least: .55, most: .65, basis: picked}
+      pectoral-at: {least: .30, most: .30, basis: picked}
+      pectoral-height: {least: -.25, most: -.15, basis: picked}
+      pelvic: {least: .13, most: .15, basis: picked}
+      pelvic-at: {least: .33, most: .33, basis: picked}
+      first-dorsal-start: {least: .30, most: .30, basis: picked}
+      first-dorsal-end: {least: .56, most: .56, basis: picked}
+      first-dorsal-front: {least: .12, most: .14, basis: picked, source: "first dorsal fin markedly higher than the second (FishBase)"}
+      first-dorsal-back: {least: .025, most: .035, basis: picked}
+      first-dorsal-spines: {least: 13, most: 18, basis: derived, source: "FishBase P. fluviatilis: dorsal spines (total) 14 - 20, less the one or two that lead the second dorsal"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-start: {least: .58, most: .58, basis: picked}
+      second-dorsal-end: {least: .78, most: .78, basis: picked}
+      second-dorsal-front: {least: .075, most: .085, basis: picked}
+      second-dorsal-back: {least: .045, most: .055, basis: picked}
+      second-dorsal-spines: {least: 1, most: 2, basis: picked, source: "the spines that lead the second dorsal; not looked up"}
+      second-dorsal-rays: {least: 13, most: 16, basis: read, source: "FishBase P. fluviatilis: dorsal soft rays (total) 13 - 16"}
+      anal-start: {least: .64, most: .64, basis: picked}
+      anal-end: {least: .76, most: .76, basis: picked}
+      anal-front: {least: .075, most: .085, basis: picked}
+      anal-back: {least: .045, most: .055, basis: picked}
+      anal-spines: {least: 2, most: 2, basis: read, source: "FishBase P. fluviatilis: anal spines 2"}
+      anal-rays: {least: 7, most: 10, basis: read, source: "FishBase P. fluviatilis: anal soft rays 7 - 10"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 17, most: 17, basis: picked, source: "nine above and eight below; not looked up"}
+      pectoral-rays: {least: 13, most: 15, basis: picked}
+      pelvic-rays: {least: 6, most: 6, basis: picked, source: "one spine and five rays; not looked up"}
+      vertebrae: {least: 39, most: 42, basis: read, source: "FishBase P. fluviatilis: vertebrae 39 - 42"}
+      precaudal: {least: 18, most: 19, basis: picked, source: "no split reached; to ask for"}
+      keels: {least: 0, most: 0, basis: picked}
+      bend-from: {least: .28, most: .34, basis: picked}
+      amplitude: {least: .08, most: .10, basis: picked}
+      wavelength: {least: .9, most: 1.0, basis: picked}
+      glide: {least: .008, most: .012, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: picked}
+      stripe-width: {least: 0, most: 0, basis: picked}
+      spot-rows: {least: 0, most: 0, basis: picked}
+      spot-pitch: {least: 0, most: 0, basis: picked}
+      spot-size: {least: 0, most: 0, basis: picked}
+      spot-height: {least: 0, most: 0, basis: picked}
+      ribs-from: {least: 3, most: 3, basis: picked}
+      fin-thickness: {least: .004, most: .005, basis: picked}
+      bar-count: {least: 5, most: 9, basis: read, source: "FishBase P. fluviatilis: 5-9 transverse black bands on the sides (ref. 2058); drawn straight, where its diagnosis says usually Y-shaped"}
+      bar-width: {least: .03, most: .04, basis: picked}
+      bar-from: {least: .32, most: .34, basis: picked}
+    looks:
+      back: {colour: [.09, .12, .035], gloss: .35, basis: picked, source: "greenish-yellow (FishBase)"}
+      belly: {colour: [.42, .40, .22], gloss: .35, basis: picked, source: "the same, paler below; the paler belly is picked"}
+      fin: {colour: [.30, .27, .08], gloss: .3, basis: picked, source: "second dorsal greenish-yellow, pectorals yellow (FishBase); the first dorsal, grey with a black tip, is drawn the same"}
+      low-fin: {colour: [.42, .07, .03], gloss: .3, basis: picked, source: "other fins red (FishBase)"}
+      tail: {colour: [.42, .07, .03], gloss: .3, basis: picked, source: "the same"}
+      finlet: {colour: [.30, .27, .08], gloss: .3, basis: picked}
+      stripe: {colour: [.09, .12, .035], gloss: .35, basis: picked}
+      spot: {colour: [.012, .012, .008], gloss: .35, basis: picked, source: "black bands (FishBase)"}
+      iris: {colour: [.40, .30, .08], gloss: .8, basis: picked}
+      pupil: *pupil
+      bone: *bone
+
+  flathead-grey-mullet:
+    figures:
+      length: {least: .30, most: .55, basis: picked, source: "about FishBase's common length, 50 cm SL; max 100 cm SL (Harrison 1995)"}
+      depth: {least: .20, most: .23, basis: picked, source: "body stout, cylindrical in cross-section, slightly compressed (FishBase)"}
+      deepest: {least: .37, most: .40, basis: picked}
+      width: {least: .72, most: .80, basis: picked, source: "the same"}
+      head: {least: .23, most: .25, basis: picked}
+      snout: {least: .52, most: .58, basis: picked}
+      stalk: {least: .08, most: .09, basis: picked}
+      stalk-width: {least: .50, most: .58, basis: picked}
+      stalk-at: {least: .85, most: .85, basis: picked}
+      tail-base: {least: .87, most: .87, basis: picked}
+      eye: {least: .15, most: .18, basis: picked}
+      eye-at: {least: .24, most: .27, basis: picked}
+      eye-height: {least: .24, most: .30, basis: picked}
+      back-line: {least: .05, most: .15, basis: picked}
+      gape: {least: .18, most: .22, basis: picked}
+      tail-span: {least: .24, most: .26, basis: picked}
+      tail-sweep: {least: .07, most: .09, basis: picked}
+      pectoral: {least: .55, most: .65, basis: picked}
+      pectoral-at: {least: .26, most: .26, basis: picked}
+      pectoral-height: {least: .15, most: .25, basis: picked}
+      pelvic: {least: .09, most: .11, basis: picked}
+      pelvic-at: {least: .40, most: .40, basis: picked}
+      first-dorsal-start: {least: .40, most: .40, basis: picked}
+      first-dorsal-end: {least: .48, most: .48, basis: picked}
+      first-dorsal-front: {least: .075, most: .085, basis: picked}
+      first-dorsal-back: {least: .035, most: .045, basis: picked}
+      first-dorsal-spines: {least: 4, most: 4, basis: derived, source: "FishBase M. cephalus: dorsal spines (total) 5, less the one that leads the second dorsal"}
+      first-dorsal-rays: {least: 0, most: 0, basis: read, source: "the same"}
+      second-dorsal-start: {least: .62, most: .62, basis: picked}
+      second-dorsal-end: {least: .70, most: .70, basis: picked}
+      second-dorsal-front: {least: .065, most: .075, basis: picked}
+      second-dorsal-back: {least: .045, most: .055, basis: picked}
+      second-dorsal-spines: {least: 1, most: 1, basis: derived, source: "the fifth spine of FishBase's total"}
+      second-dorsal-rays: {least: 7, most: 9, basis: read, source: "FishBase M. cephalus: dorsal soft rays (total) 7 - 9"}
+      anal-start: {least: .62, most: .62, basis: picked}
+      anal-end: {least: .72, most: .72, basis: picked}
+      anal-front: {least: .055, most: .065, basis: picked}
+      anal-back: {least: .035, most: .045, basis: picked}
+      anal-spines: {least: 3, most: 3, basis: read, source: "FishBase M. cephalus: anal spines 3"}
+      anal-rays: {least: 8, most: 9, basis: read, source: "FishBase M. cephalus: anal soft rays 8 - 9"}
+      dorsal-finlets: {least: 0, most: 0, basis: picked}
+      anal-finlets: {least: 0, most: 0, basis: picked}
+      caudal-rays: {least: 17, most: 17, basis: picked, source: "not looked up"}
+      pectoral-rays: {least: 16, most: 17, basis: picked}
+      pelvic-rays: {least: 6, most: 6, basis: picked, source: "one spine and five rays; not looked up"}
+      vertebrae: {least: 24, most: 24, basis: picked, source: "not looked up; to ask for"}
+      precaudal: {least: 11, most: 11, basis: picked, source: "not looked up; to ask for"}
+      keels: {least: 0, most: 0, basis: picked}
+      bend-from: {least: .32, most: .38, basis: picked}
+      amplitude: {least: .08, most: .10, basis: picked}
+      wavelength: {least: .95, most: 1.05, basis: picked}
+      glide: {least: .008, most: .012, basis: picked}
+      stripe-height: {least: 0, most: 0, basis: picked, source: "six or seven horizontal stripes (Wikipedia, citing FishBase); the maker draws one stripe, so none is drawn"}
+      stripe-width: {least: 0, most: 0, basis: picked}
+      spot-rows: {least: 0, most: 0, basis: picked}
+      spot-pitch: {least: 0, most: 0, basis: picked}
+      spot-size: {least: 0, most: 0, basis: picked}
+      spot-height: {least: 0, most: 0, basis: picked}
+      ribs-from: {least: 3, most: 3, basis: picked}
+      fin-thickness: {least: .004, most: .005, basis: picked}
+      bar-count: {least: 0, most: 0, basis: picked}
+      bar-width: {least: 0, most: 0, basis: picked}
+      bar-from: {least: 0, most: 0, basis: picked}
+      school-spacing: {least: 1, most: 1, basis: read, source: "Wikipedia, Shoaling and schooling: about one fish per cube of body length (its note 63)"}
+      school-scatter: {least: .3, most: .3, basis: picked, source: "adults usually in schools over sand or mud bottoms, 0 to 10 m (FishBase)"}
+      school-heading: {least: 10, most: 10, basis: picked}
+      school-variants: {least: 6, most: 6, basis: picked}
+      school-long: {least: 3, most: 3, basis: picked}
+      school-wide: {least: 2, most: 2, basis: picked}
+      school-high: {least: 1, most: 1, basis: picked}
+    schools: [120]
+    looks:
+      back: {colour: [.07, .08, .075], gloss: .45, basis: picked, source: "grey; not looked up"}
+      belly: {colour: [.55, .56, .57], gloss: .55, basis: picked}
+      fin: {colour: [.12, .12, .115], gloss: .3, basis: picked}
+      low-fin: {colour: [.12, .12, .115], gloss: .3, basis: picked}
+      tail: {colour: [.12, .12, .115], gloss: .3, basis: picked}
+      finlet: {colour: [.12, .12, .115], gloss: .3, basis: picked}
+      stripe: {colour: [.07, .08, .075], gloss: .45, basis: picked}
+      spot: {colour: [.07, .08, .075], gloss: .45, basis: picked}
+      iris: {colour: [.35, .33, .28], gloss: .8, basis: picked}
+      pupil: *pupil
+      bone: *bone

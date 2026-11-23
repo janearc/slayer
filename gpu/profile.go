@@ -53,6 +53,15 @@ type Profile struct {
 	// SkyShared is whether fast light shared the sky's looks among a
 	// pixel's samples.
 	SkyShared bool
+	// Restir is whether the picture was lit by restir (doc/restir.md): the
+	// crowd of lamps it chose among and the light tree's nodes, the wall
+	// time of its passes (host copies included), their device time, and
+	// the tree's build. All nought for a picture lit exactly.
+	Restir                bool
+	RestirLamps           int
+	RestirNodes           int
+	RestirWall, RestirGPU time.Duration
+	RestirTreeWall        time.Duration
 }
 
 // traceDeviceTime isolates trace commands from the kernel's cumulative GPU

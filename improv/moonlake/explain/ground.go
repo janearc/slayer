@@ -42,13 +42,13 @@ func Legible(ground color.RGBA) error {
 	ratio := Contrast(ink, ground)
 	if ratio < bandLeast || ratio > bandMost {
 		return fmt.Errorf("%w: ink on %v is %.2f to 1; the band is %v to "+
-			"%v", ErrExplain, ground, ratio, bandLeast, bandMost)
+			"%v", errExplain, ground, ratio, bandLeast, bandMost)
 	}
 	apart := math.Abs(hue(ink) - hue(ground))
 	apart = math.Min(apart, fullCircle-apart)
 	if apart < hueApart && saturation(ground) >= groundGrey {
 		return fmt.Errorf("%w: %v is %.0f degrees from the ink's hue and "+
-			"%.2f saturated; it needs %v degrees or under %v", ErrExplain,
+			"%.2f saturated; it needs %v degrees or under %v", errExplain,
 			ground, apart, saturation(ground), hueApart, groundGrey)
 	}
 	return nil

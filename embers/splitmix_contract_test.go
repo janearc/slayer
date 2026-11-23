@@ -14,7 +14,8 @@ func TestEmberFinalizerMatchesThePublishedSplitMixSequence(t *testing.T) {
 		0x367312d4a350e, 0xa7973e18e8fd4, 0x5905357c3e8a6, 0x18b082675922d5,
 	}
 	for i, want := range expected {
-		got := uint64(share(0, int64(i+1), 0) * (1 << 53))
+		birth := share(0, int64(i+1), 0)
+		got := uint64(birth * (1 << 53))
 		if got != want {
 			t.Fatalf("birth %d high bits %#x, reference %#x", i+1, got, want)
 		}

@@ -47,16 +47,19 @@ func uniformGrid(side int, opacity, emissivity float64) *Grid {
 // opacity and emissivity per band.
 func TestNewGridAndSet(t *testing.T) {
 	grid := NewGrid(3)
-	if grid.Side != 3 || grid.Opacity(2, 2, 1) != 0 {
-		t.Fatalf("new grid: side %d, opacity %v", grid.Side, grid.Opacity(2, 2, 1))
+	opacityAt := func(column, row, band int) float64 {
+		return grid.opacity[(row*grid.Side+column)*Bands+band]
+	}
+	if grid.Side != 3 || opacityAt(2, 2, 1) != 0 {
+		t.Fatalf("new grid: side %d, opacity %v", grid.Side, opacityAt(2, 2, 1))
 	}
 	grid.Set(1, 2, [Bands]float64{1, 2, 3}, [Bands]float64{4, 5, 6})
 	for band, want := range []float64{1, 2, 3} {
-		if got := grid.Opacity(1, 2, band); got != want {
+		if got := opacityAt(1, 2, band); got != want {
 			t.Errorf("opacity band %d: got %v want %v", band, got, want)
 		}
 	}
-	if got := grid.Opacity(2, 1, 0); got != 0 {
+	if got := opacityAt(2, 1, 0); got != 0 {
 		t.Errorf("neighbouring cell opacity changed to %v", got)
 	}
 }
@@ -114,7 +117,7 @@ func TestMarch(t *testing.T) {
 	}
 	for _, c := range cases {
 		grid := uniformGrid(4, c.opacity, c.emissivity)
-		got, steps := grid.March(c.originX, 0.5, 1, 0, c.from, c.to)
+		got, steps := grid.march(c.originX, 0.5, 1, 0, c.from, c.to)
 		if !near(got.Intensity[0], c.wantIntensity) || !near(got.Tau[2], c.wantTau) ||
 			steps != c.wantSteps {
 			t.Errorf("%s: intensity %v tau %v steps %d, want %v %v %d", c.name,
@@ -127,7 +130,7 @@ func TestMarch(t *testing.T) {
 // nothing.
 func TestMarchMissesGrid(t *testing.T) {
 	grid := uniformGrid(4, 0, 1)
-	got, steps := grid.March(-5, 0.5, 0, 1, 0, 3)
+	got, steps := grid.march(-5, 0.5, 0, 1, 0, 3)
 	if steps != 0 || got.Intensity != [Bands]float64{} {
 		t.Errorf("got %v after %d steps", got, steps)
 	}
@@ -189,14 +192,14 @@ func TestLevelGeometry(t *testing.T) {
 	if got := level.Rays(); got != 36 {
 		t.Errorf("Rays = %d want 36", got)
 	}
-	if got := level.Position(3); got != 7 {
+	if got := level.position(3); got != 7 {
 		t.Errorf("Position(3) = %v want 7", got)
 	}
-	x, y := level.Direction(0)
+	x, y := level.direction(0)
 	if !near(x, math.Sqrt(0.5)) || !near(y, math.Sqrt(0.5)) {
 		t.Errorf("Direction(0) = %v, %v", x, y)
 	}
-	x, y = level.Direction(2)
+	x, y = level.direction(2)
 	if !near(x, -math.Sqrt(0.5)) || !near(y, -math.Sqrt(0.5)) {
 		t.Errorf("Direction(2) = %v, %v", x, y)
 	}
@@ -246,7 +249,7 @@ func TestChildren(t *testing.T) {
 // TestExtend checks equation 11: the near interval plus what lies beyond,
 // dimmed by the near depth.
 func TestExtend(t *testing.T) {
-	near2 := Interval{Intensity: [Bands]float64{1, 2, 3},
+	near2 := interval{Intensity: [Bands]float64{1, 2, 3},
 		Tau: [Bands]float64{0, math.Log(2), math.Log(4)}}
 	got := extend(near2, [Bands]float64{8, 8, 8})
 	want := [Bands]float64{9, 6, 5}

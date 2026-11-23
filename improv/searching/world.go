@@ -17,9 +17,9 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
-// Set is one retained scene: geometry is made once, actor poses and light
+// set is one retained scene: geometry is made once, actor poses and light
 // are changed for an exposure. It owns no encoder or global render state.
-type Set struct {
+type set struct {
 	World           *thing.World
 	Actors          []actor
 	Mist            *medium.Layer
@@ -40,9 +40,9 @@ type actor struct {
 	scale  float64
 }
 
-// NewSet builds one named site without taking any GPU resources.
-func NewSet(plan Plan, site string) (*Set, error) {
-	set := &Set{World: thing.NewWorld(), Site: site, prototypes: map[string][]thing.Thing{}}
+// newSet builds one named site without taking any GPU resources.
+func newSet(plan Plan, site string) (*set, error) {
+	set := &set{World: thing.NewWorld(), Site: site, prototypes: map[string][]thing.Thing{}}
 	if site == "blazar" {
 		return set, set.blazar()
 	}
@@ -94,7 +94,7 @@ func groundHeight(x, z float64) float64 {
 }
 
 // land supplies a continuous far floor below the bounded summit mesh.
-func (set *Set) land(site string) error {
+func (set *set) land(site string) error {
 	const side, extent = 49, 800.0
 	heights := make([]float64, side*side)
 	for row := range side {
@@ -139,7 +139,7 @@ func (set *Set) land(site string) error {
 }
 
 // scenery grows a factory object; recipes and their refusal paths stay shared.
-func (set *Set) scenery(name string, seed uint64, at maths.Vec, scale float64) error {
+func (set *set) scenery(name string, seed uint64, at maths.Vec, scale float64) error {
 	key := fmt.Sprintf("%s/%d", name, seed)
 	if prototype, ok := set.prototypes[key]; ok {
 		for _, item := range prototype {
@@ -173,7 +173,7 @@ func (set *Set) scenery(name string, seed uint64, at maths.Vec, scale float64) e
 }
 
 // observatory retains the factory's hollow dome and optical structure.
-func (set *Set) observatory(plan Plan) error {
+func (set *set) observatory(plan Plan) error {
 	kind, err := manufacture.Observatory(manufacture.Optical{
 		Diameter: measure.Metres(plan.Diameter), Aperture: measure.Metres(plan.Aperture),
 		Opening: measure.Degrees(42), Altitude: measure.Degrees(plan.Altitude),
@@ -206,7 +206,7 @@ func (set *Set) observatory(plan Plan) error {
 }
 
 // instrument shares manufactured meshes while retaining one actor pose.
-func (set *Set) instrument(kind manufacture.Kind, at maths.Vec, scale float64) error {
+func (set *set) instrument(kind manufacture.Kind, at maths.Vec, scale float64) error {
 	object, err := manufacture.MakeWithComplexity(kind, manufacture.Sow(9), "quick")
 	if err != nil {
 		return err
@@ -224,7 +224,7 @@ func (set *Set) instrument(kind manufacture.Kind, at maths.Vec, scale float64) e
 }
 
 // array places distinct antennas across either a compact field or wide arms.
-func (set *Set) array(plan Plan) error {
+func (set *set) array(plan Plan) error {
 	kind, err := manufacture.KindNamed("sma-antenna")
 	if err != nil {
 		return err
@@ -255,8 +255,8 @@ func (set *Set) array(plan Plan) error {
 	return nil
 }
 
-// Update changes the light and poses for one shot, keeping terrain fixed.
-func (set *Set) Update(plan Plan, state State) (maths.Subspace, float64, error) {
+// update changes the light and poses for one shot, keeping terrain fixed.
+func (set *set) update(plan Plan, state State) (maths.Subspace, float64, error) {
 	if set.Space {
 		eye, wide := set.spaceView(state)
 		return eye, wide, nil
@@ -349,7 +349,7 @@ func (skybox siteSky) Light(toward maths.Vec) maths.Light {
 
 // blazar uses actual emissive volumes, with authored component weights per
 // view. Those views are illustrations, not measured spectral intensities.
-func (set *Set) blazar() error {
+func (set *set) blazar() error {
 	set.Space = true
 	set.World.Sky = sky.Gradient{Horizon: maths.RGB(0.001, 0.0005, 0.004), Zenith: maths.RGB(0.001, 0.0005, 0.004)}
 	set.World.Add(thing.Thing{Shape: shape.Sphere{Radius: 2.1}, Material: &thing.Material{Name: "stylized dark core", Colour: maths.Grey(0)}})
@@ -368,7 +368,7 @@ func (set *Set) blazar() error {
 }
 
 // spaceView changes which physical components of the illustration dominate.
-func (set *Set) spaceView(state State) (maths.Subspace, float64) {
+func (set *set) spaceView(state State) (maths.Subspace, float64) {
 	weights := map[string][3]float64{"radio": {0.07, 0.5, 4}, "infrared": {1.5, 0.3, 0.3}, "visible": {1, 1, 0.15}, "x-ray": {0.3, 2.5, 0.03}, "gamma": {0.04, 5, 0.01}}
 	w, ok := weights[state.Spectrum]
 	if !ok {
@@ -384,4 +384,4 @@ func (set *Set) spaceView(state State) (maths.Subspace, float64) {
 }
 
 // String names a retained set in progress reports.
-func (set *Set) String() string { return fmt.Sprintf("searching/%s", set.Site) }
+func (set *set) String() string { return fmt.Sprintf("searching/%s", set.Site) }

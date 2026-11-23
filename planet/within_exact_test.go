@@ -46,7 +46,8 @@ func oldWithin(face *Face, p maths.Vec, footprint float64) maths.Light {
 			face.glowed(marked.cleared, lo, hi) +
 			face.glowedAt(came, eye, heldIn(lo, hi))*front) * face.exposure
 	}
-	red, green, blue := srgb.Light(observer.Swatch(bands.Lines(lines)))
+	spectrum := bands.Lines(lines)
+	red, green, blue := srgb.Light(observer.Swatch(spectrum))
 	return maths.RGB(math.Max(0, red), math.Max(0, green),
 		math.Max(0, blue))
 }

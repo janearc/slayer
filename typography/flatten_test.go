@@ -82,8 +82,10 @@ var cubics = []piece{
 // the true curve at every one of five hundred points along it.
 func TestFlatteningStaysWithinItsTolerance(t *testing.T) {
 	letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@&8"
-	all := append(curves(t, mustFont(t, goregular.TTF), letters),
-		curves(t, mustFont(t, goitalic.TTF), letters)...)
+	regular := curves(t, mustFont(t, goregular.TTF), letters)
+	italic := curves(t, mustFont(t, goitalic.TTF), letters)
+	all := append(regular,
+		italic...)
 	all = append(all, cubics...)
 	for _, tolerance := range []float64{0.25, 1, 4, 16} {
 		for i, each := range all {
@@ -156,8 +158,9 @@ func TestTheHalvesOfACurveAreTheCurve(t *testing.T) {
 // bend is the pull.
 func TestBendIsNeverLessThanHowFarACurveStrays(t *testing.T) {
 	letters := "abcdefghijklmnopqrstuvwxyzOSQ@"
-	for i, each := range append(curves(t, mustFont(t, goregular.TTF),
-		letters), cubics...) {
+	regular := curves(t, mustFont(t, goregular.TTF),
+		letters)
+	for i, each := range append(regular, cubics...) {
 		chord := ring{each[len(each)-1]}
 		got, most := strays(each, chord, 500), bend(each)
 		if got > most {

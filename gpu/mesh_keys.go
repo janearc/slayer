@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/shape"
 )
 
@@ -49,15 +50,19 @@ func shapeMeshKey(made *shape.Mesh) meshKey {
 }
 
 // slayersMeshKey is the key of one of slayer's meshes, taken of its faces
-// as slayersFaces makes them: every corner, normal and mark, as the tree
-// cache packs a face.
-func slayersMeshKey(faces []triangle) meshKey {
+// as the mesh gives them: every corner, normal and mark, as the tree
+// cache packs a face, one face at a time and none held.
+func slayersMeshKey(skin *mesh.Mesh) meshKey {
 	sum := sha256.New()
 	sum.Write([]byte{slayersMeshKind})
 	packed := make([]byte, firstPlace, faceBytes)
-	hashRun(sum, len(faces), nil)
-	for _, face := range faces {
-		sum.Write(packFace(packed[:firstPlace], face))
+	hashRun(sum, skin.FaceCount(), nil)
+	for at := range skin.FaceCount() {
+		one, two, three := skin.Corners(at)
+		normals, smooth := skin.CornerNormals(at)
+		sum.Write(packFace(packed[:firstPlace], triangle{
+			corners: threeOf(one, two, three), normals: normals,
+			smooth: smooth}))
 	}
 	return keyOfSum(sum)
 }

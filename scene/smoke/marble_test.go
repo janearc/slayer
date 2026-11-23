@@ -59,7 +59,8 @@ func TestTheMarblesOnTheEarth(t *testing.T) {
 			// and the stars are as faint as a long exposure leaves
 			w.Sky = sky.Stars{Seed: 15, Share: 0.06, Size: 0.35, Bright: 0.004}
 		}
-		w.Lamp(thing.Sun(sun, maths.RGB(1.2, 1.2, 1.2)))
+		white := maths.RGB(1.2, 1.2, 1.2)
+		w.Lamp(thing.Sun(sun, white))
 		e, err := template.Earth()
 		if err != nil {
 			t.Fatal(err)
@@ -108,7 +109,8 @@ func TestTheMarblesOnTheEarth(t *testing.T) {
 	if out == "" {
 		out = t.TempDir()
 	}
-	if err := s.PNG(filepath.Join(out, t.Name()+".png")); err != nil {
+	picture := filepath.Join(out, t.Name()+".png")
+	if err := s.PNG(picture); err != nil {
 		t.Fatal(err)
 	}
 	covered := 0
@@ -174,7 +176,8 @@ func TestMarbleSetGivesTheJPEG(t *testing.T) {
 func TestMarbleSetButFailingIsRefused(t *testing.T) {
 	whole := aJPEG(t)
 	var aPNG bytes.Buffer
-	if err := png.Encode(&aPNG, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if err := png.Encode(&aPNG, blank); err != nil {
 		t.Fatal(err)
 	}
 	cases := []struct {

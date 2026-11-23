@@ -14,15 +14,15 @@ func TestAFrameIsSynchronisedAndResetsEachRow(t *testing.T) {
 			img.SetRGBA(x, y, color.RGBA{uint8(x * 60), uint8(y * 40), 90, 255})
 		}
 	}
-	var b strings.Builder
-	if err := Draw(&b, Chop(img)); err != nil {
+	var builder strings.Builder
+	if err := Draw(&builder, Chop(img)); err != nil {
 		t.Fatal(err)
 	}
-	s := b.String()
+	s := builder.String()
 	if !strings.HasPrefix(s, "\x1b[?2026h") || !strings.HasSuffix(s, "\x1b[?2026l") {
 		t.Fatal("the frame is not wrapped in synchronised output")
 	}
-	if n := strings.Count(s, "\x1b[0m"); n != 2 {
-		t.Fatalf("%d resets, want one per row, 2", n)
+	if count := strings.Count(s, "\x1b[0m"); count != 2 {
+		t.Fatalf("%d resets, want one per row, 2", count)
 	}
 }

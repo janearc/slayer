@@ -97,6 +97,13 @@ struct Hit {
 	// The exact interface normal for fields. Appearance keeps `normal`, which
 	// may be an independently sampled spectral shading normal.
 	float3 geometric = float3(0);
+	// the field row of a sea with no edge that was met, for its normal as
+	// the pixel there shows it (shading_normal); -1 for anything else
+	int sea = -1;
+	// how a sea's hit was met: nought for the true surface, one for the
+	// mean plane taken from the air side, minus one from the water side
+	// (sea_flat), so the normal is turned by the same side the hit was.
+	int flat_side = 0;
 };
 
 // sphere_hit uses the stable quadratic form shared with globe.Hit and
@@ -213,6 +220,13 @@ static float triangle_hit(float3 at, float3 way, Triangle face, float near,
 // weighted by that vertex’s contribution: for slayer's own mesh, as its
 // tracer lifts one. A shape.Mesh shaded smooth is bent and not lifted, as
 // its tracer shades it, and says so in its first normal's spare number.
+// bend_of is a face's bend's place from its first corner's fourth number:
+// -1 for a face shaded flat, or else the place its bits carry, less the
+// bias parts.go's bendNumber adds.
+static int bend_of(float carried) {
+	return carried < 0 ? -1 : as_type<int>(carried) - 0x00800000;
+}
+
 static Hit bent(Bend bend, Triangle face, float3 point, float2 weights,
                 Hit flat) {
 	float3 weighed = float3(1 - weights.x - weights.y, weights);
@@ -466,9 +480,8 @@ static Hit faces_near(World world, int root, float3 at, float3 way,
 	Hit found = {far, -1, float3(0), float3(0)};
 	Triangle met;
 	float2 weights_met;
-	// the tree splits at the middle face, so its depth is at most
-	// log2(faces / 4) and a little: tree_stack, from go, holds any tree
-	// that fits in memory
+	// a mesh's tree is cut no deeper than the mesh package's limit, and
+	// the walk holds one box more than that: tree_stack, from go, is that
 	int stack[tree_stack];
 	int depth = 0;
 	stack[depth++] = root;
@@ -506,7 +519,7 @@ static Hit faces_near(World world, int root, float3 at, float3 way,
 	}
 	float3 point = fma(way, found.distance, at);
 	found.local = point;
-	int bend = int(met.corner_a.w);
+	int bend = bend_of(met.corner_a.w);
 	if (bend >= 0) {
 		found = bent(world.bends[bend], met, point, weights_met, found);
 	}
@@ -800,7 +813,7 @@ static Hit native_face(World world, Instance placed, int triangle,
                                 face.corner_c.xyz - face.corner_a.xyz));
 	float3 point = fma(local_way, distance, local_at);
 	found = {distance, 0, normal, float3(0), point, 1};
-	int bend = int(face.corner_a.w);
+	int bend = bend_of(face.corner_a.w);
 	if (bend >= 0) { found = bent(world.bends[bend], face, point, weights, found); }
 	found.distance += shift;
 	return found;
@@ -1004,39 +1017,373 @@ static float field_hit(World world, Field field, float3 at, float3 way,
 	return -1;
 }
 
-static Hit first(World world, float3 at, float3 way, float near,
-                 int leaving_sphere) {
-	Hit found = meshes_hit(world, at, way, near, nowhere, false);
-	for (int index = 0; index < world.header->look.z; index++) {
-		Field field = world.fields[index];
-		float scale = field.origin.w;
-		float3 local_at = field_in(field, at);
-		float3 local_way = field_turned(field, way);
-		float met = field_hit(world, field, local_at, local_way,
-		                      near / scale, found.distance / scale);
-		if (met < 0) {
-			continue;
-		}
-		float3 local = local_at + local_way * met;
-		float3 faces = field_normal(world, field, local.x, local.z);
-		float3 geometric = field_geometric_normal(world, field,
-		                                          local.x, local.z);
-		found = {met * scale, field.data.z,
-		         normalize(field_out(field, faces)), float3(0), local,
-		         scale};
-		found.geometric = normalize(field_out(field, geometric));
+// A sea with no edge is a field row with bands (gpu/sea.go): for each
+// band its heights, its slopes east and its slopes north, n by n each.
+constexpr constant int sea_grids = 3;
+constexpr constant int sea_heights = 0;
+constexpr constant int sea_east = 1;
+constexpr constant int sea_north = 2;
+
+// is_sea is whether a field row is a sea with no edge, by its bands.
+static bool is_sea(Field field) {
+	return field.sea.z > 0;
+}
+
+// sea_band is one band's grid at a place east and north on its tile:
+// arid's periodicSample, with the place wrapped into one period so the
+// grid's index stays inside it. The wrap does not win back precision: a
+// far place's fraction of a texel is what a float of its size holds.
+static float sea_band(device const float *grid, int n, float side,
+                      float east, float north) {
+	float gx = east / side * n, gy = north / side * n;
+	gx = max(gx - n * floor(gx / n), 0.0f);
+	gy = max(gy - n * floor(gy / n), 0.0f);
+	float x_floor = floor(gx), y_floor = floor(gy);
+	float tx = gx - x_floor, ty = gy - y_floor;
+	int x0 = int(x_floor) % n, y0 = int(y_floor) % n;
+	int x1 = (x0 + 1) % n, y1 = (y0 + 1) % n;
+	float top = grid[y0 * n + x0] * (1 - tx) + grid[y0 * n + x1] * tx;
+	float bottom = grid[y1 * n + x0] * (1 - tx) + grid[y1 * n + x1] * tx;
+	return top * (1 - ty) + bottom * ty;
+}
+
+// sea_sum is one grid summed over a sea's bands at a place east and south
+// in its own space: each band read at its half side less the south, as
+// arid.Sea reads them, since the bands run north and the sea's z south.
+static float sea_sum(World world, Field sea, int grid, float east,
+                     float south) {
+	int n = sea.data.y;
+	float total = 0;
+	for (int band = 0; band < int(sea.sea.z); band++) {
+		float side = sea.sides[band];
+		device const float *values = world.heights + sea.data.x +
+		                             (band * sea_grids + grid) * n * n;
+		total += sea_band(values, n, side, side / 2 + east,
+		                  side / 2 - south);
 	}
-	for (int index = 0; index < world.header->counts.x; index++) {
-		Sphere sphere = world.spheres[index];
-		if (index == leaving_sphere &&
-		    dot(at - sphere.centre.xyz, way) > 0) {
+	return total;
+}
+
+// sea_normal is arid.Sea.Normal: the way the sea faces from its bands'
+// spectral slopes, its one normal for shading and for optics alike.
+static float3 sea_normal(World world, Field sea, float east, float south) {
+	float eastward = sea_sum(world, sea, sea_east, east, south);
+	float northward = sea_sum(world, sea, sea_north, east, south);
+	return normalize(float3(-eastward, 1, northward));
+}
+
+// sea_shown is oceantex.PixelShare: how much of a band a pixel covering
+// texels of its samples shows: all up to the row's shown.x, none from its
+// shown.y, and a straight line between.
+static float sea_shown(Field sea, float texels) {
+	return clamp((sea.shown.y - texels) / (sea.shown.y - sea.shown.x),
+	             0.0f, 1.0f);
+}
+
+// cubic_weights are arid's cubicWeights: cubic convolution's four weights
+// at a fraction t between the second sample and the third (Keys 1981,
+// a = -1/2, the Catmull-Rom spline).
+static float4 cubic_weights(float t) {
+	float square = t * t, cube = square * t;
+	return float4(-cube + 2 * square - t, 3 * cube - 5 * square + 2,
+	              -3 * cube + 4 * square + t, cube - square) / 2;
+}
+
+// sea_band_smooth is arid's smoothSample: one band's grid at a place east
+// and north on its tile by cubic convolution, whose slope has no kinks at
+// the sample lines, wrapped into one period as sea_band is.
+static float sea_band_smooth(device const float *grid, int n, float side,
+                             float east, float north) {
+	float gx = east / side * n, gy = north / side * n;
+	gx = max(gx - n * floor(gx / n), 0.0f);
+	gy = max(gy - n * floor(gy / n), 0.0f);
+	float x_floor = floor(gx), y_floor = floor(gy);
+	float4 across = cubic_weights(gx - x_floor);
+	float4 down = cubic_weights(gy - y_floor);
+	float total = 0;
+	for (int row = 0; row < 4; row++) {
+		int y = (int(y_floor) + row - 1 + n) % n;
+		float line = 0;
+		for (int column = 0; column < 4; column++) {
+			int x = (int(x_floor) + column - 1 + n) % n;
+			line += across[column] * grid[y * n + x];
+		}
+		total += down[row] * line;
+	}
+	return total;
+}
+
+// sea_band_slope is one band's slope grid, east or north, at a local
+// place, read smooth.
+static float sea_band_slope(World world, Field sea, int band, int grid,
+                            float east, float south) {
+	int n = sea.data.y;
+	float side = sea.sides[band];
+	device const float *values = world.heights + sea.data.x +
+	                             (band * sea_grids + grid) * n * n;
+	return sea_band_smooth(values, n, side, side / 2 + east,
+	                       side / 2 - south);
+}
+
+// sea_seen is arid.Sea.Seen: the sea's normal at a local point for a local
+// ray from from that met it there, each band kept by the share a pixel
+// width wide shows (sea_shown), turned to the side the ray began on, since
+// the search does not cross the surface; lost is the slope variance of the
+// shares not shown. A hit taken flat (flat_side not nought, see Hit) is
+// turned by the side sea_flat chose, not by the true surface at from.
+static float3 sea_seen(World world, Field sea, float3 at, float3 from,
+                       float width, int flat_side, thread float &lost) {
+	float eastward = 0, northward = 0;
+	lost = 0;
+	for (int band = 0; band < int(sea.sea.z); band++) {
+		float shown = sea_shown(sea, width * sea.data.y / sea.sides[band]);
+		lost += (1 - shown * shown) * sea.slopes[band];
+		if (shown == 0) {
 			continue;
 		}
-		float distance = sphere_hit(at, way, sphere, near,
-		                            found.distance);
-		if (distance < 0) {
-			continue;
+		eastward += shown * sea_band_slope(world, sea, band, sea_east,
+		                                   at.x, at.z);
+		northward += shown * sea_band_slope(world, sea, band, sea_north,
+		                                    at.x, at.z);
+	}
+	float3 normal = normalize(float3(-eastward, 1, northward));
+	if (flat_side != 0) {
+		return flat_side > 0 ? normal : -normal;
+	}
+	float gap = from.y - sea_sum(world, sea, sea_heights, from.x, from.z);
+	bool above = gap > 0 || (gap == 0 && at.y < from.y);
+	return above ? normal : -normal;
+}
+
+// sea_gap is how far above the sea a local ray is at along, and negative
+// below it.
+static float sea_gap(World world, Field sea, float3 at, float3 way,
+                     float along) {
+	float3 p = at + way * along;
+	return p.y - sea_sum(world, sea, sea_heights, p.x, p.z);
+}
+
+// sea_slab is the part of a local ray between near and far inside the
+// slab the sea stays in, as arid.Sea's within: false where none is.
+static bool sea_slab(Field sea, float3 at, float3 way, float near,
+                     float far, thread float *enter, thread float *leave) {
+	float reach = sea.size.z;
+	*enter = near;
+	*leave = far;
+	if (way.y == 0) {
+		return fabs(at.y) <= reach;
+	}
+	float one = (-reach - at.y) / way.y, two = (reach - at.y) / way.y;
+	*enter = max(near, min(one, two));
+	*leave = min(far, max(one, two));
+	return *enter <= *leave;
+}
+
+// sea_closing is arid.Sea's closing: whether the ray is nearer the sea a
+// touch on, or past it.
+static bool sea_closing(World world, Field sea, float3 at, float3 way,
+                        float along, float gap, float touch, float rate) {
+	float next = sea_gap(world, sea, at, way, along + touch / rate);
+	return gap * next <= 0 || fabs(next) < fabs(gap);
+}
+
+// sea_on_mean is where a ray that used up its steps ends: the mean plane,
+// between near and far, or a miss.
+static float sea_on_mean(float3 at, float3 way, float near, float far) {
+	if (way.y == 0) {
+		return -1;
+	}
+	float mean = -at.y / way.y;
+	return mean > near && mean < far ? mean : -1;
+}
+
+// pixel_at is defined with the picture's lens, after the sea.
+static float pixel_at(World world, float away);
+
+// sea_flat_from is the path length, in the field's own metres, from which
+// a sea with no edge is its mean plane: where a pixel is as wide as the
+// sea is tall, crest to trough, which is twice its reach (scrooge's
+// FlatFrom). pixel_at is linear in the path, so its width at one metre is
+// the footprint's spread, and the field's scale cancels: widths and paths
+// in the field's metres give the same ratio as in the world's. It is
+// nowhere where the row does not ask (its fourth number, nought).
+static float sea_flat_from(World world, Field sea) {
+	float spread = pixel_at(world, 1);
+	if (sea.sea.w == 0 || !(spread > 0)) {
+		return nowhere;
+	}
+	return 2 * sea.size.z / spread;
+}
+
+// sea_is_flat is whether a look that had come come metres, and has gone
+// along a ray whose way is speed long, is past where the sea is flat.
+static bool sea_is_flat(float flat_from, float come, float along,
+                        float speed) {
+	return flat_from < nowhere && come + along * speed >= flat_from;
+}
+
+// sea_flat is where a ray meets the sea taken as its mean plane: the
+// plane's crossing past near and before leave, for a ray in the air going
+// down or in the water going up, or a miss for one leaving it. The side
+// the ray began on is the plane's if it began already past the flat
+// distance (began_flat), else the true surface's at its origin. taken is
+// set to that side as Hit's flat_side says it. The crossing may be behind
+// the place the search had reached; it is the answer if it is past near.
+static float sea_flat(World world, Field sea, float3 at, float3 way,
+                      float near, float leave, bool began_flat,
+                      thread int &taken) {
+	float mean = way.y == 0 ? -1 : -at.y / way.y;
+	if (!(mean > near && mean < leave)) {
+		return -1;
+	}
+	float gap = began_flat ? at.y : sea_gap(world, sea, at, way, 0);
+	bool above = gap > 0 || (gap == 0 && way.y < 0);
+	if (above != (way.y < 0)) {
+		return -1;
+	}
+	taken = above ? 1 : -1;
+	return mean;
+}
+
+// sea_hit is arid.Sea.Hit in floats: steps of the gap over the most the
+// gap can change along the ray, which cannot cross the sea, until the ray
+// is within touch of it and closing. Touch grows with the point's distance
+// as field_hit's does, since a float far out cannot hold arid's tenth of a
+// millimetre. Minus one is a miss. come is how far the look had come
+// before this ray, in the field's metres: where come and the way along
+// reach the flat distance the answer is the flat sea's (sea_flat), which
+// is the whole search where the row does not ask. taken is Hit's flat_side.
+static float sea_hit(World world, Field sea, float3 at, float3 way,
+                     float near, float far, float come, thread int &taken) {
+	float enter, leave;
+	float rate = fabs(way.y) + sea.size.w * length(way.xz);
+	taken = 0;
+	if (!sea_slab(sea, at, way, near, far, &enter, &leave) || !(rate > 0)) {
+		return -1;
+	}
+	float flat_from = sea_flat_from(world, sea), speed = length(way);
+	float along = enter;
+	for (int step = 0; step < int(sea.sea.y); step++) {
+		if (sea_is_flat(flat_from, come, along, speed)) {
+			return sea_flat(world, sea, at, way, near, leave,
+			                come >= flat_from, taken);
 		}
+		if (along > leave) {
+			return -1;
+		}
+		float gap = sea_gap(world, sea, at, way, along);
+		float touch = max(sea.sea.x, march_touch * length(at + way * along));
+		if (fabs(gap) < touch && along > near &&
+		    sea_closing(world, sea, at, way, along, gap, touch, rate)) {
+			return along;
+		}
+		along += max(fabs(gap), touch) / rate;
+	}
+	return sea_on_mean(at, way, near, leave);
+}
+
+// surface_hit is how far along a local ray it meets a field row: by the
+// sea's search for a sea with no edge, by the march for a height field.
+// come is how far the look had come before this ray, in the field's
+// metres, and taken is how a sea's hit was met (Hit's flat_side).
+static float surface_hit(World world, Field field, float3 at, float3 way,
+                         float near, float far, float come,
+                         thread int &taken) {
+	taken = 0;
+	if (is_sea(field)) {
+		return sea_hit(world, field, at, way, near, far, come, taken);
+	}
+	return field_hit(world, field, at, way, near, far);
+}
+
+// surface_hit for a caller that wants only the distance.
+static float surface_hit(World world, Field field, float3 at, float3 way,
+                         float near, float far, float come) {
+	int taken;
+	return surface_hit(world, field, at, way, near, far, come, taken);
+}
+
+// The analytic tree: spheres and conifers under one box tree, written after
+// the meshes' nodes in the tops (analytic.go). A leaf's info is the index of
+// its sphere or conifer, a count of one, and its kind. Leaves before the
+// tree's nodes have no box, as a plane has none, and are tried each time.
+constexpr constant int analytic_sphere = 0;
+constexpr constant int analytic_conifer = 1;
+
+// How analytic_walk is asked: the nearest thing, shrinking its reach as it
+// finds one; any thing that is not clear, for a shadow; or any thing that
+// is not clear and does not let the moon through, for the moon's.
+constexpr constant int walk_nearest = 0;
+constexpr constant int walk_shadow = 1;
+constexpr constant int walk_moonlit = 2;
+
+// box_widen is how far past its exit a ray may still enter a box, as
+// box_hit lets it, so rounding does not cull a face on the boundary.
+constexpr constant float box_widen = 1.0000008f;
+
+// box_entry is whether a ray reaches the box before far, and where it
+// enters it, as box_hit takes it.
+static bool box_entry(float3 at, float3 way, Node box, float far,
+                      thread float &enter) {
+	if (any(box.low.xyz > box.high.xyz)) {
+		return false;
+	}
+	float2 across = slab(at.x, way.x, box.low.x, box.high.x);
+	float2 up = slab(at.y, way.y, box.low.y, box.high.y);
+	float2 deep = slab(at.z, way.z, box.low.z, box.high.z);
+	enter = max(max(across.x, up.x), max(deep.x, 0.0f));
+	float leave = min(min(across.y, up.y), min(deep.y, far));
+	return enter <= leave * box_widen;
+}
+
+// analytic_leaf tries the sphere or conifer a leaf holds, as the loops it
+// replaces did: a ray leaving its own sphere outward does not meet it
+// again. It is whether the ray met it before reach. In the nearest walk a
+// hit is written to found and shrinks reach; in the others it is all that
+// is said.
+static bool analytic_leaf(World world, Node leaf, float3 at, float3 way,
+                          float near, int leaving_sphere, int mode,
+                          thread float &reach, thread Hit &found) {
+	int index = leaf.info.x;
+	if (leaf.info.z == analytic_conifer) {
+		Tree tree = world.trees[index];
+		float scale = tree.origin.w;
+		float3 local_at = tree_in(tree, at);
+		float3 local_way = tree_turned(tree, way);
+		Hit grown = conifer_hit(local_at, local_way, tree, near / scale,
+		                        reach / scale);
+		if (grown.distance < 0) {
+			return false;
+		}
+		if (mode == walk_nearest) {
+			found = {grown.distance * scale, grown.material,
+			         tree_out(tree, grown.normal), float3(0),
+			         local_at + local_way * grown.distance, scale};
+			reach = found.distance;
+		}
+		return true;
+	}
+	Sphere sphere = world.spheres[index];
+	if (index == leaving_sphere &&
+	    dot(at - sphere.centre.xyz, way) > 0) {
+		return false;
+	}
+	if (mode != walk_nearest && sphere.info.y != 0) {
+		return false;
+	}
+#ifdef SLAYER_OPTICAL_MEDIA
+	if (mode == walk_moonlit) {
+		int medium = world.materials[sphere.info.x].info.w;
+		if (medium >= 0 && world.clear_media[medium].moon_light.w > 0) {
+			return false;
+		}
+	}
+#endif
+	float distance = sphere_hit(at, way, sphere, near, reach);
+	if (distance < 0) {
+		return false;
+	}
+	if (mode == walk_nearest) {
 		float3 point = at + way * distance;
 		float4 into = float4(point, 1);
 		float3 local = float3(dot(sphere.into_x, into),
@@ -1047,25 +1394,134 @@ static Hit first(World world, float3 at, float3 way, float near,
 		          normalize(point - sphere.centre.xyz)), float3(0), local,
 		         scale_of(sphere.into_x)};
 		found.sphere_index = index;
+		reach = distance;
 	}
-	for (int index = 0; index < world.header->more.w; index++) {
-		Tree tree = world.trees[index];
-		float scale = tree.origin.w;
-		float3 local_at = tree_in(tree, at);
-		float3 local_way = tree_turned(tree, way);
-		Hit grown = conifer_hit(local_at, local_way, tree, near / scale,
-		                        found.distance / scale);
-		if (grown.distance >= 0) {
-			found = {grown.distance * scale, grown.material,
-			         tree_out(tree, grown.normal), float3(0),
-			         local_at + local_way * grown.distance, scale};
+	return true;
+}
+
+// analytic_walk is whether a ray meets a sphere or conifer between near and
+// far. In the nearest walk it is the nearest, written to found, and far is
+// where the ray has met something already; the walk takes the nearer child
+// of a branch first, and puts the other back with where it was entered, to
+// be dropped if a hit has come nearer by then. In the others it stops at
+// the first. No spheres and no conifers is a header of nought, and costs
+// the reading of it.
+static bool analytic_walk(World world, float3 at, float3 way, float near,
+                          float far, int leaving_sphere, int mode,
+                          thread Hit &found) {
+	int3 place = world.header->analytic.xyz;
+	float reach = far;
+	bool met = false;
+	for (int loose = 0; loose < place.y; loose++) {
+		if (analytic_leaf(world, world.tops[place.x + loose], at, way, near,
+		                  leaving_sphere, mode, reach, found)) {
+			if (mode != walk_nearest) {
+				return true;
+			}
+			met = true;
 		}
 	}
+	if (place.z == 0) {
+		return met;
+	}
+	int stack[tree_stack];
+	float entries[tree_stack];
+	int depth = 0;
+	float enter;
+	int root = place.x + place.y;
+	if (!box_entry(at, way, world.tops[root], reach, enter)) {
+		return met;
+	}
+	stack[depth] = root;
+	entries[depth++] = enter;
+	while (depth > 0) {
+		depth--;
+		if (entries[depth] > reach * box_widen) {
+			continue;
+		}
+		Node box = world.tops[stack[depth]];
+		if (box.info.y != 0) {
+			if (analytic_leaf(world, box, at, way, near, leaving_sphere,
+			                  mode, reach, found)) {
+				if (mode != walk_nearest) {
+					return true;
+				}
+				met = true;
+			}
+			continue;
+		}
+		int left = box.info.x, right = box.info.x + 1;
+		float left_enter, right_enter;
+		bool in_left = box_entry(at, way, world.tops[left], reach,
+		                         left_enter);
+		bool in_right = box_entry(at, way, world.tops[right], reach,
+		                          right_enter);
+		if (in_left && in_right && right_enter < left_enter) {
+			stack[depth] = left, entries[depth++] = left_enter;
+			stack[depth] = right, entries[depth++] = right_enter;
+		} else {
+			if (in_right) {
+				stack[depth] = right, entries[depth++] = right_enter;
+			}
+			if (in_left) {
+				stack[depth] = left, entries[depth++] = left_enter;
+			}
+		}
+	}
+	return met;
+}
+
+// first is the nearest thing a ray meets. come is how far, in metres, the
+// look had come before this ray began, which a sea's flat distance counts
+// from (sea_hit); a caller that does not know it passes nought.
+static Hit first(World world, float3 at, float3 way, float near,
+                 int leaving_sphere, float come) {
+	Hit found = meshes_hit(world, at, way, near, nowhere, false);
+	for (int index = 0; index < world.header->look.z; index++) {
+		Field field = world.fields[index];
+		float scale = field.origin.w;
+		float3 local_at = field_in(field, at);
+		float3 local_way = field_turned(field, way);
+		int taken;
+		float met = surface_hit(world, field, local_at, local_way,
+		                        near / scale, found.distance / scale,
+		                        come / scale, taken);
+		if (met < 0) {
+			continue;
+		}
+		float3 local = local_at + local_way * met;
+		if (is_sea(field)) {
+			// a sea's one normal is its optics' too, so its geometric
+			// normal is left nought, as arid.Sea has none apart
+			float3 sea_faces = sea_normal(world, field, local.x, local.z);
+			found = {met * scale, field.data.z,
+			         normalize(field_out(field, sea_faces)), float3(0),
+			         local, scale};
+			found.sea = index;
+			found.flat_side = taken;
+			continue;
+		}
+		float3 faces = field_normal(world, field, local.x, local.z);
+		float3 geometric = field_geometric_normal(world, field,
+		                                          local.x, local.z);
+		found = {met * scale, field.data.z,
+		         normalize(field_out(field, faces)), float3(0), local,
+		         scale};
+		found.geometric = normalize(field_out(field, geometric));
+	}
+	// the spheres and the conifers, by the analytic tree
+	analytic_walk(world, at, way, near, found.distance, leaving_sphere,
+	              walk_nearest, found);
 	return found;
 }
 
+static Hit first(World world, float3 at, float3 way, float near,
+                 int leaving_sphere) {
+	return first(world, at, way, near, leaving_sphere, 0);
+}
+
 static Hit first(World world, float3 at, float3 way, float near) {
-	return first(world, at, way, near, -1);
+	return first(world, at, way, near, -1, 0);
 }
 
 // Curved segments stop at their end; ordinary first keeps the RC's refinements.
@@ -1086,8 +1542,8 @@ static bool fields_block(World world, float3 at, float3 way, float far) {
 			continue;
 		}
 		float scale = field.origin.w;
-		if (field_hit(world, field, field_in(field, at),
-		              field_turned(field, way), 0, far / scale) >= 0) {
+		if (surface_hit(world, field, field_in(field, at),
+		                field_turned(field, way), 0, far / scale, 0) >= 0) {
 			return true;
 		}
 	}
@@ -1105,27 +1561,11 @@ static bool blocked(World world, float3 at, float3 way, float far,
 	if (fields_block(world, at, way, far)) {
 		return true;
 	}
-	for (int index = 0; index < world.header->counts.x; index++) {
-		Sphere sphere = world.spheres[index];
-		if (index == leaving_sphere &&
-		    dot(at - sphere.centre.xyz, way) > 0) {
-			continue;
-		}
-		if (sphere.info.y == 0 &&
-		    sphere_hit(at, way, sphere, 0, far) >= 0) {
-			return true;
-		}
-	}
-	for (int index = 0; index < world.header->more.w; index++) {
-		Tree tree = world.trees[index];
-		float scale = tree.origin.w;
-		float3 local_at = tree_in(tree, at);
-		float3 local_way = tree_turned(tree, way);
-		Hit grown = conifer_hit(local_at, local_way, tree, 0,
-		                        far / scale);
-		if (grown.distance >= 0) {
-			return true;
-		}
+	// the spheres not clear and the conifers, any of them, by the tree
+	Hit none = {far, -1, float3(0)};
+	if (analytic_walk(world, at, way, 0, far, leaving_sphere, walk_shadow,
+	                  none)) {
+		return true;
 	}
 	return meshes_hit(world, at, way, 0, far, true).material >= 0;
 }
@@ -1249,17 +1689,38 @@ static Reached lamp_light(Lamp lamp, float3 point, float3 seen) {
  return {in, distance - lamp.at.w, lamp.strength.xyz * falling};
 }
 
+// the lists of lamps (gpu/lamp_lists.go): the floods, then the cones, then
+// the beams, each lamp's index as a float, lying after the lamps' rows and
+// after the lamp tree and the lamps outside it. header->lamp_lists says
+// how many of each there are. lamp_list is where one list begins.
+constexpr constant int flood_list = 0;
+constexpr constant int cone_list = 1;
+constexpr constant int beam_list = 2;
+static device const float *lamp_list(World world, int which) {
+	int skipped = world.header->lamp_tree.x * lamp_tree_floats +
+	              world.header->lamp_tree.y;
+	device const float *first =
+		(device const float *)(world.lamps + world.header->counts.w) +
+		skipped;
+	if (which == flood_list) { return first; }
+	first += world.header->lamp_lists.x;
+	if (which == cone_list) { return first; }
+	return first + world.header->lamp_lists.y;
+}
+
 // flooded is the light the floods among the lamps give a surface facing
 // seen, or a bit of a medium a ray runs away from along seen: each lights
 // from everywhere at once, unshadowed, and is asked at every point, as the
-// tracer asks every lamp of a scene that has one.
+// tracer asks every lamp of a scene that has one. it walks the list of
+// floods the encoder wrote (gpu/lamp_lists.go), in the lamps' order, and
+// a world with no floods has no list to walk.
 static float3 flooded(World world, float3 seen) {
 	float3 sum = float3(beam_zero);
-	for (int index = whole_zero; index < world.header->counts.w; index++) {
-		Lamp lamp = world.lamps[index];
-		if (is_flood(lamp)) {
-			sum += lamp_light(lamp, float3(beam_zero), seen).light;
-		}
+	int floods = world.header->lamp_lists.x;
+	device const float *listed = lamp_list(world, flood_list);
+	for (int place = whole_zero; place < floods; place++) {
+		Lamp lamp = world.lamps[int(listed[place])];
+		sum += lamp_light(lamp, float3(beam_zero), seen).light;
 	}
 	return sum;
 }
@@ -1295,6 +1756,306 @@ static float place_share(float3 point) {
 	return float(stirred >> 40) / 16777216.0f;
 }
 
+// the lamp tree (gpu/lamp_tree.go): a world with more than lamps_every
+// lamps and more than that many that stand somewhere is given a tree of
+// those, which a point walks down to pick a lamp, as trace's lamptree.go
+// does. its nodes lie after the lamps' rows, lamp_tree_floats floats
+// each, root first, then the index of each lamp outside the tree as a
+// float. header->lamp_tree says how many of each; none is no tree.
+//
+// lamp_tree_floor is the least squared distance a node is weighed at, a
+// millimetre squared as trace's nearestSquare, so a point on a lamp does
+// not weigh it without end. lamp_tree_depth is more forks than any tree
+// of the lamps of a world has, which a walk is held to. lamp_share_most
+// is the float below one, which a walk's share is held to as
+// strategies.Walk holds its own, and lamp_tree_huge a sum of worths that
+// is as good as infinite; fast math has no reliable infinity to test.
+//
+// a step through a medium splits the tree's lamps into at most
+// lamp_split_most nodes (gpu/structure.go lampSplitMost), a node being
+// split where it is wider across than lamp_split_square's root times the
+// distance to it. lamp_share_step moves a point's start on from one node
+// of the cut to the next, the golden ratio's fraction.
+constexpr constant float lamp_tree_floor = 1e-6f;
+constexpr constant int lamp_tree_depth = 64;
+constexpr constant float lamp_share_most = 0.99999994f;
+constexpr constant float lamp_tree_huge = 3.0e38f;
+constexpr constant float lamp_share_step = 0.61803399f;
+
+// lamp_tree_nodes is where the lamp tree begins: past the lamps' rows
+static device const float *lamp_tree_nodes(World world) {
+	return (device const float *)(world.lamps + world.header->counts.w);
+}
+
+// lamp_tree_worth is strategies.LightNode.Worth with trace's weighing
+// and no facing: the node's power over the squared distance from the
+// point to its box, held up by lamp_tree_floor, and for a point inside
+// the box the distance of half its diagonal. a node is the box's low
+// corner and the power, then the box's high corner and the children.
+static float lamp_tree_worth(device const float *node, float3 point) {
+	float3 low = float3(node[0], node[1], node[2]);
+	float3 high = float3(node[4], node[5], node[6]);
+	float3 gap = max(max(low - point, point - high), float3(0));
+	float square = dot(gap, gap);
+	if (square == 0) {
+		float3 half_across = (high - low) * 0.5f;
+		square = dot(half_across, half_across);
+	}
+	return node[3] / max(square, lamp_tree_floor);
+}
+
+// lamp_tree_walk is strategies.WalkFrom and strategies.WalkByPower: the
+// lamp a walk down the tree from the node from takes, share choosing the
+// way at each fork, and in chance the chance of taking it. a walk by
+// nearness weighs each half by lamp_tree_worth; a walk without it by the
+// half's power alone, so that a lamp's chance is its power over its
+// node's, wherever the point is. minus one and a chance of nought where
+// nothing could light the point.
+static int lamp_tree_walk(device const float *tree, int from, float3 point,
+                          float share, bool nearness,
+                          thread float &chance) {
+	int at = from;
+	chance = 1;
+	for (int depth = 0; depth < lamp_tree_depth; depth++) {
+		device const float *node = tree + at * lamp_tree_floats;
+		int lamp = int(node[9]);
+		if (lamp >= 0) { return lamp; }
+		int left = int(node[7]), right = int(node[8]);
+		device const float *left_half = tree + left * lamp_tree_floats;
+		device const float *right_half = tree + right * lamp_tree_floats;
+		float to_left = nearness ? lamp_tree_worth(left_half, point) :
+		                           left_half[3];
+		float to_right = nearness ? lamp_tree_worth(right_half, point) :
+		                            right_half[3];
+		float both = to_left + to_right;
+		if (!(both > 0) || !(both < lamp_tree_huge)) {
+			chance = 0;
+			return -1;
+		}
+		float leftward = to_left / both;
+		if (share < leftward) {
+			share = share / leftward;
+			chance *= leftward;
+			at = left;
+		} else {
+			share = (share - leftward) / (1 - leftward);
+			chance *= 1 - leftward;
+			at = right;
+		}
+		share = clamp(share, 0.0f, lamp_share_most);
+	}
+	chance = 0;
+	return -1;
+}
+
+// lamp_tree_doubt is strategies's doubt: minus one for a node whose worth
+// can be trusted to share a walk by (LightNode.Reliable: the point outside
+// its box, and the box no wider across than lamp_split_spread times the
+// distance to it; a leaf always), and for one that cannot, the most its
+// lamps can light the point, its power over the squared distance to its
+// box held up by lamp_tree_floor. lamp_split_square is the spread squared.
+static float lamp_tree_doubt(device const float *node, float3 point) {
+	if (int(node[9]) >= 0) { return -1; }
+	float3 low = float3(node[0], node[1], node[2]);
+	float3 high = float3(node[4], node[5], node[6]);
+	float3 gap = max(max(low - point, point - high), float3(0));
+	float3 across = high - low;
+	float square = dot(gap, gap);
+	if (dot(across, across) <= lamp_split_square * square) { return -1; }
+	return node[3] / max(square, lamp_tree_floor);
+}
+
+// lamp_tree_cut is strategies.Cut: the nodes the tree is cut into for a
+// point, after Conty Estevez and Kulla, "Importance sampling of many
+// lights with adaptive tree splitting" (2018). a node in doubt is split
+// into its halves, the one that could light the point most first, until
+// none is in doubt or lamp_split_most nodes are held. their number is
+// returned and the nodes are put in cut, which holds lamp_split_most.
+static int lamp_tree_cut(device const float *tree, float3 point,
+                         thread int *cut) {
+	float doubts[lamp_split_most];
+	int made = 1;
+	cut[0] = 0;
+	doubts[0] = lamp_tree_doubt(tree, point);
+	while (made < lamp_split_most) {
+		int worst = 0;
+		for (int at = 1; at < made; at++) {
+			if (doubts[at] > doubts[worst]) { worst = at; }
+		}
+		if (!(doubts[worst] > 0)) { break; }
+		device const float *node = tree + cut[worst] * lamp_tree_floats;
+		int left = int(node[7]), right = int(node[8]);
+		cut[worst] = left;
+		doubts[worst] = lamp_tree_doubt(tree + left * lamp_tree_floats, point);
+		cut[made] = right;
+		doubts[made] = lamp_tree_doubt(tree + right * lamp_tree_floats, point);
+		made++;
+	}
+	return made;
+}
+
+// lamp_worth is what a lamp is worth a point, to pick it by: its light's
+// luminance, times how squarely it lands for a surface facing normal; a
+// normal of nought takes light every way, as a bit of a volume does.
+static float lamp_worth(Reached reached, bool facing, float3 normal) {
+	float square = facing ? max(0.0f, dot(normal, reached.toward)) : 1;
+	return luminance(reached.light) * square;
+}
+
+// ask_add puts a lamp among a point's asks, unless they are full. they
+// are lamps_every: a surface takes lamps_asked outside the tree and as
+// many from it, and a step the distant lamps, lamps_marched outside the
+// tree and lamp_split_most from it. the lamps that light from everywhere
+// are kept out of a world of this size, and a world with more distant
+// lamps than a step has room for is refused (lampsDistantMost), so the
+// asks are never full in a world the encoder has taken.
+static void ask_add(thread Ask *asks, thread int &made, int lamp,
+                    float counts) {
+	if (made < lamps_every) {
+		asks[made++] = {lamp, counts};
+	}
+}
+
+// asked_cut is trace's splitFrom: the tree's lamps cut into at most
+// lamp_split_most nodes by lamp_tree_cut, and one lamp taken from each,
+// counting one over its chance among the node's lamps. a node the point
+// can trust the worth of (strategies.LightNode.Reliable) is walked by the
+// power of its halves, so that no lamp taken weighs more than the square
+// of one plus the spread times its node's light; one still in doubt, which
+// only a full cut leaves, by the point's worth of each half. the
+// nodes hold every lamp once, so the sum is the same on average. each
+// node's share is the start moved on by lamp_share_step a node, so that
+// the shares of one point's nodes are not alike.
+static void asked_cut(World world, device const float *tree, float3 point,
+                      float start, thread Ask *asks, thread int &made) {
+	int cut[lamp_split_most];
+	int held = lamp_tree_cut(tree, point, cut);
+	for (int each = 0; each < held; each++) {
+		float share = fract(start + float(each) * lamp_share_step);
+		bool trusted = lamp_tree_doubt(tree + cut[each] * lamp_tree_floats,
+		                               point) < 0;
+		float chance;
+		int taken = lamp_tree_walk(tree, cut[each], point, share, !trusted,
+		                           chance);
+		if (taken < 0 || !(chance > 0)) {
+			continue;
+		}
+		Reached reached = lamp_light(world.lamps[taken], point);
+		SLAYER_WORK(1, 1)
+		if (all(reached.light == 0)) {
+			continue;
+		}
+		ask_add(asks, made, taken, 1 / chance);
+	}
+}
+
+// asked_treed is trace's askedTreed: the lamps outside the tree are asked
+// as before, every one that lights from everywhere and sends light, and
+// of the rest that send the point light all of them when they are wanted
+// or fewer and wanted of them by worth when more; then wanted walks
+// down the tree, their shares spread evenly from the start the point's
+// place decides, each lamp taken counting one over the chance of its walk
+// and the walks' number, and a lamp taken twice counting twice. a lamp
+// that sends the point no light adds none.
+//
+// with splits above nought, as at a step through a medium, a distant lamp
+// is asked every time, counting one, and is not among the rest picked by
+// worth, and the tree's lamps are not walked to from its root but cut
+// into at most splits nodes with a lamp taken from each (asked_cut).
+static int asked_treed(World world, float3 point, float3 normal, int wanted,
+                       int splits, thread Ask *asks) {
+	device const float *tree = lamp_tree_nodes(world);
+	int nodes = world.header->lamp_tree.x, outside = world.header->lamp_tree.y;
+	device const float *others = tree + nodes * lamp_tree_floats;
+	bool facing = any(normal != 0);
+	float start = place_share(point);
+	int made = 0, rest = 0;
+	float total = 0;
+	for (int place = 0; place < outside; place++) {
+		int index = int(others[place]);
+		Reached reached = lamp_light(world.lamps[index], point);
+		SLAYER_WORK(1, 1)
+		if (all(reached.toward == 0)) {
+			if (any(reached.light != 0)) {
+				ask_add(asks, made, index, 1);
+			}
+			continue;
+		}
+		if (splits > 0 && reached.far >= nowhere) {
+			if (any(reached.light != 0)) {
+				ask_add(asks, made, index, 1);
+			}
+			continue;
+		}
+		float worth = lamp_worth(reached, facing, normal);
+		if (worth > 0) {
+			rest++;
+			total += worth;
+		}
+	}
+	if (rest > 0) {
+		float step = total / wanted;
+		float next = start * step, laid = 0;
+		int taken = 0;
+		for (int place = 0; place < outside; place++) {
+			int index = int(others[place]);
+			Reached reached = lamp_light(world.lamps[index], point);
+			SLAYER_WORK(1, 1)
+			bool distant = splits > 0 && reached.far >= nowhere;
+			float worth = all(reached.toward == 0) || distant ? 0 :
+			              lamp_worth(reached, facing, normal);
+			if (worth <= 0) {
+				continue;
+			}
+			if (rest <= wanted) {
+				ask_add(asks, made, index, 1);
+				continue;
+			}
+			laid += worth;
+			int picks = 0;
+			while (next < laid && taken < wanted) {
+				picks++, taken++;
+				next += step;
+			}
+			if (picks > 0) {
+				ask_add(asks, made, index, float(picks) * step / worth);
+			}
+		}
+	}
+	if (splits > 0) {
+		asked_cut(world, tree, point, start, asks, made);
+		return made;
+	}
+	int first = made;
+	for (int walk = 0; walk < wanted; walk++) {
+		float share = (start + float(walk)) / float(wanted);
+		float chance;
+		int taken = lamp_tree_walk(tree, 0, point, share, true, chance);
+		if (taken < 0 || !(chance > 0)) {
+			continue;
+		}
+		float counts = 1 / (chance * float(wanted));
+		bool again = false;
+		for (int k = first; k < made; k++) {
+			if (asks[k].lamp == taken) {
+				asks[k].counts += counts;
+				again = true;
+				break;
+			}
+		}
+		if (again) {
+			continue;
+		}
+		Reached reached = lamp_light(world.lamps[taken], point);
+		SLAYER_WORK(1, 1)
+		if (all(reached.light == 0)) {
+			continue;
+		}
+		ask_add(asks, made, taken, counts);
+	}
+	return made;
+}
+
 // asked is trace's asked: the lamps a point asks, each with how many
 // times over it counts, into asks, which holds lamps_every. with
 // lamps_every lamps or fewer, every lamp that sends light here, once.
@@ -1304,13 +2065,15 @@ static float place_share(float3 point) {
 // nothing, and trace's shadowed takes no shadow for it either. a lamp
 // with no way, a flood, is always asked, as trace asks it.
 //
-// with more, lamps_asked picks spread evenly along the lamps' worths
-// laid end to end, from a start the point's place decides, each pick
-// counting its share of all the worth over its lamp's own. a lamp is
-// worth its light's luminance, times how squarely it lands for a
-// surface facing normal; a normal of nought takes light every way, as a
-// bit of a volume does.
-static int asked(World world, float3 point, float3 normal,
+// with more, wanted picks (lamps_asked at a surface, lamps_marched at a
+// step through a medium, as trace's asked and marched) are taken. with a
+// lamp tree, from it by its walks (asked_treed). without one, spread
+// evenly along the lamps' worths laid end to end, from a start the
+// point's place decides, each pick counting its share of all the worth
+// over its lamp's own. a lamp is worth its light's luminance, times how
+// squarely it lands for a surface facing normal; a normal of nought takes
+// light every way, as a bit of a volume does.
+static int asked(World world, float3 point, float3 normal, int wanted,
                  thread Ask *asks) {
 	int lamps = world.header->counts.w;
 	if (lamps <= lamps_every) {
@@ -1325,6 +2088,9 @@ static int asked(World world, float3 point, float3 normal,
 		}
 		return kept;
 	}
+	if (world.header->lamp_tree.x > 0) {
+		return asked_treed(world, point, normal, wanted, 0, asks);
+	}
 	bool facing = any(normal != 0);
 	float total = 0;
 	for (int index = 0; index < lamps; index++) {
@@ -1336,10 +2102,10 @@ static int asked(World world, float3 point, float3 normal,
 	if (total <= 0) {
 		return 0;
 	}
-	float step = total / lamps_asked;
+	float step = total / wanted;
 	float next = place_share(point) * step, laid = 0;
 	int taken = 0, made = 0;
-	for (int index = 0; index < lamps && taken < lamps_asked; index++) {
+	for (int index = 0; index < lamps && taken < wanted; index++) {
 		Reached reached = lamp_light(world.lamps[index], point);
 		SLAYER_WORK(1, 1)
 		float square = facing ? max(0.0f, dot(normal, reached.toward)) : 1;
@@ -1349,7 +2115,7 @@ static int asked(World world, float3 point, float3 normal,
 		}
 		laid += worth;
 		int picks = 0;
-		while (next < laid && taken < lamps_asked) {
+		while (next < laid && taken < wanted) {
 			picks++, taken++;
 			next += step;
 		}
@@ -1358,6 +2124,24 @@ static int asked(World world, float3 point, float3 normal,
 		}
 	}
 	return made;
+}
+
+// asked_marched is trace's marched: the lamps a step through a medium
+// asks, as asked takes lamps_marched of them, except that a world with a
+// lamp tree takes every distant lamp, a sun, at every step and cuts the
+// tree's lamps into at most lamp_split_most nodes with a lamp from each,
+// where asked would walk from the root (asked_treed). a step then asks at
+// most the distant lamps, lamps_marched of the rest outside the tree, and
+// lamp_split_most of the tree's, which asks, holding lamps_every, must
+// have room for: the encoder refuses a world with more distant lamps than
+// that leaves (lampsDistantMost in gpu/structure.go).
+static int asked_marched(World world, float3 point, thread Ask *asks) {
+	if (world.header->counts.w > lamps_every &&
+	    world.header->lamp_tree.x > 0) {
+		return asked_treed(world, point, float3(0), lamps_marched,
+		                   lamp_split_most, asks);
+	}
+	return asked(world, point, float3(0), lamps_marched, asks);
 }
 
 // inside is a world point in a volume's own space, as maths.Subspace.In
@@ -1459,6 +2243,23 @@ static float3 boxed_at(World world, Volume volume, int first, int each,
 	                 mix(corners[1][1][0], corners[1][1][1], part.x),
 	                 part.y);
 	return mix(near, far, part.z);
+}
+
+// glow_at is the world's glow at a point of the world, as skyglow's
+// Field.Mean reads it: between the eight cell middles round it, and held
+// at the value at the edge beyond them. Nought with no glow.
+static float3 glow_at(World world, float3 point) {
+	int4 grid = world.header->glow_grid;
+	if (grid.w < 0) { return float3(0); }
+	Volume lattice = {};
+	lattice.low = world.header->glow_low;
+	lattice.high = world.header->glow_high;
+	lattice.grid = grid;
+	float3 held = clamp(point, lattice.low.xyz, lattice.high.xyz);
+	int3 low;
+	float3 part;
+	boxed_part(lattice, held, low, part);
+	return boxed_at(world, lattice, grid.w, 3, low, part);
 }
 
 // shell_density shares medium.ShellWeather's radial parabola and prescribed
@@ -1613,6 +2414,26 @@ static int spans(Volume volume, float3 at, float3 way, float near, float far,
 	return count;
 }
 
+// volume_missed is whether the segment of a ray from a point, along toward
+// as far as far, misses the box in the world the volume lies in (gpu/
+// volume_reach.go), as trace's meets does: it then has no span in the
+// volume, and no march to make. A volume with no box (nought in the w of
+// world_low) is missed by no ray. The box is grown, so a ray on the
+// shape's face is not missed; a number that is not one is not a miss.
+static bool volume_missed(Volume volume, float3 point, float3 toward,
+                          float far) {
+	if (volume.world_low.w == 0) { return false; }
+	float2 across = slab(point.x, toward.x, volume.world_low.x,
+	                     volume.world_high.x);
+	float2 up = slab(point.y, toward.y, volume.world_low.y,
+	                 volume.world_high.y);
+	float2 deep = slab(point.z, toward.z, volume.world_low.z,
+	                   volume.world_high.z);
+	float enter = max(max(across.x, up.x), max(deep.x, 0.0f));
+	float leave = min(min(across.y, up.y), min(deep.y, far));
+	return enter > leave;
+}
+
 // clear is how much of a lamp far along toward reaches a point through
 // every volume, each channel: a short march toward the lamp that stops
 // at it, since what lies beyond it is behind the light and takes none;
@@ -1625,6 +2446,7 @@ static float3 clear(World world, float3 point, float3 toward, float far) {
 	int shades = world.header->more.z;
 	for (int index = 0; index < world.header->more.x; index++) {
 		Volume volume = world.volumes[index];
+		if (volume_missed(volume, point, toward, far)) { continue; }
 		float3 at = inside(volume, point), way = turned(volume, toward);
 		float thick = 0;
 		float2 parts[2];
@@ -1813,13 +2635,18 @@ static float3 scattered_direct(World world, Volume volume, float3 point,
 	if (all(colour == float3(0))) { return sum; }
 	float phase = world.header->environment.x > 0 ? 1/(4*M_PI_F) : world.header->tuning.z;
 	if (sources != beam_sources) {
+		// the air the world's glow is of scatters it, its albedo times
+		// the mean radiance there, as trace's scattered adds it
+		if (volume.air.z == glow_on) {
+			sum += colour * glow_at(world, point);
+		}
 		if (world.header->environment.x > 0) {
 			sum += colour * volume_sky_at(world, point);
 		}
 		sum += colour * flooded(world, -way) * phase;
 	}
 	Ask asks[lamps_every];
-	int count = asked(world, point, float3(0), asks);
+	int count = asked_marched(world, point, asks);
 	for (int index = 0; index < count; index++) {
 		Lamp lamp = world.lamps[asks[index].lamp];
 		if (!selected_lamp(lamp, sources)) { continue; }
@@ -1931,15 +2758,112 @@ static float field_gain(World world,Volume volume,float3 point,float3 way) {
  return shift*shift*shift;
 }
 
+// most_beam_intervals is how many stretches of a ray a BeamMarch keeps
+// apart: sixteen, one more than the fifteen beams of the widest fan a set
+// has drawn, so such a fan keeps each beam's stretch to itself. Past it
+// the last stretch holds the union of the rest.
+constexpr constant int most_beam_intervals = 16;
+
+// beam_parallel is how small the square of the sine of the angle between a
+// ray and a beam's axis is before the ray is taken as along the axis: one
+// in a million, an angle of a thousandth of a radian, below which the
+// quadratic's divisor is too small to divide by with float arithmetic.
+constexpr constant float beam_parallel = 1e-6f;
+
 // BeamMarch is this ray's conservative refinement region. It changes only
 // sampling effort: light outside the region still gets ordinary integration.
-struct BeamMarch { float enter, leave, step; };
-static BeamMarch beam_march(World world, float3 at, float3 way, float far) {
- BeamMarch result = {far, beam_zero, beam_zero};
- if (world.header->look.y <= beam_zero) { return result; }
- for (int index = beam_zero; index < world.header->counts.w; index++) {
-  Lamp lamp = world.lamps[index];
-  if (lamp.extent.y <= beam_zero) { continue; }
+// Asked for by scrooge, it is one stretch of the ray for each beam the ray
+// meets, each with its beam's step, and the last stretch is the union of
+// any past most_beam_intervals; otherwise it is the single union of the
+// beams' boxes, in the first stretch. count is how many stretches it holds.
+struct BeamMarch {
+ float enter[most_beam_intervals];
+ float leave[most_beam_intervals];
+ float step[most_beam_intervals];
+ int count;
+};
+
+// beam_add keeps a stretch of the ray and its step: in the next free
+// place, or, with none free, in the last, as the union with what it holds.
+static void beam_add(thread BeamMarch &result, float enter, float leave,
+                     float step) {
+ if (result.count < most_beam_intervals) {
+  int place = result.count;
+  result.enter[place] = enter;
+  result.leave[place] = leave;
+  result.step[place] = step;
+  result.count++;
+  return;
+ }
+ int last = most_beam_intervals - beam_one;
+ result.enter[last] = min(result.enter[last], enter);
+ result.leave[last] = max(result.leave[last], leave);
+ result.step[last] = min(result.step[last], step);
+}
+
+// beam_cylinder is the part of the ray inside a beam's bounding cylinder:
+// the axis from the lamp to its end, as wide as margin, capped at both
+// ends, the caps a margin further out as the box is. It is the distances
+// along the ray, from nought to far, or leave not past enter for none.
+static float2 beam_cylinder(Lamp lamp, float3 at, float3 way, float far,
+                            float margin) {
+ float3 axis = lamp.toward.xyz;
+ float3 from = at - lamp.at.xyz;
+ float2 caps = slab(dot(from, axis), dot(way, axis), -margin,
+                    lamp.extent.w + margin);
+ float3 across = from - axis * dot(from, axis);
+ float3 aside = way - axis * dot(way, axis);
+ float slant = dot(aside, aside);
+ float2 inside_it = float2(beam_zero, far);
+ if (slant <= beam_parallel) {
+  // along the axis: the ray strays from it by no more than the sine of
+  // its angle times its length, so a ray this close to the axis at its
+  // start, widened by that, is inside the cylinder the whole way.
+  float reach = margin + sqrt(slant) * far;
+  if (dot(across, across) > reach * reach) { return float2(far, beam_zero); }
+ } else {
+  float half_b = dot(across, aside);
+  float cut = half_b * half_b - slant * (dot(across, across) -
+                                        margin * margin);
+  if (cut < beam_zero) { return float2(far, beam_zero); }
+  float root = sqrt(cut);
+  inside_it = float2(max(inside_it.x, (-half_b - root) / slant),
+                     min(inside_it.y, (-half_b + root) / slant));
+ }
+ return float2(max(inside_it.x, caps.x), min(inside_it.y, caps.y));
+}
+
+// beam_march_apart is beam_march for each beam by itself: the ray's
+// stretch inside the beam's cylinder, with the beam's step.
+static BeamMarch beam_march_apart(World world, float3 at, float3 way,
+                                  float far) {
+ BeamMarch result;
+ result.count = whole_zero;
+ int beams = world.header->lamp_lists.z;
+ device const float *listed = lamp_list(world, beam_list);
+ for (int place = whole_zero; place < beams; place++) {
+  Lamp lamp = world.lamps[int(listed[place])];
+  float margin = (lamp.extent.y + lamp.extent.z * lamp.extent.w) *
+                 beam_bound_radii;
+  float2 inside_it = beam_cylinder(lamp, at, way, far, margin);
+  if (inside_it.y <= inside_it.x) { continue; }
+  beam_add(result, inside_it.x, inside_it.y,
+           lamp.extent.y / beam_radial_samples);
+ }
+ return result;
+}
+
+// beam_march_boxes is the region as one stretch from the nearest entry to
+// the furthest exit over every beam's axis-aligned box, at the smallest
+// beam's step.
+static BeamMarch beam_march_boxes(World world, float3 at, float3 way,
+                                  float far) {
+ BeamMarch result;
+ result.count = whole_zero;
+ int beams = world.header->lamp_lists.z;
+ device const float *listed = lamp_list(world, beam_list);
+ for (int place = beam_zero; place < beams; place++) {
+  Lamp lamp = world.lamps[int(listed[place])];
   float3 end = lamp.at.xyz + lamp.toward.xyz * lamp.extent.w;
   float margin = (lamp.extent.y + lamp.extent.z * lamp.extent.w) *
                  beam_bound_radii;
@@ -1952,21 +2876,46 @@ static BeamMarch beam_march(World world, float3 at, float3 way, float far) {
   float leave = min(far, min(x.y, min(y.y, z.y)));
   if (leave <= enter) { continue; }
   float step = lamp.extent.y / beam_radial_samples;
-  if (result.step == beam_zero) {
-   result = {enter, leave, step};
+  if (result.count == whole_zero) {
+   beam_add(result, enter, leave, step);
   } else {
-   result.enter = min(result.enter, enter);
-   result.leave = max(result.leave, leave);
-   result.step = min(result.step, step);
+   result.enter[whole_zero] = min(result.enter[whole_zero], enter);
+   result.leave[whole_zero] = max(result.leave[whole_zero], leave);
+   result.step[whole_zero] = min(result.step[whole_zero], step);
   }
  }
  return result;
 }
 
+// beam_march is the region the ray's march is refined in: one stretch for
+// each beam when scrooge is asked (the header's look.w is one), else the
+// union of the beams' boxes.
+static BeamMarch beam_march(World world, float3 at, float3 way, float far) {
+ if (world.header->look.y <= beam_zero) {
+  BeamMarch none;
+  none.count = whole_zero;
+  return none;
+ }
+ if (world.header->look.w == whole_one) {
+  return beam_march_apart(world, at, way, far);
+ }
+ return beam_march_boxes(world, at, way, far);
+}
+
+// beam_splits is how many steps a cell of a crossing, from enter to leave,
+// is cut into: by the smallest step of the stretches it overlaps, and one
+// when it overlaps none.
 static int beam_splits(BeamMarch refine, float enter, float leave) {
- if (refine.step <= beam_zero || leave <= refine.enter ||
-     enter >= refine.leave) { return int(beam_one); }
- return int(clamp(ceil((leave-enter)/refine.step), beam_one,
+ float step = beam_zero;
+ for (int place = whole_zero; place < refine.count; place++) {
+  if (leave <= refine.enter[place] || enter >= refine.leave[place]) {
+   continue;
+  }
+  step = step == beam_zero ? refine.step[place] :
+         min(step, refine.step[place]);
+ }
+ if (step <= beam_zero) { return int(beam_one); }
+ return int(clamp(ceil((leave-enter)/step), beam_one,
                   float(beam_max_splits)));
 }
 
@@ -1993,7 +2942,7 @@ static float3 gas_gathered(World world, Volume volume, float3 point,
 	float3 sum = sources == beam_sources ? float3(0) :
 	             flooded(world, -way) * world.header->tuning.z;
 	Ask asks[lamps_every];
-	int count = asked(world, point, float3(beam_zero), asks);
+	int count = asked_marched(world, point, asks);
 	for (int index = whole_zero; index < count; index++) {
 		Lamp lamp = world.lamps[asks[index].lamp];
 		if (!selected_lamp(lamp, sources)) { continue; }
@@ -2253,19 +3202,10 @@ static bool ocean_moon_blocked(World world, float3 point, float3 way, float far)
 		int medium=world.materials[field.data.z].info.w;
 		if (medium>=0 && world.clear_media[medium].moon_light.w>0) continue;
 		if (field.data.w!=0) continue;
-		if (field_hit(world,field,field_in(field,point),field_turned(field,way),0,far/field.origin.w)>=0) return true;
+		if (surface_hit(world,field,field_in(field,point),field_turned(field,way),0,far/field.origin.w,0)>=0) return true;
 	}
-	for (int index=0; index<world.header->counts.x; index++) {
-		Sphere sphere=world.spheres[index];
-		int medium=world.materials[sphere.info.x].info.w;
-		if (medium>=0 && world.clear_media[medium].moon_light.w>0) continue;
-		if (sphere.info.y==0 && sphere_hit(point,way,sphere,0,far)>=0) return true;
-	}
-	for (int index=0; index<world.header->more.w; index++) {
-		Tree tree=world.trees[index];
-		Hit hit=conifer_hit(tree_in(tree,point),tree_turned(tree,way),tree,0,far/tree.origin.w);
-		if (hit.distance>=0) return true;
-	}
+	Hit none={far,-1,float3(0)};
+	if (analytic_walk(world,point,way,0,far,-1,walk_moonlit,none)) return true;
 	return meshes_hit(world,point,way,0,far,true).material>=0;
 }
 
@@ -2311,7 +3251,7 @@ static float3 falling(World world, float3 point, float3 normal,
 	sum += flooded(world, normal);
 	float3 from = lifted(world, point, normal);
 	Ask asks[lamps_every];
-	int count = asked(world, point, normal, asks);
+	int count = asked(world, point, normal, lamps_asked, asks);
 	for (int index = 0; index < count; index++) {
 		Lamp lamp = world.lamps[asks[index].lamp];
 		Reached reached = lamp_light(lamp, point);
@@ -2565,14 +3505,45 @@ static float3 reflects(Material made, float cosine) {
 	return share;
 }
 
-// crinkled is thing.Crinkle.Crinkled: a wrinkled surface's normal at a
-// point, seen along look, tilted against the slope of three octaves of
-// noise read a tenth of a wrinkle apart; left as it was where the tilt
-// would turn the face from the eye.
+// detail_shown is texture.Detail: how much of detail a feature wide a
+// pixel a footprint wide at the surface can show, both in metres. A pixel
+// half a feature wide or less shows it all, one a whole feature wide or
+// more shows none, and between the two it fades. A footprint or a feature
+// that is not over nought shows all of it.
+static float detail_shown(float footprint, float feature) {
+	if (!(footprint > 0) || !(feature > 0)) {
+		return 1;
+	}
+	float whole = feature / 2;
+	return 1 - clamp((footprint - whole) / (feature - whole), 0.0f, 1.0f);
+}
+
+// pixel_at is how wide a pixel of the finished picture is, in metres,
+// where a look has come away metres from the lens: twice the lens's
+// half-width over the picture's width in samples (lens.z) is the angle
+// between two samples' middles, times the samples along a pixel's side
+// (exposure.z, one at least), times the way come.
+static float pixel_at(World world, float away) {
+	float4 lens = world.header->lens;
+	float side = float(max(world.header->exposure.z, 1));
+	return away * 2 * lens.x * side / lens.z;
+}
+
+// crinkled is thing.Crinkle.CrinkledWithin: a wrinkled surface's normal
+// at a point, seen along look by a pixel width metres across there,
+// tilted against the slope of three octaves of noise read a tenth of a
+// wrinkle apart. Wrinkles finer than the pixel cannot be seen as wrinkles
+// and would only glitter, so their tilt fades with the pixel's width to
+// none. The normal is left as it was where the tilt would turn the face
+// from the eye.
 static float3 crinkled(Material made, float3 point, float3 normal,
-                       float3 look) {
+                       float3 look, float width) {
 	float size = made.crinkle.x, slope = made.crinkle.y;
 	if (!(size > 0) || !(slope > 0)) {
+		return normal;
+	}
+	slope *= detail_shown(width, size);
+	if (!(slope > 0)) {
 		return normal;
 	}
 	float3 at = point / size;
@@ -2660,22 +3631,80 @@ static float microfacet(float facing, float lit, float viewed, float alpha) {
 	return faces * smith(lit, a2) * smith(viewed, a2) / (4 * viewed);
 }
 
+// The coefficients of Abramowitz and Stegun's 7.1.26, erf(x) = 1 - (a1 t +
+// a2 t^2 + a3 t^3 + a4 t^4 + a5 t^5) exp(-x^2), t = 1 / (1 + p x), for x at
+// or above nought, within 1.5e-7 (Handbook of Mathematical Functions,
+// 1964, p. 299). Metal has no erfc.
+constexpr constant float erfc_p = 0.3275911f;
+constexpr constant float erfc_a1 = 0.254829592f;
+constexpr constant float erfc_a2 = -0.284496736f;
+constexpr constant float erfc_a3 = 1.421413741f;
+constexpr constant float erfc_a4 = -1.453152027f;
+constexpr constant float erfc_a5 = 1.061405429f;
+
+// erfc_above is the complementary error function at a number at or above
+// nought, by Abramowitz and Stegun's 7.1.26.
+static float erfc_above(float x) {
+	float t = 1 / (1 + erfc_p * x);
+	float series = t * (erfc_a1 + t * (erfc_a2 + t * (erfc_a3 +
+	               t * (erfc_a4 + t * erfc_a5))));
+	return series * exp(-x * x);
+}
+
+// beckmann_smith is thing's beckmannSmith: the share of a Beckmann
+// surface's tiny faces a way of that cosine sees unshadowed, 1 / (1 +
+// Lambda), Lambda = (exp(-a^2) / (a sqrt(pi)) - erfc(a)) / 2.
+static float beckmann_smith(float cosine, float slopes) {
+	if (cosine >= 1) {
+		return 1;
+	}
+	float a = cosine / sqrt((1 - cosine * cosine) * slopes);
+	float hidden = (exp(-a * a) * M_2_SQRTPI_F / (2 * a) -
+	                erfc_above(a)) / 2;
+	return 1 / (1 + hidden);
+}
+
+// beckmann is thing.Beckmann: the highlight of tiny faces whose slopes
+// are Gaussian with mean square slopes, as the sea's are to first order,
+// per unit of irradiance, before fresnel's share.
+static float beckmann(float facing, float lit, float viewed, float slopes) {
+	if (!(facing > 0 && lit > 0 && viewed > 0 && slopes > 0)) {
+		return 0;
+	}
+	float square = facing * facing;
+	float tangent = (1 - square) / square;
+	float faces = exp(-tangent / slopes) /
+	              (M_PI_F * slopes * square * square);
+	return faces * beckmann_smith(lit, slopes) *
+	       beckmann_smith(viewed, slopes) / (4 * viewed);
+}
+
+// highlight is trace's highlight: Beckmann's lobe for a material's slope
+// variance where it has one, and otherwise GGX's, as wide as its satin, at
+// most one, squared.
+static float highlight(Material made, float facing, float lit,
+                       float viewed) {
+	if (made.glint.x > 0) {
+		return beckmann(facing, lit, viewed, made.glint.x);
+	}
+	float satin = min(made.mirror.w, 1.0f);
+	return microfacet(facing, lit, viewed, satin * satin);
+}
+
 // glinted is trace's glint: the highlights a surface's lamps leave on
 // it, seen along look, each lamp's light that reaches it by the lobe of
-// its satin and the share of each colour it mirrors at the half way.
-// not the surface's colour.
+// its satin or its slope variance and the share of each colour it
+// mirrors at the half way. not the surface's colour.
 static float3 glinted(World world, float3 point, float3 normal, float3 look,
                       Material made, int leaving_sphere) {
-	float satin = min(made.mirror.w, 1.0f);
 	float viewed = dot(normal, look);
-	if (!(satin > 0) || !(viewed > 0)) {
+	if (!(made.mirror.w > 0 || made.glint.x > 0) || !(viewed > 0)) {
 		return float3(0);
 	}
-	float alpha = satin * satin;
 	float3 sum = float3(0);
 	float3 from = lifted(world, point, normal);
 	Ask asks[lamps_every];
-	int count = asked(world, point, normal, asks);
+	int count = asked(world, point, normal, lamps_asked, asks);
 	for (int index = 0; index < count; index++) {
 		Lamp lamp = world.lamps[asks[index].lamp];
 		Reached reached = lamp_light(lamp, point);
@@ -2693,7 +3722,7 @@ static float3 glinted(World world, float3 point, float3 normal, float3 look,
 			continue;
 		}
 		float3 half_way = normalize(reached.toward + look);
-		float lobe = microfacet(dot(normal, half_way), square, viewed, alpha);
+		float lobe = highlight(made, dot(normal, half_way), square, viewed);
 		if (!(lobe > 0)) {
 			continue;
 		}
@@ -2843,6 +3872,8 @@ static float3 clear_single_scatter(World world, Held active, float3 at,
 	float3 scatter = medium.scatter_phase.xyz;
 	float asymmetry = medium.scatter_phase.w;
 	float3 result = float3(0);
+	int cones = world.header->lamp_lists.y;
+	device const float *listed = lamp_list(world, cone_list);
 	for (int step = 0; step < steps; step++) {
 		float begin = float(step) * cell;
 		float3 point = at + direction * (float(step) + 0.5f) * cell_parameter;
@@ -2852,11 +3883,10 @@ static float3 clear_single_scatter(World world, Held active, float3 at,
 			incident = moon.light * gas_phase(asymmetry,
 				clamp(dot(moon.toward,direction),-1.0f,1.0f));
 		}
-		for (int index = 0; index < world.header->counts.w; index++) {
-			Lamp lamp = world.lamps[index];
-			// The world preflight permits only authored film.Spots and direct-only
-			// floods. Spots have positive cone width; floods have no direction.
-			if (is_flood(lamp) || !(lamp.toward.w > 0)) { continue; }
+		for (int place = 0; place < cones; place++) {
+			Lamp lamp = world.lamps[int(listed[place])];
+			// The list holds the lamps with a positive cone width that are not
+			// floods (gpu/lamp_lists.go), which are all this loop ever counted.
 			Reached reached = lamp_light(lamp, point, -direction);
 			if (all(reached.light == float3(0)) ||
 			    !any(reached.toward != float3(0))) { continue; }
@@ -3026,6 +4056,72 @@ static float3 face_of(Hit hit, float3 normal) {
 	return dot(hit.flat, normal) < 0 ? -hit.flat : hit.flat;
 }
 
+// front_lean is trace's frontLean: how far a fronted normal faces the ray,
+// as the cosine between them; picked, as small as keeps a mirror about
+// the normal off the surface.
+constexpr constant float front_lean = 1e-3f;
+
+// fronted is trace's fronted: a shading normal turned to side's half, the
+// way out on the ray's side, then, where it still leans away from the
+// ray, tilted toward it until the ray meets it at front_lean.
+static float3 fronted(float3 normal, float3 side, float3 way) {
+	if (dot(normal, side) < 0) {
+		normal = -normal;
+	}
+	float3 dir = normalize(way);
+	float along = dot(normal, dir);
+	if (along <= -front_lean) {
+		return normal;
+	}
+	return normalize(normal - dir * (along + front_lean));
+}
+
+// shading_normal is trace's shadingNormal: the normal a hit is shaded,
+// mirrored and bent by, the side it was met on, and the slope variance a
+// pixel width metres wide there cannot show. A sea's is its bands' as the
+// pixel shows them; a clear field's is its own fronted to its cell's
+// side; anything else's is its normal facing the ray, with side nought.
+//
+// sea_clearance is arid's seaClearance: how many of the search's touches
+// from a sea a look leaving it starts (left_from).
+constexpr constant float sea_clearance = 2;
+
+// left_from is lifted for a look leaving a surface toward side, and from a
+// sea at least sea_clearance of its touches at the point, so the look
+// begins on the side it leaves toward and does not meet the same surface
+// again at once: arid's Clearance with the kernel's touch.
+static float3 left_from(World world, Hit hit, float3 point, float3 side) {
+	float3 from = lifted(world, point, side);
+	if (hit.sea < 0) {
+		return from;
+	}
+	Field sea = world.fields[hit.sea];
+	float touch = max(sea.sea.x, march_touch * length(hit.local)) *
+	              sea.origin.w;
+	return point + side * max(length(from - point), sea_clearance * touch);
+}
+
+static float3 shading_normal(World world, Hit hit, Material made,
+                             float3 from, float3 way, float width,
+                             thread float3 &side, thread float &lost) {
+	lost = 0;
+	side = float3(0);
+	if (hit.sea >= 0) {
+		Field sea = world.fields[hit.sea];
+		float3 faces = sea_seen(world, sea, hit.local, field_in(sea, from),
+		                        width / sea.origin.w, hit.flat_side, lost);
+		side = normalize(field_out(sea, faces));
+		return fronted(side, side, way);
+	}
+	float3 normal = facing(hit, way);
+	if (made.mirror.z > 0 && dot(hit.geometric, hit.geometric) > 0) {
+		side = normalize(dot(hit.geometric, way) > 0 ? -hit.geometric :
+		                 hit.geometric);
+		return fronted(normal, side, way);
+	}
+	return normal;
+}
+
 // kept_above is trace's keptAbove: a mirrored way kept on the open side
 // of the face it leaves. turned about a smooth face's normal where the
 // eye grazes it, a way can point into the face; it is turned back about
@@ -3035,12 +4131,31 @@ static float3 kept_above(float3 way, float3 face) {
 	return under >= 0 ? way : normalize(way - face * 2 * under);
 }
 
+// last_mirror is trace's lastMirror: the sky a water surface mirrors
+// toward the eye when the look has used its bounces, by fresnel's share,
+// met by nothing on the way; nought for anything but water, a sea or a
+// clear field.
+static float3 last_mirror(World world, Hit hit, Material made,
+                          float3 normal, float3 way, Boundary met) {
+	float clearness = clamp(made.mirror.z, 0.0f, 1.0f);
+	if (!(clearness > 0) || (hit.sea < 0 && !any(hit.geometric != 0))) {
+		return float3(0);
+	}
+	float3 share = shares(made, clearness, -dot(normal, way), met);
+	float3 mirrored = way - normal * 2 * dot(way, normal);
+	// the sky's light read here from its table (sky_at), since to_sky
+	// leaves a look's sky to be painted later, and a look paints one
+	return sky_at(world, normalize(mirrored)) * share;
+}
+
 // shade_plain is trace's shade at its last bounce: what a ray meets,
-// lit, and the volumes in front, with no mirror.
+// lit, and the volumes in front, with no mirror but water's sky
+// (last_mirror). come is how far, in metres, the look had come before
+// this ray began.
 #ifdef SLAYER_OPTICAL_MEDIA
 static Seen shade_plain(World world, float3 at, float3 way,
-			int leaving_sphere, Inside inside) {
-	Hit hit = first(world, at, way, 0, leaving_sphere);
+			int leaving_sphere, Inside inside, float come) {
+	Hit hit = first(world, at, way, 0, leaving_sphere, come);
 	Seen seen;
 	float distance;
 	if (hit.material < 0) {
@@ -3050,10 +4165,17 @@ static Seen shade_plain(World world, float3 at, float3 way,
 	} else {
 		float3 point = fma(way, hit.distance, at);
 		Material made = world.materials[hit.material];
-		float3 normal = crinkled(made, point, facing(hit, way), -way);
+		float width = pixel_at(world, come + hit.distance * length(way));
+		float3 side;
+		float lost;
+		float3 normal = crinkled(made, point, shading_normal(world, hit,
+			made, at, way, width, side, lost), -way, width);
+		made.glint.x += lost;
 		seen = surfaced(world, hit, point, normal);
 		seen.light += glinted(world, point + hit.lift, normal, -way, made,
 		                      hit.sphere_index);
+		seen.light += last_mirror(world, hit, made, normal, way,
+		                          meets(inside, made));
 		float foam = made.mirror.z > 0 ? wake_foam(made, hit.local) : 0;
 		if (foam > 0) {
 			seen.light = seen.light * (1 - foam) +
@@ -3067,17 +4189,27 @@ static Seen shade_plain(World world, float3 at, float3 way,
 }
 #else
 static Seen shade_plain(World world, float3 at, float3 way,
-                        int leaving_sphere) {
-	Hit hit = first(world, at, way, 0, leaving_sphere);
+                        int leaving_sphere, float come) {
+	Hit hit = first(world, at, way, 0, leaving_sphere, come);
 	if (hit.material < 0) {
 		return behind(world, at, way, to_sky(way));
 	}
 	float3 point = fma(way, hit.distance, at);
 	Material made = world.materials[hit.material];
-	float3 normal = crinkled(made, point, facing(hit, way), -way);
+	float width = pixel_at(world, come + hit.distance * length(way));
+	float3 side;
+	float lost;
+	float3 normal = crinkled(made, point, shading_normal(world, hit, made,
+		at, way, width, side, lost), -way, width);
+	made.glint.x += lost;
 	Seen seen = surfaced(world, hit, point, normal);
 	seen.light += glinted(world, point + hit.lift, normal, -way, made,
 	                      hit.sphere_index);
+	// every plain look starts in the air, inside nothing, as shade's does
+	Inside outside;
+	outside.holding = 0;
+	seen.light += last_mirror(world, hit, made, normal, way,
+	                          meets(outside, made));
 	float foam = made.mirror.z > 0 ? wake_foam(made, hit.local) : 0;
 	if (foam > 0) {
 		seen.light = seen.light * (1 - foam) +
@@ -3129,16 +4261,24 @@ static Seen shade(World world, float3 at, float3 way) {
 	}
 	float3 point = fma(way, hit.distance, at);
 	Material made = world.materials[hit.material];
-	float3 normal = crinkled(made, point, facing(hit, way), -way);
+	// come is how far the look has come, in metres, to where it is now
+	float come = hit.distance * length(way);
+	float3 side;
+	float lost;
+	float3 normal = crinkled(made, point, shading_normal(world, hit, made,
+		at, way, pixel_at(world, come), side, lost), -way,
+		pixel_at(world, come));
+	made.glint.x += lost;
 	Seen seen = surfaced(world, hit, point, normal);
 	float clearness = clamp(made.mirror.z, 0.0f, 1.0f);
 	float foam_coverage = 0;
-	// Spectral slopes are appearance normals. A clear HeightField boundary
-	// instead uses the exact normal of the bilinear surface it intersects.
+	// Optics follow the final shading normal, as trace's do: for a sea
+	// and a clear field, their waves' own slope fronted to the side the
+	// ray met them on. That side alone says where a mirrored or bent look
+	// starts and which face it keeps above.
 	float3 optical_normal = normal;
-	if (clearness > 0 && dot(hit.geometric, hit.geometric) > 0) {
-		optical_normal = normalize(hit.geometric);
-		if (dot(optical_normal, way) > 0) optical_normal = -optical_normal;
+	if (!any(side != 0)) {
+		side = optical_normal;
 	}
 #ifdef SLAYER_OPTICAL_MEDIA
 	// The explicit camera stack was loaded before the first intersection.
@@ -3181,15 +4321,14 @@ static Seen shade(World world, float3 at, float3 way) {
 	}
 	if (most(share) > 0) {
 		float3 bounce = way - optical_normal * 2 * dot(way, optical_normal);
-		float3 bounce_face = dot(hit.geometric, hit.geometric) > 0 ?
-		                     optical_normal : face_of(hit, normal);
-		float3 mirrored = kept_above(normalize(bounce), bounce_face);
-		float3 from = lifted(world, point, optical_normal);
+		float3 mirrored = kept_above(normalize(bounce), face_of(hit, side));
+		float3 from = left_from(world, hit, point, side);
 #ifdef SLAYER_OPTICAL_MEDIA
 		Seen bounced = shade_plain(world, from, mirrored,
-		                           hit.sphere_index, inside);
+		                           hit.sphere_index, inside, come);
 #else
-		Seen bounced = shade_plain(world, from, mirrored, hit.sphere_index);
+		Seen bounced = shade_plain(world, from, mirrored, hit.sphere_index,
+		                           come);
 #endif
 		seen.light += bounced.light * share;
 		seen.weight = bounced.weight * share;
@@ -3205,6 +4344,9 @@ static Seen shade(World world, float3 at, float3 way) {
 		// the look, worked out when the look met it
 		int crossed = 0, slipped = 0;
 		float3 leg_way = way, leg_normal = optical_normal, leg_point = point;
+		// the side of the surface the leg met, which its lift takes
+		float3 leg_side = side;
+		Hit leg_hit = hit;
 		Material leg_made = made;
 		Boundary leg_at = met;
 		for (int leg = 0; leg < refractions + slips; leg++) {
@@ -3230,9 +4372,9 @@ static Seen shade(World world, float3 at, float3 way) {
 					inside = without(inside, one);
 				}
 			}
-			float3 from = lifted(world, leg_point,
-			                     turned ? leg_normal : -leg_normal);
-			Hit next = first(world, from, bent, 0);
+			float3 from = left_from(world, leg_hit, leg_point,
+			                        turned ? leg_side : -leg_side);
+			Hit next = first(world, from, bent, 0, -1, come);
 			if (next.material < 0) {
 #ifdef SLAYER_OPTICAL_MEDIA
 				Held active=medium(inside);
@@ -3260,15 +4402,18 @@ static Seen shade(World world, float3 at, float3 way) {
 #endif
 			float3 next_point = fma(bent, next.distance, from);
 			Material next_made = world.materials[next.material];
+			come += next.distance * length(bent);
+			float3 next_side;
+			float next_lost;
 			float3 next_normal = crinkled(next_made, next_point,
-				facing(next, bent), -bent);
+				shading_normal(world, next, next_made, from, bent,
+				               pixel_at(world, come), next_side, next_lost),
+				-bent, pixel_at(world, come));
+			next_made.glint.x += next_lost;
 			float next_clear = clamp(next_made.mirror.z, 0.0f, 1.0f);
 			float3 next_optical_normal = next_normal;
-			if (next_clear > 0 &&
-			    dot(next.geometric, next.geometric) > 0) {
-				next_optical_normal = normalize(next.geometric);
-				if (dot(next_optical_normal, bent) > 0)
-					next_optical_normal = -next_optical_normal;
+			if (!any(next_side != 0)) {
+				next_side = next_optical_normal;
 			}
 			Boundary next_at = meets(inside, next_made);
 			float3 next_share = shares(next_made, next_clear,
@@ -3344,6 +4489,8 @@ static Seen shade(World world, float3 at, float3 way) {
 			carry *= 1 - next_foam;
 			leg_way = bent;
 			leg_normal = next_optical_normal;
+			leg_side = next_side;
+			leg_hit = next;
 			leg_point = next_point;
 			leg_made = next_made;
 			leg_at = next_at;
@@ -3370,17 +4517,96 @@ static void record(device float *sample, int which, Painted place) {
 	at[8] = place.glow.x, at[9] = place.glow.y, at[10] = place.glow.z;
 }
 
-// look is film.Pinhole.Ray through film.Look: the ray through a pixel's
-// middle, taken out of the eye's space into the world's.
-static float3 look(constant Header *header, uint2 pixel) {
+// carried is film's carried: a share of the square, nought up to one,
+// taken onto a shape flat over the pixel's middle and sloped to nought
+// over ramp pixels at each side, as how far from the pixel's middle in
+// pixels. It is the inverse of the shape's running sum: a ramp of one is
+// the tent, and of nought the pixel's own square.
+static float carried(float share, float ramp) {
+	float foot = ramp * 0.5f, reach = (1 + ramp) * 0.5f;
+	if (share < foot) {
+		return sqrt(2 * ramp * share) - reach;
+	}
+	if (share > 1 - foot) {
+		return reach - sqrt(2 * ramp * (1 - share));
+	}
+	return share - 0.5f;
+}
+
+// mirrored is a whole number's thirty-two bits turned end for end: van der
+// Corput's radical inverse of an index, as a share of the square, and
+// film's own for the same index.
+static uint mirrored(uint bits) {
+	bits = (bits << 16) | (bits >> 16);
+	bits = ((bits & 0x00ff00ffu) << 8) | ((bits & 0xff00ff00u) >> 8);
+	bits = ((bits & 0x0f0f0f0fu) << 4) | ((bits & 0xf0f0f0f0u) >> 4);
+	bits = ((bits & 0x33333333u) << 2) | ((bits & 0xccccccccu) >> 2);
+	bits = ((bits & 0x55555555u) << 1) | ((bits & 0xaaaaaaaau) >> 1);
+	return bits;
+}
+
+// crossed is film's crossed: Sobol's second sequence at an index, as a
+// share of the square in thirty-two bits. Each bit of the index, from
+// its last, turns on a column of Pascal's triangle, odd and even.
+static uint crossed(uint index) {
+	uint share = 0;
+	for (uint column = place_half; index != 0; index >>= 1) {
+		if ((index & 1u) != 0) {
+			share ^= column;
+		}
+		column ^= column >> 1;
+	}
+	return share;
+}
+
+// square_share is a share of the square in thirty-two bits as a float,
+// nought up to one: its top twenty-four bits, which hold every share a
+// pixel of up to four thousand samples has, whole.
+static float square_share(uint share) {
+	return float(share >> place_drop) / hash_whole;
+}
+
+// placed is film.Within: how far from its own middle a sample starts, in
+// samples across and down, where the header spreads a pixel's samples,
+// and nought where it does not. The sample's number in its pixel takes
+// its point of the (0,2)-sequence, moved to its stratum's middle, and
+// the filter's shape carries it out from the pixel's middle. Every pixel
+// has the same pattern.
+static float2 placed(constant Header *header, uint2 sample) {
+	if (header->spread.x == 0) {
+		return float2(0);
+	}
+	uint side = uint(header->spread.y), centring = uint(header->spread.z);
+	float ramp = header->spread.w;
+	uint2 within = sample % side;
+	uint index = within.y * side + within.x;
+	float2 out = float2(
+		carried(square_share(mirrored(index) + centring), ramp),
+		carried(square_share(crossed(index) + centring), ramp));
+	return (out + 0.5f) * float(side) - (float2(within) + 0.5f);
+}
+
+// look_through is film.Pinhole.RayThrough through film.LookThrough: the
+// ray through a place of a pixel, off across and down from its middle in
+// pixels, taken out of the eye's space into the world's.
+static float3 look_through(constant Header *header, uint2 pixel,
+                           float2 off) {
 	float4 lens = header->lens;
 	// Center in integer pixel units before scaling, and normalize once
 	// after the orthonormal camera rotation. Fine foliage exposes the
 	// cancellation and extra rounding of two normalizations.
-	float across = (2 * float(pixel.x) + 1 - lens.z) * (lens.x / lens.z);
-	float up = (lens.w - 2 * float(pixel.y) - 1) * (lens.x / (lens.w * lens.y));
+	float across = (2 * float(pixel.x) + 1 - lens.z + 2 * off.x) *
+	               (lens.x / lens.z);
+	float up = (lens.w - 2 * float(pixel.y) - 1 - 2 * off.y) *
+	           (lens.x / (lens.w * lens.y));
 	return precise::normalize(fma(header->right.xyz, across,
 	                             fma(header->up.xyz, up, -header->back.xyz)));
+}
+
+// look is film.Pinhole.Ray through film.Look: the ray through a pixel's
+// middle, taken out of the eye's space into the world's.
+static float3 look(constant Header *header, uint2 pixel) {
+	return look_through(header, pixel, float2(0));
 }
 
 // An exposure: the primary ray of a sample where the shutter is open or
@@ -3472,8 +4698,11 @@ static float3 aperture_point(constant Header *header, uint2 sample) {
 // makes it; a thin lens's is lens.Thin.Ray, from its point on the
 // aperture toward the point at the focus the sample's middle sees sharp.
 // The ray is then taken out of the eye at the sample's time, and made
-// one long once, after the turn.
-static Primary exposed(constant Header *header, uint2 sample) {
+// one long once, after the turn. Off is how far from its own middle the
+// sample starts, across and down in samples, as placed gives it: the
+// point on the film moves, and the point on the aperture is the sample's
+// own.
+static Primary exposed(constant Header *header, uint2 sample, float2 off) {
 	Eye eye = {header->origin.xyz, header->right.xyz, header->up.xyz,
 	           header->back.xyz};
 	if (header->exposure.x != 0) {
@@ -3482,15 +4711,18 @@ static Primary exposed(constant Header *header, uint2 sample) {
 	float4 lens = header->lens;
 	float3 start = float3(0);
 	float3 toward = float3(
-		(2 * float(sample.x) + 1 - lens.z) * (lens.x / lens.z),
-		(lens.w - 2 * float(sample.y) - 1) * (lens.x / (lens.w * lens.y)),
+		(2 * float(sample.x) + 1 - lens.z + 2 * off.x) * (lens.x / lens.z),
+		(lens.w - 2 * float(sample.y) - 1 - 2 * off.y) *
+			(lens.x / (lens.w * lens.y)),
 		-1);
 	if (header->exposure.y != 0) {
 		float4 optics = header->optics;
 		start = aperture_point(header, sample);
 		float3 sharp = float3(
-			(2 * float(sample.x) + 1 - lens.z) / (2 * lens.z) * optics.z,
-			(lens.w - 2 * float(sample.y) - 1) / (2 * lens.w) * optics.w,
+			(2 * float(sample.x) + 1 - lens.z + 2 * off.x) / (2 * lens.z) *
+				optics.z,
+			(lens.w - 2 * float(sample.y) - 1 - 2 * off.y) / (2 * lens.w) *
+				optics.w,
 			-optics.y);
 		toward = sharp - start;
 	}
@@ -3634,7 +4866,9 @@ kernel void trace(SLAYER_TRACE_ARGUMENTS) {
 	world.native_counts = &native_counts;
 	uint2 pixel = uint2(at.x, at.y + origin.y);
 	world.shared = sky_share(header, pixel);
-	float3 from = header->origin.xyz, way = look(header, pixel);
+	// where in its pixel the sample starts: its own middle, or spread
+	float2 off = placed(header, pixel);
+	float3 from = header->origin.xyz, way = look_through(header, pixel, off);
 	if (header->look.x != 0) {
 		// the ray the cpu made through the lens, for this sample
 		device const float *ray = rays + (pixel.y * grid.x + pixel.x) * 6;
@@ -3642,7 +4876,7 @@ kernel void trace(SLAYER_TRACE_ARGUMENTS) {
 		way = float3(ray[3], ray[4], ray[5]);
 	} else if (header->exposure.x != 0 || header->exposure.y != 0) {
 		// the ray made here through an open shutter or an aperture
-		Primary made = exposed(header, pixel);
+		Primary made = exposed(header, pixel, off);
 		from = made.from, way = made.way;
 	}
 #if defined(SLAYER_COMPOSITE_PASS) && \

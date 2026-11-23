@@ -2,7 +2,11 @@
 
 package gpu
 
-import "github.com/janearc/slayer/metal"
+import (
+	"runtime/debug"
+
+	"github.com/janearc/slayer/metal"
+)
 
 // stripe is how many rows of samples one stripe of rays holds: as many
 // whole bands as fit in stripeBytes, and one band at least. It is asked
@@ -11,6 +15,23 @@ import "github.com/janearc/slayer/metal"
 func (lensed *through) stripe() int {
 	fit := stripeBytes / (lensed.width * rayStride)
 	return max(fit/rows*rows, rows)
+}
+
+// releasePacked is what drawn does once the device holds every input
+// and nothing on the host reads them again: the scene's packed faces,
+// bends and boxes, the largest of the inputs, are let go from the scene
+// and from the list of inputs, and the pages freed are handed back. A
+// keeper's pool still holds its own, which it keeps for the next frame.
+func (encoded *scene) releasePacked(inputs [][]byte) func() {
+	return func() {
+		for _, at := range []int{trianglesAt, nodesAt, bendsAt} {
+			inputs[at] = nil
+		}
+		encoded.triangles.bytes, encoded.nodes.bytes = nil, nil
+		encoded.bends.bytes = nil
+		debug.FreeOSMemory()
+		memoryStage("packed-released")
+	}
 }
 
 // drawn runs the trace over every sample and hands its bands to the
@@ -23,8 +44,9 @@ func (encoded *scene) drawn(kernel *metal.Kernel, inputs [][]byte,
 	var made int64
 	lensed := encoded.through
 	if lensed == nil || lensed.whole() {
-		return made, kernel.GridBands(width, height, rows,
-			encoded.perSample(), inputs, band.consume)
+		return made, kernel.GridBandsSent(width, height, rows,
+			encoded.perSample(), inputs, encoded.releasePacked(inputs),
+			band.consume)
 	}
 	for first := firstRow; first < height; first += lensed.stripe() {
 		last := min(first+lensed.stripe(), height)

@@ -68,7 +68,7 @@ var (
 )
 
 // inland is land by the Z of a middle, as the stand-ins above say.
-func inland(p maths.Vec) bool { return p.Z >= 0 }
+func inland(point maths.Vec) bool { return point.Z >= 0 }
 
 // junk is a rung the test never means to be asked about: if it is, the
 // numbers say so at once.

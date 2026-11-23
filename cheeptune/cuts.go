@@ -91,16 +91,16 @@ func ReadCuts(path string, s *Score) (*CutSheet, error) {
 	if err != nil {
 		return nil, err
 	}
-	c, err := ParseCuts(b, s)
+	c, err := parseCuts(b, s)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	return c, nil
 }
 
-// ParseCuts is ReadCuts on bytes already in hand. Every problem is
+// parseCuts is ReadCuts on bytes already in hand. Every problem is
 // returned, one a line, not just the first.
-func ParseCuts(b []byte, s *Score) (*CutSheet, error) {
+func parseCuts(b []byte, s *Score) (*CutSheet, error) {
 	var c CutSheet
 	if err := decodeStrict(b, &c); err != nil {
 		return nil, fmt.Errorf("not a cut sheet: %w", err)

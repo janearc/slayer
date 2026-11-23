@@ -1,0 +1,67 @@
+# every number the mesh tests choose, with what it is and why it was chosen.
+numbers:
+  - name: overflowing-reach
+    value: 1e200
+    says: a finite part of a point so large that its square, in a float64, is endless
+    kind: picked
+    by: a hundred times past the part, 1e154, whose square is already endless
+  - name: plate-sides
+    value: 7
+    says: how many triangles each side of the flat plate has, a fan about its middle
+    kind: picked
+    by: an odd count, so no corner of the plate has a mirror in it, and its coordinates are not dyadic
+  - name: plate-radius
+    value: 0.7
+    says: how far the plate's corners are from its middle, in its own plane
+    kind: picked
+    by: a number a float64 does not hold exactly, so the plate's sums round
+  - name: plate-slope-x
+    value: 0.3
+    says: how far the plate rises along y for a step along x
+    kind: picked
+    by: a number a float64 does not hold exactly, so the plate is not on a coordinate plane
+  - name: plate-slope-z
+    value: 0.1
+    says: how far the plate rises along y for a step along z
+    kind: picked
+    by: a number a float64 does not hold exactly, so the plate is not on a coordinate plane
+  - name: arm-length
+    value: 2
+    says: how long each arm of the L shaped solid is, from its outer corner
+    kind: picked
+    by: twice the arm's width, so the notch is a whole arm wide
+  - name: arm-width
+    value: 1
+    says: how wide each arm of the L shaped solid is, and how tall
+    kind: picked
+    by: the cube's own side, so a cube of the tests stands in each arm
+  - name: cavity-share
+    value: 0.5
+    says: how large the cavity of a hollow solid is, as a share of the solid
+    kind: picked
+    by: a half, so the cavity's corners are exact and well inside the solid
+  - name: nudged-corner
+    value: 3
+    says: which corner of the unit cube is moved an ulp on one of its faces
+    kind: picked
+    by: a corner three faces of the cube share, so moving it on one leaves the others on the exact place
+  - name: nudged-face
+    value: 7
+    says: which face of the unit cube names the nudged corner as moved
+    kind: picked
+    by: a face whose last corner is the nudged corner
+  - name: slack
+    value: 1e-12
+    says: how far a distance worked by the mesh may be from the one worked by hand, where the hand's is exact
+    kind: picked
+    by: well under what a float64 sum of a few terms is out, and well over its own rounding
+  - name: cube-half
+    value: 0.5
+    says: how far the middle of the unit cube is from each of its sides
+    kind: picked
+    by: the cube's side is one, so a half, which a float64 holds exactly
+  - name: between-reach
+    value: 0.375
+    says: how far along x from the middle a point is that is between the shell of the unit cube, at a half, and a cavity of half its size, at a quarter
+    kind: picked
+    by: half way between the cavity's side and the shell's, a float64 holds it exactly

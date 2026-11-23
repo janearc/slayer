@@ -12,8 +12,8 @@ import (
 
 // scattered is a chart of n tiles at points in the box from (lo,lo,lo)
 // to (hi,hi,hi), laid out by a fixed sequence, none next to another.
-func scattered(n int, lo, hi float64) *chart {
-	c := chained(n)
+func scattered(count int, lo, hi float64) *chart {
+	c := chained(count)
 	state := uint64(5)
 	for i := range c.at {
 		var v [3]float64
@@ -40,9 +40,9 @@ func scattered(n int, lo, hi float64) *chart {
 func TestPlatesAreDrawnFromTheSeed(t *testing.T) {
 	const seed, count = 9, 10
 	c := scattered(300, 0, 1)
-	w := on(c, seed)
-	w.Plates = count
-	plate, land, drift := w.plates()
+	world := on(c, seed)
+	world.Plates = count
+	plate, land, drift := world.plates()
 	if len(land) != count || len(drift) != count {
 		t.Fatalf("%d plates, %d drifts, want %d", len(land), len(drift), count)
 	}
@@ -68,17 +68,17 @@ func TestPlatesAreDrawnFromTheSeed(t *testing.T) {
 	if lands == 0 || seas == 0 {
 		t.Errorf("%d plates of land and %d of sea", lands, seas)
 	}
-	for i, p := range c.at {
-		warp := noise.Fractal(seed+8, p.X*1.8, p.Y*1.8, p.Z*1.8, 3)
+	for i, point := range c.at {
+		warp := noise.Fractal(seed+8, point.X*1.8, point.Y*1.8, point.Z*1.8, 3)
 		best, want := math.Inf(1), -1
 		for k := range count {
 			mid := maths.V(h(1, k), h(2, k), h(3, k))
-			if d := p.Sub(mid).Len() + 0.55*warp*h(9, k); d < best {
-				best, want = d, k
+			if distance := point.Sub(mid).Len() + 0.55*warp*h(9, k); distance < best {
+				best, want = distance, k
 			}
 		}
 		if plate[i] != want {
-			t.Errorf("tile %d at %v is plate %d, want %d", i, p, plate[i], want)
+			t.Errorf("tile %d at %v is plate %d, want %d", i, point, plate[i], want)
 		}
 	}
 }
@@ -114,16 +114,16 @@ func TestWarpDecidesBetweenPlatesAsNearAsEachOther(t *testing.T) {
 		c.at[i].X = 0
 	}
 	c.at[0] = maths.Vec{}
-	w := on(c, seed)
-	w.Plates = 2
+	world := on(c, seed)
+	world.Plates = 2
 	c.mids = []maths.Vec{maths.V(-1, 0, 0), maths.V(1, 0, 0)}
-	plate, _, _ := w.plates()
+	plate, _, _ := world.plates()
 	if plate[0] != 0 {
 		t.Errorf("the origin, as near both, is plate %d, want 0", plate[0])
 	}
 	h0, h1 := noise.Hash(seed+9, 0), noise.Hash(seed+9, 1)
-	for i, p := range c.at {
-		warp := noise.Fractal(seed+8, p.X*1.8, p.Y*1.8, p.Z*1.8, 3)
+	for i, point := range c.at {
+		warp := noise.Fractal(seed+8, point.X*1.8, point.Y*1.8, point.Z*1.8, 3)
 		if i == 0 || math.Abs(warp*(h0-h1)) < 1e-9 {
 			continue
 		}
@@ -132,7 +132,7 @@ func TestWarpDecidesBetweenPlatesAsNearAsEachOther(t *testing.T) {
 			want = 0
 		}
 		if plate[i] != want {
-			t.Errorf("tile %d at %v, warp %v: plate %d, want %d", i, p, warp,
+			t.Errorf("tile %d at %v, warp %v: plate %d, want %d", i, point, warp,
 				plate[i], want)
 		}
 	}
@@ -171,9 +171,9 @@ func TestAHeightIsBasePlusStressPlusNoise(t *testing.T) {
 		t.Fatal("no tile is moved by a boundary, which this world has")
 	}
 	want := byRank(height, tr.Ocean)
-	for i, tile := range w.Tiles() {
-		if !(math.Abs(w.Height(tile)-want[i]) <= 1e-9) {
-			t.Fatalf("tile %d is %v, want %v", i, w.Height(tile), want[i])
+	for i := range w.tiles {
+		if !(math.Abs(w.height[i]-want[i]) <= 1e-9) {
+			t.Fatalf("tile %d is %v, want %v", i, w.height[i], want[i])
 		}
 	}
 }
@@ -190,7 +190,8 @@ func byRank(height []float64, ocean float64) []float64 {
 	sort.Slice(order, func(a, b int) bool { return height[order[a]] < height[order[b]] })
 	last := float64(len(height) - 1)
 	at := func(share float64) float64 { return height[order[int(share*last)]] }
-	level := height[order[int(math.Round(math.Min(1, math.Max(0, ocean))*last))]]
+	oceanShare := math.Min(1, math.Max(0, ocean))
+	level := height[order[int(math.Round(oceanShare*last))]]
 	top, bottom := at(0.985)-level, level-at(0.015)
 	out := make([]float64, len(height))
 	for i, h := range height {

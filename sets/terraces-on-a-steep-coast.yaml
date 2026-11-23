@@ -1,0 +1,118 @@
+# rows of tall painted terraces climbing a steep coast, each row along a
+# contour and standing on its own ground, one above the next with a lane
+# between: a proof of the mechanism on measured ground. it is not
+# portofino, and it is not a model of any town. the houses are the
+# manufactory's terrace-portofino; the place is chosen only because it is
+# steep and on the shelf (see sets/portofino-cliffs.yaml for the harbour
+# this is the study of).
+#
+# the ground: copernicus glo-30, tile n22 e114, a surface model: it holds
+# the tops of what stands there, trees and roofs, and not the bare earth. the
+# window is 1000 m across and 800 m down, round 22.2140 north, 114.2450
+# east, on the west face of the peninsula on the south-east of hong kong
+# island, at a 10 m step. the model's posts are 30 m apart, so the ground
+# is a surface laid through them: it is smooth between posts and its slope
+# changes at a post, never inside a bay. smoothed by a gaussian 20 m wide
+# (its standard deviation, picked), the face rises from the sea to about
+# 100 m in about 170 m, and about 0.45 in a metre over the town: the tile's
+# heights say this, read, not recalled. the sea is the model's nought,
+# lifted half a metre so the two are not drawn in one plane.
+#
+# the sun: where scene/daylight.Sun, noaa's fractional-year equations,
+# puts it for 22.2135 north, 114.2450 east at 16:00 china standard time
+# (utc+8) on 20 november 2026: azimuth 237.97, altitude 19.83, geometric,
+# without refraction. the sky is the earth's air, worked from that.
+#
+# the town: one stand of the habit contour, the climb saying its shape.
+# "the foot" is where the first row starts, at its north end, 345 m east
+# and 520 m north in the window; the rows' fronts look down the slope,
+# west, to the sea, so a row runs south along its contour from where it
+# starts. four rows of two runs each, a lane 4 m wide between one row and
+# the next, and the doors of every bay at the ground in front of it. each
+# bay stands on its own ground: its floor is the highest ground along its
+# front wall, a plinth of concrete reaches from there down to the lowest
+# ground under it, and the hill is cut into behind. a run is a terrace of
+# fourteen bays drawn from the portofino culture, straight; each run is
+# turned to the contour where it stands.
+#
+# places of things are metres in the terrain window: east from its west
+# edge, north from its south edge. a camera's at and look_at are east from
+# the west edge, north as the window's northing less its 800 m depth, and
+# up from the lowest ground in the window, the sea's nought here.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: terraces on a steep coast
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.2135
+    lon: 114.2450
+  timeofday: 1600
+  sun:
+    azimuth: 237.97
+    altitude: 19.83
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.2140
+    lon: 114.2450
+    across: 1000
+    down: 800
+    step: 10
+    smooth: 20
+    sea: {value: 0.5, unit: m}
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 50
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    water:
+      title: "from the water, 300 m off the town, looking up the face"
+      location:
+        at: [60, -330, 40]
+      orientation:
+        look_at: [400, -330, 45]
+    plan:
+      title: "straight down from 600 m over the town, north up"
+      wide: 40
+      location:
+        at: [400, -360, 600]
+      orientation:
+        look_at: [400, -359, 0]
+    above:
+      title: "from 130 m over the water, looking down on the town"
+      wide: 45
+      location:
+        at: [200, -330, 130]
+      orientation:
+        look_at: [380, -330, 45]
+    base:
+      title: "from the slope below the first row where it bends, 40 m off, at the foot of its bays"
+      wide: 35
+      location:
+        at: [306, -350, 32]
+      orientation:
+        look_at: [346, -350, 36]
+  set:
+    things:
+      the foot: {kind: human-scale-2m, seed: 1, east: 345, north: 520}
+    stands:
+      the town:
+        kind: terrace-portofino
+        habit: contour
+        count: 8
+        seed: 7
+        complexity: quick
+        within: {of: the foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 4
+          runs: 2
+          lane: {value: 4, unit: m}
+          door: downhill
+  world:
+    unit: 1

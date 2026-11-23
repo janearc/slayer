@@ -7,16 +7,12 @@ import (
 )
 
 // Clock is the time, given to a meter by its caller.
-//
-//ninja:vow practice NewMeter takes one; time.Now is one
 type Clock func() time.Time
 
 // Meter is the state of a job in flight: how many frames, how many rows
 // to a frame, what has finished, and when. It reads the time from its clock
 // at Begin and at each frame's end, and when it is asked. It is not safe
 // for more than one goroutine.
-//
-//ninja:vow practice NewMeter makes one
 type Meter struct {
 	now          Clock
 	begun        bool

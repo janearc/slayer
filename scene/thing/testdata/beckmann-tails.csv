@@ -1,0 +1,5 @@
+name,widths,exponent,divisor
+at-the-peak,0,0,1
+one-width,1,1,4
+two-widths,2,4,25
+three-widths,3,9,100

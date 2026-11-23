@@ -52,23 +52,23 @@ type densityRow struct {
 // coefficients, and two rows at one energy
 func xrayed(kind Material, dense densityRow,
 	rows []coefficientRow) (Material, error) {
-	from, err := NewSource(nist, kind.name+", "+dense.page, hubbell,
+	from, err := newSource(nist, kind.name+", "+dense.page, hubbell,
 		dense.text)
 	if err != nil {
 		return Material{}, err
 	}
-	kind, err = kind.AtDensity(dense.density, from)
+	kind, err = kind.atDensity(dense.density, from)
 	if err != nil {
 		return Material{}, err
 	}
 	taken := make([]Attenuation, 0, len(rows))
 	for _, each := range rows {
-		read, err := NewSource(nist, kind.name+", "+each.page, hubbell,
+		read, err := newSource(nist, kind.name+", "+each.page, hubbell,
 			each.text)
 		if err != nil {
 			return Material{}, err
 		}
-		coefficient, err := NewAttenuation(each.energy, each.muOverRho, read)
+		coefficient, err := newAttenuation(each.energy, each.muOverRho, read)
 		if err != nil {
 			return Material{}, err
 		}

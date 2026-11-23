@@ -17,11 +17,19 @@ id<MTLLibrary> slayer_shared_library(id<MTLDevice> device,
 
 // slayer_wait_command waits for a committed command to finish, for at
 // most limit seconds. It is YES when the command finished, whatever its
-// own error says. It is NO when the limit passed first, with why saying
-// what was waited for and for how long: the command is then still queued
-// or running on the device, which may stay busy until it ends.
+// own error says. It is NO when the limit passed first, or waits were
+// stopped, with why saying what was waited for and for how long: the
+// command is then still queued or running on the device, which may stay
+// busy until it ends.
 BOOL slayer_wait_command(id<MTLCommandBuffer> commands, double limit,
                          NSString *what, NSString **why);
+
+// slayer_waits_stopped is whether waits are stopped now, as
+// slayer_stop_waits (bridge.h) set them. A wait for a command ends at
+// its next look when they are, without the command ending: Metal cannot
+// take a running command back, so the device is left to finish or lose
+// it, and the caller says it will not use the context or session again.
+BOOL slayer_waits_stopped(void);
 
 // slayer_stuck is the sentence a caller says when it will not use a
 // context or session again because a command outran its limit.

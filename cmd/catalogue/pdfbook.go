@@ -168,9 +168,10 @@ func (made *composer) cover() error {
 
 // tally is the cover's line of counts and the date.
 func (made *composer) tally() string {
+	groupCount := len(made.loaded.Groups())
 	line := fmt.Sprintf("Drawn %s. %d specimens in %d groups.",
 		made.drawn.Format(dateLayout), len(made.loaded.Cards),
-		len(made.loaded.Groups()))
+		groupCount)
 	if missing := made.unrendered(); missing > noEntries {
 		line += fmt.Sprintf(" %d did not render.", missing)
 	}

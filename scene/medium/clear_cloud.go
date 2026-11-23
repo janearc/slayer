@@ -2,7 +2,6 @@ package medium
 
 import (
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/janearc/slayer/maths"
@@ -10,7 +9,7 @@ import (
 
 // ClearCloud is an explicitly opted-in bounded local participating medium
 // that may be composed with named clear-medium extinction by the CPU tracer.
-// It wraps an existing density field; its scattering albedo remains the
+// It wraps a density field; its scattering albedo remains the
 // volume material's Colour. This is a single-scattering cloud approximation,
 // not resolved bubbles or fluid simulation.
 type ClearCloud struct {
@@ -19,19 +18,22 @@ type ClearCloud struct {
 	explicitPhase bool
 }
 
-// PhaseAsymmetry reports an explicit Henyey-Greenstein law. False retains
-// the legacy inherited water law; explicit zero means isotropic HG.
+// PhaseAsymmetry reports an explicit Henyey-Greenstein law. False means the
+// cloud scatters with the law of the water around it; explicit zero means
+// isotropic HG.
 func (cloud ClearCloud) PhaseAsymmetry() (float64, bool) {
 	return cloud.phase, cloud.explicitPhase
 }
 
 // NewClearCloudWithHenyeyGreenstein selects an authored bulk cloud phase,
 // independent of the surrounding water. It is not a bubble-size/Mie model.
-// Positive g scatters forward; zero is isotropic, not legacy water Rayleigh.
+// A positive asymmetry scatters forward; zero is isotropic, not the water's
+// Rayleigh.
 func NewClearCloudWithHenyeyGreenstein(of Medium,
-	g float64,
+	asymmetry float64,
 ) (ClearCloud, error) {
-	if math.IsNaN(g) || math.IsInf(g, 0) || !(g > -1 && g < 1) {
+	if !weatherFinite(asymmetry) ||
+		!(asymmetry > -unity && asymmetry < unity) {
 		return ClearCloud{}, fmt.Errorf("medium: cloud HG asymmetry must be " +
 			"finite and strictly between -1 and 1")
 	}
@@ -39,7 +41,7 @@ func NewClearCloudWithHenyeyGreenstein(of Medium,
 	if err != nil {
 		return ClearCloud{}, err
 	}
-	cloud.phase, cloud.explicitPhase = g, true
+	cloud.phase, cloud.explicitPhase = asymmetry, true
 	return cloud, nil
 }
 
@@ -48,7 +50,8 @@ func NewClearCloudWithHenyeyGreenstein(of Medium,
 func (cloud ClearCloud) DensityField() Medium { return cloud.of }
 
 // NewClearCloud admits only a finite density field no wider than 500 scene
-// units on any axis. The finite bound keeps the mixed transport work local.
+// units on any axis, chosen.clearCloudWidth. The finite bound keeps the mixed
+// transport work local.
 func NewClearCloud(of Medium) (ClearCloud, error) {
 	if of == nil {
 		return ClearCloud{}, fmt.Errorf("medium: clear cloud needs a density field")
@@ -56,32 +59,40 @@ func NewClearCloud(of Medium) (ClearCloud, error) {
 	bounds := of.Bounds()
 	for _, value := range []float64{bounds.Min.X, bounds.Min.Y, bounds.Min.Z,
 		bounds.Max.X, bounds.Max.Y, bounds.Max.Z} {
-		if math.IsNaN(value) || math.IsInf(value, 0) {
+		if !weatherFinite(value) {
 			return ClearCloud{}, fmt.Errorf("medium: clear cloud bounds must be finite")
 		}
 	}
 	for _, width := range []float64{bounds.Max.X - bounds.Min.X,
 		bounds.Max.Y - bounds.Min.Y, bounds.Max.Z - bounds.Min.Z} {
-		if width < 0 || width > maxClearCloudWidth {
-			return ClearCloud{}, fmt.Errorf("medium: clear cloud bounds must be ordered and at most %g units wide", maxClearCloudWidth)
+		if width < nought || width > chosen.clearCloudWidth {
+			return ClearCloud{}, fmt.Errorf("medium: clear cloud bounds must be ordered and at most %g units wide", chosen.clearCloudWidth)
 		}
 	}
 	return ClearCloud{of: of}, nil
 }
 
-const maxClearCloudWidth = 500.0
+// wrapped is the density field the cloud wraps. A ClearCloud that
+// NewClearCloud did not make wraps none, and refuses to be used in words.
+func (cloud ClearCloud) wrapped() Medium {
+	if cloud.of == nil {
+		panic("medium: a ClearCloud wraps no density field; make it with " +
+			"NewClearCloud or NewClearCloudWithHenyeyGreenstein")
+	}
+	return cloud.of
+}
 
 // Bounds is the wrapped field's finite integration domain.
-func (cloud ClearCloud) Bounds() maths.Box { return cloud.of.Bounds() }
+func (cloud ClearCloud) Bounds() maths.Box { return cloud.wrapped().Bounds() }
 
 // Density is the wrapped field's local coefficient.
 func (cloud ClearCloud) Density(point maths.Vec) float64 {
-	return cloud.of.Density(point)
+	return cloud.wrapped().Density(point)
 }
 
 // Span keeps exact entry intervals when the wrapped field has them.
 func (cloud ClearCloud) Span(ray maths.Ray, near, far float64) (float64, float64, bool) {
-	if spanner, ok := cloud.of.(Spanner); ok {
+	if spanner, ok := cloud.wrapped().(Spanner); ok {
 		return spanner.Span(ray, near, far)
 	}
 	return cloud.Bounds().Hit(ray, near, far)

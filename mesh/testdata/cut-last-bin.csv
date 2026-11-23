@@ -1,0 +1,10 @@
+name,x,y,z
+first-low,-10,0,0
+first-far,10,0,0
+first-top,-10,1,0
+second-low,4,0,0
+second-far,24,0,0
+second-top,4,1,0
+strip-low,15,0,0
+strip-far,15.1,0,0
+strip-top,15,100,0

@@ -11,13 +11,23 @@ static float propeller_at(device const float *card, float3 point) {
  float s=dot(delta,axis), active=card[propeller_active], core=card[propeller_core];
  if(s<0 || s>active)return 0;
  float x=dot(delta,radial),y=dot(delta,crossway),sum=0;
+ float width=core;
+ if(card[propeller_spread]>0)width+=card[propeller_spread]*max(0.0f,s-card[propeller_spread_start]);
  uint blades=whole[propeller_blades];
  for(uint k=0;k<blades;k++){
   float theta=card[propeller_omega]*(card[propeller_seconds]-s/card[propeller_slip])+6.283185307179586f*float(k)/float(blades);
-  float2 d=float2(x,y)-card[propeller_radius]*float2(cos(theta),sin(theta));
+  float2 centre=card[propeller_radius]*float2(cos(theta),sin(theta));
+  if(card[propeller_wander]>0){
+   ulong seed=(ulong(whole[propeller_seed_high])<<32)|ulong(whole[propeller_seed_low]);
+   float q=(s-card[propeller_slip]*card[propeller_seconds])/card[propeller_wander_scale];
+   float amount=card[propeller_wander]*wake_smooth(0.0f,card[propeller_wander_scale],s);
+   centre+=amount*clamp(float2(fractal(seed,float(k)+.37f,q,.73f,2),fractal(seed,float(k)+.37f,q,17.19f,2)),-1.0f,1.0f);
+  }
+  float2 d=float2(x,y)-centre;
   float r2=dot(d,d);
-  if(r2<=9*core*core)sum+=exp(-.5f*r2/(core*core));
+  if(r2<=9*width*width)sum+=exp(-.5f*r2/(width*width));
  }
+ if(card[propeller_spread]>0)sum*=(core/width)*(core/width);
  float start=wake_smooth(0.0f,2*core,s),end=1-wake_smooth(active-2*core,active,s);
  float pressure=max(0.0f,1-card[propeller_recovery]*s/card[propeller_deficit]);
  float breakup=1;

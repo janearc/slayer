@@ -1,5 +1,5 @@
 # Authored specimen view, 2026-11-07; not an orbit simulation.
-# Sources and visual choices: space-observatories.md.
+# Sources and visual choices: model/spacecraft/space-observatories.md.
 "$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
 scene:
   name: Spitzer gets to come too

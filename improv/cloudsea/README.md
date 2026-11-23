@@ -20,7 +20,7 @@ folders on the renders page are read only; nothing here changes them.
     (`eso-galacsi-layout`), 30 cm across (`eso-4lgsf`), at sodium's
     589 nm line.
   - each from a launch tube on the slit's rim, the rim pose
-    `doc/golden-hour-site.yaml`'s turned with the enclosure. The study's
+    `sets/golden-hour-summit.yaml`'s turned with the enclosure. The study's
     four splayed aims and their origins on its skin are gone.
   - the enclosure's `heading`, 145 degrees, so its slit faces the moon's
     side. The mist is the study's, unchanged.

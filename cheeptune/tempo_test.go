@@ -115,8 +115,10 @@ func TestATempoChangeOutOfPlaceIsRefusedByName(t *testing.T) {
 }
 
 func TestALoopWithATempoChangeGoesRoundInBeatsAndSeconds(t *testing.T) {
-	s, err := ParseScore([]byte(strings.Replace(string(turning(doubled)),
-		`"loop": false`, `"loop": true`, 1)))
+	turnedScore := string(turning(doubled))
+	looping := strings.Replace(turnedScore,
+		`"loop": false`, `"loop": true`, 1)
+	s, err := ParseScore([]byte(looping))
 	if err != nil {
 		t.Fatal(err)
 	}

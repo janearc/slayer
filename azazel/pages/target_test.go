@@ -108,7 +108,8 @@ func TestFolderOfRefusesJobFilesWithoutOneFolder(t *testing.T) {
 // publishes nothing for a job, and keeps it out of its live jobs.
 func TestAJobWithNoFolderIsLoggedOnce(t *testing.T) {
 	var log bytes.Buffer
-	coordinator := New(settingsFor(renders(t), nil, &clock{at: fixtureNoon}),
+	settings := settingsFor(renders(t), nil, &clock{at: fixtureNoon})
+	coordinator := New(settings,
 		&log)
 	job := queue.Job{Sequence: 7, State: queue.Running,
 		Request: request(t.TempDir(), "draw", "job.yaml")}

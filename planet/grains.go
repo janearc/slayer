@@ -56,28 +56,38 @@ func Patterns() []string {
 // round about, near zero in a clump and up to one between them, turned so a
 // clump stands thick and the gap thin.
 func cells(seed uint64, x, y, z float64) float64 {
-	nearest := math.Inf(1)
-	at := [3]float64{x, y, z}
-	for i := -1; i <= 1; i++ {
-		for k := -1; k <= 1; k++ {
-			for depth := -1; depth <= 1; depth++ {
+	nearest := math.Inf(whole)
+	at := [axes]float64{x, y, z}
+	for i := -adjacent; i <= adjacent; i++ {
+		for k := -adjacent; k <= adjacent; k++ {
+			for depth := -adjacent; depth <= adjacent; depth++ {
 				nearest = math.Min(nearest, seeded(seed, at, i, k, depth))
 			}
 		}
 	}
-	return 1 - 2*math.Min(1, nearest)
+	return whole - double*math.Min(whole, nearest)
 }
+
+// The places of the three axes of space in a list of three numbers.
+const (
+	// xAxis is defined as the place of the x axis: the first.
+	xAxis = 0
+	// yAxis is defined as the place of the y axis: the second.
+	yAxis = 1
+	// zAxis is defined as the place of the z axis: the third.
+	zAxis = 2
+)
 
 // seeded is the distance from a point to the seeded point of the cell
 // so many cells off the one it is in, along each axis.
-func seeded(seed uint64, at [3]float64, i, k, depth int) float64 {
-	cell := [3]int64{int64(math.Floor(at[0])) + int64(i),
-		int64(math.Floor(at[1])) + int64(k),
-		int64(math.Floor(at[2])) + int64(depth)}
-	sum := 0.0
+func seeded(seed uint64, at [axes]float64, i, k, depth int) float64 {
+	cell := [axes]int64{int64(math.Floor(at[xAxis])) + int64(i),
+		int64(math.Floor(at[yAxis])) + int64(k),
+		int64(math.Floor(at[zAxis])) + int64(depth)}
+	var sum float64
 	for axis := range cell {
 		point := float64(cell[axis]) + noise.Hash3(seed+uint64(axis),
-			cell[0], cell[1], cell[2])
+			cell[xAxis], cell[yAxis], cell[zAxis])
 		sum += (at[axis] - point) * (at[axis] - point)
 	}
 	return math.Sqrt(sum)
@@ -86,7 +96,22 @@ func seeded(seed uint64, at [3]float64, i, k, depth int) float64 {
 // ridges is ridged noise: high in thin strands where gradient noise crosses
 // zero, low between.
 func ridges(seed uint64, x, y, z float64) float64 {
-	return 1 - 2*math.Abs(noise.Gradient(seed, x, y, z))
+	return whole - double*math.Abs(noise.Gradient(seed, x, y, z))
+}
+
+// speckled is a ring's speckle at a point: its seed, its cell along x, its
+// cell round the circle, and how many cells go round it.
+type speckled struct {
+	seed                 uint64
+	reach, round, around float64
+}
+
+// at is the fresh value of the cell so many cells along x and round the
+// circle from the point's own, from zero to one.
+func (grid speckled) at(along, roundBy float64) float64 {
+	cell := math.Mod(grid.round+roundBy, grid.around)
+	return noise.Hash3(grid.seed, int64(grid.reach+along), int64(cell),
+		int64(grid.around))
 }
 
 // speckle is a fresh value at each cell, from minus one to one, eased
@@ -96,33 +121,43 @@ func ridges(seed uint64, x, y, z float64) float64 {
 // whole number of them to its circumference: square cells in y and z
 // would cut the ring along straight lines across its plane.
 func speckle(seed uint64, x, y, z float64) float64 {
-	around := math.Max(1, math.Round(2*math.Pi*math.Hypot(y, z)))
-	turn := (math.Atan2(z, y) + math.Pi) / (2 * math.Pi) * around
+	circumference := circle * math.Hypot(y, z)
+	around := math.Max(whole, math.Round(circumference))
+	turn := (math.Atan2(z, y) + math.Pi) / circle * around
 	reach, round := math.Floor(x), math.Floor(turn)
-	valued := func(i, k float64) float64 {
-		cell := math.Mod(round+k, around)
-		return noise.Hash3(seed, int64(reach+i), int64(cell), int64(around))
-	}
+	grid := speckled{seed: seed, reach: reach, round: round, around: around}
 	inward, outward := eased(x-reach), eased(turn-round)
-	near := valued(0, 0) + (valued(0, 1)-valued(0, 0))*outward
-	far := valued(1, 0) + (valued(1, 1)-valued(1, 0))*outward
-	return 2*(near+(far-near)*inward) - 1
+	near := grid.at(nothing, nothing) +
+		(grid.at(nothing, whole)-grid.at(nothing, nothing))*outward
+	far := grid.at(whole, nothing) +
+		(grid.at(whole, whole)-grid.at(whole, nothing))*outward
+	return double*(near+(far-near)*inward) - whole
 }
+
+// Smoothstep's cubic is three t squared less two t cubed.
+const (
+	// smoothstepCubic is defined as the three of smoothstep's cubic.
+	smoothstepCubic = 3
+	// smoothstepSquare is defined as the two of smoothstep's cubic.
+	smoothstepSquare = 2
+)
 
 // eased is smoothstep's ease over a cell, from zero at its one edge to one at
 // the other, its slope zero at both.
-func eased(t float64) float64 { return t * t * (3 - 2*t) }
+func eased(position float64) float64 {
+	return position * position * (smoothstepCubic - smoothstepSquare*position)
+}
 
 // mostLayers is the most doublings of size grains are drawn with, so a
-// wide range costs no more than this: picked.
-const mostLayers = 14
+// wide range costs no more than this.
+var mostLayers = pickCount("grain-most-layers")
 
 // Grained is the ring with its matter clumped by a pattern of a name.
 //
 // from a seed, the clumps run from smallest to largest in metres; a slope says
 // how many more small ones there are, a shear how many times longer along the
 // orbit than across each is drawn, and a clumping, from zero to one, how much
-// of the ring they leave empty.
+// of the ring they leave empty. Sizes, slope and shear may not be endless.
 func (ring Ring) Grained(name string, seed uint64, smallest, largest,
 	slope, shear, clumping float64) (Ring, error) {
 	drawn, known := patterns[name]
@@ -130,46 +165,86 @@ func (ring Ring) Grained(name string, seed uint64, smallest, largest,
 		return ring, fmt.Errorf("grains in a pattern %q; there are %v",
 			name, Patterns())
 	}
-	if !(smallest > 0) || !(largest >= smallest) || !(slope > 0) ||
-		!(shear >= 1) || !(clumping >= 0 && clumping <= 1) {
+	if !(smallest > nothing) || !(largest >= smallest) ||
+		!(slope > nothing) || !(shear >= whole) ||
+		!(clumping >= nothing && clumping <= whole) ||
+		endless(largest) || endless(slope) || endless(shear) {
 		return ring, fmt.Errorf("grains from %g to %g m, slope %g, "+
 			"shear %g, clumping %g", smallest, largest, slope, shear,
 			clumping)
 	}
-	ring.grains = grains{name: name, seed: seed, pattern: drawn, smallest: smallest,
-		largest: largest, shear: shear, slope: slope, clumping: clumping}
+	ring.grains = grains{name: name, seed: seed, pattern: drawn,
+		smallest: smallest, largest: largest, shear: shear, slope: slope,
+		clumping: clumping}
 	ring.grains.settle()
 	return ring, nil
 }
 
+// endless is whether an amount is plus or minus infinity.
+func endless(amount float64) bool { return math.IsInf(amount, nothing) }
+
+// emptiest is the share of a ring's plane its grains leave empty at the
+// greatest clumping, from picks.yaml.
+var emptiest = pick("grain-emptiest")
+
 // filled is the share of a ring's plane its grains leave holding matter at a
-// clumping: all of it at zero, a twentieth at one.
-func filled(clumping float64) float64 { return 1 - 0.95*clumping }
+// clumping: all of it at zero, what is left of the plane by emptiest at one.
+func filled(clumping float64) float64 { return whole - emptiest*clumping }
 
 // samples is how many points of the plane a ring's grains are read at
-// to find where their fill's edge falls: picked.
-const samples = 4096
+// to find where their fill's edge falls.
+var samples = pickCount("grain-samples")
+
+// tailShare is the tails of the sampled values the edge's softness is read
+// between: the sample at one over this from either end.
+var tailShare = pickCount("grain-tail-share")
+
+// shapeSeedOffset and spreadSeedOffset are what a ring's seed is mixed with
+// to draw the points its grains are read at, and the pattern that finds the
+// spread of one layer, so the two do not repeat the pattern itself.
+var (
+	shapeSeedOffset  = uint64(pickCount("grain-point-seed-offset"))
+	spreadSeedOffset = uint64(pickCount("grain-spread-seed-offset"))
+)
+
+// settleSpan is how many of the largest clumps across the points its grains
+// are read at lie, and settleDepth where on the pattern's third axis the
+// spread is read; both are in picks.yaml.
+var (
+	settleSpan  = pick("grain-settle-span")
+	settleDepth = pick("grain-settle-depth")
+)
+
+// softShare is how much of the spread between the sampled tails a clump's
+// edge is soft by, from picks.yaml.
+var softShare = pick("grain-soft-share")
 
 // settle finds the grains' threshold, the value of their pattern above which a
 // filled share of the plane lies, by reading it at points across many of its
-// largest clumps; the softness of a clump's edge, a tenth of the layers'
+// largest clumps; the softness of a clump's edge, a share of the layers'
 // spread; and the spread of one layer, its pattern's standard deviation.
 func (made *grains) settle() {
 	values := make([]float64, samples)
-	one, sum, squares := made.seed^0x0e, 0.0, 0.0
+	one := made.seed ^ spreadSeedOffset
+	var sum, squares float64
 	for i := range values {
-		x := noise.Hash(made.seed^0x5eed, int64(2*i)) * 64 * made.largest
-		z := noise.Hash(made.seed^0x5eed, int64(2*i+1)) * 64 * made.largest
-		values[i], _ = made.layered(x, z, 0)
-		read := made.pattern(one, x/made.largest, z/made.largest, 0.5)
+		x := noise.Hash(made.seed^shapeSeedOffset,
+			int64(double*i)) * settleSpan * made.largest
+		z := noise.Hash(made.seed^shapeSeedOffset,
+			int64(double*i+adjacent)) * settleSpan * made.largest
+		values[i], _ = made.layered(x, z, nothing)
+		read := made.pattern(one, x/made.largest, z/made.largest,
+			settleDepth)
 		sum, squares = sum+read, squares+read*read
 	}
 	slices.Sort(values)
-	at := int((1 - filled(made.clumping)) * float64(samples-1))
+	at := int((whole - filled(made.clumping)) * float64(samples-adjacent))
 	made.threshold = values[at]
-	made.softness = 0.1 * (values[samples-1-samples/20] - values[samples/20])
-	mean := sum / samples
-	made.spread = math.Sqrt(math.Max(0, squares/samples-mean*mean))
+	made.softness = softShare * (values[samples-adjacent-samples/tailShare] -
+		values[samples/tailShare])
+	mean := sum / float64(samples)
+	variance := math.Max(nothing, squares/float64(samples)-mean*mean)
+	made.spread = math.Sqrt(variance)
 }
 
 // layered is the grains' pattern in layers at a point of the plane, a layer for
@@ -189,33 +264,34 @@ func (made grains) layered(x, z, finest float64) (sum, hidden float64) {
 	reach := math.Hypot(x, z)
 	round := math.Atan2(z, x)
 	along := reach / made.shear
-	size, unseen := made.largest, 0.0
-	for i := 0; i < mostLayers && size >= made.smallest; i++ {
+	size := made.largest
+	var unseen float64
+	for i := nothing; i < mostLayers && size >= made.smallest; i++ {
 		strength := made.weight(size)
-		seen := 1.0
-		if finest > 0 {
-			seen = math.Max(0, math.Min(1, size/finest-1))
+		var seen float64 = whole
+		if finest > nothing {
+			seen = math.Max(nothing, math.Min(whole, size/finest-whole))
 		}
-		unseen += (1 - seen*seen) * strength * strength
-		if seen > 0 {
+		unseen += (whole - seen*seen) * strength * strength
+		if seen > nothing {
 			sum += seen * strength * made.pattern(made.seed+uint64(i),
 				reach/size, along*math.Cos(round)/size,
 				along*math.Sin(round)/size)
 		}
-		size /= 2
+		size /= double
 	}
 	return sum, math.Sqrt(unseen) * made.spread
 }
 
 // hiddenWidths is how many standard deviations of the hidden layers wide
 // smoothstep's edge is taken over, so its slope at the middle is a normal
-// spread's: 3.75, worked from the two slopes.
-const hiddenWidths = 3.75
+// spread's; its value is in picks.yaml.
+var hiddenWidths = pick("grain-hidden-widths")
 
 // weight is how strongly a layer of clumps of a size shows against the
 // largest, by the power law of their sizes.
 func (made grains) weight(size float64) float64 {
-	return math.Pow(size/made.largest, (made.slope-2)/2)
+	return math.Pow(size/made.largest, (made.slope-double)/double)
 }
 
 // share is how much of the ring's mean depth stands at a point of its
@@ -231,13 +307,14 @@ func (made grains) weight(size float64) float64 {
 // under the footprint, as the light of a pixel is.
 //
 // modelled: the hidden layers are taken as a normal spread, its slope at
-// the middle matched by smoothstep's over 3.75 standard deviations.
+// the middle matched by smoothstep's over hiddenWidths standard deviations.
 func (made grains) share(x, z, finest float64) float64 {
-	if made.clumping == 0 || made.pattern == nil {
-		return 1
+	if made.clumping == nothing || made.pattern == nil {
+		return whole
 	}
 	sum, hidden := made.layered(x, z, finest)
 	width := made.softness + hiddenWidths*hidden
-	edge := math.Max(0, math.Min(1, (sum-made.threshold)/width+0.5))
+	edge := math.Max(nothing, math.Min(whole,
+		(sum-made.threshold)/width+half))
 	return eased(edge) / filled(made.clumping)
 }

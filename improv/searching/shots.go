@@ -21,7 +21,7 @@ import (
 // ShotPlan inserts an existing scene or an explicitly labelled missing shot.
 // From and Until are song cues; scene time and camera movement are authored.
 type ShotPlan struct {
-	Stage     *StagePlan     `yaml:"stage,omitempty"`
+	Stage     *stagePlan     `yaml:"stage,omitempty"`
 	From      string         `yaml:"from"`
 	Until     string         `yaml:"until"`
 	Scene     string         `yaml:"scene"`
@@ -47,8 +47,8 @@ func (edit *Edit) checkShots() error {
 	}
 	previous := -1.0
 	for _, shot := range edit.Plan.Shots {
-		from, a := edit.Cue(shot.From)
-		until, b := edit.Cue(shot.Until)
+		from, a := edit.cue(shot.From)
+		until, b := edit.cue(shot.Until)
 		if a != nil || b != nil || from < previous || until <= from || until > edit.Grid.Score.Duration ||
 			shot.Caption == "" || !bounded(shot.TimeScale, 0, 100) || !bounded(shot.Orbit, -360, 360) {
 			return fmt.Errorf("invalid or overlapping shot %q", shot.Caption)
@@ -127,7 +127,7 @@ func (renderer *Renderer) keepOnly(site string) {
 		return
 	}
 	renderer.Close()
-	renderer.sets = map[string]*Set{}
+	renderer.sets = map[string]*set{}
 	renderer.flow, renderer.stars, renderer.named = nil, nil, nil
 	renderer.active = site
 	runtime.GC()

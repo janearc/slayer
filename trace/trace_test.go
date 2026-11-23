@@ -22,13 +22,15 @@ func smoking() *thing.World {
 		Material: &thing.Material{Name: "chalk",
 			Colour: maths.Grey(0.8)},
 	})
+	clayAt := thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0)})
 	world.Add(thing.Thing{
 		Shape: shape.Sphere{Radius: 1},
 		Material: &thing.Material{Name: "clay",
 			Colour: maths.RGB(0.7, 0.3, 0.2)},
-		Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 1, 0)}),
+		Motion: clayAt,
 	})
-	world.Lamp(thing.Sun(sunwards, maths.Grey(1)))
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(sunwards, light))
 	return world
 }
 
@@ -142,7 +144,8 @@ func TestAGlossyFloorMirrorsTheSkyMoreAtAGraze(t *testing.T) {
 		}
 	}
 	dull := floor(0)
-	dull.Lamp(thing.Sun(maths.Up, maths.Grey(1)))
+	light := maths.Grey(1)
+	dull.Lamp(thing.Sun(maths.Up, light))
 	dullSteep := bright(lone(dull, steep, 0))
 	dullGraze := bright(lone(dull, graze, 0))
 	if dullSteep != dullGraze || dullSteep <= 0.05 {
@@ -167,9 +170,10 @@ func TestTheSkyLightsWhatItCanSee(t *testing.T) {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Colour: maths.Grey(0.5)}})
+	sphereAt := resting(maths.V(0, 1.5, 0))
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
 		Material: &thing.Material{Colour: maths.Grey(0.5)},
-		Motion:   resting(maths.V(0, 1.5, 0))})
+		Motion:   sphereAt})
 	world.Sky = skies.Gradient{Horizon: maths.Grey(1),
 		Zenith: maths.Grey(1)}
 	down := func(x float64) float64 {

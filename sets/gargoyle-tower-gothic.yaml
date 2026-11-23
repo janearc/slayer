@@ -1,0 +1,83 @@
+# a gothic tower of fifteen storeys in three segments, each stepping back
+# from the one below, with a gargoyle under every ledge: at each corner,
+# facing out along the diagonal, and along each face. The gargoyles are
+# the tower's own pin, gargoyles: true; they are the creatures of the
+# catalogue in order and cut in granite. Each lets its water go, and the
+# spout agent stains the face below it.
+#
+# places are metres, x east, y north, z up. the tower stands at the origin.
+# the sun, the sky, the ground and the cameras are choices of this study,
+# picked by eye for a plain grey light, and say so.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: gargoyle-tower-gothic
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # from the street across, looking up at the corner.
+    street:
+      title: "from the street, looking up at a corner of the tower"
+      wide: 50
+      location:
+        at: [40, -45, 1.7]
+      orientation:
+        look_at: [10, -10, 30]
+  recipes:
+    gothic: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: gothic, storeys: 15, segments: 3, width: {value: 24, unit: m}, taper: false, twist: false, setbacks: true, spire: false, gargoyles: true}}
+  set:
+    things:
+      tower: {recipe: gothic, seed: 3, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      pavement:
+        colour: {srgb_linear: [0.05, 0.05, 0.052]}
+        source: eye
+    boxes:
+      ground:
+        material: pavement
+        middle: [0, 0, -1]
+        size: [3000, 3000, 2]
+        source: eye
+    suns:
+      overcast:
+        toward: [-0.35, -0.75, 0.55]
+        colour: {srgb_linear: [2.4, 2.35, 2.25]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.32, 0.33, 0.36]}
+      zenith: {srgb_linear: [0.14, 0.16, 0.2]}
+      ground: {srgb_linear: [0.04, 0.04, 0.04]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 3
+      age: 60
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        # the water a spout lets go, which stains the face below it.
+        spout:
+          kind: spout
+          colour: {srgb_linear: [0.012, 0.011, 0.01]}
+          strength: 0.95
+          settle: 20
+          level: 0.3
+          length: 14
+          spacing: 0.9
+          spread: 0.12
+          upwind: 0.2
+          grain: 0.6
+          share: 0.7

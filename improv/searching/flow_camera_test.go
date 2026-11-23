@@ -11,7 +11,7 @@ import (
 func TestFlowTravelKeepsScaleAndHolds(t *testing.T) {
 	e := flowFixture()
 	e.Plan.FlowStudy.Eye = [3]float64{0, 0, 2}
-	e.Plan.FlowStudy.Travel = &FlowTravel{To: [3]float64{0, 0, 50}, Until: "5.1"}
+	e.Plan.FlowStudy.Travel = &flowTravel{To: [3]float64{0, 0, 50}, Until: "5.1"}
 	if err := e.checkFlow(); err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func TestFlowTravelKeepsScaleAndHolds(t *testing.T) {
 // TestFlowTravelRefusesSingularViews ensures malformed recipes fail before
 // native camera construction and cannot move through their own target.
 func TestFlowTravelRefusesSingularViews(t *testing.T) {
-	for _, travel := range []FlowTravel{
+	for _, travel := range []flowTravel{
 		{Until: "1.1", To: [3]float64{0, 0, 50}},
 		{Until: "5.1"},
 		{Until: "5.1", To: [3]float64{0, 0, -50}},

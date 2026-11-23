@@ -79,7 +79,7 @@ schema is not by itself evidence that a stage draws it.
 
 See the implemented support and refusals in [`set/space.go`](../set/space.go),
 [`set/space_things.go`](../set/space_things.go), and
-[`hillside/space.go`](../hillside/space.go).
+[`session/space.go`](../session/space.go).
 
 ## Direct Go surface geometry
 

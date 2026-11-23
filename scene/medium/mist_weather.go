@@ -75,10 +75,23 @@ func (weather GroveWeather) validMist() bool {
 		weather.Coverage <= weatherOne &&
 		weatherFinite(weather.Wind.Len()) &&
 		weatherFinite(weather.GroundFloor) &&
-		math.Abs(weather.Asymmetry) < weatherOne
+		math.Abs(weather.Asymmetry) < weatherOne &&
+		weather.Edge >= weatherZero && weather.Edge <= weather.Depth
 }
 
-// mistDensity shares the existing height fade and advected noise field.
+// profile is the share of the density held at a height below the top:
+// the whole of it to an edge under the top and thinning by a smooth step
+// to nothing at the top, or, with no edge, thinning from the bottom up.
+func (weather GroveWeather) profile(below float64) float64 {
+	if weather.Edge > weatherZero {
+		return weatherOne - maths.Smooth(weather.Depth-weather.Edge,
+			weather.Depth, below)
+	}
+	return weatherOne - maths.Smooth(weatherZero, weather.Depth, below)
+}
+
+// mistDensity is the height fade and the advected noise field that canopy,
+// regional and spherical weather share.
 // Weight is a spatial mask, such as canopy coverage; it is not a water rate.
 func (weather GroveWeather) mistDensity(at maths.Vec, below, seconds,
 	weight float64,
@@ -99,6 +112,5 @@ func (weather GroveWeather) mistDensity(at maths.Vec, below, seconds,
 		weight *= maths.Smooth(threshold-mistTuning.shoulder,
 			threshold+mistTuning.shoulder, patch)
 	}
-	return weather.Extinction * weight *
-		(weatherOne - maths.Smooth(weatherZero, weather.Depth, below))
+	return weather.Extinction * weight * weather.profile(below)
 }

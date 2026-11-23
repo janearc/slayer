@@ -75,7 +75,7 @@ func TestPictureIsACropOfTheStill(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	first, err := cut.Picture(0)
+	first, err := cut.picture(0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestPictureIsACropOfTheStill(t *testing.T) {
 	}
 	laid := cut.spans()
 	second := int(laid[1].start.Seconds() * testRate)
-	cutTo, err := cut.Picture(second + 1)
+	cutTo, err := cut.picture(second + 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,7 @@ func TestWindowMovesFromItsStartToItsEnd(t *testing.T) {
 	}
 	laid := cut.spans()
 	last := int(laid[0].end.Seconds()*testRate) - 1
-	picture, err := cut.Picture(last)
+	picture, err := cut.picture(last)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func TestFadeFromBlack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	black, err := cut.Picture(0)
+	black, err := cut.picture(0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestFadeFromBlack(t *testing.T) {
 		t.Errorf("a faded shot's first frame is %v", got)
 	}
 	plain, _ := scripted(t, twoShots, "")
-	lit, _ := plain.Picture(0)
+	lit, _ := plain.picture(0)
 	if lit.RGBAAt(20, 20).G == 0 {
 		t.Error("a shot with no fade started black")
 	}
@@ -146,8 +146,8 @@ func TestTitleUntilItsTime(t *testing.T) {
 		t.Fatal(err)
 	}
 	plain, _ := scripted(t, twoShots, "")
-	early, _ := titled.Picture(0)
-	bare, _ := plain.Picture(0)
+	early, _ := titled.picture(0)
+	bare, _ := plain.picture(0)
 	if bytes.Equal(early.Pix, bare.Pix) {
 		t.Error("the title is not on the first frame")
 	}
@@ -159,11 +159,11 @@ func TestTitleUntilItsTime(t *testing.T) {
 // samePicture is whether two cuts' frame index are the same picture.
 func samePicture(t *testing.T, cut, other Cut, index int) bool {
 	t.Helper()
-	first, err := cut.Picture(index)
+	first, err := cut.picture(index)
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := other.Picture(index)
+	second, err := other.picture(index)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +177,7 @@ func TestSoundIsTheBarsPlayed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sound, err := cut.Sound()
+	sound, err := cut.sound()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -92,10 +92,14 @@ func TestAnAirWithoutTheSunIsRefused(t *testing.T) {
 	}
 }
 
-// the anti-test: the same air under the sun, with no sun block, is read:
-// the refusal is of the light, not of the air.
+// workedSun says the date and the clock's offset the set's place and time
+// of day need to work the sun, in place of a sun block.
+const workedSun = "  date: \"2026-11-20\"\n  utc-offset: {value: -10, unit: h}\n"
+
+// the anti-test: the same air under the sun, with no sun block but a date
+// to work it from, is read: the refusal is of the light, not of the air.
 func TestAnAirUnderTheSunIsRead(t *testing.T) {
-	if _, err := aired(t, "  light: sun\n  air: venus\n"); err != nil {
+	if _, err := aired(t, anAir+workedSun); err != nil {
 		t.Errorf("an air under the sun: %v", err)
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"pgregory.net/rapid"
 )
 
-// authoredHostData preserves original guard examples as embedded inputs.
+// authoredHostData holds the guard examples as embedded inputs.
 //
 //go:embed testdata/host.yaml
 var authoredHostData []byte
@@ -54,7 +54,7 @@ func (example hostSampleData) value() hostSample {
 		stopped: example.Stopped}
 }
 
-// unsafeHostData names the seven original boundary and precedence cases.
+// unsafeHostData names the seven boundary and precedence cases.
 type unsafeHostData struct {
 	LoadAtCeiling     hostSampleData `yaml:"load_at_ceiling"`
 	SwapAtCeiling     hostSampleData `yaml:"swap_at_ceiling"`
@@ -73,7 +73,7 @@ type configuredHostData struct {
 	SwapAtCeiling hostSampleData `yaml:"swap_at_ceiling"`
 }
 
-// hostAvailability retains an original bit label and readiness witness.
+// hostAvailability holds a bit label and its readiness witness.
 type hostAvailability struct {
 	Label     string `yaml:"label"`
 	LoadKnown bool   `yaml:"load_known"`
@@ -126,7 +126,7 @@ type hostKnownFlags struct {
 	load, swap, disk bool
 }
 
-// requireAvailability retains every distinct tuple and its original readiness.
+// requireAvailability retains every distinct tuple and its readiness.
 func (examples hostFixtures) requireAvailability(t *testing.T) {
 	t.Helper()
 	seen := make(map[hostKnownFlags]struct{})
@@ -339,7 +339,7 @@ func TestHostReportsKnownDiskStopBeforeUnknownMeasurements(t *testing.T) {
 	}
 }
 
-// hostProperty retains value copies of the original valid policy and sample.
+// hostProperty retains value copies of the valid policy and sample.
 type hostProperty struct {
 	policy           hostPolicy
 	measured         hostSample

@@ -222,7 +222,8 @@ func encodeAdmissionIntent(intent admissionIntent) ([]byte, error) {
 	w.owner(intent.owner)
 	w.data = append(w.data, intent.predecessor[:]...)
 	w.data = append(w.data, intent.stateDigest[:]...)
-	w.u64(uint64(len(state)))
+	stateLength := uint64(len(state))
+	w.u64(stateLength)
 	w.data = append(w.data, state...)
 	return w.seal()
 }

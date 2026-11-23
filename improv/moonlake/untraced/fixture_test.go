@@ -191,8 +191,10 @@ func TestRecipeRefusals(t *testing.T) {
 		t.Errorf("a broken still gave %v", err)
 	}
 	given = recipe(t)
-	if err := os.WriteFile(filepath.Join(given.stills, "sets", "walk-ridge.yaml"),
-		[]byte(strings.Replace(recipeSet, "    ridge:", "    crest:", 1)), 0o644); err != nil {
+	ridgePath := filepath.Join(given.stills, "sets", "walk-ridge.yaml")
+	crested := strings.Replace(recipeSet, "    ridge:", "    crest:", 1)
+	if err := os.WriteFile(ridgePath,
+		[]byte(crested), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := partsOf(given); err == nil || !strings.Contains(err.Error(), "crest") {
@@ -207,7 +209,8 @@ func TestRecipeRefusals(t *testing.T) {
 		t.Error("a set that is not yaml was read")
 	}
 	given = recipe(t)
-	if err := os.WriteFile(given.score, []byte(beatsEvery(20)), 0o644); err != nil {
+	scoreText := beatsEvery(20)
+	if err := os.WriteFile(given.score, []byte(scoreText), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := partsOf(given); err == nil || !strings.Contains(err.Error(), "bar 9 beat 1") {

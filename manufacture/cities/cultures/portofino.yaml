@@ -1,0 +1,194 @@
+# Portofino, 2026-11-19. A quay of tall narrow houses in rendered
+# plaster, each bay its own saturated colour with no two neighbours
+# alike, green shutters beside the windows, roofs flat or low hips that
+# hardly show from below, and a roofline that steps because every bay
+# has its own number of storeys. No number is measured; each says
+# whether it was picked as a figure or set by eye.
+culture: portofino
+says: a quay of tall painted houses, stepped in height, with shutters
+elements:
+- element: bays
+  says: bays in the row
+  scope: row
+  draw: range
+  unit: bays
+  whole: true
+  least: 14
+  most: 14
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: bay-width
+  says: width of every bay of a row
+  scope: row
+  draw: range
+  unit: m
+  least: 5.4
+  most: 5.8
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: bay-depth
+  says: depth of every bay of a row, front to back
+  scope: row
+  draw: range
+  unit: m
+  least: 10
+  most: 12
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: storeys
+  says: storeys of a bay, drawn for each so the roofline steps
+  scope: bay
+  draw: range
+  unit: storeys
+  whole: true
+  least: 4
+  most: 6
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: storey-height
+  says: height of a storey, floor to floor, the same for the row
+  scope: row
+  draw: range
+  unit: m
+  least: 3
+  most: 3.3
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: roof-form
+  says: the form of each roof, mostly flat and sometimes a low hip
+  scope: bay
+  draw: options
+  unit: weight
+  options:
+  - {name: flat, weight: 2, colour: [0.2, 0.2, 0.2]}
+  - {name: hip, weight: 1}
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: roof-colour
+  says: the colour of the roofs, a weathered terracotta
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: terracotta, weight: 1, colour: [0.27, 0.1, 0.06], gloss: 0.1}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: roof-pitch
+  says: how steeply a hip rises, as height over half its width; low
+  scope: bay
+  draw: range
+  unit: rise over run
+  least: 0.15
+  most: 0.25
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: palette
+  says: the colours of the bays, red, ochre, yellow, pink and cream
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 1, colour: [0.42, 0.05, 0.035]}
+  - {name: ochre, weight: 1, colour: [0.5, 0.25, 0.05]}
+  - {name: yellow, weight: 1, colour: [0.68, 0.48, 0.06]}
+  - {name: pink, weight: 1, colour: [0.55, 0.2, 0.2]}
+  - {name: cream, weight: 1, colour: [0.68, 0.58, 0.4]}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: palette-spread
+  says: how many of the palette's colours the district uses
+  scope: district
+  draw: range
+  unit: colours
+  whole: true
+  least: 5
+  most: 5
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: distinct-neighbours
+  says: no two adjacent bays share a colour
+  scope: district
+  draw: share
+  unit: chance
+  share: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: cladding
+  says: render; the colour is a tint on the bay's colour and the gloss is the plaster's
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: render, weight: 1, colour: [1, 1, 1], gloss: 0.08}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: window-count
+  says: windows in each storey of a bay
+  scope: storey
+  draw: range
+  unit: windows
+  whole: true
+  least: 2
+  most: 2
+  kind: picked
+  by: "terraces study, 2026-11-19, picked"
+- element: window-width
+  says: width of a window, without its shutters
+  scope: storey
+  draw: range
+  unit: m
+  least: 0.8
+  most: 0.9
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: window-height
+  says: height of a window, tall and narrow
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.8
+  most: 2
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: window-sill
+  says: height of a window's foot over the floor
+  scope: district
+  draw: range
+  unit: m
+  least: 0.6
+  most: 0.6
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: shutters
+  says: whether the windows of a bay have green shutters beside them
+  scope: bay
+  draw: share
+  unit: chance
+  share: 1
+  kind: picked
+  by: "terraces study, 2026-11-19, picked from the brief"
+- element: chimney
+  says: whether a bay with a party wall has a chimney on it
+  scope: bay
+  draw: share
+  unit: chance
+  share: 0.15
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: lit-share
+  says: share of windows with a light on at dusk
+  scope: opening
+  draw: share
+  unit: chance
+  share: 0.3
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"
+- element: frame-colour
+  says: the paint of window frames, a cream white
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: cream-white, weight: 1, colour: [0.6, 0.58, 0.5], gloss: 0.4}
+  kind: picked
+  by: "terraces study, 2026-11-19, by eye"

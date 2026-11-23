@@ -73,7 +73,8 @@ func finished(job queue.Job, result queue.Result, at time.Time) queue.Job {
 // lineFieldsOf is barkeep's line as its five words.
 func lineFieldsOf(t *testing.T, root string) []string {
 	t.Helper()
-	return strings.Fields(read(t, filepath.Join(root, progressName)))
+	progressPath := filepath.Join(root, progressName)
+	return strings.Fields(read(t, progressPath))
 }
 
 // pair is two render folders of stills.
@@ -96,7 +97,8 @@ func TestTwoJobsInOneFolderShareItsPageAndLine(t *testing.T) {
 	coordinator.Start(jobFor(2, root, pair[0], 12))
 	coordinator.tick(t.Context())
 	line := lineFieldsOf(t, root)
-	page := read(t, filepath.Join(pair[0].path(root), pageName))
+	pagePath := filepath.Join(pair[0].path(root), pageName)
+	page := read(t, pagePath)
 	if line[0] != "3" || line[1] != "12" || !strings.Contains(page,
 		"3 pictures.") {
 		t.Fatal(line, page)
@@ -136,7 +138,8 @@ func TestUnknownTotalWritesNoLine(t *testing.T) {
 // startPair starts a job in each folder of the pair, the first older.
 func startPair(root string, coordinator *Coordinator, pictures []int64) {
 	for index, folder := range pair {
-		coordinator.Start(jobFor(uint64(index+1), root, folder,
+		number := uint64(index + 1)
+		coordinator.Start(jobFor(number, root, folder,
 			pictures[index]))
 	}
 }
@@ -287,7 +290,8 @@ func publishFilmJob(t *testing.T, root string, sequence uint64,
 	coordinator.tick(t.Context())
 	coordinator.encoding.Wait()
 	coordinator.End(job, succeeded)
-	return read(t, filepath.Join(folder.path(root), pageName))
+	pagePath := filepath.Join(folder.path(root), pageName)
+	return read(t, pagePath)
 }
 
 // restartFolder is a film folder with a hand page and a first
@@ -320,7 +324,8 @@ func TestRestartPublishesFromDiskAlone(t *testing.T) {
 	if after := publishFilmJob(t, root, 2, encoder); after != before {
 		t.Fatal("the page changed on restart:", after)
 	}
-	aside := read(t, filepath.Join(folder.path(root), handPageName))
+	handPath := filepath.Join(folder.path(root), handPageName)
+	aside := read(t, handPath)
 	if aside != "<p>hers</p>\n" || !regularFile(filepath.Join(root,
 		latestName)) {
 		t.Fatal("the restart lost the hand page or the gallery")
@@ -350,11 +355,12 @@ func TestFinalFilmRetriesOnTheNextPoll(t *testing.T) {
 	job := finished(filmJob(root), succeeded, fixtureNoon)
 	c := New(settingsFor(root, encoder, &clock{at: fixtureNoon}), io.Discard)
 	c.look(t.Context(), ledgerOf(t, []queue.Job{job}))
-	if regularFile(filepath.Join(folder.path(root), partialName)) {
+	partialPath := filepath.Join(folder.path(root), partialName)
+	if regularFile(partialPath) {
 		t.Fatal("failed encode published a movie")
 	}
 	c.look(t.Context(), ledgerOf(t, []queue.Job{job}))
-	if !regularFile(filepath.Join(folder.path(root), partialName)) {
+	if !regularFile(partialPath) {
 		t.Fatal("completed job never retried publication")
 	}
 	c.look(t.Context(), ledgerOf(t, []queue.Job{job}))
@@ -404,7 +410,8 @@ func TestPublisherFlushesCompletedJobOnShutdown(t *testing.T) {
 	<-seen
 	cancel()
 	<-done
-	if !regularFile(filepath.Join(pair[0].path(root), pageName)) {
+	pagePath := filepath.Join(pair[0].path(root), pageName)
+	if !regularFile(pagePath) {
 		t.Fatal("shutdown missed the completed job")
 	}
 }
@@ -420,7 +427,8 @@ func firstLookAt(t *testing.T, ended time.Time) bool {
 	coordinator := New(settingsFor(root, nil, &clock{at: fixtureNoon}),
 		io.Discard)
 	coordinator.look(t.Context(), ledgerOf(t, []queue.Job{job}))
-	return regularFile(filepath.Join(pair[0].path(root), pageName))
+	pagePath := filepath.Join(pair[0].path(root), pageName)
+	return regularFile(pagePath)
 }
 
 // TestFirstLookPublishesAnEndItMissed: a job that ended a minute before a
@@ -440,7 +448,8 @@ func TestPublishesJobThatFinishesBetweenPollsOnce(t *testing.T) {
 	c.look(t.Context(), ledgerOf(t, nil))
 	job := finished(jobFor(1, root, pair[0], 1), succeeded, fixtureNoon)
 	c.look(t.Context(), ledgerOf(t, []queue.Job{job}))
-	if !regularFile(filepath.Join(pair[0].path(root), pageName)) {
+	pagePath := filepath.Join(pair[0].path(root), pageName)
+	if !regularFile(pagePath) {
 		t.Fatal("job completed between polls was missed")
 	}
 	path := staleGallery(t, root)
@@ -536,12 +545,13 @@ func runJobs(root string, ledger *changingLedger, hands *clock) {
 			for index := range picturesEach {
 				hands.advance(TickEvery)
 				name := fmt.Sprintf("%d-%d.png", sequence, index)
-				os.WriteFile(filepath.Join(folder.path(root), name),
-					[]byte("picture"), listing)
+				target := filepath.Join(folder.path(root), name)
+				os.WriteFile(target, []byte("picture"), listing)
 				time.Sleep(time.Millisecond)
 			}
 			job := jobFor(sequence+1, root, folder, 2*picturesEach)
-			ledger.set(finished(job, succeeded, hands.now()))
+			done := finished(job, succeeded, hands.now())
+			ledger.set(done)
 		})
 	}
 	jobs.Wait()
@@ -639,12 +649,12 @@ func TestASecondCoordinatorIsRefused(t *testing.T) {
 	}
 	defer first.Close()
 	_, err = lock(queueRoot, fixtureNoon)
-	if err == nil || !strings.Contains(err.Error(),
-		fmt.Sprintf("process %d", os.Getpid())) {
+	holder := fmt.Sprintf("process %d", os.Getpid())
+	if err == nil || !strings.Contains(err.Error(), holder) {
 		t.Fatal("a second coordinator was not refused:", err)
 	}
-	if Serve(t.Context(), queueRoot, settingsFor(renders(t), nil,
-		&clock{at: fixtureNoon}), io.Discard) == nil {
+	serveSettings := settingsFor(renders(t), nil, &clock{at: fixtureNoon})
+	if Serve(t.Context(), queueRoot, serveSettings, io.Discard) == nil {
 		t.Fatal("Serve ran beside a held lock")
 	}
 }

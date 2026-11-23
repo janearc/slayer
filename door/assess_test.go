@@ -66,6 +66,7 @@ func TestAssessOpensTheTitles(t *testing.T) {
 func TestAssessRefusesWhatItCannotDo(t *testing.T) {
 	t.Setenv("SLAYER_CACHE", t.TempDir())
 	directory := t.TempDir()
+	held := written(t, t.TempDir(), "held", "held")
 	for _, refusal := range []struct {
 		args []string
 		said string
@@ -86,7 +87,7 @@ func TestAssessRefusesWhatItCannotDo(t *testing.T) {
 		{[]string{"--smokes", "9999", "--dry-run"}, "slayer has no smoke " +
 			"9999"},
 		{[]string{"--smokes", "1", "--k", "1", "--out", filepath.Join(
-			written(t, t.TempDir(), "held", "held"), "copies")},
+			held, "copies")},
 			"not a directory"},
 	} {
 		got := assessed(t, directory, refusal.args...)
@@ -162,7 +163,8 @@ func Example_assess() {
 	var said strings.Builder
 	Tool(env).Run([]string{"assess", "../sets/widow.yaml", "--dry-run"},
 		&said, &said)
-	fmt.Print(strings.ReplaceAll(said.String(), here, "."))
+	shown := strings.ReplaceAll(said.String(), here, ".")
+	fmt.Print(shown)
 	// Output:
 	// widow.yaml will draw, as a still; nothing was drawn
 	// draw would write picture ./out/widow.png

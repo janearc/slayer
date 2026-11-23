@@ -1,0 +1,602 @@
+# The condominium, 2026-11-19. Two to four buildings of four or five
+# storeys of stacked flats, drawn together round a shared paved court,
+# each with a stair core standing a little proud of its front. Flat
+# roofs with a parapet. No number is measured; each says whether it was
+# picked as a figure or set by eye.
+culture: condominium
+says: blocks of stacked flats round one shared court
+elements:
+- element: buildings
+  says: buildings round the court
+  scope: district
+  draw: range
+  unit: buildings
+  whole: true
+  least: 2
+  most: 4
+  kind: picked
+  by: "condominium study, 2026-11-19, picked from the brief"
+- element: court-width
+  says: width of the court, east to west, which is the length of the north and south buildings
+  scope: district
+  draw: range
+  unit: m
+  least: 28
+  most: 34
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: court-depth
+  says: depth of the court, north to south, which is the length of the east and west buildings
+  scope: district
+  draw: range
+  unit: m
+  least: 24
+  most: 28
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: building-depth
+  says: depth of a building from its back to its front
+  scope: bay
+  draw: range
+  unit: m
+  least: 11
+  most: 12
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: storeys
+  says: storeys of a building
+  scope: bay
+  draw: range
+  unit: storeys
+  whole: true
+  least: 4
+  most: 5
+  kind: picked
+  by: "condominium study, 2026-11-19, picked from the brief"
+- element: storey-height
+  says: height of a storey, floor to floor
+  scope: bay
+  draw: range
+  unit: m
+  least: 2.8
+  most: 3
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: roof-form
+  says: the form of every roof
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: flat, weight: 1}
+  kind: picked
+  by: "condominium study, 2026-11-19, picked"
+- element: roof-colour
+  says: the colour of the roofs and parapets
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: tar, weight: 1, colour: [0.07, 0.07, 0.075], gloss: 0.1}
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: palette
+  says: the colours of the buildings
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: cream, weight: 1, colour: [0.6, 0.55, 0.43]}
+  - {name: brick, weight: 1, colour: [0.3, 0.1, 0.06]}
+  - {name: stone-grey, weight: 1, colour: [0.28, 0.29, 0.3]}
+  - {name: white, weight: 1, colour: [0.62, 0.62, 0.6]}
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: palette-spread
+  says: how many of the palette's colours the district uses
+  scope: district
+  draw: range
+  unit: colours
+  whole: true
+  least: 4
+  most: 4
+  kind: picked
+  by: "condominium study, 2026-11-19, picked"
+- element: distinct-neighbours
+  says: no two buildings in a row of them share a colour
+  scope: district
+  draw: share
+  unit: chance
+  share: 1
+  kind: picked
+  by: "condominium study, 2026-11-19, picked"
+- element: cladding
+  says: render; the colour is a tint on the building's colour and the gloss is the plaster's
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: render, weight: 3, colour: [1, 1, 1], gloss: 0.1}
+  - {name: brick-slips, weight: 1, colour: [1, 1, 1], gloss: 0.18}
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: window-count
+  says: windows in each storey of a building's front
+  scope: storey
+  draw: range
+  unit: windows
+  whole: true
+  least: 5
+  most: 6
+  kind: picked
+  by: "condominium study, 2026-11-19, picked"
+- element: window-width
+  says: width of a window
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.3
+  most: 1.5
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: window-height
+  says: height of a window
+  scope: storey
+  draw: range
+  unit: m
+  least: 1.5
+  most: 1.7
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: window-sill
+  says: height of a window's foot over the floor
+  scope: district
+  draw: range
+  unit: m
+  least: 0.9
+  most: 0.9
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: lit-share
+  says: share of windows with a light on at dusk
+  scope: opening
+  draw: share
+  unit: chance
+  share: 0.4
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+- element: paving-colour
+  says: the paving of the court
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: paving, weight: 1, colour: [0.11, 0.11, 0.115], gloss: 0.1}
+  kind: picked
+  by: "condominium study, 2026-11-19, by eye"
+# Dwellings, 2026-11-19: the windows of one household in a storey are
+# a dwelling, and what a household chose for them is drawn at that
+# scope. Every number here is picked by eye, in the detail study.
+- {element: dwelling-windows, says: "windows in one household's flat along a storey of a front", scope: storey, draw: range, unit: windows, whole: true, least: 2, most: 3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: household-lit, says: "share of dwellings with their lights on at dusk, all the windows of the flat together", scope: dwelling, draw: share, unit: chance, share: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: blind-share, says: "share of dwellings with a roller blind rather than a curtain", scope: dwelling, draw: share, unit: chance, share: 0.3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: blind-drop, says: "how much of a window's height its blind is let down, from the top", scope: dwelling, draw: range, unit: share, least: 0.15, most: 1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: household-curtain, says: "share of the dwellings with no blind that have a curtain", scope: dwelling, draw: share, unit: chance, share: 0.65, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: household-cover, says: "how much of a window's width a dwelling's curtain hangs over", scope: dwelling, draw: range, unit: share, least: 0.3, most: 0.9, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: balcony-share, says: "share of dwellings above the ground storey with a balcony", scope: dwelling, draw: share, unit: chance, share: 0.6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: household-aircon, says: "share of dwellings with no balcony that have an air-conditioning unit under a window", scope: dwelling, draw: share, unit: chance, share: 0.3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: replaced-window, says: "share of dwellings with a window replaced, in a frame unlike the building's", scope: dwelling, draw: share, unit: chance, share: 0.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: clutter-count, says: "how many things a household keeps on an open balcony", scope: dwelling, draw: range, unit: things, whole: true, least: 0, most: 3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: balcony-kind
+  says: the kind of balcony a household has, open or glazed in
+  scope: dwelling
+  draw: options
+  unit: weight
+  options:
+  - {name: open, weight: 5}
+  - {name: enclosed, weight: 1}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: clutter-item
+  says: a thing kept on an open balcony
+  scope: dwelling
+  draw: options
+  unit: weight
+  options:
+  - {name: plant, weight: 4}
+  - {name: bike, weight: 2}
+  - {name: laundry, weight: 2}
+  - {name: chair, weight: 3}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: pot-colour
+  says: the pot of a plant on a balcony
+  scope: dwelling
+  draw: options
+  unit: share of light
+  options:
+  - {name: terracotta, weight: 3, colour: [0.35, 0.14, 0.07], gloss: 0.05}
+  - {name: white, weight: 1, colour: [0.6, 0.6, 0.58], gloss: 0.2}
+  - {name: slate, weight: 1, colour: [0.12, 0.13, 0.14], gloss: 0.1}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: bike-colour
+  says: the frame of a bicycle or a drying rack
+  scope: dwelling
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 1, colour: [0.4, 0.04, 0.04], gloss: 0.4}
+  - {name: blue, weight: 1, colour: [0.05, 0.1, 0.35], gloss: 0.4}
+  - {name: black, weight: 1, colour: [0.03, 0.03, 0.035], gloss: 0.4}
+  - {name: aluminium, weight: 1, colour: [0.45, 0.46, 0.47], gloss: 0.5}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: chair-colour
+  says: a chair on a balcony
+  scope: dwelling
+  draw: options
+  unit: share of light
+  options:
+  - {name: green, weight: 1, colour: [0.06, 0.25, 0.1], gloss: 0.2}
+  - {name: white, weight: 1, colour: [0.6, 0.6, 0.58], gloss: 0.2}
+  - {name: timber, weight: 1, colour: [0.3, 0.17, 0.08], gloss: 0.1}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: blind-colour
+  says: the cloth of a roller blind
+  scope: dwelling
+  draw: options
+  unit: share of light
+  options:
+  - {name: white, weight: 3, colour: [0.65, 0.65, 0.62], gloss: 0}
+  - {name: grey, weight: 1, colour: [0.3, 0.31, 0.32], gloss: 0}
+  - {name: sand, weight: 2, colour: [0.5, 0.42, 0.28], gloss: 0}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: replaced-frame
+  says: the frame of a replaced window
+  scope: dwelling
+  draw: options
+  unit: share of light
+  options:
+  - {name: white, weight: 3, colour: [0.8, 0.8, 0.78], gloss: 0.3}
+  - {name: black, weight: 1, colour: [0.02, 0.02, 0.025], gloss: 0.3}
+  - {name: bronze, weight: 1, colour: [0.22, 0.14, 0.07], gloss: 0.4}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: home-balcony-side, says: "how far a dwelling's balcony reaches past each of its outer windows", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: home-balcony-depth, says: "how far a dwelling's balcony stands out of the wall", scope: district, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: enclosed-height, says: "height of a glazed-in balcony over its floor", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: enclosed-bar, says: "thickness of the posts and rail of a glazed-in balcony", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: piece-gap, says: "the least gap between things on a balcony and from them to the rail", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: piece-reach, says: "how far a thing on a balcony reaches out from where it is placed, at most", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: plant-width, says: "width of the leaves of a plant on a balcony", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: pot-width, says: "width of a plant's pot", scope: district, draw: range, unit: m, least: 0.36, most: 0.36, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: pot-height, says: "height of a plant's pot", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: foliage-height, says: "height of the leaves of a plant on a balcony", scope: district, draw: range, unit: m, least: 0.55, most: 0.55, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: bike-length, says: "length of a bicycle", scope: district, draw: range, unit: m, least: 1.7, most: 1.7, kind: picked, by: "condominium detail study, 2026-11-19, a common frame"}
+- {element: wheel-size, says: "width of a bicycle's wheel across", scope: district, draw: range, unit: m, least: 0.66, most: 0.66, kind: picked, by: "condominium detail study, 2026-11-19, a common wheel"}
+- {element: tyre-width, says: "thickness of a bicycle's tyre", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: bike-bar, says: "thickness of the tubes of a bicycle and of a drying rack", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: bike-seat, says: "height of a bicycle's seat over the ground", scope: district, draw: range, unit: m, least: 0.95, most: 0.95, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: chair-width, says: "width of a balcony chair", scope: district, draw: range, unit: m, least: 0.46, most: 0.46, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: chair-seat, says: "height of a balcony chair's seat", scope: district, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: chair-back, says: "height of a balcony chair's back over its seat", scope: district, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: chair-leg, says: "thickness of a balcony chair's legs and seat", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: rack-length, says: "length of a drying rack", scope: district, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: rack-height, says: "height of a drying rack's bar", scope: district, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+# Facade systems and structure, 2026-11-19: a building is built by one
+# method, and the method shows on its face. A stair core has a guard rail
+# at each landing window and a stone portal at its entrance.
+- element: facade-system
+  says: the method a building's face is built by, which shows on it; brick buildings show their courses and take none
+  scope: bay
+  draw: options
+  unit: weight
+  options:
+  - {name: stucco, weight: 3}
+  - {name: precast, weight: 3}
+  - {name: curtain-wall, weight: 2}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: joint-colour
+  says: the seam between precast panels
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: seam, weight: 1, colour: [0.04, 0.04, 0.04], gloss: 0}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: spandrel-colour
+  says: the opaque panel of a curtain wall between its ribbons of glass
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: blue-glass, weight: 2, colour: [0.04, 0.07, 0.1], gloss: 0.8}
+  - {name: green-glass, weight: 1, colour: [0.04, 0.09, 0.07], gloss: 0.8}
+  - {name: charcoal, weight: 1, colour: [0.05, 0.05, 0.055], gloss: 0.7}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: mullion-colour
+  says: the frame that holds the glass of a curtain wall
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: anodised, weight: 2, colour: [0.4, 0.4, 0.42], gloss: 0.6}
+  - {name: dark-bronze, weight: 1, colour: [0.07, 0.06, 0.05], gloss: 0.5}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: panel-width, says: "width of a precast concrete panel, from joint to joint", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: joint-width, says: "width of the seam between precast panels", scope: district, draw: range, unit: m, least: 0.025, most: 0.025, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: joint-proud, says: "how far the seam of a precast joint stands out of the wall", scope: district, draw: range, unit: m, least: 0.012, most: 0.012, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: spandrel-proud, says: "how far a spandrel panel of a curtain wall stands out of the wall", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: mullion-width, says: "width of a curtain wall's mullion", scope: district, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: mullion-proud, says: "how far a curtain wall's mullion stands out of the wall", scope: district, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: guard-side, says: "how far a landing window's guard rail reaches past each side of the window", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: guard-depth, says: "how far a landing window's guard rail stands out of the wall", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: guard-height, says: "height of a landing window's guard rail over its sill", scope: district, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "condominium detail study, 2026-11-19, a guard's usual height"}
+- {element: portal-jamb, says: "width of the stone jamb and lintel round a stair core's entrance", scope: district, draw: range, unit: m, least: 0.18, most: 0.18, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: portal-proud, says: "how far a portal's stone stands out of the wall", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: entry-panel-width, says: "width of the buttons and speaker panel beside an entrance", scope: district, draw: range, unit: m, least: 0.16, most: 0.16, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: entry-panel-height, says: "height of the panel beside an entrance", scope: district, draw: range, unit: m, least: 0.28, most: 0.28, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: entry-panel-proud, says: "how far the panel beside an entrance stands out of the wall", scope: district, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: entry-panel-rise, says: "height of the foot of the panel beside an entrance over the ground", scope: district, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "condominium detail study, 2026-11-19, a hand's height"}
+# The top, 2026-11-19: what a flat roof carries, drawn for each building.
+- {element: roof-items, says: "how many things a building carries on its roof", scope: bay, draw: range, unit: things, whole: true, least: 2, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: roof-item
+  says: a thing a roof carries
+  scope: bay
+  draw: options
+  unit: weight
+  options:
+  - {name: plant-room, weight: 3}
+  - {name: tank, weight: 3}
+  - {name: antenna, weight: 3}
+  - {name: gantry, weight: 1}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: roof-steel-colour
+  says: the steel of a roof's masts, legs and frames
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 1, colour: [0.32, 0.33, 0.34], gloss: 0.5}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: roof-housing-colour
+  says: the housing of a roof's plant room and dish
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: grey, weight: 2, colour: [0.35, 0.36, 0.36], gloss: 0.2}
+  - {name: cream, weight: 1, colour: [0.5, 0.47, 0.4], gloss: 0.2}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: roof-tank-colour
+  says: a water tank
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: green, weight: 1, colour: [0.07, 0.2, 0.12], gloss: 0.3}
+  - {name: blue, weight: 1, colour: [0.06, 0.14, 0.3], gloss: 0.3}
+  - {name: steel, weight: 1, colour: [0.3, 0.31, 0.32], gloss: 0.5}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: roof-plant-width, says: "width of a roof's plant room", scope: district, draw: range, unit: m, least: 3.2, most: 3.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: roof-plant-height, says: "height of a roof's plant room", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: roof-plant-depth, says: "depth of a roof's plant room", scope: district, draw: range, unit: m, least: 2.2, most: 2.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: vent-stack, says: "the side of the vent stack on a plant room", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: tank-width, says: "width of a roof water tank across", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: tank-height, says: "height of a roof water tank's drum", scope: district, draw: range, unit: m, least: 2.2, most: 2.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: tank-stand, says: "height of the legs a water tank stands on", scope: district, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: tank-leg, says: "thickness of a water tank's legs", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: antenna-span, says: "width of an antenna's cross bar", scope: district, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: mast-width, says: "thickness of an antenna's mast", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: mast-height, says: "height of an antenna's mast", scope: district, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: antenna-bar, says: "thickness of an antenna's cross bars", scope: district, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: gantry-span, says: "width of a building's cleaning gantry", scope: district, draw: range, unit: m, least: 4.5, most: 4.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: gantry-post, says: "thickness of a gantry's posts and beam", scope: district, draw: range, unit: m, least: 0.18, most: 0.18, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: gantry-height, says: "height of a gantry's beam over the roof", scope: district, draw: range, unit: m, least: 2.6, most: 2.6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: cradle-height, says: "height of the cradle hung from a gantry", scope: district, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+# The base, 2026-11-19: a canopy at each stair core, a row of shops along
+# the front, and the court's shared ground.
+- {element: canopy-rise, says: "height of an entrance canopy over the ground", scope: district, draw: range, unit: m, least: 2.9, most: 2.9, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: canopy-depth, says: "how far an entrance canopy stands out of the face", scope: district, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: canopy-side, says: "how far an entrance canopy reaches past each side of the stair core", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: canopy-thickness, says: "thickness of a canopy", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: canopy-post, says: "thickness of the posts an entrance canopy stands on", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: shops, says: "how many shops are in the row along a building's front", scope: bay, draw: range, unit: shops, whole: true, least: 2, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: shop-colour
+  says: the colour a shop's sign glows
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 1, colour: [0.9, 0.12, 0.1], gloss: 0.2}
+  - {name: amber, weight: 1, colour: [0.95, 0.6, 0.12], gloss: 0.2}
+  - {name: green, weight: 1, colour: [0.15, 0.8, 0.3], gloss: 0.2}
+  - {name: white, weight: 1, colour: [0.9, 0.9, 0.85], gloss: 0.2}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: shop-fascia-rise, says: "height of the foot of a shop's sign over the ground", scope: district, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: shop-sign-height, says: "height of a shop's sign", scope: district, draw: range, unit: m, least: 0.55, most: 0.55, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: shop-sign-proud, says: "how far a shop's sign stands out of the face", scope: district, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: shop-canopy-depth, says: "how far a shop's canopy stands out of the face", scope: district, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: sign-glow, says: "how many times brighter a lit sign glows than its colour reflects", scope: district, draw: range, unit: scale, least: 6, most: 6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: plaza-width, says: "width of the plaza at the court's middle, east to west", scope: district, draw: range, unit: m, least: 10, most: 10, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: plaza-depth, says: "depth of the plaza, north to south", scope: district, draw: range, unit: m, least: 8, most: 8, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: plaza-rise, says: "how far the plaza stands over the court's paving", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: plaza-colour
+  says: the paving of the plaza and its ramp
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: pale-stone, weight: 1, colour: [0.3, 0.29, 0.27], gloss: 0.1}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: ramp-run, says: "how far the plaza's ramp runs out along the court", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: ramp-width, says: "width of the plaza's ramp", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: ramp-slab, says: "thickness of the plaza's ramp", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: bench-length, says: "length of a plaza bench", scope: district, draw: range, unit: m, least: 2, most: 2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: bench-height, says: "height of a plaza bench's seat", scope: district, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: bench-width, says: "depth of a plaza bench", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: bench-colour
+  says: the timber of a bench
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: oak, weight: 1, colour: [0.25, 0.15, 0.08], gloss: 0.1}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: path-width, says: "width of a path across the court", scope: district, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: path-height, says: "how far a path stands over the court's paving", scope: district, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: path-colour
+  says: the surface of a path across the court
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: gravel, weight: 1, colour: [0.2, 0.19, 0.17], gloss: 0.05}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: bed-size, says: "the side of a planting bed on the plaza", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: bed-height, says: "height of a planting bed's soil over the plaza", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: bed-colour
+  says: the soil of a planting bed
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: soil, weight: 1, colour: [0.07, 0.05, 0.03], gloss: 0}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: trunk-width, says: "thickness of a tree's trunk", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: trunk-height, says: "height of a tree's bare trunk", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: crown-width, says: "width of a tree's crown at its foot", scope: district, draw: range, unit: m, least: 2.8, most: 2.8, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: crown-height, says: "height of a tree's crown", scope: district, draw: range, unit: m, least: 3.2, most: 3.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: trunk-colour
+  says: the bark of a tree
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: bark, weight: 1, colour: [0.1, 0.07, 0.04], gloss: 0}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: crown-colour
+  says: the leaves of a tree
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: leaf, weight: 1, colour: [0.04, 0.16, 0.06], gloss: 0.05}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: cars, says: "how many cars are parked in the court", scope: district, draw: range, unit: cars, whole: true, least: 3, most: 5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: car-length, says: "length of a car", scope: district, draw: range, unit: m, least: 4.2, most: 4.2, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: car-width, says: "width of a car", scope: district, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: car-body, says: "height of a car's body", scope: district, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: car-lift, says: "how far a car's body stands over the ground", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: car-margin, says: "how far a parked car stands in from the faces round the court", scope: district, draw: range, unit: m, least: 3.5, most: 3.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: cabin-length, says: "length of a car's cabin", scope: district, draw: range, unit: m, least: 2.3, most: 2.3, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: cabin-height, says: "height of a car's cabin over its body", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: cabin-inset, says: "how far in from the car's sides its cabin stands", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: wheel-diameter, says: "width of a car's wheel across", scope: district, draw: range, unit: m, least: 0.65, most: 0.65, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- {element: car-tyre, says: "width of a car's tyre", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "condominium detail study, 2026-11-19, a small car"}
+- element: car-colour
+  says: the paint of a car
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: silver, weight: 2, colour: [0.4, 0.4, 0.42], gloss: 0.7}
+  - {name: red, weight: 1, colour: [0.3, 0.03, 0.03], gloss: 0.7}
+  - {name: blue, weight: 1, colour: [0.04, 0.08, 0.28], gloss: 0.7}
+  - {name: white, weight: 1, colour: [0.65, 0.65, 0.62], gloss: 0.7}
+  - {name: black, weight: 1, colour: [0.03, 0.03, 0.035], gloss: 0.7}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- element: tyre-colour
+  says: the rubber of a tyre
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: rubber, weight: 1, colour: [0.02, 0.02, 0.02], gloss: 0.1}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+# Setbacks and decks, 2026-11-19: a tall building may step back every few
+# storeys, and each roof it leaves bare is a deck.
+- {element: tall-share, says: "share of buildings that are tall, of many storeys", scope: bay, draw: share, unit: chance, share: 0.45, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: tall-storeys, says: "storeys of a tall building", scope: bay, draw: range, unit: storeys, whole: true, least: 8, most: 12, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: setback-share, says: "share of buildings that step back as they rise", scope: bay, draw: share, unit: chance, share: 0.75, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: setback-every, says: "how many storeys a building rises before it steps back", scope: bay, draw: range, unit: storeys, whole: true, least: 3, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: setback-depth, says: "how far the front stands back at each step", scope: bay, draw: range, unit: m, least: 2.6, most: 3.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: setback-least-depth, says: "the least depth a tier may have, from its back to its front, before it stops stepping back", scope: district, draw: range, unit: m, least: 4.5, most: 4.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-margin, says: "how far a deck's usable floor stands off the face of the tier above", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-thickness, says: "thickness of a deck's boards", scope: district, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: deck-colour
+  says: the boards of a deck
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: weathered, weight: 2, colour: [0.2, 0.15, 0.1], gloss: 0.05}
+  - {name: grey, weight: 1, colour: [0.15, 0.15, 0.15], gloss: 0.05}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"
+- {element: deck-rail-height, says: "height of a deck's railing", scope: district, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "condominium detail study, 2026-11-19, a guard's usual height"}
+- {element: deck-rail-post, says: "thickness of a deck railing's posts", scope: district, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-rail-pitch, says: "how far apart the posts of a deck's railing are", scope: district, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-planters, says: "how many planters stand along a deck's front", scope: bay, draw: range, unit: planters, whole: true, least: 3, most: 5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-planter-width, says: "width of a deck planter", scope: district, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-planter-height, says: "height of a deck planter's trough", scope: district, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-planter-depth, says: "depth of a deck planter", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-foliage-height, says: "height of the leaves in a deck planter", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-gap, says: "the gap kept between things on a deck", scope: district, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-table-width, says: "width of a deck table", scope: district, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-table-height, says: "height of a deck table", scope: district, draw: range, unit: m, least: 0.75, most: 0.75, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-table-depth, says: "depth of a deck table", scope: district, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: deck-chairs, says: "how many chairs stand round a deck's table", scope: bay, draw: range, unit: chairs, whole: true, least: 2, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: pergola-share, says: "share of decks with a pergola over the table", scope: bay, draw: share, unit: chance, share: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: pergola-width, says: "width of a pergola", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: pergola-height, says: "height of a pergola's posts", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: pergola-post, says: "thickness of a pergola's posts and beams", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: pergola-pitch, says: "how far apart the slats of a pergola are", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+# Telescopes and billboards, 2026-11-19: the catalogue's domed optical
+# observatory, drawn small, on some roofs and decks; signs that glow.
+- {element: telescope-share, says: "share of roofs and decks with a telescope on them", scope: bay, draw: share, unit: chance, share: 0.35, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: telescope-scale, says: "how much of its catalogue size a telescope on a roof is drawn at", scope: district, draw: range, unit: share, least: 0.4, most: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: telescope-diameter, says: "the width across of the catalogue's optical observatory at its own size", scope: district, draw: range, unit: m, least: 24, most: 24, kind: picked, by: "manufacture/kinds.go, the optical-observatory kind, 2026-11-19"}
+- {element: roof-board-share, says: "share of buildings with a billboard on the roof", scope: bay, draw: share, unit: chance, share: 0.4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: wall-board-share, says: "share of buildings with a billboard on a blank side wall", scope: bay, draw: share, unit: chance, share: 0.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: board-left, says: "share of wall billboards that are on the left end of the building, and not the right", scope: bay, draw: share, unit: chance, share: 0.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: board-width, says: "width of a roof billboard", scope: district, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: board-height, says: "height of a roof billboard", scope: district, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: board-post, says: "thickness of the posts a roof billboard stands on", scope: district, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: board-lift, says: "height of a roof billboard's foot over the roof", scope: district, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: board-thickness, says: "thickness of a billboard", scope: district, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: wall-board-rise, says: "height of the foot of a side-wall billboard over the ground", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: wall-board-height, says: "height of a side-wall billboard", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- {element: wall-board-inset, says: "how far in from the front and the back of a side wall its billboard stands", scope: district, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "condominium detail study, 2026-11-19, by eye"}
+- element: board-colour
+  says: the colour a billboard glows
+  scope: bay
+  draw: options
+  unit: share of light
+  options:
+  - {name: magenta, weight: 1, colour: [0.85, 0.15, 0.55], gloss: 0.2}
+  - {name: cyan, weight: 1, colour: [0.1, 0.65, 0.85], gloss: 0.2}
+  - {name: warm-white, weight: 1, colour: [0.9, 0.78, 0.55], gloss: 0.2}
+  - {name: green, weight: 1, colour: [0.2, 0.85, 0.35], gloss: 0.2}
+  kind: picked
+  by: "condominium detail study, 2026-11-19, by eye"

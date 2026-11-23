@@ -17,13 +17,15 @@ type sceneEntry struct{ name, label string }
 // scenePicker discovers the bundled library rather than maintaining a second catalogue.
 func (work *Workspace) scenePicker() widget.Widget {
 	if work.library == nil {
-		work.library = readSceneLibrary(work.options.Examples)
+		work.library = readSceneLibrary(work.examplesFolder())
 	}
 	labels := make([]string, len(work.library))
 	selected := -1
 	for i, entry := range work.library {
 		labels[i] = entry.label
-		if filepath.Base(entry.name) == work.state.document.Name() {
+		if strings.HasSuffix(work.state.path, string(filepath.Separator)+entry.name) {
+			selected = i
+		} else if selected < 0 && filepath.Base(entry.name) == work.state.document.Name() {
 			selected = i
 		}
 	}
@@ -42,10 +44,10 @@ func (work *Workspace) scenePicker() widget.Widget {
 	return control
 }
 
-// readSceneLibrary lists the scene entries in directory, without duplicates.
+// readSceneLibrary lists every scene entry in directory. Two scenes that
+// share a label are told apart by their path from the directory.
 func readSceneLibrary(directory string) []sceneEntry {
 	entries := []sceneEntry{}
-	seen := map[string]bool{}
 	_ = filepath.WalkDir(directory, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return nil
@@ -60,9 +62,6 @@ func readSceneLibrary(directory string) []sceneEntry {
 			return nil
 		}
 		if entry.Name() == "sources.yaml" {
-			return nil
-		}
-		if seen[entry.Name()] {
 			return nil
 		}
 		raw, err := os.ReadFile(path)
@@ -83,9 +82,23 @@ func readSceneLibrary(directory string) []sceneEntry {
 		}
 		label = strings.ReplaceAll(label, "-", " ")
 		entries = append(entries, sceneEntry{name: relative, label: label})
-		seen[entry.Name()] = true
 		return nil
 	})
+	return sortedLibrary(entries)
+}
+
+// sortedLibrary gives entries that share a label the path that tells them
+// apart, then orders all of them by label.
+func sortedLibrary(entries []sceneEntry) []sceneEntry {
+	count := map[string]int{}
+	for _, entry := range entries {
+		count[entry.label]++
+	}
+	for index, entry := range entries {
+		if count[entry.label] > 1 {
+			entries[index].label = entry.label + " (" + filepath.ToSlash(entry.name) + ")"
+		}
+	}
 	sort.SliceStable(entries, func(i, j int) bool { return entries[i].label < entries[j].label })
 	return entries
 }

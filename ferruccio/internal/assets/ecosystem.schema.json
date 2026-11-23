@@ -116,7 +116,32 @@
         "timeofday": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 2359
+          "maximum": 2359,
+          "description": "The time on the scene's clock, hhmm. With a date, a location and utc-offset it works the sun."
+        },
+        "date": {
+          "description": "The day, year-month-day. With a location, timeofday and utc-offset the sun's azimuth and altitude are worked from them by scene/daylight; a scene that says this says no sun azimuth or altitude.",
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "utc-offset": {
+          "description": "The hours the scene's clock is ahead of UTC, from -12 to 14 (the clock timeofday is read on).",
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -12,
+              "maximum": 14
+            },
+            "unit": {
+              "const": "h"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
         },
         "sun": {
           "type": "object",
@@ -142,10 +167,27 @@
               }
             }
           },
-          "required": [
-            "azimuth",
-            "altitude"
+          "anyOf": [
+            {
+              "required": [
+                "azimuth",
+                "altitude"
+              ]
+            },
+            {
+              "required": [
+                "tint"
+              ]
+            }
           ],
+          "dependentRequired": {
+            "azimuth": [
+              "altitude"
+            ],
+            "altitude": [
+              "azimuth"
+            ]
+          },
           "additionalProperties": false
         },
         "terrain": {
@@ -703,6 +745,12 @@
             "$ref": "#/$defs/laser"
           }
         },
+        "plumes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/plume"
+          }
+        },
         "atmosphere": {
           "oneOf": [
             {
@@ -850,13 +898,125 @@
           },
           "minItems": 3,
           "maxItems": 3
+        },
+        "sea": {
+          "description": "The elevation of still water that fills the low ground, on the model's own datum.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -11000,
+              "maximum": 9000
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "near": {
+          "description": "A finer window cut from the same model about a place inside this one, which the terrain does not draw where it lies.",
+          "type": "object",
+          "properties": {
+            "lat": {"type": "number", "minimum": -90, "maximum": 90},
+            "lon": {"type": "number", "minimum": -360, "maximum": 360},
+            "across": {"type": "number", "minimum": 1, "maximum": 100000.0},
+            "down": {"type": "number", "minimum": 1, "maximum": 100000.0},
+            "step": {"type": "number", "minimum": 0.01, "maximum": 10000.0}
+          },
+          "required": ["lat", "lon", "across", "down", "step"],
+          "additionalProperties": false
+        },
+        "cover": {
+          "description": "How the ground is coloured by rule: the sea's level on the model's datum, and surfaces from the ground up, each laid over those before it where its height above the sea and its slope hold. Not to be said with reflectance.",
+          "type": "object",
+          "properties": {
+            "level": {"description": "The sea's height in metres on the model's datum. Said only where the terrain says no sea; where it does, the terrain's sea is the level and a level that differs is refused.", "type": "number", "minimum": -11000, "maximum": 9000},
+            "layers": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string", "minLength": 1},
+                  "reflectance": {
+                    "description": "The share of red, green and blue light the surface gives back, in linear light.",
+                    "type": "array",
+                    "items": {"type": "number", "minimum": 0, "maximum": 1},
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "source": {"type": "string", "minLength": 1},
+                  "height": {
+                    "description": "Metres above the sea the surface lies at: from, until or both, each end softened over blend, centred on it.",
+                    "type": "object",
+                    "properties": {
+                      "from": {"type": "number", "minimum": -11000, "maximum": 9000},
+                      "until": {"type": "number", "minimum": -11000, "maximum": 9000},
+                      "blend": {"type": "number", "minimum": 0.01, "maximum": 100000.0}
+                    },
+                    "required": ["blend"],
+                    "anyOf": [{"required": ["from"]}, {"required": ["until"]}],
+                    "additionalProperties": false
+                  },
+                  "slope": {
+                    "description": "Rise over run the surface lies at: from, until or both, each end softened over blend, centred on it.",
+                    "type": "object",
+                    "properties": {
+                      "from": {"type": "number", "minimum": 0, "maximum": 10},
+                      "until": {"type": "number", "minimum": 0, "maximum": 10},
+                      "blend": {"type": "number", "minimum": 0.01, "maximum": 100000.0}
+                    },
+                    "required": ["blend"],
+                    "anyOf": [{"required": ["from"]}, {"required": ["until"]}],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["name", "reflectance", "source"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["layers"],
+          "additionalProperties": false
+        },
+        "made": {
+          "description": "Ground made finer than a window's survey wherever the camera resolves finer, not said with a detail or a near window: the survey's own roughness continued below its spacing, and the flutes and beds said, on ground steeper than steep.",
+          "type": "object",
+          "properties": {
+            "seed": {"type": "integer", "minimum": 0, "maximum": 9007199254740992},
+            "steep": {"type": "number", "minimum": 0, "maximum": 10},
+            "flutes": {
+              "description": "Channels cut down a steep face: how deep, and how far apart, in metres.",
+              "type": "object",
+              "properties": {
+                "depth": {"type": "number", "minimum": 0.001, "maximum": 100},
+                "width": {"type": "number", "minimum": 0.001, "maximum": 100}
+              },
+              "required": ["depth", "width"],
+              "additionalProperties": false
+            },
+            "beds": {
+              "description": "Ledges standing out of a steep face: how far apart in height, and how far each stands out, in metres.",
+              "type": "object",
+              "properties": {
+                "spacing": {"type": "number", "minimum": 0.001, "maximum": 100},
+                "standout": {"type": "number", "minimum": 0.001, "maximum": 100}
+              },
+              "required": ["spacing", "standout"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["seed"],
+          "additionalProperties": false
         }
       },
       "required": [
         "from",
-        "file",
-        "west",
-        "north",
         "across",
         "down",
         "step"
@@ -992,6 +1152,116 @@
           "type": "object",
           "properties": {
             "kind": {
+              "const": "lashed-street"
+            },
+            "density": {"type": "number", "minimum": 0, "maximum": 1},
+            "street": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number", "minimum": 1, "maximum": 100},
+                "unit": {"const": "m"}
+              },
+              "required": ["value", "unit"],
+              "additionalProperties": false
+            },
+            "length": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number", "minimum": 1, "maximum": 500},
+                "unit": {"const": "m"}
+              },
+              "required": ["value", "unit"],
+              "additionalProperties": false
+            },
+            "sign": {"type": "string"},
+            "style": {"enum": ["festival", "lantern-rows"]}
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "bridge"
+            },
+            "irregularity": {
+              "oneOf": [
+                {"type": "number", "minimum": 0, "maximum": 1},
+                {"const": "drawn"}
+              ]
+            },
+            "span": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000000},
+                "unit": {"const": "m"}
+              },
+              "required": ["value", "unit"],
+              "additionalProperties": false
+            },
+            "depth": {"type": "integer", "minimum": 0, "maximum": 6},
+            "bare": {"type": "boolean"}
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "tower"
+            },
+            "irregularity": {
+              "oneOf": [
+                {"type": "number", "minimum": 0, "maximum": 1},
+                {"const": "drawn"}
+              ]
+            },
+            "pins": {
+              "type": "object",
+              "properties": {
+                "plan": {"enum": ["rectangle", "rounded", "polygon", "star", "y", "sail", "lobed", "ellipse"]},
+                "shafts": {"type": "integer", "minimum": 1, "maximum": 64},
+                "taper": {"type": "boolean"},
+                "twist": {"type": "boolean"},
+                "setbacks": {"type": "boolean"},
+                "gargoyles": {"type": "boolean"},
+                "spire": {"type": "boolean"},
+                "lit-crown": {"type": "boolean"},
+                "stack": {"type": "boolean"},
+                "nest": {"type": "boolean"},
+                "room": {"type": "object", "properties": {"value": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000000}, "unit": {"const": "m"}}, "required": ["value", "unit"], "additionalProperties": false},
+                "span": {"enum": ["none", "skybridge", "deck"]},
+                "skin": {"enum": ["curtain", "mirror", "granite", "concrete", "gothic", "cantilever", "vaporwave", "stainless"]},
+                "style": {"enum": ["punched", "ribbon"]},
+                "colour": {"type": "string"},
+                "use": {"enum": ["office", "home"]},
+                "cyber": {"type": "boolean"},
+                "signs": {"type": "boolean"},
+                "retail": {"type": "boolean"},
+                "planted": {"type": "boolean"},
+                "spiral": {"type": "boolean"},
+                "storeys": {"type": "integer", "minimum": 1, "maximum": 1000},
+                "segments": {"type": "integer", "minimum": 1, "maximum": 1000},
+                "width": {"type": "object", "properties": {"value": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000000}, "unit": {"const": "m"}}, "required": ["value", "unit"], "additionalProperties": false}
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
               "const": "city-grid-10000"
             },
             "batch-placement": {
@@ -1097,7 +1367,19 @@
                 "poplar",
                 "manzanita",
                 "chaparral-brush",
-                "joshua-tree"
+                "joshua-tree",
+                "kandelia-obovata",
+                "aegiceras-corniculatum",
+                "avicennia-marina",
+                "bruguiera-gymnorhiza",
+                "sonneratia-apetala",
+                "pandanus-tectorius",
+                "scaevola-taccada",
+                "metrosideros-polymorpha",
+                "barringtonia-asiatica",
+                "quercus-ilex",
+                "erica-arborea",
+                "salix-alba"
               ]
             },
             "season": {
@@ -1158,7 +1440,8 @@
                   "enum": [
                     "spitzer",
                     "hubble",
-                    "webb"
+                    "webb",
+                    "roman"
                   ]
                 },
                 "aperture": {
@@ -1257,6 +1540,7 @@
         },
         "kind": {
           "enum": [
+            "lashed-street",
             "spruce",
             "norway",
             "coast-redwood",
@@ -1277,8 +1561,13 @@
             "optical-observatory",
             "spitzer",
             "hubble",
+            "mariner-10",
+            "jimo",
             "webb",
+            "roman",
             "space-observatory",
+            "voyager-1",
+            "voyager-2",
             "palomar",
             "keck-i",
             "keck-ii",
@@ -1335,14 +1624,153 @@
             "manzanita",
             "chaparral-brush",
             "joshua-tree",
+            "kandelia-obovata",
+            "aegiceras-corniculatum",
+            "avicennia-marina",
+            "bruguiera-gymnorhiza",
+            "sonneratia-apetala",
+            "pandanus-tectorius",
+            "scaevola-taccada",
+            "metrosideros-polymorpha",
+            "barringtonia-asiatica",
+            "quercus-ilex",
+            "erica-arborea",
+            "salix-alba",
             "saguaro",
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
+            "orca-clean-05",
+            "orca-clean-05-bones",
+            "orca-clean-05-spy-hop",
+            "bay-seal",
+            "harbor-seal-hauled",
+            "harbor-seal-swimming",
+            "hawaiian-monk-seal-hauled",
+            "harbor-seal-bones",
+            "harbor-seal",
+            "harbor-seal-dry",
+            "walrus-fresh-5",
+            "bird-black-faced-spoonbill-standing",
+            "bird-black-faced-spoonbill-gliding",
+            "bird-black-faced-spoonbill-bones",
+            "bird-black-faced-spoonbill-outline",
+            "bird-grey-heron-standing",
+            "bird-grey-heron-gliding",
+            "bird-grey-heron-bones",
+            "bird-grey-heron-outline",
+            "bird-little-egret-standing",
+            "bird-little-egret-gliding",
+            "bird-little-egret-bones",
+            "bird-little-egret-outline",
+            "bird-pacific-reef-heron-standing",
+            "bird-pacific-reef-heron-gliding",
+            "bird-pacific-reef-heron-bones",
+            "bird-pacific-reef-heron-outline",
+            "bird-yellow-legged-gull-standing",
+            "bird-yellow-legged-gull-gliding",
+            "bird-yellow-legged-gull-bones",
+            "bird-yellow-legged-gull-outline",
+            "bird-white-tern-standing",
+            "bird-white-tern-gliding",
+            "bird-white-tern-bones",
+            "bird-white-tern-outline",
+            "bird-great-frigatebird-standing",
+            "bird-great-frigatebird-gliding",
+            "bird-great-frigatebird-bones",
+            "bird-great-frigatebird-outline",
+            "bird-white-tailed-tropicbird-standing",
+            "bird-white-tailed-tropicbird-gliding",
+            "bird-white-tailed-tropicbird-bones",
+            "bird-white-tailed-tropicbird-outline",
+            "pacific-bluefin-tuna",
+            "pacific-bluefin-tuna-glide",
+            "pacific-bluefin-tuna-bones",
+            "california-yellowtail",
+            "california-yellowtail-glide",
+            "california-yellowtail-bones",
+            "california-barracuda",
+            "california-barracuda-glide",
+            "california-barracuda-bones",
+            "pacific-sardine",
+            "pacific-sardine-glide",
+            "pacific-sardine-bones",
+            "pacific-sardine-school-500",
+            "pacific-sardine-school-5000",
+            "convict-tang",
+            "convict-tang-glide",
+            "convict-tang-bones",
+            "dusky-grouper",
+            "dusky-grouper-glide",
+            "dusky-grouper-bones",
+            "mediterranean-chromis",
+            "mediterranean-chromis-glide",
+            "mediterranean-chromis-bones",
+            "mediterranean-chromis-school-60",
+            "european-perch",
+            "european-perch-glide",
+            "european-perch-bones",
+            "flathead-grey-mullet",
+            "flathead-grey-mullet-glide",
+            "flathead-grey-mullet-bones",
+            "flathead-grey-mullet-school-120",
+            "walrus-fresh-5-skeleton",
+            "walrus-fresh-5-volumes",
+            "walrus-fresh-5-hauled-out",
+            "walrus-fresh-5-swimming",
+            "hatz-gargoyle",
             "alfa-hero",
+            "sampan",
+            "sampan-at-anchor",
+            "fishing-boat",
+            "fishing-boat-at-anchor",
+            "ferry",
+            "ferry-at-anchor",
+            "soho",
+            "cassini",
+            "huygens",
+            "cassini-huygens",
+            "new-horizons",
+            "new-horizons-vtad",
             "city-rowhouse",
             "city-apartment",
             "city-tower",
+            "yurt",
+            "winnebago",
+            "bivouac",
+            "scavenged-cluster",
+            "terrace-groningen",
+            "terrace-portofino",
+            "terrace-midwest",
+            "terrace-san-francisco",
+            "condominium",
+            "village-house",
+            "village",
+            "frontage",
+            "frontage-ramen",
+            "frontage-dive",
+            "frontage-one",
+            "retail-block",
+            "superblock",
+            "pier",
+            "sign-roof",
+            "sign-screen",
+            "sign-blade",
+            "sign-awning",
+            "tower",
+            "bridge",
+            "gargoyle-allosaurus-granite",
+            "gargoyle-allosaurus-concrete",
+            "gargoyle-orca-granite",
+            "gargoyle-orca-concrete",
+            "gargoyle-squid-granite",
+            "gargoyle-squid-concrete",
+            "gargoyle-pliosaur-granite",
+            "gargoyle-pliosaur-concrete",
+            "gargoyle-hatzegopteryx-granite",
+            "gargoyle-hatzegopteryx-concrete",
+            "gargoyle-cornice-granite",
+            "gargoyle-cornice-concrete",
             "city-grid-10000",
             "macro-terraced-arcology",
             "macro-twisted-spires",
@@ -1358,6 +1786,7 @@
             "gemini",
             "saturn-v",
             "sls-block-1",
+            "sls-core-tank",
             "saturn-v-apollo",
             "apollo-lunar-module",
             "saturn-ib"
@@ -1382,6 +1811,113 @@
         },
         "alight": {
           "type": "boolean"
+        },
+        "parts": {
+          "description": "For kind scavenged-cluster: the kinds its parts are drawn from, each with a weight.",
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "count": {
+          "description": "For kind scavenged-cluster: how many parts.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "parcel": {
+          "description": "For kind superblock: the width, east to west, and the depth, north to south, of the parcel it is built over.",
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            "depth": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "unit": {
+                  "const": "m"
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "ceiling": {
+          "description": "For kind superblock: the most storeys a building has.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "habit": {
+          "description": "For kind superblock: how the parcel is built over; accreted is plot by plot, each against the last.",
+          "enum": [
+            "accreted"
+          ]
+        },
+        "accretion": {
+          "description": "For kind superblock: how far the block is grown over, from planned at 0 to grown over at 1, or drawn from the seed. Drawn when not said.",
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"enum": ["drawn"]}
+          ]
+        },
+        "occupants": {
+          "description": "For kind superblock: the people the planned block is built for; with the crowding they say the slabs' storeys.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        },
+        "crowding": {
+          "description": "For kind superblock: the crowding its people tolerate, occupancy over design.",
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100
+        },
+        "band_spacing": {
+          "description": "For kind scavenged-cluster: the distance between bands along a lashing.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "const": "m"
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
         },
         "stands_in_for": {
           "type": "string",
@@ -1460,6 +1996,7 @@
       "properties": {
         "kind": {
           "enum": [
+            "lashed-street",
             "spruce",
             "norway",
             "coast-redwood",
@@ -1480,8 +2017,13 @@
             "optical-observatory",
             "spitzer",
             "hubble",
+            "mariner-10",
+            "jimo",
             "webb",
+            "roman",
             "space-observatory",
+            "voyager-1",
+            "voyager-2",
             "palomar",
             "keck-i",
             "keck-ii",
@@ -1538,14 +2080,153 @@
             "manzanita",
             "chaparral-brush",
             "joshua-tree",
+            "kandelia-obovata",
+            "aegiceras-corniculatum",
+            "avicennia-marina",
+            "bruguiera-gymnorhiza",
+            "sonneratia-apetala",
+            "pandanus-tectorius",
+            "scaevola-taccada",
+            "metrosideros-polymorpha",
+            "barringtonia-asiatica",
+            "quercus-ilex",
+            "erica-arborea",
+            "salix-alba",
             "saguaro",
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
+            "orca-clean-05",
+            "orca-clean-05-bones",
+            "orca-clean-05-spy-hop",
+            "bay-seal",
+            "harbor-seal-hauled",
+            "harbor-seal-swimming",
+            "hawaiian-monk-seal-hauled",
+            "harbor-seal-bones",
+            "harbor-seal",
+            "harbor-seal-dry",
+            "walrus-fresh-5",
+            "bird-black-faced-spoonbill-standing",
+            "bird-black-faced-spoonbill-gliding",
+            "bird-black-faced-spoonbill-bones",
+            "bird-black-faced-spoonbill-outline",
+            "bird-grey-heron-standing",
+            "bird-grey-heron-gliding",
+            "bird-grey-heron-bones",
+            "bird-grey-heron-outline",
+            "bird-little-egret-standing",
+            "bird-little-egret-gliding",
+            "bird-little-egret-bones",
+            "bird-little-egret-outline",
+            "bird-pacific-reef-heron-standing",
+            "bird-pacific-reef-heron-gliding",
+            "bird-pacific-reef-heron-bones",
+            "bird-pacific-reef-heron-outline",
+            "bird-yellow-legged-gull-standing",
+            "bird-yellow-legged-gull-gliding",
+            "bird-yellow-legged-gull-bones",
+            "bird-yellow-legged-gull-outline",
+            "bird-white-tern-standing",
+            "bird-white-tern-gliding",
+            "bird-white-tern-bones",
+            "bird-white-tern-outline",
+            "bird-great-frigatebird-standing",
+            "bird-great-frigatebird-gliding",
+            "bird-great-frigatebird-bones",
+            "bird-great-frigatebird-outline",
+            "bird-white-tailed-tropicbird-standing",
+            "bird-white-tailed-tropicbird-gliding",
+            "bird-white-tailed-tropicbird-bones",
+            "bird-white-tailed-tropicbird-outline",
+            "pacific-bluefin-tuna",
+            "pacific-bluefin-tuna-glide",
+            "pacific-bluefin-tuna-bones",
+            "california-yellowtail",
+            "california-yellowtail-glide",
+            "california-yellowtail-bones",
+            "california-barracuda",
+            "california-barracuda-glide",
+            "california-barracuda-bones",
+            "pacific-sardine",
+            "pacific-sardine-glide",
+            "pacific-sardine-bones",
+            "pacific-sardine-school-500",
+            "pacific-sardine-school-5000",
+            "convict-tang",
+            "convict-tang-glide",
+            "convict-tang-bones",
+            "dusky-grouper",
+            "dusky-grouper-glide",
+            "dusky-grouper-bones",
+            "mediterranean-chromis",
+            "mediterranean-chromis-glide",
+            "mediterranean-chromis-bones",
+            "mediterranean-chromis-school-60",
+            "european-perch",
+            "european-perch-glide",
+            "european-perch-bones",
+            "flathead-grey-mullet",
+            "flathead-grey-mullet-glide",
+            "flathead-grey-mullet-bones",
+            "flathead-grey-mullet-school-120",
+            "walrus-fresh-5-skeleton",
+            "walrus-fresh-5-volumes",
+            "walrus-fresh-5-hauled-out",
+            "walrus-fresh-5-swimming",
+            "hatz-gargoyle",
             "alfa-hero",
+            "sampan",
+            "sampan-at-anchor",
+            "fishing-boat",
+            "fishing-boat-at-anchor",
+            "ferry",
+            "ferry-at-anchor",
+            "soho",
+            "cassini",
+            "huygens",
+            "cassini-huygens",
+            "new-horizons",
+            "new-horizons-vtad",
             "city-rowhouse",
             "city-apartment",
             "city-tower",
+            "yurt",
+            "winnebago",
+            "bivouac",
+            "scavenged-cluster",
+            "terrace-groningen",
+            "terrace-portofino",
+            "terrace-midwest",
+            "terrace-san-francisco",
+            "condominium",
+            "village-house",
+            "village",
+            "frontage",
+            "frontage-ramen",
+            "frontage-dive",
+            "frontage-one",
+            "retail-block",
+            "superblock",
+            "pier",
+            "sign-roof",
+            "sign-screen",
+            "sign-blade",
+            "sign-awning",
+            "tower",
+            "bridge",
+            "gargoyle-allosaurus-granite",
+            "gargoyle-allosaurus-concrete",
+            "gargoyle-orca-granite",
+            "gargoyle-orca-concrete",
+            "gargoyle-squid-granite",
+            "gargoyle-squid-concrete",
+            "gargoyle-pliosaur-granite",
+            "gargoyle-pliosaur-concrete",
+            "gargoyle-hatzegopteryx-granite",
+            "gargoyle-hatzegopteryx-concrete",
+            "gargoyle-cornice-granite",
+            "gargoyle-cornice-concrete",
             "city-grid-10000",
             "macro-terraced-arcology",
             "macro-twisted-spires",
@@ -1561,6 +2242,7 @@
             "gemini",
             "saturn-v",
             "sls-block-1",
+            "sls-core-tank",
             "saturn-v-apollo",
             "apollo-lunar-module",
             "saturn-ib"
@@ -1602,6 +2284,74 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 100000
+        },
+        "habit": {
+          "enum": [
+            "lattice",
+            "grid",
+            "scatter",
+            "contour",
+            "frontage"
+          ]
+        },
+        "frontage": {
+          "description": "For habit frontage: the line of a channel the stand's items stand along. of is the channel; side is left or right of its line as one goes along it from its first point; setback is how far from the outer face of the channel's wall the fronts stand, away from the water, and negative toward it; gap is the room between one run of terrace and the next. The habit takes no within or area.",
+          "type": "object",
+          "properties": {
+            "of": {"type": "string", "minLength": 1},
+            "side": {"enum": ["left", "right"]},
+            "setback": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number", "minimum": -1000, "maximum": 1000},
+                "unit": {"const": "m"}
+              },
+              "required": ["value", "unit"],
+              "additionalProperties": false
+            },
+            "gap": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number", "minimum": 0, "maximum": 1000},
+                "unit": {"const": "m"}
+              },
+              "required": ["value", "unit"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["of", "side", "setback", "gap"],
+          "additionalProperties": false
+        },
+        "climb": {
+          "description": "For habit contour: how rows of terraces climb the slope, one above the next, along its contours. rows is how many; runs is how many straight runs of terrace make a row, end to end; lane is the gap between one row and the one above it; door is the way the fronts, and so the doors, look, down the slope or up it. The stand's within says where the first row starts (of), and how far from there a run may start (far).",
+          "type": "object",
+          "properties": {
+            "rows": {"type": "integer", "minimum": 1, "maximum": 100},
+            "runs": {"type": "integer", "minimum": 1, "maximum": 100},
+            "lane": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number", "minimum": 0, "maximum": 1000},
+                "unit": {"const": "m"}
+              },
+              "required": ["value", "unit"],
+              "additionalProperties": false
+            },
+            "door": {"enum": ["downhill", "uphill"]}
+          },
+          "required": ["rows", "runs", "lane", "door"],
+          "additionalProperties": false
+        },
+        "area": {
+          "type": "object",
+          "properties": {
+            "west": {"type": "number", "minimum": -10000000, "maximum": 10000000},
+            "south": {"type": "number", "minimum": -10000000, "maximum": 10000000},
+            "east": {"type": "number", "minimum": -10000000, "maximum": 10000000},
+            "north": {"type": "number", "minimum": -10000000, "maximum": 10000000}
+          },
+          "required": ["west", "south", "east", "north"],
+          "additionalProperties": false
         },
         "stands_in_for": {
           "type": "string",
@@ -1699,9 +2449,23 @@
         }
       },
       "required": [
-        "count",
         "seed"
       ],
+      "if": {
+        "required": [
+          "habit"
+        ],
+        "properties": {
+          "habit": {
+            "enum": ["lattice", "grid"]
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "count"
+        ]
+      },
       "additionalProperties": false,
       "oneOf": [
         {
@@ -1780,7 +2544,10 @@
         "type": "object",
         "properties": {
           "kind": {
-            "const": "prescribed-mist"
+            "enum": [
+              "prescribed-mist",
+              "prescribed-cloud"
+            ]
           },
           "extinction": {
             "type": "object",
@@ -1832,17 +2599,241 @@
             "type": "number",
             "minimum": -0.99,
             "maximum": 0.99
+          },
+          "angstrom": {
+            "description": "the particles' Angstrom exponent: unsaid, the mist is as thick to every colour.",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 2.5
+          },
+          "nitrogen-dioxide": {
+            "description": "nitrogen dioxide mixed through the mist where it is thickest, parts in a thousand million.",
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10000000
+              },
+              "unit": {
+                "const": "ppb"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "edge": {
+            "description": "how far under its top the mist holds its whole density before thinning to nothing, as under a lid.",
+            "$ref": "#/$defs/metres"
+          },
+          "size": {
+            "description": "the size of the patches; unsaid, the depth.",
+            "$ref": "#/$defs/metres"
+          },
+          "base": {
+            "description": "a cloud deck's base, a scene height.",
+            "$ref": "#/$defs/metres"
+          },
+          "top": {
+            "description": "a cloud deck's top, a scene height.",
+            "$ref": "#/$defs/metres"
           }
         },
         "required": [
           "kind",
           "extinction",
-          "depth",
           "coverage",
           "seed"
         ],
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "prescribed-cloud"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "base",
+            "top"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "depth"
+                ]
+              },
+              {
+                "required": [
+                  "edge"
+                ]
+              }
+            ]
+          }
+        },
+        "else": {
+          "required": [
+            "depth"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "base"
+                ]
+              },
+              {
+                "required": [
+                  "top"
+                ]
+              }
+            ]
+          }
+        },
         "additionalProperties": false
       }
+    },
+    "metres": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "const": "m"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "plume-quantity": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "enum": [
+            "m/s",
+            "K",
+            "g/s",
+            "m^2/g"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "plume": {
+      "description": "smoke or steam from a mouth, or many laid round a point, carried down the weather's wind.",
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "object",
+          "properties": {
+            "object": {
+              "type": "string",
+              "minLength": 1
+            },
+            "east": {
+              "$ref": "#/$defs/metres"
+            },
+            "up": {
+              "$ref": "#/$defs/metres"
+            },
+            "south": {
+              "$ref": "#/$defs/metres"
+            }
+          },
+          "required": [
+            "east",
+            "up",
+            "south"
+          ],
+          "additionalProperties": false
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 512
+        },
+        "spread": {
+          "$ref": "#/$defs/metres"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740992
+        },
+        "mouth": {
+          "$ref": "#/$defs/metres"
+        },
+        "exit": {
+          "$ref": "#/$defs/plume-quantity"
+        },
+        "temperature": {
+          "$ref": "#/$defs/plume-quantity"
+        },
+        "air-temperature": {
+          "$ref": "#/$defs/plume-quantity"
+        },
+        "rate": {
+          "$ref": "#/$defs/plume-quantity"
+        },
+        "mass-extinction": {
+          "$ref": "#/$defs/plume-quantity"
+        },
+        "albedo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "asymmetry": {
+          "type": "number",
+          "minimum": -0.99,
+          "maximum": 0.99
+        },
+        "angstrom": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2.5
+        },
+        "reach": {
+          "$ref": "#/$defs/metres"
+        },
+        "lid": {
+          "$ref": "#/$defs/metres"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "from",
+        "mouth",
+        "exit",
+        "temperature",
+        "air-temperature",
+        "rate",
+        "mass-extinction",
+        "albedo",
+        "asymmetry",
+        "reach",
+        "source"
+      ],
+      "additionalProperties": false
     },
     "triple": {
       "type": "array",
@@ -1933,6 +2924,16 @@
       "required": ["wind", "fetch", "depth", "toward"],
       "additionalProperties": false
     },
+    "ocean-swell": {
+      "type": "object",
+      "properties": {
+        "height": {"type": "object", "properties": {"value": {"type": "number", "exclusiveMinimum": 0, "maximum": 10000000000000.0}, "unit": {"const": "m"}}, "required": ["value", "unit"], "additionalProperties": false},
+        "period": {"type": "object", "properties": {"value": {"type": "number", "exclusiveMinimum": 0, "maximum": 10000000000000.0}, "unit": {"const": "s"}}, "required": ["value", "unit"], "additionalProperties": false},
+        "toward": {"type": "object", "properties": {"value": {"type": "number", "minimum": 0, "maximum": 6.283185307179586}, "unit": {"const": "rad"}}, "required": ["value", "unit"], "additionalProperties": false}
+      },
+      "required": ["height", "period", "toward"],
+      "additionalProperties": false
+    },
     "bright": {
       "type": "number",
       "minimum": 0,
@@ -1996,6 +2997,48 @@
     "world": {
       "type": "object",
       "properties": {
+        "weathering": {
+          "type": "object",
+          "properties": {
+            "seed": {"type": "number", "minimum": 0, "maximum": 1000000},
+            "age": {"oneOf": [
+              {"type": "number", "minimum": 0, "maximum": 1000000},
+              {
+                "type": "object",
+                "properties": {
+                  "from": {"type": "string", "minLength": 1},
+                  "planned": {"type": "number", "minimum": 0, "maximum": 1000000},
+                  "accreted": {"type": "number", "minimum": 0, "maximum": 1000000}
+                },
+                "required": ["from", "planned", "accreted"],
+                "additionalProperties": false
+              }
+            ]},
+            "ground": {"type": "number", "minimum": -1000000, "maximum": 1000000},
+            "probe": {"type": "number", "minimum": 0, "maximum": 1000000},
+            "block": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000000},
+            "wind": {"$ref": "#/$defs/triple"},
+            "source": {"$ref": "#/$defs/source"},
+            "agents": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "kind": {"enum": ["rain", "soot", "dust", "moss", "ivy", "graffiti", "rust", "spall", "vacancy", "mineral", "glitter", "nano", "festival", "spout", "wet"]},
+                  "on": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+                  "colour": {"$ref": "#/$defs/colour"},
+                  "other": {"$ref": "#/$defs/colour"},
+                  "at": {"$ref": "#/$defs/triple"},
+                  "facing": {"$ref": "#/$defs/triple"}
+                },
+                "required": ["kind"],
+                "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1000000}
+              }
+            }
+          },
+          "required": ["age", "block", "probe", "agents", "source"],
+          "additionalProperties": false
+        },
         "griffith-basin": {
           "type": "object",
           "properties": {
@@ -2136,9 +3179,17 @@
               "required": ["model"],
               "additionalProperties": false
             },
-            "surface-wake": {"$ref": "#/$defs/ocean-surface-wake"}
+            "surface-wake": {"$ref": "#/$defs/ocean-surface-wake"},
+            "unbounded": {"type": "boolean", "description": "true: the wave bands are summed at every point, so the sea has no edge and says no extent and no samples."},
+            "swell": {"$ref": "#/$defs/ocean-swell"}
           },
-          "required": ["material", "middle", "extent", "samples", "sea", "seed", "time", "source"],
+          "required": ["material", "middle", "sea", "seed", "time", "source"],
+          "if": {"required": ["unbounded"], "properties": {"unbounded": {"const": true}}},
+          "then": {"not": {"anyOf": [{"required": ["extent"]}, {"required": ["samples"]}]}},
+          "else": {"oneOf": [
+            {"required": ["extent", "samples"]},
+            {"not": {"anyOf": [{"required": ["extent"]}, {"required": ["samples"]}]}}
+          ]},
           "additionalProperties": false
         },
         "materials": {
@@ -2179,6 +3230,47 @@
                   "index": {"type": "number", "minimum": 1e-9, "maximum": 1e9},
                   "gloss": {"type": "number", "minimum": 0, "maximum": 1},
                   "rank": {"type": "integer", "minimum": -2147483648, "maximum": 2147483647},
+                  "water-composition": {
+                    "type": "object",
+                    "description": "Independent sourced water observations. Optical coefficients remain separately supplied.",
+                    "properties": {
+                      "salinity": {
+                        "type": "object",
+                        "properties": {
+                          "value": {"type": "number", "minimum": 0, "maximum": 1000000000000.0, "description": "Practical salinity, dimensionless."},
+                          "source": {"type": "string", "minLength": 1},
+                          "at": {"type": "string", "format": "date-time"},
+                          "qualifier": {"type": "string", "minLength": 1}
+                        },
+                        "required": ["value", "source"],
+                        "additionalProperties": false
+                      },
+                      "suspended-sediment-mg-per-litre": {
+                        "type": "object",
+                        "properties": {
+                          "value": {"type": "number", "minimum": 0, "maximum": 1000000000000.0, "description": "Suspended sediment concentration in milligrams per litre."},
+                          "source": {"type": "string", "minLength": 1},
+                          "at": {"type": "string", "format": "date-time"},
+                          "qualifier": {"type": "string", "minLength": 1}
+                        },
+                        "required": ["value", "source"],
+                        "additionalProperties": false
+                      },
+                      "turbidity-fnu": {
+                        "type": "object",
+                        "properties": {
+                          "value": {"type": "number", "minimum": 0, "maximum": 1000000000000.0, "description": "Measured turbidity in formazin nephelometric units."},
+                          "source": {"type": "string", "minLength": 1},
+                          "at": {"type": "string", "format": "date-time"},
+                          "qualifier": {"type": "string", "minLength": 1}
+                        },
+                        "required": ["value", "source"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "minProperties": 1,
+                    "additionalProperties": false
+                  },
                   "extinction-per-metre": {
                     "type": "array",
                     "items": {"type": "number", "minimum": 0, "maximum": 1000000000000.0},
@@ -2254,6 +3346,7 @@
               "size": {
                 "$ref": "#/$defs/positive-triple"
               },
+              "heading": {"type": "object", "properties": {"value": {"type": "number", "minimum": 0, "maximum": 360}, "unit": {"const": "deg"}}, "required": ["value", "unit"], "additionalProperties": false},
               "source": {
                 "$ref": "#/$defs/source"
               }
@@ -2262,6 +3355,68 @@
               "material",
               "middle",
               "size",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "channels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "line": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 64,
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": -10000000000000.0,
+                    "maximum": 10000000000000.0
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "width": {"$ref": "#/$defs/ocean-extent"},
+              "depth": {"$ref": "#/$defs/ocean-extent"},
+              "top": {"$ref": "#/$defs/signed-metres"},
+              "reach": {"$ref": "#/$defs/ocean-extent"},
+              "ground": {"type": "string", "minLength": 1},
+              "bed": {"type": "string", "minLength": 1},
+              "wall": {
+                "type": "object",
+                "properties": {
+                  "material": {"type": "string", "minLength": 1},
+                  "thickness": {"$ref": "#/$defs/ocean-extent"}
+                },
+                "required": ["material", "thickness"],
+                "additionalProperties": false
+              },
+              "coping": {
+                "type": "object",
+                "properties": {
+                  "material": {"type": "string", "minLength": 1},
+                  "height": {"$ref": "#/$defs/ocean-extent"},
+                  "overhang": {"$ref": "#/$defs/signed-metres"}
+                },
+                "required": ["material", "height", "overhang"],
+                "additionalProperties": false
+              },
+              "source": {"$ref": "#/$defs/source"}
+            },
+            "required": [
+              "line",
+              "width",
+              "depth",
+              "top",
+              "reach",
+              "ground",
+              "bed",
+              "wall",
+              "coping",
               "source"
             ],
             "additionalProperties": false
@@ -2298,6 +3453,25 @@
               "radius",
               "source"
             ],
+            "additionalProperties": false
+          }
+        },
+        "lamp-fields": {
+          "type": "object",
+          "description": "Crowds of small lamps. Each field scatters count lamps by a seed, evenly through the box from low to high, every one the same temperature, strength and radius. The same file draws the same lamps.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "count": {"type": "integer", "minimum": 1, "maximum": 1000000},
+              "seed": {"type": "integer", "minimum": 0, "maximum": 9007199254740992},
+              "low": {"$ref": "#/$defs/triple"},
+              "high": {"$ref": "#/$defs/triple"},
+              "temperature": {"$ref": "#/$defs/temperature"},
+              "strength": {"$ref": "#/$defs/bright"},
+              "radius": {"type": "number", "minimum": 0, "maximum": 10000000000000.0},
+              "source": {"$ref": "#/$defs/source"}
+            },
+            "required": ["count", "seed", "low", "high", "temperature", "strength", "radius", "source"],
             "additionalProperties": false
           }
         },
@@ -2720,6 +3894,10 @@
               "density-per-m": {"type": "number", "minimum": 0, "maximum": 20},
               "fragment-scale-m": {"type": "number", "minimum": 0.001, "maximum": 20},
               "fragment-contrast": {"type": "number", "minimum": 0, "maximum": 1},
+              "wander-m": {"type": "number", "minimum": 0, "maximum": 10},
+              "wander-scale-m": {"type": "number", "minimum": 0.01, "maximum": 100},
+              "spread-start-m": {"type": "number", "minimum": 0, "maximum": 200},
+              "spread-per-m": {"type": "number", "minimum": 0, "maximum": 0.5},
               "fragment-seed": {"type": "integer", "minimum": 0, "maximum": 9007199254740992},
               "pressure-deficit-pa": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000000},
               "recovery-pa-per-m": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000000},
@@ -2728,7 +3906,7 @@
               "phase-g": {"type": "number", "exclusiveMinimum": -1, "exclusiveMaximum": 1, "description": "Explicit independent Henyey-Greenstein cloud phase; zero is isotropic. Requires clear-water true; omission inherits water phase."},
               "source": {"$ref": "#/$defs/source"}
             },
-            "allOf": [{"if": {"required": ["phase-g"]}, "then": {"required": ["clear-water"], "properties": {"clear-water": {"const": true}}}}],
+            "allOf": [{"if": {"required": ["phase-g"]}, "then": {"required": ["clear-water"], "properties": {"clear-water": {"const": true}}}}, {"if": {"required": ["wander-m"], "properties": {"wander-m": {"exclusiveMinimum": 0}}}, "then": {"required": ["wander-scale-m"]}}],
             "required": ["colour", "origin", "axis", "blades", "tip-radius", "rpm", "slipstream-mps", "length-m", "core-radius-m", "density-per-m", "fragment-scale-m", "fragment-contrast", "fragment-seed", "pressure-deficit-pa", "recovery-pa-per-m", "visual-onset", "clear-water", "source"],
             "additionalProperties": false
           }
@@ -3853,6 +5031,14 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 64
+        },
+        "filter": {
+          "enum": [
+            "tent",
+            "trapezoid",
+            "box",
+            "grid"
+          ]
         },
         "exposure": {
           "type": "number",
@@ -5022,6 +6208,34 @@
           "required": [
             "value",
             "unit"
+          ],
+          "additionalProperties": false
+        },
+        "beyond": {
+          "description": "how far past the terrain's edge the layer reaches, each way across.",
+          "$ref": "#/$defs/metres"
+        },
+        "toward": {
+          "description": "the thing the layer is thickest over, the reach at which it has thinned to its least, and that least as a share.",
+          "type": "object",
+          "properties": {
+            "object": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reach": {
+              "$ref": "#/$defs/metres"
+            },
+            "least": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "object",
+            "reach",
+            "least"
           ],
           "additionalProperties": false
         }

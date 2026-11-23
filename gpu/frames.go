@@ -58,7 +58,7 @@ import (
 // path builds one every frame.
 //
 // After any error the drawer lets its device state go and refuses every
-// later draw with ErrFramesFailed: metal says a kernel that timed out is
+// later draw with errFramesFailed: metal says a kernel that timed out is
 // not used again, and the drawer cannot tell a timeout from another
 // failure. After Close it refuses with ErrFramesClosed.
 //
@@ -106,9 +106,12 @@ type shot struct {
 }
 
 // view is the header's fields the shot's eye, lens and shutter make, for
-// a picture of so many samples.
+// a picture of so many samples, and where in a pixel its samples start.
 func (take shot) view(fine [2]int) values {
-	return viewValues(take.eye, take.lens, take.shutter(), fine[0], fine[1])
+	given := viewValues(take.eye, take.lens, take.shutter(), fine[0],
+		fine[1])
+	given["spread"] = spreadRow(take.world, take.side)
+	return given
 }
 
 // shutter is the shot's shutter: closed where it has no closing eye.
@@ -260,7 +263,9 @@ func (frames *Frames) measured(take shot) (*frame.Frame, Profile, error) {
 		}
 	}
 	start := time.Now()
+	memoryStage("draw-before")
 	picture, spent, err := frames.draw(take, frames.mode)
+	memoryStage("draw-after")
 	if err != nil {
 		frames.fail(err)
 		frames.transmission = nil
@@ -270,10 +275,12 @@ func (frames *Frames) measured(take shot) (*frame.Frame, Profile, error) {
 
 // Close lets the device state go. Closing twice is harmless.
 func (frames *Frames) Close() {
+	memoryStage("close-before")
 	frames.letGo()
 	frames.trees = newKeptTrees()
 	frames.closed = true
 	frames.transmission = nil
+	memoryStage("close-after")
 }
 
 // usable refuses a draw on a closed or failed drawer, or of no world.
@@ -282,7 +289,7 @@ func (frames *Frames) usable(world *thing.World) error {
 	case frames == nil || frames.closed:
 		return ErrFramesClosed
 	case frames.failed != nil:
-		return fmt.Errorf("%w: %w", ErrFramesFailed, frames.failed)
+		return fmt.Errorf("%w: %w", errFramesFailed, frames.failed)
 	case world == nil:
 		return errNoWorld
 	}

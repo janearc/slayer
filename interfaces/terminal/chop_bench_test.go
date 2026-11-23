@@ -13,10 +13,13 @@ import (
 
 func benchImage() *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, 160, 72))
-	r := rand.New(rand.NewSource(1))
+	random := rand.New(rand.NewSource(1))
 	for y := 0; y < 72; y++ {
 		for x := 0; x < 160; x++ {
-			img.Set(x, y, color.RGBA{uint8(r.Intn(256)), uint8(r.Intn(256)), uint8(r.Intn(256)), 255})
+			red := uint8(random.Intn(256))
+			green := uint8(random.Intn(256))
+			blue := uint8(random.Intn(256))
+			img.Set(x, y, color.RGBA{red, green, blue, 255})
 		}
 	}
 	return img
@@ -32,30 +35,31 @@ func BenchmarkChop(b *testing.B) {
 }
 
 // oldEncode is colour.Encode as it was written, a power per call.
-func oldEncode(v float64) uint8 {
-	if math.IsNaN(v) {
+func oldEncode(value float64) uint8 {
+	if math.IsNaN(value) {
 		return 0
 	}
-	v = math.Max(0, math.Min(1, v))
-	return uint8(math.Round(srgb.FromLinear(v) * 255))
+	value = math.Max(0, math.Min(1, value))
+	scaled := srgb.FromLinear(value) * 255
+	return uint8(math.Round(scaled))
 }
 
 // oldMean is mean with the old Encode.
 func oldMean(px [6]color.RGBA, p uint8, set bool) color.RGBA {
 	var r, g, b float64
-	n := 0
-	for i, c := range px {
+	count := 0
+	for i, pixel := range px {
 		if (p&(1<<i) != 0) == set {
-			r += colour.Decode(c.R)
-			g += colour.Decode(c.G)
-			b += colour.Decode(c.B)
-			n++
+			r += colour.Decode(pixel.R)
+			g += colour.Decode(pixel.G)
+			b += colour.Decode(pixel.B)
+			count++
 		}
 	}
-	if n == 0 {
+	if count == 0 {
 		return color.RGBA{A: 255}
 	}
-	k := 1 / float64(n)
+	k := 1 / float64(count)
 	return color.RGBA{oldEncode(r * k), oldEncode(g * k), oldEncode(b * k), 255}
 }
 
@@ -65,11 +69,11 @@ func oldSplit(px [6]color.RGBA) Cell {
 	for p := uint8(0); p < 64; p += 2 {
 		fg, bg := oldMean(px, p, true), oldMean(px, p, false)
 		e := 0.0
-		for i, c := range px {
+		for i, pixel := range px {
 			if p&(1<<i) != 0 {
-				e += dist(c, fg)
+				e += dist(pixel, fg)
 			} else {
-				e += dist(c, bg)
+				e += dist(pixel, bg)
 			}
 		}
 		if e < bestErr {

@@ -41,5 +41,5 @@ func readCutsFile(path string, s *Score) (*CutSheet, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ParseCuts(b, s)
+	return parseCuts(b, s)
 }

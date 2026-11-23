@@ -2,8 +2,6 @@ package cues
 
 import (
 	"math"
-	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -154,40 +152,6 @@ func TestGridFloodsAreDarkBeforeTheGrid(t *testing.T) {
 		if left, right := flooded(mode, 0, -1, steady(4), nil, 0); left != 0 || right != 0 {
 			t.Errorf("%s before the grid: %v and %v", mode, left, right)
 		}
-	}
-}
-
-// TestLoadReadsBothFiles checks Load against files written to a
-// temporary directory, and refuses a file that is not yaml.
-func TestLoadReadsBothFiles(t *testing.T) {
-	dir := t.TempDir()
-	scorePath := filepath.Join(dir, "score.yaml")
-	cuesPath := filepath.Join(dir, "cues.yaml")
-	if err := os.WriteFile(scorePath, []byte(reuseScore), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(cuesPath, []byte(`cues: [{at_sec: 1, rig: 0.9}]`), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	show, err := Load(scorePath, cuesPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got := frameAt(t, show, 0.5, 24).Rig; got != 0 {
-		t.Errorf("before the cue rig = %v", got)
-	}
-	if got := frameAt(t, show, 1, 24).Rig; got != 0.9 {
-		t.Errorf("at the cue rig = %v", got)
-	}
-	bad := filepath.Join(dir, "bad.yaml")
-	if err := os.WriteFile(bad, []byte("cues: ["), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := Load(scorePath, bad); err == nil {
-		t.Error("Load accepted malformed cues")
-	}
-	if _, err := Load(bad, cuesPath); err == nil {
-		t.Error("Load accepted a malformed score")
 	}
 }
 

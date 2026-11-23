@@ -22,7 +22,7 @@ func TestTheRollIsDrawnFromWhatPlayed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	img, err := p.Roll()
+	img, err := p.roll()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,12 +54,12 @@ func TestTheRollPutsAnEchoWhereItSounded(t *testing.T) {
 		}
 		return -1
 	}
-	want := 0.75 * p.Score.BeatSeconds()
+	want := 0.75 * p.Score.beatSeconds()
 	if got := first(1) - first(0); math.Abs(got-want) > 1/tickRate {
 		t.Errorf("the echo's first mark is %.3f s after the lead's, "+
 			"want %.3f", got, want)
 	}
-	if _, err := p.Roll(); err != nil {
+	if _, err := p.roll(); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -70,7 +70,7 @@ func TestAShortPieceKeepsItsWholeTitle(t *testing.T) {
 	p := render(t,
 		score(4, false, `{"role": "lead", "bars": ["c4:4"]}`),
 		voicing(lead, ""))
-	img, err := p.Roll()
+	img, err := p.roll()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestAShortPieceKeepsItsWholeLegend(t *testing.T) {
 			{"kind": "noise", "role": "perc",
 			 "hits": {"k": {"shift": 7, "divisor": 3, "decay": 0.12}}}`,
 			""))
-	img, err := p.Roll()
+	img, err := p.roll()
 	if err != nil {
 		t.Fatal(err)
 	}

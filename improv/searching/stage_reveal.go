@@ -17,7 +17,7 @@ var revealReference []byte
 
 // makeContinuousField builds the continuous cosmos field from the plan's
 // catalogue.
-func (s *heardStage) makeContinuousField(p *StagePlan) error {
+func (s *heardStage) makeContinuousField(p *stagePlan) error {
 	data, err := readStageCatalogue(p.Catalogue)
 	if err != nil {
 		return err

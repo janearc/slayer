@@ -62,8 +62,8 @@ func RenderIn(world *thing.World, eye maths.Subspace, lens film.Sensor,
 func renderIn(seen view, band maths.Band) (*frame.Frame, error) {
 	width, height := seen.width, seen.height
 	// nothing bends in a band: the fields are left out
-	scene := stage(seen.world, seen.at)
-	if err := scene.refusal(); err != nil {
+	scene, err := seen.staging()
+	if err != nil {
 		return nil, err
 	}
 	scene.fields = nil

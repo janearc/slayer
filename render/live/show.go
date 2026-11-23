@@ -115,8 +115,9 @@ func (watching *Watcher) show() {
 	if watching.view.mode == helping {
 		lines = helpLines
 	}
-	watching.said(watching.given.Screen.Foot(append(lines,
-		watching.status(picture))))
+	statusLine := watching.status(picture)
+	footLines := append(lines, statusLine)
+	watching.said(watching.given.Screen.Foot(footLines))
 	watching.publish(picture, cells, screen.Pixel, fresh)
 }
 

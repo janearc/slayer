@@ -1,7 +1,7 @@
 # azazel/engine
 
 This package draws one set file. It calls the library that `slayer render`
-calls, `hillside.Run`, with the set's path and the render settings, and gives
+calls, `session.Run`, with the set's path and the render settings, and gives
 back hillside's exit number.
 
 It is not the queue. It has no job folder, no admission, no locking and no

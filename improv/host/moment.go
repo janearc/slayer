@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"image"
 	"math"
+
+	"github.com/janearc/slayer/maths/noise"
 )
 
 // The clips a host has, by name.
 const (
-	Resting  = "resting"
-	Speaking = "speaking"
-	Angry    = "angry"
-	Flash    = "flash"
-	Quiet    = "quiet"
+	resting  = "resting"
+	speaking = "speaking"
+	angry    = "angry"
+	flash    = "flash"
+	quiet    = "quiet"
 )
 
 // The numbers the package is made of, defined.
@@ -47,28 +49,28 @@ const (
 	flickerRate  = 12
 )
 
-// Moment is what is happening at an instant: the tune's part, how strong
+// moment is what is happening at an instant: the tune's part, how strong
 // a kick is there (one on the kick, falling to nought), how loud the music
 // is as a share of its loudest, and whether the host is speaking.
-type Moment struct {
+type moment struct {
 	Part     string
 	Kick     float64
 	Loudness float64
 	Speaking bool
 }
 
-// Pick is the host's clip at a moment: quiet in a break, flash on a hard
+// pick is the host's clip at a moment: quiet in a break, flash on a hard
 // hit, speaking while a sentence is up, resting otherwise.
-func Pick(at Moment) string {
+func pick(at moment) string {
 	switch {
 	case at.Loudness < hush:
-		return Quiet
+		return quiet
 	case at.Kick > hardHit && at.Loudness > hardHit:
-		return Flash
+		return flash
 	case at.Speaking:
-		return Speaking
+		return speaking
 	}
-	return Resting
+	return resting
 }
 
 // Box is where the host may be: a rectangle of the frame, and the host's
@@ -89,10 +91,10 @@ func NewBox(area image.Rectangle, size image.Point) (Box, error) {
 	return Box{area: area, size: size}, nil
 }
 
-// Place is where the host's top left is at a moment seconds in: drifting
+// place is where the host's top left is at a moment seconds in: drifting
 // on a seeded path inside the box, jumping up on a kick, held at the
 // box's middle foot in a break. It never leaves the box.
-func (box Box) Place(at Moment, seconds float64, seed uint64) image.Point {
+func (box Box) place(at moment, seconds float64, seed uint64) image.Point {
 	room := box.area.Size().Sub(box.size)
 	if at.Loudness < hush {
 		return box.area.Min.Add(image.Pt(room.X/two, room.Y))
@@ -110,28 +112,20 @@ func (box Box) Place(at Moment, seconds float64, seed uint64) image.Point {
 // flicker's depth.
 func Flicker(seconds float64, seed uint64) float64 {
 	tick := uint64(math.Floor(seconds * flickerRate))
-	return one - flickerDepth*seeded(seed^(tick*golden))
+	return one - flickerDepth*seeded(seed^(tick*noise.Golden))
 }
 
-// Lift is how much white is added to the picture at a moment: a share of
-// the kick, in a part that lifts; none elsewhere.
-func Lift(at Moment, lifts map[string]bool) float64 {
+// kickLift is how much white is added to the picture at a moment: a share
+// of the kick, in a part that lifts; none elsewhere.
+func kickLift(at moment, lifts map[string]bool) float64 {
 	if !lifts[at.Part] || at.Loudness < hush {
 		return none
 	}
 	return lifted * at.Kick
 }
 
-// golden is defined: the 64-bit golden ratio, which spreads a count's
-// bits for a hash.
-const golden = 0x9e3779b97f4a7c15
-
 // seeded is a share from nought up to one, the same for the same seed:
-// a splitmix64 finish of the seed.
+// the seed stepped once and stirred by slayer's one hash.
 func seeded(seed uint64) float64 {
-	mixed := seed + golden
-	mixed = (mixed ^ (mixed >> 30)) * 0xbf58476d1ce4e5b9
-	mixed = (mixed ^ (mixed >> 27)) * 0x94d049bb133111eb
-	mixed ^= mixed >> 31
-	return float64(mixed>>11) / float64(uint64(one)<<53)
+	return noise.Stirred(seed + noise.Golden)
 }

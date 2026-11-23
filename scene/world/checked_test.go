@@ -58,22 +58,21 @@ func TestAnAxisIsLeftAloneUnlessItIsTooLongOrTooShort(t *testing.T) {
 // beyond the edge.
 func TestBeyondTheWorldIsDeep(t *testing.T) {
 	flat := hexes.Flat{Step: 1, Across: 6, Down: 6}
-	w := New(Terrain{Tiling: flat, Seed: 3, Ocean: 0, Plates: 3})
+	world := New(Terrain{Tiling: flat, Seed: 3, Ocean: 0, Plates: 3})
 	out := flat.Nearest(maths.V(500, 0, 500))
-	if _, in := w.at[flat.ID(out)]; in {
+	if _, in := world.at[flat.ID(out)]; in {
 		t.Fatal("a tile at 500 is in a world six across")
 	}
-	if w.Biome(out) != Deep || w.Height(out) != -1 {
-		t.Errorf("beyond the world is %d at %v", w.Biome(out), w.Height(out))
+	if world.Biome(out) != Deep {
+		t.Errorf("beyond the world is %d", world.Biome(out))
 	}
-	for i, tile := range w.Tiles() {
-		if w.Biome(tile) != w.biome[i] || w.Height(tile) != w.height[i] {
-			t.Fatalf("tile %d is %d at %v, held as %d at %v", i, w.Biome(tile),
-				w.Height(tile), w.biome[i], w.height[i])
+	for i, tile := range world.tiles {
+		if world.Biome(tile) != world.biome[i] {
+			t.Fatalf("tile %d is %d, held as %d", i, world.Biome(tile), world.biome[i])
 		}
-		if w.Biome(tile) == Deep || w.Height(tile) < 0 {
+		if world.Biome(tile) == Deep || world.height[i] < 0 {
 			t.Fatalf("tile %d of a world with no sea is %d at %v", i,
-				w.Biome(tile), w.Height(tile))
+				world.Biome(tile), world.height[i])
 		}
 	}
 }
@@ -81,8 +80,8 @@ func TestBeyondTheWorldIsDeep(t *testing.T) {
 // a terrain with no tiling is a sphere split once: twelve tiles, the
 // twelve corners of the icosahedron.
 func TestNoTilingIsTheBareSphere(t *testing.T) {
-	w := New(Terrain{Seed: 1, Ocean: 0.5})
-	if len(w.Tiles()) != 12 {
-		t.Errorf("%d tiles, want 12", len(w.Tiles()))
+	world := New(Terrain{Seed: 1, Ocean: 0.5})
+	if len(world.tiles) != 12 {
+		t.Errorf("%d tiles, want 12", len(world.tiles))
 	}
 }

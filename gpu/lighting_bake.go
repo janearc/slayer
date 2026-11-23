@@ -9,12 +9,6 @@ import (
 	"github.com/janearc/slayer/metal"
 )
 
-// bakeLighting shares the trace kernel's native hierarchy and scene buffers.
-// Every frame recomputes lighting; this cache does not lag moving lamps.
-func (encoded *scene) bakeLighting(kernel *metal.Kernel, inputs [][]byte) (time.Duration, error) {
-	return encoded.bakeLightingOn(kernel, copied(kernel, inputs))
-}
-
 // bakeLightingOn is bakeLighting with its grids run by run. Each job
 // changes the header and the boxes on the host between grids, so run
 // must give the device what the host holds at each call.

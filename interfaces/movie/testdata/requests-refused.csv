@@ -13,3 +13,7 @@ negative frames,320,192,24,-1,false,a movie of -1 frames
 8K needs 6.0,7680,4320,24,24,false,level 6.0
 beyond every level,16384,16384,24,24,false,beyond every H.264 level
 rate past the most,320,192,241,24,false,a rate of 241
+width past every side,4611686018427387904,192,24,24,false,a side is over 65536
+height past every side padded,320,4611686018427387900,24,24,true,a side is over 65536
+one past the widest side,65538,192,24,24,false,a side is over 65536
+frames past a duration,320,192,24,9223372037,false,longer than a duration can count

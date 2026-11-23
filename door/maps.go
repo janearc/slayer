@@ -12,7 +12,7 @@ package door
 // one to its picture.
 //
 // The scene keeps its moments in its own cache (the weather's is shared
-// with hillside), spaced a frame apart, so a second run reaches each frame
+// with the session), spaced a frame apart, so a second run reaches each frame
 // from a checkpoint. The frames folder keeps a manifest of the job's key,
 // so a folder of another job is refused as a traced film's is.
 //
@@ -111,8 +111,9 @@ func (run runner) mapper(scene *scenes.Maps) (scenes.Mapper, error) {
 		return nil, err
 	}
 	renderer, said := run.wanted.Renderer()
+	mapTimes := run.wanted.Times()
 	ask, err := scenes.AskMaps(scenes.Renderer(renderer), said, cache,
-		spacing(run.wanted.Times()), run.out)
+		spacing(mapTimes), run.out)
 	if err != nil {
 		return nil, err
 	}
@@ -247,9 +248,10 @@ func (going *mapping) frame(index, frames int, at time.Duration) error {
 	if err := going.encode(index, frames, picture); err != nil {
 		return err
 	}
+	sinceStart := going.run.now().Sub(start)
 	_, err = fmt.Fprintf(going.run.out, "frame %d of %d: %s, on the %s, "+
 		"%s\n", index+one, frames, maps[nothing].Name(),
-		going.built.Renderer(), hundredths(going.run.now().Sub(start)))
+		going.built.Renderer(), hundredths(sinceStart))
 	return err
 }
 
@@ -324,8 +326,9 @@ func (going *mapping) finish(frames int) error {
 		lines = append(lines, line)
 	}
 	if going.reel != nil {
+		mapShown := going.built.Shows()
 		lines = append(lines, fmt.Sprintf("wrote %s, of the %s map",
-			run.at.movie, going.built.Shows()))
+			run.at.movie, mapShown))
 	}
 	for _, line := range lines {
 		if _, err := fmt.Fprintln(run.out, line); err != nil {

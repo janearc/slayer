@@ -28,6 +28,17 @@ type Job struct {
 	imported *importSnapshot
 }
 
+// Source records the origin of information used in the job. It records
+// attribution; it does not cause Slayer to fetch or verify the source.
+type Source struct {
+	Name string `yaml:"name" json:"name"`
+	URI  string `yaml:"uri" json:"uri"`
+	Note string `yaml:"note,omitempty" json:"note,omitempty"`
+}
+
+// Sources returns a copy of the job's source records.
+func (job Job) Sources() []Source { return slices.Clone(job.wire.Sources) }
+
 // Read is the job in the file at path, checked. A refusal says what was
 // wrong and its file, line and column, and wraps ErrRefused.
 func Read(path string) (Job, error) {
@@ -88,9 +99,8 @@ func Schema() []byte { return slices.Clone(schemaRaw) }
 func (job Job) File() string { return job.file }
 
 // Canonical is the job's canonical form: JSON with sorted keys, its
-// defaults filled in, every value that changes the picture or the
-// sound, and under inputs the sha256 of every file the job reads, and
-// nothing else.
+// defaults filled in, source attribution, every value that changes the
+// picture or sound, and under inputs the sha256 of every file it reads.
 func (job Job) Canonical() []byte { return job.formed(true) }
 
 // Key is the sha256 of the canonical form, in hex. Two jobs with the

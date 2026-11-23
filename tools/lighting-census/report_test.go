@@ -202,7 +202,8 @@ func reportSaveFrame(t *testing.T, root string, c Case, status string, when int6
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := png.Encode(file, image.NewRGBA(image.Rect(0, 0, 1, 1))); err != nil {
+		blank := image.NewRGBA(image.Rect(0, 0, 1, 1))
+		if err := png.Encode(file, blank); err != nil {
 			file.Close()
 			t.Fatal(err)
 		}

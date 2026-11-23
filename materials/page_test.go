@@ -104,7 +104,7 @@ func TestAPageWithOneThingWrongIsRefusedByIt(t *testing.T) {
 // none is refused by name.
 func TestEveryPageIsMadeUnderItsOwnName(t *testing.T) {
 	seen := map[string]bool{}
-	for _, book := range []map[string]page{metals, semiconductors, yard, xrays} {
+	for _, book := range []map[string]page{metals, alloys, semiconductors, yard, xrays} {
 		for name := range book {
 			if seen[name] {
 				t.Errorf("%s is in two books", name)
@@ -116,8 +116,8 @@ func TestEveryPageIsMadeUnderItsOwnName(t *testing.T) {
 			}
 		}
 	}
-	if len(seen) != 14 {
-		t.Errorf("%d materials by name, want 14", len(seen))
+	if len(seen) != 15 {
+		t.Errorf("%d materials by name, want 15 including nickel-aluminium bronze", len(seen))
 	}
 	if made, err := ByName("osmium"); err == nil || made.Name() != "" ||
 		!strings.Contains(err.Error(), `no material "osmium"`) {
@@ -131,7 +131,7 @@ func TestASubstanceRefusesNoNameAndNoFormula(t *testing.T) {
 		!strings.Contains(err.Error(), "no name") {
 		t.Errorf("a substance with no name: %v", err)
 	}
-	if _, err := NewSubstance("mist", Formula{}); err == nil ||
+	if _, err := NewSubstance("mist", formula{}); err == nil ||
 		!strings.Contains(err.Error(), "mist has no formula") {
 		t.Errorf("a substance of no formula: %v", err)
 	}

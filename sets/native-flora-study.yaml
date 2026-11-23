@@ -1,0 +1,93 @@
+# native flora study: one of each of the seven kinds the island and coast
+# sets sow, each from a seed of its own, standing alone in a row on flat
+# ground. west to east: hala (pandanus tectorius) on its aerial roots,
+# naupaka kahakai (scaevola taccada), ohia lehua (metrosideros polymorpha),
+# utu (barringtonia asiatica), holm oak (quercus ilex), tree heath (erica
+# arborea) and white willow (salix alba). each has a camera of its own, at
+# a person's height south of it. what was read for each and from where,
+# and what is picked, is in manufacture/plant-profiles.yaml beside its row.
+#
+# the frame. places are metres, x east, y north, z up, the ground's top at
+# z = 0. the sun and the sky are worked, not chosen: the reader works them
+# for the place, the date and the clock below, which are the harbour
+# quarter's (sets/groningen.yaml) at one in the afternoon; there is no
+# terrain, so the air is earth's over flat land. the ground is one box, its
+# colour by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: native flora study
+  seed: 1
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  location:
+    lat: 53.22
+    lon: 6.57
+  date: "2026-09-21"
+  timeofday: 1300
+  utc-offset: {value: 2, unit: h}
+  film:
+    width: 640
+    height: 360
+    rays: 2
+    wide: 55
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # each a person's height south of its tree, far enough to hold the
+    # crown, looking at about the middle of it
+    hala:
+      title: "a hala on its aerial roots, from twenty two metres south"
+      location: {at: [20, 28, 1.7]}
+      orientation: {look_at: [20, 50, 5]}
+    naupaka:
+      title: "a naupaka kahakai, from nine metres south"
+      location: {at: [40, 41, 1.7]}
+      orientation: {look_at: [40, 50, 1.2]}
+    ohia:
+      title: "an ohia lehua, from twenty metres south"
+      location: {at: [60, 30, 1.7]}
+      orientation: {look_at: [60, 50, 5]}
+    utu:
+      title: "an utu, from thirty two metres south"
+      location: {at: [85, 18, 1.7]}
+      orientation: {look_at: [85, 50, 7]}
+    holm oak:
+      title: "a holm oak, from thirty metres south"
+      location: {at: [110, 20, 1.7]}
+      orientation: {look_at: [110, 50, 7]}
+    tree heath:
+      title: "a tree heath, from twelve metres south"
+      location: {at: [130, 38, 1.7]}
+      orientation: {look_at: [130, 50, 2]}
+    willow:
+      title: "a white willow, from thirty metres south"
+      location: {at: [150, 20, 1.7]}
+      orientation: {look_at: [150, 50, 8]}
+  set:
+    things:
+      hala: {kind: pandanus-tectorius, seed: 1, complexity: demo, position: {east: {value: 20, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      naupaka: {kind: scaevola-taccada, seed: 2, complexity: demo, position: {east: {value: 40, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      ohia: {kind: metrosideros-polymorpha, seed: 3, complexity: quick, position: {east: {value: 60, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      utu: {kind: barringtonia-asiatica, seed: 4, complexity: quick, position: {east: {value: 85, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      holm oak: {kind: quercus-ilex, seed: 5, complexity: quick, position: {east: {value: 110, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      tree heath: {kind: erica-arborea, seed: 6, complexity: clumps, position: {east: {value: 130, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      willow: {kind: salix-alba, seed: 7, complexity: quick, position: {east: {value: 150, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+  world:
+    unit: 1
+    materials:
+      soil:
+        colour: {srgb_linear: [0.09, 0.075, 0.055]}
+        source: eye
+    boxes:
+      # the ground, its upper face at nought
+      ground:
+        material: soil
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye

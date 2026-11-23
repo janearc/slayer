@@ -50,8 +50,9 @@ func (body *Body) Sources(cells int) []Source {
 	var made []Source
 	for i := range cells * cells * cells {
 		x, y, z := i%cells, i/cells%cells, i/(cells*cells)
-		middle := box.Min.Add(maths.V((float64(x)+0.5)*size.X,
-			(float64(y)+0.5)*size.Y, (float64(z)+0.5)*size.Z))
+		offset := maths.V((float64(x)+0.5)*size.X,
+			(float64(y)+0.5)*size.Y, (float64(z)+0.5)*size.Z)
+		middle := box.Min.Add(offset)
 		soot := body.Density(middle)
 		if !(soot > 0) {
 			continue

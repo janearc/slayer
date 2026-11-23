@@ -1,0 +1,75 @@
+# six sampans, from six seeds, side by side on the sea of
+# sets/alfa-san-onofre.yaml, by day: its air, its sun and its exposure as
+# they are there (the sun at azimuth 236.2 and altitude 13.4, exposure
+# 1102), and its sea, which has no edge, so that the sea runs behind the
+# boats. the sea's `direct-sun: mean-plane` is left out: that mode wants
+# the one aired sun lamp and no other, and a boat
+# carries its lights. the boats are made by the kind `sampan`, which is
+# under way; see manufacture/boats.yaml for every figure and whether it was
+# recalled or picked.
+#
+# places are metres, x east, y north, z up. a boat's origin is at its
+# waterline, so each stands at up 0, the sea's height. they stand in a row
+# along the north, 14 m apart, heading north, a choice: from the camera,
+# 105 m west of the row and 4 m up, looking east with the sun behind it,
+# the port side of each faces the camera. the seeds are 1 to 6.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: six sampans by day
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 236.2, altitude: 13.4}
+  film:
+    width: 1280
+    height: 720
+    rays: 2
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.5, 0.1, 0.06]
+        source: "synthetic extinction, not measured water; colour by eye"
+    ocean:
+      material: seawater
+      middle: [-1500, 0, 0]
+      sea:
+        wind: {value: 7, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a moderate breeze off San Onofre, no shelf source"
+  set:
+    things:
+      sampan 1: {kind: sampan, seed: 1, complexity: demo, position: {east: {value: -1500, unit: m}, north: {value: -35, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+      sampan 2: {kind: sampan, seed: 2, complexity: demo, position: {east: {value: -1500, unit: m}, north: {value: -21, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+      sampan 3: {kind: sampan, seed: 3, complexity: demo, position: {east: {value: -1500, unit: m}, north: {value: -7, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+      sampan 4: {kind: sampan, seed: 4, complexity: demo, position: {east: {value: -1500, unit: m}, north: {value: 7, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+      sampan 5: {kind: sampan, seed: 5, complexity: demo, position: {east: {value: -1500, unit: m}, north: {value: 21, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+      sampan 6: {kind: sampan, seed: 6, complexity: demo, position: {east: {value: -1500, unit: m}, north: {value: 35, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+  cameras:
+    row:
+      title: "from 105 m west, 4 m up, looking east along nothing but the row"
+      location: {at: [-1605, 0, 4]}
+      orientation: {look_at: [-1500, 0, 1.5]}
+    near:
+      title: "the third and fourth, 30 m west and 2 m up, level with them"
+      location: {at: [-1530, 0, 2]}
+      orientation: {look_at: [-1500, 0, 1]}
+    quarter:
+      title: "the third's bow quarter, 20 m off it and 2 m up"
+      location: {at: [-1512, -24, 2]}
+      orientation: {look_at: [-1500, -7, 0.8]}

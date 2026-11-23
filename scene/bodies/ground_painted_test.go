@@ -50,7 +50,8 @@ func spread(n int) []maths.Vec {
 	for i := range out {
 		y := 1 - 2*(float64(i)+0.5)/float64(n)
 		r := math.Sqrt(1 - y*y)
-		out[i] = maths.V(r*math.Cos(golden*float64(i)), y, r*math.Sin(golden*float64(i)))
+		angle := golden * float64(i)
+		out[i] = maths.V(r*math.Cos(angle), y, r*math.Sin(angle))
 	}
 	return out
 }
@@ -82,8 +83,9 @@ func TestAGroundIsTiledOnASphereSplitDetailTimes(t *testing.T) {
 // split of twice: 8 is 4, 12 is 6, 13 is 6, and 5, 2 and 1 are 2.
 func TestAMoonsGroundIsTiledAtHalfTheParentsDetail(t *testing.T) {
 	for detail, want := range map[int]int{8: 4, 12: 6, 13: 6, 5: 2, 2: 2, 1: 2} {
+		smallRock := made(t, "m", bodies.Rock, 2, 1, ground(t))
 		moon, err := bodies.NewMoon(
-			made(t, "m", bodies.Rock, 2, 1, ground(t)),
+			smallRock,
 			bodies.Kilometres(4e5), measure.Radians(0))
 		if err != nil {
 			t.Fatal(err)
@@ -177,11 +179,13 @@ func TestAGroundWearsItsMapAndLightsAsDrawnMirrored(t *testing.T) {
 		onLights := toward(-5*math.Pi/8-c.turn, -math.Pi/8)
 		mirrored := func(v maths.Vec) maths.Vec { return maths.V(v.X, v.Y, -v.Z) }
 		nearLight(t, c.name+": the map's white pixel", m.Texture.At(onMap), maths.Grey(1), 1e-6)
-		nearLight(t, c.name+": the map, the right way round", m.Texture.At(mirrored(onMap)),
+		mirroredMap := mirrored(onMap)
+		nearLight(t, c.name+": the map, the right way round", m.Texture.At(mirroredMap),
 			maths.Light{}, 1e-6)
 		nearLight(t, c.name+": the lights' white pixel", m.Shine.At(onLights),
 			maths.Grey(c.gain), 1e-6)
-		nearLight(t, c.name+": the lights, the right way round", m.Shine.At(mirrored(onLights)),
+		mirroredLights := mirrored(onLights)
+		nearLight(t, c.name+": the lights, the right way round", m.Shine.At(mirroredLights),
 			maths.Light{}, 1e-6)
 		if got := m.Texture.(texture.Picture).Turn; got != c.turn {
 			t.Errorf("%s: the map is turned %v", c.name, got)
@@ -374,8 +378,9 @@ func TestCitiesOnAMapAreLaidByTheMap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	mapped := ground(t).Mapped(img, measure.Radians(0))
 	b := made(t, "r", bodies.Rock, 8, 1,
-		ground(t).Mapped(img, measure.Radians(0)), cities)
+		mapped, cities)
 	w := thing.NewWorld()
 	if err := b.Place(w, maths.Vec{}, 0.5, 4); err != nil {
 		t.Fatal(err)

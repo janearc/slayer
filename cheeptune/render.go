@@ -40,7 +40,7 @@ type Tick struct {
 // does not fit, and it fails if the mix clips: a clipped sample is a wrong
 // sample, and saying so is better than shipping it.
 func Render(s *Score, v *Voicing) (*Piece, error) {
-	pl, err := Bind(s, v)
+	pl, err := bindVoicing(s, v)
 	if err != nil {
 		return nil, err
 	}
@@ -48,12 +48,12 @@ func Render(s *Score, v *Voicing) (*Piece, error) {
 }
 
 // Render runs the voicing's machine over a plan.
-func (pl *Plan) Render() (*Piece, error) {
+func (pl *plan) Render() (*Piece, error) {
 	return machines[pl.voicing.Machine].render(pl)
 }
 
 // render runs the Game Boy over a plan.
-func (gameboy) render(pl *Plan) (*Piece, error) {
+func (gameboy) render(pl *plan) (*Piece, error) {
 	s := pl.score
 	length := s.Seconds()
 
@@ -319,7 +319,7 @@ func notesOf(voices []voice) map[string][]Note {
 		for _, n := range vc.notes {
 			loud := n.loud
 			if loud <= 0 {
-				loud = Marks["mf"]
+				loud = marks["mf"]
 			}
 			notes[vc.ch.Role] = append(notes[vc.ch.Role],
 				Note{On: n.on, Off: n.off, Hit: n.hitName, Loud: loud})

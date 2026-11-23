@@ -26,7 +26,8 @@ func ptyPair(t *testing.T) (master, slave *os.File) {
 		t.Skipf("no pseudo-terminal to be had: %v", err)
 	}
 	for _, req := range []uint{unix.TIOCPTYGRANT, unix.TIOCPTYUNLK} {
-		if err := unix.IoctlSetInt(int(master.Fd()), req, 0); err != nil {
+		descriptor := int(master.Fd())
+		if err := unix.IoctlSetInt(descriptor, req, 0); err != nil {
 			master.Close()
 			t.Skipf("no pseudo-terminal to be had: ioctl %#x: %v", req, err)
 		}
@@ -36,11 +37,11 @@ func ptyPair(t *testing.T) (master, slave *os.File) {
 		master.Close()
 		t.Skipf("no pseudo-terminal to be had: its name: %v", e)
 	}
-	n := 0
-	for n < len(name) && name[n] != 0 {
-		n++
+	count := 0
+	for count < len(name) && name[count] != 0 {
+		count++
 	}
-	slave, err = os.OpenFile(string(name[:n]), os.O_RDWR|unix.O_NOCTTY, 0)
+	slave, err = os.OpenFile(string(name[:count]), os.O_RDWR|unix.O_NOCTTY, 0)
 	if err != nil {
 		master.Close()
 		t.Skipf("no pseudo-terminal to be had: %v", err)
@@ -56,12 +57,12 @@ func ptyPair(t *testing.T) (master, slave *os.File) {
 // terminal that a write to cannot get through.
 func reopen(t *testing.T, slave *os.File) *os.File {
 	t.Helper()
-	f, err := os.OpenFile(slave.Name(), os.O_RDONLY|unix.O_NOCTTY, 0)
+	file, err := os.OpenFile(slave.Name(), os.O_RDONLY|unix.O_NOCTTY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { f.Close() })
-	return f
+	t.Cleanup(func() { file.Close() })
+	return file
 }
 
 // resize tells the slave how big it is, through the master, with the
@@ -69,7 +70,8 @@ func reopen(t *testing.T, slave *os.File) *os.File {
 func resize(t *testing.T, master *os.File, cols, rows, xpix, ypix int) {
 	t.Helper()
 	ws := &unix.Winsize{Col: uint16(cols), Row: uint16(rows), Xpixel: uint16(xpix), Ypixel: uint16(ypix)}
-	if err := unix.IoctlSetWinsize(int(master.Fd()), unix.TIOCSWINSZ, ws); err != nil {
+	descriptor := int(master.Fd())
+	if err := unix.IoctlSetWinsize(descriptor, unix.TIOCSWINSZ, ws); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -87,7 +89,8 @@ func screenOf(t *testing.T, master *os.File, want int) string {
 		if n, err := unix.Poll(fds, 100); err != nil || n == 0 {
 			continue
 		}
-		n, err := unix.Read(int(master.Fd()), buf)
+		descriptor := int(master.Fd())
+		n, err := unix.Read(descriptor, buf)
 		if err != nil || n <= 0 {
 			break
 		}
@@ -97,9 +100,10 @@ func screenOf(t *testing.T, master *os.File, want int) string {
 }
 
 // settings is the terminal's modes, to see whether they changed.
-func settings(t *testing.T, f *os.File) unix.Termios {
+func settings(t *testing.T, file *os.File) unix.Termios {
 	t.Helper()
-	tio, err := unix.IoctlGetTermios(int(f.Fd()), unix.TIOCGETA)
+	descriptor := int(file.Fd())
+	tio, err := unix.IoctlGetTermios(descriptor, unix.TIOCGETA)
 	if err != nil {
 		t.Fatal(err)
 	}

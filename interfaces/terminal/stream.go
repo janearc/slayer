@@ -42,8 +42,6 @@ const none = 0
 const onward = 1
 
 // Size is how many cells a stream is across and down.
-//
-//ninja:vow practice ParseSize makes one and NewStream takes it
 type Size struct {
 	cols, rows int
 }
@@ -89,8 +87,6 @@ func (shape Size) pixels() (wide, high int) {
 }
 
 // Source draws the frames of a stream.
-//
-//ninja:vow practice NewStream takes one, and cells.Scene is one
 type Source interface {
 	// Frame is frame number as a picture wide pixels across and high
 	// down.

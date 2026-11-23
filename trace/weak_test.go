@@ -8,6 +8,22 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
+// weakHaze is the solid scene in haze of its own colour.
+func weakHaze() *thing.World {
+	world := smoking()
+	world.Haze = thing.Haze{Density: 0.1, Colour: maths.Grey(0.25)}
+	return world
+}
+
+// weakMirror is the solid scene on a glossy floor under a white sky.
+func weakMirror() *thing.World {
+	world := smoking()
+	world.Things[0].Material = &thing.Material{Name: "glass",
+		Colour: maths.Grey(0.1), Gloss: 1}
+	world.Sky = even(maths.Grey(1))
+	return world
+}
+
 // A ray that passes a ball and goes on to the floor behind it meets
 // that floor with a weak field round the ball as it does with none.
 // The ray's nearest point to the field's middle is short of the floor,
@@ -43,7 +59,8 @@ func TestDepthThroughAWeakFieldIsTheDistance(t *testing.T) {
 	world.AddField(thing.Field{Mass: 1e-6, Reach: 40})
 	for name, aim := range map[string]maths.Ray{"at the ball": at,
 		"past the ball": past, "from beyond the reach": beyond} {
-		want := float64(lone(smoking(), aim, 0).Depth)
+		smoke := smoking()
+		want := float64(lone(smoke, aim, 0).Depth)
 		got := float64(lone(world, aim, 0).Depth)
 		if !(want > 1) || !within(got, want, 1e-3*want) {
 			t.Errorf("%s the depth is %v in the field and %v with "+
@@ -74,11 +91,13 @@ func TestAFieldGathersTheVolumeBeforeASurface(t *testing.T) {
 	want := kept + glow*(1-kept)
 	// a pixel is kept to seven figures, and the two marches add the
 	// slab up in different pieces, so five places is asked
-	plain := float64(lone(build(false), aim, 0).R)
+	plainWorld := build(false)
+	plain := float64(lone(plainWorld, aim, 0).R)
 	if !within(plain, want, 1e-5) {
 		t.Fatalf("with no field the floor is %v, want %v", plain, want)
 	}
-	curved := float64(lone(build(true), aim, 0).R)
+	curvedWorld := build(true)
+	curved := float64(lone(curvedWorld, aim, 0).R)
 	if !within(curved, want, 1e-5) {
 		t.Errorf("in a weak field the floor is %v, want %v", curved,
 			want)

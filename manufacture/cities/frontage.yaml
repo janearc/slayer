@@ -1,0 +1,98 @@
+# The room a frontage gives what it lays at a spacing along a line: trees on
+# a quay, boats along a wall. Each name is the kind, a hyphen, and what the
+# fact is. Every value is picked. Dimensions are metres, turns are degrees.
+#
+# A boat's bow is toward minus z and a thing's front is plus z, so a boat
+# whose front is turned half a turn from the line's direction has its bow
+# along the line.
+numbers:
+- name: alder-frontage-spacing
+  value: 9
+  unit: m
+  says: the room an alder takes along a quay, a crown's width and a little over
+  kind: picked
+  by: "frontage study, by eye"
+- name: poplar-frontage-spacing
+  value: 8
+  unit: m
+  says: the room a poplar takes along a quay, a narrow crown and a gap
+  kind: picked
+  by: "frontage study, by eye"
+- name: salix-alba-frontage-spacing
+  value: 12
+  unit: m
+  says: the room a white willow takes along a line, a broad crown and a gap
+  kind: picked
+  by: "native flora study, by the crown's scale"
+- name: sampan-frontage-spacing
+  value: 10
+  unit: m
+  says: the room a sampan takes along a wall, the longest of its lengths, 8 m, and a fender's room
+  kind: picked
+  by: "frontage study, from the longest length in the boats' data"
+- name: sampan-frontage-turn
+  value: 180
+  unit: deg
+  says: how far from the line's direction a sampan's front looks, so its bow is along the line
+  kind: picked
+  by: "frontage study, from the boat's own axes"
+- name: sampan-at-anchor-frontage-spacing
+  value: 10
+  unit: m
+  says: the room a sampan takes along a wall, the longest of its lengths, 8 m, and a fender's room
+  kind: picked
+  by: "frontage study, from the longest length in the boats' data"
+- name: sampan-at-anchor-frontage-turn
+  value: 180
+  unit: deg
+  says: how far from the line's direction a sampan's front looks, so its bow is along the line
+  kind: picked
+  by: "frontage study, from the boat's own axes"
+- name: fishing-boat-frontage-spacing
+  value: 28
+  unit: m
+  says: the room a fishing boat takes along a wall, the longest of its lengths, 25 m, and a fender's room
+  kind: picked
+  by: "frontage study, from the longest length in the boats' data"
+- name: fishing-boat-frontage-turn
+  value: 180
+  unit: deg
+  says: how far from the line's direction a fishing boat's front looks, so its bow is along the line
+  kind: picked
+  by: "frontage study, from the boat's own axes"
+- name: fishing-boat-at-anchor-frontage-spacing
+  value: 28
+  unit: m
+  says: the room a fishing boat takes along a wall, the longest of its lengths, 25 m, and a fender's room
+  kind: picked
+  by: "frontage study, from the longest length in the boats' data"
+- name: fishing-boat-at-anchor-frontage-turn
+  value: 180
+  unit: deg
+  says: how far from the line's direction a fishing boat's front looks, so its bow is along the line
+  kind: picked
+  by: "frontage study, from the boat's own axes"
+- name: ferry-frontage-spacing
+  value: 42
+  unit: m
+  says: the room a ferry takes along a wall, the longest of its lengths, 38 m, and a fender's room
+  kind: picked
+  by: "frontage study, from the longest length in the boats' data"
+- name: ferry-frontage-turn
+  value: 180
+  unit: deg
+  says: how far from the line's direction a ferry's front looks, so its bow is along the line
+  kind: picked
+  by: "frontage study, from the boat's own axes"
+- name: ferry-at-anchor-frontage-spacing
+  value: 42
+  unit: m
+  says: the room a ferry takes along a wall, the longest of its lengths, 38 m, and a fender's room
+  kind: picked
+  by: "frontage study, from the longest length in the boats' data"
+- name: ferry-at-anchor-frontage-turn
+  value: 180
+  unit: deg
+  says: how far from the line's direction a ferry's front looks, so its bow is along the line
+  kind: picked
+  by: "frontage study, from the boat's own axes"

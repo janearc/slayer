@@ -72,9 +72,10 @@ inferred from client config.
 ## Explicit shared-Slayer transport
 
 The default remains Azazel. An operator-authorized caller can explicitly select
-Tools.Transport=slayer and supply the shared Slayer and Game paths. This route
-runs the existing foreground Slayer draw command through its Game lane, using
-the CPU tests lane for a CPU profile. It is never an automatic queue fallback.
+Tools.Transport=slayer and supply the shared Slayer path and a cache folder.
+This route starts the existing foreground Slayer draw command itself, with no
+Game lane: the person at the keyboard does not queue behind batch work. It is
+never an automatic queue fallback.
 Catalogue settings are refused in this route.
 
 Direct execution creates its own process group, terminates that group on

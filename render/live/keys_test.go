@@ -15,15 +15,19 @@ func idle(t *testing.T, text string) *Watcher {
 	t.Helper()
 	control := gomock.NewController(t)
 	now := &clock{now: time.Date(2026, 11, 12, 12, 0, 0, 0, time.UTC)}
-	watching := watcherOn(t, jobFile(t, text), NewMockStager(control),
-		screenOf(control, make(chan terminal.Event), nil, nil), now,
+	jobPath := jobFile(t, text)
+	stager := NewMockStager(control)
+	screen := screenOf(control, make(chan terminal.Event), nil, nil)
+	watching := watcherOn(t, jobPath, stager,
+		screen, now,
 		make(chan time.Time))
 	watching.reread()
 	frames := filmFrames
 	if watching.still() {
 		frames = one
 	}
-	watching.opened(factsOf(stageOf(control, frames, nil)))
+	facts := factsOf(stageOf(control, frames, nil))
+	watching.opened(facts)
 	watching.pending = Unchanged
 	return watching
 }
@@ -72,10 +76,10 @@ func TestKeysHoldAtTheEnds(t *testing.T) {
 			watching.view.index)
 	}
 	still := idle(t, stillJob)
-	if got := still.key(pressed(t, "\x1b[C")); got != Unchanged ||
-		!strings.Contains(strings.Join(still.foot.lines(), " "),
-			"one frame") {
-		t.Errorf("right on a still gave %v, %q", got, still.foot.lines())
+	moved := still.key(pressed(t, "\x1b[C"))
+	footing := strings.Join(still.foot.lines(), " ")
+	if moved != Unchanged || !strings.Contains(footing, "one frame") {
+		t.Errorf("right on a still gave %v, %q", moved, still.foot.lines())
 	}
 	if got := still.key(pressed(t, " ")); got != Unchanged {
 		t.Errorf("space on a still gave %v", got)

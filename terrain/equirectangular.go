@@ -165,7 +165,8 @@ func (frame sphereFrame) locate(raster *Raster, longitude, latitude float64) (la
 // A column before the first or after the last wraps round to the other end;
 // locate leaves such a column only where the file is a whole circle.
 func (raster *Raster) filled(place lattice) (float64, bool, error) {
-	top := min(int(math.Floor(place.row)), raster.height-neighbourCount)
+	rowFloor := int(math.Floor(place.row))
+	top := min(rowFloor, raster.height-neighbourCount)
 	down := place.row - float64(top)
 	columnWeights := [neighbourCount]float64{1 - place.across, place.across}
 	rowWeights := [neighbourCount]float64{1 - down, down}

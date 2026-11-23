@@ -1,0 +1,17 @@
+name,node,atx,aty,atz,dirx,diry,dirz,near,far,enter,ok
+along x,slab-box,0,3,4,2,0,0,0,inf,0.5,1
+against x,slab-box,10,3,4,-2,0,0,0,inf,3,1
+along y,slab-box,2,0,4,0,4,0,0,inf,0.5,1
+against y,slab-box,2,9,4,0,-4,0,0,inf,0.75,1
+along z,slab-box,2,3,0,0,0,2,0,inf,1.5,1
+against z,slab-box,2,3,12,0,0,-2,0,inf,1.5,1
+near past,slab-box,0,3,4,1,0,0,2,3,2,1
+far before,slab-box,0,3,4,1,0,0,0,0.5,1,0
+far inside,slab-box,0,3,4,1,0,0,0,1.5,1,1
+missed,slab-box,0,10,4,1,0,0,0,inf,1,0
+missed on x,slab-box,0,3,4,0,1,0,0,inf,inf,0
+no way,slab-box,0,3,4,0,0,0,0,inf,inf,0
+corner,slab-box,0,0,0,1,2,1,0,inf,3,1
+diagonal,slab-box,0,0,0,1,1,1,0,inf,3,1
+just missed,slab-box,0,0,0,2,1,1,0,inf,3,0
+at the slack,slack-edge,0,0,0.5,1,1,0,0,inf,loosened,1

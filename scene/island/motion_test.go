@@ -108,7 +108,8 @@ func TestMotionPrepareReportsViewFailures(t *testing.T) {
 	if _, err := newMotion(t, ground).Prepare(context.Background(), lookDown(t, 1e6), origin, 0); !errors.Is(err, sentinel) {
 		t.Errorf("source failure: %v", err)
 	}
-	good := newMotion(t, testTerrain(t, flat(0), testDetail()))
+	flatTerrain := testTerrain(t, flat(0), testDetail())
+	good := newMotion(t, flatTerrain)
 	if _, err := good.Prepare(context.Background(), footprintZero(), origin, 0); err == nil {
 		t.Error("an unchecked view prepared")
 	}
@@ -204,9 +205,12 @@ func TestMotionBlendsBetweenTwoViews(t *testing.T) {
 func TestMotionReportsNormalCountsOnce(t *testing.T) {
 	detail := testDetail()
 	detail.NormalLongitude, detail.NormalLatitude = 0.1, 0.1
-	motion := newMotion(t, testTerrain(t, flat(0), detail))
+	flatTerrain := testTerrain(t, flat(0), detail)
+	motion := newMotion(t, flatTerrain)
 	ctx := context.Background()
-	if _, err := motion.Prepare(ctx, lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)), 0); err != nil {
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	if _, err := motion.Prepare(ctx, looking, placed, 0); err != nil {
 		t.Fatal(err)
 	}
 	low := originAt(t, maths.V(0, 3e5, 0))
@@ -273,14 +277,20 @@ func TestMotionStartsANewTransitionWhenOneEnds(t *testing.T) {
 	ground := testTerrain(t, flat(0), testDetail())
 	motion := newMotion(t, ground)
 	ctx := context.Background()
-	if _, err := motion.Prepare(ctx, lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)), 0); err != nil {
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	if _, err := motion.Prepare(ctx, looking, placed, 0); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := motion.Prepare(ctx, lookDown(t, 3e5), originAt(t, maths.V(0, 3e5, 0)), time.Second); err != nil {
+	closeLooking := lookDown(t, 3e5)
+	closePlaced := originAt(t, maths.V(0, 3e5, 0))
+	if _, err := motion.Prepare(ctx, closeLooking, closePlaced, time.Second); err != nil {
 		t.Fatal(err)
 	}
 	at := time.Second + span + time.Second
-	got, err := motion.Prepare(ctx, lookDown(t, 2e7), originAt(t, maths.V(0, 2e7, 0)), at)
+	farLooking := lookDown(t, 2e7)
+	farPlaced := originAt(t, maths.V(0, 2e7, 0))
+	got, err := motion.Prepare(ctx, farLooking, farPlaced, at)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -297,14 +307,16 @@ func TestMotionRefusesATransitionOverItsLimits(t *testing.T) {
 	ctx := context.Background()
 	for name, motion := range map[string]func(*testing.T) *Motion{
 		"patch allowance": func(t *testing.T) *Motion {
-			made, err := NewMotion(testTerrain(t, flat(0), testDetail()), span, 4, 1<<20)
+			flatTerrain := testTerrain(t, flat(0), testDetail())
+			made, err := NewMotion(flatTerrain, span, 4, 1<<20)
 			if err != nil {
 				t.Fatal(err)
 			}
 			return made
 		},
 		"payload allowance": func(t *testing.T) *Motion {
-			made, err := NewMotion(testTerrain(t, flat(0), testDetail()), span, 64, 80*transitionValueBytes)
+			flatTerrain := testTerrain(t, flat(0), testDetail())
+			made, err := NewMotion(flatTerrain, span, 64, 80*transitionValueBytes)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -312,10 +324,14 @@ func TestMotionRefusesATransitionOverItsLimits(t *testing.T) {
 		},
 	} {
 		owner := motion(t)
-		if _, err := owner.Prepare(ctx, lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)), 0); err != nil {
+		looking := lookDown(t, 1e6)
+		placed := originAt(t, maths.V(0, 1e6, 0))
+		if _, err := owner.Prepare(ctx, looking, placed, 0); err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
-		_, err := owner.Prepare(ctx, lookDown(t, 3e5), originAt(t, maths.V(0, 3e5, 0)), time.Second)
+		closeLooking := lookDown(t, 3e5)
+		closePlaced := originAt(t, maths.V(0, 3e5, 0))
+		_, err := owner.Prepare(ctx, closeLooking, closePlaced, time.Second)
 		if err == nil || !strings.Contains(err.Error(), "allowance") {
 			t.Errorf("%s: error %v", name, err)
 		}
@@ -339,11 +355,15 @@ func TestMotionStopsWhenTheContextEndsInATransition(t *testing.T) {
 		return 0, true, nil
 	}), testDetail())
 	motion := newMotion(t, ground)
-	if _, err := motion.Prepare(ctx, lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)), 0); err != nil {
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	if _, err := motion.Prepare(ctx, looking, placed, 0); err != nil {
 		t.Fatal(err)
 	}
 	stopAt = reads + 81
-	_, err := motion.Prepare(ctx, lookDown(t, 3e5), originAt(t, maths.V(0, 3e5, 0)), time.Second)
+	closeLooking := lookDown(t, 3e5)
+	closePlaced := originAt(t, maths.V(0, 3e5, 0))
+	_, err := motion.Prepare(ctx, closeLooking, closePlaced, time.Second)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("error %v", err)
 	}
@@ -435,7 +455,9 @@ func TestSamplerFindsPointsOnTheStitchedTriangles(t *testing.T) {
 // on a seam, and that a key outside the region owns none.
 func TestSamplerLeafAssignsSharedBoundariesUpward(t *testing.T) {
 	ground := testTerrain(t, flat(0), testDetail())
-	prepared, err := ground.Prepare(context.Background(), lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)))
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	prepared, err := ground.Prepare(context.Background(), looking, placed)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -481,7 +503,9 @@ func TestSamplerInterpolatesNormalsOnSmoothMeshes(t *testing.T) {
 	detail := testDetail()
 	detail.NormalLongitude, detail.NormalLatitude = 0.1, 0.1
 	ground := testTerrain(t, flat(0), detail)
-	prepared, err := ground.Prepare(context.Background(), lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)))
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	prepared, err := ground.Prepare(context.Background(), looking, placed)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -534,7 +558,9 @@ func TestCommonPatchesTakesTheFinerLeaf(t *testing.T) {
 func TestTransitionRefusesAnIrregularEndpoint(t *testing.T) {
 	ground := testTerrain(t, flat(0), testDetail())
 	motion := newMotion(t, ground)
-	good, err := ground.Prepare(context.Background(), lookDown(t, 1e6), originAt(t, maths.V(0, 1e6, 0)))
+	looking := lookDown(t, 1e6)
+	placed := originAt(t, maths.V(0, 1e6, 0))
+	good, err := ground.Prepare(context.Background(), looking, placed)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -585,7 +611,8 @@ func TestTransitionPrepareRefusesWhatCannotBeMeshed(t *testing.T) {
 		!strings.Contains(err.Error(), "no area") {
 		t.Errorf("direct: %v", err)
 	}
-	motion := newMotion(t, testTerrain(t, flat(0), testDetail()))
+	flatTerrain := testTerrain(t, flat(0), testDetail())
+	motion := newMotion(t, flatTerrain)
 	motion.active = zeroTransition()
 	if _, err := motion.Prepare(context.Background(), lookDown(t, 1e6), origin, time.Second); err == nil ||
 		!strings.Contains(err.Error(), "no area") {
@@ -614,7 +641,8 @@ func TestSurfaceRefusesARenderOriginThatOverflows(t *testing.T) {
 	}
 	patch := terrain.Patch{MinColumn: 4, MaxColumn: 6, MinRow: 0, MaxRow: 2, Level: 2}
 	book := bookFor(ground, []terrain.Patch{patch})
-	_, err = book.surface(patch, originAt(t, maths.V(math.MaxFloat64, 0, 0)))
+	far := originAt(t, maths.V(math.MaxFloat64, 0, 0))
+	_, err = book.surface(patch, far)
 	if err == nil || !strings.Contains(err.Error(), "overflow") {
 		t.Fatalf("error %v", err)
 	}

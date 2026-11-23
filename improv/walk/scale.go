@@ -61,13 +61,13 @@ func (view Camera) PerMetre(at Place) (float64, error) {
 	}
 	if across.Len() == 0 {
 		return 0, fmt.Errorf("%w: the camera's rows run straight up or "+
-			"down; there is no level way across it", ErrWalk)
+			"down; there is no level way across it", errWalk)
 	}
 	step := placeOf(at.world().Add(across.Unit()))
 	one, other := view.Project(at), view.Project(step)
 	if !one.ahead || !other.ahead {
 		return 0, fmt.Errorf("%w: %.1f e, %.1f n is behind the camera; "+
-			"put the bar where the camera sees", ErrWalk, at.east, at.north)
+			"put the bar where the camera sees", errWalk, at.east, at.north)
 	}
 	return math.Hypot(other.x-one.x, other.y-one.y), nil
 }
@@ -81,7 +81,7 @@ func (view Camera) ScaleBar(at Place, most float64) (Bar, error) {
 	}
 	if !(per > 0) || !(most > 0) {
 		return Bar{}, fmt.Errorf("%w: a bar of %v pixels at %v a metre; "+
-			"give a length on the picture", ErrWalk, most, per)
+			"give a length on the picture", errWalk, most, per)
 	}
 	return Bar{metres: roundDown(most / per), pixels: roundDown(most/per) *
 		per, at: view.Project(at), unit: view.unit}, nil

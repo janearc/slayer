@@ -118,9 +118,27 @@ func propertyPaths(node any, path string, into map[string]bool) {
 	}
 }
 
+// branchName is how a branch of a oneOf, anyOf or allOf is told from its
+// neighbours: by the first kind it takes, when it takes one, since version 2
+// has branches version 1 has not and its numbers differ; by its number
+// when it takes none.
+func branchName(branch any, number int) string {
+	described, _ := branch.(map[string]any)
+	properties, _ := described["properties"].(map[string]any)
+	kind, _ := properties["kind"].(map[string]any)
+	if word, ok := kind["const"]; ok {
+		return fmt.Sprint(word)
+	}
+	if words, _ := kind["enum"].([]any); len(words) > 0 {
+		return fmt.Sprint(words[0])
+	}
+	return fmt.Sprint(number)
+}
+
 // enumPaths is every list of words a schema allows at a place, by the path
-// to the place through its properties, definitions and numbered branches,
-// so two schemas can be compared word for word as well as key for key.
+// to the place through its properties, definitions and branches named by
+// the kind they take, so two schemas can be compared word for word as well
+// as key for key.
 func enumPaths(node any, path string, into map[string][]string) {
 	switch value := node.(type) {
 	case map[string]any:
@@ -144,8 +162,9 @@ func enumPaths(node any, path string, into map[string][]string) {
 			case "oneOf", "anyOf", "allOf":
 				branches, _ := child.([]any)
 				for number, branch := range branches {
-					enumPaths(branch, fmt.Sprintf("%s|%s%d", path, key,
-						number), into)
+					named := branchName(branch, number)
+					enumPaths(branch, fmt.Sprintf("%s|%s:%s", path, key,
+						named), into)
 				}
 			default:
 				enumPaths(child, path, into)

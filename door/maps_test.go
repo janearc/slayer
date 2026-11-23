@@ -80,13 +80,15 @@ func TestDrawWeatherWritesThreeMapsAFrame(t *testing.T) {
 	directory := t.TempDir()
 	path := written(t, directory, "sky.yaml", weatherFilm(t, "",
 		"outputs: {frames: maps}\n"))
-	said := drew(t, envIn(t, context.Background(), directory), path)
+	env := envIn(t, context.Background(), directory)
+	said := drew(t, env, path)
 	folder := filepath.Join(directory, "maps")
 	if got := files(t, folder); !slices.Equal(got, weatherNames) {
 		t.Errorf("the frames folder holds %v", got)
 	}
 	for _, one := range mapsAt(t, time.Second) {
-		got := pictureOf(t, filepath.Join(folder, one.Name()+".png"))
+		file := filepath.Join(folder, one.Name()+".png")
+		got := pictureOf(t, file)
 		if !bytes.Equal(got.Pix, one.Picture().Pix) {
 			t.Errorf("%s is not the weather's own", one.Name())
 		}
@@ -131,10 +133,11 @@ func TestDrawWeatherStillIsTheMapItShows(t *testing.T) {
 	path := written(t, directory, "still.yaml", weatherJob(t,
 		", show: aged", "renderer: cpu\nat: {value: 1, unit: s}\n"+
 			"outputs: {picture: aged.png}\n"))
-	drew(t, envIn(t, context.Background(), directory), path)
+	env := envIn(t, context.Background(), directory)
+	drew(t, env, path)
 	want := mapsAt(t, time.Second)[2]
-	if want.Kind() != "aged" || !bytes.Equal(pictureOf(t,
-		filepath.Join(directory, "aged.png")).Pix, want.Picture().Pix) {
+	aged := pictureOf(t, filepath.Join(directory, "aged.png"))
+	if want.Kind() != "aged" || !bytes.Equal(aged.Pix, want.Picture().Pix) {
 		t.Error("the still is not the aged map")
 	}
 }
@@ -158,7 +161,8 @@ func TestDrawWeatherRefusesWhatMapsCannotTake(t *testing.T) {
 		directory := t.TempDir()
 		path := written(t, directory, "sky.yaml", weatherFilm(t, "",
 			miss.line+"outputs: {frames: maps}\n"))
-		got := running(Tool(envIn(t, context.Background(), directory)),
+		env := envIn(t, context.Background(), directory)
+		got := running(Tool(env),
 			"draw", path)
 		if got.code == nothing || !strings.Contains(got.wrongSaid,
 			"cannot be drawn with "+miss.words) {
@@ -182,7 +186,8 @@ func TestDrawWeatherRefusesItsNearMisses(t *testing.T) {
 	} {
 		directory := t.TempDir()
 		path := written(t, directory, "sky.yaml", miss.job)
-		got := running(Tool(envIn(t, context.Background(), directory)),
+		env := envIn(t, context.Background(), directory)
+		got := running(Tool(env),
 			"draw", path)
 		if got.code == nothing || !strings.Contains(got.wrongSaid,
 			miss.words) {

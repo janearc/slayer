@@ -51,7 +51,8 @@ func (skin surface) volume() float64 {
 	var sixfold float64
 	for _, one := range skin {
 		first, second := one[0].Sub(from), one[1].Sub(from)
-		sixfold += first.Dot(second.Cross(one[2].Sub(from)))
+		edge := one[2].Sub(from)
+		sixfold += first.Dot(second.Cross(edge))
 	}
 	return sixfold / tetrahedronsInABox
 }
@@ -103,9 +104,10 @@ func TestATubesWallIsNinjasOrientedTube(t *testing.T) {
 	for _, run := range runs {
 		want := orientedTube(run.from, run.to, run.foot, run.tip,
 			run.around, barkMaterial)
-		length := run.to.Sub(run.from).Length()
+		length := lengthOf(run.to.Sub(run.from))
+		offset := turned(run.to).Sub(turned(run.from))
 		space, err := spaceAlong(turned(run.from),
-			turned(run.to).Sub(turned(run.from)))
+			offset)
 		if err != nil {
 			t.Fatalf("%s: %v", run.name, err)
 		}
@@ -197,7 +199,8 @@ func inward(skin surface, from maths.Vec) int {
 	for index, face := range skin {
 		out := face[1].Sub(face[0]).Cross(face[2].Sub(face[0]))
 		thrice := face[0].Add(face[1]).Add(face[2])
-		if out.Dot(thrice.Sub(from.Scale(3))) <= 0 {
+		tripled := from.Scale(3)
+		if out.Dot(thrice.Sub(tripled)) <= 0 {
 			return index
 		}
 	}
@@ -398,6 +401,7 @@ func TestSpaceAlongIsSquareAndRightHanded(t *testing.T) {
 func TestBackUndoesTurned(t *testing.T) {
 	point := geom.Vec3{1, 2, 3}
 	if back(turned(point)) != point {
-		t.Errorf("back of turned %v is %v", point, back(turned(point)))
+		returned := back(turned(point))
+		t.Errorf("back of turned %v is %v", point, returned)
 	}
 }

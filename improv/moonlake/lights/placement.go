@@ -14,10 +14,10 @@ type MoonDiscConfig struct {
 	Shift, Level float64
 }
 
-// AddOverhead adds the overhead pass to sky, each channel times
+// addOverhead adds the overhead pass to sky, each channel times
 // config.Gain, level and the config colour. It refuses images that are not
 // valid or differ in size, and then changes nothing.
-func AddOverhead(sky, pass Image, config OverheadConfig, level float64) error {
+func addOverhead(sky, pass Image, config OverheadConfig, level float64) error {
 	if err := sky.validate(); err != nil {
 		return err
 	}

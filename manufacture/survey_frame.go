@@ -8,7 +8,8 @@ import (
 
 // frame gives the compact survey instrument a broad double top ring and
 // paired diagonal stays. Photographic proportions are checked authored data;
-// see doc/survey-observatory.md for the Rubin mount and optical references.
+// see doc/model/observatory/survey-observatory.md for the Rubin mount and
+// optical references.
 func (survey surveyOptics) frame(row groundObservatory, assembly *instrumentAssembly,
 	pose maths.Subspace, radius, length float64,
 ) {

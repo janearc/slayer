@@ -1,0 +1,427 @@
+# The bivouac, 2026-11-19. Our lowest-density structure: a one-person bivy
+# sack lying on the ground, its guy lines and stakes, a pack and a pair of
+# boots beside it, and sometimes a small stove. Every value is picked, not
+# measured. Dimensions are metres, except where a unit says otherwise;
+# counts have no unit; shares are from nought to one; colours are shares of
+# light, each channel from zero to one, and gloss is how much of a mirror a
+# surface is. The circle side counts, for the stove's round parts, are in
+# yurt.yaml: the designs share them.
+#
+# The sack lies along z with its head, and the hoop over it, toward positive
+# z. Places across are x from its middle, and places along are z from its
+# middle.
+numbers:
+- name: bivouac-sleeps
+  value: 1
+  says: number of people a bivouac sleeps
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-floor-area
+  value: 1.6
+  unit: m2
+  says: floor inside the sack, in square metres
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-pitch-area
+  value: 12
+  unit: m2
+  says: ground one bivouac takes with its guy lines, its pack and boots and the clearance round it, in square metres
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-pitch-width
+  value: 3
+  unit: m
+  says: width of a pitch across its lane
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-pitch-depth
+  value: 4
+  unit: m
+  says: length of a pitch along its lane, which with its width is the pitch's area
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-lane-width
+  value: 1
+  unit: m
+  says: width of the lane between two rows of pitches
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-lane-heading
+  value: 0
+  unit: deg
+  says: bearing the lanes between pitches run along
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-facing-heading
+  value: 90
+  unit: deg
+  says: bearing the head of a bivouac looks along, east, to the morning
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-facing-spread
+  value: 45
+  unit: deg
+  says: how far either side of east the head of a bivouac may look
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-length
+  value: 2.0
+  unit: m
+  says: length of the bivy sack, from foot to head
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-width
+  value: 0.8
+  unit: m
+  says: width of the bivy sack across its floor
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-facets
+  value: 10
+  says: number of flat facets the sack's arched section is cut into
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-foot-height
+  value: 0.26
+  unit: m
+  says: height of the sack over the sleeper's legs
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-shoulder-length
+  value: 0.3
+  unit: m
+  says: length of the shoulder, where the sack rises from the foot to the hood
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-shoulder-height
+  value: 0.38
+  unit: m
+  says: height of the sack over the sleeper's shoulders
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-hood-length
+  value: 0.55
+  unit: m
+  says: length of the hood over the sleeper's head
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivy-hood-height
+  value: 0.5
+  unit: m
+  says: height of the hood at the hoop, a low hoop
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: hoop-thickness
+  value: 0.014
+  unit: m
+  says: side of the square section of the hoop pole
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: hoop-proud
+  value: 0.012
+  unit: m
+  says: how far the hoop stands out of the hood's cloth
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: guy-thickness
+  value: 0.004
+  unit: m
+  says: side of the square section of a guy line
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: guy-reach
+  value: 1.0
+  unit: m
+  says: how far past the head and the foot the stakes are driven
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: guy-side
+  value: 0.9
+  unit: m
+  says: how far out from the sack's side the side stakes are driven
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: stake-thickness
+  value: 0.008
+  unit: m
+  says: side of the square section of a stake
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: stake-height
+  value: 0.12
+  unit: m
+  says: how far a stake stands above the ground
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: stake-lean
+  value: 0.05
+  unit: m
+  says: how far a stake leans away from the sack over its height
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-width
+  value: 0.34
+  unit: m
+  says: width of the pack
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-height
+  value: 0.6
+  unit: m
+  says: height of the pack's body
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-depth
+  value: 0.24
+  unit: m
+  says: depth of the pack, from its back to its front
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-lid-height
+  value: 0.1
+  unit: m
+  says: height of the pack's lid
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-offset
+  value: 0.75
+  unit: m
+  says: how far from the sack's middle, to its off side, the pack stands
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-at
+  value: 0.3
+  unit: m
+  says: where along the sack the pack stands
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-width
+  value: 0.1
+  unit: m
+  says: width of a boot
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-length
+  value: 0.3
+  unit: m
+  says: length of a boot's sole
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-sole
+  value: 0.03
+  unit: m
+  says: thickness of a boot's sole
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-upper
+  value: 0.14
+  unit: m
+  says: height of a boot's upper above its sole
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-heel
+  value: 0.12
+  unit: m
+  says: length of a boot's upper, from its heel
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-gap
+  value: 0.08
+  unit: m
+  says: how far apart the two boots of a pair stand
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-offset
+  value: 0.6
+  unit: m
+  says: how far from the sack's middle, to its kerb side, the boots stand
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-at
+  value: -0.6
+  unit: m
+  says: where along the sack the boots stand
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: stove-share
+  value: 0.4
+  says: share of bivouacs that have a small stove out
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: burner-radius
+  value: 0.04
+  unit: m
+  says: radius of the stove's burner
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: burner-height
+  value: 0.09
+  unit: m
+  says: height of the stove's burner
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pot-radius
+  value: 0.07
+  unit: m
+  says: radius of the pot on the stove
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pot-height
+  value: 0.1
+  unit: m
+  says: height of the pot on the stove
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: stove-offset
+  value: 0.85
+  unit: m
+  says: how far from the sack's middle, to its kerb side, the stove stands
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: stove-at
+  value: 0.5
+  unit: m
+  says: where along the sack the stove stands, by the sleeper's head
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: flame-heat
+  value: 1800
+  unit: K
+  says: heat of the light of the stove's flame
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: flame-strength
+  value: 0.15
+  unit: luminance
+  says: luminance at a metre of the stove's flame, in the kit's relative light, as a set's lamp is given
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: seam-thread
+  value: 0.005
+  unit: m
+  says: side of the square section of a seam's taped thread, drawn at the demo level
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: nylon-pitch
+  value: 0.004
+  unit: m
+  says: distance between the threads of the sack's ripstop, drawn at the demo level
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: nylon-depth
+  value: 0.15
+  says: how much darker the ripstop is between its threads, from nought to one
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-reach
+  value: 3.0
+  unit: m
+  says: how far from the sack's middle across the ground any part of a bivouac may stand
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: bivouac-reach-top
+  value: 1.0
+  unit: m
+  says: how high above the ground any part of a bivouac may stand
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: nylon-red
+  value: 0.16
+  says: red of the sack's coated nylon, olive
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: nylon-green
+  value: 0.26
+  says: green of the sack's coated nylon, olive
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: nylon-blue
+  value: 0.14
+  says: blue of the sack's coated nylon, olive
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: nylon-gloss
+  value: 0.3
+  says: how much of a mirror the coated nylon is, a slight sheen
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: alloy-red
+  value: 0.62
+  says: red of the hoop, the stakes and the stove, aluminium
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: alloy-green
+  value: 0.63
+  says: green of the hoop, the stakes and the stove, aluminium
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: alloy-blue
+  value: 0.65
+  says: blue of the hoop, the stakes and the stove, aluminium
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: alloy-gloss
+  value: 0.55
+  says: how much of a mirror aluminium is
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: cord-red
+  value: 0.72
+  says: red of the guy lines and the seam tape, pale cord
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: cord-green
+  value: 0.68
+  says: green of the guy lines and the seam tape, pale cord
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: cord-blue
+  value: 0.52
+  says: blue of the guy lines and the seam tape, pale cord
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: cord-gloss
+  value: 0.05
+  says: how much of a mirror cord is
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-red
+  value: 0.68
+  says: red of the pack, orange nylon
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-green
+  value: 0.24
+  says: green of the pack, orange nylon
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-blue
+  value: 0.08
+  says: blue of the pack, orange nylon
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: pack-gloss
+  value: 0.12
+  says: how much of a mirror the pack's nylon is
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-red
+  value: 0.26
+  says: red of the boots, brown leather
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-green
+  value: 0.15
+  says: green of the boots, brown leather
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-blue
+  value: 0.08
+  says: blue of the boots, brown leather
+  kind: picked
+  by: "bivouac study, 2026-11-19"
+- name: boot-gloss
+  value: 0.15
+  says: how much of a mirror the boots are
+  kind: picked
+  by: "bivouac study, 2026-11-19"

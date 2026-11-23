@@ -1,0 +1,10 @@
+name,x,y,z
+peak,53,-5,4
+upstream-end,3,-5,4
+downstream-end,103,-5,4
+surface,53,0,4
+floor,53,-10,4
+edge,53,-5,14
+beyond-edge,53,-5,15
+inside,53,-5,9
+join-midpoint,10,-2,5

@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"testing"
@@ -16,29 +17,29 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// the recording: what the media computed, at ad2fff9, held bit for bit.
+// the recording: what the media compute, held bit for bit.
 //
 // each line is a medium, a method and a digest of every number the method gave
-// over its fixed inputs.
+// over its fixed inputs. SLAYER_RECORD=1 writes it again; nothing else should.
 //
-// it was written from slayer's copy while the copy was still the original in
-// every number: its code the original's but for comments and guards on inputs
-// that are no number.
-//
-// those guards were checked against the original over 400,000 points, no
-// difference (the commit that says so, "deceit sweep 3"). SLAYER_RECORD=1
-// writes it again; nothing else should.
-//
-// The historical recording remains unchanged. Jet bounds were deliberately
-// widened in 5df4eb66 to contain the previously clipped Gaussian skirt; jet
-// digests are separately recorded from the new bounds, which also determine
-// the density and ray sample coordinates. Independent analytic witnesses are in
-// jet_bounds_regression_test.go. All other media retain the original record.
+// The inputs of every method are drawn over the medium's Bounds, so a medium's
+// digests change when its Bounds do. The jets' lines are held apart, in their
+// own file, from the bounds that hold the Gaussian skirt, and independent
+// analytic witnesses are in jet_bounds_regression_test.go.
 // A recording holds implementation output; it is not evidence of correctness.
 const recording = "testdata/recorded.txt"
 const jetSkirtRecording = "testdata/recorded-jet-skirt.txt"
 
-// jetLine distinguishes only the four jet specimens in the old recording.
+// recordedOn is the header line that says where a recording was made: a
+// digest is of float bits, and a chip that fuses a multiply into an add
+// gives other bits than one that does not.
+func recordedOn() string {
+	return "# Recorded on " + runtime.GOOS + "/" + runtime.GOARCH +
+		", which fuses multiplies into adds where it can.\n"
+}
+
+// jetLine is whether a line is of one of the four jet specimens, which are
+// held in their own recording.
 func jetLine(line string) bool {
 	return strings.HasPrefix(line, "jet\t") || strings.HasPrefix(line, "jet, ")
 }
@@ -144,7 +145,8 @@ func digest(m Medium) map[string]string {
 	densities := func(of Medium, seed draws) []float64 {
 		var out []float64
 		for range 3000 {
-			out = append(out, of.Density(seed.within(b)))
+			density := of.Density(seed.within(b))
+			out = append(out, density)
 		}
 		return out
 	}
@@ -177,7 +179,8 @@ func digest(m Medium) map[string]string {
 	if moving, ok := m.(Timed); ok {
 		var out []float64
 		for _, at := range []time.Duration{0, time.Second, 7 * time.Second} {
-			out = append(out, densities(moving.Tick(at), 3)...)
+			moved := moving.Tick(at)
+			out = append(out, densities(moved, 3)...)
 		}
 		sum("ticked", out...)
 	}
@@ -214,17 +217,25 @@ func TestEveryMediumIsRecorded(t *testing.T) {
 		if len(jet) != 16 {
 			t.Fatalf("expected 16 jet lines, got %d", len(jet))
 		}
-		head := "# Jet record after 5df4eb66 widened bounds to include the Gaussian skirt.\n" +
-			"# Sample positions and rays depend on bounds; density code is unchanged.\n"
-		if err := os.WriteFile(path, []byte(head+strings.Join(jet, "\n")+"\n"), 0o644); err != nil {
+		head := "# Jet record, with bounds wide enough to hold the Gaussian skirt.\n" +
+			"# Sample positions and rays depend on bounds.\n" + recordedOn()
+		record := head + strings.Join(jet, "\n") + "\n"
+		if err := os.WriteFile(path, []byte(record), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		return
 	}
 	if os.Getenv("SLAYER_RECORD") == "1" {
-		head := "# scene/medium at ad2fff9, by digest: see recording " +
-			"in recorded_test.go\n"
-		text := head + strings.Join(got, "\n") + "\n"
+		head := "# scene/medium, by digest: see recording " +
+			"in recorded_test.go\n" + recordedOn() +
+			"# The jets are in recorded-jet-skirt.txt.\n"
+		var rest []string
+		for _, line := range got {
+			if !jetLine(line) {
+				rest = append(rest, line)
+			}
+		}
+		text := head + strings.Join(rest, "\n") + "\n"
 		if err := os.WriteFile(recording, []byte(text), 0o644); err != nil {
 			t.Fatal(err)
 		}

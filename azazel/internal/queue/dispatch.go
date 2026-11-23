@@ -204,6 +204,9 @@ func (s Store) reconcileMode(ctx context.Context, owned map[uint64]bool, mode di
 		}
 		lease, err := s.attemptLock(job)
 		if errors.Is(err, ErrActive) {
+			if watched := s.watchHeldAttempt(ctx, job, time.Now()); watched != nil && !errors.Is(watched, ErrOwner) {
+				return watched
+			}
 			continue
 		}
 		if err != nil {
@@ -258,7 +261,9 @@ func (s Store) claimMode(ctx context.Context, owner string, sample Capacity, now
 			if (job.State == Queued || job.State == Running) && (mode != gpuWork || mode.accepts(job)) {
 				relevant++
 			}
-			if job.Request.Lane == "gpu" && job.Started.After(lastGPU) {
+			// A start time after now came from a clock that has since
+			// stepped back; it is long enough ago, not an hour ahead.
+			if job.Request.Lane == "gpu" && job.Started.After(lastGPU) && !job.Started.After(now) {
 				lastGPU = job.Started
 			}
 			if job.State == Queued {

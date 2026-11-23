@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"sync"
 
 	"github.com/janearc/slayer/improv/moonlake/lights"
 	"github.com/janearc/slayer/metal"
@@ -29,7 +28,6 @@ const SupportedEffects = EffectMoon | EffectFixtures | EffectForeground
 var ErrUnsupportedEffect = errors.New("gpulights: unsupported effect flags")
 
 type Renderer struct {
-	mu       sync.Mutex
 	width    int
 	height   int
 	maxBytes int64

@@ -158,11 +158,13 @@ func TestFiniteArea(t *testing.T) {
 // horizontal extents and a shift moves it whole.
 func TestTransformedBounds(t *testing.T) {
 	box := maths.Box{Min: maths.V(-1, 0, -3), Max: maths.V(1, 2, 3)}
-	moved := transformedBounds(box, maths.NewSubspace(maths.V(10, 20, 30), maths.Identity, 1))
+	shift := maths.NewSubspace(maths.V(10, 20, 30), maths.Identity, 1)
+	moved := transformedBounds(box, shift)
 	if moved.Min != maths.V(9, 20, 27) || moved.Max != maths.V(11, 22, 33) {
 		t.Errorf("shifted box = %+v", moved)
 	}
-	turned := transformedBounds(box, maths.NewSubspace(maths.Vec{}, maths.Rotation(maths.YAxis, math.Pi/2), 1))
+	quarterTurn := maths.NewSubspace(maths.Vec{}, maths.Rotation(maths.YAxis, math.Pi/2), 1)
+	turned := transformedBounds(box, quarterTurn)
 	if !near(turned.Max.X, 3, 1e-12) || !near(turned.Max.Z, 1, 1e-12) || !near(turned.Min.X, -3, 1e-12) || !near(turned.Min.Z, -1, 1e-12) ||
 		!near(turned.Min.Y, 0, 1e-12) || !near(turned.Max.Y, 2, 1e-12) {
 		t.Errorf("turned box = %+v", turned)
@@ -333,7 +335,8 @@ func TestForestPaintChart(t *testing.T) {
 	site := &siteBuilder{frame: sphere, space: space}
 	paint := forestPaint{space: space, sphere: sphere}
 	for _, at := range [][2]float64{{0, 0}, {1200, 0}, {0, -800}, {-300, 450}} {
-		world := sphere.Centre().Add(site.chartUp(at[0], at[1]).Scale(sphere.Radius().InMetres()))
+		radius := sphere.Radius().InMetres()
+		world := sphere.Centre().Add(site.chartUp(at[0], at[1]).Scale(radius))
 		got := paint.chart(world)
 		if !near(got.X, at[0], 1e-6) || !near(got.Z, at[1], 1e-6) || got.Y != 0 {
 			t.Errorf("chart of %v = %v", at, got)

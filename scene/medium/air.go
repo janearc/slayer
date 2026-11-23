@@ -8,8 +8,7 @@ import (
 
 // Air is an atmosphere held against a body: thickest at the surface, at
 // Radius, and thinning upward by a factor of e every Height, the way air
-// does. It reaches out to Reach heights, past which it is taken as
-// nothing.
+// does. It reaches out to six heights, past which it is taken as nothing.
 //
 // Below the surface there is none; the surface is a thing of its own and
 // stops the ray.
@@ -21,32 +20,33 @@ type Air struct {
 	Thick float64
 }
 
-// Reach is how many scale heights up the air is still counted.
-const Reach = 6
+// airReach is how many scale heights up the air is still counted. It is
+// chosen: at six the air is a quarter of a hundredth of the surface's.
+const airReach = 6
 
 // top is the radius past which the air is nothing.
-func (a Air) top() float64 { return a.Radius + Reach*a.Height }
+func (air Air) top() float64 { return air.Radius + airReach*air.Height }
 
 // Bounds is the cube the air's top just fits in.
-func (a Air) Bounds() maths.Box {
-	r := a.top()
-	return maths.Box{Min: maths.V(-r, -r, -r), Max: maths.V(r, r, r)}
+func (air Air) Bounds() maths.Box {
+	return cube(air.top())
 }
 
 // Span is where a ray crosses the air's top.
-func (a Air) Span(r maths.Ray, near, far float64) (float64, float64, bool) {
-	return sphere(a.top(), r, near, far)
+func (air Air) Span(ray maths.Ray, near, far float64) (float64, float64,
+	bool) {
+	return sphere(air.top(), ray, near, far)
 }
 
-// Density is Thick at the surface, falling by e every Height above it, and zero
-// below it or past the top.
-func (a Air) Density(p maths.Vec) float64 {
-	if a.Height <= 0 {
-		return 0
+// Density is Thick at the surface, falling by e every Height above it, and
+// zero below it or past the top.
+func (air Air) Density(point maths.Vec) float64 {
+	if air.Height <= nought {
+		return nought
 	}
-	up := p.Len() - a.Radius
-	if up < 0 || up > Reach*a.Height {
-		return 0
+	above := point.Len() - air.Radius
+	if above < nought || above > airReach*air.Height {
+		return nought
 	}
-	return a.Thick * math.Exp(-up/a.Height)
+	return air.Thick * math.Exp(-above/air.Height)
 }

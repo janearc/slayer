@@ -1,0 +1,417 @@
+# a harbour quarter of row houses along a canal in groningen, the
+# netherlands, in the evening of 21 september 2026.
+#
+# the place: 53.22 north, 6.57 east. the ground of groningen is "pooltable
+# flat", and no survey of it is on the shelf, so the ground here is a stated
+# flat, not a survey: one plane, the same everywhere, and the canal is cut
+# into it by a channel. the canal's width, depth and the quay's height over
+# the water are choices; a survey of the city's heights and of its canals'
+# water levels would replace them, and until then this set says nothing
+# about where groningen is high.
+#
+# the frame. places are metres, x east, y north, z up. the quay is the
+# ground and is z = 0: the same zero a stand of houses or trees stands on in
+# a scene on no terrain. the water is 1.5 m under it, at z = -1.5.
+#
+# the canal is one channel of three straight reaches and two right-angle
+# bends: from the south end at (-100, -210) it runs 240 m north, turns east
+# for 210 m, and turns north again for 210 m to its north end at (110, 240).
+# it is 20 m between its walls and 4 m from the quay to the bed, so 2.5 m
+# of water. each reach has a quay, a street 5 m wide between the coping and
+# the house fronts, and a row of houses with their fronts to the water.
+#
+# the houses are laid by rule. two stands of the habit `frontage`, one for
+# each side of the canal's line, lay the manufactory's terrace-groningen
+# (the culture in manufacture/cities/cultures/groningen.yaml: twelve bays of
+# timber lap, a saturated colour to a bay, a terracotta roof, a tower at one
+# end) along the canal's own line: each run is a whole terrace of its own
+# seed, with its front on the street, a gap of 8 m between runs, and a run
+# that would not fit whole in what is left of a reach goes on to the next, so
+# a bend is a cross street. at a bend a run stops short of the corner on
+# the inside by the depth of the run times the tangent of half the turn,
+# so no two overlap. nothing is placed by hand: the draw says where each run
+# stands, in metres along each reach.
+#
+# the trees are a stand of the library's alder, along the quay on each side
+# of the line, 2 m from the wall, one to each 9 m. the library has an alder
+# and a poplar, drafts of a deciduous tree, not a species of the
+# netherlands. the boats are the manufactory's sampan and fishing boat,
+# stands of the habit `frontage` on the water side of the walls: the habit
+# refuses water shallower than the most a design draws (1.9 m for the
+# fishing boat in 2.5 m of water). they are not dutch boats. there are no
+# lamps, bollards, bicycles or mooring rings: the library has none.
+#
+# the ground beyond the channel's reach is eleven boxes laid round the
+# strips the channel's own ground covers (60 m from each wall), their top
+# faces at z = 0 and their edges 5 m inside those strips, or against the end
+# walls, running to 500 km each way, which from 500 m up is a tenth of a
+# degree under the horizon. past that there is nothing. the air model does
+# not haze geometry, so the flat meets the sky in a hard line at the horizon.
+#
+# the water: the world's ocean, a square sheet 512 m across laid at
+# z = -1.5 under the walls' coping, with the sea's own wave model at a wind
+# and a fetch that are choices, said beside the ocean block. the sheet is a
+# clear interface at water's index of refraction; it reflects what the
+# tracer sends to it, houses and sky alike, and nothing is mirrored by hand.
+# the colour of the water is a dark stand-in for what a canal sends back up;
+# it has no extinction, a choice left out for want of a measurement.
+#
+# the sun and the sky are worked, not chosen: the sun is where
+# scene/daylight.Sun, noaa's fractional-year equations, puts it for 53.22
+# north, 6.57 east at 17:30 central european summer time (15:30 utc) on 21
+# september 2026: azimuth 246.45, altitude 17.79, geometric, without
+# refraction. the set says the date, the clock and its offset from utc,
+# and the reader works the sun from them. the air is the standard earth air
+# of airs/earth.yaml, which supplies the sky and the sun's light; the set
+# adds no lamp and no fill.
+#
+# the film takes 16 rays a pixel, the most the job schema allows: at 2 the lit
+# rooms seen through the houses' glass are grained by sampling noise, which
+# falls away as the rays rise.
+#
+# what is chosen, by eye: the colours of the quay's wall, coping, paving and
+# bed; the bridges' size and place; the cameras. what is not here: street
+# lamps, bollards, bicycles, mooring rings, a bascule or an arched bridge,
+# a skyline of the city beyond, and any ground but the flat.
+#
+# a camera's at and look_at are east, north and up in metres, as above.
+# the first camera is the one drawn; to draw another, name it.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a harbour quarter of row houses along a canal in groningen
+  seed: 1
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  location:
+    lat: 53.22
+    lon: 6.57
+  date: "2026-09-21"
+  timeofday: 1730
+  utc-offset: {value: 2, unit: h}
+  film:
+    width: 960
+    height: 540
+    rays: 16
+    wide: 60
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    quarter:
+      title: "from 380 m up and 560 m south, the whole quarter"
+      wide: 45
+      location: {at: [5, -560, 380]}
+      orientation: {look_at: [5, 15, 0]}
+    plan:
+      title: "straight down from 700 m, the whole quarter from above"
+      wide: 60
+      location: {at: [5, 14.99, 700]}
+      orientation: {look_at: [5, 15, 0]}
+    quay:
+      title: "at eye height on the west quay street at the south end, looking north along the canal"
+      location: {at: [-111.2, -197, 1.7]}
+      orientation: {look_at: [-100, 20, 2]}
+    water:
+      title: "30 cm over the water at the south end, looking north along the canal"
+      location: {at: [-100, -205, -1.2]}
+      orientation: {look_at: [-100, 30, -0.4]}
+    fronts:
+      title: "from the east quay across the canal to the fronts of the west bank"
+      wide: 40
+      location: {at: [-89, -120, 1.7]}
+      orientation: {look_at: [-115, -112, 4]}
+    lit:
+      title: "from the west quay street across the canal to the sunlit fronts of the east bank, close"
+      wide: 30
+      location: {at: [-112.8, -30, 1.7]}
+      orientation: {look_at: [-84.5, -24, 2.6]}
+    bend:
+      title: "at eye height on the quay at the first bend, looking east along the second reach"
+      location: {at: [-118, 8, 1.7]}
+      orientation: {look_at: [100, 30, 2]}
+    boats:
+      title: "from the east quay across the canal to the boats at the west wall"
+      wide: 50
+      location: {at: [-89, -170, 1.7]}
+      orientation: {look_at: [-108, -190, -0.5]}
+    above:
+      title: "from 120 m up over the south end, looking north over both banks"
+      wide: 55
+      location: {at: [-100, -300, 120]}
+      orientation: {look_at: [-100, -40, 0]}
+    behind:
+      title: "behind the west bank, 70 m back, at eye height, to the backs of the houses"
+      location: {at: [-205, -120, 1.7]}
+      orientation: {look_at: [-100, -90, 6]}
+    horizon:
+      title: "10 cm over the water at the south end, level, along the canal to the horizon"
+      location: {at: [-100, -208, -1.4]}
+      orientation: {look_at: [-100, 200, -1.4]}
+    high:
+      title: "from 500 m up, level, to where the ground ends"
+      wide: 50
+      location: {at: [5, -1500, 500]}
+      orientation: {look_at: [5, 40000, 60]}
+  world:
+    unit: 1
+    materials:
+      water:
+        colour: {srgb_linear: [0.006, 0.011, 0.009]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+        source: "water's refractive index; colour by eye, a stand-in for a dark canal"
+      quay brick:
+        colour: {srgb_linear: [0.12, 0.05, 0.035]}
+        source: eye
+      coping stone:
+        colour: {srgb_linear: [0.28, 0.27, 0.25]}
+        source: eye
+      paving:
+        colour: {srgb_linear: [0.11, 0.095, 0.085]}
+        source: eye
+      silt:
+        colour: {srgb_linear: [0.02, 0.017, 0.012]}
+        source: eye
+    ocean:
+      material: water
+      middle: [5, 15, -1.5]
+      extent: {value: 512, unit: m}
+      samples: 1024
+      sea:
+        # a light breeze from the south-west, over a fetch of about the
+        # length of a reach. every number here is a choice.
+        wind: {value: 5, unit: m/s}
+        fetch: {value: 250, unit: m}
+        depth: {value: 2.5, unit: m}
+        toward: {value: 0.7854, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a 5 m/s wind from the south-west, 250 m of fetch, 2.5 m of water; no shelf source"
+    channels:
+      canal:
+        line: [[-100, -210], [-100, 30], [110, 30], [110, 240]]
+        width: {value: 20, unit: m}
+        depth: {value: 4, unit: m}
+        top: {value: 0, unit: m}
+        reach: {value: 60, unit: m}
+        ground: paving
+        bed: silt
+        wall: {material: quay brick, thickness: {value: 0.5, unit: m}}
+        coping:
+          material: coping stone
+          height: {value: 0.15, unit: m}
+          overhang: {value: 0.1, unit: m}
+        source: "chosen: a quay at the zero, 2.5 m of water under the ocean's sheet, no survey"
+    boxes:
+      # the flat past the strips the channel's ground covers. the strips end
+      # 70.5 m from the line; each box's top is z = 0, its edge stands 5 m
+      # inside a strip or against an end wall, and it runs to 500 km, so that its
+      # edge is under a tenth of a degree from the horizon at 500 m up. a
+      # box is 3 m thick.
+      west flat:
+        material: paving
+        middle: [-250165.5, 15, -1.5]
+        size: [500000, 1000500, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      east flat:
+        material: paving
+        middle: [250175.5, 15, -1.5]
+        size: [500000, 1000500, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      south left flat:
+        material: paving
+        middle: [-138.25, -250205, -1.5]
+        size: [54.5, 500000, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      south end flat:
+        material: paving
+        middle: [-100, -250210.5, -1.5]
+        size: [22, 500000, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      south right flat:
+        material: paving
+        middle: [43.25, -250205, -1.5]
+        size: [264.5, 500000, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      north left flat:
+        material: paving
+        middle: [-33.25, 250235, -1.5]
+        size: [264.5, 500000, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      north end flat:
+        material: paving
+        middle: [110, 250240.5, -1.5]
+        size: [22, 500000, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      north right flat:
+        material: paving
+        middle: [148.25, 250235, -1.5]
+        size: [54.5, 500000, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      inner north flat:
+        material: paving
+        middle: [-60.5, 165.25, -1.5]
+        size: [210, 139.5, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      inner south flat:
+        material: paving
+        middle: [5, -120.25, -1.5]
+        size: [79, 169.5, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      south east flat:
+        material: paving
+        middle: [110, -120.25, -1.5]
+        size: [131, 169.5, 3]
+        source: "chosen: a flat at the quay's height, no survey"
+      # two bridges, each a flat deck 6 m wide and 0.4 m thick from 1 m past
+      # one wall to 1 m past the other, its upper face 0.12 m over the quay,
+      # and a brick parapet a metre high each side over the water. their
+      # places are typed from the draw's table of where each run stood (the
+      # slayer render's -places flag), at places free of houses on both banks,
+      # and are to be set again whenever a seed, a gap or the culture moves
+      # the runs. low: 1.2 m of air under the deck, so no boat passes. the
+      # library has no bridge for this (its bridge kind is a cable-stayed
+      # span).
+      bridge a deck:
+        material: paving
+        middle: [54.7, 30, -0.08]
+        size: [6, 23, 0.4]
+        source: "chosen: a low flat bridge across the second reach"
+      bridge a parapet west:
+        material: quay brick
+        middle: [51.95, 30, 0.62]
+        size: [0.5, 21, 1]
+        source: "chosen: a low flat bridge across the second reach"
+      bridge a parapet east:
+        material: quay brick
+        middle: [57.45, 30, 0.62]
+        size: [0.5, 21, 1]
+        source: "chosen: a low flat bridge across the second reach"
+      bridge b deck:
+        material: paving
+        middle: [-100, 13.5, -0.08]
+        size: [23, 6, 0.4]
+        source: "chosen: a low flat bridge across the first reach"
+      bridge b parapet south:
+        material: quay brick
+        middle: [-100, 10.75, 0.62]
+        size: [21, 0.5, 1]
+        source: "chosen: a low flat bridge across the first reach"
+      bridge b parapet north:
+        material: quay brick
+        middle: [-100, 16.25, 0.62]
+        size: [21, 0.5, 1]
+        source: "chosen: a low flat bridge across the first reach"
+  set:
+    # every number of a stand is a choice. the setback of 5 m is the street
+    # between the coping and the fronts, of the trees 2 m from the wall, of
+    # the sampans -2 m (1.5 m of water between a sampan's middle and the
+    # wall's face, past its half beam of about 1 m) and of the fishing boats
+    # -4.7 m (4.2 m, past a half beam of 3.7 m, the widest of the design's
+    # 25 m length over its slenderness of 3.4). the gap of 8 m is the cross
+    # street between runs. a count is a ceiling: the houses' 60 and the
+    # trees' 80 are never reached (the draw lays what fits the reaches), and
+    # the sampans' 10 and the fishing boats' 4 are what is wanted.
+    stands:
+      left bank houses:
+        kind: terrace-groningen
+        habit: frontage
+        count: 60
+        seed: 21
+        complexity: demo
+        frontage:
+          of: canal
+          side: left
+          setback: {value: 5, unit: m}
+          gap: {value: 8, unit: m}
+      right bank houses:
+        kind: terrace-groningen
+        habit: frontage
+        count: 60
+        seed: 22
+        complexity: demo
+        frontage:
+          of: canal
+          side: right
+          setback: {value: 5, unit: m}
+          gap: {value: 8, unit: m}
+      left quay trees:
+        kind: alder
+        habit: frontage
+        count: 80
+        seed: 31
+        complexity: clumps
+        frontage:
+          of: canal
+          side: left
+          setback: {value: 2, unit: m}
+          gap: {value: 8, unit: m}
+      right quay trees:
+        kind: alder
+        habit: frontage
+        count: 80
+        seed: 32
+        complexity: clumps
+        frontage:
+          of: canal
+          side: right
+          setback: {value: 2, unit: m}
+          gap: {value: 8, unit: m}
+      # white willow, native here and a tree of waterkanten, the water's
+      # edges, by its source (manufacture/plant-profiles.yaml): a line of
+      # them on each side of the canal behind the houses, 22 m from the
+      # wall, where the quay's alders hold the edge itself. the houses
+      # stand 5 m back and are 9 to 11 m deep, so the willows stand 6 to 8 m
+      # behind their backs. the distance and the gap are picked.
+      left back willows:
+        kind: salix-alba
+        habit: frontage
+        count: 40
+        seed: 33
+        complexity: clumps
+        frontage:
+          of: canal
+          side: left
+          setback: {value: 22, unit: m}
+          gap: {value: 6, unit: m}
+      right back willows:
+        kind: salix-alba
+        habit: frontage
+        count: 40
+        seed: 34
+        complexity: clumps
+        frontage:
+          of: canal
+          side: right
+          setback: {value: 22, unit: m}
+          gap: {value: 6, unit: m}
+      moored sampans:
+        kind: sampan-at-anchor
+        habit: frontage
+        count: 10
+        seed: 41
+        complexity: demo
+        frontage:
+          of: canal
+          side: left
+          setback: {value: -2, unit: m}
+          gap: {value: 8, unit: m}
+      moored fishing boats:
+        kind: fishing-boat-at-anchor
+        habit: frontage
+        count: 4
+        seed: 42
+        complexity: demo
+        frontage:
+          of: canal
+          side: right
+          setback: {value: -4.7, unit: m}
+          gap: {value: 8, unit: m}

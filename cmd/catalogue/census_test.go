@@ -35,29 +35,33 @@ func TestCensusStartsWithRequestedMissionsAndIncludesUnlaunchedConcepts(t *testi
 	}
 	for index, kind := range []string{"jimo", "new-horizons", "cassini", "huygens"} {
 		row := report.Missions[index]
-		if row.Kind != kind || row.Presence != "missing" || row.Parts != nil || row.Minimum != 600 || row.Review != "not-built" {
+		if row.Kind != kind || row.Presence != "present" || row.Parts == nil ||
+			*row.Parts <= 0 || row.Minimum != 600 || row.Review != "pending" {
 			t.Fatalf("priority mission misrepresented: %+v", row)
 		}
 	}
 	if report.Missions[0].Flight != "unlaunched" {
 		t.Fatal("JIMO was excluded or labelled as flown")
 	}
-	var spitzer, webb bool
+	var spitzer, webb, voyager bool
 	for _, row := range report.Missions {
-		if row.Kind == "spitzer" {
-			spitzer = true
+		if row.Kind == "spitzer" || row.Kind == "webb" {
+			spitzer = spitzer || row.Kind == "spitzer"
+			webb = webb || row.Kind == "webb"
 			if row.Presence != "present" || row.Parts == nil || *row.Parts < 600 || row.Review != "pending" {
 				t.Fatal("part-floor pass was mistaken for maturity acceptance", row)
 			}
 		}
-		if row.Kind == "webb" {
-			webb = true
+		// Voyager 1 is the existing mission of the slate that is still under
+		// the part floor, and must be listed as such, review pending.
+		if row.Kind == "voyager-1" {
+			voyager = true
 			if row.Parts == nil || *row.Parts >= 600 || row.Review != "pending" {
 				t.Fatal("existing under-floor mission disappeared", row)
 			}
 		}
 	}
-	if !spitzer || !webb {
+	if !spitzer || !webb || !voyager {
 		t.Fatal("census did not reconcile existing missions")
 	}
 }
@@ -73,8 +77,8 @@ func Example_census() {
 		fmt.Println(row.Kind, row.Flight, row.Presence, row.Minimum)
 	}
 	// Output:
-	// jimo unlaunched missing 600
-	// new-horizons launched missing 600
+	// jimo unlaunched present 600
+	// new-horizons launched present 600
 }
 
 func TestCensusRejectsDuplicateAndUnsupportedRecords(t *testing.T) {

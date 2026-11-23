@@ -9,18 +9,18 @@ import (
 	"github.com/janearc/slayer/mesh"
 )
 
-func exampleAnatomy() *AnatomyPlan {
-	return &AnatomyPlan{
-		Cores: []CorePlan{{
+func exampleAnatomy() *anatomyPlan {
+	return &anatomyPlan{
+		Cores: []corePlan{{
 			Form: "octahedron", Radius: 1.5,
 			SpinRate: .2,
 			Colour:   [3]float64{.1, .3, .6}, Glow: [3]float64{.02, .01, .08},
 		}},
-		Bands: []BandPlan{{
+		Bands: []bandPlan{{
 			Form: "undulating", Count: 2, Segments: 24, Radius: 2, Width: .4, Thickness: .05,
 			Spacing: .6, Eccentricity: .2, WarpShare: .3, Waves: 2, SpinRate: .4,
 		}},
-		Sails: []SailPlan{{
+		Sails: []sailPlan{{
 			Count: 3, Segments: 12, SpanSegments: 4, Length: 2, Width: .9,
 			Sweep: .45, Camber: .35, TwistDegrees: 25, SpinRate: .8,
 			Colour: [3]float64{.2, .15, .1}, Glow: [3]float64{.03, .01, .02},
@@ -29,7 +29,7 @@ func exampleAnatomy() *AnatomyPlan {
 }
 
 func TestAuthoredIndividualCanDisablePrototypeSharingWithoutChangingScene(t *testing.T) {
-	sharedPlan := &StagePlan{Kind: "individual", Anatomy: exampleAnatomy(),
+	sharedPlan := &stagePlan{Kind: "individual", Anatomy: exampleAnatomy(),
 		Eye: [3]float64{2, 3, 12}, EndEye: [3]float64{2, 3, 12},
 		Look: [3]float64{}, Wide: 65, Exposure: 1}
 	separatePlan := *sharedPlan
@@ -74,7 +74,7 @@ func TestAuthoredIndividualCanDisablePrototypeSharingWithoutChangingScene(t *tes
 
 func TestAuthoredAnatomyComposesIndependentTopologyAndDimensions(t *testing.T) {
 	plan := exampleAnatomy()
-	stage, err := newHeardStage(&StagePlan{
+	stage, err := newHeardStage(&stagePlan{
 		Kind: "individual", Anatomy: plan,
 	}, "")
 	if err != nil {
@@ -106,8 +106,8 @@ func TestAuthoredAnatomyComposesIndependentTopologyAndDimensions(t *testing.T) {
 		t.Fatalf("mesh topology faces=%v closed=%t open=%t", faces, closed, open)
 	}
 
-	otherCore, err := newHeardStage(&StagePlan{Kind: "individual", Anatomy: &AnatomyPlan{
-		Cores: []CorePlan{
+	otherCore, err := newHeardStage(&stagePlan{Kind: "individual", Anatomy: &anatomyPlan{
+		Cores: []corePlan{
 			{Form: "octahedron", Radius: 1, Colour: [3]float64{.2, .1, .1}},
 			{Form: "octahedron", Radius: 2, At: [3]float64{3, 0, 0}, Colour: [3]float64{.1, .2, .3}},
 		},
@@ -120,7 +120,7 @@ func TestAuthoredAnatomyComposesIndependentTopologyAndDimensions(t *testing.T) {
 		t.Fatal("unit octahedra did not share geometry with distinct placements")
 	}
 
-	eye, err := stage.update(&StagePlan{Kind: "individual", Identity: 9,
+	eye, err := stage.update(&stagePlan{Kind: "individual", Identity: 9,
 		Eye: [3]float64{2, 3, 12}, EndEye: [3]float64{2, 3, 12},
 		Look: [3]float64{0, 0, 0}, Wide: 65, Exposure: 1, Anatomy: plan},
 		State{At: 1}, 0)
@@ -139,14 +139,14 @@ func TestAuthoredAnatomyComposesIndependentTopologyAndDimensions(t *testing.T) {
 	}
 
 	other := exampleAnatomy()
-	other.Cores = append(other.Cores, CorePlan{
+	other.Cores = append(other.Cores, corePlan{
 		Form: "sphere", Radius: .45, At: [3]float64{3, 0, 0},
 		Colour: [3]float64{.3, .1, .05},
 	})
 	other.Bands = nil
 	other.Sails[0].Count = 1
 	other.Sails[0].Sweep = -.8
-	second, err := newHeardStage(&StagePlan{Kind: "individual", Anatomy: other}, "")
+	second, err := newHeardStage(&stagePlan{Kind: "individual", Anatomy: other}, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,21 +197,21 @@ func TestAuthoredAnatomyIsStrictlyValidatedInHeardSceneInput(t *testing.T) {
 }
 
 func TestAuthoredAnatomyRefusesInvalidOrUnboundedComponents(t *testing.T) {
-	for _, plan := range []*AnatomyPlan{
+	for _, plan := range []*anatomyPlan{
 		{},
-		{Cores: []CorePlan{{Form: "sphere", Radius: 0}}},
-		{Bands: []BandPlan{{Form: "annular", Count: 1, Segments: 7, Radius: 1, Width: 1, Thickness: .1, Spacing: .1}}},
-		{Sails: []SailPlan{{Count: 0, Segments: 12, Length: 1, Width: 1}}},
-		{Cores: []CorePlan{{Form: "sphere", Radius: 1}}, Bands: []BandPlan{{Form: "annular", Count: 1, Segments: 12, Radius: 1, Width: 1, Thickness: .1, Spacing: .1, Eccentricity: 1}}},
+		{Cores: []corePlan{{Form: "sphere", Radius: 0}}},
+		{Bands: []bandPlan{{Form: "annular", Count: 1, Segments: 7, Radius: 1, Width: 1, Thickness: .1, Spacing: .1}}},
+		{Sails: []sailPlan{{Count: 0, Segments: 12, Length: 1, Width: 1}}},
+		{Cores: []corePlan{{Form: "sphere", Radius: 1}}, Bands: []bandPlan{{Form: "annular", Count: 1, Segments: 12, Radius: 1, Width: 1, Thickness: .1, Spacing: .1, Eccentricity: 1}}},
 	} {
 		if err := plan.check(); err == nil {
 			t.Fatalf("invalid anatomy plan was accepted: %#v", plan)
 		}
 	}
-	if err := (*AnatomyPlan)(nil).check(); err == nil {
+	if err := (*anatomyPlan)(nil).check(); err == nil {
 		t.Fatal("nil anatomy plan was accepted")
 	}
-	if err := (&AnatomyPlan{Cores: []CorePlan{{Form: "sphere", Radius: 1}}}).check(); err != nil {
+	if err := (&anatomyPlan{Cores: []corePlan{{Form: "sphere", Radius: 1}}}).check(); err != nil {
 		t.Fatal(err)
 	}
 }

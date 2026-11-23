@@ -25,13 +25,20 @@ const (
 	pollInterval = 500 * time.Millisecond
 	// cancellationWindow bounds recovery after the caller's context has ended.
 	cancellationWindow = 5 * time.Second
+	// statusAttempts is how many consecutive failed, malformed or unmatched
+	// status reads end observation. It was chosen: with the backoff below, a
+	// ledger being rewritten has about half a minute to settle.
+	statusAttempts = 6
+	// statusBackoffCap bounds the wait between failed status reads, which
+	// starts at one poll interval and doubles.
+	statusBackoffCap = 8 * time.Second
 )
 
 // RunObserved uses Azazel by default; direct shared Slayer requires explicit selection.
 func RunObserved(ctx context.Context, tools Tools, plan *Plan, output io.Writer, notify func(Update)) error {
 	switch tools.Transport {
 	case "", "azazel":
-		return (queueClient{runner: processRunner{}, interval: pollInterval}).run(ctx, tools, plan, output, notify)
+		return (queueClient{runner: processRunner{}, interval: pollInterval, attempts: statusAttempts}).run(ctx, tools, plan, output, notify)
 	case "slayer":
 		return runDirect(ctx, tools, plan, output, notify)
 	default:
@@ -43,6 +50,9 @@ func RunObserved(ctx context.Context, tools Tools, plan *Plan, output io.Writer,
 type queueClient struct {
 	runner   Runner
 	interval time.Duration
+	// attempts is the number of consecutive failed status reads that ends
+	// observation; zero or one means the first failure does.
+	attempts int
 }
 
 // run binds one prepared plan to one durable external request.
@@ -108,16 +118,13 @@ func (client queueClient) observe(ctx context.Context, tools Tools, plan *Plan, 
 		if err := ctx.Err(); err != nil {
 			return client.cancelOwned(tools, plan, request, sequence, output, notify, err)
 		}
-		raw, err := client.invoke(ctx, tools, plan, output, "status", "--queue", tools.Queue)
+		observation, err := client.readStatus(ctx, tools, plan, request, sequence, output)
 		if err != nil {
 			if ctx.Err() != nil {
 				return client.cancelOwned(tools, plan, request, sequence, output, notify, ctx.Err())
 			}
-			return fmt.Errorf("Azazel status unavailable; frozen input retained: %w", err)
-		}
-		observation, err := readObservation(raw, request, sequence)
-		if err != nil {
-			return fmt.Errorf("Azazel status unconfirmed; frozen input retained: %w", err)
+			cause := fmt.Errorf("Azazel status unreadable after %d tries; observation given up, cancelling job %d first; frozen input retained: %w", max(client.attempts, 1), sequence, err)
+			return client.cancelOwned(tools, plan, request, sequence, output, notify, cause)
 		}
 		if notify != nil {
 			notify(observation.update())
@@ -143,6 +150,45 @@ func (client queueClient) observe(ctx context.Context, tools Tools, plan *Plan, 
 		if err := client.wait(ctx); err != nil {
 			return client.cancelOwned(tools, plan, request, sequence, output, notify, err)
 		}
+	}
+}
+
+// readStatus reads and matches this plan's job, retrying a failed, malformed
+// or unmatched read with a doubling wait that is capped. It returns the last
+// error once the attempts are spent or the context ends.
+func (client queueClient) readStatus(ctx context.Context, tools Tools, plan *Plan, request queueRequest, sequence uint64, output io.Writer) (observedJob, error) {
+	backoff := client.interval
+	for attempt := 1; ; attempt++ {
+		raw, err := client.invoke(ctx, tools, plan, output, "status", "--queue", tools.Queue)
+		if err == nil {
+			var observation observedJob
+			if observation, err = readObservation(raw, request, sequence); err == nil {
+				return observation, nil
+			}
+		}
+		if attempt >= client.attempts || ctx.Err() != nil {
+			return observedJob{}, err
+		}
+		if waitError := sleep(ctx, backoff); waitError != nil {
+			return observedJob{}, errors.Join(err, waitError)
+		}
+		backoff = min(backoff*2, statusBackoffCap)
+	}
+}
+
+// sleep waits for the duration or the end of the context. A zero duration
+// returns at once.
+func sleep(ctx context.Context, wait time.Duration) error {
+	if wait <= 0 {
+		return ctx.Err()
+	}
+	timer := time.NewTimer(wait)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
 	}
 }
 

@@ -25,17 +25,17 @@ const (
 
 func TestPickFollowsTheMusicAndTheWords(t *testing.T) {
 	cases := []struct {
-		at   Moment
+		at   moment
 		want string
 	}{
-		{Moment{Loudness: silent, Kick: strong, Speaking: true}, Quiet},
-		{Moment{Loudness: loud, Kick: strong, Speaking: true}, Flash},
-		{Moment{Loudness: loud, Kick: weak, Speaking: true}, Speaking},
-		{Moment{Loudness: soft, Kick: strong}, Resting},
-		{Moment{Loudness: loud, Kick: weak}, Resting},
+		{moment{Loudness: silent, Kick: strong, Speaking: true}, quiet},
+		{moment{Loudness: loud, Kick: strong, Speaking: true}, flash},
+		{moment{Loudness: loud, Kick: weak, Speaking: true}, speaking},
+		{moment{Loudness: soft, Kick: strong}, resting},
+		{moment{Loudness: loud, Kick: weak}, resting},
 	}
 	for _, each := range cases {
-		if got := Pick(each.at); got != each.want {
+		if got := pick(each.at); got != each.want {
 			t.Errorf("%+v picks %s, want %s", each.at, got, each.want)
 		}
 	}
@@ -54,8 +54,8 @@ func testBox(t *testing.T) Box {
 func TestPlaceNeverLeavesTheBox(t *testing.T) {
 	box := testBox(t)
 	for i := range frames {
-		at := Moment{Loudness: loud, Kick: float64(i%two) * strong}
-		place := box.Place(at, float64(i)*frameGap, seed)
+		at := moment{Loudness: loud, Kick: float64(i%two) * strong}
+		place := box.place(at, float64(i)*frameGap, seed)
 		host := image.Rectangle{Min: place, Max: place.Add(box.size)}
 		if !host.In(box.area) {
 			t.Fatalf("frame %d puts the host at %v, outside %v", i,
@@ -66,26 +66,27 @@ func TestPlaceNeverLeavesTheBox(t *testing.T) {
 
 func TestPlaceIsTheSameTwiceAndJumpsOnAKick(t *testing.T) {
 	box := testBox(t)
-	still := Moment{Loudness: loud}
-	if box.Place(still, seconds, seed) != box.Place(still, seconds, seed) {
+	still := moment{Loudness: loud}
+	first, second := box.place(still, seconds, seed), box.place(still, seconds, seed)
+	if first != second {
 		t.Fatal("the same moment placed the host twice differently")
 	}
-	kicked := Moment{Loudness: loud, Kick: one}
-	if !(box.Place(kicked, seconds, seed).Y <=
-		box.Place(still, seconds, seed).Y) {
+	kicked := moment{Loudness: loud, Kick: one}
+	if !(box.place(kicked, seconds, seed).Y <=
+		box.place(still, seconds, seed).Y) {
 		t.Fatal("a kick did not lift the host")
 	}
-	if box.Place(still, seconds, seed) == box.Place(still, seconds,
-		seed+one) && box.Place(still, seconds+one, seed) ==
-		box.Place(still, seconds+one, seed+one) {
+	if box.place(still, seconds, seed) == box.place(still, seconds,
+		seed+one) && box.place(still, seconds+one, seed) ==
+		box.place(still, seconds+one, seed+one) {
 		t.Fatal("another seed drifts the host the same way")
 	}
 }
 
 func TestPlaceHoldsStillInABreak(t *testing.T) {
 	box := testBox(t)
-	hushed := Moment{Loudness: silent}
-	if box.Place(hushed, seconds, seed) != box.Place(hushed,
+	hushed := moment{Loudness: silent}
+	if box.place(hushed, seconds, seed) != box.place(hushed,
 		seconds*two, seed+one) {
 		t.Fatal("the host moved in a break")
 	}
@@ -116,16 +117,16 @@ func TestFlickerStaysInItsDepthAndRepeats(t *testing.T) {
 
 func TestLiftOnlyOnAKickInAPartThatLifts(t *testing.T) {
 	lifts := map[string]bool{"hairline": true}
-	kicked := Moment{Part: "hairline", Kick: one, Loudness: loud}
-	if Lift(kicked, lifts) != lifted {
-		t.Fatalf("a full kick lifts %v", Lift(kicked, lifts))
+	kicked := moment{Part: "hairline", Kick: one, Loudness: loud}
+	if kickLift(kicked, lifts) != lifted {
+		t.Fatalf("a full kick lifts %v", kickLift(kicked, lifts))
 	}
-	for _, at := range []Moment{
+	for _, at := range []moment{
 		{Part: "thin", Kick: one, Loudness: loud},
 		{Part: "hairline", Kick: none, Loudness: loud},
 		{Part: "hairline", Kick: one, Loudness: silent},
 	} {
-		if Lift(at, lifts) != none {
+		if kickLift(at, lifts) != none {
 			t.Errorf("%+v lifts the picture", at)
 		}
 	}

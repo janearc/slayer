@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/maths"
-	"github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/set"
 )
 
@@ -58,7 +58,8 @@ func TestOceanInterfaceEventsReadOnlyForExactContinuation(t *testing.T) {
 	if _, err := set.Read("finite-events.yaml", []byte(finite)); err == nil {
 		t.Fatal("accepted repeated interface events on legacy finite geometry")
 	}
-	legacy, err := set.Read("legacy-ocean.yaml", []byte(oceanSetText(t)))
+	source := oceanSetText(t)
+	legacy, err := set.Read("legacy-ocean.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +231,7 @@ func TestOceanShadingNormalApproximationIsExplicitInBothSchemas(t *testing.T) {
 		"      time: {value: 0, unit: s}\n      source: eye\n",
 		"      time: {value: 0, unit: s}\n      source: eye\n"+
 			"      shading-normal: "+
-			ocean.SmoothNormalBilinearVertexSlopes+"\n", 1)
+			arid.SmoothNormalBilinearVertexSlopes+"\n", 1)
 	for _, schema := range []string{"", "\"$schema\": \"https://github.com/janearc/slayer/schemas/ecosystem-v2.json\"\n"} {
 		written := text
 		if schema != "" {
@@ -243,14 +244,14 @@ func TestOceanShadingNormalApproximationIsExplicitInBothSchemas(t *testing.T) {
 		world, _ := read.World()
 		surface, has := world.OceanSurface()
 		if !has || surface.ShadingNormalApproximation() !=
-			ocean.SmoothNormalBilinearVertexSlopes {
+			arid.SmoothNormalBilinearVertexSlopes {
 			t.Errorf("schema %q: shading-normal = %q, present %t", schema,
 				surface.ShadingNormalApproximation(), has)
 		}
 	}
 	for _, value := range []string{"smooth", "exact", "true"} {
 		bad := strings.Replace(text,
-			"shading-normal: "+ocean.SmoothNormalBilinearVertexSlopes,
+			"shading-normal: "+arid.SmoothNormalBilinearVertexSlopes,
 			"shading-normal: "+value, 1)
 		if _, err := set.Read("bad-ocean-shading-normal.yaml", []byte(bad)); err == nil {
 			t.Errorf("accepted shading-normal %q", value)
@@ -270,7 +271,7 @@ func TestSpectralSlopeShadingNormalIsExplicitInBothSchemas(t *testing.T) {
 	text := strings.Replace(oceanSetText(t),
 		"      time: {value: 0, unit: s}\n      source: eye\n",
 		"      time: {value: 0, unit: s}\n      source: eye\n"+
-			"      shading-normal: "+ocean.SpectralSlopeNormals+"\n", 1)
+			"      shading-normal: "+arid.SpectralSlopeNormals+"\n", 1)
 	for _, schema := range []string{"", "\"$schema\": \"https://github.com/janearc/slayer/schemas/ecosystem-v2.json\"\n"} {
 		written := text
 		if schema != "" {
@@ -282,7 +283,7 @@ func TestSpectralSlopeShadingNormalIsExplicitInBothSchemas(t *testing.T) {
 		}
 		world, _ := read.World()
 		surface, has := world.OceanSurface()
-		if !has || surface.ShadingNormalApproximation() != ocean.SpectralSlopeNormals {
+		if !has || surface.ShadingNormalApproximation() != arid.SpectralSlopeNormals {
 			t.Errorf("schema %q: shading-normal = %q, present %t", schema,
 				surface.ShadingNormalApproximation(), has)
 		}
@@ -347,9 +348,10 @@ func TestWorldReadsInfiniteMeanPlaneAsExplicitFlatMeanOption(t *testing.T) {
 		continuation.CollarWidthMetres() != 4 {
 		t.Fatalf("infinite mean-plane = %+v, present %t", continuation, has)
 	}
+	edited := strings.Replace(text, "extends-to-infinity: true",
+		"extends-to-infinity: yes", 1)
 	if _, err := set.Read("bad-ocean-infinite-mean.yaml",
-		[]byte(strings.Replace(text, "extends-to-infinity: true",
-			"extends-to-infinity: yes", 1))); err == nil {
+		[]byte(edited)); err == nil {
 		t.Fatal("accepted a non-boolean infinite mean-plane option")
 	}
 }
@@ -397,8 +399,8 @@ func glintSetText(t *testing.T, glint string, two bool) string {
 
 func TestOceanGlintIsReadOnlyWhenSaid(t *testing.T) {
 	for _, two := range []bool{false, true} {
-		read, err := set.Read("glint.yaml", []byte(glintSetText(t,
-			"{model: artistic, roughness: 0.2}", two)))
+		source := glintSetText(t, "{model: artistic, roughness: 0.2}", two)
+		read, err := set.Read("glint.yaml", []byte(source))
 		if err != nil {
 			t.Fatalf("schema two %t: %v", two, err)
 		}
@@ -410,8 +412,8 @@ func TestOceanGlintIsReadOnlyWhenSaid(t *testing.T) {
 		}
 	}
 	for _, two := range []bool{false, true} {
-		read, err := set.Read("cox-munk.yaml", []byte(glintSetText(t,
-			"{model: cox-munk}", two)))
+		source := glintSetText(t, "{model: cox-munk}", two)
+		read, err := set.Read("cox-munk.yaml", []byte(source))
 		if err != nil {
 			t.Fatalf("schema two %t: %v", two, err)
 		}
@@ -422,7 +424,8 @@ func TestOceanGlintIsReadOnlyWhenSaid(t *testing.T) {
 			t.Fatalf("schema two %t: glint = %+v", two, glint)
 		}
 	}
-	read, err := set.Read("plain.yaml", []byte(oceanSetText(t)))
+	source := oceanSetText(t)
+	read, err := set.Read("plain.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -470,14 +473,16 @@ func TestOceanSurfaceRejectsBadReferencesAndBounds(t *testing.T) {
 		if !strings.Contains(valid, change.was) {
 			t.Fatalf("fixture lacks %q", change.was)
 		}
-		if _, err := set.Read("bad-ocean.yaml", []byte(strings.Replace(valid, change.was, change.now, 1))); err == nil {
+		edited := strings.Replace(valid, change.was, change.now, 1)
+		if _, err := set.Read("bad-ocean.yaml", []byte(edited)); err == nil {
 			t.Errorf("accepted %q", change.now)
 		}
 	}
 }
 
 func TestSetsWithoutOceanSurfaceKeepTheirWorldOrder(t *testing.T) {
-	read, err := set.Read("built.yaml", []byte(built(t)))
+	source := built(t)
+	read, err := set.Read("built.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

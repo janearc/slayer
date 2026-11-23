@@ -19,11 +19,13 @@ func TestFizzAndVaporPhaseRequireExplicitClearWater(t *testing.T) {
 		t.Fatal("explicit zero HG was lost")
 	}
 	for _, bad := range []string{"-1", "1", ".nan", ".inf"} {
-		if _, err := set.Read("bad.yaml", []byte(strings.Replace(fizz, "phase-g: 0", "phase-g: "+bad, 1))); err == nil {
+		edited := strings.Replace(fizz, "phase-g: 0", "phase-g: "+bad, 1)
+		if _, err := set.Read("bad.yaml", []byte(edited)); err == nil {
 			t.Fatalf("accepted HG %s", bad)
 		}
 	}
-	if _, err := set.Read("not-clear.yaml", []byte(strings.Replace(fizz, "clear-water: true", "clear-water: false", 1))); err == nil {
+	opaque := strings.Replace(fizz, "clear-water: true", "clear-water: false", 1)
+	if _, err := set.Read("not-clear.yaml", []byte(opaque)); err == nil {
 		t.Fatal("phase silently ignored without clear water")
 	}
 }

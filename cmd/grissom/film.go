@@ -1,5 +1,3 @@
-//go:build netcdf
-
 package main
 
 // A film of the earth turning: frames drawn offscreen into a directory in

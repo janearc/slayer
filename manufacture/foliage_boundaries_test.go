@@ -77,7 +77,8 @@ func TestUncheckedFireSmokeKeepsItsPlumeRefusal(t *testing.T) {
 }
 
 func TestRingAssemblyRefusesAnUncheckedNonfinitePose(t *testing.T) {
-	if _, err := around(ring{count: 1, radius: measure.Metres(math.NaN())}, canRow(), Sow(5)); err == nil || !strings.Contains(err.Error(), "invalid placement") {
+	nonfinite := measure.Metres(math.NaN())
+	if _, err := around(ring{count: 1, radius: nonfinite}, canRow(), Sow(5)); err == nil || !strings.Contains(err.Error(), "invalid placement") {
 		t.Fatalf("nonfinite ring placement: %v", err)
 	}
 }

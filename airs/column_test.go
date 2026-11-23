@@ -77,7 +77,7 @@ func TestAStackWithAGapOrAnOverlapIsFound(t *testing.T) {
 // The air's particles, cloud and haze together, are 30 optical depths at
 // 630 nm, whatever Mie says of the modes.
 func TestParticleDepthAt630IsThirty(t *testing.T) {
-	got := columnAt(t, venusRead, 630).ParticleDepth()
+	got := columnAt(t, venusRead, 630).particleDepth()
 	if math.Abs(got-30) > 1e-9 { // defined: the brief's total; picked: rounding only
 		t.Errorf("optical depth %g at 630 nm", got)
 	}
@@ -88,7 +88,7 @@ func TestParticleDepthAt630IsThirty(t *testing.T) {
 func TestAPickedDepthChangesTheTotal(t *testing.T) {
 	changed := copied(t)
 	changed.Layers[1].Depth.Value = 11 // picked: inside the lower cloud's range
-	got := columnAt(t, changed, 630).ParticleDepth()
+	got := columnAt(t, changed, 630).particleDepth()
 	if math.Abs(got-30) < 0.5 { // picked: well over rounding
 		t.Errorf("optical depth %g after a pick moved by a unit", got)
 	}
@@ -98,7 +98,7 @@ func TestAPickedDepthChangesTheTotal(t *testing.T) {
 // Mie's shape does: within 15 percent.
 func TestParticleDepthAtOtherColoursIsMiesShape(t *testing.T) {
 	for _, nanometres := range []float64{450, 750} { // defined: the brief's two
-		got := columnAt(t, venusRead, nanometres).ParticleDepth()
+		got := columnAt(t, venusRead, nanometres).particleDepth()
 		if math.Abs(got-30) > 0.15*30 { // defined: the brief's 15 percent of 30
 			t.Errorf("optical depth %g at %g nm", got, nanometres)
 		}
@@ -108,8 +108,8 @@ func TestParticleDepthAtOtherColoursIsMiesShape(t *testing.T) {
 // And it does differ: the same scale at every wavelength is not the same
 // depth at every wavelength, which is the shape.
 func TestParticleDepthIsNotTheSameAtEveryColour(t *testing.T) {
-	blue := columnAt(t, venusRead, 450).ParticleDepth()
-	red := columnAt(t, venusRead, 750).ParticleDepth()
+	blue := columnAt(t, venusRead, 450).particleDepth()
+	red := columnAt(t, venusRead, 750).particleDepth()
 	if math.Abs(blue-red) < 0.1 { // picked: a tenth of a depth
 		t.Errorf("depth %g at 450 nm and %g at 750", blue, red)
 	}
@@ -183,7 +183,7 @@ func TestAbsorbersAbsorbWhereTheyAre(t *testing.T) {
 	}
 	ultraviolet := copied(t)
 	ultraviolet.Absorbers[0].Absorption.Value = 1e-5 // picked: as above
-	if columnAt(t, ultraviolet, 550).ParticleDepth() != columnAt(t, venusRead, 550).ParticleDepth() {
+	if columnAt(t, ultraviolet, 550).particleDepth() != columnAt(t, venusRead, 550).particleDepth() {
 		t.Error("an absorber with a limit of 500 nm absorbed at 550 nm")
 	}
 }
@@ -195,13 +195,13 @@ func TestAbsorbersAtNoughtChangeNothing(t *testing.T) {
 	changed := copied(t)
 	changed.Absorbers = nil
 	with, without := columnAt(t, venusRead, 450), columnAt(t, changed, 450)
-	if relative(with.ParticleDepth(), without.ParticleDepth()) > 1e-9 || // picked: rounding only
-		relative(with.GasDepth(), without.GasDepth()) > 1e-9 {
+	if relative(with.particleDepth(), without.particleDepth()) > 1e-9 || // picked: rounding only
+		relative(with.gasDepth(), without.gasDepth()) > 1e-9 {
 		t.Error("absorbers at nought changed the column")
 	}
 	changed = copied(t)
 	changed.Absorbers[1].Absorption.Value = 1e-5 // picked: as above
-	added := columnAt(t, changed, 450).ParticleDepth() - with.ParticleDepth()
+	added := columnAt(t, changed, 450).particleDepth() - with.particleDepth()
 	if math.Abs(added-0.25) > 1e-9 { // defined: 25 km at 1e-5 a metre; picked: rounding only
 		t.Errorf("a blue absorber of 1e-5 a metre adds %g of a depth, not 0.25", added)
 	}
@@ -257,16 +257,16 @@ func TestMeansOfAColumnMadeByHand(t *testing.T) {
 		{Bottom: 0, Top: 1, ParticleExtinction: 1, ParticleAlbedo: 1, ParticleAsymmetry: 0.5},
 		{Bottom: 1, Top: 3, ParticleExtinction: 1, ParticleAlbedo: 0.5, ParticleAsymmetry: 0.8},
 	}}
-	if got := column.MeanAlbedo(); math.Abs(got-2.0/3.0) > 1e-12 { // defined: (1 + 2 x 0.5) over 3
+	if got := column.meanAlbedo(); math.Abs(got-2.0/3.0) > 1e-12 { // defined: (1 + 2 x 0.5) over 3
 		t.Errorf("mean albedo %g", got)
 	}
-	if got := column.MeanAsymmetry(); math.Abs(got-0.65) > 1e-12 { // defined: (1 x 0.5 + 1 x 0.8) over 2
+	if got := column.meanAsymmetry(); math.Abs(got-0.65) > 1e-12 { // defined: (1 x 0.5 + 1 x 0.8) over 2
 		t.Errorf("mean asymmetry %g", got)
 	}
-	if got := (Column{}).MeanAlbedo(); got != 0 {
+	if got := (Column{}).meanAlbedo(); got != 0 {
 		t.Errorf("an empty column's mean albedo %g", got)
 	}
-	if got := (Column{}).MeanAsymmetry(); got != 0 {
+	if got := (Column{}).meanAsymmetry(); got != 0 {
 		t.Errorf("an empty column's mean asymmetry %g", got)
 	}
 }
@@ -289,8 +289,8 @@ func TestTableOfTheColumn(t *testing.T) {
 			}
 		}
 		fmt.Fprintf(&table, "%6.0f %10.3f %10.3f %8.4f %8.4f %8.4f %12.4f\n", nanometres,
-			column.GasDepth(), column.ParticleDepth(), column.MeanAlbedo(),
-			column.MeanAsymmetry(), column.GroundAlbedo, irradiance)
+			column.gasDepth(), column.particleDepth(), column.meanAlbedo(),
+			column.meanAsymmetry(), column.GroundAlbedo, irradiance)
 	}
 	t.Log("\n" + table.String())
 }

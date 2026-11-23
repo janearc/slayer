@@ -1,4 +1,4 @@
-# Independent level-deck examples, 2026-11-07.
+# Independent level-deck examples.
 # At equal scene heights, density is equal until terrain clips the field.
 base: 2
 ground: {east: 1}

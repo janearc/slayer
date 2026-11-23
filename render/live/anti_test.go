@@ -199,7 +199,8 @@ func TestWorkerTellsADrawnFrameWithoutARefusal(t *testing.T) {
 		}
 		ended = said.done && said.stage == stage
 	}
-	if drawn != len(ladderFor(factsOf(stage), testScreen())) || !ended {
+	ladder := ladderFor(factsOf(stage), testScreen())
+	if drawn != len(ladder) || !ended {
 		t.Errorf("%d frames told, ended %v", drawn, ended)
 	}
 }
@@ -272,7 +273,8 @@ func TestPublishIsSilentWhenItCan(t *testing.T) {
 		said.Job != watching.given.Path {
 		t.Errorf("the status says %+v", said)
 	}
-	if strings.Contains(strings.Join(watching.foot.lines(), "\n"),
+	footing := strings.Join(watching.foot.lines(), "\n")
+	if strings.Contains(footing,
 		"not written") {
 		t.Errorf("the foot said %q", watching.foot.lines())
 	}
@@ -301,8 +303,8 @@ func TestDevelopmentOfAGoodJobMovesOn(t *testing.T) {
 	if watching.version != version+one {
 		t.Errorf("the version is %d, was %d", watching.version, version)
 	}
-	if got := strings.TrimSpace(strings.Join(watching.foot.lines(),
-		"")); got != "" {
+	footing := strings.Join(watching.foot.lines(), "")
+	if got := strings.TrimSpace(footing); got != "" {
 		t.Errorf("the foot says %q", got)
 	}
 }
@@ -363,8 +365,10 @@ func TestWatchLeavesAFrameAloneForAKeyThatChangesNothing(t *testing.T) {
 		size Size) (Drawn, error) {
 		sizes <- size
 		<-gate
-		return drawnOf(control, max(one, size.Width()),
-			max(one, size.Height())), nil
+		width := max(one, size.Width())
+		height := max(one, size.Height())
+		return drawnOf(control, width,
+			height), nil
 	})
 	stager := NewMockStager(control)
 	stager.EXPECT().Stage(gomock.Any(), gomock.Any()).Return(stage, nil)
@@ -400,8 +404,10 @@ func TestWatchCancelledFrameIsNoTroubleAtTheFoot(t *testing.T) {
 			<-ctx.Done()
 			return nil, ctx.Err()
 		}
-		return drawnOf(control, max(one, size.Width()),
-			max(one, size.Height())), nil
+		width := max(one, size.Width())
+		height := max(one, size.Height())
+		return drawnOf(control, width,
+			height), nil
 	})
 	stager := NewMockStager(control)
 	stager.EXPECT().Stage(gomock.Any(), gomock.Any()).Return(stage, nil)
@@ -426,8 +432,8 @@ func TestWatchCancelledFrameIsNoTroubleAtTheFoot(t *testing.T) {
 			t.Errorf("a cancelled frame was said at the foot: %q", lines)
 		}
 	}
-	if said := statusOf(filepath.Join(filepath.Dir(path),
-		".test.watch")); said.Error != "" {
+	watchPath := filepath.Join(filepath.Dir(path), ".test.watch")
+	if said := statusOf(watchPath); said.Error != "" {
 		t.Errorf("the status says %q", said.Error)
 	}
 }
@@ -450,8 +456,9 @@ func TestWatchStartedOnABrokenJobWaitsForItToRead(t *testing.T) {
 	folder := filepath.Join(filepath.Dir(path), ".test.watch")
 	ticks := make(chan time.Time)
 	now := noon()
+	screen := screenOf(control, make(chan terminal.Event), nil, nil)
 	watching := watcherOn(t, path, stager,
-		screenOf(control, make(chan terminal.Event), nil, nil), now, ticks)
+		screen, now, ticks)
 	running(t, watching)
 	broken := statusWhen(t, folder, "the job does not read",
 		func(said report) bool { return said.Error != "" })
@@ -524,8 +531,9 @@ func TestTheStatusFolderIsNotStoppedWhileRunning(t *testing.T) {
 	stager.EXPECT().Stage(gomock.Any(), gomock.Any()).
 		Return(stageOf(control, one, drew), nil)
 	path := jobFile(t, stillJob)
+	screen := screenOf(control, make(chan terminal.Event), nil, nil)
 	watching := watcherOn(t, path, stager,
-		screenOf(control, make(chan terminal.Event), nil, nil), noon(),
+		screen, noon(),
 		make(chan time.Time))
 	running(t, watching)
 	ladder := ladderFor(facts{width: 40, height: 30}, testScreen())
@@ -553,8 +561,9 @@ func TestTheStatusFolderCarriesARefusal(t *testing.T) {
 	stager.EXPECT().Stage(gomock.Any(), gomock.Any()).
 		Return(nil, errors.New("no scene is called that"))
 	path := jobFile(t, stillJob)
+	screen := screenOf(control, make(chan terminal.Event), nil, nil)
 	watching := watcherOn(t, path, stager,
-		screenOf(control, make(chan terminal.Event), nil, nil), noon(),
+		screen, noon(),
 		make(chan time.Time))
 	running(t, watching)
 	folder := filepath.Join(filepath.Dir(path), ".test.watch")

@@ -1,0 +1,12 @@
+name,x,y,z,dirx,diry,dirz
+sphere-least,-2,-2,-2,,,
+sphere-most,2,2,2,,,
+tube-least,-11,-2,-11,,,
+tube-most,11,2,11,,,
+along,-5,0,0,1,0,0
+touch,-5,1,0,1,0,0
+level,-5,0.5,0,1,0,0
+slant,0,4,0,0.6,-0.8,0
+up,0,-2,0,0,1,0
+near-the-end,11,1.9,0,,,
+outward,1,0,0,,,

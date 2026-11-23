@@ -71,8 +71,9 @@ func TestAHudChangesWithItsTheme(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(one.Mask()) != len(two.Mask()) {
-		t.Fatalf("%d cells in dusk, %d in dawn", len(one.Mask()),
-			len(two.Mask()))
+		dusk := len(one.Mask())
+		dawn := len(two.Mask())
+		t.Fatalf("%d cells in dusk, %d in dawn", dusk, dawn)
 	}
 	for _, at := range one.Mask() {
 		a, _ := one.At(at.X, at.Y)

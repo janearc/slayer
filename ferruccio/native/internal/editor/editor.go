@@ -38,6 +38,7 @@ type Widget struct {
 	onChange        func(string)
 	readOnly        bool
 	onEscape        func()
+	onSettings      func()
 	undo            []string
 	redo            []string
 	lineStartsCache []int
@@ -280,6 +281,11 @@ func (w *Widget) key(ctx widget.Context, ev *event.KeyEvent) bool {
 	command := mods.HasAny(event.ModSuper | event.ModCtrl)
 	if command {
 		switch ev.Key {
+		case event.KeyComma:
+			if w.onSettings != nil {
+				w.onSettings()
+				return true
+			}
 		case event.KeyA:
 			w.anchor, w.cursor = 0, len(w.text)
 			w.invalidate(ctx)

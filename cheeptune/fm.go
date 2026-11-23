@@ -11,20 +11,20 @@ import (
 // modulator's frequency. Whole-number ratios give a harmonic tone; a ratio
 // off a whole number gives the uneven partials of a bell.
 
-// FM is an fm channel's sound.
-type FM struct {
+// fmSound is an fm channel's sound.
+type fmSound struct {
 	Arrangement string     `json:"arrangement"`
-	Operators   []Operator `json:"operators"`
+	Operators   []operator `json:"operators"`
 	Feedback    float64    `json:"feedback"`
 }
 
-// Operator is one sine: its frequency as a ratio to the note, its level
+// operator is one sine: its frequency as a ratio to the note, its level
 // (how loud a carrier is, or how hard a modulator swings what it feeds)
 // and its own envelope.
-type Operator struct {
+type operator struct {
 	Ratio    float64   `json:"ratio"`
 	Level    float64   `json:"level"`
-	Envelope *Envelope `json:"envelope"`
+	Envelope *envelope `json:"envelope"`
 }
 
 // arrangement is how operators are joined: for each operator, counted
@@ -86,7 +86,7 @@ func arrangementNames() string {
 }
 
 // checkFM is an fm channel's own rules.
-func checkFM(c *Channel, q *quarrel) {
+func checkFM(c *channel, q *quarrel) {
 	f := c.FM
 	arr, ok := arrangements[f.Arrangement]
 	if !ok {
@@ -117,12 +117,12 @@ const fmRatioLeast = 0.125
 
 // fmEngine is an fm channel ready to sound.
 type fmEngine struct {
-	channel *Channel
+	channel *channel
 	arr     arrangement
 }
 
 // buildFM is the engine for a checked fm channel.
-func buildFM(c *Channel) engine {
+func buildFM(c *channel) engine {
 	return &fmEngine{channel: c, arr: arrangements[c.FM.Arrangement]}
 }
 

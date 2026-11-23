@@ -16,7 +16,7 @@ import (
 )
 
 // fire is a flame's body over a floor, its smoke rising out of it, lit
-// by the flame's own light cut into cells as hillside cuts it: a boxed
+// by the flame's own light cut into cells as the session cuts it: a boxed
 // medium that shines, thicker to blue, and one that is painted grey and
 // tinted, both of them timed, and neither a puff the kernel knows.
 func fire(t *testing.T) (*thing.World, maths.Subspace) {

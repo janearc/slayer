@@ -67,7 +67,7 @@ func TestClusteredCityKeepsExactlyTenThousandBuildingsClearOfReservedLand(t *tes
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(layout.Buildings()) != 10000 || len(layout.Parks()) != 2 || len(layout.Ramps()) != 4 {
+	if len(layout.Buildings()) != 10000 || len(layout.parks) != 2 || len(layout.ramps) != 4 {
 		t.Fatal("population or reserved infrastructure")
 	}
 	seen := map[uint64]bool{}
@@ -84,7 +84,8 @@ func TestClusteredCityKeepsExactlyTenThousandBuildingsClearOfReservedLand(t *tes
 	if !reflect.DeepEqual(layout.Buildings(), same.Buildings()) {
 		t.Fatal("city changed for identical inputs")
 	}
-	t.Logf("%d buildings, %d Poisson district centres, %d parks, %d ground ramps", len(layout.Buildings()), len(layout.Parents()), len(layout.Parks()), len(layout.Ramps()))
+	buildings := len(layout.Buildings())
+	t.Logf("%d buildings, %d Poisson district centres, %d parks, %d ground ramps", buildings, len(layout.parents), len(layout.parks), len(layout.ramps))
 	row, err := ClusteredCity(spec)
 	if err != nil {
 		t.Fatal(err)
@@ -128,7 +129,7 @@ func TestClusteredHighwayRampsJoinDecksAndActualGroundStreets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, ramp := range layout.Ramps() {
+	for _, ramp := range layout.ramps {
 		if ramp.at(0) != ramp.Points[0] || ramp.at(1) != ramp.Points[3] || ramp.at(0).Y != 8 || ramp.at(1).Y != .04 {
 			t.Fatal("disconnected ramp elevations")
 		}
@@ -193,10 +194,12 @@ func TestClusteredNativeTreesAndNightWindowsStayBatchedAndVaried(t *testing.T) {
 		t.Fatal("trees became independent native acceleration structures", len(unique))
 	}
 	if len(made.Descriptions()) != 6 {
-		t.Fatal("night needs six sparse actual fixtures", len(made.Descriptions()))
+		described := len(made.Descriptions())
+		t.Fatal("night needs six sparse actual fixtures", described)
 	}
 	if made.groups[cityWarmWindow] == nil || made.groups[cityCoolWindow] == nil || made.groups[cityGlass] == nil {
 		t.Fatal("night facade lacks occupied and unlit variation")
 	}
-	t.Logf("10000 buildings, %d native trees, %d tree prototypes, %d unique native meshes, %d stored faces, %d actual lamps", len(trees), len(prototypes), len(unique), made.faces(), len(made.Descriptions()))
+	lamps := len(made.Descriptions())
+	t.Logf("10000 buildings, %d native trees, %d tree prototypes, %d unique native meshes, %d stored faces, %d actual lamps", len(trees), len(prototypes), len(unique), made.faces(), lamps)
 }

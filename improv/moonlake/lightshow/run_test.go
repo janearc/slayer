@@ -73,7 +73,8 @@ func TestMain(m *testing.M) {
 func child(t *testing.T, args []string, env ...string) (int, string) {
 	t.Helper()
 	cmd := exec.Command(os.Args[0], args...)
-	cmd.Env = append(quiet(os.Environ()), childEnv+"=1")
+	inherited := quiet(os.Environ())
+	cmd.Env = append(inherited, childEnv+"=1")
 	cmd.Env = append(cmd.Env, env...)
 	var stderr strings.Builder
 	cmd.Stderr = &stderr
@@ -221,7 +222,8 @@ func TestMainWritesTheSkyAndTheFront(t *testing.T) {
 		"fire_since=0\nfire_lit=0\nmoon_alt=5.45\n"))
 	t.Setenv("MOON_DISC", keep(t, dir, "disc.pfm", disc, -1))
 	t.Setenv("TREEMASK", keep(t, dir, "trees.pfm", trees, -1))
-	t.Setenv("WATERMASK", keep(t, dir, "water.pfm", flat(frameW, frameH, 1), -1))
+	water := flat(frameW, frameH, 1)
+	t.Setenv("WATERMASK", keep(t, dir, "water.pfm", water, -1))
 	t.Setenv("DEBUGMASK", debug)
 	t.Setenv("PASSES", passes)
 	t.Setenv("FIRE_FRAMES", fire)

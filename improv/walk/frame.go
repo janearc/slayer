@@ -23,12 +23,12 @@ func (kept *Stills) of(picture still) (*image.RGBA, error) {
 	}
 	file, err := os.Open(picture.path)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrWalk, err)
+		return nil, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	defer file.Close()
 	decoded, err := png.Decode(file)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s: %w", ErrWalk, picture.path, err)
+		return nil, fmt.Errorf("%w: %s: %w", errWalk, picture.path, err)
 	}
 	made := image.NewRGBA(decoded.Bounds().Sub(decoded.Bounds().Min))
 	for y := range made.Rect.Dy() {
@@ -79,7 +79,7 @@ func (short Short) momentOf(i int) moment {
 func (short Short) Frame(i int, kept *Stills) (*image.RGBA, error) {
 	if i < 0 || i >= short.Frames() {
 		return nil, fmt.Errorf("%w: frame %d of a short of %d; ask for one "+
-			"of its frames", ErrWalk, i, short.Frames())
+			"of its frames", errWalk, i, short.Frames())
 	}
 	tones, err := colours()
 	if err != nil {

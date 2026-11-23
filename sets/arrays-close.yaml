@@ -1,0 +1,36 @@
+# The aft corner of Roman's solar array, from above and outboard: the
+# frame, the cells with the gaps between them, a bus bar in a gap, a hinge
+# line with its fittings, and the rail that carries the panels out past
+# the first hinge to its root fitting. The set's axes are east x, north y,
+# up z; Roman's own are x, up y, and z, so its aft is north here.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a solar array's aft corner, close
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 40}
+  set:
+    things:
+      roman:
+        kind: roman
+        seed: 5
+        complexity: quick
+        east: 0
+        north: 0
+  film:
+    width: 1920
+    height: 1080
+    rays: 3
+    exposure: 0.003
+    wide: 40
+  cameras:
+    corner:
+      title: the corner, close
+      location: {at: [3.0, 3.2, 3.4]}
+      orientation: {look_at: [1.5, 2.1, 1.9]}
+  world:
+    unit: 1
+    sky:
+      stars: {seed: 29, share: 0.01, size: 0.3, bright: 0.6}
+      source: eye

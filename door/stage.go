@@ -6,16 +6,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/render/colour"
 	"github.com/janearc/slayer/render/live"
+	"github.com/janearc/slayer/session"
 	"github.com/janearc/slayer/set"
 )
 
-// sessions is watch's stager: a hillside session for the job, and the
+// sessions is watch's stager: a session for the job, and the
 // set's cameras by name where the scene is a set.
-type sessions struct{ stamp hillside.Stamp }
+type sessions struct{ stamp session.Stamp }
 
 // Stage opens a session for the job. Frames already rendered are not a
 // scene to watch, and are refused by name.
@@ -25,7 +25,7 @@ func (made sessions) Stage(ctx context.Context, wanted job.Job) (
 		return nil, errors.New("watch draws a scene, and this job's " +
 			"scene is frames already rendered; slayer draw develops them")
 	}
-	session, err := hillside.Open(ctx, wanted, made.stamp)
+	session, err := session.Open(ctx, wanted, made.stamp)
 	if err != nil {
 		return nil, err
 	}
@@ -51,16 +51,16 @@ func camerasOf(wanted job.Job) []string {
 	return read.Cameras()
 }
 
-// staged is a hillside session as watch draws from it.
+// staged is a session as watch draws from it.
 type staged struct {
-	session *hillside.Session
+	session *session.Session
 	cameras []string
 }
 
 // Frame is the session's frame at the size asked.
 func (made staged) Frame(ctx context.Context, index int,
 	size live.Size) (live.Drawn, error) {
-	ask, err := hillside.NewAsk(size.Width(), size.Height(), size.Rays(),
+	ask, err := session.NewAsk(size.Width(), size.Height(), size.Rays(),
 		nil)
 	if err != nil {
 		return nil, err

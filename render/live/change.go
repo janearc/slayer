@@ -79,7 +79,9 @@ var within = map[string]map[string]Change{
 // read. Outputs, limits and the note are not in the canonical form, so
 // they change nothing.
 func Compare(was, is job.Job) Change {
-	return differences(tree(was.Canonical()), tree(is.Canonical()),
+	wasTree := tree(was.Canonical())
+	isTree := tree(is.Canonical())
+	return differences(wasTree, isTree,
 		costOfKey, true)
 }
 
@@ -96,7 +98,9 @@ func differences(before, after map[string]any, table map[string]Change,
 		}
 		own, has := within[key]
 		if top && has {
-			cost = cost.With(differences(asTree(was), asTree(is), own,
+			wasBranch := asTree(was)
+			isBranch := asTree(is)
+			cost = cost.With(differences(wasBranch, isBranch, own,
 				false))
 			continue
 		}

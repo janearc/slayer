@@ -4,6 +4,11 @@ package metal
 
 import _ "embed"
 
+// geodesicLibrary is the text of geodesic.metal.
+//
+//go:embed geodesic.metal
+var geodesicLibrary string
+
 // GeodesicLibrary is celestial's Kerr-Schild Hamiltonian and its RK4
 // step (hole.Step) in the Metal shading language, in float32. Vectors
 // hold time first, then x, y and z, as celestial's Vec4 and
@@ -12,9 +17,7 @@ import _ "embed"
 // A caller bounds the integration and checks its error against
 // hole.Step: one single-precision step does not make an accurate
 // picture of light. gpu's gravity tests hold it to celestial.
-//
-//go:embed geodesic.metal
-var GeodesicLibrary string
+func GeodesicLibrary() string { return geodesicLibrary }
 
 // GeodesicTimeShare is the time a step of the march spans, as a share
 // of the radius it is taken at. It is celestial's "time share" march

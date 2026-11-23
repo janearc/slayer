@@ -37,11 +37,11 @@ func executableFixture(t *testing.T, body string) (Store, Job) {
 	}
 	r.Command = path
 	r.Args = []string{"a b", ";not-a-shell-command", "--vibes", "on"}
-	j, err := s.Submit(t.Context(), r)
+	_, err := s.Submit(t.Context(), r)
 	if err != nil {
 		t.Fatal(err)
 	}
-	j, err = s.claim(t.Context(), "test-worker")
+	j, err := s.claim(t.Context(), "test-worker")
 	if err != nil {
 		t.Fatal(err)
 	}

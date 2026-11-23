@@ -193,7 +193,8 @@ func TestEachBulkCalculationHasItsOwnRefusal(t *testing.T) {
 		t.Run(trial.name, func(t *testing.T) {
 			var input []specimen.Solid
 			for index, mass := range trial.masses {
-				input = append(input, specimen.Solid{Name: string(rune('a' + index)),
+				letter := string(rune('a' + index))
+				input = append(input, specimen.Solid{Name: letter,
 					MassKG: mass, DensityKGPerM3: trial.densities[index], Basis: "numeric limit fixture"})
 			}
 			p := specimen.Pores{VolumeFraction: trial.porosity, Saturation: trial.saturation,

@@ -1,0 +1,90 @@
+# a column of sun in a dark scene: a plate just under the surface with a slot
+# in it, the worked sun refracted through the surface, and a camera in the
+# dark water beside the column. only the light scattered toward the camera
+# shows the column; nothing else is lit. the water is the honest pair of
+# sets/kelp-forest.yaml's coefficients, total extinction with the particles'
+# scattering returned to the look at the Petzold mean cosine 0.924
+# (extinction 0.4404, 0.2517, 0.2410 per metre; scattering 0.1760, 0.1952,
+# 0.2309), which is where a forward-scattered column is strongest. the
+# exposure is a camera setting, picked for a dark scene.
+# places are metres, x east, y north, z up, mean sea at z=0; the plate's
+# upper face is at z=-0.4 and its slot is two metres wide, along y.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: kelp sun column
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 60}
+  film:
+    width: 320
+    height: 180
+    rays: 1
+    exposure: 20000
+    wide: 60
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0, 0, 0]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.4404, 0.2517, 0.2410]
+          scatter:
+            coefficient-per-metre: [0.1760, 0.1952, 0.2309]
+            phase-g: 0.924
+            steps: 48
+            max-distance: {value: 30, unit: m}
+        source: "pure water absorption, Pope and Fry 1997; particle scattering, Morel and Maritorena 2001 Case 1 model at a picked 0.5 mg/m3 chlorophyll, whole; Petzold mean cosine 0.924"
+      plate:
+        colour: {srgb_linear: [0.02, 0.02, 0.02]}
+        source: eye
+      deep:
+        colour: {srgb_linear: [0, 0, 0]}
+        source: eye
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 512, unit: m}
+      samples: 257
+      sea:
+        wind: {value: 0.5, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 11
+      time: {value: 0, unit: s}
+      source: "picked: a light breeze, no shelf source"
+      flat-mean:
+        mean-level: {value: 0, unit: m}
+        collar-width: {value: 64, unit: m}
+        extends-to-infinity: true
+      direct-sun: mean-plane
+    boxes:
+      west plate:
+        material: plate
+        middle: [-26, 0, -0.5]
+        size: [50, 100, 0.2]
+        source: eye
+      east plate:
+        material: plate
+        middle: [26, 0, -0.5]
+        size: [50, 100, 0.2]
+        source: eye
+      floor:
+        material: deep
+        middle: [0, 0, -12.05]
+        size: [400, 400, 0.1]
+        source: eye
+  cameras:
+    beside:
+      title: "in the dark beside the column, level, looking across the slot"
+      location: {at: [-1.5, -9, -4]}
+      orientation: {look_at: [0.5, 0, -3]}
+      initial-media: [seawater]

@@ -59,11 +59,14 @@ func shapeOf(air gas.Optical) medium.Medium {
 	return air
 }
 
-// noAir fills the fields of a volume that is not a gas.
+// noAir fills the fields of a volume that is not a gas, and leaves its
+// box in the world empty: every writer of a volume's row calls it, and
+// boxVolumes writes the box once every row is in.
 func noAir(given values) {
 	given["scatter"], given["air"] = nil, nil
 	given["thermal"], given["thin"], given["phase"] = wholes(-1, 0), nil, nil
 	given["beam"], given["flow"] = nil, nil
+	given["world_low"], given["world_high"] = nil, nil
 }
 
 // putLast writes words over the start of a field of the volume appended

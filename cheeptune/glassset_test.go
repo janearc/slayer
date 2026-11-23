@@ -109,8 +109,9 @@ func misses(theme, member *Score, st statement) []string {
 		beats := e.Beats + float64(st.at-st.from)*meter
 		for _, n := range e.Notes {
 			if _, ok := startsNote(part, beats, n+st.shift); !ok {
+				name := noteName(n + st.shift)
 				out = append(out, fmt.Sprintf("bar %d: no %s at beat %v",
-					e.Bar-st.from+st.at, NoteName(n+st.shift), beats))
+					e.Bar-st.from+st.at, name, beats))
 			}
 		}
 	}
@@ -180,10 +181,10 @@ func TestTheFastLineMarksTheMelodyLouderThanItsFilling(t *testing.T) {
 				beats := e.Beats +
 					float64((st.at-st.from)*theme.Meter)
 				loud, ok := startsNote(part, beats, e.Notes[0]+st.shift)
-				if ok && loud < Marks["f"] {
+				if ok && loud < marks["f"] {
 					t.Errorf("%s bar %d: the melody's %s is marked %v, "+
 						"under f", name, e.Bar-st.from+st.at,
-						NoteName(e.Notes[0]+st.shift), loud)
+						noteName(e.Notes[0]+st.shift), loud)
 				}
 			}
 		}

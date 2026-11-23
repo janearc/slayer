@@ -370,11 +370,11 @@ func loadPrimitives(doc document, buffers [][]byte, limits Limits) ([]primitive,
 				mode = *source.Mode
 			}
 			if mode != 4 {
-				return nil, fmt.Errorf("%w: mesh %d primitive %d mode %d", ErrUnsupported, meshIndex, primitiveIndex, mode)
+				return nil, fmt.Errorf("%w: mesh %d primitive %d mode %d", errUnsupported, meshIndex, primitiveIndex, mode)
 			}
 			for semantic := range source.Attributes {
 				if semantic != "POSITION" && semantic != "NORMAL" {
-					return nil, fmt.Errorf("%w: vertex attribute %s", ErrUnsupported, semantic)
+					return nil, fmt.Errorf("%w: vertex attribute %s", errUnsupported, semantic)
 				}
 			}
 			positionIndex, ok := source.Attributes["POSITION"]
@@ -656,7 +656,7 @@ func readVec3Accessor(doc document, buffers [][]byte, index int, semantic string
 	}
 	accessor := doc.Accessors[index]
 	if accessor.Component != 5126 || accessor.Type != "VEC3" || accessor.Normalized {
-		return nil, fmt.Errorf("%w: %s must be an unnormalized float32 VEC3", ErrUnsupported, semantic)
+		return nil, fmt.Errorf("%w: %s must be an unnormalized float32 VEC3", errUnsupported, semantic)
 	}
 	if accessor.Min != nil && len(accessor.Min) != 3 || accessor.Max != nil && len(accessor.Max) != 3 {
 		return nil, fmt.Errorf("oakland: %s accessor bounds must have three components", semantic)
@@ -715,7 +715,7 @@ func readIndices(doc document, buffers [][]byte, index *int, vertices int) ([][3
 	}
 	accessor := doc.Accessors[*index]
 	if accessor.Type != "SCALAR" || accessor.Normalized || accessor.Component != 5121 && accessor.Component != 5123 && accessor.Component != 5125 {
-		return nil, fmt.Errorf("%w: indices must be unsigned SCALAR values", ErrUnsupported)
+		return nil, fmt.Errorf("%w: indices must be unsigned SCALAR values", errUnsupported)
 	}
 	componentBytes := 0
 	switch accessor.Component {

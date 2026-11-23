@@ -17,7 +17,7 @@ func SongSpan(song movie.Sound, from, seconds float64) (movie.Sound, error) {
 	count := int(math.Round(seconds * rate))
 	if from < 0 || !(seconds > 0) || first+count > song.Length() {
 		return movie.Sound{}, fmt.Errorf("%w: %.2f s of the song from "+
-			"%.2f s; it is %.2f s long: start it earlier", ErrWalk, seconds,
+			"%.2f s; it is %.2f s long: start it earlier", errWalk, seconds,
 			from, song.Duration().Seconds())
 	}
 	samples := song.Samples()[first*stereo : (first+count)*stereo]
@@ -41,11 +41,11 @@ func (short Short) Write(ctx context.Context, path string,
 		Width: frameSize.X, Height: frameSize.Y, Rate: filmRate,
 		Frames: short.Frames(), Sound: sound, Replace: true})
 	if err != nil {
-		return 0, fmt.Errorf("%w: %w", ErrWalk, err)
+		return 0, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	writer, err := movie.New(ctx, settings)
 	if err != nil {
-		return 0, fmt.Errorf("%w: %w", ErrWalk, err)
+		return 0, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	kept := NewStills()
 	for i := range short.Frames() {
@@ -55,11 +55,11 @@ func (short Short) Write(ctx context.Context, path string,
 		}
 		if err != nil {
 			writer.Abort()
-			return i, fmt.Errorf("%w: frame %d: %w", ErrWalk, i, err)
+			return i, fmt.Errorf("%w: frame %d: %w", errWalk, i, err)
 		}
 	}
 	if err := writer.Close(); err != nil {
-		return short.Frames(), fmt.Errorf("%w: %w", ErrWalk, err)
+		return short.Frames(), fmt.Errorf("%w: %w", errWalk, err)
 	}
 	return short.Frames(), nil
 }

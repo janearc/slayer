@@ -1,0 +1,1 @@
+check-mariner . :: go test -p=1 -v ./manufacture -run ^TestMariner10 -count=1

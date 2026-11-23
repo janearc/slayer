@@ -1,0 +1,5 @@
+name,cosine,side,want
+square on from the air,1,air,0.04
+square on from inside,1,inside,0.04
+past the critical angle inside,0.5,inside,1
+grazing from the air,0,air,1

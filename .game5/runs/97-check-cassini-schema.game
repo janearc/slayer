@@ -1,0 +1,1 @@
+check-cassini-schema . :: go test -p=1 ./set -run ^TestCassiniKindPassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s

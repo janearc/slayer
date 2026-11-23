@@ -25,8 +25,9 @@ func movedFrom(base, got keySet) moved {
 // directory all of a test's jobs are, so relative paths are one file.
 func keysOf(t *testing.T, text string) keySet {
 	t.Helper()
+	hashedName := hashed(t.Name())
 	directory := filepath.Join(os.TempDir(), "job-keys-"+
-		hashed(t.Name()))
+		hashedName)
 	if err := os.MkdirAll(directory, private|executable); err != nil {
 		t.Fatal(err)
 	}
@@ -48,14 +49,6 @@ func hashed(name string) string {
 	}
 	return string(safe)
 }
-
-// what a change to a job moves: the light, only the development of it,
-// or only the sound.
-const (
-	moveLight       = "light"
-	moveDevelopment = "development"
-	moveSound       = "sound"
-)
 
 // anti-test of TestTheKeyIgnoresWhatDoesNotChangeThePicture
 // anti-test of TestTheKeyFillsInDefaults
@@ -119,7 +112,8 @@ func TestEveryKnobOfTheJobMovesTheKeysItShould(t *testing.T) {
 		"sound gone": {"sound: {file: take.wav, from: {value: 1, unit: s}}\n",
 			"", forSound},
 	} {
-		got := movedFrom(base, keysOf(t, changed(t, each.before, each.after)))
+		edited := changed(t, each.before, each.after)
+		got := movedFrom(base, keysOf(t, edited))
 		if got != each.want {
 			t.Errorf("%s: moved %+v, want %+v", name, got, each.want)
 		}

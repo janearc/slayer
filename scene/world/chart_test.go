@@ -32,8 +32,8 @@ type chart struct {
 // tiles next to each other. The steps are a billionth, so the noise at a middle
 // is zero for every purpose the tests have, and each middle is its own key for
 // the latitude.
-func chained(n int, pairs ...[2]int) *chart {
-	c := &chart{at: make([]maths.Vec, n), near: make([][]int, n),
+func chained(count int, pairs ...[2]int) *chart {
+	c := &chart{at: make([]maths.Vec, count), near: make([][]int, count),
 		lat: map[maths.Vec]float64{}}
 	for i := range c.at {
 		c.at[i] = maths.V(float64(i)*1e-9, 0, 0)
@@ -46,9 +46,9 @@ func chained(n int, pairs ...[2]int) *chart {
 }
 
 // along is the pairs that join tiles 0 to n-1 end to end.
-func along(n int) [][2]int {
+func along(count int) [][2]int {
 	var out [][2]int
-	for i := 1; i < n; i++ {
+	for i := 1; i < count; i++ {
 		out = append(out, [2]int{i - 1, i})
 	}
 	return out
@@ -62,28 +62,28 @@ func (c *chart) Tiles() []hexes.Tile {
 	return out
 }
 
-func (c *chart) Centre(t hexes.Tile) maths.Vec { return c.at[t.Column] }
+func (c *chart) Centre(tile hexes.Tile) maths.Vec { return c.at[tile.Column] }
 
-func (c *chart) Neighbours(t hexes.Tile) []hexes.Tile {
+func (c *chart) Neighbours(tile hexes.Tile) []hexes.Tile {
 	var out []hexes.Tile
-	for _, j := range c.near[t.Column] {
+	for _, j := range c.near[tile.Column] {
 		out = append(out, hexes.Tile{Column: j})
 	}
 	return out
 }
 
-func (c *chart) Nearest(p maths.Vec) hexes.Tile {
+func (c *chart) Nearest(point maths.Vec) hexes.Tile {
 	best, at := math.Inf(1), 0
 	for i, m := range c.at {
-		if d := m.Sub(p).Len(); d < best {
-			best, at = d, i
+		if distance := m.Sub(point).Len(); distance < best {
+			best, at = distance, i
 		}
 	}
 	return hexes.Tile{Column: at}
 }
 
 func (c *chart) Edge(maths.Vec, hexes.Tile) float64 { return 1 }
-func (c *chart) ID(t hexes.Tile) int64              { return int64(t.Column) }
+func (c *chart) ID(tile hexes.Tile) int64           { return int64(tile.Column) }
 func (c *chart) Spacing() float64                   { return 1 }
 func (c *chart) Finer() hexes.Tiling {
 	c.fined++
@@ -92,7 +92,7 @@ func (c *chart) Finer() hexes.Tiling {
 
 func (c *chart) Distance(a, b maths.Vec) float64 { return a.Sub(b).Len() }
 
-func (c *chart) Latitude(p, _ maths.Vec) float64 { return c.lat[p] }
+func (c *chart) Latitude(point, _ maths.Vec) float64 { return c.lat[point] }
 
 func (c *chart) Somewhere(a, b, d float64) maths.Vec {
 	if c.asked < len(c.mids) {
@@ -104,9 +104,9 @@ func (c *chart) Somewhere(a, b, d float64) maths.Vec {
 
 // on is a world on the chart, laid out and nothing more.
 func on(c *chart, seed uint64) *World {
-	w := &World{Terrain: Terrain{Tiling: c, Seed: seed}}
-	w.lay()
-	return w
+	world := &World{Terrain: Terrain{Tiling: c, Seed: seed}}
+	world.lay()
+	return world
 }
 
 // ends runs call and, if it has not come back in a second, ends the

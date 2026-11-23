@@ -54,10 +54,10 @@ func testShow(t *testing.T) Show {
 
 func TestTheIntroIsWordsOnBlack(t *testing.T) {
 	show := testShow(t)
-	if show.Total() != shortLong+int(introLong*filmRate) {
-		t.Fatalf("the film is %d frames", show.Total())
+	if show.total() != shortLong+int(introLong*filmRate) {
+		t.Fatalf("the film is %d frames", show.total())
 	}
-	frame, err := show.Frame(none)
+	frame, err := show.frame(none)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,8 +77,8 @@ func TestTheIntroIsWordsOnBlack(t *testing.T) {
 
 func TestAShortFrameKeepsItsPictureAndOutlinesTheHost(t *testing.T) {
 	show := testShow(t)
-	for i := show.Total() - shortLong; i < show.Total(); i++ {
-		frame, err := show.Frame(i)
+	for i := show.total() - shortLong; i < show.total(); i++ {
+		frame, err := show.frame(i)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -86,9 +86,9 @@ func TestAShortFrameKeepsItsPictureAndOutlinesTheHost(t *testing.T) {
 			t.Fatalf("frame %d darkened the picture to %d", i, got)
 		}
 		seconds := float64(i) / filmRate
-		at := show.Tune.At(seconds, show.speaks(
+		at := show.Tune.at(seconds, show.speaks(
 			float64(i-show.introFrames())/filmRate))
-		place := show.Box.Place(at, seconds, show.Seed)
+		place := show.Box.place(at, seconds, show.Seed)
 		if got := frame.RGBAAt(place.X, place.Y).R; got != placeholderInk {
 			t.Fatalf("frame %d has no outline at %v: %d", i, place, got)
 		}
@@ -100,7 +100,7 @@ func TestAFrameThatCannotBeMadeSaysSo(t *testing.T) {
 	show.Frames = func(int) (*image.RGBA, error) {
 		return nil, errors.New("no picture")
 	}
-	if _, err := show.Frame(show.Total() - one); err == nil {
+	if _, err := show.frame(show.total() - one); err == nil {
 		t.Fatal("a missing picture made a frame")
 	}
 }
@@ -111,20 +111,20 @@ func TestHostClipsAreLaidAsLight(t *testing.T) {
 	for i := range white.Pix {
 		white.Pix[i] = full
 	}
-	loop := Loop{frames: []*image.RGBA{white}, rate: filmRate}
-	show.Clips = Clips{Resting: loop, Speaking: loop, Angry: loop,
-		Flash: loop, Quiet: loop}
-	frame, err := show.Frame(show.Total() - one)
+	clip := loop{frames: []*image.RGBA{white}, rate: filmRate}
+	show.Clips = Clips{resting: clip, speaking: clip, angry: clip,
+		flash: clip, quiet: clip}
+	frame, err := show.frame(show.total() - one)
 	if err != nil {
 		t.Fatal(err)
 	}
-	seconds := float64(show.Total()-one) / filmRate
-	at := show.Tune.At(seconds, false)
-	place := show.Box.Place(at, seconds, show.Seed)
+	seconds := float64(show.total()-one) / filmRate
+	at := show.Tune.at(seconds, false)
+	place := show.Box.place(at, seconds, show.Seed)
 	if got := frame.RGBAAt(place.X+one, place.Y+one).R; got <= grey {
 		t.Fatalf("the host's light did not show: %d", got)
 	}
-	if loop.At(-one) != white {
+	if clip.at(-one) != white {
 		t.Fatal("a loop before its start is not its last turn")
 	}
 }

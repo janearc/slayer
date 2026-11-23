@@ -36,7 +36,8 @@ func mixedFixture(test *testing.T, schema bool) string {
 
 func TestMixedRegionSchemaAndLegacyReaderKeepTheSameControls(test *testing.T) {
 	for _, schema := range []bool{false, true} {
-		read, err := set.Read("mixture.yaml", []byte(mixedFixture(test, schema)))
+		source := mixedFixture(test, schema)
+		read, err := set.Read("mixture.yaml", []byte(source))
 		if err != nil {
 			test.Fatal(schema, err)
 		}

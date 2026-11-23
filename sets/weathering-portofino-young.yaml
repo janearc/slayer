@@ -1,0 +1,179 @@
+# portofino, young: the row of weathering-portofino-old.yaml at one year
+# of age. the file is the same but for the age and the name, so that the
+# two pictures differ only by what the years laid.
+#
+# places are metres, as a map's run: x east, y north, z up. the row runs
+# east from the origin with its front to the south, onto the quay.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: portofino young
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    row:
+      title: "the row, from the quay"
+      wide: 56
+      location:
+        at: [39, -58, 4]
+      orientation:
+        look_at: [39, 0, 9]
+    close:
+      title: "four windows, up close"
+      location:
+        at: [40, -25, 7.6]
+      orientation:
+        look_at: [40, 0, 7.6]
+  set:
+    things:
+      row:
+        kind: terrace-portofino
+        seed: 3
+        complexity: demo
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      quay:
+        colour: {srgb_linear: [0.14, 0.125, 0.1]}
+        source: eye
+      water:
+        colour: {srgb_linear: [0.05, 0.09, 0.12]}
+        source: eye
+    boxes:
+      land:
+        material: quay
+        middle: [0, 236, -1]
+        size: [3000, 500, 2]
+        source: eye
+      harbour:
+        material: water
+        middle: [0, -514, -1.3]
+        size: [3000, 1000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.7, -0.6, 0.22]
+        colour: {srgb_linear: [2.2, 1.3, 0.65]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.22, 0.14, 0.12]}
+      zenith: {srgb_linear: [0.02, 0.035, 0.08]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 11
+      age: 1
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        rain:
+          kind: rain
+          on: [wall]
+          colour: {srgb_linear: [0.035, 0.032, 0.03]}
+          strength: 0.7
+          settle: 12
+          level: 0.2
+          length: 2.4
+          spacing: 0.5
+          share: 0.7
+        soot:
+          kind: soot
+          on: [wall]
+          colour: {srgb_linear: [0.02, 0.019, 0.018]}
+          strength: 0.65
+          settle: 25
+          reach: 3
+          share: 0.45
+          grain: 0.7
+          shelter: 2.5
+          catch: 0.3
+        dust:
+          kind: dust
+          on: [quay, roof]
+          colour: {srgb_linear: [0.33, 0.3, 0.26]}
+          strength: 0.5
+          settle: 6
+          tilt: 0.6
+          share: 0.7
+          grain: 0.8
+          shelter: 2
+        moss:
+          kind: moss
+          on: [wall, quay]
+          colour: {srgb_linear: [0.04, 0.11, 0.025]}
+          strength: 0.9
+          settle: 15
+          reach: 1.8
+          share: 0.65
+          grain: 0.35
+          shade: 0.35
+          north: 0.4
+          shelter: 1.5
+        ivy:
+          kind: ivy
+          on: [wall]
+          colour: {srgb_linear: [0.03, 0.09, 0.02]}
+          strength: 0.9
+          settle: 20
+          level: 0.2
+          spacing: 7
+          share: 0.18
+          climb: 9
+          catch: 0.2
+        graffiti:
+          kind: graffiti
+          on: [wall]
+          colour: {srgb_linear: [0.55, 0.05, 0.04]}
+          other: {srgb_linear: [0.05, 0.2, 0.55]}
+          strength: 1
+          settle: 10
+          level: 0.2
+          grain: 0.8
+          low: 0.5
+          high: 2.4
+          share: 0.1
+          catch: 3
+        cracks:
+          kind: spall
+          on: [wall]
+          colour: {srgb_linear: [0.025, 0.022, 0.02]}
+          other: {srgb_linear: [0.3, 0.11, 0.065]}
+          strength: 0.9
+          settle: 30
+          grain: 0.6
+          crack: 0.04
+          share: 0.5
+          spalled: 0.08
+        empty:
+          kind: vacancy
+          on: [glazing]
+          colour: {srgb_linear: [0.22, 0.14, 0.08]}
+          other: {srgb_linear: [0.01, 0.01, 0.012]}
+          at: [39, 0, 0]
+          facing: [0, -1, 0]
+          strength: 0.6
+          settle: 20
+          cell: 5.7
+          boarded: 0.45
+          broken: 0.4
+          proud: 0.03
+          plank: 0.3
+          share: 0.85
+          slant: 0.05
+          reach: 60

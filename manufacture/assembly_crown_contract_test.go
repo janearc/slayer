@@ -21,7 +21,8 @@ func TestCrownUsesItsSixExtremaAndClosesEveryFaceOutward(t *testing.T) {
 	for _, face := range faces {
 		middle := face[0].Add(face[1]).Add(face[2]).Scale(1.0 / 3)
 		normal := face[1].Sub(face[0]).Cross(face[2].Sub(face[0]))
-		if normal.Dot(middle.Sub(maths.V(4, 6, 8))) <= 0 {
+		corner := maths.V(4, 6, 8)
+		if normal.Dot(middle.Sub(corner)) <= 0 {
 			t.Fatal("crown has an inward or degenerate face")
 		}
 		for i, point := range face {

@@ -136,6 +136,7 @@ func Example_cache() {
 	var said strings.Builder
 	Tool(env).Run([]string{"cache", "--clear", "--dry-run",
 		"door-verb-test"}, &said, &said)
-	fmt.Print(strings.ReplaceAll(said.String(), home, "HOME"))
+	shown := strings.ReplaceAll(said.String(), home, "HOME")
+	fmt.Print(shown)
 	// Output: door-verb-test: would remove 0 entries from HOME/door-verb-test
 }

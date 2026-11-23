@@ -6,10 +6,10 @@ import (
 	"math"
 )
 
-// FlowTravel pulls away from an authored landmark before holding the wide
+// flowTravel pulls away from an authored landmark before holding the wide
 // reveal. Radius changes logarithmically so the nearby view does not vanish
 // in the first frame. Directions and aim interpolate smoothly.
-type FlowTravel struct {
+type flowTravel struct {
 	To       [3]float64 `yaml:"to"`
 	LookFrom [3]float64 `yaml:"look-from"`
 	LookTo   [3]float64 `yaml:"look-to"`
@@ -24,7 +24,7 @@ func (edit *Edit) checkFlowTravel() error {
 		return nil
 	}
 	t := p.Travel
-	until, err := edit.Cue(t.Until)
+	until, err := edit.cue(t.Until)
 	a, b := vector(p.Eye).Sub(vector(t.LookFrom)), vector(t.To).Sub(vector(t.LookTo))
 	if err != nil || until <= edit.FlowStart || until > edit.FlowFold ||
 		!pointOK(t.To) || !pointOK(t.LookFrom) || !pointOK(t.LookTo) ||
@@ -41,7 +41,7 @@ func (edit *Edit) flowCamera(at float64) (maths.Vec, maths.Vec) {
 		return vector(p.Eye), maths.Vec{}
 	}
 	t := p.Travel
-	until, _ := edit.Cue(t.Until)
+	until, _ := edit.cue(t.Until)
 	f := smooth((at - edit.FlowStart) / (until - edit.FlowStart))
 	aim := vector(t.LookFrom).Scale(1 - f).Add(vector(t.LookTo).Scale(f))
 	a, b := vector(p.Eye).Sub(vector(t.LookFrom)), vector(t.To).Sub(vector(t.LookTo))

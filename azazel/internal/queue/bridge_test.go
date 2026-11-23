@@ -22,6 +22,9 @@ func TestMain(m *testing.M) {
 	if os.Getenv("AZAZEL_QUEUE_HELPER") == "game" {
 		os.Exit(gameHelper())
 	}
+	if os.Getenv("AZAZEL_QUEUE_HELPER") == "owned" {
+		os.Exit(ownedHelper())
+	}
 	os.Exit(m.Run())
 }
 
@@ -49,7 +52,8 @@ func gameHelper() int {
 		return 94
 	}
 	defer file.Close()
-	if err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+	descriptor := int(file.Fd())
+	if err = syscall.Flock(descriptor, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
 		return 95
 	}
 	os.Setenv("GAME_LANES", os.Args[2]+"="+path)
@@ -310,7 +314,8 @@ func TestChangedHostHandsBackTheGameLaneBeforeWaiting(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer file.Close()
-	if err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+	descriptor := int(file.Fd())
+	if err = syscall.Flock(descriptor, syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
 		t.Fatal("idle supervisor retained Game lane", err)
 	}
 }

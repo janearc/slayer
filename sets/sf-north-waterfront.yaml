@@ -1,0 +1,204 @@
+# the north waterfront of san francisco, from the marina to telegraph hill:
+# lyon street east to the hill, the bay south to california street, 3.9 by 2.9
+# km, at dusk. the ground is noaa's cudem topobathy model of the bay (1/9
+# arc-second, about 3 m on the ground, the land and the floor of the bay under
+# it), cut to a 3 m step, with the bay filled to the sea at nought. the
+# buildings are laid by the grid habit: blocks of about 125 by 85 m between
+# streets 18 m wide, the grid turned 2.5 degrees off true north, and on each
+# long side of every block a row of fifteen lots fronting its street, each
+# lot of an era of its own. every row stands on the ground under it, on a
+# plinth to the lowest of it. condominiums stand about two discs where the
+# grid leaves the ground to them. the piers are the cities package's pier
+# kind, stood at the shore of the wharf.
+#
+# places are metres in the window: east runs 0 to 3900 from the west edge and
+# north 0 to 2900 from the south edge. its middle, 37.8025 north and
+# 122.4255 west, is 1950 east and 1450 north. the markers stand where the
+# quarters are, taken from their streets on a map; a marker is a person's
+# height and is there only for a camera to look at and a disc to be laid
+# about. the grid stands fill boxes of the window that meet along the streets
+# that bound the quarters, so that no block is in two of them: the marina,
+# cow hollow and pacific heights west of van ness, russian hill and polk
+# between it and mason street, and north beach and telegraph hill east of
+# that. the grid's turn is picked, not measured from the terrain.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: san francisco north waterfront
+  light: sun
+  air: earth
+  location:
+    lat: 37.8025
+    lon: -122.4255
+  timeofday: 1650
+  # picked: on the horizon in the west-south-west, as the sun stands at
+  # dusk in november. it is not worked from the date.
+  sun:
+    azimuth: 245
+    altitude: 3
+  terrain:
+    from: noaa-cudem-sf-ncei19-n38x00-w122x50-2022
+    lat: 37.8025
+    lon: -122.4255
+    across: 3900
+    down: 2900
+    step: 3
+    # the sea, at nought on the model's datum, fills the bay
+    sea: {value: 0, unit: m}
+  film:
+    width: 720
+    height: 480
+    rays: 2
+  cameras:
+    bay:
+      title: "from the bay, a pier on piles and the waterfront behind it"
+      orientation:
+        point_to: pier 39
+        alpha: 0
+      location:
+        loc_relative:
+          object: pier 39
+          standoff_x: -330
+          standoff_y: 230
+          standoff_z: 38
+    plan:
+      title: "the whole area from the south and high above, looking north"
+      # a place is east, north and up of the window's north west corner's
+      # own frame: the terrain's frame runs south from its north edge, so
+      # a northing here is the window's less its 2900 m depth
+      orientation:
+        look_at: [1950, -1600, 0]
+      location:
+        at: [1950, -3700, 1100]
+    street:
+      title: "down a pacific heights street at eye height, toward the bay"
+      orientation:
+        point_to: the marina
+        alpha: -2
+      location:
+        loc_relative:
+          object: pacific heights
+          standoff_x: 20
+          standoff_y: -110
+          standoff_z: 1.7
+    hill:
+      title: "over north beach toward telegraph hill"
+      orientation:
+        point_to: telegraph hill
+        alpha: -7
+      location:
+        loc_relative:
+          object: north beach
+          standoff_x: -300
+          standoff_y: 100
+          standoff_z: 90
+  set:
+    things:
+      the middle:
+        kind: human-scale-2m
+        seed: 1
+        east: 1950
+        north: 1450
+      the marina:
+        kind: human-scale-2m
+        seed: 1
+        east: 939
+        north: 1505
+      cow hollow:
+        kind: human-scale-2m
+        seed: 1
+        east: 1027
+        north: 950
+      pacific heights:
+        kind: human-scale-2m
+        seed: 1
+        east: 1203
+        north: 394
+      russian hill:
+        kind: human-scale-2m
+        seed: 1
+        east: 2477
+        north: 1172
+      north beach:
+        kind: human-scale-2m
+        seed: 1
+        east: 3400
+        north: 1205
+      telegraph hill:
+        kind: human-scale-2m
+        seed: 1
+        east: 3681
+        north: 1438
+      the wharf:
+        kind: human-scale-2m
+        seed: 1
+        east: 3100
+        north: 2180
+      marina green:
+        kind: human-scale-2m
+        seed: 1
+        east: 1000
+        north: 1900
+      columbus flats:
+        kind: human-scale-2m
+        seed: 1
+        east: 3350
+        north: 1700
+      pier 39:
+        kind: pier
+        seed: 39
+        heading: {value: 180, unit: deg}
+        position:
+          east: {value: 3380, unit: m}
+          north: {value: 2310, unit: m}
+          up: {value: 0, unit: m}
+      pier 45:
+        kind: pier
+        seed: 45
+        heading: {value: 180, unit: deg}
+        position:
+          east: {value: 2741, unit: m}
+          north: {value: 2370, unit: m}
+          up: {value: 0, unit: m}
+    stands:
+      marina rows:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 3
+        above: 1.5
+        area: {west: 0, south: 1100, east: 2040, north: 1760}
+      cow hollow rows:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 4
+        above: 1.5
+        area: {west: 0, south: 760, east: 2040, north: 1100}
+      pacific heights rows:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 5
+        above: 1.5
+        area: {west: 0, south: 0, east: 2040, north: 760}
+      russian hill rows:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 6
+        above: 1.5
+        area: {west: 2040, south: 0, east: 3140, north: 2000}
+      north beach rows:
+        kind: terrace-san-francisco
+        habit: grid
+        seed: 7
+        above: 1.5
+        area: {west: 3140, south: 0, east: 3900, north: 1500}
+      marina green flats:
+        kind: condominium
+        habit: lattice
+        seed: 8
+        above: 1.5
+        within: {of: marina green, from: 0, to: 360, near: 0, far: 150}
+      columbus flats:
+        kind: condominium
+        habit: lattice
+        seed: 9
+        above: 1.5
+        within: {of: columbus flats, from: 0, to: 360, near: 0, far: 150}

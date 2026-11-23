@@ -8,26 +8,96 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// The tables the audit tests read, each row named in its name column.
+const (
+	auditLinesFile       = "testdata/audit-lines.csv"
+	auditExcitationsFile = "testdata/audit-excitations.csv"
+	auditCosinesFile     = "testdata/audit-cosines.csv"
+)
+
+// auditPick is a number the audit tests chose, by its name in numbers.yaml
+// after the stem audit.
+func auditPick(t *testing.T, name string) float64 {
+	t.Helper()
+	return picked(t, "audit-"+name)
+}
+
+// auditLines is the lines of the excited gas, each wavelength with its
+// strength.
+func auditLines(t *testing.T) map[float64]float64 {
+	t.Helper()
+	lines := map[float64]float64{}
+	for _, row := range readSheet(t, auditLinesFile) {
+		lines[cell(t, row, "wavelength")] = cell(t, row, "strength")
+	}
+	return lines
+}
+
+// auditExcitations is the excitation each of the two lines wants, by its
+// wavelength.
+func auditExcitations(t *testing.T) map[float64]float64 {
+	t.Helper()
+	excitations := map[float64]float64{}
+	for _, row := range readSheet(t, auditExcitationsFile) {
+		excitations[cell(t, row, "wavelength")] = cell(t, row, "excitation")
+	}
+	return excitations
+}
+
+// auditTieLines is a line of full strength at each wavelength that wants
+// an excitation: two lines, so that a band midway between them is a tie.
+func auditTieLines(t *testing.T) map[float64]float64 {
+	t.Helper()
+	lines := map[float64]float64{}
+	for wavelength := range auditExcitations(t) {
+		lines[wavelength] = unity
+	}
+	return lines
+}
+
 // excited gas gives the same light every time it is asked: three lines
 // that overlap at a band, asked two hundred times, give one answer, and
 // a band as near two lines takes the shorter's excitation.
 func TestExcitedGasIsTheSameEveryTime(t *testing.T) {
-	e := Excited{Lines: map[float64]float64{500: 0.3, 501: 0.7, 502: 0.11,
-		503: 0.9, 504: 0.13, 505: 0.5}, Width: 2,
-		Excitations: map[float64]float64{500: 2, 502: 3}}
-	band := maths.Band{Nanometres: 502.5}
-	first := e.Emits(band)
-	for range 200 {
-		if got := e.Emits(band); math.Float64bits(got) != math.Float64bits(first) {
+	gas := Excited{Lines: auditLines(t), Width: auditPick(t, "width"),
+		Excitations: auditExcitations(t)}
+	repeats := int(auditPick(t, "repeats"))
+	band := maths.NewBand(auditPick(t, "band"))
+	first := gas.Emits(band)
+	for range repeats {
+		got := gas.Emits(band)
+		if math.Float64bits(got) != math.Float64bits(first) {
 			t.Fatalf("the gas gave %v and then %v", first, got)
 		}
 	}
-	tie := Excited{Lines: map[float64]float64{500: 1, 502: 1},
-		Excitations: map[float64]float64{500: 2, 502: 3}}
-	for range 200 {
-		if got := tie.Excitation(maths.Band{Nanometres: 501}); got != 2 {
-			t.Fatalf("midway between 500 and 502 the excitation is %v, not 500's 2", got)
+	tie := Excited{Lines: auditTieLines(t), Excitations: auditExcitations(t)}
+	midway := maths.NewBand(auditPick(t, "midway"))
+	shorter := readSheet(t, auditExcitationsFile).row(t,
+		auditExcitationsFile, "shorter")
+	want := cell(t, shorter, "excitation")
+	for range repeats {
+		if got := tie.Excitation(midway); got != want {
+			t.Fatalf("midway between 500 and 502 the excitation is %v, "+
+				"not 500's 2", got)
 		}
+	}
+}
+
+// auditExpectRefusal asks for the period of an orbit and holds it to be
+// refused with a message that names the 292 years a Duration holds.
+func auditExpectRefusal(t *testing.T, mass, radius float64) {
+	t.Helper()
+	defer auditRefusedWithYears(t, radius)
+	Period(mass, radius)
+}
+
+// auditRefusedWithYears is deferred: it reads the refusal and holds it to
+// name 292.
+func auditRefusedWithYears(t *testing.T, radius float64) {
+	t.Helper()
+	got, _ := recover().(string)
+	if !strings.Contains(got, "292") {
+		t.Errorf("an orbit of %v m: %q", radius, got)
 	}
 }
 
@@ -35,27 +105,26 @@ func TestExcitedGasIsTheSameEveryTime(t *testing.T) {
 // name: worked by hand, Sedna at 506 au round the sun is some 11,400
 // years, and would have been 292.
 func TestAnOrbitPastADurationIsRefused(t *testing.T) {
-	const sun, au = 1.98847e30, 1.495978707e11
-	for _, r := range []float64{506 * au, math.Inf(1)} {
-		func() {
-			defer func() {
-				got, _ := recover().(string)
-				if !strings.Contains(got, "292") {
-					t.Errorf("an orbit of %v m: %q", r, got)
-				}
-			}()
-			Period(sun, r)
-		}()
+	sun := auditPick(t, "sun-mass")
+	astronomicalUnit := auditPick(t, "astronomical-unit")
+	sedna := auditPick(t, "sedna-aphelion-au") * astronomicalUnit
+	for _, radius := range []float64{sedna, math.Inf(unity)} {
+		auditExpectRefusal(t, sun, radius)
 	}
 }
 
 // a surface mirrors no more than lands on it: a Gloss of two is a Gloss
 // of one, face on and grazing.
 func TestNoSurfaceMirrorsMoreThanLands(t *testing.T) {
-	two, one := &Material{Gloss: 2, Index: 1.5}, &Material{Gloss: 1, Index: 1.5}
-	for _, cos := range []float64{1, 0.5, 0} {
-		if got, want := two.Mirrors(cos), one.Mirrors(cos); got != want || got > 1 {
-			t.Errorf("a gloss of two at %v mirrors %v, want %v", cos, got, want)
+	index := auditPick(t, "index")
+	over := &Material{Gloss: auditPick(t, "over-gloss"), Index: index}
+	whole := &Material{Gloss: unity, Index: index}
+	for _, row := range readSheet(t, auditCosinesFile) {
+		cosine := cell(t, row, "cosine")
+		got, want := over.Mirrors(cosine), whole.Mirrors(cosine)
+		if got != want || got > unity {
+			t.Errorf("a gloss of two at %v mirrors %v, want %v",
+				cosine, got, want)
 		}
 	}
 }

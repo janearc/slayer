@@ -330,6 +330,8 @@ func writeHeader(encoded *scene) []reading {
 		evenly)...)
 	table = append(table, fields("header->tops", xyzw, someStandings,
 		someTops)...)
+	table = append(table, fields("header->lamp_tree", xyzw, 0, 0)...)
+	table = append(table, fields("header->lamp_lists", xyzw, 0, 0, 0)...)
 	return append(table, fields("header->look", xyzw, 0)...)
 }
 

@@ -220,10 +220,12 @@ func TestResumeVerificationContentionCancellation(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer lock.Close()
-	if err := syscall.Flock(int(lock.Fd()), syscall.LOCK_EX); err != nil {
+	descriptor := int(lock.Fd())
+	if err := syscall.Flock(descriptor, syscall.LOCK_EX); err != nil {
 		t.Fatal(err)
 	}
-	defer syscall.Flock(int(lock.Fd()), syscall.LOCK_UN)
+	lockDescriptor := int(lock.Fd())
+	defer syscall.Flock(lockDescriptor, syscall.LOCK_UN)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
 	defer cancel()
 	done := make(chan error, 1)

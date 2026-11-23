@@ -1,0 +1,7 @@
+# Same camera and scene as the first PRIMA WIP, rendered by the rebased build.
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/prima-spacecraft.yaml}
+renderer: gpu-native
+film: {width: 1080, height: 960, rays: 4, wide: 28, exposure: 0.01}
+camera: {name: concept}
+outputs: {picture: ../out/prima-spacecraft-rebased-97285b68.png}

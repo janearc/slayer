@@ -21,11 +21,11 @@ var declared = struct {
 	kinds map[string]Kind
 }{kinds: map[string]Kind{}}
 
-// NewKind is a kind of a name, lower-case words joined by hyphens, with
+// newKind is a kind of a name, lower-case words joined by hyphens, with
 // a cap of more than nothing and a reason for it; it is declared, so
 // the verb lists it. A name declared already with another cap or reason
 // is refused: one name is one folder, kept to one rule.
-func NewKind(name string, cap int64, why string) (Kind, error) {
+func newKind(name string, cap int64, why string) (Kind, error) {
 	if name == "" || strings.Trim(name, kindLetters) != "" ||
 		strings.HasPrefix(name, "-") || strings.HasSuffix(name, "-") {
 		return Kind{}, fmt.Errorf("diskcache: a kind's name is lower-case "+
@@ -46,11 +46,11 @@ func NewKind(name string, cap int64, why string) (Kind, error) {
 	return made, nil
 }
 
-// MustKind is NewKind for a package's own declaration, whose arguments
+// MustKind is newKind for a package's own declaration, whose arguments
 // are constants: a refusal there is a mistake in the program, found by
 // its first test, so it panics.
 func MustKind(name string, cap int64, why string) Kind {
-	made, err := NewKind(name, cap, why)
+	made, err := newKind(name, cap, why)
 	if err != nil {
 		panic(err)
 	}

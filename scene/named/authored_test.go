@@ -24,7 +24,8 @@ func TestAuthoredUsesNormalWorldAndAbsoluteCameraClock(t *testing.T) {
 				if at < 0 {
 					return maths.Subspace{}, failed
 				}
-				return maths.NewSubspace(maths.V(at.Seconds(), 0, 0), maths.Identity, 1), nil
+				origin := maths.V(at.Seconds(), 0, 0)
+				return maths.NewSubspace(origin, maths.Identity, 1), nil
 			}, nil
 		},
 	}}

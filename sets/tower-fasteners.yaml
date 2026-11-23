@@ -1,0 +1,84 @@
+# tower fasteners: two towers drawn as finely as the camera sees them,
+# a curtain wall and a granite one, at dusk. Up close the curtain wall
+# shows a cap over the head of each mullion with its bolt, and the granite
+# shows a bolt at each corner of its panels; both show an anchor plate
+# with four bolts at the slab every third window. They are made by the
+# tile, a storey high and two windows wide, so only the tiles the camera
+# is close to have any: further up the wall, where the camera's bands are
+# drawn at the quick level, there are none and the glass keeps its lit
+# panes over a wall at its recess.
+#
+# places are metres, as a map's run: x east, y north, z up. the towers
+# stand side by side, their fronts at y of minus fifteen. every number is
+# a choice of this study, picked by eye. the first camera is the one
+# drawn; to draw another, put it first.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower fasteners
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    close:
+      title: "four metres from the curtain wall, at the height of its second storeys"
+      wide: 50
+      location:
+        at: [2, -19, 9.5]
+      orientation:
+        look_at: [2, -15, 9.5]
+    granite:
+      title: "four metres from the granite wall, at the height of its second storeys"
+      wide: 50
+      location:
+        at: [42, -19, 9.5]
+      orientation:
+        look_at: [42, -15, 9.5]
+    street:
+      title: "at the foot of the curtain tower, looking up its wall"
+      wide: 80
+      location:
+        at: [8, -24, 1.7]
+      orientation:
+        look_at: [2, -15, 26]
+  recipes:
+    curtain: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: curtain, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    granite: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: granite, style: punched, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      curtain: {recipe: curtain, seed: 4, complexity: levelled, east: 0, north: 0, height: {value: 0, unit: m}}
+      granite: {recipe: granite, seed: 7, complexity: levelled, east: 40, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      street:
+        colour: {srgb_linear: [0.03, 0.03, 0.035]}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [4000, 4000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.5, -0.8, 0.25]
+        colour: {srgb_linear: [1.8, 0.9, 0.6]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.6, 0.9]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.18]}
+      zenith: {srgb_linear: [0.02, 0.03, 0.12]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

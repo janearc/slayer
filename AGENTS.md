@@ -84,7 +84,7 @@ serial:
 
 `trace` is the CPU tracer used by `slayer`, `ring` and `swarm`. The old
 `render/trace` is gone. `gpu` supplies Metal software/native traversal,
-retained frames and explicit lighting shortcuts. `hillside` connects jobs
+retained frames and explicit lighting shortcuts. `session` connects jobs
 to scene sessions; Omnipositor also exposes separate surface/volume passes.
 Read [the renderer guide](doc/renderer.md) and
 [optimization catalogue](doc/optimizations.md) before changing these paths.

@@ -311,6 +311,7 @@ func (m *Mesh) nearest(p maths.Vec) (int, [3]float64, float64) {
 		nd := &nodes[n]
 		if nd.count > 0 {
 			for i := nd.next; i < nd.next+nd.count; i++ {
+				askedAbout()
 				t := &m.tris[i]
 				a, b, c := vec(t.p[0]), vec(t.p[1]), vec(t.p[2])
 				w := closest(p, a, b, c)

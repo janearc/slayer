@@ -18,16 +18,10 @@ type Selection struct {
 	Cells, Generated int
 }
 
-// Select clips only root selection. It does not change population identities.
-// Callers expand a visible query by their maximum canopy/geometry radius.
-// A budget failure returns no partial population and silently drops nothing.
-func (region *Region) Select(query Rect, budget Budget) ([]Candidate, error) {
-	selection, err := region.SelectWithUsage(query, budget)
-	return selection.Roots, err
-}
-
-// SelectWithUsage returns owned root values and bounded work counts.
-// On error no partial population or successful work record is returned.
+// SelectWithUsage clips only root selection, and does not change population
+// identities. Callers expand a visible query by their maximum canopy/geometry
+// radius. It returns owned root values and bounded work counts; on error no
+// partial population or successful work record is returned.
 func (region *Region) SelectWithUsage(query Rect, budget Budget) (Selection, error) {
 	if region == nil || region.cell <= 0 || !query.valid() ||
 		budget.Cells < 0 || budget.Candidates < 0 {
@@ -78,7 +72,7 @@ func (region *Region) selectCells(query Rect, span cellSpan, limit int) (Selecti
 			selection.Generated += int(count)
 			for ordinal := uint32(0); ordinal < count; ordinal++ {
 				candidate := region.candidate(column, row, ordinal)
-				if query.Contains(candidate.East, candidate.South) {
+				if query.contains(candidate.East, candidate.South) {
 					selection.Roots = append(selection.Roots, candidate)
 				}
 			}

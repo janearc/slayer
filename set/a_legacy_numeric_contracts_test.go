@@ -70,8 +70,10 @@ func TestLegacyFireNumericLimitsReportTheirOwnExactLocations(t *testing.T) {
 	}
 	for _, row := range rows {
 		t.Run(row.prefix+row.old, func(t *testing.T) {
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+			below := math.Nextafter(row.low, math.Inf(-1))
+			refuseNumericEdge(t, raw, row, below)
+			above := math.Nextafter(row.high, math.Inf(1))
+			refuseNumericEdge(t, raw, row, above)
 		})
 	}
 }
@@ -91,14 +93,17 @@ func TestLegacyFrontNumericLimitsReportTheirOwnExactLocations(t *testing.T) {
 	}
 	for _, row := range rows {
 		t.Run(row.prefix, func(t *testing.T) {
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+			below := math.Nextafter(row.low, math.Inf(-1))
+			refuseNumericEdge(t, raw, row, below)
+			above := math.Nextafter(row.high, math.Inf(1))
+			refuseNumericEdge(t, raw, row, above)
 		})
 	}
 }
 
 func TestLegacySparkNumericLimitsReportTheirOwnExactLocations(t *testing.T) {
-	raw := legacyNumericFixture(strings.Replace(fireRecipeFixture(t), "      flame:", sparkBlock+"      flame:", 1))
+	fixture := fireRecipeFixture(t)
+	raw := legacyNumericFixture(strings.Replace(fixture, "      flame:", sparkBlock+"      flame:", 1))
 	requireLegacyNumericControl(t, raw)
 	rows := []numericContract{
 		{"rate: {value: ", "100", "value", .001, 1e6},
@@ -115,8 +120,10 @@ func TestLegacySparkNumericLimitsReportTheirOwnExactLocations(t *testing.T) {
 	}
 	for _, row := range rows {
 		t.Run(row.prefix, func(t *testing.T) {
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+			below := math.Nextafter(row.low, math.Inf(-1))
+			refuseNumericEdge(t, raw, row, below)
+			above := math.Nextafter(row.high, math.Inf(1))
+			refuseNumericEdge(t, raw, row, above)
 		})
 	}
 }
@@ -138,8 +145,10 @@ func TestLegacyFuelNumericLimitsReportTheirOwnExactLocations(t *testing.T) {
 	}
 	for _, row := range rows {
 		t.Run(row.prefix, func(t *testing.T) {
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+			below := math.Nextafter(row.low, math.Inf(-1))
+			refuseNumericEdge(t, raw, row, below)
+			above := math.Nextafter(row.high, math.Inf(1))
+			refuseNumericEdge(t, raw, row, above)
 		})
 	}
 }
@@ -166,8 +175,10 @@ func TestLegacyObservatoryAndWeatherLimitsReportTheirOwnExactLocations(t *testin
 	}
 	for _, row := range rows {
 		t.Run(row.prefix+row.old, func(t *testing.T) {
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+			below := math.Nextafter(row.low, math.Inf(-1))
+			refuseNumericEdge(t, raw, row, below)
+			above := math.Nextafter(row.high, math.Inf(1))
+			refuseNumericEdge(t, raw, row, above)
 		})
 	}
 }
@@ -179,7 +190,8 @@ func TestLegacyLayoutNumericLimitsReportTheirOwnExactLocations(t *testing.T) {
 			block = strings.Replace(block, "pattern: cluster", "pattern: line", 1)
 			block = strings.Replace(block, "radius: {value: 0.55", "length: {value: 4", 1)
 		}
-		raw := legacyNumericFixture(strings.Replace(fireRecipeFixture(t), "      flame:", block+"      flame:", 1))
+		fixture := fireRecipeFixture(t)
+		raw := legacyNumericFixture(strings.Replace(fixture, "      flame:", block+"      flame:", 1))
 		requireLegacyNumericControl(t, raw)
 		rows := []numericContract{
 			{"count: ", "7", "count", 2, 32},
@@ -193,8 +205,10 @@ func TestLegacyLayoutNumericLimitsReportTheirOwnExactLocations(t *testing.T) {
 		}
 		for _, row := range rows {
 			t.Run(pattern+row.prefix, func(t *testing.T) {
-				refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-				refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+				below := math.Nextafter(row.low, math.Inf(-1))
+				refuseNumericEdge(t, raw, row, below)
+				above := math.Nextafter(row.high, math.Inf(1))
+				refuseNumericEdge(t, raw, row, above)
 			})
 		}
 	}
@@ -214,9 +228,11 @@ func TestLegacyMoonAndPlacementLimitsReportTheirOwnExactLocations(t *testing.T) 
 	requireLegacyNumericControl(t, raw)
 	for _, row := range rows {
 		t.Run(row.prefix, func(t *testing.T) {
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
+			below := math.Nextafter(row.low, math.Inf(-1))
+			refuseNumericEdge(t, raw, row, below)
 			if !math.IsInf(row.high, 0) {
-				refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+				above := math.Nextafter(row.high, math.Inf(1))
+				refuseNumericEdge(t, raw, row, above)
 			}
 		})
 	}
@@ -233,8 +249,10 @@ func TestLegacyStandLimitsReportTheirOwnExactLocations(t *testing.T) {
 	requireLegacyNumericControl(t, raw)
 	for _, row := range rows {
 		t.Run(row.prefix, func(t *testing.T) {
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-			refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+			below := math.Nextafter(row.low, math.Inf(-1))
+			refuseNumericEdge(t, raw, row, below)
+			above := math.Nextafter(row.high, math.Inf(1))
+			refuseNumericEdge(t, raw, row, above)
 		})
 	}
 }

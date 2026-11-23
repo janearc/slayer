@@ -19,7 +19,7 @@ func laserFixture() (Image, Image, LaserConfig, LaserInput) {
 	}
 	input := LaserInput{Open: search.Open, CloseTrees: search.CloseTrees, Rim: rows,
 		Camera: search.Camera, Moon: search.Moon, Seconds: 1.25, ShoreRow: 11.25,
-		Cues: LaserCues{Rig: -1, Sweep: -1, Gate: 1, GateLeft: -1, GateRight: -1, Beams: 10, Parity: -1, Figure: "fan"}}
+		Cues: laserCues{Rig: -1, Sweep: -1, Gate: 1, GateLeft: -1, GateRight: -1, Beams: 10, Parity: -1, Figure: "fan"}}
 	return sky, front, config, input
 }
 
@@ -65,7 +65,7 @@ func TestLaserCapturedOutputs(t *testing.T) {
 			case "behind":
 				input.Camera.Forward = input.Camera.Forward.Scale(-1)
 			}
-			AddLasers(sky, front, config, input)
+			addLasers(sky, front, config, input)
 			if got := effectDigest(append(sky.Light, front.Light...)); got != want {
 				t.Fatalf("digest=%s want %s", got, want)
 			}
@@ -94,7 +94,7 @@ func TestFigureCapturedPaths(t *testing.T) {
 		if name == "one" {
 			beams = 1
 		}
-		ways, weight, split := FigureWays(name, 289.65, -3.2, 27.5, beams, 0.37)
+		ways, weight, split := figureWays(name, 289.65, -3.2, 27.5, beams, 0.37)
 		values := []float64{weight, float64(len(ways))}
 		if split {
 			values = append(values, 1)
@@ -132,7 +132,7 @@ func TestBeamLaserCapturedEffects(t *testing.T) {
 				}
 			}
 			input.ShoreRow = 9.25
-			AddLaserAperture(sky, front, input, origin, colour)
+			addLaserAperture(sky, front, input, origin, colour)
 		default:
 			if name == "near" {
 				clear(input.Open)
@@ -145,7 +145,7 @@ func TestBeamLaserCapturedEffects(t *testing.T) {
 			if name == "water" {
 				origin.Z = config.WaterZ - 1
 			}
-			AddLaserBeam(sky, front, config, input, origin, Toward(config.Azimuth+4, -2), colour)
+			addLaserBeam(sky, front, config, input, origin, Toward(config.Azimuth+4, -2), colour)
 		}
 		if got := effectDigest(append(sky.Light, front.Light...)); got != want {
 			t.Fatalf("%s digest=%s want %s", name, got, want)
@@ -154,7 +154,7 @@ func TestBeamLaserCapturedEffects(t *testing.T) {
 	_, _, config, _ := laserFixture()
 	values := []float64{}
 	for _, p := range []Vec{{0, 0, -54}, {12, -34, -20}, {-80, 11, 60}} {
-		values = append(values, LaserFog(p, 1.25, config.WaterZ))
+		values = append(values, laserFog(p, 1.25, config.WaterZ))
 	}
 	if got, want := effectDigest(values), "2d7ab3ca2dfd8b82e47c7099146c1b25fc7b0d7e5833f25802e8737f03a85ef9"; got != want {
 		t.Fatalf("fog=%s want %s", got, want)
@@ -163,7 +163,7 @@ func TestBeamLaserCapturedEffects(t *testing.T) {
 
 func TestLaserHeadGeometry(t *testing.T) {
 	_, _, config, _ := laserFixture()
-	heads := LaserHeads(config)
+	heads := laserHeads(config)
 	if heads[0].Bank != 0 || heads[1].Bank != 1 || heads[2].Bank != 0 || heads[3].Bank != 1 {
 		t.Fatal("bank ordering changed")
 	}
@@ -177,7 +177,7 @@ func TestLaserHeadGeometry(t *testing.T) {
 		t.Fatal("shore geometry changed")
 	}
 	config.RigDeck = 20.4
-	deck := LaserHeads(config)
+	deck := laserHeads(config)
 	for i, ground := range []float64{1180.2, 1191.3, 1076.1, 1079.4} {
 		if deck[i].Origin.Z != ground-(1076+config.EyeOverLake)+config.RigDeck || deck[i].Origin.X != heads[i].Origin.X || deck[i].Origin.Y != heads[i].Origin.Y {
 			t.Fatalf("tower %d geometry changed", i)
@@ -197,7 +197,7 @@ func TestLaserExplicitInputsConcurrentIsolationAndRouting(t *testing.T) {
 			}
 			original := slices.Clone(sky.Light)
 			open, trees, rows := slices.Clone(input.Open), slices.Clone(input.CloseTrees), slices.Clone(input.Rim)
-			AddLasers(sky, front, config, input)
+			addLasers(sky, front, config, input)
 			wantSky, wantFront := slices.Clone(sky.Light), slices.Clone(front.Light)
 			if slices.Equal(wantSky, original) || !slices.ContainsFunc(wantFront, func(v float64) bool { return v > 0 }) {
 				t.Fatal("fixture did not exercise both layers")
@@ -216,7 +216,7 @@ func TestLaserExplicitInputsConcurrentIsolationAndRouting(t *testing.T) {
 			for range 4 {
 				copy(sky.Light, original)
 				clear(front.Light)
-				AddLasers(sky, front, config, input)
+				addLasers(sky, front, config, input)
 				if !slices.Equal(sky.Light, wantSky) || !slices.Equal(front.Light, wantFront) {
 					t.Fatal("instance output changed")
 				}
@@ -228,7 +228,7 @@ func TestLaserExplicitInputsConcurrentIsolationAndRouting(t *testing.T) {
 				copy(sky.Light, original)
 				clear(front.Light)
 				input.Cues.GateLeft, input.Cues.GateRight = gate, gate
-				AddLasers(sky, front, config, input)
+				addLasers(sky, front, config, input)
 				if !slices.Equal(sky.Light, original) || slices.ContainsFunc(front.Light, func(v float64) bool { return v != 0 }) {
 					t.Fatal("inactive gates changed output")
 				}
@@ -238,11 +238,11 @@ func TestLaserExplicitInputsConcurrentIsolationAndRouting(t *testing.T) {
 }
 
 func TestBeamLaserFogBoundary(t *testing.T) {
-	if LaserFog(Vec{0, 0, -1}, 0, 0) != 0 {
+	if laserFog(Vec{0, 0, -1}, 0, 0) != 0 {
 		t.Fatal("fog below water")
 	}
 	for _, height := range []float64{0, 10, 100, 1000} {
-		got := LaserFog(Vec{0, 0, height}, 1.25, 0)
+		got := laserFog(Vec{0, 0, height}, 1.25, 0)
 		if math.IsNaN(got) || got < 0 || got > math.Exp(-height/90) {
 			t.Fatalf("fog at %v=%v", height, got)
 		}

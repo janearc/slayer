@@ -2,10 +2,17 @@ package shape
 
 import "testing"
 
+// edgeSignPoints is the csv file of the points a zero-length edge is put at.
+const edgeSignPoints = "testdata/edge-sign-points.csv"
+
+// TestCoincidentEdgeHasNoOwnership says that an edge from a point to itself,
+// with a determinant of nought, takes neither sign.
 func TestCoincidentEdgeHasNoOwnership(t *testing.T) {
-	for _, point := range [][2]float64{{0, 0}, {3, -7}} {
-		if side(0, point[0], point[1], point[0], point[1]) != 0 {
-			t.Fatalf("zero-length edge at %v acquired a side", point)
+	for _, row := range readSheet(t, edgeSignPoints) {
+		across, up := cell(t, row, "x"), cell(t, row, "y")
+		if side(nought, across, up, across, up) != nought {
+			t.Fatalf("zero-length edge at %v, %v acquired a side", across,
+				up)
 		}
 	}
 }

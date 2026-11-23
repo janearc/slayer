@@ -125,8 +125,9 @@ func mirrors(ball bool) *thing.World {
 	world.Sky = even(maths.Grey(1))
 	world.Add(thing.Thing{Shape: shape.Plane{}, Material: glass})
 	if ball {
+		ballAt := resting(maths.V(0, 3, 0))
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
-			Material: glass, Motion: resting(maths.V(0, 3, 0))})
+			Material: glass, Motion: ballAt})
 	}
 	return world
 }
@@ -138,7 +139,8 @@ func TestAMirrorInAMirrorIsNotFollowed(t *testing.T) {
 	steep := maths.Ray{At: maths.V(0.3, 1, 0),
 		Dir: maths.V(-0.3, -1, 0).Unit()}
 	share := (&thing.Material{Gloss: 1}).Mirrors(-steep.Dir.Y)
-	open := bright(lone(mirrors(false), steep, 0))
+	ballless := mirrors(false)
+	open := bright(lone(ballless, steep, 0))
 	if !within(open, share, 1e-6) {
 		t.Fatalf("with no ball the floor mirrors %v, want %v", open,
 			share)
@@ -155,9 +157,10 @@ func TestAMirrorInAMirrorIsNotFollowed(t *testing.T) {
 func echoing(wall bool) float64 {
 	world := radarWorld(radarGround(nil), maths.V(0, 10, 10))
 	if wall {
+		wallAt := resting(maths.V(0, 5, 6))
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
 			Material: &thing.Material{Name: "wall"},
-			Motion:   resting(maths.V(0, 5, 6))})
+			Motion:   wallAt})
 	}
 	return echoOf(world)
 }

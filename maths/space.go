@@ -7,8 +7,6 @@ import "math"
 
 // Degree is one degree, in the radians every angle here is measured in. It
 // is defined: a half turn is pi radians and 180 degrees.
-//
-//ninja:vow practice a library: its callers are in other modules
 const Degree = math.Pi / halfTurn
 
 // What the geometry counts in, each defined.
@@ -21,34 +19,30 @@ const (
 
 // nearlyAlong is how near to straight along up a view may look before up
 // is taken as minus z instead: the dot product of the two, about 2.56
-// degrees from along. lamb drew it so and it is kept as drawn.
+// degrees from along.
 //
 // it is a threshold, not a measurement. it stays a constant here because
 // the module reads no file, so every importer pays for none.
 //
-//ninja:vow source lamb's, kept as drawn; no file is read here
+//ninja:vow source picked by hand and not derived; no file is read here
 const nearlyAlong = 0.999
 
 // nearlyAlongX is how near to along x an up may be before Upright uses z
 // to find the other two axes. It is the dot product of the two.
 //
-//ninja:vow source lamb's, kept as drawn; no file is read here
+//ninja:vow source picked by hand and not derived; no file is read here
 const nearlyAlongX = 0.9
 
 // rest is what is left of a whole when share of it is gone.
 func rest(share float64) float64 { return unity - share }
 
 // Vec is a point or a direction in some space.
-//
-//ninja:vow practice a library: its callers are in other modules
 type Vec struct {
 	//ninja:vow gate a value, whose fields are what it is
 	X, Y, Z float64 //ninja:vow name x, y, z at every call site
 }
 
 // V is a Vec from its three parts.
-//
-//ninja:vow practice a library: its callers are in other modules
 func V(x, y, z float64) Vec { //ninja:vow name x, y, z at every call site
 	return Vec{x, y, z}
 }
@@ -66,30 +60,22 @@ var (
 )
 
 // Add is vec moved by other.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (vec Vec) Add(other Vec) Vec {
 	return Vec{vec.X + other.X, vec.Y + other.Y, vec.Z + other.Z}
 }
 
 // Sub is how far vec is from other, and which way.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (vec Vec) Sub(other Vec) Vec {
 	return Vec{vec.X - other.X, vec.Y - other.Y, vec.Z - other.Z}
 }
 
 // Scale is vec stretched by factor.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (vec Vec) Scale(factor float64) Vec {
 	return Vec{vec.X * factor, vec.Y * factor, vec.Z * factor}
 }
 
 // Dot is how much vec and other point the same way. For two unit directions it
 // is 1 when they agree, 0 at right angles and -1 when they are opposite.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (vec Vec) Dot(other Vec) float64 {
 	return vec.X*other.X + vec.Y*other.Y + vec.Z*other.Z
 }
@@ -106,12 +92,10 @@ func (vec Vec) Dot(other Vec) float64 {
 // From about 1.5e-162 down it is zero. These were measured and a test
 // holds them.
 //
-// Len is lamb's to the byte. It is small enough that the compiler writes
-// it into every caller and joins the multiplies and adds there. Any body
-// large enough to measure such vectors would not be inlined, and every
-// length slayer draws with would move by a last bit.
-//
-//ninja:vow practice a library: its callers are in other modules
+// Len is small enough that the compiler writes it into every caller and
+// joins the multiplies and adds there. Any body large enough to measure
+// such vectors would not be inlined, and every length slayer draws with
+// would move by a last bit.
 func (vec Vec) Len() float64 { return math.Sqrt(vec.Dot(vec)) }
 
 // unmeasured is whether Len measures the vector as zero.
@@ -129,35 +113,49 @@ func (vec Vec) Len() float64 { return math.Sqrt(vec.Dot(vec)) }
 //go:noinline
 func unmeasured(vec Vec) bool { return vec.Len() == nought }
 
-// Neg is vec pointing the other way.
+// unreadable is whether Len cannot give the vector a length at all: it has
+// a part that is no number or infinite, or a part past about 1e154, whose
+// square passes what a float holds. Rotation, LookAtUp, Upright and View
+// refuse such a vector.
 //
-//ninja:vow practice a library: its callers are in other modules
+// It is kept out of line as unmeasured is, so that the multiplies and adds
+// of its callers are not joined with Len's.
+//
+//go:noinline
+func unreadable(vec Vec) bool {
+	length := vec.Len()
+	return math.IsNaN(length) || math.IsInf(length, eitherSign)
+}
+
+// unreadableTurn is the orientation of no numbers: what Rotation, LookAtUp
+// and Upright give for a vector Len cannot measure at all. The fault shows
+// where it is used. It is not hidden as no turn.
+func unreadableTurn() Orientation {
+	none := Vec{math.NaN(), math.NaN(), math.NaN()}
+	return Orientation{none, none, none}
+}
+
+// Neg is vec pointing the other way.
 func (vec Vec) Neg() Vec { return Vec{-vec.X, -vec.Y, -vec.Z} }
 
 // Near is whether vec is within the given distance of other.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (vec Vec) Near(other Vec, within float64) bool {
 	return vec.Sub(other).Len() <= within
 }
 
 // Cross is the direction at right angles to both, by the right-hand rule.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (vec Vec) Cross(other Vec) Vec {
 	return Vec{vec.Y*other.Z - vec.Z*other.Y, vec.Z*other.X - vec.X*other.Z,
 		vec.X*other.Y - vec.Y*other.X}
 }
 
 // Unit is the same direction, one unit long. It is as near as Len
-// measures it. Unit is lamb's to the byte, for the reason Len is.
+// measures it. Unit is kept as small as Len, for the reason Len is.
 //
 // The zero vector stays zero. If the vector is too short for Len to
 // measure, it is given back as it is. If it is too long, it becomes zero.
 // If it has an infinite part, that part of the result is no number and
 // its finite parts are zero.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (vec Vec) Unit() Vec {
 	length := vec.Len()
 	if length == nought {
@@ -169,16 +167,16 @@ func (vec Vec) Unit() Vec {
 // Ray starts at At and goes along Dir, which is one unit long. Nothing
 // here makes it so. If Dir is not one unit long, the ray measures its
 // distances in Dir's lengths.
-//
-//ninja:vow practice a library: its callers are in other modules
 type Ray struct {
 	//ninja:vow gate a value, whose fields are what it is
 	At, Dir Vec
 }
 
+// NewRay is the ray that starts at at and goes along dir. It keeps dir as
+// given; it is not made one unit long.
+func NewRay(at, dir Vec) Ray { return Ray{At: at, Dir: dir} }
+
 // Point is where you are along the ray after distance.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (ray Ray) Point(distance float64) Vec {
 	return ray.At.Add(ray.Dir.Scale(distance))
 }
@@ -190,16 +188,16 @@ func (ray Ray) Point(distance float64) Vec {
 //
 // Min is the lesser corner on every axis. Made otherwise, a box is met
 // only by rays that cross it slantwise.
-//
-//ninja:vow practice a library: its callers are in other modules
 type Box struct {
 	//ninja:vow gate a value, whose fields are what it is
 	Min, Max Vec
 }
 
+// NewBox is the box with the corners low and high, in that order. It keeps
+// them as given; it does not put the lesser corner first.
+func NewBox(low, high Vec) Box { return Box{Min: low, Max: high} }
+
 // Everywhere is the box of a shape with no edge.
-//
-//ninja:vow practice a library: its callers are in other modules
 func Everywhere() Box {
 	inf := math.Inf(unity)
 	return Box{Vec{-inf, -inf, -inf}, Vec{inf, inf, inf}}
@@ -212,8 +210,6 @@ func Everywhere() Box {
 // Nothing is met if the ray, near or far is no number.
 // Nothing is met if enter would be plus infinity.
 // Nothing is met if leave would be minus infinity.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (box Box) Hit(ray Ray, near, far float64) (enter, leave float64, ok bool) {
 	enter, leave = near, far
 	for _, axis := range [dimensions]struct{ at, dir, lo, hi float64 }{
@@ -247,23 +243,36 @@ func (box Box) Hit(ray Ray, near, far float64) (enter, leave float64, ok bool) {
 	return enter, leave, true
 }
 
-// Inverse is the reciprocal of each component of v, for Box.Meets. A zero
+// Inverse is the reciprocal of each component of vec, for Box.Meets. A zero
 // component gives an infinity, which Meets never reads: it asks the ray's
 // own direction for zero first.
-//
-//ninja:vow practice a library: its callers are in other modules
-func (v Vec) Inverse() Vec { return Vec{unity / v.X, unity / v.Y, unity / v.Z} }
+func (vec Vec) Inverse() Vec {
+	return Vec{unity / vec.X, unity / vec.Y, unity / vec.Z}
+}
 
 // slack is the share by which a product by a reciprocal can differ from the
 // quotient Hit takes: a few units in the last place, widened to nine.
+//
+//ninja:vow source nine units in the last place, picked; maths reads no file
 const slack = 1e-15
 
-// soundLow and soundHigh bound the magnitudes of a distance for which that
-// share holds: near zero and near overflow the share is not the error.
-const (
-	soundLow  = 1e-280
-	soundHigh = 1e280
-)
+// soundLow is the nearest to zero a distance may be for that share to hold:
+// below it the share is not the error.
+//
+//ninja:vow source nearest zero a share holds at; maths reads no file
+const soundLow = 1e-280
+
+// soundHigh is the furthest from zero a distance may be for that share to
+// hold: above it, near overflow, the share is not the error.
+//
+//ninja:vow source furthest from zero a share holds at; maths reads no file
+const soundHigh = 1e280
+
+// reciprocalRoom is how many times inside the sound range a direction's size
+// must lie, so that its reciprocal is held to the last place.
+//
+//ninja:vow source room for a reciprocal to the last place; maths reads no file
+const reciprocalRoom = 1e20
 
 // Meets is whether Hit would say the ray meets the box between near and far,
 // for a ray whose Dir's reciprocal is inverse. It is for a walk of many boxes
@@ -275,8 +284,6 @@ const (
 // same for every distance within slack of its own, which is nearly always,
 // and otherwise it asks Hit: its answer is Hit's answer for every ray, box,
 // near and far, NaN and infinity included.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (box Box) Meets(ray Ray, inverse Vec, near, far float64) bool {
 	// the widest interval the exact distances can fill, and the narrowest
 	lowWide, lowNarrow, highWide, highNarrow := near, near, far, far
@@ -296,7 +303,8 @@ func (box Box) Meets(ray Ray, inverse Vec, near, far float64) bool {
 		// small or large that its reciprocal is not to the last place, is
 		// Hit's
 		size := math.Abs(axis.dir)
-		if !(axis.lo <= axis.hi) || !(size >= soundLow/1e20 && size <= soundHigh/1e20) {
+		if !(axis.lo <= axis.hi) || !(size >= soundLow/reciprocalRoom &&
+			size <= soundHigh/reciprocalRoom) {
 			return box.hits(ray, near, far)
 		}
 		nearer, farther := axis.lo-axis.at, axis.hi-axis.at
@@ -321,12 +329,13 @@ func (box Box) Meets(ray Ray, inverse Vec, near, far float64) bool {
 	return box.hits(ray, near, far)
 }
 
-// sound is whether a distance t, got as a product from num, is one whose
+// sound is whether a distance got as a product from a numerator is one whose
 // error is the share Meets allows: a number of a size where a share of it is
 // the error, or zero from a zero.
-func sound(t, num float64) bool {
-	size := math.Abs(t)
-	return size >= soundLow && size <= soundHigh || t == nought && num == nought
+func sound(distance, numerator float64) bool {
+	size := math.Abs(distance)
+	return size >= soundLow && size <= soundHigh ||
+		distance == nought && numerator == nought
 }
 
 // hits is Hit's answer without its distances.
@@ -341,8 +350,6 @@ func (box Box) hits(ray Ray, near, far float64) bool {
 //
 // The zero Orientation is no turn at all. The empty Subspace is exactly
 // its parent's space.
-//
-//ninja:vow practice a library: its callers are in other modules
 type Orientation struct {
 	//ninja:vow gate a value, whose fields are what it is
 	X, Y, Z Vec //ninja:vow name x, y, z at every call site
@@ -362,8 +369,6 @@ func (turn Orientation) axes() Orientation {
 }
 
 // Out takes a direction in the subspace out to its parent.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (turn Orientation) Out(direction Vec) Vec {
 	turn = turn.axes()
 	return turn.X.Scale(direction.X).Add(turn.Y.Scale(direction.Y)).
@@ -371,8 +376,6 @@ func (turn Orientation) Out(direction Vec) Vec {
 }
 
 // In takes a direction in the parent into the subspace.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (turn Orientation) In(direction Vec) Vec {
 	turn = turn.axes()
 	return Vec{direction.Dot(turn.X), direction.Dot(turn.Y),
@@ -381,8 +384,6 @@ func (turn Orientation) In(direction Vec) Vec {
 
 // Then is this orientation followed by a child's inside it: the child's
 // orientation as its grandparent sees it.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (turn Orientation) Then(child Orientation) Orientation {
 	inner := child.axes()
 	return Orientation{turn.Out(inner.X), turn.Out(inner.Y),
@@ -395,13 +396,15 @@ func (turn Orientation) Then(child Orientation) Orientation {
 // too short for Len to measure.
 //
 // If the axis or the angle is no number or is infinite, the orientation is
-// of no numbers. The fault then shows where it is used. It is not hidden
+// of no numbers. So it is for an axis too long for Len to measure, a part
+// past about 1e154. The fault then shows where it is used. It is not hidden
 // as no turn.
-//
-//ninja:vow practice a library: its callers are in other modules
 func Rotation(axis Vec, angle float64) Orientation {
 	if unmeasured(axis) {
 		return Identity
+	}
+	if unreadable(axis) {
+		return unreadableTurn()
 	}
 	about := turning{axis: axis.Unit(), sin: math.Sin(angle),
 		cos: math.Cos(angle)}
@@ -426,17 +429,12 @@ func (about turning) of(direction Vec) Vec {
 	return turned.Add(along)
 }
 
-// About is Rotation under its old name. The old name is a preposition
-// where the thing made should be named. About stays until its callers say
-// Rotation. New code does not call it.
-//
-//ninja:vow practice a library: its callers are in other modules
+// About is Rotation by another name, for the callers that still use it.
+// New code calls Rotation.
 func About(axis Vec, angle float64) Orientation { return Rotation(axis, angle) }
 
 // LookAt is the orientation of something at from, facing to. Its up is
 // kept as near the world's up as it can be. Forward is minus z.
-//
-//ninja:vow practice a library: its callers are in other modules
 func LookAt(from, to Vec) Orientation { return LookAtUp(from, to, Up) }
 
 // LookAtUp is LookAt with an up of its own. It is for someone standing on
@@ -448,13 +446,17 @@ func LookAt(from, to Vec) Orientation { return LookAtUp(from, to, Up) }
 // view is taken as minus z instead. If the view is also within that of
 // along z, the top is taken as plus x.
 //
-// So a camera sweeping past straight up rolls there. Lamb drew it so, and
-// it is kept as drawn until someone decides otherwise.
+// So a camera sweeping past straight up rolls there.
 //
-//ninja:vow practice a library: its callers are in other modules
+// If up, or the distance from to to from, is no number, is infinite, or is
+// too long for Len to measure, a part past about 1e154, the orientation is
+// of no numbers, as it is for Rotation.
 func LookAtUp(from, to, up Vec) Orientation {
 	if from == to || unmeasured(from.Sub(to)) {
 		return Identity
+	}
+	if unreadable(from.Sub(to)) || unreadable(up) {
+		return unreadableTurn()
 	}
 	if unmeasured(up) {
 		up = Up
@@ -475,12 +477,14 @@ func LookAtUp(from, to, up Vec) Orientation {
 // Upright is the orientation of something standing on up. Its y is up.
 // Its x and z are a pair at right angles to it, chosen the same way every
 // time. Standing on no up at all is no turn, nor is standing on one too
-// short for Len to measure.
-//
-//ninja:vow practice a library: its callers are in other modules
+// short for Len to measure. An up that is no number, is infinite, or is too
+// long for Len to measure gives an orientation of no numbers.
 func Upright(up Vec) Orientation {
 	if unmeasured(up) {
 		return Identity
+	}
+	if unreadable(up) {
+		return unreadableTurn()
 	}
 	y := up.Unit()
 	other := XAxis
@@ -499,8 +503,6 @@ func Upright(up Vec) Orientation {
 // The empty Subspace is exactly its parent's space. Scale is finite and
 // not zero, and zero is read as one. Negative ones turn rays inside
 // back to front.
-//
-//ninja:vow practice a library: its callers are in other modules
 type Subspace struct {
 	//ninja:vow gate a value, whose fields are what it is
 	Origin Vec
@@ -528,16 +530,12 @@ func (space Subspace) scale() float64 {
 }
 
 // Out takes a point in the subspace out to its parent.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (space Subspace) Out(point Vec) Vec {
 	scaled := point.Scale(space.scale())
 	return space.Origin.Add(space.Orientation.Out(scaled))
 }
 
 // In takes a point in the parent into the subspace.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (space Subspace) In(point Vec) Vec {
 	moved := point.Sub(space.Origin)
 	return space.Orientation.In(moved).Scale(unity / space.scale())
@@ -547,23 +545,17 @@ func (space Subspace) In(point Vec) Vec {
 // Its direction stays one unit long, so distances along it shrink by the
 // scale. Take t inside: it is t times Scale outside.
 // Zero for Scale is read as one, as everywhere else.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (space Subspace) RayIn(ray Ray) Ray {
 	return Ray{At: space.In(ray.At), Dir: space.Orientation.In(ray.Dir)}
 }
 
 // Forward is which way the subspace faces, in its parent: its minus z.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (space Subspace) Forward() Vec {
 	return space.Orientation.Out(ZAxis.Neg())
 }
 
 // Within is this subspace as the grandparent sees it, given the parent it
 // sits in. It is the absolute answer, one multiplication a level.
-//
-//ninja:vow practice a library: its callers are in other modules
 func (space Subspace) Within(parent Subspace) Subspace {
 	return Subspace{
 		Origin:      parent.Out(space.Origin),

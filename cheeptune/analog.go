@@ -18,12 +18,12 @@ import (
 // polynomial, the method called PolyBLEP, so a high note does not fold its
 // overtones back under itself. A test holds how little is left.
 
-// Analog is an analog channel's sound.
-type Analog struct {
-	Oscillators []Oscillator `json:"oscillators"`
+// analog is an analog channel's sound.
+type analog struct {
+	Oscillators []oscillator `json:"oscillators"`
 	Noise       float64      `json:"noise"`
 	Drive       float64      `json:"drive"`
-	Filter      *Filter      `json:"filter"`
+	Filter      *filter      `json:"filter"`
 
 	// Fold and Overdrive distort the sound after the filter and before
 	// the channel's envelope, so a distorted note still swells and dies
@@ -34,10 +34,10 @@ type Analog struct {
 	Overdrive float64 `json:"overdrive"`
 }
 
-// Oscillator is one band-limited wave: saw, square (with a width) or
+// oscillator is one band-limited wave: saw, square (with a width) or
 // triangle, moved by cents and by whole octaves. Levels are a balance:
 // the oscillators together are as loud as one.
-type Oscillator struct {
+type oscillator struct {
 	Shape  string   `json:"shape"`
 	Width  *float64 `json:"width"`
 	Detune float64  `json:"detune"`
@@ -45,17 +45,17 @@ type Oscillator struct {
 	Level  *float64 `json:"level"`
 }
 
-// Filter is the low-pass the oscillators go through. Cutoff is in hertz
+// filter is the low-pass the oscillators go through. Cutoff is in hertz
 // for middle c; follow is how much of the note's distance from middle c
 // the cutoff moves with it, nought to one; amount is how many octaves the
 // filter's envelope opens the cutoff at its peak (or closes it, below
 // nought).
-type Filter struct {
+type filter struct {
 	Cutoff    float64   `json:"cutoff"`
 	Resonance float64   `json:"resonance"`
 	Follow    float64   `json:"follow"`
 	Amount    float64   `json:"amount"`
-	Envelope  *Envelope `json:"envelope"`
+	Envelope  *envelope `json:"envelope"`
 
 	// Poles is two (a gentle slope, twelve decibels an octave; the
 	// default) or four (the ladder: twice as steep, and its resonance
@@ -107,7 +107,7 @@ func init() {
 }
 
 // checkAnalog is an analog channel's own rules.
-func checkAnalog(c *Channel, q *quarrel) {
+func checkAnalog(c *channel, q *quarrel) {
 	a := c.Analog
 	if n := len(a.Oscillators); n < 1 || n > oscillatorsMost {
 		q.fail("analog has %d oscillators; it takes 1 or %d", n,
@@ -218,7 +218,7 @@ func triangleWave(phase, step, _ float64) float64 {
 
 // analogEngine is an analog channel ready to sound.
 type analogEngine struct {
-	channel *Channel
+	channel *channel
 	waves   []shape
 	ratios  []float64 // each oscillator's frequency over the note's
 	levels  []float64 // each oscillator's share of the sum
@@ -226,7 +226,7 @@ type analogEngine struct {
 }
 
 // buildAnalog is the engine for a checked analog channel.
-func buildAnalog(c *Channel) engine {
+func buildAnalog(c *channel) engine {
 	e := &analogEngine{channel: c}
 	total := 0.0
 	for _, o := range c.Analog.Oscillators {
@@ -259,7 +259,7 @@ func (e *analogEngine) ring(strike) float64 {
 
 // cutoff is the filter's cutoff for a note with its envelope opening it
 // by so many octaves.
-func (f *Filter) cutoff(midi int, opened float64) float64 {
+func (f *filter) cutoff(midi int, opened float64) float64 {
 	octaves := f.Follow*float64(midi-middleC)/12 + opened
 	return math.Max(cutoffLeast, f.Cutoff*math.Exp2(octaves))
 }
@@ -276,12 +276,12 @@ func accent(loud float64) float64 {
 	if loud <= 0 {
 		return 0
 	}
-	return math.Max(-1, math.Log(loud)/math.Log(Marks["ff"]))
+	return math.Max(-1, math.Log(loud)/math.Log(marks["ff"]))
 }
 
 // opening is the filter's envelope and amount for one note: as written,
 // moved by the note's accent.
-func (f *Filter) opening(st strike) (*envelopeRun, float64) {
+func (f *filter) opening(st strike) (*envelopeRun, float64) {
 	hard := accent(st.loud)
 	amount := f.Amount + f.Accent*hard
 	envelope := f.Envelope
@@ -294,7 +294,7 @@ func (f *Filter) opening(st strike) (*envelopeRun, float64) {
 }
 
 // newLowPass is the filter a channel asks for, at rest.
-func (f *Filter) newLowPass() lowPass {
+func (f *filter) newLowPass() lowPass {
 	if f.Poles == 4 {
 		return &ladderFilter{}
 	}
@@ -310,13 +310,13 @@ func (f *Filter) newLowPass() lowPass {
 // 9 dB over its mean, against 13 for the driven voicing that was kept),
 // it was tossed. Before the envelope, a note keeps its shape.
 type after struct {
-	fold, over    *softClip
-	turns, push   float64
-	foldUp, over1 float64
+	fold, over  *softClip
+	turns, push float64
+	over1       float64
 }
 
 // newAfter is the distortion a channel asks for, or nil for none.
-func (a *Analog) newAfter() *after {
+func (a *analog) newAfter() *after {
 	if a.Fold == 0 && a.Overdrive == 0 {
 		return nil
 	}

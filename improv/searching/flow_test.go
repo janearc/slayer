@@ -19,9 +19,9 @@ func flowFixture() *Edit {
 		Beats: beats.Pulse{Times: times}}}, Plan: Plan{FlowStudy: &FlowPlan{
 		Provenance: "authored-previs", Start: "1.1", Fold: "5.1", Answer: "7.1",
 		Eye: [3]float64{0, 0, 50}, Wide: 72,
-		Paths: []FlowPath{{Width: 0.02,
+		Paths: []flowPath{{Width: 0.02,
 			Points: [][3]float64{{10, 0, 0}, {9, 0, 0}, {6, 0, 0}}}},
-		Landmarks: []FlowPoint{{At: [3]float64{8, 2, -4}, Radius: 0.1,
+		Landmarks: []flowPoint{{At: [3]float64{8, 2, -4}, Radius: 0.1,
 			RGB: [3]float64{1, 1, 1}}},
 	}}}
 }
@@ -107,13 +107,13 @@ func TestFlowRefusesFalseProvenanceAndInvalidGeometry(t *testing.T) {
 		func(p *FlowPlan) { p.Fold = p.Start },
 		func(p *FlowPlan) { p.Answer = "18.1" },
 		func(p *FlowPlan) { p.ReturnPath = len(p.Paths) },
-		func(p *FlowPlan) { p.Paths = make([]FlowPath, 129) },
-		func(p *FlowPlan) { p.Clouds = make([]FlowCloud, 49) },
+		func(p *FlowPlan) { p.Paths = make([]flowPath, 129) },
+		func(p *FlowPlan) { p.Clouds = make([]flowCloud, 49) },
 		func(p *FlowPlan) {
-			p.Clouds = []FlowCloud{{Radius: 1, Density: math.Inf(1)}}
+			p.Clouds = []flowCloud{{Radius: 1, Density: math.Inf(1)}}
 		},
 		func(p *FlowPlan) {
-			p.Clouds = []FlowCloud{{Radius: 1, RGB: [3]float64{math.NaN()}}}
+			p.Clouds = []flowCloud{{Radius: 1, RGB: [3]float64{math.NaN()}}}
 		},
 	}
 	for index, change := range changes {

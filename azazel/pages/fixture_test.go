@@ -19,7 +19,7 @@ import (
 const fixtureDirectory = "testdata/fixture"
 
 // scriptsDirectory holds what the scripts wrote from one run on the
-// fixture, on 2026-11-15, with TZ=UTC.
+// fixture, with TZ=UTC.
 const scriptsDirectory = "testdata/scripts"
 
 // The numbers a fixture is laid with.
@@ -99,7 +99,8 @@ func fixture(t *testing.T) string {
 		t.Fatal(err)
 	}
 	for line := range strings.Lines(string(data)) {
-		layLine(t, root, strings.Split(strings.TrimSuffix(line, "\n"), "\t"))
+		trimmed := strings.TrimSuffix(line, "\n")
+		layLine(t, root, strings.Split(trimmed, "\t"))
 	}
 	return root
 }

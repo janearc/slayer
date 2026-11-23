@@ -1,0 +1,1 @@
+check-jimo . :: go test -p=1 -v ./manufacture -run ^TestJIMO -count=1

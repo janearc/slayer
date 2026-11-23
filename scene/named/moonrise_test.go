@@ -61,8 +61,9 @@ func moonOf(t *testing.T, built *named.Built) maths.Vec {
 	}
 	eye := built.Eye().Origin
 	return slices.MaxFunc(found, func(one, other maths.Vec) int {
-		return int(math.Copysign(once, one.Sub(eye).Len()-
-			other.Sub(eye).Len()))
+		gap := one.Sub(eye).Len() -
+			other.Sub(eye).Len()
+		return int(math.Copysign(once, gap))
 	})
 }
 

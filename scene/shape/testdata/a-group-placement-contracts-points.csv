@@ -1,0 +1,5 @@
+name,x,y,z
+box-low,-2,-3,-5
+box-high,4,7,11
+far-corner,7,11,23
+near-corner,-5,-7,-17

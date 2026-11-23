@@ -34,8 +34,13 @@ type Kernel struct {
 	ctx    unsafe.Pointer
 	device string
 	// fixed, when not nought, is the one height every grid band is drawn
-	// at, in place of the caller's
+	// at, in place of the heights their times decide
 	fixed int
+	// aim, when not nought, is the device time each grid band is sized to
+	// take, in place of a share of limit
+	aim time.Duration
+	// limit is how long the wait for one command lasts, as SetLimit set it
+	limit time.Duration
 	// pretendStops is how many band waits from now report the system
 	// stopping their band for the display, after waiting it out; for the
 	// tests of what follows a stop, which the system cannot be asked for
@@ -43,8 +48,8 @@ type Kernel struct {
 }
 
 // FixBands has every grid band drawn rows tall, as far as the band
-// buffers hold, instead of as tall as the caller's rows; nought restores
-// them. A picture does not change with its bands; this is how that is
+// buffers hold, instead of as tall as its time decides; nought restores
+// that. A picture does not change with its bands; this is how that is
 // shown, and how a slow band is drawn again at a known size.
 func (k *Kernel) FixBands(rows int) {
 	k.fixed = max(0, rows)
@@ -70,6 +75,7 @@ func Open(source, kernel string) (*Kernel, error) {
 	k := &Kernel{ctx: ctx, device: C.GoString(C.slayer_metal_name(ctx))}
 	k.SetLimit(defaultLimit)
 	k.FixBands(0)
+	k.aimBands(0)
 	runtime.SetFinalizer(k, (*Kernel).Close)
 	return k, nil
 }
@@ -126,12 +132,19 @@ func (k *Kernel) Close() {
 }
 
 // defaultLimit is how long the wait for one command lasts before it gives
-// up, unless SetLimit says otherwise. It is measured and picked: the longest
-// single command on Melancholia at 4096 by 3002 samples ran 1.2 s on the
-// device (the `timing` lines of a build that printed each command's GPU time,
-// from `hillside -set sets/melancholia.yaml -gpu -w 2048 -n 2`), and this is
-// fifty times that, since the device is often shared with other work.
-const defaultLimit = 60 * time.Second
+// up, unless SetLimit says otherwise: a device that has hung, never a band
+// that was heavy.
+//
+// A picture's bands are sized by their time to take a
+// sixtieth of it (aimShare), but a band is committed before the one ahead
+// of it is timed, so bands sized from cheaper rows can outrun the aim
+// several in a row where the rows grow heavier: on a hazy city at 960 by
+// 540 four bands in a row took 32 to 59 s against an aim of 30. A single
+// row of that city at 1280 wide took 6.2 s.
+//
+// Picked: thirty minutes, so the
+// aim is thirty seconds and such a band has thirty times its room.
+const defaultLimit = 30 * time.Minute
 
 // SetLimit sets how long the wait for any one command of the kernel lasts
 // before it gives up with an error saying what it waited for. The command
@@ -139,6 +152,7 @@ const defaultLimit = 60 * time.Second
 // every later command, so a caller that sees the error closes the kernel
 // and does not reopen one in the same process on the same work.
 func (k *Kernel) SetLimit(limit time.Duration) {
+	k.limit = limit
 	if k.ctx == nil {
 		return
 	}

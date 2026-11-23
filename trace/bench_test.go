@@ -17,7 +17,9 @@ import (
 func earthShot(b *testing.B) (*thing.World, maths.Subspace) {
 	b.Helper()
 	world := thing.NewWorld()
-	world.Lamp(thing.Sun(maths.V(-1, 0.2, 0.4), maths.RGB(1.2, 1.2, 1.2)))
+	along := maths.V(-1, 0.2, 0.4)
+	light := maths.RGB(1.2, 1.2, 1.2)
+	world.Lamp(thing.Sun(along, light))
 	earth, err := template.Earth()
 	if err != nil {
 		b.Fatal(err)
@@ -89,8 +91,9 @@ func BenchmarkThroughManyVolumes(b *testing.B) {
 func BenchmarkFirstManyThings(b *testing.B) {
 	world := thing.NewWorld()
 	for i := range 64 {
+		at := maths.V(0, 0, float64(i))
 		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.4},
-			Motion: resting(maths.V(0, 0, float64(i)))})
+			Motion: resting(at)})
 	}
 	crowded := gathered(place(world, 0))
 	b.ReportAllocs()
@@ -119,7 +122,8 @@ func BenchmarkSkyLitBall(b *testing.B) {
 // by 36 pixels, so rays march a painted volume.
 func BenchmarkSmokePicture(b *testing.B) {
 	world := puffed(2)
-	world.Lamp(thing.Sun(sunwards, maths.Grey(1)))
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(sunwards, light))
 	eye := lookingAt(maths.V(0, 2, 3), centre)
 	lens := film.Pinhole{Wide: 40 * maths.Degree}
 	b.ReportAllocs()

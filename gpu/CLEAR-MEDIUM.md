@@ -7,7 +7,7 @@ Frames also provide `DrawOpenWithInitialMedia`, which refuses a shutter-moving c
 this first implementation does not infer a new medium stack as the camera
 moves.
 
-Fixed set cameras can author the stack as `camera.initial-media`; hillside
+Fixed set cameras can author the stack as `camera.initial-media`; the session
 passes that validated stack through its ordinary fixed-camera GPU draw and
 retained-frame paths, preserving the selected traversal mode.
 The set-camera Metal path is currently pinhole-only.
@@ -67,7 +67,7 @@ kernel. Extinction affects the observed ray segments; it does not attenuate
 lamp-to-surface paths or add in-scattering.
 
 Set staging rejects a moving job camera with an authored fixed initial stack.
-Hillside composite passes and pixel replay refuse explicit initial media before
+Composite passes and pixel replay refuse explicit initial media before
 drawing. A static camera does not cause Slayer to infer or track which medium
 contains it as animated boundaries move.
 

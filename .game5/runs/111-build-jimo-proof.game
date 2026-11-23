@@ -1,0 +1,1 @@
+build-jimo-proof . :: go build -p=1 -o bin/jimo-slayer ./cmd/slayer

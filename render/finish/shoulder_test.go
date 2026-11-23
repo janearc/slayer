@@ -74,7 +74,8 @@ func ramp(light maths.Light) *frame.Frame {
 	made := frame.New(rampSteps, rampRows)
 	growth := math.Log(rampBrightest/rampDarkest) / (rampSteps - one)
 	for x := range rampSteps {
-		amount := light.Scale(rampDarkest * math.Exp(growth*float64(x)))
+		exponent := growth * float64(x)
+		amount := light.Scale(rampDarkest * math.Exp(exponent))
 		for y := range rampRows {
 			pixel := made.At(x, y)
 			pixel.R, pixel.G = float32(amount.R), float32(amount.G)
@@ -94,10 +95,14 @@ func looks(picture *image.RGBA) []ok.OKLCH {
 		var total maths.Light
 		for y := range bounds.Dy() {
 			at := picture.RGBAAt(x, y)
-			total = total.Add(maths.RGB(ninjacolour.Decode(at.R),
-				ninjacolour.Decode(at.G), ninjacolour.Decode(at.B)))
+			red := ninjacolour.Decode(at.R)
+			green := ninjacolour.Decode(at.G)
+			blue := ninjacolour.Decode(at.B)
+			total = total.Add(maths.RGB(red,
+				green, blue))
 		}
-		mean := total.Scale(whole / float64(bounds.Dy()))
+		rowCount := float64(bounds.Dy())
+		mean := total.Scale(whole / rowCount)
 		colour := srgb.FromLight(mean.R, mean.G, mean.B)
 		seen = append(seen, ok.FromSwatch(colour).Polar())
 	}
@@ -172,7 +177,8 @@ func TestARampRisesToThePapersWhite(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, name := range stocks {
-		seen := looks(throughStock(t, name, ramp(flame)))
+		flameRamp := ramp(flame)
+		seen := looks(throughStock(t, name, flameRamp))
 		if dimmer, brighter := plateau(seen); dimmer >= none {
 			t.Errorf("%s prints step %d as %v, no lighter than step %d, "+
 				"%v; from white: %v", name, brighter, seen[brighter], dimmer,
@@ -188,7 +194,8 @@ func TestARampRisesToThePapersWhite(t *testing.T) {
 // fire's colour stops on a flat yellow short of white, as the short's
 // flames did: the test can see a plateau.
 func TestTheClampPrintsARampFlat(t *testing.T) {
-	seen := looks(throughClamp(t, "lantern", ramp(fire)))
+	fireRamp := ramp(fire)
+	seen := looks(throughClamp(t, "lantern", fireRamp))
 	if dimmer, _ := plateau(seen); dimmer < none {
 		t.Errorf("the clamp printed the ramp with no plateau; the ramp "+
 			"test cannot tell a clamp from a shoulder: %v",
@@ -226,7 +233,8 @@ func turned(seen []ok.OKLCH, start ok.OKLCH) int {
 // through lantern: where its hue has gone nearer yellow's than its own
 // at white, it has bleached to a pale colour on its way to white.
 func TestABrightOrangeDoesNotTurnYellow(t *testing.T) {
-	seen := looks(throughStock(t, "lantern", ramp(flame)))
+	flameRamp := ramp(flame)
+	seen := looks(throughStock(t, "lantern", flameRamp))
 	start := seen[whiteStep()]
 	if x := turned(seen, start); x >= none {
 		t.Errorf("step %d is %v, a yellow; at white it was %v", x,
@@ -237,7 +245,8 @@ func TestABrightOrangeDoesNotTurnYellow(t *testing.T) {
 // Anti: through the clamp the same orange turns to a strong yellow, so
 // the test can see a turn.
 func TestTheClampTurnsOrangeYellow(t *testing.T) {
-	seen := looks(throughClamp(t, "lantern", ramp(flame)))
+	flameRamp := ramp(flame)
+	seen := looks(throughClamp(t, "lantern", flameRamp))
 	if turned(seen, seen[whiteStep()]) < none {
 		t.Error("the clamp kept the orange; the hue test cannot tell")
 	}
@@ -288,7 +297,8 @@ func TestAPictureUnderWhitePrintsAsBefore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows := strings.Split(strings.TrimSpace(string(text)), "\n")[one:]
+	trimmed := strings.TrimSpace(string(text))
+	rows := strings.Split(trimmed, "\n")[one:]
 	stocks, err := ninjafilm.Stocks()
 	if err != nil {
 		t.Fatal(err)
@@ -311,8 +321,9 @@ func TestAPictureUnderWhitePrintsAsBefore(t *testing.T) {
 // white, through lantern, is not what lantern printed under white.
 func TestThePictureRecordSeesAChange(t *testing.T) {
 	light := scaled(gradient(side, side), unchangedScale+unchangedScale)
-	under := throughStock(t, "lantern", scaled(gradient(side, side),
-		unchangedScale))
+	unscaled := scaled(gradient(side, side),
+		unchangedScale)
+	under := throughStock(t, "lantern", unscaled)
 	if string(throughStock(t, "lantern", light).Pix) == string(under.Pix) {
 		t.Error("twice the light printed the same picture")
 	}

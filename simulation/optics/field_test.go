@@ -292,6 +292,8 @@ func TestIntensityRefusesNonFiniteAndOverflowingSamples(test *testing.T) {
 func TestNewRefusesInvalidConfigurationAndSamples(test *testing.T) {
 	base := config(2, 2, 1, 1, 0.5)
 	valid := []complex128{1, 2, 3, 4}
+	copied := append([]complex128(nil), valid...)
+	longer := append(copied, 5)
 	invalid := []struct {
 		name    string
 		config  Config
@@ -311,7 +313,7 @@ func TestNewRefusesInvalidConfigurationAndSamples(test *testing.T) {
 		{"bad spectral shape", Config{Shape: spectral.Shape{Width: 3, Height: 2, MaxCells: 8}, WidthMetres: 1, HeightMetres: 1, WavelengthMetres: 0.5}, valid},
 		{"over-budget shape", Config{Shape: spectral.Shape{Width: 4, Height: 4, MaxCells: 15}, WidthMetres: 1, HeightMetres: 1, WavelengthMetres: 0.5}, make([]complex128, 16)},
 		{"short samples", base, valid[:3]},
-		{"long samples", base, append(append([]complex128(nil), valid...), 5)},
+		{"long samples", base, longer},
 		{"non-finite sample", base, []complex128{1, 2, 3, complex(0, math.Inf(-1))}},
 	}
 	for _, each := range invalid {
@@ -358,7 +360,9 @@ func TestParsevalHoldsForPropagatingModes(test *testing.T) {
 	cfg := config(4, 4, 1, 1, 0.2)
 	input := make([]complex128, cfg.Shape.Width*cfg.Shape.Height)
 	for index := range input {
-		input[index] = complex(math.Sin(float64(index)*0.4), math.Cos(float64(index)*0.23))
+		sine := math.Sin(float64(index) * 0.4)
+		cosine := math.Cos(float64(index) * 0.23)
+		input[index] = complex(sine, cosine)
 	}
 	field, err := New(cfg, input)
 	if err != nil {

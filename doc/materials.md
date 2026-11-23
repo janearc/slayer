@@ -1,7 +1,7 @@
 # Materials and particle-bearing gases
 
 For the implemented mass and volume accounting of porous solids, read
-[Porous material specimens](specimens.md). It keeps current solid phases,
+[Porous material specimens](model/material/specimens.md). It keeps current solid phases,
 pore water and empty pores separate, without assigning appearance.
 
 This design describes composition as data: hydrogen
@@ -66,6 +66,12 @@ for solid things, so a reader need not infer it from the plan above.
   by its own n and k, and the finish says how polished it is.
   `thing.Stopping` is what a material takes from a band beyond the visible,
   from its attenuation; a band with no row is stopped whole.
+
+[Nickel-aluminium bronze](model/material/nickel-aluminium-bronze.md) adds a selected C95800
+composition and cited density alongside titanium. Its optical readings are
+explicit estimates derived from a different NAB specimen's reflectance;
+`Source.Estimated()` keeps that distinction available to callers. The generic
+`ConductorFromReflectance` constructor documents the chosen effective fit.
 
 Nothing reads a material's formula back yet, so a wrong one could not be
 seen; that is a known gap. No material's optics are interpolated between

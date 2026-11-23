@@ -3,7 +3,7 @@ package trace
 import (
 	"fmt"
 
-	seaocean "github.com/janearc/slayer/scene/ocean"
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/scene/thing"
 )
 
@@ -23,7 +23,7 @@ func validateOceanInterfaceEvents(world *thing.World) error {
 		boundary.Material.Through <= 0 || boundary.Material.Metal != nil {
 		return fmt.Errorf("trace: ocean interface-events requires a visible clear ocean boundary")
 	}
-	if _, exact := boundary.Shape.(*seaocean.InfiniteMeanContinuation); !exact {
+	if _, exact := boundary.Shape.(*arid.InfiniteMeanContinuation); !exact {
 		return fmt.Errorf("trace: ocean interface-events requires the exact infinite mean-plane continuation")
 	}
 	for _, each := range world.Things {

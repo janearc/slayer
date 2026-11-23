@@ -28,10 +28,10 @@ type Attenuation struct {
 	where     Source
 }
 
-// NewAttenuation is mu over rho, in square centimetres a gram, at a
+// newAttenuation is mu over rho, in square centimetres a gram, at a
 // photon energy in MeV, read somewhere. It refuses an energy or a
 // coefficient that is not a positive number, and a source never made.
-func NewAttenuation(energy, muOverRho float64,
+func newAttenuation(energy, muOverRho float64,
 	where Source) (Attenuation, error) {
 	if !positive(energy) {
 		return Attenuation{}, refuse("an attenuation at energy %v MeV",
@@ -122,10 +122,10 @@ func (stops Attenuations) Within(span radiation.Range) []Attenuation {
 	return held
 }
 
-// AtDensity is the material at a bulk density, in grams a cubic
+// atDensity is the material at a bulk density, in grams a cubic
 // centimetre, read somewhere. It refuses a material never made, a
 // density that is not a positive number, and a source never made.
-func (kind Material) AtDensity(density float64,
+func (kind Material) atDensity(density float64,
 	where Source) (Material, error) {
 	if kind.name == "" {
 		return Material{}, refuse("a density for a material never made")

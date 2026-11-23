@@ -1,5 +1,5 @@
-// Package mocks holds the mocks of everything slayer's tracer reads from
-// its scene and film packages, one package for each, made by uber's
+// Package mocks holds the mocks the tests of slayer's tracer make of what
+// it reads from its scene packages, one package for each, made by uber's
 // mockgen from generate.sh.
 //
 // They are for tests that need a part of those to answer what no fake

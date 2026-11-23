@@ -163,7 +163,8 @@ func TestAnAtNameIsLeftOnlyForTunesAndVoicings(t *testing.T) {
 // file's error and not a refusal of a job.
 // anti-test of TestEveryKeyReads
 func TestReadSaysWhenTheFileIsNotThere(t *testing.T) {
-	_, err := Read(filepath.Join(t.TempDir(), "absent.yaml"))
+	absent := filepath.Join(t.TempDir(), "absent.yaml")
+	_, err := Read(absent)
 	if err == nil || strings.Contains(err.Error(), ErrRefused.Error()) {
 		t.Errorf("a missing file read as %v", err)
 	}

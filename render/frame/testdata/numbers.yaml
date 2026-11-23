@@ -1,0 +1,78 @@
+# every number the frame tests choose, with what it is and why it was picked.
+numbers:
+  - name: frame-wide
+    value: 3
+    unit: pixels
+    says: the width of the small frame the fixed tests use, wider than one so a column can have a neighbour
+    kind: picked
+    by: small enough to read the whole frame by eye
+
+  - name: frame-tall
+    value: 2
+    unit: pixels
+    says: the height of the small frame the fixed tests use, taller than one so a row can have a neighbour, and different from the width so a swapped width and height is caught
+    kind: picked
+    by: the least height that differs from the width and has a row below another
+
+  - name: side-most
+    value: 6
+    unit: pixels
+    says: the widest or tallest a frame is drawn by the property tests, small because they draw many
+    kind: picked
+    by: large enough for a frame to have an inside, small enough to draw many
+
+  - name: past-most
+    value: 5
+    unit: pixels
+    says: the furthest past an edge a property test steps
+    kind: picked
+    by: more than one step, so a guard that allows a single pixel of slack is caught
+
+  - name: lamp-most
+    value: 64
+    unit: linear light
+    says: the brightest a drawn lamp is, for the property tests that draw light, cover or depth
+    kind: picked
+    by: well past one, since light has no ceiling
+
+  - name: lamp-red
+    value: 0.5
+    unit: linear light
+    says: the red of the pixel whose light is read back by hand, a binary fraction so the float32 and float64 values are the same number
+    kind: picked
+    by: differs from the green and blue, so a swap of channels is caught
+
+  - name: lamp-green
+    value: 0.25
+    unit: linear light
+    says: the green of the pixel whose light is read back by hand, a binary fraction like the red
+    kind: picked
+    by: differs from the red and blue, so a swap of channels is caught
+
+  - name: lamp-blue
+    value: 2
+    unit: linear light
+    says: the blue of the pixel whose light is read back by hand, past one to show that light has no ceiling
+    kind: picked
+    by: differs from the red and green, so a swap of channels is caught
+
+  - name: writers
+    value: 8
+    unit: goroutines
+    says: the goroutines that write one frame at once in the race test
+    kind: picked
+    by: several more than the cores of a small machine, so writers interleave
+
+  - name: race-wide
+    value: 64
+    unit: pixels
+    says: the width of the frame the writers share, wide enough that each writer sets many pixels
+    kind: picked
+    by: many places for each writer, few enough to finish fast under the race detector
+
+  - name: race-tall
+    value: 48
+    unit: pixels
+    says: the height of the frame the writers share, different from the width so a swapped width and height is caught
+    kind: picked
+    by: a different height from the width, divisible by the writers

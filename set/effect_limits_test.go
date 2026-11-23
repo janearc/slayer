@@ -19,8 +19,9 @@ func TestLegacyEffectsEnforceSceneWideLimitsAndSingleTargetRecipes(t *testing.T)
 		}
 		var blocks strings.Builder
 		for i := range count {
+			item := fmt.Sprintf("    item %d:", i)
 			blocks.WriteString(strings.Replace(raw[start:finish], name,
-				fmt.Sprintf("    item %d:", i), 1))
+				item, 1))
 		}
 		return raw[:start] + blocks.String() + raw[finish:]
 	}

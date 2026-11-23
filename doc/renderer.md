@@ -17,7 +17,7 @@ camera sampling and development are separate choices.
 
 `trace` is the CPU tracer used by the front door and scene commands.
 There is no second active `render/trace` implementation. `gpu` returns
-the same frame representation. `hillside.Session` connects jobs, scene
+the same frame representation. `session.Session` connects jobs, scene
 clocks and retained drawing; `door` handles output, film resume and sound.
 See [package boundaries](../PACKAGES.md).
 
@@ -110,7 +110,7 @@ encode on each frame even when device comparison avoids most transfers.
 Retained buffers save allocation and upload; they do not automatically
 eliminate host encoding or tracing.
 
-Hillside also reuses unchanged sections of fixed-view films under its
+The session also reuses unchanged sections of fixed-view films under its
 `scene.film.sections` policy. CPU can redraw rectangles; Metal currently
 reuses only an entirely unchanged frame. Positive lighting drift is an
 explicit approximation. Disable section keeping for fresh-frame profiling;
@@ -125,7 +125,7 @@ scene grids, acceleration structures or development images. See
 ## Separate surface and volume passes
 
 The set adapter exposes `gpu.SurfacePlate` and `gpu.VolumeTransport`
-through `hillside.OpenComposite`. A plate keeps surface lighting,
+through `session.OpenComposite`. A plate keeps surface lighting,
 reflections and their volume shadows. Transport returns foreground
 scattered light S and RGB transmission T, stopped at the first surface.
 Composition is `S + T * plate` in linear light, before development.

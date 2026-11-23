@@ -62,12 +62,15 @@ func Matrix() []Case {
 	var result []Case
 	for _, scene := range smoke.All() {
 		for _, mode := range modes {
+			bandValues := append([]maths.Band(nil), scene.Bands...)
+			paletteLights := append([]maths.Light(nil), scene.Palette...)
+			inputNames := append([]string(nil), scene.Inputs...)
 			result = append(result, Case{Scene: scene.Number, Name: scene.Name,
 				Group: scene.Group(), Samples: max(1, scene.Samples),
-				Bands: len(scene.Bands), BandValues: append([]maths.Band(nil), scene.Bands...),
-				Palette: append([]maths.Light(nil), scene.Palette...), Tone: scene.Tone,
+				Bands: len(scene.Bands), BandValues: bandValues,
+				Palette: paletteLights, Tone: scene.Tone,
 				Gauge: scene.Gauge, Wide: scene.Wide, Mode: mode, Status: "not-run",
-				Inputs: append([]string(nil), scene.Inputs...)})
+				Inputs: inputNames})
 		}
 	}
 	return result

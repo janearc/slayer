@@ -1,18 +1,29 @@
 package mesh
 
 import (
-	"github.com/janearc/slayer/scene/storage"
 	"unsafe"
+
+	"github.com/janearc/slayer/scene/storage"
 )
 
-// Storage counts retained geometry without copying faces or building a tree.
+// Storage counts the geometry retained so far, without copying faces or
+// building a tree. The tree is retained only once a ray or a nearest
+// point has grown it, so its nodes and bytes count then, and not before.
 func (made *Mesh) Storage() storage.Geometry {
+	made.treeMu.RLock()
+	defer made.treeMu.RUnlock()
 	return storage.Geometry{Vertices: len(made.points), Faces: len(made.faces),
-		Normals: len(made.normals), Nodes: len(made.tree.nodes), Immutable: true,
-		Bytes: uint64(unsafe.Sizeof(*made)) +
-			uint64(cap(made.points))*uint64(unsafe.Sizeof(made.points[0])) +
-			uint64(cap(made.faces))*uint64(unsafe.Sizeof(face{})) +
-			uint64(cap(made.normals))*uint64(unsafe.Sizeof(made.points[0])) +
-			uint64(cap(made.tree.nodes))*uint64(unsafe.Sizeof(node{})) +
-			uint64(cap(made.tree.order))*uint64(unsafe.Sizeof(int(0)))}
+		Normals: len(made.normals), Nodes: len(made.tree.nodes),
+		Immutable: true,
+		Bytes: uint64(unsafe.Sizeof(*made)) + capacityBytes(made.points) +
+			capacityBytes(made.rest) + capacityBytes(made.faces) +
+			capacityBytes(made.normals) + capacityBytes(made.tree.nodes) +
+			capacityBytes(made.tree.order)}
+}
+
+// capacityBytes is the bytes a slice holds in all its capacity, used or
+// not.
+func capacityBytes[Held any](slice []Held) uint64 {
+	var one Held
+	return uint64(cap(slice)) * uint64(unsafe.Sizeof(one))
 }

@@ -1,0 +1,91 @@
+# eight village houses from eight seeds, in a row, their fronts to the
+# south on a lane, each drawn at the demo level: the walk-ups of an urban
+# village, tiled, caged, with air conditioners, clothes poles, tanks on
+# the roofs and a shop at the foot. they stand 17 m apart, middle to
+# middle. there is no sun and no sky: the houses are lit by their own
+# lamps, the lit rooms, the stair doors and the shops, as the neon street
+# is. the weathering streaks the tiles and runs rust from the cages.
+#
+# places are metres, as a map's run: x east, y north, z up. the first
+# camera is the one drawn; to draw another, name it.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: eight village houses
+  seed: 1
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 70
+    exposure: 4
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    the-row:
+      title: "from the lane south of the row, a little over eye height"
+      location:
+        at: [0, -96, 6]
+      orientation:
+        look_at: [0, 0, 14]
+    close:
+      title: "at eye height before the fourth and fifth houses"
+      location:
+        at: [8, -16, 1.7]
+      orientation:
+        look_at: [8, 0, 9]
+  set:
+    things:
+      house 1: {kind: village-house, seed: 1, complexity: demo, east: -59.5, north: 0, height: {value: 0, unit: m}}
+      house 2: {kind: village-house, seed: 2, complexity: demo, east: -42.5, north: 0, height: {value: 0, unit: m}}
+      house 3: {kind: village-house, seed: 3, complexity: demo, east: -25.5, north: 0, height: {value: 0, unit: m}}
+      house 5: {kind: village-house, seed: 5, complexity: demo, east: -8.5, north: 0, height: {value: 0, unit: m}}
+      house 8: {kind: village-house, seed: 8, complexity: demo, east: 8.5, north: 0, height: {value: 0, unit: m}}
+      house 13: {kind: village-house, seed: 13, complexity: demo, east: 25.5, north: 0, height: {value: 0, unit: m}}
+      house 21: {kind: village-house, seed: 21, complexity: demo, east: 42.5, north: 0, height: {value: 0, unit: m}}
+      house 34: {kind: village-house, seed: 34, complexity: demo, east: 59.5, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.02, 0.02, 0.022]}
+        source: eye
+    boxes:
+      ground:
+        material: ground
+        middle: [0, 0, -1.02]
+        size: [400, 400, 2]
+        source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        tile-streaks:
+          kind: rain
+          on: [tile]
+          colour: {srgb_linear: [0.02, 0.018, 0.015]}
+          strength: 0.8
+          settle: 6
+          level: 0.2
+          length: 5
+          spacing: 0.3
+          share: 0.8
+        rust:
+          kind: rust
+          on: [steel]
+          colour: {srgb_linear: [0.14, 0.06, 0.03]}
+          strength: 0.5
+          settle: 10
+          level: 0.2
+          length: 2.5
+          spacing: 0.25
+          share: 0.4
+          grain: 0.3

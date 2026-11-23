@@ -13,9 +13,9 @@ import (
 // colour and cloud weather are authored; clouds are not measured weather.
 // Separate large cloud banks remain below the summit and follow the
 // spherical horizon. There is no opaque flat deck spanning the scene.
-func (s *heardStage) summitScenery(p *StagePlan) error {
+func (s *heardStage) summitScenery(p *stagePlan) error {
 	if !p.Interior {
-		temp := &Set{World: s.world, prototypes: map[string][]thing.Thing{}}
+		temp := &set{World: s.world, prototypes: map[string][]thing.Thing{}}
 		for i := range 128 {
 			angle := float64(i) * 2.399963229728653
 			radius := 85 + 19*math.Sqrt(float64(i+1))

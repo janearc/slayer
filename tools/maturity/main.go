@@ -12,7 +12,8 @@
 // under each kind, the names of the numbers it reads.
 //
 // The report counts; it does not judge. A kind with many parts and no
-// measured number is a detailed guess. See doc/object-maturity.md.
+// measured number is a detailed guess. See
+// doc/model/spacecraft/object-maturity.md.
 //
 // exit 0, or 1 if the report cannot be made, or 2 on a kind or a family
 // that is not there or a flag it does not know.

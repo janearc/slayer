@@ -131,8 +131,10 @@ func (spec *tiffSpec) bytes() []byte {
 	body := make([]byte, head)
 	var offsets, counts []uint64
 	for _, tile := range spec.tiles {
-		offsets = append(offsets, uint64(len(body)))
-		counts = append(counts, uint64(len(tile)))
+		start := uint64(len(body))
+		offsets = append(offsets, start)
+		size := uint64(len(tile))
+		counts = append(counts, size)
 		body = append(body, tile...)
 	}
 	if spec.offsets != nil {
@@ -182,18 +184,22 @@ func (spec *tiffSpec) bytes() []byte {
 		table = append(table, number(tag.count)...)
 		value := tag.raw
 		if len(value) > inline {
-			table = append(table, number(uint64(len(body)))...)
+			placed := uint64(len(body))
+			table = append(table, number(placed)...)
 			body = append(body, value...)
 			continue
 		}
 		table = append(table, value...)
-		table = append(table, make([]byte, inline-len(value))...)
+		padding := make([]byte, inline-len(value))
+		table = append(table, padding...)
 	}
 	at := uint64(len(body))
 	if spec.big {
-		body = spec.order.AppendUint64(body, uint64(len(ids)))
+		wideCount := uint64(len(ids))
+		body = spec.order.AppendUint64(body, wideCount)
 	} else {
-		body = spec.order.AppendUint16(body, uint16(len(ids)))
+		shortCount := uint16(len(ids))
+		body = spec.order.AppendUint16(body, shortCount)
 	}
 	body = append(body, table...)
 	body = append(body, make([]byte, inline)...)

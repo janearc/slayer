@@ -18,7 +18,7 @@ func TestBodyUsesItsCompositionAndReusesOnlyTheMatchingPalette(t *testing.T) {
 	}
 	fire := campfire
 	fire.Composition = profile
-	fire.Hottest = profile.Reference()
+	fire.Hottest = profile.spec.Reference
 	palettes := map[paletteKey]glowing{}
 	first, err := bodyWithPalette(fire, 1, palettes)
 	if err != nil {
@@ -41,7 +41,7 @@ func TestBodyUsesItsCompositionAndReusesOnlyTheMatchingPalette(t *testing.T) {
 	// Endpoints are exact table knots; interior comparison keeps the existing
 	// interpolation tolerance rather than asserting a second copy of its index.
 	for _, heat := range []measure.Temperature{fire.Edge, fire.Hottest} {
-		spectrum := profile.Spectrum(heat)
+		spectrum := profile.spectrum(heat)
 		r, g, b := srgb.Light(observer.Swatch(spectrum))
 		want := maths.RGB(math.Max(0, r), math.Max(0, g), math.Max(0, b))
 		got := first.glows.at(heat)
@@ -64,7 +64,7 @@ func TestExportedCompositionSamplesFollowTheirTemperatureCoordinates(t *testing.
 	}
 	fire := campfire
 	fire.Composition = profile
-	fire.Hottest = profile.Reference()
+	fire.Hottest = profile.spec.Reference
 	body, err := NewBody(fire, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -77,7 +77,8 @@ func TestExportedCompositionSamplesFollowTheirTemperatureCoordinates(t *testing.
 	for _, index := range []int{0, 127, 254, 255} {
 		fraction := float64(index) / float64(len(samples)-1)
 		heat := measure.Kelvin(cold*(1-fraction) + hot*fraction)
-		r, g, b := srgb.Light(observer.Swatch(profile.Spectrum(heat)))
+		spectrum := profile.spectrum(heat)
+		r, g, b := srgb.Light(observer.Swatch(spectrum))
 		want := maths.RGB(math.Max(0, r), math.Max(0, g), math.Max(0, b))
 		got := samples[index]
 		delta := math.Abs(got.R-want.R) + math.Abs(got.G-want.G) + math.Abs(got.B-want.B)

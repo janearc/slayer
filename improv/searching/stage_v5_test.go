@@ -28,7 +28,7 @@ func TestHeardEarthResponseLightsTheScene(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		s.world.Lamp(film.Sun{})
 	}
-	p := &StagePlan{Burst: true, Sun: [2]float64{-15, -15}}
+	p := &stagePlan{Burst: true, Sun: [2]float64{-15, -15}}
 	if err := s.updateGround(p, State{At: 243.636363636}, 0); err != nil {
 		t.Fatal(err)
 	}

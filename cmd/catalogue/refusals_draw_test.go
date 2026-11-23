@@ -60,7 +60,7 @@ func TestRenderStopsWhenItCannotSayACardOrIsCancelled(test *testing.T) {
 	unsaid := filepath.Join(root, "unsaid")
 	var wrong bytes.Buffer
 	if status := tool(context.Background()).Run([]string{"render", "webb",
-		"--out", unsaid}, refusing{}, &wrong); status == successfulExit {
+		"--out", unsaid}, refusing(test), &wrong); status == successfulExit {
 		test.Error("a run that could not say its card went on")
 	}
 	if _, err := os.Stat(filepath.Join(unsaid, "webb-quick", "specimen.png")); err != nil {

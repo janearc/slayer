@@ -19,6 +19,16 @@ import (
 // it; the readers answer what the constructors took, in the units
 // bodies speak - kilometres, radians, shares.
 
+// The numbers the parts' ground is made with, each picked.
+var (
+	nightGlowDefault = pick("night-glow-default")
+	coastReach       = pick("coast-reach")
+	radarRungs       = int(pick("radar-rungs"))
+	radarVary        = pick("radar-vary")
+	radarMix         = pick("radar-mix")
+	bareGrey         = pick("bare-grey")
+)
+
 // Part is anything NewBody can hang on a body.
 type Part interface {
 	hang(body *Body)
@@ -40,7 +50,8 @@ type Shell struct {
 // not above the low one, or a low one below the ground, is no shell.
 func NewShell(low, high Span) Shell {
 	bottom, top := low.InKilometres(), high.InKilometres()
-	if !finite(bottom) || !finite(top) || !(top > bottom) || bottom < 0 {
+	if !finite(bottom) || !finite(top) || !(top > bottom) ||
+		bottom < nought {
 		return Shell{made: true, complaint: fmt.Errorf("a shell from "+
 			"%v to %v km is no band: the high edge is above the "+
 			"low one, and the low one is above the ground, both finite",
@@ -308,10 +319,11 @@ func NewAurora(shell Shell, lat, width, tilt measure.Angle,
 	if err := shell.problem(); err != nil {
 		return Aurora{}, fmt.Errorf("bodies: an aurora: %w", err)
 	}
+	latitude, breadth, lean := lat.InRadians(), width.InRadians(),
+		tilt.InRadians()
 	if err := firstComplaint(numberComplaint("an aurora's latitude",
-		lat.InRadians()), numberComplaint("an aurora's width",
-		width.InRadians()), numberComplaint("an aurora's tilt",
-		tilt.InRadians()),
+		latitude), numberComplaint("an aurora's width", breadth),
+		numberComplaint("an aurora's tilt", lean),
 		lightComplaint("the aurora's fringe", colours.fringe),
 		lightComplaint("the aurora's bottom", colours.bottom),
 		lightComplaint("the aurora's top", colours.top)); err != nil {
@@ -328,15 +340,16 @@ func NewAurora(shell Shell, lat, width, tilt measure.Angle,
 			"curtains: %w", err)
 	}
 	return Aurora{made: true, low: shell.low, high: shell.high,
-		lat: lat.InRadians(), width: width.InRadians(),
-		tilt: tilt.InRadians(), strength: strong, curtains: dressed,
+		lat: latitude, width: breadth,
+		tilt: lean, strength: strong, curtains: dressed,
 		seed: seed, colours: colours}, nil
 }
 
 // Radiating is the aurora with what it gives off outside the visible:
 // an aurora driven by a magnetar is x-ray bright.
 func (aurora Aurora) Radiating(radiant thing.Radiant) Aurora {
-	hold(&aurora.complaint, radiantComplaint("Aurora.Radiating's radiant", radiant))
+	hold(&aurora.complaint,
+		radiantComplaint("Aurora.Radiating's radiant", radiant))
 	aurora.radiant = radiant
 	return aurora
 }
@@ -400,6 +413,9 @@ type Cities struct {
 // each glowing, their places grown from a seed.
 func NewCities(rungs uint, towns, metros maths.Portion, glow maths.Light,
 	seed uint64) (Cities, error) {
+	if err := rungsComplaint("the cities", rungs); err != nil {
+		return Cities{}, err
+	}
 	if err := lightComplaint("the cities' glow", glow); err != nil {
 		return Cities{}, fmt.Errorf("bodies: %w", err)
 	}
@@ -479,8 +495,9 @@ func NewJets(length, base Span, spread float64,
 		return Jets{}, fmt.Errorf("bodies: jets born %v km out are "+
 			"no distance: kilometres, zero or above, finite", away)
 	}
+	lean := tilt.InRadians()
 	if err := firstComplaint(numberComplaint("the jets' spread", spread),
-		numberComplaint("the jets' tilt", tilt.InRadians()),
+		numberComplaint("the jets' tilt", lean),
 		lightComplaint("the jets' glow", glow)); err != nil {
 		return Jets{}, fmt.Errorf("bodies: %w", err)
 	}
@@ -491,14 +508,16 @@ func NewJets(length, base Span, spread float64,
 	}
 	return Jets{made: true, length: long, base: wide, spread: spread,
 		from: away, dense: dense,
-		tilt: tilt.InRadians(), speed: fast, glow: glow}, nil
+		tilt: lean, speed: fast, glow: glow}, nil
 }
 
-// Knotted is the jets dressed in lumps, as medium.Jet takes them.
+// Knotted is the jets dressed in lumps, as medium.Jet takes them: a
+// share from zero, smooth, to one. A number outside that is held, and
+// Place refuses it.
 func (jets Jets) Knotted(knots float64) Jets {
-	if err := numberComplaint("Jets.Knotted's knots", knots); err != nil &&
-		jets.complaint == nil {
-		jets.complaint = err
+	if !(knots >= nought && knots <= unity) {
+		hold(&jets.complaint, fmt.Errorf("Jets.Knotted's knots is %v: "+
+			"a share from zero to one is expected", knots))
 	}
 	jets.knots = knots
 	return jets
@@ -679,6 +698,9 @@ type Fineness struct {
 // neighbouring class in by another. Zero rungs lets the picture choose
 // from the angle a pixel covers; world.Fine says how.
 func NewFineness(rungs uint, vary, mix maths.Portion) (Fineness, error) {
+	if err := rungsComplaint("fineness", rungs); err != nil {
+		return Fineness{}, err
+	}
 	varied, err := vary.Share()
 	if err != nil {
 		return Fineness{}, fmt.Errorf("bodies: fineness vary: %w",
@@ -712,7 +734,7 @@ type Ground struct {
 	// features places the features on a plain world, by asking it
 	// where its land and water are; it refuses, with the reason, when
 	// a feature has nowhere to go.
-	features func(w *world.World) ([]world.Feature, error)
+	features func(plain *world.World) ([]world.Feature, error)
 	radiant  thing.Radiant
 	// complaint is the first bad argument a method was given.
 	complaint error
@@ -781,9 +803,9 @@ func (ground Ground) RadarRough(rough world.Look) Ground {
 // Mapped wraps an equirectangular picture of the ground by day round
 // the sphere in place of the painted world, its left edge turned.
 func (ground Ground) Mapped(day image.Image, turn measure.Angle) Ground {
-	hold(&ground.complaint, numberComplaint("Ground.Mapped's turn",
-		turn.InRadians()))
-	ground.day, ground.turn = day, turn.InRadians()
+	radians := turn.InRadians()
+	hold(&ground.complaint, numberComplaint("Ground.Mapped's turn", radians))
+	ground.day, ground.turn = day, radians
 	return ground
 }
 
@@ -803,14 +825,15 @@ func (ground Ground) NightLit(lights image.Image,
 // Featured places features on the plain world, by asking it where its
 // land and water are.
 func (ground Ground) Featured(
-	features func(w *world.World) ([]world.Feature, error)) Ground {
+	features func(plain *world.World) ([]world.Feature, error)) Ground {
 	ground.features = features
 	return ground
 }
 
 // Radiating is the ground with what it does outside the visible.
 func (ground Ground) Radiating(radiant thing.Radiant) Ground {
-	hold(&ground.complaint, radiantComplaint("Ground.Radiating's radiant", radiant))
+	hold(&ground.complaint,
+		radiantComplaint("Ground.Radiating's radiant", radiant))
 	ground.radiant = radiant
 	return ground
 }
@@ -859,7 +882,7 @@ func (ground Ground) Rough() (world.Look, bool) {
 }
 
 // Features places the features on a plain world, when there are any.
-func (ground Ground) Features() func(w *world.World) ([]world.Feature,
+func (ground Ground) Features() func(plain *world.World) ([]world.Feature,
 	error) {
 	return ground.features
 }
@@ -870,7 +893,7 @@ func (ground Ground) Features() func(w *world.World) ([]world.Feature,
 func (body Body) groundMaterial(detail int) (*thing.Material, error) {
 	if body.ground == nil {
 		return &thing.Material{Name: body.name,
-			Colour: maths.Grey(0.5)}, nil
+			Colour: maths.Grey(bareGrey)}, nil
 	}
 	ground := body.ground
 	made, err := body.World(detail)
@@ -891,8 +914,8 @@ func (body Body) groundMaterial(detail int) (*thing.Material, error) {
 	}
 	if ground.lights != nil {
 		glow := ground.glow
-		if glow == 0 {
-			glow = 0.004
+		if glow == nought {
+			glow = nightGlowDefault
 		}
 		material.Shine = texture.Picture{Image: ground.lights,
 			Turn: ground.turn, Gain: glow}
@@ -901,10 +924,9 @@ func (body Body) groundMaterial(detail int) (*thing.Material, error) {
 		material.Shine = body.cityShine(made, ground, cities)
 	}
 	if ground.rough != nil {
-		// a radar map is finer than the paint: three rungs below the
-		// world's own, varied and mixed, as magellan's is in look; the
-		// 3, 0.3 and 0.35 are chosen, not from its data
-		material.Rough = made.Fine(*ground.rough, 3, 0.3, 0.35)
+		// a radar map is finer than the paint, varied and mixed
+		material.Rough = made.Fine(*ground.rough, radarRungs, radarVary,
+			radarMix)
 	}
 	return material, nil
 }
@@ -915,41 +937,64 @@ func (body Body) cityShine(made *world.World, ground *Ground,
 	cities *Cities) texture.Cities {
 	shine := texture.Cities{Tiling: made.Tiling, Rungs: int(cities.rungs),
 		Share: cities.towns, Metro: cities.metros, Glow: cities.glow,
-		Seed: cities.seed,
-		Land: func(point maths.Vec) bool {
-			return world.Land(made.Biome(
-				made.Tiling.Nearest(point)))
-		},
-		// a coast is a land tile with water beside it
-		Coast: func(point maths.Vec) bool {
-			tile := made.Tiling.Nearest(point)
-			for _, neighbour := range made.Tiling.Neighbours(tile) {
-				if world.Water(made.Biome(neighbour)) {
-					return true
-				}
-			}
-			return false
-		}}
+		Seed: cities.seed}
 	if ground.day != nil {
-		// the map says where the land and the water are: a
-		// coast is land with water within a few degrees
-		pic := texture.Picture{Image: ground.day, Turn: ground.turn}
-		shine.Land = func(point maths.Vec) bool {
-			return !pic.Water(point)
-		}
-		shine.Coast = func(point maths.Vec) bool {
-			upright := maths.Upright(point)
-			for _, way := range []maths.Vec{upright.X,
-				upright.X.Neg(), upright.Z, upright.Z.Neg()} {
-				if pic.Water(point.Unit().Add(
-					way.Scale(0.04))) {
-					return true
-				}
-			}
-			return false
+		// the map says where the land and the water are
+		reader := mapShore{picture: texture.Picture{Image: ground.day,
+			Turn: ground.turn}}
+		shine.Land, shine.Coast = reader.land, reader.coast
+		return shine
+	}
+	reader := tileShore{made: made}
+	shine.Land, shine.Coast = reader.land, reader.coast
+	return shine
+}
+
+// tileShore says where the land and the coasts are from a made world's
+// own tiles.
+type tileShore struct {
+	made *world.World
+}
+
+// land is whether the tile nearest a point is land.
+func (shore tileShore) land(point maths.Vec) bool {
+	nearest := shore.made.Tiling.Nearest(point)
+	return world.Land(shore.made.Biome(nearest))
+}
+
+// coast is whether the tile nearest a point has water beside it.
+func (shore tileShore) coast(point maths.Vec) bool {
+	tile := shore.made.Tiling.Nearest(point)
+	for _, neighbour := range shore.made.Tiling.Neighbours(tile) {
+		if world.Water(shore.made.Biome(neighbour)) {
+			return true
 		}
 	}
-	return shine
+	return false
+}
+
+// mapShore says where the land and the coasts are from a wrapped map.
+type mapShore struct {
+	picture texture.Picture
+}
+
+// land is whether a point is not water on the map.
+func (shore mapShore) land(point maths.Vec) bool {
+	return !shore.picture.Water(point)
+}
+
+// coast is whether water lies within a few degrees of a point on the
+// map, north, south, east or west of it.
+func (shore mapShore) coast(point maths.Vec) bool {
+	upright := maths.Upright(point)
+	for _, way := range []maths.Vec{upright.X, upright.X.Neg(), upright.Z,
+		upright.Z.Neg()} {
+		beyond := point.Unit().Add(way.Scale(coastReach))
+		if shore.picture.Water(beyond) {
+			return true
+		}
+	}
+	return false
 }
 
 // Gas is a giant's body: how far below the cloud tops it goes opaque,
@@ -970,7 +1015,7 @@ func NewGas(depth maths.Portion, opacity float64,
 	if err != nil {
 		return Gas{}, fmt.Errorf("bodies: the gas's depth: %w", err)
 	}
-	if !(deep > 0) {
+	if !(deep > nought) {
 		return Gas{}, fmt.Errorf("bodies: a gas of depth %v is no "+
 			"body: a share of the radius, above zero", deep)
 	}
@@ -1129,8 +1174,8 @@ func NewRings(innerTimes, outerTimes float64, thick Span,
 // the rings keep a copy of the slice given.
 func (rings Rings) Profiled(profile []float64) Rings {
 	for place, share := range profile {
-		hold(&rings.complaint, numberComplaint(fmt.Sprintf(
-			"Rings.Profiled's element %d", place), share))
+		what := fmt.Sprintf("Rings.Profiled's element %d", place)
+		hold(&rings.complaint, numberComplaint(what, share))
 	}
 	rings.profile = append([]float64(nil), profile...)
 	return rings

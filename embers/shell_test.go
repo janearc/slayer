@@ -170,7 +170,8 @@ func TestTheStarsLeaveTheBurstOnASphere(t *testing.T) {
 			t.Fatalf("star %d left the burst at %v m/s, throw %v", star.ID(),
 				speed, shell.Throw)
 		}
-		mean = mean.Add(away.Scale(1 / away.Len()))
+		reach := 1 / away.Len()
+		mean = mean.Add(away.Scale(reach))
 	}
 	if spread := mean.Len() / 4096; !(spread <= 0.05) {
 		t.Errorf("the stars' mean way is %v of a whole: lopsided", spread)

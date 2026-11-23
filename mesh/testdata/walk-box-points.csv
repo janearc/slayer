@@ -1,0 +1,11 @@
+name,x,y,z,want
+inside,2,3,4,0
+on-high-corner,1,6,9,0
+below-x,0,3,4,1
+above-x,6,3,4,4
+below-y,2,0,4,4
+above-y,2,9,4,9
+below-z,2,3,1,4
+above-z,2,3,12,9
+past-all-three,-2,10,0,34
+past-all-three-again,5,1,11,6

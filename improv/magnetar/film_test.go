@@ -42,7 +42,8 @@ func writeWAV(t *testing.T, path string) {
 	const rate, seconds = 44100, 1
 	var data bytes.Buffer
 	for i := 0; i < rate*seconds; i++ {
-		sample := int16(8000 * math.Sin(2*math.Pi*220*float64(i)/rate))
+		phase := 2 * math.Pi * 220 * float64(i) / rate
+		sample := int16(8000 * math.Sin(phase))
 		for range 2 {
 			if err := binary.Write(&data, binary.LittleEndian, sample); err != nil {
 				t.Fatal(err)
@@ -51,14 +52,16 @@ func writeWAV(t *testing.T, path string) {
 	}
 	var out bytes.Buffer
 	out.WriteString("RIFF")
-	binary.Write(&out, binary.LittleEndian, uint32(36+data.Len()))
+	riffSize := uint32(36 + data.Len())
+	binary.Write(&out, binary.LittleEndian, riffSize)
 	out.WriteString("WAVEfmt ")
 	for _, field := range []any{uint32(16), uint16(1), uint16(2),
 		uint32(rate), uint32(rate * 4), uint16(4), uint16(16)} {
 		binary.Write(&out, binary.LittleEndian, field)
 	}
 	out.WriteString("data")
-	binary.Write(&out, binary.LittleEndian, uint32(data.Len()))
+	dataSize := uint32(data.Len())
+	binary.Write(&out, binary.LittleEndian, dataSize)
 	out.Write(data.Bytes())
 	if err := os.WriteFile(path, out.Bytes(), 0o644); err != nil {
 		t.Fatal(err)
@@ -84,8 +87,9 @@ func newFilmFixture(t *testing.T, kicking, clips string) filmFixture {
 		t.Fatal(err)
 	}
 	for i := range 3 {
-		writePNG(t, filepath.Join(fixture.frames, "one",
-			fmt.Sprintf("%02d.png", i)), filmSize,
+		frame := filepath.Join(fixture.frames, "one",
+			fmt.Sprintf("%02d.png", i))
+		writePNG(t, frame, filmSize,
 			color.RGBA{R: uint8(60 * i), G: 90, B: 120, A: 255})
 	}
 	writeWAV(t, filepath.Join(dir, "tone.wav"))
@@ -305,9 +309,10 @@ func stills(t *testing.T, ink color.RGBA) string {
 // A short named that the script has not is refused once its pictures
 // are found.
 func TestRunRefusesAShortTheScriptHasNot(t *testing.T) {
+	target := filepath.Join(t.TempDir(), "x.png")
 	err := run([]string{"magnetar", "magnetar-walk.yaml",
-		stills(t, color.RGBA{A: 255}), "sideways",
-		filepath.Join(t.TempDir(), "x.png")}, &strings.Builder{})
+		stills(t, color.RGBA{A: 255}), "sideways", target},
+		&strings.Builder{})
 	if err == nil || !strings.Contains(err.Error(), `"sideways"`) {
 		t.Errorf("a short the script has not gave %v, want a refusal "+
 			"naming it", err)

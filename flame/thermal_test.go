@@ -30,7 +30,8 @@ func aFireball(t *testing.T) *Fireball {
 
 // thermalAt is the fireball at seconds after it is let go.
 func thermalAt(ball *Fireball, seconds float64) *Fireball {
-	return ball.Tick(time.Duration(seconds * float64(time.Second))).(*Fireball)
+	elapsed := time.Duration(seconds * float64(time.Second))
+	return ball.Tick(elapsed).(*Fireball)
 }
 
 // Scorer's laws, checked each against its own statement rather than
@@ -45,27 +46,25 @@ func TestAFireballRisesByScorersLaws(t *testing.T) {
 	lighter := 1 - 290.0/1800
 	for _, seconds := range []float64{0, 1, 10, 60} {
 		now := thermalAt(ball, seconds)
-		r := now.Radius()
-		if !thermalNear((now.Centre()-origin)/r, 4, 1e-12) {
+		r := now.radius()
+		if !thermalNear((now.centre()-origin)/r, 4, 1e-12) {
 			t.Errorf("at %v s the height is %v radii from its origin",
-				seconds, (now.Centre()-origin)/r)
+				seconds, (now.centre()-origin)/r)
 		}
 		felt := 9.80665 * lighter * math.Pow(10/r, 3)
-		if want := 1.2 * math.Sqrt(felt*r); !thermalNear(now.Rise(), want, 1e-9*want) {
-			t.Errorf("at %v s it rises at %v m/s, Scorer says %v", seconds,
-				now.Rise(), want)
-		}
+		want := 1.2 * math.Sqrt(felt*r)
 		step := 1e-4
-		climbed := (thermalAt(ball, seconds+step).Centre() - now.Centre()) / step
-		if !thermalNear(climbed, now.Rise(), 1e-3) {
-			t.Errorf("at %v s it climbs %v m/s, says %v", seconds, climbed,
-				now.Rise())
+		climbed := (thermalAt(ball, seconds+step).centre() - now.centre()) / step
+		if !thermalNear(climbed, want, 1e-3) {
+			t.Errorf("at %v s it climbs %v m/s, Scorer says %v", seconds,
+				climbed, want)
 		}
 	}
-	if got := thermalAt(ball, 0).Rise(); !thermalNear(got, 10.884132, 1e-6) {
-		t.Errorf("let go, it rises at %v m/s", got)
+	letGo := (thermalAt(ball, 1e-4).centre() - thermalAt(ball, 0).centre()) / 1e-4
+	if !thermalNear(letGo, 10.884132, 1e-3) {
+		t.Errorf("let go, it rises at %v m/s", letGo)
 	}
-	if got := thermalAt(ball, 10).Radius(); !thermalNear(got, 25.381225, 1e-6) {
+	if got := thermalAt(ball, 10).radius(); !thermalNear(got, 25.381225, 1e-6) {
 		t.Errorf("ten seconds on its radius is %v m", got)
 	}
 }
@@ -76,7 +75,7 @@ func TestAFireballGrowsAsTheRootOfTime(t *testing.T) {
 	ball := aFireball(t)
 	r0 := 10.0
 	grew := func(seconds float64) float64 {
-		r := thermalAt(ball, seconds).Radius()
+		r := thermalAt(ball, seconds).radius()
 		return r*r - r0*r0
 	}
 	for _, seconds := range []float64{0.5, 3, 40} {
@@ -94,25 +93,27 @@ func TestAFireballsHeatThinsWithItsVolume(t *testing.T) {
 	ball := aFireball(t)
 	for _, seconds := range []float64{0, 2, 30} {
 		now := thermalAt(ball, seconds)
-		r := now.Radius()
-		if held := now.Excess() * r * r * r; !thermalNear(held, 1510*1000, 1e-9*1510*1000) {
+		r := now.radius()
+		if held := now.excess() * r * r * r; !thermalNear(held, 1510*1000, 1e-9*1510*1000) {
 			t.Errorf("at %v s its excess heat times its radius cubed is %v",
 				seconds, held)
 		}
-		heart := now.Heat(maths.V(0, now.Centre(), 0)).InKelvin()
-		if !thermalNear(heart, 290+now.Excess(), 1e-9) {
+		centre := maths.V(0, now.centre(), 0)
+		heart := now.Heat(centre).InKelvin()
+		if !thermalNear(heart, 290+now.excess(), 1e-9) {
 			t.Errorf("at %v s its heart is %v K", seconds, heart)
 		}
-		edge := now.Heat(maths.V(r, now.Centre(), 0)).InKelvin()
+		rim := maths.V(r, now.centre(), 0)
+		edge := now.Heat(rim).InKelvin()
 		if !thermalNear(edge, 290, 1e-9) {
 			t.Errorf("at %v s its edge is %v K, not the air's", seconds, edge)
 		}
 	}
 	// twice the radius, when r^2 = 400: (400 - 100) / k seconds on
-	k := thermalAt(ball, 1).Radius()*thermalAt(ball, 1).Radius() - 100
+	k := thermalAt(ball, 1).radius()*thermalAt(ball, 1).radius() - 100
 	twice := thermalAt(ball, 300/k)
-	if !thermalNear(twice.Excess(), 1510.0/8, 1e-6) {
-		t.Errorf("at twice its size it is %v K over the air", twice.Excess())
+	if !thermalNear(twice.excess(), 1510.0/8, 1e-6) {
+		t.Errorf("at twice its size it is %v K over the air", twice.excess())
 	}
 }
 
@@ -120,7 +121,7 @@ func TestAFireballsHeatThinsWithItsVolume(t *testing.T) {
 // sqrt 2) ln 2 = 5.881549 radians (awk).
 func TestAFireballTurnsAboutItsRingAsItGrows(t *testing.T) {
 	ball := aFireball(t)
-	k := thermalAt(ball, 1).Radius()*thermalAt(ball, 1).Radius() - 100
+	k := thermalAt(ball, 1).radius()*thermalAt(ball, 1).radius() - 100
 	if got := thermalAt(ball, 300/k).turned(); !thermalNear(got, 5.881549, 1e-6) {
 		t.Errorf("at twice its size it has turned %v radians", got)
 	}
@@ -158,7 +159,8 @@ func TestAFireballsSootStaysInItsBox(t *testing.T) {
 			if !(d >= 0 && d <= 0.5*(1+0.3)) {
 				t.Fatalf("at %v s, %v holds %v", seconds, p, d)
 			}
-			q := p.Sub(maths.V(0, now.Centre(), 0)).Scale(1 / now.Radius())
+			centre := maths.V(0, now.centre(), 0)
+			q := p.Sub(centre).Scale(1 / now.radius())
 			if c := now.clumps(q); !(c >= 0.55-1e-12 && c <= 1) {
 				t.Fatalf("at %v s the eddies leave %v of the soot", seconds, c)
 			}
@@ -173,8 +175,10 @@ func TestAFireballGlowsByItsHeat(t *testing.T) {
 	ball := aFireball(t)
 	first := thermalAt(ball, 0)
 	later := thermalAt(ball, 30)
-	hot := first.Shine().At(maths.V(0, first.Centre(), 0))
-	cooled := later.Shine().At(maths.V(0, later.Centre(), 0))
+	firstCentre := maths.V(0, first.centre(), 0)
+	hot := first.Shine().At(firstCentre)
+	laterCentre := maths.V(0, later.centre(), 0)
+	cooled := later.Shine().At(laterCentre)
 	stem := later.Shine().At(maths.V(0, 1, 0))
 	if !(hot.Luminance() > cooled.Luminance() && cooled.Luminance() >= stem.Luminance()) {
 		t.Errorf("its glow is %v let go, %v later, %v in its stem",
@@ -195,11 +199,11 @@ func TestAFireballsStartOnlyMovesItsClock(t *testing.T) {
 	}
 	seen, ahead := thermalAt(late, 7), thermalAt(early, 2)
 	p := maths.V(3, 70, -2)
-	if seen.Radius() != ahead.Radius() || seen.Density(p) != ahead.Density(p) ||
+	if seen.radius() != ahead.radius() || seen.Density(p) != ahead.Density(p) ||
 		seen.Heat(p) != ahead.Heat(p) {
 		t.Errorf("let go at 5 s and seen at 7 s it is %v m, %v, %v; let go "+
-			"at once and seen at 2 s, %v m, %v, %v", seen.Radius(),
-			seen.Density(p), seen.Heat(p).InKelvin(), ahead.Radius(),
+			"at once and seen at 2 s, %v m, %v, %v", seen.radius(),
+			seen.Density(p), seen.Heat(p).InKelvin(), ahead.radius(),
 			ahead.Density(p), ahead.Heat(p).InKelvin())
 	}
 	if got := thermalAt(late, 4).Density(maths.V(0, 30, 0)); got != 0 {

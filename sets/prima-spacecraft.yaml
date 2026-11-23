@@ -1,0 +1,30 @@
+# Visual PRIMA study based on NASA/JPL's 2026 artist concept.
+# Only the 1.8 m primary diameter is measured; proportions are picked in
+# manufacture/spacecraft-choices.yaml.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: PRIMA far-infrared observatory concept
+  seed: 17
+  setting: space
+  light: sun
+  # Picked showcase fill from the optics side, following the Webb study.
+  sun: {azimuth: 180, altitude: 20}
+  set:
+    things:
+      prima:
+        kind: prima
+        seed: 5
+        complexity: demo
+        east: 0
+        north: 0
+  film:
+    width: 1080
+    height: 960
+    rays: 4
+    exposure: 0.01
+    wide: 32
+  cameras:
+    concept:
+      title: PRIMA layered dark shield and open telescope
+      location: {at: [6, -19, 4.5]}
+      orientation: {look_at: [-0.4, -0.5, -0.36]}

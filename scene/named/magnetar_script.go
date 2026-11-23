@@ -2,7 +2,6 @@ package named
 
 import (
 	_ "embed"
-	"errors"
 	"fmt"
 	"math"
 	"regexp"
@@ -24,7 +23,7 @@ import (
 var scriptRaw []byte
 
 // ErrScript is a sentence whose figures do not stand on a value.
-var ErrScript = errors.New("named: magnetar script")
+const ErrScript refusal = "named: magnetar script"
 
 // Line is one sentence zappy says: its words, the shot it goes under,
 // whether the short film says it, and the name of the value behind each

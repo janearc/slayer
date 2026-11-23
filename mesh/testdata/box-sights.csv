@@ -1,0 +1,10 @@
+name,atx,aty,atz,dirx,diry,dirz,inversex,inversey,inversez,entryx,entryy,entryz,kx,ky,kz,shearx,sheary,shearz
+along z,1,2,3,0,0,1,inf,inf,1,0,0,0,0,1,2,0,0,1
+back along z,1,2,3,0,0,-1,inf,inf,-1,0,0,1,1,0,2,0,0,-1
+negative zero,0,0,0,-0,1,0,inf,1,inf,0,0,0,2,0,1,0,0,1
+skew,0,0,0,2,-4,1,0.5,-0.25,1,0,1,0,0,2,1,-0.5,-0.25,-0.25
+slow,0,0,0,0,0,0.5,inf,inf,2,0,0,0,0,1,2,0,0,2
+slow back,0,0,0,0,0,-0.5,inf,inf,-2,0,0,1,1,0,2,0,0,-2
+long,0,0,0,2,0,0,0.5,inf,inf,0,0,0,1,2,0,0,0,0.5
+two as long,0,0,0,1,1,0,1,1,inf,0,0,0,1,2,0,1,0,1
+three as long,0,0,0,0,2,2,inf,0.5,0.5,0,0,0,2,0,1,1,0,0.5

@@ -61,28 +61,29 @@ func TestFineFollowsTheCoarseWorld(t *testing.T) {
 // footprint gets the world's own rung, a small one a rung where a tile
 // is about Across footprints across, and no footprint the world's own.
 func TestFineChoosesItsRungByTheFootprint(t *testing.T) {
-	w := New(terran)
+	world := New(terran)
 	var look Look
-	for b := range Biomes {
-		look.Paints[b] = maths.Grey(0.1 + 0.06*float64(b))
+	for biome := range Biomes {
+		look.Paints[biome] = maths.Grey(0.1 + 0.06*float64(biome))
 	}
 	look.Lines = 0.5
-	auto := w.Fine(look, 0, 0, 0).(texture.Footprinted)
-	coarse := w.Painted(look)
-	p := maths.V(0.3, 0.5, 0.8).Unit()
-	big := w.Tiling.Spacing() * 2
-	if auto.Within(p, big) != coarse.At(p) || auto.At(p) != coarse.At(p) {
+	auto := world.Fine(look, 0, 0, 0).(texture.Footprinted)
+	coarse := world.Painted(look)
+	point := maths.V(0.3, 0.5, 0.8).Unit()
+	big := world.Tiling.Spacing() * 2
+	if auto.Within(point, big) != coarse.At(point) || auto.At(point) != coarse.At(point) {
 		t.Error("a big footprint, or none, is not the coarse world")
 	}
 	// a small footprint: the same class, but lines fall where the fine
 	// rung's lines are, so across a coarse tile the paint changes often
-	small := w.Tiling.Spacing() / 200
+	small := world.Tiling.Spacing() / 200
 	changes, last := 0, maths.Light{}
-	tile := w.Tiling.Nearest(p)
-	c := w.Tiling.Centre(tile)
+	tile := world.Tiling.Nearest(point)
+	centre := world.Tiling.Centre(tile)
 	for i := 0; i < 400; i++ {
-		q := c.Add(maths.V(float64(i)*w.Tiling.Spacing()/800, 0, 0)).Unit()
-		if w.Tiling.Nearest(q) != tile {
+		reach := float64(i) * world.Tiling.Spacing() / 800
+		q := centre.Add(maths.V(reach, 0, 0)).Unit()
+		if world.Tiling.Nearest(q) != tile {
 			break
 		}
 		got := auto.Within(q, small)

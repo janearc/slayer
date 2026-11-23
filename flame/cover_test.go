@@ -57,7 +57,8 @@ func TestABallNotYetLetGoIsTheAirsHeat(t *testing.T) {
 	if got := ball.Heat(maths.V(0, 30, 0)).InKelvin(); got != 290 {
 		t.Fatalf("heat before the start is %v K, want 290", got)
 	}
-	if got := thermalAt(ball, 5).Heat(maths.V(0, ball.Centre(), 0)).InKelvin(); got <= 290 {
+	heart := maths.V(0, ball.centre(), 0)
+	if got := thermalAt(ball, 5).Heat(heart).InKelvin(); got <= 290 {
 		t.Fatalf("at its start the heart is %v K, want above the air's 290", got)
 	}
 }
@@ -68,7 +69,7 @@ func TestAFireballsTintAndShine(t *testing.T) {
 	if ball.Tint() != Tilt() {
 		t.Errorf("tint %v, want the flame's %v", ball.Tint(), Tilt())
 	}
-	at := maths.V(0, ball.Centre(), 0)
+	at := maths.V(0, ball.centre(), 0)
 	shine := ball.Shine()
 	later := shine.Tick(3 * time.Second)
 	want := thermalAt(ball, 3).Shine().At(at)

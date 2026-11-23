@@ -6,14 +6,25 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// The numbers Wood falls back on, and the two waves its rings wander by.
-const (
-	woodRing     = 0.1  // picked: a year's growth, a tenth of a unit, when none is given
-	woodLate     = 0.25 // picked: a quarter of a year's ring is late wood, when no share is given
-	woodLong     = 0.7  // picked: the long wave, under a turn in a unit along the grain
-	woodShort    = 2.9  // picked: the short wave, about three turns in a unit, not a multiple of the long one
-	woodShortBit = 0.35 // picked: the short wave is a third the size of the long one
-	woodSoft     = 0.08 // picked: the share of a ring over which early wood turns to late, and back
+// The numbers Wood falls back on, and the two waves its rings wander by,
+// each picked and held in picked-numbers.yaml.
+var (
+	// woodRing is a year's growth when none is given.
+	woodRing = pickedNumber("wood-ring")
+	// woodLate is the share of a year's ring that is late wood, when no
+	// share is given.
+	woodLate = pickedNumber("wood-late")
+	// woodLong is the long wave the rings wander by, in turns along the
+	// grain.
+	woodLong = pickedNumber("wood-long")
+	// woodShort is the short wave the rings wander by, in turns along the
+	// grain, not a multiple of the long one.
+	woodShort = pickedNumber("wood-short")
+	// woodShortBit is how big the short wave is, against the long one.
+	woodShortBit = pickedNumber("wood-short-bit")
+	// woodSoft is the share of a ring over which early wood turns to late,
+	// and back.
+	woodSoft = pickedNumber("wood-soft")
 )
 
 // Wood is sawn timber: the rings a tree grew, cut through by whatever
@@ -45,29 +56,41 @@ type Wood struct {
 	Wander float64
 }
 
-// At is the wood at p: early or late by how far through its year the
-// point's ring is, blended across the turn from one to the other.
-func (wood Wood) At(p maths.Vec) maths.Light {
-	late := wood.late(p)
-	return wood.Early.Scale(1 - late).Add(wood.Late.Scale(late))
+// ring is a year's width, with none read as the fallback.
+func (wood Wood) ring() float64 {
+	if wood.Ring <= nought {
+		return woodRing
+	}
+	return wood.Ring
 }
 
-// late is how much of the wood at p is late wood, from nought to one.
-func (wood Wood) late(p maths.Vec) float64 {
+// lateShare is how much of a ring is late wood, with none read as the
+// fallback.
+func (wood Wood) lateShare() float64 {
+	if wood.LateShare <= nought {
+		return woodLate
+	}
+	return wood.LateShare
+}
+
+// At is the wood at the point: early or late by how far through its year
+// the point's ring is, blended across the turn from one to the other.
+func (wood Wood) At(point maths.Vec) maths.Light {
+	late := wood.late(point)
+	return wood.Early.Scale(unity - late).Add(wood.Late.Scale(late))
+}
+
+// late is how much of the wood at the point is late wood, from nought to
+// one.
+func (wood Wood) late(point maths.Vec) float64 {
 	along := wood.Along
-	if along.Len() == 0 {
+	if along.Len() == nought {
 		along = maths.XAxis
 	}
 	along = along.Unit()
-	ring := wood.Ring
-	if ring <= 0 {
-		ring = woodRing
-	}
-	share := wood.LateShare
-	if share <= 0 {
-		share = woodLate
-	}
-	from := p.Sub(wood.Pith)
+	ring := wood.ring()
+	share := wood.lateShare()
+	from := point.Sub(wood.Pith)
 	run := from.Dot(along)
 	out := from.Sub(along.Scale(run)).Len()
 	wave := math.Sin(woodLong*run) + woodShortBit*math.Sin(woodShort*run)
@@ -76,15 +99,15 @@ func (wood Wood) late(p maths.Vec) float64 {
 	// early wood from the ring's start, turning to late wood at the last
 	// share of it, and back to early at the year's end, each over a soft
 	// edge so a ring's line is not a pixel's stair
-	start := 1 - share
+	start := unity - share
 	rise := smoothed((through - start) / woodSoft)
-	fall := smoothed((1 - through) / woodSoft)
+	fall := smoothed((unity - through) / woodSoft)
 	return rise * fall
 }
 
 // smoothed is a step from nought to one over nought to one, eased at
 // both ends.
 func smoothed(x float64) float64 {
-	t := math.Max(0, math.Min(1, x))
-	return t * t * (3 - 2*t)
+	held := math.Max(nought, math.Min(unity, x))
+	return held * held * (smoothCubic - pair*held)
 }

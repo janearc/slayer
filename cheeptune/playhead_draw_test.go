@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+func near(a, b float64) bool { return math.Abs(a-b) < 1e-9 }
+
 func TestThePlayheadCountsBeatsAndBars(t *testing.T) {
 	// 120 a minute is a beat every half second.
 	p := render(t,

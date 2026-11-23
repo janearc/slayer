@@ -5,9 +5,9 @@ import (
 	"github.com/janearc/slayer/maths/hexes"
 )
 
-// Painter says what paint a tile has. A world answers by biome; Hexed
+// painter says what paint a tile has. A world answers by biome; Hexed
 // answers by hash.
-type Painter interface {
+type painter interface {
 	Paint(tile hexes.Tile) maths.Light
 }
 
@@ -19,7 +19,7 @@ type Tiled struct {
 	// and the surface is black.
 	Tiling hexes.Tiling
 	// Paints is what each tile is painted. Nil is black everywhere.
-	Paints Painter
+	Paints painter
 	// Lines is how dark the edges between tiles are, zero for none and one
 	// for black.
 	Lines float64
@@ -28,26 +28,31 @@ type Tiled struct {
 	Width float64
 }
 
+// tileLineShare is the share of a tiling's spacing a line is wide when no
+// width is given.
+var tileLineShare = pickedNumber("tile-line-share")
+
 // width is the line's width, with zero read as a share of the spacing.
-func (t Tiled) width() float64 {
-	if t.Width == 0 {
-		return t.Tiling.Spacing() * 0.06
+func (tiled Tiled) width() float64 {
+	if tiled.Width == nought {
+		return tiled.Tiling.Spacing() * tileLineShare
 	}
-	return t.Width
+	return tiled.Width
 }
 
-// At is the tile's paint at p, darkened by the line if p is near an edge.
-// The point is handed to the tiling as it is: a sphere reads its
-// direction, a band its angle and height, a plane its place.
-func (t Tiled) At(p maths.Vec) maths.Light {
-	if t.Paints == nil || t.Tiling == nil {
-		return maths.Light{}
+// At is the tile's paint at the point, darkened by the line if the point
+// is near an edge. The point is handed to the tiling as it is: a sphere
+// reads its direction, a band its angle and height, a plane its place.
+func (tiled Tiled) At(point maths.Vec) maths.Light {
+	if tiled.Paints == nil || tiled.Tiling == nil {
+		return noPaint
 	}
-	tile := t.Tiling.Nearest(p)
-	paint := t.Paints.Paint(tile)
-	if t.Lines <= 0 {
+	tile := tiled.Tiling.Nearest(point)
+	paint := tiled.Paints.Paint(tile)
+	if tiled.Lines <= nought {
 		return paint
 	}
-	line := 1 - maths.Smooth(0, t.width(), t.Tiling.Edge(p, tile))
-	return paint.Scale(1 - t.Lines*line)
+	edge := tiled.Tiling.Edge(point, tile)
+	line := unity - maths.Smooth(nought, tiled.width(), edge)
+	return paint.Scale(unity - tiled.Lines*line)
 }

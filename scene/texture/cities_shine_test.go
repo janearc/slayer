@@ -18,13 +18,13 @@ var cityGlow = maths.RGB(1, 0.5, 0.25)
 // the fine rung is 0.5 across and a tenth from every edge, so a point is
 // 0.1 / (0.5 * 0.5) = 0.4 of the way in, where Smooth(0, 0.6, 0.4) is
 // (4/9)(3 - 4/3) = 20/27.
-func shineSpecs(n, coarseNearest int, around map[int][]int, fineID int) []rungSpec {
-	specs := make([]rungSpec, n+1)
+func shineSpecs(count, coarseNearest int, around map[int][]int, fineID int) []rungSpec {
+	specs := make([]rungSpec, count+1)
 	for i := range specs {
 		specs[i] = junk
 	}
-	specs[max(0, n-2)] = coarseSpecs(1.2, coarseNearest, around)
-	specs[n] = rungSpec{spacing: 0.5, edge: 0.1, nearest: fineID,
+	specs[max(0, count-2)] = coarseSpecs(1.2, coarseNearest, around)
+	specs[count] = rungSpec{spacing: 0.5, edge: 0.1, nearest: fineID,
 		centres: map[int]maths.Vec{fineID: town}}
 	return specs
 }

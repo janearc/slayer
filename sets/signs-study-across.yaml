@@ -1,0 +1,60 @@
+# the signs study, a street: five plain towers either side of a dark wet
+# street at night, each wearing signs pinned on (pins: {signs: true}): glowing
+# words on a frame at the roof's edge, screens of lines of letters on the
+# walls, and blade signs standing out of the walls, from manufacture/cities/
+# signdraw.go, their words, colours and looks drawn from each tower's seed out
+# of manufacture/cities/cultures/sign.yaml. every sign carries lamps of the
+# colour of its glass, so it is a light as well as a glowing thing: the wet
+# street and the walls take its colour.
+#
+# places are metres, as a map's run: x east, y north, z up. there is no sun
+# and no sky: the only light is the signs'. the towers' heights and places,
+# the street's colour and the two cameras are choices of this study, picked
+# by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: signs study street
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 60
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    across:
+      title: "from 60 m back, the east row's outer face and its roof signs"
+      location:
+        at: [110, 0, 10]
+      orientation:
+        look_at: [50, 0, 38]
+  recipes:
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, signs: true, storeys: 14, width: {value: 38, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    mirror: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: mirror, signs: true, storeys: 18, width: {value: 38, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    granite: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: granite, colour: grey, signs: true, storeys: 16, width: {value: 38, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      w1: {recipe: concrete, seed: 21, complexity: quick, east: -31, north: -44, height: {value: 0, unit: m}}
+      w2: {recipe: mirror, seed: 22, complexity: quick, east: -31, north: 0, height: {value: 0, unit: m}}
+      w3: {recipe: granite, seed: 23, complexity: quick, east: -31, north: 44, height: {value: 0, unit: m}}
+      e1: {recipe: granite, seed: 32, complexity: quick, east: 31, north: -22, height: {value: 0, unit: m}}
+      e2: {recipe: concrete, seed: 33, complexity: quick, east: 31, north: 22, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      street:
+        # wet asphalt: nearly opaque, and it mirrors at a low angle
+        colour: {srgb_linear: [0.02, 0.02, 0.025]}
+        clear: {through: 0.03, index: 1.5, gloss: 1, rank: 0}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye

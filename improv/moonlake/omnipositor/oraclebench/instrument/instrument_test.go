@@ -121,7 +121,8 @@ func TestCleanupReportsUnexpectedDirContent(t *testing.T) {
 		t.Fatalf("Build() error = %v", err)
 	}
 
-	unexpected := filepath.Join(filepath.Dir(plan.TimingPath()), "unexpected")
+	folder := filepath.Dir(plan.TimingPath())
+	unexpected := filepath.Join(folder, "unexpected")
 	if err := os.WriteFile(unexpected, []byte("x"), 0o600); err != nil {
 		t.Fatalf("os.WriteFile(%q) error = %v", unexpected, err)
 	}
@@ -133,7 +134,7 @@ func TestCleanupReportsUnexpectedDirContent(t *testing.T) {
 	}
 	_ = os.Remove(unexpected)
 	_ = os.Remove(plan.TimingPath())
-	_ = os.Remove(filepath.Dir(plan.TimingPath()))
+	_ = os.Remove(folder)
 }
 
 func TestCleanupRejectsMissingOwnership(t *testing.T) {

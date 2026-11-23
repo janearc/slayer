@@ -4,7 +4,8 @@
 #
 # what is earth's here: the sky, the sun and the light on the ground.
 # `air: earth` asks for earth's air worked from its sources (airs/earth.yaml,
-# doc/sky-from-the-air.md): the 1976 us standard atmosphere, its ozone and
+# doc/model/sky/sky-from-the-air.md): the 1976 us standard atmosphere,
+# its ozone and
 # a clear day's haze. package airlight follows the sun's light through the
 # air's shells at 21 wavelengths, from 380 to 780 nm, from the crater's
 # floor, and the sky, the sun's lamp and the exposure come from that.

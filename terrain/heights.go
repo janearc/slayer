@@ -56,17 +56,17 @@ func (window Window) Size() (across, down int, step float64) {
 // that leaves the raster or meets a place with no height.
 func (raster *Raster) Window(west, north float64, across, down int,
 	step float64) (Window, error) {
-	limit, err := DefaultWindowBytes()
+	limit, err := defaultWindowBytes()
 	if err != nil {
 		return Window{}, err
 	}
-	return raster.WindowWithBudget(west, north, across, down, step, limit)
+	return raster.windowWithBudget(west, north, across, down, step, limit)
 }
 
-// WindowWithBudget retains strict coverage and bounds the returned float64
+// windowWithBudget retains strict coverage and bounds the returned float64
 // grid. The byte limit is separate from decoded tile retention and temporary
 // decoding.
-func (raster *Raster) WindowWithBudget(west, north float64, across, down int,
+func (raster *Raster) windowWithBudget(west, north float64, across, down int,
 	step float64, limitBytes int64,
 ) (Window, error) {
 	if err := raster.projectedCoordinates(); err != nil {
@@ -80,7 +80,7 @@ func (raster *Raster) WindowWithBudget(west, north float64, across, down int,
 		return Window{}, fmt.Errorf("terrain: a window of %d by %d, %g "+
 			"apart", across, down, step)
 	}
-	request := GridRequest{West: west, North: north, Across: across, Down: down, Step: step}
+	request := gridRequest{West: west, North: north, Across: across, Down: down, Step: step}
 	count, err := request.capacity(limitBytes, gridHeightBytes)
 	if err != nil {
 		return Window{}, err

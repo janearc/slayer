@@ -1,0 +1,254 @@
+# tower weathered: four towers along a street at the demo level, with the
+# world's weathering laid over them: rain streaks from every ledge, soot
+# low down and under cover, rust on steel and running below it, and
+# graffiti. Writers mark the street faces at arm's reach, the shutters of
+# dark shops most; they climb to the roofs and mark the parapets, the
+# water tanks and the backs of the billboards, more thinly; they go for
+# the wet cyberpunk tower and an emptied one, and leave the polished
+# lobbies of the mirror and granite towers almost bare. The towers say
+# nothing of any of it: the weathering is the world's.
+#
+# places are metres, as a map's run: x east, y north, z up. the towers
+# stand in a row along the north side of a street, their fronts at y of
+# minus fifteen. every number is a choice of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower weathered
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "on the pavement, looking up at the cyberpunk and mirror towers"
+      wide: 80
+      location:
+        at: [-4, -40, 1.7]
+      orientation:
+        look_at: [-8, -14, 7]
+    across:
+      title: "forty metres across from the emptied concrete tower, at its roof"
+      wide: 60
+      location:
+        at: [-60, -55, 80]
+      orientation:
+        look_at: [-56, 0, 64]
+  recipes:
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    cyber: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: curtain, cyber: true, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    mirror: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: mirror, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    granite: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: granite, style: punched, colour: grey, storeys: 16, width: {value: 30, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      concrete: {recipe: concrete, seed: 3, complexity: demo, east: -60, north: 0, height: {value: 0, unit: m}}
+      cyber: {recipe: cyber, seed: 4, complexity: demo, east: -20, north: 0, height: {value: 0, unit: m}}
+      mirror: {recipe: mirror, seed: 5, complexity: demo, east: 20, north: 0, height: {value: 0, unit: m}}
+      granite: {recipe: granite, seed: 6, complexity: demo, east: 60, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.08, 0.08, 0.085]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [4000, 4000, 2]
+        source: eye
+    suns:
+      sun:
+        toward: [0.45, -0.75, 0.5]
+        colour: {srgb_linear: [2.4, 2.1, 1.7]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.35, 0.38, 0.42]}
+      zenith: {srgb_linear: [0.08, 0.14, 0.3]}
+      ground: {srgb_linear: [0.05, 0.05, 0.05]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 11
+      age: 30
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        rain:
+          kind: rain
+          colour: {srgb_linear: [0.02, 0.019, 0.018]}
+          strength: 0.65
+          settle: 10
+          level: 0.2
+          length: 3
+          spacing: 0.6
+          share: 0.65
+        soot:
+          kind: soot
+          colour: {srgb_linear: [0.012, 0.011, 0.01]}
+          strength: 0.6
+          settle: 20
+          reach: 10
+          share: 0.35
+          grain: 1.4
+          shelter: 3
+          catch: 0.5
+        rust:
+          kind: rust
+          on: [steel]
+          colour: {srgb_linear: [0.25, 0.085, 0.03]}
+          strength: 0.9
+          settle: 15
+          level: 0.2
+          length: 3
+          spacing: 0.3
+          share: 0.8
+          grain: 0.4
+        # graffiti in layers, oldest first: faded pieces and tags, then
+        # pieces, throw-ups and tags over them, and a few high tags. a
+        # writer who climbs stands with open sky this far over them
+        # (shelter): a roof, not a sill with the storey above it
+        old-pieces:
+          kind: graffiti
+          mark: piece
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.3, 0.1, 0.12]}
+          other: {srgb_linear: [0.12, 0.2, 0.3]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.45
+          settle: 6
+          level: 0.2
+          grain: 6
+          low: 0.2
+          high: 2.6
+          share: 0.15
+          sought: 1
+          shunned: 0.03
+          catch: 2
+        old-tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.3, 0.25, 0.05]}
+          other: {srgb_linear: [0.3, 0.1, 0.05]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 1.1
+          low: 0.2
+          high: 2.4
+          share: 0.2
+          sought: 2
+          shunned: 0.03
+          catch: 2
+        pieces:
+          kind: graffiti
+          mark: piece
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.03, 0.55, 0.8]}
+          other: {srgb_linear: [0.1, 0.75, 0.2]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 5
+          low: 0.2
+          high: 2.6
+          share: 0.12
+          heaven: 0.3
+          behind: 0.6
+          shelter: 8
+          sought: 2
+          shunned: 0.03
+          catch: 2
+        throw-ups:
+          kind: graffiti
+          mark: throw-up
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3
+          low: 0.2
+          high: 2.8
+          share: 0.2
+          heaven: 0.3
+          behind: 0.6
+          shelter: 8
+          sought: 3
+          shunned: 0.03
+          catch: 2
+        tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.9, 0.7, 0.05]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.1
+          low: 0.2
+          high: 2.4
+          share: 0.2
+          heaven: 0.1
+          behind: 0.6
+          shelter: 8
+          sought: 5
+          shunned: 0.03
+          catch: 2
+        high-tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.03, 0.55, 0.8]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.4
+          low: 2.4
+          high: 3.5
+          share: 0.05
+          sought: 2
+          shunned: 0.03
+          catch: 2
+        empty:
+          kind: vacancy
+          on: [glazing, window]
+          colour: {srgb_linear: [0.22, 0.14, 0.08]}
+          other: {srgb_linear: [0.01, 0.01, 0.012]}
+          at: [-60, 0, 0]
+          facing: [0, -1, 0]
+          strength: 0.85
+          settle: 15
+          cell: 2
+          storey: 3.6
+          boarded: 0.4
+          broken: 0.3
+          proud: 0.03
+          plank: 0.3
+          share: 0.8
+          slant: 0.05
+          reach: 25

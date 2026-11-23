@@ -74,8 +74,8 @@ func run(t *testing.T, command string, args ...string) (string, int) {
 	return string(told), nothing
 }
 
-// Legacy rendering keeps its usage refusals and preserves Hillside failures.
-func TestAzazelRetainsLegacyRenderRefusals(t *testing.T) {
+// The render verb refuses bad usage and reports a scene that fails to run.
+func TestAzazelRefusesBadRenderUsage(t *testing.T) {
 	for _, x := range []struct {
 		args []string
 		code int

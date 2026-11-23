@@ -30,8 +30,8 @@ func TestVideoMDQuotesEachWorkedExampleWhole(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !strings.Contains(string(b),
-				strings.TrimRight(string(file), "\n")) {
+			quoted := strings.TrimRight(string(file), "\n")
+			if !strings.Contains(string(b), quoted) {
 				t.Errorf("VIDEO.md does not quote %s whole", path)
 			}
 		}

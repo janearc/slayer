@@ -1,0 +1,82 @@
+# every number meet_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: meet-ball-halvings
+    value: 3
+    says: how many times the icosahedron is halved to make the ball the walks are counted on
+    kind: picked
+    by: enough to give twelve hundred faces, so a walk that tried every face would be far over the bounds
+  - name: meet-seed-first
+    value: 11
+    says: the first of the two numbers that seed the random rays
+    kind: picked
+    by: any whole number does; this one is not the second
+  - name: meet-seed-second
+    value: 12
+    says: the second of the two numbers that seed the random rays
+    kind: picked
+    by: any whole number does; this one is not the first
+  - name: meet-rays
+    value: 1000
+    says: how many rays are sent from outside the ball, and again from inside it
+    kind: picked
+    by: enough rays that the total is steady, few enough to run quickly
+  - name: meet-outside-radius
+    value: 4
+    says: how far from the middle of the ball the rays from outside begin
+    kind: picked
+    by: well clear of the ball, whose radius is one
+  - name: meet-target-reach
+    value: 1.2
+    says: how far from the middle of the ball a ray from outside may be aimed, at most
+    kind: picked
+    by: a fifth past the ball's radius, so some rays miss it and most meet it
+  - name: meet-inside-reach
+    value: 0.9
+    says: how far from the middle of the ball a ray from inside may begin, at most
+    kind: picked
+    by: a tenth under the ball's radius, so each ray begins within the ball
+  # the eight bounds below were measured with the ball's corners and the
+  # rays' directions made one unit long by oneLong, which rounds each square
+  # before the squares are summed. measured so, an arm64 build and an amd64
+  # build count the same. each bound is its measure and a twentieth more,
+  # rounded up to a whole number.
+  - name: meet-outside-most
+    value: 50
+    says: the most nodes one ray from outside may enter
+    kind: picked
+    by: the most measured, which was 47, and a twentieth more, rounded up
+  - name: meet-outside-tried
+    value: 23
+    says: the most faces one ray from outside may try
+    kind: picked
+    by: the most measured, which was 21, and a twentieth more, rounded up
+  - name: meet-outside-total
+    value: 15895
+    says: the most nodes all the rays from outside may enter
+    kind: picked
+    by: the total measured, which was 15138, and a twentieth more, rounded up
+  - name: meet-outside-all
+    value: 3708
+    says: the most faces all the rays from outside may try
+    kind: picked
+    by: the total measured, which was 3531, and a twentieth more, rounded up
+  - name: meet-inside-most
+    value: 38
+    says: the most nodes one ray from inside may enter
+    kind: picked
+    by: the most measured, which was 36, and a twentieth more, rounded up
+  - name: meet-inside-tried
+    value: 10
+    says: the most faces one ray from inside may try
+    kind: picked
+    by: the most measured, which was 9, and a twentieth more, rounded up
+  - name: meet-inside-total
+    value: 20931
+    says: the most nodes all the rays from inside may enter
+    kind: picked
+    by: the total measured, which was 19934, and a twentieth more, rounded up
+  - name: meet-inside-all
+    value: 3554
+    says: the most faces all the rays from inside may try
+    kind: picked
+    by: the total measured, which was 3384, and a twentieth more, rounded up

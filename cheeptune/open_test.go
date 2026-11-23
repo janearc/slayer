@@ -39,7 +39,7 @@ func TestReadDocReadsBothKinds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if kind, err := Kind(b); kind != "score" || err != nil {
+	if kind, err := kind(b); kind != "score" || err != nil {
 		t.Errorf("@crypt reads as %q (%v)", kind, err)
 	}
 	// the other kind, which is the half the name promises and this test
@@ -48,7 +48,7 @@ func TestReadDocReadsBothKinds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if kind, err := Kind(b); kind != "voicing" || err != nil {
+	if kind, err := kind(b); kind != "voicing" || err != nil {
 		t.Errorf("@crypt-dmg reads as %q (%v)", kind, err)
 	}
 	if _, err := ReadDoc("@nothing-like-this"); err == nil {

@@ -37,10 +37,10 @@ func (source *RasterHeights) Indexed(ctx context.Context, block int, limitBytes 
 	return &copy, nil
 }
 
-// HeightRange bounds source heights, including the same declared radial offset
+// heightRange bounds source heights, including the same declared radial offset
 // used by Height. An unindexed description leaves the caller's global envelope
 // in force; it does not estimate a bound from a few sampled corners.
-func (source *RasterHeights) HeightRange(west, south, east, north float64) (float64, float64, bool, error) {
+func (source *RasterHeights) heightRange(west, south, east, north float64) (float64, float64, bool, error) {
 	if source == nil || source.index == nil {
 		return 0, 0, false, nil
 	}
@@ -71,13 +71,6 @@ func NewRasterHeights(raster *terrain.Raster, expectedCRS int, datum string,
 		return nil, err
 	}
 	return &RasterHeights{raster: raster, crs: expectedCRS, datum: datum, offset: heightOffset.InMetres()}, nil
-}
-
-// Reference reports the source interpretation, including an explicitly zero
-// offset. Keeping the original datum name prevents an output record from
-// presenting a declared radial approximation as a geodetic conversion.
-func (source *RasterHeights) Reference() (crs int, datum string, offset measure.Length) {
-	return source.crs, source.datum, measure.Metres(source.offset)
 }
 
 // Height retains absence and errors while applying the declared radial offset.
@@ -128,21 +121,21 @@ func (layers *Layers) Height(longitude, latitude float64) (float64, bool, error)
 	return 0, false, nil
 }
 
-// HeightRange includes every layer's possible values, regardless of source
+// heightRange includes every layer's possible values, regardless of source
 // preference. A layer without a known bound keeps the global envelope in use.
-func (layers *Layers) HeightRange(west, south, east, north float64) (float64, float64, bool, error) {
+func (layers *Layers) heightRange(west, south, east, north float64) (float64, float64, bool, error) {
 	if layers == nil || len(layers.sources) == 0 {
 		return 0, 0, false, nil
 	}
 	var minimum, maximum float64
 	for index, source := range layers.sources {
 		bounded, ok := source.(interface {
-			HeightRange(float64, float64, float64, float64) (float64, float64, bool, error)
+			heightRange(float64, float64, float64, float64) (float64, float64, bool, error)
 		})
 		if !ok {
 			return 0, 0, false, nil
 		}
-		low, high, has, err := bounded.HeightRange(west, south, east, north)
+		low, high, has, err := bounded.heightRange(west, south, east, north)
 		if err != nil || !has {
 			return 0, 0, false, err
 		}

@@ -6,16 +6,21 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// IntersectExact finds the first isolated intersection between r and the finite
-// piecewise-bilinear surface. It traverses only the grid cells crossed by the
-// ray; within each cell the ray/height equation is quadratic. It is an explicit
-// query and does not opt ordinary HeightField scene tracing into Hitter
-// dispatch; InfiniteMeanContinuation uses it for its sampled core.
+// IntersectExact finds the first isolated intersection between r and the
+// finite piecewise-bilinear surface. It traverses only the grid cells crossed
+// by the ray, at most two a sample and two more; within each cell the
+// ray/height equation is quadratic. Hit is the same search, kept off the
+// surface a ray leaves and clipped to the field's heights, for tracing;
+// InfiniteMeanContinuation asks this one for its sampled core.
 //
 // Like the analytic primitive hit tests, both ends of the requested interval
-// are exclusive. A ray lying along a patch has no first isolated hit.
-func (field *HeightField) IntersectExact(r maths.Ray, near, far float64) (float64, bool) {
-	if field == nil || field.n < 2 || len(field.heights) != field.n*field.n ||
+// are exclusive. A ray lying along a patch has no first isolated hit. A root
+// within seamSlack of a cell's edge is taken as on the cell, so a ray through
+// a grid vertex, or along a cell's edge, meets the surface there.
+func (field *HeightField) IntersectExact(r maths.Ray, near,
+	far float64) (float64, bool) {
+	if field == nil || field.samples < 2 ||
+		len(field.heights) != field.samples*field.samples ||
 		!(near < far) || math.IsNaN(near) || math.IsNaN(far) {
 		return 0, false
 	}
@@ -43,14 +48,14 @@ func (field *HeightField) IntersectExact(r maths.Ray, near, far float64) (float6
 	if math.IsInf(enter, 0) {
 		return 0, false
 	}
-	step := field.extent / float64(field.n-1)
+	step := field.extent / float64(field.samples-1)
 	along := enter
 	at := r.Point(along)
-	column := heightfieldCell(at.X, half, step, field.n, r.Dir.X)
-	row := heightfieldCell(at.Z, half, step, field.n, r.Dir.Z)
+	column := heightfieldCell(at.X, half, step, field.samples, r.Dir.X)
+	row := heightfieldCell(at.Z, half, step, field.samples, r.Dir.Z)
 	// A ray can cross at most n-1 vertical and n-1 horizontal cell edges.
 	// The bound also makes floating-point boundary degeneracies terminate.
-	for visited := 0; visited < 2*field.n+2 && along <= leave; visited++ {
+	for visited := 0; visited < 2*field.samples+2 && along <= leave; visited++ {
 		nextX := heightfieldNextCell(along, r.At.X, r.Dir.X,
 			column, half, step)
 		nextZ := heightfieldNextCell(along, r.At.Z, r.Dir.Z,
@@ -75,8 +80,8 @@ func (field *HeightField) IntersectExact(r maths.Ray, near, far float64) (float6
 			row += sign(r.Dir.Z)
 			advanced = true
 		}
-		if !advanced || column < 0 || column >= field.n-1 ||
-			row < 0 || row >= field.n-1 {
+		if !advanced || column < 0 || column >= field.samples-1 ||
+			row < 0 || row >= field.samples-1 {
 			break
 		}
 		along = end
@@ -159,12 +164,12 @@ func (field *HeightField) hitCell(r maths.Ray, near, far, start, end float64,
 	if !(start <= end) {
 		return 0, false
 	}
-	base := row*field.n + column
+	base := row*field.samples + column
 	h00 := field.heights[base]
 	dxHeight := field.heights[base+1] - h00
-	dzHeight := field.heights[base+field.n] - h00
-	dxzHeight := field.heights[base+field.n+1] - field.heights[base+1] -
-		field.heights[base+field.n] + h00
+	dzHeight := field.heights[base+field.samples] - h00
+	dxzHeight := field.heights[base+field.samples+1] - field.heights[base+1] -
+		field.heights[base+field.samples] + h00
 	xCorner := -half + float64(column)*step
 	zCorner := -half + float64(row)*step
 	at := r.Point(start)
@@ -180,13 +185,18 @@ func (field *HeightField) hitCell(r maths.Ray, near, far, start, end float64,
 		return 0, false
 	}
 	width := end - start
+	slack := seamSlack * step / r.Dir.Len()
 	one, two, roots := heightfieldRoots(a, b, c)
 	for index, root := range [2]float64{one, two} {
 		if index >= roots {
 			break
 		}
-		along := start + root
-		if root >= 0 && root <= width && along > near && along < far {
+		if root < -slack || root > width+slack {
+			continue
+		}
+		// A root just outside the cell is on its edge, and is met there.
+		along := start + min(max(root, 0), width)
+		if along > near && along < far {
 			return along, true
 		}
 	}

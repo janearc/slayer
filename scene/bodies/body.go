@@ -72,11 +72,11 @@ func NewBody(name string, kind Kind, radius Span,
 	}
 	around := radius.InKilometres()
 	heavy := mass.InKilograms()
-	if !(around > 0) || math.IsInf(around, 1) {
+	if !(around > nought) || math.IsInf(around, infinitePositive) {
 		return Body{}, fmt.Errorf("bodies: %s's radius is %v km: "+
 			"above zero, finite", name, around)
 	}
-	if !(heavy > 0) || math.IsInf(heavy, 1) {
+	if !(heavy > nought) || math.IsInf(heavy, infinitePositive) {
 		return Body{}, fmt.Errorf("bodies: %s's mass is %v kg: "+
 			"above zero, finite", name, heavy)
 	}
@@ -103,16 +103,10 @@ func refusal(made bool, constructor string, complaint error) error {
 // nothing is hung. A part whose methods panic, as one embedding a nil
 // part does, is refused the same way.
 func (body *Body) wear(parts []Part) (err error) {
-	var trying Part
-	defer func() {
-		if lost := recover(); lost != nil {
-			err = fmt.Errorf("bodies: %s cannot wear a %T: its methods "+
-				"panic (%v), as a type embedding a nil part's do",
-				body.name, trying, lost)
-		}
-	}()
+	trying := &attempt{name: body.name}
+	defer trying.refuse(&err)
 	for _, part := range parts {
-		trying = part
+		trying.part = part
 		if part == nil {
 			return fmt.Errorf("bodies: %s cannot wear a nil part",
 				body.name)
@@ -128,10 +122,28 @@ func (body *Body) wear(parts []Part) (err error) {
 		}
 	}
 	for _, part := range parts {
-		trying = part
+		trying.part = part
 		part.hang(body)
 	}
 	return nil
+}
+
+// attempt is the part a body is trying to wear, held so that a part
+// whose methods panic can be named in the refusal.
+type attempt struct {
+	name string
+	part Part
+}
+
+// refuse turns a panic from the part's methods into the error it
+// points at. It is deferred, and recovers only when it is called by the
+// defer itself.
+func (trying *attempt) refuse(err *error) {
+	if lost := recover(); lost != nil {
+		*err = fmt.Errorf("bodies: %s cannot wear a %T: its methods "+
+			"panic (%v), as a type embedding a nil part's do",
+			trying.name, trying.part, lost)
+	}
 }
 
 // Turning is the body turning once a day, its axis leaning off its
@@ -140,7 +152,7 @@ func (body *Body) wear(parts []Part) (err error) {
 func (body Body) Turning(day time.Duration, tilt measure.Angle) Body {
 	body.day, body.tilt = day, tilt.InRadians()
 	if body.complaint == nil && !finite(body.tilt) {
-		body.complaint = fmt.Errorf("Turning's tilt is %v radians: a "+
+		body.complaint = fmt.Errorf("the tilt given to Turning is %v radians: a "+
 			"finite number is expected", body.tilt)
 	}
 	return body
@@ -383,9 +395,9 @@ func (body Body) Moons() []Moon {
 // is not finite is held, and Place refuses it. The body it
 // is called on keeps its tails as they were.
 func (body Body) Aimed(sun, trail maths.Vec) Body {
-	hold(&body.complaint, firstComplaint(
-		vecComplaint("Aimed's sun", sun),
-		vecComplaint("Aimed's trail", trail)))
+	sunComplaint := vecComplaint("Aimed's sun", sun)
+	trailComplaint := vecComplaint("Aimed's trail", trail)
+	hold(&body.complaint, firstComplaint(sunComplaint, trailComplaint))
 	body.tails = append([]Tail(nil), body.tails...)
 	for place := range body.tails {
 		body.tails[place].sun = sun

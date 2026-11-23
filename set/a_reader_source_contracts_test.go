@@ -30,7 +30,8 @@ func TestFrontFadesAndSingleTargetStandsKeepTheirLimits(t *testing.T) {
 }
 
 func TestRecipeSparkAxesAndFuelFootprintSurviveParsing(t *testing.T) {
-	raw := legacyNumericFixture(strings.Replace(fireRecipeFixture(t), "      flame:", sparkBlock+"      flame:", 1))
+	fixture := fireRecipeFixture(t)
+	raw := legacyNumericFixture(strings.Replace(fixture, "      flame:", sparkBlock+"      flame:", 1))
 	made, err := set.Read("spark-axes.yaml", []byte(raw))
 	if err != nil {
 		t.Fatal(err)
@@ -177,7 +178,8 @@ func TestFrontCountAllowsEightAndRefusesNinePlans(t *testing.T) {
 	for _, count := range []int{8, 9} {
 		var plans strings.Builder
 		for i := range count {
-			plans.WriteString(strings.Replace(entry, "through the grove:", fmt.Sprintf("front %d:", i), 1))
+			named := fmt.Sprintf("front %d:", i)
+			plans.WriteString(strings.Replace(entry, "through the grove:", named, 1))
 		}
 		edited := raw[:first] + plans.String() + raw[last:]
 		made, err := set.Read("front-count.yaml", []byte(edited))
@@ -211,7 +213,8 @@ func TestPositiveSharedSmokeRadiusCanBeLessThanOneMetre(t *testing.T) {
 func TestSparkRecipePropagatesTheCombinedLivingParticleBudget(t *testing.T) {
 	block := strings.Replace(sparkBlock, "rate: {value: 100", "rate: {value: 10000", 1)
 	block = strings.Replace(block, "lifetime: {value: 3", "lifetime: {value: 1", 1)
-	raw := legacyNumericFixture(strings.Replace(fireRecipeFixture(t), "      flame:", block+"      flame:", 1))
+	fixture := fireRecipeFixture(t)
+	raw := legacyNumericFixture(strings.Replace(fixture, "      flame:", block+"      flame:", 1))
 	if _, err := set.Read("spark-budget.yaml", []byte(raw)); err == nil ||
 		!strings.Contains(err.Error(), "embers: invalid source or too many living particles") {
 		t.Fatalf("combined particle budget: %v", err)

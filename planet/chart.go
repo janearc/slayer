@@ -43,12 +43,26 @@ const chartSide = 32
 // green and blue.
 const chartLight = 3
 
+// mostChartAcross is the most points a chart holds round the equator, so
+// its table of tiles stays a few megabytes however fine a cell is asked for.
+var mostChartAcross = pickCount("chart-most-across")
+
+// gridFits is whether a cell, in radians, makes a grid a chart can hold: at
+// least one point round the equator, and no more than mostChartAcross. A cell
+// that is not a number, or is endless, fits no grid.
+func gridFits(cell float64) bool {
+	around := circle / cell
+	return around > nothing && around <= float64(mostChartAcross)
+}
+
 // NewChart is a chart of a face on a body so many metres in radius, its
 // points cell radians apart at the equator, and whether there is one:
 // only a face whose air is read from a flow depends on nothing but the
-// point, the eye and the star once its pixel is fine.
+// point, the eye and the star once its pixel is fine. A cell too fine for
+// the chart's table, or no cell at all, makes none.
 func NewChart(face *Face, radius, cell float64) (*Chart, bool) {
-	if face.flow == nil || !positive(radius) || !positive(cell) {
+	if face.flow == nil || !positive(radius) || !positive(cell) ||
+		!gridFits(cell) {
 		return nil, false
 	}
 	across := int(math.Ceil(circle / cell))
@@ -70,7 +84,9 @@ func (chart *Chart) At(point maths.Vec) maths.Light {
 // face's own where the chart cannot stand for it.
 func (chart *Chart) Within(point maths.Vec, footprint float64) maths.Light {
 	face := chart.face
-	if footprint/point.Len() > frontStep*maths.Degree {
+	length := point.Len()
+	if !(length > nothing) || math.IsInf(length, whole) ||
+		footprint/length > frontStep*maths.Degree {
 		return face.Within(point, footprint)
 	}
 	up := point.Unit()

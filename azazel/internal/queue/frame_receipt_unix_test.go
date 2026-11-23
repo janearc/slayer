@@ -158,7 +158,7 @@ func TestFrameOptInSurvivesOldV3RequestRoundTrip(t *testing.T) {
 	if err != nil || repeated.Sequence != first.Sequence || !observeFrames(repeated.Request) {
 		t.Fatal(repeated, err)
 	}
-	// An older worker passes this already-supported environment entry normally.
+	// The worker passes this supported environment entry on to the job.
 	env := environment(repeated.Request)
 	if !slices.Contains(env, "SLAYER_OBSERVE_FRAMES=on") {
 		t.Fatal(env)
@@ -219,7 +219,8 @@ func TestFrameReceiptRunsThroughRealQueueAttempt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	lines := strings.Split(strings.TrimSpace(string(raw)), "\n")
+	trimmed := strings.TrimSpace(string(raw))
+	lines := strings.Split(trimmed, "\n")
 	if len(lines) != 4 {
 		t.Fatalf("receipt: %s", raw)
 	}

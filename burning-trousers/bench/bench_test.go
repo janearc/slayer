@@ -38,8 +38,8 @@ func scene(balls, lamps int, counts *fake.Counts) *thing.World {
 	}
 	for i := range lamps {
 		at := maths.V(float64(i%4)*3-4.5, 8, float64(i/4)*3-4.5)
-		world.Lamps = append(world.Lamps,
-			fake.NewLamp(at, maths.Grey(60), counts))
+		lamp := fake.NewLamp(at, maths.Grey(60), counts)
+		world.Lamps = append(world.Lamps, lamp)
 	}
 	return world
 }
@@ -73,9 +73,12 @@ func timed(b *testing.B, balls, lamps, pixels int,
 	}
 	b.StopTimer()
 	frames := float64(b.N * pixels)
-	b.ReportMetric(float64(b.Elapsed().Nanoseconds())/frames, "ns/pixel")
-	b.ReportMetric(float64(counts.Hits())/float64(pixels), "hits/pixel")
-	b.ReportMetric(float64(counts.Lights())/float64(pixels), "lights/pixel")
+	nanoseconds := float64(b.Elapsed().Nanoseconds())
+	hits := float64(counts.Hits())
+	lights := float64(counts.Lights())
+	b.ReportMetric(nanoseconds/frames, "ns/pixel")
+	b.ReportMetric(hits/float64(pixels), "hits/pixel")
+	b.ReportMetric(lights/float64(pixels), "lights/pixel")
 }
 
 // render times Render on one scene at one size.

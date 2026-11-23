@@ -1,0 +1,82 @@
+# the proof of the air over a bay (sets/haze-proof.yaml) with one air: the
+# deck of cloud, as sets/haze-proof-all.yaml says it, where its numbers and
+# sources are written. the deck is thickest over the marker to the
+# north-east and gone 7 km from it, so the low sun in the west-south-west
+# comes in under it. the camera looks up from the water at the deck.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: a proof of the cloud deck over a bay
+  seed: 1
+  light: sun
+  air: earth
+  # the sky's own light scattered in the cloud, as well as the sun's: a
+  # cloud's side away from the sun is lit by the sky. it is the isotropic
+  # single scattering the tracer has; light scattered many times in the
+  # cloud is not drawn.
+  volume-illumination: {model: isotropic-single, sky-samples: 4}
+  location:
+    lat: 22.5186
+    lon: 114.0151
+  timeofday: 1725
+  sun:
+    azimuth: 247.73
+    altitude: 2.37
+  terrain:
+    from: copernicus-glo30-n22-e114
+    lat: 22.5186
+    lon: 114.0151
+    across: 2000
+    down: 1500
+    step: 10
+    smooth: 60
+    sea: {value: 0, unit: m}
+  weather:
+    high cloud:
+      kind: prescribed-cloud
+      extinction: {value: 0.006, unit: m^-1}
+      base: {value: 1800, unit: m}
+      top: {value: 3400, unit: m}
+      coverage: 0.55
+      size: {value: 900, unit: m}
+      seed: 9
+      asymmetry: 0.85
+  atmosphere:
+    layers:
+      cloud deck:
+        weather: high cloud
+        extent: terrain
+        albedo: 1
+        beyond: {value: 8000, unit: m}
+        toward: {object: the cloud marker, reach: {value: 7000, unit: m}, least: 0}
+  film:
+    width: 320
+    height: 180
+    rays: 2
+    wide: 70
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    up:
+      title: "from the water 1.2 km south of the towers, 20 m up, looking north-east and up at the deck"
+      location:
+        at: [1200, -1500, 20]
+      orientation:
+        look_at: [3200, 1500, 1500]
+    sunward:
+      title: "from the water 1.2 km south of the towers, 20 m up, looking south-west and up toward the low sun under the deck"
+      location:
+        at: [1200, -1500, 20]
+      orientation:
+        look_at: [-728, -3798, 1100]
+  recipes:
+    t033: {kind: tower, irregularity: 0.99, script: simplified-chinese, pins: {plan: rounded, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 57, width: {value: 36, unit: m}}}
+    t100: {kind: tower, irregularity: 0.22, script: simplified-chinese, pins: {plan: y, skin: gothic, style: ribbon, shafts: 1, retail: true, signs: true, storeys: 56, width: {value: 36, unit: m}}}
+    t113: {kind: tower, irregularity: 0.36, script: simplified-chinese, pins: {plan: rounded, skin: vaporwave, style: punched, shafts: 1, retail: true, signs: true, storeys: 53, width: {value: 36, unit: m}}}
+  set:
+    things:
+      tower 033: {recipe: t033, seed: 1561, complexity: quick, east: 1332.5, north: 1264.2, heading: {value: 337.7, unit: deg}}
+      tower 100: {recipe: t100, seed: 2700, complexity: quick, east: 1468.0, north: 1060.4, heading: {value: 337.7, unit: deg}}
+      tower 113: {recipe: t113, seed: 2921, complexity: quick, east: 1369.0, north: 1175.4, heading: {value: 337.7, unit: deg}}
+      the cloud marker: {kind: human-scale-2m, seed: 1, east: 1950, north: 1450}

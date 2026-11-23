@@ -48,8 +48,14 @@ const sourcesList = "sources.yaml"
 // and the sources list nearest its set. A job that is not a set's still
 // is refused, so it is neither read nor kept.
 func pictureKey(wanted job.Job) diskcache.Key {
-	key := diskcache.NewKey(pictureKind).Built().
-		Digest("picture", wanted.PictureKey())
+	pictureJobKey := wanted.PictureKey()
+	return stillKey(diskcache.NewKey(pictureKind).Built().
+		Digest("picture", pictureJobKey), wanted)
+}
+
+// stillKey is a key of a job's still with the sources list nearest its
+// set laid on it, or refused where the job is not a set's still.
+func stillKey(key diskcache.Key, wanted job.Job) diskcache.Key {
 	set, isSet := wanted.Scene().Set()
 	if !isSet || !wanted.Clock().Still() {
 		return key.Text("kept", "only a set's still").
@@ -156,7 +162,8 @@ func writtenBeside(path string, written []byte) error {
 		err = os.Rename(part.Name(), path)
 	}
 	if err != nil {
-		return errors.Join(err, os.Remove(part.Name()))
+		partName := part.Name()
+		return errors.Join(err, os.Remove(partName))
 	}
 	return nil
 }

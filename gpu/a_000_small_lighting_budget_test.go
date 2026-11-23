@@ -10,6 +10,11 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
+// reserveLighting keeps source-grid ranges fixed before GPU preparation.
+func (encoded *scene) reserveLighting() {
+	encoded.reserveLightingAt(lightCells)
+}
+
 // Keep the adversarial arithmetic check before GPU fixtures. Submetre
 // bounds make a mistaken multiplication shrink the grid rather than
 // reserve gigabytes before a later assertion can notice the wrong size.

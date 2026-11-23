@@ -11,7 +11,15 @@ import (
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/settings"
 )
 
-var ErrCompositeAdmissionUnavailable = errors.New("composite: shared admission, resource reservations, locking and publication are unavailable; direct starts are refused")
+// refusal is a refusal of this package, held as a constant so that no one
+// can assign it.
+type refusal string
+
+// Error is the refusal's words.
+func (reason refusal) Error() string { return string(reason) }
+
+const ErrCompositeAdmissionUnavailable refusal = "composite: shared admission, resource reservations, locking and publication are unavailable; direct starts are refused"
+
 var ErrCompositeIdentityMismatch = errors.New("composite: dependency identity does not match execution")
 
 type CompositeEstimate struct {

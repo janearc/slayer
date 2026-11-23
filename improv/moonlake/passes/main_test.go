@@ -43,7 +43,8 @@ const baseSet = `scene:
 func runMain(t *testing.T, args ...string) string {
 	t.Helper()
 	saved, savedOut := os.Args, os.Stdout
-	out, err := os.Create(filepath.Join(t.TempDir(), "stdout"))
+	stdout := filepath.Join(t.TempDir(), "stdout")
+	out, err := os.Create(stdout)
 	if err != nil {
 		t.Fatal(err)
 	}

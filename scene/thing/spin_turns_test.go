@@ -8,19 +8,45 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// spinTurnsQuarter is a quarter of a turn, in radians.
+const spinTurnsQuarter = math.Pi / pair // defined: a right angle is half of pi
+
+// spinTurnsPointsFile holds the points the spin tests expect, by name.
+const spinTurnsPointsFile = "testdata/spin_turns_points.csv"
+
+// spinTurnsPoint is the point called name in spinTurnsPointsFile.
+func spinTurnsPoint(t *testing.T, name string) maths.Vec {
+	t.Helper()
+	rows := readSheet(t, spinTurnsPointsFile)
+	row := rows.row(t, spinTurnsPointsFile, name)
+	return maths.V(cell(t, row, "x"), cell(t, row, "y"), cell(t, row, "z"))
+}
+
+// spinTurnsPeriod is the time the spins tried take to turn once.
+func spinTurnsPeriod(t *testing.T) time.Duration {
+	t.Helper()
+	return time.Duration(picked(t, "spin-turns-period-seconds")) * time.Second
+}
+
+// spinTurnsOut is where the spin at an instant takes a direction.
+func spinTurnsOut(spin Spin, at time.Duration, axis maths.Vec) maths.Vec {
+	return spin.At(at).Orientation.Out(axis)
+}
+
 // a spin with no period never turns, at any time, but starts at its
 // Phase. worked by hand: a quarter turn about x takes y to z and z to
 // -y, and a quarter turn about up takes x to -z.
 func TestASpinOfNoPeriodStaysAtItsPhase(t *testing.T) {
-	about := Spin{Axis: maths.XAxis, Phase: math.Pi / 2}
-	for _, at := range []time.Duration{0, time.Second, time.Hour} {
-		o := about.At(at).Orientation
-		near(t, "y", o.Out(maths.YAxis), maths.ZAxis)
-		near(t, "z", o.Out(maths.ZAxis), maths.YAxis.Neg())
-		near(t, "x", o.Out(maths.XAxis), maths.XAxis)
+	about := Spin{Axis: maths.XAxis, Phase: spinTurnsQuarter}
+	for _, at := range []time.Duration{nought, time.Second, time.Hour} {
+		orientation := about.At(at).Orientation
+		near(t, "y", orientation.Out(maths.YAxis), maths.ZAxis)
+		near(t, "z", orientation.Out(maths.ZAxis), maths.YAxis.Neg())
+		near(t, "x", orientation.Out(maths.XAxis), maths.XAxis)
 	}
-	up := Spin{Phase: math.Pi / 2}
-	near(t, "x about up", up.At(time.Hour).Orientation.Out(maths.XAxis), maths.V(0, 0, -1))
+	up := Spin{Phase: spinTurnsQuarter}
+	minusZ := spinTurnsPoint(t, "minus-z")
+	near(t, "x about up", spinTurnsOut(up, time.Hour, maths.XAxis), minusZ)
 }
 
 // a spin turns from its Phase, and the other way when Period is below zero.
@@ -28,11 +54,15 @@ func TestASpinOfNoPeriodStaysAtItsPhase(t *testing.T) {
 // back: a Phase of a quarter and a quarter turn on is a half turn, which takes
 // x to -x; a period of minus 4 s at 1 s is a quarter back, which takes x to z.
 func TestASpinTurnsFromItsPhaseEitherWay(t *testing.T) {
-	half := Spin{Period: 4 * time.Second, Phase: math.Pi / 2}
-	near(t, "x half way", half.At(time.Second).Orientation.Out(maths.XAxis), maths.V(-1, 0, 0))
-	back := Spin{Period: -4 * time.Second}
-	near(t, "x a quarter back", back.At(time.Second).Orientation.Out(maths.XAxis), maths.ZAxis)
+	period := spinTurnsPeriod(t)
+	half := Spin{Period: period, Phase: spinTurnsQuarter}
+	minusX := spinTurnsPoint(t, "minus-x")
+	near(t, "x half way", spinTurnsOut(half, time.Second, maths.XAxis), minusX)
+	back := Spin{Period: -period}
+	backX := spinTurnsOut(back, time.Second, maths.XAxis)
+	near(t, "x a quarter back", backX, maths.ZAxis)
 	// about x, y goes to z in a quarter
-	x := Spin{Axis: maths.XAxis, Period: 4 * time.Second}
-	near(t, "y about x", x.At(time.Second).Orientation.Out(maths.YAxis), maths.ZAxis)
+	about := Spin{Axis: maths.XAxis, Period: period}
+	aboutY := spinTurnsOut(about, time.Second, maths.YAxis)
+	near(t, "y about x", aboutY, maths.ZAxis)
 }

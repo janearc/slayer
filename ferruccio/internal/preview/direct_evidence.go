@@ -7,17 +7,25 @@ import (
 	"path/filepath"
 )
 
+// TranscriptName is the file beside direct-request.json that holds
+// everything the child Slayer wrote, whole and in order, whether it
+// succeeded or not.
+const TranscriptName = "child-output.txt"
+
+// directLane is what a direct render records for its lane: it has none,
+// because Slayer is started by Ferruccio itself and not through Game.
+const directLane = "none"
+
 // writeDirectIntent preserves the explicit transport and exact foreground argv.
-func (plan *Plan) writeDirectIntent(tools Tools, producer, gameArgs []string) error {
-	game := append([]string{tools.Game}, gameArgs...)
-	raw, err := json.MarshalIndent(map[string]any{"transport": "slayer", "producer": producer, "game": game, "source_sha256": plan.Digest, "width": plan.Profile.Width, "height": plan.Profile.Height, "rays_per_axis": plan.Profile.samples(), "quality": plan.Profile.quality()}, "", "  ")
+func (plan *Plan) writeDirectIntent(_ Tools, producer []string) error {
+	raw, err := json.MarshalIndent(map[string]any{"transport": "slayer", "producer": producer, "lane": directLane, "source_sha256": plan.Digest, "width": plan.Profile.Width, "height": plan.Profile.Height, "rays_per_axis": plan.Profile.samples(), "quality": plan.Profile.quality()}, "", "  ")
 	if err != nil {
 		return err
 	}
 	if err := retainSubmissionFile(filepath.Join(plan.Directory, "direct-request.json"), raw); err != nil {
 		return err
 	}
-	exact, err := json.Marshal(game)
+	exact, err := json.Marshal(producer)
 	if err != nil {
 		return err
 	}
@@ -25,12 +33,13 @@ func (plan *Plan) writeDirectIntent(tools Tools, producer, gameArgs []string) er
 	if err != nil {
 		return err
 	}
-	text := fmt.Sprintf("Explicit shared-Slayer render through Game.\nExact argv (JSON): %s\nRequested image: %dx%d; rays per axis: %d; quality: %s.\nSource text SHA256: %s\nFrozen input: %q\nAudit YAML: scene.yaml\nInvocation: direct-request.json\nMeasured image and actual executable paths: receipt.json after completion.\nProcess completion is not artistic approval.\n", exact, profile.Width, profile.Height, profile.samples(), profile.quality(), plan.Digest, plan.Input)
+	text := fmt.Sprintf("Explicit shared-Slayer render, started directly: no Game lane.\nExact argv (JSON): %s\nRequested image: %dx%d; rays per axis: %d; quality: %s.\nSource text SHA256: %s\nFrozen input: %q\nAudit YAML: scene.yaml\nInvocation: direct-request.json\nMeasured image and actual executable paths: receipt.json after completion.\nProcess completion is not artistic approval.\n", exact, profile.Width, profile.Height, profile.samples(), profile.quality(), plan.Digest, plan.Input)
 	return retainSubmissionFile(filepath.Join(plan.Directory, "recipe.txt"), []byte(text))
 }
 
-// recordDirectIdentity names the actual producer and Game invoked, with no queue IDs.
-func (plan *Plan) recordDirectIdentity(tools Tools, producer, gameArgs []string) error {
+// recordDirectIdentity names the actual producer invoked, with no Game and no
+// queue IDs, and says the render had no lane.
+func (plan *Plan) recordDirectIdentity(tools Tools, producer []string) error {
 	path := filepath.Join(plan.Directory, "receipt.json")
 	raw, err := os.ReadFile(path)
 	if err != nil {
@@ -43,7 +52,7 @@ func (plan *Plan) recordDirectIdentity(tools Tools, producer, gameArgs []string)
 	receipt["transport"] = "slayer"
 	receipt["source_shelf"], receipt["cache_directory"] = tools.Shelf, tools.Cache
 	receipt["producer"], receipt["producer_arguments"] = producer[0], producer[1:]
-	receipt["game"], receipt["game_arguments"] = tools.Game, gameArgs
+	receipt["lane"] = directLane
 	raw, err = json.MarshalIndent(receipt, "", "  ")
 	if err != nil {
 		return err

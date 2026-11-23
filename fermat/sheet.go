@@ -31,7 +31,7 @@ func (proof Proof) Write(dir string) error {
 }
 
 // page is the name of a pixel's page of work.
-func (pixel Pixel) page() string {
+func (pixel checkedPixel) page() string {
 	return fmt.Sprintf("pixel-%d-%d.md", pixel.X, pixel.Y)
 }
 
@@ -51,7 +51,7 @@ func (proof Proof) index() string {
 		"raw's to the bit.\n\n")
 	for i, pixel := range proof.Pixels {
 		verdict := "holds"
-		if !pixel.Holds() {
+		if !pixel.holds() {
 			verdict = "FAILS: " + pixel.why()
 		}
 		fmt.Fprintf(&page, "%d. pixel %d, %d: %s ([work](%s))\n", i+1,
@@ -61,7 +61,7 @@ func (proof Proof) index() string {
 }
 
 // why is how a pixel that fails differs from the raw.
-func (pixel Pixel) why() string {
+func (pixel checkedPixel) why() string {
 	if pixel.Err != nil {
 		return "it could not be made: " + pixel.Err.Error()
 	}
@@ -71,10 +71,10 @@ func (pixel Pixel) why() string {
 
 // work is a pixel's page: whether it holds, then every step that made
 // it, in order.
-func (pixel Pixel) work() string {
+func (pixel checkedPixel) work() string {
 	var page strings.Builder
 	fmt.Fprintf(&page, "# pixel %d, %d\n\n", pixel.X, pixel.Y)
-	if pixel.Holds() {
+	if pixel.holds() {
 		fmt.Fprintf(&page, "holds: made again as %s, the raw's "+
 			"light to the bit.\n\n", light(pixel.Made))
 	} else {
@@ -108,7 +108,7 @@ func (proof Proof) Mark(picture *image.RGBA) {
 	failed := color.RGBA{R: 255, A: 255}
 	for _, pixel := range proof.Pixels {
 		ink := held
-		if !pixel.Holds() {
+		if !pixel.holds() {
 			ink = failed
 		}
 		square(picture, pixel.X, pixel.Y, 3, ink)

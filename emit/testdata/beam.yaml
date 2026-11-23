@@ -1,7 +1,8 @@
 # Authored contract fixtures: 2026-11-07.
 # Gaussian ratio is exp(-2); expected quadrature is 8*pi*2^2/2.
 # The integration disc extends beyond five local radii at every plane.
-# Sodium context, not a calibrated power: doc/guide-stars.md.
+# Sodium context, not a calibrated power:
+# doc/model/observatory/guide-stars.md.
 source:
   at: {x: 3, y: 4, z: 5}
   toward: {x: 0, y: 2, z: 0}

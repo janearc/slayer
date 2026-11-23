@@ -1,3 +1,5 @@
+# no need to check this
+CHANGELOG.md
 cmd/quorum
 cmd/show
 azazel/internal/locking/DESIGN.md
@@ -5,20 +7,25 @@ azazel/internal/locking/RELEASE.md
 azazel/internal/publication/LOCAL-DESIGN.md
 doc/camera-hyperlapse-result.md
 doc/feature-backlog.md
-doc/golden-hour-site.yaml
 doc/mist-packet-contract.md
 doc/music-timeline.yaml
 doc/phone-ocean-integration.md
 doc/phone-source-checks.md
 doc/review-2026-11-04.md
 doc/terrain-streaming.md
-hillside/main_draw_test.go
+session/main_draw_test.go
 manufacture/offered_test.go
 manufacture/rows_test.go
 shelf
+study
 # a never-word turns up by chance in the compressed bytes of this film;
 # sweep cannot allow a never-word, so the film is excluded, with approval
 doc/visualguide/grissom-earth-turning.mp4
+# the same, in the bytes of the three original Cassini and Huygens models,
+# which are kept for the record and not distributed; excluded, with approval
+research/cassini-huygens/attached.glb
+research/cassini-huygens/cassini.glb
+research/cassini-huygens/huygens.glb
 # ferruccio's bundled assets, moved here from ferruccio/.game: a release
 # reads only the top's exclusions
 ferruccio/internal/assets

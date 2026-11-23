@@ -1,0 +1,122 @@
+# every number mesh_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: mesh-closed-ball-halvings
+    value: 2
+    says: how many times the ball whose closedness is tested is halved
+    kind: picked
+    by: few enough to stay small, and enough that the ball has more faces than a bare icosahedron
+  - name: mesh-cube-seed-first
+    value: 1
+    says: the first seed of the stream of rays aimed at the cube
+    kind: picked
+    by: the smallest seed, so the stream is the same on every run
+  - name: mesh-cube-seed-second
+    value: 2
+    says: the second seed of the stream of rays aimed at the cube
+    kind: picked
+    by: the seed after the first, so the two differ
+  - name: mesh-cube-rays
+    value: 10000
+    says: how many rays are aimed at the cube
+    kind: picked
+    by: enough to meet every side of the cube and to miss it near its edges
+  - name: mesh-cube-start-radius
+    value: 3
+    says: how far from the cube's middle each ray starts
+    kind: picked
+    by: well outside the cube, whose corners are under one from its middle
+  - name: mesh-cube-aim-reach
+    value: 1.4
+    says: how far from the middle the point a ray aims at may be, along each axis, scaled from a half either way
+    kind: picked
+    by: a few tenths past the cube's side, so some rays miss it
+  - name: mesh-cube-meet-tolerance
+    value: 1e-14
+    says: how far, as a part of the distance, the mesh may meet the cube from the box's slabs
+    kind: picked
+    by: about forty steps of a float64 near one, wide enough for the sums of two faces' arithmetic
+  - name: mesh-cube-facing-tolerance
+    value: 1e-9
+    says: how far twice the side a ray lands on may be from twice the largest part of the point
+    kind: picked
+    by: a thousand times the tolerance of the meeting, which the point is found from
+  - name: mesh-cube-length-tolerance
+    value: 1e-12
+    says: how far a normal's length may be from one
+    kind: picked
+    by: a thousand times past the float64 step near one
+  - name: mesh-slip-halvings
+    value: 3
+    says: how many times the ball the rays leave is halved
+    kind: picked
+    by: enough faces that many edges and corners are aimed at
+  - name: mesh-slip-seed-first
+    value: 3
+    says: the first seed of the stream of random aims
+    kind: picked
+    by: a seed that is none of the seeds of the other tests, so the streams differ
+  - name: mesh-slip-seed-second
+    value: 4
+    says: the second seed of the stream of random aims
+    kind: picked
+    by: the seed after the first, so the two differ
+  - name: mesh-slip-random-aims
+    value: 20000
+    says: how many random points are aimed at, besides the corners and the edges' middles
+    kind: picked
+    by: enough to catch a rare gap between faces
+  - name: mesh-sphere-halvings
+    value: 3
+    says: how many times the ball met at the sphere is halved
+    kind: picked
+    by: enough that its faces are close to the sphere
+  - name: mesh-sphere-seed-first
+    value: 5
+    says: the first seed of the stream of directions the ball is met from
+    kind: picked
+    by: a seed that is none of the seeds of the other tests, so the streams differ
+  - name: mesh-sphere-seed-second
+    value: 6
+    says: the second seed of the stream of directions the ball is met from
+    kind: picked
+    by: the seed after the first, so the two differ
+  - name: mesh-sphere-rays
+    value: 5000
+    says: how many rays are aimed at the ball
+    kind: picked
+    by: enough to cover the ball's faces from all sides
+  - name: mesh-sphere-start-radius
+    value: 4
+    says: how far from the ball's middle each ray starts
+    kind: picked
+    by: well outside the ball, whose radius is one
+  - name: mesh-sphere-tolerance
+    value: 1e-12
+    says: how far a ray's distance to the ball may lie outside the range the faces allow
+    kind: picked
+    by: a thousand times past the float64 step near four
+  - name: mesh-finite-corner
+    value: 3
+    says: which corner of the cube has a part made bad
+    kind: picked
+    by: a corner away from the origin corner, which every face of one side leans on
+  - name: mesh-far-reach
+    value: 1e300
+    says: a finite part of a point so large that it is nearly the largest a float64 holds
+    kind: picked
+    by: three hundred places over one, finite, and far past any size a scene has
+  - name: mesh-blend-length-squared
+    value: 0.38
+    says: the squared length of the blend of the three normals by their weights
+    kind: picked
+    by: the sum of the squares of the weights, a fifth, three tenths and a half
+  - name: mesh-blend-tolerance
+    value: 1e-15
+    says: how far the blended normal may be from the one made by hand
+    kind: picked
+    by: about four steps of a float64 near one
+  - name: mesh-bounds-height
+    value: 2
+    says: the height on z at which the square of two faces stands
+    kind: picked
+    by: a height that is neither the square's side nor the origin, so its bounds are not a cube's

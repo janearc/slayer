@@ -12,14 +12,18 @@ import (
 )
 
 // oldAt is Picture.At as it was written, each tap through the image's At and
-// a power per channel.
+// a power per channel. Its direction is written out with each square rounded
+// before the sum, as the picture's own is: a sum of products the compiler is
+// free to fuse is not one number, so it cannot be held bit for bit.
 func oldAt(pic Picture, p maths.Vec) maths.Light {
 	if pic.Image == nil || pic.Image.Bounds().Empty() {
 		return maths.Light{}
 	}
-	d := p.Unit()
+	length := math.Sqrt(float64(p.X*p.X) + float64(p.Y*p.Y) + float64(p.Z*p.Z))
+	d := p.Scale(1 / length)
 	lon := math.Atan2(d.Z, d.X) + pic.Turn
-	lat := math.Asin(math.Max(-1, math.Min(1, d.Y)))
+	clamped := math.Max(-1, math.Min(1, d.Y))
+	lat := math.Asin(clamped)
 	u := lon/(2*math.Pi) + 0.5
 	u -= math.Floor(u)
 	v := 0.5 - lat/math.Pi
@@ -32,9 +36,10 @@ func oldAt(pic Picture, p maths.Vec) maths.Light {
 		px = ((px % w) + w) % w
 		py = max(0, min(h-1, py))
 		r, g, bl, _ := pic.Image.At(b.Min.X+px, b.Min.Y+py).RGBA()
-		return maths.RGB(srgb.ToLinear(float64(r)/65535),
-			srgb.ToLinear(float64(g)/65535),
-			srgb.ToLinear(float64(bl)/65535))
+		red := srgb.ToLinear(float64(r) / 65535)
+		green := srgb.ToLinear(float64(g) / 65535)
+		blue := srgb.ToLinear(float64(bl) / 65535)
+		return maths.RGB(red, green, blue)
 	}
 	top := sample(x0, y0).Scale(1 - fx).Add(sample(x0+1, y0).Scale(fx))
 	bottom := sample(x0, y0+1).Scale(1 - fx).
@@ -102,12 +107,14 @@ func TestPictureAtIsTheOldArithmeticBitForBit(t *testing.T) {
 // the tables hold what the curve gives for every part.
 func TestPictureTablesAreTheCurve(t *testing.T) {
 	for i := 0; i < 65536; i++ {
-		if math.Float64bits(linear16()[i]) != math.Float64bits(srgb.ToLinear(float64(i)/65535)) {
+		exact := srgb.ToLinear(float64(i) / 65535)
+		if math.Float64bits(linear16()[i]) != math.Float64bits(exact) {
 			t.Fatalf("linear16[%d]", i)
 		}
 	}
 	for i := 0; i < 256; i++ {
-		if math.Float64bits(linear8[i]) != math.Float64bits(srgb.ToLinear(float64(i*0x101)/65535)) {
+		exact := srgb.ToLinear(float64(i*0x101) / 65535)
+		if math.Float64bits(linear8[i]) != math.Float64bits(exact) {
 			t.Fatalf("linear8[%d]", i)
 		}
 	}

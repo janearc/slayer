@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/film"
+	"github.com/janearc/slayer/materials"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/thing"
@@ -16,6 +17,10 @@ import (
 
 // errNoWorld reports a nil world at a public rendering entry point.
 var errNoWorld = errors.New("trace: there is no world to draw")
+
+// notSpread is defined as the spread of a view whose rays each start at
+// the middle of their own fine pixel: no rays along a side to spread.
+const notSpread = 0
 
 // mostPixels limits total ray samples to 1 << 28 before allocation. A frame of
 // that many 20-byte pixels would occupy roughly 5 GiB.
@@ -30,8 +35,17 @@ type view struct {
 	at            time.Duration
 	width, height int
 	rays          int
-	inside        [mostHeld]held
-	holding       int
+	// side is the rays along a side of a pixel of the finished picture,
+	// which fine keeps when it makes every ray a pixel
+	side int
+	// spread is the rays along a pixel's side where the fine view's rays
+	// are spread over their pixels by film.Within, and ramp the width
+	// of the slope of the filter they are spread under; nought where
+	// each starts at the middle of its own fine pixel
+	spread  int
+	ramp    float64
+	inside  [mostHeld]held
+	holding int
 }
 
 // InitialMedium is one explicitly supplied clear medium the camera starts
@@ -54,6 +68,10 @@ type InitialMedium struct {
 	Index float64
 	// Rank determines which overlapping clear medium is active.
 	Rank int
+	// WaterComposition and Source retain observation metadata even when no
+	// homogeneous attenuation profile was supplied.
+	WaterComposition *materials.WaterComposition
+	Source           string
 	// ClearMedium supplies this medium's optional homogeneous RGB
 	// extinction and scene-to-metre conversion. Its name and properties
 	// must match any boundary material carrying the same named identity.
@@ -153,7 +171,7 @@ func newView(world *thing.World, eye maths.Subspace, lens film.Sensor,
 			mostPixels)
 	}
 	seen := view{world: world, eye: eye, lens: lens, at: moment,
-		width: width, height: height, rays: rays}
+		width: width, height: height, rays: rays, side: rays}
 	return seen, nil
 }
 
@@ -168,8 +186,14 @@ func finite(numbers ...float64) bool {
 }
 
 // fine expands dimensions by the sampling rate and uses one ray per pixel,
-// producing the high-resolution image to average afterward.
+// producing the high-resolution image to average afterward. Where the
+// world spreads its rays and a pixel has more than one, the fine view
+// remembers how many lie along a pixel's side, to place each by.
 func (seen view) fine() view {
+	ramp, spread := seen.world.Filter.Ramp()
+	if spread && seen.rays > oneRay {
+		seen.spread, seen.ramp = seen.rays, ramp
+	}
 	seen.width, seen.height = seen.width*seen.rays, seen.height*seen.rays
 	seen.rays = 1
 	return seen
@@ -246,9 +270,8 @@ func paint(width, height int,
 // render traces a validated view, or returns the error of a scene that
 // cannot be drawn.
 func render(seen view) (*frame.Frame, error) {
-	scene := stage(seen.world, seen.at)
-	scene.enableClearInscatterFault(seen)
-	if err := scene.refusal(); err != nil {
+	scene, err := seen.staging()
+	if err != nil {
 		return nil, err
 	}
 	wide := seen.wide()
@@ -261,6 +284,23 @@ func render(seen view) (*frame.Frame, error) {
 	return drawn, nil
 }
 
+// staging is the scene the view is drawn through, made ready: staged for
+// the view's world and moment, and armed to refuse the in-scattering it
+// cannot represent as it is drawn; or the refusal of a scene that cannot
+// be drawn at all. Every entry that draws a view takes its scene here,
+// so that what one refuses before drawing all refuse.
+//
+// Four of the five, render, the kept draw, SampledEach and Replay, ask
+// again after painting, for what only drawing shows; band does not.
+func (seen view) staging() (*staged, error) {
+	scene := stage(seen.world, seen.at)
+	scene.enableClearInscatterFault(seen)
+	if err := scene.refusal(); err != nil {
+		return nil, err
+	}
+	return scene, nil
+}
+
 // wide returns the world's explicit angular pixel width when supplied,
 // otherwise estimating it from neighbouring camera rays.
 func (seen view) wide() float64 {
@@ -270,16 +310,34 @@ func (seen view) wide() float64 {
 	return pixelAngle(seen.eye, seen.lens, seen.width, seen.height)
 }
 
+// grain is the angular width of a pixel of the finished picture, from a
+// ray's: wrinkles finer than it would show as speckle among its rays.
+func (seen view) grain(wide float64) float64 {
+	return wide * float64(seen.side)
+}
+
+// look is the view's ray for pixel x, y: through its middle, or, where
+// the view's rays are spread, through the place film.Within gives it in
+// the picture's pixel it belongs to.
+func (seen view) look(x, y int) maths.Ray {
+	if seen.spread == notSpread {
+		return film.Look(seen.eye, seen.lens, x, y, seen.width,
+			seen.height, maths.Band{})
+	}
+	across, down := film.Within(x, y, seen.spread, seen.ramp)
+	return film.LookThrough(seen.eye, seen.lens, x, y, across, down,
+		seen.width, seen.height, maths.Band{})
+}
+
 // through traces the view's ray for pixel x, y through the staged scene.
 func (seen view) through(scene *staged, wide float64, x, y int) frame.Pixel {
-	ray := film.Look(seen.eye, seen.lens, x, y, seen.width, seen.height,
-		maths.Band{})
+	ray := seen.look(x, y)
 	if told := scene.walked; told != nil {
 		of := fmt.Sprintf("%dx%d", seen.width, seen.height)
 		told.tell("a ray from the lens", "x", x, "y", y, "of", of,
 			"ray", ray)
 	}
-	asked := look{ray: ray, pixel: wide}
+	asked := look{ray: ray, pixel: wide, grain: seen.grain(wide)}
 	if seen.holding > 0 {
 		asked.inside, asked.holding = seen.inside, seen.holding
 	}

@@ -8,6 +8,14 @@ import (
 	"testing"
 )
 
+// pluckCents is how far a plucked string may be from its note, and
+// decayTolerance how far a measured decay may be from the stated one, as a
+// share.
+const (
+	pluckCents     = 3
+	decayTolerance = 0.15
+)
+
 // analogSaw is a lead of one saw through a filter, held.
 func analogSaw(filter string) string {
 	return `{"kind": "analog", "role": "lead", ` + held + `,
@@ -38,7 +46,7 @@ func TestTheFiltersCutoffMovesTheSpectrumAsStated(t *testing.T) {
 	// opens two octaves with follow at one; and c3, an octave under
 	// middle c, closes an octave.
 	follows := `, "filter": {"cutoff": 500, "resonance": 0, "follow": 1}`
-	f := Filter{Cutoff: 500, Follow: 1}
+	f := filter{Cutoff: 500, Follow: 1}
 	if got := f.cutoff(middleC+24, 0); math.Abs(got-2000) > 1 {
 		t.Errorf("following, two octaves up the cutoff is %v", got)
 	}
@@ -47,7 +55,7 @@ func TestTheFiltersCutoffMovesTheSpectrumAsStated(t *testing.T) {
 			"close the filter")
 	}
 	// and its envelope opens it by its amount, in octaves.
-	f = Filter{Cutoff: 500}
+	f = filter{Cutoff: 500}
 	if got := f.cutoff(middleC, 3); math.Abs(got-4000) > 1 {
 		t.Errorf("opened three octaves the cutoff is %v", got)
 	}
@@ -117,7 +125,7 @@ func ringing(p *Piece, at, hertz float64) float64 {
 
 func TestAModalSetsPartialsAreAtItsRatiosAndDieInTheirTimes(t *testing.T) {
 	// three modes of our own, so the stated numbers are in the test.
-	modes := []Mode{{1, 2, 1}, {2.76, 1, 0.8}, {5.4, 0.5, 0.6}}
+	modes := []mode{{1, 2, 1}, {2.76, 1, 0.8}, {5.4, 0.5, 0.6}}
 	p := render(t, slow(`{"role": "lead", "bars": ["a3:4"]}`),
 		studioVoicing(struck(`{"hardness": 1, "modes": [
 			{"ratio": 1, "decay": 2, "level": 1},

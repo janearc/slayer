@@ -30,6 +30,8 @@ const (
 	spaceStructure      = spaceMirror + spaceOne
 	spaceFoil           = spaceStructure + spaceOne
 	spaceSecondary      = spaceFoil + spaceOne
+	spacePanel     slot = spaceSecondary + spaceOne
+	spaceGold           = spacePanel + spaceOne
 )
 
 // centimetresPerMetre is defined by the SI centi prefix.
@@ -37,7 +39,7 @@ const centimetresPerMetre = 100
 
 // SpacecraftDesigns names the supported visual construction templates.
 func SpacecraftDesigns() []string {
-	return []string{"spitzer", "hubble", "webb"}
+	return []string{"spitzer", "hubble", "webb", "prima", "roman"}
 }
 
 // Spacecraft scales a visual telescope template to an explicit aperture.
@@ -52,7 +54,7 @@ func Spacecraft(design string, aperture measure.Length) (*Kind, error) {
 			"manufacture: invalid spacecraft design or aperture")
 	}
 	row := spacecraft{design: design, aperture: aperture}
-	bounds := row.extent(row.dimensions())
+	bounds := row.reach(row.dimensions())
 	if !finite(bounds.Min.Len() + bounds.Max.Len()) {
 		return nil, fmt.Errorf(
 			"manufacture: non-finite spacecraft envelope")
@@ -72,6 +74,12 @@ type spacecraftSize struct {
 // dimensions combines the declared aperture with its template proportions.
 func (row spacecraft) dimensions() spacecraftSize {
 	aperture := row.aperture.InMetres()
+	if row.design == "roman" {
+		return spacecraftSize{aperture: aperture,
+			length: research.Value("roman-deployed-length-metres"),
+			radius: research.Value("roman-deployed-width-metres") * spaceHalf,
+			span:   research.Value("roman-deployed-width-metres")}
+	}
 	if row.design == "webb" {
 		reference := research.Value("webb-primary-diameter-metres")
 		scale := aperture / reference
@@ -80,6 +88,12 @@ func (row spacecraft) dimensions() spacecraftSize {
 		length := scale * research.Value("webb-shield-length-metres")
 		return spacecraftSize{aperture: aperture, length: aperture,
 			radius: radius, span: width, shieldLength: length}
+	}
+	if row.design == "prima" {
+		return spacecraftSize{aperture: aperture, length: aperture * primaValue("tube-length"),
+			radius:       aperture * primaValue("tube-radius"),
+			span:         aperture * primaValue("shield-span"),
+			shieldLength: aperture * primaValue("shield-length")}
 	}
 	return spacecraftSize{aperture: aperture,
 		length: aperture * spacecraftValue(row.design+"-length"),
@@ -104,6 +118,14 @@ func spacecraftRows() map[string]maker {
 			return spacecraft{design: "webb", aperture: measure.Metres(
 				research.Value("webb-primary-diameter-metres"))}
 		}, "webb"),
+		"prima": rowOf(func() spacecraft {
+			return spacecraft{design: "prima", aperture: measure.Metres(
+				research.Value("prima-primary-diameter-metres"))}
+		}, "prima"),
+		"roman": rowOf(func() spacecraft {
+			return spacecraft{design: "roman", aperture: measure.Metres(
+				research.Value("roman-primary-diameter-metres"))}
+		}, "roman"),
 	}
 }
 
@@ -129,10 +151,18 @@ func (row spacecraft) madeAt(from seed, detail string) (good, error) {
 			return good{}, err
 		}
 		row.exposed(assembly, size)
+	} else if row.design == "prima" {
+		row.prima(assembly, size)
+	} else if row.design == "roman" {
+		row.roman(assembly, size)
 	} else {
 		row.enclosed(assembly, size)
 	}
-	object, err := assembly.finish(row.extent(size))
+	if err := row.shareArrays(assembly); err != nil {
+		//ninja:vow feint maker needs a value; Things refuses this one
+		return good{}, err
+	}
+	object, err := assembly.finish(row.reach(size))
 	if err != nil {
 		//ninja:vow feint maker needs a value; Things refuses this one
 		return good{}, err
@@ -140,9 +170,33 @@ func (row spacecraft) madeAt(from seed, detail string) (good, error) {
 	return *object, nil
 }
 
-// extent uses structural dimensions, independently of tessellation.
-func (row spacecraft) extent(size spacecraftSize) maths.Box {
+// shareArrays stores the identical cells and covers of the craft's arrays
+// once each. Prima carries no array, so it is left as it is.
+func (row spacecraft) shareArrays(assembly *instrumentAssembly) error {
+	if row.design == "prima" {
+		return nil
+	}
+	return assembly.shareSolar(leaf, romanSolarString, solarCover)
+}
+
+// extent is the box of the spacecraft, from its structural dimensions and
+// not by making it.
+func (row spacecraft) extent(from seed) (maths.Box, error) {
+	return row.reach(row.dimensions()), nil
+}
+
+// reach uses structural dimensions, independently of tessellation.
+func (row spacecraft) reach(size spacecraftSize) maths.Box {
 	aperture := size.aperture
+	if row.design == "roman" {
+		return maths.SegmentBox(
+			maths.V(-size.span*spaceHalf,
+				-aperture*spacecraftValue("roman-envelope-below"),
+				-size.length*spaceHalf),
+			maths.V(size.span*spaceHalf,
+				aperture*spacecraftValue("roman-envelope-above"),
+				size.length*spaceHalf), spaceZero)
+	}
 	if row.design == "webb" {
 		// above the shield: the tower's rise and the telescope on it.
 		// below it, on the sun's side: the gap, the bus, and the antenna
@@ -157,6 +211,13 @@ func (row spacecraft) extent(size spacecraftSize) maths.Box {
 			maths.V(-size.span*spaceHalf, under,
 				-size.shieldLength*spaceHalf),
 			maths.V(size.span*spaceHalf, top,
+				size.shieldLength*spaceHalf), spaceZero)
+	}
+	if row.design == "prima" {
+		return maths.SegmentBox(
+			maths.V(-size.span*spaceHalf, -size.shieldLength*spaceHalf,
+				-size.shieldLength*spaceHalf),
+			maths.V(size.span*spaceHalf, size.shieldLength*spaceHalf,
 				size.shieldLength*spaceHalf), spaceZero)
 	}
 	bus := aperture * spacecraftValue("bus-height")

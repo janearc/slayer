@@ -1,269 +1,377 @@
-package noise
+package noise_test
 
 import (
 	"math"
 	"math/rand/v2"
 	"testing"
+
+	"github.com/janearc/slayer/maths/noise"
 )
 
-// referenceGrad is grad as it was written before 12 November 2026, a
-// switch on the hash, kept so the table that replaced it is held to it.
-func referenceGrad(h uint64, x, y, z float64) float64 {
-	switch h % 12 {
-	case 0:
+// The reference is maths/noise written out again here, outside the package,
+// in its plainest form: each of a cell's eight corners hashed whole, and
+// graded by a switch on the hash. The package is held to it bit for bit.
+// Its numbers are splitmix64's and Perlin's, each defined by them.
+const (
+	firstShift   = 30                 // defined by splitmix64: the first right shift
+	firstFactor  = 0xbf58476d1ce4e5b9 // defined by splitmix64: the first multiplier
+	secondShift  = 27                 // defined by splitmix64: the second right shift
+	secondFactor = 0x94d049bb133111eb // defined by splitmix64: the second multiplier
+	lastShift    = 31                 // defined by splitmix64: the last right shift
+	golden       = 0x9e3779b97f4a7c15 // defined by splitmix64: its golden gamma, the odd number it steps by
+	quinticLead  = 6                  // defined by Perlin's quintic: the number on t to the fifth
+	quinticDrop  = 15                 // defined by Perlin's quintic: the number taken off, on t to the fourth
+	quinticTail  = 10                 // defined by Perlin's quintic: the number on t cubed
+	cubeEdges    = 12                 // defined by a cube: its edges, the directions a corner may lean
+	octaveStep   = 0x632be59bd9b4e019 // defined by the recorded numbers: the step between octaves' seeds
+	octaveFall   = 0.5                // defined by the recorded numbers: each octave's share of the one before
+	octaveRise   = 2.03               // defined by the recorded numbers: how many times finer each octave is
+	nothing      = 0.0                // defined: no amount, what a sum starts at
+	one          = 1.0                // defined: an amplitude of one, the first octave's
+	spareBits    = 11                 // defined: the bits of a 64 bit hash past a 53 bit fraction
+	fraction     = 1 << 53            // defined: how many numbers a 53 bit fraction holds
+)
+
+// the twelve edges, in Perlin's order, as the switch names them
+const (
+	xPlusY = iota
+	minusXPlusY
+	xMinusY
+	minusXMinusY
+	xPlusZ
+	minusXPlusZ
+	xMinusZ
+	minusXMinusZ
+	yPlusZ
+	minusYPlusZ
+	yMinusZ
+	minusYMinusZ
+)
+
+// mix is splitmix64's finaliser, as the reference had it.
+func mix(bits uint64) uint64 {
+	bits ^= bits >> firstShift
+	bits *= firstFactor
+	bits ^= bits >> secondShift
+	bits *= secondFactor
+	return bits ^ bits>>lastShift
+}
+
+// bits3 is the whole hash of a seed and three indices, as the reference
+// had it.
+func bits3(seed uint64, first, second, third int64) uint64 {
+	under := mix(uint64(third) + golden)
+	columned := mix(uint64(second) + under)
+	placed := mix(uint64(first) + columned)
+	return mix(seed ^ placed)
+}
+
+// hashStepping is Hash with a step in place of the golden one: the index
+// plus the step is mixed, the seed is stirred in, and the top 53 bits are
+// the number. The reference Hash is hashStepping at golden.
+func hashStepping(step, seed uint64, index int64) float64 {
+	placed := mix(uint64(index) + step)
+	return float64(mix(seed^placed)>>spareBits) / fraction
+}
+
+// fade is Perlin's quintic, as the reference had it.
+func fade(along float64) float64 {
+	return along * along * along * (along*(along*quinticLead-quinticDrop) +
+		quinticTail)
+}
+
+// lerp is a straight line from one number to another, as the reference
+// had it.
+func lerp(along, from, to float64) float64 { return from + along*(to-from) }
+
+// referenceGrad is grad written as a switch on the hash.
+func referenceGrad(hashed uint64, x, y, z float64) float64 {
+	switch hashed % cubeEdges {
+	case xPlusY:
 		return x + y
-	case 1:
+	case minusXPlusY:
 		return -x + y
-	case 2:
+	case xMinusY:
 		return x - y
-	case 3:
+	case minusXMinusY:
 		return -x - y
-	case 4:
+	case xPlusZ:
 		return x + z
-	case 5:
+	case minusXPlusZ:
 		return -x + z
-	case 6:
+	case xMinusZ:
 		return x - z
-	case 7:
+	case minusXMinusZ:
 		return -x - z
-	case 8:
+	case yPlusZ:
 		return y + z
-	case 9:
+	case minusYPlusZ:
 		return -y + z
-	case 10:
+	case yMinusZ:
 		return y - z
 	}
 	return -y - z
 }
 
-// referenceGradient is Gradient as it was before 12 November 2026: each
-// of the eight corners hashed whole by bits3, and graded by the switch.
-func referenceGradient(seed uint64, x, y, z float64) float64 {
-	fx, fy, fz := math.Floor(x), math.Floor(y), math.Floor(z)
-	ix, iy, iz := int64(fx), int64(fy), int64(fz)
-	x, y, z = x-fx, y-fy, z-fz
-	u, v, w := fade(x), fade(y), fade(z)
-	g := func(dx, dy, dz int64) float64 {
-		h := bits3(seed, ix+dx, iy+dy, iz+dz)
-		return referenceGrad(h, x-float64(dx), y-float64(dy),
-			z-float64(dz))
+// turnedGrad is referenceGrad with the last edge's first sign turned
+// round: y - z in place of -y - z. It is the wrong noise the sweep is
+// shown, to see that it is caught.
+func turnedGrad(hashed uint64, x, y, z float64) float64 {
+	if hashed%cubeEdges == minusYMinusZ {
+		return y - z
 	}
-	return lerp(w,
-		lerp(v, lerp(u, g(0, 0, 0), g(1, 0, 0)),
-			lerp(u, g(0, 1, 0), g(1, 1, 0))),
-		lerp(v, lerp(u, g(0, 0, 1), g(1, 0, 1)),
-			lerp(u, g(0, 1, 1), g(1, 1, 1))))
+	return referenceGrad(hashed, x, y, z)
+}
+
+// grader is a grad: the dot of an offset with the edge a hash picks.
+type grader func(hashed uint64, x, y, z float64) float64
+
+// gradientOver is Gradient over a grader: each of the eight corners hashed
+// whole by bits3, and graded.
+func gradientOver(grad grader, seed uint64, x, y, z float64) float64 {
+	floorX, floorY, floorZ := math.Floor(x), math.Floor(y), math.Floor(z)
+	ix, iy, iz := int64(floorX), int64(floorY), int64(floorZ)
+	x, y, z = x-floorX, y-floorY, z-floorZ
+	easedX, easedY, easedZ := fade(x), fade(y), fade(z)
+	in := referenceCell{grad, seed, ix, iy, iz, x, y, z}
+	nearLow := lerp(easedX, in.corner(nought, nought, nought), in.corner(unity, nought, nought))
+	nearHigh := lerp(easedX, in.corner(nought, unity, nought), in.corner(unity, unity, nought))
+	farLow := lerp(easedX, in.corner(nought, nought, unity), in.corner(unity, nought, unity))
+	farHigh := lerp(easedX, in.corner(nought, unity, unity), in.corner(unity, unity, unity))
+	return lerp(easedZ, lerp(easedY, nearLow, nearHigh), lerp(easedY, farLow, farHigh))
+}
+
+// referenceCell is a point in its cell as the reference graded it: the
+// grader, the seed, the cell's lattice indices and the point's place in it.
+type referenceCell struct {
+	grad       grader
+	seed       uint64
+	ix, iy, iz int64
+	x, y, z    float64
+}
+
+// corner is one corner's share: hashed whole by bits3, and graded.
+func (in referenceCell) corner(dx, dy, dz int64) float64 {
+	hashed := bits3(in.seed, in.ix+dx, in.iy+dy, in.iz+dz)
+	return in.grad(hashed, in.x-float64(dx), in.y-float64(dy), in.z-float64(dz))
+}
+
+// referenceGradient is the reference's Gradient.
+func referenceGradient(seed uint64, x, y, z float64) float64 {
+	return gradientOver(referenceGrad, seed, x, y, z)
+}
+
+// turnedGradient is the reference's Gradient with one edge turned round.
+func turnedGradient(seed uint64, x, y, z float64) float64 {
+	return gradientOver(turnedGrad, seed, x, y, z)
+}
+
+// finite is whether a number is one: not NaN, and not infinite either
+// way, as the reference had it.
+func finite(value float64) bool {
+	return !math.IsNaN(value) && !math.IsInf(value, nought)
 }
 
 // referenceFractal is Fractal over referenceGradient.
 func referenceFractal(seed uint64, x, y, z float64, octaves int) float64 {
-	sum, amp, norm := 0.0, 1.0, 0.0
-	for o := range octaves {
+	return fractalRising(octaveRise, seed, x, y, z, octaves)
+}
+
+// fractalRising is referenceFractal with each octave finer than the one
+// before by rise in place of octaveRise: a fractal with a wrong constant,
+// to show the recorded rows are moved by one.
+func fractalRising(rise float64, seed uint64, x, y, z float64,
+	octaves int) float64 {
+	sum, amp, norm := nothing, one, nothing
+	for octave := range octaves {
 		if !finite(x) || !finite(y) || !finite(z) {
 			break
 		}
-		s := seed + uint64(o)*0x632be59bd9b4e019
-		sum += amp * referenceGradient(s, x, y, z)
+		field := seed + uint64(octave)*octaveStep
+		sum += amp * referenceGradient(field, x, y, z)
 		norm += amp
-		amp *= 0.5
-		x, y, z = x*2.03, y*2.03, z*2.03
+		amp *= octaveFall
+		x, y, z = x*rise, y*rise, z*rise
 	}
-	if norm == 0 {
-		return 0
+	if norm == nothing {
+		return nothing
 	}
 	return sum / norm
 }
 
-// sameBits is whether two numbers are one to the bit: a negative zero is
-// not a zero.
-func sameBits(one, other float64) bool {
-	return math.Float64bits(one) == math.Float64bits(other)
-}
-
-// offsets are the numbers grad is checked at: both zeros, the lattice's
-// steps, halves, and numbers that are not round.
-var offsets = []float64{0, math.Copysign(0, -1), 1, -1, 0.5, -0.5, 0.25,
-	-0.75, 1e-300, -1e-300, 0.1234567890123, -0.98765432109}
-
-// TestGradIsTheSwitchItReplaced checks every edge, twice round, at every
-// three offsets from the list: the table's number is the switch's, to
-// the bit, signed zeros among them.
-func TestGradIsTheSwitchItReplaced(t *testing.T) {
-	for h := range uint64(2 * cubeEdges) {
-		for _, x := range offsets {
-			for _, y := range offsets {
-				for _, z := range offsets {
-					want := referenceGrad(h, x, y, z)
-					if got := grad(h, x, y, z); !sameBits(got, want) {
-						t.Fatalf("edge %d at %v, %v, %v: %v, want %v", h,
-							x, y, z, got, want)
-					}
-				}
-			}
-		}
-	}
-}
-
-// sweepPoints and sweepFractals are how many random points the sweeps
-// ask, picked 2026-11-12 to take about a second together.
+// the kinds of point a sweep makes, by the point's number: one of its
+// coordinates rounded to the lattice, or moved to a half, or made a
+// signed zero; the other kinds are left as thrown
 const (
-	sweepPoints   = 2000000
-	sweepFractals = 200000
+	rounded = iota
+	halved
+	signedZero
 )
 
-// point is a seed and a place for a sweep: places near the middle, far
-// out, on the lattice, on halves, and a coordinate a signed zero.
-func point(random *rand.Rand, index int) (uint64, [3]float64) {
-	seed := random.Uint64()
-	scale := []float64{1, 40, 1e6, 1e12}[index%4]
-	at := [3]float64{random.NormFloat64() * scale,
-		random.NormFloat64() * scale, random.NormFloat64() * scale}
-	switch index % 7 {
-	case 0:
-		at[index%3] = math.Round(at[index%3])
-	case 1:
-		at[index%3] = math.Round(at[index%3]) + 0.5
-	case 2:
-		at[index%3] = math.Copysign(0, -1)
-	}
-	return seed, at
+// sweeping is a sweep set up from sweeps.csv and reaches.csv: its random
+// numbers, how many points it asks, and the scales it throws them at.
+type sweeping struct {
+	random *rand.Rand
+	points int
+	scales []float64
+	kinds  int
 }
 
-// sweep is how many of the random points a gradient differs from the
+// sweepOf is the sweep a row of sweeps.csv names.
+func sweepOf(test reporter, name string) sweeping {
+	test.Helper()
+	row := read(test, sweepsFile).by(test, sweepsFile, name)
+	var scales []float64
+	for _, reach := range read(test, reachesFile) {
+		scales = append(scales, float(test, reach, "scale"))
+	}
+	first, second := seed(test, row, "first"), seed(test, row, "second")
+	source := rand.NewPCG(first, second)
+	return sweeping{
+		random: rand.New(source),
+		points: int(whole(test, row, "points")),
+		scales: scales,
+		kinds:  count(test, "point-kinds")}
+}
+
+// point is a seed and a place for the sweep's next point: places near the
+// middle, far out, on the lattice, on halves, and a coordinate a signed
+// zero.
+func (sweep sweeping) point(index int) (uint64, place) {
+	seed := sweep.random.Uint64()
+	scale := sweep.scales[index%len(sweep.scales)]
+	at := [axes]float64{sweep.random.NormFloat64() * scale,
+		sweep.random.NormFloat64() * scale, sweep.random.NormFloat64() * scale}
+	axis := index % len(at)
+	switch index % sweep.kinds {
+	case rounded:
+		at[axis] = math.Round(at[axis])
+	case halved:
+		at[axis] = math.Round(at[axis]) + half
+	case signedZero:
+		at[axis] = math.Copysign(nought, -one)
+	}
+	return seed, place{at[nought], at[unity], at[pair]}
+}
+
+// apart is how many of the sweep's points a gradient differs from the
 // reference at, to the bit.
-func sweep(gradient func(uint64, float64, float64, float64) float64) int {
-	random := rand.New(rand.NewPCG(1, 2))
-	apart := 0
-	for index := range sweepPoints {
-		seed, at := point(random, index)
-		if !sameBits(gradient(seed, at[0], at[1], at[2]),
-			referenceGradient(seed, at[0], at[1], at[2])) {
-			apart++
+func (sweep sweeping) apart(gradient field) int {
+	found := nought
+	for index := range sweep.points {
+		seed, at := sweep.point(index)
+		if !sameBits(gradient(seed, at.x, at.y, at.z),
+			referenceGradient(seed, at.x, at.y, at.z)) {
+			found++
 		}
 	}
-	return apart
+	return found
 }
 
 // TestGradientIsTheReferenceToTheBit asks Gradient and the reference at
 // two million random points: not one bit differs.
-func TestGradientIsTheReferenceToTheBit(t *testing.T) {
-	if apart := sweep(Gradient); apart != 0 {
-		t.Fatalf("%d of %d points differ from the reference", apart,
-			sweepPoints)
+func TestGradientIsTheReferenceToTheBit(test *testing.T) {
+	sweep := sweepOf(test, "gradient")
+	if found := sweep.apart(noise.Gradient); found != nought {
+		test.Fatalf("%d of %d points differ from the reference", found,
+			sweep.points)
 	}
+}
+
+// nudgedUp is Gradient moved up by one unit in the last place.
+func nudgedUp(seed uint64, x, y, z float64) float64 {
+	return math.Nextafter(noise.Gradient(seed, x, y, z), plusInf())
 }
 
 // TestTheSweepCatchesOneWrongEdgeAndOneUlp is the anti-test: with one
 // edge's sign turned round, or a result moved by one unit in the last
 // place, the sweep finds points that differ.
-func TestTheSweepCatchesOneWrongEdgeAndOneUlp(t *testing.T) {
-	kept := edges[cubeEdges-1]
-	edges[cubeEdges-1].firstSign = plus
-	turned := sweep(Gradient)
-	edges[cubeEdges-1] = kept
-	if turned == 0 {
-		t.Error("one edge turned round went unseen")
+func TestTheSweepCatchesOneWrongEdgeAndOneUlp(test *testing.T) {
+	if sweepOf(test, "gradient").apart(turnedGradient) == nought {
+		test.Error("one edge turned round went unseen")
 	}
-	nudged := func(seed uint64, x, y, z float64) float64 {
-		return math.Nextafter(Gradient(seed, x, y, z), math.Inf(1))
+	sweep := sweepOf(test, "gradient")
+	if sweep.apart(nudgedUp) != sweep.points {
+		test.Error("a result one unit in the last place up went unseen")
 	}
-	if sweep(nudged) != sweepPoints {
-		t.Error("a result one unit in the last place up went unseen")
-	}
-	if !sameBits(0, 0) || sameBits(0, math.Copysign(0, -1)) {
-		t.Error("the bits of the zeros are not told apart")
+	if !sameBits(nought, nought) || sameBits(nought, math.Copysign(nought, -one)) {
+		test.Error("the bits of the zeros are not told apart")
 	}
 }
 
 // TestFractalIsTheReferenceToTheBit asks Fractal of one to eight octaves
 // at random points, and the reference: not one bit differs.
-func TestFractalIsTheReferenceToTheBit(t *testing.T) {
-	random := rand.New(rand.NewPCG(3, 4))
-	for index := range sweepFractals {
-		seed, at := point(random, index)
-		octaves := 1 + index%8
-		want := referenceFractal(seed, at[0], at[1], at[2], octaves)
-		if got := Fractal(seed, at[0], at[1], at[2], octaves); !sameBits(
-			got, want) {
-			t.Fatalf("seed %d at %v, %d octaves: %v, want %v", seed, at,
+func TestFractalIsTheReferenceToTheBit(test *testing.T) {
+	sweep, most := sweepOf(test, "fractal"), count(test, "most-octaves")
+	for index := range sweep.points {
+		seed, at := sweep.point(index)
+		octaves := unity + index%most
+		want := referenceFractal(seed, at.x, at.y, at.z, octaves)
+		got := noise.Fractal(seed, at.x, at.y, at.z, octaves)
+		if !sameBits(got, want) {
+			test.Fatalf("seed %d at %v, %d octaves: %v, want %v", seed, at,
 				octaves, got, want)
 		}
 	}
 }
 
-// TestTheCornersAreBits3s holds the shared hash to bits3 for the eight
-// corners of cells near the middle and at the ends of the int64s.
-func TestTheCornersAreBits3s(t *testing.T) {
-	for _, cell := range [][3]int64{{0, 0, 0}, {-1, 5, -7},
-		{math.MaxInt64, math.MinInt64, -1}, {3, math.MaxInt64, 12}} {
-		inner := corners(cell[1], cell[2])
-		for dx := range int64(2) {
-			for dy := range int64(2) {
-				for dz := range int64(2) {
-					want := bits3(9, cell[0]+dx, cell[1]+dy, cell[2]+dz)
-					got := mix(9 ^ mix(uint64(cell[0]+dx)+inner[dy][dz]))
-					if got != want {
-						t.Errorf("cell %v corner %d%d%d: %#x, want %#x",
-							cell, dx, dy, dz, got, want)
-					}
-				}
-			}
-		}
+// threeSeeds are the seeds Fractals is asked at once: a run from the
+// first, or on the odd points the first, a random one and the first
+// with its last bit turned.
+func threeSeeds(sweep sweeping, first uint64, index int) []uint64 {
+	if index%pair == unity {
+		return []uint64{first, sweep.random.Uint64(), first ^ unity}
 	}
+	return []uint64{first, first + unity, first + pair}
 }
 
-// fractalSeeds is how many seeds the shared sweeps ask at once: three,
-// as a smoke column's eddies ask them, picked 2026-11-12.
-const fractalSeeds = 3
+// octaveCounts are the octave counts of counts.csv.
+func octaveCounts(test reporter) []int {
+	test.Helper()
+	var counts []int
+	for _, row := range read(test, countsFile) {
+		octaves := int(whole(test, row, "octaves"))
+		counts = append(counts, octaves)
+	}
+	return counts
+}
 
 // TestFractalsAreFractalsToTheBit asks Fractals for three seeds at two
 // hundred thousand random points, signed zeros and lattice points among
 // them, from no octaves to past what a float holds: each result is the
 // reference Fractal of its own seed, to the bit.
-func TestFractalsAreFractalsToTheBit(t *testing.T) {
-	random := rand.New(rand.NewPCG(5, 6))
-	octaveCounts := []int{-1, 0, 1, 2, 4, 6, 8}
-	into := make([]float64, fractalSeeds)
-	for index := range sweepFractals {
-		seed, at := point(random, index)
-		seeds := []uint64{seed, seed + 1, seed + 2}
-		if index%2 == 1 {
-			seeds = []uint64{seed, random.Uint64(), seed ^ 1}
-		}
-		octaves := octaveCounts[index%len(octaveCounts)]
-		Fractals(seeds, at[0], at[1], at[2], octaves, into)
-		for which, one := range seeds {
-			want := referenceFractal(one, at[0], at[1], at[2], octaves)
+func TestFractalsAreFractalsToTheBit(test *testing.T) {
+	sweep, counts := sweepOf(test, "fractals"), octaveCounts(test)
+	into := make([]float64, count(test, "fractal-seeds"))
+	for index := range sweep.points {
+		first, at := sweep.point(index)
+		seeds := threeSeeds(sweep, first, index)
+		octaves := counts[index%len(counts)]
+		noise.Fractals(seeds, at.x, at.y, at.z, octaves, into)
+		for which, each := range seeds {
+			want := referenceFractal(each, at.x, at.y, at.z, octaves)
 			if !sameBits(into[which], want) {
-				t.Fatalf("seed %d at %v, %d octaves: %v, want %v", one, at,
+				test.Fatalf("seed %d at %v, %d octaves: %v, want %v", each, at,
 					octaves, into[which], want)
 			}
 		}
 	}
 }
 
-// pastAFloat is octaves enough that a point's octaves overflow a float,
-// and overflowPoints how many points ask that many, picked 2026-11-12:
-// each asks a thousand octaves, so a few hundred say it.
-const (
-	pastAFloat     = 1100
-	overflowPoints = 300
-)
-
 // TestFractalsPastWhatAFloatHoldsAreFractals asks octaves past where a
 // coordinate overflows: the octaves past it are left out, as Fractal
 // leaves them, to the bit.
-func TestFractalsPastWhatAFloatHoldsAreFractals(t *testing.T) {
-	random := rand.New(rand.NewPCG(7, 8))
-	into := make([]float64, fractalSeeds)
-	for index := range overflowPoints {
-		seed, at := point(random, index)
-		seeds := []uint64{seed, seed + 1, seed + 2}
-		Fractals(seeds, at[0], at[1], at[2], pastAFloat, into)
-		for which, one := range seeds {
-			want := referenceFractal(one, at[0], at[1], at[2], pastAFloat)
+func TestFractalsPastWhatAFloatHoldsAreFractals(test *testing.T) {
+	sweep, octaves := sweepOf(test, "overflow"), count(test, "past-a-float")
+	into := make([]float64, count(test, "fractal-seeds"))
+	for index := range sweep.points {
+		first, at := sweep.point(index)
+		seeds := []uint64{first, first + unity, first + pair}
+		noise.Fractals(seeds, at.x, at.y, at.z, octaves, into)
+		for which, each := range seeds {
+			want := referenceFractal(each, at.x, at.y, at.z, octaves)
 			if !sameBits(into[which], want) {
-				t.Fatalf("seed %d at %v: %v, want %v", one, at,
+				test.Fatalf("seed %d at %v: %v, want %v", each, at,
 					into[which], want)
 			}
 		}
@@ -274,24 +382,31 @@ func TestFractalsPastWhatAFloatHoldsAreFractals(t *testing.T) {
 // same seeds asked in the other order give their results in that order,
 // so a result put in another seed's place is caught; and the places of
 // into past the seeds are left as they were.
-func TestFractalsTellSeedsApartAndLeaveTheRestAlone(t *testing.T) {
-	const kept = 42.0
-	into := []float64{0, 0, 0, kept}
-	Fractals([]uint64{7, 8, 9}, 0.3, 1.7, -2.2, 5, into)
-	turned := make([]float64, fractalSeeds)
-	Fractals([]uint64{9, 8, 7}, 0.3, 1.7, -2.2, 5, turned)
-	if !sameBits(into[0], turned[2]) || sameBits(into[0], turned[0]) {
-		t.Error("the seeds' results are not in their seeds' places")
+func TestFractalsTellSeedsApartAndLeaveTheRestAlone(test *testing.T) {
+	first, kept := pickedSeed(test, "fractal-seed"), picked(test, "kept")
+	row := read(test, recordedFile).by(test, recordedFile,
+		"Fractal of 7 over five octaves")
+	at := place{float(test, row, "a"), float(test, row, "b"),
+		float(test, row, "c")}
+	octaves := count(test, "fractal-octaves")
+	seeds := []uint64{first, first + unity, first + pair}
+	into := []float64{nought, nought, nought, kept}
+	noise.Fractals(seeds, at.x, at.y, at.z, octaves, into)
+	turned := make([]float64, len(seeds))
+	noise.Fractals([]uint64{first + pair, first + unity, first}, at.x, at.y,
+		at.z, octaves, turned)
+	if !sameBits(into[nought], turned[pair]) || sameBits(into[nought], turned[nought]) {
+		test.Error("the seeds' results are not in their seeds' places")
 	}
-	if into[fractalSeeds] != kept {
-		t.Errorf("a place past the seeds became %v", into[fractalSeeds])
+	if into[len(seeds)] != kept {
+		test.Errorf("a place past the seeds became %v", into[len(seeds)])
 	}
-	if !sameBits(into[0], Fractal(7, 0.3, 1.7, -2.2, 5)) {
-		t.Error("Fractals is not Fractal for the first seed")
+	if !sameBits(into[nought], noise.Fractal(first, at.x, at.y, at.z, octaves)) {
+		test.Error("Fractals is not Fractal for the first seed")
 	}
 	none := []float64{kept}
-	Fractals(nil, 0.3, 1.7, -2.2, 5, none)
-	if none[0] != kept {
-		t.Error("no seeds wrote a result")
+	noise.Fractals(nil, at.x, at.y, at.z, octaves, none)
+	if none[nought] != kept {
+		test.Error("no seeds wrote a result")
 	}
 }

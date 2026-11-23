@@ -1,0 +1,7 @@
+name,x,y,z,radius,height
+small,0,0,0,.5,.25
+broad,0,0,0,1000,20
+short,3,2,-5,2,1
+tall,-8,0,7,3,20
+wide,3,0,-5,10,20
+field,0,0,0,2,3

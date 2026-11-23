@@ -24,7 +24,8 @@ func lampAt(lamp thing.Lamp) maths.Light {
 // world with the one lamp it was staged with.
 func TestAStagedWorldKeepsItsOwnLamps(t *testing.T) {
 	world := thing.NewWorld()
-	world.Lamp(thing.Sun(sunwards, maths.Grey(0.5)))
+	light := maths.Grey(0.5)
+	world.Lamp(thing.Sun(sunwards, light))
 	want := lampAt(world.Lamps[0])
 	scene := stage(world, 0)
 	world.Lamps[0] = otherSun()

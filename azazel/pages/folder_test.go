@@ -119,7 +119,8 @@ func TestOwnPagesAreWrittenOverInPlace(t *testing.T) {
 	publishOnce(t, root, folder)
 	publishOnce(t, root, folder)
 	dir := folder.path(root)
-	if !strings.Contains(read(t, filepath.Join(dir, pageName)), folderMark) {
+	pageText := read(t, filepath.Join(dir, pageName))
+	if !strings.Contains(pageText, folderMark) {
 		t.Fatal("the script's page was not replaced")
 	}
 	if _, err := os.Lstat(filepath.Join(dir, handPageName)); err == nil {
@@ -140,7 +141,8 @@ func TestHandPageLinkedBeforeAFailedWriteIsStillReplaced(t *testing.T) {
 	if notice := publishOnce(t, root, handFolder); notice != "" {
 		t.Fatal(notice)
 	}
-	if !strings.Contains(read(t, filepath.Join(dir, pageName)), folderMark) {
+	pageText := read(t, filepath.Join(dir, pageName))
+	if !strings.Contains(pageText, folderMark) {
 		t.Fatal("the folder page was not written")
 	}
 }

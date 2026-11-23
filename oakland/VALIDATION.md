@@ -13,7 +13,7 @@ normal transformation, reflected winding, grounding and height normalization.
 Refusals cover malformed framing, unsupported features, invalid indices,
 resource limits, path escapes, cycles and non-finite geometry.
 
-Set, job, stage and hillside tests exercise explicit native bindings,
+Set, job, stage and session tests exercise explicit native bindings,
 world coordinates and units, source-dependent render identity and staging
 from the same frozen geometry that the job hashed. Job overrides retain
 that snapshot even after source files have been deleted.
@@ -28,7 +28,7 @@ within 1e-12 metres. These are chosen geometry dimensions, not measured anatomy.
 
 ## Results and limits
 
-The combined Oakland, set, job, stage, hillside and door run passed except
+The combined Oakland, set, job, stage, session and door run passed except
 for nine legacy set digests. Retaining new material provenance for all sets
 changed their private representation. Receipt retention is now restricted
 to import-bearing sets; the original baseline table was left untouched.

@@ -19,7 +19,8 @@ func row(km, depth float64) string {
 // table is a profile read from rows, or the test stops.
 func table(t *testing.T, rows ...string) Profile {
 	t.Helper()
-	profile, err := Read(strings.NewReader(strings.Join(rows, "")))
+	joined := strings.Join(rows, "")
+	profile, err := Read(strings.NewReader(joined))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +68,8 @@ func TestWhatCannotBeAProfileIsRefused(t *testing.T) {
 		"falling":      {row(3, 1), row(2, 1)},
 		"one row":      {row(1, 1)},
 	} {
-		_, err := Read(strings.NewReader(strings.Join(rows, "")))
+		joined := strings.Join(rows, "")
+		_, err := Read(strings.NewReader(joined))
 		if err == nil {
 			t.Errorf("%s: read", name)
 		}
@@ -122,13 +124,13 @@ func TestOutsideTheProfileIsEmpty(t *testing.T) {
 func TestProfilesJoinOnlyEndToEnd(t *testing.T) {
 	first := table(t, row(1, 1), row(2, 1))
 	next := table(t, row(3, 2), row(4, 2))
-	joined, err := Joined(first, next)
+	together, err := Joined(first, next)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if joined.Inner() != 0.5e3 || joined.Outer() != 4.5e3 ||
-		joined.Seen(3.2e3, 0) != 2 {
-		t.Errorf("joined from %g to %g m", joined.Inner(), joined.Outer())
+	if together.Inner() != 0.5e3 || together.Outer() != 4.5e3 ||
+		together.Seen(3.2e3, 0) != 2 {
+		t.Errorf("joined from %g to %g m", together.Inner(), together.Outer())
 	}
 	apart := table(t, row(5, 2), row(6, 2))
 	if _, err := Joined(first, apart); err == nil {
@@ -204,7 +206,8 @@ func TestBlankLinesInATableAreSkipped(t *testing.T) {
 // a line longer than the scanner's limit is an error, not a short table.
 func TestALineTooLongToScanIsRefused(t *testing.T) {
 	long := strings.Repeat("1", 70000) + "\n"
-	if _, err := Read(strings.NewReader(row(1, 1) + long)); err == nil {
+	text := row(1, 1) + long
+	if _, err := Read(strings.NewReader(text)); err == nil {
 		t.Error("a line of 70000 characters was read")
 	}
 }

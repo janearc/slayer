@@ -190,10 +190,12 @@ func TestTransactionDurableAdmission(t *testing.T) {
 	if request != original {
 		t.Fatal("mutated request")
 	}
-	if _, err := os.Stat(filepath.Join(tx.directory.Name(), "intent")); !errors.Is(err, os.ErrNotExist) {
+	intentPath := filepath.Join(tx.directory.Name(), "intent")
+	if _, err := os.Stat(intentPath); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("intent not retired: %v", err)
 	}
-	data, err := os.ReadFile(filepath.Join(tx.directory.Name(), "state"))
+	statePath := filepath.Join(tx.directory.Name(), "state")
+	data, err := os.ReadFile(statePath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -281,11 +283,13 @@ func TestTransactionAdmissionRefusesUncertainInputs(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if err := os.WriteFile(filepath.Join(tx.directory.Name(), "intent"), data, 0600); err != nil {
+				intentPath := filepath.Join(tx.directory.Name(), "intent")
+				if err := os.WriteFile(intentPath, data, 0600); err != nil {
 					t.Fatal(err)
 				}
 			case "state":
-				if err := os.WriteFile(filepath.Join(tx.directory.Name(), "state"), []byte("bad"), 0600); err != nil {
+				statePath := filepath.Join(tx.directory.Name(), "state")
+				if err := os.WriteFile(statePath, []byte("bad"), 0600); err != nil {
 					t.Fatal(err)
 				}
 			case "cancelled":
@@ -299,7 +303,8 @@ func TestTransactionAdmissionRefusesUncertainInputs(t *testing.T) {
 			case "unobserved":
 				tx.ready = false
 			}
-			before, err := os.ReadFile(filepath.Join(tx.directory.Name(), "state"))
+			beforePath := filepath.Join(tx.directory.Name(), "state")
+			before, err := os.ReadFile(beforePath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -307,11 +312,13 @@ func TestTransactionAdmissionRefusesUncertainInputs(t *testing.T) {
 			if err == nil || !reflect.DeepEqual(result, transactionAdmissionOutcome{}) {
 				t.Fatalf("uncertain success: %+v %v", result, err)
 			}
-			after, err := os.ReadFile(filepath.Join(tx.directory.Name(), "state"))
+			afterPath := filepath.Join(tx.directory.Name(), "state")
+			after, err := os.ReadFile(afterPath)
 			if err != nil || string(before) != string(after) {
 				t.Fatal("mutated state")
 			}
-			if _, err := os.Stat(filepath.Join(tx.directory.Name(), "intent")); err != nil {
+			fencePath := filepath.Join(tx.directory.Name(), "intent")
+			if _, err := os.Stat(fencePath); err != nil {
 				t.Fatal("lost fence")
 			}
 		})
@@ -351,14 +358,16 @@ func TestTransactionAdmissionHoldsAndStop(t *testing.T) {
 					t.Fatal(err)
 				}
 				tx.digest = sha256.Sum256(data)
-				if err := os.WriteFile(filepath.Join(tx.directory.Name(), "state"), data, 0600); err != nil {
+				statePath := filepath.Join(tx.directory.Name(), "state")
+				if err := os.WriteFile(statePath, data, 0600); err != nil {
 					t.Fatal(err)
 				}
 				intent, err := encodeAdmissionIntent(admissionIntent{version: 1, phase: intentObserving, boot: tx.state.boot, owner: tx.owner, predecessor: tx.digest})
 				if err != nil {
 					t.Fatal(err)
 				}
-				if err := os.WriteFile(filepath.Join(tx.directory.Name(), "intent"), intent, 0600); err != nil {
+				intentPath := filepath.Join(tx.directory.Name(), "intent")
+				if err := os.WriteFile(intentPath, intent, 0600); err != nil {
 					t.Fatal(err)
 				}
 				want = admissionStopped
@@ -367,7 +376,8 @@ func TestTransactionAdmissionHoldsAndStop(t *testing.T) {
 			if err != nil || result.disposition != want {
 				t.Fatalf("hold: %+v %v", result, err)
 			}
-			data, err := os.ReadFile(filepath.Join(tx.directory.Name(), "state"))
+			statePath := filepath.Join(tx.directory.Name(), "state")
+			data, err := os.ReadFile(statePath)
 			if err != nil {
 				t.Fatal(err)
 			}

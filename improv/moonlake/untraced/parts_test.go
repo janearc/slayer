@@ -50,10 +50,21 @@ func beatsEvery(count int) string {
 	return out.String()
 }
 
+// writtenText writes text to a file in a temporary folder and says where.
+func writtenText(t *testing.T, text string) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "written.yaml")
+	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
 // testScore is the score of 400 beats, so bars one to a hundred exist.
 func testScore(t *testing.T) *show.Score {
 	t.Helper()
-	score, err := show.ParseScore([]byte(beatsEvery(400)))
+	scoreText := beatsEvery(400)
+	score, err := show.ReadScore(writtenText(t, scoreText))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +75,7 @@ func testScore(t *testing.T) *show.Score {
 // and the searchlights at bar two and the ship's light at bar three.
 func testSheet(t *testing.T, score *show.Score) *show.Sheet {
 	t.Helper()
-	sheet, err := show.ParseSheet([]byte("cues:\n"+
+	sheet, err := show.ReadSheet(writtenText(t, "cues:\n"+
 		"  - {at_sec: 0, master: 1, moon: 1, moon_alt: 6}\n"+
 		"  - {at: \"1.1\", rig: 1, beams: 4}\n"+
 		"  - {at: \"2.1\", strobes: grid16, search: 1}\n"+
@@ -257,8 +268,10 @@ func TestExplainerLampsFollowTheSheet(t *testing.T) {
 // TestExplainerOfRefusals: a missing script is an error.
 func TestExplainerOfRefusals(t *testing.T) {
 	score := testScore(t)
-	if _, err := explainerOf(score, testSheet(t, score),
-		filepath.Join(t.TempDir(), "none.yaml")); err == nil {
+	sheet := testSheet(t, score)
+	missingScript := filepath.Join(t.TempDir(), "none.yaml")
+	if _, err := explainerOf(score, sheet,
+		missingScript); err == nil {
 		t.Error("a missing script was read")
 	}
 }
@@ -558,7 +571,8 @@ func TestReadPNGIsRGBAAtNought(t *testing.T) {
 
 // TestSongSpanOfAMissingSong refuses a song that is not there.
 func TestSongSpanOfAMissingSong(t *testing.T) {
-	if _, err := songSpan(filepath.Join(t.TempDir(), "none.wav"), 0, 1); err == nil {
+	missingSong := filepath.Join(t.TempDir(), "none.wav")
+	if _, err := songSpan(missingSong, 0, 1); err == nil {
 		t.Error("a missing song was read")
 	}
 }
@@ -591,7 +605,8 @@ func TestCommandSaysWhyItStops(t *testing.T) {
 		!strings.Contains(stderr, "say wide or tall") {
 		t.Errorf("a square layout: status %d, stderr %q", status, stderr)
 	}
-	status, stderr = child(t, "-score", filepath.Join(t.TempDir(), "none.yaml"))
+	missingScore := filepath.Join(t.TempDir(), "none.yaml")
+	status, stderr = child(t, "-score", missingScore)
 	if status != 1 || !strings.Contains(stderr, "untraced:") {
 		t.Errorf("a missing score: status %d, stderr %q", status, stderr)
 	}
@@ -602,7 +617,8 @@ func TestCommandSaysWhyItStops(t *testing.T) {
 func TestPartsOfRefusals(t *testing.T) {
 	dir := t.TempDir()
 	score := filepath.Join(dir, "score.yaml")
-	os.WriteFile(score, []byte(beatsEvery(400)), 0o644)
+	scoreText := beatsEvery(400)
+	os.WriteFile(score, []byte(scoreText), 0o644)
 	cues := filepath.Join(dir, "cues.yaml")
 	os.WriteFile(cues, []byte("cues:\n  - {at_sec: 0, master: 1}\n"), 0o644)
 	places := filepath.Join(dir, "places.csv")

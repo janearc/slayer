@@ -14,12 +14,15 @@ import (
 	"github.com/janearc/slayer/ferruccio/internal/preview"
 	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
 	"github.com/janearc/slayer/ferruccio/native/internal/processmetrics"
+	"github.com/janearc/slayer/ferruccio/native/internal/settings"
 	"github.com/janearc/slayer/ferruccio/native/internal/workspace"
 	"github.com/janearc/slayer/internal/observability"
 	"image"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -59,6 +62,9 @@ func command() *pzm.Tool {
 			return err
 		}
 		if err := validateTheme(call.Value("theme")); err != nil {
+			return err
+		}
+		if err := validateChoices(call); err != nil {
 			return err
 		}
 		if call.DryRun() {
@@ -105,13 +111,23 @@ func command() *pzm.Tool {
 		if err := validateTheme(call.Value("theme")); err != nil {
 			return err
 		}
+		if err := validateChoices(call); err != nil {
+			return err
+		}
 		if call.DryRun() {
 			_, err := fmt.Fprintln(call.Out(), "open native Metal Ferruccio unwrapped; configured preview transport owns scene rendering; dispatch requested UI gesture, export its own widget tree, close only Ferruccio")
 			return err
 		}
+		if renderRequested(call) {
+			if err := validateSlayerRoad(call); err != nil {
+				return err
+			}
+		}
 		return run(call, call.Value("file"), true)
-	}, append([]pzm.Flag{pzm.Value("out", verb.NoShort, "new widget PNG path"), pzm.Value("file", verb.NoShort, "existing YAML file"), pzm.Switch("render", verb.NoShort, "render the file before export"), pzm.Switch("full", verb.NoShort, "render the authored film with finite CPU Slayer before export"), pzm.Value("gesture", verb.NoShort, "orbit, zoom, move, turn, undo, working-move/look, trackball or travel"), pzm.Value("late-readbacks", verb.NoShort, "make the first N working-view readbacks late, to show recovery"), pzm.Switch("hover", verb.NoShort, "rest the pointer on the middle of the viewport before export")}, runtimeFlags()...)...)
+	}, append([]pzm.Flag{pzm.Value("out", verb.NoShort, "new widget PNG path"), pzm.Value("file", verb.NoShort, "existing YAML file"), pzm.Switch("render", verb.NoShort, "render the file before export"), pzm.Switch("full", verb.NoShort, "render the authored film with finite CPU Slayer before export"), pzm.Value("gesture", verb.NoShort, "orbit, zoom, move, turn, undo, working-move/look, trackball or travel"), pzm.Value("late-readbacks", verb.NoShort, "make the first N working-view readbacks late, to show recovery"), pzm.Switch("hover", verb.NoShort, "rest the pointer on the middle of the viewport before export"), pzm.Switch("settings", verb.NoShort, "open the Settings sheet before the export"), pzm.Value("settings-click", verb.NoShort, "with --settings, press this control of the sheet first"), pzm.Value("size", verb.NoShort, "window size WIDTHxHEIGHT, at least 1280x800; default 1600x1000")}, runtimeFlags()...)...)
 	registerRegression(tool)
+	registerCheck(tool)
+	registerLook(tool)
 	return tool
 }
 
@@ -133,7 +149,67 @@ func validateTheme(name string) error {
 
 // runtimeFlags keeps renderer location and scoped configuration explicit.
 func runtimeFlags() []pzm.Flag {
-	return []pzm.Flag{pzm.Switch("background", verb.NoShort, "proof only: nonactivating native startup on macOS"), pzm.Value("display", verb.NoShort, "rendered, solid, edges or wire"), pzm.Value("preview-transport", verb.NoShort, "slayer or azazel; default slayer"), pzm.Value("starter", verb.NoShort, "directory containing source.yaml, preview.png and receipt.json"), pzm.Value("azazel", verb.NoShort, "operator Azazel executable"), pzm.Value("azazel-queue", verb.NoShort, "operator Azazel queue path"), pzm.Value("agent", verb.NoShort, "submitted agent identity, default ferruccio"), pzm.Value("evidence", verb.NoShort, "existing parent directory for new preview evidence"), pzm.Value("slayer", verb.NoShort, "Slayer executable"), pzm.Value("catalogue", verb.NoShort, "catalogue specimen renderer executable"), pzm.Value("game", verb.NoShort, "Game5 executable"), pzm.Value("game-home", verb.NoShort, "scoped Game configuration home"), pzm.Value("shelf", verb.NoShort, "optional Slayer source shelf"), pzm.Value("cache", verb.NoShort, "shared Slayer cache directory"), pzm.Value("examples", verb.NoShort, "directory of existing YAML examples"), pzm.Value("composition", verb.NoShort, "play, observe or compose"), pzm.Value("theme", verb.NoShort, "checked Chroma colourway")}
+	return []pzm.Flag{pzm.Switch("background", verb.NoShort, "proof only: nonactivating native startup on macOS"), pzm.Value("display", verb.NoShort, "rendered, solid, edges or wire"), pzm.Value("preview-transport", verb.NoShort, "slayer or azazel; default slayer"), pzm.Value("starter", verb.NoShort, "directory containing source.yaml, preview.png and receipt.json"), pzm.Value("azazel", verb.NoShort, "operator Azazel executable"), pzm.Value("azazel-queue", verb.NoShort, "operator Azazel queue path"), pzm.Value("agent", verb.NoShort, "submitted agent identity, default ferruccio"), pzm.Value("evidence", verb.NoShort, "existing parent directory for new preview evidence"), pzm.Value("slayer", verb.NoShort, "Slayer executable"), pzm.Value("catalogue", verb.NoShort, "catalogue specimen renderer executable"), pzm.Value("game", verb.NoShort, "Game5 executable"), pzm.Value("game-home", verb.NoShort, "scoped Game configuration home"), pzm.Value("shelf", verb.NoShort, "optional Slayer source shelf"), pzm.Value("cache", verb.NoShort, "shared Slayer cache directory"), pzm.Value("examples", verb.NoShort, "directory of existing YAML examples"), pzm.Value("composition", verb.NoShort, "play, observe or compose"), pzm.Value("theme", verb.NoShort, "checked Chroma colourway"), pzm.Value("renderer", verb.NoShort, "cpu or gpu for your own renders; default cpu"), pzm.Value("processors", verb.NoShort, "2, 4, 8 or all for your own renders; default 2")}
+}
+
+// settingsSource says where this launch reads and saves its settings: the
+// file under the person's home folder, with this call's flags and this
+// process's environment above it. With no home folder there is no file.
+func settingsSource(call pzm.Call) workspace.SettingsSource {
+	path := ""
+	if home, err := os.UserHomeDir(); err == nil {
+		path = settings.Path(home)
+	}
+	return workspace.SettingsSource{Path: path, Flag: call.Value, Environment: os.Getenv}
+}
+
+// validateSlayerRoad refuses a proof that renders and has no cache folder
+// from any of the places a setting can come from. The window itself does not
+// refuse to open without one: it opens Settings and says so. The Azazel road
+// gives its worker its own settings and is not asked.
+func validateSlayerRoad(call pzm.Call) error {
+	if previewTransport(call.Value("preview-transport")) != "slayer" {
+		return nil
+	}
+	source := settingsSource(call)
+	resolved := settings.Resolve(source.Path, source.Flag, source.Environment)
+	return preview.RequireCache(preview.Tools{Cache: resolved.Value(settings.Cache)})
+}
+
+// The window's size when it opens, and the smallest the person can make it.
+const (
+	defaultWindowWidth  = 1600
+	defaultWindowHeight = 1000
+	minimumWindowWidth  = 1280
+	minimumWindowHeight = 800
+)
+
+// parseWindowSize reads WIDTHxHEIGHT, which a proof may give to open the
+// window at a size other than the default. It refuses a size under the
+// smallest the window may be.
+func parseWindowSize(text string) (int, int, error) {
+	first, second, found := strings.Cut(text, "x")
+	width, widthError := strconv.Atoi(first)
+	height, heightError := strconv.Atoi(second)
+	if !found || widthError != nil || heightError != nil || width < minimumWindowWidth || height < minimumWindowHeight {
+		return 0, 0, fmt.Errorf("size is WIDTHxHEIGHT, at least %dx%d, not %q", minimumWindowWidth, minimumWindowHeight, text)
+	}
+	return width, height, nil
+}
+
+// validateChoices refuses a flag that gives a setting with its own list of
+// values one that is not on it, at launch, in the words the sheet uses.
+func validateChoices(call pzm.Call) error {
+	for _, key := range settings.Keys {
+		value := ""
+		if key.Flag != "" {
+			value = call.Value(key.Flag)
+		}
+		if value != "" && key.Choices != nil && !slices.Contains(key.Choices, value) {
+			return fmt.Errorf("unknown %s %q; choose %s", strings.ToLower(key.Label), value, strings.Join(key.Choices, ", "))
+		}
+	}
+	return nil
 }
 
 // validateDisplay keeps the working-view selector within its explicit modes.
@@ -345,11 +421,26 @@ func run(call pzm.Call, file string, proof bool) error {
 	if err != nil {
 		return err
 	}
-	host := gogpu.NewApp(gogpu.DefaultConfig().WithTitle("Ferruccio · Slayer").WithSize(1600, 1000).WithMinSize(1280, 800).WithGraphicsAPI(gogpu.GraphicsAPIMetal).WithBackground(proof && call.On("background")))
+	source := settingsSource(call)
+	resolved := settings.Resolve(source.Path, source.Flag, source.Environment)
+	if theme := resolved.Value(settings.Theme); theme != "" && call.Value("theme") == "" {
+		// A theme the file names that Chroma does not have is left unused.
+		_ = appearance.SelectTheme(theme)
+	}
+	width, height := defaultWindowWidth, defaultWindowHeight
+	if proof && call.Value("size") != "" {
+		if width, height, err = parseWindowSize(call.Value("size")); err != nil {
+			return err
+		}
+	}
+	host := gogpu.NewApp(gogpu.DefaultConfig().WithTitle("Ferruccio · Slayer").WithSize(width, height).WithMinSize(minimumWindowWidth, minimumWindowHeight).WithGraphicsAPI(gogpu.GraphicsAPIMetal).WithBackground(proof && call.On("background")))
 	ui := app.New(app.WithWindowProvider(host), app.WithPlatformProvider(host), app.WithEventSource(host.EventSource()), app.WithTheme(appearance.ThemeForSize(16)))
-	work, err := workspace.New(host, ui, workspace.Options{Starter: starter, SuppressAutomaticPreview: proof, Evidence: evidenceDirectory(call.Value("evidence")), File: file, Examples: call.Value("examples"), Composition: composition, Tools: preview.Tools{Transport: previewTransport(call.Value("preview-transport")), Azazel: call.Value("azazel"), Queue: call.Value("azazel-queue"), Agent: queueAgent(call.Value("agent")), Slayer: call.Value("slayer"), Catalogue: call.Value("catalogue"), Game: call.Value("game"), GameHome: call.Value("game-home"), Shelf: call.Value("shelf"), Cache: call.Value("cache")}})
+	work, err := workspace.New(host, ui, workspace.Options{Starter: starter, SuppressAutomaticPreview: proof, Evidence: evidenceDirectory(call.Value("evidence")), File: file, Examples: resolved.Value(settings.Examples), Settings: source, Composition: composition, Tools: preview.Tools{Transport: previewTransport(call.Value("preview-transport")), Azazel: call.Value("azazel"), Queue: call.Value("azazel-queue"), Agent: queueAgent(call.Value("agent")), Slayer: resolved.Value(settings.Slayer), Catalogue: call.Value("catalogue"), Game: call.Value("game"), GameHome: call.Value("game-home"), Shelf: resolved.Value(settings.Shelf), Cache: resolved.Value(settings.Cache)}})
 	if err != nil {
 		return err
+	}
+	if !proof {
+		work.InstallMenu()
 	}
 	display := call.Value("display")
 	if display == "" {
@@ -375,7 +466,7 @@ func run(call pzm.Call, file string, proof bool) error {
 	var initialPreview, gesturePreview, initialText, gestureText string
 	var undoImageMatches bool
 	backgroundApplied := proof && call.On("background")
-	animationStarted := false
+	animationStarted, settingsAsked, settingsSeen, settingsClicked := false, false, false, false
 	var watchdog *time.Timer
 	timeout := &proofStop{}
 	if proof {
@@ -424,6 +515,31 @@ func run(call pzm.Call, file string, proof bool) error {
 			}
 		}
 		if work.Running() {
+			return
+		}
+		if call.On("settings") && !settingsAsked {
+			settingsAsked = true
+			work.OpenSettings()
+		}
+		if control := call.Value("settings-click"); control != "" && !settingsClicked {
+			if !work.SettingsOpen() {
+				return
+			}
+			if !settingsSeen {
+				settingsSeen, ready = true, time.Now()
+				return
+			}
+			if time.Since(ready) < 500*time.Millisecond {
+				return
+			}
+			settingsClicked = true
+			if err := work.ProofSettingsClick(control); err != nil {
+				proofError = err
+				finished = true
+				host.Quit()
+				return
+			}
+			ready = time.Time{}
 			return
 		}
 		if ready.IsZero() {

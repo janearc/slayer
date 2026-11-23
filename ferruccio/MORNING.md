@@ -15,8 +15,8 @@ first-picture job, with its original YAML intact.
 6. Stop cancels the current request. Closing waits for the owned renderer to stop.
 
 The preview is a still at 640 by 360 with one ray per side, using the document's
-renderer selection. It runs through Game's shared GPU lane, with CPU use held
-to two processors. The activity indicator is indeterminate; Output shows what
+renderer selection. It starts Slayer itself, with no Game lane, with CPU use held
+to two processors unless Settings choose otherwise. The activity indicator is indeterminate; Output shows what
 Game and Slayer actually report. A changed document cannot accept an older result.
 
 Previews snapshot the current draft to a new temporary file beside its source.

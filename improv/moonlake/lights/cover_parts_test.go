@@ -19,7 +19,7 @@ func TestVecSubLeadsFromSecondToFirst(t *testing.T) {
 	}
 }
 
-// TestConeChordCases checks ConeChord on rays whose entry and exit were worked out by hand.
+// TestConeChordCases checks coneChord on rays whose entry and exit were worked out by hand.
 func TestConeChordCases(t *testing.T) {
 	cases := []struct {
 		name       string
@@ -38,7 +38,7 @@ func TestConeChordCases(t *testing.T) {
 		{"ray that misses", Vec{1, 0, 0}, Vec{0, 100, 10}, 0.1, 0, 0, 0, false},
 	}
 	for _, tc := range cases {
-		in, out, ok := ConeChord(tc.d, tc.apex, tc.slope, tc.low)
+		in, out, ok := coneChord(tc.d, tc.apex, tc.slope, tc.low)
 		if ok != tc.ok || math.Abs(in-tc.in) > 1e-9 || math.Abs(out-tc.out) > 1e-9 {
 			t.Errorf("%s: got (%v, %v, %v), want (%v, %v, %v)", tc.name, in, out, ok, tc.in, tc.out, tc.ok)
 		}
@@ -48,7 +48,7 @@ func TestConeChordCases(t *testing.T) {
 // TestPlanFixturesRefusesBadGain checks a gain that is not a number is named in the error.
 func TestPlanFixturesRefusesBadGain(t *testing.T) {
 	config := FixtureConfig{FloodPasses: [2]string{"flood-left", "flood-right"}, FloodGain: math.NaN(), SpotGain: 1}
-	_, err := PlanFixtures(config, FixtureCues{FloodLeft: 1})
+	_, err := planFixtures(config, fixtureCues{FloodLeft: 1})
 	if err == nil || !strings.Contains(err.Error(), "flood-left") {
 		t.Fatalf("err=%v", err)
 	}
@@ -76,15 +76,15 @@ func TestPFMDecodeRefusals(t *testing.T) {
 	}
 }
 
-// TestPFMEncodeRefusals checks EncodePFM refuses a scale that is not a number and reports a writer that fails part way.
+// TestPFMEncodeRefusals checks encodePFM refuses a scale that is not a number and reports a writer that fails part way.
 func TestPFMEncodeRefusals(t *testing.T) {
 	image := Image{Width: 1, Height: 1, Light: []float64{1, 2, 3}}
-	if err := EncodePFM(&bytes.Buffer{}, image, math.NaN()); err == nil {
+	if err := encodePFM(&bytes.Buffer{}, image, math.NaN()); err == nil {
 		t.Fatal("scale NaN accepted")
 	}
 	big := Image{Width: 40, Height: 40, Light: make([]float64, 40*40*3)}
 	want := errors.New("synthetic write failure")
-	if err := EncodePFM(failingWriter{want}, big, -1); !errors.Is(err, want) {
+	if err := encodePFM(failingWriter(t, want), big, -1); !errors.Is(err, want) {
 		t.Fatalf("large image write error=%v", err)
 	}
 }
@@ -151,12 +151,12 @@ func TestFireContributionsGuards(t *testing.T) {
 		"no lit beat":  {Level: 1, Lit: -1, Since: []float64{0.1}},
 		"no beat ages": {Level: 1, Lit: 0.1},
 	} {
-		if got, err := FireContributions(config, cue); got != nil || err != nil {
+		if got, err := fireContributions(config, cue); got != nil || err != nil {
 			t.Errorf("%s: layers=%v err=%v", name, got, err)
 		}
 	}
 	config.SteadyFrom = -1
-	if _, err := FireContributions(config, FireCues{Level: 1, Lit: 0.1, Since: []float64{5}}); err == nil || !strings.Contains(err.Error(), "frame timing") {
+	if _, err := fireContributions(config, FireCues{Level: 1, Lit: 0.1, Since: []float64{5}}); err == nil || !strings.Contains(err.Error(), "frame timing") {
 		t.Fatalf("negative steady start: %v", err)
 	}
 }
@@ -200,7 +200,7 @@ func TestFireShoulderEdges(t *testing.T) {
 		math.NaN(), 0, 0,
 	}}
 	top, gain := 0.6, 3.0
-	FireShoulder(fire, top, gain)
+	fireShoulder(fire, top, gain)
 	for c := range 3 {
 		if fire.Light[c] != top/gain {
 			t.Fatalf("infinite pixel channel %d = %v, want %v", c, fire.Light[c], top/gain)
@@ -242,11 +242,11 @@ func TestPlanFireDropsSpentBurstLayers(t *testing.T) {
 // TestFireContributionsSteadyGuards checks a steady config with no ages gives nothing and one with no frame rate is refused.
 func TestFireContributionsSteadyGuards(t *testing.T) {
 	config := DefaultFireConfig()
-	if got, err := FireContributions(config, FireCues{Level: 1}); got != nil || err != nil {
+	if got, err := fireContributions(config, FireCues{Level: 1}); got != nil || err != nil {
 		t.Fatalf("no ages: layers=%v err=%v", got, err)
 	}
 	config.FPS = 0
-	if _, err := FireContributions(config, FireCues{Level: 1, Since: []float64{1}}); err == nil || !strings.Contains(err.Error(), "frame timing") {
+	if _, err := fireContributions(config, FireCues{Level: 1, Since: []float64{1}}); err == nil || !strings.Contains(err.Error(), "frame timing") {
 		t.Fatalf("zero frame rate: %v", err)
 	}
 }
@@ -255,7 +255,8 @@ func TestFireContributionsSteadyGuards(t *testing.T) {
 func TestPFMExpectedRefusesReadFailureAfterPixels(t *testing.T) {
 	broken := errors.New("synthetic read failure")
 	data := pfmBytes(t, "PF\n1 1\n-1\n", binary.LittleEndian, []float32{1, 2, 3})
-	_, _, err := DecodePFMExpected(io.MultiReader(bytes.NewReader(data), iotest.ErrReader(broken)), 1, 1)
+	failing := io.MultiReader(bytes.NewReader(data), iotest.ErrReader(broken))
+	_, _, err := DecodePFMExpected(failing, 1, 1)
 	if !errors.Is(err, broken) {
 		t.Fatalf("err=%v", err)
 	}

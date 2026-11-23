@@ -25,9 +25,9 @@ import (
 func TestPictureShowsEachSquareInItsCellsColour(t *testing.T) {
 	f := [4]color.RGBA{{10, 0, 0, 255}, {20, 0, 0, 255}, {30, 0, 0, 255}, {40, 0, 0, 255}}
 	b := [4]color.RGBA{{0, 10, 0, 255}, {0, 20, 0, 255}, {0, 30, 0, 255}, {0, 40, 0, 255}}
-	c := &Cells{W: 2, H: 2}
+	cells := &Cells{W: 2, H: 2}
 	for i, pattern := range []uint8{1, 32, 42, 21} {
-		c.Cells = append(c.Cells, Cell{Fg: f[i], Bg: b[i], Pattern: pattern})
+		cells.Cells = append(cells.Cells, Cell{Fg: f[i], Bg: b[i], Pattern: pattern})
 	}
 	want := [6][4]color.RGBA{
 		{f[0], b[0], b[1], b[1]},
@@ -38,7 +38,7 @@ func TestPictureShowsEachSquareInItsCellsColour(t *testing.T) {
 		{b[2], f[2], f[3], b[3]},
 	}
 	var img *image.RGBA
-	ends(t, "picture", func() { img = Picture(c) })
+	ends(t, "picture", func() { img = Picture(cells) })
 	if got := img.Bounds(); got != image.Rect(0, 0, 4, 6) {
 		t.Fatalf("bounds %v, want 4 across and 6 down from the origin", got)
 	}
@@ -56,11 +56,11 @@ func TestPictureShowsEachSquareInItsCellsColour(t *testing.T) {
 // patterns: here every square is a bg, so the whole image is the bg.
 func TestPictureOfARowOfCellsIsSixByThree(t *testing.T) {
 	bg := color.RGBA{7, 8, 9, 255}
-	c := &Cells{W: 3, H: 1, Cells: make([]Cell, 3)}
-	for i := range c.Cells {
-		c.Cells[i].Bg = bg
+	cells := &Cells{W: 3, H: 1, Cells: make([]Cell, 3)}
+	for i := range cells.Cells {
+		cells.Cells[i].Bg = bg
 	}
-	img := Picture(c)
+	img := Picture(cells)
 	if got := img.Bounds(); got != image.Rect(0, 0, 6, 3) {
 		t.Fatalf("bounds %v, want 6 across and 3 down from the origin", got)
 	}

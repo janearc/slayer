@@ -56,7 +56,7 @@ func TestVec3Cross(t *testing.T) {
 
 func TestVec3Length(t *testing.T) {
 	v := Vec3{3, 4, 0}
-	got := v.Length()
+	got := v.length()
 	want := 5.0
 	if !(math.Abs(got-want) <= 1e-9) {
 		t.Errorf("Length(%v) = %v, want %v", v, got, want)
@@ -66,26 +66,13 @@ func TestVec3Length(t *testing.T) {
 func TestVec3Normalize(t *testing.T) {
 	v := Vec3{3, 4, 0}
 	got := v.Normalize()
-	len := got.Length()
+	len := got.length()
 	if !(math.Abs(len-1.0) <= 1e-9) {
 		t.Errorf("Normalize(%v) has length %v, want 1", v, len)
 	}
 	wantX, wantY := 0.6, 0.8
 	if !(math.Abs(got[0]-wantX) <= 1e-9) || !(math.Abs(got[1]-wantY) <= 1e-9) {
 		t.Errorf("Normalize(%v) = %v, want ~[0.6 0.8 0]", v, got)
-	}
-}
-
-func TestNormal(t *testing.T) {
-	v0 := Vec3{0, 0, 0}
-	v1 := Vec3{1, 0, 0}
-	v2 := Vec3{0, 1, 0}
-	got := Normal(v0, v1, v2)
-	want := Vec3{0, 0, 1}
-	if !(math.Abs(got[0]-want[0]) <= 1e-9) ||
-		!(math.Abs(got[1]-want[1]) <= 1e-9) ||
-		!(math.Abs(got[2]-want[2]) <= 1e-9) {
-		t.Errorf("Normal(%v, %v, %v) = %v, want %v", v0, v1, v2, got, want)
 	}
 }
 

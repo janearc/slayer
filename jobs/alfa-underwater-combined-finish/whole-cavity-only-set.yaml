@@ -1,0 +1,163 @@
+---
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Project705Alfa combined finish control whole-cavity-only
+  setting: space
+  light: moon
+  moon:
+    azimuth: 230
+    altitude: 40
+    disc: false
+  film:
+    width: 640
+    height: 360
+    rays: 1
+    exposure: 100000
+    wide: 55
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour:
+          srgb_linear:
+          - 0.01
+          - 0.04
+          - 0.06
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre:
+          - 0.03
+          - 0.008
+          - 0.004
+          scatter:
+            coefficient-per-metre:
+            - 0.005
+            - 0.003
+            - 0.002
+            phase-g: 0
+            steps: 64
+            max-distance:
+              value: 80
+              unit: m
+        source: ! "shot-selected synthetic extinction and scatter; not measured coastal
+          water"
+    ocean:
+      material: seawater
+      direct-moon: mean-plane
+      clear-cloud-water-step-mode: ray-spacing
+      middle:
+      - -1500
+      - 0
+      - 0
+      extent:
+        value: 512
+        unit: m
+      samples: 3
+      sea:
+        wind:
+          value: 0
+          unit: m/s
+        fetch:
+          value: 0
+          unit: m
+        depth:
+          value: 0
+          unit: m
+        toward:
+          value: 0
+          unit: rad
+      seed: 7
+      time:
+        value: 0
+        unit: s
+      motion: scene-clock
+      flat-mean:
+        mean-level:
+          value: 0
+          unit: m
+        collar-width:
+          value: 64
+          unit: m
+        extends-to-infinity: true
+      source: ! "chosen sea state; CPU infinite mean-plane ocean and sky quadrature"
+    vapor-cavities:
+      main-screw:
+        colour:
+          srgb_linear:
+          - 0.84
+          - 0.84
+          - 0.84
+        origin:
+        - -1486.6954
+        - -36.554
+        - -55.25
+        axis:
+        - 0.342
+        - -0.94
+        - 0
+        blades: 5
+        tip-radius: 2.1
+        rpm: &shaft_rpm 300
+        slipstream-mps: 20
+        length-m: 40
+        core-radius-m: 0.12
+        density-per-m: 0.8
+        fragment-scale-m: 0.5
+        fragment-contrast: 1
+        fragment-seed: 705
+        pressure-deficit-pa: 12000
+        recovery-pa-per-m: 1000
+        visual-onset: true
+        clear-water: true
+        source: ! "model-derived propeller placement; chosen visual core, phase, breakup
+          and recovery controls; not CFD or an onset prediction"
+        phase-g: 0.82
+  set:
+    things:
+      alfa:
+        kind: alfa-hero
+        complexity: demo
+        seed: 1
+        position:
+          east:
+            value: -1500.0
+            unit: m
+          north:
+            value: 0.0
+            unit: m
+          up:
+            value: -60
+            unit: m
+        heading:
+          value: 340
+          unit: deg
+        part-spin:
+          material: propeller blade
+          pivot-metres:
+          - 0
+          - 4.75
+          - 38.9
+          axis:
+          - 0
+          - 0
+          - 1
+          rpm: *shaft_rpm
+          phase-radians: 1.5707963267948966
+  cameras:
+    underwater-60m:
+      title: whole-readable230
+      location:
+        at:
+        - -1440
+        - -5
+        - -105
+      orientation:
+        look_at:
+        - -1500
+        - -8
+        - -57
+      initial-media:
+      - seawater

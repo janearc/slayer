@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/janearc/slayer/ferruccio/native/internal/headless"
-	"github.com/janearc/slayer/hillside/placement"
+	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 )
 

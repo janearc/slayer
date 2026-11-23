@@ -95,8 +95,6 @@ func Load(shelf Shelf, name string, seed uint64) (Roll, error) {
 // Rated adjusts exposure by stops relative to the stock's rating.
 // Positive values increase exposure, negative values reduce it, and
 // each stop doubles the light.
-//
-//ninja:vow practice slayer rates each roll here; no caller in this tree
 func (loaded Roll) Rated(stops float64) Roll {
 	loaded.gain = math.Exp2(stops)
 	return loaded
@@ -120,8 +118,6 @@ func (loaded Roll) Clearest() maths.Light {
 //
 // The output is linear transmission under a white projector lamp, at most
 // one per channel. Coverage and depth come from the first glimpse.
-//
-//ninja:vow practice slayer develops frames here; no caller in this tree
 func (loaded Roll) Print(which int, glimpses []*frame.Frame) (*frame.Frame,
 	error) {
 	if !number.Positive(loaded.gain) {

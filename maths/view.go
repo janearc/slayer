@@ -1,18 +1,18 @@
 package maths
 
-import (
-	"fmt"
-	"math"
-)
+import "fmt"
 
 // View constructs a finite camera placement facing a distinct target.
 // Up must be measurable; LookAtUp defines the vertical-view fallback.
+//
+// A position, a target or an up that is no number, is infinite, or is too
+// long for Len to measure, a part past about 1e154, is refused with an
+// error, as is the distance from the target to the position when it is.
 func View(from, target, up Vec) (*Subspace, error) {
 	for _, vector := range []Vec{from, target, up, from.Sub(target)} {
-		length := vector.Len()
-		if math.IsNaN(length) || math.IsInf(length, nought) {
-			return nil, fmt.Errorf("view: non-finite position " +
-				"or direction")
+		if unreadable(vector) {
+			return nil, fmt.Errorf("view: a position or direction that " +
+				"is no number, is infinite or is too long to measure")
 		}
 	}
 	if unmeasured(up) || unmeasured(from.Sub(target)) {

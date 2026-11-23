@@ -1,0 +1,32 @@
+# every number mesh/wind_test.go chooses, with what it is and why.
+numbers:
+  - name: wind-skew-x
+    value: 4
+    says: how far along x the skew tetrahedron's corner on x stands from its corner at the origin
+    kind: picked
+    by: a whole number unlike the other two reaches, so a volume that mixed the axes up would differ
+  - name: wind-skew-y
+    value: 3
+    says: how far along y the skew tetrahedron's corner on y stands from its corner at the origin
+    kind: picked
+    by: a whole number unlike the other two reaches
+  - name: wind-skew-z
+    value: 2
+    says: how far along z the skew tetrahedron's corner on z stands from its corner at the origin
+    kind: picked
+    by: a whole number unlike the other two reaches
+  - name: wind-skew-volume
+    value: 24
+    says: six times the volume of the skew tetrahedron, which is the product of its three reaches
+    kind: picked
+    by: four times three times two, worked by hand
+  - name: wind-cube-volume
+    value: 6
+    says: six times the volume of the unit cube
+    kind: picked
+    by: six times one, worked by hand
+  - name: wind-apart
+    value: 5
+    says: how far along x the second cube stands from the first, in the inside out test
+    kind: picked
+    by: past the first cube's side with room to spare, so the cubes share no edge

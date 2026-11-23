@@ -37,7 +37,8 @@ const (
 
 // pic is a picture of one row, a pixel to each colour.
 func pic(cs ...color.RGBA) *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, len(cs), 1))
+	bounds := image.Rect(0, 0, len(cs), 1)
+	img := image.NewRGBA(bounds)
 	for i, c := range cs {
 		img.SetRGBA(i, 0, c)
 	}
@@ -98,13 +99,15 @@ func TestApartSeesTwoBytesInOneChannel(t *testing.T) {
 		{"green", color.RGBA{0, 2, 0, 255}, green2},
 		{"blue", color.RGBA{0, 0, 2, 255}, blue2},
 	} {
-		worst, mean := apartIn(t, pic(grey(0)), pic(c.to))
+		black := pic(grey(0))
+		worst, mean := apartIn(t, black, pic(c.to))
 		if !closeTo(worst, c.want, 2e-4) || !closeTo(mean, c.want, 2e-4) {
 			t.Errorf("black against %s is %.5f worst, %.5f mean; want %.5f", c.name, worst, mean, c.want)
 		}
 	}
 	// a byte out in the two other channels does not hide the third
-	worst, _ := apartIn(t, pic(grey(0)), pic(color.RGBA{2, 1, 1, 255}))
+	darkest := pic(grey(0))
+	worst, _ := apartIn(t, darkest, pic(color.RGBA{2, 1, 1, 255}))
 	if !(worst > 0.03) {
 		t.Errorf("two bytes in red with a byte in the others is %.5f apart", worst)
 	}

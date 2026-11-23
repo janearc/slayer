@@ -1,0 +1,45 @@
+# A study of tubes on the GPU path: the bay seal's muzzle, whose whiskers
+# are bent chains of three straight tubes each, drawn close so that a
+# whisker is a few pixels wide. Set files have no inline tube, so the
+# tubes here are the recipe's; draw it once with --renderer cpu and once
+# with --renderer gpu, at the same size and rays, and compare.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: GPU tube study
+  seed: 407
+  setting: space
+  light: none
+  set:
+    things:
+      seal:
+        kind: bay-seal
+        seed: 407
+        east: 0
+        north: 0
+  film:
+    width: 960
+    height: 600
+    rays: 4
+    exposure: 1.15
+    wide: 22
+  cameras:
+    muzzle:
+      location: {at: [1.47, -0.6, 0.07]}
+      orientation: {look_at: [0.34, -0.02, -0.25]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.10, 0.14, 0.17]}
+      zenith: {srgb_linear: [0.18, 0.23, 0.28]}
+      ground: {srgb_linear: [0.05, 0.07, 0.08]}
+      source: eye
+    suns:
+      study-light:
+        toward: [0.3, 0.82, 0.49]
+        colour: {srgb_linear: [1.65, 1.47, 1.23]}
+        source: eye
+    floods:
+      fill:
+        colour: {srgb_linear: [0.15, 0.19, 0.21]}
+        strength: 1
+        source: eye

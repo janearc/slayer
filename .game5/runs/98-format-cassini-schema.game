@@ -1,0 +1,1 @@
+format-cassini-schema . :: gofmt -w set/human_scale_schema_test.go

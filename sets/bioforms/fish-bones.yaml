@@ -1,0 +1,75 @@
+# The skeletons of the four fish, each alone and at rest: skull, jaws,
+# gill covers and girdles; the column by the species' counts; the tail's
+# own skeleton; every fin's rays on their supports; finlets where the
+# species has them. Counts, proportions and their sources are in
+# manufacture/fish.yaml.
+#
+# the frame. places are metres, x east, y north, z up. the four stand
+# twenty metres apart along the east, each in open air with nothing
+# under it, lit by the sun through the air. the sun is typed as azimuth
+# and altitude, chosen, as every set's is while nothing reads a time of
+# day. each camera stands south of its fish, about one and three
+# quarter lengths off, framing its length.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: four fish skeletons
+  seed: 11
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 160, altitude: 40}
+  set:
+    things:
+      tuna:
+        kind: pacific-bluefin-tuna-bones
+        seed: 11
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      yellowtail:
+        kind: california-yellowtail-bones
+        seed: 12
+        position:
+          east: {value: 20, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      barracuda:
+        kind: california-barracuda-bones
+        seed: 13
+        position:
+          east: {value: 40, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      sardine:
+        kind: pacific-sardine-bones
+        seed: 14
+        position:
+          east: {value: 60, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  film:
+    width: 800
+    height: 450
+    rays: 2
+    wide: 39
+  cameras:
+    tuna-side:
+      location: {at: [0, -3.6, 0]}
+      orientation: {look_at: [0, 0, 0]}
+    yellowtail-side:
+      location: {at: [20, -1.6, 0]}
+      orientation: {look_at: [20, 0, 0]}
+    barracuda-side:
+      location: {at: [40, -1.6, 0]}
+      orientation: {look_at: [40, 0, 0]}
+    sardine-side:
+      location: {at: [60, -0.42, 0]}
+      orientation: {look_at: [60, 0, 0]}

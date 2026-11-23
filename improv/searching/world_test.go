@@ -14,10 +14,10 @@ func setPlan() Plan {
 	return Plan{Azimuth: 25, Altitude: 55, Diameter: 38, Aperture: 8, ArrayCount: 6}
 }
 
-// newSet builds a site's set and fails the test if it cannot.
-func newSet(t *testing.T, site string) *Set {
+// builtSet builds a site's set and fails the test if it cannot.
+func builtSet(t *testing.T, site string) *set {
 	t.Helper()
-	set, err := NewSet(setPlan(), site)
+	set, err := newSet(setPlan(), site)
 	if err != nil {
 		t.Fatalf("%s: %v", site, err)
 	}
@@ -54,8 +54,8 @@ func TestStringsRadioNamesTheTwoArraySites(t *testing.T) {
 // TestNewSetBuildsAnObservatory checks the optical sites: one actor, four
 // beams, the sun and moon lamps after them, two volumes, and a name.
 func TestNewSetBuildsAnObservatory(t *testing.T) {
-	hawaii, atacama := newSet(t, "hawaii"), newSet(t, "atacama")
-	for _, set := range []*Set{hawaii, atacama} {
+	hawaii, atacama := builtSet(t, "hawaii"), builtSet(t, "atacama")
+	for _, set := range []*set{hawaii, atacama} {
 		if len(set.Actors) != 1 || len(set.Lasers) != 4 || len(set.World.Lamps) != 6 ||
 			len(set.World.Volumes) != 2 || set.Mist == nil || set.Space {
 			t.Errorf("%s: %d actors, %d lasers, %d lamps, %d volumes", set.Site,
@@ -84,7 +84,7 @@ func TestNewSetBuildsAnObservatory(t *testing.T) {
 func TestNewSetRefusesAnObservatoryWithNoDome(t *testing.T) {
 	plan := setPlan()
 	plan.Diameter = 0
-	set, err := NewSet(plan, "hawaii")
+	set, err := newSet(plan, "hawaii")
 	if err == nil || set != nil {
 		t.Fatalf("got %v, %v", set, err)
 	}
@@ -94,8 +94,8 @@ func TestNewSetRefusesAnObservatoryWithNoDome(t *testing.T) {
 // the beams, each dish on the golden-angle spiral, and a wider layout and
 // larger dishes at the second site.
 func TestNewSetBuildsAnArray(t *testing.T) {
-	hawaii, atacama := newSet(t, "radio-hawaii"), newSet(t, "radio-atacama")
-	for _, set := range []*Set{hawaii, atacama} {
+	hawaii, atacama := builtSet(t, "radio-hawaii"), builtSet(t, "radio-atacama")
+	for _, set := range []*set{hawaii, atacama} {
 		if len(set.Actors) != 6 || len(set.Lasers) != 0 || len(set.World.Lamps) != 2 {
 			t.Fatalf("%s: %d actors, %d lasers, %d lamps", set.Site, len(set.Actors), len(set.Lasers), len(set.World.Lamps))
 		}
@@ -106,7 +106,7 @@ func TestNewSetBuildsAnArray(t *testing.T) {
 	for index := 1; index < 6; index++ {
 		radius := 17 * math.Sqrt(float64(index))
 		for _, each := range []struct {
-			set    *Set
+			set    *set
 			factor float64
 			scale  float64
 		}{{hawaii, 1, 1}, {atacama, 1.55, 1.4}} {
@@ -130,7 +130,7 @@ func TestNewSetBuildsAnArray(t *testing.T) {
 // TestNewSetBuildsTheBlazar checks the space set: no ground, four volumes
 // and the three materials the views change.
 func TestNewSetBuildsTheBlazar(t *testing.T) {
-	set := newSet(t, "blazar")
+	set := builtSet(t, "blazar")
 	if !set.Space || len(set.Actors) != 0 || len(set.World.Volumes) != 4 || len(set.World.Things) != 1 ||
 		set.Disc == nil || set.Jet == nil || set.Lobe == nil || set.JetField == nil || set.World.Sky == nil {
 		t.Fatalf("blazar: %d volumes, %d things, space %v", len(set.World.Volumes), len(set.World.Things), set.Space)
@@ -144,7 +144,7 @@ func TestNewSetBuildsTheBlazar(t *testing.T) {
 // seed adds the same parts without growing the prototype cache, and that an
 // unknown kind is refused.
 func TestSceneryReusesItsPrototype(t *testing.T) {
-	set := &Set{World: thing.NewWorld(), prototypes: map[string][]thing.Thing{}}
+	set := &set{World: thing.NewWorld(), prototypes: map[string][]thing.Thing{}}
 	if err := set.scenery("boulder", 5, maths.V(1, 2, 3), 1); err != nil {
 		t.Fatal(err)
 	}
@@ -180,8 +180,8 @@ func TestUpdatePlacesTheCameraByShot(t *testing.T) {
 		{"atacama", 86.054177, 27, -50.937987},
 		{"radio-hawaii", 80.29747, 75, -172.19848},
 	} {
-		set := newSet(t, each.site)
-		eye, wide, err := set.Update(setPlan(), State{Aim: 25, Flash: 1})
+		set := builtSet(t, each.site)
+		eye, wide, err := set.update(setPlan(), State{Aim: 25, Flash: 1})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -190,8 +190,8 @@ func TestUpdatePlacesTheCameraByShot(t *testing.T) {
 			t.Errorf("%s: eye %v, lens %g", each.site, got, wide)
 		}
 	}
-	set := newSet(t, "hawaii")
-	if _, wide, err := set.Update(setPlan(), State{}); err != nil || wide != 55 {
+	set := builtSet(t, "hawaii")
+	if _, wide, err := set.update(setPlan(), State{}); err != nil || wide != 55 {
 		t.Errorf("an ordinary frame has lens %g, %v", wide, err)
 	}
 }
@@ -199,8 +199,8 @@ func TestUpdatePlacesTheCameraByShot(t *testing.T) {
 // TestUpdateTurnsEveryActor checks that each part of each actor is posed at
 // its place, turned by the aim: a quarter turn moves local x to world z.
 func TestUpdateTurnsEveryActor(t *testing.T) {
-	set := newSet(t, "radio-hawaii")
-	if _, _, err := set.Update(setPlan(), State{Aim: 90}); err != nil {
+	set := builtSet(t, "radio-hawaii")
+	if _, _, err := set.update(setPlan(), State{Aim: 90}); err != nil {
 		t.Fatal(err)
 	}
 	for index, dish := range set.Actors {
@@ -228,10 +228,10 @@ func near(one, other maths.Vec, tolerance float64) bool {
 // noon and a time between, with strengths worked by hand: the sun is up
 // only by day and the moon by night, and the lamps after the beams follow.
 func TestUpdateLightsByTheSceneryClock(t *testing.T) {
-	set := newSet(t, "hawaii")
+	set := builtSet(t, "hawaii")
 	update := func(seconds float64) {
 		t.Helper()
-		if _, _, err := set.Update(setPlan(), State{SceneSeconds: seconds}); err != nil {
+		if _, _, err := set.update(setPlan(), State{SceneSeconds: seconds}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -275,18 +275,18 @@ func TestUpdateLightsByTheSceneryClock(t *testing.T) {
 // TestUpdateAdvancesTheMist checks that the mist medium is replaced for each
 // frame, and that a set with no mist and no beams still updates.
 func TestUpdateAdvancesTheMist(t *testing.T) {
-	set := newSet(t, "atacama")
-	before := set.World.Volumes[0].Medium
-	if _, _, err := set.Update(setPlan(), State{At: 3}); err != nil {
+	built := builtSet(t, "atacama")
+	before := built.World.Volumes[0].Medium
+	if _, _, err := built.update(setPlan(), State{At: 3}); err != nil {
 		t.Fatal(err)
 	}
-	if set.World.Volumes[0].Medium == before {
+	if built.World.Volumes[0].Medium == before {
 		t.Error("the mist did not advance")
 	}
-	bare := &Set{World: thing.NewWorld(), Site: "hawaii"}
+	bare := &set{World: thing.NewWorld(), Site: "hawaii"}
 	bare.World.Lamp(bare.Sun)
 	bare.World.Lamp(bare.Moon)
-	if _, _, err := bare.Update(setPlan(), State{}); err != nil {
+	if _, _, err := bare.update(setPlan(), State{}); err != nil {
 		t.Fatalf("a set with no mist: %v", err)
 	}
 }
@@ -294,15 +294,15 @@ func TestUpdateAdvancesTheMist(t *testing.T) {
 // TestUpdateOfTheBlazarChoosesTheView checks the space eye and the glow
 // weights of each spectrum, and the fall back to the visible view.
 func TestUpdateOfTheBlazarChoosesTheView(t *testing.T) {
-	set := newSet(t, "blazar")
-	eye, wide, err := set.Update(setPlan(), State{})
+	set := builtSet(t, "blazar")
+	eye, wide, err := set.update(setPlan(), State{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if eye.Origin != (maths.V(8, 15, 68)) || wide != 52 {
 		t.Errorf("eye %v, lens %g", eye.Origin, wide)
 	}
-	_, wide, err = set.Update(setPlan(), State{Flash: 1})
+	_, wide, err = set.update(setPlan(), State{Flash: 1})
 	if err != nil || wide != 49 {
 		t.Errorf("flashing lens %g, %v", wide, err)
 	}
@@ -313,7 +313,7 @@ func TestUpdateOfTheBlazarChoosesTheView(t *testing.T) {
 		{"radio", 0.07, 0.5, 4}, {"infrared", 1.5, 0.3, 0.3}, {"visible", 1, 1, 0.15},
 		{"x-ray", 0.3, 2.5, 0.03}, {"gamma", 0.04, 5, 0.01}, {"unheard of", 1, 1, 0.15},
 	} {
-		if _, _, err := set.Update(setPlan(), State{Spectrum: each.spectrum, At: 2.5}); err != nil {
+		if _, _, err := set.update(setPlan(), State{Spectrum: each.spectrum, At: 2.5}); err != nil {
 			t.Fatal(err)
 		}
 		if !within(set.Disc.Glow.R, 9*each.disc, 1e-9) || !within(set.Jet.Glow.B, 9*each.jet, 1e-9) ||
@@ -321,12 +321,12 @@ func TestUpdateOfTheBlazarChoosesTheView(t *testing.T) {
 			t.Errorf("%s: disc %v jet %v lobe %v time %g", each.spectrum, set.Disc.Glow, set.Jet.Glow, set.Lobe.Glow, set.JetField.Time)
 		}
 	}
-	_, _, err = set.Update(setPlan(), State{Spectrum: "visible", Flash: 1})
+	_, _, err = set.update(setPlan(), State{Spectrum: "visible", Flash: 1})
 	if err != nil || !within(set.Jet.Glow.B, 9*1.5, 1e-9) {
 		t.Errorf("a flash brightens the jet: %v, %v", set.Jet.Glow, err)
 	}
 	moved := State{Camera: 25 * math.Pi}
-	eye, _, err = set.Update(setPlan(), moved)
+	eye, _, err = set.update(setPlan(), moved)
 	if err != nil || !within(eye.Origin.X, 8+60*math.Sin(0.08), 1e-9) {
 		t.Errorf("camera swing: eye %v, %v", eye.Origin, err)
 	}
@@ -380,7 +380,7 @@ func TestSiteSkyHasDiscsAndStars(t *testing.T) {
 
 // TestSetNamesItsSite checks the progress name of a hand-built set.
 func TestSetNamesItsSite(t *testing.T) {
-	if got := (&Set{Site: "somewhere"}).String(); got != "searching/somewhere" {
+	if got := (&set{Site: "somewhere"}).String(); got != "searching/somewhere" {
 		t.Errorf("name %q", got)
 	}
 }
@@ -390,13 +390,13 @@ func lightNear(one, other maths.Light) bool {
 	return within(one.R, other.R, 1e-12) && within(one.G, other.G, 1e-12) && within(one.B, other.B, 1e-12)
 }
 
-// TestUpdateRefusesALaserThatCannotBePlaced gives Update a plan whose
+// TestUpdateRefusesALaserThatCannotBePlaced gives update a plan whose
 // diameter is not a number, so no beam can be aimed, and expects an error.
 func TestUpdateRefusesALaserThatCannotBePlaced(t *testing.T) {
-	set := newSet(t, "hawaii")
+	set := builtSet(t, "hawaii")
 	plan := setPlan()
 	plan.Diameter = math.NaN()
-	if _, _, err := set.Update(plan, State{}); err == nil {
+	if _, _, err := set.update(plan, State{}); err == nil {
 		t.Fatal("a beam with no position was accepted")
 	}
 }

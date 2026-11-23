@@ -1,0 +1,10 @@
+name,x,y,z
+rounded-tree,0x1p54,0,0x1p54
+rounded-probe,0x1p54,4,0x1p54
+far-tree,1e10,0,0
+refused-west,-1e100,0,0
+refused-south,0,0,-1e100
+refused-east,1e100,0,0
+refused-north,0,0,1e100
+refused-overflow-x,0x1p63,0,0
+refused-overflow-z,0,0,0x1p63

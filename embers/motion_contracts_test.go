@@ -45,7 +45,8 @@ func TestFirebrandMotionFollowsAnIndependentForceIntegrator(t *testing.T) {
 		t.Fatal("trajectory fixture has too few particle ages")
 	}
 	for _, particle := range particles {
-		expected := integrateBrand(maths.YAxis.Scale(spec.Height.InMetres()), spec.Velocity, spec.Air, maths.V(0, -spec.Gravity, 0), particle.Age().Seconds(), spec.Drag.Seconds())
+		start := maths.YAxis.Scale(spec.Height.InMetres())
+		expected := integrateBrand(start, spec.Velocity, spec.Air, maths.V(0, -spec.Gravity, 0), particle.Age().Seconds(), spec.Drag.Seconds())
 		if distance := particle.Position().Sub(expected).Len(); !(distance < 1e-9) {
 			t.Fatalf("particle %d age %s is %g m from independent force solution", particle.ID(), particle.Age(), distance)
 		}

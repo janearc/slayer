@@ -1,0 +1,11 @@
+name,radius,low,high,patch,extinction,coverage,asymmetry
+shell-weather-refuses-no-radius,0,10,30,5,2,1,0
+shell-weather-refuses-nan-radius,NaN,10,30,5,2,1,0
+shell-weather-refuses-negative-low,100,-1,30,5,2,1,0
+shell-weather-refuses-nan-low,100,NaN,30,5,2,1,0
+shell-weather-refuses-high-at-low,100,10,10,5,2,1,0
+shell-weather-refuses-infinite-high,100,10,+Inf,5,2,1,0
+shell-weather-refuses-no-patch-size,100,10,30,0,2,1,0
+shell-weather-refuses-negative-mist,100,10,30,5,-1,1,0
+shell-weather-refuses-too-much-cover,100,10,30,5,2,1.5,0
+shell-weather-refuses-asymmetry-of-one,100,10,30,5,2,1,1

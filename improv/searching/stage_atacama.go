@@ -41,7 +41,7 @@ func (s *heardStage) atacamaSite() error {
 	}
 	s.world.Add(thing.Thing{Shape: mesh, Material: &thing.Material{Name: "authored dry-desert salts alluvium and volcanic strata", Texture: atacamaAlbedo{}}})
 	s.world.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{Name: "authored low desert beyond site model", Colour: maths.RGB(.08, .09, .12)}, Motion: thing.Still(maths.NewSubspace(maths.V(0, -600, 0), maths.Identity, 1))})
-	temp := &Set{World: s.world, prototypes: map[string][]thing.Thing{}}
+	temp := &set{World: s.world, prototypes: map[string][]thing.Thing{}}
 	for i := range 150 {
 		angle := float64(i) * 2.399963229728653
 		radius := 280 + 40*math.Sqrt(float64(i+1))

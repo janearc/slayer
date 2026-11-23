@@ -5,7 +5,7 @@ package manufacture
 // Tessellation, material slots and prototype reuse do not add parts. This is
 // an inventory of the model, not certification of its engineering accuracy.
 func (made good) PartCount() int {
-	count := 0
+	count := len(made.native)
 	for _, number := range made.partCounts() {
 		count += number
 	}

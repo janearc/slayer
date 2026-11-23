@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/janearc/slayer/hillside"
+	"github.com/janearc/slayer/session"
 )
 
 // where render's arguments hold the file, and the settings after it.
@@ -35,8 +35,8 @@ func render(arguments []string, said, wrong io.Writer) int {
 		return exitUsage
 	}
 	settings := append([]string{"-set", arguments[fileAt]}, given...)
-	stamp := hillside.Stamped(build, built, who, sessions)
-	return hillside.Run(settings, said, wrong, stamp)
+	stamp := session.Stamped(build, built, who, sessions)
+	return session.Run(settings, said, wrong, stamp)
 }
 
 // valueAfter is how far past a flag its value stands, when it is the next

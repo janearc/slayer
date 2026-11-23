@@ -2,16 +2,16 @@ package sources
 
 import "io"
 
-// Progress is told how a download is going: the key of the source, the
+// progress is told how a download is going: the key of the source, the
 // bytes received so far, and the bytes expected, which is the length
 // the server announced, or zero or less when it announced none. It is
 // called as bytes arrive, so it must be quick.
-type Progress func(key string, received, total int64)
+type progress func(key string, received, total int64)
 
 // Counting is the shelf telling a function how each download goes. A
 // nil function is none, which is how a shelf starts, so other callers
 // see no change.
-func (shelf Shelf) Counting(progress Progress) Shelf {
+func (shelf Shelf) Counting(progress progress) Shelf {
 	shelf.progress = progress
 	return shelf
 }

@@ -10,7 +10,8 @@
 # along a coast that trends north-west.
 #
 # the air. there is no terrain yet, so the set runs under an agent's
-# groundless Earth air (doc/groundless-earth-air.md): `air: earth`, the
+# groundless Earth air (doc/model/sky/groundless-earth-air.md):
+# `air: earth`, the
 # column sampled at 0 m over the Earth mean-radius datum, world.unit 1.
 # its boundary, earth-standard-land, is a land-albedo (0.15 grass and
 # soil) and continental-aerosol stand-in, NOT an offshore or coastal
@@ -25,19 +26,14 @@
 # 33.37 N, 117.56 W at 2026-11-16 23:30 UTC, 15:30 Pacific standard time
 # (UTC-8): azimuth 236.2 degrees clockwise from north, altitude 13.4.
 #
-# the sea. `world.ocean` (an agent's, doc/sets.md) is one static instant of
-# her wave cascades, 512 m across, centred on the boat, 257 samples a
-# side. every sea input is chosen, none from a shelf source: a wind of
-# 7 m/s (a moderate breeze), a fetch of 50 km, deep water (depth 0),
-# waves going toward the east, the coast, seed 7, time 0. slayer draw
-# reports the spectrum model's estimate (not an observation, and the
-# finite sampled field may differ): significant height 1.06 m, peak
-# period about 4 s, at 42eb65da, 2026-11-16. the
-# field's edge is 256 m from the boat on each side; from the camera,
-# 170 m south-west of it, the edge falls behind the boat to the
-# north-east, out past the hull's far side, where the sea ends at the
-# black sky. the camera is in air above the water, so it names no
-# `initial-media`.
+# the sea. `world.ocean` (doc/sets.md) says no extent and no samples, so it
+# is the sea with no edge: the wave bands of the wind, summed at every
+# point, running out to the horizon. every sea input is chosen, none from
+# a shelf source: a wind of 7 m/s (a moderate breeze), a fetch of 50 km,
+# deep water (depth 0), waves going toward the east, the coast, seed 7,
+# time 0. slayer draw reports the spectrum model's estimate (not an
+# observation): significant height 1.06 m, peak period about 4 s. the
+# camera is in air above the water, so it names no `initial-media`.
 #
 # `direct-sun: mean-plane` lights the submerged hull with the sun. it is
 # CPU only; it refracts with the horizontal mean-plane normal, not the
@@ -90,11 +86,9 @@ scene:
           extinction-per-metre: [0.5, 0.1, 0.06]
         source: "synthetic extinction, not measured water; colour by eye"
     ocean:
-      # mean sea at z=0, a swell from the wind and fetch above.
+      # mean sea at z=0, a sea from the wind and fetch below.
       material: seawater
       middle: [-1500, 0, 0]
-      extent: {value: 512, unit: m}
-      samples: 257
       sea:
         wind: {value: 7, unit: m/s}
         fetch: {value: 50000, unit: m}

@@ -79,32 +79,32 @@ func TestReadScript(t *testing.T) {
 		t.Fatal(err)
 	}
 	short, found := script.Short("where")
-	if !found || len(script.Shorts()) != 1 {
-		t.Fatalf("the short is not there: %v", script.Shorts())
+	if !found || len(script.shorts) != 1 {
+		t.Fatalf("the short is not there: %v", script.shorts)
 	}
 	bar, sounded := short.Bar()
 	if short.Seconds() != 5 || short.Frames() != 5*filmRate ||
-		!sounded || bar != 2 || short.Title() != "Where the markers are" ||
+		!sounded || bar != 2 || short.title != "Where the markers are" ||
 		short.Name() != "where" {
 		t.Errorf("the short is %+v", short)
 	}
 	shots := short.Shots()
-	if shots[0].Camera() != "down" || shots[0].Lit() != "show" ||
+	if shots[0].camera != "down" || shots[0].lit != "show" ||
 		shots[1].tag != lighting["inspection"] ||
-		len(shots[0].Labels()) != 2 ||
+		len(shots[0].labels) != 2 ||
 		shots[1].Seconds() != 2 || shots[0].Sentence() == "" {
 		t.Errorf("the shots are %+v", shots)
 	}
 	figure := shots[0].figures[0]
-	if figure.Value() != "6" || figure.From() == "" || figure.Says() == "" ||
-		figure.Unit() != "" {
+	if figure.value != "6" || figure.from == "" || figure.says == "" ||
+		figure.unit != "" {
 		t.Errorf("the figure is %+v", figure)
 	}
 	if _, found := script.Short("there"); found {
 		t.Error("a short the script lacks was found")
 	}
-	if label := shots[0].Labels()[0]; label.Words() != "a marker" ||
-		!label.At().On() {
+	if label := shots[0].labels[0]; label.words != "a marker" ||
+		!label.at.on {
 		t.Errorf("the label is %+v", label)
 	}
 }
@@ -145,7 +145,7 @@ func TestReadScriptRefuses(t *testing.T) {
 		{"shorts:", "shorts: []\nnothing:", "no shorts"},
 	} {
 		_, err := scriptWith(t, wrong.old, wrong.new)
-		if !errors.Is(err, ErrWalk) || !strings.Contains(err.Error(),
+		if !errors.Is(err, errWalk) || !strings.Contains(err.Error(),
 			wrong.named) {
 			t.Errorf("%q for %q: %v", wrong.new, wrong.old, err)
 		}
@@ -160,12 +160,12 @@ func TestPanelFits(t *testing.T) {
 		t.Errorf("a short panel: %v", err)
 	}
 	if err := panelFits(strings.Repeat("words go here ", 30),
-		nil, true); !errors.Is(err, ErrWalk) {
+		nil, true); !errors.Is(err, errWalk) {
 		t.Errorf("a long sentence: %v", err)
 	}
 	wide := writtenFigure{Value: "384,400,000", Unit: "km", Says: "x"}
 	if err := panelFits("s", []writtenFigure{wide, wide,
-		wide}, false); !errors.Is(err, ErrWalk) {
+		wide}, false); !errors.Is(err, errWalk) {
 		t.Errorf("a wide figure: %v", err)
 	}
 	if _, err := figuresOf(make([]writtenFigure, mostFigures+1)); err == nil {
@@ -275,17 +275,17 @@ func TestReadScriptPictures(t *testing.T) {
 	if _, err := ReadScript(path, pictures); err != nil {
 		t.Errorf("the pictures apart: %v", err)
 	}
-	if _, err := ReadScript(path, ""); !errors.Is(err, ErrWalk) {
+	if _, err := ReadScript(path, ""); !errors.Is(err, errWalk) {
 		t.Errorf("the pictures not beside the script were found: %v", err)
 	}
 	if _, err := ReadScript(filepath.Join(dir, "gone.yaml"),
-		""); !errors.Is(err, ErrWalk) {
+		""); !errors.Is(err, errWalk) {
 		t.Errorf("a script not there: %v", err)
 	}
 	if err := os.WriteFile(path, []byte("shorts: ["), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := ReadScript(path, ""); !errors.Is(err, ErrWalk) {
+	if _, err := ReadScript(path, ""); !errors.Is(err, errWalk) {
 		t.Errorf("a script that is not yaml: %v", err)
 	}
 }
@@ -356,18 +356,18 @@ func TestSceneScript(t *testing.T) {
 	}
 	short, _ := script.Short("star")
 	shots := short.Shots()
-	labels := shots[0].Labels()
-	star := labels[0].At()
+	labels := shots[0].labels
+	star := labels[0].at
 	if math.Abs(star.X()-319.5) > 1e-9 || math.Abs(star.Y()-179.5) > 1e-9 {
 		t.Errorf("the star, looked at, is at %v, %v, not the middle",
 			star.X(), star.Y())
 	}
-	if pixel := labels[2].At(); pixel.X() != 10 || pixel.Y() != 20 {
+	if pixel := labels[2].at; pixel.X() != 10 || pixel.Y() != 20 {
 		t.Errorf("a pixel label is at %+v", pixel)
 	}
-	bar, err := shots[0].view.ScaleBar(*shots[0].bar, 200)
-	if err != nil || !strings.HasSuffix(bar.Words(), " km") {
-		t.Errorf("the bar says %q: %v", bar.Words(), err)
+	scale, err := shots[0].view.ScaleBar(*shots[0].bar, 200)
+	if err != nil || !strings.HasSuffix(scale.Words(), " km") {
+		t.Errorf("the bar says %q: %v", scale.Words(), err)
 	}
 	if shots[0].tag != lighting["drawing"] ||
 		shots[1].tag != "Computed, not seen" ||
@@ -405,7 +405,7 @@ func TestSceneScriptRefuses(t *testing.T) {
 			"scale: {thing: the star}", "no camera"},
 	} {
 		_, err := sceneWith(t, wrong.old, wrong.new)
-		if !errors.Is(err, ErrWalk) || !strings.Contains(err.Error(),
+		if !errors.Is(err, errWalk) || !strings.Contains(err.Error(),
 			wrong.named) {
 			t.Errorf("%q for %q: %v", wrong.new, wrong.old, err)
 		}
@@ -418,7 +418,7 @@ func TestSceneNoPlaces(t *testing.T) {
 	text := "places: {unit: km, at: {the star: [0, 0, 0],\n" +
 		"  the hoop: [500, 0, 0]}}\n"
 	_, err := sceneWith(t, text, "")
-	if !errors.Is(err, ErrWalk) || !strings.Contains(err.Error(), "unit") {
+	if !errors.Is(err, errWalk) || !strings.Contains(err.Error(), "unit") {
 		t.Errorf("an eye with no unit: %v", err)
 	}
 	if got := grouped(10000); got != "10,000" {
@@ -449,7 +449,7 @@ func TestHost(t *testing.T) {
 	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := ReadScript(path, ""); !errors.Is(err, ErrWalk) {
+	if _, err := ReadScript(path, ""); !errors.Is(err, errWalk) {
 		t.Errorf("a host with no frames: %v", err)
 	}
 	clip := image.NewRGBA(image.Rect(0, 0, 4, 4))

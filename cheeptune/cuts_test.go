@@ -29,7 +29,7 @@ func cutsOf(t *testing.T, sheet string) (*CutSheet, error) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return ParseCuts([]byte(sheet), s)
+	return parseCuts([]byte(sheet), s)
 }
 
 func TestACutSheetThatMatchesItsScoreGivesTheTimesOfItsParts(t *testing.T) {
@@ -55,7 +55,8 @@ func TestACutSheetThatMatchesItsScoreGivesTheTimesOfItsParts(t *testing.T) {
 
 func TestASecondWrittenToTwoDecimalsIsAccepted(t *testing.T) {
 	// 140 a minute: a bar is 1.714285 s, written 1.71.
-	s, err := ParseScore([]byte(strings.Replace(cutScore, "120", "140", 1)))
+	faster := strings.Replace(cutScore, "120", "140", 1)
+	s, err := ParseScore([]byte(faster))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func TestASecondWrittenToTwoDecimalsIsAccepted(t *testing.T) {
  "seconds":13.71,"parts":[
  {"name":"a","bar":1,"second":0,"change":"x","feels":"f"},
  {"name":"b","bar":2,"second":1.71,"change":"y","feels":"f"}]}`
-	if _, err := ParseCuts([]byte(sheet), s); err != nil {
+	if _, err := parseCuts([]byte(sheet), s); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -183,7 +184,8 @@ func TestAPathToARealSheetIsReadAgainstItsScore(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(c.Spans()) != 6 {
-		t.Errorf("%d parts, want 6", len(c.Spans()))
+		count := len(c.Spans())
+		t.Errorf("%d parts, want 6", count)
 	}
 	// the same sheet against another score is refused.
 	other, err := ReadScore("@dusk")

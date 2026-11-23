@@ -20,7 +20,8 @@ func covLegacy(t *testing.T, edits ...string) (Set, error) {
 		t.Fatal(err)
 	}
 	text := strings.Replace(string(raw), "$schema: "+EcosystemSchema+"\n", "", 1)
-	return Read("legacy.yaml", []byte(covEdit(t, text, edits...)))
+	source := covEdit(t, text, edits...)
+	return Read("legacy.yaml", []byte(source))
 }
 
 // covEdit replaces each before text with the after text that follows it,
@@ -74,11 +75,20 @@ func TestAtmosphereLayersAreCheckedWhereTheyAreRead(t *testing.T) {
 	covRefused(t, "unknown weather", err, `atmosphere names unknown weather "fog"`)
 }
 
-// TestWorldAtmosphereNeedsAGlobe checks that a version 2 layer over the
-// world is refused in a set that has no globe.
-func TestWorldAtmosphereNeedsAGlobe(t *testing.T) {
-	_, err := readV2(covMist + "  atmosphere:\n    layers:\n      deck:\n        weather: mist\n        extent: world\n        albedo: 0.5\n")
-	covRefused(t, "world layer without a globe", err, "a world atmosphere needs a globe")
+// TestWorldAtmosphereWithNoGroundIsFlatAir checks that a version 2 layer
+// over the world, in a set that has no globe and no terrain, is read, and
+// is the set's flat air. Before flat air it was refused, as a world layer
+// with no globe; a set with terrain and no globe still is, in
+// TestWorldAtmosphereOverTerrainNeedsAGlobe.
+func TestWorldAtmosphereWithNoGroundIsFlatAir(t *testing.T) {
+	made, err := readV2(covMist + "  atmosphere:\n    layers:\n      deck:\n        weather: mist\n        extent: world\n        albedo: 0.5\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	flat := made.FlatAir()
+	if len(flat) != 1 || flat[0].Weather() != "mist" || flat[0].Albedo() != 0.5 {
+		t.Errorf("flat air %v, want the one layer of mist at albedo 0.5", flat)
+	}
 }
 
 // covRegion is a region block for the legacy fixture, with the lines added

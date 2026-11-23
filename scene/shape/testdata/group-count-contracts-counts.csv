@@ -1,0 +1,5 @@
+name,count,accepted
+no members,0,false
+one member,1,true
+the budget,1073741823,true
+past the budget,1073741824,false

@@ -14,8 +14,6 @@ import "math"
 // The GPU cannot call Go, so that kernel restates the arithmetic, with
 // this scale passed in its Params. TestTheKernelsShoulderIsTheTones
 // there holds the two together.
-//
-//ninja:vow practice slayer's gpu pictures take their shoulder's scale here
 func (tone Tone) Scale() float64 { return tone.scale }
 
 // scaleOf is the scale a of the shoulder knee + a ln(1 + (y - knee)/a),

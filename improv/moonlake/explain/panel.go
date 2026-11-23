@@ -18,11 +18,11 @@ type Explainer struct {
 func New(parts Parts) (*Explainer, error) {
 	if parts.Clock == nil || parts.Script == nil {
 		return nil, fmt.Errorf("%w: an explainer needs the show's clock "+
-			"and its script", ErrExplain)
+			"and its script", errExplain)
 	}
 	if len(parts.Lights) < 1 || len(parts.Lights) > mostLights {
 		return nil, fmt.Errorf("%w: %d lights; the panel shows 1 to %d",
-			ErrExplain, len(parts.Lights), mostLights)
+			errExplain, len(parts.Lights), mostLights)
 	}
 	if parts.Ground == nil {
 		parts.Ground = func(float64) (color.RGBA, error) {
@@ -69,12 +69,6 @@ func (of Panel) Beat() Beat { return of.beat }
 
 // Lamps is the lamps, in order, a copy.
 func (of Panel) Lamps() []Lamp { return append([]Lamp(nil), of.lamps...) }
-
-// Ground is the panel's ground.
-func (of Panel) Ground() color.RGBA { return of.ground }
-
-// Chant is the chant's line, if one is being sung.
-func (of Panel) Chant() (string, bool) { return of.chant, of.singing }
 
 // Says is the sentence standing, if any.
 func (of Panel) Says() (Sentence, bool) { return of.sentence, of.saying }

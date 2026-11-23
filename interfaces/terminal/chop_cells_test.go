@@ -12,18 +12,18 @@ import (
 //
 // zero wide or zero tall is zero cells, not a cell of padding.
 func TestChopMakesWholeCellsAndPadsTheEdge(t *testing.T) {
-	for _, w := range []struct{ dx, dy, cols, rows int }{
+	for _, each := range []struct{ dx, dy, cols, rows int }{
 		{0, 0, 0, 0}, {0, 3, 0, 1}, {2, 0, 1, 0}, {1, 0, 1, 0},
 		{1, 1, 1, 1}, {2, 3, 1, 1}, {2, 1, 1, 1}, {1, 3, 1, 1},
 		{3, 4, 2, 2}, {4, 6, 2, 2}, {5, 7, 3, 3}, {6, 9, 3, 3},
 		{7, 10, 4, 4},
 	} {
-		img := image.NewRGBA(image.Rect(0, 0, w.dx, w.dy))
+		img := image.NewRGBA(image.Rect(0, 0, each.dx, each.dy))
 		var got *Cells
 		ends(t, "chop", func() { got = Chop(img) })
-		if got.W != w.cols || got.H != w.rows || len(got.Cells) != w.cols*w.rows {
+		if got.W != each.cols || got.H != each.rows || len(got.Cells) != each.cols*each.rows {
 			t.Errorf("%d by %d pixels: %d across, %d down, %d cells; want %d, %d, %d",
-				w.dx, w.dy, got.W, got.H, len(got.Cells), w.cols, w.rows, w.cols*w.rows)
+				each.dx, each.dy, got.W, got.H, len(got.Cells), each.cols, each.rows, each.cols*each.rows)
 		}
 	}
 }
@@ -66,7 +66,7 @@ func TestChopStepsTwoAcrossAndThreeDown(t *testing.T) {
 	if got.W != 2 || got.H != 2 {
 		t.Fatalf("%d across and %d down, want 2 and 2", got.W, got.H)
 	}
-	for _, w := range []struct {
+	for _, each := range []struct {
 		x, y int
 		want Cell
 	}{
@@ -75,8 +75,8 @@ func TestChopStepsTwoAcrossAndThreeDown(t *testing.T) {
 		{0, 1, Cell{Rune: 0x1FB3B, Fg: white, Bg: black, Pattern: 62}},
 		{1, 1, Cell{Rune: 0x1FB07, Fg: black, Bg: white, Pattern: 8}},
 	} {
-		if cell := got.At(w.x, w.y); cell != w.want {
-			t.Errorf("cell (%d, %d) = %+v, want %+v", w.x, w.y, cell, w.want)
+		if cell := got.At(each.x, each.y); cell != each.want {
+			t.Errorf("cell (%d, %d) = %+v, want %+v", each.x, each.y, cell, each.want)
 		}
 	}
 }
@@ -115,7 +115,7 @@ func TestChopReadsEachCellsOwnSixPixels(t *testing.T) {
 	if got.W != 2 || got.H != 2 {
 		t.Fatalf("%d across and %d down, want 2 and 2", got.W, got.H)
 	}
-	for _, w := range []struct {
+	for _, each := range []struct {
 		x, y int
 		want Cell
 	}{
@@ -124,8 +124,8 @@ func TestChopReadsEachCellsOwnSixPixels(t *testing.T) {
 		{0, 1, Cell{Rune: 0x2590, Fg: white, Bg: black, Pattern: 42}},
 		{1, 1, Cell{Rune: ' ', Fg: white, Bg: white, Pattern: 0}},
 	} {
-		if cell := got.At(w.x, w.y); cell != w.want {
-			t.Errorf("cell (%d, %d) = %+v, want %+v", w.x, w.y, cell, w.want)
+		if cell := got.At(each.x, each.y); cell != each.want {
+			t.Errorf("cell (%d, %d) = %+v, want %+v", each.x, each.y, cell, each.want)
 		}
 	}
 }

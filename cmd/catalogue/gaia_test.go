@@ -39,7 +39,8 @@ func TestGaiaPresentationRejectsUnboundedInputs(t *testing.T) {
 	for id := 1; id <= 12001; id++ {
 		fmt.Fprintf(&tooMany, "%d,0,0,1\n", id)
 	}
-	if _, err := readGaia(strings.NewReader(tooMany.String()), .1, 1); err == nil {
+	population := tooMany.String()
+	if _, err := readGaia(strings.NewReader(population), .1, 1); err == nil {
 		t.Fatal("unbounded star population accepted")
 	}
 	root := t.TempDir()
@@ -61,7 +62,8 @@ func TestGaiaPresentationRejectsUnboundedInputs(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "stars.csv"), []byte(gaiaFixture), 0600); err != nil {
 		t.Fatal(err)
 	}
-	plan := gaiaPlan{File: "stars.csv", SHA256: fmt.Sprintf("%x", sha256.Sum256([]byte(gaiaFixture))), Radius: .1, Zero: 1}
+	fixtureSum := sha256.Sum256([]byte(gaiaFixture))
+	plan := gaiaPlan{File: "stars.csv", SHA256: fmt.Sprintf("%x", fixtureSum), Radius: .1, Zero: 1}
 	if _, err := plan.load(); err != nil {
 		t.Fatal("pinned source on shelf refused", err)
 	}
@@ -91,7 +93,8 @@ func TestGaiaPresentationRequiresThePinnedBytes(t *testing.T) {
 	if err := os.WriteFile(path, []byte(gaiaFixture), 0600); err != nil {
 		t.Fatal(err)
 	}
-	settings := gaiaPlan{File: path, SHA256: fmt.Sprintf("%x", sha256.Sum256([]byte(gaiaFixture))),
+	fixtureSum := sha256.Sum256([]byte(gaiaFixture))
+	settings := gaiaPlan{File: path, SHA256: fmt.Sprintf("%x", fixtureSum),
 		Radius: .1, Zero: 10}
 	if _, err := settings.load(); err != nil {
 		t.Fatal(err)

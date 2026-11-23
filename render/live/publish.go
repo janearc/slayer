@@ -176,7 +176,8 @@ func replaced(path string, raw []byte, mode os.FileMode) error {
 		err = os.Rename(beside.Name(), path)
 	}
 	if err != nil {
-		err = errors.Join(err, os.Remove(beside.Name()))
+		besideName := beside.Name()
+		err = errors.Join(err, os.Remove(besideName))
 	}
 	return err
 }

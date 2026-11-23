@@ -1,0 +1,3 @@
+name,length,base,spread,thick,knots,seed,flow
+flowing,100,2,0.05,1,1,5,1
+still,100,2,0.05,1,1,5,0

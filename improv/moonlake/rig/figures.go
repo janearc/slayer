@@ -62,8 +62,8 @@ func FigureWays(figure string, heading, tilt, spread float64, beams int,
 // tilt, turned by a phase.
 func coneWays(heading, tilt, phase float64) []Point {
 	axis := Toward(heading, tilt)
-	u := axis.Cross(Point{0, 0, 1}).Unit()
-	v := u.Cross(axis)
+	u := axis.cross(Point{0, 0, 1}).unit()
+	v := u.cross(axis)
 	open := coneHalf * math.Pi / halfTurn
 	ways := make([]Point, coneRound)
 	for k := range ways {

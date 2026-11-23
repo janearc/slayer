@@ -33,6 +33,13 @@ func near(got, want maths.Light) bool {
 // Where the shoulder rolls light off between the knee and the top it is
 // worked from its solved scale, in shoulder_solved_test.go. The table's
 // rows for that were the old shoulder's, which turned a corner.
+//
+// The row of red 2 on a knee of 0.4252 is worked by hand: 0.4252 is the
+// luminance of red 2 (0.2126 of it), so the light is on the knee and keeps
+// it. A part past white is drawn toward that grey by a share s until it is
+// white: 0.4252 + (2 - 0.4252) s = 1, s = (1 - 0.4252) / (2 - 0.4252), and
+// the other parts are 0.4252 (1 - s) = 0.4252 / (2 - 0.4252) =
+// 0.4252 / 1.5748 = 0.27000254000508.
 func TestTheShoulderRollsLightOff(t *testing.T) {
 	for _, row := range rows(t, shoulderFile) {
 		tone := colour.NewTone(none, amount(t, row, "knee"),

@@ -1,0 +1,12 @@
+name,value
+plus infinity,+Inf
+minus infinity,-Inf
+no number,NaN
+smallest positive number,5e-324
+smallest negative number,-5e-324
+largest number,1.7976931348623157e+308
+most negative number,-1.7976931348623157e+308
+a number below the smallest normal,1e-310
+a huge number,1e300
+a huge negative number,-1e300
+a tiny number,1e-300

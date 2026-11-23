@@ -1,0 +1,1 @@
+format-bronze . :: gofmt -w materials/alloys.go materials/alloys_test.go materials/reflectance_estimate.go materials/reflectance_estimate_test.go materials/materials.go materials/metals.go materials/optics.go materials/page_test.go scene/thing/metals.go scene/thing/bronze_test.go

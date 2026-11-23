@@ -51,7 +51,7 @@ func (renderer *Renderer) Sampled(world *thing.World, eye maths.Subspace,
 	var picture *frame.Frame
 	var spent timing
 	var err error
-	if len(world.Fields) == MaxGravityFields {
+	if len(world.Fields) == maxGravityFields {
 		ops := fieldDefaults()
 		ops.seeds = renderer.cachedFieldSeeds
 		picture, spent, err = fieldSampledUsing(world, eye, lens, at, width, height, side, ops, renderer.volumeCells)

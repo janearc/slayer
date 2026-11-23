@@ -1,7 +1,8 @@
 // This is flame.Body's field evaluator in float arithmetic. Its rise constants
 // arrive from the same pinned McCaffrey data; the shape and turbulence choices
 // below mirror flame/body.go. They are authored appearance, not measurements.
-// See doc/fire-recipes.md for sources, model limits and the conformance tests.
+// See doc/model/fire/fire-recipes.md for sources, model limits and the
+// conformance tests.
 
 static ulong fire_seed(constant FireGrid &p) {
  return (ulong(uint(p.seed.y)) << 32) | ulong(uint(p.seed.x));

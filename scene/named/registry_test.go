@@ -18,6 +18,20 @@ var (
 	everyName = append(slices.Clone(tracedNames), "weather")
 )
 
+// tracedScenes are the traced scenes, each found by its name.
+func tracedScenes(t *testing.T) []named.Scene {
+	t.Helper()
+	var found []named.Scene
+	for _, name := range tracedNames {
+		scene, err := named.Get(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		found = append(found, *scene)
+	}
+	return found
+}
+
 // The registry lists each scene once, in its order.
 func TestTheRegistryListsEachSceneOnce(t *testing.T) {
 	var listed []string
@@ -71,7 +85,7 @@ func TestAllHandsOutCopies(t *testing.T) {
 // Each scene says what it is, what its unit is, and that the cpu draws
 // it; its defaults are a picture of some size.
 func TestEverySceneSaysWhatItIs(t *testing.T) {
-	for _, scene := range named.Traced() {
+	for _, scene := range tracedScenes(t) {
 		made := scene.Defaults()
 		if scene.About() == "" || scene.Unit() == "" ||
 			!scene.Draws(named.CPU) || made.Width() < once ||
@@ -87,7 +101,7 @@ func TestEverySceneSaysWhatItIs(t *testing.T) {
 // anti-tests: a renderer no scene names draws none of them, and changing
 // the list of renderers a scene hands out changes nothing in it.
 func TestARendererNotNamedDrawsNothing(t *testing.T) {
-	for _, scene := range named.Traced() {
+	for _, scene := range tracedScenes(t) {
 		if scene.Draws(named.Renderer("gpu-native")) {
 			t.Errorf("%s says gpu-native draws it", scene.Name())
 		}
@@ -152,13 +166,17 @@ var wrongKind = map[named.Kind]any{
 // refused, and the refusal lists the keys it has.
 func TestAKeyTheSceneHasNotIsRefused(t *testing.T) {
 	for _, scene := range named.All() {
-		near := scene.Parameters()[0].Name() + "s"
+		parameters := scene.Parameters()
+		near := "unexpected"
+		if len(parameters) > 0 {
+			near = parameters[0].Name() + "s"
+		}
 		err := scene.Check(map[string]any{near: once})
 		if !errors.Is(err, named.ErrNoParameter) {
 			t.Errorf("%s took %q: %v", scene.Name(), near, err)
 			continue
 		}
-		for _, one := range scene.Parameters() {
+		for _, one := range parameters {
 			if !strings.Contains(err.Error(), one.Name()) {
 				t.Errorf("%s's refusal does not list %s: %v",
 					scene.Name(), one.Name(), err)
@@ -170,7 +188,7 @@ func TestAKeyTheSceneHasNotIsRefused(t *testing.T) {
 // anti-tests: a build asked for a key the scene has not is refused before
 // anything is built.
 func TestABuildWithAWrongKeyIsRefused(t *testing.T) {
-	for _, scene := range named.Traced() {
+	for _, scene := range tracedScenes(t) {
 		built, err := scene.Build(map[string]any{"wide": once},
 			io.Discard)
 		if !errors.Is(err, named.ErrNoParameter) || built != nil {

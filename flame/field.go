@@ -126,7 +126,8 @@ func (field *Field) bodyAt(piece Piece) (Body, bool) {
 	body := *piece.Body
 	body.at = field.at - piece.Start
 	if piece.Fade > 0 {
-		share := math.Min(1, math.Min(float64(body.at), float64(piece.Duration-body.at))/float64(piece.Fade))
+		nearEnd := math.Min(float64(body.at), float64(piece.Duration-body.at))
+		share := math.Min(1, nearEnd/float64(piece.Fade))
 		body.fire.Absorption *= share * share * (3 - 2*share)
 	}
 	return body, true

@@ -373,7 +373,7 @@ focused checks. Sixteen Keck geometry records changed; other rows did not.
 These are still authored proportions. Berkeley Lab's historical description
 gives an approximately 36-metre-wide, 30-metre-high dome; our current
 30-by-28-metre envelope is not a measured Keck enclosure. The source links
-and that unresolved scale mismatch are in doc/observatory-models.md.
+and that unresolved scale mismatch are in doc/model/observatory/observatory-models.md.
 Mechanical dimensions and clearance over a full pointing sweep remain open.
 
 Three actual 720-by-480 native-GPU stills show Subaru at night, Keck enclosed,
@@ -399,7 +399,7 @@ replaces the incorrect annular secondary; the camera now sits below it.
 
 Existing sourced mirror diameters are retained. Building, brace and camera
 proportions remain authored in checked YAML, with primary references in
-doc/survey-observatory.md. The mount is still simplified and static.
+doc/model/observatory/survey-observatory.md. The mount is still simplified and static.
 Small exterior and cutaway proofs precede any new full-length render.
 
 The native 720 x 480 studies are in
@@ -458,7 +458,7 @@ beam-footprint clearance or real launcher engineering.
 The November 15 spacecraft proofs add service hardware and Webb's rear
 structure. They are studio model reviews, not finished shots. Spitzer still
 has a simplified flat solar shield. Source dimensions and authored additions
-are distinguished in doc/space-instrument-studies.md.
+are distinguished in doc/model/spacecraft/space-instrument-studies.md.
 
 The new flow camera can retreat logarithmically from a nearby marker to a
 wide, held composition. Fixed landmarks stay fixed; the camera supplies

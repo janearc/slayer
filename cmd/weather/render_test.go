@@ -87,7 +87,8 @@ func TestWeatherReportsInputsAndOutputFailures(t *testing.T) {
 		{"day", "-day", "0", "day"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			args := append(tinyWeather(t.TempDir()), test.flag, test.value)
+			folder := t.TempDir()
+			args := append(tinyWeather(folder), test.flag, test.value)
 			out, err := weatherCommand(t, args...)
 			if err == nil || !strings.Contains(out, test.want) {
 				t.Fatalf("%v %q", err, out)
@@ -98,7 +99,8 @@ func TestWeatherReportsInputsAndOutputFailures(t *testing.T) {
 	if err := os.WriteFile(file, []byte("held"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if out, err := weatherCommand(t, tinyWeather(filepath.Join(file, "maps"))...); err == nil || !strings.Contains(out, "not a directory") {
+	mapsFolder := filepath.Join(file, "maps")
+	if out, err := weatherCommand(t, tinyWeather(mapsFolder)...); err == nil || !strings.Contains(out, "not a directory") {
 		t.Fatalf("%v %q", err, out)
 	}
 	dir := t.TempDir()

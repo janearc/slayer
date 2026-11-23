@@ -47,10 +47,10 @@ func (plan gaiaPlan) load() (*sky.Catalogue, error) {
 		return nil, err
 	}
 	if len(raw) > limit {
-		return nil, fmt.Errorf("Gaia presentation catalogue exceeds four MiB")
+		return nil, fmt.Errorf("the Gaia presentation catalogue exceeds four MiB")
 	}
 	if fmt.Sprintf("%x", sha256.Sum256(raw)) != plan.SHA256 {
-		return nil, fmt.Errorf("Gaia catalogue %s differs from its sha256 pin", path)
+		return nil, fmt.Errorf("the Gaia catalogue %s differs from its sha256 pin", path)
 	}
 	return readGaia(bytes.NewReader(raw), plan.Radius, plan.Zero)
 }
@@ -59,7 +59,7 @@ func (plan gaiaPlan) load() (*sky.Catalogue, error) {
 // and increasing RA toward negative Z. It does not apply proper motion.
 func readGaia(input io.Reader, radius, zero float64) (*sky.Catalogue, error) {
 	if !(radius > 0 && radius <= 1) || !(zero > 0) || math.IsInf(zero, 0) {
-		return nil, fmt.Errorf("Gaia presentation needs a finite positive size and brightness")
+		return nil, fmt.Errorf("the Gaia presentation needs a finite positive size and brightness")
 	}
 	reader := csv.NewReader(input)
 	header, err := reader.Read()
@@ -68,7 +68,7 @@ func readGaia(input io.Reader, radius, zero float64) (*sky.Catalogue, error) {
 	}
 	if len(header) != 4 || header[0] != "source_id" || header[1] != "ra" ||
 		header[2] != "dec" || header[3] != "phot_g_mean_mag" {
-		return nil, fmt.Errorf("Gaia CSV needs source_id,ra,dec,phot_g_mean_mag")
+		return nil, fmt.Errorf("the Gaia CSV needs source_id,ra,dec,phot_g_mean_mag")
 	}
 	var stars []sky.Star
 	seen := map[uint64]bool{}
@@ -85,7 +85,7 @@ func readGaia(input io.Reader, radius, zero float64) (*sky.Catalogue, error) {
 			return nil, err
 		}
 		if seen[id] || len(stars) == 12000 {
-			return nil, fmt.Errorf("Gaia catalogue repeats a source or exceeds 12000 stars")
+			return nil, fmt.Errorf("the Gaia catalogue repeats a source or exceeds 12000 stars")
 		}
 		seen[id] = true
 		stars = append(stars, star)
@@ -109,7 +109,7 @@ func gaiaStar(row []string, zero float64) (sky.Star, uint64, error) {
 	}
 	ra, dec, magnitude := values[0], values[1], values[2]
 	if ra < 0 || ra >= 360 || dec < -90 || dec > 90 || magnitude < -30 || magnitude > 30 {
-		return sky.Star{}, 0, fmt.Errorf("Gaia source %d has an out-of-range position or magnitude", id)
+		return sky.Star{}, 0, fmt.Errorf("the Gaia source %d has an out-of-range position or magnitude", id)
 	}
 	alpha, delta := ra*maths.Degree, dec*maths.Degree
 	direction := maths.V(math.Cos(delta)*math.Cos(alpha), math.Sin(delta),

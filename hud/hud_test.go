@@ -142,8 +142,8 @@ func TestABarFollowsItsGauge(t *testing.T) {
 		Empty: "ground"}
 	for at, want := range map[time.Duration]int{0: 0, time.Second: 20,
 		2 * time.Second: 40, 4 * time.Second: 80} {
-		if got, _ := filled(covered(t, image.Rect(0, 0, 10, 1), at,
-			bar)); got != want {
+		cover := covered(t, image.Rect(0, 0, 10, 1), at, bar)
+		if got, _ := filled(cover); got != want {
 			t.Errorf("at %v the bar fills %d eighths, want %d",
 				at, got, want)
 		}

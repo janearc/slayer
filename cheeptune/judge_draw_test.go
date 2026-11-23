@@ -19,7 +19,7 @@ func missedBy(p *Piece, at time.Duration) (float64, bool) {
 	if off > 0.5 {
 		off--
 	}
-	return math.Abs(off) * p.Score.BeatSeconds(), true
+	return math.Abs(off) * p.Score.beatSeconds(), true
 }
 
 func TestAPressOnTheBeatMissesByNothing(t *testing.T) {

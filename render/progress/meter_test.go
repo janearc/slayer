@@ -243,14 +243,16 @@ func TestPropertyShareNeverFallsAndRemainingNeverNegative(t *testing.T) {
 		meter, clock := begun(test, frames, rows)
 		last := meter.Share()
 		for step := 0; step < 80 && meter.FramesDone() < frames; step++ {
-			clock.pass(time.Duration(rapid.IntRange(-2000, 5000).
-				Draw(test, "millis")) * time.Millisecond)
+			millis := rapid.IntRange(-2000, 5000).
+				Draw(test, "millis")
+			clock.pass(time.Duration(millis) * time.Millisecond)
 			if rapid.Bool().Draw(test, "frame ends") {
 				mustNil(test, meter.FrameDone())
 			} else {
 				left := rows - (meter.RowsDone() - meter.FramesDone()*rows)
-				mustNil(test, meter.Rows(rapid.IntRange(0, left).
-					Draw(test, "rows done")))
+				rowsDone := rapid.IntRange(0, left).
+					Draw(test, "rows done")
+				mustNil(test, meter.Rows(rowsDone))
 			}
 			if got := meter.Share(); got < last || got > 1 {
 				test.Fatalf("share went %v to %v", last, got)

@@ -15,7 +15,9 @@ import (
 //go:embed testdata/multiple.yaml
 var multipleRaw []byte
 
+// The cases' cells are those of the union of boxes: the switch unset.
 func TestBeamRefinementHandlesWideningAndMixedWidths(test *testing.T) {
+	asked(test, "")
 	fixture := readReference(test)
 	var data struct {
 		Cases []struct {

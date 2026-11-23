@@ -1,0 +1,56 @@
+# the signs detail study, a close view of a screen's housing: the right
+# foot of the screen of seed 8, from the right and below, 10 m off: the
+# frame round the lit panel, the seams between tiles, the posts that hold
+# the housing off the wall on bolted plates, and the junction box and
+# conduit beside it, from manufacture/cities/signdraw.go, drawn from
+# manufacture/cities/cultures/sign.yaml. the wall is not drawn.
+#
+# places are metres, as a map's run: x east, y north, z up. there is no sun
+# and no sky: the light is the sign's own, and one plain dim lamp, a choice
+# of this study, picked by eye, so that the parts that are not lit can be
+# seen. the street, the lamp and the camera are choices of this study.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: signs detail close screen
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 60
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    close:
+      title: "10 m off, from the right and below, at the screen's right foot"
+      location:
+        at: [38, -10, 0.6]
+      orientation:
+        look_at: [33, 0, 3]
+  set:
+    things:
+      screen: {kind: sign-screen, seed: 8, complexity: quick, east: 20, north: 0, height: {value: 0, unit: m}, heading: {value: 0, unit: deg}}
+  world:
+    unit: 1
+    lamps:
+      plain-dim:
+        at: [38, -10, 8]
+        temperature: 5000
+        strength: 200
+        radius: 0.3
+        source: eye
+    materials:
+      street:
+        colour: {srgb_linear: [0.02, 0.02, 0.025]}
+        clear: {through: 0.03, index: 1.5, gloss: 1, rank: 0}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye

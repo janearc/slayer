@@ -139,7 +139,7 @@ func Setup(config Config, image RGB, moonReference *RGB) (oceantex.Scene, oceant
 		Sea: oceantex.Sea{Wind: config.Wind, Fetch: 1500,
 			Toward: (90 - (moonAzimuth + 180)) * math.Pi / 180},
 		Salinity: 0, Celsius: 15, Chlorophyll: 2,
-		Sun: moon, Sky: sky.At,
+		Sun: moon, Sky: sky.at,
 	}
 	gauge, err := oceantex.NewGauge("moonlake 16:9", gaugeWidth, config.FrameHeight)
 	if err != nil {
@@ -222,11 +222,11 @@ func (sky *Sky) brightest() [3]float64 {
 	return sum
 }
 
-// At is the colour of the sky seen along the direction from. A direction
+// at is the colour of the sky seen along the direction from. A direction
 // that falls inside the picture gets that pixel; one outside it gets the
 // average of the top rows if it points above the horizon, else black. Light
 // is divided by the moon's luminance and disc size.
-func (sky *Sky) At(from oceantex.Vec) swatch.Swatch {
+func (sky *Sky) at(from oceantex.Vec) swatch.Swatch {
 	d := unit(from)
 	lum := (sky.moon[0] + sky.moon[1] + sky.moon[2]) / 3
 	light := func(raw [3]float64) swatch.Swatch {

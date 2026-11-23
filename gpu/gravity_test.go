@@ -34,7 +34,7 @@ func gravityBytes(values ...float64) []byte {
 // The GPU must integrate the owning library's equations, including spin and
 // non-equatorial motion, rather than drawing a screen-space distortion.
 func TestGravityMetalStepsMatchCelestial(t *testing.T) {
-	kernel, err := metal.Open(metal.GeodesicLibrary+gravityProbe, "probe")
+	kernel, err := metal.Open(metal.GeodesicLibrary()+gravityProbe, "probe")
 	if errors.Is(err, metal.ErrNoDevice) {
 		t.Skip(err)
 	}
@@ -80,7 +80,7 @@ func TestGravityMetalStepsMatchCelestial(t *testing.T) {
 // A photon close-up stresses trajectories that spend a long time near the
 // critical orbit, as well as backward tracing and the flat ring-disc branch.
 func TestGravityMetalCriticalAndBackwardSteps(t *testing.T) {
-	kernel, err := metal.Open(metal.GeodesicLibrary+gravityProbe, "probe")
+	kernel, err := metal.Open(metal.GeodesicLibrary()+gravityProbe, "probe")
 	if errors.Is(err, metal.ErrNoDevice) {
 		t.Skip(err)
 	}
@@ -151,7 +151,7 @@ func BenchmarkGravitySteps(b *testing.B) {
 		}
 	})
 	b.Run("Metal", func(b *testing.B) {
-		kernel, err := metal.Open(metal.GeodesicLibrary+gravityProbe, "probe")
+		kernel, err := metal.Open(metal.GeodesicLibrary()+gravityProbe, "probe")
 		if errors.Is(err, metal.ErrNoDevice) {
 			b.Skip(err)
 		}

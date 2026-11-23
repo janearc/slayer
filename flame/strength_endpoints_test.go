@@ -11,7 +11,8 @@ func TestUnitFuelStrengthPreservesTheOriginalField(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	strengths := make([]float64, len(patchFixture()))
+	patchCount := len(patchFixture())
+	strengths := make([]float64, patchCount)
 	for i := range strengths {
 		strengths[i] = 1
 	}

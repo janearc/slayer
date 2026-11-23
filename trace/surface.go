@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/render/frame"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
@@ -79,15 +79,12 @@ func march(solid shape.Shape, ray maths.Ray, near,
 	if !ok {
 		return 0, false
 	}
-	size := reach(box)
-	if math.IsInf(size, 0) {
-		size = 0
-	}
+	size := marchReach(box)
 	along := enter
 	for i := 0; i < marchSteps && along <= leave; i++ {
 		at := ray.Point(along)
 		gap := solid.Distance(at)
-		if math.Abs(gap) < touch*max(size, at.Len()) {
+		if math.Abs(gap) < touched(size, at.Len()) {
 			return along, true
 		}
 		along += math.Abs(gap)
@@ -104,8 +101,8 @@ type hit struct {
 }
 
 // normal is the way the thing faces where the ray met it, turned
-// against the ray: the face it landed on, for slayer's mesh, or the
-// shape asked at the point.
+// against the ray: for slayer's mesh, what meshNormal says, and for
+// any other shape, the shape asked at the point.
 func (met hit) normal(point, dir maths.Vec) maths.Vec {
 	if met.on.grouped {
 		return met.thing.toward(met.on.normal, dir)
@@ -114,7 +111,51 @@ func (met hit) normal(point, dir maths.Vec) maths.Vec {
 	if !isMesh || !met.on.meshed {
 		return met.thing.facing(point, dir)
 	}
-	return met.thing.toward(skin.NormalAt(met.on.met), dir)
+	return met.meshNormal(skin, dir)
+}
+
+// meshNormal is the way a mesh faces where the ray met it, turned against
+// the ray, as for any shape.
+//
+// Where the mesh is shaded smooth and the eye sees
+// the front of the face by the winding of its corners, but that normal lies
+// under the face, as the ground's does at a ridge where a survey with four
+// metres between samples gives corners the slope of the ridge's other flank,
+// it is the same normal turned the other way, over the face, and leaned back
+// along the face's way by the least that makes it face the eye.
+func (met hit) meshNormal(skin *mesh.Mesh, dir maths.Vec) maths.Vec {
+	_, flat := met.sides(skin)
+	turned := met.thing.toward(skin.NormalAt(met.on.met), dir)
+	if !skin.Smooth() || flat.Dot(dir) >= 0 || turned.Dot(flat) >= 0 {
+		return turned
+	}
+	side := turned.Neg()
+	seen := -flat.Dot(dir.Unit())
+	if !(seen > 0) {
+		return flat
+	}
+	share := (leastFacing + side.Dot(dir.Unit())) / seen
+	return side.Add(flat.Scale(share)).Unit()
+}
+
+// opposed is whether a mesh is shaded smooth, the eye sees the front of the
+// face the ray met, by the winding of its corners, and the smooth normal
+// points away from the face by more than leastOpposed names: it is then the
+// normal of another surface than the face's.
+func opposed(skin *mesh.Mesh, smooth, flat, dir maths.Vec) bool {
+	return skin.Smooth() && flat.Dot(dir) < 0 &&
+		smooth.Dot(flat) < -leastOpposed
+}
+
+// sides are the two ways a mesh faces where a ray met it, in the world: the
+// smooth normal its corners blend to, and the flat face's own, on whichever of
+// its two sides the winding of its corners gives.
+func (met hit) sides(skin *mesh.Mesh) (smooth, flat maths.Vec) {
+	turn := met.thing.at.Orientation
+	smooth = turn.Out(skin.NormalAt(met.on.met)).Unit()
+	one, two, three := skin.Corners(met.on.met.Face())
+	flat = turn.Out(two.Sub(one).Cross(three.Sub(one))).Unit()
+	return smooth, flat
 }
 
 // boundaryNormal keeps the side of a clear HeightField boundary tied to its
@@ -136,7 +177,8 @@ func (met hit) boundaryNormal(point, dir maths.Vec) maths.Vec {
 // face is the face's own way out where the ray met it, turned to the
 // side normal is on: for slayer's mesh shaded smooth, the flat face its
 // corners' normals bend. Anywhere else there is no face apart from the
-// normal, and it is normal itself.
+// normal, and it is normal itself. Where meshNormal has turned the normal
+// over to the eye's side of the face, it is on the face's own side.
 func (met hit) face(normal maths.Vec) maths.Vec {
 	skin, isMesh := met.thing.thing.Shape.(*mesh.Mesh)
 	if !isMesh || !met.on.meshed || met.on.grouped || !skin.Smooth() {
@@ -147,10 +189,10 @@ func (met hit) face(normal maths.Vec) maths.Vec {
 		normal.Neg())
 }
 
-// lifted is where the light at a point the ray met is asked from: on
-// slayer's mesh shaded smooth, the point raised to the curved surface
-// its normals draw, so a light grazing it is not cut into teeth by the
-// faces beside it; anywhere else, the point.
+// lifted is the point the ray met, raised on slayer's mesh shaded smooth to
+// the curved surface its normals draw, so a light grazing it is not cut
+// into teeth by the faces beside it; anywhere else, the point itself. The
+// light is asked from it by raised, unless raised says otherwise.
 func (met hit) lifted(point maths.Vec) maths.Vec {
 	skin, isMesh := met.thing.thing.Shape.(*mesh.Mesh)
 	if !isMesh || !met.on.meshed {
@@ -158,6 +200,23 @@ func (met hit) lifted(point maths.Vec) maths.Vec {
 	}
 	at := met.thing.at
 	return at.Out(skin.Lifted(met.on.met, at.In(point)))
+}
+
+// raised is where the lamps and the sky are asked from at a point the ray
+// met: lifted, except on a smooth mesh where the smooth normal is opposed to
+// the face the eye sees. There the corners' tangent planes lie across the
+// face, and raising the point to them puts it under the face, where every ray
+// is shut out; the point is asked from as it is.
+func (met hit) raised(point, dir maths.Vec) maths.Vec {
+	skin, isMesh := met.thing.thing.Shape.(*mesh.Mesh)
+	if !isMesh || !met.on.meshed {
+		return met.lifted(point)
+	}
+	smooth, flat := met.sides(skin)
+	if opposed(skin, smooth, flat, dir) {
+		return point
+	}
+	return met.lifted(point)
 }
 
 // look is one ray asked of the world, and what travels with it: the ray, how
@@ -170,8 +229,11 @@ func (met hit) lifted(point maths.Vec) maths.Vec {
 // surface is that much further from the eye than it is along the ray, for the
 // detail it is asked at and the haze over it.
 type look struct {
-	ray    maths.Ray
-	pixel  float64
+	ray   maths.Ray
+	pixel float64
+	// grain is the angular width of a pixel of the finished picture,
+	// which pixel's rays share: a wrinkle fades by it
+	grain  float64
 	bounce int
 	come   float64
 	// onward is whether the ray is a later leg of the look, off a
@@ -196,6 +258,16 @@ type look struct {
 	// oceanEvents counts every followed reflection or transmission at the
 	// explicitly tagged ocean, independently on each copied ray branch.
 	oceanEvents int
+	// discless is whether the ray leaves the sun's disc out of the sky it
+	// finds, because the surface it left shows the lamps' highlight, which
+	// is that sun's light already. It holds for that sky, and through the
+	// clear surfaces on the way to it, and for no opaque or mirrored one.
+	//
+	// Limit: on rough water whose faces are of another width than the
+	// highlight's lobe it is not set, and the sun is counted twice. Only
+	// the tagged sea passes a mirrored look through a clear surface, so
+	// the flag it carries through one is live there and nowhere else.
+	discless bool
 }
 
 // held is a clear medium a look is inside: its index, and its rank among
@@ -397,7 +469,6 @@ func shade(scene *staged, seen look) frame.Pixel {
 		// a surface before the field is the picture as usual
 		met, found := scene.crowd.first(ray, 0)
 		if !found || met.dist > into.dist {
-			distance = into.dist
 			if told != nil {
 				told.tell("the ray enters a field", "at",
 					into.dist)
@@ -460,7 +531,8 @@ func surface(scene *staged, seen look) (frame.Pixel, float64) {
 		endless := math.Inf(1)
 		beyond := scene.skyAt(ray.Dir)
 		// and the sun, where it is drawn as a disc and the ray finds it
-		if disc := film.Discs(scene.discs, ray.Dir); disc != (maths.Light{}) {
+		disc := film.Discs(scene.discs, ray.Dir)
+		if !seen.discless && disc != (maths.Light{}) {
 			beyond = beyond.Add(disc)
 		}
 		sky := scene.air(ray.Dir, endless, beyond)
@@ -503,35 +575,49 @@ func (met hit) named() string {
 // surfaceAt is surface for a look already known to meet a thing.
 func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	ray, placed, dist := seen.ray, met.thing, met.dist
+	// a ray that leaves the sun's disc out leaves it out for the sky, and
+	// for what a clear surface lets through to it: whatever an opaque
+	// surface sends on, or a surface mirrors, finds the disc as usual
+	carried := seen.discless
+	seen.discless = false
 	point := ray.Point(dist)
 	local := placed.at.In(point)
-	normal := met.normal(point, ray.Dir)
+	// how far the point is from the eye: along this ray, and whatever
+	// way the look had come before it
+	away := seen.come + dist
+	// the pixel's width where it lands, in the thing's own units
+	footprint := away * seen.pixel / placed.scale
+	normal, side, lost := met.shadingNormal(ray, point, footprint)
+	// the face's own way, before a wrinkle tilts it, for a texture that
+	// paints by which way the surface faces
+	faced := normal
 	material := placed.thing.Material
 	if material == nil {
 		material = grey
 	}
 	// a wrinkled surface's face tilts from place to place
 	if material.Crinkle != nil {
-		normal = material.Crinkle.Crinkled(point, normal, ray.Dir.Neg())
+		// fine wrinkles fade with the finished pixel's width in metres
+		// where it lands, so a far wall is flat and not glitter
+		normal = material.Crinkle.CrinkledWithin(point, normal,
+			ray.Dir.Neg(), (seen.come+dist)*seen.grain)
 	}
-	// By default optics follow the final shading normal, including crinkle.
-	// A clear HeightField is the exception: its spectral normal is for
-	// appearance, while the exact bilinear normal owns interface sides.
+	// Optics follow the final shading normal, crinkle included: for water
+	// and a clear height field, their waves' own slope fronted to the
+	// side the ray met them on (shadingNormal). That side alone says
+	// where a mirrored or bent look starts and which face it keeps above.
 	opticalNormal := normal
-	if material.Through > 0 {
-		if _, hasGeometryNormal :=
-			met.thing.thing.Shape.(shape.GeometricNormaler); hasGeometryNormal {
-			opticalNormal = met.boundaryNormal(point, ray.Dir)
-		}
+	if side == (maths.Vec{}) {
+		side = opticalNormal
 	}
-	// how far the point is from the eye: along this ray, and whatever
-	// way the look had come before it
-	away := seen.come + dist
-	// the pixel's width where it lands, in the thing's own units
-	footprint := away * seen.pixel / placed.scale
 	colour := material.Colour
 	if placed.paint != nil {
-		colour = texture.Sample(placed.paint, local, footprint)
+		if oriented, has := placed.paint.(texture.Oriented); has {
+			colour = oriented.Facing(met.paintPoint(local), point, faced)
+		} else {
+			colour = texture.Sample(placed.paint, met.paintPoint(local),
+				footprint)
+		}
 	}
 	told := scene.walked
 	if told != nil {
@@ -540,7 +626,7 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 			"colour", colour)
 	}
 	emitted := emits(material, placed.shine, local, footprint)
-	lifted := met.lifted(point)
+	lifted := met.raised(point, ray.Dir)
 	lit := scene.oceanLamplight(lifted, normal, colour, seen, placed.thing)
 	// a replay tells the sky's share, so it asks for it here. A picture
 	// asks only where the surface keeps its own colour, below: sixteen
@@ -567,18 +653,30 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 	// light reflects: total internal reflection. off a look's first
 	// surface the mirror carries it; on a bent leg the bend does, whole.
 	//
-	// the two stay inside what the kernel can unroll: a mirrored look
-	// does not bend, a bent look does not mirror again, and a look
-	// bends through at most refractions surfaces.
+	// the two stay inside what the kernel can unroll, but for two: a
+	// mirrored look does not bend, a bent look does not mirror again at
+	// a clear surface, and a look bends through at most refractions
+	// surfaces. there are two exceptions, both this tracer's only.
 	//
-	// so a partial reflection on an already bent look is paid and not
-	// followed: the light is taken from what passes and nothing carries
-	// it back. a water ball in a surround of luminance one reads 0.98
-	// head on and 0.76 at 85 degrees of incidence, near the rim, where
-	// whole light would read one; see TestAWaterBallInASurround.
+	// an opaque mirror met after a bend is followed, and the kernel drops
+	// it: the two pictures differ. and the tagged sea passes a mirrored
+	// look through a clear surface, its event budget counting and the
+	// bounce count ignored: that is CPU only, and the kernel refuses a
+	// world with interface events (gpu/scene.go), so no picture differs.
 	//
-	// every look starts in the air: a camera inside water is drawn as
-	// if it were in the air.
+	// so a partial reflection of a clear surface on an already bent look
+	// is paid and not followed: the light is taken from what passes and
+	// nothing carries it back. a surface that is not clear keeps its
+	// mirror on a bent look, as on any.
+	//
+	// a water ball in a surround of luminance one reads 0.98 head on
+	// and 0.76 at 85 degrees of incidence, near the rim, where whole
+	// light would read one; see TestAWaterBallInASurround.
+	//
+	// a look starts in the air unless its render was given the clear
+	// media the camera is inside (the WithInitialMedia forms); nothing
+	// is inferred from where the camera is, so a camera inside water
+	// that was not given is drawn as if it were in the air.
 	//
 	// a clear surface that reflects all of what arrives, past the
 	// budget or off a mirrored look, has nothing to follow it and
@@ -605,6 +703,22 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 			reflects = maths.Grey(material.SplitsBetween(
 				-opticalNormal.Dot(ray.Dir), at.relative))
 		}
+	}
+	// rough water mirrors by many small faces, and by their share
+	rough, roughly := met.facets(material, ray, point, opticalNormal, lost,
+		at)
+	// a surface that shows the lamps' highlight shows the sun in it, so
+	// the sky its mirror finds has no disc to show it twice. Rough
+	// water's faces drop the disc only where the highlight's lobe is as
+	// wide as the faces' slopes. Where the two widths differ the disc is
+	// kept, and the faces and the highlight both count the sun.
+	glossed := roughened(material, lost)
+	highlit := seen
+	highlit.discless = glints(glossed) && (!roughly ||
+		glossed.SlopeVariance == met.facetVariance(lost))
+	lets := carried && material.Through > 0
+	if roughly {
+		reflects = maths.Grey(facetShare(rough))
 	}
 	share := math.Max(reflects.R, math.Max(reflects.G, reflects.B))
 	through := math.Min(math.Max(material.Through, 0), 1)
@@ -636,12 +750,19 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		}
 	}
 	// an unfollowed mirror keeps the surface whole, as it always has;
-	// on a bent leg fresnel's share is a toll light pays and does not
-	// come back, which is why two panes dim twice.
-	if !oceanPolicy && share > 0 && seen.crossed == 0 && seen.bounce >= bounces {
+	// on a bent leg fresnel's share of a clear surface is a toll light
+	// pays and does not come back, which is why two panes dim twice.
+	// Water past the last bounce mirrors the sky instead (lastMirror).
+	tolled := seen.crossed > 0 && material.Through > 0
+	var skyward maths.Light
+	if !oceanPolicy && share > 0 && !tolled && seen.bounce >= bounces {
+		skyward = scene.lastMirror(met, ray.Dir, opticalNormal, reflects)
+		if roughly {
+			skyward = scene.roughSky(ray.Dir, rough)
+		}
 		share, reflects = 0, maths.Light{}
 	}
-	follow := share > 0 && seen.crossed == 0
+	follow := share > 0 && !tolled
 	if oceanPolicy {
 		follow = share > 0 && follows
 	}
@@ -656,10 +777,21 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 			sum = sum.Add(scene.skylight(lifted, normal, colour))
 		}
 		kept := sum.Times(left)
-		if follow {
-			departure := scene.bounced(ray, point, opticalNormal, met.face(opticalNormal))
-			departure.At = scene.interfaceOrigin(placed, point, opticalNormal, ray.At)
-			reflected := seen.mirrored(departure)
+		if material.IndependentEmission {
+			// The ordinary surface mixture has already retained left of the
+			// emission. Add the remainder once, without changing transport.
+			kept = kept.Add(emitted.Times(maths.RGB(
+				1-left.R, 1-left.G, 1-left.B)))
+		}
+		if follow && roughly {
+			kept = kept.Add(scene.roughMirror(highlit, met, ray, point, side,
+				rough))
+		} else if follow {
+			departure := scene.bounced(ray, point, opticalNormal,
+				met.face(side))
+			departure.At = scene.interfaceOrigin(placed, point, side,
+				ray.At)
+			reflected := highlit.mirrored(departure)
 			if oceanPolicy {
 				reflected.oceanEvents++
 			}
@@ -689,16 +821,17 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		if passes != (maths.Light{}) {
 			// a reflected bend stays on the ray's side of the
 			// surface, and inside whatever it was inside
-			side := opticalNormal.Scale(-1)
+			beyondSide := side.Scale(-1)
 			if total {
-				side = opticalNormal
+				beyondSide = side
 			}
-			enter := maths.Ray{At: scene.interfaceOrigin(placed, point, side,
-				ray.At), Dir: bent}
+			enter := maths.Ray{At: scene.interfaceOrigin(placed, point,
+				beyondSide, ray.At), Dir: bent}
 			beyond := seen.passed(enter, material, at)
 			if total {
 				beyond = seen.turnedBack(enter)
 			}
+			beyond.discless = lets
 			if oceanPolicy {
 				beyond.oceanEvents++
 			}
@@ -714,8 +847,10 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 		sum = sum.Add(scene.skylight(lifted, normal, colour))
 	}
 	// the lamps' highlights, over what it keeps, mirrors and passes
-	if glints(material) {
-		glint := scene.oceanGlint(lifted, normal, ray.Dir.Neg(), material,
+	sum = sum.Add(skyward)
+	// the slope the pixel cannot show widens the highlight's lobe
+	if glints(glossed) {
+		glint := scene.oceanGlint(lifted, normal, ray.Dir.Neg(), glossed,
 			seen, placed.thing)
 		sum = sum.Add(glint)
 		if told != nil {
@@ -737,8 +872,23 @@ func surfaceAt(scene *staged, seen look, met hit) frame.Pixel {
 			sum = sum.Scale(1 - coverage).Add(light.Scale(coverage))
 		}
 	}
+	if throughFoam(material, at) {
+		sum = scene.surfFoam(sum, local, lifted, normal, seen, placed.thing)
+	}
 	hazed := scene.air(ray.Dir, away, sum)
 	return pixelOf(hazed, 1, float32(dist))
+}
+
+// paintPoint is the point a texture is read at: the mesh's rest point where
+// the hit is on a mesh that has one, and the local point otherwise.
+func (met hit) paintPoint(local maths.Vec) maths.Vec {
+	if met.on.meshed {
+		skin := met.thing.thing.Shape.(*mesh.Mesh)
+		if rest, found := skin.RestPointAt(met.on.met); found {
+			return rest
+		}
+	}
+	return local
 }
 
 // throughFoam limits the mixture to real clear boundaries. The clear branch
@@ -768,6 +918,11 @@ func (scene *staged) lamplightExcept(point, normal maths.Vec,
 	squarely := func(toward maths.Vec, light maths.Light) float64 {
 		return light.Luminance() * math.Max(0, normal.Dot(toward))
 	}
+	// every lamp's ray starts from the same place: the lift is a walk
+	// of the marched things, made once a surface, at the first lamp that
+	// needs it and not before
+	var from maths.Vec
+	var started bool
 	var room [lampsEvery]lit
 	for _, one := range scene.askedExcept(room[:], point, normal,
 		squarely, skip) {
@@ -792,7 +947,9 @@ func (scene *staged) lamplightExcept(point, normal maths.Vec,
 			}
 			continue
 		}
-		from := scene.lifted(point, normal)
+		if !started {
+			from, started = scene.lifted(point, normal), true
+		}
 		reached := scene.unhidden(i, from, toward, far)
 		// a matte surface sends what lands on it out every way alike:
 		// its radiance is its colour over pi times the irradiance
@@ -831,6 +988,10 @@ func (scene *staged) glintExcept(point, normal, look maths.Vec,
 	squarely := func(toward maths.Vec, light maths.Light) float64 {
 		return light.Luminance() * math.Max(0, normal.Dot(toward))
 	}
+	// every lamp's ray starts from the same place, lifted once a surface
+	// at the first lamp that needs it
+	var from maths.Vec
+	var started bool
 	var room [lampsEvery]lit
 	for _, one := range scene.askedExcept(room[:], point, normal,
 		squarely, skip) {
@@ -844,7 +1005,9 @@ func (scene *staged) glintExcept(point, normal, look maths.Vec,
 		if !(lobe > 0) {
 			continue
 		}
-		from := scene.lifted(point, normal)
+		if !started {
+			from, started = scene.lifted(point, normal), true
+		}
 		reached := scene.unhidden(one.index, from, one.toward, one.far)
 		mirrored := material.Reflects(half.Dot(look))
 		sum = sum.Add(light.Times(reached).Times(mirrored).Scale(lobe))
@@ -967,9 +1130,16 @@ func (scene *staged) air(along maths.Vec, dist float64,
 
 // interfaceOrigin preserves ordinary lifts while preventing an exact ocean
 // departure from crossing a neighboring bilinear crease.
+// A sea (clearedWater) is left by at least its clearance, so the look
+// begins on the side it leaves toward and does not meet the same surface
+// again within the search's touch.
 func (scene *staged) interfaceOrigin(placed placedThing, point, side, from maths.Vec) maths.Vec {
 	origin := scene.liftedAlong(point, side, from)
-	water, ok := placed.thing.Shape.(*seaocean.InfiniteMeanContinuation)
+	if sea, cleared := placed.thing.Shape.(clearedWater); cleared {
+		return point.Add(side.Unit().Scale(max(origin.Sub(point).Len(),
+			sea.Clearance()*placed.scale)))
+	}
+	water, ok := placed.thing.Shape.(*arid.InfiniteMeanContinuation)
 	if !ok {
 		return origin
 	}

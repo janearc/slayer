@@ -180,7 +180,8 @@ func TestAGrownLimbFlows(t *testing.T) {
 	on := place{space: space, size: size{length: measure.Metres(10),
 		girth: measure.Metres(0.1)}}
 	bent := func(pieces int, droop, wander float64) (sharpest, out float64) {
-		bark, err := sleeved(resampled(girths(1, 0.75, 0.5, 0.25), pieces+1),
+		widths := girths(1, 0.75, 0.5, 0.25)
+		bark, err := sleeved(resampled(widths, pieces+1),
 			5, body)
 		if err != nil {
 			t.Fatal(err)
@@ -197,11 +198,13 @@ func TestAGrownLimbFlows(t *testing.T) {
 		plane := way.Cross(maths.Up).Unit()
 		for at, run := range runs {
 			along := run.space.Orientation.Out(maths.YAxis)
-			out = math.Max(out, math.Abs(along.Dot(plane)))
+			component := math.Abs(along.Dot(plane))
+			out = math.Max(out, component)
 			if at > 0 {
 				before := runs[at-1].space.Orientation.Out(maths.YAxis)
-				sharpest = math.Max(sharpest,
-					math.Acos(math.Min(1, before.Dot(along))))
+				alignment := before.Dot(along)
+				turn := math.Acos(math.Min(1, alignment))
+				sharpest = math.Max(sharpest, turn)
 			}
 		}
 		return sharpest, out

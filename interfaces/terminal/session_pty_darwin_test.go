@@ -30,7 +30,7 @@ const (
 func TestOpenTakesTheTerminalAndEndGivesItBack(t *testing.T) {
 	master, slave := ptyPair(t)
 	before := settings(t, slave)
-	s, err := Open(slave, slave)
+	session, err := Open(slave, slave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,14 +40,14 @@ func TestOpenTakesTheTerminalAndEndGivesItBack(t *testing.T) {
 	if during := settings(t, slave); during.Lflag&(unix.ECHO|unix.ICANON) != 0 {
 		t.Errorf("local modes %#x while open: echo or line buffering is still on", during.Lflag)
 	}
-	s.End()
+	session.End()
 	if got := screenOf(t, master, len(givenBack)); got != givenBack {
 		t.Errorf("End sent %q, want %q", got, givenBack)
 	}
 	if after := settings(t, slave); after != before {
 		t.Errorf("modes after End are not the modes before Open:\n%+v\n%+v", after, before)
 	}
-	s.End()
+	session.End()
 	if _, err := slave.WriteString("Z"); err != nil {
 		t.Fatal(err)
 	}
@@ -62,24 +62,24 @@ func TestOpenTakesTheTerminalAndEndGivesItBack(t *testing.T) {
 func TestOpenRefusesAnythingButATerminalAtBothEnds(t *testing.T) {
 	const refusal = "needs a terminal on both input and output"
 	master, slave := ptyPair(t)
-	r, w, err := os.Pipe()
+	reader, writer, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer r.Close()
-	defer w.Close()
+	defer reader.Close()
+	defer writer.Close()
 	before := settings(t, slave)
-	for _, c := range []struct {
+	for _, each := range []struct {
 		what    string
 		in, out *os.File
 	}{
-		{"a pipe for both", r, w},
-		{"a pipe for the input", r, slave},
-		{"a pipe for the output", slave, w},
+		{"a pipe for both", reader, writer},
+		{"a pipe for the input", reader, slave},
+		{"a pipe for the output", slave, writer},
 	} {
-		s, err := Open(c.in, c.out)
-		if s != nil || err == nil || err.Error() != refusal {
-			t.Errorf("%s: got %v, %v; want no session and %q", c.what, s, err, refusal)
+		session, err := Open(each.in, each.out)
+		if session != nil || err == nil || err.Error() != refusal {
+			t.Errorf("%s: got %v, %v; want no session and %q", each.what, session, err, refusal)
 		}
 	}
 	if after := settings(t, slave); after != before {
@@ -100,9 +100,9 @@ func TestOpenRefusesAnythingButATerminalAtBothEnds(t *testing.T) {
 func TestOpenGivesBackAKeyboardItCouldNotUse(t *testing.T) {
 	_, slave := ptyPair(t)
 	before := settings(t, slave)
-	s, err := Open(slave, reopen(t, slave))
-	if s != nil || err == nil {
-		t.Fatalf("got %v, %v; want no session and an error", s, err)
+	session, err := Open(slave, reopen(t, slave))
+	if session != nil || err == nil {
+		t.Fatalf("got %v, %v; want no session and an error", session, err)
 	}
 	if !strings.Contains(err.Error(), "could not take over the screen") || !errors.Is(err, unix.EBADF) {
 		t.Errorf("got %q, want it to say the screen could not be taken over, from the bad descriptor", err)

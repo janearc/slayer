@@ -5,8 +5,8 @@ import (
 	"math"
 )
 
-// PlanLasers lists the splats AddLasers would draw for a width by height
-// frame, without drawing them. Cues are read as AddLasers reads them. It
+// PlanLasers lists the splats addLasers would draw for a width by height
+// frame, without drawing them. Cues are read as addLasers reads them. It
 // refuses bad sizes, mask lengths, reach, a beam count over 256, and numbers
 // that are not finite or are over 1e7. It returns nothing when Rig is 0 or
 // the gates are shut. Splats well off the frame are dropped, and over 1<<20
@@ -82,7 +82,7 @@ func PlanLasers(width, height int, config LaserConfig, input LaserInput) ([]Plan
 	}
 	lum := (input.Moon[0] + input.Moon[1] + input.Moon[2]) / 3
 	camera := input.Camera
-	for _, head := range LaserHeads(config) {
+	for _, head := range laserHeads(config) {
 		gate := gates[head.Bank]
 		if gate < 0.01 {
 			continue
@@ -91,7 +91,7 @@ func PlanLasers(width, height int, config LaserConfig, input LaserInput) ([]Plan
 		for channel := range lit {
 			lit[channel] *= gate
 		}
-		ways, weight, split := FigureWays(cue.Figure, head.Aim+head.Mirror*swing, tilt+head.Lift, spread, cue.Beams, cue.FigurePhase)
+		ways, weight, split := figureWays(cue.Figure, head.Aim+head.Mirror*swing, tilt+head.Lift, spread, cue.Beams, cue.FigurePhase)
 		for beam, way := range ways {
 			if split && cue.Parity >= 0 && (beam+head.Flip)%2 != cue.Parity {
 				continue
@@ -104,7 +104,7 @@ func PlanLasers(width, height int, config LaserConfig, input LaserInput) ([]Plan
 				point := head.Origin.Add(way.Scale(distanceAlong))
 				if point.Z < config.WaterZ {
 					if x, y, ahead := camera.Project(point); ahead {
-						if err := add(x, y, 1.2, lum*60*LaserFog(point, input.Seconds, config.WaterZ), each); err != nil {
+						if err := add(x, y, 1.2, lum*60*laserFog(point, input.Seconds, config.WaterZ), each); err != nil {
 							return nil, err
 						}
 					}
@@ -127,7 +127,7 @@ func PlanLasers(width, height int, config LaserConfig, input LaserInput) ([]Plan
 				if input.CloseTrees != nil && xi >= 0 && yi >= 0 && xi < width && yi < height && input.CloseTrees[yi*width+xi] {
 					continue
 				}
-				bright := lum * (0.12 + 24*LaserFog(point, input.Seconds, config.WaterZ)) * 2.2 * math.Min(1, float64(width)/1280)
+				bright := lum * (0.12 + 24*laserFog(point, input.Seconds, config.WaterZ)) * 2.2 * math.Min(1, float64(width)/1280)
 				pixels := step / distance * camera.Focal
 				if err := add(x, y, 0.5, bright*pixels*0.88, each); err != nil {
 					return nil, err

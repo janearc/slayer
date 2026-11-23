@@ -1,0 +1,6 @@
+name,x,z,near,far,enter,leave
+a-sphere-interval-contracts-tangent,1,3,0,10,0,0
+a-sphere-interval-contracts-pinched,0,3,2.5,2.5,0,0
+a-sphere-interval-contracts-ends-at-entry,0,3,0,2,0,0
+a-sphere-interval-contracts-starts-at-exit,0,3,4,10,0,0
+a-sphere-interval-contracts-clipped,0,3,2,4,2,4

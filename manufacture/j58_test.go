@@ -254,8 +254,9 @@ func TestTheJ58HasSixBypassTubesFromTheFourthStage(t *testing.T) {
 		starts[first] = true
 	}
 	if len(starts) != j58Tubes || len(j58PartsOf(j58Tube)) != j58Tubes*9 {
+		tubeParts := len(j58PartsOf(j58Tube))
 		t.Errorf("the tubes start at %d places in %d parts, want %d in %d",
-			len(starts), len(j58PartsOf(j58Tube)), j58Tubes, j58Tubes*9)
+			len(starts), tubeParts, j58Tubes, j58Tubes*9)
 	}
 	one, opposite := size.tubeRun(size.tubeTurn(0))[0],
 		size.tubeRun(size.tubeTurn(j58Tubes / 2))[0]
@@ -322,8 +323,9 @@ func TestTheJ58BurnerShowsItsEightCans(t *testing.T) {
 	size := j58Read
 	bosses := j58PartsOf(j58Boss)
 	if len(bosses) != j58Cans || len(j58PartsOf(j58Manifold)) != 1 {
+		manifolds := len(j58PartsOf(j58Manifold))
 		t.Fatalf("the burner has %d bosses and %d manifolds, want %d and 1",
-			len(bosses), len(j58PartsOf(j58Manifold)), j58Cans)
+			len(bosses), manifolds, j58Cans)
 	}
 	seen := map[maths.Vec]bool{}
 	for index, each := range bosses {
@@ -407,9 +409,12 @@ func TestTheJ58AfterburnerShowsThroughTheNozzle(t *testing.T) {
 	rings := len(burner.Rings)
 	if len(j58PartsOf(j58Spray)) != rings || len(j58PartsOf(j58Holder)) != rings ||
 		len(j58PartsOf(j58Strut)) != burner.Struts*2 {
+		sprays := len(j58PartsOf(j58Spray))
+		holders := len(j58PartsOf(j58Holder))
+		struts := len(j58PartsOf(j58Strut))
 		t.Fatalf("the afterburner has %d spray rings, %d holders and %d "+
-			"struts", len(j58PartsOf(j58Spray)), len(j58PartsOf(j58Holder)),
-			len(j58PartsOf(j58Strut)))
+			"struts", sprays, holders,
+			struts)
 	}
 	for _, of := range []slot{j58Spray, j58Holder} {
 		out, front, _ := j58Reach(j58PartsOf(of))
@@ -582,7 +587,8 @@ func TestAJ58ThatCannotBeBuiltIsRefused(t *testing.T) {
 		if !strings.Contains(whole, each.was) {
 			t.Fatalf("%s: the file has no %q to change", name, each.was)
 		}
-		_, err := readJ58([]byte(strings.Replace(whole, each.was, each.is, 1)))
+		edited := strings.Replace(whole, each.was, each.is, 1)
+		_, err := readJ58([]byte(edited))
 		if err == nil {
 			t.Errorf("%s: read without refusal", name)
 			continue

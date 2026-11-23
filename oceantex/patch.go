@@ -7,9 +7,9 @@ import (
 	"math/rand/v2"
 )
 
-// Patch is one square of sea, periodic, as the random amplitudes of its
+// patch is one square of sea, periodic, as the random amplitudes of its
 // waves. It can be asked for the surface at any time.
-type Patch struct {
+type patch struct {
 	n      int
 	extent float64
 	sea    Sea
@@ -44,7 +44,7 @@ func wave(index, n int) int {
 	return index - n
 }
 
-// NewPatch draws the waves of a sea on an n by n grid, extent metres along
+// newPatch draws the waves of a sea on an n by n grid, extent metres along
 // a side. n must be a power of two, at least 2. The same seed gives the
 // same sea.
 //
@@ -52,7 +52,7 @@ func wave(index, n int) int {
 // gets a complex Gaussian amplitude whose mean square is half the spectrum
 // there times the cell's area in wavenumber space, half because a real
 // surface needs each wave and its mirror image [Ho15, eqs. 46-47].
-func NewPatch(sea Sea, n int, extent float64, seed uint64) (*Patch, error) {
+func newPatch(sea Sea, n int, extent float64, seed uint64) (*patch, error) {
 	return newBand(sea, n, extent, seed, 0, math.Inf(1))
 }
 
@@ -60,7 +60,7 @@ func NewPatch(sea Sea, n int, extent float64, seed uint64) (*Patch, error) {
 // least shortest and under longest.
 func newBand(
 	sea Sea, n int, extent float64, seed uint64, shortest, longest float64,
-) (*Patch, error) {
+) (*patch, error) {
 	if n < 2 || n&(n-1) != 0 {
 		return nil, errors.New("oceantex: grid size must be a power of two")
 	}
@@ -81,7 +81,7 @@ func newBand(
 
 	source := rand.New(rand.NewPCG(seed, seed^0x9e3779b97f4a7c15))
 	cell := 2 * math.Pi / extent
-	p := &Patch{n: n, extent: extent, sea: sea,
+	p := &patch{n: n, extent: extent, sea: sea,
 		shortest: shortest, longest: longest,
 		start: make([]complex128, n*n)}
 	for iy := 0; iy < n; iy++ {
@@ -91,7 +91,7 @@ func newBand(
 			if !carried {
 				continue
 			}
-			density := sea.Wavenumber(kx, ky)
+			density := sea.wavenumber(kx, ky)
 			size := math.Sqrt(density * cell * cell / 2)
 			p.start[iy*n+ix] = complex(re, im) * complex(size/math.Sqrt2, 0)
 		}
@@ -101,7 +101,7 @@ func newBand(
 
 // vector is the wave vector at a grid index, and whether the patch
 // carries a wave there. The row with no mirror image stays flat.
-func (p *Patch) vector(ix, iy int) (kx, ky float64, carried bool) {
+func (p *patch) vector(ix, iy int) (kx, ky float64, carried bool) {
 	cell := 2 * math.Pi / p.extent
 	wx, wy := wave(ix, p.n), wave(iy, p.n)
 	kx, ky = float64(wx)*cell, float64(wy)*cell
@@ -111,10 +111,10 @@ func (p *Patch) vector(ix, iy int) (kx, ky float64, carried bool) {
 	return kx, ky, carried
 }
 
-// Resolved is the slope variance the grid carries, expected over every sea
+// resolved is the slope variance the grid carries, expected over every sea
 // with this wind: along the wind and across it. It is the spectrum times
 // the squared wave number, summed over the grid.
-func (p *Patch) Resolved() (along, across float64) {
+func (p *patch) resolved() (along, across float64) {
 	cell := 2 * math.Pi / p.extent
 	sin, cos := math.Sincos(p.sea.Toward)
 	for iy := 0; iy < p.n; iy++ {
@@ -123,7 +123,7 @@ func (p *Patch) Resolved() (along, across float64) {
 			if !carried {
 				continue
 			}
-			power := p.sea.Wavenumber(kx, ky) * cell * cell
+			power := p.sea.wavenumber(kx, ky) * cell * cell
 			ka, kc := kx*cos+ky*sin, -kx*sin+ky*cos
 			along += ka * ka * power
 			across += kc * kc * power
@@ -134,7 +134,7 @@ func (p *Patch) Resolved() (along, across float64) {
 
 // At is the surface at a time in seconds. Each wave turns at the
 // frequency the dispersion relation gives it.
-func (p *Patch) At(seconds float64) *Field {
+func (p *patch) At(seconds float64) *Field {
 	n := p.n
 	grids := make([][]complex128, 8)
 	for i := range grids {

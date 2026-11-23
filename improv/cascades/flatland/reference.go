@@ -39,7 +39,7 @@ func cellMean(grid *Grid, column, row int, cosines, sines []float64) ([Bands]flo
 	var steps int64
 	centreX, centreY := float64(column)+0.5, float64(row)+0.5
 	for direction := range cosines {
-		interval, used := grid.March(centreX, centreY,
+		interval, used := grid.march(centreX, centreY,
 			cosines[direction], sines[direction], 0, math.Inf(1))
 		for band := 0; band < Bands; band++ {
 			sum[band] += interval.Intensity[band]

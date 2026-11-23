@@ -10,6 +10,9 @@ import (
 
 // moveCamera commits a single camera translation through the normal editor history.
 func (work *Workspace) moveCamera(east, north, up float64) error {
+	if err := work.fullRenderRefusal("moving the camera"); err != nil {
+		return err
+	}
 	if !work.viewer.navigable || work.viewer.source == nil {
 		return fmt.Errorf("a current working camera is required before moving it")
 	}

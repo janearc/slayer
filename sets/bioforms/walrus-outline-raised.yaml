@@ -1,0 +1,58 @@
+# A bull walrus hauled out on pale ground with its head up: the chest on
+# the fore flippers and the belly flat, as at rest, the neck raised and
+# the head lifted and held level, so the tusks hang clear of the ground.
+# The pose is made by turning joints of the skeleton under the hide
+# (manufacture/walrus_pose.go). The staging is that of
+# walrus-outline.yaml, and the reasons for it are written there.
+#
+# the frame. places are metres, x east, y north, z up, the ground's face
+# at z=0. the walrus's own floor is 0.41 m below its middle, so it
+# stands 0.41 m up and rests on the ground. its nose points east.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: walrus hauled out, head raised
+  seed: 17
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 160, altitude: 45}
+  set:
+    things:
+      walrus:
+        kind: walrus-fresh-5-hauled-out
+        seed: 17
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0.41, unit: m}
+  film:
+    width: 1600
+    height: 1000
+    rays: 2
+    wide: 38
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.62, 0.64, 0.66]}
+        source: "chosen: about the reflectance of old snow on sea ice, no measurement"
+    boxes:
+      # the ground, its upper face at nought
+      ground:
+        material: ground
+        middle: [0, 0, -1]
+        size: [2000, 2000, 2]
+        source: "chosen: a flat slab, no survey"
+  cameras:
+    side:
+      title: "from the south, level with the back"
+      location: {at: [0.2, -6.8, 0.7]}
+      orientation: {look_at: [0.2, 0, 0.5]}
+    quarter:
+      title: "from the south-east, on the head"
+      location: {at: [4.7, -4.3, 1.5]}
+      orientation: {look_at: [0.3, 0, 0.45]}

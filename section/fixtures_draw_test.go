@@ -8,6 +8,18 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// row is the row of a csv file called a name.
+func row(t *testing.T, file, name string) map[string]string {
+	t.Helper()
+	for _, each := range rows(t, file) {
+		if each["name"] == name {
+			return each
+		}
+	}
+	t.Fatalf("%s: no row called %q", file, name)
+	return nil
+}
+
 // place is the vector of a named row of places.csv.
 func place(t *testing.T, name string) maths.Vec {
 	t.Helper()

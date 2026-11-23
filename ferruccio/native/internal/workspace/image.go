@@ -39,6 +39,8 @@ type imageView struct {
 	endWorking       func(bool)
 	ball             *cameraBall
 	travel           *cameraBall
+	// settingsHandler opens the settings sheet on command and comma.
+	settingsHandler func()
 }
 
 // newImageView creates a visible, noninteractive still-image surface.
@@ -84,6 +86,10 @@ func (view *imageView) Event(ctx widget.Context, e event.Event) bool {
 		return true
 	}
 	if view.travel != nil && view.travel.Event(ctx, e) {
+		return true
+	}
+	if key, ok := e.(*event.KeyEvent); ok && key.KeyType == event.KeyPress && key.Key == event.KeyComma && key.Modifiers().HasAny(event.ModSuper|event.ModCtrl) && view.settingsHandler != nil {
+		view.settingsHandler()
 		return true
 	}
 	if mouse, ok := e.(*event.MouseEvent); ok {
@@ -277,7 +283,7 @@ func (view *imageView) Draw(_ widget.Context, canvas widget.Canvas) {
 	canvas.PushClipRoundRect(bounds, 8)
 	defer canvas.PopClip()
 	if view.source == nil {
-		canvas.DrawText("Your next world starts here", bounds, 20, appearance.Ink, false, widget.TextAlignCenter)
+		canvas.DrawText("Your next world starts here", bounds, view.fontSize, appearance.Ink, false, widget.TextAlignCenter)
 		return
 	}
 	source := view.source.Bounds()

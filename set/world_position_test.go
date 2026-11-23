@@ -13,8 +13,9 @@ const absoluteTree = "        position:\n" +
 func TestThingReadsTypedWorldPositionInBothSettings(t *testing.T) {
 	for _, setting := range []string{"ground", "space"} {
 		t.Run(setting, func(t *testing.T) {
+			plant := spruce("tree", absoluteTree)
 			read, err := readV2("  setting: " + setting + "\n" +
-				stood(spruce("tree", absoluteTree)))
+				stood(plant))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -50,8 +51,9 @@ func TestThingWorldPositionRefusesAmbiguousPlacements(t *testing.T) {
 		{"space orbit", "space", "        around: tree\n", "position and around"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
+			plant := spruce("tree", absoluteTree+test.extra)
 			_, err := readV2("  setting: " + test.setting + "\n" +
-				stood(spruce("tree", absoluteTree+test.extra)))
+				stood(plant))
 			if err == nil || !strings.Contains(err.Error(), test.want) {
 				t.Fatalf("error = %v, want %q", err, test.want)
 			}
@@ -70,7 +72,8 @@ func TestThingWorldPositionRequiresThreeFiniteMetreCoordinates(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			text := strings.Replace(absoluteTree,
 				"          up: {value: -3, unit: m}\n", test.change, 1)
-			if _, err := readV2(stood(spruce("tree", text))); err == nil {
+			plant := spruce("tree", text)
+			if _, err := readV2(stood(plant)); err == nil {
 				t.Fatal("accepted invalid world position")
 			}
 		})
@@ -78,9 +81,10 @@ func TestThingWorldPositionRequiresThreeFiniteMetreCoordinates(t *testing.T) {
 }
 
 func TestLegacyTerrainPlacementRetainsItsRelativeHeight(t *testing.T) {
-	read, err := readV2("  setting: ground\n" + stood(spruce("tree",
+	plant := spruce("tree",
 		"        east: 12\n        north: 25\n"+
-			"        height: {value: 2.5, unit: m}\n")))
+			"        height: {value: 2.5, unit: m}\n")
+	read, err := readV2("  setting: ground\n" + stood(plant))
 	if err != nil {
 		t.Fatal(err)
 	}

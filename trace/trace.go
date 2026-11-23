@@ -16,8 +16,10 @@
 // media; they do not infer media from geometry.
 //
 // The CPU-only named ClearMedium option applies Beer-Lambert extinction to each
-// camera/refracted segment. It does not add in-scattering or refract direct
-// lamp paths.
+// camera/refracted segment. A medium that scatters also adds single
+// in-scattering along the segment. The tagged ocean's mean-plane source
+// refracts its one distant lamp through the sea's mean plane to points under
+// it; no other lamp's direct path is refracted.
 //
 // Gravitational fields bend visible-light rays along geodesics. Volume
 // integration adds emission and scattering while attenuating the light behind
@@ -54,6 +56,25 @@ const (
 	// reach or the point's distance from the origin, whichever is
 	// more. A share for touch's reason, and the same one.
 	lift = 1e-6
+	// leastFacing is the cosine between the way the eye looks from and
+	// the normal a smooth mesh is shaded by, where the smooth normal is
+	// opposed to its face and, turned over, still leans away from the
+	// eye: the normal is leaned back until its cosine is this before it
+	// is made a unit length, and under this after, by a face seen at a
+	// grazing angle most.
+	//
+	// It was picked: a hundredth, about half a degree off the view's own
+	// plane, over a rounding of a normal's length, so the side is sure.
+	leastFacing = 1e-2
+	// leastOpposed is how far the cosine between a smooth normal and the
+	// face the eye sees must be under nought for the smooth normal to be
+	// called opposed to it: a half, so a hundred and twenty degrees apart.
+	//
+	// It was picked: a smooth normal that far from its face is the normal of
+	// another surface. A survey with four metres between samples has faces
+	// on a ridge whose corners lean about a hundred and forty degrees from
+	// the face (measured at one cliff); no other mesh was measured.
+	leastOpposed = 0.5
 	// marchSteps is the most steps a march toward a surface takes
 	// before it gives up as a miss.
 	marchSteps = 256

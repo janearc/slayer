@@ -227,8 +227,9 @@ func wouldWrite(chosen tuneJob, at tuneAt, names []string) error {
 			chosen.writes)}
 	default:
 		for _, name := range names {
+			writtenName := fmt.Sprintf(chosen.writes, name)
 			lines = append(lines, "would write "+filepath.Join(at.to,
-				fmt.Sprintf(chosen.writes, name)))
+				writtenName))
 		}
 	}
 	_, err := fmt.Fprintln(at.out, strings.Join(lines, "\n"))

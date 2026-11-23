@@ -150,7 +150,8 @@ func flatSun(t *testing.T) airs.Sun {
 	for nanometres := flatFirst; nanometres <= flatLast; nanometres++ {
 		fmt.Fprintf(&text, "%d,%g\n", nanometres, flatPower)
 	}
-	sun, err := airs.ReadSun(strings.NewReader(text.String()))
+	sunText := text.String()
+	sun, err := airs.ReadSun(strings.NewReader(sunText))
 	if err != nil {
 		t.Fatal(err)
 	}

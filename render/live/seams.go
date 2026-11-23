@@ -13,18 +13,18 @@ import (
 )
 
 // The seams the view draws and shows through. Each is the least the view
-// needs of a piece that already exists: the door hands it a hillside
+// needs of a piece that already exists: the door hands it a
 // session and a terminal.Live, and the tests hand it mocks made by
 // mockgen (seams_mock_test.go).
 
-// Drawn is one frame's light and its own hud, as hillside.Drawn gives
+// Drawn is one frame's light and its own hud, as session.Drawn gives
 // them.
 type Drawn interface {
 	Light() *frame.Frame
 	Overlay(picture *image.RGBA) error
 }
 
-// Stage is a job's scene staged once, as a hillside session is: it draws
+// Stage is a job's scene staged once, as a session is: it draws
 // any of the job's frames at any size and rays.
 type Stage interface {
 	// Frame draws frame index at the size asked; a zero size is the

@@ -100,8 +100,16 @@ func (encoded *scene) populateAcceleration(plan nativePlan) (int, error) {
 	return plan.Instances(places...)
 }
 
-// triangleRange recovers a pooled mesh's contiguous faces from its tree.
+// triangleRange is a pooled mesh's contiguous faces: as packPool noted
+// them, or else recovered from its tree, which only the low-retention
+// trial pools as boxes.
 func (encoded *scene) triangleRange(root int) (int, int) {
+	if run, noted := encoded.runs[root]; noted {
+		if run.count == 0 {
+			return 0, 0
+		}
+		return run.first, run.count
+	}
 	node := encoded.faces.nodes[root]
 	if node.bounds.low.X > node.bounds.high.X {
 		return 0, 0

@@ -5,9 +5,9 @@ import (
 	"math"
 )
 
-// SkyOf marks the open sky pixels of mask: those whose channel sum is over 2
+// skyOf marks the open sky pixels of mask: those whose channel sum is over 2
 // percent of the largest sum in the image. An image with no light has no sky.
-func SkyOf(mask Image) ([]bool, error) {
+func skyOf(mask Image) ([]bool, error) {
 	if err := mask.validate(); err != nil {
 		return nil, err
 	}
@@ -24,10 +24,10 @@ func SkyOf(mask Image) ([]bool, error) {
 	return open, nil
 }
 
-// CoveredBy marks the pixels of mask whose channel sum is over 0.3 times the
+// coveredBy marks the pixels of mask whose channel sum is over 0.3 times the
 // largest single channel value in the image. An image with no light covers
 // nothing.
-func CoveredBy(mask Image) ([]bool, error) {
+func coveredBy(mask Image) ([]bool, error) {
 	if err := mask.validate(); err != nil {
 		return nil, err
 	}
@@ -45,11 +45,11 @@ func CoveredBy(mask Image) ([]bool, error) {
 	return covered, nil
 }
 
-// RimOf returns a function giving the rim row for column x: one below the
+// rimOf returns a function giving the rim row for column x: one below the
 // lowest open pixel in the column, then the largest such row within 30
 // columns either side. A column with no open pixel counts as 0, and x outside
 // the picture is held to the nearest column.
-func RimOf(open []bool, width, height int) (func(int) int, error) {
+func rimOf(open []bool, width, height int) (func(int) int, error) {
 	if err := validateMask(open, width, height); err != nil {
 		return nil, err
 	}
@@ -71,11 +71,11 @@ func RimOf(open []bool, width, height int) (func(int) int, error) {
 	return func(x int) int { return smoothed[max(0, min(width-1, x))] }, nil
 }
 
-// NearOf marks pixels that are not open and can be reached from not-open
+// nearOf marks pixels that are not open and can be reached from not-open
 // pixels in the top 40 rows by steps up, down, left or right through not-open
 // pixels, never entering a row that is 2 above the rim of its column or
 // lower. It refuses a nil rim.
-func NearOf(open []bool, rim func(int) int, width, height int) ([]bool, error) {
+func nearOf(open []bool, rim func(int) int, width, height int) ([]bool, error) {
 	if err := validateMask(open, width, height); err != nil {
 		return nil, err
 	}
@@ -109,9 +109,9 @@ func NearOf(open []bool, rim func(int) int, width, height int) ([]bool, error) {
 	return found, nil
 }
 
-// Brightest is the mean colour of the pixels whose channel sum is at least
+// brightest is the mean colour of the pixels whose channel sum is at least
 // half the largest sum in the image.
-func Brightest(image Image) ([3]float64, error) {
+func brightest(image Image) ([3]float64, error) {
 	if err := image.validate(); err != nil {
 		return [3]float64{}, err
 	}

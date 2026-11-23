@@ -64,7 +64,8 @@ func TestAttachedFizzTracksSubjectWhileUnselectedPopulationStaysFixed(t *testing
 		t.Fatal(err)
 	}
 	for _, index := range []int{0, 2, 3} {
-		raw, err := os.ReadFile(filepath.Join(root, "output/scenes", fmt.Sprintf("frame-%06d.yaml", index)))
+		sceneName := fmt.Sprintf("frame-%06d.yaml", index)
+		raw, err := os.ReadFile(filepath.Join(root, "output/scenes", sceneName))
 		if err != nil {
 			t.Fatal(err)
 		}

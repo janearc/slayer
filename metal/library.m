@@ -11,6 +11,8 @@
 // for.
 
 #import "library.h"
+#include "bridge.h"
+#include <stdatomic.h>
 #include <unistd.h>
 
 static NSMutableDictionary<NSString *, id<MTLLibrary>> *kept;
@@ -60,11 +62,31 @@ id<MTLLibrary> slayer_shared_library(id<MTLDevice> device,
 // milliseconds a band takes, long enough that waiting costs no cpu to speak of
 static const useconds_t look = 200;
 
+// stopped is whether waits are stopped: set from Go, when the context a
+// drawing stops on is done, and read by every wait at each look. a wait
+// ends within look microseconds of it, however long the command runs.
+static atomic_int stopped;
+
+void slayer_stop_waits(int stop) {
+	atomic_store(&stopped, stop != 0);
+}
+
+BOOL slayer_waits_stopped(void) {
+	return atomic_load(&stopped) != 0;
+}
+
 BOOL slayer_wait_command(id<MTLCommandBuffer> commands, double limit,
                          NSString *what, NSString **why) {
 	NSDate *begun = [NSDate date];
 	while (commands.status != MTLCommandBufferStatusCompleted &&
 	       commands.status != MTLCommandBufferStatusError) {
+		if (slayer_waits_stopped()) {
+			*why = [NSString stringWithFormat:
+				@"%@ was stopped before it completed; the command may "
+				@"still be running on the device, which may stay busy, "
+				@"so do not reuse this one", what];
+			return NO;
+		}
 		if (-[begun timeIntervalSinceNow] >= limit) {
 			*why = [NSString stringWithFormat:
 				@"%@ did not complete in %g s; the command may still be "

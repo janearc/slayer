@@ -27,6 +27,7 @@ scene:
   # solstice, so the sun stands high over Hawaiʻi in the morning
   date: "2026-06-21"
   timeofday: 1030
+  utc-offset: {value: -10, unit: h}
   # v2, gaps 5 and 6: one anchor, fixed for the whole scene, that the
   # map, the maths and the terrain all agree on, from the crater floor to
   # the orbit. east, north, up from here

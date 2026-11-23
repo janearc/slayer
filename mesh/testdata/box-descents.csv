@@ -1,0 +1,9 @@
+name,left,right,ray,near,far,top
+left first,unit,far,forward,0,99,0 1
+right first,unit,far,back,0,99,1 0
+as near,unit,unit,forward,0,99,0 1
+left only,unit,far,forward,0,7,0
+right only,unit,far,forward,7,99,1
+neither,unit,far,forward,20,99,
+left and not a nearer right,unit,aside,forward,0,99,0
+right and not a nearer left,aside,unit,forward,0,99,1

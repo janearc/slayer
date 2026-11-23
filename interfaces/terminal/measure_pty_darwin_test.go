@@ -10,7 +10,7 @@ import (
 // an error that names how big it said, not a screen of no size. a fresh pty
 // says 0 by 0.
 func TestMeasuringATerminalOfNoSizeIsAnError(t *testing.T) {
-	for _, w := range []struct {
+	for _, each := range []struct {
 		cols, rows int
 		said       string
 	}{
@@ -19,13 +19,13 @@ func TestMeasuringATerminalOfNoSizeIsAnError(t *testing.T) {
 		{80, 0, "says it is 80 by 0 cells"},
 	} {
 		master, slave := ptyPair(t)
-		if w.cols != 0 || w.rows != 0 {
-			resize(t, master, w.cols, w.rows, 0, 0)
+		if each.cols != 0 || each.rows != 0 {
+			resize(t, master, each.cols, each.rows, 0, 0)
 		}
 		got, err := Measure(slave)
-		if err == nil || !strings.Contains(err.Error(), w.said) || !strings.Contains(err.Error(), slave.Name()) {
+		if err == nil || !strings.Contains(err.Error(), each.said) || !strings.Contains(err.Error(), slave.Name()) {
 			t.Errorf("%d by %d: got %+v, %v; want an error naming the file and saying %q",
-				w.cols, w.rows, got, err, w.said)
+				each.cols, each.rows, got, err, each.said)
 		}
 	}
 }

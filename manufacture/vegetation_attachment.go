@@ -1,11 +1,18 @@
 package manufacture
 
 import (
+	"errors"
 	"math"
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
 )
+
+// errEndlessCells is a branch whose cells along it cannot be counted: a
+// spacing of nought, or a length that is not a number. A plant with more
+// cells than its budget is grown, at its cost; this is the one refused.
+var errEndlessCells = errors.New("manufacture: a branch's cells along it " +
+	"are not a count")
 
 // plantAttachment shares a cell without scaling its physical leaves.
 type plantAttachment struct {
@@ -24,14 +31,10 @@ func (plant seasonalPlant) attachments(plan plantPlan, detail string) ([]plantAt
 		count := spaceOne
 		if plant.profile.Form != "rosette" {
 			ratio := length / plant.profile.CellSpacing
-			room := int(plantValue("maximum-cells")) - len(cells)
-			if math.IsInf(ratio, spaceZero) || ratio >= float64(room) {
-				return nil, errTooMany
+			if math.IsInf(ratio, spaceZero) || math.IsNaN(ratio) {
+				return nil, errEndlessCells
 			}
 			count = int(ratio) + spaceOne
-		}
-		if len(cells)+count > int(plantValue("maximum-cells")) {
-			return nil, errTooMany
 		}
 		for cell := range count {
 			share := float64(cell+spaceOne) / float64(count)
@@ -52,7 +55,7 @@ func (plant seasonalPlant) attachments(plan plantPlan, detail string) ([]plantAt
 func (plan plantPlan) bark(detail string) ([]part, error) {
 	var parts []part
 	fine := cut{around: int(plantValue("stem-sides-" + detail))}
-	for _, axis := range plan.axes {
+	for _, axis := range plan.woody() {
 		run := axis.end.Sub(axis.root)
 		length := measure.Metres(run.Len())
 		tube, err := newTube(length,
@@ -71,9 +74,10 @@ func (plan plantPlan) bark(detail string) ([]part, error) {
 
 // bounds encloses every possible roundness without manufacturing all details.
 func (plan plantPlan) bounds() maths.Box {
-	first := plan.axes[spaceZero]
+	woody := plan.woody()
+	first := woody[spaceZero]
 	box := maths.SegmentBox(first.root, first.end, first.radius)
-	for _, axis := range plan.axes[spaceOne:] {
+	for _, axis := range woody[spaceOne:] {
 		box = enclosing(box, maths.SegmentBox(axis.root, axis.end, axis.radius))
 	}
 	return box

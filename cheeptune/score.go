@@ -7,10 +7,10 @@ import (
 	"strings"
 )
 
-// Roles are the parts a score may hold. Four, because the first machine
+// roles are the parts a score may hold. Four, because the first machine
 // has four channels and a role nothing can play is a role nobody should
 // write. The studio keeps the four, so every score plays on both.
-var Roles = []string{"lead", "bass", "pad", "perc"}
+var roles = []string{"lead", "bass", "pad", "perc"}
 
 // Score is what is played: roles, each with bars of notes, and no sound.
 type Score struct {
@@ -22,7 +22,7 @@ type Score struct {
 
 	// Tempos are the places the tempo changes, each at the start of a
 	// bar. Without any, the piece keeps its tempo; tempo.go has the map.
-	Tempos []TempoChange `json:"tempos"`
+	Tempos []tempoChange `json:"tempos"`
 
 	spans []tempoSpan
 }
@@ -48,9 +48,9 @@ type event struct {
 	slide   bool // it slides into the next note, which does not restart
 }
 
-// BeatSeconds is how long one beat lasts at the piece's first tempo. A
+// beatSeconds is how long one beat lasts at the piece's first tempo. A
 // piece whose tempo changes asks SecondsAt and BeatsAt instead.
-func (s *Score) BeatSeconds() float64 { return 60 / s.Tempo }
+func (s *Score) beatSeconds() float64 { return 60 / s.Tempo }
 
 // Bars is how many bars the piece holds.
 func (s *Score) Bars() int {
@@ -113,9 +113,9 @@ func (s *Score) check() error {
 	seen := map[string]bool{}
 	for i := range s.Parts {
 		p := &s.Parts[i]
-		if !known(p.Role, Roles) {
+		if !known(p.Role, roles) {
 			fail("part %d: unknown role %q; roles are %s",
-				i+1, p.Role, strings.Join(Roles, ", "))
+				i+1, p.Role, strings.Join(roles, ", "))
 			continue
 		}
 		if seen[p.Role] {
@@ -309,7 +309,7 @@ func parseToken(t string) (ev event, tie, rest bool, err error) {
 	}
 	ev.len, ev.loud = frac{1, 1}, 1
 	if i := strings.LastIndex(t, "@"); i >= 0 {
-		gain, ok := Marks[t[i+1:]]
+		gain, ok := marks[t[i+1:]]
 		if !ok {
 			return ev, tie, rest, fmt.Errorf("loudness mark %q; marks "+
 				"are %s", t[i+1:], strings.Join(markNames, ", "))
@@ -462,8 +462,8 @@ func pitch(s string) (int, error) {
 	return (oct+1)*12 + semi, nil
 }
 
-// NoteName is a midi number as the score would write it.
-func NoteName(m int) string {
+// noteName is a midi number as the score would write it.
+func noteName(m int) string {
 	names := []string{"c", "c#", "d", "d#", "e", "f", "f#", "g", "g#",
 		"a", "a#", "b"}
 	return fmt.Sprintf("%s%d", names[((m%12)+12)%12], m/12-1)

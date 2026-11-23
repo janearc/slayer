@@ -58,7 +58,10 @@ func (fixture reference) beam(test *testing.T, source emit.Lit) *emit.Beam {
 	return beam
 }
 
+// The reference's cells are those of the union of boxes, which is what
+// the switch unset gives: the test says so, whatever the environment.
 func TestBeamRefinementFollowsThisRaysBoundsAndOriginalCells(test *testing.T) {
+	asked(test, "")
 	fixture := readReference(test)
 	beam := fixture.beam(test, fixture.Source)
 	plan := beamstep.Of([]thing.Lamp{beam})
@@ -72,23 +75,30 @@ func TestBeamRefinementFollowsThisRaysBoundsAndOriginalCells(test *testing.T) {
 	}
 }
 
+// Ordinary and missing lamps leave sampling alone with the switch unset
+// and set alike.
 func TestBeamRefinementLeavesOrdinaryAndMissingLampsAlone(test *testing.T) {
 	fixture := readReference(test)
-	var absent *emit.Beam
-	plan := beamstep.Of([]thing.Lamp{fixture.Source, absent})
-	var missing *beamstep.Beams
-	for _, query := range fixture.Queries {
-		ordinary := plan.Ray(query.Ray, query.Far)
-		empty := missing.Ray(query.Ray, query.Far)
-		for _, cell := range query.Cells {
-			if ordinary.Splits(cell.Enter, cell.Leave) != oneCell || empty.Splits(cell.Enter, cell.Leave) != oneCell {
-				test.Fatal("ordinary lamp changed volume sampling")
+	for _, value := range []string{"", "1"} {
+		asked(test, value)
+		var absent *emit.Beam
+		plan := beamstep.Of([]thing.Lamp{fixture.Source, absent})
+		var missing *beamstep.Beams
+		for _, query := range fixture.Queries {
+			ordinary := plan.Ray(query.Ray, query.Far)
+			empty := missing.Ray(query.Ray, query.Far)
+			for _, cell := range query.Cells {
+				if ordinary.Splits(cell.Enter, cell.Leave) != oneCell || empty.Splits(cell.Enter, cell.Leave) != oneCell {
+					test.Fatal("ordinary lamp changed volume sampling", value)
+				}
 			}
 		}
 	}
 }
 
+// The merged gap is the union of boxes' way: the switch unset.
 func TestBeamRefinementConservativelyMergesSeparatedIntervals(test *testing.T) {
+	asked(test, "")
 	fixture := readReference(test)
 	first := fixture.beam(test, fixture.Source)
 	second := fixture.beam(test, fixture.Second)

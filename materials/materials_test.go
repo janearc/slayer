@@ -6,7 +6,7 @@ import (
 )
 
 // water is ice's formula, H2O, for the tests that need a material
-func water(t *testing.T) Formula {
+func water(t *testing.T) formula {
 	t.Helper()
 	made, err := NewFormula(map[string]float64{"H": 2, "O": 1})
 	if err != nil {
@@ -70,7 +70,7 @@ func TestAMaterialRefusesANonsenseDensity(t *testing.T) {
 	if _, err := NewMaterial("", water(t), 0.92); err == nil {
 		t.Error("a material with no name was made")
 	}
-	if _, err := NewMaterial("ice", Formula{}, 0.92); err == nil {
+	if _, err := NewMaterial("ice", formula{}, 0.92); err == nil {
 		t.Error("a material of no formula was made")
 	}
 }
@@ -121,7 +121,7 @@ func TestAParticleRefusesNoSizeAndNoMakeup(t *testing.T) {
 			t.Errorf("a particle of size %v was made", size)
 		}
 	}
-	if _, err := NewParticle(0.1, Fractions{}); err == nil {
+	if _, err := NewParticle(0.1, fractions{}); err == nil {
 		t.Error("a particle made of nothing was made")
 	}
 	grain, err := NewParticle(0.1, made)

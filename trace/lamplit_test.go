@@ -70,10 +70,11 @@ func TestALampLightsAThingInABand(t *testing.T) {
 func TestALampInABandIsShadowed(t *testing.T) {
 	world := thing.NewWorld()
 	world.Add(scattering())
+	wallAt := thing.Still(maths.Subspace{Origin: maths.V(0, 3.5, 4)})
 	// halfway to the lamp, and clear of the eye's way to the ball
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 0.5},
 		Material: &thing.Material{Name: "wall"},
-		Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, 3.5, 4)})})
+		Motion:   wallAt})
 	world.Lamp(xrayLamp(above))
 	if got := litIn(world); got != 0 {
 		t.Errorf("in the wall's shadow the ball is %v, want dark", got)
@@ -87,12 +88,13 @@ func TestALampInABandPassesThroughWhatPassesIt(t *testing.T) {
 	through := func(passing float64) float64 {
 		world := thing.NewWorld()
 		world.Add(scattering())
+		gasAt := thing.Still(maths.Subspace{Origin: maths.V(0, 3.5, 4)})
 		world.AddVolume(thing.Volume{Medium: medium.Puff{Radius: 1,
 			Thick: 3},
 			Material: &thing.Material{Name: "gas",
 				Radiant: thing.Spectrum{Passes: map[radiation.Range]float64{
 					radiation.XRay(): passing}}},
-			Motion: thing.Still(maths.Subspace{Origin: maths.V(0, 3.5, 4)})})
+			Motion: gasAt})
 		world.Lamp(xrayLamp(above))
 		return litIn(world)
 	}
@@ -111,14 +113,16 @@ func TestALampInABandPassesThroughWhatPassesIt(t *testing.T) {
 func TestALampLightsInABandOnlyWhatScattersItAndFacesIt(t *testing.T) {
 	sun := thing.NewWorld()
 	sun.Add(scattering())
-	sun.Lamp(thing.Sun(maths.ZAxis, maths.Grey(1)))
+	light := maths.Grey(1)
+	sun.Lamp(thing.Sun(maths.ZAxis, light))
 	if got := litIn(sun); got != 0 {
 		t.Errorf("under a sun with no spectrum the ball is %v in x-ray, "+
 			"want dark", got)
 	}
 	behind := thing.NewWorld()
 	behind.Add(scattering())
-	behind.Lamp(xrayLamp(maths.V(0, 0, -10)))
+	lampAt := maths.V(0, 0, -10)
+	behind.Lamp(xrayLamp(lampAt))
 	if got := litIn(behind); got != 0 {
 		t.Errorf("lit from behind the ball is %v, want dark", got)
 	}

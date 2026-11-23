@@ -42,7 +42,8 @@ type Loss struct {
 // PerKilometre is the share of the light lost in a kilometre of path
 // where the part is densest. Below zero, or no number, is no loss.
 func PerKilometre(amount float64) Loss {
-	if math.IsNaN(amount) || math.IsInf(amount, 0) || amount < 0 {
+	if math.IsNaN(amount) || math.IsInf(amount, anySign) ||
+		amount < nought {
 		return Loss{complaint: fmt.Errorf(
 			"PerKilometre(%v) is no extinction", amount)}
 	}
@@ -68,13 +69,19 @@ func (loss Loss) problem() (float64, error) {
 
 // finite is whether x is a number a length, angle or brightness can
 // be: not NaN, not infinite.
-func finite(x float64) bool { return !math.IsNaN(x) && !math.IsInf(x, 0) }
+func finite(x float64) bool {
+	return !math.IsNaN(x) && !math.IsInf(x, anySign)
+}
 
 // positiveFinite is whether x is above zero and finite.
-func positiveFinite(x float64) bool { return x > 0 && !math.IsInf(x, 1) }
+func positiveFinite(x float64) bool {
+	return x > nought && !math.IsInf(x, infinitePositive)
+}
 
 // nonNegativeFinite is whether x is zero or above and finite.
-func nonNegativeFinite(x float64) bool { return x >= 0 && !math.IsInf(x, 1) }
+func nonNegativeFinite(x float64) bool {
+	return x >= nought && !math.IsInf(x, infinitePositive)
+}
 
 // finiteLight is whether every component of the light is finite.
 func finiteLight(light maths.Light) bool {
@@ -98,6 +105,22 @@ func lightComplaint(what string, light maths.Light) error {
 	}
 	return fmt.Errorf("%s is %v: finite red, green and blue are expected",
 		what, light)
+}
+
+// mostRungs is the most rungs a body is painted or lit below its own
+// tiles. A rung splits a tiling twice as finely and the tiling stops
+// splitting at a fixed finest, so rungs past this change nothing, and
+// each one is walked when the ground is read.
+var mostRungs = uint(pick("most-rungs"))
+
+// rungsComplaint is the refusal, with the package prefix, for a count of
+// rungs past the most, or nil when it is within it.
+func rungsComplaint(what string, rungs uint) error {
+	if rungs <= mostRungs {
+		return nil
+	}
+	return fmt.Errorf("bodies: %s has %d rungs: no more than %d are "+
+		"taken, a tiling is no finer past them", what, rungs, mostRungs)
 }
 
 // firstComplaint is the first complaint that is not nil, or nil.

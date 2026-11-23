@@ -51,6 +51,6 @@ func TestTheGameBoyPlaysTheFirstHitWrittenInAStack(t *testing.T) {
 	// the one played.
 	s, _ := ParseScore(perc("(k t) -:3"))
 	gb, _ := ParseVoicing(v)
-	_, err := Bind(s, gb)
+	_, err := bindVoicing(s, gb)
 	wantErr(t, err, `hit "t" is not one of h, k`)
 }

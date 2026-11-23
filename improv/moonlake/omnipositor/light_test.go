@@ -217,7 +217,7 @@ func TestLightRequestValidationAndCancellation(t *testing.T) {
 	if _, err := stage.Light(ctx, base); !errors.Is(err, context.Canceled) {
 		t.Fatalf("cancellation: %v", err)
 	}
-	if _, err := stage.Light(nil, base); err == nil {
+	if _, err := stage.Light(never, base); err == nil {
 		t.Fatal("nil context accepted")
 	}
 	var absent *RendererLightStage

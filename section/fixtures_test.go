@@ -93,18 +93,6 @@ func rows(t *testing.T, file string) []map[string]string {
 	return out
 }
 
-// row is the row of a csv file called a name.
-func row(t *testing.T, file, name string) map[string]string {
-	t.Helper()
-	for _, each := range rows(t, file) {
-		if each["name"] == name {
-			return each
-		}
-	}
-	t.Fatalf("%s: no row called %q", file, name)
-	return nil
-}
-
 // float is the number in a column of a row.
 func float(t *testing.T, each map[string]string, column string) float64 {
 	t.Helper()

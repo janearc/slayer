@@ -1,0 +1,235 @@
+# honopu beach and the cliffs of the na pali coast, kauai: landscape and
+# water only, drawn at 16:30 on 20 november 2026.
+#
+# the ground: noaa's cudem 1/9 arc-second tile ncei19_n22x25_w159x75, cut to
+# 817 x 721 samples 4 m apart on the utm zone 4 north grid, from 429368 e,
+# 2452940 n, and kept on the shelf as noaa-cudem-honopu-window-4m (its entry
+# in sources.yaml says what was checked and what was not). its heights are
+# metres above local mean sea level, -49.82 to 1127.73 m, the sea bed in
+# them. the window is read whole, unsmoothed, at its own 4 m. a surface of
+# 4 m samples has no cliff sharper than 4 m and no overhang: the arch of
+# honopu is not in it, and a face is a ramp of triangles. the window ends
+# at its own edge; there is no sea bed beyond it and nothing made stands in
+# for it.
+#
+# the ground's colour is a cover: three surfaces laid by rule on the height
+# above the sea and the slope of the ground, each blended across a stated
+# width (set/terrain_cover.go; doc/sets.md). rock is the ground under all,
+# grass is laid over it on gentle ground well above the beach, and sand is
+# laid over both low and gentle, down into the water. the cliffs are what
+# neither grass nor sand can hold, so they stay rock; a face past about 40
+# degrees is rock at every height.
+#
+# the colours are the nearest the library has, and no better. each is a
+# linear reflectance from scene/swatches' Earth palette (Rock, Grass,
+# Beach), which the earth template typed and which has not been checked
+# against a measurement. the tree holds no measured reflectance for basalt,
+# wet or dry sand or soil. the palette's Beach is a tan sand; Honopu's own
+# beach is paler, and its rock is not this brown. what would put numbers in
+# their place is a measured visible reflectance, from a source named in the
+# layer's own `source`, of weathered basalt, of carbonate beach sand dry and
+# wet, and of forest or grass cover.
+#
+# the rules' numbers, each with its reason. sea level is 0, the datum of
+# the heights; the terrain says no sea, so the cover says the level, and
+# the reader refuses an ocean whose middle stands at another height.
+#   sand, height from -8 to 4 m, edges blended over 2 m. the top, 4 m, is
+#   picked: the back of a beach on this coast stands a few metres over the
+#   sea. the foot, 8 m under, is picked. this water's attenuation is 0.2656,
+#   0.0584 and 0.0141 per metre for red, green and blue; at 8 m, down and
+#   back up 16 m, red has 1.4 percent left, green 39 and blue 80. so the
+#   water has taken the red from the bed there, not the bed's whole colour:
+#   the green length is 1 / 0.0584, about 17 m, and sand to that depth
+#   would be the other reading. 8 m is about two red lengths (3.8 m each).
+#   sand, slope to 0.45 (full to 0.3), blended over 0.3: 0.6 is the tangent
+#   of 31 degrees, the least angle dry sand is commonly said to stand at,
+#   and nothing steeper holds it. the angle is a general fact, not read from
+#   a source in the tree.
+#   grass, height from 10 m, blended over 4 m (none to 8, full from 12):
+#   above the sand's top and a bare backshore, so sand and grass do not run
+#   into each other. picked.
+#   grass, slope to 0.7, blended over 0.4 (full to 0.5, none from 0.9): soil
+#   is commonly said to stand at 35 to 40 degrees (0.7 to 0.84), and falls
+#   off steeper ground. picked on that.
+# the slope read is the ground's shading normal: the survey's own, 4 m,
+# carried smoothly over each triangle. a cliff that falls in less than 4 m
+# is a ramp of that spacing, so a face reads as steep as the survey's
+# samples say, and no steeper.
+#
+# made ground (doc/sets.md, `made`): where the camera drawn resolves finer
+# than the survey's 4 m, each cell is cut finer and ground is made in it,
+# none of it measured. its roughness is the survey's own, read over seven
+# and thirteen samples (28 and 52 m at this 4 m step) and continued below
+# 4 m at the rate the survey falls by. the faces
+# are basalt flows, so beds stand out of them, and they are cut by water,
+# so flutes run down them. the numbers of both are picked, not measured:
+# beds 3 m apart standing out 0.4 m, flutes 1 m deep and 1.6 m apart, on
+# ground steeper than 1.7 (about 60 degrees). the seed is picked.
+#
+# the sea: sea level at 0, the datum of the heights. the waves are the sea
+# the set language builds from a wind (oceantex's cascades: a spectrum, four
+# bands of wave 4096, 512, 64 and 8 m across, summed at every point, so the sea
+# has no edge: the ocean says no extent and no samples). the wind is chosen
+# for the picture: 14 m/s, blowing toward 5.76 rad from east counterclockwise,
+# a strong wind onto the coast; no measurement stands behind the figure. the
+# fetch is 100 km, chosen for the picture too: a sea still growing is
+# shorter and steeper than a grown one, and from a low camera shows more
+# crests. the depth is deep, so the bed does not change the spectrum. the bands repeat, the longest
+# every 4096 m and the finest every 8 m. each band is read where its water
+# is carried to, so crests are peaked and troughs flat, and short waves ride
+# the long ones. no white water is drawn on the open sea, and there is no
+# wash on the beach.
+#
+# the swell: the north pacific's winter swell, which this coast faces,
+# travelling toward the south-east (5.498 rad from east counterclockwise).
+# wind, swell height and period are chosen for the picture, a heavy day and
+# not a mean one: for scale, the waimea buoy off the north shore of oahu has
+# january means of 2.45 m and 13.38 s for the whole sea (university of hawaii
+# sea level center, "north shore, oahu buoy data and surf compute",
+# uhslc.soest.hawaii.edu/outreach/climo/nshore/ns_climo_buoy_obs_table.pdf).
+#
+# the water: pure seawater's attenuation, absorption (Pope and Fry 1997)
+# plus scattering (Morel 1974) as oceantex holds them, at 610, 550 and 465 nm
+# for red, green and blue: 0.2656, 0.0584 and 0.0141 per metre. no
+# chlorophyll, no sediment, and the light the water scatters back up is not
+# modelled, so water deeper than the ground under it is dark. the glint is
+# oceantex's own: cox and munk's total slope for the wind, less what the
+# bands resolve, as a beckmann lobe on the sea's surface. the sun's light
+# is not carried through the surface: a lamp's shadow ray passes the water,
+# so the sea bed is lit as if there were none.
+#
+# the sun: the place is 22.1673 north, 159.6692 west, the window's middle
+# (utm 4 north 431000 e, 2451500 n through proj's cs2cs); the day 20 november
+# 2026; the time 16:30 on a clock ten hours behind utc. scene/daylight.Sun,
+# noaa's fractional-year equations, gives azimuth 239.72 and altitude 16.96
+# degrees, geometric. the set says the date, the clock and its offset from
+# utc, and the reader works the sun from them. the afternoon is chosen: it
+# lights the cliffs the first camera looks at. the sky and the light's
+# colour are worked from the air, `air: earth`; no fill lamp, no horizon
+# colour.
+#
+# places. the world half (the ocean's middle) is in the model's own metres,
+# east and north as the utm grid has them. a camera's at and look_at are east
+# from the window's west edge (429368), north as the northing less the
+# window's northing (2452940), and up from the lowest ground in the window,
+# which is 49.82 m below sea level, so sea level is at up 49.82.
+#
+# cameras, from the cove's views:
+#   water    2 m over the sea at 430200 e, 2451875 n, looking up the walls
+#            at 431120 e, 2451440 n, 150 m up
+#   overlook 275 m over the same place, looking down on the beach
+#   low      2 m over the sea, level, due west to the horizon
+#   close    12 m over the sea 450 m off the beach, at its foot
+#   high     1200 m over the sea off the coast, looking down on the cove
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: honopu beach and the na pali cliffs
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 22.1673
+    lon: -159.6692
+  date: "2026-11-20"
+  timeofday: 1630
+  utc-offset: {value: -10, unit: h}
+  terrain:
+    from: noaa-cudem-honopu-window-4m
+    west: 429368
+    north: 2452940
+    across: 3264
+    down: 2880
+    step: 4
+    made:
+      seed: 2318
+      steep: 1.7
+      flutes: {depth: 1, width: 1.6}
+      beds: {spacing: 3, standout: 0.4}
+    cover:
+      level: 0
+      layers:
+        - name: rock
+          reflectance: [0.19, 0.16, 0.12]
+          source: "scene/swatches Earth.Rock, typed by the earth template, not checked against a measurement"
+        - name: grass
+          reflectance: [0.21, 0.39, 0.058]
+          source: "scene/swatches Earth.Grass, typed by the earth template, not checked against a measurement"
+          height: {from: 10, blend: 4}
+          slope: {until: 0.7, blend: 0.4}
+        - name: sand
+          reflectance: [0.69, 0.55, 0.26]
+          source: "scene/swatches Earth.Beach, typed by the earth template, not checked against a measurement"
+          height: {from: -8, until: 4, blend: 2}
+          slope: {until: 0.45, blend: 0.3}
+  film:
+    width: 1600
+    height: 900
+    rays: 2
+    wide: 60
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  set:
+    # the coast's own plants, sown by rule over the whole window, each stand
+    # from its seed, between heights over the sea and no steeper than its
+    # steepest, rise over run. naupaka kahakai keeps to the shore, under the
+    # 150 feet (46 m) its source gives and no steeper than the sand lies;
+    # hala climbs to the 2,000 feet (610 m) its source says it rarely passes;
+    # ohia lehua, which its source finds from near the sea to 7,200 feet,
+    # is sown from 30 m up, leaving the shore to the other two. hala and
+    # ohia keep to ground no steeper than the grass lies, so the cliffs stay
+    # bare rock. the 30 m floor, the steepness and the counts are picked.
+    # the sources are in manufacture/plant-profiles.yaml beside each kind.
+    stands:
+      naupaka a: {kind: scaevola-taccada, count: 600, seed: 601, complexity: clumps, above: 2, below: 46, steepest: 0.45}
+      naupaka b: {kind: scaevola-taccada, count: 600, seed: 602, complexity: clumps, above: 2, below: 46, steepest: 0.45}
+      hala a: {kind: pandanus-tectorius, count: 1000, seed: 611, complexity: clumps, above: 3, below: 610, steepest: 0.7}
+      hala b: {kind: pandanus-tectorius, count: 1000, seed: 612, complexity: clumps, above: 3, below: 610, steepest: 0.7}
+      ohia a: {kind: metrosideros-polymorpha, count: 2000, seed: 621, complexity: clumps, above: 30, below: 1200, steepest: 0.7}
+      ohia b: {kind: metrosideros-polymorpha, count: 2000, seed: 622, complexity: clumps, above: 30, below: 1200, steepest: 0.7}
+  world:
+    unit: 1
+    materials:
+      seawater:
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.2656, 0.0584, 0.0141]
+        source: "pure seawater: absorption, Pope and Fry 1997, and scattering, Morel 1974, from oceantex at 610, 550 and 465 nm; no chlorophyll, no sediment"
+    ocean:
+      material: seawater
+      middle: [431000, 2451500, 0]
+      sea:
+        wind: {value: 14, unit: m/s}
+        fetch: {value: 100000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 5.76, unit: rad}
+      swell: {height: {value: 3, unit: m}, period: {value: 14, unit: s}, toward: {value: 5.498, unit: rad}}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen for the picture: a 14 m/s wind over 100 km, a young steep sea, and a 3 m, 14 s swell from the north-west; no measurement behind the figures"
+      glint: {model: cox-munk}
+  cameras:
+    water:
+      title: "from the water at 430200 e, 2451875 n, 2 m over the sea, up the walls"
+      location: {at: [832, -1065, 51.82]}
+      orientation: {look_at: [1752, -1500, 199.82]}
+    overlook:
+      title: "275 m over the same place, down on the beach and the sea"
+      location: {at: [832, -1065, 324.82]}
+      orientation: {look_at: [1752, -1500, 139.82]}
+    low:
+      title: "2 m over the sea, level, due west to the horizon"
+      location: {at: [832, -1065, 51.82]}
+      orientation: {look_at: [0, -1065, 51.82]}
+    close:
+      title: "12 m over the sea, 450 m off the beach, at the foot of the wall"
+      location: {at: [1382, -1290, 61.82]}
+      orientation: {look_at: [1782, -1460, 109.82]}
+    high:
+      title: "1200 m over the sea off the coast, down on the cove"
+      location: {at: [932, -1040, 1249.82]}
+      orientation: {look_at: [1682, -1490, 149.82]}

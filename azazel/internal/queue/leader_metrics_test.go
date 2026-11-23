@@ -137,8 +137,8 @@ func TestNativeLeaderMetadataIsRecordedOnLaunch(t *testing.T) {
 }
 
 func TestBothClaimPathsClearPreviousAttemptLeader(t *testing.T) {
-	for _, legacy := range []bool{true, false} {
-		t.Run(map[bool]string{true: "legacy", false: "dispatcher"}[legacy], func(t *testing.T) {
+	for _, serial := range []bool{true, false} {
+		t.Run(map[bool]string{true: "claim", false: "claimAvailable"}[serial], func(t *testing.T) {
 			store, request := fixture(t)
 			if _, err := store.Submit(t.Context(), request); err != nil {
 				t.Fatal(err)
@@ -153,7 +153,7 @@ func TestBothClaimPathsClearPreviousAttemptLeader(t *testing.T) {
 			}
 			var got Job
 			var err error
-			if legacy {
+			if serial {
 				got, err = store.claim(t.Context(), "new")
 			} else {
 				got, err = store.claimAvailable(t.Context(), "new", Capacity{Ready: true, GPUKnown: true}, time.Now())

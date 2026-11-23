@@ -8,7 +8,9 @@ import (
 	"testing"
 
 	"github.com/janearc/slayer/improv/moonlake/lights"
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
 	"github.com/janearc/slayer/oceantex"
+	"go.uber.org/mock/gomock"
 )
 
 // TestConfigValidateRefusals checks that each bad value in a compositor
@@ -166,12 +168,6 @@ func TestNilProfile(t *testing.T) {
 	}
 }
 
-// brokenWriter is a writer that refuses every write.
-type brokenWriter struct{}
-
-// Write refuses p.
-func (brokenWriter) Write([]byte) (int, error) { return 0, errors.New("disk gone") }
-
 // TestWriteTraceReportsWriterFailure checks that a failing writer is named in
 // the error and that an empty profile writes an empty event list.
 func TestWriteTraceReportsWriterFailure(t *testing.T) {
@@ -179,7 +175,10 @@ func TestWriteTraceReportsWriterFailure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := p.WriteTrace(brokenWriter{}); err == nil || !strings.Contains(err.Error(), "disk gone") {
+	broken := mocks.NewMockWriter(gomock.NewController(t))
+	broken.EXPECT().Write(gomock.Any()).Return(0, errors.New("disk gone")).
+		AnyTimes()
+	if err := p.WriteTrace(broken); err == nil || !strings.Contains(err.Error(), "disk gone") {
 		t.Errorf("failing writer: %v", err)
 	}
 	var out strings.Builder

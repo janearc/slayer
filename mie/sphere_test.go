@@ -37,9 +37,9 @@ func anomalousDiffraction(size, index float64) float64 {
 }
 
 // must is a sphere's efficiencies, the test stopped where it refuses.
-func must(t *testing.T, size float64, index complex128) Efficiencies {
+func must(t *testing.T, size float64, index complex128) efficiencies {
 	t.Helper()
-	got, err := Sphere(size, index)
+	got, err := sphere(size, index)
 	if err != nil {
 		t.Fatalf("size %g index %v: %v", size, index, err)
 	}
@@ -208,8 +208,9 @@ func TestWidePopulationIsNotOneSphere(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := math.Pi * radius * radius * math.Exp(2*math.Pow(math.Log(1.5), 2)) // defined: the log-normal's mean of r squared
-	if miss := relative(got.Geometric, want); miss > 1e-3 {                    // picked: the quadrature's own error
+	logged := math.Log(1.5)
+	want := math.Pi * radius * radius * math.Exp(2*math.Pow(logged, 2)) // defined: the log-normal's mean of r squared
+	if miss := relative(got.Geometric, want); miss > 1e-3 {             // picked: the quadrature's own error
 		t.Errorf("geometric %g against the log-normal's %g", got.Geometric, want)
 	}
 	if relative(got.Geometric, math.Pi*radius*radius) < 0.1 { // picked: a visible difference
@@ -224,18 +225,18 @@ func TestRefusals(t *testing.T) {
 		index complex128
 		why   error
 	}{
-		"nought":          {0, 1.44, ErrSize},
-		"negative":        {-1, 1.44, ErrSize},
-		"under the limit": {MinSize / 2, 1.44, ErrSize},
-		"not a number":    {math.NaN(), 1.44, ErrSize},
-		"over the limit":  {MaxSize * 1.01, 1.44, ErrSize},
-		"gain":            {1, complex(1.44, -0.1), ErrIndex},
-		"no real part":    {1, complex(0, 0.1), ErrIndex},
-		"negative real":   {1, complex(-1.44, 0), ErrIndex},
-		"the medium":      {1, 1, ErrIndex},
-		"index not a num": {1, complex(math.NaN(), 0), ErrIndex},
+		"nought":          {0, 1.44, errSize},
+		"negative":        {-1, 1.44, errSize},
+		"under the limit": {minSize / 2, 1.44, errSize},
+		"not a number":    {math.NaN(), 1.44, errSize},
+		"over the limit":  {maxSize * 1.01, 1.44, errSize},
+		"gain":            {1, complex(1.44, -0.1), errIndex},
+		"no real part":    {1, complex(0, 0.1), errIndex},
+		"negative real":   {1, complex(-1.44, 0), errIndex},
+		"the medium":      {1, 1, errIndex},
+		"index not a num": {1, complex(math.NaN(), 0), errIndex},
 	} {
-		if _, err := Sphere(each.size, each.index); !errors.Is(err, each.why) {
+		if _, err := sphere(each.size, each.index); !errors.Is(err, each.why) {
 			t.Errorf("%s: %v, not %v", name, err, each.why)
 		}
 	}
@@ -246,7 +247,7 @@ func TestRefusals(t *testing.T) {
 		"spread under":    {1e-6, 0.9},
 		"spread nan":      {1e-6, math.NaN()},
 	} {
-		if _, err := NewPopulation(each.radius, each.spread); !errors.Is(err, ErrPopulation) {
+		if _, err := NewPopulation(each.radius, each.spread); !errors.Is(err, errPopulation) {
 			t.Errorf("%s: %v", name, err)
 		}
 	}
@@ -254,41 +255,41 @@ func TestRefusals(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := population.Average(0, 1.44); !errors.Is(err, ErrPopulation) {
+	if _, err := population.Average(0, 1.44); !errors.Is(err, errPopulation) {
 		t.Errorf("wavelength nought: %v", err)
 	}
-	if _, err := population.Average(550e-9, complex(1.44, -1)); !errors.Is(err, ErrIndex) {
+	if _, err := population.Average(550e-9, complex(1.44, -1)); !errors.Is(err, errIndex) {
 		t.Errorf("a population with gain: %v", err)
 	}
 	huge, err := NewPopulation(1e-2, 1.3) // picked: a centimetre, a raindrop's hundredfold
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := huge.Average(550e-9, complex(1.44, 0)); !errors.Is(err, ErrSize) {
+	if _, err := huge.Average(550e-9, complex(1.44, 0)); !errors.Is(err, errSize) {
 		t.Errorf("a population of centimetres: %v", err)
 	}
 }
 
-// What is allowed is allowed: the edges of what Sphere takes, a sphere
+// What is allowed is allowed: the edges of what sphere takes, a sphere
 // at the smallest size still keeps to Rayleigh's law.
 func TestEdgesOfWhatIsAllowed(t *testing.T) {
 	for name, each := range map[string]struct {
 		size  float64
 		index complex128
 	}{
-		"the largest":      {MaxSize, 1.44},
-		"the smallest":     {MinSize, 1.44},
+		"the largest":      {maxSize, 1.44},
+		"the smallest":     {minSize, 1.44},
 		"barely absorbing": {1, complex(1.44, 1e-12)},
 		"index near one":   {1, 1.0000001},
 		"high absorption":  {1, complex(1.44, 10)},
 	} {
-		got, err := Sphere(each.size, each.index)
+		got, err := sphere(each.size, each.index)
 		if err != nil || math.IsNaN(got.Extinction) || math.IsNaN(got.Asymmetry) {
 			t.Errorf("%s: %+v, %v", name, got, err)
 		}
 	}
-	smallest := must(t, MinSize, 1.44)
-	if miss := relative(smallest.Scattering, rayleighScattering(MinSize, 1.44)); miss > 1e-3 { // picked: the cancellation's few parts in 1e7, with room
+	smallest := must(t, minSize, 1.44)
+	if miss := relative(smallest.Scattering, rayleighScattering(minSize, 1.44)); miss > 1e-3 { // picked: the cancellation's few parts in 1e7, with room
 		t.Errorf("at the smallest size scattering is %g off Rayleigh's law", miss)
 	}
 }

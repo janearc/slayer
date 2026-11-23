@@ -17,8 +17,15 @@ type plantAxis struct {
 
 // plantPlan separates the permanent scaffold from the foliage representation.
 type plantPlan struct {
-	axes []plantAxis
-	tips []int
+	axes  []plantAxis
+	tips  []int
+	roots []plantAxis
+}
+
+// woody is every woody axis the plan draws: the scaffold, then the roots
+// that show above the ground. Only the scaffold's tips carry foliage.
+func (plan plantPlan) woody() []plantAxis {
+	return append(append([]plantAxis{}, plan.axes...), plan.roots...)
 }
 
 // plan applies bounded parametric branching rules directly, without strings.
@@ -52,6 +59,7 @@ func (profile plantProfile) plan(from seed) (plantPlan, error) {
 			plan.axes = append(plan.axes, next)
 		}
 	}
+	plan.roots = profile.exposed(from, scale)
 	return plan, nil
 }
 

@@ -1,0 +1,12 @@
+# 10000 small lights drawn the fast way: vibes on turns on the restir shortcut.
+# the same job with vibes: off is the exact tracer's picture (slow at this
+# count: the exact path scans every lamp at every point).
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/restir-crowd-10k.yaml}
+camera: {name: front}
+film: {width: 320, height: 180, rays: 1}
+renderer: gpu
+quality: exact
+vibes: on
+outputs:
+  picture: ../out/restir-crowd-10k.png

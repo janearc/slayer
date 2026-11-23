@@ -64,7 +64,7 @@ func poleSky(share func(round int) float64) (*Fields, *Sky) {
 	for bin := range fields.counts[none] {
 		fields.counts[none][bin] = poleCounts
 	}
-	return fields, NewSky(fields, wayAt(thirty*degree, none), one)
+	return fields, newSky(fields, wayAt(thirty*degree, none), one)
 }
 
 // ring is the luminance of a reading round a ring of looks at an angle

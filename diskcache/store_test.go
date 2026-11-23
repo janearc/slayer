@@ -26,11 +26,13 @@ func TestPutThenGetIsByteForByte(t *testing.T) {
 // anti-test of TestPutThenGetIsByteForByte
 func TestGetMissesAKeyOneByteAway(t *testing.T) {
 	store, _ := testStore(t, "store-near")
-	if err := store.Put(NewKey(store.kind).Bytes("set", []byte("abc")),
+	nearKey := NewKey(store.kind).Bytes("set", []byte("abc"))
+	if err := store.Put(nearKey,
 		payload(entryBytes)); err != nil {
 		t.Fatal(err)
 	}
-	hit, err := store.Get(NewKey(store.kind).Bytes("set", []byte("abd")))
+	awayKey := NewKey(store.kind).Bytes("set", []byte("abd"))
+	hit, err := store.Get(awayKey)
 	if err != nil || hit.Found() || hit.Why() != "no entry" ||
 		hit.Payload() != nil {
 		t.Fatalf("a key one byte away was served: %v, %v", hit, err)
@@ -122,7 +124,8 @@ func TestGetMissesAnotherKeysEntryUnderItsName(t *testing.T) {
 	if err := store.Put(theirs, payload(entryBytes)); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Dir(store.path(mine)), folderMode); err != nil {
+	mineFolder := filepath.Dir(store.path(mine))
+	if err := os.MkdirAll(mineFolder, folderMode); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Rename(store.path(theirs), store.path(mine)); err != nil {
@@ -175,7 +178,8 @@ func TestPutSaysWhenItCannotWrite(t *testing.T) {
 func TestPutSaysWhenItCannotRename(t *testing.T) {
 	store, _ := testStore(t, "store-unrenamed")
 	key := NewKey(store.kind).Text("a", "1")
-	if err := os.MkdirAll(filepath.Join(store.path(key), "full"),
+	fullPath := filepath.Join(store.path(key), "full")
+	if err := os.MkdirAll(fullPath,
 		folderMode); err != nil {
 		t.Fatal(err)
 	}
@@ -240,7 +244,8 @@ func TestOpenMakesTheKindsFolderUnderTheHome(t *testing.T) {
 func TestOpenSaysWhenTheFolderCannotBeMade(t *testing.T) {
 	home := t.TempDir()
 	kind := testKind(t, "store-unmade")
-	if err := os.WriteFile(filepath.Join(home, kind.Name()), nil,
+	unmade := filepath.Join(home, kind.Name())
+	if err := os.WriteFile(unmade, nil,
 		fileMode); err != nil {
 		t.Fatal(err)
 	}

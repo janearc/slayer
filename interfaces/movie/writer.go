@@ -33,8 +33,6 @@ type pipe interface {
 }
 
 // Stats is what a writer has done so far.
-//
-//ninja:vow practice a Writer gives one; callers read it
 type Stats struct {
 	frames int
 	bytes  int64
@@ -51,8 +49,6 @@ func (stats Stats) Bytes() int64 { return stats.bytes }
 func (stats Stats) Spent() time.Duration { return stats.spent }
 
 // Writer takes frames in order and writes them to a movie.
-//
-//ninja:vow practice New makes one
 type Writer struct {
 	mu        sync.Mutex
 	settings  Settings
@@ -153,7 +149,8 @@ func (writer *Writer) Frame(index int, picture *image.RGBA) error {
 	err := writer.pipe.frame(index, picture)
 	writer.stats.spent += time.Since(start)
 	if err != nil {
-		return writer.fail(errors.Join(err, writer.ctx.Err()))
+		stopped := errors.Join(err, writer.ctx.Err())
+		return writer.fail(stopped)
 	}
 	writer.next++
 	writer.stats.frames++
@@ -187,7 +184,7 @@ func pictureRefusal(index int, picture *image.RGBA, size image.Point) error {
 			"movie's frames are %v", index, picture.Rect.Size(), size)
 	}
 	row := size.X * bytesPerPixel
-	needed := (size.Y-1)*picture.Stride + row
+	needed := (size.Y-one)*picture.Stride + row
 	if picture.Stride < row || len(picture.Pix) < needed {
 		return fmt.Errorf("movie: frame %d holds %d bytes at a stride of "+
 			"%d, too few for its size", index, len(picture.Pix),
@@ -220,8 +217,8 @@ func (writer *Writer) discard() error {
 }
 
 // leftovers marks what AVFoundation leaves beside a file it was stopped
-// writing: a directory named after the file, then this. Measured on
-// this machine, 2026-11-12, when a cancelled writer was then finished.
+// writing: a directory named after the file, then this. It is what a
+// cancelled writer that was then finished leaves on this machine.
 const leftovers = ".sb-"
 
 // removeLeftovers removes whatever AVFoundation left beside the
@@ -266,7 +263,8 @@ func (writer *Writer) Close() error {
 		return writer.fail(fmt.Errorf("movie: stopped: %w", err))
 	}
 	if err := writer.pipe.finish(writer.settings.frames); err != nil {
-		return writer.fail(errors.Join(err, writer.ctx.Err()))
+		stopped := errors.Join(err, writer.ctx.Err())
+		return writer.fail(stopped)
 	}
 	writer.unhook()
 	writer.pipe.release()

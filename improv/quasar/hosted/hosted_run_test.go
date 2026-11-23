@@ -51,20 +51,23 @@ func writeTone(t *testing.T, path string) {
 	const rate = 44100
 	var data bytes.Buffer
 	for i := 0; i < rate; i++ {
-		sample := int16(8000 * math.Sin(2*math.Pi*220*float64(i)/rate))
+		phase := 2 * math.Pi * 220 * float64(i) / rate
+		sample := int16(8000 * math.Sin(phase))
 		binary.Write(&data, binary.LittleEndian, sample)
 		binary.Write(&data, binary.LittleEndian, sample)
 	}
 	var out bytes.Buffer
 	out.WriteString("RIFF")
-	binary.Write(&out, binary.LittleEndian, uint32(36+data.Len()))
+	riffSize := uint32(36 + data.Len())
+	binary.Write(&out, binary.LittleEndian, riffSize)
 	out.WriteString("WAVEfmt ")
 	for _, field := range []any{uint32(16), uint16(1), uint16(2),
 		uint32(rate), uint32(rate * 4), uint16(4), uint16(16)} {
 		binary.Write(&out, binary.LittleEndian, field)
 	}
 	out.WriteString("data")
-	binary.Write(&out, binary.LittleEndian, uint32(data.Len()))
+	dataSize := uint32(data.Len())
+	binary.Write(&out, binary.LittleEndian, dataSize)
 	out.Write(data.Bytes())
 	if err := os.WriteFile(path, out.Bytes(), 0o644); err != nil {
 		t.Fatal(err)

@@ -83,8 +83,9 @@ func (machine) Run(ctx context.Context, path string, args ...string) (
 	string, error) {
 	said, err := exec.CommandContext(ctx, path, args...).CombinedOutput()
 	if err != nil {
+		saidTrimmed := strings.TrimSpace(string(said))
 		return "", fmt.Errorf("%s %s: %w: %s", filepath.Base(path),
-			strings.Join(args, " "), err, strings.TrimSpace(string(said)))
+			strings.Join(args, " "), err, saidTrimmed)
 	}
 	return string(said), nil
 }
@@ -413,8 +414,9 @@ func template(schema string) []byte {
 	for _, each := range job.Presets() {
 		presets = append(presets, each.Name())
 	}
+	presetList := strings.Join(presets, ", ")
 	return []byte(fmt.Sprintf(templateText, schema, jobSchema,
-		strings.Join(presets, ", ")))
+		presetList))
 }
 
 // templateText is the template, with the schema's path, the schema's
@@ -439,7 +441,8 @@ func agentGuide() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return []byte(fmt.Sprintf(guideText, strings.Join(lines, "\n"),
+	guideLines := strings.Join(lines, "\n")
+	return []byte(fmt.Sprintf(guideText, guideLines,
 		jobSchema, jobSchema)), nil
 }
 

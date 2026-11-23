@@ -34,15 +34,18 @@ func TestEachPartIsMadeToTheBodysScale(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	aurora, err := bodies.NewAurora(bodies.NewShell(km(128), km(384)),
+	auroraShell := bodies.NewShell(km(128), km(384))
+	auroraColours := bodies.NewAuroraColours(light(0.5, 1, 2), light(1, 2, 4),
+		light(2, 4, 8))
+	aurora, err := bodies.NewAurora(auroraShell,
 		rad(1.25), rad(0.5), rad(math.Pi/2), maths.Share(0.25),
 		maths.Share(0.75), 7,
-		bodies.NewAuroraColours(light(0.5, 1, 2), light(1, 2, 4),
-			light(2, 4, 8)))
+		auroraColours)
 	if err != nil {
 		t.Fatal(err)
 	}
-	clouds, err := bodies.NewClouds(bodies.NewShell(km(64), km(128)),
+	cloudShell := bodies.NewShell(km(64), km(128))
+	clouds, err := bodies.NewClouds(cloudShell,
 		maths.Share(0.75), bodies.PerKilometre(0.25), 9)
 	if err != nil {
 		t.Fatal(err)
@@ -244,9 +247,11 @@ func TestJetsAreAConeCutToTheScale(t *testing.T) {
 	if v.Beam == nil || v.Beam.Speed != 0.5 || v.Beam.Axis != maths.Up || v.Beam.Round {
 		t.Errorf("the jets' beam is %+v", v.Beam)
 	}
+	jetsAxis := v.At(0).Orientation.Out(maths.Up)
+	sinSixty := math.Sqrt(3) / 2
 	// a third of a turn up about x takes +y to (0, cos 60, sin 60)
-	nearVec(t, "the jets' axis", v.At(0).Orientation.Out(maths.Up),
-		maths.V(0, 0.5, math.Sqrt(3)/2), 1e-12)
+	nearVec(t, "the jets' axis", jetsAxis,
+		maths.V(0, 0.5, sinSixty), 1e-12)
 	nearVec(t, "where the jets are", v.At(0).Origin, maths.V(10, 0, 0), 1e-12)
 }
 

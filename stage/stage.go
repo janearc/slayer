@@ -88,8 +88,9 @@ func Print(said set.Film) colour.Tone {
 // material is a material: its colour, glow and clear interface, built for
 // the renderer.
 func material(said set.Material, metresPerUnit float64) (*thing.Material, error) {
-	made := &thing.Material{Name: said.Name()}
+	made := &thing.Material{Name: said.Name(), Source: said.Source()}
 	if clear, has := said.Clear(); has {
+		made.WaterComposition, _ = clear.WaterComposition()
 		made.Through = clear.Through
 		made.Index = clear.Index
 		made.Gloss = clear.Gloss
@@ -111,6 +112,12 @@ func material(said set.Material, metresPerUnit float64) (*thing.Material, error)
 			if err != nil {
 				return nil, fmt.Errorf("material %s: %w", said.Name(), err)
 			}
+			if water, hasWater := clear.WaterComposition(); hasWater {
+				medium, err = medium.WithWaterComposition(water, clear.WaterOpticalSource())
+				if err != nil {
+					return nil, fmt.Errorf("material %s: %w", said.Name(), err)
+				}
+			}
 			made.ClearMedium = medium
 		}
 	}
@@ -129,6 +136,9 @@ func material(said set.Material, metresPerUnit float64) (*thing.Material, error)
 	}
 	return made, nil
 }
+
+// Colour is a colour a set says, as the tracer carries light.
+func Colour(said set.Colour) maths.Light { return light(said) }
 
 // light is a colour as the tracer carries light: a swatch's, by its
 // name, or the linear light the set says.

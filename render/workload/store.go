@@ -92,7 +92,8 @@ func (store *Store) Record(identity Identity, samples []Observation) error {
 		if err != nil {
 			return err
 		}
-		encoded[i], err = json.Marshal(envelope{fmt.Sprintf("%x", sha256.Sum256(raw)), raw})
+		rawDigest := sha256.Sum256(raw)
+		encoded[i], err = json.Marshal(envelope{fmt.Sprintf("%x", rawDigest), raw})
 		if err != nil {
 			return err
 		}

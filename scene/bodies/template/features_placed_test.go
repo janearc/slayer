@@ -65,9 +65,11 @@ func TestVenusPutsMaxwellAndMaatWhereItIsTold(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	plateauAt := landNear(t, w, maths.V(0.2, 0.9, 0.4))
+	volcanoAt := landNear(t, w, maths.V(0.9, 0.05, 0.4))
 	holds(t, "venus's features", got, []world.Feature{
-		world.Plateau{At: landNear(t, w, maths.V(0.2, 0.9, 0.4)), Reach: 3 * step, Top: 0.9},
-		world.Volcano{At: landNear(t, w, maths.V(0.9, 0.05, 0.4)), Reach: 3 * step,
+		world.Plateau{At: plateauAt, Reach: 3 * step, Top: 0.9},
+		world.Volcano{At: volcanoAt, Reach: 3 * step,
 			Rise: 0.5, Dead: true}})
 }
 
@@ -108,8 +110,9 @@ func TestPlutoLaysItsHeartOfIceWhereItIsTold(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	patchAt := landNear(t, w, maths.V(0.2, 0.1, 1))
 	holds(t, "pluto's features", got, []world.Feature{
-		world.Patch{At: landNear(t, w, maths.V(0.2, 0.1, 1)),
+		world.Patch{At: patchAt,
 			Reach: 5 * w.Tiling.Spacing(), Of: world.Ice}})
 }
 

@@ -1,0 +1,54 @@
+# Same camera and model as prima-spacecraft.yaml; authored studio sources
+# test whether close soft reflections make the polished parts legible.
+# This is not a claim about PRIMA's operational illumination or materials.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: PRIMA spacecraft close-fill material study
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 180, altitude: 20}
+  set:
+    things:
+      prima:
+        kind: prima
+        seed: 5
+        complexity: demo
+        east: 0
+        north: 0
+  film:
+    width: 1080
+    height: 960
+    rays: 4
+    exposure: 0.01
+    wide: 32
+  cameras:
+    concept:
+      title: PRIMA matched material study with close studio fills
+      location: {at: [6, -19, 4.5]}
+      orientation: {look_at: [-0.4, -0.5, -0.36]}
+  world:
+    unit: 1
+    floods:
+      cool-space-fill:
+        colour: {srgb_linear: [0.08, 0.10, 0.16]}
+        strength: 1
+        source: eye
+    lamps:
+      warm-front-softbox:
+        at: [6, -15, 10]
+        temperature: 4800
+        strength: 200
+        radius: 0.8
+        source: eye
+      cool-edge-softbox:
+        at: [-8, 10, 8]
+        temperature: 7600
+        strength: 130
+        radius: 0.8
+        source: eye
+    suns:
+      cool-rim:
+        toward: [8, 4, 4]
+        colour: {srgb_linear: [0.8, 1.1, 1.8]}
+        source: eye

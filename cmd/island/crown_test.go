@@ -92,12 +92,14 @@ func TestCrownPoints(t *testing.T) {
 	if count != 8 || len(seen) != 8 || !seen[maths.V(-1, 0, -1)] || !seen[maths.V(1, 2, 1)] {
 		t.Errorf("%d corners, %d distinct", count, len(seen))
 	}
-	group, err := shape.NewMeshGroup([]shape.MeshMember{{Mesh: made, Space: maths.NewSubspace(maths.V(10, 0, 0), maths.Identity, 1)}})
+	shifted := maths.NewSubspace(maths.V(10, 0, 0), maths.Identity, 1)
+	group, err := shape.NewMeshGroup([]shape.MeshMember{{Mesh: made, Space: shifted}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	seen = map[maths.Vec]bool{}
-	if err := crownPoints(group, maths.NewSubspace(maths.V(0, 100, 0), maths.Identity, 1), visit); err != nil {
+	lifted := maths.NewSubspace(maths.V(0, 100, 0), maths.Identity, 1)
+	if err := crownPoints(group, lifted, visit); err != nil {
 		t.Fatal(err)
 	}
 	if !seen[maths.V(9, 100, -1)] || !seen[maths.V(11, 102, 1)] {
@@ -167,8 +169,9 @@ func TestVerticalArea(t *testing.T) {
 // refusals.
 func TestProjectedPartAreas(t *testing.T) {
 	value := diamondPrototype(t)
+	placed := maths.NewSubspace(maths.V(0.5, 0, 0), maths.Identity, 1)
 	value.parts = append(value.parts, thing.Thing{Shape: diamond(t), Material: &thing.Material{Name: "leaf"},
-		Motion: thing.Still(maths.NewSubspace(maths.V(0.5, 0, 0), maths.Identity, 1))})
+		Motion: thing.Still(placed)})
 	domain := maths.Box{Min: maths.V(-1, 0, -1), Max: maths.V(1.5, 2, 1)}
 	areas, err := projectedPartAreas(t.Context(), value, domain, 64)
 	if err != nil {
@@ -253,9 +256,11 @@ func (distanceOnly) Distance(maths.Vec) float64 { return 0 }
 // that spans their combined corners.
 func TestCrownBinsCorners(t *testing.T) {
 	made := diamond(t)
+	nearSpace := maths.NewSubspace(maths.V(2, 0, 2), maths.Identity, 1)
+	farSpace := maths.NewSubspace(maths.V(5, 0, 5), maths.Identity, 1)
 	group, err := shape.NewMeshGroup([]shape.MeshMember{
-		{Mesh: made, Space: maths.NewSubspace(maths.V(2, 0, 2), maths.Identity, 1)},
-		{Mesh: made, Space: maths.NewSubspace(maths.V(5, 0, 5), maths.Identity, 1)}})
+		{Mesh: made, Space: nearSpace},
+		{Mesh: made, Space: farSpace}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -342,7 +347,8 @@ func TestFitCrownAreaLimits(t *testing.T) {
 		t.Errorf("small proxy: %+v", part)
 	}
 	away := widened(t, source, 1)
-	away.parts[0].Motion = thing.Still(maths.NewSubspace(maths.V(50, 0, 0), maths.Identity, 1))
+	awaySpace := maths.NewSubspace(maths.V(50, 0, 0), maths.Identity, 1)
+	away.parts[0].Motion = thing.Still(awaySpace)
 	fitted, err = fitCrownArea(t.Context(), source, away, 32)
 	if err != nil {
 		t.Fatal(err)
@@ -356,6 +362,8 @@ func TestFitCrownAreaLimits(t *testing.T) {
 func TestFitCrownAreaRefusals(t *testing.T) {
 	source := diamondPrototype(t)
 	proxy := widened(t, source, 1)
+	copied := append([]thing.Thing(nil), source.parts...)
+	doubled := append(copied, source.parts...)
 	cases := []struct {
 		name          string
 		source, proxy prototype
@@ -363,7 +371,7 @@ func TestFitCrownAreaRefusals(t *testing.T) {
 		want          string
 	}{
 		{"no proxy parts", source, prototype{bounds: proxy.bounds}, 16, "correspondence is missing"},
-		{"part count differs", prototype{parts: append(append([]thing.Thing(nil), source.parts...), source.parts...)}, proxy, 16, "correspondence is missing"},
+		{"part count differs", prototype{parts: doubled}, proxy, 16, "correspondence is missing"},
 		{"axis outside the envelope", source, func() prototype {
 			p := proxy
 			p.bounds = maths.Box{Min: maths.V(1, 0, 1), Max: maths.V(2, 2, 2)}

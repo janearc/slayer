@@ -62,9 +62,9 @@ func TestEveryBuiltInStudioVoicingHasTheSameSixDrums(t *testing.T) {
 			if !v.Percussive(i) {
 				continue
 			}
-			if got := len(c.Drums); got != len(DrumLetters) {
+			if got := len(c.Drums); got != len(drumMeanings) {
 				t.Errorf("%s has %d drums, want the %d letters", name,
-					got, len(DrumLetters))
+					got, len(drumMeanings))
 			}
 			// an open hat is longer than a closed one, where both are
 			// hiss: the one thing about a letter that can be measured.
@@ -78,10 +78,10 @@ func TestEveryBuiltInStudioVoicingHasTheSameSixDrums(t *testing.T) {
 	if seen != 8 {
 		t.Errorf("%d studio voicings, want eight", seen)
 	}
-	if len(drumLetters) != len(DrumLetters) {
+	if len(drumLetters) != len(drumMeanings) {
 		t.Errorf("the letters and their order disagree")
 	}
 }
 
 // longest is how long a drum sounds, by its longer decay.
-func longest(d Drum) float64 { return max(d.Decay, d.NoiseDecay) }
+func longest(d drum) float64 { return max(d.Decay, d.NoiseDecay) }

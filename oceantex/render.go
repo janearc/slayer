@@ -32,12 +32,12 @@ func Render(scene Scene, tile Tile) (*Texture, *Field, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	patch, err := NewPatch(scene.Sea, tile.Size, tile.Extent, tile.Seed)
+	patch, err := newPatch(scene.Sea, tile.Size, tile.Extent, tile.Seed)
 	if err != nil {
 		return nil, nil, err
 	}
 	field := patch.At(tile.Seconds)
-	gotAlong, gotAcross := patch.Resolved()
+	gotAlong, gotAcross := patch.resolved()
 
 	n := tile.Size
 	out := &Texture{Width: n, Height: n,

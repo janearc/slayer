@@ -15,8 +15,6 @@ const (
 //
 // If x is no number the result is none. Start or end as no number is
 // promised nothing: the result is zero or one or none.
-//
-//ninja:vow practice a library: its callers are in other modules
 func Smooth(start, end, x float64) float64 {
 	if x <= start {
 		return below

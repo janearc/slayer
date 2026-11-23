@@ -8,6 +8,16 @@ import (
 	"time"
 )
 
+func samplingBody(t *testing.T) *Body {
+	t.Helper()
+	body, err := NewBody(Fire{Radius: .8, Height: 1.8, Absorption: 2,
+		Hottest: measure.Kelvin(1500), Edge: measure.Kelvin(900), Seed: 3}, 1e3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return body
+}
+
 func TestFlameScaleHeatAndTimedEmissionStayCoherent(t *testing.T) {
 	body := samplingBody(t)
 	if body.Finest() <= 0 || body.Finest() >= body.fire.Radius {
@@ -30,9 +40,5 @@ func TestFlameScaleHeatAndTimedEmissionStayCoherent(t *testing.T) {
 	fire.Radius = math.MaxFloat64
 	if _, err := NewBody(fire, 1); err == nil {
 		t.Fatal("overflowing period accepted")
-	}
-	soot, err := NewSoot(measure.Kelvin(1300), 1, measure.Metres(550e-9), 1)
-	if err != nil || soot.Heat() != measure.Kelvin(1300) {
-		t.Fatal("soot lost its measured heat", err)
 	}
 }

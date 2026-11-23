@@ -20,7 +20,7 @@ func TestQueueMalformedLedgerAndMissingOutputCannotAcceptPixels(t *testing.T) {
 			runner := NewMockRunner(gomock.NewController(t))
 			var request queueRequest
 			submit := expectSubmit(t, runner, tools, plan, &request, nil)
-			expectStatus(t, runner, tools, func() ([]byte, error) {
+			reply := func() ([]byte, error) {
 				job := queueJob{Sequence: 41, Request: request, State: "succeeded", Result: queueResult{State: "succeeded"}}
 				switch variant {
 				case "malformed":
@@ -43,7 +43,12 @@ func TestQueueMalformedLedgerAndMissingOutputCannotAcceptPixels(t *testing.T) {
 					return nil, errors.New("queue status unavailable")
 				}
 				return queueJSON(t, map[string]any{"version": 1, "jobs": []queueJob{job}}), nil
-			}).After(submit)
+			}
+			observed := expectStatus(t, runner, tools, reply).After(submit)
+			if variant != "missing PNG" && variant != "bad PNG" {
+				// An unreadable status ends observation with the job cancelled first.
+				expectGiveUp(t, runner, tools, reply, observed)
+			}
 			var last Update
 			err := (queueClient{runner: runner}).run(context.Background(), tools, plan, io.Discard, func(update Update) { last = update })
 			if err == nil {

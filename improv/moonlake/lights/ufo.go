@@ -120,7 +120,7 @@ func addUFOBeam(sky, front Image, config UFOConfig, input UFOInput, treeMask, wa
 			var light [3]float64
 			inner := 0.0
 			for _, layer := range layers {
-				in, out, crosses := ConeChord(d, apex, layer.slope, config.WaterZ)
+				in, out, crosses := coneChord(d, apex, layer.slope, config.WaterZ)
 				if !crosses || in >= hitWater {
 					continue
 				}
@@ -128,7 +128,7 @@ func addUFOBeam(sky, front Image, config UFOConfig, input UFOInput, treeMask, wa
 				mist := 0.0
 				for _, f := range []float64{0.2, 0.5, 0.8} {
 					p := d.Scale(in + f*(out-in))
-					mist += (0.35 + 6*LaserFog(p, seconds, config.WaterZ)) / 3
+					mist += (0.35 + 6*laserFog(p, seconds, config.WaterZ)) / 3
 				}
 				length := out - in
 				shell := length - inner

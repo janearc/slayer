@@ -15,7 +15,7 @@ func TestPlannedSearchlightsMatchCPU(t *testing.T) {
 	config := SearchConfig{Gain: 0.1, Count: 2}
 	cpuSky := Image{Width: width, Height: height, Light: make([]float64, width*height*3)}
 	cpuFront := Image{Width: width, Height: height, Light: make([]float64, width*height*3)}
-	AddSearchlights(cpuSky, cpuFront, config, input)
+	addSearchlights(cpuSky, cpuFront, config, input)
 	planned, err := PlanSearchlights(width, height, config, input)
 	if err != nil {
 		t.Fatal(err)

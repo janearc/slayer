@@ -44,6 +44,7 @@ type plantProfile struct {
 	LeafPairs                                     int     `yaml:"leaf-pairs"`
 	RosetteLeaves                                 int     `yaml:"rosette-leaves"`
 	RosetteAngle                                  float64 `yaml:"rosette-angle"`
+	Roots                                         *plantRoots
 }
 
 // readPlantProfiles checks the authored status and names before registration.

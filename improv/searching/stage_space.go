@@ -14,7 +14,7 @@ import (
 
 // makeSpace builds small bounded proof sets. Fictional respondents and
 // large-scale flow geometry are authored, not presented as survey data.
-func (s *heardStage) makeSpace(p *StagePlan) error {
+func (s *heardStage) makeSpace(p *stagePlan) error {
 	s.world.Sky = sky.Stars{Share: .14, Size: .16, Bright: .8, Dark: maths.RGB(.0006, .0008, .002), Seed: 29}
 	if p.Kind != "space" {
 		s.world.Lamp(thing.Sun(maths.V(-1, 2, 3), maths.RGB(.35, .2, .4)))
@@ -163,17 +163,10 @@ func (s *heardStage) cosmicWeb() {
 }
 
 // updateSpace moves the space objects for the stage at progress u.
-func (s *heardStage) updateSpace(p *StagePlan, state State, u float64) {
-	fold := smooth(u)
-	if p.Kind == "laniakea" {
-		fold = 0
-	}
-	if p.Kind == "answer" || p.Kind == "consequence" {
-		fold = 1
-	}
+func (s *heardStage) updateSpace(p *stagePlan, state State, u float64) {
 	// Four stages align with the same four musical bars at both scales.
 	phase := math.Min(3, u*4)
-	fold = (math.Floor(phase) + smooth(phase-math.Floor(phase))) / 3
+	fold := (math.Floor(phase) + smooth(phase-math.Floor(phase))) / 3
 	if p.Kind == "laniakea" {
 		fold = 0
 	}

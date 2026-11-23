@@ -24,6 +24,43 @@ import (
 	"github.com/janearc/slayer/scene/world"
 )
 
+// lit is the lit volume pixels of a frame in a band of rows: how many,
+// and their mean x and luminance.
+func lit(f *frame.Frame, from, to int) (n int, meanX, meanLum float64) {
+	sumX, sumL := 0.0, 0.0
+	for y := from; y < to; y++ {
+		for x := 0; x < f.W; x++ {
+			p := f.At(x, y)
+			if p.Cover > 0.05 && math.IsInf(float64(p.Depth), 1) {
+				if l := p.Light().Luminance(); l > 0.02 {
+					n, sumX, sumL = n+1, sumX+float64(x), sumL+l
+				}
+			}
+		}
+	}
+	if n == 0 {
+		return 0, 0, 0
+	}
+	return n, sumX / float64(n), sumL / float64(n)
+}
+
+// twentyNineNames are the eagle's three lines, by their chemistry.
+var twentyNineNames = []string{"s ii", "h alpha", "o iii"}
+
+// thirtyTwoJupiter is jupiter's aurora, for the test's second frame:
+// the giant from over its pole, the sun from the far side so the pole
+// is in night, exposed twenty times.
+//
+// the oval is in blues, standing in for the ultraviolet it shines in.
+func thirtyTwoJupiter() (*thing.World, maths.Subspace) {
+	w := dark()
+	w.Lamp(thing.Sun(maths.V(0.2, -0.3, -1), swatches.Light(swatches.Daylight).Scale(1.2)))
+	j := sure(template.Jupiter()).WithoutMoons()
+	placed(j.Place(w, maths.Vec{}, 1/j.Radius(), 6))
+	from := maths.V(0, 3.2, 2.2)
+	return w, maths.Subspace{Origin: from, Orientation: maths.LookAt(from, maths.Vec{})}
+}
+
 // noise is how far a float32 frame can be from exact: a sum stored once
 // against two stored separately.
 const noise = 1e-6
@@ -411,7 +448,7 @@ func TestSmoke7APlanet(t *testing.T) {
 		planet := world.New(sevenTerrain)
 		look := sevenLook()
 		tx := planet.Painted(look)
-		for _, tile := range planet.Tiles()[:50] {
+		for _, tile := range planet.Tiling.Tiles()[:50] {
 			c := planet.Tiling.Centre(tile)
 			if got, want := tx.At(c), look.Paints[planet.Biome(tile)]; got != want {
 				t.Fatalf("tile %v: %v, want %v", tile, got, want)
@@ -689,7 +726,7 @@ func TestSmoke12APlanetWithFeatures(t *testing.T) {
 	t.Run("the features are on the world", func(t *testing.T) {
 		planet := twelveWorld()
 		counts := map[world.Biome]int{}
-		for _, tile := range planet.Tiles() {
+		for _, tile := range planet.Tiling.Tiles() {
 			counts[planet.Biome(tile)]++
 		}
 		if counts[world.Lava] == 0 || counts[world.Ash] == 0 {

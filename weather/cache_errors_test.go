@@ -14,12 +14,13 @@ func TestCheckpointRefusesTruncatedWrongAndMismatchedFiles(t *testing.T) {
 	if err := made.save(dir); err != nil {
 		t.Fatal(err)
 	}
-	original, err := os.ReadFile(filepath.Join(dir, name(0)))
+	originalPath := filepath.Join(dir, name(0))
+	original, err := os.ReadFile(originalPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	wrong := bytes.Clone(original)
-	copy(wrong, strings.Repeat("x", len(magic)))
+	wrong, padding := bytes.Clone(original), strings.Repeat("x", len(magic))
+	copy(wrong, padding)
 	count := bytes.Clone(original)
 	count[len(magic)+16] ^= 1
 	for _, test := range []struct {
@@ -48,7 +49,8 @@ func TestCheckpointRefusesTruncatedWrongAndMismatchedFiles(t *testing.T) {
 	if err := made.save(filepath.Join(dir, "absent")); err == nil {
 		t.Fatal("save to missing shelf")
 	}
-	if err := os.Mkdir(filepath.Join(dir, name(3600)), 0700); err != nil {
+	folderPath := filepath.Join(dir, name(3600))
+	if err := os.Mkdir(folderPath, 0700); err != nil {
 		t.Fatal(err)
 	}
 	made.Run(3600)
@@ -70,7 +72,8 @@ func TestReachReportsAReferencedBrokenCheckpointAndBlockedShelf(t *testing.T) {
 	if _, err := made.Reach(dir, 10, 10, false); err == nil {
 		t.Fatal("missing referenced checkpoint")
 	}
-	if err := os.WriteFile(filepath.Join(shelf, name(20)), []byte("broken"), 0600); err != nil {
+	brokenPath := filepath.Join(shelf, name(20))
+	if err := os.WriteFile(brokenPath, []byte("broken"), 0600); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := made.Reach(dir, 30, 10, false); err == nil {

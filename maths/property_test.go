@@ -273,12 +273,14 @@ func TestAHitLiesInsideTheBoxAndBetweenNearAndFar(test *testing.T) {
 
 // The box of no edge is met by every ray drawn, from any start and way.
 func TestTheBoxOfNoEdgeCatchesEveryDrawnRay(test *testing.T) {
-	rapid.Check(test, func(test *rapid.T) {
-		ray := maths.Ray{At: anyVec(test, "at"), Dir: aDirection(test, "way").Unit()}
-		if _, _, ok := maths.Everywhere().Hit(ray, nought, math.Inf(unity)); !ok {
-			test.Fatalf("a ray from %v along %v missed the box of no edge", ray.At, ray.Dir)
-		}
-	})
+	rapid.Check(test, everywhereCatchesEveryRay)
+}
+
+func everywhereCatchesEveryRay(test *rapid.T) {
+	ray := maths.Ray{At: anyVec(test, "at"), Dir: aDirection(test, "way").Unit()}
+	if _, _, ok := maths.Everywhere().Hit(ray, nought, math.Inf(unity)); !ok {
+		test.Fatalf("a ray from %v along %v missed the box of no edge", ray.At, ray.Dir)
+	}
 }
 
 // Rays aimed at a point inside a box meet it. The start is outside the
@@ -286,32 +288,34 @@ func TestTheBoxOfNoEdgeCatchesEveryDrawnRay(test *testing.T) {
 // The box is widened a unit each side, so rounding cannot put the point out.
 // The point is reached between enter and leave.
 func TestARayAimedAtAPointInsideMeetsTheBox(test *testing.T) {
-	rapid.Check(test, func(test *rapid.T) {
-		first, second := anyVec(test, "a"), anyVec(test, "b")
-		low := maths.V(math.Min(first.X, second.X), math.Min(first.Y, second.Y),
-			math.Min(first.Z, second.Z))
-		high := maths.V(math.Max(first.X, second.X), math.Max(first.Y, second.Y),
-			math.Max(first.Z, second.Z))
-		box := maths.Box{Min: low.Sub(maths.V(unity, unity, unity)),
-			Max: high.Add(maths.V(unity, unity, unity))}
-		share := rapid.Float64Range(nought, unity)
-		inside := maths.V(
-			low.X+share.Draw(test, "x share")*(high.X-low.X),
-			low.Y+share.Draw(test, "y share")*(high.Y-low.Y),
-			low.Z+share.Draw(test, "z share")*(high.Z-low.Z))
-		way := aDirection(test, "way").Unit()
-		away := rapid.Float64Range(nought, picked(test, "distance-most")).Draw(test, "away")
-		ray := maths.Ray{At: inside.Sub(way.Scale(away)), Dir: way}
-		span := rapid.Float64Range(nought, picked(test, "distance-most")).Draw(test, "span")
-		enter, leave, ok := box.Hit(ray, nought, away+span)
-		if !ok {
-			test.Fatalf("a ray from %v aimed at %v inside %v met nothing", ray.At, inside, box)
-		}
-		slack := picked(test, "relative") * picked(test, "coordinate-most") * picked(test, "distance-most")
-		if enter > away+slack || leave < away-slack {
-			test.Fatalf("the point is at %v, not between %v and %v", away, enter, leave)
-		}
-	})
+	rapid.Check(test, aimedRayMeetsTheBox)
+}
+
+func aimedRayMeetsTheBox(test *rapid.T) {
+	first, second := anyVec(test, "a"), anyVec(test, "b")
+	low := maths.V(math.Min(first.X, second.X), math.Min(first.Y, second.Y),
+		math.Min(first.Z, second.Z))
+	high := maths.V(math.Max(first.X, second.X), math.Max(first.Y, second.Y),
+		math.Max(first.Z, second.Z))
+	box := maths.Box{Min: low.Sub(maths.V(unity, unity, unity)),
+		Max: high.Add(maths.V(unity, unity, unity))}
+	share := rapid.Float64Range(nought, unity)
+	inside := maths.V(
+		low.X+share.Draw(test, "x share")*(high.X-low.X),
+		low.Y+share.Draw(test, "y share")*(high.Y-low.Y),
+		low.Z+share.Draw(test, "z share")*(high.Z-low.Z))
+	way := aDirection(test, "way").Unit()
+	away := rapid.Float64Range(nought, picked(test, "distance-most")).Draw(test, "away")
+	ray := maths.Ray{At: inside.Sub(way.Scale(away)), Dir: way}
+	span := rapid.Float64Range(nought, picked(test, "distance-most")).Draw(test, "span")
+	enter, leave, ok := box.Hit(ray, nought, away+span)
+	if !ok {
+		test.Fatalf("a ray from %v aimed at %v inside %v met nothing", ray.At, inside, box)
+	}
+	slack := picked(test, "relative") * picked(test, "coordinate-most") * picked(test, "distance-most")
+	if enter > away+slack || leave < away-slack {
+		test.Fatalf("the point is at %v, not between %v and %v", away, enter, leave)
+	}
 }
 
 func hitIsInside(test *rapid.T) {

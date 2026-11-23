@@ -1,0 +1,5 @@
+name,x,y,z,dirx,diry,dirz
+second-member,5,0,0,,,
+above,0.2,0.2,2,,,
+plane-query,3,2,4,,,
+coplanar,0.2,0.2,0,1,0,0

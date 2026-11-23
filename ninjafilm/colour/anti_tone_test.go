@@ -63,6 +63,31 @@ func kneeLeavesLowLightAlone(t *rapid.T) {
 	}
 }
 
+// what the next test draws red from. The least is past white. The most
+// has a luminance just under a half, the least knee the test draws.
+const (
+	redLeast = 1.1  // picked: a part past white
+	redMost  = 2.35 // picked: 2.35 * 0.2126 is just under a half
+)
+
+// anti-tests: the shoulder does not clip a colour under the knee a part
+// at a time. A red past white, whose luminance is under the knee, comes
+// out with its red part at white and not past it, and not as it went in.
+func TestTheShoulderDoesNotClipAColourUnderTheKnee(t *testing.T) {
+	rapid.Check(t, kneeDrawsSaturatedColourToWhite)
+}
+
+func kneeDrawsSaturatedColourToWhite(t *rapid.T) {
+	knee := rapid.Float64Range(half, whole-within).Draw(t, "knee")
+	tone := colour.NewTone(none, knee, none, none)
+	red := rapid.Float64Range(redLeast, redMost).Draw(t, "red")
+	light := maths.RGB(red, none, none)
+	got := tone.Squeeze(light)
+	if got == light || got.R > whole+within || got.R < whole-within {
+		t.Fatalf("red of %v under a knee of %v came out %v", red, knee, got)
+	}
+}
+
 // anti-tests: the shoulder never rolls light below the knee. Grey light
 // above the knee comes out at the knee or above.
 func TestTheShoulderNeverRollsLightBelowTheKnee(t *testing.T) {

@@ -156,7 +156,8 @@ func readNotes(root string) ([]note, error) {
 		if err != nil {
 			return nil, err
 		}
-		all = append(all, notesIn(string(data))...)
+		dataText := string(data)
+		all = append(all, notesIn(dataText)...)
 	}
 	return all, nil
 }
@@ -351,7 +352,8 @@ func (g gallery) figure(each card) (string, error) {
 	}
 	recipe, err := g.recipe(each)
 	var out strings.Builder
-	fmt.Fprintf(&out, `<figure data-folder="%s">`, escape(lastPart(dir)))
+	partName := lastPart(dir)
+	fmt.Fprintf(&out, `<figure data-folder="%s">`, escape(partName))
 	g.picture(&out, path, link, film)
 	out.WriteString("<figcaption>")
 	g.caption(&out, each, dir, book)

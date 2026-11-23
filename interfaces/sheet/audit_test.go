@@ -156,7 +156,8 @@ func TestThePNGIsTheSheet(t *testing.T) {
 			}
 		}
 	}
-	if err := s.PNG(filepath.Join(t.TempDir(), "none", "sheet.png")); err == nil {
+	missing := filepath.Join(t.TempDir(), "none", "sheet.png")
+	if err := s.PNG(missing); err == nil {
 		t.Error("a sheet into a folder that is not there wrote without error")
 	}
 }

@@ -1,0 +1,506 @@
+# The birds, one row a species, for the one bird maker in bird.go.
+#
+# Every figure says where it came from in its basis. read is a figure
+# read on the page its source names. picked is chosen to look right, as
+# a bird of that sort is seen, and has no source. A range is where a
+# seed picks from: a bigger bird is bigger in every length, so no two
+# are alike.
+#
+# Lengths are metres: length is bill tip to tail tip, wingspan tip to
+# tip, bill the exposed bill, tarsus the bare tarsus. head, neck and
+# tail are shares of the length less the bill; the trunk takes the
+# rest. depth and width are shares of the trunk. arm is the wing's
+# bones, a share of the half span outside the body; humerus and forearm
+# are shares of the arm, the hand the rest. tibia, femur and toe (the
+# middle toe) are shares of the tarsus. secondary is a secondary's
+# length, a share of the longest primary. bill-depth and bill-width are
+# the bill's base, and spatula the spoon's width, shares of the bill.
+# stance is the trunk's rise standing, neck-bend the turn of each neck
+# joint, bill-tilt the bill below level standing, all in radians.
+#
+# A colour is a diffuse reflectance, red, green and blue, from nought
+# to one. Its words are the source's for that region; the numbers are
+# always picked from those words. A region no page described says so.
+#
+# The quotes from Wikipedia and the Hong Kong Bird Watching Society were
+# read through a fetching tool's summary of each page, not from the
+# page's own text; see the report.
+read: >-
+  English Wikipedia species pages; the Hong Kong Bird Watching Society's
+  avifauna pages; the Cook Islands Biodiversity Database of the Bishop
+  Museum; Italian Wikipedia for the gull's range. Each figure names its
+  page.
+species:
+  black-faced-spoonbill:
+    name: black-faced spoonbill
+    binomial: Platalea minor
+    plan: wader
+    native:
+      place: >-
+        Deep Bay, the bay between Hong Kong and Shenzhen; the page names
+        the Hong Kong side only. A winter visitor. The plumage below is
+        the non-breeding adult's.
+      source: https://avifauna.hkbws.org.hk/species/0160/021900
+      quote: >-
+        Almost all records of Black-faced Spoonbill come from the Deep Bay
+        area. ... Mai Po and Deep Bay have long been an important
+        wintering ground for this species.
+    bill-shape: spatula
+    neck-in-flight: extended
+    legs-in-flight: trailed
+    figures:
+      length: {least: 0.60, most: 0.79, basis: read, source: "https://avifauna.hkbws.org.hk/species/0160/021900: 60-79 cm"}
+      wingspan: {least: 1.10, most: 1.25, basis: picked}
+      bill: {least: 0.17, most: 0.20, basis: picked}
+      tarsus: {least: 0.11, most: 0.13, basis: picked}
+      head: {least: 0.10, most: 0.10, basis: picked}
+      neck: {least: 0.33, most: 0.33, basis: picked}
+      tail: {least: 0.14, most: 0.14, basis: picked}
+      depth: {least: 0.55, most: 0.55, basis: picked}
+      width: {least: 0.50, most: 0.50, basis: picked}
+      arm: {least: 0.66, most: 0.66, basis: picked}
+      humerus: {least: 0.36, most: 0.36, basis: picked}
+      forearm: {least: 0.40, most: 0.40, basis: picked}
+      tibia: {least: 1.35, most: 1.35, basis: picked}
+      femur: {least: 0.62, most: 0.62, basis: picked}
+      toe: {least: 0.75, most: 0.75, basis: picked}
+      secondary: {least: 0.62, most: 0.62, basis: picked}
+      bill-depth: {least: 0.09, most: 0.09, basis: picked}
+      bill-width: {least: 0.10, most: 0.10, basis: picked}
+      spatula: {least: 0.26, most: 0.26, basis: picked}
+      stance: {least: 0.35, most: 0.35, basis: picked}
+      neck-bend: {least: 0.08, most: 0.08, basis: picked}
+      bill-tilt: {least: 0.45, most: 0.45, basis: picked}
+      cervicals: {least: 17, most: 17, basis: picked}
+      thoracics: {least: 5, most: 5, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 20, most: 20, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+    plumage:
+      crown: {colour: [0.78, 0.78, 0.76], words: "Large all-white waterbird", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      face: {colour: [0.03, 0.03, 0.03], words: "black facial skin and bill", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      neck: {colour: [0.78, 0.78, 0.76], words: "Large all-white waterbird", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      back: {colour: [0.78, 0.78, 0.76], words: "Large all-white waterbird", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      wing: {colour: [0.78, 0.78, 0.76], words: "Large all-white waterbird", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      primaries: {colour: [0.78, 0.78, 0.76], words: "white wing tips while young birds have dark wing tips", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      secondaries: {colour: [0.78, 0.78, 0.76], words: "Large all-white waterbird", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      tail: {colour: [0.78, 0.78, 0.76], words: "Large all-white waterbird", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      belly: {colour: [0.78, 0.78, 0.76], words: "Large all-white waterbird", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      bill: {colour: [0.03, 0.03, 0.03], words: "black facial skin and bill", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0160/021900"}
+      legs: {colour: [0.03, 0.03, 0.03], words: "no page read; picked dark", basis: picked, source: picked}
+      feet: {colour: [0.03, 0.03, 0.03], words: "no page read; picked dark", basis: picked, source: picked}
+      eye: {colour: [0.25, 0.04, 0.03], words: "no page read; picked", basis: picked, source: picked}
+  little-egret:
+    name: little egret
+    binomial: Egretta garzetta
+    plan: wader
+    native:
+      place: Deep Bay, the bay between Hong Kong and Shenzhen
+      source: https://avifauna.hkbws.org.hk/species/0170/023500
+      quote: >-
+        Present all year in a wide variety of fresh and non-freshwater
+        wetland habitats. ... notably high numbers were recorded on the
+        Shenzhen side of Deep Bay
+    bill-shape: dagger
+    neck-in-flight: retracted
+    legs-in-flight: trailed
+    figures:
+      length: {least: 0.55, most: 0.65, basis: read, source: "https://en.wikipedia.org/wiki/Little_egret: 55-65 cm long"}
+      wingspan: {least: 0.88, most: 1.06, basis: read, source: "https://en.wikipedia.org/wiki/Little_egret: 88-106 cm wingspan"}
+      bill: {least: 0.085, most: 0.10, basis: picked}
+      tarsus: {least: 0.09, most: 0.11, basis: picked}
+      head: {least: 0.09, most: 0.09, basis: picked}
+      neck: {least: 0.38, most: 0.38, basis: picked}
+      tail: {least: 0.14, most: 0.14, basis: picked}
+      depth: {least: 0.50, most: 0.50, basis: picked}
+      width: {least: 0.42, most: 0.42, basis: picked}
+      arm: {least: 0.66, most: 0.66, basis: picked}
+      humerus: {least: 0.34, most: 0.34, basis: picked}
+      forearm: {least: 0.40, most: 0.40, basis: picked}
+      tibia: {least: 1.30, most: 1.30, basis: picked}
+      femur: {least: 0.55, most: 0.55, basis: picked}
+      toe: {least: 0.70, most: 0.70, basis: picked}
+      secondary: {least: 0.65, most: 0.65, basis: picked}
+      bill-depth: {least: 0.12, most: 0.12, basis: picked}
+      bill-width: {least: 0.10, most: 0.10, basis: picked}
+      stance: {least: 0.40, most: 0.40, basis: picked}
+      neck-bend: {least: 0.11, most: 0.11, basis: picked}
+      bill-tilt: {least: 0.15, most: 0.15, basis: picked}
+      cervicals: {least: 19, most: 19, basis: picked}
+      thoracics: {least: 5, most: 5, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 17, most: 17, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+      plumes: {least: 2, most: 2, basis: read, source: "https://en.wikipedia.org/wiki/Little_egret: two long plumes on the nape that form a crest (the breeding adult; the face is the non-courting colour)"}
+      plume-length: {least: 0.15, most: 0.15, basis: read, source: "https://en.wikipedia.org/wiki/Little_egret: about 150 mm (6 in)"}
+    plumage:
+      crown: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      face: {colour: [0.30, 0.36, 0.28], words: "greenish-grey bare skin surrounds the eye", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      neck: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      back: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      wing: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      primaries: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      secondaries: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      tail: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      belly: {colour: [0.80, 0.80, 0.78], words: "entirely white", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      plumes: {colour: [0.82, 0.82, 0.80], words: "two nape plumes, the breeding adult's", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      bill: {colour: [0.03, 0.03, 0.03], words: "Bill of adults all black", basis: picked, source: "https://avifauna.hkbws.org.hk/species/0170/023500"}
+      legs: {colour: [0.03, 0.03, 0.03], words: "black and the feet yellow", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      feet: {colour: [0.62, 0.52, 0.06], words: "black and the feet yellow", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+      eye: {colour: [0.70, 0.58, 0.08], words: "yellow iris", basis: picked, source: "https://en.wikipedia.org/wiki/Little_egret"}
+  grey-heron:
+    name: grey heron
+    binomial: Ardea cinerea
+    plan: wader
+    native:
+      place: >-
+        the Netherlands, the whole country; Groningen itself is on no page
+        read, so the place is picked within it
+      source: https://nl.wikipedia.org/wiki/Blauwe_reiger
+      quote: >-
+        De vogel komt in heel Nederland voor, ook in steden. ... De
+        broeddichtheid is nergens in Europa zo groot als in Nederland.
+    bill-shape: dagger
+    neck-in-flight: retracted
+    legs-in-flight: trailed
+    figures:
+      length: {least: 0.84, most: 1.02, basis: read, source: "https://en.wikipedia.org/wiki/Grey_heron: 84-102 cm (33-40 in) long"}
+      wingspan: {least: 1.55, most: 1.95, basis: read, source: "https://en.wikipedia.org/wiki/Grey_heron: a 155-195 cm (61-77 in) wingspan"}
+      bill: {least: 0.11, most: 0.13, basis: picked}
+      tarsus: {least: 0.14, most: 0.17, basis: picked}
+      head: {least: 0.09, most: 0.09, basis: picked}
+      neck: {least: 0.37, most: 0.37, basis: picked}
+      tail: {least: 0.15, most: 0.15, basis: picked}
+      depth: {least: 0.50, most: 0.50, basis: picked}
+      width: {least: 0.44, most: 0.44, basis: picked}
+      arm: {least: 0.66, most: 0.66, basis: picked}
+      humerus: {least: 0.35, most: 0.35, basis: picked}
+      forearm: {least: 0.40, most: 0.40, basis: picked}
+      tibia: {least: 1.30, most: 1.30, basis: picked}
+      femur: {least: 0.55, most: 0.55, basis: picked}
+      toe: {least: 0.70, most: 0.70, basis: picked}
+      secondary: {least: 0.65, most: 0.65, basis: picked}
+      bill-depth: {least: 0.14, most: 0.14, basis: picked}
+      bill-width: {least: 0.11, most: 0.11, basis: picked}
+      stance: {least: 0.40, most: 0.40, basis: picked}
+      neck-bend: {least: 0.11, most: 0.11, basis: picked}
+      bill-tilt: {least: 0.15, most: 0.15, basis: picked}
+      cervicals: {least: 19, most: 19, basis: picked}
+      thoracics: {least: 5, most: 5, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 18, most: 18, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+      plumes: {least: 2, most: 2, basis: picked}
+      plume-length: {least: 0.12, most: 0.12, basis: picked}
+    plumage:
+      crown: {colour: [0.72, 0.72, 0.70], words: "white head and neck with a broad black stripe over the eye", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      face: {colour: [0.62, 0.52, 0.12], words: "no page read; picked yellow", basis: picked, source: picked}
+      neck: {colour: [0.56, 0.57, 0.58], words: "white head and neck; bluish-black streaks on the front of the neck (averaged)", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      back: {colour: [0.45, 0.46, 0.48], words: "largely ashy-grey above", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      wing: {colour: [0.45, 0.46, 0.48], words: "largely ashy-grey above", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      primaries: {colour: [0.05, 0.05, 0.06], words: "de vleugeleinden zijn zwart", basis: picked, source: "https://nl.wikipedia.org/wiki/Blauwe_reiger"}
+      secondaries: {colour: [0.12, 0.12, 0.13], words: "no page read; picked dark grey", basis: picked, source: picked}
+      tail: {colour: [0.45, 0.46, 0.48], words: "largely ashy-grey above", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      belly: {colour: [0.48, 0.49, 0.50], words: "greyish-white underparts and some black on the flanks", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      plumes: {colour: [0.03, 0.03, 0.03], words: "ending in a slender, dangling crest", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      bill: {colour: [0.70, 0.55, 0.30], words: "pinkish-yellow", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      legs: {colour: [0.25, 0.18, 0.12], words: "brown and very long", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      feet: {colour: [0.25, 0.18, 0.12], words: "brown and very long", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+      eye: {colour: [0.70, 0.58, 0.08], words: "iris yellow", basis: picked, source: "https://en.wikipedia.org/wiki/Grey_heron"}
+  pacific-reef-heron:
+    name: Pacific reef heron
+    binomial: Egretta sacra
+    plan: wader
+    native:
+      place: Rarotonga, Cook Islands; the dark morph, the more common
+        one, which the page's Rarotonga photograph shows
+      source: https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=8443
+      quote: >-
+        Native, Resident Breeder; Marine, near-shore, nest on Land
+        (Rarotonga marked +++, which the page's key gives as common)
+    bill-shape: dagger
+    neck-in-flight: retracted
+    legs-in-flight: trailed
+    figures:
+      length: {least: 0.57, most: 0.66, basis: read, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron: 57 to 66 cm"}
+      wingspan: {least: 0.90, most: 1.10, basis: read, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron: between 90 and 110 cm"}
+      bill: {least: 0.08, most: 0.095, basis: picked}
+      tarsus: {least: 0.075, most: 0.09, basis: picked}
+      head: {least: 0.10, most: 0.10, basis: picked}
+      neck: {least: 0.33, most: 0.33, basis: picked}
+      tail: {least: 0.15, most: 0.15, basis: picked}
+      depth: {least: 0.55, most: 0.55, basis: picked}
+      width: {least: 0.46, most: 0.46, basis: picked}
+      arm: {least: 0.66, most: 0.66, basis: picked}
+      humerus: {least: 0.34, most: 0.34, basis: picked}
+      forearm: {least: 0.40, most: 0.40, basis: picked}
+      tibia: {least: 1.30, most: 1.30, basis: picked}
+      femur: {least: 0.60, most: 0.60, basis: picked}
+      toe: {least: 0.80, most: 0.80, basis: picked}
+      secondary: {least: 0.65, most: 0.65, basis: picked}
+      bill-depth: {least: 0.14, most: 0.14, basis: picked}
+      bill-width: {least: 0.11, most: 0.11, basis: picked}
+      stance: {least: 0.35, most: 0.35, basis: picked}
+      neck-bend: {least: 0.10, most: 0.10, basis: picked}
+      bill-tilt: {least: 0.20, most: 0.20, basis: picked}
+      cervicals: {least: 19, most: 19, basis: picked}
+      thoracics: {least: 5, most: 5, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 17, most: 17, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+    plumage:
+      crown: {colour: [0.10, 0.10, 0.11], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      face: {colour: [0.40, 0.42, 0.12], words: "greenish to yellow", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      neck: {colour: [0.10, 0.10, 0.11], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      back: {colour: [0.10, 0.10, 0.11], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      wing: {colour: [0.10, 0.10, 0.11], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      primaries: {colour: [0.08, 0.08, 0.09], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      secondaries: {colour: [0.08, 0.08, 0.09], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      tail: {colour: [0.10, 0.10, 0.11], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      belly: {colour: [0.10, 0.10, 0.11], words: "charcoal-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      bill: {colour: [0.25, 0.18, 0.10], words: "brown", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      legs: {colour: [0.40, 0.40, 0.25], words: "yellow-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      feet: {colour: [0.40, 0.40, 0.25], words: "yellow-grey", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+      eye: {colour: [0.72, 0.58, 0.10], words: "gold-yellow coloured eyes", basis: picked, source: "https://en.wikipedia.org/wiki/Pacific_reef_heron"}
+  yellow-legged-gull:
+    name: yellow-legged gull
+    binomial: Larus michahellis
+    plan: gull
+    native:
+      place: >-
+        the Portofino regional park, among its seabirds; the species
+        breeds along the Mediterranean coast
+      source: https://it.wikipedia.org/wiki/Parco_naturale_regionale_di_Portofino
+      quote: >-
+        Uccelli marini: gabbiano comune, gabbiano reale mediterraneo,
+        beccapesci, berta e sula. (And https://en.wikipedia.org/wiki/Yellow-legged_gull:
+        "In Europe, there are colonies all along the Mediterranean coast.")
+    bill-shape: hooked
+    neck-in-flight: extended
+    legs-in-flight: tucked
+    figures:
+      length: {least: 0.52, most: 0.68, basis: read, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull: from 52 to 68 cm in total length"}
+      wingspan: {least: 1.20, most: 1.55, basis: read, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull: from 120 to 155 cm in wingspan"}
+      bill: {least: 0.046, most: 0.060, basis: read, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull: the bill is 4.6 to 6 cm"}
+      tarsus: {least: 0.056, most: 0.075, basis: read, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull: the tarsus is 5.6 to 7.5 cm"}
+      head: {least: 0.15, most: 0.15, basis: picked}
+      neck: {least: 0.16, most: 0.16, basis: picked}
+      tail: {least: 0.25, most: 0.25, basis: picked}
+      depth: {least: 0.55, most: 0.55, basis: picked}
+      width: {least: 0.55, most: 0.55, basis: picked}
+      arm: {least: 0.60, most: 0.60, basis: picked}
+      humerus: {least: 0.30, most: 0.30, basis: picked}
+      forearm: {least: 0.36, most: 0.36, basis: picked}
+      tibia: {least: 1.40, most: 1.40, basis: picked}
+      femur: {least: 0.75, most: 0.75, basis: picked}
+      toe: {least: 0.90, most: 0.90, basis: picked}
+      secondary: {least: 0.50, most: 0.50, basis: picked}
+      bill-depth: {least: 0.30, most: 0.30, basis: picked}
+      bill-width: {least: 0.18, most: 0.18, basis: picked}
+      stance: {least: 0.15, most: 0.15, basis: picked}
+      neck-bend: {least: 0.05, most: 0.05, basis: picked}
+      bill-tilt: {least: 0.05, most: 0.05, basis: picked}
+      cervicals: {least: 14, most: 14, basis: picked}
+      thoracics: {least: 6, most: 6, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 18, most: 18, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+    plumage:
+      crown: {colour: [0.80, 0.80, 0.79], words: "much whiter-headed in autumn (the autumn adult)", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      face: {colour: [0.80, 0.80, 0.79], words: "much whiter-headed in autumn (the autumn adult)", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      neck: {colour: [0.80, 0.80, 0.79], words: "no page read; picked white", basis: picked, source: picked}
+      back: {colour: [0.36, 0.38, 0.40], words: "grey back slightly darker than a herring gull's", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      wing: {colour: [0.36, 0.38, 0.40], words: "grey back slightly darker than a herring gull's", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      primaries: {colour: [0.03, 0.03, 0.03], words: "more extensively black wing tips with few white spots", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      secondaries: {colour: [0.36, 0.38, 0.40], words: "no page read; picked as the back", basis: picked, source: picked}
+      tail: {colour: [0.80, 0.80, 0.79], words: "no page read; picked white", basis: picked, source: picked}
+      belly: {colour: [0.80, 0.80, 0.79], words: "no page read; picked white", basis: picked, source: picked}
+      bill: {colour: [0.72, 0.58, 0.08], words: "a red spot on the bill; the bill's own yellow not read", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      legs: {colour: [0.72, 0.60, 0.08], words: "yellow legs", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      feet: {colour: [0.72, 0.60, 0.08], words: "yellow legs", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+      eye: {colour: [0.55, 0.06, 0.04], words: "a red ring around the eye (the eye drawn as the ring's red; the iris not on the page)", basis: picked, source: "https://en.wikipedia.org/wiki/Yellow-legged_gull"}
+  white-tern:
+    name: white tern
+    binomial: Gygis alba
+    plan: gull
+    native:
+      place: Rarotonga, Cook Islands
+      source: https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=8500
+      quote: >-
+        Native, Resident Breeder; Marine, near-shore - pelagic, nest on
+        Land (Rarotonga marked ++++, which the page's key gives as very
+        common)
+    # a dagger: the slight upward curve one page gives is not shaped
+    bill-shape: dagger
+    neck-in-flight: extended
+    legs-in-flight: tucked
+    figures:
+      length: {least: 0.23, most: 0.30, basis: read, source: "https://en.wikipedia.org/wiki/Gygis_alba: 23-30 cm (9.1-11.8 in) long"}
+      wingspan: {least: 0.76, most: 0.87, basis: read, source: "https://en.wikipedia.org/wiki/Gygis_alba: a wingspan of 76-87 cm (30-34 in)"}
+      bill: {least: 0.035, most: 0.040, basis: picked}
+      tarsus: {least: 0.012, most: 0.015, basis: picked}
+      head: {least: 0.16, most: 0.16, basis: picked}
+      neck: {least: 0.14, most: 0.14, basis: picked}
+      tail: {least: 0.30, most: 0.30, basis: picked}
+      depth: {least: 0.55, most: 0.55, basis: picked}
+      width: {least: 0.55, most: 0.55, basis: picked}
+      arm: {least: 0.60, most: 0.60, basis: picked}
+      humerus: {least: 0.28, most: 0.28, basis: picked}
+      forearm: {least: 0.34, most: 0.34, basis: picked}
+      tibia: {least: 1.60, most: 1.60, basis: picked}
+      femur: {least: 1.00, most: 1.00, basis: picked}
+      toe: {least: 1.60, most: 1.60, basis: picked}
+      secondary: {least: 0.45, most: 0.45, basis: picked}
+      bill-depth: {least: 0.20, most: 0.20, basis: picked}
+      bill-width: {least: 0.14, most: 0.14, basis: picked}
+      stance: {least: 0.10, most: 0.10, basis: picked}
+      neck-bend: {least: 0.05, most: 0.05, basis: picked}
+      bill-tilt: {least: 0.0, most: 0.0, basis: picked}
+      cervicals: {least: 13, most: 13, basis: picked}
+      thoracics: {least: 6, most: 6, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 14, most: 14, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+    plumage:
+      crown: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      face: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      neck: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      back: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      wing: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      primaries: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      secondaries: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      tail: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      belly: {colour: [0.82, 0.82, 0.81], words: "pure white plumage", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      bill: {colour: [0.03, 0.03, 0.05], words: "a long black to bluish-black bill", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      legs: {colour: [0.10, 0.11, 0.13], words: "dark grey", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+      feet: {colour: [0.60, 0.52, 0.12], words: "with yellow webs on the feet (the toes drawn the webs' colour)", basis: picked, source: "https://nzbirdsonline.org.nz/species/white-tern"}
+      eye: {colour: [0.02, 0.02, 0.02], words: "a narrow ring of black feathers round the eye", basis: picked, source: "https://en.wikipedia.org/wiki/Gygis_alba"}
+  great-frigatebird:
+    name: great frigatebird
+    binomial: Fregata minor
+    plan: seabird
+    native:
+      place: >-
+        Kauai's north shore and uplands; the page lists the Pihea Trail
+        among its hotspots
+      source: https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/
+      quote: >-
+        Often soaring high in the sky, the ʻiwa is commonly seen throughout
+        the pacific (hotspots listed: Kīlauea Point National Wildlife
+        Refuge, Māhā'ulepū Heritage Trail, Pihea Trail)
+    bill-shape: hooked
+    neck-in-flight: extended
+    legs-in-flight: tucked
+    # the deep fork: each pair longer outward; picked, from how the bird
+    # is seen soaring
+    tail-shape: {lengths: [1, 1.15, 1.35, 1.6, 1.9, 2.2], basis: picked}
+    figures:
+      length: {least: 0.85, most: 1.05, basis: read, source: "https://en.wikipedia.org/wiki/Great_frigatebird: 85 to 105 cm (33 to 41 in) in length"}
+      wingspan: {least: 2.05, most: 2.30, basis: read, source: "https://en.wikipedia.org/wiki/Great_frigatebird: 205-230 cm (81-91 in)"}
+      bill: {least: 0.10, most: 0.12, basis: picked}
+      tarsus: {least: 0.022, most: 0.026, basis: picked}
+      head: {least: 0.12, most: 0.12, basis: picked}
+      neck: {least: 0.12, most: 0.12, basis: picked}
+      tail: {least: 0.20, most: 0.20, basis: picked}
+      depth: {least: 0.50, most: 0.50, basis: picked}
+      width: {least: 0.50, most: 0.50, basis: picked}
+      arm: {least: 0.72, most: 0.72, basis: picked}
+      humerus: {least: 0.27, most: 0.27, basis: picked}
+      forearm: {least: 0.30, most: 0.30, basis: picked}
+      tibia: {least: 1.80, most: 1.80, basis: picked}
+      femur: {least: 1.20, most: 1.20, basis: picked}
+      toe: {least: 1.60, most: 1.60, basis: picked}
+      secondary: {least: 0.35, most: 0.35, basis: picked}
+      bill-depth: {least: 0.14, most: 0.14, basis: picked}
+      bill-width: {least: 0.12, most: 0.12, basis: picked}
+      stance: {least: 0.10, most: 0.10, basis: picked}
+      neck-bend: {least: 0.05, most: 0.05, basis: picked}
+      bill-tilt: {least: 0.0, most: 0.0, basis: picked}
+      cervicals: {least: 14, most: 14, basis: picked}
+      thoracics: {least: 6, most: 6, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 24, most: 24, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+      web: {least: 0.35, most: 0.35, basis: picked}
+    plumage:
+      crown: {colour: [0.03, 0.03, 0.03], words: "their large black body (the male; the female's white breast not drawn)", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      face: {colour: [0.03, 0.03, 0.03], words: "their large black body", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      neck: {colour: [0.03, 0.03, 0.03], words: "their large black body (the male's red throat pouch not shaped)", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      back: {colour: [0.03, 0.03, 0.03], words: "their large black body", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      wing: {colour: [0.03, 0.03, 0.03], words: "their large black body", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      primaries: {colour: [0.03, 0.03, 0.03], words: "their large black body", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      secondaries: {colour: [0.03, 0.03, 0.03], words: "their large black body", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      tail: {colour: [0.03, 0.03, 0.03], words: "their large black body", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      belly: {colour: [0.03, 0.03, 0.03], words: "their large black body", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/great-frigatebird/"}
+      bill: {colour: [0.30, 0.31, 0.33], words: "no page read; picked grey", basis: picked, source: picked}
+      legs: {colour: [0.05, 0.05, 0.05], words: "no page read; picked dark", basis: picked, source: picked}
+      feet: {colour: [0.05, 0.05, 0.05], words: "no page read; picked dark", basis: picked, source: picked}
+      eye: {colour: [0.03, 0.02, 0.02], words: "no page read; picked dark", basis: picked, source: picked}
+  white-tailed-tropicbird:
+    name: white-tailed tropicbird
+    binomial: Phaethon lepturus
+    plan: seabird
+    native:
+      place: >-
+        Kauai's cliffs; the page lists Kīlauea Point, Kawaiʻele and the
+        Pihea Trail among its hotspots
+      source: https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/
+      quote: >-
+        Feeding on fish and squid throughout the day, they nest and roost
+        in the security of cliff faces and rock crevices.
+    bill-shape: dagger
+    neck-in-flight: extended
+    legs-in-flight: tucked
+    # the two long streamers are the middle pair; the rest picked, a
+    # little shorter outward
+    tail-shape: {lengths: [3.2, 1, 0.95, 0.9, 0.85, 0.8], basis: picked}
+    figures:
+      length: {least: 0.71, most: 0.80, basis: read, source: "https://en.wikipedia.org/wiki/White-tailed_tropicbird: 71-80 cm (28-31 in) long, the streamers included"}
+      wingspan: {least: 0.89, most: 0.96, basis: read, source: "https://en.wikipedia.org/wiki/White-tailed_tropicbird: 89-96 cm (35-38 in)"}
+      bill: {least: 0.045, most: 0.050, basis: picked}
+      tarsus: {least: 0.020, most: 0.024, basis: picked}
+      head: {least: 0.12, most: 0.12, basis: picked}
+      neck: {least: 0.08, most: 0.08, basis: picked}
+      tail: {least: 0.16, most: 0.16, basis: picked}
+      depth: {least: 0.55, most: 0.55, basis: picked}
+      width: {least: 0.55, most: 0.55, basis: picked}
+      arm: {least: 0.62, most: 0.62, basis: picked}
+      humerus: {least: 0.30, most: 0.30, basis: picked}
+      forearm: {least: 0.36, most: 0.36, basis: picked}
+      tibia: {least: 1.60, most: 1.60, basis: picked}
+      femur: {least: 1.10, most: 1.10, basis: picked}
+      toe: {least: 1.50, most: 1.50, basis: picked}
+      secondary: {least: 0.45, most: 0.45, basis: picked}
+      bill-depth: {least: 0.25, most: 0.25, basis: picked}
+      bill-width: {least: 0.16, most: 0.16, basis: picked}
+      stance: {least: 0.10, most: 0.10, basis: picked}
+      neck-bend: {least: 0.05, most: 0.05, basis: picked}
+      bill-tilt: {least: 0.0, most: 0.0, basis: picked}
+      cervicals: {least: 13, most: 13, basis: picked}
+      thoracics: {least: 6, most: 6, basis: picked}
+      caudals: {least: 6, most: 6, basis: picked}
+      primaries: {least: 10, most: 10, basis: picked}
+      secondaries: {least: 16, most: 16, basis: picked}
+      rectrices: {least: 12, most: 12, basis: picked}
+      web: {least: 0.90, most: 0.90, basis: picked}
+    plumage:
+      crown: {colour: [0.84, 0.84, 0.83], words: "brilliant white", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      face: {colour: [0.03, 0.03, 0.03], words: "black streaks around its eyes", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      neck: {colour: [0.84, 0.84, 0.83], words: "brilliant white", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      back: {colour: [0.84, 0.84, 0.83], words: "brilliant white", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      wing: {colour: [0.84, 0.84, 0.83], words: "brilliant white (the black band across the inner wing not drawn)", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      primaries: {colour: [0.04, 0.04, 0.04], words: "black streaks ... along wing edges", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      secondaries: {colour: [0.84, 0.84, 0.83], words: "brilliant white", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      tail: {colour: [0.84, 0.84, 0.83], words: "The long tail feathers", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      belly: {colour: [0.84, 0.84, 0.83], words: "brilliant white", basis: picked, source: "https://hawaiibirdingtrails.hawaii.gov/bird/white-tailed-tropicbird/"}
+      bill: {colour: [0.75, 0.40, 0.08], words: "orange-yellow to orange-red", basis: picked, source: "https://en.wikipedia.org/wiki/White-tailed_tropicbird"}
+      legs: {colour: [0.06, 0.06, 0.06], words: "no page read; picked dark", basis: picked, source: picked}
+      feet: {colour: [0.06, 0.06, 0.06], words: "no page read; picked dark", basis: picked, source: picked}
+      eye: {colour: [0.02, 0.02, 0.02], words: "no page read; picked dark", basis: picked, source: picked}

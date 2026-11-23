@@ -254,7 +254,7 @@ func TestEachKindRefusesTheOthersNames(t *testing.T) {
 	}
 }
 
-// The weather's cache is the one hillside keeps: the weather folder
+// The weather's cache is the one the session keeps: the weather folder
 // under SLAYER_CACHE.
 func TestTheWeathersCacheIsHillsides(t *testing.T) {
 	dir := t.TempDir()

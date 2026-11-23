@@ -3,8 +3,8 @@
 // height, by the sun's angle from the local vertical, and by the way an
 // observer looks, for a planet lit by the sun's parallel rays.
 //
-// It is the core of slayer's computed sky (doc/sky-from-the-air.md). A
-// caller gives the air as spherical shells, each uniform within, and
+// It is the core of slayer's computed sky
+// (doc/model/sky/sky-from-the-air.md). A caller gives the air as spherical shells, each uniform within, and
 // the ground as a Lambertian reflector. Solve follows photons through
 // them, scattering each as many times as the air asks.
 //
@@ -78,7 +78,8 @@ type Grid struct {
 // perpendicular to the sun's rays, so in square metres. Escaped, Air,
 // Ground and Capped add to Launched within Russian roulette's noise.
 type Budget struct {
-	// Launched is the light that crossed the top sphere's disc.
+	// Launched is the light that crossed the top sphere's disc, or the
+	// band of it a walk for some suns starts on.
 	Launched float64
 	// Escaped is what left the top of the air.
 	Escaped float64
@@ -92,7 +93,8 @@ type Budget struct {
 // Solve walks photons through the column and keeps the light that
 // crosses the grid's heights, with where all the light went. The same
 // seed and number of workers give the same field and budget: each
-// worker draws from its own generator, from the seed and its index.
+// photon draws from its own generator, from the seed and its number,
+// so one seed walks each photon alike at every wavelength.
 //
 // Each worker walks a fixed share of the photons, and their tallies are
 // added in the workers' order. Photons is how many cross the disc of
@@ -104,19 +106,47 @@ func Solve(column Column, grid Grid, photons int, seed uint64,
 	return field, spent, err
 }
 
+// SolveFor is Solve for an observer at the ground under a sun whose
+// zenith is in a span: the photons start only on the band of the disc
+// whose light can reach that observer, so the bins of those zeniths
+// hold as many crossings as a walk of the whole planet with so many
+// more photons as the disc is to the band.
+//
+// The bins of other zeniths hold only part of their light, and are not
+// to be read. Budget is of the band.
+func SolveFor(column Column, grid Grid, suns Suns, photons int,
+	seed uint64, workers int) (*Field, Budget, error) {
+	field, spent, _, err := solveFor(column, grid, suns, photons, seed,
+		workers, mostEvents)
+	return field, spent, err
+}
+
 // solve is Solve with the cap on events per photon given, and with what
 // the walk counted besides power.
 func solve(column Column, grid Grid, photons int, seed uint64,
 	workers, most int) (*Field, Budget, census, error) {
+	return solveFor(column, grid, everySun, photons, seed, workers, most)
+}
+
+// solveFor is SolveFor with the cap on events per photon given, and
+// with what the walk counted besides power.
+func solveFor(column Column, grid Grid, suns Suns, photons int,
+	seed uint64, workers, most int) (*Field, Budget, census, error) {
 	if err := check(column, grid, photons, workers); err != nil {
 		return nil, Budget{}, census{}, err
 	}
+	if err := checkSuns(suns); err != nil {
+		return nil, Budget{}, census{}, err
+	}
 	made := layered(column, grid.Heights)
+	made.band = bandOf(&made, suns)
 	walkers := make([]*walker, workers)
 	var group sync.WaitGroup
+	first := uint64(none)
 	for index := range walkers {
-		walkers[index] = newWalker(&made, grid, seed, index, most)
+		walkers[index] = newWalker(&made, grid, seed, first, most)
 		share := shareOf(photons, workers, index)
+		first += uint64(share)
 		group.Go(func() { walkers[index].run(share) })
 	}
 	group.Wait()

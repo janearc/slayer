@@ -1,0 +1,42 @@
+# the tower of retail-tower-close.yaml from fourteen metres, at eye height,
+# looking up at the foot of its south wall: the shops, and what the signs
+# hang over them. see that file for what is picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: retail-tower-foot
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 70
+    exposure: 8
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    foot:
+      title: "fourteen metres from the foot of a tower with shops and signs"
+      location:
+        at: [-4, -40, 1.7]
+      orientation:
+        look_at: [-4, -18, 6]
+  recipes:
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, signs: true, retail: true, storeys: 16, width: {value: 36, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      tower: {recipe: concrete, seed: 21, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      pavement:
+        colour: {srgb_linear: [0.035, 0.035, 0.04]}
+        source: eye
+    boxes:
+      ground:
+        material: pavement
+        middle: [0, 0, -1.01]
+        size: [300, 300, 2]
+        source: eye

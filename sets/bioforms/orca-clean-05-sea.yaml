@@ -1,0 +1,72 @@
+# The adult cow orca of orca-clean-05 spy-hopping in an open sea: the
+# body upright, turned by the joints of its skeleton, the head and eye
+# clear of the water, the flippers turned out down to the surface.
+#
+# the frame. places are metres, x east, y north, z up, mean sea at z=0.
+# the animal stands at the origin 0.2 m down (chosen), which puts the
+# eye about 0.95 m and the snout about 1.9 m above the water, the eye
+# patch clear of it, the flippers' roots about 0.4 m above it and their
+# tips near it (worked by hand from the pose's turns). the camera stands
+# 12 m north-west of it, 1.6 m up, where the chin and the eye patch
+# face it (found by four small draws from north, east, south and west).
+#
+# the sea. one static instant of the wave cascades, 513 samples over
+# 256 m (half a metre apart), a wind of 5 m/s, a fetch of 200 km, deep
+# water, seed 11, time 0. every input is chosen; no shelf source.
+#
+# the sun is typed as azimuth and altitude, chosen, as every set's is
+# while nothing reads a time of day.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: orca spy-hop at sea
+  seed: 17
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 140, altitude: 28}
+  set:
+    things:
+      orca:
+        kind: orca-clean-05-spy-hop
+        seed: 17
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: -0.2, unit: m}
+  film:
+    width: 1600
+    height: 1000
+    rays: 4
+    wide: 39
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+        source: "water's refractive index; colour by eye, a stand-in"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 256, unit: m}
+      samples: 513
+      sea:
+        wind: {value: 5, unit: m/s}
+        fetch: {value: 200000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 1.5708, unit: rad}
+      seed: 11
+      time: {value: 0, unit: s}
+      source: "chosen: a 5 m/s wind, no shelf source"
+  cameras:
+    near:
+      title: "twelve metres off, low, on the head"
+      location: {at: [-7.6, 8.5, 1.6]}
+      orientation: {look_at: [0.9, 0, 0.9]}

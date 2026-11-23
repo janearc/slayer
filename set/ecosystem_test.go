@@ -21,7 +21,8 @@ func ecosystemFixture(t *testing.T) string {
 }
 
 func TestEcosystemRecipeResolvesUnitsOverridesAndReferences(t *testing.T) {
-	made, err := set.Read("ecosystem.yaml", []byte(ecosystemFixture(t)))
+	source := ecosystemFixture(t)
+	made, err := set.Read("ecosystem.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

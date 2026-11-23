@@ -8,12 +8,24 @@ import (
 	"testing"
 )
 
-// examples are the example jobs in doc/examples/jobs/, each with its
-// scene's form and whether it is a still.
-var examples = map[string]struct {
+// example is what an example job is held to: its scene's form and whether
+// it is a still.
+type example struct {
 	form  string
 	still bool
-}{
+}
+
+// crowdExamples are the three restir crowd jobs, which stand in jobs/ with
+// the working render jobs and not in doc/examples/jobs/.
+var crowdExamples = map[string]example{
+	"restir-crowd-1k.yaml":   {formSet, true},
+	"restir-crowd-10k.yaml":  {formSet, true},
+	"restir-crowd-100k.yaml": {formSet, true},
+}
+
+// examples are the example jobs in doc/examples/jobs/, each with its
+// scene's form and whether it is a still.
+var examples = map[string]example{
 	"first-picture.yaml":              {formSmoke, true},
 	"first-film.yaml":                 {formSmoke, false},
 	"smoke-still.yaml":                {formSmoke, true},
@@ -26,8 +38,9 @@ var examples = map[string]struct {
 	"macrostructures.yaml":            {formSet, true},
 }
 
-// TestTheExampleJobsRead holds every example in doc/examples/jobs/ to a
-// job that is read, of its form, with every file it reads there to read.
+// TestTheExampleJobsRead holds every example in doc/examples/jobs/, and
+// the crowd jobs in jobs/, to a job that is read, of its form, with every
+// file it reads there to read.
 func TestTheExampleJobsRead(t *testing.T) {
 	paths, err := filepath.Glob(
 		filepath.Join("..", "doc", "examples", "jobs", "*.yaml"))
@@ -35,8 +48,14 @@ func TestTheExampleJobsRead(t *testing.T) {
 		t.Fatalf("doc/examples/jobs/ holds %d examples, want %d: %v",
 			len(paths), len(examples), err)
 	}
+	for name := range crowdExamples {
+		paths = append(paths, filepath.Join("..", "jobs", name))
+	}
 	for _, path := range paths {
 		want, listed := examples[filepath.Base(path)]
+		if !listed {
+			want, listed = crowdExamples[filepath.Base(path)]
+		}
 		job, err := Read(path)
 		if !listed || err != nil {
 			t.Errorf("%s: listed %v, read %v", path, listed, err)

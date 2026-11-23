@@ -43,7 +43,8 @@ func beamSource(t *testing.T, schema string) string {
 func TestBeamReadsInLegacyAndBothSchemaVersions(t *testing.T) {
 	for _, schema := range []string{"", set.EcosystemSchema, beamSchemaV2} {
 		t.Run(schema, func(t *testing.T) {
-			made, err := set.Read("beam.yaml", []byte(beamSource(t, schema)))
+			source := beamSource(t, schema)
+			made, err := set.Read("beam.yaml", []byte(source))
 			if err != nil {
 				t.Fatal(err)
 			}

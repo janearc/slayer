@@ -1,0 +1,8 @@
+name,facing,lit,viewed,slopes
+facing-nought,0,0.8,0.8,0.03884
+lit-nought,1,0,0.8,0.03884
+viewed-nought,1,0.8,0,0.03884
+slopes-nought,1,0.8,0.8,0
+slopes-negative,1,0.8,0.8,-1
+slopes-not-a-number,1,0.8,0.8,NaN
+facing-not-a-number,NaN,0.8,0.8,0.03884

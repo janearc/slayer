@@ -254,7 +254,7 @@ func hot(file string, out, errOut io.Writer) int {
 	return 0
 }
 
-// drawTimeout is how long one package's draw tier may run: hillside's
+// drawTimeout is how long one package's draw tier may run: the session's
 // drawing tests alone take 7 to 25 minutes on this laptop
 const drawTimeout = "60m"
 

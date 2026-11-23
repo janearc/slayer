@@ -54,7 +54,8 @@ func alfaImmersed(size alfaSizes, height float64) (float64, float64) {
 	step := size.hullEnd() / alfaSlices
 	for slice := range alfaSlices {
 		radius := size.hullRadius((float64(slice) + 0.5) * step)
-		over := math.Max(-radius, math.Min(radius, height-size.radius()))
+		reach := height - size.radius()
+		over := math.Max(-radius, math.Min(radius, reach))
 		// the half chord as a product of differences, which is nought,
 		// not a fused multiply's residue below it, at the circle's edge
 		chord := math.Sqrt((radius - over) * (radius + over))
@@ -88,7 +89,8 @@ func TestTheAlfaFileHoldsItsCitedNumbers(t *testing.T) {
 // the stern at plus half, as wide as the beam, the keel at nought and
 // the top at the beam's height.
 func TestTheAlfaHullIsAsLongAndAsWideAsCited(t *testing.T) {
-	box := partBounds(append(alfaPartsOf(alfaHull), alfaPartsOf(alfaBoss)...))
+	hullAndBoss := append(alfaPartsOf(alfaHull), alfaPartsOf(alfaBoss)...)
+	box := partBounds(hullAndBoss)
 	half := alfaLengthMeasured / 2
 	if math.Abs(box.Min.Z+half) > alfaNear ||
 		math.Abs(box.Max.Z-half) > alfaNear ||
@@ -460,8 +462,9 @@ func TestTheAlfaHasACruciformStern(t *testing.T) {
 		math.Abs(fins.Max.Z+size.Length/2-size.trailing()) > alfaNear {
 		t.Errorf("the fins reach %+v", fins)
 	}
-	flaps := partBounds(append(alfaPartsOf(alfaRudder),
-		alfaPartsOf(alfaFlap)...))
+	rudderAndFlap := append(alfaPartsOf(alfaRudder),
+		alfaPartsOf(alfaFlap)...)
+	flaps := partBounds(rudderAndFlap)
 	if !(flaps.Min.Z > fins.Max.Z) {
 		t.Errorf("the rudders start at %v, ahead of the fins' end, %v",
 			flaps.Min.Z, fins.Max.Z)
@@ -533,8 +536,9 @@ func TestTheAlfaHasOnePropeller(t *testing.T) {
 		t.Fatalf("the propeller has %d blades, want %d", len(blades),
 			size.Propeller.Blades)
 	}
-	flaps := partBounds(append(alfaPartsOf(alfaRudder),
-		alfaPartsOf(alfaFlap)...))
+	rudderAndFlap := append(alfaPartsOf(alfaRudder),
+		alfaPartsOf(alfaFlap)...)
+	flaps := partBounds(rudderAndFlap)
 	for index, each := range blades {
 		out := 0.0
 		for _, triangle := range each.skin() {
@@ -759,7 +763,8 @@ func TestAnAlfaThatCannotBeBuiltIsRefused(t *testing.T) {
 		if !strings.Contains(whole, each.was) {
 			t.Fatalf("%s: the file has no %q to change", name, each.was)
 		}
-		_, err := readAlfa([]byte(strings.Replace(whole, each.was, each.is, 1)))
+		edited := strings.Replace(whole, each.was, each.is, 1)
+		_, err := readAlfa([]byte(edited))
 		if err == nil {
 			t.Errorf("%s: read without refusal", name)
 			continue

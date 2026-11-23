@@ -78,9 +78,9 @@ func TestTheLandedLarsonStandsOnItsGear(t *testing.T) {
 	for _, each := range lights {
 		if !(each.At().Y > 0) {
 			t.Errorf("the light %q is at %v, not above the ground",
-				each.Name(), each.At())
+				each.name, each.At())
 		}
-		if each.Name() == bellyName && !(each.At().Y < held) {
+		if each.name == bellyName && !(each.At().Y < held) {
 			t.Errorf("the belly light is at %v, not under the hull at %v",
 				each.At().Y, held)
 		}
@@ -199,7 +199,8 @@ func TestARailRunToTheTopWouldPokeThroughTheHull(t *testing.T) {
 	slope := (rail.High.Y - rail.Low.Y) / (rail.Low.Z - rail.High.Z)
 	top := -float64(gear.Stairs.Steps-1) * gear.Stairs.Going
 	high := maths.V(rail.Offset, rail.Low.Y+slope*(rail.Low.Z-top), top)
-	at := high.Add(maths.V(0, gear.ground(size), gear.Foot))
+	grounded := gear.ground(size)
+	at := high.Add(maths.V(0, grounded, gear.Foot))
 	if !(at.Y+rail.Radius > hullAbove(size, at)) {
 		t.Errorf("a rail run to the top reaches %v, under a hull at %v: "+
 			"the check above could not fail", at.Y+rail.Radius,

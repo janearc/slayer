@@ -52,9 +52,9 @@ func (made Cut) at(index int) time.Duration {
 	return time.Duration(index) * time.Second / time.Duration(made.rate)
 }
 
-// Picture is frame index: its shot's window at its place, faded, and the
+// picture is frame index: its shot's window at its place, faded, and the
 // title over it while it shows.
-func (made Cut) Picture(index int) (*image.RGBA, error) {
+func (made Cut) picture(index int) (*image.RGBA, error) {
 	when := made.at(index)
 	laid := made.spans()
 	current := laid[len(laid)-one]

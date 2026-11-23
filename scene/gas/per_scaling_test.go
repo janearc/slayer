@@ -16,7 +16,7 @@ func scaled() Gas {
 		Phase:   0.5,
 		Sources: []string{"a test"},
 		Ranges: map[radiation.Range]Optics{
-			thing.Visible:        {Absorb: 0.25, Scatter: 0.5},
+			thing.Visible():      {Absorb: 0.25, Scatter: 0.5},
 			radiation.Infrared(): {Absorb: 1, Scatter: 2},
 		},
 		Visible: func(nm float64) (absorb, scatter float64) {
@@ -31,8 +31,8 @@ func scaled() Gas {
 // line's strength, and not a quarter of any. what the gas is, its name,
 // asymmetry and sources, is kept.
 func TestPerScalesEveryNumberByTheUnit(t *testing.T) {
-	g := scaled().Per(4)
-	if got := g.Ranges[thing.Visible]; got != (Optics{Absorb: 1, Scatter: 2}) {
+	g := scaled().per(4)
+	if got := g.Ranges[thing.Visible()]; got != (Optics{Absorb: 1, Scatter: 2}) {
 		t.Errorf("the visible range is %v, want 1 and 2", got)
 	}
 	if got := g.Ranges[radiation.Infrared()]; got != (Optics{Absorb: 4, Scatter: 8}) {
@@ -51,7 +51,7 @@ func TestPerScalesEveryNumberByTheUnit(t *testing.T) {
 		t.Errorf("per lost what the gas is: %q, %v, %v", g.Name, g.Phase, g.Sources)
 	}
 	// and the optics read the scaled rule and the scaled table
-	if a := g.Absorb(maths.Band{Nanometres: 500}); a != 2 {
+	if a, _ := g.optics(maths.Band{Nanometres: 500}); a != 2 {
 		t.Errorf("the scaled gas absorbs %v at 500 nm, want 2", a)
 	}
 	if s := g.Scatter(maths.Band{Nanometres: 5000}); s != 8 {
@@ -63,7 +63,7 @@ func TestPerScalesEveryNumberByTheUnit(t *testing.T) {
 // lines are not the scaled gas's, and are not shared with it.
 func TestPerLeavesTheGasItCameFrom(t *testing.T) {
 	was := scaled()
-	was.Per(4)
+	was.per(4)
 	if got := was.Ranges[radiation.Infrared()]; got != (Optics{Absorb: 1, Scatter: 2}) {
 		t.Errorf("the infrared range became %v", got)
 	}
@@ -80,18 +80,18 @@ func TestPerLeavesTheGasItCameFrom(t *testing.T) {
 // as a map.
 func TestPerAddsNeitherARuleNorLines(t *testing.T) {
 	bare := Gas{Ranges: map[radiation.Range]Optics{
-		thing.Visible: {Absorb: 0.25}}}
-	got := bare.Per(4)
+		thing.Visible(): {Absorb: 0.25}}}
+	got := bare.per(4)
 	if got.Visible != nil {
 		t.Error("per gave a gas with no rule a rule")
 	}
 	if got.Lines != nil {
 		t.Errorf("per gave a gas with no lines the lines %v", got.Lines)
 	}
-	if got.Absorb(maths.Band{Nanometres: 550}) != 1 {
+	if absorbs, _ := got.optics(maths.Band{Nanometres: 550}); absorbs != 1 {
 		t.Error("the table was not scaled")
 	}
-	empty := Gas{Lines: map[float64]float64{}}.Per(4)
+	empty := Gas{Lines: map[float64]float64{}}.per(4)
 	if empty.Lines == nil || len(empty.Lines) != 0 {
 		t.Errorf("a gas of no lines became %v", empty.Lines)
 	}

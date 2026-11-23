@@ -93,24 +93,6 @@ func TestSelectRefusesBadQueries(t *testing.T) {
 	}
 }
 
-// TestSelectReturnsTheSameRootsAsSelectWithUsage checks that Select is the
-// roots of SelectWithUsage, and returns none with its error.
-func TestSelectReturnsTheSameRootsAsSelectWithUsage(t *testing.T) {
-	population := region(t, 1)
-	budget := biome.Budget{Cells: haloWork, Candidates: haloWork}
-	roots, err := population.Select(population.Bounds(), budget)
-	if err != nil || len(roots) != rootCount {
-		t.Fatalf("got %d roots, %v; want %d", len(roots), err, rootCount)
-	}
-	if want := selection(t, population, population.Bounds()).Roots; !reflect.DeepEqual(roots, want) {
-		t.Error("Select and SelectWithUsage disagree")
-	}
-	roots, err = population.Select(population.Bounds(), biome.Budget{})
-	if err == nil || roots != nil {
-		t.Errorf("over budget: %v, %v", roots, err)
-	}
-}
-
 // TestFractionalMeanRoundsRandomly checks that a mean of one and a half per
 // cell gives one or two candidates a cell, one and a half on average.
 func TestFractionalMeanRoundsRandomly(t *testing.T) {

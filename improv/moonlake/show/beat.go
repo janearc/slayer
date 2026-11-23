@@ -53,15 +53,9 @@ func (of Beat) InBar() int {
 	return of.index%of.meter + 1
 }
 
-// Downbeat is whether the beat is its bar's first.
-func (of Beat) Downbeat() bool { return of.InBar() == 1 }
-
 // Measured is whether the beat was measured from the drums; false for
 // one carried through a break at the median spacing.
 func (of Beat) Measured() bool { return of.measured }
 
 // Since is how long ago the beat struck, in seconds.
 func (of Beat) Since() float64 { return of.since }
-
-// Struck is when the beat struck, in seconds.
-func (of Beat) Struck() float64 { return of.struck }

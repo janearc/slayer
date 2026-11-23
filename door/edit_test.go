@@ -87,9 +87,9 @@ func TestWindowOfReadsTmux(t *testing.T) {
 func editingIn(t *testing.T, directory string, machine programs,
 	variables ...string) editing {
 	t.Helper()
+	cache := filepath.Join(directory, "cache")
 	env := envIn(t, context.Background(), directory,
-		append([]string{"SLAYER_CACHE",
-			filepath.Join(directory, "cache")}, variables...)...)
+		append([]string{"SLAYER_CACHE", cache}, variables...)...)
 	return editing{env: env, machine: machine,
 		watcher: watching{env: env}}
 }
@@ -199,7 +199,8 @@ func TestTheTemplateIsAJob(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	path := written(t, directory, "new.yaml", string(template(schema)))
+	text := template(schema)
+	path := written(t, directory, "new.yaml", string(text))
 	if _, err := job.Read(path); err != nil {
 		t.Fatalf("the template does not read: %v", err)
 	}

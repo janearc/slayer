@@ -27,18 +27,18 @@ import (
 // asks BeatsAt, so the notes, the playhead, the roll's grid and a cut
 // sheet's seconds agree.
 
-// Marks are the loudness marks and the gain each gives. Picked by the
+// marks are the loudness marks and the gain each gives. Picked by the
 // writer of the studio, 2026-11-12, as steps in decibels around mf: pp is
 // twelve down, p eight, mp four, f two up and ff four.
-var Marks = map[string]float64{
+var marks = map[string]float64{
 	"pp": 0.25, "p": 0.4, "mp": 0.63, "mf": 1, "f": 1.26, "ff": 1.58,
 }
 
 // markNames is the marks from quiet to loud, for an error.
 var markNames = []string{"pp", "p", "mp", "mf", "f", "ff"}
 
-// TempoChange is a new tempo from the start of a bar, counted from one.
-type TempoChange struct {
+// tempoChange is a new tempo from the start of a bar, counted from one.
+type tempoChange struct {
 	Bar   int     `json:"bar"`
 	Tempo float64 `json:"tempo"`
 }
@@ -99,7 +99,7 @@ func (s *Score) checkTempos() []error {
 // the end of a looping piece it goes round again.
 func (s *Score) SecondsAt(beats float64) float64 {
 	if len(s.spans) == 0 {
-		return beats * s.BeatSeconds()
+		return beats * s.beatSeconds()
 	}
 	whole := float64(s.Bars() * s.Meter)
 	if s.Loop && beats >= whole {
@@ -112,7 +112,7 @@ func (s *Score) SecondsAt(beats float64) float64 {
 // the end of a looping piece it goes round again.
 func (s *Score) BeatsAt(seconds float64) float64 {
 	if len(s.spans) == 0 {
-		return seconds / s.BeatSeconds()
+		return seconds / s.beatSeconds()
 	}
 	whole := float64(s.Bars() * s.Meter)
 	length := s.spanAt(whole).secondOf(whole)
@@ -144,7 +144,7 @@ func (t tempoSpan) secondOf(beats float64) float64 {
 // its tempo is one stretch.
 func (s *Score) tempoSpans() []tempoSpan {
 	if len(s.spans) == 0 {
-		return []tempoSpan{{beatSeconds: s.BeatSeconds()}}
+		return []tempoSpan{{beatSeconds: s.beatSeconds()}}
 	}
 	return s.spans
 }

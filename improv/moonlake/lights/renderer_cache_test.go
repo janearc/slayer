@@ -10,7 +10,7 @@ func TestRendererStaticStorageAndPassReuse(t *testing.T) {
 	var stored StaticAssets
 	for name, image := range map[string]Image{"plate": source.Plate, "mask": source.Mask, "overhead": source.Plate} {
 		var data bytes.Buffer
-		if err := EncodePFM(&data, image, -1); err != nil {
+		if err := encodePFM(&data, image, -1); err != nil {
 			t.Fatal(err)
 		}
 		if err := stored.Decode(name, &data, 1, 3); err != nil {

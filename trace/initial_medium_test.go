@@ -44,7 +44,8 @@ func TestRenderWithInitialWaterUsesSnellAndFresnelAtFlatBoundary(t *testing.T) {
 	// unpolarised Fresnel share from water to air is 0.025090, leaving
 	// 0.974910 for the glowing sphere on the refracted path.
 	const want = 0.974910
-	if !within(float64(got.At(0, 0).R), want, 2e-6) {
+	red := float64(got.At(0, 0).R)
+	if !within(red, want, 2e-6) {
 		t.Fatalf("refracted path returned %g, want %g", got.At(0, 0).R,
 			want)
 	}
@@ -52,9 +53,10 @@ func TestRenderWithInitialWaterUsesSnellAndFresnelAtFlatBoundary(t *testing.T) {
 
 func TestRenderWithInitialWaterUsesTotalInternalReflection(t *testing.T) {
 	w := mediumWorld()
+	planeAt := resting(maths.V(0, -3, 0))
 	w.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, -3, 0))})
+		Motion:   planeAt})
 	from := maths.V(0, -1, 0)
 	direction := maths.V(math.Sin(maths.Degree*60),
 		math.Cos(maths.Degree*60), 0)
@@ -74,9 +76,10 @@ func TestNestedInitialMediaUseRankAndEntryOrder(t *testing.T) {
 	w.Add(thing.Thing{Shape: shape.Plane{}, Material: &thing.Material{
 		Through: 1, Gloss: 1, Index: 1.5, Rank: 2,
 	}})
+	planeAt := resting(maths.V(0, 3, 0))
 	w.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, 3, 0))})
+		Motion:   planeAt})
 	from := maths.V(0, -1, 0)
 	got, err := RenderWithInitialMedia(w, mediumEye(from, maths.Up),
 		film.Pinhole{}, 0, 1, 1, []InitialMedium{
@@ -89,7 +92,8 @@ func TestNestedInitialMediaUseRankAndEntryOrder(t *testing.T) {
 	// into rank-0 water, so normal-incidence reflection is
 	// ((1.5-1.33)/(1.5+1.33))^2 = 0.00360847.
 	const want = 0.99639153
-	if !within(float64(got.At(0, 0).R), want, 1e-6) {
+	red := float64(got.At(0, 0).R)
+	if !within(red, want, 1e-6) {
 		t.Fatalf("nested start state returned %g, want %g",
 			got.At(0, 0).R, want)
 	}
@@ -152,9 +156,10 @@ func TestEmptyInitialMediaIsBitIdenticalToExistingRender(t *testing.T) {
 
 func TestSampledWithInitialMediaSharesTheRenderPath(t *testing.T) {
 	w := mediumWorld()
+	planeAt := resting(maths.V(0, 3, 0))
 	w.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Glow: maths.Grey(1)},
-		Motion:   resting(maths.V(0, 3, 0))})
+		Motion:   planeAt})
 	from := maths.V(0, -1, 0)
 	eye := mediumEye(from, maths.Up)
 	media := []InitialMedium{{Index: 1.33}}

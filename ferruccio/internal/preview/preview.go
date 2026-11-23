@@ -8,10 +8,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"image"
 	"image/png"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/janearc/slayer/ferruccio/internal/draft"
@@ -26,10 +28,13 @@ type Request struct {
 	DirectoryPrefix      string
 }
 
-// Profile freezes preview dimensions and an optional CPU renderer choice.
+// Profile freezes preview dimensions and an optional CPU or GPU renderer
+// choice. GPU is the person's own choice of the GPU renderer and is never set
+// with CPURenderer; with neither, the producer's own renderer is used.
 type Profile struct {
 	Width, Height int
 	CPURenderer   bool
+	GPU           bool
 	Full          bool
 	Rays          int
 }
@@ -42,7 +47,13 @@ type Plan struct {
 }
 
 // Tools identifies existing executables and their scoped execution settings.
-type Tools struct{ Game, Slayer, Catalogue, GameHome, Shelf, Cache, Azazel, Queue, Agent, Transport string }
+// Renderer and Processors are the person's own choices for a render started
+// by this client: "cpu" or "gpu", and "2", "4", "8" or "all". Empty is the
+// default, the CPU renderer on two processors.
+type Tools struct {
+	Game, Slayer, Catalogue, GameHome, Shelf, Cache, Azazel, Queue, Agent, Transport string
+	Renderer, Processors                                                             string
+}
 
 // Prepare checks a still request without changing the source or its outputs.
 func Prepare(request Request) (*Plan, error) {
@@ -82,7 +93,7 @@ func Prepare(request Request) (*Plan, error) {
 		if err != nil {
 			return nil, err
 		}
-		profile.CPURenderer = false
+		profile.CPURenderer, profile.GPU = false, false
 		detail = catalogueSnapshot(tree, profile)
 	}
 	if document.Kind() == "job" {
@@ -118,31 +129,38 @@ func Prepare(request Request) (*Plan, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := CopySourceManifest(request.Path, folder); err != nil {
+	var inputName string
+	prepared := false
+	defer func() {
+		if prepared {
+			return
+		}
+		// Every error path removes what was made, including a folder that
+		// already holds a copied manifest.
 		os.RemoveAll(folder)
+		if inputName != "" {
+			os.Remove(inputName)
+		}
+	}()
+	if err := CopySourceManifest(request.Path, folder); err != nil {
 		return nil, err
 	}
 	input, err := os.CreateTemp(filepath.Dir(request.Path), ".ferruccio-preview-*.yaml")
 	if err != nil {
-		os.Remove(folder)
 		return nil, err
 	}
+	inputName = input.Name()
 	if _, err := input.Write(source.Bytes()); err != nil {
 		input.Close()
-		os.Remove(input.Name())
-		os.Remove(folder)
 		return nil, err
 	}
 	if err := input.Close(); err != nil {
-		os.Remove(input.Name())
-		os.Remove(folder)
 		return nil, err
 	}
 	if err := os.WriteFile(filepath.Join(folder, "scene.yaml"), source.Bytes(), 0600); err != nil {
-		os.Remove(input.Name())
-		os.RemoveAll(folder)
 		return nil, err
 	}
+	prepared = true
 	sum := sha256.Sum256([]byte(request.Text))
 	output := filepath.Join(folder, "preview.png")
 	if document.Kind() == "catalogue" {
@@ -180,23 +198,37 @@ func Run(ctx context.Context, tools Tools, plan *Plan, output io.Writer) error {
 	return RunObserved(ctx, tools, plan, output, nil)
 }
 
+// decodeWholePNG reads every pixel of the file before it is called good, so a
+// truncated file is a failure here and not later in the viewer. The header is
+// read first, so a wrong-sized image is named by its size.
+func decodeWholePNG(path string) (image.Config, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return image.Config{}, fmt.Errorf("producer finished without the preview image: %w", err)
+	}
+	defer file.Close()
+	configuration, err := png.DecodeConfig(file)
+	if err != nil {
+		return image.Config{}, fmt.Errorf("preview PNG: %w", err)
+	}
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return image.Config{}, err
+	}
+	if _, err := png.Decode(file); err != nil {
+		return image.Config{}, fmt.Errorf("preview PNG is truncated or damaged (%dx%d header): %w", configuration.Width, configuration.Height, err)
+	}
+	return configuration, nil
+}
+
 // record accepts only the frozen profile output and records its actual dimensions.
 func (plan *Plan) record(_ Tools) error {
 	profile, err := plan.Profile.resolved()
 	if err != nil {
 		return err
 	}
-	file, err := os.Open(plan.Output)
+	picture, err := decodeWholePNG(plan.Output)
 	if err != nil {
-		return fmt.Errorf("producer finished without the preview image: %w", err)
-	}
-	picture, err := png.DecodeConfig(file)
-	closeError := file.Close()
-	if err != nil {
-		return fmt.Errorf("preview PNG: %w", err)
-	}
-	if closeError != nil {
-		return closeError
+		return err
 	}
 	if picture.Width != profile.Width || picture.Height != profile.Height {
 		return fmt.Errorf("preview is %dx%d, expected %dx%d", picture.Width, picture.Height, profile.Width, profile.Height)
@@ -206,6 +238,9 @@ func (plan *Plan) record(_ Tools) error {
 	receipt["renderer_override"] = ""
 	if plan.Profile.CPURenderer && plan.Kind != "catalogue" {
 		receipt["renderer_override"] = "cpu"
+	}
+	if plan.Profile.GPU && plan.Kind != "catalogue" {
+		receipt["renderer_override"] = "gpu"
 	}
 	if plan.Kind == "catalogue" {
 		receipt["specimen"], receipt["detail"] = plan.Specimen, plan.Detail
@@ -230,9 +265,25 @@ func ChildEnvironment() []string {
 	return result
 }
 
-// environment retains the user's machine identity while bounding renderer work.
+// defaultProcessors is how many processors a render may use when the person
+// has not chosen: two, which keeps the rest of the machine usable.
+const defaultProcessors = "2"
+
+// ProcessorsAll is the choice of every processor the machine has.
+const ProcessorsAll = "all"
+
+// environment retains the user's machine identity while bounding renderer
+// work to the processors the person chose, two by default. With "all" the
+// child is given no limit, and any limit this process inherited is dropped.
 func environment(tools Tools) []string {
-	replacements := map[string]string{"GOMAXPROCS": "2"}
+	replacements := map[string]string{}
+	processors := tools.Processors
+	if count, err := strconv.Atoi(processors); processors != ProcessorsAll && (err != nil || count < 1) {
+		processors = defaultProcessors
+	}
+	if processors != ProcessorsAll {
+		replacements["GOMAXPROCS"] = processors
+	}
 	if tools.GameHome != "" {
 		replacements["GAME_HOME"] = tools.GameHome
 	}
@@ -245,7 +296,9 @@ func environment(tools Tools) []string {
 	var result []string
 	for _, value := range ChildEnvironment() {
 		key, _, _ := strings.Cut(value, "=")
-		if _, exists := replacements[key]; !exists {
+		_, replaced := replacements[key]
+		unlimited := key == "GOMAXPROCS" && processors == ProcessorsAll
+		if !replaced && !unlimited {
 			result = append(result, value)
 		}
 	}

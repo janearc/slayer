@@ -1,0 +1,53 @@
+# Twin spacecraft drawings use the common Voyager bus/boom dimensions in
+# research/research-derived-data.yml. Camera, lights and colours are picked.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Voyager 1 interplanetary probe
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 225, altitude: 28}
+  set:
+    things:
+      voyager-1:
+        kind: voyager-1
+        seed: 17
+        complexity: demo
+        east: 0
+        north: 0
+  film:
+    width: 1080
+    height: 960
+    rays: 4
+    exposure: 0.01
+    wide: 45
+  cameras:
+    three-quarter:
+      title: Voyager 1 bus, dish and instrument booms
+      location: {at: [19, 13, 18]}
+      orientation: {look_at: [-3, 0, 0]}
+    deployed:
+      title: Full deployed Voyager spacecraft
+      location: {at: [26, 17, 23]}
+      orientation: {look_at: [-3.5, 0, 0]}
+    reflector:
+      title: Voyager reflector, feed and electronics bus
+      location: {at: [8.5, -12, 6.7]}
+      orientation: {look_at: [0.1, -0.45, 1.1]}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.018, 0.025, 0.045]}
+      zenith: {srgb_linear: [0.004, 0.008, 0.018]}
+      ground: {srgb_linear: [0.008, 0.010, 0.016]}
+      source: eye
+    floods:
+      cool-space-fill:
+        colour: {srgb_linear: [0.08, 0.10, 0.16]}
+        strength: 1
+        source: eye
+    suns:
+      cool-rim:
+        toward: [8, 4, 4]
+        colour: {srgb_linear: [0.8, 1.1, 1.8]}
+        source: eye

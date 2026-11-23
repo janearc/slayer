@@ -1,0 +1,91 @@
+# the numbers the movie package chose, each with what it is and why.
+# picks.go reads this once, when the package starts.
+numbers:
+  - name: keyframes-within
+    value: 48
+    unit: frames
+    says: the most frames between one keyframe and the next
+    kind: picked
+    by: QuickTime played files with a keyframe every 48 frames on the machine it was tried on, and longer runs did not play
+
+  - name: highest-level
+    value: 52
+    says: the highest H.264 level written, as level_idc, ten times the level
+    kind: picked
+    by: a 4K file at level 6.0 showed as blocks in QuickTime on the machine it was tried on; level 5.2 played
+
+  - name: bits-per-pixel
+    value: 0.2
+    says: the video bit rate asked of the encoder, in bits for each pixel of each frame
+    kind: picked
+    by: 0.2 makes 1080x1920 at 24 a second about 10 Mbit/s, above the 8 Mbit/s YouTube asks for 1080p uploads at that rate
+
+  - name: audio-bit-rate
+    value: 192000
+    unit: bits a second
+    says: the AAC bit rate, for both channels
+    kind: picked
+    by: YouTube asks for 128 kbit/s stereo or more, and 192 leaves room
+
+  - name: wait-pause-milliseconds
+    value: 2
+    unit: milliseconds
+    says: how long the writer sleeps between looks at whether the encoder will take more
+    kind: picked
+    by: two milliseconds is a tenth of a frame at 48 a second, so a wait never spins a core and never lags a frame
+
+  - name: wait-limit-seconds
+    value: 60
+    unit: seconds
+    says: the longest the writer waits for the encoder to take one more frame, or for the file to finish
+    kind: picked
+    by: a 4K frame encodes in tens of milliseconds on the machine it was tried on, so a minute is a stuck encoder
+
+  - name: why-length
+    value: 1024
+    unit: bytes
+    says: the room for the bridge's reason a call failed
+    kind: picked
+    by: the Metal bridge keeps the same room, and a reason is a line or two
+
+  - name: most-rate
+    value: 240
+    unit: frames a second
+    says: the most frames a second a request may ask for
+    kind: picked
+    by: a rate past 240 is a typo, and a frame would hold less than one sample of sound
+
+  - name: most-side
+    value: 8192
+    unit: pixels
+    says: the longest side a film's pictures are read at
+    kind: picked
+    by: twice the widest film read here (4096), so a larger ask is a typo and not a film
+
+  - name: most-picture-side
+    value: 65536
+    unit: pixels
+    says: the longest side a request may ask for, before any level is looked at
+    kind: picked
+    by: four times the widest side any H.264 level holds (16880 pixels at 6.2), so only a size that would overflow the level arithmetic is refused here and every other size is left to the level table
+
+  - name: seek-slack
+    value: 1e-6
+    unit: seconds
+    says: how far before a picture's own time a moment asked for still names that picture
+    kind: picked
+    by: a moment given in whole nanoseconds is cut short by up to one, and a picture's time comes back as a fraction of the file's own clock; a microsecond is far above both and far below any frame
+
+  - name: ticks-per-frame
+    value: 512
+    unit: ticks
+    says: how finely the video track counts time, in ticks a frame
+    kind: picked
+    by: any whole number keeps frame i at exactly i/rate, and 512 is what ffmpeg writes at 24
+
+  - name: sound-chunk
+    value: 4096
+    unit: stereo pairs
+    says: how many stereo pairs are handed to the writer at a time
+    kind: picked
+    by: four AAC packets of 1024, about a tenth of a second at 44100

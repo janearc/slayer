@@ -15,17 +15,23 @@ type Wire struct {
 	Width  float64
 }
 
-// At is the light at p: the line's where p is on an edge, fading to
-// nothing a line's width in.
-func (w Wire) At(p maths.Vec) maths.Light {
-	if w.Tiling == nil {
-		return maths.Light{}
+// lineWidth is the line's width, with no width read as a share of the
+// tiling's spacing.
+func (wire Wire) lineWidth() float64 {
+	if wire.Width <= nought {
+		return wire.Tiling.Spacing() / wireShare
 	}
-	width := w.Width
-	if width <= 0 {
-		width = w.Tiling.Spacing() / 10
+	return wire.Width
+}
+
+// At is the light at the point: the line's where the point is on an edge,
+// fading to nothing a line's width in.
+func (wire Wire) At(point maths.Vec) maths.Light {
+	if wire.Tiling == nil {
+		return noPaint
 	}
-	tile := w.Tiling.Nearest(p)
-	line := 1 - maths.Smooth(0, width, w.Tiling.Edge(p, tile))
-	return w.Light.Scale(line)
+	width := wire.lineWidth()
+	tile := wire.Tiling.Nearest(point)
+	line := unity - maths.Smooth(nought, width, wire.Tiling.Edge(point, tile))
+	return wire.Light.Scale(line)
 }

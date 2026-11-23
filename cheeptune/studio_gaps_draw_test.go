@@ -19,7 +19,7 @@ func TestAModeAboveTheCeilingIsLeftOutNotFoldedBack(t *testing.T) {
 	if got := decibels(s.most(100, 3500) / own); got > -60 {
 		t.Errorf("under c8 there is %.1f dB of something", got)
 	}
-	e := buildModal(&Channel{Modal: &Modal{Set: "bar", Decay: 2}})
+	e := buildModal(&channel{Modal: &modal{Set: "bar", Decay: 2}})
 	if got := len(e.(*modalEngine).bank(hz(108, 0))); got != 2 {
 		t.Errorf("c8 on a bar rings %d modes, want the 2 under the "+
 			"ceiling", got)
@@ -41,9 +41,9 @@ func TestAPieceNeverRingsPastItsLongestTail(t *testing.T) {
 func TestTheSheetShowsAKitOfAnySize(t *testing.T) {
 	// a kit of more drums than a panel has seconds shows the first of
 	// them; one that cannot sound is refused with its channel.
-	many := Channel{Kind: "drum", Role: "perc", Drums: map[string]Drum{}}
+	many := channel{Kind: "drum", Role: "perc", Drums: map[string]drum{}}
 	for _, name := range drumLetters {
-		many.Drums[name] = Drum{Tone: 100, Decay: 0.2}
+		many.Drums[name] = drum{Tone: 100, Decay: 0.2}
 	}
 	sound, err := alone(many)
 	if err != nil || len(sound) != sheetSeconds*studioRate {
@@ -52,8 +52,8 @@ func TestTheSheetShowsAKitOfAnySize(t *testing.T) {
 	if rms(sound[3*studioRate:3*studioRate+2000]) == 0 {
 		t.Errorf("the fourth second of a kit of six is silent")
 	}
-	bad := Channel{Kind: "fm", Role: "lead", FM: &FM{
-		Arrangement: "sum", Operators: []Operator{{Ratio: 1, Level: 1},
+	bad := channel{Kind: "fm", Role: "lead", FM: &fmSound{
+		Arrangement: "sum", Operators: []operator{{Ratio: 1, Level: 1},
 			{Ratio: 1, Level: 1}, {Ratio: 1, Level: 1},
 			{Ratio: 1, Level: 1}}}}
 	loud := 1.0
@@ -61,13 +61,13 @@ func TestTheSheetShowsAKitOfAnySize(t *testing.T) {
 	if _, err := alone(bad); err != nil {
 		t.Errorf("four full carriers alone: %v", err)
 	}
-	if _, err := alone(Channel{Kind: "fm", Role: "perc", FM: bad.FM}); err == nil {
+	if _, err := alone(channel{Kind: "fm", Role: "perc", FM: bad.FM}); err == nil {
 		t.Errorf("an fm channel on perc drew a panel")
 	}
 }
 
 func TestTheSheetPadsASmallKitAndRefusesWhatCannotSound(t *testing.T) {
-	two := Channel{Kind: "drum", Role: "perc", Drums: map[string]Drum{
+	two := channel{Kind: "drum", Role: "perc", Drums: map[string]drum{
 		"k": {Tone: 60, Decay: 0.2}, "s": {Tone: 200, Decay: 0.1}}}
 	sound, err := alone(two)
 	if err != nil {

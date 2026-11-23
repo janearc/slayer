@@ -18,6 +18,8 @@ import (
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/encoder"
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/identity"
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/settings"
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
+	"go.uber.org/mock/gomock"
 )
 
 func Example_stretch() {
@@ -25,7 +27,8 @@ func Example_stretch() {
 }
 
 func TestStretchArguments(t *testing.T) {
-	code, out := run(stretchArgs([]string{"-from", "10", "-to", "12", "-fps", "24", "-settings", "missing.yaml", "-out", t.TempDir(), "-png", "--dry-run"})...)
+	outDir := t.TempDir()
+	code, out := run(stretchArgs([]string{"-from", "10", "-to", "12", "-fps", "24", "-settings", "missing.yaml", "-out", outDir, "-png", "--dry-run"})...)
 	if code != 0 || !strings.Contains(out, "[10,12)") {
 		t.Fatalf("%d %s", code, out)
 	}
@@ -117,9 +120,12 @@ func (host *readings) read(context.Context) (hostUsage, error) {
 func unpaused(context.Context) error { return nil }
 
 // refusing is somewhere to say things that takes nothing
-type refusing struct{}
-
-func (refusing) Write([]byte) (int, error) { return 0, errors.New("nowhere to write") }
+func refusing(t *testing.T) *mocks.MockWriter {
+	writer := mocks.NewMockWriter(gomock.NewController(t))
+	writer.EXPECT().Write(gomock.Any()).
+		Return(0, errors.New("nowhere to write")).AnyTimes()
+	return writer
+}
 
 // The regression for 2026-11-11: with swap over its limit the gate held a
 // run for ten minutes and said nothing, so it read as a hang. A gate that
@@ -179,7 +185,8 @@ func TestAHeldGateSaysEachNewReason(t *testing.T) {
 	if err := waitGate(context.Background(), g, host.read, unpaused, &told); err != nil {
 		t.Fatal(err)
 	}
-	lines := strings.Split(strings.TrimSuffix(told.String(), "\n"), "\n")
+	said := told.String()
+	lines := strings.Split(strings.TrimSuffix(said, "\n"), "\n")
 	if len(lines) != 3 {
 		t.Fatalf("three reasons in turn, and the gate spoke %d times: %q", len(lines), told.String())
 	}
@@ -205,7 +212,7 @@ func TestAGateThatCannotSpeakRefusesToWait(t *testing.T) {
 	if over.asked != 0 {
 		t.Errorf("a gate with nowhere to speak asked the host %d times first", over.asked)
 	}
-	err := waitGate(context.Background(), g, over.read, unpaused, refusing{})
+	err := waitGate(context.Background(), g, over.read, unpaused, refusing(t))
 	if err == nil || !strings.Contains(err.Error(), "saying why it waits") {
 		t.Errorf("a gate whose words could not be written went on: %v", err)
 	}
@@ -364,7 +371,8 @@ func TestStretchOutputsAndFailure(t *testing.T) {
 					t.Fatal("fixture must distinguish static ocean altitude from moving cue")
 				}
 				film = append(film, index)
-				return consume(compositor.Result{Index: index, Image: image.NewRGBA(image.Rect(0, 0, 2, 2))})
+				blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+				return consume(compositor.Result{Index: index, Image: blank})
 			}}, nil
 		}, encode: func(ctx context.Context, ec encoder.Config) (frameEncoder, error) {
 			if ec.FrameCount != 3 || ec.FPS != 24 {

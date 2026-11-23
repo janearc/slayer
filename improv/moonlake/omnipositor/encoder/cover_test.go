@@ -41,7 +41,8 @@ func TestAFailedWriteIsKeptAndACanceledContextRefusesWrites(t *testing.T) {
 	if first == nil {
 		t.Fatal("a nil frame was accepted")
 	}
-	if _, again := e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); again != first {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, again := e.WriteFrame(0, blank); again != first {
 		t.Errorf("second write returned %v, want the first failure %v", again, first)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -50,7 +51,8 @@ func TestAFailedWriteIsKeptAndACanceledContextRefusesWrites(t *testing.T) {
 		t.Fatal(err)
 	}
 	cancel()
-	if _, err = e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err == nil || !strings.Contains(err.Error(), "frame 0: context canceled") {
+	blankAfterCancel := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, err = e.WriteFrame(0, blankAfterCancel); err == nil || !strings.Contains(err.Error(), "frame 0: context canceled") {
 		t.Errorf("write after cancel: %v", err)
 	}
 	if e.Stats().Bytes != 0 {
@@ -64,10 +66,12 @@ func TestCloseReportsAnEncodedFileThatVanished(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, err = e.WriteFrame(0, blank); err != nil {
 		t.Fatal(err)
 	}
-	matches, err := filepath.Glob(filepath.Join(filepath.Dir(cfg.Output), "."+filepath.Base(cfg.Output)+"-*.mp4"))
+	pattern := filepath.Join(filepath.Dir(cfg.Output), "."+filepath.Base(cfg.Output)+"-*.mp4")
+	matches, err := filepath.Glob(pattern)
 	if err != nil || len(matches) != 1 {
 		t.Fatalf("temporary files %v, %v", matches, err)
 	}
@@ -101,7 +105,8 @@ func TestCloseReportsATemporaryFileThatCannotBeRemoved(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = e.Abort() })
-	if _, err = e.WriteFrame(0, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+	blank := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	if _, err = e.WriteFrame(0, blank); err != nil {
 		t.Fatal(err)
 	}
 	if err = os.Chmod(dir, 0o500); err != nil {

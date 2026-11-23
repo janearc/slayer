@@ -24,7 +24,7 @@ func Check(w io.Writer, paths ...string) error {
 			bad = true
 			continue
 		}
-		kind, err := Kind(b)
+		kind, err := kind(b)
 		if err != nil {
 			problems(w, fmt.Errorf("%s: %w", path, err))
 			bad = true
@@ -50,7 +50,7 @@ func Check(w io.Writer, paths ...string) error {
 		}
 	}
 	if s != nil && v != nil {
-		if _, err := Bind(s, v); err != nil {
+		if _, err := bindVoicing(s, v); err != nil {
 			fmt.Fprintf(w, "together\n")
 			problems(w, err)
 			bad = true
@@ -109,7 +109,7 @@ func describeScore(w io.Writer, s *Score) {
 			what = append(what, fmt.Sprintf("%d chords", chords))
 		}
 		if hi >= lo {
-			span := NoteName(lo) + " to " + NoteName(hi)
+			span := noteName(lo) + " to " + noteName(hi)
 			what = append(what, span)
 		}
 		if len(hits) > 0 {

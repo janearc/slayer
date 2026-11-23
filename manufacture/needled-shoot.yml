@@ -1,5 +1,5 @@
 # Model choices, not botanical measurements. Algorithm and botanical
-# provenance: doc/conifer-foliage.md. Read through Puzzlemouth numbers.
+# provenance: doc/model/vegetation/conifer-foliage.md. Read through Puzzlemouth numbers.
 # Original choices: 2026-11-03; spruce extension: 2026-11-08.
 numbers:
   - name: redwood-branchlet-minimum

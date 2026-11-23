@@ -27,7 +27,8 @@ func frontFixture(t *testing.T) string {
 }
 
 func TestFireFrontReadsAnExplicitPrescribedMotionAndFindsItsFuel(t *testing.T) {
-	made, err := set.Read("front.yaml", []byte(frontFixture(t)))
+	source := frontFixture(t)
+	made, err := set.Read("front.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}

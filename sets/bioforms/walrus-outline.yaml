@@ -1,0 +1,73 @@
+# A bull walrus hauled out on pale ground, lying at rest: the chest
+# propped on the fore flippers, the head carried level with the
+# shoulders, the belly flat where its weight rests, the hind flippers
+# turned forward along the flanks. The body is one outline of stations
+# from nose to tail (manufacture/walrus_outline.go).
+#
+# the frame. places are metres, x east, y north, z up, the ground's face
+# at z=0. the walrus's own floor is 0.41 m below its middle, so it
+# stands 0.41 m up and rests on the ground. its nose points east.
+#
+# the ground. one flat pale slab, about as bright as old snow on sea
+# ice; chosen, no measurement and no relief.
+#
+# the sun is typed as azimuth and altitude, chosen, as every set's is
+# while nothing reads a time of day: in the south-south-east, under the
+# height a summer noon reaches at a walrus's latitudes, which lights the
+# flank the cameras see and the face. the sky is the air's.
+#
+# cameras. each is placed so the animal fills about two thirds of the
+# frame: side, from the south; quarter, from the south-east, on the
+# head; top, straight down.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: walrus hauled out
+  seed: 17
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 160, altitude: 45}
+  set:
+    things:
+      walrus:
+        kind: walrus-fresh-5
+        seed: 17
+        heading: {value: 0, unit: deg}
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0.41, unit: m}
+  film:
+    width: 1600
+    height: 1000
+    rays: 2
+    wide: 38
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.62, 0.64, 0.66]}
+        source: "chosen: about the reflectance of old snow on sea ice, no measurement"
+    boxes:
+      # the ground, its upper face at nought
+      ground:
+        material: ground
+        middle: [0, 0, -1]
+        size: [2000, 2000, 2]
+        source: "chosen: a flat slab, no survey"
+  cameras:
+    side:
+      title: "from the south, level with the back"
+      location: {at: [0.2, -6.8, 0.7]}
+      orientation: {look_at: [0.2, 0, 0.42]}
+    quarter:
+      title: "from the south-east, on the head"
+      location: {at: [4.7, -4.3, 1.5]}
+      orientation: {look_at: [0.3, 0, 0.4]}
+    top:
+      title: "straight down"
+      location: {at: [0.2, -0.4, 7.0]}
+      orientation: {look_at: [0.2, 0, 0]}

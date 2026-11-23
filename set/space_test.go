@@ -28,7 +28,8 @@ scene:
 
 // readV2 reads a small version 2 set with lines added under scene.
 func readV2(add string) (Set, error) {
-	return Read("t.yaml", []byte(v2Text(defaultFilm, add)))
+	source := v2Text(defaultFilm, add)
+	return Read("t.yaml", []byte(source))
 }
 
 // stood is a block of things under set, each thing a name and its keys as
@@ -144,7 +145,8 @@ func TestFilmFramesASecondAreRead(t *testing.T) {
 		return "  film: {width: 64, height: 36, rays: 1, exposure: 1, fps: " +
 			fps + "}\n"
 	}
-	made, err := Read("t.yaml", []byte(v2Text(film("24"), "")))
+	source := v2Text(film("24"), "")
+	made, err := Read("t.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,12 +154,14 @@ func TestFilmFramesASecondAreRead(t *testing.T) {
 		t.Errorf("fps is %v, want 24", got)
 	}
 	for _, bad := range []string{"0", "241", "2.5", "-24", "fast"} {
-		if _, err := Read("t.yaml", []byte(v2Text(film(bad), ""))); err == nil {
+		source := v2Text(film(bad), "")
+		if _, err := Read("t.yaml", []byte(source)); err == nil {
 			t.Errorf("fps %s was taken", bad)
 		}
 	}
 	for _, good := range []string{"1", "240"} {
-		if _, err := Read("t.yaml", []byte(v2Text(film(good), ""))); err != nil {
+		source := v2Text(film(good), "")
+		if _, err := Read("t.yaml", []byte(source)); err != nil {
 			t.Errorf("fps %s is refused: %v", good, err)
 		}
 	}
@@ -166,9 +170,9 @@ func TestFilmFramesASecondAreRead(t *testing.T) {
 // A thing is placed by its place, at the origin, the anchor or the frame,
 // or by what it is around; each is read into a typed field.
 func TestThingPlaceAndAroundAreRead(t *testing.T) {
-	made, err := readV2("  setting: space\n" + stood(
-		spruce("sun", "        place: {at: origin}\n"),
-		spruce("moon", "        around: sun\n")))
+	sun := spruce("sun", "        place: {at: origin}\n")
+	moon := spruce("moon", "        around: sun\n")
+	made, err := readV2("  setting: space\n" + stood(sun, moon))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,8 +242,9 @@ func TestCameraDurationIsRead(t *testing.T) {
 			"      location: {at: [0, -5, 2]}\n      duration: " + duration + "\n"
 	}
 	text := func(duration string) []byte {
-		return []byte(strings.Replace(v2Text(defaultFilm, ""), defaultCamera,
-			camera(duration), 1))
+		edited := strings.Replace(v2Text(defaultFilm, ""), defaultCamera,
+			camera(duration), 1)
+		return []byte(edited)
 	}
 	made, err := Read("t.yaml", text("{value: 6, unit: s}"))
 	if err != nil {

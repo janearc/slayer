@@ -25,16 +25,57 @@ func TestSceneExtentAndInvalidFieldsAreBounded(t *testing.T) {
 		t.Fatal("impossible field accepted")
 	}
 }
-func TestEqualSurfaceDistancesKeepTheEarlierObject(t *testing.T) {
+
+// balls is a crowd of balls at the world's middle, of the radii given,
+// and how far along a ray down z from three away each is met: three
+// less its radius.
+func balls(radii ...float64) (crowd, maths.Ray) {
 	world := thing.NewWorld()
-	for range 2 {
-		world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1}})
+	for _, radius := range radii {
+		world.Add(thing.Thing{Shape: shape.Sphere{Radius: radius}})
 	}
-	seen := gathered(place(world, 0))
-	best := nearest{index: 0, dist: 2}
-	got := seen.closer(best, 1, maths.Ray{At: maths.V(0, 0, 3), Dir: maths.V(0, 0, -1)}, 0)
-	if got.index != 0 || got.dist != 2 {
-		t.Fatal("stable tie broken", got)
+	return gathered(place(world, 0)),
+		maths.Ray{At: maths.V(0, 0, 3), Dir: maths.V(0, 0, -1)}
+}
+
+// Two balls of one size at one place are met at one distance, two along
+// the ray. At the same distance the earlier thing is kept, whichever of
+// the two was the best so far: the later one does not replace the
+// earlier, and the earlier does replace the later, which it can only do
+// if it is met at the best's own distance and not passed over.
+func TestEqualSurfaceDistancesKeepTheEarlierObject(t *testing.T) {
+	seen, ray := balls(1, 1)
+	met, found := seen.first(ray, 0)
+	if !found || !within(met.dist, 2, 1e-12) {
+		t.Fatalf("the balls are met at %v, found %v, want two along",
+			met.dist, found)
+	}
+	kept := seen.closer(nearest{index: 0, dist: met.dist}, 1, ray, 0)
+	if kept.index != 0 || kept.dist != met.dist {
+		t.Errorf("the later ball replaced the earlier at a tie: %+v", kept)
+	}
+	taken := seen.closer(nearest{index: 1, dist: met.dist}, 0, ray, 0)
+	if taken.index != 0 || taken.dist != met.dist {
+		t.Errorf("the earlier ball did not replace the later at a tie: "+
+			"%+v", taken)
+	}
+}
+
+// Anti: only a tie goes by which came first. A ball met nearer replaces
+// the best whatever its place in the crowd, and one met further off
+// does not: a ball of half the size at the same place is met half a
+// unit further along.
+func TestANearerObjectReplacesTheBestAndAFartherOneDoesNot(t *testing.T) {
+	seen, ray := balls(0.5, 1)
+	nearer := seen.closer(nearest{index: 0, dist: 2.5}, 1, ray, 0)
+	if nearer.index != 1 || !within(nearer.dist, 2, 1e-12) {
+		t.Errorf("the nearer, later ball did not replace the best: %+v",
+			nearer)
+	}
+	farther := seen.closer(nearest{index: 1, dist: 2}, 0, ray, 0)
+	if farther.index != 1 || farther.dist != 2 {
+		t.Errorf("the farther, earlier ball replaced the best: %+v",
+			farther)
 	}
 }
 func TestMeshReplayIncludesFaceAmbientLightAndHaze(t *testing.T) {
@@ -42,7 +83,8 @@ func TestMeshReplayIncludesFaceAmbientLightAndHaze(t *testing.T) {
 	world.Add(thing.Thing{Shape: aCube(t), Material: &thing.Material{Name: "cube", Colour: maths.Grey(.5)}})
 	world.Lamp(fill)
 	world.Haze = thing.Haze{Density: .2, Colour: maths.Grey(.2)}
-	pixel, steps, err := Replay(world, lookingAt(maths.V(0, 0, 3), maths.Vec{}),
+	from := maths.V(0, 0, 3)
+	pixel, steps, err := Replay(world, lookingAt(from, maths.Vec{}),
 		film.Pinhole{}, 0, 1, 1, 1, 0, 0)
 	if err != nil || pixel.R <= 0 {
 		t.Fatal("mesh replay failed", pixel, err)

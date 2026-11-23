@@ -60,8 +60,10 @@ func lattice(x, y float64, seed uint64) float64 {
 	fx, fy := math.Floor(x), math.Floor(y)
 	tx, ty := x-fx, y-fy
 	at := func(dx, dy float64) float64 {
-		bits := mix(mix(uint64(int64(fx+dx))+golden) ^
-			mix(uint64(int64(fy+dy))+seed*golden))
+		xCell := uint64(int64(fx + dx))
+		yCell := uint64(int64(fy + dy))
+		bits := mix(mix(xCell+golden) ^
+			mix(yCell+seed*golden))
 		return 2*unit(bits) - 1
 	}
 	low := at(0, 0)*(1-tx) + at(1, 0)*tx
@@ -97,12 +99,12 @@ func TestCoarseGroundIsMeasured(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Kind() != Measured || got.Made() != 0 {
+		if got.Kind() != measured || got.Made() != 0 {
 			t.Errorf("at %v m of detail the ground is %v, with %v m made",
 				detail, got.Kind(), got.Made())
 		}
-		if got.Edge() > detail {
-			t.Errorf("asked for %v m, got edges of %v m", detail, got.Edge())
+		if got.edgeLength() > detail {
+			t.Errorf("asked for %v m, got edges of %v m", detail, got.edgeLength())
 		}
 	}
 	// a corner of the mesh is a place the map was asked about directly
@@ -136,13 +138,13 @@ func TestFineGroundIsGeneratedAndSaysSo(t *testing.T) {
 		if got.Made() != 0 {
 			movedAtAll = true
 		}
-		if got.Edge() > math.Max(detail, Inchworm) {
-			t.Errorf("asked for %v m, got edges of %v m", detail, got.Edge())
+		if got.edgeLength() > math.Max(detail, inchworm) {
+			t.Errorf("asked for %v m, got edges of %v m", detail, got.edgeLength())
 		}
-		if got.Edge() < Inchworm/2 {
-			t.Errorf("split to %v m, finer than an inchworm", got.Edge())
+		if got.edgeLength() < inchworm/2 {
+			t.Errorf("split to %v m, finer than an inchworm", got.edgeLength())
 		}
-		if got.Source() != from.Source() {
+		if got.mapSource() != from.Source() {
 			t.Errorf("the sample forgot its map")
 		}
 	}
@@ -150,9 +152,9 @@ func TestFineGroundIsGeneratedAndSaysSo(t *testing.T) {
 		t.Errorf("rough ground was given no made relief at all")
 	}
 	finest, _ := world.At(at, 1e-6)
-	if finest.Depth() != world.Depth(Inchworm) {
+	if finest.reachedDepth() != world.depth(inchworm) {
 		t.Errorf("the finest depth is %d, an inchworm's is %d",
-			finest.Depth(), world.Depth(Inchworm))
+			finest.reachedDepth(), world.depth(inchworm))
 	}
 }
 
@@ -185,8 +187,9 @@ func TestMadeGroundTakesAfterTheMap(t *testing.T) {
 		var squares float64
 		const places = 200
 		for i := range places {
-			got, err := world.At(spot(t, 20+float64(i)*0.0137,
-				10+float64(i)*0.0071), 0.01)
+			lon := 20 + float64(i)*0.0137
+			lat := 10 + float64(i)*0.0071
+			got, err := world.At(spot(t, lon, lat), 0.01)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -237,15 +240,15 @@ func TestLookingCloserMovesNothing(t *testing.T) {
 		}
 		for _, each := range shape {
 			here := each.at.point()
-			got, err := world.At(&here, Inchworm)
+			got, err := world.At(&here, inchworm)
 			if err != nil {
 				t.Fatal(err)
 			}
 			// the noise at the corner: no more than a hint of each
 			// made depth's spread, all its layers pulling one way
 			var noise float64
-			for made := 1; made <= world.Depth(Inchworm); made++ {
-				if world.Edge(made) < each.spacing {
+			for made := 1; made <= world.depth(inchworm); made++ {
+				if world.edge(made) < each.spacing {
 					noise += hint * world.spread(each, made)
 				}
 			}
@@ -273,12 +276,13 @@ func TestNoCracks(t *testing.T) {
 	for i := range places {
 		lon := 30 + float64(i)*step/earth*180/math.Pi
 		lat := 20 + float64(i)*step*0.37/earth*180/math.Pi
-		got, err := world.At(spot(t, lon, lat), Inchworm)
+		got, err := world.At(spot(t, lon, lat), inchworm)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if i > 0 {
-			worst = math.Max(worst, math.Abs(got.Height()-last))
+			drop := math.Abs(got.Height() - last)
+			worst = math.Max(worst, drop)
 		}
 		last = got.Height()
 	}
@@ -309,29 +313,29 @@ func TestTheMapIsAskedOnce(t *testing.T) {
 		t.Errorf("the map was asked %d more times for ground it had "+
 			"already given", from.asked-first)
 	}
-	if kept := world.Kept(); kept == 0 || kept > most {
+	if kept := world.cornersHeld(); kept == 0 || kept > most {
 		t.Errorf("the ground is keeping %d corners", kept)
 	}
 	// each kept corner cost one reading and two rings of six
-	if want := world.Kept() * (1 + 2*around); first != want {
+	if want := world.cornersHeld() * (1 + 2*around); first != want {
 		t.Errorf("the map was asked %d times for %d corners", first,
-			world.Kept())
+			world.cornersHeld())
 	}
 }
 
 func TestRefusals(t *testing.T) {
-	if _, err := New(nil, earth, 1); !errors.Is(err, Refused()) {
+	if _, err := New(nil, earth, 1); !errors.Is(err, errRefused) {
 		t.Errorf("a ground with no map: %v", err)
 	}
 	from := &chart{finest: 100, relief: 300, share: 0.6, hole: true}
-	if _, err := New(from, 0, 1); !errors.Is(err, Refused()) {
+	if _, err := New(from, 0, 1); !errors.Is(err, errRefused) {
 		t.Errorf("a ground of no size: %v", err)
 	}
 	world := ground(t, from, 1)
-	if _, err := world.At(nil, 1); !errors.Is(err, Refused()) {
+	if _, err := world.At(nil, 1); !errors.Is(err, errRefused) {
 		t.Errorf("the ground at no place: %v", err)
 	}
-	if _, err := world.At(spot(t, 10, 80), 1); !errors.Is(err, Refused()) {
+	if _, err := world.At(spot(t, 10, 80), 1); !errors.Is(err, errRefused) {
 		t.Errorf("the ground where the map has none: %v", err)
 	}
 	if _, err := world.At(spot(t, 10, 0), 1); err != nil {
@@ -344,24 +348,24 @@ func TestRefusals(t *testing.T) {
 func TestDepths(t *testing.T) {
 	world := ground(t, &chart{finest: 100}, 1)
 	for depth := range 30 {
-		ratio := world.Edge(depth) / world.Edge(depth+1)
+		ratio := world.edge(depth) / world.edge(depth+1)
 		if !(math.Abs(ratio-2) <= 1e-12) {
 			t.Fatalf("depth %d to the next is a ratio of %v", depth, ratio)
 		}
 	}
-	bottom := world.Depth(Inchworm)
-	if world.Edge(bottom) > Inchworm || world.Edge(bottom-1) <= Inchworm {
+	bottom := world.depth(inchworm)
+	if world.edge(bottom) > inchworm || world.edge(bottom-1) <= inchworm {
 		t.Errorf("an inchworm is depth %d, with edges of %v m", bottom,
-			world.Edge(bottom))
+			world.edge(bottom))
 	}
-	if world.Depth(0) != bottom || world.Depth(1e9) != 0 {
-		t.Errorf("depths past the ends: %d and %d", world.Depth(0),
-			world.Depth(1e9))
+	if world.depth(0) != bottom || world.depth(1e9) != 0 {
+		t.Errorf("depths past the ends: %d and %d", world.depth(0),
+			world.depth(1e9))
 	}
 	t.Logf("on a world of radius %.0f km: a face's edge is %.0f km; "+
 		"an inchworm is depth %d; grissom's keys reach depth %d, "+
-		"edges of %.3f m", earth/1000, world.Edge(0)/1000, bottom,
-		mesh.Deepest, world.Edge(mesh.Deepest))
+		"edges of %.3f m", earth/1000, world.edge(0)/1000, bottom,
+		mesh.Deepest, world.edge(mesh.Deepest))
 }
 
 // Made ground is about as steep as the map showed: neither a hundred

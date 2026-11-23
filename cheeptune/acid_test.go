@@ -25,7 +25,8 @@ func hissed(f lowPass, level float64) []float32 {
 	source := newNoise(7)
 	out := make([]float32, waveLength)
 	for i := range out {
-		out[i] = float32(f.low(source.next() * level))
+		drive := source.next() * level
+		out[i] = float32(f.low(drive))
 	}
 	return out
 }

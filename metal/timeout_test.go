@@ -138,6 +138,8 @@ func TestABandOverTheLimitNamesItsRows(t *testing.T) {
 	requireDevice(t, err)
 	t.Cleanup(kernel.Close)
 	kernel.SetLimit(limit)
+	// the bands are fixed at four rows, so the long one is rows 4 to 7
+	kernel.FixBands(4)
 	if _, err := kernel.Grid(64, 8, 4, 4, [][]byte{trips(brief)}); err != nil {
 		t.Fatalf("a brief band under a limit of %v: %v", limit, err)
 	}
@@ -208,6 +210,9 @@ func TestABandDrawnAheadThatTimesOutIsReported(t *testing.T) {
 	requireDevice(t, err)
 	t.Cleanup(kernel.Close)
 	kernel.SetLimit(limit)
+	// the bands are fixed at four rows, so the one drawn ahead is rows 4
+	// to 7
+	kernel.FixBands(4)
 	stream, err := kernel.OpenGrid(64, 8, 4, 4, [][]byte{trips(long)})
 	if err != nil {
 		t.Fatal(err)

@@ -1,0 +1,105 @@
+# Bridges of buildings, 2026-11-19. Every distribution and threshold the
+# bridge generator draws from. As with towers, a share is the chance of a
+# feature at an irregularity of one, taken down by the irregularity raised
+# to gate-power, and a count reaches from its least toward its most as far
+# as the irregularity goes. Scopes: a row is the whole bridge, a bay is one
+# station of pylons, a storey is one stretch of deck, an opening is one lot
+# on the deck. No number is measured. Lengths are metres.
+culture: bridge
+says: the draws of the generator of bridges whose structure is buildings
+elements:
+- {element: gate-power, says: "the power the irregularity is raised to when it gates a feature", scope: row, draw: range, unit: power, least: 1.5, most: 1.5, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: skyline-draw, says: "the irregularity of a bridge drawn from its seed", scope: row, draw: range, unit: irregularity, least: 0, most: 1, kind: picked, by: "bridge study, 2026-11-19, picked"}
+- {element: skyline-power, says: "the power the draw is raised to, so most bridges are plain", scope: row, draw: range, unit: power, least: 2, most: 2, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: pylon-spacing, says: "how far apart the stations of pylons stand, so the span gives how many", scope: row, draw: range, unit: m, least: 550, most: 800, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: pylon-reach, says: "a pylon tower's irregularity as a share of the bridge's", scope: row, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: pylon-gap, says: "how far a pylon tower stands from the deck's edge, to its nearest face", scope: row, draw: range, unit: m, least: 18, most: 18, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: deck-height, says: "height of the deck above the water", scope: row, draw: range, unit: m, least: 45, most: 70, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: deck-width, says: "width of the deck, wide enough for a street and a block of buildings each side", scope: row, draw: range, unit: m, least: 150, most: 150, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: bare-deck-width, says: "width of the deck of a bare bridge, a road and its walks and no buildings", scope: row, draw: range, unit: m, least: 28, most: 28, kind: picked, by: "bridge study, 2026-11-19, picked as a double-decked road's width"}
+- {element: deck-thickness, says: "thickness of the deck", scope: row, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: street-width, says: "width of the street down the middle of the deck", scope: row, draw: range, unit: m, least: 16, most: 16, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: sidewalk, says: "width of the walk between the street and the buildings", scope: row, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: lot-gap, says: "the gap between two lots along a side of the deck", scope: row, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: deck-end-margin, says: "how far past the last lot a deck level runs", scope: row, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: block-length, says: "length of a stretch of deck that is one level, in the approaches and under a sag or step", scope: row, draw: range, unit: m, least: 100, most: 100, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: approach-share, says: "length of the approach at each end, stepping down to the ground, as a share of the span", scope: row, draw: range, unit: share, least: 0.2, most: 0.2, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: default-span, says: "the span of a bridge whose set does not say one", scope: row, draw: range, unit: m, least: 2000, most: 2000, kind: picked, by: "bridge study, 2026-11-19, picked from the brief"}
+- {element: default-depth, says: "how many bridges deep a bridge's lots may nest, where the set does not say", scope: row, draw: range, unit: bridges, least: 2, most: 2, kind: picked, by: "bridge study, 2026-11-19, picked from the brief"}
+- {element: lot-tower-irregularity, says: "irregularity of a tower that is a lot on the deck", scope: opening, draw: range, unit: irregularity, least: 0, most: 0.25, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: lot-bridge-span, says: "span of a bridge that is a lot on the deck of a bridge", scope: opening, draw: range, unit: m, least: 140, most: 220, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: lot-bridge-reach, says: "a nested bridge's irregularity as a share of the bridge's it stands on", scope: row, draw: range, unit: share, least: 0.5, most: 0.5, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- element: lot-kind
+  says: what stands on a lot of the deck; a bridge only while the depth allows it
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: terrace-groningen, weight: 3}
+  - {name: terrace-portofino, weight: 3}
+  - {name: terrace-midwest, weight: 1}
+  - {name: condominium, weight: 3}
+  - {name: tower, weight: 1.2}
+  - {name: bridge, weight: 0.4}
+  kind: picked
+  by: "bridge study, 2026-11-19, picked"
+- element: approach-near
+  says: what stands on the first steps of an approach, tall still
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: terrace-portofino, weight: 1}
+  - {name: terrace-groningen, weight: 1}
+  kind: picked
+  by: "bridge study, 2026-11-19, picked"
+- element: approach-far
+  says: what stands on the last steps of an approach, low
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: terrace-midwest, weight: 1}
+  kind: picked
+  by: "bridge study, 2026-11-19, picked"
+- {element: cable-thickness, says: "thickness of a main cable", scope: row, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: cable-segment, says: "length of one link of a main cable", scope: row, draw: range, unit: m, least: 30, most: 30, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: cable-sag-share, says: "how far a main cable hangs at its lowest between supports, as a share of the distance between them", scope: bay, draw: range, unit: share, least: 0.08, most: 0.12, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: cable-strands, says: "strands in each main cable, from one up to as far as the irregularity reaches", scope: row, draw: range, unit: strands, whole: true, least: 1, most: 5, kind: picked, by: "bridge study, 2026-11-19, picked"}
+- {element: strand-gap, says: "gap between the strands of a cable", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: hanger-spacing, says: "distance between the hangers that drop from a cable to the deck", scope: row, draw: range, unit: m, least: 30, most: 30, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: hanger-thickness, says: "thickness of a hanger", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: deck-sag, says: "whether the deck sags between pylons", scope: row, draw: share, unit: chance, share: 0.6, kind: picked, by: "bridge study, 2026-11-19, picked"}
+- {element: deck-sag-depth, says: "how far the deck sags at the middle between two stations", scope: bay, draw: range, unit: m, least: 8, most: 30, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: deck-step, says: "whether the deck steps up or down at each station", scope: row, draw: share, unit: chance, share: 0.5, kind: picked, by: "bridge study, 2026-11-19, picked"}
+- {element: deck-step-height, says: "how far the deck steps at a station, up or down", scope: bay, draw: range, unit: m, least: 8, most: 25, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: second-deck, says: "whether the bridge carries a second deck above the first", scope: row, draw: share, unit: chance, share: 0.5, kind: picked, by: "bridge study, 2026-11-19, picked"}
+- {element: second-deck-gap, says: "height of the second deck over the first", scope: row, draw: range, unit: m, least: 50, most: 70, kind: picked, by: "bridge study, 2026-11-19, by eye"}
+- {element: second-deck-share, says: "the share of lots the second deck is built on, the rest left open", scope: opening, draw: share, unit: chance, share: 0.5, kind: picked, by: "bridge study, 2026-11-19, picked"}
+- element: steel-colour
+  says: the colour of cables and hangers
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: cable-steel, weight: 1, colour: [0.1, 0.1, 0.11], gloss: 0.5}
+  kind: picked
+  by: "bridge study, 2026-11-19, by eye"
+- element: deck-colour
+  says: the colour of the deck's underside and edge
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: deck-concrete, weight: 1, colour: [0.14, 0.14, 0.15], gloss: 0}
+  kind: picked
+  by: "bridge study, 2026-11-19, by eye"
+- element: street-colour
+  says: the colour of the street
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: street-tarmac, weight: 1, colour: [0.03, 0.03, 0.035], gloss: 0.1}
+  kind: picked
+  by: "bridge study, 2026-11-19, by eye"

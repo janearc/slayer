@@ -3,11 +3,30 @@
 package shape
 
 import (
+	"math"
 	"math/rand/v2"
 	"testing"
 
 	"github.com/janearc/slayer/maths"
 )
+
+// nearestOfAll is how far p is from the nearest face, squared, found by
+// asking every face.
+func nearestOfAll(built *Mesh, point maths.Vec) float64 {
+	best := math.Inf(unity)
+	for _, face := range built.tris {
+		first := vec(face.p[meshtreeFirst])
+		second := vec(face.p[meshtreeSecond])
+		third := vec(face.p[meshtreeThird])
+		weights := closest(point, first, second, third)
+		nearest := first.Scale(weights[meshtreeFirst]).
+			Add(second.Scale(weights[meshtreeSecond])).
+			Add(third.Scale(weights[meshtreeThird]))
+		offset := nearest.Sub(point)
+		best = math.Min(best, offset.Dot(offset))
+	}
+	return best
+}
 
 // The tree finds what asking every face finds: the same nearest face at
 // the same distance, to the last bit, on a soup of ten thousand faces,

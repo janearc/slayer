@@ -14,45 +14,45 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
-func populationSail(colour, glow [3]float64, rate float64) SailPlan {
-	return SailPlan{Count: 3, Segments: 12, SpanSegments: 3,
+func populationSail(colour, glow [3]float64, rate float64) sailPlan {
+	return sailPlan{Count: 3, Segments: 12, SpanSegments: 3,
 		Length: 2, Width: .7, Sweep: .4, Camber: .2, TwistDegrees: 15,
 		SpinRate: rate, Colour: colour, Glow: glow}
 }
 
-func examplePopulation() []AuthoredBeingPlan {
+func examplePopulation() []authoredBeingPlan {
 	secondSail := populationSail([3]float64{.2, .1, .8}, [3]float64{.02, .01, .1}, -.5)
 	secondSail.Rotation = [3]float64{0, 25, 0}
-	return []AuthoredBeingPlan{
+	return []authoredBeingPlan{
 		{Identity: 4, At: [3]float64{-3, 0, 0}, Scale: 1,
-			Anatomy: &AnatomyPlan{
-				Cores: []CorePlan{{Form: "sphere", Radius: .7,
+			Anatomy: &anatomyPlan{
+				Cores: []corePlan{{Form: "sphere", Radius: .7,
 					Colour: [3]float64{.2, .4, .8}, Glow: [3]float64{.01, .02, .1}}},
-				Sails: []SailPlan{populationSail([3]float64{.8, .2, .1}, [3]float64{.1, .02, .01}, .3)},
+				Sails: []sailPlan{populationSail([3]float64{.8, .2, .1}, [3]float64{.1, .02, .01}, .3)},
 			}},
 		{Identity: 9, At: [3]float64{3, 0, 0}, Scale: 1.4,
-			Anatomy: &AnatomyPlan{
-				Cores: []CorePlan{{Form: "octahedron", Radius: .9,
+			Anatomy: &anatomyPlan{
+				Cores: []corePlan{{Form: "octahedron", Radius: .9,
 					Colour: [3]float64{.1, .8, .2}, Glow: [3]float64{.02, .1, .01}}},
-				Sails: []SailPlan{secondSail},
+				Sails: []sailPlan{secondSail},
 			}},
 	}
 }
 
-func populationStagePlan(population []AuthoredBeingPlan) *StagePlan {
-	return &StagePlan{Kind: "authored-multitude", Population: population,
+func populationStagePlan(population []authoredBeingPlan) *stagePlan {
+	return &stagePlan{Kind: "authored-multitude", Population: population,
 		Eye: [3]float64{0, 3, 24}, EndEye: [3]float64{1, 4, 22},
 		Look: [3]float64{0, 0, 0}, Wide: 60, Exposure: 1.6}
 }
 
 func TestAuthoredStagePlanJSONRoundTripKeepsYAMLFieldNames(t *testing.T) {
 	disabled := false
-	plan := &StagePlan{Kind: "individual", Anatomy: exampleAnatomy(), ShareAnatomyPrototypes: &disabled}
+	plan := &stagePlan{Kind: "individual", Anatomy: exampleAnatomy(), ShareAnatomyPrototypes: &disabled}
 	encoded, err := json.Marshal(plan)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var decoded StagePlan
+	var decoded stagePlan
 	if err = json.Unmarshal(encoded, &decoded); err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestAuthoredStagePlanJSONRoundTripKeepsYAMLFieldNames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	decoded = StagePlan{}
+	decoded = stagePlan{}
 	if err = json.Unmarshal(encoded, &decoded); err != nil {
 		t.Fatal(err)
 	}
@@ -253,22 +253,22 @@ func TestAuthoredMultitudeHasStrictSceneInputAndTotalResourceBound(t *testing.T)
 	if _, err = readStageJob(decoded); err == nil {
 		t.Fatal("unknown prototype sharing field was accepted")
 	}
-	tooMuch := make([]AuthoredBeingPlan, 2)
+	tooMuch := make([]authoredBeingPlan, 2)
 	for index := range tooMuch {
-		cores := make([]CorePlan, maxAnatomyParts)
+		cores := make([]corePlan, maxAnatomyParts)
 		for i := range cores {
-			cores[i] = CorePlan{Form: "sphere", Radius: 1}
+			cores[i] = corePlan{Form: "sphere", Radius: 1}
 		}
-		tooMuch[index] = AuthoredBeingPlan{Scale: 1,
-			Anatomy: &AnatomyPlan{Cores: cores}}
+		tooMuch[index] = authoredBeingPlan{Scale: 1,
+			Anatomy: &anatomyPlan{Cores: cores}}
 	}
 	if err = populationStagePlan(tooMuch).check(); err == nil {
 		t.Fatal("total population work exceeded its bound")
 	}
-	tooManyFaces := make([]AuthoredBeingPlan, 6)
+	tooManyFaces := make([]authoredBeingPlan, 6)
 	for index := range tooManyFaces {
-		tooManyFaces[index] = AuthoredBeingPlan{Scale: 1,
-			Anatomy: &AnatomyPlan{Sails: []SailPlan{{
+		tooManyFaces[index] = authoredBeingPlan{Scale: 1,
+			Anatomy: &anatomyPlan{Sails: []sailPlan{{
 				Count: 10, Segments: 128, SpanSegments: 16,
 				Length: 1, Width: 1,
 			}}}}

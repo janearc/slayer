@@ -17,8 +17,8 @@ var tideSpeeds = func() map[string]float64 {
 	return out
 }()
 
-// Constituent is one of the regular rises and falls a tide is the sum of.
-type Constituent struct {
+// constituent is one of the regular rises and falls a tide is the sum of.
+type constituent struct {
 	// Name is M2, S2, N2, K1, O1 or M4.
 	Name string
 	// Amplitude is half its range, in metres.
@@ -30,7 +30,7 @@ type Constituent struct {
 
 // Tide is the tide at one place, as the constituents measured there. A
 // port's are published; NOAA lists them for every station it keeps.
-type Tide []Constituent
+type Tide []constituent
 
 // Level is the height of the tide above its mean, in metres, at a number
 // of hours after hour zero: each constituent's amplitude times the cosine

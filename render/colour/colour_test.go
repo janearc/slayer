@@ -21,7 +21,8 @@ func TestHalfTheLightIs188NotHalfTheByte(t *testing.T) {
 
 func TestDecodeUndoesEncode(t *testing.T) {
 	for b := 0; b < 256; b++ {
-		if got := Encode(Decode(uint8(b))); got != uint8(b) {
+		code := uint8(b)
+		if got := Encode(Decode(code)); got != uint8(b) {
 			t.Fatalf("byte %d came back as %d", b, got)
 		}
 	}

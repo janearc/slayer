@@ -62,7 +62,10 @@ func (band *bandFinisher) consume(first, down int, samples []float32) error {
 	band.peak = max(band.peak, int64(cap(samples))*4)
 	band.rows(first, down, samples)
 	band.next += down
-	return nil
+	// a watched drawing says its pixel rows finished, and stops here,
+	// between bands, once its watch's context is done
+	watched.rows(band.next/band.side, band.picture.H)
+	return watched.stopped()
 }
 
 // valid refuses skipped/overlapping bands before they can corrupt accumulation.

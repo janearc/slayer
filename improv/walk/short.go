@@ -26,9 +26,6 @@ type Short struct {
 // Name is the short's name, in words, for its folder.
 func (short Short) Name() string { return short.name }
 
-// Title is what the short is.
-func (short Short) Title() string { return short.title }
-
 // Bar is the bar of the song the sound starts at, as the set's song
 // counts them, and whether the short has a song under it.
 func (short Short) Bar() (int, bool) { return short.bar, short.sounded }
@@ -59,60 +56,31 @@ type Shot struct {
 	lit, tag string
 	travel   [2]window
 	name     string
-	figures  []Figure
-	labels   []Label
+	figures  []figure
+	labels   []label
 	bar      *Place
 	outright *outrightBar
 	sentence string
 }
 
-// Camera is the set's camera the shot's still was drawn from.
-func (shot Shot) Camera() string { return shot.camera }
-
 // Seconds is how long the shot stands.
 func (shot Shot) Seconds() float64 { return shot.seconds }
-
-// Lit is how the still was lit: show, plate or inspection.
-func (shot Shot) Lit() string { return shot.lit }
-
-// Labels is the shot's labels.
-func (shot Shot) Labels() []Label {
-	return append([]Label(nil), shot.labels...)
-}
 
 // Sentence is what the shot says.
 func (shot Shot) Sentence() string { return shot.sentence }
 
-// Figure is a number on the panel: as written, its unit, a few words,
+// figure is a number on the panel: as written, its unit, a few words,
 // and where it comes from.
-type Figure struct {
+type figure struct {
 	value, unit, says, from string
 }
 
-// Value is the figure as written.
-func (figure Figure) Value() string { return figure.value }
-
-// Unit is the figure's unit, or nothing for a count.
-func (figure Figure) Unit() string { return figure.unit }
-
-// Says is the few words under the figure.
-func (figure Figure) Says() string { return figure.says }
-
-// From is where the figure comes from: a file and key, or a sum of them.
-func (figure Figure) From() string { return figure.from }
-
-// Label is words on the picture with a leader to the pixel of a place.
-type Label struct {
+// label is words on the picture with a leader to the pixel of a place.
+type label struct {
 	words string
 	at    Pixel
 	side  image.Point
 }
-
-// Words is what the label says.
-func (label Label) Words() string { return label.words }
-
-// At is the pixel of the still the leader points to.
-func (label Label) At() Pixel { return label.at }
 
 // still is a traced picture: its file and its size.
 type still struct {
@@ -124,17 +92,17 @@ type still struct {
 func (where stage) stillOf(path string) (still, error) {
 	if path == "" {
 		return still{}, fmt.Errorf("%w: a shot with no picture; name "+
-			"its still", ErrWalk)
+			"its still", errWalk)
 	}
 	full := filepath.Join(where.pictures, path)
 	file, err := os.Open(full)
 	if err != nil {
-		return still{}, fmt.Errorf("%w: %w", ErrWalk, err)
+		return still{}, fmt.Errorf("%w: %w", errWalk, err)
 	}
 	defer file.Close()
 	shape, err := png.DecodeConfig(file)
 	if err != nil {
-		return still{}, fmt.Errorf("%w: %s is not a png: %w", ErrWalk,
+		return still{}, fmt.Errorf("%w: %s is not a png: %w", errWalk,
 			path, err)
 	}
 	return still{path: full, size: image.Pt(shape.Width, shape.Height)},
@@ -153,10 +121,10 @@ func (where stage) picture(read set.Set, path, camera string) (still,
 	if err != nil {
 		return still{}, Camera{}, err
 	}
-	if _, height := view.Size(); height != picture.size.Y {
+	if _, height := view.size(); height != picture.size.Y {
 		return still{}, Camera{}, fmt.Errorf("%w: %s is %d by %d; the "+
 			"set's rig makes a picture %d across %d high; draw it again "+
-			"from the set", ErrWalk, path, picture.size.X, picture.size.Y,
+			"from the set", errWalk, path, picture.size.X, picture.size.Y,
 			picture.size.X, height)
 	}
 	return picture, view, nil
@@ -189,7 +157,7 @@ func windowOf(said *writtenWindow, picture still) ([2]window, error) {
 	for i, shares := range [][]float64{said.From, said.To} {
 		if len(shares) != len(ends[0].shares()) {
 			return ends, fmt.Errorf("%w: a window end of %v; give its "+
-				"left, top and width as shares of the still", ErrWalk,
+				"left, top and width as shares of the still", errWalk,
 				shares)
 		}
 		ends[i] = window{left: shares[0] * float64(size.X),
@@ -197,7 +165,7 @@ func windowOf(said *writtenWindow, picture still) ([2]window, error) {
 				float64(size.X)}
 		if !ends[i].inside(size) {
 			return ends, fmt.Errorf("%w: the window %v is off its %d by "+
-				"%d still; keep it inside", ErrWalk, shares, size.X, size.Y)
+				"%d still; keep it inside", errWalk, shares, size.X, size.Y)
 		}
 	}
 	return ends, nil
@@ -224,23 +192,23 @@ var sides = map[string]image.Point{"": {0, -1}, "up": {0, -1},
 // camera sees on its still, or a pixel of the still given outright;
 // and a side to stand on.
 func (where stage) label(said writtenLabel, view *Camera,
-	size image.Point) (Label, error) {
+	size image.Point) (label, error) {
 	side, known := sides[said.Side]
 	if !known || said.Words == "" {
-		return Label{}, fmt.Errorf("%w: the label %q on side %q; give it "+
-			"words and a side of up, down, left or right", ErrWalk,
+		return label{}, fmt.Errorf("%w: the label %q on side %q; give it "+
+			"words and a side of up, down, left or right", errWalk,
 			said.Words, said.Side)
 	}
 	seen, err := where.target(said, view, size)
 	if err != nil {
-		return Label{}, err
+		return label{}, err
 	}
 	if !seen.ahead || !seen.on {
-		return Label{}, fmt.Errorf("%w: the label %q points at a place the "+
+		return label{}, fmt.Errorf("%w: the label %q points at a place the "+
 			"camera does not see; point it at one on the picture",
-			ErrWalk, said.Words)
+			errWalk, said.Words)
 	}
-	return Label{words: said.Words, at: seen, side: side}, nil
+	return label{words: said.Words, at: seen, side: side}, nil
 }
 
 // placeShares, wayShares and pixelShares are how many numbers a place, a
@@ -261,7 +229,7 @@ func (where stage) target(said writtenLabel, view *Camera,
 	}
 	if given != 1 {
 		return Pixel{}, fmt.Errorf("%w: the label %q points at %d things; "+
-			"give one of thing, at, toward or pixel", ErrWalk, said.Words,
+			"give one of thing, at, toward or pixel", errWalk, said.Words,
 			given)
 	}
 	if said.Pixel != nil {
@@ -271,7 +239,7 @@ func (where stage) target(said writtenLabel, view *Camera,
 		return Pixel{}, fmt.Errorf("%w: the label %q points at a thing, a "+
 			"place or a way, and the shot has no camera to find it "+
 			"through; give it a pixel, or give the shot a camera or an "+
-			"eye", ErrWalk, said.Words)
+			"eye", errWalk, said.Words)
 	}
 	return where.projectedTarget(said, *view)
 }
@@ -280,7 +248,7 @@ func (where stage) target(said writtenLabel, view *Camera,
 func pixelOf(said writtenLabel, size image.Point) (Pixel, error) {
 	if len(said.Pixel) != pixelShares {
 		return Pixel{}, fmt.Errorf("%w: the label %q: a pixel is a column "+
-			"and a row", ErrWalk, said.Words)
+			"and a row", errWalk, said.Words)
 	}
 	x, y := said.Pixel[0], said.Pixel[1]
 	on := x >= 0-half && y >= 0-half && x < float64(size.X)-half &&
@@ -294,10 +262,10 @@ func (where stage) projectedTarget(said writtenLabel, view Camera) (Pixel,
 	error) {
 	switch {
 	case said.Thing != "":
-		at, found := where.places.Of(said.Thing)
+		at, found := where.places.of(said.Thing)
 		if !found {
 			return Pixel{}, fmt.Errorf("%w: the label %q points at %q, "+
-				"which the places do not have", ErrWalk, said.Words,
+				"which the places do not have", errWalk, said.Words,
 				said.Thing)
 		}
 		return view.Project(at), nil
@@ -305,11 +273,11 @@ func (where stage) projectedTarget(said writtenLabel, view Camera) (Pixel,
 		at, err := where.placeOf(said.At)
 		return view.Project(at), err
 	case len(said.Toward) == wayShares && !where.scene:
-		return view.Toward(said.Toward[0], said.Toward[1]), nil
+		return view.toward(said.Toward[0], said.Toward[1]), nil
 	}
 	return Pixel{}, fmt.Errorf("%w: the label %q: at is three numbers "+
 		"(east, north and height on a set; x, y and z in a scene); toward "+
-		"is azimuth and altitude, on a set only", ErrWalk, said.Words)
+		"is azimuth and altitude, on a set only", errWalk, said.Words)
 }
 
 // placeOf is a place written in a script: east, north and height on a
@@ -335,7 +303,7 @@ func (where stage) scaled(shot *Shot, said writtenScale) error {
 		if !(said.Pixels > 0) || said.Length == "" || said.Thing != "" ||
 			said.At != nil || said.Toward != nil {
 			return fmt.Errorf("%w: a scale bar given outright needs pixels "+
-				"over nought and a length, and nothing else", ErrWalk)
+				"over nought and a length, and nothing else", errWalk)
 		}
 		shot.outright = &outrightBar{pixels: said.Pixels,
 			words: strings.TrimSpace(said.Length + " " + said.Unit)}
@@ -344,7 +312,7 @@ func (where stage) scaled(shot *Shot, said writtenScale) error {
 	if said.Toward != nil || shot.view == nil {
 		return fmt.Errorf("%w: a scale bar toward the sky, or measured "+
 			"with no camera; put it at a thing or a place a camera sees, "+
-			"or give its pixels and length outright", ErrWalk)
+			"or give its pixels and length outright", errWalk)
 	}
 	label := writtenLabel{Thing: said.Thing, At: said.At,
 		Words: "the scale bar"}
@@ -354,9 +322,9 @@ func (where stage) scaled(shot *Shot, said writtenScale) error {
 	}
 	if !seen.on {
 		return fmt.Errorf("%w: the scale bar stands where the camera does "+
-			"not see; put it on the picture", ErrWalk)
+			"not see; put it on the picture", errWalk)
 	}
-	at, _ := where.places.Of(said.Thing)
+	at, _ := where.places.of(said.Thing)
 	if said.At != nil {
 		at, _ = where.placeOf(said.At)
 	}

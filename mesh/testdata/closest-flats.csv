@@ -1,0 +1,7 @@
+name,x0,y0,x1,y1,x2,y2
+right,0,0,4,0,0,3
+acute,0,0,5,0,2,3
+obtuse at c,0,0,6,0,3,1
+obtuse at a,0,0,4,0,-2,2
+sliver,0,0,8,0,7,1
+turned inward,1,1,1,5,-3,2

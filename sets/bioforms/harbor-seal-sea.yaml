@@ -1,0 +1,61 @@
+# harbor seal at sea: the seal built on its skeleton, in its swimming
+# stroke, at the surface of a small height-field sea by day, its back
+# and head above the water and its belly and hind flippers under it.
+#
+# the frame. places are metres, x east, y north, z up, mean sea at z=0.
+# the sea is centred on the seal and 24 m across, 241 samples a side
+# (0.1 m spacing), a light breeze of 3 m/s, deep water. every input is
+# chosen; the water is the boats sets' seawater.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: harbor seal at sea
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 236.2, altitude: 24}
+  film:
+    width: 1600
+    height: 1000
+    rays: 2
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.5, 0.1, 0.06]
+        source: "synthetic extinction, not measured water; colour by eye"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 24, unit: m}
+      samples: 241
+      sea:
+        wind: {value: 3, unit: m/s}
+        fetch: {value: 5000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a light breeze in a sheltered bay, no shelf source"
+  set:
+    things:
+      seal: {kind: harbor-seal-swimming, seed: 407, position: {east: {value: 0, unit: m}, north: {value: 0, unit: m}, up: {value: -0.13, unit: m}}, heading: {value: 0, unit: deg}}
+  cameras:
+    swell:
+      title: "low over the water at the seal's quarter, 3 m off"
+      location: {at: [2.2, -2.2, 0.7]}
+      orientation: {look_at: [0.1, 0, 0.0]}
+    above:
+      title: "from above and behind, 4 m up"
+      location: {at: [-1.5, -2.0, 4.0]}
+      orientation: {look_at: [0, 0, 0]}

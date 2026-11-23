@@ -1,0 +1,76 @@
+# the air a seal lets go, seen from under the surface: a bubble stream of
+# the catalogue rising from the seal's muzzle through water, the camera
+# looking up at the sky through the surface. it is the water of
+# sets/kelp-forest.yaml (see its header for where each number comes from),
+# without that set's `direct-sun: mean-plane`: the tracer refuses mean-plane
+# direct sun in a scene that has another transparent boundary, and a bubble
+# is one. so the light in the water here is the sky seen through the
+# surface, and the bubbles are seen against it.
+#
+# places are metres, x east, y north, z up, mean sea at z=0. the seal is at
+# the place it has in sets/kelp-forest.yaml, and the stream's origin is
+# at its muzzle.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: kelp forest bubbles
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 200, altitude: 60}
+  film:
+    width: 640
+    height: 360
+    rays: 1
+    exposure: 20000
+    wide: 60
+  world:
+    unit: 1
+    materials:
+      seawater:
+        colour: {srgb_linear: [0, 0, 0]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+          extinction-per-metre: [0.2778, 0.0713, 0.0277]
+        source: "pure water absorption, Pope and Fry 1997; particle scattering, Morel and Maritorena 2001 Case 1 model at a picked 0.5 mg/m3 chlorophyll, counted as loss by its share turned away, one minus the Petzold mean cosine 0.924; see sets/kelp-forest.yaml"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      extent: {value: 512, unit: m}
+      samples: 257
+      sea:
+        wind: {value: 5, unit: m/s}
+        fetch: {value: 50000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 11
+      time: {value: 0, unit: s}
+      source: "picked: a light breeze, no shelf source"
+  set:
+    things:
+      seal:
+        kind: bay-seal
+        seed: 1
+        position:
+          east: {value: -7, unit: m}
+          north: {value: -2, unit: m}
+          up: {value: -9, unit: m}
+        heading: {value: 60, unit: deg}
+      breath:
+        kind: bubble-stream
+        seed: 5
+        position:
+          east: {value: -6.2, unit: m}
+          north: {value: -1.6, unit: m}
+          up: {value: -8.9, unit: m}
+  cameras:
+    breath:
+      title: "close, looking up along the seal's breath to the surface"
+      location: {at: [-5.6, -2.3, -7.9]}
+      orientation: {look_at: [-6.2, -1.6, -7.0]}
+      initial-media: [seawater]

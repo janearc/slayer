@@ -41,8 +41,9 @@ func tuned(score, voicing string, length time.Duration) (track, error) {
 	for i := range pairs {
 		samples = append(samples, piece.Left[i], piece.Right[i])
 	}
+	tuneLength := piece.Duration()
 	said := fmt.Sprintf("the tune is %s and the film %s", seconds(
-		piece.Duration()), seconds(length))
+		tuneLength), seconds(length))
 	switch {
 	case piece.Duration() >= length:
 		said += ": the tune is cut at the film's end"
@@ -66,8 +67,9 @@ func sampleCount(rate int, length time.Duration) int {
 func looped(samples []float32, count int) []float32 {
 	made := make([]float32, nothing, count)
 	for len(made) < count {
-		made = append(made, samples[:min(len(samples),
-			count-len(made))]...)
+		chunkLength := min(len(samples),
+			count-len(made))
+		made = append(made, samples[:chunkLength]...)
 	}
 	return made
 }
@@ -82,16 +84,18 @@ func filed(path string, from, length time.Duration) (track, error) {
 	skip := sampleCount(read.Rate(), from)
 	samples := read.Samples()
 	if skip >= len(samples) {
+		fileLength := read.Duration()
 		return track{}, fmt.Errorf("%s is %s long, and the sound is to "+
 			"start at %s: nothing is left; say an earlier from", path,
-			seconds(read.Duration()), seconds(from))
+			seconds(fileLength), seconds(from))
 	}
 	sound, err := movie.NewSound(read.Rate(), samples[skip:])
 	if err != nil {
 		return track{}, err
 	}
+	soundLength := sound.Duration()
 	said := fmt.Sprintf("the sound file plays %s from %s, and the film "+
-		"is %s", seconds(sound.Duration()), seconds(from),
+		"is %s", seconds(soundLength), seconds(from),
 		seconds(length))
 	return track{sound: sound, said: said}, nil
 }

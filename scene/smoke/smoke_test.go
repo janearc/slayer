@@ -12,29 +12,8 @@ import (
 	"time"
 
 	"github.com/janearc/slayer/maths"
-	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/world"
 )
-
-// lit is the lit volume pixels of a frame in a band of rows: how many,
-// and their mean x and luminance.
-func lit(f *frame.Frame, from, to int) (n int, meanX, meanLum float64) {
-	sumX, sumL := 0.0, 0.0
-	for y := from; y < to; y++ {
-		for x := 0; x < f.W; x++ {
-			p := f.At(x, y)
-			if p.Cover > 0.05 && math.IsInf(float64(p.Depth), 1) {
-				if l := p.Light().Luminance(); l > 0.02 {
-					n, sumX, sumL = n+1, sumX+float64(x), sumL+l
-				}
-			}
-		}
-	}
-	if n == 0 {
-		return 0, 0, 0
-	}
-	return n, sumX / float64(n), sumL / float64(n)
-}
 
 // A smoke's Reads opens its inputs out: a path passes through, a $NAME
 // becomes the files in the folder the variable names, a $NAME/file that

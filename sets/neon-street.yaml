@@ -1,0 +1,251 @@
+# the neon street: one street at night that every part of the shot stands
+# in. a block of towers carrying signs on their roofs and sides, a street
+# of buildings lashed together with rows of lanterns across it, shops at
+# the foot of the buildings, and the road wet with rain.
+#
+# first assembly. each part is the kind its own study drew, set down on one
+# street; nothing here is tuned. what the shot wants and this does not have
+# yet: light in the air, so the sky is black; the moon; shops in the foot of
+# the towers themselves, where here they stand in plain blocks south of
+# them.
+#
+# places are metres, as a map's run: x east, y north, z up. the street runs
+# north, twelve metres from wall to wall, its walls at x of six either
+# side. from the south: the shops, from y of -124 to -78; the towers, from
+# -76 to 0; the lashed street, from 4 to 100. every number is a choice of
+# this study, picked. the first camera is the one drawn; to draw another,
+# put it first.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: neon street
+  # the seed slayer draws with when a set names none, said so that the
+  # working display, which wants it said, makes the things the render does
+  seed: 1
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 640
+    rays: 2
+    wide: 70
+    exposure: 4
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    above:
+      title: "from above the south end, the whole street laid out"
+      wide: 60
+      location:
+        at: [0, -190, 120]
+      orientation:
+        look_at: [0, 0, 10]
+    down-the-street:
+      title: "at eye height at the south end, looking north down the street"
+      location:
+        at: [1.2, -118, 1.7]
+      orientation:
+        look_at: [0, 40, 16]
+  recipes:
+    cyber: {kind: tower, irregularity: 0, pins: {plan: rectangle, retail: true, skin: curtain, cyber: true, storeys: 22, width: {value: 36, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    gothic: {kind: tower, irregularity: 0, pins: {plan: rectangle, retail: true, skin: gothic, signs: true, gargoyles: true, storeys: 18, segments: 3, width: {value: 36, unit: m}, taper: false, twist: false, setbacks: true, spire: false}}
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, retail: true, skin: concrete, signs: true, storeys: 16, width: {value: 36, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    mirror: {kind: tower, irregularity: 0, pins: {plan: rectangle, retail: true, skin: mirror, signs: true, storeys: 26, width: {value: 36, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    lanterns: {kind: lashed-street, style: lantern-rows, street: {value: 12, unit: m}, length: {value: 96, unit: m}}
+    wet: {kind: street, wetness: 0.7, length: {value: 100, unit: m}}
+    wet-end: {kind: street, wetness: 0.7, length: {value: 50, unit: m}}
+  set:
+    things:
+      shops east: {kind: frontage, seed: 33, complexity: demo, east: 6, north: -80, height: {value: 0, unit: m}, heading: {value: 90, unit: deg}}
+      shops west: {kind: frontage, seed: 41, complexity: demo, east: -6, north: -122, height: {value: 0, unit: m}, heading: {value: 270, unit: deg}}
+      tower southwest: {recipe: concrete, seed: 21, complexity: quick, east: -24, north: -58, height: {value: 0, unit: m}}
+      tower southeast: {recipe: mirror, seed: 22, complexity: quick, east: 24, north: -58, height: {value: 0, unit: m}}
+      tower northwest: {recipe: cyber, seed: 4, complexity: quick, east: -24, north: -18, height: {value: 0, unit: m}}
+      tower northeast: {recipe: gothic, seed: 3, complexity: quick, east: 24, north: -18, height: {value: 0, unit: m}}
+      lashed street: {recipe: lanterns, seed: 7, complexity: quick, east: 0, north: 52, height: {value: 0, unit: m}, heading: {value: 0, unit: deg}}
+      road south: {recipe: wet, seed: 11, complexity: quick, east: 0, north: -80, height: {value: 0, unit: m}}
+      road middle: {recipe: wet, seed: 12, complexity: quick, east: 0, north: 20, height: {value: 0, unit: m}}
+      road north: {recipe: wet-end, seed: 13, complexity: quick, east: 0, north: 95, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.02, 0.02, 0.022]}
+        source: eye
+      storeys:
+        colour: {srgb_linear: [0.05, 0.05, 0.06]}
+        source: eye
+    boxes:
+      ground:
+        material: ground
+        middle: [0, 0, -1.02]
+        size: [600, 600, 2]
+        source: eye
+      block over shops east:
+        material: storeys
+        middle: [13, -100, 21.7]
+        size: [14, 44, 36.6]
+        source: eye
+      block over shops west:
+        material: storeys
+        middle: [-13, -100, 21.7]
+        size: [14, 44, 36.6]
+        source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        grime:
+          kind: rain
+          on: [wet]
+          colour: {srgb_linear: [0.008, 0.008, 0.007]}
+          strength: 0.85
+          settle: 6
+          level: 0.2
+          length: 6
+          spacing: 0.35
+          share: 0.85
+        soot:
+          kind: soot
+          colour: {srgb_linear: [0.01, 0.009, 0.008]}
+          strength: 0.6
+          settle: 15
+          reach: 14
+          share: 0.4
+          grain: 1.2
+          shelter: 3
+          catch: 0.5
+        rust:
+          kind: rust
+          on: [steel]
+          colour: {srgb_linear: [0.14, 0.06, 0.03]}
+          strength: 0.4
+          settle: 10
+          level: 0.2
+          length: 3
+          spacing: 0.25
+          share: 0.3
+          grain: 0.3
+        # the oldest marks, faded, under everything after them
+        old-pieces:
+          kind: graffiti
+          mark: piece
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.3, 0.1, 0.12]}
+          other: {srgb_linear: [0.12, 0.2, 0.3]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.45
+          settle: 6
+          level: 0.2
+          grain: 6
+          low: 0.2
+          high: 2.6
+          share: 0.15
+          sought: 1
+          shunned: 0.03
+          catch: 2
+        old-tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.3, 0.25, 0.05]}
+          other: {srgb_linear: [0.3, 0.1, 0.05]}
+          line: {srgb_linear: [0.03, 0.03, 0.035]}
+          strength: 0.4
+          settle: 6
+          level: 0.2
+          grain: 1.1
+          low: 0.2
+          high: 2.4
+          share: 0.2
+          sought: 2
+          shunned: 0.03
+          catch: 2
+        # pieces over a blank wall or a loading door, and where writers climb
+        pieces:
+          kind: graffiti
+          mark: piece
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.03, 0.55, 0.8]}
+          other: {srgb_linear: [0.1, 0.75, 0.2]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 5
+          low: 0.2
+          high: 2.6
+          share: 0.12
+          heaven: 0.3
+          behind: 0.6
+          shelter: 8
+          sought: 2
+          shunned: 0.03
+          catch: 2
+        throw-ups:
+          kind: graffiti
+          mark: throw-up
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 3
+          low: 0.2
+          high: 2.8
+          share: 0.2
+          heaven: 0.3
+          behind: 0.6
+          shelter: 8
+          sought: 3
+          shunned: 0.03
+          catch: 2
+        # tags on top, most of all on a shutter, and a few high ones
+        tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.9, 0.7, 0.05]}
+          other: {srgb_linear: [0.9, 0.3, 0.03]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.1
+          low: 0.2
+          high: 2.4
+          share: 0.2
+          sought: 5
+          shunned: 0.03
+          catch: 2
+        high-tags:
+          kind: graffiti
+          mark: tag
+          seek: [shutter, wet, plant]
+          shun: [polished, mirror]
+          colour: {srgb_linear: [0.85, 0.05, 0.4]}
+          other: {srgb_linear: [0.03, 0.55, 0.8]}
+          line: {srgb_linear: [0.7, 0.7, 0.75]}
+          strength: 1
+          settle: 6
+          level: 0.2
+          grain: 1.4
+          low: 2.4
+          high: 3.5
+          share: 0.05
+          sought: 2
+          shunned: 0.03
+          catch: 2

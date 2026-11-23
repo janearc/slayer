@@ -1,0 +1,13 @@
+name,x,y,z,long
+corner 0,-1,1,0,1
+corner 1,1,1,0,1
+corner 2,-1,-1,0,1
+corner 3,1,-1,0,1
+corner 4,0,-1,1,2
+corner 5,0,1,1,2
+corner 6,0,-1,-1,2
+corner 7,0,1,-1,2
+corner 8,1,0,-1,0
+corner 9,1,0,1,0
+corner 10,-1,0,-1,0
+corner 11,-1,0,1,0

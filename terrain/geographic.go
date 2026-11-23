@@ -15,9 +15,7 @@ func (raster *Raster) GeographicElevation(longitude, latitude float64) (float64,
 		return 0, false, fmt.Errorf("terrain: unavailable geographic source")
 	}
 	ref := raster.reference
-	// ModelTypeGeographic=2 and Angular_Degree=9102 are GeoTIFF registry codes.
-	if ref.Model != 2 || ref.GeographicCRS == 0 || ref.AngularUnits != 9102 ||
-		(ref.RasterType != 1 && ref.RasterType != 2) {
+	if !ref.degreeGrid() || (ref.RasterType != 1 && ref.RasterType != 2) {
 		return 0, false, fmt.Errorf("terrain: need a declared degree grid and pixel registration")
 	}
 	if !finiteCoordinate(longitude) || !finiteCoordinate(latitude) ||
@@ -36,8 +34,10 @@ func (raster *Raster) GeographicElevation(longitude, latitude float64) (float64,
 	if x < 0 || y < 0 || x > float64(raster.width-1) || y > float64(raster.height-1) {
 		return 0, false, nil
 	}
-	column := min(int(math.Floor(x)), raster.width-2)
-	row := min(int(math.Floor(y)), raster.height-2)
+	columnFloor := int(math.Floor(x))
+	rowFloor := int(math.Floor(y))
+	column := min(columnFloor, raster.width-2)
+	row := min(rowFloor, raster.height-2)
 	u, v := x-float64(column), y-float64(row)
 	weights := [4]float64{(1 - u) * (1 - v), u * (1 - v), (1 - u) * v, u * v}
 	corners := [4][2]int{{column, row}, {column + 1, row}, {column, row + 1}, {column + 1, row + 1}}

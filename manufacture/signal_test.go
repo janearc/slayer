@@ -130,7 +130,7 @@ func TestTheLarsonsLightsKeepTheirProgramme(t *testing.T) {
 		for _, each := range made.Descriptions() {
 			share := each.Light().Share(at)
 			switch {
-			case each.Name() == cabinName:
+			case each.name == cabinName:
 				cabin = share
 			case share == 1:
 				lit++

@@ -8,59 +8,105 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// clearCloudPhaseOrigin is the middle of space.
+func clearCloudPhaseOrigin() maths.Vec {
+	return maths.V(nought, nought, nought)
+}
+
+// clearCloudPhaseValid is the phase asymmetries a cloud takes: a retreating
+// one, none, a forward one and the largest below one.
+func clearCloudPhaseValid(t *testing.T) []float64 {
+	t.Helper()
+	return []float64{picked(t, "clear-cloud-phase-retreating"), nought,
+		picked(t, "clear-cloud-phase-forward"), math.Nextafter(unity, nought)}
+}
+
+// clearCloudPhaseInvalid is the phase asymmetries a cloud refuses: one either
+// way, no number, and an infinity either way.
+func clearCloudPhaseInvalid() []float64 {
+	return []float64{-unity, unity, math.NaN(), math.Inf(unity),
+		math.Inf(-unity)}
+}
+
+// TestClearCloudExplicitHGValidatesAndDistinguishesZero holds that a cloud
+// takes only a phase asymmetry strictly between minus one and one, and says
+// a given zero apart from none given.
 func TestClearCloudExplicitHGValidatesAndDistinguishesZero(t *testing.T) {
-	field := Puff{Radius: 2, Thick: 3}
-	legacy, err := NewClearCloud(field)
+	field := Puff{Radius: picked(t, "clear-cloud-phase-field-radius"),
+		Thick: picked(t, "clear-cloud-phase-field-thick")}
+	omitted, err := NewClearCloud(field)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if g, explicit := legacy.PhaseAsymmetry(); g != 0 || explicit {
+	phase, explicit := omitted.PhaseAsymmetry()
+	if phase != nought || explicit {
 		t.Fatal("omitted phase acquired an override")
 	}
-	for _, g := range []float64{-.9, 0, .8, math.Nextafter(1, 0)} {
-		cloud, err := NewClearCloudWithHenyeyGreenstein(field, g)
+	for _, phase := range clearCloudPhaseValid(t) {
+		cloud, err := NewClearCloudWithHenyeyGreenstein(field, phase)
 		if err != nil {
 			t.Fatal(err)
 		}
 		got, explicit := cloud.PhaseAsymmetry()
-		if !explicit || got != g {
-			t.Fatalf("phase %g read (%g,%t)", g, got, explicit)
+		if !explicit || got != phase {
+			t.Fatalf("phase %g read (%g,%t)", phase, got, explicit)
 		}
-		if cloud.Density(maths.Vec{}) != legacy.Density(maths.Vec{}) {
+		origin := clearCloudPhaseOrigin()
+		if cloud.Density(origin) != omitted.Density(origin) {
 			t.Fatal("phase changed density")
 		}
 	}
-	for _, g := range []float64{-1, 1, math.NaN(), math.Inf(1), math.Inf(-1)} {
-		if _, err := NewClearCloudWithHenyeyGreenstein(field, g); err == nil {
-			t.Fatalf("invalid phase %g accepted", g)
+	for _, phase := range clearCloudPhaseInvalid() {
+		_, refused := NewClearCloudWithHenyeyGreenstein(field, phase)
+		if refused == nil {
+			t.Fatalf("invalid phase %g accepted", phase)
 		}
 	}
-	if _, err := NewClearCloudWithHenyeyGreenstein(nil, .8); err == nil {
+	forward := picked(t, "clear-cloud-phase-forward")
+	if _, err := NewClearCloudWithHenyeyGreenstein(nil, forward); err == nil {
 		t.Fatal("phase bypassed field bounds validation")
 	}
 }
 
+// phaseClockField is a field whose density is one more than the seconds it
+// has been ticked to.
 type phaseClockField struct{ seconds float64 }
 
+// Bounds is the box a unit either side of the middle.
 func (field phaseClockField) Bounds() maths.Box {
-	return maths.Box{Min: maths.V(-1, -1, -1), Max: maths.V(1, 1, 1)}
+	return maths.Box{Min: maths.V(-unity, -unity, -unity),
+		Max: maths.V(unity, unity, unity)}
 }
-func (field phaseClockField) Density(maths.Vec) float64 { return field.seconds + 1 }
+
+// Density is one more than the seconds, wherever it is asked.
+func (field phaseClockField) Density(maths.Vec) float64 {
+	return field.seconds + unity
+}
+
+// Tick is the field at a time, a copy and not the same field.
 func (field phaseClockField) Tick(at time.Duration) Medium {
 	field.seconds = at.Seconds()
 	return field
 }
 
-func TestClearCloudTickRetainsExplicitHGAndTicksUnderlyingField(t *testing.T) {
-	cloud, err := NewClearCloudWithHenyeyGreenstein(phaseClockField{}, 0)
+// TestClearCloudTickRetainsExplicitHGAndTicksUnderlyingField holds that a
+// ticked cloud keeps the zero phase it was given, ticks the field under it,
+// and leaves the cloud it was ticked from as it was.
+func TestClearCloudTickRetainsExplicitHGAndTicksUnderlyingField(
+	t *testing.T) {
+	cloud, err := NewClearCloudWithHenyeyGreenstein(phaseClockField{}, nought)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ticked := cloud.Tick(2 * time.Second).(ClearCloud)
-	if g, explicit := ticked.PhaseAsymmetry(); g != 0 || !explicit {
+	seconds := time.Duration(pickedCount(t, "clear-cloud-phase-tick-seconds"))
+	ticked := cloud.Tick(seconds * time.Second).(ClearCloud)
+	if phase, explicit := ticked.PhaseAsymmetry(); phase != nought ||
+		!explicit {
 		t.Fatal("Tick lost explicit isotropic HG")
 	}
-	if ticked.Density(maths.Vec{}) != 3 || cloud.Density(maths.Vec{}) != 1 {
+	origin := clearCloudPhaseOrigin()
+	want := picked(t, "clear-cloud-phase-ticked-density")
+	if ticked.Density(origin) != want || cloud.Density(origin) != unity {
 		t.Fatal("phase wrapper lost immutable field clock")
 	}
 }

@@ -32,7 +32,8 @@ func TestEveryOperatorWordAndNumberCanChange(t *testing.T) {
 
 func TestAChangeIsMadeWhereItWas(t *testing.T) {
 	all := changes([]byte(small), 5, 5)
-	made := string(all[0].apply([]byte(small)))
+	applied := all[0].apply([]byte(small))
+	made := string(applied)
 	if want := "return a <= 3 && true"; !strings.Contains(made, want) {
 		t.Errorf("made\n%s\nwant %q in it", made, want)
 	}

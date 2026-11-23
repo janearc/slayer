@@ -90,7 +90,8 @@ func TestTheBareRingWithNoSunIsUnlit(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(built.World().Lamps) != none || said.Len() != none {
+		lamps := len(built.World().Lamps)
 		t.Errorf("a ring with no sun has %d lamps and said %q",
-			len(built.World().Lamps), said.String())
+			lamps, said.String())
 	}
 }

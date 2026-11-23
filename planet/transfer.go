@@ -55,8 +55,8 @@ type leaf struct {
 func (layer optics) leaf() leaf {
 	gas, haze := layer.scatter, layer.haze*layer.hazeAlbedo
 	tau := layer.depth()
-	made := leaf{raw: layer, tau: tau, open: tau > 0, gas: gas, haze: haze,
-		together: gas + haze, lobe: lobeOf(layer.hazeLean)}
+	made := leaf{raw: layer, tau: tau, open: tau > nothing, gas: gas,
+		haze: haze, together: gas + haze, lobe: lobeOf(layer.hazeLean)}
 	if made.open {
 		made.albedo = layer.scattered() / tau
 	}
@@ -67,16 +67,20 @@ func (layer optics) leaf() leaf {
 // is turn, given its haze's henyey phase at that turn, which every layer
 // with the same lobe shares: its optics' phase.
 func (layer *leaf) phase(turn, tilt float64) float64 {
-	if layer.together == 0 {
-		return 0
+	if layer.together == nothing {
+		return nothing
 	}
 	return (layer.gas*rayleigh(turn) + layer.haze*tilt) / layer.together
 }
 
+// rayleighScale is three quarters, which a molecule's phase is normalised by:
+// defined by rayleigh's phase function.
+const rayleighScale = 0.75
+
 // rayleigh is a molecule's phase: three quarters of one and the turn's
 // cosine squared.
 func rayleigh(turn float64) float64 {
-	return 0.75 * (1 + turn*turn)
+	return rayleighScale * (whole + turn*turn)
 }
 
 // henyey is the henyey-greenstein phase of a haze leaning forward by lean: zero
@@ -92,12 +96,17 @@ type lobe struct{ rest, near, twice float64 }
 // lobeOf is the lobe of a haze leaning forward by lean.
 func lobeOf(lean float64) lobe {
 	square := lean * lean
-	return lobe{rest: 1 - square, near: 1 + square, twice: 2 * lean}
+	return lobe{rest: whole - square, near: whole + square,
+		twice: double * lean}
 }
+
+// henyeyPower is three halves, the power henyey's phase divides by: defined
+// by the henyey-greenstein function.
+const henyeyPower = 1.5
 
 // at is henyey's phase through an angle whose cosine is turn.
 func (shape lobe) at(turn float64) float64 {
-	return shape.rest / math.Pow(shape.near-shape.twice*turn, 1.5)
+	return shape.rest / math.Pow(shape.near-shape.twice*turn, henyeyPower)
 }
 
 // reflected is the light a column sends back toward an eye, as radiance
@@ -126,12 +135,13 @@ func reflected(stack []optics, deck, star, eye, turn float64) float64 {
 // henyey phase at the turn, by the leaves' slots.
 func shone(stack []leaf, tilts []float64, deck, star, eye,
 	turn float64) float64 {
-	slant := 1/star + 1/eye
-	above, light := 0.0, 0.0
+	slant := whole/star + whole/eye
+	var above, light float64
 	for k := range stack {
 		layer := &stack[k]
 		if layer.open {
-			light += layer.albedo * layer.phase(turn, tilts[layer.slot]) / (4 * math.Pi) *
+			phase := layer.phase(turn, tilts[layer.slot])
+			light += layer.albedo * phase / sphere *
 				star / (star + eye) * math.Exp(-above*slant) *
 				-math.Expm1(-layer.tau*slant)
 		}
@@ -145,6 +155,6 @@ func shone(stack []leaf, tilts []float64, deck, star, eye,
 // is eye, round from it by round radians: the light travels away from
 // the star and leaves toward the eye.
 func scatterTurn(star, eye, round float64) float64 {
-	return -(star*eye + math.Sqrt(1-star*star)*math.Sqrt(1-eye*eye)*
+	return -(star*eye + math.Sqrt(whole-star*star)*math.Sqrt(whole-eye*eye)*
 		math.Cos(round))
 }

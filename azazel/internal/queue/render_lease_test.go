@@ -141,18 +141,109 @@ func TestPreparingWorkerRenewsRenderLease(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stop := s.keepRenderLease(t.Context(), job, io.Discard)
+	ticks := make(chan time.Time)
+	stop := s.keepLeaseOnTicks(t.Context(), job, io.Discard, ticks)
 	defer stop()
-	deadline := time.Now().Add(8 * time.Second)
-	for time.Now().Before(deadline) {
-		state, err := s.Status(t.Context())
-		if err != nil {
-			t.Fatal(err)
-		}
-		if state.Jobs[0].LeaseUntil.After(job.LeaseUntil) {
-			return
-		}
-		time.Sleep(100 * time.Millisecond)
+	// The holder takes a second tick only after it finished the first.
+	ticks <- job.LeaseUntil.Add(-renderLeaseDuration / 2)
+	ticks <- job.LeaseUntil.Add(-renderLeaseDuration / 2)
+	state, err := s.Status(t.Context())
+	if err != nil || !state.Jobs[0].LeaseUntil.After(job.LeaseUntil) {
+		t.Fatal("preparing worker did not renew the lease", state, err)
 	}
-	t.Fatal("preparing worker did not renew the lease")
+	renewed := state.Jobs[0].LeaseUntil
+	ticks <- job.LeaseUntil.Add(-time.Hour)
+	ticks <- job.LeaseUntil.Add(-time.Hour)
+	state, err = s.Status(t.Context())
+	if err != nil || !state.Jobs[0].LeaseUntil.Equal(renewed) {
+		t.Fatal("a clock stepped back moved the deadline", state, err)
+	}
+}
+
+// A lease that a forward clock step expired is renewed while the attempt
+// lock is held, because the render holding it lives.
+func TestHeldAttemptRenewsALeaseExpiredByAClockStep(t *testing.T) {
+	s, job := claimedFixture(t)
+	lock, err := s.attemptLock(job)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer lock.Close()
+	stepped := job.LeaseUntil.Add(time.Hour)
+	if err := s.renewHeldRenderLease(t.Context(), job, stepped); err != nil {
+		t.Fatal("held attempt lost its lease to a clock step", err)
+	}
+	state, err := s.Status(t.Context())
+	if err != nil || !state.Jobs[0].LeaseUntil.After(stepped) {
+		t.Fatal(state, err)
+	}
+}
+
+// Anti-test: with no lock held nothing lives to keep, so the expired lease
+// stays expired, and the strict renewal before launch never revives one.
+func TestExpiredLeaseIsRefusedWithoutAHeldLockOrBeforeLaunch(t *testing.T) {
+	s, job := claimedFixture(t)
+	stepped := job.LeaseUntil.Add(time.Hour)
+	if err := s.renewHeldRenderLease(t.Context(), job, stepped); !errors.Is(err, ErrExpiredLease) {
+		t.Fatal("a lease with no held lock was revived", err)
+	}
+	lock, err := s.attemptLock(job)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer lock.Close()
+	if err := s.renewRenderLease(t.Context(), job, stepped); !errors.Is(err, ErrExpiredLease) {
+		t.Fatal("the strict renewal revived an expired lease", err)
+	}
+}
+
+// claimedFixture claims the fixture job with a fresh lease.
+func claimedFixture(t *testing.T) (Store, Job) {
+	t.Helper()
+	s, request := fixture(t)
+	if _, err := s.Submit(t.Context(), request); err != nil {
+		t.Fatal(err)
+	}
+	job, err := s.claimAvailable(t.Context(), "owner", Capacity{Ready: true, GPUKnown: true}, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return s, job
+}
+
+// A start time in the future, left by a clock that stepped back, does not
+// hold GPU admission; a start inside the interval still does.
+func TestGPUSpacingIgnoresAStartTimeInTheFuture(t *testing.T) {
+	for name, c := range map[string]struct {
+		offset time.Duration
+		admits bool
+	}{
+		"an hour ahead":       {time.Hour, true},
+		"inside the interval": {-time.Second, false},
+		"past the interval":   {-2 * gpuAdmissionInterval, true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			s, request := fixture(t)
+			now := time.Now().UTC()
+			capacity := Capacity{Ready: true, GPUKnown: true}
+			if _, err := s.Submit(t.Context(), request); err != nil {
+				t.Fatal(err)
+			}
+			first, err := s.claimAvailable(t.Context(), "owner", capacity, now.Add(c.offset))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := s.finish(t.Context(), first.Sequence, first.Worker, Result{State: Succeeded}); err != nil {
+				t.Fatal(err)
+			}
+			request.Key = "two"
+			if _, err := s.Submit(t.Context(), request); err != nil {
+				t.Fatal(err)
+			}
+			_, err = s.claimAvailable(t.Context(), "owner", capacity, now)
+			if c.admits != (err == nil) {
+				t.Fatal("admission differs from the rule", err)
+			}
+		})
+	}
 }

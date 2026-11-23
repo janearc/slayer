@@ -50,12 +50,6 @@ func NewLens(distance, lean float64) (Lens, error) {
 // still hole: three, defined by the schwarzschild metric.
 const photonSphere = 3
 
-// Distance is the eye's distance from the hole's centre, in masses.
-func (lens Lens) Distance() float64 { return lens.distance }
-
-// Lean is the eye's height above the disc's plane, as an angle.
-func (lens Lens) Lean() float64 { return lens.lean }
-
 // heading is the way the eye looks at an angle off the hole's centre,
 // in the plane of the eye and the disc's axis: toward the centre, turned
 // up toward the axis by the angle. It is in the hole's own axes, which
@@ -80,17 +74,6 @@ func (lens Lens) Follow(angle float64) Path {
 	return walk.path()
 }
 
-// Impact is the impact parameter, in masses, of the ray the eye sees at
-// an angle: its angular momentum over its energy, as celestial says.
-func (lens Lens) Impact(angle float64) float64 {
-	ray := lens.hole.Arriving(lens.eye, lens.frame, lens.heading(angle))
-	return lens.hole.ImpactParameter(ray)
-}
-
-// Shadow is the impact parameter, in masses, at which a ray is just
-// captured: root twenty-seven, as celestial says.
-func (lens Lens) Shadow() float64 { return lens.hole.Shadow() }
-
 // Edge is the angle off the hole's centre, above it, at which the eye
 // sees the shadow's edge: the least angle whose ray escapes, halved
 // toward from a captured ray at the centre and an escaping one far out.
@@ -98,7 +81,7 @@ func (lens Lens) Edge() float64 {
 	in, out := float64(none), halfTurn/two
 	for range halvings {
 		mid := (in + out) / two
-		if lens.Follow(mid).Captured() {
+		if lens.Follow(mid).captured {
 			in = mid
 			continue
 		}

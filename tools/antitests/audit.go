@@ -86,8 +86,9 @@ func scanFile(fset *token.FileSet, path string) ([]testFunc, []marker,
 	for _, decl := range file.Decls {
 		fn, ok := decl.(*ast.FuncDecl)
 		if ok && fn.Recv == nil && isTestName(fn.Name.Name) {
+			testPosition := fset.Position(fn.Pos())
 			funcs = append(funcs, testFunc{
-				at:     place{path, fset.Position(fn.Pos()).Line},
+				at:     place{path, testPosition.Line},
 				name:   fn.Name.Name,
 				marked: docMarked(fn.Doc),
 			})

@@ -10,6 +10,7 @@ import (
 var (
 	cascadeExtents = nums("view.cascade.extents")
 	cascadeGrid    = int(num("view.cascade.grid"))
+	cascadeCut     = num("view.cascade.cut")
 	filterKeep     = num("view.filter.keep")
 	filterDrop     = num("view.filter.drop")
 	slopeBound     = num("view.slope.bound")
@@ -48,14 +49,16 @@ func newSurface(sea Sea, seconds float64, seed uint64) (*surface, error) {
 	shortest := 0.0
 	for i, extent := range cascadeExtents {
 		texel := extent / float64(cascadeGrid)
-		longest := math.Pi / texel // the shortest wave the grid can hold
+		// the shortest wave the band carries: the cut's share of the
+		// shortest its grid can hold
+		longest := cascadeCut * math.Pi / texel
 		patch, err := newBand(sea, cascadeGrid, extent, seed+uint64(i),
 			shortest, longest)
 		if err != nil {
 			return nil, err
 		}
 		l := layer{field: patch.At(seconds), texel: texel}
-		l.gotAlong, l.gotAcross = patch.Resolved()
+		l.gotAlong, l.gotAcross = patch.resolved()
 		for _, h := range l.field.Height {
 			l.reach = math.Max(l.reach, math.Abs(h))
 		}
@@ -103,10 +106,13 @@ func WaveCascades(sea Sea, seconds float64, seed uint64) ([]WaveCascade, error) 
 }
 
 // share is how much of a layer a pixel shows, given how much sea the
-// pixel covers: all of it while the pixel is no bigger than a texel, none
-// once it covers two, and a straight line between.
+// pixel covers: all of it while the pixel is no bigger than half the
+// layer's shortest wave, none once it covers the whole of that wave, and
+// a straight line between. The filter's numbers are in texels of a layer
+// cut at its Nyquist wave number, whose shortest wave is two texels; a
+// layer cut at a share of that has a shortest wave so many times longer.
 func (l *layer) share(footprint float64) float64 {
-	texels := footprint / l.texel
+	texels := footprint / l.texel * cascadeCut
 	switch {
 	case texels <= filterKeep:
 		return 1
@@ -114,6 +120,21 @@ func (l *layer) share(footprint float64) float64 {
 		return 0
 	}
 	return (filterDrop - texels) / (filterDrop - filterKeep)
+}
+
+// PixelShare is how much of a band of waves a pixel shows, given how much
+// sea the pixel covers and the band's sample spacing, both in metres: the
+// share this package's own view takes of each band. A band kept by a share
+// keeps that share squared of its slope variance.
+func PixelShare(footprint, texel float64) float64 {
+	return (&layer{texel: texel}).share(footprint)
+}
+
+// PixelShareSpan is where PixelShare fades, in samples a pixel covers: it
+// shows a whole band up to keep and none from drop, each the filter's own
+// over the cut's share of the Nyquist wave number.
+func PixelShareSpan() (keep, drop float64) {
+	return filterKeep / cascadeCut, filterDrop / cascadeCut
 }
 
 // flat is whether a pixel covering this much sea shows no waves at all.
@@ -143,7 +164,7 @@ func (s *surface) source(x, y, footprint float64, rounds int) (px, py float64) {
 // sea shows it: the open sea's, and over a shore, that with the waves a
 // wall sends back added, all made as tall as the depth there makes them.
 func (s *surface) height(x, y, footprint float64, rounds int) float64 {
-	if s.shore == nil || !s.shore.Holds(x, y) {
+	if s.shore == nil || !s.shore.holds(x, y) {
 		return s.open(x, y, footprint, rounds)
 	}
 	return s.arriving(x, y, footprint, rounds) *
@@ -184,7 +205,7 @@ func (s *surface) slopes(
 	x, y, footprint float64,
 ) (slopeX, slopeY, gotAlong, gotAcross float64) {
 	slopeX, slopeY, gotAlong, gotAcross = s.openSlopes(x, y, footprint)
-	if s.shore == nil || !s.shore.Holds(x, y) {
+	if s.shore == nil || !s.shore.holds(x, y) {
 		return slopeX, slopeY, gotAlong, gotAcross
 	}
 	both := 1.0
@@ -353,7 +374,7 @@ func (l *lighting) along1(sea *surface, from, ray Vec, pixel float64) light {
 	for range steps {
 		footprint := t * pixel / graze
 		at := from.plus(ray.times(t))
-		over := shore != nil && shore.Holds(at.X, at.Y)
+		over := shore != nil && shore.holds(at.X, at.Y)
 		if sea.flat(footprint) && !over {
 			// too far for any wave to show: the mean sea, all roughness
 			if ray.Z >= 0 {
@@ -390,7 +411,7 @@ func (l *lighting) along1(sea *surface, from, ray Vec, pixel float64) light {
 	}
 	at := from.plus(ray.times(t))
 	footprint := t * pixel / graze
-	if shore != nil && shore.Holds(at.X, at.Y) {
+	if shore != nil && shore.holds(at.X, at.Y) {
 		water := sea.height(at.X, at.Y, footprint, invertRounds)
 		if shore.Height(at.X, at.Y) >= water {
 			return l.rock(shore.slope(at.X, at.Y))
@@ -398,7 +419,7 @@ func (l *lighting) along1(sea *surface, from, ray Vec, pixel float64) light {
 	}
 	slopeX, slopeY, gotAlong, gotAcross := sea.slopes(at.X, at.Y, footprint)
 	seen := l.seen(eye, slopeX, slopeY, gotAlong, gotAcross)
-	if shore != nil && shore.Holds(at.X, at.Y) {
+	if shore != nil && shore.holds(at.X, at.Y) {
 		// where a wave is breaking its crest is foam
 		surf := shore.foam(at.X, at.Y,
 			sea.arriving(at.X, at.Y, footprint, invertRounds))

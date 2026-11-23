@@ -30,7 +30,7 @@ func TestTheLarsonCarriesARedCabinLightInsideItsDome(t *testing.T) {
 	}
 	var cabin *lit
 	for index := range lights {
-		if lights[index].Name() == want.Name {
+		if lights[index].name == want.Name {
 			cabin = &lights[index]
 		}
 	}
@@ -40,7 +40,8 @@ func TestTheLarsonCarriesARedCabinLightInsideItsDome(t *testing.T) {
 	size := saucerShape()
 	at := cabin.At()
 	inner := size.dome - size.wall
-	if !(at.Y > size.deck()) || !(at.Sub(maths.V(0, size.deck(), 0)).Len() < inner) {
+	deckPlace := maths.V(0, size.deck(), 0)
+	if !(at.Y > size.deck()) || !(at.Sub(deckPlace).Len() < inner) {
 		t.Errorf("the cabin light is at %v, not under the dome's glass", at)
 	}
 	colour := cabin.Light().colour
@@ -61,7 +62,7 @@ func TestALightWithNoNameSaysSo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(lights) == 0 || lights[0].Name() != "" {
-		t.Errorf("a campfire's light is named %q", lights[0].Name())
+	if len(lights) == 0 || lights[0].name != "" {
+		t.Errorf("a campfire's light is named %q", lights[0].name)
 	}
 }

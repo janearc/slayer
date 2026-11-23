@@ -11,13 +11,13 @@ import (
 // A kick is the tone and the click; a hat is the noise alone; a snare is
 // both; a tom is the tone with a small fall.
 
-// DrumLetters are the hits a studio drum channel may have, and what each
+// drumMeanings are the hits a studio drum channel may have, and what each
 // is. A letter means the same kind of hit in every studio voicing, so a
 // score's drums move between voicings without being rewritten: a voicing
 // decides what a kick sounds like, not which letter is the kick. Picked
 // by the writer of the studio, 2026-11-12, after a composer found one
 // letter was a tom in one voicing and an open hat in another.
-var DrumLetters = map[string]string{
+var drumMeanings = map[string]string{
 	"k": "the kick, or what stands in for it: the low, heavy hit",
 	"s": "the snare or clap: the hit on the back beat",
 	"h": "the closed hat or a tick: short and high",
@@ -29,8 +29,8 @@ var DrumLetters = map[string]string{
 // drumLetters is the letters in the order a kit is described.
 var drumLetters = []string{"k", "s", "h", "o", "t", "b"}
 
-// Drum is one hit on a drum channel, named by the letter the score uses.
-type Drum struct {
+// drum is one hit on a drum channel, named by the letter the score uses.
+type drum struct {
 	Tone       float64  `json:"tone"`        // hertz the tone lands on
 	Sweep      float64  `json:"sweep"`       // semitones it starts above
 	Fall       float64  `json:"fall"`        // seconds the fall takes
@@ -73,7 +73,7 @@ func init() {
 }
 
 // drumNames lists a channel's hits, sorted.
-func drumNames(drums map[string]Drum) []string {
+func drumNames(drums map[string]drum) []string {
 	names := make([]string, 0, len(drums))
 	for name := range drums {
 		names = append(names, name)
@@ -83,14 +83,14 @@ func drumNames(drums map[string]Drum) []string {
 }
 
 // checkDrums is a drum channel's own rules.
-func checkDrums(c *Channel, q *quarrel) {
+func checkDrums(c *channel, q *quarrel) {
 	if len(c.Drums) == 0 {
 		q.fail("a drum channel with no drums plays nothing")
 	}
 	for _, name := range drumNames(c.Drums) {
 		d := c.Drums[name]
 		at := "drum " + name
-		if _, ok := DrumLetters[name]; !ok {
+		if _, ok := drumMeanings[name]; !ok {
 			q.fail("%s: a studio drum is one of %s (kick, snare, "+
 				"closed hat, open hat, tom, bell), so a score's drums "+
 				"mean the same in every voicing", at,
@@ -133,10 +133,10 @@ func checkDrums(c *Channel, q *quarrel) {
 }
 
 // drumEngine is a drum channel ready to sound.
-type drumEngine struct{ drums map[string]Drum }
+type drumEngine struct{ drums map[string]drum }
 
 // buildDrums is the engine for a checked drum channel.
-func buildDrums(c *Channel) engine { return &drumEngine{drums: c.Drums} }
+func buildDrums(c *channel) engine { return &drumEngine{drums: c.Drums} }
 
 // ring is how long the hit lasts past its written length, which a hit
 // ignores: it lasts as long as its longest decay.
@@ -159,7 +159,7 @@ func (e *drumEngine) sound(st strike, out []float64) {
 	var bank []resonator
 	var blow []float64
 	if d.Struck != "" {
-		object := &modalEngine{modal: &Modal{Hardness: d.Hardness},
+		object := &modalEngine{modal: &modal{Hardness: d.Hardness},
 			modes: setModes(modeSets[d.Struck], d.Decay)}
 		bank, blow = object.bank(d.Tone), object.blow()
 	}

@@ -95,7 +95,7 @@ func TestNilFramesAreRefused(t *testing.T) {
 			t.Fatalf("accepted nil frame: %v, %v", picture, err)
 		}
 	}
-	if err := Balance(nil, 3200); err == nil {
+	if err := balance(nil, 3200); err == nil {
 		t.Fatal("balanced a nil frame")
 	}
 }
@@ -128,7 +128,7 @@ func TestErrors(t *testing.T) {
 func TestBalanceRetainsGreenAndMetadata(t *testing.T) {
 	picture := frame.New(1, 1)
 	picture.Pix[0] = frame.Pixel{R: .2, G: .3, B: .4, Cover: 1, Depth: 2}
-	if err := Balance(picture, 3200); err != nil {
+	if err := balance(picture, 3200); err != nil {
 		t.Fatal(err)
 	}
 	pixel := picture.Pix[0]
@@ -137,7 +137,7 @@ func TestBalanceRetainsGreenAndMetadata(t *testing.T) {
 	}
 	for _, kelvin := range []float64{0, -1, math.NaN(), math.Inf(1), 1e-300} {
 		before := picture.Pix[0]
-		if err := Balance(picture, kelvin); err == nil {
+		if err := balance(picture, kelvin); err == nil {
 			t.Fatalf("accepted %g K", kelvin)
 		}
 		if picture.Pix[0] != before {

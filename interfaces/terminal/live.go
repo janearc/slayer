@@ -177,12 +177,14 @@ func (live *Live) take() error {
 	if err != nil {
 		return err
 	}
-	old, err := term.MakeRaw(int(live.in.Fd()))
+	inputDescriptor := int(live.in.Fd())
+	old, err := term.MakeRaw(inputDescriptor)
 	if err != nil {
 		return err
 	}
 	if _, err := io.WriteString(live.out, liveTake); err != nil {
-		term.Restore(int(live.in.Fd()), old)
+		restoreDescriptor := int(live.in.Fd())
+		term.Restore(restoreDescriptor, old)
 		return fmt.Errorf("could not take over the screen: %w", err)
 	}
 	live.old, live.screen = old, screen
@@ -261,7 +263,8 @@ func (live *Live) read() {
 		case lapsed:
 			keys = decoder.Flush()
 		case ready == pollInput:
-			count, err := unix.Read(int(live.in.Fd()), buf)
+			readDescriptor := int(live.in.Fd())
+			count, err := unix.Read(readDescriptor, buf)
 			if err == unix.EAGAIN || err == unix.EINTR {
 				continue
 			}

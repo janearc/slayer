@@ -29,7 +29,8 @@ func ready(t *testing.T, text string, screen func(*gomock.Controller) Screen) (
 	if watching.still() {
 		frames = one
 	}
-	watching.opened(factsOf(stageOf(control, frames, nil)))
+	facts := factsOf(stageOf(control, frames, nil))
+	watching.opened(facts)
 	watching.pending = Unchanged
 	return watching, now, control
 }
@@ -69,7 +70,8 @@ func TestNextCameraGoesOnFromTheJobsOwnCamera(t *testing.T) {
 	if watching.view.camera != "near" {
 		t.Errorf("the camera chosen is %q, want near", watching.view.camera)
 	}
-	if !strings.Contains(strings.Join(watching.foot.lines(), " "),
+	footing := strings.Join(watching.foot.lines(), " ")
+	if !strings.Contains(footing,
 		"camera near") {
 		t.Errorf("the foot says %q", watching.foot.lines())
 	}
@@ -80,7 +82,9 @@ func TestPublishWithNoFolderWritesNothing(t *testing.T) {
 	watching := idle(t, stillJob)
 	watching.given.Folder = ""
 	picture := image.NewRGBA(image.Rect(0, 0, 4, 3))
-	cells := terminal.Chop(canvas(picture, placed(4, 3, paneOf(testScreen()))))
+	pane := paneOf(testScreen())
+	region := placed(4, 3, pane)
+	cells := terminal.Chop(canvas(picture, region))
 	watching.publish(picture, cells, testPixel, true)
 	if watching.kept.pictures != none {
 		t.Errorf("%d pictures counted with no folder", watching.kept.pictures)
@@ -149,7 +153,8 @@ func TestSaveSaysWhenTheFileCannotBeWritten(t *testing.T) {
 	if got := watching.key(pressed(t, "s")); got != Unchanged {
 		t.Errorf("s with the file gone gave %v", got)
 	}
-	if !strings.Contains(strings.Join(watching.foot.lines(), " "),
+	footing := strings.Join(watching.foot.lines(), " ")
+	if !strings.Contains(footing,
 		"no such file") {
 		t.Errorf("the foot says %q", watching.foot.lines())
 	}
@@ -216,8 +221,9 @@ func TestAScreenThatRefusesIsSaidAtTheFoot(t *testing.T) {
 	watching, _, control := ready(t, stillJob,
 		func(control *gomock.Controller) Screen {
 			screen := NewMockScreen(control)
+			noEvents := (<-chan terminal.Event)(make(chan terminal.Event))
 			screen.EXPECT().Events().Return(
-				(<-chan terminal.Event)(make(chan terminal.Event))).AnyTimes()
+				noEvents).AnyTimes()
 			screen.EXPECT().Screen().Return(testScreen()).AnyTimes()
 			screen.EXPECT().Present(gomock.Any()).
 				Return(errors.New("the terminal went away")).AnyTimes()
@@ -230,7 +236,8 @@ func TestAScreenThatRefusesIsSaidAtTheFoot(t *testing.T) {
 		})
 	watching.shown = lightHeld(control, none)
 	watching.show()
-	if !strings.Contains(strings.Join(watching.foot.lines(), " "),
+	footing := strings.Join(watching.foot.lines(), " ")
+	if !strings.Contains(footing,
 		"the terminal went away") {
 		t.Errorf("the foot says %q", watching.foot.lines())
 	}
@@ -287,7 +294,8 @@ func TestAHudThatFailsLeavesNoPicture(t *testing.T) {
 		t.Error("a hud that failed gave a picture")
 	}
 	watching.show()
-	if !strings.Contains(strings.Join(watching.foot.lines(), " "),
+	footing := strings.Join(watching.foot.lines(), " ")
+	if !strings.Contains(footing,
 		"hud would not draw") {
 		t.Errorf("the foot says %q", watching.foot.lines())
 	}
@@ -400,8 +408,8 @@ func TestRelaidLetsGoAMomentTheJobCannotTake(t *testing.T) {
 	if got := watching.relaid(); got != Restage {
 		t.Errorf("relaid gave %v, want a restage", got)
 	}
-	if watching.view.said || !strings.Contains(
-		strings.Join(watching.foot.lines(), " "), "minimum") {
+	footing := strings.Join(watching.foot.lines(), " ")
+	if watching.view.said || !strings.Contains(footing, "minimum") {
 		t.Errorf("the moment was kept or not said: %+v, %q", watching.view,
 			watching.foot.lines())
 	}

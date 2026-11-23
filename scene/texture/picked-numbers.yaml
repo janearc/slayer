@@ -1,0 +1,445 @@
+# every number the textures are drawn with that is chosen and not true by
+# definition, with what it is and why it is what it is. the code asks for
+# each by its name. a change to a value is a change to the picture. where
+# no reason was written down for a number, the entry says so.
+numbers:
+  - name: board-tone
+    value: 0.45
+    says: how far a board's own tone may differ from the concrete's, as a share of the stain's difference from it
+    kind: picked
+    by: boards that are told apart, none that is a stripe
+  - name: grain-along
+    value: 6
+    says: how many board heights long a streak of grain is
+    kind: picked
+    by: the grain of a plank runs the length of it
+  - name: grain-across
+    value: 7
+    says: how many streaks of grain fit in a board's height
+    kind: picked
+    by: a few fine streaks to a board
+  - name: grain-share
+    value: 0.35
+    says: how much of the stain's difference the darkest grain takes
+    kind: picked
+    by: faint, as an imprint is
+  - name: joint-share
+    value: 0.9
+    says: how much of the stain's difference a joint between two boards takes
+    kind: picked
+    by: a dark seam, not a black one
+  - name: grain-octaves
+    value: 2
+    says: how many sizes of grain lie one on another
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: grain-range
+    value: 0.6
+    says: about how far either side of nought the grain noise runs
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: width-floor
+    value: 1e-9
+    says: the least a width is taken as, where a share is worked by dividing by it
+    kind: picked
+    by: it keeps a width from being nought where it is divided by
+  - name: wire-lines-in-spacing
+    value: 10
+    says: how many lines of the default width fit in a tiling's spacing
+    kind: picked
+    by: the default width a wire is drawn with
+  - name: tile-line-share
+    value: 0.06
+    says: the share of a tiling's spacing a line is wide when no width is given
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: aurora-fringe-top
+    value: 0.15
+    says: how far up the shell, as a share of it, the fringe has blended into the bottom colour
+    kind: picked
+    by: chosen, not derived from the lines of an aurora
+  - name: aurora-bottom-top
+    value: 0.35
+    says: how far up the shell, as a share of it, the bottom colour begins to blend into the top
+    kind: picked
+    by: chosen, not derived from the lines of an aurora
+  - name: city-bell-centre
+    value: 35
+    says: the latitude, in degrees, a city's weight peaks at
+    kind: picked
+    by: laid as the black marble looks, by eye; not from a source
+  - name: city-bell-width
+    value: 14
+    says: the spread of the weight's bell, in degrees
+    kind: picked
+    by: laid as the black marble looks, by eye; not from a source
+  - name: city-floor
+    value: 0.15
+    says: the weight at the poles, where the bell is nothing
+    kind: picked
+    by: laid as the black marble looks, by eye; not from a source
+  - name: city-bell-height
+    value: 0.85
+    says: the bell's height over the floor
+    kind: picked
+    by: laid as the black marble looks, by eye; not from a source
+  - name: city-coast-boost
+    value: 1.6
+    says: how many times a coast's weight is an inland one's
+    kind: picked
+    by: laid as the black marble looks, by eye; not from a source
+  - name: city-metro-rungs
+    value: 2
+    says: how many rungs below the fine one a metro's coarse rung is
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: city-town-multiple
+    value: 3
+    says: how many times likelier a town is next to a metro, and at its heart
+    kind: picked
+    by: thrice as many towns round a metro
+  - name: city-heart-boost
+    value: 3
+    says: how much brighter than a town a metro's heart is, less the town's own light
+    kind: picked
+    by: a metro four times a town
+  - name: city-size-floor
+    value: 0.4
+    says: the least a city's size is, as a share of the most
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: city-size-spread
+    value: 0.6
+    says: how far a city's size is drawn above its floor
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: city-clump-per-spacing
+    value: 3
+    says: how many clumps of lights fit in a tile's width
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: city-clump-octaves
+    value: 2
+    says: how many scales of noise a clump of lights has
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: city-clump-floor
+    value: 0.2
+    says: the least a clump dims a city's light to, as a share of it
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: city-edge-fade
+    value: 0.6
+    says: how far in from its edge, as a share of the way to its middle, a tile's light has come to its full
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: cloth-streak-size
+    value: 0.35
+    says: how wide, in metres, a rain streak is
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: cloth-mottle
+    value: 0.8
+    says: how big, in metres, the mottle of soil is
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: cloth-mottle-bit
+    value: 0.3
+    says: how much of the soil the mottle moves
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: cloth-streak-fall
+    value: 1.5
+    says: how many soil heights up a rain streak still shows
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: fibre-fine
+    value: 3
+    says: how many times finer the fine fibre is than the coarse
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: fibre-coarse-bit
+    value: 0.35
+    says: how much the coarse fibre moves the light
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: fibre-fine-bit
+    value: 0.25
+    says: how much the fine fibre moves the light
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: fibre-fleck-above
+    value: 0.82
+    says: the level above which the fine fibre is a fleck of dark wool
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: woven-ink
+    value: 0.15
+    says: how thick the chevron's ink is, as a share of a row
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: woven-edge
+    value: 0.08
+    says: how thick the chevron's edge line is, as a share of a row
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: dust-octaves
+    value: 3
+    says: how many scales of noise the dust patches have
+    kind: picked
+    by: patches, and the ragged edges of patches
+  - name: dust-soft
+    value: 0.15
+    says: how far, in the noise's own units, a patch's edge fades from rock to dust
+    kind: picked
+    by: soft enough not to show a pixel's stair
+  - name: dust-range
+    value: 0.6
+    says: about how far either side of nought the patch noise runs
+    kind: picked
+    by: what three octaves of gradient noise mostly stay within
+  - name: water-blue-over-red
+    value: 1.15
+    says: how many times more blue than red a point of a map is, to be water
+    kind: picked
+    by: blue over red and green, as the sea is in a map of the earth by day
+  - name: water-blue-over-green
+    value: 1.05
+    says: how many times more blue than green a point of a map is, to be water
+    kind: picked
+    by: blue over red and green, as the sea is in a map of the earth by day
+  - name: resolved-full
+    value: 0.25
+    says: the width of a pixel, as a share of a feature's width, at which the feature is drawn whole
+    kind: picked
+    by: a feature four pixels wide is drawn whole
+  - name: resolved-none
+    value: 1
+    says: the width of a pixel, as a share of a feature's width, at which the feature is an even grey
+    kind: picked
+    by: a feature a pixel wide is an even grey
+  - name: asphalt-grain
+    value: 0.04
+    says: how wide the mottling of the binder is, in metres
+    kind: picked
+    by: the size of a handful of chippings
+  - name: asphalt-contrast
+    value: 0.3
+    says: how far the mottling takes the colour from its mean, as a share of it
+    kind: picked
+    by: a road of one grey is too clean
+  - name: asphalt-chip
+    value: 0.012
+    says: how wide a bare chipping is, in metres
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: asphalt-chip-share
+    value: 0.05
+    says: the share of the surface in bare chippings
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: asphalt-chip-lift
+    value: 0.9
+    says: how far a bare chipping's colour replaces the binder's where one lies, as a share
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: asphalt-patch
+    value: 1.6
+    says: how wide a damp patch is, in metres
+    kind: picked
+    by: a patch of road two lorries could not cover
+  - name: asphalt-patch-octaves
+    value: 2
+    says: how many scales of noise a damp patch's edge and the binder's mottling have
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: asphalt-soft
+    value: 0.2
+    says: how far, in the noise's own units, a patch's edge fades from dry to damp
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: asphalt-range
+    value: 0.6
+    says: about how far either side of nought the patch noise runs
+    kind: picked
+    by: what two octaves of gradient noise stay in
+  - name: asphalt-darkening
+    value: 0.55
+    says: how much of its light a wet road loses to the water in it, as a share
+    kind: picked
+    by: from how a wet road looks against a dry one, water in the pores traps light that would have left
+  - name: asphalt-soaked
+    value: 0.6
+    says: the wetness at which every patch is damp and the road is one darkness
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: asphalt-track-width
+    value: 0.45
+    says: how wide a wheel track is, in metres
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: asphalt-track-bias
+    value: 0.35
+    says: how much sooner a wheel track is damp than the road between
+    kind: picked
+    by: tyres press the water in and the camber leaves it there
+  - name: asphalt-depth
+    value: 0.37
+    says: how far up the noise is read
+    kind: picked
+    by: so that a road flat at nought never lies on a lattice plane of the noise
+  - name: slabs-darkening
+    value: 0.4
+    says: how much of its light a wet slab loses, as a share
+    kind: picked
+    by: concrete is less porous than asphalt is dark
+  - name: slabs-tone
+    value: 0.18
+    says: how far one slab's colour strays from the next's, as a share of the colour
+    kind: picked
+    by: slabs from different pours
+  - name: slabs-joint-lift
+    value: 0.45
+    says: the share of a slab's colour a joint has, from mortar and dirt
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: slabs-sharp
+    value: 0.0001
+    says: the narrowest footprint a joint is filtered by, in metres, so that a lone ray finds a joint without dividing by nought
+    kind: picked
+    by: a tenth of a millimetre
+  - name: grate-slot
+    value: 0.5
+    says: the share of the grate's pitch that is open slot
+    kind: picked
+    by: the bars of a gully grating are about as wide as the gaps between them
+  - name: thin-dark-below
+    value: 500
+    says: the temperature, in kelvin, below which a thin disc is dark
+    kind: picked
+    by: a cut chosen, not measured
+  - name: thin-streak-bands
+    value: 6
+    says: how many streaks lie across a thin disc from its inner edge to its outer
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: thin-streak-radius
+    value: 2
+    says: the radius of the circle in the noise that a streak's angle is read round
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: thin-streak-octaves
+    value: 3
+    says: how many scales of noise the streaks of a thin disc have
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: thin-streak-gain
+    value: 2
+    says: how far the noise moves a streak's brightness, for each unit of Streaks
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: thermal-step
+    value: 50
+    says: the step, in kelvin, of the table of black body colours
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: thermal-top
+    value: 60000
+    says: the last temperature, in kelvin, of the table of black body colours
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: wood-ring
+    value: 0.1
+    says: a year's growth, in units, when none is given
+    kind: picked
+    by: a year's growth, a tenth of a unit
+  - name: wood-late
+    value: 0.25
+    says: the share of a year's ring that is late wood, when no share is given
+    kind: picked
+    by: a quarter of a year's ring is late wood
+  - name: wood-long
+    value: 0.7
+    says: the long wave the rings wander by, in radians along the grain for each unit
+    kind: picked
+    by: the long wave, under a turn in a unit along the grain
+  - name: wood-short
+    value: 2.9
+    says: the short wave the rings wander by, in radians along the grain for each unit
+    kind: picked
+    by: the short wave, about three turns in a unit, not a multiple of the long one
+  - name: wood-short-bit
+    value: 0.35
+    says: how big the short wave is, against the long one
+    kind: picked
+    by: the short wave is a third the size of the long one
+  - name: wood-soft
+    value: 0.08
+    says: the share of a ring over which early wood turns to late, and back
+    kind: picked
+    by: soft enough that a ring's line is not a pixel's stair
+  - name: banded-grain
+    value: 0.1
+    says: the roil's feature size, as a share of the body, when none is given
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: banded-axis-parallel
+    value: 0.9
+    says: how near to parallel with north, as the cosine of the angle, the x axis may be and still serve to square the longitude
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: banded-jet-reach
+    value: 0.35
+    says: how far, in radians, a jet slides the roil round the body
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: banded-roil-octaves
+    value: 4
+    says: how many scales of noise the roil has
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: banded-fine-scale
+    value: 3
+    says: how many times finer the fine roil is than the roil
+    kind: picked
+    by: a third of the grain
+  - name: banded-fine-octaves
+    value: 5
+    says: how many scales of noise the fine roil has
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: banded-mottle-scale
+    value: 0.5
+    says: how big the mottle's features are, against the roil's, as a multiple of the noise's frequency
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: banded-mottle-octaves
+    value: 4
+    says: how many scales of noise the mottle has
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: spot-stretch-floor
+    value: 0.001
+    says: the least a spot's stretch is read as, so that no spot is infinitely tall
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: street-lon-jitter
+    value: 0.6
+    says: how far, as a share of the gap between storms, a storm is placed off its even place along a street
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: street-size-floor
+    value: 0.7
+    says: the least a storm of a street is, as a share of the street's size
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: street-size-spread
+    value: 0.6
+    says: how far a storm of a street's size is drawn above its floor
+    kind: picked
+    by: picked by eye; no reason was written down
+  - name: street-stretch-floor
+    value: 1.3
+    says: the least a storm of a street is stretched, as times wider than tall
+    kind: picked
+    by: picked by eye; no reason was written down

@@ -68,7 +68,8 @@ func TestUncheckedAssemblyDirectionsReturnTheRunRefusal(t *testing.T) {
 	}
 	stand := stalk{tall: measure.Metres(1), thick: measure.Metres(.01)}
 	head := horn{long: measure.Metres(.2), back: measure.Metres(.05), front: measure.Metres(.1)}
-	if _, err := headed(stand, head, measure.Radians(math.NaN()), 6, nil); !errors.Is(err, errNoRun) {
+	unchecked := measure.Radians(math.NaN())
+	if _, err := headed(stand, head, unchecked, 6, nil); !errors.Is(err, errNoRun) {
 		t.Fatalf("unchecked lamp direction cause: %v", err)
 	}
 	if _, err := headed(stand, head, measure.Radians(0), 2, nil); !errors.Is(err, errCut) {

@@ -1,0 +1,49 @@
+# Gargoyles, 2026-11-19. A gargoyle is a carved stone spout on a building,
+# shaped like a creature. This file says the stone it stands on and the
+# wall it comes out of: a corbel, which is a stone bracket that sticks out
+# of a wall in steps, a panel that holds the creature and goes into the
+# wall, and a cornice wall with a row of corbels under its eave. It says
+# nothing of the creature: the manufactory carves that from a creature it
+# already has, and gargoyle-creatures.yaml names those. Nothing is
+# measured; each number says whether it was picked, and by what. Lengths
+# are metres; colours are shares of light, each channel from zero to one;
+# a gloss is how much of a mirror a surface is.
+culture: gargoyle
+says: gargoyles on corbels, in a cornice wall of granite or concrete
+elements:
+- {element: gargoyle-count, says: "how many gargoyles stand in a row along the cornice", scope: district, draw: range, unit: gargoyles, whole: true, least: 5, most: 5, kind: picked, by: "gargoyle study, 2026-11-19, a row short enough to see whole"}
+- {element: gargoyle-pitch, says: "distance along the wall from one gargoyle to the next", scope: district, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "gargoyle study, 2026-11-19, by eye, wide enough to read each alone"}
+- {element: end-margin, says: "wall left clear beyond the first and the last gargoyle", scope: district, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: wall-height, says: "height of the wall from its foot to the top of its cornice", scope: district, draw: range, unit: m, least: 22, most: 22, kind: picked, by: "gargoyle study, 2026-11-19, by eye, a church or a courthouse"}
+- {element: wall-thickness, says: "thickness of the wall, deep enough to hold the back of a gargoyle's panel", scope: district, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: course-height, says: "height of the cornice course at the top of the wall", scope: district, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: course-proud, says: "how far the cornice course stands out of the wall", scope: district, draw: range, unit: m, least: 2, most: 2, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: mould-height, says: "height of the plain moulding under the cornice course", scope: district, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: mould-proud, says: "how far the moulding under the course stands out of the wall", scope: district, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: gargoyle-drop, says: "how far the top of a corbel's slab stands below the top of the cornice course, room for the panel over it", scope: district, draw: range, unit: m, least: 5.4, most: 5.4, kind: picked, by: "gargoyle study, 2026-11-19, by eye, over the height of the panel and the moulding, with room for a creature's wings and mantle"}
+- {element: boss-proud, says: "how far a gargoyle's panel stands out of the wall's face, so that its edge is seen", scope: district, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: corbel-width, says: "width of the slab of a corbel, along the wall", scope: district, draw: range, unit: m, least: 2.2, most: 2.2, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: corbel-proud, says: "how far the top slab of a corbel stands out of the wall", scope: district, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: corbel-slab, says: "thickness of the top slab of a corbel, which the creature crouches on", scope: district, draw: range, unit: m, least: 0.55, most: 0.55, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: corbel-step-height, says: "height of each step under the slab, each standing out less than the one over it", scope: district, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: corbel-steps, says: "how many steps a corbel has under its slab", scope: district, draw: range, unit: steps, whole: true, least: 3, most: 3, kind: picked, by: "gargoyle study, 2026-11-19, by eye, as a stone corbel is stepped"}
+- {element: corbel-step-narrowing, says: "how much narrower each step is than the one over it", scope: district, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: corbel-chamfer, says: "how far a chisel cuts the upright corners of a block of the corbel, in each direction", scope: district, draw: range, unit: m, least: 0.18, most: 0.18, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: panel-margin, says: "how far the panel the creature comes out of stands beyond the slab, each side", scope: district, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "gargoyle study, 2026-11-19, by eye"}
+- {element: panel-above, says: "how far the panel stands over the top of the slab, room for the creature's head and shoulders", scope: district, draw: range, unit: m, least: 4.4, most: 4.4, kind: picked, by: "gargoyle study, 2026-11-19, by eye, over the height of the tallest creature carved"}
+- {element: panel-back, says: "how far the panel goes into the wall behind its face", scope: district, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "gargoyle study, 2026-11-19, by eye, enough that the block is seen to be one stone with the wall"}
+- {element: tower-pitch, says: "distance along a cornice of a tower from one gargoyle to the next, where one stands on every run", scope: district, draw: range, unit: m, least: 9, most: 9, kind: picked, by: "gargoyle study, 2026-11-19, by eye, as far apart as a pair of panels and the gap that lets each read alone"}
+- {element: tower-corner-turn, says: "the least a plan turns at a corner for a gargoyle to stand there, facing out along the diagonal", scope: district, draw: range, unit: degrees, least: 60, most: 60, kind: picked, by: "gargoyle study, 2026-11-19, a square corner turns 90 and a many-sided plan's about 45 or less"}
+- {element: tower-edge-margin, says: "how far along a run of a cornice from its corner the first gargoyle of the run stands", scope: district, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "gargoyle study, 2026-11-19, by eye, clear of the corner's own gargoyle"}
+- {element: tower-gargoyle-drop, says: "how far the top of a corbel's slab stands below the top of a tower's segment", scope: district, draw: range, unit: m, least: 5.6, most: 5.6, kind: picked, by: "gargoyle study, 2026-11-19, by eye, as gargoyle-drop is for the cornice wall"}
+- {element: tower-boss-proud, says: "how far a gargoyle's panel stands out of a tower's face, over the ground of the buttresses", scope: district, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "gargoyle study, 2026-11-19, by eye, past the buttresses of a gothic face, which stand out 0.9"}
+- element: stone
+  says: what the wall, the corbels and the gargoyles are all cut or cast from
+  scope: district
+  draw: options
+  unit: share of light
+  options:
+  - {name: granite, weight: 1, colour: [0.3, 0.3, 0.31], gloss: 0.12}
+  - {name: concrete, weight: 1, colour: [0.44, 0.43, 0.41], gloss: 0.04}
+  kind: picked
+  by: "gargoyle study, 2026-11-19, by eye, grey granite and weathered concrete"

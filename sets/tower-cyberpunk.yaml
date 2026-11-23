@@ -1,0 +1,79 @@
+# tower cyberpunk: a street canyon of plain towers wearing the cyberpunk
+# layer, looked up at from the street at night. each tower is a plain block
+# of concrete, mirror glass or granite with the layer over its skin:
+# greebles stuck to the walls, stacked signs and screens that are also
+# lights, bands of light up the corners, wet surfaces and searchlights on
+# the roofs. the searchlights are lit heads only: no haze is drawn, so no
+# beam shows. made by the cities package (manufacture/cities) from
+# manufacture/cities/cultures/tower.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. two rows of
+# towers face each other across a street fifty metres wide. the street,
+# the moon, the sky and the camera are choices of this study, picked by
+# eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower cyberpunk
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 62
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    street:
+      title: "in the street, looking up the canyon"
+      location:
+        at: [4, -150, 1.7]
+      orientation:
+        look_at: [0, 120, 85]
+  recipes:
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, cyber: true, storeys: 56, width: {value: 38, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    mirror: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: mirror, cyber: true, storeys: 70, width: {value: 38, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    granite: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: granite, colour: grey, cyber: true, storeys: 62, width: {value: 38, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      w1: {recipe: concrete, seed: 21, complexity: quick, east: -46, north: -90, height: {value: 0, unit: m}}
+      w2: {recipe: mirror, seed: 22, complexity: quick, east: -46, north: -48, height: {value: 0, unit: m}}
+      w3: {recipe: granite, seed: 23, complexity: quick, east: -46, north: -6, height: {value: 0, unit: m}}
+      w4: {recipe: concrete, seed: 24, complexity: quick, east: -46, north: 36, height: {value: 0, unit: m}}
+      w5: {recipe: mirror, seed: 25, complexity: quick, east: -46, north: 78, height: {value: 0, unit: m}}
+      w6: {recipe: granite, seed: 26, complexity: quick, east: -46, north: 120, height: {value: 0, unit: m}}
+      w7: {recipe: concrete, seed: 27, complexity: quick, east: -46, north: 162, height: {value: 0, unit: m}}
+      e1: {recipe: mirror, seed: 31, complexity: quick, east: 46, north: -90, height: {value: 0, unit: m}}
+      e2: {recipe: granite, seed: 32, complexity: quick, east: 46, north: -48, height: {value: 0, unit: m}}
+      e3: {recipe: concrete, seed: 33, complexity: quick, east: 46, north: -6, height: {value: 0, unit: m}}
+      e4: {recipe: mirror, seed: 34, complexity: quick, east: 46, north: 36, height: {value: 0, unit: m}}
+      e5: {recipe: granite, seed: 35, complexity: quick, east: 46, north: 78, height: {value: 0, unit: m}}
+      e6: {recipe: concrete, seed: 36, complexity: quick, east: 46, north: 120, height: {value: 0, unit: m}}
+      e7: {recipe: mirror, seed: 37, complexity: quick, east: 46, north: 162, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      street:
+        # wet asphalt: nearly opaque, and it mirrors at a low angle
+        colour: {srgb_linear: [0.02, 0.02, 0.025]}
+        clear: {through: 0.03, index: 1.5, gloss: 1, rank: 0}
+        source: eye
+    boxes:
+      street:
+        material: street
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      moon:
+        toward: [0.2, -0.7, 0.5]
+        colour: {srgb_linear: [0.12, 0.15, 0.3]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.14, 0.04, 0.12]}
+      zenith: {srgb_linear: [0.004, 0.006, 0.03]}
+      ground: {srgb_linear: [0.004, 0.004, 0.006]}
+      source: eye

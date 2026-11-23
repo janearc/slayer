@@ -58,6 +58,9 @@ type grown struct {
 // material, or why there can be none.
 func newGrown(place maths.Subspace, params manufacture.ConiferParams,
 	material *thing.Material) (grown, error) {
+	if material != nil && material.IndependentEmission {
+		return grown{}, unsupported{"independent surface emission is CPU-only"}
+	}
 	if params.Depth < 0 || params.Depth > mostConiferDepth {
 		return grown{}, unsupported{fmt.Sprintf(
 			"a conifer %d levels deep, past %d", params.Depth,
@@ -112,6 +115,7 @@ func (encoded *scene) conifer(tree grown, material int) {
 		scale = 1
 	}
 	params := tree.params
+	encoded.boundConifer(tree, scale)
 	encoded.trees.row(treeStruct, values{
 		"origin": append(point(tree.place.Origin), scale),
 		"x":      point(axes.Out(maths.XAxis)),

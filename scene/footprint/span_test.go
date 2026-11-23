@@ -129,7 +129,8 @@ func TestAssessRetainsAPixelBoundTooLargeToCount(t *testing.T) {
 		t.Fatal(err)
 	}
 	point := maths.Box{Min: maths.V(0, 0, -1), Max: maths.V(0, 0, -1)}
-	got, err := view.Assess(point, measure.Metres(math.Nextafter(1, 0)))
+	almostOne := math.Nextafter(1, 0)
+	got, err := view.Assess(point, measure.Metres(almostOne))
 	if err != nil || !got.Visible || !got.Limited || got.Pixels != math.MaxFloat64 {
 		t.Errorf("an unbounded pixel bound: %+v, %v", got, err)
 	}

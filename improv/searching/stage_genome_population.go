@@ -3,7 +3,7 @@ package searching
 import "github.com/janearc/slayer/maths"
 
 // makeAuthoredMultitude builds one being for each authored population member.
-func (s *heardStage) makeAuthoredMultitude(plan *StagePlan) error {
+func (s *heardStage) makeAuthoredMultitude(plan *stagePlan) error {
 	if err := checkAuthoredPopulation(plan.Population); err != nil {
 		return err
 	}

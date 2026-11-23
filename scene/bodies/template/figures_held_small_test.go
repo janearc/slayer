@@ -54,13 +54,14 @@ func TestMagnetarFiguresAreHeld(t *testing.T) {
 		Gives: map[radiation.Range]float64{radiation.Gamma(): 2,
 			radiation.XRay(): 1},
 		Passes: map[radiation.Range]float64{radiation.Gamma(): 0.9}})
-	holds(t, "magnetar", its(t, Magnetar),
-		want(t, "magnetar", bodies.Star, 12, 1.4*bodies.Sun, flare).
-			Turning(7540*time.Millisecond, measure.Radians(0)).
-			Glowing(maths.Light{}, thing.Spectrum{
-				Gives: map[radiation.Range]float64{
-					radiation.XRay():  1,
-					radiation.Gamma(): 0.2}}))
+	got := its(t, Magnetar)
+	figure := want(t, "magnetar", bodies.Star, 12, 1.4*bodies.Sun, flare).
+		Turning(7540*time.Millisecond, measure.Radians(0)).
+		Glowing(maths.Light{}, thing.Spectrum{
+			Gives: map[radiation.Range]float64{
+				radiation.XRay():  1,
+				radiation.Gamma(): 0.2}})
+	holds(t, "magnetar", got, figure)
 }
 
 // the template's figure, held so nothing moves; from memory, not
@@ -76,13 +77,14 @@ func TestPulsarFiguresAreHeld(t *testing.T) {
 				radiation.XRay(): 0.8, radiation.Radio(): 1},
 			Passes: map[radiation.Range]float64{
 				radiation.XRay(): 0.97, radiation.Radio(): 0.97}})
-	holds(t, "pulsar", its(t, Pulsar),
-		want(t, "pulsar", bodies.Star, 10, 1.4*bodies.Sun, beams).
-			Seeded(8).
-			Turning(33*time.Millisecond, measure.Radians(0)).
-			Glowing(maths.Light{}, thing.Spectrum{
-				Gives: map[radiation.Range]float64{
-					radiation.XRay(): 1}}))
+	got := its(t, Pulsar)
+	figure := want(t, "pulsar", bodies.Star, 10, 1.4*bodies.Sun, beams).
+		Seeded(8).
+		Turning(33*time.Millisecond, measure.Radians(0)).
+		Glowing(maths.Light{}, thing.Spectrum{
+			Gives: map[radiation.Range]float64{
+				radiation.XRay(): 1}})
+	holds(t, "pulsar", got, figure)
 }
 
 // physics, worked by hand: a hole's radius is 2GM/c^2. with G =

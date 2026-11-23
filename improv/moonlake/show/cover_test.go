@@ -7,7 +7,7 @@ import (
 
 // TestACueSetsItsFadedAndPlainNumbers checks the levels and numbers a cue names reach the lines of a moment, and the ones it does not name stay where they were.
 func TestACueSetsItsFadedAndPlainNumbers(t *testing.T) {
-	sheet, err := ParseSheet([]byte(`cues:
+	sheet, err := parseSheet([]byte(`cues:
   - {at: "1.1", rig: 1, mist: 0.5, exposure: 1.5, spots: 0.25, spot_bars: 2,
      search: 0.4, search_bars: 4, banks_bars: 2, sweep_bars: 1, decay: 0.5, split: true,
      pulse: "x..............."}`), testScore(t))
@@ -42,7 +42,7 @@ func TestACueSetsItsFadedAndPlainNumbers(t *testing.T) {
 
 // TestACueSetsOverheadAndWithoutSplitHasNoParity checks the overhead fades to the cue's level, and a pulse that is not split has no parity.
 func TestACueSetsOverheadAndWithoutSplitHasNoParity(t *testing.T) {
-	sheet, err := ParseSheet([]byte(`cues:
+	sheet, err := parseSheet([]byte(`cues:
   - {at: "1.1", overhead: 0.75, pulse: "x..............."}`), testScore(t))
 	if err != nil {
 		t.Fatal(err)
@@ -58,7 +58,7 @@ func TestACueSetsOverheadAndWithoutSplitHasNoParity(t *testing.T) {
 
 // TestLinesListTheBurstsStillShowing checks the fire bursts are written as the seconds since each began, newest first.
 func TestLinesListTheBurstsStillShowing(t *testing.T) {
-	sheet, err := ParseSheet([]byte(`cues:
+	sheet, err := parseSheet([]byte(`cues:
   - {at: "1.1", fire: 1}`), testScore(t))
 	if err != nil {
 		t.Fatal(err)
@@ -84,18 +84,18 @@ func TestGridHitsBeforeTheGridAreNone(t *testing.T) {
 // TestParseScoreMeterAndStatus checks a score of another meter keeps
 // it, an unstated meter is four, and the status and meter are reported.
 func TestParseScoreMeterAndStatus(t *testing.T) {
-	three, err := ParseScore([]byte("score:\n  meter: 3\n  beats:\n    times: [1, 2]\n"))
+	three, err := parseScore([]byte("score:\n  meter: 3\n  beats:\n    times: [1, 2]\n"))
 	if err != nil || three.Meter() != 3 {
 		t.Fatalf("meter 3: %v", err)
 	}
-	score, err := ParseScore([]byte("score:\n  status: estimated\n  beats:\n    times: [1, 2]\n"))
+	score, err := parseScore([]byte("score:\n  status: estimated\n  beats:\n    times: [1, 2]\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if score.Meter() != 4 || !score.Estimated() {
 		t.Errorf("meter %d, estimated %v; want 4 and true", score.Meter(), score.Estimated())
 	}
-	score, err = ParseScore([]byte("score:\n  status: verified\n  meter: 4\n  beats:\n    times: [1, 2]\n"))
+	score, err = parseScore([]byte("score:\n  status: verified\n  meter: 4\n  beats:\n    times: [1, 2]\n"))
 	if err != nil || score.Estimated() {
 		t.Errorf("verified score: estimated=%v err=%v", err == nil && score.Estimated(), err)
 	}

@@ -170,13 +170,13 @@ func once(t *testing.T, letter rune, p point, in, want int) {
 
 // over is how many of the triangles hold p.
 func over(tris [][3]point, p point) int {
-	n := 0
+	count := 0
 	for _, t := range tris {
 		if inside(t[0], t[1], t[2], p) {
-			n++
+			count++
 		}
 	}
-	return n
+	return count
 }
 
 // inLetter is one where p is in a solid, inside its outer and in none of its

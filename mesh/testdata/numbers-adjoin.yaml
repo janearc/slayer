@@ -1,0 +1,32 @@
+# every number mesh/adjoin_test.go chooses, with what it is and why.
+numbers:
+  - name: adjoin-wait
+    value: 2
+    says: how many seconds the join test waits for its work before it fails
+    kind: picked
+    by: far longer than six joins take, and short enough that a root that never ends fails the test quickly
+  - name: adjoin-faces
+    value: 6
+    says: how many faces the join test joins, none joined at first
+    kind: picked
+    by: enough for two pieces of three, a lone face and a joining of pieces
+  - name: adjoin-late-one
+    value: 1
+    says: the first of the two faces the join test joins last, to join two pieces
+    kind: picked
+    by: a face of the first piece, which holds faces 0 and 1
+  - name: adjoin-late-other
+    value: 4
+    says: the second of the two faces the join test joins last
+    kind: picked
+    by: a face of the second piece, which holds faces 2, 3 and 4
+  - name: adjoin-asked-one
+    value: 0
+    says: the first of the two faces the join test asks about after the last join
+    kind: picked
+    by: a face of the first piece
+  - name: adjoin-asked-other
+    value: 2
+    says: the second of the two faces the join test asks about after the last join
+    kind: picked
+    by: a face of the second piece, joined to the first by the last join

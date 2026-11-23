@@ -29,8 +29,8 @@ Examples open as independent editable copies. Saving an example asks for a
 location so your work does not remain only in a temporary folder. **Check**
 shows syntax/schema diagnostics while preserving invalid work for repair.
 
-**Render preview** freezes the current draft, waits for Game’s shared GPU lane,
-then invokes the bundled existing Slayer. **Stop** cancels that preview’s owned
+**Render preview** freezes the current draft, then starts the bundled existing
+Slayer itself, with no Game lane in between. **Stop** cancels that preview’s owned
 process group. The resulting 640 × 360 still appears in the image pane. Logs
 and diagnostics remain available; the app never invents a completion percentage.
 A result for an older draft cannot replace the current document’s view.

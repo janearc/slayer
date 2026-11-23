@@ -1,0 +1,83 @@
+# Five fish native to the waters of other sets, each from the side in
+# its skin at a phase of its stroke: a convict tang, a dusky grouper, a
+# chromis, a perch and a flathead grey mullet. Their sources are in
+# manufacture/fish.yaml.
+#
+# the frame. places are metres, x east, y north, z up. the fish stand
+# twenty metres apart along the east, in open air, lit by the sun through
+# the air; the sun is typed as azimuth and altitude, chosen. each camera
+# stands south of its fish about one and three quarter lengths off.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: five native fish
+  seed: 21
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 160, altitude: 40}
+  set:
+    things:
+      tang:
+        kind: convict-tang
+        seed: 21
+        position:
+          east: {value: 0, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      grouper:
+        kind: dusky-grouper
+        seed: 22
+        position:
+          east: {value: 20, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      chromis:
+        kind: mediterranean-chromis
+        seed: 23
+        position:
+          east: {value: 40, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      perch:
+        kind: european-perch
+        seed: 24
+        position:
+          east: {value: 60, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+      mullet:
+        kind: flathead-grey-mullet
+        seed: 25
+        position:
+          east: {value: 80, unit: m}
+          north: {value: 0, unit: m}
+          up: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  film:
+    width: 800
+    height: 450
+    rays: 2
+    wide: 39
+  cameras:
+    tang-side:
+      location: {at: [0, -0.32, 0]}
+      orientation: {look_at: [0, 0, 0]}
+    grouper-side:
+      location: {at: [20, -1.4, 0]}
+      orientation: {look_at: [20, 0, 0]}
+    chromis-side:
+      location: {at: [40, -0.2, 0]}
+      orientation: {look_at: [40, 0, 0]}
+    perch-side:
+      location: {at: [60, -0.65, 0]}
+      orientation: {look_at: [60, 0, 0]}
+    mullet-side:
+      location: {at: [80, -1.0, 0]}
+      orientation: {look_at: [80, 0, 0]}

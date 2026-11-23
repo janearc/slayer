@@ -44,8 +44,8 @@ const (
 	lightYearKpc = lightYearKm / kpcKm
 )
 
-// ErrField is a field asked of the dipole that it does not have.
-var ErrField = errors.New("named: the magnetar's field")
+// errField is a field asked of the dipole that it does not have.
+var errField = errors.New("named: the magnetar's field")
 
 // star is a real magnetar's measured body: its radius in km, its
 // surface dipole field at the equator in gauss, and its spin period in
@@ -78,7 +78,7 @@ func (body star) fieldAt(distance, colatitude float64) float64 {
 func (body star) reach(field float64) (float64, error) {
 	if !(field > 0) || field > body.field {
 		return 0, fmt.Errorf("%w: %g G is not between nothing and the "+
-			"surface's %g G; ask for a weaker field", ErrField, field,
+			"surface's %g G; ask for a weaker field", errField, field,
 			body.field)
 	}
 	return body.radius * math.Pow(body.field/field, cubeRoot), nil

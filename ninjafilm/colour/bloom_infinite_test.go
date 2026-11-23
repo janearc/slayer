@@ -30,7 +30,8 @@ func noNumber(light maths.Light) bool {
 func TestABloomOfOneInfinitePixelHasNoNaN(t *testing.T) {
 	size, middle := rowsInATest, rowsInATest/pair
 	reach := int(data.Picked("bloom-reach-sigmas"))
-	lights := dimPicture(maths.Grey(math.Inf(whole)))
+	endless := maths.Grey(math.Inf(whole))
+	lights := dimPicture(endless)
 	got := colour.Bloom(lights, size, size, whole, whole)
 	for place, light := range got {
 		if noNumber(light) {
@@ -50,7 +51,8 @@ func TestABloomOfOneInfinitePixelHasNoNaN(t *testing.T) {
 // An infinite part of one colour spills only that part.
 func TestABloomOfAnInfiniteColourKeepsItsHue(t *testing.T) {
 	size, middle := rowsInATest, rowsInATest/pair
-	got := colour.Bloom(dimPicture(maths.RGB(math.Inf(whole), none, none)),
+	endlessRed := maths.RGB(math.Inf(whole), none, none)
+	got := colour.Bloom(dimPicture(endlessRed),
 		size, size, whole, whole)
 	for place, light := range got {
 		if noNumber(light) {
@@ -86,7 +88,8 @@ func TestABloomOfAnInfiniteStarAtTheEdgesOfTheFloatsHasNoNaN(t *testing.T) {
 // were. It stays no number, which Encode draws as black.
 func TestANaNPixelDoesNotSpreadInABloom(t *testing.T) {
 	size, middle := rowsInATest, rowsInATest/pair
-	lights := dimPicture(maths.Grey(math.NaN()))
+	notANumber := maths.Grey(math.NaN())
+	lights := dimPicture(notANumber)
 	lights[none] = maths.Grey(starLight)
 	got := colour.Bloom(lights, size, size, whole, whole)
 	for place, light := range got {

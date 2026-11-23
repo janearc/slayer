@@ -78,7 +78,7 @@ func TestCarbonDioxideCrossSectionAt550IsWhatHandWorkingGives(t *testing.T) {
 // cross section. A check against an independent working, not a source.
 func TestRayleighDepthOfTheColumnAt550(t *testing.T) {
 	const worked, give = 16.0, 2.0 // picked: a hand working and its give, 2026-11-15
-	depth := columnAt(t, venusRead, 550).GasDepth()
+	depth := columnAt(t, venusRead, 550).gasDepth()
 	if math.Abs(depth-worked) > give {
 		t.Errorf("rayleigh depth %g, working %g +- %g", depth, worked, give)
 	}
@@ -89,7 +89,7 @@ func TestRayleighDepthOfTheColumnAt550(t *testing.T) {
 func TestRayleighDepthOfNitrogenAloneIsFarFromIt(t *testing.T) {
 	changed := copied(t)
 	changed.Gas.CarbonDioxide.Value, changed.Gas.Nitrogen.Value = 0, 1
-	depth := columnAt(t, changed, 550).GasDepth()
+	depth := columnAt(t, changed, 550).gasDepth()
 	if depth >= 14 { // picked: the working's 16 less its give of 2
 		t.Errorf("nitrogen alone gives %g", depth)
 	}
@@ -97,8 +97,8 @@ func TestRayleighDepthOfNitrogenAloneIsFarFromIt(t *testing.T) {
 
 // The depth falls as about the fourth power of wavelength.
 func TestRayleighDepthFallsAsTheFourthPowerOfWavelength(t *testing.T) {
-	blue := columnAt(t, venusRead, 450).GasDepth()
-	red := columnAt(t, venusRead, 750).GasDepth()
+	blue := columnAt(t, venusRead, 450).gasDepth()
+	red := columnAt(t, venusRead, 750).gasDepth()
 	want := math.Pow(750.0/450.0, 4)                  // defined: rayleigh's law
 	if miss := relative(blue/red, want); miss > 0.1 { // picked: dispersion adds a few percent
 		t.Errorf("depth %g at 450 nm over %g at 750: %g, not near %g",
@@ -109,8 +109,8 @@ func TestRayleighDepthFallsAsTheFourthPowerOfWavelength(t *testing.T) {
 // The particles do not fall so: their ratio is far from the fourth
 // power, so the test above is about the gas.
 func TestParticleDepthDoesNotFallAsTheFourthPower(t *testing.T) {
-	blue := columnAt(t, venusRead, 450).ParticleDepth()
-	red := columnAt(t, venusRead, 750).ParticleDepth()
+	blue := columnAt(t, venusRead, 450).particleDepth()
+	red := columnAt(t, venusRead, 750).particleDepth()
 	if blue/red > 2 { // picked: far under the fourth power's 7.7
 		t.Errorf("particle depth %g over %g", blue, red)
 	}

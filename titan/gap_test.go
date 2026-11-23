@@ -112,7 +112,7 @@ func lastTriangle(t *testing.T, world *Ground, at *mesh.Point,
 			t.Fatal(err)
 		}
 	}
-	for depth := range world.Depth(detail) {
+	for depth := range world.depth(detail) {
 		shape, err = world.step(shape, toward, depth+1)
 		if err != nil {
 			t.Fatal(err)
@@ -178,7 +178,7 @@ func TestAFarHoleIsNeverCountedOrFilled(t *testing.T) {
 			t.Errorf("at %v m a far corner's height of %v m moved the "+
 				"ground", detail, gapAbsurd)
 		}
-		if (detail == gapDetail) != (got.Kind() == Measured) {
+		if (detail == gapDetail) != (got.Kind() == measured) {
 			t.Errorf("at %v m of detail the ground is %v", detail,
 				got.Kind())
 		}
@@ -189,12 +189,13 @@ func TestAFarHoleIsNeverCountedOrFilled(t *testing.T) {
 // refuses it, and the words name that corner.
 func TestAHoleBesideThePlaceRefuses(t *testing.T) {
 	at := spot(t, gapLon, gapLat)
-	last := lastTriangle(t, ground(t, gapChart(), 1), at, gapDetail)
+	chartGround := ground(t, gapChart(), 1)
+	last := lastTriangle(t, chartGround, at, gapDetail)
 	for i, each := range last {
 		from := &gappy{chart: gapChart(), holes: []vector{each.at},
 			radius: gapHole}
 		_, err := ground(t, from, 1).At(at, gapDetail)
-		if !errors.Is(err, Refused()) {
+		if !errors.Is(err, errRefused) {
 			t.Fatalf("corner %d unknown: %v", i, err)
 		}
 		here := each.at.point()
@@ -210,14 +211,15 @@ func TestAHoleBesideThePlaceRefuses(t *testing.T) {
 // place is not refused.
 func TestAKnownNoughtBesideThePlaceIsNotAHole(t *testing.T) {
 	at := spot(t, gapLon, gapLat)
-	last := lastTriangle(t, ground(t, gapChart(), 1), at, gapDetail)
+	chartGround := ground(t, gapChart(), 1)
+	last := lastTriangle(t, chartGround, at, gapDetail)
 	from := &gappy{chart: gapChart(), holes: []vector{last[0].at},
 		radius: gapHole, zero: true}
 	got, err := ground(t, from, 1).At(at, gapDetail)
 	if err != nil {
 		t.Fatalf("a corner of nought was refused: %v", err)
 	}
-	if from.asked() == 0 || got.Kind() != Measured {
+	if from.asked() == 0 || got.Kind() != measured {
 		t.Errorf("the nought corner was not read, or not measured")
 	}
 }
@@ -229,7 +231,7 @@ func TestAHoleAtThePlaceRefuses(t *testing.T) {
 	from := &gappy{chart: gapChart(), holes: []vector{vectorOf(*at)},
 		radius: gapWide}
 	_, err := ground(t, from, 1).At(at, gapDetail)
-	if !errors.Is(err, Refused()) {
+	if !errors.Is(err, errRefused) {
 		t.Errorf("a place the map has no height for: %v", err)
 	}
 }
@@ -246,18 +248,19 @@ func TestThePlaceWithoutItsHoleIsNotRefused(t *testing.T) {
 // hole asks the map no more times for it than the first did.
 func TestAnUnknownCornerIsKeptAsUnknown(t *testing.T) {
 	at := spot(t, gapLon, gapLat)
-	last := lastTriangle(t, ground(t, gapChart(), 1), at, gapDetail)
+	chartGround := ground(t, gapChart(), 1)
+	last := lastTriangle(t, chartGround, at, gapDetail)
 	from := &gappy{chart: gapChart(), holes: []vector{last[1].at},
 		radius: gapHole}
 	world := ground(t, from, 1)
-	if _, err := world.At(at, gapDetail); !errors.Is(err, Refused()) {
+	if _, err := world.At(at, gapDetail); !errors.Is(err, errRefused) {
 		t.Fatalf("the first walk: %v", err)
 	}
 	first := from.asked()
 	if first == 0 {
 		t.Fatalf("the map was never asked about the hole")
 	}
-	if _, err := world.At(at, gapDetail); !errors.Is(err, Refused()) {
+	if _, err := world.At(at, gapDetail); !errors.Is(err, errRefused) {
 		t.Fatalf("the second walk: %v", err)
 	}
 	if from.asked() != first {
@@ -271,7 +274,8 @@ func TestAnUnknownCornerIsKeptAsUnknown(t *testing.T) {
 // ground, which refuses nothing.
 func TestAnUnknownCornerIsNotNought(t *testing.T) {
 	at := spot(t, gapLon, gapLat)
-	last := lastTriangle(t, ground(t, gapChart(), 1), at, gapDetail)
+	chartGround := ground(t, gapChart(), 1)
+	last := lastTriangle(t, chartGround, at, gapDetail)
 	world := ground(t, &gappy{chart: gapChart(),
 		holes: []vector{last[1].at}, radius: gapHole}, 1)
 	kept, err := world.read(last[1].at, last[1].name)
@@ -298,7 +302,7 @@ func TestAnErrorFromTheMapPassesThrough(t *testing.T) {
 	if err != broken {
 		t.Errorf("an error from the map came back as %v", err)
 	}
-	if errors.Is(err, Refused()) {
+	if errors.Is(err, errRefused) {
 		t.Errorf("an error from the map was called a refusal")
 	}
 }

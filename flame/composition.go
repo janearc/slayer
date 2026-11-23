@@ -65,13 +65,14 @@ func NewComposition(spec CompositionSpec) (*composition, error) {
 	return profile, nil
 }
 
-// Spectrum returns the source radiance, with line powers at or below their
+// spectrum returns the source radiance, with line powers at or below their
 // prescribed reference values. It does not infer abundance from a species name.
-func (profile *composition) Spectrum(heat measure.Temperature) bands.Light {
+func (profile *composition) spectrum(heat measure.Temperature) bands.Light {
 	if !sane(heat.InKelvin()) {
 		return bands.Light{}
 	}
-	heat = measure.Kelvin(math.Min(heat.InKelvin(), profile.spec.Reference.InKelvin()))
+	capped := math.Min(heat.InKelvin(), profile.spec.Reference.InKelvin())
+	heat = measure.Kelvin(capped)
 	lines := make(map[float64]float64, len(profile.spec.Lines))
 	for i, line := range profile.spec.Lines {
 		share := radiance.Planck(heat, line.Wavelength).InWattsPerNanometre() / profile.reference[i]
@@ -79,13 +80,10 @@ func (profile *composition) Spectrum(heat measure.Temperature) bands.Light {
 	}
 	light := bands.Lines(lines)
 	if profile.spec.Continuum > 0 {
-		light = bands.Add(light, Glowing(heat).Scale(profile.spec.Continuum))
+		light = bands.Add(light, blackBody(heat).Scale(profile.spec.Continuum))
 	}
 	return light
 }
-
-// Reference is the temperature at which the authored line powers apply.
-func (profile *composition) Reference() measure.Temperature { return profile.spec.Reference }
 
 // Lines returns copied provenance and source inputs.
 func (profile *composition) Lines() []LineSpec { return slices.Clone(profile.spec.Lines) }

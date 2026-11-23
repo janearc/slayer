@@ -31,6 +31,9 @@ func TestAStreamRedrawsWithOnlyTheChangedInput(t *testing.T) {
 	}
 	defer kernel.Close()
 	width, height, rows := 13, 10, 4
+	// the where kernel writes its band's first row, so the bands are
+	// fixed at the most rows, where expected finds them
+	kernel.FixBands(rows)
 	stream, err := kernel.OpenGrid(width, height, rows, 4,
 		[][]byte{floats(7)})
 	if err != nil {

@@ -37,7 +37,8 @@ func TestAFlameIsTheSameAtATime(t *testing.T) {
 	moved := false
 	later := first.Tick(time.Second + 130*time.Millisecond).(*Body)
 	for i := range 50 {
-		p := maths.V(0.1*math.Sin(float64(i)), 0.012*float64(i), 0.05)
+		angle := float64(i)
+		p := maths.V(0.1*math.Sin(angle), 0.012*float64(i), 0.05)
 		if first.Density(p) != again.Density(p) ||
 			first.Heat(p) != again.Heat(p) {
 			t.Fatalf("at %v the flame was two flames", p)
@@ -61,7 +62,8 @@ func TestAFlameGlowsAtItsOwnTemperature(t *testing.T) {
 			t.Fatalf("at %v the glow is not the heat's", p)
 		}
 	}
-	red, green, blue := srgb.Light(observer.Swatch(Glowing(campfire.Hottest)))
+	light := blackBody(campfire.Hottest)
+	red, green, blue := srgb.Light(observer.Swatch(light))
 	hottest := fire.glows.at(campfire.Hottest)
 	for c, want := range [3]float64{red, green, blue} {
 		got := [3]float64{hottest.R, hottest.G, hottest.B}[c]
@@ -80,8 +82,8 @@ func TestAFlameGlowsAtItsOwnTemperature(t *testing.T) {
 func TestAFlameIsInsideItsBox(t *testing.T) {
 	fire := body(t, campfire)
 	if !(fire.Density(low(campfire)) > 0) {
-		t.Errorf("the middle low down is clear: %v",
-			fire.Density(low(campfire)))
+		density := fire.Density(low(campfire))
+		t.Errorf("the middle low down is clear: %v", density)
 	}
 	box := fire.Bounds()
 	for _, p := range []maths.Vec{maths.V(0, -0.01, 0),

@@ -36,6 +36,13 @@ type heldKey struct {
 // hierarchy is built from these bytes.
 const trianglesAt = 2
 
+// nodesAt and bendsAt are the boxes' and the bends' places among the
+// inputs: buffer(3) and buffer(12).
+const (
+	nodesAt = 3
+	bendsAt = 12
+)
+
 // headerAt is the header's place among the inputs: buffer(0).
 const headerAt = 0
 
@@ -113,6 +120,9 @@ func (state *held) first(rules []staleRule, next candidate) string {
 func (frames *Frames) retained(take shot, mode traversal) (*frame.Frame,
 	timing, error) {
 	var spent timing
+	if lowRetentionEnabled() {
+		frames.trees = newKeptTrees()
+	}
 	frames.last = nil
 	start := time.Now()
 	width, height, err := checkedFineSize(take.width, take.height,
@@ -130,6 +140,7 @@ func (frames *Frames) retained(take shot, mode traversal) (*frame.Frame,
 	}
 	// the encoder's shutter is closed; the shot's is written over it
 	headerStruct.patch(encoded.header.bytes, take.view(fine))
+	encoded.spreadOver(take.world, take.side)
 	encoded.shareSkyFor(mode, take.side)
 	inputs := encoded.inputs()
 	if mode.primary() {
@@ -155,16 +166,19 @@ func (state *held) traced(take shot, encoded *scene, inputs [][]byte,
 	spent.device = state.kernel.Device()
 	base := state.kernel.GPUTime()
 	run := state.grids(inputs, spent)
+	memoryStage("traced-lit-before")
 	if err := encoded.lit(state.kernel, run, state.key.mode,
 		spent); err != nil {
 		return nil, err
 	}
+	memoryStage("traced-lit-after")
 	for _, input := range inputs {
 		spent.inputBytes += int64(len(input))
 	}
 	start := time.Now()
 	band := newBand(take.world, encoded.paints, encoded.records(),
 		take.eye, take.lens, fine, take.width, take.height, take.side)
+	memoryStage("traced-band-created")
 	consume := band.consume
 	if take.transmission != nil {
 		// Transport has no CPU-painted surfaces or sky. Its otherwise
@@ -207,7 +221,9 @@ func (frames *Frames) hold(encoded *scene, inputs [][]byte, mode traversal,
 		height: fine[1], per: encoded.perSample()}
 	spent.compile = time.Since(start)
 	start = time.Now()
+	memoryStage("native-plan-before")
 	plan, root, err := planned(encoded, mode)
+	memoryStage("native-plan-after")
 	spent.acceleration = time.Since(start)
 	if err != nil {
 		return nil, err
@@ -226,6 +242,7 @@ func (frames *Frames) hold(encoded *scene, inputs [][]byte, mode traversal,
 		spent.retained.Held = frames.held.inputs
 		frames.rebuilt = frames.held.first(hierarchyRules, next)
 		if frames.rebuilt == "" {
+			memoryStage("native-build-reused")
 			return frames.held, nil
 		}
 		return frames.held, frames.held.rebuild(next, plan, root, spent)
@@ -236,11 +253,20 @@ func (frames *Frames) hold(encoded *scene, inputs [][]byte, mode traversal,
 }
 
 // rebuild builds the kernel's hierarchy again from the frame's plan, in
-// the place of the one it has, and keeps its layout.
+// the place of the one it has, and keeps its layout. The build reads the
+// triangles from the stream's input, which it first makes hold them, so
+// the device holds them once; the sync that follows finds them sent.
 func (state *held) rebuild(next candidate, plan *metal.Acceleration,
 	root int, spent *timing) error {
+	memoryStage("native-rebuild-before")
 	start, before := time.Now(), state.kernel.GPUTime()
-	err := state.kernel.Rebuild(plan, root)
+	sent, err := state.kernel.RebuildOver(plan, root, state.stream,
+		trianglesAt)
+	if sent > 0 {
+		spent.retained.Sent++
+		spent.retained.SentBytes += sent
+	}
+	memoryStage("native-rebuild-after")
 	spent.acceleration += time.Since(start)
 	spent.accelerationGPU = state.kernel.GPUTime() - before
 	if err == nil {
@@ -264,10 +290,12 @@ func planned(encoded *scene, mode traversal) (*metal.Acceleration, int,
 	return plan, root, err
 }
 
-// openHeld compiles the kernel, builds its hierarchy where there is a
-// plan, and sends every input to a new stream.
+// openHeld compiles the kernel, sends every input to a new stream, and
+// builds the hierarchy where there is a plan, over the stream's triangles
+// so the device holds them once. The stream comes first for that.
 func openHeld(next candidate, plan *metal.Acceleration, root int,
 	inputs [][]byte, spent *timing) (*held, error) {
+	memoryStage("metal-open-before")
 	start := time.Now()
 	kernel, err := metal.Open(next.key.text, "trace")
 	spent.compile += time.Since(start)
@@ -275,19 +303,12 @@ func openHeld(next candidate, plan *metal.Acceleration, root int,
 		return nil, err
 	}
 	kernel.FixBands(bandRows)
-	if plan != nil {
-		start = time.Now()
-		err = kernel.Accelerate(plan, root)
-		spent.acceleration += time.Since(start)
-		spent.accelerationGPU = kernel.GPUTime()
-		if err != nil {
-			kernel.Close()
-			return nil, err
-		}
-	}
 	start = time.Now()
+	metal.ReportDeviceMemoryStage("metal-grid-before")
 	stream, err := kernel.OpenGrid(next.key.width, next.key.height, rows,
 		next.key.per, inputs)
+	memoryStage("metal-grid-after")
+	metal.ReportDeviceMemoryStage("metal-grid-after")
 	spent.dispatch += time.Since(start)
 	if err != nil {
 		kernel.Close()
@@ -298,8 +319,30 @@ func openHeld(next candidate, plan *metal.Acceleration, root int,
 		spent.retained.Sent++
 		spent.retained.SentBytes += int64(len(input))
 	}
+	if err := accelerateOver(kernel, stream, plan, root, spent); err != nil {
+		stream.Close()
+		kernel.Close()
+		return nil, err
+	}
 	return &held{kernel: kernel, stream: stream, key: next.key,
 		layout: next.layout, inputs: len(inputs)}, nil
+}
+
+// accelerateOver builds the kernel's first hierarchy from the frame's
+// plan over the stream's triangles, which the stream already holds; no
+// plan, in the software mode, builds nothing.
+func accelerateOver(kernel *metal.Kernel, stream *metal.GridStream,
+	plan *metal.Acceleration, root int, spent *timing) error {
+	if plan == nil {
+		return nil
+	}
+	memoryStage("native-build-before")
+	start := time.Now()
+	_, err := kernel.AccelerateOver(plan, root, stream, trianglesAt)
+	memoryStage("native-build-after")
+	spent.acceleration += time.Since(start)
+	spent.accelerationGPU = kernel.GPUTime()
+	return err
 }
 
 // sync sends each input whose bytes the device does not already hold.
@@ -331,14 +374,20 @@ func (state *held) send(index int, input []byte, spent *timing) error {
 func (state *held) grids(inputs [][]byte, spent *timing) grids {
 	return func(width, height, per int,
 		consume func(first, down int, samples []float32) error) error {
+		memoryStage("grid-sync-before")
 		if err := state.sync(inputs, spent); err != nil {
 			return err
 		}
+		memoryStage("grid-sync-after")
 		if err := state.stream.Reshape(width, height, rows,
 			per); err != nil {
 			return err
 		}
-		return state.stream.DrawBands(consume)
+		memoryStage("grid-reshape-after")
+		memoryStage("grid-bands-before")
+		err := state.stream.DrawBands(consume)
+		memoryStage("grid-bands-after")
+		return err
 	}
 }
 

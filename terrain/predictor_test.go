@@ -45,7 +45,7 @@ func TestFloatingPredictorMatchesIndependentLibtiffFiles(t *testing.T) {
 }
 
 func TestFloatingPredictorAccountsForScanlineBuffer(t *testing.T) {
-	budget, err := DefaultRasterBudget()
+	budget, err := defaultRasterBudget()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -144,7 +144,6 @@ func (made Set) frame() (spaceFrame, bool) {
 func (reading reader) spaceScene() map[string]step {
 	return map[string]step{
 		"setting": reading.onlyTwo(reading.settingStep),
-		"date":    reading.versionTwo("scene.date", reading.dateStep),
 		"frame":   reading.versionTwo("scene.frame", reading.frameStep),
 		"anchor":  reading.versionTwo("scene.anchor", reading.anchorStep),
 		"globe":   reading.versionTwo("scene.globe", reading.globeStep),
@@ -169,16 +168,6 @@ func (reading reader) settingStep(name, value *yaml.Node) error {
 		reading.note("scene.setting", name, value)
 	}
 	return err
-}
-
-// dateStep reads the day the scene says it is.
-func (reading reader) dateStep(name, value *yaml.Node) error {
-	var got calendarDay
-	if err := reading.day(&got)(name, value); err != nil {
-		return err
-	}
-	reading.set.when = &got
-	return nil
 }
 
 // frameStep reads where a scene in space is, and when.

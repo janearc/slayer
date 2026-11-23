@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: vtad-study.yaml}
+renderer: gpu-native
+film: {width: 1080, height: 960, rays: 4, wide: 32, exposure: 0.003}
+camera: {name: concept}
+outputs:
+  picture: ../../out/new-horizons-vtad-wip.png

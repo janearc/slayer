@@ -90,6 +90,7 @@ func (encoded *scene) volumesOf(world *thing.World,
 			return err
 		}
 	}
+	encoded.boxVolumes()
 	return nil
 }
 
@@ -111,6 +112,7 @@ func (encoded *scene) volumeAt(volume *thing.Volume, at time.Duration) error {
 			if explicitCloudPhase {
 				encoded.cloudPhaseLast(cloudPhase)
 			}
+			encoded.glowLast(volume)
 		}
 	}()
 	med := volume.Medium
@@ -231,12 +233,17 @@ var volumeStruct = structure{"Volume", []field{
 		"a gas's extinction at the eye's three bands"),
 	floatField("scatter", "a gas's scatter at the eye's three bands, "+
 		"its phase asymmetry in w; a lopsided mist's asymmetry in w"),
-	intField("air", "one in x for a gas, nought for the rest"),
+	intField("air", "one in x for a gas, nought for the rest; "+
+		"one in z for the air the world's glow lights"),
 	floatField("beam", "axis and speed"),
 	floatField("flow", "round and reference radius"),
 	intField("thermal", "radial light table, count, seed low, seed high"),
 	floatField("thin", "inner, outer, streaks, shear"),
 	floatField("phase", "orbital coefficient times seconds"),
+	floatField("world_low", "the low corner of a box in the world "+
+		"that the volume lies in, and one in w where it has a box; "+
+		"nought for none (volume_reach.go)"),
+	floatField("world_high", "the high corner of that box"),
 }}
 
 // volume appends one puff. The axes are the rows that take a world

@@ -8,6 +8,33 @@ import (
 	"github.com/janearc/slayer/maths/noise"
 )
 
+// mutantsPillarsFirst is the place of the first of a list of columns or tips.
+const mutantsPillarsFirst = nought // defined: the first place in a list
+
+// mutantsPillarsStreaks is the table of points in the filaments test: where
+// the streak noise of a single pillar is deepest.
+const mutantsPillarsStreaks = "testdata/mutants-pillars-streaks.csv"
+
+// mutantsPillarsStanding is the pillars most of these tests stand in their
+// box: three columns of a height and a width, Thick, with a seed.
+func mutantsPillarsStanding(t *testing.T) Pillars {
+	t.Helper()
+	return Pillars{Count: pickedCount(t, "mutants-pillars-count"),
+		Height: picked(t, "mutants-pillars-height"),
+		Width:  picked(t, "mutants-pillars-width"),
+		Thick:  picked(t, "mutants-pillars-thick"),
+		Seed:   uint64(pickedCount(t, "mutants-pillars-seed"))}
+}
+
+// mutantsPillarsSingle is one pillar of the standing size, Thick one, with
+// the seed given.
+func mutantsPillarsSingle(t *testing.T, seed uint64) Pillars {
+	t.Helper()
+	standing := mutantsPillarsStanding(t)
+	return Pillars{Count: unity, Height: standing.Height,
+		Width: standing.Width, Thick: unity, Seed: seed}
+}
+
 // the wall along the bottom is Thick, a fifth of the height up and a little
 // ragged: on the middle of the base the noise that ragged it is zero (it is
 // read at the middle of space there, whatever the height), and the wall is
@@ -16,26 +43,26 @@ import (
 // no pillar is above one, so the density there is Thick. pillars of no count,
 // height or width are none; of one of any of them, they are not.
 func TestPillarsAreAWallAtTheFoot(t *testing.T) {
-	for _, p := range []Pillars{
-		{Count: 3, Height: 10, Width: 20, Thick: 2, Seed: 4},
-		{Count: 1, Height: 10, Width: 20, Thick: 2, Seed: 4},
-		{Count: 3, Height: 1, Width: 20, Thick: 2, Seed: 4},
-		{Count: 3, Height: 10, Width: 1, Thick: 2, Seed: 4},
-	} {
-		if d := p.Density(maths.V(0, 0.1*p.Height, 0)); d != 2 {
-			t.Errorf("%+v: the wall is %v, want 2", p, d)
+	standing := mutantsPillarsStanding(t)
+	lone, low, narrow := standing, standing, standing
+	lone.Count, low.Height, narrow.Width = unity, unity, unity
+	share := picked(t, "mutants-pillars-wall-share")
+	for _, pillars := range []Pillars{standing, lone, low, narrow} {
+		at := mutantsUp(share * pillars.Height)
+		if got := pillars.Density(at); got != standing.Thick {
+			t.Errorf("%+v: the wall is %v, want %v", pillars, got,
+				standing.Thick)
 		}
 	}
-	for _, p := range []Pillars{
-		{Count: 3, Height: 0, Width: 20, Thick: 2, Seed: 4},
-		{Count: 3, Height: 10, Width: 0, Thick: 2, Seed: 4},
-		{Count: 0, Height: 10, Width: 20, Thick: 2, Seed: 4},
-	} {
-		if d := p.Density(maths.V(0, 0, 0)); d != 0 {
-			t.Errorf("%+v: %v at the foot, want none", p, d)
+	heightless, widthless, countless := standing, standing, standing
+	heightless.Height, widthless.Width, countless.Count = nought, nought, nought
+	for _, pillars := range []Pillars{heightless, widthless, countless} {
+		if got := pillars.Density(mutantsOrigin()); got != nought {
+			t.Errorf("%+v: %v at the foot, want none", pillars, got)
 		}
-		if d := p.Density(maths.V(0, 0.1*p.Height, 0)); d != 0 {
-			t.Errorf("%+v: %v in the wall, want none", p, d)
+		at := mutantsUp(share * pillars.Height)
+		if got := pillars.Density(at); got != nought {
+			t.Errorf("%+v: %v in the wall, want none", pillars, got)
 		}
 	}
 }
@@ -44,16 +71,38 @@ func TestPillarsAreAWallAtTheFoot(t *testing.T) {
 // Thick, and at its top, and at its sides, the fog, a three-thousandth of
 // Thick, where no column reaches (a column's height is under the whole).
 func TestThePillarsBoxIsClosed(t *testing.T) {
-	p := Pillars{Count: 3, Height: 10, Width: 20, Thick: 2, Seed: 4}
-	if d := p.Density(maths.Vec{}); d != 2 {
-		t.Errorf("on the floor the wall is %v, want 2", d)
+	pillars := mutantsPillarsStanding(t)
+	if got := pillars.Density(mutantsOrigin()); got != pillars.Thick {
+		t.Errorf("on the floor the wall is %v, want %v", got, pillars.Thick)
 	}
-	for _, at := range []maths.Vec{maths.V(0, 10, 0), maths.V(10, 10, 0),
-		maths.V(-10, 10, 0), maths.V(0, 10, 10), maths.V(0, 10, -10)} {
-		if d := p.Density(at); !closeTo(d, 2*0.003, 1e-15) {
-			t.Errorf("at %v the fog is %v, want %v", at, d, 2*0.003)
+	top, side := pillars.Height, pillars.Width/double
+	want := pillars.Thick * picked(t, "mutants-pillars-fog")
+	fine := picked(t, "mutants-pillars-tolerance-fog")
+	for _, at := range []maths.Vec{maths.V(nought, top, nought),
+		maths.V(side, top, nought), maths.V(-side, top, nought),
+		maths.V(nought, top, side), maths.V(nought, top, -side)} {
+		if got := pillars.Density(at); !closeTo(got, want, fine) {
+			t.Errorf("at %v the fog is %v, want %v", at, got, want)
 		}
 	}
+}
+
+// mutantsPillarsTipWant is the density a column's tip has by the working in
+// the comment of the tip test: the larger of the fog and the column's edge
+// shifted by the noise at the tip.
+func mutantsPillarsTipWant(t *testing.T, pillars Pillars,
+	tip maths.Vec) float64 {
+	t.Helper()
+	base := pillars.Width / picked(t, "mutants-pillars-base-divisor")
+	scale := picked(t, "mutants-pillars-tip-scale") / base
+	offset := uint64(pickedCount(t, "mutants-pillars-noise-seed-offset"))
+	octaves := pickedCount(t, "mutants-pillars-octaves")
+	grain := noise.Fractal(pillars.Seed+offset, tip.X*scale, tip.Y*scale,
+		tip.Z*scale, octaves)
+	shift := (grain - halfway) * picked(t, "mutants-pillars-build") * base
+	edge := picked(t, "mutants-pillars-edge")
+	body := unity - maths.Smooth(-edge*base, nought, shift)
+	return math.Max(picked(t, "mutants-pillars-fog"), body)
 }
 
 // at the very height of a column's tip its dome has closed to a point,
@@ -66,23 +115,21 @@ func TestThePillarsBoxIsClosed(t *testing.T) {
 // base, for the seed plus ten. over fifty seeds the tip is the fog for
 // some and well above it for others.
 func TestAColumnsTipIsItsNoise(t *testing.T) {
-	above := 0
-	for seed := range uint64(50) {
-		p := Pillars{Count: 1, Height: 10, Width: 20, Thick: 1, Seed: seed}
-		tip := p.Tips()[0]
-		base := p.Width / 3.2
-		f := 1.5 / base
-		n := noise.Fractal(seed+10, tip.X*f, tip.Y*f, tip.Z*f, 4)
-		shift := (n - 0.5) * 0.9 * base
-		want := math.Max(0.003, 1-maths.Smooth(-0.3*base, 0, shift))
-		if want > 0.01 {
+	above := nought
+	aboveFog := picked(t, "mutants-pillars-above-fog")
+	tolerance := picked(t, "mutants-pillars-tolerance-tip")
+	for seed := range uint64(pickedCount(t, "mutants-pillars-tip-seeds")) {
+		pillars := mutantsPillarsSingle(t, seed)
+		tip := pillars.Tips()[mutantsPillarsFirst]
+		want := mutantsPillarsTipWant(t, pillars, tip)
+		if want > aboveFog {
 			above++
 		}
-		if d := p.Density(tip); !closeTo(d, want, 1e-6) {
-			t.Errorf("seed %d: the tip is %v, want %v", seed, d, want)
+		if got := pillars.Density(tip); !closeTo(got, want, tolerance) {
+			t.Errorf("seed %d: the tip is %v, want %v", seed, got, want)
 		}
 	}
-	if above < 10 {
+	if least := pickedCount(t, "mutants-pillars-tips-least"); above < least {
 		t.Fatalf("only %d of fifty tips were above the fog", above)
 	}
 }
@@ -91,17 +138,25 @@ func TestAColumnsTipIsItsNoise(t *testing.T) {
 // negative Filaments is none: over a spread of points through the columns,
 // a Filaments of minus one is the density of none.
 func TestANegativeFilamentsIsNone(t *testing.T) {
-	plain := Pillars{Count: 3, Height: 10, Width: 20, Thick: 1, Seed: 6}
+	plain := mutantsPillarsStanding(t)
+	plain.Thick = unity
+	plain.Seed = uint64(pickedCount(t, "mutants-pillars-filaments-seed"))
 	negative := plain
-	negative.Filaments = -1
-	base := plain.Width / (3 * 3.2)
-	for _, c := range plain.columns() {
-		for i := range int64(4000) {
-			at := maths.V(c.x+(noise.Hash(1, i)-0.5)*base,
-				noise.Hash(2, i)*c.height,
-				c.z+(noise.Hash(3, i)-0.5)*base)
-			if n, p := negative.Density(at), plain.Density(at); n != p {
-				t.Fatalf("at %v a Filaments of minus one is %v, none %v", at, n, p)
+	negative.Filaments = -unity
+	divisor := picked(t, "mutants-pillars-base-divisor")
+	base := plain.Width / (float64(plain.Count) * divisor)
+	streamX := uint64(pickedCount(t, "mutants-pillars-stream-x"))
+	streamY := uint64(pickedCount(t, "mutants-pillars-stream-y"))
+	streamZ := uint64(pickedCount(t, "mutants-pillars-stream-z"))
+	for _, column := range plain.columns() {
+		for index := range int64(pickedCount(t, "mutants-pillars-samples")) {
+			at := maths.V(column.x+(noise.Hash(streamX, index)-halfway)*base,
+				noise.Hash(streamY, index)*column.height,
+				column.z+(noise.Hash(streamZ, index)-halfway)*base)
+			thinned, whole := negative.Density(at), plain.Density(at)
+			if thinned != whole {
+				t.Fatalf("at %v a Filaments of minus one is %v, none %v", at,
+					thinned, whole)
 			}
 		}
 	}
@@ -115,24 +170,31 @@ func TestANegativeFilamentsIsNone(t *testing.T) {
 // pillar's body, where the streak is deepest. they were found by search
 // and the test checks that they still are, and that the body is whole.
 func TestFilamentsTakeNoMoreThanTheirShare(t *testing.T) {
-	plain := Pillars{Count: 1, Height: 10, Width: 20, Thick: 1, Seed: 6}
+	plainSeed := uint64(pickedCount(t, "mutants-pillars-filaments-seed"))
+	plain := mutantsPillarsSingle(t, plainSeed)
 	half := plain
-	half.Filaments = 0.5
-	base := plain.columns()[0].base
-	g := 3 / base
-	for _, at := range []maths.Vec{
-		maths.V(-3.5034349961134796, 3.2501261627607625, -2.2284598309482697),
-		maths.V(-3.5239823779911186, 3.0350469601625956, -2.2265621113066976),
-	} {
-		m := noise.Fractal(plain.Seed+10+50, at.X*g, at.Y*g/3, at.Z*g, 4)
-		if m >= -0.5 {
-			t.Fatalf("at %v the streak noise is %v, not below minus a half", at, m)
+	half.Filaments = halfway
+	base := plain.columns()[mutantsPillarsFirst].base
+	scale := picked(t, "mutants-pillars-streak-scale") / base
+	stretch := picked(t, "mutants-pillars-streak-stretch")
+	seed := plain.Seed + uint64(pickedCount(t,
+		"mutants-pillars-noise-seed-offset")) + uint64(pickedCount(t,
+		"mutants-pillars-streak-seed-offset"))
+	octaves := pickedCount(t, "mutants-pillars-octaves")
+	tolerance := picked(t, "mutants-pillars-tolerance-share")
+	for _, row := range readSheet(t, mutantsPillarsStreaks) {
+		at := maths.V(cell(t, row, "x"), cell(t, row, "y"), cell(t, row, "z"))
+		streak := noise.Fractal(seed, at.X*scale, at.Y*scale/stretch,
+			at.Z*scale, octaves)
+		if streak >= -halfway {
+			t.Fatalf("at %v the streak noise is %v, not below minus a half",
+				at, streak)
 		}
-		if d := plain.Density(at); d != 1 {
-			t.Fatalf("at %v the column is %v, not whole", at, d)
+		if got := plain.Density(at); got != unity {
+			t.Fatalf("at %v the column is %v, not whole", at, got)
 		}
-		if d := half.Density(at); !closeTo(d, 0.5, 1e-12) {
-			t.Errorf("at %v half the filaments leave %v, want 0.5", at, d)
+		if got := half.Density(at); !closeTo(got, halfway, tolerance) {
+			t.Errorf("at %v half the filaments leave %v, want 0.5", at, got)
 		}
 	}
 }

@@ -1,0 +1,59 @@
+# Harbor seal hauled out on a sand bar in the banana pose: head and
+# hind flippers held up, belly pressed where it bears. Built on its
+# skeleton; its swimming pose is the kind harbor-seal-swimming and its
+# bones alone are harbor-seal-bones.
+#
+# the frame. places are metres, x east, y north, z up, the sand at z = 0.
+# the seal's nose points east. the sand is one flat box, its colour
+# chosen; no beach was surveyed. the sun is low in the south-west,
+# through the earth's air, and the sky is that air's.
+#
+# cameras: side (from the south, the seal's right flank), above
+# (straight down, north up), quarter (three-quarter, from ahead), and
+# face (the head and shoulders, close).
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Harbor seal hauled out
+  seed: 407
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 236.2, altitude: 24}
+  world:
+    unit: 1
+    materials:
+      sand:
+        colour: {srgb_linear: [0.40, 0.37, 0.31]}
+        source: eye
+    boxes:
+      sand bar:
+        material: sand
+        middle: [0, 0, -0.5]
+        size: [600, 600, 1]
+        source: "chosen: a flat sand bar, its top at z = 0, no survey"
+  set:
+    things:
+      seal: {kind: harbor-seal-hauled, seed: 407, position: {east: {value: 0, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+  film:
+    width: 1600
+    height: 1000
+    rays: 2
+    exposure: 780
+    wide: 39
+  cameras:
+    side:
+      location: {at: [-0.1, -4.0, 0.55]}
+      orientation: {look_at: [-0.1, 0, 0.22]}
+    above:
+      location: {at: [-0.1, -0.01, 4.2]}
+      orientation: {look_at: [-0.1, 0, 0]}
+    quarter:
+      location: {at: [2.9, -2.6, 1.3]}
+      orientation: {look_at: [-0.05, 0, 0.2]}
+    face:
+      wide: 30
+      location: {at: [1.85, -1.0, 0.80]}
+      orientation: {look_at: [0.74, 0, 0.42]}

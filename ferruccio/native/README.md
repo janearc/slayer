@@ -79,7 +79,7 @@ $SLAYER_RENDERS/frames`. The separate Azazel worker owns admission;
 frontend-held Game lanes can block its work.
 
 The earlier ccfe456f lane wrapper is historical evidence. See [the integrated
-build guide](../../doc/ferruccio/BUILD.md). `--gesture orbit`, `zoom`, `move`,
+build guide](../../doc/applications/ferruccio/BUILD.md). `--gesture orbit`, `zoom`, `move`,
 `turn` or `undo` dispatches through the actual UI event path after the initial
 render. Each needs `--render --file FILE`.
 

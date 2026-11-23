@@ -10,6 +10,24 @@ import (
 	"github.com/janearc/slayer/scene/thing"
 )
 
+const (
+	// missX, missY, missFar and missRadius are the pixel, the distance
+	// along its ray and the radius of the first ball the close lens's
+	// sight refuses at a side of sixteen, found by the sight test with
+	// the seeds of numbers.yaml.
+	missX      = 95
+	missY      = 21
+	missFar    = 0.0354
+	missRadius = 0.0003
+	// oddX, oddY, oddFar and oddRadius are the pixel, the distance along
+	// its ray and the radius of the ball that the sight of the odd frame
+	// refuses, found by the sight test with the seeds of numbers.yaml.
+	oddX      = 53
+	oddY      = 32
+	oddFar    = 1.837
+	oddRadius = 0.0269
+)
+
 // a ball that the ray of one pixel of a lens with a wide aperture meets,
 // close to the glass and small, is in no kept section: it is drawn in the
 // whole frame and not in the frame made by keeping what is kept. The

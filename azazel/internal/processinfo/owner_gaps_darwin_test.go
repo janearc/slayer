@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+// never is the stop of a read that does not stop: no context at all,
+// which the owner reads refuse.
+var never context.Context
+
 // scriptedOwner is an ownerReader whose every answer is a function of how
 // many times it has been asked, so a test can change the world between
 // two reads.
@@ -133,7 +137,7 @@ func TestOwnerUsageRefusesACancelledContext(t *testing.T) {
 	if _, err := ownerUsage(ctx, reader, 42); !errors.Is(err, context.Canceled) {
 		t.Errorf("cancelled: %v", err)
 	}
-	if _, err := ownerUsage(nil, reader, 42); !errors.Is(err, os.ErrInvalid) {
+	if _, err := ownerUsage(never, reader, 42); !errors.Is(err, os.ErrInvalid) {
 		t.Errorf("nil context: %v", err)
 	}
 	if reader.usages != 0 {
@@ -348,6 +352,7 @@ func TestNativeRelationsAndLists(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Errorf("this process %s is not in its own group %v", strconv.Itoa(os.Getpid()), members)
+		self := strconv.Itoa(os.Getpid())
+		t.Errorf("this process %s is not in its own group %v", self, members)
 	}
 }

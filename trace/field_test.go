@@ -63,12 +63,17 @@ func TestEntering(t *testing.T) {
 	}
 }
 
-// A ray through the edge of the reach comes out within a degree of
-// straight, bent toward the hole. That is the tracer cutting the
-// bending off at the reach, and not the truth: such a ray really turns
-// about six degrees. One aimed at the hole is black and covers its
-// pixel.
-func TestARayLeavesOrFalls(t *testing.T) {
+// Known shortfall, pinned as it is. A ray through the edge of the reach
+// comes out within a degree of straight, bent toward the hole. That is
+// the tracer cutting the bending off at the reach, and not the truth: a
+// ray passing a mass M at a distance b turns 4M/b radians and a little
+// more, 15 pi / 4 times (M/b) squared, which at b = 39.9 M is 0.1003 and
+// 0.0074 of a radian, 6.2 degrees. This test is to be rewritten to that
+// when a ray is bent beyond the reach.
+//
+// One aimed at the hole is black and covers its pixel, which is right.
+func TestKnownShortfallARayAtTheReachsEdgeLeavesNearlyStraight(
+	t *testing.T) {
 	world := holeWorld(nil)
 	edge := lone(world, maths.Ray{At: maths.V(0, 39.9, -100),
 		Dir: maths.V(0, 0, 1)}, 0)
@@ -76,7 +81,8 @@ func TestARayLeavesOrFalls(t *testing.T) {
 	if !(out.Len() >= 0.5) {
 		t.Fatalf("the ray past the edge came back %v", edge)
 	}
-	turned := math.Acos(math.Min(1, out.Unit().Z)) / maths.Degree
+	forward := out.Unit().Z
+	turned := math.Acos(math.Min(1, forward)) / maths.Degree
 	if !(turned <= 1 && out.Y < 0) {
 		t.Errorf("past the edge the ray turned %.3f degrees, toward %v",
 			turned, out.Unit())
@@ -120,8 +126,9 @@ func TestTheFirstStepNeverLeaves(t *testing.T) {
 // of the shifter that a caller had to remember to set.
 func TestAGainDependsOnTheRaysMomentum(t *testing.T) {
 	world := holeWorld(nil)
+	glow := glows(maths.Grey(1))
 	world.AddVolume(thing.Volume{Medium: plate(0.5, -1, 1),
-		Material: glows(maths.Grey(1))})
+		Material: glow})
 	scene := stage(world, 0)
 	inward := maths.Ray{At: maths.V(0, 5, -100), Dir: maths.V(0, 0, 1)}
 	into, enters := entering(scene.fields, inward)
@@ -195,8 +202,9 @@ func TestARaySpentInsideAFieldStopsThere(t *testing.T) {
 // nothing, adds no depth and does not end the march.
 func TestAStepThatGoesNowhereIsPassedOver(t *testing.T) {
 	world := holeWorld(nil)
+	glow := glows(maths.Grey(1))
 	world.AddVolume(thing.Volume{Medium: plate(0.5, -50, 50),
-		Material: glows(maths.Grey(1))})
+		Material: glow})
 	scene := stage(world, 0)
 	inward := maths.Ray{At: maths.V(0, 20, -100), Dir: maths.V(0, 0, 1)}
 	into, enters := entering(scene.fields, inward)
@@ -234,18 +242,23 @@ func turned(passing float64) float64 {
 	return math.Acos(seen.Z) / maths.Degree
 }
 
-// The tracer's own bending, as it is, so that a change to it is seen
-// and the comments on loose and leave cannot go stale unnoticed. These
-// are not the true angles: the hole's own march from far to far turns a
-// ray more, and how near the tracer should come is still to be decided.
+// Known shortfall, pinned as it is: the tracer's own bending, so that a
+// change to it is seen and the comments on loose and leave cannot go
+// stale unnoticed. The three numbers are what the tracer gives, and are
+// not the true angles.
 //
-// The numbers are what this code gave on 2026-10-15, after libholemath
-// began stepping a ray by its own time, so that a photon's energy has
-// no say in its path (libholemath 94300c5), which moved every angle.
-// They hold to the hundredth on celestial's hole, 2026-11-01.
-// That a ray passing at thirty turns more than one at twenty is the way
-// out of a field entering it again, each time turning the ray a little.
-func TestTheTracersOwnBendingIsAsMeasured(t *testing.T) {
+// A ray passing a mass M at a distance b turns, from far to far,
+// 4M/b + (15 pi / 4)(M/b)^2 + (128/3)(M/b)^3 radians and a little more:
+// at b of 20 and 30 masses that is 13.5 and 8.5 degrees, and at 10 over
+// 32. The tracer bends a ray only inside the field's reach and lets it
+// go past loose, so it should give less; at ten and twenty it does. At
+// thirty it gives 10.43 degrees, more than the 8.5 of the whole, and
+// more than the 9.73 it gives at twenty, by the way out of a field
+// entering it again.
+//
+// This test is to be rewritten to the true angles, or to the tracer's
+// stated share of them, when the bending is put right.
+func TestKnownShortfallTheTracersOwnBendingIsAsItGivesIt(t *testing.T) {
 	for _, each := range []struct{ passing, degrees float64 }{
 		{10, 27.80}, {20, 9.73}, {30, 10.43},
 	} {

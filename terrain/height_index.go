@@ -86,10 +86,16 @@ func (index *HeightIndex) Range(west, south, east, north float64) (low, high flo
 	if right < 0 || bottom < 0 || left > float64(index.columns-1) || top > float64(index.rows-1) {
 		return 0, 0, false, nil
 	}
-	firstColumn := int(max(0, math.Floor(left)-1)) / index.block
-	lastColumn := int(min(float64(index.columns-1), math.Ceil(right)+1)) / index.block
-	firstRow := int(max(0, math.Floor(top)-1)) / index.block
-	lastRow := int(min(float64(index.rows-1), math.Ceil(bottom)+1)) / index.block
+	leftEdge := math.Floor(left) - 1
+	rightEdge := math.Ceil(right) + 1
+	topEdge := math.Floor(top) - 1
+	bottomEdge := math.Ceil(bottom) + 1
+	columnMost := float64(index.columns - 1)
+	rowMost := float64(index.rows - 1)
+	firstColumn := int(max(0, leftEdge)) / index.block
+	lastColumn := int(min(columnMost, rightEdge)) / index.block
+	firstRow := int(max(0, topEdge)) / index.block
+	lastRow := int(min(rowMost, bottomEdge)) / index.block
 	for row := firstRow; row <= lastRow; row++ {
 		for column := firstColumn; column <= lastColumn; column++ {
 			cell := row*index.across + column

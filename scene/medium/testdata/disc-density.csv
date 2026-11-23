@@ -1,0 +1,7 @@
+name,x,y,z,want
+gap,3,0,0,0
+inner-ring,2.2,0,0,1
+outer-ring,0,0,3.8,1
+hole,1,0,0,0
+beyond-edge,5,0,0,0
+above-face,2.2,0.2,0,0

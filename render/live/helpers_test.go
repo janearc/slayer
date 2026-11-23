@@ -163,9 +163,10 @@ func screenOf(control *gomock.Controller, events chan terminal.Event,
 func watcherOn(t *testing.T, path string, stager Stager, screen Screen,
 	now *clock, ticks chan time.Time) *Watcher {
 	t.Helper()
+	watchFolder := filepath.Join(filepath.Dir(path), ".test.watch")
 	watching, err := New(Given{Path: path, Read: job.Read, Stager: stager,
 		Screen: screen, Now: now.Now, Ticks: ticks,
-		Folder: filepath.Join(filepath.Dir(path), ".test.watch")})
+		Folder: watchFolder})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +212,8 @@ func await[Value any](t *testing.T, from <-chan Value, what string) Value {
 func keyOf(t *testing.T, char rune) terminal.Event {
 	t.Helper()
 	var decoder terminal.Decoder
-	keys := decoder.Feed([]byte(string(char)))
+	typed := string(char)
+	keys := decoder.Feed([]byte(typed))
 	if len(keys) != one {
 		t.Fatalf("%q decoded as %d keys", char, len(keys))
 	}

@@ -25,7 +25,9 @@ func earthlike() *thing.World {
 			Thick: 1}, In: gas.Air(), Unit: 6371e3},
 		Material: &thing.Material{Name: "air",
 			Colour: maths.RGB(1, 0, 1)}})
-	world.Lamp(thing.Sun(maths.V(1, 0, 0), maths.Grey(1)))
+	along := maths.V(1, 0, 0)
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(along, light))
 	return world
 }
 
@@ -38,7 +40,9 @@ func TestNoGasChangesNothing(t *testing.T) {
 	world.AddVolume(thing.Volume{Medium: medium.Puff{Radius: 1, Thick: 0.5},
 		Material: &thing.Material{Name: "puff",
 			Colour: maths.Grey(0.8)}})
-	world.Lamp(thing.Sun(maths.V(0, 1, 0), maths.Grey(1)))
+	along := maths.V(0, 1, 0)
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(along, light))
 	scene := stage(world, 0)
 	if hasGas(scene.volumes) {
 		t.Fatal("a puff is a gas")
@@ -58,7 +62,8 @@ func TestNoGasChangesNothing(t *testing.T) {
 // here from the gas at each by hand, and the numbers a placed volume keeps.
 func TestEyeOpticsAreTheGassNumbersAtTheEyesBands(t *testing.T) {
 	for name, air := range map[string]gas.Gas{"air": gas.Air(),
-		"haze": gas.Haze(), "air per planet": gas.Air().Per(6371e3)} {
+		"haze": gas.Haze(), "air per planet": gas.Of{In: gas.Air(),
+			Unit: 6371e3}.Gas()} {
 		extinction, scatter := EyeOptics(air)
 		bands := [3]maths.Band{{Nanometres: 610}, {Nanometres: 550},
 			{Nanometres: 465}}

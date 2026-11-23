@@ -9,6 +9,9 @@ import (
 
 // Navigate edits the current supported camera and queues its next preview.
 func (work *Workspace) Navigate(yaw, pitch, zoom float64) error {
+	if err := work.fullRenderRefusal("moving the camera"); err != nil {
+		return err
+	}
 	if !work.viewer.navigable || work.viewer.source == nil || !work.state.document.CanNavigate() {
 		return fmt.Errorf("render a scene with a supported camera before moving it")
 	}
@@ -36,6 +39,9 @@ func (work *Workspace) undoCamera(ctx widget.Context, redo bool) {
 	if work.editor == nil || work.state.document == nil {
 		return
 	}
+	if work.refuseWhileFull("undoing a camera change") {
+		return
+	}
 	before := work.state.document.Text()
 	if redo {
 		work.editor.Redo(ctx)
@@ -56,12 +62,23 @@ func (work *Workspace) undoCamera(ctx widget.Context, redo bool) {
 
 // StopPreview requests cancellation on the UI thread for this window only.
 func (work *Workspace) StopPreview() {
-	work.stopPreview()
+	work.cancelRender()
 	work.invalidate()
 }
 
-// stopPreview discards queued navigation and cancels only this window's render.
+// stopPreview makes room for a newer preview: it discards queued navigation
+// and cancels this window's preview. A running full render is left alone;
+// only cancelRender, which answers the user's own request, stops it.
 func (work *Workspace) stopPreview() {
+	if work.fullRunning {
+		return
+	}
+	work.cancelRender()
+}
+
+// cancelRender discards queued navigation and cancels only this window's
+// render, full or preview.
+func (work *Workspace) cancelRender() {
 	work.clearNavigation()
 	work.generation++
 	work.cancelRequested = work.cancel != nil
@@ -110,7 +127,13 @@ func (work *Workspace) finishPreview(result renderResult) {
 	wasCancelling := work.cancelRequested
 	work.cancel = nil
 	work.cancelRequested = false
+	work.fullRunning = false
+	work.unresolvedJob, work.unresolvedPlan = 0, nil
+	if result.err != nil && work.options.Tools.Transport != "slayer" && result.observation.Sequence != 0 && !result.observation.Terminal {
+		work.unresolvedJob, work.unresolvedPlan = result.observation.Sequence, result.plan
+	}
 	if work.closing {
+		work.releaseExample()
 		work.host.Quit()
 		return
 	}
@@ -128,11 +151,14 @@ func (work *Workspace) finishPreview(result renderResult) {
 		if work.queueState == "interrupted" {
 			work.status = "Preview interrupted"
 		}
-		work.diagnostic = result.err.Error() + "\n" + work.log.read()
+		work.diagnostic = failureDiagnostic(result.err, work.log.read())
 		return
 	}
 	if !work.state.accepts(result.plan) || (result.plan.Kind == "catalogue" && result.plan.Specimen != work.specimen) {
 		work.status = "Preview finished for an older draft; render again"
+		if result.full {
+			work.status = "Full render finished for an older draft; its picture is at " + result.plan.Output
+		}
 		return
 	}
 	if err := work.showImage(result.plan.Output); err != nil {
@@ -170,6 +196,7 @@ func (work *Workspace) finishPreview(result renderResult) {
 		_ = work.SetWorkingMode("rendered")
 		work.caption = fmt.Sprintf("Full Slayer render · %d × %d · %d rays per side · exact", result.plan.Profile.Width, result.plan.Profile.Height, result.plan.Profile.Rays)
 	}
+	work.caption += work.reducedNote
 	work.status = "Preview ready · " + work.state.document.Name()
 	work.diagnostic = ""
 }

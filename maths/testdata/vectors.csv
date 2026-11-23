@@ -75,3 +75,13 @@ moved 2,-0.8,-0.2,0.7
 moved 3,-0.8,-0.1,-0.5
 infinite on x,+Inf,0,0
 barely measured,1.6e-162,0,0
+face min on x,-Inf,-1,-1
+face max on x,+Inf,1,1
+face min on y,-1,-Inf,-1
+face max on y,1,+Inf,1
+along x and y,1,1,0
+corner of the unit box,1,1,1
+bench box min,-1,-2,-3
+bench box max,2,1,4
+bench ray start,-5,-1,-8
+bench ray way,0.4,0.3,0.8

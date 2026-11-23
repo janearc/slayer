@@ -59,7 +59,7 @@ scene:
     rays: 3
     # lampExposure: a watt a steradian as this picture's light
     exposure: 15000
-    # webbWide, degrees. the film says no print: hillside develops with
+    # webbWide, degrees. the film says no print: the session develops with
     # its own, knee 0.7 and top 8, which are webbKnee and webbTop
     wide: 45
   cameras:

@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-// Playhead says where a piece of music is, at an offset from its first
+// playhead says where a piece of music is, at an offset from its first
 // sample. It is the interface miami's app depends on; tune does not import
 // miami and miami does not import tune, and the method set is what joins
 // them.
-type Playhead interface {
+type playhead interface {
 	At(offset time.Duration) (beat, bar, beats, level float64, ok bool)
 }
 
-var _ Playhead = (*Piece)(nil)
+var _ playhead = (*Piece)(nil)
 
 // levelWindow is the span the level is measured over, centred on the offset.
 // It reads half of it ahead of the offset, which is fine: the audio exists

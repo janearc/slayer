@@ -148,7 +148,8 @@ func TestReadCuesKeepsKeyValueLines(t *testing.T) {
 // TestReadCuesRefusesAMissingFile checks that a file that is not there is
 // an error.
 func TestReadCuesRefusesAMissingFile(t *testing.T) {
-	if _, err := readCues(filepath.Join(t.TempDir(), "none.env")); err == nil {
+	missing := filepath.Join(t.TempDir(), "none.env")
+	if _, err := readCues(missing); err == nil {
 		t.Error("a cue file that is not there was read")
 	}
 }
@@ -161,7 +162,8 @@ func TestReadCuesRefusesALineTooLongToScan(t *testing.T) {
 	for i := range long {
 		long[i] = 'x'
 	}
-	if err := os.WriteFile(path, append([]byte("bar="), long...), 0o644); err != nil {
+	body := append([]byte("bar="), long...)
+	if err := os.WriteFile(path, body, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := readCues(path); err == nil {

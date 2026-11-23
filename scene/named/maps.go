@@ -14,7 +14,6 @@ package named
 // other kind's name by saying which kind it is.
 
 import (
-	"errors"
 	"fmt"
 	"image"
 	"io"
@@ -62,7 +61,7 @@ type Map struct {
 	picture    *image.RGBA
 }
 
-// Kind is which of the scene's pictures this is, as Pictures names it.
+// Kind is which of the scene's pictures this is.
 func (made Map) Kind() string { return made.kind }
 
 // Name is the picture's file name, with no extension, as the scene's
@@ -85,8 +84,8 @@ type MapsAsk struct {
 }
 
 // ErrEvery is a cache asked for with no spacing between its moments.
-var ErrEvery = errors.New("named: a cache needs its moments spaced " +
-	"by more than nothing")
+const ErrEvery refusal = "named: a cache needs its moments spaced " +
+	"by more than nothing"
 
 // AskMaps is what a caller asks of a scene of maps. With no renderer
 // said, the scene takes its own default. A cache's moments must be
@@ -122,7 +121,7 @@ func (scene Maps) Draws(renderer Renderer) bool {
 }
 
 // Cache is where the scene keeps its moments between runs, shared with
-// whatever else draws it: the weather's is hillside's.
+// whatever else draws it: the weather's is the session's.
 func (scene Maps) Cache() (string, error) { return scene.cache() }
 
 // Pictures are the kinds of picture the scene makes at each moment, in
@@ -158,7 +157,7 @@ func (scene Maps) Build(with map[string]any, ask MapsAsk) (Mapper, error) {
 }
 
 // ErrRenderer is a renderer a scene is not drawn by.
-var ErrRenderer = errors.New("named: not drawn by that renderer")
+const ErrRenderer refusal = "named: not drawn by that renderer"
 
 // GetMaps is the scene of maps of that name, or a refusal that lists the
 // names there are, or says the name is a traced scene's.

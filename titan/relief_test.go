@@ -27,8 +27,9 @@ func madeRelief(t *testing.T, asked bool) float64 {
 	}
 	var squares float64
 	for i := range reliefPlaces {
-		got, err := world.At(spot(t, 20+float64(i)*0.0137, // picked: a line
-			10+float64(i)*0.0071), Inchworm)
+		lon := 20 + float64(i)*0.0137 // picked: a line
+		lat := 10 + float64(i)*0.0071
+		got, err := world.At(spot(t, lon, lat), inchworm)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -67,7 +68,7 @@ func TestReliefNeverMovesTheMap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Kind() != Measured || math.Abs(got.Height()-want) > 1e-6 {
+	if got.Kind() != measured || math.Abs(got.Height()-want) > 1e-6 {
 		t.Errorf("at a corner the ground is %v %v, the map %v", got.Kind(),
 			got.Height(), want)
 	}
@@ -79,7 +80,7 @@ func TestReliefRefusals(t *testing.T) {
 	for _, asked := range [][2]float64{{-0.1, 10}, {0.1, 0},
 		{math.NaN(), 10}, {0.1, math.Inf(1)}} {
 		if err := world.Relief(asked[0], asked[1]); !errors.Is(err,
-			Refused()) {
+			errRefused) {
 			t.Errorf("relief %v was not refused: %v", asked, err)
 		}
 	}

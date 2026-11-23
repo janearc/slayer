@@ -20,7 +20,7 @@ func oldOptics(g Gas, band maths.Band) (absorb, scatter float64) {
 	r := thing.Range(maths.Band{Nanometres: nm})
 	near := (r == radiation.Ultraviolet() || r == radiation.Infrared()) &&
 		nm > 300 && nm < 1200
-	if g.Visible != nil && (r == thing.Visible || near) {
+	if g.Visible != nil && (r == thing.Visible() || near) {
 		return g.Visible(nm)
 	}
 	o, ok := thing.Lookup(g.Ranges, maths.Band{Nanometres: nm})
@@ -44,7 +44,9 @@ func TestOpticsIsTheOldDerivationBitForBit(t *testing.T) {
 		math.Inf(-1), math.NaN(), 299.9999999, 300.0000001, 1199.99999, 1200.00001}
 	r := rand.New(rand.NewSource(20260910))
 	for i := 0; i < 20000; i++ {
-		nms = append(nms, r.Float64()*1500, math.Exp(r.Float64()*40-12))
+		wavelength := r.Float64() * 1500
+		weight := math.Exp(r.Float64()*40 - 12)
+		nms = append(nms, wavelength, weight)
 	}
 	for name, g := range gases {
 		for _, nm := range nms {

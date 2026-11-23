@@ -7,7 +7,7 @@ numbers:
   by: vegetation scenery study, 2026-11-08
 - name: maximum-cells
   value: 1024
-  says: maximum physical foliage cells per specimen
+  says: physical foliage cells a specimen is drawn up to stay within; one with more is grown, at its cost
   kind: picked
   by: vegetation scenery study, 2026-11-08
 - name: maximum-orders
@@ -385,3 +385,58 @@ numbers:
   says: upper bound for private cactus physical ranges in metres
   kind: picked
   by: cactus scenery study, 2026-11-08
+- name: maximum-roots
+  value: 128
+  says: maximum visible roots of one kind of plant, per specimen
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: root-sink
+  value: 0.05
+  says: metres a visible root begins below the ground, so it stands in it
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: root-clearance
+  value: 0.12
+  says: metres from the trunk axis inside which no upright root stands
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: root-variation
+  value: 0.25
+  says: seeded share by which a root's radius differs from its kind's
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: pencil-lean
+  value: 0.12
+  says: sideways lean of an upright root, per metre of its height
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: prop-turn-variation
+  value: 0.35
+  says: seeded share of the gap between neighbouring prop roots they stray
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: prop-landing-variation
+  value: 0.3
+  says: seeded share by which a prop root lands nearer or further out
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: prop-elbow-reach
+  value: 0.55
+  says: share of a prop root's reach at which it turns down
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: prop-elbow-height
+  value: 0.9
+  says: share of a prop root's height at the trunk it keeps at its elbow
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: prop-lower-share
+  value: 0.8
+  says: radius of a prop root where it turns down, as a share of its foot
+  kind: picked
+  by: mangrove study, 2026-11-20
+- name: prop-start-share
+  value: 0.5
+  says: share of the trunk radius, from its axis, a prop root starts at
+  kind: picked
+  by: mangrove study, 2026-11-20

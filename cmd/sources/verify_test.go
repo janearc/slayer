@@ -58,9 +58,10 @@ func verifying(quoted, value string) (place, rig) {
 	made.dir, _ = os.MkdirTemp("", "sources-verify")
 	sum := sha256.Sum256([]byte(sheet))
 	list := filepath.Join(made.dir, "sources.yaml")
+	checksum := hex.EncodeToString(sum[:])
 	os.WriteFile(list, []byte("sources:\n  - key: candle\n    from: "+
 		made.server.URL+"/candle.txt\n    licence: public domain\n"+
-		"    sha256: "+hex.EncodeToString(sum[:])+"\n"), openFile)
+		"    sha256: "+checksum+"\n"), openFile)
 	data, _ := numbers.Read("research.yml", []byte("numbers:\n"+
 		"  - name: burn\n    value: "+value+"\n"+
 		"    says: how fast the candle burns down\n    kind: measured\n"+
@@ -77,7 +78,8 @@ func verifying(quoted, value string) (place, rig) {
 const openFile = 0o644
 
 // Verify holds each measured number to its source: on the shelf as
-// pinned, its text there, and saying the number.
+// pinned, its text there, and saying the number. A number that holds is
+// not spoken of: verify prints nothing and leaves nought.
 func Example_verify() {
 	at, made := verifying("6.84", "6.84")
 	defer made.done()
@@ -88,8 +90,25 @@ func Example_verify() {
 	fmt.Print(out.String())
 	fmt.Println(code)
 	// Output:
-	// burn: 6.84, in candle
 	// 0
+}
+
+// and one that does not hold is spoken of, and fails the verb: the quiet
+// is for numbers that hold, not for verify.
+func TestVerifyIsQuietOnlyWhenEveryNumberHolds(t *testing.T) {
+	if said := verified("6.84", "6.84", true); said != "" {
+		t.Errorf("a number that holds was spoken of: %q", said)
+	}
+	at, made := verifying("6.84", "6.8")
+	defer made.done()
+	var out bytes.Buffer
+	tool(at).Run([]string{"fetch"}, &out, &out)
+	out.Reset()
+	if code := tool(at).Run([]string{"verify"}, &out, &out); code == 0 ||
+		!strings.Contains(out.String(), "burn") {
+		t.Errorf("a number that does not hold left %d and said %q", code,
+			out.String())
+	}
 }
 
 // verified is what verify says of the rig's number, quoted and holding

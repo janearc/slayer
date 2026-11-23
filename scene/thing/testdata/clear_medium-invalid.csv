@@ -1,0 +1,9 @@
+name,identity,extinctionRed,extinctionGreen,extinctionBlue,unit
+blank name,,0.1,0.1,0.1,1
+untrimmed name," water",0.1,0.1,0.1,1
+negative extinction,water,-0.1,0.1,0.1,1
+nan extinction,water,NaN,0.1,0.1,1
+infinite extinction,water,+Inf,0.1,0.1,1
+zero unit,water,0.1,0.1,0.1,0
+negative unit,water,0.1,0.1,0.1,-1
+infinite unit,water,0.1,0.1,0.1,+Inf

@@ -1,0 +1,6 @@
+name,side-x,side-y,side-z,axis
+x longest,3,2,1,0
+y longest,1,3,2,1
+z longest,1,2,3,2
+first past the second only,2,3,1,1
+first past the third only,2,1,3,2

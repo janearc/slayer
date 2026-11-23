@@ -7,8 +7,8 @@ scale. Prose colours must remain in the owner's contrast band, on each actual
 surface; decorative edges and imagery do not substitute for readable text.
 
 The next working step opens existing Slayer job and set YAML and draws a still
-preview with the existing Slayer executable. The editor invokes Game's GPU lane,
-never a second tracer. Preview size is 640 by 360 with one ray per side, labelled
+preview with the existing Slayer executable. The editor starts the configured Slayer itself,
+never a second tracer, and the person's own render waits in no Game lane. Preview size is 640 by 360 with one ray per side, labelled
 as a preview. Film jobs are refused for now, so opening one cannot accidentally
 start a movie. Original files and their outputs remain untouched.
 

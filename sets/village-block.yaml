@@ -1,0 +1,102 @@
+# one block of an urban village: a parcel of 80 by 60 m packed by the
+# seed with village houses, each on its own plot, alleys of a metre or
+# three between them and a lane every few plots, the parcel's edges lanes
+# too. the houses are levelled: near ones drawn to their cage bars, far
+# ones to their walls and lit windows. cables hang across the lanes and
+# the alleys. there is no sun and no sky: the block is lit by its own
+# lamps, the lit rooms, the stair doors, the shops, the signs and the
+# lanterns, as the neon street is. the weathering streaks the tiles and
+# runs rust from the cages.
+#
+# places are metres, as a map's run: x east, y north, z up. the first
+# camera is the one drawn; to draw another, name it.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: one block of an urban village
+  seed: 1
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 70
+    exposure: 4
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    above:
+      title: "from above and south of the block"
+      wide: 60
+      location:
+        at: [0, -95, 85]
+      orientation:
+        look_at: [0, 0, 10]
+    alley:
+      title: "at eye height at the south end of an alley, looking north up it; placed from the overhead picture"
+      location:
+        at: [6.9, -32, 1.7]
+      orientation:
+        look_at: [6.9, 20, 9]
+    lane:
+      title: "at eye height at the south end of the lane, looking north along its shops; placed from the overhead picture"
+      location:
+        at: [-7.3, -34, 1.7]
+      orientation:
+        look_at: [-7.3, 20, 6]
+    overhead:
+      title: "from straight above the middle of the block, north up"
+      wide: 60
+      location:
+        at: [0, -0.01, 150]
+      orientation:
+        look_at: [0, 0, 0]
+  recipes:
+    village: {kind: village, parcel: {width: {value: 80, unit: m}, depth: {value: 60, unit: m}}}
+  set:
+    things:
+      village: {recipe: village, seed: 20, complexity: levelled, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      ground:
+        colour: {srgb_linear: [0.02, 0.02, 0.022]}
+        source: eye
+    boxes:
+      ground:
+        material: ground
+        middle: [0, 0, -1.02]
+        size: [400, 400, 2]
+        source: eye
+    weathering:
+      source: eye
+      seed: 13
+      age: 25
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        tile-streaks:
+          kind: rain
+          on: [tile]
+          colour: {srgb_linear: [0.02, 0.018, 0.015]}
+          strength: 0.8
+          settle: 6
+          level: 0.2
+          length: 5
+          spacing: 0.3
+          share: 0.8
+        rust:
+          kind: rust
+          on: [steel]
+          colour: {srgb_linear: [0.14, 0.06, 0.03]}
+          strength: 0.5
+          settle: 10
+          level: 0.2
+          length: 2.5
+          spacing: 0.25
+          share: 0.4
+          grain: 0.3

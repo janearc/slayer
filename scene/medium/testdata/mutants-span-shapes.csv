@@ -1,0 +1,6 @@
+name,length,base,spread,curve,thick,from,x,y,z,direction,enter,leave
+mutants-span-jet-half-base,100,1,0,0,1,30.9,0,0,0,y,30.75,100
+mutants-span-jet-no-base,64,0,0.125,0,1,29.25,0,0,0,y,28.5,64
+mutants-span-tail-no-base,64,0,0.125,0.8,1,0,0,0,0,y,0,25.5
+mutants-span-tail-head,64,2,0,0,1,0,-10,0,0,x,7.5,12.5
+mutants-span-jet-up,2,1,0,0,1,0,0,-5,0,y,3,7

@@ -58,7 +58,8 @@ func TestAPointProjectsWhereTheCameraSeesIt(t *testing.T) {
 // be projected through and say so.
 func TestWhatCannotBeProjectedSaysSo(t *testing.T) {
 	view := hud.View{Eye: eye(), Width: 10, Height: 10}
-	behind := eye().Origin.Add(eye().Origin.Sub(maths.V(0, 0.5, 0)))
+	toward := eye().Origin.Sub(maths.V(0, 0.5, 0))
+	behind := eye().Origin.Add(toward)
 	if _, _, ahead, err := view.Project(behind); ahead || err != nil {
 		t.Errorf("a point behind the eye: ahead %v, %v", ahead, err)
 	}

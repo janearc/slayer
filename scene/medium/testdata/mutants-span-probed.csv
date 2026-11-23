@@ -1,0 +1,5 @@
+name,gas,near,far,finest,enter,leave
+mutants-span-probed-capped,1000.9,0,4096,1,999,4096
+mutants-span-probed-no-finest,20.9,0,48,0,20.5,48
+mutants-span-probed-upper-half,1001.1,0,4096,1,1001,4096
+mutants-span-probed-whole,-1,0,48,0,0,48

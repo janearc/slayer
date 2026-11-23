@@ -129,15 +129,7 @@ func Joined(parts ...Profile) (Profile, error) {
 	return made(parts[0].inner, parts[0].step, depths), nil
 }
 
-// Inner is the radius in metres the profile starts at.
-func (profile Profile) Inner() float64 { return profile.inner }
-
-// Outer is the radius in metres the profile ends at.
-func (profile Profile) Outer() float64 {
-	return profile.inner + profile.step*float64(len(profile.depths))
-}
-
-// Mean is the mean depth from one radius to another, in metres.
+// Mean is the Mean depth from one radius to another, in metres.
 func (profile Profile) Mean(from, to float64) float64 {
 	from, to = profile.within(from), profile.within(to)
 	if !(to > from) {
@@ -145,6 +137,14 @@ func (profile Profile) Mean(from, to float64) float64 {
 	}
 	return (profile.under(profile.summed, to) -
 		profile.under(profile.summed, from)) / (to - from)
+}
+
+// Inner is the radius in metres the profile starts at.
+func (profile Profile) Inner() float64 { return profile.inner }
+
+// Outer is the radius in metres the profile ends at.
+func (profile Profile) Outer() float64 {
+	return profile.inner + profile.step*float64(len(profile.depths))
 }
 
 // Seen is the depth across so many metres of radius about a radius, as light

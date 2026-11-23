@@ -1,0 +1,5 @@
+name,x,y,z,want
+middle,0,0,0,-0.5
+along-x,2,0,0,1.5
+near-a-side,0.1,0.2,-0.45,-0.05
+beyond-corner,1.5,1.5,1.5,1.7320508075688772

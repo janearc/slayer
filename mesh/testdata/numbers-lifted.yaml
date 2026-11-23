@@ -1,0 +1,52 @@
+# every number mesh/lifted_test.go chooses, with what it is and why.
+numbers:
+  - name: lifted-start-height
+    value: 5
+    says: how far above the triangle, along y, the rays that land on it start
+    kind: picked
+    by: well above a triangle that is four across
+  - name: lifted-reach
+    value: 10
+    says: how far along a ray the triangle is looked for
+    kind: picked
+    by: twice the start height, so a ray from it lands with room to spare
+  - name: lifted-inside-x
+    value: 1.2
+    says: the x of the point inside the triangle that a ray lands on
+    kind: picked
+    by: inside the triangle, off its middle and away from its sides
+  - name: lifted-inside-z
+    value: 1.3
+    says: the z of the point inside the triangle that a ray lands on
+    kind: picked
+    by: inside the triangle, off its middle and away from its sides
+  - name: lifted-corner-nudge
+    value: 1e-6
+    says: how far in from a corner, along x and z, the point is that is lifted near a corner
+    kind: picked
+    by: close enough that the lift is the corner's own, far enough that the ray lands on the face
+  - name: lifted-least
+    value: 1e-6
+    says: how far above the face a lifted point inside it must be at least
+    kind: picked
+    by: well above rounding and well below the lift worked by hand
+  - name: lifted-most
+    value: 1
+    says: how far a point inside the triangle may be lifted at the most
+    kind: picked
+    by: a quarter of the triangle's side, which the lift of its curve does not reach
+  - name: lifted-corner-slack
+    value: 1e-5
+    says: how far a point at a corner may be moved by the lift
+    kind: picked
+    by: a few times the nudge in from the corner
+  - name: lifted-normal-slack
+    value: 1e-12
+    says: how far a corner's normal may be from the one worked by hand, made one long
+    kind: picked
+    by: well under what a float64 sum of a few terms is out
+  - name: lifted-bowl-slack
+    value: 1e-12
+    says: how far the lift may move a point that is above every tangent plane
+    kind: picked
+    by: well under what a float64 sum of a few terms is out

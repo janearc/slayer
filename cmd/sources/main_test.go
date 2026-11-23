@@ -74,7 +74,8 @@ func Example_check() {
 	defer done()
 	var out bytes.Buffer
 	code := tool(at).Run([]string{"check"}, &out, &out)
-	fmt.Println(code, strings.Contains(out.String(), "not on the shelf"))
+	absent := strings.Contains(out.String(), "not on the shelf")
+	fmt.Println(code, absent)
 	// Output: 1 true
 }
 
@@ -84,7 +85,8 @@ func Example_path() {
 	defer done()
 	var out bytes.Buffer
 	tool(at).Run([]string{"path", "candle"}, &out, &out)
-	fmt.Println(filepath.Base(strings.TrimSpace(out.String())))
+	trimmed := strings.TrimSpace(out.String())
+	fmt.Println(filepath.Base(trimmed))
 	// Output: candle.pdf
 }
 

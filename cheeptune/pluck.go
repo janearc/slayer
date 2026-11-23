@@ -14,7 +14,7 @@ import "math"
 // made by an allpass filter. And both are worked out at the note's own
 // frequency, not as low-frequency approximations. A test holds the pitch.
 
-// Pluck is a pluck channel's sound. Brightness is how much of the top the
+// pluck is a pluck channel's sound. Brightness is how much of the top the
 // pluck itself has, nought (a thumb) to one (a pick). Damping is how fast
 // the high end dies against the low, nought to one.
 //
@@ -22,7 +22,7 @@ import "math"
 // end) to a half (the middle, which takes out every even overtone).
 // Decay is the seconds the note takes to fall sixty decibels while held,
 // and release the seconds once it is let go.
-type Pluck struct {
+type pluck struct {
 	Brightness float64 `json:"brightness"`
 	Damping    float64 `json:"damping"`
 	Position   float64 `json:"position"`
@@ -54,7 +54,7 @@ func init() {
 }
 
 // checkPluck is a pluck channel's own rules.
-func checkPluck(c *Channel, q *quarrel) {
+func checkPluck(c *channel, q *quarrel) {
 	p := c.Pluck
 	q.within("pluck brightness", p.Brightness, 0, 1)
 	q.within("pluck damping", p.Damping, 0, 1)
@@ -64,10 +64,10 @@ func checkPluck(c *Channel, q *quarrel) {
 }
 
 // pluckEngine is a pluck channel ready to sound.
-type pluckEngine struct{ pluck *Pluck }
+type pluckEngine struct{ pluck *pluck }
 
 // buildPluck is the engine for a checked pluck channel.
-func buildPluck(c *Channel) engine { return &pluckEngine{pluck: c.Pluck} }
+func buildPluck(c *channel) engine { return &pluckEngine{pluck: c.Pluck} }
 
 // ring is the string's release.
 func (e *pluckEngine) ring(strike) float64 { return e.pluck.Release }

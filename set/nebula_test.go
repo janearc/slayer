@@ -33,7 +33,8 @@ func nebula(t *testing.T, changes ...string) string {
 // nebulaRead is the nebula's world, read as written or changed.
 func nebulaRead(t *testing.T, changes ...string) set.World {
 	t.Helper()
-	made, err := set.Read("nebula.yaml", []byte(nebula(t, changes...)))
+	source := nebula(t, changes...)
+	made, err := set.Read("nebula.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,8 +245,8 @@ func TestANebulasMistakesAreRefused(t *testing.T) {
 		{"colour: {swatch: rust}", "colour: {swatch: rust, strength: 1}",
 			"strength is not a key here"},
 	} {
-		_, err := set.Read("nebula.yaml", []byte(nebula(t, mistake.was,
-			mistake.now)))
+		source := nebula(t, mistake.was, mistake.now)
+		_, err := set.Read("nebula.yaml", []byte(source))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%q: refused with %v, wanted %q", mistake.now, err,
 				mistake.said)
@@ -266,12 +267,12 @@ func TestANebulasNumbersAreTakenToTheirEdges(t *testing.T) {
 		{"cone: 12", "cone: 180", "cone: 180.0001"},
 		{"temperature: 9000", "temperature: 1", "temperature: 0.999"},
 	} {
-		if _, err := set.Read("nebula.yaml", []byte(nebula(t, edge.was,
-			edge.at))); err != nil {
+		source := nebula(t, edge.was, edge.at)
+		if _, err := set.Read("nebula.yaml", []byte(source)); err != nil {
 			t.Errorf("%s: %v", edge.at, err)
 		}
-		if _, err := set.Read("nebula.yaml", []byte(nebula(t, edge.was,
-			edge.past))); err == nil {
+		source = nebula(t, edge.was, edge.past)
+		if _, err := set.Read("nebula.yaml", []byte(source)); err == nil {
 			t.Errorf("%s was taken", edge.past)
 		}
 	}

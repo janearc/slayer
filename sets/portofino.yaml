@@ -1,0 +1,475 @@
+# portofino: the harbour, and the painted houses on the slopes round it.
+#
+# the ground. copernicus glo-30, tile n44 e009 (1 arc-second, posts about
+# 22 m east to west and 31 m north to south here), a surface model: it
+# holds the tops of what stands there, roofs and trees, and not the bare
+# earth, and it holds the sea at nought. the window is 2400 m across and
+# 1700 m down at a 5 m step, bilinear between the posts and not smoothed: a
+# 20 m smoothing takes half the harbour's water away (22000 square metres
+# of water in the harbour's box, 11000 smoothed). the harbour is 1300 m
+# from the window's west edge and 600 m from its south edge, at 44.3022
+# north, 9.2118 east; the window's middle is 44.30445 north, 9.21055 east,
+# worked from that: 1200 m east and 850 m north of the window's south-west
+# corner, which puts the harbour 100 m east of the middle and 250 m south
+# of it. the ground is cut in a wall at the window's edge, and the camera
+# `high` sees it, since a camera high enough sees any edge a window has.
+# the window is placed round the harbour the heights show: the water is
+# where they fall to nought, and the ground climbs on the sides the next
+# paragraph names.
+#
+# what the heights say. the water of the harbour is a basin about 260 m
+# across, east to west, and 100 m from its head to its mouth, its head at
+# 605 m north in the window and its mouth, between a low tongue of land on
+# the north and the east headland, at about 725 m north, open to the
+# north-east. the ground is 0 to 3 m over a strip along the head, climbs
+# to 10 m within 35 to 55 m of the water on the west, and to 40 m within
+# about 100 m on the east. over the slopes that fall toward the water the
+# rise is 0.4 to 0.5 in a metre on average, and 0.78 at the steepest, on
+# the east side of the head.
+#
+# the sea. world.ocean, one static instant of the wave cascades laid over
+# the harbour and the sea off it, with its mean face at 0.5 m on the
+# model's datum: the model holds the water at nought and has no depth under
+# it, so the floor is the ground at nought and the face is half a metre
+# over it, picked. it is the sea with no edge: the ocean says no extent
+# and no samples, so its waves run to the horizon. the ground's own `sea`
+# is the same level, 0.5 m, since the cover is laid from it and the two
+# are one water. the language has one ocean to a set, one wind and one
+# fetch over the whole plane, so the basin of the harbour, which a
+# headland shelters, and the open sea off its mouth have the same waves
+# here; they cannot differ.
+#
+# the wind: 4 m/s from the north-east, a light breeze, up the harbour's
+# mouth; every number is a choice and says so beside it in the ocean block,
+# and no measurement stands behind them. the fetch is the distance over
+# water, along the wind's line, to the first land the tile shows: from
+# just outside the harbour's mouth it is 4950 m along 30 degrees from
+# north and 5980 m along 60, so 5000 m is taken for the wind from 45. the
+# depth is 0, which is deep water, since the tile gives no bed under the
+# water and a sea of 4 m/s waves is deep in 10 m of it.
+#
+# made ground and cover. `made` lays ground finer than the 5 m window
+# where the camera resolves finer, its roughness the survey's own read
+# over seven and thirteen samples, 35 and 65 m at this step; this survey
+# is 30 m posts drawn bilinear at 5 m, so the roughness it reads is the
+# model's, smoothed, and less than the ground's. no flutes or beds are
+# asked. the seed is picked. the cover is rock under all and green over
+# it where gentle and above the shore, by the reasons sets/honopu.yaml
+# gives for its grass: soil stands to about 35 to 40 degrees (0.7 to
+# 0.84), picked on that; the foot, 4 m over the sea, is picked. the
+# cover's sea is the terrain's own `sea`. the colours are the swatches',
+# unmeasured.
+#
+# the sun. scene/daylight.Sun, noaa's fractional-year equations, for
+# 44.3022 north, 9.2118 east, at 07:30 local summer time (utc+2) on 21
+# june 2026: azimuth 73.64, altitude 17.09, geometric, without refraction.
+# the set says the date, the clock and its offset from utc, and the reader
+# works the sun from them. the sky and the air are the earth's, worked from
+# that. the day and the
+# hour are a choice: the sun, low in the east-north-east, lights the
+# faces that look east and, grazing, those that look north.
+#
+# the houses. the kind terrace-portofino, from
+# manufacture/cities/cultures/portofino.yaml: fourteen bays to a terrace,
+# each bay its own number of storeys, and its colour drawn from that
+# culture's palette of red, ochre, yellow, pink and cream, so that no
+# bay has the colour of the one beside it. no house is coloured here.
+# four stands of the habit `contour` lay rows along the contours of the
+# slopes that face the harbour: the south, which is the head, fronts to
+# the north; the east flank, fronts to the west; the west flank, fronts
+# to the east; and the north ledge, fronts to the south. each stand's
+# first row starts at "the foot" of its stand, which is the back corner
+# of its first terrace, and is a place picked from the heights (the front
+# wall of the first row a few metres from the water's edge). each run is
+# turned to the ground's contour where it stands, and each bay is founded
+# on the ground under it.
+#
+# the quay. seventeen boxes, each a chord of the harbour's shore, 6 m
+# across, its near edge on the shore and its length that of its chord and
+# 3 m more, so that two meet at a bend. each has a heading, so the run
+# follows the shore where the shore is not along east and west. the shore
+# is where the model's heights first rise to the sea's face, 0.5 m, read
+# along rays from the harbour's middle, and each chord is joined by eye
+# from those points: the 5 m posts hold the shore within about 15 m. the
+# top of every box is 1.5 m over the nought of the model, 1 m over the sea.
+#
+# the boats. sampan-at-anchor and fishing-boat-at-anchor are the
+# manufactory's small boats, and are not Ligurian boats: five sampans of 5
+# to 8 m and two steel fishing boats of 15 to 25 m, in the basin, each laid
+# on the water at least 15 m from the shore the tile shows. they are at
+# anchor, bows into the wind, which is from the north-east: 45 degrees
+# clockwise from north, the same for all. a boat stands at the sea's mean
+# height, 0.5 m. no ferry: it is much longer than the basin's other boats,
+# so it is not a small boat.
+#
+# places of things are metres in the terrain window: east from its west
+# edge, north from its south edge. a camera's at and look_at are east from
+# the west edge, north as the window's northing less its 1700 m depth, and
+# up from the lowest ground in the window, the water's nought.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: portofino
+  seed: 1
+  light: sun
+  air: earth
+  location:
+    lat: 44.3022
+    lon: 9.2118
+  date: "2026-06-21"
+  timeofday: 730
+  utc-offset: {value: 2, unit: h}
+  terrain:
+    from: copernicus-glo30-n44-e009
+    lat: 44.30445
+    lon: 9.21055
+    across: 2400
+    down: 1700
+    step: 5
+    sea: {value: 0.5, unit: m}
+    made: {seed: 44}
+    cover:
+      layers:
+        - name: rock
+          reflectance: [0.19, 0.16, 0.12]
+          source: "scene/swatches Earth.Rock, typed by the earth template, not checked against a measurement"
+        - name: green
+          reflectance: [0.21, 0.39, 0.058]
+          source: "scene/swatches Earth.Grass, typed by the earth template, not checked against a measurement; standing for the scrub and woods of the slopes"
+          height: {from: 4, blend: 4}
+          slope: {until: 0.7, blend: 0.4}
+  film:
+    width: 1600
+    height: 900
+    rays: 4
+    wide: 50
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    headland:
+      title: "from the east headland, 15 m over its slope, looking west across the harbour"
+      wide: 55
+      location:
+        at: [1480, -1050, 58.5]
+      orientation:
+        look_at: [1240, -1060, 3]
+    water:
+      title: "from the water off the harbour's mouth, 6 m up, looking south-west into the harbour at the houses of its head"
+      location:
+        at: [1450, -870, 6]
+      orientation:
+        look_at: [1250, -1090, 12]
+    quay:
+      title: "on the quay at the east end of the head, at eye height, looking west along the fronts"
+      wide: 60
+      location:
+        at: [1341, -1082.5, 3.4]
+      orientation:
+        look_at: [1190, -1100, 6]
+    sea:
+      title: "2.2 m over the water off the harbour's mouth, level, looking north-north-east to the open sea and its horizon"
+      wide: 60
+      location:
+        at: [1360, -940, 2.2]
+      orientation:
+        look_at: [2360, 792, 2.2]
+    above:
+      title: "450 m over the sea north-east of the harbour, looking down on it and its houses"
+      wide: 45
+      location:
+        at: [1400, -700, 450]
+      orientation:
+        look_at: [1290, -1060, 10]
+    high:
+      title: "1500 m up over the south-west bay, looking north-north-east over the whole harbour, where the ground ends at its edge"
+      wide: 50
+      location:
+        at: [1100, -1600, 1500]
+      orientation:
+        look_at: [1300, -1000, 0]
+    plan:
+      title: "straight down from 700 m over the harbour, north up"
+      wide: 40
+      location:
+        at: [1300, -1060, 700]
+      orientation:
+        look_at: [1300, -1059, 0]
+    east:
+      title: "from the water in the middle of the basin, 4 m up, looking north-east at the east flank's fronts"
+      wide: 55
+      location:
+        at: [1250, -1040, 4]
+      orientation:
+        look_at: [1410, -1000, 15]
+  set:
+    things:
+      the south foot: {kind: human-scale-2m, seed: 1, east: 1345, north: 589}
+      the east foot: {kind: human-scale-2m, seed: 1, east: 1426, north: 705}
+      the west foot: {kind: human-scale-2m, seed: 1, east: 1184, north: 630}
+      the north foot: {kind: human-scale-2m, seed: 1, east: 1145, north: 714}
+      anchored sampan one:
+        kind: sampan-at-anchor
+        seed: 3
+        complexity: demo
+        position:
+          east: {value: 1255, unit: m}
+          north: {value: 640, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 45, unit: deg}
+      anchored sampan two:
+        kind: sampan-at-anchor
+        seed: 5
+        complexity: demo
+        position:
+          east: {value: 1290, unit: m}
+          north: {value: 652, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 45, unit: deg}
+      anchored sampan three:
+        kind: sampan-at-anchor
+        seed: 7
+        complexity: demo
+        position:
+          east: {value: 1232, unit: m}
+          north: {value: 650, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 45, unit: deg}
+      anchored sampan four:
+        kind: sampan-at-anchor
+        seed: 9
+        complexity: demo
+        position:
+          east: {value: 1340, unit: m}
+          north: {value: 668, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 45, unit: deg}
+      anchored sampan five:
+        kind: sampan-at-anchor
+        seed: 8
+        complexity: demo
+        position:
+          east: {value: 1345, unit: m}
+          north: {value: 645, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 45, unit: deg}
+      anchored fishing boat one:
+        kind: fishing-boat-at-anchor
+        seed: 2
+        complexity: demo
+        position:
+          east: {value: 1300, unit: m}
+          north: {value: 692, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 45, unit: deg}
+      anchored fishing boat two:
+        kind: fishing-boat-at-anchor
+        seed: 4
+        complexity: demo
+        position:
+          east: {value: 1250, unit: m}
+          north: {value: 672, unit: m}
+          up: {value: 0.5, unit: m}
+        heading: {value: 45, unit: deg}
+    stands:
+      the head:
+        kind: terrace-portofino
+        habit: contour
+        count: 6
+        seed: 11
+        complexity: demo
+        within: {of: the south foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 3
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+      the east flank:
+        kind: terrace-portofino
+        habit: contour
+        count: 6
+        seed: 12
+        complexity: demo
+        within: {of: the east foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 3
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+      the west flank:
+        kind: terrace-portofino
+        habit: contour
+        count: 6
+        seed: 13
+        complexity: demo
+        within: {of: the west foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 3
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+      the north ledge:
+        kind: terrace-portofino
+        habit: contour
+        count: 4
+        seed: 14
+        complexity: demo
+        within: {of: the north foot, from: 0, to: 360, near: 0, far: 400}
+        climb:
+          rows: 2
+          runs: 2
+          lane: {value: 3, unit: m}
+          door: downhill
+      # the promontory's own trees, sown by rule: holm oak and tree heath,
+      # which the marine reserve's coastal handbook names together in the
+      # holm oak wood that comes near the sea (manufacture/plant-profiles.yaml
+      # cites it). each stand grows from its seed over the ground 150 to
+      # 1200 m from the head of the harbour, above 30 m, so the town's rows
+      # below are left bare, and no steeper than its steepest, rise over run.
+      # the heath, a shrub of the maquis, is let onto steeper and higher
+      # ground than the oak. the floor, the distances and the steepness are
+      # picked. the ground is a surface model that already holds the tops of
+      # the trees that stand there, so these stand on that canopy, not under it.
+      #
+      # how many. a forty-year holm oak coppice in sicily holds 1496 holm oak
+      # stools a hectare, 10.4 m tall on average, under a crown cover of 97%
+      # (iforest 11: 344-351, doi 10.3832/ifor2424-011, table 1, plot a4). a stool
+      # there is a few slim shoots; a holm oak here is one tree whose crown is
+      # about 11 m across (the study's draw, measured by eye), 95 square
+      # metres, so 97% cover is about 100 of them a hectare. the ground these
+      # stands may grow on, inside the window, over 30 m and gentle enough, is
+      # not measured; it is guessed at about 150 hectares, so 15000 oaks. the
+      # heath fills under and between them, a third as many again, picked.
+      holm oaks a: {kind: quercus-ilex, count: 5000, seed: 501, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      holm oaks b: {kind: quercus-ilex, count: 5000, seed: 502, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      holm oaks c: {kind: quercus-ilex, count: 5000, seed: 503, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      tree heath a: {kind: erica-arborea, count: 2500, seed: 511, complexity: clumps, above: 40, below: 700, steepest: 1.2, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      tree heath b: {kind: erica-arborea, count: 2500, seed: 512, complexity: clumps, above: 40, below: 700, steepest: 1.2, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+  world:
+    unit: 1
+    materials:
+      quay stone:
+        colour: {srgb_linear: [0.16, 0.15, 0.13]}
+        source: eye
+      seawater:
+        colour: {srgb_linear: [0.01, 0.04, 0.06]}
+        clear:
+          through: 1
+          index: 1.333
+          gloss: 1
+          rank: 0
+        source: "water's refractive index; colour by eye, a stand-in"
+    ocean:
+      material: seawater
+      middle: [1400, 800, 0.5]
+      sea:
+        wind: {value: 4, unit: m/s}
+        fetch: {value: 5000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 3.927, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "chosen: a 4 m/s wind from the north-east, toward 225 degrees (3.927 rad counterclockwise from east); fetch read from the tile; deep water; no measurement behind the wind"
+    boxes:
+      quay 1:
+        material: quay stone
+        middle: [1240.8, 598.8, 0]
+        size: [41.1, 6, 3]
+        heading: {value: 3.8, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 2:
+        material: quay stone
+        middle: [1277.3, 609.3, 0]
+        size: [41.3, 6, 3]
+        heading: {value: 144, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 3:
+        material: quay stone
+        middle: [1308.3, 619, 0]
+        size: [38.1, 6, 3]
+        heading: {value: 3.3, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 4:
+        material: quay stone
+        middle: [1341.2, 617.5, 0]
+        size: [33.5, 6, 3]
+        heading: {value: 1.9, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 5:
+        material: quay stone
+        middle: [1369.7, 627.2, 0]
+        size: [32.5, 6, 3]
+        heading: {value: 139.8, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 6:
+        material: quay stone
+        middle: [1392.4, 651.7, 0]
+        size: [39.4, 6, 3]
+        heading: {value: 127.2, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 7:
+        material: quay stone
+        middle: [1404.5, 676.8, 0]
+        size: [21, 6, 3]
+        heading: {value: 93.2, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 8:
+        material: quay stone
+        middle: [1415.3, 697.9, 0]
+        size: [38.2, 6, 3]
+        heading: {value: 128.7, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 9:
+        material: quay stone
+        middle: [1218, 612.4, 0]
+        size: [22.6, 6, 3]
+        heading: {value: 84.1, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 10:
+        material: quay stone
+        middle: [1208.7, 624.5, 0]
+        size: [25.1, 6, 3]
+        heading: {value: 25.4, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 11:
+        material: quay stone
+        middle: [1197, 648, 0]
+        size: [35, 6, 3]
+        heading: {value: 90, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 12:
+        material: quay stone
+        middle: [1178.7, 663, 0]
+        size: [45.2, 6, 3]
+        heading: {value: 5.4, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 13:
+        material: quay stone
+        middle: [1162.4, 681.1, 0]
+        size: [29.9, 6, 3]
+        heading: {value: 121.3, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 14:
+        material: quay stone
+        middle: [1197.2, 696.5, 0]
+        size: [54.2, 6, 3]
+        heading: {value: 174.4, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 15:
+        material: quay stone
+        middle: [1248.9, 699.5, 0]
+        size: [55, 6, 3]
+        heading: {value: 178.9, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 16:
+        material: quay stone
+        middle: [1278.9, 703, 0]
+        size: [16, 6, 3]
+        heading: {value: 147.5, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"
+      quay 17:
+        material: quay stone
+        middle: [1284.5, 715.4, 0]
+        size: [25.2, 6, 3]
+        heading: {value: 96.9, unit: deg}
+        source: "a choice: a chord of the shore the model's heights give, see the quay paragraph above"

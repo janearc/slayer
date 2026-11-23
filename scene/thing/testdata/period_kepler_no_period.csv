@@ -1,0 +1,8 @@
+name,mass,radius
+no-radius-of-one-mass,0,1
+negative-mass,-1,1
+no-radius,1,0
+negative-radius,1,-1
+nothing,0,0
+heavy-no-radius,1e10,0
+heavy-negative-radius,1e10,-1e10

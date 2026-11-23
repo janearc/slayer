@@ -2,6 +2,32 @@ package thing
 
 import "math"
 
+// The counts the highlight equations are written with.
+const (
+	// glintNone is defined: no amount.
+	glintNone = 0
+	// glintWhole is defined: one amount, the whole of a share.
+	glintWhole = 1
+	// glintPair is defined: two, the factor of the equations' squares and
+	// halves.
+	glintPair = 2
+	// glintFour is defined: the factor of four in the denominator of the
+	// highlight, from the change of variables to the eye's direction.
+	glintFour = 4
+)
+
+// glintPositive reports whether every cosine and width is above nothing,
+// which a highlight needs before it has a value. A number that is no number
+// is not positive.
+func glintPositive(values ...float64) bool {
+	for _, value := range values {
+		if !(value > glintNone) {
+			return false
+		}
+	}
+	return true
+}
+
 // Microfacet is how much of a lamp's light a rough surface sends toward
 // the eye as a highlight, before Fresnel's share: the reflection
 // function times the cosine to the lamp, so that times the light a lamp
@@ -20,19 +46,20 @@ import "math"
 // surfaces" (EGSR 2007), equations 33 and 34, with Smith's separable
 // shadowing.
 func Microfacet(facing, lit, viewed, alpha float64) float64 {
-	if !(facing > 0 && lit > 0 && viewed > 0 && alpha > 0) {
-		return 0
+	if !glintPositive(facing, lit, viewed, alpha) {
+		return glintNone
 	}
 	a2 := alpha * alpha
-	spread := facing*facing*(a2-1) + 1
+	spread := facing*facing*(a2-glintWhole) + glintWhole
 	faces := a2 / (math.Pi * spread * spread)
-	return faces * smith(lit, a2) * smith(viewed, a2) / (4 * viewed)
+	return faces * smith(lit, a2) * smith(viewed, a2) / (glintFour * viewed)
 }
 
 // smith is the share of a rough surface's tiny faces a way of cosine
 // cos to the normal sees unshadowed, for a GGX width squared a2.
 func smith(cos, a2 float64) float64 {
-	return 2 * cos / (cos + math.Sqrt(a2+(1-a2)*cos*cos))
+	return glintPair * cos /
+		(cos + math.Sqrt(a2+(glintWhole-a2)*cos*cos))
 }
 
 // Beckmann is Microfacet's highlight for a surface whose tiny faces
@@ -53,11 +80,11 @@ func smith(cos, a2 float64) float64 {
 // Walter and others, "Microfacet models for refraction through rough
 // surfaces" (EGSR 2007): Beckmann's distribution, Smith's shadowing.
 func Beckmann(facing, lit, viewed, slopes float64) float64 {
-	if !(facing > 0 && lit > 0 && viewed > 0 && slopes > 0) {
-		return 0
+	if !glintPositive(facing, lit, viewed, slopes) {
+		return glintNone
 	}
 	return beckmannFaces(facing, slopes) * beckmannSmith(lit, slopes) *
-		beckmannSmith(viewed, slopes) / (4 * viewed)
+		beckmannSmith(viewed, slopes) / (glintFour * viewed)
 }
 
 // beckmannFaces is the Beckmann density of tiny faces whose normal has
@@ -66,7 +93,7 @@ func Beckmann(facing, lit, viewed, slopes float64) float64 {
 // hemisphere, it sums to one.
 func beckmannFaces(facing, slopes float64) float64 {
 	square := facing * facing
-	tangent := (1 - square) / square
+	tangent := (glintWhole - square) / square
 	return math.Exp(-tangent/slopes) /
 		(math.Pi * slopes * square * square)
 }
@@ -76,10 +103,11 @@ func beckmannFaces(facing, slopes float64) float64 {
 // (a sqrt(pi)) - erfc(a)) / 2, a = cot / sqrt(slopes), as
 // oceantex.Hidden has it for the sea. Straight down, all of them.
 func beckmannSmith(cos, slopes float64) float64 {
-	if cos >= 1 {
-		return 1
+	if cos >= glintWhole {
+		return glintWhole
 	}
-	a := cos / math.Sqrt((1-cos*cos)*slopes)
-	hidden := (math.Exp(-a*a)/(a*math.SqrtPi) - math.Erfc(a)) / 2
-	return 1 / (1 + hidden)
+	cotangent := cos / math.Sqrt((glintWhole-cos*cos)*slopes)
+	hidden := (math.Exp(-cotangent*cotangent)/(cotangent*math.SqrtPi) -
+		math.Erfc(cotangent)) / glintPair
+	return glintWhole / (glintWhole + hidden)
 }

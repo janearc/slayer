@@ -346,7 +346,7 @@ func (kept *treeShelf) want(key programKey, used time.Time) {
 
 // TrimTrees ends a run's use of the tree file: it writes the use of the
 // trees the run took, then, if the file is over its cap, drops the least
-// recently used and writes the file fresh (see treebolt.Rewrite). It
+// recently used and writes the file fresh (see treebolt.Trim). It
 // says what it dropped, and nothing when it dropped nothing. It does
 // nothing when the cache is off, is kept as files, or gave up on its
 // file.
@@ -355,7 +355,7 @@ func TrimTrees() (string, error) {
 	if kept == nil || kept.form == asFiles || kept.stopped() != nil {
 		return "", nil
 	}
-	return kept.trimmed(treebolt.Standard, time.Now())
+	return kept.trimmed(treebolt.Standard(), time.Now())
 }
 
 // trimmed is TrimTrees for a bound and a time.

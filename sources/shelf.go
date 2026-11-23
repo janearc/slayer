@@ -24,7 +24,7 @@ type Shelf struct {
 	client *http.Client
 	hash   func(path string) (string, error)
 	// progress, when set, is told how each download goes.
-	progress Progress
+	progress progress
 }
 
 // NewShelf is a shelf in a directory, fetching through a client.
@@ -73,7 +73,7 @@ func Here() (string, error) {
 // sends, so it is not kept.
 var endings = map[string]bool{".pdf": true, ".tif": true, ".tiff": true,
 	".csv": true, ".txt": true, ".zip": true, ".nc": true, ".json": true,
-	".xml": true, ".png": true, ".jpg": true, ".gz": true}
+	".xml": true, ".png": true, ".jpg": true, ".gz": true, ".otf": true}
 
 // Path is where a source's bytes are on the shelf: its key, and the
 // ending its url's path has, if it is one of the kinds sources come as.
@@ -233,7 +233,7 @@ func (shelf Shelf) sidecar(source Source, at, sum string, size int64,
 	}
 	encoder := yaml.NewEncoder(out)
 	err = encoder.Encode(side{Key: source.Key(),
-		From: source.From(), Licence: source.Licence(), Sha256: sum,
+		From: source.From(), Licence: source.licence(), Sha256: sum,
 		Bytes: size, Fetched: now.UTC().Format(time.RFC3339)})
 	return errors.Join(err, encoder.Close(), out.Close())
 }

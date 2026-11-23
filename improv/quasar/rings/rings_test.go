@@ -63,9 +63,9 @@ func smokeDisc(t *testing.T) Disc {
 
 func TestNewLensHoldsWhatItIsGiven(t *testing.T) {
 	lens := smokeLens(t)
-	if lens.Distance() != smokeEye || lens.Lean() != smokeLean {
-		t.Fatalf("lens is %v out at %v, want %v at %v", lens.Distance(),
-			lens.Lean(), smokeEye, smokeLean)
+	if lens.distance != smokeEye || lens.lean != smokeLean {
+		t.Fatalf("lens is %v out at %v, want %v at %v", lens.distance,
+			lens.lean, smokeEye, smokeLean)
 	}
 }
 
@@ -89,23 +89,25 @@ func TestNewLensRefusesALeanThatReachesTheAxis(t *testing.T) {
 
 func TestTheEdgeIsRootTwentySeven(t *testing.T) {
 	lens := smokeLens(t)
-	impact := lens.Impact(lens.Edge())
+	edge := lens.heading(lens.Edge())
+	impact := lens.hole.ImpactParameter(
+		lens.hole.Arriving(lens.eye, lens.frame, edge))
 	if math.Abs(impact-rootTwentySeven) > shadowTolerance {
 		t.Fatalf("the edge's impact parameter is %v, want %v",
 			impact, rootTwentySeven)
 	}
-	if math.Abs(lens.Shadow()-rootTwentySeven) > shadowTolerance {
-		t.Fatalf("celestial's shadow is %v", lens.Shadow())
+	if math.Abs(lens.hole.Shadow()-rootTwentySeven) > shadowTolerance {
+		t.Fatalf("celestial's shadow is %v", lens.hole.Shadow())
 	}
 }
 
 func TestJustInsideTheEdgeIsBlackAndJustOutsideIsNot(t *testing.T) {
 	lens := smokeLens(t)
 	edge := lens.Edge()
-	if !lens.Follow(edge - justPast).Captured() {
+	if !lens.Follow(edge - justPast).captured {
 		t.Error("a ray just inside the edge escaped")
 	}
-	if lens.Follow(edge + justPast).Captured() {
+	if lens.Follow(edge + justPast).captured {
 		t.Error("a ray just outside the edge was captured")
 	}
 }
@@ -113,14 +115,14 @@ func TestJustInsideTheEdgeIsBlackAndJustOutsideIsNot(t *testing.T) {
 func TestARayNearTheEdgeGoesRoundAndOneFarOffDoesNot(t *testing.T) {
 	lens := smokeLens(t)
 	near := lens.Follow(lens.Edge() + justPast)
-	if near.Turns() < two {
+	if math.Abs(near.swept)/turn < two {
 		t.Errorf("a ray just past the edge went %v turns round",
-			near.Turns())
+			math.Abs(near.swept)/turn)
 	}
 	far := lens.Follow(farOff)
-	if far.Turns() >= one || far.Captured() {
+	if math.Abs(far.swept)/turn >= one || far.captured {
 		t.Errorf("a ray %v radians off went %v turns, captured %v",
-			farOff, far.Turns(), far.Captured())
+			farOff, math.Abs(far.swept)/turn, far.captured)
 	}
 }
 

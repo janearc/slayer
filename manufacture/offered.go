@@ -9,6 +9,7 @@ import (
 	"github.com/janearc/celestial/bands"
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/strategies"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -28,7 +29,7 @@ import (
 // their methods, as emit.Described does. Use go doc -u to inspect the methods
 // on generated specimens.
 //
-// hillside uses object construction; emit reads light descriptions. Keep
+// the session uses object construction; emit reads light descriptions. Keep
 // additional implementation details private until a client needs them.
 
 // Sow constructs a deterministic random seed, not an object age or state.
@@ -52,6 +53,21 @@ func KindNamed(name string) (kind, error) { return kindNamed(name) }
 // Make generates a kind from a seed, selecting values within the kind's
 // declared ranges. It returns an error when construction is invalid.
 func Make(row kind, from seed) (good, error) { return makeOf(row, from) }
+
+// ExtentOf is the box that holds what a kind makes from a seed, in the
+// thing's own frame, said without making the thing where the kind can. It
+// may be too large and is never too small.
+func ExtentOf(row kind, from seed) (maths.Box, error) {
+	return extentOf(row, from)
+}
+
+// SeenOf is how an eye sees what a kind makes from a seed standing at a
+// place: whether any pixel's ray can meet it, and how many pixels across it
+// spans.
+func SeenOf(row kind, from seed, at maths.Subspace,
+	by strategies.Eye) (strategies.Seen, error) {
+	return seenOf(row, from, at, by)
+}
 
 var errTaller = errors.New("manufacture: only a whorled tree grows " +
 	"taller, and by a number of times above nought")
@@ -141,10 +157,6 @@ func (one lit) Toward() maths.Vec { return one.toward }
 // Beyond returns the source exclusion distance from At, preventing the light's
 // own housing from shadowing its illumination.
 func (one lit) Beyond() measure.Length { return one.beyond }
-
-// Name returns the name a scene addresses the light by to program it,
-// or nothing for a light that has none.
-func (one lit) Name() string { return one.name }
 
 // Light returns the attached light's emission description.
 func (one lit) Light() light { return one.made }

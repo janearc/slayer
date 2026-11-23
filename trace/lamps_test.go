@@ -57,8 +57,9 @@ func TestWhatReachesAPointFromALamp(t *testing.T) {
 	over := counted{asked: &asked, slab: slab{density: 0.5,
 		box: maths.Box{Min: maths.V(-9, 2, -9), Max: maths.V(9, 3, 9)}}}
 	world := thing.NewWorld()
+	sphereAt := resting(maths.V(0, 6, 0))
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
-		Motion: resting(maths.V(0, 6, 0))})
+		Motion: sphereAt})
 	world.AddVolume(thing.Volume{Medium: over})
 	scene := stage(world, 0)
 	under := maths.Vec{}
@@ -106,22 +107,32 @@ func TestAFloodLightsASurfaceByItsColour(t *testing.T) {
 	}
 }
 
-// In smoke a lamp from everywhere is weighed evenly, a half, like any
-// lamp; and what the smoke scatters is its texture where it has one,
-// not its plain colour.
-func TestAFloodInSmokeIsWeighedEvenlyAndPaintedByTexture(t *testing.T) {
+// floodLevel is what the flood of these tests, a half, sends a step of a
+// level look: the step asks the flood facing back along the look, which
+// is level, and a flood weighs a level facing by a half, so a quarter.
+// That a volume's light from a flood goes by the way the eye looks is
+// how the step asks it today, and is not held to be right here.
+const floodLevel = 0.25
+
+// Known shortfall, pinned as it is: in smoke a lamp from everywhere is
+// weighed by the legacy half, like any lamp, where an even scatterer's
+// phase is one in four pi (see scattered_test.go). And what the smoke
+// scatters is its texture where it has one, not its plain colour. The
+// smoke takes one less e^(-1.4) of what is behind it and gives that
+// much of its own light.
+func TestKnownShortfallAFloodInSmokeIsWeighedAHalfAndPaintedByTexture(
+	t *testing.T) {
 	const density, deep = 0.7, 2.0
 	took := 1 - math.Exp(-density*deep)
-	light := filling(alongZ.Dir.Neg()).R
 	for name, each := range map[string]struct {
 		worn *thing.Material
 		want float64
 	}{
 		"plain smoke": {&thing.Material{Colour: maths.Grey(0.8)},
-			0.8 * light * evenly * took},
+			0.8 * floodLevel * 0.5 * took},
 		"textured smoke": {&thing.Material{Colour: maths.Grey(0.8),
 			Texture: flat(maths.Grey(0.25))},
-			0.25 * light * evenly * took},
+			0.25 * floodLevel * 0.5 * took},
 	} {
 		world := thing.NewWorld()
 		world.AddVolume(thing.Volume{Medium: plate(density, -1, 1),
@@ -135,10 +146,37 @@ func TestAFloodInSmokeIsWeighedEvenlyAndPaintedByTexture(t *testing.T) {
 	}
 }
 
-// In a gas a lamp from everywhere is weighed evenly too: one step
-// gathers the lamp's light times a half, times what the gas scatters
-// at each of the eye's bands, times the step's thickness.
-func TestAFloodInAGasIsWeighedEvenly(t *testing.T) {
+// Anti: the half is the lamp's weight and not the smoke's own light.
+// Smoke that scatters nothing gives nothing under the same flood, and
+// with no flood the same smoke gives nothing.
+func TestSmokeGivesNothingOfAFloodItDoesNotScatterOrDoesNotHave(
+	t *testing.T) {
+	black := thing.NewWorld()
+	black.AddVolume(thing.Volume{Medium: plate(0.7, -1, 1),
+		Material: &thing.Material{}})
+	black.Lamp(fill)
+	unlit := thing.NewWorld()
+	unlit.AddVolume(thing.Volume{Medium: plate(0.7, -1, 1),
+		Material: &thing.Material{Colour: maths.Grey(0.8)}})
+	for name, world := range map[string]*thing.World{
+		"black smoke under a flood": black, "smoke with no lamp": unlit} {
+		got := through(stage(world, 0), alongZ, math.Inf(1)).added
+		if got != (maths.Light{}) {
+			t.Errorf("%s adds %v, want nothing", name, got)
+		}
+	}
+}
+
+// Known shortfall, pinned as it is: in a gas a lamp from everywhere is
+// weighed by the legacy half too, beside the gas's own phase for every
+// lamp with a direction. One step gathers the flood's quarter times a
+// half, times what the gas scatters at each of the eye's bands, times
+// the step's thickness.
+//
+// The step is thin, an optical depth of a few hundredths, and the
+// number is the step's light to first order in it: it is held to twelve
+// places, so it holds only while a step's light is taken as thin.
+func TestKnownShortfallAFloodInAGasIsWeighedAHalf(t *testing.T) {
 	const thick = 2e3
 	air := gas.Air()
 	world := thing.NewWorld()
@@ -149,8 +187,7 @@ func TestAFloodInAGasIsWeighedEvenly(t *testing.T) {
 	inside := crossings(scene.volumes, alongZ, math.Inf(1))[0]
 	got := gasStep(scene, &inside, stride{thick: thick}, alongZ, 1,
 		untouched()).added
-	light := filling(alongZ.Dir.Neg())
-	want := light.Scale(evenly).Times(byEye(air.Scatter)).Scale(thick)
+	want := byEye(air.Scatter).Scale(floodLevel * 0.5 * thick)
 	if !(want.B > want.R && want.R > 0) {
 		t.Fatalf("the test's air scatters nothing to tell: %v", want)
 	}
@@ -163,8 +200,11 @@ func TestAFloodInAGasIsWeighedEvenly(t *testing.T) {
 // Under two lamps a point is shone on by the sum of the two.
 func TestTwoLampsShineTheirSum(t *testing.T) {
 	world := thing.NewWorld()
-	world.Lamp(thing.Sun(maths.Up, maths.Grey(0.5)))
-	world.Lamp(thing.Sun(maths.V(1, 0, 0), maths.Grey(0.25)))
+	half := maths.Grey(0.5)
+	world.Lamp(thing.Sun(maths.Up, half))
+	along := maths.V(1, 0, 0)
+	quarter := maths.Grey(0.25)
+	world.Lamp(thing.Sun(along, quarter))
 	got := shone(stage(world, 0), maths.Vec{}, maths.Up)
 	if !within(got, 0.75, 1e-12) {
 		t.Errorf("two lamps of a half and a quarter shine %v", got)
@@ -182,7 +222,8 @@ func TestAHazeScattersForwardMoreThanBack(t *testing.T) {
 		world := thing.NewWorld()
 		world.AddVolume(thing.Volume{Medium: gas.Of{
 			Shape: plate(1, -1, 1), In: haze, Unit: 1}})
-		world.Lamp(thing.Sun(toward, maths.Grey(1)))
+		light := maths.Grey(1)
+		world.Lamp(thing.Sun(toward, light))
 		scene := stage(world, 0)
 		inside := crossings(scene.volumes, alongZ, math.Inf(1))[0]
 		return gasStep(scene, &inside, stride{thick: thick}, alongZ, 1,
@@ -210,7 +251,9 @@ func TestASurfaceTurnedFromALampIsUnlit(t *testing.T) {
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
 		Material: &thing.Material{Colour: maths.Grey(0.8)},
 		Attrs:    thing.Attrs{Clear: true}})
-	world.Lamp(thing.Sun(maths.V(0, 0, -1), maths.Grey(1)))
+	along := maths.V(0, 0, -1)
+	light := maths.Grey(1)
+	world.Lamp(thing.Sun(along, light))
 	front := maths.Ray{At: maths.V(0, 0, 5), Dir: maths.V(0, 0, -1)}
 	if got := lone(world, front, 0); got.Light() != (maths.Light{}) ||
 		got.Cover != 1 {

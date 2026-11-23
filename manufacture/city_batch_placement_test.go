@@ -252,9 +252,11 @@ func cityBatchPlacementFixture() []cityBatchPlacementRow {
 	rows := make([]cityBatchPlacementRow, 0, 192)
 	for index := range 192 {
 		family := []string{"city-rowhouse", "city-apartment", "city-tower"}[index%3]
-		design := cityBuildingDesign(family, sow(citySeed(uint64(index+1))))
+		seed := citySeed(uint64(index + 1))
+		design := cityBuildingDesign(family, sow(seed))
 		angle := float64(index%17) * .031
-		place := maths.NewSubspace(maths.V(float64(index%16)*37, 0, float64(index/16)*41),
+		corner := maths.V(float64(index%16)*37, 0, float64(index/16)*41)
+		place := maths.NewSubspace(corner,
 			maths.About(maths.YAxis, angle), .9+float64(index%5)*.05)
 		rows = append(rows, cityBatchPlacementRow{parts: design.parts("quick"), place: place})
 	}

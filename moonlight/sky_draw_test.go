@@ -56,7 +56,7 @@ func TestASkyIsItsLightsOwn(t *testing.T) {
 	}
 	moon := Moon()
 	size := moon.Radius().Over(moon.Distance())
-	share := moon.Albedo() * size * size
+	share := moon.geometricAlbedo() * size * size
 	both := Skies{byMoon, bySun}
 	for _, look := range []maths.Vec{maths.V(0, 1, 0),
 		maths.V(way.X, 0.1, way.Z), maths.V(-way.X, 0.1, -way.Z)} {

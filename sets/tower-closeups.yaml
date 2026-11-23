@@ -1,0 +1,88 @@
+# tower closeups: eight towers, one of each skin and one plain tower under
+# the cyberpunk layer, each looked at close at dusk from two places: a
+# facade from about twenty five metres away at mid-height, as from a
+# neighbouring building, four storeys or so across the frame; and the foot
+# of the tower from the street, looking along its base. The towers are the
+# lineup's: forty storeys, a plain rectangle, same seed. The study is for
+# seeing what each skin lacks up close: it fixes nothing.
+#
+# places are metres, as a map's run: x east, y north, z up. the towers
+# stand a hundred and fifty metres apart along x. the sun, the sky and the
+# cameras are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower closeups
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 60
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    mirror-facade: {title: "mirror, facade", location: {at: [0, -45, 60]}, orientation: {look_at: [0, 0, 60]}}
+    mirror-base: {title: "mirror, base", location: {at: [-45, -35, 1.7]}, orientation: {look_at: [5, -12, 7]}}
+    curtain-facade: {title: "curtain, facade", location: {at: [150, -45, 60]}, orientation: {look_at: [150, 0, 60]}}
+    curtain-base: {title: "curtain, base", location: {at: [105, -35, 1.7]}, orientation: {look_at: [155, -12, 7]}}
+    granite-facade: {title: "granite, facade", location: {at: [300, -45, 60]}, orientation: {look_at: [300, 0, 60]}}
+    granite-base: {title: "granite, base", location: {at: [255, -35, 1.7]}, orientation: {look_at: [305, -12, 7]}}
+    concrete-facade: {title: "concrete, facade", location: {at: [450, -45, 60]}, orientation: {look_at: [450, 0, 60]}}
+    concrete-base: {title: "concrete, base", location: {at: [405, -35, 1.7]}, orientation: {look_at: [455, -12, 7]}}
+    gothic-facade: {title: "gothic, facade", location: {at: [600, -45, 60]}, orientation: {look_at: [600, 0, 60]}}
+    gothic-base: {title: "gothic, base", location: {at: [555, -35, 1.7]}, orientation: {look_at: [605, -12, 7]}}
+    cantilever-facade: {title: "cantilever, facade", location: {at: [750, -45, 60]}, orientation: {look_at: [750, 0, 60]}}
+    cantilever-base: {title: "cantilever, base", location: {at: [705, -35, 1.7]}, orientation: {look_at: [755, -12, 7]}}
+    vaporwave-facade: {title: "vaporwave, facade", location: {at: [900, -45, 60]}, orientation: {look_at: [900, 0, 60]}}
+    vaporwave-base: {title: "vaporwave, base", location: {at: [855, -35, 1.7]}, orientation: {look_at: [905, -12, 7]}}
+    cyber-facade: {title: "cyberpunk layer, facade", location: {at: [1050, -45, 60]}, orientation: {look_at: [1050, 0, 60]}}
+    cyber-base: {title: "cyberpunk layer, base", location: {at: [1005, -35, 1.7]}, orientation: {look_at: [1055, -12, 7]}}
+  recipes:
+    mirror: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: mirror, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    curtain: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: curtain, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    granite: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: granite, style: punched, colour: pink, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    gothic: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: gothic, storeys: 40, segments: 3, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: true, spire: true}}
+    cantilever: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: cantilever, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    vaporwave: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: vaporwave, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    cyber: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: curtain, cyber: true, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      mirror: {recipe: mirror, seed: 3, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+      curtain: {recipe: curtain, seed: 3, complexity: quick, east: 150, north: 0, height: {value: 0, unit: m}}
+      granite: {recipe: granite, seed: 3, complexity: quick, east: 300, north: 0, height: {value: 0, unit: m}}
+      concrete: {recipe: concrete, seed: 3, complexity: quick, east: 450, north: 0, height: {value: 0, unit: m}}
+      gothic: {recipe: gothic, seed: 3, complexity: quick, east: 600, north: 0, height: {value: 0, unit: m}}
+      cantilever: {recipe: cantilever, seed: 3, complexity: quick, east: 750, north: 0, height: {value: 0, unit: m}}
+      vaporwave: {recipe: vaporwave, seed: 3, complexity: quick, east: 900, north: 0, height: {value: 0, unit: m}}
+      cyber: {recipe: cyber, seed: 3, complexity: quick, east: 1050, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.06, 0.06, 0.065]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [500, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.6, 0.7, 0.4]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.58, 0.8]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.14]}
+      zenith: {srgb_linear: [0.01, 0.025, 0.1]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

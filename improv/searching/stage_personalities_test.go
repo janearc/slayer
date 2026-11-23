@@ -103,7 +103,7 @@ func TestZappyUsesRadiationVolumesRatherThanSolidShafts(t *testing.T) {
 			t.Fatal("opaque shaft remains")
 		}
 	}
-	s.updateSpace(&StagePlan{Kind: "zappy"}, State{At: 94, Beat: 12}, .5)
+	s.updateSpace(&stagePlan{Kind: "zappy"}, State{At: 94, Beat: 12}, .5)
 	for _, v := range s.world.Volumes {
 		if v.At(0).Origin != maths.V(2, 3, 4) || v.At(0).Scale != 2 {
 			t.Fatal("jet detached from character")

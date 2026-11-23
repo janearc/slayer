@@ -1,0 +1,4 @@
+# the folder slayer's large data lives in; the beach surveys are in its
+# beachsurvey folder. given in your game config with set. unset, a
+# survey is refused and the tests that read one skip.
+SLAYER_DATA where slayer's data folder is, for the beach surveys

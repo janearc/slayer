@@ -73,7 +73,7 @@ func Make(face *Font, text Text) ([]Letter, error) {
 
 // once is a placed letter's mesh, made the first time its glyph is
 // asked for and kept for every time after.
-func (face *Font) once(kept map[Glyph]*mesh.Mesh, each Placed,
+func (face *Font) once(kept map[Glyph]*mesh.Mesh, each placed,
 	text Text) (*mesh.Mesh, error) {
 	if solid, ok := kept[each.Glyph]; ok {
 		return solid, nil

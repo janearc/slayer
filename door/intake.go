@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/janearc/slayer/hillside"
 	"github.com/janearc/slayer/job"
+	"github.com/janearc/slayer/session"
 	yaml "gopkg.in/yaml.v3"
 )
 
@@ -19,7 +19,7 @@ const (
 // readers is how each schema's file becomes a job.
 var readers = map[string]func(path string) (job.Job, error){
 	jobSchema:  job.Read,
-	planSchema: hillside.LiftSequence,
+	planSchema: session.LiftSequence,
 }
 
 // heading is the one key of a file the door reads itself: its schema.

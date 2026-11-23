@@ -19,22 +19,23 @@ type vantage struct {
 
 // MostStretch is the most a ray's footprint is drawn out across a ring
 // seen nearly edge on, so a ray grazing the plane still sees its largest
-// clumps: picked.
-const MostStretch = 100.0
+// clumps; its value is in picks.yaml.
+var MostStretch = pick("ring-most-stretch")
 
 // finest is the finest a ray from the eye tells apart at a point of the ring's
 // plane, in metres, across the orbit, the way the ring's clumps are narrow: the
 // ray's width at that distance, stretched as the plane slants away from it
 // along the reach. zero with no eye.
 func (from vantage) finest(x, z float64) float64 {
-	point := maths.V(x, 0, z)
+	point := maths.V(x, nothing, z)
 	toward := point.Sub(from.eye)
 	distance, reach := toward.Len(), point.Len()
-	if from.ray == 0 || distance == 0 || reach == 0 {
-		return 0
+	if from.ray == nothing || distance == nothing || reach == nothing {
+		return nothing
 	}
-	slant := point.Scale(1 / reach).Dot(toward.Scale(1 / distance))
-	squash := math.Max(1/MostStretch, math.Sqrt(math.Max(0, 1-slant*slant)))
+	slant := point.Scale(whole / reach).Dot(toward.Scale(whole / distance))
+	across := math.Sqrt(math.Max(nothing, whole-slant*slant))
+	squash := math.Max(whole/MostStretch, across)
 	return from.ray * distance / squash
 }
 
@@ -43,7 +44,7 @@ func (from vantage) finest(x, z float64) float64 {
 // ray tells apart are drawn as the mean of what it covers, as a pixel
 // takes them.
 func (body Body) Seen(eye maths.Vec, ray float64) (Body, error) {
-	if !(ray >= 0) || math.IsInf(ray, 0) || !finite(eye) {
+	if !(ray >= nothing) || endless(ray) || !finite(eye) {
 		return body, fmt.Errorf("rings seen from %v through rays %g wide",
 			eye, ray)
 	}
@@ -56,9 +57,9 @@ func (body Body) Seen(eye maths.Vec, ray float64) (Body, error) {
 
 // finite is whether each of a point's coordinates is a number and not
 // endless.
-func finite(p maths.Vec) bool {
-	for _, each := range []float64{p.X, p.Y, p.Z} {
-		if math.IsNaN(each) || math.IsInf(each, 0) {
+func finite(point maths.Vec) bool {
+	for _, each := range []float64{point.X, point.Y, point.Z} {
+		if math.IsNaN(each) || endless(each) {
 			return false
 		}
 	}

@@ -1,0 +1,15 @@
+name,count,height,width,thick,seed,filaments
+pillars-exact-filamented,3,7,10,1.6,9,0.5
+pillars-exact-small-box,5,3,4,0.7,1234567,0
+pillars-exact-nine-columns,9,3,4,0.7,5,1
+pillars-exact-twenty-columns,20,3,8,1,6,0
+pillars-exact-single,1,1,1,1,0,1
+pillars-exact-no-count,0,1,1,0,0,0
+pillars-exact-negative-count,-2,1,1,0,0,0
+pillars-exact-negative-width,2,2,-3,1,0,0
+pillars-exact-negative-height,2,-2,3,1,0,0
+pillars-exact-negative-zero-width,2,2,-0,1,0,0
+pillars-exact-negative-zero-height,2,-0,3,1,0,0
+pillars-exact-no-number-height,2,NaN,3,1,0,0
+pillars-exact-no-number-width,2,2,NaN,1,0,0
+pillars-exact-no-number-thick,2,2,3,NaN,0,NaN

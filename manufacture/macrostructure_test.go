@@ -224,7 +224,8 @@ func TestLandformElevationUsesTypedMetresAndStableSeeds(t *testing.T) {
 		measure.Metres(0)); err == nil {
 		t.Fatal("unsown landform sample")
 	}
-	if _, err := LandformElevation(spec, Sow(2), measure.Metres(math.Inf(1)),
+	unbounded := measure.Metres(math.Inf(1))
+	if _, err := LandformElevation(spec, Sow(2), unbounded,
 		measure.Metres(0)); err == nil {
 		t.Fatal("infinite landform sample")
 	}

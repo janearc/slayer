@@ -115,8 +115,9 @@ func randomText(source *rand.Rand) string {
 	var made strings.Builder
 	for made.Len() < longest*3 {
 		for range source.Intn(longest) + firstName {
-			made.WriteRune([]rune(alphabet)[source.Intn(
-				len([]rune(alphabet)))])
+			letters := []rune(alphabet)
+			place := source.Intn(len(letters))
+			made.WriteRune(letters[place])
 		}
 		made.WriteString(" ")
 	}
@@ -137,8 +138,9 @@ func TestAWrappedLineNeverExceedsTheColumn(test *testing.T) {
 				test.Fatalf("%q is wider than %g", line, width)
 			}
 		}
-		if strings.Join(lines, " ") != strings.Join(strings.Fields(text),
-			" ") && strings.Join(strings.Fields(strings.Join(lines, " ")),
+		joined := strings.Join(lines, " ")
+		if joined != strings.Join(strings.Fields(text),
+			" ") && strings.Join(strings.Fields(joined),
 			"") != strings.Join(strings.Fields(text), "") {
 			test.Fatal("wrapping lost or added letters")
 		}

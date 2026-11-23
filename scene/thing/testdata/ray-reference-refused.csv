@@ -1,0 +1,6 @@
+name,metres
+nought,0
+below nought,-1
+endless,+Inf
+endless below,-Inf
+no number,NaN

@@ -53,16 +53,16 @@ func table(rows []float64, nm float64) float64 {
 	return rows[below] + (rows[below+1]-rows[below])*part
 }
 
-// Absorption is pure water's absorption per metre at a wavelength in
+// absorption is pure water's absorption per metre at a wavelength in
 // nanometres [PF97].
-func Absorption(nm float64) float64 { return table(absorbed, nm) }
+func absorption(nm float64) float64 { return table(absorbed, nm) }
 
-// Scattering is how much light pure seawater scatters, per metre [M74].
-func Scattering(nm float64) float64 {
+// scattering is how much light pure seawater scatters, per metre [M74].
+func scattering(nm float64) float64 {
 	return scatterAt500 * math.Pow(nm/scatterRef, scatterPower)
 }
 
-// Reflectance is the remote-sensing reflectance of deep seawater just
+// reflectance is the remote-sensing reflectance of deep seawater just
 // above the surface, per steradian: the light leaving the water straight
 // up, as a fraction of the light falling on it. chlorophyll is in
 // milligrams a cubic metre, and zero is water with nothing in it.
@@ -77,9 +77,9 @@ func Scattering(nm float64) float64 {
 // Below the surface the reflectance is 0.0949 u + 0.0794 u^2, where u is
 // backscattering over absorption plus backscattering [G88]. Crossing the
 // surface it becomes 0.52 r / (1 - 1.7 r) [L02].
-func Reflectance(nm, chlorophyll float64) float64 {
-	absorb := Absorption(nm)
-	back := Scattering(nm) * backwardShare
+func reflectance(nm, chlorophyll float64) float64 {
+	absorb := absorption(nm)
+	back := scattering(nm) * backwardShare
 	if chlorophyll > 0 {
 		pigment := particleScale * math.Pow(chlorophyll, particlePower)
 		absorb += pigment * table(pigmentShape, nm)
@@ -141,13 +141,13 @@ func Lamp(lamp map[int]float64) swatch.Swatch {
 	return lit(lamp, lamp, func(int) float64 { return 1 })
 }
 
-// Water is the colour of deep seawater under a lamp, seen from straight
+// water is the colour of deep seawater under a lamp, seen from straight
 // above with the surface's own reflections left out: pi times
 // Reflectance, so that a perfect white matte surface would be the lamp's
 // colour at luminance 1. chlorophyll is in milligrams a cubic metre.
 //
 // GLUE: outside 400 to 700 nm the water is taken to send nothing back.
-func Water(lamp map[int]float64, chlorophyll float64) swatch.Swatch {
+func water(lamp map[int]float64, chlorophyll float64) swatch.Swatch {
 	return lit(lamp, lamp, waterPart(chlorophyll))
 }
 
@@ -159,7 +159,7 @@ func waterPart(chlorophyll float64) func(nm int) float64 {
 		if float64(nm) < waterFirst || float64(nm) > last {
 			return 0
 		}
-		return math.Pi * Reflectance(float64(nm), chlorophyll)
+		return math.Pi * reflectance(float64(nm), chlorophyll)
 	}
 }
 

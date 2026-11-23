@@ -1,0 +1,122 @@
+# a row of five gargoyles on a granite cornice wall in grey daylight, with
+# the stone dark and streaked below each spout. each gargoyle is a creature
+# of the catalogue carved in stone on its corbel: the allosaurus, the orca,
+# the pliosaur, the squid and, at the right-hand end, the hatzegopteryx with
+# its wings half folded. made by the kind gargoyle-cornice-granite; for
+# board-marked concrete name gargoyle-cornice-concrete.
+#
+# this is the close view. gargoyle-cornice-rain-street.yaml is the same
+# row from the pavement, and gargoyle-cornice-rain-hatz.yaml the
+# hatzegopteryx at the end of it: render draws a set's first camera, so
+# each view is a set of its own.
+#
+# places are metres, x east, y north, z up. the wall's face looks south, to
+# negative y, and its middle is the origin; the gargoyles stand at x of
+# minus twelve, six, nought, six and twelve, in that order. the sun, the
+# sky, the ground and the cameras are choices of this study, picked by eye
+# for a plain grey light that shows the stone, and say so: the light is to
+# be replaced by the air's own when that lands.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: gargoyle-cornice-rain
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # a few metres from the wall, below the corbels, on the middle three.
+    close:
+      title: "close, from below and the left, the allosaurus and the orca"
+      wide: 50
+      location:
+        at: [-17, -12, 11.5]
+      orientation:
+        look_at: [-8, 0, 17.2]
+  set:
+    things:
+      cornice:
+        kind: gargoyle-cornice-granite
+        seed: 11
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      pavement:
+        colour: {srgb_linear: [0.05, 0.05, 0.052]}
+        source: eye
+    boxes:
+      ground:
+        material: pavement
+        middle: [0, 0, -1.06]
+        size: [3000, 3000, 2]
+        source: eye
+    suns:
+      overcast:
+        toward: [-0.35, -0.75, 0.55]
+        colour: {srgb_linear: [2.4, 2.35, 2.25]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.32, 0.33, 0.36]}
+      zenith: {srgb_linear: [0.14, 0.16, 0.2]}
+      ground: {srgb_linear: [0.04, 0.04, 0.04]}
+      source: eye
+    weathering:
+      source: eye
+      seed: 3
+      age: 60
+      ground: 0
+      probe: 0.03
+      block: 2
+      wind: [1, 0, 0]
+      agents:
+        # the water a spout lets go, which stains the stone below it.
+        spout:
+          kind: spout
+          on: [wall, corbel]
+          colour: {srgb_linear: [0.012, 0.011, 0.01]}
+          strength: 0.95
+          settle: 20
+          level: 0.3
+          length: 12
+          spacing: 0.9
+          spread: 0.12
+          upwind: 0.2
+          grain: 0.6
+          share: 0.7
+        # the rain that runs off the cornice, fainter than the spouts.
+        rain:
+          kind: rain
+          on: [wall]
+          colour: {srgb_linear: [0.02, 0.019, 0.018]}
+          strength: 0.3
+          settle: 15
+          level: 0.2
+          length: 3.5
+          spacing: 0.7
+          share: 0.7
+        # moss in the shade and under the slabs, on the corbels and the
+        # creatures, which hold the damp.
+        moss:
+          kind: moss
+          on: [corbel, gargoyle]
+          colour: {srgb_linear: [0.03, 0.07, 0.022]}
+          strength: 0.7
+          settle: 20
+          reach: 40
+          share: 0.5
+          grain: 0.3
+          shade: 0.2
+          north: 0.3
+          shelter: 1.5
+          catch: 1

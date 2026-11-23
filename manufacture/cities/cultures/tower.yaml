@@ -1,0 +1,1034 @@
+# Towers, 2026-11-19. Every distribution and threshold the tower
+# generator draws from. A tower is drawn from a seed at an irregularity
+# from nought to one: a feature that has a share here comes with that
+# share at an irregularity of one, taken down by the irregularity raised to
+# gate-power; a count that has a range reaches from its least toward its
+# most as far as the irregularity takes it. At nought a tower is a plain
+# block. Scopes here: a row is the whole tower, a bay is one shaft of it, a
+# storey is one segment of a shaft, and an opening is one window or panel.
+# No number is measured. Each says whether it was picked as a figure or
+# set by eye. Lengths are metres; colours are shares of light, each channel
+# from zero to one.
+culture: tower
+says: the draws of the tower generator, gated by irregularity
+elements:
+# how irregularity gates and is drawn
+- {element: gate-power, says: "the power the irregularity is raised to when it gates a feature, so features come late and then fast", scope: row, draw: range, unit: power, least: 1, most: 1, kind: picked, by: "tower study, 2026-11-19, by eye, from 1.5 to make the strange ones plainer"}
+- {element: skyline-draw, says: "the irregularity of a tower of a skyline, drawn; its power below makes most of them low", scope: row, draw: range, unit: irregularity, least: 0, most: 1, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: skyline-power, says: "the power the skyline's draw is raised to; the higher, the more towers are plain and the fewer strange", scope: row, draw: range, unit: power, least: 3, most: 3, kind: picked, by: "tower study, 2026-11-19, by eye, from 4 so a skyline of thirty has four to six strange towers"}
+- {element: stack, says: "whether a shaft is a stack of flared modules", scope: bay, draw: share, unit: chance, share: 0.35, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: stack-modules, says: "modules in a stack, as far as storeys allow", scope: bay, draw: range, unit: modules, whole: true, least: 3, most: 8, kind: picked, by: "tower study, 2026-11-19, picked from the brief"}
+- {element: stack-neck, says: "the foot of a module as a share of its top, which flares out above it", scope: bay, draw: range, unit: share, least: 0.62, most: 0.78, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: nest, says: "whether a shaft carries a slim core on above its body, which is wrapped round the core's foot", scope: bay, draw: share, unit: chance, share: 0.35, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: nest-core-share, says: "the core's plan as a share of the plan of the body's top", scope: bay, draw: range, unit: share, least: 0.4, most: 0.6, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: nest-extra-storeys, says: "storeys the core stands over the body", scope: bay, draw: range, unit: storeys, whole: true, least: 10, most: 40, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: fit-gap, says: "the gap between shafts of a tower that has to fit a room", scope: row, draw: range, unit: m, least: 10, most: 10, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: least-room-width, says: "the least a shaft may be drawn to fit a room, across, before a shaft is dropped", scope: row, draw: range, unit: m, least: 22, most: 22, kind: picked, by: "tower study, 2026-11-19, by eye"}
+# plan
+- {element: plan-irregular, says: "whether a tower has a plan that is not a rectangle", scope: row, draw: share, unit: chance, share: 0.95, kind: picked, by: "tower study, 2026-11-19, picked"}
+- element: plan
+  says: the plans a tower may have, other than the rectangle
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: rounded, weight: 2}
+  - {name: polygon, weight: 2}
+  - {name: star, weight: 2}
+  - {name: "y", weight: 2}
+  - {name: sail, weight: 1.5}
+  kind: picked
+  by: "tower study, 2026-11-19, picked"
+- {element: plan-width, says: "width of a plan across its widest, in metres", scope: row, draw: range, unit: m, least: 36, most: 56, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: plan-aspect, says: "depth of a plan as a share of its width", scope: row, draw: range, unit: share, least: 0.65, most: 1, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: arc-steps, says: "flat pieces a rounded corner or a sail's bow is cut into", scope: row, draw: range, unit: pieces, least: 3, most: 3, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: round-share, says: "radius of a rounded plan's corners as a share of its shorter side", scope: row, draw: range, unit: share, least: 0.15, most: 0.3, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: polygon-sides, says: "sides of a polygonal plan", scope: row, draw: range, unit: sides, whole: true, least: 5, most: 8, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: sail-bow-share, says: "how far a sail's face bows out, as a share of the plan's width", scope: row, draw: range, unit: share, least: 0.08, most: 0.18, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: star-share, says: "side of each square of a star as a share of the plan's width", scope: row, draw: range, unit: share, least: 0.62, most: 0.72, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: wing-share, says: "length of a Y's wings from its middle as a share of the plan's width", scope: row, draw: range, unit: share, least: 0.5, most: 0.62, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: wing-width-share, says: "width of a Y's wings as a share of the plan's width", scope: row, draw: range, unit: share, least: 0.26, most: 0.34, kind: picked, by: "tower study, 2026-11-19, by eye"}
+# shafts and segments
+- {element: shafts, says: "shafts on one base, from one up to as far as the irregularity reaches", scope: row, draw: range, unit: shafts, whole: true, least: 1, most: 4, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: most-shafts, says: "the most shafts a tower may have, pinned or drawn", scope: row, draw: range, unit: shafts, least: 4, most: 4, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: shaft-gap, says: "gap between the circles round two neighbouring shafts", scope: bay, draw: range, unit: m, least: 20, most: 60, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: shaft-height-share, says: "height of a shaft after the first as a share of the first's, so shafts end at their own heights", scope: bay, draw: range, unit: share, least: 0.75, most: 1, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: base-storeys, says: "storeys of a plain block", scope: row, draw: range, unit: storeys, whole: true, least: 30, most: 45, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: extra-storeys, says: "storeys added to a block as far as the irregularity reaches", scope: row, draw: range, unit: storeys, whole: true, least: 0, most: 120, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: segments, says: "segments of a shaft, from one up to as far as the irregularity reaches", scope: bay, draw: range, unit: segments, whole: true, least: 1, most: 8, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: least-segment-storeys, says: "the fewest storeys a segment may have", scope: row, draw: range, unit: storeys, least: 4, most: 4, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: least-plan-share, says: "the least a plan may shrink to by tapers and setbacks, as a share of the radius of the plan at the foot", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: crown-panel-least, says: "the least width of a crown panel, in gaps, so a small crown has fewer panels", scope: row, draw: range, unit: gaps, least: 2, most: 2, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: segment-weight, says: "how much of a shaft's storeys a segment takes, against the others", scope: storey, draw: range, unit: weight, least: 0.6, most: 1.4, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: taper, says: "whether a segment's top is smaller than its bottom", scope: storey, draw: share, unit: chance, share: 0.7, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: taper-scale, says: "a tapered segment's top as a share of its bottom", scope: storey, draw: range, unit: share, least: 0.25, most: 0.8, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: setback, says: "whether the segment above a segment steps back from it", scope: storey, draw: share, unit: chance, share: 0.8, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: setback-scale, says: "a setback segment's bottom as a share of the top below", scope: storey, draw: range, unit: share, least: 0.72, most: 0.9, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: wing-step, says: "how much of its length a Y's wing keeps when it steps back", scope: storey, draw: range, unit: share, least: 0.72, most: 0.88, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: twist, says: "whether a segment is turned on the one below", scope: storey, draw: share, unit: chance, share: 0.5, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: twist-angle, says: "how far a turned segment is turned from the one below", scope: storey, draw: range, unit: deg, least: 8, most: 30, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: span, says: "whether the shafts of a tower of several are joined", scope: row, draw: share, unit: chance, share: 0.9, kind: picked, by: "tower study, 2026-11-19, picked"}
+- element: span-kind
+  says: what joins shafts, a skybridge between two or a deck across the tops
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: skybridge, weight: 0.6}
+  - {name: deck, weight: 0.4}
+  kind: picked
+  by: "tower study, 2026-11-19, picked"
+- {element: span-height, says: "the storey of a skybridge as a share of the lowest shaft's storeys", scope: row, draw: range, unit: share, least: 0.35, most: 0.6, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: bridge-lap, says: "how far a skybridge laps into each shaft it joins", scope: row, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: bridge-depth, says: "depth of a skybridge", scope: row, draw: range, unit: m, least: 9, most: 9, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: bridge-storeys, says: "storeys tall a skybridge is", scope: row, draw: range, unit: storeys, least: 2, most: 2, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: bridge-plate, says: "thickness of the plates over and under a skybridge", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: deck-overhang, says: "how far a deck reaches past the outer faces of the end shafts", scope: row, draw: range, unit: m, least: 25, most: 25, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: deck-thickness, says: "thickness of a deck across the tops", scope: row, draw: range, unit: m, least: 7, most: 7, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: podium-height, says: "height of the base several shafts stand on", scope: row, draw: range, unit: m, least: 10, most: 10, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: podium-margin, says: "how far the base reaches past the shafts", scope: row, draw: range, unit: m, least: 12, most: 12, kind: picked, by: "tower study, 2026-11-19, by eye"}
+# derived: storeys, windows, plant floors, the core
+- {element: storey-height, says: "height of a storey, floor to floor", scope: row, draw: range, unit: m, least: 3.8, most: 4.2, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: window-module, says: "width of one window with the bar beside it, the module windows are laid out by across a face", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: mullion-width, says: "width of a vertical bar of the grid", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: spandrel-height, says: "height of the band of wall at the foot of a storey", scope: row, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: edge-margin, says: "how far a run of windows keeps from the end of a face", scope: row, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: mechanical-every, says: "a plant floor every so many storeys, drawn as louvres and never lit", scope: row, draw: range, unit: storeys, whole: true, least: 10, most: 14, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: plant-proud, says: "how far a plant floor's slab stands out of the face", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: louvre-count, says: "louvre slats on a plant floor's face", scope: row, draw: range, unit: slats, least: 6, most: 6, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: louvre-height, says: "height of a louvre slat", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: louvre-proud, says: "how far a louvre slat stands out of the plant slab", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: lift-storeys, says: "storeys one lift serves before the wait is too long, so a taller tower needs more lifts", scope: row, draw: range, unit: storeys, least: 8, most: 8, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: lift-area, says: "floor area of one lift with its shaft walls and machinery", scope: row, draw: range, unit: m2, least: 7, most: 7, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: stair-area, says: "floor area of the stairs and risers of a core", scope: row, draw: range, unit: m2, least: 40, most: 40, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: core-overrun, says: "how far a core's lift overrun stands over the roof", scope: row, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: lit-share, says: "share of windows with a light on at night", scope: opening, draw: share, unit: chance, share: 0.35, kind: picked, by: "tower study, 2026-11-19, by eye"}
+# the top
+- {element: penthouse, says: "whether a shaft has a set-back penthouse with terraces in place of a crown", scope: bay, draw: share, unit: chance, share: 0.35, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: observation-deck, says: "whether a shaft has an observation deck on its top", scope: bay, draw: share, unit: chance, share: 0.4, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: spire, says: "whether a shaft has a spire", scope: bay, draw: share, unit: chance, share: 0.8, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: crown-lit, says: "whether a crown's panels are lit in a travelling band", scope: bay, draw: share, unit: chance, share: 0.85, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: crown-fill, says: "the half width of a crown as a share of the room the plan has", scope: bay, draw: range, unit: share, least: 0.8, most: 0.85, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: crown-height, says: "height of a crown", scope: bay, draw: range, unit: m, least: 6, most: 12, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: crown-panels, says: "panels along each face of a crown", scope: bay, draw: range, unit: panels, whole: true, least: 6, most: 8, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: crown-gap, says: "gap between crown panels, and round them", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: crown-panel-thickness, says: "how far a crown panel stands out of the crown", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: crown-period, says: "seconds for the band of light to go once round the crown", scope: row, draw: range, unit: s, least: 24, most: 24, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: crown-band, says: "how wide the band of light is, in panels, to dark either side", scope: row, draw: range, unit: panels, least: 3, most: 3, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: crown-steps, says: "the steps a panel's brightness is held to, so a crown has a few materials", scope: row, draw: range, unit: steps, least: 4, most: 4, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: crown-glow, says: "how brightly a panel at full brightness glows, a scale on its colour", scope: row, draw: range, unit: scale, least: 1.6, most: 1.6, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: observation-overhang, says: "how far an observation deck reaches past the crown", scope: row, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: observation-thickness, says: "thickness of an observation deck", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: terrace-thickness, says: "thickness of a penthouse's terrace slab", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: penthouse-fill, says: "the penthouse's half width as a share of the terrace's", scope: bay, draw: range, unit: share, least: 0.65, most: 0.75, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: penthouse-storeys, says: "storeys of a penthouse", scope: bay, draw: range, unit: storeys, whole: true, least: 2, most: 3, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: spire-base-share, says: "half the width of a spire's base as a share of the room the plan has", scope: bay, draw: range, unit: share, least: 0.12, most: 0.2, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: spire-tip, says: "half the width of a spire's tip", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: spire-share, says: "height of a spire as a share of its shaft's height", scope: bay, draw: range, unit: share, least: 0.08, most: 0.3, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: beacon-height, says: "the height over which a tower carries red aircraft-warning beacons", scope: row, draw: range, unit: m, least: 120, most: 120, kind: picked, by: "tower study, 2026-11-19, picked"}
+- {element: beacon-size, says: "side of a beacon", scope: row, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "tower study, 2026-11-19, by eye"}
+- {element: beacon-glow, says: "how brightly a beacon glows, a scale on its colour", scope: row, draw: range, unit: scale, least: 8, most: 8, kind: picked, by: "tower study, 2026-11-19, by eye"}
+# looks
+- element: grid-colour
+  says: the colour of the grid on a tower's glass
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: steel, weight: 3, colour: [0.2, 0.22, 0.25], gloss: 0.4}
+  - {name: bronze, weight: 1, colour: [0.2, 0.12, 0.07], gloss: 0.4}
+  - {name: white, weight: 1, colour: [0.5, 0.5, 0.5], gloss: 0.3}
+  - {name: charcoal, weight: 2, colour: [0.07, 0.07, 0.08], gloss: 0.4}
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- element: plant-colour
+  says: the dark colour of plant floors and cores
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: plant, weight: 1, colour: [0.03, 0.03, 0.035], gloss: 0.3}
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- element: podium-colour
+  says: the colour of the base several shafts stand on
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: concrete, weight: 1, colour: [0.2, 0.2, 0.2], gloss: 0.1}
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- element: crown-panel-colour
+  says: the colour of a crown's panels when dark
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: dark-panel, weight: 1, colour: [0.1, 0.12, 0.16], gloss: 0.5}
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- element: crown-glow-colour
+  says: the colour a crown's panels glow
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: warm-white, weight: 1, colour: [0.9, 0.82, 0.55]}
+  kind: picked
+  by: "tower study, 2026-11-19, by eye"
+- element: beacon-colour
+  says: the colour of an aircraft-warning beacon
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: warning-red, weight: 1, colour: [1, 0.05, 0.03]}
+  kind: picked
+  by: "tower study, 2026-11-19, picked"
+# skins, 2026-11-19. A skin is what a tower's faces are made of: the
+# curtain is the plain dress above; the others replace its mullions,
+# spandrels and panes. The cyber layer and the planting go over any skin.
+# Colours are shares of light; gloss scales reflection, one is mirror.
+- {element: skin-change, says: "whether a tower wears a skin other than the plain curtain", scope: row, draw: share, unit: chance, share: 0.8, kind: picked, by: "skin study, 2026-11-19, picked"}
+- element: skin
+  says: the skins a tower may wear, other than the plain curtain
+  scope: row
+  draw: options
+  unit: weight
+  options:
+  - {name: mirror, weight: 3}
+  - {name: granite, weight: 3}
+  - {name: concrete, weight: 2}
+  - {name: gothic, weight: 1}
+  - {name: cantilever, weight: 1}
+  - {name: vaporwave, weight: 0.5}
+  - {name: stainless, weight: 1}
+  kind: picked
+  by: "skin study, 2026-11-19, picked"
+- {element: cyber, says: "whether a tower wears the cyberpunk layer over its skin", scope: row, draw: share, unit: chance, share: 0.12, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: planted, says: "whether a tower is planted, with terraces and balconies holding trees", scope: row, draw: share, unit: chance, share: 0.08, kind: picked, by: "skin study, 2026-11-19, picked"}
+- element: use
+  says: what a segment of a shaft is used for, which lights its windows at night
+  scope: storey
+  draw: options
+  unit: weight
+  options:
+  - {name: office, weight: 4}
+  - {name: home, weight: 1}
+  kind: picked
+  by: "skin study, 2026-11-19, picked"
+# use at night: an office floor is lit across, all its windows, cool; a
+# home window is lit alone, warm, and may have a curtain across it
+- {element: office-lit, says: "share of the floors of an office that are lit at night, every window of a lit floor together", scope: storey, draw: share, unit: chance, share: 0.6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: office-heat, says: "colour temperature of an office's light", scope: row, draw: range, unit: K, least: 6500, most: 6500, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: office-glow, says: "how bright an office's lit window is against the culture's window glow, so a cool white does not burn out to a flat white", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: home-glow, says: "how bright a home's lit window is against the culture's window glow", scope: row, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: home-lit, says: "share of the windows of a home that are lit at night, each alone", scope: opening, draw: share, unit: chance, share: 0.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: home-heat, says: "colour temperature of the light in a home's window", scope: opening, draw: range, unit: K, least: 2300, most: 3000, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- element: window-dark
+  says: the dark glass of a window set in a wall of stone, steel or concrete, which is opaque, as the clear glazing of a curtain wall is not
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: dark, weight: 1, colour: [0.015, 0.02, 0.03], gloss: 0.7}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+# mirror glass curtain wall
+- element: mirror-colour
+  says: the tint of mirror glass
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: blue, weight: 3, colour: [0.05, 0.09, 0.14], gloss: 1}
+  - {name: green, weight: 2, colour: [0.04, 0.1, 0.09], gloss: 1}
+  - {name: bronze, weight: 1, colour: [0.12, 0.08, 0.05], gloss: 1}
+  - {name: silver, weight: 1, colour: [0.3, 0.32, 0.35], gloss: 1}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- element: mirror-spandrel-colour
+  says: the opaque band at each slab behind mirror glass
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: frit, weight: 1, colour: [0.03, 0.035, 0.04], gloss: 0.6}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- element: mirror-cap-colour
+  says: the metal of the cap on a mullion
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: cap, weight: 1, colour: [0.35, 0.37, 0.4], gloss: 0.8}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: mirror-panel-depth, says: "thickness of a unitized glass panel", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: mirror-wave, says: "the range of a panel's lean in degrees, drawn twice, about the way along and the way up, each less the middle of the range, so a panel leans either way by half the range at most and the glass reflects in waves", scope: opening, draw: range, unit: deg, least: 0.2, most: 1.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: mirror-cap-width, says: "width of the cap on a mullion", scope: row, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: mirror-cap-proud, says: "how far a mullion cap stands out of the face", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: mirror-spandrel-height, says: "height of the opaque band at each slab", scope: row, draw: range, unit: m, least: 1.3, most: 1.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: mirror-spandrel-proud, says: "how far the opaque band stands out of the face", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# granite
+- element: granite-colour
+  says: the stone of a granite tower
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: pink, weight: 2, colour: [0.34, 0.22, 0.2]}
+  - {name: grey, weight: 3, colour: [0.25, 0.25, 0.26]}
+  - {name: black, weight: 1, colour: [0.04, 0.04, 0.045]}
+  - {name: red, weight: 1, colour: [0.33, 0.07, 0.06]}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- element: granite-finish
+  says: how the stone is finished, polished to reflect or flamed to be dull
+  scope: row
+  draw: options
+  unit: gloss
+  options:
+  - {name: polished, weight: 1, colour: [1, 1, 1], gloss: 0.6}
+  - {name: flamed, weight: 1, colour: [1, 1, 1], gloss: 0.04}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- element: granite-style
+  says: whether a segment of granite has punched windows or ribbon windows between bands of stone
+  scope: storey
+  draw: options
+  unit: weight
+  options:
+  - {name: punched, weight: 1}
+  - {name: ribbon, weight: 1}
+  kind: picked
+  by: "skin study, 2026-11-19, picked"
+- {element: granite-window-width, says: "width of a punched window", scope: row, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-window-height, says: "height of a punched window", scope: row, draw: range, unit: m, least: 2.1, most: 2.1, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-sill, says: "height of a punched window's sill above the floor", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-pier-proud, says: "how far a pier of stone between punched windows stands out", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-sill-proud, says: "how far a window sill stands out", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-sill-height, says: "thickness of a window sill", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-ribbon-height, says: "height of a ribbon window", scope: row, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-ribbon-sill, says: "height of the band of stone under a ribbon window, which stands out of the face", scope: row, draw: range, unit: m, least: 1.0, most: 1.0, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: granite-band-proud, says: "how far a band of stone stands out of the face", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# stainless steel with horizontal fins
+- element: stainless-colour
+  says: the steel of a stainless tower
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: brushed, weight: 1, colour: [0.5, 0.52, 0.55], gloss: 0.8}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: stainless-fin-height, says: "thickness of a horizontal fin", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: stainless-fin-proud, says: "how far a fin stands out of the face", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: stainless-window-height, says: "height of the ribbon of glass between fins", scope: row, draw: range, unit: m, least: 2.0, most: 2.0, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: stainless-window-sill, says: "height of the glass above the floor", scope: row, draw: range, unit: m, least: 1.0, most: 1.0, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# board-marked concrete
+- element: concrete-colour
+  says: the concrete of a poured tower
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: grey, weight: 3, colour: [0.2, 0.2, 0.19], gloss: 0.02}
+  - {name: warm, weight: 1, colour: [0.24, 0.22, 0.19], gloss: 0.02}
+  - {name: dark, weight: 1, colour: [0.12, 0.12, 0.12], gloss: 0.02}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- element: concrete-board-colour
+  says: the shadow in the grain of the boards the concrete was poured against
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: grain, weight: 1, colour: [0.07, 0.07, 0.07], gloss: 0.02}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: concrete-slab-thick, says: "thickness of an expressed slab edge", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: concrete-slab-proud, says: "how far a slab edge stands out of the face", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: concrete-pier-width, says: "width of a pier between windows", scope: row, draw: range, unit: m, least: 1.0, most: 1.0, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: concrete-pier-proud, says: "how far a pier stands out of the face, which is how deep the windows are set", scope: row, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: concrete-boards, says: "board marks on the edge of a slab", scope: row, draw: range, unit: lines, whole: true, least: 3, most: 3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: concrete-board-mark, says: "thickness of a board mark", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# gothic
+- element: gothic-stone
+  says: the stone of a gothic tower
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: pale, weight: 2, colour: [0.32, 0.3, 0.26], gloss: 0.05}
+  - {name: sooty, weight: 2, colour: [0.14, 0.13, 0.12], gloss: 0.05}
+  - {name: sandstone, weight: 1, colour: [0.3, 0.2, 0.12], gloss: 0.05}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: gothic-bay, says: "the width of a bay between buttresses", scope: row, draw: range, unit: m, least: 3.6, most: 3.6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-pier-width, says: "width of a buttress", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-pier-proud, says: "how far a buttress stands out of the face", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-lancet-width, says: "width of the tall window between two buttresses", scope: row, draw: range, unit: m, least: 1.3, most: 1.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-pinnacle-base, says: "side of a pinnacle at its foot", scope: row, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-pinnacle-tip, says: "side of a pinnacle at its point", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-pinnacle-height, says: "height of a pinnacle over the roof", scope: row, draw: range, unit: m, least: 9, most: 9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-tracery-height, says: "height of the band of tracery under the crown", scope: row, draw: range, unit: m, least: 7, most: 7, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-tracery-bar, says: "width of a bar of tracery", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-tracery-depth, says: "how far tracery stands out of the face", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-transom-share, says: "height of the transom across the tracery, as a share of the band", scope: row, draw: range, unit: share, least: 0.55, most: 0.55, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-step-least, says: "the least a plan must shrink at a setback for there to be a ledge to stand figures on", scope: row, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-figure-ledge, says: "how far out from the face a figure's plinth starts, on the ledge", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-plinth, says: "side of a figure's plinth", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-plinth-height, says: "height of a figure's plinth", scope: row, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-figure-width, says: "width of a figure's body", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-figure-height, says: "height of a figure's body", scope: row, draw: range, unit: m, least: 1.7, most: 1.7, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-figure-depth, says: "depth of a figure's body", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: gothic-figure-head, says: "side of a figure's head", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# cantilevered and tensioned
+- element: cantilever-colour
+  says: the floor plates thrown out past the core
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: plate, weight: 1, colour: [0.35, 0.35, 0.34], gloss: 0.1}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- element: cantilever-cable-colour
+  says: the steel of a tension cable
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: steel, weight: 1, colour: [0.5, 0.52, 0.55], gloss: 0.8}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: cantilever-reach, says: "how far a floor plate is thrown out past the face, drawn for each floor of each face", scope: opening, draw: range, unit: m, least: 0.8, most: 7, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cantilever-thick, says: "thickness of a floor plate", scope: row, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cantilever-cable, says: "thickness of a cable", scope: row, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cantilever-cable-storeys, says: "storeys a cable crosses before the next", scope: row, draw: range, unit: storeys, whole: true, least: 2, most: 2, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: cantilever-cable-proud, says: "how far a cable stands out of the glass", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# vaporwave
+- element: vapor-low
+  says: the pastel at the foot of a vaporwave tower
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: pink, weight: 3, colour: [0.95, 0.45, 0.7]}
+  - {name: lilac, weight: 2, colour: [0.7, 0.5, 0.9]}
+  - {name: peach, weight: 1, colour: [0.98, 0.65, 0.55]}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye, from the look and not from a colourway, which this repository cannot read"
+- element: vapor-high
+  says: the pastel at the top of a vaporwave tower
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: teal, weight: 3, colour: [0.2, 0.85, 0.8]}
+  - {name: mint, weight: 2, colour: [0.5, 0.95, 0.75]}
+  - {name: sky, weight: 1, colour: [0.45, 0.7, 0.95]}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye, from the look and not from a colourway, which this repository cannot read"
+- element: vapor-marble
+  says: the marble of a vaporwave tower
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: marble, weight: 1, colour: [0.75, 0.68, 0.72], gloss: 0.75}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: vapor-steps, says: "the steps the gradient from low to high is held to, so a tower has a few materials", scope: row, draw: range, unit: steps, whole: true, least: 6, most: 6, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: vapor-glow, says: "how much of its colour a pastel band gives off, so it keeps its colour at night", scope: row, draw: range, unit: share, least: 0.45, most: 0.45, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: vapor-pane, says: "the colour of glass block as a share of the gradient's colour", scope: row, draw: range, unit: share, least: 0.5, most: 0.5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: vapor-band-height, says: "height of the pastel band at each slab", scope: row, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: vapor-band-proud, says: "how far a pastel band stands out of the face", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: vapor-bar, says: "width of the bars between blocks of glass", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: vapor-bars, says: "horizontal bars across the glass blocks of one storey", scope: row, draw: range, unit: bars, whole: true, least: 2, most: 2, kind: picked, by: "skin study, 2026-11-19, picked"}
+# the cyberpunk layer
+- {element: cyber-spot, says: "a draw from nought to one for where a thing stands, which stretch of a face it is on, and whether a cell of a sign is lit, each with a salt of its own", scope: opening, draw: range, unit: share, least: 0, most: 1, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: cyber-cell-gap, says: "the dark gap between the lit cells of a sign", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-greeble-density, says: "greebles on a face for each hundred square metres of it", scope: row, draw: range, unit: per 100 m2, least: 0.5, most: 0.5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- element: cyber-greeble
+  says: the kinds of greeble, each a thing stuck to a wall in a dense city
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: pipe, weight: 3}
+  - {name: vent, weight: 3}
+  - {name: box, weight: 3}
+  - {name: gantry, weight: 1}
+  kind: picked
+  by: "skin study, 2026-11-19, picked"
+- element: cyber-greeble-colour
+  says: the metal of greebles
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: grime, weight: 3, colour: [0.04, 0.04, 0.045], gloss: 0.5}
+  - {name: rust, weight: 1, colour: [0.12, 0.05, 0.03], gloss: 0.2}
+  - {name: steel, weight: 2, colour: [0.15, 0.16, 0.18], gloss: 0.6}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: cyber-pipe-radius, says: "radius of a pipe", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-pipe-sides, says: "sides of a pipe's section", scope: row, draw: range, unit: sides, whole: true, least: 6, most: 6, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: cyber-pipe-length, says: "length of a run of pipe", scope: opening, draw: range, unit: m, least: 8, most: 30, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-vent-width, says: "width of a vent", scope: row, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-vent-height, says: "height of a vent", scope: row, draw: range, unit: m, least: 1.0, most: 1.0, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-vent-depth, says: "depth of a vent", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-box-width, says: "width of a utility box", scope: opening, draw: range, unit: m, least: 1.2, most: 3.2, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-box-height, says: "height of a utility box", scope: opening, draw: range, unit: m, least: 1.0, most: 2.6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-box-depth, says: "depth of a utility box", scope: row, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-gantry-length, says: "length of a gantry along the face", scope: row, draw: range, unit: m, least: 9, most: 9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-gantry-width, says: "how far a gantry reaches out of the face", scope: row, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-gantry-thick, says: "thickness of a gantry's floor", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-rail-height, says: "height of a gantry's rail", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-rail-thick, says: "thickness of a gantry's rail", scope: row, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-share, says: "share of faces that carry stacked signs or a screen", scope: opening, draw: share, unit: chance, share: 0.6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-count, says: "signs stacked on one face", scope: opening, draw: range, unit: signs, whole: true, least: 1, most: 3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- element: cyber-sign-kind
+  says: whether a stacked thing is a sign of lit letters or a screen of changing colour
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: sign, weight: 3}
+  - {name: screen, weight: 1}
+  kind: picked
+  by: "skin study, 2026-11-19, picked"
+- {element: cyber-sign-width, says: "width of a sign", scope: opening, draw: range, unit: m, least: 5, most: 10, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-height, says: "height of a sign", scope: opening, draw: range, unit: m, least: 4, most: 9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-screen-width, says: "width of a screen", scope: opening, draw: range, unit: m, least: 12, most: 18, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-screen-height, says: "height of a screen", scope: opening, draw: range, unit: m, least: 8, most: 12, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-cell, says: "side of one lit cell of a sign or screen", scope: row, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-board-depth, says: "depth of the dark board behind a sign's cells", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-cell-proud, says: "how far a lit cell stands out of its board", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-fill, says: "share of a sign's cells that are lit at one moment", scope: row, draw: range, unit: share, least: 0.45, most: 0.45, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-screen-fill, says: "share of a screen's cells that are lit at one moment", scope: row, draw: range, unit: share, least: 0.8, most: 0.8, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-period, says: "seconds a sign's pattern holds before it changes", scope: row, draw: range, unit: s, least: 1.5, most: 1.5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-luminance, says: "luminance at a metre of the light a sign throws, in the kit's relative light", scope: row, draw: range, unit: luminance, least: 6, most: 6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-heat, says: "colour temperature of the light a sign throws, in kelvin", scope: row, draw: range, unit: K, least: 4500, most: 4500, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-edge, says: "how far a stack of signs keeps from the edge of a face, in metres", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-gap, says: "the gap between signs stacked on one face", scope: row, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-sign-start, says: "how high up a face its stack of signs starts, as a share of the face", scope: opening, draw: range, unit: share, least: 0.05, most: 0.5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- element: cyber-neon
+  says: the colours of lit signs, screens and corner bands
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: magenta, weight: 3, colour: [1, 0.1, 0.55]}
+  - {name: cyan, weight: 3, colour: [0.1, 0.9, 1]}
+  - {name: amber, weight: 2, colour: [1, 0.6, 0.1]}
+  - {name: green, weight: 1, colour: [0.2, 1, 0.35]}
+  - {name: red, weight: 1, colour: [1, 0.12, 0.1]}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: cyber-neon-glow, says: "how brightly lit signs and bands glow, a scale on the colour", scope: row, draw: range, unit: scale, least: 1.6, most: 1.6, kind: picked, by: "skin study, 2026-11-19, by eye, from 4 which burned the colour out to white"}
+- element: cyber-board-colour
+  says: the dark board a sign's cells are on
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: board, weight: 1, colour: [0.02, 0.02, 0.025], gloss: 0.4}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: cyber-band-width, says: "width of the light band up a corner", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-band-proud, says: "how far a corner band stands out of the face", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-searchlights, says: "searchlight heads on a roof", scope: row, draw: range, unit: heads, whole: true, least: 2, most: 2, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: cyber-searchlight-size, says: "side of a searchlight's housing", scope: row, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-searchlight-inset, says: "how far a searchlight stands in from the corner of the roof", scope: row, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-searchlight-lens, says: "side of a searchlight's lit lens", scope: row, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-searchlight-glow, says: "how brightly a searchlight's lens glows, a scale on its colour", scope: row, draw: range, unit: scale, least: 12, most: 12, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: cyber-searchlight-luminance, says: "luminance at a metre of a searchlight's light, in the kit's relative light", scope: row, draw: range, unit: luminance, least: 20, most: 20, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- element: cyber-searchlight-colour
+  says: the colour of a searchlight's lens
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: white, weight: 1, colour: [0.9, 0.95, 1]}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: cyber-wet-gloss, says: "the gloss a wet surface takes, which is near mirror", scope: row, draw: range, unit: gloss, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# planted towers
+- {element: planted-every, says: "storeys between one terrace or balcony and the next", scope: row, draw: range, unit: storeys, whole: true, least: 5, most: 5, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: planted-depth, says: "how far a balcony reaches out of the face", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-thick, says: "thickness of a balcony slab", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-wall, says: "height of the wall of a planter", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-wall-thick, says: "thickness of the wall of a planter", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-hedge, says: "height of the shrubs along a balcony, drawn for each stretch of it", scope: opening, draw: range, unit: m, least: 0.8, most: 1.8, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-hedge-run, says: "length of one stretch of shrubs along a balcony", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-tree-spacing, says: "the gap between trees on a balcony", scope: row, draw: range, unit: m, least: 16, most: 16, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-tree-height, says: "how tall a tree on a balcony is made, in metres", scope: row, draw: range, unit: m, least: 10, most: 10, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-tree-seeds, says: "how many different trees of a kind a tower grows, so that they are shared", scope: row, draw: range, unit: trees, whole: true, least: 3, most: 3, kind: picked, by: "skin study, 2026-11-19, picked"}
+- element: planted-tree
+  says: the kinds of tree on a terrace, by the names the catalogue gives them
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: alder, weight: 2}
+  - {name: poplar, weight: 2}
+  - {name: valley-oak, weight: 1}
+  kind: picked
+  by: "skin study, 2026-11-19, picked from the catalogue's tree kinds"
+- element: planted-leaf
+  says: the green of shrubs, vines and hanging plants
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: leaf, weight: 3, colour: [0.04, 0.18, 0.05], gloss: 0.1}
+  - {name: dark, weight: 2, colour: [0.03, 0.12, 0.04], gloss: 0.1}
+  - {name: bright, weight: 1, colour: [0.09, 0.25, 0.06], gloss: 0.1}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- element: planted-soil
+  says: the soil in a planter
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: soil, weight: 1, colour: [0.05, 0.035, 0.025], gloss: 0.02}
+  kind: picked
+  by: "skin study, 2026-11-19, by eye"
+- {element: planted-vine-spacing, says: "the gap between climbing plants along a balcony", scope: row, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-vine-width, says: "width of a climbing plant", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-vine-proud, says: "how far a climbing plant stands out of the face", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-vine-storeys, says: "storeys a climbing plant climbs from its balcony", scope: opening, draw: range, unit: storeys, whole: true, least: 2, most: 5, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-hang-spacing, says: "the gap between hanging plants along a balcony's edge", scope: row, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-hang-length, says: "how far a hanging plant hangs under its balcony", scope: opening, draw: range, unit: m, least: 1.2, most: 4, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-hang-width, says: "width of a hanging plant", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "skin study, 2026-11-19, by eye"}
+- {element: planted-clear, says: "half the width, from the middle of a face, of the stretch of every balcony that is kept clear of shrubs and trees, to stand and sit in", scope: row, draw: range, unit: m, least: 2.5, most: 2.5, kind: picked, by: "balcony study, 2026-11-19, by eye"}
+- {element: planted-chair, says: "whether a balcony has a chair", scope: opening, draw: share, unit: chance, share: 1, kind: picked, by: "balcony study, 2026-11-19, picked: every balcony has one"}
+- {element: planted-chair-at, says: "where along the face, from its middle, a chair stands", scope: row, draw: range, unit: m, least: 0, most: 0, kind: picked, by: "balcony study, 2026-11-19, by eye; the middle of the clear stretch"}
+- {element: planted-chair-size, says: "side of a chair's seat", scope: row, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "balcony study, 2026-11-19, by eye"}
+- {element: planted-chair-seat, says: "height of a chair's seat", scope: row, draw: range, unit: m, least: 0.43, most: 0.43, kind: picked, by: "balcony study, 2026-11-19, by eye"}
+- {element: planted-chair-back, says: "height of a chair's back over its seat", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "balcony study, 2026-11-19, by eye"}
+- {element: planted-chair-board, says: "thickness of a chair's seat, back and legs", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "balcony study, 2026-11-19, by eye"}
+# shapes
+- {element: lobe-share, says: "radius of the arc that fills each inner corner of a lobed plan, as a share of the side of its squares", scope: row, draw: range, unit: share, least: 0.15, most: 0.15, kind: picked, by: "skin study, 2026-11-19, by eye; the arc must stay inside the star's tips"}
+- {element: lobe-steps, says: "flat pieces each arc of a lobed plan is cut into", scope: row, draw: range, unit: pieces, whole: true, least: 5, most: 5, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: ellipse-sides, says: "flat sides of an elliptical plan", scope: row, draw: range, unit: sides, whole: true, least: 20, most: 20, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: spiral-storeys, says: "storeys in each block of a tower whose floors turn as they rise", scope: row, draw: range, unit: storeys, whole: true, least: 4, most: 4, kind: picked, by: "skin study, 2026-11-19, picked"}
+- {element: spiral-turn, says: "degrees each block of a turning tower is turned on the one below", scope: row, draw: range, unit: deg, least: 3, most: 3, kind: picked, by: "skin study, 2026-11-19, by eye"}
+# The demo level of a tower: every skin cut into the parts its makers
+# build it from. Lengths are metres. Nothing here is read at the hull or
+# the quick level.
+# curtain wall: mullions with caps, transoms, spandrels with backpans
+- {element: cw-mullion-proud, says: "how far a curtain wall's mullion stands out of the face", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-cap-width, says: "width of the pressure cap on a mullion", scope: row, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-cap-proud, says: "how far a mullion's cap stands out of the mullion", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-transom-height, says: "height of a transom, the bar across a bay", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-transom-proud, says: "how far a transom stands out of the face", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-spandrel-height, says: "height of the spandrel panel at the foot of a storey, from the slab to the sill of the vision glass", scope: row, draw: range, unit: m, least: 1.15, most: 1.15, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-spandrel-through, says: "how much of the light a spandrel glass lets through to the backpan behind it", scope: row, draw: range, unit: share, least: 0.5, most: 0.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-backpan-gap, says: "the gap between a spandrel glass and the backpan behind it", scope: row, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-backpan-thick, says: "thickness of a backpan, the folded metal tray behind a spandrel", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-backpan-fold, says: "height of the fold stiffening a backpan across its middle", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-fold-proud, says: "how far a backpan's fold stands out of the pan", scope: row, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-slab-edge-height, says: "height of the slab edge seen through the foot of a spandrel", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-sill-thick, says: "thickness of the sill at the foot of a vision glass", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-sill-proud, says: "how far the sill at the foot of a vision glass stands out of the face", scope: row, draw: range, unit: m, least: 0.16, most: 0.16, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-vent-every, says: "every how many bays has an operable vent, counted along a storey", scope: row, draw: range, unit: bays, whole: true, least: 4, most: 4, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: cw-vent-width, says: "width of an operable vent in a bay", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-vent-height, says: "height of an operable vent at the head of a bay", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-vent-bar, says: "width of the bar of a vent's frame", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cw-vent-proud, says: "how far a vent's frame stands out of the glass", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- element: fine-metal-colour
+  says: the anodised aluminium of caps, sills and vents
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: anodised, weight: 1, colour: [0.3, 0.31, 0.33], gloss: 0.7}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+- element: backpan-colour
+  says: the galvanised tray behind a spandrel glass
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 1, colour: [0.2, 0.21, 0.22], gloss: 0.3}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+- element: slab-edge-colour
+  says: the fire-stopped concrete edge of a floor slab, seen through a spandrel
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: slab, weight: 1, colour: [0.28, 0.27, 0.25], gloss: 0}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+# punched windows: aprons, sills, heads, frames
+- {element: ps-spandrel-proud, says: "how far the wall between punched windows, over and under them, stands out of the face; less than a pier, so the piers read as piers", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ps-head-height, says: "height of the lintel over a punched window", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ps-head-proud, says: "how far a lintel stands out of the face", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ps-head-lap, says: "how far a lintel reaches past each side of its window", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ps-sill-lap, says: "how far a sill reaches past each side of its window", scope: row, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ps-frame-bar, says: "width of the bar of a window's frame", scope: row, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ps-frame-deep, says: "how deep the bars of a window's frame are", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ps-transom-share, says: "how far up a window its transom stands, as a share of the window's height", scope: row, draw: range, unit: share, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- element: precast-colour
+  says: the precast stone of lintels and sills, paler than the wall
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: precast, weight: 1, colour: [0.42, 0.4, 0.37], gloss: 0.1}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+- element: window-frame-colour
+  says: the dark metal of a window's frame
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: bronze, weight: 1, colour: [0.06, 0.05, 0.045], gloss: 0.5}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+# concrete: panels, tie holes, drip edges, cold joints
+- {element: cc-panel-gap, says: "the joint between two panels of a slab edge", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-drip-height, says: "height of the drip lip under a slab edge", scope: row, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-drip-proud, says: "how far a drip lip stands out of the slab edge", scope: row, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-tie-size, says: "side of a tie hole, left where a formwork tie ran through", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-tie-proud, says: "how far a tie hole's plug stands out of the face it is on", scope: row, draw: range, unit: m, least: 0.015, most: 0.015, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-tie-inset, says: "how far in from the end of a panel its first tie hole is", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-joint-height, says: "height of the cold joint between two lifts of a pier", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+# gothic: offsets, pointed arches, spandrels with tracery, pinnacle shafts
+- {element: gt-offset-count, says: "how many steps a buttress widens in at its foot", scope: row, draw: range, unit: steps, whole: true, least: 2, most: 2, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: gt-offset-step, says: "how far each step of a buttress's foot reaches out on each side and stands out of it", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-offset-height, says: "height of each step of a buttress's foot", scope: row, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-arch-sides, says: "flat pieces each side of a pointed arch is cut into", scope: row, draw: range, unit: pieces, whole: true, least: 5, most: 5, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: gt-arch-deep, says: "how deep a pointed arch is, front to back", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-hood, says: "how far the stone hood round a pointed arch reaches past it", scope: row, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-panel-height, says: "height of the spandrel panel under a lancet, which holds a blind tracery", scope: row, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-panel-proud, says: "how far a spandrel panel stands out of the face", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-foil, says: "side of the lozenge of tracery on a spandrel panel", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-foil-proud, says: "how far the lozenge of tracery stands out of its panel", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-shaft-height, says: "height of the square shaft a pinnacle's point stands on", scope: row, draw: range, unit: m, least: 3.5, most: 3.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-shaft-side, says: "side of a pinnacle's shaft", scope: row, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gt-finial, says: "side of the finial on the point of a pinnacle", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+# cantilevered floors: slab, soffit, balustrade, anchored cables
+- {element: cl-soffit-thick, says: "thickness of the lining under a floor plate", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-soffit-inset, says: "how far the lining under a plate stops short of its edge", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-post-pitch, says: "how far apart the posts of a balustrade are", scope: row, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-post-size, says: "side of a balustrade post", scope: row, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-rail-height, says: "height of a balustrade over its plate", scope: row, draw: range, unit: m, least: 1.05, most: 1.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-rail-size, says: "side of a balustrade's handrail", scope: row, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-edge-inset, says: "how far in from a plate's edge a balustrade stands", scope: row, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-anchor, says: "side of the anchor a cable ends in, on a plate's edge", scope: row, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cl-mullion, says: "width of the slim mullion between a cantilevered plate's glass bays", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+# rooms behind the glass
+- {element: room-cavity, says: "how deep the rooms behind a face are, from the glass back to the core wall", scope: row, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "tower detail study, 2026-11-19, by eye; a perimeter office is deeper, a tower's plan is not"}
+- {element: room-cavity-share, says: "the most of a segment's inradius the rooms may take, so a narrow top is not hollowed out", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: floor-thick, says: "thickness of a floor slab behind the glass", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: mirror-through, says: "how much of the light a mirror glass lets through to the room behind it", scope: row, draw: range, unit: share, least: 0.4, most: 0.4, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: partition-thick, says: "thickness of a partition between two rooms", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: partition-every, says: "every how many windows an office has a partition", scope: row, draw: range, unit: windows, whole: true, least: 4, most: 4, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: ceiling-light-size, says: "side of a square ceiling light of an office", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ceiling-light-thick, says: "thickness of a ceiling light", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ceiling-lights-across, says: "how many ceiling lights an office has across each window", scope: row, draw: range, unit: lights, whole: true, least: 2, most: 2, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: ceiling-lights-deep, says: "how many rows of ceiling lights an office has from the glass to the core", scope: row, draw: range, unit: rows, whole: true, least: 2, most: 2, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: ceiling-light-gain, says: "how much brighter a ceiling light glows than the lit window of the quick level, which was a whole pane", scope: row, draw: range, unit: scale, least: 40, most: 40, kind: picked, by: "tower detail study, 2026-11-19, by eye, from 5 which drew a dark room"}
+- {element: office-lamp-every, says: "every how many windows a lit office floor has a lamp that lights the room, counted along a face", scope: row, draw: range, unit: windows, whole: true, least: 6, most: 6, kind: picked, by: "tower detail study, 2026-11-19, picked; each lamp is a light the tracer pays for"}
+- {element: office-lamp-strength, says: "luminance at a metre of an office lamp, in the kit's relative light", scope: row, draw: range, unit: relative light, least: 8, most: 8, kind: picked, by: "tower detail study, 2026-11-19, by eye, from 0.9 which drew a dark room"}
+- {element: home-lamp-every, says: "every how many windows a lit home has a lamp that lights the room", scope: row, draw: range, unit: windows, whole: true, least: 2, most: 2, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: home-lamp-strength, says: "luminance at a metre of a home's lamp, in the kit's relative light", scope: row, draw: range, unit: relative light, least: 4, most: 4, kind: picked, by: "tower detail study, 2026-11-19, by eye, from 0.45 which drew a dark room"}
+- {element: wall-wash-gain, says: "how brightly the core wall of a lit room glows against the lit window of the quick level", scope: row, draw: range, unit: scale, least: 1.2, most: 1.2, kind: picked, by: "tower detail study, 2026-11-19, by eye, from 4 which burnt the room out to white; the lamps are too few to light every room"}
+- {element: wall-wash-thick, says: "thickness of the sheet that glows on a lit room's core wall", scope: row, draw: range, unit: m, least: 0.01, most: 0.01, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: lamp-box, says: "side of the box a room's lamp is", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: desk-width, says: "width of a desk", scope: row, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: desk-depth, says: "depth of a desk", scope: row, draw: range, unit: m, least: 0.75, most: 0.75, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: desk-height, says: "height of a desk's top", scope: row, draw: range, unit: m, least: 0.74, most: 0.74, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: desk-set-back, says: "how far a desk stands back from the glass", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: desk-share, says: "share of the windows of a lit office floor with a desk and a screen behind them", scope: opening, draw: share, unit: chance, share: 0.85, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: screen-width, says: "width of a screen on a desk", scope: row, draw: range, unit: m, least: 0.55, most: 0.55, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: screen-height, says: "height of a screen on a desk", scope: row, draw: range, unit: m, least: 0.34, most: 0.34, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: screen-thick, says: "thickness of a screen", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: screen-gain, says: "how brightly a screen glows against the light of its floor", scope: row, draw: range, unit: scale, least: 2, most: 2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: chair-size, says: "side of an office chair's back, seat and height of its seat, as a block", scope: row, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: chair-height, says: "height of an office chair's back", scope: row, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: blind-share, says: "share of windows with a blind drawn down some of the way", scope: opening, draw: share, unit: chance, share: 0.65, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: blind-drop, says: "how far down its window a blind is drawn, as a share of the window", scope: opening, draw: range, unit: share, least: 0.1, most: 0.95, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: blind-thick, says: "thickness of a blind", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: blind-set-back, says: "how far behind the glass a blind hangs", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: couch-share, says: "share of the windows of a home with a couch behind them", scope: opening, draw: share, unit: chance, share: 0.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: couch-width, says: "width of a couch", scope: row, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: couch-height, says: "height of a couch's back", scope: row, draw: range, unit: m, least: 0.85, most: 0.85, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: couch-depth, says: "depth of a couch", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: couch-set-back, says: "how far a couch stands back from the glass", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- element: desk-colour
+  says: the top and panels of an office desk
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: laminate, weight: 1, colour: [0.2, 0.18, 0.15], gloss: 0.1}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+- element: blind-colour
+  says: the fabric of a blind
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: white, weight: 3, colour: [0.55, 0.55, 0.52], gloss: 0}
+  - {name: grey, weight: 2, colour: [0.28, 0.29, 0.3], gloss: 0}
+  - {name: sand, weight: 1, colour: [0.45, 0.4, 0.3], gloss: 0}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+- element: couch-colour
+  says: the cloth of a couch
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: slate, weight: 2, colour: [0.1, 0.12, 0.16], gloss: 0}
+  - {name: rust, weight: 1, colour: [0.28, 0.12, 0.08], gloss: 0}
+  kind: picked
+  by: "tower detail study, 2026-11-19, by eye"
+# surfaces: stone in panels with joints and grain, concrete in boards with
+# aggregate and patches, metal in panels with seams and a brushed finish,
+# and grime under the cyberpunk layer. A tower is never smoother than a
+# row house's wall, which is brick at tone 0.3 and mortar at 0.4.
+- {element: granite-panel-length, says: "length of a panel of granite cladding", scope: row, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: granite-panel-height, says: "height of a panel of granite cladding", scope: row, draw: range, unit: m, least: 0.75, most: 0.75, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: granite-joint, says: "thickness of the joint between two panels of granite", scope: row, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "tower detail study, 2026-11-19, by eye; wider than a mason's so that it shows at twenty five metres"}
+- {element: granite-joint-tone, says: "how much of its light the joint between granite panels gives back, against the stone", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: granite-panel-tone, says: "how much one panel of granite differs from the next, as a share of its light", scope: row, draw: range, unit: share, least: 0.35, most: 0.35, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: granite-relief-size, says: "how wide the slight relief of a granite face is", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: granite-relief-slope, says: "how far the relief of a granite face tilts it", scope: row, draw: range, unit: share, least: 0.12, most: 0.12, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gothic-panel-length, says: "length of a block of gothic stone", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gothic-panel-height, says: "height of a course of gothic stone", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gothic-joint, says: "thickness of the joint between two blocks of gothic stone", scope: row, draw: range, unit: m, least: 0.025, most: 0.025, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gothic-joint-tone, says: "how much of its light a joint of gothic stone gives back, against the stone", scope: row, draw: range, unit: share, least: 0.35, most: 0.35, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gothic-panel-tone, says: "how much one block of gothic stone differs from the next, as a share of its light", scope: row, draw: range, unit: share, least: 0.35, most: 0.35, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gothic-relief-size, says: "how wide the relief of a gothic face is", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: gothic-relief-slope, says: "how far the relief of a gothic face tilts it", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: crystal-share, says: "how much of a stone face the darker crystals cover", scope: row, draw: range, unit: share, least: 0.5, most: 0.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: crystal-size, says: "how wide a patch of crystals in stone is", scope: row, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: crystal-tone, says: "how much of its light a patch of dark crystals gives back, against the clean stone", scope: row, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: vein-share, says: "how much of a stone face its veins and stains cover", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: vein-size, says: "how wide a vein or stain in stone is", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: vein-tone, says: "how much of its light a vein or stain gives back, against the clean stone", scope: row, draw: range, unit: share, least: 0.75, most: 0.75, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-board-height, says: "height of a board of the formwork, so of a board mark", scope: row, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-board-shadow, says: "how much of its light the mark at the foot of a board gives back", scope: row, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-board-share, says: "how much of a board's height its mark takes", scope: row, draw: range, unit: share, least: 0.14, most: 0.14, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-board-tone, says: "how much one board of concrete differs from the next, as a share of its light", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-patch-share, says: "how much of a concrete face has been patched or stained", scope: row, draw: range, unit: share, least: 0.25, most: 0.25, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-patch-size, says: "how wide a patch of mended concrete is", scope: row, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-patch-tone, says: "how much of its light a patch of mended concrete gives back, against the rest", scope: row, draw: range, unit: share, least: 0.65, most: 0.65, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-aggregate-share, says: "how much of a concrete face the aggregate shows in", scope: row, draw: range, unit: share, least: 0.5, most: 0.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-aggregate-size, says: "how wide a speck of aggregate is", scope: row, draw: range, unit: m, least: 0.025, most: 0.025, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-aggregate-tone, says: "how much of its light a speck of aggregate gives back, against the cement", scope: row, draw: range, unit: share, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-relief-size, says: "how wide the relief of a concrete face is", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: cc-relief-slope, says: "how far the relief of a concrete face tilts it", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-panel-length, says: "length of a panel of metal cladding", scope: row, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-panel-height, says: "height of a panel of metal cladding", scope: row, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-seam, says: "thickness of the seam between two panels of metal", scope: row, draw: range, unit: m, least: 0.015, most: 0.015, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-seam-tone, says: "how much of its light a seam between metal panels gives back, against the panel", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-panel-tone, says: "how much one metal panel differs from the next, as a share of its light", scope: row, draw: range, unit: share, least: 0.2, most: 0.2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-brush-ring, says: "the distance between two lines of a brushed finish", scope: row, draw: range, unit: m, least: 0.006, most: 0.006, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-brush-late, says: "how much of the distance between two brush lines is the darker part", scope: row, draw: range, unit: share, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: metal-brush-tone, says: "how much of its light the dark part of a brushed finish gives back", scope: row, draw: range, unit: share, least: 0.73, most: 0.73, kind: picked, by: "tower detail study, 2026-11-19, by eye, then two hundredths darker so that brushed metal varies more over a wall than a row house's brick does"}
+- {element: metal-brush-wander, says: "how far the lines of a brushed finish wander, in line widths", scope: row, draw: range, unit: lines, least: 0.5, most: 0.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: grime-soot-share, says: "how much of a surface under the cyberpunk layer is sooted", scope: row, draw: range, unit: share, least: 0.5, most: 0.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: grime-soot-size, says: "how wide a patch of soot is", scope: row, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: grime-soot-tone, says: "how much of its light a sooted patch gives back, against the clean surface", scope: row, draw: range, unit: share, least: 0.4, most: 0.4, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: grime-streak-ring, says: "the distance between two streaks of grime running down a surface", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: grime-streak-late, says: "how much of the distance between two streaks the dark part takes", scope: row, draw: range, unit: share, least: 0.35, most: 0.35, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: grime-streak-tone, says: "how much of its light the dark part of a streak gives back", scope: row, draw: range, unit: share, least: 0.45, most: 0.45, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: grime-streak-wander, says: "how far a streak wanders as it runs down, in streak widths", scope: row, draw: range, unit: streaks, least: 1.2, most: 1.2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+# the ground floor, a storey of its own: plinth, glass, lobby and shops,
+# the way in with its canopy and revolving door, a loading bay, bollards
+- {element: ground-plinth-height, says: "height of the stone plinth the ground floor's glass stands on", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-plinth-proud, says: "how far the plinth stands out of the face", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-glass-height, says: "height of the glass of a ground floor, from its plinth up", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-lit, says: "share of the bays of a ground floor that are lit at night", scope: opening, draw: share, unit: chance, share: 0.75, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-heat, says: "colour temperature of the light in a lobby or a shop", scope: row, draw: range, unit: K, least: 3300, most: 3300, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-wash-gain, says: "how brightly a lit lobby or shop glows against the lit window of the quick level", scope: row, draw: range, unit: scale, least: 2, most: 2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-strip, says: "width of the strip of light along the ceiling of a lobby or a shop", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-shelf-share, says: "how much of a bay's width the shelves along the back of a shop take", scope: row, draw: range, unit: share, least: 0.7, most: 0.7, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-shelf-height, says: "height of the shelves along the back of a shop", scope: row, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-shelf-deep, says: "depth of the shelves along the back of a shop", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: ground-sign-glow, says: "how brightly a shop sign glows against its own colour", scope: row, draw: range, unit: scale, least: 1.2, most: 1.2, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: door-drum-radius, says: "radius of the drum of a revolving door", scope: row, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: door-drum-sides, says: "flat sides a revolving door's drum is cut into", scope: row, draw: range, unit: sides, whole: true, least: 12, most: 12, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: door-drum-height, says: "height of a revolving door and of the doors beside it", scope: row, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: door-leaf-thick, says: "thickness of the leaf of a revolving door", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: door-swing-width, says: "width of a swing door beside a revolving door", scope: row, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: canopy-width, says: "width of the canopy over the way in", scope: row, draw: range, unit: m, least: 9, most: 9, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: canopy-depth, says: "how far the canopy stands out of the face", scope: row, draw: range, unit: m, least: 3.5, most: 3.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: canopy-thick, says: "thickness of the canopy", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: canopy-height, says: "height of the underside of the canopy over the pavement", scope: row, draw: range, unit: m, least: 3.6, most: 3.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: canopy-rod, says: "side of a rod the canopy hangs on", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: canopy-strip, says: "side of the strip of light along the canopy's edge", scope: row, draw: range, unit: m, least: 0.1, most: 0.1, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: loading-height, says: "height of the loading bay's roller door", scope: row, draw: range, unit: m, least: 3.6, most: 3.6, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: loading-frame, says: "width of the frame round the roller door", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: loading-slats, says: "how many slats the roller door is cut into, up it", scope: row, draw: range, unit: slats, whole: true, least: 18, most: 18, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: loading-slat, says: "thickness of the groove between two slats", scope: row, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: bollard-radius, says: "radius of a bollard", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: bollard-height, says: "height of a bollard", scope: row, draw: range, unit: m, least: 0.95, most: 0.95, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: bollard-sides, says: "flat sides a bollard is cut into", scope: row, draw: range, unit: sides, whole: true, least: 8, most: 8, kind: picked, by: "tower detail study, 2026-11-19, picked"}
+- {element: bollard-pitch, says: "how far apart the bollards along a kerb are", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+- {element: bollard-out, says: "how far out of the face the line of bollards stands", scope: row, draw: range, unit: m, least: 4.5, most: 4.5, kind: picked, by: "tower detail study, 2026-11-19, by eye"}
+# where writers go: a dark shop's roller shutter, a lobby of polished
+# stone they leave alone, and on the roof a slab, a parapet, a water tank
+# and a billboard with a catwalk behind it. All at the demo level.
+- {element: shutter-slats, says: "how many slats a shop's roller shutter is cut into, up it", scope: row, draw: range, unit: slats, whole: true, least: 24, most: 24, kind: picked, by: "tower detail study 2, 2026-11-19, picked"}
+- element: shutter-colour
+  says: the metal of a shop's roller shutter, pulled down over its glass when it is dark
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 3, colour: [0.22, 0.22, 0.23], gloss: 0.3}
+  - {name: green, weight: 1, colour: [0.05, 0.12, 0.08], gloss: 0.2}
+  - {name: blue, weight: 1, colour: [0.05, 0.08, 0.16], gloss: 0.2}
+  kind: picked
+  by: "tower detail study 2, 2026-11-19, by eye"
+- element: lobby-stone-colour
+  says: the polished stone of the plinth of a mirror tower's lobby
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: black, weight: 2, colour: [0.03, 0.03, 0.035], gloss: 0.8}
+  - {name: grey, weight: 1, colour: [0.12, 0.12, 0.13], gloss: 0.8}
+  kind: picked
+  by: "tower detail study 2, 2026-11-19, by eye"
+- {element: lobby-gloss, says: "the least gloss of a polished lobby's stone", scope: row, draw: range, unit: share, least: 0.8, most: 0.8, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: roof-slab, says: "thickness of the slab over a shaft's top plan", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: parapet-height, says: "height of the parapet along a roof's edge", scope: row, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "tower detail study 2, 2026-11-19, a common guard height"}
+- {element: parapet-thick, says: "thickness of a parapet", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: roof-margin, says: "how far in from a roof's edge a tank or a billboard keeps", scope: row, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- element: tank-colour
+  says: the timber staves of a water tank
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: cedar, weight: 2, colour: [0.2, 0.12, 0.07], gloss: 0.05}
+  - {name: grey timber, weight: 1, colour: [0.16, 0.15, 0.14], gloss: 0.05}
+  kind: picked
+  by: "tower detail study 2, 2026-11-19, by eye"
+- element: roof-steel-colour
+  says: the steel of a tank's legs and hoops, a billboard's posts, back and catwalk
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 2, colour: [0.2, 0.2, 0.21], gloss: 0.3}
+  - {name: black, weight: 1, colour: [0.05, 0.05, 0.055], gloss: 0.3}
+  kind: picked
+  by: "tower detail study 2, 2026-11-19, by eye"
+- {element: tank-radius, says: "radius of a water tank", scope: row, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: tank-height, says: "height of a water tank's staves", scope: row, draw: range, unit: m, least: 4.5, most: 4.5, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: tank-lid, says: "height of a water tank's cone of a lid", scope: row, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: tank-lid-top, says: "how wide the top of a tank's lid is, as a share of the tank", scope: row, draw: range, unit: share, least: 0.15, most: 0.15, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: tank-legs, says: "height of a water tank's legs", scope: row, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "tower detail study 2, 2026-11-19, by eye; low enough that a writer reaches the staves"}
+- {element: tank-leg, says: "side of a water tank's leg", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: tank-leg-spread, says: "how far from a tank's middle its legs stand, as a share of its radius", scope: row, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: tank-sides, says: "flat sides a water tank is cut into", scope: row, draw: range, unit: sides, whole: true, least: 16, most: 16, kind: picked, by: "tower detail study 2, 2026-11-19, picked"}
+- {element: tank-hoops, says: "how many steel hoops go round a water tank", scope: row, draw: range, unit: hoops, whole: true, least: 4, most: 4, kind: picked, by: "tower detail study 2, 2026-11-19, picked"}
+- {element: tank-hoop, says: "height of a steel hoop round a water tank", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: tank-hoop-proud, says: "how far a hoop stands out of a tank's staves", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- element: billboard-colour
+  says: the face of a billboard on a roof, lit
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 1, colour: [0.55, 0.08, 0.06], gloss: 0.2}
+  - {name: yellow, weight: 1, colour: [0.6, 0.45, 0.08], gloss: 0.2}
+  - {name: teal, weight: 1, colour: [0.06, 0.4, 0.4], gloss: 0.2}
+  kind: picked
+  by: "tower detail study 2, 2026-11-19, by eye"
+- {element: billboard-glow, says: "how brightly a billboard's face glows against its own colour", scope: row, draw: range, unit: scale, least: 0.8, most: 0.8, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: billboard-width, says: "width of a billboard on a roof", scope: row, draw: range, unit: m, least: 9, most: 9, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: billboard-height, says: "height of a billboard on a roof", scope: row, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: billboard-lift, says: "height of the foot of a billboard over its roof", scope: row, draw: range, unit: m, least: 2.2, most: 2.2, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: billboard-thick, says: "thickness of a billboard's steel back", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: billboard-face, says: "thickness of a billboard's lit face", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: billboard-post, says: "side of a billboard's post", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: catwalk-depth, says: "depth of the catwalk behind a billboard", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: catwalk-thick, says: "thickness of the catwalk behind a billboard", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+# the cyberpunk layer at the demo level: air conditioners, ducts, sagging
+# cables and bolted boxes, over the quick level's greebles.
+- {element: cyber-fine-density, says: "demo greebles on a face for each hundred square metres of it", scope: row, draw: range, unit: per 100 m2, least: 2.5, most: 2.5, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- element: cyber-fine-greeble
+  says: the kinds of greeble the demo level adds
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: air, weight: 4}
+  - {name: duct, weight: 2}
+  - {name: cable, weight: 2}
+  - {name: bolted, weight: 3}
+  kind: picked
+  by: "tower detail study 2, 2026-11-19, picked"
+- {element: cyber-air-width, says: "width of an air conditioner hung on a wall", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-air-height, says: "height of an air conditioner", scope: row, draw: range, unit: m, least: 0.65, most: 0.65, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-air-depth, says: "how far an air conditioner stands out of the wall", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-air-fan, says: "radius of an air conditioner's fan grille", scope: row, draw: range, unit: m, least: 0.22, most: 0.22, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-air-sides, says: "flat sides a fan grille is cut into", scope: row, draw: range, unit: sides, whole: true, least: 12, most: 12, kind: picked, by: "tower detail study 2, 2026-11-19, picked"}
+- {element: cyber-air-grille, says: "how far a fan grille stands out of its box", scope: row, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-duct-side, says: "side of a duct's square section", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-duct-length, says: "length of a run of duct along a wall", scope: opening, draw: range, unit: m, least: 4, most: 12, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-duct-drop, says: "how far a duct's elbow runs down the wall", scope: row, draw: range, unit: m, least: 2.5, most: 2.5, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-duct-flange, says: "thickness of a duct's flange and how far it stands round the duct", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-duct-pitch, says: "how far apart a duct's flanges are", scope: row, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-cable-length, says: "how far apart the two hooks a cable hangs between are", scope: opening, draw: range, unit: m, least: 3, most: 9, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-cable-sag, says: "how far a hung cable sags at its middle", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-cable-runs, says: "straight runs a hung cable is drawn in", scope: row, draw: range, unit: runs, whole: true, least: 8, most: 8, kind: picked, by: "tower detail study 2, 2026-11-19, picked"}
+- {element: cyber-cable-thick, says: "thickness of a hung cable", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-cable-off, says: "how far a hung cable stands off the wall", scope: row, draw: range, unit: m, least: 0.12, most: 0.12, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-bolted-width, says: "width of a box bolted to a wall", scope: row, draw: range, unit: m, least: 0.8, most: 0.8, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-bolted-height, says: "height of a box bolted to a wall", scope: row, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-bolted-depth, says: "how far a bolted box stands out of the wall", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-conduit, says: "side of the conduit running down from a bolted box", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: cyber-conduit-length, says: "how far a conduit runs down from its box", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: bolt-head, says: "side of a bolt's head", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: bolt-inset, says: "how far in from a plate's edge its bolts are", scope: row, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+# vaporwave up close: veined marble and pastel bands, glass block in
+# square blocks with pale joints, each bulging bright at its middle.
+- {element: marble-vein-tone, says: "how much of the stone's light a marble vein gives back", scope: row, draw: range, unit: share, least: 0.55, most: 0.55, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: marble-vein-apart, says: "how far apart the veins of marble run", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: marble-vein-width, says: "how wide a marble vein is, as a share of the distance between two", scope: row, draw: range, unit: share, least: 0.12, most: 0.12, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: marble-vein-turbulence, says: "how far a marble vein wanders, in distances between veins", scope: row, draw: range, unit: veins, least: 1.6, most: 1.6, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: glass-block-side, says: "side of a glass block", scope: row, draw: range, unit: m, least: 0.2, most: 0.2, kind: picked, by: "tower detail study 2, 2026-11-19, the common block of about eight inches"}
+- {element: glass-block-joint, says: "width of the joint between two glass blocks", scope: row, draw: range, unit: m, least: 0.015, most: 0.015, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: glass-block-joint-tone, says: "how much of the marble's light a glass block's joint gives back", scope: row, draw: range, unit: share, least: 0.9, most: 0.9, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: glass-block-rim, says: "how much darker a glass block is at its rim than at its middle, as a share of its light", scope: row, draw: range, unit: share, least: 0.45, most: 0.45, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+# fasteners: bolts down the posts between windows and anchor plates on
+# the bands across a face, each plate with its own bolts. bolt-head and
+# bolt-inset, above, size the bolts.
+- {element: fastener-tile, says: "how many columns of windows one tile of a face's fasteners spans, the tile being a node the leveller gives its own level", scope: row, draw: range, unit: columns, whole: true, least: 2, most: 2, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: fastener-proud, says: "how far an anchor plate stands out of the band it is on", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: bolt-proud, says: "how far a bolt's head stands out of what it holds", scope: row, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: post-bolts, says: "bolts down the front of a post between windows, for each storey", scope: row, draw: range, unit: bolts, whole: true, least: 2, most: 2, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: anchor-every, says: "an anchor plate in every so many windows of a storey, staggered from one storey to the next", scope: row, draw: range, unit: columns, whole: true, least: 3, most: 3, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: anchor-width, says: "width of an anchor plate", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- {element: anchor-height, says: "height of an anchor plate", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "tower detail study 2, 2026-11-19, by eye"}
+- element: fastener-colour
+  says: the metal of bolts and anchor plates
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 3, colour: [0.2, 0.21, 0.23], gloss: 0.6}
+  - {name: dark, weight: 2, colour: [0.05, 0.05, 0.055], gloss: 0.4}
+  kind: picked
+  by: "tower detail study 2, 2026-11-19, by eye"

@@ -11,6 +11,9 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
+	"go.uber.org/mock/gomock"
 )
 
 func pfmBytes(t *testing.T, header string, order binary.ByteOrder, values []float32) []byte {
@@ -36,7 +39,8 @@ func TestDecodePFMUsesTopDownFloat64WithoutScaling(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			raw := []float32{7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6}
-			image, scale, err := DecodePFM(bytes.NewReader(pfmBytes(t, test.header, test.order, raw)))
+			encoded := pfmBytes(t, test.header, test.order, raw)
+			image, scale, err := DecodePFM(bytes.NewReader(encoded))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -61,7 +65,7 @@ func TestEncodePFMExactBottomUpFloat32Bytes(t *testing.T) {
 		{0, "PF\n1 2\n0\n", binary.LittleEndian},
 	} {
 		var got bytes.Buffer
-		if err := EncodePFM(&got, image, test.scale); err != nil {
+		if err := encodePFM(&got, image, test.scale); err != nil {
 			t.Fatal(err)
 		}
 		want := pfmBytes(t, test.header, test.order, []float32{4, 5, 6, float32(1.0 / 3), -2, 3})
@@ -77,7 +81,7 @@ func TestEncodePFMExactBottomUpFloat32Bytes(t *testing.T) {
 func TestPFMRoundTripPreservesFloat32SpecialValues(t *testing.T) {
 	image := Image{Width: 1, Height: 1, Light: []float64{math.Inf(1), math.NaN(), math.Copysign(0, -1)}}
 	var data bytes.Buffer
-	if err := EncodePFM(&data, image, -1); err != nil {
+	if err := encodePFM(&data, image, -1); err != nil {
 		t.Fatal(err)
 	}
 	got, _, err := DecodePFM(&data)
@@ -107,9 +111,11 @@ func TestDecodePFMRejectsInvalidAndTruncatedInput(t *testing.T) {
 
 func TestPFMExpectedDimensionsAndBoundedInput(t *testing.T) {
 	valid := pfmBytes(t, "PF\n1 1\n-1\n", binary.LittleEndian, []float32{1, 2, 3})
+	copied := append([]byte(nil), valid...)
+	trailing := append(copied, 0)
 	for _, input := range [][]byte{
 		[]byte("PF\n1000000000 1000000000\n-1\n"),
-		append(append([]byte(nil), valid...), 0),
+		trailing,
 		[]byte("PF 1 1\n-1\njunk\nabcdefghijkl"),
 		[]byte(strings.Repeat(" ", 4097) + "PF\n1 1\n-1\n"),
 	} {
@@ -157,7 +163,7 @@ func TestPFMFileIOAndValidationBeforeCreate(t *testing.T) {
 			t.Fatal("invalid write damaged existing file")
 		}
 		var buffer bytes.Buffer
-		if err := EncodePFM(&buffer, test.image, test.scale); err == nil || buffer.Len() != 0 {
+		if err := encodePFM(&buffer, test.image, test.scale); err == nil || buffer.Len() != 0 {
 			t.Fatal("invalid encode emitted output")
 		}
 	}
@@ -169,14 +175,17 @@ func TestPFMFileIOAndValidationBeforeCreate(t *testing.T) {
 	}
 }
 
-type failingWriter struct{ err error }
-
-func (w failingWriter) Write([]byte) (int, error) { return 0, w.err }
+// failingWriter takes nothing and says why.
+func failingWriter(t *testing.T, why error) *mocks.MockWriter {
+	writer := mocks.NewMockWriter(gomock.NewController(t))
+	writer.EXPECT().Write(gomock.Any()).Return(0, why).AnyTimes()
+	return writer
+}
 
 func TestPFMPropagatesIOErrors(t *testing.T) {
 	want := errors.New("synthetic write failure")
 	image := Image{Width: 1, Height: 1, Light: []float64{1, 2, 3}}
-	if err := EncodePFM(failingWriter{want}, image, -1); !errors.Is(err, want) {
+	if err := encodePFM(failingWriter(t, want), image, -1); !errors.Is(err, want) {
 		t.Fatalf("write error=%v", err)
 	}
 	_, _, err := DecodePFM(bytes.NewBufferString("PF\n1 1\n-1\n123"))

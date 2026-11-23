@@ -24,7 +24,7 @@ type heardWorkerMeasurement struct {
 	Cue                 string    `json:"cue"`
 	At                  float64   `json:"at"`
 	Recorded            string    `json:"recorded_at"`
-	Stage               StagePlan `json:"stage"`
+	Stage               stagePlan `json:"stage"`
 	StartProgress       float64   `json:"start_progress"`
 	ProgressStep        float64   `json:"progress_step"`
 	Workers             int       `json:"workers"`
@@ -54,7 +54,7 @@ func BenchmarkHeardWorkers(b *testing.B) {
 	if cue == "" {
 		cue = "18.1"
 	}
-	var plan *StagePlan
+	var plan *stagePlan
 	for _, shot := range edit.Plan.Shots {
 		if shot.From == cue && shot.Stage != nil && shot.Stage.Kind == "kecks" {
 			copy := *shot.Stage
@@ -87,7 +87,7 @@ func BenchmarkHeardWorkers(b *testing.B) {
 	}
 }
 
-func benchmarkHeardStage(b *testing.B, plan *StagePlan, workers int, cameraOnly bool) {
+func benchmarkHeardStage(b *testing.B, plan *stagePlan, workers int, cameraOnly bool) {
 	previous := runtime.GOMAXPROCS(workers)
 	defer runtime.GOMAXPROCS(previous)
 	// Keep the benchmark inside active motion; updateGround settles at u=.62.
@@ -214,7 +214,7 @@ func heardBenchmarkCPU(b *testing.B) time.Duration {
 // construction size. It does no GPU work and makes no deliverable images.
 func BenchmarkHeardMultitudeInventory(b *testing.B) {
 	for range b.N {
-		stage, err := newHeardStage(&StagePlan{Kind: "multitude"}, "")
+		stage, err := newHeardStage(&stagePlan{Kind: "multitude"}, "")
 		if err != nil {
 			b.Fatal(err)
 		}

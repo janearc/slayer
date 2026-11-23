@@ -39,7 +39,7 @@ type reverbRun struct {
 }
 
 // newReverbRun is a room at rest.
-func newReverbRun(r *Reverb) *reverbRun {
+func newReverbRun(r *reverb) *reverbRun {
 	run := &reverbRun{dull: r.Damping * reverbDullest, level: r.Level}
 	scale := reverbSmallest + (1-reverbSmallest)*r.Size
 	for k, full := range reverbLengths {

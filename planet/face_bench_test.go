@@ -92,19 +92,19 @@ func BenchmarkFaceWithinGiantPaired(b *testing.B) {
 		maths.V(-1.4e8, 3e7, 5e7), even(), 0.9)
 	probes := giantProbes(b, face)
 	var now, was time.Duration
-	var sink maths.Light
+	var newer, older maths.Light
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		each := probes[i%len(probes)]
 		start := time.Now()
-		sink = face.Within(each.at, each.footprint)
+		newer = face.Within(each.at, each.footprint)
 		mid := time.Now()
-		sink = refWithin(face, each.at, each.footprint)
+		older = refWithin(face, each.at, each.footprint)
 		end := time.Now()
 		now, was = now+mid.Sub(start), was+end.Sub(mid)
 	}
-	_ = sink
+	_, _ = newer, older
 	b.ReportMetric(float64(now)/float64(b.N), "new-ns/op")
 	b.ReportMetric(float64(was)/float64(b.N), "ref-ns/op")
 	b.ReportMetric(float64(was)/float64(now), "ref/new")

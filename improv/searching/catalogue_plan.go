@@ -59,11 +59,11 @@ func (edit *Edit) readCatalogue(path string) error {
 		return fmt.Errorf("invalid catalogue camera or conflicting study")
 	}
 	var err error
-	edit.CatalogueStart, err = edit.Cue(plan.Start)
+	edit.CatalogueStart, err = edit.cue(plan.Start)
 	if err != nil {
 		return err
 	}
-	edit.CatalogueEnd, err = edit.Cue(plan.End)
+	edit.CatalogueEnd, err = edit.cue(plan.End)
 	if err != nil {
 		return err
 	}

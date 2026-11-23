@@ -12,6 +12,27 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
+// bakeFlame prepares a paired density/emission grid on Metal.
+func bakeFlame(grid boxed) ([]float32, []float32, time.Duration, error) {
+	kernel, inputs, err := prepareFlameBake(grid)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+	defer kernel.Close()
+	samples, err := kernel.Grid(grid.cells[0]*grid.cells[1],
+		grid.cells[2], rows, 4, inputs)
+	if err != nil {
+		return nil, nil, kernel.GPUTime(), err
+	}
+	density := make([]float32, grid.count())
+	shine := make([]float32, grid.count()*3)
+	for i := range density {
+		density[i] = samples[4*i]
+		copy(shine[3*i:3*i+3], samples[4*i+1:4*i+4])
+	}
+	return density, shine, kernel.GPUTime(), nil
+}
+
 func fireGridFixture(t *testing.T, seed uint64, at time.Duration) boxed {
 	t.Helper()
 	body, err := flame.NewBody(flame.Fire{Radius: 0.7, Height: 2.4,

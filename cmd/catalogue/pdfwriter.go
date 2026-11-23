@@ -266,19 +266,23 @@ func (composed *document) objects() [][]byte {
 	table := &objectTable{}
 	table.reserve()
 	table.reserve()
-	table.add([]byte(fmt.Sprintf("<< /Title %s /Producer (catalogue pdf) >>",
-		hexTitle(composed.title))))
+	titleHex := hexTitle(composed.title)
+	titleObject := fmt.Sprintf("<< /Title %s /Producer (catalogue pdf) >>",
+		titleHex)
+	table.add([]byte(titleObject))
 	var fonts []string
 	for _, set := range []face{helvetica, helveticaBold, courier} {
-		number := table.add([]byte(fmt.Sprintf("<< /Type /Font"+
+		fontObject := fmt.Sprintf("<< /Type /Font"+
 			" /Subtype /Type1 /BaseFont /%s /Encoding /WinAnsiEncoding >>",
-			set.base)))
+			set.base)
+		number := table.add([]byte(fontObject))
 		fonts = append(fonts, fmt.Sprintf("/%s %d 0 R", set.resource, number))
 	}
 	shown := make([]string, len(composed.pictures))
 	for index, shot := range composed.pictures {
+		pictureData := pictureObject(shot)
 		shown[index] = fmt.Sprintf("/Im%d %d 0 R", index+firstName,
-			table.add(pictureObject(shot)))
+			table.add(pictureData))
 	}
 	pages := make([]int, len(composed.sheets))
 	for index := range pages {
@@ -290,14 +294,19 @@ func (composed *document) objects() [][]byte {
 	for index, number := range pages {
 		kids[index] = fmt.Sprintf("%d 0 R", number)
 	}
-	table.put(pagesObject, []byte(fmt.Sprintf(
+	kidsText := strings.Join(kids, " ")
+	fontsText := strings.Join(fonts, " ")
+	shownText := strings.Join(shown, " ")
+	pagesText := fmt.Sprintf(
 		"<< /Type /Pages /Kids [%s] /Count %d /MediaBox [0 0 %g %g]"+
 			" /Resources << /Font << %s >> /XObject << %s >> >> >>",
-		strings.Join(kids, " "), len(pages), pageWidth, pageHeight,
-		strings.Join(fonts, " "), strings.Join(shown, " "))))
-	table.put(catalogObject, []byte(fmt.Sprintf(
+		kidsText, len(pages), pageWidth, pageHeight,
+		fontsText, shownText)
+	table.put(pagesObject, []byte(pagesText))
+	catalogText := fmt.Sprintf(
 		"<< /Type /Catalog /Pages %d 0 R /Outlines %d 0 R"+
-			" /PageMode /UseOutlines >>", pagesObject, outlines)))
+			" /PageMode /UseOutlines >>", pagesObject, outlines)
+	table.put(catalogObject, []byte(catalogText))
 	return table.bodies
 }
 
@@ -314,16 +323,19 @@ func pictureObject(shot flatPicture) []byte {
 // page object at the number reserved for it.
 func (composed *document) fillSheets(table *objectTable, pages []int) {
 	for index, drawn := range composed.sheets {
-		contents := table.add(streamed("", drawn.content.Bytes()))
+		contentBytes := drawn.content.Bytes()
+		contents := table.add(streamed("", contentBytes))
 		var annotations []string
 		for _, each := range drawn.marks {
 			number := table.add(each.annotation(pages))
 			annotations = append(annotations, fmt.Sprintf("%d 0 R", number))
 		}
-		table.put(pages[index], []byte(fmt.Sprintf(
+		annotationText := strings.Join(annotations, " ")
+		pageText := fmt.Sprintf(
 			"<< /Type /Page /Parent %d 0 R /Contents %d 0 R"+
 				" /Annots [%s] >>", pagesObject, contents,
-			strings.Join(annotations, " "))))
+			annotationText)
+		table.put(pages[index], []byte(pageText))
 	}
 }
 
@@ -331,8 +343,9 @@ func (composed *document) fillSheets(table *objectTable, pages []int) {
 func (each mark) annotation(pages []int) []byte {
 	action := fmt.Sprintf("/Dest [%d 0 R /Fit]", pages[each.sheet])
 	if each.address != "" {
+		addressBytes := []byte(each.address)
 		action = fmt.Sprintf("/A << /S /URI /URI (%s) >>",
-			escaped([]byte(each.address)))
+			escaped(addressBytes))
 	}
 	return []byte(fmt.Sprintf("<< /Type /Annot /Subtype /Link"+
 		" /Rect [%g %g %g %g] /Border [0 0 0] %s >>", each.x, each.y,

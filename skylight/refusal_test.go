@@ -25,9 +25,9 @@ func goodCall() call {
 }
 
 // named are every refusal Solve gives.
-var named = []error{ErrPhotons, ErrWorkers, ErrRadius, ErrShells, ErrGap,
-	ErrOverlap, ErrThickness, ErrCoefficient, ErrAlbedo, ErrAsymmetry,
-	ErrBins, ErrHeight, ErrOrder}
+var named = []error{errPhotons, errWorkers, errRadius, ErrShells, errGap,
+	errOverlap, errThickness, errCoefficient, errAlbedo, errAsymmetry,
+	errBins, errHeight, errOrder}
 
 // refusals are broken calls, one wrong thing in each, and the refusal
 // each must name.
@@ -36,48 +36,48 @@ var refusals = []struct {
 	want   error
 	change func(*call)
 }{
-	{"a gap", ErrGap, func(c *call) { c.column.Shells[one].Bottom += one }},
-	{"a gap at the ground", ErrGap,
+	{"a gap", errGap, func(c *call) { c.column.Shells[one].Bottom += one }},
+	{"a gap at the ground", errGap,
 		func(c *call) { c.column.Shells[none].Bottom = one }},
-	{"an overlap", ErrOverlap,
+	{"an overlap", errOverlap,
 		func(c *call) { c.column.Shells[one].Bottom -= one }},
-	{"a shell of no thickness", ErrThickness,
+	{"a shell of no thickness", errThickness,
 		func(c *call) { c.column.Shells[none].Top = none }},
-	{"an endless top", ErrThickness,
+	{"an endless top", errThickness,
 		func(c *call) { c.column.Shells[one].Top = math.Inf(one) }},
-	{"negative gas scattering", ErrCoefficient,
+	{"negative gas scattering", errCoefficient,
 		func(c *call) { c.column.Shells[none].GasScattering = -offBy }},
-	{"negative gas absorption", ErrCoefficient,
+	{"negative gas absorption", errCoefficient,
 		func(c *call) { c.column.Shells[one].GasAbsorption = -offBy }},
-	{"negative particle extinction", ErrCoefficient,
+	{"negative particle extinction", errCoefficient,
 		func(c *call) { c.column.Shells[none].ParticleExtinction = -offBy }},
-	{"a coefficient of no number", ErrCoefficient,
+	{"a coefficient of no number", errCoefficient,
 		func(c *call) { c.column.Shells[none].GasScattering = math.NaN() }},
-	{"a particle albedo over one", ErrAlbedo,
+	{"a particle albedo over one", errAlbedo,
 		func(c *call) { c.column.Shells[none].ParticleAlbedo = one + offBy }},
-	{"a particle albedo under nought", ErrAlbedo,
+	{"a particle albedo under nought", errAlbedo,
 		func(c *call) { c.column.Shells[one].ParticleAlbedo = -offBy }},
-	{"a ground albedo over one", ErrAlbedo,
+	{"a ground albedo over one", errAlbedo,
 		func(c *call) { c.column.GroundAlbedo = one + offBy }},
-	{"an asymmetry of one", ErrAsymmetry,
+	{"an asymmetry of one", errAsymmetry,
 		func(c *call) { c.column.Shells[none].ParticleAsymmetry = one }},
-	{"an asymmetry under minus one", ErrAsymmetry, func(c *call) {
+	{"an asymmetry under minus one", errAsymmetry, func(c *call) {
 		c.column.Shells[one].ParticleAsymmetry = -one - offBy
 	}},
-	{"a height above the top", ErrHeight,
+	{"a height above the top", errHeight,
 		func(c *call) { c.grid.Heights = []float64{none, airTop + one} }},
-	{"a height below the ground", ErrHeight,
+	{"a height below the ground", errHeight,
 		func(c *call) { c.grid.Heights = []float64{-one, none} }},
-	{"no heights", ErrHeight, func(c *call) { c.grid.Heights = nil }},
-	{"heights out of order", ErrOrder,
+	{"no heights", errHeight, func(c *call) { c.grid.Heights = nil }},
+	{"heights out of order", errOrder,
 		func(c *call) { c.grid.Heights = []float64{lowTop, none} }},
-	{"a height twice", ErrOrder,
+	{"a height twice", errOrder,
 		func(c *call) { c.grid.Heights = []float64{lowTop, lowTop} }},
-	{"no bins", ErrBins, func(c *call) { c.grid.Azimuths = none }},
-	{"no radius", ErrRadius, func(c *call) { c.column.Radius = none }},
+	{"no bins", errBins, func(c *call) { c.grid.Azimuths = none }},
+	{"no radius", errRadius, func(c *call) { c.column.Radius = none }},
 	{"no shells", ErrShells, func(c *call) { c.column.Shells = nil }},
-	{"no photons", ErrPhotons, func(c *call) { c.photons = none }},
-	{"no workers", ErrWorkers, func(c *call) { c.workers = none }},
+	{"no photons", errPhotons, func(c *call) { c.photons = none }},
+	{"no workers", errWorkers, func(c *call) { c.workers = none }},
 }
 
 // solveCall is Solve's refusal of a call, if any.

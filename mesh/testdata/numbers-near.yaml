@@ -1,0 +1,62 @@
+# every number near_test.go chooses and does not keep in a csv file.
+numbers:
+  - name: near-met-height
+    value: 5
+    says: the height on z of the square a ray is sent at
+    kind: picked
+    by: far enough from the ray's start that the near and far ends are not the start
+  - name: near-met-past
+    value: 6
+    says: the number the far end is stepped toward from the height
+    kind: picked
+    by: any number above the height gives the next float after it
+  - name: near-met-reach
+    value: 10
+    says: a far end well beyond the square
+    kind: picked
+    by: twice the height, so a near end at the height leaves room
+  - name: near-ray-offset
+    value: 0.2
+    says: where in x and in y the ray starts, inside the unit square
+    kind: picked
+    by: inside the face and off its diagonal, so the ray crosses it
+  - name: near-back-height
+    value: 2
+    says: the height on z of the two faces back to back
+    kind: picked
+    by: away from the ray's start, so the faces are met ahead of it
+  - name: near-back-ray-x
+    value: 0.6
+    says: where in x the ray at the faces back to back starts
+    kind: picked
+    by: inside the unit square and on the side of the diagonal both faces cover
+  - name: near-back-ray-y
+    value: 0.3
+    says: where in y the ray at the faces back to back starts
+    kind: picked
+    by: inside the unit square and on the side of the diagonal both faces cover
+  - name: near-corner-tolerance
+    value: 1e-15
+    says: how far the normal at a corner may differ from that corner's normal
+    kind: picked
+    by: a few units of the last place of a unit vector
+  - name: near-middle-tolerance
+    value: 1e-14
+    says: how far the normal at the middle may differ from the mean of the three
+    kind: picked
+    by: a few more units of the last place, for the added rounding of the sum
+  - name: near-distance-tolerance
+    value: 1e-12
+    says: how far a distance may differ from the one worked out by hand
+    kind: picked
+    by: far below any distance in the cases and far above rounding
+  - name: near-scribble
+    value: 9
+    says: the part of a point written into the copies of a mesh's corners
+    kind: picked
+    by: a part no corner of the cube has, so a change shows
+  - name: near-normal-tolerance
+    value: 1e-15
+    says: how far the normal at a point may differ from its side's
+    kind: picked
+    by: a few units of the last place of a unit vector

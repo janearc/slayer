@@ -22,8 +22,8 @@ func TestKeyRecordSaysEveryPartInOrder(t *testing.T) {
 		Digest("dem", sumOf("dem"))
 	want := "kind key-record\nwidth 640\nset " + sumOf("a") + "\ndem " +
 		sumOf("dem") + "\n"
-	if key.Err() != nil || key.Record() != want {
-		t.Fatalf("record %q, %v; want %q", key.Record(), key.Err(), want)
+	if key.Err() != nil || key.record() != want {
+		t.Fatalf("record %q, %v; want %q", key.record(), key.Err(), want)
 	}
 	if key.Name() != sumOf(want) || key.Kind() != kind {
 		t.Fatalf("name %s is not the record's sha256", key.Name())
@@ -45,15 +45,15 @@ func TestKeyIsNotChangedInPlace(t *testing.T) {
 	base := NewKey(testKind(t, "key-place")).Text("a", "1").Text("b", "2").
 		Text("c", "3")
 	one, other := base.Text("d", "4"), base.Text("d", "5")
-	if base.Record() != "kind key-place\na 1\nb 2\nc 3\n" ||
+	if base.record() != "kind key-place\na 1\nb 2\nc 3\n" ||
 		one.Err() != nil || other.Err() != nil {
-		t.Fatalf("base %q, one %q, other %q", base.Record(), one.Record(),
-			other.Record())
+		t.Fatalf("base %q, one %q, other %q", base.record(), one.record(),
+			other.record())
 	}
 	// anti-test of TestKeyIsNotChangedInPlace
 	// Two keys made from one base differ; if they shared the base's list
 	// the second would have overwritten the first and the two would be one.
-	if one.Name() == other.Name() || one.Record() == other.Record() {
+	if one.Name() == other.Name() || one.record() == other.record() {
 		t.Fatal("two keys made from one base are one key")
 	}
 }
@@ -113,7 +113,8 @@ func TestFileDigestIsTheBytesSha256(t *testing.T) {
 
 // anti-test of TestFileDigestIsTheBytesSha256
 func TestFileDigestRefusesAFileThatIsNotThere(t *testing.T) {
-	if _, err := FileDigest(filepath.Join(t.TempDir(), "gone")); err == nil {
+	gone := filepath.Join(t.TempDir(), "gone")
+	if _, err := FileDigest(gone); err == nil {
 		t.Fatal("a missing file had a digest")
 	}
 }
@@ -141,8 +142,8 @@ func TestBuiltIsTheBuildAsAPart(t *testing.T) {
 	program, err := Build()
 	key := NewKey(testKind(t, "key-built")).Built()
 	if err != nil || key.Err() != nil ||
-		key.Record() != "kind key-built\nbuild "+program+"\n" {
-		t.Fatalf("record %q, %v, %v", key.Record(), key.Err(), err)
+		key.record() != "kind key-built\nbuild "+program+"\n" {
+		t.Fatalf("record %q, %v, %v", key.record(), key.Err(), err)
 	}
 }
 
@@ -159,7 +160,7 @@ func TestKeyNameIsTheSameForTheSameParts(t *testing.T) {
 	kind := testKind(t, "key-same")
 	one := NewKey(kind).Text("width", "640").Bytes("set", []byte("abc"))
 	other := NewKey(kind).Text("width", "640").Bytes("set", []byte("abc"))
-	if one.Name() != other.Name() || one.Record() != other.Record() {
+	if one.Name() != other.Name() || one.record() != other.record() {
 		t.Fatalf("the same parts gave %s and %s", one.Name(), other.Name())
 	}
 }
@@ -169,7 +170,7 @@ func TestKeyRecordKeepsTheOrderSaid(t *testing.T) {
 	kind := testKind(t, "key-order")
 	one := NewKey(kind).Text("a", "1").Text("b", "2")
 	other := NewKey(kind).Text("b", "2").Text("a", "1")
-	if one.Record() == other.Record() || one.Name() == other.Name() {
+	if one.record() == other.record() || one.Name() == other.Name() {
 		t.Fatal("two orders of the same parts gave one key")
 	}
 }

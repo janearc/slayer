@@ -4,8 +4,8 @@ import (
 	"math"
 	"testing"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/maths"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/sky"
 	"github.com/janearc/slayer/scene/thing"
@@ -22,7 +22,7 @@ func oceanInterfaceEscapeFixture(t *testing.T) (*thing.World, look) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	interfaceShape, err := seaocean.NewInfiniteMeanContinuation(field, 0, 1)
+	interfaceShape, err := arid.NewInfiniteMeanContinuation(field, 0, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,10 +53,10 @@ func TestOceanInterfaceEventsCanEscapeAfterTotalInternalReflection(t *testing.T)
 		t.Fatalf("two-event water path cannot escape after TIR: %v", escaped)
 	}
 	leftNormal := maths.V(-.2, 1, 0).Unit()
-	reflected := seen.ray.Dir.Sub(leftNormal.Scale(
-		2 * seen.ray.Dir.Dot(leftNormal))).Unit()
-	want := 1 - maths.Fresnel(reflected.Dot(maths.V(4, 1, 0).Unit()),
-		1/1.333)
+	normalPart := leftNormal.Scale(2 * seen.ray.Dir.Dot(leftNormal))
+	reflected := seen.ray.Dir.Sub(normalPart).Unit()
+	toward := maths.V(4, 1, 0).Unit()
+	want := 1 - maths.Fresnel(reflected.Dot(toward), 1/1.333)
 	for _, got := range []float64{escaped.R, escaped.G, escaped.B} {
 		if math.Abs(got-want) > 1e-6 {
 			t.Fatalf("escape radiance=%v, want Fresnel transmission %g", escaped, want)

@@ -61,9 +61,10 @@ func TestOceanDirectMoonLightsCloudWithoutSkyQuadrature(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	cloudAt := thing.Still(maths.Subspace{Origin: maths.V(0, -2, 0)})
 	world.AddVolume(thing.Volume{Medium: cloud,
 		Material: &thing.Material{Colour: maths.Grey(1)},
-		Motion:   thing.Still(maths.Subspace{Origin: maths.V(0, -2, 0)})})
+		Motion:   cloudAt})
 	if err := ValidateClearState(world, []InitialMedium{{Index: 1.333,
 		ClearMedium: water}}); err != nil {
 		t.Fatal(err)

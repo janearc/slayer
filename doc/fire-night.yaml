@@ -3,7 +3,7 @@
 # front speed, fade, geometry, temperatures, line strengths and shared smoke
 # power/footprint are authored. Na I air wavelengths are from NIST's linked
 # strong-line table (R56); powers are not the handbook's relative intensities.
-# the Douglas-fir smoke coefficients are a proxy; see fire-recipes.md.
+# the Douglas-fir smoke coefficients are a proxy; see model/fire/fire-recipes.md.
 # aggregate smoke follows faded active fuel, without transported burn history.
 "$schema": https://github.com/janearc/slayer/schemas/ecosystem-v1.json
 scene:

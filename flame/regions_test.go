@@ -54,8 +54,9 @@ func TestTheTonguesThinWithHeight(t *testing.T) {
 		for k := range looks {
 			at := flame.Tick(time.Duration(k) * 37 *
 				time.Millisecond).(*Body)
-			p := maths.V(0.02*math.Sin(float64(k)), up*campfire.Height,
-				0.02*math.Cos(float64(k)))
+			angle := float64(k)
+			p := maths.V(0.02*math.Sin(angle), up*campfire.Height,
+				0.02*math.Cos(angle))
 			if at.Density(p) > 0 {
 				held++
 			}

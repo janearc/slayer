@@ -75,8 +75,8 @@ func (source Source) Key() string { return source.row.Key }
 // From is where its bytes are fetched from.
 func (source Source) From() string { return source.row.From }
 
-// Licence is what the source may be used under, as the list says.
-func (source Source) Licence() string { return source.row.Licence }
+// licence is what the source may be used under, as the list says.
+func (source Source) licence() string { return source.row.Licence }
 
 // Pinned is whether the list holds the source's sha256.
 func (source Source) Pinned() bool { return source.row.Sha256 != "" }

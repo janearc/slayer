@@ -32,7 +32,8 @@ func TestReadPFMRejectsInvalid(t *testing.T) {
 	}
 	for _, length := range []int{0, 11, 13} {
 		path := filepath.Join(t.TempDir(), "payload.pfm")
-		if err := os.WriteFile(path, append([]byte("PF\n1 1\n-1\n"), make([]byte, length)...), 0600); err != nil {
+		payload := append([]byte("PF\n1 1\n-1\n"), make([]byte, length)...)
+		if err := os.WriteFile(path, payload, 0600); err != nil {
 			t.Fatal(err)
 		}
 		if _, err := ReadPFM(path); err == nil {

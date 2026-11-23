@@ -1,0 +1,5 @@
+name,min,max,at,dir,near,far,enter,left
+a unit box along x,box min,box max,origin,one on x,-Inf,10,-1,1
+a face at infinity on x,face min on x,face max on x,origin,along x and y,-Inf,1,-1,1
+a face at infinity on y,face min on y,face max on y,origin,along x and y,-Inf,1,-1,1
+a way that reaches down to the box,box min,box max,high above,down,0,+Inf,4,6

@@ -155,5 +155,21 @@
       "research/research-derived-data.yml": "6095f248d10055ba20b580dcdbfb286e094bcc92d3ab4b8dfefd8299bdf254b1",
       "manufacture/spitzer-surfaces.yaml": "abf4bb5a79f33bcf7efe6c85c4115d639376f5b3db526164dc760b2f79138726"
     }
+  },
+  "solarArrayUpdate20261123": {
+    "baseCommit": "b86e562e8f4eba56ac5802144c0fee6f2b78cc27",
+    "producer": "TestSpacecraftAppearance with SPACECRAFT_REFERENCE_OUT to separate candidate",
+    "cases": 40,
+    "kinds": [
+      "hubble",
+      "space-observatory",
+      "spitzer",
+      "webb",
+      "roman"
+    ],
+    "changedCases": "all 40: every kind, both seeds, every detail",
+    "referenceSHA256": "a67e0c091165cea8eaa14d75804ebeebf7c14661067ce446098eff1ae12f2e2a",
+    "change": "every craft's solar arrays are built by the one array maker, with a substrate, a frame, cells in a grid and hinge fittings, in place of a slab and crossed bars; Hubble's and Spitzer's arrays stay inside the craft's extent; an array's repeated parts are shared meshes",
+    "review": "accepted by eye on 2026-11-23 from pictures of Webb and Hubble before and after from one camera and close views of a Roman array corner and a Hubble wing; Spitzer, Roman whole and the space-observatory were not pictured at the review"
   }
 }

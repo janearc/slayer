@@ -1,0 +1,6 @@
+name,x,y,z,dirx,diry,dirz
+ball-from-above,0,0,10,0,0,-1
+from-inside,0,0,0,1,0,0
+miss-above,0,5,10,0,0,-1
+plane-from-far,1e6,3,-1e6,0,-1,0
+diagonal,1,1,1,,,

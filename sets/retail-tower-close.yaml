@@ -1,0 +1,50 @@
+# one tower with shops at its foot, from three metres at eye height, lit
+# only by the shops and the signs' own lamps: no moon, no sky. the tower is
+# the neon street's concrete recipe (sets/neon-street.yaml) with retail
+# pinned on, at the same seed; signs are on, so that where the signs' awning
+# mounts meet a shop front shows. the camera and the pavement are choices of
+# this study, picked by eye. a set draws its first camera: retail-tower-foot
+# is the same tower from further back.
+#
+# places are metres, x east, y north, z up; the tower stands at the origin,
+# thirty-six metres wide, and its south wall is at y of -18, the shops'
+# fronts 7.2 m out of it.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: retail-tower-close
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 80
+    exposure: 8
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    close:
+      title: "three metres from the shops at the foot of a tower, at eye height"
+      location:
+        at: [-4, -28.2, 1.7]
+      orientation:
+        look_at: [-4, -25, 2]
+  recipes:
+    concrete: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: concrete, signs: true, retail: true, storeys: 16, width: {value: 36, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      tower: {recipe: concrete, seed: 21, complexity: demo, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      pavement:
+        colour: {srgb_linear: [0.035, 0.035, 0.04]}
+        source: eye
+    boxes:
+      ground:
+        material: pavement
+        middle: [0, 0, -1.01]
+        size: [300, 300, 2]
+        source: eye

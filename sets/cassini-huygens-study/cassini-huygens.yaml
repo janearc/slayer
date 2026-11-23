@@ -1,0 +1,16 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Cassini and Huygens attached NASA geometry study
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 180, altitude: 35}
+  set:
+    things:
+      orbiter: {kind: cassini-huygens, seed: 5, east: 0, north: 0}
+  film: {width: 1080, height: 960, rays: 4, exposure: 0.003, wide: 40}
+  cameras:
+    concept:
+      title: Cassini and Huygens attached
+      location: {at: [8, -15, 7]}
+      orientation: {look_at: [0, 1, 0]}

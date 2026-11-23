@@ -37,13 +37,13 @@ func queueTool(ctx context.Context) *pzm.Tool {
 		"# schema\n\nPrint the schema for YAML and JSON job requests.\n", "Example_queueSchema", reads, func(call pzm.Call) error { _, err := call.Out().Write(requestSchema); return err })
 	made.Verb("init", verb.NoShort, "create one shared queue",
 		"# init\n\nCreate a new Azazel-owned render queue.\n", "Example_queueInit", changes, previewMutation("init", app.init), root,
-		pzm.Value("game", verb.NoShort, "optional legacy Game executable"))
+		pzm.Value("game", verb.NoShort, "optional Game executable, fingerprinted with each job"))
 	made.Verb("submit", verb.NoShort, "submit a Slayer command request",
 		"# submit\n\nSubmit REQUEST.yaml or REQUEST.json. Its command and arguments run unchanged.\n", "Example_queueSubmit", changes, previewMutation("submit", app.submit), root)
 	made.Verb("status", verb.NoShort, "read ordered jobs and their results",
 		"# status\n\nPrint a JSON snapshot, including held and failed work.\n", "Example_queueStatus", reads, app.status, root)
 	made.Verb("cancel", verb.NoShort, "cancel a job from its submitting agent",
-		"# cancel\n\nCancel SEQUENCE. Running work stops under its supervisor.\n", "Example_queueCancel", changes, previewMutation("cancel", app.cancel), root,
+		"# cancel\n\nCancel SEQUENCE. Running work stops under its supervisor.\nWhen the ledger says the supervisor is gone, the render's process group is\nsignaled, if its recorded identity still matches.\n", "Example_queueCancel", changes, previewMutation("cancel", app.cancel), root,
 		pzm.Value("agent", verb.NoShort, "the agent that submitted this job"))
 	made.Verb("pause", verb.NoShort, "pause work with a recorded reason",
 		"# pause\n\nKeep pending jobs and stop active work.\n", "Example_queuePause", changes, previewMutation("pause", app.pause), root,
@@ -54,14 +54,14 @@ func queueTool(ctx context.Context) *pzm.Tool {
 		"# work\n\nDrain eligible work with measured GPU and host admission.\nWith --serve, wait for later submissions. Azazel owns render admission.\nRestart adopts surviving supervisors and requeues unstarted attempts.\n", "Example_queueWork", runs, previewMutation("work", app.work), root,
 		pzm.Switch("serve", verb.NoShort, "wait for more jobs after draining"), gpuJobs,
 		pzm.Value("renders", verb.NoShort, "absolute render root for automatic publication"))
-	made.Verb("work-gpu", verb.NoShort, "retired GPU coordinator",
-		"# work-gpu\n\nRetired; work owns GPU and CPU render admission.\n", "Example_queueGPUWork", runs, previewMutation("work-gpu", app.gpuWork), root, gpuJobs)
+	made.Verb("work-gpu", verb.NoShort, "GPU coordinator entry, which refuses",
+		"# work-gpu\n\nAlways refuses; work owns GPU and CPU render admission.\n", "Example_queueGPUWork", runs, previewMutation("work-gpu", app.gpuWork), root, gpuJobs)
 	made.Verb("recover", verb.NoShort, "resolve an interrupted attempt",
 		"# recover\n\nResolve SEQUENCE only after verifying its work and all descendants\nhave stopped. A dead worker alone is insufficient. No PID is signaled.\n", "Example_queueRecover", changes, previewMutation("recover", app.recover), root,
 		pzm.Value("worker", verb.NoShort, "exact recorded worker identity"),
 		pzm.Switch("stopped", verb.NoShort, "confirm that this attempt and its descendants have stopped"))
-	made.Verb("execute", verb.NoShort, "retired Game supervisor entry",
-		"# execute\n\nRetired; render supervisors use execute-owned.\n", "Example_queueExecute", runs, previewMutation("execute", app.execute), root,
+	made.Verb("execute", verb.NoShort, "Game supervisor entry, which refuses",
+		"# execute\n\nAlways refuses; render supervisors use execute-owned.\n", "Example_queueExecute", runs, previewMutation("execute", app.execute), root,
 		pzm.Value("worker", verb.NoShort, "the selecting worker identity"))
 	made.Verb("execute-owned", verb.NoShort, "supervise an Azazel-owned attempt",
 		"# execute-owned\n\nInternal worker entry for a claimed render lease.\n", "Example_queueExecuteOwned", runs, previewMutation("execute-owned", app.executeOwned), root,
@@ -266,7 +266,7 @@ func (app queueApplication) work(call pzm.Call) error {
 	return s.Dispatch(app.ctx, queue.RenderExecutor{Store: s, Executable: executable}, queue.NativeCapacityProbe{}, call.On("serve"))
 }
 
-// gpuWork is the private Game-lane coordinator started by the main worker.
+// gpuWork always refuses: the work verb owns GPU and CPU admission.
 func (app queueApplication) gpuWork(call pzm.Call) error {
 	if len(call.Args()) != 0 {
 		return fmt.Errorf("work-gpu takes no positional arguments")
@@ -276,7 +276,7 @@ func (app queueApplication) gpuWork(call pzm.Call) error {
 		return err
 	}
 	_ = s
-	return fmt.Errorf("work-gpu is retired; use the Azazel-owned work command")
+	return fmt.Errorf("work-gpu always refuses; use the Azazel-owned work command")
 }
 
 // workerStore validates concurrency before starting either coordinator.
@@ -308,9 +308,9 @@ func (app queueApplication) recover(call pzm.Call) error {
 	return s.Recover(app.ctx, seq, call.Value("worker"), call.On("stopped"))
 }
 
-// execute refuses the former Game supervisor entry for new queues.
+// execute always refuses: render supervisors enter through execute-owned.
 func (app queueApplication) execute(call pzm.Call) error {
-	return fmt.Errorf("execute is retired; render supervisors use execute-owned")
+	return fmt.Errorf("execute always refuses; render supervisors use execute-owned")
 }
 
 // executeOwned runs the sequence named by the call under its worker.

@@ -10,6 +10,7 @@ import (
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/strategies"
 	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -78,10 +79,30 @@ const (
 	housing
 )
 
-// maker is what a row knows: how to make one of its kind from a seed.
+// object is what a plan asks of anything a set holds, made or not: how big
+// it is, and whether a sensor sees it, without making it. A laser is an
+// object that makes no good; a kind of thing is a maker.
+type object interface {
+	// extent is the box that holds everything made would make from from,
+	// in the thing's own frame. It may be too large, never too small. A
+	// maker that cannot say it from its recipe's numbers says it by
+	// greedyExtent, which makes the thing once.
+	extent(from seed) (maths.Box, error)
+	// seen is how by sees what made would make from from, standing at at:
+	// whether any pixel's ray can meet it, and how many pixels across it
+	// spans. Most makers answer it by seenFrom.
+	seen(from seed, at maths.Subspace, by strategies.Eye) (strategies.Seen, error)
+}
+
+// maker is what a row knows: how to make one of its kind from a seed, and,
+// as every object does, how big that is and whether a sensor sees it.
 type maker interface {
+	object
 	made(from seed) (good, error)
 }
+
+// Laser is an object, and makes no good.
+var _ object = Laser{}
 
 // kind is a row of the table: a name, and how one is made.
 //
@@ -101,8 +122,50 @@ func table() map[string]maker {
 		"bonfire": pyreRow(), "spotlight": spotRow(), "maser": maserRow(),
 		"home": homeRow()}
 	rows["guide-star-launcher"] = guideLauncher{}
+	rows["orca-clean-05"] = orcaClean05Kind{}
+	rows["orca-clean-05-bones"] = orcaClean05Still{bones: true}
+	rows["orca-clean-05-spy-hop"] = orcaClean05Still{}
+	rows["bay-seal"] = baySealKind{}
+	rows["harbor-seal-hauled"] = sealBanana
+	rows["harbor-seal-swimming"] = sealStroke
+	rows["hawaiian-monk-seal-hauled"] = sealBasking
+	rows["harbor-seal-bones"] = harborSealBonesKind{}
+	rows["harbor-seal"] = harborSealKind{look: SealLook{Wet: .85, Nostrils: .8}, pose: harborSealRelaxed}
+	rows["harbor-seal-dry"] = harborSealKind{look: SealLook{Wet: 0, Nostrils: 1}, pose: harborSealRelaxed}
+	rows["walrus-fresh-5"] = walrusFresh5Kind{}
+	rows["walrus-fresh-5-skeleton"] = walrusFresh5Kind{bones: true}
+	rows["walrus-fresh-5-volumes"] = walrusFresh5Kind{volumes: true}
+	rows["walrus-fresh-5-hauled-out"] = walrusFresh5Kind{pose: walrusHauledOut}
+	rows["walrus-fresh-5-swimming"] = walrusFresh5Kind{pose: walrusSwimming}
+	birdKinds(rows)
+	rows["hatz-gargoyle"] = hatzGargoyleKind{}
+	rows["soho"] = soho{}
+	rows["cassini"] = cassiniHuygens{}
+	rows["huygens"] = cassiniHuygens{probe: true}
+	rows["cassini-huygens"] = cassiniHuygens{attached: true}
+	rows["new-horizons"] = newHorizons{}
+	rows["new-horizons-vtad"] = newHorizonsVTAD{}
 	rows["saguaro"] = saguaro{}
 	rows["human-scale-2m"] = scaleHuman{}
+	rows["yurt"] = yurtRow{}
+	rows["winnebago"] = winnebagoRow{}
+	rows["bivouac"] = bivouacRow{}
+	rows[ClusterKind] = scavengedRow{}
+	rows["terrace-groningen"] = terraceRow{culture: "groningen"}
+	rows["terrace-portofino"] = terraceRow{culture: "portofino"}
+	rows["terrace-midwest"] = terraceRow{culture: "midwest"}
+	rows["terrace-san-francisco"] = terraceRow{culture: "san-francisco"}
+	rows["condominium"] = condominiumRow{}
+	rows[VillageHouseKind] = villageHouseRow{}
+	rows[VillageKind] = villageRow{}
+	rows[SuperblockKind] = superblockRow{}
+	rows[LashedStreetKind] = lashedStreetRow{}
+	rows[pierKind] = pierRow{}
+	rows["tower"] = towerRow{}
+	rows["bridge"] = bridgeRow{}
+	rows[streetKind] = streetRow{}
+	rows["mariner-10"] = mariner10{}
+	rows["jimo"] = jimo{}
 	rows["optical-observatory"] = optical{Optical{
 		Diameter: measure.Metres(24), Aperture: measure.Metres(8),
 		Opening: measure.Degrees(35), Azimuth: measure.Degrees(180),
@@ -114,10 +177,16 @@ func table() map[string]maker {
 	for name, row := range stoneRows() {
 		rows[name] = row
 	}
+	for name, row := range signRows() {
+		rows[name] = row
+	}
 	for name, row := range plateRows() {
 		rows[name] = row
 	}
 	for name, row := range spacecraftRows() {
+		rows[name] = row
+	}
+	for name, row := range voyagerRows() {
 		rows[name] = row
 	}
 	for name, row := range personalRows() {
@@ -159,10 +228,28 @@ func table() map[string]maker {
 	for name, row := range alfaRows() {
 		rows[name] = row
 	}
+	for name, row := range boatRows() {
+		rows[name] = row
+	}
+	for name, row := range fishRows() {
+		rows[name] = row
+	}
+	for name, row := range kelpRows() {
+		rows[name] = row
+	}
+	for name, row := range bubblesRows() {
+		rows[name] = row
+	}
 	for name, row := range macroRows() {
 		rows[name] = row
 	}
 	for name, row := range cityRows() {
+		rows[name] = row
+	}
+	for name, row := range gargoyleRows() {
+		rows[name] = row
+	}
+	for name, row := range retailRows() {
 		rows[name] = row
 	}
 	rows["city-clustered-10000"] = clusteredCityMaker{DefaultClusteredCity()}

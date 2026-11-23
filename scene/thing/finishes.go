@@ -20,8 +20,9 @@ var finishesRaw []byte
 // finishes is the book of finishes, by name.
 var finishes = readFinishes(finishesRaw)
 
-// finishRow is one finish of the book: a few numbers, and the record of
-// the picking, which nothing reads but the file keeps.
+// finishRow is one finish of the book: a few numbers, and what the finish
+// says and how its numbers were chosen, which the file keeps for its
+// reader.
 type finishRow struct {
 	//ninja:vow gate Puzzlemouth decodes this private YAML field
 	Name string `yaml:"name"`
@@ -41,8 +42,6 @@ type finishRow struct {
 	Says string `yaml:"says"`
 	//ninja:vow gate Puzzlemouth decodes this private YAML field
 	Kind string `yaml:"kind"`
-	//ninja:vow gate Puzzlemouth decodes this private YAML field
-	By string `yaml:"by"`
 }
 
 // readFinishes refuses a broken embedded book before making any look.
@@ -53,9 +52,11 @@ func readFinishes(raw []byte) map[string]finishRow {
 	}
 	rows := make(map[string]finishRow, len(book.Finishes))
 	for _, row := range book.Finishes {
-		if len(row.Colour) != 0 && len(row.Colour) != 3 {
-			panic(fmt.Sprintf("finishes.yaml: %s wears %d parts of colour",
-				row.Name, len(row.Colour)))
+		parts := len(row.Colour)
+		if parts != metalNone && parts != metalBands {
+			message := fmt.Sprintf(
+				"finishes.yaml: %s wears %d parts of colour", row.Name, parts)
+			panic(message)
 		}
 		rows[row.Name] = row
 	}

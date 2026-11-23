@@ -1,0 +1,1142 @@
+# The signs of a night street, 2026-11-20: what they say, in what colour,
+# in what hand, how they are made and how big. A sign hangs as a roof sign,
+# big words on a steel frame at a roof's edge; a screen on a wall; a blade,
+# letters one under the next on a cabinet that stands out from a wall on a
+# bracket; or an awning's valance over a shopfront. Each is made one of a
+# few ways: open tube letters bent to the edge of each letter on a backing,
+# channel letters lit from their faces, a painted board lit by lamps on
+# arms, a lit box with a translucent face, a board with a border of bulbs,
+# a screen of lit tiles, a valance painted or lit. The words are of a trade:
+# ramen, a dive, a bar, a hotel, a pharmacy, an arcade. Letters are Latin
+# capitals, set in go's own fonts, unless a set asks for another script.
+# Simplified Chinese, the mainland's, says the elements again under the
+# same names ending in -hans: the trades, the words of each, the lines of a
+# screen, the fonts, the makes of a roof sign and a blade sign, which leave
+# out the open tube, and the sizes that suit square characters. Its fonts
+# are named by the key of the source that keeps them on the shelf. Two
+# trades, a women's shelter and a dog boutique, are in no script's draw by
+# weight: a set that asks for them gets each, once, on every building. A
+# sign is a glowing surface and also a
+# light, as a lit window is: the tracer lights by lamps, not by glow.
+# Lengths are metres unless the unit says a share of an em; colours are
+# shares of light, each channel from nought to one; heats are kelvin.
+# Nothing here is measured: every number is picked, and says so.
+culture: sign
+says: the words, colours, makes and sizes of the signs of a street
+elements:
+- element: sign-trade
+  says: what trade a sign is for, which decides its words
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: ramen, weight: 3}
+  - {name: dive, weight: 2}
+  - {name: bar, weight: 3}
+  - {name: hotel, weight: 2}
+  - {name: pharmacy, weight: 1}
+  - {name: arcade, weight: 2}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-word-ramen
+  says: what a ramen place's sign says, on its own, in capitals
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: RAMEN, weight: 3}
+  - {name: NOODLES, weight: 2}
+  - {name: RAMEN HOUSE, weight: 2}
+  - {name: TONKOTSU, weight: 2}
+  - {name: NOODLE BAR, weight: 2}
+  - {name: MISO RAMEN, weight: 1}
+  - {name: TSUKEMEN, weight: 1}
+  - {name: UDON, weight: 1}
+  - {name: SOBA, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-short-ramen
+  says: a short word for a ramen place's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: RAMEN, weight: 3}
+  - {name: UDON, weight: 2}
+  - {name: SOBA, weight: 2}
+  - {name: MISO, weight: 2}
+  - {name: MEN, weight: 1}
+  - {name: NOODLE, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-word-dive
+  says: what a dive's sign says, on its own, in capitals
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: COLD BEER, weight: 3}
+  - {name: LUCKY 7, weight: 2}
+  - {name: THE ANCHOR, weight: 2}
+  - {name: BLUE MOON, weight: 2}
+  - {name: LIQUOR, weight: 2}
+  - {name: SALOON, weight: 1}
+  - {name: BILLIARDS, weight: 1}
+  - {name: OPEN LATE, weight: 2}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-short-dive
+  says: a short word for a dive's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: BEER, weight: 3}
+  - {name: LIQUOR, weight: 2}
+  - {name: POOL, weight: 2}
+  - {name: LUCKY, weight: 1}
+  - {name: OPEN, weight: 2}
+  - {name: BAR, weight: 2}
+  - {name: PAWN, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-word-bar
+  says: what a bar's sign says, on its own, in capitals
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: COCKTAILS, weight: 2}
+  - {name: SAKE BAR, weight: 3}
+  - {name: IZAKAYA, weight: 3}
+  - {name: WHISKY, weight: 2}
+  - {name: HAPPY HOUR, weight: 2}
+  - {name: KARAOKE, weight: 2}
+  - {name: THE OWL, weight: 1}
+  - {name: NIGHTCAP, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-short-bar
+  says: a short word for a bar's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: BAR, weight: 3}
+  - {name: SAKE, weight: 3}
+  - {name: GIN, weight: 1}
+  - {name: RUM, weight: 1}
+  - {name: PUB, weight: 2}
+  - {name: CLUB, weight: 2}
+  - {name: JAZZ, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-word-hotel
+  says: what a hotel's sign says, on its own, in capitals
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: HOTEL, weight: 3}
+  - {name: CAPSULE HOTEL, weight: 2}
+  - {name: GRAND HOTEL, weight: 2}
+  - {name: HOTEL ZENOVA, weight: 1}
+  - {name: SKY INN, weight: 2}
+  - {name: NEO HOTEL, weight: 2}
+  - {name: ROOMS 24H, weight: 2}
+  - {name: MOTEL, weight: 2}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-short-hotel
+  says: a short word for a hotel's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: HOTEL, weight: 3}
+  - {name: INN, weight: 2}
+  - {name: ROOMS, weight: 3}
+  - {name: MOTEL, weight: 2}
+  - {name: STAY, weight: 1}
+  - {name: VACANCY, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-word-pharmacy
+  says: what a pharmacy's sign says, on its own, in capitals
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: PHARMACY, weight: 3}
+  - {name: DRUGSTORE, weight: 2}
+  - {name: CHEMIST, weight: 2}
+  - {name: APOTHECARY, weight: 1}
+  - {name: 24H PHARMACY, weight: 2}
+  - {name: HEALTH MART, weight: 1}
+  - {name: CLINIC, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-short-pharmacy
+  says: a short word for a pharmacy's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: DRUGS, weight: 3}
+  - {name: RX, weight: 3}
+  - {name: CLINIC, weight: 1}
+  - {name: HEALTH, weight: 1}
+  - {name: CARE, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-word-arcade
+  says: what an arcade's sign says, on its own, in capitals
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: ARCADE, weight: 3}
+  - {name: PACHINKO, weight: 3}
+  - {name: NOVA PACHI, weight: 2}
+  - {name: GAME CENTER, weight: 2}
+  - {name: KOSMO, weight: 1}
+  - {name: HELIX, weight: 1}
+  - {name: INSERT COIN, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-short-arcade
+  says: a short word for an arcade's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: PLAY, weight: 3}
+  - {name: GAMES, weight: 2}
+  - {name: PACHI, weight: 3}
+  - {name: ARCADE, weight: 1}
+  - {name: COINS, weight: 1}
+  - {name: START, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-word-womens-shelter
+  says: what a women's shelter's sign says, on its own, in capitals; a trade no weight draws, which a set asks for
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: WOMENS SHELTER, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-short-womens-shelter
+  says: a short word for a women's shelter's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: WOMENS SHELTER, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-word-dog-boutique
+  says: what a dog boutique's sign says, on its own, in capitals; a trade no weight draws, which a set asks for
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: DOG BOUTIQUE, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-short-dog-boutique
+  says: a short word for a dog boutique's blade sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: DOG BOUTIQUE, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-trade-hans
+  says: what trade a sign is for, in simplified Chinese, the weights of the Latin trades; there is no pachinko on the mainland, and the arcade's words are those of its rooms
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: ramen, weight: 3}
+  - {name: dive, weight: 2}
+  - {name: bar, weight: 3}
+  - {name: hotel, weight: 2}
+  - {name: pharmacy, weight: 1}
+  - {name: arcade, weight: 2}
+  kind: picked
+  by: "signs script, 2026-11-20, the weights of sign-trade"
+- element: sign-word-ramen-hans
+  says: what a noodle shop's sign says, on its own, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 面馆, weight: 3}
+  - {name: 拉面, weight: 3}
+  - {name: 牛肉面, weight: 2}
+  - {name: 兰州拉面, weight: 2}
+  - {name: 拉面馆, weight: 2}
+  - {name: 米线, weight: 2}
+  - {name: 馄饨, weight: 1}
+  - {name: 饺子馆, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-short-ramen-hans
+  says: a short word for a noodle shop's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 拉面, weight: 3}
+  - {name: 面馆, weight: 2}
+  - {name: 米线, weight: 2}
+  - {name: 馄饨, weight: 1}
+  - {name: 饺子, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-word-dive-hans
+  says: what a dive's sign says, on its own, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 啤酒, weight: 3}
+  - {name: 小酒馆, weight: 2}
+  - {name: 烧烤, weight: 3}
+  - {name: 台球, weight: 2}
+  - {name: 大排档, weight: 2}
+  - {name: 夜宵, weight: 2}
+  - {name: 烟酒, weight: 2}
+  - {name: 24小时营业, weight: 2}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-short-dive-hans
+  says: a short word for a dive's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 啤酒, weight: 3}
+  - {name: 烧烤, weight: 3}
+  - {name: 台球, weight: 2}
+  - {name: 烟酒, weight: 2}
+  - {name: 夜宵, weight: 2}
+  - {name: 酒馆, weight: 2}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-word-bar-hans
+  says: what a bar's sign says, on its own, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 酒吧, weight: 3}
+  - {name: 清吧, weight: 2}
+  - {name: 鸡尾酒, weight: 2}
+  - {name: 威士忌, weight: 2}
+  - {name: 精酿啤酒, weight: 2}
+  - {name: 卡拉OK, weight: 2}
+  - {name: 居酒屋, weight: 2}
+  - {name: 酒馆, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-short-bar-hans
+  says: a short word for a bar's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 酒吧, weight: 3}
+  - {name: 清吧, weight: 3}
+  - {name: 酒馆, weight: 2}
+  - {name: 精酿, weight: 1}
+  - {name: 威士忌, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-word-hotel-hans
+  says: what a hotel's sign says, on its own, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 酒店, weight: 3}
+  - {name: 宾馆, weight: 2}
+  - {name: 旅馆, weight: 2}
+  - {name: 大酒店, weight: 2}
+  - {name: 快捷酒店, weight: 3}
+  - {name: 胶囊酒店, weight: 2}
+  - {name: 住宿, weight: 2}
+  - {name: 旅店, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-short-hotel-hans
+  says: a short word for a hotel's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 酒店, weight: 3}
+  - {name: 宾馆, weight: 3}
+  - {name: 旅馆, weight: 2}
+  - {name: 住宿, weight: 2}
+  - {name: 旅店, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-word-pharmacy-hans
+  says: what a pharmacy's sign says, on its own, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 药店, weight: 3}
+  - {name: 药房, weight: 2}
+  - {name: 大药房, weight: 3}
+  - {name: 24小时药店, weight: 2}
+  - {name: 诊所, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-short-pharmacy-hans
+  says: a short word for a pharmacy's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 药店, weight: 3}
+  - {name: 药房, weight: 3}
+  - {name: 诊所, weight: 1}
+  - {name: 门诊, weight: 1}
+  - {name: 中药, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-word-arcade-hans
+  says: what an arcade's sign says, on its own, in simplified Chinese; the mahjong and card room stands where the pachinko hall stands elsewhere
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 棋牌室, weight: 3}
+  - {name: 电玩城, weight: 3}
+  - {name: 游戏厅, weight: 2}
+  - {name: 网吧, weight: 2}
+  - {name: 麻将馆, weight: 2}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-short-arcade-hans
+  says: a short word for an arcade's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 棋牌, weight: 3}
+  - {name: 电玩, weight: 3}
+  - {name: 麻将, weight: 2}
+  - {name: 网吧, weight: 2}
+  - {name: 游戏, weight: 2}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-word-womens-shelter-hans
+  says: what a women's shelter's sign says, on its own, in simplified Chinese; a trade no weight draws, which a set asks for
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 妇女庇护所, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-short-womens-shelter-hans
+  says: a short word for a women's shelter's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 妇女庇护所, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-word-dog-boutique-hans
+  says: what a dog boutique's sign says, on its own, in simplified Chinese; a trade no weight draws, which a set asks for
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 狗狗精品店, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-short-dog-boutique-hans
+  says: a short word for a dog boutique's blade sign, in simplified Chinese
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 狗狗精品店, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, asked for"
+- element: sign-screen-line-hans
+  says: a line a screen carries, in simplified Chinese; the invented names of the Latin lines are left out, being names of nothing
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: 营业中, weight: 3}
+  - {name: 24小时营业, weight: 2}
+  - {name: 通宵营业, weight: 2}
+  - {name: 欢迎光临, weight: 3}
+  - {name: 新品上市, weight: 2}
+  - {name: 特价, weight: 2}
+  - {name: 打折, weight: 2}
+  - {name: 优惠, weight: 2}
+  - {name: 买一送一, weight: 1}
+  - {name: 免费WiFi, weight: 1}
+  - {name: 正在热映, weight: 2}
+  - {name: 直播, weight: 2}
+  - {name: 酒水, weight: 2}
+  - {name: 夜宵, weight: 2}
+  - {name: 卡拉OK, weight: 2}
+  - {name: 入口, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-screen-line
+  says: a line a screen carries, in capitals
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: NOW SHOWING, weight: 2}
+  - {name: HAPPY HOUR, weight: 2}
+  - {name: ALL NIGHT, weight: 2}
+  - {name: OPEN 24H, weight: 2}
+  - {name: LIVE, weight: 2}
+  - {name: NEW, weight: 2}
+  - {name: SALE, weight: 2}
+  - {name: VELMORA, weight: 2}
+  - {name: ORBITEK, weight: 2}
+  - {name: NEOMART, weight: 2}
+  - {name: HAKARI, weight: 2}
+  - {name: ZENOVA, weight: 2}
+  - {name: SOLUNA, weight: 2}
+  - {name: TOKYO CITY, weight: 1}
+  - {name: RAMEN 800, weight: 2}
+  - {name: DRINKS, weight: 2}
+  - {name: ARCADE, weight: 2}
+  - {name: KARAOKE, weight: 2}
+  - {name: 2 FOR 1, weight: 1}
+  - {name: TRY IT, weight: 1}
+  - {name: ENTER, weight: 1}
+  - {name: HELIX, weight: 2}
+  - {name: KOSMO, weight: 2}
+  - {name: TANUKI, weight: 2}
+  - {name: FREE WIFI, weight: 1}
+  - {name: SUMIRE, weight: 2}
+  - {name: UMBRA, weight: 2}
+  - {name: 03 44 AM, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-screen-lines
+  says: how many lines a screen carries
+  scope: opening
+  draw: range
+  unit: lines
+  whole: true
+  least: 2
+  most: 4
+  kind: picked
+  by: "signs study, 2026-11-19, by eye"
+- element: sign-make-roof
+  says: how a roof sign's face is made
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: tube, weight: 3}
+  - {name: channel, weight: 3}
+  - {name: lamped, weight: 2}
+  - {name: box, weight: 2}
+  - {name: bulb, weight: 2}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-make-screen
+  says: how a screen's face is made
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: led, weight: 5}
+  - {name: box, weight: 2}
+  - {name: bulb, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-make-blade
+  says: how a blade sign's faces are made
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: tube, weight: 3}
+  - {name: channel, weight: 2}
+  - {name: box, weight: 3}
+  - {name: bulb, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-make-roof-hans
+  says: how a roof sign's face is made, in simplified Chinese; open tube letters are left out, for a tube swept round the sharp turns of a character folds over itself and the mesh refuses it
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: channel, weight: 3}
+  - {name: lamped, weight: 2}
+  - {name: box, weight: 2}
+  - {name: bulb, weight: 2}
+  kind: picked
+  by: "signs script, 2026-11-20, the weights of sign-make-roof without the tube"
+- element: sign-make-blade-hans
+  says: how a blade sign's faces are made, in simplified Chinese; open tube letters are left out, as on a roof sign
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: channel, weight: 2}
+  - {name: box, weight: 3}
+  - {name: bulb, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, the weights of sign-make-blade without the tube"
+- element: sign-make-awning
+  says: how the words on an awning's valance are made
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: valance, weight: 3}
+  - {name: lit-valance, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-neon
+  says: the colours of lit letters, which is the colour the glass glows and the colour of the light the sign throws on what is near it
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: magenta, weight: 4, colour: [1, 0.06, 0.5]}
+  - {name: cyan, weight: 4, colour: [0.04, 0.85, 1]}
+  - {name: amber, weight: 3, colour: [1, 0.5, 0.06]}
+  - {name: red, weight: 2, colour: [1, 0.07, 0.05]}
+  - {name: violet, weight: 2, colour: [0.5, 0.15, 1]}
+  - {name: ice, weight: 2, colour: [0.65, 0.88, 1]}
+  - {name: gold, weight: 2, colour: [1, 0.78, 0.18]}
+  kind: picked
+  by: "signs study, 2026-11-19, by eye"
+- element: sign-screen-colour
+  says: the dark tint a screen's panel glows between its letters
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: indigo, weight: 3, colour: [0.1, 0.06, 0.45]}
+  - {name: teal, weight: 2, colour: [0.03, 0.3, 0.38]}
+  - {name: plum, weight: 2, colour: [0.35, 0.05, 0.3]}
+  - {name: ember, weight: 1, colour: [0.4, 0.12, 0.04]}
+  kind: picked
+  by: "signs study, 2026-11-19, by eye"
+- element: sign-body-colour
+  says: the dark metal of a sign's boards, cabinets and the bodies of its channel letters
+  scope: row
+  draw: options
+  unit: share of light
+  options:
+  - {name: steel, weight: 1, colour: [0.025, 0.025, 0.03], gloss: 0.5}
+  kind: picked
+  by: "signs study, 2026-11-19, by eye"
+- element: sign-frame-colour
+  says: the metal of a sign's frame, brackets, stays, posts and conduit
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: galvanised, weight: 3, colour: [0.12, 0.12, 0.13], gloss: 0.6}
+  - {name: black, weight: 2, colour: [0.02, 0.02, 0.022], gloss: 0.4}
+  - {name: rust, weight: 1, colour: [0.06, 0.025, 0.012], gloss: 0.1}
+  - {name: green, weight: 1, colour: [0.02, 0.05, 0.035], gloss: 0.3}
+  kind: picked
+  by: "signs detail, 2026-11-20, by eye"
+- element: sign-stain
+  says: the colour of the streaks of grime that run down a sign's face
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: grime, weight: 3, colour: [0.01, 0.009, 0.008], gloss: 0.2}
+  - {name: rust, weight: 1, colour: [0.05, 0.02, 0.01], gloss: 0.1}
+  kind: picked
+  by: "signs detail, 2026-11-20, by eye"
+- element: sign-paint-dark
+  says: the dark paints of a painted board, or of the letters on a pale one
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: oxblood, weight: 2, colour: [0.12, 0.015, 0.015], gloss: 0.3}
+  - {name: bottle, weight: 2, colour: [0.015, 0.07, 0.03], gloss: 0.3}
+  - {name: navy, weight: 2, colour: [0.015, 0.025, 0.1], gloss: 0.3}
+  - {name: black, weight: 1, colour: [0.02, 0.02, 0.02], gloss: 0.4}
+  kind: picked
+  by: "signs detail, 2026-11-20, by eye"
+- element: sign-paint-light
+  says: the pale paints of a painted board, or of the letters on a dark one
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: cream, weight: 3, colour: [0.8, 0.72, 0.5], gloss: 0.2}
+  - {name: ivory, weight: 1, colour: [0.85, 0.82, 0.7], gloss: 0.2}
+  - {name: mustard, weight: 2, colour: [0.75, 0.52, 0.08], gloss: 0.2}
+  - {name: white, weight: 1, colour: [0.85, 0.85, 0.85], gloss: 0.2}
+  kind: picked
+  by: "signs detail, 2026-11-20, by eye"
+- element: sign-cloth
+  says: the cloth of an awning, one for the canopy and valance and another for its stripes
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: red, weight: 3, colour: [0.4, 0.03, 0.03], gloss: 0.1}
+  - {name: green, weight: 2, colour: [0.03, 0.22, 0.1], gloss: 0.1}
+  - {name: navy, weight: 2, colour: [0.03, 0.06, 0.3], gloss: 0.1}
+  - {name: ochre, weight: 2, colour: [0.5, 0.3, 0.04], gloss: 0.1}
+  - {name: cream, weight: 2, colour: [0.7, 0.62, 0.45], gloss: 0.1}
+  kind: picked
+  by: "signs detail, 2026-11-20, by eye"
+- element: sign-lamp-warm
+  says: the colour of the light of the lamps on arms over a painted board and under an awning
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: warm, weight: 3, colour: [1, 0.7, 0.35]}
+  - {name: sodium, weight: 1, colour: [1, 0.55, 0.15]}
+  kind: picked
+  by: "signs detail, 2026-11-20, by eye"
+- element: sign-bulb-colour
+  says: the colour of the bulbs of a border
+  scope: opening
+  draw: options
+  unit: share of light
+  options:
+  - {name: warm, weight: 4, colour: [1, 0.75, 0.4]}
+  - {name: amber, weight: 1, colour: [1, 0.5, 0.06]}
+  - {name: red, weight: 1, colour: [1, 0.1, 0.05]}
+  - {name: cyan, weight: 1, colour: [0.04, 0.85, 1]}
+  - {name: white, weight: 1, colour: [0.9, 0.9, 1]}
+  kind: picked
+  by: "signs detail, 2026-11-20, by eye"
+- element: sign-tube-font
+  says: the font of tube neon letters and of a screen's letters, one of go's own
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-medium, weight: 3}
+  - {name: go, weight: 2}
+  - {name: go-bold, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-channel-font
+  says: the font of channel letters, one of go's own
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-bold, weight: 3}
+  - {name: go-medium, weight: 2}
+  - {name: go-mono, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-lamped-font
+  says: the font of letters painted on a board, one of go's own
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-bold, weight: 3}
+  - {name: go-italic, weight: 2}
+  - {name: go, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-box-font
+  says: the font of letters on a lit box, one of go's own
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-bold, weight: 2}
+  - {name: go-medium, weight: 2}
+  - {name: go-mono, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-bulb-font
+  says: the font of letters on a board with a border of bulbs, one of go's own
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-bold, weight: 3}
+  - {name: go-medium, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-led-font
+  says: the font a screen of tiles is drawn with before its letters take the tube font
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-medium, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-valance-font
+  says: the font of letters painted on an awning's valance, one of go's own
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-italic, weight: 2}
+  - {name: go-bold, weight: 2}
+  - {name: go, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-lit-valance-font
+  says: the font of lit letters on an awning's valance, one of go's own
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: go-medium, weight: 2}
+  - {name: go-bold, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-tube-font-hans
+  says: the font of tube neon characters and of a screen's, by the key of the source that keeps it on the shelf; Noto Sans SC bold and Noto Serif SC bold, each of which refuses a few characters the other draws
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 3}
+  - {name: noto-serif-sc-bold, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-channel-font-hans
+  says: the font of channel characters, by the key of the source that keeps it on the shelf
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 4}
+  - {name: noto-serif-sc-bold, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-lamped-font-hans
+  says: the font of characters painted on a board lit by lamps, by the key of the source that keeps it on the shelf
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 2}
+  - {name: noto-serif-sc-bold, weight: 2}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-box-font-hans
+  says: the font of characters on a lit box's face, by the key of the source that keeps it on the shelf
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 4}
+  - {name: noto-serif-sc-bold, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-bulb-font-hans
+  says: the font of characters on a board with a border of bulbs, by the key of the source that keeps it on the shelf
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 3}
+  - {name: noto-serif-sc-bold, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-led-font-hans
+  says: the font of a screen of lit tiles, by the key of the source that keeps it on the shelf
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 3}
+  - {name: noto-serif-sc-bold, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-valance-font-hans
+  says: the font of characters painted on an awning's valance, by the key of the source that keeps it on the shelf
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 2}
+  - {name: noto-serif-sc-bold, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-lit-valance-font-hans
+  says: the font of lit characters on an awning's valance, by the key of the source that keeps it on the shelf
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: noto-sans-sc-bold, weight: 2}
+  - {name: noto-serif-sc-bold, weight: 1}
+  kind: picked
+  by: "signs script, 2026-11-20, picked"
+- element: sign-wear-tube
+  says: what has gone wrong with a tube sign that has worn, a whole letter dark or one tube out
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: letter, weight: 3}
+  - {name: tube, weight: 3}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-wear-channel
+  says: what has gone wrong with a channel letter sign that has worn
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: letter, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-wear-lamped
+  says: what has gone wrong with a painted board lit by lamps that has worn, a lamp out
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: lamp, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-wear-box
+  says: what has gone wrong with a lit box that has worn, a panel of its face gone
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: panel, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-wear-bulb
+  says: what has gone wrong with a border of bulbs that has worn, a bulb out or a letter dark
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: bulb, weight: 3}
+  - {name: letter, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-wear-led
+  says: what has gone wrong with a screen of tiles that has worn, a dead tile or a letter dark
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: panel, weight: 2}
+  - {name: letter, weight: 2}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-wear-valance
+  says: what has gone wrong with a painted valance that has worn, a lamp under it out
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: lamp, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-wear-lit-valance
+  says: what has gone wrong with a lit valance that has worn, a letter dark
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: letter, weight: 1}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- element: sign-frame-style
+  says: how the steel frame behind a roof sign is made, a lattice of columns and diagonals or pairs of legs that meet under it
+  scope: opening
+  draw: options
+  unit: weight
+  options:
+  - {name: truss, weight: 3}
+  - {name: legs, weight: 2}
+  kind: picked
+  by: "signs detail, 2026-11-20, picked"
+- {element: sign-wear-share, says: "chance that a sign has worn", scope: opening, draw: share, unit: chance, share: 0.35, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-paint-light-board, says: "chance that a painted board is a pale paint with dark letters and not the other way", scope: opening, draw: share, unit: chance, share: 0.3, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-wear-line, says: "which line of a sign has worn, as a share of the way down its lines", scope: opening, draw: range, unit: share, least: 0, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-wear-item, says: "which of a line's letters, tubes, bulbs or tiles has worn, as a share of the way along them", scope: opening, draw: range, unit: share, least: 0, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-streak-share, says: "chance that a sign has streaks of grime running down its face", scope: opening, draw: share, unit: chance, share: 0.4, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-streak-count, says: "how many streaks a sign that has them has", scope: opening, draw: range, unit: streaks, whole: true, least: 1, most: 3, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-streak-width, says: "width of a streak of grime", scope: opening, draw: range, unit: m, least: 0.04, most: 0.16, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-streak-length, says: "how far down a face a streak runs, as a share of its height", scope: opening, draw: range, unit: share, least: 0.15, most: 0.7, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-streak-at, says: "where across a face a streak starts, as a share of the width left to it", scope: opening, draw: range, unit: share, least: 0, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-streak-depth, says: "how far a streak of grime stands out of the face it is on", scope: row, draw: range, unit: m, least: 0.01, most: 0.01, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-roof-share, says: "chance that a roof edge a building offers carries a roof sign", scope: opening, draw: share, unit: chance, share: 0.6, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-share, says: "chance that a wall a building offers carries a screen", scope: opening, draw: share, unit: chance, share: 0.7, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-share, says: "chance that a corner a building offers carries a blade sign", scope: opening, draw: share, unit: chance, share: 0.6, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-awning-share, says: "chance that a wall a building offers carries an awning over its foot", scope: opening, draw: share, unit: chance, share: 0.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-cap-share, says: "how tall a capital is, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.72, most: 0.72, kind: picked, by: "signs study, 2026-11-19, from go's own metrics"}
+- {element: sign-cap-share-hans, says: "how tall a simplified Chinese character is, as a share of the em, its ink from the foot of its lowest stroke to the top of its highest", scope: row, draw: range, unit: share of em, least: 0.97, most: 0.97, kind: picked, by: "signs script, 2026-11-20, picked from the ink of the Noto Sans and Serif SC bold outlines of the characters of the words: from -0.098 to 0.866 of the em"}
+- {element: sign-rise-hans, says: "how far a simplified Chinese character is set above its baseline, as a share of the em, so that its ink stands on the line a sign is laid out by", scope: row, draw: range, unit: share of em, least: 0.1, most: 0.1, kind: picked, by: "signs script, 2026-11-20, picked from the same outlines: the lowest ink is 0.098 of the em under the baseline"}
+- {element: sign-curve-tolerance, says: "how far a straight step of a letter's outline may stray from the curve, in the font's units of 2048 to the em", scope: row, draw: range, unit: font units, least: 10, most: 10, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-line-ratio, says: "how much smaller each line of a sign's words is than the line above", scope: row, draw: range, unit: share, least: 0.6, most: 0.6, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-line-gap, says: "the gap between two lines of a sign's words, as a share of the first line's em", scope: row, draw: range, unit: share of em, least: 0.3, most: 0.3, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tube-radius, says: "radius of a tube neon letter's tube, as a share of the em, drawn thick enough to be seen at street scale", scope: row, draw: range, unit: share of em, least: 0.018, most: 0.018, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tube-stand, says: "how far the middle of a tube stands off its backing board, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.06, most: 0.06, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tube-pitch, says: "how far apart the posts that hold a tube off its board are, along the tube, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.5, most: 0.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tube-post, says: "side of a post that holds a tube off its board, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.012, most: 0.012, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tube-gap, says: "the gap between the two ends of a tube bent to a ring, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.04, most: 0.04, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-electrode-size, says: "side of the housing at the end of a tube, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.035, most: 0.035, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-electrode-length, says: "how far the housing at the end of a tube runs on along the tube, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.06, most: 0.06, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-rim-inset, says: "how far in from the edge of a backing board the tube round it runs, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.12, most: 0.12, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tube-depth, says: "depth of a screen's pillowed neon letter, front to back, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.1, most: 0.1, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-tube-bevel, says: "how far a screen letter's faces step in, as a share of its depth", scope: row, draw: range, unit: share of depth, least: 0.1, most: 0.1, kind: picked, by: "signs study, 2026-11-19, by eye; typography refuses a wider step on the letter M of go, and none at all on the letter K"}
+- {element: sign-tube-glow, says: "how many times brighter a tube or a screen's letter glows than the colour it is drawn in", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs study, 2026-11-19, by eye; at 2.4 the print clipped a letter to cream"}
+- {element: sign-channel-depth, says: "depth of a channel letter's dark body, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.28, most: 0.28, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-channel-face, says: "depth of the glowing face on a channel letter, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.03, most: 0.03, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-channel-glow, says: "how many times brighter a channel letter's face glows than the colour it is drawn in", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-lamped-glow, says: "how many times brighter than its colour a painted board's lamp glass glows when seen from far", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-box-glow, says: "how many times brighter than its colour a lit box's translucent face glows", scope: row, draw: range, unit: scale, least: 0.6, most: 0.6, kind: picked, by: "signs detail, 2026-11-20, picked, a little under a letter's so that a dark letter on it reads"}
+- {element: sign-bulb-glow, says: "how many times brighter than its colour a bulb glows, and a letter on a board that has bulbs", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-led-glow, says: "how many times brighter than its colour a screen's lamp glass glows when seen from far", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-valance-glow, says: "how many times brighter than its colour a painted valance's glass glows, which is none of it", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-lit-valance-glow, says: "how many times brighter than its colour a lit valance's letter glows", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-lamp-glow, says: "how many times brighter than its colour the glass of a warm lamp glows", scope: row, draw: range, unit: scale, least: 1, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-panel-glow, says: "how many times brighter than its colour a sign glows as one flat panel, when it is too far off to read", scope: row, draw: range, unit: scale, least: 0.9, most: 0.9, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-glow, says: "how many times brighter than its tint a screen's panel glows", scope: row, draw: range, unit: scale, least: 0.3, most: 0.3, kind: picked, by: "signs study, 2026-11-19, by eye; lower, so that the letters on a panel are the bright thing"}
+- {element: sign-flat-depth, says: "depth of a flat letter, painted or dark on a lit face, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.02, most: 0.02, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-trim, says: "width of the trim round a painted board", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-trim-depth, says: "how far the trim round a painted board stands out of it", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-box-bezel, says: "width of the frame round the translucent face of a lit box", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-box-lip, says: "how far the frame of a lit box, and of a screen, stands out of its face", scope: row, draw: range, unit: m, least: 0.08, most: 0.08, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-panel-wide, says: "width of one translucent panel of a lit box's face", scope: row, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-panel-skin, says: "how far a lit box's translucent panel stands out of its cabinet", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-seam-width, says: "width of a seam between two panels or two tiles", scope: row, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-seam-depth, says: "how far a seam between tiles stands out of a screen's panel", scope: row, draw: range, unit: m, least: 0.02, most: 0.02, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tile-wide, says: "width of one tile of a screen", scope: row, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-tile-high, says: "height of one tile of a screen", scope: row, draw: range, unit: m, least: 1.5, most: 1.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-bulb-side, says: "side of a bulb in a border", scope: row, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-bulb-socket, says: "how far a bulb stands out of a board on its socket", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-bulb-inset, says: "how far in from the edge of a board its border of bulbs runs", scope: row, draw: range, unit: m, least: 0.22, most: 0.22, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-bulb-pitch, says: "how far apart the bulbs of a border are", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-arm-spacing, says: "how wide a stretch of a painted board one lamp on an arm serves", scope: row, draw: range, unit: m, least: 3.5, most: 3.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-arm-most, says: "the most lamps on arms a painted board carries", scope: row, draw: range, unit: lamps, whole: true, least: 4, most: 4, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-arm-rise, says: "how far a lamp's stem rises above the top of a painted board", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-arm-reach, says: "how far a lamp's arm reaches out over a painted board's face", scope: row, draw: range, unit: m, least: 1.1, most: 1.1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-arm-side, says: "side of the stem and the arm of a lamp over a painted board", scope: row, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-lamp-head, says: "side of the lit head of a lamp on an arm or under an awning", scope: row, draw: range, unit: m, least: 0.28, most: 0.28, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-lamped-luminance, says: "luminance at a metre of all the light the lamps over a painted board throw, shared among them", scope: row, draw: range, unit: luminance, least: 160, most: 160, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-lamp-size, says: "side of the lit box that marks a sign's lamp", scope: row, draw: range, unit: m, least: 0.15, most: 0.15, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-lamp-out, says: "how far in front of a sign's letters its lamps hang", scope: row, draw: range, unit: m, least: 1.6, most: 1.6, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-lamp-spacing, says: "how wide a stretch of sign one lamp serves", scope: row, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-lamp-most, says: "the most lamps one sign carries", scope: row, draw: range, unit: lamps, whole: true, least: 4, most: 4, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-roof-luminance, says: "luminance at a metre of all the light a roof sign throws, in the kit's relative light, shared among its lamps", scope: row, draw: range, unit: luminance, least: 320, most: 320, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-luminance, says: "luminance at a metre of all the light a screen throws, shared among its lamps", scope: row, draw: range, unit: luminance, least: 220, most: 220, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-luminance, says: "luminance at a metre of all the light a blade sign throws, shared among its lamps", scope: row, draw: range, unit: luminance, least: 60, most: 60, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-awning-luminance, says: "luminance at a metre of all the light an awning throws, shared among its lamps", scope: row, draw: range, unit: luminance, least: 40, most: 40, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-roof-em, says: "the em of a roof sign's letters, before it is fitted to the room", scope: opening, draw: range, unit: m, least: 3.5, most: 7, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-roof-lines, says: "how many lines of words a roof sign carries", scope: opening, draw: range, unit: lines, whole: true, least: 1, most: 2, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-roof-lift, says: "how high a roof sign's board stands on its frame above the roof", scope: opening, draw: range, unit: m, least: 1.8, most: 3.4, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-roof-margin, says: "the margin round a roof sign's letters on its board, as a share of the em", scope: opening, draw: range, unit: share of em, least: 0.2, most: 0.45, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-roof-panel-depth, says: "depth of a roof sign's board", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-roof-post, says: "side of a post a roof sign stands on when seen from far", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-roof-fit, says: "how much of the room along an edge a roof sign's board may take", scope: row, draw: range, unit: share, least: 0.92, most: 0.92, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-frame-member, says: "side of a member of a roof sign's frame", scope: row, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-frame-bay, says: "how wide a bay of a roof sign's lattice is", scope: row, draw: range, unit: m, least: 2.4, most: 2.4, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-frame-brace, says: "how far behind a roof sign's board its struts and legs reach to the roof", scope: row, draw: range, unit: m, least: 2.2, most: 2.2, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-frame-strut, says: "how high up a roof sign's board its struts to the roof are fixed, as a share of its height", scope: row, draw: range, unit: share, least: 0.8, most: 0.8, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-frame-middle, says: "how many bays wide a roof sign's lattice must be for it to have a strut to the roof in the middle as well as at its ends", scope: row, draw: range, unit: bays, least: 5, most: 5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-leg-pitch, says: "how far apart the stations of legs under a low roof sign are", scope: row, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-leg-front, says: "how far in front of a roof sign's board the front legs stand on the roof", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-leg-cross, says: "how far up its legs the cross brace between a pair is, as a share of the way to where they meet", scope: row, draw: range, unit: share, least: 0.45, most: 0.45, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-plate-side, says: "side of a bolted plate a post, leg, bracket or stay stands on", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-plate-thick, says: "thickness of a bolted plate", scope: row, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-bolt-side, says: "side of the head of a bolt in a plate", scope: row, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-bolt-head, says: "how far the head of a bolt stands out of its plate", scope: row, draw: range, unit: m, least: 0.03, most: 0.03, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-bolt-inset, says: "how far in from the edge of a plate its bolts are", scope: row, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-conduit-side, says: "side of the conduit that carries a sign's cable", scope: row, draw: range, unit: m, least: 0.07, most: 0.07, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-junction-side, says: "side of a junction box on a sign's feed", scope: row, draw: range, unit: m, least: 0.22, most: 0.22, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-feed-inset, says: "how far in from the end of a sign its feed stands", scope: row, draw: range, unit: m, least: 1.2, most: 1.2, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-feed-behind, says: "how far behind a roof sign's board its transformer stands", scope: row, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-feed-run, says: "how far a sign's conduit runs on from its transformer or up its wall to the building", scope: row, draw: range, unit: m, least: 2.5, most: 2.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-feed-share, says: "how high up a screen's wall-side junction box is, as a share of the screen's height", scope: row, draw: range, unit: share, least: 0.35, most: 0.35, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-transformer-wide, says: "width of a roof sign's transformer box", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-transformer-high, says: "height of a roof sign's transformer box", scope: row, draw: range, unit: m, least: 0.9, most: 0.9, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-transformer-deep, says: "depth of a roof sign's transformer box", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-screen-bezel, says: "width of the dark frame round a screen's glowing panel", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-depth, says: "depth of a screen's housing", scope: row, draw: range, unit: m, least: 0.5, most: 0.5, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-skin, says: "how far a screen's glowing panel stands out of its housing", scope: row, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-stand, says: "how far a screen's housing is held off its wall on posts", scope: row, draw: range, unit: m, least: 0.25, most: 0.25, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-post-side, says: "side of a post that holds a screen off its wall", scope: row, draw: range, unit: m, least: 0.16, most: 0.16, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-post-pitch, says: "how far apart the posts that hold a screen off its wall are", scope: row, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-screen-fit, says: "how much of a screen's width a line of its letters may take", scope: row, draw: range, unit: share, least: 0.86, most: 0.86, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-fill, says: "how much of a line's row of a screen its capitals may fill, from top to foot", scope: row, draw: range, unit: share, least: 0.62, most: 0.62, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-em, says: "the em of a blade sign's letters, before it is fitted to the room", scope: opening, draw: range, unit: m, least: 0.9, most: 1.4, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-pitch, says: "how far a blade sign's letters are apart from one to the next, as a share of the em", scope: row, draw: range, unit: share of em, least: 1.2, most: 1.2, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-margin, says: "the margin round a blade sign's letters on its board, as a share of the em", scope: row, draw: range, unit: share of em, least: 0.25, most: 0.25, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-width, says: "width of a blade sign's letters, as a share of the em, which its board is made to take", scope: opening, draw: range, unit: share of em, least: 0.75, most: 1.4, kind: picked, by: "signs detail, 2026-11-20, picked; go's capitals are about 0.85 wide, and a wider share is a deeper cabinet"}
+- {element: sign-blade-width-hans, says: "width of a blade sign's characters, as a share of the em, which its board is made to take", scope: opening, draw: range, unit: share of em, least: 1.05, most: 1.4, kind: picked, by: "signs script, 2026-11-20, picked; a character is square, its ink running from 0 to 1 of the em across, so the board takes a little more than an em"}
+- {element: sign-blade-depth, says: "thickness of a blade sign's cabinet", scope: row, draw: range, unit: m, least: 0.35, most: 0.35, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-arm, says: "side of the arms of a blade sign's bracket", scope: row, draw: range, unit: m, least: 0.14, most: 0.14, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-hang, says: "how far the top arm of a blade sign's bracket is below its top", scope: row, draw: range, unit: m, least: 0.4, most: 0.4, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-cap-over, says: "how far the cap on the top and foot of a blade cabinet stands out all round it", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-cap-high, says: "height of the cap on the top and foot of a blade cabinet", scope: row, draw: range, unit: m, least: 0.06, most: 0.06, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-stay-rise, says: "how far above a blade sign's top arm its stay is fixed to the wall", scope: row, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-stay-at, says: "how far out along its top arm a stay meets it, as a share of the reach", scope: row, draw: range, unit: share, least: 0.75, most: 0.75, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-stay-side, says: "side of a stay", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-blade-riser, says: "how far above its cabinet a blade sign's conduit rises before it turns to the wall", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-roof-set-back, says: "how far in from the edge of a roof a roof sign stands, to the back of its board", scope: row, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-roof-high, says: "how much room a roof gives a roof sign above the roof, with its frame", scope: row, draw: range, unit: m, least: 14, most: 14, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-edge-margin, says: "how far a sign keeps from the end of a roof's edge", scope: row, draw: range, unit: m, least: 2, most: 2, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-least-wide, says: "the narrowest stretch of wall or roof edge a sign is offered", scope: row, draw: range, unit: m, least: 6, most: 6, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-least-high, says: "the lowest room a sign is offered", scope: row, draw: range, unit: m, least: 4, most: 4, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-rise, says: "how high up a wall the foot of a screen is", scope: row, draw: range, unit: m, least: 10, most: 10, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-high, says: "the most a wall gives a screen, from its foot up", scope: row, draw: range, unit: m, least: 10, most: 10, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-margin, says: "how far a screen keeps from the ends of a wall, wide enough that a blade sign at the end clears it", scope: row, draw: range, unit: m, least: 4.5, most: 4.5, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-screen-reach, says: "how far a screen may stand out of a wall", scope: row, draw: range, unit: m, least: 1, most: 1, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-inset, says: "how far in from the end of a wall the bracket of a blade sign is", scope: row, draw: range, unit: m, least: 1.4, most: 1.4, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-rise, says: "how high up a wall the foot of a blade sign is", scope: row, draw: range, unit: m, least: 5, most: 5, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-high, says: "the most a wall gives a blade sign, from its top down", scope: row, draw: range, unit: m, least: 16, most: 16, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-blade-reach, says: "how far out of a wall a blade sign's board stands, which its bracket spans", scope: row, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-awning-margin, says: "how far an awning keeps from the ends of a wall", scope: row, draw: range, unit: m, least: 4.5, most: 4.5, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-room, says: "the widest stretch of wall an awning is offered", scope: row, draw: range, unit: m, least: 14, most: 14, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-rise, says: "how high up a wall the foot of an awning's valance is", scope: row, draw: range, unit: m, least: 2.8, most: 2.8, kind: picked, by: "signs detail, 2026-11-20, picked; a person walks under it"}
+- {element: sign-awning-high, says: "how much room an awning is given above the foot of its valance", scope: row, draw: range, unit: m, least: 3, most: 3, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-reach-most, says: "how far an awning may stand out of a wall", scope: row, draw: range, unit: m, least: 2.6, most: 2.6, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-wide, says: "how wide an awning is, before it is fitted to the room", scope: opening, draw: range, unit: m, least: 4.5, most: 10, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-reach, says: "how far an awning stands out of its wall, before it is fitted to the room", scope: opening, draw: range, unit: m, least: 1.5, most: 2.6, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-valance, says: "how tall an awning's valance is", scope: opening, draw: range, unit: m, least: 0.5, most: 0.85, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-drop, says: "how far the back of an awning's canopy is above its front edge", scope: row, draw: range, unit: m, least: 0.7, most: 0.7, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-stripe, says: "width of one stripe of an awning's canopy", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-canopy-thick, says: "thickness of an awning's cloth", scope: row, draw: range, unit: m, least: 0.04, most: 0.04, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-valance-thick, says: "thickness of an awning's valance", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-valance-fill, says: "how much of a valance's height its capitals may fill, from top to foot", scope: row, draw: range, unit: share, least: 0.62, most: 0.62, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-valance-fit, says: "how much of a valance's width its line of letters may take", scope: row, draw: range, unit: share, least: 0.8, most: 0.8, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-rib, says: "side of a rib, a rail or a lamp's stalk under an awning", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-rib-pitch, says: "how far apart the ribs under an awning's canopy are", scope: row, draw: range, unit: m, least: 1.8, most: 1.8, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-stay-rise, says: "how far above the back edge of an awning its stays are fixed to the wall", scope: row, draw: range, unit: m, least: 0.6, most: 0.6, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-lamp-back, says: "how far back from the front edge of an awning a lamp hangs under it", scope: row, draw: range, unit: m, least: 0.45, most: 0.45, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-awning-stalk, says: "how far a lamp hangs below the cloth of an awning on its stalk", scope: row, draw: range, unit: m, least: 0.3, most: 0.3, kind: picked, by: "signs detail, 2026-11-20, picked"}
+- {element: sign-vertical, says: "how upright a wall must be, as the share of its length that is height, for a sign to hang on it", scope: row, draw: range, unit: share, least: 0.98, most: 0.98, kind: picked, by: "signs study, 2026-11-19, picked"}
+- {element: sign-free-wide, says: "the width of room a sign made on its own is given", scope: row, draw: range, unit: m, least: 24, most: 24, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-free-high, says: "the height of room a sign made on its own is given", scope: row, draw: range, unit: m, least: 14, most: 14, kind: picked, by: "signs study, 2026-11-19, by eye"}
+- {element: sign-cover-slack, says: "how far inside another box a place must be to count as hidden by it", scope: row, draw: range, unit: m, least: 0.05, most: 0.05, kind: picked, by: "signs study, 2026-11-19, picked"}
+- {element: sign-unlit, says: "how much light a lit letter's glass reflects of what falls on it, the same in each colour channel", scope: row, draw: range, unit: share of light, least: 0.05, most: 0.05, kind: picked, by: "signs study, 2026-11-19, by eye, as the cyberpunk neon"}

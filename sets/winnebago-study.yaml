@@ -1,0 +1,75 @@
+# the winnebago study: a motorhome on flat ground at dusk, seen from 22 m
+# off at eye height, from the south-west so that the windscreen and the
+# kerb side, with its door and its windows, face the camera. made by the
+# cities package (manufacture/cities), through the manufactory's kind
+# winnebago, the way the yurt study is.
+#
+# places are metres, as a map's run: x east, y north, z up. the vehicle
+# faces south, and its kerb side, with the door, is its west side. its size
+# and colours are in manufacture/cities/winnebago.yaml, each picked or set
+# by eye. the sun's place, the ground's colour and the camera are choices
+# of this study, picked by eye, and say so.
+#
+# not true yet, and so wrong in the picture: the glazing is dark opaque
+# glass that shines, since the vehicle has no interior to see through it.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: winnebago study
+  # the scene stands things on a world's own ground, not a terrain's,
+  # which is how a set says it has none
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 40
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # eye height, 22 m off to the south-west, looking at the middle of
+    # the vehicle's side
+    close:
+      title: "from the south-west, at eye height"
+      location:
+        at: [-14, -17, 1.7]
+      orientation:
+        look_at: [0, -0.5, 1.8]
+  set:
+    things:
+      motorhome:
+        kind: winnebago
+        seed: 1
+        complexity: demo
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  world:
+    unit: 1
+    materials:
+      gravel:
+        colour: {srgb_linear: [0.1, 0.09, 0.05]}
+        source: eye
+    boxes:
+      # the ground, its upper face at nought
+      ground:
+        material: gravel
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    # dusk, by eye: a low warm sun in the west, a dim sky that is
+    # lightest at the horizon. the sun a set may hold on the ground
+    # needs a terrain, and this study has none.
+    suns:
+      west:
+        toward: [-1, -0.3, 0.12]
+        colour: {srgb_linear: [2.2, 1.2, 0.55]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.22, 0.14, 0.12]}
+      zenith: {srgb_linear: [0.02, 0.035, 0.08]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye

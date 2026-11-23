@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/janearc/slayer/hillside"
+	"github.com/janearc/slayer/session"
 )
 
 // the widow set, which says a world and no ground, and the small size the
@@ -53,8 +53,8 @@ func hillsides(t *testing.T, path, settings string) ([]byte, int) {
 	t.Helper()
 	out := filepath.Join(t.TempDir(), "hillside.png")
 	arguments := append([]string{"-set", path}, strings.Fields(settings)...)
-	code := hillside.Run(append(arguments, "-out", out), io.Discard,
-		io.Discard, hillside.Stamped("", "", "", ""))
+	code := session.Run(append(arguments, "-out", out), io.Discard,
+		io.Discard, session.Stamped("", "", "", ""))
 	picture, _ := os.ReadFile(out)
 	return picture, code
 }

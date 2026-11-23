@@ -146,7 +146,8 @@ The named spruce/Norway entries now use radial needle shoots too, while
 legacy conifer references remain for comparison.
 
 Read
-[recursive foliage](conifer-foliage.md) and [spruce foliage](spruce-foliage.md)
+[recursive foliage](model/vegetation/conifer-foliage.md) and
+[spruce foliage](model/vegetation/spruce-foliage.md)
 for which sources and acceptance results apply to each family.
 
 Increasing a shoot's reach adds more cells of physical-size needles; it
@@ -184,10 +185,10 @@ reviewable and record representation cost before scattering thousands.
 Use [testing](testing.md) for checks and
 [contributing](../CONTRIBUTING.md) for commit and review conventions.
 
-The [city building recipes](city-buildings.md) provide standalone architectural
+The [city building recipes](model/city/city-buildings.md) provide standalone architectural
 families and a reusable street grid with exactly 10,000 seeded buildings,
 cross alleys, traffic circles and material-batched native geometry.
 
-The [macrostructure and terrain recipes](macrostructures.md) add typed
+The [macrostructure and terrain recipes](model/terrain/macrostructures.md) add typed
 kilometre-scale arcologies, twisted spires, inhabited bridges, mountains
 and calderas, with formulae and existing biome placement metadata.

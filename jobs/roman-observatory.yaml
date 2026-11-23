@@ -1,0 +1,7 @@
+$schema: https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/roman-observatory.yaml}
+film: {width: 1080, height: 960, rays: 4, exposure: 0.004}
+camera: {name: roman-three-quarter}
+renderer: gpu
+outputs:
+  picture: ../proof/roman-space-telescope-1080x960.png

@@ -1,0 +1,1 @@
+build-mariner-proof . :: go build -p=1 -o bin/mariner-slayer ./cmd/slayer

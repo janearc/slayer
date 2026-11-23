@@ -1,0 +1,54 @@
+# every number the scene/bodies tests choose, with what it is and why it was
+# chosen. a test asks for a number by its name. a name starts with the test
+# file's stem, so that two files never share one.
+numbers:
+  - name: degenerate-radius
+    value: 1000
+    says: the radius in kilometres of the body a test builds
+    kind: picked
+    by: any radius above zero will do; the test is about what is round it
+  - name: degenerate-mass
+    value: 1.0e24
+    says: the mass in kilograms of the body a test builds
+    kind: picked
+    by: any mass above zero will do; the test is about what is round it
+  - name: degenerate-orbit
+    value: 10000
+    says: the radius in kilometres of the circular orbit a test asks the rate of
+    kind: picked
+    by: any radius above zero will do
+  - name: degenerate-share
+    value: 0.5
+    says: a share of a whole that every constructor takes
+    kind: picked
+    by: the middle of zero to one
+  - name: degenerate-knots-over
+    value: 1.5
+    says: a dressing of knots above the one a share ends at
+    kind: picked
+    by: above one by half
+  - name: degenerate-knots-under
+    value: -0.1
+    says: a dressing of knots below the zero a share starts at
+    kind: picked
+    by: below zero by a tenth
+  - name: degenerate-rungs-most
+    value: 32
+    says: the most rungs a body may be painted or lit below its own tiles, as picks.yaml holds it
+    kind: picked
+    by: the number the package holds; the test fails if the two drift apart
+  - name: degenerate-rungs-over
+    value: 33
+    says: one rung more than the most
+    kind: picked
+    by: one past the most
+  - name: degenerate-rungs-huge
+    value: 1.0e18
+    says: a count of rungs no tiling has room for
+    kind: picked
+    by: a count that would loop for ever if it were taken
+  - name: degenerate-light
+    value: 0.2
+    says: the red, green and blue of a light a test gives a part
+    kind: picked
+    by: any finite share will do

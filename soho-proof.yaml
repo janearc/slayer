@@ -1,0 +1,20 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: SOHO solar and heliospheric observatory study
+  seed: 17
+  setting: space
+  light: sun
+  sun: {azimuth: 180, altitude: 35}
+  set:
+    things:
+      observatory:
+        kind: soho
+        seed: 5
+        east: 0
+        north: 0
+  film: {width: 1080, height: 960, rays: 4, exposure: 0.01, wide: 32}
+  cameras:
+    concept:
+      title: SOHO solar arrays and instrument payload
+      location: {at: [6, -23, 10]}
+      orientation: {look_at: [0, 0, 0.4]}

@@ -81,7 +81,8 @@ func TestLoadAssetsSharesAFileUsedTwice(t *testing.T) {
 // not usable, and a file of the wrong size.
 func TestReadAssetRefusals(t *testing.T) {
 	s := assetSettings(t)
-	if _, _, err := readAsset("named", filepath.Join(t.TempDir(), "gone.pfm"), 2, 2); err == nil || !strings.Contains(err.Error(), "named") {
+	missingAsset := filepath.Join(t.TempDir(), "gone.pfm")
+	if _, _, err := readAsset("named", missingAsset, 2, 2); err == nil || !strings.Contains(err.Error(), "named") {
 		t.Errorf("missing file: %v", err)
 	}
 	for _, size := range [][2]int{{0, 2}, {2, 0}, {-1, 2}, {math.MaxInt / 2, 2}} {

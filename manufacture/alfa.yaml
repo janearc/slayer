@@ -164,11 +164,11 @@ looks:
   propeller blade:
     material: titanium
     finish: satin
-    alloy: "not found; titanium stands in, as slayer has no bronze"
+    alloy: "not found; legacy titanium stand-in retained; nickel-aluminium-bronze is available separately"
   auxiliary propeller blade:
     material: titanium
     finish: satin
-    alloy: "not found; titanium stands in, as slayer has no bronze"
+    alloy: "not found; legacy titanium stand-in retained; nickel-aluminium-bronze is available separately"
   mast and antenna:
     material: titanium
     finish: satin

@@ -1,0 +1,503 @@
+# The numbers the media's shapes are drawn with. Each is chosen for the picture
+# and measured from nothing; a medium's arithmetic reads them by name.
+numbers:
+  - name: skirt-widths
+    value: 2.5
+    says: half widths from a stream's middle where its gaussian is cut to exactly zero
+    kind: picked
+    by: Slayer's medium shapes
+  - name: stream-bell
+    value: 2
+    says: the gaussian across a stream is exp of minus this times the squared distance in half widths
+    kind: picked
+    by: Slayer's medium shapes
+  - name: stream-eighth
+    value: 8
+    says: a stream with no base is probed in cells of this part of its widest
+    kind: picked
+    by: Slayer's medium shapes
+  - name: jet-lower-side
+    value: 7
+    says: where the knot noise of the lower jet is read, so each side has its own knots
+    kind: picked
+    by: Slayer's medium shapes
+  - name: jet-knot-spacing
+    value: 3
+    says: base widths between the knots of a jet
+    kind: picked
+    by: Slayer's medium shapes
+  - name: jet-knot-octaves
+    value: 2
+    says: octaves of the noise that bunches a jet into knots
+    kind: picked
+    by: Slayer's medium shapes
+  - name: jet-knot-weight
+    value: 2
+    says: how many times Knots weighs the knot noise
+    kind: picked
+    by: Slayer's medium shapes
+  - name: along-the-axis
+    value: 0.000000000001
+    says: the least sideways part of a ray, squared, for it to be taken as across a cylinder and not along its axis
+    kind: picked
+    by: Slayer's medium shapes
+  - name: probes-least
+    value: 48
+    says: the fewest cells a span is probed in
+    kind: picked
+    by: Slayer's medium shapes
+  - name: probes-most
+    value: 2048
+    says: the most cells a span is probed in
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-frequency
+    value: 6
+    says: how many times the unit direction the cloud patches' noise is read at
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-octaves
+    value: 4
+    says: octaves of the noise that lays cloud patches
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-edge
+    value: 0.08
+    says: how far either side of the cover's threshold a cloud patch's edge is soft
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-whole
+    value: 0.33
+    says: how far up the layer a cloud patch is whole
+    kind: picked
+    by: Slayer's medium shapes
+  - name: cloud-top
+    value: 0.15
+    says: the share of itself a cloud patch still is at the top of the layer
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-floor
+    value: 0.001
+    says: the share of its peak under which an aurora's oval is dropped
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-fall
+    value: 3
+    says: how many times the way up the shell the aurora's glow thins by e
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-soft
+    value: 0.1
+    says: the share of the shell over which the aurora's lower border is soft
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-rays
+    value: 24
+    says: how many times the direction round the pole the curtains' rays are read at
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-folds
+    value: 6
+    says: how many times the direction round the pole the curtains' folds are read at
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-stretch
+    value: 2
+    says: how many times the rays are stretched up the shell
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-ray-weight
+    value: 2
+    says: how many times a ray weighs a fold
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-octaves
+    value: 2
+    says: octaves of the noise of the curtains' rays and folds
+    kind: picked
+    by: Slayer's medium shapes
+  - name: aurora-fold-seed
+    value: 1
+    says: how far from the seed the folds' noise is
+    kind: picked
+    by: Slayer's medium shapes
+  - name: plume-core
+    value: 0.1
+    says: the column's width, as a share of the plume's half width
+    kind: picked
+    by: Slayer's medium shapes
+  - name: plume-thin
+    value: 0.5
+    says: how much of itself the column loses by the top
+    kind: picked
+    by: Slayer's medium shapes
+  - name: plume-skin
+    value: 0.15
+    says: the umbrella shell's thickness, as a share of the plume's half width
+    kind: picked
+    by: Slayer's medium shapes
+  - name: plume-peak
+    value: 0.5
+    says: the umbrella's peak density, as a share of Thick, at the top
+    kind: picked
+    by: Slayer's medium shapes
+  - name: plume-foot
+    value: 0.4
+    says: the share of the umbrella's peak that remains at the ground
+    kind: picked
+    by: Slayer's medium shapes
+  - name: plume-rise
+    value: 0.6
+    says: the share of the umbrella's peak gained from the ground to the top
+    kind: picked
+    by: Slayer's medium shapes
+  - name: plume-skirt
+    value: 3
+    says: shell thicknesses from the umbrella's shell where its gaussian is cut to exactly zero
+    kind: picked
+    by: Slayer's medium shapes
+  - name: fizz-octaves
+    value: 4
+    says: octaves of the noise of a fizz's churn
+    kind: picked
+    by: Slayer's medium shapes
+  - name: fizz-grain
+    value: 2
+    says: how many times finer than the foot's radius a fizz's churn is
+    kind: picked
+    by: Slayer's medium shapes
+  - name: fizz-spread
+    value: 2
+    says: how many times its foot's radius a fizz's column holds at its top
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wispy-octaves
+    value: 4
+    says: octaves of the noise that makes a wisp
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wake-fade
+    value: 0.45
+    says: where a wake's gas begins to thin toward the edge, as a share of the reach
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wake-swept
+    value: 0.55
+    says: where a wake's channel begins to clear, as a share of its clear
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wake-ridge
+    value: 0.3
+    says: the width of a wake's banks, as a share of its clear
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wake-bank
+    value: 2.2
+    says: how many times the open gas a wake's banks hold
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wake-lift
+    value: 3
+    says: how many times a wake's cubed noise is lifted, so its mean gas stays near the thick
+    kind: picked
+    by: Slayer's medium shapes
+  - name: exponent-most
+    value: 2.5
+    says: the greatest Angstrom exponent an aerosol accepts
+    kind: picked
+    by: Slayer's medium shapes
+  - name: clear-cloud-width
+    value: 500
+    says: the widest a clear cloud may be on any axis, in scene units
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wavelength-red
+    value: 610
+    says: the wavelength, in nanometres, of the eye's red channel
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wavelength-green
+    value: 550
+    says: the wavelength, in nanometres, of the eye's green channel, and of the extinction a layer is given at
+    kind: picked
+    by: Slayer's medium shapes
+  - name: wavelength-blue
+    value: 465
+    says: the wavelength, in nanometres, of the eye's blue channel
+    kind: picked
+    by: Slayer's medium shapes
+  - name: disc-ringlets
+    value: 60
+    says: how many ringlets a disc has across it when it says none
+    kind: picked
+    by: Slayer's medium shapes
+  - name: disc-ring-y
+    value: 0.37
+    says: where a disc's ringlet noise is read on its second axis
+    kind: picked
+    by: Slayer's medium shapes
+  - name: disc-ring-z
+    value: 0.61
+    says: where a disc's ringlet noise is read on its third axis
+    kind: picked
+    by: Slayer's medium shapes
+  - name: disc-octaves
+    value: 3
+    says: octaves of the noise of a disc's ringlets
+    kind: picked
+    by: Slayer's medium shapes
+  - name: disc-face
+    value: 0.1
+    says: the share of a disc's half thickness over which each face is soft
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-fog
+    value: 0.003
+    says: the thin gas between the pillars, as a share of Thick
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-base-divisor
+    value: 3.2
+    says: how many times the width over the count a column's base is narrower
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-height-least
+    value: 0.55
+    says: the share of Height the shortest column reaches
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-height-range
+    value: 0.45
+    says: the share of Height the columns' heights vary over
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-seed-x
+    value: 1
+    says: how far from the seed the hash that places a column along x is
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-seed-z
+    value: 2
+    says: how far from the seed the hash that places a column along z is
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-seed-height
+    value: 3
+    says: how far from the seed the hash that sizes a column is
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-wall
+    value: 0.2
+    says: the share of Height the wall along the bottom reaches
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-wall-rag
+    value: 0.06
+    says: the share of Height the wall's top is ragged by
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-wall-scale
+    value: 3
+    says: how many times over the height the wall's noise is read
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-wall-octaves
+    value: 3
+    says: octaves of the noise of the wall's top
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-wall-edge
+    value: 0.08
+    says: the share of Height over which the wall's top is soft
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-taper
+    value: 0.35
+    says: how much narrower a column is at its tip than at its foot
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-noise-scale
+    value: 1.5
+    says: how many times over a column's base its edge noise is read
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-seed-noise
+    value: 10
+    says: how far from the seed the noise that eats into the columns is
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-octaves
+    value: 4
+    says: octaves of the noise that eats into the columns
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-build
+    value: 0.9
+    says: how much of a base the noise builds a column out or in by
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-edge
+    value: 0.3
+    says: the share of a base over which a column's edge is soft
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-streak
+    value: 3
+    says: how many times over a column's base the filaments' noise is read
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-stretch
+    value: 3
+    says: how many times longer along y the filaments are than across
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-seed-streak
+    value: 50
+    says: how far from the column's seed the filaments' noise is
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-streak-octaves
+    value: 4
+    says: octaves of the noise of the filaments
+    kind: picked
+    by: Slayer's medium shapes
+  - name: pillars-streak-threshold
+    value: 0.5
+    says: the noise value under which the filaments thin the gas
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-max-blades
+    value: 16
+    says: the most blades a cavitation field has, a numerical work budget on its filament cores
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-core-support
+    value: 3
+    says: standard deviations that bound the authored gaussian core
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-transition
+    value: 0.5
+    says: the density mask's transition, which softens the zero crossing of the noise
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-fragment-least
+    value: 0.001
+    says: the least fragment scale, in metres, that keeps noise coordinates finite and local
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-fragment-most
+    value: 20
+    says: the greatest fragment scale, in metres, that keeps noise coordinates finite and local
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-tip-most
+    value: 5
+    says: the greatest tip radius, in metres
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-rpm-most
+    value: 600
+    says: the greatest shaft speed, in revolutions a minute
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-slip-most
+    value: 100
+    says: the greatest slipstream speed, in metres a second
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-length-most
+    value: 200
+    says: the greatest cavity length, in metres
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-core-most
+    value: 2
+    says: the greatest core radius, in metres
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-density-most
+    value: 20
+    says: the greatest density, per metre
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-pressure-most
+    value: 1000000
+    says: the greatest pressure deficit, in pascals
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-recovery-most
+    value: 1000000
+    says: the greatest pressure recovery, in pascals a metre
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-origin-most
+    value: 10000000000000
+    says: the farthest any coordinate of the origin may be from zero, in metres
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-axis-least
+    value: 0.000000001
+    says: the shortest axis that is taken to point anywhere
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-parallel
+    value: 0.99
+    says: how parallel to up the axis may be before the frame is built from the x axis
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-wander-most
+    value: 10
+    says: the greatest centreline meander, in metres
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-wander-scale-most
+    value: 100
+    says: the greatest meander scale, in metres
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-wander-scale-least
+    value: 0.01
+    says: the least meander scale, in metres, when there is a meander
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-spread-start-most
+    value: 200
+    says: the farthest downstream, in metres, the dilution may begin
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-spread-most
+    value: 0.5
+    says: the greatest dilution, in metres of radius a metre
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-wander-octaves
+    value: 2
+    says: octaves of the noise of the meander
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-wander-blade
+    value: 0.37
+    says: where the meander's noise is read along the blade axis, past the blade number
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-wander-across
+    value: 0.73
+    says: where the meander's noise is read for the first cross direction
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-wander-out
+    value: 17.19
+    says: where the meander's noise is read for the second cross direction
+    kind: picked
+    by: Slayer's medium shapes
+  - name: propeller-fragment-octaves
+    value: 3
+    says: octaves of the noise of the fragmentation
+    kind: picked
+    by: Slayer's medium shapes
+  - name: grove-fade-from
+    value: 0.7
+    says: where, as a share of a canopy's radius, a faded grove's mist begins to thin
+    kind: picked
+    by: Slayer's medium shapes

@@ -36,7 +36,8 @@ func TestFourFourLinesAreUnchanged(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		digest.Write([]byte(moment.Lines()))
+		lineBytes := []byte(moment.Lines())
+		digest.Write(lineBytes)
 	}
 	if got := hex.EncodeToString(digest.Sum(nil)); got != fourFourLines {
 		t.Errorf("four-four lines hash %s, not %s", got, fourFourLines)

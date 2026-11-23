@@ -8,7 +8,23 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/janearc/slayer/improv/walk"
 )
+
+// readShort reads the script and returns its short named where.
+func readShort(t *testing.T, path string) walk.Short {
+	t.Helper()
+	script, err := walk.ReadScript(path, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	short, found := script.Short("where")
+	if !found {
+		t.Fatal("the script has no short where")
+	}
+	return short
+}
 
 // TestSoundFor checks the span under a short: none for a silent short, the
 // score's span for a sounded one, and each way it is refused.

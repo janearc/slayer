@@ -1,0 +1,7 @@
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../sets/prima-spacecraft.yaml}
+renderer: gpu-native
+film: {width: 1080, height: 960, rays: 4, wide: 32, exposure: 0.01}
+camera: {name: concept}
+outputs:
+  picture: ../out/prima-spacecraft-1080x960-wip-v2.png

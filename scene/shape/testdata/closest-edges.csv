@@ -1,0 +1,5 @@
+name,point-x,point-y,point-z,first-weight,second-weight,third-weight
+past the first corner along x,0.25,-1,0,0.9375,0.0625,0
+past the first corner along y,-1,0.25,0,0.9375,0,0.0625
+a unit out from the x edge,1,-1,0,0.75,0.25,0
+a unit out from the y edge,-1,1,0,0.75,0,0.25

@@ -144,13 +144,6 @@ func (row macrostructureMaker) madeAt(from seed, detail string) (good, error) {
 	if row.spec.Wildness > 0 || row.spec.LivingCover {
 		made = row.weather(made, from, structural)
 	}
-	limit := int(macroValue("face-budget"))
-	if row.spec.Wildness > 0 {
-		limit = 100000
-	}
-	if made.faces() > limit {
-		return good{}, errTooMany
-	}
 	width, depth, height := row.spec.Width.InMetres(), row.spec.Depth.InMetres(),
 		row.spec.Height.InMetres()
 	extent := maths.Box{Min: maths.V(-width/2, 0, -depth/2), Max: maths.V(width/2,

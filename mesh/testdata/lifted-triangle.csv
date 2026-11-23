@@ -1,0 +1,4 @@
+name,x,y,z
+the corner at the origin,0,0,0
+the corner along x,4,0,0
+the corner along z,0,0,4

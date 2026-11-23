@@ -1,0 +1,183 @@
+# a dry road at night: the same street, panels and camera as wet-road-wet,
+# with no rain on it. the asphalt takes the panels' light as a matt
+# surface does, and mirrors nothing. this is the study the wet ones are
+# set against.
+#
+# places are metres, as a map's run: x east, y north, z up. every number
+# is a choice of this study, picked by eye, and says so.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: dry road
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 16
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    down-the-street:
+      title: "eye height, in the street, looking down it"
+      wide: 60
+      location:
+        at: [0, -27, 1.7]
+      orientation:
+        look_at: [0, 20, 2.6]
+  recipes:
+    lane: {kind: street, wetness: 0, length: {value: 60, unit: m}}
+  set:
+    things:
+      the street:
+        recipe: lane
+        seed: 11
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  world:
+    unit: 1
+    materials:
+      wall:
+        colour: {srgb_linear: [0.03, 0.03, 0.034]}
+        source: eye
+      red:
+        glow: {srgb_linear: [5, 0.03, 0.05]}
+        source: eye
+      cyan:
+        glow: {srgb_linear: [0.03, 2.2, 3.4]}
+        source: eye
+      warm:
+        glow: {srgb_linear: [5, 1.8, 0.4]}
+        source: eye
+    boxes:
+      west-wall:
+        material: wall
+        middle: [-6.5, 2, 7]
+        size: [1, 66, 14]
+        source: eye
+      east-wall:
+        material: wall
+        middle: [6.5, 2, 7]
+        size: [1, 66, 14]
+        source: eye
+      end-wall:
+        material: wall
+        middle: [0, 35.5, 7]
+        size: [14, 1, 14]
+        source: eye
+      red-1:
+        material: red
+        middle: [-5.9, -18, 3]
+        size: [0.2, 2.2, 1.2]
+        source: eye
+      warm-1:
+        material: warm
+        middle: [-5.9, -8, 2.6]
+        size: [0.2, 1.6, 2.4]
+        source: eye
+      cyan-1:
+        material: cyan
+        middle: [-5.9, 4, 3.4]
+        size: [0.2, 2.6, 1.4]
+        source: eye
+      red-2:
+        material: red
+        middle: [-5.9, 16, 2.8]
+        size: [0.2, 1.4, 2.8]
+        source: eye
+      warm-2:
+        material: warm
+        middle: [-5.9, 26, 3.6]
+        size: [0.2, 2.2, 1.0]
+        source: eye
+      cyan-2:
+        material: cyan
+        middle: [5.9, -14, 3.2]
+        size: [0.2, 1.8, 1.8]
+        source: eye
+      warm-3:
+        material: warm
+        middle: [5.9, -2, 2.4]
+        size: [0.2, 2.8, 1.2]
+        source: eye
+      red-3:
+        material: red
+        middle: [5.9, 9, 3]
+        size: [0.2, 1.6, 2]
+        source: eye
+      cyan-3:
+        material: cyan
+        middle: [5.9, 21, 2.6]
+        size: [0.2, 2.4, 1.4]
+        source: eye
+      red-4:
+        material: red
+        middle: [5.9, 29, 3.4]
+        size: [0.2, 1.2, 1.2]
+        source: eye
+    lamps:
+      red-1:
+        at: [-5.0, -18, 3]
+        temperature: 1800
+        strength: 40
+        radius: 0.2
+        source: eye
+      warm-1:
+        at: [-5.0, -8, 2.6]
+        temperature: 2700
+        strength: 40
+        radius: 0.2
+        source: eye
+      cyan-1:
+        at: [-5.0, 4, 3.4]
+        temperature: 10000
+        strength: 40
+        radius: 0.2
+        source: eye
+      red-2:
+        at: [-5.0, 16, 2.8]
+        temperature: 1800
+        strength: 40
+        radius: 0.2
+        source: eye
+      warm-2:
+        at: [-5.0, 26, 3.6]
+        temperature: 2700
+        strength: 40
+        radius: 0.2
+        source: eye
+      cyan-2:
+        at: [5.0, -14, 3.2]
+        temperature: 10000
+        strength: 40
+        radius: 0.2
+        source: eye
+      warm-3:
+        at: [5.0, -2, 2.4]
+        temperature: 2700
+        strength: 40
+        radius: 0.2
+        source: eye
+      red-3:
+        at: [5.0, 9, 3]
+        temperature: 1800
+        strength: 40
+        radius: 0.2
+        source: eye
+      cyan-3:
+        at: [5.0, 21, 2.6]
+        temperature: 10000
+        strength: 40
+        radius: 0.2
+        source: eye
+      red-4:
+        at: [5.0, 29, 3.4]
+        temperature: 1800
+        strength: 40
+        radius: 0.2
+        source: eye

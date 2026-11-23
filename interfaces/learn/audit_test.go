@@ -40,7 +40,9 @@ func TestACellOfThreeColoursIsItsTwo(t *testing.T) {
 // a picture not whole cells comes back whole cells: five by four is three
 // cells by two, six by six.
 func TestAPictureComesBackWholeCells(t *testing.T) {
-	got := Chopped(terminal.Chop(image.NewRGBA(image.Rect(0, 0, 5, 4)))).Bounds()
+	blank := image.NewRGBA(image.Rect(0, 0, 5, 4))
+	chopped := terminal.Chop(blank)
+	got := Chopped(chopped).Bounds()
 	if got.Dx() != 6 || got.Dy() != 6 {
 		t.Errorf("five by four came back %v", got)
 	}

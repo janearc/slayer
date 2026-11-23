@@ -16,6 +16,10 @@ import (
 	"github.com/janearc/slayer/improv/moonlake/omnipositor/settings"
 )
 
+// never is the stop of a frame that does not stop: no context at all,
+// which the snapshot and the light stage refuse.
+var never context.Context
+
 func executionBinary(t *testing.T) string {
 	t.Helper()
 	path, err := os.Executable()
@@ -108,7 +112,8 @@ func TestIdentityOwnedExecution(t *testing.T) {
 		func(s *settings.Settings, c *Config, l *lights.Config, a, b *[]byte) { c.Develop.Exposure++ },
 		func(s *settings.Settings, c *Config, l *lights.Config, a, b *[]byte) { l.HazeGain++ },
 		func(s *settings.Settings, c *Config, l *lights.Config, a, b *[]byte) {
-			*a = append(append([]byte(nil), (*a)...), '\n')
+			copied := append([]byte(nil), (*a)...)
+			*a = append(copied, '\n')
 		},
 		func(s *settings.Settings, c *Config, l *lights.Config, a, b *[]byte) {
 			*b = []byte("cues: [{at_sec: 0, exposure: 1}]\n")
@@ -138,7 +143,7 @@ func TestIdentityOwnedExecution(t *testing.T) {
 	if _, err := base.PrepareFrame(ctx, 0); !errors.Is(err, context.Canceled) {
 		t.Fatalf("cancellation: %v", err)
 	}
-	if _, err := base.PrepareFrame(nil, 0); err == nil {
+	if _, err := base.PrepareFrame(never, 0); err == nil {
 		t.Fatal("nil context accepted")
 	}
 }

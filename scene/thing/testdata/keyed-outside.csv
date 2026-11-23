@@ -1,0 +1,10 @@
+name,x,want
+far-below-tiny,-1e-300,0
+below-half,-0.5,0
+below-one,-1,0
+below-five,-5,0
+far-below,-1e300,0
+at-nought,0,0
+at-one,1,1
+past-two,2,1
+far-past,1e300,1

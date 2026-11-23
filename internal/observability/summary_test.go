@@ -48,7 +48,8 @@ func TestSummaryDoesNotDispatchNextSinkAfterCancellation(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
-	go func() { sendSummary(ctx, "slayer", sinks, io.Discard, make([]time.Time, len(sinks)), 0); close(done) }()
+	stamps := make([]time.Time, len(sinks))
+	go func() { sendSummary(ctx, "slayer", sinks, io.Discard, stamps, 0); close(done) }()
 	<-entered
 	cancel()
 	close(release)

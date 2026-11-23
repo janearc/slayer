@@ -61,7 +61,7 @@ CLOCK the weather's seconds, eight wide, as the command always named them.
 It runs on the gpu, in float32, where there is a metal device and no
 renderer is said, and says so; `renderer: cpu` runs it in float64. Its
 moments are kept in the weather cache, `weather/` in the cache home
-(`SLAYER_CACHE`), which hillside shares.
+(`SLAYER_CACHE`), which the session package shares.
 
 ## A scene
 

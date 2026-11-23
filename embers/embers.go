@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/noise"
 	"math"
 	"time"
 )
@@ -114,11 +115,8 @@ func (source emitter) particle(id int64, age time.Duration) Particle {
 // share hashes a birth and attribute independently; it is not evolving state.
 // SplitMix64's finalizer supplies a reproducible uniform rendering sample.
 func share(seed uint64, id int64, attribute uint64) float64 {
-	bits := seed + uint64(id)*0x9e3779b97f4a7c15 + attribute*0x632be59bd9b4e019
-	bits = (bits ^ (bits >> 30)) * 0xbf58476d1ce4e5b9
-	bits = (bits ^ (bits >> 27)) * 0x94d049bb133111eb
-	bits ^= bits >> 31
-	return float64(bits>>11) / (1 << 53)
+	bits := seed + uint64(id)*noise.Golden + attribute*0x632be59bd9b4e019
+	return noise.Stirred(bits)
 }
 
 // ID is the stable birth identifier.

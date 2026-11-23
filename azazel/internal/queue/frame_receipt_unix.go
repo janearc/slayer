@@ -235,7 +235,8 @@ func (r *frameReceipt) accept(state *receiptState, raw []byte, flags int, out io
 		state.overflow = true
 		return nil
 	}
-	line := append(append([]byte(nil), raw...), '\n')
+	copiedRaw := append([]byte(nil), raw...)
+	line := append(copiedRaw, '\n')
 	written, err := out.Write(line)
 	if err == nil && written != len(line) {
 		err = io.ErrShortWrite

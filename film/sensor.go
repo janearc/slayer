@@ -52,6 +52,13 @@ func (p Pinhole) pixel() float64 {
 // Row 0 is the top of the picture, and up in space is up the picture: this is
 // the one place where rows counting downward meet y counting up. A pinhole has
 // no glass, so it bends every band alike.
+func (p Pinhole) Ray(x, y, w, h int, band maths.Band) maths.Ray {
+	return p.RayThrough(x, y, 0, 0, w, h, band)
+}
+
+// RayThrough is Ray through a place of the pixel and not its middle:
+// across and down are how far from the middle, in pixels, to the right
+// and down the picture. At nought and nought it is Ray, to the bit.
 //
 // a picture of no pixels looks straight ahead; a Wide that is not a field from
 // zero to a half turn is the 60 degree default, and a Pixel that is not a width
@@ -59,7 +66,8 @@ func (p Pinhole) pixel() float64 {
 //
 // the guards are here and not in wide and pixel, which the compiler writes into
 // their callers.
-func (p Pinhole) Ray(x, y, w, h int, _ maths.Band) maths.Ray {
+func (p Pinhole) RayThrough(x, y int, across, down float64, w, h int,
+	_ maths.Band) maths.Ray {
 	if w <= 0 || h <= 0 {
 		return maths.Ray{Dir: maths.V(0, 0, -1)}
 	}
@@ -73,8 +81,8 @@ func (p Pinhole) Ray(x, y, w, h int, _ maths.Band) maths.Ray {
 	// the picture, measured in pixel heights, is w*pixel wide and h tall;
 	// keeping that ratio is what keeps circles round
 	aspect := float64(w) * p.pixel() / float64(h)
-	u := (2*(float64(x)+0.5)/float64(w) - 1) * half
-	v := (1 - 2*(float64(y)+0.5)/float64(h)) * half / aspect
+	u := (2*(float64(x)+0.5+across)/float64(w) - 1) * half
+	v := (1 - 2*(float64(y)+0.5+down)/float64(h)) * half / aspect
 	return maths.Ray{Dir: maths.V(u, v, -1).Unit()}
 }
 

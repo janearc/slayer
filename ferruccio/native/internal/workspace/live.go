@@ -8,8 +8,8 @@ import (
 	"github.com/janearc/slayer/ferruccio/internal/draft"
 	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
 	"github.com/janearc/slayer/ferruccio/native/internal/workingview"
-	"github.com/janearc/slayer/hillside/placement"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 	"image"
 	"time"
@@ -117,6 +117,9 @@ func copyDisplay(scene *placement.DisplayScene) *placement.DisplayScene {
 // the base for moves.
 func (work *Workspace) beginWorking() {
 	if !work.workingCurrent() {
+		return
+	}
+	if work.refuseWhileFull("changing the scene") {
 		return
 	}
 	if work.Running() {

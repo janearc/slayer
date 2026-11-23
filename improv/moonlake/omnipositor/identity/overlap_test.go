@@ -115,7 +115,8 @@ func TestRedrawNeverMixesManifestAndPixels(t *testing.T) {
 		}
 	}()
 	for i := 0; i < 30; i++ {
-		flat, err := os.ReadFile(filepath.Join(dir, slot(a)))
+		slotPath := filepath.Join(dir, slot(a))
+		flat, err := os.ReadFile(slotPath)
 		if err != nil {
 			t.Fatal(err)
 		}

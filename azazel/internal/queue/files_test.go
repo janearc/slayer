@@ -13,7 +13,8 @@ import (
 // TestInitializationRequiresDirectoryDurability refuses an unflushed new ledger.
 func TestInitializationRequiresDirectoryDurability(t *testing.T) {
 	for _, failParent := range []bool{false, true} {
-		store := At(filepath.Join(t.TempDir(), "queue"))
+		queueRoot := filepath.Join(t.TempDir(), "queue")
+		store := At(queueRoot)
 		files := NewMockinitialFiles(gomock.NewController(t))
 		files.EXPECT().MakeDirectory(store.root).DoAndReturn(func(path string) error { return os.Mkdir(path, 0700) })
 		files.EXPECT().Create(filepath.Join(store.root, "queue.db")).DoAndReturn(func(path string) (io.Closer, error) {
@@ -37,7 +38,8 @@ func TestInitializationRequiresDirectoryDurability(t *testing.T) {
 // TestInitializationRetainsCreateAndCloseFailures refuses partial initialization.
 func TestInitializationRetainsCreateAndCloseFailures(t *testing.T) {
 	for _, closeFails := range []bool{false, true} {
-		s := At(filepath.Join(t.TempDir(), "queue"))
+		queueRoot := filepath.Join(t.TempDir(), "queue")
+		s := At(queueRoot)
 		files := NewMockinitialFiles(gomock.NewController(t))
 		files.EXPECT().MakeDirectory(s.root).Return(nil)
 		broken := errors.New("create refused")

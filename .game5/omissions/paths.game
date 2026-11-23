@@ -10,14 +10,13 @@ azazel/internal/locking/RELEASE.md
 azazel/internal/publication/LOCAL-DESIGN.md
 doc/camera-hyperlapse-result.md
 doc/feature-backlog.md
-doc/golden-hour-site.yaml
 doc/mist-packet-contract.md
 doc/music-timeline.yaml
 doc/phone-ocean-integration.md
 doc/phone-source-checks.md
 doc/review-2026-11-04.md
 doc/terrain-streaming.md
-hillside/main_draw_test.go
+session/main_draw_test.go
 manufacture/offered_test.go
 manufacture/rows_test.go
 
@@ -27,3 +26,12 @@ DEBT.md
 # the cited sources verification reads by default: in git for whoever
 # builds, never distributed.
 shelf
+
+# the four-pass studies are ours, and do not belong in the dist
+study
+
+# the original Cassini and Huygens models are kept in git for the record
+# of what the craft were built from, and are not distributed
+research/cassini-huygens/attached.glb
+research/cassini-huygens/cassini.glb
+research/cassini-huygens/huygens.glb

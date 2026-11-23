@@ -1,0 +1,8 @@
+slot,name,red,green,blue,gloss,index,metal,from,says
+body,Voyager electronics bus,0.22,0.16,0.10,0,0,,chosen,the dark equipment shell of the bus
+mirror,pale high-gain reflector,0.63,0.67,0.72,0.14,1.45,,chosen,the pale shell of the high-gain reflector
+structure,aluminium spacecraft truss,0.55,0.59,0.63,0.72,0,aluminium,chosen,the bare aluminium of struts and booms
+foil,gold-toned thermal blanket,0.58,0.34,0.12,0.28,1.7,,chosen,the thermal blanket on the bus bays and the scan platform
+secondary,instrument housings,0.42,0.46,0.5,0,0,,chosen,the grey housings of the instruments and generator cans
+panel,Voyager equipment panel,0.34,0.39,0.43,0,0,,chosen,the grey equipment panel of the calibration target
+gold,gold-toned thermal hardware,0.62,0.36,0.13,0.3,1.6,,chosen,the gold-toned fittings and fins

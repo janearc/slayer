@@ -19,8 +19,8 @@ import (
 // Picture sizes. Defined by the movie package: 1280 by 720 is taken
 // without padding (the height is a multiple of sixteen).
 const (
-	Wide = 1280
-	Tall = 720
+	wide = 1280
+	tall = 720
 )
 
 // Layout, in pixels. Picked by the writer of this package, 2026-11-12, to
@@ -44,7 +44,6 @@ const (
 var (
 	ground = color.RGBA{0x14, 0x13, 0x1a, 0xff}
 	ink    = color.RGBA{0xc4, 0xc1, 0xcf, 0xff}
-	grid   = color.RGBA{0x26, 0x24, 0x2e, 0xff}
 	band   = color.RGBA{0x1d, 0x1b, 0x26, 0xff}
 	marker = color.RGBA{0x8a, 0x87, 0x96, 0xff}
 	cursor = color.RGBA{0xff, 0xf0, 0xc8, 0xff}
@@ -91,7 +90,7 @@ func (t *Tune) seconds() float64 {
 
 // xAt is the column a moment falls in.
 func (t *Tune) xAt(second float64) int {
-	return margin + int(second/t.seconds()*float64(Wide-2*margin))
+	return margin + int(second/t.seconds()*float64(wide-2*margin))
 }
 
 // fill paints a rectangle.
@@ -114,7 +113,7 @@ func Plate(t *Tune) (*image.RGBA, error) {
 	if err != nil {
 		return nil, err
 	}
-	img := image.NewRGBA(image.Rect(0, 0, Wide, Tall))
+	img := image.NewRGBA(image.Rect(0, 0, wide, tall))
 	fill(img, img.Bounds(), ground)
 	w.text(img, margin, titleY, titleSize, ink, t.Name+"   "+t.Sheet.Mood)
 	t.drawBands(img, w)

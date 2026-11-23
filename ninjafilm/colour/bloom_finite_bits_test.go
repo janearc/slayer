@@ -27,7 +27,8 @@ func oldBloom(lights []maths.Light, across, down int, exposure,
 	if !found {
 		return lights
 	}
-	reach := int(math.Ceil(data.Picked("bloom-reach-sigmas") * radius))
+	reachSigmas := data.Picked("bloom-reach-sigmas")
+	reach := int(math.Ceil(reachSigmas * radius))
 	weights := make([]float64, pair*reach+whole)
 	var sum float64
 	for index := range weights {

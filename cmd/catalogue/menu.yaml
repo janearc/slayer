@@ -523,6 +523,22 @@ entries:
         url: https://science.nasa.gov/mission/webb/science-overview/science-explainers/telescope-overview/
       - title: NASA, Webb sunshield
         url: https://science.nasa.gov/mission/webb/webbs-sunshield/
+  - kind: prima
+    group: Observatories
+    about: A concept model of the PRIMA infrared observatory, with an open telescope tube and broad sunshield.
+    notes: The 1.8 m telescope aperture follows the mission source. Tube, shield, bus, truss and surface treatments are authored visual approximations from the concept, not engineering specifications.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Caltech/IPAC, PRIMA Observatory
+        url: https://prima.ipac.caltech.edu/page/observatory
+  - kind: roman
+    group: Observatories
+    about: Roman Space Telescope with its deployed aperture cover and six solar panels.
+    notes: NASA aperture and deployment envelope, with visually estimated component shapes and materials.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA, Building Roman
+        url: https://science.nasa.gov/missions/roman-space-telescope/building-roman/
   - kind: mcrn-larson
     group: Visitors
     about: A flying saucer, the MCRN Larson, weathered titanium under a glass dome.
@@ -1086,6 +1102,80 @@ entries:
       the deciduous blades and keeps the woody twigs.
       Code draft; geometry and CPU/Metal views await the review break.
     details: [hull, clumps, quick, demo]
+  - kind: pandanus-tectorius
+    group: Native island and coast plants
+    about: A wide-branched screw pine with long spiralled blades and prop roots.
+    notes: >-
+      Height, leaf length, the rosette at the branch end and the aerial roots
+      are read from the sources named; every other number is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Native Plants Hawaii, Pandanus tectorius
+        url: https://nativeplants.hawaii.edu/plants/pandanus-tectorius/
+      - title: Bishop Museum, Cook Islands species, Pandanus tectorius
+        url: https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=6472
+  - kind: scaevola-taccada
+    group: Native island and coast plants
+    about: A spreading salt-tolerant shrub with oval, light green leaves.
+    notes: >-
+      Height, spread, leaf length, outline and the zone it grows in are read
+      from the source named; every other number is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Native Plants Hawaii, Scaevola taccada
+        url: https://nativeplants.hawaii.edu/plants/scaevola-sericea/
+  - kind: metrosideros-polymorpha
+    group: Native island and coast plants
+    about: A shrub or tree of the island slopes with small dark green leaves.
+    notes: >-
+      Habit, leaf length and the heights it grows at are read from the source
+      named; every other number is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Native Plants Hawaii, Metrosideros polymorpha
+        url: https://nativeplants.hawaii.edu/plants/metrosideros-polymorpha/
+  - kind: barringtonia-asiatica
+    group: Native island and coast plants
+    about: A large low-branching shore tree with very large oblong leaves.
+    notes: >-
+      Height, the low branching and the leaf outline and its greatest size are
+      read from the source named; every other number is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Bishop Museum, Cook Islands species, Barringtonia asiatica
+        url: https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=5803
+  - kind: quercus-ilex
+    group: Native island and coast plants
+    about: A broad domed evergreen oak with small dark leaves, as on a coastal slope.
+    notes: >-
+      Height, crown, bark, leaf outline and length and the darkness of the
+      colour are read from the sources named; every other number is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: European Forest Atlas, Quercus ilex
+        url: https://forest.jrc.ec.europa.eu/media/atlas/Quercus_ilex.pdf
+      - title: Portofino marine reserve, coastal environment handbook
+        url: https://www.portofinoamp.it/come/didattica/3ambientecostierodispensedefinitiveecorrette2012.pdf
+  - kind: erica-arborea
+    group: Native island and coast plants
+    about: A tree heath with small needle leaves borne in whorls.
+    notes: >-
+      Only that it grows among the holm oaks and that its leaves are small is
+      read from the source named; every number is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Portofino marine reserve, coastal environment handbook
+        url: https://www.portofinoamp.it/come/didattica/3ambientecostierodispensedefinitiveecorrette2012.pdf
+  - kind: salix-alba
+    group: Native island and coast plants
+    about: A waterside willow with long narrow pointed leaves.
+    notes: >-
+      Height, the waterside it grows at and the leaf's length and outline are
+      read from the source named; every other number is picked.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: Verspreidingsatlas, Salix alba
+        url: https://www.verspreidingsatlas.nl/1116
   - kind: manzanita
     group: Desert and chaparral
     about: A red-barked multi-stem shrub with small oval blades.
@@ -1116,6 +1206,46 @@ entries:
     references:
       - title: Oregon State University, Joshua-tree foliage habit
         url: https://landscapeplants.oregonstate.edu/plants/yucca-brevifolia
+  - kind: kandelia-obovata
+    group: Mangroves
+    about: A low multi-stem mangrove on short propped roots, with thick oval leaves.
+    notes: >-
+      Authored scenery for the low native stand of a tidal shore. Height,
+      leaf size and root habit are recalled, not looked up or measured; every
+      other number is picked. Roots are physical size and differ by seed.
+    details: [hull, clumps, quick, demo]
+  - kind: aegiceras-corniculatum
+    group: Mangroves
+    about: A small many-stemmed mangrove shrub with short basal props.
+    notes: >-
+      Authored scenery for the lowest rank of a tidal shore. Height and leaf
+      size are recalled, not looked up or measured; the basal props are
+      picked, and every other number is picked.
+    details: [hull, clumps, quick, demo]
+  - kind: avicennia-marina
+    group: Mangroves
+    about: A rounded mangrove standing in a field of upright breathing roots.
+    notes: >-
+      Authored scenery. Height, leaf size and the pencil roots' height and
+      thickness are recalled, not looked up or measured; their number, the
+      field's width and every other number are picked.
+    details: [hull, clumps, quick, demo]
+  - kind: bruguiera-gymnorhiza
+    group: Mangroves
+    about: A single-trunked mangrove on propped, buttressed roots.
+    notes: >-
+      Authored scenery. Height, leaf size and root habit are recalled, not
+      looked up or measured. Knee roots are drawn as propped buttresses. Every
+      other number is picked.
+    details: [hull, clumps, quick, demo]
+  - kind: sonneratia-apetala
+    group: Mangroves
+    about: A tall planted mangrove with hanging narrow leaves and upright cone roots.
+    notes: >-
+      Authored scenery for the planted stand behind the native one. Height,
+      leaf size and root habit are recalled, not looked up or measured; the
+      cones' height, their number and every other number are picked.
+    details: [hull, clumps, quick, demo]
   - kind: saguaro
     group: Desert and chaparral
     about: A pleated upright cactus with rounded tips and curved rising arms.
@@ -1128,3 +1258,759 @@ entries:
     references:
       - title: National Park Service, saguaro arms and pleats
         url: https://www.nps.gov/tont/learn/nature/saguaro.htm
+  - kind: giant-kelp
+    group: Sea
+    about: A giant kelp plant held up by its gas bladders, in a named water.
+    notes: >-
+      A holdfast, stipes, a ruffled blade and a gas bladder at each node,
+      and a canopy at the surface. It leans with a current and takes the
+      swell's orbit by depth; kelp.yaml gives every figure its basis.
+    details: [quick]
+  - kind: kelp-forest
+    group: Sea
+    about: A forest of giant kelp, the plants by seed on a jittered grid.
+    notes: >-
+      The same plants sharing their meshes, so faces stored do not grow with
+      the plants. kelp.yaml gives every figure its basis.
+    details: [quick]
+  - kind: giant-kelp-slack
+    group: Sea
+    about: A giant kelp plant in still water, no current and no swell.
+    notes: The kind giant-kelp in the slack water of kelp.yaml.
+    details: [quick]
+  - kind: giant-kelp-moderate
+    group: Sea
+    about: A giant kelp plant in a moderate current and swell.
+    notes: The kind giant-kelp in the moderate water of kelp.yaml.
+    details: [quick]
+  - kind: giant-kelp-surge
+    group: Sea
+    about: A giant kelp plant in a strong current and a heavy swell.
+    notes: The kind giant-kelp in the surge water of kelp.yaml.
+    details: [quick]
+  - kind: kelp-forest-slack
+    group: Sea
+    about: A forest of giant kelp in still water.
+    notes: The kind kelp-forest in the slack water of kelp.yaml.
+    details: [quick]
+  - kind: kelp-forest-moderate
+    group: Sea
+    about: A forest of giant kelp in a moderate current and swell.
+    notes: The kind kelp-forest in the moderate water of kelp.yaml.
+    details: [quick]
+  - kind: kelp-forest-surge
+    group: Sea
+    about: A forest of giant kelp in a strong current and a heavy swell.
+    notes: The kind kelp-forest in the surge water of kelp.yaml.
+    details: [quick]
+  - kind: bubble-stream
+    group: Sea
+    about: A stream of air bubbles rising through water from the origin.
+    notes: >-
+      Air bubbles of the index of air, sized and shaped and risen by
+      bubbles.yaml. Place the origin where the stream is born.
+    details: [quick]
+  - kind: bird-black-faced-spoonbill-standing
+    group: Birds
+    about: A black-faced spoonbill standing, wings folded, with its spoon bill.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-black-faced-spoonbill-gliding
+    group: Birds
+    about: A black-faced spoonbill in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-black-faced-spoonbill-outline
+    group: Birds
+    about: A black-faced spoonbill standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-black-faced-spoonbill-bones
+    group: Birds
+    about: The skeleton of a black-faced spoonbill at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-little-egret-standing
+    group: Birds
+    about: A little egret standing, wings folded.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-little-egret-gliding
+    group: Birds
+    about: A little egret in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-little-egret-outline
+    group: Birds
+    about: A little egret standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-little-egret-bones
+    group: Birds
+    about: The skeleton of a little egret at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-grey-heron-standing
+    group: Birds
+    about: A grey heron standing, wings folded.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-grey-heron-gliding
+    group: Birds
+    about: A grey heron in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-grey-heron-outline
+    group: Birds
+    about: A grey heron standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-grey-heron-bones
+    group: Birds
+    about: The skeleton of a grey heron at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-pacific-reef-heron-standing
+    group: Birds
+    about: A Pacific reef heron standing, wings folded.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-pacific-reef-heron-gliding
+    group: Birds
+    about: A Pacific reef heron in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-pacific-reef-heron-outline
+    group: Birds
+    about: A Pacific reef heron standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-pacific-reef-heron-bones
+    group: Birds
+    about: The skeleton of a Pacific reef heron at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-yellow-legged-gull-standing
+    group: Birds
+    about: A yellow-legged gull standing, wings folded.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-yellow-legged-gull-gliding
+    group: Birds
+    about: A yellow-legged gull in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-yellow-legged-gull-outline
+    group: Birds
+    about: A yellow-legged gull standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-yellow-legged-gull-bones
+    group: Birds
+    about: The skeleton of a yellow-legged gull at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tern-standing
+    group: Birds
+    about: A white tern standing, wings folded.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tern-gliding
+    group: Birds
+    about: A white tern in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tern-outline
+    group: Birds
+    about: A white tern standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tern-bones
+    group: Birds
+    about: The skeleton of a white tern at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-great-frigatebird-standing
+    group: Birds
+    about: A great frigatebird standing, wings folded.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-great-frigatebird-gliding
+    group: Birds
+    about: A great frigatebird in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-great-frigatebird-outline
+    group: Birds
+    about: A great frigatebird standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-great-frigatebird-bones
+    group: Birds
+    about: The skeleton of a great frigatebird at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tailed-tropicbird-standing
+    group: Birds
+    about: A white-tailed tropicbird standing, wings folded.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tailed-tropicbird-gliding
+    group: Birds
+    about: A white-tailed tropicbird in the air, wings spread.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tailed-tropicbird-outline
+    group: Birds
+    about: A white-tailed tropicbird standing, its body one skin with no feather on.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: bird-white-tailed-tropicbird-bones
+    group: Birds
+    about: The skeleton of a white-tailed tropicbird at rest.
+    notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
+    details: [quick]
+  - kind: pacific-bluefin-tuna
+    group: Fish
+    about: A Pacific bluefin tuna at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: pacific-bluefin-tuna-glide
+    group: Fish
+    about: A Pacific bluefin tuna gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: pacific-bluefin-tuna-bones
+    group: Fish
+    about: The skeleton of a Pacific bluefin tuna at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: california-yellowtail
+    group: Fish
+    about: A California yellowtail at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: california-yellowtail-glide
+    group: Fish
+    about: A California yellowtail gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: california-yellowtail-bones
+    group: Fish
+    about: The skeleton of a California yellowtail at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: california-barracuda
+    group: Fish
+    about: A California barracuda at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: california-barracuda-glide
+    group: Fish
+    about: A California barracuda gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: california-barracuda-bones
+    group: Fish
+    about: The skeleton of a California barracuda at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: pacific-sardine
+    group: Fish
+    about: A Pacific sardine at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: pacific-sardine-glide
+    group: Fish
+    about: A Pacific sardine gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: pacific-sardine-bones
+    group: Fish
+    about: The skeleton of a Pacific sardine at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: pacific-sardine-school-500
+    group: Fish
+    about: A school of five hundred Pacific sardines.
+    notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
+    details: [quick]
+  - kind: pacific-sardine-school-5000
+    group: Fish
+    about: A school of five thousand Pacific sardines.
+    notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
+    details: [quick]
+  - kind: convict-tang
+    group: Fish
+    about: A convict tang at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: convict-tang-glide
+    group: Fish
+    about: A convict tang gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: convict-tang-bones
+    group: Fish
+    about: The skeleton of a convict tang at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: dusky-grouper
+    group: Fish
+    about: A dusky grouper at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: dusky-grouper-glide
+    group: Fish
+    about: A dusky grouper gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: dusky-grouper-bones
+    group: Fish
+    about: The skeleton of a dusky grouper at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: mediterranean-chromis
+    group: Fish
+    about: A Mediterranean chromis at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: mediterranean-chromis-glide
+    group: Fish
+    about: A Mediterranean chromis gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: mediterranean-chromis-bones
+    group: Fish
+    about: The skeleton of a Mediterranean chromis at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: mediterranean-chromis-school-60
+    group: Fish
+    about: A school of sixty Mediterranean chromis.
+    notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
+    details: [quick]
+  - kind: european-perch
+    group: Fish
+    about: A European perch at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: european-perch-glide
+    group: Fish
+    about: A European perch gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: european-perch-bones
+    group: Fish
+    about: The skeleton of a European perch at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: flathead-grey-mullet
+    group: Fish
+    about: A flathead grey mullet at one point of its swimming stroke.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: flathead-grey-mullet-glide
+    group: Fish
+    about: A flathead grey mullet gliding, nearly straight.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: flathead-grey-mullet-bones
+    group: Fish
+    about: The skeleton of a flathead grey mullet at rest.
+    notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
+    details: [quick]
+  - kind: flathead-grey-mullet-school-120
+    group: Fish
+    about: A school of a hundred and twenty flathead grey mullet.
+    notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
+    details: [quick]
+  - kind: harbor-seal
+    group: Seals, orca and walrus
+    about: A harbor seal at rest with the head a little tucked, its coat wet.
+    notes: The rigged skin with hair as blades along the coat's flow, five-digit flippers with claws, a short tail, ear openings, open nostrils, whiskers in rows and a spotted coat that reads wet. A static pose, not a clock.
+    details: [quick]
+  - kind: harbor-seal-dry
+    group: Seals, orca and walrus
+    about: A harbor seal at rest with the head a little tucked, its coat dry.
+    notes: The wet harbor seal with a dry coat and its nostrils shut. A static pose, not a clock.
+    details: [quick]
+  - kind: harbor-seal-hauled
+    group: Seals, orca and walrus
+    about: A harbor seal hauled out, the head and the hind body raised.
+    notes: The lofted harbor seal, one surface through an outline of stations, in the hauled-out pose.
+    details: [quick]
+  - kind: harbor-seal-swimming
+    group: Seals, orca and walrus
+    about: A harbor seal swimming, the hind body swept to one side.
+    notes: The lofted harbor seal, one surface through an outline of stations, wet, in its stroke.
+    details: [quick]
+  - kind: harbor-seal-bones
+    group: Seals, orca and walrus
+    about: The skeleton of a harbor seal.
+    notes: The vertebrae and ribs by region. Where a count is sourced the code comment quotes it; the others are chosen.
+    details: [quick]
+  - kind: hawaiian-monk-seal-hauled
+    group: Seals, orca and walrus
+    about: A Hawaiian monk seal asleep on a beach, nearly flat, the head down.
+    notes: The lofted maker with the monk seal's own stations, its length of 2.13 m and a plain coat, drawn over the harbor seal's skeleton. The length is read from the species page the code names; the girth is worked from the weight.
+    details: [quick]
+  - kind: bay-seal
+    group: Seals, orca and walrus
+    about: The first bay scene's seal, in its bottling pose, with eyes and whiskers.
+    notes: A static specimen with the original materials, corneas and whiskers, kept as it was drawn. Not a clock.
+    details: [quick]
+  - kind: orca-clean-05
+    group: Seals, orca and walrus
+    about: An adult cow orca at the start of a three-second swim.
+    notes: One closed skin, the trunk, falcate dorsal fin, paddle flippers, notched flukes, melon, mouth, blowhole, eyes and belly slits, bound to the bones. The swim cycle is authored, not measured.
+    details: [quick]
+  - kind: orca-clean-05-spy-hop
+    group: Seals, orca and walrus
+    about: The orca raised out of the water in a spy hop.
+    notes: The same skin as orca-clean-05 held still in the pose.
+    details: [quick]
+  - kind: orca-clean-05-bones
+    group: Seals, orca and walrus
+    about: The skeleton of the orca at rest.
+    notes: The bones the orca's skin is bound to.
+    details: [quick]
+  - kind: walrus-fresh-5
+    group: Seals, orca and walrus
+    about: A walrus in one pose, with its whiskers and creased hide.
+    notes: A static specimen, not animated.
+    details: [quick]
+  - kind: walrus-fresh-5-hauled-out
+    group: Seals, orca and walrus
+    about: A walrus hauled out of the water.
+    notes: The walrus in its hauled-out pose. A static specimen, not animated.
+    details: [quick]
+  - kind: walrus-fresh-5-swimming
+    group: Seals, orca and walrus
+    about: A walrus swimming.
+    notes: The walrus in its swimming pose. A static specimen, not animated.
+    details: [quick]
+  - kind: walrus-fresh-5-skeleton
+    group: Seals, orca and walrus
+    about: The skeleton of a walrus at rest.
+    notes: The bones alone.
+    details: [quick]
+  - kind: walrus-fresh-5-volumes
+    group: Seals, orca and walrus
+    about: The volumes of a walrus over its skeleton, before any detail.
+    notes: The masses the walrus's skin is made from, shown without the skin's detail.
+    details: [quick]
+  - kind: sampan
+    group: Boats
+    about: A sampan under way, with a canopy over a low wooden hull.
+    notes: A canopy of matting or tarpaulin over the middle of the hull, an outboard motor or a sculling oar at the stern, a lantern under the canopy, and crates and nets on the deck. Under way it shows a red light to port, a green one to starboard and a white one at the stern. Every proportion is chosen, and boats.yaml says which figures were recalled.
+    details: [quick]
+  - kind: sampan-at-anchor
+    group: Boats
+    about: A sampan at anchor, showing one white light all round.
+    notes: The sampan with the lights of a boat at anchor. Every proportion is chosen, and boats.yaml says which figures were recalled.
+    details: [quick]
+  - kind: fishing-boat
+    group: Boats
+    about: A steel inshore fishing boat under way, its wheelhouse aft of the middle.
+    notes: Plated hull, bulwark and stanchions, and the working lights of the design. Under way it shows a red light to port, a green one to starboard, a white one at the stern and one at the masthead. Every proportion is chosen, and boats.yaml says which figures were recalled.
+    details: [clumps, quick, demo]
+  - kind: fishing-boat-at-anchor
+    group: Boats
+    about: A steel inshore fishing boat at anchor, showing one white light all round.
+    notes: The fishing boat with the lights of a boat at anchor and its working lights. Every proportion is chosen, and boats.yaml says which figures were recalled.
+    details: [clumps, quick, demo]
+  - kind: ferry
+    group: Boats
+    about: A passenger ferry under way, a long open-sided cabin with a row of lit windows.
+    notes: The roof stands on pillars over sills and headers so that the windows are seen through. Under way it shows a red light to port, a green one to starboard, a white one at the stern and one at the masthead. Every proportion is chosen, and boats.yaml says which figures were recalled.
+    details: [clumps, quick, demo]
+  - kind: ferry-at-anchor
+    group: Boats
+    about: A passenger ferry at anchor, showing one white light all round.
+    notes: The ferry with the lights of a boat at anchor. Every proportion is chosen, and boats.yaml says which figures were recalled.
+    details: [clumps, quick, demo]
+  - kind: pier
+    group: Waterfront
+    about: A wharf pier, a deck on rows of piles with a shed on it.
+    notes: Drawn by the cities package. Its origin stands at the sea, so a set stands it at an absolute position.
+    details: [hull, clumps, quick, demo]
+  - kind: bivouac
+    group: Camping
+    about: A one-person bivy sack with its guy lines, a pack and boots.
+    notes: Drawn by the cities package from its design. The seed decides whether a stove is out.
+    details: [hull, clumps, quick]
+  - kind: yurt
+    group: Camping
+    about: A Mongolian ger.
+    notes: Drawn by the cities package from its design.
+    details: [hull, clumps, quick]
+  - kind: winnebago
+    group: Camping
+    about: A motorhome.
+    notes: Made as the yurt is, and differs only in its design.
+    details: [hull, clumps, quick]
+  - kind: sls-core-tank
+    group: Launchers
+    about: The core stage tank of the Space Launch System alone, with no booster and nothing above it.
+    notes: The very section the sls-block-1 stack lists, so its width, length, material and paint are that row's.
+    details: [hull, clumps, quick, demo]
+  - kind: tower
+    group: City buildings
+    about: A tower, a plain block unless its recipe gives it irregularity or pins.
+    notes: Drawn by the cities package from the seed. A recipe may give its irregularity and pin retail on its foot, a skin, a plan, a use and a span between shafts.
+    details: [clumps, quick]
+  - kind: bridge
+    group: City buildings
+    about: A span whose structure is buildings, plain at the default span and depth.
+    notes: Drawn by the cities package from the seed. A recipe may give its irregularity, span and depth.
+    details: [clumps, quick]
+  - kind: condominium
+    group: City buildings
+    about: Two to four buildings of stacked flats round a shared court.
+    notes: Drawn by the cities package and made as the terraces are.
+    details: [hull, clumps, quick]
+  - kind: terrace-groningen
+    group: City buildings
+    about: A row of houses of the Groningen culture.
+    notes: A terrace drawn by the cities package from one culture's data.
+    details: [clumps, quick]
+  - kind: terrace-midwest
+    group: City buildings
+    about: A row of houses of the midwest culture.
+    notes: A terrace drawn by the cities package from one culture's data.
+    details: [hull, clumps, quick]
+  - kind: terrace-portofino
+    group: City buildings
+    about: A row of houses of the Portofino culture.
+    notes: A terrace drawn by the cities package from one culture's data.
+    details: [hull, clumps, quick]
+  - kind: terrace-san-francisco
+    group: City buildings
+    about: A row of houses of the San Francisco culture.
+    notes: A terrace drawn by the cities package from one culture's data.
+    details: [clumps, quick]
+  - kind: village
+    group: City buildings
+    about: An urban village, a parcel packed with houses, alleys and lanes between them, cables over both.
+    notes: Drawn by the cities package. Each house is levelled as a building is and stands on the ground under its own plot.
+    details: [quick]
+  - kind: village-house
+    group: City buildings
+    about: One house of an urban village, standing alone on a lane.
+    notes: Drawn by the cities package. Levelled as a building is.
+    details: [quick]
+  - kind: street
+    group: City buildings
+    about: A carriageway with a kerb and a paved footway each side, a centre line, a crossing and gully gratings.
+    notes: Runs along its own z axis, centred on the origin; the footways end at six metres each side, where a twelve metre street's buildings stand. As it grows wet it takes a film of water and puddles in the low places.
+    details: [hull, clumps, quick, demo]
+  - kind: superblock
+    group: City buildings
+    about: A parcel built over plot by plot, each against the last, into one mass.
+    notes: A set asks the size of its parcel, its ceiling in storeys, the kinds on its roofs, the people it is planned for and its accretion, from planned to grown over, or drawn from the seed.
+    details: [hull, clumps, quick]
+  - kind: lashed-street
+    group: City buildings
+    about: A street of plain blocks with cables across it hung with lanterns and signs.
+    notes: Two rows of plain blocks give the lashings a group of their own; the lashings are a decoration over any group of buildings.
+    details: [hull, clumps, quick, demo]
+  - kind: scavenged-cluster
+    group: City buildings
+    about: A cluster of parts drawn from other kinds, weighted, in bands.
+    notes: A set asks the kinds, their weights, how many parts and how far apart the bands stand; what it leaves unsaid comes from scavenged.yaml. Drawn here at the clumps level, which makes in under a second; the other levels draw the same parts finer and were not drawn for this entry.
+    details: [clumps]
+  - kind: retail-block
+    group: City buildings
+    about: A building on a podium of shops.
+    notes: Street-level retail, each unit lit from inside so that its light spills onto the pavement.
+    details: [quick]
+  - kind: frontage
+    group: Shopfronts
+    about: A row of shopfronts drawn from the seed, none beside one of its own kind.
+    notes: Each unit is one of the types of retail-units.yaml, a whole number of bays wide and as tall as the ground storey. Hull is a lit opening, quick has the counter, door, awning and sign, demo the stools, bowls and hardware.
+    details: [quick]
+  - kind: frontage-one
+    group: Shopfronts
+    about: One shopfront of a type the seed draws.
+    notes: Each unit is one of the types of retail-units.yaml. Hull is a lit opening, quick has the counter, door, awning and sign, demo the stools, bowls and hardware.
+    details: [quick]
+  - kind: frontage-ramen
+    group: Shopfronts
+    about: A ramen counter.
+    notes: One unit of the ramen type of retail-units.yaml. Hull is a lit opening, quick has the counter, door, awning and sign, demo the stools, bowls and hardware.
+    details: [quick]
+  - kind: frontage-dive
+    group: Shopfronts
+    about: A dive bar.
+    notes: One unit of the dive type of retail-units.yaml. Hull is a lit opening, quick has the counter, door, awning and sign, demo the stools, bowls and hardware.
+    details: [quick]
+  - kind: sign-roof
+    group: Signs
+    about: A lit sign standing on a roof.
+    notes: The words and look are the seed's, and the sign carries the lamps that throw its colour on what is near it.
+    details: [quick, demo]
+  - kind: sign-screen
+    group: Signs
+    about: A lit screen sign.
+    notes: The words and look are the seed's, and the sign carries the lamps that throw its colour on what is near it.
+    details: [quick, demo]
+  - kind: sign-blade
+    group: Signs
+    about: A lit blade sign, hung out from a wall.
+    notes: The words and look are the seed's, and the sign carries the lamps that throw its colour on what is near it.
+    details: [quick, demo]
+  - kind: sign-awning
+    group: Signs
+    about: A lit awning with stripes and a valance carrying words.
+    notes: The words and look are the seed's, and the sign carries the lamps that throw its colour on what is near it.
+    details: [quick, demo]
+  - kind: gargoyle-allosaurus-concrete
+    group: Gargoyles
+    about: An allosaur carved in concrete, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-allosaurus-granite
+    group: Gargoyles
+    about: An allosaur carved in granite, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-hatzegopteryx-concrete
+    group: Gargoyles
+    about: A Hatzegopteryx carved in concrete, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-hatzegopteryx-granite
+    group: Gargoyles
+    about: A Hatzegopteryx carved in granite, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-orca-concrete
+    group: Gargoyles
+    about: An orca carved in concrete, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-orca-granite
+    group: Gargoyles
+    about: An orca carved in granite, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-pliosaur-concrete
+    group: Gargoyles
+    about: A pliosaur carved in concrete, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-pliosaur-granite
+    group: Gargoyles
+    about: A pliosaur carved in granite, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-squid-concrete
+    group: Gargoyles
+    about: A squid carved in concrete, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-squid-granite
+    group: Gargoyles
+    about: A squid carved in granite, crouched on a corbel with a spout.
+    notes: The creature supplies its shape and nothing else; the stone, the corbel and the spout are the gargoyle's own. The front stands out of the corbel and the rest goes into the wall behind.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-cornice-concrete
+    group: Gargoyles
+    about: A concrete cornice wall with a row of gargoyles under its eave.
+    notes: Each gargoyle is a different creature the seed draws. The wall's face is in the plane z is nought and faces positive z.
+    details: [hull, clumps, quick, demo]
+  - kind: gargoyle-cornice-granite
+    group: Gargoyles
+    about: A granite cornice wall with a row of gargoyles under its eave.
+    notes: Each gargoyle is a different creature the seed draws. The wall's face is in the plane z is nought and faces positive z.
+    details: [hull, clumps, quick, demo]
+  - kind: hatz-gargoyle
+    group: Gargoyles
+    about: A Hatzegopteryx crouched with its wings half folded.
+    notes: The animal of the roof-berth study with its wings raised and swept back; the folding is picked by eye against a render.
+    details: [hull, clumps, quick, demo]
+  - kind: soho
+    group: Observatories
+    about: Solar and Heliospheric Observatory with its deployed solar wings.
+    notes: ESA overall scale with photo-led flight fittings and estimated surface treatments.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA SOHO assembly photographs
+        url: https://soho.nascom.nasa.gov/gallery/Spacecraft/soho_photo10.html
+  - kind: mariner-10
+    group: Spacecraft
+    about: Deployed Venus and Mercury flyby spacecraft.
+    notes: NASA bus, array span and reflector sizes with estimated minor fittings.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA Mariner 10 diagram
+        url: https://science.nasa.gov/resource/mariner-10-diagram/
+  - kind: jimo
+    group: Spacecraft
+    about: Deployed Jupiter Icy Moons Orbiter concept with four radiator banks.
+    notes: Unflown NASA concept with visually estimated dimensions and finishes.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA September 2012 spacecraft overview
+        url: https://ntrs.nasa.gov/citations/20120016895
+  - kind: cassini
+    group: Spacecraft
+    about: Saturn orbiter with its reflector, instruments and booms.
+    notes: NASA mesh adapted for the renderer. Material assignments are simplified.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA Cassini and Huygens geometry
+        url: https://science.nasa.gov/3d-resources/cassini-huygens-a/
+  - kind: huygens
+    group: Spacecraft
+    about: Titan entry capsule with its exterior seam and fittings.
+    notes: Uses the NASA capsule mesh with estimated seam hardware.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA Cassini and Huygens geometry
+        url: https://science.nasa.gov/3d-resources/cassini-huygens-a/
+  - kind: cassini-huygens
+    group: Spacecraft
+    about: Cassini orbiter with Huygens in its attached cruise position.
+    notes: Uses the NASA assembly placement with simplified materials.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA Cassini and Huygens geometry
+        url: https://science.nasa.gov/3d-resources/cassini-huygens-a/
+  - kind: new-horizons
+    group: Spacecraft
+    about: New Horizons printable-model study with dish, bus and RTG.
+    notes: NASA printable meshes with an estimated assembly and flat materials.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA printable New Horizons
+        url: https://science.nasa.gov/3d-resources/new-horizons/
+  - kind: new-horizons-vtad
+    group: Spacecraft
+    about: New Horizons with separate foil, dish and instrument surfaces.
+    notes: NASA source mesh with simplified materials and renderer topology repairs.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA New Horizons 3D model
+        url: https://science.nasa.gov/resource/new-horizons-3d-model/
+  - kind: voyager-1
+    group: Spacecraft
+    about: Voyager 1 with deployed dish, antenna wires and instrument booms.
+    notes: NASA supplies the primary dimensions. Minor fittings and finishes are visual estimates shared by the two spacecraft.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA Voyager instruments and spacecraft
+        url: https://science.nasa.gov/mission/voyager/instruments/
+      - title: NASA Voyager frequently asked questions
+        url: https://science.nasa.gov/mission/voyager/frequently-asked-questions/
+  - kind: voyager-2
+    group: Spacecraft
+    about: Voyager 2 with deployed dish, antenna wires and instrument booms.
+    notes: NASA supplies the primary dimensions. Minor fittings and finishes are visual estimates shared by the two spacecraft.
+    details: [hull, clumps, quick, demo]
+    references:
+      - title: NASA Voyager instruments and spacecraft
+        url: https://science.nasa.gov/mission/voyager/instruments/
+      - title: NASA Voyager frequently asked questions
+        url: https://science.nasa.gov/mission/voyager/frequently-asked-questions/

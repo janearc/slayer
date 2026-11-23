@@ -20,8 +20,9 @@ func TestCompositionPaletteTracksThePrescribedSpectrumAcrossItsRange(t *testing.
 	const cold, hot, exposure = 900.0, 1900.0, 1e-5
 	table := compositionGlowing(profile, cold, hot, exposure)
 	for _, temperature := range []float64{0, 900, 1100, 1400, 1700, 1900, 2400} {
-		expectedHeat := measure.Kelvin(math.Max(cold, math.Min(hot, temperature)))
-		spectrum := profile.Spectrum(expectedHeat).Scale(exposure)
+		clamped := math.Max(cold, math.Min(hot, temperature))
+		expectedHeat := measure.Kelvin(clamped)
+		spectrum := profile.spectrum(expectedHeat).Scale(exposure)
 		r, g, b := srgb.Light(observer.Swatch(spectrum))
 		expected := maths.RGB(math.Max(0, r), math.Max(0, g), math.Max(0, b))
 		got := table.At(measure.Kelvin(temperature))

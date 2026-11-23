@@ -1,0 +1,44 @@
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+# the rings test with the water a mirror that lets nothing through,
+# picked, to see whether the shards come through the bend or the mirror.
+scene:
+  name: rings on an opaque sea
+  light: sun
+  air: earth
+  groundless-air:
+    coordinate-origin: earth-mean-radius
+    reference-altitude: {value: 0, unit: m}
+    boundary: earth-standard-land
+  sun: {azimuth: 236.2, altitude: 24}
+  film:
+    width: 1600
+    height: 1000
+    rays: 2
+    exposure: 1102
+    wide: 40
+  world:
+    unit: 1
+    materials:
+      seawater:
+        clear:
+          through: 0.001
+          index: 1.333
+          gloss: 1
+          rank: 0
+        source: "picked for the measurement: water's mirror with nothing through it"
+    ocean:
+      material: seawater
+      middle: [0, 0, 0]
+      sea:
+        wind: {value: 3, unit: m/s}
+        fetch: {value: 5000, unit: m}
+        depth: {value: 0, unit: m}
+        toward: {value: 0, unit: rad}
+      seed: 7
+      time: {value: 0, unit: s}
+      source: "the bay seal's sea: a light breeze in a sheltered bay, no shelf source"
+  cameras:
+    swell:
+      title: "low over the water, 3 m off the middle"
+      location: {at: [2.2, -2.2, 0.7]}
+      orientation: {look_at: [0.1, 0, 0.0]}

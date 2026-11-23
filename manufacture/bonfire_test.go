@@ -17,7 +17,8 @@ func TestABonfireIsLogsLeanedTogether(t *testing.T) {
 			t.Fatalf("seed %d: %d lights of its own", number,
 				len(made.lights))
 		}
-		if !row.logs.holds(float64(len(made.parts))) {
+		logCount := float64(len(made.parts))
+		if !row.logs.holds(logCount) {
 			t.Errorf("seed %d: %d logs", number, len(made.parts))
 		}
 		for _, one := range made.parts {

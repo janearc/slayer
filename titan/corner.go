@@ -109,7 +109,7 @@ type corner struct {
 	// reaches the same names a cpu does. What a corner is made from
 	// hangs on its name and the seed and nothing else.
 	name   uint64
-	kind   Kind
+	kind   kind
 	height float64 // metres above the map's zero
 	made   float64 // how many of those metres are made
 	// differs is how much the map's heights differ, on average, between
@@ -177,7 +177,7 @@ func (ground *Ground) read(at vector, name uint64) (corner, error) {
 		ground.kept[name] = kept
 		ground.guard.Unlock()
 	}
-	return corner{at: at, name: name, kind: Measured,
+	return corner{at: at, name: name, kind: measured,
 		height: kept.height, differs: kept.differs, hurst: kept.hurst,
 		spacing: kept.spacing, slope: kept.slope,
 		unknown: kept.unknown}, nil

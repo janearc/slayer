@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 // every request in the table of refusals is refused, and says why in
@@ -56,7 +57,7 @@ func TestPaddingSaysHowManyRows(t *testing.T) {
 func TestPaddingAddsNothingWhenNotNeeded(t *testing.T) {
 	request := smallRequest(t)
 	request.Pad = true
-	if padding := mustSettings(t, request).Padding(); padding != 0 {
+	if padding := mustSettings(t, request).Padding(); padding != zero {
 		t.Errorf("padded %d rows onto a height of %d", padding,
 			request.Height)
 	}
@@ -65,12 +66,12 @@ func TestPaddingAddsNothingWhenNotNeeded(t *testing.T) {
 // a checked request keeps what was asked, and knows its length.
 func TestSettingsKeepWhatWasAsked(t *testing.T) {
 	request := smallRequest(t)
-	request.Sound = tone(t, readRate, 1)
+	request.Sound = tone(t, readRate, one)
 	settings := mustSettings(t, request)
 	if settings.Path() != request.Path || settings.Rate() != request.Rate ||
 		settings.Frames() != request.Frames ||
 		settings.Sound().Length() != request.Sound.Length() ||
-		settings.Duration().Seconds() != 1 {
+		settings.Duration().Seconds() != one {
 		t.Errorf("settings %+v from request %+v", settings, request)
 	}
 }
@@ -95,6 +96,44 @@ func TestAFileAsTheDirectoryIsRefused(t *testing.T) {
 	_, err := NewSettings(request)
 	if err == nil || !strings.Contains(err.Error(), "does not exist") {
 		t.Errorf("a file as the directory: %v", err)
+	}
+}
+
+// a directory at the path is refused even when Replace is set, since a
+// movie cannot be renamed over one, and that would be found only after
+// every frame was written.
+func TestADirectoryIsNeverReplaced(t *testing.T) {
+	request := smallRequest(t)
+	if err := os.Mkdir(request.Path, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for _, replace := range []bool{false, true} {
+		request.Replace = replace
+		_, err := NewSettings(request)
+		if err == nil {
+			t.Errorf("a directory at the path taken, replace %v", replace)
+		}
+	}
+	request.Replace = true
+	_, err := NewSettings(request)
+	if err == nil || !strings.Contains(err.Error(), "is a directory") {
+		t.Errorf("a directory, replaced: %v", err)
+	}
+}
+
+// settings that were not made by NewSettings have no rate to divide by:
+// their duration is nought, not a panic. The anti-test is settings that
+// were made, which play for as long as their frames last.
+func TestSettingsNotMadeHaveNoDuration(t *testing.T) {
+	if got := (Settings{}).Duration(); got != zero {
+		t.Errorf("settings never made play for %v", got)
+	}
+	settings := mustSettings(t, smallRequest(t))
+	want := time.Duration(settings.Frames()) * time.Second /
+		time.Duration(settings.Rate())
+	if settings.Duration() != want || settings.Duration() == zero {
+		t.Errorf("settings made play for %v, want %v", settings.Duration(),
+			want)
 	}
 }
 

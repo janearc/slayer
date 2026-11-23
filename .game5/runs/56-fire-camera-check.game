@@ -1,1 +1,1 @@
-fire-camera-check . :: ./bin/hillside sequence --plan doc/fire-camera-sequence.yaml --dry-run
+fire-camera-check . :: ./bin/slayer assess doc/fire-camera-sequence.yaml

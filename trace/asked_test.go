@@ -17,27 +17,125 @@ func suns(count int) *thing.World {
 	world := thing.NewWorld()
 	world.Add(thing.Thing{Shape: shape.Plane{},
 		Material: &thing.Material{Colour: maths.Grey(0.5)}})
+	sphereAt := resting(maths.V(0, 1.5, 0))
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 1},
 		Material: &thing.Material{Colour: maths.Grey(0.5)},
-		Motion:   resting(maths.V(0, 1.5, 0))})
+		Motion:   sphereAt})
 	random := rand.New(rand.NewPCG(7, 11))
 	for range count {
 		way := maths.V(random.Float64()*2-1, 0.2+random.Float64(),
 			random.Float64()*2-1).Unit()
-		world.Lamp(thing.Sun(way, maths.Grey(0.1+random.Float64())))
+		light := maths.Grey(0.1 + random.Float64())
+		world.Lamp(thing.Sun(way, light))
 	}
 	return world
 }
 
+// levelWorth is what a lamp is worth to a level floor: its light by how
+// squarely it lands.
+func levelWorth(toward maths.Vec, light maths.Light) float64 {
+	return light.Luminance() * math.Max(0, maths.Up.Dot(toward))
+}
+
+// evenSteps is how many times each of some lamps is taken by so many
+// picks spaced evenly along their worths laid end to end, the first
+// pick a share start of a step in: lamp by lamp, the picks that fall
+// inside its own stretch of the worth, as a count by its place.
+func evenSteps(worths []float64, start float64, asks int) map[int]int {
+	total := 0.0
+	for _, each := range worths {
+		total += each
+	}
+	taken := map[int]int{}
+	for pick := range asks {
+		target, laid := (start+float64(pick))*total/float64(asks), 0.0
+		for place, each := range worths {
+			laid += each
+			if target < laid {
+				taken[place]++
+				break
+			}
+		}
+	}
+	return taken
+}
+
+// sameTaking is whether the lamps asked are the lamps taken, each
+// counted its picks times the worth of a step over its own worth.
+func sameTaking(asked []lit, taken map[int]int, worths []float64,
+	step float64) bool {
+	if len(asked) != len(taken) {
+		return false
+	}
+	for _, one := range asked {
+		want := float64(taken[one.index]) * step / worths[one.index]
+		if !within(one.counts, want, 1e-9*want) {
+			return false
+		}
+	}
+	return true
+}
+
+// twoHundred is a scene of two hundred suns, what each is worth to a
+// level floor at a point of it, the worth of one of lampsAsked steps
+// along them, and the point.
+func twoHundred() (*staged, []float64, float64, maths.Vec) {
+	scene, point := stage(suns(200), 0), maths.V(40, 0, 40)
+	worths, total := make([]float64, len(scene.lamps)), 0.0
+	for index, lamp := range scene.lamps {
+		toward, _, light := lamp.Light(point, maths.Up)
+		worths[index] = levelWorth(toward, light)
+		total += worths[index]
+	}
+	return scene, worths, total / lampsAsked, point
+}
+
+// Past lampsEvery lamps a point asks lampsAsked of them: the lamps that
+// even steps along the lamps' worth fall in, from a start the place
+// gives, each counted its picks times a step over its own worth. Which
+// lamps those are is worked here pick by pick and held to what the
+// point asks, lamp for lamp.
+//
+// The sum of count times worth is the lamps' whole worth for any choice
+// of lamps, since every count is a step over the worth: it is not what
+// this holds.
+func TestTwoHundredLampsAreAskedWhereEvenStepsFallAlongTheirWorth(
+	t *testing.T) {
+	scene, worths, step, point := twoHundred()
+	taken := evenSteps(worths, placeShare(point), lampsAsked)
+	asked := scene.asked(nil, point, maths.Up, levelWorth)
+	if len(taken) < 2 || len(taken) > lampsAsked {
+		t.Fatalf("the test's own steps fall in %d lamps", len(taken))
+	}
+	if !sameTaking(asked, taken, worths, step) {
+		t.Errorf("the point asks %+v, and even steps take %v", asked, taken)
+	}
+}
+
+// Anti: the same lamps picked from another start are told. Steps begun
+// half a step on from the place's own fall in other lamps, and the
+// check says the point did not ask those.
+func TestLampsTakenFromAnotherStartAreNotTheLampsAsked(t *testing.T) {
+	scene, worths, step, point := twoHundred()
+	other := math.Mod(placeShare(point)+0.5, 1)
+	asked := scene.asked(nil, point, maths.Up, levelWorth)
+	if sameTaking(asked, evenSteps(worths, other, lampsAsked), worths,
+		step) {
+		t.Error("lamps taken from another start passed for the lamps " +
+			"the point asks")
+	}
+}
+
 // with nothing in the way, the lamps a point asks are worth, counted as
-// asked, exactly what every lamp is worth: with two hundred lamps as
-// with eight; with lampsEvery or fewer every lamp is asked once.
+// asked, exactly what every lamp is worth; with lampsEvery or fewer
+// every lamp is asked, once. Past lampsEvery that sum says nothing of
+// which lamps were asked: see the test above.
 func TestTheLampsAskedAreWorthEveryLamp(t *testing.T) {
 	up := maths.V(0, 1, 0)
 	worth := func(toward maths.Vec, light maths.Light) float64 {
 		return light.Luminance() * math.Max(0, up.Dot(toward))
 	}
-	for _, count := range []int{3, lampsAsked, 12, lampsEvery, 200} {
+	for _, count := range []int{3, lampsAsked, 12, lampsEvery} {
 		scene := stage(suns(count), 0)
 		point := maths.V(40, 0, 40)
 		all, got := 0.0, 0.0

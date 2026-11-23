@@ -17,7 +17,8 @@ func TestThermalColoursRetainTheirPhysicalEndpointsAndScale(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, heat := range []measure.Temperature{spec.Coolest, spec.Hottest} {
-		r, g, b := srgb.Light(observer.Swatch(Glowing(heat).Scale(spec.Exposure)))
+		light := blackBody(heat).Scale(spec.Exposure)
+		r, g, b := srgb.Light(observer.Swatch(light))
 		want := maths.RGB(max(0, r), max(0, g), max(0, b))
 		got := table.At(heat)
 		if !(got.R > 0) || math.Abs(got.R-want.R)+math.Abs(got.G-want.G)+math.Abs(got.B-want.B) > 1e-10*max(1, want.Luminance()) {

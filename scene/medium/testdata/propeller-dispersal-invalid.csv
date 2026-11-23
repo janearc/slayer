@@ -1,0 +1,5 @@
+name,field,value
+wander alone,wander,1
+negative spread per metre,spread_per,-1
+wander scale not a number,wander_scale,nan
+spread start too far,spread_start,201

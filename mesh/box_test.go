@@ -2,10 +2,161 @@ package mesh
 
 import (
 	"math"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/janearc/slayer/maths"
 )
+
+// The csv files of this file's fixtures, each row named in its first
+// column.
+const (
+	boxSpansFile    = "testdata/box-spans.csv"
+	boxPointsFile   = "testdata/box-points.csv"
+	boxFlatFile     = "testdata/box-flat-areas.csv"
+	boxBinsFile     = "testdata/box-bins.csv"
+	boxNearerFile   = "testdata/box-nearer.csv"
+	boxRaysFile     = "testdata/box-rays.csv"
+	boxDescentsFile = "testdata/box-descents.csv"
+	boxEntersFile   = "testdata/box-enters.csv"
+	boxSightsFile   = "testdata/box-sights.csv"
+)
+
+// boxSlackName is the box whose low end on x is the slack past a far side.
+const boxSlackName = "slack-edge"
+
+// boxLoosenedWord is what the enter column of a row says when the way in
+// is as far as the slack allows.
+const boxLoosenedWord = "loosened"
+
+// The places of a stack, from its bottom.
+const (
+	boxStackBottom = nought // defined: the first place of a stack
+	boxStackSecond = unity  // defined: the place above the bottom
+	boxStackThird  = pair   // defined: the place above the second
+)
+
+const (
+	// boxHalf is half of one.
+	boxHalf = 0.5 // defined: half is one over two
+	// boxLastPlace is the step from one to the next float64 above it.
+	boxLastPlace = 0x1p-52 // defined by float64: its fraction is 52 bits
+)
+
+// boxRowNamed is the row of a csv file with the given name. A name that
+// no row has stops the test.
+func boxRowNamed(test testing.TB, file, name string) map[string]string {
+	test.Helper()
+	for _, row := range read(test, file) {
+		if row["name"] == name {
+			return row
+		}
+	}
+	test.Fatalf("%s: no row named %q", file, name)
+	return nil
+}
+
+// boxPartsIn is the three parts of a point, read from the columns of a
+// row that are named for the prefix and then x, y and z.
+func boxPartsIn(test testing.TB, row map[string]string,
+	prefix string) [axes]float64 {
+	test.Helper()
+	along := float(test, row, prefix+"x")
+	up := float(test, row, prefix+"y")
+	deep := float(test, row, prefix+"z")
+	return partsOf(along, up, deep)
+}
+
+// boxVectorOf is a point's three parts as a vector.
+func boxVectorOf(point [axes]float64) maths.Vec {
+	return maths.V(point[alongX], point[alongY], point[alongZ])
+}
+
+// boxPointNamed is a point of the points file, by name.
+func boxPointNamed(test testing.TB, name string) [axes]float64 {
+	test.Helper()
+	return boxPartsIn(test, boxRowNamed(test, boxPointsFile, name), "")
+}
+
+// boxSpanNamed is a box of the spans file, by name.
+func boxSpanNamed(test testing.TB, name string) span {
+	test.Helper()
+	row := boxRowNamed(test, boxSpansFile, name)
+	return span{
+		low:  boxPartsIn(test, row, "low"),
+		high: boxPartsIn(test, row, "high"),
+	}
+}
+
+// boxNodeNamed is a node whose bounds are those of a box of the spans
+// file, by name.
+func boxNodeNamed(test testing.TB, name string) node {
+	test.Helper()
+	box := boxSpanNamed(test, name)
+	return node{bounds: [boundEnds][axes]float64{low: box.low, high: box.high}}
+}
+
+// boxNodeAt is the node of a box of the spans file, by name, to be
+// entered. The box named for the slack has the slack for its low end
+// on x.
+func boxNodeAt(test testing.TB, name string) *node {
+	test.Helper()
+	at := boxNodeNamed(test, name)
+	if name == boxSlackName {
+		at.bounds[low][alongX] = loosened
+	}
+	return &at
+}
+
+// boxRayIn is the ray of a row, from its at and dir columns.
+func boxRayIn(test testing.TB, row map[string]string) maths.Ray {
+	test.Helper()
+	at := boxPartsIn(test, row, "at")
+	dir := boxPartsIn(test, row, "dir")
+	return maths.NewRay(boxVectorOf(at), boxVectorOf(dir))
+}
+
+// boxSightIn is the sight a row says a ray is made ready as.
+func boxSightIn(test testing.TB, row map[string]string) sight {
+	test.Helper()
+	return sight{
+		from:    boxPartsIn(test, row, "at"),
+		inverse: boxPartsIn(test, row, "inverse"),
+		entry: [axes]int{whole(test, row, "entryx"),
+			whole(test, row, "entryy"), whole(test, row, "entryz")},
+		kx:     whole(test, row, "kx"),
+		ky:     whole(test, row, "ky"),
+		kz:     whole(test, row, "kz"),
+		shearX: float(test, row, "shearx"),
+		shearY: float(test, row, "sheary"),
+		shearZ: float(test, row, "shearz"),
+	}
+}
+
+// boxEnterIn is the distance a row says a sight enters a box at.
+func boxEnterIn(test testing.TB, row map[string]string) float64 {
+	test.Helper()
+	if row["enter"] == boxLoosenedWord {
+		return loosened
+	}
+	return float(test, row, "enter")
+}
+
+// boxTopNodes is the nodes a row says are on top of a stack, from the
+// top down, as whole numbers with spaces between.
+func boxTopNodes(test testing.TB, text string) []int {
+	test.Helper()
+	var nodes []int
+	for _, word := range strings.Fields(text) {
+		number, err := strconv.Atoi(word)
+		if err != nil {
+			test.Fatal(err)
+		}
+		nodes = append(nodes, number)
+	}
+	return nodes
+}
 
 // this file's name sorts before any that builds a mesh. game mutants
 // runs the suite failfast, in file order, so a change that makes a
@@ -16,18 +167,18 @@ import (
 // box of that point alone, and a box joined to it is itself.
 func TestAnEmptySpanTakesWhatIsJoinedToIt(t *testing.T) {
 	empty := emptySpan()
-	for axis := range 3 {
-		if !math.IsInf(empty.low[axis], 1) ||
-			!math.IsInf(empty.high[axis], -1) {
+	for axis := range axes {
+		if !math.IsInf(empty.low[axis], plusInfinity) ||
+			!math.IsInf(empty.high[axis], -plusInfinity) {
 			t.Errorf("axis %d runs %v to %v", axis, empty.low[axis],
 				empty.high[axis])
 		}
 	}
-	point := partsOf(-3, 0, 4)
+	point := boxPointNamed(t, "join-point")
 	if got := empty.with(point); got.low != point || got.high != point {
 		t.Errorf("a point alone is %v", got)
 	}
-	box := span{low: partsOf(-1, 2, -3), high: partsOf(4, 5, 6)}
+	box := boxSpanNamed(t, "join-box")
 	if got := empty.joined(box); got != box {
 		t.Errorf("joined to nothing it is %v", got)
 	}
@@ -39,22 +190,22 @@ func TestAnEmptySpanTakesWhatIsJoinedToIt(t *testing.T) {
 // two boxes joined are the box round both: the lows' least and the
 // highs' greatest, each axis alone.
 func TestJoinedSpansTakeTheirExtremesByAxis(t *testing.T) {
-	one := span{low: partsOf(0, 5, -2), high: partsOf(4, 6, 1)}
-	other := span{low: partsOf(1, 3, -3), high: partsOf(2, 9, 0)}
-	want := span{low: partsOf(0, 3, -3), high: partsOf(4, 9, 1)}
+	one := boxSpanNamed(t, "join-one")
+	other := boxSpanNamed(t, "join-other")
+	want := boxSpanNamed(t, "join-want")
 	if got := one.joined(other); got != want {
 		t.Errorf("joined they are %v, not %v", got, want)
 	}
-	if got := one.with(partsOf(5, 4, -7)); got !=
-		(span{low: partsOf(0, 4, -7), high: partsOf(5, 6, 1)}) {
+	grown := boxSpanNamed(t, "join-grown-want")
+	if got := one.with(boxPointNamed(t, "grown-point")); got != grown {
 		t.Errorf("grown to a point it is %v", got)
 	}
 }
 
 // the middle is halfway between low and high on each axis.
 func TestASpansMiddleIsHalfwayOnEachAxis(t *testing.T) {
-	box := span{low: partsOf(-1, 2, -3), high: partsOf(3, 6, 5)}
-	if got := box.middle(); got != partsOf(1, 4, 1) {
+	box := boxSpanNamed(t, "middle-box")
+	if got := box.middle(); got != boxPointNamed(t, "middle-want") {
 		t.Errorf("the middle is %v", got)
 	}
 }
@@ -62,49 +213,75 @@ func TestASpansMiddleIsHalfwayOnEachAxis(t *testing.T) {
 // the area is half the surface: wide times tall, tall times deep, deep
 // times wide, for a box two wide, five tall and nine deep.
 func TestASpansAreaIsHalfItsSurface(t *testing.T) {
-	box := span{low: partsOf(1, 2, 4), high: partsOf(3, 7, 13)}
-	if got := box.area(); got != 2*5+5*9+9*2 {
-		t.Errorf("the area is %v, not 73", got)
+	box := boxSpanNamed(t, "area-box")
+	wide := picked(t, "box-area-wide")
+	tall := picked(t, "box-area-tall")
+	deep := picked(t, "box-area-deep")
+	want := wide*tall + tall*deep + deep*wide
+	if got := box.area(); got != want {
+		t.Errorf("the area is %v, not %v", got, want)
+	}
+}
+
+// boxCheckFlatArea checks that a box flat on one axis has the area of
+// its face.
+func boxCheckFlatArea(test testing.TB, axis int) {
+	test.Helper()
+	flat := boxSpanNamed(test, "flat-base")
+	flat.high[axis] = unity
+	want := float(test, read(test, boxFlatFile)[axis], "area")
+	if got := flat.area(); got != want {
+		test.Errorf("flat on %d: %v, not %v", axis, got, want)
+	}
+}
+
+// boxCheckThinArea checks that a box half a unit thin on one axis has
+// an area.
+func boxCheckThinArea(test testing.TB, axis int) {
+	test.Helper()
+	thin := boxSpanNamed(test, "origin-base")
+	thin.high[axis] = boxHalf
+	if got := thin.area(); got == nought {
+		test.Errorf("half a unit thin on %d has no area", axis)
+	}
+}
+
+// boxCheckInsideOutArea checks that a box with its high below its low on
+// one axis has no area.
+func boxCheckInsideOutArea(test testing.TB, axis int) {
+	test.Helper()
+	inside := boxSpanNamed(test, "origin-base")
+	inside.high[axis] = -unity
+	if got := inside.area(); got != nought {
+		test.Errorf("inside out on %d: %v", axis, got)
 	}
 }
 
 // a box flat on one axis has the area of its face, and a box with a
 // high below its low on any axis, or none at all, has none.
 func TestASpansAreaIsNoughtOnlyWhereItIsInsideOut(t *testing.T) {
-	for axis := range 3 {
-		flat := span{low: partsOf(1, 1, 1), high: partsOf(3, 4, 6)}
-		flat.high[axis] = 1
-		want := map[int]float64{0: 3 * 5, 1: 2 * 5, 2: 2 * 3}[axis]
-		if got := flat.area(); got != want {
-			t.Errorf("flat on %d: %v, not %v", axis, got, want)
-		}
-		thin := span{low: partsOf(0, 0, 0), high: partsOf(2, 3, 4)}
-		thin.high[axis] = 0.5
-		if got := thin.area(); got == 0 {
-			t.Errorf("half a unit thin on %d has no area", axis)
-		}
-		inside := span{low: partsOf(0, 0, 0), high: partsOf(2, 3, 4)}
-		inside.high[axis] = -1
-		if got := inside.area(); got != 0 {
-			t.Errorf("inside out on %d: %v", axis, got)
-		}
+	for axis := range axes {
+		boxCheckFlatArea(t, axis)
+		boxCheckThinArea(t, axis)
+		boxCheckInsideOutArea(t, axis)
 	}
-	if got := emptySpan().area(); got != 0 {
+	if got := emptySpan().area(); got != nought {
 		t.Errorf("an empty box has area %v", got)
 	}
 }
 
 // parts and vectors go to and from three parts, each part in its place.
 func TestPartsAndVectorsKeepEachPartInItsPlace(t *testing.T) {
-	if got := vectorOf(partsOf(1, 2, 3)); got != maths.V(1, 2, 3) {
+	ascending := boxSpanNamed(t, "ascending")
+	if got := vectorOf(ascending.low); got != boxVectorOf(ascending.low) {
 		t.Errorf("vectorOf gave %v", got)
 	}
-	if got := parts(maths.V(4, 5, 6)); got != partsOf(4, 5, 6) {
+	if got := parts(boxVectorOf(ascending.high)); got != ascending.high {
 		t.Errorf("parts gave %v", got)
 	}
-	at := node{bounds: [2][3]float64{{1, 2, 3}, {4, 5, 6}}}
-	if got := at.box(); got.Min != maths.V(1, 2, 3) ||
-		got.Max != maths.V(4, 5, 6) {
+	at := boxNodeNamed(t, "ascending")
+	if got := at.box(); got.Min != boxVectorOf(ascending.low) ||
+		got.Max != boxVectorOf(ascending.high) {
 		t.Errorf("the node's box is %v", got)
 	}
 }
@@ -112,24 +289,42 @@ func TestPartsAndVectorsKeepEachPartInItsPlace(t *testing.T) {
 // a middle falls in one of sixteen bins along a box's width, the first
 // where the box has none, and the last at its far side.
 func TestAMiddleFallsInABinAlongTheBox(t *testing.T) {
-	box := span{low: partsOf(0, 2, 0), high: partsOf(0, 10, 0)}
-	for _, each := range []struct {
-		middle float64
-		want   int
-	}{{2, 0}, {2.4, 0}, {3, 2}, {6, 8}, {9, 14}, {9.9, 15}, {10, 15}} {
-		if got := binOf(each.middle, box, 1); got != each.want {
-			t.Errorf("%v falls in bin %d, not %d", each.middle, got,
-				each.want)
+	for _, row := range read(t, boxBinsFile) {
+		box := boxSpanNamed(t, row["span"])
+		axis := whole(t, row, "axis")
+		middle := float(t, row, "middle")
+		want := whole(t, row, "bin")
+		if got := binOf(middle, box, axis); got != want {
+			t.Errorf("%s: %v falls in bin %d, not %d", row["name"],
+				middle, got, want)
 		}
 	}
-	for _, middle := range []float64{0, 5, -5} {
-		if got := binOf(middle, box, 0); got != 0 {
-			t.Errorf("%v with no width falls in bin %d", middle, got)
-		}
+}
+
+// boxCheckNearerOnTop checks that closer puts the child a point is nearer
+// to on top of the stack, and the other below it.
+func boxCheckNearerOnTop(test testing.TB, nodes []node,
+	row map[string]string) {
+	test.Helper()
+	point := boxPartsIn(test, row, "")
+	top := whole(test, row, "top")
+	other := unity - top
+	under := pickedCount(test, "box-stack-bottom")
+	var stack [deepest + pushed]waiting
+	stack[boxStackBottom] = waiting{node: under}
+	height := closer(nodes, nought, point, &stack, unity)
+	if height != unity+pushed {
+		test.Fatalf("the stack is %d high", height)
 	}
-	narrow := span{low: partsOf(0, 0, 0), high: partsOf(0, 0.5, 0)}
-	if got := binOf(0.4, narrow, 1); got != 12 {
-		t.Errorf("in half a unit it falls in bin %d, not 12", got)
+	shown := stack[:boxStackThird+unity]
+	if stack[boxStackBottom].node != under ||
+		stack[boxStackThird].node != top ||
+		stack[boxStackSecond].node != other {
+		test.Errorf("from %v the stack is %v", point, shown)
+	}
+	if stack[boxStackThird].enter != awayFrom(&nodes[top], point) ||
+		stack[boxStackSecond].enter != awayFrom(&nodes[other], point) {
+		test.Errorf("from %v the stack's distances are %v", point, shown)
 	}
 }
 
@@ -137,29 +332,9 @@ func TestAMiddleFallsInABinAlongTheBox(t *testing.T) {
 // for a point nearer the left, nearer the right, and the same from
 // both, which puts the left on top.
 func TestTheNearerChildIsOnTopOfTheStack(t *testing.T) {
-	nodes := []node{
-		{bounds: [2][3]float64{{0, 0, 0}, {1, 1, 1}}},
-		{bounds: [2][3]float64{{3, 0, 0}, {4, 1, 1}}}}
-	for _, each := range []struct {
-		point [3]float64
-		top   int
-	}{{[3]float64{-1, 0.5, 0.5}, 0}, {[3]float64{6, 0.5, 0.5}, 1},
-		{[3]float64{2, 0.5, 0.5}, 0}} {
-		var stack [deepest + 2]waiting
-		stack[0] = waiting{node: 7}
-		if got := closer(nodes, 0, each.point, &stack, 1); got != 3 {
-			t.Fatalf("the stack is %d high", got)
-		}
-		other := 1 - each.top
-		if stack[0].node != 7 || stack[2].node != each.top ||
-			stack[1].node != other {
-			t.Errorf("from %v the stack is %v", each.point, stack[:3])
-		}
-		if stack[2].enter != awayFrom(&nodes[each.top], each.point) ||
-			stack[1].enter != awayFrom(&nodes[other], each.point) {
-			t.Errorf("from %v the stack's distances are %v",
-				each.point, stack[:3])
-		}
+	nodes := []node{boxNodeNamed(t, "unit"), boxNodeNamed(t, "far")}
+	for _, row := range read(t, boxNearerFile) {
+		boxCheckNearerOnTop(t, nodes, row)
 	}
 }
 
@@ -167,7 +342,8 @@ func TestTheNearerChildIsOnTopOfTheStack(t *testing.T) {
 // one and two gammas of three come to a little over 6.66e-16, which
 // rounds to three steps of 2^-52 above one.
 func TestTheSlackIsThreeUnitsInTheLastPlace(t *testing.T) {
-	if want := 1 + 3*0x1p-52; loosened != want {
+	steps := picked(t, "box-slack-steps")
+	if want := unity + steps*boxLastPlace; loosened != want {
 		t.Errorf("the slack is %v, not %v", loosened, want)
 	}
 }
@@ -177,48 +353,11 @@ func TestTheSlackIsThreeUnitsInTheLastPlace(t *testing.T) {
 // other two in turn, and the shear that straightens it. a part that is zero has
 // an endless inverse, either sign.
 func TestARayIsMadeReadyAxisByAxis(t *testing.T) {
-	inf := math.Inf(1)
-	for name, each := range map[string]struct {
-		ray  maths.Ray
-		want sight
-	}{
-		"along z": {maths.Ray{At: maths.V(1, 2, 3), Dir: maths.V(0, 0, 1)},
-			sight{from: [3]float64{1, 2, 3}, inverse: [3]float64{inf, inf, 1},
-				kx: 0, ky: 1, kz: 2, shearZ: 1}},
-		"back along z": {maths.Ray{At: maths.V(1, 2, 3),
-			Dir: maths.V(0, 0, -1)},
-			sight{from: [3]float64{1, 2, 3},
-				inverse: [3]float64{inf, inf, -1}, entry: [3]int{0, 0, 1},
-				kx: 1, ky: 0, kz: 2, shearZ: -1}},
-		"negative zero": {maths.Ray{At: maths.V(0, 0, 0),
-			Dir: maths.V(math.Copysign(0, -1), 1, 0)},
-			sight{inverse: [3]float64{inf, 1, inf}, kx: 2, ky: 0, kz: 1,
-				shearZ: 1}},
-		"skew": {maths.Ray{At: maths.V(0, 0, 0), Dir: maths.V(2, -4, 1)},
-			sight{inverse: [3]float64{0.5, -0.25, 1}, entry: [3]int{0, 1, 0},
-				kx: 0, ky: 2, kz: 1, shearX: -0.5, shearY: -0.25,
-				shearZ: -0.25}},
-		"slow": {maths.Ray{At: maths.V(0, 0, 0), Dir: maths.V(0, 0, 0.5)},
-			sight{inverse: [3]float64{inf, inf, 2}, kx: 0, ky: 1, kz: 2,
-				shearZ: 2}},
-		"slow back": {maths.Ray{At: maths.V(0, 0, 0),
-			Dir: maths.V(0, 0, -0.5)},
-			sight{inverse: [3]float64{inf, inf, -2},
-				entry: [3]int{0, 0, 1}, kx: 1, ky: 0, kz: 2, shearZ: -2}},
-		"long": {maths.Ray{At: maths.V(0, 0, 0), Dir: maths.V(2, 0, 0)},
-			sight{inverse: [3]float64{0.5, inf, inf}, kx: 1, ky: 2, kz: 0,
-				shearZ: 0.5}},
-		"two as long": {maths.Ray{At: maths.V(0, 0, 0),
-			Dir: maths.V(1, 1, 0)},
-			sight{inverse: [3]float64{1, 1, inf}, kx: 1, ky: 2, kz: 0,
-				shearX: 1, shearY: 0, shearZ: 1}},
-		"three as long": {maths.Ray{At: maths.V(0, 0, 0),
-			Dir: maths.V(0, 2, 2)},
-			sight{inverse: [3]float64{inf, 0.5, 0.5}, kx: 2, ky: 0, kz: 1,
-				shearX: 1, shearY: 0, shearZ: 0.5}},
-	} {
-		if got := aimed(each.ray); got != each.want {
-			t.Errorf("%s: %+v, not %+v", name, got, each.want)
+	for _, row := range read(t, boxSightsFile) {
+		ray := boxRayIn(t, row)
+		want := boxSightIn(t, row)
+		if got := aimed(ray); got != want {
+			t.Errorf("%s: %+v, not %+v", row["name"], got, want)
 		}
 	}
 }
@@ -229,47 +368,46 @@ func TestARayIsMadeReadyAxisByAxis(t *testing.T) {
 // clipped by near and far, missed, and grazed so that the way in is as
 // far as the slack allows past the way out.
 func TestASightEntersABoxWhereItsSlabsSay(t *testing.T) {
-	box := &node{bounds: [2][3]float64{{1, 2, 3}, {4, 6, 9}}}
-	slack := &node{bounds: [2][3]float64{{loosened, 0, 0}, {5, 1, 1}}}
-	point, inf := maths.V, math.Inf(1)
-	for _, each := range []struct {
-		name      string
-		at        *node
-		from, dir maths.Vec
-		near, far float64
-		enter     float64
-		ok        bool
-	}{
-		{"along x", box, point(0, 3, 4), point(2, 0, 0), 0, inf, 0.5, true},
-		{"against x", box, point(10, 3, 4), point(-2, 0, 0), 0, inf, 3,
-			true},
-		{"along y", box, point(2, 0, 4), point(0, 4, 0), 0, inf, 0.5, true},
-		{"against y", box, point(2, 9, 4), point(0, -4, 0), 0, inf, 0.75,
-			true},
-		{"along z", box, point(2, 3, 0), point(0, 0, 2), 0, inf, 1.5, true},
-		{"against z", box, point(2, 3, 12), point(0, 0, -2), 0, inf, 1.5,
-			true},
-		{"near past", box, point(0, 3, 4), point(1, 0, 0), 2, 3, 2, true},
-		{"far before", box, point(0, 3, 4), point(1, 0, 0), 0, 0.5, 1,
-			false},
-		{"far inside", box, point(0, 3, 4), point(1, 0, 0), 0, 1.5, 1,
-			true},
-		{"missed", box, point(0, 10, 4), point(1, 0, 0), 0, inf, 1, false},
-		{"missed on x", box, point(0, 3, 4), point(0, 1, 0), 0, inf, inf,
-			false},
-		{"no way", box, point(0, 3, 4), point(0, 0, 0), 0, inf, inf, false},
-		{"corner", box, point(0, 0, 0), point(1, 2, 1), 0, inf, 3, true},
-		{"diagonal", box, point(0, 0, 0), point(1, 1, 1), 0, inf, 3, true},
-		{"just missed", box, point(0, 0, 0), point(2, 1, 1), 0, inf, 3,
-			false},
-		{"at the slack", slack, point(0, 0, 0.5), point(1, 1, 0), 0, inf,
-			loosened, true},
-	} {
-		look := aimed(maths.Ray{At: each.from, Dir: each.dir})
-		enter, ok := look.enters(each.at, each.near, each.far)
-		if ok != each.ok || enter != each.enter {
-			t.Errorf("%s: %v %v, not %v %v", each.name, enter, ok,
-				each.enter, each.ok)
+	for _, row := range read(t, boxEntersFile) {
+		look := aimed(boxRayIn(t, row))
+		at := boxNodeAt(t, row["node"])
+		near, far := float(t, row, "near"), float(t, row, "far")
+		enter, ok := look.enters(at, near, far)
+		wantEnter := boxEnterIn(t, row)
+		wantOk := whole(t, row, "ok") == unity
+		if ok != wantOk || enter != wantEnter {
+			t.Errorf("%s: %v %v, not %v %v", row["name"], enter, ok,
+				wantEnter, wantOk)
+		}
+	}
+}
+
+// boxCheckDescent checks one row of the descents: the stack's height
+// after descend, the places under it left alone, and the nodes on top.
+func boxCheckDescent(test testing.TB, row map[string]string) {
+	test.Helper()
+	nodes := []node{boxNodeNamed(test, row["left"])}
+	nodes = append(nodes, boxNodeNamed(test, row["right"]))
+	ray := boxRayIn(test, boxRowNamed(test, boxRaysFile, row["ray"]))
+	under := pickedCount(test, "box-stack-bottom")
+	above := pickedCount(test, "box-stack-second")
+	var stack [deepest + pushed]waiting
+	stack[boxStackBottom] = waiting{node: under}
+	stack[boxStackSecond] = waiting{node: above}
+	look := aimed(ray)
+	near, far := float(test, row, "near"), float(test, row, "far")
+	top := look.descend(nodes, nought, near, far, &stack, pair)
+	want := boxTopNodes(test, row["top"])
+	if top != pair+len(want) || stack[boxStackBottom].node != under ||
+		stack[boxStackSecond].node != above {
+		test.Errorf("%s: the stack is %d high: %v", row["name"], top,
+			stack[:top])
+		return
+	}
+	for place, wanted := range want {
+		if got := stack[top-unity-place].node; got != wanted {
+			test.Errorf("%s: %d from the top is node %d, not %d",
+				row["name"], place, got, wanted)
 		}
 	}
 }
@@ -280,43 +418,7 @@ func TestASightEntersABoxWhereItsSlabsSay(t *testing.T) {
 // not enter, whichever of the two is nearer. a ray along x from
 // (-5, 0.5, 0.5) meets the unit box at 5 and the box at 3 to 4 at 8.
 func TestTheNearerChildTheSightEntersIsOnTop(t *testing.T) {
-	unit := [2][3]float64{{0, 0, 0}, {1, 1, 1}}
-	far := [2][3]float64{{3, 0, 0}, {4, 1, 1}}
-	aside := [2][3]float64{{3, 5, 5}, {4, 6, 6}}
-	forward := maths.Ray{At: maths.V(-5, 0.5, 0.5), Dir: maths.V(1, 0, 0)}
-	back := maths.Ray{At: maths.V(6, 0.5, 0.5), Dir: maths.V(-1, 0, 0)}
-	for _, each := range []struct {
-		name        string
-		left, right [2][3]float64
-		ray         maths.Ray
-		near, far   float64
-		top         []int
-	}{
-		{"left first", unit, far, forward, 0, 99, []int{0, 1}},
-		{"right first", unit, far, back, 0, 99, []int{1, 0}},
-		{"as near", unit, unit, forward, 0, 99, []int{0, 1}},
-		{"left only", unit, far, forward, 0, 7, []int{0}},
-		{"right only", unit, far, forward, 7, 99, []int{1}},
-		{"neither", unit, far, forward, 20, 99, nil},
-		{"left, not a nearer right", unit, aside, forward, 0, 99, []int{0}},
-		{"right, not a nearer left", aside, unit, forward, 0, 99, []int{1}},
-	} {
-		nodes := []node{{bounds: each.left}, {bounds: each.right}}
-		var stack [deepest + 2]waiting
-		stack[0], stack[1] = waiting{node: 7}, waiting{node: 8}
-		look := aimed(each.ray)
-		top := look.descend(nodes, 0, each.near, each.far, &stack, 2)
-		if top != 2+len(each.top) || stack[0].node != 7 ||
-			stack[1].node != 8 {
-			t.Errorf("%s: the stack is %d high: %v", each.name, top,
-				stack[:top])
-			continue
-		}
-		for i, want := range each.top {
-			if got := stack[top-1-i].node; got != want {
-				t.Errorf("%s: %d from the top is node %d, not %d",
-					each.name, i, got, want)
-			}
-		}
+	for _, row := range read(t, boxDescentsFile) {
+		boxCheckDescent(t, row)
 	}
 }

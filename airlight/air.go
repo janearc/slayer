@@ -10,9 +10,9 @@ import (
 	"github.com/janearc/slayer/skylight"
 )
 
-// Air is a planet's air as the renderer asks it: its name, its column
+// air is a planet's air as the renderer asks it: its name, its column
 // at a wavelength as the solver takes it, and the sun at its top.
-type Air interface {
+type air interface {
 	// Name is the air's name, as a set file says it.
 	Name() string
 	// Column is the air at a wavelength in nanometres, its shells from
@@ -29,7 +29,7 @@ type Air interface {
 // cosine from up, an even count so the horizon falls between two, and
 // of the azimuth from the sun.
 type Known struct {
-	Air             Air
+	Air             air
 	Photons         int
 	Views, Azimuths int
 }

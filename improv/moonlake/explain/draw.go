@@ -33,7 +33,7 @@ func ThemeColour(role string) (color.RGBA, error) {
 	colour, ok := tones[role]
 	if !ok {
 		return color.RGBA{}, fmt.Errorf("%w: no theme role %q; choose %v",
-			ErrExplain, role, themeRoles)
+			errExplain, role, themeRoles)
 	}
 	return colour, nil
 }
@@ -45,7 +45,7 @@ var colours = sync.OnceValues(func() (palette, error) {
 	for _, role := range themeRoles {
 		colour, err := theme.Colour(role)
 		if err != nil {
-			return nil, fmt.Errorf("%w: the hud theme: %w", ErrExplain, err)
+			return nil, fmt.Errorf("%w: the hud theme: %w", errExplain, err)
 		}
 		made[role] = colour
 	}
@@ -56,7 +56,7 @@ var colours = sync.OnceValues(func() (palette, error) {
 var regular = sync.OnceValues(func() (*opentype.Font, error) {
 	parsed, err := opentype.Parse(goregular.TTF)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrExplain, err)
+		return nil, fmt.Errorf("%w: %w", errExplain, err)
 	}
 	return parsed, nil
 })
@@ -78,7 +78,7 @@ func (of *Explainer) Compose(seconds float64, film *image.RGBA) (
 	if film == nil || film.Bounds().Dx() != frameSize.X ||
 		film.Bounds().Dy() >= beatTop {
 		return nil, fmt.Errorf("%w: the film's picture must be %d across "+
-			"and under %d down; read it at that size", ErrExplain,
+			"and under %d down; read it at that size", errExplain,
 			frameSize.X, beatTop)
 	}
 	panel, err := of.PanelAt(seconds)
@@ -93,7 +93,7 @@ func (of *Explainer) Compose(seconds float64, film *image.RGBA) (
 	for role, colour := range theme {
 		tones[role] = colour
 	}
-	tones["ground"] = panel.Ground()
+	tones["ground"] = panel.ground
 	frame := image.NewRGBA(image.Rectangle{Max: frameSize})
 	draw.Draw(frame, frame.Bounds(), image.NewUniform(tones["ground"]),
 		image.Point{}, draw.Src)
@@ -113,7 +113,7 @@ func (of *Explainer) Compose(seconds float64, film *image.RGBA) (
 // them.
 func drawBeat(frame *image.RGBA, panel Panel, tones palette) error {
 	beat := panel.Beat()
-	count := beat.PerBar()
+	count := beat.perBar
 	side := (beatRow - (count-1)*beatGap) / count
 	for k := range count {
 		on := tones["ok"]
@@ -128,7 +128,7 @@ func drawBeat(frame *image.RGBA, panel Panel, tones palette) error {
 		square := image.Rect(left, beatTop, left+side, beatTop+beatHigh)
 		shade := mix(mix(tones["ground"], on, offShare), on, lit)
 		fill(frame, square, shade)
-		if beat.On() && !beat.Measured() {
+		if beat.On() && !beat.measured {
 			fill(frame, square.Inset(beatHollow), tones["ground"])
 		}
 	}
@@ -166,11 +166,10 @@ func drawLamps(frame *image.RGBA, panel Panel, tones palette) error {
 
 // drawChant is the line being sung, whole, centred, in ink.
 func drawChant(frame *image.RGBA, panel Panel, tones palette) error {
-	words, singing := panel.Chant()
-	if !singing {
+	if !panel.singing {
 		return nil
 	}
-	return centred(frame, words, image.Pt(frameSize.X/2, chantBaseline),
+	return centred(frame, panel.chant, image.Pt(frameSize.X/2, chantBaseline),
 		chantSize, tones["ink"])
 }
 
@@ -186,7 +185,7 @@ func drawSentence(frame *image.RGBA, panel Panel, tones palette) error {
 	}
 	if len(rows) > sentenceMostRows {
 		return fmt.Errorf("%w: %q takes %d rows; the panel has room for "+
-			"%d: shorten it", ErrExplain, sentence.Words(), len(rows),
+			"%d: shorten it", errExplain, sentence.Words(), len(rows),
 			sentenceMostRows)
 	}
 	for i, row := range rows {

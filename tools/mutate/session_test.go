@@ -160,7 +160,8 @@ func TestASpecIsAFileAndItsLines(t *testing.T) {
 // and no tests are left recorded as running.
 func TestRunRefusesACommandThatCannotStart(t *testing.T) {
 	s := newTestSession(t)
-	if _, err := s.run(filepath.Join(t.TempDir(), "no-such-command")); err == nil {
+	missing := filepath.Join(t.TempDir(), "no-such-command")
+	if _, err := s.run(missing); err == nil {
 		t.Fatal("a command that is not there ran")
 	}
 	if s.tests != nil {

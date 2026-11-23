@@ -19,7 +19,8 @@ const lensSet = "scene:\n  name: a lens\n  cameras:\n    down:\n" +
 // the refusal of the set.
 func lensOf(t *testing.T, more string) (float64, error) {
 	t.Helper()
-	read, err := set.Read("lens.yaml", []byte(fmt.Sprintf(lensSet, more)))
+	source := fmt.Sprintf(lensSet, more)
+	read, err := set.Read("lens.yaml", []byte(source))
 	if err != nil {
 		return 0, err
 	}

@@ -160,7 +160,8 @@ func (watching *Watcher) event(event terminal.Event, open bool) {
 		watching.show()
 		return
 	}
-	watching.fold(watching.key(event.Key()))
+	eventKey := event.Key()
+	watching.fold(watching.key(eventKey))
 	watching.show()
 }
 
@@ -172,7 +173,8 @@ func (watching *Watcher) tick(now time.Time) {
 		watching.poll()
 	}
 	if watching.view.playing && watching.flight == nil {
-		watching.fold(watching.goTo(watching.playedTo()))
+		playedFrame := watching.playedTo()
+		watching.fold(watching.goTo(playedFrame))
 	}
 }
 

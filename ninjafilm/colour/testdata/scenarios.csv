@@ -3,18 +3,18 @@ plain,develop,1,0,0,0,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
 no exposure given,develop,0,0,0,0,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
 twice the exposure,develop,2,0,0,0,0,0,0,0,0,0,0,0,0,0,f10a104600b74121
 half the exposure,develop,0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,1be7cadb3bcb0ba9
-a knee,develop,1,0.6,0,0,0,0,0,0,0,0,0,0,0,0,9ac4f32c57e81e76
-a knee and a top,develop,1,0.5,2.5,0,0,0,0,0,0,0,0,0,0,0,3151d37b645a6d20
-a low knee and a high top,develop,1.5,0.3,8,0,0,0,0,0,0,0,0,0,0,0,84f97b6754c192e2
+a knee,develop,1,0.6,0,0,0,0,0,0,0,0,0,0,0,0,3264c9b63144782e
+a knee and a top,develop,1,0.5,2.5,0,0,0,0,0,0,0,0,0,0,0,6318761e18914ffe
+a low knee and a high top,develop,1.5,0.3,8,0,0,0,0,0,0,0,0,0,0,0,639532ffb4adc40
 a knee of one,develop,1,1,0,0,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
 a bloom,develop,1,0,0,1.2,0,0,0,0,0,0,0,0,0,0,ba4b6207917bb345
 a small bloom,develop,1,0,0,0.5,0,0,0,0,0,0,0,0,0,0,73a02ad6fffaa2bd
 a big bloom at twice the exposure,develop,2,0,0,2,0,0,0,0,0,0,0,0,0,0,8dd2de319c0fd2ba
-a bloom through a knee,develop,1,0.6,0,1,0,0,0,0,0,0,0,0,0,0,53013a3e2d200b29
+a bloom through a knee,develop,1,0.6,0,1,0,0,0,0,0,0,0,0,0,0,ca84effaf294543f
 no bloom,develop,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,d6f40f9415c3605f
 false with a gain,false,1,0,0,0,0,0,0,0,0,0.0008,0.5,0,0,0,34c9dcdd53c79751
 false with no gain,false,1,0,0,0,0,0,0,0,0,0.0008,0,0,0,0,28e66e5a575effb8
-false with a knee,false,1,0.5,0,0,0,0,0,0,0,2e-05,2,0,0,0,9d2db0dea18405f8
+false with a knee,false,1,0.5,0,0,0,0,0,0,0,2e-05,2,0,0,0,80fee3aaccf2635d
 false with a tint,false,1,0,0,0,0,0,0,0,0,656,1,0,1,0,a418379dd63df058
 false with visible band,false,2,0,0,0,0,0,0,0,0,0,0.25,0,0,0,d78531eed6a374a3
 false with in no range,false,1,0,0,0,0,0,0,0,0,550,1,0,0,0,5c3b45baa2052d82

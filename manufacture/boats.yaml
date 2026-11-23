@@ -1,0 +1,212 @@
+# The boats, in metres: a sampan, a steel
+# inshore fishing boat and a passenger ferry. Every number says where it
+# came from in its basis. recalled is a figure taken from memory and not
+# looked up: a length, or
+# a rule of the collision regulations. picked is a figure chosen to look
+# right, as a boat of that sort is seen. Nothing here is measured, and a
+# range is where a seed picks from, so no two boats are alike.
+#
+# A boat's own space: metres, y up, the waterline at y nought, the
+# centreline on x nought, the bow toward minus z (the way slayer's spaces
+# face, and the Alfa's), starboard toward plus x, the middle of the length
+# at z nought. A scene sets a boat on the water by putting its origin at
+# the sea's height: there is no draught to subtract.
+#
+# The names a range may have are the list in boat.go. A name a kind does
+# not give is nought: no tyres, no mast.
+kinds:
+  sampan:
+    # a small wooden working boat: low freeboard, a flat sheer, an arched
+    # or flat canopy over the middle, an outboard or a sculling oar, tyres
+    # or rope along the side, a lantern under the canopy, nets and crates.
+    # the length is recalled; the rest of the hull is picked.
+    ranges:
+      length: {least: 5, most: 8, basis: recalled}
+      slenderness: {least: 3.6, most: 4.6, basis: picked}
+      # freeboard is to the deck, here the sole of an open boat; the gunwale
+      # stands a rail higher, and the figures sum to the old low freeboard
+      freeboard: {least: 0.1, most: 0.18, basis: picked}
+      rail: {least: 0.22, most: 0.3, basis: picked}
+      strakes: {least: 6, most: 8, basis: picked}
+      ribs: {least: 14, most: 20, basis: picked}
+      hoops: {least: 3, most: 5, basis: picked}
+      buckets: {least: 1, most: 2, basis: picked}
+      coils: {least: 1, most: 2, basis: picked}
+      cleats: {least: 2, most: 4, basis: picked}
+      draught: {least: 0.18, most: 0.3, basis: picked}
+      spring: {least: 0.08, most: 0.2, basis: picked}
+      flare: {least: 0.02, most: 0.08, basis: picked}
+      transom: {least: 0.55, most: 0.75, basis: picked}
+      bilge: {least: 1.6, most: 2.6, basis: picked}
+      rake: {least: 0.2, most: 0.45, basis: picked}
+      camber: {least: 0.03, most: 0.06, basis: picked}
+      forefoot: {least: 0.4, most: 0.6, basis: picked}
+      bow: {least: 0.3, most: 0.4, basis: picked}
+      wear: {least: 0.15, most: 0.6, basis: picked}
+      canopy-length: {least: 0.3, most: 0.45, basis: picked}
+      canopy-height: {least: 0.8, most: 1.1, basis: picked}
+      canopy-arched: {least: 0.5, most: 0.5, basis: picked}
+      canopy-tarpaulin: {least: 0.35, most: 0.35, basis: picked}
+      outboard: {least: 0.6, most: 0.6, basis: picked}
+      tyre-fenders: {least: 0.6, most: 0.6, basis: picked}
+      tyres: {least: 2, most: 6, basis: picked}
+      crates: {least: 1, most: 4, basis: picked}
+      nets: {least: 0, most: 2, basis: picked}
+      mast-height: {least: 1.2, most: 1.8, basis: picked}
+    paints:
+      - {name: bare wood, colour: [0.12, 0.07, 0.04], basis: picked}
+      - {name: faded blue, colour: [0.06, 0.15, 0.3], basis: picked}
+      - {name: faded green, colour: [0.07, 0.2, 0.1], basis: picked}
+      - {name: red oxide, colour: [0.3, 0.07, 0.04], basis: picked}
+    underbody: {name: tarred wood, colour: [0.025, 0.02, 0.018], basis: picked}
+    deck: deck wood
+  fishing-boat:
+    # a steel inshore boat: a high flared bow, the wheelhouse aft of the
+    # middle, a mast with booms, deck floodlights, rust and faded paint
+    # in blue, green or red. the length is recalled; the rest is picked.
+    ranges:
+      length: {least: 15, most: 25, basis: recalled}
+      slenderness: {least: 3.4, most: 4.2, basis: picked}
+      # freeboard is to the deck's edge; the bulwark stands a rail higher
+      freeboard: {least: 0.7, most: 1.1, basis: picked}
+      rail: {least: 0.8, most: 1.0, basis: picked}
+      strakes: {least: 4, most: 4, basis: picked}
+      stanchion-pitch: {least: 1.0, most: 1.3, basis: picked}
+      hatches: {least: 1, most: 2, basis: picked}
+      lifebuoys: {least: 2, most: 2, basis: picked}
+      buckets: {least: 2, most: 4, basis: picked}
+      coils: {least: 2, most: 4, basis: picked}
+      cleats: {least: 6, most: 8, basis: picked}
+      floats: {least: 8, most: 14, basis: picked}
+      aerials: {least: 2, most: 4, basis: picked}
+      draught: {least: 1.2, most: 1.9, basis: picked}
+      spring: {least: 0.7, most: 1.2, basis: picked}
+      flare: {least: 0.25, most: 0.4, basis: picked}
+      transom: {least: 0.6, most: 0.8, basis: picked}
+      bilge: {least: 2.0, most: 3.0, basis: picked}
+      rake: {least: 0.8, most: 1.5, basis: picked}
+      camber: {least: 0.08, most: 0.14, basis: picked}
+      forefoot: {least: 0.3, most: 0.5, basis: picked}
+      bow: {least: 0.32, most: 0.42, basis: picked}
+      wear: {least: 0.3, most: 0.7, basis: picked}
+      house-position: {least: 0.55, most: 0.68, basis: picked}
+      house-length: {least: 0.12, most: 0.18, basis: picked}
+      house-width: {least: 0.5, most: 0.65, basis: picked}
+      house-height: {least: 1.9, most: 2.4, basis: picked}
+      funnel-height: {least: 1.2, most: 1.8, basis: picked}
+      mast-height: {least: 7, most: 10, basis: picked}
+      boom-length: {least: 4, most: 6.5, basis: picked}
+      floods: {least: 2, most: 4, basis: picked}
+      lit-windows: {least: 0.7, most: 0.7, basis: picked}
+      tyres: {least: 3, most: 8, basis: picked}
+      crates: {least: 4, most: 10, basis: picked}
+      nets: {least: 1, most: 3, basis: picked}
+    paints:
+      - {name: faded blue, colour: [0.05, 0.14, 0.32], basis: picked}
+      - {name: faded green, colour: [0.06, 0.22, 0.11], basis: picked}
+      - {name: faded red, colour: [0.38, 0.07, 0.05], basis: picked}
+      - {name: dirty white, colour: [0.45, 0.45, 0.4], basis: picked}
+    underbody: {name: antifouling, colour: [0.12, 0.03, 0.025], basis: picked}
+    deck: deck steel
+  ferry:
+    # a passenger ferry: a long low cabin with a row of lit windows. the
+    # whole boat is picked: the brief gave no figure.
+    ranges:
+      length: {least: 20, most: 38, basis: picked}
+      slenderness: {least: 4.2, most: 5.2, basis: picked}
+      # freeboard is to the deck's edge; a ferry has railings, not a bulwark
+      freeboard: {least: 0.5, most: 0.8, basis: picked}
+      strakes: {least: 3, most: 3, basis: picked}
+      stanchion-pitch: {least: 1.0, most: 1.2, basis: picked}
+      seat-pitch: {least: 0.8, most: 1.0, basis: picked}
+      lifebuoys: {least: 3, most: 5, basis: picked}
+      cleats: {least: 6, most: 8, basis: picked}
+      aerials: {least: 2, most: 3, basis: picked}
+      draught: {least: 0.9, most: 1.5, basis: picked}
+      spring: {least: 0.25, most: 0.5, basis: picked}
+      flare: {least: 0.1, most: 0.2, basis: picked}
+      transom: {least: 0.65, most: 0.85, basis: picked}
+      bilge: {least: 2.2, most: 3.2, basis: picked}
+      rake: {least: 0.4, most: 0.8, basis: picked}
+      camber: {least: 0.06, most: 0.1, basis: picked}
+      forefoot: {least: 0.4, most: 0.6, basis: picked}
+      bow: {least: 0.28, most: 0.36, basis: picked}
+      wear: {least: 0.1, most: 0.4, basis: picked}
+      house-position: {least: 0.5, most: 0.55, basis: picked}
+      house-length: {least: 0.5, most: 0.62, basis: picked}
+      house-width: {least: 0.78, most: 0.88, basis: picked}
+      house-height: {least: 2.2, most: 2.7, basis: picked}
+      window-spacing: {least: 1.2, most: 1.6, basis: picked}
+      lit-windows: {least: 0.85, most: 0.85, basis: picked}
+      upper-deck: {least: 0.5, most: 0.5, basis: picked}
+      funnel-height: {least: 1.4, most: 2.0, basis: picked}
+      mast-height: {least: 4.5, most: 6.5, basis: picked}
+      tyres: {least: 4, most: 10, basis: picked}
+    paints:
+      - {name: white, colour: [0.55, 0.55, 0.52], basis: picked}
+      - {name: pale blue, colour: [0.14, 0.28, 0.45], basis: picked}
+      - {name: cream, colour: [0.5, 0.45, 0.3], basis: picked}
+    underbody: {name: antifouling, colour: [0.1, 0.03, 0.03], basis: picked}
+    deck: deck steel
+# what a boat is fitted out in, shared: reflectance in linear light, a
+# glow where it shines on its own, and how much of a mirror it is. a
+# lens's glow is picked several times a window's, and a white one thirty:
+# a lamp's lens is far brighter than a lit window, and a lens a hand across
+# must still read as a point of light from a kilometre off. the red and the
+# green keep their other channels low, so that a print that clips a bright
+# channel does not clip them to white.
+looks:
+  rubber: {colour: [0.025, 0.025, 0.027], gloss: 0.05, basis: picked}
+  steel: {colour: [0.06, 0.06, 0.065], gloss: 0.3, basis: picked}
+  glass: {colour: [0.03, 0.035, 0.045], gloss: 0.5, basis: picked}
+  deck wood: {colour: [0.2, 0.14, 0.08], gloss: 0.1, basis: picked}
+  deck steel: {colour: [0.1, 0.12, 0.1], gloss: 0.15, basis: picked}
+  house: {colour: [0.5, 0.5, 0.46], gloss: 0.2, basis: picked}
+  matting: {colour: [0.3, 0.2, 0.1], gloss: 0.02, basis: picked}
+  tarpaulin: {colour: [0.05, 0.12, 0.3], gloss: 0.1, basis: picked}
+  crate: {colour: [0.35, 0.22, 0.1], gloss: 0.1, basis: picked}
+  net: {colour: [0.12, 0.14, 0.1], gloss: 0.02, basis: picked}
+  rust: {colour: [0.25, 0.08, 0.03], gloss: 0.05, basis: picked}
+  boot topping: {colour: [0.03, 0.02, 0.02], gloss: 0.2, basis: picked}
+  lettering: {colour: [0.55, 0.55, 0.5], gloss: 0.2, basis: picked}
+  bamboo: {colour: [0.32, 0.26, 0.1], gloss: 0.1, basis: picked}
+  lifebuoy: {colour: [0.6, 0.1, 0.03], gloss: 0.25, basis: picked}
+  bucket: {colour: [0.05, 0.12, 0.3], gloss: 0.3, basis: picked}
+  seat: {colour: [0.08, 0.14, 0.2], gloss: 0.2, basis: picked}
+  lit window: {colour: [0.03, 0.03, 0.03], glow: [0.85, 0.62, 0.35], gloss: 0.15, basis: picked}
+  red lens: {colour: [0.05, 0.005, 0.005], glow: [2, 0.005, 0.002], gloss: 0.3, basis: picked}
+  green lens: {colour: [0.005, 0.05, 0.015], glow: [0.005, 2, 0.05], gloss: 0.3, basis: picked}
+  white lens: {colour: [0.05, 0.05, 0.05], glow: [30, 28.5, 25.5], gloss: 0.3, basis: picked}
+  warm lens: {colour: [0.05, 0.03, 0.01], glow: [6, 2.4, 0.6], gloss: 0.3, basis: picked}
+# the lamps. a boat under way shows a red light on its port side, a green
+# one to starboard and a white one at its stern, and a power vessel a
+# white one at its masthead, forward and higher than the rest. a boat at
+# anchor shows one white light all round. the arcs, in degrees across,
+# are the collision regulations' as I recalled them, not looked up: 112.5
+# for each side light, 135 for the stern light, 225 for the masthead light
+# and 360 for the anchor light. the strengths are picked, in the kit's
+# relative light, a luminance at a metre; the colours are picked, a tint
+# where a lamp has a colour of its own and a heat in kelvin where it is
+# white. soft is how many degrees past its arc a light fades out.
+lamps:
+  port: {tint: [1, 0.02, 0.01], arc: 112.5, soft: 3, luminance: 40, beyond: 0.3, arc-basis: recalled, basis: picked}
+  starboard: {tint: [0.03, 1, 0.2], arc: 112.5, soft: 3, luminance: 40, beyond: 0.3, arc-basis: recalled, basis: picked}
+  stern: {kelvin: 4000, arc: 135, soft: 3, luminance: 30, beyond: 0.3, arc-basis: recalled, basis: picked}
+  masthead: {kelvin: 4000, arc: 225, soft: 3, luminance: 50, beyond: 0.3, arc-basis: recalled, basis: picked}
+  anchor: {kelvin: 4000, arc: 360, soft: 0, luminance: 50, beyond: 0.3, arc-basis: recalled, basis: picked}
+  lantern: {kelvin: 2400, arc: 360, soft: 0, luminance: 12, beyond: 0.3, arc-basis: picked, basis: picked}
+  flood: {kelvin: 4500, arc: 100, soft: 20, luminance: 60, beyond: 0.3, arc-basis: picked, basis: picked}
+  cabin: {kelvin: 3200, arc: 360, soft: 0, luminance: 20, beyond: 0.5, arc-basis: picked, basis: picked}
+# the painted letters: a number on each bow of a fishing boat and a name on
+# its stern, set in a face of go's own, which has the Latin letters and the
+# digits and nothing else. the numbers are four digits drawn from the seed.
+# the names are picked, not recalled. a place is left for Chinese: when a
+# face of Simplified Chinese lands, name it in `chinese.face` and give the
+# names in `chinese.names`, and the boats' names are set in it. it is empty
+# now, and an empty face means the Latin names are used. no font is kept here.
+lettering:
+  face: go-bold
+  names: [LUCKY STAR, SEA PEARL, GOOD FORTUNE, BRIGHT MOON, EASTERN WIND, GOLDEN FISH, HARVEST, CALM WATER, RISING TIDE, JADE SEA, NEW HOPE, SILVER WAVE]
+  basis: picked
+  chinese: {face: "", names: []}
+read: "recalled and picked; no source was read"

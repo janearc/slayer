@@ -11,6 +11,7 @@ import (
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/research"
 	"github.com/janearc/slayer/scene/shape"
+	"github.com/janearc/slayer/scene/thing"
 )
 
 // Maturity is what can be counted about one kind without judging it: how
@@ -110,7 +111,15 @@ func maturityOf(build func() map[string]maker) ([]Maturity, error) {
 
 // measure counts the geometry of one made specimen.
 func (one *Maturity) measure(made good) {
-	one.Parts, one.Looks, one.Lights = len(made.parts), len(made.dressed), len(made.lights)
+	one.Parts, one.Looks, one.Lights = len(made.parts)+len(made.native), len(made.dressed), len(made.lights)
+	// Native attachments can share one material: count each shared object once.
+	looks := map[*thing.Material]bool{}
+	for _, part := range made.native {
+		if part.Material != nil {
+			looks[part.Material] = true
+		}
+	}
+	one.Looks += len(looks)
 	one.Pieces = piecesOf(made)
 	for _, group := range made.groups {
 		one.MeshMembers += len(group.Members())
@@ -195,14 +204,25 @@ func rowOf[row maker](build func() row, kinds ...string) row {
 // familyOf is the family a maker's kinds belong to.
 func familyOf(how maker) string {
 	switch how.(type) {
-	case spacecraft, lunarModule, saucer, veneraLander:
+	case spacecraft, lunarModule, saucer, veneraLander,
+		soho, mariner10, jimo, cassiniHuygens, newHorizons, newHorizonsVTAD, voyagerMaker:
 		return "spacecraft"
 	case alfaBoat:
 		return "submarine"
+	case boatRow:
+		return "boat"
 	case j58Engine:
 		return "engine"
 	case scaleHuman:
 		return "scale reference"
+	case orcaClean05Kind, orcaClean05Still, baySealKind, walrusFresh5Kind,
+		harborSealKind, harborSealBonesKind, sealLoftedKind,
+		birdKind, fishRow, fishSchoolRow:
+		return "animal"
+	case hatzGargoyleKind, gargoyleRow, gargoyleCorniceRow:
+		return "architectural ornament"
+	case bubblesRow:
+		return "water"
 	case stack:
 		return "launch stack"
 	case groundObservatory, owlObservatory, civicObservatory, optical:
@@ -211,7 +231,8 @@ func familyOf(how maker) string {
 		return "summit instrument"
 	case personalTelescope:
 		return "personal telescope"
-	case physicalSpruce, conifer, seasonalPlant, saguaro, shootKind, fern:
+	case physicalSpruce, conifer, seasonalPlant, saguaro, shootKind, fern,
+		kelpRow:
 		return "plant"
 	case yardEquipment, owlShelter, guideLauncher, scaffolding, j58Stand:
 		return "site equipment"
@@ -227,12 +248,18 @@ func familyOf(how maker) string {
 		return "macrostructure"
 	case landformMaker:
 		return "landform"
-	case cityFamily:
+	case cityFamily, frontageRow, retailBlockRow:
 		return "city building"
-	case cityMaker, clusteredCityMaker:
+	case cityMaker, clusteredCityMaker, scavengedRow, superblockRow,
+		pierRow, villageRow, streetRow, lashedStreetRow, signRow:
 		return "city"
-	case home:
+	case home, yurtRow, winnebagoRow, bivouacRow, terraceRow, condominiumRow,
+		villageHouseRow:
 		return "home"
+	case towerRow:
+		return "city building"
+	case bridgeRow:
+		return "city"
 	}
 	return "other"
 }
@@ -247,10 +274,9 @@ func piecesIn(corners func(yield func(a, b, c maths.Vec))) int {
 	type place [3]int64
 	index := map[place]int{}
 	var parent []int
-	var find func(int) int
 	// A chain to a root is no longer than the corners there are, so the
 	// walk is bounded by them and cannot run on.
-	find = func(at int) int {
+	find := func(at int) int {
 		for range parent {
 			if parent[at] == at {
 				break
@@ -290,6 +316,9 @@ func piecesIn(corners func(yield func(a, b, c maths.Vec))) int {
 // that stands in several places is counted once for each.
 func piecesOf(made good) int {
 	total := 0
+	for _, native := range made.native {
+		total += meshPieces(native.Shape)
+	}
 	for _, piece := range made.parts {
 		skin := piece.shape.skin(piece.fine)
 		total += piecesIn(func(yield func(a, b, c maths.Vec)) {

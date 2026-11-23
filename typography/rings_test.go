@@ -70,7 +70,8 @@ func TestLettersNestAsTheyAreDrawn(t *testing.T) {
 	for _, raw := range [][]byte{goregular.TTF, gobold.TTF} {
 		face := mustFont(t, raw)
 		for letter, want := range drawn {
-			got := shapeOf(nested(glyphRings(t, face, letter)))
+			letterRings := glyphRings(t, face, letter)
+			got := shapeOf(nested(letterRings))
 			if !same(got, want) {
 				t.Errorf("%q nests as %v, want %v", letter, got,
 					want)

@@ -1,6 +1,7 @@
 package terrain
 
 import (
+	"compress/zlib"
 	"fmt"
 	"io"
 	"math"
@@ -38,18 +39,17 @@ func (raster *Raster) tile(index int) ([]float32, error) {
 	if err != nil {
 		return nil, err
 	}
-	var input io.Reader = section
-	if raster.compression == lzwed {
-		compressed := lzw.NewReader(section, lzw.MSB, byteBits)
-		defer compressed.Close()
-		input = compressed
+	input, closer, err := raster.inflated(section)
+	if err != nil {
+		return nil, fmt.Errorf("terrain: tile %d: %w", index, err)
 	}
+	defer closer.Close()
 	buffered := newSampleReader(input)
 	samples, err := raster.decode(buffered, count)
 	if err != nil {
 		return nil, fmt.Errorf("terrain: tile %d: %w", index, err)
 	}
-	if raster.compression == lzwed {
+	if raster.compression != uncompressed {
 		if err := compressedEnd(buffered); err != nil {
 			return nil, fmt.Errorf("terrain: tile %d: %w", index, err)
 		}
@@ -57,6 +57,25 @@ func (raster *Raster) tile(index int) ([]float32, error) {
 	raster.cache.put(index, samples)
 
 	return samples, nil
+}
+
+// inflated is a tile's bytes as the compression leaves them to be read, and
+// what closes the reader: the section itself where there is none, or its
+// lzw or zlib stream.
+func (raster *Raster) inflated(section io.Reader) (io.Reader, io.Closer,
+	error) {
+	switch raster.compression {
+	case lzwed:
+		compressed := lzw.NewReader(section, lzw.MSB, byteBits)
+		return compressed, compressed, nil
+	case deflated, oldDeflated:
+		compressed, err := zlib.NewReader(section)
+		if err != nil {
+			return nil, nil, err
+		}
+		return compressed, compressed, nil
+	}
+	return section, io.NopCloser(nil), nil
 }
 
 // decodeSigned reads signed 16-bit samples, whole numbers in the file's byte
@@ -69,7 +88,8 @@ func (raster *Raster) decodeSigned(input io.Reader, count int) ([]float32, error
 		if _, err := io.ReadFull(input, word[:]); err != nil {
 			return nil, err
 		}
-		samples[index] = float32(int16(raster.order.Uint16(word[:])))
+		signed := int16(raster.order.Uint16(word[:]))
+		samples[index] = float32(signed)
 	}
 	return samples, nil
 }

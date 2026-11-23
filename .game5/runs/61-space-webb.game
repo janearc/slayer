@@ -1,1 +1,1 @@
-space-webb . :: ./bin/hillside -set doc/space-webb.yaml -sky black -out out/space-webb.png
+space-webb . :: ./bin/slayer draw sets/webb-specimen.yaml --out out/space-webb.png

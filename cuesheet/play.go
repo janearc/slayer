@@ -173,7 +173,7 @@ func (sheet *Sheet) strikes(written fields,
 func (sheet *Sheet) pulsed(pattern string,
 	at time.Duration) ([]time.Duration, error) {
 	if len(pattern) == 0 || strings.Trim(pattern, "x.") != "" {
-		return nil, fmt.Errorf("%w: pulse %q is steps of x and .",
+		return nil, fmt.Errorf("%w: pulse %q is steps of x and \".\"",
 			ErrCue, pattern)
 	}
 	meter := float64(sheet.clock.Meter())

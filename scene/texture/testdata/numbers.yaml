@@ -1,0 +1,78 @@
+# every number the texture tests in package texture_test choose, with what
+# it is and why. the tests ask for each by its name.
+numbers:
+  - name: first-grey
+    value: 0.8
+    says: the grey of the first colour of a checker and of the first band of a giant
+    kind: picked
+    by: far from the second grey, so the two are told apart
+  - name: second-grey
+    value: 0.2
+    says: the grey of the second colour of a checker and of the second band of a giant
+    kind: picked
+    by: far from the first grey, so the two are told apart
+  - name: ink-bright
+    value: 0.9
+    says: the grey of the first ink of an ornament, the one at the middle of a lozenge
+    kind: picked
+    by: apart from every grey of the checker beneath, so an ink is told from what is beneath
+  - name: ink-mid
+    value: 0.6
+    says: the grey of the second ink of an ornament
+    kind: picked
+    by: apart from every grey of the checker beneath
+  - name: ink-dim
+    value: 0.3
+    says: the grey of the third ink of an ornament
+    kind: picked
+    by: apart from every grey of the checker beneath
+  - name: place-near
+    value: 0.3
+    says: a coordinate near the origin, in the thing's own units, for a point the tests ask about
+    kind: picked
+    by: inside the cell at the origin of a checker of size one
+  - name: place-far
+    value: 3.4
+    says: a coordinate several cells from the origin, for a point the tests ask about
+    kind: picked
+    by: well away from the origin, and not on a cell's edge
+  - name: place-behind
+    value: -4.6
+    says: a coordinate several cells behind the origin, for a point the tests ask about
+    kind: picked
+    by: negative, so that a count of cells below nought is tried, and not on a cell's edge
+  - name: sample-across
+    value: 0.31
+    says: where across a surface the ornament tests ask, in metres
+    kind: picked
+    by: not at the middle of a lozenge of the ornament cell below
+  - name: sample-up
+    value: 0.17
+    says: where up a surface the ornament tests ask, in metres
+    kind: picked
+    by: not at the middle of a lozenge of the ornament cell below
+  - name: ornament-cell
+    value: 0.2
+    says: how wide one lozenge of the ornament the tests lay is, in metres
+    kind: picked
+    by: a few lozenges across the surface the tests ask about
+  - name: ornament-ring
+    value: 0.02
+    says: how wide each ring of a lozenge of the ornament the tests lay is, in metres
+    kind: picked
+    by: several rings to a lozenge
+  - name: street-latitude
+    value: 0.2
+    says: the sine of the latitude a street of storms is laid along in the tests
+    kind: picked
+    by: off the equator, so a street is not at the band's edge
+  - name: samples-round
+    value: 8
+    says: how many points are asked at even steps round a body, at one latitude
+    kind: picked
+    by: closer together than any storm the tests lay is wide
+  - name: street-size
+    value: 0.1
+    says: the size, in latitude units, of the storms of a street in the tests
+    kind: picked
+    by: small beside the band they lie in

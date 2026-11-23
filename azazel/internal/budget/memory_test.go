@@ -35,7 +35,7 @@ type memoryCase struct {
 	Requested uint64 `yaml:"requested"`
 }
 
-// brokenMemoryRange records the original generated broken-ledger bounds.
+// brokenMemoryRange records the generated broken-ledger bounds.
 type brokenMemoryRange struct {
 	MinimumLimit   uint64 `yaml:"minimum_limit"`
 	MaximumLimit   uint64 `yaml:"maximum_limit"`
@@ -44,7 +44,7 @@ type brokenMemoryRange struct {
 	MaximumRequest uint64 `yaml:"maximum_request"`
 }
 
-// memoryFixtures keeps each original example group and property range named.
+// memoryFixtures keeps each example group and property range named.
 type memoryFixtures struct {
 	UnreservedCapacity []memoryCase      `yaml:"unreserved_capacity"`
 	KeptReservations   []memoryCase      `yaml:"kept_reservations"`
@@ -168,7 +168,7 @@ func TestMemoryMatchesAnUnboundedLedger(t *testing.T) {
 	rapid.Check(t, memoryLedgerProperty{}.check)
 }
 
-// brokenMemoryProperty retains the original overcommitted-ledger generator.
+// brokenMemoryProperty is the overcommitted-ledger generator.
 type brokenMemoryProperty struct {
 	bounds brokenMemoryRange
 }

@@ -44,7 +44,7 @@ import (
 	"slices"
 
 	"github.com/janearc/puzzlemouth/pzm"
-	"github.com/janearc/slayer/hillside"
+	"github.com/janearc/slayer/session"
 )
 
 // build, built, who and sessions are set by the linker; they say which build
@@ -59,8 +59,8 @@ func main() {
 		tool := stamped()
 		os.Exit(tool.Run(arguments, os.Stdout, os.Stderr))
 	}
-	stamp := hillside.Stamped(build, built, who, sessions)
-	os.Exit(hillside.Run(arguments, os.Stdout, os.Stderr, stamp))
+	stamp := session.Stamped(build, built, who, sessions)
+	os.Exit(session.Run(arguments, os.Stdout, os.Stderr, stamp))
 }
 
 // stamped is the tool that answers which build this is.

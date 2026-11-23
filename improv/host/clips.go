@@ -14,50 +14,50 @@ import (
 // clipEnding is how a clip's file is named: the clip's name and this.
 const clipEnding = ".mp4"
 
-// Loop is a short film on black, read whole, played round and round.
-type Loop struct {
+// loop is a short film on black, read whole, played round and round.
+type loop struct {
 	frames []*image.RGBA
 	rate   float64
 }
 
-// At is the loop's picture at seconds in, round and round.
-func (loop Loop) At(seconds float64) *image.RGBA {
-	count := len(loop.frames)
-	at := int(math.Floor(seconds*loop.rate)) % count
-	if at < none {
-		at += count
+// at is the loop's picture at seconds in, round and round.
+func (playing loop) at(seconds float64) *image.RGBA {
+	count := len(playing.frames)
+	turns := int(math.Floor(seconds*playing.rate)) % count
+	if turns < none {
+		turns += count
 	}
-	return loop.frames[at]
+	return playing.frames[turns]
 }
 
-// ReadLoop reads a film whole, each picture scaled to a size. It refuses
+// readLoop reads a film whole, each picture scaled to a size. It refuses
 // a film it cannot open and one with no pictures.
-func ReadLoop(path string, size image.Point) (Loop, error) {
+func readLoop(path string, size image.Point) (loop, error) {
 	film, err := movie.OpenFilm(path, none, size)
 	if err != nil {
-		return Loop{}, fmt.Errorf("host: %s: %w", path, err)
+		return loop{}, fmt.Errorf("host: %s: %w", path, err)
 	}
 	defer film.Close()
-	loop := Loop{rate: film.Rate()}
+	read := loop{rate: film.Rate()}
 	for {
 		picture, err := film.Next()
 		if errors.Is(err, movie.ErrPastEnd) {
 			break
 		}
 		if err != nil {
-			return Loop{}, fmt.Errorf("host: %s: %w", path, err)
+			return loop{}, fmt.Errorf("host: %s: %w", path, err)
 		}
-		loop.frames = append(loop.frames, picture)
+		read.frames = append(read.frames, picture)
 	}
-	if len(loop.frames) == none || !(loop.rate > none) {
-		return Loop{}, fmt.Errorf("host: %s has no pictures to loop",
+	if len(read.frames) == none || !(read.rate > none) {
+		return loop{}, fmt.Errorf("host: %s has no pictures to loop",
 			path)
 	}
-	return loop, nil
+	return read, nil
 }
 
 // Clips is the host's loops by name.
-type Clips map[string]Loop
+type Clips map[string]loop
 
 // ReadClips reads the host's five clips from a folder, each NAME.mp4,
 // scaled to a size. A folder that does not exist is no clips, and the
@@ -68,13 +68,13 @@ func ReadClips(dir string, size image.Point) (Clips, error) {
 		return Clips{}, nil
 	}
 	clips := Clips{}
-	for _, name := range []string{Resting, Speaking, Angry, Flash,
-		Quiet} {
-		loop, err := ReadLoop(filepath.Join(dir, name+clipEnding), size)
+	for _, name := range []string{resting, speaking, angry, flash,
+		quiet} {
+		read, err := readLoop(filepath.Join(dir, name+clipEnding), size)
 		if err != nil {
 			return nil, err
 		}
-		clips[name] = loop
+		clips[name] = read
 	}
 	return clips, nil
 }

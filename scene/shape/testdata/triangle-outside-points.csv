@@ -1,0 +1,5 @@
+name,x,y
+past-the-long-edge,0.75,0.75
+left-of-the-short-edge,-0.1,0.5
+below-the-short-edge,0.5,-0.1
+far-away,2,2

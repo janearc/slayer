@@ -38,7 +38,7 @@ func TestAnAxisOfAnyLengthIsTheSameNorth(t *testing.T) {
 	for _, up := range []float64{1e-200, 1e200} {
 		got := New(Terrain{Tiling: hexes.Sphere{Splits: 4}, Seed: 2, Ocean: 0.6,
 			Axis: maths.V(0, up, 0)})
-		for _, tile := range want.Tiles() {
+		for _, tile := range want.tiles {
 			if got.Biome(tile) != want.Biome(tile) {
 				t.Fatalf("an axis %v up: %v is %v, not %v", up, tile,
 					got.Biome(tile), want.Biome(tile))
@@ -49,9 +49,9 @@ func TestAnAxisOfAnyLengthIsTheSameNorth(t *testing.T) {
 
 // a world of no tiles has none, and no sea to pour into them.
 func TestAWorldOfNoTilesIsEmpty(t *testing.T) {
-	w := New(Terrain{Tiling: hexes.Flat{}})
-	if len(w.Tiles()) != 0 {
-		t.Errorf("a flat of no size has %d tiles", len(w.Tiles()))
+	world := New(Terrain{Tiling: hexes.Flat{}})
+	if len(world.tiles) != 0 {
+		t.Errorf("a flat of no size has %d tiles", len(world.tiles))
 	}
 }
 
@@ -79,9 +79,9 @@ func TestAFeatureIsASizeAndABiome(t *testing.T) {
 // past a volcano's edge the ground is as it was, and at the edge too: a
 // share of one and a half is not a power of a negative.
 func TestPastAVolcanoTheGroundIsAsItWas(t *testing.T) {
-	v := Volcano{Rise: 1}
+	volcano := Volcano{Rise: 1}
 	for _, share := range []float64{1, 1.5, 3} {
-		if got := v.Shape(0.25, share); got != 0.25 {
+		if got := volcano.Shape(0.25, share); got != 0.25 {
 			t.Errorf("a volcano at a share of %v is %v", share, got)
 		}
 	}

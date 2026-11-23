@@ -1,0 +1,962 @@
+# Street-level retail, 2026-11-19, detailed 2026-11-20: the shopfronts at
+# the foot of a city street, as data. Each unit type below is one
+# shopfront. A frontage is a row of them, drawn from the seed with a rule
+# that no two of a kind stand side by side. Every value is picked, not
+# measured, by eye, from what a person sees from the pavement: awnings with
+# valances, roll-down shutters, windows full of goods, lit rooms, sign
+# boards, pay stations, pipes and meters.
+#
+# Places are metres in a unit's own frame. x runs along the front from the
+# unit's left edge as a person in the street sees it; y is up from the
+# pavement; z is out into the street, so the wall plane is z nought and a
+# room lies at negative z. A unit is a whole number of the city's bays
+# wide (manufacture/city-choices.yaml, bay-pitch), from bays to bays-most
+# as the seed draws, and a storey tall (its storey-max), the height of a
+# city building's ground floor. Places are given for the unit at its
+# least width.
+#
+# A part is a box [x0 y0 z0 x1 y1 z1], a prism [x y z radius length], a
+# round solid about its middle with its axis y (up) unless axis says x or
+# z, or a slab [x0 x1 z0 y0 z1 y1 thick], a plank whose underside runs from
+# the height y0 at z0 to the height y1 at z1, thick measured straight up.
+# count and step repeat a part. from is the first detail level that draws
+# it: hull (the default), quick or demo. At hull a shopfront is a lit
+# opening and its biggest things; at quick it has its door, counter,
+# awning, sign frame and services; at demo, its stools, goods and
+# hardware. sides is how many sides a prism has (ten if not said).
+#
+# When a unit is wider than its least, along says how a part, a light or a
+# module moves: right carries it with the right edge, centre with the
+# middle, fill stretches it, or, for a part that repeats along x, adds to
+# its count. An opening stretches if the unit says stretch.
+#
+# A material named "@name" is the one the unit's seed picks from the
+# palette of that name. A module is a set of parts that units share, put
+# in a unit with uses. An option is a choice the seed makes for a unit:
+# with its chance it takes one of its variants, by their weights; wide
+# is the fewest bays the unit has to be to be offered it.
+#
+# A light is a point: its kelvin heat and its luminance at a metre in the
+# kit's relative light, as a set's lamp is given. The tracer lights by
+# lamps and not by what glows, so every glowing thing that should throw
+# light on the pavement has a lamp with it. A lamp's light starts 0.3 m
+# from it, and what stands inside that distance does not shade it: so a
+# lamp 0.2 m behind a pane of glass lights the pavement through it, and
+# one further back does not. Lamps stand at least a metre from the wall
+# they would otherwise glare on.
+#
+# A unit's sign slot [x0 y0 x1 y1] is a named place on its wall plane for a
+# lettered sign made by another kind. The frontage draws nothing in it but
+# a frame round it, from the sign-frame module, which a sign stands in.
+run:
+  units: 8
+shell:
+  # floor is the height of a unit's floor above the pavement: a step.
+  floor: 0.15
+  # slab is the thickness of the ceiling slab under the storey above.
+  slab: 0.25
+  # wall is the thickness of the front wall.
+  wall: 0.3
+  # partition is the thickness of the back and side walls.
+  partition: 0.2
+grounds:
+  # the kinds of building that may stand on a podium of shops, by weight.
+  buildings: {tower: 3, terrace-midwest: 1, terrace-san-francisco: 1, terrace-portofino: 1}
+  # podium is how far the shops' front stands out from the building's
+  # front, metres: the deepest room, and a little over.
+  podium: 7.2
+  # margin is plain wall at each end of the shops, metres.
+  margin: 0.6
+  # pool is how many distinct units of each type a block draws from.
+  pool: 12
+  filler: wall-filler
+palettes:
+  awning: [awning-red, awning-navy, awning-ochre, awning-green, awning-charcoal]
+  frame: [aluminium, frame-black, frame-green, frame-red, wood]
+  wall: [plaster-dark, wall-teal, wall-maroon, wall-ink, wall-grey]
+  brick: [brick-dark, brick-umber, brick-soot]
+  shutter: [shutter, shutter-green, shutter-rust, shutter-blue]
+  noren: [indigo, noren-red, noren-charcoal]
+  stool: [stool-red, stool-black, wood-light]
+  cabinet-a: [cabinet-black, cabinet-purple, cabinet-blue]
+  screen-a: [screen-magenta, screen-cyan, screen-yellow]
+  screen-b: [screen-cyan, screen-yellow, screen-magenta]
+  mat: [mat-black, mat-red, mat-green]
+  machine-a: [vending-red, vending-yellow]
+  machine-b: [vending-blue, vending-green]
+  machine-c: [vending-green, vending-yellow, vending-blue]
+  lantern: [lantern-red, lantern-amber, lantern-white]
+  bin: [bin-green, bin-grey, frame-red]
+materials:
+  plaster-dark: {colour: [0.05, 0.045, 0.05], gloss: 0.05}
+  brick-dark: {colour: [0.075, 0.035, 0.03], gloss: 0.08}
+  brick-umber: {colour: [0.09, 0.04, 0.025], gloss: 0.08}
+  brick-soot: {colour: [0.05, 0.04, 0.04], gloss: 0.08}
+  wall-teal: {colour: [0.02, 0.06, 0.06], gloss: 0.05}
+  wall-maroon: {colour: [0.07, 0.02, 0.025], gloss: 0.05}
+  wall-ink: {colour: [0.03, 0.03, 0.055], gloss: 0.05}
+  wall-grey: {colour: [0.09, 0.09, 0.1], gloss: 0.05}
+  # the plain wall behind a podium's shallow units and at its ends.
+  wall-filler: {colour: [0.03, 0.03, 0.035]}
+  plaster-warm: {colour: [0.34, 0.21, 0.12]}
+  plaster-dim: {colour: [0.14, 0.08, 0.06]}
+  # the same look as plaster-dim, in its own slot: a ceiling and a back wall
+  # of one material share an edge the mesh refuses.
+  ceiling-dim: {colour: [0.14, 0.08, 0.06]}
+  # likewise the side walls of a room, which touch its back wall.
+  side-dim: {colour: [0.14, 0.08, 0.06]}
+  side-warm: {colour: [0.34, 0.21, 0.12]}
+  side-white: {colour: [0.62, 0.62, 0.64]}
+  plaster-white: {colour: [0.62, 0.62, 0.64]}
+  tile-dark: {colour: [0.05, 0.045, 0.04], gloss: 0.35}
+  tile-pale: {colour: [0.45, 0.45, 0.46], gloss: 0.3}
+  ceiling-warm: {colour: [0.24, 0.16, 0.1]}
+  ceiling-white: {colour: [0.5, 0.5, 0.52]}
+  wood: {colour: [0.17, 0.085, 0.04], gloss: 0.1}
+  wood-light: {colour: [0.36, 0.21, 0.11], gloss: 0.2}
+  steel: {colour: [0.5, 0.5, 0.52], gloss: 0.5}
+  stool-red: {colour: [0.33, 0.03, 0.03], gloss: 0.3}
+  stool-black: {colour: [0.02, 0.02, 0.025], gloss: 0.3}
+  bowl-white: {colour: [0.72, 0.72, 0.66], gloss: 0.4}
+  condiment: {colour: [0.3, 0.05, 0.03]}
+  indigo: {colour: [0.01, 0.04, 0.45]}
+  noren-red: {colour: [0.3, 0.02, 0.02]}
+  noren-charcoal: {colour: [0.04, 0.04, 0.045]}
+  menu-glow: {colour: [0.05, 0.04, 0.02], glow: [0.8, 0.52, 0.2]}
+  paper-glow: {colour: [0.3, 0.25, 0.15], glow: [0.9, 0.6, 0.3]}
+  lantern-red: {colour: [0.2, 0.02, 0.01], glow: [1.3, 0.12, 0.05]}
+  lantern-amber: {colour: [0.2, 0.1, 0.01], glow: [1.3, 0.6, 0.1]}
+  lantern-white: {colour: [0.3, 0.3, 0.28], glow: [1.1, 1.05, 0.9]}
+  beer-red: {colour: [0.2, 0.01, 0.02], glow: [1.3, 0.07, 0.13]}
+  neon-blue: {colour: [0.01, 0.03, 0.2], glow: [0.15, 0.5, 2.2]}
+  bulb-amber: {colour: [0.2, 0.1, 0.02], glow: [1.6, 0.8, 0.25]}
+  amber-glow: {colour: [0.1, 0.05, 0.015], glow: [0.55, 0.26, 0.07]}
+  jukebox-glow: {colour: [0.02, 0.03, 0.1], glow: [0.2, 0.35, 1.1]}
+  door-steel: {colour: [0.05, 0.05, 0.055], gloss: 0.3}
+  bars-iron: {colour: [0.02, 0.02, 0.022], gloss: 0.3}
+  aluminium: {colour: [0.55, 0.56, 0.58], gloss: 0.6}
+  frame-black: {colour: [0.02, 0.02, 0.022], gloss: 0.4}
+  frame-green: {colour: [0.03, 0.12, 0.07], gloss: 0.3}
+  frame-red: {colour: [0.25, 0.03, 0.02], gloss: 0.3}
+  board-dark: {colour: [0.02, 0.02, 0.025], gloss: 0.2}
+  # clear glass: it lets the room behind it through. A pane stops a lamp's
+  # light unless the lamp is within 0.3 m of it, so lamps stand just
+  # behind the panes that should let light out.
+  glass: {colour: [0.95, 0.95, 0.95], gloss: 0.5, through: 1, index: 1.5}
+  concrete: {colour: [0.17, 0.17, 0.165]}
+  sticker-a: {colour: [0.6, 0.05, 0.05]}
+  sticker-b: {colour: [0.05, 0.3, 0.6]}
+  sticker-c: {colour: [0.65, 0.55, 0.05]}
+  sticker-d: {colour: [0.7, 0.7, 0.68]}
+  sticker-e: {colour: [0.08, 0.5, 0.2]}
+  tag-pink: {colour: [0.7, 0.1, 0.35]}
+  tag-cyan: {colour: [0.05, 0.55, 0.6]}
+  # paper on the glass, lit from behind by the room: it glows a share of its
+  # colour, about four fifths, picked.
+  poster-red: {colour: [0.4, 0.03, 0.03], glow: [0.32, 0.025, 0.025]}
+  poster-yellow: {colour: [0.55, 0.45, 0.04], glow: [0.44, 0.36, 0.03]}
+  poster-white: {colour: [0.55, 0.55, 0.55], glow: [0.44, 0.44, 0.44]}
+  shutter: {colour: [0.25, 0.26, 0.28], gloss: 0.4}
+  shutter-green: {colour: [0.07, 0.14, 0.1], gloss: 0.4}
+  shutter-rust: {colour: [0.2, 0.1, 0.06], gloss: 0.3}
+  shutter-blue: {colour: [0.08, 0.12, 0.22], gloss: 0.4}
+  shutter-box: {colour: [0.14, 0.14, 0.15], gloss: 0.3}
+  security-glow: {colour: [0.3, 0.3, 0.3], glow: [1.2, 1.25, 1.4]}
+  awning-red: {colour: [0.26, 0.02, 0.02], gloss: 0.1}
+  awning-navy: {colour: [0.02, 0.03, 0.17], gloss: 0.1}
+  awning-ochre: {colour: [0.4, 0.24, 0.02], gloss: 0.1}
+  awning-green: {colour: [0.03, 0.2, 0.07], gloss: 0.1}
+  awning-charcoal: {colour: [0.05, 0.05, 0.055], gloss: 0.1}
+  awning-trim: {colour: [0.42, 0.39, 0.3]}
+  vending-red: {colour: [0.33, 0.02, 0.02], gloss: 0.5}
+  vending-blue: {colour: [0.03, 0.08, 0.3], gloss: 0.5}
+  vending-yellow: {colour: [0.5, 0.4, 0.02], gloss: 0.5}
+  vending-green: {colour: [0.02, 0.2, 0.08], gloss: 0.5}
+  vending-glow-white: {colour: [0.3, 0.3, 0.3], glow: [1.1, 1.15, 1.2]}
+  vending-glow-cool: {colour: [0.2, 0.3, 0.4], glow: [0.5, 0.8, 1.3]}
+  vending-dark: {colour: [0.015, 0.015, 0.018], gloss: 0.4}
+  tube-light: {colour: [0.5, 0.5, 0.5], glow: [2.2, 2.3, 2.5]}
+  fridge-glow: {colour: [0.3, 0.35, 0.4], glow: [0.9, 1.2, 1.5]}
+  shelf-white: {colour: [0.6, 0.6, 0.6]}
+  counter-white: {colour: [0.55, 0.55, 0.56], gloss: 0.3}
+  register-glow: {colour: [0.02, 0.1, 0.05], glow: [0.1, 1.0, 0.4]}
+  product-red: {colour: [0.5, 0.05, 0.04]}
+  product-green: {colour: [0.05, 0.4, 0.1]}
+  product-yellow: {colour: [0.6, 0.5, 0.05]}
+  band-teal: {colour: [0.02, 0.2, 0.15], glow: [0.05, 0.9, 0.7]}
+  cross-green: {colour: [0.03, 0.2, 0.08], glow: [0.1, 1.5, 0.5]}
+  crate-yellow: {colour: [0.55, 0.38, 0.02], gloss: 0.2}
+  brown-glass: {colour: [0.1, 0.05, 0.02], gloss: 0.6}
+  bottle-green: {colour: [0.03, 0.12, 0.05], gloss: 0.6}
+  bottle-clear: {colour: [0.55, 0.6, 0.55], gloss: 0.6}
+  condenser-grey: {colour: [0.3, 0.31, 0.32], gloss: 0.2}
+  fan-dark: {colour: [0.02, 0.02, 0.02], gloss: 0.3}
+  pipe-grey: {colour: [0.2, 0.2, 0.2], gloss: 0.3}
+  meter-body: {colour: [0.22, 0.25, 0.22], gloss: 0.2}
+  conduit-grey: {colour: [0.28, 0.28, 0.3], gloss: 0.2}
+  bike-dark: {colour: [0.02, 0.02, 0.025], gloss: 0.4}
+  bag-black: {colour: [0.012, 0.012, 0.014], gloss: 0.5}
+  drain-iron: {colour: [0.015, 0.015, 0.017], gloss: 0.3}
+  wall-blank: {colour: [0.22, 0.22, 0.23]}
+  mat-black: {colour: [0.01, 0.01, 0.012]}
+  mat-red: {colour: [0.25, 0.02, 0.02]}
+  mat-green: {colour: [0.03, 0.15, 0.06]}
+  bin-green: {colour: [0.03, 0.1, 0.05], gloss: 0.3}
+  bin-grey: {colour: [0.08, 0.08, 0.09], gloss: 0.3}
+  pot-clay: {colour: [0.2, 0.08, 0.05]}
+  plant-green: {colour: [0.03, 0.16, 0.05]}
+  tatami: {colour: [0.25, 0.23, 0.1]}
+  cabinet-black: {colour: [0.015, 0.015, 0.02], gloss: 0.4}
+  cabinet-purple: {colour: [0.07, 0.02, 0.13], gloss: 0.4}
+  cabinet-blue: {colour: [0.02, 0.04, 0.15], gloss: 0.4}
+  screen-magenta: {colour: [0.1, 0.02, 0.1], glow: [1.4, 0.15, 1.2]}
+  screen-cyan: {colour: [0.02, 0.1, 0.12], glow: [0.15, 1.1, 1.4]}
+  screen-yellow: {colour: [0.1, 0.08, 0.01], glow: [1.4, 1.0, 0.1]}
+  button-red: {colour: [0.5, 0.03, 0.03]}
+  prize-pink: {colour: [0.5, 0.15, 0.3]}
+  prize-teal: {colour: [0.05, 0.4, 0.4]}
+modules:
+  # An awning on arms, sloping down and out from the wall, with a valance
+  # hanging from its edge. Its origin is where its top meets the wall. At
+  # demo it is striped.
+  awning:
+    says: an awning on two arms with a valance and a trim
+    width: 3.4
+    parts:
+      - {says: the rail it hangs from, material: steel, box: [0, -0.04, 0.0, 3.4, 0.08, 0.1], along: fill, from: quick}
+      - {says: the slope, material: "@awning", slab: [0, 3.4, 0.03, 0.0, 1.1, -0.42, 0.035], along: fill, from: quick}
+      - {says: the valance, material: "@awning", box: [0, -0.68, 1.07, 3.4, -0.37, 1.11], along: fill, from: quick}
+      - {says: the valance's trim, material: awning-trim, box: [0, -0.71, 1.065, 3.4, -0.68, 1.115], along: fill, from: quick}
+      - {says: the left arm, material: steel, slab: [0.4, 0.44, 0.0, -0.013, 1.06, -0.429, 0.025], from: quick}
+      - {says: the right arm, material: steel, slab: [2.96, 3.0, 0.0, -0.013, 1.06, -0.429, 0.025], along: right, from: quick}
+      - {says: stripes on the slope, material: awning-trim, slab: [0.0, 0.18, 0.05, 0.0302, 1.08, -0.3741, 0.004], count: 9, step: [0.36, 0, 0], along: fill, from: demo}
+  # A flat canopy with a lip, hung from two rods.
+  canopy:
+    says: a flat canopy over the front with a lip and two rods
+    width: 3.4
+    parts:
+      - {says: the slab, material: "@awning", box: [0, 0.0, 0.0, 3.4, 0.1, 1.0], along: fill, from: quick}
+      - {says: the lip, material: "@awning", box: [0, -0.2, 0.96, 3.4, 0.1, 1.04], along: fill, from: quick}
+      - {says: the left brace, material: steel, slab: [0.3, 0.34, 0.0, -0.45, 0.95, -0.03, 0.03], from: quick}
+      - {says: the right brace, material: steel, slab: [3.06, 3.1, 0.0, -0.45, 0.95, -0.03, 0.03], along: right, from: quick}
+  # The frame round a sign slot, which a lettered sign stands in. Its
+  # origin is 0.06 m left of and below the slot, which is 0.5 m high.
+  sign-frame:
+    says: four boards round a blank slot for a sign
+    width: 2.6
+    parts:
+      - {says: the bottom board, material: board-dark, box: [0, 0, 0, 2.6, 0.06, 0.07], along: fill, from: quick}
+      - {says: the top board, material: board-dark, box: [0, 0.56, 0, 2.6, 0.62, 0.07], along: fill, from: quick}
+      - {says: the left board, material: board-dark, box: [0, 0.05, 0, 0.06, 0.57, 0.07], from: quick}
+      - {says: the right board, material: board-dark, box: [2.54, 0.05, 0, 2.6, 0.57, 0.07], along: right, from: quick}
+  # A glass door in a frame, its handle, hinges and kick plate, on a step
+  # with a mat. Its origin is the door's lower left corner on the pavement.
+  door-glass:
+    says: a glass door with a frame, a handle, hinges, a kick plate and a step
+    width: 1.1
+    parts:
+      - {says: the left jamb, material: "@frame", box: [0, 0.15, -0.04, 0.07, 2.29, 0.06], from: quick}
+      - {says: the right jamb, material: "@frame", box: [1.03, 0.15, -0.04, 1.1, 2.29, 0.06], from: quick}
+      - {says: the head, material: "@frame", box: [0, 2.23, -0.04, 1.1, 2.3, 0.06], from: quick}
+      - {says: the kick plate, material: steel, box: [0.07, 0.15, -0.04, 1.03, 0.42, 0.065], from: quick}
+      - {says: the glass, material: glass, box: [0.06, 0.43, -0.02, 1.04, 2.24, 0.0], from: quick}
+      - {says: the middle rail, material: "@frame", box: [0.07, 1.02, -0.04, 1.03, 1.08, 0.05], from: demo}
+      - {says: the handle's bar, material: aluminium, box: [0.9, 0.96, 0.1, 0.94, 1.54, 0.14], from: quick}
+      - {says: the handle's posts, material: aluminium, box: [0.9, 1.0, 0.06, 0.94, 1.04, 0.1], count: 2, step: [0, 0.46, 0], from: demo}
+      - {says: the hinges, material: steel, box: [0.0, 0.5, 0.06, 0.05, 0.62, 0.09], count: 3, step: [0, 0.75, 0], from: demo}
+      - {says: the step, material: concrete, box: [-0.08, 0.0, -0.03, 1.18, 0.15, 0.5], from: quick}
+      - {says: the mat, material: "@mat", box: [0.1, 0.15, 0.12, 1.0, 0.165, 0.45], from: demo}
+  # A sliding door of two leaves, one of them slid open, in a frame on a
+  # track. Its origin is the left of the frame on the pavement.
+  door-sliding:
+    says: a sliding glass door with one leaf open, on a track and a step
+    width: 1.8
+    parts:
+      - {says: the left jamb, material: "@frame", box: [0, 0.15, -0.04, 0.07, 2.29, 0.06], from: quick}
+      - {says: the right jamb, material: "@frame", box: [1.73, 0.15, -0.04, 1.8, 2.29, 0.06], from: quick}
+      - {says: the head, material: "@frame", box: [0, 2.23, -0.04, 1.8, 2.3, 0.06], from: quick}
+      - {says: the track, material: steel, box: [0.07, 0.15, -0.04, 1.73, 0.19, 0.06], from: quick}
+      - {says: the shut leaf's glass, material: glass, box: [0.06, 0.2, -0.02, 0.93, 2.23, 0.0], from: quick}
+      - {says: the leaf's stiles, material: "@frame", box: [0.07, 0.2, -0.03, 0.13, 2.22, 0.02], count: 2, step: [0.8, 0, 0], from: demo}
+      - {says: the leaf's top rail, material: "@frame", box: [0.07, 2.17, -0.03, 0.93, 2.23, 0.02], from: demo}
+      - {says: the leaf's bottom rail, material: "@frame", box: [0.07, 0.19, -0.03, 0.93, 0.45, 0.02], from: demo}
+      - {says: the leaf's pull, material: aluminium, box: [0.78, 1.0, 0.02, 0.81, 1.5, 0.05], from: demo}
+      - {says: the step, material: concrete, box: [-0.08, 0.0, -0.03, 1.88, 0.15, 0.5], from: quick}
+      - {says: the mat, material: "@mat", box: [0.1, 0.15, 0.1, 1.7, 0.165, 0.45], from: demo}
+  # A heavy steel door with a frame, a bulb beside it on a bracket, a
+  # handle, a peephole, hinges and a kick plate, on a step. Its origin is
+  # the door's lower left corner on the pavement.
+  door-steel:
+    says: a heavy steel door, its frame, a bulb on a bracket, a step
+    width: 1.1
+    parts:
+      - {says: the door, material: door-steel, box: [0, 0.15, 0.0, 1.1, 2.3, 0.1], from: quick}
+      - {says: the frame's sides, material: "@frame", box: [-0.06, 0.15, -0.02, 0.0, 2.35, 0.12], from: quick}
+      - {says: the frame's right side, material: "@frame", box: [1.1, 0.15, -0.02, 1.16, 2.35, 0.12], from: quick}
+      - {says: the frame's head, material: "@frame", box: [-0.06, 2.3, -0.02, 1.16, 2.36, 0.12], from: quick}
+      - {says: the kick plate, material: steel, box: [0.04, 0.15, 0.1, 1.06, 0.4, 0.115], from: quick}
+      - {says: the handle's bar, material: aluminium, box: [0.85, 0.98, 0.14, 0.9, 1.42, 0.18], from: quick}
+      - {says: the handle's posts, material: aluminium, box: [0.85, 1.02, 0.1, 0.9, 1.06, 0.14], count: 2, step: [0, 0.32, 0], from: demo}
+      - {says: the peephole, material: steel, prism: [0.55, 1.62, 0.1, 0.03, 0.025], axis: z, sides: 6, from: demo}
+      - {says: the hinges, material: steel, box: [0.0, 0.4, 0.1, 0.03, 0.55, 0.13], count: 3, step: [0, 0.75, 0], from: demo}
+      - {says: the bracket for the bulb, material: steel, box: [-0.22, 1.9, 0.0, -0.18, 1.96, 0.3], from: quick}
+      - {says: the bulb, material: bulb-amber, box: [-0.25, 1.96, 0.22, -0.15, 2.06, 0.32], from: quick}
+      - {says: the bulb's cage, material: steel, box: [-0.27, 1.94, 0.2, -0.13, 1.96, 0.34], from: demo}
+      - {says: the step, material: concrete, box: [-0.1, 0.0, 0.0, 1.26, 0.15, 0.5], from: quick}
+      - {says: the mat, material: "@mat", box: [0.1, 0.15, 0.12, 1.0, 0.165, 0.42], from: demo}
+  # A shop window of glass in a frame with mullions, from the sill of the
+  # opening up. Its origin is the lower left corner of the glass.
+  shopwindow:
+    says: a window of glass in a frame, a head, a transom and mullions
+    width: 2.8
+    parts:
+      - {says: the left side, material: "@frame", box: [0, 0.0, 0.0, 0.06, 2.59, 0.07], from: quick}
+      - {says: the right side, material: "@frame", box: [2.74, 0.0, 0.0, 2.8, 2.59, 0.07], along: right, from: quick}
+      - {says: the head, material: "@frame", box: [0, 2.54, 0.0, 2.8, 2.6, 0.07], along: fill, from: quick}
+      - {says: the glass, material: glass, box: [0.01, 0.01, -0.04, 2.79, 2.59, -0.02], along: fill, from: quick}
+      - {says: the transom, material: "@frame", box: [0, 1.9, 0.0, 2.8, 1.94, 0.06], along: fill, from: demo}
+      - {says: the mullions, material: "@frame", box: [0.87, 0.0, 0.0, 0.93, 2.54, 0.07], count: 2, step: [0.9, 0, 0], along: fill, from: demo}
+  # The meter, the conduit and the downpipe on a pier of wall. Its origin
+  # is the left of the pier.
+  services:
+    says: an electric meter in a box, a conduit up the wall and a downpipe
+    width: 0.7
+    parts:
+      - {says: the meter box, material: meter-body, box: [0.05, 1.15, 0.0, 0.5, 1.7, 0.16], from: quick}
+      - {says: the meter's window, material: glass, box: [0.12, 1.35, 0.16, 0.43, 1.6, 0.17], from: demo}
+      - {says: the conduit up, material: conduit-grey, box: [0.2, 1.7, 0.0, 0.24, 3.3, 0.045], from: quick}
+      - {says: the conduit down, material: conduit-grey, box: [0.2, 0.0, 0.0, 0.24, 1.15, 0.045], from: quick}
+      - {says: the junction box, material: conduit-grey, box: [0.15, 2.3, 0.0, 0.29, 2.46, 0.1], from: demo}
+      - {says: the downpipe, material: pipe-grey, prism: [0.6, 1.75, 0.07, 0.04, 3.5], sides: 8, from: quick}
+      - {says: the downpipe's brackets, material: steel, box: [0.55, 0.8, 0.0, 0.65, 0.84, 0.07], count: 3, step: [0, 1.1, 0], from: demo}
+  # An air conditioner's outdoor unit on two brackets, its fan facing out,
+  # its pipes running down. Its origin is the foot of its brackets.
+  condenser:
+    says: a condenser unit on its brackets with a fan guard and pipes
+    width: 0.9
+    parts:
+      - {says: the body, material: condenser-grey, box: [0, 0.0, 0.08, 0.9, 0.65, 0.42], from: quick}
+      - {says: the brackets, material: steel, box: [0.1, -0.06, 0.0, 0.16, 0.0, 0.36], count: 2, step: [0.64, 0, 0], from: quick}
+      - {says: the fan, material: fan-dark, prism: [0.45, 0.33, 0.42, 0.27, 0.02], axis: z, sides: 12, from: demo}
+      - {says: the hub, material: steel, prism: [0.45, 0.33, 0.43, 0.06, 0.03], axis: z, sides: 8, from: demo}
+      - {says: the guard's bars, material: steel, box: [0.18, 0.2, 0.43, 0.72, 0.215, 0.445], count: 4, step: [0, 0.07, 0], from: demo}
+      - {says: the pipes, material: pipe-grey, box: [0.8, -1.0, 0.02, 0.84, 0.1, 0.06], from: demo}
+props:
+  # Beer crates stacked three high, two wide, with bottles on the top.
+  crates:
+    says: yellow plastic crates, stacked
+    parts:
+      - {material: crate-yellow, box: [0, 0, 0, 0.5, 0.32, 0.36], count: 2, step: [0.52, 0, 0]}
+      - {material: crate-yellow, box: [0.02, 0.34, 0.01, 0.48, 0.66, 0.35], count: 2, step: [0.52, 0, 0]}
+      - {material: crate-yellow, box: [0.28, 0.68, 0.0, 0.78, 1.0, 0.36]}
+      - {material: brown-glass, prism: [0.4, 1.14, 0.18, 0.035, 0.26], sides: 6, count: 4, step: [0.1, 0, 0], from: demo}
+  # A bicycle, leaning at the wall.
+  bicycle:
+    says: a bicycle, its wheels and a plain frame
+    parts:
+      - {material: bike-dark, prism: [0.0, 0.34, 0.0, 0.33, 0.03], axis: z}
+      - {material: bike-dark, prism: [1.05, 0.34, 0.0, 0.33, 0.03], axis: z}
+      - {material: bike-dark, box: [0.1, 0.6, -0.015, 1.0, 0.65, 0.015], from: demo}
+      - {material: bike-dark, box: [0.4, 0.34, -0.015, 0.45, 0.95, 0.015], from: demo}
+      - {material: bike-dark, box: [0.98, 0.34, -0.015, 1.03, 1.02, 0.015], from: demo}
+      - {material: bike-dark, box: [0.96, 1.02, -0.22, 1.05, 1.06, 0.22], from: demo}
+      - {material: bike-dark, box: [0.3, 0.95, -0.06, 0.58, 0.99, 0.06], from: demo}
+  # Black bin bags, slumped against each other.
+  bags:
+    says: three black bin bags
+    parts:
+      - {material: bag-black, prism: [0.2, 0.2, 0.2, 0.22, 0.4], sides: 8}
+      - {material: bag-black, prism: [0.58, 0.17, 0.3, 0.19, 0.34], sides: 8}
+      - {material: bag-black, prism: [0.35, 0.16, 0.6, 0.18, 0.32], sides: 8}
+      - {material: bag-black, box: [0.16, 0.4, 0.16, 0.24, 0.5, 0.24], from: demo}
+  # A drain grate let into the pavement, a hair above it.
+  drain:
+    says: an iron drain grate
+    parts:
+      - {material: drain-iron, box: [0, 0.0, 0, 0.6, 0.012, 0.36]}
+      - {material: bars-iron, box: [0.05, 0.012, 0.04, 0.07, 0.02, 0.32], count: 10, step: [0.055, 0, 0], from: demo}
+  # Beer kegs, two standing and one on them.
+  kegs:
+    says: three steel beer kegs stacked
+    parts:
+      - {material: steel, prism: [0.25, 0.25, 0.25, 0.22, 0.5], sides: 10}
+      - {material: steel, prism: [0.75, 0.25, 0.25, 0.22, 0.5], sides: 10}
+      - {material: steel, prism: [0.5, 0.75, 0.25, 0.22, 0.5], sides: 10, from: quick}
+      - {material: bars-iron, prism: [0.25, 0.1, 0.25, 0.225, 0.03], sides: 10, count: 2, step: [0.5, 0, 0], from: demo}
+      - {material: bars-iron, prism: [0.5, 0.6, 0.25, 0.225, 0.03], sides: 10, from: demo}
+  # A wheeled bin with a lid and a handle.
+  bin:
+    says: a wheeled bin with a sloping lid
+    parts:
+      - {material: "@bin", box: [0, 0.0, 0.0, 0.55, 0.95, 0.6]}
+      - {material: "@bin", slab: [-0.02, 0.57, -0.02, 0.95, 0.62, 0.99, 0.03], from: quick}
+      - {material: bars-iron, box: [0.05, 0.93, -0.06, 0.5, 0.97, -0.02], from: demo}
+      - {material: bars-iron, prism: [0.08, 0.08, 0.1, 0.08, 0.04], axis: x, sides: 8, count: 2, step: [0.4, 0, 0], from: demo}
+  # A sandwich board on its two legs, a menu in glowing lines.
+  aframe:
+    says: a board that leans on itself, with a few lines of menu in light
+    parts:
+      - {material: board-dark, slab: [0, 0.6, 0.6, 0.0, 0.3, 0.9, 0.03]}
+      - {material: board-dark, slab: [0, 0.6, 0.0, 0.0, 0.31, 0.88, 0.03], from: quick}
+      - {material: menu-glow, slab: [0.08, 0.52, 0.55, 0.182, 0.52, 0.272, 0.004], from: demo}
+      - {material: menu-glow, slab: [0.08, 0.52, 0.48, 0.392, 0.45, 0.482, 0.004], from: demo}
+      - {material: menu-glow, slab: [0.08, 0.52, 0.41, 0.602, 0.38, 0.692, 0.004], from: demo}
+  # A stand with umbrellas in it.
+  umbrellas:
+    says: an umbrella stand with three umbrellas
+    parts:
+      - {material: steel, prism: [0.15, 0.25, 0.15, 0.13, 0.5], sides: 8}
+      - {material: frame-black, box: [0.1, 0.5, 0.1, 0.12, 1.2, 0.12], from: quick}
+      - {material: frame-red, box: [0.15, 0.5, 0.17, 0.17, 1.15, 0.19], from: quick}
+      - {material: frame-green, box: [0.2, 0.5, 0.1, 0.22, 1.18, 0.12], from: quick}
+  # A clay pot with a bush in it.
+  planter:
+    says: a clay pot with a bush
+    parts:
+      - {material: pot-clay, box: [0, 0.0, 0.0, 0.5, 0.45, 0.35]}
+      - {material: plant-green, prism: [0.25, 0.8, 0.18, 0.22, 0.7], sides: 7, from: quick}
+units:
+  ramen:
+    says: a ramen counter with an open front, stools, pots, a noren and lanterns
+    bays: 2
+    bays-most: 3
+    weight: 3
+    depth: 5.2
+    stretch: true
+    opening: [0.8, 0.15, 6.4, 2.75]
+    wall: "@wall"
+    floor: tile-dark
+    ceiling: ceiling-warm
+    inner: plaster-warm
+    sides: side-warm
+    sign: [1.0, 2.9, 6.2, 3.4]
+    parts:
+      - {says: the counter's body, material: wood, box: [1.2, 0.15, -3.0, 5.8, 1.0, -2.2], along: fill}
+      - {says: menu board as a plain glowing panel, material: menu-glow, box: [4.2, 1.5, -4.99, 6.0, 2.5, -4.95], along: right}
+      - {says: hood over the stove, material: steel, box: [1.2, 2.0, -4.7, 3.8, 2.35, -3.7], from: quick}
+      - {says: the vent duct, material: steel, box: [2.2, 2.35, -4.4, 2.8, 3.25, -3.9], from: quick}
+      - {says: the stove, material: steel, box: [1.3, 0.15, -4.6, 3.7, 0.95, -3.8], from: quick}
+      - {says: the counter's top, material: wood-light, box: [1.1, 1.0, -3.05, 5.9, 1.06, -2.15], along: fill, from: quick}
+      - {says: menu cards under the hood, material: menu-glow, box: [1.3, 1.25, -4.99, 1.65, 1.75, -4.95], count: 3, step: [0.5, 0, 0], from: quick}
+      - {says: the noren over the door split in three, material: "@noren", box: [5.15, 1.5, -0.05, 5.5, 2.65, 0.02], count: 3, step: [0.4, 0, 0], along: right, from: quick}
+      - {says: the noren's rod, material: wood, box: [5.05, 2.65, -0.06, 6.35, 2.7, 0.0], along: right, from: quick}
+      - {says: the exterior steam vent, material: steel, box: [6.9, 1.9, 0.0, 7.1, 3.3, 0.18], along: right, from: quick}
+      - {says: the vent's cap, material: steel, box: [6.84, 3.3, 0.0, 7.16, 3.38, 0.26], along: right, from: demo}
+      - {says: the counter's footrail, material: steel, box: [1.4, 0.28, -2.15, 5.7, 0.32, -2.08], along: fill, from: demo}
+      - {says: stool legs, material: "@stool", prism: [1.5, 0.46, -1.55, 0.05, 0.62], sides: 6, count: 5, step: [0.9, 0, 0], along: fill, from: demo}
+      - {says: stool seats, material: "@stool", prism: [1.5, 0.805, -1.55, 0.21, 0.07], sides: 10, count: 5, step: [0.9, 0, 0], along: fill, from: demo}
+      - {says: bowls on the counter, material: bowl-white, prism: [1.8, 1.095, -2.6, 0.11, 0.07], sides: 8, count: 4, step: [1.0, 0, 0], along: fill, from: demo}
+      - {says: condiments, material: condiment, box: [1.2, 1.06, -2.45, 1.32, 1.2, -2.35], count: 5, step: [0.9, 0, 0], along: fill, from: demo}
+      - {says: pots on the stove, material: steel, prism: [1.9, 1.175, -4.2, 0.32, 0.45], sides: 10, count: 2, step: [1.0, 0, 0], from: demo}
+    uses:
+      - {module: services, at: [0.05, 0, 0], from: quick}
+      - {module: sign-frame, at: [0.94, 2.84, 0], span: 5.32, along: fill, from: quick}
+    lights:
+      - {at: [2.0, 3.0, -2.0], heat: 2700, luminance: 10}
+      - {at: [5.0, 3.0, -2.0], heat: 2700, luminance: 10, along: right}
+      - {at: [3.0, 1.8, -4.2], heat: 2400, luminance: 2}
+    props:
+      - {prop: bags, chance: 0.4, x: [0.9, 5.5], z: [0.8, 1.6], from: quick}
+      - {prop: crates, chance: 0.3, x: [0.9, 5.0], z: [0.8, 1.4], from: quick}
+      - {prop: bicycle, chance: 0.25, x: [0.9, 5.0], z: [0.9, 1.2], from: quick}
+      - {prop: drain, chance: 0.4, x: [0.5, 6.0], z: [1.5, 2.0], from: quick}
+      - {prop: aframe, chance: 0.5, x: [0.9, 3.0], z: [0.9, 1.3], from: quick}
+      - {prop: bin, chance: 0.25, x: [0.9, 1.2], z: [0.5, 0.8], from: quick}
+      - {prop: planter, chance: 0.3, x: [0.9, 4.5], z: [0.5, 0.7], from: quick}
+    options:
+      - says: an awning or a canopy over the front
+        chance: 0.55
+        variants:
+          - {says: an awning, weight: 3, uses: [{module: awning, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}
+          - {says: a flat canopy, weight: 1, uses: [{module: canopy, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}
+      - says: lanterns
+        chance: 1
+        variants:
+          - says: a lantern at each pier
+            weight: 3
+            parts:
+              - {material: "@lantern", prism: [0.4, 2.2, 0.28, 0.2, 0.45], sides: 8, from: quick}
+              - {material: "@lantern", prism: [6.7, 2.2, 0.28, 0.2, 0.45], sides: 8, along: right, from: quick}
+              - {says: the lanterns' caps, material: bars-iron, prism: [0.4, 2.45, 0.28, 0.12, 0.04], sides: 8, from: demo}
+              - {says: the lanterns' caps, material: bars-iron, prism: [6.7, 2.45, 0.28, 0.12, 0.04], sides: 8, along: right, from: demo}
+            lights:
+              - {at: [0.4, 2.0, 0.95], heat: 1900, luminance: 3, from: quick}
+              - {at: [6.7, 2.0, 0.95], heat: 1900, luminance: 3, along: right, from: quick}
+          - says: a row of lanterns across the front
+            weight: 2
+            parts:
+              - {material: "@lantern", prism: [1.2, 2.25, 0.3, 0.18, 0.4], sides: 8, count: 4, step: [1.6, 0, 0], along: fill, from: quick}
+            lights:
+              - {at: [2.0, 2.0, 0.95], heat: 1900, luminance: 2.5, from: quick}
+              - {at: [5.4, 2.0, 0.95], heat: 1900, luminance: 2.5, along: right, from: quick}
+          - {says: no lanterns, weight: 1}
+      - says: a sliding door in the opening
+        chance: 1
+        variants:
+          - {says: a sliding door with a glass leaf, weight: 2, uses: [{module: door-sliding, at: [4.6, 0, 0], along: right, from: quick}]}
+          - {says: the front open, weight: 2}
+      - says: a ticket machine or an umbrella stand at the right pier
+        chance: 0.6
+        variants:
+          - says: a ticket machine
+            weight: 2
+            parts:
+              - {says: the body, material: vending-dark, box: [6.5, 0.0, 0.0, 7.05, 1.6, 0.35], along: right, from: quick}
+              - {says: the face, material: menu-glow, box: [6.55, 0.9, 0.35, 7.0, 1.45, 0.37], along: right, from: quick}
+              - {says: the buttons, material: button-red, box: [6.6, 1.15, 0.37, 6.7, 1.25, 0.39], count: 3, step: [0.12, 0, 0], along: right, from: demo}
+              - {says: the coin slot, material: steel, box: [6.8, 0.7, 0.35, 6.95, 0.78, 0.38], along: right, from: demo}
+          - says: an umbrella stand
+            weight: 1
+            props:
+              - {prop: umbrellas, chance: 1, x: [6.5, 6.6], z: [0.4, 0.5], from: quick}
+  dive:
+    says: a narrow dark front, one barred window with a beer sign, a heavy door
+    bays: 1
+    bays-most: 2
+    weight: 2
+    depth: 7
+    opening: [0.45, 1.05, 1.75, 2.05]
+    wall: "@brick"
+    floor: tile-dark
+    ceiling: ceiling-dim
+    inner: plaster-dim
+    sides: side-dim
+    sign: [0.5, 2.3, 3.1, 2.8]
+    parts:
+      - {says: the beer sign as a plain glowing panel, material: beer-red, box: [0.6, 1.3, -0.14, 1.6, 1.9, -0.08]}
+      - {says: a blue neon strip under it, material: neon-blue, box: [0.55, 1.15, -0.14, 1.65, 1.22, -0.08]}
+      - {says: the bar, material: wood, box: [0.25, 0.15, -5.6, 0.9, 1.05, -1.4]}
+      - {says: the back bar glowing, material: amber-glow, box: [0.3, 1.55, -6.79, 3.3, 2.5, -6.77], along: fill}
+      - {says: the window's left side, material: "@frame", box: [0.4, 1.0, 0.0, 0.45, 2.09, 0.07], from: quick}
+      - {says: the window's right side, material: "@frame", box: [1.75, 1.0, 0.0, 1.8, 2.09, 0.07], from: quick}
+      - {says: the window's head, material: "@frame", box: [0.4, 2.05, 0.0, 1.8, 2.1, 0.07], from: quick}
+      - {says: the window's sill board, material: concrete, box: [0.35, 0.99, 0.0, 1.85, 1.05, 0.16], from: quick}
+      - {says: the glass, material: glass, box: [0.46, 1.06, -0.04, 1.74, 2.04, -0.02], from: quick}
+      - {says: blank wall for paste-ups and paint, material: wall-blank, box: [0.1, 0.2, 0.0, 1.95, 0.95, 0.006], along: fill, from: quick}
+      - {says: the bar top, material: wood-light, box: [0.2, 1.05, -5.65, 0.95, 1.1, -1.35], from: demo}
+      - {says: the bar's footrail, material: steel, box: [0.95, 0.3, -5.5, 1.0, 0.34, -1.5], from: demo}
+      - {says: the beer taps, material: steel, box: [0.5, 1.1, -3.0, 0.6, 1.35, -2.95], count: 3, step: [0, 0, 0.35], from: demo}
+      - {says: the jukebox, material: door-steel, box: [1.1, 0.15, -1.6, 1.7, 1.7, -1.0], from: demo}
+      - {says: the jukebox's face, material: jukebox-glow, box: [1.15, 1.0, -1.0, 1.65, 1.65, -0.98], from: demo}
+      - {says: bar stool legs, material: "@stool", prism: [1.45, 0.46, -2.4, 0.04, 0.62], sides: 6, count: 3, step: [0, 0, -0.9], from: demo}
+      - {says: bar stool seats, material: "@stool", prism: [1.45, 0.805, -2.4, 0.18, 0.07], sides: 10, count: 3, step: [0, 0, -0.9], from: demo}
+      - {says: the back bar's low shelf, material: wood, box: [0.3, 1.45, -6.78, 3.3, 1.52, -6.55], along: fill, from: demo}
+      - {says: the back bar's high shelf, material: wood, box: [0.3, 1.9, -6.78, 3.3, 1.97, -6.55], along: fill, from: demo}
+      - {says: bottles on the low shelf, material: brown-glass, prism: [0.45, 1.66, -6.65, 0.04, 0.28], sides: 6, count: 12, step: [0.24, 0, 0], along: fill, from: demo}
+      - {says: bottles on the high shelf, material: bottle-green, prism: [0.52, 2.11, -6.65, 0.04, 0.28], sides: 6, count: 11, step: [0.24, 0, 0], along: fill, from: demo}
+    uses:
+      - {module: sign-frame, at: [0.44, 2.24, 0], span: 2.72, along: fill, from: quick}
+    lights:
+      - {at: [1.1, 1.55, -0.22], heat: 1900, luminance: 8}
+      - {at: [1.8, 3.0, -3.6], heat: 2200, luminance: 1.5}
+      - {at: [1.8, 2.2, -5.9], heat: 2000, luminance: 1.2, from: quick}
+      - {at: [2.0, 1.95, 0.65], heat: 2000, luminance: 0.9, along: right, from: quick}
+    scatter:
+      - {says: stickers on the low wall, region: [0.1, 0.2, 1.95, 0.95], z: 0.008, count: 5, size: [0.1, 0.17], materials: [sticker-a, sticker-b, sticker-c, sticker-d, sticker-e], from: quick}
+      - {says: stickers high on the wall, region: [0.1, 2.9, 3.5, 3.4], z: 0.0, count: 5, size: [0.1, 0.17], materials: [sticker-a, sticker-b, sticker-c, sticker-d, sticker-e], from: quick}
+    props:
+      - {prop: bags, chance: 0.6, x: [0.2, 1.4], z: [0.7, 1.2], from: quick}
+      - {prop: crates, chance: 0.4, x: [1.0, 2.0], z: [0.8, 1.2], from: quick}
+      - {prop: kegs, chance: 0.4, x: [0.3, 1.2], z: [0.6, 1.0], from: quick}
+      - {prop: bin, chance: 0.3, x: [0.2, 1.3], z: [0.6, 0.9], from: quick}
+      - {prop: drain, chance: 0.4, x: [0.4, 2.4], z: [1.5, 2.0], from: quick}
+    options:
+      - says: the door
+        chance: 1
+        variants:
+          - {says: a steel door, weight: 3, uses: [{module: door-steel, at: [2.15, 0, 0], along: right, from: quick}]}
+          - says: a steel door with a barred hatch
+            weight: 1
+            uses: [{module: door-steel, at: [2.15, 0, 0], along: right, from: quick}]
+            parts:
+              - {says: the hatch, material: bars-iron, box: [2.45, 1.55, 0.1, 2.85, 1.75, 0.125], along: right, from: quick}
+              - {says: the hatch's bars, material: steel, box: [2.5, 1.55, 0.125, 2.52, 1.75, 0.14], count: 4, step: [0.1, 0, 0], along: right, from: demo}
+      - says: the window's bars
+        chance: 1
+        variants:
+          - says: vertical bars
+            weight: 2
+            parts:
+              - {material: bars-iron, box: [0.6, 1.05, 0.02, 0.64, 2.05, 0.06], count: 3, step: [0.34, 0, 0], from: quick}
+              - {material: bars-iron, box: [0.45, 1.3, 0.03, 1.75, 1.34, 0.07], from: demo}
+          - says: a grid of bars
+            weight: 1
+            parts:
+              - {material: bars-iron, box: [0.55, 1.05, 0.02, 0.59, 2.05, 0.06], count: 5, step: [0.27, 0, 0], from: quick}
+              - {material: bars-iron, box: [0.45, 1.3, 0.03, 1.75, 1.34, 0.07], count: 3, step: [0, 0.25, 0], from: quick}
+      - says: a roller shutter rolled up over the window
+        chance: 0.4
+        variants:
+          - says: the housing and the rails
+            weight: 1
+            parts:
+              - {says: the housing, material: shutter-box, box: [0.38, 2.1, 0.0, 1.82, 2.26, 0.18], from: quick}
+              - {says: the rails, material: shutter-box, box: [0.38, 1.0, 0.0, 0.42, 2.1, 0.05], count: 2, step: [1.4, 0, 0], from: quick}
+              - {says: the lock box, material: steel, box: [1.5, 1.04, 0.0, 1.7, 1.2, 0.08], from: demo}
+  shuttered:
+    says: a unit with its roller shutter down, or part way, or up on a dark shop
+    bays: 1
+    bays-most: 2
+    weight: 1.5
+    depth: 4
+    stretch: true
+    opening: [0.3, 0.15, 3.3, 2.8]
+    wall: "@wall"
+    floor: tile-dark
+    ceiling: ceiling-dim
+    inner: plaster-dim
+    sides: side-dim
+    parts:
+      - {says: shelving along the back, material: wood, box: [0.5, 0.15, -3.75, 3.1, 2.2, -3.55], along: fill, from: quick}
+      - {says: a shelf board, material: wood-light, box: [0.5, 1.1, -3.75, 3.1, 1.15, -3.2], along: fill, from: quick}
+      - {says: a counter, material: wood-light, box: [0.6, 0.15, -2.2, 2.0, 1.0, -1.5], from: quick}
+      - {says: a security light's housing, material: shutter-box, box: [1.65, 3.2, 0.0, 1.95, 3.3, 0.3], from: quick}
+      - {says: a security light's face, material: security-glow, box: [1.7, 3.16, 0.05, 1.9, 3.2, 0.25], from: quick}
+      - {says: goods on the shelf, material: product-red, box: [0.6, 1.15, -3.7, 0.9, 1.4, -3.5], count: 6, step: [0.4, 0, 0], along: fill, from: demo}
+      - {says: goods on the low shelf, material: product-yellow, box: [0.6, 0.15, -3.7, 1.0, 0.5, -3.5], count: 4, step: [0.6, 0, 0], from: demo}
+    lights:
+      - {at: [1.8, 3.0, 1.0], heat: 5200, luminance: 3, from: quick}
+    options:
+      - says: where the shutter is
+        chance: 1
+        variants:
+          - says: down
+            weight: 3
+            parts:
+              - {says: the shutter, material: "@shutter", box: [0.25, 0.15, -0.2, 3.35, 2.8, -0.04], along: fill}
+              - {says: the housing, material: shutter-box, box: [0.2, 2.8, -0.1, 3.4, 3.15, 0.28], along: fill, from: quick}
+              - {says: the bottom bar, material: shutter-box, box: [0.25, 0.15, -0.04, 3.35, 0.28, 0.1], along: fill, from: quick}
+              - {says: the slats, material: "@shutter", box: [0.25, 0.3, -0.08, 3.35, 0.33, 0.02], count: 9, step: [0, 0.26, 0], along: fill, from: quick}
+              - {says: the left guide rail, material: shutter-box, box: [0.21, 0.15, -0.09, 0.27, 2.81, 0.06], from: quick}
+              - {says: the right guide rail, material: shutter-box, box: [3.33, 0.15, -0.09, 3.39, 2.81, 0.06], along: right, from: quick}
+              - {says: the lock box, material: steel, box: [2.7, 0.3, 0.1, 2.95, 0.5, 0.17], along: right, from: demo}
+              - {says: the lock's plate, material: bars-iron, box: [2.78, 0.36, 0.17, 2.88, 0.44, 0.18], along: right, from: demo}
+            scatter:
+              - {says: stickers on the shutter, region: [0.4, 0.4, 3.2, 2.6], z: 0.025, count: 8, size: [0.14, 0.2], materials: [sticker-a, sticker-b, sticker-c, sticker-d, sticker-e], from: quick}
+              - {says: tags on the shutter, region: [0.4, 0.5, 3.0, 2.4], z: 0.025, count: 3, size: [0.6, 0.12], materials: [tag-pink, tag-cyan], from: quick}
+          - says: half up, a gap at the foot with the shop dim behind
+            weight: 1.5
+            parts:
+              - {says: the shutter, material: "@shutter", box: [0.25, 1.45, -0.2, 3.35, 2.8, -0.04], along: fill}
+              - {says: the housing, material: shutter-box, box: [0.2, 2.8, -0.1, 3.4, 3.15, 0.28], along: fill, from: quick}
+              - {says: the bottom bar, material: shutter-box, box: [0.25, 1.45, -0.04, 3.35, 1.58, 0.1], along: fill, from: quick}
+              - {says: the slats, material: "@shutter", box: [0.25, 1.6, -0.08, 3.35, 1.63, 0.02], count: 5, step: [0, 0.26, 0], along: fill, from: quick}
+              - {says: the left guide rail, material: shutter-box, box: [0.21, 0.15, -0.09, 0.27, 2.81, 0.06], from: quick}
+              - {says: the right guide rail, material: shutter-box, box: [3.33, 0.15, -0.09, 3.39, 2.81, 0.06], along: right, from: quick}
+            scatter:
+              - {says: stickers on the shutter, region: [0.4, 1.65, 3.2, 2.7], z: 0.025, count: 4, size: [0.14, 0.2], materials: [sticker-a, sticker-b, sticker-c, sticker-d, sticker-e], from: quick}
+            lights:
+              - {at: [1.5, 1.4, -1.8], heat: 3000, luminance: 1.2, from: quick}
+          - says: up, a glass front and a glass door on a shop with its light off
+            weight: 1.5
+            uses:
+              - {module: shopwindow, at: [0.3, 0.15, 0], span: 1.75, along: fill, from: quick}
+              - {module: door-glass, at: [2.15, 0, 0], along: right, from: quick}
+            parts:
+              - {says: the housing rolled up, material: shutter-box, box: [0.2, 2.8, -0.1, 3.4, 3.15, 0.28], along: fill, from: quick}
+              - {says: the left guide rail, material: shutter-box, box: [0.21, 0.15, -0.09, 0.27, 2.81, 0.06], from: quick}
+              - {says: the right guide rail, material: shutter-box, box: [3.33, 0.15, -0.09, 3.39, 2.81, 0.06], along: right, from: quick}
+              - {says: the low wall under the window, material: "@wall", box: [0.3, 0.15, -0.12, 2.05, 0.75, 0.0], along: fill, from: quick}
+            lights:
+              - {at: [1.5, 2.3, -1.6], heat: 3500, luminance: 1.0, from: quick}
+    props:
+      - {prop: crates, chance: 0.4, x: [0.3, 2.0], z: [0.6, 1.2], from: quick}
+      - {prop: bags, chance: 0.5, x: [0.3, 2.4], z: [0.7, 1.3], from: quick}
+      - {prop: bin, chance: 0.3, x: [0.3, 2.4], z: [0.5, 0.8], from: quick}
+  vending:
+    says: a blank wall with a pair of vending machines glowing on the pavement
+    bays: 1
+    bays-most: 2
+    weight: 1.5
+    depth: 0
+    wall: "@wall"
+    floor: tile-dark
+    ceiling: plaster-dim
+    inner: plaster-dim
+    parts:
+      - {says: the first machine, material: "@machine-a", box: [0.4, 0.0, 0.0, 1.45, 1.95, 0.8]}
+      - {says: the second machine, material: "@machine-b", box: [1.75, 0.0, 0.0, 2.8, 1.95, 0.8]}
+      - {says: the first machine's lit face, material: vending-glow-white, box: [0.5, 0.5, 0.8, 1.35, 1.8, 0.82]}
+      - {says: the second machine's lit face, material: vending-glow-cool, box: [1.85, 0.5, 0.8, 2.7, 1.8, 0.82]}
+      - {says: the first machine's chute, material: vending-dark, box: [0.6, 0.15, 0.8, 1.2, 0.4, 0.84], from: quick}
+      - {says: the second machine's chute, material: vending-dark, box: [1.95, 0.15, 0.8, 2.55, 0.4, 0.84], from: quick}
+      - {says: the machines' caps, material: vending-dark, box: [0.38, 1.95, 0.0, 1.47, 2.12, 0.82], from: quick}
+      - {says: the second cap, material: vending-dark, box: [1.73, 1.95, 0.0, 2.82, 2.12, 0.82], from: quick}
+      - {says: the first label, material: vending-glow-white, box: [0.5, 1.82, 0.8, 1.35, 1.93, 0.82], from: quick}
+      - {says: the second label, material: vending-glow-cool, box: [1.85, 1.82, 0.8, 2.7, 1.93, 0.82], from: quick}
+      - {says: the first machine's coin slot, material: vending-dark, box: [1.25, 1.0, 0.82, 1.32, 1.2, 0.86], from: demo}
+      - {says: the second machine's coin slot, material: vending-dark, box: [2.6, 1.0, 0.82, 2.67, 1.2, 0.86], from: demo}
+      - {says: the first machine's buttons, material: button-red, box: [1.27, 1.3, 0.82, 1.32, 1.36, 0.85], count: 3, step: [0, 0.1, 0], from: demo}
+      - {says: the second machine's buttons, material: button-red, box: [2.62, 1.3, 0.82, 2.67, 1.36, 0.85], count: 3, step: [0, 0.1, 0], from: demo}
+      - {says: cans in the top row, material: product-red, box: [0.54, 1.55, 0.82, 0.64, 1.75, 0.9], count: 5, step: [0.13, 0, 0], from: demo}
+      - {says: cans in the middle row, material: product-yellow, box: [0.54, 1.15, 0.82, 0.64, 1.35, 0.9], count: 5, step: [0.13, 0, 0], from: demo}
+      - {says: bottles in the top row, material: product-green, box: [1.89, 1.55, 0.82, 1.99, 1.75, 0.9], count: 5, step: [0.13, 0, 0], from: demo}
+      - {says: bottles in the middle row, material: product-red, box: [1.89, 1.15, 0.82, 1.99, 1.35, 0.9], count: 5, step: [0.13, 0, 0], from: demo}
+    lights:
+      - {at: [0.9, 1.3, 1.6], heat: 5600, luminance: 3}
+      - {at: [2.3, 1.3, 1.6], heat: 7500, luminance: 3}
+    scatter:
+      - {says: stickers on the wall above, region: [0.1, 2.2, 3.5, 3.4], z: 0.0, count: 4, size: [0.1, 0.17], materials: [sticker-a, sticker-b, sticker-c, sticker-d, sticker-e], from: quick}
+    props:
+      - {prop: bags, chance: 0.4, x: [2.8, 2.8], z: [0.9, 1.3], from: quick}
+      - {prop: drain, chance: 0.5, x: [0.4, 2.4], z: [1.8, 2.2], from: quick}
+      - {prop: bicycle, chance: 0.3, x: [0.4, 2.0], z: [1.5, 1.8], from: quick}
+    options:
+      - says: a third machine and a bin, where the unit is wide
+        chance: 1
+        wide: 2
+        variants:
+          - says: a third machine with a bin beside it
+            weight: 1
+            parts:
+              - {says: the third machine, material: "@machine-c", box: [3.1, 0.0, 0.0, 4.15, 1.95, 0.8]}
+              - {says: the third machine's lit face, material: vending-glow-white, box: [3.2, 0.5, 0.8, 4.05, 1.8, 0.82]}
+              - {says: the third machine's chute, material: vending-dark, box: [3.3, 0.15, 0.8, 3.9, 0.4, 0.84], from: quick}
+              - {says: the third machine's cap, material: vending-dark, box: [3.08, 1.95, 0.0, 4.17, 2.12, 0.82], from: quick}
+              - {says: a recycling bin, material: "@bin", box: [4.7, 0.0, 0.1, 5.25, 1.0, 0.6], from: quick}
+              - {says: the bin's lid, material: "@bin", slab: [4.68, 5.27, 0.08, 1.0, 0.62, 1.04, 0.03], from: quick}
+            lights:
+              - {at: [3.6, 1.3, 1.6], heat: 6500, luminance: 3}
+      - says: an air conditioner's outdoor unit on the wall above
+        chance: 0.6
+        variants:
+          - {says: a condenser, weight: 1, uses: [{module: condenser, at: [1.5, 2.25, 0], from: quick}]}
+  konbini:
+    says: a convenience store with a bright glass front and an open door
+    bays: 2
+    bays-most: 3
+    weight: 1.5
+    depth: 7
+    stretch: true
+    opening: [0.35, 0.15, 6.85, 2.75]
+    wall: "@wall"
+    floor: tile-pale
+    ceiling: ceiling-white
+    inner: plaster-white
+    sides: side-white
+    sign: [0.5, 2.9, 6.7, 3.4]
+    parts:
+      - {says: ceiling lights in the front row, material: tube-light, box: [0.8, 3.2, -3.0, 6.4, 3.25, -2.6], along: fill}
+      - {says: ceiling lights in the back row, material: tube-light, box: [0.8, 3.2, -5.0, 6.4, 3.25, -4.6], along: fill}
+      - {says: the chilled cases along the back, material: shelf-white, box: [0.4, 0.15, -6.75, 6.8, 2.45, -6.4], along: fill, from: quick}
+      - {says: the chilled cases' lit doors, material: fridge-glow, box: [0.5, 0.4, -6.4, 6.7, 2.3, -6.38], along: fill, from: quick}
+      - {says: a shelf gondola, material: shelf-white, box: [1.0, 0.15, -4.2, 2.6, 1.55, -3.4], from: quick}
+      - {says: a second shelf gondola, material: shelf-white, box: [4.2, 0.15, -4.2, 5.8, 1.55, -3.4], along: right, from: quick}
+      - {says: the till counter, material: counter-white, box: [4.6, 0.15, -1.8, 6.3, 1.05, -0.9], along: right, from: quick}
+      - {says: the till's screen, material: register-glow, box: [5.2, 1.05, -1.5, 5.6, 1.35, -1.46], along: right, from: quick}
+      - {says: the low wall under the left window, material: counter-white, box: [0.35, 0.15, -0.12, 3.0, 0.75, 0.0], from: quick}
+      - {says: the left window's glass, material: glass, box: [0.36, 0.75, -0.04, 2.99, 2.74, -0.02], from: quick}
+      - {says: the left window's post, material: aluminium, box: [1.7, 0.75, -0.05, 1.76, 2.74, 0.04], from: quick}
+      - {says: the low wall under the right window, material: counter-white, box: [4.8, 0.15, -0.12, 6.85, 0.75, 0.0], along: fill, from: quick}
+      - {says: the right window's glass, material: glass, box: [4.8, 0.75, -0.04, 6.84, 2.74, -0.02], along: fill, from: quick}
+      - {says: the right window's posts, material: aluminium, box: [5.8, 0.75, -0.05, 5.86, 2.74, 0.04], count: 2, step: [1.0, 0, 0], along: fill, from: quick}
+      - {says: the head rail over the glass, material: aluminium, box: [0.35, 2.7, 0.0, 6.85, 2.75, 0.05], along: fill, from: quick}
+      - {says: a band of colour over the glass, material: band-teal, box: [0.3, 2.75, 0.0, 6.9, 2.85, 0.05], along: fill, from: quick}
+      - {says: the downpipe, material: pipe-grey, prism: [0.15, 1.75, 0.07, 0.04, 3.5], sides: 8, from: quick}
+      - {says: handles on the chilled doors, material: aluminium, box: [1.0, 0.9, -6.37, 1.04, 1.7, -6.33], count: 6, step: [1.05, 0, 0], along: fill, from: demo}
+      - {says: a poster on the left glass, material: poster-red, box: [0.5, 1.3, 0.0, 1.3, 2.1, 0.008], from: demo}
+      - {says: a second poster, material: poster-yellow, box: [2.0, 1.5, 0.0, 2.7, 2.2, 0.008], from: demo}
+      - {says: a poster on the right glass, material: poster-white, box: [5.1, 1.2, 0.0, 5.7, 2.0, 0.008], along: right, from: demo}
+      - {says: an oden steamer on the till counter, material: steel, box: [4.8, 1.05, -1.3, 5.1, 1.2, -1.0], along: right, from: demo}
+      - {says: snacks on the near gondola, material: product-red, box: [1.1, 1.55, -4.1, 1.4, 1.85, -3.5], count: 4, step: [0.4, 0, 0], from: demo}
+      - {says: snacks on the far gondola, material: product-yellow, box: [4.3, 1.55, -4.1, 4.6, 1.85, -3.5], count: 4, step: [0.4, 0, 0], along: right, from: demo}
+      - {says: drinks on the shelves, material: product-green, box: [1.1, 0.6, -3.5, 1.26, 1.0, -3.4], count: 7, step: [0.2, 0, 0], from: demo}
+    uses:
+      - {module: door-sliding, at: [3.0, 0, 0], from: quick}
+      - {module: sign-frame, at: [0.44, 2.84, 0], span: 6.32, along: fill, from: quick}
+    lights:
+      - {at: [1.8, 3.0, -2.8], heat: 6500, luminance: 8}
+      - {at: [5.4, 3.0, -2.8], heat: 6500, luminance: 8, along: right}
+      - {at: [3.6, 3.0, -5.5], heat: 6000, luminance: 5, along: centre}
+      - {at: [1.7, 2.5, -0.2], heat: 6500, luminance: 4, from: quick}
+      - {at: [5.9, 2.5, -0.2], heat: 6500, luminance: 4, along: right, from: quick}
+    props:
+      - {prop: bicycle, chance: 0.4, x: [0.4, 5.0], z: [0.9, 1.3], from: quick}
+      - {prop: bags, chance: 0.3, x: [0.4, 5.5], z: [0.8, 1.4], from: quick}
+      - {prop: bin, chance: 0.4, x: [0.4, 6.0], z: [0.5, 0.8], from: quick}
+      - {prop: aframe, chance: 0.3, x: [0.5, 2.5], z: [1.0, 1.4], from: quick}
+      - {prop: drain, chance: 0.4, x: [0.5, 6.0], z: [1.6, 2.1], from: quick}
+    options:
+      - says: a third gondola, where the shop is wide
+        chance: 1
+        wide: 3
+        variants:
+          - says: a third gondola with snacks
+            weight: 1
+            parts:
+              - {says: the third gondola, material: shelf-white, box: [3.2, 0.15, -4.2, 4.8, 1.55, -3.4], along: centre, from: quick}
+              - {says: snacks on the third gondola, material: product-green, box: [3.3, 1.55, -4.1, 3.6, 1.85, -3.5], count: 4, step: [0.4, 0, 0], along: centre, from: demo}
+  izakaya:
+    says: a wooden lattice front, a long noren, lanterns, a counter and a barrel
+    bays: 2
+    bays-most: 3
+    weight: 2
+    depth: 6
+    stretch: true
+    opening: [0.5, 0.15, 6.7, 2.75]
+    wall: "@wall"
+    floor: tile-dark
+    ceiling: ceiling-warm
+    inner: plaster-warm
+    sides: side-warm
+    sign: [1.0, 2.9, 6.2, 3.4]
+    parts:
+      - {says: the counter's body, material: wood, box: [1.2, 0.15, -2.7, 4.8, 1.0, -1.9], along: fill}
+      - {says: a paper screen on the back wall, material: paper-glow, box: [0.8, 0.6, -5.79, 3.2, 2.4, -5.77]}
+      - {says: a second paper screen, material: paper-glow, box: [3.6, 0.6, -5.79, 6.0, 2.4, -5.77], along: right}
+      - {says: the counter's top, material: wood-light, box: [1.1, 1.0, -2.75, 4.9, 1.06, -1.85], along: fill, from: quick}
+      - {says: the back bar's unit, material: wood, box: [1.0, 0.15, -5.6, 3.4, 2.3, -5.2], from: quick}
+      - {says: the lattice's slats, material: wood-light, box: [0.6, 0.85, 0.0, 0.66, 2.7, 0.05], count: 18, step: [0.22, 0, 0], along: fill, from: quick}
+      - {says: the lattice's rails, material: wood-light, box: [0.55, 1.4, 0.0, 4.4, 1.46, 0.06], count: 3, step: [0, 0.45, 0], along: fill, from: quick}
+      - {says: the noren over the door, material: "@noren", box: [4.7, 1.4, -0.05, 5.05, 2.65, 0.02], count: 4, step: [0.4, 0, 0], along: right, from: quick}
+      - {says: the noren's rod, material: wood, box: [4.6, 2.65, -0.06, 6.4, 2.7, 0.0], along: right, from: quick}
+      - {says: a sake barrel at the right pier, material: wood-light, prism: [6.9, 0.35, 0.4, 0.25, 0.7], sides: 10, along: right, from: quick}
+      - {says: the barrel's hoops, material: steel, prism: [6.9, 0.2, 0.4, 0.26, 0.04], sides: 10, count: 2, step: [0, 0.3, 0], along: right, from: demo}
+      - {says: bottles on the back bar, material: bottle-clear, prism: [1.2, 1.55, -5.4, 0.05, 0.3], sides: 6, count: 8, step: [0.28, 0, 0], from: demo}
+      - {says: bottles on the upper shelf, material: bottle-green, prism: [1.2, 2.0, -5.4, 0.05, 0.3], sides: 6, count: 8, step: [0.28, 0, 0], from: demo}
+      - {says: the shelf boards, material: wood-light, box: [1.0, 1.4, -5.6, 3.4, 1.45, -5.2], count: 2, step: [0, 0.45, 0], from: demo}
+      - {says: stool legs, material: "@stool", prism: [1.5, 0.46, -1.45, 0.05, 0.62], sides: 6, count: 5, step: [0.9, 0, 0], along: fill, from: demo}
+      - {says: stool seats, material: "@stool", prism: [1.5, 0.805, -1.45, 0.21, 0.07], sides: 10, count: 5, step: [0.9, 0, 0], along: fill, from: demo}
+      - {says: plates on the counter, material: bowl-white, prism: [1.8, 1.075, -2.3, 0.12, 0.03], sides: 8, count: 4, step: [1.0, 0, 0], along: fill, from: demo}
+      - {says: the raised mats at the back, material: tatami, box: [3.8, 0.15, -5.1, 6.4, 0.45, -3.4], along: right, from: demo}
+      - {says: the low table, material: wood-light, box: [4.6, 0.45, -4.5, 5.6, 0.7, -3.9], along: right, from: demo}
+    uses:
+      - {module: door-sliding, at: [4.6, 0, 0], along: right, from: quick}
+      - {module: sign-frame, at: [0.94, 2.84, 0], span: 5.32, along: fill, from: quick}
+    lights:
+      - {at: [2.2, 2.6, -3.5], heat: 2200, luminance: 5}
+      - {at: [5.0, 2.6, -3.5], heat: 2200, luminance: 5, along: right}
+      - {at: [3.0, 1.8, -5.2], heat: 2000, luminance: 1.5, from: quick}
+    props:
+      - {prop: kegs, chance: 0.4, x: [0.9, 3.5], z: [0.6, 1.0], from: quick}
+      - {prop: crates, chance: 0.3, x: [0.9, 4.0], z: [0.8, 1.2], from: quick}
+      - {prop: aframe, chance: 0.5, x: [0.9, 3.5], z: [0.9, 1.3], from: quick}
+      - {prop: bicycle, chance: 0.2, x: [0.9, 4.0], z: [0.9, 1.2], from: quick}
+      - {prop: planter, chance: 0.3, x: [0.9, 4.0], z: [0.5, 0.7], from: quick}
+      - {prop: drain, chance: 0.4, x: [0.5, 6.0], z: [1.5, 2.0], from: quick}
+    options:
+      - says: an awning or a canopy over the front
+        chance: 0.5
+        variants:
+          - {says: an awning, weight: 3, uses: [{module: awning, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}
+          - {says: a flat canopy, weight: 1, uses: [{module: canopy, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}
+      - says: lanterns hung across the front
+        chance: 1
+        variants:
+          - says: a row of lanterns
+            weight: 2
+            parts:
+              - {material: "@lantern", prism: [1.0, 2.3, 0.35, 0.17, 0.4], sides: 8, count: 5, step: [1.2, 0, 0], along: fill, from: quick}
+            lights:
+              - {at: [2.4, 2.1, 1.0], heat: 1900, luminance: 2.5, from: quick}
+              - {at: [5.0, 2.1, 1.0], heat: 1900, luminance: 2.5, along: right, from: quick}
+          - {says: no lanterns, weight: 1}
+  arcade:
+    says: an arcade of lit cabinets behind a glass front, a claw machine at the window
+    bays: 2
+    bays-most: 3
+    weight: 1.2
+    depth: 6.5
+    stretch: true
+    opening: [0.3, 0.15, 6.9, 2.75]
+    wall: "@wall"
+    floor: tile-dark
+    ceiling: ceiling-dim
+    inner: plaster-dim
+    sides: side-dim
+    sign: [0.8, 2.9, 6.4, 3.4]
+    parts:
+      - {says: the back row of cabinets, material: "@cabinet-a", box: [0.8, 0.15, -5.2, 1.6, 1.9, -4.4], count: 6, step: [1.0, 0, 0], along: fill}
+      - {says: screens in the back row, material: "@screen-a", box: [0.9, 1.25, -4.4, 1.5, 1.75, -4.36], count: 3, step: [2.0, 0, 0], along: fill}
+      - {says: screens in the back row between, material: "@screen-b", box: [1.9, 1.25, -4.4, 2.5, 1.75, -4.36], count: 3, step: [2.0, 0, 0], along: fill}
+      - {says: marquees over the back row, material: "@screen-b", box: [0.85, 1.9, -4.8, 1.55, 2.15, -4.4], count: 6, step: [1.0, 0, 0], along: fill}
+      - {says: the back row's decks, material: "@cabinet-a", box: [0.8, 0.95, -4.4, 1.6, 1.05, -4.0], count: 6, step: [1.0, 0, 0], along: fill, from: quick}
+      - {says: the island of cabinets, material: "@cabinet-a", box: [1.4, 0.15, -3.0, 2.2, 1.8, -2.2], count: 3, step: [1.6, 0, 0], along: fill, from: quick}
+      - {says: the island's screens, material: "@screen-b", box: [1.5, 1.2, -2.2, 2.1, 1.7, -2.16], count: 3, step: [1.6, 0, 0], along: fill, from: quick}
+      - {says: the claw machine's base, material: cabinet-purple, box: [5.0, 0.15, -1.8, 6.2, 0.95, -0.9], along: right, from: quick}
+      - {says: the claw machine's glass, material: glass, box: [5.05, 0.95, -1.75, 6.15, 2.1, -0.95], along: right, from: quick}
+      - {says: the claw machine's marquee, material: screen-magenta, box: [5.0, 2.1, -1.8, 6.2, 2.3, -0.9], along: right, from: quick}
+      - {says: the claw machine's posts at the back, material: steel, box: [5.0, 0.95, -1.8, 5.06, 2.1, -1.74], count: 2, step: [1.14, 0, 0], along: right, from: quick}
+      - {says: the claw machine's posts at the front, material: steel, box: [5.0, 0.95, -0.96, 5.06, 2.1, -0.9], count: 2, step: [1.14, 0, 0], along: right, from: quick}
+      - {says: the gantry, material: steel, box: [5.5, 1.95, -1.7, 5.7, 2.08, -1.0], along: right, from: demo}
+      - {says: prizes, material: prize-pink, box: [5.2, 0.95, -1.6, 5.5, 1.25, -1.3], along: right, from: demo}
+      - {says: more prizes, material: prize-teal, box: [5.6, 0.95, -1.5, 5.95, 1.3, -1.15], along: right, from: demo}
+      - {says: buttons on the back row, material: button-red, prism: [0.95, 1.05, -4.1, 0.04, 0.05], sides: 6, count: 6, step: [1.0, 0, 0], along: fill, from: demo}
+      - {says: buttons on the back row's other side, material: button-red, prism: [1.2, 1.05, -4.1, 0.04, 0.05], sides: 6, count: 6, step: [1.0, 0, 0], along: fill, from: demo}
+      - {says: the low wall under the window, material: "@wall", box: [1.45, 0.15, -0.12, 6.9, 0.8, 0.0], along: fill, from: quick}
+      - {says: a poster on the glass, material: poster-yellow, box: [2.0, 1.2, 0.0, 2.8, 2.2, 0.008], from: demo}
+      - {says: a second poster, material: poster-red, box: [3.6, 1.3, 0.0, 4.2, 2.1, 0.008], from: demo}
+    uses:
+      - {module: door-glass, at: [0.3, 0, 0], from: quick}
+      - {module: shopwindow, at: [1.45, 0.15, 0], span: 5.45, along: fill, from: quick}
+      - {module: sign-frame, at: [0.74, 2.84, 0], span: 5.72, along: fill, from: quick}
+    lights:
+      - {at: [3.5, 2.5, -0.2], heat: 12000, luminance: 4, along: centre, from: quick}
+      - {at: [5.6, 2.5, -0.2], heat: 3000, luminance: 3, along: right, from: quick}
+      - {at: [3.0, 3.0, -3.0], heat: 9000, luminance: 6, along: centre}
+      - {at: [3.0, 2.4, -5.0], heat: 4000, luminance: 3, along: centre}
+    props:
+      - {prop: bags, chance: 0.3, x: [0.4, 5.5], z: [0.8, 1.4], from: quick}
+      - {prop: bicycle, chance: 0.3, x: [1.5, 5.0], z: [0.9, 1.3], from: quick}
+      - {prop: bin, chance: 0.3, x: [1.6, 6.0], z: [0.5, 0.8], from: quick}
+      - {prop: drain, chance: 0.4, x: [0.5, 6.0], z: [1.5, 2.0], from: quick}
+    options:
+      - says: an awning or a canopy over the front
+        chance: 0.35
+        variants:
+          - {says: an awning, weight: 1, uses: [{module: awning, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}
+          - {says: a flat canopy, weight: 1, uses: [{module: canopy, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}
+  pharmacy:
+    says: a bright shop with a green cross, shelves, a counter and a display case
+    bays: 2
+    bays-most: 3
+    weight: 1.2
+    depth: 6
+    stretch: true
+    opening: [0.4, 0.15, 6.8, 2.75]
+    wall: "@wall"
+    floor: tile-pale
+    ceiling: ceiling-white
+    inner: plaster-white
+    sides: side-white
+    sign: [1.0, 2.9, 6.2, 3.4]
+    parts:
+      - {says: ceiling panels at the front, material: tube-light, box: [0.8, 3.2, -2.5, 6.4, 3.25, -2.0], along: fill}
+      - {says: ceiling panels at the back, material: tube-light, box: [0.8, 3.2, -4.5, 6.4, 3.25, -4.0], along: fill}
+      - {says: the cross's upright, material: cross-green, box: [0.6, 2.85, 0.0, 0.72, 3.45, 0.06]}
+      - {says: the cross's arm, material: cross-green, box: [0.36, 3.09, 0.0, 0.96, 3.21, 0.06]}
+      - {says: shelving along the back wall, material: shelf-white, box: [0.5, 0.15, -5.75, 6.7, 2.4, -5.45], along: fill, from: quick}
+      - {says: the dispensing counter, material: counter-white, box: [2.2, 0.15, -4.0, 5.0, 1.05, -3.3], along: centre, from: quick}
+      - {says: the dispensing window's glow, material: register-glow, box: [2.8, 1.05, -3.35, 4.4, 1.5, -3.3], along: centre, from: quick}
+      - {says: a gondola of shelves, material: shelf-white, box: [1.0, 0.15, -2.6, 1.6, 1.5, -1.0], from: quick}
+      - {says: the low wall under the left window, material: "@wall", box: [0.4, 0.15, -0.12, 2.9, 0.75, 0.0], from: quick}
+      - {says: the low wall under the right window, material: "@wall", box: [4.7, 0.15, -0.12, 6.8, 0.75, 0.0], along: fill, from: quick}
+      - {says: the display case's base, material: counter-white, box: [5.3, 0.15, -1.8, 6.6, 0.95, -1.0], along: right, from: quick}
+      - {says: the display case's glass, material: glass, box: [5.3, 0.95, -1.8, 6.6, 1.25, -1.0], along: right, from: quick}
+      - {says: goods in the case, material: product-yellow, box: [5.45, 0.95, -1.6, 5.75, 1.1, -1.2], along: right, from: demo}
+      - {says: boxes on the back shelves, material: product-green, box: [0.7, 0.6, -5.45, 0.9, 0.85, -5.3], count: 12, step: [0.45, 0, 0], along: fill, from: demo}
+      - {says: boxes on the upper shelves, material: product-red, box: [0.7, 1.3, -5.45, 0.9, 1.55, -5.3], count: 12, step: [0.45, 0, 0], along: fill, from: demo}
+      - {says: boxes on the gondola, material: product-yellow, box: [1.05, 1.5, -2.5, 1.2, 1.7, -1.1], from: demo}
+    uses:
+      - {module: door-sliding, at: [2.9, 0, 0], from: quick}
+      - {module: shopwindow, at: [0.4, 0.15, 0], span: 2.5, from: quick}
+      - {module: shopwindow, at: [4.7, 0.15, 0], span: 2.1, along: fill, from: quick}
+      - {module: sign-frame, at: [0.94, 2.84, 0], span: 5.32, along: fill, from: quick}
+    lights:
+      - {at: [2.0, 3.0, -2.2], heat: 6500, luminance: 8}
+      - {at: [5.2, 3.0, -2.2], heat: 6500, luminance: 8, along: right}
+      - {at: [3.6, 3.0, -4.3], heat: 6000, luminance: 5, along: centre}
+      - {at: [1.6, 2.5, -0.2], heat: 6500, luminance: 3, from: quick}
+      - {at: [5.6, 2.5, -0.2], heat: 6500, luminance: 3, along: right, from: quick}
+    props:
+      - {prop: bags, chance: 0.2, x: [0.4, 5.5], z: [0.8, 1.4], from: quick}
+      - {prop: aframe, chance: 0.4, x: [0.5, 2.5], z: [1.0, 1.4], from: quick}
+      - {prop: bin, chance: 0.3, x: [0.4, 6.0], z: [0.5, 0.8], from: quick}
+      - {prop: planter, chance: 0.4, x: [0.5, 4.5], z: [0.5, 0.7], from: quick}
+      - {prop: drain, chance: 0.4, x: [0.5, 6.0], z: [1.5, 2.0], from: quick}
+    options:
+      - says: an awning or a canopy over the front
+        chance: 0.4
+        variants:
+          - {says: an awning, weight: 2, uses: [{module: awning, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}
+          - {says: a flat canopy, weight: 1, uses: [{module: canopy, at: [0.4, 2.75, 0], span: 6.4, along: fill, from: quick}]}

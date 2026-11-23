@@ -20,7 +20,7 @@ type commanded struct {
 	tone                colour.Tone
 }
 
-// commands are each scene's command's defaults.
+// commands holds the command defaults of each traced scene.
 var commands = map[string]commanded{
 	"swarm": {width: 1600, height: 900, rays: 2,
 		wide: 45 * maths.Degree, tone: colour.Tone{Knee: 0.7, Top: 8}},
@@ -42,7 +42,7 @@ var commands = map[string]commanded{
 
 // Each scene's defaults are its command's.
 func TestDefaultsAreTheCommands(t *testing.T) {
-	for _, scene := range named.Traced() {
+	for _, scene := range tracedScenes(t) {
 		want, found := commands[scene.Name()]
 		if !found {
 			t.Errorf("%s has no command's defaults to hold it to",
@@ -56,14 +56,15 @@ func TestDefaultsAreTheCommands(t *testing.T) {
 	}
 }
 
-// anti-tests: the defaults of one scene are not another's. No two scenes
-// share a lens, a time and a picture size at once.
+// No two scenes share a picture's size, rays, lens and tone: each scene's
+// defaults are its own. TestDefaultsAreTheCommands pins every scene's
+// individual values.
 func TestDefaultsAreEachScenesOwn(t *testing.T) {
 	seen := map[commanded]string{}
-	for _, scene := range named.Traced() {
+	for _, scene := range tracedScenes(t) {
 		held := heldOf(scene.Defaults())
 		if other, found := seen[held]; found {
-			t.Errorf("%s has %s's defaults", scene.Name(), other)
+			t.Errorf("%s has unrelated %s's defaults", scene.Name(), other)
 		}
 		seen[held] = scene.Name()
 	}

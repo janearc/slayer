@@ -41,7 +41,7 @@ func reaching(calls *[]asked, reach func(way maths.Vec) float64) Through {
 // and throws light every way alike: rayleigh's lobe. test figures.
 func even() Gas {
 	return Gas{Name: "even", Ranges: map[radiation.Range]Optics{
-		thing.Visible: {Absorb: 0.3, Scatter: 0.01}}}
+		thing.Visible(): {Absorb: 0.3, Scatter: 0.01}}}
 }
 
 var green = maths.Band{Nanometres: 550}
@@ -179,10 +179,12 @@ func TestSingleScalesWithTheDensity(t *testing.T) {
 	var calls []asked
 	one := reaching(&calls, func(maths.Vec) float64 { return 1 })
 	k := 0.01 * 3 / (16 * math.Pi)
-	wantLight(t, "density two", Single(even(), 2, green, []thing.Lamp{sun},
-		maths.Vec{}, maths.V(0, 0, 1), one), maths.Grey(2*k))
-	wantLight(t, "density a half", Single(even(), 0.5, green, []thing.Lamp{sun},
-		maths.Vec{}, maths.V(0, 0, 1), one), maths.Grey(0.5*k))
+	twice := Single(even(), 2, green, []thing.Lamp{sun},
+		maths.Vec{}, maths.V(0, 0, 1), one)
+	wantLight(t, "density two", twice, maths.Grey(2*k))
+	halved := Single(even(), 0.5, green, []thing.Lamp{sun},
+		maths.Vec{}, maths.V(0, 0, 1), one)
+	wantLight(t, "density a half", halved, maths.Grey(0.5*k))
 }
 
 // the uniform path is beer's law over density times distance: with
@@ -190,7 +192,7 @@ func TestSingleScalesWithTheDensity(t *testing.T) {
 // sun's endless path, to nothing.
 func TestUniformIsBeersLawOverDensityTimesDistance(t *testing.T) {
 	g := Gas{Ranges: map[radiation.Range]Optics{
-		thing.Visible: {Absorb: 0.04, Scatter: 0.06}}}
+		thing.Visible(): {Absorb: 0.04, Scatter: 0.06}}}
 	wantClose(t, "uniform", Uniform(g, 2)(maths.Vec{}, maths.Up, 3, green), math.Exp(-0.6))
 	if got := Uniform(g, 2)(maths.Vec{}, maths.Up, math.Inf(1), green); got != 0 {
 		t.Errorf("uniform to the sun is %v", got)

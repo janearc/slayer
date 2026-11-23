@@ -14,7 +14,8 @@ func oldEncode(v float64) uint8 {
 		return 0
 	}
 	v = math.Max(0, math.Min(1, v))
-	return uint8(math.Round(srgb.FromLinear(v) * 255))
+	scaled := srgb.FromLinear(v) * 255
+	return uint8(math.Round(scaled))
 }
 
 // every step of the table is where the curve's byte steps, and the floats
@@ -70,7 +71,8 @@ func TestEncodeIsTheCurveEverywhere(t *testing.T) {
 	}
 	// and every byte's decoded value, which the round trip must keep
 	for b := 0; b < 256; b++ {
-		if got := Encode(Decode(uint8(b))); got != uint8(b) {
+		code := uint8(b)
+		if got := Encode(Decode(code)); got != uint8(b) {
 			t.Errorf("Encode(Decode(%d)) = %d", b, got)
 		}
 	}

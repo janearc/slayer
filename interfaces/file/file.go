@@ -45,7 +45,9 @@ func Block(pixel float64) (w, h int) {
 func Grow(img image.Image, bw, bh int) *image.RGBA {
 	bw, bh = max(bw, 1), max(bh, 1)
 	b := img.Bounds()
-	out := image.NewRGBA(image.Rect(0, 0, b.Dx()*bw, b.Dy()*bh))
+	grownWidth := b.Dx() * bw
+	grownHeight := b.Dy() * bh
+	out := image.NewRGBA(image.Rect(0, 0, grownWidth, grownHeight))
 	for y := 0; y < out.Bounds().Dy(); y++ {
 		for x := 0; x < out.Bounds().Dx(); x++ {
 			out.Set(x, y, img.At(b.Min.X+x/bw, b.Min.Y+y/bh))

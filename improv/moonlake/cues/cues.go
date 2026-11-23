@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
@@ -398,25 +397,6 @@ func Parse(scoreYAML, cuesYAML []byte) (*Show, error) {
 	}
 	if err := yaml.Unmarshal(cuesYAML, &show.sheet); err != nil {
 		return nil, err
-	}
-	show.compile()
-	return &show, nil
-}
-
-// Load is Parse for a score file and a cues file that are read from disk.
-func Load(scorePath, cuesPath string) (*Show, error) {
-	var show Show
-	for _, input := range []struct {
-		path string
-		into any
-	}{{scorePath, &show.written}, {cuesPath, &show.sheet}} {
-		raw, err := os.ReadFile(input.path)
-		if err != nil {
-			return nil, err
-		}
-		if err := yaml.Unmarshal(raw, input.into); err != nil {
-			return nil, err
-		}
 	}
 	show.compile()
 	return &show, nil

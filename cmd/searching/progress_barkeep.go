@@ -34,11 +34,11 @@ func progressBar(call pzm.Call) (*barkeepProgress, error) {
 		return nil, err
 	}
 	if call.Value("barkeep-kind") == "" || call.Value("barkeep-signal") == "" {
-		return nil, fmt.Errorf("Barkeep needs its configured --barkeep-kind and --barkeep-signal")
+		return nil, fmt.Errorf("the Barkeep needs its configured --barkeep-kind and --barkeep-signal")
 	}
 	return &barkeepProgress{address: address, kind: call.Value("barkeep-kind"), signal: call.Value("barkeep-signal"),
 		client: &http.Client{Timeout: 2 * time.Second, Transport: &http.Transport{Proxy: nil},
-			CheckRedirect: func(*http.Request, []*http.Request) error { return fmt.Errorf("Barkeep redirects are refused") }}}, nil
+			CheckRedirect: func(*http.Request, []*http.Request) error { return fmt.Errorf("the Barkeep redirects are refused") }}}, nil
 }
 
 // loopbackBar confines status updates to a literal local IP and port.
@@ -47,7 +47,7 @@ func loopbackBar(address string) (string, error) {
 	if err != nil || parsed.Scheme != "http" || parsed.User != nil ||
 		parsed.RawQuery != "" || parsed.Fragment != "" || parsed.Port() == "" ||
 		parsed.Path != "" && parsed.Path != "/" || !net.ParseIP(parsed.Hostname()).IsLoopback() {
-		return "", fmt.Errorf("Barkeep address must be http://LOOPBACK-IP:PORT without credentials or a path")
+		return "", fmt.Errorf("the Barkeep address must be http://LOOPBACK-IP:PORT without credentials or a path")
 	}
 	return strings.TrimSuffix(address, "/"), nil
 }
@@ -110,7 +110,7 @@ func (bar *barkeepProgress) request(ctx context.Context, path string, payload an
 		return 0, err
 	}
 	if len(body) > 8192 || response.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("Barkeep %s returned %s", path, response.Status)
+		return 0, fmt.Errorf("the Barkeep %s returned %s", path, response.Status)
 	}
 	var status struct {
 		Queued *int `json:"queued"`

@@ -19,14 +19,14 @@ func TestASpectrumPassesByBeersLaw(t *testing.T) {
 	g := Gas{
 		Ranges: map[radiation.Range]Optics{
 			radiation.Ultraviolet(): {Absorb: 0.1, Scatter: 0.2},
-			thing.Visible:           {Absorb: 1, Scatter: 1},
+			thing.Visible():         {Absorb: 1, Scatter: 1},
 		},
 		Visible: func(nm float64) (absorb, scatter float64) { return 0.25, 0.25 },
 		Lines:   map[float64]float64{656: 3},
 	}
 	s := g.Spectrum(2)
 	wantClose(t, "ultraviolet passes", s.Passes[radiation.Ultraviolet()], math.Exp(-0.6))
-	wantClose(t, "the visible passes", s.Passes[thing.Visible], math.Exp(-1))
+	wantClose(t, "the visible passes", s.Passes[thing.Visible()], math.Exp(-1))
 	if len(s.Passes) != 2 {
 		t.Errorf("the spectrum passes %d ranges, want 2", len(s.Passes))
 	}
@@ -34,7 +34,7 @@ func TestASpectrumPassesByBeersLaw(t *testing.T) {
 		t.Errorf("a gas with a line gives %v, want an empty table: lines are the aurora's", s.Gives)
 	}
 	g.Visible = nil
-	wantClose(t, "the visible, with no rule, passes", g.Spectrum(2).Passes[thing.Visible], math.Exp(-4))
+	wantClose(t, "the visible, with no rule, passes", g.Spectrum(2).Passes[thing.Visible()], math.Exp(-4))
 }
 
 // haze, venus and mars pass each range by beer's law over ten metres: e to
@@ -58,7 +58,7 @@ func TestTheOtherGasesPassByBeersLaw(t *testing.T) {
 		}
 		for r, o := range g.Ranges {
 			want := math.Exp(-(o.Absorb + o.Scatter) * unit)
-			if r == thing.Visible {
+			if r == thing.Visible() {
 				want = visible[g.Name]
 			}
 			wantClose(t, g.Name+" passes "+r.String(), s.Passes[r], want)

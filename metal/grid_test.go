@@ -44,6 +44,9 @@ func TestEveryPixelIsReachedOnceInItsPlace(t *testing.T) {
 	defer kernel.Close()
 	given := binary.LittleEndian.AppendUint32(nil, math.Float32bits(7))
 	width, height, rows := 13, 10, 4
+	// the where kernel writes its band's first row, so the bands are
+	// fixed at the most rows, where expected finds them
+	kernel.FixBands(rows)
 	out, err := kernel.Grid(width, height, rows, 4, [][]byte{given})
 	if err != nil {
 		t.Fatal(err)

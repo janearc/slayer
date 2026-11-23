@@ -38,5 +38,8 @@ func (plan *Plan) arguments(tools Tools) ([]string, error) {
 	if profile.CPURenderer {
 		arguments = append(arguments, "--renderer", "cpu")
 	}
+	if profile.GPU {
+		arguments = append(arguments, "--renderer", "gpu")
+	}
 	return arguments, nil
 }

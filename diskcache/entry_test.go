@@ -10,7 +10,8 @@ import (
 const testRecord = "kind entry\na 1\n"
 
 func TestDecodedIsWhatEncodedWrote(t *testing.T) {
-	read, err := decoded(encoded(testRecord, started, payload(entryBytes)),
+	wrote := encoded(testRecord, started, payload(entryBytes))
+	read, err := decoded(wrote,
 		testRecord)
 	if err != nil || !bytes.Equal(read.payload, payload(entryBytes)) ||
 		!read.written.Equal(started) {
@@ -20,7 +21,8 @@ func TestDecodedIsWhatEncodedWrote(t *testing.T) {
 
 // anti-test of TestDecodedIsWhatEncodedWrote
 func TestDecodedRefusesEveryMalformedHeader(t *testing.T) {
-	whole := string(encoded(testRecord, started, payload(entryBytes)))
+	record := encoded(testRecord, started, payload(entryBytes))
+	whole := string(record)
 	for _, each := range []struct{ name, from, to, says string }{
 		{"no record word", "record ", "rekord ", "ends early"},
 		{"no break after the count", "record 15\n", "record 15", "record"},

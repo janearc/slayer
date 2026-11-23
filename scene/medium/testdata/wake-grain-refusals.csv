@@ -1,0 +1,6 @@
+name,scale,octaves
+zero scale,0,2
+nan scale,nan,2
+negative scale,-1,2
+no octaves,10,0
+negative octaves,10,-1

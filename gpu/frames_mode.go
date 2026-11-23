@@ -28,15 +28,22 @@ const (
 // known is whether the mode is one of the six.
 func (mode Mode) known() bool { return mode > noMode && mode < modes }
 
-// ErrFramesClosed is a draw on a Frames drawer after its Close.
-var ErrFramesClosed = errors.New("gpu: the frames drawer is closed; " +
-	"make another with NewFrames")
+// framesRefusal is a refusal of the Frames drawer, held as a constant so
+// that no one can assign it.
+type framesRefusal string
 
-// ErrFramesFailed is a draw on a Frames drawer after one of its draws
+// Error is the refusal's words.
+func (r framesRefusal) Error() string { return string(r) }
+
+// ErrFramesClosed is a draw on a Frames drawer after its Close.
+const ErrFramesClosed framesRefusal = "gpu: the frames drawer is closed; " +
+	"make another with NewFrames"
+
+// errFramesFailed is a draw on a Frames drawer after one of its draws
 // failed. The drawer has let its device state go: a kernel that timed
 // out may still be running and is never used again (see metal.SetLimit),
 // so a caller does not draw the same work again in this process.
-var ErrFramesFailed = errors.New("gpu: the frames drawer failed earlier " +
+var errFramesFailed = errors.New("gpu: the frames drawer failed earlier " +
 	"and draws no more")
 
 // errNoWorld is a draw asked of no world.

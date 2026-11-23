@@ -53,18 +53,18 @@ type row struct {
 func optics(table []row) (Optics, error) {
 	bands := make(map[Band]Reading, len(table))
 	for _, each := range table {
-		where, err := NewSource(release,
+		where, err := newSource(release,
 			each.material+", "+each.file, each.paper, each.text)
 		if err != nil {
 			return Optics{}, err
 		}
-		read, err := NewReading(each.wavelength, each.n, each.k, where)
+		read, err := newReading(each.wavelength, each.n, each.k, where)
 		if err != nil {
 			return Optics{}, err
 		}
 		bands[each.band] = read
 	}
-	return NewOptics(bands)
+	return newOptics(bands)
 }
 
 // page is what the database holds of one material: what it is made of;
@@ -76,11 +76,16 @@ type page struct {
 	sight []row
 	dense *densityRow
 	stops []coefficientRow
+	proxy *reflectancePage
+	bulk  *bulkRow
 }
 
 // made is the page's material under a name, every part of it read
 // through the constructors, refusing a bad page by what is wrong in it
 func (leaf page) made(name string) (Material, error) {
+	if leaf.bulk != nil && (leaf.dense != nil || len(leaf.stops) > 0) {
+		return Material{}, refuse("%s mixes a bulk-only row and x-ray records", name)
+	}
 	formula, err := NewFormula(leaf.parts)
 	if err != nil {
 		return Material{}, err
@@ -88,6 +93,9 @@ func (leaf page) made(name string) (Material, error) {
 	kind, err := leaf.plain(name, formula)
 	if err != nil {
 		return Material{}, err
+	}
+	if leaf.bulk != nil {
+		return leaf.bulk.attach(kind)
 	}
 	if leaf.dense == nil {
 		return kind, nil
@@ -98,7 +106,17 @@ func (leaf page) made(name string) (Material, error) {
 // plain is the page's material before any x-ray row: with its optics
 // where the page has rows of them, and a substance of its formula alone
 // where it has none
-func (leaf page) plain(name string, formula Formula) (Material, error) {
+func (leaf page) plain(name string, formula formula) (Material, error) {
+	if leaf.proxy != nil {
+		if len(leaf.sight) > 0 {
+			return Material{}, refuse("%s has both measured and estimated optics", name)
+		}
+		sight, err := leaf.proxy.optics()
+		if err != nil {
+			return Material{}, err
+		}
+		return newOpticalMaterial(name, formula, sight)
+	}
 	if len(leaf.sight) == 0 {
 		return NewSubstance(name, formula)
 	}
@@ -106,7 +124,7 @@ func (leaf page) plain(name string, formula Formula) (Material, error) {
 	if err != nil {
 		return Material{}, err
 	}
-	return NewOpticalMaterial(name, formula, sight)
+	return newOpticalMaterial(name, formula, sight)
 }
 
 // ByName is the material a thing says it is made of, by its name: the
@@ -115,7 +133,7 @@ func (leaf page) plain(name string, formula Formula) (Material, error) {
 // with what they take from an x-ray beam. It refuses a name it does not
 // know, by name.
 func ByName(name string) (Material, error) {
-	for _, book := range []map[string]page{metals, semiconductors, yard, xrays} {
+	for _, book := range []map[string]page{metals, alloys, semiconductors, yard, xrays} {
 		if leaf, known := book[name]; known {
 			return leaf.made(name)
 		}

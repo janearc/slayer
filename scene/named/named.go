@@ -10,7 +10,6 @@
 package named
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"slices"
@@ -35,7 +34,7 @@ const (
 )
 
 // ErrNoScene is a name no scene has.
-var ErrNoScene = errors.New("named: no such scene")
+const ErrNoScene refusal = "named: no such scene"
 
 // Scene is one named scene: what it is, what it takes, what it is drawn
 // at by default, and how it is built.
@@ -47,7 +46,14 @@ type Scene struct {
 	parameters        []Parameter
 	defaults          Defaults
 	build             builder
+	// noted is whether what the scene says as it builds is for the reader
+	// of the run, not only for its command's own output.
+	noted bool
 }
+
+// Noted is whether what the scene says as it builds is shown to whoever
+// draws it by a job.
+func (scene Scene) Noted() bool { return scene.noted }
 
 // builder makes a scene's world from checked values, saying what it built
 // to said.
@@ -93,7 +99,8 @@ func (scene Scene) Check(with map[string]any) error {
 // The values are checked first, and the first that is wrong is refused by
 // name; a parameter left out takes its default.
 func (scene Scene) Build(with map[string]any, said io.Writer) (*Built,
-	error) {
+	error,
+) {
 	if scene.authored != nil {
 		if err := scene.authored.Check(with); err != nil {
 			return nil, err
@@ -119,7 +126,6 @@ func (scene Scene) Build(with map[string]any, said io.Writer) (*Built,
 	}
 	held, err := scene.read(with)
 	if err != nil {
-
 		return nil, err
 	}
 	if said == nil {
@@ -167,6 +173,7 @@ type Built struct {
 	clock   *time.Duration
 	played  *lantern.Played
 	tick    func(at time.Duration)
+	media   []*thing.Material
 }
 
 // World is what is in the scene.
@@ -174,6 +181,12 @@ func (made *Built) World() *thing.World { return made.world }
 
 // Eye is where the scene is seen from, as its command sees it.
 func (made *Built) Eye() maths.Subspace { return made.eye }
+
+// InitialMedia describes the transparent materials containing a named
+// scene's fixed camera, in entry order from outermost to innermost.
+func (made *Built) InitialMedia() []*thing.Material {
+	return slices.Clone(made.media)
+}
 
 // Timed is whether the scene has lamps that keep their own time, or
 // light that changes with it, so that Set must be told the time of each
@@ -194,7 +207,7 @@ func (made *Built) Set(at time.Duration) {
 }
 
 // ErrUnplayed is a value for a channel of a scene that has none.
-var ErrUnplayed = errors.New("named: this scene has no channels")
+const ErrUnplayed refusal = "named: this scene has no channels"
 
 // Channels are the channels music can play the scene by, each with its
 // range and rest; none for a scene that has none. Only zappy has them.
@@ -233,11 +246,6 @@ func All() []Listed {
 	return all
 }
 
-// Traced is every traced scene, each once, a copy a caller may change.
-func Traced() []Scene {
-	return slices.Clone(registry)
-}
-
 // Get is the traced scene of that name, or a refusal that lists the
 // names there are, or says the name is drawn as maps.
 func Get(name string) (*Scene, error) {
@@ -266,8 +274,10 @@ func names() []string {
 
 // registry is every named scene. It is made once and never changed; All
 // and Get hand out copies.
-var registry = []Scene{swarmScene(), zappyScene(), orbitalScene(),
-	ringScene(), moonriseScene(), magnetarScene()}
+var registry = []Scene{
+	swarmScene(), zappyScene(), orbitalScene(),
+	ringScene(), moonriseScene(), magnetarScene(),
+}
 
 // the counts a scene's parts are made of, each defined
 const (

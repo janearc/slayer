@@ -30,7 +30,8 @@ func Publish(ctx context.Context, settings Settings, folder Folder,
 	failures = append(failures, err, made.publishGallery())
 	told := []string{notice}
 	if pictures > 0 {
-		said, err := made.publishLine(int64(len(found.pictures)), pictures)
+		pictureCount := int64(len(found.pictures))
+		said, err := made.publishLine(pictureCount, pictures)
 		told, failures = append(told, said), append(failures, err)
 	}
 	silent := func(word string) bool { return word == "" }

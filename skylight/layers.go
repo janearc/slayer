@@ -3,11 +3,13 @@ package skylight
 // air is a column worked out for the walk: the planet's radius, the
 // radius of its top sphere, its ground's albedo, its shells as layers
 // split at the kept heights, and for each boundary between layers, from
-// the ground up, the kept height it is, or unkept.
+// the ground up, the kept height it is, or unkept; and the band of the
+// sun's disc its photons start on.
 type air struct {
 	radius, top, ground float64
 	layers              []layer
 	kept                []int
+	band                band
 }
 
 // a layer is a shell ready for the walk: the heights of its ends, their

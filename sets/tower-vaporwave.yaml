@@ -1,0 +1,74 @@
+# tower vaporwave: three towers in pastel gradients, pink to teal, lilac to
+# mint and peach to sky, with marble, bands that glow a little of their
+# colour, and glass block, over a pale polished plaza under a pink and
+# violet dusk. the palette is picked by eye in manufacture/cities/cultures/
+# tower.yaml: this repository has no way to read the colourways. made by
+# the cities package (manufacture/cities).
+#
+# places are metres, as a map's run: x east, y north, z up. the plaza, the
+# sun, the sky and the camera are choices of this study, picked by eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower vaporwave
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 54
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    plaza:
+      title: "across the plaza, three towers in pastel"
+      location:
+        at: [20, -380, 3]
+      orientation:
+        look_at: [0, 0, 60]
+  recipes:
+    pink-teal: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: vaporwave, colour: pink, storeys: 52, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    lilac-mint: {kind: tower, irregularity: 0, pins: {plan: rounded, skin: vaporwave, colour: lilac, storeys: 66, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+    peach-sky: {kind: tower, irregularity: 0, pins: {plan: rectangle, skin: vaporwave, colour: peach, storeys: 44, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}}
+  set:
+    things:
+      left: {recipe: lilac-mint, seed: 8, complexity: quick, east: -95, north: 40, height: {value: 0, unit: m}}
+      middle: {recipe: pink-teal, seed: 8, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+      right: {recipe: peach-sky, seed: 8, complexity: quick, east: 90, north: 30, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.1, 0.07, 0.1]}
+        source: eye
+      plaza:
+        colour: {srgb_linear: [0.4, 0.3, 0.4]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+      plaza:
+        material: plaza
+        middle: [0, -200, -0.9]
+        size: [900, 700, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.8, 0.8, 0.9]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.6, 0.9]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.7, 0.25, 0.4]}
+      zenith: {srgb_linear: [0.05, 0.04, 0.25]}
+      ground: {srgb_linear: [0.08, 0.04, 0.08]}
+      source: eye

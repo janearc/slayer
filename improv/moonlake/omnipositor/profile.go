@@ -84,7 +84,7 @@ func (profile *Profile) WriteTrace(writer io.Writer) error {
 	for _, span := range spans {
 		micros := float64(span.Start.UnixMicro())
 		duration := float64(span.Duration) / float64(time.Microsecond)
-		if math.IsNaN(micros) || math.IsInf(micros, 0) || math.IsInf(duration, 0) {
+		if math.IsInf(duration, 0) {
 			return errors.New("profile: invalid trace time")
 		}
 		events = append(events, traceEvent{Name: span.Stage, Category: "cpu-wall", Phase: "X", Timestamp: micros, Duration: duration, Process: 1, Thread: 1, Args: map[string]int{"frame": span.Frame}})

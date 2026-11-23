@@ -1,0 +1,4 @@
+name,nanoseconds
+none,0
+one-nanosecond-less-than-none,-1
+an-hour-less-than-none,-3600000000000

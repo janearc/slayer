@@ -184,7 +184,8 @@ func TestARelayWithNoClockTellsNoOne(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	mode.relay.Set(time.Duration(pick("cells-frames")) * time.Second)
+	frames := pick("cells-frames")
+	mode.relay.Set(time.Duration(frames) * time.Second)
 }
 
 // anti-tests: -cells draws on the cpu, so -gpu with it is refused before

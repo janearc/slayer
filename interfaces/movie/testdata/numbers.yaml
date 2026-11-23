@@ -1,115 +1,157 @@
-# every number the movie tests choose, with what it is and who picked it.
+# every number the movie tests choose, with what it is and why.
 numbers:
   - name: small-width
     value: 320
     says: pixels across the small movies the tests write; even, and quick to encode
     kind: picked
-    by: the test author, 2026-11-12
+    by: small enough that a movie encodes in a moment, and a multiple of 16 so it needs no padding
 
   - name: small-height
     value: 192
     says: pixels down the small movies; twelve macroblocks
     kind: picked
-    by: the test author, 2026-11-12
+    by: twelve macroblocks, a multiple of 16, and small enough to encode in a moment
 
   - name: short-height
     value: 180
     says: a height that is not a multiple of 16, written padded to 192
     kind: picked
-    by: the test author, 2026-11-12
+    by: twelve rows under the small height, so it needs padding to reach it
 
   - name: small-rate
     value: 24
     says: frames a second of the small movies, as the shorts are
     kind: picked
-    by: the test author, 2026-11-12
+    by: the rate films are made at, and the one the shorts use
 
   - name: small-frames
     value: 24
     says: frames in a small movie; one second at the small rate
     kind: picked
-    by: the test author, 2026-11-12
+    by: one second at the small rate, enough to hold a picture and a sound
 
   - name: long-frames
     value: 120
     says: frames in the movie the keyframe test writes; more than two runs of 48
     kind: picked
-    by: the test author, 2026-11-12
+    by: more than two runs of 48 frames, so a keyframe gap is tested more than once
 
   - name: early-frames
     value: 12
     says: frames written before a test stops, aborts or closes early
     kind: picked
-    by: the test author, 2026-11-12
+    by: half of the small movie, so a movie is stopped part way
 
   - name: tone-hertz
     value: 440
     says: the pitch of the test tone, concert A
     kind: picked
-    by: the test author, 2026-11-12
+    by: concert A, a pitch anyone can tell by ear
 
   - name: tone-loudness
     value: 0.5
     says: the left channel's peak, half of full scale
     kind: picked
-    by: the test author, 2026-11-12
+    by: half of full scale, so the tone is loud enough to measure and clips nothing
+
+  - name: tone-kept
+    value: 0.5
+    says: the share of the tone's loudness a sound read back must still reach
+    kind: picked
+    by: half, since the read goes through a lossy codec and a resample, and silence would be far below it
 
   - name: right-share
     value: -0.5
     says: the right channel as a share of the left, inverted and halved, so the channels can be told apart
     kind: picked
-    by: the test author, 2026-11-12
+    by: a different sign and size from the left, so a swapped or merged pair of channels shows
 
   - name: mono-rate
     value: 48000
     says: the sample rate of the mono wav file ReadSound reads and resamples
     kind: picked
-    by: the test author, 2026-11-12
+    by: not the 44100 ReadSound returns, so the resample is exercised
 
   - name: aac-error
     value: 0.02
     says: the most a decoded sample may differ from the one written, once aligned; AAC is lossy, and on the test tone at 192 kbit/s the worst measured here was 0.0065, so this is three times that
     kind: picked
-    by: the test author, 2026-11-12
+    by: three times the worst difference measured on the test tone at 192 kbit/s
 
   - name: silence-loudness
     value: 0.001
     says: the root mean square below which decoded sound counts as silence; AAC codes silence as near-silence
     kind: picked
-    by: the test author, 2026-11-12
+    by: far below the tone's loudness and above what AAC leaves where it codes silence
 
   - name: aac-packet
     value: 1024
     says: samples in one AAC-LC packet (ISO/IEC 14496-3); a track's length is a whole number of them, so lengths are compared to within one
     kind: picked
-    by: the test author, 2026-11-12
+    by: the packet size AAC-LC codes in, so a track length is judged to within one packet
 
   - name: aac-delay
     value: 3136
     says: the furthest the comparison looks for the decoded sound shifted from the written; AAC's 2112 samples of priming and one packet, so a sound left primed is found and refused
     kind: picked
-    by: the test author, 2026-11-12
+    by: AAC's 2112 samples of priming and one packet of 1024, so a sound left primed is found and refused
 
   - name: shorts-width
     value: 1080
     says: pixels across a YouTube short, portrait
     kind: picked
-    by: the test author, 2026-11-12
+    by: the width of a YouTube short
 
   - name: shorts-height
     value: 1920
     says: pixels down a YouTube short, portrait
     kind: picked
-    by: the test author, 2026-11-12
+    by: the height of a YouTube short
 
   - name: shorts-frames
     value: 72
     says: three seconds at 24; a movie this size with sound stalled at frame 57 when sound and pictures were handed over from one thread
     kind: picked
-    by: the test author, 2026-11-12
+    by: three seconds at 24, past the frame where a movie this size with sound stalled when handed over from one thread
 
   - name: film-error
     value: 4
     says: the most a written film's pictures may differ from what was written, read back, as the mean of every channel's difference in 0-255 steps; H.264 4:2:0 at 0.2 bits a pixel loses some of the colour, most at the gradient's wrap
     kind: picked
-    by: the film reader's author, 2026-11-12, over the 1.37 measured on the small movie that day
+    by: about three times the 1.37 measured on the small movie
+
+  - name: ftyp-body
+    value: 4
+    says: bytes in the body of the file-type box the box tests write
+    kind: picked
+    by: one four-letter brand, as a file-type box holds
+
+  - name: moov-body
+    value: 16
+    says: bytes in the body of the index box the box tests write
+    kind: picked
+    by: more than the brand, so an index box is told from a short one by its size
+
+  - name: mdat-body
+    value: 32
+    says: bytes in the body of the media box the box tests write
+    kind: picked
+    by: more than the index box, so the media is told from the index by its size
+
+  - name: span-tone-seconds
+    value: 2
+    says: seconds of tone in the test that tiles a picture with spans of it
+    kind: picked
+    by: longer than the small movie's one second, so the spans are cut where the sound is longer
+
+  - name: short-tone-seconds
+    value: 0.5
+    says: seconds of tone in the test where the sound ends before the picture
+    kind: picked
+    by: half the small movie's one second, so the picture outlasts the sound
+
+  - name: lowest-level
+    value: 30
+    says: the level_idc of the first row of the level table, level 3.0
+    kind: picked
+    by: the lowest level VideoToolbox names for High profile

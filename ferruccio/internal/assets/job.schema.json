@@ -8,6 +8,32 @@
       "description": "The name of this schema, which says the document is a slayer job. Always https://github.com/janearc/slayer/schemas/job-v1.json; required.",
       "const": "https://github.com/janearc/slayer/schemas/job-v1.json"
     },
+    "sources": {
+      "description": "Attribution and provenance for information used in this job. These records do not fetch data.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "One source used by the scene or a material.",
+        "properties": {
+          "name": {
+            "description": "A human-readable name for the source.",
+            "type": "string",
+            "minLength": 1
+          },
+          "uri": {
+            "description": "The source URL or other identifier.",
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "description": "How this source was used and any important qualification.",
+            "type": "string"
+          }
+        },
+        "required": ["name", "uri"],
+        "additionalProperties": false
+      }
+    },
     "scene": {
       "description": "Which scene to render, in exactly one of four forms: set, smoke, named or frames. Required; for example {set: ../sets/moonlake.yaml}.",
       "type": "object",
@@ -167,6 +193,13 @@
         },
         "sky-looks": {
           "description": "The sky's sixteen looks from a surface shared among a pixel's rays. Each ray takes its share, not all sixteen, so sky-lit shade is a little rougher within a pixel. Refused without lamp-store, and as fastlight is.",
+          "enum": [
+            "on",
+            "off"
+          ]
+        },
+        "restir": {
+          "description": "Many lamps lit by reservoir resampling, noisier and biased. A few candidate lamps a pixel are chosen from a tree of the lamps, shared with the last frame and with neighbours, and one shadow ray. Adds noise, bias and lag. Refused beside media, shutters, a rig's lens, and a world with a lamp that has no place (a flood, a sun, a beam), and as fastlight is.",
           "enum": [
             "on",
             "off"

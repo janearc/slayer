@@ -19,8 +19,9 @@ func TestADistantSunsShadowReachesAnyDistance(t *testing.T) {
 	}
 	world := thing.NewWorld()
 	world.Lamp(sun)
+	sphereAt := resting(maths.V(0, 7071, 7071))
 	world.Add(thing.Thing{Shape: shape.Sphere{Radius: 50},
-		Motion: resting(maths.V(0, 7071, 7071))})
+		Motion: sphereAt})
 	scene := stage(world, 0)
 	up := maths.V(0, 1, 0)
 	shaded := scene.lamplight(maths.Vec{}, up, maths.Grey(1))

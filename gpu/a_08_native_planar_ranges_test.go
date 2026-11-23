@@ -3,6 +3,7 @@
 package gpu
 
 import (
+	"encoding/binary"
 	"testing"
 
 	"github.com/janearc/slayer/maths"
@@ -50,7 +51,11 @@ func TestNativeFaceRangesKeepPlanarMeshesAndTheirPooledOffsets(t *testing.T) {
 		}
 		for i, want := range [][2]int{{0, 1}, {1, 6}} {
 			root := encoded.standings[i].root
-			if i == 1 && encoded.faces.nodes[root].count != 0 {
+			// the root's count is the second whole of its info, after the
+			// two corners' eight numbers
+			countAt := root*nodeStruct.size() + 9*4
+			if i == 1 && binary.LittleEndian.Uint32(
+				encoded.nodes.bytes[countAt:]) != 0 {
 				t.Fatal("six-face fixture needs a branch, not just one leaf")
 			}
 			first, count := encoded.triangleRange(root)

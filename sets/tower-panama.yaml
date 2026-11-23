@@ -1,0 +1,89 @@
+# tower panama: a cluster of slender twisting towers packed close on a
+# shore, as the glass towers of Panama City are, with floors that rotate
+# as they rise, as the F&F Tower's do. every tower is a rounded plan
+# twenty two metres across, mirror glass, cut into blocks of four storeys
+# each turned three degrees on the one below; the heights and the tints
+# differ. at dusk into night. made by the cities package
+# (manufacture/cities) from manufacture/cities/cultures/tower.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the sea is
+# south of y = 0 and the land north of it. the towers' places, the sea,
+# the sun, the sky and the camera are choices of this study, picked by
+# eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower panama
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    shore:
+      title: "from the water, the cluster on the shore"
+      location:
+        at: [-80, -560, 8]
+      orientation:
+        look_at: [-30, 50, 120]
+  recipes:
+    blue-tall: {kind: tower, irregularity: 0, pins: {plan: rounded, skin: mirror, colour: blue, spiral: true, width: {value: 22, unit: m}, storeys: 86, taper: false, setbacks: false, spire: false}}
+    green-mid: {kind: tower, irregularity: 0, pins: {plan: rounded, skin: mirror, colour: green, spiral: true, width: {value: 24, unit: m}, storeys: 72, taper: false, setbacks: false, spire: false}}
+    silver-low: {kind: tower, irregularity: 0, pins: {plan: rounded, skin: mirror, colour: silver, spiral: true, width: {value: 22, unit: m}, storeys: 60, taper: false, setbacks: false, spire: false}}
+    blue-mid: {kind: tower, irregularity: 0, pins: {plan: rounded, skin: mirror, colour: blue, spiral: true, width: {value: 26, unit: m}, storeys: 70, taper: false, setbacks: false, spire: false}}
+    green-tall: {kind: tower, irregularity: 0, pins: {plan: rounded, skin: mirror, colour: green, spiral: true, width: {value: 22, unit: m}, storeys: 80, taper: false, setbacks: false, spire: false}}
+    bronze-low: {kind: tower, irregularity: 0, pins: {plan: rounded, skin: mirror, colour: bronze, spiral: true, width: {value: 24, unit: m}, storeys: 56, taper: false, setbacks: false, spire: false}}
+  set:
+    things:
+      a: {recipe: blue-tall, seed: 1, complexity: quick, east: -300, north: 70, height: {value: 0, unit: m}}
+      b: {recipe: silver-low, seed: 2, complexity: quick, east: -255, north: 52, height: {value: 0, unit: m}}
+      c: {recipe: green-mid, seed: 3, complexity: quick, east: -210, north: 38, height: {value: 0, unit: m}}
+      d: {recipe: blue-mid, seed: 4, complexity: quick, east: -165, north: 32, height: {value: 0, unit: m}}
+      e: {recipe: green-tall, seed: 5, complexity: quick, east: -120, north: 30, height: {value: 0, unit: m}}
+      f: {recipe: bronze-low, seed: 6, complexity: quick, east: -75, north: 32, height: {value: 0, unit: m}}
+      g: {recipe: blue-tall, seed: 7, complexity: quick, east: -30, north: 38, height: {value: 0, unit: m}}
+      h: {recipe: silver-low, seed: 8, complexity: quick, east: 15, north: 48, height: {value: 0, unit: m}}
+      i: {recipe: green-mid, seed: 9, complexity: quick, east: 60, north: 62, height: {value: 0, unit: m}}
+      j: {recipe: blue-mid, seed: 10, complexity: quick, east: 105, north: 82, height: {value: 0, unit: m}}
+      k: {recipe: green-tall, seed: 11, complexity: quick, east: 150, north: 108, height: {value: 0, unit: m}}
+      l: {recipe: bronze-low, seed: 12, complexity: quick, east: 195, north: 138, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      land:
+        colour: {srgb_linear: [0.06, 0.06, 0.06]}
+        source: eye
+      sea:
+        colour: {srgb_linear: [0.02, 0.05, 0.08]}
+        source: eye
+    boxes:
+      land:
+        material: land
+        middle: [0, 5000, -1]
+        size: [20000, 10000, 2]
+        source: eye
+      sea:
+        material: sea
+        middle: [0, -5000, -1]
+        size: [20000, 10000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.6, 0.7, 0.4]}
+        source: eye
+      moon:
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.58, 0.8]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.14]}
+      zenith: {srgb_linear: [0.01, 0.025, 0.1]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

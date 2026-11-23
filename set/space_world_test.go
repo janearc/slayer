@@ -134,8 +134,10 @@ func TestAtmosphereLayerExtentCanBeTheWorld(t *testing.T) {
 	if _, err := readV2(globe + layer("sky")); err == nil {
 		t.Error("a layer reaching the sky was taken")
 	}
-	if _, err := readV2(layer("world")); err == nil {
-		t.Error("a world layer with no globe was taken")
+	made, err = readV2(layer("world"))
+	if err != nil || len(made.FlatAir()) != 1 {
+		t.Errorf("a world layer with no globe or terrain is %+v, %v",
+			made.FlatAir(), err)
 	}
 }
 
@@ -201,9 +203,10 @@ func TestCameraInstrumentNeedsAThingWithAnEye(t *testing.T) {
 		"      moves:\n        - look: {object: base}\n          duration: {value: 1, unit: s}\n"
 	eye := "        eye:\n          pupil: {value: 1, unit: m}\n          focal: {value: 2, unit: m}\n          models: diffraction-limited pupil\n"
 	text := func(more string) []byte {
-		return []byte(strings.Replace(v2Text(defaultFilm,
+		source := v2Text(defaultFilm,
 			"  setting: space\n  set:\n    things:\n"+base+
-				satellite("scope", "        around: base\n"+more)), defaultCamera, camera, 1))
+				satellite("scope", "        around: base\n"+more))
+		return []byte(strings.Replace(source, defaultCamera, camera, 1))
 	}
 	if _, err := Read("t.yaml", text(eye)); err != nil {
 		t.Errorf("an instrument with an eye is refused: %v", err)

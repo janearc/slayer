@@ -2,10 +2,13 @@
 
 Profile.Full freezes explicit authored film width, height and rays from a
 job or set, including a legacy set. Slayer receives --quality exact and
-no width, height or rays overrides. Frozen YAML retains the other film
+no width, height or rays overrides.
+
+Frozen YAML retains the other film
 settings. Native StartFullRender explicitly selects CPU and shares the
 existing generation, cancellation, observation and verified-result pipeline.
-It runs the configured shared Slayer through the Game tests lane.
+It starts the configured shared Slayer itself, with no Game lane, on the CPU
+renderer and two processors unless the settings choose otherwise.
 
 A full request refuses catalogue plans, movie jobs, and film settings that
 require presets or inherited defaults. Those cases have no full adapter yet;

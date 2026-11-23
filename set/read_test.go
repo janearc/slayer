@@ -19,7 +19,8 @@ func shoebox(test *testing.T) string {
 }
 
 func TestTheShoeboxReads(test *testing.T) {
-	made, err := set.Read("shoebox.yaml", []byte(shoebox(test)))
+	source := shoebox(test)
+	made, err := set.Read("shoebox.yaml", []byte(source))
 	if err != nil {
 		test.Fatal(err)
 	}

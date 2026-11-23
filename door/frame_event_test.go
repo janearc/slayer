@@ -24,7 +24,8 @@ import (
 func TestStillFrameEventsCoverDrawnAndCached(t *testing.T) {
 	fd := frameEvents(t)
 	directory := t.TempDir()
-	wanted, err := job.Read(written(t, directory, "still.yaml", stillJob(t, "")))
+	file := written(t, directory, "still.yaml", stillJob(t, ""))
+	wanted, err := job.Read(file)
 	if err != nil {
 		t.Fatal(err)
 	}

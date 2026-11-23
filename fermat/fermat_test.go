@@ -13,7 +13,7 @@ import (
 // no bigger than the picks gives every pixel, and none gives none.
 func TestPicksAreTheRawsOwn(t *testing.T) {
 	sum := sha256.Sum256([]byte("a raw"))
-	first, again := Picks(sum, 40, 30, Many), Picks(sum, 40, 30, Many)
+	first, again := picks(sum, 40, 30, Many), picks(sum, 40, 30, Many)
 	seen := map[[2]int]bool{}
 	for i, at := range first {
 		if at != again[i] || seen[at] || at[0] < 0 || at[0] >= 40 ||
@@ -23,15 +23,16 @@ func TestPicksAreTheRawsOwn(t *testing.T) {
 		}
 		seen[at] = true
 	}
-	other := Picks(sha256.Sum256([]byte("another raw")), 40, 30, Many)
+	anotherRaw := sha256.Sum256([]byte("another raw"))
+	other := picks(anotherRaw, 40, 30, Many)
 	if len(first) != Many || first[0] == other[0] && first[1] == other[1] {
 		t.Errorf("%d picks; other bytes picked %v, %v first", len(first),
 			other[0], other[1])
 	}
-	if every := Picks(sum, 5, 4, Many); len(every) != 20 {
+	if every := picks(sum, 5, 4, Many); len(every) != 20 {
 		t.Errorf("a picture of 20 gave %d picks", len(every))
 	}
-	if Picks(sum, 0, 4, Many) != nil || Picks(sum, 5, 4, 0) != nil {
+	if picks(sum, 0, 4, Many) != nil || picks(sum, 5, 4, 0) != nil {
 		t.Error("nothing to pick picked something")
 	}
 }
@@ -52,7 +53,7 @@ func TestAProofNeedsARaw(t *testing.T) {
 // a picture is marked about each picked pixel, green where it holds and
 // red where it fails, and the pixel itself is left as it was.
 func TestTheMarksSayWhichHeld(t *testing.T) {
-	proof := Proof{Pixels: []Pixel{{X: 4, Y: 4}, {X: 0, Y: 0,
+	proof := Proof{Pixels: []checkedPixel{{X: 4, Y: 4}, {X: 0, Y: 0,
 		Err: os.ErrNotExist}}}
 	picture := image.NewRGBA(image.Rect(0, 0, 10, 10))
 	proof.Mark(picture)

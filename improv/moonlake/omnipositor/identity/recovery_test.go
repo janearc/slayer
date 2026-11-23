@@ -24,7 +24,8 @@ func TestCorruptionNeverReused(t *testing.T) {
 			if _, err := store.Publish(k, data, false); err != nil {
 				t.Fatal(err)
 			}
-			target, err := os.Readlink(filepath.Join(dir, slot(k)))
+			slotPath := filepath.Join(dir, slot(k))
+			target, err := os.Readlink(slotPath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -76,7 +77,8 @@ func TestCorruptionNeverReused(t *testing.T) {
 					t.Fatal(err)
 				}
 			case "trailing-manifest":
-				write(metadata, append(raw, []byte(" {}")...))
+				trailer := append(raw, []byte(" {}")...)
+				write(metadata, trailer)
 			}
 			if what == "digest" || what == "decode" || what == "dimensions" {
 				raw, err = json.Marshal(m)
@@ -132,7 +134,8 @@ func TestInterruptedGeneration(t *testing.T) {
 				if _, err := store.Publish(k, data, false); err != nil {
 					t.Fatal(err)
 				}
-				target, err := os.Readlink(filepath.Join(dir, slot(k)))
+				slotPath := filepath.Join(dir, slot(k))
+				target, err := os.Readlink(slotPath)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -190,7 +193,8 @@ func TestDirectorySafetyAndPrivacy(t *testing.T) {
 	if err := os.WriteFile(sentinel, []byte("untouched"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Symlink(outside, filepath.Join(dir, slot(k))); err != nil {
+	slotPath := filepath.Join(dir, slot(k))
+	if err := os.Symlink(outside, slotPath); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := store.Publish(k, data, false); !errors.Is(err, ErrCorrupt) {
@@ -199,7 +203,7 @@ func TestDirectorySafetyAndPrivacy(t *testing.T) {
 	if _, err := store.Publish(k, data, true); !errors.Is(err, ErrCorrupt) {
 		t.Fatalf("unsafe redraw: %v", err)
 	}
-	if err := os.Remove(filepath.Join(dir, slot(k))); err != nil {
+	if err := os.Remove(slotPath); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := store.Publish(k, data, false); err != nil {
@@ -208,11 +212,12 @@ func TestDirectorySafetyAndPrivacy(t *testing.T) {
 	if got, err := os.ReadFile(sentinel); err != nil || string(got) != "untouched" {
 		t.Fatalf("outside changed: %v", err)
 	}
-	target, err := os.Readlink(filepath.Join(dir, slot(k)))
+	target, err := os.Readlink(slotPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	raw, err := os.ReadFile(filepath.Join(dir, filepath.Dir(target), "manifest.json"))
+	manifestPath := filepath.Join(dir, filepath.Dir(target), "manifest.json")
+	raw, err := os.ReadFile(manifestPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -221,7 +226,8 @@ func TestDirectorySafetyAndPrivacy(t *testing.T) {
 			t.Fatal("manifest leaks specification")
 		}
 	}
-	info, err := os.Stat(filepath.Join(dir, filepath.Dir(target)))
+	generationPath := filepath.Join(dir, filepath.Dir(target))
+	info, err := os.Stat(generationPath)
 	if err != nil || info.Mode().Perm() != 0700 {
 		t.Fatalf("generation not private: %v", err)
 	}

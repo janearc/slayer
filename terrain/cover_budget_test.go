@@ -16,7 +16,8 @@ func policyBook(t *testing.T, values map[string]string) numbers.Numbers {
 	for name, value := range values {
 		fmt.Fprintf(&text, "  - name: %s\n    value: %s\n    says: a test count\n    kind: picked\n    by: test\n", name, value)
 	}
-	book, err := numbers.Read("test.yaml", []byte(text.String()))
+	written := text.String()
+	book, err := numbers.Read("test.yaml", []byte(written))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,12 +47,12 @@ func goodPolicy(t *testing.T, change map[string]string) numbers.Numbers {
 // written in the book it is read from.
 func TestDefaultsComeFromThePolicyBook(t *testing.T) {
 	usePolicy(t, goodPolicy(t, nil), nil)
-	budget, err := DefaultRasterBudget()
+	budget, err := defaultRasterBudget()
 	want := RasterBudget{CacheBytes: 2000, CacheTiles: 5, TileBytes: 300, MetadataBytes: 400}
 	if err != nil || budget != want {
 		t.Fatalf("budget %+v, %v; want %+v", budget, err, want)
 	}
-	window, err := DefaultWindowBytes()
+	window, err := defaultWindowBytes()
 	if err != nil || window != 1000 {
 		t.Fatalf("window bytes %d, %v", window, err)
 	}
@@ -76,7 +77,7 @@ func TestDefaultsRefuseABrokenPolicyBook(t *testing.T) {
 	}
 	for name, each := range cases {
 		usePolicy(t, each.book, each.err)
-		if _, err := DefaultRasterBudget(); err == nil || !strings.Contains(err.Error(), each.want) {
+		if _, err := defaultRasterBudget(); err == nil || !strings.Contains(err.Error(), each.want) {
 			t.Errorf("%s: default budget error %v, want %q", name, err, each.want)
 		}
 		if _, err := Open("missing.tif"); err == nil || !strings.Contains(err.Error(), each.want) {
@@ -84,15 +85,15 @@ func TestDefaultsRefuseABrokenPolicyBook(t *testing.T) {
 		}
 	}
 	usePolicy(t, goodPolicy(t, map[string]string{"window-bytes": "-5"}), nil)
-	if _, err := DefaultWindowBytes(); err == nil {
+	if _, err := defaultWindowBytes(); err == nil {
 		t.Error("a negative window limit was accepted")
 	}
 	usePolicy(t, nil, fmt.Errorf("book is gone"))
-	if _, err := DefaultWindowBytes(); err == nil {
+	if _, err := defaultWindowBytes(); err == nil {
 		t.Error("an unreadable book gave a window limit")
 	}
 	usePolicy(t, policyBook(t, map[string]string{"other": "1"}), nil)
-	if _, err := DefaultWindowBytes(); err == nil {
+	if _, err := defaultWindowBytes(); err == nil {
 		t.Error("a book without a window limit gave one")
 	}
 	if _, err := raster.Window(100, 50, 2, 2, 1); err == nil {

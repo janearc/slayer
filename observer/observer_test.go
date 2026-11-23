@@ -22,7 +22,8 @@ const (
 // order of its own.
 func lines(draw *rapid.T) map[float64]float64 {
 	lo, hi := swatch.Observed()
-	drawn := rapid.MapOf(rapid.Float64Range(float64(lo), float64(hi)),
+	inRange := rapid.Float64Range(float64(lo), float64(hi))
+	drawn := rapid.MapOf(inRange,
 		rapid.Float64Range(nought, unity)).Draw(draw, "lines")
 	held, one := map[float64]float64{}, map[bands.Band]bool{}
 	for nm, power := range drawn {

@@ -40,7 +40,7 @@ const (
 	PartSearch   = "search"
 	PartMoon     = "moon"
 	PartOverhead = "overhead"
-	PartMaster   = "master"
+	partMaster   = "master"
 )
 
 // parts is which of a cue's fields set which part of the rig.
@@ -54,7 +54,7 @@ var parts = map[string]func(cue) bool{
 	PartSearch:   func(c cue) bool { return c.Search != nil },
 	PartMoon:     func(c cue) bool { return c.Moon != nil || c.MoonAlt != nil },
 	PartOverhead: func(c cue) bool { return c.Overhead != nil },
-	PartMaster:   func(c cue) bool { return c.Master != nil },
+	partMaster:   func(c cue) bool { return c.Master != nil },
 }
 
 // Fired is every cue at its moment, in the sheet's order.

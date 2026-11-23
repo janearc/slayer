@@ -23,8 +23,9 @@ func TestAWrappedComplaintCarriesThePrefixOnce(t *testing.T) {
 	if err == nil || err.Error() != want {
 		t.Errorf("NewAir with a negative loss: %v; want %q", err, want)
 	}
+	flatShell := bodies.NewShell(bodies.Kilometres(5), bodies.Kilometres(5))
 	_, err = bodies.NewClouds(
-		bodies.NewShell(bodies.Kilometres(5), bodies.Kilometres(5)),
+		flatShell,
 		maths.Share(0.5), bodies.PerKilometre(1), 1)
 	front := "bodies: clouds: a shell from 5 to 5 km is no band"
 	if err == nil || !strings.HasPrefix(err.Error(), front) ||
@@ -66,12 +67,14 @@ func TestConstructorsRefuseWhatIsNotANumber(t *testing.T) {
 		err  func() error
 	}{
 		{"shell nan low", func() error {
-			_, e := bodies.NewClouds(bodies.NewShell(km(nan), km(2)),
+			nanLowShell := bodies.NewShell(km(nan), km(2))
+			_, e := bodies.NewClouds(nanLowShell,
 				maths.Share(0.5), nothing, 1)
 			return e
 		}},
 		{"shell inf high", func() error {
-			_, e := bodies.NewClouds(bodies.NewShell(km(1), km(inf)),
+			infHighShell := bodies.NewShell(km(1), km(inf))
+			_, e := bodies.NewClouds(infHighShell,
 				maths.Share(0.5), nothing, 1)
 			return e
 		}},
@@ -738,7 +741,8 @@ func TestARefusalNamesTheInputAndItsValue(t *testing.T) {
 			return e
 		}, []string{"a tail's spread", "NaN"}},
 		"NewClouds": {func() error {
-			_, e := bodies.NewClouds(bodies.NewShell(km(nan), km(2)),
+			nanLowShell := bodies.NewShell(km(nan), km(2))
+			_, e := bodies.NewClouds(nanLowShell,
 				maths.Share(0.5), nothing, 1)
 			return e
 		}, []string{"a shell from NaN to 2 km"}},

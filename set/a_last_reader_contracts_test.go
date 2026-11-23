@@ -28,12 +28,15 @@ func TestLegacyIntermittencyLimitsReportTheirOwnLocation(t *testing.T) {
 	requireLegacyNumericControl(t, raw)
 	row := numericContract{"intermittency-start: ", "0.25",
 		"intermittency-start", .001, .999}
-	refuseNumericEdge(t, raw, row, math.Nextafter(row.low, math.Inf(-1)))
-	refuseNumericEdge(t, raw, row, math.Nextafter(row.high, math.Inf(1)))
+	below := math.Nextafter(row.low, math.Inf(-1))
+	refuseNumericEdge(t, raw, row, below)
+	above := math.Nextafter(row.high, math.Inf(1))
+	refuseNumericEdge(t, raw, row, above)
 }
 
 func TestLegacyCoupledSparkRefusalsPointToTheSparkBlock(t *testing.T) {
-	base := legacyNumericFixture(strings.Replace(fireRecipeFixture(t),
+	fixture := fireRecipeFixture(t)
+	base := legacyNumericFixture(strings.Replace(fixture,
 		"      flame:", sparkBlock+"      flame:", 1))
 	requireLegacyNumericControl(t, base)
 	for _, edit := range [][2]string{

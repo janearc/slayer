@@ -13,12 +13,14 @@ mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/m
 mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/emitter.go -package mocks github.com/janearc/slayer/ninjafilm/film Emitter
 mocks . :: go tool mockgen -write_package_comment=false -destination ninjafilm/mocks/beamer.go -package mocks github.com/janearc/slayer/ninjafilm/film Beamer
 mocks . :: go tool mockgen -source=cmd/catalogue/resume.go -destination=cmd/catalogue/drawer_mock_test.go -package=main
-mocks . :: go tool mockgen -write_command_comment=false -source=hillside/session.go -destination=hillside/session_mock_test.go -package=hillside
+mocks . :: go tool mockgen -write_command_comment=false -source=session/session.go -destination=session/session_mock_test.go -package=session
 mocks . :: go tool mockgen -write_command_comment=false -source=door/seams.go -destination=door/seams_mock_test.go -package=door
 mocks . :: go tool mockgen -write_command_comment=false -source=render/live/seams.go -destination=render/live/seams_mock_test.go -package=live
-mocks . :: go tool mockgen -write_command_comment=false -write_package_comment=false -destination=hillside/context_mock_test.go -package=hillside context Context
+mocks . :: go tool mockgen -write_command_comment=false -write_package_comment=false -destination=session/context_mock_test.go -package=session context Context
 mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/publication/filesystem.go -destination=azazel/internal/publication/filesystem_mock_test.go -package=publication
 mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/publication/immutable_filesystem.go -destination=azazel/internal/publication/immutable_filesystem_mock_test.go -package=publication
+mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/budget/sample_darwin.go -destination=azazel/internal/budget/sample_mock_darwin_test.go -package=budget
+mocks . :: go tool mockgen -write_command_comment=false -source=improv/moonlake/omnipositor/compositor.go -destination=improv/moonlake/omnipositor/light_mock_test.go -package=omnipositor
 mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/monitor.go -destination=azazel/internal/queue/monitor_mock_test.go -package=queue
 mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/files.go -destination=azazel/internal/queue/files_mock_test.go -package=queue
 mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/dispatch.go -destination=azazel/internal/queue/dispatch_mock_test.go -package=queue

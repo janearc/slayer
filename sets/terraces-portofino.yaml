@@ -1,0 +1,85 @@
+# terraces, portofino: a straight row of fourteen tall bays along a quay,
+# each its own colour, with green shutters, stepping in height, seen from
+# across the water at eye height and from higher up. made by the cities
+# package (manufacture/cities), through the manufactory's kind
+# terrace-portofino, from manufacture/cities/cultures/portofino.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the row runs
+# east from the origin with its front to the south, onto the quay. the
+# water is a flat blue-grey box standing in for the sea, with no gloss,
+# since a set's material has none that is not a clear one.
+# the sun, the colours and the cameras are choices of this study, picked
+# by eye, and say so.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: terraces portofino
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 40
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # eye height, 160 m across the water from the middle of the row, far
+    # enough back for the whole row to be in the frame
+    across:
+      title: "across the harbour, at eye height"
+      location:
+        at: [40, -160, 1.7]
+      orientation:
+        look_at: [40, 0, 9]
+    # forty metres up, looking down the quay
+    above:
+      title: "from higher up"
+      location:
+        at: [40, -120, 40]
+      orientation:
+        look_at: [40, 0, 6]
+  set:
+    things:
+      row:
+        kind: terrace-portofino
+        seed: 3
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+        heading: {value: 0, unit: deg}
+  world:
+    unit: 1
+    materials:
+      quay:
+        colour: {srgb_linear: [0.14, 0.125, 0.1]}
+        source: eye
+      water:
+        colour: {srgb_linear: [0.05, 0.09, 0.12]}
+        source: eye
+    boxes:
+      # the quay: land from four metres in front of the row, upper face
+      # at nought
+      land:
+        material: quay
+        middle: [0, 236, -1]
+        size: [3000, 500, 2]
+        source: eye
+      harbour:
+        material: water
+        middle: [0, -514, -1.3]
+        size: [3000, 1000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.7, -0.6, 0.22]
+        colour: {srgb_linear: [2.2, 1.3, 0.65]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.22, 0.14, 0.12]}
+      zenith: {srgb_linear: [0.02, 0.035, 0.08]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye

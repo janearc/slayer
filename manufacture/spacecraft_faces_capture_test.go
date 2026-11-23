@@ -26,7 +26,7 @@ func TestSpacecraftFacesCapture(t *testing.T) {
 	}
 	var rows strings.Builder
 	for _, name := range []string{"hubble", "space-observatory",
-		"spitzer", "webb"} {
+		"spitzer", "webb", "roman"} {
 		row, err := KindNamed(name)
 		if err != nil {
 			t.Fatal(err)
@@ -42,7 +42,8 @@ func TestSpacecraftFacesCapture(t *testing.T) {
 			}
 		}
 	}
-	if err := os.WriteFile(out, []byte(rows.String()),
+	text := rows.String()
+	if err := os.WriteFile(out, []byte(text),
 		0o644); err != nil { // defined: owner rw, others r
 		t.Fatal(err)
 	}

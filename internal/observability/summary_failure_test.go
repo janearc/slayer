@@ -5,16 +5,20 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/janearc/slayer/interfaces/terminal/mocks"
+	"go.uber.org/mock/gomock"
 )
 
-type blockedLog struct{}
-
-func (blockedLog) Write([]byte) (int, error) { select {} }
+// waitsForEver is a write that never comes back.
+func waitsForEver([]byte) (int, error) { select {} }
 
 func TestSummaryFailureNeverCallsArbitraryBlockedWriter(t *testing.T) {
+	blocked := mocks.NewMockWriter(gomock.NewController(t))
+	blocked.EXPECT().Write(gomock.Any()).DoAndReturn(waitsForEver).AnyTimes()
 	before := SummaryFailures()
 	start := time.Now()
-	NoteSummaryFailure(blockedLog{}, "failed\n")
+	NoteSummaryFailure(blocked, "failed\n")
 	if time.Since(start) > time.Second || SummaryFailures() != before+1 {
 		t.Fatal("failure logging blocked or was not counted")
 	}

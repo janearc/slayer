@@ -7,8 +7,8 @@ import (
 	"github.com/janearc/slayer/maths"
 )
 
-// ErrUnlit is fields that land no light on the ground to meter.
-var ErrUnlit = errors.New("airlight: no light lands on the ground to " +
+// errUnlit is fields that land no light on the ground to meter.
+var errUnlit = errors.New("airlight: no light lands on the ground to " +
 	"meter an exposure by")
 
 // Sun is the direct sun's light at the fields' ground with the sun along
@@ -16,7 +16,7 @@ var ErrUnlit = errors.New("airlight: no light lands on the ground to " +
 // surface square to it. It is the sun's spectrum at the top times the
 // fields' share of it that reaches the ground.
 //
-// It is made as hillside makes the moon's lamp from moonlight's
+// It is made as the session makes the moon's lamp from moonlight's
 // spectrum, by the spectrum's Picture, so the sun and the sky are one
 // light in two parts.
 func Sun(fields *Fields, way maths.Vec, exposure float64) maths.Light {
@@ -41,15 +41,19 @@ func Sun(fields *Fields, way maths.Vec, exposure float64) maths.Light {
 // both sides of the sun.
 //
 // So exposure = g / Y(g E / pi), which is pi / Y(E): Y the luminance of
-// a spectrum's Picture at exposure one. It refuses fields that land no
-// light on the card, with ErrUnlit.
+// a spectrum's Picture at exposure one. It refuses fields not walked
+// for the sun, as Holds does, and fields that land no light on the
+// card, with ErrUnlit.
 func Meter(fields *Fields, way maths.Vec) (float64, error) {
+	if err := fields.Holds(way); err != nil {
+		return none, err
+	}
 	zenith := zenithOf(way)
 	card := fields.seen(func(wave int) float64 {
 		return fields.landing(wave, zenith) * grey / math.Pi
 	}).Picture(one).Luminance()
 	if !(card > none) {
-		return none, ErrUnlit
+		return none, errUnlit
 	}
 	return grey / card, nil
 }

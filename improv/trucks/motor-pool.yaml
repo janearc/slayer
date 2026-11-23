@@ -10,7 +10,11 @@ scene:
   seed: 7
   light: sun
   location: {lat: 19.4165, lon: -155.2485}
+  # the sun is worked from the place, this day and this time on a clock
+  # ten hours behind utc: the day the set was made, picked.
+  date: "2026-11-10"
   timeofday: 1500
+  utc-offset: {value: -10, unit: h}
   terrain:
     from: usgs-kilauea-2019-dem
     file: unpacked/kil_2019dem/kil_2019dem.tif

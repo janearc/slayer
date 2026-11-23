@@ -9,7 +9,7 @@ import (
 )
 
 func TestSlayerFilmPreservesShotLensAtMusicalCut(t *testing.T) {
-	edit := &Edit{Plan: Plan{Shots: []ShotPlan{{Stage: &StagePlan{Wide: 55}}, {Wide: 90}}}, ShotSpans: [][2]float64{{0, 4}, {4, 8}}}
+	edit := &Edit{Plan: Plan{Shots: []ShotPlan{{Stage: &stagePlan{Wide: 55}}, {Wide: 90}}}, ShotSpans: [][2]float64{{0, 4}, {4, 8}}}
 	for _, sample := range []struct{ at, wide float64 }{{0, 55}, {3.999, 55}, {4, 90}, {7.999, 90}, {1, 55}} {
 		if got := screenplayWide(edit, sample.at); got != sample.wide {
 			t.Fatalf("lens at %g s: %g, wanted %g", sample.at, got, sample.wide)

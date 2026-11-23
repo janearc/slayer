@@ -5,12 +5,13 @@ import (
 	"math"
 	"time"
 
+	"github.com/janearc/slayer/arid"
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/globe"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/maths/strategies/scrooge"
 	"github.com/janearc/slayer/mesh"
-	seaocean "github.com/janearc/slayer/scene/ocean"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
@@ -37,6 +38,8 @@ var materialStruct = structure{"Material", []field{
 	floatField("foam_look", "aerated-water diffuse reflectance RGB and satin"),
 	floatField("foam_extra", "authored breakup band"),
 	intField("foam_seed", "low 32 bits of the authored ocean seed"),
+	floatField("glint", "the mean-square slope of Beckmann's highlight, "+
+		"both ways together; nought for GGX's by satin"),
 }}
 
 // In optical-state renders only, Material.info.w carries a named medium ID.
@@ -117,6 +120,7 @@ func (encoded *scene) material(made *thing.Material) int {
 	row["foam_look"] = []float64{0, 0, 0, 0}
 	row["foam_extra"] = []float64{0, 0, 0, 0}
 	row["foam_seed"] = wholes(0)
+	row["glint"] = []float64{made.SlopeVariance}
 	if foam := made.WakeFoam; foam != nil && foam.Coverage > 0 {
 		seconds := encoded.at.Seconds()
 		if foam.FrozenTime {
@@ -162,8 +166,10 @@ func ticked(painted texture.Texture, moment time.Duration) texture.Texture {
 // spheres as a centre and a radius, and meshes each once in their own
 // space, under trees of their own, standing wherever a thing stands,
 // with a tree over the standings. The meshes' faces are packed once all
-// are placed, or taken whole from the last frame's (see keptPool).
+// are placed, or taken whole from the last frame's (see keptPool). The
+// trees of slayer's meshes are grown first, all at once (see growTrees).
 func (encoded *scene) things(world *thing.World, at time.Duration) error {
+	encoded.growTrees(world)
 	for _, placed := range world.Things {
 		if placed.Hidden() {
 			continue
@@ -175,12 +181,22 @@ func (encoded *scene) things(world *thing.World, at time.Duration) error {
 	if err := encoded.packPool(); err != nil {
 		return err
 	}
+	memoryStage("pool-after")
 	return encoded.instancesOf()
 }
 
 // place puts one thing where it is at time t: a sphere among the
 // spheres, or a mesh standing there.
 func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
+	if material := placed.Material; material != nil && material.IndependentEmission {
+		return unsupported{"independent surface emission is CPU-only"}
+	}
+	if material := placed.Material; material != nil {
+		if _, covered := material.Texture.(texture.Cover); covered {
+			return unsupported{"a ground cover, which only the processor " +
+				"renderer (--renderer cpu) reads by slope"}
+		}
+	}
 	if material := placed.Material; material != nil && material.WakeFoam != nil && material.WakeFoam.Coverage > 0 &&
 		(material.Texture != nil || material.Shine != nil ||
 			material.Glow != (maths.Light{})) {
@@ -215,15 +231,22 @@ func (encoded *scene) place(placed *thing.Thing, at time.Duration) error {
 		encoded.stand(made, grown, space, material, clear)
 		return nil
 	case *mesh.Mesh:
+		if err := restPaintRefusal(made, placed.Material); err != nil {
+			return err
+		}
 		grown := func() pendingMesh { return encoded.slayersTree(made) }
 		encoded.stand(made, grown, space, material, clear)
 		return nil
+	case shape.Tube:
+		return encoded.tube(made, space, material, clear)
 	case *shape.MeshGroup:
 		return encoded.group(made, space, material, clear)
 	case *shape.HeightField:
 		encoded.field(made, space, material, clear)
 		return nil
-	case *seaocean.InfiniteMeanContinuation:
+	case *arid.Sea:
+		return encoded.sea(made.Pack(), space, material, clear)
+	case *arid.InfiniteMeanContinuation:
 		if level, ok := made.ExactPlaneLevel(); ok && encoded.oceanMoon != nil &&
 			encoded.oceanMoon.Unbounded && placed == encoded.oceanMoon.Boundary {
 			shifted := maths.NewSubspace(space.Out(maths.V(0, level, 0)), space.Orientation, space.Scale)
@@ -259,6 +282,7 @@ func (encoded *scene) sphere(space maths.Subspace, radius float64,
 		"centre": {centre.X, centre.Y, centre.Z, radius * scale},
 		"info":   wholes(material, flag(clear))}
 	into(space, given)
+	encoded.boundSphere(centre, radius*scale)
 	encoded.spheres.row(sphereStruct, given)
 	encoded.counts.spheres++
 }
@@ -273,6 +297,7 @@ func (encoded *scene) plane(space maths.Subspace, material int, clear bool) {
 		"info":   wholes(material, flag(clear), 1),
 	}
 	into(space, given)
+	encoded.boundPlane()
 	encoded.spheres.row(sphereStruct, given)
 	encoded.counts.spheres++
 }
@@ -319,20 +344,6 @@ func meshFaces(made *shape.Mesh) []triangle {
 	return faces
 }
 
-// slayersFaces is slayer's mesh's faces in its own space, each with its
-// corners' normals when the mesh is shaded smooth.
-func slayersFaces(skin *mesh.Mesh) []triangle {
-	faces := make([]triangle, 0, skin.FaceCount())
-	for i := range skin.FaceCount() {
-		one, two, three := skin.Corners(i)
-		normals, smooth := skin.CornerNormals(i)
-		corners := threeOf(one, two, three)
-		faces = append(faces, triangle{corners: corners,
-			normals: normals, smooth: smooth})
-	}
-	return faces
-}
-
 // threeOf is three corners as a face's.
 func threeOf(one, two, three maths.Vec) [3]maths.Vec {
 	return [3]maths.Vec{one, two, three}
@@ -355,9 +366,33 @@ var bendStruct = structure{"Bend", []field{
 	floatField("normal_c", ""),
 }}
 
-// mostBends is the most faces shaded smooth a scene may have: a bend's
-// place rides in a float, which holds every whole number below this.
-const mostBends = 1 << 24
+// A bend's place rides in the fourth number of a face's first corner, a
+// float. As a float's value it names every whole number only below 2^24,
+// so a scene of more faces shaded smooth could not be drawn. So its bits
+// carry the place instead: the place plus bendBias, the bits of the least
+// float that is not subnormal, so no device flushes it to nought and every
+// place reads back exactly.
+//
+// A face shaded flat keeps -1, a float's value,
+// and the kernel's bend_of reads the two apart by sign.
+
+// bendBias is the bits of the least positive float that is not
+// subnormal.
+const bendBias = 0x00800000
+
+// mostBends is the most faces shaded smooth a scene may have: the places
+// whose bits, biased, stay below infinity's.
+const mostBends = 0x7f800000 - bendBias
+
+// bendNumber is a face's bend's place as the number the kernel reads: -1
+// for a face shaded flat, or else the float whose bits are the place
+// plus bendBias.
+func bendNumber(bend int) float64 {
+	if bend < 0 {
+		return -1
+	}
+	return float64(math.Float32frombits(uint32(bend) + bendBias))
+}
 
 var nodeStruct = structure{"Node", []field{
 	floatField("low", ""),
@@ -387,41 +422,79 @@ func (encoded *scene) tree(grown tree) error {
 // treeWithin uses the same packing path under an explicit smooth-face cap.
 // Small caps let boundary checks run without allocating millions of faces.
 func (encoded *scene) treeWithin(grown tree, bendLimit int) error {
-	bends := 0
-	for i := range grown.triangles {
-		if grown.triangles[i].smooth {
-			bends++
-		}
-	}
+	return encoded.packWithin([][]triangle{grown.triangles}, grown.nodes,
+		bendLimit)
+}
+
+// packWithin packs runs of faces, one after another as if they were one
+// list, the bends of those shaded smooth, and the boxes, under a cap on
+// smooth faces. The pool packs each tree's faces where the tree holds
+// them, so they are never copied into one list of float64 first.
+func (encoded *scene) packWithin(runs [][]triangle, nodes []node,
+	bendLimit int) error {
+	faces, bends := facesAndBends(runs)
 	if bends > bendLimit {
 		return unsupported{fmt.Sprintf("more than %d faces shaded "+
 			"smooth", bendLimit)}
 	}
-	for _, face := range grown.triangles {
-		if !finiteFace(face) {
-			return unsupported{"a mesh face outside finite float32 coordinates"}
-		}
+	if !allFinite(runs) {
+		return unsupported{"a mesh face outside finite float32 coordinates"}
 	}
-	if err := encoded.geometryCapacity(grown, bends); err != nil {
+	if err := encoded.geometryCapacity(faces, bends,
+		len(nodes)); err != nil {
 		return err
 	}
-	encoded.reserveGeometry(grown, bends)
+	encoded.reserveGeometry(faces, bends, len(nodes))
 	// All index/coordinate/byte checks precede either output reservation.
-	bends = 0
-	for _, face := range grown.triangles {
-		bend := -1
-		if face.smooth {
-			bend = bends
-			bends++
-		}
-		encoded.packedFace(face, bend)
-	}
-	for _, box := range grown.nodes {
+	encoded.packedFaces(runs)
+	for _, box := range nodes {
 		encoded.packedNode(box)
 	}
-	encoded.counts.triangles = len(grown.triangles)
-	encoded.counts.nodes = len(grown.nodes)
+	encoded.counts.triangles = faces
+	encoded.counts.nodes = len(nodes)
 	return nil
+}
+
+// facesAndBends is how many faces the runs hold, and how many of them
+// are shaded smooth.
+func facesAndBends(runs [][]triangle) (faces, bends int) {
+	for _, run := range runs {
+		faces += len(run)
+		for index := range run {
+			if run[index].smooth {
+				bends++
+			}
+		}
+	}
+	return faces, bends
+}
+
+// allFinite is whether every face of the runs fits float32.
+func allFinite(runs [][]triangle) bool {
+	for _, run := range runs {
+		for index := range run {
+			if !finiteFace(run[index]) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// packedFaces packs the runs' faces in order, each smooth one with the
+// place of its bend, counted across every run.
+func (encoded *scene) packedFaces(runs [][]triangle) {
+	bends := 0
+	for _, run := range runs {
+		for _, face := range run {
+			bend := -1
+			if face.smooth {
+				bend = bends
+				bends++
+			}
+			encoded.packedFace(face, bend)
+		}
+	}
 }
 
 // finiteFace keeps fast-math kernels from receiving nonfinite mesh data.
@@ -553,6 +626,8 @@ func (encoded *scene) lampsOf(world *thing.World) {
 			"extent": {radius}, "second": {}})
 	}
 	encoded.counts.lamps = len(world.Lamps)
+	encoded.crowd = lampCrowdOf(world.Lamps)
+	encoded.lists = lampListsOf(encoded.lamps.bytes)
 }
 
 // ambientOf appends a lamp that has no place of its own, a film.Flood, or
@@ -618,6 +693,13 @@ var fieldStruct = structure{"Field", []field{
 	intField("data", "first sample, samples a side, material, clear"),
 	floatField("size", "extent, bottom, top, slant"),
 	intField("normal", "x slope offset, z slope offset, interpolated-slope flag"),
+	floatField("sides", "a sea with no edge: its bands' sides in metres"),
+	floatField("sea", "a sea with no edge: its touch in metres, its most "+
+		"steps, its bands, one if its far part is its mean plane "+
+		"(scrooge); nought for a height field"),
+	floatField("slopes", "a sea with no edge: its bands' slope variances"),
+	floatField("shown", "a sea with no edge: the samples a pixel covers "+
+		"where a band starts to fade from it, and where it is gone"),
 }}
 
 // field appends one height field: its placement, its samples flat
@@ -648,6 +730,8 @@ func (encoded *scene) field(made *shape.HeightField,
 	given["data"] = wholes(first, n, material, flag(clear))
 	given["size"] = []float64{extent, bottom, top, slant}
 	given["normal"] = wholes(int(normal[0]), int(normal[1]), int(normal[2]))
+	given["sides"], given["sea"] = nil, nil
+	given["slopes"], given["shown"] = nil, nil
 	encoded.fields.row(fieldStruct, given)
 	encoded.counts.fields++
 }
@@ -664,7 +748,9 @@ var headerStruct = structure{"Header", []field{
 	floatField("tuning", "lift, faint, evenly, spread"),
 	intField("tops", "mesh standings, the boxes of their tree"),
 	intField("look", "whether rays are given in x; narrow beam count "+
-		"in y; height fields in z"),
+		"in y; height fields in z; one in w if a ray's march is "+
+		"refined inside each beam's cylinder (scrooge), nought if "+
+		"inside the union of the beams' boxes"),
 	intField("lighting", "source volume during smoke preparation; "+
 		"fast light's bake volume and lamp in x and y, and for its "+
 		"trace the samples a pixel's side in x where the sky's looks "+
@@ -683,6 +769,23 @@ var headerStruct = structure{"Header", []field{
 	intField("exposure", "whether the shutter is open in x; whether "+
 		"the aperture is in y; samples along a pixel's side in z; "+
 		"the frame's seed in w"),
+	floatField("spread", "whether a pixel's samples start spread over "+
+		"it in x; samples along a pixel's side in y; half a "+
+		"stratum's width, as a share in 32 bits, in z; the width of "+
+		"the filter's slope, in pixels, in w"),
+	floatField("glow_low", "the world's glow's box in world metres"),
+	floatField("glow_high", ""),
+	intField("glow_grid", "its cells across x, y, z and its first "+
+		"RGB number in the boxes; -1 for no glow"),
+	intField("analytic", "where the sphere and conifer tree's nodes "+
+		"begin in the tops, how many leaves with no box come first, "+
+		"and how many nodes of the tree follow them"),
+	intField("lamp_tree", "the nodes of the lamp tree in x, and the "+
+		"lamps outside it in y; both kept after the lamps' rows, "+
+		"nought for a world drawn without one"),
+	intField("lamp_lists", "how many floods, cones and beams are "+
+		"listed after the lamp tree and the lamps outside it, in "+
+		"x, y and z; nought for a world with none"),
 }}
 
 // camera makes the header: the eye's place and axes, the lens, and how
@@ -699,13 +802,20 @@ func (encoded *scene) camera(eye maths.Subspace, lens film.Sensor,
 			counts.trees),
 		"tuning": {lift, faint, evenly, encoded.spread},
 		"tops":   wholes(counts.instances, counts.tops),
+		"analytic": wholes(encoded.analyticAt.first,
+			encoded.analyticAt.loose, encoded.analyticAt.nodes),
 		"look": wholes(flag(encoded.looked), encoded.counts.beams,
-			counts.fields),
+			counts.fields, flag(scrooge.Asked())),
 		"lighting": wholes(beamZero), "environment": wholes(encoded.volumeSky),
+		"lamp_tree": wholes(len(encoded.crowd.nodes),
+			len(encoded.crowd.others)),
+		"lamp_lists": wholes(len(encoded.lists.floods),
+			len(encoded.lists.cones), len(encoded.lists.beams)),
 		"bounds": encoded.standingBounds()}) {
 		given[name] = numbers
 	}
 	encoded.incidentHeader(given)
+	encoded.glowHeader(given)
 	encoded.header.row(headerStruct, given)
 }
 

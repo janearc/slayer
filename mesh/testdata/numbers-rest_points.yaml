@@ -1,0 +1,42 @@
+# every number mesh/rest_points_test.go chooses, with what it is and why.
+numbers:
+  - name: rest-points-moved
+    value: 100
+    says: where every part of the second rest point is moved to after the mesh is made
+    kind: picked
+    by: far from where it was, so a mesh that kept the caller's rest points would answer wrongly
+  - name: rest-points-ray-x
+    value: 2.5
+    says: the x of the point the ray starts at, above the posed face
+    kind: picked
+    by: inside the posed face's span along x, a quarter of the way along its base
+  - name: rest-points-ray-y
+    value: 5
+    says: the y of the point the ray starts at, above the posed face
+    kind: picked
+    by: inside the posed face's span along y, half way up its height
+  - name: rest-points-ray-z
+    value: 4
+    says: the z the ray starts at, above the posed face, which lies at one
+    kind: picked
+    by: above the face, so the ray runs down on to it
+  - name: rest-points-far
+    value: 8
+    says: how far along the ray the mesh is looked for
+    kind: picked
+    by: past the face, three along the ray from its start
+  - name: rest-points-want-x
+    value: 0.25
+    says: the x of the rest point the ray's hit pairs with, in the undeformed face
+    kind: picked
+    by: a quarter along the undeformed base, as the hit is along the posed one
+  - name: rest-points-want-y
+    value: 0.5
+    says: the y of the rest point the ray's hit pairs with, in the undeformed face
+    kind: picked
+    by: half way up the undeformed face, as the hit is up the posed one
+  - name: rest-points-slack
+    value: 1e-12
+    says: how far the rest point found may be from the one worked by hand
+    kind: picked
+    by: well under what a float64 sum of a few terms is out

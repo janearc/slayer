@@ -1,0 +1,7 @@
+unit,low,high,whole,says
+metre,0.000001,100,no,a size or radius of a part in metres; above zero and no longer than a deployed boom of any model
+offset,-100,100,no,a placement or signed distance in metres from the part it is measured against
+count,1,64,yes,how many of a part there are; a whole number of at least one
+share,0,1,no,a fraction of a whole: a colour channel a gloss or a share of a length
+span,-1,1,no,a signed fraction of a half extent; minus one is one end and one is the other
+index,0,4,no,a refractive index; nought when the surface has none and otherwise from one to four

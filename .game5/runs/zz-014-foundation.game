@@ -1,0 +1,35 @@
+check-prima-spacecraft . :: go test -p=1 ./manufacture -run ^TestSpacecraftProfilesKeepClosedBoundedGeometryAtEveryDetail$|^TestSpacecraftConstructorRefusesInvalidSizesAndUnknownDesigns$|^TestPrimaComplexityReceipt$|^TestPrimaStudyFinishesUsePickedConductorAnalogues$ -v -count=1 -timeout=5m
+prima-build . :: go build -p=1 -o bin/slayer ./cmd/slayer
+check-voyager . :: go test -p=1 ./manufacture -run ^TestVoyagerTwinsShareACompleteDetailedAssembly$ -count=1 -timeout=120s
+check-soho . :: go test -p=1 ./manufacture -run ^TestSOHORegisteredDetailedAndBounded -count=1 -timeout=120s
+soho-proof-build . :: go build -p=1 -o bin/soho-slayer ./cmd/slayer
+soho-format . :: gofmt -w manufacture/soho.go manufacture/soho_test.go manufacture/kinds.go
+check-soho-schema . :: go test -p=1 ./set -run ^TestSOHOPassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s
+format-soho-schema . :: gofmt -w set/human_scale_schema_test.go
+format-mariner . :: gofmt -w manufacture/mariner.go manufacture/kinds.go manufacture/mariner_test.go
+check-mariner . :: go test -p=1 -v ./manufacture -run ^TestMariner10 -count=1
+build-mariner-proof . :: go build -p=1 -o bin/mariner-slayer ./cmd/slayer
+check-cassini-huygens . :: go test -p=1 ./manufacture -run ^TestCassiniAndHuygensAreSeparateDetailedKinds -v -count=1 -timeout=120s
+format-cassini-huygens . :: gofmt -w manufacture/cassini_huygens.go manufacture/cassini_huygens_test.go manufacture/kinds.go
+cassini-huygens-build . :: go build -p=1 -o bin/cassini-huygens-slayer ./cmd/slayer
+check-cassini-schema . :: go test -p=1 ./set -run ^TestCassiniKindPassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s
+format-cassini-schema . :: gofmt -w set/human_scale_schema_test.go
+check-cassini-all-schemas . :: go test -p=1 ./set -run PassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s
+check-new-horizons . :: go test -p=1 ./manufacture -run ^TestNewHorizonsRegisteredAndHasThreeSourcedParts -count=1 -timeout=120s
+format-new-horizons . :: gofmt -w manufacture/new_horizons.go manufacture/new_horizons_test.go manufacture/kinds.go
+new-horizons-build . :: go build -p=1 -o bin/new-horizons-slayer ./cmd/slayer
+check-new-horizons-schema . :: go test -p=1 ./set -run ^TestNewHorizonsPassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s
+format-new-horizons-schema . :: gofmt -w set/human_scale_schema_test.go
+check-nh-vtad . :: go test -p=1 ./manufacture -run ^TestNewHorizonsVTADIsRegistered -count=1 -timeout=120s
+format-nh-vtad . :: gofmt -w manufacture/new_horizons_vtad.go manufacture/new_horizons_test.go manufacture/kinds.go
+check-nh-vtad-schema . :: go test -p=1 ./set -run ^TestNewHorizonsVTADPassesBothSetSchemasAndResolvesToAMaker -count=1 -timeout=120s
+format-nh-vtad-schema . :: gofmt -w set/human_scale_schema_test.go
+format-jimo . :: gofmt -w manufacture/jimo.go manufacture/jimo_test.go manufacture/kinds.go
+check-jimo . :: go test -p=1 -v ./manufacture -run ^TestJIMO -count=1
+build-jimo-proof . :: go build -p=1 -o bin/jimo-slayer ./cmd/slayer
+format-bronze . :: gofmt -w materials/alloys.go materials/alloys_test.go materials/reflectance_estimate.go materials/reflectance_estimate_test.go materials/materials.go materials/metals.go materials/optics.go materials/page_test.go scene/thing/metals.go scene/thing/bronze_test.go
+check-bronze . :: go test -count=1 ./materials ./scene/thing
+check-bronze-metal . :: go test -tags=draw -p=1 -count=1 -v ./gpu -run ^TestMetalNickelAluminiumBronzeEstimateMatchesCPU$ -timeout=180s
+check-propeller-dispersal . :: go test -p=1 -count=1 ./scene/medium ./set ./stage ./gpu -run Propeller|Vapor -timeout=180s
+check-propeller-dispersal-metal . :: go test -tags=draw -p=1 -count=1 -v ./gpu -run Propeller -timeout=180s
+check-propeller-source-contract . :: go test -p=1 -count=1 ./gpu -run NoOpticsShaderSource|Propeller -timeout=180s

@@ -37,7 +37,7 @@ checkout's root `bin/slayer` and `bin/catalogue`. It does not use the old
 private renderer checkpoints. Game records their actual build stamps and
 hashes inside the bundle. During development a dirty stamp describes a
 working tree; it is not release provenance. See
-[the build contract](../../../doc/ferruccio/BUILD.md).
+[the build contract](../../../doc/applications/ferruccio/BUILD.md).
 
 The Subaru settings fixture is the existing authored night study from
 the shared renders collection, with its camera and local lights preserved.

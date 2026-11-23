@@ -1,0 +1,1 @@
+check-bronze . :: go test -count=1 ./materials ./scene/thing

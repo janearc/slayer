@@ -185,6 +185,14 @@ var v2Also = map[string][]string{
 		"space_world.go/spacecraft/orbit"},
 }
 
+// v2Only is, for a block of the reader named the same way, the keys in
+// that very block that only schema version 2 has: version 1 does not take
+// them, and version 2's stand says a floating stand's least water and the
+// steepest ground a stand grows on.
+var v2Only = map[string][]string{
+	"world.go/stands/within": {"least-water", "steepest"},
+}
+
 // v2Unread is, for a block of the reader named the same way, the keys
 // schema version 2 has that the reader does not take yet.
 var v2Unread = map[string][]string{}
@@ -342,8 +350,14 @@ func keySetsStayInStep(t *testing.T, version schemaVersion) {
 				t.Fatal("stale subset omission", test.path, key)
 			}
 		}
+		for _, key := range v2Only[name] {
+			if !slices.Contains(readerKeys, key) {
+				t.Fatal("stale version 2 only key", test.path, key)
+			}
+		}
 		for _, key := range readerKeys {
-			if !slices.Contains(test.omitted, key) {
+			only := slices.Contains(v2Only[name], key) && !version.two
+			if !slices.Contains(test.omitted, key) && !only {
 				wanted = append(wanted, key)
 			}
 		}

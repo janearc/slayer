@@ -1,368 +1,573 @@
 # every number the laid, chart and allocation tests choose, with what it
-# is and who chose it.
+# is and why it was chosen.
 numbers:
   - name: alloc-exposure
     value: 0.9
     says: "the exposure of the giant's face in the test that its points make no garbage"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: ungridded-exposure
     value: 1
     says: "the exposure of a face whose flow is not a grid, or which has none"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-exposure
     value: 3
     says: "the exposure of the giant's face laid out and painted from its numbers"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-exposure
     value: 3
     says: "the exposure of the giant's face a chart is made of"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-lat-seed
     value: 51
     says: "the hash seed that picks the latitude of the points a chart is tried at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-lon-seed
     value: 52
     says: "the hash seed that picks the longitude of the points a chart is tried at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-clear-of-limb
     value: 0.05
     says: "the cosine of the angle between a point's up and the eye above which the eye sees it well clear of the limb"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-points
     value: 20000
     says: "how many points of the body a chart is tried at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-fine-cell
     value: 0.5
     says: "the fine chart's cell, in degrees"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-coarse-cell
     value: 1
     says: "the coarse chart's cell, in degrees"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-grid-down
     value: 12
     says: "how many fine cells south of the pole's end the point on the chart's grid is"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-grid-along
     value: 31
     says: "how many fine cells east of the front the point on the chart's grid is"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-grid-close
     value: 1e-06
     says: "how near, as a share of the green, a chart is to its face at a point of its grid; the chart keeps float32"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-finer-top
     value: 2
     says: "the top of the share the fine chart's mean difference must come under the coarse one's: two"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-finer-bottom
     value: 3
     says: "the bottom of that share: three, so two thirds"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-limb-grazing
     value: 0.002
     says: "the cosine under which a point is at the limb, where a chart asks the face"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-paint-cell
     value: 0.25
     says: "the cell, in degrees, of the chart that is shown to paint only the tiles asked for"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-paint-down
     value: 10.1
     says: "the latitude, in degrees from the south pole's end, of the one ray that paints a tile"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-paint-along
     value: 20.1
     says: "the longitude, in degrees, of the one ray that paints a tile"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-least-tiles
     value: 100
     says: "the fewest tiles the chart of that cell has, so that one is a small part"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-broad-degrees
     value: 2
     says: "the width of a wide pixel, in degrees at the body's radius, where a chart asks the face"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-ungridded-cell
     value: 0.01
     says: "the cell, in radians, asked of a chart of a face with no flow"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-rays-cell
     value: 0.5
     says: "the cell, in degrees, of the chart read by many rays at once"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-rays-down
     value: -30.3
     says: "the latitude, in degrees, every ray reads at the end"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-rays-along
     value: 40.7
     says: "the longitude, in degrees, every ray reads at the end"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-rays
     value: 16
     says: "how many rays read the chart at once"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: chart-ray-draws
     value: 2000
     says: "how many points each of those rays reads first"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-lat-seed
     value: 31
     says: "the hash seed that picks the latitude of the points a laid face is tried at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-lon-seed
     value: 32
     says: "the hash seed that picks the longitude of the points a laid face is tried at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-foot-seed
     value: 33
     says: "the hash seed that picks the width of the pixel at those points"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-points
     value: 4000
     says: "how many points of a laid face the painter is tried at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-footprint
     value: 4000000.0
     says: "the widest pixel, in metres, a laid face is tried at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-wide-every
     value: 2
     says: "every so many points the pixel has a width and the rest have none"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-close
     value: 1e-09
     says: "how near the painter must come to Within, against the brightest of the light's three: the two sum the same terms in a different order, in float64"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-bright-floor
     value: 1e-12
     says: "the brightness a point is held to at least when its difference is compared, so a dark point is not held to nothing"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-polar-from
     value: 78
     says: "the latitude, in degrees, past which a grid fades to its edge, and where polar points are counted"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-least-lit
     value: 1000
     says: "the fewest points that must be lit for the layout to be shown whole"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-least-glowing
     value: 500
     says: "the fewest points that must be in the airglow's band"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-least-polar
     value: 30
     says: "the fewest lit points that must be by the poles"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: laid-least-cleared
     value: 200
     says: "the fewest points the stand-in grid must clear"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: painter-floor
     value: 0.05
     says: "the least cosine of the latitude the painter widens a step by, as the face's own steepness does"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-close
     value: 1e-12
     says: "how near the painter's reading of a laid grid must come to the weather's own, against the size of what is read: the same sums in float64"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-points
     value: 3000
     says: "how many places the laid grid is read at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-lat-seed
     value: 41
     says: "the hash seed that picks the latitude of those places"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-lon-seed
     value: 42
     says: "the hash seed that picks the longitude of those places"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-wall-seed
     value: 43
     says: "the hash seed that picks how far past the walls the places past them are"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-wall-every
     value: 3
     says: "every so many places is past the walls, so a third of them are"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-wall-from
     value: 76
     says: "the latitude, in degrees, the places past the walls start at"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: read-wall-span
     value: 14
     says: "how many degrees past that the places past the walls reach, to the pole"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-across
     value: 64
     says: "how many cells the stand-in grid has round the planet"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-rows
     value: 32
     says: "how many rows of cells the stand-in grid has"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-limit
     value: 80
     says: "the latitude, in degrees, the stand-in grid's last rows stand inside of"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-wave-along
     value: 5
     says: "how many cells a wave of the stand-in grid's fields is a radian long, along a row"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-wave-down
     value: 3
     says: "how many rows a wave of the stand-in grid's fields is a radian long, down the grid"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-origin-swing
     value: 0.2
     says: "how far, in radians, the wave swings the stand-in grid's air from its row's latitude"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-spin-swing
     value: 1.2
     says: "how much spin the wave gives the stand-in grid, over twice the planet's"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-spin-noise
     value: 0.2
     says: "how much spin a hash adds to the stand-in grid, either way"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-spin-seed
     value: 5
     says: "the hash seed of the stand-in grid's spin"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-age-seed
     value: 6
     says: "the hash seed of the stand-in grid's age"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-age-span
     value: 3000000.0
     says: "how many seconds the stand-in grid's ages spread over"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: grid-age-floor
     value: 100000.0
     says: "how many seconds under none the stand-in grid's youngest age is, so some are below zero"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-across
     value: 64
     says: "how many cells the real weather's grid has round the planet; a power of two"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-rows
     value: 32
     says: "how many rows of cells the real weather's grid has"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-limit
     value: 80
     says: "the latitude, in degrees, the real weather's last rows stand inside of"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-radius
     value: 60000000.0
     says: "the radius of the planet the real weather is on, in metres"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: stirring-rate
     value: 4e-17
     says: "how many storms a second break out over a square metre"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: stirring-radius
     value: 4000000.0
     says: "how wide each of those storms is, in metres"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: stirring-strength
     value: 3e-05
     says: "how fast each of those storms spins at its middle, in radians a second"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-day
     value: 36000
     says: "the length of the real weather's day, in seconds"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-drag
     value: 10000000.0
     says: "the seconds over which friction slows the real weather's winds"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-relax
     value: 10000000.0
     says: "the seconds over which the real weather's bands' air is drawn back"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-seed
     value: 7
     says: "the seed the real weather's storms are stirred from"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
   - name: weather-run
     value: 400000.0
     says: "how many seconds the real weather is run, long enough to spin up storms and age its air"
     kind: picked
-    by: the test author, kept as the tests had it before they were moved here, 2026-11-11
+    by: picked by eye; no reason was written down
+  - name: degenerate-molar
+    value: 0.028
+    says: "the molar mass, in kilograms a mole, of the gas the degenerate-input tests make"
+    kind: picked
+    by: "any mass above zero would do"
+  - name: methane-test-vacuum
+    value: 500.05
+    says: "the vacuum wavelength, in nanometres, of the one row the methane table tests read"
+    kind: picked
+    by: "a wavelength inside the table the reader covers"
+  - name: methane-test-coefficient
+    value: 1.5
+    says: "the coefficient, in reciprocal kilometre-amagats, of the good row the methane table tests read"
+    kind: picked
+    by: "any coefficient of zero or more would do"
+  - name: methane-test-negative
+    value: -0.5
+    says: "a coefficient below zero, which the methane reader refuses"
+    kind: picked
+    by: "any coefficient below zero would do"
+  - name: glow-share-large
+    value: 0.7
+    says: "the share of a ring's mass given to each of two phosphors, which together are more than the whole of it"
+    kind: picked
+    by: "twice it is more than one, each alone is not"
+  - name: glow-share-half
+    value: 0.5
+    says: "the share of a ring's mass given to each of two phosphors, which together are the whole of it"
+    kind: picked
+    by: "twice it is one"
+  - name: degenerate-ring-inner
+    value: 1.0e+8
+    says: "the inner radius, in metres, of the ring the degenerate-input tests make"
+    kind: picked
+    by: "any radius above zero would do"
+  - name: degenerate-ring-outer
+    value: 2.0e+8
+    says: "the outer radius, in metres, of the ring the degenerate-input tests make"
+    kind: picked
+    by: "any radius above the inner one would do"
+  - name: degenerate-ring-depth
+    value: 0.5
+    says: "the optical depth of the ring the degenerate-input tests make"
+    kind: picked
+    by: "any depth of zero or more would do"
+  - name: degenerate-ring-albedo
+    value: 0.6
+    says: "the albedo of the ring the degenerate-input tests make"
+    kind: picked
+    by: "any albedo from zero to one would do"
+  - name: degenerate-ring-lean
+    value: 0.2
+    says: "the lean of the ring the degenerate-input tests make"
+    kind: picked
+    by: "any lean between minus one and one would do"
+  - name: degenerate-seed
+    value: 7
+    says: "the seed of the ring's moonlets and grains in the degenerate-input tests"
+    kind: picked
+    by: "any seed would do"
+  - name: degenerate-moonlet-count
+    value: 3
+    says: "how many moonlets the degenerate-input tests ask for when the count is fair"
+    kind: picked
+    by: "any count from zero to the most a ring may hold would do"
+  - name: degenerate-moonlet-smallest
+    value: 1.0e+4
+    says: "the smallest moonlet radius, in metres, the degenerate-input tests ask for"
+    kind: picked
+    by: "any radius above zero would do"
+  - name: degenerate-moonlet-largest
+    value: 1.0e+5
+    says: "the largest moonlet radius, in metres, the degenerate-input tests ask for"
+    kind: picked
+    by: "any radius from the smallest up would do"
+  - name: degenerate-moonlet-slope
+    value: 2.5
+    says: "the slope of the power law of moonlet radii the degenerate-input tests ask for"
+    kind: picked
+    by: "any slope above one would do"
+  - name: degenerate-moonlet-opens
+    value: 5.0e+4
+    says: "the radius, in metres, from which a moonlet of the degenerate-input tests clears its whole orbit"
+    kind: picked
+    by: "any radius above zero would do"
+  - name: degenerate-planet-mass
+    value: 5.7e+26
+    says: "the mass, in kilograms, of the planet the degenerate-input tests put the moonlets under"
+    kind: picked
+    by: "any mass above zero would do"
+  - name: degenerate-grain-smallest
+    value: 2.0e+3
+    says: "the smallest clump size, in metres, the degenerate-input tests ask for"
+    kind: picked
+    by: "any size above zero would do"
+  - name: degenerate-grain-largest
+    value: 8.0e+3
+    says: "the largest clump size, in metres, the degenerate-input tests ask for"
+    kind: picked
+    by: "any size from the smallest up would do"
+  - name: degenerate-grain-slope
+    value: 3
+    says: "the slope of the power law of clump sizes the degenerate-input tests ask for"
+    kind: picked
+    by: "any slope above zero would do"
+  - name: degenerate-grain-shear
+    value: 4
+    says: "how many times longer along the orbit than across a clump is in the degenerate-input tests"
+    kind: picked
+    by: "any shear of one or more would do"
+  - name: degenerate-grain-clumping
+    value: 0.5
+    says: "how much of the ring the grains leave empty in the degenerate-input tests"
+    kind: picked
+    by: "any clumping from zero to one would do"
+  - name: degenerate-cooking
+    value: 1.0e+5
+    says: "the seconds over which air cooks in the degenerate-input tests"
+    kind: picked
+    by: "any time above zero would do"
+  - name: degenerate-age
+    value: 5.0e+4
+    says: "the age, in seconds, of air that has cooked part of the way in the degenerate-input tests"
+    kind: picked
+    by: "any age above zero would do"
+  - name: degenerate-chart-radius
+    value: 7.0e+7
+    says: "the radius, in metres, of the body the degenerate-input chart tests chart"
+    kind: picked
+    by: "any radius above zero would do"
+  - name: degenerate-chart-cell
+    value: 0.1
+    says: "a fair cell, in radians, for the degenerate-input chart tests"
+    kind: picked
+    by: "a cell of a few degrees makes a small chart"
+  - name: degenerate-grid-cells
+    value: 4
+    says: "how many cells round, and how many rows, the grid the degenerate-input laid tests make has"
+    kind: picked
+    by: "any count of two or more would do"
+  - name: degenerate-storm-turbulence
+    value: 0.5
+    says: "the turbulence of the storms the degenerate-input tests make"
+    kind: picked
+    by: "any turbulence from zero to one would do"
+  - name: degenerate-storm-eddies
+    value: 6
+    says: "how many eddies fit around the planet in the storms the degenerate-input tests make"
+    kind: picked
+    by: "any count above zero would do"
+  - name: degenerate-storm-stretch
+    value: 2
+    says: "how many times longer east to west than north to south the degenerate-input storms pull their eddies"
+    kind: picked
+    by: "any stretch of one or more would do"
+  - name: degenerate-storm-edge
+    value: 5
+    says: "how many degrees either side of a band's edge the degenerate-input storms blend its two columns"
+    kind: picked
+    by: "any width of zero or more would do"
+  - name: degenerate-storm-folds
+    value: 2
+    says: "how many times the degenerate-input storms fold the flow"
+    kind: picked
+    by: "any count from zero to the most folds would do"
+  - name: degenerate-spot-latitude
+    value: 20
+    says: "the latitude, in degrees, of the spot the degenerate-input tests make"
+    kind: picked
+    by: "any latitude from the south pole to the north would do"
+  - name: degenerate-spot-longitude
+    value: 30
+    says: "the longitude, in degrees, of the spot the degenerate-input tests make"
+    kind: picked
+    by: "any longitude would do"
+  - name: degenerate-spot-radius
+    value: 10
+    says: "the radius, in degrees, of the spot the degenerate-input tests make"
+    kind: picked
+    by: "any radius above zero and no more than ninety would do"
+  - name: degenerate-spot-turn
+    value: 1
+    says: "how far, in half turns, the spot the degenerate-input tests make turns the bands"
+    kind: picked
+    by: "any turn would do"
+  - name: degenerate-swarm-count
+    value: 3
+    says: "how many spots the degenerate-input swarm holds"
+    kind: picked
+    by: "any count from zero to the most spots would do"
+  - name: degenerate-swarm-smallest
+    value: 2
+    says: "the smallest radius, in degrees, of the spots of the degenerate-input swarm"
+    kind: picked
+    by: "any radius above zero would do"
+  - name: degenerate-swarm-largest
+    value: 8
+    says: "the largest radius, in degrees, of the spots of the degenerate-input swarm"
+    kind: picked
+    by: "any radius from the smallest up to the most a swarm's spots may have would do"
+  - name: degenerate-swarm-slope
+    value: 2.5
+    says: "the slope of the power law of the radii of the degenerate-input swarm's spots"
+    kind: picked
+    by: "any slope above one would do"

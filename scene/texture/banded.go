@@ -48,6 +48,70 @@ type Banded struct {
 	Seed    uint64
 }
 
+// The streams of the giant's hash, each defined as a distinct offset from
+// the seed, so that each draw of a street, a roil and a mottle is alone.
+const (
+	// streetLonStream is defined: the offset of the stream a street's
+	// longitudes are drawn from.
+	streetLonStream = 1
+	// streetLatStream is defined: the offset of the stream a street's
+	// latitudes are drawn from.
+	streetLatStream = 2
+	// streetSizeStream is defined: the offset of the stream a street's
+	// sizes are drawn from.
+	streetSizeStream = 3
+	// streetStretchStream is defined: the offset of the stream a street's
+	// stretches are drawn from.
+	streetStretchStream = 4
+	// fineStream is defined: the offset of the stream the fine roil is
+	// drawn from.
+	fineStream = 7
+	// mottleStream is defined: the offset of the stream the mottle is
+	// drawn from.
+	mottleStream = 9
+)
+
+// the numbers Banded is drawn with, each picked and held in
+// picked-numbers.yaml
+var (
+	// bandedGrain is the roil's feature size, as a share of the body, when
+	// none is given.
+	bandedGrain = pickedNumber("banded-grain")
+	// bandedAxisParallel is how near to parallel with north, as the cosine
+	// of the angle, the x axis may be and still serve to square the
+	// longitude.
+	bandedAxisParallel = pickedNumber("banded-axis-parallel")
+	// bandedJetReach is how far, in radians, a jet slides the roil round
+	// the body.
+	bandedJetReach = pickedNumber("banded-jet-reach")
+	// bandedRoilOctaves is how many scales of noise the roil has.
+	bandedRoilOctaves = int(pickedNumber("banded-roil-octaves"))
+	// bandedFineScale is how many times finer the fine roil is than the
+	// roil.
+	bandedFineScale = pickedNumber("banded-fine-scale")
+	// bandedFineOctaves is how many scales of noise the fine roil has.
+	bandedFineOctaves = int(pickedNumber("banded-fine-octaves"))
+	// bandedMottleScale is how big the mottle's features are, against the
+	// roil's.
+	bandedMottleScale = pickedNumber("banded-mottle-scale")
+	// bandedMottleOctaves is how many scales of noise the mottle has.
+	bandedMottleOctaves = int(pickedNumber("banded-mottle-octaves"))
+	// spotStretchFloor is the least a spot's stretch is read as, so that
+	// no spot is infinitely tall.
+	spotStretchFloor = pickedNumber("spot-stretch-floor")
+	// streetLonJitter is how far, as a share of the gap between storms, a
+	// storm is placed off its even place along a street.
+	streetLonJitter = pickedNumber("street-lon-jitter")
+	// streetSizeFloor is the least a storm of a street is, as a share of
+	// the street's size.
+	streetSizeFloor = pickedNumber("street-size-floor")
+	// streetSizeSpread is how far a storm of a street's size is drawn
+	// above its floor.
+	streetSizeSpread = pickedNumber("street-size-spread")
+	// streetStretchFloor is the least a storm of a street is stretched.
+	streetStretchFloor = pickedNumber("street-stretch-floor")
+)
+
 // Street is a row of storms along a latitude: Count spots of Size, each
 // painted Paint and swirled by Turn, spaced round the body by hash.
 type Street struct {
@@ -58,24 +122,33 @@ type Street struct {
 	Seed       uint64
 }
 
+// spot is the street's storm at a place along it.
+func (street Street) spot(place int) Spot {
+	index := int64(place)
+	jitter := noise.Hash(street.Seed+streetLonStream, index) * streetLonJitter
+	lon := (float64(place) + jitter) / float64(street.Count) * pair * math.Pi
+	size := streetSizeFloor +
+		streetSizeSpread*noise.Hash(street.Seed+streetSizeStream, index)
+	return Spot{
+		Lat: street.Lat +
+			(noise.Hash(street.Seed+streetLatStream, index)-half)*street.Size,
+		Lon:  lon,
+		Size: street.Size * size,
+		Stretch: streetStretchFloor +
+			noise.Hash(street.Seed+streetStretchStream, index),
+		Turn:  street.Turn,
+		Paint: street.Paint,
+	}
+}
+
 // spots is the street's storms as spots.
-func (s Street) spots() []Spot {
-	if s.Count <= 0 {
+func (street Street) spots() []Spot {
+	if street.Count <= nought {
 		return nil
 	}
-	out := make([]Spot, 0, s.Count)
-	for i := range s.Count {
-		k := int64(i)
-		lon := (float64(i) + noise.Hash(s.Seed+1, k)*0.6) /
-			float64(max(1, s.Count)) * 2 * math.Pi
-		out = append(out, Spot{
-			Lat:     s.Lat + (noise.Hash(s.Seed+2, k)-0.5)*s.Size,
-			Lon:     lon,
-			Size:    s.Size * (0.7 + 0.6*noise.Hash(s.Seed+3, k)),
-			Stretch: 1.3 + noise.Hash(s.Seed+4, k),
-			Turn:    s.Turn,
-			Paint:   s.Paint,
-		})
+	out := make([]Spot, nought, street.Count)
+	for place := range street.Count {
+		out = append(out, street.spot(place))
 	}
 	return out
 }
@@ -97,80 +170,95 @@ type Spot struct {
 }
 
 // north is the axis, with zero read as up.
-func (b Banded) north() maths.Vec {
-	if b.Axis == (maths.Vec{}) {
+func (banded Banded) north() maths.Vec {
+	if banded.Axis == noAxis {
 		return maths.Up
 	}
-	return b.Axis.Unit()
+	return banded.Axis.Unit()
 }
 
-// grain is the roil's feature size, with zero read as a tenth.
-func (b Banded) grain() float64 {
-	if b.Grain <= 0 {
-		return 0.1
+// grain is the roil's feature size, with zero read as the fallback.
+func (banded Banded) grain() float64 {
+	if banded.Grain <= nought {
+		return bandedGrain
 	}
-	return b.Grain
+	return banded.Grain
 }
 
 // where is a point as a latitude from minus one to one and a longitude
 // in radians, in the body's own frame.
-func (b Banded) where(p maths.Vec) (lat, lon float64) {
-	n := b.north()
-	d := p.Unit()
-	lat = d.Dot(n)
+func (banded Banded) where(point maths.Vec) (latitude, longitude float64) {
+	north := banded.north()
+	direction := point.Unit()
+	latitude = direction.Dot(north)
 	// a pair of axes square to north, for the longitude
-	e := maths.XAxis
-	if math.Abs(n.Dot(e)) > 0.9 {
-		e = maths.ZAxis
+	reference := maths.XAxis
+	if math.Abs(north.Dot(reference)) > bandedAxisParallel {
+		reference = maths.ZAxis
 	}
-	e = e.Sub(n.Scale(n.Dot(e))).Unit()
-	f := n.Cross(e)
-	return lat, math.Atan2(d.Dot(f), d.Dot(e))
+	shadow := north.Scale(north.Dot(reference))
+	reference = reference.Sub(shadow).Unit()
+	across := north.Cross(reference)
+	return latitude, math.Atan2(direction.Dot(across), direction.Dot(reference))
 }
 
-// At is the gas's colour at p.
-func (b Banded) At(p maths.Vec) maths.Light {
-	if len(b.Paints) == 0 {
-		return maths.Light{}
+// stormed is a place's latitude and longitude after every storm has
+// swirled it, and the tint the storms give it and how much of it.
+func (banded Banded) stormed(latitude, longitude float64) (float64, float64,
+	maths.Light, float64) {
+	tint := noPaint
+	var tintBy float64
+	for _, spot := range banded.Spots {
+		latitude, longitude, tint, tintBy = spot.swirl(latitude, longitude,
+			tint, tintBy)
 	}
-	lat, lon := b.where(p)
-	// the storms swirl the place being asked about
-	tint, tintBy := maths.Light{}, 0.0
-	for _, s := range b.Spots {
-		lat, lon, tint, tintBy = s.swirl(lat, lon, tint, tintBy)
-	}
-	for _, st := range b.Streets {
-		for _, s := range st.spots() {
-			lat, lon, tint, tintBy = s.swirl(lat, lon, tint, tintBy)
+	for _, street := range banded.Streets {
+		for place := range street.Count {
+			latitude, longitude, tint, tintBy = street.spot(place).swirl(
+				latitude, longitude, tint, tintBy)
 		}
 	}
+	return latitude, longitude, tint, tintBy
+}
+
+// At is the gas's colour at the point.
+func (banded Banded) At(point maths.Vec) maths.Light {
+	if len(banded.Paints) == nought {
+		return noPaint
+	}
+	latitude, longitude := banded.where(point)
+	// the storms swirl the place being asked about
+	latitude, longitude, tint, tintBy := banded.stormed(latitude, longitude)
 	// the jets slide the roil round the body by latitude, the opposite
 	// way in neighbouring bands, so the turbulence shears between them
-	jet := 0.0
-	if b.Jets > 0 {
-		jet = 0.35 * math.Sin(float64(b.Jets)*math.Pi*lat)
+	var jet float64
+	if banded.Jets > nought {
+		jet = bandedJetReach * math.Sin(float64(banded.Jets)*math.Pi*latitude)
 	}
 	// the roil pushes the latitude by noise, stretched along the band,
 	// at two scales: the waves along a band's edge and the turbulence
 	// inside it
-	shear := math.Max(b.Shear, 1)
-	g := b.grain()
-	x := math.Cos(lon+jet) / (g * shear)
-	z := math.Sin(lon+jet) / (g * shear)
-	if b.Roil > 0 {
-		lat += b.Roil * noise.Fractal(b.Seed, x, lat/g, z, 4)
+	shear := math.Max(banded.Shear, unity)
+	grain := banded.grain()
+	x := math.Cos(longitude+jet) / (grain * shear)
+	z := math.Sin(longitude+jet) / (grain * shear)
+	if banded.Roil > nought {
+		latitude += banded.Roil * noise.Fractal(banded.Seed, x, latitude/grain,
+			z, bandedRoilOctaves)
 	}
-	if b.Fine > 0 {
-		f := 3.0
-		lat += b.Fine * noise.Fractal(b.Seed+7, x*f, lat/g*f, z*f, 5)
+	if banded.Fine > nought {
+		latitude += banded.Fine * noise.Fractal(banded.Seed+fineStream,
+			x*bandedFineScale, latitude/grain*bandedFineScale,
+			z*bandedFineScale, bandedFineOctaves)
 	}
-	band := b.band(lat)
-	if b.Mottle > 0 {
-		m := noise.Fractal(b.Seed+9, x*0.5, lat/g, z*0.5, 4)
-		band = band.Scale(1 + b.Mottle*m)
+	band := banded.band(latitude)
+	if banded.Mottle > nought {
+		mottle := noise.Fractal(banded.Seed+mottleStream, x*bandedMottleScale,
+			latitude/grain, z*bandedMottleScale, bandedMottleOctaves)
+		band = band.Scale(unity + banded.Mottle*mottle)
 	}
-	if tintBy > 0 {
-		band = band.Scale(1 - tintBy).Add(tint.Scale(tintBy))
+	if tintBy > nought {
+		band = band.Scale(unity - tintBy).Add(tint.Scale(tintBy))
 	}
 	return band
 }
@@ -178,50 +266,52 @@ func (b Banded) At(p maths.Vec) maths.Light {
 // band is the paint at a latitude: the two nearest paints, blended. a
 // latitude that is no number, from a point that is none, is no number of
 // light, the same on every machine.
-func (b Banded) band(lat float64) maths.Light {
-	if math.IsNaN(lat) {
-		return maths.Grey(math.NaN())
+func (banded Banded) band(latitude float64) maths.Light {
+	if math.IsNaN(latitude) {
+		return noNumberLight()
 	}
-	n := len(b.Paints)
-	if n == 1 {
-		return b.Paints[0]
+	count := len(banded.Paints)
+	if count == unity {
+		return banded.Paints[firstPlace]
 	}
-	t := (math.Max(-1, math.Min(1, lat)) + 1) / 2 * float64(n-1)
-	i := int(math.Floor(t))
-	if i >= n-1 {
-		return b.Paints[n-1]
+	along := (clamped(latitude) + unity) / pair * float64(count-unity)
+	place := int(math.Floor(along))
+	if place >= count-unity {
+		return banded.Paints[count-unity]
 	}
-	f := t - float64(i)
-	return b.Paints[i].Scale(1 - f).Add(b.Paints[i+1].Scale(f))
+	fraction := along - float64(place)
+	return banded.Paints[place].Scale(unity - fraction).
+		Add(banded.Paints[place+unity].Scale(fraction))
 }
 
 // swirl turns a latitude and longitude round the spot if they are near
 // it, and says how much of the spot's paint belongs there.
-func (s Spot) swirl(lat, lon float64, tint maths.Light,
+func (spot Spot) swirl(latitude, longitude float64, tint maths.Light,
 	tintBy float64) (float64, float64, maths.Light, float64) {
-	if s.Size <= 0 {
-		return lat, lon, tint, tintBy
+	if spot.Size <= nought {
+		return latitude, longitude, tint, tintBy
 	}
-	stretch := math.Max(s.Stretch, 1e-3)
+	stretch := math.Max(spot.Stretch, spotStretchFloor)
 	// the offset from the spot's heart, with the longitude brought to
 	// the same side and squashed by the stretch
-	dlon := math.Remainder(lon-s.Lon, 2*math.Pi)
-	cosLat := math.Cos(math.Asin(math.Max(-1, math.Min(1, s.Lat))))
-	u, v := dlon*cosLat/stretch, lat-s.Lat
-	r := math.Hypot(u, v) / s.Size
-	if r >= 1 {
-		return lat, lon, tint, tintBy
+	dlon := math.Remainder(longitude-spot.Lon, fullTurn)
+	heartAngle := math.Asin(clamped(spot.Lat))
+	cosLat := math.Cos(heartAngle)
+	across, up := dlon*cosLat/stretch, latitude-spot.Lat
+	reach := math.Hypot(across, up) / spot.Size
+	if reach >= unity {
+		return latitude, longitude, tint, tintBy
 	}
-	in := 1 - maths.Smooth(0, 1, r)
-	a := s.Turn * in
-	c, sn := math.Cos(a), math.Sin(a)
-	u, v = u*c-v*sn, u*sn+v*c
-	lat = s.Lat + v
-	lon = s.Lon + u*stretch/cosLat
-	tint = tint.Scale(tintBy * (1 - in)).Add(s.Paint.Scale(in))
-	tintBy = tintBy + in*(1-tintBy)
-	if tintBy > 0 {
-		tint = tint.Scale(1 / tintBy)
+	in := unity - maths.Smooth(nought, unity, reach)
+	angle := spot.Turn * in
+	cosine, sine := math.Cos(angle), math.Sin(angle)
+	across, up = across*cosine-up*sine, across*sine+up*cosine
+	latitude = spot.Lat + up
+	longitude = spot.Lon + across*stretch/cosLat
+	tint = tint.Scale(tintBy * (unity - in)).Add(spot.Paint.Scale(in))
+	tintBy = tintBy + in*(unity-tintBy)
+	if tintBy > nought {
+		tint = tint.Scale(unity / tintBy)
 	}
-	return lat, lon, tint, tintBy
+	return latitude, longitude, tint, tintBy
 }

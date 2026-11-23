@@ -1,0 +1,188 @@
+# Buildings on a slope, 2026-11-19. A building stands on a plinth that
+# reaches the lowest ground under it; the plinth's height is worked out from
+# the ground, never picked. What is picked is how finely the ground under a
+# footprint is looked at, and the plinth's concrete. Dimensions are metres,
+# colours are shares of light, each channel from zero to one, and gloss is
+# how much of a mirror a surface is.
+numbers:
+- name: footing-step
+  value: 1
+  unit: m
+  says: the distance between the places the ground is read under a footprint, which are spread evenly over it with a place at each corner
+  kind: picked
+  by: "slope study, 2026-11-19"
+- name: plinth-red
+  value: 0.22
+  says: red share of the plinth's concrete
+  kind: picked
+  by: "slope study, 2026-11-19, by eye"
+- name: plinth-green
+  value: 0.21
+  says: green share of the plinth's concrete
+  kind: picked
+  by: "slope study, 2026-11-19, by eye"
+- name: plinth-blue
+  value: 0.2
+  says: blue share of the plinth's concrete
+  kind: picked
+  by: "slope study, 2026-11-19, by eye"
+- name: plinth-gloss
+  value: 0.05
+  says: gloss of the plinth's concrete
+  kind: picked
+  by: "slope study, 2026-11-19, by eye"
+# The room a lattice gives a terrace or a condominium, so that a stand of
+# them is laid in streets on a hillside. A terrace's front looks along the
+# lane, so its length stands across the lane (the pitch's width) and its
+# depth along it. The streets run north and south and the fronts look north,
+# down a slope that faces the bay.
+- name: terrace-groningen-pitch-width
+  value: 72
+  unit: m
+  says: width of the room a Groningen terrace takes across its street, its length of twelve bays and a gap
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-groningen-pitch-depth
+  value: 24
+  unit: m
+  says: length of the room a Groningen terrace takes along its street, its depth and a front garden
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-groningen-lane-width
+  value: 10
+  unit: m
+  says: width of the street between two rows of Groningen terraces
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-groningen-lane-heading
+  value: 0
+  unit: deg
+  says: bearing the streets run along, and the way the fronts look, so north
+  kind: picked
+  by: "sf study, 2026-11-19, picked"
+- name: terrace-portofino-pitch-width
+  value: 84
+  unit: m
+  says: width of the room a Portofino terrace takes across its street, its length of fourteen bays and a gap
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-portofino-pitch-depth
+  value: 26
+  unit: m
+  says: length of the room a Portofino terrace takes along its street
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-portofino-lane-width
+  value: 10
+  unit: m
+  says: width of the street between two rows of Portofino terraces
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-portofino-lane-heading
+  value: 0
+  unit: deg
+  says: bearing the streets run along, and the way the fronts look, so north
+  kind: picked
+  by: "sf study, 2026-11-19, picked"
+- name: terrace-midwest-pitch-width
+  value: 88
+  unit: m
+  says: width of the room a Midwest terrace takes across its street, six bays with their garages and yards, and a gap
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-midwest-pitch-depth
+  value: 28
+  unit: m
+  says: length of the room a Midwest terrace takes along its street
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-midwest-lane-width
+  value: 10
+  unit: m
+  says: width of the street between two rows of Midwest terraces
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-midwest-lane-heading
+  value: 0
+  unit: deg
+  says: bearing the streets run along, and the way the fronts look, so north
+  kind: picked
+  by: "sf study, 2026-11-19, picked"
+- name: condominium-pitch-width
+  value: 64
+  unit: m
+  says: width of the room a condominium takes across its street, its court and the buildings round it
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: condominium-pitch-depth
+  value: 62
+  unit: m
+  says: length of the room a condominium takes along its street
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: condominium-lane-width
+  value: 12
+  unit: m
+  says: width of the street between two rows of condominiums
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: condominium-lane-heading
+  value: 0
+  unit: deg
+  says: bearing the streets run along, and the way the fronts look, so north
+  kind: picked
+  by: "sf study, 2026-11-19, picked"
+# The blocks of San Francisco's streets for a row of houses laid by the
+# grid habit. A block is about 125 by 85 m between its streets, and two rows
+# stand back to back on it, each facing its street.
+- name: terrace-san-francisco-block-length
+  value: 125
+  unit: m
+  says: length of a block along its long streets
+  kind: picked
+  by: "sf study, 2026-11-19, from the brief"
+- name: terrace-san-francisco-block-depth
+  value: 85
+  unit: m
+  says: depth of a block between its long streets, the streets not included
+  kind: picked
+  by: "sf study, 2026-11-19, from the brief"
+- name: terrace-san-francisco-street-width
+  value: 18
+  unit: m
+  says: width of a street between two blocks
+  kind: picked
+  by: "sf study, 2026-11-19, by eye"
+- name: terrace-san-francisco-row-length
+  value: 118
+  unit: m
+  says: length of a drawn row of fifteen lots, a little short of its block
+  kind: picked
+  by: "sf study, 2026-11-19, from the culture's fifteen bays of about eight metres"
+- name: terrace-san-francisco-row-depth
+  value: 26
+  unit: m
+  says: depth of a drawn row, the middle of the culture's range of house depth
+  kind: picked
+  by: "sf study, 2026-11-19, from the culture"
+- name: terrace-san-francisco-grid-turn
+  value: 2.5
+  unit: deg
+  says: how far the grid is turned clockwise off true north; north of Market the streets are about two to three degrees off
+  kind: picked
+  by: "sf study, 2026-11-19, from the brief, not measured from the terrain"
+# Rows of terraces along the contours of a steep hillside, 2026-11-20. The
+# fall line, the way the ground drops fastest, is read from the ground
+# itself, never picked. What is picked is how far either side of a place
+# it is read, and how flat the ground may be before it has no fall line.
+- name: contour-span
+  value: 20
+  unit: m
+  says: the distance either side of a place over which the fall of the ground is read, a few times the finest step a window is cut at, so that the corners of a window's cells do not turn a row
+  kind: picked
+  by: "cliff terraces study, 2026-11-20, by eye"
+- name: least-fall
+  value: 0.02
+  says: the least rise of the ground over a metre of run at which a place has a fall line; flatter ground has no one way down, and a row cannot follow its contour
+  kind: picked
+  by: "cliff terraces study, 2026-11-20, by eye"

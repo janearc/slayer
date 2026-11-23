@@ -19,25 +19,25 @@ var stateNames = [...]string{
 	"moderate", "rough", "very rough", "high", "very high", "phenomenal",
 }
 
-// SeaState is a state of the sea in the World Meteorological
+// seaState is a state of the sea in the World Meteorological
 // Organization's code, table 3700: 0, calm and glassy, to 9, phenomenal.
 // It is the scale mariners and coast guards report, and the wind-sea half
 // of the Douglas scale.
-type SeaState int
+type seaState int
 
 // String is the code's descriptive term.
-func (code SeaState) String() string {
+func (code seaState) String() string {
 	if code < 0 || int(code) >= len(stateNames) {
 		return "not a sea state"
 	}
 	return stateNames[code]
 }
 
-// Heights is the range of wave heights a code covers, in metres. A height
+// heights is the range of wave heights a code covers, in metres. A height
 // exactly on a bound belongs to the lower code, as the table's note says:
 // four metres is 5, not 6. Code 9 has no upper bound, and reports
 // infinity.
-func (code SeaState) Heights() (from, to float64, err error) {
+func (code seaState) heights() (from, to float64, err error) {
 	switch {
 	case code < 0 || int(code) >= len(stateNames):
 		return 0, 0, errors.New("oceantex: sea states run from 0 to 9")
@@ -50,11 +50,11 @@ func (code SeaState) Heights() (from, to float64, err error) {
 }
 
 // StateOf is the code for a significant wave height in metres.
-func StateOf(height float64) SeaState {
+func StateOf(height float64) seaState {
 	if height <= 0 {
 		return 0
 	}
-	code := SeaState(1)
+	code := seaState(1)
 	for int(code) < len(stateBounds) && height > stateBounds[code] {
 		code++
 	}
@@ -68,8 +68,8 @@ func StateOf(height float64) SeaState {
 // GLUE: the height aimed for is the middle of the code's range, and for
 // code 9, which has no top, its lower bound. If no wind up to 80 metres a
 // second can raise the state over this fetch and depth, Raise says so.
-func (code SeaState) Raise(fetch, depth, toward float64) (Sea, error) {
-	from, to, err := code.Heights()
+func (code seaState) Raise(fetch, depth, toward float64) (Sea, error) {
+	from, to, err := code.heights()
 	if err != nil {
 		return Sea{}, err
 	}

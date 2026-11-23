@@ -1,0 +1,114 @@
+# tower skins lineup: one tower of each skin side by side, all the same
+# height, forty storeys, across a plaza, at dusk into night. the skins
+# are the tower generator's (manufacture/cities, towerskin.go); every
+# number of every skin is in manufacture/cities/cultures/tower.yaml.
+#
+# from the left: mirror glass, granite, board-marked concrete, gothic
+# stone, cantilevered and tensioned glass, vaporwave pastel. the gothic
+# tower has three segments so that its setbacks leave ledges for figures.
+#
+# places are metres, as a map's run: x east, y north, z up. the plaza,
+# the sun, the sky and the camera are choices of this study, picked by
+# eye.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower skins lineup
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 58
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    plaza:
+      title: "across the plaza, the six skins"
+      location:
+        at: [0, -500, 3]
+      orientation:
+        look_at: [0, 0, 72]
+    near-left:
+      title: "the mirror, granite and concrete, close"
+      location:
+        at: [-135, -230, 12]
+      orientation:
+        look_at: [-135, 0, 70]
+    near-right:
+      title: "the gothic, cantilever and vaporwave, close"
+      location:
+        at: [135, -230, 12]
+      orientation:
+        look_at: [135, 0, 70]
+  recipes:
+    mirror:
+      kind: tower
+      irregularity: 0
+      pins: {plan: rectangle, skin: mirror, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}
+    granite:
+      kind: tower
+      irregularity: 0
+      pins: {plan: rectangle, skin: granite, colour: pink, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}
+    concrete:
+      kind: tower
+      irregularity: 0
+      pins: {plan: rectangle, skin: concrete, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}
+    gothic:
+      kind: tower
+      irregularity: 0
+      pins: {plan: rectangle, skin: gothic, storeys: 40, segments: 3, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: true, spire: true}
+    cantilever:
+      kind: tower
+      irregularity: 0
+      pins: {plan: rectangle, skin: cantilever, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}
+    vaporwave:
+      kind: tower
+      irregularity: 0
+      pins: {plan: rectangle, skin: vaporwave, storeys: 40, width: {value: 40, unit: m}, taper: false, twist: false, setbacks: false, spire: false}
+  set:
+    things:
+      mirror: {recipe: mirror, seed: 3, complexity: quick, east: -225, north: 0, height: {value: 0, unit: m}}
+      granite: {recipe: granite, seed: 3, complexity: quick, east: -135, north: 0, height: {value: 0, unit: m}}
+      concrete: {recipe: concrete, seed: 3, complexity: quick, east: -45, north: 0, height: {value: 0, unit: m}}
+      gothic: {recipe: gothic, seed: 3, complexity: quick, east: 45, north: 0, height: {value: 0, unit: m}}
+      cantilever: {recipe: cantilever, seed: 3, complexity: quick, east: 135, north: 0, height: {value: 0, unit: m}}
+      vaporwave: {recipe: vaporwave, seed: 3, complexity: quick, east: 225, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+      plaza:
+        colour: {srgb_linear: [0.1, 0.1, 0.11]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+      plaza:
+        material: plaza
+        middle: [0, -300, -0.9]
+        size: [800, 620, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-0.9, -0.3, 0.02]
+        colour: {srgb_linear: [1.6, 0.7, 0.4]}
+        source: eye
+      moon:
+        # a cool fill from the south, on the faces the camera sees
+        toward: [0.25, -0.9, 0.4]
+        colour: {srgb_linear: [0.5, 0.58, 0.8]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.3, 0.14, 0.14]}
+      zenith: {srgb_linear: [0.01, 0.025, 0.1]}
+      ground: {srgb_linear: [0.01, 0.01, 0.012]}
+      source: eye

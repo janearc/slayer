@@ -26,8 +26,6 @@ const errSizes = "colour: layer %d is %d by %d, and layer 0 is %d by " +
 // Its tint is the visible colour the band stands in, when it is set. It
 // replaces the colour of libtheme for the range. Palettes do so. The
 // hubble palette paints sulphur red, hydrogen green and oxygen blue.
-//
-//ninja:vow practice slayer's false colour pictures hold their layers
 type Layer struct {
 	band maths.Band
 	grid *frame.Frame
@@ -37,8 +35,6 @@ type Layer struct {
 
 // NewLayer is a layer of a band. It holds a frame rendered in the band
 // with a gain and a tint.
-//
-//ninja:vow practice slayer's false colour pictures make their layers here
 func NewLayer(band maths.Band, grid *frame.Frame, gain float64,
 	tint maths.Light) Layer {
 	return Layer{band, grid, gain, tint}
@@ -57,8 +53,6 @@ func False(layers []Layer) *image.RGBA { return Tone{}.False(layers) }
 
 // False is the false colour picture through the tone. Exposure and the
 // shoulder are applied to the sum, after the layers add.
-//
-//ninja:vow practice slayer's false colour pictures develop here
 func (tone Tone) False(layers []Layer) *image.RGBA {
 	if len(layers) == none {
 		return image.NewRGBA(image.Rect(none, none, none, none))
@@ -122,8 +116,6 @@ var shown = []radiation.Range{radiation.Gamma(), radiation.XRay(),
 // Where ranges overlap the first in shown wins. Radio comes before
 // microwave. Microwave is never reached. Infrared comes over the short
 // end of radio. Lamb drew it so, and the order is kept.
-//
-//ninja:vow practice slayer's false colour pictures ask what a band stands for
 func Stands(band maths.Band) maths.Light {
 	for _, span := range shown {
 		if span.Holds(band.Nanometres) {

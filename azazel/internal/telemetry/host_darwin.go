@@ -35,7 +35,8 @@ func hostSamples(host hostSource, directory string) []observability.Sample {
 	validMemory := err == nil && len(memory) == 8 && binary.NativeEndian.Uint64(memory) > 0
 	put("azazel_host_physical_memory_total_available", flag(validMemory))
 	if validMemory {
-		put("azazel_host_physical_memory_total_bytes", float64(binary.NativeEndian.Uint64(memory)))
+		memoryBytes := binary.NativeEndian.Uint64(memory)
+		put("azazel_host_physical_memory_total_bytes", float64(memoryBytes))
 	}
 	pages, err := host.vm()
 	states := []struct {
@@ -97,7 +98,8 @@ func hostSamples(host hostSource, directory string) []observability.Sample {
 	validDisk := err == nil && stat.Bsize > 0 && stat.Bavail <= stat.Bfree && stat.Bfree <= stat.Blocks && uint64(stat.Bavail) <= math.MaxUint64/uint64(stat.Bsize)
 	put("azazel_host_disk_available", flag(validDisk))
 	if validDisk {
-		put("azazel_host_disk_free_bytes", float64(uint64(stat.Bavail)*uint64(stat.Bsize)))
+		diskFreeBytes := uint64(stat.Bavail) * uint64(stat.Bsize)
+		put("azazel_host_disk_free_bytes", float64(diskFreeBytes))
 	}
 	return out
 }

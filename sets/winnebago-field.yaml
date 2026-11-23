@@ -1,0 +1,82 @@
+# a square kilometre of motorhomes.
+#
+# an rv park the size of a square kilometre: a disc of radius 564 m
+# around the first vehicle, on dusk gravel, seen from a hill to the south.
+# the stand has the habit lattice: pitches of 8 by 15 m in rows, a lane of
+# 6 m between every pair of rows, every vehicle along its lane facing east
+# with its door on the south side (all in manufacture/cities/winnebago.yaml).
+# it has no count: the lattice takes every pitch that fits wholly inside
+# the disc, outside 12 m of the first vehicle. that is 4620 pitches, an
+# output of the data and the ground, not a number picked here. the disc
+# over a pitch alone would be 8333, but a pitch with its lane takes 210
+# square metres, not 120.
+# light and ground are the yurt field's.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: winnebago field
+  setting: space
+  light: none
+  film:
+    width: 720
+    height: 480
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    hill:
+      title: "from a hill to the south"
+      location:
+        at: [0, -900, 180]
+      orientation:
+        look_at: [0, 0, 0]
+    # in a lane between two rows, 7 m north of the middle row's line, 60
+    # m east of the middle, at eye height, looking east along the lane at
+    # the vehicles' fronts, each with its door on the south side
+    close:
+      title: "among the rows, at eye height"
+      location:
+        at: [60, 7, 1.7]
+      orientation:
+        look_at: [200, 7, 1.8]
+  set:
+    things:
+      motorhome:
+        kind: winnebago
+        seed: 1
+        complexity: quick
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+    stands:
+      the park:
+        kind: winnebago
+        habit: lattice
+        seed: 2
+        complexity: quick
+        within: {of: motorhome, from: 0, to: 360, near: 12, far: 564}
+  world:
+    unit: 1
+    materials:
+      gravel:
+        colour: {srgb_linear: [0.1, 0.09, 0.05]}
+        source: eye
+    boxes:
+      ground:
+        material: gravel
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      west:
+        toward: [-1, -0.3, 0.12]
+        colour: {srgb_linear: [2.2, 1.2, 0.55]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.22, 0.14, 0.12]}
+      zenith: {srgb_linear: [0.02, 0.035, 0.08]}
+      ground: {srgb_linear: [0.03, 0.028, 0.02]}
+      source: eye

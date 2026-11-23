@@ -7,8 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 )
+
+// dusk is one rendered piece the tests below share, so that a render is
+// paid for once.
+var dusk = sync.OnceValues(func() (*Piece, error) {
+	return Open("@dusk", "@dmg-pad")
+})
 
 func TestACookedPieceThatWasRenderedNotOpenedIsNamedForItsSamples(t *testing.T) {
 	s, err := ReadScore("@dusk")

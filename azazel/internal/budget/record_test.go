@@ -165,9 +165,10 @@ func TestRecordResealedAntiTests(t *testing.T) {
 	reservationCount := ownerStart + firstOwnerSize + secondOwnerSize
 	reservationStart := reservationCount + 2
 	reservationSize := 2 + 1 + 2 + len("game") + 2 + len("attempt-1") + 8
+	notANumber := math.Float64bits(math.NaN())
 	cases := map[string]func([]byte) []byte{
 		"bad-boolean":           func(b []byte) []byte { b[bootEnd+24] = 2; return b },
-		"nan-policy":            func(b []byte) []byte { binary.BigEndian.PutUint64(b[bootEnd:], math.Float64bits(math.NaN())); return b },
+		"nan-policy":            func(b []byte) []byte { binary.BigEndian.PutUint64(b[bootEnd:], notANumber); return b },
 		"owner-count":           func(b []byte) []byte { binary.BigEndian.PutUint16(b[ownerCount:], math.MaxUint16); return b },
 		"reservation-count":     func(b []byte) []byte { binary.BigEndian.PutUint16(b[reservationCount:], math.MaxUint16); return b },
 		"owner-token-length":    func(b []byte) []byte { binary.BigEndian.PutUint16(b[ownerStart:], math.MaxUint16); return b },
@@ -190,7 +191,8 @@ func TestRecordResealedAntiTests(t *testing.T) {
 	}
 	for name, mutate := range cases {
 		t.Run(name, func(t *testing.T) {
-			bad := recordReseal(mutate(slices.Clone(valid)))
+			cloned := slices.Clone(valid)
+			bad := recordReseal(mutate(cloned))
 			if state, err := decodeAdmissionRecord(bad); err == nil || !reflect.DeepEqual(state, admissionRecord{}) {
 				t.Fatal("accepted resealed invalid state")
 			}
@@ -248,7 +250,8 @@ func TestRecordBoundaryAndGoldenBody(t *testing.T) {
 	for j := 0; j < 1024; j++ {
 		owner := reservationOwner{name: reservationOwnerName(fmt.Sprintf("owner-%04d", j)), incarnation: "i"}
 		state.owners = append(state.owners, owner)
-		state.ledger.reservations = append(state.ledger.reservations, ownedMemoryReservation{id: reservationIdentity(fmt.Sprintf("id-%04d", j)), owner: owner, amount: 1})
+		held := reservationIdentity(fmt.Sprintf("id-%04d", j))
+		state.ledger.reservations = append(state.ledger.reservations, ownedMemoryReservation{id: held, owner: owner, amount: 1})
 	}
 	data, err = encodeAdmissionRecord(state)
 	if err != nil {
@@ -305,7 +308,8 @@ func TestRecordIntentBinding(t *testing.T) {
 		if _, err := decodeAdmissionRecord(data); err == nil {
 			t.Fatal("intent accepted as state")
 		}
-		if _, err := decodeAdmissionIntent(append(slices.Clone(data), 0)); err == nil {
+		trailing := append(slices.Clone(data), 0)
+		if _, err := decodeAdmissionIntent(trailing); err == nil {
 			t.Fatal("intent trailing bytes")
 		}
 		clear(data)
@@ -370,7 +374,9 @@ func TestRecordRapidCanonical(t *testing.T) {
 		n := rapid.IntRange(0, 40).Draw(t, "count")
 		state.ledger.reservations = nil
 		for j := 0; j < n; j++ {
-			state.ledger.reservations = append(state.ledger.reservations, ownedMemoryReservation{id: reservationIdentity(fmt.Sprintf("id-%03d", j)), owner: state.owners[j%2], amount: byteCount(rapid.Uint64Range(1, 1000).Draw(t, "amount"))})
+			held := reservationIdentity(fmt.Sprintf("id-%03d", j))
+			drawn := byteCount(rapid.Uint64Range(1, 1000).Draw(t, "amount"))
+			state.ledger.reservations = append(state.ledger.reservations, ownedMemoryReservation{id: held, owner: state.owners[j%2], amount: drawn})
 		}
 		first, err := encodeAdmissionRecord(state)
 		if err != nil {

@@ -28,8 +28,8 @@ func Replay(world *thing.World, eye maths.Subspace, lens film.Sensor,
 			"not in a picture of %d by %d", x, y, width, height)
 	}
 	fine := seen.fine()
-	scene := stage(fine.world, fine.at)
-	if err := scene.refusal(); err != nil {
+	scene, err := fine.staging()
+	if err != nil {
 		return frame.Pixel{}, nil, err
 	}
 	walked := &walk{}

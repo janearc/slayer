@@ -6,6 +6,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/render/beamstep"
 )
 
@@ -125,9 +126,11 @@ var structures = []structure{sphereStruct,
 	fieldStruct}
 
 // treeStack is how many boxes the kernel's walk of the tree can hold
-// waiting: the split at the middle face keeps a tree's depth near
-// log2(faces / 4), so 64 holds any tree that fits in memory.
-const treeStack = 64
+// waiting. A walk holds at most one box more than the tree's depth, and
+// the deepest tree is a mesh's, cut as deep as mesh.MostTreeDepth and
+// no deeper; the split at the middle face, which the other trees are
+// cut by, keeps a tree's depth near log2(faces / 4), well within it.
+const treeStack = mesh.MostTreeDepth + 1
 
 // nowhere is the kernel's depth for a ray into the sky, which has no
 // infinity of its own; it becomes the tracer's +Inf here
@@ -142,6 +145,37 @@ const lampsEvery = 16
 // lampsAsked is how many lamps a point picks when the world has more
 // than lampsEvery: trace's own lampsAsked, so the two pick alike
 const lampsAsked = 8
+
+// lampsMarched is how many lamps a step of a march through a medium
+// picks when the world has more than lampsEvery: trace's own
+// lampsMarched, so the two pick alike. A ray through haze takes a
+// hundred steps and more, and its steps' picks are summed along it.
+const lampsMarched = 1
+
+// lampSplitMost is the most nodes the lamp tree's lamps are split into at
+// a step through a medium, a lamp taken from each: trace's own
+// lampSplitMost, so the two split alike. It is lampsAsked, so that a step
+// asks no more lamps of the tree than a surface does, and it leaves the
+// kernel's asks, which hold lampsEvery, room for the distant lamps and the
+// lamps outside the tree that a step also asks.
+const lampSplitMost = lampsAsked
+
+// lampSplitSpread is how wide across a tree node's box may be, in
+// distances from the point to the box, before the node is split and not
+// picked among: trace's own lampSplitSpread. The kernel is given its
+// square. A pick from a node left whole weighs at most the square of one
+// plus this, four, times the light of the node's lamps.
+const lampSplitSpread = 1.0
+
+// lampsDistantMost is the most distant lamps, suns, that a world with a
+// lamp tree may have. A step through a medium asks every one, and
+// lampsMarched lamps outside the tree, and lampSplitMost from it, of the
+// kernel's asks, which hold lampsEvery and drop a lamp that does not fit.
+// The encoder refuses a world with more (lampCrowd.refuse).
+const lampsDistantMost = lampsEvery - lampsMarched - lampSplitMost
+
+// the asks hold the split's nodes, a pick outside the tree, and a sun
+const _ = uint(lampsDistantMost - 1)
 
 // refractions is how many clear surfaces a look may bend through:
 // trace's own refractions, so the two bend alike
@@ -179,6 +213,11 @@ constexpr constant int conifer_stack = %d;
 constexpr constant int most_conifer_depth = %d;
 constexpr constant int lamps_asked = %d;
 constexpr constant int lamps_every = %d;
+constexpr constant int lamps_marched = %d;
+constexpr constant int lamp_split_most = `+fmt.Sprint(lampSplitMost)+`;
+constexpr constant float lamp_split_square = `+
+		fmt.Sprint(lampSplitSpread*lampSplitSpread)+`;
+constexpr constant int lamp_tree_floats = %d;
 constexpr constant int field_seed_words = 16;
 constexpr constant int boxed_kind = %d;
 constexpr constant int shell_kind = %d;
@@ -199,13 +238,14 @@ constexpr constant float gas_lobe_power = %g;
 constexpr constant float gas_twice = %g;
 constexpr constant float clip_share = %g;
 constexpr constant float clip_rounding = %g;
+constexpr constant int glow_on = %d;
 `, max(volumes, 1), treeStack, per+perRecord*records, per, perRecord,
 		records, nowhere, coniferStack, mostConiferDepth, lampsAsked,
-		lampsEvery, boxedKind, shellKind, float64(beamZero), float64(beamWhole), beamHalf,
+		lampsEvery, lampsMarched, nodeFloats, boxedKind, shellKind, float64(beamZero), float64(beamWhole), beamHalf,
 		beamstep.Radii(), beamstep.RadialSamples(),
 		beamstep.MaximumSplits(), polarKind, floodKind, float64(beamWhole), beamHalf,
 		gasOn, rayleighLobe, fourPi, lobePower, float64(lobeTwice),
-		clipShare, clipRounding)
+		clipShare, clipRounding, glowOn)
 }
 
 // clipShare and clipRounding are how far a hardware query's segment is
@@ -305,8 +345,9 @@ func prelude(records, volumes int) string {
 	text.WriteString(ringNumbers())
 	text.WriteString(wakeNumbers())
 	text.WriteString(propellerNumbers())
-	text.WriteString("#ifdef SLAYER_OPTICAL_MEDIA\n" + fizzNumbers() + "#endif\n")
+	text.WriteString("#ifdef SLAYER_OPTICAL_MEDIA\n" + propellerDispersalNumbers() + fizzNumbers() + "#endif\n")
 	text.WriteString(exposureNumbers())
+	text.WriteString(placeNumbers())
 	for _, made := range structures {
 		text.WriteString(made.msl())
 	}

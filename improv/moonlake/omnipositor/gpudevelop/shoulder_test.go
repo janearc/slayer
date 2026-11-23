@@ -74,7 +74,7 @@ const (
 	codeTop = 255 // defined: a byte's eight bits
 )
 
-// heldTones are the tones the kernel is held to the tone at: hillside's,
+// heldTones are the tones the kernel is held to the tone at: the session's,
 // a hundred times white, and a low knee with a near top. Each says its
 // top, so the ramp knows how far to run; a top of one or less read as a
 // hundred is ninjafilm/colour's to test.
@@ -97,10 +97,9 @@ var saturated = []maths.Light{
 // it: a grey ramp from black to past the top, then each saturated colour
 // at luminances from a step past the knee to past the top.
 //
-// Not at the knee itself: a colour with a part past white is clipped a
-// part at a time at or under the knee and bleached just over it, a jump
-// in the definition, and a float32 rounding of its luminance puts the
-// kernel on either side of it.
+// Not at the knee itself: the print is continuous there, so a float32
+// rounding of the luminance that puts the kernel on either side of it
+// changes nothing, and the steps start a step past it.
 func heldLights(tone colour.Tone) []float32 {
 	var rgb []float32
 	for step := range rampPixels {
@@ -196,6 +195,85 @@ func TestTheOldDenominatorIsSeenToDisagree(t *testing.T) {
 		if !(worst > codeBound) {
 			t.Errorf("knee %v, top %v: the old denominator came within "+
 				"%.4f, inside %.4f", tone.Knee, tone.Top, worst, codeBound)
+		}
+	}
+}
+
+// underKneeLights is the stage's light for a tone as the saturated colours
+// take it under the knee: each at luminances from a step over black to a
+// step under the knee, well away from the knee itself. Those whose red,
+// green or blue is past white there are the ones the shoulder bleaches
+// without rolling their luminance off.
+func underKneeLights(tone colour.Tone) []float32 {
+	var rgb []float32
+	for _, hue := range saturated {
+		unit := hue.Scale(1 / hue.Luminance()) // defined: unit luminance
+		for step := range colourSteps {
+			past := float64(step + 1) // defined: a step over black
+			l := unit.Scale(tone.Knee * past / (colourSteps + 1))
+			rgb = append(rgb, float32(l.R), float32(l.G), float32(l.B))
+		}
+	}
+	return rgb
+}
+
+// pastWhite is whether any part of any light is past white.
+func pastWhite(rgb []float32) bool {
+	for _, part := range rgb {
+		if part > 1 { // defined: white
+			return true
+		}
+	}
+	return false
+}
+
+// the kernel bleaches a saturated colour under the knee as the tone does:
+// a part past white is drawn toward white along the colour's hue, and not
+// clipped a part at a time. Every byte the kernel draws is within
+// codeBound of the tone's code before rounding.
+func TestTheKernelBleachesASaturatedColourUnderTheKneeAsTheToneDoes(
+	t *testing.T) {
+	for _, tone := range heldTones {
+		rgb := underKneeLights(tone)
+		if !pastWhite(rgb) {
+			t.Fatalf("knee %v: no light under the knee has a part past "+
+				"white", tone.Knee)
+		}
+		stage, err := New(len(rgb)/channels, 1, tone)
+		if err != nil {
+			t.Fatal(err)
+		}
+		worst, at := shoulderExcess(t, stage, tone, rgb)
+		stage.Close()
+		if worst > codeBound {
+			t.Errorf("knee %v, top %v: byte %d is %.4f from the tone's "+
+				"code, past %.4f", tone.Knee, tone.Top, at, worst, codeBound)
+		}
+	}
+}
+
+// the anti-test: a clip of the same lights, each part held at white, is
+// further from the tone's bleach than codeBound, so the test above can
+// tell a kernel that clips under the knee from one that bleaches.
+func TestAClipUnderTheKneeIsToldFromTheTonesBleach(t *testing.T) {
+	for _, tone := range heldTones {
+		rgb := underKneeLights(tone)
+		printing := tone.Print()
+		worst := 0.0
+		for first := 0; first < len(rgb); first += channels {
+			light := maths.RGB(float64(rgb[first]), float64(rgb[first+1]),
+				float64(rgb[first+2])) // defined: green and blue follow red
+			bleached := printing.Squeeze(light)
+			clipped := maths.RGB(min(light.R, 1), min(light.G, 1),
+				min(light.B, 1)) // defined: white is one
+			for _, pair := range [][2]float64{{bleached.R, clipped.R},
+				{bleached.G, clipped.G}, {bleached.B, clipped.B}} {
+				worst = max(worst, math.Abs(codeOf(pair[0])-codeOf(pair[1])))
+			}
+		}
+		if !(worst > codeBound) {
+			t.Errorf("knee %v: a clip came within %.4f of the bleach, "+
+				"inside %.4f", tone.Knee, worst, codeBound)
 		}
 	}
 }
