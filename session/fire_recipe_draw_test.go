@@ -27,10 +27,10 @@ func fireOnFixture(t *testing.T) asked {
 	text := string(raw)
 	text = strings.Replace(text, "scene:", "$schema: "+set.EcosystemSchema+"\nscene:\n  renderer: gpu-native", 1)
 	text = strings.Replace(text, "light: moon", "light: none", 1)
-	text = strings.Replace(text, "kind: spruce", "recipe: wood fire", 1)
+	text = strings.Replace(text, "recipe: fixture-spruce", "recipe: wood fire", 1)
 	text = strings.Replace(text, "alight: true", "alight: false", 1)
 	start, end := strings.Index(string(study), "  recipes:"), strings.Index(string(study), "  set:")
-	text = strings.Replace(text, "  terrain:", string(study)[start:end]+"  terrain:", 1)
+	text = strings.Replace(text, "  recipes:\n", string(study)[start:end], 1)
 	if err = os.WriteFile(given.set, []byte(text), 0o644); err != nil {
 		t.Fatal(err)
 	}

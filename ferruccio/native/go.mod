@@ -1,6 +1,6 @@
 module github.com/janearc/slayer/ferruccio/native
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/go-webgpu/goffi v0.6.8
@@ -29,6 +29,7 @@ require (
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
+	go.etcd.io/bbolt v1.5.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/term v0.47.0 // indirect
 	golang.org/x/text v0.42.0 // indirect

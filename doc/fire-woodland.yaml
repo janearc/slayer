@@ -26,6 +26,8 @@ scene:
     step: 1
     smooth: 3
   recipes:
+    plant-coast-redwood: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: coast-redwood}}
+    plant-fern: {plant: {family: fern, file: ../manufacture/plants/ferns/fern-profiles.yaml, species: fern}}
     surface fire:
       kind: fire
       flame:
@@ -55,22 +57,22 @@ scene:
   set:
     things:
       viewpoint: {kind: cobble, seed: 4, east: 263748, north: 2148392}
-      lower west: {kind: coast-redwood, complexity: clumps, seed: 2, east: 263654, north: 2148389}
-      lower east: {kind: coast-redwood, complexity: clumps, seed: 5, east: 263667, north: 2148391}
-      upper west: {kind: coast-redwood, complexity: clumps, seed: 9, east: 263652, north: 2148401}
-      upper centre: {kind: coast-redwood, complexity: clumps, seed: 2, east: 263658, north: 2148396}
-      upper east: {kind: coast-redwood, complexity: clumps, seed: 5, east: 263664, north: 2148399}
-      east flank: {kind: coast-redwood, complexity: clumps, seed: 9, east: 263679, north: 2148387}
-      west flank: {kind: coast-redwood, complexity: clumps, seed: 5, east: 263642, north: 2148398}
+      lower west: {recipe: plant-coast-redwood, complexity: clumps, seed: 2, east: 263654, north: 2148389}
+      lower east: {recipe: plant-coast-redwood, complexity: clumps, seed: 5, east: 263667, north: 2148391}
+      upper west: {recipe: plant-coast-redwood, complexity: clumps, seed: 9, east: 263652, north: 2148401}
+      upper centre: {recipe: plant-coast-redwood, complexity: clumps, seed: 2, east: 263658, north: 2148396}
+      upper east: {recipe: plant-coast-redwood, complexity: clumps, seed: 5, east: 263664, north: 2148399}
+      east flank: {recipe: plant-coast-redwood, complexity: clumps, seed: 9, east: 263679, north: 2148387}
+      west flank: {recipe: plant-coast-redwood, complexity: clumps, seed: 5, east: 263642, north: 2148398}
     stands:
       the grove:
-        kind: coast-redwood
+        recipe: plant-coast-redwood
         complexity: clumps
         count: 100
         seed: 15
         exclude: {around: viewpoint, clearance: {value: 65, unit: m}}
       understory:
-        kind: fern
+        recipe: plant-fern
         count: 250
         seed: 21
         exclude: {around: viewpoint, clearance: {value: 55, unit: m}}

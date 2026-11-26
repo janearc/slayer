@@ -13,4 +13,4 @@ case "$game" in
     */*) game=$(cd "$(dirname "$game")" && pwd)/$(basename "$game") ;;
     *) game=$(command -v "$game") ;;
 esac
-exec "$root/bin/ferruccio" open --preview-transport slayer --starter "${FERRUCCIO_STARTER:-}" --evidence "$evidence" --agent "${FERRUCCIO_AGENT:-ferruccio}" --game "$game" --slayer "$slayer" --examples "$root/ferruccio/examples" --game-home "${GAME_HOME:-}" "$@"
+exec "$root/bin/ferruccio" open --preview-transport azazel --azazel "${FERRUCCIO_AZAZEL:-}" --azazel-queue "${FERRUCCIO_AZAZEL_QUEUE:-}" --starter "${FERRUCCIO_STARTER:-}" --evidence "$evidence" --agent "${FERRUCCIO_AGENT:-ferruccio}" --game "$game" --slayer "$slayer" --examples "$root/ferruccio/examples" --game-home "${GAME_HOME:-}" "$@"

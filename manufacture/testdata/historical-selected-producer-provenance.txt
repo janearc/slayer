@@ -1,0 +1,17 @@
+Selected producer source reconstruction, 2026-11-24
+
+The recorded captures used the original selected producer with SHA-256
+3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094.
+The maintained geometry_sample_selected.go is gofmt-formatted and has
+SHA-256 a507301d2d4776b6e9db2635e7fb37322642987b9abbb1080d005a1122c5b30f.
+The sole source difference is import ordering. Reconstruct the exact original:
+
+    cp manufacture/testdata/geometry_sample_selected.go /tmp/historical_selected.go
+    patch -s /tmp/historical_selected.go < manufacture/testdata/history/historical-selected-producer.patch
+    shasum -a 256 /tmp/historical_selected.go
+
+The zero-context reconstruction patch has SHA-256
+94c923cddbf4153f5c157b223d45259d076fc9eb21bc621a792e3d1cfa2aca65.
+The historical plant producer can then be reconstructed from that file using
+history/historical-plant-producer.patch, as detailed in
+historical-plants-provenance.txt.

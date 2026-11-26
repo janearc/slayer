@@ -1,0 +1,18 @@
+One 32 by 32 water patch at left 1160, top 1400 of the
+2048 by 1820 street frame. The same executable (SHA-256
+65ddcb20b7bfdac9400297b78339baa8692b06003aaf6d18ff607b52b0a6004e),
+set (SHA-256 a5b906416963004ce02cd4ef5eebd38e78b170262a3397a4b147fce26bb365fd),
+street camera, fixed exposure, software GPU and SLAYER_SCROOGE=1 were used.
+
+One and four rays per side are cuts of separately drawn 96 by 96 regions;
+16 and 32 rays per side are independently drawn 32 by 32 regions. These are
+1, 16, 256 and 1024 samples per pixel. A two-rays-per-side (four-sample)
+region was also drawn. The 16-ray draw reported 3 minutes 17 seconds and the
+32-ray draw 5 minutes 6 seconds after staging, with cached scene inputs.
+The 32-ray image is a finer visual reference, not proven converged. These
+are developed PNG images; linear-light scores have not been computed.
+
+The two-rays-per-side region completed in 1 minute 34 seconds after staging.
+All five developed images are available for visual review. No convergence,
+raw-light error, isolated-bright-pixel score or cross-run variation has yet
+been measured for this street patch.

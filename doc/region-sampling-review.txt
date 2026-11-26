@@ -1,0 +1,34 @@
+Region sampling review
+
+Five 32 by 32 patches in the recorded 2048 by 1820 street study have raw
+linear-light comparisons. Each uses the same recorded executable and set,
+software GPU, fixed exposure and fresh draws. The reports name the hashes,
+coordinates, thresholds, scores and limitations. Existing scene caches were
+used; complete transitive input closure has not been established.
+
+Mean absolute RGB difference against the 32-per-side reference:
+                1/side     2/side     4/side     16/side
+Water           0.580653   0.762536   0.841461   0.630330
+Wall            0.013001   0.007951   0.004234   0.001751
+Haze            0.050309   0.028586   0.017689   0.007339
+Lamps           0.099712   0.051567   0.025610   0.007638
+End             0.861611   0.461575   0.256102   0.079692
+
+Water does not show a monotonic mean difference in this sequence; the other
+four do. Isolated-positive counts do not all follow the same pattern and use
+patch-specific thresholds; consult the individual reports rather than compare
+counts across patches. These are observations of particular finite draws, not
+a universal sampling rule or an identified cause of bright pixels.
+
+The water patch also has a 64-per-side reference: its 32-per-side frame has
+mean absolute RGB difference 0.500921 against that finer draw. A single 64
+reference is also finite. No reference has been shown converged and raw draw
+repeat variation was not measured in these studies. For water, delivered
+pixels from one prior repeat matched for each sample setting; that is not a
+raw repeat measurement. The nearly white end sheet hides much of its raw
+variation. Review the images as well as the numbers.
+
+Reports: region-water-linear-report.txt, region-water-64-report.txt,
+region-wall-linear-report.txt, region-haze-linear-report.txt,
+region-lamps-linear-report.txt and region-end-linear-report.txt. Each gallery
+folder holds its inspected sheet, source raw frames, score JSON and helper.

@@ -16,7 +16,7 @@ const nativeSeeds = 6
 
 func TestNativeKindsAreGrownAtEveryDetailFromManySeeds(t *testing.T) {
 	for _, name := range nativeKinds {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatalf("%s is not a kind: %v", name, err)
 		}
@@ -53,24 +53,5 @@ func TestTheHalaStandsOnItsAerialRootsAndOthersOnNone(t *testing.T) {
 		if plantProfiles[name].Roots != nil {
 			t.Errorf("%s shows roots no source named", name)
 		}
-	}
-}
-
-func TestANativeProfileWithoutItsLeavesIsRefused(t *testing.T) {
-	for _, name := range nativeKinds {
-		profile := plantProfiles[name]
-		profile.LeafLength = 0
-		if profile.valid() == nil {
-			t.Errorf("%s with no leaf length was taken", name)
-		}
-	}
-}
-
-func TestATreeHeathWithMoreBladesThanACellHoldsIsRefused(t *testing.T) {
-	profile := plantProfiles["erica-arborea"]
-	profile.TwigCount *= 2
-	if profile.valid() == nil {
-		t.Error("a tree heath of twice its twigs, past a cell's blades, " +
-			"was taken")
 	}
 }

@@ -1,0 +1,25 @@
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: gate bridge
+  seed: 1
+  setting: space
+  light: none
+  film: {width: 800, height: 600, rays: 1, wide: 40, exposure: 1}
+  cameras:
+    far:
+      location: {at: [-520, -820, 60]}
+      orientation: {look_at: [0, 0, 260]}
+  recipes:
+    gate:
+      composition: {file: gate-composition.yaml}
+  set:
+    things:
+      gate:
+        recipe: gate
+        seed: 31
+        complexity: hull
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  world:
+    unit: 1

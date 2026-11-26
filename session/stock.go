@@ -2,6 +2,7 @@ package session
 
 import (
 	"math"
+	"sync"
 
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/manufacture"
@@ -70,8 +71,42 @@ func (have stock) made(given asked, name string,
 // it stands at the origin. the manufactory's light is a type nothing
 // outside it can name, so its lamps are kept as the way to read them.
 func manufactured(given asked, name string, pick int) (kept, error) {
-	return manufacturedRecipe(given, name, pick, "quick", nil)
+	var book func() (*manufacture.PlantBook, error)
+	switch name {
+	case "spruce", "norway":
+		book = hillsideConifers
+	case "fern":
+		book = hillsideFerns
+	default:
+		return manufacturedRecipe(given, name, pick, "quick", nil)
+	}
+	plants, err := book()
+	if err != nil {
+		return kept{}, err
+	}
+	row, err := plants.New(manufacture.PlantOptions{Species: name})
+	if err != nil {
+		return kept{}, err
+	}
+	return manufacturedKind(given, row, pick, "quick")
 }
+
+// Hillside's species selectors use the same checked, embedded books as
+// authored models. Each book is read once and shared across its specimens.
+func hillsideBook(family string) (*manufacture.PlantBook, error) {
+	name, raw, err := manufacture.EmbeddedPlantBook(family)
+	if err != nil {
+		return nil, err
+	}
+	return manufacture.ReadPlantBook(family, name, raw)
+}
+
+var hillsideConifers = sync.OnceValues(func() (*manufacture.PlantBook, error) {
+	return hillsideBook("conifer")
+})
+var hillsideFerns = sync.OnceValues(func() (*manufacture.PlantBook, error) {
+	return hillsideBook("fern")
+})
 
 // manufacturedRecipe shares geometry across placements of one recipe.
 func manufacturedRecipe(given asked, name string, pick int, detail string,

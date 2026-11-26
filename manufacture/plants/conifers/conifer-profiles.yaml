@@ -1,0 +1,290 @@
+# Authored modelling choices, not measurements. Source notes:
+# doc/model/vegetation/conifer-foliage.md
+profiles:
+- kind: "spruce"
+  status: "picked"
+  by: "ninja-gaiden and vegetation study"
+  date: "2026-11-08"
+  height: [4, 11]
+  slenderness: [0.02, 0.03]
+  between: [0.4, 0.6]
+  lowest: [5, 8]
+  habit:
+    turn: 2.399963229728653
+    start: 0.1
+    top: 0.97
+    thinning: 0.55
+    fewest: 3
+    stray: 0.35
+    low: 100
+    lift: 38
+    sway: 6
+    reach: 0.3
+    shortening: 0.88
+    uneven: 0.15
+    girth: 0.35
+    least: 0.012
+    own: 0
+  trunk:
+    joints: [[1, 0], [0, 0.01]]
+    sides: 8
+  bark:
+    joints: [[1, 0], [0.75, 0], [0.5, 0], [0.25, 0]]
+    sides: 5
+  branch:
+    pieces: 3
+    droop: 0.22
+    wander: 0
+  clad:
+    joints: [[0, 0.1], [0, 0.22], [0, 0.15], [0, 0]]
+    sides: 6
+  foliage: "needles"
+  needle:
+    length: [0.014, 0.022]
+    length-status: picked
+    width: 0.0012
+    thickness: 0.0012
+    spacing: 0.004
+    angle: 70
+    rows: 4
+    wood-sides: 8
+  flare: 0
+  bark-name: "bark"
+  bark-colour: [0.26, 0.17, 0.1]
+  leaf-name: "needles"
+  leaf-colour: [0.07, 0.24, 0.1]
+- kind: "norway"
+  status: "picked"
+  by: "ninja-gaiden and vegetation study"
+  date: "2026-11-08"
+  height: [6, 13]
+  slenderness: [0.015, 0.025]
+  between: [0.5, 0.75]
+  lowest: [5, 7]
+  habit:
+    turn: 2.399963229728653
+    start: 0.1
+    top: 0.97
+    thinning: 0.55
+    fewest: 3
+    stray: 0.35
+    low: 100
+    lift: 38
+    sway: 6
+    reach: 0.3
+    shortening: 0.88
+    uneven: 0.15
+    girth: 0.35
+    least: 0.012
+    own: 0
+  trunk:
+    joints: [[1, 0], [0, 0.01]]
+    sides: 8
+  bark:
+    joints: [[1, 0], [0.7, 0], [0.45, 0], [0.2, 0]]
+    sides: 5
+  branch:
+    pieces: 3
+    droop: 0.12
+    wander: 0
+  clad:
+    joints: [[0, 0.05], [0, 0.07], [0, 0.06], [0, 0.03]]
+    sides: 5
+  foliage: "needles"
+  needle:
+    length: [0.014, 0.022]
+    length-status: picked
+    width: 0.0012
+    thickness: 0.0012
+    spacing: 0.004
+    angle: 70
+    rows: 4
+    wood-sides: 8
+  flare: 0
+  bark-name: "bark"
+  bark-colour: [0.24, 0.15, 0.09]
+  leaf-name: "needles"
+  leaf-colour: [0.06, 0.2, 0.08]
+  shoots:
+    per: [4, 6]
+    shoot:
+      pieces: 2
+      droop: 0.6
+      wander: 0
+    habit:
+      turn: 3.141592653589793
+      start: 0.15
+      top: 0.95
+      thinning: 0
+      fewest: 1
+      stray: 0.05
+      low: 65
+      lift: 10
+      sway: 8
+      reach: 1.1
+      shortening: 0.4
+      uneven: 0.2
+      girth: 0.4
+      least: 0.01
+      own: 0
+    wear:
+      joints: [[0, 0.12], [0, 0.2], [0, 0.08]]
+      sides: 4
+- kind: "coast-redwood"
+  status: "picked"
+  by: "ninja-gaiden and vegetation study"
+  date: "2026-11-08"
+  height: [18, 42]
+  slenderness: [0.018, 0.026]
+  between: [1.1, 1.8]
+  lowest: [3, 5]
+  habit:
+    turn: 2.399963229728653
+    start: 0.3
+    top: 0.995
+    thinning: 0.55
+    fewest: 3
+    stray: 0.35
+    low: 86
+    lift: 22
+    sway: 6
+    reach: 0.22
+    shortening: 0.88
+    uneven: 0.15
+    girth: 0.22
+    least: 0.0002
+    own: 0
+  trunk:
+    joints: [[1, 0], [0, 0.01]]
+    sides: 8
+  bark:
+    joints: [[1, 0], [0.7, 0], [0.45, 0], [0.2, 0]]
+    sides: 5
+  branch:
+    pieces: 3
+    droop: 0.06
+    wander: 0
+  clad:
+    joints: [[0, 0.05], [0, 0.07], [0, 0.06], [0, 0.03]]
+    sides: 5
+  foliage: "flat-spray"
+  needle:
+    length: [0.01, 0.02]
+    length-status: read
+    length-source: osu-coast-redwood-foliage
+    length-references: [redwood-needle-minimum, redwood-needle-maximum]
+    width: 0.002
+    thickness: 0.00025
+    spacing: 0.004
+    angle: 75
+    rows: 2
+    wood-sides: 6
+  flare: 1.6
+  bark-name: "redwood bark"
+  bark-colour: [0.31, 0.16, 0.1]
+  leaf-name: "redwood foliage"
+  leaf-colour: [0.07, 0.24, 0.12]
+  shoots:
+    per: [12, 18]
+    shoot:
+      pieces: 2
+      droop: 0.08
+      wander: 0
+    habit:
+      turn: 3.141592653589793
+      start: 0.15
+      top: 0.95
+      thinning: 0
+      fewest: 1
+      stray: 0.05
+      low: 65
+      lift: 10
+      sway: 8
+      reach: 1.7999999999999998
+      shortening: 0.4
+      uneven: 0.2
+      girth: 0.4
+      least: 0.01
+      own: 0
+    wear:
+      joints: [[0, 0.05], [0, 0.09], [0, 0]]
+      sides: 4
+- kind: "giant-sequoia"
+  status: "picked"
+  by: "ninja-gaiden and vegetation study"
+  date: "2026-11-08"
+  height: [20, 45]
+  slenderness: [0.045, 0.065]
+  between: [1.4, 2.4]
+  lowest: [3, 5]
+  habit:
+    turn: 2.399963229728653
+    start: 0.25
+    top: 0.995
+    thinning: 0.55
+    fewest: 3
+    stray: 0.35
+    low: 72
+    lift: 22
+    sway: 6
+    reach: 0.24
+    shortening: 0.88
+    uneven: 0.15
+    girth: 0.22
+    least: 0.0002
+    own: 0
+  trunk:
+    joints: [[1, 0], [0, 0.01]]
+    sides: 8
+  bark:
+    joints: [[1, 0], [0.7, 0], [0.45, 0], [0.2, 0]]
+    sides: 5
+  branch:
+    pieces: 3
+    droop: 0.12
+    wander: 0
+  clad:
+    joints: [[0, 0.05], [0, 0.07], [0, 0.06], [0, 0.03]]
+    sides: 5
+  foliage: "scales"
+  needle:
+    length: [0.003, 0.006]
+    length-status: read
+    length-source: osu-giant-sequoia-foliage
+    length-references: [sequoia-scale-minimum, sequoia-scale-maximum]
+    width: 0.001
+    thickness: 0.0006
+    spacing: 0.003
+    angle: 30
+    rows: 3
+    wood-sides: 6
+  flare: 1.5
+  bark-name: "sequoia bark"
+  bark-colour: [0.37, 0.2, 0.12]
+  leaf-name: "sequoia foliage"
+  leaf-colour: [0.1, 0.27, 0.13]
+  shoots:
+    per: [12, 18]
+    shoot:
+      pieces: 2
+      droop: 0.18
+      wander: 0
+    habit:
+      turn: 2.399963229728653
+      start: 0.15
+      top: 0.95
+      thinning: 0
+      fewest: 1
+      stray: 0.05
+      low: 65
+      lift: 10
+      sway: 8
+      reach: 1.7999999999999998
+      shortening: 0.4
+      uneven: 0.2
+      girth: 0.4
+      least: 0.01
+      own: 0
+    wear:
+      joints: [[0, 0.05], [0, 0.09], [0, 0]]
+      sides: 4

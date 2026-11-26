@@ -56,7 +56,7 @@ var filmMisses = []miss{
 		[]string{"job.yaml:3:", "/film/width"}},
 	{"film.height bound", still + "film: {height: 0}\n",
 		[]string{"job.yaml:3:", "/film/height"}},
-	{"film.rays bound", still + "film: {rays: 17}\n",
+	{"film.rays bound", still + "film: {rays: 65}\n",
 		[]string{"job.yaml:3:", "/film/rays"}},
 	{"film.wide bound", still + "film: {wide: 180}\n",
 		[]string{"job.yaml:3:", "/film/wide"}},

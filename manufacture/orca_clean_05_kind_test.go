@@ -9,7 +9,7 @@ import (
 )
 
 func TestOrcaKindPreservesApprovedMeshAndPlacement(t *testing.T) {
-	kind, err := KindNamed("orca-clean-05")
+	kind, err := defaultWhaleProfiles.NewOrca("swim", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestOrcaKindPreservesApprovedMeshAndPlacement(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want, err := OrcaClean05(0, maths.Local())
+	want, err := orcaSwimming(0, maths.Local())
 	if err != nil {
 		t.Fatal(err)
 	}

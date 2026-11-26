@@ -5,6 +5,8 @@ package manufacture
 import (
 	"bufio"
 	_ "embed"
+	"encoding/hex"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -17,151 +19,141 @@ import (
 //go:embed testdata/geometry-records.yaml
 var geometryCountsRaw []byte
 
-// referenceReason is defined by the four fields before a refusal's reason.
-const referenceReason = 4
+// referenceRecord retains the full refusal text, including its spacing.
+type referenceRecord struct {
+	name, seedText, level, expected, reason string
+	seed                                    uint64
+}
+
+func parseReferenceRecord(line string) (referenceRecord, error) {
+	fields := strings.SplitN(line, " ", 4)
+	if len(fields) != 4 || fields[0] == "" || (fields[1] != "5" && fields[1] != "11") {
+		return referenceRecord{}, fmt.Errorf("invalid geometry reference row %q", line)
+	}
+	switch fields[2] {
+	case "hull", "clumps", "quick", "demo":
+	default:
+		return referenceRecord{}, fmt.Errorf("invalid geometry detail in %q", line)
+	}
+	seed, err := strconv.ParseUint(fields[1], 10, 64)
+	if err != nil {
+		return referenceRecord{}, err
+	}
+	row := referenceRecord{name: fields[0], seedText: fields[1], seed: seed, level: fields[2], expected: fields[3]}
+	if strings.HasPrefix(fields[3], "REFUSED ") {
+		row.expected, row.reason = "REFUSED", strings.TrimPrefix(fields[3], "REFUSED ")
+		if row.reason == "" {
+			return referenceRecord{}, fmt.Errorf("empty refusal in %q", line)
+		}
+	} else if raw, err := hex.DecodeString(fields[3]); err != nil || len(raw) != 32 {
+		return referenceRecord{}, fmt.Errorf("invalid geometry digest in %q", line)
+	}
+	return row, nil
+}
+
+// referenceFiles keeps independent historical sources separate.
+var referenceFiles = []string{
+	"geometry-reference-arm64.txt", "spacecraft-reference-arm64.txt",
+	"ground-reference-arm64.txt", "survey-reference-arm64.txt", "large-reference-arm64.txt",
+	"civic-reference-arm64.txt", "personal-reference-arm64.txt", "yard-reference-arm64.txt",
+	"summit-reference-arm64.txt", "launcher-reference-arm64.txt", "vegetation-reference-arm64.txt",
+	"stage-reference-arm64.txt", "vehicle-reference-arm64.txt", "saucer-reference-arm64.txt",
+	"stack-reference-arm64.txt", "later-reference-arm64.txt", "historical-plants-reference-arm64.txt",
+	"historical-public-partial.txt", "historical-bridge-demo-arm64.txt", "historical-corrected-scavenged-arm64.txt",
+}
 
 func TestAuthoredCatalogueMatchesItsGeometryRecords(t *testing.T) {
-	file, err := os.Open("testdata/geometry-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer file.Close()
-	additions, err := os.Open("testdata/spacecraft-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer additions.Close()
-	ground, err := os.Open("testdata/ground-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer ground.Close()
-	survey, err := os.Open("testdata/survey-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer survey.Close()
-	large, err := os.Open("testdata/large-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer large.Close()
-	civic, err := os.Open("testdata/civic-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer civic.Close()
-	personal, err := os.Open("testdata/personal-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer personal.Close()
-	yard, err := os.Open("testdata/yard-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer yard.Close()
-	summit, err := os.Open("testdata/summit-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer summit.Close()
-	launcher, err := os.Open("testdata/launcher-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer launcher.Close()
-	vegetation, err := os.Open("testdata/vegetation-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer vegetation.Close()
-	stage, err := os.Open("testdata/stage-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer stage.Close()
-	vehicles, err := os.Open("testdata/vehicle-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer vehicles.Close()
-	saucers, err := os.Open("testdata/saucer-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer saucers.Close()
-	stacks, err := os.Open("testdata/stack-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer stacks.Close()
-	later, err := os.Open("testdata/later-reference-arm64.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer later.Close()
-	names := map[string]bool{}
-	seen := map[string]bool{}
-	scan := bufio.NewScanner(io.MultiReader(file, additions, ground, survey, large, civic,
-		personal, yard, summit, launcher, vegetation, stage, vehicles, saucers,
-		stacks, later))
-	cases, geometries, refusals := 0, 0, 0
-	for scan.Scan() {
-		row := strings.Fields(scan.Text())
-		if len(row) < 4 {
-			t.Fatalf("invalid geometry reference row: %q", scan.Text())
-		}
-		name, seedText, level := row[0], row[1], row[2]
-		key := strings.Join(row[:3], " ")
-		if seen[key] {
-			t.Fatalf("duplicate geometry reference %s", key)
-		}
-		seen[key] = true
-		names[name] = true
-		cases++
-		seed, err := strconv.ParseUint(seedText, 10, 64)
+	var sources []io.Reader
+	for _, name := range referenceFiles {
+		file, err := os.Open("testdata/" + name)
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected := row[3]
-		if expected == "REFUSED" {
-			refusals++
-		} else {
-			geometries++
+		defer file.Close()
+		sources = append(sources, file)
+	}
+	scan := bufio.NewScanner(io.MultiReader(sources...))
+	var rows []referenceRecord
+	for scan.Scan() {
+		row, err := parseReferenceRecord(scan.Text())
+		if err != nil {
+			t.Fatal(err)
 		}
-		t.Run(name+"_"+seedText+"_"+level, func(t *testing.T) {
-			referenceSpecimen(t, name, seed, level, expected,
-				strings.Join(row[referenceReason:], " "))
-		})
+		rows = append(rows, row)
 	}
 	if err := scan.Err(); err != nil {
 		t.Fatal(err)
 	}
-	referencePopulation(t, names, cases, geometries, refusals)
+	// Refuse an incomplete catalogue before attempting any expensive models.
+	referencePopulation(t, rows)
+	for _, row := range rows {
+		t.Run(row.name+"_"+row.seedText+"_"+row.level, func(t *testing.T) {
+			referenceSpecimen(t, row.name, row.seed, row.level, row.expected, row.reason)
+		})
+	}
 }
 
-// referencePopulation refuses incomplete records or uncatalogued kinds.
-func referencePopulation(t *testing.T, names map[string]bool,
-	cases, geometries, refusals int,
-) {
+// referencePopulation refuses missing, duplicate or uncatalogued cases.
+func referencePopulation(t *testing.T, rows []referenceRecord) {
 	t.Helper()
-	var expected struct{ Cases, Geometries, Refusals int }
-	if err := yamlfile.Read("testdata/geometry-records.yaml", geometryCountsRaw, &expected); err != nil {
+	var counts referenceCounts
+	if err := yamlfile.Read("testdata/geometry-records.yaml", geometryCountsRaw, &counts); err != nil {
 		t.Fatal(err)
 	}
-	if cases != expected.Cases || geometries != expected.Geometries || refusals != expected.Refusals {
-		t.Fatalf("incomplete reference: %d cases, %d geometries, %d refusals", cases, geometries, refusals)
+	actual := append(KindNames(), "spruce", "norway", "coast-redwood", "giant-sequoia",
+		"coast-redwood-shoot", "giant-sequoia-shoot", "fern", "saguaro",
+		"valley-oak", "alder", "poplar", "manzanita", "chaparral-brush", "joshua-tree",
+		"kandelia-obovata", "aegiceras-corniculatum", "avicennia-marina", "bruguiera-gymnorhiza", "sonneratia-apetala",
+		"pandanus-tectorius", "scaevola-taccada", "metrosideros-polymorpha", "barringtonia-asiatica", "quercus-ilex", "erica-arborea", "salix-alba")
+	if err := validateReferencePopulation(rows, actual, counts); err != nil {
+		t.Fatal(err)
 	}
-	actual := KindNames()
-	if len(actual) != len(names) {
-		t.Fatal("catalogue and geometry reference have different kind counts")
-	}
+}
+
+type referenceCounts struct{ Cases, Geometries, Refusals int }
+
+func validateReferencePopulation(rows []referenceRecord, actual []string, counts referenceCounts) error {
+	names := make(map[string]bool, len(actual))
 	for _, name := range actual {
-		if !names[name] {
-			t.Fatalf("kind %s has no reference", name)
+		if names[name] {
+			return fmt.Errorf("duplicate catalogue kind %q", name)
+		}
+		names[name] = true
+	}
+	if len(names) == 0 {
+		return fmt.Errorf("catalogue has no kinds")
+	}
+	seen := make(map[string]bool, len(rows))
+	geometries, refusals := 0, 0
+	for _, row := range rows {
+		if !names[row.name] {
+			return fmt.Errorf("uncatalogued geometry record %q", row.name)
+		}
+		key := row.name + " " + row.seedText + " " + row.level
+		if seen[key] {
+			return fmt.Errorf("duplicate geometry reference %s", key)
+		}
+		seen[key] = true
+		if row.expected == "REFUSED" {
+			refusals++
+		} else {
+			geometries++
 		}
 	}
+	if len(rows) != counts.Cases || geometries != counts.Geometries || refusals != counts.Refusals {
+		return fmt.Errorf("incomplete reference: %d cases, %d geometries, %d refusals", len(rows), geometries, refusals)
+	}
+	for name := range names {
+		for _, seed := range []string{"5", "11"} {
+			for _, level := range []string{"hull", "clumps", "quick", "demo"} {
+				key := name + " " + seed + " " + level
+				if !seen[key] {
+					return fmt.Errorf("missing geometry reference %s", key)
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // referenceSpecimen checks one authored shape and its material record.
@@ -169,22 +161,27 @@ func referenceSpecimen(t *testing.T, name string, seed uint64,
 	level, expected, reason string,
 ) {
 	t.Helper()
-	kind, err := KindNamed(name)
+	kind, err := testKind(name)
 	if err != nil {
 		t.Fatal(err)
 	}
 	made, err := MakeWithComplexity(kind, Sow(seed), level)
 	if expected == "REFUSED" {
-		want := reason
-		if err == nil || err.Error() != want {
-			t.Fatalf("unsupported level: got %v, want %s", err, want)
+		var digest string
+		if err == nil {
+			digest = referenceDigest(t, made)
+		}
+		if !referenceRefusalAccepted(name, seed, level, err, digest, reason) {
+			t.Fatalf("unsupported level: got error %v and digest %q, want refusal %q or the required recorded city success", err, digest, reason)
 		}
 		return
 	}
 	if err != nil {
 		t.Fatal(err)
 	}
-	referenceFingerprint(t, made, expected)
+	if got := referenceDigest(t, made); !referenceAccepted(name, seed, level, got, expected) {
+		t.Fatalf("authored geometry changed: %s, recorded %s", got, expected)
+	}
 }
 
 // referenceFingerprint holds the authored geometry and display material bytes.

@@ -4,6 +4,15 @@ import "fmt"
 
 // resolved preserves the original profile unless both dimensions are supplied.
 func (profile Profile) resolved() (Profile, error) {
+	if profile.Samples < 0 || profile.Samples > 64 || (profile.Samples > 0 && (!profile.Full || (profile.GPU && profile.CPURenderer))) {
+		return Profile{}, fmt.Errorf("exact samples require a full render, one backend, and a count from 1 to 64")
+	}
+	if profile.Samples > 0 && !profile.GPU {
+		profile.CPURenderer = true
+	}
+	if profile.SizePreset != "" && (!profile.Full || profile.Width <= 0 || profile.Height <= 0) {
+		return Profile{}, fmt.Errorf("an output-size preset needs full render dimensions")
+	}
 	if profile.Full && profile.Width == 0 && profile.Height == 0 {
 		return profile, nil
 	}

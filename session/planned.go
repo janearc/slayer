@@ -128,7 +128,7 @@ func (stage *staging) plannedThings(read set.Set) ([]plannedThing,
 			Orientation: maths.About(maths.YAxis, turn)}
 		box, asked, err := stage.extentAt(each.Kind(), each.Recipe(),
 			each.Seed(), at)
-		line := planLine{name: each.Name(), kind: each.Kind(), count: 1,
+		line := planLine{name: each.Name(), kind: stage.reportedKind(each.Kind(), each.Recipe()), count: 1,
 			asked: asked}
 		if err != nil {
 			line.verdict, line.why = verdictBuild,
@@ -213,7 +213,7 @@ func (one plannedThing) judged(eye strategies.Eye) planLine {
 func (stage *staging) plannedStand(each set.Stand, index int,
 	eye strategies.Eye) (planLine, error) {
 	count, seed := each.Count()
-	line := planLine{name: each.Name(), kind: each.Kind(), count: count}
+	line := planLine{name: each.Name(), kind: stage.reportedKind(each.Kind(), each.Recipe()), count: count}
 	member, asked, err := stage.memberExtent(each, seed)
 	line.asked = asked
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 // A branch can have correct needles yet leave a whole tree nearly bare.
 // Shoot rays across the foliage bounds from three sides, excluding lighting.
 func TestCrownFoliageCoverage(t *testing.T) {
-	row, err := KindNamed("coast-redwood")
+	row, err := testKind("coast-redwood")
 	if err != nil {
 		t.Fatal(err)
 	}

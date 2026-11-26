@@ -56,7 +56,7 @@ func TestStagingCannotSampleAFuelBedBeforeItsClockStarts(t *testing.T) {
 
 func TestAValidRepresentationNameCanStillBeUnsupportedByTheChosenMaker(t *testing.T) {
 	given := mustParse(t)
-	given.set = onFixture(t, "kind: fern", "kind: can\n        complexity: hull")
+	given.set = onFixture(t, "recipe: fixture-fern", "kind: can\n        complexity: hull")
 	if _, _, _, err := staged(given); err == nil || !strings.Contains(err.Error(), "can has no hull representation") {
 		t.Fatalf("stand representation refusal lost: %v", err)
 	}

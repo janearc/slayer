@@ -5,6 +5,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
+#include <limits.h>
 #include <string.h>
 #include "bridge.h"
 #include "library.h"
@@ -371,6 +372,7 @@ typedef struct {
 	int flights;
 	int ready_down, ready_band; // the band last waited out, to copy
 	int width, height, rows;
+	int origin_x, origin_y;
 	int expected_inputs, inputs;
 	size_t row_bytes;
 } grid_stream;
@@ -384,11 +386,25 @@ static id<MTLCommandBuffer> commit_band(grid_stream *stream, int band,
 		(__bridge NSArray<id<MTLBuffer>> *)stream->inputs_held;
 	id<MTLBuffer> out = (__bridge id<MTLBuffer>)stream->bands[band];
 	NSArray<id<MTLBuffer>> *buffers = [inputs arrayByAddingObject:out];
-	unsigned int origin[2] = {0, (unsigned int)first};
+	unsigned int origin[2] = {(unsigned int)stream->origin_x,
+	                          (unsigned int)(stream->origin_y + first)};
 	MTLSize grid = MTLSizeMake((NSUInteger)stream->width,
 	                           (NSUInteger)down, 1);
 	return encode(stream->kernel, buffers, grid, origin, sizeof(origin),
 	              err, errlen);
+}
+
+int slayer_metal_grid_origin(void *handle, int x, int y, char *err,
+                             int errlen) {
+	grid_stream *stream = handle;
+	if (stream == NULL || x < 0 || y < 0 || stream->flights != 0 ||
+	    x > INT_MAX - stream->width || y > INT_MAX - stream->height) {
+		say(err, errlen, @"invalid streamed grid origin");
+		return 1;
+	}
+	stream->origin_x = x;
+	stream->origin_y = y;
+	return 0;
 }
 
 // band_named is a phrase naming a band of rows in the context's kernel

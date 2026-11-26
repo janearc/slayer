@@ -40,7 +40,7 @@ func directSunSet(t *testing.T, extraScene string) set.Set {
         source: "synthetic validation coefficients"
 `
 	text = strings.Replace(text, "  set:\n", world+"  set:\n", 1)
-	read, err := set.Read("direct-sun-ground.yaml", []byte(text))
+	read, err := set.Read("../set/testdata/kilauea-iki.yaml", []byte(text))
 	if err != nil {
 		t.Fatal(err)
 	}

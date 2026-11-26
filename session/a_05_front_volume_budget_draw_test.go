@@ -24,7 +24,7 @@ func TestFrontPreparationBudgetsSharedSmokeAtTheGPUVolumeLimit(t *testing.T) {
 	}
 	text := strings.Replace(string(raw), "group-width: {value: 100, unit: m}",
 		"group-width: {value: 0.01, unit: m}", 1)
-	text = strings.Replace(text, "kind: fern, count: 4", "kind: fern, count: 8", 1)
+	text = strings.Replace(text, "recipe: fixture-fern, count: 4", "recipe: fixture-fern, count: 8", 1)
 	if text == string(raw) {
 		t.Fatal("fixture lost grouping width")
 	}

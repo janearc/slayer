@@ -65,8 +65,9 @@ type plan struct {
 	// Studio lights every entry by the plan's own sky and lamps, an
 	// entry with a staging of its own among them: a mirror staged in
 	// space mirrors the dark, and what it is made of is judged in a room.
-	Studio bool `json:"studio" yaml:"studio"`
-	raw    []byte
+	Studio   bool `json:"studio" yaml:"studio"`
+	raw      []byte
+	renderer string
 }
 
 // orbitLimit is the farthest final view may rise above or below its horizon.

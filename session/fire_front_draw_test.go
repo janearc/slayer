@@ -21,7 +21,7 @@ func frontOnFixture(t *testing.T) asked {
 		t.Fatal(err)
 	}
 	text := string(raw)
-	text = strings.Replace(text, "    stands:\n", "    stands:\n      front fuel: {kind: fern, count: 4, seed: 17}\n", 1)
+	text = strings.Replace(text, "    stands:\n", "    stands:\n      front fuel: {recipe: fixture-fern, count: 4, seed: 17}\n", 1)
 	text = strings.Replace(text, "  film:", `  fire-fronts:
     a passing front:
       stand: front fuel
@@ -93,8 +93,8 @@ func TestLiveFrontRefusesTooManyConcurrentGroupsBeforeRendering(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := strings.Replace(string(raw), "kind: fern, count: 4",
-		fmt.Sprintf("kind: fern, count: %d", gpu.VolumeLimit()+8), 1)
+	text := strings.Replace(string(raw), "recipe: fixture-fern, count: 4",
+		fmt.Sprintf("recipe: fixture-fern, count: %d", gpu.VolumeLimit()+8), 1)
 	text = strings.Replace(text, "group-width: {value: 100", "group-width: {value: 0.01", 1)
 	if err = os.WriteFile(given.set, []byte(text), 0644); err != nil {
 		t.Fatal(err)

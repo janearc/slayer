@@ -605,6 +605,9 @@ func Sun(toward maths.Vec, strength maths.Light) Lamp {
 
 // World assembles surfaces, volumes, fields, lights, sky, and global haze.
 type World struct {
+	// authors records optional source identity for staged surface pointers.
+	// It is staging metadata and is not read by the renderer.
+	authors map[*Thing]AuthorRef
 	// VolumeIllumination's zero value lights painted media by lamps alone.
 	VolumeIllumination VolumeIllumination
 	// RayOriginReference's zero value keeps the geometry-derived heuristic.
@@ -695,6 +698,30 @@ type Haze struct {
 
 // NewWorld returns an empty world.
 func NewWorld() *World { return &World{} }
+
+// AuthorRef names an authored collection and object without parsing names.
+type AuthorRef struct {
+	Collection, Name string
+}
+
+// RecordAuthor associates a stored surface with its authored object. Staging
+// records metadata before publishing the world; it must not mutate it while
+// readers inspect the world.
+func (world *World) RecordAuthor(part *Thing, author AuthorRef) {
+	if world.authors == nil {
+		world.authors = make(map[*Thing]AuthorRef)
+	}
+	world.authors[part] = author
+}
+
+// AuthorOf returns a surface's source identity when staging retained one.
+func (world *World) AuthorOf(part *Thing) (AuthorRef, bool) {
+	if world == nil || part == nil {
+		return AuthorRef{}, false
+	}
+	author, ok := world.authors[part]
+	return author, ok
+}
 
 // Add appends a surface and returns its stored pointer.
 func (world *World) Add(added Thing) *Thing {

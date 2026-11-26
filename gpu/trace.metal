@@ -4864,7 +4864,7 @@ kernel void trace(SLAYER_TRACE_ARGUMENTS) {
 	World world = SLAYER_WORLD_INITIALIZER;
 	uint4 native_counts(0);
 	world.native_counts = &native_counts;
-	uint2 pixel = uint2(at.x, at.y + origin.y);
+	uint2 pixel = uint2(at.x + origin.x, at.y + origin.y);
 	world.shared = sky_share(header, pixel);
 	// where in its pixel the sample starts: its own middle, or spread
 	float2 off = placed(header, pixel);

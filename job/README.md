@@ -77,6 +77,12 @@ Exactly one of:
 `aperture`, `focus`, `mode`. All are optional. A preset gives width and height, and some give a rate; a key
 written beside a preset stands over it.
 
+`samples` instead gives the exact total samples per pixel, from 1 to 64;
+do not write it beside `rays`, which remains the number along each side.
+Exact samples support CPU and software-GPU stills without a physical rig,
+aperture, wire mode or region. `--spp` overrides either form; `--rays` restores the
+legacy per-side form. Do not give both flags together.
+
 `mode: wire` draws the edges of what the picture's first rays meet, in
 place of their light: the same rays, camera, time and things as the
 light picture, so the two lie one over the other exactly. On a mesh face
@@ -135,7 +141,14 @@ kernel makes those rays and the frame costs what a pinhole's does. A set
 whose film has a rig takes its lens from the rig, and an aperture over
 it is refused.
 
-Bounds: width and height from 1 to 8192, rays from 1 to 16.
+Bounds: width and height from 1 to 8192. Rays along a pixel's side are
+from 1 to 16 for a whole picture and 1 to 64 for a region.
+
+`region` names a rectangle in the full picture, counting from the top left:
+`{left: 20, top: 30, width: 80, height: 60}`. The rectangle must be
+nonempty and fit the resolved picture. Its pixels keep the full picture's
+camera and scale. A region is a still; unsupported renderers and effects
+are refused. `slayer draw --region 20,30,80,60` stands over the job.
 
 ### flags and shortcuts
 

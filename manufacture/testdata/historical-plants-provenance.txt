@@ -1,0 +1,44 @@
+Historical plant geometry capture, 2026-11-24
+
+The twelve names in historical-plants-names.txt were registered directly
+at f11cfac285997b5fbad53e16509b4bff22a87e3f, the parent of the commit
+that retired the plant kind names. The capture uses that revision's factory
+and the same geometry and material fingerprint as geometry_sample.go.
+It does not add those names back to the public registry.
+
+The producer historical_plant_sample.go accepts a names file, selects each
+kind directly, and records seeds 5 and 11 at hull, clumps, quick and demo.
+It ran on Darwin arm64 with go1.27.3, GOWORK=off and GOMAXPROCS=2.
+Before the capture it reproduced all eight unchanged Valley Oak records.
+The later f8ddbbbb checked-profile constructors reproduced all 96 captured
+rows byte for byte. The explicit twig rounding fix was checked against all
+96 rows on the current RC; all matched.
+
+SHA-256:
+  f11 plant-profiles.yaml       fabb548597747053f7948b1d59ccaa2de7dd97ab899494304f598b51e6b64172
+  f11 plant-choices.yaml        1e069705eb7ce04b616d3e6bf7a1bebbd760991c57aa269099dd64e646f26b60
+  historical_plant_sample.go   8d5da56718f135d5458db3231ff24e804b67e0348acc4f13642855da0c725a1c
+  historical-plants-names.txt  ac2e6757bf0accfd0e3b1531a179119a2e95f5bbe0813cbe6c887d1b09f480e3
+  historical plant records     ebbc00a17ec5b4cca4457314aebde0bd49efe8cc96310c7287136493ab71086f
+
+Producer consolidation, 2026-11-24
+
+The original plant producer's exact source is retained as the patch
+history/historical-plant-producer.patch against the reconstructed original selected
+public producer (SHA-256 3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094).
+To reconstruct the original source without repository history:
+
+    cp manufacture/testdata/geometry_sample_selected.go /tmp/historical_plant_sample.go
+    patch -s /tmp/historical_plant_sample.go < manufacture/testdata/history/historical-selected-producer.patch
+    patch -s /tmp/historical_plant_sample.go < manufacture/testdata/history/historical-plant-producer.patch
+
+The zero-context patch has SHA-256
+a2e69ccde5b64295425afb2c3c5865cb49647ddab246938303f6929953895e99.
+The reconstructed source has the original SHA-256 recorded above. The
+original selected public producer was also compiled against f11cfac2 and
+run once per directly registered plant name; all 96 rows matched this
+capture byte for byte. Its additive Sphere and Tube tags do not change the
+plant meshes' fingerprint bytes.
+
+The original selected producer is reconstructed as documented in
+historical-selected-producer-provenance.txt.

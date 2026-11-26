@@ -8,21 +8,24 @@ It is an illustrative individual. Counts of bones come from specimen
 records; shapes, sizes and markings are chosen, and the code says so in the
 comment beside each number.
 
-## Kinds and sets
+## Profile and sets
 
-- `orca-clean-05`: the animal in an authored three-second swim loop, driven
+- `swim`: the animal in an authored three-second swim loop, driven
   by scene time. Set: `sets/bioforms/orca-clean-05.yaml`, cameras `side`,
   `quarter` and `close` (the head's skin).
-- `orca-clean-05-bones`: the skeleton alone, at rest. Set:
+- `bones`: the skeleton alone, at rest. Set:
   `sets/bioforms/orca-clean-05-bones.yaml`, cameras `side`, `quarter` and
   `hand` (the right flipper).
-- `orca-clean-05-spy-hop`: the skin upright with the head raised and the
+- `spy-hop`: the skin upright with the head raised and the
   flippers out. Set: `sets/bioforms/orca-clean-05-spy-hop.yaml`.
   `sets/bioforms/orca-clean-05-sea.yaml` places the same pose in an open sea,
   the animal standing 0.2 m down so the eye is about 0.95 m above the water.
 
-The bones and the spy-hop are their own kinds because they do not change
-with time, so a renderer that refuses deforming geometry can draw them.
+These sets select the `orca` species from the whale profile book. Its checked
+profile supplies the trunk stations, swim cycle, skin sheen and marking
+reflectances. The existing marking layout and anatomy remain specific to this
+orca study. The bones representation and spy-hop pose are static, so a
+renderer that refuses deforming geometry can draw them.
 
 ## Built from
 
@@ -120,9 +123,8 @@ made. Read the page's anatomy as a study, not as a reference.
 ## Earlier builds
 
 Two earlier lines of study, five builds each, were thrown away one after
-another, each started from a blank file. Their code remains only as the named
-scenes `orca-form-study` and `orca-bioform-study`. What they taught is carried
-into the present animal:
+another, each started from a blank file. Those scenes are no longer in Slayer; their history remains in Git. What
+they taught is carried into the present animal:
 
 - A body and fins that share one radial surface stay connected but are hard to
   shape one part at a time; fins need their own roots, filleted in.

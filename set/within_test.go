@@ -20,7 +20,7 @@ func withinOf(t *testing.T, wedge string) string {
 func TestAStandGrowsWithinAWedge(t *testing.T) {
 	source := withinOf(t,
 		"{of: the first tree, from: 350, to: 20, near: 40, far: 250}")
-	made, err := set.Read("kilauea-iki.yaml", []byte(source))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestAWedgesMistakesAreRefused(t *testing.T) {
 	} {
 		source := withinOf(t,
 			mistake.wedge)
-		_, err := set.Read("kilauea-iki.yaml", []byte(source))
+		_, err := set.Read("testdata/kilauea-iki.yaml", []byte(source))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%s: refused with %v, wanted %q", mistake.wedge, err,
 				mistake.said)

@@ -83,6 +83,9 @@ func (made *digested) of() map[string]string {
 				made.sums[name] = digestOf(path)
 			}
 		}
+		for name, fixed := range made.fixed {
+			made.sums[name] = fixed
+		}
 	})
 	copied := make(map[string]string, len(made.sums))
 	for name, sum := range made.sums {

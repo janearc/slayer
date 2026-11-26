@@ -53,9 +53,14 @@ func TestEachBoatOfAStandIsDrawnAfresh(t *testing.T) {
 // standOf is a stand of a kind, read from a set's text.
 func standOf(t *testing.T, kind string) set.Stand {
 	t.Helper()
-	text := "scene:\n  name: a stand\n  set:\n    stands:\n      those:\n" +
-		"        kind: " + kind + "\n        count: 2\n        seed: 1\n"
-	read, err := set.Read("stand.yaml", []byte(text))
+	selector, recipes := "kind: "+kind, ""
+	if kind == "spruce" {
+		selector = "recipe: specimen-spruce"
+		recipes = "  recipes:\n    specimen-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}\n"
+	}
+	text := "scene:\n  name: a stand\n" + recipes + "  set:\n    stands:\n      those:\n" +
+		"        " + selector + "\n        count: 2\n        seed: 1\n"
+	read, err := set.Read("../sets/stand.yaml", []byte(text))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,7 +2,7 @@
 # gill covers and girdles; the column by the species' counts; the tail's
 # own skeleton; every fin's rays on their supports; finlets where the
 # species has them. Counts, proportions and their sources are in
-# manufacture/fish.yaml.
+# manufacture/animals/vertebrates/fishes/fish.yaml.
 #
 # the frame. places are metres, x east, y north, z up. the four stand
 # twenty metres apart along the east, each in open air with nothing
@@ -21,10 +21,15 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 160, altitude: 40}
+  recipes:
+    profile-pacific-bluefin-tuna-bones: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: pacific-bluefin-tuna, pose: bones}}
+    profile-california-yellowtail-bones: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: california-yellowtail, pose: bones}}
+    profile-california-barracuda-bones: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: california-barracuda, pose: bones}}
+    profile-pacific-sardine-bones: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: pacific-sardine, pose: bones}}
   set:
     things:
       tuna:
-        kind: pacific-bluefin-tuna-bones
+        recipe: profile-pacific-bluefin-tuna-bones
         seed: 11
         position:
           east: {value: 0, unit: m}
@@ -32,7 +37,7 @@ scene:
           up: {value: 0, unit: m}
         heading: {value: 0, unit: deg}
       yellowtail:
-        kind: california-yellowtail-bones
+        recipe: profile-california-yellowtail-bones
         seed: 12
         position:
           east: {value: 20, unit: m}
@@ -40,7 +45,7 @@ scene:
           up: {value: 0, unit: m}
         heading: {value: 0, unit: deg}
       barracuda:
-        kind: california-barracuda-bones
+        recipe: profile-california-barracuda-bones
         seed: 13
         position:
           east: {value: 40, unit: m}
@@ -48,7 +53,7 @@ scene:
           up: {value: 0, unit: m}
         heading: {value: 0, unit: deg}
       sardine:
-        kind: pacific-sardine-bones
+        recipe: profile-pacific-sardine-bones
         seed: 14
         position:
           east: {value: 60, unit: m}

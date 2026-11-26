@@ -4,7 +4,9 @@ package session
 
 import (
 	"math"
+	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -64,10 +66,12 @@ const boxAndTree = `scene:
           standoff_x: 0
           standoff_y: 0
           standoff_z: 2
+  recipes:
+    fixture-spruce: {plant: {family: conifer, file: __CONIFER_PROFILE__, species: spruce}}
   set:
     things:
       the tree:
-        kind: spruce
+        recipe: fixture-spruce
         seed: 3
         east: 1051.5
         north: 8955.25
@@ -96,12 +100,22 @@ const boxAndTree = `scene:
         source: eye
 `
 
+// boxAndTreeSource keeps the profile reference valid in a temporary set.
+func boxAndTreeSource(t *testing.T, source string) string {
+	t.Helper()
+	path, err := filepath.Abs("../manufacture/plants/conifers/conifer-profiles.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.ReplaceAll(source, "__CONIFER_PROFILE__", strconv.Quote(path))
+}
+
 // boxAndTreeAt is the box and tree set written onto the fixture's shelf,
 // and its path.
 func boxAndTreeAt(t *testing.T) string {
 	t.Helper()
 	path := onFixture(t, "", "")
-	put(t, path, boxAndTree)
+	put(t, path, boxAndTreeSource(t, boxAndTree))
 	return path
 }
 
@@ -109,7 +123,7 @@ func boxAndTreeAt(t *testing.T) string {
 func boxAndTreeWith(t *testing.T, was, now string) string {
 	t.Helper()
 	path := onFixture(t, "", "")
-	put(t, path, replaced(t, boxAndTree, was, now))
+	put(t, path, boxAndTreeSource(t, replaced(t, boxAndTree, was, now)))
 	return path
 }
 
@@ -122,7 +136,7 @@ func worldHalfless(t *testing.T) string {
 	if cut == "" {
 		t.Fatal("the set has no world half to cut")
 	}
-	put(t, path, whole)
+	put(t, path, boxAndTreeSource(t, whole))
 	return path
 }
 

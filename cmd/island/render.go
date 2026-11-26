@@ -37,6 +37,8 @@ type record struct {
 	Started             time.Time                `json:"started"`
 	Elapsed             time.Duration            `json:"elapsed-nanoseconds"`
 	SettingsSHA256      string                   `json:"settings-sha256"`
+	InputSettingsSHA256 string                   `json:"input-settings-sha256,omitempty"`
+	ModelSources        []modelSourceRecord      `json:"model-sources,omitempty"`
 	BinarySHA256        string                   `json:"binary-sha256"`
 	ImageSHA256         string                   `json:"image-sha256"`
 	Build               *debug.BuildInfo         `json:"go-build-info,omitempty"`
@@ -142,7 +144,11 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 	if err := os.Mkdir(destination, 0o755); err != nil {
 		return record{}, err
 	}
-	if err := os.WriteFile(filepath.Join(destination, "scene.yaml"), plan.raw, 0o644); err != nil {
+	replay, err := plan.replayScene(destination)
+	if err != nil {
+		return record{}, err
+	}
+	if err := os.WriteFile(filepath.Join(destination, "scene.yaml"), replay, 0o644); err != nil {
 		return record{}, err
 	}
 	picture, profile, err := gpu.SampledAccelerated(world, localEye, lens, time.Duration(plan.Time*float64(time.Second)),
@@ -168,10 +174,13 @@ func (session *sceneSession) draw(ctx context.Context, plan *plan, destination s
 	if err != nil {
 		return record{}, err
 	}
-	receipt := record{TerrainTransition: prepared.Transition, Started: started.UTC(), Elapsed: time.Since(started), SettingsSHA256: plan.hash,
+	receipt := record{TerrainTransition: prepared.Transition, Started: started.UTC(), Elapsed: time.Since(started), SettingsSHA256: configHash(replay),
 		BinarySHA256: session.binaryHash, ImageSHA256: hex.EncodeToString(imageHash[:]), Build: session.build,
-		Sources: plan.Sources, HeightModel: plan.Model, RenderOrigin: origin.Origin(),
+		Sources: plan.Sources, ModelSources: plan.modelSourceRecords(), HeightModel: plan.Model, RenderOrigin: origin.Origin(),
 		Patches: prepared.Patches, Samples: prepared.Samples, Limited: prepared.Limited, Profile: profile, Site: site}
+	if len(plan.modelSources) > 0 {
+		receipt.InputSettingsSHA256 = plan.hash
+	}
 	receipt.NormalStencils, receipt.NormalHeightQueries = prepared.NormalStencils, prepared.NormalHeightQueries
 	receipt.RayReference = trace.Spread(world, time.Duration(plan.Time*float64(time.Second)))
 	raw, err := json.MarshalIndent(receipt, "", "  ")

@@ -36,6 +36,28 @@ func TestOfficeAndHomeBandsDifferAtNightBehindTheGlass(t *testing.T) {
 	}
 }
 
+// An office has a back wall in front of the core, of the rooms' own
+// colour, which its lamp lights; a home has its own side walls and none.
+func TestAnOfficeHasABackWallAndAHomeNone(t *testing.T) {
+	offices, homes := counts(useTower(t, useOffice)),
+		counts(useTower(t, useHome))
+	if offices["back wall"] == 0 || homes["back wall"] != 0 {
+		t.Errorf("back walls: %d in offices, %d in homes",
+			offices["back wall"], homes["back wall"])
+	}
+}
+
+// Anti: an office's back wall glows with no light of its own; only the
+// lit wall that stands in for it in an office with no lamp glows.
+// anti-test of TestAnOfficeHasABackWallAndAHomeNone
+func TestAnOfficesBackWallDoesNotGlow(t *testing.T) {
+	for _, wall := range named(useTower(t, useOffice), "back wall") {
+		if wall.Material != nil && wall.Material.Glow.Luminance() > 0 {
+			t.Fatalf("a back wall glows: %v", wall.Material.Glow)
+		}
+	}
+}
+
 func TestEveryLampOfARoomIsALightAndOnlyOnALitFloorOrHome(t *testing.T) {
 	for _, use := range UseNames() {
 		lamps := named(useTower(t, use), "lamp")

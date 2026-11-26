@@ -16,8 +16,8 @@ type cityFoliagePart struct {
 // group. It does not flatten millions of repeated leaf triangles or introduce
 // unsupported groups inside groups. Native acceleration receives the original
 // shared mesh pointers plus composed planting/cell transforms.
-func prepareCityFoliage(prototypes []cityTreePrototype, palette looks) (map[uint64][]cityFoliagePart, error) {
-	prepared := map[uint64][]cityFoliagePart{}
+func prepareCityFoliage(prototypes []cityTreePrototype, palette looks) (map[cityTreeKey][]cityFoliagePart, error) {
+	prepared := map[cityTreeKey][]cityFoliagePart{}
 	// Different plant families can use the same role name with different
 	// colours. Do not silently assign every family the first one's palette.
 	type plantLook struct {
@@ -46,7 +46,8 @@ func prepareCityFoliage(prototypes []cityTreePrototype, palette looks) (map[uint
 			} else {
 				members = []shape.MeshMember{{Mesh: part.Shape, Space: maths.Local()}}
 			}
-			prepared[prototype.seed] = append(prepared[prototype.seed], cityFoliagePart{role, members})
+			key := cityTreeKey{prototype.kind, prototype.seed}
+			prepared[key] = append(prepared[key], cityFoliagePart{role, members})
 		}
 	}
 	return prepared, nil

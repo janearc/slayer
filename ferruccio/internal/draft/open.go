@@ -83,3 +83,19 @@ func (document *Document) Cameras() []string {
 	}
 	return names
 }
+
+// ReferencedSet returns a job's explicitly named scene file, if present.
+func (document *Document) ReferencedSet() string {
+	if document.kind != "job" {
+		return ""
+	}
+	tree, err := document.Tree()
+	if err != nil {
+		return ""
+	}
+	path := member(member(tree.Content[0], "scene"), "set")
+	if path == nil || path.Kind != yaml.ScalarNode || path.Tag != "!!str" {
+		return ""
+	}
+	return path.Value
+}

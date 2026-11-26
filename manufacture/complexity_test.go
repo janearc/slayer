@@ -5,7 +5,7 @@ import (
 )
 
 func TestCoarseTreesHaveFewerFacesAndDemoHasSeparateBlades(t *testing.T) {
-	row, _ := KindNamed("spruce")
+	row, _ := testKind("spruce")
 	counts, leafFaces := map[string]int{}, map[string]int{}
 	for _, detail := range Complexities() {
 		made, err := MakeWithComplexity(row, Sow(11), detail)
@@ -30,7 +30,7 @@ func TestCoarseTreesHaveFewerFacesAndDemoHasSeparateBlades(t *testing.T) {
 }
 
 func TestComplexityRefusesUnknownLevelsAndUnsownSeeds(t *testing.T) {
-	row, _ := KindNamed("spruce")
+	row, _ := testKind("spruce")
 	if _, err := MakeWithComplexity(row, Sow(1), "needlez"); err == nil {
 		t.Error("accepted an unknown level")
 	}

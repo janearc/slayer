@@ -155,6 +155,28 @@ func TestImageViewNavigableHoverUsesMoveCursor(t *testing.T) {
 	}
 }
 
+func TestImageViewRedrawsOnlyWhenNavigationChanges(t *testing.T) {
+	view := newImageView()
+	view.SetNeedsRedraw(false)
+	view.SetNavigable(false)
+	if view.NeedsRedraw() {
+		t.Fatal("unchanged disabled navigation marked the view dirty")
+	}
+	view.SetNavigable(true)
+	if !view.NeedsRedraw() {
+		t.Fatal("enabling navigation did not mark the view dirty")
+	}
+	view.SetNeedsRedraw(false)
+	view.SetNavigable(true)
+	if view.NeedsRedraw() {
+		t.Fatal("unchanged enabled navigation marked the view dirty")
+	}
+	view.SetNavigable(false)
+	if !view.NeedsRedraw() {
+		t.Fatal("disabling navigation did not mark the view dirty")
+	}
+}
+
 func TestFocusedNavigablePreviewRoutesUndoAndRedoKeys(t *testing.T) {
 	view := configuredNavigableImage()
 	view.SetNavigateHandler(func(float64, float64, float64) {})

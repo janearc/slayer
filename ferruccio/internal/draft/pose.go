@@ -10,10 +10,15 @@ import (
 
 // Object is an immutable snapshot of one supported scene placement.
 type Object struct {
-	id, name, kind string
-	position       [3]float64
-	heading        float64
-	hasHeading     bool
+	id, name, kind, recipe  string
+	position                [3]float64
+	heading                 float64
+	hasHeading              bool
+	importHeight            float64
+	hasImportHeight         bool
+	scale                   float64
+	hasScale, scaleEditable bool
+	grounded                bool
 }
 
 // ID identifies the authored collection and key, independent of pose.
@@ -22,11 +27,18 @@ func (object Object) ID() string { return object.id }
 // Name is the authored placement key.
 func (object Object) Name() string { return object.name }
 
-// Kind is the native manufacture kind or import.
+// Kind is the native manufacture kind, recipe, or import.
 func (object Object) Kind() string { return object.kind }
 
-// Position is east, north and up in metres.
+// Recipe is the authored recipe name, or empty for other objects.
+func (object Object) Recipe() string { return object.recipe }
+
+// Position is east, north and up in metres. For a grounded thing, up is its
+// authored height above the terrain, not its staged world elevation.
 func (object Object) Position() [3]float64 { return object.position }
+
+// Grounded reports a placement anchored to terrain.
+func (object Object) Grounded() bool { return object.grounded }
 
 // Heading is clockwise degrees from north and whether explicitly authored.
 func (object Object) Heading() (float64, bool) { return object.heading, object.hasHeading }
@@ -34,12 +46,50 @@ func (object Object) Heading() (float64, bool) { return object.heading, object.h
 // Unit is the explicit position unit presented by pose controls.
 func (object Object) Unit() string { return "m" }
 
+// ImportHeight is the explicitly authored target height in metres, if any.
+func (object Object) ImportHeight() (float64, bool) {
+	return object.importHeight, object.hasImportHeight
+}
+
+// SizeScale is the uniform size factor and whether it was explicitly written.
+func (object Object) SizeScale() (float64, bool) { return object.scale, object.hasScale }
+
+// ScaleEditable reports whether the source placement supports a scale field.
+// Its actual constructor must also be checked for deforming geometry.
+func (object Object) ScaleEditable() bool { return object.scaleEditable }
+
 // PoseChange is a relative movement and turn of one authored object.
 // LengthUnit must be m and AngleUnit deg, including for a zero gesture.
 type PoseChange struct {
 	ID                       string
 	East, North, Up, Heading float64
 	LengthUnit, AngleUnit    string
+}
+
+// SetGeneratedHeading replaces an omitted ground heading with an explicit one.
+func (document *Document) SetGeneratedHeading(id string, degrees float64) error {
+	if math.IsNaN(degrees) || math.IsInf(degrees, 0) {
+		return fmt.Errorf("heading must be finite")
+	}
+	tree, placements, err := document.poseNodes()
+	if err != nil {
+		return err
+	}
+	for _, placement := range placements {
+		if placement.object.id != id {
+			continue
+		}
+		if !placement.object.grounded || placement.object.hasHeading {
+			return fmt.Errorf("object does not have a generated ground heading")
+		}
+		degrees = math.Mod(degrees, 360)
+		if degrees < 0 {
+			degrees += 360
+		}
+		setNumber(quantityNode(placement.block, "heading", "deg"), degrees)
+		return document.savePoseTree(tree)
+	}
+	return fmt.Errorf("scene object %q is not an editable placement", id)
 }
 
 // Objects reads supported placements without opening geometry or changing text.
@@ -102,22 +152,26 @@ func (document *Document) ChangePose(change PoseChange) error {
 			}
 			setNumber(target, next)
 		}
-		var encoded bytes.Buffer
-		encoder := yaml.NewEncoder(&encoded)
-		encoder.SetIndent(2)
-		if err := encoder.Encode(tree); err != nil {
-			return err
-		}
-		if err := encoder.Close(); err != nil {
-			return err
-		}
-		if _, err := document.read(encoded.Bytes()); err != nil {
-			return fmt.Errorf("pose edit would make invalid set YAML: %w", err)
-		}
-		document.source = bytes.Clone(encoded.Bytes())
-		return nil
+		return document.savePoseTree(tree)
 	}
 	return fmt.Errorf("scene object %q is not an editable placement", change.ID)
+}
+
+func (document *Document) savePoseTree(tree *yaml.Node) error {
+	var encoded bytes.Buffer
+	encoder := yaml.NewEncoder(&encoded)
+	encoder.SetIndent(2)
+	if err := encoder.Encode(tree); err != nil {
+		return err
+	}
+	if err := encoder.Close(); err != nil {
+		return err
+	}
+	if _, err := document.read(encoded.Bytes()); err != nil {
+		return fmt.Errorf("pose edit would make invalid set YAML: %w", err)
+	}
+	document.source = bytes.Clone(encoded.Bytes())
+	return nil
 }
 
 // poseNodes binds immutable descriptions to nodes in a fresh checked tree.
@@ -139,18 +193,36 @@ func (document *Document) poseNodes() (*yaml.Node, []poseNodes, error) {
 	}
 	scene := member(tree.Content[0], "scene")
 	var placements []poseNodes
-	if setting := member(scene, "setting"); setting != nil && setting.Value == "space" {
+	setting := member(scene, "setting")
+	grounded := (setting == nil || setting.Value == "ground") && document.schemaName == "https://github.com/janearc/slayer/schemas/ecosystem-v2.json"
+	if grounded || setting != nil && setting.Value == "space" {
 		things := member(member(scene, "set"), "things")
 		if things != nil && things.Kind == yaml.MappingNode {
 			for index := 0; index+1 < len(things.Content); index += 2 {
 				name, block := things.Content[index].Value, things.Content[index+1]
 				kind := member(block, "kind")
-				if kind == nil || member(block, "east") == nil || member(block, "north") == nil ||
+				recipe := member(block, "recipe")
+				if (kind == nil && recipe == nil) || member(block, "east") == nil || member(block, "north") == nil ||
 					member(block, "place") != nil || member(block, "orbit") != nil || member(block, "around") != nil ||
 					member(block, "attitude") != nil {
 					continue
 				}
-				placement := poseNodes{object: Object{id: "scene.set.things/" + name, name: name, kind: kind.Value}, block: block}
+				object := Object{id: "scene.set.things/" + name, name: name, grounded: grounded}
+				object.scale = 1
+				object.scaleEditable = document.schemaName == "https://github.com/janearc/slayer/schemas/ecosystem-v2.json" && member(block, "part-spin") == nil
+				if value := member(block, "scale"); value != nil {
+					object.scale, err = readNumber(value, "object scale")
+					if err != nil {
+						return nil, nil, err
+					}
+					object.hasScale = true
+				}
+				if recipe != nil {
+					object.kind, object.recipe = "recipe", recipe.Value
+				} else {
+					object.kind = kind.Value
+				}
+				placement := poseNodes{object: object, block: block}
 				placement.coordinates[0], placement.coordinates[1] = member(block, "east"), member(block, "north")
 				for axis := 0; axis < 2; axis++ {
 					placement.object.position[axis], err = readNumber(placement.coordinates[axis], "object position")
@@ -190,6 +262,11 @@ func (document *Document) poseNodes() (*yaml.Node, []poseNodes, error) {
 			}
 			placement := poseNodes{object: Object{id: "scene.world.imports/" + name, name: name, kind: "import", position: position}, block: block}
 			copy(placement.coordinates[:], at.Content)
+			height, metres, err := poseQuantity(block, "height", "m")
+			if err != nil {
+				return nil, nil, err
+			}
+			placement.object.importHeight, placement.object.hasImportHeight = metres, height != nil
 			if err := placement.readHeading(); err != nil {
 				return nil, nil, err
 			}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/janearc/puzzlemouth/yamlfile"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/session"
 	yaml "gopkg.in/yaml.v3"
@@ -20,6 +21,31 @@ const (
 var readers = map[string]func(path string) (job.Job, error){
 	jobSchema:  job.Read,
 	planSchema: session.LiftSequence,
+}
+
+// jobOfSource reads frozen bytes but interprets relative paths from their
+// original document. Sequence plans do not yet have a buffered adapter.
+func jobOfSource(path, original string) (job.Job, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return job.Job{}, err
+	}
+	var tree yaml.Node
+	if err := yamlfile.Read(path, raw, &tree); err != nil {
+		return job.Job{}, fmt.Errorf("%s is not a job or a set: %w", path, err)
+	}
+	var said heading
+	if err := tree.Decode(&said); err != nil {
+		return job.Job{}, fmt.Errorf("%s is not a job or a set: %w", path, err)
+	}
+	switch said.Schema {
+	case jobSchema:
+		return job.ReadSource(original, raw)
+	case planSchema:
+		return job.Job{}, fmt.Errorf("a relocated sequence plan is not supported")
+	default:
+		return job.StillFrom(original, raw)
+	}
 }
 
 // heading is the one key of a file the door reads itself: its schema.

@@ -120,6 +120,9 @@ type exposer interface {
 // where the job says tall, and a rig's rows for the width.
 func (session *Session) asking(ask Ask) (asked, error) {
 	given := session.given
+	if given.exactSamples > 0 && ask.rays > 0 {
+		return asked{}, errors.New("exact samples: a rays-per-side frame override is not supported")
+	}
 	for _, each := range []struct {
 		value int
 		into  *int
@@ -136,7 +139,14 @@ func (session *Session) asking(ask Ask) (asked, error) {
 		given.height); said {
 		given.wide = wide
 	}
-	return given.rigSized(ask.height)
+	resized, err := given.rigSized(ask.height)
+	if err != nil {
+		return asked{}, err
+	}
+	if err := regionRefusal(resized); err != nil {
+		return asked{}, err
+	}
+	return resized, nil
 }
 
 // rigSized is what was asked with a rig's rows for its width: a rig's

@@ -1,15 +1,16 @@
 # Allosaurus
 
-An authored walking Allosaurus fragilis about 7.4 m long, built in
-`manufacture/allosaurus_bioform.go` as `AllosaurusStudy(seconds, at)`. The
+An authored walking Allosaurus fragilis about 7.4 m long, available as
+`AllosaurusStudy(seconds, at)`. Its builder and checked profiles live in
+`manufacture/animals/vertebrates/dinosaurs/theropods`. The
 motion is kinematic, not physical. It is a study of published bone
 proportions with neutral invented flesh, not a likeness and not a
 reconstruction of an individual.
 
 ## Where it is used
 
-It is a Go function, not a manufactory kind, and no set under `sets/` draws
-it directly. The cornice gargoyles use it: `manufacture/gargoyle_studies.go`
+A theropod profile recipe can select the walking study. The cornice gargoyles
+use it: `manufacture/gargoyle_studies.go`
 holds the study at time zero, and `manufacture/cities/gargoyle-creatures.yaml`
 lists it as the creature `allosaurus`, a snarling head and neck out of the
 wall with the lower jaw as the spout.

@@ -48,12 +48,28 @@ func (work *Workspace) undoCamera(ctx widget.Context, redo bool) {
 	} else {
 		work.editor.Undo(ctx)
 	}
-	if work.state.document.Text() == before || !work.state.document.CanNavigate() {
+	if work.state.document.Text() == before {
+		return
+	}
+	if work.play.disclosure == "size" || work.play.disclosure == "add" || work.play.disclosure == "coordinates" || work.play.disclosure == "region" || work.play.disclosure == "film" || work.play.disclosure == "stock" {
+		work.stopPreview()
+		work.play.sizeObject, work.play.poseObject, work.play.groupAreaID = "", "", ""
+		work.play.gaugeChoice, work.play.stockChoice = 0, 0
+		work.refreshLayout = true
+		work.working.dirty = true
+		work.status = "History restored · ⌘Z to undo"
+		work.invalidate()
+		return
+	}
+	if !work.state.document.CanNavigate() {
 		return
 	}
 	work.needsCheck = false
 	work.pending.remember(work.state, work.specimen, time.Now())
 	work.caption = "Previous render · history restored · preparing preview"
+	if work.composition == "play" {
+		work.caption = "History restored · working view updating"
+	}
 	work.status = "History restored · drawing your world"
 	work.diagnostic = ""
 	work.wakeNavigation(navigationDelay)
@@ -114,6 +130,12 @@ func (work *Workspace) advanceNavigation() {
 	}
 	busy := work.cancel != nil || work.gesturing()
 	if work.pending.take(work.state, work.specimen, time.Now(), busy) {
+		if work.composition == "play" {
+			work.working.dirty = true
+			work.status = "Working view updating · render when ready"
+			work.invalidate()
+			return
+		}
 		work.startAutomaticPreview()
 		return
 	}

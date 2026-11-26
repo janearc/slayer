@@ -149,7 +149,12 @@ func TestDescribeFindsWhatIsUnderThePointer(t *testing.T) {
 
 func TestDescribeCapsWhatIsInViewAndCountsTheRest(t *testing.T) {
 	count := MostSeen + 3
-	described := Describe(lookInput(t, lookSource(count)))
+	source := strings.Replace(lookSource(count), "wide: 40", "wide: 90", 1)
+	input := lookInput(t, source)
+	if got := len(input.Scene.InView()); got != count {
+		t.Fatalf("test scene has %d things in view, want %d", got, count)
+	}
+	described := Describe(input)
 	if len(described.Seen) != MostSeen || described.More != 3 {
 		t.Fatalf("listed %d and left out %d", len(described.Seen), described.More)
 	}
@@ -204,13 +209,16 @@ func TestRenderDoesNotClaimANoteWasTaken(t *testing.T) {
 }
 
 func TestQuoteKeepsOddNamesOnOneLine(t *testing.T) {
-	for _, name := range []string{"tower: north", "line\nbreak", "#hash", "", "true", "it's"} {
+	for _, name := range []string{"tower: north", "line\nbreak", "#hash", "", "true", "it's", "two  spaces", "tab\there", "雪", "null\x00byte"} {
 		var back map[string]string
 		if err := yaml.Unmarshal([]byte("name: "+quote(name)+"\n"), &back); err != nil {
 			t.Fatalf("%q does not read back: %v", name, err)
 		}
 		if strings.Contains(quote(name), "\n") {
 			t.Fatalf("%q quotes to more than one line: %q", name, quote(name))
+		}
+		if back["name"] != name {
+			t.Fatalf("%q reads back as %q", name, back["name"])
 		}
 	}
 }

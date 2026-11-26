@@ -35,9 +35,16 @@ func (yurtRow) madeAt(from seed, detail string) (good, error) {
 	return goodOfRendered(drawn)
 }
 
-// sharedMeshes are the meshes made so far from what package cities drew,
-// each with the triangles it was made from.
-type sharedMeshes []sharedMesh
+// sharedMeshes index candidate prototypes by their endpoint triangles. The
+// index is local to goodOfRendered, which only reads the rendered triangles;
+// assembled meshes own their geometry. Equal meshes must share a key, and
+// the full comparison decides each collision.
+type sharedMeshes map[meshKey][]sharedMesh
+
+type meshKey struct {
+	count       int
+	first, last cities.Triangle
+}
 
 // sharedMesh is one mesh made, and the triangles of what it was made of.
 type sharedMesh struct {
@@ -49,7 +56,12 @@ type sharedMesh struct {
 // get the same mesh, however they came by them, so a window placed a
 // thousand times is one mesh placed a thousand times.
 func (meshes *sharedMeshes) of(drawn *cities.Mesh) (*mesh.Mesh, error) {
-	for _, known := range *meshes {
+	key := meshKey{count: len(drawn.Triangles)}
+	if key.count > 0 {
+		key.first = drawn.Triangles[0]
+		key.last = drawn.Triangles[key.count-1]
+	}
+	for _, known := range (*meshes)[key] {
 		if slices.Equal(known.drawn, drawn.Triangles) {
 			return known.made, nil
 		}
@@ -62,7 +74,10 @@ func (meshes *sharedMeshes) of(drawn *cities.Mesh) (*mesh.Mesh, error) {
 	if err != nil {
 		return nil, err
 	}
-	*meshes = append(*meshes, sharedMesh{drawn.Triangles, made})
+	if *meshes == nil {
+		*meshes = make(sharedMeshes)
+	}
+	(*meshes)[key] = append((*meshes)[key], sharedMesh{drawn.Triangles, made})
 	return made, nil
 }
 
@@ -71,8 +86,7 @@ func (meshes *sharedMeshes) of(drawn *cities.Mesh) (*mesh.Mesh, error) {
 // its material, each placed where it was drawn. A drawing with no mesh or
 // no material is refused.
 func goodOfRendered(drawn []cities.Rendered) (good, error) {
-	made := good{dressed: looks{}, groups: map[slot]*shape.MeshGroup{},
-		groupParts: map[slot]int{}}
+	made := good{dressed: looks{}, groupParts: map[slot]int{}}
 	slots := map[string]slot{}
 	members := map[slot][]shape.MeshMember{}
 	var meshes sharedMeshes
@@ -96,21 +110,9 @@ func goodOfRendered(drawn []cities.Rendered) (good, error) {
 			lamps = append(lamps, one)
 		}
 	}
-	shaped, err := grouped(made, members)
+	shaped, err := made.withMeshGroups(members)
 	if err != nil {
 		return good{}, err
 	}
 	return lamped(shaped, lamps)
-}
-
-// grouped is the good with a group of the members of each slot.
-func grouped(made good, members map[slot][]shape.MeshMember) (good, error) {
-	for of, each := range members {
-		group, err := shape.NewMeshGroup(each)
-		if err != nil {
-			return good{}, err
-		}
-		made.groups[of], made.groupParts[of] = group, len(each)
-	}
-	return made, nil
 }

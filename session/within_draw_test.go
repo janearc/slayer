@@ -23,7 +23,7 @@ func wedged(t *testing.T, wedge string) set.Stand {
 	}
 	written := strings.Replace(string(source), "        alight: 4\n",
 		"        alight: 4\n        within: "+wedge+"\n", 1)
-	read, err := set.Read("kilauea-iki.yaml", []byte(written))
+	read, err := set.Read("../set/testdata/kilauea-iki.yaml", []byte(written))
 	if err != nil {
 		t.Fatal(err)
 	}

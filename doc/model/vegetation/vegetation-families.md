@@ -70,12 +70,13 @@ Arm paths, radii, cap dimensions and reserved bounds stay fixed.
 
 ## Seasons
 
-A named construction recipe can choose foliage independently of kind:
+A seasonal plant recipe can choose foliage independently of species. For a
+set in `sets/`, the book path is relative to the set:
 
 ```yaml
 recipes:
   winter-oak:
-    kind: valley-oak
+    plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: valley-oak}
     season: winter
 ```
 
@@ -84,7 +85,8 @@ a thing or stand. `summer` is the default; `autumn` changes the picked
 deciduous palette; `winter` removes deciduous blades but retains woody
 branches and twigs. Evergreens keep foliage in every season.
 
-The six tree/shrub kinds accept this control; saguaro has no foliage season.
+Seasonal plant profiles accept this control; conifer, fern and cactus
+profiles do not.
 
 These are discrete authored states, not dates or simulated phenology.
 In Go, `manufacture.WithSeason(kind, "winter")` returns a new `Kind`.
@@ -141,11 +143,16 @@ A stand grows where the ground lies between its `above` and `below`, in
 metres on the terrain's datum. On a terrain with `sea: {value: 0, unit: m}`
 the sea is nought, so a band over it reads as a shore:
 
+For a set in `sets/`:
+
 ```yaml
+recipes:
+  kandelia:
+    plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: kandelia-obovata}
 set:
   stands:
     kandelia a:
-      kind: kandelia-obovata
+      recipe: kandelia
       count: 40
       seed: 101
       complexity: clumps
@@ -187,3 +194,12 @@ They introduce no new GPU primitive or special CPU-only foliage path.
 The prototype cache is keyed by kind, detail and a bounded variant count.
 It does not add an entry per tree, world position or animation frame.
 Scaffolds, cell attachments and explicit blades also have input budgets.
+
+## Fern anatomy
+
+Fern profiles specify crown span and radius, stalk and leaflet taper, and
+leaflet reach, shortening, girth and minimum width. These are proportions
+of the sampled frond or stalk dimensions. The frond ring's lean and variation,
+the paired leaflet arrangement and angles, and the four- and six-sided stem
+cuts remain fixed family construction choices. The default `fern` is authored
+scenery, not a measured species.

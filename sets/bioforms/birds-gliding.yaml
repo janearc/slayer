@@ -13,15 +13,18 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 200, altitude: 35}
+  recipes:
+    profile-yellow-legged-gull-gliding: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: yellow-legged-gull, pose: gliding}}
+    profile-white-tern-gliding: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: white-tern, pose: gliding}}
   set:
     things:
       gull:
-        kind: bird-yellow-legged-gull-gliding
+        recipe: profile-yellow-legged-gull-gliding
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: -1, unit: m}, north: {value: 0, unit: m}, up: {value: 2, unit: m}}
       tern:
-        kind: bird-white-tern-gliding
+        recipe: profile-white-tern-gliding
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: 1, unit: m}, north: {value: 0, unit: m}, up: {value: 2, unit: m}}

@@ -284,8 +284,8 @@ where its folder already holds a picture drawn from another job file
 of the same name; `--replace` draws over it. The job file is copied
 beside the outputs only once the run is known to be that folder's.
 
-A still a set drew is kept on disk under its picture key, the build and
-the shelf's sources list (`door/kept.go`), and served in place of drawing
+A still a set drew is kept on disk under its picture key, the build,
+the scrooge setting and the shelf's sources list (`door/kept.go`), and served in place of drawing
 only where `SLAYER_KEPT_STILLS` is `on`: the key does not yet hold every
 file a set reads from beside itself, its hud theme for one. `--fresh`
 draws even then, and keeps what it drew.
@@ -295,7 +295,7 @@ draws even then, and keeps what it drew.
 A still drawn on the processor is drawn a row at a time
 (`trace.SampledKept`), and each row is kept under the cache home, kind
 `rows`, as it is finished (`door/rows.go`). Its key is the job's light
-key, the build, the sources list and the row's number, so rows of
+key, the build, the scrooge setting, the sources list and the row's number, so rows of
 another job, size, camera, rays or build are never taken up, and an
 entry that does not check is a miss.
 

@@ -20,8 +20,8 @@ var (
 
 func mustGrow(t *testing.T, grown growth, length, girth float64) good {
 	t.Helper()
-	made, err := grow(grown, size{length: measure.Metres(length),
-		girth: measure.Metres(girth)}, sow(5))
+	made, err := grow(grown, size{Length: measure.Metres(length),
+		Girth: measure.Metres(girth)}, sow(5))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestAThingThatCannotBeMadeOrDrawnIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stem := size{length: measure.Metres(6), girth: measure.Metres(0.2)}
+	stem := size{Length: measure.Metres(6), Girth: measure.Metres(0.2)}
 	if _, err := grow(growth{}, stem, sow(1)); !errors.Is(err, errGood) {
 		t.Errorf("a growth never made: %v, not %v", err, errGood)
 	}

@@ -33,6 +33,7 @@ type bandFinisher struct {
 	finish      finishing
 	picture     *frame.Frame
 	side, next  int
+	exact       int
 	native      NativeCounts
 	bytes, peak int64
 	spent       time.Duration
@@ -51,7 +52,7 @@ func (band *bandFinisher) consume(first, down int, samples []float32) error {
 			return fmt.Errorf("gpu: lunar mean-interface source path left its finite water footprint or became invalid")
 		}
 	}
-	workReceipt(first, down, band.picture.W*band.side,
+	workReceipt(first, down, band.sampleWidth(),
 		per+perRecord*band.finish.records, samples)
 	counts := nativeCounts(samples, per+perRecord*band.finish.records)
 	band.native.Queries += counts.Queries
@@ -64,12 +65,26 @@ func (band *bandFinisher) consume(first, down int, samples []float32) error {
 	band.next += down
 	// a watched drawing says its pixel rows finished, and stops here,
 	// between bands, once its watch's context is done
-	watched.rows(band.next/band.side, band.picture.H)
+	finished := band.next / band.side
+	if band.exact > 0 {
+		finished = band.next
+	}
+	watched.rows(finished, band.picture.H)
 	return watched.stopped()
 }
 
 // valid refuses skipped/overlapping bands before they can corrupt accumulation.
 func (band *bandFinisher) valid(first, down int, samples []float32) error {
+	if band.exact > 0 {
+		if first != band.next || down <= 0 || first < 0 || first > band.picture.H-down {
+			return fmt.Errorf("gpu: invalid or out-of-order sample band")
+		}
+		wanted := band.sampleWidth() * down * (per + perRecord*band.finish.records)
+		if len(samples) != wanted {
+			return fmt.Errorf("gpu: sample band has %d numbers, needs %d", len(samples), wanted)
+		}
+		return nil
+	}
 	if first != band.next || down <= 0 || first < 0 ||
 		first > band.picture.H*band.side-down {
 		return fmt.Errorf("gpu: invalid or out-of-order sample band")
@@ -84,6 +99,9 @@ func (band *bandFinisher) valid(first, down int, samples []float32) error {
 // rows shares independent output rows across the allowed Go CPU workers.
 func (band *bandFinisher) rows(first, down int, samples []float32) {
 	start, stop := first/band.side, (first+down-1)/band.side+1
+	if band.exact > 0 {
+		start, stop = first, first+down
+	}
 	jobs := make(chan int, stop-start)
 	for row := start; row < stop; row++ {
 		jobs <- row
@@ -104,6 +122,10 @@ func (band *bandFinisher) rows(first, down int, samples []float32) {
 
 // row preserves the old down-then-across summation order for every pixel.
 func (band *bandFinisher) row(first, down, row int, samples []float32) {
+	if band.exact > 0 {
+		band.exactRow(first, row, samples)
+		return
+	}
 	begin, end := max(first, row*band.side), min(first+down, (row+1)*band.side)
 	each := per + perRecord*band.finish.records
 	fineWidth := band.picture.W * band.side
@@ -120,6 +142,33 @@ func (band *bandFinisher) row(first, down, row int, samples []float32) {
 				sum.Cover += sample.Cover * share
 				sum.Depth = min(sum.Depth, sample.Depth)
 			}
+		}
+		band.picture.Set(column, row, sum)
+	}
+}
+
+// sampleWidth is the number of dispatched samples across a band.
+func (band *bandFinisher) sampleWidth() int {
+	if band.exact > 0 {
+		return band.picture.W * band.exact
+	}
+	return band.picture.W * band.side
+}
+
+// exactRow combines exactly the requested consecutive samples per pixel.
+func (band *bandFinisher) exactRow(first, row int, samples []float32) {
+	each := per + perRecord*band.finish.records
+	share := 1 / float32(band.exact)
+	for column := range band.picture.W {
+		sum := band.picture.At(column, row)
+		for index := 0; index < band.exact; index++ {
+			at := ((row-first)*band.sampleWidth() + column*band.exact + index) * each
+			sample := band.finish.sample(samples[at : at+each])
+			sum.R += sample.R * share
+			sum.G += sample.G * share
+			sum.B += sample.B * share
+			sum.Cover += sample.Cover * share
+			sum.Depth = min(sum.Depth, sample.Depth)
 		}
 		band.picture.Set(column, row, sum)
 	}

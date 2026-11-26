@@ -149,7 +149,7 @@ func validateTheme(name string) error {
 
 // runtimeFlags keeps renderer location and scoped configuration explicit.
 func runtimeFlags() []pzm.Flag {
-	return []pzm.Flag{pzm.Switch("background", verb.NoShort, "proof only: nonactivating native startup on macOS"), pzm.Value("display", verb.NoShort, "rendered, solid, edges or wire"), pzm.Value("preview-transport", verb.NoShort, "slayer or azazel; default slayer"), pzm.Value("starter", verb.NoShort, "directory containing source.yaml, preview.png and receipt.json"), pzm.Value("azazel", verb.NoShort, "operator Azazel executable"), pzm.Value("azazel-queue", verb.NoShort, "operator Azazel queue path"), pzm.Value("agent", verb.NoShort, "submitted agent identity, default ferruccio"), pzm.Value("evidence", verb.NoShort, "existing parent directory for new preview evidence"), pzm.Value("slayer", verb.NoShort, "Slayer executable"), pzm.Value("catalogue", verb.NoShort, "catalogue specimen renderer executable"), pzm.Value("game", verb.NoShort, "Game5 executable"), pzm.Value("game-home", verb.NoShort, "scoped Game configuration home"), pzm.Value("shelf", verb.NoShort, "optional Slayer source shelf"), pzm.Value("cache", verb.NoShort, "shared Slayer cache directory"), pzm.Value("examples", verb.NoShort, "directory of existing YAML examples"), pzm.Value("composition", verb.NoShort, "play, observe or compose"), pzm.Value("theme", verb.NoShort, "checked Chroma colourway"), pzm.Value("renderer", verb.NoShort, "cpu or gpu for your own renders; default cpu"), pzm.Value("processors", verb.NoShort, "2, 4, 8 or all for your own renders; default 2")}
+	return []pzm.Flag{pzm.Switch("background", verb.NoShort, "proof only: nonactivating native startup on macOS"), pzm.Value("display", verb.NoShort, "rendered, solid, edges or wire"), pzm.Value("preview-transport", verb.NoShort, "slayer or azazel; default azazel"), pzm.Value("starter", verb.NoShort, "directory containing source.yaml, preview.png and receipt.json"), pzm.Value("azazel", verb.NoShort, "operator Azazel executable"), pzm.Value("azazel-queue", verb.NoShort, "operator Azazel queue path"), pzm.Value("agent", verb.NoShort, "submitted agent identity, default ferruccio"), pzm.Value("evidence", verb.NoShort, "existing parent directory for new preview evidence"), pzm.Value("slayer", verb.NoShort, "Slayer executable"), pzm.Value("catalogue", verb.NoShort, "catalogue specimen renderer executable"), pzm.Value("game", verb.NoShort, "Game5 executable"), pzm.Value("game-home", verb.NoShort, "scoped Game configuration home"), pzm.Value("shelf", verb.NoShort, "optional Slayer source shelf"), pzm.Value("data", verb.NoShort, "optional external scene data folder"), pzm.Value("cache", verb.NoShort, "shared Slayer cache directory"), pzm.Value("examples", verb.NoShort, "directory of existing YAML examples"), pzm.Value("composition", verb.NoShort, "play, observe or compose"), pzm.Value("theme", verb.NoShort, "checked Chroma colourway"), pzm.Value("renderer", verb.NoShort, "cpu or gpu for your own renders; default cpu"), pzm.Value("processors", verb.NoShort, "2, 4, 8 or all for your own renders; default 2")}
 }
 
 // settingsSource says where this launch reads and saves its settings: the
@@ -367,10 +367,10 @@ func (proof *heldWorkingProof) step(work *workspace.Workspace, gesture string) (
 	}
 }
 
-// previewTransport keeps the app on the shared renderer unless explicitly selected otherwise.
+// previewTransport defaults to the shared queue unless explicitly selected otherwise.
 func previewTransport(name string) string {
 	if name == "" {
-		return "slayer"
+		return "azazel"
 	}
 	return name
 }
@@ -392,7 +392,8 @@ func queueAgent(name string) string {
 	return name
 }
 
-// evidenceDirectory selects the shared destination without creating it.
+// evidenceDirectory keeps an existing shared destination, or uses a portable
+// per-user destination on machines without the shared renders folder.
 func evidenceDirectory(explicit string) string {
 	if explicit != "" {
 		return explicit
@@ -404,7 +405,69 @@ func evidenceDirectory(explicit string) string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, "mesh", "the-vorrh", "renders", "frames")
+	shared := filepath.Join(home, "mesh", "the-vorrh", "renders", "frames")
+	if info, err := os.Stat(shared); err == nil && info.IsDir() {
+		return shared
+	}
+	return filepath.Join(home, "Library", "Application Support", "Ferruccio", "Renders")
+}
+
+// queueDirectory discovers the local shared queue only when it already exists.
+func queueDirectory(explicit string) string {
+	if explicit != "" {
+		return explicit
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	shared := filepath.Join(home, "mesh", "the-vorrh", "renders", "applications", "azazel", "queue")
+	if info, err := os.Stat(shared); err == nil && info.IsDir() {
+		return shared
+	}
+	return ""
+}
+
+// cacheDirectory reuses the shared cache where it exists; elsewhere it
+// gives this user a private, portable location for reconstructible data.
+func cacheDirectory(explicit string) string {
+	if explicit != "" {
+		return explicit
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	shared := filepath.Join(home, "mesh", "the-vorrh", "renders", "cache")
+	if info, err := os.Stat(shared); err == nil && info.IsDir() {
+		return shared
+	}
+	return filepath.Join(home, "Library", "Caches", "Ferruccio", "Slayer")
+}
+
+// sourceShelf detects the shared shelf only when it already exists.
+func sourceShelf(explicit string) string {
+	if explicit != "" {
+		return explicit
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	shared := filepath.Join(home, "mesh", "the-vorrh", "data", "slayer", "sources")
+	if info, err := os.Stat(shared); err == nil && info.IsDir() {
+		return shared
+	}
+	return ""
+}
+
+// isBundledClient distinguishes the launcher's fallback from an explicitly
+// selected operator client, which must remain in force.
+func isBundledClient(client, executable string) bool {
+	if client == "" || executable == "" {
+		return false
+	}
+	return filepath.Clean(client) == filepath.Clean(filepath.Join(filepath.Dir(executable), "..", "Resources", "engine", "azazel"))
 }
 
 // run shares one real workspace between normal use and the native proof.
@@ -423,6 +486,15 @@ func run(call pzm.Call, file string, proof bool) error {
 	}
 	source := settingsSource(call)
 	resolved := settings.Resolve(source.Path, source.Flag, source.Environment)
+	evidence := evidenceDirectory(resolved.Value(settings.Evidence))
+	if !proof && resolved.Value(settings.Evidence) == "" && evidence != "" {
+		// A missing output folder must not prevent opening and editing a file.
+		_ = os.MkdirAll(evidence, 0o700)
+	}
+	cache := cacheDirectory(resolved.Value(settings.Cache))
+	if resolved.Value(settings.Cache) == "" && cache != "" {
+		_ = os.MkdirAll(cache, 0o700)
+	}
 	if theme := resolved.Value(settings.Theme); theme != "" && call.Value("theme") == "" {
 		// A theme the file names that Chroma does not have is left unused.
 		_ = appearance.SelectTheme(theme)
@@ -435,7 +507,8 @@ func run(call pzm.Call, file string, proof bool) error {
 	}
 	host := gogpu.NewApp(gogpu.DefaultConfig().WithTitle("Ferruccio · Slayer").WithSize(width, height).WithMinSize(minimumWindowWidth, minimumWindowHeight).WithGraphicsAPI(gogpu.GraphicsAPIMetal).WithBackground(proof && call.On("background")))
 	ui := app.New(app.WithWindowProvider(host), app.WithPlatformProvider(host), app.WithEventSource(host.EventSource()), app.WithTheme(appearance.ThemeForSize(16)))
-	work, err := workspace.New(host, ui, workspace.Options{Starter: starter, SuppressAutomaticPreview: proof, Evidence: evidenceDirectory(call.Value("evidence")), File: file, Examples: resolved.Value(settings.Examples), Settings: source, Composition: composition, Tools: preview.Tools{Transport: previewTransport(call.Value("preview-transport")), Azazel: call.Value("azazel"), Queue: call.Value("azazel-queue"), Agent: queueAgent(call.Value("agent")), Slayer: resolved.Value(settings.Slayer), Catalogue: call.Value("catalogue"), Game: call.Value("game"), GameHome: call.Value("game-home"), Shelf: resolved.Value(settings.Shelf), Cache: resolved.Value(settings.Cache)}})
+	executable, _ := os.Executable()
+	work, err := workspace.New(host, ui, workspace.Options{Starter: starter, SuppressAutomaticPreview: proof, PreferQueueClient: isBundledClient(call.Value("azazel"), executable), Evidence: evidence, File: file, Examples: resolved.Value(settings.Examples), Settings: source, Composition: composition, Tools: preview.Tools{Transport: previewTransport(call.Value("preview-transport")), Azazel: call.Value("azazel"), Queue: queueDirectory(resolved.Value(settings.Queue)), Agent: queueAgent(call.Value("agent")), Slayer: resolved.Value(settings.Slayer), Catalogue: call.Value("catalogue"), Game: call.Value("game"), GameHome: call.Value("game-home"), Shelf: sourceShelf(resolved.Value(settings.Shelf)), Cache: cache}})
 	if err != nil {
 		return err
 	}

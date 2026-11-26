@@ -108,6 +108,7 @@ type plan struct {
 	RayReference        *float64     `yaml:"secondary-ray-reference-metres" json:"secondary-ray-reference-metres,omitempty"`
 	raw                 []byte
 	hash                string
+	modelSources        map[string][]byte
 }
 
 // readPlan checks the schema and cross-field rules, resolves source paths and
@@ -142,6 +143,9 @@ func readPlan(path string) (*plan, error) {
 		plan.Region.West >= plan.Region.East || plan.Region.South >= plan.Region.North ||
 		plan.Detail.MinimumHeight > plan.Detail.MaximumHeight {
 		return nil, fmt.Errorf("island: invalid terrain region, lattice or height range")
+	}
+	if err := plan.bindPlantObjects(filepath.Dir(absolute)); err != nil {
+		return nil, err
 	}
 	if err := plan.checkComposition(); err != nil {
 		return nil, err

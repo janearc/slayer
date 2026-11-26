@@ -310,6 +310,9 @@ scene:
         middle: [-100, 16.25, 0.62]
         size: [21, 0.5, 1]
         source: "chosen: a low flat bridge across the first reach"
+  recipes:
+    plant-alder: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: alder}}
+    plant-salix-alba: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: salix-alba}}
   set:
     # every number of a stand is a choice. the setback of 5 m is the street
     # between the coping and the fronts, of the trees 2 m from the wall, of
@@ -344,7 +347,7 @@ scene:
           setback: {value: 5, unit: m}
           gap: {value: 8, unit: m}
       left quay trees:
-        kind: alder
+        recipe: plant-alder
         habit: frontage
         count: 80
         seed: 31
@@ -355,7 +358,7 @@ scene:
           setback: {value: 2, unit: m}
           gap: {value: 8, unit: m}
       right quay trees:
-        kind: alder
+        recipe: plant-alder
         habit: frontage
         count: 80
         seed: 32
@@ -366,13 +369,13 @@ scene:
           setback: {value: 2, unit: m}
           gap: {value: 8, unit: m}
       # white willow, native here and a tree of waterkanten, the water's
-      # edges, by its source (manufacture/plant-profiles.yaml): a line of
+      # edges, by its source (manufacture/plants/seasonal/profiles.yaml): a line of
       # them on each side of the canal behind the houses, 22 m from the
       # wall, where the quay's alders hold the edge itself. the houses
       # stand 5 m back and are 9 to 11 m deep, so the willows stand 6 to 8 m
       # behind their backs. the distance and the gap are picked.
       left back willows:
-        kind: salix-alba
+        recipe: plant-salix-alba
         habit: frontage
         count: 40
         seed: 33
@@ -383,7 +386,7 @@ scene:
           setback: {value: 22, unit: m}
           gap: {value: 6, unit: m}
       right back willows:
-        kind: salix-alba
+        recipe: plant-salix-alba
         habit: frontage
         count: 40
         seed: 34

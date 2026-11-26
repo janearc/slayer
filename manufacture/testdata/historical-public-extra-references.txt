@@ -1,0 +1,5 @@
+The two bridge demo rows are included in the complete-name inventory by
+reference to manufacture/testdata/historical-bridge-demo-arm64.txt at commit
+35577d9c. They are not included in historical-public-partial.txt. Their
+producer was the indexed f8 historical checkout, not the unmodified f8
+binary. See historical-bridge-demo-provenance.txt at the same commit.

@@ -57,7 +57,7 @@ func filmed(t *testing.T, lines string) (*set.Film, error) {
 	if !strings.Contains(written, "film:\n") {
 		t.Fatal("the set has no film block to add to")
 	}
-	made, err := set.Read("kilauea-iki.yaml", []byte(written))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 	if err != nil {
 		return nil, err
 	}

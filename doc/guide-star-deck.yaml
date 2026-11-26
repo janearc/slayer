@@ -29,6 +29,7 @@ scene:
     down: 64
     step: 2
   recipes:
+    plant-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
     compact dome:
       kind: optical-observatory
       enclosure:
@@ -214,7 +215,7 @@ scene:
         complexity: quick
     stands:
       young spruces:
-        kind: spruce
+        recipe: plant-spruce
         complexity: hull
         count: 32
         seed: 11

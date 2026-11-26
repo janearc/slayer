@@ -6,8 +6,8 @@ is a static specimen. It does not swim and it does not read a clock.
 
 ## Built from
 
-The kind `bay-seal` preserves the pose and the materials of two named scenes
-at base `935105fd`: `scene/named/seal_bay.go` and
+The harbor-seal profile’s `bay` study preserves the pose and the materials
+of two named scenes at base `935105fd`: `scene/named/seal_bay.go` and
 `scene/named/seal_rig_study.go`. The pose and materials are copied from
 them. The geometry is built again, with the same `SealRig`. No external
 asset is imported, and the named scenes are unchanged.
@@ -35,9 +35,28 @@ not a measured individual.
 under authored studio light, with two cameras: `side` and `face`. The film
 uses a 39 degree lens. Each set supplies its own studio, cameras and light.
 
-The kind takes a seed and places the animal where the set puts it. The
-`bay-nose-map` and `bay-face-map` coats stay available as opt-in comparisons
-beside the original coat.
+The recipe selects `family: pinniped`, the `harbor-seal` species, and
+`study: bay` from the checked profile book. The study takes a seed and places
+the animal where the set puts it. Its drawn rig and pose are fixed by the
+study, with look settings from the profile; it does not use the profile's
+loft skeleton counts. The earlier
+`bay-nose-map` and `bay-face-map` comparisons are documented in the
+[material study](../../../../study/harbor-seal-four-pass/BAY-MATERIAL-COMPARISON.md).
+
+For a set alongside `sets/bioforms/bay-seal.yaml`, the recipe is:
+
+```yaml
+recipes:
+  profile-harbor-bay:
+    animal:
+      family: pinniped
+      file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml
+      species: harbor-seal
+      study: bay
+```
+
+The file path is relative to the set. A study cannot be combined with a pose
+or representation; see [animal profile recipes](../../../animal-profile-recipes.md).
 
 To draw it from the repository root:
 
@@ -51,6 +70,6 @@ bin/slayer draw sets/bioforms/bay-seal.yaml --camera side --out bay-seal.png
   view, so the set does not validate a face-to-face bottling composition.
 - Neutral studio lighting does not show how dark the coat looks underwater.
 - The eyes sit proud of the skin. A request to set them closer to flush was
-  not done; this kind keeps the earlier eyes.
+  not done; this study keeps the earlier eyes.
 - The seal is static. A swim needs the deforming-set support described in
   the [bioform index](../README.md).

@@ -180,8 +180,20 @@ func (row superblockRow) berthed(whole good, berths []cities.Volume,
 // wider or taller than the berth, and standing on its floor at its middle.
 func (row superblockRow) partFor(berth cities.Volume, rng *rand.Rand,
 	detail string) (good, bool, error) {
-	name := drawKind(ClusterAsk{Parts: row.ask.Parts}, rng)
-	part, err := partOf(name, rng.Uint64(), maths.Identity, detail)
+	name, err := drawKind(ClusterAsk{Parts: row.ask.Parts}, rng)
+	if err != nil {
+		return good{}, false, err
+	}
+	var part scavengedPart
+	if len(row.ask.Parts) == 0 {
+		made, makeErr := madeDefaultPart(name, rng.Uint64(), detail)
+		if makeErr != nil {
+			return good{}, false, makeErr
+		}
+		part, err = turnedPart(name, made, maths.Identity)
+	} else {
+		part, err = partOf(name, rng.Uint64(), maths.Identity, detail)
+	}
 	if err != nil {
 		return good{}, false, err
 	}

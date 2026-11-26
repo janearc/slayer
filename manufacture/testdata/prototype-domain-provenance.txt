@@ -42,3 +42,22 @@ style=2 bin=3 variant=1 length=0.20000000000000001 axes=96 shortest-child=0.0060
 style=2 bin=4 variant=0 length=0.40000000000000002 axes=113 shortest-child=0.0060317594375944722
 style=2 bin=4 variant=1 length=0.40000000000000002 axes=113 shortest-child=0.0060317594375944722
 plans=20 axes=1240 exact-cutoff-equalities=0 minimum-needle-count=2
+
+Follow-up conifer-family verification (2026-11-24)
+
+Prototype commit: cfb05c0ad6f852e3aa018059c162c41685337ef9
+Toolchain: Go 1.27.3, Darwin/ARM64
+All original recorded numerical results matched; this is a follow-up run, not a replacement for the historical record above.
+Output rows are the diagnostic value lines with the test filename and line-number prefix removed, each ending in a newline.
+Output rows SHA256: 656109fb1095568127d5571333e962c3b7162a9e3bca349880f02af5072f481f
+Complete go test output SHA256: e566fa47996448950857111d0c2ca6830065a1a77c2947d74c035303db5015e4
+Source SHA256:
+d6f4e4b92982f20735869ccb8537324b9f787d29c35cc47f0c6091ac4c9891e3  manufacture/plants/conifers/shoot.go
+f8fa79d273e430d28e22403451a7f1cc5f71e640ab4af8f21eaaf1a7bdbcc3f3  manufacture/plants/conifers/architecture.go
+f0b4affb50175be224364519b5c124152c14c30914181b23a9682840877ad75e  manufacture/plants/conifers/profiles.go
+abefa59195a0d73dafa53f0175de721dc53847e68efd2a4f2084e009417fff43  manufacture/plants/conifers/conifer-profiles.yaml
+ceb699d4066a6ecef68e5efffda591b635050a2f93771df94c9392a51fbc272e  manufacture/needled_shoot.go
+1076f741494028bb1de897518fcaaf453644caa668612997abbe39c06832586c  manufacture/needled-shoot.yml
+0131cc1aa34feb4b261433305b17e35bfda88dc8cb810fb782ecd584cad4e73a  manufacture/shoot_normal_darwin_arm64.go
+f6d5bbe6b20fa3c1c0649056cf6c01ae4828d12c4ff17334ccd6c571daa2d57b  manufacture/plant_reference_helpers_test.go
+d368252c7d012b7c084b07c24afa44d437bd1f3d78198f30842719f0c6a44a61  manufacture/testdata/prototype_domain_sample_test.go

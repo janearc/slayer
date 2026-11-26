@@ -55,3 +55,27 @@ $ ./bin/slayer draw sets/shoebox.yaml --out ${SROOT}/render/frames/shoebox.png
 ```
 
 you can get a list of scenes slayer knows about with `slayer list scenes`.
+
+## shared render queue
+
+For shared-machine renders, use the operator's Azazel queue. The queue and
+the worker are separate: submitting a job does not start a worker. Use the
+deployed Azazel executable and the queue path named by the operator, and
+keep the renderer and declared inputs unchanged while a job waits.
+
+```sh
+azazel schema
+azazel submit --queue /absolute/shared/queue request.yaml
+azazel status --queue /absolute/shared/queue
+```
+
+When the operator asks you to start the worker, run it in the foreground:
+
+```sh
+azazel work --queue /absolute/shared/queue --serve --gpu-jobs 1
+```
+
+Live queue tuning can override the startup GPU limit; check status before
+submitting more work. A queued job has not drawn a picture, and a successful
+job still needs visual inspection. See [the Azazel guide](doc/azazel.md) for
+the request fields, resource policy, and publication workflow.

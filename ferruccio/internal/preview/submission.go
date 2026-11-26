@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -123,6 +125,28 @@ func queueEnvironment(tools Tools) map[string]string {
 		}
 		result["SLAYER_SHELF"] = tools.Shelf
 	}
+	if tools.Cache != "" {
+		if result == nil {
+			result = map[string]string{}
+		}
+		result["SLAYER_CACHE"] = tools.Cache
+	}
+	if tools.Data != "" {
+		if result == nil {
+			result = map[string]string{}
+		}
+		result["SLAYER_DATA"] = tools.Data
+	}
+	workers := tools.Processors
+	if workers == ProcessorsAll {
+		workers = strconv.Itoa(min(runtime.NumCPU(), 1024))
+	} else if count, err := strconv.Atoi(workers); err != nil || count < 1 || count > 1024 {
+		workers = defaultProcessors
+	}
+	if result == nil {
+		result = map[string]string{}
+	}
+	result["SLAYER_CPU_WORKERS"] = workers
 	return result
 }
 

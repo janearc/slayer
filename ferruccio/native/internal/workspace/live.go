@@ -18,14 +18,34 @@ import (
 // workingState keeps display geometry resident; source changes only on release.
 type workingState struct {
 	cache                       *placement.DisplayCache
+	parsed                      *set.Set
 	scene, gesture              *placement.DisplayScene
 	gpu                         *workingview.View
 	photograph                  image.Image
 	source, path, mode, failure string
+	notice                      string
 	dirty, waiting, displayed   bool
 	width, height               int
+	stager                      *stageLoader
+	staging                     bool
+	stageOverride               stageBuild
 	// late is how many readbacks the next GPU view is told to miss.
 	late int
+}
+
+// gestureOrigin resolves a source placement to the renderer's actual anchor.
+// Older space snapshots can still use their authored world coordinates.
+func gestureOrigin(scene *placement.DisplayScene, object draft.Object) (maths.Vec, error) {
+	if scene != nil {
+		if origin, ok := scene.Origins[object.ID()]; ok {
+			return origin, nil
+		}
+	}
+	if object.Grounded() {
+		return maths.Vec{}, fmt.Errorf("the staged terrain anchor is unavailable; wait for the working view to reload")
+	}
+	position := object.Position()
+	return maths.V(position[0], position[2], -position[1]), nil
 }
 
 // ForceLateReadbacks makes the working view's next count readbacks late on
@@ -110,6 +130,7 @@ func copyDisplay(scene *placement.DisplayScene) *placement.DisplayScene {
 	}
 	copied := *scene
 	copied.Objects = append([]placement.DisplayObject(nil), scene.Objects...)
+	copied.Batches = append([]placement.StagedBatch(nil), scene.Batches...)
 	return &copied
 }
 
@@ -121,6 +142,26 @@ func (work *Workspace) beginWorking() {
 	}
 	if work.refuseWhileFull("changing the scene") {
 		return
+	}
+	if group, ok := work.selectedGroup(); ok && work.viewer.dragObject {
+		work.status = group.Name + " · generated members cannot be dragged separately"
+		if _, editable := work.state.document.GroupArea(group.ID); editable {
+			work.status = group.Name + " · use Region to edit this group area"
+		}
+		work.invalidate()
+		return
+	}
+	if object, ok := work.selectedObject(); ok && object.Grounded() && work.viewer.dragObject {
+		if _, err := gestureOrigin(work.working.scene, object); err != nil {
+			work.problem(err)
+			return
+		}
+		if work.play.mode == "turn" {
+			if _, said := object.Heading(); !said {
+				work.problem(fmt.Errorf("this terrain object has a generated heading; set an explicit heading in its source before turning it"))
+				return
+			}
+		}
 	}
 	if work.Running() {
 		work.stopPreview()
@@ -147,7 +188,15 @@ func (work *Workspace) moveWorking() {
 		x1, y1 := x0+dx/float64(bounds.Width()), y0+dy/float64(bounds.Height())
 		east, north, err := 0.0, 0.0, error(nil)
 		if view.mode != "turn" {
-			east, north, err = base.Drag(work.play.selected, x0, y0, x1, y1)
+			if object, ok := work.selectedObject(); ok && len(base.Batches) > 0 {
+				origin, originErr := gestureOrigin(base, object)
+				if originErr != nil {
+					return
+				}
+				east, north, err = base.DragHeight(origin.Y, x0, y0, x1, y1)
+			} else {
+				east, north, err = base.Drag(work.play.selected, x0, y0, x1, y1)
+			}
 		}
 		if err != nil {
 			return
@@ -159,6 +208,33 @@ func (work *Workspace) moveWorking() {
 			scene.Objects[i].At.Origin = scene.Objects[i].At.Origin.Add(maths.V(east, 0, -north))
 			if view.mode == "turn" {
 				scene.Objects[i].At.Orientation = maths.Rotation(maths.YAxis, -(x1-x0)*180*maths.Degree).Then(base.Objects[i].At.Orientation)
+			}
+		}
+		if object, ok := work.selectedObject(); ok {
+			pivot, err := gestureOrigin(base, object)
+			if err != nil {
+				return
+			}
+			if object.Grounded() && view.mode != "turn" {
+				work.caption = "Moving · terrain height updates on release"
+			}
+			turn := maths.Rotation(maths.YAxis, -(x1-x0)*180*maths.Degree)
+			for i := range scene.Batches {
+				batch := &scene.Batches[i]
+				if !batch.Authored || batch.Author.Collection+"/"+batch.Author.Name != work.play.selected {
+					continue
+				}
+				batch.Places = append([]maths.Subspace(nil), base.Batches[i].Places...)
+				batch.HasBounds = false
+				for j := range batch.Places {
+					place := &batch.Places[j]
+					if view.mode == "turn" {
+						place.Origin = pivot.Add(turn.Out(place.Origin.Sub(pivot)))
+						place.Orientation = turn.Then(place.Orientation)
+					} else {
+						place.Origin = place.Origin.Add(maths.V(east, 0, -north))
+					}
+				}
 			}
 		}
 	} else {
@@ -207,25 +283,55 @@ func (work *Workspace) updateWorking() {
 	live := &work.working
 	text := work.state.document.Text()
 	if live.gesture == nil && (live.source != text || live.path != work.state.path) {
+		if live.stager != nil {
+			live.stager.discard()
+			live.staging = false
+		}
 		live.source, live.path = text, work.state.path
-		live.failure = ""
+		live.failure, live.notice = "", ""
+		live.parsed = nil
+		if work.state.document.Kind() == "job" {
+			if err := work.state.document.Check(); err == nil {
+				if build := work.stagedBuilder(); build != nil {
+					work.requestStaged(build)
+					return
+				}
+			}
+			live.scene = nil
+			live.failure = "working view does not yet display job documents"
+			if err := work.state.document.Check(); err != nil {
+				live.failure = err.Error()
+			}
+			work.diagnostic = "Interactive geometry unavailable: " + live.failure
+			work.caption = "Interactive geometry unavailable · see the reason below"
+			return
+		}
 		if live.cache == nil {
 			live.cache = placement.NewDisplayCache()
 		}
 		read, err := set.Read(work.state.path, []byte(text))
 		live.scene = nil
 		if err == nil {
+			live.parsed = &read
+			work.refreshLayout = true
 			live.scene, err = live.cache.Scene(read)
 		}
 		if err != nil {
+			if work.state.document.Check() == nil {
+				if build := work.stagedBuilder(); build != nil {
+					work.requestStaged(build)
+					return
+				}
+			}
 			live.failure = err.Error()
 			work.diagnostic = "Interactive geometry unavailable: " + err.Error()
-			work.caption = "Slayer can still draw this scene · interactive geometry is unavailable"
+			work.caption = "Interactive geometry unavailable · see the reason below"
 			return
 		}
 		live.dirty = true
 		live.waiting = work.play.renderedText != text
 	}
+	work.drainStaged()
 	if live.scene == nil || live.failure != "" {
 		return
 	}
@@ -293,9 +399,17 @@ func (work *Workspace) updateWorking() {
 		work.caption = "Grab something · drag to change it · scroll to approach · ⌘Z undo"
 	}
 	if live.displayed {
-		work.caption = "Working view · opaque native geometry · Slayer lighting refines after release"
+		work.caption = work.workingCaption()
 		work.viewer.SetNavigable(true)
 	}
+}
+
+// workingCaption keeps staged limitations visible after drawing and validation.
+func (work *Workspace) workingCaption() string {
+	if work.working.notice != "" {
+		return "Staged working view · " + work.working.notice
+	}
+	return "Working view · opaque native geometry · Slayer lighting refines after release"
 }
 
 // WorkingDiagnostic exposes the actual geometry/device failure to native regression.

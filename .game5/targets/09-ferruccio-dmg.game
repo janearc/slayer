@@ -1,0 +1,1 @@
+ferruccio-dmg . :: /bin/sh ferruccio/scripts/build-dmg.sh

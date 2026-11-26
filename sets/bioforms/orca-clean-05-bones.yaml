@@ -9,10 +9,12 @@ scene:
   seed: 17
   setting: space
   light: none
+  recipes:
+    profile-orca: {animal: {family: whale, file: ../../manufacture/animals/vertebrates/mammals/whales/profiles.yaml, species: orca, representation: bones}}
   set:
     things:
       bones:
-        kind: orca-clean-05-bones
+        recipe: profile-orca
         seed: 17
         east: 0
         north: 0

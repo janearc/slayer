@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
+	"github.com/janearc/slayer/manufacture/profilecheck"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/thing"
 )
@@ -176,11 +177,8 @@ func based(basis string) bool {
 	return basis == boatRecalled || basis == boatPicked
 }
 
-// shares is whether colour channels are three shares of the light.
-func shares(channels []float64) bool {
-	return len(channels) == alfaChannels && share(channels[0]) &&
-		share(channels[1]) && share(channels[2])
-}
+// shares checks reflectance through the shared profile policy.
+var shares = profilecheck.ColourShares
 
 // designed refuses a design that is missing, or has a range that is
 // not a range, a name nobody reads, a hull figure it does not give, no

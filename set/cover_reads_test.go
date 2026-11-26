@@ -21,7 +21,7 @@ func covLegacy(t *testing.T, edits ...string) (Set, error) {
 	}
 	text := strings.Replace(string(raw), "$schema: "+EcosystemSchema+"\n", "", 1)
 	source := covEdit(t, text, edits...)
-	return Read("legacy.yaml", []byte(source))
+	return Read("testdata/legacy.yaml", []byte(source))
 }
 
 // covEdit replaces each before text with the after text that follows it,
@@ -167,7 +167,7 @@ func TestEcosystemNeedsTerrain(t *testing.T) {
 	text = strings.TrimSuffix(text, "  terrain:")
 	_, err := covSmall(`  recipes:
     redwoods:
-      kind: coast-redwood
+      kind: boulder
 ` + text)
 	covRefused(t, "no terrain", err, "ecosystem mixed grove needs terrain")
 }
@@ -177,15 +177,15 @@ func TestEcosystemNeedsTerrain(t *testing.T) {
 func TestRecipeSeasonsApplyOnlyToPlants(t *testing.T) {
 	made, err := covSmall(`  recipes:
     bare:
-      kind: alder
+      plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: alder}
       season: winter
 `)
 	if err != nil {
 		t.Fatal(err)
 	}
 	recipe, found := made.Recipe("bare")
-	if !found {
-		t.Fatal("recipe lost")
+	if !found || !recipe.IsPlant() || recipe.PlantSpecies() != "alder" {
+		t.Fatal("seasonal plant recipe lost")
 	}
 	row, err := recipe.Construction()
 	if err != nil || row == nil {
@@ -283,7 +283,7 @@ func TestVersionTwoDomainRefusalsSayWhatIsWrong(t *testing.T) {
 		add  string
 		want string
 	}{
-		{"east without north", "  setting: space\n  set:\n    things:\n      a:\n        kind: spruce\n        seed: 1\n        east: 5\n", "east and north together, or neither"},
+		{"east without north", "  setting: space\n  set:\n    things:\n      a:\n        kind: can\n        seed: 1\n        east: 5\n", "east and north together, or neither"},
 		{"unknown kind", one("a", "wizard", ""), "kind takes"},
 		{"a corona that reaches nowhere", one("a", "star", "        corona: {reach: 0, streamers: 1, seed: 1}\n"), "a corona reaches past the star"},
 		{"a turning that is not yes or no", one("a", "lantern", "        turning: sometimes\n"), "turning"},
@@ -307,9 +307,9 @@ func TestVersionTwoDomainRefusalsSayWhatIsWrong(t *testing.T) {
 // value which only spells another kind's key does not hide that key.
 func TestAKeyOfAnotherKindIsRefusedEvenAfterAValueWithItsName(t *testing.T) {
 	covDomainOnly(t)
-	_, err := readV2(one("a", "spruce", "        stands_in_for: radius\n        radius: {value: 1, unit: m}\n"))
-	covRefused(t, "radius on a spruce", err, "radius is a key of a culture-orbital")
-	if _, err := readV2(one("a", "spruce", "        stands_in_for: radius\n")); err != nil {
+	_, err := readV2(one("a", "can", "        stands_in_for: radius\n        radius: {value: 1, unit: m}\n"))
+	covRefused(t, "radius on a can", err, "radius is a key of a culture-orbital")
+	if _, err := readV2(one("a", "can", "        stands_in_for: radius\n")); err != nil {
 		t.Errorf("a value spelling a key was refused: %v", err)
 	}
 }

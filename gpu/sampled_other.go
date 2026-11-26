@@ -31,6 +31,13 @@ func SampledMeasured(world *thing.World, eye maths.Subspace, lens film.Sensor,
 	return nil, Profile{}, ErrNoMetal
 }
 
+// ExactMeasured is unavailable off a Mac.
+func ExactMeasured(world *thing.World, eye maths.Subspace, lens film.Sensor,
+	at time.Duration, width, height, count int, media []trace.InitialMedium,
+) (*frame.Frame, Profile, error) {
+	return nil, Profile{}, ErrNoMetal
+}
+
 // SampledWithInitialMedia is unavailable off a Mac. It never silently draws
 // in air when the caller explicitly supplies a camera medium.
 func SampledWithInitialMedia(mode Mode, world *thing.World,

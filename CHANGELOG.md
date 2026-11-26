@@ -1,3 +1,35 @@
+## slayer  v0.1.6 25 nov 2026
+
+i accidentally shipped 014 as 015, so we skipped 014, and the nominal current
+release as of today is 016. today's release is primarily a reorganization of
+taxonomy, so we can move towards a common constructor for all procedurally
+generated things. to state things clearly: the goal from here forward is to be
+able to procedurally generate anything from a single domicile to an entire
+planetary system without bespoke constructors or even weird yaml. the goal is
+to have fewer than sity-four parameters necessary to generate anything from a
+pebble to a planetary system, and have slayer understand how to represent and
+construct that, and only render what you want at the time you want it
+rendered. this means it would undersand that there's ten planets around a
+binary star system, but might only be interested in the third planet, and just
+one thing orbiting that planet. but you'd be able to preserve that because the
+constructors are deterministic. anyways, now that we have that out of the way.
+
+this release is a mid-week release (we've been releasing on mondays, about
+once a week, with about 300kloc of diff per release, and this cadence suits
+the project well). the reason for this is we are shipping Ferruccio properly
+today, and that is meant to be the graphical (native, golang, metal) interface
+to slayer. this will be built with github actions and available from the
+releases tab. i can't afford the apple tax for having my binary signed and
+that's okay.
+
+there's kind of a lot of organizational changes in this release but
+fundamentally there isn't much change in how slayer, azazel, or ferruccio
+actually work. so i'm going to omit the big dramatic changelog entry, and next
+monday we'll include something more interesting here.
+
+please keep your arms inside the car at all times, and do not touch any of the
+space telescopes or mosasaurs.
+
 ## slayer 0.1.4 23 nov 2026
 
 this is an incremental release. the code is a lot cleaner, the documentation

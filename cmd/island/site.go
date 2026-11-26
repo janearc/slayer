@@ -20,11 +20,12 @@ import (
 )
 
 type placedObject struct {
-	Name     string    `json:"name"`
-	Kind     string    `json:"kind"`
-	Detail   string    `json:"detail"`
-	Position maths.Vec `json:"world-position-metres"`
-	Ground   float64   `json:"radial-ground-height-metres"`
+	Name     string       `json:"name"`
+	Kind     string       `json:"kind,omitempty"`
+	Plant    *placedPlant `json:"plant,omitempty"`
+	Detail   string       `json:"detail"`
+	Position maths.Vec    `json:"world-position-metres"`
+	Ground   float64      `json:"radial-ground-height-metres"`
 }
 
 type siteRecord struct {
@@ -61,6 +62,8 @@ type siteRecord struct {
 
 type prototypeKey struct {
 	kind, detail string
+	plant        string
+	forest       bool
 	seed         uint64
 	areaSide     int
 }
@@ -222,7 +225,7 @@ func (site *siteBuilder) load(key prototypeKey) (prototype, error) {
 		return value, nil
 	}
 	if key.detail == "crown" {
-		source, err := site.load(prototypeKey{kind: key.kind, detail: "clumps", seed: key.seed})
+		source, err := site.load(prototypeKey{kind: key.kind, detail: "clumps", seed: key.seed, forest: key.forest, plant: key.plant})
 		if err != nil {
 			return prototype{}, err
 		}
@@ -244,7 +247,19 @@ func (site *siteBuilder) load(key prototypeKey) (prototype, error) {
 		site.store.values[key] = value
 		return value, nil
 	}
-	kind, err := manufacture.KindNamed(key.kind)
+	var kind manufacture.Kind
+	var err error
+	if key.plant != "" {
+		var found bool
+		kind, found = site.plan.plantRows[key.plant]
+		if !found {
+			return prototype{}, fmt.Errorf("island: missing checked plant snapshot")
+		}
+	} else if key.forest {
+		kind, err = forestPlant(key.kind)
+	} else {
+		kind, err = manufacture.KindNamed(key.kind)
+	}
 	if err != nil {
 		return prototype{}, err
 	}
@@ -307,7 +322,16 @@ func (site *siteBuilder) add(value prototype, pose maths.Subspace) error {
 
 // object grounds an authored recipe and reserves its horizontal clearing.
 func (site *siteBuilder) object(object objectPlan) error {
-	value, err := site.load(prototypeKey{kind: object.Kind, detail: object.Detail, seed: object.Seed})
+	key := prototypeKey{kind: object.Kind, detail: object.Detail, seed: object.Seed}
+	var plant *placedPlant
+	if object.Plant != nil {
+		if object.Plant.binding == nil {
+			return fmt.Errorf("island: object %q has no plant snapshot", object.Name)
+		}
+		key.kind, key.plant = object.Plant.Species, object.Plant.binding.identity
+		plant = &placedPlant{Family: object.Plant.Family, Species: object.Plant.Species, SHA256: object.Plant.binding.source, Season: object.Plant.Season, Representation: object.Plant.Representation}
+	}
+	value, err := site.load(key)
 	if err != nil {
 		return err
 	}
@@ -327,7 +351,7 @@ func (site *siteBuilder) object(object objectPlan) error {
 	radius := math.Hypot(math.Max(math.Abs(value.bounds.Min.X), math.Abs(value.bounds.Max.X)),
 		math.Max(math.Abs(value.bounds.Min.Z), math.Abs(value.bounds.Max.Z)))
 	site.clearings = append(site.clearings, clearing{object.East, object.South, radius})
-	site.record.Objects = append(site.record.Objects, placedObject{object.Name, object.Kind, object.Detail, position, height})
+	site.record.Objects = append(site.record.Objects, placedObject{Name: object.Name, Kind: object.Kind, Plant: plant, Detail: object.Detail, Position: position, Ground: height})
 	return nil
 }
 

@@ -411,11 +411,17 @@ because the meter puts a noon scene at mid grey. `air` needs `light: sun`.
 
 ### step 3: one made thing
 
-added under set: things:
+add a spruce recipe under `scene`, then place it under `set: things`. For a
+set in `sets/guide/`, the book path is relative to that set:
 
 ```yaml
+  recipes:
+    guide-spruce:
+      plant: {family: conifer, file: ../../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}
+  set:
+    things:
       the tree:
-        kind: spruce
+        recipe: guide-spruce
         seed: 3
         east: 263920
         north: 2148690
@@ -499,7 +505,7 @@ added under set:
 ```yaml
     stands:
       trees on the rim:
-        kind: spruce
+        recipe: guide-spruce
         count: 160
         seed: 11
         above: 1150
@@ -514,8 +520,8 @@ bin/slayer render sets/guide/step-6.yaml -out out/step-6.png
 
 *step 6. 160 spruces on the rim; most stand outside this frame.*
 
-a stand is many of one kind, grown on the ground from one seed: here 160
-spruces wherever the ground is above 1150 m. the single tree stays and the
+the stand uses the `guide-spruce` recipe from step 3. it grows many trees
+on the ground from one seed: here 160 spruces wherever the ground is above 1150 m. the single tree stays and the
 stand grows round it. a few show on the horizon here; step 7 rises to see
 more.
 

@@ -115,6 +115,9 @@ func heightAt(stretches []stretch, along float64) float64 {
 // the pylons, the cables and the hangers. Along the span is x, the deck
 // is as wide as the culture says along z, and up is y.
 func (bridge *Bridge) Design(level Detail, seconds float64) (Design, error) {
+	if bridge.Hub {
+		return bridge.hubDesign(), bridge.drawing.trouble
+	}
 	looks := bridge.looks()
 	stretches := bridge.stretches()
 	parts := bridge.deck(stretches, looks)

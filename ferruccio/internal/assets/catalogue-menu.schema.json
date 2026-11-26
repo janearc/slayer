@@ -9,8 +9,102 @@
       "items": {
         "type": "object", "additionalProperties": false,
         "required": ["kind", "group", "about", "notes", "details"],
+        "not": {"anyOf": [{"required": ["animal", "plant"]}, {"required": ["animal", "alga"]}, {"required": ["plant", "alga"]}]},
         "properties": {
           "kind": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+          "animal": {
+            "type": "object",
+            "properties": {
+              "family": {"enum": ["fish", "bird", "theropod", "pinniped", "squid", "whale", "reptile", "snake", "sauropod"]},
+              "file": {"type": "string", "minLength": 1},
+              "species": {"type": "string", "minLength": 1},
+              "pose": {"enum": ["swim", "glide", "bones", "standing", "gliding", "outline", "hauled", "hauled-out", "lying", "swimming", "spy-hop"]},
+              "count": {"type": "integer", "minimum": 0, "maximum": 5000},
+              "seconds": {"type": "number", "minimum": -100000, "maximum": 100000},
+              "phase": {"type": "number", "minimum": -100000, "maximum": 100000},
+              "representation": {"enum": ["skin", "bones", "volumes"]},
+              "study": {"type": "string", "minLength": 1}
+            },
+            "required": ["family", "file", "species"],
+            "allOf": [
+              {"if": {"required": ["phase"]}, "then": {"properties": {"family": {"const": "squid"}}}},
+              {
+                "if": {"properties": {"family": {"enum": ["snake", "sauropod"]}}, "required": ["family"]},
+                "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["seconds"]}, {"required": ["phase"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+              },
+              {
+                "if": {"properties": {"family": {"const": "squid"}}, "required": ["family"]},
+                "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["seconds"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+              },
+              {
+                "if": {"properties": {"family": {"const": "fish"}}, "required": ["family"]},
+                "then": {
+                  "properties": {"pose": {"enum": ["swim", "glide", "bones"]}},
+                  "not": {"anyOf": [{"required": ["seconds"]}, {"required": ["representation"]}, {"required": ["study"]}]},
+                  "allOf": [{
+                    "if": {"required": ["count"], "properties": {"count": {"minimum": 1}}},
+                    "then": {"properties": {"pose": {"const": "swim"}}}
+                  }]
+                }
+              },
+              {
+                "if": {"properties": {"family": {"const": "bird"}}, "required": ["family"]},
+                "then": {"properties": {"pose": {"enum": ["standing", "gliding", "bones", "outline"]}},
+                  "not": {"anyOf": [{"required": ["count"]}, {"required": ["seconds"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+              },
+              {
+                "if": {"properties": {"family": {"const": "pinniped"}}, "required": ["family"]},
+                "then": {
+                  "properties": {"pose": {"enum": ["hauled", "hauled-out", "lying", "swimming"]}},
+                  "not": {"anyOf": [{"required": ["count"]}, {"required": ["seconds"]}]},
+                  "allOf": [
+                    {"if": {"required": ["study"]}, "then": {"not": {"anyOf": [{"required": ["pose"]}, {"required": ["representation"]}]}}},
+                    {"if": {"required": ["representation"], "properties": {"representation": {"const": "bones"}}}, "then": {"not": {"required": ["pose"]}}},
+                    {"if": {"required": ["representation"], "properties": {"representation": {"const": "volumes"}}}, "then": {"properties": {"pose": {"const": "lying"}}}}
+                  ]
+                }
+              },
+              {
+                  "if": {"properties": {"family": {"const": "reptile"}}, "required": ["family"]},
+                  "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["seconds"]}, {"required": ["representation"]}]}}
+                },
+                {
+                  "if": {"properties": {"family": {"const": "whale"}}, "required": ["family"]},
+                  "then": {"properties": {"pose": {"enum": ["swim", "spy-hop"]}, "representation": {"enum": ["skin", "bones"]}}, "not": {"anyOf": [{"required": ["count"]}, {"required": ["seconds"]}, {"required": ["study"]}]}, "allOf": [{"if": {"required": ["representation"], "properties": {"representation": {"const": "bones"}}}, "then": {"not": {"required": ["pose"]}}}]}
+                },
+                {
+                  "if": {"properties": {"family": {"const": "theropod"}}, "required": ["family"]},
+                "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+              }
+            ],
+            "additionalProperties": false
+          },
+          "plant": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "family": {"enum": ["seasonal", "conifer", "fern", "cactus"]},
+              "file": {"type": "string", "minLength": 1},
+              "species": {"type": "string", "minLength": 1},
+              "season": {"enum": ["summer", "autumn", "winter"]},
+              "representation": {"const": "shoot"}
+            },
+            "required": ["family", "file", "species"],
+            "allOf": [
+              {"if": {"required": ["season"]}, "then": {"properties": {"family": {"const": "seasonal"}}}},
+              {"if": {"required": ["representation"]}, "then": {"properties": {"family": {"const": "conifer"}}}}
+            ]
+          },
+          "alga": {
+            "type": "object", "additionalProperties": false,
+            "required": ["family", "file", "species"],
+            "properties": {
+              "family": {"const": "kelp"},
+              "file": {"type": "string", "minLength": 1},
+              "species": {"type": "string", "minLength": 1},
+              "condition": {"type": "string", "minLength": 1},
+              "forest": {"type": "boolean"}
+            }
+          },
           "group": {"type": "string", "minLength": 1},
           "about": {"type": "string", "minLength": 1},
           "notes": {"type": "string", "minLength": 1},

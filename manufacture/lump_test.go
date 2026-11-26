@@ -6,8 +6,11 @@ import (
 	"testing"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/manufacture/geometry"
 	"github.com/janearc/slayer/maths"
 )
+
+func icosahedron() surface { return surface(geometry.Icosahedron[face]()) }
 
 func mustLump(t *testing.T, long, middle, short, worn float64,
 	number uint64) lump {

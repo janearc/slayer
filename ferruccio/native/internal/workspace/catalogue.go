@@ -24,16 +24,17 @@ func (work *Workspace) selectSpecimen() {
 
 // rendererConfigured checks the executable that owns the active format.
 func (work *Workspace) rendererConfigured() bool {
+	tools := work.renderTools()
 	if work.options.Tools.Transport == "slayer" {
-		return work.options.Evidence != "" && work.renderTools().Slayer != "" && work.state.document.Kind() != "catalogue"
+		return work.evidenceFolder() != "" && tools.Slayer != "" && work.state.document.Kind() != "catalogue"
 	}
-	if work.options.Tools.Azazel == "" || work.options.Tools.Queue == "" || work.options.Evidence == "" {
+	if tools.Azazel == "" || tools.Queue == "" || work.evidenceFolder() == "" {
 		return false
 	}
 	if work.state.document.Kind() == "catalogue" {
-		return work.options.Tools.Catalogue != ""
+		return tools.Catalogue != ""
 	}
-	return work.options.Tools.Slayer != ""
+	return tools.Slayer != ""
 }
 
 // catalogueControl keeps specimen identity separate from unmodified plan YAML.

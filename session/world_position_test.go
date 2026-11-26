@@ -22,14 +22,16 @@ scene:
       title: between
       orientation: {look_at: [0, 0, 0]}
       location: {at: [0, -5, 2]}
+  recipes:
+    specimen-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       near:
-        kind: spruce
+        recipe: specimen-spruce
         seed: 1
 ` + first + `
       far:
-        kind: spruce
+        recipe: specimen-spruce
         seed: 2
 ` + second + `
 `
@@ -37,7 +39,7 @@ scene:
 
 func readPositionSet(t *testing.T, text string) set.Set {
 	t.Helper()
-	read, err := set.Read("positions.yaml", []byte(text))
+	read, err := set.Read("../sets/positions.yaml", []byte(text))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,19 +73,22 @@ func TestAbsolutePositionRebasesAndNamedCameraUsesStagedPlace(t *testing.T) {
         loc_relative: {object: near}
       orientation:
         point_to: far
+  recipes:
+    specimen-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       near:
-        kind: spruce
+        recipe: specimen-spruce
         seed: 1
 ` + first + `
       far:
-        kind: spruce
+        recipe: specimen-spruce
         seed: 2
 ` + second + `
 `
 	read := readPositionSet(t, text)
 	stage := testStaging()
+	stage.recipes = read
 	stage.west, stage.north, stage.lowest = 100, 200, 30
 	if err := stage.stand(read); err != nil {
 		t.Fatal(err)
@@ -114,6 +119,7 @@ func TestGroundlessEarthAirKeepsAbsoluteManufacturedWorldCoordinates(t *testing.
           up: {value: 50, unit: m}`
 	read := readPositionSet(t, positionedSetText("ground", first, second))
 	stage := testStaging()
+	stage.recipes = read
 	stage.groundlessAir = true
 	if err := stage.stand(read); err != nil {
 		t.Fatal(err)
@@ -137,6 +143,7 @@ func TestAbsolutePositionAndSpacePlacementShareTheNamedMetreCoordinate(t *testin
           up: {value: 0, unit: m}`
 	read := readPositionSet(t, positionedSetText("space", first, second))
 	stage := testStaging()
+	stage.recipes = read
 	if err := stage.afloat(read); err != nil {
 		t.Fatal(err)
 	}
@@ -160,6 +167,7 @@ func TestLegacySpaceCoordinatesAndTerrainHeightKeepTheirOldMeaning(t *testing.T)
 	read := readPositionSet(t, positionedSetText("space",
 		near, far))
 	stage := testStaging()
+	stage.recipes = read
 	if err := stage.afloat(read); err != nil {
 		t.Fatal(err)
 	}

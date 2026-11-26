@@ -1,5 +1,7 @@
 package main
 
+import "github.com/janearc/slayer/manufacture"
+
 // These are authored scene controls. Source heights and geographic references
 // retain their separate contracts; a plant mixture is not a vegetation survey.
 type geographicPoint struct {
@@ -20,14 +22,15 @@ type heightBand struct {
 }
 
 type objectPlan struct {
-	Name    string  `yaml:"name" json:"name"`
-	Kind    string  `yaml:"kind" json:"kind"`
-	Seed    uint64  `yaml:"seed" json:"seed"`
-	Detail  string  `yaml:"detail" json:"detail"`
-	East    float64 `yaml:"east-metres" json:"east-metres"`
-	South   float64 `yaml:"south-metres" json:"south-metres"`
-	Above   float64 `yaml:"above-metres" json:"above-metres"`
-	Heading float64 `yaml:"heading-deg" json:"heading-deg"`
+	Name    string       `yaml:"name" json:"name"`
+	Kind    string       `yaml:"kind" json:"kind,omitempty"`
+	Plant   *objectPlant `yaml:"plant" json:"plant,omitempty"`
+	Seed    uint64       `yaml:"seed" json:"seed"`
+	Detail  string       `yaml:"detail" json:"detail"`
+	East    float64      `yaml:"east-metres" json:"east-metres"`
+	South   float64      `yaml:"south-metres" json:"south-metres"`
+	Above   float64      `yaml:"above-metres" json:"above-metres"`
+	Heading float64      `yaml:"heading-deg" json:"heading-deg"`
 }
 
 type forestPlan struct {
@@ -86,6 +89,7 @@ type laserPlan struct {
 }
 
 type sitePlan struct {
+	plantRows     map[string]manufacture.Kind
 	LightExposure float64         `yaml:"light-exposure" json:"light-exposure"`
 	At            geographicPoint `yaml:"at" json:"at"`
 	Objects       []objectPlan    `yaml:"objects" json:"objects"`

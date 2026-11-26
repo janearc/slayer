@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"image/png"
@@ -15,6 +16,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/janearc/slayer/ferruccio/internal/draft"
 	"gopkg.in/yaml.v3"
@@ -37,6 +39,13 @@ type Profile struct {
 	GPU           bool
 	Full          bool
 	Rays          int
+	// Samples is an explicit total per pixel; zero keeps authored sampling.
+	Samples int
+	// SizePreset names a producer output-size preset selected for this render.
+	// Width and Height are its dimensions, frozen when the choice is made.
+	SizePreset string
+	// Camera overrides the authored camera by its producer-defined name.
+	Camera string
 }
 
 // Plan owns one temporary input and a fresh output directory.
@@ -44,6 +53,8 @@ type Plan struct {
 	Input, Output, Directory, Digest, Source, Kind, Specimen, Detail string
 	Profile                                                          Profile
 	state                                                            *planState
+	// relocated says its frozen input lives away from the source directory.
+	relocated bool
 }
 
 // Tools identifies existing executables and their scoped execution settings.
@@ -51,8 +62,8 @@ type Plan struct {
 // by this client: "cpu" or "gpu", and "2", "4", "8" or "all". Empty is the
 // default, the CPU renderer on two processors.
 type Tools struct {
-	Game, Slayer, Catalogue, GameHome, Shelf, Cache, Azazel, Queue, Agent, Transport string
-	Renderer, Processors                                                             string
+	Game, Slayer, Catalogue, GameHome, Shelf, Cache, Data, Azazel, Queue, Agent, Transport string
+	Renderer, Processors                                                                   string
 }
 
 // Prepare checks a still request without changing the source or its outputs.
@@ -146,6 +157,11 @@ func Prepare(request Request) (*Plan, error) {
 		return nil, err
 	}
 	input, err := os.CreateTemp(filepath.Dir(request.Path), ".ferruccio-preview-*.yaml")
+	relocated := false
+	if err != nil && (os.IsPermission(err) || errors.Is(err, syscall.EROFS)) && document.Kind() != "catalogue" {
+		input, err = os.CreateTemp(folder, ".ferruccio-preview-*.yaml")
+		relocated = err == nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +182,7 @@ func Prepare(request Request) (*Plan, error) {
 	if document.Kind() == "catalogue" {
 		output = filepath.Join(folder, "book", specimen+"-"+detail, "specimen.png")
 	}
-	return &Plan{Input: input.Name(), Output: output, Directory: folder, Digest: hex.EncodeToString(sum[:]), Source: request.Path, Kind: document.Kind(), Specimen: specimen, Detail: detail, Profile: profile, state: &planState{}}, nil
+	return &Plan{Input: input.Name(), Output: output, Directory: folder, Digest: hex.EncodeToString(sum[:]), Source: request.Path, Kind: document.Kind(), Specimen: specimen, Detail: detail, Profile: profile, state: &planState{}, relocated: relocated}, nil
 }
 
 // Close removes a temporary input only when no unconfirmed queue job needs it.
@@ -233,7 +249,18 @@ func (plan *Plan) record(_ Tools) error {
 	if picture.Width != profile.Width || picture.Height != profile.Height {
 		return fmt.Errorf("preview is %dx%d, expected %dx%d", picture.Width, picture.Height, profile.Width, profile.Height)
 	}
-	receipt := map[string]any{"source_sha256": plan.Digest, "width": picture.Width, "height": picture.Height, "preview": !profile.Full, "quality": profile.quality(), "rays_per_axis": profile.samples(), "document_kind": plan.Kind}
+	receipt := map[string]any{"source_sha256": plan.Digest, "width": picture.Width, "height": picture.Height, "preview": !profile.Full, "quality": profile.quality(), "document_kind": plan.Kind}
+	if profile.Full && profile.Samples > 0 {
+		receipt["samples_per_pixel"] = profile.Samples
+	} else {
+		receipt["rays_per_axis"] = profile.samples()
+	}
+	if profile.SizePreset != "" {
+		receipt["size_preset"] = profile.SizePreset
+	}
+	if profile.Camera != "" {
+		receipt["camera_override"] = profile.Camera
+	}
 	receipt["lane"] = plan.lane()
 	receipt["renderer_override"] = ""
 	if plan.Profile.CPURenderer && plan.Kind != "catalogue" {
@@ -292,6 +319,9 @@ func environment(tools Tools) []string {
 	}
 	if tools.Shelf != "" {
 		replacements["SLAYER_SHELF"] = tools.Shelf
+	}
+	if tools.Data != "" {
+		replacements["SLAYER_DATA"] = tools.Data
 	}
 	var result []string
 	for _, value := range ChildEnvironment() {

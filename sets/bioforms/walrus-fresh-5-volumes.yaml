@@ -8,10 +8,12 @@ scene:
   seed: 17
   setting: space
   light: none
+  recipes:
+    profile-walrus-volumes: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: walrus, representation: volumes}}
   set:
     things:
       walrus:
-        kind: walrus-fresh-5-volumes
+        recipe: profile-walrus-volumes
         seed: 17
         east: 0
         north: 0

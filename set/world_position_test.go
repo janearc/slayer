@@ -13,7 +13,7 @@ const absoluteTree = "        position:\n" +
 func TestThingReadsTypedWorldPositionInBothSettings(t *testing.T) {
 	for _, setting := range []string{"ground", "space"} {
 		t.Run(setting, func(t *testing.T) {
-			plant := spruce("tree", absoluteTree)
+			plant := specimen("tree", absoluteTree)
 			read, err := readV2("  setting: " + setting + "\n" +
 				stood(plant))
 			if err != nil {
@@ -30,7 +30,7 @@ func TestThingReadsTypedWorldPositionInBothSettings(t *testing.T) {
 func TestThingWorldPositionIsAlsoReadByVersionOne(t *testing.T) {
 	text := `"$schema": ` + EcosystemSchema + "\n" +
 		"scene:\n  name: old\n" + defaultFilm + defaultCamera +
-		"  set:\n    things:\n" + spruce("tree", absoluteTree)
+		"  set:\n    things:\n" + specimen("tree", absoluteTree)
 	read, err := Read("old-position.yaml", []byte(text))
 	if err != nil {
 		t.Fatal(err)
@@ -51,7 +51,7 @@ func TestThingWorldPositionRefusesAmbiguousPlacements(t *testing.T) {
 		{"space orbit", "space", "        around: tree\n", "position and around"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			plant := spruce("tree", absoluteTree+test.extra)
+			plant := specimen("tree", absoluteTree+test.extra)
 			_, err := readV2("  setting: " + test.setting + "\n" +
 				stood(plant))
 			if err == nil || !strings.Contains(err.Error(), test.want) {
@@ -72,7 +72,7 @@ func TestThingWorldPositionRequiresThreeFiniteMetreCoordinates(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			text := strings.Replace(absoluteTree,
 				"          up: {value: -3, unit: m}\n", test.change, 1)
-			plant := spruce("tree", text)
+			plant := specimen("tree", text)
 			if _, err := readV2(stood(plant)); err == nil {
 				t.Fatal("accepted invalid world position")
 			}
@@ -81,7 +81,7 @@ func TestThingWorldPositionRequiresThreeFiniteMetreCoordinates(t *testing.T) {
 }
 
 func TestLegacyTerrainPlacementRetainsItsRelativeHeight(t *testing.T) {
-	plant := spruce("tree",
+	plant := specimen("tree",
 		"        east: 12\n        north: 25\n"+
 			"        height: {value: 2.5, unit: m}\n")
 	read, err := readV2("  setting: ground\n" + stood(plant))

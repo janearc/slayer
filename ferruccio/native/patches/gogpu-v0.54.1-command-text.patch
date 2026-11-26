@@ -1,0 +1,51 @@
+--- a/internal/platform/platform_darwin.go
++++ b/internal/platform/platform_darwin.go
+@@ -999,7 +999,16 @@
+ 
+ 	// Convert to Go byte slice (safe: pointer valid within this autorelease pool scope)
+ 	data := unsafe.Slice((*byte)(unsafe.Pointer(utf8Ptr)), length*4) //nolint:govet // ObjC UTF8String pointer, bounded by NSString length
++	w.dispatchCharacters(data)
++}
+ 
++// dispatchCharacters queues text from a macOS key event.
++func (w *darwinWindow) dispatchCharacters(data []byte) {
++	// Command key equivalents are actions, not text. Option remains available
++	// for characters produced by international keyboard layouts.
++	if w.modifiers&gpucontext.ModSuper != 0 {
++		return
++	}
+ 	// Decode UTF-8 runes and push each non-control character to event queue.
+ 	// Stop at null terminator (UTF8String is a C string).
+ 	// Skip macOS Private Use Area function-key sentinels (U+F700-U+F8FF):
+--- /dev/null
++++ b/internal/platform/shortcut_text_darwin_test.go
+@@ -0,0 +1,29 @@
++//go:build darwin
++
++package platform
++
++import (
++	"testing"
++
++	"github.com/gogpu/gogpu/internal/platform/eventqueue"
++	"github.com/gogpu/gpucontext"
++)
++
++func TestCommandShortcutDoesNotProduceText(t *testing.T) {
++	w := &darwinWindow{events: eventqueue.New[Event](eventqueue.DefaultCapacity)}
++	w.modifiers = gpucontext.ModSuper
++	w.dispatchCharacters([]byte("o\x00"))
++	if e, ok := w.events.Pop(); ok {
++		t.Fatalf("command shortcut produced text: %+v", e)
++	}
++	w.modifiers = gpucontext.ModAlt
++	w.dispatchCharacters([]byte("ø\x00"))
++	if e, ok := w.events.Pop(); !ok || e.Type != EventChar || e.Char != 'ø' {
++		t.Fatalf("option text lost: %+v, present %v", e, ok)
++	}
++	w.modifiers = 0
++	w.dispatchCharacters([]byte("o\x00"))
++	if e, ok := w.events.Pop(); !ok || e.Type != EventChar || e.Char != 'o' {
++		t.Fatalf("ordinary text lost: %+v, present %v", e, ok)
++	}
++}

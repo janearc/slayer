@@ -1,0 +1,50 @@
+Historical public catalogue capture, 2026-11-24
+
+The 475 rows in historical-public-partial.txt were produced from the
+unmodified manufacture implementation at
+f8ddbbbba211d5cb4ec6ca0a1775303ff6fce4b4, on Darwin arm64, Go 1.27.3,
+GOWORK=off and GOMAXPROCS=2. They contain 455 geometry hashes and 20
+expected Make refusals, with original refusal strings. Names were selected
+from the intersection of the public-kind inventory and the kinds missing an
+existing record. Each kind uses seeds 5 and 11 and requested details hull,
+clumps, quick and demo. The records omit exactly bridge 5/11 demo and
+scavenged-cluster 11 hull/quick/demo; those are addressed separately below.
+
+The producer starts from the retained public geometry_sample.go and changes
+only selection and two additive shape encodings: tag 4 and Radius for a
+Sphere, and tag 5 followed by Radius, Thick, Height for a Tube. Older shape
+tags and bytes are unchanged. Earlier filtered producers lacking those tags
+never returned a row for unsupported shapes. An existing mesh row and a
+Sphere row were checked byte for byte after the Tube addition. The Sphere
+and Tube literal-byte and changed-dimension tests passed under Game.
+
+Each case ran in its own process through a per-kind Game tests-lane ticket.
+The driver retained individual rows and errors, stopped if free disk fell
+below 30 GiB, and bounded each case to 120 seconds and 4 GiB sampled RSS.
+The 475 successful case times sum to 276.422 seconds, including the driver's
+polling floor but excluding lane waits and failed attempts. The largest
+sampled successful peak was 1,671,648 KiB, scavenged-cluster 5 demo; the
+longest successful case was bridge 5 quick at 15.322 seconds. RSS was
+sampled every 0.2 seconds and can miss short-lived peaks; a zero sample is
+not a measurement of zero memory.
+
+The two bridge demos are supplied by reference from
+historical-bridge-demo-arm64.txt and its separate provenance, committed at
+35577d9c. They were captured from an optimized historical implementation,
+not the unmodified f8 binary. Unmodified f8 produced no demo row within the
+120-second bound. The three scavenged-cluster 11 cases failed in Things on
+unmodified f8; their separately corrected-f8 rows and provenance are in
+historical-corrected-scavenged-arm64.txt and its provenance companion.
+Those three corrected rows must not be represented as unmodified successes.
+
+SHA-256:
+  retained public producer  ae1b8ece6a1c9ac151d9f56d536ee8a473a0128642f50159fc6541560e8b3d8b
+  first selected producer   61742e213b10afa0c3a1ad2c9ad23f8ef8112d3e00eaf17556302352ba895c13
+  sphere selected producer  fe308f06b9479498cb605fc007f036b6b9900e601162798eb8e3f9c4bdea3d2f
+  final selected producer   3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094
+  selected names            cd6d0ef8821776e2c33f02dbfe5ba47eb800d4fb3b1ee2580149c00e8483a486
+  475 unmodified rows       1755cd9044a22d18090e79e0207f696d1e185937d5075d967e1d390921a88a83
+  latest capture driver     22fb737579a3bdf6e9a0fccab6f483169020b3540864275b02bb08435221e781
+
+The original selected producer is reconstructed as documented in
+historical-selected-producer-provenance.txt.

@@ -1,0 +1,10 @@
+# The anatomy and colours are authored choices, not measurements.
+profiles:
+  - kind: humboldt-squid
+    status: picked
+    by: Humboldt squid illustration study
+    date: '2026-11-24'
+    mantle-metres: 0.8
+    anatomy: {mantle-radius: 0.255, head-width: 0.21, fin-span: 0.25, arm-length: 1.0, tentacle-length: 1.48}
+    coat: {r: 0.32, g: 0.09, b: 0.085}
+    mottle: {r: 0.035, g: 0.018, b: 0.015}

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/maths"
 )
 
 // A Norway spruce's needles are on branchlets its branches carry, many
@@ -31,15 +32,15 @@ func TestANorwaySpruceIsBranchedTwice(t *testing.T) {
 // piece, has no more faces than a made thing may: so no seed is refused.
 func TestTheLargestNorwaySpruceFits(t *testing.T) {
 	row := norwayRow()
-	whorls := int(math.Round(row.tall.most / row.between.least))
-	grown, err := row.grows.grown(whorls, row.lowest.count(1),
-		row.grows.shoots.per.count(1), row.hangs, atQuick)
+	whorls := int(math.Round(row.Tall[1] / row.Between[0]))
+	grown, err := row.Grows.Grown(whorls, maths.CountBetween(row.Lowest[0], row.Lowest[1], 1),
+		maths.CountBetween(row.Grows.Shoots.Per[0], row.Grows.Shoots.Per[1], 1), row.Hangs, int(body), int(leaf))
 	if err != nil {
 		t.Fatal(err)
 	}
-	tall := measure.Metres(row.tall.most)
-	made, err := grow(grown, size{length: tall,
-		girth: tall.Times(row.slender.most)}, sow(1))
+	tall := measure.Metres(row.Tall[1])
+	made, err := grow(grown, size{Length: tall,
+		Girth: tall.Times(row.Slender[1])}, sow(1))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -131,6 +131,9 @@ func reading(laid []job.Override, qualitySaid bool) func(string) (
 		if err != nil {
 			return job.Job{}, err
 		}
+		if err := refuseRegionOutput(wanted); err != nil {
+			return job.Job{}, err
+		}
 		if _, said := wanted.Quality(); said || qualitySaid {
 			return wanted, nil
 		}

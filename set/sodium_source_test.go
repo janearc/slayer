@@ -14,7 +14,7 @@ func TestNightCompositionKeepsThePinnedSodiumAirWavelengths(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	scene, err := set.Read("night.yaml", raw)
+	scene, err := set.Read("../doc/night.yaml", raw)
 	if err != nil {
 		t.Fatal(err)
 	}

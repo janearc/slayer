@@ -4,6 +4,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/janearc/slayer/manufacture/plants/conifers"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/shape"
 )
@@ -12,25 +13,25 @@ func TestRecursiveShootHasAttachedContractingAxes(t *testing.T) {
 	for _, style := range []int{1, 2} {
 		plan := planShoot(style, 0.2, Sow(11))
 		orders := map[int]bool{}
-		for index, axis := range plan.axes {
-			orders[axis.order] = true
+		for index, axis := range plan.Axes {
+			orders[axis.Order] = true
 			if index == 0 {
 				continue
 			}
-			parent := plan.axes[axis.parent]
-			delta := axis.at.Sub(parent.at)
-			along := delta.Dot(parent.direction)
-			if along <= 0 || along >= parent.length || delta.Sub(parent.direction.Scale(along)).Len() > 1e-12 {
+			parent := plan.Axes[axis.Parent]
+			delta := axis.At.Sub(parent.At)
+			along := delta.Dot(parent.Direction)
+			if along <= 0 || along >= parent.Length || delta.Sub(parent.Direction.Scale(along)).Len() > 1e-12 {
 				t.Fatal("lateral axis detached from its parent")
 			}
-			if axis.length >= parent.length || axis.radius >= parent.radius {
+			if axis.Length >= parent.Length || axis.Radius >= parent.Radius {
 				t.Fatal("child did not contract")
 			}
 			// For the authored exponent 3/2, cross-section area contracts
 			// as the cube of relative length. Check this relation without
 			// repeating the implementation's fractional power.
-			ratio := axis.length / parent.length
-			area := axis.radius * axis.radius / (parent.radius * parent.radius)
+			ratio := axis.Length / parent.Length
+			area := axis.Radius * axis.Radius / (parent.Radius * parent.Radius)
 			if !(math.Abs(area-ratio*ratio*ratio) <= 1e-14) {
 				t.Fatal("twig cross-section does not follow the authored contraction")
 			}
@@ -46,9 +47,9 @@ func TestNeedleDimensionsAndRanksFollowTheSpeciesDescriptions(t *testing.T) {
 		for _, length := range []float64{0.025, 0.05, 0.1, 0.2, 0.4} {
 			plan := planShoot(style, length, Sow(7))
 			ranks := map[int]bool{}
-			for _, needle := range plan.needles {
-				ranks[needle.rank] = true
-				long := needle.tip.Sub(needle.root).Len()
+			for _, needle := range plan.Needles {
+				ranks[needle.Rank] = true
+				long := needle.Tip.Sub(needle.Root).Len()
 				low, high := 0.01, 0.02 // OSU redwood description, converted cm to m.
 				if style == 2 {
 					low, high = 0.003, 0.006
@@ -56,15 +57,15 @@ func TestNeedleDimensionsAndRanksFollowTheSpeciesDescriptions(t *testing.T) {
 				if long < low-1e-12 || long > high+1e-12 {
 					t.Fatalf("style %d leaf length %g m", style, long)
 				}
-				axis := plan.axes[needle.axis]
-				delta := needle.root.Sub(axis.at)
-				axial := delta.Dot(axis.direction)
-				radial := delta.Sub(axis.direction.Scale(axial)).Len()
-				wantRadius := axis.radius * (1 - 0.85*axial/axis.length)
+				axis := plan.Axes[needle.Axis]
+				delta := needle.Root.Sub(axis.At)
+				axial := delta.Dot(axis.Direction)
+				radial := delta.Sub(axis.Direction.Scale(axial)).Len()
+				wantRadius := axis.Radius * (1 - 0.85*axial/axis.Length)
 				if !(math.Abs(radial-wantRadius) <= 1e-12) {
 					t.Fatal("needle root is not on the twig surface")
 				}
-				if style == 1 && math.Abs(needle.normal.Dot(maths.ZAxis)) < 1-1e-12 {
+				if style == 1 && math.Abs(needle.Normal.Dot(maths.ZAxis)) < 1-1e-12 {
 					t.Fatal("redwood spray lost its plane")
 				}
 			}
@@ -101,8 +102,8 @@ func TestNeedledShootHasVisibleGapsAndClosedIndividualLeaves(t *testing.T) {
 		t.Fatalf("leaf silhouette: %d hits, %d gaps", hits, misses)
 	}
 	for _, detail := range []string{"quick", "demo"} {
-		needle := shoot.plan.needles[0]
-		skin := needle.skin(detail)
+		needle := shoot.plan.Needles[0]
+		skin := conifers.NeedleSkin[face](needle, detail)
 		edges := map[[2]maths.Vec]int{}
 		for _, face := range skin {
 			for i := range 3 {
@@ -119,7 +120,7 @@ func TestNeedledShootHasVisibleGapsAndClosedIndividualLeaves(t *testing.T) {
 
 func TestRedwoodTreeUsesSharedShootsInsteadOfGreenSleeves(t *testing.T) {
 	for _, detail := range []string{"clumps", "quick", "demo"} {
-		row, _ := KindNamed("coast-redwood")
+		row, _ := testKind("coast-redwood")
 		made, err := MakeWithComplexity(row, Sow(3), detail)
 		if err != nil {
 			t.Fatal(err)
@@ -156,9 +157,9 @@ func TestNeedleBasesMeetTheRenderedWood(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			step := max(1, len(shoot.plan.needles)/24)
-			for i := 0; i < len(shoot.plan.needles); i += step {
-				gap := math.Abs(shoot.wood.Distance(shoot.plan.needles[i].root))
+			step := max(1, len(shoot.plan.Needles)/24)
+			for i := 0; i < len(shoot.plan.Needles); i += step {
+				gap := math.Abs(shoot.wood.Distance(shoot.plan.Needles[i].Root))
 				if gap > 1e-10 {
 					t.Fatalf("style %d %s: base is %g m off the wood", style, detail, gap)
 				}

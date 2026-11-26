@@ -9,7 +9,7 @@ import (
 // for a plant is made, from a seed, without refusal.
 func TestEveryRungASaysIsMade(t *testing.T) {
 	for _, name := range mangroveKinds {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -25,7 +25,7 @@ func TestEveryRungASaysIsMade(t *testing.T) {
 // TestAPlantSaysAllFourRungs checks the mangroves give the hull, clumps,
 // quick and demo, coarse to fine.
 func TestAPlantSaysAllFourRungs(t *testing.T) {
-	row, err := KindNamed("avicennia-marina")
+	row, err := testKind("avicennia-marina")
 	if err != nil {
 		t.Fatal(err)
 	}

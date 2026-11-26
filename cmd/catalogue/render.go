@@ -17,6 +17,7 @@ import (
 	"github.com/janearc/slayer/gpu"
 	"github.com/janearc/slayer/interfaces/file"
 	"github.com/janearc/slayer/render/frame"
+	"github.com/janearc/slayer/trace"
 )
 
 // directoryMode is defined as owner rwx, group rx and other rx.
@@ -44,17 +45,19 @@ type card struct {
 	// Producer the binary that drew it: both belong to the card, so a
 	// book resumed by another binary keeps each card's own record.
 	Settings string    `json:"settings-sha256,omitempty"`
+	Source   string    `json:"model-source-sha256,omitempty"`
 	Producer *producer `json:"producer,omitempty"`
 }
 
 type book struct {
 	Cards    []card    `json:"cards"`
 	Producer *producer `json:"producer"`
+	offered  *menu
 }
 
 // prepare resolves every selector and detail before creating output.
 func prepare(call pzm.Call) (*book, *plan, error) {
-	menu, err := readMenu()
+	menu, err := menuForCall(call)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -65,6 +68,12 @@ func prepare(call pzm.Call) (*book, *plan, error) {
 	plan, err := loadPlan(call)
 	if err != nil {
 		return nil, nil, err
+	}
+	if call.Given("renderer") {
+		plan.renderer = call.Value("renderer")
+		if plan.renderer != "cpu" && plan.renderer != "gpu" {
+			return nil, nil, fmt.Errorf("unknown catalogue renderer %q: choose gpu or cpu", plan.renderer)
+		}
 	}
 	var cards []card
 	for _, entry := range entries {
@@ -82,7 +91,7 @@ func prepare(call pzm.Call) (*book, *plan, error) {
 				entry.Kind, plan.Details)
 		}
 	}
-	return &book{Cards: cards}, plan, nil
+	return &book{Cards: cards, offered: menu}, plan, nil
 }
 
 // render writes one completed specimen at a time, keeping a truthful
@@ -132,7 +141,7 @@ func (app application) drawAll(call pzm.Call, destination string,
 	settings := plan.hash()
 	for index := range book.Cards {
 		view := &book.Cards[index]
-		if !selected[view.Folder] || view.drawnUnder(settings) {
+		if !selected[view.Folder] || view.drawnWith(settings, plan.status()) {
 			continue
 		}
 		if err := app.context.Err(); err != nil {
@@ -144,7 +153,7 @@ func (app application) drawAll(call pzm.Call, destination string,
 		if err := book.write(destination); err != nil {
 			return failures, err
 		}
-		if view.Status != renderedStatus {
+		if !view.Rendered() {
 			continue
 		}
 		if _, err := fmt.Fprintln(call.Out(), view.Folder); err != nil {
@@ -161,17 +170,26 @@ func (app application) drawOne(destination string, view *card, plan *plan,
 ) error {
 	view.Status, view.Failure = pendingStatus, ""
 	view.Settings, view.Producer = plan.hash(), maker
+	view.Source = view.Entry.source
 	err := os.RemoveAll(filepath.Join(destination, view.Folder))
 	if err == nil {
 		err = app.drawer.draw(*plan, destination, view, maker)
 	}
 	if err != nil {
 		view.Status, view.Failure = failedStatus, err.Error()
-		view.Settings, view.Producer = "", nil
+		view.Settings, view.Source, view.Producer = "", "", nil
 		return err
 	}
-	view.Status = renderedStatus
+	view.Status = plan.status()
 	return nil
+}
+
+// status names the rendering path without changing the plan's byte hash.
+func (plan plan) status() string {
+	if plan.renderer == "cpu" {
+		return cpuRenderedStatus
+	}
+	return renderedStatus
 }
 
 // failed says every specimen that failed, one line each, as the error
@@ -195,15 +213,27 @@ func (plan plan) draw(destination string, card *card,
 	}
 	card.Cutaway = object.cutaway
 	prepared := time.Since(start)
-	picture, profile, err := gpu.SampledAccelerated(object.world,
-		*object.eye, object.lens, specimenEpoch,
-		plan.Width, plan.Height, plan.Rays)
+	var picture *frame.Frame
+	var profile *gpu.Profile
+	var cpuWall time.Duration
+	if plan.renderer == "cpu" {
+		started := time.Now()
+		picture, err = trace.Sampled(object.world, *object.eye, object.lens,
+			specimenEpoch, plan.Width, plan.Height, plan.Rays)
+		cpuWall = time.Since(started)
+	} else {
+		var measured gpu.Profile
+		picture, measured, err = gpu.SampledAccelerated(object.world,
+			*object.eye, object.lens, specimenEpoch,
+			plan.Width, plan.Height, plan.Rays)
+		profile = &measured
+		if err == nil && (measured.Native.Refined == noEntries || measured.Device == "" ||
+			measured.TraceGPU <= specimenEpoch) {
+			return fmt.Errorf("specimen had no native refinement")
+		}
+	}
 	if err != nil {
 		return err
-	}
-	if profile.Native.Refined == noEntries || profile.Device == "" ||
-		profile.TraceGPU <= specimenEpoch {
-		return fmt.Errorf("specimen had no native refinement")
 	}
 	if err := plan.visible(picture); err != nil {
 		return err
@@ -226,12 +256,16 @@ func (plan plan) draw(destination string, card *card,
 			return err
 		}
 	}
-	card.Status = "native GPU render"
+	card.Status = plan.status()
 	imageHash, err := hashFile(imagePath)
 	if err != nil {
 		return err
 	}
-	record := receipt{Card: *card, Profile: profile,
+	backend := "gpu"
+	if plan.renderer == "cpu" {
+		backend = "cpu"
+	}
+	record := receipt{Card: *card, Backend: backend, Profile: profile, CPUTraceWall: cpuWall,
 		Bounds: object.bounds, StoredFaces: object.faces,
 		Seed:     plan.Seed,
 		Producer: producer, DurationUnit: "nanoseconds",

@@ -2,6 +2,7 @@ package manufacture
 
 import (
 	"errors"
+	"github.com/janearc/slayer/manufacture/geometry"
 	"math"
 
 	"github.com/janearc/celestial/measure"
@@ -134,58 +135,7 @@ const cleaving = 100
 // is zero and every stone would have the same six dimples.
 var offLattice = maths.V(7.3, 3.1, 5.7)
 
-// icosahedron is the twenty-sided ball every lump starts as: its
-// twelve corners on the unit ball and its faces by corner, each wound
-// outward.
-func icosahedron() surface {
-	golden := (1 + math.Sqrt(5)) / 2
-	corners := []maths.Vec{
-		maths.V(-1, golden, 0), maths.V(1, golden, 0),
-		maths.V(-1, -golden, 0), maths.V(1, -golden, 0),
-		maths.V(0, -1, golden), maths.V(0, 1, golden),
-		maths.V(0, -1, -golden), maths.V(0, 1, -golden),
-		maths.V(golden, 0, -1), maths.V(golden, 0, 1),
-		maths.V(-golden, 0, -1), maths.V(-golden, 0, 1),
-	}
-	faces := [][3]int{{0, 11, 5}, {0, 5, 1}, {0, 1, 7}, {0, 7, 10},
-		{0, 10, 11}, {1, 5, 9}, {5, 11, 4}, {11, 10, 2}, {10, 7, 6},
-		{7, 1, 8}, {3, 9, 4}, {3, 4, 2}, {3, 2, 6}, {3, 6, 8},
-		{3, 8, 9}, {4, 9, 5}, {2, 4, 11}, {6, 2, 10}, {8, 6, 7},
-		{9, 8, 1}}
-	var ball surface
-	for _, corner := range faces {
-		ball = append(ball, face{corners[corner[0]].Unit(),
-			corners[corner[1]].Unit(), corners[corner[2]].Unit()})
-	}
-	return ball
-}
-
-// roundTheMiddle is how many sides an icosahedron has round its
-// middle, which each cutting doubles.
-const roundTheMiddle = 5
-
-// ball is the unit ball cut finely enough to have as many sides round its
-// middle as the cut asks: every face of the icosahedron made four, their new
-// corners pushed out to the ball, as often as it takes.
-//
-// a corner two faces share is worked out from the same two corners either way,
-// so the ball closes exactly.
-func ball(fine cut) surface {
-	made := icosahedron()
-	for round := roundTheMiddle; round < fine.around; round *= 2 {
-		var finer surface
-		for _, one := range made {
-			ab := one[0].Add(one[1]).Unit()
-			bc := one[1].Add(one[2]).Unit()
-			ca := one[2].Add(one[0]).Unit()
-			finer = append(finer, face{one[0], ab, ca},
-				face{one[1], bc, ab}, face{one[2], ca, bc},
-				face{ab, bc, ca})
-		}
-		made = finer
-	}
-	return made
-}
+func ball(fine cut) surface { return surface(geometry.Ball[face](fine.around)) }
 
 // plane is one cleaving of a stone: which way it faces and how far
 // from the middle it lies, on the unit ball.

@@ -1,4 +1,4 @@
-# one giant kelp plant, the study of the kind giant-kelp-slack, stood in
+# one giant kelp plant in moderate water, stood in
 # air on a pale floor so its form is seen by the worked sun and sky, with
 # no water in the picture. places are metres, x east, y north, z up; the
 # holdfast stands at the origin and the top is about twelve metres up. the
@@ -33,10 +33,12 @@ scene:
         middle: [0, 0, -0.05]
         size: [200, 200, 0.1]
         source: eye
+  recipes:
+    profile-kelp: {alga: {family: kelp, file: ../manufacture/algae/kelp/kelp.yaml, species: macrocystis-pyrifera, condition: moderate}}
   set:
     things:
       plant:
-        kind: giant-kelp-moderate
+        recipe: profile-kelp
         seed: 1
         position:
           east: {value: 0, unit: m}

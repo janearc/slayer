@@ -1,0 +1,20 @@
+# Authored generic fern; dimensions are picked scenery, not a species survey.
+profiles:
+  - kind: fern
+    status: picked
+    by: fern scenery study
+    date: '2026-10-06'
+    frond-length: {minimum: 0.4, maximum: 0.9}
+    stalk-radius: {minimum: 0.005, maximum: 0.008}
+    fronds: {minimum: 6, maximum: 11}
+    leaflets: {minimum: 14, maximum: 24}
+    anatomy:
+      crown-span: 0.03
+      crown-radius: 3
+      stalk-tip: 0.15
+      leaflet-tip: 0.2
+      leaflet-reach: 0.22
+      leaflet-shortening: 0.85
+      leaflet-girth: 3
+      leaflet-minimum: 0.01
+    colour: {r: 0.2, g: 0.5, b: 0.12}

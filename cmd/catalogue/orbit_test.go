@@ -16,7 +16,7 @@ func TestCatalogueOrbitYawTurnsAroundTheEntryVertical(test *testing.T) {
 	for _, angle := range []float64{42, -37} {
 		test.Run(fmtAngle(angle), func(test *testing.T) {
 			plan := defaultPlan(test)
-			entry := entry{Kind: "coast-redwood-shoot", Yaw: 19, Up: "x"}
+			entry := orbitShoot(test, 19)
 			base := specimenFor(test, plan, entry)
 			plan.Orbit.Yaw = angle
 			turned := specimenFor(test, plan, entry)
@@ -49,7 +49,7 @@ func TestCatalogueOrbitPitchUsesTheTurnedCameraRight(test *testing.T) {
 	for _, angle := range []float64{31, -24} {
 		test.Run(fmtAngle(angle), func(test *testing.T) {
 			plan := defaultPlan(test)
-			entry := entry{Kind: "coast-redwood-shoot", Yaw: -23, Up: "x"}
+			entry := orbitShoot(test, -23)
 			base := specimenFor(test, plan, entry)
 			plan.Orbit.Yaw = 28
 			plan.Orbit.Pitch = angle
@@ -73,7 +73,7 @@ func TestCatalogueOrbitPitchUsesTheTurnedCameraRight(test *testing.T) {
 
 func TestCatalogueOrbitZeroKeepsTheAuthoredCameraExactly(test *testing.T) {
 	plan := defaultPlan(test)
-	entry := entry{Kind: "coast-redwood-shoot", Yaw: 17, Up: "x"}
+	entry := orbitShoot(test, 17)
 	authored := specimenFor(test, plan, entry)
 	plan.Orbit = orbit{}
 	zero := specimenFor(test, plan, entry)
@@ -85,7 +85,7 @@ func TestCatalogueOrbitZeroKeepsTheAuthoredCameraExactly(test *testing.T) {
 func TestCatalogueOrbitClampsElevationAndKeepsFiniteEye(test *testing.T) {
 	plan := defaultPlan(test)
 	plan.Orbit.Pitch = 80
-	shot := specimenFor(test, plan, entry{Kind: "coast-redwood-shoot", Up: "x"})
+	shot := specimenFor(test, plan, orbitShoot(test, 0))
 	centre := centreOf(shot)
 	direction := shot.eye.Origin.Sub(centre)
 	elevation := math.Asin(direction.Dot(maths.XAxis) / direction.Len())
@@ -103,7 +103,7 @@ func TestCatalogueOrbitClampsElevationAndKeepsFiniteEye(test *testing.T) {
 
 func TestCatalogueOrbitClampDoesNotFlipItsAzimuth(test *testing.T) {
 	plan := defaultPlan(test)
-	entry := entry{Kind: "coast-redwood-shoot", Up: "x"}
+	entry := orbitShoot(test, 0)
 	base := specimenFor(test, plan, entry)
 	centre := centreOf(base)
 	direction := base.eye.Origin.Sub(centre)
@@ -149,7 +149,7 @@ func TestCatalogueOrbitLeavesItsAuthoredPlanUntouched(test *testing.T) {
 	before := append([]byte(nil), plan.raw...)
 	setting := plan.Camera
 	distance := plan.Distance
-	entry := entry{Kind: "coast-redwood-shoot", Yaw: 17, Up: "x"}
+	entry := orbitShoot(test, 17)
 	plan.Orbit = orbit{Yaw: 22, Pitch: -11}
 	if _, err := plan.construct(entry, "quick"); err != nil {
 		test.Fatal(err)
@@ -194,6 +194,24 @@ func TestCatalogueOrbitPlanSchemaRequiresBothFiniteBoundedAngles(test *testing.T
 	if err != nil || valid.Orbit != (orbit{Yaw: -180, Pitch: 80}) {
 		test.Fatal("schema rejected boundary orbit", valid, err)
 	}
+}
+
+func orbitShoot(test *testing.T, yaw float64) entry {
+	test.Helper()
+	menu, err := readMenu()
+	if err != nil {
+		test.Fatal(err)
+	}
+	entries, err := menu.selectEntries([]string{"coast-redwood-shoot"})
+	if err != nil || len(entries) != 1 {
+		test.Fatalf("checked shoot entry: %v", err)
+	}
+	entry := entries[0]
+	if entry.Plant == nil || entry.checked == nil || entry.Up != "x" {
+		test.Fatal("catalogue shoot lost its checked profile or vertical axis")
+	}
+	entry.Yaw = yaw
+	return entry
 }
 
 func specimenFor(test *testing.T, plan *plan, entry entry) *specimen {

@@ -13,6 +13,10 @@ import (
 type inventoryRow struct {
 	Kind       string      `json:"kind"`
 	Group      string      `json:"group"`
+	Animal     *animalSpec `json:"animal,omitempty"`
+	Plant      *plantSpec  `json:"plant,omitempty"`
+	Alga       *algaSpec   `json:"alga,omitempty"`
+	Source     string      `json:"profile-identity-sha256,omitempty"`
 	Detail     string      `json:"detail"`
 	Seed       uint64      `json:"seed"`
 	Parts      int         `json:"parts"`
@@ -26,7 +30,7 @@ type inventoryRow struct {
 
 // inventory measures selected specimens without drawing or declaring maturity.
 func inventory(call pzm.Call) error {
-	menu, err := readMenu()
+	menu, err := menuForCall(call)
 	if err != nil {
 		return err
 	}
@@ -63,7 +67,7 @@ func measureEntries(entries []entry) ([]inventoryRow, error) {
 
 // measureEntry keeps the model's limitations beside its generated population.
 func measureEntry(entry entry) (inventoryRow, error) {
-	kind, err := manufacture.KindNamed(entry.Kind)
+	kind, err := entry.kind()
 	if err != nil {
 		return inventoryRow{}, err
 	}
@@ -78,6 +82,7 @@ func measureKind(entry entry, kind manufacture.Kind) (inventoryRow, error) {
 	}
 	minimum := entry.partMinimum()
 	return inventoryRow{Kind: entry.Kind, Group: entry.Group,
+		Animal: entry.Animal, Plant: entry.Plant, Alga: entry.Alga, Source: entry.source,
 		Detail: "quick", Seed: 1, Parts: made.PartCount(), Minimum: minimum,
 		Shortfall: max(0, minimum-made.PartCount()), Review: "pending",
 		Bounds: made.Bounds(), Notes: entry.Notes, References: entry.References}, nil

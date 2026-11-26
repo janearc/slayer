@@ -1,0 +1,35 @@
+Historical city demo geometry, 2026-11-24
+
+The original source was a clean checkout at
+f8ddbbbba211d5cb4ec6ca0a1775303ff6fce4b4. It successfully made the 14
+city/demo cases in historical-city-demo-arm64.txt, each in its own process.
+The original refusal records in later-reference-arm64.txt remain unchanged;
+these are separately captured successful alternatives, not rewritten history.
+
+The original producer was the historical selected source reconstructed from
+geometry_sample_selected.go: the established public
+geometry sample selected by kind, seed and detail through environment
+variables. Relative to the historical geometry_sample.go it adds those
+selectors and the established Tube and Sphere geometry tags; its existing
+mesh, group, bounds, zero-time placement and material fingerprint is
+unchanged. It was built against the clean f8 checkout; no manufacture source
+was modified. Its output uses zero placement, seeds 5 and 11 and detail demo.
+
+Darwin arm64, go1.27.3, default GOEXPERIMENT, GOWORK=off, GOMAXPROCS=2,
+GOFLAGS='-p=1 -parallel=1 -timeout=60m'. Game's tests lane ran the build and
+each case separately. The committed Ruby driver imposed a 120-second wall
+limit, 4-GiB sampled RSS limit and 30-GiB free-space floor, stopping on any
+failure without creating a row. The JSONL capture log contains every case's
+elapsed time and sampled peak RSS; these are samples, not guaranteed maxima.
+All 14 completed, with a largest sample of 1,801,856 KiB. No threshold tripped.
+
+SHA-256:
+  historical geometry_sample.go  ae1b8ece6a1c9ac151d9f56d536ee8a473a0128642f50159fc6541560e8b3d8b
+  selected producer              3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094
+  f8 producer binary             cfaa0c7ce3f97df998109da25d09fe7bd72dc7c48a6a33f05dc0301350cf337c
+  bounded capture driver         800b1ef6091752ea684cadfb9a74d97152ee8a1bfceb1f96ecb23bc79b26ab5b
+  14 geometry rows               b392596f9e043102495965764936ec7f33b28a3fcd31d8bf25aff5cce4413abf
+  per-case JSONL log              0b615da29493822dc0234b177b4ff62c302839bb421bafd8bedb708a3d147855
+
+The original selected producer is reconstructed as documented in
+historical-selected-producer-provenance.txt.

@@ -130,21 +130,26 @@ func (scene *DisplayScene) Drag(id string, x0, y0, x1, y1 float64) (float64, flo
 		if object.ID != id || id == "scene.world" {
 			continue
 		}
-		first, err := scene.displayPlane(x0, y0, object.At.Origin.Y)
-		if err != nil {
-			return 0, 0, err
-		}
-		last, err := scene.displayPlane(x1, y1, object.At.Origin.Y)
-		if err != nil {
-			return 0, 0, err
-		}
-		delta := last.Sub(first)
-		if !displayFinite(delta.X) || !displayFinite(delta.Z) {
-			return 0, 0, fmt.Errorf("working drag produced an invalid displacement")
-		}
-		return delta.X, -delta.Z, nil
+		return scene.DragHeight(object.At.Origin.Y, x0, y0, x1, y1)
 	}
 	return 0, 0, fmt.Errorf("working scene has no selected object")
+}
+
+// DragHeight intersects a checked authored object's horizontal plane.
+func (scene *DisplayScene) DragHeight(height, x0, y0, x1, y1 float64) (float64, float64, error) {
+	first, err := scene.displayPlane(x0, y0, height)
+	if err != nil {
+		return 0, 0, err
+	}
+	last, err := scene.displayPlane(x1, y1, height)
+	if err != nil {
+		return 0, 0, err
+	}
+	delta := last.Sub(first)
+	if !displayFinite(delta.X) || !displayFinite(delta.Z) {
+		return 0, 0, fmt.Errorf("working drag produced an invalid displacement")
+	}
+	return delta.X, -delta.Z, nil
 }
 
 // displayRay returns the eye ray through the pixel at image coordinates x and

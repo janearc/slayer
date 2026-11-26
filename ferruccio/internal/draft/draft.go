@@ -59,6 +59,9 @@ func New(options Options) (*Document, error) {
 // Text returns the current source, including an invalid edit.
 func (document *Document) Text() string { return string(document.source) }
 
+// Matches reports whether text is the current source without copying it.
+func (document *Document) Matches(text string) bool { return string(document.source) == text }
+
 // Name is the document's displayed file name.
 func (document *Document) Name() string { return document.name }
 

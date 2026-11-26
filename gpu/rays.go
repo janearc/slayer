@@ -48,6 +48,9 @@ type through struct {
 	// they are spread under; nought where each starts at its own middle
 	side int
 	ramp float64
+	// exact holds a total sample count; width then counts samples across,
+	// while pictureWidth and pictureHeight are the finished image size.
+	exact, pictureWidth, pictureHeight int
 }
 
 // lensRays readies the rays through a lens: every sample's ray now when
@@ -106,6 +109,12 @@ func (lensed *through) work(jobs <-chan int, made []byte, first int,
 // look is a sample's ray: through its middle, or, where the samples are
 // spread, through the place film.Within gives it in its pixel.
 func (lensed *through) look(x, y int) maths.Ray {
+	if lensed.exact > 0 {
+		column, index := x/lensed.exact, x%lensed.exact
+		across, down := film.Place(index, lensed.exact, lensed.ramp)
+		return film.LookThrough(lensed.eye, lensed.lens, column, y, across, down,
+			lensed.pictureWidth, lensed.pictureHeight, maths.Band{})
+	}
 	if lensed.side == wholeZero {
 		return film.Look(lensed.eye, lensed.lens, x, y, lensed.width,
 			lensed.height, maths.Band{})

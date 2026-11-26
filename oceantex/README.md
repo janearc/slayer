@@ -104,6 +104,10 @@ differ:
 
 ## sources.yaml
 
+The [night water reflection source index](../doc/night-water-reflection-sources.md)
+lists additional publications on water glints, city lights and reflection
+filtering. They are references for investigation, not new numeric claims.
+
 every measured or chosen number is in `sources.yaml`, with the publication
 it belongs to, the url i read it on, the date, and whether i fetched that
 page, read it in a search excerpt of it, or cloned the repository it is in. the code holds none of them: it

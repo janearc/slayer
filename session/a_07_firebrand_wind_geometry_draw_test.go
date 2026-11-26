@@ -46,7 +46,7 @@ func TestFrontFirebrandsUseHorizontalWindFromTheSpecifiedBearing(t *testing.T) {
 			}
 			block := string(night[start : start+end])
 			text := strings.Replace(string(raw), "      flame:", block+"      flame:", 1)
-			text = strings.Replace(text, "kind: fern, count: 4", "kind: fern, count: 1", 1)
+			text = strings.Replace(text, "recipe: fixture-fern, count: 4", "recipe: fixture-fern, count: 1", 1)
 			weather := fmt.Sprintf("  weather:\n    wind:\n      from: {value: %d, unit: deg}\n      speed: {value: 5, unit: m/s}\n", sample.from)
 			text = strings.Replace(text, "  film:", weather+"  film:", 1)
 			if err := os.WriteFile(given.set, []byte(text), 0600); err != nil {

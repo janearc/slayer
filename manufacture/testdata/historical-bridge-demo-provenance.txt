@@ -1,0 +1,42 @@
+Historical bridge demo capture, 2026-11-24
+
+The unmodified historical source is f8ddbbbba211d5cb4ec6ca0a1775303ff6fce4b4.
+Its first seed-5 demo capture exceeded the 120-second wall limit after
+120.104 seconds, with a sampled peak of 3,226,448 KiB. It wrote no record;
+that timeout is not a refusal or a geometry result.
+
+A separate historical checkout changed only shared city mesh lookup to
+index by triangle count and first and last triangles, retaining the original
+full slices.Equal test and first matching prototype. The exact patch and
+its equality, collision, empty, signed-zero, NaN and ownership witnesses
+are part of this change. The original seed-5 hull, clumps and quick records
+matched after this change. The exact optimized historical demo rows are in
+historical-bridge-demo-arm64.txt. They have not been rewritten or inferred.
+
+The same lookup change on the current source at 26f69179 produced exactly
+the same two rows. The later d2d61956 topic tip did not change manufacture
+code. On Darwin arm64 with go1.27.3, GOWORK=off, GOMAXPROCS=2, the bounded
+capture used 120 seconds, 4 GiB sampled RSS and a 30 GiB free-disk floor:
+
+                    seed 5             seed 11
+  historical       11.368 s           5.594 s
+  historical peak  3,748,512 KiB      2,325,808 KiB
+  current          11.788 s           5.594 s
+  current peak     3,658,656 KiB      2,412,704 KiB
+
+The peaks are sampled, not guaranteed exact process maxima. These records
+are produced by a search optimization on the historical source; the original
+unoptimized demo did not complete under the bound. They must not be described
+as output captured from the unmodified historical binary.
+
+SHA-256:
+  historical f8 yurt.go       f009921081d1d0c1f8aa04fe184a7372b0ace04bffced5b4b2187feaee04e5a7
+  optimized f8 yurt.go        b948c216076e24a387861c1b6aadae1d6299824d957669a0671bdcab4cd751e8
+  d2 original yurt.go         997645e9017029090f8de429ea63ffa766e14f4f0ed5f1ad3e45e1605fe66dc5
+  optimized d2 yurt.go        f8629fcd7db8e296bf0f6ffb3d2e1388a10b3ab4f1165d0287bca0c3cbe7d17c
+  selected sample producer   3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094
+  bounded capture driver     4cbf5a388407325fa453b82e75c25d6a6dbf7aa2b13fb0d9ed353dba37dff22f
+  both demo records          8214df26692aad6f8f1aad354a70adb4ca6f8cd41bfdfc10eaa8e7c3a246a91f
+
+The original selected producer is reconstructed as documented in
+historical-selected-producer-provenance.txt.

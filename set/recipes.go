@@ -1,17 +1,30 @@
 package set
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"maps"
 	"slices"
+	"strings"
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/manufacture"
+	"github.com/janearc/slayer/manufacture/cities"
 	yaml "gopkg.in/yaml.v3"
 )
 
 // Recipe is a reusable construction specification, independent of placement.
 type Recipe struct {
+	profileKind                                    *manufacture.Kind
+	profileFamily                                  string
+	profileSpecies                                 string
+	profileDigest                                  [32]byte
+	profilePath                                    string
+	profileBuiltin                                 string
+	treeProfiles                                   *manufacture.PlantProfiles
+	composition                                    *cities.Composition
+	compositionDigest                              [32]byte
+	compositionPath                                string
 	burn                                           *manufacture.BurnSpec
 	kind                                           string
 	batchPlacement                                 manufacture.CityBatchPlacementMode
@@ -33,6 +46,56 @@ type Recipe struct {
 // Kind names the construction rule shared by these specimens.
 func (recipe Recipe) Kind() string { return recipe.kind }
 
+// HasTreeProfiles reports a city or tower recipe with a checked tree book.
+func (recipe Recipe) HasTreeProfiles() bool { return recipe.treeProfiles != nil }
+
+// IsPlant reports a checked plant profile recipe.
+func (recipe Recipe) IsPlant() bool {
+	return recipe.profileKind != nil && recipe.kind == "plant-profile"
+}
+
+// IsAnimal reports a checked animal profile recipe.
+func (recipe Recipe) IsAnimal() bool {
+	return recipe.profileKind != nil && recipe.kind == "animal-profile"
+}
+
+// IsAlga reports a checked alga profile recipe.
+func (recipe Recipe) IsAlga() bool {
+	return recipe.profileKind != nil && recipe.kind == "alga-profile"
+}
+
+// AlgaSpecies names the species in a checked alga recipe, or empty.
+func (recipe Recipe) AlgaSpecies() string {
+	if !recipe.IsAlga() {
+		return ""
+	}
+	return recipe.profileSpecies
+}
+
+// AnimalSpecies names the species in a checked animal recipe, or empty.
+func (recipe Recipe) AnimalSpecies() string {
+	if !recipe.IsAnimal() {
+		return ""
+	}
+	return recipe.profileSpecies
+}
+
+// PlantFamily names the family in a checked plant recipe, or empty.
+func (recipe Recipe) PlantFamily() string {
+	if !recipe.IsPlant() {
+		return ""
+	}
+	return recipe.profileFamily
+}
+
+// PlantSpecies names the species in a checked plant recipe, or empty.
+func (recipe Recipe) PlantSpecies() string {
+	if !recipe.IsPlant() {
+		return ""
+	}
+	return recipe.profileSpecies
+}
+
 // BatchPlacement is the city's explicit material-batch placement mode, if set.
 func (recipe Recipe) BatchPlacement() manufacture.CityBatchPlacementMode {
 	return recipe.batchPlacement
@@ -53,6 +116,14 @@ func (recipe Recipe) Carries() []string { return slices.Clone(recipe.carries) }
 
 // Construction selects the checked solid recipe. Volumetric fire uses Fire.
 func (recipe Recipe) Construction() (*manufacture.Kind, error) {
+	if recipe.profileKind != nil {
+		row := *recipe.profileKind
+		return &row, nil
+	}
+	if recipe.composition != nil {
+		row, err := manufacture.Composition(*recipe.composition)
+		return &row, err
+	}
 	if recipe.kind == "space-observatory" {
 		aperture := measure.Metres(recipe.aperture)
 		return manufacture.Spacecraft(recipe.design, aperture)
@@ -79,6 +150,12 @@ func (recipe Recipe) Construction() (*manufacture.Kind, error) {
 	}
 	if err != nil {
 		return nil, err
+	}
+	if recipe.treeProfiles != nil && recipe.kind != "tower" {
+		row, err = manufacture.WithCityTreeProfiles(row, recipe.treeProfiles)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if recipe.season != "" {
 		row, err = manufacture.WithSeason(row, recipe.season)
@@ -177,6 +254,18 @@ func (reading reader) quantity(target *float64, unit string, lo, hi float64) ste
 // recipes reads construction independently of placement.
 func (reading reader) recipes(_, node *yaml.Node) error {
 	return reading.each(node, reading.digested(func(name, block *yaml.Node) error {
+		if says(block, "animal") {
+			return reading.animalRecipe(name, block)
+		}
+		if says(block, "plant") {
+			return reading.plantRecipe(name, block)
+		}
+		if says(block, "alga") {
+			return reading.algaRecipe(name, block)
+		}
+		if says(block, "composition") {
+			return reading.structureRecipe(name, block)
+		}
 		if valueOf(block, "kind") == "fire" {
 			return reading.fireRecipe(name, block)
 		}
@@ -184,7 +273,22 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 			return reading.spacecraftRecipe(name, block)
 		}
 		r := Recipe{}
+		var treeFile string
 		steps := map[string]step{
+			"tree-profiles": func(_, value *yaml.Node) error {
+				if err := reading.keys(value, map[string]step{
+					"file": func(key, file *yaml.Node) error {
+						if file.Kind != yaml.ScalarNode || file.ShortTag() != "!!str" || strings.TrimSpace(file.Value) == "" {
+							return reading.refuse(file, "%s needs a nonempty file path", key.Value)
+						}
+						treeFile = file.Value
+						return nil
+					},
+				}, nil); err != nil {
+					return err
+				}
+				return reading.all(value, "tree profiles", "file")
+			},
 			"kind":         reading.word(&r.kind, manufacture.KindNames()...),
 			"season":       reading.word(&r.season, manufacture.SeasonNames()...),
 			"script":       reading.word(&r.script, manufacture.SignScripts()...),
@@ -193,6 +297,7 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 			"pins":         reading.towerPins(&r.tower),
 			"span":         reading.quantity(&r.bridge.Span, "m", 1, bridgeMostSpan),
 			"bare":         reading.boolean(&r.bridge.Bare),
+			"hub":          reading.boolean(&r.bridge.Hub),
 			"depth":        reading.bridgeDepth(&r.bridge),
 			"wetness":      reading.number(&r.street.Wetness, 0, 1),
 			"parcel":       reading.parcel(&r.parcel),
@@ -241,6 +346,26 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 		if r.kind == "" {
 			return reading.refuse(block, "recipe %s needs a kind", name.Value)
 		}
+		if says(block, "tree-profiles") {
+			if r.kind != "tower" && r.kind != "city-clustered-green-10000" && r.kind != "city-clustered-night-10000" {
+				return reading.refuse(block, "recipe %s does not support tree profiles", name.Value)
+			}
+			path, raw, err := reading.profileFile(treeFile)
+			if err != nil {
+				return err
+			}
+			book, err := manufacture.ReadPlantProfiles(path, raw)
+			if err != nil {
+				return fmt.Errorf("%s: %w", path, err)
+			}
+			r.profilePath, r.profileDigest, r.treeProfiles = path, sha256.Sum256(raw), book
+			if r.kind == "tower" {
+				r.tower.TreeProfiles = book
+			}
+			if _, err := r.Construction(); err != nil {
+				return reading.refuse(block, "%v", err)
+			}
+		}
 		if r.kind != "tower" && r.kind != "bridge" && says(block, "irregularity") {
 			return reading.refuse(block, "recipe %s is not a tower or a bridge", name.Value)
 		}
@@ -248,7 +373,7 @@ func (reading reader) recipes(_, node *yaml.Node) error {
 			return reading.refuse(block, "recipe %s is not a tower", name.Value)
 		}
 		if r.kind != "bridge" && (says(block, "span") ||
-			says(block, "depth") || says(block, "bare")) {
+			says(block, "depth") || says(block, "bare") || says(block, "hub")) {
 			return reading.refuse(block, "recipe %s is not a bridge", name.Value)
 		}
 		if r.bridge.Bare && says(block, "depth") {

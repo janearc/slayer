@@ -8,13 +8,14 @@ import (
 
 	"github.com/janearc/celestial/measure"
 	"github.com/janearc/slayer/geom"
+	"github.com/janearc/slayer/manufacture/branching"
 	"github.com/janearc/slayer/maths"
 )
 
 // standing is a place at the middle of the world, upright, of a size.
 func standing(length, girth float64) place {
-	return place{size: size{length: measure.Metres(length),
-		girth: measure.Metres(girth)}}
+	return place{Size: size{Length: measure.Metres(length),
+		Girth: measure.Metres(girth)}}
 }
 
 // spruceOf is the growth and the parts of ninja's conifer, by the
@@ -26,7 +27,7 @@ func spruceOf(t *testing.T, params ProperConiferParams) []part {
 	if err != nil {
 		t.Fatal(err)
 	}
-	parts, err := grown.parts(standing(params.Height,
+	parts, err := grownParts(grown, standing(params.Height,
 		params.TrunkRadius), sow(params.Seed))
 	if err != nil {
 		t.Fatal(err)
@@ -110,7 +111,7 @@ func fernOf(t *testing.T, number uint64) []part {
 	if err != nil {
 		t.Fatal(err)
 	}
-	parts, err := grown.parts(standing(frondLength, stalkGirth),
+	parts, err := grownParts(grown, standing(frondLength, stalkGirth),
 		sow(number))
 	if err != nil {
 		t.Fatal(err)
@@ -278,9 +279,9 @@ func TestWhatIsCarriedTakesItsCarriersScale(t *testing.T) {
 	}
 	plain := standing(frondLength, stalkGirth)
 	doubled := plain
-	doubled.space.Scale = 2
-	small, _ := grown.parts(plain, sow(3))
-	big, _ := grown.parts(doubled, sow(3))
+	doubled.Space.Scale = 2
+	small, _ := grownParts(grown, plain, sow(3))
+	big, _ := grownParts(grown, doubled, sow(3))
 	for index := range small {
 		want := 2 * small[index].space.Scale
 		if got := big[index].space.Scale; !(math.Abs(got-want) <= close) {
@@ -297,7 +298,7 @@ func TestWhatIsCarriedTakesItsCarriersScale(t *testing.T) {
 
 func TestALimbThatCannotBeIsRefused(t *testing.T) {
 	fine := mustCut(t, 5)
-	taper := []joint{{ofGirth: 1}, {ofGirth: 0.5}}
+	taper := []joint{{OfGirth: 1}, {OfGirth: 0.5}}
 	bark, err := newSleeve(taper, fine, body)
 	if err != nil {
 		t.Fatal(err)
@@ -330,10 +331,10 @@ func TestALimbThatCannotBeIsRefused(t *testing.T) {
 		}
 	}
 	sleeves := map[string][]joint{
-		"one joint":           {{ofGirth: 1}},
-		"a foot of nothing":   {{}, {ofGirth: 1}},
-		"a share below zero":  {{ofGirth: 1}, {ofLength: -0.1}},
-		"a share of no count": {{ofGirth: nan}, {ofGirth: 1}},
+		"one joint":           {{OfGirth: 1}},
+		"a foot of nothing":   {{}, {OfGirth: 1}},
+		"a share below zero":  {{OfGirth: 1}, {OfLength: -0.1}},
+		"a share of no count": {{OfGirth: nan}, {OfGirth: 1}},
 	}
 	for name, joints := range sleeves {
 		if _, err := newSleeve(joints, fine, body); !errors.Is(err,
@@ -341,7 +342,7 @@ func TestALimbThatCannotBeIsRefused(t *testing.T) {
 			t.Errorf("a sleeve with %s: %v, not %v", name, err,
 				errSleeve)
 		}
-		if _, err := newLeaf(joints, leaf); !errors.Is(err, errSleeve) {
+		if _, err := branching.NewLeaf(joints, int(leaf)); !errors.Is(err, errSleeve) {
 			t.Errorf("a leaf with %s: %v, not %v", name, err,
 				errSleeve)
 		}
@@ -352,7 +353,7 @@ func TestALimbThatCannotBeIsRefused(t *testing.T) {
 	}
 	// the edges: the coarsest cut there is, and a joint that is as
 	// much of the girth as of the length
-	even := []joint{{ofGirth: 0.5, ofLength: 0.5}, {}}
+	even := []joint{{OfGirth: 0.5, OfLength: 0.5}, {}}
 	if _, err := newSleeve(even, mustCut(t, leastAround),
 		body); err != nil {
 		t.Errorf("the coarsest sleeve was refused: %v", err)
@@ -367,7 +368,7 @@ func TestAGrowthThatCannotBeIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := newGrowth(stem.stem, carried{}); !errors.Is(err,
+	if _, err := newGrowth(stem.Stem, carried{}); !errors.Is(err,
 		errGrowth) {
 		t.Errorf("a growth carrying nothing anywhere: %v, not %v", err,
 			errGrowth)
@@ -378,8 +379,8 @@ func TestAGrowthThatCannotBeIsRefused(t *testing.T) {
 // join end to end.
 func TestALimbDroopsAndItsPiecesJoin(t *testing.T) {
 	fine := mustCut(t, 4)
-	skin, err := newSleeve([]joint{{ofGirth: 1}, {ofGirth: 0.8},
-		{ofGirth: 0.6}, {ofGirth: 0.4}}, fine, body)
+	skin, err := newSleeve([]joint{{OfGirth: 1}, {OfGirth: 0.8},
+		{OfGirth: 0.6}, {OfGirth: 0.4}}, fine, body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -392,20 +393,20 @@ func TestALimbDroopsAndItsPiecesJoin(t *testing.T) {
 		t.Fatal(err)
 	}
 	space.Scale = 1.5
-	on := place{space: space, size: size{length: measure.Metres(3),
-		girth: measure.Metres(0.1)}}
-	runs, err := bough.runs(on)
+	on := place{Space: space, Size: size{Length: measure.Metres(3),
+		Girth: measure.Metres(0.1)}}
+	runs, err := bough.Runs(on)
 	if err != nil {
 		t.Fatal(err)
 	}
-	parts, err := bough.along(on.size, runs)
+	parts, err := limbAlong(bough, on.Size, runs)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(parts) != 3 {
 		t.Fatalf("%d parts for three pieces of one skin", len(parts))
 	}
-	end, fall := on.space.Origin, math.Inf(1)
+	end, fall := on.Space.Origin, math.Inf(1)
 	for index, one := range parts {
 		if !one.space.Origin.Near(end, 1e-9) {
 			t.Errorf("piece %d starts at %v, the last ended at %v",
@@ -429,9 +430,9 @@ func TestALimbDroopsAndItsPiecesJoin(t *testing.T) {
 // nowhere is an arrangement that cannot say where its one part goes.
 type nowhere struct{ why error }
 
-func (nowhere) rows() int      { return 1 }
-func (nowhere) across(int) int { return 1 }
-func (lost nowhere) at(size, int, int, seed) (place, error) {
+func (nowhere) Rows() int      { return 1 }
+func (nowhere) Across(int) int { return 1 }
+func (lost nowhere) At(size, int, int, branching.Draws) (place, error) {
 	return place{}, lost.why
 }
 
@@ -439,11 +440,11 @@ func (lost nowhere) at(size, int, int, seed) (place, error) {
 // can have.
 type sizeless struct{}
 
-func (sizeless) rows() int      { return 1 }
-func (sizeless) across(int) int { return 1 }
-func (sizeless) at(on size, _, _ int, _ seed) (place, error) {
-	return place{size: size{length: measure.Metres(0),
-		girth: on.girth}}, nil
+func (sizeless) Rows() int      { return 1 }
+func (sizeless) Across(int) int { return 1 }
+func (sizeless) At(on size, _, _ int, _ branching.Draws) (place, error) {
+	return place{Size: size{Length: measure.Metres(0),
+		Girth: on.Girth}}, nil
 }
 
 // whatever goes wrong while a thing grows comes back as the error it
@@ -453,11 +454,11 @@ func TestAThingThatCannotGrowSaysWhy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bough := spruce.carries[0].what
+	bough := spruce.Carries[0].What
 	lost := errors.New("nowhere to go")
 	carrying := func(where arrangement) growth {
-		grown, err := newGrowth(spruce.stem, carried{where: where,
-			what: bough})
+		grown, err := newGrowth(spruce.Stem, carried{Where: where,
+			What: bough})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -465,8 +466,8 @@ func TestAThingThatCannotGrowSaysWhy(t *testing.T) {
 	}
 	// a limb pointing straight up that droops by exactly its own
 	// length has no way left to go
-	twoPiece, err := sleeved([]joint{{ofGirth: 1}, {ofGirth: 1},
-		{ofGirth: 1}}, 4, body)
+	twoPiece, err := sleeved([]joint{{OfGirth: 1}, {OfGirth: 1},
+		{OfGirth: 1}}, 4, body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -494,7 +495,7 @@ func TestAThingThatCannotGrowSaysWhy(t *testing.T) {
 			errNoRun},
 	}
 	for _, refused := range cases {
-		parts, err := refused.grown.parts(refused.on, sow(1))
+		parts, err := grownParts(refused.grown, refused.on, sow(1))
 		if !errors.Is(err, refused.want) || parts != nil {
 			t.Errorf("%s: %d parts and %v, not none and %v",
 				refused.name, len(parts), err, refused.want)
@@ -522,10 +523,10 @@ func TestLyingAlongItsOwnRunLeavesASpaceAlone(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := lyingAlong(space, space.Orientation.Y); got != space {
+	if got := branching.LyingAlong(space, space.Orientation.Y); got != space {
 		t.Errorf("the space was turned: %v", got.Orientation)
 	}
-	turned := lyingAlong(space, maths.V(0, 0, 1))
+	turned := branching.LyingAlong(space, maths.V(0, 0, 1))
 	if turned.Orientation.X.Dot(maths.V(0, 0, 1)) <= 0 {
 		t.Errorf("its x is %v, not toward the way asked",
 			turned.Orientation.X)
@@ -539,12 +540,12 @@ func TestLyingAlongItsOwnRunLeavesASpaceAlone(t *testing.T) {
 // still draws from the seed itself, which is what keeps a spruce
 // ninja's.
 func TestPiecesOfOneStemCarryDifferentParts(t *testing.T) {
-	stem, err := sleeved([]joint{{ofGirth: 1}, {ofGirth: 0.8},
-		{ofGirth: 0.6}}, 4, body)
+	stem, err := sleeved([]joint{{OfGirth: 1}, {OfGirth: 0.8},
+		{OfGirth: 0.6}}, 4, body)
 	if err != nil {
 		t.Fatal(err)
 	}
-	twig, err := sleeved([]joint{{ofGirth: 1}, {}}, 4, body)
+	twig, err := sleeved([]joint{{OfGirth: 1}, {}}, 4, body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -554,7 +555,7 @@ func TestPiecesOfOneStemCarryDifferentParts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	parts, err := grown.parts(standing(4, 0.2), sow(9))
+	parts, err := grownParts(grown, standing(4, 0.2), sow(9))
 	if err != nil {
 		t.Fatal(err)
 	}

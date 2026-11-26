@@ -18,7 +18,13 @@ const directLane = "none"
 
 // writeDirectIntent preserves the explicit transport and exact foreground argv.
 func (plan *Plan) writeDirectIntent(_ Tools, producer []string) error {
-	raw, err := json.MarshalIndent(map[string]any{"transport": "slayer", "producer": producer, "lane": directLane, "source_sha256": plan.Digest, "width": plan.Profile.Width, "height": plan.Profile.Height, "rays_per_axis": plan.Profile.samples(), "quality": plan.Profile.quality()}, "", "  ")
+	intent := map[string]any{"transport": "slayer", "producer": producer, "lane": directLane, "source_sha256": plan.Digest, "width": plan.Profile.Width, "height": plan.Profile.Height, "quality": plan.Profile.quality()}
+	if plan.Profile.Full && plan.Profile.Samples > 0 {
+		intent["samples_per_pixel"] = plan.Profile.Samples
+	} else {
+		intent["rays_per_axis"] = plan.Profile.samples()
+	}
+	raw, err := json.MarshalIndent(intent, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -33,7 +39,11 @@ func (plan *Plan) writeDirectIntent(_ Tools, producer []string) error {
 	if err != nil {
 		return err
 	}
-	text := fmt.Sprintf("Explicit shared-Slayer render, started directly: no Game lane.\nExact argv (JSON): %s\nRequested image: %dx%d; rays per axis: %d; quality: %s.\nSource text SHA256: %s\nFrozen input: %q\nAudit YAML: scene.yaml\nInvocation: direct-request.json\nMeasured image and actual executable paths: receipt.json after completion.\nProcess completion is not artistic approval.\n", exact, profile.Width, profile.Height, profile.samples(), profile.quality(), plan.Digest, plan.Input)
+	sampling := fmt.Sprintf("rays per axis: %d", profile.samples())
+	if profile.Full && profile.Samples > 0 {
+		sampling = fmt.Sprintf("samples per pixel: %d", profile.Samples)
+	}
+	text := fmt.Sprintf("Explicit shared-Slayer render, started directly: no Game lane.\nExact argv (JSON): %s\nRequested image: %dx%d; %s; quality: %s.\nSource text SHA256: %s\nFrozen input: %q\nAudit YAML: scene.yaml\nInvocation: direct-request.json\nMeasured image and actual executable paths: receipt.json after completion.\nProcess completion is not artistic approval.\n", exact, profile.Width, profile.Height, sampling, profile.quality(), plan.Digest, plan.Input)
 	return retainSubmissionFile(filepath.Join(plan.Directory, "recipe.txt"), []byte(text))
 }
 

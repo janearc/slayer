@@ -27,7 +27,7 @@ for resource in source.yaml preview.png receipt.json; do
         exit 1
     fi
 done
-for program in bin/ferruccio "$game"; do
+for program in bin/ferruccio bin/ferruccio-stage "$game"; do
     if [ ! -x "$program" ]; then
         echo "Live package needs Game-built executable: $program" >&2
         exit 1
@@ -40,7 +40,17 @@ if [ -e "$bundle_app" ]; then
 fi
 bundle="$bundle_app/Contents"
 mkdir -p "$bundle/MacOS" "$bundle/Resources/engine/gamehome/.config/game" "$bundle/Resources/examples" "$bundle/Resources/starter"
+iconset="$bundle/Resources/Ferruccio.iconset"
+mkdir -p "$iconset"
+for size in 16 32 128 256 512; do
+    sips -z "$size" "$size" ferruccio/assets/icon.png --out "$iconset/icon_${size}x${size}.png" >/dev/null
+    double=$((size * 2))
+    sips -z "$double" "$double" ferruccio/assets/icon.png --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
+done
+iconutil -c icns "$iconset" -o "$bundle/Resources/Ferruccio.icns"
+rm -rf "$iconset"
 cp bin/ferruccio "$bundle/MacOS/ferruccio"
+cp bin/ferruccio-stage "$bundle/MacOS/ferruccio-stage"
 cp "$game" "$bundle/Resources/engine/game5"
 printf 'author ferruccio\ngomaxprocs 2\n' > "$bundle/Resources/engine/gamehome/.config/game/config"
 cp ferruccio/examples/*.yaml "$bundle/Resources/examples/"
@@ -92,12 +102,14 @@ if [ -n "$evidence" ]; then evidence=$(absolute_path "$evidence"); fi
     printf '#!/bin/sh\nset -eu\n'
     printf 'slayer_default=%s\n' "$(shell_word "$slayer")"
     printf 'agent_default=%s\n' "$(shell_word "${FERRUCCIO_AGENT-ferruccio}")"
+    printf 'azazel_default=%s\n' "$(shell_word "${FERRUCCIO_AZAZEL-}")"
+    printf 'queue_default=%s\n' "$(shell_word "${FERRUCCIO_AZAZEL_QUEUE-}")"
     printf 'cache_default=%s\n' "$(shell_word "${FERRUCCIO_CACHE-${SLAYER_CACHE-}}")"
     printf 'evidence_default=%s\n' "$(shell_word "$evidence")"
 } > "$bundle/MacOS/launch"
 cat >> "$bundle/MacOS/launch" <<'LAUNCH'
 runtime="$(dirname "$0")/../Resources"
-exec "$(dirname "$0")/ferruccio" open --display "${FERRUCCIO_DISPLAY:-wire}" --preview-transport slayer --starter "$runtime/starter" --evidence "${FERRUCCIO_EVIDENCE:-$evidence_default}" --agent "${FERRUCCIO_AGENT:-$agent_default}" --game "$runtime/engine/game5" --slayer "${FERRUCCIO_SLAYER:-$slayer_default}" --game-home "$runtime/engine/gamehome" --examples "$runtime/examples" --cache "${FERRUCCIO_CACHE:-$cache_default}" --shelf "${FERRUCCIO_SHELF:-$HOME/mesh/the-vorrh/data/slayer/sources}" "$@"
+exec "$(dirname "$0")/ferruccio" open --display "${FERRUCCIO_DISPLAY:-wire}" --preview-transport azazel --azazel "${FERRUCCIO_AZAZEL:-$azazel_default}" --azazel-queue "${FERRUCCIO_AZAZEL_QUEUE:-$queue_default}" --starter "$runtime/starter" --evidence "${FERRUCCIO_EVIDENCE:-$evidence_default}" --agent "${FERRUCCIO_AGENT:-$agent_default}" --game "$runtime/engine/game5" --slayer "${FERRUCCIO_SLAYER:-$slayer_default}" --game-home "$runtime/engine/gamehome" --examples "$runtime/examples" --cache "${FERRUCCIO_CACHE:-$cache_default}" --shelf "${FERRUCCIO_SHELF:-$HOME/mesh/the-vorrh/data/slayer/sources}" "$@"
 LAUNCH
 chmod 755 "$bundle/MacOS/launch"
 cat > "$bundle/Info.plist" <<'PLIST'
@@ -108,6 +120,7 @@ cat > "$bundle/Info.plist" <<'PLIST'
 <key>CFBundleIdentifier</key><string>com.janearc.slayer.ferruccio.live</string>
 <key>CFBundleName</key><string>Ferruccio Live</string>
 <key>CFBundleDisplayName</key><string>Ferruccio Live</string>
+<key>CFBundleIconFile</key><string>Ferruccio</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.1.3</string>
@@ -117,13 +130,13 @@ PLIST
 printf '%s\n' "$slayer" > "$bundle/Resources/shared-renderer.txt"
 builds="$bundle/Resources/builds.txt"
 : > "$builds"
-for program in "$root/bin/ferruccio" "$slayer" "$game"; do
+for program in "$root/bin/ferruccio" "$root/bin/ferruccio-stage" "$slayer" "$game"; do
     mark=$(wc -c < "$builds")
     if ! "$program" --age >> "$builds" 2>&1; then
         tail -c +$((mark + 1)) "$builds" >&2
         exit 1
     fi
 done
-shasum -a 256 "$bundle/MacOS/ferruccio" "$bundle/Resources/engine/game5" "$bundle/Resources/starter/source.yaml" "$bundle/Resources/starter/preview.png" "$bundle/Resources/starter/receipt.json" > "$bundle/Resources/SHA256SUMS"
+shasum -a 256 "$bundle/MacOS/ferruccio" "$bundle/MacOS/ferruccio-stage" "$bundle/Resources/engine/game5" "$bundle/Resources/starter/source.yaml" "$bundle/Resources/starter/preview.png" "$bundle/Resources/starter/receipt.json" > "$bundle/Resources/SHA256SUMS"
 cat "$bundle/Resources/builds.txt"
 printf 'Live candidate: %s\n' "$bundle_app"

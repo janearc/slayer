@@ -17,19 +17,19 @@ func TestDiagnosticCheckTheCompletePrototypeLengthDomain(t *testing.T) {
 				length := .025 * math.Exp2(float64(bin))
 				plan := planShoot(style, length, Sow(uint64(variant)))
 				lowest := math.Inf(1)
-				for i, axis := range plan.axes {
+				for i, axis := range plan.Axes {
 					axes++
-					count := int(axis.length / needleSpacing(style))
+					count := int(axis.Length / needleSpacing(style))
 					minimumCount = min(minimumCount, count)
 					if i > 0 {
-						lowest = math.Min(lowest, axis.length)
-						if axis.length == 2*needleSpacing(style) {
+						lowest = math.Min(lowest, axis.Length)
+						if axis.Length == 2*needleSpacing(style) {
 							equalities++
 						}
 					}
 				}
 				t.Logf("style=%d bin=%d variant=%d length=%.17g axes=%d shortest-child=%.17g",
-					style, bin, variant, length, len(plan.axes), lowest)
+					style, bin, variant, length, len(plan.Axes), lowest)
 				plans++
 			}
 		}

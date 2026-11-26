@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/manufacture/geometry"
 	"github.com/janearc/slayer/maths"
 )
 
@@ -77,26 +78,11 @@ func partBounds(parts []part) maths.Box {
 }
 
 // enclosing retains both physical extents in one box.
-func enclosing(a, b maths.Box) maths.Box {
-	return maths.Box{Min: maths.V(math.Min(a.Min.X, b.Min.X),
-		math.Min(a.Min.Y, b.Min.Y), math.Min(a.Min.Z, b.Min.Z)),
-		Max: maths.V(math.Max(a.Max.X, b.Max.X),
-			math.Max(a.Max.Y, b.Max.Y), math.Max(a.Max.Z, b.Max.Z))}
-}
+func enclosing(a, b maths.Box) maths.Box { return geometry.Enclosing(a, b) }
 
 // transformed encloses all eight corners in the parent space.
 func transformed(box maths.Box, space maths.Subspace) maths.Box {
-	first := space.Out(box.Min)
-	moved := maths.Box{Min: first, Max: first}
-	for _, x := range []float64{box.Min.X, box.Max.X} {
-		for _, y := range []float64{box.Min.Y, box.Max.Y} {
-			for _, z := range []float64{box.Min.Z, box.Max.Z} {
-				point := space.Out(maths.V(x, y, z))
-				moved = enclosing(moved, maths.Box{Min: point, Max: point})
-			}
-		}
-	}
-	return moved
+	return geometry.Transformed(box, space)
 }
 
 // madeAt first grows the unchanged specimen, then changes its skin.
@@ -104,12 +90,12 @@ func (row conifer) madeAt(from seed, detail string) (good, error) {
 	if !from.made() {
 		return good{}, errGood
 	}
-	if row.foliageStyle != 0 {
+	if row.FoliageStyle != 0 {
 		made, err := row.scaffold(from)
 		if err != nil {
 			return good{}, err
 		}
-		return recursiveFoliage(made, from, row.foliageStyle, detail)
+		return recursiveFoliageWith(made, from, row.FoliageStyle, detail, row.shootConfig)
 	}
 	made, err := row.made(from)
 	if err != nil || detail == "quick" {
@@ -133,7 +119,7 @@ func (row conifer) madeAt(from seed, detail string) (good, error) {
 			made.parts[i].fine.around = leastAround
 		}
 	case "demo":
-		made = individualFoliage(made, from, row.foliageStyle)
+		made = individualFoliage(made, from, row.FoliageStyle)
 	}
 	return made, nil
 }
@@ -142,20 +128,7 @@ func (row conifer) madeAt(from seed, detail string) (good, error) {
 type crownShape struct{ box maths.Box }
 
 // skin closes a coarse crown around its four widest points.
-func (shape crownShape) skin(cut) surface {
-	box := shape.box
-	x, z := (box.Min.X+box.Max.X)/2, (box.Min.Z+box.Max.Z)/2
-	y := (box.Min.Y + box.Max.Y) / 2
-	bottom, top := maths.V(x, box.Min.Y, z), maths.V(x, box.Max.Y, z)
-	ring := []maths.Vec{maths.V(box.Max.X, y, z), maths.V(x, y, box.Min.Z),
-		maths.V(box.Min.X, y, z), maths.V(x, y, box.Max.Z)}
-	var skin surface
-	for i, point := range ring {
-		next := ring[(i+1)%len(ring)]
-		skin = append(skin, face{top, point, next}, face{bottom, next, point})
-	}
-	return skin
-}
+func (shape crownShape) skin(cut) surface { return geometry.Crown[face](shape.box) }
 
 // foliageBudget is an authored preview budget, not a botanical density.
 // Blades and their supporting twigs share the existing face cap.

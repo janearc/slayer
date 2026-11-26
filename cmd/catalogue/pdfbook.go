@@ -41,7 +41,7 @@ const (
 	bookTagline = "A field guide to the things we can make."
 	bookScenery = "These are authored scenery. Source notes say which" +
 		" dimensions have references and which are picked."
-	bookCaveat = "A rendered specimen proves that view reached the GPU." +
+	bookCaveat = "A rendered specimen records its rendering path." +
 		" It does not establish numerical agreement for every scene" +
 		" or physical accuracy."
 )
@@ -182,7 +182,7 @@ func (made *composer) tally() string {
 func (made *composer) unrendered() int {
 	missing := noEntries
 	for _, each := range made.loaded.Cards {
-		if each.Status != renderedStatus {
+		if !each.Rendered() {
 			missing++
 		}
 	}
@@ -281,7 +281,7 @@ func (made *composer) pictureHeight(laid *flow, each card,
 // card's words allow and centred, or for a card that did not render,
 // saying so and why.
 func (made *composer) pictureOrReason(laid *flow, each card) error {
-	if each.Status != renderedStatus {
+	if !each.Rendered() {
 		reason := each.Status
 		if each.Failure != "" {
 			reason += ": " + each.Failure
@@ -356,10 +356,13 @@ func (made *composer) provenance(laid *flow, each card) error {
 	return nil
 }
 
-// deviceOf reads the GPU a card was drawn on from its render record.
+// deviceOf names the CPU or reads the GPU from the render record.
 // A book without the record says so; a record that cannot be read is
 // an error.
 func deviceOf(root string, each card) (string, error) {
+	if each.Status == cpuRenderedStatus {
+		return "CPU", nil
+	}
 	raw, err := os.ReadFile(filepath.Join(root, each.Folder,
 		"render.json"))
 	if errors.Is(err, os.ErrNotExist) {

@@ -46,7 +46,7 @@ func withMounts(made good, mounts []cities.Mount, from seed,
 		if err != nil {
 			return good{}, err
 		}
-		if _, refused := placed.things(maths.Local()); refused == nil {
+		if _, refused := placed.thingsStrict(maths.Local()); refused == nil {
 			things = append(things, placed)
 		}
 	}

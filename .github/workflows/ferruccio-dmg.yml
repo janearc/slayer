@@ -1,0 +1,69 @@
+name: Ferruccio Apple silicon build
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  dmg:
+    runs-on: macos-15
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    env:
+      GAME_HOME: ${{ runner.temp }}/ferruccio-game-home
+      SLAYER_CACHE: ${{ runner.temp }}/slayer-cache
+      GOWORK: off
+      GOMAXPROCS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.4'
+          cache: false
+      # game is the version go.mod pins as a tool; go tool builds and runs it
+      - name: Configure Game
+        run: |
+          mkdir -p "$SLAYER_CACHE" "$GAME_HOME/.config/game"
+          printf 'set SLAYER_CACHE %s\n' "$SLAYER_CACHE" > "$GAME_HOME/.config/game/config"
+          go tool game --age
+      # the citation shelf is not in the dist and cannot be fetched here.
+      # the release was verified against it before it was tagged.
+      - name: Build the disk image
+        run: |
+          go tool game build --unattended ferruccio-dmg
+      - name: Check the image and bundled executables
+        run: |
+          hdiutil verify bin/Ferruccio.dmg
+          mount="$RUNNER_TEMP/ferruccio-image"
+          mkdir -p "$mount"
+          hdiutil attach -readonly -nobrowse -mountpoint "$mount" bin/Ferruccio.dmg
+          trap 'hdiutil detach "$mount"' EXIT
+          app="$mount/Ferruccio.app"
+          (cd "$app" && shasum -a 256 -c Contents/Resources/SHA256SUMS)
+          for executable in Contents/MacOS/ferruccio Contents/MacOS/ferruccio-stage Contents/Resources/engine/slayer Contents/Resources/engine/azazel Contents/Resources/engine/game5; do
+            lipo -verify_arch arm64 "$app/$executable"
+          done
+          go version -m "$app/Contents/Resources/engine/game5" | grep -E '^\s+mod\s+github.com/janearc/game\s'
+          shasum -a 256 bin/Ferruccio.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ferruccio-apple-silicon-${{ github.sha }}
+          path: |
+            bin/Ferruccio.dmg
+            bin/Ferruccio.dmg.sha256
+          if-no-files-found: error
+      - name: Attach the image to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release upload "$TAG" bin/Ferruccio.dmg bin/Ferruccio.dmg.sha256 \
+            --repo "$GITHUB_REPOSITORY" --clobber

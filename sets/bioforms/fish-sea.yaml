@@ -1,7 +1,7 @@
 # The four fish in an open sea, under its surface: a tuna, a yellowtail
 # and a barracuda swimming a metre or so down, and a school of five
 # hundred sardines below and beyond them. Their sources are in
-# manufacture/fish.yaml.
+# manufacture/animals/vertebrates/fishes/fish.yaml.
 #
 # the frame. places are metres, x east, y north, z up, mean sea at z=0.
 # the camera stands five metres south-west of the fish and two and a half
@@ -22,10 +22,15 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 160, altitude: 55}
+  recipes:
+    profile-pacific-bluefin-tuna-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: pacific-bluefin-tuna, pose: swim}}
+    profile-california-yellowtail-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: california-yellowtail, pose: swim}}
+    profile-california-barracuda-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: california-barracuda, pose: swim}}
+    profile-pacific-sardine-500: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: pacific-sardine, pose: swim, count: 500}}
   set:
     things:
       tuna:
-        kind: pacific-bluefin-tuna
+        recipe: profile-pacific-bluefin-tuna-swim
         seed: 11
         position:
           east: {value: 0, unit: m}
@@ -33,7 +38,7 @@ scene:
           up: {value: -1.2, unit: m}
         heading: {value: 0, unit: deg}
       yellowtail:
-        kind: california-yellowtail
+        recipe: profile-california-yellowtail-swim
         seed: 12
         position:
           east: {value: -1.2, unit: m}
@@ -41,7 +46,7 @@ scene:
           up: {value: -0.8, unit: m}
         heading: {value: 20, unit: deg}
       barracuda:
-        kind: california-barracuda
+        recipe: profile-california-barracuda-swim
         seed: 13
         position:
           east: {value: 1.5, unit: m}
@@ -49,7 +54,7 @@ scene:
           up: {value: -0.7, unit: m}
         heading: {value: 345, unit: deg}
       sardines:
-        kind: pacific-sardine-school-500
+        recipe: profile-pacific-sardine-500
         seed: 14
         position:
           east: {value: 0.5, unit: m}

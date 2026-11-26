@@ -1,6 +1,6 @@
-# Authored population: 70 kinds, seeds 5/11 and four requested details.
+# Authored population: 197 kinds, seeds 5/11 and four requested details.
 # Original: 144 cases, 78 geometries, 66 refusals, kept byte-identical.
-# Spacecraft additions: 32 cases, all supported geometry.
+# Spacecraft additions: 40 cases, all supported geometry, including Roman.
 # Ground additions: 32 cases, all supported geometry.
 # Survey addition: 8 cases, all supported geometry.
 # Large-telescope addition: 8 cases, all supported geometry.
@@ -32,6 +32,10 @@
 # arcology and spires, the city kinds, and from 2026-11-16 the j58 and
 # the j58-test-stand. Written by TestWriteLaterReference, which writes
 # rows only for kinds with none.
-cases: 992
-geometries: 780
-refusals: 212
+# Historical plant kinds: 96 geometry cases from the direct pre-retirement makers.
+# Historical public kinds: 475 unmodified-f8 cases (455 geometry, 20 refusals).
+# Optimized-f8 bridge demos: 2 geometry cases; see their separate provenance.
+# Repaired-f8 scavenged assembly: 3 geometry cases; see its separate provenance.
+cases: 1576
+geometries: 1344
+refusals: 232

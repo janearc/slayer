@@ -23,7 +23,8 @@ func frontFixture(t *testing.T) string {
       ignition-height: {value: 1, unit: m}
       smoke-radius: {value: 8, unit: m}
   film:`, 1)
-	return strings.Replace(raw, "  set:\n", "  set:\n    stands:\n      the grove: {kind: coast-redwood, count: 3, seed: 2}\n", 1)
+	raw = strings.Replace(raw, "  recipes:\n", "  recipes:\n    front tree: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: coast-redwood}}\n", 1)
+	return strings.Replace(raw, "  set:\n", "  set:\n    stands:\n      the grove: {recipe: front tree, count: 3, seed: 2}\n", 1)
 }
 
 func TestFireFrontReadsAnExplicitPrescribedMotionAndFindsItsFuel(t *testing.T) {

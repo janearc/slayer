@@ -2,6 +2,7 @@ package manufacture
 
 import (
 	"fmt"
+	"github.com/janearc/slayer/manufacture/geometry"
 	"math"
 
 	"github.com/janearc/celestial/measure"
@@ -147,19 +148,7 @@ const (
 
 // quad retains only non-degenerate triangles, including at an axial pole.
 func quad(skin surface, a, b, c, d maths.Vec) surface {
-	for _, triangle := range []face{{a, b, c}, {a, c, d}} {
-		// Coincident edges can leave a cross-product roundoff residue.
-		first := triangle[quadFirstCorner]
-		second := triangle[quadSecondCorner]
-		third := triangle[quadThirdCorner]
-		if first == second || second == third || third == first {
-			continue
-		}
-		if triangle[1].Sub(triangle[0]).Cross(triangle[2].Sub(triangle[0])).Len() > 1e-14 {
-			skin = append(skin, triangle)
-		}
-	}
-	return skin
+	return surface(geometry.Quad(skin, a, b, c, d))
 }
 
 // domeShell is a hollow hemisphere with a real observing slit.

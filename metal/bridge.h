@@ -52,6 +52,8 @@ int slayer_metal_points(void *ctx, const float *points, int n,
 // a turn between bands, and reads one band while the next is drawn.
 void *slayer_metal_grid_begin(void *ctx, int width, int height, int rows,
                              int per, int count, char *err, int errlen);
+// Set a compact stream's full-grid origin before any band is committed.
+int slayer_metal_grid_origin(void *stream, int x, int y, char *err, int errlen);
 int slayer_metal_grid_add(void *stream, const void *input, long length,
                           char *err, int errlen);
 // slayer_metal_grid_update replaces one added input's bytes, waiting out

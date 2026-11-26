@@ -1,0 +1,808 @@
+version: 1
+name: gate bridge
+parameters: {void: 220}
+parts:
+  - {id: leg-nw, type: leg, at: [-125, 0, -125], size: [50, {parameter: void}, 50], ground: true}
+  - {id: leg-ne, type: leg, at: [-125, 0, 75], size: [50, {parameter: void}, 50], ground: true}
+  - {id: leg-sw, type: leg, at: [75, 0, -125], size: [50, {parameter: void}, 50], ground: true}
+  - {id: leg-se, type: leg, at: [75, 0, 75], size: [50, {parameter: void}, 50], ground: true}
+  - id: tower
+    type: body
+    at: [-125, {parameter: void}, -125]
+    size: [250, 0, 250]
+    top: 750
+    rests-on: [leg-nw, leg-ne, leg-sw, leg-se]
+  - id: lower-deck
+    type: deck
+    at: [-1000, 59, -30]
+    size: [2000, 3, 60]
+    # The lower deck hangs from members connected to the upper deck.
+    hangs-from:
+      - hanger-north-00
+      - hanger-north-01
+      - hanger-north-02
+      - hanger-north-03
+      - hanger-north-04
+      - hanger-north-05
+      - hanger-north-06
+      - hanger-north-07
+      - hanger-north-08
+      - hanger-north-09
+      - hanger-north-10
+      - hanger-north-11
+      - hanger-north-12
+      - hanger-north-13
+      - hanger-north-14
+      - hanger-north-15
+      - hanger-north-16
+      - hanger-north-17
+      - hanger-north-18
+      - hanger-north-19
+      - hanger-north-20
+      - hanger-north-21
+      - hanger-north-22
+      - hanger-north-23
+      - hanger-north-24
+      - hanger-north-25
+      - hanger-north-26
+      - hanger-north-27
+      - hanger-north-28
+      - hanger-north-29
+      - hanger-north-30
+      - hanger-north-31
+      - hanger-north-32
+      - hanger-north-33
+      - hanger-north-34
+      - hanger-north-35
+      - hanger-north-36
+      - hanger-north-37
+      - hanger-north-38
+      - hanger-north-39
+      - hanger-south-00
+      - hanger-south-01
+      - hanger-south-02
+      - hanger-south-03
+      - hanger-south-04
+      - hanger-south-05
+      - hanger-south-06
+      - hanger-south-07
+      - hanger-south-08
+      - hanger-south-09
+      - hanger-south-10
+      - hanger-south-11
+      - hanger-south-12
+      - hanger-south-13
+      - hanger-south-14
+      - hanger-south-15
+      - hanger-south-16
+      - hanger-south-17
+      - hanger-south-18
+      - hanger-south-19
+      - hanger-south-20
+      - hanger-south-21
+      - hanger-south-22
+      - hanger-south-23
+      - hanger-south-24
+      - hanger-south-25
+      - hanger-south-26
+      - hanger-south-27
+      - hanger-south-28
+      - hanger-south-29
+      - hanger-south-30
+      - hanger-south-31
+      - hanger-south-32
+      - hanger-south-33
+      - hanger-south-34
+      - hanger-south-35
+      - hanger-south-36
+      - hanger-south-37
+      - hanger-south-38
+      - hanger-south-39
+  # Members touch both decks and stand at 50 m centres, along the roadway edge.
+  - {id: hanger-north-00, type: body, at: [-975.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-01, type: body, at: [-925.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-02, type: body, at: [-875.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-03, type: body, at: [-825.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-04, type: body, at: [-775.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-05, type: body, at: [-725.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-06, type: body, at: [-675.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-07, type: body, at: [-625.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-08, type: body, at: [-575.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-09, type: body, at: [-525.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-10, type: body, at: [-475.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-11, type: body, at: [-425.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-12, type: body, at: [-375.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-13, type: body, at: [-325.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-14, type: body, at: [-275.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-15, type: body, at: [-225.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-16, type: body, at: [-175.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-17, type: body, at: [-125.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-18, type: body, at: [-75.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-19, type: body, at: [-25.75, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-20, type: body, at: [24.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-21, type: body, at: [74.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-22, type: body, at: [124.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-23, type: body, at: [174.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-24, type: body, at: [224.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-25, type: body, at: [274.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-26, type: body, at: [324.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-27, type: body, at: [374.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-28, type: body, at: [424.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-29, type: body, at: [474.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-30, type: body, at: [524.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-31, type: body, at: [574.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-32, type: body, at: [624.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-33, type: body, at: [674.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-34, type: body, at: [724.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-35, type: body, at: [774.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-36, type: body, at: [824.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-37, type: body, at: [874.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-38, type: body, at: [924.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-north-39, type: body, at: [974.25, 62, -31], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-00, type: body, at: [-975.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-01, type: body, at: [-925.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-02, type: body, at: [-875.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-03, type: body, at: [-825.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-04, type: body, at: [-775.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-05, type: body, at: [-725.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-06, type: body, at: [-675.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-07, type: body, at: [-625.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-08, type: body, at: [-575.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-09, type: body, at: [-525.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-10, type: body, at: [-475.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-11, type: body, at: [-425.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-12, type: body, at: [-375.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-13, type: body, at: [-325.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-14, type: body, at: [-275.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-15, type: body, at: [-225.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-16, type: body, at: [-175.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-17, type: body, at: [-125.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-18, type: body, at: [-75.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-19, type: body, at: [-25.75, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-20, type: body, at: [24.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-21, type: body, at: [74.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-22, type: body, at: [124.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-23, type: body, at: [174.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-24, type: body, at: [224.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-25, type: body, at: [274.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-26, type: body, at: [324.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-27, type: body, at: [374.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-28, type: body, at: [424.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-29, type: body, at: [474.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-30, type: body, at: [524.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-31, type: body, at: [574.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-32, type: body, at: [624.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-33, type: body, at: [674.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-34, type: body, at: [724.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-35, type: body, at: [774.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-36, type: body, at: [824.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-37, type: body, at: [874.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-38, type: body, at: [924.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - {id: hanger-south-39, type: body, at: [974.25, 62, 29.5], size: [1.5, 13, 1.5], hangs-from: [upper-deck]}
+  - id: upper-deck
+    type: deck
+    at: [-1000, 75, -30]
+    size: [2000, 3, 60]
+    supported-by: [upper-west-north, upper-west-south, upper-east-north, upper-east-south]
+  - id: upper-west-north
+    type: stay-fan
+    tower: tower
+    deck: upper-deck
+    tower-from: [-125, 420, -30]
+    tower-to: [-125, 700, -30]
+    deck-from: [-225, 78, -30]
+    deck-to: [-1000, 78, -30]
+    count: 8
+    thickness: 1.2
+  - id: upper-west-south
+    type: stay-fan
+    tower: tower
+    deck: upper-deck
+    tower-from: [-125, 420, 30]
+    tower-to: [-125, 700, 30]
+    deck-from: [-225, 78, 30]
+    deck-to: [-1000, 78, 30]
+    count: 8
+    thickness: 1.2
+  - id: upper-east-north
+    type: stay-fan
+    tower: tower
+    deck: upper-deck
+    tower-from: [125, 420, -30]
+    tower-to: [125, 700, -30]
+    deck-from: [225, 78, -30]
+    deck-to: [1000, 78, -30]
+    count: 8
+    thickness: 1.2
+  - id: upper-east-south
+    type: stay-fan
+    tower: tower
+    deck: upper-deck
+    tower-from: [125, 420, 30]
+    tower-to: [125, 700, 30]
+    deck-from: [225, 78, 30]
+    deck-to: [1000, 78, 30]
+    count: 8
+    thickness: 1.2
+  - id: under
+    type: storey-band
+    at: [-1000, 24, -50]
+    size: [2000, 35, 100]
+    count: 10
+    hangs-from: [lower-deck]
+  - id: lower-north-storeys
+    type: storey-band
+    at: [-1000, 62, -50]
+    size: [2000, 10.5, 20]
+    count: 3
+    rests-on: [lower-north-column-west, lower-north-column-east]
+  - id: lower-south-storeys
+    type: storey-band
+    at: [-1000, 62, 30]
+    size: [2000, 10.5, 20]
+    count: 3
+    rests-on: [lower-south-column-west, lower-south-column-east]
+  - id: upper-north-storeys
+    type: storey-band
+    at: [-1000, 78, -50]
+    size: [2000, 10.5, 20]
+    count: 3
+    rests-on: [upper-north-column-west, upper-north-column-east]
+  - id: upper-south-storeys
+    type: storey-band
+    at: [-1000, 78, 30]
+    size: [2000, 10.5, 20]
+    count: 3
+    rests-on: [upper-south-column-west, upper-south-column-east]
+  - id: under-north-window-0
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 24.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-0
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 24.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-1
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 28.4, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-1
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 28.4, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-2
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 31.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-2
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 31.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-3
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 35.4, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-3
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 35.4, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-4
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 38.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-4
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 38.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-5
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 42.4, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-5
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 42.4, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-6
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 45.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-6
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 45.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-7
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 49.4, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-7
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 49.4, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-8
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 52.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-8
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 52.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-north-window-9
+    type: window-ribbon
+    on: under
+    face: north
+    at: [-1000, 56.4, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-south-window-9
+    type: window-ribbon
+    on: under
+    face: south
+    at: [-1000, 56.4, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-north-window-0
+    type: window-ribbon
+    on: lower-north-storeys
+    face: north
+    at: [-1000, 62.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-north-road-window-0
+    type: window-ribbon
+    on: lower-north-storeys
+    face: south
+    at: [-1000, 62.9, -30]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-south-road-window-0
+    type: window-ribbon
+    on: lower-south-storeys
+    face: north
+    at: [-1000, 62.9, 29.95]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-south-window-0
+    type: window-ribbon
+    on: lower-south-storeys
+    face: south
+    at: [-1000, 62.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-north-window-1
+    type: window-ribbon
+    on: lower-north-storeys
+    face: north
+    at: [-1000, 66.4, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-north-road-window-1
+    type: window-ribbon
+    on: lower-north-storeys
+    face: south
+    at: [-1000, 66.4, -30]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-south-road-window-1
+    type: window-ribbon
+    on: lower-south-storeys
+    face: north
+    at: [-1000, 66.4, 29.95]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-south-window-1
+    type: window-ribbon
+    on: lower-south-storeys
+    face: south
+    at: [-1000, 66.4, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-north-window-2
+    type: window-ribbon
+    on: lower-north-storeys
+    face: north
+    at: [-1000, 69.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-north-road-window-2
+    type: window-ribbon
+    on: lower-north-storeys
+    face: south
+    at: [-1000, 69.9, -30]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-south-road-window-2
+    type: window-ribbon
+    on: lower-south-storeys
+    face: north
+    at: [-1000, 69.9, 29.95]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: lower-south-window-2
+    type: window-ribbon
+    on: lower-south-storeys
+    face: south
+    at: [-1000, 69.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-north-window-0
+    type: window-ribbon
+    on: upper-north-storeys
+    face: north
+    at: [-1000, 78.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-north-road-window-0
+    type: window-ribbon
+    on: upper-north-storeys
+    face: south
+    at: [-1000, 78.9, -30]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-south-road-window-0
+    type: window-ribbon
+    on: upper-south-storeys
+    face: north
+    at: [-1000, 78.9, 29.95]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-south-window-0
+    type: window-ribbon
+    on: upper-south-storeys
+    face: south
+    at: [-1000, 78.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-north-window-1
+    type: window-ribbon
+    on: upper-north-storeys
+    face: north
+    at: [-1000, 82.4, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-north-road-window-1
+    type: window-ribbon
+    on: upper-north-storeys
+    face: south
+    at: [-1000, 82.4, -30]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-south-road-window-1
+    type: window-ribbon
+    on: upper-south-storeys
+    face: north
+    at: [-1000, 82.4, 29.95]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-south-window-1
+    type: window-ribbon
+    on: upper-south-storeys
+    face: south
+    at: [-1000, 82.4, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-north-window-2
+    type: window-ribbon
+    on: upper-north-storeys
+    face: north
+    at: [-1000, 85.9, -50.05]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-north-road-window-2
+    type: window-ribbon
+    on: upper-north-storeys
+    face: south
+    at: [-1000, 85.9, -30]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-south-road-window-2
+    type: window-ribbon
+    on: upper-south-storeys
+    face: north
+    at: [-1000, 85.9, 29.95]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: upper-south-window-2
+    type: window-ribbon
+    on: upper-south-storeys
+    face: south
+    at: [-1000, 85.9, 50]
+    size: [2000, 2, 0.05]
+    bay-width: 6
+    lit-share: 0.35
+    heat: 3500
+    glow: 0.3
+  - id: under-base
+    type: body
+    at: [-1000, 23, -50]
+    size: [2000, 1, 100]
+    hangs-from: [under]
+  - id: lower-north-column-west
+    type: body
+    at: [-900, 59, -49]
+    size: [1.5, 3, 1.5]
+    rests-on: [under]
+  - id: lower-north-column-east
+    type: body
+    at: [900, 59, -49]
+    size: [1.5, 3, 1.5]
+    rests-on: [under]
+  - id: lower-south-column-west
+    type: body
+    at: [-900, 59, 47.5]
+    size: [1.5, 3, 1.5]
+    rests-on: [under]
+  - id: lower-south-column-east
+    type: body
+    at: [900, 59, 47.5]
+    size: [1.5, 3, 1.5]
+    rests-on: [under]
+  - id: upper-north-column-west
+    type: body
+    at: [-900, 72.5, -49]
+    size: [1.5, 5.5, 1.5]
+    rests-on: [lower-north-storeys]
+  - id: upper-north-column-east
+    type: body
+    at: [900, 72.5, -49]
+    size: [1.5, 5.5, 1.5]
+    rests-on: [lower-north-storeys]
+  - id: upper-south-column-west
+    type: body
+    at: [-900, 72.5, 47.5]
+    size: [1.5, 5.5, 1.5]
+    rests-on: [lower-south-storeys]
+  - id: upper-south-column-east
+    type: body
+    at: [900, 72.5, 47.5]
+    size: [1.5, 5.5, 1.5]
+    rests-on: [lower-south-storeys]
+  - id: lower-west-shore
+    type: deck
+    at: [-2600, 0, -30]
+    size: [50, 1, 60]
+    ground: true
+  - id: lower-west-approach
+    type: ramp
+    from: [-2550, 1, 0]
+    to: [-1000, 62, 0]
+    width: 60
+    thickness: 3
+    from-support: lower-west-shore
+    to-support: lower-deck
+  - id: lower-east-shore
+    type: deck
+    at: [2550, 0, -30]
+    size: [50, 1, 60]
+    ground: true
+  - id: lower-east-approach
+    type: ramp
+    from: [1000, 62, 0]
+    to: [2550, 1, 0]
+    width: 60
+    thickness: 3
+    from-support: lower-deck
+    to-support: lower-east-shore
+  - id: upper-west-shore
+    type: deck
+    at: [-3050, 0, -30]
+    size: [50, 1, 60]
+    ground: true
+  - id: upper-west-approach
+    type: ramp
+    from: [-3000, 1, 0]
+    to: [-1000, 78, 0]
+    width: 60
+    thickness: 3
+    from-support: upper-west-shore
+    to-support: upper-deck
+  - id: upper-east-shore
+    type: deck
+    at: [3000, 0, -30]
+    size: [50, 1, 60]
+    ground: true
+  - id: upper-east-approach
+    type: ramp
+    from: [1000, 78, 0]
+    to: [3000, 1, 0]
+    width: 60
+    thickness: 3
+    from-support: upper-deck
+    to-support: upper-east-shore
+roads:
+  - {id: lower-road-west, type: straight, on: lower-deck, from: [-1000, 62, 0], to: [-125, 62, 0], width: 58.5, next: lower-road-centre}
+  - {id: lower-road-centre, type: straight, on: lower-deck, from: [-125, 62, 0], to: [125, 62, 0], width: 58.5, next: lower-road-east}
+  - {id: lower-road-east, type: straight, on: lower-deck, from: [125, 62, 0], to: [1000, 62, 0], width: 58.5, next: lower-approach-east}
+  - {id: upper-road-west, type: straight, on: upper-deck, from: [-1000, 78, 0], to: [-125, 78, 0], width: 58.5, next: upper-road-centre}
+  - {id: upper-road-centre, type: straight, on: upper-deck, from: [-125, 78, 0], to: [125, 78, 0], width: 58.5, next: upper-road-east}
+  - {id: upper-road-east, type: straight, on: upper-deck, from: [125, 78, 0], to: [1000, 78, 0], width: 58.5, next: upper-approach-east}
+  - {id: lower-shore-west, type: straight, on: lower-west-shore, from: [-2600, 1, 0], to: [-2550, 1, 0], width: 58.5, next: lower-approach-west}
+  - {id: lower-approach-west, type: straight, on: lower-west-approach, from: [-2550, 1, 0], to: [-1000, 62, 0], width: 58.5, next: lower-road-west}
+  - {id: lower-approach-east, type: straight, on: lower-east-approach, from: [1000, 62, 0], to: [2550, 1, 0], width: 58.5, next: lower-shore-east}
+  - {id: lower-shore-east, type: straight, on: lower-east-shore, from: [2550, 1, 0], to: [2600, 1, 0], width: 58.5}
+  - {id: upper-shore-west, type: straight, on: upper-west-shore, from: [-3050, 1, 0], to: [-3000, 1, 0], width: 58.5, next: upper-approach-west}
+  - {id: upper-approach-west, type: straight, on: upper-west-approach, from: [-3000, 1, 0], to: [-1000, 78, 0], width: 58.5, next: upper-road-west}
+  - {id: upper-approach-east, type: straight, on: upper-east-approach, from: [1000, 78, 0], to: [3000, 1, 0], width: 58.5, next: upper-shore-east}
+  - {id: upper-shore-east, type: straight, on: upper-east-shore, from: [3000, 1, 0], to: [3050, 1, 0], width: 58.5}

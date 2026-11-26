@@ -1,6 +1,7 @@
 package job_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -9,6 +10,37 @@ import (
 
 	"github.com/janearc/slayer/job"
 )
+
+func TestStillFromRetainsBufferedImportClosure(t *testing.T) {
+	path, buffer := importJobFiles(t)
+	setPath := filepath.Join(filepath.Dir(path), "set.yaml")
+	raw, err := os.ReadFile(setPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	changed := bytes.Replace(raw, []byte("value: 2, unit: m"), []byte("value: 3, unit: m"), 1)
+	if bytes.Equal(raw, changed) {
+		t.Fatal("fixture did not change")
+	}
+	still, err := job.StillFrom(setPath, changed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	read, has := still.ImportedSet()
+	if !has || len(read.ImportSources()) != 2 {
+		t.Fatal("buffered still did not retain its relative import closure")
+	}
+	before := still.Canonical()
+	if err := os.Remove(buffer); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(still.Canonical(), before) {
+		t.Fatal("buffered still changed after its imported asset was removed")
+	}
+	if _, err := job.StillFrom(setPath, changed); err == nil {
+		t.Fatal("a fresh buffered still accepted a missing asset")
+	}
+}
 
 // TestWithKeepsImportedSnapshotAfterItsFilesGoAway holds an override over
 // the admitted import snapshot, not a fresh read of files that may be gone.

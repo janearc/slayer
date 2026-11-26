@@ -79,6 +79,30 @@ func TestAFlagBeatsTheEnvironmentBeatsTheFileBeatsNothing(t *testing.T) {
 	}
 }
 
+func TestSceneDataCanBeSavedAndOverridden(t *testing.T) {
+	path := fileIn(t, "processors 4\n")
+	if err := Save(path, Data, "/from/file"); err != nil {
+		t.Fatal(err)
+	}
+	if got := Resolve(path, none, none); got.Problem != "" || got.Value(Data) != "/from/file" {
+		t.Fatalf("saved data: %+v", got)
+	}
+	if got := Resolve(path, only("data", "/from/flag"), only("SLAYER_DATA", "/from/environment")).Get(Data); got.Value != "/from/flag" || got.Source != FromFlag {
+		t.Fatalf("data override: %+v", got)
+	}
+}
+
+func TestWordStyleProcessorsAndSavedQueueAreBothRead(t *testing.T) {
+	path := fileIn(t, "processors 4\n")
+	if err := Save(path, Queue, "/shared/queue"); err != nil {
+		t.Fatal(err)
+	}
+	resolved := Resolve(path, none, none)
+	if resolved.Problem != "" || resolved.Value(Processors) != "4" || resolved.Value(Queue) != "/shared/queue" {
+		t.Fatalf("mixed settings: %+v", resolved)
+	}
+}
+
 func TestOnlyAFlagOrTheEnvironmentLocksAValue(t *testing.T) {
 	path := fileIn(t, "cache :: /c\n")
 	if Resolve(path, none, none).Get(Cache).Locked() {

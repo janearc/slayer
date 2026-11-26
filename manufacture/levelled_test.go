@@ -13,7 +13,7 @@ func TestEachKindIsLevelledByItsLadder(t *testing.T) {
 		"norway": treeLadder, "terrace-portofino": buildingLadder,
 		"tower": buildingLadder, "condominium": buildingLadder,
 		"soho": kindLadder} {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -27,7 +27,7 @@ func TestEachKindIsLevelledByItsLadder(t *testing.T) {
 func TestOnlyBuildingsAreDrawnPartByPart(t *testing.T) {
 	for name, want := range map[string]bool{"terrace-groningen": true,
 		"tower": true, "spruce": false, "condominium": false} {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -38,7 +38,7 @@ func TestOnlyBuildingsAreDrawnPartByPart(t *testing.T) {
 }
 
 func TestAKindNotDrawnPartByPartIsRefusedALevelledMaking(t *testing.T) {
-	row, err := KindNamed("spruce")
+	row, err := testKind("spruce")
 	if err != nil {
 		t.Fatal(err)
 	}

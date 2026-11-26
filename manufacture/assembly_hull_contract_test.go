@@ -10,7 +10,7 @@ import (
 
 func TestLegacyHullEnclosesTheFoliageRatherThanTheWoodyScaffold(t *testing.T) {
 	for _, name := range []string{"spruce", "norway"} {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatal(err)
 		}

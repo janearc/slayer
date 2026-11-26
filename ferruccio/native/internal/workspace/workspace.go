@@ -31,6 +31,7 @@ import (
 	"github.com/janearc/slayer/ferruccio/native/internal/appearance"
 	"github.com/janearc/slayer/ferruccio/native/internal/editor"
 	"github.com/janearc/slayer/ferruccio/native/internal/picking"
+	"github.com/janearc/slayer/ferruccio/native/internal/stagewire"
 	"github.com/janearc/slayer/internal/observability"
 )
 
@@ -42,6 +43,9 @@ type Options struct {
 	Evidence                 string
 	Starter                  string
 	SuppressAutomaticPreview bool
+	// PreferQueueClient allows the bundled client to defer to a queue's own
+	// installed client. An explicitly selected client is never replaced.
+	PreferQueueClient bool
 	// Settings is where the person's settings are read and saved.
 	Settings SettingsSource
 }
@@ -93,9 +97,31 @@ type Workspace struct {
 	autoPreview                         bool
 	// settings says where settings are read and saved. wantSettings asks the
 	// next tick to open the sheet, from any thread; sheet is the one open.
-	settings     SettingsSource
-	wantSettings atomic.Bool
-	settingsOpen bool
+	settings               SettingsSource
+	wantSettings           atomic.Bool
+	wantOpen               atomic.Bool
+	protecting             bool
+	settingsOpen           bool
+	renderSetupOpen        bool
+	renderSetupLoading     bool
+	renderSetupError       string
+	renderSetupPath        string
+	renderSetupSource      string
+	renderCameraSourcePath string
+	renderCameraSourceHash [32]byte
+	renderCameraError      string
+	renderSetupChoice      int
+	renderCameraChoice     int
+	renderBackendChoice    int
+	renderSamplesChoice    int
+	renderCameras          []string
+	renderPresets          []stagewire.FilmPreset
+	renderPresetResults    chan presetResult
+	renderPresetCancel     context.CancelFunc
+	renderAuthored         preview.Profile
+	renderSampling         preview.Profile
+	renderAuthoredError    error
+	renderSamplingError    error
 	// drawn says what drew the most recent Export.
 	drawn Drawn
 }
@@ -168,7 +194,6 @@ func New(host *gogpu.App, ui *app.App, options Options) (*Workspace, error) {
 	})
 	if work.composition == "play" {
 		work.setupPlay()
-		work.autoPreview = !options.SuppressAutomaticPreview
 		work.caption = "Grab the ship. Try something."
 	} else {
 		work.reference("venus")
@@ -202,6 +227,8 @@ func (work *Workspace) Tick() {
 			}
 			work.protect(func() {
 				work.clearNavigation()
+				work.closeStaged()
+				work.closeRenderSetup()
 				if work.cancel != nil {
 					work.closing = true
 					work.cancel()
@@ -222,6 +249,10 @@ func (work *Workspace) Tick() {
 		work.invalidate()
 	}
 	work.openSettingsIfAsked()
+	work.drainRenderPresets()
+	if work.wantOpen.Swap(false) {
+		work.open()
+	}
 	work.drainResolution()
 	work.recheckUnresolved()
 	work.drainProgress()
@@ -245,6 +276,11 @@ func (work *Workspace) StartPreview() error { return work.startRender(false) }
 
 // startRender shares cancellation, frozen input and acceptance across both modes.
 func (work *Workspace) startRender(full bool) error {
+	return work.startRenderWithPreset(full, nil)
+}
+
+// startRenderWithPreset freezes an optional size, camera and backend choice.
+func (work *Workspace) startRenderWithPreset(full bool, preset *stagewire.FilmPreset) error {
 	work.autoPreview = false
 	if work.cancel != nil {
 		return fmt.Errorf("a preview is already running")
@@ -262,6 +298,18 @@ func (work *Workspace) startRender(full bool) error {
 	request := work.previewRequest(time.Now())
 	if full {
 		request.Profile = work.ownRender(preview.Profile{Full: true})
+		if work.renderSetupOpen {
+			request.Profile.CPURenderer = work.renderBackendChoice == 0
+			request.Profile.GPU = work.renderBackendChoice == 1
+			request.Profile.Samples = work.renderSamplesChoice
+		}
+		if preset != nil {
+			request.Profile.SizePreset = preset.Name
+			request.Profile.Width, request.Profile.Height = preset.Width, preset.Height
+		}
+		if work.renderSetupOpen && work.renderCameraChoice > 0 && work.renderCameraChoice <= len(work.renderCameras) {
+			request.Profile.Camera = work.renderCameras[work.renderCameraChoice-1]
+		}
 		request.DirectoryPrefix = strings.Replace(request.DirectoryPrefix, "-preview-", "-full-", 1)
 	}
 	measured := observability.Enabled()
@@ -384,7 +432,7 @@ func (work *Workspace) rebuild() {
 	work.viewer.SetFontSize(work.size)
 	work.theme = appearance.Theme()
 	work.ui.SetTheme(appearance.ThemeForSize(work.size))
-	work.root = work.layout()
+	work.root = newShortcutRoot(work.layout(), work.requestOpen)
 	work.ui.SetRoot(work.root)
 	work.invalidate()
 }
@@ -422,18 +470,23 @@ func (work *Workspace) problem(err error) {
 
 // protect offers save, discard and cancel before replacing unsaved work.
 func (work *Workspace) protect(action func()) {
+	if work.protecting {
+		return
+	}
 	if !work.state.document.Dirty() {
 		action()
 		return
 	}
-	dialog.New(dialog.Title("Keep your changes?"), dialog.Content(work.text("Save this draft before continuing. Unfinished YAML can be saved.")), dialog.Actions(
+	prompt := dialog.New(dialog.Title("Keep your changes?"), dialog.Content(work.text("Save this draft before continuing. Unfinished YAML can be saved.")), dialog.Actions(
 		dialog.Action{Label: "Cancel", Variant: dialog.VariantOutlined},
 		dialog.Action{Label: "Discard", Variant: dialog.VariantOutlined, OnClick: action},
 		dialog.Action{Label: "Save", OnClick: func() {
 			if work.save(false) {
 				action()
 			}
-		}}), dialog.PainterOpt(appearance.DialogPainter{Theme: work.theme, Size: work.size})).Show(work.ui.Window().Context())
+		}}), dialog.OnClose(func() { work.protecting = false }), dialog.PainterOpt(appearance.DialogPainter{Theme: work.theme, Size: work.size}))
+	prompt.Show(work.ui.Window().Context())
+	work.protecting = prompt.IsOpen()
 	work.host.RequestRedraw()
 }
 
@@ -467,7 +520,6 @@ func (work *Workspace) open() {
 		if work.composition == "play" {
 			work.play.geometry = nil
 			work.play.selected = ""
-			work.autoPreview = true
 		}
 		work.validate()
 		work.rebuild()
@@ -496,7 +548,21 @@ func (work *Workspace) save(as bool) bool {
 	if work.study != "" {
 		err = saveBundledStudyDocument(work.state.document, path, filepath.Dir(work.state.path), work.study)
 	} else {
-		err = work.state.document.Save(path)
+		original := work.state.document.Text()
+		absolute, pathErr := filepath.Abs(path)
+		if pathErr == nil {
+			pathErr = work.state.document.RebaseProfileBooks(work.state.path, absolute)
+		}
+		if pathErr == nil {
+			err = work.state.document.Save(path)
+		} else {
+			err = pathErr
+		}
+		if err != nil {
+			work.state.document.Replace(original)
+		} else if work.state.document.Text() != original {
+			work.editor.ApplyText(work.state.document.Text())
+		}
 	}
 	if err != nil {
 		work.problem(err)
@@ -544,6 +610,10 @@ func (work *Workspace) example(name string) error {
 		if err != nil {
 			return err
 		}
+		source, err = builtinExampleProfiles(examples, path, source)
+		if err != nil {
+			return err
+		}
 		folder, err = os.MkdirTemp("", "atelier-example-")
 		if err != nil {
 			return err
@@ -581,6 +651,7 @@ func (work *Workspace) releaseExample() {
 	if work.exampleFolder == "" {
 		return
 	}
+	work.closeStaged()
 	_ = os.RemoveAll(work.exampleFolder)
 	work.exampleFolder = ""
 }
@@ -611,7 +682,6 @@ func (work *Workspace) chooseCatalogueExample(name, specimen string) {
 		if work.composition == "play" {
 			work.play.geometry = nil
 			work.play.selected = ""
-			work.autoPreview = true
 		}
 		work.validate()
 		work.rebuild()
@@ -729,6 +799,9 @@ const (
 func (work *Workspace) layout() widget.Widget {
 	if work.settingsOpen {
 		return work.settingsSheet()
+	}
+	if work.renderSetupOpen {
+		return work.renderSetupSheet()
 	}
 	if work.composition == "play" {
 		return work.playLayout()

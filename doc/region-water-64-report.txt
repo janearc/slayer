@@ -1,0 +1,33 @@
+Water sampling: comparison with a 64-per-side finite reference
+
+The same 32 by 32 patch at left 1160, top 1400 was drawn at 64 rays per
+side (4096 samples per pixel) using the recorded executable and set. Their
+SHA-256 hashes were rechecked and still match recipe.txt. The draw used the
+software GPU, fixed exposure, SLAYER_SCROOGE=1 and fresh frame output.
+Existing caches were used; the full transitive source closure is not proven.
+
+This compares the existing raw 1, 2, 4, 16 and 32 per-side frames with the
+new 64 per-side frame, using the same 0.345 isolated-positive luminance
+threshold as report.txt. That threshold was chosen from the earlier 32-side
+reference, not a defect cutoff. The original 32-side comparison remains in
+report.txt and scores.json. The 64-side raw scores are in scores-64.json.
+
+Rays per side | Samples per pixel | Mean absolute RGB difference | Isolated positive residuals
+1             | 1                 | 0.484008                     | 34
+2             | 4                 | 0.656466                     | 13
+4             | 16                | 0.744783                     | 11
+16            | 256               | 0.633523                     | 26
+32            | 1024              | 0.500921                     | 28
+Reference: 64 rays per side, 4096 samples per pixel.
+
+For 32 minus 64, signed mean RGB differences were (0.127348, 0.091529,
+0.018478). The 32- and 64-side frames differ in raw light; neither this
+comparison nor the repeat of developed pixels establishes convergence or raw
+repeatability. Scores and isolated counts are not monotonic across these
+candidate settings. The inspected sheet is enlarged 6x with nearest-neighbour
+pixels; bright glints remain visible in both high-sample images.
+
+The 64-side frame's linear luminance median was 0.409432, 95th percentile
+2.273950, and maximum 11.742105. The corresponding 32-side values are
+0.342587, 3.451069, and 22.813562 (report.txt). These are observations from
+individual finite draws; the threshold remains fixed for this comparison.

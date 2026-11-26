@@ -273,8 +273,8 @@ func TestPlayBundledSceneMatchesProducerAndOpensAsDefault(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { work.clearNavigation(); os.RemoveAll(filepath.Dir(work.state.path)) })
-	if work.DocumentName() != "ferruccio-playground.yaml" || work.editor.Text() != string(producer) || !work.autoPreview || work.play.mode != "move" {
-		t.Fatal("play opening did not load the real native set and request its initial preview")
+	if work.DocumentName() != "ferruccio-playground.yaml" || work.editor.Text() != string(producer) || work.autoPreview || work.play.mode != "move" {
+		t.Fatal("play opening did not load the real native set without an automatic preview")
 	}
 	original, err := filepath.Abs("../../../examples/ferruccio-playground.yaml")
 	if err != nil {

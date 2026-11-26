@@ -275,7 +275,7 @@ func TestTerrainBackedNamedMediumRequiresMetreWorldUnit(t *testing.T) {
 			"      title: \"across the crater\"\n",
 			"      title: \"across the crater\"\n"+
 				"      initial-media: [water]\n", 1)
-		read, err := set.Read("terrain-water.yaml", []byte(source))
+		read, err := set.Read("../set/testdata/kilauea-iki.yaml", []byte(source))
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -40,19 +40,25 @@ func warmSetText() string {
         loc_relative: {object: near tower}
       orientation:
         point_to: far tower
+  recipes:
+    warm-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
 `)
 	for _, each := range warmFixture {
+		selector := "kind: " + each.kind
+		if each.kind == "spruce" {
+			selector = "recipe: warm-spruce"
+		}
 		fmt.Fprintf(&text, `      %s:
-        kind: %s
+        %s
         seed: %d
         complexity: quick
         position:
           east: {value: 0, unit: m}
           north: {value: %g, unit: m}
           up: {value: 0, unit: m}
-`, each.name, each.kind, each.seed, each.north)
+`, each.name, selector, each.seed, each.north)
 	}
 	return text.String()
 }

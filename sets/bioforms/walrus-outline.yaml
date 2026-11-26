@@ -30,10 +30,12 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 160, altitude: 45}
+  recipes:
+    profile-walrus-lying: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: walrus, pose: lying}}
   set:
     things:
       walrus:
-        kind: walrus-fresh-5
+        recipe: profile-walrus-lying
         seed: 17
         heading: {value: 0, unit: deg}
         position:

@@ -22,7 +22,9 @@ type producer struct {
 type receipt struct {
 	Card            card          `json:"specimen"`
 	Producer        *producer     `json:"producer"`
-	Profile         gpu.Profile   `json:"gpu-profile"`
+	Backend         string        `json:"backend,omitempty"`
+	Profile         *gpu.Profile  `json:"gpu-profile,omitempty"`
+	CPUTraceWall    time.Duration `json:"cpu-trace-wall,omitempty"`
 	DurationUnit    string        `json:"duration-unit"`
 	Bounds          maths.Box     `json:"physical-bounds-metres"`
 	StoredFaces     int           `json:"stored-faces"`

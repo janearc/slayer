@@ -39,12 +39,12 @@ var sweepOrders = [...][2]bool{{true, true}, {false, true}, {true, false},
 // longest first, the wave number in radians a metre that stands for the
 // band in its bending: the spectrum's peak, peak, held to the wave
 // numbers the band carries. A band carries those from the last band's
-// shortest to the shortest its own grid holds, pi N / side.
+// shortest to the cut of its own grid's Nyquist, cut * pi N / side.
 func bandNumbers(bands []*oceantex.Field, peak float64) []float64 {
 	numbers := make([]float64, len(bands))
 	var longest float64
 	for index, band := range bands {
-		shortest := math.Pi * float64(band.N) / band.Extent
+		shortest := oceantex.CascadeCut() * math.Pi * float64(band.N) / band.Extent
 		numbers[index] = math.Min(math.Max(peak, longest), shortest)
 		longest = shortest
 	}

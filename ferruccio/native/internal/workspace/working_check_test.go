@@ -84,3 +84,48 @@ func TestCheckWorkingGivesTheSameRefusalAtBothDepths(t *testing.T) {
 		t.Fatalf("the refusal does not name the placement: %v", cheap)
 	}
 }
+
+func TestWorkingRefusalDoesNotClaimRenderSuccess(t *testing.T) {
+	work := playWorkspace(t)
+	work.editor.ApplyText("scene: [\n")
+	work.updateWorking()
+	if work.working.failure == "" || work.diagnostic == "" {
+		t.Fatal("invalid source did not report its working-view refusal")
+	}
+	if strings.Contains(work.caption, "can still draw") || !strings.Contains(work.caption, "unavailable") {
+		t.Fatalf("working-view refusal made an unsupported render claim: %q", work.caption)
+	}
+}
+
+func TestWorkingViewNamesJobLimitation(t *testing.T) {
+	work := playWorkspace(t)
+	path := filepath.Join("..", "..", "..", "..", "jobs", "voyager-1-hero.yaml")
+	if err := work.state.load(path); err != nil {
+		t.Fatal(err)
+	}
+	if work.state.document.Kind() != "job" {
+		t.Fatalf("document kind = %q", work.state.document.Kind())
+	}
+	work.editor.SetText(work.state.document.Text())
+	work.updateWorking()
+	if !strings.Contains(work.diagnostic, "job documents") {
+		t.Fatalf("job limitation not explained: %q", work.diagnostic)
+	}
+	if strings.Contains(work.diagnostic, "jsonschema validation failed") {
+		t.Fatalf("a job was described as an invalid set: %q", work.diagnostic)
+	}
+}
+
+func TestInvalidJobKeepsItsValidationError(t *testing.T) {
+	work := playWorkspace(t)
+	path := filepath.Join("..", "..", "..", "..", "jobs", "voyager-1-hero.yaml")
+	if err := work.state.load(path); err != nil {
+		t.Fatal(err)
+	}
+	work.editor.SetText(work.state.document.Text())
+	work.editor.ApplyText("scene: [\n")
+	work.updateWorking()
+	if work.diagnostic == "" || strings.Contains(work.diagnostic, "does not yet display job documents") {
+		t.Fatalf("invalid job hid its validation error: %q", work.diagnostic)
+	}
+}

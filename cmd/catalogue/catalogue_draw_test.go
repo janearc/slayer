@@ -17,7 +17,7 @@ func TestCatalogueDeclaresEveryKindAndOnlyActualDetails(test *testing.T) {
 	}
 	plan := defaultPlan(test)
 	for _, entry := range menu.Entries {
-		row, err := manufacture.KindNamed(entry.Kind)
+		row, err := entry.kind()
 		if err != nil {
 			test.Fatal(err)
 		}

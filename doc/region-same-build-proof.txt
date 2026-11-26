@@ -1,0 +1,15 @@
+Same-build street equality test, 2048 by 1820 full frame,
+one ray per side, software GPU, street camera, fixed set exposure,
+SLAYER_SCROOGE=1, fresh renders. The independently drawn region is left
+1130, top 1370, width 96, height 96. The matching full-frame draw is
+complete. The executable file's SHA-256 while the full draw ran was
+65ddcb20b7bfdac9400297b78339baa8692b06003aaf6d18ff607b52b0a6004e;
+its recorded source build is 5b88aebb. The set SHA-256 is
+a5b906416963004ce02cd4ef5eebd38e78b170262a3397a4b147fce26bb365fd.
+This is a one-sample equality test, not a higher-sample reference.
+
+The whole frame finished after 27 minutes 19 seconds of reported draw time.
+A 96 by 96 crop at the stated coordinates and the independent region were
+both converted to BMP with sips; cmp reported identical bytes. This checks
+the delivered pixels for one ray per side, not raw-light equality or other
+sampling rates. Both images are retained for inspection.

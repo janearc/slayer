@@ -1,0 +1,39 @@
+--- geometry_sample_selected.go
++++ historical_plant_sample.go
+@@ -9 +8,0 @@
+-	"strconv"
+@@ -10,0 +10,2 @@
++	"strings"
++	"time"
+@@ -69,6 +69,0 @@
+-	case shape.Tube:
+-		write(h, byte(5))
+-		write(h, [3]float64{made.Radius, made.Thick, made.Height})
+-	case shape.Sphere:
+-		write(h, byte(4))
+-		write(h, made.Radius)
+@@ -88 +83,8 @@
+-	names := manufacture.KindNames()
++	if len(os.Args) != 2 {
++		panic("usage: geometry sample names-file")
++	}
++	raw, err := os.ReadFile(os.Args[1])
++	if err != nil {
++		panic(err)
++	}
++	names := strings.Fields(string(raw))
+@@ -91,3 +93 @@
+-		if os.Getenv("REFERENCE_NAME") != "" && name != os.Getenv("REFERENCE_NAME") {
+-			continue
+-		}
++		started := time.Now()
+@@ -99,3 +98,0 @@
+-			if v := os.Getenv("REFERENCE_SEED"); v != "" && v != strconv.FormatUint(seed, 10) {
+-				continue
+-			}
+@@ -103,3 +99,0 @@
+-				if v := os.Getenv("REFERENCE_LEVEL"); v != "" && v != level {
+-					continue
+-				}
+@@ -140,0 +135 @@
++		fmt.Fprintf(os.Stderr, "capture %s %s\n", name, time.Since(started))

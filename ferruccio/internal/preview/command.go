@@ -31,10 +31,21 @@ func (plan *Plan) arguments(tools Tools) ([]string, error) {
 		return nil, err
 	}
 	arguments := []string{tools.Slayer, "draw", plan.Input, "--out", plan.Output}
+	if plan.relocated {
+		arguments = append(arguments, "--source-path", plan.Source)
+	}
 	if !profile.Full {
 		arguments = append(arguments, "--width", strconv.Itoa(profile.Width), "--height", strconv.Itoa(profile.Height), "--rays", "1")
+	} else if profile.SizePreset != "" {
+		arguments = append(arguments, "--width", strconv.Itoa(profile.Width), "--height", strconv.Itoa(profile.Height))
+	}
+	if profile.Full && profile.Samples > 0 {
+		arguments = append(arguments, "--spp", strconv.Itoa(profile.Samples))
 	}
 	arguments = append(arguments, "--quality", profile.quality())
+	if profile.Camera != "" {
+		arguments = append(arguments, "--camera", profile.Camera)
+	}
 	if profile.CPURenderer {
 		arguments = append(arguments, "--renderer", "cpu")
 	}

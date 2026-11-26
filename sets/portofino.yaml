@@ -202,6 +202,9 @@ scene:
         at: [1250, -1040, 4]
       orientation:
         look_at: [1410, -1000, 15]
+  recipes:
+    plant-erica-arborea: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: erica-arborea}}
+    plant-quercus-ilex: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: quercus-ilex}}
   set:
     things:
       the south foot: {kind: human-scale-2m, seed: 1, east: 1345, north: 589}
@@ -322,7 +325,7 @@ scene:
           door: downhill
       # the promontory's own trees, sown by rule: holm oak and tree heath,
       # which the marine reserve's coastal handbook names together in the
-      # holm oak wood that comes near the sea (manufacture/plant-profiles.yaml
+      # holm oak wood that comes near the sea (manufacture/plants/seasonal/profiles.yaml
       # cites it). each stand grows from its seed over the ground 150 to
       # 1200 m from the head of the harbour, above 30 m, so the town's rows
       # below are left bare, and no steeper than its steepest, rise over run.
@@ -340,11 +343,11 @@ scene:
       # stands may grow on, inside the window, over 30 m and gentle enough, is
       # not measured; it is guessed at about 150 hectares, so 15000 oaks. the
       # heath fills under and between them, a third as many again, picked.
-      holm oaks a: {kind: quercus-ilex, count: 5000, seed: 501, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
-      holm oaks b: {kind: quercus-ilex, count: 5000, seed: 502, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
-      holm oaks c: {kind: quercus-ilex, count: 5000, seed: 503, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
-      tree heath a: {kind: erica-arborea, count: 2500, seed: 511, complexity: clumps, above: 40, below: 700, steepest: 1.2, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
-      tree heath b: {kind: erica-arborea, count: 2500, seed: 512, complexity: clumps, above: 40, below: 700, steepest: 1.2, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      holm oaks a: {recipe: plant-quercus-ilex, count: 5000, seed: 501, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      holm oaks b: {recipe: plant-quercus-ilex, count: 5000, seed: 502, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      holm oaks c: {recipe: plant-quercus-ilex, count: 5000, seed: 503, complexity: clumps, above: 30, below: 700, steepest: 0.8, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      tree heath a: {recipe: plant-erica-arborea, count: 2500, seed: 511, complexity: clumps, above: 40, below: 700, steepest: 1.2, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
+      tree heath b: {recipe: plant-erica-arborea, count: 2500, seed: 512, complexity: clumps, above: 40, below: 700, steepest: 1.2, within: {of: the south foot, from: 0, to: 360, near: 150, far: 1200}}
   world:
     unit: 1
     materials:

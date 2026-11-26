@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
+	"github.com/janearc/slayer/manufacture/profilecheck"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/shape"
@@ -59,8 +60,8 @@ const (
 type bubblesBook struct {
 	Read    string
 	Sources map[string]string
-	Figures map[string]kelpFigure
-	Physics map[string]kelpConstant
+	Figures map[string]profilecheck.Figure
+	Physics map[string]profilecheck.Constant
 }
 
 // bubblesRead is the file read and checked, and bubblesError why not.
@@ -72,18 +73,17 @@ func readBubbles(raw []byte) (bubblesBook, error) {
 	if err := yamlfile.Read("bubbles.yaml", raw, &book); err != nil {
 		return bubblesBook{}, err
 	}
-	basis := kelpBook{Sources: book.Sources}
 	for _, name := range bubblesNames {
 		row, given := book.Figures[name]
 		if !given || !(row.Least >= 0 && row.Most >= row.Least) ||
-			!positive(row.Most) || !basis.based(row.Basis) {
+			!positive(row.Most) || !profilecheck.Based(book.Sources, row.Basis) {
 			return bubblesBook{}, fmt.Errorf("manufacture: the bubbles' "+
 				"%s, %+v, is not a range with a basis", name, row)
 		}
 	}
 	for _, name := range bubblesPhysics {
 		row, given := book.Physics[name]
-		if !given || !positive(row.Value) || !basis.based(row.Basis) {
+		if !given || !positive(row.Value) || !profilecheck.Based(book.Sources, row.Basis) {
 			return bubblesBook{}, fmt.Errorf("manufacture: the bubbles' "+
 				"%s, %+v, is not a number with a basis", name, row)
 		}
@@ -108,7 +108,7 @@ func (book bubblesBook) rise(radius float64) float64 {
 	diameter := 2 * radius
 	tension, density := book.number("surface-tension"), book.number("density")
 	return math.Sqrt(2*tension/(density*diameter) +
-		book.number("gravity")*diameter*kelpHalf)
+		book.number("gravity")*diameter*.5)
 }
 
 // aspect is a bubble's height over its width, from its Eotvos number.
@@ -127,7 +127,7 @@ var bubblesKit = sync.OnceValues(func() ([]*mesh.Mesh, error) {
 	least, most := book.Figures["radius"].Least, book.Figures["radius"].Most
 	var kit []*mesh.Mesh
 	for class := range bubblesClasses {
-		middle := least + (most-least)*(float64(class)+kelpHalf)/bubblesClasses
+		middle := least + (most-least)*(float64(class)+.5)/bubblesClasses
 		made, err := bubbleMesh(book.aspect(middle))
 		if err != nil {
 			return nil, err

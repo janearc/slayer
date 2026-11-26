@@ -14,3 +14,8 @@ most 8 MiB. No manifest found is allowed. Filesystem and copy failures propagate
 This helper copies metadata only. It never copies datasets or changes the
 original input directory. Its callers must use new private destination folders;
 ordinary user directories are not staging destinations.
+
+Some scenes also require SLAYER_DATA. Ferruccio's Scene data setting supplies
+that folder to the staging helper and to queued or direct render processes;
+an explicit setting overrides the inherited environment. The app does not yet
+read the project slayer block from Game's configuration automatically.

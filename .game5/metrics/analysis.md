@@ -1,4 +1,4 @@
-written by `game signature` and committed. taken at 8850746.
+written by `game signature` and committed. taken at 334567f.
 
 # signature
 
@@ -6,23 +6,23 @@ written by `game signature` and committed. taken at 8850746.
 
 | directory | go | test | ratio | other | files |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| . | 0 | 0 | - | 7977 | 18 |
+| . | 0 | 0 | - | 8081 | 18 |
 | .game5 | 0 | 0 | - | 7 | 1 |
-| .game5/excludes | 0 | 0 | - | 29 | 1 |
+| .game5/excludes | 0 | 0 | - | 31 | 1 |
 | .game5/lint | 0 | 0 | - | 16 | 3 |
 | .game5/needs | 0 | 0 | - | 5 | 1 |
 | .game5/omissions | 0 | 0 | - | 37 | 1 |
-| .game5/runs | 0 | 0 | - | 228 | 135 |
+| .game5/runs | 0 | 0 | - | 230 | 136 |
 | .game5/sweep | 0 | 0 | - | 3 | 1 |
-| .game5/targets | 0 | 0 | - | 21 | 8 |
+| .game5/targets | 0 | 0 | - | 23 | 10 |
 | .game5/wants | 0 | 0 | - | 8 | 2 |
 | .github | 0 | 0 | - | 95 | 2 |
-| .github/workflows | 0 | 0 | - | 21 | 1 |
+| .github/workflows | 0 | 0 | - | 93 | 2 |
 | .idea | 0 | 0 | - | 31 | 4 |
 | airlight | 1267 | 2336 | 1.8 | 0 | 18 |
 | airlight/mocks | 84 | 0 | 0.0 | 0 | 1 |
 | airs | 1418 | 1770 | 1.2 | 714 | 20 |
-| arid | 4093 | 3954 | 1.0 | 127 | 43 |
+| arid | 4093 | 4055 | 1.0 | 127 | 44 |
 | art | 0 | 0 | - | 25 | 1 |
 | azazel | 0 | 0 | - | 1123 | 12 |
 | azazel/cmd/azazel | 684 | 821 | 1.2 | 183 | 17 |
@@ -81,7 +81,7 @@ written by `game signature` and committed. taken at 8850746.
 | biome/testdata | 0 | 0 | - | 172 | 4 |
 | biome/testdata/golden | 0 | 0 | - | 3651 | 1 |
 | burning-trousers | 0 | 0 | - | 55 | 4 |
-| burning-trousers/animation | 0 | 323 | - | 25 | 3 |
+| burning-trousers/animation | 0 | 324 | - | 25 | 3 |
 | burning-trousers/bench | 0 | 122 | - | 0 | 1 |
 | burning-trousers/cmd/apart | 74 | 248 | 3.4 | 0 | 2 |
 | burning-trousers/divergence | 100 | 106 | 1.1 | 0 | 2 |
@@ -91,13 +91,15 @@ written by `game signature` and committed. taken at 8850746.
 | burning-trousers/fixture | 0 | 828 | - | 0 | 10 |
 | burning-trousers/fixture/testdata | 0 | 0 | - | 482 | 2 |
 | burning-trousers/kernel | 0 | 303 | - | 0 | 4 |
-| burning-trousers/manufactory | 0 | 347 | - | 0 | 5 |
-| burning-trousers/mesh | 0 | 599 | - | 157 | 4 |
+| burning-trousers/manufactory | 0 | 588 | - | 0 | 6 |
+| burning-trousers/mesh | 0 | 926 | - | 157 | 6 |
 | burning-trousers/mocks | 9 | 0 | 0.0 | 17 | 2 |
 | burning-trousers/mocks/mediummock | 137 | 0 | 0.0 | 0 | 1 |
 | burning-trousers/mocks/shapemock | 107 | 0 | 0.0 | 0 | 1 |
 | burning-trousers/rules | 0 | 453 | - | 0 | 2 |
 | burning-trousers/scenes | 187 | 0 | 0.0 | 0 | 1 |
+| burning-trousers/specimens | 323 | 351 | 1.1 | 0 | 3 |
+| burning-trousers/specimens/testdata | 0 | 0 | - | 282 | 1 |
 | burning-trousers/tools | 0 | 0 | - | 31 | 1 |
 | burning-trousers/torture | 0 | 173 | - | 0 | 2 |
 | camera | 308 | 789 | 2.6 | 0 | 9 |
@@ -110,7 +112,7 @@ written by `game signature` and committed. taken at 8850746.
 | cheeptune/examples | 0 | 0 | - | 383 | 7 |
 | cheeptune/library | 0 | 0 | - | 4679 | 70 |
 | cmd/beats | 196 | 309 | 1.6 | 0 | 4 |
-| cmd/catalogue | 3512 | 3958 | 1.1 | 3580 | 54 |
+| cmd/catalogue | 3873 | 5429 | 1.4 | 3953 | 70 |
 | cmd/catalogue/testdata | 0 | 0 | - | 75 | 4 |
 | cmd/catalogue/testdata/book | 0 | 0 | - | 40 | 1 |
 | cmd/catalogue/testdata/book/fern-quick | 0 | 0 | - | 0 | 1 |
@@ -123,8 +125,8 @@ written by `game signature` and committed. taken at 8850746.
 | cmd/hillside | 70 | 87 | 1.2 | 0 | 2 |
 | cmd/house | 176 | 361 | 2.1 | 0 | 6 |
 | cmd/house/testdata | 0 | 0 | - | 72 | 1 |
-| cmd/island | 2843 | 3518 | 1.2 | 1020 | 41 |
-| cmd/moonrise | 194 | 232 | 1.2 | 0 | 7 |
+| cmd/island | 3169 | 3906 | 1.2 | 1033 | 45 |
+| cmd/moonrise | 194 | 247 | 1.3 | 0 | 7 |
 | cmd/orbital | 422 | 1672 | 4.0 | 0 | 15 |
 | cmd/orbital/testdata | 0 | 0 | - | 83 | 3 |
 | cmd/ring | 143 | 150 | 1.0 | 0 | 4 |
@@ -140,20 +142,20 @@ written by `game signature` and committed. taken at 8850746.
 | dependencies/patches | 0 | 0 | - | 183 | 1 |
 | diskcache | 813 | 1253 | 1.5 | 123 | 19 |
 | diskcache/testdata | 0 | 0 | - | 20 | 1 |
-| doc | 0 | 0 | - | 9895 | 85 |
-| doc/applications/ferruccio | 0 | 0 | - | 489 | 8 |
+| doc | 0 | 0 | - | 12064 | 111 |
+| doc/applications/ferruccio | 0 | 0 | - | 548 | 9 |
 | doc/design | 0 | 0 | - | 95 | 3 |
 | doc/examples/jobs | 0 | 0 | - | 101 | 11 |
 | doc/examples/jobs/alfa | 0 | 0 | - | 180 | 3 |
 | doc/model/bioform | 0 | 0 | - | 145 | 2 |
-| doc/model/bioform/allosaurus | 0 | 0 | - | 129 | 1 |
-| doc/model/bioform/bay-seal | 0 | 0 | - | 56 | 1 |
-| doc/model/bioform/hatzegopteryx | 0 | 0 | - | 197 | 2 |
-| doc/model/bioform/humboldt-squid | 0 | 0 | - | 150 | 2 |
-| doc/model/bioform/orca | 0 | 0 | - | 244 | 2 |
-| doc/model/bioform/pliosaur | 0 | 0 | - | 126 | 1 |
-| doc/model/bioform/purussaurus | 0 | 0 | - | 139 | 1 |
-| doc/model/bioform/walrus | 0 | 0 | - | 159 | 1 |
+| doc/model/bioform/allosaurus | 0 | 0 | - | 130 | 1 |
+| doc/model/bioform/bay-seal | 0 | 0 | - | 75 | 1 |
+| doc/model/bioform/hatzegopteryx | 0 | 0 | - | 199 | 2 |
+| doc/model/bioform/humboldt-squid | 0 | 0 | - | 164 | 2 |
+| doc/model/bioform/orca | 0 | 0 | - | 246 | 2 |
+| doc/model/bioform/pliosaur | 0 | 0 | - | 128 | 1 |
+| doc/model/bioform/purussaurus | 0 | 0 | - | 138 | 1 |
+| doc/model/bioform/walrus | 0 | 0 | - | 178 | 1 |
 | doc/model/boat | 0 | 0 | - | 480 | 6 |
 | doc/model/city | 0 | 0 | - | 285 | 3 |
 | doc/model/fire | 0 | 0 | - | 492 | 4 |
@@ -168,10 +170,10 @@ written by `game signature` and committed. taken at 8850746.
 | doc/model/spacecraft/guide/jobs | 0 | 0 | - | 75 | 9 |
 | doc/model/spacecraft/guide/sets | 0 | 0 | - | 249 | 8 |
 | doc/model/terrain | 0 | 0 | - | 187 | 1 |
-| doc/model/vegetation | 0 | 0 | - | 559 | 5 |
-| doc/visualguide | 0 | 0 | - | 2004 | 6 |
+| doc/model/vegetation | 0 | 0 | - | 575 | 5 |
+| doc/visualguide | 0 | 0 | - | 2010 | 6 |
 | doc/visualguide/images | 0 | 0 | - | 0 | 31 |
-| door | 7567 | 8963 | 1.2 | 505 | 89 |
+| door | 7969 | 9539 | 1.2 | 525 | 98 |
 | door/testdata | 0 | 0 | - | 97 | 3 |
 | door/testdata/tunes | 0 | 0 | - | 11 | 2 |
 | embers | 412 | 1005 | 2.4 | 0 | 14 |
@@ -179,33 +181,36 @@ written by `game signature` and committed. taken at 8850746.
 | emit | 733 | 1135 | 1.5 | 0 | 19 |
 | emit/testdata | 0 | 0 | - | 57 | 1 |
 | fermat | 281 | 234 | 0.8 | 0 | 4 |
-| ferruccio | 0 | 0 | - | 550 | 10 |
+| ferruccio | 0 | 0 | - | 850 | 15 |
+| ferruccio/assets | 0 | 0 | - | 0 | 1 |
 | ferruccio/cmd/atelier | 158 | 67 | 0.4 | 0 | 3 |
 | ferruccio/cmd/atelier-capture | 88 | 74 | 0.8 | 0 | 2 |
 | ferruccio/examples | 0 | 0 | - | 536 | 8 |
 | ferruccio/examples/oakland-larson | 0 | 0 | - | 304 | 5 |
 | ferruccio/gallery | 0 | 0 | - | 43 | 1 |
-| ferruccio/internal/assets | 48 | 54 | 1.1 | 18048 | 20 |
+| ferruccio/internal/assets | 48 | 54 | 1.1 | 18173 | 20 |
 | ferruccio/internal/capture | 44 | 70 | 1.6 | 0 | 2 |
-| ferruccio/internal/draft | 938 | 1229 | 1.3 | 27 | 10 |
-| ferruccio/internal/preview | 1745 | 2464 | 1.4 | 147 | 43 |
+| ferruccio/internal/draft | 1613 | 2174 | 1.3 | 106 | 32 |
+| ferruccio/internal/preview | 1997 | 2722 | 1.4 | 177 | 46 |
 | ferruccio/internal/preview/testdata | 0 | 0 | - | 245 | 6 |
 | ferruccio/internal/studio | 1141 | 400 | 0.4 | 0 | 11 |
-| ferruccio/native | 0 | 0 | - | 619 | 10 |
-| ferruccio/native/cmd/ferruccio | 1641 | 1324 | 0.8 | 0 | 15 |
-| ferruccio/native/internal/appearance | 785 | 409 | 0.5 | 0 | 4 |
+| ferruccio/native | 0 | 0 | - | 623 | 10 |
+| ferruccio/native/cmd/ferruccio | 1714 | 1402 | 0.8 | 0 | 15 |
+| ferruccio/native/cmd/ferruccio-stage | 106 | 165 | 1.6 | 0 | 5 |
+| ferruccio/native/internal/appearance | 812 | 409 | 0.5 | 0 | 5 |
 | ferruccio/native/internal/appearance/themes | 0 | 0 | - | 1178 | 18 |
 | ferruccio/native/internal/editor | 761 | 490 | 0.6 | 0 | 5 |
 | ferruccio/native/internal/headless | 114 | 0 | 0.0 | 0 | 1 |
-| ferruccio/native/internal/look | 430 | 285 | 0.7 | 0 | 4 |
+| ferruccio/native/internal/look | 425 | 293 | 0.7 | 0 | 4 |
 | ferruccio/native/internal/picking | 157 | 220 | 1.4 | 0 | 3 |
 | ferruccio/native/internal/processmetrics | 127 | 117 | 0.9 | 0 | 3 |
-| ferruccio/native/internal/settings | 424 | 312 | 0.7 | 0 | 3 |
-| ferruccio/native/internal/workingview | 655 | 185 | 0.3 | 46 | 5 |
-| ferruccio/native/internal/workspace | 4850 | 4253 | 0.9 | 0 | 69 |
-| ferruccio/native/patches | 0 | 0 | - | 499 | 1 |
+| ferruccio/native/internal/settings | 463 | 336 | 0.7 | 0 | 3 |
+| ferruccio/native/internal/stagewire | 768 | 336 | 0.4 | 0 | 8 |
+| ferruccio/native/internal/workingview | 959 | 429 | 0.4 | 51 | 7 |
+| ferruccio/native/internal/workspace | 6999 | 8242 | 1.2 | 74 | 102 |
+| ferruccio/native/patches | 0 | 0 | - | 550 | 2 |
 | ferruccio/native/third_party | 0 | 0 | - | 3 | 1 |
-| ferruccio/scripts | 0 | 0 | - | 241 | 6 |
+| ferruccio/scripts | 0 | 0 | - | 364 | 8 |
 | film | 794 | 1023 | 1.3 | 0 | 18 |
 | firefront | 184 | 431 | 2.3 | 0 | 6 |
 | flame | 1256 | 2110 | 1.7 | 0 | 38 |
@@ -215,7 +220,7 @@ written by `game signature` and committed. taken at 8850746.
 | fuelbed/testdata | 0 | 0 | - | 57 | 1 |
 | geom | 100 | 125 | 1.2 | 0 | 3 |
 | globe | 77 | 156 | 2.0 | 0 | 3 |
-| gpu | 12086 | 24227 | 2.0 | 6300 | 276 |
+| gpu | 12368 | 24701 | 2.0 | 6300 | 289 |
 | gpu/testdata | 0 | 0 | - | 492 | 9 |
 | hud | 816 | 1516 | 1.9 | 20 | 20 |
 | hud/mocks | 56 | 0 | 0.0 | 4 | 2 |
@@ -224,11 +229,11 @@ written by `game signature` and committed. taken at 8850746.
 | improv/cascades/flatland | 543 | 385 | 0.7 | 0 | 5 |
 | improv/cloudsea | 0 | 78 | - | 917 | 5 |
 | improv/cloudsea/shorts | 141 | 259 | 1.8 | 0 | 3 |
-| improv/fire-support | 0 | 0 | - | 365 | 6 |
+| improv/fire-support | 0 | 0 | - | 368 | 6 |
 | improv/host | 649 | 355 | 0.5 | 0 | 8 |
 | improv/larson | 0 | 0 | - | 99 | 2 |
 | improv/magnetar | 295 | 574 | 1.9 | 163 | 7 |
-| improv/moonlake | 0 | 0 | - | 4495 | 10 |
+| improv/moonlake | 0 | 0 | - | 4497 | 10 |
 | improv/moonlake/cues | 741 | 637 | 0.9 | 0 | 4 |
 | improv/moonlake/cueshow | 78 | 175 | 2.2 | 0 | 2 |
 | improv/moonlake/cueshow/testdata | 0 | 0 | - | 23 | 2 |
@@ -243,7 +248,7 @@ written by `game signature` and committed. taken at 8850746.
 | improv/moonlake/mist | 326 | 316 | 1.0 | 0 | 3 |
 | improv/moonlake/mistlake | 120 | 191 | 1.6 | 0 | 2 |
 | improv/moonlake/ocean | 396 | 418 | 1.1 | 0 | 5 |
-| improv/moonlake/omnipositor | 2146 | 3533 | 1.6 | 142 | 36 |
+| improv/moonlake/omnipositor | 2149 | 3533 | 1.6 | 142 | 36 |
 | improv/moonlake/omnipositor/cmd/omnipositor | 1652 | 2553 | 1.5 | 0 | 14 |
 | improv/moonlake/omnipositor/compare | 340 | 475 | 1.4 | 0 | 2 |
 | improv/moonlake/omnipositor/encoder | 343 | 798 | 2.3 | 7 | 4 |
@@ -256,7 +261,7 @@ written by `game signature` and committed. taken at 8850746.
 | improv/moonlake/omnipositor/oraclebench | 976 | 834 | 0.9 | 0 | 3 |
 | improv/moonlake/omnipositor/oraclebench/instrument | 170 | 314 | 1.8 | 0 | 3 |
 | improv/moonlake/omnipositor/settings | 419 | 534 | 1.3 | 0 | 2 |
-| improv/moonlake/passes | 307 | 170 | 0.6 | 0 | 2 |
+| improv/moonlake/passes | 323 | 203 | 0.6 | 0 | 2 |
 | improv/moonlake/pfmstat | 73 | 0 | 0.0 | 0 | 1 |
 | improv/moonlake/rig | 541 | 309 | 0.6 | 0 | 6 |
 | improv/moonlake/scalepfm | 78 | 0 | 0.0 | 0 | 1 |
@@ -279,7 +284,7 @@ written by `game signature` and committed. taken at 8850746.
 | improv/quasar/photonring | 10 | 179 | 17.9 | 87 | 3 |
 | improv/quasar/rings | 515 | 295 | 0.6 | 0 | 9 |
 | improv/quasar/ringshots | 378 | 220 | 0.6 | 0 | 4 |
-| improv/searching | 6812 | 3632 | 0.5 | 35598 | 96 |
+| improv/searching | 6844 | 3649 | 0.5 | 35598 | 96 |
 | improv/searching/studies | 0 | 0 | - | 29334 | 49 |
 | improv/searching/studies/music | 0 | 0 | - | 1938 | 7 |
 | improv/searching/testdata | 0 | 0 | - | 34 | 1 |
@@ -299,25 +304,53 @@ written by `game signature` and committed. taken at 8850746.
 | internal/appicon | 16 | 44 | 2.8 | 9 | 5 |
 | internal/commandtest | 25 | 36 | 1.4 | 0 | 2 |
 | internal/observability | 1322 | 1050 | 0.8 | 0 | 24 |
-| job | 2685 | 3679 | 1.4 | 1479 | 53 |
+| job | 2840 | 5832 | 2.1 | 1533 | 74 |
 | job/testdata | 0 | 0 | - | 30 | 1 |
 | jobs | 0 | 0 | - | 141 | 18 |
 | jobs/alfa-gas-cloud-proof | 0 | 0 | - | 983 | 11 |
 | jobs/alfa-underwater-combined-finish | 0 | 0 | - | 1625 | 17 |
 | jobs/alfa-underwater-finish-shots | 0 | 0 | - | 695 | 9 |
+| jobs/bioforms/sauropod-review | 0 | 0 | - | 24 | 4 |
+| jobs/bioforms/snake-review | 0 | 0 | - | 54 | 9 |
 | lantern | 1172 | 539 | 0.5 | 187 | 14 |
 | lines | 67 | 297 | 4.4 | 0 | 4 |
 | lines/testdata | 0 | 0 | - | 19 | 1 |
-| manufacture | 62266 | 35273 | 0.6 | 13691 | 640 |
+| manufacture | 39515 | 34576 | 0.9 | 10931 | 557 |
+| manufacture/algae/kelp | 771 | 52 | 0.1 | 69 | 8 |
+| manufacture/animals/cnidarians/coral | 197 | 68 | 0.3 | 0 | 2 |
+| manufacture/animals/molluscs | 80 | 72 | 0.9 | 0 | 2 |
+| manufacture/animals/molluscs/squid | 261 | 0 | 0.0 | 10 | 3 |
+| manufacture/animals/vertebrates/dinosaurs/sauropods | 542 | 512 | 0.9 | 108 | 6 |
+| manufacture/animals/vertebrates/dinosaurs/theropods | 374 | 94 | 0.3 | 31 | 4 |
+| manufacture/animals/vertebrates/dinosaurs/theropods/birds | 2637 | 1171 | 0.4 | 506 | 16 |
+| manufacture/animals/vertebrates/fishes | 1989 | 250 | 0.1 | 766 | 10 |
+| manufacture/animals/vertebrates/mammals | 45 | 0 | 0.0 | 0 | 2 |
+| manufacture/animals/vertebrates/mammals/pinnipeds | 8043 | 3372 | 0.4 | 186 | 38 |
+| manufacture/animals/vertebrates/mammals/whales | 2240 | 1210 | 0.5 | 38 | 18 |
+| manufacture/animals/vertebrates/reptiles | 376 | 129 | 0.3 | 139 | 5 |
+| manufacture/animals/vertebrates/reptiles/crocodylians | 138 | 0 | 0.0 | 0 | 1 |
+| manufacture/animals/vertebrates/reptiles/hatzegopteryx | 580 | 165 | 0.3 | 0 | 4 |
+| manufacture/animals/vertebrates/reptiles/pliosaurs | 181 | 0 | 0.0 | 0 | 2 |
+| manufacture/animals/vertebrates/reptiles/snakes | 535 | 671 | 1.3 | 175 | 11 |
+| manufacture/branching | 586 | 448 | 0.8 | 0 | 15 |
 | manufacture/cassini-huygens | 0 | 0 | - | 32 | 1 |
 | manufacture/cassini-huygens/attached | 0 | 0 | - | 0 | 2 |
 | manufacture/cassini-huygens/cassini | 0 | 0 | - | 0 | 8 |
 | manufacture/cassini-huygens/huygens | 0 | 0 | - | 0 | 2 |
-| manufacture/cities | 24769 | 13143 | 0.5 | 2796 | 200 |
+| manufacture/cities | 25741 | 13633 | 0.5 | 2796 | 206 |
 | manufacture/cities/cultures | 0 | 0 | - | 5844 | 15 |
+| manufacture/geometry | 679 | 26 | 0.0 | 0 | 10 |
 | manufacture/new-horizons | 0 | 0 | - | 24 | 4 |
 | manufacture/new-horizons-vtad | 0 | 0 | - | 26 | 13 |
-| manufacture/testdata | 356 | 275 | 0.8 | 4090 | 68 |
+| manufacture/plants/cacti | 391 | 75 | 0.2 | 34 | 4 |
+| manufacture/plants/conifers | 706 | 35 | 0.0 | 290 | 5 |
+| manufacture/plants/ferns | 173 | 147 | 0.8 | 20 | 6 |
+| manufacture/plants/seasonal | 1035 | 534 | 0.5 | 1171 | 14 |
+| manufacture/profilecheck | 304 | 97 | 0.3 | 0 | 4 |
+| manufacture/testdata | 498 | 331 | 0.7 | 5727 | 100 |
+| manufacture/testdata/history | 0 | 0 | - | 45 | 2 |
+| manufacture/testdata/history/historical-public-errors | 0 | 0 | - | 21 | 3 |
+| manufacture/testdata/history/orca-arithmetic-evidence | 0 | 0 | - | 33 | 3 |
 | manufacture/testdata/history/rubin-generic-enclosure | 0 | 0 | - | 77 | 2 |
 | materials | 1126 | 1785 | 1.6 | 0 | 22 |
 | materials/specimen | 198 | 262 | 1.3 | 0 | 2 |
@@ -328,7 +361,7 @@ written by `game signature` and committed. taken at 8850746.
 | materials/testdata/main/Be/nk | 0 | 0 | - | 1014 | 1 |
 | materials/testdata/main/GaAs/nk | 0 | 0 | - | 59 | 1 |
 | materials/testdata/main/Ti/nk | 0 | 0 | - | 62 | 1 |
-| maths | 798 | 2627 | 3.3 | 17 | 29 |
+| maths | 823 | 2645 | 3.2 | 17 | 32 |
 | maths/hexes | 896 | 1564 | 1.7 | 0 | 9 |
 | maths/noise | 381 | 1446 | 3.8 | 0 | 7 |
 | maths/noise/testdata | 0 | 0 | - | 265 | 7 |
@@ -337,7 +370,7 @@ written by `game signature` and committed. taken at 8850746.
 | maths/testdata | 0 | 0 | - | 471 | 19 |
 | mesh | 1707 | 4482 | 2.6 | 0 | 33 |
 | mesh/testdata | 0 | 0 | - | 1234 | 79 |
-| metal | 2121 | 4265 | 2.0 | 2658 | 59 |
+| metal | 2152 | 4355 | 2.0 | 2676 | 61 |
 | metal/testdata | 0 | 0 | - | 99 | 1 |
 | mie | 344 | 295 | 0.9 | 0 | 4 |
 | moonlight | 484 | 391 | 0.8 | 0 | 10 |
@@ -386,7 +419,7 @@ written by `game signature` and committed. taken at 8850746.
 | oakland/testdata | 0 | 0 | - | 214 | 4 |
 | observer | 158 | 338 | 2.1 | 0 | 6 |
 | occultation | 278 | 336 | 1.2 | 0 | 4 |
-| oceantex | 3426 | 1759 | 0.5 | 1520 | 38 |
+| oceantex | 3426 | 1759 | 0.5 | 1524 | 38 |
 | oceantex/data | 0 | 0 | - | 278 | 1 |
 | planet | 4032 | 4160 | 1.0 | 525 | 42 |
 | planet/testdata | 0 | 0 | - | 589 | 2 |
@@ -410,6 +443,12 @@ written by `game signature` and committed. taken at 8850746.
 | render/frame/testdata | 0 | 0 | - | 78 | 1 |
 | render/live | 1938 | 2883 | 1.5 | 162 | 24 |
 | render/progress | 406 | 546 | 1.3 | 0 | 11 |
+| render/regioncompare | 944 | 1001 | 1.1 | 79 | 15 |
+| render/regioninput | 202 | 126 | 0.6 | 21 | 5 |
+| render/regionjudge | 109 | 184 | 1.7 | 30 | 4 |
+| render/regionmanifest | 83 | 96 | 1.2 | 17 | 3 |
+| render/regionref | 124 | 97 | 0.8 | 23 | 3 |
+| render/regionset | 109 | 106 | 1.0 | 27 | 4 |
 | render/shortcut | 475 | 1427 | 3.0 | 0 | 14 |
 | render/smokecache | 490 | 674 | 1.4 | 0 | 5 |
 | render/smokejudge | 768 | 789 | 1.0 | 0 | 4 |
@@ -436,7 +475,7 @@ written by `game signature` and committed. taken at 8850746.
 | scene/island | 980 | 1856 | 1.9 | 0 | 13 |
 | scene/medium | 3137 | 7562 | 2.4 | 521 | 72 |
 | scene/medium/testdata | 93 | 0 | 0.0 | 4050 | 54 |
-| scene/named | 5264 | 3327 | 0.6 | 312 | 64 |
+| scene/named | 5339 | 3452 | 0.6 | 312 | 65 |
 | scene/pier | 198 | 0 | 0.0 | 0 | 2 |
 | scene/seaside | 284 | 0 | 0.0 | 24 | 3 |
 | scene/shape | 2631 | 7793 | 3.0 | 40 | 54 |
@@ -449,19 +488,21 @@ written by `game signature` and committed. taken at 8850746.
 | scene/texture | 2328 | 3930 | 1.7 | 445 | 58 |
 | scene/texture/mocks | 69 | 0 | 0.0 | 5 | 2 |
 | scene/texture/testdata | 0 | 0 | - | 78 | 1 |
-| scene/thing | 3358 | 6202 | 1.8 | 199 | 60 |
+| scene/thing | 3385 | 6202 | 1.8 | 199 | 60 |
 | scene/thing/testdata | 0 | 0 | - | 2138 | 76 |
 | scene/world | 871 | 2138 | 2.5 | 0 | 21 |
 | scripts | 0 | 0 | - | 81 | 2 |
 | section | 575 | 1951 | 3.4 | 0 | 17 |
 | section/testdata | 0 | 0 | - | 334 | 5 |
-| session | 15181 | 28763 | 1.9 | 362 | 342 |
-| session/placement | 1113 | 743 | 0.7 | 63 | 16 |
+| session | 15519 | 30652 | 2.0 | 373 | 365 |
+| session/placement | 1672 | 1183 | 0.7 | 108 | 29 |
 | session/testdata | 358 | 0 | 0.0 | 653 | 29 |
-| set | 11427 | 13937 | 1.2 | 14154 | 180 |
-| set/testdata | 0 | 0 | - | 994 | 18 |
-| sets | 0 | 0 | - | 30909 | 207 |
-| sets/bioforms | 0 | 0 | - | 1866 | 35 |
+| set | 12100 | 15723 | 1.3 | 13921 | 203 |
+| set/testdata | 0 | 0 | - | 1830 | 20 |
+| sets | 0 | 0 | - | 34033 | 211 |
+| sets/bioforms | 0 | 0 | - | 1958 | 35 |
+| sets/bioforms/sauropod-review | 0 | 0 | - | 124 | 4 |
+| sets/bioforms/snake-review | 0 | 0 | - | 243 | 9 |
 | sets/cassini-huygens-study | 0 | 0 | - | 77 | 4 |
 | sets/cassini-huygens-study/huygens | 0 | 0 | - | 54 | 2 |
 | sets/guide | 0 | 0 | - | 107 | 2 |
@@ -483,7 +524,7 @@ written by `game signature` and committed. taken at 8850746.
 | skytable | 92 | 87 | 0.9 | 0 | 2 |
 | smokes | 0 | 0 | - | 13 | 1 |
 | sources | 1191 | 1656 | 1.4 | 0 | 15 |
-| stage | 1299 | 1968 | 1.5 | 0 | 21 |
+| stage | 1302 | 2053 | 1.6 | 34 | 23 |
 | stage/testdata | 0 | 0 | - | 235 | 3 |
 | study/harbor-seal-four-pass | 0 | 0 | - | 22 | 1 |
 | study/harbor-seal-four-pass/01 | 0 | 0 | - | 21 | 2 |
@@ -520,7 +561,7 @@ written by `game signature` and committed. taken at 8850746.
 | tools/mutate | 303 | 519 | 1.7 | 0 | 5 |
 | tools/render/alfa-surface-clip | 278 | 152 | 0.5 | 78 | 3 |
 | tools/tiers | 458 | 459 | 1.0 | 7536 | 6 |
-| trace | 7878 | 17908 | 2.3 | 151 | 164 |
+| trace | 8101 | 18393 | 2.3 | 170 | 174 |
 | trace/testdata | 0 | 0 | - | 22 | 1 |
 | trace/testdata/golden | 0 | 0 | - | 2560 | 10 |
 | treebolt | 506 | 355 | 0.7 | 0 | 2 |
@@ -534,36 +575,36 @@ written by `game signature` and committed. taken at 8850746.
 | validation/refraction-ab/patches | 0 | 0 | - | 33 | 3 |
 | weather | 1391 | 698 | 0.5 | 305 | 23 |
 | weathering | 2235 | 1651 | 0.7 | 0 | 19 |
-| total | 339988 | 401876 | 1.2 | 285271 | 6905 |
+| total | 351027 | 429576 | 1.2 | 296410 | 7386 |
 
 ## by language
 
 | language | files | lines |
 | --- | ---: | ---: |
-| go | 2081 | 339988 |
-| go test | 2731 | 401876 |
-| markdown | 340 | 38057 |
-| shell | 15 | 744 |
-| c | 9 | 560 |
-| yaml | 726 | 159340 |
-| json | 162 | 45284 |
-| game | 156 | 378 |
-| other | 685 | 40908 |
+| go | 2159 | 351027 |
+| go test | 2995 | 429576 |
+| markdown | 377 | 40850 |
+| shell | 17 | 867 |
+| c | 9 | 562 |
+| yaml | 771 | 165353 |
+| json | 162 | 45049 |
+| game | 159 | 384 |
+| other | 737 | 43345 |
 
 ## go tests against go
 
 packages by band.
 
 ```
-fewer           84  ########################################
-about as many   84  ########################################
-twice           84  ########################################
-five times      15  ########
-more            25  ############
+fewer          105  ########################################
+about as many   92  ####################################
+twice           87  ##################################
+five times      15  ######
+more            25  ##########
 ```
 
 ## totals
 
-lines     go 339988, go test 401876, everything 1027135
-files     6905
-packages  292
+lines     go 351027, go test 429576, everything 1077013
+files     7386
+packages  324

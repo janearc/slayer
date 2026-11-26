@@ -14,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/moonlight"
 	"github.com/janearc/slayer/raw"
 	"github.com/janearc/slayer/render/frame"
@@ -25,6 +26,11 @@ import (
 // metres apart, its first corner at 1000.5 e, 9000.25 n, each height
 // (column + 1000 row) / 8, so the ground climbs 125 m a row southward.
 const terrainFixture = "../terrain/testdata/fixture-plain.tif"
+
+const fixtureRecipes = `  recipes:
+    fixture-spruce: {plant: {family: conifer, file: ../manufacture/conifer-profiles.yaml, species: spruce}}
+    fixture-fern: {plant: {family: fern, file: ../manufacture/fern-profiles.yaml, species: fern}}
+`
 
 // a scene in a set file, standing on terrain's fixture: a tree alight
 // with a stone to see it from, a stand of ferns in a band of heights,
@@ -57,10 +63,10 @@ const fixtureScene = `scene:
           standoff_x: 0
           standoff_y: 0
           standoff_z: 2
-  set:
+` + fixtureRecipes + `  set:
     things:
       the tree:
-        kind: spruce
+        recipe: fixture-spruce
         seed: 3
         east: 1050
         north: 8960
@@ -72,7 +78,7 @@ const fixtureScene = `scene:
         north: 8990
     stands:
       ferns:
-        kind: fern
+        recipe: fixture-fern
         count: 12
         seed: 7
         above: 2000
@@ -100,7 +106,26 @@ func onFixture(t *testing.T, was, now string) string {
 			hex.EncodeToString(sum[:])+"\n"), 0o644)
 	os.MkdirAll(filepath.Join(root, "sets"), 0o755)
 	path := filepath.Join(root, "sets", "scene.yaml")
+	models := filepath.Join(root, "manufacture")
+	if err := os.MkdirAll(models, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, family := range []string{"conifer", "fern"} {
+		name, raw, err := manufacture.EmbeddedPlantBook(family)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(models, name), raw, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
 	scene := strings.Replace(fixtureScene, was, now, 1)
+	// Some tests insert another recipe block before the fixture's block.
+	// Merge them rather than emitting a duplicate mapping key.
+	if strings.Count(scene, "  recipes:\n") > 1 {
+		scene = strings.Replace(scene, fixtureRecipes, "", 1)
+		scene = strings.Replace(scene, "  recipes:\n", fixtureRecipes, 1)
+	}
 	os.WriteFile(path, []byte(scene), 0o644)
 	t.Setenv("SLAYER_SHELF", shelf)
 	return path
@@ -269,7 +294,7 @@ func TestEverySetStages(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		read, err := set.Read(filepath.Base(path), source)
+		read, err := set.Read(path, source)
 		if err != nil {
 			t.Errorf("%s: %v", filepath.Base(path), err)
 			continue

@@ -38,7 +38,14 @@ func displayGate(read set.Set, each set.Thing) (manufacture.Kind, string, error)
 	if each.Alight() {
 		return manufacture.Kind{}, "", errBurning
 	}
-	return displayRow(read, each)
+	row, digest, err := displayRow(read, each)
+	if err != nil {
+		return manufacture.Kind{}, "", err
+	}
+	if _, has := each.Scale(); has && manufacture.Deforms(row) {
+		return manufacture.Kind{}, "", fmt.Errorf("scale is not yet supported for deforming geometry")
+	}
+	return row, digest, nil
 }
 
 // displayRow is the construction a placement is made from, with the digest

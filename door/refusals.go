@@ -45,7 +45,7 @@ func (made sessionSource) Refusals(index int) ([]gpu.Refusal, error) {
 func (held assessing) refusals(call pzm.Call, given string) error {
 	drawer := drawing(held)
 	name := filepath.Base(given)
-	run, err := drawer.planned(call, given)
+	run, err := drawer.planned(call, given, false)
 	if err != nil {
 		return fmt.Errorf("%s will not draw: %w", name, err)
 	}

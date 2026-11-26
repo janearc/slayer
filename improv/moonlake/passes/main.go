@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -237,7 +238,22 @@ func main() {
 	if err != nil {
 		fail(err)
 	}
-	base := swapped(string(raw), "the base", []struct{ from, to string }{
+	// Profiles are relative to the source set; generated passes can be in a
+	// different directory, so preserve the referenced book when moving them.
+	profile, err := filepath.Abs(filepath.Join(filepath.Dir(os.Args[1]), "../manufacture/plants/conifers/conifer-profiles.yaml"))
+	if err != nil {
+		fail(err)
+	}
+	out, err := filepath.Abs(os.Args[2])
+	if err != nil {
+		fail(err)
+	}
+	relative, err := filepath.Rel(out, profile)
+	if err != nil {
+		fail(err)
+	}
+	source := strings.ReplaceAll(string(raw), "file: ../manufacture/plants/conifers/conifer-profiles.yaml", "file: "+strconv.Quote(filepath.ToSlash(relative)))
+	base := swapped(source, "the base", []struct{ from, to string }{
 		{"  light: moon\n", "  # a pass: the moon's light off\n  light: none\n"},
 		{"    face: svs-moon-kit-color\n",
 			"    face: svs-moon-kit-color\n    # a pass: the moon's disc off\n    disc: false\n"},
@@ -271,13 +287,13 @@ func main() {
 	// front of the fires, and lightshow hides the fires behind their
 	// mask, so the fire need not be rendered again when they change
 	fire := swapped(base, "the fire",
-		[]struct{ from, to string }{{things, fireRecipe + things + fires}})
+		[]struct{ from, to string }{{"  recipes:\n", fireRecipe}, {things, things + fires}})
 	for _, close := range []string{
-		"      close left:\n        kind: spruce\n        complexity: demo\n" +
+		"      close left:\n        recipe: plant-spruce\n        complexity: demo\n" +
 			"        seed: 51\n        east: 263115.3\n        north: 2148423.9\n",
-		"      close right:\n        kind: spruce\n        complexity: demo\n" +
+		"      close right:\n        recipe: plant-spruce\n        complexity: demo\n" +
 			"        seed: 52\n        east: 263114.1\n        north: 2148414.8\n",
-		"      close edge:\n        kind: spruce\n        complexity: demo\n" +
+		"      close edge:\n        recipe: plant-spruce\n        complexity: demo\n" +
 			"        seed: 53\n        east: 263113.8\n        north: 2148428.7\n",
 	} {
 		fire = swapped(fire, "the fire without the close spruces",
@@ -297,10 +313,10 @@ func main() {
 	// so its pass is the scene moonlit with the disc at 5.45 degrees,
 	// clear of the rim's giants (their tops near 3.75) and the frame's
 	// top (7.1). The sky is black but for it; lightshow takes the sky
-	write(os.Args[2], "nodisc", swapped(string(raw), "the scene without its disc",
+	write(os.Args[2], "nodisc", swapped(source, "the scene without its disc",
 		[]struct{ from, to string }{{"    face: svs-moon-kit-color\n",
 			"    face: svs-moon-kit-color\n    # a pass: the moon's disc off\n    disc: false\n"}}))
-	write(os.Args[2], "disc", swapped(string(raw), "the disc",
+	write(os.Args[2], "disc", swapped(source, "the disc",
 		[]struct{ from, to string }{
 			{"    altitude: 2.3\n", "    # a pass: clear of the rim\n    altitude: 5.45\n"},
 		}))

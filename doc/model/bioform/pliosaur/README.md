@@ -40,14 +40,16 @@ sanity check, not as a fit.
   it at phase zero as the creature `pliosaur`, a long-jawed head reaching out of
   the wall with the tip of the jaw as the spout
   (`manufacture/cities/gargoyle-creatures.yaml`).
-- `PliosaurFresh2` to `PliosaurFresh5`: four further constructions, each a Go
-  function taking a phase, with tests. `PliosaurFresh5` is the last.
-- It is not a manufactory kind. `sets/gargoyle-cornice-rain.yaml` is the set
-  that uses it.
+- `PliosaurContinuousSkin`: the last of four further constructions, formerly
+  named `PliosaurFresh5`. Its family builder lives in
+  `manufacture/animals/vertebrates/reptiles/pliosaurs/continuous.go`. The
+  reptile profile book selects it with the `continuous` study. Earlier
+  studies and their tests remain in Git history.
+- `sets/gargoyle-cornice-rain.yaml` uses the detached-fin gargoyle form.
 
 ## How the last construction is put together
 
-`PliosaurFresh5` is one skin from an axial and head field with four
+`PliosaurContinuousSkin` is one skin from an axial and head field with four
 asymmetric wing fields and smoothly combined fore and hind controls. A
 three-second cycle with a fore and hind offset beats the flippers. The cycle
 is illustrative, and no fluid is simulated. Sixteen separately made teeth are
@@ -65,8 +67,8 @@ flippers move; fore maxima are 0.843 and 0.844 m and hind 0.278 m. The worst
 tooth root is 0.0436 m from its nearest skin vertex, which does not prove
 exact attachment.
 
-Tests: `TestPliosaurFresh5`, `TestPliosaurFresh5WorstEdge`,
-`TestPliosaurFresh5AttachmentsAndSeam`, `TestPliosaurFresh5BoundsAndFourPaddles`.
+Tests: `TestPliosaurContinuousSkin`, `TestPliosaurContinuousSkinWorstEdge`,
+`TestPliosaurContinuousSkinAttachmentsAndSeam`, `TestPliosaurContinuousSkinBoundsAndFourPaddles`.
 A 720 by 480, one-ray side frame with two CPU workers took 1.34 s and 112 MB
 at peak. A compression check of an eight-frame preview film gave 47.17 dB
 average PSNR, which says nothing about smooth motion.

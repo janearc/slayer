@@ -3,10 +3,9 @@ package look
 import (
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 	"time"
-
-	"gopkg.in/yaml.v3"
 )
 
 // Divider starts every look in a looks file, so a file of looks is a stream
@@ -41,11 +40,7 @@ func Render(described Look) string {
 
 // quote is text as one YAML scalar on one line.
 func quote(text string) string {
-	raw, err := yaml.Marshal(text)
-	if err != nil {
-		return `"unprintable"`
-	}
-	return strings.Join(strings.Fields(strings.TrimSpace(string(raw))), " ")
+	return strconv.Quote(text)
 }
 
 // point is three coordinates as a flow sequence, each to the hundredth.

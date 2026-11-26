@@ -54,7 +54,10 @@ type Bridge struct {
 	Strands           int
 	// Bare says the bridge has no lots on its deck and a deck as wide as
 	// a road, as a bridge that carries traffic and not a district does.
-	Bare    bool
+	Bare bool
+	// Hub says the bridge is a tower in the middle with an arm out of each
+	// face and both decks' roads running through it (see hubDesign).
+	Hub     bool
 	seed    Seed
 	drawing *drawer
 	pylons  []*Tower
@@ -75,6 +78,18 @@ func NewBridge(seed Seed, irregularity Irregularity, span float64,
 func NewBareBridge(seed Seed, irregularity Irregularity,
 	span float64) (*Bridge, error) {
 	return newBridge(seed, irregularity, span, 0, true)
+}
+
+// NewHubBridge draws a bridge as NewBareBridge does, and makes it a hub:
+// a tower in the middle that the decks run through, with an arm out of
+// each face.
+func NewHubBridge(seed Seed, irregularity Irregularity,
+	span float64) (*Bridge, error) {
+	bridge, err := newBridge(seed, irregularity, span, 0, true)
+	if bridge != nil {
+		bridge.Hub = true
+	}
+	return bridge, err
 }
 
 // newBridge is the bridge of either kind, bare or built on.

@@ -23,6 +23,7 @@ import (
 
 	"github.com/janearc/slayer/diskcache"
 	"github.com/janearc/slayer/job"
+	"github.com/janearc/slayer/maths/strategies/scrooge"
 )
 
 // pictureKind keeps finished stills. Its cap is picked by the disk
@@ -56,6 +57,11 @@ func pictureKey(wanted job.Job) diskcache.Key {
 // stillKey is a key of a job's still with the sources list nearest its
 // set laid on it, or refused where the job is not a set's still.
 func stillKey(key diskcache.Key, wanted job.Job) diskcache.Key {
+	mode := "off"
+	if scrooge.Asked() {
+		mode = "on"
+	}
+	key = key.Text("scrooge", mode)
 	set, isSet := wanted.Scene().Set()
 	if !isSet || !wanted.Clock().Still() {
 		return key.Text("kept", "only a set's still").

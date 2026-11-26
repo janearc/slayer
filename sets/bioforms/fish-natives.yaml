@@ -1,7 +1,7 @@
 # Five fish native to the waters of other sets, each from the side in
 # its skin at a phase of its stroke: a convict tang, a dusky grouper, a
 # chromis, a perch and a flathead grey mullet. Their sources are in
-# manufacture/fish.yaml.
+# manufacture/animals/vertebrates/fishes/fish.yaml.
 #
 # the frame. places are metres, x east, y north, z up. the fish stand
 # twenty metres apart along the east, in open air, lit by the sun through
@@ -18,10 +18,16 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 160, altitude: 40}
+  recipes:
+    profile-convict-tang-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: convict-tang, pose: swim}}
+    profile-dusky-grouper-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: dusky-grouper, pose: swim}}
+    profile-mediterranean-chromis-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: mediterranean-chromis, pose: swim}}
+    profile-european-perch-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: european-perch, pose: swim}}
+    profile-flathead-grey-mullet-swim: {animal: {family: fish, file: ../../manufacture/animals/vertebrates/fishes/fish.yaml, species: flathead-grey-mullet, pose: swim}}
   set:
     things:
       tang:
-        kind: convict-tang
+        recipe: profile-convict-tang-swim
         seed: 21
         position:
           east: {value: 0, unit: m}
@@ -29,7 +35,7 @@ scene:
           up: {value: 0, unit: m}
         heading: {value: 0, unit: deg}
       grouper:
-        kind: dusky-grouper
+        recipe: profile-dusky-grouper-swim
         seed: 22
         position:
           east: {value: 20, unit: m}
@@ -37,7 +43,7 @@ scene:
           up: {value: 0, unit: m}
         heading: {value: 0, unit: deg}
       chromis:
-        kind: mediterranean-chromis
+        recipe: profile-mediterranean-chromis-swim
         seed: 23
         position:
           east: {value: 40, unit: m}
@@ -45,7 +51,7 @@ scene:
           up: {value: 0, unit: m}
         heading: {value: 0, unit: deg}
       perch:
-        kind: european-perch
+        recipe: profile-european-perch-swim
         seed: 24
         position:
           east: {value: 60, unit: m}
@@ -53,7 +59,7 @@ scene:
           up: {value: 0, unit: m}
         heading: {value: 0, unit: deg}
       mullet:
-        kind: flathead-grey-mullet
+        recipe: profile-flathead-grey-mullet-swim
         seed: 25
         position:
           east: {value: 80, unit: m}

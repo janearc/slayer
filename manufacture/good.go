@@ -2,6 +2,7 @@ package manufacture
 
 import (
 	"errors"
+	"maps"
 	"sort"
 	"time"
 
@@ -245,10 +246,10 @@ func newGood(shape form, fine cut) (good, error) {
 // grow is a thing grown from a seed to a size, or why it cannot be: a
 // spruce, a fern.
 func grow(grown growth, to size, from seed) (good, error) {
-	if grown.stem.pieces < 1 || !from.made() {
+	if grown.Stem.Pieces < 1 || !from.made() {
 		return good{}, errGood
 	}
-	parts, err := grown.parts(place{size: to}, from)
+	parts, err := grownParts(grown, place{Size: to}, from)
 	if err != nil {
 		return good{}, err
 	}
@@ -295,6 +296,15 @@ func (made good) faces() int {
 // nobody gave a look, and whatever slayer's mesh refuses. a matter with a
 // rounded part in it is shaded smooth by shadings, its other faces flat.
 func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
+	return made.thingsWithTouching(at, true)
+}
+
+// thingsStrict keeps the original one-mesh-per-material validation policy.
+func (made good) thingsStrict(at maths.Subspace) ([]thing.Thing, error) {
+	return made.thingsWithTouching(at, false)
+}
+
+func (made good) thingsWithTouching(at maths.Subspace, separate bool) ([]thing.Thing, error) {
 	if !shape.ValidPlacement(at) {
 		return nil, errors.New("manufacture: invalid placement")
 	}
@@ -317,14 +327,81 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
 			continue
 		}
 		skin := skins[of]
-		mesh, err := skin.shaded(shadings[of])
+		solid, err := skin.shaded(shadings[of])
 		if err != nil {
-			return nil, err
+			if !separate {
+				return nil, err
+			}
+			separate, ok := made.separateParts(of, shadings[of], look, at)
+			if !ok {
+				return nil, err
+			}
+			things = append(things, separate...)
+			continue
 		}
 		things = append(things, thing.Thing{
-			Shape: mesh, Material: look,
+			Shape: solid, Material: look,
 			Motion: thing.Still(at),
 		})
 	}
 	return things, nil
+}
+
+// separateParts preserves independently valid surfaces as separate things
+// when their combined edges coincide. Their shared placement retains local
+// material coordinates; no invalid constituent is accepted.
+func (made good) separateParts(of slot, normals [][3]maths.Vec,
+	look *thing.Material, at maths.Subspace) ([]thing.Thing, bool) {
+	var things []thing.Thing
+	offset := 0
+	for _, one := range made.parts {
+		if one.of != of {
+			continue
+		}
+		skin := one.skin()
+		if len(skin) == 0 {
+			continue
+		}
+		var each [][3]maths.Vec
+		if normals != nil {
+			if offset > len(normals) || len(skin) > len(normals)-offset {
+				return nil, false
+			}
+			each = normals[offset : offset+len(skin)]
+		}
+		offset += len(skin)
+		mesh, err := skin.shaded(each)
+		if err != nil {
+			return nil, false
+		}
+		things = append(things, thing.Thing{Shape: mesh, Material: look, Motion: thing.Still(at)})
+	}
+	return things, len(things) >= 2 && (normals == nil || offset == len(normals))
+}
+
+// withMeshGroups validates each material before installing any groups.
+// Slot order keeps body errors ahead of foliage errors.
+func (made good) withMeshGroups(members map[slot][]shape.MeshMember) (good, error) {
+	order := make([]int, 0, len(members))
+	for of := range members {
+		order = append(order, int(of))
+	}
+	sort.Ints(order)
+	groups := make(map[slot]*shape.MeshGroup, len(members))
+	for _, index := range order {
+		of := slot(index)
+		group, err := shape.NewMeshGroup(members[of])
+		if err != nil {
+			return good{}, err
+		}
+		groups[of] = group
+	}
+	if made.groupParts != nil {
+		made.groupParts = maps.Clone(made.groupParts)
+		for of := range groups {
+			made.groupParts[of] = len(members[of])
+		}
+	}
+	made.groups = groups
+	return made, nil
 }

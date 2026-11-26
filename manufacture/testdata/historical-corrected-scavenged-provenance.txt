@@ -1,0 +1,41 @@
+Corrected historical scavenged-cluster captures, 2026-11-24
+
+Unmodified f8ddbbbba211d5cb4ec6ca0a1775303ff6fce4b4 did not produce
+these three rows: its Things call refused the seed-11 hull, quick and demo
+assemblies because a combined mesh had an edge with four adjacent faces.
+The original failure logs are in history/historical-public-errors/. Trailing
+spaces on their empty stdout lines were removed; the error text is unchanged.
+
+The rows in historical-corrected-scavenged-arm64.txt were captured instead
+from f8 plus the touching-part fallback, committed as 567e988f in the
+isolated historical reference checkout. That commit changes only
+manufacture/good.go. They are corrected-reference captures; they are not
+successful output of unmodified f8.
+
+The same three rows were independently captured and matched on the b74
+prototype with the same fix, commit 41c4b3ac. The production version of the
+fix was committed as 26f69179. The capture ran on Darwin arm64, Go 1.27.3,
+GOWORK=off and GOMAXPROCS=2. The selected public producer SHA-256 was
+3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094.
+
+Reconstructing the corrected historical source
+
+The isolated commit is not needed to reconstruct its source. From a checkout
+containing f8ddbbbba211d5cb4ec6ca0a1775303ff6fce4b4 and this evidence, run:
+
+  mkdir -p /tmp/scavenged-f8/manufacture
+  git show f8ddbbbba211d5cb4ec6ca0a1775303ff6fce4b4:manufacture/good.go > /tmp/scavenged-f8/manufacture/good.go
+  cp manufacture/testdata/historical-scavenged-touching-parts.patch /tmp/scavenged-f8/fix.patch
+  (cd /tmp/scavenged-f8 && git apply --no-index --unidiff-zero fix.patch)
+  shasum -a 256 /tmp/scavenged-f8/manufacture/good.go
+
+The zero-context patch changes only manufacture/good.go. Its reconstructed
+file was compared byte for byte with good.go from 567e988f. The SHA-256
+values below identify the inputs and exact corrected source:
+
+  f8 good.go       483e7984252e12831cf285e027426afc14174930efcf89568c93d38dc46bb4bd
+  correction patch 1d5b3101ed51a07893dc77fadaa71f9097e2aa618c0bd32bcb82795c36d00ded
+  corrected good.go fdabbab096eca5b70bb5d36687082e5a415b61d5983dca5515d95b885f882245
+
+The original selected producer is reconstructed as documented in
+historical-selected-producer-provenance.txt.

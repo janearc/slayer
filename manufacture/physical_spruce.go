@@ -1,11 +1,13 @@
 package manufacture
 
+import "github.com/janearc/slayer/manufacture/plants/conifers"
+
 // physicalSpruce keeps the legacy whorled architecture as a reference while
 // named factory specimens use fixed-size, recursively branched needle shoots.
 type physicalSpruce struct{ legacy conifer }
 
 // spruceShootStyle is the third physical shoot family, after redwood/sequoia.
-const spruceShootStyle = 3
+const spruceShootStyle = conifers.SpruceStyle
 
 // made supplies the named factory's ordinary quick specimen.
 func (row physicalSpruce) made(from seed) (good, error) { return row.madeAt(from, "quick") }
@@ -22,14 +24,14 @@ func (row physicalSpruce) madeAt(from seed, detail string) (good, error) {
 		return good{}, err
 	}
 	made = row.terminals(made)
-	return recursiveFoliage(made, from, spruceShootStyle, detail)
+	return recursiveFoliageWith(made, from, spruceShootStyle, detail, row.legacy.shootConfig)
 }
 
 // terminals identifies the leaf-bearing axes of a spruce without branchlets.
 // Norway already marks its hanging branchlet foliage and leaves major sleeves
 // unmarked; ordinary spruce carries foliage on the main branch segments.
 func (row physicalSpruce) terminals(made good) good {
-	if row.legacy.grows.shoots != nil {
+	if row.legacy.Grows.Shoots != nil {
 		return made
 	}
 	for index := range made.parts {

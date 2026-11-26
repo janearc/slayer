@@ -20,11 +20,15 @@ slayer draw JOB draws a job here and writes what it asks for. JOB is a
 job file (job-v1), a sequence plan (sequence-v1), or a set file, which is
 drawn as a still with the set's own defaults.
 
-The flags stand over the job: --out, --width, --height, --rays, --at,
+The flags stand over the job: --out, --width, --height, --region, --rays, --spp, --at,
 --camera, --renderer and --quality, and the job's flags and shortcuts,
 each on or off: --vibes, --fastlight, --lamp-store and --sky-looks.
 --dry-run prints the job as it will
 be drawn and each file it would write, and writes nothing.
+
+--spp is an exact total per pixel and stands over a job's rays; --rays
+counts per side and stands over samples. Give only one of the two flags.
+Exact samples support CPU and software-GPU stills without a rig or region.
 
 --fetch-terrain fetches the datasets the set names (its terrain, and
 its moon's face) that are not on the shelf, SLAYER_SHELF, checks them
@@ -91,7 +95,7 @@ func (drawer drawing) draw(call pzm.Call) error {
 	if !filepath.IsAbs(given) {
 		given = filepath.Join(drawer.env.directory, given)
 	}
-	run, err := drawer.planned(call, given)
+	run, err := drawer.planned(call, given, true)
 	if err == nil {
 		run, err = run.withPlaces(call, drawer.env.directory)
 	}
@@ -100,6 +104,9 @@ func (drawer drawing) draw(call pzm.Call) error {
 	}
 	if call.DryRun() {
 		return dryDraw(call.Out(), run, way, tends)
+	}
+	if _, region := run.wanted.Film().Region(); region && tends {
+		return errors.New("region: terrain tending is not supported with a region draw")
 	}
 	if tends {
 		if err := tended(call.Out(), way, run.wanted); err != nil {
@@ -134,6 +141,9 @@ func declareDraw(made *pzm.Tool, drawer drawing) {
 	draws := verb.NewFacts(writes, verb.Changes, verb.Outside,
 		verb.NoOne, verb.FullGPU)
 	flags := append(jobFlags(),
+		pzm.Value("source-path", verb.NoShort, "original document path for relative inputs in a frozen copy"),
+		pzm.List("region", verb.NoShort,
+			"a rectangle of the full picture, over the job's"),
 		pzm.Switch(replaceFlag, verb.NoShort,
 			"draw a still over one another job drew"),
 		pzm.Switch(keepFlag, verb.NoShort,
@@ -155,11 +165,16 @@ func declareDraw(made *pzm.Tool, drawer drawing) {
 // flags laid over it, its keys and places, and the refusals they make;
 // draw's own switches are the caller's to set. draw runs it; assess
 // makes its refusals and draws nothing.
-func (drawer drawing) planned(call pzm.Call, given string) (runner,
+func (drawer drawing) planned(call pzm.Call, given string, regionFlag bool) (runner,
 	error) {
-	wanted, err := drawer.job(call, given)
+	wanted, err := drawer.job(call, given, regionFlag)
 	if err != nil {
 		return runner{}, err
+	}
+	if !regionFlag {
+		if err := refuseRegionOutput(wanted); err != nil {
+			return runner{}, err
+		}
 	}
 	drawn := keysOf(wanted, drawer.env.build.drawnBy())
 	at, err := placesOf(placing{wanted: wanted, given: given,
@@ -175,6 +190,14 @@ func (drawer drawing) planned(call pzm.Call, given string) (runner,
 		given: given, at: at, keys: drawn, env: drawer.env}, nil
 }
 
+// refuseRegionOutput keeps unverified development and overlays from being written.
+func refuseRegionOutput(wanted job.Job) error {
+	if _, said := wanted.Film().Region(); said {
+		return errors.New("region: output is not yet supported while development and overlays are being checked")
+	}
+	return nil
+}
+
 // draw's own switches: to draw a still over one another job drew in the
 // same folder, and to keep the working frames of a film that writes a
 // movie and no frames.
@@ -184,13 +207,34 @@ const (
 )
 
 // job is the file's job with the call's flags laid over it.
-func (drawer drawing) job(call pzm.Call, given string) (job.Job,
+func (drawer drawing) job(call pzm.Call, given string, regionFlag bool) (job.Job,
 	error) {
-	wanted, err := jobOf(given)
+	var wanted job.Job
+	var err error
+	if regionFlag && call.Given("source-path") {
+		original := call.Value("source-path")
+		if original == "" {
+			return job.Job{}, errors.New("--source-path needs the original document path")
+		}
+		if !filepath.IsAbs(original) {
+			original = filepath.Join(drawer.env.directory, original)
+		}
+		wanted, err = jobOfSource(given, original)
+	} else {
+		wanted, err = jobOf(given)
+	}
 	if err != nil {
 		return job.Job{}, err
 	}
 	laid, err := overridesOf(call, drawer.env.directory)
+	if err == nil && regionFlag && call.Given("region") {
+		value := call.List("region")
+		made, ok := region(value)
+		if !ok {
+			return job.Job{}, fmt.Errorf("--region takes left,top,width,height in pixels, not %v", value)
+		}
+		laid = append(laid, made)
+	}
 	if err != nil || len(laid) == nothing {
 		return wanted, err
 	}

@@ -137,7 +137,7 @@ func TestNamedFireRecipeAndDaylightRefusals(t *testing.T) {
 	if _, err := stage.putFireRecipe("absent", 1, 0, maths.Vec{}, ""); err == nil || !strings.Contains(err.Error(), "named recipe") {
 		t.Fatalf("missing recipe: %v", err)
 	}
-	read, err := set.Read("nonfire.yaml", []byte(strings.Replace(fixtureScene, "  terrain:", "  recipes:\n    solid: {kind: can}\n  terrain:", 1)))
+	read, err := set.Read("nonfire.yaml", []byte(strings.Replace(fixtureScene, "  recipes:\n", "  recipes:\n    solid: {kind: can}\n", 1)))
 	if err != nil {
 		t.Fatal(err)
 	}

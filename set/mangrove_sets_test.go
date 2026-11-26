@@ -42,10 +42,12 @@ func TestMangroveStudyStandsTwelveTreesOfFiveKinds(t *testing.T) {
 	}
 	seeds, kinds := map[uint64]bool{}, map[string]bool{}
 	for _, each := range things {
-		if !mangroveKinds[each.Kind()] {
-			t.Fatalf("%s is a %s, not a mangrove", each.Name(), each.Kind())
+		recipe, found := made.Recipe(each.Recipe())
+		species := recipe.PlantSpecies()
+		if !found || !mangroveKinds[species] {
+			t.Fatalf("%s is a %s, not a mangrove", each.Name(), species)
 		}
-		seeds[each.Seed()], kinds[each.Kind()] = true, true
+		seeds[each.Seed()], kinds[species] = true, true
 	}
 	if len(seeds) != len(things) || len(kinds) != len(mangroveKinds) {
 		t.Fatalf("%d seeds and %d kinds among %d trees", len(seeds), len(kinds),
@@ -60,17 +62,19 @@ func TestMangroveShoreStandsEachKindInItsBandOverTheSea(t *testing.T) {
 	}
 	seeds, total := map[uint64]bool{}, 0
 	for _, each := range made.Stands() {
-		if !mangroveKinds[each.Kind()] {
-			t.Fatalf("%s stands %s, not a mangrove", each.Name(), each.Kind())
+		recipe, found := made.Recipe(each.Recipe())
+		species := recipe.PlantSpecies()
+		if !found || !mangroveKinds[species] {
+			t.Fatalf("%s stands %s, not a mangrove", each.Name(), species)
 		}
 		above, below := each.Band()
 		if above < 0 || below <= above {
 			t.Fatalf("%s grows between %v and %v m", each.Name(), above, below)
 		}
-		if each.Kind() == "sonneratia-apetala" && above < 1 {
+		if species == "sonneratia-apetala" && above < 1 {
 			t.Fatalf("%s stands in the native band", each.Name())
 		}
-		if each.Kind() != "sonneratia-apetala" && below > 1 {
+		if species != "sonneratia-apetala" && below > 1 {
 			t.Fatalf("%s stands in the planted band", each.Name())
 		}
 		count, seed := each.Count()
@@ -96,15 +100,15 @@ func TestMangroveShoreRefusesABandThatIsNowhere(t *testing.T) {
 
 func TestMangroveShoreRefusesAKindThatIsNotOne(t *testing.T) {
 	_, err := readMangroveSet(t, "mangrove-shore.yaml", func(text string) string {
-		return strings.Replace(text, "kind: kandelia-obovata",
-			"kind: rhizophora-apiculata", 1)
+		return strings.Replace(text, "species: kandelia-obovata",
+			"species: rhizophora-apiculata", 1)
 	})
 	if err == nil {
 		t.Fatal("a mangrove no profile grows was read")
 	}
 }
 
-func TestSchemasNameEveryMangroveAndTheirCopiesAreLevel(t *testing.T) {
+func TestSchemasAcceptProfileSpeciesAndTheirCopiesAreLevel(t *testing.T) {
 	for _, name := range []string{"ecosystem.schema.json",
 		"ecosystem-v2.schema.json"} {
 		own, err := os.ReadFile(name)
@@ -119,10 +123,13 @@ func TestSchemasNameEveryMangroveAndTheirCopiesAreLevel(t *testing.T) {
 		if !bytes.Equal(own, copied) {
 			t.Fatalf("ferruccio's %s is not the set's", name)
 		}
-		for kind := range mangroveKinds {
-			if !bytes.Contains(own, []byte("\""+kind+"\"")) {
-				t.Fatalf("%s does not name %s", name, kind)
+		for species := range mangroveKinds {
+			if bytes.Contains(own, []byte("\""+species+"\"")) {
+				t.Fatalf("%s still registers %s as a kind", name, species)
 			}
+		}
+		if !bytes.Contains(own, []byte("\"species\"")) {
+			t.Fatalf("%s has no profile species field", name)
 		}
 	}
 }

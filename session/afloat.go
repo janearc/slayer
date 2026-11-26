@@ -77,10 +77,10 @@ type craftPart struct {
 
 // recipeKinds are the kinds a craft in space may be made from a recipe
 // of: the observatory, the tower, the bridge, the street and the lashed
-// street, the village, and the four signs that stand on their own, which
+// street, the village, a composition, and the four signs that stand on their own, which
 // a recipe can give a script.
 var recipeKinds = []string{"space-observatory", "tower", "bridge", "street",
-	"lashed-street", manufacture.VillageKind, "sign-roof", "sign-screen",
+	"lashed-street", manufacture.VillageKind, "composition", "sign-roof", "sign-screen",
 	"sign-blade", "sign-awning"}
 
 // craftParts are the keys of a thing a scene in space refuses.
@@ -123,9 +123,11 @@ func (stage *staging) afloat(read set.Set) error {
 		}
 	}
 	for _, each := range read.Stands() {
+		start := len(stage.world.Things)
 		if err := stage.afloatStand(each); err != nil {
 			return fmt.Errorf("%s: %s: %w", stage.given.set, each.Name(), err)
 		}
+		stage.recordAuthor(start, "scene.set.stands", each.Name())
 	}
 	return nil
 }
@@ -251,6 +253,11 @@ func (stage *staging) sunned(read set.Set) error {
 // one; or refuses a key of it the stage does not draw.
 func (stage *staging) craft(each set.Thing) error {
 	for _, part := range craftParts {
+		if part.name == "recipe" && each.Recipe() != "" {
+			if recipe, found := stage.recipes.Recipe(each.Recipe()); found && (recipe.IsPlant() || recipe.IsAnimal() || recipe.IsAlga() || recipe.HasTreeProfiles()) {
+				continue
+			}
+		}
 		if part.says(each) {
 			return fmt.Errorf("a craft in space says %s, which is not "+
 				"drawn there", part.name)
@@ -260,9 +267,18 @@ func (stage *staging) craft(each set.Thing) error {
 	if err != nil {
 		return err
 	}
+	if scale, has := each.Scale(); has {
+		if one.deform != nil {
+			return fmt.Errorf("scale is not yet supported for deforming geometry")
+		}
+		if stage.radii == nil {
+			stage.radii = map[string]float64{}
+		}
+		stage.radii[each.Name()] = horizontalRadius(one.bounds) * scale
+	}
 	at := afloatAt(each)
 	stage.places[each.Name()] = at.Origin
-	stage.note(each.Name(), each.Kind(), at.Origin)
+	stage.note(each.Name(), stage.reportedKind(each.Kind(), each.Recipe()), at.Origin)
 	if _, spinning := each.PartSpin(); spinning && one.deform != nil {
 		return fmt.Errorf("deforming geometry cannot use part-spin")
 	}
@@ -270,7 +286,11 @@ func (stage *staging) craft(each set.Thing) error {
 	if err := stage.add(one, each.Kind(), at, each.Seed(), false); err != nil {
 		return err
 	}
-	return stage.partSpin(start, each)
+	if err := stage.partSpin(start, each); err != nil {
+		return err
+	}
+	stage.recordThingAuthor(start, each.Name())
+	return nil
 }
 
 // errLevelledCluster is the refusal of a cluster or a superblock that is

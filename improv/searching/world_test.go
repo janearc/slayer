@@ -400,3 +400,20 @@ func TestUpdateRefusesALaserThatCannotBePlaced(t *testing.T) {
 		t.Fatal("a beam with no position was accepted")
 	}
 }
+
+func TestSceneryBuildsCheckedPlantSpecies(t *testing.T) {
+	s := &set{World: thing.NewWorld(), prototypes: map[string][]thing.Thing{}}
+	for _, name := range []string{"coast-redwood", "valley-oak", "chaparral-brush", "manzanita"} {
+		if err := s.scenery(name, 77, maths.Vec{}, 1); err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		key := name + "/77"
+		if len(s.prototypes[key]) == 0 {
+			t.Fatalf("%s has no retained prototype", name)
+		}
+		count := len(s.prototypes)
+		if err := s.scenery(name, 77, maths.XAxis, 2); err != nil || len(s.prototypes) != count {
+			t.Fatalf("%s did not reuse its seeded prototype: %v", name, err)
+		}
+	}
+}

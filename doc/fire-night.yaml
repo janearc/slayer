@@ -29,6 +29,7 @@ scene:
     down: 192
     step: 2
   recipes:
+    plant-coast-redwood: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: coast-redwood}}
     wood fire:
       kind: fire
       layout:
@@ -228,7 +229,7 @@ scene:
         north: 2148748
     stands:
       the grove:
-        kind: coast-redwood
+        recipe: plant-coast-redwood
         complexity: clumps
         count: 500
         seed: 11

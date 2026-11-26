@@ -31,7 +31,7 @@ type resourceRow struct {
 // resources visits every selected constructor at every advertised detail.
 // JSON lines are emitted immediately, so one failed model cannot hide others.
 func resources(call pzm.Call) error {
-	menu, err := readMenu()
+	menu, err := menuForCall(call)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func resources(call pzm.Call) error {
 		for _, detail := range entry.Details {
 			// Release the preceding specimen before constructing the next.
 			runtime.GC()
-			row := measureResources(entry.Kind, detail)
+			row := measureEntryResources(entry, detail)
 			row.Producer = by
 			if row.Error != "" {
 				failed++
@@ -68,11 +68,15 @@ func resources(call pzm.Call) error {
 // measureResources builds one kind at the given detail and records the
 // construction time and the memory it allocated.
 func measureResources(name, detail string) resourceRow {
-	row := resourceRow{Kind: name, Detail: detail, Seed: 1}
+	return measureEntryResources(entry{Kind: name}, detail)
+}
+
+func measureEntryResources(entry entry, detail string) resourceRow {
+	row := resourceRow{Kind: entry.Kind, Detail: detail, Seed: 1}
 	var before, after runtime.MemStats
 	runtime.ReadMemStats(&before)
 	start := time.Now()
-	kind, err := manufacture.KindNamed(name)
+	kind, err := entry.kind()
 	if err != nil {
 		row.Error = err.Error()
 		return row

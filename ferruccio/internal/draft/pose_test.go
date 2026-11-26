@@ -109,6 +109,25 @@ func TestChangePoseMovesOnlySelectedObjectAndRestoresFromText(t *testing.T) {
 	}
 }
 
+func TestGroundedPoseKeepsHeightRelativeAndOffersScale(t *testing.T) {
+	source := strings.Replace(poseSource, "setting: space", "setting: ground", 1)
+	document := poseDraft(t, source)
+	objects, err := document.Objects()
+	if err != nil || len(objects) != 3 || !objects[0].Grounded() || !objects[0].ScaleEditable() {
+		t.Fatalf("ground placements = %+v, %v", objects, err)
+	}
+	if err := document.ChangePose(PoseChange{ID: objects[0].ID(), East: 2, North: -3, Heading: 5, LengthUnit: "m", AngleUnit: "deg"}); err != nil {
+		t.Fatal(err)
+	}
+	changed, err := document.Objects()
+	if err != nil || changed[0].Position() != [3]float64{32, 37, 50} {
+		t.Fatalf("ground move = %+v, %v", changed, err)
+	}
+	if !strings.Contains(document.Text(), "Keep the east note.") {
+		t.Fatal("ground move lost a source comment")
+	}
+}
+
 func TestChangePoseImportsAndOmittedHeading(t *testing.T) {
 	document := poseDraft(t, poseSource)
 	objects, _ := document.Objects()
@@ -183,8 +202,8 @@ func TestObjectsRefuseUnsupportedAndInvalidUnits(t *testing.T) {
 	}
 	terrain := poseDraft(t, strings.Replace(poseSource, "setting: space", "setting: ground", 1))
 	objects, err := terrain.Objects()
-	if err != nil || len(objects) != 1 || objects[0].Kind() != "import" {
-		t.Fatal("interpreted terrain height as up", objects, err)
+	if err != nil || len(objects) != 3 || !objects[0].Grounded() || objects[0].Position()[2] != 50 || objects[2].Kind() != "import" {
+		t.Fatal("lost terrain-relative height or import identity", objects, err)
 	}
 	scaled := poseDraft(t, strings.Replace(poseSource, "  world:\n", "  world:\n    unit: 2\n", 1))
 	objects, err = scaled.Objects()
@@ -218,6 +237,54 @@ func TestPoseAdditionRefusesOverflowAndKeepsSource(t *testing.T) {
 	err = document.ChangePose(PoseChange{ID: objects[0].ID(), Up: 1e308, LengthUnit: "m", AngleUnit: "deg"})
 	if err == nil || document.Text() != source {
 		t.Fatal("overflow changed source", err)
+	}
+}
+
+func TestSetGeneratedHeadingAuthorsZeroAndPreservesOtherSource(t *testing.T) {
+	source := strings.Replace(poseSource, "setting: space", "setting: ground", 1)
+	source = strings.Replace(source, "        heading: {value: 60, unit: deg}\n", "", 1)
+	document := poseDraft(t, source)
+	if err := document.SetGeneratedHeading("scene.set.things/craft", 0); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(document.Text(), "# Keep the east note.") || !strings.Contains(document.Text(), "kind: webb") {
+		t.Fatal("heading edit lost unrelated source")
+	}
+	objects, err := document.Objects()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, object := range objects {
+		if object.ID() == "scene.set.things/craft" {
+			heading, said := object.Heading()
+			if !said || heading != 0 {
+				t.Fatalf("heading = %v, authored %v", heading, said)
+			}
+			return
+		}
+	}
+	t.Fatal("authored object missing")
+}
+
+func TestSetGeneratedHeadingRefusesExistingOrInvalid(t *testing.T) {
+	document := poseDraft(t, poseSource)
+	for _, sample := range []struct {
+		id      string
+		degrees float64
+	}{
+		{"scene.set.things/craft", 10},
+		{"scene.set.things/missing", 0},
+		{"scene.set.things/craft", math.NaN()},
+	} {
+		if err := document.SetGeneratedHeading(sample.id, sample.degrees); err == nil || document.Text() != poseSource {
+			t.Fatal("invalid edit changed source", err)
+		}
+	}
+	ground := strings.Replace(poseSource, "setting: space", "setting: ground", 1)
+	ground = strings.Replace(ground, "        heading: {value: 60, unit: deg}\n", "", 1)
+	document = poseDraft(t, ground)
+	if err := document.SetGeneratedHeading("scene.set.things/craft", math.NaN()); err == nil || document.Text() != ground {
+		t.Fatal("non-finite generated heading changed source", err)
 	}
 }
 
@@ -264,5 +331,40 @@ func TestChangePoseKeepsSupportedSignedSpaceCoordinates(t *testing.T) {
 	after, err := document.Objects()
 	if err != nil || after[0].Position() != [3]float64{-10, -10, 50} {
 		t.Fatal("signed native pose lost", after, err)
+	}
+}
+
+func TestImplicitV2GroundExposesAuthoredPlacements(t *testing.T) {
+	source := strings.Replace(poseSource, "  setting: space\n", "", 1)
+	document := poseDraft(t, source)
+	if !document.GroundSetting() {
+		t.Fatal("v2 default terrain not recognized")
+	}
+	objects, err := document.Objects()
+	if err != nil || len(objects) != 3 || !objects[0].Grounded() || !objects[0].ScaleEditable() {
+		t.Fatalf("default terrain objects %+v: %v", objects, err)
+	}
+	if err := document.ChangePose(PoseChange{ID: objects[0].ID(), East: 1, LengthUnit: "m", AngleUnit: "deg"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := document.AddKindThing("second-ground", "yurt", 3, [3]float64{10, 20, 0}); err != nil {
+		t.Fatal(err)
+	}
+	objects, err = document.Objects()
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, one := range objects {
+		if one.Name() == "second-ground" {
+			heading, said := one.Heading()
+			if !one.Grounded() || !said || heading != 0 {
+				t.Fatal("new default-terrain object has wrong placement semantics")
+			}
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("default-terrain addition missing")
 	}
 }

@@ -16,9 +16,11 @@ models.
 - [spruce](#spruce): a whorled conifer with draft recursive needle shoots.
 - [norway](#norway): a taller spruce with hanging branchlets.
 - `coast-redwood`: an authored 18 to 42 m conifer with flared bark
-  and flat sprays, [construction row](../manufacture/redwoods.go).
+  and flat sprays, with dimensions in the checked
+  [conifer profiles](../manufacture/plants/conifers/conifer-profiles.yaml).
 - `giant-sequoia`: an authored 20 to 45 m conifer with a thicker
-  flared trunk and scale-like detail, in the same construction file.
+  flared trunk and scale-like detail, in the same profile book. Both use
+  the shared [conifer constructor](../manufacture/conifer_profiles.go).
 - `coast-redwood-shoot` and `giant-sequoia-shoot`: the actual reusable
   foliage specimens, exposed for close views. Their recursive rules,
   published leaf lengths and authored choices are recorded in

@@ -59,6 +59,9 @@ func ReadScenePlan(path string) (ScenePlan, job.Job, error) {
 // PlateEvery > 1 is an authored approximation even with a fixed camera:
 // moving geometry and its lighting remain frozen until the next refresh.
 func (plan ScenePlan) Validate(wanted job.Job) error {
+	if _, said := wanted.Film().Samples(); said {
+		return fmt.Errorf("composite scene: exact samples are not supported")
+	}
 	if plan.Version != 1 || plan.From < 0 || plan.To <= plan.From || plan.To > wanted.Clock().Frames() || plan.PlateEvery < 1 || plan.Rays < 1 || plan.Rays > 4 || (plan.Scale != 1 && plan.Scale != 2 && plan.Scale != 4) {
 		return fmt.Errorf("composite scene: invalid range, version, plate interval, scale or rays")
 	}

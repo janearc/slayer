@@ -51,7 +51,8 @@ func readLaserContract(test *testing.T) laserContract {
 
 // laserSources exercises both the opt-in schema and the legacy domain reader.
 func laserSources() []string {
-	raw := string(laserFixture)
+	// Most callers read altered fixtures under a synthetic name in set/.
+	raw := strings.ReplaceAll(string(laserFixture), "../../manufacture/", "../manufacture/")
 	legacy := strings.ReplaceAll(raw, "$schema: "+set.EcosystemSchema+"\n", "")
 	return []string{raw, legacy}
 }

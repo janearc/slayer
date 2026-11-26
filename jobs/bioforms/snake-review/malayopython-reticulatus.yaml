@@ -1,0 +1,6 @@
+# Select camera full or head with --camera; Azazel supplies a fresh --out.
+"$schema": https://github.com/janearc/slayer/schemas/job-v1.json
+scene: {set: ../../../sets/bioforms/snake-review/malayopython-reticulatus.yaml}
+renderer: gpu
+film: {width: 640, height: 360, rays: 2}
+outputs: {picture: ../../../out/snake-review/malayopython-reticulatus.png}

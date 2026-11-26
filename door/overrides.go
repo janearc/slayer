@@ -2,6 +2,7 @@ package door
 
 import (
 	"fmt"
+	"image"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -25,6 +26,28 @@ type override struct {
 // against the working directory, and says whether the value could be
 // read.
 type reader func(value, directory string) (job.Override, bool)
+
+// region reads a rectangle in full-picture pixel coordinates.
+func region(parts []string) (job.Override, bool) {
+	if len(parts) != 4 {
+		return job.Override{}, false
+	}
+	var values [4]int
+	for i, part := range parts {
+		number, err := strconv.Atoi(part)
+		if err != nil || number < 0 {
+			return job.Override{}, false
+		}
+		values[i] = number
+	}
+	left, top, width, height := values[0], values[1], values[2], values[3]
+	maximum := int(^uint(0) >> 1)
+	if width == 0 || height == 0 || width > maximum-left || height > maximum-top {
+		return job.Override{}, false
+	}
+	return job.Region(image.Rectangle{Min: image.Pt(left, top),
+		Max: image.Pt(left+width, top+height)}), true
+}
 
 // overrides is every shared flag, in the order help shows them: the
 // plain ones, then the job's flags and shortcuts.
@@ -69,6 +92,8 @@ var plainOverrides = []override{
 		"a whole number", whole(job.Height)},
 	{"rays", "rays along each side of a pixel, over the job's",
 		"a whole number", whole(job.Rays)},
+	{"spp", "exact total samples per pixel, over the job's",
+		"a whole number", whole(job.Samples)},
 	{"at", "a still's scene time, as 20s, over the job's",
 		"a time such as 20s or 1m30s", func(value, _ string) (
 			job.Override, bool) {
@@ -115,6 +140,9 @@ func jobFlags() []pzm.Flag {
 // flag's name. The job checks the numbers' bounds when laid over it.
 func overridesOf(call pzm.Call, directory string) ([]job.Override,
 	error) {
+	if call.Given("rays") && call.Given("spp") {
+		return nil, fmt.Errorf("say --spp or --rays, not both")
+	}
 	var laid []job.Override
 	for _, each := range overrides {
 		if !call.Given(string(each.name)) {

@@ -17,16 +17,16 @@ func TestBaySealSetPassesBothSchemas(t *testing.T) {
 		if version == "v1" {
 			source = strings.ReplaceAll(source, "  setting: space\n", "")
 		}
-		read, err := set.Read("seal.yaml", []byte(source))
+		read, err := set.Read("../sets/bioforms/bay-seal.yaml", []byte(source))
 		if err != nil {
 			t.Fatalf("%s: %v", version, err)
 		}
-		if len(read.Things()) != 1 || read.Things()[0].Kind() != "bay-seal" {
+		if len(read.Things()) != 1 || read.Things()[0].Kind() != "animal-profile" {
 			t.Fatalf("%s parsed wrong specimen", version)
 		}
-		unknown := strings.ReplaceAll(source, "bay-seal", "bay-seals")
-		if _, err := set.Read("unknown.yaml", []byte(unknown)); err == nil {
-			t.Fatalf("%s accepted unknown kind", version)
+		unknown := strings.ReplaceAll(source, "species: harbor-seal", "species: unknown-seal")
+		if _, err := set.Read("../sets/bioforms/bay-seal.yaml", []byte(unknown)); err == nil {
+			t.Fatalf("%s accepted unknown species", version)
 		}
 	}
 }

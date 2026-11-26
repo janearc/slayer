@@ -38,10 +38,10 @@ func stood(each ...string) string {
 	return "  set:\n    things:\n" + strings.Join(each, "")
 }
 
-// spruce is a thing of the usual kind, with more keys after its kind and
+// specimen is a thing of the usual kind, with more keys after its kind and
 // seed, indented to stand under the thing's name.
-func spruce(name, more string) string {
-	return "      " + name + ":\n        kind: spruce\n        seed: 1\n" + more
+func specimen(name, more string) string {
+	return "      " + name + ":\n        kind: can\n        seed: 1\n" + more
 }
 
 // A scene says where it is, and when: its setting and its date, and a
@@ -170,8 +170,8 @@ func TestFilmFramesASecondAreRead(t *testing.T) {
 // A thing is placed by its place, at the origin, the anchor or the frame,
 // or by what it is around; each is read into a typed field.
 func TestThingPlaceAndAroundAreRead(t *testing.T) {
-	sun := spruce("sun", "        place: {at: origin}\n")
-	moon := spruce("moon", "        around: sun\n")
+	sun := specimen("sun", "        place: {at: origin}\n")
+	moon := specimen("moon", "        around: sun\n")
 	made, err := readV2("  setting: space\n" + stood(sun, moon))
 	if err != nil {
 		t.Fatal(err)
@@ -193,14 +193,14 @@ func TestThingPlaceAndAroundAreRead(t *testing.T) {
 // things around each other.
 func TestThingPlaceAndAroundRefuseWhatIsNotTheirs(t *testing.T) {
 	for why, add := range map[string]string{
-		"a place at nowhere": stood(spruce("a",
+		"a place at nowhere": stood(specimen("a",
 			"        place: {at: elsewhere}\n")),
-		"an around that names no thing": stood(spruce("a",
+		"an around that names no thing": stood(specimen("a",
 			"        around: nothing\n")),
-		"a thing around itself": stood(spruce("a", "        around: a\n")),
+		"a thing around itself": stood(specimen("a", "        around: a\n")),
 		"two things around each other": stood(
-			spruce("a", "        around: b\n"),
-			spruce("b", "        around: a\n")),
+			specimen("a", "        around: b\n"),
+			specimen("b", "        around: a\n")),
 	} {
 		if _, err := readV2("  setting: space\n" + add); err == nil {
 			t.Errorf("%s was taken", why)
@@ -214,18 +214,18 @@ func TestThingStandsInOneWay(t *testing.T) {
 	east := "        east: 1\n        north: 2\n"
 	place := "        place: {at: origin}\n"
 	around := "        around: base\n"
-	base := spruce("base", east)
+	base := specimen("base", east)
 	for why, each := range map[string]struct {
 		things string
 		good   bool
 	}{
-		"east and north":          {stood(spruce("a", east)), true},
-		"a place":                 {stood(spruce("a", place)), true},
-		"an around":               {stood(base, spruce("a", around)), true},
-		"none":                    {stood(spruce("a", "")), false},
-		"east without north":      {stood(spruce("a", "        east: 1\n")), false},
-		"east, north and a place": {stood(spruce("a", east+place)), false},
-		"a place and an around":   {stood(base, spruce("a", place+around)), false},
+		"east and north":          {stood(specimen("a", east)), true},
+		"a place":                 {stood(specimen("a", place)), true},
+		"an around":               {stood(base, specimen("a", around)), true},
+		"none":                    {stood(specimen("a", "")), false},
+		"east without north":      {stood(specimen("a", "        east: 1\n")), false},
+		"east, north and a place": {stood(specimen("a", east+place)), false},
+		"a place and an around":   {stood(base, specimen("a", place+around)), false},
 	} {
 		_, err := readV2("  setting: space\n" + each.things)
 		if (err == nil) != each.good {

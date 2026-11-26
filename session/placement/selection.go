@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/scene/thing"
@@ -28,10 +27,16 @@ func SpaceGeometry(read set.Set) (*spaceGeometry, error) {
 	}
 	geometry := &spaceGeometry{}
 	for _, each := range read.Things() {
-		if each.Recipe() != "" || each.Alight() {
-			return nil, fmt.Errorf("selection does not support recipes or burning placements")
+		if each.Alight() {
+			return nil, fmt.Errorf("selection does not support burning placements")
 		}
-		row, err := manufacture.KindNamed(each.Kind())
+		if each.Recipe() != "" {
+			recipe, found := read.Recipe(each.Recipe())
+			if !found || (!recipe.IsPlant() && !recipe.IsAnimal() && !recipe.IsAlga()) {
+				return nil, fmt.Errorf("selection does not support this recipe")
+			}
+		}
+		row, _, err := displayGate(read, each)
 		if err != nil {
 			return nil, err
 		}
@@ -93,7 +98,13 @@ func (geometry *spaceGeometry) Hit(ray maths.Ray) string {
 	ray.Dir = ray.Dir.Unit()
 	nearest, name := math.Inf(1), ""
 	for _, surface := range geometry.surfaces {
-		distance, hit := surface.shape.Hit(surface.at.RayIn(ray), 0, nearest)
+		scale := surface.at.Scale
+		if scale == 0 {
+			scale = 1
+		}
+		// RayIn expresses distances in the part's local units.
+		local, hit := surface.shape.Hit(surface.at.RayIn(ray), 0, nearest/scale)
+		distance := local * scale
 		if hit && distance < nearest {
 			nearest, name = distance, surface.name
 		}

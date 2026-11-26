@@ -13,8 +13,8 @@ const partSpinBlock = "        east: 0\n        north: 0\n        part-spin:\n" 
 
 func TestPartSpinReadsNativeUnitsPhaseAndBothSettingOrders(t *testing.T) {
 	for _, text := range []string{
-		"  setting: space\n" + stood(spruce("a", partSpinBlock)),
-		stood(spruce("a", partSpinBlock)) + "  setting: space\n",
+		"  setting: space\n" + stood(specimen("a", partSpinBlock)),
+		stood(specimen("a", partSpinBlock)) + "  setting: space\n",
 	} {
 		read, err := readV2(text)
 		if err != nil {
@@ -25,7 +25,7 @@ func TestPartSpinReadsNativeUnitsPhaseAndBothSettingOrders(t *testing.T) {
 			t.Fatalf("spin=%+v has%t", got, has)
 		}
 	}
-	plant := spruce("a", partSpinBlock+"          phase-radians: 1.5707963267948966\n")
+	plant := specimen("a", partSpinBlock+"          phase-radians: 1.5707963267948966\n")
 	read, err := readV2("  setting: space\n" + stood(plant))
 	if err != nil {
 		t.Fatal(err)
@@ -36,7 +36,7 @@ func TestPartSpinReadsNativeUnitsPhaseAndBothSettingOrders(t *testing.T) {
 	}
 }
 func TestPartSpinOmissionAndRefusals(t *testing.T) {
-	plant := spruce("a", "        east: 0\n        north: 0\n")
+	plant := specimen("a", "        east: 0\n        north: 0\n")
 	read, err := readV2(stood(plant))
 	if err != nil {
 		t.Fatal(err)
@@ -53,7 +53,7 @@ func TestPartSpinOmissionAndRefusals(t *testing.T) {
 		{strings.Replace(partSpinBlock, "          axis: [0, 0, 1]\n", "", 1), "space"},
 		{partSpinBlock + "          mystery: 1\n", "space"},
 	} {
-		plant := spruce("a", row.block)
+		plant := specimen("a", row.block)
 		if _, err := readV2("  setting: " + row.setting + "\n" + stood(plant)); err == nil {
 			t.Fatalf("invalid part spin accepted: %s%s", row.setting, row.block)
 		}
@@ -63,8 +63,8 @@ func TestPartSpinOmissionAndRefusals(t *testing.T) {
 func TestPartSpinSharesAnExplicitRPMAnchor(t *testing.T) {
 	first := strings.Replace(partSpinBlock, "rpm: -300", "rpm: &shaft -300", 1)
 	second := strings.Replace(partSpinBlock, "rpm: -300", "rpm: *shaft", 1)
-	plantA := spruce("a", first)
-	plantB := spruce("b", second)
+	plantA := specimen("a", first)
+	plantB := specimen("b", second)
 	read, err := readV2("  setting: space\n" + stood(plantA, plantB))
 	if err != nil {
 		t.Fatal(err)

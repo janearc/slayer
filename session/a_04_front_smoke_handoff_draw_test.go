@@ -26,7 +26,7 @@ func TestFrontKeepsFlamesAndFullStrengthSmokeAcrossAnExactFuelHandoff(t *testing
 	}
 	text := strings.Replace(string(raw), "speed: {value: 1000, unit: m/s}",
 		"speed: {value: 1, unit: m/s}", 1)
-	text = strings.Replace(text, "kind: fern, count: 4", "kind: fern, count: 2", 1)
+	text = strings.Replace(text, "recipe: fixture-fern, count: 4", "recipe: fixture-fern, count: 2", 1)
 	text = strings.Replace(text, "fade-time: {value: 0.2, unit: s}",
 		"fade-time: {value: 0, unit: s}", 1)
 	if err := os.WriteFile(given.set, []byte(text), 0600); err != nil {

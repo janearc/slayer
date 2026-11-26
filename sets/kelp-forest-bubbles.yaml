@@ -51,10 +51,12 @@ scene:
       seed: 11
       time: {value: 0, unit: s}
       source: "picked: a light breeze, no shelf source"
+  recipes:
+    profile-harbor-bay: {animal: {family: pinniped, file: ../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: harbor-seal, study: bay}}
   set:
     things:
       seal:
-        kind: bay-seal
+        recipe: profile-harbor-bay
         seed: 1
         position:
           east: {value: -7, unit: m}

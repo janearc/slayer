@@ -59,7 +59,15 @@ func TestScatteredStandRepeatsItsFourChosenSeededForms(t *testing.T) {
 			t.Fatalf("stand specimen %d moved from its authored seeded place: %+v, want %v", i, actual, expected)
 		}
 	}
-	kind, err := manufacture.KindNamed("fern")
+	name, raw, err := manufacture.EmbeddedPlantBook("fern")
+	if err != nil {
+		t.Fatal(err)
+	}
+	book, err := manufacture.ReadPlantBook("fern", name, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	kind, err := book.New(manufacture.PlantOptions{Species: "fern"})
 	if err != nil {
 		t.Fatal(err)
 	}

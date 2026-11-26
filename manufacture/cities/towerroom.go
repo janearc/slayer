@@ -74,9 +74,24 @@ func (job faceJob) wall(name string, along, floor, ceiling float64) placedElemen
 		floor+slab, -job.deep())
 }
 
-// office is an office behind one window: a partition now and then, and if
-// its floor is lit the ceiling lights, a lamp every so many windows, and a
-// desk with its screen and chair, by chance.
+// backWall is the wall at the back of an office, in front of the core: a
+// wall of the rooms' own colour, which a lamp in the room lights as it
+// lights the partitions.
+func (job faceJob) backWall(start, end, floor, ceiling float64) placedElement {
+	drawing := job.drawing
+	slab := drawing.fixed("floor-thick")
+	return job.frame.onFace("back wall", Box{end - start,
+		ceiling - floor - slab, drawing.fixed("wall-wash-thick")},
+		job.looks.fine.wall, start, floor+slab, -job.deep())
+}
+
+// office is an office behind one window: a partition now and then and a
+// back wall, and if its floor is lit the ceiling lights, a lamp every so
+// many windows, and a desk with its screen and chair, by chance.
+//
+// A lit office with a lamp is lit by it, back wall and all. One without
+// has the wash in place of its back wall, which glows as a lit wall would
+// look and lights nothing.
 func (job faceJob) office(index, column int, start, end, floor, ceiling float64,
 	look *thing.Material, on bool) []placedElement {
 	var parts []placedElement
@@ -84,14 +99,16 @@ func (job faceJob) office(index, column int, start, end, floor, ceiling float64,
 		parts = append(parts, job.wall("partition", start, floor, ceiling))
 	}
 	if !on || look == nil {
-		return parts
+		return append(parts, job.backWall(start, end, floor, ceiling))
 	}
-	parts = append(parts, job.wash(start, end, floor, ceiling, look))
 	parts = append(parts, job.ceilingLights(start, end, ceiling, look)...)
 	if column%int(job.drawing.fixed("office-lamp-every")) == 0 {
-		parts = append(parts, job.lamp((start+end)/2, ceiling, look,
-			job.drawing.fixed("office-heat"),
-			job.drawing.fixed("office-lamp-strength")))
+		parts = append(parts, job.backWall(start, end, floor, ceiling),
+			job.lamp((start+end)/2, ceiling, look,
+				job.drawing.fixed("office-heat"),
+				job.drawing.fixed("office-lamp-strength")))
+	} else {
+		parts = append(parts, job.wash(start, end, floor, ceiling, look))
 	}
 	if job.drawing.chance("desk-share", job.place(index, column)) {
 		parts = append(parts, job.desk(start, end, floor, look)...)

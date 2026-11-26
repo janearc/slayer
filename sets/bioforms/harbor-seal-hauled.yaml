@@ -1,7 +1,7 @@
 # Harbor seal hauled out on a sand bar in the banana pose: head and
 # hind flippers held up, belly pressed where it bears. Built on its
-# skeleton; its swimming pose is the kind harbor-seal-swimming and its
-# bones alone are harbor-seal-bones.
+# skeleton; the harbor-seal profile also supports pose: swimming and
+# representation: bones (with no pose).
 #
 # the frame. places are metres, x east, y north, z up, the sand at z = 0.
 # the seal's nose points east. the sand is one flat box, its colour
@@ -34,9 +34,11 @@ scene:
         middle: [0, 0, -0.5]
         size: [600, 600, 1]
         source: "chosen: a flat sand bar, its top at z = 0, no survey"
+  recipes:
+    profile-harbor-hauled: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: harbor-seal, pose: hauled}}
   set:
     things:
-      seal: {kind: harbor-seal-hauled, seed: 407, position: {east: {value: 0, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
+      seal: {recipe: profile-harbor-hauled, seed: 407, position: {east: {value: 0, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}, heading: {value: 0, unit: deg}}
   film:
     width: 1600
     height: 1000

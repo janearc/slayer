@@ -14,35 +14,42 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 200, altitude: 35}
+  recipes:
+    profile-black-faced-spoonbill-standing: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: black-faced-spoonbill, pose: standing}}
+    profile-little-egret-standing: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: little-egret, pose: standing}}
+    profile-grey-heron-standing: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: grey-heron, pose: standing}}
+    profile-pacific-reef-heron-standing: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: pacific-reef-heron, pose: standing}}
+    profile-yellow-legged-gull-standing: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: yellow-legged-gull, pose: standing}}
+    profile-white-tern-standing: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: white-tern, pose: standing}}
   set:
     things:
       spoonbill:
-        kind: bird-black-faced-spoonbill-standing
+        recipe: profile-black-faced-spoonbill-standing
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: -2.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
       egret:
-        kind: bird-little-egret-standing
+        recipe: profile-little-egret-standing
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: -1.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
       heron:
-        kind: bird-grey-heron-standing
+        recipe: profile-grey-heron-standing
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: -0.5, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
       reef heron:
-        kind: bird-pacific-reef-heron-standing
+        recipe: profile-pacific-reef-heron-standing
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: 0.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
       gull:
-        kind: bird-yellow-legged-gull-standing
+        recipe: profile-yellow-legged-gull-standing
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: 1.6, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}
       tern:
-        kind: bird-white-tern-standing
+        recipe: profile-white-tern-standing
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: 2.5, unit: m}, north: {value: 0, unit: m}, up: {value: 0, unit: m}}

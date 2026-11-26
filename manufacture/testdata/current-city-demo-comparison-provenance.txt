@@ -1,0 +1,27 @@
+Current city demo comparison, 2026-11-24
+
+Current source was a clean isolated checkout at
+35577d9c45d518dd6781089346ef57e3c84273d7. The 14 cases in historical-city-demo-arm64.txt were captured independently
+from current source, each in its own process and Game tests-lane invocation.
+The complete current output matched the stored historical f8 rows byte for
+byte; the identical rows are stored once. The independently captured current
+output is also retained in isolated comparison commit c9d4d40b.
+The original refusal records were not altered.
+
+The same public selected geometry producer and bounded driver used for the
+f8 capture were used here. They use zero placement, seeds 5 and 11, detail
+demo, and the full geometry/material fingerprint. The driver enforced a
+120-second wall limit, 4-GiB sampled RSS limit and a 30-GiB free-space floor;
+no guard tripped. Darwin arm64, go1.27.3, default GOEXPERIMENT, GOWORK=off,
+GOMAXPROCS=2, GOFLAGS='-p=1 -parallel=1 -timeout=60m'. The JSONL log retains
+each elapsed time and sampled RSS peak; samples are not guaranteed maxima.
+
+SHA-256:
+  producer source    3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094
+  bounded driver     800b1ef6091752ea684cadfb9a74d97152ee8a1bfceb1f96ecb23bc79b26ab5b
+  current binary     d3785b7b0db41e7c1643f4dffb64682dbd7bfcf96226895c17c759d77f499b77
+  14 current rows    b392596f9e043102495965764936ec7f33b28a3fcd31d8bf25aff5cce4413abf
+  JSONL log          39010e18555184e4f032c462928f671c7c1bc4bf62dd1738fa9962c38dde3f2e
+
+The original selected producer is reconstructed as documented in
+historical-selected-producer-provenance.txt.

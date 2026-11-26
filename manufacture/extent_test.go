@@ -1,6 +1,7 @@
 package manufacture
 
 import (
+	"errors"
 	"math"
 	"testing"
 
@@ -30,7 +31,7 @@ func holds(outer, inner maths.Box) bool {
 
 func TestAnExtentHoldsEverythingTheKindMakes(t *testing.T) {
 	for _, name := range shoreKinds {
-		row, err := kindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
@@ -54,7 +55,7 @@ func TestAnExtentHoldsEverythingTheKindMakes(t *testing.T) {
 
 func TestAnExtentIsTheSameForTheSameSeed(t *testing.T) {
 	for _, name := range shoreKinds {
-		row, err := kindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
@@ -150,5 +151,17 @@ func TestAGreedyExtentIsTheBoundsOfWhatIsMade(t *testing.T) {
 	made, err := makeOf(row, sow(3))
 	if err != nil || box != made.Bounds() {
 		t.Errorf("greedy %+v, made %+v (%v)", box, made.Bounds(), err)
+	}
+}
+
+// Every non-maker object checks the eye before asking for its own extent.
+func TestObjectSightKeepsEyeAndExtentRefusals(t *testing.T) {
+	for _, value := range []object{Ecosystem{}, Atmosphere{}, Sea{}, Plume{}, Text{}, Laser{}} {
+		if _, err := value.seen(sow(1), maths.Local(), strategies.Eye{}); !errors.Is(err, strategies.ErrEye) {
+			t.Errorf("%T did not refuse the eye first: %v", value, err)
+		}
+	}
+	if _, err := (Laser{}).seen(sow(1), maths.Local(), lookingDown()); !errors.Is(err, errLaser) {
+		t.Errorf("valid eye lost the laser extent refusal: %v", err)
 	}
 }

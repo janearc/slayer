@@ -1,0 +1,47 @@
+Water sampling: raw linear-light comparison
+
+A 32 by 32 patch at left 1160, top 1400 in a 2048 by 1820 street frame.
+All draws used the street camera, the same set, fixed exposure, software
+GPU, SLAYER_SCROOGE=1 and fresh frame draws. The executable SHA-256 was
+65ddcb20b7bfdac9400297b78339baa8692b06003aaf6d18ff607b52b0a6004e;
+the set SHA-256 was
+a5b906416963004ce02cd4ef5eebd38e78b170262a3397a4b147fce26bb365fd.
+The scene used existing caches; the complete transitive input closure has not
+been established. These are observations for this patch, not a proof about
+other scenes or regions.
+
+The reference is 32 rays per side, or 1024 samples per pixel. Its linear
+luminance median was 0.3425871, 95th percentile 3.4510688, and maximum
+22.8135619. It is finite and has not been shown to converge. All five repeat
+draws at 1, 2, 4, 16 and 32 rays per side matched their earlier developed
+images byte for byte after both were converted to BMP. That is one repeat of
+delivered pixels at each setting; raw-light repeat variation was not measured.
+
+The isolated-positive-residual threshold is 0.345 linear luminance units,
+chosen as approximately 10% of the reference's 95th percentile. It is a
+measurement choice, not a defect threshold. A counted pixel exceeds it in
+candidate-minus-reference luminance and none of its eight neighbours does;
+border pixels are excluded. The raw score data, including per-channel
+absolute and signed differences, is in scores.json.
+
+Rays per side | Samples per pixel | Mean absolute RGB difference | Isolated positive residuals
+1             | 1                 | 0.580653                     | 30
+2             | 4                 | 0.762536                     | 15
+4             | 16                | 0.841461                     | 13
+16            | 256               | 0.630330                     | 24
+Reference: 32 rays per side, 1024 samples per pixel.
+
+The difference and isolated count are not monotonic here. The signed mean
+candidate-minus-reference values for 1, 2, 4 and 16 rays per side respectively
+are (-0.72269, -0.52388, -0.11215), (-0.30430, -0.34418, 0.01983),
+(-0.15728, -0.09003, -0.01539), and (-0.15489, -0.11503, -0.02612).
+These scores neither prove which image is best nor establish convergence.
+The 6x nearest-neighbour sheet is for visual review; it uses the earlier
+images, which were verified to match the repeat draws' delivered pixels.
+
+Raw files in this folder: reference-32.pfm and candidate-1.pfm,
+candidate-2.pfm, candidate-4.pfm and candidate-16.pfm. scores.json uses the
+original local study paths for the same files. scoring-helper.go.txt records
+the Puzzlemouth helper that read them and used the project's regionjudge.
+The helper returned zero difference for a raw fixture compared with itself.
+The remaining four regions have not had this raw-light sampling sequence.

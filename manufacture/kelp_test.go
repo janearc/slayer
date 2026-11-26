@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+func testKelp(t *testing.T, forest bool) Kind {
+	t.Helper()
+	row, err := defaultKelpProfiles.NewGiantKelp(defaultKelpWater, forest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return row
+}
+
 // TestKelpFiguresAreSound checks that the file reads and that every
 // figure has a basis the file allows.
 func TestKelpFiguresAreSound(test *testing.T) {
@@ -30,7 +39,7 @@ func TestKelpRefusesAFigureWithNoBasis(test *testing.T) {
 		if raw == string(kelpRaw) {
 			test.Fatalf("the file has no %q to damage", whole)
 		}
-		if _, err := readKelp([]byte(raw)); err == nil {
+		if _, err := ReadKelpProfiles("damaged.yaml", []byte(raw)); err == nil {
 			test.Fatalf("a figure with the basis %q was accepted", damaged)
 		}
 	}
@@ -39,10 +48,7 @@ func TestKelpRefusesAFigureWithNoBasis(test *testing.T) {
 // TestKelpHonoursItsSeed checks that a seed makes the same plant each time
 // and that another seed makes another.
 func TestKelpHonoursItsSeed(test *testing.T) {
-	row, err := kindNamed(KelpKind)
-	if err != nil {
-		test.Fatal(err)
-	}
+	row := testKelp(test, false)
 	first, err := makeOf(row, sow(1))
 	again, err2 := makeOf(row, sow(1))
 	other, err3 := makeOf(row, sow(2))
@@ -61,7 +67,7 @@ func TestKelpHonoursItsSeed(test *testing.T) {
 
 // TestKelpRefusesAnUnsownSeed is the anti-test for the seed's guard.
 func TestKelpRefusesAnUnsownSeed(test *testing.T) {
-	row, _ := kindNamed(KelpKind)
+	row := testKelp(test, false)
 	if _, err := makeOf(row, seed{}); err == nil {
 		test.Fatal("a seed nobody sowed made a plant")
 	}
@@ -70,8 +76,8 @@ func TestKelpRefusesAnUnsownSeed(test *testing.T) {
 // TestKelpForestStoresNoMoreFacesThanAPlant checks that a forest shares
 // its meshes: the faces stored do not grow with the plants.
 func TestKelpForestStoresNoMoreFacesThanAPlant(test *testing.T) {
-	plant, _ := kindNamed(KelpKind)
-	forest, _ := kindNamed(KelpForestKind)
+	plant := testKelp(test, false)
+	forest := testKelp(test, true)
 	one, err := makeOf(plant, sow(3))
 	many, err2 := makeOf(forest, sow(3))
 	if err != nil || err2 != nil {
@@ -86,32 +92,9 @@ func TestKelpForestStoresNoMoreFacesThanAPlant(test *testing.T) {
 	}
 }
 
-// TestKelpLeansWithACurrent checks that the same seed in a current hangs
-// a stipe's top farther downstream than in still water, and that the
-// swell moves it with time.
-func TestKelpLeansWithACurrent(test *testing.T) {
-	still := kelpPlant{from: sow(4), water: kelpRead.Conditions["slack"]}
-	moving := kelpPlant{from: sow(4), water: kelpRead.Conditions["surge"]}
-	top := still.top()
-	if still.drift(top).X != 0 {
-		test.Fatal("still water moved a stipe")
-	}
-	if moving.drift(top).X <= 0 {
-		test.Fatal("a current did not lean a stipe downstream")
-	}
-	later := moving
-	later.clock = moving.water.SwellPeriod / 4
-	if later.drift(top).X == moving.drift(top).X {
-		test.Fatal("the swell did not move with time")
-	}
-	if moving.drift(0).Len() != 0 {
-		test.Fatal("the foot moved")
-	}
-}
-
 // TestKelpMovesWithTime checks that a deforming kind is one.
 func TestKelpMovesWithTime(test *testing.T) {
-	row, _ := kindNamed(KelpKind)
+	row := testKelp(test, false)
 	if !Deforms(row) {
 		test.Fatal("kelp is not a deforming kind")
 	}

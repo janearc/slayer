@@ -68,6 +68,12 @@ scene:
           standoff_x: -150
           standoff_y: -60
           standoff_z: 1.7
+  recipes:
+    plant-aegiceras-corniculatum: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: aegiceras-corniculatum}}
+    plant-avicennia-marina: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: avicennia-marina}}
+    plant-bruguiera-gymnorhiza: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: bruguiera-gymnorhiza}}
+    plant-kandelia-obovata: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: kandelia-obovata}}
+    plant-sonneratia-apetala: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: sonneratia-apetala}}
   set:
     things:
       # a marker, a person's height, to look at and to grow the strip about
@@ -77,16 +83,16 @@ scene:
         east: 1000
         north: 1900
     stands:
-      kandelia a: {kind: kandelia-obovata, count: 40, seed: 101, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      kandelia b: {kind: kandelia-obovata, count: 40, seed: 102, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      kandelia c: {kind: kandelia-obovata, count: 40, seed: 103, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      avicennia a: {kind: avicennia-marina, count: 40, seed: 111, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      avicennia b: {kind: avicennia-marina, count: 40, seed: 112, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      avicennia c: {kind: avicennia-marina, count: 40, seed: 113, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      aegiceras a: {kind: aegiceras-corniculatum, count: 20, seed: 121, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      aegiceras b: {kind: aegiceras-corniculatum, count: 20, seed: 122, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      bruguiera a: {kind: bruguiera-gymnorhiza, count: 20, seed: 131, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      bruguiera b: {kind: bruguiera-gymnorhiza, count: 20, seed: 132, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      sonneratia a: {kind: sonneratia-apetala, count: 20, seed: 141, complexity: clumps, above: 1, below: 1.8, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      sonneratia b: {kind: sonneratia-apetala, count: 20, seed: 142, complexity: clumps, above: 1, below: 1.8, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
-      sonneratia c: {kind: sonneratia-apetala, count: 20, seed: 143, complexity: clumps, above: 1, below: 1.8, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      kandelia a: {recipe: plant-kandelia-obovata, count: 40, seed: 101, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      kandelia b: {recipe: plant-kandelia-obovata, count: 40, seed: 102, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      kandelia c: {recipe: plant-kandelia-obovata, count: 40, seed: 103, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      avicennia a: {recipe: plant-avicennia-marina, count: 40, seed: 111, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      avicennia b: {recipe: plant-avicennia-marina, count: 40, seed: 112, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      avicennia c: {recipe: plant-avicennia-marina, count: 40, seed: 113, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      aegiceras a: {recipe: plant-aegiceras-corniculatum, count: 20, seed: 121, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      aegiceras b: {recipe: plant-aegiceras-corniculatum, count: 20, seed: 122, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      bruguiera a: {recipe: plant-bruguiera-gymnorhiza, count: 20, seed: 131, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      bruguiera b: {recipe: plant-bruguiera-gymnorhiza, count: 20, seed: 132, complexity: clumps, above: 0.1, below: 1, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      sonneratia a: {recipe: plant-sonneratia-apetala, count: 20, seed: 141, complexity: clumps, above: 1, below: 1.8, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      sonneratia b: {recipe: plant-sonneratia-apetala, count: 20, seed: 142, complexity: clumps, above: 1, below: 1.8, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}
+      sonneratia c: {recipe: plant-sonneratia-apetala, count: 20, seed: 143, complexity: clumps, above: 1, below: 1.8, within: {of: the marina, from: 270, to: 90, near: 0, far: 600}}

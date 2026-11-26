@@ -162,7 +162,7 @@ var v2Also = map[string][]string{
 	"world.go/film/rays":                 {"space.go/spaceFilm/fps"},
 	"scene.go/cameraKeys/eye":            {"space_cameras.go/spaceCamera/duration"},
 	"scene.go/locationKeys/loc_relative": {"space_cameras.go/spaceLocation/relative"},
-	"world.go/things/north": {"space_things.go/placing/place",
+	"world.go/things/north": {"space_things.go/placing/place", "space_things.go/sizing/scale",
 		"space_things.go/starring/star", "space_things.go/lanterning/panels",
 		"space_things.go/orbiting/radius", "space_things.go/nebulous/thickness",
 		"space_world.go/spacecraft/orbit"},
@@ -179,7 +179,7 @@ var v2Also = map[string][]string{
 		"ocean_surface.go/waveSurface/motion"},
 	"ocean_surface.go/waveSurface/flat-mean": {
 		"ocean_surface.go/waveSurface/motion"},
-	"world.go/things/position": {"space_things.go/placing/place",
+	"world.go/things/position": {"space_things.go/placing/place", "space_things.go/sizing/scale",
 		"space_things.go/starring/star", "space_things.go/lanterning/panels",
 		"space_things.go/orbiting/radius", "space_things.go/nebulous/thickness",
 		"space_world.go/spacecraft/orbit"},

@@ -97,21 +97,21 @@ func (row scaleHuman) seen(from seed, at maths.Subspace,
 // grown by the reach of the largest cell of foliage at any level and any
 // variant, since a cell is posed at a tip and may turn any way.
 func (plant seasonalPlant) extent(from seed) (maths.Box, error) {
-	plan, err := plant.profile.plan(from)
+	plan, err := plant.profile.Plan(from)
 	if err != nil {
 		return maths.Box{}, err
 	}
 	reach := 0.0
 	for _, detail := range []string{"clumps", "quick", "demo"} {
 		for variant := range int(plantValue("cell-variants")) {
-			cell, err := plant.profile.cell(detail, variant)
+			bounds, err := plant.profile.CellBounds(detail, variant)
 			if err != nil {
 				return maths.Box{}, err
 			}
-			reach = math.Max(reach, cornerReach(cell.bounds))
+			reach = math.Max(reach, cornerReach(bounds))
 		}
 	}
-	return grownBy(plan.bounds(), reach), nil
+	return grownBy(plan.Bounds(), reach), nil
 }
 
 // cornerReach is how far the furthest corner of a box is from its origin.
@@ -224,7 +224,7 @@ func mountedExtent(box maths.Box, mounts []cities.Mount,
 		if err != nil {
 			return maths.Box{}, err
 		}
-		one, err := row.how.extent(from)
+		one, err := makerExtent(row.how, from)
 		if err != nil {
 			return maths.Box{}, err
 		}

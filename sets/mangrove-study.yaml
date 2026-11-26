@@ -5,7 +5,7 @@
 # sonneratia apetala. each shows its roots above the ground: the pencils of
 # avicennia, the cones of sonneratia, the props of kandelia and bruguiera.
 # the heights, leaf sizes and root habits are recalled, not looked up, and
-# not measured; every number is in manufacture/plant-profiles.yaml, with
+# not measured; every number is in manufacture/plants/seasonal/profiles.yaml, with
 # the status of each.
 #
 # places are metres, as a map's run: x east, y north, z up. the ground,
@@ -63,20 +63,26 @@ scene:
         at: [0, -3.2, 1]
       orientation:
         look_at: [0, 0, 0.4]
+  recipes:
+    plant-aegiceras-corniculatum: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: aegiceras-corniculatum}}
+    plant-avicennia-marina: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: avicennia-marina}}
+    plant-bruguiera-gymnorhiza: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: bruguiera-gymnorhiza}}
+    plant-kandelia-obovata: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: kandelia-obovata}}
+    plant-sonneratia-apetala: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: sonneratia-apetala}}
   set:
     things:
-      kandelia one: {kind: kandelia-obovata, seed: 1, complexity: demo, east: -22, north: 0, height: {value: 0, unit: m}}
-      kandelia two: {kind: kandelia-obovata, seed: 2, complexity: demo, east: -16.5, north: 0, height: {value: 0, unit: m}}
-      avicennia one: {kind: avicennia-marina, seed: 3, complexity: demo, east: -11, north: 0, height: {value: 0, unit: m}}
-      avicennia two: {kind: avicennia-marina, seed: 4, complexity: demo, east: -5.5, north: 0, height: {value: 0, unit: m}}
-      bruguiera one: {kind: bruguiera-gymnorhiza, seed: 5, complexity: demo, east: 0, north: 0, height: {value: 0, unit: m}}
-      bruguiera two: {kind: bruguiera-gymnorhiza, seed: 6, complexity: demo, east: 5.5, north: 0, height: {value: 0, unit: m}}
-      aegiceras one: {kind: aegiceras-corniculatum, seed: 7, complexity: demo, east: 11, north: 0, height: {value: 0, unit: m}}
-      aegiceras two: {kind: aegiceras-corniculatum, seed: 8, complexity: demo, east: 16.5, north: 0, height: {value: 0, unit: m}}
-      kandelia three: {kind: kandelia-obovata, seed: 9, complexity: demo, east: 22, north: 0, height: {value: 0, unit: m}}
-      sonneratia one: {kind: sonneratia-apetala, seed: 10, complexity: demo, east: -10, north: 14, height: {value: 0, unit: m}}
-      sonneratia two: {kind: sonneratia-apetala, seed: 11, complexity: demo, east: 0, north: 14, height: {value: 0, unit: m}}
-      sonneratia three: {kind: sonneratia-apetala, seed: 12, complexity: demo, east: 10, north: 14, height: {value: 0, unit: m}}
+      kandelia one: {recipe: plant-kandelia-obovata, seed: 1, complexity: demo, east: -22, north: 0, height: {value: 0, unit: m}}
+      kandelia two: {recipe: plant-kandelia-obovata, seed: 2, complexity: demo, east: -16.5, north: 0, height: {value: 0, unit: m}}
+      avicennia one: {recipe: plant-avicennia-marina, seed: 3, complexity: demo, east: -11, north: 0, height: {value: 0, unit: m}}
+      avicennia two: {recipe: plant-avicennia-marina, seed: 4, complexity: demo, east: -5.5, north: 0, height: {value: 0, unit: m}}
+      bruguiera one: {recipe: plant-bruguiera-gymnorhiza, seed: 5, complexity: demo, east: 0, north: 0, height: {value: 0, unit: m}}
+      bruguiera two: {recipe: plant-bruguiera-gymnorhiza, seed: 6, complexity: demo, east: 5.5, north: 0, height: {value: 0, unit: m}}
+      aegiceras one: {recipe: plant-aegiceras-corniculatum, seed: 7, complexity: demo, east: 11, north: 0, height: {value: 0, unit: m}}
+      aegiceras two: {recipe: plant-aegiceras-corniculatum, seed: 8, complexity: demo, east: 16.5, north: 0, height: {value: 0, unit: m}}
+      kandelia three: {recipe: plant-kandelia-obovata, seed: 9, complexity: demo, east: 22, north: 0, height: {value: 0, unit: m}}
+      sonneratia one: {recipe: plant-sonneratia-apetala, seed: 10, complexity: demo, east: -10, north: 14, height: {value: 0, unit: m}}
+      sonneratia two: {recipe: plant-sonneratia-apetala, seed: 11, complexity: demo, east: 0, north: 14, height: {value: 0, unit: m}}
+      sonneratia three: {recipe: plant-sonneratia-apetala, seed: 12, complexity: demo, east: 10, north: 14, height: {value: 0, unit: m}}
   world:
     unit: 1
     materials:

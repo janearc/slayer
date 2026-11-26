@@ -5,66 +5,81 @@ import (
 	"fmt"
 
 	"github.com/janearc/puzzlemouth/numbers"
-	"github.com/janearc/puzzlemouth/yamlfile"
-	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/manufacture/branching"
+	"github.com/janearc/slayer/manufacture/plants/seasonal"
 )
 
-//go:embed plant-profiles.yaml
-var plantProfilesRaw []byte
+var plantProfilesRaw = seasonal.Embedded()
 
 //go:embed plant-choices.yaml
 var plantChoicesRaw []byte
 
 var plantChoices = readPlantChoices(plantChoicesRaw)
-var plantProfiles = readPlantProfiles(plantProfilesRaw)
+var defaultPlantProfiles = mustPlantProfiles(plantProfilesRaw)
 
-// plantProfile is a private, authored construction book, not a growth survey.
-type plantProfile struct {
-	Kind, Form, Status, By, Date                  string
-	Scale                                         struct{ Minimum, Maximum float64 }
-	Slenderness, Trunk, Reach, Contraction, Taper float64
-	RadiusPower                                   float64 `yaml:"radius-power"`
-	Fork, Twist, Upward                           float64
-	LeaderGain                                    float64 `yaml:"leader-gain"`
-	StemSpread                                    float64 `yaml:"stem-spread"`
-	Orders, Children, Stems                       int
-	Leader, Deciduous                             bool
-	Bark, Green, Autumn, Dry                      maths.Light
-	LeafShape                                     string  `yaml:"leaf-shape"`
-	LeafLength                                    float64 `yaml:"leaf-length"`
-	LeafWidth                                     float64 `yaml:"leaf-width"`
-	LeafThickness                                 float64 `yaml:"leaf-thickness"`
-	Lobes                                         int
-	LobeDepth                                     float64 `yaml:"lobe-depth"`
-	CellLength                                    float64 `yaml:"cell-length"`
-	CellSpacing                                   float64 `yaml:"cell-spacing"`
-	TwigCount                                     int     `yaml:"twig-count"`
-	TwigLength                                    float64 `yaml:"twig-length"`
-	TwigRadius                                    float64 `yaml:"twig-radius"`
-	LeafPairs                                     int     `yaml:"leaf-pairs"`
-	RosetteLeaves                                 int     `yaml:"rosette-leaves"`
-	RosetteAngle                                  float64 `yaml:"rosette-angle"`
-	Roots                                         *plantRoots
+const maximumPlantFigure = seasonal.MaximumFigure
+
+type plantProfile = seasonal.Profile
+
+type PlantProfiles struct{ book *seasonal.Book }
+
+// ReadPlantProfiles reads and checks a seasonal plant species book.
+func ReadPlantProfiles(file string, raw []byte) (*PlantProfiles, error) {
+	policy := &seasonal.Policy{Value: plantValue, Sow: func(n uint64) branching.Seed { return sow(n) }}
+	book, err := seasonal.Read(file, raw, policy)
+	if err != nil {
+		return nil, err
+	}
+	return &PlantProfiles{book: book}, nil
 }
 
-// readPlantProfiles checks the authored status and names before registration.
-func readPlantProfiles(raw []byte) map[string]plantProfile {
-	var book struct{ Profiles []plantProfile }
-	if err := yamlfile.Read("plant-profiles.yaml", raw, &book); err != nil {
+// NewPlant makes a species from this book, without consulting the registry.
+func (book *PlantProfiles) NewPlant(name string) (Kind, error) {
+	if book == nil {
+		return Kind{}, fmt.Errorf("manufacture: no plant profile book")
+	}
+	profile, found := book.book.Get(name)
+	if !found {
+		return Kind{}, fmt.Errorf("manufacture: no plant profile %q", name)
+	}
+	return Kind{name: name, how: seasonalPlant{profile: profile, season: "summer"}}, nil
+}
+
+// Named species constructors use profile data from the caller's book.
+func (b *PlantProfiles) NewValleyOak() (Kind, error)       { return b.NewPlant("valley-oak") }
+func (b *PlantProfiles) NewAlder() (Kind, error)           { return b.NewPlant("alder") }
+func (b *PlantProfiles) NewPoplar() (Kind, error)          { return b.NewPlant("poplar") }
+func (b *PlantProfiles) NewManzanita() (Kind, error)       { return b.NewPlant("manzanita") }
+func (b *PlantProfiles) NewChaparralBrush() (Kind, error)  { return b.NewPlant("chaparral-brush") }
+func (b *PlantProfiles) NewJoshuaTree() (Kind, error)      { return b.NewPlant("joshua-tree") }
+func (b *PlantProfiles) NewKandeliaObovata() (Kind, error) { return b.NewPlant("kandelia-obovata") }
+func (b *PlantProfiles) NewAegicerasCorniculatum() (Kind, error) {
+	return b.NewPlant("aegiceras-corniculatum")
+}
+func (b *PlantProfiles) NewAvicenniaMarina() (Kind, error) { return b.NewPlant("avicennia-marina") }
+func (b *PlantProfiles) NewBruguieraGymnorhiza() (Kind, error) {
+	return b.NewPlant("bruguiera-gymnorhiza")
+}
+func (b *PlantProfiles) NewSonneratiaApetala() (Kind, error) { return b.NewPlant("sonneratia-apetala") }
+func (b *PlantProfiles) NewPandanusTectorius() (Kind, error) { return b.NewPlant("pandanus-tectorius") }
+func (b *PlantProfiles) NewScaevolaTaccada() (Kind, error)   { return b.NewPlant("scaevola-taccada") }
+func (b *PlantProfiles) NewMetrosiderosPolymorpha() (Kind, error) {
+	return b.NewPlant("metrosideros-polymorpha")
+}
+func (b *PlantProfiles) NewBarringtoniaAsiatica() (Kind, error) {
+	return b.NewPlant("barringtonia-asiatica")
+}
+func (b *PlantProfiles) NewQuercusIlex() (Kind, error)  { return b.NewPlant("quercus-ilex") }
+func (b *PlantProfiles) NewEricaArborea() (Kind, error) { return b.NewPlant("erica-arborea") }
+func (b *PlantProfiles) NewSalixAlba() (Kind, error)    { return b.NewPlant("salix-alba") }
+
+// mustPlantProfiles retains the checked default book for existing callers.
+func mustPlantProfiles(raw []byte) *PlantProfiles {
+	book, err := ReadPlantProfiles("plant-profiles.yaml", raw)
+	if err != nil {
 		panic(err)
 	}
-	profiles := map[string]plantProfile{}
-	for _, profile := range book.Profiles {
-		if profile.Status != "picked" || profile.By == "" || profile.Date == "" ||
-			profile.Kind == "" || profiles[profile.Kind].Kind != "" {
-			panic(fmt.Errorf("manufacture: invalid authored plant profile %q", profile.Kind))
-		}
-		if err := profile.valid(); err != nil {
-			panic(err)
-		}
-		profiles[profile.Kind] = profile
-	}
-	return profiles
+	return book
 }
 
 // readPlantChoices keeps shared numerical policies in Puzzlemouth data.

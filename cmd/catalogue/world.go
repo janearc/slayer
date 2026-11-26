@@ -38,7 +38,11 @@ type specimenSource interface {
 
 // construct releases procedural parts after placing their meshes and lamps.
 func (plan plan) construct(entry entry, detail string) (*specimen, error) {
-	object, err := makeSpecimen(entry.Kind, plan.Seed, detail)
+	row, err := entry.kind()
+	if err != nil {
+		return nil, err
+	}
+	object, err := manufacture.MakeWithComplexity(row, manufacture.Sow(plan.Seed), detail)
 	if err != nil {
 		return nil, err
 	}

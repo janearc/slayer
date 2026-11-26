@@ -36,7 +36,7 @@ func TestFrontSparkReservationKeepsTheExactAggregateLimit(t *testing.T) {
         end-temperature: {value: 900, unit: K}
 `
 	text := strings.Replace(string(raw), "      flame:", strings.TrimPrefix(block, "\n")+"      flame:", 1)
-	text = strings.Replace(text, "kind: fern, count: 4", "kind: fern, count: 1", 1)
+	text = strings.Replace(text, "recipe: fixture-fern, count: 4", "recipe: fixture-fern, count: 1", 1)
 	if err := os.WriteFile(given.set, []byte(text), 0600); err != nil {
 		t.Fatal(err)
 	}

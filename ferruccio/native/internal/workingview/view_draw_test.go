@@ -4,15 +4,82 @@ package workingview
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"image"
+	"image/png"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/janearc/slayer/ferruccio/native/internal/headless"
+	"github.com/janearc/slayer/ferruccio/native/internal/stagewire"
+	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/session/placement"
 	"github.com/janearc/slayer/set"
 )
+
+func TestRealSceneSharedBatchDraw(t *testing.T) {
+	path, helper, cache := os.Getenv("FERRUCCIO_STAGE_SCENE"), os.Getenv("FERRUCCIO_STAGE_HELPER"), os.Getenv("FERRUCCIO_STAGE_CACHE")
+	if path == "" || helper == "" || cache == "" {
+		t.Skip("set the scene, helper and cache for a real shared-scene draw")
+	}
+	source, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	kind := os.Getenv("FERRUCCIO_STAGE_KIND")
+	if kind == "" {
+		kind = "set"
+	}
+	snapshot, err := stagewire.Run(context.Background(), helper, path, string(source), kind, cache, os.Getenv("FERRUCCIO_STAGE_SHELF"), 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	device, err := headless.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer device.Close()
+	view, err := New(device)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer view.Close()
+	picture, err := drawUntilReady(view, &snapshot.Scene, 320, 180)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if oneColour(picture.Pix) {
+		t.Fatal("shared scene drew no visible geometry")
+	}
+	if path := os.Getenv("FERRUCCIO_STAGE_IMAGE"); path != "" {
+		file, err := os.Create(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := png.Encode(file, picture); err != nil {
+			file.Close()
+			t.Fatal(err)
+		}
+		if err := file.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Logf("shared GPU draw: %+v; %s", view.Stats(), snapshot.Notice)
+	started := time.Now()
+	id := snapshot.Scene.Pick(.5, .5)
+	t.Logf("centre selection %q in %s", id, time.Since(started))
+	if os.Getenv("FERRUCCIO_STAGE_SECOND_FRAME") == "1" {
+		changed := snapshot.Scene
+		changed.Eye.Origin.X += 1
+		started = time.Now()
+		if _, err := drawUntilReady(view, &changed, 320, 180); err != nil {
+			t.Fatalf("second working frame: %v", err)
+		}
+		t.Logf("one-metre camera move drew in %s: %+v", time.Since(started), view.Stats())
+	}
+}
 
 // playground is the scene the workspace tests also draw.
 const playground = "../../../../sets/ferruccio-playground.yaml"
@@ -110,6 +177,150 @@ func TestDrawReusesThePictureWhileTheSizeHolds(t *testing.T) {
 	}
 	if resized == first || resized.Rect != image.Rect(0, 0, 300, 200) {
 		t.Fatalf("resized picture %v, shared %t", resized.Rect, resized == first)
+	}
+}
+
+func TestDrawBatchesSharedMeshPlacements(t *testing.T) {
+	view, scene := openView(t)
+	if len(scene.Objects) == 0 {
+		t.Fatal("playground has no objects")
+	}
+	first, err := view.Draw(scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := bytes.Clone(first.Pix)
+	uploads := view.Stats().Uploads
+	copy := scene.Objects[0]
+	copy.ID = "second-placement"
+	copy.At.Origin.Y += 4
+	scene.Batches = append(scene.Batches, placement.StagedBatch{Mesh: copy.Mesh, Places: []maths.Subspace{copy.At}})
+	draws, err := view.place(scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	batched := false
+	for _, draw := range draws {
+		if draw.count >= 2 {
+			batched = true
+		}
+	}
+	if !batched || view.Stats().Uploads != uploads {
+		t.Fatal("shared placement was not batched with its existing mesh")
+	}
+	after, err := drawUntilReady(view, scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Equal(before, after.Pix) {
+		t.Fatal("the second placement did not change the GPU frame")
+	}
+}
+
+func TestDrawBatchesKeepVisibleInstancesAcrossMaskWords(t *testing.T) {
+	view, scene := openView(t)
+	mesh := scene.Objects[0].Mesh
+	places := make([]maths.Subspace, 130)
+	want := 0
+	for i := range places {
+		local := maths.V(0, 0, -100)
+		if i%3 == 0 {
+			local.X = 1000000
+		} else {
+			want++
+		}
+		places[i] = maths.Subspace{Origin: scene.Eye.Out(local)}
+	}
+	scene.Objects = nil
+	scene.Batches = []placement.StagedBatch{{Mesh: mesh, Places: places}}
+	draws, err := view.place(scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(draws) != 1 || draws[0].count != uint32(want) {
+		t.Fatalf("visible draw instances = %v; want one batch of %d", draws, want)
+	}
+}
+
+func TestIndexedCullingPreservesTheWorkingFrame(t *testing.T) {
+	view, scene := openView(t)
+	mesh := scene.Objects[0].Mesh
+	places := make([]maths.Subspace, 3*placement.PlacementBlockSize)
+	for i := range places {
+		local := maths.V(1000000, 0, -100)
+		if i >= placement.PlacementBlockSize && i < 2*placement.PlacementBlockSize {
+			local.X = float64(i%7) - 3
+		}
+		places[i] = maths.Subspace{Origin: scene.Eye.Out(local)}
+	}
+	scene.Objects = nil
+	scene.Batches = []placement.StagedBatch{{Mesh: mesh, Places: places, HasBounds: true, Bounds: maths.Box{Min: maths.V(-2000000, -2000000, -2000000), Max: maths.V(2000000, 2000000, 2000000)}}}
+	before, err := drawUntilReady(view, scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reference := bytes.Clone(before.Pix)
+	scene.IndexPicking()
+	after, err := drawUntilReady(view, scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(reference, after.Pix) {
+		t.Fatal("indexed culling changed the displayed frame")
+	}
+}
+
+func drawUntilReady(view *View, scene *placement.DisplayScene, width, height int) (*image.NRGBA, error) {
+	deadline := time.Now().Add(3 * time.Minute)
+	for {
+		picture, err := view.Draw(scene, width, height)
+		if !errors.Is(err, ErrReadbackLate) || time.Now().After(deadline) {
+			return picture, err
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+}
+
+func TestDrawReleasesMeshesNoLongerInScene(t *testing.T) {
+	view, scene := openView(t)
+	if _, err := view.Draw(scene, 320, 200); err != nil {
+		t.Fatal(err)
+	}
+	if view.Stats().Meshes == 0 {
+		t.Fatal("scene uploaded no meshes")
+	}
+	scene.Objects, scene.Batches = nil, nil
+	if _, err := view.Draw(scene, 320, 200); err != nil {
+		t.Fatal(err)
+	}
+	if view.Stats().Meshes != 0 || view.Stats().Triangles != 0 {
+		t.Fatal("old scene meshes remain resident")
+	}
+}
+
+func TestBatchReadbackIsRetainedAndStaleFrameCancelled(t *testing.T) {
+	view, scene := openView(t)
+	copy := scene.Objects[0]
+	scene.Batches = []placement.StagedBatch{{Mesh: copy.Mesh, Places: []maths.Subspace{copy.At}}}
+	view.ForceLateReadbacks(2)
+	if _, err := view.Draw(scene, 320, 200); !errors.Is(err, ErrReadbackLate) || view.pending == nil {
+		t.Fatalf("first pending draw: %v", err)
+	}
+	first := view.pending
+	if _, err := view.Draw(scene, 320, 200); !errors.Is(err, ErrReadbackLate) || view.pending != first {
+		t.Fatalf("pending frame was not retained: %v", err)
+	}
+	if _, err := drawUntilReady(view, scene, 320, 200); err != nil || view.pending != nil || view.Stats().Draws != 1 {
+		t.Fatalf("pending frame did not complete once: %v", err)
+	}
+	view.ForceLateReadbacks(1)
+	if _, err := view.Draw(scene, 320, 200); !errors.Is(err, ErrReadbackLate) || view.pending == nil {
+		t.Fatalf("second pending draw: %v", err)
+	}
+	changed := *scene
+	changed.Eye.Origin.X += 1
+	if _, err := drawUntilReady(view, &changed, 320, 200); err != nil || view.pending != nil {
+		t.Fatalf("changed view did not cancel its stale frame: %v", err)
 	}
 }
 

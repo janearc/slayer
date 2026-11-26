@@ -38,7 +38,7 @@ func titled(t *testing.T) string {
 func TestASetsTextIsWhatItSays(t *testing.T) {
 	written := strings.Replace(titled(t), "point_to: the first tree",
 		"point_to: the title", 1)
-	made, err := set.Read("kilauea-iki.yaml", []byte(written))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestATextSaysWhatItLeavesOut(t *testing.T) {
 		"    texts:\n"+
 			"      plain:\n        words: hi\n        font: go\n"+
 			"        size: 1\n        depth: 0.2\n    stands:\n", 1)
-	made, err := set.Read("kilauea-iki.yaml", []byte(written))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestATextsMistakesAreRefused(t *testing.T) {
 	} {
 		was, now := mistake.was, mistake.now
 		written := strings.Replace(titled(t), was, now, 1)
-		_, err := set.Read("kilauea-iki.yaml", []byte(written))
+		_, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%q for %q: refused with %v, wanted %q",
 				now, was, err, mistake.said)

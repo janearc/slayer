@@ -1,6 +1,6 @@
 # Sources for the orca-clean-05 skeleton, teeth and body
 
-The code under manufacture/orca_clean_05_*.go cites these by number
+The code under manufacture/animals/vertebrates/mammals/whales cites these by number
 (S1 and on) and gives no names of people or places itself. Each entry
 says the page that was read, the work it cites where it cites one, and
 the value as written there. Nothing was downloaded; pages were read in

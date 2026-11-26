@@ -1,0 +1,108 @@
+# One static illustrative reconstruction per row. Positions and radii are
+# metres, not specimen measurements. Sources identify fossil evidence;
+# missing anatomy, pose, soft tissue and colours are picked, not known.
+profiles:
+  - kind: alamosaurus-sanjuanensis
+    scientific: Alamosaurus sanjuanensis
+    basis: picked
+    source: "https://doi.org/10.1080/14772019.2016.1183150; https://pmc.ncbi.nlm.nih.gov/articles/PMC4725985/"
+    notes: "Cervical series BIBE 45854 and a separate partial skeleton inform this illustrative composite. Skull, neck and tail curves, body outline, feet and colours are picked; no manual claws are modelled."
+    stations:
+      - {x: -12.000, y: 0.600, width: 0.050, height: 0.050}
+      - {x: -9.000, y: 1.350, width: 0.220, height: 0.220}
+      - {x: -6.000, y: 2.450, width: 0.550, height: 0.500}
+      - {x: -4.000, y: 3.550, width: 0.950, height: 0.900}
+      - {x: -2.500, y: 4.300, width: 1.350, height: 1.300}
+      - {x: -0.500, y: 4.500, width: 1.650, height: 1.600}
+      - {x: 1.500, y: 4.550, width: 1.380, height: 1.480}
+      - {x: 4.000, y: 5.000, width: 0.700, height: 0.700}
+      - {x: 6.500, y: 5.900, width: 0.500, height: 0.550}
+      - {x: 9.000, y: 6.800, width: 0.370, height: 0.430}
+      - {x: 10.500, y: 7.100, width: 0.240, height: 0.300}
+      - {x: 11.200, y: 7.150, width: 0.410, height: 0.360}
+      - {x: 12.000, y: 7.050, width: 0.330, height: 0.280}
+      - {x: 12.250, y: 7.030, width: 0.260, height: 0.220}
+      - {x: 12.400, y: 7.000, width: 0.040, height: 0.040}
+    fore: {station: 6, footx: 1.50, footz: 1.00, footlength: 1.50, footwidth: 1.05}
+    hind: {station: 4, footx: -2.50, footz: 1.00, footlength: 1.50, footwidth: 1.05}
+    head: {eyestation: 11, eyeheight: 0.35, eyeradius: 0.040}
+    skin: {r: 0.290, g: 0.310, b: 0.230}
+    underside: {r: 0.490, g: 0.470, b: 0.370}
+  - kind: diplodocus-carnegii
+    scientific: Diplodocus carnegii
+    basis: picked
+    source: "https://www.miketaylor.org.uk/dino/pubs/taylor-et-al-2025/TaylorEtAl2025--history-and-composition-of-the-Carnegie-Diplodocus.pdf"
+    notes: "The CM 84 holotype and composite Carnegie mount inform this illustration; the mount includes other individuals, casts and sculptures. Skull, neck and tail curves, feet, skin and colours are inferred."
+    stations:
+      - {x: -14.000, y: 0.500, width: 0.035, height: 0.035}
+      - {x: -11.000, y: 1.050, width: 0.120, height: 0.120}
+      - {x: -7.000, y: 2.100, width: 0.320, height: 0.310}
+      - {x: -4.500, y: 3.300, width: 0.700, height: 0.720}
+      - {x: -2.800, y: 4.000, width: 1.100, height: 1.200}
+      - {x: -0.800, y: 4.100, width: 1.250, height: 1.380}
+      - {x: 1.200, y: 4.150, width: 1.080, height: 1.220}
+      - {x: 3.400, y: 4.450, width: 0.520, height: 0.540}
+      - {x: 5.500, y: 5.000, width: 0.360, height: 0.430}
+      - {x: 7.800, y: 5.600, width: 0.280, height: 0.320}
+      - {x: 9.800, y: 5.900, width: 0.180, height: 0.200}
+      - {x: 10.600, y: 5.900, width: 0.300, height: 0.290}
+      - {x: 11.300, y: 5.800, width: 0.240, height: 0.190}
+      - {x: 11.430, y: 5.800, width: 0.190, height: 0.150}
+      - {x: 11.500, y: 5.800, width: 0.035, height: 0.035}
+    fore: {station: 6, footx: 1.20, footz: 0.80, footlength: 1.20, footwidth: 0.85}
+    hind: {station: 4, footx: -2.80, footz: 0.85, footlength: 1.30, footwidth: 0.90}
+    head: {eyestation: 11, eyeheight: 0.35, eyeradius: 0.030}
+    skin: {r: 0.390, g: 0.320, b: 0.240}
+    underside: {r: 0.620, g: 0.530, b: 0.400}
+  - kind: apatosaurus-louisae
+    scientific: Apatosaurus louisae
+    basis: picked
+    source: "https://npshistory.com/publications/dino/mcm-v11n4-1936.pdf; https://pmc.ncbi.nlm.nih.gov/articles/PMC3628838/"
+    notes: "The CM 3018 postcranial skeleton and comparative cervical anatomy inform this illustration. Skull association, whole body outline, foot soft tissue, pose and colours are inferred."
+    stations:
+      - {x: -12.200, y: 0.550, width: 0.040, height: 0.040}
+      - {x: -9.000, y: 1.150, width: 0.160, height: 0.150}
+      - {x: -6.000, y: 2.300, width: 0.420, height: 0.430}
+      - {x: -4.000, y: 3.400, width: 0.900, height: 0.900}
+      - {x: -2.400, y: 4.200, width: 1.350, height: 1.350}
+      - {x: -0.400, y: 4.300, width: 1.500, height: 1.480}
+      - {x: 1.600, y: 4.350, width: 1.300, height: 1.350}
+      - {x: 3.500, y: 4.650, width: 0.920, height: 1.000}
+      - {x: 5.500, y: 5.200, width: 0.780, height: 0.860}
+      - {x: 7.400, y: 5.700, width: 0.620, height: 0.700}
+      - {x: 8.800, y: 5.900, width: 0.300, height: 0.350}
+      - {x: 9.500, y: 5.900, width: 0.390, height: 0.350}
+      - {x: 10.200, y: 5.800, width: 0.290, height: 0.230}
+      - {x: 10.320, y: 5.800, width: 0.240, height: 0.190}
+      - {x: 10.400, y: 5.800, width: 0.040, height: 0.040}
+    fore: {station: 6, footx: 1.60, footz: 0.95, footlength: 1.45, footwidth: 1.00}
+    hind: {station: 4, footx: -2.40, footz: 1.00, footlength: 1.55, footwidth: 1.10}
+    head: {eyestation: 11, eyeheight: 0.35, eyeradius: 0.040}
+    skin: {r: 0.360, g: 0.290, b: 0.250}
+    underside: {r: 0.570, g: 0.480, b: 0.410}
+  - kind: brachiosaurus-altithorax
+    scientific: Brachiosaurus altithorax
+    basis: picked
+    source: "https://www.miketaylor.org.uk/dino/pubs/taylor2009/Taylor2009-brachiosaurus-and-giraffatitan.pdf"
+    notes: "The incomplete FMNH P 25107 holotype informs the shoulder and limb proportions. Its neck and skull are not preserved in that specimen; the whole outline, tail, head, feet and colours are inferred."
+    stations:
+      - {x: -9.000, y: 0.600, width: 0.040, height: 0.040}
+      - {x: -7.000, y: 1.200, width: 0.160, height: 0.160}
+      - {x: -5.000, y: 2.500, width: 0.430, height: 0.420}
+      - {x: -3.500, y: 3.800, width: 0.800, height: 0.800}
+      - {x: -2.200, y: 4.500, width: 1.180, height: 1.180}
+      - {x: -0.400, y: 5.150, width: 1.380, height: 1.420}
+      - {x: 1.500, y: 5.850, width: 1.280, height: 1.380}
+      - {x: 3.500, y: 6.400, width: 0.750, height: 0.850}
+      - {x: 5.000, y: 7.600, width: 0.550, height: 0.620}
+      - {x: 6.400, y: 9.000, width: 0.420, height: 0.490}
+      - {x: 7.800, y: 10.200, width: 0.320, height: 0.370}
+      - {x: 8.700, y: 10.750, width: 0.450, height: 0.410}
+      - {x: 9.500, y: 10.800, width: 0.360, height: 0.290}
+      - {x: 9.700, y: 10.800, width: 0.290, height: 0.230}
+      - {x: 9.800, y: 10.800, width: 0.040, height: 0.040}
+    fore: {station: 6, footx: 1.50, footz: 0.95, footlength: 1.40, footwidth: 1.00}
+    hind: {station: 4, footx: -2.20, footz: 0.90, footlength: 1.35, footwidth: 0.95}
+    head: {eyestation: 11, eyeheight: 0.35, eyeradius: 0.040}
+    skin: {r: 0.340, g: 0.310, b: 0.250}
+    underside: {r: 0.550, g: 0.500, b: 0.410}

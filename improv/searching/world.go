@@ -3,6 +3,7 @@ package searching
 import (
 	"fmt"
 	"math"
+	"sync"
 	"time"
 
 	"github.com/janearc/celestial/measure"
@@ -138,6 +139,23 @@ func (set *set) land(site string) error {
 	return nil
 }
 
+// sceneryBooks retains checked embedded profiles for the authored scenery.
+var sceneryBooks = sync.OnceValues(func() (map[string]*manufacture.PlantBook, error) {
+	books := make(map[string]*manufacture.PlantBook)
+	for _, family := range []string{"seasonal", "conifer"} {
+		name, raw, err := manufacture.EmbeddedPlantBook(family)
+		if err != nil {
+			return nil, err
+		}
+		book, err := manufacture.ReadPlantBook(family, name, raw)
+		if err != nil {
+			return nil, err
+		}
+		books[family] = book
+	}
+	return books, nil
+})
+
 // scenery grows a factory object; recipes and their refusal paths stay shared.
 func (set *set) scenery(name string, seed uint64, at maths.Vec, scale float64) error {
 	key := fmt.Sprintf("%s/%d", name, seed)
@@ -148,13 +166,27 @@ func (set *set) scenery(name string, seed uint64, at maths.Vec, scale float64) e
 		}
 		return nil
 	}
-	kind, err := manufacture.KindNamed(name)
+	var kind manufacture.Kind
+	var err error
+	detail := "quick"
+	family := ""
+	switch name {
+	case "coast-redwood":
+		family, detail = "conifer", "clumps"
+	case "chaparral-brush", "valley-oak", "manzanita":
+		family = "seasonal"
+	}
+	if family != "" {
+		books, bookErr := sceneryBooks()
+		if bookErr != nil {
+			return bookErr
+		}
+		kind, err = books[family].New(manufacture.PlantOptions{Species: name})
+	} else {
+		kind, err = manufacture.KindNamed(name)
+	}
 	if err != nil {
 		return err
-	}
-	detail := "quick"
-	if name == "coast-redwood" {
-		detail = "clumps"
 	}
 	object, err := manufacture.MakeWithComplexity(kind, manufacture.Sow(seed), detail)
 	if err != nil {

@@ -40,8 +40,14 @@ func (plan plan) checkComposition() error {
 	site := plan.Site
 	names := make(map[string]bool)
 	for _, object := range site.Objects {
-		if _, err := manufacture.KindNamed(object.Kind); err != nil {
-			return err
+		if object.Plant != nil {
+			if object.Kind != "" || object.Plant.binding == nil {
+				return fmt.Errorf("island: object %q has an invalid plant snapshot", object.Name)
+			}
+		} else {
+			if _, err := manufacture.KindNamed(object.Kind); err != nil {
+				return err
+			}
 		}
 		if names[object.Name] {
 			return fmt.Errorf("island: duplicate site object %q", object.Name)
@@ -53,7 +59,7 @@ func (plan plan) checkComposition() error {
 			return fmt.Errorf("island: crown material-area matching needs the crown floor and an explicit sampling side")
 		}
 		for _, member := range forest.Mixture {
-			if _, err := manufacture.KindNamed(member.Kind); err != nil {
+			if _, err := forestPlant(member.Kind); err != nil {
 				return err
 			}
 		}

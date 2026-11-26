@@ -319,8 +319,9 @@ func boxes(world *thing.World, said set.World,
 		if err != nil {
 			return fmt.Errorf("box %s: %w", each.Name(), err)
 		}
-		world.Add(thing.Thing{Shape: shaped, Material: worn[each.Material()],
+		part := world.Add(thing.Thing{Shape: shaped, Material: worn[each.Material()],
 			Motion: thing.Still(boxPlace(each, shift))})
+		world.RecordAuthor(part, thing.AuthorRef{Collection: "scene.world.boxes", Name: each.Name()})
 	}
 	return nil
 }
@@ -367,8 +368,9 @@ func spheres(world *thing.World, said set.World,
 		if name, carried := each.Motion(); carried {
 			moving = keyed(runs[name], start, shift)
 		}
-		world.Add(thing.Thing{Shape: shape.Sphere{Radius: each.Radius()},
+		part := world.Add(thing.Thing{Shape: shape.Sphere{Radius: each.Radius()},
 			Material: worn[each.Material()], Motion: moving})
+		world.RecordAuthor(part, thing.AuthorRef{Collection: "scene.world.spheres", Name: each.Name()})
 	}
 	return nil
 }

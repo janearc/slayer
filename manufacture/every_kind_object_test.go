@@ -38,12 +38,11 @@ func askedBoth(row kind) error {
 	return nil
 }
 
-// TestEveryKindIsAnObjectAndTheHonestOnesSayTheirSize walks every kind the
-// manufactory lists and checks each is held as a maker, which is the base
-// type with extent and seen. Of them it asks the extent and the sight only
-// of the shore kinds, which say their size from their recipe: asking each
-// of the rest makes it whole. A kind added without the two methods does
-// not build.
+// TestEveryKindIsAnObjectAndTheHonestOnesSayTheirSize checks every listed
+// kind has a maker with an explicit extent or declared greedy fallback. It
+// asks for extent and sight only from shore kinds, which size themselves
+// from their recipes; asking the rest makes each one whole. A new undeclared
+// recipe fails this check.
 func TestEveryKindIsAnObjectAndTheHonestOnesSayTheirSize(t *testing.T) {
 	for _, name := range kindNames() {
 		row, err := kindNamed(name)
@@ -52,10 +51,14 @@ func TestEveryKindIsAnObjectAndTheHonestOnesSayTheirSize(t *testing.T) {
 		}
 		if row.how == nil {
 			t.Errorf("%s is not held as the base type", name)
+			continue
+		}
+		if _, has := row.how.(interface{ extent(seed) (maths.Box, error) }); !has && !declaredGreedy(row.how) {
+			t.Errorf("%s: %T has no declared extent", name, row.how)
 		}
 	}
 	for _, name := range shoreKinds {
-		row, err := kindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
@@ -92,5 +95,31 @@ func TestAKindWithABadBoxOrNoMakerIsReported(t *testing.T) {
 	}
 	if err := askedBoth(kind{name: "none"}); !errors.Is(err, errKind) {
 		t.Errorf("a kind with no maker gave %v, want %v", err, errKind)
+	}
+}
+
+// undeclaredExtentMaker witnesses that absence of an extent is never an
+// implicit authorization to build a specimen while planning.
+type undeclaredExtentMaker struct{ calls *int }
+
+func (row undeclaredExtentMaker) made(seed) (good, error) {
+	*row.calls++
+	return good{}, nil
+}
+
+func TestUndeclaredMakerRefusesExtentWithoutBuilding(t *testing.T) {
+	calls := 0
+	row := kind{name: "undeclared", how: undeclaredExtentMaker{&calls}}
+	if _, err := extentOf(row, sow(1)); err == nil {
+		t.Fatal("undeclared maker gave an extent")
+	}
+	if calls != 0 {
+		t.Fatalf("undeclared maker built %d times", calls)
+	}
+	if _, err := seenOf(row, sow(1), maths.Local(), lookingDown()); err == nil {
+		t.Fatal("undeclared maker was seen")
+	}
+	if calls != 0 {
+		t.Fatalf("sight built undeclared maker %d times", calls)
 	}
 }

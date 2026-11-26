@@ -12,10 +12,12 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 200, altitude: 35}
+  recipes:
+    profile-great-frigatebird-gliding: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: great-frigatebird, pose: gliding}}
   set:
     things:
       frigatebird:
-        kind: bird-great-frigatebird-gliding
+        recipe: profile-great-frigatebird-gliding
         seed: 7
         heading: {value: 0, unit: deg}
         position: {east: {value: 0, unit: m}, north: {value: 0, unit: m}, up: {value: 3, unit: m}}

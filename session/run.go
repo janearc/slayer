@@ -7,6 +7,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"image"
 	"io"
 	"math"
 	"os"
@@ -21,7 +22,6 @@ import (
 	"github.com/janearc/slayer/globe"
 	"github.com/janearc/slayer/gpu"
 	"github.com/janearc/slayer/interfaces/file"
-	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/noise"
 	"github.com/janearc/slayer/ninjafilm/lens"
@@ -62,6 +62,8 @@ type asked struct {
 	variety                int
 	from, wide, tilt       float64
 	width, height, samples int
+	exactSamples           int
+	region                 *image.Rectangle
 	night, onGPU, above    bool
 	nativeShadows          bool
 	nativeMeshes           bool
@@ -124,6 +126,8 @@ type asked struct {
 	// so that stood is its table, empty or not.
 	stood     []standing
 	stoodKept bool
+	// authoredOrigins are the actual staged anchors for named set things.
+	authoredOrigins map[string]maths.Vec
 	// camera is the set's camera a job names, which stands in place of
 	// its first; nothing is the first
 	camera string
@@ -424,7 +428,7 @@ func (given asked) sound() error {
 	if err := given.terrain.sound(given.set); err != nil {
 		return err
 	}
-	for _, name := range manufacture.KindNames() {
+	for _, name := range flagKinds() {
 		if count := given.counts[name]; count < 0 {
 			return fmt.Errorf("%w: %d of %s", errAsked, count, name)
 		}
@@ -627,7 +631,7 @@ func (made tally) String() string {
 // swaps with one at or below it.
 func order(given asked) []string {
 	var names []string
-	for _, name := range manufacture.KindNames() {
+	for _, name := range flagKinds() {
 		for range given.counts[name] {
 			names = append(names, name)
 		}
@@ -880,6 +884,23 @@ func lensFor(given asked) film.Sensor {
 func drawMeasured(world *thing.World, given asked,
 	across float64) (*frame.Frame, gpu.Profile, error) {
 	given.placing(world)
+	if given.exactSamples > 0 {
+		if err := exactSamplesRefusal(given); err != nil {
+			return nil, gpu.Profile{}, err
+		}
+		eye, glass := eyeFor(given, across), lensFor(given)
+		if given.onGPU {
+			return gpu.ExactMeasured(world, eye, glass, given.at, given.width,
+				given.height, given.exactSamples, given.initialMedia)
+		}
+		keeping := trace.Keeping{}
+		if given.keeping != nil {
+			keeping = *given.keeping
+		}
+		picture, err := trace.ExactKept(world, eye, glass, given.at, given.width,
+			given.height, given.exactSamples, given.initialMedia, keeping)
+		return picture, gpu.Profile{}, err
+	}
 	if err := refuseGPUInitialMediaAperture(given); err != nil {
 		return nil, gpu.Profile{}, err
 	}
@@ -887,6 +908,24 @@ func drawMeasured(world *thing.World, given asked,
 		return nil, gpu.Profile{}, err
 	}
 	eye, glass := eyeFor(given, across), lensFor(given)
+	if given.region != nil {
+		if err := regionRefusal(given); err != nil {
+			return nil, gpu.Profile{}, err
+		}
+		if given.onGPU {
+			// GPU bands use the session's watch for progress and cancellation;
+			// unlike processor rows, they are not retained for a later draw.
+			return gpu.SampledRegion(gpu.Software, world, eye, glass, given.at,
+				given.width, given.height, given.samples, *given.region)
+		}
+		if given.keeping == nil {
+			return nil, gpu.Profile{}, errors.New("region: a cancellable row keeper is required")
+		}
+		picture, err := trace.SampledRegionKept(world, eye, glass, given.at,
+			given.width, given.height, given.samples, *given.region,
+			given.initialMedia, *given.keeping)
+		return picture, gpu.Profile{}, err
+	}
 	if given.composite != nil {
 		if len(given.initialMedia) > 0 {
 			return nil, gpu.Profile{}, errors.New(
@@ -951,6 +990,14 @@ func drawMeasured(world *thing.World, given asked,
 	picture, err := sampled(world, given, eye, glass, given.at, given.width,
 		given.height, given.samples)
 	return picture, gpu.Profile{}, err
+}
+
+// exactSamplesRefusal prevents a drawing path from ignoring the total count.
+func exactSamplesRefusal(given asked) error {
+	if given.glass != nil || given.frame != nil || given.region != nil || given.wire || given.composite != nil || given.optics.opened != nil || given.optics.closing != nil || given.restir || given.skyLooks || given.fastLighting || given.cachedLighting || given.nativeMeshes || given.nativeShadows {
+		return errors.New("exact samples: this renderer or drawing mode is not supported yet")
+	}
+	return nil
 }
 
 // sampled preserves the legacy air path and uses the explicit trace API only

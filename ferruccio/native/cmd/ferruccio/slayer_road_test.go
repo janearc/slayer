@@ -19,10 +19,10 @@ func noSettings(t *testing.T) string {
 	return home
 }
 
-func TestProofThatRendersRefusesWithoutACacheFolderFromAnyPlace(t *testing.T) {
+func TestProofUsingSlayerRefusesWithoutACacheFolderFromAnyPlace(t *testing.T) {
 	noSettings(t)
 	for _, render := range []string{"--render", "--full"} {
-		code, output := runAtelier("proof", "--out", "unused.png", render, "--file", "source.yaml")
+		code, output := runAtelier("proof", "--out", "unused.png", render, "--file", "source.yaml", "--preview-transport", "slayer")
 		for _, want := range []string{"--cache", "SLAYER_CACHE", "Settings"} {
 			if code == 0 || !strings.Contains(output, want) {
 				t.Fatalf("proof %s without a cache folder returned %d, and the line lacks %s: %s", render, code, want, output)

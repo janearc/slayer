@@ -19,10 +19,12 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 160, altitude: 45}
+  recipes:
+    profile-walrus-hauled-out: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: walrus, pose: hauled-out}}
   set:
     things:
       walrus:
-        kind: walrus-fresh-5-hauled-out
+        recipe: profile-walrus-hauled-out
         seed: 17
         heading: {value: 0, unit: deg}
         position:

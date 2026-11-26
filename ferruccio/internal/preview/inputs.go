@@ -23,13 +23,17 @@ func (plan *Plan) declaredInputs() ([]string, error) {
 		return nil, os.ErrInvalid
 	}
 	scene := field(tree.Content[0], "scene")
+	base := filepath.Dir(plan.Input)
+	if plan.relocated {
+		base = filepath.Dir(plan.Source)
+	}
 	add := func(node *yaml.Node) {
 		if node == nil || node.Kind != yaml.ScalarNode || node.Tag != "!!str" || node.Value == "" {
 			return
 		}
 		path := node.Value
 		if !filepath.IsAbs(path) {
-			path = filepath.Join(filepath.Dir(plan.Input), path)
+			path = filepath.Join(base, path)
 		}
 		path = filepath.Clean(path)
 		for _, known := range inputs {

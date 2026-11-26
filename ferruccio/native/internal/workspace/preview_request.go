@@ -11,7 +11,7 @@ import (
 func (work *Workspace) previewRequest(now time.Time) preview.Request {
 	request := preview.Request{
 		Path: work.state.path, Text: work.state.document.Text(), Specimen: work.specimen,
-		OutputRoot: work.options.Evidence, DirectoryPrefix: previewDirectoryPrefix(now, work.options.Tools.Agent),
+		OutputRoot: work.evidenceFolder(), DirectoryPrefix: previewDirectoryPrefix(now, work.options.Tools.Agent),
 	}
 	if work.composition == "play" {
 		request.Profile = work.ownRender(preview.Profile{Width: 640, Height: 400})

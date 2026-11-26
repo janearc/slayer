@@ -16,11 +16,11 @@ func TestNativeMaturityCountsSharedLooks(t *testing.T) {
 	}{
 		// the walrus: the hide, and each side's head parts each with a
 		// material of its own
-		{"bay-seal", 3}, {"walrus-fresh-5", 1 + 2*walrusHeadPartCount},
+		{"bay-seal", 3}, {"walrus-fresh-5", 9},
 		{"orca-clean-05", 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			row, err := KindNamed(tc.name)
+			row, err := referenceNativeKind(tc.name)
 			if err != nil {
 				t.Fatal(err)
 			}

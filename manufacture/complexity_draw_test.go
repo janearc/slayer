@@ -11,7 +11,7 @@ import (
 
 func TestComplexityKeepsTheSpecimenExtentAndQuickGeometry(t *testing.T) {
 	for _, name := range []string{"spruce", "norway", "coast-redwood", "giant-sequoia", "coast-redwood-shoot", "giant-sequoia-shoot"} {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatal(err)
 		}

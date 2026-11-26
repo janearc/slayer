@@ -23,11 +23,14 @@ type Name string
 const (
 	Cache      Name = "cache"
 	Shelf      Name = "shelf"
+	Data       Name = "data"
 	Slayer     Name = "slayer"
 	Examples   Name = "examples"
 	Theme      Name = "theme"
 	Renderer   Name = "renderer"
 	Processors Name = "processors"
+	Queue      Name = "queue"
+	Evidence   Name = "evidence"
 )
 
 // Kind is how a person chooses a setting's value: a folder or an executable
@@ -70,8 +73,11 @@ const (
 // what Ferruccio did before there were settings: the CPU renderer on two
 // processors.
 var Keys = []Key{
-	{Name: Cache, Label: "Cache folder", Kind: Folder, Flag: "cache", Variable: "SLAYER_CACHE", Why: "where Slayer keeps what it can work out again; it will not draw without one"},
+	{Name: Queue, Label: "Render queue", Kind: Folder, Flag: "azazel-queue", Variable: "FERRUCCIO_AZAZEL_QUEUE", Why: "the shared Azazel queue used to render; its worker must be running"},
+	{Name: Evidence, Label: "Render output", Kind: Folder, Flag: "evidence", Variable: "FERRUCCIO_EVIDENCE", Why: "where rendered pictures and their receipts are saved"},
+	{Name: Cache, Label: "Cache folder", Kind: Folder, Flag: "cache", Variable: "SLAYER_CACHE", Why: "where Slayer keeps reusable work; required for direct rendering"},
 	{Name: Shelf, Label: "Source shelf", Kind: Folder, Flag: "shelf", Variable: "SLAYER_SHELF", Why: "the folder of source papers and data some scenes cite; optional"},
+	{Name: Data, Label: "Scene data", Kind: Folder, Flag: "data", Variable: "SLAYER_DATA", Why: "the folder of external data used by some scenes"},
 	{Name: Slayer, Label: "Slayer", Kind: Executable, Flag: "slayer", Why: "the Slayer program that draws your pictures"},
 	{Name: Examples, Label: "Examples folder", Kind: Folder, Flag: "examples", Why: "where the starting scenes are found"},
 	{Name: Theme, Label: "Theme", Kind: Choice, Flag: "theme", Why: "the colours of the window"},
@@ -162,8 +168,11 @@ func (value *tail) SetLine(line config.Line) error {
 
 // fileValues is what the settings file may say.
 type fileValues struct {
+	Queue      tail `config:"queue,0,tail" help:"the shared Azazel render queue"`
+	Evidence   tail `config:"evidence,0,tail" help:"the folder for rendered pictures and receipts"`
 	Cache      tail `config:"cache,0,tail" help:"the folder Slayer keeps what it can work out again in"`
 	Shelf      tail `config:"shelf,0,tail" help:"the folder of source papers and data"`
+	Data       tail `config:"data,0,tail" help:"the folder of external scene data"`
 	Slayer     tail `config:"slayer,0,tail" help:"the Slayer executable"`
 	Examples   tail `config:"examples,0,tail" help:"the folder of starting scenes"`
 	Theme      tail `config:"theme,0,tail" help:"the colour theme"`
@@ -171,16 +180,39 @@ type fileValues struct {
 	Processors tail `config:"processors,0,tail" help:"2, 4, 8 or all"`
 }
 
+// wordProcessorsValues accepts the established Game-style "processors 4"
+// spelling while the app's saved form continues to use a tail. Puzzlemouth
+// reads and validates both complete schemas, including every other setting.
+type wordProcessorsValues struct {
+	Queue      tail   `config:"queue,0,tail" help:"the shared Azazel render queue"`
+	Evidence   tail   `config:"evidence,0,tail" help:"the folder for rendered pictures and receipts"`
+	Cache      tail   `config:"cache,0,tail" help:"the folder Slayer keeps what it can work out again in"`
+	Shelf      tail   `config:"shelf,0,tail" help:"the folder of source papers and data"`
+	Data       tail   `config:"data,0,tail" help:"the folder of external scene data"`
+	Slayer     tail   `config:"slayer,0,tail" help:"the Slayer executable"`
+	Examples   tail   `config:"examples,0,tail" help:"the folder of starting scenes"`
+	Theme      tail   `config:"theme,0,tail" help:"the colour theme"`
+	Renderer   tail   `config:"renderer,0,tail" help:"cpu or gpu"`
+	Processors string `config:"processors,1" help:"2, 4, 8 or all"`
+}
+
 // schema is made once from fileValues.
 var schema, schemaError = config.NewSchema[fileValues]()
+var wordProcessorsSchema, wordProcessorsSchemaError = config.NewSchema[wordProcessorsValues]()
 
 // valueOf is the file's value for a setting.
 func (values fileValues) valueOf(name Name) string {
 	switch name {
+	case Queue:
+		return string(values.Queue)
+	case Evidence:
+		return string(values.Evidence)
 	case Cache:
 		return string(values.Cache)
 	case Shelf:
 		return string(values.Shelf)
+	case Data:
+		return string(values.Data)
 	case Slayer:
 		return string(values.Slayer)
 	case Examples:
@@ -236,8 +268,8 @@ func entryOf(key Key, path string, file fileValues, flag, environment Lookup) En
 // readFile reads the file at path, or says why it cannot.
 func readFile(path string) (fileValues, string) {
 	var values fileValues
-	if schemaError != nil {
-		return values, schemaError.Error()
+	if err := errors.Join(schemaError, wordProcessorsSchemaError); err != nil {
+		return values, err.Error()
 	}
 	raw, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -247,7 +279,14 @@ func readFile(path string) (fileValues, string) {
 		return values, err.Error()
 	}
 	if err := schema.Read(path, raw, &values); err != nil {
-		return fileValues{}, err.Error()
+		var legacy wordProcessorsValues
+		if wordErr := wordProcessorsSchema.Read(path, raw, &legacy); wordErr != nil {
+			return fileValues{}, err.Error()
+		}
+		return fileValues{Queue: legacy.Queue, Evidence: legacy.Evidence,
+			Cache: legacy.Cache, Shelf: legacy.Shelf, Data: legacy.Data, Slayer: legacy.Slayer,
+			Examples: legacy.Examples, Theme: legacy.Theme, Renderer: legacy.Renderer,
+			Processors: tail(legacy.Processors)}, ""
 	}
 	return values, ""
 }

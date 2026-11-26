@@ -50,21 +50,25 @@ func toolDrawing(ctx context.Context, drawing drawer) *pzm.Tool {
 		verb.Changes, verb.ThisMachine, verb.NoOne, verb.FullGPU)
 	made.Verb("list", verb.NoShort, "list the available specimens",
 		"# list\n\nNames, descriptions and supported detail levels.\n",
-		"Example_list", reads, list)
+		"Example_list", reads, list, pzm.Value("models", verb.NoShort, "directory of model books"))
 	app := application{context: ctx, drawer: drawing}
 	made.Verb("resources", verb.NoShort, "audit geometry storage for every model representation",
 		"# resources\n\nJSON lines for each advertised detail, seed 1, without drawing.\nCounts shared geometry once and reports construction allocations separately.\nThese are not native or whole-process working-set estimates. Failed rows remain visible.\n",
-		"Example_resources", reads, resources)
+		"Example_resources", reads, resources, pzm.Value("models", verb.NoShort, "directory of model books"))
 	made.Verb("inventory", verb.NoShort, "measure model parts and report maturity gaps",
 		"# inventory\n\nJSON inventory at quick detail, seed 1. Optional kind names select models.\nPart counts preserve panels and instances; maturity review remains explicit.\n",
-		"Example_inventory", reads, inventory)
+		"Example_inventory", reads, inventory, pzm.Value("models", verb.NoShort, "directory of model books"))
 	made.Verb("census", verb.NoShort, "compare researched missions with the factory",
 		"# census\n\nJSON report from a cited, explicitly incomplete mission survey.\nOptional mission kind names select rows. Unlaunched concepts remain eligible.\n",
 		"Example_census", reads, census)
 	made.Verb("render", verb.NoShort, "render a searchable specimen book",
 		renderHelp, "Example_render", draws, app.render,
+		pzm.Value("renderer", verb.NoShort,
+			"native GPU (default) or cpu"),
 		pzm.Value("plan", verb.NoShort,
 			"checked YAML or JSON render plan"),
+		pzm.Value("models", verb.NoShort,
+			"directory of model books; no embedded fallback"),
 		pzm.Value("out", verb.NoShort,
 			"new directory, or a book to resume; default out/catalogue"))
 	//ninja:vow blade each command says its own facts beside its verbs
@@ -85,8 +89,9 @@ const renderHelp = `# render
 
 Render all named kinds, or the names following render. A plan supplies
 detail levels, camera, lighting and image budgets. The default is a small
-quick-detail book. Native Metal rendering is required; there is no CPU
-fallback. Open the destination's index.html to browse.
+quick-detail book. Native Metal rendering is the default. To trace explicitly
+on the processor, give --renderer cpu; there is no automatic fallback. Open
+the destination's index.html to browse.
 
 A specimen that fails is marked failed on its card with the reason, and
 the run goes on to the next. At the end the run names every specimen that
@@ -104,7 +109,7 @@ refuses it and changes nothing.
 
 // list reads the same checked menu that supplies the rendered book.
 func list(call pzm.Call) error {
-	menu, err := readMenu()
+	menu, err := menuForCall(call)
 	if err != nil {
 		return err
 	}

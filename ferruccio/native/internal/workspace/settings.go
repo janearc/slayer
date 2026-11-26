@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/janearc/slayer/ferruccio/internal/preview"
@@ -27,11 +28,24 @@ func (work *Workspace) renderTools() preview.Tools {
 	tools := work.options.Tools
 	resolved := work.resolved()
 	tools.Slayer = absolutePath(resolved.Value(settings.Slayer), tools.Slayer)
+	tools.Queue = absolutePath(resolved.Value(settings.Queue), tools.Queue)
+	if work.options.PreferQueueClient && tools.Queue != "" {
+		paired := filepath.Join(filepath.Dir(tools.Queue), "bin", "azazel")
+		if info, err := os.Stat(paired); err == nil && info.Mode().IsRegular() && info.Mode().Perm()&0o111 != 0 {
+			tools.Azazel = paired
+		}
+	}
 	tools.Cache = absolutePath(resolved.Value(settings.Cache), tools.Cache)
 	tools.Shelf = absolutePath(resolved.Value(settings.Shelf), tools.Shelf)
+	tools.Data = absolutePath(resolved.Value(settings.Data), tools.Data)
 	tools.Renderer = resolved.Get(settings.Renderer).Value
 	tools.Processors = resolved.Get(settings.Processors).Value
 	return tools
+}
+
+// evidenceFolder follows Settings without requiring the app to restart.
+func (work *Workspace) evidenceFolder() string {
+	return absolutePath(work.resolved().Value(settings.Evidence), work.options.Evidence)
 }
 
 // examplesFolder is the folder of starting scenes now: the settings', or the

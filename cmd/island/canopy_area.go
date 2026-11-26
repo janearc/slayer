@@ -21,7 +21,7 @@ func (site *siteBuilder) canopyAppearance() error {
 	for _, member := range forest.Mixture {
 		totalWeight += member.Weight
 		for variant := 0; variant < forest.Variety; variant++ {
-			key := prototypeKey{kind: member.Kind, detail: "clumps", seed: forest.Seed + uint64(variant)}
+			key := prototypeKey{forest: true, kind: member.Kind, detail: "clumps", seed: forest.Seed + uint64(variant)}
 			value, err := site.load(key)
 			if err != nil {
 				return err

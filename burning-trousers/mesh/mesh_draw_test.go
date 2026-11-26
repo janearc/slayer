@@ -3,18 +3,21 @@
 package mesh_test
 
 import (
+	"fmt"
 	"math"
 	"slices"
 	"testing"
 
 	"github.com/janearc/slayer/burning-trousers/divergence"
 	"github.com/janearc/slayer/burning-trousers/fake"
+	"github.com/janearc/slayer/burning-trousers/specimens"
 	"github.com/janearc/slayer/film"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/scene/shape"
+	"github.com/janearc/slayer/scene/texture"
 	"github.com/janearc/slayer/scene/thing"
 	"github.com/janearc/slayer/trace"
 )
@@ -43,49 +46,194 @@ func made(t *testing.T, name string) []thing.Thing {
 	return things
 }
 
-// Every face of every kind is met where it is, on slayer's mesh and on
-// a shape.Mesh: a face the three eyes never see, behind or under the rest, is
-// held as well as one they do.
-func TestEveryFaceIsMetOnBothMeshes(t *testing.T) {
-	seen := map[*mesh.Mesh]bool{}
+// Every registered kind is made once for the independent face and picture checks.
+// Faces are met on both mesh types; six independently drawn views must agree
+// within the existing pixel and placement tolerances.
+func TestRegisteredMeshReferenceChecks(t *testing.T) {
+	seen := map[shape.Shape]bool{}
 	for _, name := range manufacture.KindNames() {
-		for _, each := range made(t, name) {
-			var meshes []*mesh.Mesh
-			switch held := each.Shape.(type) {
-			case *mesh.Mesh:
-				meshes = append(meshes, held)
-			case *shape.MeshGroup:
-				for _, member := range held.Members() {
-					if mesh, ok := member.Mesh.(*mesh.Mesh); ok {
-						meshes = append(meshes, mesh)
-					} else {
-						t.Fatalf("%s group member is not a mesh: %T", name, member.Mesh)
-					}
+		t.Run(name, func(t *testing.T) {
+			ours := made(t, name)
+			t.Run("faces", func(t *testing.T) {
+				checkFaces(t, name, ours, seen)
+			})
+			t.Run("drawing", func(t *testing.T) {
+				alike(t, name, ours, inRefMesh(t, ours))
+			})
+		})
+	}
+}
+
+// Each checked profile is made once, then independently checked for face
+// intersections, smooth normals and, when the reference supports it, drawing.
+func TestProfileMeshReferenceChecks(t *testing.T) {
+	profiles, err := specimens.Profiles()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profile := range profiles {
+		t.Run(profile.Name, func(t *testing.T) {
+			ours := profileThings(t, profile)
+			t.Run("faces", func(t *testing.T) {
+				checkFaces(t, profile.Name, ours, map[shape.Shape]bool{})
+			})
+			t.Run("normals", func(t *testing.T) {
+				checkProfileSmoothNormals(t, ours)
+			})
+			t.Run("drawing", func(t *testing.T) {
+				if why := cannotCopyProfileShading(ours); why != "" {
+					t.Skip(why)
 				}
+				alike(t, profile.Name, ours, inRefMesh(t, ours))
+			})
+		})
+	}
+}
+
+func profileThings(t *testing.T, profile specimens.Specimen) []thing.Thing {
+	t.Helper()
+	good, err := manufacture.Make(profile.Kind, manufacture.Sow(seed))
+	if err != nil {
+		t.Fatal(err)
+	}
+	things, err := good.Things(maths.Subspace{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return things
+}
+
+// checkFaces reads the constructed points, then independently meets each
+// face on the original and reference meshes.
+func checkFaces(t *testing.T, name string, things []thing.Thing, seen map[shape.Shape]bool) {
+	t.Helper()
+	for _, each := range things {
+		meshes, err := faceMeshes(each.Shape)
+		if err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		for _, held := range meshes {
+			if seen[held] {
+				continue
 			}
-			for _, held := range meshes {
-				if seen[held] {
-					continue
+			seen[held] = true
+			var corners []maths.Vec
+			var faces [][3]int
+			var ours, theirs meeter
+			switch made := held.(type) {
+			case *mesh.Mesh:
+				corners, faces = made.Points(), made.Faces()
+				ours, theirs = made, refMesh(t, corners, faces)
+			case *shape.Mesh:
+				corners, faces = made.Vertices, made.Faces
+				copy, err := mesh.New(corners, faces, nil, false)
+				if err != nil {
+					t.Fatalf("%s: copy of reference mesh: %v", name, err)
 				}
-				seen[held] = true
-				corners, faces := held.Points(), held.Faces()
-				theirs := refMesh(t, corners, faces)
-				missed := unmet(held, theirs, corners, faces)
-				if len(missed) > 0 {
-					t.Errorf("%s: %d of %d faces not met "+
-						"where they are: %v",
-						name, len(missed), len(faces), missed)
-				}
+				ours, theirs = copy, made
+			}
+			missed := unmet(ours, theirs, corners, faces)
+			if len(missed) > 0 {
+				t.Errorf("%s: %d of %d faces not met "+
+					"where they are: %v",
+					name, len(missed), len(faces), missed)
 			}
 		}
 	}
 }
 
-// around is the box around some things standing at the origin.
+// faceMeshes names both mesh types, including group prototypes. Spheres and
+// tubes are analytic shapes with no triangle faces; unknown shapes are not
+// silently treated as if their faces had been checked.
+func faceMeshes(solid shape.Shape) ([]shape.Shape, error) {
+	switch held := solid.(type) {
+	case *mesh.Mesh:
+		if held == nil {
+			return nil, fmt.Errorf("nil production mesh")
+		}
+		return []shape.Shape{solid}, nil
+	case *shape.Mesh:
+		if held == nil {
+			return nil, fmt.Errorf("nil reference mesh")
+		}
+		return []shape.Shape{solid}, nil
+	case shape.Sphere, shape.Tube:
+		return nil, nil
+	case *shape.MeshGroup:
+		if held == nil {
+			return nil, fmt.Errorf("nil mesh group")
+		}
+		var meshes []shape.Shape
+		for _, member := range held.Members() {
+			switch member.Mesh.(type) {
+			case *mesh.Mesh, *shape.Mesh:
+				meshes = append(meshes, member.Mesh)
+			default:
+				return nil, fmt.Errorf("unknown group prototype %T", member.Mesh)
+			}
+		}
+		return meshes, nil
+	default:
+		return nil, fmt.Errorf("unknown shape %T in face comparison", solid)
+	}
+}
+
+// Mixed profile animals can include either mesh type. Both must be read;
+// analytic surfaces have no triangle faces, and unknown shapes are refused.
+func TestFaceComparisonSeesBothMeshTypes(t *testing.T) {
+	points := []maths.Vec{maths.V(0, 0, 0), maths.V(1, 0, 0), maths.V(0, 1, 0)}
+	faces := [][3]int{{0, 1, 2}}
+	production, err := mesh.New(points, faces, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reference, err := shape.NewMesh(points, faces, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	group, err := shape.NewMeshGroup([]shape.MeshMember{{Mesh: production}, {Mesh: reference}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[shape.Shape]bool{}
+	checkFaces(t, "mixed", []thing.Thing{{Shape: reference}, {Shape: group}}, seen)
+	if len(seen) != 2 || !seen[production] || !seen[reference] {
+		t.Fatalf("not every mixed mesh was checked: %v", seen)
+	}
+	for _, analytic := range []shape.Shape{shape.Sphere{Radius: 1}, shape.Tube{Radius: 1, Thick: 1, Height: 1}} {
+		faces, err := faceMeshes(analytic)
+		if err != nil || len(faces) != 0 {
+			t.Fatalf("analytic surface %T: %v, %v", analytic, faces, err)
+		}
+	}
+	if _, err := faceMeshes(shape.Plane{}); err == nil {
+		t.Fatal("unknown shape was silently ignored")
+	}
+	var missing *shape.Mesh
+	if _, err := faceMeshes(missing); err == nil {
+		t.Fatal("nil mesh was accepted")
+	}
+}
+
+// around encloses every thing's placed shape at the frame being drawn.
 func around(things []thing.Thing) maths.Box {
-	box := things[0].Shape.Bounds()
-	for _, each := range things[1:] {
-		box = joined(box, each.Shape.Bounds())
+	var box maths.Box
+	first := true
+	for _, each := range things {
+		local, at := each.Shape.Bounds(), each.At(0)
+		for _, x := range []float64{local.Min.X, local.Max.X} {
+			for _, y := range []float64{local.Min.Y, local.Max.Y} {
+				for _, z := range []float64{local.Min.Z, local.Max.Z} {
+					point := at.Out(maths.V(x, y, z))
+					one := maths.Box{Min: point, Max: point}
+					if first {
+						box, first = one, false
+					} else {
+						box = joined(box, one)
+					}
+				}
+			}
+		}
 	}
 	return box
 }
@@ -133,18 +281,56 @@ func drawn(t *testing.T, things []thing.Thing, eye maths.Subspace,
 	return picture
 }
 
-// Every kind drawn on slayer's mesh is the same faces drawn on a shape.Mesh,
-// from each side and in each lighting: not one pixel placed apart, and
-// none past one just-noticeable difference but where a shadow ray grazes.
-// the still budget's two in a hundred is for shortcuts that trade
-// light for time; this is no shortcut, so a pixel past one jnd is a
-// face met differently, and is to be looked at. three hundred pixels
-// of each picture at least are the thing, so the pixels compared are
-// its; a log seen end on is few more.
-func TestSlayersMeshDrawsWhatAShapeMeshDoes(t *testing.T) {
-	for _, name := range manufacture.KindNames() {
-		ours := made(t, name)
-		alike(t, name, ours, inRefMesh(t, ours))
+func cannotCopyProfileShading(things []thing.Thing) string {
+	for _, each := range things {
+		var meshes []*mesh.Mesh
+		switch held := each.Shape.(type) {
+		case *mesh.Mesh:
+			meshes = append(meshes, held)
+		case *shape.MeshGroup:
+			for _, member := range held.Members() {
+				if part, ok := member.Mesh.(*mesh.Mesh); ok {
+					meshes = append(meshes, part)
+				}
+			}
+		}
+		for _, held := range meshes {
+			if held.Posed() && each.Material != nil && each.Material.Texture != nil {
+				return "reference mesh cannot preserve posed texture coordinates"
+			}
+			if held.Smooth() {
+				return "reference mesh lacks smooth shadow-terminator correction"
+			}
+		}
+	}
+	return ""
+}
+
+func TestReferenceDistinguishesUnsupportedShading(t *testing.T) {
+	points := []maths.Vec{maths.V(0, 0, 0), maths.V(1, 0, 0), maths.V(0, 1, 0)}
+	faces := [][3]int{{0, 1, 2}}
+	rest := []maths.Vec{maths.V(0, 0, 1), maths.V(1, 0, 1), maths.V(0, 1, 1)}
+	posed, err := mesh.NewWithRestPoints(points, rest, faces, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	flat, err := mesh.New(points, faces, nil, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	paint := &thing.Material{Texture: texture.Checker(1, maths.Grey(0), maths.Grey(1))}
+	if cannotCopyProfileShading([]thing.Thing{{Shape: posed, Material: paint}}) == "" {
+		t.Fatal("posed paint was accepted by a reference with no rest points")
+	}
+	if why := cannotCopyProfileShading([]thing.Thing{{Shape: flat, Material: paint}, {Shape: posed}}); why != "" {
+		t.Fatalf("ordinary paint or unpainted pose refused: %s", why)
+	}
+	smooth, err := mesh.New(points, faces, []maths.Vec{maths.ZAxis, maths.ZAxis, maths.ZAxis}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if why := cannotCopyProfileShading([]thing.Thing{{Shape: smooth}}); why != "reference mesh lacks smooth shadow-terminator correction" {
+		t.Fatalf("smooth reference is not distinguished: %q", why)
 	}
 }
 

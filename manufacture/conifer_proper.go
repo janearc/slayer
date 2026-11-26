@@ -204,11 +204,3 @@ func branchGeometry(base geom.Vec3, b Branch) []geom.Triangle {
 
 	return triangles
 }
-
-// max is the larger of two whole numbers.
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}

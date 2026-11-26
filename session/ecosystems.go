@@ -94,7 +94,7 @@ func (stage *staging) ecosystemCandidate(request set.Ecosystem,
 	if err := stage.add(one, row.Kind(), pose, candidate.Seed, false); err != nil {
 		return groveTree{}, false, err
 	}
-	stage.note(request.Name(), row.Kind(), place)
+	stage.note(request.Name(), stage.reportedKind(row.Kind(), candidate.Recipe), place)
 	return groveTree{at: place, bounds: one.bounds}, true, nil
 }
 

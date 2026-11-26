@@ -1,10 +1,21 @@
 package job
 
 import (
+	"image"
 	"math"
 
 	"github.com/janearc/slayer/maths"
 )
+
+// Region is the rectangle of the full picture the job asks to draw.
+func (made Film) Region() (image.Rectangle, bool) {
+	region := made.wire.Region
+	if region == nil {
+		return image.Rectangle{}, false
+	}
+	return image.Rect(region.Left, region.Top, region.Left+region.Width,
+		region.Top+region.Height), true
+}
 
 // Film is the picture's size, rays and lens, as the job says them, its
 // preset's size counted as said. What it leaves unsaid comes from the
@@ -44,6 +55,9 @@ func (made Film) Height() (int, bool) { return said(made.wire.Height) }
 
 // Rays is the rays along each side of a pixel, and whether the job said.
 func (made Film) Rays() (int, bool) { return said(made.wire.Rays) }
+
+// Samples is the exact total samples per pixel, and whether the job said it.
+func (made Film) Samples() (int, bool) { return said(made.wire.Samples) }
 
 // Wide is the angle across the picture in degrees, and whether the job
 // said it.

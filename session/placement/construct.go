@@ -45,5 +45,9 @@ func SpaceAt(each set.Thing) maths.Subspace {
 	if angle, said := each.Heading(); said {
 		turn = -angle * maths.Degree
 	}
-	return maths.Subspace{Origin: maths.V(east, up, -north), Orientation: maths.About(maths.YAxis, turn)}
+	at := maths.Subspace{Origin: maths.V(east, up, -north), Orientation: maths.About(maths.YAxis, turn)}
+	if scale, has := each.Scale(); has {
+		at.Scale = scale
+	}
+	return at
 }

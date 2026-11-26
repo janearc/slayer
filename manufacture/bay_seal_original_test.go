@@ -19,7 +19,15 @@ import (
 // independent reference lets the specimen be checked without reviving a
 // retired named scene or deriving the expected values from the new maker.
 func TestBaySealMatchesOriginalBayScene(t *testing.T) {
-	kind, err := manufacture.KindNamed("bay-seal")
+	name, raw, err := manufacture.EmbeddedAnimalBook("pinniped")
+	if err != nil {
+		t.Fatal(err)
+	}
+	book, err := manufacture.ReadPinnipedProfiles(name, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	kind, err := book.NewPinnipedStudy("harbor-seal", "bay")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -64,8 +64,8 @@ func TestLegacyCoupledSparkRefusalsPointToTheSparkBlock(t *testing.T) {
 func TestLegacyFrontRefusesAStandWithNoDeclaredCount(t *testing.T) {
 	base := legacyNumericFixture(frontFixture(t))
 	requireLegacyNumericControl(t, base)
-	raw := strings.Replace(base, "kind: coast-redwood, count: 3, seed: 2",
-		"kind: coast-redwood, seed: 2", 1)
+	raw := strings.Replace(base, "recipe: front tree, count: 3, seed: 2",
+		"recipe: front tree, seed: 2", 1)
 	if raw == base {
 		t.Fatal("ineffective empty stand fixture")
 	}

@@ -13,7 +13,7 @@ import (
 
 func TestShortenKeepsTheEndOfALongPathAndMarksTheCut(t *testing.T) {
 	got := shorten("/a/very/long/path/to/the/cache", 12)
-	if utf8.RuneCountInString(got) != 12 || !strings.HasPrefix(got, "…") || !strings.HasSuffix(got, "to/the/cache") {
+	if utf8.RuneCountInString(got) != 12 || !strings.HasPrefix(got, "…") || !strings.HasSuffix(got, "o/the/cache") {
 		t.Fatalf("got %q", got)
 	}
 	if shorten("/short", 12) != "/short" {

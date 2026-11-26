@@ -17,12 +17,14 @@ any of its forms below, and no version of it has been approved as one.
   edge, the beak's tip the spout. `manufacture/gargoyle_hatz.go` folds the
   wings half way and curls them up; the hinge, radius and turn there are
   picked by eye against a render.
-- `HatzFeedbackOne`, `HatzFeedbackTwo`, `HatzFeedback2B`, `HatzFeedbackThree`
-  and `HatzFeedbackFour`: five motion studies, Go functions taking a phase.
-  Only the last is used, by the gargoyle.
-- `HatzegopteryxStudy(fold, seconds, at)`: an earlier standing and flying
-  study with a fold from 0 to 1. It rejects a fold outside that range and
-  any time that is not finite.
+- `HatzDensityStudy`, formerly `HatzFeedbackFour`: the motion study used by
+  the gargoyle. Its builder lives in
+  `manufacture/animals/vertebrates/reptiles/hatzegopteryx/density.go`. Earlier
+  uncalled studies and their tests remain in Git history.
+- The profile-selected composite study: an earlier standing and flying
+  reconstruction with a fold from 0 to 1. It rejects a fold outside that
+  range and any time that is not finite. Its constructor lives at
+  `manufacture/animals/vertebrates/reptiles/hatzegopteryx/composite.go`.
 
 [SOURCES.md](SOURCES.md) lists each source, what it supports and what it does
 not.
@@ -48,7 +50,7 @@ structure, drainage and weathering are not established.
 
 ## How the last motion study is put together
 
-`HatzFeedbackFour` is one closed skin from an additive density field of
+`HatzDensityStudy` is one closed skin from an additive density field of
 masses for trunk, neck, a deeper skull tapering to a long toothless beak,
 longer hindlimb segments and thin wing masses, with eyes and a mouth marked
 on the surface as hypotheses. The rest mesh keeps its indices and coordinates
@@ -82,7 +84,7 @@ numbers, and the motion is authored. It was not compared with a gait.
 ## Earlier builds
 
 Three lines of study were made, each rejected in turn. Their code was
-dropped, except the five motion studies and the earlier study function above.
+dropped, except the final motion study and the earlier study function above.
 
 The first line, five builds, was found on audit to have carried animal
 anatomy, controls and much code from one build to the next, so it does not

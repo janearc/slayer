@@ -358,6 +358,7 @@ type Thing struct {
 	height               float64
 	position             *WorldPosition
 	heading              *float64
+	scale                *float64
 	partSpin             *PartSpin
 	alight               bool
 	space                spaceThing
@@ -379,6 +380,15 @@ func (made Thing) At() (east, north float64) { return made.east, made.north }
 
 // Height is the optional lift above terrain, in metres. Zero stands on it.
 func (made Thing) Height() float64 { return made.height }
+
+// Scale is a dimensionless uniform size and whether it was explicitly given.
+// An omitted scale means one.
+func (made Thing) Scale() (float64, bool) {
+	if made.scale == nil {
+		return 1, false
+	}
+	return *made.scale, true
+}
 
 // Position is the thing's explicit absolute east/north/up coordinate in
 // metres, and whether the set gave one. It is independent of terrain height.
@@ -872,6 +882,12 @@ func (reading reader) things(_, value *yaml.Node) error {
 		}
 		if err == nil && made.partSpin != nil && !reading.spaceCoordinates {
 			err = reading.refuse(valueNode(block, "part-spin"), "part-spin is supported only with setting: space")
+		}
+		if err == nil && made.scale != nil {
+			if !reading.second || !says(block, "east") || !says(block, "north") ||
+				says(block, "place") || says(block, "orbit") || says(block, "around") || says(block, "attitude") || made.partSpin != nil {
+				return reading.refuse(valueNode(block, "scale"), "scale requires an explicit east/north placement without part-spin or attitude")
+			}
 		}
 		if err == nil && reading.second {
 			err = reading.standing(block, made)

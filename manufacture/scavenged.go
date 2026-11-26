@@ -168,7 +168,10 @@ func drawPart(plan cities.ClusterPlan, ask ClusterAsk, rng *rand.Rand,
 	detail string,
 ) (scavengedPart, error) {
 	for range plan.DrawTries {
-		name := drawKind(ask, rng)
+		name, err := drawKind(ask, rng)
+		if err != nil {
+			return scavengedPart{}, err
+		}
 		number := rng.Uint64()
 		turn := randomTurn(rng)
 		if len(ask.Parts) > 0 {
@@ -208,7 +211,7 @@ var (
 func fittingPart(plan cities.ClusterPlan, name string, number uint64,
 	turn maths.Orientation, detail string,
 ) (scavengedPart, error) {
-	made, err := madePart(name, number, detail)
+	made, err := madeDefaultPart(name, number, detail)
 	if err != nil {
 		return scavengedPart{}, err
 	}
@@ -225,9 +228,23 @@ func fittingPart(plan cities.ClusterPlan, name string, number uint64,
 	return turnedPart(name, made, turn)
 }
 
+// madeDefaultPart resolves the private historical default draw, never an
+// explicitly authored part.
+func madeDefaultPart(name string, number uint64, detail string) (good, error) {
+	row, err := scavengedModel(name)
+	if err != nil {
+		return good{}, err
+	}
+	made, err := MakeWithComplexity(row, sow(number), detail)
+	if err != nil {
+		return good{}, fmt.Errorf("manufacture: part %s: %w", name, err)
+	}
+	return made, nil
+}
+
 // drawKind is a kind name drawn from the set's parts by weight if it has
 // any, and otherwise from the catalogue, less the cluster itself.
-func drawKind(ask ClusterAsk, rng *rand.Rand) string {
+func drawKind(ask ClusterAsk, rng *rand.Rand) (string, error) {
 	if len(ask.Parts) > 0 {
 		names := make([]string, 0, len(ask.Parts))
 		var total float64
@@ -239,18 +256,38 @@ func drawKind(ask ClusterAsk, rng *rand.Rand) string {
 		pick := rng.Float64() * total
 		for _, name := range names {
 			if pick -= ask.Parts[name]; pick < 0 {
-				return name
+				return name, nil
 			}
 		}
-		return names[len(names)-1]
+		return names[len(names)-1], nil
 	}
+	models, err := scavengedModels()
+	if err != nil {
+		return "", err
+	}
+	names, err := scavengedCandidateNames(kindNames(), models)
+	if err != nil {
+		return "", err
+	}
+	return names[rng.IntN(len(names))], nil
+}
+
+// scavengedCandidateNames refuses public/private collisions before drawing.
+func scavengedCandidateNames(public []string, models map[string]func() (Kind, error)) ([]string, error) {
 	var names []string
-	for _, name := range kindNames() {
+	for _, name := range public {
+		if _, exists := models[name]; exists {
+			return nil, fmt.Errorf("manufacture: cluster candidate %q is also a public kind", name)
+		}
 		if name != ClusterKind {
 			names = append(names, name)
 		}
 	}
-	return names[rng.IntN(len(names))]
+	for name := range models {
+		names = append(names, name)
+	}
+	slices.Sort(names)
+	return names, nil
 }
 
 // randomTurn is an orientation drawn evenly from all those there are: a

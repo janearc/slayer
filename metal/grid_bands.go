@@ -41,6 +41,33 @@ func (kernel *Kernel) GridBandsSent(width, height, rows, per int,
 	inputs [][]byte, sent func(),
 	consume func(first, down int, samples []float32) error,
 ) error {
+	return kernel.gridBandsSent(0, 0, width, height, rows, per, inputs, sent, consume)
+}
+
+// RegionBandsSent draws a compact grid at a full-grid origin. The kernel sees
+// that origin plus each band's local first row; callbacks receive local rows.
+func (kernel *Kernel) RegionBandsSent(x, y, width, height, rows, per int,
+	inputs [][]byte, sent func(),
+	consume func(first, down int, samples []float32) error,
+) error {
+	if !regionOriginFits(x, y, width, height) {
+		return errGridSize
+	}
+	return kernel.gridBandsSent(x, y, width, height, rows, per, inputs, sent, consume)
+}
+
+// regionOriginFits checks that a dispatch fits its integer coordinates.
+func regionOriginFits(x, y, width, height int) bool {
+	return x >= 0 && y >= 0 && width > 0 && height > 0 &&
+		width <= math.MaxInt32 && height <= math.MaxInt32 &&
+		x <= math.MaxInt32-width && y <= math.MaxInt32-height
+}
+
+// gridBandsSent dispatches a grid in compact bands from the given origin.
+func (kernel *Kernel) gridBandsSent(x, y, width, height, rows, per int,
+	inputs [][]byte, sent func(),
+	consume func(first, down int, samples []float32) error,
+) error {
 	if err := kernel.validBands(width, height, rows, per, inputs, consume); err != nil {
 		return err
 	}
@@ -52,10 +79,14 @@ func (kernel *Kernel) GridBandsSent(width, height, rows, per int,
 	if err != nil {
 		return err
 	}
+	defer C.slayer_metal_grid_close(stream)
+	var why [1024]C.char
+	if C.slayer_metal_grid_origin(stream, C.int(x), C.int(y), &why[0], C.int(len(why))) != 0 {
+		return errors.New("metal: " + C.GoString(&why[0]))
+	}
 	if sent != nil {
 		sent()
 	}
-	defer C.slayer_metal_grid_close(stream)
 	defer runtime.KeepAlive(kernel)
 	samples := make([]float32, width*rows*per)
 	place := func(_, down int) []float32 { return samples[:width*down*per] }

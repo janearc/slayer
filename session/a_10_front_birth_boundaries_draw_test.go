@@ -34,7 +34,7 @@ func particleBoundaryFront(t *testing.T, seed uint64) (retainedFront, embers.Spe
 		t.Fatal("night scene lost following light-cells")
 	}
 	text := strings.Replace(string(raw), "      flame:", string(night[first:first+next])+"      flame:", 1)
-	text = strings.Replace(text, "kind: fern, count: 4", "kind: fern, count: 1", 1)
+	text = strings.Replace(text, "recipe: fixture-fern, count: 4", "recipe: fixture-fern, count: 1", 1)
 	if err := os.WriteFile(fixture.set, []byte(text), 0600); err != nil {
 		t.Fatal(err)
 	}

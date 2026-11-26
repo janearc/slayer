@@ -12,6 +12,86 @@
 # says why, in never. used, never released: the bytes are not shipped.
 
 sources:
+  - key: perez-vega-2024-bridge-reflections
+    title: "Polarised light pollution on river water surfaces caused by artificial light at night from illuminated bridges and surroundings"
+    by: "Catherine Pérez Vega, Franz Hölker, Karolina M. Zielinska-Dabkowska, Andreas Jechow"
+    year: 2024
+    doi: 10.4081/jlimnol.2024.2173
+    from: https://www.jlimnol.it/jlimnol/article/download/2173/2031/18362
+    licence: "CC BY-NC 4.0; local research reference, no redistribution."
+    sha256: cffc16c8a966dfd8d4320e19c344dfcae5a4c92a3bcc8a6e812f2d112d1d6498
+    bytes: 7943775
+    fetched: 2026-11-24
+  - key: lynch-2011-glitter-and-glints
+    title: "Glitter and glints on water"
+    by: "David K. Lynch, David S. P. Dearborn, James A. Lock"
+    year: 2011
+    doi: 10.1364/AO.50.000F39
+    from: https://csuohio.elsevierpure.com/ws/portalfiles/portal/39955766/Glitter%20and%20Glints%20on%20Water.pdf
+    licence: "Author's institutional copy; local study, no redistribution."
+    sha256: 62269c46d29b07f06dcfb773396a48858ee15d0fd56cb6685f469ce4666c182d
+    bytes: 2130887
+    fetched: 2026-11-24
+  - key: bruneton-2010-ocean-lighting
+    title: "Real-time realistic ocean lighting using seamless transitions from geometry to BRDF"
+    by: "Eric Bruneton, Fabrice Neyret, Nicolas Holzschuch"
+    year: 2010
+    doi: 10.1111/j.1467-8659.2009.01618.x
+    from: https://inria.hal.science/inria-00443630v3/document
+    licence: "Authors' institutional copy; local study, no redistribution."
+    sha256: cd254a24ea4d5c67fe9c061decafbe679566c1ed6e6a794cddec916d1a9b2c05
+    bytes: 17338956
+    fetched: 2026-11-24
+  - key: yan-2014-normal-map-glints
+    title: "Rendering glints on high-resolution normal-mapped specular surfaces"
+    by: "Ling-Qi Yan, Miloš Hašan, Wenzel Jakob, Jason Lawrence, Steve Marschner, Ravi Ramamoorthi"
+    year: 2014
+    doi: 10.1145/2601097.2601155
+    from: https://d38rqfq1h7iukm.cloudfront.net/media/papers/Yan2014Rendering.pdf
+    licence: "Authors' publication copy; local study, no redistribution."
+    sha256: 4488b416b83e520fb4d62525bb053a6939ffa2d078820a31db8748e9b32a4095
+    bytes: 15038328
+    fetched: 2026-11-24
+  - key: cox-munk-1954-sea-roughness
+    title: "Measurement of the roughness of the sea surface from photographs of the sun's glitter"
+    by: "Charles Cox, Walter Munk"
+    year: 1954
+    doi: 10.1364/JOSA.44.000838
+    from: https://userpages.umbc.edu/~martins/PHYS650/Cox%20and%20Munk%20Glint%20paper.pdf
+    licence: "Institutional teaching copy; local study, no redistribution."
+    sha256: d0c916266bb3ee46cbe8264c37ba099ac3cbeb8ec1e0e7d85243bce5d1b097b7
+    bytes: 1986916
+    fetched: 2026-11-24
+  - key: quan-fry-1995-seawater-index
+    title: "Empirical equation for the index of refraction of seawater"
+    by: "Xiaohong Quan, Edward S. Fry"
+    year: 1995
+    doi: 10.1364/AO.34.003477
+    from: https://misclab.umeoce.maine.edu/ftp/users/emmanuel/sediment/Tommy/ch_2_ref/QuanandFry1995.pdf
+    licence: "Institutional research copy; local study, no redistribution."
+    sha256: 974b155a6cccbeb694998a8ccc1a05938f8698ecada7af32dfb2f6f86d5efaaa
+    bytes: 108430
+    fetched: 2026-11-24
+  - key: podee-2021-water-reflection-antialiasing
+    title: "Temporal and spatial anti-aliasing for rendering reflections on water waves"
+    by: "Namo Podee, Nelson Max, Kei Iwasaki, Yoshinori Dobashi"
+    year: 2021
+    doi: 10.1007/s41095-021-0204-1
+    from: https://link.springer.com/content/pdf/10.1007/s41095-021-0204-1.pdf
+    licence: "Publisher open-access copy; local study, no redistribution."
+    sha256: 9042d20dcc1e552a818129ab9e63d0f71afa8280397b6e683a57a037a9564c31
+    bytes: 4307403
+    fetched: 2026-11-24
+  - key: veach-guibas-1995-combining-sampling
+    title: "Optimally combining sampling techniques for Monte Carlo rendering"
+    by: "Eric Veach, Leonidas J. Guibas"
+    year: 1995
+    doi: 10.1145/218380.218498
+    from: https://cseweb.ucsd.edu/~viscomp/classes/cse168/sp21/readings/veach.pdf
+    licence: "University teaching copy; local study, no redistribution."
+    sha256: 2967f53c748225a274141bd06ad7275a7719b5fbf6c9b2349bfe785d2c2198d6
+    bytes: 509784
+    fetched: 2026-11-24
   - key: prima-ipac-observatory
     title: PRIMA Observatory
     by: Caltech/IPAC PRIMA

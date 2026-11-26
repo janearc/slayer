@@ -92,10 +92,11 @@ upstream editor repository is currently scaffolding, so the YAML widget is
 local. Upstream Image currently draws a placeholder; Ferruccio’s viewer
 draws actual PNG/JPEG pixels.
 
-gogpu carries one patch, in `patches/`: on macOS the app can start in the
-background without taking focus, for proof and regression windows.
-`ferruccio/scripts/patch-gogpu.sh` applies it to gogpu 0.54.1 from the
-module cache before a build; it is offered upstream.
+gogpu carries patches in `patches/`: on macOS the app can start in the
+background without taking focus, and Command shortcuts do not insert their
+letters into the focused editor. Option text remains available.
+`ferruccio/scripts/patch-gogpu.sh` applies them to gogpu 0.54.1 from the
+module cache before a build; the background patch is offered upstream.
 
 Catalogue `settings.yaml` files use their own schema and renderer. Open the
 file beside its `render.json` receipt to recover the specimen automatically.

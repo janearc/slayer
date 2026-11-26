@@ -12,10 +12,12 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 200, altitude: 35}
+  recipes:
+    profile-grey-heron-gliding: {animal: {family: bird, file: ../../manufacture/animals/vertebrates/dinosaurs/theropods/birds/birds.yaml, species: grey-heron, pose: gliding}}
   set:
     things:
       bird:
-        kind: bird-grey-heron-gliding
+        recipe: profile-grey-heron-gliding
         seed: 7
         heading: {value: 0, unit: deg}
         position:

@@ -54,6 +54,8 @@ type TowerSpec struct {
 	// foot in metres. Each is nought if not pinned.
 	Storeys, Segments int
 	Width             float64
+	// TreeProfiles, when supplied, is the complete checked seasonal tree book.
+	TreeProfiles *PlantProfiles
 }
 
 // TowerSkins are the skins a set may pin a tower to.
@@ -99,8 +101,16 @@ type towerRow struct{ spec TowerSpec }
 // draws a tower once to check the pins, and refuses those it cannot keep.
 func Tower(spec TowerSpec) (Kind, error) {
 	row := towerRow{spec: spec}
-	if _, err := row.drawn(sow(0)); err != nil {
+	tower, err := row.drawn(sow(0))
+	if err != nil {
 		return Kind{}, err
+	}
+	if spec.TreeProfiles != nil {
+		for _, species := range tower.TreeSpecies() {
+			if _, err := seasonalTree(spec.TreeProfiles, species); err != nil {
+				return Kind{}, err
+			}
+		}
 	}
 	return Kind{name: "tower", how: row}, nil
 }
@@ -183,7 +193,7 @@ func (row towerRow) madeLevelled(from seed, pass cities.Pass,
 	if err != nil {
 		return good{}, err
 	}
-	return treed(made, tower.Trees(), func(tree cities.Tree) string {
+	return treed(made, tower.Trees(), row.spec.TreeProfiles, func(tree cities.Tree) string {
 		return treeLevel(pass, place, tree)
 	})
 }
@@ -214,7 +224,7 @@ const treeDetail = "clumps"
 // made as tall as the tower asks and stood where it says, at the detail
 // it is given. A tree of a kind, seed and detail is grown once and placed
 // wherever it is wanted.
-func treed(made good, trees []cities.Tree,
+func treed(made good, trees []cities.Tree, profiles *PlantProfiles,
 	detailOf func(cities.Tree) string) (good, error) {
 	grown := map[string]good{}
 	all := []good{made}
@@ -223,7 +233,7 @@ func treed(made good, trees []cities.Tree,
 		key := fmt.Sprintf("%s %d %s", tree.Kind, tree.Seed, detail)
 		specimen, known := grown[key]
 		if !known {
-			row, err := KindNamed(tree.Kind)
+			row, err := seasonalTree(profiles, tree.Kind)
 			if err != nil {
 				return good{}, err
 			}

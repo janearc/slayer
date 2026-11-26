@@ -109,13 +109,13 @@ func (row fire) made(from seed) (good, error) {
 // from a sprout of the seed, gathered into one thing of one matter.
 func around(where ring, of maker, from seed) (good, error) {
 	var all good
-	for index := range where.across(0) {
-		there := where.place(0, index, from)
+	for index := range where.Across(0) {
+		there := where.Place(0, index, from)
 		one, err := of.made(from.sprout(index, 0))
 		if err != nil {
 			return good{}, err
 		}
-		placed, err := one.placed(there.space)
+		placed, err := one.placed(there)
 		if err != nil {
 			return good{}, err
 		}

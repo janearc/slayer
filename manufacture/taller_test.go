@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/manufacture/plants/conifers"
 	"github.com/janearc/slayer/maths"
 )
 
@@ -19,7 +20,7 @@ import (
 // carry: three times the whorls, each with more branches by whorlFill,
 // each branch longer by branchGrowth.
 func TestATallerSpruceIsGrownNotMagnified(t *testing.T) {
-	short, err := KindNamed("spruce")
+	short, err := testKind("spruce")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,24 +86,24 @@ func TestATallerSpruceIsGrownNotMagnified(t *testing.T) {
 // thick.
 func TestAGrownBranchDoesNotThickenWithItsTrunk(t *testing.T) {
 	set := spruceHabit()
-	set.own = grownGirth
+	set.Own = grownGirth
 	up := mustWhorls(t, 20, 7, set)
-	thin := size{length: measure.Metres(20), girth: measure.Metres(0.4)}
-	stout := size{length: measure.Metres(20), girth: measure.Metres(0.8)}
+	thin := size{Length: measure.Metres(20), Girth: measure.Metres(0.4)}
+	stout := size{Length: measure.Metres(20), Girth: measure.Metres(0.8)}
 	same, all := 0, 0
-	for row := range up.rows() {
-		for index := range up.across(row) {
+	for row := range up.Rows() {
+		for index := range up.Across(row) {
 			var got [2]float64
 			for which, stem := range []size{thin, stout} {
-				at, err := up.at(stem, row, index, sow(5))
+				at, err := up.At(stem, row, index, sow(5))
 				if err != nil {
 					t.Fatal(err)
 				}
-				length := inScene(at.size.length)
-				stemHere := inScene(stem.girth) *
-					(1 - at.space.Origin.Y/inScene(stem.length))
-				want := math.Min(set.own*length, set.girth*stemHere)
-				got[which] = inScene(at.size.girth)
+				length := inScene(at.Size.Length)
+				stemHere := inScene(stem.Girth) *
+					(1 - at.Space.Origin.Y/inScene(stem.Length))
+				want := math.Min(set.Own*length, set.Girth*stemHere)
+				got[which] = inScene(at.Size.Girth)
 				if !(math.Abs(got[which]-want) <= close) {
 					t.Errorf("whorl %d branch %d is %v through, not %v",
 						row, index, got[which], want)
@@ -128,7 +129,7 @@ func TestAGrownBranchDoesNotThickenWithItsTrunk(t *testing.T) {
 // own size. A side branch is foliage on its own axis, its wood the
 // shoots' twigs, as the norway's branchlets are.
 func TestABranchedSpruceCarriesSideBranches(t *testing.T) {
-	spruce, err := KindNamed("spruce")
+	spruce, err := testKind("spruce")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,11 +178,11 @@ func TestAGrownLimbFlows(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	on := place{space: space, size: size{length: measure.Metres(10),
-		girth: measure.Metres(0.1)}}
+	on := place{Space: space, Size: size{Length: measure.Metres(10),
+		Girth: measure.Metres(0.1)}}
 	bent := func(pieces int, droop, wander float64) (sharpest, out float64) {
 		widths := girths(1, 0.75, 0.5, 0.25)
-		bark, err := sleeved(resampled(widths, pieces+1),
+		bark, err := sleeved(conifers.Resampled(widths, pieces+1),
 			5, body)
 		if err != nil {
 			t.Fatal(err)
@@ -190,18 +191,18 @@ func TestAGrownLimbFlows(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		made.wander = wander
-		runs, err := made.runs(on)
+		made.Wander = wander
+		runs, err := made.Runs(on)
 		if err != nil {
 			t.Fatal(err)
 		}
 		plane := way.Cross(maths.Up).Unit()
 		for at, run := range runs {
-			along := run.space.Orientation.Out(maths.YAxis)
+			along := run.Space.Orientation.Out(maths.YAxis)
 			component := math.Abs(along.Dot(plane))
 			out = math.Max(out, component)
 			if at > 0 {
-				before := runs[at-1].space.Orientation.Out(maths.YAxis)
+				before := runs[at-1].Space.Orientation.Out(maths.YAxis)
 				alignment := before.Dot(along)
 				turn := math.Acos(math.Min(1, alignment))
 				sharpest = math.Max(sharpest, turn)
@@ -225,7 +226,7 @@ func TestAGrownLimbFlows(t *testing.T) {
 // mustKind is the kind of a name, or the test stops.
 func mustKind(t *testing.T, name string) kind {
 	t.Helper()
-	row, err := KindNamed(name)
+	row, err := testKind(name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +235,7 @@ func mustKind(t *testing.T, name string) kind {
 
 // only a whorled tree grows taller, by a number of times above nought.
 func TestWhatCannotGrowTallerIsRefused(t *testing.T) {
-	spruce, err := KindNamed("spruce")
+	spruce, err := testKind("spruce")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,7 +245,7 @@ func TestWhatCannotGrowTallerIsRefused(t *testing.T) {
 				errTaller)
 		}
 	}
-	log, err := KindNamed("log")
+	log, err := testKind("log")
 	if err != nil {
 		t.Fatal(err)
 	}

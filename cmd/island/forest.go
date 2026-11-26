@@ -32,7 +32,7 @@ func (site *siteBuilder) forest(minimum, maximum float64) error {
 	for index, member := range forest.Mixture {
 		mixture[index] = biome.Species{Recipe: member.Kind, Weight: member.Weight}
 		for variant := 0; variant < forest.Variety; variant++ {
-			value, err := site.load(prototypeKey{kind: member.Kind, detail: "hull", seed: forest.Seed + uint64(variant)})
+			value, err := site.load(prototypeKey{forest: true, kind: member.Kind, detail: "hull", seed: forest.Seed + uint64(variant)})
 			if err != nil {
 				return err
 			}
@@ -147,7 +147,7 @@ func (site *siteBuilder) forest(minimum, maximum float64) error {
 			site.record.Aggregated++
 			continue
 		}
-		value, err := site.load(prototypeKey{kind: candidate.Recipe, detail: detail, seed: forest.Seed + uint64(variant)})
+		value, err := site.load(prototypeKey{forest: true, kind: candidate.Recipe, detail: detail, seed: forest.Seed + uint64(variant)})
 		if err != nil {
 			return err
 		}

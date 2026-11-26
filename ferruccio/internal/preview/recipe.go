@@ -33,7 +33,11 @@ func (plan *Plan) writeRecipe(tools Tools, request queueRequest) error {
 	fmt.Fprintln(&text, "Prepared preview submission; acceptance and execution require owner acknowledgement/status.")
 	fmt.Fprintf(&text, "\nExact producer argv (JSON array, never a shell):\n%s\n", exact)
 	fmt.Fprintf(&text, "Working directory: %q\nQueue: %q\nAgent: %s\nRequest key: %s\n", request.Directory, tools.Queue, request.Agent, request.Key)
-	fmt.Fprintf(&text, "Requested image: %dx%d; rays: %d per axis.\nRequested quality: %s\nRequested renderer: %s\nLane: %s\nTimeout: %d seconds.\n", profile.Width, profile.Height, profile.samples(), quality, renderer, request.Lane, request.TimeoutSeconds)
+	sampling := fmt.Sprintf("rays: %d per axis", profile.samples())
+	if profile.Full && profile.Samples > 0 {
+		sampling = fmt.Sprintf("samples: %d per pixel", profile.Samples)
+	}
+	fmt.Fprintf(&text, "Requested image: %dx%d; %s.\nRequested quality: %s\nRequested renderer: %s\nLane: %s\nTimeout: %d seconds.\n", profile.Width, profile.Height, sampling, quality, renderer, request.Lane, request.TimeoutSeconds)
 	fmt.Fprintf(&text, "\nSource document: %q\nSource text SHA256: %s\nExecuted frozen YAML: %q\n", plan.Source, plan.Digest, plan.Input)
 	fmt.Fprintln(&text, "Audit YAML: scene.yaml")
 	fmt.Fprintln(&text, "Exact request and declared inputs: azazel-request.json")

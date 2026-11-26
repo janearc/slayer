@@ -29,12 +29,12 @@ func TestCompleteEnvelope(t *testing.T) {
 	if box.Min.X != box.Min.Z || box.Max.X != box.Max.Z || box.Min.X != -box.Max.X || box.Min.Y > 0 || box.Max.Y < 5 {
 		t.Errorf("envelope = %+v", box)
 	}
-	for _, key := range []prototypeKey{{kind: "saguaro", detail: "hull", seed: 5}, {kind: "saguaro", detail: "quick", seed: 6}, {kind: "saguaro", detail: "demo", seed: 5}, {kind: "saguaro", detail: "clumps", seed: 6}} {
+	for _, key := range []prototypeKey{{forest: true, kind: "saguaro", detail: "hull", seed: 5}, {forest: true, kind: "saguaro", detail: "quick", seed: 6}, {forest: true, kind: "saguaro", detail: "demo", seed: 5}, {forest: true, kind: "saguaro", detail: "clumps", seed: 6}} {
 		if _, found := site.store.values[key]; !found {
 			t.Errorf("%v was not measured", key)
 		}
 	}
-	if _, found := site.store.values[prototypeKey{kind: "saguaro", detail: "crown", seed: 5}]; found {
+	if _, found := site.store.values[prototypeKey{forest: true, kind: "saguaro", detail: "crown", seed: 5}]; found {
 		t.Error("the crown was measured without the crown floor")
 	}
 	site.plan.Forest.GeometryMinimum = "crown"

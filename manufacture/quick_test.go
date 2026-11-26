@@ -32,7 +32,7 @@ var todaysTrees = map[string][12]string{
 // so many whorls and so many branches to the lowest, set by a habit:
 // the door ninja's truths for the spruce are held at.
 func spruceGrowth(count, lowest int, set habit) (growth, error) {
-	return spruceRow().grows.grown(count, lowest, 0, set, atQuick)
+	return spruceRow().Grows.Grown(count, lowest, 0, set, int(body), int(leaf))
 }
 
 // cornersPerMetre is how finely a corner is held in a fingerprint: to a

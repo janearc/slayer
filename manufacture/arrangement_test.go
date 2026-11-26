@@ -24,7 +24,7 @@ func mustWhorls(t *testing.T, count, lowest int, set habit) whorls {
 // parameters carry, the crown's start and the reach, taken from them.
 func habitOf(params ProperConiferParams) habit {
 	set := spruceHabit()
-	set.start, set.reach = params.CrownStart, params.BranchLength
+	set.Start, set.Reach = params.CrownStart, params.BranchLength
 	return set
 }
 
@@ -48,8 +48,8 @@ func TestWhorlsAreNinjasBranches(t *testing.T) {
 	for _, params := range all {
 		up := mustWhorls(t, params.Whorls, params.PerWhorl,
 			habitOf(params))
-		if up.rows() != params.Whorls {
-			t.Fatalf("%d rows, %d whorls", up.rows(), params.Whorls)
+		if up.Rows() != params.Whorls {
+			t.Fatalf("%d rows, %d whorls", up.Rows(), params.Whorls)
 		}
 		for whorl := range params.Whorls {
 			flaw := whorlUnlike(up, params, whorl)
@@ -64,14 +64,14 @@ func TestWhorlsAreNinjasBranches(t *testing.T) {
 // whorlUnlike is how one whorl differs from ninja's, or nothing.
 func whorlUnlike(up whorls, params ProperConiferParams,
 	whorl int) string {
-	if got, want := up.across(whorl), BranchCount(params,
+	if got, want := up.Across(whorl), BranchCount(params,
 		whorl); got != want {
 		return fmt.Sprintf("%d branches, ninja's has %d", got, want)
 	}
-	stem := size{length: measure.Metres(params.Height),
-		girth: measure.Metres(params.TrunkRadius)}
-	for index := range up.across(whorl) {
-		got, err := up.at(stem, whorl, index, sow(params.Seed))
+	stem := size{Length: measure.Metres(params.Height),
+		Girth: measure.Metres(params.TrunkRadius)}
+	for index := range up.Across(whorl) {
+		got, err := up.At(stem, whorl, index, sow(params.Seed))
 		if err != nil {
 			return err.Error()
 		}
@@ -89,11 +89,11 @@ func branchUnlike(got place, want Branch) string {
 		what string
 		same bool
 	}{
-		{"foot", got.space.Origin.Near(turned(want.Base), close)},
-		{"way", got.space.Orientation.Y.Near(turned(want.Dir), close)},
-		{"length", math.Abs(inScene(got.size.length)-want.Length) <
+		{"foot", got.Space.Origin.Near(turned(want.Base), close)},
+		{"way", got.Space.Orientation.Y.Near(turned(want.Dir), close)},
+		{"length", math.Abs(inScene(got.Size.Length)-want.Length) <
 			close},
-		{"girth", math.Abs(inScene(got.size.girth)-want.Radius) <
+		{"girth", math.Abs(inScene(got.Size.Girth)-want.Radius) <
 			close},
 	}
 	for _, check := range checks {
@@ -110,7 +110,7 @@ func branchUnlike(got place, want Branch) string {
 func TestTheSpruceTurnsByTheGoldenAngle(t *testing.T) {
 	golden := (1 + math.Sqrt(5)) / 2
 	want := 2 * math.Pi / (golden * golden)
-	got := spruceHabit().turn.InRadians()
+	got := spruceHabit().Turn.InRadians()
 	if !(math.Abs(got-want) <= close) {
 		t.Errorf("the spruce turns %v a whorl, the golden angle is %v",
 			got, want)
@@ -129,22 +129,22 @@ func TestWhorlsThatCannotBeAreRefused(t *testing.T) {
 	none := measure.Radians(math.NaN())
 	endless := measure.Degrees(math.Inf(1))
 	spoils := map[string]func(set *habit){
-		"turn":       func(set *habit) { set.turn = none },
-		"start":      func(set *habit) { set.start = -0.1 },
-		"top":        func(set *habit) { set.top = set.start },
-		"top ":       func(set *habit) { set.top = 1.01 },
-		"thinning":   func(set *habit) { set.thinning = 1.2 },
-		"fewest":     func(set *habit) { set.fewest = 0 },
-		"stray":      func(set *habit) { set.stray = math.NaN() },
-		"low":        func(set *habit) { set.low = none },
-		"lift":       func(set *habit) { set.lift = endless },
-		"sway":       func(set *habit) { set.sway = none },
-		"reach":      func(set *habit) { set.reach = 0 },
-		"shortening": func(set *habit) { set.shortening = -1 },
-		"uneven":     func(set *habit) { set.uneven = 1 },
-		"girth":      func(set *habit) { set.girth = 0 },
-		"least":      func(set *habit) { set.least = -0.5 },
-		"own":        func(set *habit) { set.own = math.Inf(1) },
+		"turn":       func(set *habit) { set.Turn = none },
+		"start":      func(set *habit) { set.Start = -0.1 },
+		"top":        func(set *habit) { set.Top = set.Start },
+		"top ":       func(set *habit) { set.Top = 1.01 },
+		"thinning":   func(set *habit) { set.Thinning = 1.2 },
+		"fewest":     func(set *habit) { set.Fewest = 0 },
+		"stray":      func(set *habit) { set.Stray = math.NaN() },
+		"low":        func(set *habit) { set.Low = none },
+		"lift":       func(set *habit) { set.Lift = endless },
+		"sway":       func(set *habit) { set.Sway = none },
+		"reach":      func(set *habit) { set.Reach = 0 },
+		"shortening": func(set *habit) { set.Shortening = -1 },
+		"uneven":     func(set *habit) { set.Uneven = 1 },
+		"girth":      func(set *habit) { set.Girth = 0 },
+		"least":      func(set *habit) { set.Least = -0.5 },
+		"own":        func(set *habit) { set.Own = math.Inf(1) },
 	}
 	for name, spoil := range spoils {
 		set := spruceHabit()
@@ -188,17 +188,17 @@ func turnOf(point maths.Vec) float64 {
 func TestARingIsEvenRoundItsMiddle(t *testing.T) {
 	const count, radius, stray = 9, 0.7, 0.4
 	round := mustRing(t, count, radius, 0, stray, 0)
-	if round.rows() != 1 || round.across(0) != count {
-		t.Fatalf("%d rows of %d, not one of %d", round.rows(),
-			round.across(0), count)
+	if round.Rows() != 1 || round.Across(0) != count {
+		t.Fatalf("%d rows of %d, not one of %d", round.Rows(),
+			round.Across(0), count)
 	}
 	strayed := 0
 	for index := range count {
-		got, err := round.at(size{}, 0, index, sow(5))
+		got, err := round.At(size{}, 0, index, sow(5))
 		if err != nil {
 			t.Fatal(err)
 		}
-		foot := got.space.Origin
+		foot := got.Space.Origin
 		if foot.Y != 0 || !(math.Abs(foot.Len()-radius) <= close) {
 			t.Errorf("place %d is at %v, not %v out on the ground",
 				index, foot, radius)
@@ -224,16 +224,16 @@ func TestARingWithNoStrayIsExact(t *testing.T) {
 	const count = 6
 	round := mustRing(t, count, 2, 0, 0, 0)
 	for index := range count {
-		got, err := round.at(size{}, 0, index, sow(1))
+		got, err := round.At(size{}, 0, index, sow(1))
 		if err != nil {
 			t.Fatal(err)
 		}
 		want := float64(index) / count
-		if !(math.Abs(turnOf(got.space.Origin)-want) <= close) {
+		if !(math.Abs(turnOf(got.Space.Origin)-want) <= close) {
 			t.Errorf("place %d is %v of a turn round, not %v",
-				index, turnOf(got.space.Origin), want)
+				index, turnOf(got.Space.Origin), want)
 		}
-		if scale := got.space.Scale; scale != 1 {
+		if scale := got.Space.Scale; scale != 1 {
 			t.Errorf("place %d is scaled %v", index, scale)
 		}
 	}
@@ -247,15 +247,15 @@ func TestARingsPartsLeanInOrOut(t *testing.T) {
 		round := mustRing(t, 5, 1.5, lean, 0.2, 0)
 		faces := map[float64]bool{}
 		for index := range 5 {
-			got, err := round.at(size{}, 0, index, sow(8))
+			got, err := round.At(size{}, 0, index, sow(8))
 			if err != nil {
 				t.Fatal(err)
 			}
-			if flaw := leanUnlike(got.space, lean); flaw != "" {
+			if flaw := leanUnlike(got.Space, lean); flaw != "" {
 				t.Errorf("lean %v, place %d: %s", lean, index,
 					flaw)
 			}
-			faces[math.Round(got.space.Orientation.X.X*1e6)] = true
+			faces[math.Round(got.Space.Orientation.X.X*1e6)] = true
 		}
 		if len(faces) < 4 {
 			t.Errorf("lean %v: five parts face only %d ways", lean,
@@ -286,17 +286,17 @@ func TestARingsPartsAreUnevenByTheSeed(t *testing.T) {
 	round := mustRing(t, 40, 1, 0, 0, uneven)
 	low, high := math.Inf(1), math.Inf(-1)
 	for index := range 40 {
-		got, _ := round.at(size{}, 0, index, sow(2))
-		same, _ := round.at(size{}, 0, index, sow(2))
-		other, _ := round.at(size{}, 0, index, sow(3))
+		got, _ := round.At(size{}, 0, index, sow(2))
+		same, _ := round.At(size{}, 0, index, sow(2))
+		other, _ := round.At(size{}, 0, index, sow(3))
 		if got != same {
 			t.Fatalf("place %d changed for the same seed", index)
 		}
 		if got == other {
 			t.Fatalf("place %d is the same for another seed", index)
 		}
-		low = math.Min(low, got.space.Scale)
-		high = math.Max(high, got.space.Scale)
+		low = math.Min(low, got.Space.Scale)
+		high = math.Max(high, got.Space.Scale)
 	}
 	if low < 1-uneven || high > 1+uneven {
 		t.Errorf("sizes from %v to %v, past %v either way", low, high,
@@ -345,8 +345,8 @@ func TestARingUntwistedFacesItsMiddle(t *testing.T) {
 		t.Fatal(err)
 	}
 	for index := range 6 {
-		got, _ := round.at(size{}, 0, index, sow(4))
-		axes, out := got.space.Orientation, got.space.Origin.Unit()
+		got, _ := round.At(size{}, 0, index, sow(4))
+		axes, out := got.Space.Orientation, got.Space.Origin.Unit()
 		if axes.X.Y != 0 || !(math.Abs(axes.X.Dot(out)) <= close) {
 			t.Errorf("place %d: its x is %v, not level and round "+
 				"the ring", index, axes.X)
@@ -367,11 +367,11 @@ func TestARingTakesEachNumberFromItsOwnDraw(t *testing.T) {
 	const count, stray, uneven = 7, 0.3, 0.2
 	round, from := mustRing(t, count, 1, 0, stray, uneven), sow(21)
 	for index := range count {
-		got, err := round.at(size{}, 0, index, from)
+		got, err := round.At(size{}, 0, index, from)
 		if err != nil {
 			t.Fatal(err)
 		}
-		off := turnOf(got.space.Origin)*count - float64(index)
+		off := turnOf(got.Space.Origin)*count - float64(index)
 		off -= math.Round(off/count) * count
 		if want := stray * from.swing(0, index, 0); !(math.Abs(off-
 			want) <= 1e-9) {
@@ -380,14 +380,14 @@ func TestARingTakesEachNumberFromItsOwnDraw(t *testing.T) {
 		}
 		// untwisted, a part's x runs round the ring, a quarter turn on
 		// from where the part stands
-		spun := turnOf(got.space.Orientation.X) -
-			turnOf(got.space.Origin) - 0.25
+		spun := turnOf(got.Space.Orientation.X) -
+			turnOf(got.Space.Origin) - 0.25
 		spun -= math.Floor(spun)
 		if want := from.draw(0, index, 1); !(math.Abs(spun-want) <= 1e-9) {
 			t.Errorf("place %d is spun %v, its draw says %v",
 				index, spun, want)
 		}
-		scale := got.space.Scale
+		scale := got.Space.Scale
 		if want := 1 + uneven*from.swing(0, index, 2); scale != want {
 			t.Errorf("place %d is scaled %v, its draw says %v",
 				index, scale, want)
@@ -399,16 +399,16 @@ func TestARingTakesEachNumberFromItsOwnDraw(t *testing.T) {
 // each bound, and one whorl of one part is whorls.
 func TestTheEdgesOfAHabitAreAllowed(t *testing.T) {
 	edges := map[string]func(set *habit){
-		"a top of one":      func(set *habit) { set.top = 1 },
-		"a start of nought": func(set *habit) { set.start = 0 },
-		"no thinning":       func(set *habit) { set.thinning = 0 },
-		"all thinned":       func(set *habit) { set.thinning = 1 },
-		"a fewest of one":   func(set *habit) { set.fewest = 1 },
-		"nothing uneven":    func(set *habit) { set.uneven = 0 },
-		"a least of nought": func(set *habit) { set.least = 0 },
-		"no stray":          func(set *habit) { set.stray = 0 },
+		"a top of one":      func(set *habit) { set.Top = 1 },
+		"a start of nought": func(set *habit) { set.Start = 0 },
+		"no thinning":       func(set *habit) { set.Thinning = 0 },
+		"all thinned":       func(set *habit) { set.Thinning = 1 },
+		"a fewest of one":   func(set *habit) { set.Fewest = 1 },
+		"nothing uneven":    func(set *habit) { set.Uneven = 0 },
+		"a least of nought": func(set *habit) { set.Least = 0 },
+		"no stray":          func(set *habit) { set.Stray = 0 },
 		"a turn the other way": func(set *habit) {
-			set.turn = measure.Degrees(-180)
+			set.Turn = measure.Degrees(-180)
 		},
 	}
 	for name, edge := range edges {
@@ -419,7 +419,7 @@ func TestTheEdgesOfAHabitAreAllowed(t *testing.T) {
 		}
 	}
 	lost := spruceHabit()
-	lost.least = math.Inf(1)
+	lost.Least = math.Inf(1)
 	if _, err := newWhorls(1, 1, lost); !errors.Is(err, errHabit) {
 		t.Errorf("an endless least girth: %v, not %v", err, errHabit)
 	}
@@ -461,9 +461,9 @@ func TestWhorlsOnAStemOfNoSizeSayWhy(t *testing.T) {
 		"a girth below nought":  {10, -0.3},
 	}
 	for name, of := range stems {
-		stem := size{length: measure.Metres(of[0]),
-			girth: measure.Metres(of[1])}
-		got, err := up.at(stem, 0, 0, sow(1))
+		stem := size{Length: measure.Metres(of[0]),
+			Girth: measure.Metres(of[1])}
+		got, err := up.At(stem, 0, 0, sow(1))
 		if !errors.Is(err, errStem) || got != (place{}) {
 			t.Errorf("a stem with %s: %v, not %v", name, err,
 				errStem)

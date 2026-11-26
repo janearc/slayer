@@ -1,0 +1,110 @@
+# bridge alone: the bridge of the futian set by itself, on flat ground
+# standing for the water, so that its structure can be looked at: the
+# deck, the approaches, the pylon towers, the cables and the hangers.
+# the same recipe and seed as futian-shore.yaml's bridge of buildings,
+# made by manufacture/cities through the manufactory's kind bridge.
+#
+# places are metres: x east, y north, z up. the ground, the sun, the sky
+# and the cameras are choices of this study, picked by eye, and say so.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: bridge alone
+  setting: space
+  light: none
+  seed: 1
+  film:
+    width: 960
+    height: 540
+    rays: 2
+    wide: 50
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # three quarters on to the tower, a little below the decks, to see the
+    # bridge pass through the void under its body
+    gate:
+      title: "three quarters on to the tower and its void"
+      wide: 55
+      location:
+        at: [-520, -820, 60]
+      orientation:
+        look_at: [0, 0, 260]
+    # on the upper deck's road, west of the tower, looking along the road
+    # into the tower's portal
+    road:
+      title: "on the upper deck, looking along the road into the tower"
+      wide: 60
+      location:
+        at: [-380, 0, 84]
+      orientation:
+        look_at: [0, 0, 80]
+    # close on the west arm where it leaves the tower, a little above the
+    # decks, to count the storeys under and beside them
+    arm:
+      title: "the west arm where it leaves the tower"
+      wide: 50
+      location:
+        at: [-420, -260, 95]
+      orientation:
+        look_at: [-170, 0, 70]
+    # side on, from far off, the whole bridge across the frame
+    side:
+      title: "side on, the whole bridge"
+      wide: 60
+      location:
+        at: [0, -2400, 375]
+      orientation:
+        look_at: [0, 0, 375]
+    # from above one shore end, along the bridge
+    along:
+      title: "from above the shore end, along the bridge"
+      location:
+        at: [-700, -250, 220]
+      orientation:
+        look_at: [100, 0, 60]
+    # from the water under the deck, looking up at it and a pylon
+    under:
+      title: "from the water under the deck"
+      wide: 70
+      location:
+        at: [-120, -90, 4]
+      orientation:
+        look_at: [0, 0, 70]
+    # high and to one side, looking down on the deck
+    above:
+      title: "high and to one side, down on the deck"
+      location:
+        at: [300, -700, 600]
+      orientation:
+        look_at: [0, 0, 60]
+  recipes:
+    bay bridge: {kind: bridge, irregularity: 0.5, span: {value: 700, unit: m}, depth: 2}
+    hub bridge: {kind: bridge, irregularity: 0.5, span: {value: 950, unit: m}, hub: true}
+  set:
+    things:
+      the bridge: {recipe: hub bridge, seed: 3, complexity: quick, east: 0, north: 0, heading: {value: 0, unit: deg}}
+  world:
+    unit: 1
+    materials:
+      flat:
+        colour: {srgb_linear: [0.05, 0.07, 0.09]}
+        source: eye
+    boxes:
+      ground:
+        material: flat
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      sun:
+        toward: [0.4, -0.5, 0.75]
+        colour: {srgb_linear: [1, 0.95, 0.88]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.5, 0.6, 0.75]}
+      zenith: {srgb_linear: [0.15, 0.3, 0.6]}
+      ground: {srgb_linear: [0.1, 0.1, 0.1]}
+      source: eye

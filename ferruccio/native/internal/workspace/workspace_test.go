@@ -174,3 +174,40 @@ func TestStatusAndRenderLogRemainVisible(t *testing.T) {
 		}
 	}
 }
+
+// TestEditorSaveReopensTheEditedDocument keeps the workspace save path honest.
+func TestEditorSaveReopensTheEditedDocument(t *testing.T) {
+	folder := t.TempDir()
+	path := filepath.Join(folder, "scene.yaml")
+	neighbor := filepath.Join(folder, "neighbor.yaml")
+	original := "# keep this comment\nscene: {}\n"
+	if err := os.WriteFile(path, []byte(original), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(neighbor, []byte("untouched"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	work, err := New(gogpu.NewApp(gogpu.DefaultConfig()), app.New(), Options{File: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	changed := original + "# an edit\n"
+	work.editor.ApplyText(changed)
+	if !work.state.document.Dirty() {
+		t.Fatal("editor change did not mark the draft dirty")
+	}
+	if !work.save(false) {
+		t.Fatal("workspace did not save the edited file")
+	}
+	reopened := &documentState{}
+	if err := reopened.load(path); err != nil {
+		t.Fatal(err)
+	}
+	if reopened.document.Text() != changed || work.state.document.Dirty() {
+		t.Fatal("saved document did not reopen with the edit")
+	}
+	kept, err := os.ReadFile(neighbor)
+	if err != nil || string(kept) != "untouched" {
+		t.Fatal("save changed the neighboring file")
+	}
+}

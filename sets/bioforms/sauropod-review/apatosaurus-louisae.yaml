@@ -1,0 +1,31 @@
+# Static illustrative reconstruction. The checked profile identifies fossil
+# sources and inferred anatomy; these cameras are for review, not measurement.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Sauropod specimen Apatosaurus louisae
+  setting: space
+  light: none
+  film: {width: 640, height: 360, rays: 2, exposure: 1, wide: 39}
+  cameras:
+    full: {location: {at: [20.27, -37.40, 8.00]}, orientation: {look_at: [-0.90, 0, 4.00]}}
+    head: {location: {at: [9.00, -6.00, 6.70]}, orientation: {look_at: [9.50, 0, 5.85]}}
+  recipes:
+    specimen: {animal: {family: sauropod, file: ../../../manufacture/animals/vertebrates/dinosaurs/sauropods/profiles.yaml, species: apatosaurus-louisae}}
+  set:
+    things:
+      sauropod: {recipe: specimen, seed: 7, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    materials:
+      ground: {colour: {srgb_linear: [0.55, 0.54, 0.50]}, source: "chosen: neutral review ground"}
+    boxes:
+      ground: {material: ground, middle: [0, 0, -1], size: [2000, 2000, 2], source: "chosen: flat contact surface"}
+    sky:
+      horizon: {srgb_linear: [0.30, 0.30, 0.30]}
+      zenith: {srgb_linear: [0.35, 0.38, 0.42]}
+      ground: {srgb_linear: [0.18, 0.17, 0.15]}
+      source: eye
+    suns:
+      key: {toward: [0.3, -0.8, 0.7], colour: {srgb_linear: [1.6, 1.5, 1.4]}, source: eye}
+    floods:
+      fill: {colour: {srgb_linear: [0.12, 0.12, 0.12]}, strength: 1, source: eye}

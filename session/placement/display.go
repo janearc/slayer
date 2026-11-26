@@ -24,6 +24,17 @@ type DisplayMesh struct {
 	hitter             shape.Hitter
 }
 
+// Detached returns the immutable display data without private exact hit
+// targets. Its geometry remains usable after the staged session is closed.
+func (mesh *DisplayMesh) Detached() *DisplayMesh {
+	if mesh == nil {
+		return nil
+	}
+	copy := *mesh
+	copy.hitter = nil
+	return &copy
+}
+
 // DisplayObject places one shared mesh; only At changes during a gesture.
 type DisplayObject struct {
 	ID, Name string
@@ -34,6 +45,8 @@ type DisplayObject struct {
 // DisplayScene is a mutable view over immutable shared object-local meshes.
 type DisplayScene struct {
 	Objects       []DisplayObject
+	Batches       []StagedBatch
+	Origins       map[string]maths.Vec `json:"origins,omitempty"`
 	Eye           maths.Subspace
 	Focus         maths.Vec
 	Lens          film.Pinhole

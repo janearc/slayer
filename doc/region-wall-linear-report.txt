@@ -1,0 +1,44 @@
+Wall sampling: raw linear-light comparison
+
+A 32 by 32 patch at left 183, top 392 in a 2048 by 1820 street frame.
+All draws used the same recorded street set, fixed exposure, street camera,
+software GPU, SLAYER_SCROOGE=1 and fresh frame draws. The executable SHA-256
+was 65ddcb20b7bfdac9400297b78339baa8692b06003aaf6d18ff607b52b0a6004e;
+the set SHA-256 was
+a5b906416963004ce02cd4ef5eebd38e78b170262a3397a4b147fce26bb365fd.
+Existing scene caches were used. The complete transitive input closure and
+cache stability have not been proven, so this is an observation of the
+recorded runs, not a provenance guarantee.
+
+The reference is 32 rays per side, or 1024 samples per pixel. Its linear
+luminance median was 0.0330178, 95th percentile 0.0364306, and maximum
+0.0411373. It is a finite reference, not proven converged. No raw-light
+repeat variation was measured.
+
+The isolated-positive-residual threshold is 0.00364 linear luminance units,
+approximately 10% of this wall reference's 95th percentile. This is a chosen
+measurement threshold, not a defect cutoff. A counted pixel exceeds it in
+candidate-minus-reference luminance and none of its eight neighbours does;
+border pixels are excluded. Thresholds differ between wall and water, so
+isolated counts should not be compared directly between those patches.
+
+Rays per side | Samples per pixel | Mean absolute RGB difference | Isolated positive residuals
+1             | 1                 | 0.013001                     | 20
+2             | 4                 | 0.007951                     | 19
+4             | 16                | 0.004234                     | 35
+16            | 256               | 0.001751                     | 29
+Reference: 32 rays per side, 1024 samples per pixel.
+
+The mean absolute difference falls across these sample counts, but the isolated
+positive count does not. Signed channel means and per-channel absolute errors
+are in scores.json. These measurements do not establish which image is best
+or prove reference convergence. The 6x nearest-neighbour sheet is for visual
+review; the wall becomes more even at higher sampling, though some colored
+flecks remain. No water or lighting tuning was made.
+
+Raw files: reference-32.pfm and candidate-1.pfm, candidate-2.pfm,
+candidate-4.pfm and candidate-16.pfm. scores.json names their original local
+study paths. scoring-helper.go.txt records the Puzzlemouth helper that read
+them and used the project's regionjudge. The helper reported zero difference
+when comparing a raw fixture to itself. The old full-frame crop uses an
+unconfirmed build and GPU mode and is not the reference for these scores.

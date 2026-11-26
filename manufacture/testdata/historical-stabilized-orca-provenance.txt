@@ -1,0 +1,77 @@
+Separately sourced orca gargoyle alternatives, 2026-11-24
+
+The 32 rows in historical-stabilized-orca-alternatives.txt cover the two
+orca gargoyle stones and the two cornice stones, seeds 5 and 11, and hull,
+clumps, quick and demo. Every row differs from its original, unmodified-f8
+row. All 32 separately match the independently captured b74ee1ba current
+rows byte for byte. These alternatives do not replace the original records.
+
+The alternative source is unmodified historical commit
+f8ddbbbba211d5cb4ec6ca0a1775303ff6fce4b4 plus only the production hunk of
+0551dc30 that stabilizes the orca flipper normal with math.FMA. The isolated
+source commit was c321e0f067fd8fcdb89bd0ff15e68817c2fbf290; its sole
+production diff is preserved as historical-orca-flipper-stabilization.patch.
+No caller-specific or species-specific production branch was introduced.
+
+Why this is separately sourced. On the plain-arithmetic historical parent
+72727dfc, a same-binary probe retained the f8 gargoyle digest and measured
+flipper-normal X = 1.9955116307308054e-17. In that same test binary, the
+unchanged binding witness introduced with 0551 fails: it requires
+X = 1.053477413162646e-17. In clean f8 with the explicit FMA, the same
+binding witness passes and the unchanged historical gargoyle check fails,
+instead obtaining the current, different digest. The original
+and stabilized results thus expose different rounded historical inputs;
+the separately sourced alternatives record that fact without deleting or
+rewriting either witness.
+
+The affected cornice trace held 370 things: only the orca mesh changed;
+all placements, material fields and sharing indices matched. Meshes each
+had 75,817 indexed points and 151,110 identically indexed faces. Thirty-nine
+positions differed, by at most 1.3322676295501878e-15 in Euclidean distance;
+202 indexed vertices' normals differed, by at most 2.5632691087507654e-14.
+The recorded values are exact-byte comparisons, not a claim of visible change.
+
+Capture used Darwin arm64, Go 1.27.3, GOWORK=off, GOMAXPROCS=2, the
+selected public producer and Game tests-lane per-kind tickets, with each
+case bounded to 120 seconds and 4 GiB sampled RSS, and a 30-GiB disk floor.
+All 32 succeeded, taking 96.44 seconds in total excluding lane waits. The
+largest sampled peak was 316,704 KiB; sampling can miss short-lived peaks.
+The independently captured b74 comparison used the identical producer source.
+
+SHA-256:
+  unmodified f8 orca_skin.go  56267c58934f1ccf8026d2b60a2ec268f9e7d0321f074d32b00858dabdd448b7
+  stabilized orca_skin.go    25b6e754c6173a850a906c8144053f6f240415c0fc163347bb4f9525c3ab81c0
+  exact production patch     8d9d424970050927664bfdebd8599db54875dee7ad60e194d6e979d8026d6d7a
+  selected producer source   3551acf3fca97e5c118f0c3b76db5342bd4d2a56386471ada6185d2287328094
+  stabilized producer binary 8eaca4b09bf710b11938eb3cfa231d1aff4fb9bb78fceded3f73bbcad33a6b8c
+  stabilized 32 rows        1d5d241dd34be203d62e5433ec2337c774bc7aa8fec5d0885a5860b59a6e950f
+
+The identical test-only probe patch for both cases is preserved as
+historical-orca-probe.patch, with SHA-256
+2b332626d9390c4520cbfc0ebb52b60b988f0b39fab8e593ae3f59ba5eab72e5.
+The original Game output is in history/orca-arithmetic-evidence/. Both
+probe runs intentionally fail one of the two unchanged exact witnesses.
+
+An additional control applied the same test-only patch to clean unmodified
+f8, without changing its production source. Its test binary evaluated the
+plain Cross expression to the right-fused value: the binding witness passed
+and the original standalone-producer gargoyle digest failed. On 72727dfc
+with the identical test-only patch, the initializer evaluated to the other
+rounded value and the outcomes reversed. This shows the unfenced source is
+sensitive to compilation context; the original f8 rows were captured by
+the separately recorded standalone producer, not this test binary.
+
+The three control probes use the identical patch above, applied respectively
+to 72727dfc, f8 plus the stabilization patch, and clean f8. Their isolated
+source commits were c5ea92dc01e2c772a87b56d1742d4ea0b0392791,
+96caf0ab700eaac6881aca02b53f29d0ea38cc3a, and
+3d7e091ad163d34561ec02c1473b73c04fe2d10e. The original Game outputs are
+preserved alongside this record.
+
+Both source patches use zero context; apply each from the appropriate
+historical checkout with git apply --unidiff-zero. Applying the production
+patch to f8 and the probe patch to each of the three named control bases
+reconstructed every corresponding source file byte-for-byte.
+
+The original selected producer is reconstructed as documented in
+historical-selected-producer-provenance.txt.

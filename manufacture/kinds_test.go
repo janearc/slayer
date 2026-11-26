@@ -13,7 +13,7 @@ import (
 
 func mustMake(t *testing.T, name string, number uint64) good {
 	t.Helper()
-	row, err := kindNamed(name)
+	row, err := testKind(name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,8 +100,8 @@ func reach(t *testing.T, made good) (float64, float64, float64) {
 // over forty seeds the picks spread across that range.
 func TestASeedPicksInsideItsKindsRange(t *testing.T) {
 	sizes := map[string]span{
-		"spruce":  spruceRow().tall,
-		"norway":  norwayRow().tall,
+		"spruce":  span{spruceRow().Tall[0], spruceRow().Tall[1]},
+		"norway":  span{norwayRow().Tall[0], norwayRow().Tall[1]},
 		"pebble":  stoneRows()["pebble"].long,
 		"cobble":  stoneRows()["cobble"].long,
 		"boulder": stoneRows()["boulder"].long,
@@ -205,6 +205,9 @@ func TestALogLiesOnTheGround(t *testing.T) {
 func TestAKindIsFoundByItsName(t *testing.T) {
 	names := kindNames()
 	for _, name := range solids {
+		if isTestPlant(name) {
+			continue // Plant specimens are checked through their books.
+		}
 		row, err := kindNamed(name)
 		if err != nil || row.name != name {
 			t.Errorf("%s: %v, %v", name, row.name, err)
@@ -224,7 +227,7 @@ func TestAKindIsFoundByItsName(t *testing.T) {
 }
 
 func TestMakingFromNoKindOrNoSeedIsRefused(t *testing.T) {
-	row, err := kindNamed("fern")
+	row, err := testKind("fern")
 	if err != nil {
 		t.Fatal(err)
 	}

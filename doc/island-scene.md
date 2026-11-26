@@ -102,6 +102,27 @@ sphere, samples source heights and places equipment and trees with radial up.
 The introduced redwood/sequoia mixture is scenery, not a Hawaiian flora survey.
 Equipment clearings keep roots away from the manufactured buildings.
 
+An individual site object can instead name a checked plant profile:
+
+```yaml
+- name: specimen
+  plant: {family: cactus, file: models/cactus.yaml, species: saguaro}
+  seed: 5
+  detail: hull
+  east-metres: 0
+  south-metres: 0
+  above-metres: 0
+  heading-deg: 0
+```
+
+Use either `kind` or `plant` for an object. Plant families are `seasonal`,
+`conifer`, `fern` and `cactus`. A seasonal plant may name a `season`; a
+conifer may select `representation: shoot` where its profile supports it.
+The book path is relative to the input scene. An optional `sha256` pins its
+exact bytes. Each book is at most 1 MiB; the scene retains at most 16 MiB of
+distinct model-book bytes. The checked source snapshot is shared by sequence
+frames even if the file later changes.
+
 Root identity and prototype variety are independent of the camera. Projected
 specimen size chooses aggregate appearance, hull, clumps, quick or demo detail.
 An authored canopy colour blends into the ground at large ray footprints;
@@ -154,9 +175,15 @@ floor grid into a planetary weather approximation.
 Faceting, thin-foliage aliasing at four samples, the uniform background and
 local weather support are visible approximation limits.
 
-The output keeps `island.png`, the exact `scene.yaml` and a `render.json`
-with source identities, executable hash and build info, image hash, origin,
-selected patches, target status and measured GPU costs. A failed invocation
+The output keeps `island.png`, `scene.yaml` and a `render.json` with source
+identities, executable hash and build info, image hash, origin, selected
+patches, target status and measured GPU costs. For ordinary kind-only scenes,
+`scene.yaml` retains the exact input bytes. A scene with plant profiles instead
+keeps a replay scene and exact model bytes under content-addressed `models/`
+paths. The replay scene pins each book's hash and refuses changed bytes. Its
+receipt records the replay settings hash, input settings hash and model source
+hashes. Terrain rasters are not copied into the output and their
+resolved paths still point to the original sources. A failed invocation
 may leave partial artifacts; only a successful run and inspected image are
 a render result. A dry run or a successful compile is not a rendered proof.
 

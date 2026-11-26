@@ -45,10 +45,12 @@ const groundlessAirFixture = `scene:
       title: view
       orientation: {look_at: [0, 0, 0]}
       location: {at: [0, 12, 50]}
+  recipes:
+    specimen-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       target:
-        kind: spruce
+        recipe: specimen-spruce
         seed: 1
         position:
           east: {value: 10, unit: m}
@@ -58,7 +60,7 @@ const groundlessAirFixture = `scene:
 
 func groundlessAirRead(t *testing.T, text string) set.Set {
 	t.Helper()
-	read, err := set.Read("groundless-air.yaml", []byte(text))
+	read, err := set.Read("../sets/groundless-air.yaml", []byte(text))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,6 +107,7 @@ func TestGroundlessEarthAirStagesAbsoluteThingAndWorldOcean(t *testing.T) {
 	}
 	read := groundlessAirRead(t, groundlessAirFixture)
 	stage := testStaging()
+	stage.recipes = read
 	stage.given.set = "../groundless-air.yaml"
 	if err := stage.place(read, set.Planet{}, false); err != nil {
 		t.Fatal(err)
@@ -132,6 +135,7 @@ func TestGroundlessEarthAirStagesPhysicalMoonlightWithoutTerrain(t *testing.T) {
 	read := groundlessAirRead(t, text)
 	t.Setenv(sources.Placed, t.TempDir())
 	stage := testStaging()
+	stage.recipes = read
 	stage.given.set = "groundless-moon.yaml"
 	stage.given.exposure = 1
 	stage.given.moonScale = 1

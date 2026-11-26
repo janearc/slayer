@@ -29,11 +29,18 @@ Examples open as independent editable copies. Saving an example asks for a
 location so your work does not remain only in a temporary folder. **Check**
 shows syntax/schema diagnostics while preserving invalid work for repair.
 
-**Render preview** freezes the current draft, then starts the bundled existing
-Slayer itself, with no Game lane in between. **Stop** cancels that preview’s owned
-process group. The resulting 640 × 360 still appears in the image pane. Logs
-and diagnostics remain available; the app never invents a completion percentage.
-A result for an older draft cannot replace the current document’s view.
+**Preview** and **Render fully** freeze the current draft and submit it to the
+shared Azazel queue. **Stop** requests cancellation of that render. A finished
+image appears in the workspace, with its receipt saved in the render output
+folder. A result for an older draft cannot replace the current document’s view.
+
+On a machine with the Vorrh's shared queue, Ferruccio finds it, its installed
+client, the shared cache and source shelf when those exist. On another machine,
+choose an existing Azazel queue under **Settings…** and start its worker
+separately. Settings also lets you choose where pictures and receipts go; a
+per-user cache and output folder are used when the shared folders are absent.
+Some scenes need an external source shelf. The bundled application does not
+yet create or run a queue for a new installation.
 
 The editor supports multiline Unicode text, selection, clipboard, undo/redo,
 cursor navigation and scrolling. There is no completion or language server.
@@ -56,9 +63,9 @@ from `native/` with `CGO_ENABLED=0 game5 build`. The nested module reuses the
 parent’s draft, schema and preview packages without importing Fyne or Slayer’s
 private source dependencies. GoGPU’s macOS bridge requires Cgo to be disabled.
 
-From the parent directory, `game5 run bundle_native` packages the already-built
-native binary into `bin/Ferruccio.app`. Its launcher supplies the explicit
-Puzzlemouth verb and bundled renderer locations.
+From the repository root, `game build ferruccio` builds `bin/Ferruccio.app`,
+and `game build ferruccio-dmg` builds `bin/Ferruccio.dmg`. The bundle includes
+the renderer and the queue client; it still needs a configured queue and worker.
 
 Stage the existing clean Slayer in `bin/engine/slayer`, requested Game5 in
 `bin/engine/game5` and processor-limited Game configuration in

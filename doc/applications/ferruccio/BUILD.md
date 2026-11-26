@@ -1,4 +1,19 @@
-# building ferruccio in slayer
+# Building Ferruccio
+
+From the Slayer checkout, `game build ferruccio` builds the frontend and
+staging helper, Slayer and the Azazel client, then assembles
+`bin/Ferruccio.app`. `game build ferruccio-dmg` performs that build and makes
+`bin/Ferruccio.dmg`, containing the app and an Applications shortcut. Builds
+replace only a previous app made by this target or a disk image whose recorded
+checksum still matches.
+
+The app and its engine executables are bundled; a
+shared Azazel queue and any external scene assets still need configuration.
+No rendering is started by building. The app launcher honours the existing
+Game environment and does not install or start an Azazel worker.
+
+The descriptions below record older build and package paths and may describe
+historical launch defaults. The two commands above are the new entry points.
 
 ## populated opening candidate
 

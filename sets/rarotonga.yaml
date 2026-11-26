@@ -170,6 +170,9 @@ scene:
       knee: 0.7
       top: 8
       source: eye
+  recipes:
+    plant-barringtonia-asiatica: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: barringtonia-asiatica}}
+    plant-pandanus-tectorius: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: pandanus-tectorius}}
   set:
     # the island's own trees, sown by rule over the whole survey, each stand
     # from its seed, between heights over the sea and no steeper than its
@@ -181,13 +184,13 @@ scene:
     # the posts are 99 m apart, so a tree may stand as much as its slope
     # times 70 m in or over the ground drawn between them: the steepest,
     # 0.15, keeps that under about 10 m, and keeps the trees on the flat
-    # ring. the sources are in manufacture/plant-profiles.yaml beside each
+    # ring. the sources are in manufacture/plants/seasonal/profiles.yaml beside each
     # kind.
     stands:
-      utu a: {kind: barringtonia-asiatica, count: 2000, seed: 701, complexity: clumps, above: 1, below: 120, steepest: 0.15}
-      utu b: {kind: barringtonia-asiatica, count: 2000, seed: 702, complexity: clumps, above: 1, below: 120, steepest: 0.15}
-      hala a: {kind: pandanus-tectorius, count: 2000, seed: 711, complexity: clumps, above: 1, below: 60, steepest: 0.15}
-      hala b: {kind: pandanus-tectorius, count: 2000, seed: 712, complexity: clumps, above: 1, below: 60, steepest: 0.15}
+      utu a: {recipe: plant-barringtonia-asiatica, count: 2000, seed: 701, complexity: clumps, above: 1, below: 120, steepest: 0.15}
+      utu b: {recipe: plant-barringtonia-asiatica, count: 2000, seed: 702, complexity: clumps, above: 1, below: 120, steepest: 0.15}
+      hala a: {recipe: plant-pandanus-tectorius, count: 2000, seed: 711, complexity: clumps, above: 1, below: 60, steepest: 0.15}
+      hala b: {recipe: plant-pandanus-tectorius, count: 2000, seed: 712, complexity: clumps, above: 1, below: 60, steepest: 0.15}
   world:
     unit: 1
     materials:

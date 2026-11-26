@@ -62,7 +62,7 @@ func groundedSet(t *testing.T) set.Set {
 	if err != nil {
 		t.Fatal(err)
 	}
-	read, err := set.Read("shore.yaml", raw)
+	read, err := set.Read("../doc/observatory-ecosystem.yaml", raw)
 	if err != nil {
 		t.Fatal(err)
 	}

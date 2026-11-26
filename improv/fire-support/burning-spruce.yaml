@@ -18,10 +18,12 @@ scene:
     across: 104
     down: 104
     step: 1
+  recipes:
+    plant-spruce: {plant: {family: conifer, file: ../../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       the tree:
-        kind: spruce
+        recipe: plant-spruce
         seed: 3
         east: 263812
         north: 2148748

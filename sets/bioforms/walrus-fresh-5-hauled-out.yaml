@@ -13,10 +13,12 @@ scene:
   seed: 17
   setting: space
   light: none
+  recipes:
+    profile-walrus-hauled-out: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: walrus, pose: hauled-out}}
   set:
     things:
       walrus:
-        kind: walrus-fresh-5-hauled-out
+        recipe: profile-walrus-hauled-out
         seed: 17
         east: 0
         north: 0

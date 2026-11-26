@@ -30,3 +30,22 @@ run go test -count=1 -v -run
 then remove the temporary copy. Review the finite domain again if its
 caller, key domain or embedded parameters change. This establishes three
 isolated operation equivalences, not botanical or experimental validity.
+
+Follow-up conifer-family verification (2026-11-24)
+
+Prototype commit: cfb05c0ad6f852e3aa018059c162c41685337ef9
+Toolchain: Go 1.27.3, Darwin/ARM64
+All original recorded numerical results matched; this is a follow-up run, not a replacement for the historical record above.
+Output rows are the diagnostic value lines with the test filename and line-number prefix removed, each ending in a newline.
+Output rows SHA256: b5589adde76a52223af7e835487d46bb95e99feacbd414030c2c3fb1344036fe
+Complete go test output SHA256: e566fa47996448950857111d0c2ca6830065a1a77c2947d74c035303db5015e4
+Source SHA256:
+d6f4e4b92982f20735869ccb8537324b9f787d29c35cc47f0c6091ac4c9891e3  manufacture/plants/conifers/shoot.go
+f8fa79d273e430d28e22403451a7f1cc5f71e640ab4af8f21eaaf1a7bdbcc3f3  manufacture/plants/conifers/architecture.go
+f0b4affb50175be224364519b5c124152c14c30914181b23a9682840877ad75e  manufacture/plants/conifers/profiles.go
+abefa59195a0d73dafa53f0175de721dc53847e68efd2a4f2084e009417fff43  manufacture/plants/conifers/conifer-profiles.yaml
+ceb699d4066a6ecef68e5efffda591b635050a2f93771df94c9392a51fbc272e  manufacture/needled_shoot.go
+1076f741494028bb1de897518fcaaf453644caa668612997abbe39c06832586c  manufacture/needled-shoot.yml
+0131cc1aa34feb4b261433305b17e35bfda88dc8cb810fb782ecd584cad4e73a  manufacture/shoot_normal_darwin_arm64.go
+f6d5bbe6b20fa3c1c0649056cf6c01ae4828d12c4ff17334ccd6c571daa2d57b  manufacture/plant_reference_helpers_test.go
+3fa050d545b443e0e6b47cb20343e3292107dc3355cdd524366bf908cd933dea  manufacture/testdata/needle_volume_domain_sample_test.go

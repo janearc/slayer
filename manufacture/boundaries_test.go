@@ -4,6 +4,7 @@ import (
 	"errors"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/janearc/puzzlemouth/numbers"
@@ -21,9 +22,17 @@ func TestSpecializedMakersRequireTheirSeedAndSupportedRepresentation(t *testing.
 			t.Fatalf("unsown seed cause: %v", err)
 		}
 	}
-	if _, err := (shootKind{style: 4}).madeAt(Sow(1), "quick"); err == nil ||
+	if _, err := (shootKind{style: 4, config: &shootConfig{profile: defaultShootProfile(1), store: &shootStore{}}}).madeAt(Sow(1), "quick"); err == nil ||
 		!strings.Contains(err.Error(), "unsupported shoot prototype key") {
 		t.Fatalf("unsupported shoot style: %v", err)
+	}
+	if _, err := (shootKind{style: 1}).madeAt(Sow(1), "quick"); err == nil ||
+		!strings.Contains(err.Error(), "needs a checked profile") {
+		t.Fatalf("unconfigured shoot did not refuse: %v", err)
+	}
+	if _, err := recursiveFoliageWith(good{}, Sow(1), 1, "quick", nil); err == nil ||
+		!strings.Contains(err.Error(), "needs a checked profile") {
+		t.Fatalf("unconfigured foliage did not refuse: %v", err)
 	}
 	if _, err := (optical{spec: opticalSpec()}).madeAt(Sow(1), "unknown"); err == nil ||
 		!strings.Contains(err.Error(), `unknown complexity "unknown"`) {
@@ -98,8 +107,9 @@ func TestPrototypeRefusesInvalidAuthoredTubeAndNeedleGeometry(t *testing.T) {
 		}
 	})
 	t.Run("needle width", func(t *testing.T) {
-		changedShootChoice(t, "redwood-needle-width", 0)
-		if _, err := prototype(1, 0, 0, "quick"); err == nil || !strings.Contains(err.Error(), "has no area") {
+		profile := defaultShootProfile(1)
+		profile.Width = 0
+		if _, err := prototypeWith(1, 0, 0, "quick", profile, &sync.Map{}); err == nil || !strings.Contains(err.Error(), "has no area") {
 			t.Fatalf("degenerate needle lost its mesh cause: %v", err)
 		}
 	})
@@ -158,17 +168,31 @@ func TestFoliageGroupFailureReturnsNoPartialSpecimen(t *testing.T) {
 		t.Fatal(err)
 	}
 	box := maths.Box{Min: maths.Vec{}, Max: maths.V(1, 1, 0)}
-	original := good{extent: &box, dressed: looks{body: plain("test wood", .2, .1, .1)}}
+	original := good{extent: &box, dressed: looks{body: plain("test wood", .2, .1, .1)}, groupParts: map[slot]int{body: 23}}
+	// Both are invalid for different reasons. Body must be checked first.
+	_, err = original.withMeshGroups(map[slot][]shape.MeshMember{
+		leaf: {{Mesh: nil}}, body: nil,
+	})
+	if err == nil || !strings.Contains(err.Error(), "invalid mesh group member count") {
+		t.Fatalf("body must be refused before foliage: %v", err)
+	}
+	grouped, err := original.withMeshGroups(map[slot][]shape.MeshMember{body: {{Mesh: triangle}}})
+	if err != nil || grouped.groupParts[body] != 1 || original.groupParts[body] != 23 {
+		t.Fatalf("group success changed original part counts: %v", err)
+	}
 	for _, members := range [][2][]shape.MeshMember{
 		{nil, {{Mesh: triangle}}},
 		{{{Mesh: triangle}}, nil},
 	} {
-		got, err := original.withFoliageGroups(members[0], members[1])
+		got, err := original.withMeshGroups(map[slot][]shape.MeshMember{body: members[0], leaf: members[1]})
 		if err == nil || !strings.Contains(err.Error(), "invalid mesh group member count") {
 			t.Fatalf("invalid foliage group cause: %v", err)
 		}
 		if got.extent != nil || got.dressed != nil || len(got.groups) != 0 {
 			t.Fatal("group refusal returned a partially assembled specimen")
+		}
+		if len(original.groupParts) != 1 || original.groupParts[body] != 23 {
+			t.Fatal("group refusal changed the original part counts")
 		}
 	}
 }

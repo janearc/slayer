@@ -4,18 +4,49 @@ import (
 	"github.com/gogpu/gg"
 	"github.com/gogpu/gogpu"
 	"github.com/gogpu/ui/app"
+	"github.com/gogpu/ui/core/dropdown"
 	"github.com/gogpu/ui/event"
 	"github.com/gogpu/ui/geometry"
 	"github.com/gogpu/ui/render"
 	"github.com/gogpu/ui/widget"
 	"github.com/janearc/slayer/ferruccio/internal/preview"
+	"github.com/janearc/slayer/ferruccio/native/internal/stagewire"
 	"image"
 	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
+
+func TestScenePickerNamesOpenedFileOutsideLibrary(t *testing.T) {
+	work := libraryEventWorkspace(t)
+	path := filepath.Join(t.TempDir(), "job.yaml")
+	if err := os.WriteFile(path, []byte("scene: {set: example.yaml}\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := work.state.load(path); err != nil {
+		t.Fatal(err)
+	}
+	work.exampleDraft = false
+	control := work.scenePicker().(*dropdown.Widget)
+	if got := control.SelectedValue(); got != "job.yaml" {
+		t.Fatalf("opened file label = %q, want job.yaml", got)
+	}
+	// An unrelated file with the same basename as an example is still its own file.
+	name := filepath.Base(work.library[0].name)
+	other := filepath.Join(t.TempDir(), name)
+	if err := os.WriteFile(other, []byte("scene: {}\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := work.state.load(other); err != nil {
+		t.Fatal(err)
+	}
+	if got := work.scenePicker().(*dropdown.Widget).SelectedValue(); got != name {
+		t.Fatalf("unrelated file label = %q, want %q", got, name)
+	}
+}
 
 func libraryEventWorkspace(t *testing.T) *Workspace {
 	t.Helper()
@@ -143,6 +174,22 @@ func TestFullRenderButtonFreezesAuthoredRequestAndKeepsAcceptedPhotograph(t *tes
 	control := libraryWidget(work.root, "Render fully")
 	bounds := control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
 	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	work.Tick()
+	drawLibraryWindow(t, work)
+	if !work.renderSetupOpen {
+		t.Fatal("full-render button did not open setup")
+	}
+	select {
+	case result := <-work.renderPresetResults:
+		work.renderPresetResults <- result
+		work.Tick()
+		drawLibraryWindow(t, work)
+	case <-time.After(5 * time.Second):
+		t.Fatal("render setup did not finish loading")
+	}
+	control = libraryWidget(work.root, "Render")
+	bounds = control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
 	var result renderResult
 	select {
 	case result = <-work.results:
@@ -174,5 +221,143 @@ func TestFullRenderButtonFreezesAuthoredRequestAndKeepsAcceptedPhotograph(t *tes
 	}
 	if !work.refreshLayout {
 		t.Fatal("full completion did not refresh display picker")
+	}
+}
+
+func TestRenderSetupFreezesChosenProducerSize(t *testing.T) {
+	work := libraryEventWorkspace(t)
+	source, err := filepath.Abs("../../../examples/full-render-check.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := work.state.load(source); err != nil {
+		t.Fatal(err)
+	}
+	work.editor.SetText(work.state.document.Text())
+	work.options.Evidence = t.TempDir()
+	work.options.Tools = preview.Tools{Transport: "disabled-for-unit-test", Azazel: "unused", Queue: "unused", Slayer: "unused"}
+	work.renderSetupOpen = true
+	work.renderSetupPath, work.renderSetupSource = work.state.path, work.state.document.Text()
+	work.renderPresets = []stagewire.FilmPreset{{Name: "imax", Width: 4096, Height: 3002}}
+	work.renderCameras = work.state.document.Cameras()
+	work.rebuild()
+	drawLibraryWindow(t, work)
+	control := libraryWidget(work.root, "Output size")
+	bounds := control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	drawLibraryWindow(t, work)
+	overlays := work.ui.Window().OverlayContentWidgets()
+	if len(overlays) != 1 {
+		t.Fatalf("output-size menu did not open: %d overlays", len(overlays))
+	}
+	menu := overlays[0].(interface{ Bounds() geometry.Rect }).Bounds()
+	clickLibraryPoint(work, geometry.Pt(menu.Min.X+20, menu.Min.Y+60))
+	if work.renderSetupChoice != 1 {
+		t.Fatalf("preset selection = %d, want imax", work.renderSetupChoice)
+	}
+	work.Tick()
+	drawLibraryWindow(t, work)
+	control = libraryWidget(work.root, "Render camera")
+	bounds = control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	drawLibraryWindow(t, work)
+	overlays = work.ui.Window().OverlayContentWidgets()
+	if len(overlays) != 1 {
+		t.Fatalf("camera menu did not open: %d overlays", len(overlays))
+	}
+	menu = overlays[0].(interface{ Bounds() geometry.Rect }).Bounds()
+	clickLibraryPoint(work, geometry.Pt(menu.Min.X+20, menu.Min.Y+60))
+	if work.renderCameraChoice != 1 {
+		t.Fatalf("camera selection = %d, want arrival", work.renderCameraChoice)
+	}
+	control = libraryWidget(work.root, "Render backend")
+	bounds = control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	drawLibraryWindow(t, work)
+	overlays = work.ui.Window().OverlayContentWidgets()
+	if len(overlays) != 1 {
+		t.Fatalf("backend menu did not open: %d overlays", len(overlays))
+	}
+	menu = overlays[0].(interface{ Bounds() geometry.Rect }).Bounds()
+	clickLibraryPoint(work, geometry.Pt(menu.Min.X+20, menu.Min.Y+60))
+	if work.renderBackendChoice != 1 {
+		t.Fatalf("backend selection = %d, want GPU", work.renderBackendChoice)
+	}
+	work.Tick()
+	drawLibraryWindow(t, work)
+	control = libraryWidget(work.root, "Render")
+	bounds = control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	work.state.document.Replace(work.renderSetupSource + "\n# changed while setup was open\n")
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	if !strings.Contains(work.renderSetupError, "scene changed") || work.Running() {
+		t.Fatal("stale render setup was submitted")
+	}
+	work.state.document.Replace(work.renderSetupSource)
+	work.Tick()
+	drawLibraryWindow(t, work)
+	control = libraryWidget(work.root, "Render")
+	bounds = control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	select {
+	case result := <-work.results:
+		if result.plan == nil {
+			t.Fatalf("no frozen plan: %v", result.err)
+		}
+		defer result.plan.Close()
+		profile := result.plan.Profile
+		if profile.SizePreset != "imax" || profile.Width != 4096 || profile.Height != 3002 || profile.Rays != 2 || profile.Camera != "arrival" || !profile.GPU || profile.CPURenderer {
+			t.Fatalf("wrong frozen preset or sampling: %+v", profile)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("preset selection did not start a frozen request")
+	}
+}
+
+func TestRenderSetupFreezesSevenExactSamples(t *testing.T) {
+	work := libraryEventWorkspace(t)
+	source, err := filepath.Abs("../../../examples/full-render-check.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := work.state.load(source); err != nil {
+		t.Fatal(err)
+	}
+	work.editor.SetText(work.state.document.Text())
+	work.options.Evidence = t.TempDir()
+	work.options.Tools = preview.Tools{Transport: "disabled-for-unit-test", Azazel: "unused", Queue: "unused", Slayer: "unused"}
+	work.renderSetupOpen = true
+	work.renderSetupPath, work.renderSetupSource = work.state.path, work.state.document.Text()
+	work.renderBackendChoice = 1
+	work.rebuild()
+	drawLibraryWindow(t, work)
+	control := libraryWidget(work.root, "Samples per pixel")
+	bounds := control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	drawLibraryWindow(t, work)
+	overlays := work.ui.Window().OverlayContentWidgets()
+	if len(overlays) != 1 {
+		t.Fatalf("sampling menu did not open: %d overlays", len(overlays))
+	}
+	menu := overlays[0].(interface{ Bounds() geometry.Rect }).Bounds()
+	clickLibraryPoint(work, geometry.Pt(menu.Min.X+20, menu.Min.Y+300))
+	if work.renderSamplesChoice != 7 || work.renderBackendChoice != 1 {
+		t.Fatalf("selected samples=%d backend=%d", work.renderSamplesChoice, work.renderBackendChoice)
+	}
+	work.Tick()
+	drawLibraryWindow(t, work)
+	control = libraryWidget(work.root, "Render")
+	bounds = control.(interface{ ScreenBounds() geometry.Rect }).ScreenBounds()
+	clickLibraryPoint(work, geometry.Pt((bounds.Min.X+bounds.Max.X)/2, (bounds.Min.Y+bounds.Max.Y)/2))
+	select {
+	case result := <-work.results:
+		if result.plan == nil {
+			t.Fatalf("no frozen plan: %v", result.err)
+		}
+		defer result.plan.Close()
+		if result.plan.Profile.Samples != 7 || !result.plan.Profile.GPU || result.plan.Profile.CPURenderer {
+			t.Fatalf("wrong frozen sampling: %+v", result.plan.Profile)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("sample selection did not start a frozen request")
 	}
 }

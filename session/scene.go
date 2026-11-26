@@ -142,6 +142,20 @@ type standing struct {
 	east, north, height float64
 }
 
+// reportedKind identifies a plant by its authored species in reports. The
+// construction category remains unchanged for dispatch and every other recipe.
+func (stage *staging) reportedKind(kind, recipeName string) string {
+	if recipe, found := stage.recipes.Recipe(recipeName); found {
+		if recipe.IsPlant() {
+			return recipe.PlantSpecies()
+		}
+		if recipe.IsAlga() {
+			return recipe.AlgaSpecies()
+		}
+	}
+	return kind
+}
+
 // note keeps where a thing of a name and a kind was stood.
 func (stage *staging) note(of, kind string, place maths.Vec) {
 	stage.stood = append(stage.stood, standing{of: of, kind: kind,
@@ -290,6 +304,7 @@ func staged(given asked) (*thing.World, tally, asked, error) {
 	retained = true
 	stage.given.departures = append(departures, stage.given.departures...)
 	stage.given.stood, stage.given.stoodKept = stage.stood, true
+	stage.given.authoredOrigins = stage.places
 	return stage.world, stage.made, stage.given, nil
 }
 
@@ -1046,21 +1061,27 @@ func (stage *staging) stand(read set.Set) error {
 		if stage.trialUnseen(each.Name()) {
 			continue
 		}
+		if _, scaled := each.Scale(); scaled && (stage.villagey(each) || each.Kind() == fireKind || each.Alight() || strings.HasPrefix(each.Name(), "rig ")) {
+			return fmt.Errorf("%s: scale is not supported for terrain-founded villages, fire, burning things or special stage rigs", each.Name())
+		}
 		place, err := stage.thingPlace(each)
 		if err != nil {
 			return err
 		}
 		stage.places[each.Name()] = place
-		stage.note(each.Name(), each.Kind(), place)
+		stage.note(each.Name(), stage.reportedKind(each.Kind(), each.Recipe()), place)
+		start := len(stage.world.Things)
 		stood, err := stage.groundedThing(each, uint64(i), place)
 		if !stood && err == nil {
-			_, err = stage.putRecipe(each.Kind(), each.Recipe(),
+			scale, _ := each.Scale()
+			_, err = stage.putRecipeFacingScaled(each.Kind(), each.Recipe(),
 				each.Complexity(), each.Seed(), uint64(i), place,
-				each.Alight(), each.Name())
+				each.Alight(), each.Name(), nil, scale)
 		}
 		if err != nil {
 			return fmt.Errorf("%s: %w", each.Name(), err)
 		}
+		stage.recordThingAuthor(start, each.Name())
 	}
 	stage.warmNote()
 	stage.warm = nil
@@ -1070,9 +1091,11 @@ func (stage *staging) stand(read set.Set) error {
 			len(stands)); err != nil {
 			return err
 		}
+		start := len(stage.world.Things)
 		if err := stage.scatter(each); err != nil {
 			return fmt.Errorf("%s: %w", each.Name(), err)
 		}
+		stage.recordAuthor(start, "scene.set.stands", each.Name())
 	}
 	stage.rungNote()
 	for _, each := range read.Texts() {
@@ -1081,6 +1104,21 @@ func (stage *staging) stand(read set.Set) error {
 		}
 	}
 	return stage.stepped("ecosystems", stage.ecosystems, read)
+}
+
+// recordThingAuthor retains a named placement's static surfaces as one group.
+// Deforming parts are rebuilt at frame time and cannot yet retain identity.
+func (stage *staging) recordThingAuthor(start int, name string) {
+	stage.recordAuthor(start, "scene.set.things", name)
+}
+
+// recordAuthor retains static surfaces under the named authoring group.
+func (stage *staging) recordAuthor(start int, collection, name string) {
+	for _, part := range stage.world.Things[start:] {
+		if !stage.dynamicThings[part] {
+			stage.world.RecordAuthor(part, thing.AuthorRef{Collection: collection, Name: name})
+		}
+	}
 }
 
 // absolutePosition turns a named east/north/up placement in the map's
@@ -1137,7 +1175,7 @@ func (stage *staging) scattered(each set.Stand, choose chooser) error {
 		if stage.trialMemberUnseen(each, seed, place) {
 			continue
 		}
-		stage.note(each.Name(), each.Kind(), place)
+		stage.note(each.Name(), stage.reportedKind(each.Kind(), each.Recipe()), place)
 		pick := standPick(each, seed, i)
 		var bounds maths.Box
 		bounds, err = stage.putRecipe(each.Kind(), each.Recipe(), each.Complexity(),
@@ -1310,6 +1348,13 @@ func stockIdentity(kind, recipe string, taller float64,
 func (stage *staging) putRecipeFacing(kind, recipe, detail string,
 	seed, index uint64, place maths.Vec, burning bool, name string,
 	facing *float64) (maths.Box, error) {
+	return stage.putRecipeFacingScaled(kind, recipe, detail, seed, index, place, burning, name, facing, 1)
+}
+
+// putRecipeFacingScaled stands a thing with an explicit uniform size factor.
+func (stage *staging) putRecipeFacingScaled(kind, recipe, detail string,
+	seed, index uint64, place maths.Vec, burning bool, name string,
+	facing *float64, scale float64) (maths.Box, error) {
 	if kind == fireKind {
 		return stage.putFireRecipe(recipe, seed, index, place, name)
 	}
@@ -1318,6 +1363,9 @@ func (stage *staging) putRecipeFacing(kind, recipe, detail string,
 		turn = *facing
 	}
 	at := turnedAt(place, turn)
+	if scale != 1 {
+		at.Scale = scale
+	}
 	detail, err := stage.memberDetail(kind, recipe, detail, seed, name, at,
 		burning)
 	if err != nil {
@@ -1326,6 +1374,9 @@ func (stage *staging) putRecipeFacing(kind, recipe, detail string,
 	one, err := stage.levelledStock(kind, recipe, detail, seed, name, at)
 	if err != nil {
 		return maths.Box{}, err
+	}
+	if scale != 1 && one.deform != nil {
+		return maths.Box{}, fmt.Errorf("scale is not yet supported for deforming geometry")
 	}
 	// improv/moonlake's stage rigs: a stage light magnified to stand as a
 	// rig the far lasers come out of (2026-11-10: "some kind of
@@ -1336,7 +1387,7 @@ func (stage *staging) putRecipeFacing(kind, recipe, detail string,
 		one.lamps = func(maths.Subspace) ([]emit.Lit, error) { return nil, nil }
 	}
 	if name != "" {
-		stage.radii[name] = horizontalRadius(one.bounds)
+		stage.radii[name] = horizontalRadius(one.bounds) * scale
 	}
 	before := len(stage.world.Things)
 	err = stage.add(one, kind, at, seed, burning)

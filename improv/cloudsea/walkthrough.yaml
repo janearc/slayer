@@ -280,14 +280,14 @@ shorts:
           - value: "18-42"
             unit: m
             says: redwoods, picked
-            from: manufacture/redwoods.go redwoodRow tall
+            from: manufacture/plants/conifers/conifer-profiles.yaml coast-redwood height
           - value: "20-45"
             unit: m
             says: sequoias, picked
-            from: manufacture/redwoods.go sequoiaRow tall
+            from: manufacture/plants/conifers/conifer-profiles.yaml giant-sequoia height
         sentence: >-
-          Their heights were picked, not measured. Each is grown from the
-          code's spruce recipe, reshaped.
+          Their heights were picked, not measured. Both use the shared
+          whorled conifer construction with their own profiles.
 
   - name: the cloud sea
     title: The cloud sea

@@ -6,25 +6,25 @@ bones, so a pose turns joints. It is a study, not a specimen: the length and
 the mass are held to published figures, and every other proportion says in
 the code whether it is read or chosen.
 
-## Kinds and sets
+## Poses, representations and sets
 
-All five kinds are static. None animates with scene time.
+All five selections are static. None animates with scene time.
 
-- `walrus-fresh-5`: at rest, the chest propped on the fore flippers and the
+- `pose: lying`: at rest, the chest propped on the fore flippers and the
   belly flat on the ground.
-- `walrus-fresh-5-hauled-out`: the same, with the neck raised and the head
+- `pose: hauled-out`: the same, with the neck raised and the head
   lifted and held level, by turning joints.
-- `walrus-fresh-5-swimming`: the body in line, fore flippers laid back, hind
+- `pose: swimming`: the body in line, fore flippers laid back, hind
   flippers trailing and swept to one side.
-- `walrus-fresh-5-volumes`: the outline and the flippers alone, in plain
+- `representation: volumes`: the outline and the flippers alone, in plain
   grey, for seeing the form.
-- `walrus-fresh-5-skeleton`: the bones alone.
+- `representation: bones`: the bones alone.
 
 `sets/bioforms/walrus-outline.yaml` places the first on pale ground under the
 air's sky and a typed sun, with cameras `side`, `quarter` and `top`.
 `walrus-outline-raised.yaml` does the same for the hauled-out pose. The
-`walrus-fresh-5*.yaml` sets beside them are studio studies of each kind; the
-one for the rest pose adds a `skin` camera for the neck and head. The named
+`walrus-fresh-5*.yaml` sets beside them are studio studies of each selection;
+the one for the rest pose adds a `skin` camera for the neck and head. The named
 walrus study scenes default to a 38 degree lens.
 
 ## Built from
@@ -108,9 +108,26 @@ rest, so it stays on the body as it bends.
 
 ## Using it in a set
 
-Place a kind as a thing with a seed, an east and a north. The rest and
-hauled-out poses lie on land, so a set gives them ground, as the outline
-set does with its own sky and sun. Draw posed kinds on the CPU renderer.
+Select the `walrus` species from a checked pinniped profile book in a
+recipe, then place that recipe as a thing with a seed, an east and a north.
+For a set alongside the supplied bioform sets:
+
+```yaml
+recipes:
+  profile-walrus-lying:
+    animal:
+      family: pinniped
+      file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml
+      species: walrus
+      pose: lying
+```
+
+The file path is relative to the set. Skin is the default representation;
+bones accept no pose, and volumes accept an omitted pose or `lying`. See
+[animal profile recipes](../../../animal-profile-recipes.md) for the shared
+rules. The rest and hauled-out poses lie on land, so a set gives them ground,
+as the outline set does with its own sky and sun. Draw posed skins on the CPU
+renderer.
 
 ## Known faults and unfinished parts
 
@@ -120,7 +137,7 @@ set does with its own sky and sun. Draw posed kinds on the CPU renderer.
 - No table of widths and heights along a walrus was found, so every row of
   the stations table is picked.
 - The graphics processor does not yet read the rest place when it paints a
-  posed hide. Draw posed kinds on the CPU.
+  posed hide. Draw posed skins on the CPU.
 - Neck folds, lip texture and bristle roots are cartoon approximations of
   the photographs. The tusks taper more sharply than the photographed ivory.
 - Deformation is not audited for self-intersection or local strain. In the
@@ -157,3 +174,5 @@ What carried forward:
 - Put face features against the actual skin in the same deformation frame.
 - Smooth unions can merge anatomical parts silently; compare several views.
 - Do not infer fin stroke or soft-tissue movement from a single still image.
+
+Earlier uncalled walrus studies and their tests remain in Git history.

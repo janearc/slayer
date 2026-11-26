@@ -35,7 +35,11 @@ func TestCanopyAppearanceMeasuresCover(t *testing.T) {
 	}
 	extent := 0.0
 	for _, seed := range []uint64{5, 6} {
-		bounds := site.store.values[prototypeKey{kind: "saguaro", detail: "clumps", seed: seed}].bounds
+		value, found := site.store.values[prototypeKey{forest: true, kind: "saguaro", detail: "clumps", seed: seed}]
+		if !found {
+			t.Fatalf("saguaro seed %d was not measured", seed)
+		}
+		bounds := value.bounds
 		extent = math.Max(extent, (bounds.Max.X-bounds.Min.X)*(bounds.Max.Z-bounds.Min.Z))
 	}
 	if record.CanopyArea <= 0 || record.CanopyArea > extent {

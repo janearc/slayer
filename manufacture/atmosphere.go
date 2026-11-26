@@ -119,14 +119,7 @@ func (atmosphere Atmosphere) Extent() (maths.Box, error) {
 // seen is how an eye sees the atmosphere's box.
 func (atmosphere Atmosphere) seen(from seed, at maths.Subspace,
 	by strategies.Eye) (strategies.Seen, error) {
-	if err := by.Check(); err != nil {
-		return strategies.Seen{}, err
-	}
-	box, err := atmosphere.Extent()
-	if err != nil {
-		return strategies.Seen{}, err
-	}
-	return by.Cover(transformed(box, at)), nil
+	return seenObject(atmosphere, at, by)
 }
 
 // thinned is a field that can be made thickest over a point: a layer, or

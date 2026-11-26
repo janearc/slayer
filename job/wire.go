@@ -71,16 +71,25 @@ type sceneWire struct {
 }
 
 type filmWire struct {
-	Preset   string  `yaml:"preset" json:"preset,omitempty"`
-	Width    int     `yaml:"width" json:"width,omitempty"`
-	Height   int     `yaml:"height" json:"height,omitempty"`
-	Rays     int     `yaml:"rays" json:"rays,omitempty"`
-	Wide     float64 `yaml:"wide" json:"wide,omitempty"`
-	Tall     float64 `yaml:"tall" json:"tall,omitempty"`
-	Exposure float64 `yaml:"exposure" json:"exposure,omitempty"`
-	Aperture float64 `yaml:"aperture" json:"aperture,omitempty"`
-	Focus    float64 `yaml:"focus" json:"focus,omitempty"`
-	Mode     string  `yaml:"mode" json:"mode,omitempty"`
+	Preset   string      `yaml:"preset" json:"preset,omitempty"`
+	Width    int         `yaml:"width" json:"width,omitempty"`
+	Height   int         `yaml:"height" json:"height,omitempty"`
+	Rays     int         `yaml:"rays" json:"rays,omitempty"`
+	Samples  int         `yaml:"samples" json:"samples,omitempty"`
+	Wide     float64     `yaml:"wide" json:"wide,omitempty"`
+	Tall     float64     `yaml:"tall" json:"tall,omitempty"`
+	Exposure float64     `yaml:"exposure" json:"exposure,omitempty"`
+	Aperture float64     `yaml:"aperture" json:"aperture,omitempty"`
+	Focus    float64     `yaml:"focus" json:"focus,omitempty"`
+	Mode     string      `yaml:"mode" json:"mode,omitempty"`
+	Region   *regionWire `yaml:"region" json:"region,omitempty"`
+}
+
+type regionWire struct {
+	Left   int `yaml:"left" json:"left"`
+	Top    int `yaml:"top" json:"top"`
+	Width  int `yaml:"width" json:"width"`
+	Height int `yaml:"height" json:"height"`
 }
 
 // point is a place in scene metres: x east, y up, z south.

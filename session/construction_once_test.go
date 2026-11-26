@@ -7,11 +7,11 @@ import "testing"
 // row made afresh would not be.
 func TestASecondAskForTheSameKindIsTheFirstAnswer(t *testing.T) {
 	stage := testStaging()
-	first, err := stage.construction("spruce", "")
+	first, err := stage.construction("cobble", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := stage.construction("spruce", "")
+	second, err := stage.construction("cobble", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,20 +24,20 @@ func TestASecondAskForTheSameKindIsTheFirstAnswer(t *testing.T) {
 // kind other than the first is its own row.
 func TestAKindThatDiffersIsWorkedOutAfresh(t *testing.T) {
 	stage := testStaging()
-	spruce, err := stage.construction("spruce", "")
+	stone, err := stage.construction("cobble", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fern, err := stage.construction("fern", "")
+	can, err := stage.construction("can", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if spruce == fern {
-		t.Error("a fern was given the spruce's row")
+	if stone == can {
+		t.Error("a can was given the cobble's row")
 	}
-	again, err := stage.construction("spruce", "")
-	if err != nil || again != spruce {
-		t.Error("asking for the fern lost the spruce's row")
+	again, err := stage.construction("cobble", "")
+	if err != nil || again != stone {
+		t.Error("asking for the can lost the cobble's row")
 	}
 }
 
@@ -46,15 +46,15 @@ func TestAKindThatDiffersIsWorkedOutAfresh(t *testing.T) {
 // that differs is refused for its own name.
 func TestARecipeThereIsNoneOfIsRefusedInTheSameWordsEachTime(t *testing.T) {
 	stage := testStaging()
-	_, first := stage.construction("spruce", "no such recipe")
-	_, second := stage.construction("spruce", "no such recipe")
+	_, first := stage.construction("cobble", "no such recipe")
+	_, second := stage.construction("cobble", "no such recipe")
 	if first == nil || second == nil {
 		t.Fatal("a recipe there is none of was not refused")
 	}
 	if first != second {
 		t.Errorf("refused as %q, then as %q", first, second)
 	}
-	_, other := stage.construction("spruce", "another")
+	_, other := stage.construction("cobble", "another")
 	if other == nil || other.Error() == first.Error() {
 		t.Errorf("a recipe that differs was refused as %v", other)
 	}

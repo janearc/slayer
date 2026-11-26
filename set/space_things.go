@@ -112,12 +112,27 @@ func isKey(block *yaml.Node, node *yaml.Node) bool {
 // into the thing.
 func (reading reader) spaceThing(made *Thing) map[string]step {
 	steps := reading.placing(&made.space)
+	maps.Copy(steps, reading.sizing(made))
 	maps.Copy(steps, reading.starring(&made.space))
 	maps.Copy(steps, reading.lanterning(&made.space))
 	maps.Copy(steps, reading.orbiting(&made.space))
 	maps.Copy(steps, reading.nebulous(&made.space))
 	maps.Copy(steps, reading.spacecraft(&made.space))
 	return steps
+}
+
+// sizing reads the version 2 uniform scale of an explicitly placed thing.
+func (reading reader) sizing(made *Thing) map[string]step {
+	return map[string]step{
+		"scale": reading.onlyTwo(func(key, value *yaml.Node) error {
+			var amount float64
+			if err := reading.number(&amount, 0.01, 100)(key, value); err != nil {
+				return err
+			}
+			made.scale = &amount
+			return nil
+		}),
+	}
 }
 
 // placing is the keys that say where a thing stands in space.

@@ -13,7 +13,7 @@ import (
 // asked: nothing here runs while the view is drawn. It returns the path of
 // the looks file.
 func (work *Workspace) WriteLook() (string, error) {
-	path, err := look.Place(work.state.path, work.options.Evidence, work.exampleDraft)
+	path, err := look.Place(work.state.path, work.evidenceFolder(), work.exampleDraft)
 	if err != nil {
 		return "", err
 	}

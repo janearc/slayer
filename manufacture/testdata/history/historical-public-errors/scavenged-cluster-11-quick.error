@@ -1,0 +1,7 @@
+panic: mesh: an edge is shared by more than two faces: 4 faces run the edge {46.84086003689702 44.28674168776021 -50.70161574956721} to {46.94462029284385 44.29685192673667 -50.76104295170299} either way, faces 385 and 559 the same way
+
+goroutine 1 [running]:
+main.main()
+	manufacture/testdata/geometry_sample_selected.go:113 +0xae4
+
+stdout:

@@ -277,7 +277,7 @@ func TestASetAfloatHangsItsWorldsSky(t *testing.T) {
 // draw: a light that is not the sun, moon or none, a sun or moon not said, what stands
 // on ground, a planet, a burning craft, and the lake.
 func TestASetAfloatRefusesWhatItDoesNotDraw(t *testing.T) {
-	stand := "  set:\n    stands:\n      trees: {kind: spruce, count: 1, " +
+	stand := "  set:\n    stands:\n      trees: {kind: cobble, count: 1, " +
 		"seed: 1}\n    things:\n"
 	planet := "  planet:\n    name: p\n    made_up: true\n    radius: 1.0e7\n" +
 		"    gravity: 10\n    from_star: 1\n    columns:\n      a:\n" +

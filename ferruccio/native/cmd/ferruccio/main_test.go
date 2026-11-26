@@ -234,3 +234,64 @@ func TestEvidenceDestinationHasSharedDefaultAndExplicitPrecedence(t *testing.T) 
 		}
 	}
 }
+
+func TestPortableDefaultsUseExistingSharedFoldersOrUserOutput(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("FERRUCCIO_EVIDENCE", "")
+	want := filepath.Join(home, "Library", "Application Support", "Ferruccio", "Renders")
+	if got := evidenceDirectory(""); got != want {
+		t.Fatalf("portable output %q, want %q", got, want)
+	}
+	if got := queueDirectory(""); got != "" {
+		t.Fatalf("invented a queue: %q", got)
+	}
+	if got := cacheDirectory(""); got != filepath.Join(home, "Library", "Caches", "Ferruccio", "Slayer") {
+		t.Fatalf("portable cache = %q", got)
+	}
+	if got := sourceShelf(""); got != "" {
+		t.Fatalf("invented a source shelf: %q", got)
+	}
+	shared := filepath.Join(home, "mesh", "the-vorrh", "renders")
+	queue := filepath.Join(shared, "applications", "azazel", "queue")
+	frames := filepath.Join(shared, "frames")
+	cache := filepath.Join(shared, "cache")
+	shelf := filepath.Join(home, "mesh", "the-vorrh", "data", "slayer", "sources")
+	for _, path := range []string{queue, frames, cache, shelf} {
+		if err := os.MkdirAll(path, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := queueDirectory(""); got != queue {
+		t.Fatalf("shared queue %q, want %q", got, queue)
+	}
+	if got := evidenceDirectory(""); got != frames {
+		t.Fatalf("shared output %q, want %q", got, frames)
+	}
+	if got := cacheDirectory(""); got != cache {
+		t.Fatalf("shared cache = %q, want %q", got, cache)
+	}
+	if got := sourceShelf(""); got != shelf {
+		t.Fatalf("shared shelf = %q, want %q", got, shelf)
+	}
+	if got := queueDirectory("/chosen/queue"); got != "/chosen/queue" {
+		t.Fatalf("explicit queue was replaced: %q", got)
+	}
+}
+
+func TestOnlyBundledQueueClientIsAutomaticallyReplaced(t *testing.T) {
+	executable := "/test/Ferruccio.app/Contents/MacOS/ferruccio"
+	bundled := "/test/Ferruccio.app/Contents/Resources/engine/azazel"
+	if !isBundledClient(bundled, executable) || isBundledClient("/chosen/azazel", executable) {
+		t.Fatal("bundled and explicitly chosen clients were not distinguished")
+	}
+}
+
+func TestPreviewTransportDefaultsToQueue(t *testing.T) {
+	if got := previewTransport(""); got != "azazel" {
+		t.Fatalf("default transport = %q", got)
+	}
+	if got := previewTransport("slayer"); got != "slayer" {
+		t.Fatalf("explicit transport = %q", got)
+	}
+}

@@ -1,0 +1,25 @@
+Reference crops cut from the existing 2048 by 1820 street PNG. These are not
+newly rendered regions. The original was recorded at four rays per side,
+sixteen samples per pixel, on the GPU, with street-2k.yaml.
+The original executable revision and exact GPU mode have not been established.
+The source set's SHA-256 is
+a5b906416963004ce02cd4ef5eebd38e78b170262a3397a4b147fce26bb365fd.
+The source PNG's SHA-256 is
+08e9ee7e1597bf3db2bedaccd046c6b78716cbdd0043317988d4043bc29e3d29.
+
+Each rectangle is left, top, width, height in original image pixels:
+water: 1020, 1260, 320, 300
+wall: 75, 250, 320, 350
+haze: 570, 160, 300, 350
+lamps: 1300, 0, 350, 260
+end: 850, 700, 350, 350
+
+Each cut used `sips --cropOffset TOP LEFT -c HEIGHT WIDTH SOURCE --out OUTPUT`
+with the numbers above and the existing PNG as SOURCE. No resampling was
+requested for these cuts.
+
+The water contains isolated bright points in a yellow reflection. The wall
+has red speckle with hard slanted boundaries. The haze has yellow specks in
+columns. The cool lamp halo is grainy. The end of the street is blown out.
+These are candidate test areas, not evidence of a corrected image or of
+independently rendered region equality.

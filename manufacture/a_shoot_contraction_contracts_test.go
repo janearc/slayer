@@ -21,18 +21,18 @@ func TestSmallShootPlansFinishWithContractingChildren(t *testing.T) {
 			t.Fatalf("style %d small plan did not finish within one second", style)
 		}
 		// The picked two-order grammar has at most 1 + 16 + 16*8 axes.
-		if len(plan.axes) < 2 || len(plan.axes) > 145 {
-			t.Fatalf("style %d has %d axes", style, len(plan.axes))
+		if len(plan.Axes) < 2 || len(plan.Axes) > 145 {
+			t.Fatalf("style %d has %d axes", style, len(plan.Axes))
 		}
-		for i, axis := range plan.axes {
+		for i, axis := range plan.Axes {
 			if i == 0 {
 				continue
 			}
-			if axis.parent < 0 || axis.parent >= i {
-				t.Fatalf("style %d invalid parent %d", style, axis.parent)
+			if axis.Parent < 0 || axis.Parent >= i {
+				t.Fatalf("style %d invalid parent %d", style, axis.Parent)
 			}
-			parent := plan.axes[axis.parent]
-			if !(axis.length > 0 && axis.length < parent.length && axis.radius > 0 && axis.radius < parent.radius) {
+			parent := plan.Axes[axis.Parent]
+			if !(axis.Length > 0 && axis.Length < parent.Length && axis.Radius > 0 && axis.Radius < parent.Radius) {
 				t.Fatalf("style %d child %d did not contract from its parent", style, i)
 			}
 		}

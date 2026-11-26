@@ -23,14 +23,18 @@ func (work *Workspace) scenePicker() widget.Widget {
 	selected := -1
 	for i, entry := range work.library {
 		labels[i] = entry.label
-		if strings.HasSuffix(work.state.path, string(filepath.Separator)+entry.name) {
+		if work.state.path != "" && filepath.Clean(work.state.path) == filepath.Join(work.examplesFolder(), entry.name) {
 			selected = i
-		} else if selected < 0 && filepath.Base(entry.name) == work.state.document.Name() {
+		} else if work.exampleDraft && selected < 0 && strings.HasSuffix(work.state.path, string(filepath.Separator)+entry.name) {
 			selected = i
 		}
 	}
 	if len(labels) == 0 {
 		return work.text(work.state.document.Name())
+	}
+	if selected < 0 {
+		selected = len(labels)
+		labels = append(labels, work.state.document.Name())
 	}
 	var control *dropdown.Widget
 	control = dropdown.New(dropdown.Items(labels...), dropdown.Selected(selected), dropdown.PainterOpt(appearance.DropdownPainter{Theme: work.theme, Size: work.size}), dropdown.OnChange(func(i int, _ string) {
@@ -106,6 +110,10 @@ func sortedLibrary(entries []sceneEntry) []sceneEntry {
 // resetDocumentView prevents old pixels or gestures from being attributed to a new set.
 func (work *Workspace) resetDocumentView() {
 	work.stopPreview()
+	if work.working.stager != nil {
+		work.working.stager.discard()
+		work.working.staging = false
+	}
 	work.viewer.dragging = false
 	if work.viewer.ball != nil {
 		work.viewer.ball.dragging = false
@@ -120,10 +128,12 @@ func (work *Workspace) resetDocumentView() {
 	work.viewer.SetNavigable(false)
 	work.working.photograph = nil
 	work.working.scene = nil
+	work.working.parsed = nil
 	work.working.gesture = nil
 	work.working.source = ""
 	work.working.path = ""
 	work.working.failure = ""
+	work.working.notice = ""
 	work.working.displayed = false
 	work.working.waiting = false
 	work.working.dirty = true

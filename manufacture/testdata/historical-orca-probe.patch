@@ -1,0 +1,77 @@
+diff --git a/manufacture/b_geometry_reference_contracts_test.go b/manufacture/b_geometry_reference_contracts_test.go
+index b820afe9..e69ebfd0 100644
+--- a/manufacture/b_geometry_reference_contracts_test.go
++++ b/manufacture/b_geometry_reference_contracts_test.go
+@@ -79,0 +80,6 @@ func referenceGeometry(h hash.Hash, solid shape.Shape, seen map[shape.Shape]int)
++	case shape.Sphere:
++		referenceWrite(h, byte(4))
++		referenceWrite(h, made.Radius)
++	case shape.Tube:
++		referenceWrite(h, byte(5))
++		referenceWrite(h, [3]float64{made.Radius, made.Thick, made.Height})
+diff --git a/manufacture/orca_arithmetic_probe_test.go b/manufacture/orca_arithmetic_probe_test.go
+new file mode 100644
+index 00000000..f38e20d8
+--- /dev/null
++++ b/manufacture/orca_arithmetic_probe_test.go
+@@ -0,0 +1,34 @@
++package manufacture
++
++import (
++	"math"
++	"testing"
++)
++
++// This probe keeps the gargoyle witness in the same compiled package as the
++// arithmetic observations, so a compiler-context change cannot go unnoticed.
++func TestOrcaArithmeticAndHistoricalGargoyle(t *testing.T) {
++	span, chord := orcaFlipperSpan, orcaFlipperChordway
++	left := float64(span.Y * chord.Z)
++	right := float64(span.Z * chord.Y)
++	plain := left - right
++	fusedLeft := math.FMA(span.Y, chord.Z, -right)
++	fusedRight := math.FMA(-span.Z, chord.Y, left)
++	cross := span.Cross(chord)
++	t.Logf("span=(%.17g,%.17g,%.17g) chord=(%.17g,%.17g,%.17g)",
++		span.X, span.Y, span.Z, chord.X, chord.Y, chord.Z)
++	t.Logf("normal.x=%.17g bits=%016x cross.x=%.17g bits=%016x", orcaFlipperNormal.X, math.Float64bits(orcaFlipperNormal.X), cross.X, math.Float64bits(cross.X))
++	t.Logf("left=%.17g right=%.17g plain=%.17g fused-left=%.17g fused-right=%.17g", left, right, plain, fusedLeft, fusedRight)
++	kind, err := KindNamed("gargoyle-orca-concrete")
++	if err != nil {
++		t.Fatal(err)
++	}
++	made, err := MakeWithComplexity(kind, Sow(5), "hull")
++	if err != nil {
++		t.Fatal(err)
++	}
++	const original = "b6b5ffc85c46a0760fa7132bd32a11eb7a2afc966ed9fb7dfb442f5c233ad2e9"
++	if got := referenceDigest(t, made); got != original {
++		t.Errorf("historical gargoyle: got %s want %s", got, original)
++	}
++}
+diff --git a/manufacture/orca_flipper_normal_test.go b/manufacture/orca_flipper_normal_test.go
+new file mode 100644
+index 00000000..614fe251
+--- /dev/null
++++ b/manufacture/orca_flipper_normal_test.go
+@@ -0,0 +1,20 @@
++package manufacture
++
++import (
++	"math"
++	"runtime"
++	"testing"
++)
++
++// The cross product's X terms nearly cancel. The chosen evaluation retains
++// the original binding even if an unrelated package initializer changes how
++// the compiler fuses arithmetic.
++func TestOrcaFlipperNormalRetainsBindingPrecision(t *testing.T) {
++	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
++		t.Skip("precision witness was captured on Darwin/ARM64")
++	}
++	const original = 1.053477413162646e-17
++	if math.Float64bits(orcaFlipperNormal.X) != math.Float64bits(original) {
++		t.Fatalf("flipper normal X changed: %.17g", orcaFlipperNormal.X)
++	}
++}

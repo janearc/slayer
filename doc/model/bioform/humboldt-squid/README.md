@@ -7,19 +7,33 @@ rig. Colour, scale and local deformation are choices, not a measured animal.
 
 ## What ships
 
-`HumboldtSquidFive(phase)` in `manufacture/humboldt_squid_five.go` is the
+`NewHumboldtSquid(phase)` in `manufacture/humboldt_squid.go` is the
 squid. It is a Go function taking a phase of an authored pulse. The cornice
 gargoyles use it at phase zero as the creature `squid`, a grotesque with the
 mantle against the wall, the arms hanging over the corbel and the funnel as
 the spout (`manufacture/cities/gargoyle-creatures.yaml`,
 `manufacture/gargoyle_studies.go`).
 
-It is not a manufactory kind and no set
-draws it directly.
+Its length, proportions and coat are in the checked
+[`squid-profiles.yaml`](../../../../manufacture/animals/molluscs/squid/squid-profiles.yaml) book. In Go,
+`ReadSquidProfiles(path, bytes)` reads an independent book;
+`book.NewHumboldtSquid(phase)` selects its named profile, and
+`book.NewSquid(species, phase)` selects another entry. Additional entries
+can change mantle length, mantle radius, head width, fin span, arm and
+tentacle lengths, and coat. They share an illustrative body construction and
+pulse; these controls do not establish the anatomy of another squid species.
+Each checked profile owns its rest mesh. A missing species or invalid book is
+refused.
+Lengths are bounded to 0.01–100 m for stable construction; that is a numerical
+limit, not a biological range.
 
-The files `humboldt_squid_one.go` through `humboldt_squid_four.go` and
-`humboldt_squid_three_b.go` are the earlier studies, kept with their tests.
-Nothing calls them.
+The shared squid builder passes its posed surface to `NewMollusc`. A set can
+use an `animal` recipe with `family: squid` and an optional phase in radians;
+see [animal profile recipes](../../../animal-profile-recipes.md). It is not a
+registered manufactory kind.
+
+The earlier studies are preserved in Git history. They had no callers and
+were removed with their tests to reduce the maintained code footprint.
 
 Sources and what each gives are in [SOURCES.md](SOURCES.md).
 
@@ -47,9 +61,9 @@ phases. Those are geometric results and not biological tolerances.
 The pulse is a stationary authored loop of mantle, fins and arms. The 2012
 field study describes climb then fins-first glide. The loop does not copy it.
 
-Tests: `TestHumboldtSquidFiveCorrespondence`,
-`TestHumboldtSquidFiveRestTopology` and
-`TestHumboldtSquidFiveRestRelativeEdgeRange`.
+Tests: `TestNewHumboldtSquidCorrespondence`,
+`TestNewHumboldtSquidRestTopology` and
+`TestNewHumboldtSquidRestRelativeEdgeRange`.
 
 ## Known faults and unfinished parts
 

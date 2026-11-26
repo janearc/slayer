@@ -4,9 +4,11 @@ import (
 	_ "embed"
 	"fmt"
 	"math"
+	"path/filepath"
 	"slices"
 	"strings"
 
+	"github.com/janearc/puzzlemouth/pzm"
 	"github.com/janearc/puzzlemouth/yamlfile"
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
@@ -30,6 +32,9 @@ type reference struct {
 
 type entry struct {
 	Kind       string      `json:"kind" yaml:"kind"`
+	Animal     *animalSpec `json:"animal,omitempty" yaml:"animal"`
+	Plant      *plantSpec  `json:"plant,omitempty" yaml:"plant"`
+	Alga       *algaSpec   `json:"alga,omitempty" yaml:"alga"`
 	Group      string      `json:"group" yaml:"group"`
 	About      string      `json:"about" yaml:"about"`
 	Notes      string      `json:"notes" yaml:"notes"`
@@ -39,6 +44,8 @@ type entry struct {
 	Up         string      `json:"view-up,omitempty" yaml:"view-up"`
 	Pitch      *float64    `json:"view-elevation-deg" yaml:"view-elevation-deg"`
 	Staging    *staging    `json:"staging,omitempty" yaml:"staging"`
+	checked    *manufacture.Kind
+	source     string
 }
 
 // staging is an entry's own sky and lamps, lit in place of the plan's
@@ -78,25 +85,62 @@ func (entry entry) vertical() maths.Vec {
 
 // readMenu checks both the schema and the actual factory vocabulary.
 func readMenu() (*menu, error) {
-	return parseMenu("menu.yaml", menuRaw)
+	return parseMenuWithModels("menu.yaml", menuRaw, "")
+}
+
+func menuForCall(call pzm.Call) (*menu, error) {
+	if !call.Given("models") {
+		return readMenu()
+	}
+	if strings.TrimSpace(call.Value("models")) == "" {
+		return nil, fmt.Errorf("models directory must not be empty")
+	}
+	root, err := filepath.Abs(call.Value("models"))
+	if err != nil {
+		return nil, err
+	}
+	return parseMenuWithModels("menu.yaml", menuRaw, root)
 }
 
 // parseMenu is readMenu's checks over the bytes of any menu.
 func parseMenu(name string, raw []byte) (*menu, error) {
+	return parseMenuWithModels(name, raw, "")
+}
+
+// parseMenuWithModels resolves every profile once and retains its checked
+// constructor and source identity for the lifetime of the returned menu.
+func parseMenuWithModels(name string, raw []byte, modelRoot string) (*menu, error) {
 	var made menu
 	err := readDocument(name, raw, menuSchema, &made)
 	if err != nil {
 		return nil, err
 	}
 	names := map[string]bool{}
-	for _, entry := range made.Entries {
+	books := &modelBooks{root: modelRoot, bytes: map[string][]byte{}}
+	for index := range made.Entries {
+		entry := &made.Entries[index]
 		if strings.TrimSpace(entry.About) == "" {
 			return nil, fmt.Errorf("catalogue kind %q needs an about description", entry.Kind)
 		}
 		if strings.TrimSpace(entry.Notes) == "" {
 			return nil, fmt.Errorf("catalogue kind %q needs notes", entry.Kind)
 		}
-		if _, err := manufacture.KindNamed(entry.Kind); err != nil {
+		if entry.Animal != nil && (entry.Plant != nil || entry.Alga != nil) || entry.Plant != nil && entry.Alga != nil {
+			return nil, fmt.Errorf("catalogue %q cannot name multiple profile categories", entry.Kind)
+		}
+		if entry.Animal != nil {
+			if err := entry.bindAnimal(books); err != nil {
+				return nil, fmt.Errorf("catalogue %q: %w", entry.Kind, err)
+			}
+		} else if entry.Plant != nil {
+			if err := entry.bindPlant(books); err != nil {
+				return nil, fmt.Errorf("catalogue %q: %w", entry.Kind, err)
+			}
+		} else if entry.Alga != nil {
+			if err := entry.bindAlga(books); err != nil {
+				return nil, fmt.Errorf("catalogue %q: %w", entry.Kind, err)
+			}
+		} else if _, err := manufacture.KindNamed(entry.Kind); err != nil {
 			return nil, err
 		}
 		if names[entry.Kind] {

@@ -4,6 +4,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/janearc/slayer/manufacture/plants/conifers"
 	"github.com/janearc/slayer/maths"
 )
 
@@ -19,10 +20,10 @@ func TestDiagnosticNeedleVolumeSignsAcrossThePrototypeDomain(t *testing.T) {
 		for bin := range 5 {
 			for variant := range 2 {
 				plan := planShoot(style, .025*math.Exp2(float64(bin)), Sow(uint64(variant)))
-				for _, needle := range plan.needles {
+				for _, needle := range plan.Needles {
 					needles++
 					for _, detail := range []string{"quick", "demo"} {
-						skin := needle.skin(detail)
+						skin := conifers.NeedleSkin[face](needle, detail)
 						for _, origin := range []maths.Vec{skin[0][0], skin[1][0], skin[0][1], skin[0][2]} {
 							sum := 0.0
 							for _, face := range skin {

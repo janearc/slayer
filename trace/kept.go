@@ -86,14 +86,15 @@ func SampledKept(world *thing.World, eye maths.Subspace, lens film.Sensor,
 // the rays a side of a pixel, the staged scene, the angle a fine pixel
 // sees, the picture, the rows left to draw, and how many are finished.
 type painting struct {
-	keeping  Keeping
-	fine     view
-	rays     int
-	scene    *staged
-	wide     float64
-	picture  *frame.Frame
-	left     chan int
-	finished atomic.Int64
+	keeping               Keeping
+	fine                  view
+	rays                  int
+	scene                 *staged
+	wide                  float64
+	regionLeft, regionTop int
+	picture               *frame.Frame
+	left                  chan int
+	finished              atomic.Int64
 }
 
 // render is the view drawn by rows, or the refusal of a scene that cannot
@@ -197,9 +198,9 @@ func (made *painting) put(row int, pixels []frame.Pixel) {
 // row is picture row y drawn from its fine rows, and whether it was drawn
 // whole: a draw told to stop leaves it at the next ray.
 func (made *painting) row(y int) ([]frame.Pixel, bool) {
-	block := frame.New(made.fine.width, made.rays)
+	block := frame.New(made.picture.W*made.rays, made.rays)
 	for down := 0; down < made.rays; down++ {
-		if !made.across(block, y*made.rays+down, down) {
+		if !made.across(block, (made.regionTop+y)*made.rays+down, down) {
 			return nil, false
 		}
 	}
@@ -209,11 +210,11 @@ func (made *painting) row(y int) ([]frame.Pixel, bool) {
 // across casts fine row at into the block's row down, and says whether
 // it got to the row's end.
 func (made *painting) across(block *frame.Frame, at, down int) bool {
-	for x := 0; x < made.fine.width; x++ {
+	for x := 0; x < block.W; x++ {
 		if made.keeping.told() {
 			return false
 		}
-		block.Set(x, down, made.fine.through(made.scene, made.wide, x, at))
+		block.Set(x, down, made.fine.through(made.scene, made.wide, made.regionLeft*made.rays+x, at))
 	}
 	return true
 }

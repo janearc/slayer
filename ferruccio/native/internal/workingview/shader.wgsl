@@ -8,6 +8,10 @@ struct VertexInput {
     @location(0) position: vec3<f32>,
     @location(1) normal: vec3<f32>,
     @location(2) colour: vec3<f32>,
+    @location(3) model0: vec4<f32>,
+    @location(4) model1: vec4<f32>,
+    @location(5) model2: vec4<f32>,
+    @location(6) model3: vec4<f32>,
 }
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -16,8 +20,9 @@ struct VertexOutput {
 }
 fn project(input: VertexInput) -> VertexOutput {
     var result: VertexOutput;
-    result.position = scene.view_projection * scene.model * vec4<f32>(input.position, 1.0);
-    result.normal = (scene.model * vec4<f32>(input.normal, 0.0)).xyz;
+    let model = mat4x4<f32>(input.model0, input.model1, input.model2, input.model3);
+    result.position = scene.view_projection * model * vec4<f32>(input.position, 1.0);
+    result.normal = (model * vec4<f32>(input.normal, 0.0)).xyz;
     result.colour = input.colour;
     return result;
 }

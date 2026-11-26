@@ -182,7 +182,7 @@ func strays(call pzm.Call, takes []string, way string) error {
 func (held assessing) check(call pzm.Call, given string) error {
 	drawer := drawing(held)
 	name := filepath.Base(given)
-	run, err := drawer.planned(call, given)
+	run, err := drawer.planned(call, given, false)
 	if err == nil {
 		run, err = run.withPlaces(call, held.env.directory)
 	}

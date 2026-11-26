@@ -7,8 +7,8 @@
 # beside any other transparent boundary, and a bubble is one.
 #
 # the frame. places are metres, x east, y north, z up, mean sea at z=0.
-# the floor is at z=-12, the file's depth for kelp (manufacture/kelp.yaml),
-# so a plant of the kind kelp-forest-moderate reaches the surface from a
+# the floor is at z=-12, the file's depth for kelp (manufacture/algae/kelp/kelp.yaml),
+# so a plant in the moderate-water forest reaches the surface from a
 # thing set at up -12. the forest is 12 plants a side about the origin.
 #
 # the water. one clear medium, no tint: its colour is what its coefficients
@@ -128,17 +128,21 @@ scene:
         middle: [0, 0, -12.05]
         size: [400, 400, 0.1]
         source: eye
+  recipes:
+    profile-kelp: {alga: {family: kelp, file: ../manufacture/algae/kelp/kelp.yaml, species: macrocystis-pyrifera, condition: moderate, forest: true}}
+    profile-orca: {animal: {family: whale, file: ../manufacture/animals/vertebrates/mammals/whales/profiles.yaml, species: orca, pose: swim}}
+    profile-harbor-bay: {animal: {family: pinniped, file: ../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: harbor-seal, study: bay}}
   set:
     things:
       forest:
-        kind: kelp-forest-moderate
+        recipe: profile-kelp
         seed: 1
         position:
           east: {value: 0, unit: m}
           north: {value: 0, unit: m}
           up: {value: -12, unit: m}
       orca:
-        kind: orca-clean-05
+        recipe: profile-orca
         seed: 1
         position:
           east: {value: 10, unit: m}
@@ -146,7 +150,7 @@ scene:
           up: {value: -6, unit: m}
         heading: {value: 120, unit: deg}
       seal:
-        kind: bay-seal
+        recipe: profile-harbor-bay
         seed: 1
         position:
           east: {value: -7, unit: m}

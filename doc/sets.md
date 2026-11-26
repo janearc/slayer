@@ -495,14 +495,21 @@ most the ground may rise in a metre of run where one of its things stands,
 read along the ground's steepest way at the terrain's nearest post. with
 `above` and `below` it sows a stand by height and slope together:
 
-    stands:
-      hala a:
-        kind: pandanus-tectorius
-        count: 200
-        seed: 611
-        above: 3
-        below: 610
-        steepest: 0.7
+    recipes:
+      hala:
+        plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: pandanus-tectorius}
+    set:
+      stands:
+        hala a:
+          recipe: hala
+          count: 200
+          seed: 611
+          above: 3
+          below: 610
+          steepest: 0.7
+
+the profile path is relative to the set; this example assumes the set is in
+`sets/`.
 
 - `steepest` is from 0, level ground only, to 10, past any cliff; unsaid,
   a stand grows on ground of any slope.

@@ -261,6 +261,7 @@ entries:
       - title: NAOJ, Subaru telescope parameters
         url: https://subarutelescope.org/Telescope/Parameters/
   - kind: spruce
+    plant: {family: conifer, file: conifer-profiles.yaml, species: spruce}
     group: Conifers
     about: A whorled spruce with a clear trunk and radial branches.
     notes: >-
@@ -270,6 +271,7 @@ entries:
       records are deferred to the review break.
     details: [hull, clumps, quick, demo]
   - kind: norway
+    plant: {family: conifer, file: conifer-profiles.yaml, species: norway}
     group: Conifers
     about: A taller spruce with hanging branchlets.
     notes: >-
@@ -282,6 +284,7 @@ entries:
       - title: Oregon State University, Norway spruce foliage and branch habit
         url: https://landscapeplants.oregonstate.edu/plants/picea-abies
   - kind: coast-redwood
+    plant: {family: conifer, file: conifer-profiles.yaml, species: coast-redwood}
     group: Conifers
     about: Flared bark, a tall crown and recursively branched flat sprays.
     notes: Authored crown; leaf lengths have botanical references. Not a growth model.
@@ -290,6 +293,7 @@ entries:
       - title: Oregon State University, coast redwood foliage
         url: https://landscapeplants.oregonstate.edu/plants/sequoia-sempervirens
   - kind: giant-sequoia
+    plant: {family: conifer, file: conifer-profiles.yaml, species: giant-sequoia}
     group: Conifers
     about: A broad flared trunk and dense sprays with scale-like foliage.
     notes: Authored crown; source-backed scale lengths do not calibrate the whole tree.
@@ -298,6 +302,7 @@ entries:
       - title: Oregon State University, giant sequoia foliage
         url: https://landscapeplants.oregonstate.edu/plants/sequoiadendron-giganteum
   - kind: coast-redwood-shoot
+    plant: {family: conifer, file: conifer-profiles.yaml, species: coast-redwood, representation: shoot}
     view-up: x
     group: Foliage
     about: A loose redwood spray for looking at the actual reusable foliage.
@@ -307,6 +312,7 @@ entries:
       - title: Oregon State University, coast redwood foliage
         url: https://landscapeplants.oregonstate.edu/plants/sequoia-sempervirens
   - kind: giant-sequoia-shoot
+    plant: {family: conifer, file: conifer-profiles.yaml, species: giant-sequoia, representation: shoot}
     view-up: x
     group: Foliage
     about: A loose sequoia shoot, down to its individual foliage at demo detail.
@@ -316,6 +322,7 @@ entries:
       - title: Oregon State University, giant sequoia foliage
         url: https://landscapeplants.oregonstate.edu/plants/sequoiadendron-giganteum
   - kind: fern
+    plant: {family: fern, file: fern-profiles.yaml, species: fern}
     group: Understory
     about: Arched fronds carrying paired leaflets.
     notes: Seeded dimensions and arrangement, with a shared green appearance.
@@ -1073,6 +1080,7 @@ entries:
       - title: ESO OWL enclosure and infrastructure concept
         url: https://www.eso.org/sci/facilities/eelt/owl/Blue_Book/11_Enclosure_and_infrastructures.pdf
   - kind: valley-oak
+    plant: {family: seasonal, file: plant-profiles.yaml, species: valley-oak}
     group: Broadleaf trees
     about: A spreading forked oak with lobed physical leaves.
     notes: >-
@@ -1085,6 +1093,7 @@ entries:
       - title: UC ANR, California oak identification and ecology
         url: https://www.ucanr.edu/site/uc-oaks/california-oak-tree-species-id-and-ecology
   - kind: alder
+    plant: {family: seasonal, file: plant-profiles.yaml, species: alder}
     group: Broadleaf trees
     about: A continuing leader with lateral branches and oval blades.
     notes: >-
@@ -1094,6 +1103,7 @@ entries:
       Code draft; geometry and CPU/Metal views await the review break.
     details: [hull, clumps, quick, demo]
   - kind: poplar
+    plant: {family: seasonal, file: plant-profiles.yaml, species: poplar}
     group: Broadleaf trees
     about: A tall leader-based crown with deltoid leaf outlines.
     notes: >-
@@ -1103,6 +1113,7 @@ entries:
       Code draft; geometry and CPU/Metal views await the review break.
     details: [hull, clumps, quick, demo]
   - kind: pandanus-tectorius
+    plant: {family: seasonal, file: plant-profiles.yaml, species: pandanus-tectorius}
     group: Native island and coast plants
     about: A wide-branched screw pine with long spiralled blades and prop roots.
     notes: >-
@@ -1115,6 +1126,7 @@ entries:
       - title: Bishop Museum, Cook Islands species, Pandanus tectorius
         url: https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=6472
   - kind: scaevola-taccada
+    plant: {family: seasonal, file: plant-profiles.yaml, species: scaevola-taccada}
     group: Native island and coast plants
     about: A spreading salt-tolerant shrub with oval, light green leaves.
     notes: >-
@@ -1125,6 +1137,7 @@ entries:
       - title: Native Plants Hawaii, Scaevola taccada
         url: https://nativeplants.hawaii.edu/plants/scaevola-sericea/
   - kind: metrosideros-polymorpha
+    plant: {family: seasonal, file: plant-profiles.yaml, species: metrosideros-polymorpha}
     group: Native island and coast plants
     about: A shrub or tree of the island slopes with small dark green leaves.
     notes: >-
@@ -1135,6 +1148,7 @@ entries:
       - title: Native Plants Hawaii, Metrosideros polymorpha
         url: https://nativeplants.hawaii.edu/plants/metrosideros-polymorpha/
   - kind: barringtonia-asiatica
+    plant: {family: seasonal, file: plant-profiles.yaml, species: barringtonia-asiatica}
     group: Native island and coast plants
     about: A large low-branching shore tree with very large oblong leaves.
     notes: >-
@@ -1145,6 +1159,7 @@ entries:
       - title: Bishop Museum, Cook Islands species, Barringtonia asiatica
         url: https://data.bishopmuseum.org/PBS/cookislands/species.asp?id=5803
   - kind: quercus-ilex
+    plant: {family: seasonal, file: plant-profiles.yaml, species: quercus-ilex}
     group: Native island and coast plants
     about: A broad domed evergreen oak with small dark leaves, as on a coastal slope.
     notes: >-
@@ -1157,6 +1172,7 @@ entries:
       - title: Portofino marine reserve, coastal environment handbook
         url: https://www.portofinoamp.it/come/didattica/3ambientecostierodispensedefinitiveecorrette2012.pdf
   - kind: erica-arborea
+    plant: {family: seasonal, file: plant-profiles.yaml, species: erica-arborea}
     group: Native island and coast plants
     about: A tree heath with small needle leaves borne in whorls.
     notes: >-
@@ -1167,6 +1183,7 @@ entries:
       - title: Portofino marine reserve, coastal environment handbook
         url: https://www.portofinoamp.it/come/didattica/3ambientecostierodispensedefinitiveecorrette2012.pdf
   - kind: salix-alba
+    plant: {family: seasonal, file: plant-profiles.yaml, species: salix-alba}
     group: Native island and coast plants
     about: A waterside willow with long narrow pointed leaves.
     notes: >-
@@ -1177,6 +1194,7 @@ entries:
       - title: Verspreidingsatlas, Salix alba
         url: https://www.verspreidingsatlas.nl/1116
   - kind: manzanita
+    plant: {family: seasonal, file: plant-profiles.yaml, species: manzanita}
     group: Desert and chaparral
     about: A red-barked multi-stem shrub with small oval blades.
     notes: >-
@@ -1186,6 +1204,7 @@ entries:
       Code draft; geometry and CPU/Metal views await the review break.
     details: [hull, clumps, quick, demo]
   - kind: chaparral-brush
+    plant: {family: seasonal, file: plant-profiles.yaml, species: chaparral-brush}
     group: Desert and chaparral
     about: Low multi-stem brush with narrow evergreen blades.
     notes: >-
@@ -1195,6 +1214,7 @@ entries:
       Code draft; geometry and CPU/Metal views await the review break.
     details: [hull, clumps, quick, demo]
   - kind: joshua-tree
+    plant: {family: seasonal, file: plant-profiles.yaml, species: joshua-tree}
     group: Desert and chaparral
     about: Forked stems ending in green blade rosettes and brown leaf skirts.
     notes: >-
@@ -1207,6 +1227,7 @@ entries:
       - title: Oregon State University, Joshua-tree foliage habit
         url: https://landscapeplants.oregonstate.edu/plants/yucca-brevifolia
   - kind: kandelia-obovata
+    plant: {family: seasonal, file: plant-profiles.yaml, species: kandelia-obovata}
     group: Mangroves
     about: A low multi-stem mangrove on short propped roots, with thick oval leaves.
     notes: >-
@@ -1215,6 +1236,7 @@ entries:
       other number is picked. Roots are physical size and differ by seed.
     details: [hull, clumps, quick, demo]
   - kind: aegiceras-corniculatum
+    plant: {family: seasonal, file: plant-profiles.yaml, species: aegiceras-corniculatum}
     group: Mangroves
     about: A small many-stemmed mangrove shrub with short basal props.
     notes: >-
@@ -1223,6 +1245,7 @@ entries:
       picked, and every other number is picked.
     details: [hull, clumps, quick, demo]
   - kind: avicennia-marina
+    plant: {family: seasonal, file: plant-profiles.yaml, species: avicennia-marina}
     group: Mangroves
     about: A rounded mangrove standing in a field of upright breathing roots.
     notes: >-
@@ -1231,6 +1254,7 @@ entries:
       field's width and every other number are picked.
     details: [hull, clumps, quick, demo]
   - kind: bruguiera-gymnorhiza
+    plant: {family: seasonal, file: plant-profiles.yaml, species: bruguiera-gymnorhiza}
     group: Mangroves
     about: A single-trunked mangrove on propped, buttressed roots.
     notes: >-
@@ -1239,6 +1263,7 @@ entries:
       other number is picked.
     details: [hull, clumps, quick, demo]
   - kind: sonneratia-apetala
+    plant: {family: seasonal, file: plant-profiles.yaml, species: sonneratia-apetala}
     group: Mangroves
     about: A tall planted mangrove with hanging narrow leaves and upright cone roots.
     notes: >-
@@ -1247,6 +1272,7 @@ entries:
       cones' height, their number and every other number are picked.
     details: [hull, clumps, quick, demo]
   - kind: saguaro
+    plant: {family: cactus, file: cactus-profiles.yaml, species: saguaro}
     group: Desert and chaparral
     about: A pleated upright cactus with rounded tips and curved rising arms.
     notes: >-
@@ -1259,6 +1285,7 @@ entries:
       - title: National Park Service, saguaro arms and pleats
         url: https://www.nps.gov/tont/learn/nature/saguaro.htm
   - kind: giant-kelp
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: moderate}
     group: Sea
     about: A giant kelp plant held up by its gas bladders, in a named water.
     notes: >-
@@ -1267,6 +1294,7 @@ entries:
       swell's orbit by depth; kelp.yaml gives every figure its basis.
     details: [quick]
   - kind: kelp-forest
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: moderate, forest: true}
     group: Sea
     about: A forest of giant kelp, the plants by seed on a jittered grid.
     notes: >-
@@ -1274,34 +1302,40 @@ entries:
       the plants. kelp.yaml gives every figure its basis.
     details: [quick]
   - kind: giant-kelp-slack
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: slack}
     group: Sea
     about: A giant kelp plant in still water, no current and no swell.
-    notes: The kind giant-kelp in the slack water of kelp.yaml.
+    notes: The giant kelp profile in the slack water of kelp.yaml.
     details: [quick]
   - kind: giant-kelp-moderate
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: moderate}
     group: Sea
     about: A giant kelp plant in a moderate current and swell.
-    notes: The kind giant-kelp in the moderate water of kelp.yaml.
+    notes: The giant kelp profile in the moderate water of kelp.yaml.
     details: [quick]
   - kind: giant-kelp-surge
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: surge}
     group: Sea
     about: A giant kelp plant in a strong current and a heavy swell.
-    notes: The kind giant-kelp in the surge water of kelp.yaml.
+    notes: The giant kelp profile in the surge water of kelp.yaml.
     details: [quick]
   - kind: kelp-forest-slack
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: slack, forest: true}
     group: Sea
     about: A forest of giant kelp in still water.
-    notes: The kind kelp-forest in the slack water of kelp.yaml.
+    notes: A giant kelp forest in the slack water of kelp.yaml.
     details: [quick]
   - kind: kelp-forest-moderate
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: moderate, forest: true}
     group: Sea
     about: A forest of giant kelp in a moderate current and swell.
-    notes: The kind kelp-forest in the moderate water of kelp.yaml.
+    notes: A giant kelp forest in the moderate water of kelp.yaml.
     details: [quick]
   - kind: kelp-forest-surge
+    alga: {family: kelp, file: kelp.yaml, species: macrocystis-pyrifera, condition: surge, forest: true}
     group: Sea
     about: A forest of giant kelp in a strong current and a heavy swell.
-    notes: The kind kelp-forest in the surge water of kelp.yaml.
+    notes: A giant kelp forest in the surge water of kelp.yaml.
     details: [quick]
   - kind: bubble-stream
     group: Sea
@@ -1310,392 +1344,610 @@ entries:
       Air bubbles of the index of air, sized and shaped and risen by
       bubbles.yaml. Place the origin where the stream is born.
     details: [quick]
+  - kind: humboldt-squid
+    animal: {family: squid, file: squid-profiles.yaml, species: humboldt-squid, phase: 0}
+    group: Sea
+    about: A Humboldt squid illustration with mantle, fins, arms and tentacles.
+    notes: The profile uses authored size and colours; its proportions and pose are illustrative rather than measured anatomy.
+    details: [quick]
+  - kind: allosaurus
+    animal: {family: theropod, file: allosaurus-profiles.yaml, species: allosaurus, seconds: 0}
+    group: Dinosaurs
+    about: An Allosaurus in a walking pose.
+    notes: An authored reconstruction; the soft-tissue dimensions, colour and pose are modelling choices.
+    details: [quick]
+  - kind: pliosaur
+    animal: {family: reptile, file: reptile-profiles.yaml, species: pliosaur, study: baseline}
+    group: Prehistoric reptiles
+    about: A composite pliosaur study with four detached fins.
+    notes: The skull informs the study; the body, soft tissue and pose are conjectural.
+    details: [quick]
+  - kind: pliosaur-continuous
+    animal: {family: reptile, file: reptile-profiles.yaml, species: pliosaur, study: continuous}
+    group: Prehistoric reptiles
+    about: A pliosaur study with one continuous skin.
+    notes: The field-built body and fins are an illustrative alternative to the detached-fin composite.
+    details: [quick]
+  - kind: purussaurus
+    animal: {family: reptile, file: reptile-profiles.yaml, species: purussaurus, study: study}
+    group: Prehistoric reptiles
+    about: A Purussaurus study with a tapered body and four limbs.
+    notes: The body, skin, pose and movement are conjectural, not measurements of fossil soft tissue.
+    details: [quick]
+  - kind: hatzegopteryx
+    animal: {family: reptile, file: reptile-profiles.yaml, species: hatzegopteryx, study: composite}
+    group: Pterosaurs
+    about: A Hatzegopteryx composite with separately modelled wings.
+    notes: The body, wings and pose are an inferred study, not a simulation of tissue or flight.
+    details: [quick]
+  - kind: hatzegopteryx-cage
+    animal: {family: reptile, file: reptile-profiles.yaml, species: hatzegopteryx, study: cage}
+    group: Pterosaurs
+    about: A Hatzegopteryx study built around a subdivided cage.
+    notes: The cage and endpoint-constrained limbs are an authored reconstruction.
+    details: [quick]
+  - kind: hatzegopteryx-density
+    animal: {family: reptile, file: reptile-profiles.yaml, species: hatzegopteryx, study: density}
+    group: Pterosaurs
+    about: A Hatzegopteryx density-field study.
+    notes: Its masses, skin and motion are speculative rather than fossil soft-tissue measurements.
+    details: [quick]
+  - kind: alamosaurus-sanjuanensis
+    animal: {family: sauropod, file: sauropod-profiles.yaml, species: alamosaurus-sanjuanensis}
+    group: Sauropods
+    about: An illustrative Alamosaurus sanjuanensis.
+    notes: A composite reconstruction; missing anatomy, posture and colours are illustrative.
+    details: [quick]
+    references:
+      - {title: Fossil anatomy and reconstruction, url: "https://www.tandfonline.com/doi/full/10.1080/14772019.2016.1183150"}
+  - kind: diplodocus-carnegii
+    animal: {family: sauropod, file: sauropod-profiles.yaml, species: diplodocus-carnegii}
+    group: Sauropods
+    about: An illustrative Diplodocus carnegii.
+    notes: A static reconstruction; soft tissue, posture and colours are illustrative.
+    details: [quick]
+    references:
+      - {title: Fossil anatomy and reconstruction, url: "https://www.miketaylor.org.uk/dino/pubs/taylor-et-al-2025/TaylorEtAl2025--history-and-composition-of-the-Carnegie-Diplodocus.pdf"}
+  - kind: apatosaurus-louisae
+    animal: {family: sauropod, file: sauropod-profiles.yaml, species: apatosaurus-louisae}
+    group: Sauropods
+    about: An illustrative Apatosaurus louisae.
+    notes: A static reconstruction; soft tissue, posture and colours are illustrative.
+    details: [quick]
+    references:
+      - {title: Fossil anatomy and reconstruction, url: "https://npshistory.com/publications/dino/mcm-v11n4-1936.pdf"}
+  - kind: brachiosaurus-altithorax
+    animal: {family: sauropod, file: sauropod-profiles.yaml, species: brachiosaurus-altithorax}
+    group: Sauropods
+    about: An illustrative Brachiosaurus altithorax.
+    notes: A static reconstruction; the incompletely known neck, soft tissue, posture and colours are illustrative.
+    details: [quick]
+    references:
+      - {title: Fossil anatomy and reconstruction, url: "https://www.miketaylor.org.uk/dino/pubs/taylor2009/Taylor2009-brachiosaurus-and-giraffatitan.pdf"}
+  - kind: palaeophis-colossaeus
+    animal: {family: snake, file: snake-profiles.yaml, species: palaeophis-colossaeus}
+    group: Snakes
+    about: A Palaeophis colossaeus reconstruction from the Eocene of Mali.
+    notes: Static, uncoiled illustration. Length follows one vertebra-based specimen estimate; the body, head, skin and colours are speculative.
+    details: [quick]
+    references:
+      - {title: McCartney and colleagues on Palaeophis, url: "https://www.app.pan.pl/archive/published/app63/app004422017.html"}
+  - kind: titanoboa-cerrejonensis
+    animal: {family: snake, file: snake-profiles.yaml, species: titanoboa-cerrejonensis}
+    group: Snakes
+    about: A reconstruction of the Paleocene snake Titanoboa cerrejonensis.
+    notes: Static, uncoiled illustration. Length is a rounded fossil-based estimate; the body, head and colouring are speculative.
+    details: [quick]
+    references:
+      - {title: Head and colleagues on Titanoboa, url: "https://repository.si.edu/bitstream/handle/10088/15900/stri_Head_et_al_2009.pdf"}
+  - kind: eunectes-murinus
+    animal: {family: snake, file: snake-profiles.yaml, species: eunectes-murinus}
+    group: Snakes
+    about: An illustrative green anaconda, Eunectes murinus.
+    notes: Static, uncoiled illustration. Length, proportions and simplified spotting are chosen, not species-wide limits.
+    details: [quick]
+  - kind: boa-constrictor-occidentalis
+    animal: {family: snake, file: snake-profiles.yaml, species: boa-constrictor-occidentalis}
+    group: Snakes
+    about: An illustrative Argentine boa, Boa constrictor occidentalis.
+    notes: Static, uncoiled illustration. Length, proportions and simplified saddles are chosen, not specimen measurements.
+    details: [quick]
+  - kind: malayopython-reticulatus
+    animal: {family: snake, file: snake-profiles.yaml, species: malayopython-reticulatus}
+    group: Snakes
+    about: An illustrative reticulated python, Malayopython reticulatus.
+    notes: Static, uncoiled illustration. Its regular net is a stylized reconstruction, not a measured pattern; proportions and labial markings are illustrative.
+    details: [quick]
+  - kind: python-bivittatus
+    animal: {family: snake, file: snake-profiles.yaml, species: python-bivittatus}
+    group: Snakes
+    about: An illustrative Burmese python, Python bivittatus.
+    notes: Static, uncoiled illustration. The chosen length, proportions, saddles and labial markings are illustrative.
+    details: [quick]
+  - kind: bitis-gabonica
+    animal: {family: snake, file: snake-profiles.yaml, species: bitis-gabonica}
+    group: Snakes
+    about: An illustrative Gaboon viper, Bitis gabonica.
+    notes: Static, uncoiled illustration. The chosen length, head and simplified triangular pattern are illustrative.
+    details: [quick]
+  - kind: python-sebae
+    animal: {family: snake, file: snake-profiles.yaml, species: python-sebae}
+    group: Snakes
+    about: An illustrative African rock python, Python sebae.
+    notes: Static, uncoiled illustration. The chosen length, proportions, saddles and labial markings are illustrative.
+    details: [quick]
+  - kind: madtsoia-bai
+    animal: {family: snake, file: snake-profiles.yaml, species: madtsoia-bai}
+    group: Snakes
+    about: A Madtsoia bai reconstruction based on a fossil specimen.
+    notes: Static, uncoiled illustration. Length uses one estimate for AMNH 3154; head, tail, skin and pattern remain speculative.
+    details: [quick]
+    references:
+      - {title: Research on Madtsoia bai, url: "https://www.nature.com/articles/s41598-024-58377-0"}
   - kind: bird-black-faced-spoonbill-standing
+    animal: {family: bird, file: birds.yaml, species: black-faced-spoonbill, pose: standing}
     group: Birds
     about: A black-faced spoonbill standing, wings folded, with its spoon bill.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-black-faced-spoonbill-gliding
+    animal: {family: bird, file: birds.yaml, species: black-faced-spoonbill, pose: gliding}
     group: Birds
     about: A black-faced spoonbill in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-black-faced-spoonbill-outline
+    animal: {family: bird, file: birds.yaml, species: black-faced-spoonbill, pose: outline}
     group: Birds
     about: A black-faced spoonbill standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-black-faced-spoonbill-bones
+    animal: {family: bird, file: birds.yaml, species: black-faced-spoonbill, pose: bones}
     group: Birds
     about: The skeleton of a black-faced spoonbill at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-little-egret-standing
+    animal: {family: bird, file: birds.yaml, species: little-egret, pose: standing}
     group: Birds
     about: A little egret standing, wings folded.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-little-egret-gliding
+    animal: {family: bird, file: birds.yaml, species: little-egret, pose: gliding}
     group: Birds
     about: A little egret in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-little-egret-outline
+    animal: {family: bird, file: birds.yaml, species: little-egret, pose: outline}
     group: Birds
     about: A little egret standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-little-egret-bones
+    animal: {family: bird, file: birds.yaml, species: little-egret, pose: bones}
     group: Birds
     about: The skeleton of a little egret at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-grey-heron-standing
+    animal: {family: bird, file: birds.yaml, species: grey-heron, pose: standing}
     group: Birds
     about: A grey heron standing, wings folded.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-grey-heron-gliding
+    animal: {family: bird, file: birds.yaml, species: grey-heron, pose: gliding}
     group: Birds
     about: A grey heron in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-grey-heron-outline
+    animal: {family: bird, file: birds.yaml, species: grey-heron, pose: outline}
     group: Birds
     about: A grey heron standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-grey-heron-bones
+    animal: {family: bird, file: birds.yaml, species: grey-heron, pose: bones}
     group: Birds
     about: The skeleton of a grey heron at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-pacific-reef-heron-standing
+    animal: {family: bird, file: birds.yaml, species: pacific-reef-heron, pose: standing}
     group: Birds
     about: A Pacific reef heron standing, wings folded.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-pacific-reef-heron-gliding
+    animal: {family: bird, file: birds.yaml, species: pacific-reef-heron, pose: gliding}
     group: Birds
     about: A Pacific reef heron in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-pacific-reef-heron-outline
+    animal: {family: bird, file: birds.yaml, species: pacific-reef-heron, pose: outline}
     group: Birds
     about: A Pacific reef heron standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-pacific-reef-heron-bones
+    animal: {family: bird, file: birds.yaml, species: pacific-reef-heron, pose: bones}
     group: Birds
     about: The skeleton of a Pacific reef heron at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-yellow-legged-gull-standing
+    animal: {family: bird, file: birds.yaml, species: yellow-legged-gull, pose: standing}
     group: Birds
     about: A yellow-legged gull standing, wings folded.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-yellow-legged-gull-gliding
+    animal: {family: bird, file: birds.yaml, species: yellow-legged-gull, pose: gliding}
     group: Birds
     about: A yellow-legged gull in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-yellow-legged-gull-outline
+    animal: {family: bird, file: birds.yaml, species: yellow-legged-gull, pose: outline}
     group: Birds
     about: A yellow-legged gull standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-yellow-legged-gull-bones
+    animal: {family: bird, file: birds.yaml, species: yellow-legged-gull, pose: bones}
     group: Birds
     about: The skeleton of a yellow-legged gull at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tern-standing
+    animal: {family: bird, file: birds.yaml, species: white-tern, pose: standing}
     group: Birds
     about: A white tern standing, wings folded.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tern-gliding
+    animal: {family: bird, file: birds.yaml, species: white-tern, pose: gliding}
     group: Birds
     about: A white tern in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tern-outline
+    animal: {family: bird, file: birds.yaml, species: white-tern, pose: outline}
     group: Birds
     about: A white tern standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tern-bones
+    animal: {family: bird, file: birds.yaml, species: white-tern, pose: bones}
     group: Birds
     about: The skeleton of a white tern at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-great-frigatebird-standing
+    animal: {family: bird, file: birds.yaml, species: great-frigatebird, pose: standing}
     group: Birds
     about: A great frigatebird standing, wings folded.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-great-frigatebird-gliding
+    animal: {family: bird, file: birds.yaml, species: great-frigatebird, pose: gliding}
     group: Birds
     about: A great frigatebird in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-great-frigatebird-outline
+    animal: {family: bird, file: birds.yaml, species: great-frigatebird, pose: outline}
     group: Birds
     about: A great frigatebird standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-great-frigatebird-bones
+    animal: {family: bird, file: birds.yaml, species: great-frigatebird, pose: bones}
     group: Birds
     about: The skeleton of a great frigatebird at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tailed-tropicbird-standing
+    animal: {family: bird, file: birds.yaml, species: white-tailed-tropicbird, pose: standing}
     group: Birds
     about: A white-tailed tropicbird standing, wings folded.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tailed-tropicbird-gliding
+    animal: {family: bird, file: birds.yaml, species: white-tailed-tropicbird, pose: gliding}
     group: Birds
     about: A white-tailed tropicbird in the air, wings spread.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tailed-tropicbird-outline
+    animal: {family: bird, file: birds.yaml, species: white-tailed-tropicbird, pose: outline}
     group: Birds
     about: A white-tailed tropicbird standing, its body one skin with no feather on.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: bird-white-tailed-tropicbird-bones
+    animal: {family: bird, file: birds.yaml, species: white-tailed-tropicbird, pose: bones}
     group: Birds
     about: The skeleton of a white-tailed tropicbird at rest.
     notes: One maker for every bird. Sizes, bill, neck and plumage are a row of birds.yaml, each figure with its basis, read or picked. The seed picks the size within the species' ranges.
     details: [quick]
   - kind: pacific-bluefin-tuna
+    animal: {family: fish, file: fish.yaml, species: pacific-bluefin-tuna, pose: swim}
     group: Fish
     about: A Pacific bluefin tuna at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: pacific-bluefin-tuna-glide
+    animal: {family: fish, file: fish.yaml, species: pacific-bluefin-tuna, pose: glide}
     group: Fish
     about: A Pacific bluefin tuna gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: pacific-bluefin-tuna-bones
+    animal: {family: fish, file: fish.yaml, species: pacific-bluefin-tuna, pose: bones}
     group: Fish
     about: The skeleton of a Pacific bluefin tuna at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: california-yellowtail
+    animal: {family: fish, file: fish.yaml, species: california-yellowtail, pose: swim}
     group: Fish
     about: A California yellowtail at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: california-yellowtail-glide
+    animal: {family: fish, file: fish.yaml, species: california-yellowtail, pose: glide}
     group: Fish
     about: A California yellowtail gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: california-yellowtail-bones
+    animal: {family: fish, file: fish.yaml, species: california-yellowtail, pose: bones}
     group: Fish
     about: The skeleton of a California yellowtail at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: california-barracuda
+    animal: {family: fish, file: fish.yaml, species: california-barracuda, pose: swim}
     group: Fish
     about: A California barracuda at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: california-barracuda-glide
+    animal: {family: fish, file: fish.yaml, species: california-barracuda, pose: glide}
     group: Fish
     about: A California barracuda gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: california-barracuda-bones
+    animal: {family: fish, file: fish.yaml, species: california-barracuda, pose: bones}
     group: Fish
     about: The skeleton of a California barracuda at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: pacific-sardine
+    animal: {family: fish, file: fish.yaml, species: pacific-sardine, pose: swim}
     group: Fish
     about: A Pacific sardine at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: pacific-sardine-glide
+    animal: {family: fish, file: fish.yaml, species: pacific-sardine, pose: glide}
     group: Fish
     about: A Pacific sardine gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: pacific-sardine-bones
+    animal: {family: fish, file: fish.yaml, species: pacific-sardine, pose: bones}
     group: Fish
     about: The skeleton of a Pacific sardine at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: pacific-sardine-school-500
+    animal: {family: fish, file: fish.yaml, species: pacific-sardine, pose: swim, count: 500}
     group: Fish
     about: A school of five hundred Pacific sardines.
     notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
     details: [quick]
   - kind: pacific-sardine-school-5000
+    animal: {family: fish, file: fish.yaml, species: pacific-sardine, pose: swim, count: 5000}
     group: Fish
     about: A school of five thousand Pacific sardines.
     notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
     details: [quick]
   - kind: convict-tang
+    animal: {family: fish, file: fish.yaml, species: convict-tang, pose: swim}
     group: Fish
     about: A convict tang at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: convict-tang-glide
+    animal: {family: fish, file: fish.yaml, species: convict-tang, pose: glide}
     group: Fish
     about: A convict tang gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: convict-tang-bones
+    animal: {family: fish, file: fish.yaml, species: convict-tang, pose: bones}
     group: Fish
     about: The skeleton of a convict tang at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: dusky-grouper
+    animal: {family: fish, file: fish.yaml, species: dusky-grouper, pose: swim}
     group: Fish
     about: A dusky grouper at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: dusky-grouper-glide
+    animal: {family: fish, file: fish.yaml, species: dusky-grouper, pose: glide}
     group: Fish
     about: A dusky grouper gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: dusky-grouper-bones
+    animal: {family: fish, file: fish.yaml, species: dusky-grouper, pose: bones}
     group: Fish
     about: The skeleton of a dusky grouper at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: mediterranean-chromis
+    animal: {family: fish, file: fish.yaml, species: mediterranean-chromis, pose: swim}
     group: Fish
     about: A Mediterranean chromis at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: mediterranean-chromis-glide
+    animal: {family: fish, file: fish.yaml, species: mediterranean-chromis, pose: glide}
     group: Fish
     about: A Mediterranean chromis gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: mediterranean-chromis-bones
+    animal: {family: fish, file: fish.yaml, species: mediterranean-chromis, pose: bones}
     group: Fish
     about: The skeleton of a Mediterranean chromis at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: mediterranean-chromis-school-60
+    animal: {family: fish, file: fish.yaml, species: mediterranean-chromis, pose: swim, count: 60}
     group: Fish
     about: A school of sixty Mediterranean chromis.
     notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
     details: [quick]
   - kind: european-perch
+    animal: {family: fish, file: fish.yaml, species: european-perch, pose: swim}
     group: Fish
     about: A European perch at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: european-perch-glide
+    animal: {family: fish, file: fish.yaml, species: european-perch, pose: glide}
     group: Fish
     about: A European perch gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: european-perch-bones
+    animal: {family: fish, file: fish.yaml, species: european-perch, pose: bones}
     group: Fish
     about: The skeleton of a European perch at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: flathead-grey-mullet
+    animal: {family: fish, file: fish.yaml, species: flathead-grey-mullet, pose: swim}
     group: Fish
     about: A flathead grey mullet at one point of its swimming stroke.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: flathead-grey-mullet-glide
+    animal: {family: fish, file: fish.yaml, species: flathead-grey-mullet, pose: glide}
     group: Fish
     about: A flathead grey mullet gliding, nearly straight.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: flathead-grey-mullet-bones
+    animal: {family: fish, file: fish.yaml, species: flathead-grey-mullet, pose: bones}
     group: Fish
     about: The skeleton of a flathead grey mullet at rest.
     notes: One maker for every bony fish. Bones first, then the body lofted round them, the fins as webs between rays, and a skin painted by the species' rule. Every figure is a row of fish.yaml with its basis, read or picked.
     details: [quick]
   - kind: flathead-grey-mullet-school-120
+    animal: {family: fish, file: fish.yaml, species: flathead-grey-mullet, pose: swim, count: 120}
     group: Fish
     about: A school of a hundred and twenty flathead grey mullet.
     notes: A rounded body of fish, a few made fish repeated, each placed a little larger or smaller. The packing is the species' row of fish.yaml.
     details: [quick]
   - kind: harbor-seal
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: harbor-seal, study: detailed-wet}
     group: Seals, orca and walrus
     about: A harbor seal at rest with the head a little tucked, its coat wet.
     notes: The rigged skin with hair as blades along the coat's flow, five-digit flippers with claws, a short tail, ear openings, open nostrils, whiskers in rows and a spotted coat that reads wet. A static pose, not a clock.
     details: [quick]
   - kind: harbor-seal-dry
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: harbor-seal, study: detailed-dry}
     group: Seals, orca and walrus
     about: A harbor seal at rest with the head a little tucked, its coat dry.
     notes: The wet harbor seal with a dry coat and its nostrils shut. A static pose, not a clock.
     details: [quick]
   - kind: harbor-seal-hauled
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: harbor-seal, pose: hauled}
     group: Seals, orca and walrus
     about: A harbor seal hauled out, the head and the hind body raised.
     notes: The lofted harbor seal, one surface through an outline of stations, in the hauled-out pose.
     details: [quick]
   - kind: harbor-seal-swimming
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: harbor-seal, pose: swimming}
     group: Seals, orca and walrus
     about: A harbor seal swimming, the hind body swept to one side.
     notes: The lofted harbor seal, one surface through an outline of stations, wet, in its stroke.
     details: [quick]
   - kind: harbor-seal-bones
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: harbor-seal, representation: bones}
     group: Seals, orca and walrus
     about: The skeleton of a harbor seal.
     notes: The vertebrae and ribs by region. Where a count is sourced the code comment quotes it; the others are chosen.
     details: [quick]
   - kind: hawaiian-monk-seal-hauled
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: hawaiian-monk-seal, pose: hauled}
     group: Seals, orca and walrus
     about: A Hawaiian monk seal asleep on a beach, nearly flat, the head down.
     notes: The lofted maker with the monk seal's own stations, its length of 2.13 m and a plain coat, drawn over the harbor seal's skeleton. The length is read from the species page the code names; the girth is worked from the weight.
     details: [quick]
   - kind: bay-seal
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: harbor-seal, study: bay}
     group: Seals, orca and walrus
     about: The first bay scene's seal, in its bottling pose, with eyes and whiskers.
     notes: A static specimen with the original materials, corneas and whiskers, kept as it was drawn. Not a clock.
     details: [quick]
-  - kind: orca-clean-05
+  - kind: orca
+    animal: {family: whale, file: whale-profiles.yaml, species: orca, pose: swim}
     group: Seals, orca and walrus
     about: An adult cow orca at the start of a three-second swim.
     notes: One closed skin, the trunk, falcate dorsal fin, paddle flippers, notched flukes, melon, mouth, blowhole, eyes and belly slits, bound to the bones. The swim cycle is authored, not measured.
     details: [quick]
-  - kind: orca-clean-05-spy-hop
+  - kind: orca-spy-hop
+    animal: {family: whale, file: whale-profiles.yaml, species: orca, pose: spy-hop}
     group: Seals, orca and walrus
     about: The orca raised out of the water in a spy hop.
-    notes: The same skin as orca-clean-05 held still in the pose.
+    notes: The same orca skin held still in the pose.
     details: [quick]
-  - kind: orca-clean-05-bones
+  - kind: orca-bones
+    animal: {family: whale, file: whale-profiles.yaml, species: orca, representation: bones}
     group: Seals, orca and walrus
     about: The skeleton of the orca at rest.
     notes: The bones the orca's skin is bound to.
     details: [quick]
   - kind: walrus-fresh-5
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: walrus, pose: lying}
     group: Seals, orca and walrus
     about: A walrus in one pose, with its whiskers and creased hide.
     notes: A static specimen, not animated.
     details: [quick]
   - kind: walrus-fresh-5-hauled-out
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: walrus, pose: hauled-out}
     group: Seals, orca and walrus
     about: A walrus hauled out of the water.
     notes: The walrus in its hauled-out pose. A static specimen, not animated.
     details: [quick]
   - kind: walrus-fresh-5-swimming
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: walrus, pose: swimming}
     group: Seals, orca and walrus
     about: A walrus swimming.
     notes: The walrus in its swimming pose. A static specimen, not animated.
     details: [quick]
   - kind: walrus-fresh-5-skeleton
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: walrus, representation: bones}
     group: Seals, orca and walrus
     about: The skeleton of a walrus at rest.
     notes: The bones alone.
     details: [quick]
   - kind: walrus-fresh-5-volumes
+    animal: {family: pinniped, file: pinniped_profiles.yaml, species: walrus, representation: volumes}
     group: Seals, orca and walrus
     about: The volumes of a walrus over its skeleton, before any detail.
     notes: The masses the walrus's skin is made from, shown without the skin's detail.

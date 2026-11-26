@@ -248,6 +248,9 @@ func (view *imageView) IsFocusable() bool { return view.IsEnabled() && view.IsVi
 
 // SetNavigable controls whether this image accepts preview navigation gestures.
 func (view *imageView) SetNavigable(enabled bool) {
+	if view.navigable == enabled {
+		return
+	}
 	view.navigable = enabled
 	view.SetNeedsRedraw(true)
 }

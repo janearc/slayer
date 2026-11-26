@@ -23,3 +23,18 @@ func TestWhatCannotBeDrawnIsRefused(t *testing.T) {
 			"the scene's bounds", err)
 	}
 }
+
+func TestPlantSelectorsSurviveRegistryRemoval(t *testing.T) {
+	for _, species := range []string{"norway", "fern", "saguaro", "valley-oak", "giant-sequoia-shoot"} {
+		if _, err := parse([]string{"-out", "x.pfm", "-kind", species}, io.Discard); err != nil {
+			t.Errorf("%s: %v", species, err)
+		}
+	}
+	given, err := parse([]string{"-out", "x.pfm"}, io.Discard)
+	if err != nil || given.kind != "norway" {
+		t.Fatalf("default kind %q: %v", given.kind, err)
+	}
+	if _, err := parse([]string{"-out", "x.pfm", "-kind", "Norway"}, io.Discard); !errors.Is(err, named.ErrChoice) {
+		t.Fatalf("unknown species: %v", err)
+	}
+}

@@ -23,8 +23,8 @@ func fantasyFixture(t *testing.T, lines string) string {
 		t.Fatal(err)
 	}
 	trees := "    things:\n" +
-		"      rim one: {kind: spruce, seed: 5, east: 1040, north: 8950}\n" +
-		"      close one: {kind: spruce, seed: 6, east: 1060, north: 8950}\n"
+		"      rim one: {recipe: fixture-spruce, seed: 5, east: 1040, north: 8950}\n" +
+		"      close one: {recipe: fixture-spruce, seed: 6, east: 1060, north: 8950}\n"
 	more := strings.Replace(string(written), "    things:\n", trees, 1)
 	if err := os.WriteFile(path, []byte(more), 0o600); err != nil {
 		t.Fatal(err)

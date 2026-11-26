@@ -22,7 +22,7 @@ var planTakes = []string{"width", "height", "at", "camera", planFlag}
 // plan prints the plan of the file's first frame.
 func (held assessing) plan(call pzm.Call, given string) error {
 	drawer := drawing(held)
-	run, err := drawer.planned(call, given)
+	run, err := drawer.planned(call, given, false)
 	if err != nil {
 		return err
 	}

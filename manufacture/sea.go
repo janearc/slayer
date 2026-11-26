@@ -150,14 +150,7 @@ func (sea Sea) Extent() (maths.Box, error) {
 // seen is how an eye sees the sea's box.
 func (sea Sea) seen(from seed, at maths.Subspace,
 	by strategies.Eye) (strategies.Seen, error) {
-	if err := by.Check(); err != nil {
-		return strategies.Seen{}, err
-	}
-	box, err := sea.Extent()
-	if err != nil {
-		return strategies.Seen{}, err
-	}
-	return by.Cover(transformed(box, at)), nil
+	return seenObject(sea, at, by)
 }
 
 // Staged adds the sea to a world as a set's ocean has always been added:

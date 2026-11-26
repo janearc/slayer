@@ -17,7 +17,11 @@ import (
 // A thing made once and stood at a place is the thing made there, to
 // the bit: the mesh does not depend on where it stands.
 func TestAKeptThingStandsAsOneMadeThere(t *testing.T) {
-	row, err := manufacture.KindNamed("spruce")
+	book, err := hillsideConifers()
+	if err != nil {
+		t.Fatal(err)
+	}
+	row, err := book.New(manufacture.PlantOptions{Species: "spruce"})
 	if err != nil {
 		t.Fatal(err)
 	}

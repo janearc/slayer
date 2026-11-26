@@ -83,7 +83,7 @@ func TestDeformationRefusesExclusionsWithoutConservativeBounds(t *testing.T) {
 		t.Fatal("fixture insertion failed")
 	}
 	for _, tc := range []struct{ source, want string }{{withoutStand, ""}, {withStand, "stand"}, {withRegion, "ecosystem"}} {
-		read, err := set.Read("exclusions.yaml", []byte(tc.source))
+		read, err := set.Read("../doc/observatory-ecosystem.yaml", []byte(tc.source))
 		if err != nil {
 			t.Fatal(err)
 		}

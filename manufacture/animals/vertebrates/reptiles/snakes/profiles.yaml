@@ -1,0 +1,175 @@
+# Each row is one illustrative static specimen. Fractions are of total length.
+# Source identifies research context, not a measurement for picked anatomy,
+# colours or fossil soft tissue. Limits in the reader protect the builder.
+profiles:
+  - kind: palaeophis-colossaeus
+    scientific: Palaeophis colossaeus
+    basis: picked
+    source: "https://www.app.pan.pl/archive/published/app63/app004422017.html"
+    notes: "Length is the regression estimate for specimen NHMUK PV R 9870, not a species maximum; the nearly round outline, head, eyes and markings are speculative."
+    length: 12.3
+    stations:
+      - {at: 0.000, width: 0.001365, height: 0.001435}
+      - {at: 0.040, width: 0.007800, height: 0.008200}
+      - {at: 0.160, width: 0.024570, height: 0.026240}
+      - {at: 0.450, width: 0.039000, height: 0.041000}
+      - {at: 0.760, width: 0.029250, height: 0.030750}
+      - {at: 0.890, width: 0.019500, height: 0.020090}
+      - {at: 0.940, width: 0.016380, height: 0.017220}
+      - {at: 0.965, width: 0.020670, height: 0.023370}
+      - {at: 0.990, width: 0.016770, height: 0.016810}
+      - {at: 1.000, width: 0.001365, height: 0.001435}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.001265, pit: false}
+    pattern: {kind: bands, base: {r: 0.160, g: 0.240, b: 0.220}, mark: {r: 0.080, g: 0.110, b: 0.130}, belly: {r: 0.520, g: 0.530, b: 0.450}, edge: {r: 0.250, g: 0.310, b: 0.280}, repeat: 21, contrast: 0.55}
+  - kind: titanoboa-cerrejonensis
+    scientific: Titanoboa cerrejonensis
+    basis: picked
+    source: "https://repository.si.edu/bitstream/handle/10088/15900/stri_Head_et_al_2009.pdf"
+    notes: "Length is a rounded vertebra-based estimate; the complete body, head, eyes and colours are speculative reconstructions."
+    length: 13.0
+    stations:
+      - {at: 0.000, width: 0.001540, height: 0.001470}
+      - {at: 0.040, width: 0.008800, height: 0.008400}
+      - {at: 0.160, width: 0.027720, height: 0.026880}
+      - {at: 0.450, width: 0.044000, height: 0.042000}
+      - {at: 0.760, width: 0.033000, height: 0.031500}
+      - {at: 0.890, width: 0.022000, height: 0.020580}
+      - {at: 0.940, width: 0.018480, height: 0.017640}
+      - {at: 0.965, width: 0.023320, height: 0.023940}
+      - {at: 0.990, width: 0.018920, height: 0.017220}
+      - {at: 1.000, width: 0.001540, height: 0.001470}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.002420, pit: false}
+    pattern: {kind: saddles, base: {r: 0.240, g: 0.200, b: 0.110}, mark: {r: 0.095, g: 0.065, b: 0.045}, belly: {r: 0.480, g: 0.420, b: 0.270}, edge: {r: 0.360, g: 0.290, b: 0.160}, repeat: 32, contrast: 0.78}
+  - kind: eunectes-murinus
+    scientific: Eunectes murinus
+    basis: picked
+    source: "https://repositorio.museu-goeldi.br/items/c1360101-c003-4671-890b-500f1e76bf04"
+    notes: "Length and morphology are illustrative, not a population limit; anaconda sample identity and localities have been disputed."
+    length: 5.0
+    stations:
+      - {at: 0.000, width: 0.001435, height: 0.001295}
+      - {at: 0.040, width: 0.008200, height: 0.007400}
+      - {at: 0.160, width: 0.025830, height: 0.023680}
+      - {at: 0.450, width: 0.041000, height: 0.037000}
+      - {at: 0.760, width: 0.030750, height: 0.027750}
+      - {at: 0.890, width: 0.020500, height: 0.018130}
+      - {at: 0.940, width: 0.017220, height: 0.015540}
+      - {at: 0.965, width: 0.021730, height: 0.021090}
+      - {at: 0.990, width: 0.017630, height: 0.015170}
+      - {at: 1.000, width: 0.001435, height: 0.001295}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.002255, pit: false}
+    pattern: {kind: spots, base: {r: 0.240, g: 0.280, b: 0.120}, mark: {r: 0.055, g: 0.070, b: 0.035}, belly: {r: 0.490, g: 0.490, b: 0.300}, edge: {r: 0.360, g: 0.360, b: 0.170}, repeat: 29, contrast: 0.78}
+  - kind: boa-constrictor-occidentalis
+    scientific: Boa constrictor occidentalis
+    basis: picked
+    source: "https://brill.com/downloadpdf/view/journals/amre/24/1/article-p65_7.pdf"
+    notes: "Length, shape and palette are chosen illustration, not measurements or species limits; the source concerns a Cordoba sample."
+    length: 3.0
+    stations:
+      - {at: 0.000, width: 0.001120, height: 0.001050}
+      - {at: 0.040, width: 0.006400, height: 0.006000}
+      - {at: 0.160, width: 0.020160, height: 0.019200}
+      - {at: 0.450, width: 0.032000, height: 0.030000}
+      - {at: 0.760, width: 0.024000, height: 0.022500}
+      - {at: 0.890, width: 0.016000, height: 0.014700}
+      - {at: 0.940, width: 0.013440, height: 0.012600}
+      - {at: 0.965, width: 0.016960, height: 0.017100}
+      - {at: 0.990, width: 0.013760, height: 0.012300}
+      - {at: 1.000, width: 0.001120, height: 0.001050}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.001760, pit: false}
+    pattern: {kind: saddles, base: {r: 0.340, g: 0.280, b: 0.200}, mark: {r: 0.110, g: 0.075, b: 0.060}, belly: {r: 0.600, g: 0.540, b: 0.400}, edge: {r: 0.440, g: 0.370, b: 0.270}, repeat: 25, contrast: 0.8}
+  - kind: malayopython-reticulatus
+    scientific: Malayopython reticulatus
+    basis: picked
+    source: "https://doi.org/10.1046/j.1365-2435.1998.00179.x; https://pmc.ncbi.nlm.nih.gov/articles/PMC11572825/"
+    notes: "Length, body outline, net pattern and labial markings are chosen illustration, not specimen measurements or maximum size."
+    length: 5.0
+    stations:
+      - {at: 0.000, width: 0.000945, height: 0.000910}
+      - {at: 0.040, width: 0.005400, height: 0.005200}
+      - {at: 0.160, width: 0.017010, height: 0.016640}
+      - {at: 0.450, width: 0.027000, height: 0.026000}
+      - {at: 0.760, width: 0.020250, height: 0.019500}
+      - {at: 0.890, width: 0.013500, height: 0.012740}
+      - {at: 0.940, width: 0.011340, height: 0.010920}
+      - {at: 0.965, width: 0.014310, height: 0.014820}
+      - {at: 0.990, width: 0.011610, height: 0.010660}
+      - {at: 1.000, width: 0.000945, height: 0.000910}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.001485, pit: true}
+    pattern: {kind: reticulated, base: {r: 0.430, g: 0.360, b: 0.210}, mark: {r: 0.110, g: 0.100, b: 0.075}, belly: {r: 0.660, g: 0.600, b: 0.430}, edge: {r: 0.270, g: 0.220, b: 0.150}, repeat: 38, contrast: 0.82}
+  - kind: python-bivittatus
+    scientific: Python bivittatus
+    basis: picked
+    source: "https://www.usgs.gov/data/sex-length-total-mass-fat-mass-and-specimen-condition-data-248-burmese-pythons-python"
+    notes: "Length, stations and palette are illustrative choices, not measurements from the Florida sample or a maximum."
+    length: 4.0
+    stations:
+      - {at: 0.000, width: 0.001225, height: 0.001155}
+      - {at: 0.040, width: 0.007000, height: 0.006600}
+      - {at: 0.160, width: 0.022050, height: 0.021120}
+      - {at: 0.450, width: 0.035000, height: 0.033000}
+      - {at: 0.760, width: 0.026250, height: 0.024750}
+      - {at: 0.890, width: 0.017500, height: 0.016170}
+      - {at: 0.940, width: 0.014700, height: 0.013860}
+      - {at: 0.965, width: 0.018550, height: 0.018810}
+      - {at: 0.990, width: 0.015050, height: 0.013530}
+      - {at: 1.000, width: 0.001225, height: 0.001155}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.001925, pit: true}
+    pattern: {kind: saddles, base: {r: 0.430, g: 0.350, b: 0.220}, mark: {r: 0.130, g: 0.095, b: 0.060}, belly: {r: 0.670, g: 0.610, b: 0.460}, edge: {r: 0.570, g: 0.480, b: 0.310}, repeat: 30, contrast: 0.78}
+  - kind: bitis-gabonica
+    scientific: Bitis gabonica
+    basis: picked
+    source: "https://repository.naturalis.nl/pub/319202/ZM1968043009.pdf"
+    notes: "Length, head flare and pattern are illustrative choices; the source discusses Gaboon viper forms."
+    length: 1.4
+    stations:
+      - {at: 0.000, width: 0.001820, height: 0.001330}
+      - {at: 0.040, width: 0.010400, height: 0.007600}
+      - {at: 0.160, width: 0.032760, height: 0.024320}
+      - {at: 0.450, width: 0.052000, height: 0.038000}
+      - {at: 0.760, width: 0.039000, height: 0.028500}
+      - {at: 0.890, width: 0.026000, height: 0.018620}
+      - {at: 0.940, width: 0.021840, height: 0.015960}
+      - {at: 0.965, width: 0.040040, height: 0.021660}
+      - {at: 0.990, width: 0.022360, height: 0.015580}
+      - {at: 1.000, width: 0.001820, height: 0.001330}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.002860, pit: false}
+    pattern: {kind: triangles, base: {r: 0.470, g: 0.380, b: 0.300}, mark: {r: 0.140, g: 0.100, b: 0.110}, belly: {r: 0.720, g: 0.660, b: 0.570}, edge: {r: 0.620, g: 0.510, b: 0.420}, repeat: 20, contrast: 0.82}
+  - kind: python-sebae
+    scientific: Python sebae
+    basis: picked
+    source: "https://www.thebhs.org/publications/british-journal-of-herpetology/4171-volume-6-number-10-june-1984/file"
+    notes: "Length, body and palette are illustrative, not measurements or species maxima; source discusses geographic variation."
+    length: 4.0
+    stations:
+      - {at: 0.000, width: 0.001330, height: 0.001190}
+      - {at: 0.040, width: 0.007600, height: 0.006800}
+      - {at: 0.160, width: 0.023940, height: 0.021760}
+      - {at: 0.450, width: 0.038000, height: 0.034000}
+      - {at: 0.760, width: 0.028500, height: 0.025500}
+      - {at: 0.890, width: 0.019000, height: 0.016660}
+      - {at: 0.940, width: 0.015960, height: 0.014280}
+      - {at: 0.965, width: 0.020140, height: 0.019380}
+      - {at: 0.990, width: 0.016340, height: 0.013940}
+      - {at: 1.000, width: 0.001330, height: 0.001190}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.002090, pit: true}
+    pattern: {kind: saddles, base: {r: 0.370, g: 0.310, b: 0.190}, mark: {r: 0.100, g: 0.075, b: 0.055}, belly: {r: 0.640, g: 0.580, b: 0.420}, edge: {r: 0.500, g: 0.420, b: 0.280}, repeat: 27, contrast: 0.82}
+  - kind: madtsoia-bai
+    scientific: Madtsoia bai
+    basis: picked
+    source: "https://www.nature.com/articles/s41598-024-58377-0"
+    notes: "Length uses one estimate for AMNH 3154; head, tail, eyes, body outline and surface pattern remain speculative."
+    length: 3.9
+    stations:
+      - {at: 0.000, width: 0.001050, height: 0.001015}
+      - {at: 0.040, width: 0.006000, height: 0.005800}
+      - {at: 0.160, width: 0.018900, height: 0.018560}
+      - {at: 0.450, width: 0.030000, height: 0.029000}
+      - {at: 0.760, width: 0.022500, height: 0.021750}
+      - {at: 0.890, width: 0.015000, height: 0.014210}
+      - {at: 0.940, width: 0.012600, height: 0.012180}
+      - {at: 0.965, width: 0.015900, height: 0.016530}
+      - {at: 0.990, width: 0.012900, height: 0.011890}
+      - {at: 1.000, width: 0.001050, height: 0.001015}
+    head: {eyeat: .975, eyeheight: .40, eyesize: 0.001650, pit: false}
+    pattern: {kind: bands, base: {r: 0.270, g: 0.220, b: 0.180}, mark: {r: 0.130, g: 0.095, b: 0.070}, belly: {r: 0.540, g: 0.470, b: 0.360}, edge: {r: 0.360, g: 0.300, b: 0.230}, repeat: 28, contrast: 0.65}

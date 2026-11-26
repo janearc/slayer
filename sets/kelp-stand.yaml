@@ -1,4 +1,4 @@
-# a stand of kelp: the kind kelp-forest-slack, one hundred and forty-four
+# a stand of kelp in moderate water: one hundred and forty-four
 # plants by seed on a jittered grid, stood in air on a pale floor and seen
 # from a distance by the worked sun and sky, with no water in the picture,
 # so the stand itself is seen. places are metres, x east, y north, z up; the
@@ -34,10 +34,12 @@ scene:
         middle: [0, 0, -0.05]
         size: [400, 400, 0.1]
         source: eye
+  recipes:
+    profile-kelp: {alga: {family: kelp, file: ../manufacture/algae/kelp/kelp.yaml, species: macrocystis-pyrifera, condition: moderate, forest: true}}
   set:
     things:
       forest:
-        kind: kelp-forest-moderate
+        recipe: profile-kelp
         seed: 1
         position:
           east: {value: 0, unit: m}

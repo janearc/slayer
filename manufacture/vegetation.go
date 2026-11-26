@@ -3,6 +3,8 @@ package manufacture
 import (
 	"fmt"
 
+	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/manufacture/plants/seasonal"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/scene/shape"
 )
@@ -35,15 +37,6 @@ func WithSeason(row Kind, season string) (Kind, error) {
 	return row, nil
 }
 
-// vegetationRows exposes the architecture names in the ordinary factory.
-func vegetationRows() map[string]maker {
-	rows := map[string]maker{}
-	for name, profile := range plantProfiles {
-		rows[name] = seasonalPlant{profile: profile, season: "summer"}
-	}
-	return rows
-}
-
 // made supplies the ordinary quick specimen.
 func (plant seasonalPlant) made(from seed) (good, error) {
 	return plant.madeAt(from, "quick")
@@ -56,12 +49,12 @@ func (plant seasonalPlant) madeAt(from seed, detail string) (good, error) {
 		//ninja:vow feint maker needs a value; Things refuses this one
 		return good{}, errGood
 	}
-	plan, err := plant.profile.plan(from)
+	plan, err := plant.profile.Plan(from)
 	if err != nil {
 		//ninja:vow feint maker needs a value; Things refuses this one
 		return good{}, err
 	}
-	bark, err := plan.bark(detail)
+	bark, err := plantBark(plan, detail)
 	if err != nil {
 		//ninja:vow feint maker needs a value; Things refuses this one
 		return good{}, err
@@ -70,14 +63,14 @@ func (plant seasonalPlant) madeAt(from seed, detail string) (good, error) {
 	if level == "hull" || (plant.profile.Deciduous && plant.season == "winter") {
 		level = "clumps"
 	}
-	cells, err := plant.attachments(plan, level)
+	cells, err := plant.profile.Attachments(plan, level)
 	if err != nil {
 		//ninja:vow feint maker needs a value; Things refuses this one
 		return good{}, err
 	}
-	bounds := plan.bounds()
+	bounds := plan.Bounds()
 	for _, cell := range cells {
-		bounds = enclosing(bounds, transformed(cell.prototype.bounds, cell.pose))
+		bounds = enclosing(bounds, transformed(cell.Bounds, cell.Pose))
 	}
 	made := good{parts: bark, dressed: plant.looks(), extent: &bounds}
 	return plant.foliage(made, cells, detail)
@@ -99,14 +92,14 @@ func (plant seasonalPlant) looks() looks {
 }
 
 // foliage keeps shared twigs even when deciduous leaves are absent.
-func (plant seasonalPlant) foliage(made good, cells []plantAttachment,
+func (plant seasonalPlant) foliage(made good, cells []seasonal.Attachment,
 	detail string,
 ) (good, error) {
 	leafless := plant.profile.Deciduous && plant.season == "winter"
 	if detail == "hull" && !leafless {
 		var crown *maths.Box
 		for _, cell := range cells {
-			box := transformed(cell.prototype.bounds, cell.pose)
+			box := transformed(cell.Bounds, cell.Pose)
 			if crown == nil {
 				crown = &box
 			} else {
@@ -131,26 +124,35 @@ func (plant seasonalPlant) foliage(made good, cells []plantAttachment,
 	}
 	groups := map[slot][]shape.MeshMember{body: {{Mesh: wood, Space: maths.Local()}}}
 	for _, cell := range cells {
-		groups[body] = append(groups[body], shape.MeshMember{Mesh: cell.prototype.wood, Space: cell.pose})
+		groups[body] = append(groups[body], shape.MeshMember{Mesh: cell.Wood, Space: cell.Pose})
 		if leafless {
 			continue
 		}
-		groups[leaf] = append(groups[leaf], shape.MeshMember{Mesh: cell.prototype.green, Space: cell.pose})
-		if cell.prototype.dry != nil {
+		groups[leaf] = append(groups[leaf], shape.MeshMember{Mesh: cell.Green, Space: cell.Pose})
+		if cell.Dry != nil {
 			groups[plantDryLeaf] = append(groups[plantDryLeaf],
-				shape.MeshMember{Mesh: cell.prototype.dry, Space: cell.pose})
+				shape.MeshMember{Mesh: cell.Dry, Space: cell.Pose})
 		}
 	}
 	made.parts = nil
-	made.groups = map[slot]*shape.MeshGroup{}
-	for role, members := range groups {
-		group, err := shape.NewMeshGroup(members)
+	return made.withMeshGroups(groups)
+}
+
+func plantBark(plan seasonal.Plan, detail string) ([]part, error) {
+	var parts []part
+	fine := cut{around: int(plantValue("stem-sides-" + detail))}
+	for _, axis := range plan.Woody() {
+		run := axis.End.Sub(axis.Root)
+		length := measure.Metres(run.Len())
+		tube, err := newTube(length, measure.Metres(axis.Radius), measure.Metres(axis.Tip))
 		if err != nil {
-			// Its caller refuses the incomplete plant.
-			//ninja:vow feint value API requires result
-			return good{}, err
+			return nil, err
 		}
-		made.groups[role] = group
+		pose, err := spaceAlong(axis.Root, run)
+		if err != nil {
+			return nil, err
+		}
+		parts = append(parts, part{shape: tube, fine: fine, space: pose, of: body})
 	}
-	return made, nil
+	return parts, nil
 }

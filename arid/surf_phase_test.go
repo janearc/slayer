@@ -102,7 +102,9 @@ func TestBandNumbersHoldThePeakToEachBand(t *testing.T) {
 	bands := []*oceantex.Field{{N: 256, Extent: 4096}, {N: 256, Extent: 512},
 		{N: 256, Extent: 64}}
 	got := bandNumbers(bands, 0.05)
-	want := []float64{0.05, math.Pi * 256 / 4096, math.Pi * 256 / 512}
+	want := []float64{oceantex.CascadeCut() * math.Pi * 256 / 4096,
+		0.05,
+		oceantex.CascadeCut() * math.Pi * 256 / 512}
 	for index := range want {
 		if math.Abs(got[index]-want[index]) > 1e-12 {
 			t.Errorf("band %d: %g, want %g", index, got[index], want[index])

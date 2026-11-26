@@ -18,16 +18,16 @@ func TestOrcaSetPassesBothSchemas(t *testing.T) {
 		if version == "v1" {
 			source = strings.ReplaceAll(source, "  setting: space\n", "")
 		}
-		read, err := set.Read("orca.yaml", []byte(source))
+		read, err := set.Read("../sets/bioforms/orca-clean-05.yaml", []byte(source))
 		if err != nil {
 			t.Fatalf("%s: %v", version, err)
 		}
-		if len(read.Things()) != 1 || read.Things()[0].Kind() != "orca-clean-05" {
+		if len(read.Things()) != 1 || read.Things()[0].Kind() != "animal-profile" {
 			t.Fatalf("%s parsed the wrong thing", version)
 		}
-		unknown := strings.ReplaceAll(source, "orca-clean-05", "orca-clean-055")
-		if _, err := set.Read("unknown.yaml", []byte(unknown)); err == nil {
-			t.Fatalf("%s accepted unknown orca kind", version)
+		unknown := strings.ReplaceAll(source, "species: orca", "species: unknown-whale")
+		if _, err := set.Read("../sets/bioforms/orca-clean-05.yaml", []byte(unknown)); err == nil {
+			t.Fatalf("%s accepted unknown whale profile", version)
 		}
 	}
 }

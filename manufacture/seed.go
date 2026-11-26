@@ -1,5 +1,7 @@
 package manufacture
 
+import "github.com/janearc/slayer/manufacture/branching"
+
 // seed is what a thing grows from: the number that makes one spruce
 // differ from the next. the same seed is the same thing every time, on
 // any machine, and the kernel can draw the same numbers from it.
@@ -64,3 +66,11 @@ func (from seed) onPiece(piece int) seed {
 // drawSteps is how many different shares a draw can be: unit keeps 53
 // bits, as many as a float64 holds exactly.
 const drawSteps = 1 << 53
+
+// Draw and Swing let shared arrangement engines use this same seeded stream.
+func (from seed) Draw(part, index, which int) float64  { return from.draw(part, index, which) }
+func (from seed) Swing(part, index, which int) float64 { return from.swing(part, index, which) }
+
+// OnPiece and Sprout preserve the same seed stream in shared growth.
+func (from seed) OnPiece(piece int) branching.Seed     { return from.onPiece(piece) }
+func (from seed) Sprout(row, index int) branching.Seed { return from.sprout(row, index) }

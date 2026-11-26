@@ -61,6 +61,7 @@ func mapsRefused(wanted job.Job) []struct {
 	_, width := film.Width()
 	_, height := film.Height()
 	_, rays := film.Rays()
+	_, samples := film.Samples()
 	_, wide := film.Wide()
 	_, tall := film.Tall()
 	_, exposure := film.Exposure()
@@ -78,7 +79,7 @@ func mapsRefused(wanted job.Job) []struct {
 	}{
 		{width || height, "a film size (its maps are its grid's size: " +
 			"say across and rows in with, and fps for a film's rate)"},
-		{rays, "rays"}, {wide || tall, "a lens"},
+		{rays || samples, "rays or samples"}, {wide || tall, "a lens"},
 		{exposure, "an exposure"}, {camera, "a camera"},
 		{shutter, "a shutter"}, {printed, "a print"}, {stock, "a stock"},
 		{titles, "titles"}, {sound, "sound"}, {raw, "raw light"},

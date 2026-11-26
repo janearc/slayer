@@ -60,7 +60,7 @@ func TestPreparedPlacementKeepsGeometryAndMaterials(t *testing.T) {
 func TestPreparedPlacementPreservesNativeAttachments(t *testing.T) {
 	for _, name := range []string{"bay-seal", "walrus-fresh-5", "orca-clean-05"} {
 		t.Run(name, func(t *testing.T) {
-			row, err := KindNamed(name)
+			row, err := referenceNativeKind(name)
 			if err != nil {
 				t.Fatal(err)
 			}

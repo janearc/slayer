@@ -48,6 +48,8 @@ scene:
           standoff_x: 0
           standoff_y: 0
           standoff_z: 20
+  recipes:
+    plant-spruce: {plant: {family: conifer, file: ../../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       the west rise:
@@ -56,7 +58,7 @@ scene:
         east: 263104.5
         north: 2148423.5
       the far tree:
-        kind: spruce
+        recipe: plant-spruce
         seed: 3
         east: 264832
         north: 2147806

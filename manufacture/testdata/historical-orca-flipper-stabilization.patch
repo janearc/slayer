@@ -1,0 +1,16 @@
+diff --git a/manufacture/orca_skin.go b/manufacture/orca_skin.go
+index a3e07dbf..f9d18c90 100644
+--- a/manufacture/orca_skin.go
++++ b/manufacture/orca_skin.go
+@@ -686,2 +686,9 @@ var (
+-	// orcaFlipperNormal stands through the paddle's thickness.
+-	orcaFlipperNormal = orcaFlipperSpan.Cross(orcaFlipperChordway).Unit()
++	// orcaFlipperNormal stands through the paddle's thickness. Its X
++	// component nearly cancels, so choose the fused operation explicitly:
++	// compiler-dependent fusion changes the flipper's skin binding.
++	orcaFlipperNormal = func() maths.Vec {
++		normal := orcaFlipperSpan.Cross(orcaFlipperChordway)
++		normal.X = math.FMA(-orcaFlipperSpan.Z, orcaFlipperChordway.Y,
++			orcaFlipperSpan.Y*orcaFlipperChordway.Z)
++		return normal.Unit()
++	}()

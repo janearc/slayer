@@ -3,8 +3,11 @@ package placement
 import (
 	"github.com/janearc/slayer/manufacture"
 	"github.com/janearc/slayer/maths"
+	"github.com/janearc/slayer/scene/shape"
 	"github.com/janearc/slayer/set"
 	"math"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -137,6 +140,46 @@ func TestSpaceAtRetainsEastUpMinusNorthAndHeading(t *testing.T) {
 	}
 }
 
+func TestSpaceAtKeepsOriginAndAppliesScale(t *testing.T) {
+	source := strings.Replace(selectionSource, "        east: 0\n", "        east: 3\n        scale: 2\n", 1)
+	read := readSelection(t, source)
+	at := SpaceAt(read.Things()[0])
+	if at.Origin != maths.V(3, 0, 0) || at.Scale != 2 || at.Out(maths.V(1, 0, 0)).Sub(at.Origin).Len() != 2 {
+		t.Fatalf("scaled placement = %+v", at)
+	}
+}
+
+func TestSpaceGeometryPicksScaledNativeSurface(t *testing.T) {
+	baseRead := readSelection(t, selectionSource)
+	scaledRead := readSelection(t, strings.Replace(selectionSource, "        east: 0\n", "        east: 0\n        scale: 2\n", 1))
+	base, err := SpaceGeometry(baseRead)
+	if err != nil {
+		t.Fatal(err)
+	}
+	scaled, err := SpaceGeometry(scaledRead)
+	if err != nil {
+		t.Fatal(err)
+	}
+	display, err := NewDisplayCache().Scene(baseRead)
+	if err != nil {
+		t.Fatal(err)
+	}
+	low, high, ok := display.Objects[0].Mesh.Bounds()
+	if !ok {
+		t.Fatal("base object has no bounds")
+	}
+	right := math.Max(math.Abs(low.X), math.Abs(high.X))
+	for ix := 11; ix <= 19; ix += 2 {
+		for iy := 1; iy <= 9; iy++ {
+			ray := maths.Ray{At: maths.V(right*float64(ix)/10, high.Y*2*float64(iy)/10, 6), Dir: maths.V(0, 0, -1)}
+			if scaled.Hit(ray) == "visitor" && base.Hit(ray) != "visitor" {
+				return
+			}
+		}
+	}
+	t.Fatal("no ray selected the enlarged part of the actual native surface")
+}
+
 func TestSpaceGeometrySelectsActualNativeLarson(t *testing.T) {
 	source := strings.ReplaceAll(selectionSource, "human-scale-2m", "mcrn-larson-landed")
 	read := readSelection(t, source)
@@ -206,5 +249,72 @@ func TestWorldSurfaceOccludesManufacturedSelection(t *testing.T) {
 	ray.At.Z = 1
 	if got := geometry.Hit(ray); got != "visitor" {
 		t.Fatalf("wall behind ray blocked %q", got)
+	}
+}
+
+func TestSpaceGeometrySelectsFrozenAnimalProfile(t *testing.T) {
+	dir := t.TempDir()
+	raw, err := os.ReadFile(filepath.Join("..", "..", "manufacture", "animals", "vertebrates", "fishes", "fish.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, "fish.yaml")
+	if err := os.WriteFile(path, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+	source := `$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: animal selection
+  setting: space
+  seed: 19
+  light: none
+  recipes:
+    fish: {animal: {family: fish, file: fish.yaml, species: pacific-bluefin-tuna}}
+  set:
+    things:
+      visitor: {recipe: fish, seed: 7, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+  film: {width: 8, height: 8, rays: 1}
+  cameras:
+    view: {location: {at: [0, -10, 0]}, orientation: {look_at: [0, 0, 0]}}
+`
+	read, err := set.Read(filepath.Join(dir, "scene.yaml"), []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	geometry, err := SpaceGeometry(read)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(geometry.surfaces) == 0 {
+		t.Fatal("no selectable animal surfaces")
+	}
+	// The center of the first fish surface's box is inside its body.
+	first := geometry.surfaces[0]
+	box := first.shape.(interface{ Bounds() maths.Box }).Bounds()
+	center := first.at.Out(box.Min.Add(box.Max).Scale(.5))
+	ray := maths.Ray{At: center.Add(maths.V(0, 0, 10)), Dir: maths.V(0, 0, -1)}
+	if got := geometry.Hit(ray); got != "visitor" {
+		t.Fatalf("selected %q", got)
+	}
+}
+
+func TestSpaceGeometryComparesScaledSurfaceDistances(t *testing.T) {
+	near := selectionSurface{name: "near", shape: shape.Sphere{Radius: 1}, at: maths.NewSubspace(maths.V(0, 0, 3), maths.Identity, .5)}
+	far := selectionSurface{name: "far", shape: shape.Sphere{Radius: 1}, at: maths.NewSubspace(maths.V(0, 0, 0), maths.Identity, 2)}
+	ray := maths.Ray{At: maths.V(0, 0, 6), Dir: maths.V(0, 0, -1)}
+	for _, surfaces := range [][]selectionSurface{{near, far}, {far, near}} {
+		geometry := spaceGeometry{surfaces: surfaces}
+		if got := geometry.Hit(ray); got != "near" {
+			t.Fatalf("selected %q, want near", got)
+		}
+	}
+}
+
+func TestSpaceGeometryStillRefusesUnrelatedRecipes(t *testing.T) {
+	if _, err := SpaceGeometry(readSelection(t, recipeSource)); err == nil {
+		t.Fatal("accepted unsupported non-model recipe")
 	}
 }

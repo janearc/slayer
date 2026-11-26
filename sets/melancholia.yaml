@@ -436,6 +436,7 @@ scene:
   # carried to 550 nm as 8.7 * (632/550)^1.39 = 10.554, in air of 280.5 K
   # and 1.09 kg/m3, the standard atmosphere at about 1,170 to 1,230 m.
   recipes:
+    plant-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
     bonfire fire:
       kind: fire
       layout:
@@ -686,47 +687,47 @@ scene:
       # the rim where the bearing meets it, 1,468 m from the lookout,
       # and trees along it every 8 m, across the line of sight
       the far tree:
-        kind: spruce
+        recipe: plant-spruce
         seed: 3
         east: 264832
         north: 2147806
         # its fire is `the far tree flames`, below
         stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
       rim a:
-        kind: spruce
+        recipe: plant-spruce
         seed: 21
         east: 264824
         north: 2147783
         # its fire is `rim a flames`, below
       rim b:
-        kind: spruce
+        recipe: plant-spruce
         seed: 22
         east: 264827
         north: 2147791
       rim c:
-        kind: spruce
+        recipe: plant-spruce
         seed: 23
         east: 264829
         north: 2147798
       rim d:
-        kind: spruce
+        recipe: plant-spruce
         seed: 24
         east: 264835
         north: 2147814
         # its fire is `rim d flames`, below
       rim e:
-        kind: spruce
+        recipe: plant-spruce
         seed: 25
         east: 264837
         north: 2147821
       rim f:
-        kind: spruce
+        recipe: plant-spruce
         seed: 26
         east: 264840
         north: 2147829
         # its fire is `rim f flames`, below
       rim g:
-        kind: spruce
+        recipe: plant-spruce
         seed: 27
         east: 264843
         north: 2147802
@@ -761,7 +762,7 @@ scene:
         north: 2147829
     stands:
       the east rim:
-        kind: spruce
+        recipe: plant-spruce
         count: 150
         seed: 17
         above: 1195
@@ -771,7 +772,7 @@ scene:
       # grown where the frame sees it across the crater: bearings
       # 80 to 150 from the lookout, 0.7 to 2 km out, on the rim's top
       the forest:
-        kind: spruce
+        recipe: plant-spruce
         count: 4000
         seed: 11
         above: 1160
@@ -784,7 +785,7 @@ scene:
       # the bonfire. no band: within 90 m all of it is the
       # rim's flat top
       the clearing:
-        kind: spruce
+        recipe: plant-spruce
         count: 500
         seed: 29
         within: {of: the lookout, from: 135, to: 85, near: 20, far: 90}

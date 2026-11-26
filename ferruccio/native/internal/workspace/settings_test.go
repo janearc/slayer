@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/janearc/slayer/ferruccio/internal/draft"
 	"github.com/janearc/slayer/ferruccio/internal/preview"
@@ -51,6 +52,49 @@ func TestRenderToolsTakeTheSettingsFileAndNeedNoRestart(t *testing.T) {
 	tools := work.renderTools()
 	if tools.Cache != "/the/cache" || tools.Processors != "8" {
 		t.Fatalf("a saved value was not in force at the next render: %+v", tools)
+	}
+}
+
+func TestRenderQueueAndOutputSettingsTakeEffectWithoutRestart(t *testing.T) {
+	work := settingsWorkspace(t, "")
+	work.options.Tools = preview.Tools{Transport: "azazel", Azazel: "/azazel", Slayer: "/slayer"}
+	work.options.Evidence = ""
+	if work.rendererConfigured() {
+		t.Fatal("render enabled without a queue or output folder")
+	}
+	if err := settings.Save(work.settings.Path, settings.Queue, "/shared/queue"); err != nil {
+		t.Fatal(err)
+	}
+	if err := settings.Save(work.settings.Path, settings.Evidence, "/my/renders"); err != nil {
+		t.Fatal(err)
+	}
+	if !work.rendererConfigured() || work.renderTools().Queue != "/shared/queue" {
+		t.Fatalf("saved queue did not enable rendering: %+v", work.renderTools())
+	}
+	if got := work.previewRequest(time.Time{}).OutputRoot; got != "/my/renders" {
+		t.Fatalf("render output = %q", got)
+	}
+}
+
+func TestBundledClientUsesTheSelectedQueuesInstalledClient(t *testing.T) {
+	work := settingsWorkspace(t, "")
+	root := t.TempDir()
+	paired := filepath.Join(root, "bin", "azazel")
+	if err := os.MkdirAll(filepath.Dir(paired), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(paired, []byte("client"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	work.options.Tools.Azazel = "/bundled/azazel"
+	work.options.Tools.Queue = filepath.Join(root, "queue")
+	work.options.PreferQueueClient = true
+	if got := work.renderTools().Azazel; got != paired {
+		t.Fatalf("client = %q, want %q", got, paired)
+	}
+	work.options.PreferQueueClient = false
+	if got := work.renderTools().Azazel; got != "/bundled/azazel" {
+		t.Fatalf("explicit client replaced: %q", got)
 	}
 }
 

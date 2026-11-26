@@ -36,9 +36,9 @@ scene:
     smooth: 2
   recipes:
     redwoods:
-      kind: coast-redwood
+      plant: {family: conifer, file: ../../../manufacture/plants/conifers/conifer-profiles.yaml, species: coast-redwood}
     sequoias:
-      kind: giant-sequoia
+      plant: {family: conifer, file: ../../../manufacture/plants/conifers/conifer-profiles.yaml, species: giant-sequoia}
   lasers:
     front rim 1:
       origin:

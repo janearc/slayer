@@ -87,11 +87,11 @@ func (work *Workspace) retainedImageCaption(state string) string {
 
 // queueUnavailable keeps editing available when transport has not been configured.
 func (work *Workspace) queueUnavailable() {
-	reason := "preview queue is not configured"
+	reason := "choose a render queue in Settings"
 	if work.options.Tools.Transport == "slayer" {
 		reason = "shared renderer is not configured"
 	}
-	if work.options.Tools.Azazel != "" && work.options.Tools.Queue != "" && work.options.Evidence == "" {
+	if work.renderTools().Azazel != "" && work.renderTools().Queue != "" && work.evidenceFolder() == "" {
 		reason = "shared render destination is not configured"
 	}
 	work.status = "Ready to edit · " + reason

@@ -6,6 +6,7 @@ package job
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
@@ -50,8 +51,20 @@ func Read(path string) (Job, error) {
 	if err != nil {
 		return Job{}, err
 	}
-	from := source{name: path, base: filepath.Dir(absolute),
-		file: absolute}
+	return ReadSource(path, raw)
+}
+
+// ReadSource checks a job's bytes at path, resolving relative paths against
+// that file's directory. It does not write the file.
+func ReadSource(path string, raw []byte) (Job, error) {
+	if path == "" {
+		return Job{}, refusal{errors.New("a job source needs a file path")}
+	}
+	absolute, err := filepath.Abs(path)
+	if err != nil {
+		return Job{}, err
+	}
+	from := source{name: path, base: filepath.Dir(absolute), file: absolute}
 	return admitted(from, raw)
 }
 

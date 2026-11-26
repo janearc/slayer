@@ -13,9 +13,49 @@ type check func(wire document) (where []string, why string)
 var checks = []check{
 	knownPreset, sceneForm, sceneParameters, scenePlayed, stillOrFilm,
 	filmDuration,
-	filmRate, lensAngle, lensOpening, printOrStock, cameraForm, soundForm,
+	filmRate, exactSamples, regionBounds, lensAngle, lensOpening, printOrStock, cameraForm, soundForm,
 	stillOutputs, filmOutputs, stillShutter, stillSound, framesUntraced,
 	titleSpans,
+}
+
+// exactSamples refuses combinations the exact-count paths cannot yet draw.
+func exactSamples(wire document) ([]string, string) {
+	if wire.Film == nil || wire.Film.Samples == 0 {
+		return nil, ""
+	}
+	film := wire.Film
+	switch {
+	case film.Rays != 0:
+		return []string{"film", "samples"}, "say samples or rays, not both"
+	case wire.film():
+		return []string{"film", "samples"}, "exact samples currently support stills only"
+	case wire.Scene.Frames != "":
+		return []string{"film", "samples"}, "already rendered frames have no samples to trace"
+	case film.Region != nil:
+		return []string{"film", "samples"}, "exact samples do not yet support regions"
+	case film.Mode == "wire":
+		return []string{"film", "samples"}, "exact samples do not yet support wire mode"
+	case film.Aperture != 0:
+		return []string{"film", "samples"}, "exact samples do not yet support an aperture"
+	}
+	return nil, ""
+}
+
+// regionBounds checks the dimensions already said by the job or its preset.
+// A set's dimensions are resolved later and must be checked there too.
+func regionBounds(wire document) ([]string, string) {
+	if wire.Film == nil || wire.Film.Region == nil {
+		return nil, ""
+	}
+	if wire.film() {
+		return []string{"film", "region"}, "a region is a still's rectangle; a film cannot name one"
+	}
+	box := wire.Film.Region
+	if (wire.Film.Width > 0 && box.Left+box.Width > wire.Film.Width) ||
+		(wire.Film.Height > 0 && box.Top+box.Height > wire.Film.Height) {
+		return []string{"film", "region"}, "the region must fit within the picture"
+	}
+	return nil, ""
 }
 
 // film is whether the job is a film: it says a rate or a span.

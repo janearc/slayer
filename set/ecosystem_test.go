@@ -22,7 +22,7 @@ func ecosystemFixture(t *testing.T) string {
 
 func TestEcosystemRecipeResolvesUnitsOverridesAndReferences(t *testing.T) {
 	source := ecosystemFixture(t)
-	made, err := set.Read("ecosystem.yaml", []byte(source))
+	made, err := set.Read("../doc/ecosystem.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,8 +37,11 @@ func TestEcosystemRecipeResolvesUnitsOverridesAndReferences(t *testing.T) {
 	if things[0].Kind() != "optical-observatory" || things[0].Complexity() != "demo" {
 		t.Errorf("thing %+v", things[0])
 	}
-	if stands[0].Kind() != "coast-redwood" || stands[0].Complexity() != "clumps" {
+	if stands[0].Kind() != "plant-profile" || stands[0].Recipe() != "redwoods" || stands[0].Complexity() != "clumps" {
 		t.Errorf("stand %+v", stands[0])
+	}
+	if redwood, ok := made.Recipe("redwoods"); !ok || !redwood.IsPlant() || redwood.PlantFamily() != "conifer" || redwood.PlantSpecies() != "coast-redwood" {
+		t.Errorf("redwood profile %+v", redwood)
 	}
 	if name, clearance := stands[0].Exclude(); name != "the observatory" || clearance != 40 {
 		t.Errorf("exclusion %s %v", name, clearance)
@@ -57,7 +60,7 @@ func TestEcosystemSchemaRejectsUnknownFieldsUnitsAndAmbiguousRecipes(t *testing.
 		{"unit: m^-1", "unit: kg", "const", ""},
 		{"diameter: {value: 24, unit: m}", "diameter: {value: 24, unit: deg}", "const", ""},
 		{"count: 5000", "count: 5000\n        unexpected: true", "additionalProperties", ""},
-		{"recipe: redwoods", "recipe: redwoods\n        kind: spruce", "oneOf", ""},
+		{"recipe: redwoods", "recipe: redwoods\n        kind: can", "oneOf", ""},
 		{"aperture: {value: 8, unit: m}", "aperture: {value: 24, unit: m}", "", "invalid optical observatory"},
 		{"recipe: redwoods", "recipe: missing tree", "", "unknown recipe"},
 		{"weather: grove mist", "weather: missing weather", "", "unknown weather"},
@@ -67,7 +70,7 @@ func TestEcosystemSchemaRejectsUnknownFieldsUnitsAndAmbiguousRecipes(t *testing.
 		if raw == ecosystemFixture(t) {
 			t.Fatalf("ineffective change %s", change.from)
 		}
-		_, err := set.Read("bad-ecosystem.yaml", []byte(raw))
+		_, err := set.Read("../doc/bad-ecosystem.yaml", []byte(raw))
 		if err == nil || !strings.Contains(err.Error(), "bad-ecosystem.yaml") {
 			t.Fatalf("%s: %v", change.to, err)
 		}
@@ -119,7 +122,7 @@ func TestEcosystemSchemaTakesARigAndAnEye(t *testing.T) {
 	if !strings.Contains(raw, "lens:") || !strings.Contains(raw, "eye:") {
 		t.Fatal("the fixture's film or camera moved")
 	}
-	if _, err := set.Read("rig.yaml", []byte(raw)); err != nil {
+	if _, err := set.Read("../doc/rig.yaml", []byte(raw)); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -143,7 +146,7 @@ func TestEcosystemSchemaRefusesHalfARigAndAStrangeEye(t *testing.T) {
 		if raw == ecosystemFixture(t) {
 			t.Fatalf("ineffective change to %q", change.to)
 		}
-		_, err := set.Read("bad-rig.yaml", []byte(raw))
+		_, err := set.Read("../doc/bad-rig.yaml", []byte(raw))
 		var invalid *jsonschema.ValidationError
 		if !errors.As(err, &invalid) || !schemaKeyword(invalid,
 			change.keyword) {
@@ -185,7 +188,7 @@ func TestEcosystemSchemaTakesAWedgeTextsBoundsAndAHud(t *testing.T) {
 			t.Fatalf("the fixture moved; no %s", said)
 		}
 	}
-	if _, err := set.Read("pieces.yaml", []byte(raw)); err != nil {
+	if _, err := set.Read("../doc/pieces.yaml", []byte(raw)); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -217,7 +220,7 @@ func TestEcosystemSchemaRefusesHalfSaidPieces(t *testing.T) {
 		if raw == ecosystemFixture(t) {
 			t.Fatalf("ineffective change to %q", change.to)
 		}
-		_, err := set.Read("bad-pieces.yaml", []byte(raw))
+		_, err := set.Read("../doc/bad-pieces.yaml", []byte(raw))
 		var invalid *jsonschema.ValidationError
 		if !errors.As(err, &invalid) || !schemaKeyword(invalid,
 			change.keyword) {
@@ -245,7 +248,7 @@ func TestEcosystemSchemaTakesTheSetsAsWritten(t *testing.T) {
 		"widow-tail", "fizz", "kilauea-iki", "melancholia",
 		"planetary-turbidity"} {
 		raw := []byte(declared(t, name))
-		if _, err := set.Read(name+".yaml", raw); err != nil {
+		if _, err := set.Read("../sets/"+name+".yaml", raw); err != nil {
 			t.Errorf("%s: %v", name, err)
 		}
 	}
@@ -309,7 +312,7 @@ func TestEcosystemSchemaRefusesAPlanetHalfSaid(t *testing.T) {
 
 func TestEcosystemSchemaRefusesASecondDocument(t *testing.T) {
 	raw := ecosystemFixture(t) + "\n---\nscene: {name: hidden}\n"
-	if _, err := set.Read("two.yaml", []byte(raw)); err == nil {
+	if _, err := set.Read("../doc/two.yaml", []byte(raw)); err == nil {
 		t.Error("accepted a hidden second scene")
 	}
 }

@@ -1,8 +1,10 @@
 package named
 
 import (
+	"fmt"
 	"io"
 	"math"
+	"slices"
 
 	"github.com/janearc/slayer/emit"
 	"github.com/janearc/slayer/globe"
@@ -68,8 +70,14 @@ func moonriseScene() Scene {
 // moonriseParameters are what the moonrise takes, as cmd/moonrise's
 // flags were, with the bounds it held them to.
 func moonriseParameters() []Parameter {
+	choices := manufacture.KindNames()
+	for name := range moonrisePlants {
+		choices = append(choices, name)
+	}
+	slices.Sort(choices)
+	choices = slices.Compact(choices)
 	return []Parameter{
-		oneOf("kind", moonriseKind, manufacture.KindNames(),
+		oneOf("kind", moonriseKind, choices,
 			"the tree's kind"),
 		whole("seed", moonriseSeed, atLeast(nothing), "the tree's seed"),
 		number("away", moonriseAway, above(nothing),
@@ -79,6 +87,67 @@ func moonriseParameters() []Parameter {
 		number("sun", sunAltitude, between(nothing, highest),
 			"the sun's altitude, in degrees"),
 	}
+}
+
+type moonrisePlant struct {
+	book    *manufacture.PlantBook
+	options manufacture.PlantOptions
+}
+
+type moonriseBook struct {
+	family string
+	book   *manufacture.PlantBook
+}
+
+// The command's species choices come from the checked embedded books, not
+// the kind registry. The two loose shoots were also offered by the command.
+var moonrisePlants = func() map[string]moonrisePlant {
+	var books []moonriseBook
+	for _, family := range []string{"seasonal", "conifer", "fern", "cactus"} {
+		name, raw, err := manufacture.EmbeddedPlantBook(family)
+		if err != nil {
+			panic(err)
+		}
+		book, err := manufacture.ReadPlantBook(family, name, raw)
+		if err != nil {
+			panic(err)
+		}
+		books = append(books, moonriseBook{family, book})
+	}
+	plants, err := collectMoonrisePlants(books, manufacture.KindNames())
+	if err != nil {
+		panic(err)
+	}
+	return plants
+}()
+
+// collectMoonrisePlants refuses ambiguous selectors before the scene offers
+// its choices; neither a species nor a shoot can shadow a factory kind.
+func collectMoonrisePlants(books []moonriseBook, public []string) (map[string]moonrisePlant, error) {
+	plants := make(map[string]moonrisePlant)
+	add := func(name string, plant moonrisePlant) error {
+		if _, exists := plants[name]; exists || slices.Contains(public, name) {
+			return fmt.Errorf("moonrise: ambiguous plant selector %q", name)
+		}
+		plants[name] = plant
+		return nil
+	}
+	for _, family := range books {
+		for _, species := range family.book.Species() {
+			if err := add(species, moonrisePlant{family.book, manufacture.PlantOptions{Species: species}}); err != nil {
+				return nil, err
+			}
+		}
+		if family.family == "conifer" {
+			shoot := "shoot"
+			for _, species := range []string{"coast-redwood", "giant-sequoia"} {
+				if err := add(species+"-shoot", moonrisePlant{family.book, manufacture.PlantOptions{Species: species, Representation: &shoot}}); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	return plants, nil
 }
 
 // buildMoonrise is the scene as asked: the earth, a tree on it at the
@@ -112,7 +181,13 @@ func buildMoonrise(held values, _ io.Writer) (*Built, error) {
 
 // planted stands one tree of the kind and seed asked at the origin.
 func planted(world *thing.World, kind string, seed uint64) error {
-	row, err := manufacture.KindNamed(kind)
+	var row manufacture.Kind
+	var err error
+	if plant, ok := moonrisePlants[kind]; ok {
+		row, err = plant.book.New(plant.options)
+	} else {
+		row, err = manufacture.KindNamed(kind)
+	}
 	if err != nil {
 		return err
 	}

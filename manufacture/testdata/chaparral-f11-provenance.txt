@@ -1,0 +1,26 @@
+Chaparral geometry alternatives, 2026-11-24
+
+The six rows in chaparral-f11-alternates-arm64.txt were generated from the
+pre-retirement direct constructor at f11cfac285997b5fbad53e16509b4bff22a87e3f.
+The checked profile constructor at f8ddbbbb produced the same rows byte for
+byte. Both use the seeds, detail levels, geometry and material fingerprint
+of the original vegetation-reference-arm64.txt record. The original Nov 9
+record remains unchanged and is still accepted for those cases.
+
+Moving twig construction between packages changes compiler inlining and
+fused multiply-add evaluation. A measured twig endpoint differed by 1–2
+ULP between f8 and the initial moved implementation. Explicitly retaining
+fused twig endpoint arithmetic restores all 96 newly captured historical
+plant records, but it also reproduces these six f11/f8 chaparral values
+instead of the older recorded values. The verifier accepts exactly either
+recorded digest for each of those six cases and no alternative elsewhere.
+
+Captured on Darwin arm64 with go1.27.3, GOWORK=off and GOMAXPROCS=2 using
+the historical direct plant kind and original producer (reconstructed as
+described in historical-plants-provenance.txt). Source and
+producer hashes are recorded in historical-plants-provenance.txt.
+
+SHA-256:
+  original vegetation record  4deb4660e31734a88a69a420f366e07cbfd14cd3aab29b1071d93b8338f1350a
+  f11 vegetation_cell.go      812dec6b0a83d54151b66e3ed07e9f9c9f1f0c855a2f0ad64fc5aba35c2c2709
+  six alternative rows        0c673f4dad05a757670af5c1735b7772849b52a8f6ed936f9a0be36fbe49dde1

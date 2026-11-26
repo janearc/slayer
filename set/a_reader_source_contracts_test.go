@@ -84,8 +84,8 @@ func TestFireCannotAlsoUseTheLegacyAlightSwitch(t *testing.T) {
 func TestFrontsRefuseAlreadyLitTargetsAndNonfireRecipes(t *testing.T) {
 	raw := legacyNumericFixture(frontFixture(t))
 	for _, change := range []struct{ before, after, want string }{
-		{"kind: coast-redwood, count: 3", "kind: coast-redwood, alight: 1, count: 3", "existing unlit non-fire stand"},
-		{"kind: coast-redwood, count: 3", "recipe: wood fire, count: 3", "existing unlit non-fire stand"},
+		{"recipe: front tree, count: 3", "recipe: front tree, alight: 1, count: 3", "existing unlit non-fire stand"},
+		{"recipe: front tree, count: 3", "recipe: wood fire, count: 3", "existing unlit non-fire stand"},
 	} {
 		edited := strings.Replace(raw, change.before, change.after, 1)
 		if edited == raw {
@@ -97,7 +97,7 @@ func TestFrontsRefuseAlreadyLitTargetsAndNonfireRecipes(t *testing.T) {
 	}
 	// Keep the original fire recipe for its placed object, but ask the front
 	// for an existing tree recipe. A missing name is a different refusal.
-	raw = strings.Replace(raw, "  recipes:\n", "  recipes:\n    tree recipe: {kind: coast-redwood}\n", 1)
+	raw = strings.Replace(raw, "  recipes:\n", "  recipes:\n    tree recipe: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: coast-redwood}}\n", 1)
 	raw = strings.Replace(raw, "\n      recipe: wood fire\n", "\n      recipe: tree recipe\n", 1)
 	if _, err := set.Read("front-recipe.yaml", []byte(raw)); err == nil || !strings.Contains(err.Error(), "needs a known fire recipe") {
 		t.Fatalf("front tree recipe: %v", err)
@@ -122,7 +122,7 @@ func TestNonOpticalRecipesRefuseEitherOpticalBlockOnItsOwn(t *testing.T) {
 
 func TestFuelBedsRequireAnExistingFireRecipe(t *testing.T) {
 	raw := legacyNumericFixture(bedFixture(t))
-	raw = strings.Replace(raw, "  recipes:\n", "  recipes:\n    tree recipe: {kind: coast-redwood}\n", 1)
+	raw = strings.Replace(raw, "  recipes:\n", "  recipes:\n    tree recipe: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: coast-redwood}}\n", 1)
 	raw = strings.Replace(raw, "      recipe: surface fire", "      recipe: tree recipe", 1)
 	if _, err := set.Read("bed-tree-recipe.yaml", []byte(raw)); err == nil ||
 		!strings.Contains(err.Error(), "fuel bed needs a single-patch fire recipe") {

@@ -117,6 +117,9 @@ func (keep *keeper) close() {
 // film's sections start at, a wire picture, or no keeper, is drawn whole.
 func (keep *keeper) picture(world *thing.World, given asked,
 	across float64) (*frame.Frame, gpu.Profile, error) {
+	if given.exactSamples > 0 {
+		return drawMeasured(world, given, across)
+	}
 	if given.composite != nil {
 		return drawMeasured(world, given, across)
 	}

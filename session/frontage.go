@@ -63,7 +63,7 @@ func (stage *staging) fronted(each set.Stand) (cities.Laid, error) {
 	if err != nil {
 		return cities.Laid{}, err
 	}
-	item, err := cities.ItemOf(each.Kind())
+	item, err := cities.ItemOf(stage.reportedKind(each.Kind(), each.Recipe()))
 	if err != nil {
 		return cities.Laid{}, err
 	}

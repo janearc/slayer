@@ -1,0 +1,36 @@
+# Rectangles are in the original 2048 by 1820 picture. A linear-light
+# threshold is still to be chosen from measured reference data, so this
+# draft is not yet a complete comparison set. The job wrapper must name the
+# street camera; the set's first camera is the aerial view.
+job: street-job.yaml
+regions:
+  - name: water
+    observation: Isolated bright points in the yellow reflection.
+    left: 1130
+    top: 1370
+    width: 96
+    height: 96
+  - name: wall
+    observation: Red speckle with sharp slanted boundaries.
+    left: 175
+    top: 360
+    width: 96
+    height: 96
+  - name: haze
+    observation: Yellow specks in leaning columns.
+    left: 630
+    top: 280
+    width: 96
+    height: 96
+  - name: lamps
+    observation: Grain around the cool lamp halo.
+    left: 1420
+    top: 60
+    width: 96
+    height: 96
+  - name: street-end
+    observation: Bright core with little visible detail.
+    left: 950
+    top: 800
+    width: 96
+    height: 96

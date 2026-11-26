@@ -1,0 +1,51 @@
+diff --git a/manufacture/good.go b/manufacture/good.go
+index c1240060..ec38ef40 100644
+--- a/manufacture/good.go
++++ b/manufacture/good.go
+@@ -320 +320 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
+-		mesh, err := skin.shaded(shadings[of])
++		solid, err := skin.shaded(shadings[of])
+@@ -322 +322,6 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
+-			return nil, err
++			separate, ok := made.separateParts(of, shadings[of], look, at)
++			if !ok {
++				return nil, err
++			}
++			things = append(things, separate...)
++			continue
+@@ -325 +330 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
+-			Shape: mesh, Material: look,
++			Shape: solid, Material: look,
+@@ -330,0 +336,32 @@ func (made good) things(at maths.Subspace) ([]thing.Thing, error) {
++
++// separateParts preserves independently valid surfaces as separate things
++// when their combined edges coincide. Their shared placement retains local
++// material coordinates; no invalid constituent is accepted.
++func (made good) separateParts(of slot, normals [][3]maths.Vec,
++	look *thing.Material, at maths.Subspace) ([]thing.Thing, bool) {
++	var things []thing.Thing
++	offset := 0
++	for _, one := range made.parts {
++		if one.of != of {
++			continue
++		}
++		skin := one.skin()
++		if len(skin) == 0 {
++			continue
++		}
++		var each [][3]maths.Vec
++		if normals != nil {
++			if offset > len(normals) || len(skin) > len(normals)-offset {
++				return nil, false
++			}
++			each = normals[offset : offset+len(skin)]
++		}
++		offset += len(skin)
++		mesh, err := skin.shaded(each)
++		if err != nil {
++			return nil, false
++		}
++		things = append(things, thing.Thing{Shape: mesh, Material: look, Motion: thing.Still(at)})
++	}
++	return things, len(things) >= 2 && (normals == nil || offset == len(normals))
++}

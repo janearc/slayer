@@ -1,0 +1,32 @@
+In progress: independently drawn regions of the 2048 by 1820 street frame,
+using the street camera, four rays per side, the set's fixed exposure, and
+software GPU rendering with SLAYER_SCROOGE=1. The executable is built from
+5b88aebb. The set's
+SHA-256 is a5b906416963004ce02cd4ef5eebd38e78b170262a3397a4b147fce26bb365fd.
+The first region is left 1130, top 1370, width 96, height 96. The larger
+320 by 300 candidate at left 1020, top 1260 was stopped after 31 of 300
+rows; it produced no image. The smaller patch is inside that reference area.
+
+The region path passed small-scene checks. It has not yet been compared to
+a whole street frame from the same build. The original render’s precise build identity and GPU mode are not yet confirmed. The images
+are tests, not a correction to the scene.
+
+The 96 by 96 water region finished in 2 minutes 22 seconds after scene
+staging, using the cached air field and the same recorded detail counts as
+the original. It visibly differs in speckle pattern from the old reference;
+the different or unknown build and GPU mode prevent an equality claim.
+
+The remaining 96 by 96 test rectangles are wall (175, 360), haze (630, 280),
+lamps (1420, 60), and street end (950, 800), given as left and top. Each
+reference is a cut from the original image; each region result is drawn
+separately at the full frame's scale.
+
+The wall and haze regions have finished. The old wall crop shows denser red
+speckling; the two haze crops show different arrangements and densities of
+bright flecks. These visual observations compare different or unidentified
+builds and do not establish a regression or exactness.
+
+The lamp and street-end regions also finished. The fresh lamp patch is darker
+and less densely speckled than the old cut. The street-end pair looks broadly
+similar and heavily overexposed. All five fresh patches use the same 5b88aebb
+executable; no same-build whole-frame comparison has been completed yet.

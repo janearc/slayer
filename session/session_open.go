@@ -66,10 +66,27 @@ func opened(ctx context.Context, wanted job.Job, stamp Stamp) (*Session,
 	if err != nil {
 		return nil, err
 	}
+	if session.given.exactSamples > 0 {
+		if err := exactSamplesRefusal(session.given); err != nil {
+			return nil, errors.Join(err, session.Close())
+		}
+	}
+	if box, said := wanted.Film().Region(); said {
+		if form != sceneSet || !wanted.Clock().Still() {
+			return nil, errors.Join(errors.New("region: only a set still is supported"), session.Close())
+		}
+		session.given.region = &box
+		if err := regionRefusal(session.given); err != nil {
+			return nil, errors.Join(err, session.Close())
+		}
+	}
 	if session.offsets == nil {
 		// a rig's opener has placed its own shutter's glimpses; a rig's
 		// film has no job's shutter, so no share of one
 		session.offsets, session.share = offsets, share
+	}
+	if session.given.region != nil && session.given.onGPU && len(session.offsets) > singleRay {
+		return nil, errors.Join(errors.New("region: GPU shutter glimpses are not supported"), session.Close())
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, errors.Join(err, session.Close())
@@ -106,6 +123,7 @@ func jobAsked(wanted job.Job) (asked, error) {
 // size, rays, exposure and lens, each marked said. A tall angle is the
 // wide one for this size; each frame works it out again for its own.
 func (given asked) filmedBy(made job.Film) asked {
+	given.exactSamples, _ = made.Samples()
 	for _, each := range []struct {
 		value func() (int, bool)
 		into  *int

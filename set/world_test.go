@@ -22,7 +22,7 @@ func kilaueaIki(t *testing.T) string {
 // each as written, and a camera finds a thing by its name.
 func TestASetSaysItsWorld(t *testing.T) {
 	source := kilaueaIki(t)
-	made, err := set.Read("kilauea-iki.yaml", []byte(source))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,14 +42,14 @@ func TestASetSaysItsWorld(t *testing.T) {
 	things := made.Things()
 	east, northing := things[0].At()
 	if len(things) != 1 || things[0].Name() != "the first tree" ||
-		things[0].Kind() != "spruce" || things[0].Seed() != 3 ||
+		things[0].Kind() != "plant-profile" || things[0].Recipe() != "plant-spruce" || things[0].Seed() != 3 ||
 		east != 264800 || northing != 2147900 || !things[0].Alight() ||
 		!strings.Contains(things[0].StandsIn(), "ʻōhiʻa") {
 		t.Errorf("things %+v", things)
 	}
 	stands := made.Stands()
 	count, seed := stands[1].Count()
-	if len(stands) != 2 || stands[1].Kind() != "spruce" || count != 30 ||
+	if len(stands) != 2 || stands[1].Kind() != "plant-profile" || stands[1].Recipe() != "plant-spruce" || count != 30 ||
 		seed != 11 || stands[1].Alight() != 4 {
 		t.Errorf("stands %+v", stands)
 	}
@@ -60,7 +60,7 @@ func TestASetSaysItsWorld(t *testing.T) {
 // that is not whole, and alight that is not true or false.
 func TestAWorldsMistakesAreRefused(t *testing.T) {
 	for _, mistake := range []struct{ was, now, said string }{
-		{"kind: fern", "kind: ohia", "kind takes"},
+		{"recipe: plant-fern", "kind: ohia", "kind takes"},
 		{"alight: 4", "alight: 40", "has 40 alight of 30"},
 		{"count: 120", "count: 12.5", "count takes a whole number"},
 		{"alight: true", "alight: yes please", "alight takes true or false"},
@@ -68,7 +68,7 @@ func TestAWorldsMistakesAreRefused(t *testing.T) {
 			`wants "the second tree"`},
 	} {
 		written := strings.Replace(kilaueaIki(t), mistake.was, mistake.now, 1)
-		_, err := set.Read("kilauea-iki.yaml", []byte(written))
+		_, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%q: refused with %v, wanted %q", mistake.now, err,
 				mistake.said)
@@ -81,7 +81,7 @@ func TestAWorldsMistakesAreRefused(t *testing.T) {
 func TestASetsSunIsWhereItSays(t *testing.T) {
 	sun := "  light: moon\n  sun:\n    azimuth: 289.65\n    altitude: -1.5\n"
 	written := strings.Replace(kilaueaIki(t), "  light: moon\n", sun, 1)
-	made, err := set.Read("kilauea-iki.yaml", []byte(written))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestASetsSunIsWhereItSays(t *testing.T) {
 		t.Errorf("the sun %v at %g, %g", has, azimuth, altitude)
 	}
 	written = strings.Replace(written, "altitude: -1.5", "altitude: -95", 1)
-	if _, err := set.Read("kilauea-iki.yaml", []byte(written)); err == nil {
+	if _, err := set.Read("testdata/kilauea-iki.yaml", []byte(written)); err == nil {
 		t.Error("a sun 95 degrees down was read")
 	}
 	if _, has := kilaueaIkiRead(t).Sunlit(); has {
@@ -103,7 +103,7 @@ func TestASetsSunIsWhereItSays(t *testing.T) {
 func kilaueaIkiRead(t *testing.T) set.Set {
 	t.Helper()
 	source := kilaueaIki(t)
-	made, err := set.Read("kilauea-iki.yaml", []byte(source))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func rigged(t *testing.T) string {
 // a set's rig is what it says: its frame, its lens and its shutter.
 func TestASetsRigIsWhatItSays(t *testing.T) {
 	source := rigged(t)
-	made, err := set.Read("kilauea-iki.yaml", []byte(source))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func TestARigsMistakesAreRefused(t *testing.T) {
 		{"focus: the first tree", "focus: the moon", "focused on"},
 	} {
 		written := strings.Replace(rigged(t), mistake.was, mistake.now, 1)
-		_, err := set.Read("kilauea-iki.yaml", []byte(written))
+		_, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%q: refused with %v, wanted %q", mistake.now, err,
 				mistake.said)

@@ -35,10 +35,13 @@ scene:
           standoff_x: -70
           standoff_y: -25
           standoff_z: 4
+  recipes:
+    plant-fern: {plant: {family: fern, file: ../manufacture/plants/ferns/fern-profiles.yaml, species: fern}}
+    plant-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       the rim tree:
-        kind: spruce
+        recipe: plant-spruce
         seed: 3
         east: 263800
         north: 2148620
@@ -46,20 +49,20 @@ scene:
         stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
     stands:
       ferns on the wall:
-        kind: fern
+        recipe: plant-fern
         count: 600
         seed: 7
         above: 1110
         stands_in_for: "ʻamaʻu, with a temperate fern's numbers"
       trees on the rim:
-        kind: spruce
+        recipe: plant-spruce
         count: 160
         seed: 11
         above: 1150
         alight: 6
         stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
       trees on the wall:
-        kind: spruce
+        recipe: plant-spruce
         count: 90
         seed: 13
         above: 1110

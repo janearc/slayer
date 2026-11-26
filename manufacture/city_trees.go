@@ -14,7 +14,9 @@ import (
 // actual native foliage detail; placement always uses its original physical
 // hull bounds. Four shared prototypes retain foliage-cell mesh sharing.
 type CityTreeSpec struct {
-	Kind                         string
+	Kind string
+	// TreeProfiles, when supplied, is the complete checked seasonal tree book.
+	TreeProfiles                 *PlantProfiles
 	Complexity                   string
 	Height, Spacing, ParkSpacing measure.Length
 	Prototypes                   int
@@ -65,12 +67,16 @@ func (spec CityTreeSpec) check() error {
 	if spec.UrbanRows && !spec.ParkEnrichment {
 		return fmt.Errorf("manufacture: urban rows require park enrichment")
 	}
-	row, err := KindNamed(spec.Kind)
+	_, err := seasonalTree(spec.TreeProfiles, spec.Kind)
 	if err != nil {
 		return err
 	}
-	if _, known := row.how.(seasonalPlant); !known {
-		return fmt.Errorf("manufacture: city trees need an existing seasonal plant recipe")
+	if spec.ParkEnrichment {
+		for _, name := range []string{"alder", "poplar", "joshua-tree"} {
+			if _, err := seasonalTree(spec.TreeProfiles, name); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -81,6 +87,11 @@ type cityTreePrototype struct {
 	made good
 }
 
+type cityTreeKey struct {
+	kind string
+	seed uint64
+}
+
 // treePrototypes retains the original physical placement specimens.
 func treePrototypes(spec CityTreeSpec, from seed) ([]cityTreePrototype, error) {
 	return treePrototypesAt(spec, from, "hull")
@@ -88,7 +99,7 @@ func treePrototypes(spec CityTreeSpec, from seed) ([]cityTreePrototype, error) {
 
 // treePrototypesAt changes foliage geometry independently of planting.
 func treePrototypesAt(spec CityTreeSpec, from seed, detail string) ([]cityTreePrototype, error) {
-	row, err := KindNamed(spec.Kind)
+	row, err := seasonalTree(spec.TreeProfiles, spec.Kind)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +114,7 @@ func treePrototypesAt(spec CityTreeSpec, from seed, detail string) ([]cityTreePr
 	}
 	if spec.ParkEnrichment {
 		for family, name := range []string{"alder", "poplar", "joshua-tree"} {
-			row, err := KindNamed(name)
+			row, err := seasonalTree(spec.TreeProfiles, name)
 			if err != nil {
 				return nil, err
 			}
@@ -332,7 +343,7 @@ func (city ClusteredCityLayout) treeGroups(made good, spec CityTreeSpec, from se
 	}
 	counts := map[slot]int{}
 	for _, tree := range city.trees {
-		for _, part := range prepared[tree.PrototypeSeed] {
+		for _, part := range prepared[cityTreeKey{tree.Kind, tree.PrototypeSeed}] {
 			counts[part.role] += len(part.members)
 		}
 	}
@@ -341,7 +352,7 @@ func (city ClusteredCityLayout) treeGroups(made good, spec CityTreeSpec, from se
 		members[role] = make([]shape.MeshMember, 0, count)
 	}
 	for _, tree := range city.trees {
-		for _, part := range prepared[tree.PrototypeSeed] {
+		for _, part := range prepared[cityTreeKey{tree.Kind, tree.PrototypeSeed}] {
 			for _, member := range part.members {
 				member.Space = member.Space.Within(tree.Place)
 				members[part.role] = append(members[part.role], member)

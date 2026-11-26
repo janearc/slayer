@@ -71,6 +71,9 @@ scene:
           standoff_x: 0
           standoff_y: 0
           standoff_z: 2
+  recipes:
+    plant-fern: {plant: {family: fern, file: ../manufacture/plants/ferns/fern-profiles.yaml, species: fern}}
+    plant-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       # moonrise's lookout, a stone on the crater's floor
@@ -80,26 +83,26 @@ scene:
         east: 263450
         north: 2148300
       the rim tree:
-        kind: spruce
+        recipe: plant-spruce
         seed: 3
         east: 263800
         north: 2148620
         stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
     stands:
       ferns on the wall:
-        kind: fern
+        recipe: plant-fern
         count: 600
         seed: 7
         above: 1110
         stands_in_for: "ʻamaʻu, with a temperate fern's numbers"
       trees on the rim:
-        kind: spruce
+        recipe: plant-spruce
         count: 160
         seed: 11
         above: 1150
         stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
       trees on the wall:
-        kind: spruce
+        recipe: plant-spruce
         count: 90
         seed: 13
         above: 1110

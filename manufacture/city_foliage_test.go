@@ -12,7 +12,7 @@ import (
 
 // Count actual native plant representations before choosing city preparation.
 func TestCityFoliagePrototypeCosts(t *testing.T) {
-	row, err := KindNamed("valley-oak")
+	row, err := testKind("valley-oak")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -17,7 +17,7 @@ type hatzGargoyleKind struct{}
 // reuse it between roof berths, while keeping each placement separate. Current
 // face budgets conservatively count every placed native part independently.
 var hatzGargoyleRest = sync.OnceValues(func() ([]thing.Thing, error) {
-	return hatzFeedbackFour(0, false, maths.Local())
+	return hatzDensityStudy(0, false, maths.Local())
 })
 
 // made is the first study at rest, as a gargoyle. It refuses a seed that

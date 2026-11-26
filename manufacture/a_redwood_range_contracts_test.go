@@ -11,7 +11,7 @@ func TestRedwoodFamilyKeepsItsAuthoredLowestWhorlRange(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			seen := map[int]bool{}
 			for number := uint64(0); number < 64; number++ {
-				count := row.lowest.count(Sow(number).draw(picking, 3, 0))
+				count := (span{row.Lowest[0], row.Lowest[1]}).count(Sow(number).draw(picking, 3, 0))
 				if count < 3 || count > 5 {
 					t.Fatalf("seed %d: lowest whorl has %d branches, want 3..5", number, count)
 				}

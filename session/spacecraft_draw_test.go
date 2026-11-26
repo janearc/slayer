@@ -40,7 +40,7 @@ func spacecraftGiven(test *testing.T, data spacecraftPlacementContract,
 		test.Fatal(err)
 	}
 	replacement := strings.ReplaceAll(data.Replacement, "$LIFT", fmt.Sprint(lift))
-	text := strings.ReplaceAll(string(raw), "kind: spruce", replacement)
+	text := strings.ReplaceAll(string(raw), "recipe: fixture-spruce", replacement)
 	text = strings.ReplaceAll(text, "alight: true", "alight: false")
 	text = strings.ReplaceAll(text, "object: the stone", "object: the tree")
 	text = strings.ReplaceAll(text, "standoff_x: 0", "standoff_x: 3")

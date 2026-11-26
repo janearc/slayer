@@ -63,6 +63,9 @@ func (scene *DisplayScene) PickAt(x, y float64) (DisplayHit, bool) {
 			found = DisplayHit{ID: object.ID, Name: object.Name, Point: point, Distance: worldDistance, Part: object.Mesh.partAt(local)}
 		}
 	}
+	if hit, ok := scene.batchHit(ray, nearest); ok {
+		found = hit
+	}
 	return found, found.ID != ""
 }
 

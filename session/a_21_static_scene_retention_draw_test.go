@@ -124,7 +124,11 @@ func TestRetentionRefusesActualLegacyFireLampKinds(t *testing.T) {
 	for _, kind := range []string{"spruce", "campfire", "bonfire"} {
 		t.Run(kind, func(t *testing.T) {
 			given := mustParse(t)
-			given.set = onFixture(t, "kind: spruce", "kind: "+kind)
+			replacement := "kind: " + kind
+			if kind == "spruce" {
+				replacement = "recipe: fixture-spruce"
+			}
+			given.set = onFixture(t, "recipe: fixture-spruce", replacement)
 			raw, err := os.ReadFile(given.set)
 			if err != nil {
 				t.Fatal(err)
@@ -183,7 +187,7 @@ func TestRetentionKeepsAnUnlitBonfireBesideAFireRecipe(t *testing.T) {
 // construction, and a sequence still refuses it.
 func TestRetentionRefusesALegacyAlightBonfire(t *testing.T) {
 	given := mustParse(t)
-	given.set = onFixture(t, "kind: spruce", "kind: bonfire")
+	given.set = onFixture(t, "recipe: fixture-spruce", "kind: bonfire")
 	_, _, prepared, err := staged(given)
 	if err != nil {
 		t.Fatal(err)

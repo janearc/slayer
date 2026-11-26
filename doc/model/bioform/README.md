@@ -8,13 +8,13 @@ together, how to use it in a set, and what is known to be wrong.
 | Animal | Page | In one line |
 | --- | --- | --- |
 | Allosaurus | [allosaurus](allosaurus/README.md) | A walking theropod of 7.4 m, kinematic, used by the cornice gargoyles. |
-| Bay seal | [bay-seal](bay-seal/README.md) | A harbor seal at its bottling pose, a static manufactory kind. |
-| Hatzegopteryx | [hatzegopteryx](hatzegopteryx/README.md) | A giant azhdarchid of 11 m span; the stone gargoyle kind and five motion studies. |
+| Bay seal | [bay-seal](bay-seal/README.md) | A harbor seal at its bottling pose, a static profile study. |
+| Hatzegopteryx | [hatzegopteryx](hatzegopteryx/README.md) | A giant azhdarchid of 11 m span; the stone gargoyle kind and a motion study. |
 | Humboldt squid | [humboldt-squid](humboldt-squid/README.md) | A 0.80 m mantle squid with eight arms and two tentacles, used as a gargoyle. |
 | Orca | [orca](orca/README.md) | An adult cow bound to a skeleton: swim loop, bones alone, spy-hop. |
 | Pliosaur | [pliosaur](pliosaur/README.md) | A Pliosaurus kevani composite with four flippers; skull only is fossil. |
-| Purussaurus | [purussaurus](purussaurus/README.md) | A giant caiman after UFAC 1403, five constructions as Go functions. |
-| Walrus | [walrus](walrus/README.md) | A bull on land, hide over a skeleton, five static kinds. |
+| Purussaurus | [purussaurus](purussaurus/README.md) | A giant caiman after UFAC 1403, an authored Go construction. |
+| Walrus | [walrus](walrus/README.md) | A bull on land, hide over a skeleton, with static poses and representations. |
 
 [Authored anatomy](authored-anatomy.md) is a separate page: the opt-in
 anatomy of an individual stage and the small authored populations of heard

@@ -59,12 +59,5 @@ func (laser Laser) Extent() (maths.Box, error) {
 // seen is how an eye sees the beam's box.
 func (laser Laser) seen(from seed, at maths.Subspace,
 	by strategies.Eye) (strategies.Seen, error) {
-	if err := by.Check(); err != nil {
-		return strategies.Seen{}, err
-	}
-	box, err := laser.Extent()
-	if err != nil {
-		return strategies.Seen{}, err
-	}
-	return by.Cover(transformed(box, at)), nil
+	return seenObject(laser, at, by)
 }

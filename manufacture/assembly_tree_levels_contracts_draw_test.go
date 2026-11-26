@@ -6,7 +6,7 @@ import "testing"
 
 func TestRecursiveTreeLevelsChangeTheActualFoliageGeometry(t *testing.T) {
 	for _, name := range []string{"coast-redwood", "giant-sequoia"} {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatal(err)
 		}

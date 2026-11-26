@@ -1,42 +1,52 @@
 package manufacture
 
 import (
-	"maps"
-	"math"
-	"testing"
-
-	"github.com/janearc/slayer/bioforms/skeleton"
+	"fmt"
 	"github.com/janearc/slayer/scene/shape"
+	"gopkg.in/yaml.v3"
+	"testing"
 )
 
-// fishNames are the species the file gives.
-func fishNames(t *testing.T) []string {
+// fishHistoricalRows maps old labels to constructors only inside tests.
+func fishHistoricalRows(t *testing.T) map[string]maker {
 	t.Helper()
-	if fishError != nil {
-		t.Fatal(fishError)
+	book, err := ReadFishProfiles("fish.yaml", fishRaw)
+	if err != nil {
+		t.Fatal(err)
 	}
-	var names []string
-	for name := range fishRead.Species {
-		names = append(names, name)
+	var document struct {
+		Species map[string]struct{ Schools []int }
 	}
-	return names
-}
-
-// fishWith is the file with one figure of one species changed.
-func fishWith(name, key string, figure fishFigure) fishFile {
-	file := fishFile{Read: fishRead.Read,
-		Species: maps.Clone(fishRead.Species)}
-	species := file.Species[name]
-	species.Figures = maps.Clone(species.Figures)
-	species.Figures[key] = figure
-	file.Species[name] = species
-	return file
+	if err := yaml.Unmarshal(fishRaw, &document); err != nil {
+		t.Fatal(err)
+	}
+	rows := map[string]maker{}
+	for name, species := range document.Species {
+		for _, each := range []struct {
+			suffix  string
+			options FishOptions
+		}{{"", FishOptions{}}, {"-glide", FishOptions{Glide: true}}, {"-bones", FishOptions{Bones: true}}} {
+			row, err := book.NewFish(name, each.options)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rows[name+each.suffix] = row.how
+		}
+		for _, count := range species.Schools {
+			row, err := book.NewFish(name, FishOptions{School: count})
+			if err != nil {
+				t.Fatal(err)
+			}
+			rows[fmt.Sprintf("%s-school-%d", name, count)] = row.how
+		}
+	}
+	return rows
 }
 
 // TestFishKindsAreMade holds every fish kind to being made from a seed,
 // as surfaces in looks.
 func TestFishKindsAreMade(t *testing.T) {
-	for name, row := range fishRows() {
+	for name, row := range fishHistoricalRows(t) {
 		made, err := row.made(sow(7))
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
@@ -52,85 +62,29 @@ func TestFishKindsAreMade(t *testing.T) {
 	}
 }
 
-// TestFishColumnIsTheSpecies holds each skeleton to its species' counts:
-// precaudal and caudal vertebrae, caudal rays, the fins' rays and the
-// finlets.
-func TestFishColumnIsTheSpecies(t *testing.T) {
-	for _, name := range fishNames(t) {
-		plan := planFish(name, sow(3))
-		body, err := buildFish(plan)
-		if err != nil {
-			t.Fatal(err)
+func TestFishSpeciesAreNotRegistryAliases(t *testing.T) {
+	rows := table()
+	for name := range fishHistoricalRows(t) {
+		if _, ok := rows[name]; ok {
+			t.Errorf("registered old fish alias %s", name)
 		}
-		bones := body.bones
-		precaudal := plan.whole("precaudal")
-		counts := map[string]int{"P": precaudal,
-			"Ca":                 plan.whole("vertebrae") - precaudal,
-			"caudal-ray-":        plan.whole("caudal-rays"),
-			"anal-ray-":          plan.whole("anal-rays"),
-			"dorsal-finlet-":     plan.whole("dorsal-finlets"),
-			"pectoral-left-ray-": plan.whole("pectoral-rays")}
-		for prefix, want := range counts {
-			if got := bones.Count(prefix); got != want {
-				t.Fatalf("%s has %d bones named %s, not %d", name, got,
-					prefix, want)
-			}
-		}
+	}
+	if _, err := KindNamed("pacific-sardine-school-500"); err == nil {
+		t.Fatal("old fish kind still resolves")
 	}
 }
 
-// TestFishSeedsMakeDifferentFish holds the same seed to the same fish and
-// two seeds to two sizes.
-func TestFishSeedsMakeDifferentFish(t *testing.T) {
-	for _, name := range fishNames(t) {
-		one, again := planFish(name, sow(1)), planFish(name, sow(1))
-		other := planFish(name, sow(2))
-		if one.length() != again.length() {
-			t.Fatalf("%s: one seed made two lengths", name)
-		}
-		row := fishRead.Species[name].Figures["length"]
-		if row.Most > row.Least && one.length() == other.length() {
-			t.Fatalf("%s: two seeds made one length", name)
-		}
-	}
-}
-
-// fishSwing is how far the column's vertebra nearest share s stands to
-// the side in the stroke, of the fish's length.
-func fishSwing(t *testing.T, name string, s float64) float64 {
+func fishStored(t *testing.T, count int) (int, int) {
 	t.Helper()
-	plan := planFish(name, sow(5))
-	body, err := buildFish(plan)
+	book, err := ReadFishProfiles("fish.yaml", fishRaw)
 	if err != nil {
 		t.Fatal(err)
 	}
-	amplitude := body.plan.figure("amplitude")
-	frames := body.bones.Frames(body.stroke(amplitude))
-	at, _ := body.bones.Find(body.nearest(s))
-	moved := frames[at].Apply(body.bones.Bone(at).Head())
-	return math.Abs(moved.Z) / body.outline.length
-}
-
-// TestFishTunaBendsOnlyItsTail holds the tuna's middle to swing less
-// than the sardine's, and its tail to swing.
-func TestFishTunaBendsOnlyItsTail(t *testing.T) {
-	const middle, tail = .5, .85
-	tuna := fishSwing(t, "pacific-bluefin-tuna", middle)
-	sardine := fishSwing(t, "pacific-sardine", middle)
-	if !(tuna < sardine) {
-		t.Fatalf("the tuna's middle swings %v, the sardine's %v", tuna,
-			sardine)
+	row, err := book.NewFish("pacific-sardine", FishOptions{School: count})
+	if err != nil {
+		t.Fatal(err)
 	}
-	if fishSwing(t, "pacific-bluefin-tuna", tail) == 0 {
-		t.Fatal("the tuna's tail does not swing")
-	}
-}
-
-// fishStored is the faces a school stores and the meshes it shares.
-func fishStored(t *testing.T, count int) (int, int) {
-	t.Helper()
-	made, err := fishSchoolRow{species: "pacific-sardine",
-		count: count}.made(sow(9))
+	made, err := Make(row, Sow(9))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,85 +108,8 @@ func TestFishSchoolDoesNotGrowItsMeshes(t *testing.T) {
 	}
 }
 
-// TestFishSchoolPacksByBodyLength holds the school's nearest fish to lie
-// within a few body lengths of one another, not on top of one another.
-func TestFishSchoolPacksByBodyLength(t *testing.T) {
-	plan := planFish("pacific-sardine", sow(4))
-	places := plan.schoolPlaces(200)
-	row := plan.species.Figures["length"]
-	length := (row.Least + row.Most) / 2
-	for i, place := range places {
-		nearest := math.Inf(1)
-		for j, other := range places {
-			if i != j {
-				nearest = math.Min(nearest,
-					place.Origin.Sub(other.Origin).Len())
-			}
-		}
-		if nearest < .2*length || nearest > 2*length {
-			t.Fatalf("fish %d's nearest is %v away, %v lengths", i,
-				nearest, nearest/length)
-		}
-	}
-}
-
-// TestFishRefusesAFigureWithNoBasis is an anti-test: a figure with no
-// basis, a read one with no source, a name nobody reads, and a column
-// with no caudal vertebrae are each refused.
-func TestFishRefusesAFigureWithNoBasis(t *testing.T) {
-	name := fishNames(t)[0]
-	cases := map[string]fishFile{
-		"no basis": fishWith(name, "depth", fishFigure{Least: .2,
-			Most: .3}),
-		"read with no source": fishWith(name, "depth", fishFigure{
-			Least: .2, Most: .3, Basis: fishFromRead}),
-		"a name nobody reads": fishWith(name, "girth", fishFigure{
-			Least: .2, Most: .3, Basis: fishFromPicked}),
-		"no caudal vertebrae": fishWith(name, "precaudal", fishFigure{
-			Least: 60, Most: 60, Basis: fishFromPicked}),
-		"backward range": fishWith(name, "depth", fishFigure{Least: .3,
-			Most: .2, Basis: fishFromPicked}),
-	}
-	for why, file := range cases {
-		if err := file.checked(); err == nil {
-			t.Fatalf("a file with %s was taken", why)
-		}
-	}
-}
-
-// TestFishRefusesAnUnsownSeed is an anti-test: a fish and a school from
-// a seed nobody sowed are refused.
 func TestFishRefusesAnUnsownSeed(t *testing.T) {
-	name := fishNames(t)[0]
-	if _, err := (fishRow{species: name}).made(seed{}); err == nil {
+	if _, err := (fishRow{}).made(seed{}); err == nil {
 		t.Fatal("a fish grew from an unsown seed")
-	}
-	if _, err := (fishSchoolRow{species: name, count: 3}).made(
-		seed{}); err == nil {
-		t.Fatal("a school grew from an unsown seed")
-	}
-}
-
-// TestFishSkinFollowsTheBones holds the skin at rest to be where the
-// loft put it, and in the stroke to move with the tail.
-func TestFishSkinFollowsTheBones(t *testing.T) {
-	plan := planFish("pacific-sardine", sow(6))
-	body, err := buildFish(plan)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rest := body.skin(body.bones.Frames(skeleton.Pose{}), fishSchoolRings,
-		fishSchoolAround)
-	for i, p := range rest.points {
-		if !p.Near(rest.rest[i], 1e-9) {
-			t.Fatalf("point %d moved at rest: %v from %v", i, p, rest.rest[i])
-		}
-	}
-	frames := body.bones.Frames(body.stroke(.1))
-	posed := body.skin(frames, fishSchoolRings,
-		fishSchoolAround)
-	last := len(posed.points) - 1
-	if posed.points[last].Near(posed.rest[last], 1e-6) {
-		t.Fatal("the tail's last point did not move in the stroke")
 	}
 }

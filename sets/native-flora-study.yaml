@@ -5,7 +5,7 @@
 # utu (barringtonia asiatica), holm oak (quercus ilex), tree heath (erica
 # arborea) and white willow (salix alba). each has a camera of its own, at
 # a person's height south of it. what was read for each and from where,
-# and what is picked, is in manufacture/plant-profiles.yaml beside its row.
+# and what is picked, is in manufacture/plants/seasonal/profiles.yaml beside its row.
 #
 # the frame. places are metres, x east, y north, z up, the ground's top at
 # z = 0. the sun and the sky are worked, not chosen: the reader works them
@@ -69,15 +69,23 @@ scene:
       title: "a white willow, from thirty metres south"
       location: {at: [150, 20, 1.7]}
       orientation: {look_at: [150, 50, 8]}
+  recipes:
+    plant-barringtonia-asiatica: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: barringtonia-asiatica}}
+    plant-erica-arborea: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: erica-arborea}}
+    plant-metrosideros-polymorpha: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: metrosideros-polymorpha}}
+    plant-pandanus-tectorius: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: pandanus-tectorius}}
+    plant-quercus-ilex: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: quercus-ilex}}
+    plant-salix-alba: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: salix-alba}}
+    plant-scaevola-taccada: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: scaevola-taccada}}
   set:
     things:
-      hala: {kind: pandanus-tectorius, seed: 1, complexity: demo, position: {east: {value: 20, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
-      naupaka: {kind: scaevola-taccada, seed: 2, complexity: demo, position: {east: {value: 40, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
-      ohia: {kind: metrosideros-polymorpha, seed: 3, complexity: quick, position: {east: {value: 60, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
-      utu: {kind: barringtonia-asiatica, seed: 4, complexity: quick, position: {east: {value: 85, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
-      holm oak: {kind: quercus-ilex, seed: 5, complexity: quick, position: {east: {value: 110, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
-      tree heath: {kind: erica-arborea, seed: 6, complexity: clumps, position: {east: {value: 130, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
-      willow: {kind: salix-alba, seed: 7, complexity: quick, position: {east: {value: 150, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      hala: {recipe: plant-pandanus-tectorius, seed: 1, complexity: demo, position: {east: {value: 20, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      naupaka: {recipe: plant-scaevola-taccada, seed: 2, complexity: demo, position: {east: {value: 40, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      ohia: {recipe: plant-metrosideros-polymorpha, seed: 3, complexity: quick, position: {east: {value: 60, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      utu: {recipe: plant-barringtonia-asiatica, seed: 4, complexity: quick, position: {east: {value: 85, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      holm oak: {recipe: plant-quercus-ilex, seed: 5, complexity: quick, position: {east: {value: 110, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      tree heath: {recipe: plant-erica-arborea, seed: 6, complexity: clumps, position: {east: {value: 130, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
+      willow: {recipe: plant-salix-alba, seed: 7, complexity: quick, position: {east: {value: 150, unit: m}, north: {value: 50, unit: m}, up: {value: 0, unit: m}}}
   world:
     unit: 1
     materials:

@@ -81,7 +81,7 @@ func (stage *staging) laid(each set.Stand) (cities.Laid, error) {
 	if err != nil {
 		return cities.Laid{}, err
 	}
-	item, err := cities.ItemOf(each.Kind())
+	item, err := cities.ItemOf(stage.reportedKind(each.Kind(), each.Recipe()))
 	if err != nil {
 		return cities.Laid{}, err
 	}
@@ -119,7 +119,7 @@ func (stage *staging) gridded(each set.Stand, box cities.Quarter) (cities.Laid,
 	if err != nil {
 		return cities.Laid{}, err
 	}
-	item, err := cities.ItemOf(each.Kind())
+	item, err := cities.ItemOf(stage.reportedKind(each.Kind(), each.Recipe()))
 	if err != nil {
 		return cities.Laid{}, err
 	}
@@ -171,7 +171,7 @@ func (stage *staging) habited(each set.Stand, ground groundAt,
 			continue
 		}
 		index := len(grove)
-		stage.note(each.Name(), each.Kind(), place)
+		stage.note(each.Name(), stage.reportedKind(each.Kind(), each.Recipe()), place)
 		pick, err := stage.pickOf(each, seed, index, number)
 		if err != nil {
 			return err

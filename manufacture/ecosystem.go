@@ -89,12 +89,5 @@ func (ecosystem Ecosystem) Extent() (maths.Box, error) {
 // seen is how an eye sees the ecosystem's box.
 func (ecosystem Ecosystem) seen(from seed, at maths.Subspace,
 	by strategies.Eye) (strategies.Seen, error) {
-	if err := by.Check(); err != nil {
-		return strategies.Seen{}, err
-	}
-	box, err := ecosystem.Extent()
-	if err != nil {
-		return strategies.Seen{}, err
-	}
-	return by.Cover(transformed(box, at)), nil
+	return seenObject(ecosystem, at, by)
 }

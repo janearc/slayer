@@ -19,7 +19,7 @@ const (
 func aired(t *testing.T, said string) (set.Set, error) {
 	t.Helper()
 	written := strings.Replace(kilaueaIki(t), moonlit, said, 1)
-	return set.Read("kilauea-iki.yaml", []byte(written))
+	return set.Read("testdata/kilauea-iki.yaml", []byte(written))
 }
 
 // inTheSky is the giant set's planet put in a ground set's sky, and the

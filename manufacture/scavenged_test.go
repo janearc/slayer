@@ -283,11 +283,14 @@ func TestAScavengedClusterNeedsASownSeed(t *testing.T) {
 func TestWithNoPartsTheCatalogueIsDrawnFromLessTheClusterItself(t *testing.T) {
 	rng := newDraws(1)
 	for range 50 {
-		name := drawKind(ClusterAsk{}, rng)
+		name, err := drawKind(ClusterAsk{}, rng)
+		if err != nil {
+			t.Fatal(err)
+		}
 		if name == ClusterKind {
 			t.Fatal("a cluster drew itself")
 		}
-		if _, err := kindNamed(name); err != nil {
+		if _, err := scavengedModel(name); err != nil {
 			t.Fatalf("drew %q: %v", name, err)
 		}
 	}
@@ -349,7 +352,8 @@ func TestTheFacesAGoodComesToAreTheFacesItHolds(t *testing.T) {
 // repeat past what a made thing's budgets are drawn up within.
 func TestAKindTooHeavyForAPartIsDrawnAgain(t *testing.T) {
 	const kelp = "giant-kelp-moderate"
-	made, err := madePart(kelp, 1, "quick")
+	row := testKelp(t, false)
+	made, err := MakeWithComplexity(row, sow(1), "quick")
 	if err != nil {
 		t.Fatal(err)
 	}

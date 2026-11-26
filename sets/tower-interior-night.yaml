@@ -1,0 +1,110 @@
+# tower interior, night: one tower alone in the dark, drawn at the demo
+# level, so that what is behind its glass can be looked at: the rooms,
+# their ceilings of lights, what stands in them, and which are lit.
+# the tower is the shape of a small city block's: a rectangle in plan,
+# one shaft, fourteen storeys, a curtain skin with punched windows. it has
+# no shops and no signs, so the only light it makes is its rooms'.
+# made by the cities package (manufacture/cities), through the manufactory's
+# kind tower, from manufacture/cities/cultures/tower.yaml.
+#
+# places are metres, as a map's run: x east, y north, z up. the ground,
+# the moon, the sky and the cameras are choices of this study, picked by
+# eye, and say so. the moon is far brighter than a moon is: it is there to
+# show the outside of the tower a little, and for nothing else.
+$schema: https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: tower interior night
+  setting: space
+  light: none
+  film:
+    width: 960
+    height: 540
+    rays: 4
+    wide: 40
+    exposure: 1
+    print:
+      knee: 0.7
+      top: 8
+      source: eye
+  cameras:
+    # the south face square on, from across a street, half way up
+    facade:
+      title: "the south face, square on, from across the street"
+      location:
+        at: [0, -70, 28]
+      orientation:
+        look_at: [0, 0, 28]
+    # from a window of a building across the way, level with the eighth
+    # floor: the floors below are looked down into, the ones above up into
+    across:
+      title: "from a window across the way, level with the eighth floor"
+      wide: 62
+      location:
+        at: [6, -42, 31]
+      orientation:
+        look_at: [0, 0, 29]
+    # close to the glass, level with a floor, to see into a few rooms
+    rooms:
+      title: "close to the glass, level with the sixth floor"
+      location:
+        at: [4, -32, 23]
+      orientation:
+        look_at: [4, 0, 23]
+    # the south-east corner, where two faces and their corner rooms meet
+    corner:
+      title: "the south-east corner, from a little above half way"
+      location:
+        at: [55, -55, 34]
+      orientation:
+        look_at: [14, -8, 30]
+    # from the pavement, looking up the face, as someone walking by sees it
+    street:
+      title: "from the pavement, looking up"
+      location:
+        at: [24, -46, 1.7]
+      orientation:
+        look_at: [0, 0, 34]
+  recipes:
+    block:
+      kind: tower
+      irregularity: 0.2
+      pins:
+        plan: rectangle
+        skin: curtain
+        style: punched
+        shafts: 1
+        retail: false
+        signs: false
+        storeys: 14
+        width: {value: 36, unit: m}
+  set:
+    things:
+      tower:
+        recipe: block
+        seed: 1
+        complexity: demo
+        east: 0
+        north: 0
+        height: {value: 0, unit: m}
+  world:
+    unit: 1
+    materials:
+      paving:
+        colour: {srgb_linear: [0.04, 0.04, 0.045]}
+        source: eye
+    boxes:
+      ground:
+        material: paving
+        middle: [0, 0, -1]
+        size: [20000, 20000, 2]
+        source: eye
+    suns:
+      moon:
+        toward: [0.35, -0.6, 0.72]
+        colour: {srgb_linear: [0.03, 0.035, 0.05]}
+        source: eye
+    sky:
+      horizon: {srgb_linear: [0.006, 0.006, 0.009]}
+      zenith: {srgb_linear: [0.001, 0.0015, 0.004]}
+      ground: {srgb_linear: [0.002, 0.002, 0.003]}
+      source: eye

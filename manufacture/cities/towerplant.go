@@ -179,9 +179,13 @@ func (job faceJob) climbers(at func(int) place, left, right,
 }
 
 // hangings are the plants that hang below the edge of a balcony, one at
-// each spacing along it, as long as their place draws.
+// each spacing along it, as long as their place draws. A balcony with no
+// room under it, at the foot of its segment, hangs none.
 func (job faceJob) hangings(at func(int) place, left, right, foot,
 	depth float64) []placedElement {
+	if !(foot+job.beneath > 0) {
+		return nil
+	}
 	drawing := job.drawing
 	width, spacing := drawing.fixed("planted-hang-width"),
 		drawing.fixed("planted-hang-spacing")
@@ -219,4 +223,15 @@ func (job faceJob) trees(at func(int) place, left, right, top,
 			Height: drawing.fixed("planted-tree-height")})
 	}
 	return found
+}
+
+// TreeSpecies lists the planting culture's possible species in authored
+// order, without drawing or consuming any seed choices.
+func (tower *Tower) TreeSpecies() []string {
+	options := tower.drawing.options("planted-tree")
+	names := make([]string, 0, len(options))
+	for _, option := range options {
+		names = append(names, option.Name)
+	}
+	return names
 }

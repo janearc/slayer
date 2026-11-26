@@ -28,3 +28,4 @@ mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/
 mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/execute.go -destination=azazel/internal/queue/execute_mock_test.go -package=queue
 mocks . :: go tool mockgen -write_command_comment=false -source=azazel/internal/queue/worker.go -destination=azazel/internal/queue/worker_mock_test.go -package=queue
 mocks . :: go tool mockgen -write_package_comment=false -source=ferruccio/native/cmd/ferruccio/proof_stop.go -destination=ferruccio/native/cmd/ferruccio/proof_stop_mock_test.go -package=main -mock_names=proofPreview=MockProofPreview
+mocks . :: go tool mockgen -write_command_comment=false -source=trace/kept.go -destination=trace/exact_rows_mock_test.go -package=trace

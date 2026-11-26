@@ -27,10 +27,12 @@ scene:
     reference-altitude: {value: 0, unit: m}
     boundary: earth-standard-land
   sun: {azimuth: 140, altitude: 28}
+  recipes:
+    profile-orca: {animal: {family: whale, file: ../../manufacture/animals/vertebrates/mammals/whales/profiles.yaml, species: orca, pose: spy-hop}}
   set:
     things:
       orca:
-        kind: orca-clean-05-spy-hop
+        recipe: profile-orca
         seed: 17
         position:
           east: {value: 0, unit: m}

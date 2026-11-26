@@ -1,0 +1,33 @@
+Haze sampling: raw linear-light comparison
+
+A 32 by 32 patch at left 662, top 312 in a 2048 by 1820 street frame.
+The street camera, set, fixed exposure, software GPU, SLAYER_SCROOGE=1 and
+fresh frame draws were used. Executable SHA-256:
+65ddcb20b7bfdac9400297b78339baa8692b06003aaf6d18ff607b52b0a6004e.
+Set SHA-256:
+a5b906416963004ce02cd4ef5eebd38e78b170262a3397a4b147fce26bb365fd.
+Existing caches were used; complete transitive input closure is not established.
+
+The reference is 32 rays per side (1024 samples per pixel). Its linear
+luminance median was 0.1457253, 95th percentile 0.1588396, and maximum
+0.1789689. This finite reference has not been shown to converge. Raw repeat
+variation was not measured.
+
+The isolated-positive-residual threshold is 0.0159 linear luminance units,
+approximately 10% of reference p95. This is a measurement choice, not a
+defect cutoff. A counted pixel exceeds it in candidate-minus-reference
+luminance and none of its eight neighbours does; border pixels are excluded.
+Thresholds differ across patches, so isolated counts are not directly
+comparable across the water, wall and haze studies.
+
+Rays per side | Samples per pixel | Mean absolute RGB difference | Isolated positive residuals
+1             | 1                 | 0.050309                     | 27
+2             | 4                 | 0.028586                     | 24
+4             | 16                | 0.017689                     | 41
+16            | 256               | 0.007339                     | 33
+Reference: 32 rays per side, 1024 samples per pixel.
+
+Mean absolute difference falls across these candidates; isolated positive
+counts do not. Neither result establishes convergence or a cause of visible
+speckles. Per-channel signed and absolute scores are retained in scores.json.
+The enlarged sheet uses nearest-neighbour pixels for visual review.

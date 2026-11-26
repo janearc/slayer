@@ -1,0 +1,27 @@
+# Static illustrative specimen, currently uncoiled; profile data and its
+# research sources are in the checked snake book. Cameras are not to scale.
+"$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
+scene:
+  name: Snake specimen Boa constrictor occidentalis
+  setting: space
+  light: none
+  film: {width: 640, height: 360, rays: 2, exposure: 1, wide: 39}
+  cameras:
+    full: {location: {at: [0, 2.7000, 4.9500]}, orientation: {look_at: [0, 0, 0]}}
+    head: {location: {at: [1.41000, 0.33000, 0.57000]}, orientation: {look_at: [1.41000, 0, 0]}}
+  recipes:
+    specimen: {animal: {family: snake, file: ../../../manufacture/animals/vertebrates/reptiles/snakes/profiles.yaml, species: boa-constrictor-occidentalis}}
+  set:
+    things:
+      snake: {recipe: specimen, seed: 7, complexity: quick, east: 0, north: 0, height: {value: 0, unit: m}}
+  world:
+    unit: 1
+    sky:
+      horizon: {srgb_linear: [0.30, 0.30, 0.30]}
+      zenith: {srgb_linear: [0.35, 0.38, 0.42]}
+      ground: {srgb_linear: [0.18, 0.17, 0.15]}
+      source: eye
+    suns:
+      key: {toward: [0.3, 0.8, 0.5], colour: {srgb_linear: [1.6, 1.5, 1.4]}, source: eye}
+    floods:
+      fill: {colour: {srgb_linear: [0.25, 0.25, 0.25]}, strength: 1, source: eye}

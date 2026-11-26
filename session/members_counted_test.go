@@ -1,6 +1,7 @@
 package session
 
 import (
+	"os"
 	"testing"
 
 	"github.com/janearc/slayer/maths"
@@ -8,8 +9,15 @@ import (
 )
 
 // sightedStaging is a stage whose camera is the one of lookingNorth.
-func sightedStaging() *staging {
+func sightedStaging(t *testing.T) *staging {
+	t.Helper()
+	raw, err := os.ReadFile("../sets/mangrove-study.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	read := readPositionSet(t, string(raw))
 	stage := testStaging()
+	stage.recipes = read
 	eye := lookingNorth()
 	stage.sight = &eye
 	return stage
@@ -35,8 +43,8 @@ const (
 func TestAMemberOutOfViewIsMadeAtTheCoarsestRungAndCountedUnseen(
 	t *testing.T) {
 	t.Setenv(scrooge.Variable, "1")
-	stage := sightedStaging()
-	got, err := stage.memberDetail("avicennia-marina", "", "demo", 1, "",
+	stage := sightedStaging(t)
+	got, err := stage.memberDetail("plant-profile", "plant-avicennia-marina", "demo", 1, "",
 		standingAt(behind), false)
 	if err != nil || got != "hull" {
 		t.Fatalf("a thing out of view got %q, %v; want hull", got, err)
@@ -52,8 +60,8 @@ func TestAMemberOutOfViewIsMadeAtTheCoarsestRungAndCountedUnseen(
 // complexity, and counted as seen.
 func TestAMemberCloseByIsMadeAsFineAsTheSetSays(t *testing.T) {
 	t.Setenv(scrooge.Variable, "1")
-	stage := sightedStaging()
-	got, err := stage.memberDetail("avicennia-marina", "", "demo", 1, "",
+	stage := sightedStaging(t)
+	got, err := stage.memberDetail("plant-profile", "plant-avicennia-marina", "demo", 1, "",
 		standingAt(closeBy), false)
 	if err != nil || got != "demo" {
 		t.Fatalf("a thing close by got %q, %v; want demo", got, err)
@@ -69,8 +77,8 @@ func TestAMemberCloseByIsMadeAsFineAsTheSetSays(t *testing.T) {
 // that memberDetail then counts it once.
 func TestAChoiceOfRungCountsNothingUntilItIsCounted(t *testing.T) {
 	t.Setenv(scrooge.Variable, "1")
-	stage := sightedStaging()
-	chosen, err := stage.rungChosen("avicennia-marina", "", "demo", 1, "",
+	stage := sightedStaging(t)
+	chosen, err := stage.rungChosen("plant-profile", "plant-avicennia-marina", "demo", 1, "",
 		standingAt(behind), false)
 	if err != nil || chosen.rung != "hull" || !chosen.counted ||
 		!chosen.unseen {
@@ -81,7 +89,7 @@ func TestAChoiceOfRungCountsNothingUntilItIsCounted(t *testing.T) {
 		t.Errorf("a choice counted %v with %d unseen", stage.rungs.made,
 			stage.rungs.unseen)
 	}
-	if _, err := stage.memberDetail("avicennia-marina", "", "demo", 1, "",
+	if _, err := stage.memberDetail("plant-profile", "plant-avicennia-marina", "demo", 1, "",
 		standingAt(behind), false); err != nil {
 		t.Fatal(err)
 	}
@@ -97,8 +105,8 @@ func TestAChoiceOfRungCountsNothingUntilItIsCounted(t *testing.T) {
 func TestAChoiceWhereScroogeIsNotAskedIsTheSetsAndIsNotCounted(
 	t *testing.T) {
 	t.Setenv(scrooge.Variable, "")
-	stage := sightedStaging()
-	chosen, err := stage.rungChosen("avicennia-marina", "", "demo", 1, "",
+	stage := sightedStaging(t)
+	chosen, err := stage.rungChosen("plant-profile", "plant-avicennia-marina", "demo", 1, "",
 		standingAt(behind), false)
 	if err != nil || chosen.rung != "demo" || chosen.counted ||
 		chosen.unseen {

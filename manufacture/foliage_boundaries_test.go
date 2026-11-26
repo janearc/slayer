@@ -57,8 +57,8 @@ func TestRecursiveFoliagePropagatesPrototypeAndBarkRefusals(t *testing.T) {
 		}
 	}
 	row := norwayRow()
-	row.foliageStyle = 1
-	row.grows.trunk.sides = 2
+	row.FoliageStyle = 1
+	row.Grows.Trunk.Sides = 2
 	if _, err := row.madeAt(Sow(5), "quick"); !errors.Is(err, errCut) {
 		t.Fatalf("recursive tree lost scaffold cause: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestUncheckedFireSmokeKeepsItsPlumeRefusal(t *testing.T) {
 
 func TestRingAssemblyRefusesAnUncheckedNonfinitePose(t *testing.T) {
 	nonfinite := measure.Metres(math.NaN())
-	if _, err := around(ring{count: 1, radius: nonfinite}, canRow(), Sow(5)); err == nil || !strings.Contains(err.Error(), "invalid placement") {
+	if _, err := around(ring{Count: 1, Radius: nonfinite.InMetres()}, canRow(), Sow(5)); err == nil || !strings.Contains(err.Error(), "invalid placement") {
 		t.Fatalf("nonfinite ring placement: %v", err)
 	}
 }

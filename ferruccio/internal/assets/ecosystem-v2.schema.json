@@ -1098,6 +1098,135 @@
         {
           "type": "object",
           "properties": {
+            "animal": {
+              "type": "object",
+              "properties": {
+                "family": {"enum": ["fish", "bird", "theropod", "pinniped", "squid", "whale", "reptile", "snake", "sauropod"]},
+                "file": {"type": "string", "minLength": 1},
+                "species": {"type": "string", "minLength": 1},
+                "pose": {"enum": ["swim", "glide", "bones", "standing", "gliding", "outline", "hauled", "hauled-out", "lying", "swimming", "spy-hop"]},
+                "count": {"type": "integer", "minimum": 0, "maximum": 5000},
+                "seconds": {"type": "number", "minimum": -100000, "maximum": 100000},
+                "phase": {"type": "number", "minimum": -100000, "maximum": 100000},
+                "representation": {"enum": ["skin", "bones", "volumes"]},
+                "study": {"type": "string", "minLength": 1}
+              },
+              "required": ["family", "file", "species"],
+              "allOf": [
+                {"if": {"required": ["phase"]}, "then": {"properties": {"family": {"const": "squid"}}}},
+                {
+                  "if": {"properties": {"family": {"enum": ["snake", "sauropod"]}}, "required": ["family"]},
+                  "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["seconds"]}, {"required": ["phase"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+                },
+                {
+                  "if": {"properties": {"family": {"const": "squid"}}, "required": ["family"]},
+                  "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["seconds"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+                },
+                {
+                  "if": {"properties": {"family": {"const": "fish"}}, "required": ["family"]},
+                  "then": {
+                    "properties": {"pose": {"enum": ["swim", "glide", "bones"]}},
+                    "not": {"anyOf": [{"required": ["seconds"]}, {"required": ["representation"]}, {"required": ["study"]}]},
+                    "allOf": [{
+                      "if": {"required": ["count"], "properties": {"count": {"minimum": 1}}},
+                      "then": {"properties": {"pose": {"const": "swim"}}}
+                    }]
+                  }
+                },
+                {
+                  "if": {"properties": {"family": {"const": "bird"}}, "required": ["family"]},
+                  "then": {"properties": {"pose": {"enum": ["standing", "gliding", "bones", "outline"]}},
+                    "not": {"anyOf": [{"required": ["count"]}, {"required": ["seconds"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+                },
+                {
+                  "if": {"properties": {"family": {"const": "pinniped"}}, "required": ["family"]},
+                  "then": {
+                    "properties": {"pose": {"enum": ["hauled", "hauled-out", "lying", "swimming"]}},
+                    "not": {"anyOf": [{"required": ["count"]}, {"required": ["seconds"]}]},
+                    "allOf": [
+                      {"if": {"required": ["study"]}, "then": {"not": {"anyOf": [{"required": ["pose"]}, {"required": ["representation"]}]}}},
+                      {"if": {"required": ["representation"], "properties": {"representation": {"const": "bones"}}}, "then": {"not": {"required": ["pose"]}}},
+                      {"if": {"required": ["representation"], "properties": {"representation": {"const": "volumes"}}}, "then": {"properties": {"pose": {"const": "lying"}}}}
+                    ]
+                  }
+                },
+                {
+                  "if": {"properties": {"family": {"const": "reptile"}}, "required": ["family"]},
+                  "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["seconds"]}, {"required": ["representation"]}]}}
+                },
+                {
+                  "if": {"properties": {"family": {"const": "whale"}}, "required": ["family"]},
+                  "then": {"properties": {"pose": {"enum": ["swim", "spy-hop"]}, "representation": {"enum": ["skin", "bones"]}}, "not": {"anyOf": [{"required": ["count"]}, {"required": ["seconds"]}, {"required": ["study"]}]}, "allOf": [{"if": {"required": ["representation"], "properties": {"representation": {"const": "bones"}}}, "then": {"not": {"required": ["pose"]}}}]}
+                },
+                {
+                  "if": {"properties": {"family": {"const": "theropod"}}, "required": ["family"]},
+                  "then": {"not": {"anyOf": [{"required": ["count"]}, {"required": ["pose"]}, {"required": ["representation"]}, {"required": ["study"]}]}}
+                }
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": ["animal"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "alga": {
+              "type": "object",
+              "properties": {
+                "family": {"const": "kelp"},
+                "file": {"type": "string", "minLength": 1},
+                "species": {"type": "string", "minLength": 1},
+                "condition": {"type": "string", "minLength": 1},
+                "forest": {"type": "boolean"}
+              },
+              "required": ["family", "file", "species"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["alga"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "plant": {
+              "type": "object",
+              "properties": {
+                "family": {"enum": ["seasonal", "conifer", "fern", "cactus"]},
+                "file": {"type": "string", "minLength": 1},
+                "species": {"type": "string", "minLength": 1},
+                "representation": {"const": "shoot"}
+              },
+              "required": ["file", "species"],
+              "additionalProperties": false
+            },
+            "season": {"enum": ["summer", "autumn", "winter"]}
+          },
+          "required": ["plant"],
+          "allOf": [
+            {"if": {"required": ["season"]}, "then": {"properties": {"plant": {"properties": {"family": {"const": "seasonal"}}}}}},
+            {"if": {"properties": {"plant": {"required": ["representation"]}}}, "then": {"properties": {"plant": {"required": ["family"], "properties": {"family": {"const": "conifer"}}}}}}
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "composition": {
+              "oneOf": [
+                {"type": "object", "properties": {"file": {"type": "string", "minLength": 1}}, "required": ["file"], "additionalProperties": false},
+                {"type": "object", "properties": {"inline": {"type": "object"}}, "required": ["inline"], "additionalProperties": false}
+              ]
+            }
+          },
+          "required": ["composition"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
             "kind": {
               "const": "optical-observatory"
             },
@@ -1310,7 +1439,8 @@
               "additionalProperties": false
             },
             "depth": {"type": "integer", "minimum": 0, "maximum": 6},
-            "bare": {"type": "boolean"}
+            "bare": {"type": "boolean"},
+            "hub": {"type": "boolean"}
           },
           "required": [
             "kind"
@@ -1344,6 +1474,10 @@
           "properties": {
             "kind": {
               "const": "tower"
+            },
+            "tree-profiles": {
+              "type": "object", "properties": {"file": {"type": "string", "minLength": 1, "pattern": "\\S"}},
+              "required": ["file"], "additionalProperties": false
             },
             "irregularity": {
               "oneOf": [
@@ -1450,6 +1584,10 @@
                 "city-clustered-night-10000"
               ]
             },
+            "tree-profiles": {
+              "type": "object", "properties": {"file": {"type": "string", "minLength": 1, "pattern": "\\S"}},
+              "required": ["file"], "additionalProperties": false
+            },
             "batch-placement": {
               "enum": [
                 "fused",
@@ -1473,13 +1611,6 @@
           "properties": {
             "kind": {
               "enum": [
-                "spruce",
-                "norway",
-                "coast-redwood",
-                "giant-sequoia",
-                "coast-redwood-shoot",
-                "giant-sequoia-shoot",
-                "fern",
                 "pebble",
                 "cobble",
                 "boulder",
@@ -1494,7 +1625,6 @@
                 "hubble",
                 "webb",
                 "prima",
-                "saguaro",
                 "giant-kelp",
                 "giant-kelp-slack",
                 "giant-kelp-moderate",
@@ -1505,45 +1635,6 @@
                 "kelp-forest-surge",
                 "bubble-stream"
               ]
-            }
-          },
-          "required": [
-            "kind"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "enum": [
-                "valley-oak",
-                "alder",
-                "poplar",
-                "manzanita",
-                "chaparral-brush",
-                "joshua-tree",
-                "kandelia-obovata",
-                "aegiceras-corniculatum",
-                "avicennia-marina",
-                "bruguiera-gymnorhiza",
-                "sonneratia-apetala",
-                "pandanus-tectorius",
-                "scaevola-taccada",
-                "metrosideros-polymorpha",
-                "barringtonia-asiatica",
-                "quercus-ilex",
-                "erica-arborea",
-                "salix-alba"
-              ]
-            },
-            "season": {
-              "enum": [
-                "summer",
-                "autumn",
-                "winter"
-              ],
-              "default": "summer"
             }
           },
           "required": [
@@ -1683,6 +1774,7 @@
     "thing": {
       "type": "object",
       "properties": {
+        "scale": {"type": "number", "minimum": 0.01, "maximum": 100},
         "part-spin": {"$ref": "#/$defs/part-spin"},
         "east": {
           "type": "number",
@@ -1697,13 +1789,6 @@
         "kind": {
           "enum": [
             "lashed-street",
-            "spruce",
-            "norway",
-            "coast-redwood",
-            "giant-sequoia",
-            "coast-redwood-shoot",
-            "giant-sequoia-shoot",
-            "fern",
             "pebble",
             "cobble",
             "boulder",
@@ -1775,25 +1860,6 @@
             "guide-star-launcher",
             "owl",
             "owl-shelter",
-            "valley-oak",
-            "alder",
-            "poplar",
-            "manzanita",
-            "chaparral-brush",
-            "joshua-tree",
-            "kandelia-obovata",
-            "aegiceras-corniculatum",
-            "avicennia-marina",
-            "bruguiera-gymnorhiza",
-            "sonneratia-apetala",
-            "pandanus-tectorius",
-            "scaevola-taccada",
-            "metrosideros-polymorpha",
-            "barringtonia-asiatica",
-            "quercus-ilex",
-            "erica-arborea",
-            "salix-alba",
-            "saguaro",
             "giant-kelp",
             "giant-kelp-slack",
             "giant-kelp-moderate",
@@ -1806,84 +1872,6 @@
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
-            "orca-clean-05",
-            "orca-clean-05-bones",
-            "orca-clean-05-spy-hop",
-            "bay-seal",
-            "harbor-seal-hauled",
-            "harbor-seal-swimming",
-            "hawaiian-monk-seal-hauled",
-            "harbor-seal-bones",
-            "harbor-seal",
-            "harbor-seal-dry",
-            "walrus-fresh-5",
-            "bird-black-faced-spoonbill-standing",
-            "bird-black-faced-spoonbill-gliding",
-            "bird-black-faced-spoonbill-bones",
-            "bird-black-faced-spoonbill-outline",
-            "bird-grey-heron-standing",
-            "bird-grey-heron-gliding",
-            "bird-grey-heron-bones",
-            "bird-grey-heron-outline",
-            "bird-little-egret-standing",
-            "bird-little-egret-gliding",
-            "bird-little-egret-bones",
-            "bird-little-egret-outline",
-            "bird-pacific-reef-heron-standing",
-            "bird-pacific-reef-heron-gliding",
-            "bird-pacific-reef-heron-bones",
-            "bird-pacific-reef-heron-outline",
-            "bird-yellow-legged-gull-standing",
-            "bird-yellow-legged-gull-gliding",
-            "bird-yellow-legged-gull-bones",
-            "bird-yellow-legged-gull-outline",
-            "bird-white-tern-standing",
-            "bird-white-tern-gliding",
-            "bird-white-tern-bones",
-            "bird-white-tern-outline",
-            "bird-great-frigatebird-standing",
-            "bird-great-frigatebird-gliding",
-            "bird-great-frigatebird-bones",
-            "bird-great-frigatebird-outline",
-            "bird-white-tailed-tropicbird-standing",
-            "bird-white-tailed-tropicbird-gliding",
-            "bird-white-tailed-tropicbird-bones",
-            "bird-white-tailed-tropicbird-outline",
-            "pacific-bluefin-tuna",
-            "pacific-bluefin-tuna-glide",
-            "pacific-bluefin-tuna-bones",
-            "california-yellowtail",
-            "california-yellowtail-glide",
-            "california-yellowtail-bones",
-            "california-barracuda",
-            "california-barracuda-glide",
-            "california-barracuda-bones",
-            "pacific-sardine",
-            "pacific-sardine-glide",
-            "pacific-sardine-bones",
-            "pacific-sardine-school-500",
-            "pacific-sardine-school-5000",
-            "convict-tang",
-            "convict-tang-glide",
-            "convict-tang-bones",
-            "dusky-grouper",
-            "dusky-grouper-glide",
-            "dusky-grouper-bones",
-            "mediterranean-chromis",
-            "mediterranean-chromis-glide",
-            "mediterranean-chromis-bones",
-            "mediterranean-chromis-school-60",
-            "european-perch",
-            "european-perch-glide",
-            "european-perch-bones",
-            "flathead-grey-mullet",
-            "flathead-grey-mullet-glide",
-            "flathead-grey-mullet-bones",
-            "flathead-grey-mullet-school-120",
-            "walrus-fresh-5-skeleton",
-            "walrus-fresh-5-volumes",
-            "walrus-fresh-5-hauled-out",
-            "walrus-fresh-5-swimming",
             "hatz-gargoyle",
             "street",
             "city-rowhouse",
@@ -2339,13 +2327,6 @@
         "kind": {
           "enum": [
             "lashed-street",
-            "spruce",
-            "norway",
-            "coast-redwood",
-            "giant-sequoia",
-            "coast-redwood-shoot",
-            "giant-sequoia-shoot",
-            "fern",
             "pebble",
             "cobble",
             "boulder",
@@ -2417,25 +2398,6 @@
             "guide-star-launcher",
             "owl",
             "owl-shelter",
-            "valley-oak",
-            "alder",
-            "poplar",
-            "manzanita",
-            "chaparral-brush",
-            "joshua-tree",
-            "kandelia-obovata",
-            "aegiceras-corniculatum",
-            "avicennia-marina",
-            "bruguiera-gymnorhiza",
-            "sonneratia-apetala",
-            "pandanus-tectorius",
-            "scaevola-taccada",
-            "metrosideros-polymorpha",
-            "barringtonia-asiatica",
-            "quercus-ilex",
-            "erica-arborea",
-            "salix-alba",
-            "saguaro",
             "giant-kelp",
             "giant-kelp-slack",
             "giant-kelp-moderate",
@@ -2448,84 +2410,6 @@
             "mcrn-larson",
             "mcrn-larson-landed",
             "human-scale-2m",
-            "orca-clean-05",
-            "orca-clean-05-bones",
-            "orca-clean-05-spy-hop",
-            "bay-seal",
-            "harbor-seal-hauled",
-            "harbor-seal-swimming",
-            "hawaiian-monk-seal-hauled",
-            "harbor-seal-bones",
-            "harbor-seal",
-            "harbor-seal-dry",
-            "walrus-fresh-5",
-            "bird-black-faced-spoonbill-standing",
-            "bird-black-faced-spoonbill-gliding",
-            "bird-black-faced-spoonbill-bones",
-            "bird-black-faced-spoonbill-outline",
-            "bird-grey-heron-standing",
-            "bird-grey-heron-gliding",
-            "bird-grey-heron-bones",
-            "bird-grey-heron-outline",
-            "bird-little-egret-standing",
-            "bird-little-egret-gliding",
-            "bird-little-egret-bones",
-            "bird-little-egret-outline",
-            "bird-pacific-reef-heron-standing",
-            "bird-pacific-reef-heron-gliding",
-            "bird-pacific-reef-heron-bones",
-            "bird-pacific-reef-heron-outline",
-            "bird-yellow-legged-gull-standing",
-            "bird-yellow-legged-gull-gliding",
-            "bird-yellow-legged-gull-bones",
-            "bird-yellow-legged-gull-outline",
-            "bird-white-tern-standing",
-            "bird-white-tern-gliding",
-            "bird-white-tern-bones",
-            "bird-white-tern-outline",
-            "bird-great-frigatebird-standing",
-            "bird-great-frigatebird-gliding",
-            "bird-great-frigatebird-bones",
-            "bird-great-frigatebird-outline",
-            "bird-white-tailed-tropicbird-standing",
-            "bird-white-tailed-tropicbird-gliding",
-            "bird-white-tailed-tropicbird-bones",
-            "bird-white-tailed-tropicbird-outline",
-            "pacific-bluefin-tuna",
-            "pacific-bluefin-tuna-glide",
-            "pacific-bluefin-tuna-bones",
-            "california-yellowtail",
-            "california-yellowtail-glide",
-            "california-yellowtail-bones",
-            "california-barracuda",
-            "california-barracuda-glide",
-            "california-barracuda-bones",
-            "pacific-sardine",
-            "pacific-sardine-glide",
-            "pacific-sardine-bones",
-            "pacific-sardine-school-500",
-            "pacific-sardine-school-5000",
-            "convict-tang",
-            "convict-tang-glide",
-            "convict-tang-bones",
-            "dusky-grouper",
-            "dusky-grouper-glide",
-            "dusky-grouper-bones",
-            "mediterranean-chromis",
-            "mediterranean-chromis-glide",
-            "mediterranean-chromis-bones",
-            "mediterranean-chromis-school-60",
-            "european-perch",
-            "european-perch-glide",
-            "european-perch-bones",
-            "flathead-grey-mullet",
-            "flathead-grey-mullet-glide",
-            "flathead-grey-mullet-bones",
-            "flathead-grey-mullet-school-120",
-            "walrus-fresh-5-skeleton",
-            "walrus-fresh-5-volumes",
-            "walrus-fresh-5-hauled-out",
-            "walrus-fresh-5-swimming",
             "hatz-gargoyle",
             "street",
             "alfa-hero",

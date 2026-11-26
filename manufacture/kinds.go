@@ -4,11 +4,14 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"sort"
 	"strings"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/slayer/manufacture/plants/conifers"
+	"github.com/janearc/slayer/manufacture/plants/ferns"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/maths/strategies"
 	"github.com/janearc/slayer/scene/texture"
@@ -63,8 +66,7 @@ func (of span) watts(share float64) measure.Power {
 // count is pick for whole numbers: each from the least to the most is
 // as likely as the next.
 func (of span) count(share float64) int {
-	wide := of.most - of.least + 1
-	return int(of.least + math.Min(math.Floor(share*wide), wide-1))
+	return maths.CountBetween(of.least, of.most, share)
 }
 
 // the places a row's picks are drawn from in its seed. the thing
@@ -94,10 +96,9 @@ type object interface {
 	seen(from seed, at maths.Subspace, by strategies.Eye) (strategies.Seen, error)
 }
 
-// maker is what a row knows: how to make one of its kind from a seed, and,
-// as every object does, how big that is and whether a sensor sees it.
+// maker is the concrete recipe. A kind supplies object behaviour around it;
+// recipes declare a bound or an explicitly greedy planning strategy.
 type maker interface {
-	object
 	made(from seed) (good, error)
 }
 
@@ -112,32 +113,21 @@ type kind struct {
 	how  maker
 }
 
+var _ object = kind{}
+
+func (row kind) extent(from seed) (maths.Box, error) { return extentOf(row, from) }
+func (row kind) seen(from seed, at maths.Subspace, by strategies.Eye) (strategies.Seen, error) {
+	return seenOf(row, from, at, by)
+}
+
 var errKind = errors.New("manufacture: no such kind")
 
 // table is every kind there is, by name.
 func table() map[string]maker {
-	rows := map[string]maker{"spruce": physicalSpruce{legacy: spruceRow()}, "fern": fernRow(),
-		"norway": physicalSpruce{legacy: norwayRow()},
-		"log":    logRow(), "can": canRow(), "campfire": fireRow(),
+	rows := map[string]maker{"log": logRow(), "can": canRow(), "campfire": fireRow(),
 		"bonfire": pyreRow(), "spotlight": spotRow(), "maser": maserRow(),
 		"home": homeRow()}
 	rows["guide-star-launcher"] = guideLauncher{}
-	rows["orca-clean-05"] = orcaClean05Kind{}
-	rows["orca-clean-05-bones"] = orcaClean05Still{bones: true}
-	rows["orca-clean-05-spy-hop"] = orcaClean05Still{}
-	rows["bay-seal"] = baySealKind{}
-	rows["harbor-seal-hauled"] = sealBanana
-	rows["harbor-seal-swimming"] = sealStroke
-	rows["hawaiian-monk-seal-hauled"] = sealBasking
-	rows["harbor-seal-bones"] = harborSealBonesKind{}
-	rows["harbor-seal"] = harborSealKind{look: SealLook{Wet: .85, Nostrils: .8}, pose: harborSealRelaxed}
-	rows["harbor-seal-dry"] = harborSealKind{look: SealLook{Wet: 0, Nostrils: 1}, pose: harborSealRelaxed}
-	rows["walrus-fresh-5"] = walrusFresh5Kind{}
-	rows["walrus-fresh-5-skeleton"] = walrusFresh5Kind{bones: true}
-	rows["walrus-fresh-5-volumes"] = walrusFresh5Kind{volumes: true}
-	rows["walrus-fresh-5-hauled-out"] = walrusFresh5Kind{pose: walrusHauledOut}
-	rows["walrus-fresh-5-swimming"] = walrusFresh5Kind{pose: walrusSwimming}
-	birdKinds(rows)
 	rows["hatz-gargoyle"] = hatzGargoyleKind{}
 	rows["soho"] = soho{}
 	rows["cassini"] = cassiniHuygens{}
@@ -145,7 +135,6 @@ func table() map[string]maker {
 	rows["cassini-huygens"] = cassiniHuygens{attached: true}
 	rows["new-horizons"] = newHorizons{}
 	rows["new-horizons-vtad"] = newHorizonsVTAD{}
-	rows["saguaro"] = saguaro{}
 	rows["human-scale-2m"] = scaleHuman{}
 	rows["yurt"] = yurtRow{}
 	rows["winnebago"] = winnebagoRow{}
@@ -171,9 +160,6 @@ func table() map[string]maker {
 		Opening: measure.Degrees(35), Azimuth: measure.Degrees(180),
 		Altitude: measure.Degrees(55), Segmented: true,
 	}}
-	rows["coast-redwood"], rows["giant-sequoia"] = redwoodRow(), sequoiaRow()
-	rows["coast-redwood-shoot"] = shootKind{style: 1}
-	rows["giant-sequoia-shoot"] = shootKind{style: 2}
 	for name, row := range stoneRows() {
 		rows[name] = row
 	}
@@ -183,83 +169,32 @@ func table() map[string]maker {
 	for name, row := range plateRows() {
 		rows[name] = row
 	}
-	for name, row := range spacecraftRows() {
-		rows[name] = row
-	}
-	for name, row := range voyagerRows() {
-		rows[name] = row
-	}
-	for name, row := range personalRows() {
-		rows[name] = row
-	}
-	for name, row := range yardRows() {
-		rows[name] = row
-	}
-	for name, row := range vegetationRows() {
-		rows[name] = row
-	}
-	for name, row := range owlRows() {
-		rows[name] = row
-	}
-	for name, row := range summitRows() {
-		rows[name] = row
-	}
-	for name, row := range stageRows() {
-		rows[name] = row
-	}
-	for name, row := range truckRows() {
-		rows[name] = row
-	}
-	for name, row := range saucerRows() {
-		rows[name] = row
-	}
-	for name, row := range stackRows() {
-		rows[name] = row
-	}
-	for name, row := range lunarRows() {
-		rows[name] = row
-	}
-	for name, row := range veneraRows() {
-		rows[name] = row
-	}
-	for name, row := range j58Rows() {
-		rows[name] = row
-	}
-	for name, row := range alfaRows() {
-		rows[name] = row
-	}
-	for name, row := range boatRows() {
-		rows[name] = row
-	}
-	for name, row := range fishRows() {
-		rows[name] = row
-	}
-	for name, row := range kelpRows() {
-		rows[name] = row
-	}
-	for name, row := range bubblesRows() {
-		rows[name] = row
-	}
-	for name, row := range macroRows() {
-		rows[name] = row
-	}
-	for name, row := range cityRows() {
-		rows[name] = row
-	}
-	for name, row := range gargoyleRows() {
-		rows[name] = row
-	}
-	for name, row := range retailRows() {
-		rows[name] = row
-	}
+	maps.Copy(rows, spacecraftRows())
+	maps.Copy(rows, voyagerRows())
+	maps.Copy(rows, personalRows())
+	maps.Copy(rows, yardRows())
+	maps.Copy(rows, owlRows())
+	maps.Copy(rows, summitRows())
+	maps.Copy(rows, stageRows())
+	maps.Copy(rows, truckRows())
+	maps.Copy(rows, saucerRows())
+	maps.Copy(rows, stackRows())
+	maps.Copy(rows, lunarRows())
+	maps.Copy(rows, veneraRows())
+	maps.Copy(rows, j58Rows())
+	maps.Copy(rows, alfaRows())
+	maps.Copy(rows, boatRows())
+	maps.Copy(rows, bubblesRows())
+	maps.Copy(rows, macroRows())
+	maps.Copy(rows, cityRows())
+	maps.Copy(rows, gargoyleRows())
+	maps.Copy(rows, retailRows())
 	rows["city-clustered-10000"] = clusteredCityMaker{DefaultClusteredCity()}
 	rows["city-clustered-green-10000"] = clusteredCityMaker{greenClusteredCity(false)}
 	rows["city-clustered-night-10000"] = clusteredCityMaker{greenClusteredCity(true)}
 	rows["griffith"] = civicObservatory{}
 	rows["space-observatory"] = rows["spitzer"]
-	for name, row := range groundRows() {
-		rows[name] = row
-	}
+	maps.Copy(rows, groundRows())
 	return rows
 }
 
@@ -458,69 +393,9 @@ func shaped(shape form, around int, dressed looks) (good, error) {
 // are, in metres, how many branches its lowest whorl has, how its
 // branches hang, and the whorled architecture it grows by.
 type conifer struct {
-	tall, slender, between, lowest span
-	hangs                          habit
-	grows                          whorled
-	dressed                        looks
-	foliageStyle                   int
-	flare                          float64
-}
-
-// spruceRow is the spruce, a pinaceae. how its branches hang is ninja's
-// habit, and how it grows is spruceWhorled.
-func spruceRow() conifer {
-	return conifer{tall: span{4, 11}, slender: span{0.02, 0.03},
-		between: span{0.4, 0.6}, lowest: span{5, 8},
-		hangs: spruceHabit(), grows: spruceWhorled(),
-		dressed: looks{body: plain("bark", 0.26, 0.17, 0.1),
-			leaf: plain("needles", 0.07, 0.24, 0.1)}}
-}
-
-// spruceWhorled is how a spruce grows, ninja's, from ConiferProper and
-// branchGeometry: a trunk of one piece carrying whorls of branches,
-// each three drooping pieces in bark with a sleeve of needles. set by
-// eye, none measured.
-func spruceWhorled() whorled {
-	return whorled{
-		trunk:  round{joints: tapering(), sides: 8},
-		bark:   round{joints: girths(1, 0.75, 0.5, 0.25), sides: 5},
-		branch: limbing{pieces: 3, droop: 0.22},
-		clad: sleeveFoliage{joints: lengths(0.10, 0.22, 0.15, 0),
-			sides: 6},
-	}
-}
-
-// norwayRow is the norway spruce, picea abies, a pinaceae: taller and
-// more slender than the spruce, its whorls further apart. its numbers
-// are set by eye, mine, 2026-10-14; its branches hang by the spruce's
-// habit, and how it grows is norwayWhorled.
-func norwayRow() conifer {
-	return conifer{tall: span{6, 13}, slender: span{0.015, 0.025},
-		between: span{0.5, 0.75}, lowest: span{5, 7},
-		hangs: spruceHabit(), grows: norwayWhorled(),
-		dressed: looks{body: plain("bark", 0.24, 0.15, 0.09),
-			leaf: plain("needles", 0.06, 0.2, 0.08)}}
-}
-
-// norwayWhorled is how a norway spruce grows: a spruce's trunk and
-// whorls, every piece of a branch carrying two rows of branchlets that
-// droop toward the ground. most of its needles are on the branchlets,
-// the curtains an old one hangs in. set by eye, mine, 2026-10-14.
-func norwayWhorled() whorled {
-	return whorled{
-		trunk:  round{joints: tapering(), sides: 8},
-		bark:   round{joints: girths(1, 0.7, 0.45, 0.2), sides: 5},
-		branch: limbing{pieces: 3, droop: 0.12},
-		clad: sleeveFoliage{joints: lengths(0.05, 0.07, 0.06, 0.03),
-			sides: 5},
-		shoots: &branchlets{
-			per:   span{4, 6},
-			shoot: limbing{pieces: 2, droop: 0.6},
-			set:   norwayShoots(),
-			wear: sleeveFoliage{joints: lengths(0.12, 0.2, 0.08),
-				sides: 4},
-		},
-	}
+	conifers.Tree
+	dressed     looks
+	shootConfig *shootConfig
 }
 
 const (
@@ -551,41 +426,6 @@ const (
 	grownWander = 0.06
 )
 
-// resampled is joints, foot to tip, taken again at so many places along
-// the limb, each share eased between the two joints either side.
-func resampled(joints []joint, count int) []joint {
-	out := make([]joint, count)
-	last := float64(len(joints) - 1)
-	for at := range out {
-		place := float64(at) / float64(count-1) * last
-		low := min(int(place), len(joints)-2)
-		f := place - float64(low)
-		a, b := joints[low], joints[low+1]
-		out[at] = joint{ofGirth: a.ofGirth + f*(b.ofGirth-a.ofGirth),
-			ofLength: a.ofLength + f*(b.ofLength-a.ofLength)}
-	}
-	return out
-}
-
-// flowing is the architecture with its limbs in so many pieces that
-// wander, the same droop spread over their joints, and their bark and
-// foliage taken again at each joint. A foliage it cannot take again
-// leaves the limbs as they were.
-func (tree whorled) flowing(pieces int, wander float64) whorled {
-	clad, ok := tree.clad.(sleeveFoliage)
-	if !ok || tree.branch.pieces < 2 {
-		return tree
-	}
-	joints := tree.branch.pieces - 1
-	tree.branch = limbing{pieces: pieces,
-		droop:  tree.branch.droop * float64(joints) / float64(pieces-1),
-		wander: wander}
-	tree.bark.joints = resampled(tree.bark.joints, pieces+1)
-	clad.joints = resampled(clad.joints, pieces+1)
-	tree.clad = clad
-	return tree
-}
-
 // taller is the row with its height so many times over: the same seed
 // picks the same share of the taller span, so the same tree, taller,
 // with as many more whorls as fit, on a trunk as much thicker.
@@ -596,12 +436,12 @@ func (tree whorled) flowing(pieces int, wander float64) whorled {
 // the times to branchGrowth's power, more to a whorl by whorlFill's, and
 // flow in grownPieces pieces rather than kink in three.
 func (row conifer) taller(times float64) conifer {
-	row.tall = span{row.tall.least * times, row.tall.most * times}
-	row.hangs.reach *= math.Pow(times, branchGrowth-1)
-	row.hangs.own = grownGirth
+	row.Tall = [2]float64{row.Tall[0] * times, row.Tall[1] * times}
+	row.Hangs.Reach *= math.Pow(times, branchGrowth-1)
+	row.Hangs.Own = grownGirth
 	fill := math.Pow(times, whorlFill)
-	row.lowest = span{row.lowest.least * fill, row.lowest.most * fill}
-	row.grows = row.grows.flowing(grownPieces, grownWander)
+	row.Lowest = [2]float64{row.Lowest[0] * fill, row.Lowest[1] * fill}
+	row.Grows = row.Grows.Flowing(grownPieces, grownWander)
 	return row
 }
 
@@ -619,25 +459,25 @@ const (
 // sprays, not a line of them. A row that has branchlets already keeps
 // their shape and takes the spacing.
 func (row conifer) branched() conifer {
-	pieces := float64(row.grows.branch.pieces)
-	longest := row.hangs.reach * (row.tall.least + row.tall.most) / 2
+	pieces := float64(row.Grows.Branch.Pieces)
+	longest := row.Hangs.Reach * (row.Tall[0] + row.Tall[1]) / 2
 	each := math.Max(2, longest/pieces/sideSpacing)
 	sides := branchlets{
-		per:   span{0.8 * each, 1.2 * each},
-		shoot: limbing{pieces: 2, droop: 0.15},
-		set:   spruceSides(),
-		wear:  sleeveFoliage{joints: lengths(0.10, 0.18, 0.08), sides: 5},
+		Per:   [2]float64{0.8 * each, 1.2 * each},
+		Shoot: limbing{Pieces: 2, Droop: 0.15},
+		Set:   spruceSides(),
+		Wear:  round{Joints: lengths(0.10, 0.18, 0.08), Sides: 5},
 	}
 	// a side branch is sized against the piece it stands on, so a share
 	// of the whole limb is that share times the pieces, as the redwood's
 	// branchlets are
-	sides.set.reach = sideReach * pieces
-	if row.grows.shoots != nil {
-		sides.shoot = row.grows.shoots.shoot
-		sides.set = row.grows.shoots.set
-		sides.wear = row.grows.shoots.wear
+	sides.Set.Reach = sideReach * pieces
+	if row.Grows.Shoots != nil {
+		sides.Shoot = row.Grows.Shoots.Shoot
+		sides.Set = row.Grows.Shoots.Set
+		sides.Wear = row.Grows.Shoots.Wear
 	}
-	row.grows.shoots = &sides
+	row.Grows.Shoots = &sides
 	return row
 }
 
@@ -648,14 +488,14 @@ func (row conifer) branched() conifer {
 // measured.
 func spruceSides() habit {
 	return habit{
-		turn:  measure.Radians(fullTurn / 2),
-		start: 0.05, top: 0.95,
-		thinning: 0, fewest: 1,
-		stray: 0.1,
-		low:   measure.Degrees(55), lift: measure.Degrees(10),
-		sway:  measure.Degrees(10),
-		reach: 1, shortening: 0.3, uneven: 0.25,
-		girth: 0.4, least: 0.002,
+		Turn:  measure.Radians(fullTurn / 2),
+		Start: 0.05, Top: 0.95,
+		Thinning: 0, Fewest: 1,
+		Stray: 0.1,
+		Low:   measure.Degrees(55), Lift: measure.Degrees(10),
+		Sway:  measure.Degrees(10),
+		Reach: 1, Shortening: 0.3, Uneven: 0.25,
+		Girth: 0.4, Least: 0.002,
 	}
 }
 
@@ -663,34 +503,33 @@ func spruceSides() habit {
 // height, at quick.
 func (row conifer) made(from seed) (good, error) {
 	made, err := row.scaffold(from)
-	if err != nil || row.foliageStyle == 0 {
+	if err != nil || row.FoliageStyle == 0 {
 		return made, err
 	}
-	return recursiveFoliage(made, from, row.foliageStyle, "quick")
+	return recursiveFoliageWith(made, from, row.FoliageStyle, "quick", row.shootConfig)
 }
 
 // scaffold retains the seeded major limbs while foliage is constructed
 // separately. Legacy spruce recipes still use its original sleeves.
 func (row conifer) scaffold(from seed) (good, error) {
-	tall := row.tall.metres(from.draw(picking, 0, 0))
-	girth := tall.Times(row.slender.pick(from.draw(picking, 1, 0)))
-	between := row.between.metres(from.draw(picking, 2, 0))
+	tall := (span{row.Tall[0], row.Tall[1]}).metres(from.draw(picking, 0, 0))
+	girth := tall.Times((span{row.Slender[0], row.Slender[1]}).pick(from.draw(picking, 1, 0)))
+	between := (span{row.Between[0], row.Between[1]}).metres(from.draw(picking, 2, 0))
 	whorls := int(math.Round(tall.Over(between)))
 	sprays := 0
-	if row.grows.shoots != nil {
-		sprays = row.grows.shoots.per.count(from.draw(picking, 4, 0))
+	if row.Grows.Shoots != nil {
+		sprays = maths.CountBetween(row.Grows.Shoots.Per[0], row.Grows.Shoots.Per[1], from.draw(picking, 4, 0))
 	}
-	grown, err := row.grows.grown(whorls,
-		row.lowest.count(from.draw(picking, 3, 0)), sprays, row.hangs,
-		atQuick)
+	grown, err := row.Grows.Grown(whorls,
+		(span{row.Lowest[0], row.Lowest[1]}).count(from.draw(picking, 3, 0)), sprays, row.Hangs, int(body), int(leaf))
 	if err != nil {
 		return good{}, err
 	}
 	made, err := grownIn(grown, tall, girth, maths.Subspace{}, from, row.dressed)
-	if err == nil && row.flare > 0 {
+	if err == nil && row.Flare > 0 {
 		h, r := tall.InMetres(), girth.InMetres()
 		made.parts[0].shape = turnedProfile{[][2]float64{
-			{0, 0}, {r * row.flare, 0}, {r, h * 0.08}, {r * 0.65, h * 0.4}, {0, h}}}
+			{0, 0}, {r * row.Flare, 0}, {r, h * 0.08}, {r * 0.65, h * 0.4}, {0, h}}}
 	}
 	return made, err
 }
@@ -699,7 +538,7 @@ func (row conifer) scaffold(from seed) (good, error) {
 // in its looks.
 func grownIn(grown growth, length, girth measure.Length,
 	in maths.Subspace, from seed, dressed looks) (good, error) {
-	made, err := grow(grown, size{length: length, girth: girth},
+	made, err := grow(grown, size{Length: length, Girth: girth},
 		from.sprout(growing, 0))
 	if err != nil {
 		return good{}, err
@@ -714,20 +553,13 @@ func grownIn(grown growth, length, girth measure.Length,
 type fern struct {
 	long, stalk, fronds, leaflets span
 	dressed                       looks
-}
-
-// fernRow is the fern.
-func fernRow() fern {
-	green := plain("frond", 0.2, 0.5, 0.12)
-	return fern{long: span{0.4, 0.9}, stalk: span{0.005, 0.008},
-		fronds: span{6, 11}, leaflets: span{14, 24},
-		dressed: looks{body: green, leaf: green}}
+	anatomy                       ferns.Anatomy
 }
 
 // made is a fern from a seed.
 func (row fern) made(from seed) (good, error) {
-	grown, err := fernGrowth(row.fronds.count(from.draw(picking, 2, 0)),
-		row.leaflets.count(from.draw(picking, 3, 0)))
+	grown, err := ferns.Growth(row.fronds.count(from.draw(picking, 2, 0)),
+		row.leaflets.count(from.draw(picking, 3, 0)), int(body), int(leaf), row.anatomy)
 	if err != nil {
 		return good{}, err
 	}
@@ -807,14 +639,14 @@ func logRow() log {
 // square to the trunk.
 func stubHabit() habit {
 	return habit{
-		turn:  spruceHabit().turn,
-		start: 0.15, top: 0.85,
-		thinning: 0, fewest: 1,
-		stray: 0.1,
-		low:   measure.Degrees(80), lift: measure.Degrees(0),
-		sway:  measure.Degrees(15),
-		reach: 0.05, shortening: 0, uneven: 0.4,
-		girth: 0.5, least: 0.008,
+		Turn:  measure.Radians(math.Pi * (3 - math.Sqrt(5))),
+		Start: 0.15, Top: 0.85,
+		Thinning: 0, Fewest: 1,
+		Stray: 0.1,
+		Low:   measure.Degrees(80), Lift: measure.Degrees(0),
+		Sway:  measure.Degrees(15),
+		Reach: 0.05, Shortening: 0, Uneven: 0.4,
+		Girth: 0.5, Least: 0.008,
 	}
 }
 
@@ -823,12 +655,12 @@ func stubHabit() habit {
 func (row log) made(from seed) (good, error) {
 	long := row.long.metres(from.draw(picking, 0, 0))
 	girth := long.Times(row.thick.pick(from.draw(picking, 1, 0)))
-	trunk, err := sleeved([]joint{{ofGirth: 1}, {ofGirth: row.taper}},
+	trunk, err := sleeved([]joint{{OfGirth: 1}, {OfGirth: row.taper}},
 		row.around, body)
 	if err != nil {
 		return good{}, err
 	}
-	stub, err := sleeved([]joint{{ofGirth: 1}, {}}, row.stubAround,
+	stub, err := sleeved([]joint{{OfGirth: 1}, {}}, row.stubAround,
 		body)
 	if err != nil {
 		return good{}, err

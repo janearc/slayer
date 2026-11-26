@@ -2,6 +2,7 @@ package manufacture
 
 import (
 	"fmt"
+	"github.com/janearc/slayer/manufacture/geometry"
 	"math"
 
 	"github.com/janearc/slayer/maths"
@@ -31,96 +32,14 @@ type alfaLoft struct{ rings [][]maths.Vec }
 
 // skin joins each ring to the next, corner to corner, and caps the
 // first and last rings with fans from their middles.
-func (shape alfaLoft) skin(cut) surface {
-	var skin surface
-	rings := shape.rings
-	for step := spaceOne; step < len(rings); step++ {
-		low, high := rings[step-spaceOne], rings[step]
-		for at := range low {
-			next := (at + spaceOne) % len(low)
-			skin = quad(skin, low[at], low[next], high[next], high[at])
-		}
-	}
-	first, last := rings[spaceZero], rings[len(rings)-spaceOne]
-	middle, end := alfaMiddle(first), alfaMiddle(last)
-	for at := range first {
-		next := (at + spaceOne) % len(first)
-		skin = append(skin, face{middle, first[next], first[at]},
-			face{end, last[at], last[next]})
-	}
-	if skin.held() < spaceZero {
-		for index := range skin {
-			skin[index][quadSecondCorner], skin[index][quadThirdCorner] =
-				skin[index][quadThirdCorner], skin[index][quadSecondCorner]
-		}
-	}
-	return skin
-}
+func (shape alfaLoft) skin(cut) surface { return surface(geometry.Loft[face](shape.rings)) }
 
-// normals is the loft's skin shaded smooth across its sides and sharp
-// at its caps and edges, so its sides read as one curved surface.
-func (shape alfaLoft) normals(skin surface) [][3]maths.Vec {
-	return creased(skin)
-}
+func (shape alfaLoft) normals(skin surface) [][3]maths.Vec { return geometry.Creased(skin) }
 
-// alfaCrease is the cosine of the widest angle between two faces whose
-// shared corner is shaded as one smooth surface; a sharper edge between
-// them stays sharp.
-const alfaCrease = 0.5 // chosen: sixty degrees
+func creased(skin surface) [][3]maths.Vec { return geometry.Creased(skin) }
 
-// creased is the normal at each corner of each face of a skin: the
-// faces at that corner that turn from it by less than the crease,
-// summed by their areas, so a curved surface shades smooth and an edge
-// sharper than the crease shades sharp.
-func creased(skin surface) [][3]maths.Vec {
-	meeting := map[maths.Vec][]int{}
-	areas := make([]maths.Vec, len(skin))
-	for index, one := range skin {
-		areas[index] = one[quadSecondCorner].Sub(one[quadFirstCorner]).Cross(
-			one[quadThirdCorner].Sub(one[quadFirstCorner]))
-		for _, corner := range one {
-			meeting[corner] = append(meeting[corner], index)
-		}
-	}
-	normals := make([][3]maths.Vec, len(skin))
-	for index, one := range skin {
-		own := areas[index].Unit()
-		for corner, point := range one {
-			sum := maths.V(spaceZero, spaceZero, spaceZero)
-			for _, other := range meeting[point] {
-				if areas[other].Unit().Dot(own) >= alfaCrease {
-					sum = sum.Add(areas[other])
-				}
-			}
-			normals[index][corner] = sum.Unit()
-		}
-	}
-	return normals
-}
-
-// alfaMiddle is the mean of a ring's corners.
-func alfaMiddle(ring []maths.Vec) maths.Vec {
-	sum := maths.V(spaceZero, spaceZero, spaceZero)
-	for _, corner := range ring {
-		sum = sum.Add(corner)
-	}
-	return sum.Scale(spaceOne / float64(len(ring)))
-}
-
-// alfaTetra is what the triple product of a tetrahedron's edges is over
-// its volume.
-const alfaTetra = 6 // defined: a tetrahedron holds a sixth of the triple product
-
-// held is the volume a closed skin holds, by its winding: above nought
-// when it is wound counterclockwise as seen from outside.
-func (skin surface) held() float64 {
-	volume := float64(spaceZero)
-	for _, one := range skin {
-		volume += one[quadFirstCorner].Dot(one[quadSecondCorner].Cross(
-			one[quadThirdCorner]))
-	}
-	return volume / alfaTetra
-}
+// held is the signed volume a closed skin holds.
+func (skin surface) held() float64 { return geometry.Volume(skin) }
 
 // alfaHalf is a foil's half width a share of the way along its chord:
 // a quarter ellipse over its round nose, then tapering aft to its tail's
@@ -168,21 +87,10 @@ func alfaLoop(chord float64,
 // Catmull-Rom spline gives them from their neighbours, a share of the
 // way from the first to the second.
 func alfaHermite(before, low, high, after, share float64) float64 {
-	rest := spaceOne - share
-	lowSlope := (high - before) * spaceHalf
-	highSlope := (after - low) * spaceHalf
-	return (spaceOne+alfaCubicTwo*share)*rest*rest*low +
-		share*rest*rest*lowSlope +
-		share*share*(alfaCubicThree-alfaCubicTwo*share)*high -
-		share*share*rest*highSlope
+	return geometry.CatmullRom(before, low, high, after, share)
 }
 
-// The cubic Hermite basis's coefficients.
-const (
-	alfaCubicTwo   = 2 // defined: the Hermite basis, (1+2t)(1-t)^2 and t^2(3-2t)
-	alfaCubicThree = 3 // defined: the same basis
-	alfaSailSteps  = 4 // chosen: levels drawn from each of the file's to the next, so the sail curves and does not facet
-)
+const alfaSailSteps = 4 // chosen: interpolated levels between authored sections
 
 // sailLevels is the sail's levels as drawn: the file's, and between each
 // two, levels on a Catmull-Rom spline through them, so its height,

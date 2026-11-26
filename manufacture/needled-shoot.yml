@@ -2,21 +2,6 @@
 # provenance: doc/model/vegetation/conifer-foliage.md. Read through Puzzlemouth numbers.
 # Original choices: 2026-11-03; spruce extension: 2026-11-08.
 numbers:
-  - name: redwood-branchlet-minimum
-    value: 12
-    says: authored branchlet count per main-branch segment, lower endpoint
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: redwood-branchlet-maximum
-    value: 18
-    says: authored branchlet count per main-branch segment, upper endpoint
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: redwood-branchlet-length
-    value: 0.6
-    says: maximum branchlet length as a share of the whole primary branch
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
   - name: shoot-orders
     value: 2
     says: two recursive lateral orders below each existing branchlet axis
@@ -82,108 +67,9 @@ numbers:
     says: smallest prototype length; cells are binned without scaling needles
     kind: picked
     by: Slayer's recursive-foliage study, 2026-11-03
-  - name: redwood-needle-width
-    value: 0.002
-    unit: m
-    says: authored maximum width, not a measurement from the cited length range
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: redwood-needle-thickness
-    value: 0.00025
-    unit: m
-    says: authored thickness for closed ray-intersectable flat needles
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: redwood-needle-spacing
-    value: 0.004
-    unit: m
-    says: authored axial spacing between needle pairs
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: redwood-needle-angle
-    value: 75
-    unit: deg
-    says: authored needle angle from the shoot, within its flat spray
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: sequoia-scale-width
-    value: 0.001
-    unit: m
-    says: authored width of an awl-shaped scale
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: sequoia-scale-thickness
-    value: 0.0006
-    unit: m
-    says: authored scale thickness for the geometric approximation
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: sequoia-scale-spacing
-    value: 0.003
-    unit: m
-    says: authored axial spacing; the descriptive leader length is applied to all modeled shoots
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: sequoia-scale-angle
-    value: 30
-    unit: deg
-    says: authored inclination keeping scales close to the twig
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
-  - name: sequoia-scale-rows
-    value: 3
-    says: representation uses the three longitudinal rows described by OSU
-    kind: picked
-    by: Slayer's recursive-foliage study, 2026-11-03
   - name: shoot-roll
     value: 60
     unit: deg
     says: authored maximum roll either way between neighboring flat sprays
     kind: picked
     by: Slayer's recursive-foliage study, 2026-11-03
-  - name: spruce-wood-sides
-    value: 8
-    says: ring vertices retaining four needle ranks at alternating phases
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08
-  - name: spruce-needle-rows
-    value: 4
-    says: authored radial needle ranks per axial node, not measured phyllotaxis
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08
-  - name: spruce-needle-spacing
-    value: 0.004
-    unit: m
-    says: picked axial spacing between radial needle nodes
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08
-  - name: spruce-needle-minimum
-    value: 0.014
-    unit: m
-    says: picked physical needle length minimum, not a source measurement
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08
-  - name: spruce-needle-maximum
-    value: 0.022
-    unit: m
-    says: picked physical needle length maximum, not a source measurement
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08
-  - name: spruce-needle-angle
-    value: 70
-    unit: deg
-    says: picked needle direction relative to its twig axis
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08
-  - name: spruce-needle-width
-    value: 0.0012
-    unit: m
-    says: picked physical needle width
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08
-  - name: spruce-needle-thickness
-    value: 0.0012
-    unit: m
-    says: picked physical needle thickness
-    kind: picked
-    by: spruce foliage scenery, 2026-11-08

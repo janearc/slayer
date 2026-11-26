@@ -14,7 +14,7 @@ import (
 )
 
 func TestAssemblyPreservesLimbAndFormRefusals(t *testing.T) {
-	skin, err := sleeved([]joint{{ofGirth: 1}, {ofGirth: .2}}, 4, body)
+	skin, err := sleeved([]joint{{OfGirth: 1}, {OfGirth: .2}}, 4, body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestAssemblyPreservesLimbAndFormRefusals(t *testing.T) {
 		func() (growth, error) { return stemCarrying(0, 0, []sleeve{skin}, ring{}, 1, 0, []sleeve{skin}) },
 		func() (growth, error) { return stemCarrying(1, 0, []sleeve{skin}, ring{}, 0, 0, []sleeve{skin}) },
 		func() (growth, error) { return trunkCarrying(sleeve{}, 1, 1, spruceHabit(), growth{}) },
-		func() (growth, error) { return (whorled{}).branching(skin, skin, 1, atQuick) },
+		func() (growth, error) { return (whorled{}).Branching(skin, skin, 1, int(leaf)) },
 	} {
 		if _, err := make(); !errors.Is(err, errLimb) {
 			t.Fatalf("assembly lost the invalid-limb cause: %v", err)
@@ -56,9 +56,9 @@ func TestRowAssembliesRefuseInvalidCountsAndGlassSizes(t *testing.T) {
 }
 
 func TestUncheckedAssemblyDirectionsReturnTheRunRefusal(t *testing.T) {
-	where := whorls{count: 2, lowest: 2, set: spruceHabit()}
-	where.set.low = measure.Radians(math.NaN())
-	if _, err := where.at(size{length: measure.Metres(1), girth: measure.Metres(.1)}, 0, 0, Sow(1)); !errors.Is(err, errNoRun) {
+	where := whorls{Count: 2, Lowest: 2, Habit: spruceHabit()}
+	where.Habit.Low = measure.Radians(math.NaN())
+	if _, err := where.At(size{Length: measure.Metres(1), Girth: measure.Metres(.1)}, 0, 0, Sow(1)); !errors.Is(err, errNoRun) {
 		t.Fatalf("unchecked whorl direction cause: %v", err)
 	}
 	spec := opticalSpec()

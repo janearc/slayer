@@ -18,10 +18,18 @@ func TestFailureDiagnosticLeadsWithTheChildsLastLine(t *testing.T) {
 }
 
 func TestFailureDiagnosticSurvivesTheInlineCut(t *testing.T) {
-	transcript := strings.Repeat("lane chatter that goes on and on\n", 40) + "slayer draw: the reason\n"
+	transcript := strings.Repeat("lane chatter that goes on and on\n", 40) + "slayer: disk full\n"
 	got := summarizeDiagnostic(failureDiagnostic(errors.New("failed"), transcript), 16)
-	if !strings.HasPrefix(got, "slayer draw: the reason") {
+	if !strings.HasPrefix(got, "slayer: disk full") {
 		t.Fatalf("the reason was cut away: %q", got)
+	}
+}
+
+func TestLongFailureDiagnosticIsCutWithinTheInlineLimit(t *testing.T) {
+	transcript := "slayer draw: " + strings.Repeat("a", 40) + "\n"
+	got := summarizeDiagnostic(failureDiagnostic(errors.New("failed"), transcript), 16)
+	if !strings.HasPrefix(got, "slayer draw: ") || !strings.HasSuffix(got, "…") || len([]rune(got)) != messageSummaryRunes(16) {
+		t.Fatalf("long reason was not bounded with its beginning intact: %q", got)
 	}
 }
 

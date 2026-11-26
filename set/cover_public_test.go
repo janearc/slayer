@@ -22,7 +22,7 @@ func withoutSchema(t *testing.T, raw string) string {
 // before text replaced by the after text for each pair in edits.
 func legacyLaser(t *testing.T, edits ...string) (set.Set, error) {
 	t.Helper()
-	text := withoutSchema(t, string(laserFixture))
+	text := withoutSchema(t, laserSources()[0])
 	for i := 0; i+1 < len(edits); i += 2 {
 		if !strings.Contains(text, edits[i]) {
 			t.Fatalf("the fixture has no %q to change", edits[i])

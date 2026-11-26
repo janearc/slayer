@@ -90,7 +90,7 @@ func (held proofs) prove(call pzm.Call) error {
 		return err
 	}
 	given := resolved(call.Args()[nothing], held.env.directory)
-	run, err := drawing(held).planned(call, given)
+	run, err := drawing(held).planned(call, given, false)
 	if err != nil {
 		return err
 	}

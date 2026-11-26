@@ -23,7 +23,8 @@ func imports(world *thing.World, said set.World, worn map[string]*thing.Material
 		placement.Origin = moved(placement.Origin, shift)
 		for _, piece := range pieces {
 			piece.Motion = thing.Still(piece.At(0).Within(placement))
-			world.Add(piece)
+			stored := world.Add(piece)
+			world.RecordAuthor(stored, thing.AuthorRef{Collection: "scene.world.imports", Name: part.Name()})
 		}
 	}
 	return nil

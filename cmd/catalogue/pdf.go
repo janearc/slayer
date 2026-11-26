@@ -10,9 +10,14 @@ import (
 	"github.com/janearc/puzzlemouth/pzm"
 )
 
-// renderedStatus is defined by render: the one status a finished
-// book's cards carry.
+// The statuses a finished book's cards carry name their rendering paths.
 const renderedStatus = "native GPU render"
+const cpuRenderedStatus = "CPU render"
+
+// Rendered distinguishes completed pictures from pending and failed cards.
+func (view card) Rendered() bool {
+	return view.Status == renderedStatus || view.Status == cpuRenderedStatus
+}
 
 // bookRecord is defined by render: the file that holds a book's cards.
 const bookRecord = "catalogue.json"
@@ -112,7 +117,7 @@ func readBook(root string, failures bool) (*book, error) {
 	}
 	var unfinished []string
 	for _, card := range loaded.Cards {
-		if card.Status != renderedStatus {
+		if !card.Rendered() {
 			unfinished = append(unfinished, card.unfinished())
 		}
 	}

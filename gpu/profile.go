@@ -38,6 +38,8 @@ type Profile struct {
 	// averaging. Streaming consumes it in bands rather than retaining one
 	// full array.
 	SampleBytes int64
+	// PrimarySamples is the number of completed sample records for an exact draw.
+	PrimarySamples int64
 	// PeakSampleBytes is the peak Go raw-sample readback buffer. Metal
 	// keeps a separate output band; neither value is a whole-process memory
 	// measure.

@@ -476,3 +476,21 @@ func TestOpenLegacySceneAndCheckRefusesDuplicateNestedKey(t *testing.T) {
 		t.Errorf("Check error = %v; want duplicate-key refusal", err)
 	}
 }
+
+func TestReferencedSetOnlyReadsJobScenePath(t *testing.T) {
+	source := strings.Replace(string(exampleSource(t, "first-picture.yaml")), "scene: {smoke: 1}", "scene: {set: ../sets/harbor.yaml}", 1)
+	document, err := Open("job.yaml", []byte(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := document.ReferencedSet(); got != "../sets/harbor.yaml" {
+		t.Fatalf("reference = %q", got)
+	}
+	document, err = Open("set.yaml", []byte(poseSource))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := document.ReferencedSet(); got != "" {
+		t.Fatalf("set has job reference %q", got)
+	}
+}

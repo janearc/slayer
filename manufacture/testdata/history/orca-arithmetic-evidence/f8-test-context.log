@@ -1,0 +1,11 @@
+=== RUN   TestOrcaArithmeticAndHistoricalGargoyle
+    orca_arithmetic_probe_test.go:18: span=(-0.3855176431903074,-0.34268234950249549,0.85670587375623863) chord=(0.92270046428350228,-0.1431776582508883,0.35794414562722066)
+    orca_arithmetic_probe_test.go:20: normal.x=1.0534774131626459e-17 bits=3c684aa20e72f236 cross.x=1.0534774131626456e-17 bits=3c684aa20e72f234
+    orca_arithmetic_probe_test.go:21: left=-0.12266114081419938 right=-0.12266114081419939 plain=1.3877787807814457e-17 fused-left=1.9955116307308051e-17 fused-right=1.0534774131626456e-17
+    orca_arithmetic_probe_test.go:32: historical gargoyle: got 8e223c72469e385c494ccbbd0c906ac0c2c48bb30a559b56b358a463ff9e0720 want b6b5ffc85c46a0760fa7132bd32a11eb7a2afc966ed9fb7dfb442f5c233ad2e9
+--- FAIL: TestOrcaArithmeticAndHistoricalGargoyle (2.46s)
+=== RUN   TestOrcaFlipperNormalRetainsBindingPrecision
+--- PASS: TestOrcaFlipperNormalRetainsBindingPrecision (0.00s)
+FAIL
+FAIL	github.com/janearc/slayer/manufacture	5.725s
+FAIL

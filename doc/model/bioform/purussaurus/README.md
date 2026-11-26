@@ -33,12 +33,11 @@ The reference figures were studied and not imported as geometry or texture.
 
 ## What ships
 
-Five Go functions, each a different construction, with tests, in
-`manufacture/purussaurus_fresh1.go` to `purussaurus_fresh5.go`:
-`PurussaurusFresh1` and `PurussaurusFresh2` take a phase, a yaw and a ground
-height, and the other three take a phase, a yaw and a posture. They are not
-manufactory kinds, and no set under `sets/` and no gargoyle uses them. The
-last is `PurussaurusFresh5`.
+`PurussaurusStudy`, formerly named `PurussaurusFresh5`, takes a phase, a yaw
+and a posture. The family builder lives in
+`manufacture/animals/vertebrates/reptiles/crocodylians/purussaurus.go`; the
+reptile profile book selects it as the `purussaurus` study. The earlier
+studies and their tests remain in Git history.
 
 ## How the last construction is put together
 
@@ -76,9 +75,9 @@ A 720 by 480 one-ray CPU render with two workers took 0.75 s and 84.9 MB at
 peak. The preview film is 8 frames at 4 fps over 2 s, enough for broad
 sampled motion and not for smoothness.
 
-Tests: `TestPurussaurusFresh5`, `...ShapeAndStrain`, `...EdgeDistribution`,
+Tests: `TestPurussaurusStudy`, `...ShapeAndStrain`, `...EdgeDistribution`,
 `...NoTopologyHandle`, `...ToothAttachments` and `...BoundsAndGround`, in
-`manufacture/purussaurus_fresh5_test.go`.
+`manufacture/purussaurus_study_test.go`.
 
 ## Using it
 
@@ -104,8 +103,8 @@ distinct from the walrus family, which keeps 38.
 
 ## Earlier builds
 
-Five fresh constructions, each replacing the last. The first four remain in
-the source tree and were not kept as the design.
+Five fresh constructions, each replacing the last. The first four were not
+kept as the design; their code and tests remain in Git history.
 
 1. Joined ellipsoids with a tail shear: a closed connected skin of 8,662
    vertices and 17,320 faces, volume 8.5172 and 8.5174 m3, edge ratios 0.83292

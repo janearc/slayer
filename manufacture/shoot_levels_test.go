@@ -8,7 +8,7 @@ import (
 
 func TestLooseShootsKeepTheirBoundsAndProvideEveryDetailLevel(t *testing.T) {
 	for _, name := range []string{"coast-redwood-shoot", "giant-sequoia-shoot"} {
-		row, err := KindNamed(name)
+		row, err := testKind(name)
 		if err != nil {
 			t.Fatal(err)
 		}

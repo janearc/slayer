@@ -121,7 +121,7 @@ func openNamed(wanted job.Job, given asked) (*Session, error) {
 	if err := given.withNamedMedia(built, wanted); err != nil {
 		return nil, placed(wanted, err)
 	}
-	if given.onGPU {
+	if given.onGPU && given.exactSamples == 0 {
 		if source.frames, err = gpu.NewFrames(framesMode(given)); err != nil {
 			return nil, err
 		}

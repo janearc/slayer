@@ -1,0 +1,14 @@
+{"name":"city-apartment","seed":5,"detail":"demo","seconds":3.917,"sampled_peak_kib":14256,"ok":true,"reason":null}
+{"name":"city-apartment","seed":11,"detail":"demo","seconds":0.208,"sampled_peak_kib":4752,"ok":true,"reason":null}
+{"name":"city-clustered-10000","seed":5,"detail":"demo","seconds":2.89,"sampled_peak_kib":699904,"ok":true,"reason":null}
+{"name":"city-clustered-10000","seed":11,"detail":"demo","seconds":2.688,"sampled_peak_kib":633520,"ok":true,"reason":null}
+{"name":"city-clustered-green-10000","seed":5,"detail":"demo","seconds":10.325,"sampled_peak_kib":1801856,"ok":true,"reason":null}
+{"name":"city-clustered-green-10000","seed":11,"detail":"demo","seconds":9.515,"sampled_peak_kib":1699840,"ok":true,"reason":null}
+{"name":"city-clustered-night-10000","seed":5,"detail":"demo","seconds":9.705,"sampled_peak_kib":1741472,"ok":true,"reason":null}
+{"name":"city-clustered-night-10000","seed":11,"detail":"demo","seconds":9.077,"sampled_peak_kib":1578064,"ok":true,"reason":null}
+{"name":"city-grid-10000","seed":5,"detail":"demo","seconds":2.273,"sampled_peak_kib":563792,"ok":true,"reason":null}
+{"name":"city-grid-10000","seed":11,"detail":"demo","seconds":2.27,"sampled_peak_kib":553456,"ok":true,"reason":null}
+{"name":"city-rowhouse","seed":5,"detail":"demo","seconds":0.207,"sampled_peak_kib":4368,"ok":true,"reason":null}
+{"name":"city-rowhouse","seed":11,"detail":"demo","seconds":0.208,"sampled_peak_kib":3680,"ok":true,"reason":null}
+{"name":"city-tower","seed":5,"detail":"demo","seconds":0.208,"sampled_peak_kib":4752,"ok":true,"reason":null}
+{"name":"city-tower","seed":11,"detail":"demo","seconds":0.207,"sampled_peak_kib":4192,"ok":true,"reason":null}

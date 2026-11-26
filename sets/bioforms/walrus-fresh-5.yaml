@@ -8,10 +8,12 @@ scene:
   seed: 17
   setting: space
   light: none
+  recipes:
+    profile-walrus-lying: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: walrus, pose: lying}}
   set:
     things:
       walrus:
-        kind: walrus-fresh-5
+        recipe: profile-walrus-lying
         seed: 17
         east: 0
         north: 0

@@ -3,9 +3,27 @@ package job
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"path/filepath"
 	"time"
 )
+
+// Region puts a rectangle over the job's region.
+func Region(box image.Rectangle) Override {
+	return Override{key: "region", apply: func(wire *document) error {
+		if box.Min.X < 0 || box.Min.Y < 0 || box.Max.X <= box.Min.X || box.Max.Y <= box.Min.Y {
+			return refusal{fmt.Errorf("region %v must have a nonnegative origin and positive size", box)}
+		}
+		film := filmWire{}
+		if wire.Film != nil {
+			film = *wire.Film
+		}
+		film.Region = &regionWire{Left: box.Min.X, Top: box.Min.Y,
+			Width: box.Max.X - box.Min.X, Height: box.Max.Y - box.Min.Y}
+		wire.Film = &film
+		return nil
+	}}
+}
 
 // Override is one value the command line lays over a job. It is made by
 // Output, Width, Height, Rays, At, CameraName, Renderer or Quality.
@@ -119,6 +137,15 @@ func Height(pixels int) Override {
 func Rays(count int) Override {
 	return filmOverride("rays", count, func(film *filmWire) {
 		film.Rays = count
+		film.Samples = 0
+	})
+}
+
+// Samples sets the exact total per pixel in place of rays per side.
+func Samples(count int) Override {
+	return filmOverride("samples", count, func(film *filmWire) {
+		film.Samples = count
+		film.Rays = 0
 	})
 }
 

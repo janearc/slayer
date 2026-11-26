@@ -17,7 +17,7 @@ func TestWalrusSetStageKeepsNativeAttachments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	source, err := manufacture.WalrusFresh5(0, 0)
+	source, err := manufacture.WalrusStudy(0, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

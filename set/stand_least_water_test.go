@@ -7,7 +7,7 @@ import (
 
 // leastWaterAnchor is the start of the first stand's line in the mangrove
 // shore set, which the tests add a least water to.
-const leastWaterAnchor = "kandelia a: {kind: kandelia-obovata, "
+const leastWaterAnchor = "kandelia a: {recipe: plant-kandelia-obovata, "
 
 // withLeastWater is a set text whose first stand says the least water.
 func withLeastWater(said string) func(string) string {

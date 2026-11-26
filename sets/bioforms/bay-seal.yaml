@@ -6,10 +6,12 @@ scene:
   seed: 407
   setting: space
   light: none
+  recipes:
+    profile-harbor-bay: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: harbor-seal, study: bay}}
   set:
     things:
       seal:
-        kind: bay-seal
+        recipe: profile-harbor-bay
         seed: 407
         east: 0
         north: 0

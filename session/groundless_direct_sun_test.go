@@ -206,6 +206,7 @@ func TestGroundlessAirOceanRejectsDuplicateOrWrongAiredSun(t *testing.T) {
 func TestGroundlessAirWithoutOceanKeepsAiredLampAndSkyUnchanged(t *testing.T) {
 	read := groundlessAirRead(t, groundlessAirFixture)
 	stage := injectedAiredFields(t)
+	stage.recipes = read
 	stage.given.set = "groundless-air.yaml"
 	if err := stage.place(read, set.Planet{}, false); err != nil {
 		t.Fatal(err)

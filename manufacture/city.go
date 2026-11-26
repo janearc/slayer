@@ -58,6 +58,25 @@ func WithCityVacantLotIndex(row Kind, mode CityVacantLotIndexMode) (Kind, error)
 	return Kind{name: row.name, how: how}, nil
 }
 
+// WithCityTreeProfiles copies a tree-bearing city and freezes its checked
+// seasonal book without mutating the registered city's tree specification.
+func WithCityTreeProfiles(row Kind, book *PlantProfiles) (Kind, error) {
+	if book == nil {
+		return Kind{}, fmt.Errorf("manufacture: city needs a checked tree book")
+	}
+	how, ok := row.how.(clusteredCityMaker)
+	if !ok || how.spec.Trees == nil {
+		return Kind{}, fmt.Errorf("manufacture: %s does not support tree profiles", row.name)
+	}
+	trees := *how.spec.Trees
+	trees.TreeProfiles = book
+	if err := trees.check(); err != nil {
+		return Kind{}, err
+	}
+	how.spec.Trees = &trees
+	return Kind{name: row.name, how: how}, nil
+}
+
 // WithCityBatchPlacement copies a named city kind with an explicit batch
 // placement mode. Other kinds refuse the setting rather than ignoring it.
 func WithCityBatchPlacement(row Kind, mode CityBatchPlacementMode) (Kind, error) {

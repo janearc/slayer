@@ -243,20 +243,12 @@ func TestEveryKindHasAFamily(t *testing.T) {
 
 // TestEachKindIsInTheFamilyItBelongsTo checks the word a family is, for one
 // kind of every maker that was left without one: a living thing is an
-// animal, kelp an alga is a plant, a gargoyle is an ornament of a building,
+// animal, a gargoyle is an ornament of a building,
 // a frontage or a shop block is a city building, a street and its signs are
 // the city, and a stream of bubbles is water. Each kind named must exist,
 // so that a kind renamed fails here and is not skipped.
 func TestEachKindIsInTheFamilyItBelongsTo(t *testing.T) {
 	want := [][2]string{
-		{"bird-grey-heron-standing", "animal"},
-		{"california-barracuda", "animal"},
-		{"pacific-sardine-school-500", "animal"},
-		{"harbor-seal", "animal"},
-		{"harbor-seal-bones", "animal"},
-		{"hawaiian-monk-seal-hauled", "animal"},
-		{"giant-kelp", "plant"},
-		{"kelp-forest", "plant"},
 		{"gargoyle-orca-granite", "architectural ornament"},
 		{"gargoyle-cornice-granite", "architectural ornament"},
 		{"frontage", "city building"},
@@ -267,6 +259,9 @@ func TestEachKindIsInTheFamilyItBelongsTo(t *testing.T) {
 		{"bubble-stream", "water"},
 	}
 	rows := table()
+	if got := familyOf(kelpRow{}); got != "alga" {
+		t.Errorf("profiled kelp classified as %q", got)
+	}
 	for _, pair := range want {
 		name, family := pair[0], pair[1]
 		how, found := rows[name]
@@ -276,6 +271,14 @@ func TestEachKindIsInTheFamilyItBelongsTo(t *testing.T) {
 		}
 		if got := familyOf(how); got != family {
 			t.Errorf("%s is of the family %q, want %q", name, got, family)
+		}
+	}
+	for _, how := range []maker{
+		birdKind{species: "grey-heron"}, fishRow{},
+		sealKind{}, snakeKind{}, sauropodKind{},
+	} {
+		if got := familyOf(how); got != "animal" {
+			t.Errorf("profiled animal classified as %q", got)
 		}
 	}
 }

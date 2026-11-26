@@ -28,8 +28,8 @@ func TestAPlantedTowersTreesAreKindsTheCatalogueHasAndGrowOnTheTower(
 		t.Fatal("a planted tower has no trees")
 	}
 	for _, tree := range tower.Trees() {
-		if _, err := KindNamed(tree.Kind); err != nil {
-			t.Errorf("the catalogue has no %q: %v", tree.Kind, err)
+		if _, err := testKind(tree.Kind); err != nil {
+			t.Errorf("no checked plant for %q: %v", tree.Kind, err)
 		}
 	}
 	row, err := Tower(planted)

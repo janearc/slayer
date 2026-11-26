@@ -56,7 +56,12 @@ func (plan plan) hash() string {
 
 // drawnUnder says whether the card is already drawn, and under this plan.
 func (view card) drawnUnder(settings string) bool {
-	return view.Status == renderedStatus && view.Settings == settings
+	return view.Rendered() && view.Settings == settings
+}
+
+// drawnWith also holds the explicitly requested rendering path.
+func (view card) drawnWith(settings, status string) bool {
+	return view.drawnUnder(settings) && view.Status == status
 }
 
 // open makes the destination ready and returns the folders of the cards
@@ -79,11 +84,14 @@ func (fresh *book) open(said io.Writer, destination string,
 	if previous == nil {
 		return selected, fresh.start(destination)
 	}
-	menu, err := readMenu()
-	if err != nil {
-		return nil, err
+	menu := fresh.offered
+	if menu == nil {
+		menu, err = readMenu()
+		if err != nil {
+			return nil, err
+		}
 	}
-	dropped, kept := fresh.resume(previous, menu, settings.hash())
+	dropped, kept := fresh.resume(previous, menu, settings.hash(), settings.status())
 	_, err = fmt.Fprintf(said, "resuming %s: %d cards kept, %d dropped\n",
 		destination, kept, len(dropped))
 	for _, folder := range dropped {
@@ -137,7 +145,7 @@ func existingBook(destination string) (*book, error) {
 // longer has is dropped. It returns the folders dropped and the count
 // kept.
 func (fresh *book) resume(previous *book, offered *menu,
-	settings string) ([]string, int) {
+	settings, status string) ([]string, int) {
 	order := map[string]int{}
 	for position, entry := range offered.Entries {
 		order[entry.Kind] = position
@@ -155,7 +163,7 @@ func (fresh *book) resume(previous *book, offered *menu,
 		switch {
 		case !current:
 			dropped = append(dropped, old.Folder)
-		case selected && !old.drawnUnder(settings):
+		case selected && (!old.drawnWith(settings, status) || old.Source != redraw.Entry.source):
 			merged = append(merged, redraw)
 			delete(wanted, old.Folder)
 		default:

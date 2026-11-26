@@ -388,6 +388,11 @@ scene:
       orientation:
         look_at: [1900, -1050, 0]
   recipes:
+    plant-aegiceras-corniculatum: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: aegiceras-corniculatum}}
+    plant-avicennia-marina: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: avicennia-marina}}
+    plant-bruguiera-gymnorhiza: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: bruguiera-gymnorhiza}}
+    plant-kandelia-obovata: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: kandelia-obovata}}
+    plant-sonneratia-apetala: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: sonneratia-apetala}}
     wet: {kind: street, wetness: 0.7, length: {value: 84, unit: m}}
     wet-across: {kind: street, wetness: 0.7, length: {value: 36, unit: m}}
     lashed: {kind: lashed-street, density: 1.0}
@@ -986,55 +991,55 @@ scene:
       # six stands of a kind, each of a seed of its own, make twenty-four
       # trees of a kind. 1000 trees a stand, thirty stands: thirty thousand
       # trees. the band, the counts and the seeds are choices.
-      belt kandelia 1: {kind: kandelia-obovata, count: 1000, seed: 1001, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt kandelia 2: {kind: kandelia-obovata, count: 1000, seed: 1002, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt kandelia 3: {kind: kandelia-obovata, count: 1000, seed: 1003, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt kandelia 4: {kind: kandelia-obovata, count: 1000, seed: 1004, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt kandelia 5: {kind: kandelia-obovata, count: 1000, seed: 1005, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt kandelia 6: {kind: kandelia-obovata, count: 1000, seed: 1006, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt avicennia 1: {kind: avicennia-marina, count: 1000, seed: 1101, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt avicennia 2: {kind: avicennia-marina, count: 1000, seed: 1102, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt avicennia 3: {kind: avicennia-marina, count: 1000, seed: 1103, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt avicennia 4: {kind: avicennia-marina, count: 1000, seed: 1104, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt avicennia 5: {kind: avicennia-marina, count: 1000, seed: 1105, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt avicennia 6: {kind: avicennia-marina, count: 1000, seed: 1106, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt aegiceras 1: {kind: aegiceras-corniculatum, count: 1000, seed: 1201, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt aegiceras 2: {kind: aegiceras-corniculatum, count: 1000, seed: 1202, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt aegiceras 3: {kind: aegiceras-corniculatum, count: 1000, seed: 1203, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt aegiceras 4: {kind: aegiceras-corniculatum, count: 1000, seed: 1204, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt aegiceras 5: {kind: aegiceras-corniculatum, count: 1000, seed: 1205, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt aegiceras 6: {kind: aegiceras-corniculatum, count: 1000, seed: 1206, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt bruguiera 1: {kind: bruguiera-gymnorhiza, count: 1000, seed: 1301, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt bruguiera 2: {kind: bruguiera-gymnorhiza, count: 1000, seed: 1302, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt bruguiera 3: {kind: bruguiera-gymnorhiza, count: 1000, seed: 1303, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt bruguiera 4: {kind: bruguiera-gymnorhiza, count: 1000, seed: 1304, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt bruguiera 5: {kind: bruguiera-gymnorhiza, count: 1000, seed: 1305, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt bruguiera 6: {kind: bruguiera-gymnorhiza, count: 1000, seed: 1306, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt sonneratia 1: {kind: sonneratia-apetala, count: 1000, seed: 1401, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt sonneratia 2: {kind: sonneratia-apetala, count: 1000, seed: 1402, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt sonneratia 3: {kind: sonneratia-apetala, count: 1000, seed: 1403, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt sonneratia 4: {kind: sonneratia-apetala, count: 1000, seed: 1404, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt sonneratia 5: {kind: sonneratia-apetala, count: 1000, seed: 1405, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      belt sonneratia 6: {kind: sonneratia-apetala, count: 1000, seed: 1406, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
-      reserve kandelia a: {kind: kandelia-obovata, count: 25, seed: 101, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve kandelia b: {kind: kandelia-obovata, count: 25, seed: 102, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve kandelia c: {kind: kandelia-obovata, count: 25, seed: 103, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve avicennia a: {kind: avicennia-marina, count: 25, seed: 111, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve avicennia b: {kind: avicennia-marina, count: 25, seed: 112, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve avicennia c: {kind: avicennia-marina, count: 25, seed: 113, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve aegiceras a: {kind: aegiceras-corniculatum, count: 15, seed: 121, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve aegiceras b: {kind: aegiceras-corniculatum, count: 15, seed: 122, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve bruguiera a: {kind: bruguiera-gymnorhiza, count: 15, seed: 131, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve bruguiera b: {kind: bruguiera-gymnorhiza, count: 15, seed: 132, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve sonneratia a: {kind: sonneratia-apetala, count: 15, seed: 141, complexity: clumps, above: 2.0, below: 3.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve sonneratia b: {kind: sonneratia-apetala, count: 15, seed: 142, complexity: clumps, above: 2.0, below: 3.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      reserve sonneratia c: {kind: sonneratia-apetala, count: 15, seed: 143, complexity: clumps, above: 2.0, below: 3.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
-      front kandelia: {kind: kandelia-obovata, count: 15, seed: 201, complexity: clumps, above: 0.6, below: 2.0, within: {of: the front, from: 0, to: 360, near: 0, far: 450}}
-      front avicennia: {kind: avicennia-marina, count: 15, seed: 211, complexity: clumps, above: 0.6, below: 2.0, within: {of: the front, from: 0, to: 360, near: 0, far: 450}}
-      front sonneratia: {kind: sonneratia-apetala, count: 10, seed: 241, complexity: clumps, above: 2.0, below: 3.0, within: {of: the front, from: 0, to: 360, near: 0, far: 450}}
-      south-east kandelia: {kind: kandelia-obovata, count: 10, seed: 301, complexity: clumps, above: 0.6, below: 2.0, within: {of: the south-east shore, from: 0, to: 360, near: 0, far: 500}}
-      south-east avicennia: {kind: avicennia-marina, count: 10, seed: 311, complexity: clumps, above: 0.6, below: 2.0, within: {of: the south-east shore, from: 0, to: 360, near: 0, far: 500}}
-      south-east sonneratia: {kind: sonneratia-apetala, count: 8, seed: 341, complexity: clumps, above: 2.0, below: 3.0, within: {of: the south-east shore, from: 0, to: 360, near: 0, far: 500}}
+      belt kandelia 1: {recipe: plant-kandelia-obovata, count: 1000, seed: 1001, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt kandelia 2: {recipe: plant-kandelia-obovata, count: 1000, seed: 1002, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt kandelia 3: {recipe: plant-kandelia-obovata, count: 1000, seed: 1003, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt kandelia 4: {recipe: plant-kandelia-obovata, count: 1000, seed: 1004, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt kandelia 5: {recipe: plant-kandelia-obovata, count: 1000, seed: 1005, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt kandelia 6: {recipe: plant-kandelia-obovata, count: 1000, seed: 1006, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt avicennia 1: {recipe: plant-avicennia-marina, count: 1000, seed: 1101, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt avicennia 2: {recipe: plant-avicennia-marina, count: 1000, seed: 1102, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt avicennia 3: {recipe: plant-avicennia-marina, count: 1000, seed: 1103, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt avicennia 4: {recipe: plant-avicennia-marina, count: 1000, seed: 1104, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt avicennia 5: {recipe: plant-avicennia-marina, count: 1000, seed: 1105, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt avicennia 6: {recipe: plant-avicennia-marina, count: 1000, seed: 1106, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt aegiceras 1: {recipe: plant-aegiceras-corniculatum, count: 1000, seed: 1201, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt aegiceras 2: {recipe: plant-aegiceras-corniculatum, count: 1000, seed: 1202, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt aegiceras 3: {recipe: plant-aegiceras-corniculatum, count: 1000, seed: 1203, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt aegiceras 4: {recipe: plant-aegiceras-corniculatum, count: 1000, seed: 1204, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt aegiceras 5: {recipe: plant-aegiceras-corniculatum, count: 1000, seed: 1205, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt aegiceras 6: {recipe: plant-aegiceras-corniculatum, count: 1000, seed: 1206, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt bruguiera 1: {recipe: plant-bruguiera-gymnorhiza, count: 1000, seed: 1301, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt bruguiera 2: {recipe: plant-bruguiera-gymnorhiza, count: 1000, seed: 1302, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt bruguiera 3: {recipe: plant-bruguiera-gymnorhiza, count: 1000, seed: 1303, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt bruguiera 4: {recipe: plant-bruguiera-gymnorhiza, count: 1000, seed: 1304, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt bruguiera 5: {recipe: plant-bruguiera-gymnorhiza, count: 1000, seed: 1305, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt bruguiera 6: {recipe: plant-bruguiera-gymnorhiza, count: 1000, seed: 1306, complexity: clumps, above: 0.1, below: 1.2, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt sonneratia 1: {recipe: plant-sonneratia-apetala, count: 1000, seed: 1401, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt sonneratia 2: {recipe: plant-sonneratia-apetala, count: 1000, seed: 1402, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt sonneratia 3: {recipe: plant-sonneratia-apetala, count: 1000, seed: 1403, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt sonneratia 4: {recipe: plant-sonneratia-apetala, count: 1000, seed: 1404, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt sonneratia 5: {recipe: plant-sonneratia-apetala, count: 1000, seed: 1405, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      belt sonneratia 6: {recipe: plant-sonneratia-apetala, count: 1000, seed: 1406, complexity: clumps, above: 1.2, below: 2.5, within: {of: the near water, from: 0, to: 360, near: 0, far: 2800}}
+      reserve kandelia a: {recipe: plant-kandelia-obovata, count: 25, seed: 101, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve kandelia b: {recipe: plant-kandelia-obovata, count: 25, seed: 102, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve kandelia c: {recipe: plant-kandelia-obovata, count: 25, seed: 103, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve avicennia a: {recipe: plant-avicennia-marina, count: 25, seed: 111, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve avicennia b: {recipe: plant-avicennia-marina, count: 25, seed: 112, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve avicennia c: {recipe: plant-avicennia-marina, count: 25, seed: 113, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve aegiceras a: {recipe: plant-aegiceras-corniculatum, count: 15, seed: 121, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve aegiceras b: {recipe: plant-aegiceras-corniculatum, count: 15, seed: 122, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve bruguiera a: {recipe: plant-bruguiera-gymnorhiza, count: 15, seed: 131, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve bruguiera b: {recipe: plant-bruguiera-gymnorhiza, count: 15, seed: 132, complexity: clumps, above: 0.6, below: 2.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve sonneratia a: {recipe: plant-sonneratia-apetala, count: 15, seed: 141, complexity: clumps, above: 2.0, below: 3.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve sonneratia b: {recipe: plant-sonneratia-apetala, count: 15, seed: 142, complexity: clumps, above: 2.0, below: 3.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      reserve sonneratia c: {recipe: plant-sonneratia-apetala, count: 15, seed: 143, complexity: clumps, above: 2.0, below: 3.0, within: {of: the reserve, from: 0, to: 360, near: 0, far: 1000}}
+      front kandelia: {recipe: plant-kandelia-obovata, count: 15, seed: 201, complexity: clumps, above: 0.6, below: 2.0, within: {of: the front, from: 0, to: 360, near: 0, far: 450}}
+      front avicennia: {recipe: plant-avicennia-marina, count: 15, seed: 211, complexity: clumps, above: 0.6, below: 2.0, within: {of: the front, from: 0, to: 360, near: 0, far: 450}}
+      front sonneratia: {recipe: plant-sonneratia-apetala, count: 10, seed: 241, complexity: clumps, above: 2.0, below: 3.0, within: {of: the front, from: 0, to: 360, near: 0, far: 450}}
+      south-east kandelia: {recipe: plant-kandelia-obovata, count: 10, seed: 301, complexity: clumps, above: 0.6, below: 2.0, within: {of: the south-east shore, from: 0, to: 360, near: 0, far: 500}}
+      south-east avicennia: {recipe: plant-avicennia-marina, count: 10, seed: 311, complexity: clumps, above: 0.6, below: 2.0, within: {of: the south-east shore, from: 0, to: 360, near: 0, far: 500}}
+      south-east sonneratia: {recipe: plant-sonneratia-apetala, count: 8, seed: 341, complexity: clumps, above: 2.0, below: 3.0, within: {of: the south-east shore, from: 0, to: 360, near: 0, far: 500}}
   world:
     unit: 1
     materials:

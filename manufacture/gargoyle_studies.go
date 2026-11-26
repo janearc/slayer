@@ -27,11 +27,11 @@ func gargoyleStudies() map[string]func() ([]thing.Thing, error) {
 		"hatzegopteryx": func() ([]thing.Thing, error) {
 			return hatzGargoyleStudy()
 		},
-		"orca": func() ([]thing.Thing, error) { return OrcaClean05(0, rest) },
+		"orca": func() ([]thing.Thing, error) { return orcaSwimming(0, rest) },
 		"pliosaur": func() ([]thing.Thing, error) {
 			return PliosaurStudy(0, rest)
 		},
-		"squid": func() ([]thing.Thing, error) { return HumboldtSquidFive(0) },
+		"squid": func() ([]thing.Thing, error) { return NewHumboldtSquid(0) },
 	}
 }
 

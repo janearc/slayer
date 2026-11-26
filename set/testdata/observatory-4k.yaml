@@ -46,7 +46,7 @@ scene:
           azimuth: 180
           altitude: 55
     redwoods:
-      kind: coast-redwood
+      plant: {family: conifer, file: ../../manufacture/plants/conifers/conifer-profiles.yaml, species: coast-redwood}
 
   weather:
     wind:

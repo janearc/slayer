@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/janearc/slayer/manufacture/geometry"
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
 	"github.com/janearc/slayer/scene/thing"
@@ -57,14 +58,7 @@ func foldedWing(point maths.Vec) maths.Vec {
 // the sum of the normals of the faces that meet at the corner, longer
 // for a larger face, made one unit long.
 func smoothed(corners []maths.Vec, faces [][3]int) []maths.Vec {
-	normals := make([]maths.Vec, len(corners))
-	for _, face := range faces {
-		normal := corners[face[1]].Sub(corners[face[0]]).Cross(
-			corners[face[2]].Sub(corners[face[0]]))
-		for _, corner := range face {
-			normals[corner] = normals[corner].Add(normal)
-		}
-	}
+	normals := geometry.AreaNormals(corners, faces)
 	for index := range normals {
 		normals[index] = normals[index].Unit()
 	}

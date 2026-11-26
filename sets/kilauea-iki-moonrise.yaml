@@ -87,6 +87,8 @@ scene:
           standoff_x: 0
           standoff_y: 0
           standoff_z: 2
+  recipes:
+    plant-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       the lookout:
@@ -97,60 +99,60 @@ scene:
       # the rim where the bearing meets it, 1,468 m from the lookout,
       # and trees along it every 8 m, across the line of sight
       the far tree:
-        kind: spruce
+        recipe: plant-spruce
         seed: 3
         east: 264832
         north: 2147806
         alight: true
         stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
       rim a:
-        kind: spruce
+        recipe: plant-spruce
         seed: 21
         east: 264824
         north: 2147783
         alight: true
       rim b:
-        kind: spruce
+        recipe: plant-spruce
         seed: 22
         east: 264827
         north: 2147791
       rim c:
-        kind: spruce
+        recipe: plant-spruce
         seed: 23
         east: 264829
         north: 2147798
       rim d:
-        kind: spruce
+        recipe: plant-spruce
         seed: 24
         east: 264835
         north: 2147814
         alight: true
       rim e:
-        kind: spruce
+        recipe: plant-spruce
         seed: 25
         east: 264837
         north: 2147821
       rim f:
-        kind: spruce
+        recipe: plant-spruce
         seed: 26
         east: 264840
         north: 2147829
         alight: true
       rim g:
-        kind: spruce
+        recipe: plant-spruce
         seed: 27
         east: 264843
         north: 2147802
     stands:
       the east rim:
-        kind: spruce
+        recipe: plant-spruce
         count: 150
         seed: 17
         above: 1195
         alight: 10
         stands_in_for: "ʻōhiʻa lehua, until the manufactory grows it"
       the forest:
-        kind: spruce
+        recipe: plant-spruce
         count: 600
         seed: 11
         above: 1150

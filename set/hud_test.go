@@ -51,7 +51,7 @@ func hudded(t *testing.T) string {
 // the order written with every part it says.
 func TestASetsHudIsWhatItSays(t *testing.T) {
 	source := hudded(t)
-	made, err := set.Read("kilauea-iki.yaml", []byte(source))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(source))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestAHudSaysWhatItLeavesOut(t *testing.T) {
 		"          start: 2\n          over: 8\n"
 	written = strings.Replace(written, ramp,
 		"        value: 0.25\n", 1)
-	made, err := set.Read("kilauea-iki.yaml", []byte(written))
+	made, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +144,7 @@ func TestAHudsMistakesAreRefused(t *testing.T) {
 	} {
 		was, now := mistake.was, mistake.now
 		written := strings.Replace(hudded(t), was, now, 1)
-		_, err := set.Read("kilauea-iki.yaml", []byte(written))
+		_, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 		if err == nil || !strings.Contains(err.Error(), mistake.said) {
 			t.Errorf("%q for %q: refused with %v, wanted %q",
 				now, was, err, mistake.said)
@@ -186,7 +186,7 @@ func TestAHudsNumbersAreTakenToTheirEdges(t *testing.T) {
 		{ramp, v + "0\n          to: 1.1e12\n", false},
 	} {
 		written := strings.Replace(hudded(t), edge.was, edge.now, 1)
-		_, err := set.Read("kilauea-iki.yaml", []byte(written))
+		_, err := set.Read("testdata/kilauea-iki.yaml", []byte(written))
 		if (err == nil) != edge.taken {
 			t.Errorf("%q: %v", edge.now, err)
 		}

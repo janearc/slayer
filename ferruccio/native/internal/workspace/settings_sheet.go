@@ -44,6 +44,7 @@ func (work *Workspace) OpenSettings() { work.requestSettings() }
 // the key, open the same sheet.
 func (work *Workspace) InstallMenu() {
 	work.host.SetMenu(gogpu.NewMenu().
+		AddItem(gogpu.MenuItem{Title: "Open…", Action: work.requestOpen}).
 		AddItem(gogpu.MenuItem{Title: "Settings…", Role: gogpu.RolePreferences, Action: work.requestSettings}).
 		AddItem(gogpu.MenuItem{Separator: true}).
 		AddItem(gogpu.MenuItem{Title: "Hide Ferruccio", Role: gogpu.RoleHide}).
@@ -157,7 +158,20 @@ func (work *Workspace) settingRow(entry settings.Entry) widget.Widget {
 	label := work.text(entry.Key.Label).Color(appearance.Cyan).MaxLines(1)
 	value := work.text(shorten(work.settingValue(entry), work.valueRunes(entry))).MaxLines(1)
 	head := primitives.HBox(primitives.VBox(label).Width(settingsLabelWidth), primitives.Expanded(value), work.settingControl(entry)).Gap(12)
-	return primitives.VBox(head, work.paragraph(settingNote(entry), appearance.Ink)).Gap(4)
+	note := settingNote(entry)
+	if entry.Source == settings.Unset && entry.Key.Name == settings.Queue && work.options.Tools.Queue != "" {
+		note = "Found the existing shared queue. Choose another queue to use it instead."
+	}
+	if entry.Source == settings.Unset && entry.Key.Name == settings.Evidence && work.options.Evidence != "" {
+		note = "Using the default output folder. Choose another folder to use it instead."
+	}
+	if entry.Source == settings.Unset && entry.Key.Name == settings.Cache && work.options.Tools.Cache != "" {
+		note = "Using the default cache folder. Choose another folder to use it instead."
+	}
+	if entry.Source == settings.Unset && entry.Key.Name == settings.Shelf && work.options.Tools.Shelf != "" {
+		note = "Found the existing source shelf. Choose another folder to use it instead."
+	}
+	return primitives.VBox(head, work.paragraph(note, appearance.Ink)).Gap(4)
 }
 
 // settingsLabelWidth is the width of the column of setting names.
@@ -216,6 +230,14 @@ func (work *Workspace) settingValue(entry settings.Entry) string {
 	switch {
 	case entry.Value != "":
 		return entry.Value
+	case entry.Key.Name == settings.Queue && work.options.Tools.Queue != "":
+		return work.options.Tools.Queue + " (detected)"
+	case entry.Key.Name == settings.Evidence && work.options.Evidence != "":
+		return work.options.Evidence + " (default)"
+	case entry.Key.Name == settings.Cache && work.options.Tools.Cache != "":
+		return work.options.Tools.Cache + " (default)"
+	case entry.Key.Name == settings.Shelf && work.options.Tools.Shelf != "":
+		return work.options.Tools.Shelf + " (detected)"
 	case entry.Key.Default != "":
 		return entry.Key.Default + " (default)"
 	case entry.Key.Name == settings.Theme:
@@ -305,7 +327,18 @@ func (work *Workspace) saveSetting(name settings.Name, value string) {
 		}
 	}
 	work.status = "Settings saved"
+	if name == settings.Cache || name == settings.Shelf || name == settings.Data || name == settings.Processors {
+		work.working.source = ""
+	}
 	work.refreshRenderBlocked(work.state.document.Check() == nil)
 	work.requestSettings()
 	work.invalidate()
+}
+
+// requestOpen defers the file chooser to the UI thread.
+func (work *Workspace) requestOpen() {
+	work.wantOpen.Store(true)
+	if work.host != nil {
+		work.host.RequestRedraw()
+	}
 }

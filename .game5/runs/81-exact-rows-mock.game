@@ -1,0 +1,1 @@
+exact-rows-mock . :: go tool mockgen -write_command_comment=false -source=trace/kept.go -destination=trace/exact_rows_mock_test.go -package=trace

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/janearc/slayer/set"
 )
 
 // baseSet is the smallest moonlake set that holds every line the passes swap, each once.
@@ -17,22 +19,24 @@ const baseSet = `scene:
   sun:
     azimuth: 304
     altitude: -12
+  recipes:
+    plant-spruce: {plant: {family: conifer, file: ../manufacture/plants/conifers/conifer-profiles.yaml, species: spruce}}
   set:
     things:
       close left:
-        kind: spruce
+        recipe: plant-spruce
         complexity: demo
         seed: 51
         east: 263115.3
         north: 2148423.9
       close right:
-        kind: spruce
+        recipe: plant-spruce
         complexity: demo
         seed: 52
         east: 263114.1
         north: 2148414.8
       close edge:
-        kind: spruce
+        recipe: plant-spruce
         complexity: demo
         seed: 53
         east: 263113.8
@@ -165,6 +169,35 @@ func TestFailingRunsStopWithStatusOne(t *testing.T) {
 		}
 		if !strings.Contains(string(out), "passes: ") || !strings.Contains(string(out), tc.want) {
 			t.Errorf("%s: output %q does not say %q", tc.name, out, tc.want)
+		}
+	}
+}
+
+// Passes may be written elsewhere than the authored set. Their checked plant
+// recipes must still refer to the original book and fire passes must retain
+// both the plant and fire recipes in a single mapping.
+func TestGeneratedPassesReadFromAnotherDirectory(t *testing.T) {
+	out := t.TempDir()
+	runMain(t, "passes", "../../../sets/moonlake.yaml", out)
+	for _, name := range []string{"flood-left", "fire", "fire-swell", "fire-burst", "nodisc", "disc"} {
+		path := filepath.Join(out, "moonlake-pass-"+name+".yaml")
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		read, err := set.Read(path, raw)
+		if err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		plant, ok := read.Recipe("plant-spruce")
+		if !ok || plant.PlantSpecies() != "spruce" {
+			t.Fatalf("%s lost its spruce profile", name)
+		}
+		if strings.HasPrefix(name, "fire") {
+			fire, ok := read.Recipe("the moonlake fire")
+			if !ok || fire.Kind() != "fire" {
+				t.Fatalf("%s lost its fire", name)
+			}
 		}
 	}
 }

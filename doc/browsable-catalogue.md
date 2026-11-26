@@ -11,8 +11,18 @@ game run catalogue-render
 ```
 
 Open `out/catalogue/index.html` in a browser. The default is a small,
-quick-detail view of every one of the 106 kinds the menu holds. These are
-native Metal renders; the command refuses an unavailable GPU rather than substituting a CPU image.
+quick-detail view of the kinds supporting that detail. These are native Metal
+renders by default; the command does not silently substitute a CPU image.
+For a model that needs CPU tracing, select it explicitly:
+
+```sh
+game run catalogue -- render harbor-seal --renderer cpu --out out/catalogue
+```
+
+CPU and GPU cards may share a book. Each card names its path and retains its
+own receipt. Selecting a card with a different renderer redraws that card;
+other cards are kept. Some menu entries do not support quick detail and need
+an alternate plan.
 No survey or terrain download is needed for the specimen book.
 
 The default takes four samples per pixel against a uniform backdrop.
@@ -23,6 +33,14 @@ List the names or choose a few, using Game's argument forwarding:
 game run catalogue-list
 game run catalogue -- render spitzer hubble webb --out out/space-book
 ```
+
+Plant and animal cards read checked model books. With no `--models`, the
+catalogue uses its embedded books. To use external books, pass `--models`
+with their directory. The catalogue checks the whole menu before selecting
+cards, so the directory must contain every book referenced by that menu,
+even when rendering one specimen. Missing or invalid books are refused.
+Each profile-backed card records its descriptor and exact model bytes;
+changing either causes that card to be redrawn on resume.
 
 A specimen that fails does not stop the run. Its card is marked failed
 with the reason, the run goes on, and at the end it names every specimen
@@ -140,8 +158,9 @@ construction allocations; keep render jobs serial on a shared machine.
 
 Each specimen has its own directory, containing a PNG, the input settings
 and a JSON render record. The record identifies the executing binary, any
-compiled Git stamp, physical bounds, stored faces and actual GPU timings and
-native query counts. Missing build provenance is explicitly unknown.
+compiled Git stamp, physical bounds and stored faces. GPU receipts hold actual
+GPU timings and native query counts; CPU receipts name the CPU path and its
+wall time. Missing build provenance is explicitly unknown.
 
 The index's "Rendered on the native GPU path" label means that view completed
 with real native closest-hit refinements. It does not establish CPU agreement

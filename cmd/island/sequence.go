@@ -22,17 +22,18 @@ type sequenceFrame struct {
 }
 
 type sequenceRecord struct {
-	Complete         bool            `json:"complete"`
-	Started          time.Time       `json:"started"`
-	Elapsed          time.Duration   `json:"elapsed-nanoseconds"`
-	Preparation      time.Duration   `json:"preparation-nanoseconds"`
-	InputSceneSHA256 string          `json:"input-scene-sha256"`
-	InputPlanSHA256  string          `json:"input-plan-sha256"`
-	BinarySHA256     string          `json:"binary-sha256"`
-	FPS              int             `json:"fps"`
-	ExpectedFrames   int             `json:"expected-frames"`
-	SceneDuration    float64         `json:"scene-duration-seconds"`
-	Frames           []sequenceFrame `json:"frames"`
+	Complete         bool                `json:"complete"`
+	Started          time.Time           `json:"started"`
+	Elapsed          time.Duration       `json:"elapsed-nanoseconds"`
+	Preparation      time.Duration       `json:"preparation-nanoseconds"`
+	InputSceneSHA256 string              `json:"input-scene-sha256"`
+	InputPlanSHA256  string              `json:"input-plan-sha256"`
+	BinarySHA256     string              `json:"binary-sha256"`
+	ModelSources     []modelSourceRecord `json:"model-sources,omitempty"`
+	FPS              int                 `json:"fps"`
+	ExpectedFrames   int                 `json:"expected-frames"`
+	SceneDuration    float64             `json:"scene-duration-seconds"`
+	Frames           []sequenceFrame     `json:"frames"`
 }
 
 // sequence shares verified sources and prototypes across sampled views. Its
@@ -73,7 +74,7 @@ func sequence(ctx context.Context, call pzm.Call) (failure error) {
 		return err
 	}
 	started := time.Now()
-	status := sequenceRecord{Started: started.UTC(), InputSceneSHA256: base.hash, InputPlanSHA256: track.hash, FPS: track.FPS, ExpectedFrames: track.Frames, SceneDuration: track.Duration}
+	status := sequenceRecord{Started: started.UTC(), InputSceneSHA256: base.hash, InputPlanSHA256: track.hash, ModelSources: base.modelSourceRecords(), FPS: track.FPS, ExpectedFrames: track.Frames, SceneDuration: track.Duration}
 	for name, raw := range map[string][]byte{"input-scene.yaml": base.raw, "input-sequence.yaml": track.raw, "scene.schema.json": sceneSchema, "sequence.schema.json": sequenceSchema} {
 		if err := os.WriteFile(filepath.Join(destination, name), raw, 0o644); err != nil {
 			return err
@@ -138,6 +139,9 @@ func sequence(ctx context.Context, call pzm.Call) (failure error) {
 		if err := os.WriteFile(filepath.Join(destination, name), raw, 0o644); err != nil {
 			return err
 		}
+	}
+	if err := base.writeModelSources(destination); err != nil {
+		return err
 	}
 	resolved := *track
 	resolved.Scene = "scene.yaml"

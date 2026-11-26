@@ -567,9 +567,9 @@
     "site-object": {
       "type": "object",
       "additionalProperties": false,
+      "oneOf": [{"required": ["kind"]}, {"required": ["plant"]}],
       "required": [
         "name",
-        "kind",
         "seed",
         "detail",
         "east-metres",
@@ -585,6 +585,19 @@
         "kind": {
           "type": "string",
           "minLength": 1
+        },
+        "plant": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["family", "file", "species"],
+          "properties": {
+            "family": {"enum": ["seasonal", "conifer", "fern", "cactus"]},
+            "file": {"type": "string", "minLength": 1},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "species": {"type": "string", "minLength": 1},
+            "season": {"enum": ["summer", "autumn", "winter"]},
+            "representation": {"const": "shoot"}
+          }
         },
         "seed": {
           "type": "integer",

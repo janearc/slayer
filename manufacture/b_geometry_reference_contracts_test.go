@@ -77,6 +77,12 @@ func referenceGeometry(h hash.Hash, solid shape.Shape, seen map[shape.Shape]int)
 		for _, normal := range made.Normals {
 			referenceVector(h, normal)
 		}
+	case shape.Tube:
+		referenceWrite(h, byte(5))
+		referenceWrite(h, [3]float64{made.Radius, made.Thick, made.Height})
+	case shape.Sphere:
+		referenceWrite(h, byte(4))
+		referenceWrite(h, made.Radius)
 	case *shape.MeshGroup:
 		members := made.Members()
 		referenceWrite(h, byte(3))

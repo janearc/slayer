@@ -215,9 +215,8 @@ func familyOf(how maker) string {
 		return "engine"
 	case scaleHuman:
 		return "scale reference"
-	case orcaClean05Kind, orcaClean05Still, baySealKind, walrusFresh5Kind,
-		harborSealKind, harborSealBonesKind, sealLoftedKind,
-		birdKind, fishRow, fishSchoolRow:
+	case whaleSwim, whaleStill, reptileStudy, sealKind,
+		birdKind, fishRow, snakeKind, sauropodKind:
 		return "animal"
 	case hatzGargoyleKind, gargoyleRow, gargoyleCorniceRow:
 		return "architectural ornament"
@@ -231,9 +230,10 @@ func familyOf(how maker) string {
 		return "summit instrument"
 	case personalTelescope:
 		return "personal telescope"
-	case physicalSpruce, conifer, seasonalPlant, saguaro, shootKind, fern,
-		kelpRow:
+	case physicalSpruce, conifer, seasonalPlant, columnarCactus, shootKind, fern:
 		return "plant"
+	case kelpRow:
+		return "alga"
 	case yardEquipment, owlShelter, guideLauncher, scaffolding, j58Stand:
 		return "site equipment"
 	case truck:

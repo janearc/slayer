@@ -26,6 +26,14 @@ func (reading reader) digested(read func(name, block *yaml.Node) error,
 		}
 		stored := reading.set.recipes[name.Value]
 		stored.digest = digestOf(block)
+		if stored.profilePath != "" || stored.profileBuiltin != "" {
+			sum := sha256.Sum256([]byte(stored.digest + hex.EncodeToString(stored.profileDigest[:])))
+			stored.digest = hex.EncodeToString(sum[:])
+		}
+		if stored.composition != nil {
+			sum := sha256.Sum256([]byte(stored.digest + hex.EncodeToString(stored.compositionDigest[:])))
+			stored.digest = hex.EncodeToString(sum[:])
+		}
 		reading.set.recipes[name.Value] = stored
 		return nil
 	}

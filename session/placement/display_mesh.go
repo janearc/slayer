@@ -3,6 +3,7 @@ package placement
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/janearc/slayer/maths"
 	"github.com/janearc/slayer/mesh"
@@ -16,6 +17,8 @@ type displayBuilder struct {
 	positions  map[maths.Vec]uint32
 	edges      map[[2]uint32]bool
 	components displayComponents
+	// heightFields enables labeled height-field approximations for staged views.
+	heightFields bool
 	// material is the name of the material of the part being added.
 	material string
 }
@@ -30,6 +33,11 @@ func newDisplayBuilder() *displayBuilder {
 // colour is the material colour, or the glow when the colour is unset, and
 // the shape is placed where the part stands at time zero.
 func (builder *displayBuilder) thing(part thing.Thing) error {
+	return builder.thingAt(part, 0)
+}
+
+// thingAt adds a staged part at its scene time.
+func (builder *displayBuilder) thingAt(part thing.Thing, at time.Duration) error {
 	if part.Hidden() {
 		return nil
 	}
@@ -42,7 +50,7 @@ func (builder *displayBuilder) thing(part thing.Thing) error {
 			colour = part.Material.Glow
 		}
 	}
-	return builder.surface(part.Shape, part.At(0), colour)
+	return builder.surface(part.Shape, part.At(at), colour)
 }
 
 // surface follows native GPU geometry extraction, with analytic display tessellation.
@@ -79,6 +87,13 @@ func (builder *displayBuilder) surface(solid shape.Shape, at maths.Subspace, col
 		builder.sphere(made, at, colour)
 	case shape.Tube:
 		builder.tube(made, at, colour)
+	case *shape.HeightField:
+		if !builder.heightFields {
+			return fmt.Errorf("native shape %T has no finite working display mesh", solid)
+		}
+		if err := builder.heightField(made, at, colour); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("native shape %T has no finite working display mesh", solid)
 	}
@@ -155,8 +170,10 @@ func (builder *displayBuilder) finish() (*DisplayMesh, error) {
 // displayComponents preserves native validated surfaces as separate hit targets.
 // Touching parts share GPU vertex storage without becoming a welded solid.
 type displayComponent struct {
-	hitter shape.Hitter
-	at     maths.Subspace
+	hitter   shape.Hitter
+	at       maths.Subspace
+	author   thing.AuthorRef
+	authored bool
 	// material is the name of the material the part was made with, which
 	// may be empty.
 	material string
@@ -174,18 +191,27 @@ func (parts displayComponents) Hit(ray maths.Ray, near, far float64) (float64, b
 // hitPart is Hit and also gives the material name of the component that was
 // hit first, empty when it has none or nothing was hit.
 func (parts displayComponents) hitPart(ray maths.Ray, near, far float64) (float64, string, bool) {
-	found, material := false, ""
-	for _, part := range parts {
+	distance, index, found := parts.hitComponent(ray, near, far)
+	if !found {
+		return distance, "", false
+	}
+	return distance, parts[index].material, true
+}
+
+// hitComponent returns the nearest surface's index, including unknown ones.
+func (parts displayComponents) hitComponent(ray maths.Ray, near, far float64) (float64, int, bool) {
+	found, index := false, 0
+	for i, part := range parts {
 		scale := part.at.Scale
 		if scale == 0 {
 			scale = 1
 		}
 		distance, hit := part.hitter.Hit(part.at.RayIn(ray), near/scale, far/scale)
 		if hit {
-			far, found, material = distance*scale, true, part.material
+			far, found, index = distance*scale, true, i
 		}
 	}
-	return far, material, found
+	return far, index, found
 }
 
 // These are display-only tessellation budgets, not changes to the analytic shape.

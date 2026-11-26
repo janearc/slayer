@@ -122,6 +122,9 @@ func (held developing) develop(call pzm.Call) error {
 	if err != nil {
 		return err
 	}
+	if err := refuseRegionOutput(wanted); err != nil {
+		return err
+	}
 	plates, err := platesOf(call.Args()[one:], held.env.directory)
 	if err != nil {
 		return err

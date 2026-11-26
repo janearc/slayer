@@ -43,7 +43,7 @@
 <article data-group="{{.Entry.Group}}" data-detail="{{.Detail}}"
   data-find="{{.Entry.Kind}} {{.Entry.About}} {{.Entry.Notes}}
     {{range .Entry.References}}{{.Title}} {{end}}">
-  {{if eq .Status "native GPU render"}}
+  {{if .Rendered}}
   <a class="picture" href="{{.Folder}}/specimen.png">
     <img src="{{.Folder}}/specimen.png" loading="lazy"
       alt="{{.Entry.Kind}} at {{.Detail}} detail">
@@ -64,8 +64,8 @@
       <p><a href="{{.URL}}">{{.Title}}</a></p>
       {{end}}
     </details>
-    {{if eq .Status "native GPU render"}}
-    <p class="evidence">Rendered on the native GPU path.
+    {{if .Rendered}}
+    <p class="evidence">{{if eq .Status "CPU render"}}Rendered on the CPU.{{else}}Rendered on the native GPU path.{{end}}
       <a href="{{.Folder}}/render.json">Render record</a> /
       <a href="{{.Folder}}/settings-yaml.txt">The yaml it was drawn from</a></p>
     {{end}}
@@ -75,7 +75,7 @@
 </section>
 <p id="empty" hidden>No specimens match those filters.</p>
 <footer>
-  <p>A rendered specimen proves that view reached the GPU. It does not
+  <p>A rendered specimen records its rendering path. It does not
     establish numerical agreement for every scene or physical accuracy.</p>
   <p><a href="catalogue.json">Catalogue and producer record</a></p>
 </footer>

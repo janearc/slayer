@@ -21,6 +21,9 @@ type BridgeSpec struct {
 	// as a road, the pylons and the cables. It has no lots, so it says
 	// no depth.
 	Bare bool
+	// Hub is a bridge that is a tower in the middle with an arm out of
+	// each face, the roads of both decks running through the tower.
+	Hub bool
 }
 
 // bridgeRow is the kind bridge: a span whose structure is buildings,
@@ -43,6 +46,11 @@ func (row bridgeRow) drawn(from seed) (*cities.Bridge, error) {
 	depth := -1
 	if row.spec.DepthSaid {
 		depth = row.spec.Depth
+	}
+	if row.spec.Hub {
+		return cities.NewHubBridge(cities.Seed(from.number),
+			cities.Irregularity{Value: row.spec.Irregularity,
+				Drawn: row.spec.Drawn}, row.spec.Span)
 	}
 	if row.spec.Bare {
 		return cities.NewBareBridge(cities.Seed(from.number),

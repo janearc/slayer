@@ -87,7 +87,7 @@ func BenchmarkCommitted4K(b *testing.B) {
 	if bytes.Count(authored, []byte("  renderer: gpu\n")) != 1 {
 		b.Fatal("study must name exactly one software GPU mode")
 	}
-	read, err := set.Read("observatory-4k.yaml", authored)
+	read, err := set.Read(filepath.Join(root, "set", "testdata", "observatory-4k.yaml"), authored)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -98,7 +98,8 @@ func BenchmarkCommitted4K(b *testing.B) {
 	width, height, side := film.Size()
 	trees := 0
 	for _, stand := range read.Stands() {
-		if stand.Kind() == "coast-redwood" {
+		row, found := read.Recipe(stand.Recipe())
+		if found && row.PlantSpecies() == "coast-redwood" {
 			count, _ := stand.Count()
 			trees += count
 		}

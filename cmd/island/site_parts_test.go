@@ -74,17 +74,17 @@ func TestLoadRefusals(t *testing.T) {
 func TestLoadCrown(t *testing.T) {
 	site := roomySite(t)
 	site.plan.Forest = &forestPlan{CrownAreaMatch: true, CrownAreaSide: 8}
-	value, err := site.load(prototypeKey{kind: "spruce", detail: "crown", seed: 3})
+	value, err := site.load(prototypeKey{forest: true, kind: "spruce", detail: "crown", seed: 3})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if value.fit == nil || value.fit.Side != 8 || site.record.CrownAreaRays != 3*8*8 {
 		t.Errorf("fit %+v rays %d", value.fit, site.record.CrownAreaRays)
 	}
-	if _, found := site.store.values[prototypeKey{kind: "spruce", detail: "clumps", seed: 3}]; !found {
+	if _, found := site.store.values[prototypeKey{forest: true, kind: "spruce", detail: "clumps", seed: 3}]; !found {
 		t.Error("the clump prototype was not retained")
 	}
-	if _, found := site.store.values[prototypeKey{kind: "spruce", detail: "crown", seed: 3, areaSide: 8}]; !found {
+	if _, found := site.store.values[prototypeKey{forest: true, kind: "spruce", detail: "crown", seed: 3, areaSide: 8}]; !found {
 		t.Error("the crown was not stored under its area side")
 	}
 	if len(value.parts) == 0 || value.bounds.Max.Y <= 0 {
@@ -95,7 +95,7 @@ func TestLoadCrown(t *testing.T) {
 // TestLoadCrownWithoutMatching checks the unfitted crown and its refusals.
 func TestLoadCrownWithoutMatching(t *testing.T) {
 	site := roomySite(t)
-	value, err := site.load(prototypeKey{kind: "spruce", detail: "crown", seed: 3})
+	value, err := site.load(prototypeKey{forest: true, kind: "spruce", detail: "crown", seed: 3})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,23 +103,23 @@ func TestLoadCrownWithoutMatching(t *testing.T) {
 		t.Errorf("an unmatched crown has a fit or rays: %d", site.record.CrownAreaRays)
 	}
 	probe := roomySite(t)
-	if _, err := probe.load(prototypeKey{kind: "spruce", detail: "clumps", seed: 3}); err != nil {
+	if _, err := probe.load(prototypeKey{forest: true, kind: "spruce", detail: "clumps", seed: 3}); err != nil {
 		t.Fatal(err)
 	}
 	clumpFaces := probe.store.faces
 	tight := roomySite(t)
 	tight.plan.Budget.Faces = clumpFaces - 1
-	if _, err := tight.load(prototypeKey{kind: "spruce", detail: "crown", seed: 3}); err == nil {
+	if _, err := tight.load(prototypeKey{forest: true, kind: "spruce", detail: "crown", seed: 3}); err == nil {
 		t.Error("clumps over the face budget were accepted")
 	}
 	exact := roomySite(t)
 	exact.plan.Budget.Faces = clumpFaces
-	if _, err := exact.load(prototypeKey{kind: "spruce", detail: "crown", seed: 3}); err == nil || !containsText(err.Error(), "crown exceeds retained prototype face budget") {
+	if _, err := exact.load(prototypeKey{forest: true, kind: "spruce", detail: "crown", seed: 3}); err == nil || !containsText(err.Error(), "crown exceeds retained prototype face budget") {
 		t.Errorf("crown over budget: %v", err)
 	}
 	bad := roomySite(t)
 	bad.plan.Forest = &forestPlan{CrownAreaMatch: true, CrownAreaSide: 4}
-	if _, err := bad.load(prototypeKey{kind: "spruce", detail: "crown", seed: 3}); err == nil || !containsText(err.Error(), "probe grid") {
+	if _, err := bad.load(prototypeKey{forest: true, kind: "spruce", detail: "crown", seed: 3}); err == nil || !containsText(err.Error(), "probe grid") {
 		t.Errorf("bad area side: %v", err)
 	}
 	if _, err := bad.load(prototypeKey{kind: "dragon", detail: "crown", seed: 3}); err == nil {

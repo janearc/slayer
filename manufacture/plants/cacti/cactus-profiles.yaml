@@ -1,0 +1,34 @@
+# Authored saguaro scenery choices; dimensions are picked, not a survey.
+profiles:
+  - kind: saguaro
+    status: picked
+    by: cactus scenery study
+    date: '2026-11-08'
+    values:
+      height-minimum: 4.0
+      height-maximum: 9.0
+      radius-minimum: 0.22
+      radius-maximum: 0.38
+      arms-minimum: 0
+      arms-maximum: 5
+      ribs: 12
+      pleat-depth: 0.12
+      attachment-minimum: 0.3
+      attachment-maximum: 0.72
+      root-radius-share: 0.45
+      arm-radius-share: 0.6
+      arm-turn-variation: 0.035
+      arm-run-minimum: 1.0
+      arm-run-maximum: 3.7
+      bend-minimum: 0.5
+      bend-maximum: 1.05
+      spine-length: 0.03
+      spine-radius: 0.0015
+      spine-spacing: 0.18
+      spine-root-share: 0.99
+      green-r: 0.19
+      green-g: 0.32
+      green-b: 0.13
+      spine-r: 0.58
+      spine-g: 0.48
+      spine-b: 0.28

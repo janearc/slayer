@@ -62,6 +62,7 @@ var launchVariables = []string{
 	"FERRUCCIO_SLAYER", "FERRUCCIO_AGENT", "FERRUCCIO_EVIDENCE",
 	"FERRUCCIO_CACHE", "SLAYER_CACHE", "FERRUCCIO_STARTER",
 	"FERRUCCIO_BUNDLE", "FERRUCCIO_SHELF", "FERRUCCIO_DISPLAY",
+	"FERRUCCIO_AZAZEL", "FERRUCCIO_AZAZEL_QUEUE",
 	"GAME_BIN", "GAME_HOME",
 }
 
@@ -176,10 +177,14 @@ func (check *launcherCheck) buildBundle(name string,
 			return "", "", err
 		}
 	}
+	if err := copyScript(filepath.Join(scriptsDirectory, "..", "assets"), "icon.png", filepath.Join(root, "ferruccio", "assets", "icon.png")); err != nil {
+		return "", "", err
+	}
 	for path, content := range map[string]string{
-		filepath.Join(root, "bin", "ferruccio"): cliStandIn,
-		filepath.Join(root, "bin", "game5"):     stubProgram,
-		slayer:                                  stubProgram,
+		filepath.Join(root, "bin", "ferruccio"):       cliStandIn,
+		filepath.Join(root, "bin", "ferruccio-stage"): stubProgram,
+		filepath.Join(root, "bin", "game5"):           stubProgram,
+		slayer:                                        stubProgram,
 	} {
 		if err := writeFile(path, content, executableMode); err != nil {
 			return "", "", err
@@ -269,14 +274,25 @@ func (check *launcherCheck) checkBundle() error {
 	hostile := check.hostile
 	root, launch, err := check.buildBundle("quote ' app $literal one",
 		map[string]string{"FERRUCCIO_AGENT": hostile.agent,
-			"FERRUCCIO_CACHE":    hostile.cache,
-			"FERRUCCIO_EVIDENCE": hostile.evidence})
+			"FERRUCCIO_CACHE":        hostile.cache,
+			"FERRUCCIO_EVIDENCE":     hostile.evidence,
+			"FERRUCCIO_AZAZEL":       "queue tool",
+			"FERRUCCIO_AZAZEL_QUEUE": "queue path"})
 	if err != nil {
 		return err
 	}
+	helper := filepath.Join(filepath.Dir(launch), "ferruccio-stage")
+	if info, err := os.Stat(helper); err != nil || info.Mode()&0111 == 0 {
+		return fmt.Errorf("bundle lacks executable staging helper: %v", err)
+	}
+	checksums, err := os.ReadFile(filepath.Join(filepath.Dir(filepath.Dir(launch)), "Resources", "SHA256SUMS"))
+	if err != nil || !strings.Contains(string(checksums), "ferruccio-stage") {
+		return fmt.Errorf("bundle lacks staging helper checksum: %v", err)
+	}
 	defaults := map[string]string{"--slayer": filepath.Join(check.directory,
 		"outside", hostile.slayer), "--agent": hostile.agent,
-		"--cache": hostile.cache, "--evidence": root + "/" + hostile.evidence}
+		"--cache": hostile.cache, "--evidence": root + "/" + hostile.evidence,
+		"--preview-transport": "azazel", "--azazel": "queue tool", "--azazel-queue": "queue path"}
 	none := map[string]string{}
 	if err := check.expectDryRun(launch, none, defaults); err != nil {
 		return err
@@ -288,10 +304,11 @@ func (check *launcherCheck) checkBundle() error {
 func (check *launcherCheck) expectOverrides(launch string) error {
 	settings := map[string]string{"FERRUCCIO_SLAYER": overrideSlayer,
 		"FERRUCCIO_AGENT": overrideAgent, "FERRUCCIO_CACHE": overrideCache,
-		"FERRUCCIO_EVIDENCE": overrideEvidence}
+		"FERRUCCIO_EVIDENCE": overrideEvidence, "FERRUCCIO_AZAZEL": "other tool", "FERRUCCIO_AZAZEL_QUEUE": "other queue"}
 	return check.expectDryRun(launch, settings, map[string]string{
 		"--slayer": overrideSlayer, "--agent": overrideAgent,
-		"--cache": overrideCache, "--evidence": overrideEvidence})
+		"--cache": overrideCache, "--evidence": overrideEvidence,
+		"--azazel": "other tool", "--azazel-queue": "other queue"})
 }
 
 // checkBundleFallbacks builds a bundle launcher with no agent, no evidence

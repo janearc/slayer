@@ -22,7 +22,7 @@ func overTerrain(t *testing.T, add string) (Set, error) {
 	}
 	text := strings.Replace(string(raw), EcosystemSchema, ecosystemV2Schema, 1)
 	text = covEdit(t, text, "  terrain:\n", add+"  terrain:\n")
-	return Read("over-terrain.yaml", []byte(text))
+	return Read("testdata/over-terrain.yaml", []byte(text))
 }
 
 // TestWorldAtmosphereOverTerrainNeedsAGlobe is the anti-test of flat air:

@@ -1,8 +1,8 @@
 # one giant kelp plant alone, in the water of sets/kelp-forest.yaml (see its
 # header for the water and the exposure), twelve metres of it over a pale
 # floor, lit by the worked sun refracted through the surface. the plant is
-# the kind giant-kelp-moderate: a current toward the east leans the stipes
-# and streams the blades. (giant-kelp-slack is the same plant in still
+# the moderate condition: a current toward the east leans the stipes
+# and streams the blades. (slack is the same plant in still
 # water: the stipes rise straight and the blades stand out all round.) places are metres, x east, y north, z up,
 # mean sea at z=0; the holdfast is at the origin on the floor, z=-12.
 "$schema": https://github.com/janearc/slayer/schemas/ecosystem-v2.json
@@ -66,10 +66,12 @@ scene:
         middle: [0, 0, -12.05]
         size: [400, 400, 0.1]
         source: eye
+  recipes:
+    profile-kelp: {alga: {family: kelp, file: ../manufacture/algae/kelp/kelp.yaml, species: macrocystis-pyrifera, condition: moderate}}
   set:
     things:
       plant:
-        kind: giant-kelp-moderate
+        recipe: profile-kelp
         seed: 1
         position:
           east: {value: 0, unit: m}

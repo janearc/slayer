@@ -6,10 +6,12 @@ scene:
   seed: 407
   setting: space
   light: none
+  recipes:
+    profile-harbor-bones: {animal: {family: pinniped, file: ../../manufacture/animals/vertebrates/mammals/pinnipeds/profiles.yaml, species: harbor-seal, representation: bones}}
   set:
     things:
       seal:
-        kind: harbor-seal-bones
+        recipe: profile-harbor-bones
         seed: 407
         east: 0
         north: 0

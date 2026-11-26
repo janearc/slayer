@@ -104,11 +104,23 @@
           "minimum": 1,
           "maximum": 8192
         },
+        "region": {
+          "description": "A rectangle in the complete picture's pixels, from the top left.",
+          "type": "object",
+          "properties": {
+            "left": {"description": "The first column in the complete picture, counting from the left.", "type": "integer", "minimum": 0, "maximum": 8192},
+            "top": {"description": "The first row in the complete picture, counting from the top.", "type": "integer", "minimum": 0, "maximum": 8192},
+            "width": {"description": "The region's width in pixels.", "type": "integer", "minimum": 1, "maximum": 8192},
+            "height": {"description": "The region's height in pixels.", "type": "integer", "minimum": 1, "maximum": 8192}
+          },
+          "required": ["left", "top", "width", "height"],
+          "additionalProperties": false
+        },
         "rays": {
-          "description": "Rays along each side of a pixel, from 1 to 16, so 4 is sixteen rays a pixel. Unsaid, the set's count is used.",
+          "description": "Rays along each side of a pixel, from 1 to 64, so 4 is sixteen rays a pixel. Unsaid, the set's count is used.",
           "type": "integer",
           "minimum": 1,
-          "maximum": 16
+          "maximum": 64
         },
         "wide": {
           "description": "The angle the lens sees across the picture, in degrees, above 0 and below 180. Say wide or tall, not both; for example 55.",

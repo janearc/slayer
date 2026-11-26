@@ -170,6 +170,10 @@ scene:
       knee: 0.7
       top: 8
       source: eye
+  recipes:
+    plant-metrosideros-polymorpha: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: metrosideros-polymorpha}}
+    plant-pandanus-tectorius: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: pandanus-tectorius}}
+    plant-scaevola-taccada: {plant: {family: seasonal, file: ../manufacture/plants/seasonal/profiles.yaml, species: scaevola-taccada}}
   set:
     # the coast's own plants, sown by rule over the whole window, each stand
     # from its seed, between heights over the sea and no steeper than its
@@ -180,14 +184,14 @@ scene:
     # is sown from 30 m up, leaving the shore to the other two. hala and
     # ohia keep to ground no steeper than the grass lies, so the cliffs stay
     # bare rock. the 30 m floor, the steepness and the counts are picked.
-    # the sources are in manufacture/plant-profiles.yaml beside each kind.
+    # the sources are in manufacture/plants/seasonal/profiles.yaml beside each kind.
     stands:
-      naupaka a: {kind: scaevola-taccada, count: 600, seed: 601, complexity: clumps, above: 2, below: 46, steepest: 0.45}
-      naupaka b: {kind: scaevola-taccada, count: 600, seed: 602, complexity: clumps, above: 2, below: 46, steepest: 0.45}
-      hala a: {kind: pandanus-tectorius, count: 1000, seed: 611, complexity: clumps, above: 3, below: 610, steepest: 0.7}
-      hala b: {kind: pandanus-tectorius, count: 1000, seed: 612, complexity: clumps, above: 3, below: 610, steepest: 0.7}
-      ohia a: {kind: metrosideros-polymorpha, count: 2000, seed: 621, complexity: clumps, above: 30, below: 1200, steepest: 0.7}
-      ohia b: {kind: metrosideros-polymorpha, count: 2000, seed: 622, complexity: clumps, above: 30, below: 1200, steepest: 0.7}
+      naupaka a: {recipe: plant-scaevola-taccada, count: 600, seed: 601, complexity: clumps, above: 2, below: 46, steepest: 0.45}
+      naupaka b: {recipe: plant-scaevola-taccada, count: 600, seed: 602, complexity: clumps, above: 2, below: 46, steepest: 0.45}
+      hala a: {recipe: plant-pandanus-tectorius, count: 1000, seed: 611, complexity: clumps, above: 3, below: 610, steepest: 0.7}
+      hala b: {recipe: plant-pandanus-tectorius, count: 1000, seed: 612, complexity: clumps, above: 3, below: 610, steepest: 0.7}
+      ohia a: {recipe: plant-metrosideros-polymorpha, count: 2000, seed: 621, complexity: clumps, above: 30, below: 1200, steepest: 0.7}
+      ohia b: {recipe: plant-metrosideros-polymorpha, count: 2000, seed: 622, complexity: clumps, above: 30, below: 1200, steepest: 0.7}
   world:
     unit: 1
     materials:

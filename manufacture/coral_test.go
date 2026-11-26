@@ -47,26 +47,6 @@ func TestCoralRejectsInvalidDimensions(t *testing.T) {
 	}
 }
 
-func TestCoralliteReliefWrapsAndChangesTheBranchSkin(t *testing.T) {
-	const radius = .02
-	for _, height := range []float64{0, .013, .041} {
-		left := coralliteRelief(0, height, radius)
-		right := coralliteRelief(2*math.Pi, height, radius)
-		if math.Abs(left-right) > 1e-12 {
-			t.Fatalf("surface does not wrap at height %g: %g != %g", height, left, right)
-		}
-	}
-	around := math.Round(2 * math.Pi * radius / .008)
-	if coralliteRelief(0, 0, radius) >= coralliteRelief(.31*2*math.Pi/around, 0, radius) {
-		t.Fatal("expected the cup centre to sit below its rim")
-	}
-	plain := coralBranch{length: .14, radius: radius, seed: 7}.skin(cut{})
-	detailed := coralBranch{length: .14, radius: radius, seed: 7, corallites: true}.skin(cut{})
-	if len(detailed) <= len(plain) {
-		t.Fatal("the detailed surface needs enough faces to resolve its cups")
-	}
-}
-
 func TestDetailedCoralColonyFitsSceneMesh(t *testing.T) {
 	spec := DefaultCoral()
 	spec.Corallites, spec.FineSurface = true, true

@@ -22,6 +22,7 @@ func tool(env Env, shop workshop, programs programs) *pzm.Tool {
 		pzm.Build(env.build.build), pzm.Built(env.build.built),
 		pzm.Who(env.build.who), pzm.Sessions(env.build.sessions))
 	declareDraw(made, drawing{env: env, shop: shop})
+	declareRegionComparison(made, env)
 	declareList(made)
 	declareTunes(made, env)
 	declareAssess(made, env, shop)

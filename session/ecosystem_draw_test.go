@@ -38,13 +38,11 @@ func TestEcosystemStagesOneSharedFieldAndKeepsItsClearing(t *testing.T) {
 		t.Fatal(err)
 	}
 	scene := strings.ReplaceAll(string(raw), "alight: true", "alight: false")
-	scene = strings.Replace(scene, "kind: spruce", "recipe: redwoods\n        complexity: hull", 1)
-	scene = strings.Replace(scene, "kind: fern", "recipe: redwoods\n        complexity: clumps\n        exclude:\n          around: the stone\n          clearance: {value: 10, unit: m}\n        atmosphere:\n          weather: grove\n          extent: canopy-and-ground\n          fade-at-boundary: true", 1)
+	scene = strings.Replace(scene, "recipe: fixture-spruce", "recipe: redwoods\n        complexity: hull", 1)
+	scene = strings.Replace(scene, "recipe: fixture-fern", "recipe: redwoods\n        complexity: clumps\n        exclude:\n          around: the stone\n          clearance: {value: 10, unit: m}\n        atmosphere:\n          weather: grove\n          extent: canopy-and-ground\n          fade-at-boundary: true", 1)
+	scene = strings.Replace(scene, "  recipes:\n", "  recipes:\n    redwoods: {plant: {family: conifer, file: ../manufacture/conifer-profiles.yaml, species: coast-redwood}}\n", 1)
 	scene = strings.Replace(scene, "  terrain:", `  seed: 17
   renderer: cpu
-  recipes:
-    redwoods:
-      kind: coast-redwood
   weather:
     grove:
       kind: prescribed-mist

@@ -11,10 +11,12 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/janearc/slayer/gpu"
 	"github.com/janearc/slayer/interfaces/file"
 	"github.com/janearc/slayer/internal/observability"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/raw"
+	"github.com/janearc/slayer/render/colour"
 	"github.com/janearc/slayer/render/frame"
 	"github.com/janearc/slayer/trace"
 )
@@ -72,6 +74,11 @@ type made struct {
 // carried through its frames; then the note written. The job is copied
 // beside its outputs only once the run is known to be that folder's.
 func (run runner) draw() error {
+	if _, region := run.wanted.Film().Region(); region {
+		if _, isSet := run.wanted.Scene().Set(); !isSet || !run.wanted.Clock().Still() {
+			return errors.New("region: only a set still is supported")
+		}
+	}
 	var err error
 	if scene, isMaps := mapsOf(run.wanted); isMaps {
 		err = run.mapped(scene)
@@ -92,6 +99,9 @@ func (run runner) draw() error {
 // drawStill draws a still: refused where it would draw over a picture
 // another job drew today, then the job copied, then the frame.
 func (run runner) drawStill() error {
+	if _, region := run.wanted.Film().Region(); region {
+		return run.regionStill()
+	}
 	if err := run.unclaimed(); err != nil {
 		return err
 	}
@@ -121,6 +131,58 @@ func (run runner) drawStill() error {
 		return err
 	}
 	return run.keepPicture()
+}
+
+// regionStill checks the staged source and development before any output.
+func (run runner) regionStill() error {
+	if run.at.stood != "" {
+		return errors.New("region: writing places is not supported")
+	}
+	if _, said := run.wanted.Stock(); said {
+		return errors.New("region: stock development is not supported")
+	}
+	if _, said := run.wanted.Titles(); said {
+		return errors.New("region: titles are not supported")
+	}
+	if err := run.unclaimed(); err != nil {
+		return err
+	}
+	tools, err := run.tools()
+	if err != nil {
+		return err
+	}
+	if err := run.copied(); err != nil {
+		return errors.Join(err, tools.source.Close())
+	}
+	tools.rows = run.rowsKept()
+	err = run.still(tools)
+	tools.rows.close()
+	if err == nil {
+		tools.rows.forget()
+	}
+	return errors.Join(err, tools.source.Close())
+}
+
+// regionDevelopment checks the actual tone used by the developer.
+func regionDevelopment(wanted job.Job, fallback colour.Tone) error {
+	if _, said := wanted.Film().Region(); !said {
+		return nil
+	}
+	if _, said := wanted.Stock(); said {
+		return errors.New("region: stock development is not supported")
+	}
+	if _, said := wanted.Titles(); said {
+		return errors.New("region: titles are not supported")
+	}
+	if print, said := wanted.Print(); said {
+		bloom, _ := print.Bloom()
+		if bloom != 0 {
+			return errors.New("region: bloom development is not supported")
+		}
+	} else if fallback.Bloom != 0 {
+		return errors.New("region: the scene's bloom development is not supported")
+	}
+	return nil
 }
 
 // light is frame index's light from the kit's source, its rows kept
@@ -185,6 +247,11 @@ func (run runner) tools() (kit, error) {
 	if err != nil {
 		return kit{}, err
 	}
+	if _, region := run.wanted.Film().Region(); region {
+		if err := regionDevelopment(run.wanted, opened.Tone()); err != nil {
+			return kit{}, errors.Join(err, opened.Close())
+		}
+	}
 	if err := run.cached(opened); err != nil {
 		return kit{}, errors.Join(err, opened.Close())
 	}
@@ -242,6 +309,13 @@ func (run runner) frame(tools kit, index int, at time.Duration) (made,
 	light, err := tools.light(run.ctx, index)
 	if err != nil {
 		return made{}, err
+	}
+	if measured, ok := light.(interface{ Profile() gpu.Profile }); ok {
+		if count := measured.Profile().PrimarySamples; count > 0 {
+			if _, err := fmt.Fprintf(run.out, "gpu: completed %d primary samples\n", count); err != nil {
+				return made{}, err
+			}
+		}
 	}
 	drew := run.now()
 	picture, err := tools.developer.Develop(index,
