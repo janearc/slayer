@@ -1,7 +1,14 @@
 name: Ferruccio Apple silicon build
 
 on:
+  # run by hand, it builds the branch it is run on; given a tag, it builds
+  # that tag's code and attaches the image to that tag's release
   workflow_dispatch:
+    inputs:
+      tag:
+        description: release tag to build and attach to, such as v0.1.6
+        required: false
+        type: string
   release:
     types: [published]
 
@@ -14,15 +21,16 @@ jobs:
     timeout-minutes: 120
     permissions:
       contents: write
+    # the runner's temp folder is not known at the job's level, so the two
+    # folders under it are set by the first step, for the steps after it
     env:
-      GAME_HOME: ${{ runner.temp }}/ferruccio-game-home
-      SLAYER_CACHE: ${{ runner.temp }}/slayer-cache
       GOWORK: off
       GOMAXPROCS: 2
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.4'
@@ -30,9 +38,12 @@ jobs:
       # game is the version go.mod pins as a tool; go tool builds and runs it
       - name: Configure Game
         run: |
+          GAME_HOME="$RUNNER_TEMP/ferruccio-game-home"
+          SLAYER_CACHE="$RUNNER_TEMP/slayer-cache"
           mkdir -p "$SLAYER_CACHE" "$GAME_HOME/.config/game"
           printf 'set SLAYER_CACHE %s\n' "$SLAYER_CACHE" > "$GAME_HOME/.config/game/config"
-          go tool game --age
+          printf 'GAME_HOME=%s\nSLAYER_CACHE=%s\n' "$GAME_HOME" "$SLAYER_CACHE" >> "$GITHUB_ENV"
+          GAME_HOME="$GAME_HOME" go tool game --age
       # the citation shelf is not in the dist and cannot be fetched here.
       # the release was verified against it before it was tagged.
       - name: Build the disk image
@@ -60,10 +71,10 @@ jobs:
             bin/Ferruccio.dmg.sha256
           if-no-files-found: error
       - name: Attach the image to the release
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || inputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           gh release upload "$TAG" bin/Ferruccio.dmg bin/Ferruccio.dmg.sha256 \
             --repo "$GITHUB_REPOSITORY" --clobber

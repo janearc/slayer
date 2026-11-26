@@ -1,3 +1,7 @@
+## slayer v0.1.7 25 nov 2026
+
+- fussing with github actions to get ferruccio built with releases
+
 ## slayer  v0.1.6 25 nov 2026
 
 i accidentally shipped 014 as 015, so we skipped 014, and the nominal current
