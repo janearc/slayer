@@ -100,6 +100,7 @@ type Workspace struct {
 	settings               SettingsSource
 	wantSettings           atomic.Bool
 	wantOpen               atomic.Bool
+	wantSave               atomic.Bool
 	protecting             bool
 	settingsOpen           bool
 	renderSetupOpen        bool
@@ -252,6 +253,9 @@ func (work *Workspace) Tick() {
 	work.drainRenderPresets()
 	if work.wantOpen.Swap(false) {
 		work.open()
+	}
+	if work.wantSave.Swap(false) {
+		work.save(false)
 	}
 	work.drainResolution()
 	work.recheckUnresolved()
@@ -427,12 +431,11 @@ func (work *Workspace) invalidate() {
 
 // rebuild changes structural controls while preserving the editor and its text.
 func (work *Workspace) rebuild() {
-	work.working.dirty = true
 	work.editor.SetFontSize(work.size)
 	work.viewer.SetFontSize(work.size)
 	work.theme = appearance.Theme()
 	work.ui.SetTheme(appearance.ThemeForSize(work.size))
-	work.root = newShortcutRoot(work.layout(), work.requestOpen)
+	work.root = newShortcutRoot(work.layout(), work.requestOpen, work.requestSave)
 	work.ui.SetRoot(work.root)
 	work.invalidate()
 }

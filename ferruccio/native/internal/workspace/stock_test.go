@@ -11,7 +11,64 @@ import (
 	"github.com/janearc/slayer/ferruccio/internal/preview"
 	"github.com/janearc/slayer/job"
 	"github.com/janearc/slayer/ninjafilm"
+	"github.com/janearc/slayer/session/placement"
 )
+
+func TestStockEditRetainsCurrentWorkingSceneAndUndo(t *testing.T) {
+	raw, err := os.ReadFile("../../../examples/first-picture.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "job.yaml")
+	doc, err := draft.Open(path, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	work := libraryEventWorkspace(t)
+	work.state.document, work.state.path = doc, path
+	work.editor.SetText(string(raw))
+	scene := &placement.DisplayScene{Width: 640, Height: 400}
+	work.working.scene, work.working.source, work.working.path, work.working.displayed = scene, doc.Text(), path, true
+	work.working.notice = "working view limitations"
+	if err := work.changeStock(1); err != nil {
+		t.Fatal(err)
+	}
+	work.updateWorking()
+	if work.working.scene != scene || work.working.source != doc.Text() || work.working.staging || work.working.notice != "working view limitations" {
+		t.Fatal("stock edit discarded or incorrectly restaged the current working scene")
+	}
+	work.undoCamera(work.ui.Window().Context(), false)
+	if doc.Text() != string(raw) || work.working.scene != scene || work.working.source != doc.Text() {
+		t.Fatal("stock undo did not restore the unchanged working scene")
+	}
+	work.undoCamera(work.ui.Window().Context(), true)
+	if doc.Text() == string(raw) || work.working.scene != scene || work.working.source != doc.Text() {
+		t.Fatal("stock redo discarded the unchanged working scene")
+	}
+}
+
+func TestStockEditDoesNotMarkAnOldSceneCurrent(t *testing.T) {
+	raw, err := os.ReadFile("../../../examples/first-picture.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "job.yaml")
+	doc, err := draft.Open(path, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	work := libraryEventWorkspace(t)
+	work.state.document, work.state.path = doc, path
+	work.editor.SetText(string(raw))
+	work.working.scene = &placement.DisplayScene{Width: 640, Height: 400}
+	work.working.source, work.working.path, work.working.displayed = "an older draft", path, true
+	if err := work.changeStock(1); err != nil {
+		t.Fatal(err)
+	}
+	if work.workingCurrent() || work.working.source != "an older draft" {
+		t.Fatal("stock edit presented an old working scene as current")
+	}
+}
 
 func TestStockPanelEditsJobAndFreezesProducerInput(t *testing.T) {
 	raw, err := os.ReadFile("../../../examples/first-picture.yaml")

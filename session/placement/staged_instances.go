@@ -56,7 +56,8 @@ func WorkingInstances(world *thing.World, at time.Duration) (StagedInstances, er
 			return fmt.Errorf("staged instance has invalid geometry or placement")
 		}
 		if group, ok := solid.(*shape.MeshGroup); ok {
-			for _, member := range group.Members() {
+			for i := 0; i < group.MemberCount(); i++ {
+				member := group.Member(i)
 				if err := add(member.Mesh, member.Space.Within(place), colour, author, authored); err != nil {
 					return err
 				}

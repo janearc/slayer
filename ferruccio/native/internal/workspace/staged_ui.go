@@ -85,6 +85,7 @@ func (work *Workspace) drainStaged() bool {
 		_ = result.view.close()
 		return true
 	}
+	live.rollback = nil
 	if result.err == nil && (result.view == nil || result.view.scene == nil || result.view.owner != nil) {
 		result.err = fmt.Errorf("staging helper returned no detached scene")
 	}
@@ -98,7 +99,7 @@ func (work *Workspace) drainStaged() bool {
 		live.notice = result.view.notice
 		live.dirty, live.waiting = true, work.play.renderedText != result.source
 		work.diagnostic = result.view.notice
-		work.caption = "Staged working view · " + result.view.notice
+		work.caption = work.workingCaption()
 	}
 	work.invalidate()
 	return true
@@ -106,6 +107,7 @@ func (work *Workspace) drainStaged() bool {
 
 // closeStaged cancels and joins the staging worker before window shutdown.
 func (work *Workspace) closeStaged() {
+	work.working.rollback = nil
 	if work.working.stager == nil {
 		return
 	}

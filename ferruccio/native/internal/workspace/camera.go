@@ -51,6 +51,13 @@ func (work *Workspace) undoCamera(ctx widget.Context, redo bool) {
 	if work.state.document.Text() == before {
 		return
 	}
+	if work.restoreWorking(work.state.document.Text()) {
+		work.stopPreview()
+		work.play.sizeObject, work.play.poseObject, work.play.groupAreaID = "", "", ""
+		work.status = "History restored · restoring working view"
+		work.invalidate()
+		return
+	}
 	if work.play.disclosure == "size" || work.play.disclosure == "add" || work.play.disclosure == "coordinates" || work.play.disclosure == "region" || work.play.disclosure == "film" || work.play.disclosure == "stock" {
 		work.stopPreview()
 		work.play.sizeObject, work.play.poseObject, work.play.groupAreaID = "", "", ""

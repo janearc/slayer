@@ -21,7 +21,18 @@ mkdir "$tmp/content"
 cp -R bin/Ferruccio.app "$tmp/content/Ferruccio.app"
 cp doc/applications/ferruccio/howto-run-dis.md "$tmp/content/howto-run-dis.md"
 ln -s /Applications "$tmp/content/Applications"
-hdiutil create -quiet -format UDZO -volname Ferruccio -srcfolder "$tmp/content" "$tmp/image.dmg"
+# on GitHub's macOS runners, hdiutil create fails now and then with
+# "Resource busy" while the system scans the new files; a second try
+# after a pause gets through
+attempt=1
+until hdiutil create -quiet -ov -format UDZO -volname Ferruccio -srcfolder "$tmp/content" "$tmp/image.dmg"; do
+    if [ "$attempt" -ge 3 ]; then
+        echo "build-dmg: hdiutil create failed $attempt times" >&2; exit 1
+    fi
+    echo "build-dmg: hdiutil create failed on attempt $attempt; trying again in 10 s" >&2
+    attempt=$((attempt + 1))
+    sleep 10
+done
 shasum -a 256 "$tmp/image.dmg" | cut -d ' ' -f 1 > "$tmp/checksum"
 mv -f "$tmp/image.dmg" "$out"
 mv -f "$tmp/checksum" "$out.sha256"

@@ -76,6 +76,7 @@ func (work *Workspace) submitGeneratedHeading(text string) error {
 	if err := work.state.document.SetGeneratedHeading(object.ID(), degrees); err != nil {
 		return err
 	}
+	work.rememberWorking(work.working.scene)
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())
 	work.needsCheck = false
@@ -144,6 +145,7 @@ func (work *Workspace) submitCoordinates(withHeading bool) error {
 	if before == work.state.document.Text() {
 		return nil
 	}
+	work.rememberWorking(work.working.scene)
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())
 	work.needsCheck = false

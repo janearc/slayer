@@ -1,4 +1,4 @@
-written by `game signature` and committed. taken at 334567f.
+written by `game signature` and committed. taken at 0a1d1e3.
 
 # signature
 
@@ -6,7 +6,7 @@ written by `game signature` and committed. taken at 334567f.
 
 | directory | go | test | ratio | other | files |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| . | 0 | 0 | - | 8081 | 18 |
+| . | 0 | 0 | - | 8273 | 18 |
 | .game5 | 0 | 0 | - | 7 | 1 |
 | .game5/excludes | 0 | 0 | - | 31 | 1 |
 | .game5/lint | 0 | 0 | - | 16 | 3 |
@@ -17,7 +17,7 @@ written by `game signature` and committed. taken at 334567f.
 | .game5/targets | 0 | 0 | - | 23 | 10 |
 | .game5/wants | 0 | 0 | - | 8 | 2 |
 | .github | 0 | 0 | - | 95 | 2 |
-| .github/workflows | 0 | 0 | - | 93 | 2 |
+| .github/workflows | 0 | 0 | - | 101 | 2 |
 | .idea | 0 | 0 | - | 31 | 4 |
 | airlight | 1267 | 2336 | 1.8 | 0 | 18 |
 | airlight/mocks | 84 | 0 | 0.0 | 0 | 1 |
@@ -181,7 +181,7 @@ written by `game signature` and committed. taken at 334567f.
 | emit | 733 | 1135 | 1.5 | 0 | 19 |
 | emit/testdata | 0 | 0 | - | 57 | 1 |
 | fermat | 281 | 234 | 0.8 | 0 | 4 |
-| ferruccio | 0 | 0 | - | 850 | 15 |
+| ferruccio | 0 | 0 | - | 849 | 15 |
 | ferruccio/assets | 0 | 0 | - | 0 | 1 |
 | ferruccio/cmd/atelier | 158 | 67 | 0.4 | 0 | 3 |
 | ferruccio/cmd/atelier-capture | 88 | 74 | 0.8 | 0 | 2 |
@@ -190,15 +190,15 @@ written by `game signature` and committed. taken at 334567f.
 | ferruccio/gallery | 0 | 0 | - | 43 | 1 |
 | ferruccio/internal/assets | 48 | 54 | 1.1 | 18173 | 20 |
 | ferruccio/internal/capture | 44 | 70 | 1.6 | 0 | 2 |
-| ferruccio/internal/draft | 1613 | 2174 | 1.3 | 106 | 32 |
-| ferruccio/internal/preview | 1997 | 2722 | 1.4 | 177 | 46 |
+| ferruccio/internal/draft | 1661 | 2195 | 1.3 | 107 | 32 |
+| ferruccio/internal/preview | 2017 | 2785 | 1.4 | 177 | 46 |
 | ferruccio/internal/preview/testdata | 0 | 0 | - | 245 | 6 |
 | ferruccio/internal/studio | 1141 | 400 | 0.4 | 0 | 11 |
-| ferruccio/native | 0 | 0 | - | 623 | 10 |
+| ferruccio/native | 0 | 0 | - | 628 | 10 |
 | ferruccio/native/cmd/ferruccio | 1714 | 1402 | 0.8 | 0 | 15 |
 | ferruccio/native/cmd/ferruccio-stage | 106 | 165 | 1.6 | 0 | 5 |
 | ferruccio/native/internal/appearance | 812 | 409 | 0.5 | 0 | 5 |
-| ferruccio/native/internal/appearance/themes | 0 | 0 | - | 1178 | 18 |
+| ferruccio/native/internal/appearance/themes | 0 | 0 | - | 1175 | 18 |
 | ferruccio/native/internal/editor | 761 | 490 | 0.6 | 0 | 5 |
 | ferruccio/native/internal/headless | 114 | 0 | 0.0 | 0 | 1 |
 | ferruccio/native/internal/look | 425 | 293 | 0.7 | 0 | 4 |
@@ -206,11 +206,11 @@ written by `game signature` and committed. taken at 334567f.
 | ferruccio/native/internal/processmetrics | 127 | 117 | 0.9 | 0 | 3 |
 | ferruccio/native/internal/settings | 463 | 336 | 0.7 | 0 | 3 |
 | ferruccio/native/internal/stagewire | 768 | 336 | 0.4 | 0 | 8 |
-| ferruccio/native/internal/workingview | 959 | 429 | 0.4 | 51 | 7 |
-| ferruccio/native/internal/workspace | 6999 | 8242 | 1.2 | 74 | 102 |
+| ferruccio/native/internal/workingview | 961 | 461 | 0.5 | 51 | 7 |
+| ferruccio/native/internal/workspace | 7192 | 8618 | 1.2 | 74 | 104 |
 | ferruccio/native/patches | 0 | 0 | - | 550 | 2 |
 | ferruccio/native/third_party | 0 | 0 | - | 3 | 1 |
-| ferruccio/scripts | 0 | 0 | - | 364 | 8 |
+| ferruccio/scripts | 0 | 0 | - | 378 | 8 |
 | film | 794 | 1023 | 1.3 | 0 | 18 |
 | firefront | 184 | 431 | 2.3 | 0 | 6 |
 | flame | 1256 | 2110 | 1.7 | 0 | 38 |
@@ -304,7 +304,7 @@ written by `game signature` and committed. taken at 334567f.
 | internal/appicon | 16 | 44 | 2.8 | 9 | 5 |
 | internal/commandtest | 25 | 36 | 1.4 | 0 | 2 |
 | internal/observability | 1322 | 1050 | 0.8 | 0 | 24 |
-| job | 2840 | 5832 | 2.1 | 1533 | 74 |
+| job | 2847 | 5916 | 2.1 | 1533 | 75 |
 | job/testdata | 0 | 0 | - | 30 | 1 |
 | jobs | 0 | 0 | - | 141 | 18 |
 | jobs/alfa-gas-cloud-proof | 0 | 0 | - | 983 | 11 |
@@ -347,7 +347,7 @@ written by `game signature` and committed. taken at 334567f.
 | manufacture/plants/ferns | 173 | 147 | 0.8 | 20 | 6 |
 | manufacture/plants/seasonal | 1035 | 534 | 0.5 | 1171 | 14 |
 | manufacture/profilecheck | 304 | 97 | 0.3 | 0 | 4 |
-| manufacture/testdata | 498 | 331 | 0.7 | 5727 | 100 |
+| manufacture/testdata | 498 | 331 | 0.7 | 5665 | 99 |
 | manufacture/testdata/history | 0 | 0 | - | 45 | 2 |
 | manufacture/testdata/history/historical-public-errors | 0 | 0 | - | 21 | 3 |
 | manufacture/testdata/history/orca-arithmetic-evidence | 0 | 0 | - | 33 | 3 |
@@ -495,9 +495,9 @@ written by `game signature` and committed. taken at 334567f.
 | section | 575 | 1951 | 3.4 | 0 | 17 |
 | section/testdata | 0 | 0 | - | 334 | 5 |
 | session | 15519 | 30652 | 2.0 | 373 | 365 |
-| session/placement | 1672 | 1183 | 0.7 | 108 | 29 |
+| session/placement | 1676 | 1205 | 0.7 | 108 | 30 |
 | session/testdata | 358 | 0 | 0.0 | 653 | 29 |
-| set | 12100 | 15723 | 1.3 | 13921 | 203 |
+| set | 12139 | 15723 | 1.3 | 13921 | 203 |
 | set/testdata | 0 | 0 | - | 1830 | 20 |
 | sets | 0 | 0 | - | 34033 | 211 |
 | sets/bioforms | 0 | 0 | - | 1958 | 35 |
@@ -575,21 +575,21 @@ written by `game signature` and committed. taken at 334567f.
 | validation/refraction-ab/patches | 0 | 0 | - | 33 | 3 |
 | weather | 1391 | 698 | 0.5 | 305 | 23 |
 | weathering | 2235 | 1651 | 0.7 | 0 | 19 |
-| total | 351027 | 429576 | 1.2 | 296410 | 7386 |
+| total | 351340 | 430174 | 1.2 | 296564 | 7389 |
 
 ## by language
 
 | language | files | lines |
 | --- | ---: | ---: |
-| go | 2159 | 351027 |
-| go test | 2995 | 429576 |
-| markdown | 377 | 40850 |
-| shell | 17 | 867 |
+| go | 2160 | 351340 |
+| go test | 2998 | 430174 |
+| markdown | 377 | 40883 |
+| shell | 17 | 881 |
 | c | 9 | 562 |
-| yaml | 771 | 165353 |
+| yaml | 771 | 165361 |
 | json | 162 | 45049 |
 | game | 159 | 384 |
-| other | 737 | 43345 |
+| other | 736 | 43444 |
 
 ## go tests against go
 
@@ -605,6 +605,6 @@ more            25  ##########
 
 ## totals
 
-lines     go 351027, go test 429576, everything 1077013
-files     7386
+lines     go 351340, go test 430174, everything 1078078
+files     7389
 packages  324

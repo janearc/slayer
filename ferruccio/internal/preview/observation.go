@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/janearc/puzzlemouth/yamlfile"
 )
 
 // errNoMatchingJob is a readable ledger that holds no job for this plan.
 var errNoMatchingJob = errors.New("Azazel ledger has no matching preview job")
+
+// The dispatcher normally refreshes every second; allow for a busy host.
+const schedulerStaleAfter = 30 * time.Second
 
 // decodeReply checks duplicate keys and JSON syntax before consuming owner data.
 func decodeReply(raw []byte, target any) error {
@@ -70,17 +74,22 @@ func terminalJob(job queueJob) bool {
 }
 
 type observedJob struct {
-	job    queueJob
-	raw    []byte
-	paused string
+	job          queueJob
+	raw          []byte
+	paused       string
+	lastSchedule time.Time
+	hasSnapshot  bool
 }
 
 // readObservation filters the retained ledger by this plan's sequence and owner.
 func readObservation(raw []byte, request queueRequest, sequence uint64) (observedJob, error) {
 	var snapshot struct {
-		Version int               `json:"version"`
-		Paused  string            `json:"paused"`
-		Jobs    []json.RawMessage `json:"jobs"`
+		Version    int    `json:"version"`
+		Paused     string `json:"paused"`
+		Scheduling *struct {
+			Observed time.Time `json:"observed"`
+		} `json:"scheduling"`
+		Jobs []json.RawMessage `json:"jobs"`
 	}
 	if err := decodeReply(raw, &snapshot); err != nil {
 		return observedJob{}, err
@@ -114,7 +123,10 @@ func readObservation(raw []byte, request queueRequest, sequence uint64) (observe
 		if err != nil {
 			return observedJob{}, err
 		}
-		found = &observedJob{job: job, raw: rawJob, paused: snapshot.Paused}
+		found = &observedJob{job: job, raw: rawJob, paused: snapshot.Paused, hasSnapshot: true}
+		if snapshot.Scheduling != nil {
+			found.lastSchedule = snapshot.Scheduling.Observed
+		}
 	}
 	if found == nil {
 		return observedJob{}, errNoMatchingJob
@@ -124,6 +136,11 @@ func readObservation(raw []byte, request queueRequest, sequence uint64) (observe
 
 // update reports execution only after the owner's executing flag confirms it.
 func (observation observedJob) update() Update {
+	return observation.updateAt(time.Now())
+}
+
+// updateAt reports stale scheduler evidence without claiming the worker is dead.
+func (observation observedJob) updateAt(now time.Time) Update {
 	state := observation.job.State
 	if state == "running" && !observation.job.Executing {
 		state = "waiting"
@@ -131,6 +148,9 @@ func (observation observedJob) update() Update {
 	held := observation.job.Held
 	if held == "" && (state == "queued" || state == "waiting" || state == "running") {
 		held = observation.paused
+	}
+	if held == "" && state == "queued" && observation.hasSnapshot && (observation.lastSchedule.IsZero() || now.Sub(observation.lastSchedule) > schedulerStaleAfter) {
+		held = "No recent queue worker activity · check the queue worker"
 	}
 	return Update{State: state, Held: held, Sequence: observation.job.Sequence, Terminal: terminalJob(observation.job)}
 }

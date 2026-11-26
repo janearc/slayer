@@ -18,6 +18,7 @@ func (work *Workspace) themePicker() widget.Widget {
 				work.problem(err)
 				return
 			}
+			work.working.dirty = true
 			work.rebuild()
 		}))
 	choice.SetID("Chroma theme")

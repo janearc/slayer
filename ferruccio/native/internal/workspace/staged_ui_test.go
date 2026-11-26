@@ -85,17 +85,21 @@ func TestWorkingFallbackWithBuiltHelper(t *testing.T) {
 
 func TestStagedWorkspaceShowsNoticeAndFailure(t *testing.T) {
 	work := playWorkspace(t)
+	work.working.rollback = &workingRollback{scene: &placement.DisplayScene{Width: 1}}
 	work.requestStaged(func(_ context.Context, _, _, _ string) (*stagedView, error) {
 		return &stagedView{scene: &placement.DisplayScene{Width: 640, Height: 400}, notice: "aggregate only"}, nil
 	})
 	waitStaged(t, work)
-	if work.working.scene == nil || !strings.Contains(work.diagnostic, "aggregate only") {
+	if work.working.scene == nil || work.working.rollback != nil || !strings.Contains(work.diagnostic, "aggregate only") {
 		t.Fatalf("staged scene or notice missing: %q", work.diagnostic)
 	}
-	work.diagnostic = ""
-	if !strings.Contains(work.workingCaption(), "aggregate only") || !strings.Contains(work.playReadout(), "aggregate only") {
+	if !strings.Contains(work.workingCaption(), "View limitations") || work.working.notice != "aggregate only" {
 		t.Fatal("staged notice vanished after a later validation")
 	}
+	if strings.Contains(work.playReadout(), "aggregate only") {
+		t.Fatal("staged notice obscures the editor readout")
+	}
+	work.diagnostic = ""
 	work.requestStaged(func(_ context.Context, _, _, _ string) (*stagedView, error) {
 		return nil, errors.New("a missing shelf")
 	})
@@ -131,6 +135,66 @@ func TestWorkingFallbackStagesAndCancelsWhenDraftChanges(t *testing.T) {
 		t.Fatal("changing to a supported set did not cancel staging")
 	}
 	work.closeStaged()
+}
+
+func TestUndoWhileStagingRestoresThePreviousExactScene(t *testing.T) {
+	work := playWorkspace(t)
+	source := strings.Replace(checkingSource, "visitor: {kind:", "visitor: {alight: true, kind:", 1)
+	work.state.document.Replace(source)
+	work.editor.SetText(source)
+	work.play.selected = "scene.set.things/visitor"
+	original := &placement.DisplayScene{Width: 640, Height: 400}
+	work.working.scene, work.working.source, work.working.path = original, source, work.state.path
+	work.working.notice = "original staged scene"
+	started, cancelled := make(chan struct{}), make(chan struct{})
+	work.working.stageOverride = func(ctx context.Context, _, _, _ string) (*stagedView, error) {
+		close(started)
+		<-ctx.Done()
+		close(cancelled)
+		return nil, ctx.Err()
+	}
+	defer work.closeStaged()
+	if err := work.changePose(1, 0, 0); err != nil {
+		t.Fatal(err)
+	}
+	work.updateWorking()
+	<-started
+	if !work.working.staging || work.working.scene != nil {
+		t.Fatal("changed scene was not staging")
+	}
+	work.undoCamera(work.ui.Window().Context(), false)
+	if work.state.document.Text() != source || work.working.scene != original || work.working.source != source || work.working.staging {
+		t.Fatal("undo did not immediately restore the exact previous scene")
+	}
+	if work.working.notice != "original staged scene" || work.working.rollback != nil {
+		t.Fatal("restored scene lost its notice or retained the backup")
+	}
+	select {
+	case <-cancelled:
+	case <-time.After(3 * time.Second):
+		t.Fatal("undo did not cancel the obsolete stage")
+	}
+}
+
+func TestCommittedGestureKeepsItsUnchangedBaseForUndo(t *testing.T) {
+	work := playWorkspace(t)
+	source := work.state.document.Text()
+	base := &placement.DisplayScene{Width: 640, Height: 400, Objects: []placement.DisplayObject{{ID: "scene.set.things/larson"}}}
+	work.working.scene, work.working.source, work.working.path, work.working.displayed = base, source, work.state.path, true
+	work.viewer.dragObject = true
+	work.beginWorking()
+	if work.working.gesture == nil {
+		t.Fatal("gesture did not start")
+	}
+	work.working.scene = &placement.DisplayScene{Width: 111, Height: 222}
+	if err := work.changePose(1, 0, 0); err != nil {
+		t.Fatal(err)
+	}
+	work.endWorking(true)
+	work.undoCamera(work.ui.Window().Context(), false)
+	if work.working.scene == nil || work.working.scene.Width != 640 || work.working.scene.Height != 400 || work.state.document.Text() != source {
+		t.Fatal("undo restored the transient dragged scene instead of the unchanged base")
+	}
 }
 
 func TestStagingWaitsForInputToSettle(t *testing.T) {

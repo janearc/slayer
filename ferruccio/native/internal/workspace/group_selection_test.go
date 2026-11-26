@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -28,6 +29,17 @@ func TestGeneratedMemberSelectsReadOnlyGroup(t *testing.T) {
 	if !strings.Contains(work.playReadout(), "generated group · read-only") {
 		t.Fatalf("group identity not explained: %q", work.playReadout())
 	}
+	_, cancel := context.WithCancel(context.Background())
+	work.cancel = cancel
+	work.queueObserved, work.queueState, work.queueHeld = true, "queued", "No recent queue worker activity · check the queue worker"
+	work.working.notice = "generated members are not individually editable"
+	work.diagnostic = work.working.notice
+	if readout := work.playReadout(); !strings.Contains(readout, "Queued") || !strings.Contains(readout, "check the queue worker") {
+		t.Fatalf("selected group hid queued render status: %q", readout)
+	}
+	cancel()
+	work.cancel = nil
+	work.diagnostic = ""
 	work.viewer.dragObject = true
 	work.beginWorking()
 	work.viewer.changeObject(.5, .5, .6, .6)

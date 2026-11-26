@@ -13,10 +13,10 @@ import (
 	uitheme "github.com/gogpu/ui/theme"
 	"github.com/gogpu/ui/theme/devtools"
 	"github.com/gogpu/ui/widget"
-	"github.com/janearc/chroma/libtheme/colourway"
-	"github.com/janearc/chroma/libtheme/css"
-	"github.com/janearc/chroma/libtheme/primitives/swatch"
-	"github.com/janearc/chroma/libtheme/spaces/srgb"
+	"github.com/janearc/libtheme-css/colourway"
+	"github.com/janearc/libtheme-css/css"
+	"github.com/janearc/libtheme-css/primitives/swatch"
+	"github.com/janearc/libtheme-css/spaces/srgb"
 )
 
 //go:embed themes/*.css

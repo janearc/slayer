@@ -29,8 +29,50 @@ type workingState struct {
 	stager                      *stageLoader
 	staging                     bool
 	stageOverride               stageBuild
+	rollback                    *workingRollback
 	// late is how many readbacks the next GPU view is told to miss.
 	late int
+}
+
+// workingRollback retains the last exact scene only while its replacement is staging.
+type workingRollback struct {
+	document             *draft.Document
+	scene                *placement.DisplayScene
+	parsed               *set.Set
+	source, path, notice string
+}
+
+func (work *Workspace) rememberWorking(scene *placement.DisplayScene) {
+	live := &work.working
+	if scene == nil || live.source == "" || live.path != work.state.path {
+		return
+	}
+	if live.rollback != nil && live.rollback.document == work.state.document && live.rollback.source == live.source && live.rollback.path == live.path {
+		return
+	}
+	live.rollback = &workingRollback{document: work.state.document, scene: scene, parsed: live.parsed, source: live.source, path: live.path, notice: live.notice}
+}
+
+func (work *Workspace) restoreWorking(text string) bool {
+	live, saved := &work.working, work.working.rollback
+	if saved == nil || saved.document != work.state.document || saved.source != text || saved.path != work.state.path {
+		return false
+	}
+	if live.stager != nil {
+		live.stager.discard()
+	}
+	var inverse *workingRollback
+	if live.scene == saved.scene && live.path == saved.path && live.source != saved.source {
+		inverse = &workingRollback{document: saved.document, scene: live.scene, parsed: live.parsed, source: live.source, path: live.path, notice: live.notice}
+	}
+	live.scene, live.parsed = saved.scene, saved.parsed
+	live.source, live.path, live.notice = saved.source, saved.path, saved.notice
+	live.failure, live.staging, live.displayed = "", false, false
+	live.dirty, live.waiting, live.rollback = true, work.play.renderedText != text, inverse
+	work.diagnostic = saved.notice
+	work.caption = work.workingCaption()
+	work.refreshLayout = true
+	return true
 }
 
 // gestureOrigin resolves a source placement to the renderer's actual anchor.
@@ -261,6 +303,9 @@ func (work *Workspace) endWorking(committed bool) {
 		return
 	}
 	committed = committed && live.source != work.state.document.Text()
+	if committed {
+		work.rememberWorking(live.gesture)
+	}
 	if !committed {
 		live.scene = live.gesture
 	}
@@ -282,6 +327,9 @@ func (work *Workspace) updateWorking() {
 	}
 	live := &work.working
 	text := work.state.document.Text()
+	if live.rollback != nil && (live.rollback.document != work.state.document || live.rollback.path != work.state.path) {
+		live.rollback = nil
+	}
 	if live.gesture == nil && (live.source != text || live.path != work.state.path) {
 		if live.stager != nil {
 			live.stager.discard()
@@ -298,6 +346,7 @@ func (work *Workspace) updateWorking() {
 				}
 			}
 			live.scene = nil
+			live.rollback = nil
 			live.failure = "working view does not yet display job documents"
 			if err := work.state.document.Check(); err != nil {
 				live.failure = err.Error()
@@ -324,10 +373,12 @@ func (work *Workspace) updateWorking() {
 				}
 			}
 			live.failure = err.Error()
+			live.rollback = nil
 			work.diagnostic = "Interactive geometry unavailable: " + err.Error()
 			work.caption = "Interactive geometry unavailable · see the reason below"
 			return
 		}
+		live.rollback = nil
 		live.dirty = true
 		live.waiting = work.play.renderedText != text
 	}
@@ -407,7 +458,7 @@ func (work *Workspace) updateWorking() {
 // workingCaption keeps staged limitations visible after drawing and validation.
 func (work *Workspace) workingCaption() string {
 	if work.working.notice != "" {
-		return "Staged working view · " + work.working.notice
+		return "Staged working view · see View limitations"
 	}
 	return "Working view · opaque native geometry · Slayer lighting refines after release"
 }

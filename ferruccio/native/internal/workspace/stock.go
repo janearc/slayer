@@ -46,12 +46,20 @@ func (work *Workspace) changeStock(index int) error {
 	if index <= 0 || index > len(stocks) {
 		return fmt.Errorf("choose a development stock")
 	}
+	current := work.workingCurrent()
 	before := work.state.document.Text()
 	if err := work.state.document.SetStock(stocks[index-1]); err != nil {
 		return err
 	}
 	if work.state.document.Text() == before {
 		return nil
+	}
+	if current {
+		// Stock only develops the finished light; it does not change the
+		// staged geometry or camera. Preserve its exact old source for undo.
+		work.rememberWorking(work.working.scene)
+		work.working.source = work.state.document.Text()
+		work.working.waiting = true
 	}
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())

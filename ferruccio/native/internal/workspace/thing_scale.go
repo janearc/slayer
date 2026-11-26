@@ -104,6 +104,7 @@ func (work *Workspace) changeThingScale(factor float64) error {
 	if work.state.document.Text() == before {
 		return nil
 	}
+	work.rememberWorking(work.working.scene)
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())
 	work.play.scaleDocument, work.play.scaleID, work.play.scaleSource, work.play.scalePath = work.state.document, work.play.selected, work.state.document.Text(), work.state.path

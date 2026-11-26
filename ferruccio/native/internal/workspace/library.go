@@ -130,6 +130,7 @@ func (work *Workspace) resetDocumentView() {
 	work.working.scene = nil
 	work.working.parsed = nil
 	work.working.gesture = nil
+	work.working.rollback = nil
 	work.working.source = ""
 	work.working.path = ""
 	work.working.failure = ""

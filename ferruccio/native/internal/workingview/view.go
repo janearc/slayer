@@ -14,6 +14,7 @@ import (
 	"github.com/janearc/slayer/session/placement"
 	"image"
 	"math"
+	"math/bits"
 	"time"
 )
 
@@ -517,12 +518,13 @@ func (view *View) place(scene *placement.DisplayScene, width, height int) ([]dra
 			return
 		}
 		current := &batches[index]
-		for i, place := range places {
-			if mask[i/64]&(uint64(1)<<uint(i%64)) == 0 {
-				continue
-			}
-			for _, value := range frameMatrix(place, false) {
-				current.data = binary.LittleEndian.AppendUint32(current.data, math.Float32bits(value))
+		for block, visible := range mask {
+			for visible != 0 {
+				i := block*64 + bits.TrailingZeros64(visible)
+				for _, value := range frameMatrix(places[i], false) {
+					current.data = binary.LittleEndian.AppendUint32(current.data, math.Float32bits(value))
+				}
+				visible &= visible - 1
 			}
 		}
 	}

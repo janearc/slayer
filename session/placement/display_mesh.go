@@ -12,11 +12,12 @@ import (
 )
 
 type displayBuilder struct {
-	skin       DisplayMesh
-	vertices   map[DisplayVertex]uint32
-	positions  map[maths.Vec]uint32
-	edges      map[[2]uint32]bool
-	components displayComponents
+	skin            DisplayMesh
+	vertices        map[DisplayVertex]uint32
+	positions       map[maths.Vec]uint32
+	vertexPositions []uint32
+	edges           map[uint64]struct{}
+	components      displayComponents
 	// heightFields enables labeled height-field approximations for staged views.
 	heightFields bool
 	// material is the name of the material of the part being added.
@@ -26,7 +27,7 @@ type displayBuilder struct {
 // newDisplayBuilder returns an empty display builder with its vertex,
 // position and edge tables made.
 func newDisplayBuilder() *displayBuilder {
-	return &displayBuilder{vertices: map[DisplayVertex]uint32{}, positions: map[maths.Vec]uint32{}, edges: map[[2]uint32]bool{}}
+	return &displayBuilder{vertices: map[DisplayVertex]uint32{}, positions: map[maths.Vec]uint32{}, edges: map[uint64]struct{}{}}
 }
 
 // thing adds one part to the display mesh. Hidden parts are skipped. The
@@ -78,7 +79,8 @@ func (builder *displayBuilder) surface(solid shape.Shape, at maths.Subspace, col
 			builder.triangle(points, normals, smooth, at, colour)
 		}
 	case *shape.MeshGroup:
-		for _, member := range made.Members() {
+		for i := 0; i < made.MemberCount(); i++ {
+			member := made.Member(i)
 			if err := builder.surface(member.Mesh, member.Space.Within(at), colour); err != nil {
 				return err
 			}
@@ -127,6 +129,7 @@ func (builder *displayBuilder) triangle(points, normals [3]maths.Vec, smooth boo
 		if !known {
 			index = uint32(len(builder.skin.Vertices))
 			builder.skin.Vertices = append(builder.skin.Vertices, vertex)
+			builder.vertexPositions = append(builder.vertexPositions, builder.positionID(vertex.Position))
 			builder.vertices[vertex] = index
 		}
 		indices[corner] = index
@@ -134,13 +137,13 @@ func (builder *displayBuilder) triangle(points, normals [3]maths.Vec, smooth boo
 	builder.skin.Indices = append(builder.skin.Indices, indices[:]...)
 	for edge := range 3 {
 		a, b := indices[edge], indices[(edge+1)%3]
-		pa, pb := builder.positionID(builder.skin.Vertices[a].Position), builder.positionID(builder.skin.Vertices[b].Position)
+		pa, pb := builder.vertexPositions[a], builder.vertexPositions[b]
 		if pa > pb {
 			pa, pb = pb, pa
 		}
-		key := [2]uint32{pa, pb}
-		if !builder.edges[key] {
-			builder.edges[key] = true
+		key := uint64(pa)<<32 | uint64(pb)
+		if _, found := builder.edges[key]; !found {
+			builder.edges[key] = struct{}{}
 			builder.skin.Edges = append(builder.skin.Edges, a, b)
 		}
 	}

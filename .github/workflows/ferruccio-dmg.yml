@@ -49,6 +49,9 @@ jobs:
       - name: Build the disk image
         run: |
           go tool game build --unattended ferruccio-dmg
+      - name: Show the build logs
+        if: failure()
+        run: tail -n 40 bin/*.log
       - name: Check the image and bundled executables
         run: |
           hdiutil verify bin/Ferruccio.dmg
@@ -59,7 +62,7 @@ jobs:
           app="$mount/Ferruccio.app"
           (cd "$app" && shasum -a 256 -c Contents/Resources/SHA256SUMS)
           for executable in Contents/MacOS/ferruccio Contents/MacOS/ferruccio-stage Contents/Resources/engine/slayer Contents/Resources/engine/azazel Contents/Resources/engine/game5; do
-            lipo -verify_arch arm64 "$app/$executable"
+            lipo "$app/$executable" -verify_arch arm64
           done
           go version -m "$app/Contents/Resources/engine/game5" | grep -E '^\s+mod\s+github.com/janearc/game\s'
           shasum -a 256 bin/Ferruccio.dmg

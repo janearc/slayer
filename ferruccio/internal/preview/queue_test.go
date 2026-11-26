@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"go.uber.org/mock/gomock"
 )
@@ -110,6 +111,68 @@ func jobSnapshot(t *testing.T, request queueRequest, state, held string, executi
 		result.State = state
 	}
 	return queueJSON(t, map[string]any{"version": 1, "paused": held, "jobs": []queueJob{{Sequence: 41, Request: request, State: state, Executing: executing, Result: result}}})
+}
+
+func TestQueuedPreviewReportsStaleWorkerObservation(t *testing.T) {
+	_, tools := queuedPlan(t)
+	request := queueRequest{Agent: tools.Agent, Key: "stale-worker"}
+	now := time.Date(2026, 11, 25, 15, 50, 0, 0, time.UTC)
+	for _, sample := range []struct {
+		name     string
+		observed time.Time
+		paused   string
+		want     string
+	}{
+		{"worker stopped", now.Add(-59 * time.Minute), "", "No recent queue worker activity"},
+		{"never observed", time.Time{}, "", "No recent queue worker activity"},
+		{"worker active", now.Add(-time.Second), "", ""},
+		{"queue paused", now.Add(-time.Hour), "maintenance", "maintenance"},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			snapshot := map[string]any{"version": 1, "paused": sample.paused, "jobs": []queueJob{{Sequence: 100, Request: request, State: "queued"}}}
+			if !sample.observed.IsZero() {
+				snapshot["scheduling"] = map[string]any{"observed": sample.observed}
+			}
+			observation, err := readObservation(queueJSON(t, snapshot), request, 100)
+			if err != nil {
+				t.Fatal(err)
+			}
+			update := observation.updateAt(now)
+			if update.State != "queued" || update.Terminal || !strings.Contains(update.Held, sample.want) || (sample.want == "" && update.Held != "") {
+				t.Fatalf("queued observation: %+v, want hold %q", update, sample.want)
+			}
+		})
+	}
+}
+
+func TestPreviewWaitsForWorkerThenAcceptsItsImage(t *testing.T) {
+	plan, tools := queuedPlan(t)
+	runner := NewMockRunner(gomock.NewController(t))
+	var request queueRequest
+	submit := expectSubmit(t, runner, tools, plan, &request, nil)
+	waiting := expectStatus(t, runner, tools, func() ([]byte, error) {
+		return queueJSON(t, map[string]any{
+			"version":    1,
+			"scheduling": map[string]any{"observed": time.Now().Add(-time.Hour)},
+			"jobs":       []queueJob{{Sequence: 41, Request: request, State: "queued"}},
+		}), nil
+	}).After(submit)
+	expectStatus(t, runner, tools, func() ([]byte, error) {
+		queuePNG(t, plan, 16, 12)
+		return jobSnapshot(t, request, "succeeded", "", false), nil
+	}).After(waiting)
+	var updates []Update
+	if err := (queueClient{runner: runner}).run(context.Background(), tools, plan, io.Discard, func(update Update) {
+		updates = append(updates, update)
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if len(updates) < 3 || updates[1].State != "queued" || !strings.Contains(updates[1].Held, "check the queue worker") || updates[1].Terminal || !updates[len(updates)-1].Terminal {
+		t.Fatalf("workerless wait and completed image updates: %+v", updates)
+	}
+	if _, err := os.Stat(plan.Output); err != nil {
+		t.Fatalf("completed worker image missing: %v", err)
+	}
 }
 
 func TestQueuePausedAndClaimedAreNotAcceptedImages(t *testing.T) {

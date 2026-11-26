@@ -14,6 +14,25 @@ import (
 	"github.com/janearc/slayer/ferruccio/internal/preview"
 )
 
+func TestQueuedPreviewWithStaleWorkerShowsWhatToCheck(t *testing.T) {
+	work := playWorkspace(t)
+	_, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	work.cancel = cancel
+	work.progress = make(chan renderProgress, 1)
+	work.progress <- renderProgress{generation: work.generation, update: preview.Update{
+		Sequence: 100, State: "queued", Held: "No recent queue worker activity · check the queue worker",
+	}}
+	work.Tick()
+	readout := work.playReadout()
+	if !strings.Contains(readout, "Queued") || !strings.Contains(readout, "check the queue worker") || !strings.Contains(readout, "waiting for completed pixels") {
+		t.Fatalf("queued preview did not explain the missing worker: %q", readout)
+	}
+	if work.cancel == nil || work.output != "" {
+		t.Fatal("stale worker evidence cancelled the request or accepted an image")
+	}
+}
+
 // Queue acknowledgement and running metadata never stand in for new pixels.
 func TestQueueProgressTickRetainsTheDisplayedWorld(t *testing.T) {
 	work := playWorkspace(t)

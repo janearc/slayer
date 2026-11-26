@@ -196,6 +196,9 @@ func (work *Workspace) changePose(east, north, heading float64) error {
 	if before == work.state.document.Text() {
 		return nil
 	}
+	if work.working.gesture == nil {
+		work.rememberWorking(work.working.scene)
+	}
 	work.stopPreview()
 	work.editor.ApplyText(work.state.document.Text())
 	work.needsCheck = false
@@ -330,7 +333,10 @@ func (work *Workspace) playLayout() widget.Widget {
 		work.action("Render fully", true, func() bool { return work.Running() }, work.openRenderSetup),
 		work.action("Source", work.play.disclosure == "source", idle, func() { work.toggleDisclosure("source") }),
 	).Gap(18).PaddingXY(24, 12).Background(appearance.Ground)
-	world := primitives.VBox(primitives.Expanded(work.viewer), work.live(func() string { return work.caption })).Gap(8)
+	caption := primitives.HBox(primitives.Expanded(work.live(func() string { return work.caption })), work.action("View limitations…", false, func() bool { return work.working.notice == "" }, func() {
+		work.message("Working view limitations", work.working.notice)
+	})).Gap(12)
+	world := primitives.VBox(primitives.Expanded(work.viewer), caption).Gap(8)
 	var center widget.Widget = world
 	if work.play.disclosure != "" {
 		var detail widget.Widget
@@ -452,16 +458,6 @@ func (work *Workspace) objectPicker() widget.Widget {
 
 // playReadout keeps computation state, exact units and first-touch cues visible.
 func (work *Workspace) playReadout() string {
-	if group, ok := work.selectedGroup(); ok {
-		text := group.Name + " · generated group · read-only"
-		if work.play.selectionRegion {
-			text = group.Name + " · generated group · region editable"
-		}
-		if work.working.notice != "" {
-			text += " · " + work.working.notice
-		}
-		return text
-	}
 	if work.gesturing() && work.working.gesture != nil {
 		if work.viewer.travel != nil && work.viewer.travel.dragging {
 			return "Camera travel · drag left/right or approach/retreat · Shift to rise/fall · Escape cancels"
@@ -478,14 +474,18 @@ func (work *Workspace) playReadout() string {
 			}
 		}
 	}
-	if work.working.notice != "" {
-		return work.working.notice
-	}
-	if work.diagnostic != "" {
+	if work.diagnostic != "" && work.diagnostic != work.working.notice {
 		return work.diagnostic
 	}
 	if work.cancel != nil || work.pending.document != nil {
 		return work.previewProgressText()
+	}
+	if group, ok := work.selectedGroup(); ok {
+		text := group.Name + " · generated group · read-only"
+		if work.play.selectionRegion {
+			text = group.Name + " · generated group · region editable"
+		}
+		return text
 	}
 	object, ok := work.selectedObject()
 	if !ok {

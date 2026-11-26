@@ -3,8 +3,8 @@
 These CSS files are copied byte-for-byte from `janearc/chroma` commit
 `284aab1761ca9202052caee4e3b65e4e9c0a456f`, under
 `colourways/sources/`. The Atelier appearance loader reads their named colour
-roles with Chroma's `libtheme/css` package, pinned to the same commit in
-`native/go.mod` and `native/go.sum`.
+roles with the `css` package of `github.com/janearc/libtheme-css`, at the
+version `native/go.mod` and `native/go.sum` pin.
 
 The default `vaporwave` colours, and every selectable theme, come from these
 source files. `LICENSE.chroma` is the license from that source commit.
@@ -63,8 +63,5 @@ resolved `panel` and `surface-1` roles are exported as `DecorativePanel` and
 `DecorativeRaised` for non-text framing. This keeps their source colors
 available without putting prose on surfaces that fail the contrast floor.
 
-The pinned Chroma source archive for this machine's local Go module proxy is
-`../../../../../chroma-module-proxy/github.com/janearc/chroma/@v/v0.0.0-20261008193048-284aab1761ca.zip`,
-SHA-256 `350eac41be3bc275848282c49bc12e43837451f15452fec5e61a2d32a321ae60`.
-The module path and version are pinned in `native/go.mod` and its checksum in
-`native/go.sum`; `LICENSE.chroma` is copied from the same source commit.
+The CSS is copied, not built from Chroma, so the build does not need Chroma
+as a module. `LICENSE.chroma` is copied from the same source commit.

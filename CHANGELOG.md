@@ -1,3 +1,7 @@
+## slayer v0.1.8 25 nov 2026
+
+- i am still not a potato
+
 ## slayer v0.1.7 25 nov 2026
 
 - fussing with github actions to get ferruccio built with releases

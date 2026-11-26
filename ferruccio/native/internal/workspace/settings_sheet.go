@@ -323,12 +323,14 @@ func (work *Workspace) saveSetting(name settings.Name, value string) {
 		if err := appearance.SelectTheme(value); err != nil {
 			work.problem(err)
 		} else {
+			work.working.dirty = true
 			work.rebuild()
 		}
 	}
 	work.status = "Settings saved"
 	if name == settings.Cache || name == settings.Shelf || name == settings.Data || name == settings.Processors {
 		work.working.source = ""
+		work.working.rollback = nil
 	}
 	work.refreshRenderBlocked(work.state.document.Check() == nil)
 	work.requestSettings()
@@ -338,6 +340,14 @@ func (work *Workspace) saveSetting(name settings.Name, value string) {
 // requestOpen defers the file chooser to the UI thread.
 func (work *Workspace) requestOpen() {
 	work.wantOpen.Store(true)
+	if work.host != nil {
+		work.host.RequestRedraw()
+	}
+}
+
+// requestSave defers saving, including a native chooser when needed.
+func (work *Workspace) requestSave() {
+	work.wantSave.Store(true)
 	if work.host != nil {
 		work.host.RequestRedraw()
 	}

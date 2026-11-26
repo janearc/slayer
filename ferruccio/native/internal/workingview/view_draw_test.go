@@ -242,6 +242,38 @@ func TestDrawBatchesKeepVisibleInstancesAcrossMaskWords(t *testing.T) {
 	}
 }
 
+func TestSparseBatchDrawsTheVisiblePlacements(t *testing.T) {
+	view, scene := openView(t)
+	object := scene.Objects[0]
+	places := make([]maths.Subspace, 130)
+	for i := range places {
+		places[i] = maths.Subspace{Origin: scene.Eye.Out(maths.V(1000000, 0, -100))}
+	}
+	for i, index := range []int{1, 64, 129} {
+		places[index] = maths.Subspace{Origin: scene.Eye.Out(maths.V(float64(i-1)*12, 0, -100))}
+	}
+	scene.Objects = nil
+	scene.Batches = []placement.StagedBatch{{Mesh: object.Mesh, Places: places}}
+	batch, err := drawUntilReady(view, scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := bytes.Clone(batch.Pix)
+	scene.Batches = nil
+	for _, index := range []int{1, 64, 129} {
+		copy := object
+		copy.At = places[index]
+		scene.Objects = append(scene.Objects, copy)
+	}
+	reference, err := drawUntilReady(view, scene, 320, 200)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(want, reference.Pix) {
+		t.Fatal("sparse batch did not draw the same placements as individual objects")
+	}
+}
+
 func TestIndexedCullingPreservesTheWorkingFrame(t *testing.T) {
 	view, scene := openView(t)
 	mesh := scene.Objects[0].Mesh
